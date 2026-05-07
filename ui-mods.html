@@ -8,9 +8,9 @@
     <style>
         /* 頁面基礎背景 */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
         /* 導覽列縮進 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
-        /* 導覽連結 */ .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
+        /* 導覽連結樣式 */ .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
 
-        /* RWD 響應式網格容器 (修正點：移除重複嵌套) */ 
+        /* 模組網格容器 - 解決大小不一問題 */ 
         .mod-container { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
@@ -20,7 +20,7 @@
             padding: 0 20px; 
         }
 
-        /* 模組卡片樣式與動畫初始值 */
+        /* 模組卡片基礎與動畫 */
         .mod-card { 
             background: #fff; 
             border: 1px solid #f0f0f0; 
@@ -28,15 +28,15 @@
             overflow: hidden; 
             opacity: 0; 
             transform: translateY(30px); 
-            transition: all 0.6s ease-out; 
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; 
             display: flex;
             flex-direction: column;
         }
         /* 滾動觸發顯示 */ .mod-card.is-visible { opacity: 1; transform: translateY(0); }
 
-        /* 示意圖統一樣式 */ .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
-        .preview-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .mod-card:hover .preview-img img { transform: scale(1.05); }
+        /* 示意圖統一樣式 - 已移除所有 HOVER 放大效果 */ 
+        .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
+        .preview-img img { width: 100%; height: 100%; object-fit: cover; }
 
         /* 卡片內容區塊 */ .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
         .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #111; letter-spacing: 0.5px; }
@@ -62,32 +62,17 @@
     <div class="mod-container">
 
         <div class="mod-card">
-            <div class="preview-img"><img src="cas_columns.jpg" alt="Preview"></div>
-            <div class="content">
-                <h2 class="mod-header">CAS 更多欄位 (More Columns in CAS)</h2>
-                <div class="author">BY <a href="https://www.patreon.com/weerbesu" target="_blank">WEERBESU</a></div>
-                <div class="details">
-                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">More_Columns_v1.30.package</a></div>
-                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
-                    <div class="info-row"><strong>備用載點 / </strong><a href="#">直接貼檔案 (雲端)</a></div>
-                    <div class="info-row"><strong>下載時間 / </strong>2026/05/01 (v1.30)</div>
-                </div>
-                <p class="notes">增加 CAS 創造小人介面的物品欄位數量，可選 3/4/5 欄。</p>
-            </div>
-        </div>
-
-        <div class="mod-card">
             <div class="preview-img"><img src="chalkd_ui.jpg" alt="Preview"></div>
             <div class="content">
-                <h2 class="mod-header">黑色UI (CHALK'D UI / CHALKBOARD)</h2>
+                <h2 class="mod-header">黑色UI (CHALK'D UI)</h2>
                 <div class="author">BY <a href="https://www.patreon.com/vyxated" target="_blank">VYXATED</a></div>
                 <div class="details">
-                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">[Vyxated]_Chalkboard_UI.zip</a></div>
-                    <div class="info-row"><strong>漢化版本 / </strong><a href="#">織夢漢化版</a></div>
+                    <div class="info-row"><strong>檔案連結 / </strong><a href="#">[Vyxated]_Chalkboard_UI.zip</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong><a href="#">內建繁中 (或織夢漢化)</a></div>
                     <div class="info-row"><strong>備用載點 / </strong><a href="#">Google Drive</a></div>
-                    <div class="info-row"><strong>當前版本 / </strong>v2.12 (支援 1.121)</div>
+                    <div class="info-row"><strong>下載版本 / </strong>v2.12 (1.121 支援)</div>
                 </div>
-                <p class="notes">【相容性注意】需刪除其「_CONFIG」資料夾內特定檔案，避免與 BetterWorldSelect 衝突。</p>
+                <p class="notes">需刪除黑色UI「_CONFIG」內特定資料夾才可與其它模組相容。</p>
             </div>
         </div>
 
@@ -97,34 +82,34 @@
                 <h2 class="mod-header">手繪地圖替換 (Fan Made Maps)</h2>
                 <div class="author">BY <a href="https://20thcenturysims.tumblr.com/" target="_blank">20THCENTURYSIMS</a></div>
                 <div class="details">
-                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">20thCentury_MapReplacement</a></div>
-                    <div class="info-row"><strong>漢化版本 / </strong>圖片替換 (無需漢化)</div>
+                    <div class="info-row"><strong>檔案連結 / </strong><a href="#">MapReplacement_Collection.zip</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
                     <div class="info-row"><strong>備用載點 / </strong><a href="#">作者官網下載</a></div>
-                    <div class="info-row"><strong>下載時間 / </strong>2026/04/20</div>
+                    <div class="info-row"><strong>下載日期 / </strong>2026/04/20</div>
                 </div>
-                <p class="notes">PDF P.43：將平面地圖換成細緻手繪風。不含三米舒諾，需搭配 Mama-Llama 版本。</p>
+                <p class="notes">將平面地圖換成手繪風格。不含三米舒諾，需搭配 Mama-Llama 版本。</p>
             </div>
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="wrench_preview.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="cas_columns.jpg" alt="Preview"></div>
             <div class="content">
-                <h2 class="mod-header">自訂圖示替換 (Sparkle CC Wrench)</h2>
-                <div class="author">BY <a href="#" target="_blank">DREARYFAWN</a></div>
+                <h2 class="mod-header">CAS 更多欄位 (More Columns in CAS)</h2>
+                <div class="author">BY <a href="https://www.patreon.com/weerbesu" target="_blank">WEERBESU</a></div>
                 <div class="details">
-                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">Tiasha - Sparkle CC Wrench.package</a></div>
-                    <div class="info-row"><strong>漢化版本 / </strong>內建繁中</div>
-                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Mega 備份</a></div>
-                    <div class="info-row"><strong>下載版本 / </strong>v1.122 支援</div>
+                    <div class="info-row"><strong>檔案連結 / </strong><a href="#">More_Columns_v1.30.package</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Mega 雲端備份</a></div>
+                    <div class="info-row"><strong>下載版本 / </strong>v1.30 (最新支援)</div>
                 </div>
-                <p class="notes">PDF P.39：更改模組左上角的板手圖示為閃亮星星圖示。</p>
+                <p class="notes">增加 CAS 創造小人介面的物品欄位數量，可選 3/4/5 欄。</p>
             </div>
         </div>
 
     </div>
 
     <script>
-        /* 滾動動畫實作 */
+        /* 滾動動畫腳本 */
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
