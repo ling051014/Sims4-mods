@@ -1,21 +1,123 @@
-/* ========【社交互動】 設定 - 子文件頁面 ======== */
-<nav class="nav-menu">
-    <a href="index.html">INDEX</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">SOCIAL & STORY</a>
-</nav>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LING'S SIMS 4 - SOCIAL MODS</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 頁面基礎背景 */ body { background-color: #fcfcfc; margin: 0; font-family: "PingFang TC", sans-serif; }
+        /* 導覽列縮進樣式 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
+        /* 導覽連結 */ .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; transition: 0.3s; }
+        /* 導覽連結滑過 */ .nav-menu a:hover { color: #000; }
 
-<div class="mod-container">
-    /* ========【模組：KISS-N-GRIND】======== */
-    <div class="mod-card">
-        <h2 class="mod-header">KISS-N-GRIND</h2>
-        <div class="author">BY UTOPYA_CC</div>
-        <div class="preview-img"><img src="kiss_preview.jpg" alt="Preview"></div>
-        <div class="details"><div class="info-row"><strong>版本 / </strong>v1.9.9</div></div>
+        /* 模組網格容器 - RWD響應式設計 */ 
+        .mod-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+            gap: 25px; 
+            max-width: 1200px; 
+            margin: 50px auto; 
+            padding: 0 20px; 
+        }
+
+        /* 模組卡片基礎與隱藏狀態(準備動畫) */
+        .mod-card { 
+            background: #fff; 
+            border: 1px solid #f0f0f0; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            transition: 0.5s ease-out; 
+            opacity: 0; 
+            transform: translateY(30px); 
+        }
+        /* 滾動觸發後的顯示狀態 */ .mod-card.is-visible { opacity: 1; transform: translateY(0); }
+
+        /* 示意圖容器 */ .preview-img { width: 100%; height: 200px; background: #fafafa; overflow: hidden; }
+        /* 圖片自適應 */ .preview-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        /* 圖片滑過放大 */ .mod-card:hover .preview-img img { transform: scale(1.05); }
+
+        /* 卡片內容區 */ .content { padding: 20px; }
+        /* 中英雙語標題 */ .mod-header { font-size: 18px; margin: 0 0 10px 0; font-weight: 500; letter-spacing: 1px; color: #222; }
+        /* 作者區塊 */ .author { font-size: 12px; color: #888; margin-bottom: 15px; }
+        /* 資訊列樣式 */ .info-row { font-size: 13px; margin: 8px 0; color: #555; line-height: 1.6; }
+        /* 強調標籤 */ .info-row strong { color: #999; font-weight: 400; width: 80px; display: inline-block; }
+        /* 下載連結樣式 */ .info-row a { color: #7bbff1; text-decoration: none; border-bottom: 1px solid transparent; }
+        /* 連結滑過 */ .info-row a:hover { border-bottom: 1px solid #7bbff1; }
+        
+        /* 備註小字 */ .notes { font-size: 12px; color: #bbb; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; }
+
+        /* 手機版調整 */ @media (max-width: 480px) { .mod-container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-menu">
+        <a href="index.html">INDEX</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">SOCIAL & STORY 功能模組</a>
+    </nav>
+
+    <div class="mod-container">
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="kiss_preview.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">深情之吻與磨蹭 (KISS-N-GRIND)</h2>
+                <div class="author">作者 / <a href="https://www.patreon.com/utopya_cc" target="_blank">UTOPYA_CC</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">Utopya_Kiss-n-Grind.package</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong><a href="#">內建繁中 (由作者提供)</a></div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Google Drive</a></div>
+                    <div class="info-row"><strong>更新日期 / </strong>v1.9.9 (2026/04更新)</div>
+                </div>
+                <p class="notes">增加小人在床上或沙發上更多親密交談與互動動作。</p>
+            </div>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="attachment_style.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">依戀類型系統 (ATTACHMENT STYLE)</h2>
+                <div class="author">作者 / <a href="https://www.patreon.com/jayesims" target="_blank">JAYESIMS</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">JSims_AttachmentStyle_StoryPack</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong><a href="#">需搭配織夢漢化</a></div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">直接貼檔案 (雲端載點)</a></div>
+                    <div class="info-row"><strong>當前版本 / </strong>v1.2 (Story Pack)</div>
+                </div>
+                <p class="notes">為小人加入心理學依戀類型，影響社交安全感與感情發展。</p>
+            </div>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="rpo_preview.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">RPO關係與懷孕大修</h2>
+                <div class="author">作者 / <a href="https://www.patreon.com/lumpinou" target="_blank">LUMPINAOUEL</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">Lumpinou_RPO_AllModules</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong><a href="#">內建繁中 (由 Moocha 漢化)</a></div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">作者官網下載</a></div>
+                    <div class="info-row"><strong>更新日期 / </strong>2026/05/01 支援最新版本</div>
+                </div>
+                <p class="notes">包含 16 個子模組，涵蓋外遇、懷孕意願、人工受孕等龐大系統。</p>
+            </div>
+        </div>
+
     </div>
-    /* ========【模組：ATTACHMENT STYLE】======== */
-    <div class="mod-card">
-        <h2 class="mod-header">ATTACHMENT STYLE</h2>
-        <div class="author">BY JAYESIMS</div>
-        <div class="details"><div class="info-row"><strong>內容 / </strong>Story Pack</div></div>
-    </div>
-    /* 增加 3 組空白供新增... */
-</div>
+
+    <script>
+        /* 滾動偵測動畫腳本 */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.mod-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
