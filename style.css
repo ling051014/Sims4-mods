@@ -1,104 +1,95 @@
-/* --- 全局樣式設定 --- */
+/* --- 全局基礎設定 --- */
 body {
-    background-color: #ffe5d9; /* 背景底色：粉橘色 */
-    /* 背景格紋：製作出白色格線效果 */
-    background-image: linear-gradient(#ffffff 1px, transparent 1px), 
-                      linear-gradient(90deg, #ffffff 1px, transparent 1px);
-    background-size: 20px 20px; /* 格點的大小 */
-    
-    /* ③ 修改全站字體：優先使用微軟正黑體 */
-    font-family: "Microsoft JhengHei", "Apple LiGothic Medium", sans-serif;
-    
+    background-color: #f8f9fa; /* 極淺灰色背景，讓眼睛更舒服 */
+    /* ③ 修改全站字體：使用更現代的無襯線字體組合 */
+    font-family: 'Helvetica Neue', Arial, "Microsoft JhengHei", sans-serif;
     margin: 0;
-    padding: 20px;
-    color: #2c3e50; /* 文字預設顏色 */
+    padding: 0;
+    color: #333; /* 主文字顏色：深灰色而非純黑 */
+    line-height: 1.6; /* 增加行距，讓閱讀更輕鬆 */
 }
 
-/* --- 頂部導覽列 (回首頁按鈕那行) --- */
+/* --- 導覽列：改為簡約白底 --- */
 .nav-menu {
-    background: #ffb494; /* 橘粉色背景 */
-    padding: 15px;
+    background: #ffffff; 
+    padding: 20px;
     text-align: center;
-    border-radius: 12px;
-    margin-bottom: 30px;
+    border-bottom: 1px solid #eee; /* 用淡淡的線條取代色塊 */
+    margin-bottom: 40px;
+    position: sticky; /* 向上捲動時固定在頂部 */
+    top: 0;
+    z-index: 100;
 }
 .nav-menu a {
-    margin: 0 15px;
-    text-decoration: none; /* 移除超連結下劃線 */
-    color: #2c3e50;
-    font-weight: bold;
-}
-
-/* --- 模組卡片排列容器 --- */
-.mod-container {
-    display: grid; /* 開啟網格排版 */
-    /* 響應式關鍵：寬度不足時自動換行，每個卡片最小 320px */
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-    gap: 25px; /* 卡片間距 */
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* --- 模組卡片主體 --- */
-.mod-card {
-    background: #fff8f0; /* 卡片底色 */
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08); /* 陰影效果 */
-    display: flex;
-    flex-direction: column;
-}
-
-/* --- 模組標題 (卡片最上面那塊) --- */
-.mod-header {
-    background: #ffb494;
-    width: fit-content;
-    margin: 0 auto 10px;
-    padding: 8px 25px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-/* --- 作者區域 --- */
-.author { text-align: right; font-size: 13px; margin-bottom: 8px; color: #666; }
-/* ① 作者超連結樣式 */
-.author a { 
-    color: #ff69b4; /* 粉紅色連結 */
-    text-decoration: underline; 
-    font-weight: bold;
-}
-
-/* --- 圖片樣式 --- */
-.preview-img img {
-    width: 100%; /* 寬度填滿 */
-    height: auto;
-    border-radius: 10px;
-    border: 4px solid #2c2c2c; /* 黑色粗邊框 */
-}
-
-/* --- 下方深色資訊區 --- */
-.details {
-    background: #34495e; /* 深藍色背景 */
-    color: white;
-    padding: 15px;
-    border-radius: 12px;
-    margin-top: 15px;
+    margin: 0 20px;
+    text-decoration: none;
+    color: #666;
     font-size: 14px;
+    letter-spacing: 1px; /* 增加字距，更有質感 */
+    transition: 0.3s;
 }
-.info-row { margin-bottom: 6px; }
-.info-row a { color: #85c1e9; text-decoration: none; } /* 連結顏色 */
+.nav-menu a:hover { color: #000; } /* 游標指上去變黑 */
 
-/* --- 底部紅字備註 --- */
-.notes { color: #e74c3c; font-size: 12px; margin-top: 12px; text-align: center; }
-
-/* --- 滑出動畫設定 --- */
-.reveal {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s ease-out;
+/* --- 容器與卡片設定 --- */
+.mod-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
 }
-.reveal.active {
-    opacity: 1;
-    transform: translateY(0);
+
+.mod-card {
+    background: #ffffff;
+    border-radius: 8px; /* 圓角縮小一點，更顯精緻 */
+    padding: 25px;
+    /* 質感陰影：淡淡的擴散效果 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0; /* 極細邊框 */
+    transition: transform 0.3s ease;
+}
+.mod-card:hover { transform: translateY(-5px); } /* 指上去輕微浮起 */
+
+/* --- 卡片內的文字排版 --- */
+.mod-header {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #222;
+}
+
+.author { 
+    text-align: center; 
+    font-size: 12px; 
+    color: #999; 
+    margin-bottom: 20px; 
+}
+/* ① 作者超連結：簡約底線 */
+.author a { color: #666; text-decoration: underline; }
+
+.preview-img img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    /* 移除粗黑框，改為乾淨的圖片展示 */
+}
+
+.details {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f5f5f5; /* 內部分隔線 */
+    font-size: 13px;
+}
+.info-row { margin-bottom: 8px; color: #555; }
+/* ② 本體連結樣式 */
+.info-row a { color: #007bff; text-decoration: none; font-weight: 500; }
+
+.notes { 
+    margin-top: 15px; 
+    font-size: 12px; 
+    color: #b0b0b0; 
+    font-style: italic; 
+    text-align: center; 
 }
