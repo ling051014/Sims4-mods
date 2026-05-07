@@ -114,12 +114,14 @@ body {
     /* 強制斷行 */ word-break: break-all;
 }
 .notes { 
-    /* 備註間距 */ margin-top: 12px; 
+    /* 備註間距 */ margin-top: 15px; 
     /* 備註大小 */ font-size: 12px; 
     /* 備註顏色 */ color: #bbb; 
-    /* 左側線條 */ border-left: 2px solid #eee; 
-    /* 左側內縮 */ padding-left: 10px; 
+    /* 虛線方框 */ border: 1px dashed #eee; 
+    /* 設定圓角 */ border-radius: 6px; 
+    /* 方框內縮 */ padding: 10px; 
     /* 斜體顯示 */ font-style: italic; 
+    /* 行距設定 */ line-height: 1.5;
 }
 
 /* ========【響應式調整】 設定 - 手機端顯示優化 ======== */
