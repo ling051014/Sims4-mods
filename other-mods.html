@@ -6,7 +6,7 @@
     <title>其他延伸</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 頁面基礎背景 */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
+        /* 頁面基礎背景 - 統一為 #fafafa */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
         /* 導覽列 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
         .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
 
@@ -20,7 +20,7 @@
             padding: 0 20px; 
         }
 
-        /* 模組卡片基礎與動畫 */
+        /* 模組卡片基礎與動畫 - 統一格式 */
         .mod-card { 
             background: #fff; 
             border: 1px solid #f0f0f0; 
@@ -34,7 +34,7 @@
         }
         .mod-card.is-visible { opacity: 1; transform: translateY(0); }
 
-        /* 示意圖統一樣式 - 無 HOVER 效果 */ 
+        /* 示意圖統一樣式 - 移除左上角標籤，無 HOVER 效果 */ 
         .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
         .preview-img img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -42,11 +42,10 @@
         .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #111; letter-spacing: 0.5px; }
         .author { font-size: 12px; color: #999; margin-bottom: 15px; text-transform: uppercase; }
         
-        /* 資訊列欄位設計 */ 
+        /* 資訊列欄位設計 - 統一 7 大核心欄位風格 */ 
         .info-row { font-size: 13px; margin-bottom: 8px; color: #444; line-height: 1.6; }
         .info-row strong { color: #aaa; font-weight: 400; width: 90px; display: inline-block; }
         .info-row a { color: #55acee; text-decoration: none; border-bottom: 1px solid transparent; }
-        .info-row a:hover { border-bottom: 1px solid #55acee; }
         
         /* 備註樣式 */ .notes { font-size: 12px; color: #bbb; margin-top: auto; padding-top: 15px; border-top: 1px dashed #eee; line-height: 1.5; }
 
@@ -68,10 +67,11 @@
                 <div class="author">BY GAMETIME DEV</div>
                 <div class="details">
                     <div class="info-row"><strong>官方網站 / </strong><a href="https://gametimedev.de/S4MM/" target="_blank">Gametimedev</a></div>
-                    <div class="info-row"><strong>主要功能 / </strong><span>管理、啟用、停用與預覽模組</span></div>
-                    <div class="info-row"><strong>下載版本 / </strong><span>v2.x (2026 適用)</span></div>
+                    <div class="info-row"><strong>主要功能 / </strong>管理、預覽模組</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">官方載點</a></div>
+                    <div class="info-row"><strong>下載版本 / </strong>v2.x (2026 適用)</div>
                 </div>
-                <p class="notes">最強大的模組管理工具，支援圖片預覽，可快速抓出重複或損壞的 package 檔案。</p>
+                <p class="notes">最強大的模組管理工具，支援圖片預覽，可快速抓出重複或損壞的檔案。</p>
             </div>
         </div>
 
@@ -81,11 +81,12 @@
                 <h2 class="mod-header">Moonglow 世界照明</h2>
                 <div class="author">BY SOFTERHAZE</div>
                 <div class="details">
-                    <div class="info-row"><strong>檔案名稱 / </strong><span>softerhaze-moonglow.zip</span></div>
+                    <div class="info-row"><strong>檔案名稱 / </strong>softerhaze-moonglow.zip</div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
                     <div class="info-row"><strong>下載管道 / </strong><a href="https://softerhaze.itch.io/" target="_blank">itch.io</a></div>
-                    <div class="info-row"><strong>效果描述 / </strong><span>真實光影環境，提升夜晚細節</span></div>
+                    <div class="info-row"><strong>下載版本 / </strong>最新支援版</div>
                 </div>
-                <p class="notes">目前使用的版本。光影最為真實，但部分環境下可能較暗，建議搭配高亮度螢幕。</p>
+                <p class="notes">目前使用的照明替換。光影最為真實，但部分環境下可能較暗。</p>
             </div>
         </div>
 
@@ -95,10 +96,57 @@
                 <h2 class="mod-header">高清模組 (Better Graphics)</h2>
                 <div class="author">BY 鴨呀 (SULSULDUCK)</div>
                 <div class="details">
-                    <div class="info-row"><strong>檔案名稱 / </strong><span>Better Graphics Solution.zip</span></div>
-                    <div class="info-row"><strong>主要功能 / </strong><span>移除遊戲預設模糊、提升解析度</span></div>
+                    <div class="info-row"><strong>檔案名稱 / </strong>Better Graphics Solution.zip</div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Google Drive</a></div>
+                    <div class="info-row"><strong>主要功能 / </strong>移除模糊、提升遠景</div>
                 </div>
                 <p class="notes">有效解決遠處景物糊成一片的問題，讓遊戲截圖更加銳利。</p>
+            </div>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="reshade.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">ReShade 6.7.3</h2>
+                <div class="author">BY RESHADE TEAM</div>
+                <div class="details">
+                    <div class="info-row"><strong>下載連結 / </strong><a href="https://reshade.me/" target="_blank">Official Site</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>內建簡中</div>
+                    <div class="info-row"><strong>支援類型 / </strong>Full add-on support</div>
+                    <div class="info-row"><strong>當前版本 / </strong>v6.7.3</div>
+                </div>
+                <p class="notes">畫質濾鏡的基石。安裝時請務必選擇包含「Full add-on support」的版本。</p>
+            </div>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="tray_importer.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">S4TI 托盤導入器</h2>
+                <div class="author">BY DEEVAS</div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong>S4TI_setup_250831.zip</div>
+                    <div class="info-row"><strong>漢化版本 / </strong>內建繁中</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">官方網站</a></div>
+                    <div class="info-row"><strong>主要用途 / </strong>打包人物房屋 CC 清單</div>
+                </div>
+                <p class="notes">必備工具，能精準找出該房屋或小人所用的所有模組檔案。</p>
+            </div>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="s4s.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">Sims 4 Studio</h2>
+                <div class="author">BY S4S TEAM</div>
+                <div class="details">
+                    <div class="info-row"><strong>最新版本 / </strong>v3.2.4.9 (Star)</div>
+                    <div class="info-row"><strong>漢化版本 / </strong>內建繁中</div>
+                    <div class="info-row"><strong>下載連結 / </strong><a href="https://sims4studio.com/" target="_blank">S4S論壇</a></div>
+                    <div class="info-row"><strong>主要用途 / </strong>模組修復、CC批量更新</div>
+                </div>
+                <p class="notes">用於修復舊模組、批量更新 CC 以及開發自製物品的核心工具。</p>
             </div>
         </div>
 
