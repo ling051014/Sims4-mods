@@ -6,14 +6,27 @@
     <title>LING'S SIMS 4 MODS</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 首頁標題樣式 */ .home-title { text-align: center; font-weight: 200; letter-spacing: 8px; margin: 50px 0; font-size: 24px; }
-        /* 目錄按鈕網格 */ .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto; padding: 20px; }
-        /* 目錄按鈕樣式 */ .cat-btn { background: #fff; padding: 50px 10px; text-align: center; border: 1px solid #eee; text-decoration: none; color: #888; font-size: 12px; letter-spacing: 2px; transition: 0.3s; border-radius: 4px; }
-        /* 按鈕滑過特效 */ .cat-btn:hover { border-color: #000; color: #000; background: #fafafa; }
+        /* 首頁標題區域樣式 */ 
+        .header-section { text-align: center; margin: 50px 0; }
+        .home-title { font-weight: 200; letter-spacing: 8px; font-size: 24px; margin-bottom: 10px; }
+        
+        /* 最後更新日期樣式 - 縮小字體並增加間距 */
+        .update-date { font-size: 11px; color: #bbb; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* 目錄按鈕網格 */ 
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto; padding: 20px; }
+        /* 目錄按鈕樣式 */ 
+        .cat-btn { background: #fff; padding: 50px 10px; text-align: center; border: 1px solid #eee; text-decoration: none; color: #888; font-size: 12px; letter-spacing: 2px; transition: 0.3s; border-radius: 4px; }
+        /* 按鈕滑過特效 */ 
+        .cat-btn:hover { border-color: #000; color: #000; background: #fafafa; }
     </style>
 </head>
 <body>
-    <h1 class="home-title">模擬市民4 自用模組整理</h1>
+
+    <div class="header-section">
+        <h1 class="home-title">模擬市民4 自用模組整理</h1>
+        <div class="update-date">Last Updated / 2026.05.06</div>
+    </div>
     
     <div class="category-grid">
         <a href="base-mods.html" class="cat-btn">BASE<br>自訂義模組</a>
@@ -24,7 +37,8 @@
         <a href="ui-mods.html" class="cat-btn">UI<br>UI美化</a>
         <a href="other-mods.html" class="cat-btn">OTHER<br>其他延伸</a>
     </div>
-<script>
+
+    <script>
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
