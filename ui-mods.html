@@ -3,60 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UI美化</title>
+    <title>VISUAL UI - LING'S SIMS 4</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 頁面基礎背景 */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
+        /* 導覽列縮進 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
+        /* 導覽連結 */ .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
+
+        /* RWD 響應式網格容器 (修正點：移除重複嵌套) */ 
+        .mod-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
+            gap: 30px; 
+            max-width: 1200px; 
+            margin: 50px auto; 
+            padding: 0 20px; 
+        }
+
+        /* 模組卡片樣式與動畫初始值 */
+        .mod-card { 
+            background: #fff; 
+            border: 1px solid #f0f0f0; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            opacity: 0; 
+            transform: translateY(30px); 
+            transition: all 0.6s ease-out; 
+            display: flex;
+            flex-direction: column;
+        }
+        /* 滾動觸發顯示 */ .mod-card.is-visible { opacity: 1; transform: translateY(0); }
+
+        /* 示意圖統一樣式 */ .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
+        .preview-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .mod-card:hover .preview-img img { transform: scale(1.05); }
+
+        /* 卡片內容區塊 */ .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #111; letter-spacing: 0.5px; }
+        .author { font-size: 12px; color: #999; margin-bottom: 15px; text-transform: uppercase; }
+        
+        /* 資訊列欄位設計 */ 
+        .info-row { font-size: 13px; margin-bottom: 8px; color: #444; line-height: 1.6; }
+        .info-row strong { color: #aaa; font-weight: 400; width: 90px; display: inline-block; }
+        .info-row a { color: #55acee; text-decoration: none; border-bottom: 1px solid transparent; }
+        .info-row a:hover { border-bottom: 1px solid #55acee; }
+        
+        /* 備註樣式 */ .notes { font-size: 12px; color: #bbb; margin-top: auto; padding-top: 15px; border-top: 1px dashed #eee; line-height: 1.5; }
+
+        /* 手機版適應 */ @media (max-width: 480px) { .mod-container { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
+
     <nav class="nav-menu">
-        <a href="index.html">首頁</a>
-        <span style="color: #eee;">/</span>
-        <a href="#" style="color: #000;">UI美化</a>
+        <a href="index.html">INDEX</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">UI & VISUAL 美化</a>
     </nav>
 
     <div class="mod-container">
 
         <div class="mod-card">
-            <h2 class="mod-header">More Columns in CAS</h2>
-            <div class="author">BY WEERBESU</div>
-            <div class="preview-img"><img src="cas_columns.jpg"></div>
-            <div class="details">
-                <div class="info-row"><strong>下載連結：</strong><a href="https://www.patreon.com/posts/more-columns-in-27751117" target="_blank">Patreon Download</a></div>
-            </div>
-            <p class="notes">增加 CAS 介面欄位（可選 3/4/5 欄）。</p>
-        </div>
-
-        <div class="mod-card">
-            <h2 class="mod-header">Clean UI</h2>
-            <div class="author">BY TWISTEDMEXI</div>
-            <div class="preview-img"><img src="clean_ui.jpg"></div>
-            <div class="details">
-                <div class="info-row"><strong>最新更新：</strong>2026/02</div>
-                <div class="info-row"><strong>下載連結：</strong><a href="https://twistedmexi.com" target="_blank">TwistedMexi Official</a></div>
-            </div>
-            <p class="notes">全方位的介面美化，移除白色邊框與舊版漸層，必備的視覺模組。</p>
-        </div>
-
-        <div class="mod-card">
-            <h2 class="mod-header">Fan Made Maps</h2>
-            <div class="author">BY 20THCENTURYSIMS</div>
-            <div class="preview-img"><img src="fan_maps.jpg"></div>
-            <div class="details">
-                <div class="info-row"><strong>包含地圖：</strong>柳溪、紐奎斯特、綠洲之泉</div>
-                <div class="info-row"><strong>下載連結：</strong><a href="#">SimsCommunity Download</a></div>
-            </div>
-            <p class="notes">將平面地圖替換成色彩鮮豔的手繪插畫風格，大幅提升地圖質感。</p>
-        </div>
-        
-        <div class="mod-container">
-            <div class="mod-card">
-                <h2 class="mod-header">CHALK'D UI (黑色UI)</h2>
-                <div class="author">BY VYXATED</div>
-                <div class="preview-img"><img src="圖檔名.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="cas_columns.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">CAS 更多欄位 (More Columns in CAS)</h2>
+                <div class="author">BY <a href="https://www.patreon.com/weerbesu" target="_blank">WEERBESU</a></div>
                 <div class="details">
-                    <div class="info-row"><strong>下載 / </strong><a href="#">連結</a></div>
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">More_Columns_v1.30.package</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">直接貼檔案 (雲端)</a></div>
+                    <div class="info-row"><strong>下載時間 / </strong>2026/05/01 (v1.30)</div>
                 </div>
-                <div class="notes">需刪除黑色UI「_CONFIG」內特定資料夾才可與其它模組相容。</div>
+                <p class="notes">增加 CAS 創造小人介面的物品欄位數量，可選 3/4/5 欄。</p>
             </div>
         </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="chalkd_ui.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">黑色UI (CHALK'D UI / CHALKBOARD)</h2>
+                <div class="author">BY <a href="https://www.patreon.com/vyxated" target="_blank">VYXATED</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">[Vyxated]_Chalkboard_UI.zip</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong><a href="#">織夢漢化版</a></div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Google Drive</a></div>
+                    <div class="info-row"><strong>當前版本 / </strong>v2.12 (支援 1.121)</div>
+                </div>
+                <p class="notes">【相容性注意】需刪除其「_CONFIG」資料夾內特定檔案，避免與 BetterWorldSelect 衝突。</p>
+            </div>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="fan_maps.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">手繪地圖替換 (Fan Made Maps)</h2>
+                <div class="author">BY <a href="https://20thcenturysims.tumblr.com/" target="_blank">20THCENTURYSIMS</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">20thCentury_MapReplacement</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>圖片替換 (無需漢化)</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">作者官網下載</a></div>
+                    <div class="info-row"><strong>下載時間 / </strong>2026/04/20</div>
+                </div>
+                <p class="notes">PDF P.43：將平面地圖換成細緻手繪風。不含三米舒諾，需搭配 Mama-Llama 版本。</p>
+            </div>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="wrench_preview.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">自訂圖示替換 (Sparkle CC Wrench)</h2>
+                <div class="author">BY <a href="#" target="_blank">DREARYFAWN</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">Tiasha - Sparkle CC Wrench.package</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>內建繁中</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Mega 備份</a></div>
+                    <div class="info-row"><strong>下載版本 / </strong>v1.122 支援</div>
+                </div>
+                <p class="notes">PDF P.39：更改模組左上角的板手圖示為閃亮星星圖示。</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* 滾動動畫實作 */
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.mod-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
 </body>
 </html>
