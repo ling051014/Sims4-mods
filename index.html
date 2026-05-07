@@ -2,30 +2,37 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>Ling's Mods 整理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ling's Mods 整理基地</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ④ 首頁專屬封面圖樣式 */
+        /* ④ 首頁專屬封面圖：寬度自動縮放 */
         .home-banner {
-            width: 100%;
-            max-width: 800px; /* 限制最大寬度 */
-            margin: 0 auto 30px; /* 居中並與下方保持距離 */
+            width: 95%; /* 佔螢幕寬度 95% */
+            max-width: 800px; /* 電腦版最大寬度 */
+            height: auto;
+            margin: 0 auto 30px;
             display: block;
-            border-radius: 20px; /* 封面也要圓角 */
-            border: 5px solid #fff; /* 白色粗框 */
+            border-radius: 20px;
+            border: 4px solid #fff;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
+        /* 首頁按鈕容器：自動換行響應式 */
         .category-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            /* 關鍵：按鈕寬度最少 150px，不足時自動換到下一排 */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
             max-width: 900px;
             margin: 20px auto;
+            padding: 0 10px;
         }
+
+        /* 首頁按鈕樣式 */
         .cat-btn {
             background: #fff8f0;
-            padding: 30px 10px;
+            padding: 25px 10px;
             text-align: center;
             border-radius: 20px;
             text-decoration: none;
@@ -33,22 +40,29 @@
             font-weight: bold;
             border: 2px solid #ffb494;
             transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .cat-btn:hover { transform: scale(1.05); background: #ffb494; }
+        .cat-btn:hover { background: #ffb494; transform: scale(1.05); }
+
+        /* 「全部展開」按鈕特別顏色 */
+        .all-btn { background: #34495e !important; color: white !important; border: none !important; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align: center; margin-top: 30px;">Ling's Mods 整理基地</h1>
+    <h1 style="text-align: center; margin: 30px 0;">Ling's Mods 整理基地</h1>
 
-    <img src="banner.jpg" class="home-banner" alt="首頁封面">
+    <img src="banner.jpg" class="home-banner" alt="首頁封面圖">
 
     <div class="category-grid">
         <a href="ui-mods.html" class="cat-btn">🎨 UI 美化</a>
         <a href="function-mods.html" class="cat-btn">🛠️ 功能模組</a>
         <a href="cheat-mods.html" class="cat-btn">⚡ 作弊模組</a>
         <a href="18plus.html" class="cat-btn">🔞 18+ 模組</a>
-        <a href="all-mods.html" class="cat-btn" style="background: #34495e; color: white; border: none;">👁️ 全部展開</a>
+        <a href="all-mods.html" class="cat-btn all-btn">👁️ 全部展開</a>
     </div>
 
 </body>
