@@ -1,95 +1,59 @@
-/* --- 全局基礎設定 --- */
+/* ========【全站基礎設定】 設定 - 背景與字體 ======== */
 body {
-    background-color: #f8f9fa; /* 極淺灰色背景，讓眼睛更舒服 */
-    /* ③ 修改全站字體：使用更現代的無襯線字體組合 */
-    font-family: 'Helvetica Neue', Arial, "Microsoft JhengHei", sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #333; /* 主文字顏色：深灰色而非純黑 */
-    line-height: 1.6; /* 增加行距，讓閱讀更輕鬆 */
+    /* 背景色 */ background-color: #fcfcfc;
+    /* 全站字體 */ font-family: 'Helvetica Neue', Arial, "Microsoft JhengHei", sans-serif;
+    /* 預設邊距 */ margin: 0; padding: 0;
+    /* 文字顏色 */ color: #444;
+    /* 行距 */ line-height: 1.6;
 }
 
-/* --- 導覽列：改為簡約白底 --- */
+/* ========【導覽選單】 設定 - 頁面最上方選單 ======== */
 .nav-menu {
-    background: #ffffff; 
-    padding: 20px;
-    text-align: center;
-    border-bottom: 1px solid #eee; /* 用淡淡的線條取代色塊 */
-    margin-bottom: 40px;
-    position: sticky; /* 向上捲動時固定在頂部 */
-    top: 0;
-    z-index: 100;
+    /* 背景顏色 */ background: #ffffff;
+    /* 內圈空間 */ padding: 25px;
+    /* 居中對齊 */ text-align: center;
+    /* 底部細線 */ border-bottom: 1px solid #f0f0f0;
+    /* 底部留空 */ margin-bottom: 40px;
+    /* 滑動時固定在頂部 */ position: sticky; top: 0; z-index: 100;
 }
 .nav-menu a {
-    margin: 0 20px;
-    text-decoration: none;
-    color: #666;
-    font-size: 14px;
-    letter-spacing: 1px; /* 增加字距，更有質感 */
-    transition: 0.3s;
+    /* 選單間距 */ margin: 0 20px;
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小與間距 */ font-size: 13px; letter-spacing: 2px;
+    /* 顏色與轉場 */ color: #888; transition: 0.3s;
 }
-.nav-menu a:hover { color: #000; } /* 游標指上去變黑 */
+.nav-menu a:hover { color: #000; } /* 指上去變黑色 */
 
-/* --- 容器與卡片設定 --- */
+/* ========【模組卡片】 設定 - 卡片容器排版 ======== */
 .mod-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px;
+    /* 開啟網格 */ display: grid;
+    /* 自動排列：手機一欄，電腦多欄 */ grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    /* 卡片間距 */ gap: 35px;
+    /* 最大總寬度 */ max-width: 1100px;
+    /* 整體居中 */ margin: 0 auto; padding: 20px;
 }
 
+/* ========【單個卡片造型】 設定 - 白色質感方塊 ======== */
 .mod-card {
-    background: #ffffff;
-    border-radius: 8px; /* 圓角縮小一點，更顯精緻 */
-    padding: 25px;
-    /* 質感陰影：淡淡的擴散效果 */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border: 1px solid #f0f0f0; /* 極細邊框 */
-    transition: transform 0.3s ease;
+    /* 背景 */ background: #ffffff;
+    /* 圓角 */ border-radius: 4px;
+    /* 內圈留白 */ padding: 30px;
+    /* 淡淡陰影 */ box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    /* 極細邊框 */ border: 1px solid #eee;
+    /* 滑動效果轉場 */ transition: 0.4s;
 }
-.mod-card:hover { transform: translateY(-5px); } /* 指上去輕微浮起 */
-
-/* --- 卡片內的文字排版 --- */
-.mod-header {
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 15px;
-    color: #222;
+.mod-card:hover { 
+    /* 指上去浮起與陰影加深 */ box-shadow: 0 10px 30px rgba(0,0,0,0.08); transform: translateY(-5px);
 }
 
-.author { 
-    text-align: center; 
-    font-size: 12px; 
-    color: #999; 
-    margin-bottom: 20px; 
-}
-/* ① 作者超連結：簡約底線 */
-.author a { color: #666; text-decoration: underline; }
+/* ========【卡片內文】 設定 - 標題與作者 ======== */
+.mod-header { /* 模組標題 */ font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 5px; }
+.author { /* 作者區域 */ text-align: center; font-size: 11px; color: #bbb; margin-bottom: 20px; text-transform: uppercase; }
+.author a { /* 作者連結 */ color: #999; text-decoration: none; border-bottom: 1px solid #ddd; }
 
-.preview-img img {
-    width: 100%;
-    height: auto;
-    border-radius: 4px;
-    /* 移除粗黑框，改為乾淨的圖片展示 */
-}
-
-.details {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #f5f5f5; /* 內部分隔線 */
-    font-size: 13px;
-}
-.info-row { margin-bottom: 8px; color: #555; }
-/* ② 本體連結樣式 */
-.info-row a { color: #007bff; text-decoration: none; font-weight: 500; }
-
-.notes { 
-    margin-top: 15px; 
-    font-size: 12px; 
-    color: #b0b0b0; 
-    font-style: italic; 
-    text-align: center; 
-}
+/* ========【詳細資訊區】 設定 - 下載連結與版本 ======== */
+.details { /* 底部資訊區塊 */ margin-top: 20px; padding-top: 15px; border-top: 1px solid #fafafa; font-size: 13px; }
+.info-row { /* 每一列資訊 */ margin-bottom: 10px; color: #666; }
+.info-row strong { color: #222; font-weight: 500; } /* 粗體字顏色 */
+.info-row a { /* 下載按鈕造型 */ color: #555; text-decoration: none; background: #f5f5f5; padding: 2px 8px; border-radius: 4px; }
+.notes { /* 紅字或重要備註 */ margin-top: 15px; font-size: 12px; color: #bbb; border-left: 2px solid #eee; padding-left: 10px; }
