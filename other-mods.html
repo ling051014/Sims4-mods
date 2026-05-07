@@ -6,11 +6,11 @@
     <title>其他延伸</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 頁面基礎背景 */ body { background-color: #fcfcfc; margin: 0; font-family: "PingFang TC", sans-serif; }
+        /* 頁面基礎背景 */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
         /* 導覽列 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
         .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
 
-        /* 網格容器 */ 
+        /* RWD 響應式網格容器 */ 
         .mod-container { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
@@ -20,37 +20,35 @@
             padding: 0 20px; 
         }
 
-        /* 模組卡片 */
+        /* 模組卡片基礎與動畫 */
         .mod-card { 
             background: #fff; 
-            border: 1px solid #efefef; 
+            border: 1px solid #f0f0f0; 
             border-radius: 12px; 
             overflow: hidden; 
             opacity: 0; 
             transform: translateY(30px); 
-            transition: all 0.6s ease-out; 
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; 
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
         .mod-card.is-visible { opacity: 1; transform: translateY(0); }
 
-        /* 示意圖樣式 */ 
-        .preview-img { width: 100%; height: 210px; background: #f5f5f5; overflow: hidden; position: relative; }
+        /* 示意圖統一樣式 - 無 HOVER 效果 */ 
+        .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
         .preview-img img { width: 100%; height: 100%; object-fit: cover; }
-        .category-tag { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); color: #fff; font-size: 10px; padding: 4px 10px; border-radius: 20px; letter-spacing: 1px; }
 
-        /* 卡片內容 */ .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
-        .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #222; letter-spacing: 0.5px; }
-        .author { font-size: 12px; color: #bbb; margin-bottom: 20px; text-transform: uppercase; }
+        /* 卡片內容區塊 */ .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #111; letter-spacing: 0.5px; }
+        .author { font-size: 12px; color: #999; margin-bottom: 15px; text-transform: uppercase; }
         
-        /* 資訊列 */ 
-        .info-row { font-size: 13px; margin-bottom: 10px; color: #555; display: flex; align-items: baseline; }
-        .info-row strong { color: #999; font-weight: 400; width: 85px; flex-shrink: 0; }
-        .info-row span, .info-row a { color: #444; word-break: break-all; }
-        .info-row a { color: #5b9bd5; text-decoration: none; border-bottom: 1px solid transparent; }
+        /* 資訊列欄位設計 */ 
+        .info-row { font-size: 13px; margin-bottom: 8px; color: #444; line-height: 1.6; }
+        .info-row strong { color: #aaa; font-weight: 400; width: 90px; display: inline-block; }
+        .info-row a { color: #55acee; text-decoration: none; border-bottom: 1px solid transparent; }
+        .info-row a:hover { border-bottom: 1px solid #55acee; }
         
-        /* 備註 */ .notes { font-size: 12px; color: #9a9a9a; margin-top: auto; padding-top: 15px; border-top: 1px solid #f9f9f9; line-height: 1.6; font-style: italic; }
+        /* 備註樣式 */ .notes { font-size: 12px; color: #bbb; margin-top: auto; padding-top: 15px; border-top: 1px dashed #eee; line-height: 1.5; }
 
         @media (max-width: 480px) { .mod-container { grid-template-columns: 1fr; } }
     </style>
@@ -58,126 +56,56 @@
 <body>
 
     <nav class="nav-menu">
-        <a href="index.html">首頁</a> <span style="color: #eee; margin: 0 10px;">/</span> <a href="#" style="color: #000;">其他延伸</a>
+        <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">其他延伸</a>
     </nav>
 
     <div class="mod-container">
 
         <div class="mod-card">
-            <div class="preview-img">
-                <span class="category-tag">SYSTEM TOOL</span>
-                <img src="mod_manager.jpg" alt="Mod Manager">
-            </div>
+            <div class="preview-img"><img src="mod_manager.jpg" alt="Preview"></div>
             <div class="content">
                 <h2 class="mod-header">Sims 4 模組管理器</h2>
                 <div class="author">BY GAMETIME DEV</div>
                 <div class="details">
                     <div class="info-row"><strong>官方網站 / </strong><a href="https://gametimedev.de/S4MM/" target="_blank">Gametimedev</a></div>
-                    <div class="info-row"><strong>主要功能 / </strong><span>管理、啟用、停用與預覽模組檔案</span></div>
-                    <div class="info-row"><strong>當前版本 / </strong><span>v2.x (2026 適用)</span></div>
+                    <div class="info-row"><strong>主要功能 / </strong><span>管理、啟用、停用與預覽模組</span></div>
+                    <div class="info-row"><strong>下載版本 / </strong><span>v2.x (2026 適用)</span></div>
                 </div>
-                <p class="notes">
-                    最強大的模組管理工具，支援圖片預覽，可快速抓出重複或損壞的 package 檔案。 
-                </p>
+                <p class="notes">最強大的模組管理工具，支援圖片預覽，可快速抓出重複或損壞的 package 檔案。</p>
             </div>
         </div>
 
         <div class="mod-card">
-            <div class="preview-img">
-                <span class="category-tag">GRAPHICS</span>
-                <img src="moonglow.jpg" alt="Moonglow">
-            </div>
+            <div class="preview-img"><img src="moonglow.jpg" alt="Preview"></div>
             <div class="content">
-                <h2 class="mod-header">Moonglow世界照明</h2>
+                <h2 class="mod-header">Moonglow 世界照明</h2>
                 <div class="author">BY SOFTERHAZE</div>
                 <div class="details">
                     <div class="info-row"><strong>檔案名稱 / </strong><span>softerhaze-moonglow.zip</span></div>
                     <div class="info-row"><strong>下載管道 / </strong><a href="https://softerhaze.itch.io/" target="_blank">itch.io</a></div>
-                    <div class="info-row"><strong>效果描述 / </strong><span>真實光影環境，提升夜晚與室內細節</span></div>
+                    <div class="info-row"><strong>效果描述 / </strong><span>真實光影環境，提升夜晚細節</span></div>
                 </div>
-                <p class="notes">
-                    目前使用的版本。光影最為真實，但部分環境下可能較暗，建議搭配高亮度螢幕。 
-                </p>
+                <p class="notes">目前使用的版本。光影最為真實，但部分環境下可能較暗，建議搭配高亮度螢幕。</p>
             </div>
         </div>
 
         <div class="mod-card">
-            <div class="preview-img">
-                <span class="category-tag">VISUAL FIX</span>
-                <img src="graphics_fix.jpg" alt="Graphics Fix">
-            </div>
+            <div class="preview-img"><img src="graphics_fix.jpg" alt="Preview"></div>
             <div class="content">
-                <h2 class="mod-header">高清模組</h2>
+                <h2 class="mod-header">高清模組 (Better Graphics)</h2>
                 <div class="author">BY 鴨呀 (SULSULDUCK)</div>
                 <div class="details">
                     <div class="info-row"><strong>檔案名稱 / </strong><span>Better Graphics Solution.zip</span></div>
-                    <div class="info-row"><strong>主要功能 / </strong><span>移除遊戲預設模糊、提升遠景解析度</span></div>
+                    <div class="info-row"><strong>主要功能 / </strong><span>移除遊戲預設模糊、提升解析度</span></div>
                 </div>
-                <p class="notes">
-                    有效解決遠處景物糊成一片的問題，讓遊戲截圖更加銳利。 
-                </p>
-            </div>
-        </div>
-
-        <div class="mod-card">
-            <div class="preview-img">
-                <span class="category-tag">CORE ENGINE</span>
-                <img src="reshade.jpg" alt="ReShade">
-            </div>
-            <div class="content">
-                <h2 class="mod-header">ReShade 6.7.3</h2>
-                <div class="author">BY RESHADE TEAM</div>
-                <div class="details">
-                    <div class="info-row"><strong>下載連結 / </strong><a href="https://reshade.me/" target="_blank">Official Download</a></div>
-                    <div class="info-row"><strong>支援類型 / </strong><span>Full add-on support</span></div>
-                </div>
-                <p class="notes">
-                    畫質濾鏡的基石。安裝時請務必選擇包含「Full add-on support」的版本以確保濾鏡完整。 
-                </p>
-            </div>
-        </div>
-
-        <div class="mod-card">
-            <div class="preview-img">
-                <span class="category-tag">UTILITY</span>
-                <img src="tray_importer.jpg" alt="Tray Importer">
-            </div>
-            <div class="content">
-                <h2 class="mod-header">S4TI Tray導入器</h2>
-                <div class="author">BY DEEVAS</div>
-                <div class="details">
-                    <div class="info-row"><strong>檔案名稱 / </strong><span>S4TI_setup_250831.zip</span></div>
-                    <div class="info-row"><strong>用途 / </strong><span>打包人物與房屋、導出所使用的 CC 清單</span></div>
-                </div>
-                <p class="notes">
-                    想要分享自己捏的小人或蓋的房子時，這是必備工具，能精準找出該房屋所用的所有模組檔案。 
-                </p>
-            </div>
-        </div>
-
-        <div class="mod-card">
-            <div class="preview-img">
-                <span class="category-tag">CREATOR TOOL</span>
-                <img src="s4s.jpg" alt="Sims 4 Studio">
-            </div>
-            <div class="content">
-                <h2 class="mod-header">Sims 4 Studio</h2>
-                <div class="author">BY S4S TEAM</div>
-                <div class="details">
-                    <div class="info-row"><strong>最新版本 / </strong><span>v3.2.4.9</span></div>
-                    <div class="info-row"><strong>下載連結 / </strong><a href="https://sims4studio.com/" target="_blank">S4S 論壇</a></div>
-                </div>
-                <p class="notes">
-                    用於修復舊模組、批量更新 CC 以及自製家具衣服的核心開發工具。 
-                </p>
+                <p class="notes">有效解決遠處景物糊成一片的問題，讓遊戲截圖更加銳利。</p>
             </div>
         </div>
 
     </div>
 
     <script>
-        /* 滾動動畫實作 */
-        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -185,10 +113,7 @@
                 }
             });
         }, observerOptions);
-
-        document.querySelectorAll('.mod-card').forEach(card => {
-            observer.observe(card);
-        });
+        document.querySelectorAll('.mod-card').forEach(card => { observer.observe(card); });
     </script>
 </body>
 </html>
