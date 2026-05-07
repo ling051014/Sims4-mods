@@ -25,7 +25,7 @@ body {
     /* 字體大小 */ font-size: 13px; 
     /* 字距拉開 */ letter-spacing: 1px; 
     /* 轉場動畫 */ transition: 0.3s;
-    /* 響應式：區塊顯示 */ display: inline-block;
+    /* 區塊顯示 */ display: inline-block;
 }
 .nav-menu a:hover { 
     /* 滑過顏色 */ color: #000; 
@@ -34,7 +34,7 @@ body {
 /* ========【卡片容器】 設定 - 網格排列佈局 ======== */
 .mod-container {
     /* 網格系統 */ display: grid;
-    /* 響應式：自動填充與最小寬度 */ grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    /* 寬度適應 (RWD 關鍵) */ grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     /* 卡片間距 */ gap: 30px; 
     /* 最大寬度 */ max-width: 1200px; 
     /* 居中對齊 */ margin: 0 auto; 
@@ -48,8 +48,8 @@ body {
     /* 內部留白 */ padding: 25px;
     /* 極輕陰影 */ box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
     /* 卡片邊框 */ border: 1px solid #eee; 
-    /* 動畫效果 */ transition: 0.4s;
     /* 垂直排列 */ display: flex; flex-direction: column;
+    /* 動畫效果 */ transition: 0.4s;
 }
 .mod-card:hover { 
     /* 滑過浮起 */ transform: translateY(-5px); 
@@ -70,35 +70,11 @@ body {
     /* 區塊顯示 */ display: block; 
 }
 
-/* ========【文字內容】 設定 - 標題與說明文字 ======== */
-.mod-header { 
-    /* 標題大小 */ font-size: 18px; 
-    /* 字體加粗 */ font-weight: 600; 
-    /* 標題居中 */ text-align: center; 
-    /* 下方間距 */ margin-bottom: 5px; 
-    /* 文字顏色 */ color: #222; 
-}
-.author { 
-    /* 作者居中 */ text-align: center; 
-    /* 作者大小 */ font-size: 11px; 
-    /* 作者顏色 */ color: #bbb; 
-    /* 下方間距 */ margin-bottom: 15px; 
-    /* 強制大寫 */ text-transform: uppercase; 
-}
-.details { 
-    /* 自動推到底部 */ margin-top: auto;
-    /* 上方間距 */ margin-top: 15px; 
-    /* 頂部線條 */ border-top: 1px solid #fafafa; 
-    /* 內容內縮 */ padding-top: 15px; 
-    /* 內容大小 */ font-size: 13px; 
-}
-.info-row { 
-    /* 行與行距 */ margin-bottom: 8px; 
-    /* 文字顏色 */ color: #666; 
-}
-.info-row strong { 
-    /* 重點顏色 */ color: #222; 
-    /* 重點粗細 */ font-weight: 500; 
-}
-.info-row a { 
-    /* 連結顏色 */ color:
+/* 剩下的文字樣式比照辦理... */
+.mod-header { /* 標題大小 */ font-size: 18px; /* 字體加粗 */ font-weight: 600; /* 標題居中 */ text-align: center; /* 下方間距 */ margin-bottom: 5px; /* 文字顏色 */ color: #222; }
+.author { /* 作者居中 */ text-align: center; /* 作者大小 */ font-size: 11px; /* 作者顏色 */ color: #bbb; /* 下方間距 */ margin-bottom: 15px; /* 強制大寫 */ text-transform: uppercase; }
+.details { /* 自動推到底部 */ margin-top: auto; /* 上方間距 */ margin-top: 15px; /* 頂部線條 */ border-top: 1px solid #fafafa; /* 內容內縮 */ padding-top: 15px; /* 內容大小 */ font-size: 13px; }
+.info-row { /* 行間距 */ margin-bottom: 8px; /* 文字顏色 */ color: #666; }
+.info-row strong { /* 重點顏色 */ color: #222; }
+.info-row a { /* 連結樣式 */ color: #555; text-decoration: none; background: #f5f5f5; padding: 2px 8px; border-radius: 4px; }
+.notes { /* 備註樣式 */ margin-top: 12px; font-size: 12px; color: #bbb; border-left: 2px solid #eee; padding-left: 10px; font-style: italic; }
