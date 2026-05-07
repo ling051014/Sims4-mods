@@ -3,50 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UI 美化分區 - Ling's Mods</title>
+    <title>UI Mods - Archive</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <nav class="nav-menu">
-        <a href="index.html">🏠 回首頁</a>
-        <span>🎨 UI 美化分區</span>
+        <a href="index.html">INDEX</a>
+        <span style="color: #ccc;">/</span>
+        <a href="#" style="color: #000;">UI DESIGN</a>
     </nav>
 
     <div class="mod-container">
 
-        <div class="mod-card reveal">
-            <div class="mod-header">黑色UI介面</div>
+        <div class="mod-card">
+            <h2 class="mod-header">黑色UI介面</h2>
             
-            <div class="author">作者：<a href="https://www.patreon.com/vyxated" target="_blank">vyxated</a></div>
+            <div class="author">BY <a href="https://www.patreon.com/vyxated" target="_blank">VYXATED</a></div>
             
             <div class="preview-img">
-                <img src="IMG_3193.jpg" alt="預覽圖">
+                <img src="IMG_3193.jpg" alt="Preview">
             </div>
             
             <div class="details">
-                <div class="info-row"><strong>本體：</strong><a href="#" target="_blank">Chalk'd UI.zip</a></div>
-                <div class="info-row"><strong>漢化：</strong><a href="#" target="_blank">點此下載</a></div>
-                <div class="info-row"><strong>版本：</strong>2026-05-07 / v1.2</div>
+                <div class="info-row"><strong>本體 / </strong><a href="#" target="_blank">Download</a></div>
+                <div class="info-row"><strong>漢化 / </strong><a href="#" target="_blank">Translation</a></div>
+                <div class="info-row"><strong>版本 / </strong>2026.05.07</div>
             </div>
             
-            <div class="notes">※ 刪除特定資料夾才可相容</div>
-        </div>
+            <div class="notes">※ 需要刪除快取檔案以確保正常運作</div>
         </div>
 
-    <script>
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                if (elementTop < windowHeight - 100) {
-                    reveals[i].classList.add("active");
-                }
-            }
-        }
-        window.addEventListener("scroll", reveal);
-        reveal(); // 網頁載入時先執行一次
-    </script>
+    </div>
+
 </body>
 </html>
