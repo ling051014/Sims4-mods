@@ -5,26 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自訂義模組</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 頁面基礎背景 */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
+        /* 導覽列縮進 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
+        /* 導覽連結 */ .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
+
+        /* RWD 響應式網格容器 */ 
+        .mod-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
+            gap: 30px; 
+            max-width: 1200px; 
+            margin: 50px auto; 
+            padding: 0 20px; 
+        }
+
+        /* 模組卡片基礎與動畫 */
+        .mod-card { 
+            background: #fff; 
+            border: 1px solid #f0f0f0; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            opacity: 0; 
+            transform: translateY(30px); 
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; 
+            display: flex;
+            flex-direction: column;
+        }
+        /* 滾動觸發顯示 */ .mod-card.is-visible { opacity: 1; transform: translateY(0); }
+
+        /* 示意圖統一樣式 - 無 HOVER 效果 */ 
+        .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
+        .preview-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* 卡片內容區塊 */ .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #111; letter-spacing: 0.5px; }
+        .author { font-size: 12px; color: #999; margin-bottom: 15px; text-transform: uppercase; }
+        
+        /* 資訊列欄位設計 */ 
+        .info-row { font-size: 13px; margin-bottom: 8px; color: #444; line-height: 1.6; }
+        .info-row strong { color: #aaa; font-weight: 400; width: 90px; display: inline-block; }
+        .info-row a { color: #55acee; text-decoration: none; border-bottom: 1px solid transparent; }
+        .info-row a:hover { border-bottom: 1px solid #55acee; }
+        
+        /* 備註樣式 */ .notes { font-size: 12px; color: #bbb; margin-top: auto; padding-top: 15px; border-top: 1px dashed #eee; line-height: 1.5; }
+
+        /* 手機版適應 */ @media (max-width: 480px) { .mod-container { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
+
     <nav class="nav-menu">
-        <a href="index.html">首頁</a>
-        <span style="color: #eee;">/</span>
-        <a href="#" style="color: #000;">自訂義模組</a>
+        <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">自訂義模組</a>
     </nav>
 
     <div class="mod-container">
 
         <div class="mod-card">
-            <h2 class="mod-header">XML INJECTOR</h2>
-            <div class="author">BY SCUMBUMBO</div>
             <div class="preview-img"><img src="xml_injector.jpg" alt="Preview"></div>
-            <div class="details">
-                <div class="info-row"><strong>下載連結：</strong><a href="https://scumbumbomods.com/xml-injector" target="_blank">XmlInjector v4.2</a></div>
+            <div class="content">
+                <h2 class="mod-header">XML INJECTOR (模組注入器)</h2>
+                <div class="author">BY <a href="https://scumbumbomods.com/xml-injector" target="_blank">SCUMBUMBO</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">XmlInjector_Script_v4.ts4script</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Google Drive</a></div>
+                    <div class="info-row"><strong>下載版本 / </strong>v4.2 (最新支援)</div>
+                </div>
+                <p class="notes">
+                    加載自定義模組的核心工具。一般玩家解壓縮後只需保留 "Script_v4" 檔案放入 Mods 資料夾即可。
+                </p>
             </div>
-            <p class="notes">如果您只是一般玩家，只需保留 "Script_v4" 檔案即可。它是加載自定義模組的核心工具。</p>
+        </div>
+
+        <div class="mod-card">
+            <div class="preview-img"><img src="lot51_core.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">LOT51 CORE LIBRARY (核心庫)</h2>
+                <div class="author">BY <a href="https://lot51.cc/core" target="_blank">LOT51</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">lot51_core.ts4script</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>內建繁中</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Mega 雲端備份</a></div>
+                    <div class="info-row"><strong>下載版本 / </strong>v1.22 (最新支援)</div>
+                </div>
+                <p class="notes">
+                    許多大型腳本模組（如電梯、智慧家庭、音樂系統）的底層依賴，為模組提供進階的腳本功能。
+                </p>
+            </div>
         </div>
 
     </div>
+
+    <script>
+        /* 滾動動畫實作 */
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.mod-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
 </body>
 </html>
