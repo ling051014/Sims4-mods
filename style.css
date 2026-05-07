@@ -1,96 +1,110 @@
-/* --- 全局樣式 --- */
+/* --- 全局樣式設定 --- */
 body {
-    background-color: #ffe5d9; 
+    background-color: #ffe5d9; /* 背景底色：粉橘色 */
+    /* 背景格紋：利用漸層製作出白色格線 */
     background-image: linear-gradient(#ffffff 1px, transparent 1px), 
                       linear-gradient(90deg, #ffffff 1px, transparent 1px);
-    background-size: 20px 20px;
-    font-family: "Microsoft JhengHei", sans-serif;
+    background-size: 20px 20px; /* 格點的大小 */
+    
+    /* ③ 修改全站字體：優先順序為微軟正黑體 -> 圓體 -> 無襯線字體 */
+    font-family: "Microsoft JhengHei", "Apple LiGothic Medium", "Yu Gothic", sans-serif;
+    
     margin: 0;
     padding: 20px;
-    color: #2c3e50;
+    color: #2c3e50; /* 全站文字預設顏色 */
 }
 
-/* --- 導覽列 --- */
+/* --- 頂部導覽選單樣式 --- */
 .nav-menu {
-    background: #ffb494;
+    background: #ffb494; /* 導覽列背景色 */
     padding: 15px;
     text-align: center;
     border-radius: 12px;
     margin-bottom: 30px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 .nav-menu a {
     margin: 0 15px;
-    text-decoration: none;
+    text-decoration: none; /* 移除超連結底線 */
     color: #2c3e50;
-    font-weight: bold;
+    font-weight: bold; /* 字體加粗 */
 }
 
-/* --- 容器：控制格子排隊 --- */
+/* --- 模組卡片排列容器 --- */
 .mod-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 25px;
-    max-width: 1200px;
-    margin: 0 auto;
+    display: grid; /* 開啟網格排版 */
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* 自動填滿，最小寬度350px */
+    gap: 25px; /* 卡片之間的間距 */
+    max-width: 1200px; /* 容器最大寬度 */
+    margin: 0 auto; /* 居中對齊 */
 }
 
-/* --- 模組卡片主體 --- */
+/* --- 模組卡片主體樣式 --- */
 .mod-card {
-    background: #fff8f0;
-    border-radius: 20px;
+    background: #fff8f0; /* 卡片背景色 */
+    border-radius: 20px; /* 圓角程度 */
     padding: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08); /* 卡片陰影 */
     display: flex;
     flex-direction: column;
 }
 
+/* --- 模組名稱標題樣式 --- */
 .mod-header {
     background: #ffb494;
-    width: fit-content;
-    margin: 0 auto 10px;
+    width: fit-content; /* 寬度隨文字長度調整 */
+    margin: 0 auto 10px; /* 底部間距10px且水平居中 */
     padding: 8px 25px;
     border-radius: 12px;
     font-size: 18px;
     font-weight: bold;
 }
 
-.author { text-align: right; font-size: 12px; margin-bottom: 8px; color: #666; }
-.author a { color: #333; }
-
-.preview-img img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    border: 4px solid #2c2c2c;
+/* --- 作者區域樣式 --- */
+.author { 
+    text-align: right; 
+    font-size: 13px; 
+    margin-bottom: 8px; 
+    color: #666; 
+}
+/* ① 作者名稱超連結樣式 */
+.author a { 
+    color: #ff69b4; /* 作者連結顏色改為粉色 */
+    text-decoration: underline; /* 加上底線方便識別 */
+    font-weight: bold;
 }
 
+/* --- 圖片區域樣式 --- */
+.preview-img img {
+    width: 100%; /* 寬度填滿卡片 */
+    height: auto;
+    border-radius: 10px;
+    border: 4px solid #2c2c2c; /* 圖片黑框邊界 */
+}
+
+/* --- 詳細資訊深色區塊樣式 --- */
 .details {
-    background: #34495e;
-    color: white;
+    background: #34495e; /* 深藍色背景 */
+    color: white; /* 文字顏色為白色 */
     padding: 15px;
     border-radius: 12px;
     margin-top: 15px;
     font-size: 14px;
 }
 
+/* --- 內容列樣式 --- */
 .info-row { margin-bottom: 6px; }
-.info-row a { color: #85c1e9; text-decoration: none; }
+.info-row a { color: #85c1e9; text-decoration: none; } /* 下載連結顏色 */
 
+/* --- 底部備註樣式 --- */
 .notes { color: #e74c3c; font-size: 12px; margin-top: 12px; text-align: center; }
 
-/* --- 滑出動畫樣式 --- */
+/* --- 滑出動畫設定 --- */
 .reveal {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s ease-out;
+    opacity: 0; /* 預設透明 */
+    transform: translateY(30px); /* 預設位置向下移30px */
+    transition: all 0.8s ease-out; /* 動畫時間0.8秒 */
 }
 .reveal.active {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* --- 響應式設定 --- */
-@media (max-width: 600px) {
-    .mod-container { grid-template-columns: 1fr; }
+    opacity: 1; /* 顯示 */
+    transform: translateY(0); /* 回到原始位置 */
 }
