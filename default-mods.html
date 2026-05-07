@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>默認替換</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 頁面基礎背景 */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
+        /* 導覽列縮進 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
+        /* 導覽連結 */ .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
+
+        /* RWD 響應式網格容器 */ 
+        .mod-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
+            gap: 30px; 
+            max-width: 1200px; 
+            margin: 50px auto; 
+            padding: 0 20px; 
+        }
+
+        /* 模組卡片基礎與動畫 */
+        .mod-card { 
+            background: #fff; 
+            border: 1px solid #f0f0f0; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            opacity: 0; 
+            transform: translateY(30px); 
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; 
+            display: flex;
+            flex-direction: column;
+        }
+        /* 滾動觸發顯示 */ .mod-card.is-visible { opacity: 1; transform: translateY(0); }
+
+        /* 示意圖統一樣式 - 無 HOVER 效果 */ 
+        .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
+        .preview-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* 卡片內容區塊 */ .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #111; letter-spacing: 0.5px; }
+        .author { font-size: 12px; color: #999; margin-bottom: 15px; text-transform: uppercase; }
+        
+        /* 資訊列欄位設計 */ 
+        .info-row { font-size: 13px; margin-bottom: 8px; color: #444; line-height: 1.6; }
+        .info-row strong { color: #aaa; font-weight: 400; width: 90px; display: inline-block; }
+        .info-row a { color: #55acee; text-decoration: none; border-bottom: 1px solid transparent; }
+        .info-row a:hover { border-bottom: 1px solid #55acee; }
+        
+        /* 備註樣式 */ .notes { font-size: 12px; color: #bbb; margin-top: auto; padding-top: 15px; border-top: 1px dashed #eee; line-height: 1.5; }
+
+        /* 手機版適應 */ @media (max-width: 480px) { .mod-container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-menu">
+        <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">默認替換</a>
+    </nav>
+
+    <div class="mod-container">
+
+        <!-- ========【模組：手繪地圖替換 Fan Made Maps】 (PDF P.43) ======== -->
+        <div class="mod-card">
+            <div class="preview-img"><img src="fan_maps.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">手繪地圖替換 (Fan Made Maps)</h2>
+                <div class="author">BY <a href="https://20thcenturysims.tumblr.com/" target="_blank">20THCENTURYSIMS</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">MapReplacement_Collection.zip</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">作者 Tumblr 下載</a></div>
+                    <div class="info-row"><strong>下載版本 / </strong>2026 最新版</div>
+                </div>
+                <p class="notes">
+                    將遊戲原生的 2D 平面地圖替換為精緻的手繪風格圖案。不含三米舒諾與部分特殊地圖。
+                </p>
+            </div>
+        </div>
+
+        <!-- ========【模組：Loading 背景替換 Cloud Loading Screen】 (PDF P.5) ======== -->
+        <div class="mod-card">
+            <div class="preview-img"><img src="loading_screen.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">雲朵讀取畫面 (Cloud Loading Screen)</h2>
+                <div class="author">BY <a href="#" target="_blank">DREARYFAWN</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">[DF] LoadingScreen_Cloud.package</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Mega 雲端備份</a></div>
+                    <div class="info-row"><strong>下載版本 / </strong>v1.0</div>
+                </div>
+                <p class="notes">
+                    替換遊戲啟動與切換地圖時的預設讀取畫面。請注意每個資料夾只能放置一個「讀取畫面替換」模組。
+                </p>
+            </div>
+        </div>
+
+        <!-- ========【模組：電話圖示替換 Phone Icon Overrides】 (PDF P.6) ======== -->
+        <div class="mod-card">
+            <div class="preview-img"><img src="phone_override.jpg" alt="Preview"></div>
+            <div class="content">
+                <h2 class="mod-header">電話圖示替換 (Phone Icon)</h2>
+                <div class="author">BY <a href="#" target="_blank">A_KIND_SIM</a></div>
+                <div class="details">
+                    <div class="info-row"><strong>檔案名稱 / </strong><a href="#">PhoneIcon_Replacement.package</a></div>
+                    <div class="info-row"><strong>漢化版本 / </strong>無需漢化</div>
+                    <div class="info-row"><strong>備用載點 / </strong><a href="#">Google Drive</a></div>
+                    <div class="info-row"><strong>下載日期 / </strong>2026/04/28</div>
+                </div>
+                <p class="notes">
+                    將遊戲介面右下角的手機圖示替換為自定義風格（如簡約黑白或復古色系）。
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* 滾動動畫實作 */
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.mod-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
