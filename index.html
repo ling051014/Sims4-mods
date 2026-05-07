@@ -2,36 +2,46 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ling's Mods 整理 - 首頁</title>
+    <title>Ling's Mods 整理</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 首頁專用的按鈕排版 */
+        /* ④ 首頁專屬封面圖樣式 */
+        .home-banner {
+            width: 100%;
+            max-width: 800px; /* 限制最大寬度 */
+            margin: 0 auto 30px; /* 居中並與下方保持距離 */
+            display: block;
+            border-radius: 20px; /* 封面也要圓角 */
+            border: 5px solid #fff; /* 白色粗框 */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
         .category-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             max-width: 900px;
-            margin: 50px auto;
+            margin: 20px auto;
         }
         .cat-btn {
             background: #fff8f0;
-            padding: 40px 20px;
+            padding: 30px 10px;
             text-align: center;
             border-radius: 20px;
             text-decoration: none;
             color: #2c3e50;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: 0.3s;
             border: 2px solid #ffb494;
+            transition: 0.3s;
         }
         .cat-btn:hover { transform: scale(1.05); background: #ffb494; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align: center; margin-top: 50px;">Ling's Mods 整理</h1>
+    <h1 style="text-align: center; margin-top: 30px;">Ling's Mods 整理基地</h1>
+
+    <img src="banner.jpg" class="home-banner" alt="首頁封面">
 
     <div class="category-grid">
         <a href="ui-mods.html" class="cat-btn">🎨 UI 美化</a>
