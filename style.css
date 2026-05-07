@@ -113,15 +113,19 @@ body {
     /* 連結圓角 */ border-radius: 4px; 
     /* 強制斷行 */ word-break: break-all;
 }
-.notes { 
-    /* 備註間距 */ margin-top: 15px; 
+.notes {  
+    /* 備註間距 */ margin-top: 20px; 
     /* 備註大小 */ font-size: 12px; 
     /* 備註顏色 */ color: #bbb; 
+    /* 撐開寬度 */width: 100%; 
+    /* ？？？？ */box-sizing: border-box; 
+    /* 變距調整 */margin-left: 0; 
     /* 虛線方框 */ border: 1px dashed #eee; 
-    /* 設定圓角 */ border-radius: 6px; 
-    /* 方框內縮 */ padding: 10px; 
-    /* 斜體顯示 */ font-style: italic; 
-    /* 行距設定 */ line-height: 1.5;
+    /* 方框圓角 */ border-radius: 8px; 
+    /* 方框內縮 */ padding: 15px; 
+    /* 文字斜體 */ font-style: italic; 
+    /* 行距設定 */ line-height: 1.6; 
+    /* 文字對齊 */ text-align: center; 
 }
 
 /* ========【響應式調整】 設定 - 手機端顯示優化 ======== */
