@@ -80,6 +80,7 @@ body {
     /* 字體加粗 */ font-weight: 600; 
     /* 標題居中 */ text-align: center; 
     /* 下方間距 */ margin-bottom: 5px; 
+    /* 文字行距 */ line-height: 1.3;
     /* 文字顏色 */ color: #222; 
 }
 .author { 
