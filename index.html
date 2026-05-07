@@ -3,66 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ling's Archive</title>
+    <title>模擬市民4 模組整理</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ④ 首頁專屬封面：現代寬屏感 */
-        .home-banner {
-            width: 100%;
-            height: 300px; /* 固定高度 */
-            object-fit: cover; /* 圖片自動裁切填滿，不變形 */
-            margin-bottom: 50px;
-        }
-
-        .home-title {
-            text-align: center;
-            font-weight: 300; /* 細體字更有高級感 */
-            letter-spacing: 4px;
-            margin-bottom: 40px;
-            text-transform: uppercase; /* 英文強制大寫（如果有英文字） */
-        }
-
+        /* ========【首頁封面與標題】 設定 ======== */
+        .home-banner { width: 100%; height: 40vh; object-fit: cover; }
+        .home-title { text-align: center; font-weight: 200; letter-spacing: 8px; margin: 50px 0; font-size: 24px; }
+        
+        /* ========【分類按鈕】 設定 - 響應式排列 ======== */
         .category-grid {
-            display: grid;
-            /* 響應式：手機 1 欄，平板以上 2-3 欄 */
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px; max-width: 900px; margin: 0 auto; padding: 20px;
         }
-
         .cat-btn {
-            background: #ffffff;
-            padding: 30px 20px;
-            text-align: center;
-            border: 1px solid #eee;
-            text-decoration: none;
-            color: #444;
-            font-size: 14px;
-            transition: 0.3s;
+            background: #fff; padding: 40px 10px; text-align: center; border: 1px solid #eee;
+            text-decoration: none; color: #888; font-size: 12px; letter-spacing: 2px; transition: 0.3s;
         }
-        .cat-btn:hover {
-            border-color: #000;
-            color: #000;
-            background: #fafafa;
-        }
-
-        .all-btn { background: #222 !important; color: #fff !important; }
+        .cat-btn:hover { border-color: #000; color: #000; }
+        .all-btn { background: #000 !important; color: #fff !important; }
     </style>
 </head>
 <body>
 
-    <img src="banner.jpg" class="home-banner" alt="Banner">
+    <img src="banner.jpg" class="home-banner" alt="SIMS 4 ARCHIVE">
 
-    <h1 class="home-title">Archive</h1>
+    <h1 class="home-title">SIMS 4 ARCHIVE</h1>
 
     <div class="category-grid">
-        <a href="ui-mods.html" class="cat-btn">UI DESIGN</a>
-        <a href="function-mods.html" class="cat-btn">FUNCTION</a>
-        <a href="cheat-mods.html" class="cat-btn">CHEATS</a>
-        <a href="18plus.html" class="cat-btn">COLLECTION</a>
-        <a href="all-mods.html" class="cat-btn all-btn">VIEW ALL</a>
+        <a href="base-mods.html" class="cat-btn">CORE<br>基礎 / 核心</a>
+        <a href="cheat-mods.html" class="cat-btn">SYSTEM<br>作弊 / 系統</a>
+        <a href="ui-mods.html" class="cat-btn">VISUAL<br>UI / 介面美化</a>
+        <a href="social-mods.html" class="cat-btn">SOCIAL<br>社交 / 互動</a>
+        <a href="18plus-mods.html" class="cat-btn">ADULT<br>18+ 紳士</a>
+        <a href="all-mods.html" class="cat-btn all-btn">VIEW ALL<br>全部展開</a>
     </div>
 
 </body>
