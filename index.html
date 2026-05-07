@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模擬市民4 模組整理</title>
+    <title>Sims 4 Archive</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* ========【首頁封面與標題】 設定 ======== */
-        .home-banner { width: 100%; height: 40vh; object-fit: cover; }
-        .home-title { text-align: center; font-weight: 200; letter-spacing: 8px; margin: 50px 0; font-size: 24px; }
+        .home-banner { width: 100%; height: 40vh; object-fit: cover; margin-bottom: 30px; }
+        .home-title { text-align: center; font-weight: 200; letter-spacing: 8px; margin: 30px 0; font-size: 22px; color: #333; }
         
-        /* ========【分類按鈕】 設定 - 響應式排列 ======== */
+        /* ========【分類按鈕排版】 設定 ======== */
         .category-grid {
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px; max-width: 900px; margin: 0 auto; padding: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px; max-width: 850px; margin: 0 auto; padding: 20px;
         }
         .cat-btn {
-            background: #fff; padding: 40px 10px; text-align: center; border: 1px solid #eee;
+            background: #fff; padding: 35px 15px; text-align: center; border: 1px solid #eee;
             text-decoration: none; color: #888; font-size: 12px; letter-spacing: 2px; transition: 0.3s;
         }
-        .cat-btn:hover { border-color: #000; color: #000; }
-        .all-btn { background: #000 !important; color: #fff !important; }
+        .cat-btn:hover { border-color: #222; color: #222; background: #fafafa; }
     </style>
 </head>
 <body>
@@ -31,12 +30,11 @@
     <h1 class="home-title">SIMS 4 ARCHIVE</h1>
 
     <div class="category-grid">
-        <a href="base-mods.html" class="cat-btn">CORE<br>基礎 / 核心</a>
-        <a href="cheat-mods.html" class="cat-btn">SYSTEM<br>作弊 / 系統</a>
-        <a href="ui-mods.html" class="cat-btn">VISUAL<br>UI / 介面美化</a>
-        <a href="social-mods.html" class="cat-btn">SOCIAL<br>社交 / 互動</a>
-        <a href="18plus-mods.html" class="cat-btn">ADULT<br>18+ 紳士</a>
-        <a href="all-mods.html" class="cat-btn all-btn">VIEW ALL<br>全部展開</a>
+        <a href="ui-mods.html" class="cat-btn">COLLECTION<br>全部整理</a>
+        <a href="#" class="cat-btn" style="opacity: 0.4;">CORE<br>基礎工具</a>
+        <a href="#" class="cat-btn" style="opacity: 0.4;">SYSTEM<br>作弊系統</a>
+        <a href="#" class="cat-btn" style="opacity: 0.4;">SOCIAL<br>社交互動</a>
+        <a href="#" class="cat-btn" style="opacity: 0.4;">ADULT<br>18+ 紳士</a>
     </div>
 
 </body>
