@@ -12,7 +12,7 @@ body {
 /* ========【頂部導覽列】 設定 - 頁面頂端按鈕區 ======== */
 .nav-menu {
     /* 背景顏色 */ background: #ffffff; 
-    /* 上下內縮 */ padding: 20px; 
+    /* 上下內縮 */ padding: 12px; 
     /* 文字居中 */ text-align: center;
     /* 底部細線 */ border-bottom: 1px solid #f0f0f0; 
     /* 下方間距 */ margin-bottom: 30px;
