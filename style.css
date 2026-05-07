@@ -25,6 +25,7 @@ body {
     /* 字體大小 */ font-size: 13px; 
     /* 字距拉開 */ letter-spacing: 1px; 
     /* 轉場動畫 */ transition: 0.3s;
+    /* 響應式：區塊顯示 */ display: inline-block;
 }
 .nav-menu a:hover { 
     /* 滑過顏色 */ color: #000; 
@@ -33,7 +34,7 @@ body {
 /* ========【卡片容器】 設定 - 網格排列佈局 ======== */
 .mod-container {
     /* 網格系統 */ display: grid;
-    /* 寬度適應 */ grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    /* 響應式：自動填充與最小寬度 */ grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     /* 卡片間距 */ gap: 30px; 
     /* 最大寬度 */ max-width: 1200px; 
     /* 居中對齊 */ margin: 0 auto; 
@@ -85,6 +86,7 @@ body {
     /* 強制大寫 */ text-transform: uppercase; 
 }
 .details { 
+    /* 自動推到底部 */ margin-top: auto;
     /* 上方間距 */ margin-top: 15px; 
     /* 頂部線條 */ border-top: 1px solid #fafafa; 
     /* 內容內縮 */ padding-top: 15px; 
@@ -99,17 +101,4 @@ body {
     /* 重點粗細 */ font-weight: 500; 
 }
 .info-row a { 
-    /* 連結顏色 */ color: #555; 
-    /* 移除底線 */ text-decoration: none; 
-    /* 連結背景 */ background: #f5f5f5; 
-    /* 連結內縮 */ padding: 2px 8px; 
-    /* 連結圓角 */ border-radius: 4px; 
-}
-.notes { 
-    /* 備註間距 */ margin-top: 12px; 
-    /* 備註大小 */ font-size: 12px; 
-    /* 備註顏色 */ color: #bbb; 
-    /* 左側線條 */ border-left: 2px solid #eee; 
-    /* 左側內縮 */ padding-left: 10px; 
-    /* 斜體顯示 */ font-style: italic; 
-}
+    /* 連結顏色 */ color:
