@@ -3,66 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ling's Mods 整理基地</title>
+    <title>Ling's Archive</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ④ 首頁專屬封面圖：寬度自動縮放 */
+        /* ④ 首頁專屬封面：現代寬屏感 */
         .home-banner {
-            width: 95%; /* 佔螢幕寬度 95% */
-            max-width: 800px; /* 電腦版最大寬度 */
-            height: auto;
-            margin: 0 auto 30px;
-            display: block;
-            border-radius: 20px;
-            border: 4px solid #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            height: 300px; /* 固定高度 */
+            object-fit: cover; /* 圖片自動裁切填滿，不變形 */
+            margin-bottom: 50px;
         }
 
-        /* 首頁按鈕容器：自動換行響應式 */
+        .home-title {
+            text-align: center;
+            font-weight: 300; /* 細體字更有高級感 */
+            letter-spacing: 4px;
+            margin-bottom: 40px;
+            text-transform: uppercase; /* 英文強制大寫（如果有英文字） */
+        }
+
         .category-grid {
             display: grid;
-            /* 關鍵：按鈕寬度最少 150px，不足時自動換到下一排 */
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 0 10px;
+            /* 響應式：手機 1 欄，平板以上 2-3 欄 */
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        /* 首頁按鈕樣式 */
         .cat-btn {
-            background: #fff8f0;
-            padding: 25px 10px;
+            background: #ffffff;
+            padding: 30px 20px;
             text-align: center;
-            border-radius: 20px;
+            border: 1px solid #eee;
             text-decoration: none;
-            color: #2c3e50;
-            font-weight: bold;
-            border: 2px solid #ffb494;
+            color: #444;
+            font-size: 14px;
             transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
-        .cat-btn:hover { background: #ffb494; transform: scale(1.05); }
+        .cat-btn:hover {
+            border-color: #000;
+            color: #000;
+            background: #fafafa;
+        }
 
-        /* 「全部展開」按鈕特別顏色 */
-        .all-btn { background: #34495e !important; color: white !important; border: none !important; }
+        .all-btn { background: #222 !important; color: #fff !important; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align: center; margin: 30px 0;">Ling's Mods 整理基地</h1>
+    <img src="banner.jpg" class="home-banner" alt="Banner">
 
-    <img src="banner.jpg" class="home-banner" alt="首頁封面圖">
+    <h1 class="home-title">Archive</h1>
 
     <div class="category-grid">
-        <a href="ui-mods.html" class="cat-btn">🎨 UI 美化</a>
-        <a href="function-mods.html" class="cat-btn">🛠️ 功能模組</a>
-        <a href="cheat-mods.html" class="cat-btn">⚡ 作弊模組</a>
-        <a href="18plus.html" class="cat-btn">🔞 18+ 模組</a>
-        <a href="all-mods.html" class="cat-btn all-btn">👁️ 全部展開</a>
+        <a href="ui-mods.html" class="cat-btn">UI DESIGN</a>
+        <a href="function-mods.html" class="cat-btn">FUNCTION</a>
+        <a href="cheat-mods.html" class="cat-btn">CHEATS</a>
+        <a href="18plus.html" class="cat-btn">COLLECTION</a>
+        <a href="all-mods.html" class="cat-btn all-btn">VIEW ALL</a>
     </div>
 
 </body>
