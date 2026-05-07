@@ -17,10 +17,28 @@
     
     <div class="category-grid">
         <a href="base-mods.html" class="cat-btn">CORE<br>自訂義模組</a>
+        <a href="adult-mods.html" class="cat-btn">ADULT<br>18+模組</a>
         <a href="cheat-mods.html" class="cat-btn">SYSTEM<br>作弊系統</a>
         <a href="social-mods.html" class="cat-btn">SOCIAL<br>功能模組</a>
-        <a href="adult-mods.html" class="cat-btn">ADULT<br>18+模組</a>
+        <a href="default-mods.html" class="cat-btn">REPLACEMENT<br>默認替換</a>
         <a href="ui-mods.html" class="cat-btn">VISUAL<br>UI美化</a>
+        <a href="other-mods.html" class="cat-btn">EXTENSION<br>其他延伸</a>
     </div>
+<script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = "1";
+                    entry.target.style.transform = "translateY(0)";
+                }
+            });
+        });
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.style.opacity = "0";
+            btn.style.transform = "translateY(20px)";
+            btn.style.transition = "0.5s ease-out";
+            observer.observe(btn);
+        });
+    </script>
 </body>
 </html>
