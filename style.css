@@ -93,7 +93,7 @@ body {
     /* 行距設定 */ line-height: 1.6;
     /* 彈性佈局 */ display: flex;
     /* 允許換行 */ flex-wrap: wrap;
-    /* 預設靠左 */ justify-content: flex-start
+    /* 預設靠左 */ justify-content: flex-start;
 }
 .info-row strong {
     /* 文字顏色 */ color: #aaa;
