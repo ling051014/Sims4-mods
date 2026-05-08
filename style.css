@@ -119,8 +119,8 @@ body {
     /* 備註顏色 */ color: #bbb; 
     /* 強制撐開 */ width: auto; 
     /* 尺寸計算 */ box-sizing: border-box; 
-    /* 左右推開 */ margin-left: -25px; 
-    /* 左右推開 */ margin-right: -25px; 
+    /* 左右推開 */ margin-left: 0px; 
+    /* 左右推開 */ margin-right: 0px; 
     /* 虛線方框 */ border: 1px dashed #eee; 
     /* 方框圓角 */ border-radius: 8px; 
     /* 內容內縮 */ padding: 15px 25px; 
