@@ -79,7 +79,7 @@ body {
 }
 .author {
     /* 字體大小 */ font-size: 12px;
-    /* 連結顏色 */ color: inherit;
+    /* 文字顏色 */ color: #999;
     /* 文字靠右 */ text-align: right;
     /* 下方間距 */ margin-bottom: 15px;
     /* 強制大寫 */ text-transform: uppercase;
