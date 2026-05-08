@@ -113,20 +113,20 @@ body {
     /* 連結圓角 */ border-radius: 4px; 
     /* 強制斷行 */ word-break: break-all;
 }
-.notes {  
-    /* 備註間距 */ margin-top: 20px; 
-    /* 備註大小 */ font-size: 12px; 
-    /* 備註顏色 */ color: #bbb; 
-    /* 強制撐開 */ width: auto; 
-    /* 尺寸計算 */ box-sizing: border-box; 
-    /* 左右推開 */ margin-left: 0px; 
-    /* 左右推開 */ margin-right: 0px; 
-    /* 虛線方框 */ border: 1px dashed #eee; 
-    /* 方框圓角 */ border-radius: 8px; 
-    /* 內容內縮 */ padding: 15px 25px; 
-    /* 文字斜體 */ font-style: italic; 
-    /* 行距設定 */ line-height: 1.6; 
-    /* 文字對齊 */ text-align: center; 
+.notes {  
+    /* 備註間距 */ margin-top: 20px; 
+    /* 備註大小 */ font-size: 12px; 
+    /* 備註顏色 */ color: #bbb; 
+    /* 強制撐開 */ width: auto; 
+    /* 尺寸計算 */ box-sizing: border-box; 
+    /* 左右推開 */ margin-left: -25px; 
+    /* 左右推開 */ margin-right: -25px; 
+    /* 虛線方框 */ border: 1px dashed #eee; 
+    /* 方框圓角 */ border-radius: 8px; 
+    /* 內容內縮 */ padding: 15px 25px; 
+    /* 文字斜體 */ font-style: italic; 
+    /* 行距設定 */ line-height: 1.6; 
+    /* 文字對齊 */ text-align: center; 
 }
 
 /* ========【響應式調整】 設定 - 手機端顯示優化 ======== */
