@@ -1,137 +1,122 @@
-/* ========【全站基礎設定】 設定 - 網頁底層樣式 ======== */
+/* ========【頁面基礎背景】 設定 - 網頁底層樣式 ======== */
 body {
-    /* 背景顏色 */ background-color: #fcfcfc;
-    /* 全站字體 */ font-family: 'Helvetica Neue', Arial, "Microsoft JhengHei", sans-serif;
-    /* 預設邊距 */ margin: 0; 
-    /* 內縮空間 */ padding: 0; 
-    /* 文字顏色 */ color: #444; 
-    /* 行距設定 */ line-height: 1.6;
-    /* 防止縮放 */ -webkit-text-size-adjust: 100%;
+    /* 背景顏色 */ background-color: #fafafa;
+    /* 預設邊距 */ margin: 0;
+    /* 全站字體 */ font-family: "PingFang TC", sans-serif;
 }
 
-/* ========【頂部導覽列】 設定 - 頁面頂端按鈕區 ======== */
+/* ========【導覽列】 設定 - 頂部導覽區 ======== */
 .nav-menu {
-    /* 背景顏色 */ background: #ffffff; 
-    /* 上下內縮 */ padding: 8px; 
-    /* 文字居中 */ text-align: center;
-    /* 底部細線 */ border-bottom: 1px solid #f0f0f0; 
-    /* 下方間距 */ margin-bottom: 30px;
-    /* 固定頂部 */ position: sticky; 
-    /* 置頂層級 */ top: 0; z-index: 100;
+    /* 內縮空間 */ padding: 30px;
+    /* 文字置中 */ text-align: center;
+    /* 底部分隔線 */ border-bottom: 1px solid #eee;
+    /* 背景顏色 */ background: #fff;
+    /* 固定頂部 */ position: sticky;
+    /* 置頂位置 */ top: 0;
+    /* 顯示層級 */ z-index: 100;
 }
 .nav-menu a {
-    /* 左右間距 */ margin: 0 15px; 
-    /* 移除底線 */ text-decoration: none; 
-    /* 字體顏色 */ color: #999; 
-    /* 字體大小 */ font-size: 13px; 
-    /* 字距拉開 */ letter-spacing: 1px; 
-    /* 轉場動畫 */ transition: 0.3s;
-    /* 區塊顯示 */ display: inline-block;
-}
-.nav-menu a:hover { 
-    /* 滑過顏色 */ color: #000; 
+    /* 移除底線 */ text-decoration: none;
+    /* 文字顏色 */ color: #aaa;
+    /* 字體大小 */ font-size: 13px;
+    /* 字距設定 */ letter-spacing: 2px;
 }
 
-/* ========【卡片容器】 設定 - 網格排列佈局 ======== */
+/* ========【模組容器】 設定 - 網格排列區 ======== */
 .mod-container {
     /* 網格系統 */ display: grid;
-    /* 寬度適應 */ grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    /* 卡片間距 */ gap: 30px; 
-    /* 最大寬度 */ max-width: 1200px; 
-    /* 居中對齊 */ margin: 0 auto; 
-    /* 內縮空間 */ padding: 20px;
+    /* 自適應欄位 */ grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    /* 卡片間距 */ gap: 30px;
+    /* 最大寬度 */ max-width: 1200px;
+    /* 上下外距 */ margin: 50px auto;
+    /* 左右內縮 */ padding: 0 20px;
 }
 
-/* ========【模組卡片】 設定 - 單個模組方塊樣式 ======== */
+/* ========【模組卡片】 設定 - 卡片基礎與動畫 ======== */
 .mod-card {
-    /* 卡片背景 */ background: #ffffff; 
-    /* 圓角弧度 */ border-radius: 4px; 
-    /* 內部留白 */ padding: 25px;
-    /* 極輕陰影 */ box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
-    /* 卡片邊框 */ border: 1px solid #eee; 
-    /* 垂直排列 */ display: flex; 
-    /* 方向設定 */ flex-direction: column;
-    /* 搬運：初始透明 */ opacity: 0; 
-    /* 搬運：初始位移 */ transform: translateY(30px); 
-    /* 搬運：過渡動畫 */ transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.4s, transform 0.4s; 
-}
-.mod-card:hover { 
-    /* 滑過浮起 */ transform: translateY(-5px); 
-    /* 加深陰影 */ box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-}
-.mod-card.is-visible { 
-    /* 顯示狀態 */ opacity: 1; transform: translateY(0); 
+    /* 卡片背景 */ background: #fff;
+    /* 卡片邊框 */ border: 1px solid #f0f0f0;
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 超出隱藏 */ overflow: hidden;
+    /* 初始透明 */ opacity: 0;
+    /* 初始位移 */ transform: translateY(30px);
+    /* 動畫效果 */ transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    /* 彈性排列 */ display: flex;
+    /* 垂直方向 */ flex-direction: column;
 }
 
-/* ========【示意圖區】 設定 - 預覽圖片樣式 ======== */
+/* ========【卡片顯示狀態】 設定 - 滾動觸發動畫 ======== */
+.mod-card.is-visible {
+    /* 顯示透明度 */ opacity: 1;
+    /* 回到原位 */ transform: translateY(0);
+}
+
+/* ========【示意圖片】 設定 - 預覽圖區塊 ======== */
 .preview-img {
-    /* 容器寬度 */ width: 100%; 
-    /* 下方間距 */ margin-bottom: 15px; 
-    /* 圖片圓角 */ border-radius: 2px; 
-    /* 超出隱藏 */ overflow: hidden; 
-    /* 預設背景 */ background: #f9f9f9;
-    /* 保持比例 */ aspect-ratio: 16 / 9;
+    /* 寬度填滿 */ width: 100%;
+    /* 固定高度 */ height: 210px;
+    /* 背景顏色 */ background: #eee;
+    /* 超出隱藏 */ overflow: hidden;
 }
-.preview-img img { 
-    /* 圖片寬度 */ width: 100%; 
-    /* 高度填滿 */ height: 100%; 
+.preview-img img {
+    /* 圖片寬度 */ width: 100%;
+    /* 圖片高度 */ height: 100%;
     /* 裁切填滿 */ object-fit: cover;
-    /* 區塊顯示 */ display: block; 
 }
 
-/* ========【文字內容】 設定 - 標題與說明文字 ======== */
-.mod-header { 
-    /* 標題大小 */ font-size: 18px; 
-    /* 字體加粗 */ font-weight: 600; 
-    /* 標題居中 */ text-align: center; 
-    /* 下方間距 */ margin-bottom: 5px; 
-    /* 文字行距 */ line-height: 1.3;
-    /* 文字顏色 */ color: #222; 
+/* ========【內容區塊】 設定 - 卡片文字內容 ======== */
+.content {
+    /* 內縮空間 */ padding: 25px;
+    /* 自動撐滿 */ flex-grow: 1;
+    /* 彈性排列 */ display: flex;
+    /* 垂直方向 */ flex-direction: column;
 }
-.author { 
-    /* 作者居中 */ text-align: center; 
-    /* 作者大小 */ font-size: 11px; 
-    /* 作者顏色 */ color: #bbb; 
-    /* 下方間距 */ margin-bottom: 15px; 
-    /* 強制大寫 */ text-transform: uppercase; 
+.mod-header {
+    /* 標題大小 */ font-size: 19px;
+    /* 外距設定 */ margin: 0 0 5px 0;
+    /* 文字顏色 */ color: #111;
+    /* 字距設定 */ letter-spacing: 0.5px;
 }
-.details { 
-    /* 自動推底 */ margin-top: 25px;
-    /* 頂部線條 */ border-top: 1px solid #fafafa; 
-    /* 內容內縮 */ padding-top: 15px; 
-    /* 內容大小 */ font-size: 13px; 
-}
-.info-row { 
-    /* 行與行距 */ margin-bottom: 8px; 
-    /* 文字顏色 */ color: #666; 
-}
-.info-row strong { 
-    /* 重點顏色 */ color: #222; 
-    /* 重點粗細 */ font-weight: 500; 
-}
-.info-row a { 
-    /* 連結顏色 */ color: #555; 
-    /* 強制斷行 */ word-break: break-all;
+.author {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: #999;
+    /* 下方間距 */ margin-bottom: 15px;
+    /* 強制大寫 */ text-transform: uppercase;
 }
 
-/* ========【備註樣式】 設定 - 底部備註方塊樣式 ======== */
-.notes {  
-    /* 備註間距 */ margin-top: 20px; 
-    /* 備註大小 */ font-size: 12px; 
-    /* 備註顏色 */ color: #bbb; 
-    /* 強制撐開 */ width: auto; 
-    /* 尺寸計算 */ box-sizing: border-box; 
-    /* 左右推開 */ margin-left: 0px; 
-    /* 左右推開 */ margin-right: 0px; 
-    /* 虛線方框 */ border: 1px dashed #eee; 
-    /* 方框圓角 */ border-radius: 8px; 
-    /* 內容內縮 */ padding: 15px 15px; 
-    /* 文字斜體 */ font-style: italic; 
-    /* 行距設定 */ line-height: 1.6; 
-    /* 文字對齊 */ text-align: center; 
+/* ========【資訊列】 設定 - 詳細資訊欄位 ======== */
+.info-row {
+    /* 字體大小 */ font-size: 13px;
+    /* 下方間距 */ margin-bottom: 8px;
+    /* 文字顏色 */ color: #444;
+    /* 行距設定 */ line-height: 1.6;
+}
+.info-row strong {
+    /* 文字顏色 */ color: #aaa;
+    /* 字體粗細 */ font-weight: 400;
+    /* 右側間距 */ margin-right: 8px;
+    /* 區塊顯示 */ display: inline-block;
+}
+.info-row a {
+    /* 連結顏色 */ color: #55acee;
+    /* 移除底線 */ text-decoration: none;
+    /* 底線初始透明 */ border-bottom: 1px solid transparent;
+}
+.info-row a:hover {
+    /* Hover 底線顏色 */ border-bottom: 1px solid #55acee;
 }
 
-/* ========【響應式調整】 設定 - 手機端顯示優化 ======== */
+/* ========【備註區塊】 設定 - 卡片底部備註 ======== */
+.notes {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: #bbb;
+    /* 自動推到底部 */ margin-top: auto;
+    /* 上方內縮 */ padding-top: 15px;
+    /* 虛線分隔 */ border-top: 1px dashed #eee;
+    /* 行距設定 */ line-height: 1.5;
+}
+
+/* ========【響應式設定】 設定 - 手機版優化 ======== */
 @media (max-width: 600px) {
     .nav-menu { 
         /* 手機內縮 */ padding: 15px 5px; 
