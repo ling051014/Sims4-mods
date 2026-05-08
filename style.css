@@ -137,7 +137,6 @@ body {
         /* 手機網格 */ grid-template-columns: 1fr; 
         /* 手機內縮 */ padding: 10px; 
     }
-    /* 核心修正：確保手機版也能左右撐開 */
     .notes {
         /* 左右推開 */ margin-left: -25px;
         /* 左右推開 */ margin-right: -25px;
