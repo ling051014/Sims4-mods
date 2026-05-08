@@ -118,6 +118,8 @@ body {
     /* 虛線分隔 */ border-top: 1px dashed #eee;
     /* 行距設定 */ line-height: 1.5;
 }
+.text-red { 
+    /* 備註裡的強調紅 */color: #ef8181; font-weight: 500; }
 
 /* ========【響應式設定】 設定 - 手機版優化 ======== */
 @media (max-width: 600px) {
