@@ -91,7 +91,7 @@ body {
     /* 強制大寫 */ text-transform: uppercase; 
 }
 .details { 
-    /* 底部間距 */ margin-bottom: 25px;
+    /* 自動推底 */ margin-top: auto;
     /* 上方間距 */ margin-top: 15px; 
     /* 頂部線條 */ border-top: 1px solid #fafafa; 
     /* 內容內縮 */ padding-top: 15px; 
@@ -113,6 +113,7 @@ body {
     /* 連結圓角 */ border-radius: 4px; 
     /* 強制斷行 */ word-break: break-all;
 }
+
 .notes {  
     /* 備註間距 */ margin-top: 20px; 
     /* 備註大小 */ font-size: 12px; 
