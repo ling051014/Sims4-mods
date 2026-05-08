@@ -108,7 +108,7 @@ body {
 }
 
 /* ========【備註區塊】 設定 - 卡片底部備註 ======== */
-.notes {
+.tips {
     /* 文字斜體 */ font-style: italic;
     /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 12px;
@@ -120,7 +120,7 @@ body {
 }
 .text-red { 
     /* 備註裡的強調紅 */color: #ef8181; font-weight: 500; }
-.text-file { 
+.text-green { 
     /* 備註裡的綠色 */color: #8a9a5b; font-style: normal; }
 
 /* ========【響應式設定】 設定 - 手機版優化 ======== */
@@ -136,7 +136,7 @@ body {
         /* 手機網格 */ grid-template-columns: 1fr; 
         /* 手機內縮 */ padding: 10px; 
     }
-    .notes {
+    .tips {
         /* 左右推開 */ margin-left: -25px;
         /* 左右推開 */ margin-right: -25px;
         /* 內容內縮 */ padding: 15px 25px;
