@@ -106,8 +106,6 @@ body {
 }
 .info-row a { 
     /* 連結顏色 */ color: #555; 
-    /* 連結內縮 */ padding: 2px 8px; 
-    /* 連結圓角 */ border-radius: 4px; 
     /* 強制斷行 */ word-break: break-all;
 }
 .notes {  
