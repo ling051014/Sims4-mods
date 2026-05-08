@@ -122,7 +122,7 @@ body {
     /* 左右推開 */ margin-right: 0px; 
     /* 虛線方框 */ border: 1px dashed #eee; 
     /* 方框圓角 */ border-radius: 8px; 
-    /* 內容內縮 */ padding: 15px 25px; 
+    /* 內容內縮 */ padding: 15px 15px; 
     /* 文字斜體 */ font-style: italic; 
     /* 行距設定 */ line-height: 1.6; 
     /* 文字對齊 */ text-align: center; 
