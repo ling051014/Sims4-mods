@@ -92,7 +92,6 @@ body {
 }
 .details { 
     /* 自動推底 */ margin-top: auto;
-    /* 上方間距 */ margin-top: 15px; 
     /* 頂部線條 */ border-top: 1px solid #fafafa; 
     /* 內容內縮 */ padding-top: 15px; 
     /* 內容大小 */ font-size: 13px; 
