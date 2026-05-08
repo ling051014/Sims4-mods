@@ -91,7 +91,7 @@ body {
     /* 強制大寫 */ text-transform: uppercase; 
 }
 .details { 
-    /* 自動推底 */ margin-top: auto;
+    /* 自動推底 */ margin-top: 25px;
     /* 頂部線條 */ border-top: 1px solid #fafafa; 
     /* 內容內縮 */ padding-top: 15px; 
     /* 內容大小 */ font-size: 13px; 
@@ -106,8 +106,6 @@ body {
 }
 .info-row a { 
     /* 連結顏色 */ color: #555; 
-    /* 移除底線 */ text-decoration: none; 
-    /* 連結背景 */ background: #f5f5f5; 
     /* 連結內縮 */ padding: 2px 8px; 
     /* 連結圓角 */ border-radius: 4px; 
     /* 強制斷行 */ word-break: break-all;
