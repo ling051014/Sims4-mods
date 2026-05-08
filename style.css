@@ -109,6 +109,7 @@ body {
 
 /* ========【備註區塊】 設定 - 卡片底部備註 ======== */
 .notes {
+    /* 文字斜體 */ font-style: italic;
     /* 字體大小 */ font-size: 12px;
     /* 文字顏色 */ color: #bbb;
     /* 自動推到底部 */ margin-top: auto;
