@@ -127,6 +127,7 @@ body {
     /* 文字斜體 */ font-style: italic; 
     /* 行距設定 */ line-height: 1.6; 
     /* 文字對齊 */ text-align: center; 
+    /* 停止推底 */ align-self: center;
 }
 
 /* ========【響應式調整】 設定 - 手機端顯示優化 ======== */
