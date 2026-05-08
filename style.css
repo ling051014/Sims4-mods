@@ -49,18 +49,18 @@ body {
     /* 內部留白 */ padding: 25px;
     /* 極輕陰影 */ box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
     /* 卡片邊框 */ border: 1px solid #eee; 
-    /* 動畫效果 */ transition: 0.4s;
     /* 垂直排列 */ display: flex; 
     /* 方向設定 */ flex-direction: column;
-    /* 動畫基礎 */ opacity: 0; transform: translateY(30px);
-    /* 轉場動畫 */ transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    /* 搬運：初始透明 */ opacity: 0; 
+    /* 搬運：初始位移 */ transform: translateY(30px); 
+    /* 搬運：過渡動畫 */ transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.4s, transform 0.4s; 
 }
 .mod-card:hover { 
     /* 滑過浮起 */ transform: translateY(-5px); 
     /* 加深陰影 */ box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
 }
 .mod-card.is-visible { 
-    /* 顯示動畫 */ opacity: 1; transform: translateY(0); 
+    /* 顯示狀態 */ opacity: 1; transform: translateY(0); 
 }
 
 /* ========【示意圖區】 設定 - 預覽圖片樣式 ======== */
@@ -74,7 +74,7 @@ body {
 }
 .preview-img img { 
     /* 圖片寬度 */ width: 100%; 
-    /* 高度自動 */ height: 100%; 
+    /* 高度填滿 */ height: 100%; 
     /* 裁切填滿 */ object-fit: cover;
     /* 區塊顯示 */ display: block; 
 }
@@ -113,6 +113,8 @@ body {
     /* 連結顏色 */ color: #555; 
     /* 強制斷行 */ word-break: break-all;
 }
+
+/* ========【備註樣式】 設定 - 底部備註方塊樣式 ======== */
 .notes {  
     /* 備註間距 */ margin-top: 20px; 
     /* 備註大小 */ font-size: 12px; 
