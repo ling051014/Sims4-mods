@@ -101,6 +101,7 @@ body {
 .info-row a {
     /* 連結顏色 */ color: #55acee;
     /* 移除底線 */ text-decoration: none;
+    /* 換行靠右 */ text-align: right;
     /* 底線初始透明 */ border-bottom: 1px solid transparent;
 }
 .info-row a:hover {
