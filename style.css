@@ -73,6 +73,67 @@ body {
     /* 字距設定 */ letter-spacing: 2px;
 }
 
+/* ========【導覽佈局】 設定 - 導覽列彈性配置 ======== */
+.nav-menu {
+    /* 彈性佈局 */ display: flex;
+    /* 兩端對齊 */ justify-content: space-between;
+    /* 垂直置中 */ align-items: center;
+    /* 內縮空間 */ padding: 20px 40px;
+    /* 底部分隔 */ border-bottom: 1px solid #eee;
+    /* 背景顏色 */ background: #fff;
+    /* 固定頂部 */ position: sticky;
+    /* 置頂位置 */ top: 0;
+    /* 顯示層級 */ z-index: 100;
+}
+
+/* ========【搜尋容器】 設定 - 搜尋框外殼 ======== */
+.search-box {
+    /* 相對定位 */ position: relative;
+    /* 容器寬度 */ width: 220px;
+}
+
+/* ========【搜尋輸入框】 設定 - 輸入框本體樣式 ======== */
+#mod-search {
+    /* 寬度填滿 */ width: 100%;
+    /* 內縮空間 */ padding: 8px 15px;
+    /* 邊框設定 */ border: 1px solid #eee;
+    /* 圓角弧度 */ border-radius: 20px;
+    /* 字體大小 */ font-size: 12px;
+    /* 移除外框 */ outline: none;
+    /* 動畫效果 */ transition: 0.3s;
+}
+
+/* ========【搜尋結果視窗】 設定 - 下拉式選單小視窗 ======== */
+.search-dropdown {
+    /* 絕對定位 */ position: absolute;
+    /* 距離頂部 */ top: 40px;
+    /* 對齊右側 */ right: 0;
+    /* 視窗寬度 */ width: 280px;
+    /* 背景顏色 */ background: #fff;
+    /* 視窗邊框 */ border: 1px solid #eee;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 視窗陰影 */ box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    /* 最大高度 */ max-height: 300px;
+    /* 溢出捲動 */ overflow-y: auto;
+    /* 預設隱藏 */ display: none;
+    /* 顯示層級 */ z-index: 1000;
+}
+
+/* ========【搜尋項目內容】 設定 - 下拉清單單個項目 ======== */
+.search-item {
+    /* 內縮空間 */ padding: 12px 15px;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: #666;
+    /* 指標手勢 */ cursor: pointer;
+    /* 分隔線條 */ border-bottom: 1px solid #f9f9f9;
+}
+
+/* ========【項目滑過效果】 設定 - 下拉清單 Hover ======== */
+.search-item:hover {
+    /* 背景顏色 */ background: #f5faff;
+    /* 文字顏色 */ color: #55acee;
+}
+
 /* ========【模組容器】 設定 - 網格排列區 ======== */
 .mod-container {
     /* 網格系統 */ display: grid;
