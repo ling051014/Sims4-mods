@@ -275,6 +275,11 @@ body {
         /* 手機間距 */ margin: 0 5px; 
         /* 手機字體 */ font-size: 12px; 
     }
+    .cat-btn {
+        /* 手機直向時改為一排兩個或佔滿 */
+        flex: 0 1 calc(45% - 10px);
+        min-width: 140px;==
+    }
     .mod-container { 
         /* 手機網格 */ grid-template-columns: 1fr; 
         /* 手機內縮 */ padding: 10px; 
