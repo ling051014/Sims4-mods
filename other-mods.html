@@ -15,7 +15,7 @@
     <div class="mod-container">
         
         <div class="mod-card">
-            <div class="preview-img"><img src="moonglow.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="moonglow.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">世界照明</h2>
                 <div class="author">BY <a href="https://softerhaze.tumblr.com/tagged/z" target="_blank">softerhaze.itch</div>
@@ -32,7 +32,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="graphics_fix.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="graphics_fix.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">高清模組</h2>
                 <div class="author">BY <a href="https://www.patreon.com/cw/SulSulDUCK" target="_blank">鴨呀 (SulSulDUCK)</a></div>
@@ -47,7 +47,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="reshade.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="reshade.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">ReShade 6.7.3</h2>
                 <div class="author">BY RESHADE TEAM</div>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="mod_manager.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="mod_manager.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">Sims 4 Mod Manager</br>模組可視化</h2>
                 <div class="author">BY GAMETIME DEV</div>
@@ -82,7 +82,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="tray_importer.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="tray_importer.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">S4TI Tray導入器</h2>
                 <div class="author">BY DEEVAS</div>
@@ -97,7 +97,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="s4s.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="s4s.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">Sims 4 Studio</h2>
                 <div class="author">BY S4S TEAM</div>
@@ -114,6 +114,16 @@
     </div>
 
     <script>
+        /* ========【數量統計】 偵測目前的卡片總數 ======== */
+        function updateModCount() {
+            const count = document.querySelectorAll('.mod-card').length;
+            const countElement = document.getElementById('mod-count');
+            if (countElement) {
+                countElement.innerText = count;
+            }
+        }
+        
+        /* 滾動動畫腳本 */
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -122,7 +132,14 @@
                 }
             });
         }, observerOptions);
-        document.querySelectorAll('.mod-card').forEach(card => { observer.observe(card); });
+
+        document.querySelectorAll('.mod-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // 執行統計
+        updateModCount();
     </script>
+    
 </body>
 </html>
