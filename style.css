@@ -62,7 +62,7 @@ body {
 .nav-menu {
     /* 彈性佈局 */ display: flex;
     /* 內縮空間 */ padding: 30px;
-    /* 文字置中 */ text-align: center;
+    /* 垂直置中 */ align-items: center;
     /* 兩端對齊 */ justify-content: space-between;
     /* 底部分隔線 */ border-bottom: 1px solid #eee;
     /* 背景顏色 */ background: #fff;
