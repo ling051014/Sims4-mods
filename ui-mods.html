@@ -9,13 +9,13 @@
 <body>
 
     <nav class="nav-menu">
-        <div class="nav-center-container"> <div class="nav-links">
-                <a href="index.html">首頁</a> / <a href="#">UI美化</a>
-            </div>
-            <div class="search-box">
-                <input type="text" id="mod-search" placeholder="Search..." ==oninput="searchMods()"==>
-                <div id="search-results" class="search-dropdown"></div>
-            </div>
+        <div class="nav-links">
+            <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">UI美化</a>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="mod-search" placeholder="Search..." onkeyup="searchMods()">
+            <div id="search-results" class="search-dropdown"></div>
         </div>
     </nav>
 
@@ -222,7 +222,7 @@
                 <p class="tips">PDF P.39：更改模組左上角的板手圖示為閃亮星星圖示。</p>
             </div>
         </div>
-        
+
     </div>
 
     <script>
@@ -232,9 +232,9 @@
             const filter = input.value.toUpperCase();
             const dropdown = document.getElementById('search-results');
             const cards = document.querySelectorAll('.mod-card');
-    
+
             dropdown.innerHTML = ''; // 清空先前結果
-    
+
             if (!filter) {
                 dropdown.style.display = 'none';
                 return;
@@ -245,7 +245,7 @@
                 const title = card.querySelector('.mod-header').innerText;
                 const author = card.querySelector('.author').innerText;
                 const fullText = card.innerText.toUpperCase();
-        
+
                 if (fullText.includes(filter)) {
                     found = true;
                     const item = document.createElement('div');
@@ -253,7 +253,7 @@
                     // 顯示格式：[編號] 標題 - 作者
                     const displayNum = (index + 1).toString().padStart(2, '0');
                     item.innerHTML = `<strong>#${displayNum} ${title}</strong><br><small>${author}</small>`;
-            
+
                     // 點擊後跳轉
                     item.onclick = () => {
                         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -275,6 +275,7 @@
             if (e.target.id !== 'mod-search') {
                 document.getElementById('search-results').style.display = 'none';
             }
+    
         });
         /* ========【數量統計】 偵測目前的卡片總數 ======== */
         function updateModCount() {
@@ -284,7 +285,7 @@
                 countElement.innerText = count;
             }
         }
-        
+
         /* 滾動動畫腳本 */
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
