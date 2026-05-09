@@ -291,3 +291,27 @@ body {
         /* 內容內縮 */ padding: 15px 25px;
     }
 }
+
+/* ========【響應式設定】 設定 - 手機橫屏模式 ======== */
+
+@media (max-width: 932px) and (orientation: landscape) {
+    
+    .mod-container {
+        /* 三欄配置 */ grid-template-columns: repeat(3, 1fr) !important;
+        /* 縮減間距 */ gap: 15px;
+        /* 左右內縮 */ padding: 10px 20px;
+        /* 上下外距 */ margin: 20px auto;
+    }
+
+    .preview-img {
+        /* 圖片高度 */ height: 140px;
+    }
+
+    .mod-header {
+        /* 標題大小 */ font-size: 16px;
+    }
+
+    .content {
+        /* 內容內縮 */ padding: 15px;
+    }
+}
