@@ -63,6 +63,7 @@ body {
     /* 彈性佈局 */ display: flex;
     /* 內縮空間 */ padding: 30px;
     /* 文字置中 */ text-align: center;
+    /* 兩端對齊 */ justify-content: space-between;
     /* 底部分隔線 */ border-bottom: 1px solid #eee;
     /* 背景顏色 */ background: #fff;
     /* 固定頂部 */ position: sticky;
