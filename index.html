@@ -13,7 +13,7 @@
         <div class="update-date">Last Updated ｜ 2026.05.06</div>
     </div>
     
-    <div class="category-grid scroll-reveal">
+    <div class="category-grid">
         <a href="prep-mods.html" class="cat-btn">PREP<br>自訂義模組</a>
         <a href="adult-mods.html" class="cat-btn">ADULT<br>18+模組</a>
         <a href="cheat-mods.html" class="cat-btn">CHEAT<br>作弊系統</a>
@@ -23,39 +23,20 @@
         <a href="other-mods.html" class="cat-btn">OTHER<br>其他延伸</a>
     </div>
 
-    <div class="extra-section scroll-reveal">
-        <h2 class="section-divider">RESOURCES & TIPS</h2>
-        <div class="category-grid secondary">
-            <a href="sliders.html" class="cat-btn">SLIDERS<br>拉桿相關</a>
-            <a href="cc-platforms.html" class="cat-btn">PLATFORMS<br>CC平台/作者</a>
-            <a href="tips.html" class="cat-btn">TIPS<br>小貼士</a>
-        </div>
-    </div>
-
-    <div class="tag-section scroll-reveal">
-        <h2 class="section-divider">QUICK TAGS</h2>
-        <div class="tag-container">
-            <span class="tag">#MCCC</span>
-            <span class="tag">#WickedWhims</span>
-            <span class="tag">#UICheats</span>
-            <span class="tag">#Patreon獨家</span>
-            <span class="tag">#漢化完成</span>
-            <span class="tag">#需手動更新</span>
-        </div>
-    </div>
-
     <script>
-        const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
+                    entry.target.style.opacity = "1";
+                    entry.target.style.transform = "translateY(0)";
                 }
             });
-        }, observerOptions);
-
-        document.querySelectorAll('.scroll-reveal').forEach(el => {
-            observer.observe(el);
+        });
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.style.opacity = "0";
+            btn.style.transform = "translateY(20px)";
+            btn.style.transition = "0.5s ease-out";
+            observer.observe(btn);
         });
     </script>
 </body>
