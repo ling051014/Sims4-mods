@@ -81,6 +81,7 @@ body {
     /* 最大寬度 */ max-width: 1200px;
     /* 上下外距 */ margin: 50px auto;
     /* 左右內縮 */ padding: 0 20px;
+    /* 重置計數器 */ counter-reset: mod-counter;
 }
 
 /* ========【模組卡片】 設定 - 卡片基礎與動畫 ======== */
@@ -94,6 +95,24 @@ body {
     /* 動畫效果 */ transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     /* 彈性排列 */ display: flex;
     /* 垂直方向 */ flex-direction: column;
+    /* 讓數字定位 */ position: relative;
+    /* 每一張加 1 */ counter-increment: mod-counter;
+}
+
+/* ========【編號標籤樣式】 設定 - 卡片左上角數字 ======== */
+.mod-card::before {
+    /* 自動補零編號 */ content: counter(mod-counter, decimal-leading-zero);
+    /* 絕對定位 */ position: absolute;
+    /* 距離頂部 */ top: 15px;
+    /* 距離左側 */ left: 15px;
+    /* 半透明黑底 */ background: rgba(0, 0, 0, 0.6);
+    /* 文字顏色 */ color: #fff;
+    /* 字體大小 */ font-size: 10px;
+    /* 內縮空間 */ padding: 2px 8px;
+    /* 圓角外觀 */ border-radius: 20px;
+    /* 顯示層級 */ z-index: 10;
+    /* 字距拉開 */ letter-spacing: 1px;
+    /* 等寬字體 */ font-family: monospace;
 }
 
 /* ========【卡片顯示狀態】 設定 - 滾動觸發動畫 ======== */
