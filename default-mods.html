@@ -16,7 +16,7 @@
 
         <!-- ========【模組：手繪地圖替換 Fan Made Maps】 (PDF P.43) ======== -->
         <div class="mod-card">
-            <div class="preview-img"><img src="fan_maps.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="fan_maps.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">手繪地圖替換 (Fan Made Maps)</h2>
                 <div class="author">BY <a href="https://20thcenturysims.tumblr.com/" target="_blank">20THCENTURYSIMS</a></div>
@@ -34,7 +34,7 @@
 
         <!-- ========【模組：Loading 背景替換 Cloud Loading Screen】 (PDF P.5) ======== -->
         <div class="mod-card">
-            <div class="preview-img"><img src="loading_screen.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="loading_screen.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">雲朵讀取畫面 (Cloud Loading Screen)</h2>
                 <div class="author">BY <a href="#" target="_blank">DREARYFAWN</a></div>
@@ -52,7 +52,7 @@
 
         <!-- ========【模組：電話圖示替換 Phone Icon Overrides】 (PDF P.6) ======== -->
         <div class="mod-card">
-            <div class="preview-img"><img src="phone_override.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="phone_override.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">電話圖示替換 (Phone Icon)</h2>
                 <div class="author">BY <a href="#" target="_blank">A_KIND_SIM</a></div>
@@ -71,7 +71,16 @@
     </div>
 
     <script>
-        /* 滾動動畫實作 */
+        /* ========【數量統計】 偵測目前的卡片總數 ======== */
+        function updateModCount() {
+            const count = document.querySelectorAll('.mod-card').length;
+            const countElement = document.getElementById('mod-count');
+            if (countElement) {
+                countElement.innerText = count;
+            }
+        }
+        
+        /* 滾動動畫腳本 */
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -84,6 +93,10 @@
         document.querySelectorAll('.mod-card').forEach(card => {
             observer.observe(card);
         });
+
+        // 執行統計
+        updateModCount();
     </script>
+    
 </body>
 </html>
