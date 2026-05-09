@@ -5,6 +5,57 @@ body {
     /* 全站字體 */ font-family: "PingFang TC", sans-serif;
 }
 
+/* ========【首頁標題區塊】 設定 - 頁面主標題區 ======== */
+.header-section {
+    /* 文字置中 */ text-align: center;
+    /* 上下外距 */ margin: 50px 0;
+}
+.home-title {
+    /* 字體粗細 */ font-weight: 200;
+    /* 字距拉開 */ letter-spacing: 8px;
+    /* 標題大小 */ font-size: 24px;
+    /* 下方間距 */ margin-bottom: 10px;
+}
+
+/* ========【更新日期】 設定 - 最後更新資訊 ======== */
+.update-date {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: #bbb;
+    /* 字距設定 */ letter-spacing: 2px;
+    /* 強制大寫 */ text-transform: uppercase;
+}
+
+/* ========【目錄按鈕容器】 設定 - 首頁分類網格 ======== */
+.category-grid {
+    /* 網格系統 */ display: grid;
+    /* 自適應欄位 */ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* 按鈕間距 */ gap: 15px;
+    /* 最大寬度 */ max-width: 900px;
+    /* 水平置中 */ margin: 0 auto;
+    /* 內縮空間 */ padding: 20px;
+}
+
+/* ========【目錄按鈕】 設定 - 分類入口按鈕 ======== */
+.cat-btn {
+    /* 背景顏色 */ background: #fff;
+    /* 上下左右內縮 */ padding: 50px 10px;
+    /* 文字置中 */ text-align: center;
+    /* 按鈕邊框 */ border: 1px solid #eee;
+    /* 移除底線 */ text-decoration: none;
+    /* 文字顏色 */ color: #888;
+    /* 字體大小 */ font-size: 12px;
+    /* 字距拉開 */ letter-spacing: 2px;
+    /* 動畫效果 */ transition: 0.3s;
+    /* 圓角弧度 */ border-radius: 4px;
+}
+
+/* ========【按鈕滑過效果】 設定 - Hover 動畫 ======== */
+.cat-btn:hover {
+    /* 邊框顏色 */ border-color: #000;
+    /* 文字顏色 */ color: #000;
+    /* 背景顏色 */ background: #fafafa;
+}
+
 /* ========【導覽列】 設定 - 頂部導覽區 ======== */
 .nav-menu {
     /* 內縮空間 */ padding: 30px;
