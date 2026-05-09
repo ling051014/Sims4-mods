@@ -15,7 +15,7 @@
     <div class="mod-container">
 
         <div class="mod-card">
-            <div class="preview-img"><img src="xml_injector.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="xml_injector.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">XML INJECTOR<br>模組注入器</h2>
                 <div class="author">BY <a href="https://scumbumbomods.com/" target="_blank">SCUMBUMBO</a></div>
@@ -34,7 +34,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="lot51_core.jpg" alt="Preview"></div>
+            <div class="preview-img"><img src="lot51_core.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">CORE LIBRARY<br>LOT51核心庫</h2>
                 <div class="author">BY <a href="https://lot51.cc/" target="_blank">LOT51</a></div>
@@ -50,7 +50,16 @@
     </div>
 
     <script>
-        /* 滾動動畫實作 */
+        /* ========【數量統計】 偵測目前的卡片總數 ======== */
+        function updateModCount() {
+            const count = document.querySelectorAll('.mod-card').length;
+            const countElement = document.getElementById('mod-count');
+            if (countElement) {
+                countElement.innerText = count;
+            }
+        }
+        
+        /* 滾動動畫腳本 */
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -63,6 +72,10 @@
         document.querySelectorAll('.mod-card').forEach(card => {
             observer.observe(card);
         });
+
+        // 執行統計
+        updateModCount();
     </script>
+    
 </body>
 </html>
