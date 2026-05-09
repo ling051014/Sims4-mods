@@ -266,7 +266,7 @@ body {
     /* 上下外距 */ margin: 50px 0 30px;
 }
 
-/* ========【響應式設定】 設定 - 手機版優化 ======== */
+/* ========【響應式設定】 設定 - 手機直向優化 ======== */
 @media (max-width: 600px) and (orientation: portrait) {
     .nav-menu {
         /* 減少內縮 */ padding: 15px 10px !important;
@@ -303,7 +303,7 @@ body {
     }
 }
 
-/* ========【響應式設定】 設定 - 手機橫屏模式 ======== */
+/* ========【響應式設定】 設定 - 手機橫向優化 ======== */
 @media (orientation: landscape) {
     .mod-container {
         /* 三欄配置 */ grid-template-columns: repeat(3, 1fr) !important;
