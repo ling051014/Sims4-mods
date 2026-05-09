@@ -29,7 +29,6 @@ body {
 .category-grid {
     /* 網格系統 */ display: flex;
     /* 自動換行 */ flex-wrap: wrap;
-    /* 自適應欄位 */ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     /* 按鈕間距 */ gap: 15px;
     /* 最大寬度 */ max-width: 900px;
     /* 水平置中 */ margin: 0 auto;
