@@ -91,20 +91,14 @@ body {
     /* 下方間距 */ margin-bottom: 8px;
     /* 文字顏色 */ color: #444;
     /* 行距設定 */ line-height: 1.6;
-    /* 首行靠左 */ text-align-last: left;
-    /* 文字靠右 */ text-align: right;
 }
 .info-row strong {
     /* 文字顏色 */ color: #aaa;
     /* 字體粗細 */ font-weight: 400;
-    /* 右側間距 */ margin-right: 8px;
-    /* 區塊顯示 */ display: inline-block;
-    /* 防止被擠壓 */ flex-shrink: 0;
 }
 .info-row a {
     /* 連結顏色 */ color: #55acee;
     /* 移除底線 */ text-decoration: none;
-    /* ？？？？ */ display: inline;
 }
 .info-row a:hover {
     /* Hover 底線顏色 */ border-bottom: 1px solid #55acee;
