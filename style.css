@@ -277,8 +277,9 @@ body {
     }
     .cat-btn {
         /* 手機直向時改為一排兩個或佔滿 */
-        flex: 0 1 calc(45% - 10px);
-        min-width: 120px;
+        flex: 0 1 44%;
+        min-width: 0;
+        padding: 30px 5px;
     }
     .mod-container { 
         /* 手機網格 */ grid-template-columns: 1fr; 
