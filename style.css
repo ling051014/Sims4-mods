@@ -269,11 +269,15 @@ body {
 /* ========【響應式設定】 設定 - 手機版優化 ======== */
 @media (max-width: 600px) and (orientation: portrait) {
     .nav-menu { 
-        /* 手機內縮 */ padding: 15px 5px; 
+        /* 手機內縮 */ padding: 15px 15px; 
+        /* 兩端對齊 */ justify-content: space-between;
     }
     .nav-menu a { 
         /* 手機間距 */ margin: 0 5px; 
         /* 手機字體 */ font-size: 12px; 
+    }
+    .search-box {
+        /* 縮減寬度 */ width: 140px; 
     }
     .cat-btn {
         /* 手機直向時改為一排兩個或佔滿 */
