@@ -5,50 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LING'S SIMS 4 MODS - 功能模組</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* 頁面基礎背景 */ body { background-color: #fcfcfc; margin: 0; font-family: "PingFang TC", sans-serif; }
-        /* 導覽列縮進樣式 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
-        /* 導覽連結 */ .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; transition: 0.3s; }
-        /* 導覽連結滑過 */ .nav-menu a:hover { color: #000; }
-
-        /* 模組網格容器 - RWD響應式設計 */ 
-        .mod-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
-            gap: 25px; 
-            max-width: 1200px; 
-            margin: 50px auto; 
-            padding: 0 20px; 
-        }
-
-        /* 模組卡片基礎與隱藏狀態(準備動畫) */
-        .mod-card { 
-            background: #fff; 
-            border: 1px solid #f0f0f0; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            transition: 0.5s ease-out; 
-            opacity: 0; 
-            transform: translateY(30px); 
-        }
-        /* 滾動觸發後的顯示狀態 */ .mod-card.is-visible { opacity: 1; transform: translateY(0); }
-
-        /* 示意圖容器 */ .preview-img { width: 100%; height: 200px; background: #fafafa; overflow: hidden; }
-        /* 圖片自適應 */ .preview-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        /* 圖片滑過放大 */ .mod-card:hover .preview-img img { transform: scale(1.05); }
-
-        /* 卡片內容區 */ .content { padding: 20px; }
-        /* 中英雙語標題 */ .mod-header { font-size: 18px; margin: 0 0 10px 0; font-weight: 500; letter-spacing: 1px; color: #222; }
-        /* 作者區塊 */ .author { font-size: 12px; color: #888; margin-bottom: 15px; }
-        /* 資訊列樣式 */ .info-row { font-size: 13px; margin: 8px 0; color: #555; line-height: 1.6; }
-        /* 強調標籤 */ .info-row strong { color: #999; font-weight: 400; margin-right: 8px; display: inline-block; }
-        /* 下載連結樣式 */ .info-row a { color: #7bbff1; text-decoration: none; border-bottom: 1px solid transparent; }
-        /* 連結滑過 */ .info-row a:hover { border-bottom: 1px solid #7bbff1; }
-        
-        /* 備註小字 */ .notes { font-size: 12px; color: #bbb; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; }
-
-        /* 手機版調整 */ @media (max-width: 480px) { .mod-container { grid-template-columns: 1fr; } }
-    </style>
 </head>
 <body>
 
