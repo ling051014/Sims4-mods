@@ -265,7 +265,7 @@ body {
 }
 
 /* ========【響應式設定】 設定 - 手機版優化 ======== */
-@media (max-width: 600px) {
+@media (max-width: 600px) and (orientation: portrait) {
     .nav-menu { 
         /* 手機內縮 */ padding: 15px 5px; 
     }
