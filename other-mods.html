@@ -5,52 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LING'S SIMS 4 MODS - 其他延伸</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* 頁面基礎背景 - 統一為 #fafafa */ body { background-color: #fafafa; margin: 0; font-family: "PingFang TC", sans-serif; }
-        /* 導覽列 */ .nav-menu { padding: 30px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 100; }
-        .nav-menu a { text-decoration: none; color: #aaa; font-size: 13px; letter-spacing: 2px; }
-
-        /* RWD 響應式網格容器 */ 
-        .mod-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
-            gap: 30px; 
-            max-width: 1200px; 
-            margin: 50px auto; 
-            padding: 0 20px; 
-        }
-
-        /* 模組卡片基礎與動畫 - 統一格式 */
-        .mod-card { 
-            background: #fff; 
-            border: 1px solid #f0f0f0; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            opacity: 0; 
-            transform: translateY(30px); 
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out; 
-            display: flex;
-            flex-direction: column;
-        }
-        .mod-card.is-visible { opacity: 1; transform: translateY(0); }
-
-        /* 示意圖統一樣式 - 移除左上角標籤，無 HOVER 效果 */ 
-        .preview-img { width: 100%; height: 210px; background: #eee; overflow: hidden; }
-        .preview-img img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* 卡片內容區塊 */ .content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
-        .mod-header { font-size: 19px; margin: 0 0 5px 0; color: #111; letter-spacing: 0.5px; }
-        .author { font-size: 12px; color: #999; margin-bottom: 15px; text-transform: uppercase; }
-        
-        /* 資訊列欄位設計 - 統一 7 大核心欄位風格 */ 
-        .info-row { font-size: 13px; margin-bottom: 8px; color: #444; line-height: 1.6; }
-        .info-row strong { color: #aaa; font-weight: 400; margin-right: 8px; display: inline-block; }
-        .info-row a { color: #55acee; text-decoration: none; border-bottom: 1px solid transparent; }
-        
-        /* 備註樣式 */ .notes { font-size: 12px; color: #bbb; margin-top: auto; padding-top: 15px; border-top: 1px dashed #eee; line-height: 1.5; }
-
-        @media (max-width: 480px) { .mod-container { grid-template-columns: 1fr; } }
-    </style>
 </head>
 <body>
 
@@ -66,9 +20,8 @@
                 <h2 class="mod-header">世界照明</h2>
                 <div class="author">BY SOFTERHAZE</div>
                 <div class="details">
-                    <div class="info-row"><strong>檔案名稱 ｜</strong>softerhaze-moonglow.zip</div>
-                    <div class="info-row"><strong>漢化版本 ｜</strong>無需漢化</div>
-                    <div class="info-row"><strong>下載管道 ｜</strong><a href="https://softerhaze.itch.io/" target="_blank">itch.io</a></div>
+                    <div class="info-row"><strong>模組主體 ｜</strong>softerhaze-moonglow.zip</div>
+                    <div class="info-row"><strong>備用載點 ｜</strong>無</div>
                     <div class="info-row"><strong>下載版本 ｜</strong>最新支援版</div>
                 </div>
                 <p class="tips">
@@ -85,9 +38,8 @@
                 <div class="author">BY 鴨呀 (SUL SUL DUCK)</div>
                 <div class="details">
                     <div class="info-row"><strong>檔案名稱 ｜</strong>Better Graphics Solution.zip</div>
-                    <div class="info-row"><strong>漢化版本 ｜</strong>無需漢化</div>
                     <div class="info-row"><strong>備用載點 ｜</strong><a href="#">Google Drive</a></div>
-                    <div class="info-row"><strong>主要功能 ｜</strong>移除模糊、提升遠景</div>
+                    <div class="info-row"><strong>下載日期 ｜</strong>2025？</div>
                 </div>
                 <p class="tips">有效解決遠處景物糊成一片的問題，讓遊戲截圖更加銳利。</p>
             </div>
@@ -100,11 +52,14 @@
                 <div class="author">BY RESHADE TEAM</div>
                 <div class="details">
                     <div class="info-row"><strong>下載連結 ｜</strong><a href="https://reshade.me/" target="_blank">Official Site</a></div>
-                    <div class="info-row"><strong>漢化版本 ｜</strong>內建簡中</div>
+                    <div class="info-row"><strong>漢化版本 ｜</strong>內建繁中</div>
                     <div class="info-row"><strong>支援類型 ｜</strong>Full add-on support</div>
                     <div class="info-row"><strong>當前版本 ｜</strong>v6.7.3</div>
                 </div>
-                <p class="tips">畫質濾鏡的基石。安裝時請務必選擇包含「Full add-on support」的版本。</p>
+                <p class="tips">
+                    畫質濾鏡的基石。安裝時請務必選擇包含「Full add-on support」的版本。</br>
+                    濾鏡開關快捷鍵「數字 . 」
+                </p>
             </div>
         </div>
 
