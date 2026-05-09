@@ -27,11 +27,12 @@ body {
 
 /* ========【目錄按鈕容器】 設定 - 首頁分類網格 ======== */
 .category-grid {
-    /* 網格系統 */ display: grid;
+    /* 網格系統 */ display: flex;
     /* 自適應欄位 */ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     /* 按鈕間距 */ gap: 15px;
     /* 最大寬度 */ max-width: 900px;
     /* 水平置中 */ margin: 0 auto;
+    /* 末排置中 */ justify-content: center;
     /* 內縮空間 */ padding: 20px;
 }
 
@@ -47,6 +48,7 @@ body {
     /* 字距拉開 */ letter-spacing: 2px;
     /* 動畫效果 */ transition: 0.3s;
     /* 圓角弧度 */ border-radius: 4px;
+    /* ？？？？ */ flex: 0 1 calc(25% - 15px);
 }
 
 /* ========【按鈕滑過效果】 設定 - Hover 動畫 ======== */
