@@ -15,7 +15,7 @@
     <div class="mod-container">
 
         <div class="mod-card">
-            <div class="preview-img"><img src="mccc.jpg" alt="MCCC Preview"></div>
+            <div class="preview-img"><img src="mccc.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">MC Command Center (MCCC)</h2>
                 <div class="author">BY <a href="https://www.patreon.com/c/mccc_deaderpool/posts?utm_source=campaign-search-results" target="_blank">Deaderpool</a></div>
@@ -30,7 +30,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="uicheats.jpg" alt="UI Preview"></div>
+            <div class="preview-img"><img src="uicheats.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">UI Cheats Extension</h2>
                 <div class="author">BY <a href="https://www.patreon.com/weerbesu" target="_blank">weerbesu</a></div>
@@ -46,6 +46,15 @@
     </div>
 
     <script>
+        /* ========【數量統計】 偵測目前的卡片總數 ======== */
+        function updateModCount() {
+            const count = document.querySelectorAll('.mod-card').length;
+            const countElement = document.getElementById('mod-count');
+            if (countElement) {
+                countElement.innerText = count;
+            }
+        }
+        
         /* 滾動動畫腳本 */
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
@@ -59,6 +68,10 @@
         document.querySelectorAll('.mod-card').forEach(card => {
             observer.observe(card);
         });
+
+        // 執行統計
+        updateModCount();
     </script>
+    
 </body>
 </html>
