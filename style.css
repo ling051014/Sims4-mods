@@ -293,8 +293,8 @@ body {
 }
 
 /* ========【響應式設定】 設定 - 手機橫屏模式 ======== */
-
-@media (max-width: 932px) and (orientation: landscape) {
+@media (orientation: landscape) {
+    /* 去掉 max-width 限制，只要是橫向就觸發 */
     
     .mod-container {
         /* 三欄配置 */ grid-template-columns: repeat(3, 1fr) !important;
