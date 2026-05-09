@@ -60,6 +60,7 @@ body {
 
 /* ========【導覽列】 設定 - 頂部導覽區 ======== */
 .nav-menu {
+    /* 彈性佈局 */ display: flex;
     /* 內縮空間 */ padding: 30px;
     /* 文字置中 */ text-align: center;
     /* 底部分隔線 */ border-bottom: 1px solid #eee;
@@ -73,19 +74,6 @@ body {
     /* 文字顏色 */ color: #aaa;
     /* 字體大小 */ font-size: 13px;
     /* 字距設定 */ letter-spacing: 2px;
-}
-
-/* ========【導覽佈局】 設定 - 導覽列彈性配置 ======== */
-.nav-menu {
-    /* 彈性佈局 */ display: flex;
-    /* 兩端對齊 */ justify-content: space-between;
-    /* 垂直置中 */ align-items: center;
-    /* 內縮空間 */ padding: 20px 40px;
-    /* 底部分隔 */ border-bottom: 1px solid #eee;
-    /* 背景顏色 */ background: #fff;
-    /* 固定頂部 */ position: sticky;
-    /* 置頂位置 */ top: 0;
-    /* 顯示層級 */ z-index: 100;
 }
 
 /* ========【搜尋容器】 設定 - 搜尋框外殼 ======== */
@@ -275,8 +263,9 @@ body {
         /* 避免溢出 */ overflow: hidden;
     }
     .search-box {
-        /* 彈性寬度 */ width: 45% !important;
-        /* 最小寬度 */ min-width: 130px;
+        /* 彈性寬度 */ width: 40% !important;
+        /* 最小寬度 */ min-width: 110px;
+        /* 強制收縮 */ flex-shrink: 1;
     }
     #mod-search {
         /* 縮減內縮 */ padding: 6px 10px;
