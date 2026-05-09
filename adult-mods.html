@@ -15,7 +15,7 @@
     <div class="mod-container">
 
         <div class="mod-card">
-            <div class="preview-img"><img src="ww_preview.jpg" alt="WickedWhims"></div>
+            <div class="preview-img"><img src="ww_preview.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">WickedWhims (邪惡紳士)</h2>
                 <div class="author">BY TURBODRIVER</div>
@@ -32,7 +32,7 @@
         </div>
 
         <div class="mod-card">
-            <div class="preview-img"><img src="kritical_bdsm.jpg" alt="Kritical BDSM"></div>
+            <div class="preview-img"><img src="kritical_bdsm.jpg"></div>
             <div class="content">
                 <h2 class="mod-header">Kritical BDSM 物品合集</h2>
                 <div class="author">BY KRITICAL</div>
@@ -51,6 +51,15 @@
     </div>
 
     <script>
+        /* ========【數量統計】 偵測目前的卡片總數 ======== */
+        function updateModCount() {
+            const count = document.querySelectorAll('.mod-card').length;
+            const countElement = document.getElementById('mod-count');
+            if (countElement) {
+                countElement.innerText = count;
+            }
+        }
+        
         /* 滾動動畫腳本 */
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
@@ -64,6 +73,9 @@
         document.querySelectorAll('.mod-card').forEach(card => {
             observer.observe(card);
         });
+
+        // 執行統計
+        updateModCount();
     </script>
 
 </body>
