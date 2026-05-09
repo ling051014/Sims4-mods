@@ -85,6 +85,10 @@ body {
     /* 強制大寫 */ text-transform: uppercase;
 }
 
+.author a {
+    /* 作者連結 */ color: inherit;
+}
+
 /* ========【資訊列】 設定 - 詳細資訊欄位 ======== */
 .info-row {
     /* 字體大小 */ font-size: 13px;
