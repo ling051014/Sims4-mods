@@ -104,7 +104,7 @@ body {
     /* 自動補零編號 */ content: counter(mod-counter, decimal-leading-zero);
     /* 絕對定位 */ position: absolute;
     /* 距離頂部 */ top: 15px;
-    /* 距離左側 */ left: 15px;
+    /* 距離右側 */ right: 15px;
     /* 半透明黑底 */ background: rgba(0, 0, 0, 0.6);
     /* 文字顏色 */ color: #fff;
     /* 字體大小 */ font-size: 10px;
