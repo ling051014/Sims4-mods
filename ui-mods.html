@@ -227,54 +227,54 @@
 
     <script>
         /* ========【關鍵字搜尋】 偵測輸入並顯示結果視窗 ======== */
-function searchMods() {
-    const input = document.getElementById('mod-search');
-    const filter = input.value.toUpperCase();
-    const dropdown = document.getElementById('search-results');
-    const cards = document.querySelectorAll('.mod-card');
+        function searchMods() {
+            const input = document.getElementById('mod-search');
+            const filter = input.value.toUpperCase();
+            const dropdown = document.getElementById('search-results');
+            const cards = document.querySelectorAll('.mod-card');
     
-    dropdown.innerHTML = ''; // 清空先前結果
+            dropdown.innerHTML = ''; // 清空先前結果
     
-    if (!filter) {
-        dropdown.style.display = 'none';
-        return;
-    }
-
-    let found = false;
-    cards.forEach((card, index) => {
-        const title = card.querySelector('.mod-header').innerText;
-        const author = card.querySelector('.author').innerText;
-        const fullText = card.innerText.toUpperCase();
-        
-        if (fullText.includes(filter)) {
-            found = true;
-            const item = document.createElement('div');
-            item.className = 'search-item';
-            // 顯示格式：[編號] 標題 - 作者
-            const displayNum = (index + 1).toString().padStart(2, '0');
-            item.innerHTML = `<strong>#${displayNum} ${title}</strong><br><small>${author}</small>`;
-            
-            // 點擊後跳轉
-            item.onclick = () => {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (!filter) {
                 dropdown.style.display = 'none';
-                input.value = '';
-                // 加上閃爍提醒
-                card.style.outline = "2px solid #55acee";
-                setTimeout(() => card.style.outline = "none", 2000);
-            };
-            dropdown.appendChild(item);
+                return;
+            }
+
+            let found = false;
+            cards.forEach((card, index) => {
+                const title = card.querySelector('.mod-header').innerText;
+                const author = card.querySelector('.author').innerText;
+                const fullText = card.innerText.toUpperCase();
+        
+                if (fullText.includes(filter)) {
+                    found = true;
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    // 顯示格式：[編號] 標題 - 作者
+                    const displayNum = (index + 1).toString().padStart(2, '0');
+                    item.innerHTML = `<strong>#${displayNum} ${title}</strong><br><small>${author}</small>`;
+            
+                    // 點擊後跳轉
+                    item.onclick = () => {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        dropdown.style.display = 'none';
+                        input.value = '';
+                        // 加上閃爍提醒
+                        card.style.outline = "2px solid #55acee";
+                        setTimeout(() => card.style.outline = "none", 2000);
+                    };
+                    dropdown.appendChild(item);
+                }
+            });
+
+            dropdown.style.display = found ? 'block' : 'none';
         }
-    });
 
-    dropdown.style.display = found ? 'block' : 'none';
-}
-
-/* 點擊視窗外自動關閉搜尋結果 */
-document.addEventListener('click', (e) => {
-    if (e.target.id !== 'mod-search') {
-        document.getElementById('search-results').style.display = 'none';
-    }
+        /* 點擊視窗外自動關閉搜尋結果 */
+        document.addEventListener('click', (e) => {
+            if (e.target.id !== 'mod-search') {
+                document.getElementById('search-results').style.display = 'none';
+            }
     
         /* ========【數量統計】 偵測目前的卡片總數 ======== */
         function updateModCount() {
