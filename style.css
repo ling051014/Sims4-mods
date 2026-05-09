@@ -175,6 +175,15 @@ body {
 .text-green { 
     /* 備註裡的綠色 */color: #88d8b0; font-weight: 500; }
 
+/* ========【網站底部】 設定 - 頁尾統計資訊 ======== */
+.site-footer {
+    /* 文字置中 */ text-align: center;
+    /* 文字顏色 */ color: #bbb;
+    /* 字體大小 */ font-size: 11px;
+    /* 字距設定 */ letter-spacing: 2px;
+    /* 上下外距 */ margin: 50px 0 30px;
+}
+
 /* ========【響應式設定】 設定 - 手機版優化 ======== */
 @media (max-width: 600px) {
     .nav-menu { 
