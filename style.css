@@ -296,7 +296,7 @@ body {
 }
 
 /* ========【響應式設定】 設定 - 手機橫向優化 ======== */
-@media (orientation: landscape) {
+@media (max-width: 900px) and (orientation: landscape) {
     .nav-menu {
         /* 減少內縮 */ padding: 15px 10px !important;
         /* 兩端對齊 */ justify-content: space-between !important;
