@@ -74,6 +74,15 @@
             observer.observe(card);
         });
 
+        /* 視窗載入 */
+        window.onload = function() {
+            /* 確認年齡 */ 
+            if (!confirm("您是否已滿 18 歲？\n點擊確定代表您已成年並同意進入。")) {
+                /* 拒絕進入 */
+                window.location.href = "index.html"; /* ⭐強制跳轉 */
+        }
+    };
+
         // 執行統計
         updateModCount();
     </script>
