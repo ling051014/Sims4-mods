@@ -61,7 +61,7 @@ body {
 /* ========【導覽列】 設定 - 頂部導覽區 ======== */
 .nav-menu {
     /* 彈性佈局 */ display: flex;
-    /* 內縮空間 */ padding: 30px;
+    /* 內縮空間 */ padding: 15px 10px;
     /* 垂直置中 */ align-items: center;
     /* 兩端對齊 */ justify-content: space-between;
     /* 尺寸計算 */ box-sizing: border-box;
@@ -298,8 +298,6 @@ body {
 /* ========【響應式設定】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
     .nav-menu {
-        /* 減少內縮 */ padding: 15px 10px !important;
-        /* 兩端對齊 */ justify-content: space-between !important;
         /* 寬度限制 */ box-sizing: border-box;
     }
     .mod-container {
