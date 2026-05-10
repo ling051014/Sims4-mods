@@ -64,6 +64,7 @@ body {
     /* 內縮空間 */ padding: 30px;
     /* 垂直置中 */ align-items: center;
     /* 兩端對齊 */ justify-content: space-between;
+    /* 尺寸計算 */ box-sizing: border-box;
     /* 底部分隔線 */ border-bottom: 1px solid #eee;
     /* 背景顏色 */ background: #fff;
     /* 固定頂部 */ position: sticky;
@@ -87,6 +88,7 @@ body {
 #mod-search {
     /* 寬度填滿 */ width: 100%;
     /* 內縮空間 */ padding: 8px 15px;
+    /* 尺寸計算 */ box-sizing: border-box;
     /* 邊框設定 */ border: 1px solid #eee;
     /* 圓角弧度 */ border-radius: 20px;
     /* 字體大小 */ font-size: 12px;
