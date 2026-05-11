@@ -12,6 +12,17 @@
         <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">18+模組</a>
     </nav>
 
+    <div id="age-verify-overlay" class="age-overlay">
+        <div class="age-modal">
+            <h2>您是否已滿 18 歲？</h2>
+            <p>本分頁包含成人內容，進入前請先確認年齡。</p>
+            <div class="age-btns">
+                <button onclick="leavePage()" class="btn-no">我還未成年</button>
+                <button onclick="enterPage()" class="btn-yes">我已成年</button>
+            </div>
+        </div>
+    </div>
+
     <div class="mod-container">
 
         <div class="mod-card">
@@ -74,14 +85,22 @@
             observer.observe(card);
         });
 
-        /* 視窗載入 */
-        window.onload = function() {
-            /* 確認年齡 */ 
-            if (!confirm("您是否已滿 18 歲？\n點擊確定代表您已成年並同意進入。")) {
-                /* 拒絕進入 */
-                window.location.href = "index.html"; /* ⭐強制跳轉 */
+        /* ========【跳窗控制】 設定 - 按鈕點擊功能 ======== */
+        function leavePage() {
+            /* 強制回首 */ window.location.href = "index.html";
         }
-    };
+
+        function enterPage() {
+            /* 儲存狀態 */ sessionStorage.setItem("adult_verified", "true");
+            /* 隱藏視窗 */ document.getElementById("age-verify-overlay").style.display = "none";
+        }
+
+        /* 載入檢查 */
+        window.onload = function() {
+            if (sessionStorage.getItem("adult_verified")) {
+                /* 已驗證過 */ document.getElementById("age-verify-overlay").style.display = "none";
+            }
+        };
 
         // 執行統計
         updateModCount();
