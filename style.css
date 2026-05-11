@@ -129,7 +129,9 @@ body {
 
 /* ========【模組卡片】 設定 - 網格排列區 ======== */
 .mod-container {
-    /* 網格系統 */ display: grid;
+    /* 網格系統 */ display: flex;
+    /* 自動換行 */flex-wrap: wrap;
+    /* 末排置中 */justify-content: center;
     /* 自適應欄位 */ grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
     /* 卡片間距 */ gap: 30px;
     /* 最大寬度 */ max-width: 1200px;
