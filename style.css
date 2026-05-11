@@ -190,7 +190,7 @@ body {
 
 /* ========【內容區塊】 設定 - 卡片文字內容 ======== */
 .content {
-    /* 內縮空間 */ padding: 25px;
+    /* 內縮空間 */ padding: 20px;
     /* 自動撐滿 */ flex-grow: 1;
     /* 彈性排列 */ display: flex;
     /* 垂直方向 */ flex-direction: column;
