@@ -284,6 +284,8 @@ body {
     /* 水平置中 */ justify-content: center;
     /* 下方間距 */ margin-bottom: 20px;
     /* 內縮空間 */ padding: 10px 0 10px;
+    /* 垂直排列 */flex-direction: column; 
+    /* 行距調整 */gap: 10px;
 }
 
 .filter-group {
