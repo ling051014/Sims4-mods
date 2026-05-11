@@ -251,6 +251,38 @@ body {
 .text-green { 
     /* 備註裡的綠色 */color: #88d8b0; font-weight: 500; }
 
+/* ========【首頁貼士】 設定 - 容器佈局樣式 ======== */
+.home-tips-container {
+    /* 最大寬度 */ max-width: 900px;
+    /* 水平置中 */ margin: 40px auto;
+    /* 左右內縮 */ padding: 0 20px;
+}
+.home-tips-content {
+    /* 背景顏色 */ background: #fff;
+    /* 虛線邊框 */ border: 1px dashed #ddd;
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 內縮空間 */ padding: 30px;
+}
+.home-tips-content h3 {
+    /* 標題大小 */ font-size: 16px;
+    /* 文字顏色 */ color: #555;
+    /* 文字置中 */ text-align: center;
+    /* 下方間距 */ margin-bottom: 20px;
+    /* 字距拉開 */ letter-spacing: 2px;
+}
+.home-tips-content ul {
+    /* 移除預設 */ margin: 0;
+    /* 內縮調整 */ padding-left: 20px;
+    /* 清單樣式 */ list-style-type: decimal-leading-zero;
+}
+.home-tips-content li {
+    /* 文字顏色 */ color: #888;
+    /* 字體大小 */ font-size: 13px;
+    /* 行距設定 */ line-height: 1.8;
+    /* 下方間距 */ margin-bottom: 10px;
+    /* 字距設定 */ letter-spacing: 1px;
+}
+
 /* ========【網站底部】 設定 - 瀏覽次數 ======== */
 .site-footer {
     /* 文字置中 */ text-align: center;
