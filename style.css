@@ -284,6 +284,7 @@ body {
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
     /* 下方間距 */ margin-bottom: 20px;
+    /* 內縮空間 */ padding: 25px 0 10px;
 }
 
 .filter-group {
@@ -297,6 +298,7 @@ body {
     /* 文字顏色 */ color: #999;
     /* 字體大小 */ font-size: 13px;
     /* 水平對齊 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
 }
 
 .filter-group label {
@@ -306,6 +308,14 @@ body {
     /* 指標手勢 */ cursor: pointer;
     /* 文字顏色 */ color: #666;
     /* 字體大小 */ font-size: 13px;
+}
+
+.filter-group input[type="checkbox"] {
+    /* 移除預設位移 */ margin: 0;
+    /* 強制對齊基準 */ vertical-align: middle;
+    /* 修正位置偏差 */ position: relative;
+    /* 微調頂部位置 */ top: -1px;
+    /* 指標手勢 */ cursor: pointer;
 }
 
 /* ========【摺疊面板】 設定 - 表格本體 ======== */
