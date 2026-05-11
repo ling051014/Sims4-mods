@@ -262,6 +262,7 @@ body {
 
 /* ========【成年審核】 設定 - 全螢幕半透明 ======== */
 .age-overlay {
+    /* 預設顯示 */ display: flex;
     /* 固定定位 */ position: fixed;
     /* 置頂座標 */ top: 0;
     /* 靠左座標 */ left: 0;
