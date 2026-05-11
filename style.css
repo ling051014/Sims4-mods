@@ -257,32 +257,40 @@ body {
 
 
 
-/* ========【資源工具】 設定 - 全體居中容器 ======== */
-.resource-detail {
-    /* 移除邊框 */ border: none;
-    /* 背景透明 */ background: transparent;
-    /* 最大寬度 */ max-width: 900px;
-    /* 水平置中 */ margin: 40px auto;
-    /* 彈性佈局 */ display: flex;
-    /* 垂直排列 */ flex-direction: column;
-    /* 項目置中 */ align-items: center; 
-}
-
+/* ========【摺疊面板】 設定 - 恢復箭頭標題樣式 ======== */
 .resource-detail summary {
-    /* 寬度自適 */ width: 100%;
-    /* 文字置中 */ text-align: center;
-    /* 移除箭頭 */ list-style: none;
-    /* 內縮空間 */ padding: 20px;
+    /* 彈性佈局 */ display: flex;
+    /* 水平置中 */ justify-content: center;
+    /* 垂直置中 */ align-items: center;
     /* 指標手勢 */ cursor: pointer;
+    /* 內縮空間 */ padding: 22px 30px;
     /* 字體大小 */ font-size: 18px;
     /* 字體粗細 */ font-weight: 400;
     /* 文字顏色 */ color: #333;
     /* 字距拉開 */ letter-spacing: 2px;
     /* 移除外框 */ outline: none;
+    /* 背景顏色 */ background: #fff;
+    /* 項目間距 */ gap: 10px; /* ⭐控制三角形與文字的距離 */
 }
-.resource-detail summary::-webkit-details-marker { display: none; }
 
-/* ========【篩選面板】 設定 - 按鈕水平置中 ======== */
+/* 顯示三角形箭頭 (針對 Chrome/Safari) */
+.resource-detail summary::-webkit-details-marker {
+    /* 顯示標記 */ display: inline-block;
+    /* 箭頭顏色 */ color: #ccc;
+    /* 箭頭大小 */ font-size: 12px;
+}
+
+/* 顯示三角形箭頭 (通用標準) */
+.resource-detail summary {
+    /* 預設箭頭 */ list-style: disclosure-closed;
+}
+
+/* 展開後的箭頭方向 (選用) */
+.resource-detail[open] summary {
+    /* 展開箭頭 */ list-style: disclosure-open;
+}
+
+/* ========【摺疊面板】 設定 - 篩選按鈕 ======== */
 .filter-panel {
     /* 寬度自適 */ width: 100%;
     /* 彈性佈局 */ display: flex;
@@ -302,7 +310,7 @@ body {
     /* 字體大小 */ font-size: 13px;
 }
 
-/* ========【表格本體】 設定 - 內容縮窄置中 ======== */
+/* ========【摺疊面板】 設定 - 表格本體 ======== */
 .table-container {
     /* 寬度填滿 */ width: 100%;
     /* 彈性佈局 */ display: flex;
@@ -334,7 +342,7 @@ body {
     /* 統一字體 */ font-family: inherit;
 }
 
-/* ========【Hover 與細節】 設定 - 簡約質感 ======== */
+/* ========【摺疊面板】 設定 - Hover 與細節 ======== */
 #map-master-table tbody tr:hover {
     /* 背景高亮 */ background-color: rgba(0, 0, 0, 0.02) !important;
 }
