@@ -406,6 +406,8 @@ body {
     /* 下方間距 */ margin-bottom: 10px;
     /* 字距設定 */ letter-spacing: 1px;
     /* 對齊方向 */ text-align: left;
+    /* 底部分割 */ border-bottom: 1px solid #ddd;
+    /* 內縮間距 */ padding-bottom: 5px;
 }
 
 /* ========【網站底部】 設定 - 瀏覽次數 ======== */
