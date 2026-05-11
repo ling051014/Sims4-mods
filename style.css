@@ -395,14 +395,14 @@ body {
         /* 內容內縮 */ padding: 15px;
     }
     .age-modal {
-        /* 極簡內縮 */ padding: 15px 25px !important; 
-        /* ⭐橫向寬度 */ width: 280px !important;
-        /* 限制最大 */ max-width: 400px !important;
-        /* 高度自適 */ height: auto !important;
+        /* 極簡內縮 */ padding: 15px 25px; 
+        /* 橫向寬度 */ width: 280px;
+        /* 限制最大 */ max-width: 400px;
+        /* 高度自適 */ height: auto;
     }
     .age-modal h2 {
-        /* ⭐標題縮小 */ font-size: 15px !important;
-        /* 移除底距 */ margin-bottom: 5px !important;
+        /* 標題縮小 */ font-size: 15px;
+        /* 移除底距 */ margin-bottom: 5px;
     }
     .age-modal p {
         /* 內文縮小 */ font-size: 12px;
