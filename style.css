@@ -269,7 +269,7 @@ body {
     /* 寬度填滿 */ width: 100%;
     /* 高度填滿 */ height: 100%;
     /* 深色背景 */ background: rgba(0, 0, 0, 0.1);
-    /* 毛玻璃感 */ backdrop-filter: blur(15px); 
+    /* 毛玻璃感 */ backdrop-filter: blur(5px); 
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
     /* 垂直置中 */ align-items: center;
