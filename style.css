@@ -375,12 +375,14 @@ body {
     /* 最大寬度 */ max-width: 900px;
     /* 水平置中 */ margin: 40px auto;
     /* 左右內縮 */ padding: 0 20px;
+    /* 文字置中 */ text-align: center;
 }
 .home-tips-content {
     /* 背景顏色 */ background: #fff;
     /* 虛線邊框 */ border: 1px dashed #ddd;
     /* 圓角弧度 */ border-radius: 12px;
     /* 內縮空間 */ padding: 30px;
+    /* ？？？？ */ display: inline-block;
 }
 .home-tips-content h3 {
     /* 標題大小 */ font-size: 16px;
