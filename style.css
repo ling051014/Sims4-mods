@@ -398,19 +398,19 @@ body {
         /* 極簡內縮 */ padding: 15px 25px !important; 
         /* ⭐橫向寬度 */ width: 280px !important;
         /* 限制最大 */ max-width: 400px !important;
-        /* 避免過高 */ height: auto !important;
+        /* 高度自適 */ height: auto !important;
     }
     .age-modal h2 {
         /* ⭐標題縮小 */ font-size: 15px !important;
         /* 移除底距 */ margin-bottom: 5px !important;
     }
     .age-modal p {
-        /* 內文縮小 */ font-size: 11px;
-        /* 緊湊間距 */ margin-bottom: 10px;
-        /* 行高壓縮 */ line-height: 1.2;
+        /* 內文縮小 */ font-size: 12px;
+        /* 緊湊間距 */ margin-bottom: 15px;
+        /* 行高壓縮 */ line-height: 1.4;
     }
     .age-btns {
-        /* 緊湊間距 */ gap: 8px;
+        /* 按鈕間距 */ gap: 8px;
     }
     .age-btns button {
         /* 按鈕高度 */ padding: 10px;
