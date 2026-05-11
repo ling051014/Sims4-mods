@@ -267,10 +267,11 @@ body {
 
 .resource-detail summary {
     /* 自適應字數 */ width: fit-content;
+    /* 水平置中 */ margin: 0 auto;
     /* 背景透明 */ background: transparent;
     /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 18px;
-    /* 字體粗細 */ font-weight: 300; /* ⭐改細一點更有質感 */
+    /* 字體粗細 */ font-weight: 300;
     /* 文字顏色 */ color: #333;
     /* 字距拉開 */ letter-spacing: 3px;
     /* 內縮空間 */ padding: 20px;
