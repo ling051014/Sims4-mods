@@ -352,6 +352,26 @@ body {
         /* 左右推開 */ margin-right: -25px;
         /* 內容內縮 */ padding: 15px 25px;
     }
+    .age-modal {
+        /* ⭐手機內縮 */ padding: 20px !important; /* 精簡空間 */
+        /* ⭐手機寬度 */ width: 85% !important; /* ⭐強制全寬 */
+        /* ⭐移除限制 */ max-width: 280px !important; /* ⭐限制最大 */
+    }
+    .age-modal h2 {
+        /* ⭐手機標題 */ font-size: 16px !important; /* 從 18px 縮小 */
+        /* 手機間距 */ margin-bottom: 8px !important;
+    }
+    .age-modal p {
+        /* ⭐手機內文 */ font-size: 11px !important; /* 縮小內文 */
+        /* 手機間距 */ margin-bottom: 15px !important;
+    }
+    .age-btns {
+        /* ⭐手機間距 */ gap: 8px !important;
+        /* 手機字體 */ font-size: 12px !important; /* ⭐同步縮小 */
+    }
+    .age-btns button {
+        /* ⭐手機按鈕 */ padding: 8px !important; /* ⭐按鈕變扁 */
+    }
 }
 
 /* ========【響應式設定】 設定 - 手機橫向優化 ======== */
