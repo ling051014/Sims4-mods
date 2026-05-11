@@ -503,6 +503,10 @@ body {
 
 /* ========【響應式設定】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
+    .cat-btn {
+        /* 手機橫向一排三個 */
+        flex: 0 1 calc(33.333% - 15px);
+    }
     .nav-menu {
         /* 寬度限制 */ box-sizing: border-box;
     }
