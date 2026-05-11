@@ -525,6 +525,22 @@ body {
     .content {
         /* 內容內縮 */ padding: 15px;
     }
+    .home-tips-container {
+        /* 縮小上下距離 */margin: 20px auto;
+        /* 減少左右內縮 */padding: 0 15px;
+    }
+    .home-tips-content {
+        /* 減少內縮 */padding: 20px;
+    }
+    .home-tips-content h3 {
+        /* 標題縮小 */font-size: 14px;
+        /* 縮小間距 */margin-bottom: 15px;
+    }
+    .home-tips-content li {
+        /* 文字縮小 */ font-size: 12px;
+        /* 行距縮小 */ line-height: 1.6;
+        /* 減少項目距離 */ margin-bottom: 6px;
+    }
     .age-modal {
         /* 極簡內縮 */ padding: 15px 25px; 
         /* 橫向寬度 */ width: 280px;
