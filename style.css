@@ -257,94 +257,96 @@ body {
 
 
 
-/* ========【資源工具】 設定 - 透明高級感容器 ======== */
+/* ========【資源工具】 設定 - 全體居中容器 ======== */
 .resource-detail {
-    /* 移除陰影 */ box-shadow: none;
+    /* 移除邊框 */ border: none;
     /* 背景透明 */ background: transparent;
     /* 最大寬度 */ max-width: 900px;
     /* 水平置中 */ margin: 40px auto;
+    /* 彈性佈局 */ display: flex;
+    /* 垂直排列 */ flex-direction: column;
+    /* 項目置中 */ align-items: center; 
 }
 
 .resource-detail summary {
-    /* 背景透明 */ background: transparent;
+    /* 寬度自適 */ width: 100%;
     /* 文字置中 */ text-align: center;
-    /* 字體大小 */ font-size: 18px;
-    /* 字體粗細 */ font-weight: 300; /* ⭐改細一點更有質感 */
-    /* 文字顏色 */ color: #333;
-    /* 字距拉開 */ letter-spacing: 3px;
+    /* 移除箭頭 */ list-style: none;
     /* 內縮空間 */ padding: 20px;
+    /* 指標手勢 */ cursor: pointer;
+    /* 字體大小 */ font-size: 18px;
+    /* 字體粗細 */ font-weight: 400;
+    /* 文字顏色 */ color: #333;
+    /* 字距拉開 */ letter-spacing: 2px;
+    /* 移除外框 */ outline: none;
 }
+.resource-detail summary::-webkit-details-marker { display: none; }
 
-/* ========【篩選面板】 設定 - 隱藏風格樣式 ======== */
+/* ========【篩選面板】 設定 - 按鈕水平置中 ======== */
 .filter-panel {
-    /* 垂直對齊 */ justify-content: center;
-    /* 減少邊界 */ border: none;
+    /* 寬度自適 */ width: 100%;
+    /* 彈性佈局 */ display: flex;
+    /* 水平置中 */ justify-content: center;
     /* 下方間距 */ margin-bottom: 20px;
 }
 
-.filter-group label {
-    /* 灰掉文字 */ color: #ccc;
-    /* 字體大小 */ font-size: 12px;
-    /* 字距設定 */ letter-spacing: 1px;
-    /* 過渡動畫 */ transition: 0.3s;
+.filter-group {
+    /* 彈性佈局 */ display: flex;
+    /* 水平置中 */ justify-content: center;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 項目間距 */ gap: 20px;
 }
 
-/* 勾選時文字加深 */
-.filter-group input:checked + label, 
-.filter-group label:has(input:checked) {
-    color: #666;
+.filter-label {
+    /* 文字顏色 */ color: #999;
+    /* 字體大小 */ font-size: 13px;
 }
 
-/* ========【表格本體】 設定 - 無框線高級感 ======== */
+/* ========【表格本體】 設定 - 內容縮窄置中 ======== */
 .table-container {
-    /* 強制置中 */ display: flex;
-    /* 水平對齊 */ justify-content: center;
+    /* 寬度填滿 */ width: 100%;
+    /* 彈性佈局 */ display: flex;
+    /* 水平置中 */ justify-content: center;
+    /* 橫向捲動 */ overflow-x: auto;
 }
 
 #map-master-table {
-    /* 自動寬度 */ width: 100%;
-    /* 邊框合併 */ border-collapse: collapse; /* ⭐改回合併，用線條裝飾 */
+    /* ⭐寬度自適 */ width: auto; 
+    /* 左右邊距 */ margin: 0 auto;
+    /* 邊框合併 */ border-collapse: collapse;
 }
 
 #map-master-table th {
-    /* 文字顏色 */ color: #999;
-    /* 字體大小 */ font-size: 11px;
-    /* 字體粗細 */ font-weight: 400;
+    /* 文字顏色 */ color: #bbb;
+    /* 字體大小 */ font-size: 12px;
+    /* ⭐取消大寫 */ text-transform: none; 
     /* 底部細線 */ border-bottom: 1px solid #eee;
-    /* 內縮空間 */ padding: 15px;
-    /* 字母大寫 */ text-transform: uppercase;
+    /* 內縮空間 */ padding: 15px 25px;
 }
 
 #map-master-table td {
-    /* 背景透明 */ background: transparent !important;
-    /* 內縮空間 */ padding: 25px 15px; /* ⭐加大上下間距 */
+    /* ⭐文字置中 */ text-align: center;
+    /* 內縮空間 */ padding: 20px 30px;
     /* 底部細線 */ border-bottom: 1px solid #f2f2f2;
-    /* 文字顏色 */ color: #555;
+    /* 禁止斷行 */ white-space: nowrap;
+    /* 字體大小 */ font-size: 14px;
+    /* 文字顏色 */ color: #666;
+    /* 統一字體 */ font-family: inherit;
 }
 
-/* ========【Hover 動畫】 設定 - 柔和光暈效果 ======== */
-#map-master-table tbody tr {
-    /* 平滑過渡 */ transition: 0.4s;
-}
-
+/* ========【Hover 與細節】 設定 - 簡約質感 ======== */
 #map-master-table tbody tr:hover {
-    /* 背景微青 */ background-color: rgba(245, 250, 255, 0.5) !important;
-    /* 稍微發光 */ box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+    /* 背景高亮 */ background-color: rgba(0, 0, 0, 0.02) !important;
 }
 
-/* 序號樣式加強 */
-#map-master-table td:first-child {
-    /* 字體粗細 */ font-weight: 600;
-    /* 文字顏色 */ color: #aaa;
-    /* 等寬字體 */ font-family: monospace;
-}
-
-/* 圖標微調 */
 .dlc-icon {
-    /* 圖片高度 */ height: 22px;
-    /* 圓角弧度 */ border-radius: 50%; /* ⭐圓形圖標更精緻 */
-    /* 柔和邊線 */ border: 1px solid #eee;
+    /* 圖片高度 */ height: 24px;
+    /* 圓型圖標 */ border-radius: 50%;
+    /* 垂直對齊 */ vertical-align: middle;
 }
+
+/* 強制隱藏 */
+.hide-item { display: none !important; }
 
 
 
