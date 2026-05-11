@@ -266,6 +266,8 @@ body {
 }
 
 .resource-detail summary {
+    /* 自適應字數 */ width: fit-content;
+    /* 彈性佈局 */ display: inline-flex;
     /* 背景透明 */ background: transparent;
     /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 18px;
@@ -273,6 +275,7 @@ body {
     /* 文字顏色 */ color: #333;
     /* 字距拉開 */ letter-spacing: 3px;
     /* 內縮空間 */ padding: 20px;
+    /* 下方虛線 */ border-bottom: 1px dashed #ddd;
 }
 
 /* ========【摺疊面板】 設定 - 篩選按鈕 ======== */
