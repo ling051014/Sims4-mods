@@ -27,6 +27,66 @@
         <a href="other-mods.html" class="cat-btn">OTHER<br>其他延伸</a>
     </div>
 
+    <div class="map-tool-box">
+        <div class="filter-panel">
+            <div class="filter-group">
+                <span class="filter-label">顯示欄位：</span>
+                <label><input type="checkbox" checked onclick="ctrlCol(0)"> 序號</label>
+                <label><input type="checkbox" checked onclick="ctrlCol(1)"> 英文</label>
+                <label><input type="checkbox" checked onclick="ctrlCol(2)"> 中文</label>
+                <label><input type="checkbox" checked onclick="ctrlCol(3)"> 圖標</label>
+                <label><input type="checkbox" checked onclick="ctrlCol(4)"> 地圖</label>
+            </div>
+        
+            <div class="filter-group">
+                <span class="filter-label">選取地圖：</span>
+                <select id="map-select" onchange="ctrlRow()">
+                    <option value="all">顯示全部地圖</option>
+                    <option value="willow">柳溪 (Willow Creek)</option>
+                    <option value="oasis">綠洲之泉 (Oasis Springs)</option>
+                    <option value="winden">溫登堡 (Windenburg)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="map-master-table">
+                <thead>
+                    <tr>
+                        <th>序號</th>
+                        <th>英文</th>
+                        <th>中文</th>
+                        <th>圖標</th>
+                        <th>地圖描述</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="map-row" data-map="willow">
+                        <td>01</td>
+                        <td>Willow Creek</td>
+                        <td>柳溪</td>
+                        <td>🌳</td>
+                       <td>傳統美式風格，氣候宜人。</td>
+                    </tr>
+                    <tr class="map-row" data-map="oasis">
+                        <td>02</td>
+                        <td>Oasis Springs</td>
+                        <td>綠洲之泉</td>
+                        <td>🌵</td>
+                        <td>沙漠景觀，現代感建築。</td>
+                    </tr>
+                    <tr class="map-row" data-map="winden">
+                        <td>03</td>
+                        <td>Windenburg</td>
+                        <td>溫登堡</td>
+                        <td>🏰</td>
+                        <td>超大型地圖，都鐸式建築。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="home-tips-container">
         <div class="home-tips-content">
             <h3>💡 模組安裝小貼士</h3>
