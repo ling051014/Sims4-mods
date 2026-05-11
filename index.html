@@ -27,61 +27,50 @@
         <a href="other-mods.html" class="cat-btn">OTHER<br>其他延伸</a>
     </div>
 
-    <div class="map-tool-box">
-    <div class="filter-panel">
-        <div class="filter-group">
-            <span class="filter-label">顯示欄位：</span>
-            <label><input type="checkbox" checked onclick="ctrlCol(0)"> 序號</label>
-            <label><input type="checkbox" checked onclick="ctrlCol(1)"> 英文名稱</label>
-            <label><input type="checkbox" checked onclick="ctrlCol(2)"> 中文名稱</label>
-            <label><input type="checkbox" checked onclick="ctrlCol(3)"> 圖標</label>
-            <label><input type="checkbox" checked onclick="ctrlCol(4)"> 解鎖地圖</label>
-        </div>
-    </div>
+    <div class="home-tips-container">
+        <details class="resource-detail">
+            <summary>🗺️ 擴充包地圖中英對照工具 (含解鎖地圖)</summary>
+            <div class="filter-panel">
+                <div class="filter-group">
+                    <span class="filter-label">顯示欄位：</span>
+                    <label><input type="checkbox" checked onclick="ctrlCol(0)"> 序號</label
+                    <label><input type="checkbox" checked onclick="ctrlCol(3)"> 圖標</label>
+                    <label><input type="checkbox" checked onclick="ctrlCol(1)"> 英文名稱</label>
+                    <label><input type="checkbox" checked onclick="ctrlCol(2)"> 中文名稱</label>
+                    <label><input type="checkbox" checked onclick="ctrlCol(4)"> 解鎖地圖</label>
+                </div>
+            </div>
 
-        <div class="table-container">
-            <table id="map-master-table">
-                <thead>
-                    <tr>
-                        <th style="width: 10%;">序號</th>
-                        <th style="width: 25%;">English</th>
-                        <th style="width: 25%;">中文</th>
-                        <th style="width: 10%;">圖標</th>
-                        <th style="width: 30%;">解鎖地圖</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="map-row">
-                        <td>EP01</td>
-                        <td>Get to Work</td>
-                        <td>來去上班</td>
-                        <td>💼</td>
-                        <td>木蘭步道 (Magnolia Promenade)</td>
-                    </tr>
-                    <tr class="map-row">
-                        <td>EP02</td>
-                        <td>Get Together</td>
-                        <td>同歡共樂</td>
-                        <td>👫</td>
-                        <td>溫登堡 (Windenburg)</td>
-                    </tr>
-                    <tr class="map-row">
-                        <td>EP03</td>
-                        <td>City Living</td>
-                        <td>都會生活</td>
-                        <td>🏙️</td>
-                        <td>三米舒諾 (San Myshuno)</td>
-                    </tr>
-                    <tr class="map-row">
-                        <td>EP04</td>
-                        <td>Cats & Dogs</td>
-                        <td>貓狗總動員</td>
-                        <td>🐾</td>
-                        <td>虎斑灣 (Brindleton Bay)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+           	<div class="table-container">
+                <table id="map-master-table">
+                    <thead>
+                        <tr>
+                            <th>序號</th>
+                            <th>圖標</th>
+                            <th>English Name</th>
+                            <th>中文名稱</th>
+                            <th>解鎖地圖</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="map-row">
+                            <td>EP01</td>
+                            <td><img src="icons/ep01.png" class="dlc-icon" alt="EP01"></td>
+                            <td>Get to Work</td>
+                            <td>來去上班</td>
+                            <td>木蘭步道 (Magnolia Promenade)</td>
+                        </tr>
+                        <tr class="map-row">
+                            <td>EP02</td>
+                            <td><img src="icons/ep02.png" class="dlc-icon" alt="EP02"></td>
+                            <td>Get Together</td>
+                            <td>同歡共樂</td>
+                            <td>溫登堡 (Windenburg)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
     </div>
 
     <div class="home-tips-container">
