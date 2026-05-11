@@ -259,41 +259,61 @@ body {
 
 /* ========【表格工具】 設定 - 控制面板佈局 ======== */
 .filter-panel {
-    /* 背景顏色 */ background: #f9f9f9;
-    /* 內縮空間 */ padding: 15px;
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 下方間距 */ margin-bottom: 20px;
+    /* 背景顏色 */ background: #fdfdfd;
+    /* 內縮空間 */ padding: 18px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 下方間距 */ margin-bottom: 25px;
+    /* 邊框樣式 */ border: 1px solid #eee;
     /* 彈性佈局 */ display: flex;
     /* 垂直排列 */ flex-direction: column;
-    /* 項目間距 */ gap: 10px;
+    /* 項目間距 */ gap: 12px;
+}
+.filter-group { 
+    /* 項目置中 */ display: flex; 
+    /* 垂直對齊 */ align-items: center; 
+    /* 自動換行 */ flex-wrap: wrap; 
+    /* 項目間距 */ gap: 15px; 
+}
+.filter-label { 
+    /* 字體粗細 */ font-weight: bold; 
+    /* 字體大小 */ font-size: 13px; 
+    /* 文字顏色 */ color: #555; 
 }
 
-.filter-group { /* 項目置中 */ display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.filter-label { /* 字體粗細 */ font-weight: bold; font-size: 13px; color: #666; }
-
-/* ========【表格本體】 設定 - 交互與顯示效果 ======== */
+/* ========【表格本體】 設定 - 內容自適應寬度 ======== */
+.table-container {
+    /* 橫向捲動 */ overflow-x: auto;
+    /* 圓角修飾 */ border-radius: 8px;
+    /* 邊框設定 */ border: 1px solid #f0f0f0;
+}
 #map-master-table {
     /* 寬度填滿 */ width: 100%;
     /* 邊框合併 */ border-collapse: collapse;
-    /* 尺寸計算 */ table-layout: fixed; /* ⭐固定寬度 */
+    /* ⭐自動寬度 */ table-layout: auto; 
 }
-
 #map-master-table th, #map-master-table td {
-    /* 內縮空間 */ padding: 12px;
+    /* 內縮空間 */ padding: 12px 20px;
     /* 底部分隔 */ border-bottom: 1px solid #eee;
     /* 文字置中 */ text-align: center;
-    /* 超出隱藏 */ overflow: hidden;
+    /* ⭐禁止斷行 */ white-space: nowrap;
+    /* 字體大小 */ font-size: 13px;
+    /* 文字顏色 */ color: #666;
 }
-
-/* ⭐橫排 Hover 效果 */
+#map-master-table th {
+    /* 背景顏色 */ background: #fafafa;
+    /* 文字顏色 */ color: #444;
+    /* 字體粗細 */ font-weight: 600;
+}
+/* ⭐橫排整行 Hover 效果 */
 #map-master-table tbody tr:hover {
-    /* 背景高亮 */ background-color: #f0f7ff !important;
-    /* 文字加深 */ color: #000;
-    /* 過渡效果 */ transition: 0.2s;
+    /* 背景高亮 */ background-color: #f7faff !important;
+    /* 文字加深 */ color: #000 !important;
+    /* 過渡效果 */ transition: 0.15s;
 }
-
-/* 隱藏用 Class */
-.hide-item { display: none !important; }
+/* 隱藏用 Class - 務必保留 */
+.hide-item { 
+    display: none !important; 
+}
 
 
 
