@@ -122,6 +122,31 @@
             btn.style.transition = "0.5s ease-out";
             observer.observe(btn);
         });
+        // ========【縱列控制】 設定 - 勾選隱藏特定直欄 ========
+        function ctrlCol(index) {
+            const table = document.getElementById('map-master-table');
+            const rows = table.rows;
+    
+            for (let i = 0; i < rows.length; i++) {
+                // 切換該行中對應 index 的單元格顯示狀態
+                rows[i].cells[index].classList.toggle('hide-item');
+            }
+        }
+
+        // ========【橫排控制】 設定 - 下拉選單篩選地圖 ========
+        function ctrlRow() {
+            const select = document.getElementById('map-select');
+            const filter = select.value;
+            const rows = document.querySelectorAll('.map-row');
+
+            rows.forEach(row => {
+                if (filter === 'all' || row.getAttribute('data-map') === filter) {
+                    /* 符合顯示 */ row.classList.remove('hide-item');
+                } else {
+                    /* 不符隱藏 */ row.classList.add('hide-item');
+                }
+            });
+        }
     </script>
 </body>
 </html>
