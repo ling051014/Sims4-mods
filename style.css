@@ -257,37 +257,22 @@ body {
 
 
 
-/* ========【摺疊面板】 設定 - 恢復箭頭標題樣式 ======== */
+/* ========【摺疊面板】 設定 - 高級質感 ======== */
+.resource-detail {
+    /* 移除陰影 */ box-shadow: none;
+    /* 背景透明 */ background: transparent;
+    /* 最大寬度 */ max-width: 900px;
+    /* 水平置中 */ margin: 40px auto;
+}
+
 .resource-detail summary {
-    /* 彈性佈局 */ display: flex;
-    /* 水平置中 */ justify-content: center;
-    /* 垂直置中 */ align-items: center;
-    /* 指標手勢 */ cursor: pointer;
-    /* 內縮空間 */ padding: 22px 30px;
+    /* 背景透明 */ background: transparent;
+    /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 18px;
-    /* 字體粗細 */ font-weight: 400;
+    /* 字體粗細 */ font-weight: 300; /* ⭐改細一點更有質感 */
     /* 文字顏色 */ color: #333;
-    /* 字距拉開 */ letter-spacing: 2px;
-    /* 移除外框 */ outline: none;
-    /* 背景顏色 */ background: #fff;
-    /* 項目間距 */ gap: 10px; /* ⭐控制三角形與文字的距離 */
-}
-
-/* 顯示三角形箭頭 (針對 Chrome/Safari) */
-.resource-detail summary::-webkit-details-marker {
-    /* 顯示標記 */ display: inline-block;
-    /* 箭頭顏色 */ color: #ccc;
-    /* 箭頭大小 */ font-size: 12px;
-}
-
-/* 顯示三角形箭頭 (通用標準) */
-.resource-detail summary {
-    /* 預設箭頭 */ list-style: disclosure-closed;
-}
-
-/* 展開後的箭頭方向 (選用) */
-.resource-detail[open] summary {
-    /* 展開箭頭 */ list-style: disclosure-open;
+    /* 字距拉開 */ letter-spacing: 3px;
+    /* 內縮空間 */ padding: 20px;
 }
 
 /* ========【摺疊面板】 設定 - 篩選按鈕 ======== */
