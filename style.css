@@ -239,7 +239,7 @@ body {
     /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 12px;
     /* 文字顏色 */ color: #999;
-    /* 上方內縮 */ padding-top: 15px;
+    /* 上方內縮 */ padding-top: 20px;
     /* 虛線分隔 */ border-top: 1px dashed #eee;
     /* 行距設定 */ line-height: 1.5;
 }
