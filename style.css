@@ -534,8 +534,10 @@ body {
     .nav-menu {
         /* 寬度限制 */ box-sizing: border-box;
     }
-    .mod-container {
+    .mod-card {
         /* 三欄配置 */ flex: 0 0 calc(33.333% - 10px);
+    }
+    .mod-container {
         /* 縮減間距 */ gap: 15px;
         /* 左右內縮 */ padding: 10px 20px;
         /* 上下外距 */ margin: 20px auto;
