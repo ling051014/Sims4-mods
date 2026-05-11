@@ -267,7 +267,6 @@ body {
 
 .resource-detail summary {
     /* 自適應字數 */ width: fit-content;
-    /* 彈性佈局 */ display: inline-flex;
     /* 背景透明 */ background: transparent;
     /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 18px;
