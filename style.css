@@ -257,79 +257,94 @@ body {
 
 
 
-/* ========【資源工具】 設定 - 容器置中樣式 ======== */
+/* ========【資源工具】 設定 - 透明高級感容器 ======== */
 .resource-detail {
-    /* 移除邊框 */ border: none;
-    /* 背景顏色 */ background: #fdfdfd;
-    /* 圓角弧度 */ border-radius: 20px;
-    /* 下方間距 */ margin: 30px auto;
-    /* 陰影裝飾 */ box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    /* 溢出隱藏 */ overflow: hidden;
+    /* 移除陰影 */ box-shadow: none;
+    /* 背景透明 */ background: transparent;
     /* 最大寬度 */ max-width: 900px;
+    /* 水平置中 */ margin: 40px auto;
 }
 
 .resource-detail summary {
-    /* 內縮空間 */ padding: 22px 30px;
-    /* 指標手勢 */ cursor: pointer;
-    /* ⭐標題置中 */ text-align: center;
-    /* 移除箭頭 */ list-style: none; 
-    /* 字體大小 */ font-size: 16px;
-    /* 字體粗細 */ font-weight: 600;
-    /* 背景顏色 */ background: #fff;
-    /* 移除外框 */ outline: none;
+    /* 背景透明 */ background: transparent;
+    /* 文字置中 */ text-align: center;
+    /* 字體大小 */ font-size: 18px;
+    /* 字體粗細 */ font-weight: 300; /* ⭐改細一點更有質感 */
+    /* 文字顏色 */ color: #333;
+    /* 字距拉開 */ letter-spacing: 3px;
+    /* 內縮空間 */ padding: 20px;
 }
 
-/* 針對不同瀏覽器隱藏預設箭頭 */
-.resource-detail summary::-webkit-details-marker { display: none; }
-
-/* ========【篩選面板】 設定 - 按鈕水平置中 ======== */
+/* ========【篩選面板】 設定 - 隱藏風格樣式 ======== */
 .filter-panel {
-    /* 內縮空間 */ padding: 20px 30px;
-    /* 頂部線條 */ border-top: 1px solid #f9f9f9;
-    /* 彈性佈局 */ display: flex;
-    /* ⭐水平置中 */ justify-content: center;
-    /* 項目間距 */ gap: 20px;
+    /* 垂直對齊 */ justify-content: center;
+    /* 減少邊界 */ border: none;
+    /* 下方間距 */ margin-bottom: 20px;
 }
 
-.filter-group {
-    /* ⭐內容置中 */ display: flex;
-    /* 對齊方式 */ align-items: center;
-    /* 自動換行 */ flex-wrap: wrap;
-    /* 水平置中 */ justify-content: center;
-    /* 項目間距 */ gap: 15px;
+.filter-group label {
+    /* 灰掉文字 */ color: #ccc;
+    /* 字體大小 */ font-size: 12px;
+    /* 字距設定 */ letter-spacing: 1px;
+    /* 過渡動畫 */ transition: 0.3s;
 }
 
-/* ========【表格本體】 設定 - 卡片式置中樣式 ======== */
+/* 勾選時文字加深 */
+.filter-group input:checked + label, 
+.filter-group label:has(input:checked) {
+    color: #666;
+}
+
+/* ========【表格本體】 設定 - 無框線高級感 ======== */
 .table-container {
-    /* 內縮空間 */ padding: 0 30px 30px;
-    /* 橫向捲動 */ overflow-x: auto;
-    /* ⭐強制置中 */ display: flex;
+    /* 強制置中 */ display: flex;
     /* 水平對齊 */ justify-content: center;
 }
 
 #map-master-table {
-    /* 自動寬度 */ width: auto; 
-    /* 邊框合併 */ border-collapse: separate;
-    /* 行間間距 */ border-spacing: 0 10px;
+    /* 自動寬度 */ width: 100%;
+    /* 邊框合併 */ border-collapse: collapse; /* ⭐改回合併，用線條裝飾 */
 }
 
-#map-master-table th, 
+#map-master-table th {
+    /* 文字顏色 */ color: #999;
+    /* 字體大小 */ font-size: 11px;
+    /* 字體粗細 */ font-weight: 400;
+    /* 底部細線 */ border-bottom: 1px solid #eee;
+    /* 內縮空間 */ padding: 15px;
+    /* 字母大寫 */ text-transform: uppercase;
+}
+
 #map-master-table td {
-    /* ⭐文字置中 */ text-align: center;
-    /* 垂直置中 */ vertical-align: middle;
-    /* 內縮空間 */ padding: 15px 25px;
-    /* 禁止斷行 */ white-space: nowrap;
+    /* 背景透明 */ background: transparent !important;
+    /* 內縮空間 */ padding: 25px 15px; /* ⭐加大上下間距 */
+    /* 底部細線 */ border-bottom: 1px solid #f2f2f2;
+    /* 文字顏色 */ color: #555;
 }
 
-#map-master-table td {
-    /* 背景顏色 */ background: #fff;
-    /* 字體大小 */ font-size: 14px;
-    /* 統一字體 */ font-family: inherit;
+/* ========【Hover 動畫】 設定 - 柔和光暈效果 ======== */
+#map-master-table tbody tr {
+    /* 平滑過渡 */ transition: 0.4s;
 }
 
-/* 卡片圓角樣式 */
-#map-master-table td:first-child { border-radius: 12px 0 0 12px; }
-#map-master-table td:last-child { border-radius: 0 12px 12px 0; }
+#map-master-table tbody tr:hover {
+    /* 背景微青 */ background-color: rgba(245, 250, 255, 0.5) !important;
+    /* 稍微發光 */ box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+}
+
+/* 序號樣式加強 */
+#map-master-table td:first-child {
+    /* 字體粗細 */ font-weight: 600;
+    /* 文字顏色 */ color: #aaa;
+    /* 等寬字體 */ font-family: monospace;
+}
+
+/* 圖標微調 */
+.dlc-icon {
+    /* 圖片高度 */ height: 22px;
+    /* 圓角弧度 */ border-radius: 50%; /* ⭐圓形圖標更精緻 */
+    /* 柔和邊線 */ border: 1px solid #eee;
+}
 
 
 
