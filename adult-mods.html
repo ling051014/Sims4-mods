@@ -91,16 +91,19 @@
         }
 
         function enterPage() {
-            /* 儲存狀態 */ sessionStorage.setItem("adult_verified", "true");
-            /* 隱藏視窗 */ document.getElementById("age-verify-overlay").style.display = "none";
+            /* 隱藏視窗 */ 
+            document.getElementById("age-verify-overlay").style.display = "none";
+            /* 恢復滾動 */ 
+            document.body.style.overflow = "auto"; 
         }
 
-        /* 載入檢查 */
-        window.onload = function() {
-            if (sessionStorage.getItem("adult_verified")) {
-                /* 已驗證過 */ document.getElementById("age-verify-overlay").style.display = "none";
-            }
-        };
+        /* ========【頁面載入】 設定 - 每次強制檢查 ======== */
+        window.addEventListener('load', function() {
+            /* 強制顯示 */ 
+            document.getElementById("age-verify-overlay").style.display = "flex";
+            /* 禁止滾動 */ 
+            document.body.style.overflow = "hidden"; /* ⭐防止偷看內容 */
+        });
 
         // 執行統計
         updateModCount();
