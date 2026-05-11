@@ -28,59 +28,56 @@
     </div>
 
     <div class="map-tool-box">
-        <div class="filter-panel">
-            <div class="filter-group">
-                <span class="filter-label">顯示欄位：</span>
-                <label><input type="checkbox" checked onclick="ctrlCol(0)"> 序號</label>
-                <label><input type="checkbox" checked onclick="ctrlCol(1)"> 英文</label>
-                <label><input type="checkbox" checked onclick="ctrlCol(2)"> 中文</label>
-                <label><input type="checkbox" checked onclick="ctrlCol(3)"> 圖標</label>
-                <label><input type="checkbox" checked onclick="ctrlCol(4)"> 地圖</label>
-            </div>
-        
-            <div class="filter-group">
-                <span class="filter-label">選取地圖：</span>
-                <select id="map-select" onchange="ctrlRow()">
-                    <option value="all">顯示全部地圖</option>
-                    <option value="willow">柳溪 (Willow Creek)</option>
-                    <option value="oasis">綠洲之泉 (Oasis Springs)</option>
-                    <option value="winden">溫登堡 (Windenburg)</option>
-                </select>
-            </div>
+    <div class="filter-panel">
+        <div class="filter-group">
+            <span class="filter-label">顯示欄位：</span>
+            <label><input type="checkbox" checked onclick="ctrlCol(0)"> 序號</label>
+            <label><input type="checkbox" checked onclick="ctrlCol(1)"> 英文名稱</label>
+            <label><input type="checkbox" checked onclick="ctrlCol(2)"> 中文名稱</label>
+            <label><input type="checkbox" checked onclick="ctrlCol(3)"> 圖標</label>
+            <label><input type="checkbox" checked onclick="ctrlCol(4)"> 解鎖地圖</label>
         </div>
+    </div>
 
         <div class="table-container">
             <table id="map-master-table">
                 <thead>
                     <tr>
-                        <th>序號</th>
-                        <th>英文</th>
-                        <th>中文</th>
-                        <th>圖標</th>
-                        <th>地圖描述</th>
+                        <th style="width: 10%;">序號</th>
+                        <th style="width: 25%;">English</th>
+                        <th style="width: 25%;">中文</th>
+                        <th style="width: 10%;">圖標</th>
+                        <th style="width: 30%;">解鎖地圖</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="map-row" data-map="willow">
-                        <td>01</td>
-                        <td>Willow Creek</td>
-                        <td>柳溪</td>
-                        <td>🌳</td>
-                       <td>傳統美式風格，氣候宜人。</td>
+                    <tr class="map-row">
+                        <td>EP01</td>
+                        <td>Get to Work</td>
+                        <td>來去上班</td>
+                        <td>💼</td>
+                        <td>木蘭步道 (Magnolia Promenade)</td>
                     </tr>
-                    <tr class="map-row" data-map="oasis">
-                        <td>02</td>
-                        <td>Oasis Springs</td>
-                        <td>綠洲之泉</td>
-                        <td>🌵</td>
-                        <td>沙漠景觀，現代感建築。</td>
+                    <tr class="map-row">
+                        <td>EP02</td>
+                        <td>Get Together</td>
+                        <td>同樂會</td>
+                        <td>👫</td>
+                        <td>溫登堡 (Windenburg)</td>
                     </tr>
-                    <tr class="map-row" data-map="winden">
-                        <td>03</td>
-                        <td>Windenburg</td>
-                        <td>溫登堡</td>
-                        <td>🏰</td>
-                        <td>超大型地圖，都鐸式建築。</td>
+                    <tr class="map-row">
+                        <td>EP03</td>
+                        <td>City Living</td>
+                        <td>都會生活</td>
+                        <td>🏙️</td>
+                        <td>三米舒諾 (San Myshuno)</td>
+                    </tr>
+                    <tr class="map-row">
+                        <td>EP04</td>
+                        <td>Cats & Dogs</td>
+                        <td>貓狗總動員</td>
+                        <td>🐾</td>
+                        <td>虎斑灣 (Brindleton Bay)</td>
                     </tr>
                 </tbody>
             </table>
