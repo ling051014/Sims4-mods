@@ -143,6 +143,7 @@ body {
 /* ========【模組卡片】 設定 - 卡片基礎與動畫 ======== */
 .mod-card {
     /* 卡片背景 */ background: #fff;
+    /* 卡片寬度 */ flex: 0 0 360px;
     /* 卡片邊框 */ border: 1px solid #f0f0f0;
     /* 圓角弧度 */ border-radius: 12px;
     /* 超出隱藏 */ overflow: hidden;
