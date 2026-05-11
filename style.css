@@ -293,6 +293,16 @@ body {
 .filter-label {
     /* 文字顏色 */ color: #999;
     /* 字體大小 */ font-size: 13px;
+    /* 水平對齊 */ display: inline-flex;
+}
+
+.filter-group label {
+    /* 選項置中 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 5px;
+    /* 指標手勢 */ cursor: pointer;
+    /* 文字顏色 */ color: #666;
+    /* 字體大小 */ font-size: 13px;
 }
 
 /* ========【摺疊面板】 設定 - 表格本體 ======== */
