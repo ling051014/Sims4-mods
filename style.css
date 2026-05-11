@@ -251,6 +251,56 @@ body {
 .text-green { 
     /* 備註裡的綠色 */color: #88d8b0; font-weight: 500; }
 
+
+
+
+
+
+
+/* ========【表格工具】 設定 - 控制面板佈局 ======== */
+.filter-panel {
+    /* 背景顏色 */ background: #f9f9f9;
+    /* 內縮空間 */ padding: 15px;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 下方間距 */ margin-bottom: 20px;
+    /* 彈性佈局 */ display: flex;
+    /* 垂直排列 */ flex-direction: column;
+    /* 項目間距 */ gap: 10px;
+}
+
+.filter-group { /* 項目置中 */ display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.filter-label { /* 字體粗細 */ font-weight: bold; font-size: 13px; color: #666; }
+
+/* ========【表格本體】 設定 - 交互與顯示效果 ======== */
+#map-master-table {
+    /* 寬度填滿 */ width: 100%;
+    /* 邊框合併 */ border-collapse: collapse;
+    /* 尺寸計算 */ table-layout: fixed; /* ⭐固定寬度 */
+}
+
+#map-master-table th, #map-master-table td {
+    /* 內縮空間 */ padding: 12px;
+    /* 底部分隔 */ border-bottom: 1px solid #eee;
+    /* 文字置中 */ text-align: center;
+    /* 超出隱藏 */ overflow: hidden;
+}
+
+/* ⭐橫排 Hover 效果 */
+#map-master-table tbody tr:hover {
+    /* 背景高亮 */ background-color: #f0f7ff !important;
+    /* 文字加深 */ color: #000;
+    /* 過渡效果 */ transition: 0.2s;
+}
+
+/* 隱藏用 Class */
+.hide-item { display: none !important; }
+
+
+
+
+
+
+
 /* ========【首頁貼士】 設定 - 容器佈局樣式 ======== */
 .home-tips-container {
     /* 最大寬度 */ max-width: 900px;
