@@ -394,15 +394,18 @@ body {
 }
 .home-tips-content ul {
     /* 移除預設 */ margin: 0;
-    /* 內縮調整 */ padding-left: 20px;
+    /* 懸掛縮排 */ padding-left: 35px;
     /* 清單樣式 */ list-style-type: decimal-leading-zero;
+    /* 對齊設定 */ list-style-position: outside;
 }
+
 .home-tips-content li {
     /* 文字顏色 */ color: #888;
     /* 字體大小 */ font-size: 13px;
     /* 行距設定 */ line-height: 1.8;
     /* 下方間距 */ margin-bottom: 10px;
     /* 字距設定 */ letter-spacing: 1px;
+    /* 對齊方向 */ text-align: left;
 }
 
 /* ========【網站底部】 設定 - 瀏覽次數 ======== */
