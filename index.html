@@ -29,8 +29,19 @@
 
     <div class="home-tips-container">
         <details class="resource-detail">
-            <summary>🗺️ 擴充包中英對照表</summary>
+            <summary>🗺️ DLC中英對照表</summary>
             <div class="filter-panel">
+
+                <div class="filter-group" style="margin-top: 15px;">
+                    <span class="filter-label">DLC：</span>
+                    <label><input type="checkbox" checked onclick="ctrlType('type-ep')"> 資料片 (EP)</label>
+                    <label><input type="checkbox" checked onclick="ctrlType('type-gp')"> 擴充包 (GP)</label>
+                    <label><input type="checkbox" checked onclick="ctrlType('type-sp')"> 組合包 (SP)</label>
+                    <label><input type="checkbox" checked onclick="ctrlType('type-kit')"> 套件包 (Kit)</label>
+                    <label><input type="checkbox" checked onclick="ctrlType('type-fp')"> 額外內容 (FP)</label>
+                </div>
+            </div>
+            
                 <div class="filter-group">
                     <span class="filter-label">查看：</span>
                     <label><input type="checkbox" checked onclick="ctrlCol(0)"> 序號</label>
