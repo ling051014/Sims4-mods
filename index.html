@@ -122,14 +122,17 @@
             btn.style.transition = "0.5s ease-out";
             observer.observe(btn);
         });
-        // ========【縱列控制】 設定 - 勾選隱藏特定直欄 ========
+        /* ========【表格控制】 設定 - 修正勾選反應 ======== */
         function ctrlCol(index) {
             const table = document.getElementById('map-master-table');
             const rows = table.rows;
     
+            // 遍歷每一行（包含標題 th 和內容 td）
             for (let i = 0; i < rows.length; i++) {
-                // 切換該行中對應 index 的單元格顯示狀態
-                rows[i].cells[index].classList.toggle('hide-item');
+                const cell = rows[i].cells[index];
+                if (cell) {
+                    cell.classList.toggle('hide-item');
+                }
             }
         }
 
