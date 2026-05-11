@@ -353,24 +353,24 @@ body {
         /* 內容內縮 */ padding: 15px 25px;
     }
     .age-modal {
-        /* 手機內縮 */ padding: 20px !important;
-        /* 手機寬度 */ width: 85% !important;
-        /* 移除限制 */ max-width: 280px !important;
+        /* 手機內縮 */ padding: 20px;
+        /* 手機寬度 */ width: 85%;
+        /* 移除限制 */ max-width: 280px;
     }
     .age-modal h2 {
-        /* 手機標題 */ font-size: 16px !important;
-        /* 手機間距 */ margin-bottom: 8px !important;
+        /* 手機標題 */ font-size: 16px;
+        /* 手機間距 */ margin-bottom: 8px;
     }
     .age-modal p {
-        /* 手機內文 */ font-size: 11px !important;
-        /* 手機間距 */ margin-bottom: 15px !important;
+        /* 手機內文 */ font-size: 11px;
+        /* 手機間距 */ margin-bottom: 15px;
     }
     .age-btns {
-        /* 手機間距 */ gap: 8px !important;
-        /* 手機字體 */ font-size: 12px !important;
+        /* 手機間距 */ gap: 8px;
+        /* 手機字體 */ font-size: 12px;
     }
     .age-btns button {
-        /* 手機按鈕 */ padding: 8px !important;
+        /* 手機按鈕 */ padding: 8px;
     }
 }
 
