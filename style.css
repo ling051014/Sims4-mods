@@ -234,12 +234,12 @@ body {
 
 /* ========【備註區塊】 設定 - 卡片底部備註 ======== */
 .tips {
-    /* 拉開資訊距離 */ margin-top: 25px;
+    /* 拉開資訊距離 */ margin-top: 15px;
     /* 文字斜體 */ font-style: italic;
     /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 12px;
     /* 文字顏色 */ color: #bbb;
-    /* 上方內縮 */ padding-top: 25px;
+    /* 上方內縮 */ padding-top: 15px;
     /* 虛線分隔 */ border-top: 1px dashed #eee;
     /* 行距設定 */ line-height: 1.5;
 }
