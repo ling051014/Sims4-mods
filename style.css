@@ -492,6 +492,10 @@ body {
         /* 寬度限制 */ box-sizing: border-box;
         /* 避免溢出 */ overflow: hidden;
     }
+    .nav-menu a {
+        /* 字體大小 */ font-size: 12px;
+        /* 避免斷行 */ white-space: nowrap;
+    }
     .search-box {
         /* 彈性寬度 */ width: 40% !important;
         /* 最小寬度 */ min-width: 110px;
@@ -500,10 +504,6 @@ body {
     #mod-search {
         /* 縮減內縮 */ padding: 6px 10px;
         /* 字體大小 */ font-size: 11px;
-    }
-    .nav-menu a {
-        /* 字體大小 */ font-size: 12px;
-        /* 避免斷行 */ white-space: nowrap;
     }
     .cat-btn {
         /* 手機直向時改為一排兩個或佔滿 */
