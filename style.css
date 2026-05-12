@@ -386,7 +386,7 @@ body {
     /* 文字置中 */ text-align: center;
 }
 .home-tips-content {
-    /* 背景顏色 */ background: #fffff2;
+    /* 背景顏色 */ background: #fcfcf7;
     /* 虛線邊框 */ border: 1px dashed #ddd;
     /* 圓角弧度 */ border-radius: 12px;
     /* 內縮空間 */ padding: 30px;
@@ -405,7 +405,6 @@ body {
     /* 隱藏樣式 */ list-style-type: none;
     /* 啟動計數 */ counter-reset: tip-counter;
 }
-
 .home-tips-content li {
     /* 文字顏色 */ color: #888;
     /* 字體大小 */ font-size: 13px;
@@ -417,7 +416,6 @@ body {
     /* 內縮間距 */ padding-bottom: 5px;
     /* 內容排列 */ display: flex;
 }
-
 .home-tips-content li::before {
     /* 增加計數 */ counter-increment: tip-counter;
     /* 顯示數字 */ content: counter(tip-counter, decimal-leading-zero) ". ";
