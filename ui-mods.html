@@ -240,8 +240,18 @@
 
     </div>
 
+    </div> <dialog id="dlc-dialog" class="dlc-modal">
+        <div class="modal-header">
+            <span>🔍 DLC 與地圖對照查詢</span>
+            <button onclick="document.getElementById('dlc-dialog').close()" class="close-btn">×</button>
+        </div>
+        <div id="modal-content-placeholder" class="modal-body"></div>
+    </dialog>
+
+    <script src="dlc-table.js"></script>
+
     <script>
-        /* ========【關鍵字搜尋】 偵測輸入並顯示結果視窗 ======== */
+        // ========【關鍵字搜尋】 偵測輸入並顯示結果視窗 ========
         function searchMods() {
             const input = document.getElementById('mod-search');
             const filter = input.value.toUpperCase();
@@ -285,14 +295,35 @@
             dropdown.style.display = found ? 'block' : 'none';
         }
 
-        /* 點擊視窗外自動關閉搜尋結果 */
+        // 點擊視窗外自動關閉搜尋結果
         document.addEventListener('click', (e) => {
             if (e.target.id !== 'mod-search') {
                 document.getElementById('search-results').style.display = 'none';
             }
     
         });
-        /* ========【數量統計】 偵測目前的卡片總數 ======== */
+
+        // ========【彈窗控制】 分頁專用開啟函數 ========
+        // 如果你沒把這個函數寫進 dlc-table.js，就把它貼在這裡
+        function openDLCDialog() {
+            const container = document.getElementById('modal-content-placeholder');
+            const dialog = document.getElementById('dlc-dialog');
+
+            if (container.innerHTML === "") {
+                // 如果內容是空的才執行抓取
+                fetch('dlc-table.html')
+                    .then(response => response.text())
+                    .then(data => {
+                        container.innerHTML = data;
+                        dialog.showModal();
+                    })
+                    .catch(err => console.error('無法載入表格:', err));
+            } else {
+                dialog.showModal();
+            }
+        }
+        
+        // ========【數量統計】 偵測目前的卡片總數 ========
         function updateModCount() {
             const count = document.querySelectorAll('.mod-card').length;
             const countElement = document.getElementById('mod-count');
@@ -301,7 +332,7 @@
             }
         }
 
-        /* 滾動動畫腳本 */
+        // 滾動動畫腳本
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
