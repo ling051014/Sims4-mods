@@ -606,6 +606,20 @@ body {
         /* 左右推開 */ margin-right: -25px;
         /* 內容內縮 */ padding: 15px 25px;
     }
+    .home-tips-content {
+        /* 縮減內縮 */ padding: 20px 15px !important; 
+    }
+    .home-tips-content li {
+        /* 改為塊狀 */ display: block !important; 
+        /* 提升行距 */ line-height: 1.6 !important; 
+        /* 下方間距 */ margin-bottom: 15px !important;
+        /* 內縮間距 */ padding-bottom: 10px;
+    }
+    .home-tips-content li::before {
+        /* 彈性排列 */ display: inline-block;
+        /* 下方微調 */ margin-bottom: 5px;
+        /* 字體加粗 */ font-weight: bold;
+    }
     .age-modal {
         /* 手機內縮 */ padding: 20px;
         /* 手機寬度 */ width: 85%;
