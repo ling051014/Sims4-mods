@@ -318,6 +318,11 @@ body {
     /* 指標手勢 */ cursor: pointer;
 }
 
+/* ========【摺疊面板】 設定 - 表格與篩選間距 ======== */
+.filter-panel .table-container {
+    /* 上方間距 */ margin-top: 10px;
+}
+
 /* ========【摺疊面板】 設定 - 表格本體 ======== */
 .table-container {
     /* 寬度填滿 */ width: 100%;
