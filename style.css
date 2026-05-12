@@ -341,7 +341,7 @@ body {
 
 #map-master-table,
 .hotkey-table {
-    /* ⭐寬度自適 */ width: auto; 
+    /* 寬度自適 */ width: auto; 
     /* 左右邊距 */ margin: 0 auto;
     /* 邊框合併 */ border-collapse: collapse;
 }
@@ -350,14 +350,13 @@ body {
 .hotkey-table th {
     /* 文字顏色 */ color: #bbb;
     /* 字體大小 */ font-size: 12px;
-    /* ⭐取消大寫 */ text-transform: none; 
     /* 底部細線 */ border-bottom: 1px solid #eee;
     /* 內縮空間 */ padding: 15px 25px;
 }
 
 #map-master-table td,
 .hotkey-table td {
-    /* ⭐文字置中 */ text-align: center;
+    /* 文字置中 */ text-align: center;
     /* 內縮空間 */ padding: 20px 30px;
     /* 底部細線 */ border-bottom: 1px solid #f2f2f2;
     /* 禁止斷行 */ white-space: nowrap;
