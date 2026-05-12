@@ -394,9 +394,9 @@ body {
 }
 .home-tips-content ul {
     /* 移除預設 */ margin: 0;
-    /* 懸掛縮排 */ padding-left: 35px;
-    /* 清單樣式 */ list-style-type: decimal-leading-zero;
-    /* 對齊設定 */ list-style-position: outside;
+    /* 懸掛縮排 */ padding-left: 0;
+    /* 隱藏樣式 */ list-style-type: none;
+    /* 啟動計數 */ counter-reset: tip-counter;
 }
 
 .home-tips-content li {
@@ -408,6 +408,14 @@ body {
     /* 對齊方向 */ text-align: left;
     /* 底部分割 */ border-bottom: 1px solid #ddd;
     /* 內縮間距 */ padding-bottom: 5px;
+    /* 內容排列 */ display: flex;
+}
+
+.home-tips-content li::before {
+    /* 增加計數 */ counter-increment: tip-counter;
+    /* 顯示數字 */ content: counter(tip-counter, decimal-leading-zero) ". ";
+    /* 數字間距 */ margin-right: 8px;
+    /* 數字顏色 */ color: #888;
 }
 
 /* ========【網站底部】 設定 - 瀏覽次數 ======== */
