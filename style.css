@@ -289,21 +289,18 @@ body {
     /* 垂直排列 */flex-direction: column; 
     /* 行距調整 */gap: 10px;
 }
-
 .filter-group {
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
     /* 自動換行 */ flex-wrap: wrap;
     /* 項目間距 */ gap: 20px;
 }
-
 .filter-label {
     /* 文字顏色 */ color: #999;
     /* 字體大小 */ font-size: 13px;
     /* 水平對齊 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
 }
-
 .filter-group label {
     /* 選項置中 */ display: flex;
     /* 垂直置中 */ align-items: center;
@@ -312,13 +309,37 @@ body {
     /* 文字顏色 */ color: #666;
     /* 字體大小 */ font-size: 13px;
 }
-
 .filter-group input[type="checkbox"] {
     /* 移除預設位移 */ margin: 0;
     /* 強制對齊基準 */ vertical-align: middle;
     /* 修正位置偏差 */ position: relative;
     /* 微調頂部位置 */ top: -1px;
     /* 指標手勢 */ cursor: pointer;
+}
+
+/* ========【摺疊面板】 設定 - 鍵盤快捷鍵 ======== */
+.hotkey-table {
+    /* 寬度設定 */ width: 100%;
+    /* 邊框合併 */ border-collapse: collapse;
+    /* 上方間距 */ margin-top: 10px;
+}
+.hotkey-table th, .hotkey-table td {
+    /* 單元內縮 */ padding: 12px;
+    /* 底部邊框 */ border-bottom: 1px solid #eee;
+    /* 文字對齊 */ text-align: left;
+    /* 字體大小 */ font-size: 14px;
+}
+.hotkey-table th {
+    /* 標題顏色 */ color: #555;
+    /* 標題背景 */ background-color: #fcfcfc;
+}
+.hotkey-table td {
+    /* 內容顏色 */ color: #888;
+}
+.hotkey-table td:last-child {
+    /* 鍵位加粗 */ font-weight: bold;
+    /* 鍵位顏色 */ color: #666;
+    /* 代碼字型 */ font-family: monospace;
 }
 
 /* ========【摺疊面板】 設定 - 表格本體 ======== */
