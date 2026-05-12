@@ -115,58 +115,21 @@
         window.addEventListener('DOMContentLoaded', () => {
             // 找到首頁那個洞
             const container = document.getElementById('home-table-placeholder');
-
-    // 抓取獨立檔案
+            
+            // 抓取獨立檔案
             fetch('dlc-table.html')
-        // 取得文字內容
+                // 取得文字內容
                 .then(response => response.text())
-        // 塞進首頁的洞
-            .then(data => {
-                container.innerHTML = data;
-            });
+                // 塞進首頁的洞
+                .then(data => {
+                    container.innerHTML = data;
+                });
         });
         
-        // ========【表格控制】 設定 - 修正勾選反應 ======== 
-        function ctrlCol(index) {
-            const table = document.getElementById('map-master-table');
-            const rows = table.rows;
-    
-            // 遍歷每一行（包含標題 th 和內容 td）
-            for (let i = 0; i < rows.length; i++) {
-                const cell = rows[i].cells[index];
-                if (cell) {
-                    cell.classList.toggle('hide-item');
-                }
-            }
-        }
-
-        // ========【橫排控制】 設定 - 下拉選單篩選地圖 ========
-        function ctrlRow() {
-            const select = document.getElementById('map-select');
-            const filter = select.value;
-            const rows = document.querySelectorAll('.map-row');
-
-            rows.forEach(row => {
-                if (filter === 'all' || row.getAttribute('data-map') === filter) {
-                    /* 符合顯示 */ row.classList.remove('hide-item');
-                } else {
-                    /* 不符隱藏 */ row.classList.add('hide-item');
-                }
-            });
-        }
-
-        function ctrlType(typeName) {
-            // 抓取所有帶有該分類 class 的行
-            const elements = document.getElementsByClassName(typeName);
-            for (let i = 0; i < elements.length; i++) {
-                // 切換隱藏/顯示
-                if (elements[i].style.display === "none") {
-                    elements[i].style.display = "";
-                } else {
-                    elements[i].style.display = "none";
-                }
-            }
-        }
+        // 頁面載入完成後，自動把表格塞進首頁的 placeholder
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDLCTable('home-table-placeholder');
+        });
     </script>
 </body>
 </html>
