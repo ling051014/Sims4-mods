@@ -109,25 +109,41 @@ function loadDLCTable(containerId, callback) {
 
 // ========【DLC對照表】 設定 - 開啟 Dialog ========
 function openDLCDialog() {
-    // 取得內容容器
-    const container =
-        document.getElementById('modal-content-placeholder');
-    // 取得 dialog 元件
-    const dialog =
-        document.getElementById('dlc-dialog');
-    // 若內容尚未載入
-    if (container.innerHTML === "") {
-        // 先載入內容再開啟
-        loadDLCTable(
-            'modal-content-placeholder',
-            // 載入完成後開啟
-            () => dialog.showModal()
-        );
+    const container = document.getElementById('modal-content-placeholder');
+    const dialog = document.getElementById('dlc-dialog');
+    // 使用 trim() 確保準確判斷容器是否為空
+    if (container.innerHTML.trim() === "") {
+        loadDLCTable('modal-content-placeholder', () => {
+            dialog.showModal();
+            // 載入後重新綁定一次點擊事件（選擇性，若使用全域監聽則免）
+        });
     } else {
-        // 已載入過則直接開啟
         dialog.showModal();
     }
 }
+
+// ========【表格互動】 設定 - 點擊行變色效果 ========
+// 使用全域監聽，這樣動態載入的表格也能觸發
+document.addEventListener('click', function(e) {
+    // 檢查點擊的是否為表格內的儲存格 (td) 或行 (tr)
+    const tr = e.target.closest('#map-master-table tbody tr');
+    if (tr) {
+        // 移除該表格內所有行的選取狀態
+        const allRows = tr.closest('tbody').querySelectorAll('tr');
+        allRows.forEach(row => row.classList.remove('selected-row'));
+        // 幫當前點擊行加上選取類別 (對應 CSS 的 .selected-row)
+        tr.classList.add('selected-row');
+    }
+});
+
+// ========【搜尋優化】 設定 - 點擊搜尋結果外自動隱藏 ========
+document.addEventListener('click', (e) => {
+    const searchBox = document.querySelector('.search-box');
+    const dropdown = document.getElementById('search-results');
+    if (dropdown && !searchBox.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
 
 // ========【卡片統計】 設定 - 顯示模組總數 ========
 function updateModCount() {
