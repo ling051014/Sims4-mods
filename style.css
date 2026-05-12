@@ -318,17 +318,6 @@ body {
 }
 
 /* ========【摺疊面板】 設定 - 鍵盤快捷鍵 ======== */
-.hotkey-table {
-    /* 寬度設定 */ width: 100%;
-    /* 邊框合併 */ border-collapse: collapse;
-    /* 上方間距 */ margin-top: 10px;
-}
-.hotkey-table th, .hotkey-table td {
-    /* 單元內縮 */ padding: 12px;
-    /* 底部邊框 */ border-bottom: 1px solid #eee;
-    /* 文字對齊 */ text-align: left;
-    /* 字體大小 */ font-size: 14px;
-}
 .hotkey-table th {
     /* 標題顏色 */ color: #555;
     /* 標題背景 */ background-color: #fcfcfc;
@@ -350,13 +339,15 @@ body {
     /* 橫向捲動 */ overflow-x: auto;
 }
 
-#map-master-table {
+#map-master-table,
+.hotkey-table {
     /* ⭐寬度自適 */ width: auto; 
     /* 左右邊距 */ margin: 0 auto;
     /* 邊框合併 */ border-collapse: collapse;
 }
 
-#map-master-table th {
+#map-master-table th,
+.hotkey-table th {
     /* 文字顏色 */ color: #bbb;
     /* 字體大小 */ font-size: 12px;
     /* ⭐取消大寫 */ text-transform: none; 
@@ -364,7 +355,8 @@ body {
     /* 內縮空間 */ padding: 15px 25px;
 }
 
-#map-master-table td {
+#map-master-table td,
+.hotkey-table td {
     /* ⭐文字置中 */ text-align: center;
     /* 內縮空間 */ padding: 20px 30px;
     /* 底部細線 */ border-bottom: 1px solid #f2f2f2;
