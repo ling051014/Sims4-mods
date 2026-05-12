@@ -352,8 +352,13 @@ body {
 }
 
 /* ========【摺疊面板】 設定 - Hover 與細節 ======== */
-#map-master-table tbody tr:hover {
-    /* 背景高亮 */ background-color: rgba(0, 0, 0, 0.02) !important;
+#map-master-table tbody tr:hover,
+.hotkey-table tbody tr:hover {
+    /* 懸停顏色 */ background-color: #f1f8ff;
+}
+
+.selected-row {
+    /* 點擊顏色 */ background-color: #e2f0fe !important;
 }
 
 .dlc-icon {
@@ -364,6 +369,7 @@ body {
 
 /* 強制隱藏 */
 .hide-item { display: none !important; }
+
 
 
 
@@ -563,17 +569,6 @@ body {
 .hotkey-table td {
     /* 禁止文字自動換行 */ white-space: nowrap;
     /* 內縮空間 */ padding: 10px 15px;
-}
-
-/* ========【表格】 設定 - 互動效果 ======== */
-/* 滑鼠懸停顏色 */
-#map-master-table tbody tr:hover,
-.hotkey-table tbody tr:hover {
-    background-color: #f1f8ff;
-}
-/* 點擊後的選取顏色 */
-.selected-row {
-    background-color: #e2f0fe !important;
 }
 
 /* ========【響應式設定】 設定 - 手機直向優化 ======== */
