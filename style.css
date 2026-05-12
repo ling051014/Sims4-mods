@@ -267,6 +267,7 @@ body {
 }
 
 .resource-detail summary {
+    /* 指標手勢 */ cursor: pointer;
     /* 自適應字數 */ width: fit-content;
     /* 水平置中 */ margin: 0 auto;
     /* 背景透明 */ background: transparent;
