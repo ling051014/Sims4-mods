@@ -568,7 +568,14 @@ body {
 }
 
 /* ========【表格】 設定 - 防止欄位擠壓 ======== */
-#map-master-table {
+/* 首頁折疊面板 */
+.home-table-wrapper #map-master-table {
+    /* 根據內容自動縮放 */ width: fit-content;
+    /* 不限制最小寬度 */ min-width: unset;
+    /* 邊框合併 */ border-collapse: collapse;
+}
+/* 彈窗 */
+.dlc-modal #map-master-table {
     /* 確保寬度足以容納內容 */ width: max-content;
     /* 最小寬度填滿容器 */ min-width: 100%;
     /* 邊框合併 */ border-collapse: collapse;
