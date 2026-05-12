@@ -572,14 +572,17 @@ body {
     /* 邊框合併 */ border-collapse: collapse;
 }
 #map-master-table th,
-#map-master-table td {
+#map-master-table td,
+.hotkey-table th,
+.hotkey-table td {
     /* 禁止文字自動換行 */ white-space: nowrap;
     /* 內縮空間 */ padding: 10px 15px;
 }
 
 /* ========【表格】 設定 - 互動效果 ======== */
 /* 滑鼠懸停顏色 */
-#map-master-table tbody tr:hover {
+#map-master-table tbody tr:hover,
+.hotkey-table tbody tr:hover {
     background-color: #f1f8ff;
 }
 /* 點擊後的選取顏色 */
