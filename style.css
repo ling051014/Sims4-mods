@@ -263,7 +263,7 @@ body {
     /* 移除陰影 */ box-shadow: none;
     /* 背景透明 */ background: transparent;
     /* 最大寬度 */ max-width: 900px;
-    /* 水平置中 */ margin: 40px auto;
+    /* 水平置中 */ margin: 20px auto;
 }
 
 .resource-detail summary {
@@ -276,7 +276,7 @@ body {
     /* 字體粗細 */ font-weight: 300;
     /* 文字顏色 */ color: #333;
     /* 字距拉開 */ letter-spacing: 3px;
-    /* 內縮空間 */ padding: 20px;
+    /* 內縮空間 */ padding: 10px 20px;
     /* 下方虛線 */ border-bottom: 1px dashed #999;
 }
 
