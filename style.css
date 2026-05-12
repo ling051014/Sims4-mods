@@ -505,7 +505,18 @@ body {
     /* 文字顏色 */ color: #fff; 
 }
 
-/* ========【彈窗主體】 設定 ======== */
+/* ========【彈窗引用】 設定 - 觸發文字樣式 ======== */
+.lookup-link {
+    /* 文字顏色 */ color: #55acee;
+    /* 滑標樣式 */ cursor: pointer;
+    /* 底部裝飾 */ text-decoration: underline;
+}
+
+.lookup-link:hover {
+    /* 懸停效果 */ font-weight: bold;
+}
+
+/* ========【彈窗】 設定 - 主體 ======== */
 .dlc-modal {
     /* 視窗寬度 */ width: 90%;
     /* 最大寬度 */ max-width: 800px;
@@ -516,13 +527,13 @@ body {
     /* 溢出隱藏 */ overflow: hidden;
 }
 
-/* ========【背景遮罩】 設定 ======== */
+/* ========【彈窗】 設定 - 背景遮罩 ======== */
 .dlc-modal::backdrop {
     /* 遮罩顏色 */ background: rgba(0, 0, 0, 0.6);
     /* 模糊效果 */ backdrop-filter: blur(4px);
 }
 
-/* ========【視窗頂部】 標題列 ======== */
+/* ========【彈窗】 設定 - 標題列 ======== */
 .modal-header {
     /* 背景顏色 */ background-color: #f8f8f8;
     /* 內縮空間 */ padding: 15px 20px;
@@ -531,14 +542,13 @@ body {
     /* 兩端對齊 */ justify-content: space-between;
     /* 垂直置中 */ align-items: center;
 }
-
 .modal-header span {
     /* 字體大小 */ font-size: 16px;
     /* 字體加粗 */ font-weight: bold;
     /* 文字顏色 */ color: #444;
 }
 
-/* ========【關閉按鈕】 設定 ======== */
+/* ========【彈窗】 設定 - 關閉按鈕 ======== */
 .close-btn {
     /* 背景移除 */ background: none;
     /* 邊框移除 */ border: none;
@@ -546,27 +556,15 @@ body {
     /* 滑標樣式 */ cursor: pointer;
     /* 文字顏色 */ color: #999;
 }
-
 .close-btn:hover {
     /* 懸停顏色 */ color: #333;
 }
 
-/* ========【視窗內容區】 設定 ======== */
+/* ========【彈窗】 設定 - 內容區 ======== */
 .modal-body {
     /* 內縮空間 */ padding: 20px;
     /* 最大高度 */ max-height: 75vh;
     /* 垂直捲軸 */ overflow-y: auto;
-}
-
-/* ========【查詢連結】 觸發文字樣式 ======== */
-.lookup-link {
-    /* 文字顏色 */ color: #55acee;
-    /* 滑標樣式 */ cursor: pointer;
-    /* 底部裝飾 */ text-decoration: underline;
-}
-
-.lookup-link:hover {
-    /* 懸停效果 */ font-weight: bold;
 }
 
 /* ========【響應式設定】 設定 - 手機直向優化 ======== */
