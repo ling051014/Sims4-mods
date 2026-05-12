@@ -45,3 +45,17 @@ function ctrlType(typeName) {
         }
     }
 }
+
+// ========【互動控制】 點擊行變色 ========
+document.addEventListener('click', function(e) {
+    // 檢查點擊的是否為表格內的儲存格
+    const tr = e.target.closest('.map-row');
+    if (tr) {
+        // 移除其他行的選取狀態
+        document.querySelectorAll('.map-row').forEach(row => {
+            row.classList.remove('selected-row');
+        });
+        // 幫當前點擊行加上選取類別
+        tr.classList.add('selected-row');
+    }
+});
