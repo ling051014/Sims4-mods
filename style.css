@@ -401,7 +401,7 @@ body {
     /* 文字置中 */ text-align: center;
 }
 .home-tips-content {
-    /* 背景顏色 */ background: #fcfced;
+    /* 背景顏色 */ background: #fffff2;
     /* 虛線邊框 */ border: 1px dashed #ddd;
     /* 圓角弧度 */ border-radius: 12px;
     /* 內縮空間 */ padding: 30px;
