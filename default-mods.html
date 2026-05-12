@@ -70,33 +70,7 @@
 
     </div>
 
-    <script>
-        /* ========【數量統計】 偵測目前的卡片總數 ======== */
-        function updateModCount() {
-            const count = document.querySelectorAll('.mod-card').length;
-            const countElement = document.getElementById('mod-count');
-            if (countElement) {
-                countElement.innerText = count;
-            }
-        }
-        
-        /* 滾動動畫腳本 */
-        const observerOptions = { threshold: 0.1 };
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.mod-card').forEach(card => {
-            observer.observe(card);
-        });
-
-        // 執行統計
-        updateModCount();
-    </script>
+    <script src="script.js"></script>
     
 </body>
 </html>
