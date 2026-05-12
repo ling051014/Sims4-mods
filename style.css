@@ -263,7 +263,7 @@ body {
     /* 移除陰影 */ box-shadow: none;
     /* 背景透明 */ background: transparent;
     /* 最大寬度 */ max-width: 900px;
-    /* 水平置中 */ margin: 20px auto;
+    /* 水平置中 */ margin: 5px auto;
 }
 
 .resource-detail summary {
