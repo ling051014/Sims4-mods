@@ -61,6 +61,7 @@ body {
 /* ========【頂部橫條】 設定 - 頂部導覽區 ======== */
 .nav-menu {
     /* 彈性佈局 */ display: flex;
+    /* 滿版寬度 */ width: 100%;
     /* 內縮空間 */ padding: 15px 10px;
     /* 垂直置中 */ align-items: center;
     /* 兩端對齊 */ justify-content: space-between;
