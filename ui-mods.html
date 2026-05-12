@@ -304,21 +304,35 @@
         });
 
         // ========【彈窗控制】 分頁專用開啟函數 ========
-        // 如果你沒把這個函數寫進 dlc-table.js，就把它貼在這裡
+        // ========【核心功能】 載入外部 HTML 內容 ========
+        function loadDLCTable(containerId, callback) {
+            // 取得目標容器
+            const container = document.getElementById(containerId);
+            if (!container) return;
+                // 執行檔案抓取
+                fetch('dlc-table.html')
+                    // 轉為文字流
+                    .then(response => response.text())
+                    // 渲染內容
+                    .then(data => {
+                        container.innerHTML = data;
+                        // 載入後回調
+                        if (callback) callback();
+                    })
+                    // 錯誤攔截
+                    .catch(err => console.error('無法載入對照表:', err));
+        }
+        
+        // ========【彈窗控制】 開啟並確保內容存在 ========
         function openDLCDialog() {
             const container = document.getElementById('modal-content-placeholder');
             const dialog = document.getElementById('dlc-dialog');
-
+            
             if (container.innerHTML === "") {
-                // 如果內容是空的才執行抓取
-                fetch('dlc-table.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        container.innerHTML = data;
-                        dialog.showModal();
-                    })
-                    .catch(err => console.error('無法載入表格:', err));
+                // 內容為空時載入檔案
+                loadDLCTable('modal-content-placeholder', () => dialog.showModal());
             } else {
+                // 已有內容則直接顯示
                 dialog.showModal();
             }
         }
