@@ -122,17 +122,18 @@ function openDLCDialog() {
     }
 }
 
-// ========【表格互動】 設定 - 點擊行變色效果 ========
-// 使用全域監聽，這樣動態載入的表格也能觸發
-document.addEventListener('click', function(e) {
+// 確保點擊表格行會變色（支援首頁與彈窗）
+document.addEventListener('click', function (e) {
     // 檢查點擊的是否為表格內的儲存格 (td) 或行 (tr)
-    const tr = e.target.closest('#map-master-table tbody tr');
-    if (tr) {
-        // 移除該表格內所有行的選取狀態
-        const allRows = tr.closest('tbody').querySelectorAll('tr');
-        allRows.forEach(row => row.classList.remove('selected-row'));
+    const row = e.target.closest('#map-master-table tbody tr');
+    
+    if (row) {
+        // 先移除同一表格內所有行的選取顏色
+        const allRows = row.closest('tbody').querySelectorAll('tr');
+        allRows.forEach(r => r.classList.remove('selected-row'));
+
         // 幫當前點擊行加上選取類別 (對應 CSS 的 .selected-row)
-        tr.classList.add('selected-row');
+        row.classList.add('selected-row');
     }
 });
 
