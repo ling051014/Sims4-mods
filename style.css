@@ -507,73 +507,10 @@ body {
 
 /* ========【彈窗引用】 設定 - 觸發文字樣式 ======== */
 .lookup-link {
-    /* 文字顏色 */ color: #55acee;
-    /* 滑標樣式 */ cursor: pointer;
-    /* 底部裝飾 */ text-decoration: underline;
-}
-
-.lookup-link:hover {
-    /* 懸停效果 */ font-weight: bold;
-}
-
-/* ========【彈窗】 設定 - 主體 ======== */
-.dlc-modal {
-    /* 視窗寬度 */ width: 90%;
-    /* 最大寬度 */ max-width: 800px;
-    /* 圓角邊框 */ border-radius: 12px;
-    /* 移除邊框 */ border: none;
-    /* 內縮空間 */ padding: 0;
-    /* 陰影效果 */ box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    /* 溢出隱藏 */ overflow: hidden;
-}
-
-/* ========【彈窗】 設定 - 背景遮罩 ======== */
-.dlc-modal::backdrop {
-    /* 遮罩顏色 */ background: rgba(0, 0, 0, 0.6);
-    /* 模糊效果 */ backdrop-filter: blur(4px);
-}
-
-/* ========【彈窗】 設定 - 標題列 ======== */
-.modal-header {
-    /* 背景顏色 */ background-color: #f8f8f8;
-    /* 內縮空間 */ padding: 15px 20px;
-    /* 底部邊框 */ border-bottom: 1px solid #eee;
-    /* 佈局方式 */ display: flex;
-    /* 兩端對齊 */ justify-content: space-between;
-    /* 垂直置中 */ align-items: center;
-}
-.modal-header span {
-    /* 字體大小 */ font-size: 16px;
-    /* 字體加粗 */ font-weight: bold;
-    /* 文字顏色 */ color: #444;
-}
-
-/* ========【彈窗】 設定 - 關閉按鈕 ======== */
-.close-btn {
-    /* 背景移除 */ background: none;
-    /* 邊框移除 */ border: none;
-    /* 字體大小 */ font-size: 24px;
-    /* 滑標樣式 */ cursor: pointer;
-    /* 文字顏色 */ color: #999;
-}
-.close-btn:hover {
-    /* 懸停顏色 */ color: #333;
-}
-
-/* ========【彈窗】 設定 - 內容區 ======== */
-.modal-body {
-    /* 內縮空間 */ padding: 20px;
-    /* 最大高度 */ max-height: 75vh;
-    /* 垂直捲軸 */ overflow-y: auto;
-}
-
-/* ========【彈窗引用】 設定 - 觸發文字樣式 ======== */
-.lookup-link {
     /* 文字顏色 */ color: #55acee;
     /* 滑標樣式 */ cursor: pointer;
     /* 底部裝飾 */ text-decoration: underline;
 }
-
 .lookup-link:hover {
     /* 懸停效果 */ font-weight: bold;
 }
@@ -596,7 +533,7 @@ body {
 }
 
 /* ========【彈窗】 設定 - 標題列 ======== */
-.modal-header {
+.dlc-modal .modal-header {
     /* 背景顏色 */ background-color: #f8f8f8;
     /* 內縮空間 */ padding: 15px 20px;
     /* 底部邊框 */ border-bottom: 1px solid #eee;
@@ -604,26 +541,26 @@ body {
     /* 兩端對齊 */ justify-content: space-between;
     /* 垂直置中 */ align-items: center;
 }
-.modal-header span {
+.dlc-modal .modal-header span {
     /* 字體大小 */ font-size: 16px;
     /* 字體加粗 */ font-weight: bold;
     /* 文字顏色 */ color: #444;
 }
 
 /* ========【彈窗】 設定 - 關閉按鈕 ======== */
-.close-btn {
+.dlc-modal .close-btn {
     /* 背景移除 */ background: none;
     /* 邊框移除 */ border: none;
     /* 字體大小 */ font-size: 24px;
     /* 滑標樣式 */ cursor: pointer;
     /* 文字顏色 */ color: #999;
 }
-.close-btn:hover {
+.dlc-modal .close-btn:hover {
     /* 懸停顏色 */ color: #333;
 }
 
 /* ========【彈窗】 設定 - 內容區 ======== */
-.modal-body {
+.dlc-modal .modal-body {
     /* 內縮空間 */ padding: 20px;
     /* 最大高度 */ max-height: 80vh;
     /* 垂直捲軸 */ overflow-y: auto;
@@ -636,8 +573,7 @@ body {
     /* 最小寬度填滿容器 */ min-width: 100%;
     /* 邊框合併 */ border-collapse: collapse;
 }
-
-#map-master-table th, 
+#map-master-table th,
 #map-master-table td {
     /* 禁止文字自動換行 */ white-space: nowrap;
     /* 內縮空間 */ padding: 10px 15px;
