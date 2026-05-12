@@ -511,19 +511,18 @@ body {
     /* 滑標樣式 */ cursor: pointer;
     /* 底部裝飾 */ text-decoration: underline;
 }
-
 .lookup-link:hover {
     /* 懸停效果 */ font-weight: bold;
 }
 
 /* ========【彈窗】 設定 - 主體 ======== */
 .dlc-modal {
-    /* 視窗寬度 */ width: 90%;
-    /* 最大寬度 */ max-width: 800px;
+    /* 根據內容自動調整寬度 */ width: fit-content;
+    /* 限制最大寬度不超過螢幕 */ max-width: 95vw;
     /* 圓角邊框 */ border-radius: 12px;
     /* 移除邊框 */ border: none;
     /* 內縮空間 */ padding: 0;
-    /* 陰影效果 */ box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    /* 陰影效果 */ box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     /* 溢出隱藏 */ overflow: hidden;
 }
 
@@ -563,8 +562,31 @@ body {
 /* ========【彈窗】 設定 - 內容區 ======== */
 .modal-body {
     /* 內縮空間 */ padding: 20px;
-    /* 最大高度 */ max-height: 75vh;
+    /* 最大高度 */ max-height: 80vh;
     /* 垂直捲軸 */ overflow-y: auto;
+    /* 橫向捲軸 */ overflow-x: auto;
+}
+
+/* ========【表格】 設定 - 防止欄位擠壓 ======== */
+#map-master-table {
+    /* 確保寬度足以容納內容 */ width: max-content;
+    /* 最小寬度填滿容器 */ min-width: 100%;
+    /* 邊框合併 */ border-collapse: collapse;
+}
+#map-master-table th, 
+#map-master-table td {
+    /* 禁止文字自動換行 */ white-space: nowrap;
+    /* 內縮空間 */ padding: 10px 15px;
+}
+
+/* ========【表格】 設定 - 互動效果 ======== */
+/* 滑鼠懸停顏色 */
+#map-master-table tbody tr:hover {
+    background-color: #f1f8ff;
+}
+/* 點擊後的選取顏色 */
+.selected-row {
+    background-color: #e2f0fe !important;
 }
 
 /* ========【響應式設定】 設定 - 手機直向優化 ======== */
