@@ -122,18 +122,17 @@ function openDLCDialog() {
     }
 }
 
-// 確保點擊表格行會變色（支援首頁與彈窗）
-document.addEventListener('click', function (e) {
-    // 檢查點擊的是否為表格內的儲存格 (td) 或行 (tr)
-    const row = e.target.closest('#map-master-table tbody tr');
-    
-    if (row) {
-        // 先移除同一表格內所有行的選取顏色
-        const allRows = row.closest('tbody').querySelectorAll('tr');
-        allRows.forEach(r => r.classList.remove('selected-row'));
-
-        // 幫當前點擊行加上選取類別 (對應 CSS 的 .selected-row)
-        row.classList.add('selected-row');
+// 確保全域點擊表格行會變色（支援首頁與彈窗）
+document.addEventListener('click', function(e) {
+    // 只要點擊的是 tr (不管是地圖表格還是快捷鍵表格)
+    const tr = e.target.closest('tr');
+    // 確保這個 tr 是在 tbody 裡面（避開標題列 th）
+    if (tr && tr.closest('tbody')) {
+        // 移除「該表格」內所有行的選取狀態
+        const allRows = tr.closest('tbody').querySelectorAll('tr');
+        allRows.forEach(row => row.classList.remove('selected-row'));    
+        // 幫目前點擊行加上顏色
+        tr.classList.add('selected-row');
     }
 });
 
