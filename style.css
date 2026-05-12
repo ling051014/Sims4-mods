@@ -285,10 +285,11 @@ body {
     /* 寬度自適 */ width: 100%;
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
-    /* 下方間距 */ margin-bottom: 20px;
-    /* 內縮空間 */ padding: 30px 0;
     /* 垂直排列 */ flex-direction: column; 
     /* 行距調整 */ gap: 10px;
+    /* 上方外距 */ margin-top: 20px;
+    /* 下方外距 */ margin-bottom: 30px;
+    /* 內縮空間 */ padding: 10px 0;
 }
 .filter-group {
     /* 彈性佈局 */ display: flex;
@@ -644,7 +645,6 @@ body {
     }
     .mod-container {
         /* 縮減間距 */ gap: 15px;
-        /* 左右內縮 */ padding: 10px 20px;
         /* 上下外距 */ margin: 20px auto;
     }
     .preview-img {
