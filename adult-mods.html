@@ -62,28 +62,7 @@
     </div>
 
     <script src="script.js"></script>
-
-    <script>
-        /* ========【跳窗控制】 設定 - 按鈕點擊功能 ======== */
-        function leavePage() {
-            /* 強制回首 */ window.location.href = "index.html";
-        }
-
-        function enterPage() {
-            /* 隱藏視窗 */ 
-            document.getElementById("age-verify-overlay").style.display = "none";
-            /* 恢復滾動 */ 
-            document.body.style.overflow = "auto"; 
-        }
-
-        /* ========【頁面載入】 設定 - 每次強制檢查 ======== */
-        window.addEventListener('load', function() {
-            /* 強制顯示 */ 
-            document.getElementById("age-verify-overlay").style.display = "flex";
-            /* 禁止滾動 */ 
-            document.body.style.overflow = "hidden"; /* ⭐防止偷看內容 */
-        });
-    </script>
+    <script src="adult.js"></script>
 
 </body>
 </html>
