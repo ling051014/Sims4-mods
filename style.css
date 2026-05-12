@@ -287,7 +287,7 @@ body {
     /* 水平置中 */ justify-content: center;
     /* 垂直排列 */ flex-direction: column; 
     /* 行距調整 */ gap: 10px;
-    /* 上方外距 */ margin-top: 20px;
+    /* 上方外距 */ margin-top: 30px;
     /* 下方外距 */ margin-bottom: 30px;
     /* 內縮空間 */ padding: 10px 0;
 }
@@ -324,7 +324,7 @@ body {
     /* 寬度填滿 */ width: 100%;
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
-    /* 橫向捲動 */ overflow-x: auto;
+    /* 移除預設推擠 */ margin-top: 0 !important;
 }
 
 #map-master-table,
@@ -636,7 +636,7 @@ body {
         flex: 0 1 calc(33.333% - 15px);
     }
     .nav-menu {
-        /* 寬度限制 */ box-sizing: border-box;
+        /* 寬度自適 */ width: 100%;
     }
     .mod-card {
         /* 三欄配置 */ flex: 0 0 calc(33.333% - 10px);
