@@ -46,12 +46,11 @@ function ctrlType(typeName) {
     }
 }
 
-// ========【排序控制】 設定 - 狀態紀錄 ========
+// ========【排序控制】 設定 - 正序倒序 ========
 let isAscending = true;
 
 // ========【排序功能】========
 function sortTable(colIndex) {
-
     // 取得表格
     const table = document.getElementById('map-master-table');
     // 取得 tbody
@@ -64,19 +63,40 @@ function sortTable(colIndex) {
     // ========【發行日期排序】========
     if (colIndex === 0) {
         rows.sort((a, b) => {
-            // 取得日期文字
             const aDate = new Date(a.cells[0].innerText.trim());
             const bDate = new Date(b.cells[0].innerText.trim());
-            // 正倒序切換
             return isAscending
                 ? aDate - bDate
                 : bDate - aDate;
         });
 
     // ========【序號排序】========
-    } else {
+    } else if (colIndex === 1) {
         // 直接反轉
         rows.reverse();
+
+    // ========【一般文字排序】========
+    } else {
+        rows.sort((a, b) => {
+            // 取得文字
+            let aText = a.cells[colIndex].innerText.trim();
+            let bText = b.cells[colIndex].innerText.trim();
+
+            // ========【- 永遠排最後】========
+            // 正序
+            if (isAscending) {
+                if (aText === '-') return 1;
+                if (bText === '-') return -1;
+            // 倒序
+            } else {
+                if (aText === '-') return -1;
+                if (bText === '-') return 1;
+            }
+            // 一般文字排序
+            return isAscending
+                ? aText.localeCompare(bText, 'zh-Hant')
+                : bText.localeCompare(aText, 'zh-Hant');
+        });
     }
 
     // 清空原本內容
@@ -97,24 +117,6 @@ function sortTable(colIndex) {
         th.classList.add('desc');
     }
 }
-
-// ========【互動控制】 點擊行變色 (排除標題) ========
-document.addEventListener('click', function(e) {
-    // 尋找行數
-    const tr = e.target.closest('tr');
-    
-    // 判定有效：確保點擊的不是 <thead> 內的元素
-    if (tr && tr.closest('table') && !tr.closest('thead')) {
-        // 取得容器
-        const table = tr.closest('table');
-        // 清除同表
-        table.querySelectorAll('tr').forEach(row => {
-            row.classList.remove('selected-row');
-        });
-        // 套用選取
-        tr.classList.add('selected-row');
-    }
-});
 
 // ========【彈窗控制】 設定 - 點擊外部自動關閉 ========
 const dlcModal = document.querySelector('.dlc-modal');
