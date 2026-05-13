@@ -483,7 +483,7 @@ body {
 /* ========【彈窗引用】 設定 - 觸發文字樣式 ======== */
 .lookup-link {
     /* 文字顏色 */ color: #55acee;
-    /* 滑標樣式 */ cursor: pointer;
+    /* 指標手勢 */ cursor: pointer;
     /* 底部裝飾 */ text-decoration: underline;
 }
 .lookup-link:hover {
@@ -528,7 +528,7 @@ body {
     /* 背景移除 */ background: none;
     /* 邊框移除 */ border: none;
     /* 字體大小 */ font-size: 24px;
-    /* 滑標樣式 */ cursor: pointer;
+    /* 指標手勢 */ cursor: pointer;
     /* 文字顏色 */ color: #999;
 }
 .dlc-modal .close-btn:hover {
