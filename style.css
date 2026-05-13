@@ -284,21 +284,23 @@ body {
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
     /* 垂直排列 */ flex-direction: column; 
-    /* 行距調整 */ gap: 10px;
+    /* 行距調整 */ gap: 15px;
     /* 上方外距 */ margin-top: 5px;
-    /* 內縮空間 */ padding: 10px 0;
+    /* 內縮空間 */ padding: 15px 0;
 }
 .filter-group {
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
     /* 自動換行 */ flex-wrap: wrap;
-    /* 項目間距 */ gap: 20px;
+    /* 項目間距 */ gap: 12px 20px;
+    /* 設定行高 */line-height: 1.8;
 }
 .filter-label {
     /* 文字顏色 */ color: #999;
     /* 字體大小 */ font-size: 13px;
     /* 水平對齊 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
+    /* 單一不拆不換行 */ white-space: nowrap;
 }
 .filter-group label {
     /* 選項置中 */ display: flex;
@@ -307,6 +309,7 @@ body {
     /* 指標手勢 */ cursor: pointer;
     /* 文字顏色 */ color: #666;
     /* 字體大小 */ font-size: 13px;
+    /* 單一不拆不換行 */ white-space: nowrap;
 }
 .filter-group input[type="checkbox"] {
     /* 移除預設位移 */ margin: 0;
