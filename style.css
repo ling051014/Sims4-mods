@@ -514,6 +514,7 @@ body {
     /* 底部邊框 */ border-bottom: 1px solid #eee;
     /* 佈局方式 */ display: flex;
     /* 兩端對齊 */ justify-content: space-between;
+    /* 水平置中 */ justify-content: center;
     /* 垂直置中 */ align-items: center;
 }
 .dlc-modal .modal-header span {
@@ -525,6 +526,8 @@ body {
 
 /* ========【彈窗】 設定 - 關閉按鈕 ======== */
 .dlc-modal .close-btn {
+    /* 絕對定位 */ position: absolute;
+    /* 距離右側 */ right: 20px;
     /* 背景移除 */ background: none;
     /* 邊框移除 */ border: none;
     /* 字體大小 */ font-size: 24px;
