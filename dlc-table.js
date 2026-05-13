@@ -46,46 +46,58 @@ function ctrlType(typeName) {
     }
 }
 
-// ========【排序控制】 設定 - 全域升序降序邏輯 ========
-let isAscending = true; 
+// ========【排序控制】 設定 - 狀態紀錄 ========
+let isAscending = true;
 
+// ========【排序功能】========
 function sortTable(colIndex) {
+
+    // 取得表格
     const table = document.getElementById('map-master-table');
+    // 取得 tbody
     const tbody = table.tBodies[0];
-    const rows = Array.from(tbody.rows);
+    // 取得所有列
+    let rows = Array.from(tbody.rows);
+    // 取得目前標題
     const th = table.querySelectorAll('th')[colIndex];
 
-    // 檢查目前這個標頭是否已經是升序
-    const currentIsAsc = th.classList.contains('asc');
-    
-    // 執行邏輯排序 (不再只是單純反轉)
-    rows.sort((rowA, rowB) => {
-        const cellA = rowA.cells[colIndex].innerText.trim();
-        const cellB = rowB.cells[colIndex].innerText.trim();
-        
-        // 如果是空的（例如有些 DLC 沒有職業），排在最後面
-        if (cellA === '-') return 1;
-        if (cellB === '-') return -1;
-        
-        // 使用 localeCompare 進行字串比對 (適用於日期 YYYY/MM/DD 和 序號 SP01)
-        return currentIsAsc 
-            ? cellB.localeCompare(cellA, undefined, { numeric: true }) // 原本升序就改降序
-            : cellA.localeCompare(cellB, undefined, { numeric: true }); // 原本降序就改升序
-    });
+    // ========【發行日期排序】========
+    if (colIndex === 0) {
+        rows.sort((a, b) => {
+            // 取得日期文字
+            const aDate = new Date(a.cells[0].innerText.trim());
+            const bDate = new Date(b.cells[0].innerText.trim());
+            // 正倒序切換
+            return isAscending
+                ? aDate - bDate
+                : bDate - aDate;
+        });
 
-    // 重新填充排序後的行
+    // ========【序號排序】========
+    } else {
+        // 直接反轉
+        rows.reverse();
+    }
+
+    // 清空原本內容
+    tbody.innerHTML = '';
+    // 重新加入
     rows.forEach(row => tbody.appendChild(row));
-    // 更新標頭 UI 狀態
+    // 切換排序狀態
+    isAscending = !isAscending;
+    // 清除所有標題狀態
     table.querySelectorAll('th').forEach(header => {
         header.classList.remove('asc', 'desc');
     });
 
-    if (currentIsAsc) {
-        th.classList.add('desc');
-    } else {
+    // 套用目前狀態
+    if (isAscending) {
         th.classList.add('asc');
+    } else {
+        th.classList.add('desc');
     }
 }
+
 // ========【互動控制】 點擊行變色 (排除標題) ========
 document.addEventListener('click', function(e) {
     // 尋找行數
