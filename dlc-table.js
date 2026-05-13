@@ -114,8 +114,8 @@ function sortTable(colIndex) {
         rows.sort((a, b) => {
 
             // 取得日期
-            const aDate = new Date(a.cells[0].innerText.trim());
-            const bDate = new Date(b.cells[0].innerText.trim());
+            const aDate = new Date(a.cells[0]?.innerText.trim() || '');
+            const bDate = new Date(b.cells[0]?.innerText.trim() || '');
 
             // 排序結果
             let result;
@@ -148,8 +148,11 @@ function sortTable(colIndex) {
         rows.sort((a, b) => {
             
             // 取得文字
-            const aText = a.cells[1].innerText.trim();
-            const bText = b.cells[1].innerText.trim();
+            const aCell = a.cells[colIndex];
+            const bCell = b.cells[colIndex];
+
+            const aText = a.cells[1]?.innerText.trim() || '';
+            const bText = b.cells[1]?.innerText.trim() || '';
             
             // ========【取得 DLC 類型】========
             // 取得英文類型
