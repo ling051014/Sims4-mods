@@ -99,20 +99,31 @@
     <script src="dlc-table.js"></script>
     
     <script>
+        // ========【 UI 視覺進場控制 】========
+        // 建立一個「監視器」，專門盯著按鈕有沒有出現在螢幕畫面裡
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                // 當按鈕進入視野時，觸發「進場動畫」
                 if (entry.isIntersecting) {
+                    // 恢復不透明度
                     entry.target.style.opacity = "1";
+                    // 回歸原始 Y 軸座標
                     entry.target.style.transform = "translateY(0)";
                 }
             });
         });
+        // 針對所有分類按鈕 (.cat-btn) 進行「初始化隱藏」
         document.querySelectorAll('.cat-btn').forEach(btn => {
-            btn.style.opacity = "0";
-            btn.style.transform = "translateY(20px)";
-            btn.style.transition = "0.5s ease-out";
+            // 設定初始狀態：先藏起來，位置往下壓一點點（營造浮現感）
+            btn.style.opacity = "0"; 
+            btn.style.transform = "translateY(20px)"; 
+            
+            // 設定過場效果 (就像設定 Blender 的 Keyframe 曲線一樣)
+            btn.style.transition = "0.5s ease-out"; 
+        
+            // 開始監視這個按鈕
             observer.observe(btn);
         });
-    </script>
+</script>
 </body>
 </html>
