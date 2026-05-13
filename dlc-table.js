@@ -114,16 +114,18 @@ function sortTable(colIndex) {
 
     // ========【序號】========
     else if (colIndex === 1) {
-        // 倒序
-        if (sortState === 2) {
-            rows.reverse();
-        // 正序恢復原本
-        } else {
-            rows.sort((a, b) => {
-                return a.dataset.originalIndex - b.dataset.originalIndex;
-            });
+
+    rows.sort((a, b) => {
+        // 原始序號正序
+        if (sortState === 1) {
+            return a.dataset.originalIndex - b.dataset.originalIndex;
         }
-    }
+        // 原始序號倒序
+        else {
+            return b.dataset.originalIndex - a.dataset.originalIndex;
+        }
+    });
+}
         
     // ========【一般文字】========
     else {
