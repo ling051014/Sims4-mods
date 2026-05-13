@@ -324,14 +324,12 @@ body {
     /* 水平置中 */ justify-content: center;
     /* 表格與篩選距離 */ margin-top: 15px;
 }
-
 #map-master-table,
 .hotkey-table {
     /* 寬度自適 */ width: auto; 
     /* 左右邊距 */ margin: 0 auto;
     /* 邊框合併 */ border-collapse: collapse;
 }
-
 #map-master-table th,
 .hotkey-table th {
     /* 文字顏色 */ color: #bbb;
@@ -339,7 +337,6 @@ body {
     /* 底部細線 */ border-bottom: 1px solid #eee;
     /* 內縮空間 */ padding: 15px 25px;
 }
-
 #map-master-table td,
 .hotkey-table td {
     /* 文字置中 */ text-align: center;
@@ -356,11 +353,9 @@ body {
 .hotkey-table tbody tr:hover {
     /* 懸停顏色 */ background-color: #f1f8ff;
 }
-
 .selected-row {
     /* 點擊顏色 */ background-color: #e2f0fe !important;
 }
-
 .dlc-icon {
     /* 圖片高度 */ height: 24px;
     /* 圓型圖標 */ border-radius: 50%;
@@ -522,6 +517,7 @@ body {
     /* 垂直置中 */ align-items: center;
 }
 .dlc-modal .modal-header span {
+    /* 文字置中 */ text-align: center;
     /* 字體大小 */ font-size: 16px;
     /* 字體加粗 */ font-weight: bold;
     /* 文字顏色 */ color: #444;
