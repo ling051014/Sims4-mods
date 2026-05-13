@@ -80,15 +80,21 @@ function sortTable(colIndex) {
 
     // ========【切換排序狀態】========
 
-    // 點不同欄位 → 重置
+    // 點不同欄位
     if (currentSortCol !== colIndex) {
+
         currentSortCol = colIndex;
+
+        // 第一下
         sortState = 1;
     }
+
+    // 點同欄位
     else {
-        // 同欄位循環
+
         sortState++;
-        // 超過 2 → 回到未排序
+
+        // 第三下 → 回原始
         if (sortState > 2) {
             sortState = 0;
         }
@@ -96,86 +102,94 @@ function sortTable(colIndex) {
 
     // ========【未排序】========
     if (sortState === 0) {
+
         rows.sort((a, b) => {
-            return a.dataset.originalIndex - b.dataset.originalIndex;
+            return Number(a.dataset.originalIndex)
+                - Number(b.dataset.originalIndex);
         });
     }
 
     // ========【發行日期】========
     else if (colIndex === 0) {
+
         rows.sort((a, b) => {
+
             const aDate = new Date(a.cells[0].innerText.trim());
             const bDate = new Date(b.cells[0].innerText.trim());
-            return sortState === 1
-                ? aDate - bDate
-                : bDate - aDate;
+
+            // 正序
+            if (sortState === 1) {
+                return aDate - bDate;
+            }
+
+            // 倒序
+            else {
+                return bDate - aDate;
+            }
         });
     }
 
     // ========【序號】========
     else if (colIndex === 1) {
-        
+
         rows.sort((a, b) => {
-        // 原始序號正序
-        if (sortState === 1) {
-            return a.dataset.originalIndex - b.dataset.originalIndex;
-        }
-        // 原始序號倒序
-        else {
-            return b.dataset.originalIndex - a.dataset.originalIndex;
-        }
-    });
+
+            const aText = a.cells[1].innerText.trim();
+            const bText = b.cells[1].innerText.trim();
+
+            // 正序
+            if (sortState === 1) {
+                return aText.localeCompare(bText);
+            }
+
+            // 倒序
+            else {
+                return bText.localeCompare(aText);
+            }
+        });
     }
-        
+
     // ========【一般文字】========
     else {
+
         rows.sort((a, b) => {
-            // 取得文字
+
             const aText = a.cells[colIndex].innerText.trim();
             const bText = b.cells[colIndex].innerText.trim();
 
-            // ========【第一下：正序（▼）】========
-            // 有內容在前，- 在後
+            // ========【- 排最後】========
             if (sortState === 1) {
-                if (aText === '-' && bText !== '-') {
-                    return 1;
-                }
-                if (aText !== '-' && bText === '-') {
-                return -1;
-                }
+
+                if (aText === '-' && bText !== '-') return 1;
+                if (aText !== '-' && bText === '-') return -1;
+
+                return aText.localeCompare(bText, 'zh-Hant');
             }
-                
-            // ========【第二下：倒序（▲）】========
-            // - 在前，有內容在後
-            else if (sortState === 2) {
-                if (aText === '-' && bText !== '-') {
-                    return -1;
-                }
-                if (aText !== '-' && bText === '-') {
-                    return 1;
-                }
+
+            // ========【- 排最前】========
+            else {
+
+                if (aText === '-' && bText !== '-') return -1;
+                if (aText !== '-' && bText === '-') return 1;
+
+                return bText.localeCompare(aText, 'zh-Hant');
             }
-            
-            // 維持原本順序
-            return Number(a.dataset.originalIndex)
-                - Number(b.dataset.originalIndex);
         });
     }
-    
+
     // ========【重新填入表格】========
-    // 清空 tbody
     tbody.innerHTML = '';
-    // 重新加入排序後內容
+    
     rows.forEach((row) => {
         tbody.appendChild(row);
+        
     });
-    
+
     // ========【箭頭狀態】========
-    // 清除所有箭頭
     table.querySelectorAll('th').forEach((header) => {
         header.classList.remove('asc', 'desc');
     });
-
+    
     // 第一下 ▼
     if (sortState === 1) {
         th.classList.add('desc');
