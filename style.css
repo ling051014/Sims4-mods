@@ -376,7 +376,10 @@ body {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
-
+/* ========【摺疊面板】 設定 - 表格與篩選間距 ======== */
+.filter-panel > *:not(:first-child) {
+    /* 上方間距 */ margin-top: 15px;
+}
 
 
 
@@ -650,14 +653,17 @@ body {
 /* ========【響應式設定】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
     .cat-btn {
-        /* 手機橫向一排三個 */
-        flex: 0 1 calc(33.333% - 15px);
+        /* 三欄配置 */ flex: 0 0 calc((100% - 30px) / 3);
+        /* 防止撐爆 */ min-width: 0;
+        /* 尺寸計算 */ box-sizing: border-box;
     }
     .nav-menu {
         /* 寬度自適 */ width: 100%;
     }
     .mod-card {
-        /* 三欄配置 */ flex: 0 0 calc(33.333% - 10px);
+        /* 三欄配置 */ flex: 0 0 calc((100% - 30px) / 3);
+        /* 防止撐開 */ min-width: 0;
+        /* 尺寸計算 */ box-sizing: border-box;
     }
     .mod-container {
         /* 縮減間距 */ gap: 15px;
