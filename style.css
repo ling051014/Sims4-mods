@@ -803,60 +803,63 @@ body {
         /* 按鈕高度 */ padding: 10px;
         /* 字體縮小 */ font-size: 12px;
     }
-    /* ========【摺疊面板】 設定 - 容器佈局優化 ======== */
-    .resource-detail {
-        /* 寬度佔比 */ max-width: 95%;
-        /* 上下邊距 */ margin: 10px auto;
-        /* 背景顏色 */ background: #fff;
-        /* 圓角弧度 */ border-radius: 8px;
-        /* 細微邊框 */ border: 1px solid #eee;
-        /* 內縮空間 */ padding: 5px;
-    }
-
-    /* ========【摺疊面板】 設定 - 標題與虛線樣式 ======== */
+    /* ========【摺疊面板】 設定 - 摺疊標題優化 ======== */
     .resource-detail summary {
-        /* 字體大小 */ font-size: 14px;
+        /* 字體大小 */ font-size: 15px;
         /* 字距拉開 */ letter-spacing: 2px;
-        /* 內縮空間 */ padding: 8px 20px;
+        /* 內縮空間 */ padding: 12px 10px;
+        /* 水平置中 */ margin: 0 auto;
         /* 隨字縮放 */ width: fit-content;
         /* 區塊化 */ display: table;
-        /* 水平置中 */ margin: 0 auto;
-        /* 文字顏色 */ color: #555;
-        /* 下方虛線 */ border-bottom: 1px dashed #bbb;
     }
 
-    /* ========【摺疊面板】 設定 - 表格橫向捲動解決方案 ======== */
+    /* ========【摺疊面板】 設定 - 篩選面板緊湊排列 ======== */
+    .filter-group {
+        /* 項目間距 */ gap: 10px 15px;
+        /* 左右內縮 */ padding: 0 10px;
+    }
+    .filter-group label {
+        /* 字體大小 */ font-size: 12px;
+    }
+
+    /* ========【摺疊面板】 設定 - 表格橫向滑動防止撐爆 ======== */
     .table-container {
-        /* 區塊化顯示 */ display: block;
+        /* 區塊顯示 */ display: block;
         /* 寬度填滿 */ width: 100%;
         /* 橫向捲動 */ overflow-x: auto;
+        /* 相對定位 */ position: relative;
         /* 順暢滑動 */ -webkit-overflow-scrolling: touch;
-        /* 上方外距 */ margin-top: 10px;
-        /* 圓角邊框 */ border-radius: 4px;
     }
 
-    /* ========【摺疊面板】 設定 - 表格內容壓縮 ======== */
+    /* ========【摺疊面板】 設定 - 表格內容內縮與大小 ======== */
     #map-master-table td, 
     .hotkey-table td {
-        /* 縮減行高 */ padding: 8px 12px !important;
-        /* 字體大小 */ font-size: 12px;
-        /* 底部細線 */ border-bottom: 1px solid #f9f9f9;
+        /* 內縮空間 */ padding: 10px 12px !important;
+        /* 字體大小 */ font-size: 13px;
     }
-
     #map-master-table th, 
     .hotkey-table th {
         /* 內縮空間 */ padding: 10px 12px !important;
         /* 字體大小 */ font-size: 11px;
-        /* 表頭背景 */ background: #fafafa;
     }
 
-    /* ========【摺疊面板】 設定 - 滑動提示文字 ======== */
-    .table-container::after {
-        /* 提示內容 */ content: "« 左右滑動查看表格 »";
+    /* ========【摺疊面板】 設定 - 圖標尺寸微調 ======== */
+    .dlc-icon {
+        /* 圖片高度 */ height: 20px;
+    }
+
+    /* ========【摺疊面板】 設定 - 滑動提示字眼 ======== */
+    .table-container::before {
+        /* 提示內容 */ content: "« 滑動查看完整表格 »";
         /* 區塊顯示 */ display: block;
         /* 文字置中 */ text-align: center;
         /* 字體大小 */ font-size: 10px;
         /* 文字顏色 */ color: #ccc;
-        /* 上下內縮 */ padding: 5px 0;
+        /* 下方間距 */ margin-bottom: 8px;
+        /* 黏性定位 */ position: sticky;
+        /* 靠左固定 */ left: 0;
+        /* 寬度填滿 */ width: 100%;
+        /* 顯示層級 */ z-index: 5;
+        /* 背景顏色 */ background: transparent;
     }
 }
