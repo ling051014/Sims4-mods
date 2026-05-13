@@ -724,7 +724,7 @@ body {
     }
     /* 提示字眼：提醒使用者可滑動 */
     .table-container::before {
-        /* 提示內容 */ content: "↔ 滑動查看完整表格";
+        /* 提示內容 */ content: "« 滑動查看完整表格 »";
         /* 區塊顯示 */ display: block;
         /* 文字置中 */ text-align: center;
         /* 字體大小 */ font-size: 10px;
