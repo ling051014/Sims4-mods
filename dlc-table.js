@@ -114,8 +114,8 @@ function sortTable(colIndex) {
 
     // ========【序號】========
     else if (colIndex === 1) {
-
-    rows.sort((a, b) => {
+        
+        rows.sort((a, b) => {
         // 原始序號正序
         if (sortState === 1) {
             return a.dataset.originalIndex - b.dataset.originalIndex;
@@ -125,7 +125,7 @@ function sortTable(colIndex) {
             return b.dataset.originalIndex - a.dataset.originalIndex;
         }
     });
-}
+    }
         
     // ========【一般文字】========
     else {
@@ -166,6 +166,24 @@ function sortTable(colIndex) {
         th.classList.add('desc');
     }
 }
+
+// ========【互動控制】 點擊行變色 (排除標題) ========
+document.addEventListener('click', function(e) {
+    // 尋找行數
+    const tr = e.target.closest('tr');
+
+    // 判定有效：確保點擊的不是 <thead> 內的元素
+    if (tr && tr.closest('table') && !tr.closest('thead')) {
+        // 取得容器
+        const table = tr.closest('table');
+        // 清除同表
+        table.querySelectorAll('tr').forEach(row => {
+            row.classList.remove('selected-row');
+        });
+        // 套用選取
+        tr.classList.add('selected-row');
+    }
+});
 
 // ========【彈窗控制】 設定 - 點擊外部自動關閉 ========
 const dlcModal = document.querySelector('.dlc-modal');
