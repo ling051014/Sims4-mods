@@ -53,10 +53,6 @@ function ctrlType(typeName) {
 // 0 = 未排序
 // 1 = 正序
 // 2 = 倒序
-let sortState = 0;
-
-// 目前排序欄位
-let currentSortCol = null;
 
 // ========【初始化】 保存 HTML 原始順序 ========
 // 原始 HTML 順序
@@ -315,10 +311,8 @@ document.addEventListener('click', function(e) {
 
 // 排序狀態
 let sortState = 0;
-
 // 目前排序欄位
 let currentSortCol = null;
-
 // 原始 rows（排序還原用）
 let originalRows = [];
 
