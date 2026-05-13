@@ -52,33 +52,30 @@ let isAscending = true;
 function sortTable(colIndex) {
     // 取得表格
     const table = document.getElementById('map-master-table');
-    // 取得行數
-    const rows = Array.from(table.rows).slice(1);
-    // 取得標題
-    const th = table.querySelector('th:first-child');
-
-    // 執行排序
-    rows.sort((a, b) => {
-        const valA = parseInt(a.cells[colIndex].innerText) || 0;
-        const valB = parseInt(b.cells[colIndex].innerText) || 0;
-        return isAscending ? valA - valB : valB - valA;
-    });
-
-    // 重新填充
+    // 取得容器
     const tbody = table.tBodies[0];
+    // 取得行數 (轉為陣列)
+    const rows = Array.from(tbody.rows);
+    // 取得標題
+    const th = table.querySelectorAll('th')[colIndex];
+
+    // 執行排序 (直接反轉陣列)
+    rows.reverse();
+    // 重新填充
     rows.forEach(row => tbody.appendChild(row));
-
-    // 切換圖示
-    if (isAscending) {
-        th.classList.remove('desc');
-        th.classList.add('asc');
-    } else {
-        th.classList.remove('asc');
-        th.classList.add('desc');
-    }
-
     // 翻轉狀態
     isAscending = !isAscending;
+    // 清除同表標頭狀態
+    table.querySelectorAll('th').forEach(header => {
+        header.classList.remove('asc', 'desc');
+    });
+
+    // 套用狀態
+    if (isAscending) {
+        th.classList.add('asc');
+    } else {
+        th.classList.add('desc');
+    }
 }
 
 // ========【互動控制】 點擊行變色 (排除標題) ========
