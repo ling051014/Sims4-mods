@@ -187,17 +187,17 @@ function sortTable(colIndex) {
             // ========【倒序】========
             else {
 
-            // ========【- 排最前】========
-            if (aText === '-' && bText !== '-') return -1;
-            if (aText !== '-' && bText === '-') return 1;
+                // ========【- 排最前】========
+                if (aText === '-' && bText !== '-') return -1;
+                if (aText !== '-' && bText === '-') return 1;
 
-            // ========【主要排序】========
-            const result = bText.localeCompare(
-                aText,
-                'zh-Hant'
-            );
+                // ========【主要排序】========
+                const result = bText.localeCompare(
+                    aText,
+                    'zh-Hant'
+                );
 
-            // ========【文字不同】========
+                // ========【文字不同】========
                 if (result !== 0) {
                     return result;
                 }
