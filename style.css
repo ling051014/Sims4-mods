@@ -684,6 +684,54 @@ body {
     .age-btns button {
         /* 手機按鈕 */ padding: 8px;
     }
+    /* 摺疊標題：強化手指點擊感 */
+    .resource-detail summary {
+        /* 字體大小 */ font-size: 16px;
+        /* 字距拉開 */ letter-spacing: 2px;
+        /* 內縮空間 */ padding: 12px 10px;
+        /* 寬度調整 */ width: 90%;
+        /* 水平置中 */ margin: 0 auto;
+    }
+    /* 篩選面板：手機端緊湊排列 */
+    .filter-group {
+        /* 項目間距 */ gap: 10px 15px;
+        /* 左右內縮 */ padding: 0 10px;
+    }
+    .filter-group label {
+        /* 字體大小 */ font-size: 12px;
+    }
+    /* 表格容器：開啟橫向滑動防止撐爆 */
+    .table-container {
+        /* 區塊顯示 */ display: block;
+        /* 寬度填滿 */ width: 100%;
+        /* 橫向捲動 */ overflow-x: auto;
+        /* 順暢滑動 */ -webkit-overflow-scrolling: touch;
+        /* 下方間距 */ padding-bottom: 10px;
+    }
+    /* 表格內容：大幅縮減內縮以節省空間 */
+    #map-master-table td, 
+    .hotkey-table td {
+        /* 內縮空間 */ padding: 10px 12px !important;
+        /* 字體大小 */ font-size: 13px;
+    }
+    #map-master-table th, 
+    .hotkey-table th {
+        /* 內縮空間 */ padding: 10px 12px !important;
+        /* 字體大小 */ font-size: 11px;
+    }
+    /* 圖標尺寸：手機微調 */
+    .dlc-icon {
+        /* 圖片高度 */ height: 20px;
+    }
+    /* 提示字眼：提醒使用者可滑動 */
+    .table-container::after {
+        /* 提示內容 */ content: "↔ 滑動查看完整表格";
+        /* 區塊顯示 */ display: block;
+        /* 文字置中 */ text-align: center;
+        /* 字體大小 */ font-size: 10px;
+        /* 文字顏色 */ color: #ccc;
+        /* 上方間距 */ margin-top: 5px;
+    }
 }
 
 /* ========【響應式設定】 設定 - 手機橫向優化 ======== */
