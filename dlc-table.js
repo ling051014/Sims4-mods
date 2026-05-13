@@ -38,7 +38,8 @@ function ctrlRow() {
         if (filter === 'all' || row.getAttribute('data-map') === filter) {
             // 符合則顯示 (移除隱藏類別)
             row.classList.remove('hide-item');
-        } else {
+        }
+        else {
             // 不符則隱藏 (加入隱藏類別)
             row.classList.add('hide-item');
         }
@@ -57,7 +58,8 @@ function ctrlType(typeName) {
         if (elements[i].style.display === "none") {
             // 若隱藏則清除 display 屬性恢復顯示
             elements[i].style.display = "";
-        } else {
+        }
+        else {
             // 若顯示則設為 none 隱藏
             elements[i].style.display = "none";
         }
@@ -156,7 +158,8 @@ function sortTable(colIndex) {
         // 若點擊新欄位，重置為正序
         currentSortCol = colIndex;
         sortState = 1;
-    } else {
+    }
+    else {
         // 若點擊同欄位，在 0, 1, 2 之間循環
         sortState = (sortState + 1) % 3;
     }
@@ -167,7 +170,8 @@ function sortTable(colIndex) {
     if (sortState === 0) {
         // 回歸原始順序
         rows = [...originalRows];
-    } else {
+    }
+    else {
         // 執行排序邏輯
         rows.sort((a, b) => {
             let result = 0;
@@ -222,16 +226,34 @@ function sortTable(colIndex) {
                 if (sortState === 1) {
                     if (aText === '-' && bText !== '-') return 1;
                     if (aText !== '-' && bText === '-') return -1;
-                } else {
+                }
+                else {
                     if (aText === '-' && bText !== '-') return -1;
                     if (aText !== '-' && bText === '-') return 1;
                 }
 
-                // 使用 localeCompare 進行繁體中文文字比對
-                result = (sortState === 1)
-                    ? aText.localeCompare(bText, 'zh-Hant')
-                    : bText.localeCompare(aText, 'zh-Hant');
-            }
+                // 解析文字中的 DLC 資訊 (類型與編號)
+                const aKey = parseDLC(aText);
+                const bKey = parseDLC(bText);
+
+                // 【第一優先：DLC 類型排序】 (EP > GP > SP > FP)
+                if (aKey.typeIndex !== bKey.typeIndex) {
+                    result = (sortState === 1)
+                        ? aKey.typeIndex - bKey.typeIndex
+                        : bKey.typeIndex - aKey.typeIndex;
+                }
+                // 【第二優先：序號排序】 (同類型時比較數字)
+                else if (aKey.num !== bKey.num) {
+                    result = (sortState === 1)
+                        ? aKey.num - bKey.num
+                        : bKey.num - aKey.num;
+                }
+                // 【第三優先：純文字排序】 (完全不含 DLC 格式或內容相同時)
+                else {
+                    result = (sortState === 1)
+                        ? aText.localeCompare(bText, 'zh-Hant')
+                        : bText.localeCompare(aText, 'zh-Hant');
+                }
 
             // 若排序結果相同，則依原始索引排列確保穩定排序
             return result !== 0
