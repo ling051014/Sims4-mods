@@ -757,6 +757,9 @@ body {
         /* 內縮空間 */ padding: 10px 15px !important;
         /* 盒模型設定 */ box-sizing: border-box;
     }
+    .search-dropdown {
+        /* 顯示層級 */ z-index: 9999;
+    }
     .mod-card {
         /* 三欄配置 */ flex: 0 0 calc((100% - 30px) / 3);
         /* 防止撐開 */ min-width: 0;
