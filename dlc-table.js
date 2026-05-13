@@ -1,3 +1,9 @@
+// ========【全域防呆】========
+const table = document.getElementById('map-master-table');
+if (!table) {
+    console.warn('map-master-table not found');
+}
+
 // ========【表格控制】 勾選反應 ========
 function ctrlCol(index) {
 
@@ -77,10 +83,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ========【排序功能】========
 function sortTable(colIndex) {
+
     // 取得表格
     const table = document.getElementById('map-master-table');
+    // 防呆：table 不存在
+    if (!table) return;
     // 取得 tbody
     const tbody = table.tBodies[0];
+    // 防呆：tbody 不存在
+    if (!tbody) return;
     // 取得標題
     const th = table.querySelectorAll('th')[colIndex];
 
@@ -307,3 +318,20 @@ document.addEventListener('click', function(e) {
         tr.classList.add('selected-row');
     }
 });
+
+// ========【初始化入口】========
+// 給 HTML 呼叫用（避免 undefined）
+window.loadDLCTable = function () {
+
+    // ========【確認表格存在】========
+    const table = document.getElementById('map-master-table');
+    if (!table) {
+        console.warn('map-master-table not found');
+        return;
+    }
+
+    // ========【未來初始化可以放這裡】========
+    // 例如：預設排序 / 預設 filter / 綁定事件
+
+    console.log('DLCTable 初始化完成');
+};
