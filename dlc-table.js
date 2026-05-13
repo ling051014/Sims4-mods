@@ -336,21 +336,29 @@ function initTable() {
 
     const table = document.getElementById('map-master-table');
 
-    // 防呆
-    if (!table) return;
+    // 【防呆】table 尚未存在
+    if (!table) {
+        console.warn("map-master-table 尚未載入");
+        return;
+    }
 
     const tbody = table.tBodies[0];
-    if (!tbody) return;
 
-    // 保存原始順序
+    // 【防呆】tbody 不存在
+    if (!tbody) {
+        console.warn("tbody 不存在");
+        return;
+    }
+
+    // 建立排序基準資料
     originalRows = Array.from(tbody.rows);
 
-    // 標記原始 index
+    // 標記原始順序 index
     originalRows.forEach((row, index) => {
         row.dataset.originalIndex = index;
     });
 
-    console.log("✅ 表格初始化完成");
+    console.log("✔ 表格初始化完成");
 }
 
 
