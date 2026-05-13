@@ -5,12 +5,11 @@ function ctrlCol(index) {
     const table = document.getElementById('map-master-table');
     if (!table) return;
 
-    // 取得所有 row（包含 thead + tbody）
-    const rows = table.rows;
+    // 處理 thead + tbody
+    const allRows = table.rows;
 
-    // 逐列處理整欄
-    for (let i = 0; i < rows.length; i++) {
-        const cell = rows[i].cells[index];
+    for (let i = 0; i < allRows.length; i++) {
+        const cell = allRows[i].cells[index];
         if (cell) {
             cell.classList.toggle('hide-item');
         }
