@@ -176,79 +176,52 @@ function sortTable(colIndex) {
         rows.sort((a, b) => {
             let result = 0;
 
+            // ===================================================
             // 欄位索引 0：發行日期
+            // ===================================================
             if (colIndex === 0) {
+
                 // 定義日期解析函數
                 const parseDate = (text) => {
                     const m = text.trim().match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
                     if (!m) return 0;
-                    // 將日期轉為毫秒數值以便比對
                     return new Date(m[1], m[2] - 1, m[3]).getTime();
                 };
 
                 const aTime = parseDate(a.cells[0]?.innerText || '');
                 const bTime = parseDate(b.cells[0]?.innerText || '');
 
-                // 依狀態決定相減順序
-                result = (sortState === 1) ? aTime - bTime : bTime - aTime;
+                result = (sortState === 1)
+                    ? aTime - bTime
+                    : bTime - aTime;
             }
 
-            // 欄位索引 1：DLC 序號
+            // ===================================================
+            // 欄位索引 1：DLC 序號（統一新版邏輯）
+            // ===================================================
             else if (colIndex === 1) {
-                // 取得內容文字
+
                 const aText = a.cells[1]?.innerText.trim() || '';
                 const bText = b.cells[1]?.innerText.trim() || '';
 
-                // 解析內容包含的類型與編號
-                const aInfo = parseDLC(aText);
-                const bInfo = parseDLC(bText);
+                const aDlc = parseDLC(aText);
+                const bDlc = parseDLC(bText);
 
-                // 先比較類型優先權索引
-                if (aInfo.typeIndex !== bInfo.typeIndex) {
+                // 🔥 第一優先：DLC類型
+                if (aDlc.typeIndex !== bDlc.typeIndex) {
                     result = (sortState === 1)
-                        ? aInfo.typeIndex - bInfo.typeIndex
-                        : bInfo.typeIndex - aInfo.typeIndex;
+                        ? aDlc.typeIndex - bDlc.typeIndex
+                        : bDlc.typeIndex - aDlc.typeIndex;
                 }
-                // 類型相同時比較後方的編號數字
-                else {
+
+                // 🔥 第二優先：DLC序號
+                else if (aDlc.num !== bDlc.num) {
                     result = (sortState === 1)
-                        ? aInfo.num - bInfo.num
-                        : bInfo.num - aInfo.num;
-                }
-            }
-
-            // 其餘欄位：一般文字
-            else {
-                const aText = a.cells[colIndex].innerText.trim();
-                const bText = b.cells[colIndex].innerText.trim();
-
-                // 處理特殊符號 '-' 的優先權 (使其排在最後)
-                if (sortState === 1) {
-                    if (aText === '-' && bText !== '-') return 1;
-                    if (aText !== '-' && bText === '-') return -1;
-                }
-                else {
-                    if (aText === '-' && bText !== '-') return -1;
-                    if (aText !== '-' && bText === '-') return 1;
+                        ? aDlc.num - bDlc.num
+                        : bDlc.num - aDlc.num;
                 }
 
-                // 解析文字中的 DLC 資訊 (類型與編號)
-                const aKey = parseDLC(aText);
-                const bKey = parseDLC(bText);
-
-                // 【第一優先：DLC 類型排序】 (EP > GP > SP > FP)
-                if (aKey.typeIndex !== bKey.typeIndex) {
-                    result = (sortState === 1)
-                        ? aKey.typeIndex - bKey.typeIndex
-                        : bKey.typeIndex - aKey.typeIndex;
-                }
-                // 【第二優先：序號排序】 (同類型時比較數字)
-                else if (aKey.num !== bKey.num) {
-                    result = (sortState === 1)
-                        ? aKey.num - bKey.num
-                        : bKey.num - aKey.num;
-                }
-                // 【第三優先：純文字排序】 (完全不含 DLC 格式或內容相同時)
+                // 🔥 第三優先：純文字
                 else {
                     result = (sortState === 1)
                         ? aText.localeCompare(bText, 'zh-Hant')
@@ -256,10 +229,50 @@ function sortTable(colIndex) {
                 }
             }
 
+            // ===================================================
+            // 其餘欄位：一般文字（合併你提供的新邏輯）
+            // ===================================================
+            else {
+                const aText = a.cells[colIndex].innerText.trim();
+                const bText = b.cells[colIndex].innerText.trim();
+
+                const aDlc = parseDLC(a.cells[1]?.innerText || '');
+                const bDlc = parseDLC(b.cells[1]?.innerText || '');
+
+                // 🔥 第一優先：DLC序號（所有欄位都一致規則）
+                if (aDlc.typeIndex !== bDlc.typeIndex) {
+                    result = (sortState === 1)
+                        ? aDlc.typeIndex - bDlc.typeIndex
+                        : bDlc.typeIndex - aDlc.typeIndex;
+                }
+                else if (aDlc.num !== bDlc.num) {
+                    result = (sortState === 1)
+                        ? aDlc.num - bDlc.num
+                        : bDlc.num - aDlc.num;
+                }
+                else {
+                    // 第二才是文字
+                    if (sortState === 1) {
+                        if (aText === '-' && bText !== '-') return 1;
+                        if (aText !== '-' && bText === '-') return -1;
+                    } else {
+                        if (aText === '-' && bText !== '-') return -1;
+                        if (aText !== '-' && bText === '-') return 1;
+                    }
+
+                    result = (sortState === 1)
+                        ? aText.localeCompare(bText, 'zh-Hant')
+                        : bText.localeCompare(aText, 'zh-Hant');
+                }
+            }
+
+            // ===================================================
             // 若排序結果相同，則依原始索引排列確保穩定排序
+            // ===================================================
             return result !== 0
                 ? result
                 : Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex);
+
         });
     }
 
@@ -268,7 +281,9 @@ function sortTable(colIndex) {
     rows.forEach(row => tbody.appendChild(row));
 
     // 更新標題樣式 (asc/desc 箭頭)
-    table.querySelectorAll('th').forEach(t => t.classList.remove('asc', 'desc'));
+    table.querySelectorAll('th').forEach(t =>
+        t.classList.remove('asc', 'desc')
+    );
 
     if (sortState === 1) th.classList.add('desc');
     else if (sortState === 2) th.classList.add('asc');
