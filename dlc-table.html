@@ -22,7 +22,12 @@
   <table id="map-master-table">
     <thead>
       <tr>
-        <th>序號</th>
+        <th onclick="sortTable(0)" style="cursor: pointer;">
+          <div class="sort-wrapper">
+            序號
+            <div id="sort-arrows" class="sort-arrows"></div>
+          </div>
+        </th>
         <th>圖標</th>
         <th>English Name</th>
         <th>中文名稱</th>
