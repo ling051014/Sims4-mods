@@ -492,7 +492,7 @@ body {
 
 /* ========【彈窗】 設定 - 主體 ======== */
 .dlc-modal {
-    /* 根據內容自動調整寬度 */ width: fit-content;
+    /* 自適應寬度 */ width: fit-content;
     /* 限制最大寬度不超過螢幕 */ max-width: 95vw;
     /* 圓角邊框 */ border-radius: 12px;
     /* 移除邊框 */ border: none;
@@ -503,8 +503,8 @@ body {
 
 /* ========【彈窗】 設定 - 背景遮罩 ======== */
 .dlc-modal::backdrop {
-    /* 遮罩顏色 */ background: rgba(0, 0, 0, 0.6);
-    /* 模糊效果 */ backdrop-filter: blur(4px);
+    /* 遮罩顏色 */ background: rgba(0, 0, 0, 0.1);
+    /* 模糊效果 */ backdrop-filter: blur(1px);
 }
 
 /* ========【彈窗】 設定 - 標題列 ======== */
