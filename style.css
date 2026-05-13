@@ -133,7 +133,6 @@ body {
     /* 網格系統 */ display: flex;
     /* 自動換行 */flex-wrap: wrap;
     /* 末排置中 */justify-content: center;
-    /* 自適應欄位 */ grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
     /* 卡片間距 */ gap: 30px;
     /* 最大寬度 */ max-width: 1200px;
     /* 上下外距 */ margin: 50px auto;
@@ -318,17 +317,12 @@ body {
     /* 指標手勢 */ cursor: pointer;
 }
 
-/* ========【摺疊面板】 設定 - 表格與篩選間距 ======== */
-.filter-panel .table-container {
-    /* 上方間距 */ margin-top: 10px;
-}
-
 /* ========【摺疊面板】 設定 - 表格本體 ======== */
 .table-container {
     /* 寬度填滿 */ width: 100%;
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
-    /* 移除預設推擠 */ margin-top: 0 !important;
+    /* 移除預設推擠 */ margin-top: 0;
 }
 
 #map-master-table,
