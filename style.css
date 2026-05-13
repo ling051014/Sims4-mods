@@ -803,4 +803,18 @@ body {
         /* 按鈕高度 */ padding: 10px;
         /* 字體縮小 */ font-size: 12px;
     }
+    /* 摺疊標題：橫向模式扁平化優化 */
+    .resource-detail summary {
+        /* 字體縮小 */ font-size: 14px;
+        /* 字距緊湊 */ letter-spacing: 1px;
+        /* 極致縮減內縮 */ padding: 6px 12px;
+        /* 隨字縮放 */ width: fit-content;
+        /* 區塊化 */ display: table;
+        /* 水平置中 */ margin: 0 auto;
+        /* 繼承虛線不變 */
+    }
+    /* 調整摺疊面板容器間距，節省垂直空間 */
+    .resource-detail {
+        margin: 2px auto;
+    }
 }
