@@ -23,8 +23,13 @@
   <table id="map-master-table">
     <thead>
       <tr>
-        <th>發行日期</th>
         <th onclick="sortTable(0)" style="cursor: pointer;">
+          <div class="sort-wrapper">
+            發行日期
+            <div id="sort-arrows" class="sort-arrows"></div>
+          </div>
+        </th>
+        <th onclick="sortTable(1)" style="cursor: pointer;">
           <div class="sort-wrapper">
             序號
             <div id="sort-arrows" class="sort-arrows"></div>
@@ -723,147 +728,160 @@
         <td>-</td>
       </tr>
 
-<tr class="type-kit">
-    <td>2022/05/26</td>
-    <td>SP32</td>
-    <td><img src="icons/sp32.png" class="dlc-icon"></td>
-    <td>Moonlight Chic</td>
-    <td>月色潮流</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2022/05/26</td>
-    <td>SP33</td>
-    <td><img src="icons/sp33.png" class="dlc-icon"></td>
-    <td>Little Campers</td>
-    <td>小小露營家</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2022/09/01</td>
-    <td>SP34</td>
-    <td><img src="icons/sp34.png" class="dlc-icon"></td>
-    <td>First Fits</td>
-    <td>初心童裝</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2022/09/14</td>
-    <td>SP35</td>
-    <td><img src="icons/sp35.png" class="dlc-icon"></td>
-    <td>Desert Luxe</td>
-    <td>沙漠奢華</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2022/11/10</td>
-    <td>SP36</td>
-    <td><img src="icons/sp36.png" class="dlc-icon"></td>
-    <td>Pastel Pop</td>
-    <td>粉彩狂想曲</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2022/11/10</td>
-    <td>SP37</td>
-    <td><img src="icons/sp37.png" class="dlc-icon"></td>
-    <td>Everyday Clutter</td>
-    <td>生活感小物</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2022/05/26</td>
+        <td>SP32</td>
+        <td><img src="icons/sp32.png" class="dlc-icon"></td>
+        <td>Moonlight Chic</td>
+        <td>月色潮流</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2022/05/26</td>
+        <td>SP33</td>
+        <td><img src="icons/sp33.png" class="dlc-icon"></td>
+        <td>Little Campers</td>
+        <td>小小露營家</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2022/09/01</td>
+        <td>SP34</td>
+        <td><img src="icons/sp34.png" class="dlc-icon"></td>
+        <td>First Fits</td>
+        <td>初心童裝</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2022/09/14</td>
+        <td>SP35</td>
+        <td><img src="icons/sp35.png" class="dlc-icon"></td>
+        <td>Desert Luxe</td>
+        <td>沙漠奢華</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2022/11/10</td>
+        <td>SP36</td>
+        <td><img src="icons/sp36.png" class="dlc-icon"></td>
+        <td>Pastel Pop</td>
+        <td>粉彩狂想曲</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2022/11/10</td>
+       <td>SP37</td>
+        <td><img src="icons/sp37.png" class="dlc-icon"></td>
+        <td>Everyday Clutter</td>
+       <td>生活感小物</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
 
-<tr class="type-kit">
-    <td>2023/01/19</td>
-    <td>SP38</td>
-    <td><img src="icons/sp38.png" class="dlc-icon"></td>
-    <td>Simtimates Collection</td>
-    <td>私密時尚</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2023/01/19</td>
-    <td>SP39</td>
-    <td><img src="icons/sp39.png" class="dlc-icon"></td>
-    <td>Bathroom Clutter</td>
-    <td>浴室小物</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2023/04/20</td>
-    <td>SP40</td>
-    <td><img src="icons/sp40.png" class="dlc-icon"></td>
-    <td>Greenhouse Haven</td>
-    <td>溫室樂土</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2023/04/20</td>
-    <td>SP41</td>
-    <td><img src="icons/sp41.png" class="dlc-icon"></td>
-    <td>Basement Treasures</td>
-    <td>地下寶庫</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2023/06/01</td>
-    <td>SP42</td>
-    <td><img src="icons/sp42.png" class="dlc-icon"></td>
-    <td>Grunge Revival</td>
-    <td>頹廢狂潮</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2023/06/01</td>
-    <td>SP43</td>
-    <td><img src="icons/sp43.png" class="dlc-icon"></td>
-    <td>Book Nook</td>
-    <td>靜謐書房</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2023/09/07</td>
-    <td>SP44</td>
-    <td><img src="icons/sp44.png" class="dlc-icon"></td>
-    <td>Poolside Splash</td>
-    <td>泳池狂歡</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2023/09/07</td>
-    <td>SP45</td>
-    <td><img src="icons/sp45.png" class="dlc-icon"></td>
-    <td>Modern Luxe</td>
-    <td>現代奢華</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2023/01/19</td>
+        <td>SP38</td>
+        <td><img src="icons/sp38.png" class="dlc-icon"></td>
+        <td>Simtimates Collection</td>
+        <td>私密時尚</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2023/01/19</td>
+        <td>SP39</td>
+        <td><img src="icons/sp39.png" class="dlc-icon"></td>
+        <td>Bathroom Clutter</td>
+        <td>浴室小物</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2023/04/20</td>
+        <td>SP40</td>
+        <td><img src="icons/sp40.png" class="dlc-icon"></td>
+        <td>Greenhouse Haven</td>
+        <td>溫室樂土</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2023/04/20</td>
+        <td>SP41</td>
+        <td><img src="icons/sp41.png" class="dlc-icon"></td>
+        <td>Basement Treasures</td>
+        <td>地下寶庫</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2023/06/01</td>
+        <td>SP42</td>
+        <td><img src="icons/sp42.png" class="dlc-icon"></td>
+        <td>Grunge Revival</td>
+        <td>頹廢狂潮</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2023/06/01</td>
+        <td>SP43</td>
+        <td><img src="icons/sp43.png" class="dlc-icon"></td>
+        <td>Book Nook</td>
+        <td>靜謐書房</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2023/09/07</td>
+        <td>SP44</td>
+        <td><img src="icons/sp44.png" class="dlc-icon"></td>
+        <td>Poolside Splash</td>
+        <td>泳池狂歡</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2023/09/07</td>
+        <td>SP45</td>
+        <td><img src="icons/sp45.png" class="dlc-icon"></td>
+        <td>Modern Luxe</td>
+        <td>現代奢華</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
       <tr class="type-sp">
         <td>2023/09/08</td>
         <td>SP46</td>
@@ -875,26 +893,27 @@
         <td>-</td>
       </tr>
       
-<tr class="type-kit">
-    <td>2024/01/18</td>
-    <td>SP47</td>
-    <td><img src="icons/sp47.png" class="dlc-icon"></td>
-    <td>Castle Estate</td>
-    <td>城堡莊園</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
-<tr class="type-kit">
-    <td>2024/01/18</td>
-    <td>SP48</td>
-    <td><img src="icons/sp48.png" class="dlc-icon"></td>
-    <td>Goth Galore</td>
-    <td>哥德盛宴</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2024/01/18</td>
+        <td>SP47</td>
+        <td><img src="icons/sp47.png" class="dlc-icon"></td>
+        <td>Castle Estate</td>
+        <td>城堡莊園</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      
+      <tr class="type-kit">
+        <td>2024/01/18</td>
+        <td>SP48</td>
+        <td><img src="icons/sp48.png" class="dlc-icon"></td>
+        <td>Goth Galore</td>
+        <td>哥德盛宴</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
 
       <tr class="type-sp">
         <td>2024/02/29</td>
@@ -908,70 +927,70 @@
       </tr>
 
       <tr class="type-kit">
-    <td>2024/04/18</td>
-    <td>SP50</td>
-    <td><img src="icons/sp50.png" class="dlc-icon"></td>
-    <td>Urban Homage</td>
-    <td>懷舊都市</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+        <td>2024/04/18</td>
+        <td>SP50</td>
+        <td><img src="icons/sp50.png" class="dlc-icon"></td>
+        <td>Urban Homage</td>
+        <td>懷舊都市</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
       
-<tr class="type-kit">
-    <td>2024/04/18</td>
-    <td>SP51</td>
-    <td><img src="icons/sp51.png" class="dlc-icon"></td>
-    <td>Party Essentials</td>
-    <td>派對必備</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2024/04/18</td>
+        <td>SP51</td>
+        <td><img src="icons/sp51.png" class="dlc-icon"></td>
+        <td>Party Essentials</td>
+        <td>派對必備</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
       
-<tr class="type-kit">
-    <td>2024/05/30</td>
-    <td>SP52</td>
-    <td><img src="icons/sp52.png" class="dlc-icon"></td>
-    <td>Riviera Cozy</td>
-    <td>義大利海濱度假</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2024/05/30</td>
+        <td>SP52</td>
+        <td><img src="icons/sp52.png" class="dlc-icon"></td>
+        <td>Riviera Cozy</td>
+        <td>義大利海濱度假</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
       
-<tr class="type-kit">
-    <td>2024/05/30</td>
-    <td>SP53</td>
-    <td><img src="icons/sp53.png" class="dlc-icon"></td>
-    <td>Cozy Bistro</td>
-    <td>愜意小餐館</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2024/05/30</td>
+        <td>SP53</td>
+        <td><img src="icons/sp53.png" class="dlc-icon"></td>
+        <td>Cozy Bistro</td>
+        <td>愜意小餐館</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
       
-<tr class="type-kit">
-    <td>2024/09/19</td>
-    <td>SP54</td>
-    <td><img src="icons/sp54.png" class="dlc-icon"></td>
-    <td>Artist Studio</td>
-    <td>藝術家工作室</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2024/09/19</td>
+        <td>SP54</td>
+        <td><img src="icons/sp54.png" class="dlc-icon"></td>
+        <td>Artist Studio</td>
+        <td>藝術家工作室</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
       
-<tr class="type-kit">
-    <td>2024/09/19</td>
-    <td>SP55</td>
-    <td><img src="icons/sp55.png" class="dlc-icon"></td>
-    <td>Storybook Nursery</td>
-    <td>童夢育兒房</td>
-    <td>-</td>
-    <td>-</td>
-    <td>-</td>
-</tr>
+      <tr class="type-kit">
+        <td>2024/09/19</td>
+        <td>SP55</td>
+        <td><img src="icons/sp55.png" class="dlc-icon"></td>
+        <td>Storybook Nursery</td>
+        <td>童夢育兒房</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
 
       <tr class="type-kit">
         <td>2024/11/14</td>
