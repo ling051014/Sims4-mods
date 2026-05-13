@@ -264,7 +264,6 @@ body {
     /* 最大寬度 */ max-width: 900px;
     /* 水平置中 */ margin: 5px auto;
 }
-
 .resource-detail summary {
     /* 指標手勢 */ cursor: pointer;
     /* 自適應字數 */ width: fit-content;
@@ -351,10 +350,11 @@ body {
 /* ========【摺疊面板】 設定 - Hover 與細節 ======== */
 #map-master-table tbody tr:hover,
 .hotkey-table tbody tr:hover {
-    /* 懸停顏色 */ background-color: #f1f8ff;
+    /* 懸停顏色 */ background-color: rgba(85, 172, 238, 0.08);
 }
 .selected-row {
-    /* 點擊顏色 */ background-color: #e2f0fe !important;
+    /* 點擊顏色 */ background-color: rgba(85, 172, 238, 0.15);
+    /* 過渡動畫 */ transition: 0.2s;
 }
 .dlc-icon {
     /* 圖片高度 */ height: 24px;
