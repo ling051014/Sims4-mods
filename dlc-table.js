@@ -81,14 +81,17 @@ function sortTable(colIndex) {
     isAscending = !isAscending;
 }
 
-// ========【互動控制】 點擊行變色 (全域適用) ========
+// ========【互動控制】 點擊行變色 (排除標題) ========
 document.addEventListener('click', function(e) {
     // 尋找行數
     const tr = e.target.closest('tr');
-    // 判定有效
-    if (tr && tr.closest('table')) {
-        // 清除舊項
-        document.querySelectorAll('.selected-row').forEach(row => {
+    
+    // 判定有效：確保點擊的不是 <thead> 內的元素
+    if (tr && tr.closest('table') && !tr.closest('thead')) {
+        // 取得容器
+        const table = tr.closest('table');
+        // 清除同表
+        table.querySelectorAll('tr').forEach(row => {
             row.classList.remove('selected-row');
         });
         // 套用選取
