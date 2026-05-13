@@ -697,6 +697,7 @@ body {
     }
     /* 篩選面板：手機端緊湊排列 */
     .filter-group {
+        /* 項目間距 */ gap: 0px 15px;
         /* 左右內縮 */ padding: 0 10px;
     }
     .filter-group label {
