@@ -113,20 +113,6 @@
             btn.style.transition = "0.5s ease-out";
             observer.observe(btn);
         });
-
-        // 當頁面載入完成後執行
-        window.addEventListener('DOMContentLoaded', () => {
-            // 找到首頁那個洞
-            const container = document.getElementById('home-table-placeholder');
-            // 抓取獨立檔案
-            fetch('dlc-table.html')
-                // 取得文字內容
-                .then(response => response.text())
-                // 塞進首頁的洞
-                .then(data => {
-                    container.innerHTML = data;
-                });
-        });
         
         // 頁面載入完成後，自動把表格塞進首頁的 placeholder
         window.addEventListener('DOMContentLoaded', () => {
