@@ -112,18 +112,34 @@ function sortTable(colIndex) {
     // ========【發行日期】========
     else if (colIndex === 0) {
         rows.sort((a, b) => {
+
+            // 取得日期
             const aDate = new Date(a.cells[0].innerText.trim());
             const bDate = new Date(b.cells[0].innerText.trim());
 
+            // 排序結果
+            let result;
+            
+            // ========【日期排序】========
             // 正序
             if (sortState === 1) {
-                return aDate - bDate;
+                result = aDate - bDate;
             }
-
             // 倒序
             else {
-                return bDate - aDate;
+                result = bDate - aDate;
             }
+
+            // ========【日期不同】========
+            // 直接回傳排序結果
+            if (result !== 0) {
+                return result;
+            }
+
+            // ========【日期相同】========
+            // 保持 HTML 原始順序
+            return Number(a.dataset.originalIndex)
+                - Number(b.dataset.originalIndex);
         });
     }
 
