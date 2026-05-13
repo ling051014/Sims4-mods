@@ -1,9 +1,3 @@
-// ========【全域防呆】========
-const table = document.getElementById('map-master-table');
-if (!table) {
-    console.warn('map-master-table not found');
-}
-
 // ========【表格控制】 勾選反應 ========
 function ctrlCol(index) {
     // 取得表格
@@ -317,34 +311,63 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ========【初始化入口】========
-// 給 HTML 呼叫用（避免 undefined）
-window.loadDLCTable = function () {
+// ========【排序用 - 全域資料】========
 
-    // ========【確認表格存在】========
-    const table = document.getElementById('map-master-table');
-    if (!table) {
-        console.warn('map-master-table not found');
-        return;
-    }
+// 排序狀態
+let sortState = 0;
 
-    // ========【未來初始化可以放這裡】========
-    // 例如：預設排序 / 預設 filter / 綁定事件
+// 目前排序欄位
+let currentSortCol = null;
 
-    console.log('DLCTable 初始化完成');
-};
+// 原始 rows（排序還原用）
+let originalRows = [];
 
-// ========【首頁用】載入 DLC 表格 ========
+
+// ========【1. 載入 DLC 表格】========
 function loadDLCTable(containerId) {
-    // 取得容器
+
     const container = document.getElementById(containerId);
-    // 防呆
     if (!container) return;
 
-    // 抓取表格 HTML
     fetch('dlc-table.html')
         .then(res => res.text())
         .then(html => {
+
+            // A. 插入 HTML
             container.innerHTML = html;
-        });
+
+            // B. 初始化表格
+            initTable();
+        })
+        .catch(err => console.error("載入 HTML 失敗:", err));
 }
+
+
+// ========【2. 初始化表格（建立排序基準）】========
+function initTable() {
+
+    const table = document.getElementById('map-master-table');
+
+    // 防呆
+    if (!table) return;
+
+    const tbody = table.tBodies[0];
+    if (!tbody) return;
+
+    // 保存原始順序
+    originalRows = Array.from(tbody.rows);
+
+    // 標記原始 index
+    originalRows.forEach((row, index) => {
+        row.dataset.originalIndex = index;
+    });
+
+    console.log("✅ 表格初始化完成");
+}
+
+
+// ========【3. 頁面啟動】========
+window.addEventListener('DOMContentLoaded', () => {
+    // 直接載入表格
+    loadDLCTable('home-table-placeholder');
+});
