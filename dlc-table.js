@@ -46,8 +46,26 @@ function ctrlType(typeName) {
     }
 }
 
-// ========【排序控制】 設定 - 正序倒序 ========
-let isAscending = true;
+// ========【排序控制】 設定 - 狀態紀錄 ========
+
+// 排序狀態
+// 0 = 未排序
+// 1 = 正序
+// 2 = 倒序
+let sortState = 0;
+
+// 目前排序欄位
+let currentSortCol = null;
+
+// ========【初始化】 記錄原始順序 ========
+window.addEventListener('DOMContentLoaded', () => {
+    const rows = document.querySelectorAll('#map-master-table tbody tr');
+    rows.forEach((row, index) => {
+
+        // 記錄原始位置
+        row.dataset.originalIndex = index;
+    });
+});
 
 // ========【排序功能】========
 function sortTable(colIndex) {
@@ -57,63 +75,92 @@ function sortTable(colIndex) {
     const tbody = table.tBodies[0];
     // 取得所有列
     let rows = Array.from(tbody.rows);
-    // 取得目前標題
+    // 取得標題
     const th = table.querySelectorAll('th')[colIndex];
 
-    // ========【發行日期排序】========
-    if (colIndex === 0) {
+    // ========【切換排序狀態】========
+
+    // 點不同欄位 → 重置
+    if (currentSortCol !== colIndex) {
+        currentSortCol = colIndex;
+        sortState = 1;
+    }
+    else {
+        // 同欄位循環
+        sortState++;
+        // 超過 2 → 回到未排序
+        if (sortState > 2) {
+            sortState = 0;
+        }
+    }
+
+    // ========【未排序】========
+    if (sortState === 0) {
+        rows.sort((a, b) => {
+            return a.dataset.originalIndex - b.dataset.originalIndex;
+        });
+    }
+
+    // ========【發行日期】========
+    else if (colIndex === 0) {
         rows.sort((a, b) => {
             const aDate = new Date(a.cells[0].innerText.trim());
             const bDate = new Date(b.cells[0].innerText.trim());
-            return isAscending
+            return sortState === 1
                 ? aDate - bDate
                 : bDate - aDate;
         });
+    }
 
-    // ========【序號排序】========
-    } else if (colIndex === 1) {
-        // 直接反轉
-        rows.reverse();
-
-    // ========【一般文字排序】========
-    } else {
+    // ========【序號】========
+    else if (colIndex === 1) {
+        // 倒序
+        if (sortState === 2) {
+            rows.reverse();
+        // 正序恢復原本
+        } else {
+            rows.sort((a, b) => {
+                return a.dataset.originalIndex - b.dataset.originalIndex;
+            });
+        }
+    }
+        
+    // ========【一般文字】========
+    else {
         rows.sort((a, b) => {
-            // 取得文字
             let aText = a.cells[colIndex].innerText.trim();
             let bText = b.cells[colIndex].innerText.trim();
 
-            // ========【- 永遠排最後】========
-            // 正序
-            if (isAscending) {
+            // ========【- 排最後】========
+            if (sortState === 1) {
                 if (aText === '-') return 1;
                 if (bText === '-') return -1;
-            // 倒序
-            } else {
+            }
+            else {
                 if (aText === '-') return -1;
                 if (bText === '-') return 1;
             }
-            // 一般文字排序
-            return isAscending
+            return sortState === 1
                 ? aText.localeCompare(bText, 'zh-Hant')
                 : bText.localeCompare(aText, 'zh-Hant');
         });
     }
-
-    // 清空原本內容
+    
+    // 清空 tbody
     tbody.innerHTML = '';
     // 重新加入
     rows.forEach(row => tbody.appendChild(row));
-    // 切換排序狀態
-    isAscending = !isAscending;
-    // 清除所有標題狀態
+
+    // ========【箭頭狀態】========
+    // 清除全部
     table.querySelectorAll('th').forEach(header => {
         header.classList.remove('asc', 'desc');
     });
-
-    // 套用目前狀態
-    if (isAscending) {
+    // 套用狀態
+    if (sortState === 1) {
         th.classList.add('asc');
-    } else {
+    }
+    else if (sortState === 2) {
         th.classList.add('desc');
     }
 }
