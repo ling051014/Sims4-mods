@@ -254,6 +254,7 @@ function sortTable(colIndex) {
                         ? aText.localeCompare(bText, 'zh-Hant')
                         : bText.localeCompare(aText, 'zh-Hant');
                 }
+            }
 
             // 若排序結果相同，則依原始索引排列確保穩定排序
             return result !== 0
