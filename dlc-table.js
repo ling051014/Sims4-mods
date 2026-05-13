@@ -57,12 +57,17 @@ let sortState = 0;
 // 目前排序欄位
 let currentSortCol = null;
 
-// ========【初始化】 記錄原始順序 ========
+// ========【初始化】 保存 HTML 原始順序 ========
+// 原始 HTML 順序
+let originalRows = [];
 window.addEventListener('DOMContentLoaded', () => {
-    const rows = document.querySelectorAll('#map-master-table tbody tr');
-    rows.forEach((row, index) => {
 
-        // 記錄原始位置
+    // 取得 tbody
+    const tbody = document.querySelector('#map-master-table tbody');
+    // 保存真正 HTML 順序
+    originalRows = Array.from(tbody.rows);
+    // 記錄原始位置
+    originalRows.forEach((row, index) => {
         row.dataset.originalIndex = index;
     });
 });
