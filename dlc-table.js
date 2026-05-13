@@ -1,13 +1,17 @@
-// ========【表格控制】 修正勾選反應 ========
+// ========【表格控制】 勾選反應 ========
 function ctrlCol(index) {
+
     // 取得表格
     const table = document.getElementById('map-master-table');
-    // 取得行數
+    if (!table) return;
+
+    // 取得所有 row（包含 thead + tbody）
     const rows = table.rows;
+
+    // 逐列處理整欄
     for (let i = 0; i < rows.length; i++) {
         const cell = rows[i].cells[index];
         if (cell) {
-            // 切換類別
             cell.classList.toggle('hide-item');
         }
     }
