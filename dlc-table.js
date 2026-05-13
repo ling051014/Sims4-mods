@@ -308,20 +308,27 @@ document.addEventListener('click', function(e) {
 // ========【彈窗控制】 設定 - 點擊外部自動關閉 ========
 const dlcModal = document.querySelector('.dlc-modal');
 
-dlcModal.addEventListener('click', (event) => {
-    // 取得視窗
-    const rect = dlcModal.getBoundingClientRect();
-    // 位置判定
-    const isInModal = (
-        rect.top <= event.clientY &&
-        event.clientY <= rect.top + rect.height &&
-        rect.left <= event.clientX &&
-        event.clientX <= rect.left + rect.width
-    );
+if (dlcModal) {
+    dlcModal.addEventListener('click', (event) => {
 
-    // 點擊外部
-    if (!isInModal) {
-        // 執行關閉
-        dlcModal.close();
-    }
-});
+        // ========【取得視窗範圍】========
+        const rect = dlcModal.getBoundingClientRect();
+
+        // ========【判定是否點擊在 modal 內】========
+        const isInModal = (
+            rect.top <= event.clientY &&
+            event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX &&
+            event.clientX <= rect.left + rect.width
+        );
+
+        // ========【點擊外部 → 關閉】========
+        if (!isInModal) {
+
+            // 防呆：避免 close 不存在
+            if (typeof dlcModal.close === "function") {
+                dlcModal.close();
+            }
+        }
+    });
+}
