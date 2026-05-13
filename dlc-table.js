@@ -46,16 +46,17 @@ function ctrlType(typeName) {
     }
 }
 
-// ========【互動控制】 點擊行變色 ========
+// ========【互動控制】 點擊行變色 (全域適用) ========
 document.addEventListener('click', function(e) {
-    // 檢查點擊的是否為表格內的儲存格
-    const tr = e.target.closest('.map-row');
-    if (tr) {
-        // 移除其他行的選取狀態
-        document.querySelectorAll('.map-row').forEach(row => {
+    // 尋找行數
+    const tr = e.target.closest('tr');
+    // 判定有效
+    if (tr && tr.closest('table')) {
+        // 清除舊項
+        document.querySelectorAll('.selected-row').forEach(row => {
             row.classList.remove('selected-row');
         });
-        // 幫當前點擊行加上選取類別
+        // 套用選取
         tr.classList.add('selected-row');
     }
 });
