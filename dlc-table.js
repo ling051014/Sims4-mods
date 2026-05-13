@@ -55,6 +55,10 @@ function ctrlType(typeName) {
 // 2 = 倒序
 
 // ========【初始化】 保存 HTML 原始順序 ========
+// 排序狀態
+let sortState = 0;
+// 目前排序欄位
+let currentSortCol = null;
 // 原始 HTML 順序
 let originalRows = [];
 window.addEventListener('DOMContentLoaded', () => {
@@ -306,16 +310,6 @@ document.addEventListener('click', function(e) {
         tr.classList.add('selected-row');
     }
 });
-
-// ========【排序用 - 全域資料】========
-
-// 排序狀態
-let sortState = 0;
-// 目前排序欄位
-let currentSortCol = null;
-// 原始 rows（排序還原用）
-let originalRows = [];
-
 
 // ========【1. 載入 DLC 表格】========
 function loadDLCTable(containerId) {
