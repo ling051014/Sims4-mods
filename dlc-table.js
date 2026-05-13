@@ -76,20 +76,39 @@ let originalRows = [];
 function loadDLCTable(containerId) {
     // 取得放置表格的容器
     const container = document.getElementById(containerId);
+
+    // ========【防呆】容器不存在則跳出========
     if (!container) return;
 
     // 讀取外部 HTML 檔案
     fetch('dlc-table.html')
-        .then(res => res.text())
+        .then(res => res.text()) // 將回應轉為文字
         .then(html => {
-            // 將內容寫入容器
+            // ========【插入 HTML】========
             container.innerHTML = html;
 
-            // 確保內容渲染後執行初始化 (使用 requestAnimationFrame 避免時間差錯誤)
-            requestAnimationFrame(() => {
-                initTable();
+            // ========【強制等待 DOM 更新完成】========
+            // 建立一個 Promise，確保瀏覽器完成下一次重繪
+            return new Promise(resolve => {
+                // requestAnimationFrame 會在瀏覽器準備好渲染時執行
+                requestAnimationFrame(() => resolve());
             });
         })
+        .then(() => {
+            // ========【再次確認 table 已存在】========
+            // 此時 Promise 已完成，表格理論上已進入 DOM
+            const table = document.getElementById('map-master-table');
+
+            // 如果還是找不到 table，發出警告並停止
+            if (!table) {
+                console.warn("table 尚未成功插入 DOM");
+                return;
+            }
+
+            // 確認存在後，執行初始化（備份原始順序）
+            initTable();
+        })
+        // 捕捉 fetch 或後續處理中的任何錯誤
         .catch(err => console.error("載入 HTML 失敗:", err));
 }
 
