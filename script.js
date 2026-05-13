@@ -1,3 +1,9 @@
+// ========【全域防呆】========
+const table = document.getElementById('map-master-table');
+if (!table) {
+    console.warn('map-master-table not found');
+}
+
 // ========【關鍵字搜尋】 設定 - 搜尋模組卡片 ========
 function searchMods() {
     // 取得搜尋輸入框
