@@ -705,8 +705,8 @@ body {
         /* 區塊顯示 */ display: block;
         /* 寬度填滿 */ width: 100%;
         /* 橫向捲動 */ overflow-x: auto;
+        /* 相對定位 */ position: relative;
         /* 順暢滑動 */ -webkit-overflow-scrolling: touch;
-        /* 下方間距 */ padding-bottom: 10px;
     }
     /* 表格內容：大幅縮減內縮以節省空間 */
     #map-master-table td, 
@@ -724,13 +724,18 @@ body {
         /* 圖片高度 */ height: 20px;
     }
     /* 提示字眼：提醒使用者可滑動 */
-    .table-container::after {
+    .table-container::before {
         /* 提示內容 */ content: "↔ 滑動查看完整表格";
         /* 區塊顯示 */ display: block;
         /* 文字置中 */ text-align: center;
         /* 字體大小 */ font-size: 10px;
         /* 文字顏色 */ color: #ccc;
-        /* 上方間距 */ margin-top: 5px;
+        /* 下方間距 */ margin-bottom: 8px;
+        /* 黏性定位 */ position: sticky;
+        /* 靠左固定 */ left: 0;
+        /* 寬度填滿 */ width: 100%;
+        /* 顯示層級 */ z-index: 5;
+        /* 背景顏色 */ background: transparent;
     }
 }
 
