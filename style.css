@@ -322,7 +322,7 @@ body {
     /* 寬度填滿 */ width: 100%;
     /* 彈性佈局 */ display: flex;
     /* 水平置中 */ justify-content: center;
-    /* 移除預設推擠 */ margin-top: 0;
+    /* 表格與篩選距離 */ margin-top: 15px;
 }
 
 #map-master-table,
@@ -370,10 +370,6 @@ body {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
-/* ========【摺疊面板】 設定 - 表格與篩選間距 ======== */
-.filter-panel > *:not(:first-child) {
-    /* 上方間距 */ margin-top: 15px;
-}
 
 
 
