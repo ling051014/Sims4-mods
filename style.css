@@ -751,7 +751,11 @@ body {
         /* 尺寸計算 */ box-sizing: border-box;
     }
     .nav-menu {
-        /* 寬度自適 */ width: 100%;
+        /* 寬度自適 */ width: 100vw !important;
+        /* 貼齊邊緣 */ left: 0;
+        /* 移除左右邊距 */ margin: 0;
+        /* 內縮空間 */ padding: 10px 15px !important;
+        /* 盒模型設定 */ box-sizing: border-box;
     }
     .mod-card {
         /* 三欄配置 */ flex: 0 0 calc((100% - 30px) / 3);
