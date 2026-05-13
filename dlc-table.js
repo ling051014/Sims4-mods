@@ -78,16 +78,12 @@ function sortTable(colIndex) {
     const table = document.getElementById('map-master-table');
     // 取得 tbody
     const tbody = table.tBodies[0];
-    // 取得所有列
-    let rows = Array.from(tbody.rows);
     // 取得標題
     const th = table.querySelectorAll('th')[colIndex];
 
     // ========【切換排序狀態】========
-
     // 點不同欄位
     if (currentSortCol !== colIndex) {
-
         currentSortCol = colIndex;
 
         // 第一下
@@ -96,7 +92,6 @@ function sortTable(colIndex) {
 
     // 點同欄位
     else {
-
         sortState++;
 
         // 第三下 → 回原始
@@ -105,20 +100,18 @@ function sortTable(colIndex) {
         }
     }
 
+    // ========【複製原始 rows】========
+    let rows = [...originalRows];
+
     // ========【未排序】========
     if (sortState === 0) {
-
-        rows.sort((a, b) => {
-            return Number(a.dataset.originalIndex)
-                - Number(b.dataset.originalIndex);
-        });
+        // 完全恢復 HTML 原順序
+        rows = [...originalRows];
     }
 
     // ========【發行日期】========
     else if (colIndex === 0) {
-
         rows.sort((a, b) => {
-
             const aDate = new Date(a.cells[0].innerText.trim());
             const bDate = new Date(b.cells[0].innerText.trim());
 
@@ -136,20 +129,46 @@ function sortTable(colIndex) {
 
     // ========【序號】========
     else if (colIndex === 1) {
-
         rows.sort((a, b) => {
-
             const aText = a.cells[1].innerText.trim();
             const bText = b.cells[1].innerText.trim();
 
+            // 取得類型
+            const aType = aText.match(/[A-Z]+/)[0];
+            const bType = bText.match(/[A-Z]+/)[0];
+
+            // 類型順序
+            const order = ['EP', 'GP', 'SP', 'FP'];
+
+            const aTypeIndex = order.indexOf(aType);
+            const bTypeIndex = order.indexOf(bType);
+
+            // ========【先比 DLC 類型】========
+            if (aTypeIndex !== bTypeIndex) {
+
+                // 正序
+                if (sortState === 1) {
+                    return aTypeIndex - bTypeIndex;
+                }
+
+                // 倒序
+                else {
+                    return bTypeIndex - aTypeIndex;
+                }
+            }
+
+            // ========【再比數字】========
+            const aNum = parseInt(aText.match(/\d+/)[0]);
+            const bNum = parseInt(bText.match(/\d+/)[0]);
+
             // 正序
             if (sortState === 1) {
-                return aText.localeCompare(bText);
+                return aNum - bNum;
             }
 
             // 倒序
             else {
-                return bText.localeCompare(aText);
+                return bNum - aNum;
             }
         });
     }
@@ -157,27 +176,34 @@ function sortTable(colIndex) {
     // ========【一般文字】========
     else {
         rows.sort((a, b) => {
-
-            // 取得文字
             const aText = a.cells[colIndex].innerText.trim();
             const bText = b.cells[colIndex].innerText.trim();
 
-            // ========【取得原始排序值】========
-            const aOriginal = Number(a.dataset.originalIndex);
-            const bOriginal = Number(b.dataset.originalIndex);
-
-            // ========【正序】========
+            // ========【- 排序控制】========
+            // 正序 → - 最後
             if (sortState === 1) {
+                if (aText === '-' && bText !== '-') return 1;
+                if (aText !== '-' && bText === '-') return -1;
+            }
 
-            // ========【- 排最後】========
-            if (aText === '-' && bText !== '-') return 1;
-            if (aText !== '-' && bText === '-') return -1;
+            // 倒序 → - 最前
+            else {
+                if (aText === '-' && bText !== '-') return -1;
+                if (aText !== '-' && bText === '-') return 1;
+            }
 
-            // ========【主要排序】========
-            const result = aText.localeCompare(
-                bText,
-                'zh-Hant'
-            );
+            // ========【主要文字排序】========
+            let result;
+
+            // 正序
+            if (sortState === 1) {
+                result = aText.localeCompare(bText, 'zh-Hant');
+            }
+
+            // 倒序
+            else {
+                result = bText.localeCompare(aText, 'zh-Hant');
+            }
 
             // ========【文字不同】========
             if (result !== 0) {
@@ -186,52 +212,28 @@ function sortTable(colIndex) {
 
             // ========【文字相同】========
             // 保持 HTML 原順序
-            return aOriginal - bOriginal;
-            }
-
-            // ========【倒序】========
-            else {
-
-                // ========【- 排最前】========
-                if (aText === '-' && bText !== '-') return -1;
-                if (aText !== '-' && bText === '-') return 1;
-
-                // ========【主要排序】========
-                const result = bText.localeCompare(
-                    aText,
-                    'zh-Hant'
-                );
-
-                // ========【文字不同】========
-                if (result !== 0) {
-                    return result;
-                }
-
-                // ========【文字相同】========
-                // 保持 HTML 原順序
-                return aOriginal - bOriginal;
-            }
+            return Number(a.dataset.originalIndex)
+                 - Number(b.dataset.originalIndex);
         });
     }
 
     // ========【重新填入表格】========
     tbody.innerHTML = '';
-    
+
     rows.forEach((row) => {
         tbody.appendChild(row);
-        
     });
 
     // ========【箭頭狀態】========
     table.querySelectorAll('th').forEach((header) => {
         header.classList.remove('asc', 'desc');
     });
-    
+
     // 第一下 ▼
     if (sortState === 1) {
         th.classList.add('desc');
     }
-        
+
     // 第二下 ▲
     else if (sortState === 2) {
         th.classList.add('asc');
