@@ -46,6 +46,32 @@ function ctrlType(typeName) {
     }
 }
 
+// ========【排序控制】 設定 - 序號正倒序 ========
+let isAscending = true; // 紀錄當前狀態
+
+function sortTable(colIndex) {
+    // 取得表格
+    const table = document.getElementById('map-master-table');
+    // 取得行數
+    const rows = Array.from(table.rows).slice(1); // 排除標題
+    // 取得圖示
+    const icon = document.getElementById('sort-icon');
+    // 執行排序
+    rows.sort((a, b) => {
+        const valA = parseInt(a.cells[colIndex].innerText);
+        const valB = parseInt(b.cells[colIndex].innerText);
+        return isAscending ? valA - valB : valB - valA;
+    });
+    
+    // 重新填充
+    const tbody = table.tBodies[0];
+    rows.forEach(row => tbody.appendChild(row));
+    // 切換狀態
+    isAscending = !isAscending;
+    // 更新圖示
+    icon.innerText = isAscending ? '↑' : '↓';
+}
+
 // ========【互動控制】 點擊行變色 (全域適用) ========
 document.addEventListener('click', function(e) {
     // 尋找行數
