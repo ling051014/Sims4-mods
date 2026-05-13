@@ -1,44 +1,57 @@
+// ===================================================
 // ========【表格控制】 勾選反應 ========
+// ===================================================
 function ctrlCol(index) {
     // 取得表格
     const table = document.getElementById('map-master-table');
+    // 防呆：表格不存在則跳出
     if (!table) return;
-    // 處理 thead + tbody
-    const allRows = table.rows;
 
+    // 取得表格所有行
+    const allRows = table.rows;
     for (let i = 0; i < allRows.length; i++) {
+        // 取得該行對應索引的儲存格
         const cell = allRows[i].cells[index];
         if (cell) {
+            // 切換隱藏樣式
             cell.classList.toggle('hide-item');
         }
     }
 }
 
+// ===================================================
 // ========【橫排控制】 下拉選單篩選 ========
+// ===================================================
 function ctrlRow() {
     // 取得選單
     const select = document.getElementById('map-select');
-    // 取得數值
+    if (!select) return;
+
+    // 取得選取的值
     const filter = select.value;
-    // 取得行數
+    // 取得所有具有 .map-row 類別的行
     const rows = document.querySelectorAll('.map-row');
+
     rows.forEach(row => {
+        // 判定：值為 all 或是 符合資料標記
         if (filter === 'all' || row.getAttribute('data-map') === filter) {
-            // 符合顯示
+            // 符合則移除隱藏類別
             row.classList.remove('hide-item');
         } else {
-            // 不符隱藏
+            // 不符則加入隱藏類別
             row.classList.add('hide-item');
         }
     });
 }
 
+// ===================================================
 // ========【分類控制】 切換顯示狀態 ========
+// ===================================================
 function ctrlType(typeName) {
-    // 取得分類
+    // 取得所有該分類名稱的元素
     const elements = document.getElementsByClassName(typeName);
     for (let i = 0; i < elements.length; i++) {
-        // 切換顯示
+        // 判斷目前顯示狀態並切換
         if (elements[i].style.display === "none") {
             elements[i].style.display = "";
         } else {
@@ -47,317 +60,53 @@ function ctrlType(typeName) {
     }
 }
 
-// ========【排序控制】 設定 - 狀態紀錄 ========
-
-// 排序狀態
-// 0 = 未排序
-// 1 = 正序
-// 2 = 倒序
-
-// ========【初始化】 保存 HTML 原始順序 ========
-// 排序狀態
+// ===================================================
+// ========【排序控制】 狀態與變數紀錄 ========
+// ===================================================
+// 排序狀態紀錄：0 = 未排序, 1 = 正序, 2 = 倒序
 let sortState = 0;
-// 目前排序欄位
+// 目前排序的欄位索引
 let currentSortCol = null;
-// 原始 HTML 順序
-let originalRows = [];
-window.addEventListener('DOMContentLoaded', () => {
+// 保存 HTML 原始順序的陣列
+let originalRows = []; 
 
-    // 取得 tbody
-    const tbody = document.querySelector('#map-master-table tbody');
-    // 保存真正 HTML 順序
-    originalRows = Array.from(tbody.rows);
-    // 記錄原始位置
-    originalRows.forEach((row, index) => {
-        row.dataset.originalIndex = index;
-    });
-});
-
-// ========【排序功能】========
-function sortTable(colIndex) {
-
-    // 取得表格
-    const table = document.getElementById('map-master-table');
-    // 防呆：table 不存在
-    if (!table) return;
-    // 取得 tbody
-    const tbody = table.tBodies[0];
-    // 防呆：tbody 不存在
-    if (!tbody) return;
-    // 取得標題
-    const th = table.querySelectorAll('th')[colIndex];
-
-    // ========【切換排序狀態】========
-    // 點不同欄位
-    if (currentSortCol !== colIndex) {
-        currentSortCol = colIndex;
-
-        // 第一下
-        sortState = 1;
-    }
-
-    // 點同欄位
-    else {
-        sortState++;
-
-        // 第三下 → 回原始
-        if (sortState > 2) {
-            sortState = 0;
-        }
-    }
-
-    // ========【複製原始 rows】========
-    let rows = originalRows ? [...originalRows] : [];
-
-    // ========【未排序】========
-    if (sortState === 0) {
-        // 完全恢復 HTML 原順序
-        rows = [...originalRows];
-    }
-
-    // ========【發行日期】========
-    else if (colIndex === 0) {
-        rows.sort((a, b) => {
-
-        // ========【安全解析 YYYY/MM/DD】========
-            const parseDate = (text) => {
-                const match = text.trim().match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
-                if (!match) return 0;
-                
-                const [, y, m, d] = match;
-                return new Date(Number(y), Number(m) - 1, Number(d)).getTime();
-            };
-            
-            const aTime = parseDate(a.cells[0]?.innerText || '');
-            const bTime = parseDate(b.cells[0]?.innerText || '');
-            
-            let result;
-
-            // ========【日期排序】========
-            if (sortState === 1) {
-                result = aTime - bTime;
-            }
-            else {
-                result = bTime - aTime;
-            }
-
-            // ========【相同日期 → 保持原順序】========
-            if (result !== 0) return result;
-            
-            return Number(a.dataset.originalIndex)
-                - Number(b.dataset.originalIndex);
-        });
-    }
-        
-    // ========【序號】========
-    else if (colIndex === 1) {
-        rows.sort((a, b) => {
-            
-            // 取得文字
-            const aCell = a.cells[colIndex];
-            const bCell = b.cells[colIndex];
-
-            const aText = a.cells[1]?.innerText.trim() || '';
-            const bText = b.cells[1]?.innerText.trim() || '';
-            
-            // ========【取得 DLC 類型】========
-            // 取得英文類型
-            const aTypeMatch = aText.match(/[A-Z]+/);
-            const bTypeMatch = bText.match(/[A-Z]+/);
-
-            // 防止 null 錯誤
-            const aType = aTypeMatch ? aTypeMatch[0] : '';
-            const bType = bTypeMatch ? bTypeMatch[0] : '';
-
-            // DLC 排序順序
-            const order = ['EP', 'GP', 'SP', 'FP'];
-
-            // 取得排序位置
-            const aTypeIndex = order.indexOf(aType);
-            const bTypeIndex = order.indexOf(bType);
-
-            // 排序結果
-            let result;
-            
-            // ========【先比 DLC 類型】========
-            if (aTypeIndex !== bTypeIndex) {
-                // 正序
-                if (sortState === 1) {
-                    result = aTypeIndex - bTypeIndex;
-                }
-                // 倒序
-                else {
-                    result = bTypeIndex - aTypeIndex;
-                }
-                
-                // 回傳結果
-                return result;
-            }
-
-            // ========【再比數字】========
-            // 取得數字
-            const aNumMatch = aText.match(/\d+/);
-            const bNumMatch = bText.match(/\d+/);
-
-            // 防止 null 錯誤
-            const aNum = aNumMatch ? parseInt(aNumMatch[0]) : 0;
-            const bNum = bNumMatch ? parseInt(bNumMatch[0]) : 0;
-
-            // 正序
-            if (sortState === 1) {
-                result = aNum - bNum;
-            }
-
-            // 倒序
-            else {
-                result = bNum - aNum;
-            }
-            
-            // ========【數字不同】========
-            // 直接回傳排序結果
-            if (result !== 0) {
-                return result;
-            }
-
-            // ========【完全相同】========
-            // 保持 HTML 原始順序
-            return Number(a.dataset.originalIndex)
-                - Number(b.dataset.originalIndex);
-        });
-    }
-
-    // ========【一般文字】========
-    else {
-        rows.sort((a, b) => {
-            const aText = a.cells[colIndex].innerText.trim();
-            const bText = b.cells[colIndex].innerText.trim();
-
-            // ========【- 排序控制】========
-            // 正序 → - 最後
-            if (sortState === 1) {
-                if (aText === '-' && bText !== '-') return 1;
-                if (aText !== '-' && bText === '-') return -1;
-            }
-
-            // 倒序 → - 最前
-            else {
-                if (aText === '-' && bText !== '-') return -1;
-                if (aText !== '-' && bText === '-') return 1;
-            }
-
-            // ========【主要文字排序】========
-            let result;
-
-            // 正序
-            if (sortState === 1) {
-                result = aText.localeCompare(bText, 'zh-Hant');
-            }
-
-            // 倒序
-            else {
-                result = bText.localeCompare(aText, 'zh-Hant');
-            }
-
-            // ========【文字不同】========
-            if (result !== 0) {
-                return result;
-            }
-
-            // ========【文字相同】========
-            // 保持 HTML 原順序
-            return Number(a.dataset.originalIndex)
-                 - Number(b.dataset.originalIndex);
-        });
-    }
-
-    // ========【重新填入表格】========
-    tbody.innerHTML = '';
-
-    rows.forEach((row) => {
-        tbody.appendChild(row);
-    });
-
-    // ========【箭頭狀態】========
-    table.querySelectorAll('th').forEach((header) => {
-        header.classList.remove('asc', 'desc');
-    });
-
-    // 第一下 ▼
-    if (sortState === 1) {
-        th.classList.add('desc');
-    }
-
-    // 第二下 ▲
-    else if (sortState === 2) {
-        th.classList.add('asc');
-    }
-}
-
-// ========【互動控制】 點擊行變色 (排除標題) ========
-document.addEventListener('click', function(e) {
-    // 尋找行數
-    const tr = e.target.closest('tr');
-
-    // 判定有效：確保點擊的不是 <thead> 內的元素
-    if (tr && tr.closest('table') && !tr.closest('thead')) {
-        // 取得容器
-        const table = tr.closest('table');
-        // 清除同表
-        table.querySelectorAll('tr').forEach(row => {
-            row.classList.remove('selected-row');
-        });
-        // 套用選取
-        tr.classList.add('selected-row');
-    }
-});
-
-// ========【1. 載入 DLC 表格】========
+// ===================================================
+// ========【1. 載入 DLC 表格】 ========
+// ===================================================
 function loadDLCTable(containerId) {
-
+    // 取得放置表格的容器
     const container = document.getElementById(containerId);
-
-    // 【防呆】container 不存在
     if (!container) return;
 
+    // 讀取外部 HTML 檔案
     fetch('dlc-table.html')
         .then(res => res.text())
         .then(html => {
-
-            // 插入 HTML
+            // 將內容寫入容器
             container.innerHTML = html;
 
-            // 等待 DOM 更新後再初始化
-            setTimeout(() => {
+            // 確保內容渲染後執行初始化 (使用 requestAnimationFrame 避免時間差錯誤)
+            requestAnimationFrame(() => {
                 initTable();
-            }, 0);
+            });
         })
         .catch(err => console.error("載入 HTML 失敗:", err));
 }
 
-
-// ========【2. 初始化表格（建立排序基準）】========
+// ===================================================
+// ========【2. 初始化表格】 ========
+// ===================================================
 function initTable() {
-
+    // 取得表格與內部的 tbody
     const table = document.getElementById('map-master-table');
-
-    // 【防呆】table 尚未存在
-    if (!table) {
-        console.warn("map-master-table 尚未載入");
-        return;
-    }
-
+    if (!table) return;
     const tbody = table.tBodies[0];
+    if (!tbody) return;
 
-    // 【防呆】tbody 不存在
-    if (!tbody) {
-        console.warn("tbody 不存在");
-        return;
-    }
-
-    // 建立排序基準資料
+    // 將當前 rows 轉換成陣列備份
     originalRows = Array.from(tbody.rows);
 
-    // 標記原始順序 index
+    // 幫每一行加上原始序號，確保穩定排序
     originalRows.forEach((row, index) => {
         row.dataset.originalIndex = index;
     });
@@ -365,9 +114,120 @@ function initTable() {
     console.log("✔ 表格初始化完成");
 }
 
+// ===================================================
+// ========【3. 排序核心功能】 ========
+// ===================================================
+function sortTable(colIndex) {
+    const table = document.getElementById('map-master-table');
+    if (!table) return;
+    const tbody = table.tBodies[0];
+    if (!tbody) return;
 
-// ========【3. 頁面啟動】========
+    // 取得點擊的標題元素
+    const th = table.querySelectorAll('th')[colIndex];
+
+    // 切換排序狀態邏輯
+    if (currentSortCol !== colIndex) {
+        currentSortCol = colIndex;
+        sortState = 1;
+    } else {
+        sortState = (sortState + 1) % 3;
+    }
+
+    // 複製備份的 rows 進行排序
+    let rows = [...originalRows];
+
+    if (sortState === 0) {
+        // 回歸原始 HTML 順序
+        rows = [...originalRows];
+    } else {
+        rows.sort((a, b) => {
+            let result = 0;
+
+            // [發行日期排序]
+            if (colIndex === 0) {
+                const parseDate = (text) => {
+                    const match = text.trim().match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+                    if (!match) return 0;
+                    return new Date(match[1], match[2] - 1, match[3]).getTime();
+                };
+                const aTime = parseDate(a.cells[0]?.innerText || '');
+                const bTime = parseDate(b.cells[0]?.innerText || '');
+                result = (sortState === 1) ? aTime - bTime : bTime - aTime;
+            }
+            // [序號排序] 比對 EP/GP/SP/FP 類型順序
+            else if (colIndex === 1) {
+                const aText = a.cells[1]?.innerText.trim() || '';
+                const bText = b.cells[1]?.innerText.trim() || '';
+                const order = ['EP', 'GP', 'SP', 'FP'];
+                const aType = (aText.match(/[A-Z]+/) || [''])[0];
+                const bType = (bText.match(/[A-Z]+/) || [''])[0];
+                const aTypeIdx = order.indexOf(aType);
+                const bTypeIdx = order.indexOf(bType);
+
+                if (aTypeIdx !== bTypeIdx) {
+                    result = (sortState === 1) ? aTypeIdx - bTypeIdx : bTypeIdx - aTypeIdx;
+                } else {
+                    const aNum = parseInt((aText.match(/\d+/) || [0])[0]);
+                    const bNum = parseInt((bText.match(/\d+/) || [0])[0]);
+                    result = (sortState === 1) ? aNum - bNum : bNum - aNum;
+                }
+            }
+            // [一般文字排序]
+            else {
+                const aText = a.cells[colIndex].innerText.trim();
+                const bText = b.cells[colIndex].innerText.trim();
+                
+                // 處理 '-' 字串排至最後
+                if (sortState === 1) {
+                    if (aText === '-' && bText !== '-') return 1;
+                    if (aText !== '-' && bText === '-') return -1;
+                } else {
+                    if (aText === '-' && bText !== '-') return -1;
+                    if (aText !== '-' && bText === '-') return 1;
+                }
+                
+                // 使用中文語系進行文字比對
+                result = (sortState === 1) 
+                    ? aText.localeCompare(bText, 'zh-Hant') 
+                    : bText.localeCompare(aText, 'zh-Hant');
+            }
+
+            // 若內容相同，則依照原始標記索引排列
+            return result !== 0 ? result : Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex);
+        });
+    }
+
+    // 清空 tbody 並重新填入排序後的 rows
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+
+    // 移除所有標題的箭頭樣式並重新賦予
+    table.querySelectorAll('th').forEach(t => t.classList.remove('asc', 'desc'));
+    if (sortState === 1) th.classList.add('desc');
+    else if (sortState === 2) th.classList.add('asc');
+}
+
+// ===================================================
+// ========【點擊行選取效果】 ========
+// ===================================================
+document.addEventListener('click', function (e) {
+    // 取得點擊目標最近的 tr 元素
+    const tr = e.target.closest('tr');
+    // 確保點擊的是 tbody 內的行
+    if (tr && tr.closest('tbody')) {
+        const table = tr.closest('table');
+        // 清除該表內所有選取樣式
+        table.querySelectorAll('tr').forEach(row => row.classList.remove('selected-row'));
+        // 幫被點擊的行加上選取樣式
+        tr.classList.add('selected-row');
+    }
+});
+
+// ===================================================
+// ========【頁面啟動】 ========
+// ===================================================
 window.addEventListener('DOMContentLoaded', () => {
-    // 直接載入表格
+    // 啟動表格載入程序
     loadDLCTable('home-table-placeholder');
 });
