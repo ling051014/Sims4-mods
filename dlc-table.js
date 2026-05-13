@@ -142,50 +142,78 @@ function sortTable(colIndex) {
                 - Number(b.dataset.originalIndex);
         });
     }
-
+        
     // ========【序號】========
     else if (colIndex === 1) {
         rows.sort((a, b) => {
+            
+            // 取得文字
             const aText = a.cells[1].innerText.trim();
             const bText = b.cells[1].innerText.trim();
+            
+            // ========【取得 DLC 類型】========
+            // 取得英文類型
+            const aTypeMatch = aText.match(/[A-Z]+/);
+            const bTypeMatch = bText.match(/[A-Z]+/);
 
-            // 取得類型
-            const aType = aText.match(/[A-Z]+/)[0];
-            const bType = bText.match(/[A-Z]+/)[0];
+            // 防止 null 錯誤
+            const aType = aTypeMatch ? aTypeMatch[0] : '';
+            const bType = bTypeMatch ? bTypeMatch[0] : '';
 
-            // 類型順序
+            // DLC 排序順序
             const order = ['EP', 'GP', 'SP', 'FP'];
 
+            // 取得排序位置
             const aTypeIndex = order.indexOf(aType);
             const bTypeIndex = order.indexOf(bType);
 
+            // 排序結果
+            let result;
+            
             // ========【先比 DLC 類型】========
             if (aTypeIndex !== bTypeIndex) {
-
                 // 正序
                 if (sortState === 1) {
-                    return aTypeIndex - bTypeIndex;
+                    result = aTypeIndex - bTypeIndex;
                 }
-
                 // 倒序
                 else {
-                    return bTypeIndex - aTypeIndex;
+                    result = bTypeIndex - aTypeIndex;
                 }
+                
+                // 回傳結果
+                return result;
             }
 
             // ========【再比數字】========
-            const aNum = parseInt(aText.match(/\d+/)[0]);
-            const bNum = parseInt(bText.match(/\d+/)[0]);
+            // 取得數字
+            const aNumMatch = aText.match(/\d+/);
+            const bNumMatch = bText.match(/\d+/);
+
+            // 防止 null 錯誤
+            const aNum = aNumMatch ? parseInt(aNumMatch[0]) : 0;
+            const bNum = bNumMatch ? parseInt(bNumMatch[0]) : 0;
 
             // 正序
             if (sortState === 1) {
-                return aNum - bNum;
+                result = aNum - bNum;
             }
 
             // 倒序
             else {
-                return bNum - aNum;
+                result = bNum - aNum;
             }
+            
+            // ========【數字不同】========
+            // 直接回傳排序結果
+            if (result !== 0) {
+                return result;
+            }
+
+            // ========【完全相同】========
+            // 保持 HTML 原始順序
+            return Number(a.dataset.originalIndex)
+                - Number(b.dataset.originalIndex);
         });
     }
 
