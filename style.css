@@ -301,7 +301,8 @@ body {
     /* 水平對齊 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
     /* 單一不拆不換行 */ white-space: nowrap;
-    /* 標籤右邊距離 */ margin-right: 8px;
+    /* 標籤右邊距離 */ margin-right: -15px;
+    /* ？？？？ */ padding-right: 5px;
 }
 .filter-group label {
     /* 選項置中 */ display: flex;
