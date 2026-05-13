@@ -107,7 +107,7 @@ function sortTable(colIndex) {
     }
 
     // ========【複製原始 rows】========
-    let rows = [...originalRows];
+    let rows = originalRows ? [...originalRows] : [];
 
     // ========【未排序】========
     if (sortState === 0) {
