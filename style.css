@@ -686,10 +686,9 @@ body {
     }
     /* 摺疊標題：強化手指點擊感 */
     .resource-detail summary {
-        /* 字體大小 */ font-size: 16px;
+        /* 字體大小 */ font-size: 15px;
         /* 字距拉開 */ letter-spacing: 2px;
         /* 內縮空間 */ padding: 12px 10px;
-        /* 寬度調整 */ width: 90%;
         /* 水平置中 */ margin: 0 auto;
     }
     /* 篩選面板：手機端緊湊排列 */
