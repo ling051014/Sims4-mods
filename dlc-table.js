@@ -151,28 +151,60 @@ function sortTable(colIndex) {
 
     // ========【一般文字】========
     else {
-
         rows.sort((a, b) => {
 
+            // 取得文字
             const aText = a.cells[colIndex].innerText.trim();
             const bText = b.cells[colIndex].innerText.trim();
 
-            // ========【- 排最後】========
+            // ========【取得原始排序值】========
+            const aOriginal = Number(a.dataset.originalIndex);
+            const bOriginal = Number(b.dataset.originalIndex);
+
+            // ========【正序】========
             if (sortState === 1) {
 
-                if (aText === '-' && bText !== '-') return 1;
-                if (aText !== '-' && bText === '-') return -1;
+            // ========【- 排最後】========
+            if (aText === '-' && bText !== '-') return 1;
+            if (aText !== '-' && bText === '-') return -1;
 
-                return aText.localeCompare(bText, 'zh-Hant');
+            // ========【主要排序】========
+            const result = aText.localeCompare(
+                bText,
+                'zh-Hant'
+            );
+
+            // ========【文字不同】========
+            if (result !== 0) {
+                return result;
             }
 
-            // ========【- 排最前】========
+            // ========【文字相同】========
+            // 保持 HTML 原順序
+            return aOriginal - bOriginal;
+            }
+
+            // ========【倒序】========
             else {
 
-                if (aText === '-' && bText !== '-') return -1;
-                if (aText !== '-' && bText === '-') return 1;
+            // ========【- 排最前】========
+            if (aText === '-' && bText !== '-') return -1;
+            if (aText !== '-' && bText === '-') return 1;
 
-                return bText.localeCompare(aText, 'zh-Hant');
+            // ========【主要排序】========
+            const result = bText.localeCompare(
+                aText,
+                'zh-Hant'
+            );
+
+            // ========【文字不同】========
+                if (result !== 0) {
+                    return result;
+                }
+
+                // ========【文字相同】========
+                // 保持 HTML 原順序
+                return aOriginal - bOriginal;
             }
         });
     }
