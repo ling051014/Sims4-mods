@@ -315,17 +315,21 @@ document.addEventListener('click', function(e) {
 function loadDLCTable(containerId) {
 
     const container = document.getElementById(containerId);
+
+    // 【防呆】container 不存在
     if (!container) return;
 
     fetch('dlc-table.html')
         .then(res => res.text())
         .then(html => {
 
-            // A. 插入 HTML
+            // 插入 HTML
             container.innerHTML = html;
 
-            // B. 初始化表格
-            initTable();
+            // 等待 DOM 更新後再初始化
+            setTimeout(() => {
+                initTable();
+            }, 0);
         })
         .catch(err => console.error("載入 HTML 失敗:", err));
 }
