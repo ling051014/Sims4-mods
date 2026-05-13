@@ -6,11 +6,9 @@ if (!table) {
 
 // ========【表格控制】 勾選反應 ========
 function ctrlCol(index) {
-
     // 取得表格
     const table = document.getElementById('map-master-table');
     if (!table) return;
-
     // 處理 thead + tbody
     const allRows = table.rows;
 
@@ -335,3 +333,18 @@ window.loadDLCTable = function () {
 
     console.log('DLCTable 初始化完成');
 };
+
+// ========【首頁用】載入 DLC 表格 ========
+function loadDLCTable(containerId) {
+    // 取得容器
+    const container = document.getElementById(containerId);
+    // 防呆
+    if (!container) return;
+
+    // 抓取表格 HTML
+    fetch('dlc-table.html')
+        .then(res => res.text())
+        .then(html => {
+            container.innerHTML = html;
+        });
+}
