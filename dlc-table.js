@@ -134,20 +134,6 @@ function sortTable(colIndex) {
             const aText = a.cells[colIndex].innerText.trim();
             const bText = b.cells[colIndex].innerText.trim();
 
-            // ========【重新填入表格】========
-            // 清空 tbody
-            tbody.innerHTML = '';
-            // 重新加入排序後內容
-            rows.forEach((row) => {
-                tbody.appendChild(row);
-            });
-            
-            // ========【箭頭狀態】========
-            // 清除所有箭頭
-            table.querySelectorAll('th').forEach((header) => {
-                header.classList.remove('asc', 'desc');
-            });
-
             // ========【第一下：正序（▼）】========
             // 有內容在前，- 在後
             if (sortState === 1) {
@@ -175,8 +161,21 @@ function sortTable(colIndex) {
                 - Number(b.dataset.originalIndex);
         });
     }
-
+    
+    // ========【重新填入表格】========
+    // 清空 tbody
+    tbody.innerHTML = '';
+    // 重新加入排序後內容
+    rows.forEach((row) => {
+        tbody.appendChild(row);
+    });
+    
     // ========【箭頭狀態】========
+    // 清除所有箭頭
+    table.querySelectorAll('th').forEach((header) => {
+        header.classList.remove('asc', 'desc');
+    });
+
     // 第一下 ▼
     if (sortState === 1) {
         th.classList.add('desc');
