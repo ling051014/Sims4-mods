@@ -46,30 +46,39 @@ function ctrlType(typeName) {
     }
 }
 
-// ========【排序控制】 設定 - 序號正倒序 ========
-let isAscending = true; // 紀錄當前狀態
+// ========【排序控制】 設定 - 序號正倒序切換 ========
+let isAscending = true; 
 
 function sortTable(colIndex) {
     // 取得表格
     const table = document.getElementById('map-master-table');
     // 取得行數
-    const rows = Array.from(table.rows).slice(1); // 排除標題
-    // 取得圖示
-    const icon = document.getElementById('sort-icon');
+    const rows = Array.from(table.rows).slice(1);
+    // 取得標題
+    const th = table.querySelector('th:first-child');
+
     // 執行排序
     rows.sort((a, b) => {
-        const valA = parseInt(a.cells[colIndex].innerText);
-        const valB = parseInt(b.cells[colIndex].innerText);
+        const valA = parseInt(a.cells[colIndex].innerText) || 0;
+        const valB = parseInt(b.cells[colIndex].innerText) || 0;
         return isAscending ? valA - valB : valB - valA;
     });
-    
+
     // 重新填充
     const tbody = table.tBodies[0];
     rows.forEach(row => tbody.appendChild(row));
-    // 切換狀態
+
+    // 切換圖示
+    if (isAscending) {
+        th.classList.remove('desc');
+        th.classList.add('asc');
+    } else {
+        th.classList.remove('asc');
+        th.classList.add('desc');
+    }
+
+    // 翻轉狀態
     isAscending = !isAscending;
-    // 更新圖示
-    icon.innerText = isAscending ? '↑' : '↓';
 }
 
 // ========【互動控制】 點擊行變色 (全域適用) ========
