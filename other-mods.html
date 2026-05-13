@@ -9,7 +9,14 @@
 <body>
 
     <nav class="nav-menu">
-        <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">其他延伸</a>
+        <div class="nav-links">
+            <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">其他延伸</a>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="mod-search" placeholder="關鍵字搜尋..." onkeyup="searchMods()">
+            <div id="search-results" class="search-dropdown"></div>
+        </div>
     </nav>
 
     <div class="mod-container">
@@ -58,7 +65,6 @@
                     <div class="info-row"><strong>下載日期 ｜</strong>2025.11.11</div>
                 </div>
                 <p class="tips">
-                    </br>
                     <span class="text-red">支援插件需安裝「Full add-on support」版本</span></br>
                     濾鏡開關快捷鍵「數字 . 」</br>
                     濾鏡選單HOME鍵「數字 7 」</br>
