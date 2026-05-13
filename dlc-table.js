@@ -174,55 +174,66 @@ function sortTable(colIndex) {
     else {
         // 執行排序邏輯
         rows.sort((a, b) => {
+
             let result = 0;
 
             // ===================================================
-            // 欄位索引 0：發行日期
+            // ========【欄位索引 0】 發行日期排序 ========
             // ===================================================
             if (colIndex === 0) {
 
                 // 定義日期解析函數
                 const parseDate = (text) => {
                     const m = text.trim().match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+
+                    // 若格式不符則回傳 0
                     if (!m) return 0;
+
+                    // 將日期轉為毫秒數值以便排序
                     return new Date(m[1], m[2] - 1, m[3]).getTime();
                 };
 
                 const aTime = parseDate(a.cells[0]?.innerText || '');
                 const bTime = parseDate(b.cells[0]?.innerText || '');
 
+                // 正序 / 倒序
                 result = (sortState === 1)
                     ? aTime - bTime
                     : bTime - aTime;
             }
 
             // ===================================================
-            // 欄位索引 1：DLC 序號（統一新版邏輯）
+            // ========【欄位索引 1】 DLC 序號排序 ========
             // ===================================================
             else if (colIndex === 1) {
 
+                // 取得內容文字
                 const aText = a.cells[1]?.innerText.trim() || '';
                 const bText = b.cells[1]?.innerText.trim() || '';
 
-                const aDlc = parseDLC(aText);
-                const bDlc = parseDLC(bText);
+                // 解析 DLC 資訊
+                const aInfo = parseDLC(aText);
+                const bInfo = parseDLC(bText);
 
-                // 🔥 第一優先：DLC類型
-                if (aDlc.typeIndex !== bDlc.typeIndex) {
+                // 【第一優先：DLC 類型排序】
+                if (aInfo.typeIndex !== bInfo.typeIndex) {
+
                     result = (sortState === 1)
-                        ? aDlc.typeIndex - bDlc.typeIndex
-                        : bDlc.typeIndex - aDlc.typeIndex;
+                        ? aInfo.typeIndex - bInfo.typeIndex
+                        : bInfo.typeIndex - aInfo.typeIndex;
                 }
 
-                // 🔥 第二優先：DLC序號
-                else if (aDlc.num !== bDlc.num) {
+                // 【第二優先：DLC 編號排序】
+                else if (aInfo.num !== bInfo.num) {
+
                     result = (sortState === 1)
-                        ? aDlc.num - bDlc.num
-                        : bDlc.num - aDlc.num;
+                        ? aInfo.num - bInfo.num
+                        : bInfo.num - aInfo.num;
                 }
 
-                // 🔥 第三優先：純文字
+                // 【第三優先：文字排序】
                 else {
+
                     result = (sortState === 1)
                         ? aText.localeCompare(bText, 'zh-Hant')
                         : bText.localeCompare(aText, 'zh-Hant');
@@ -230,35 +241,71 @@ function sortTable(colIndex) {
             }
 
             // ===================================================
-            // 其餘欄位：一般文字（合併你提供的新邏輯）
+            // ========【其餘欄位】 地圖 / 職業 / 種族 ========
             // ===================================================
             else {
-                const aText = a.cells[colIndex].innerText.trim();
-                const bText = b.cells[colIndex].innerText.trim();
 
-                const aDlc = parseDLC(a.cells[1]?.innerText || '');
-                const bDlc = parseDLC(b.cells[1]?.innerText || '');
+                // 取得欄位文字
+                const aText = a.cells[colIndex]?.innerText.trim() || '';
+                const bText = b.cells[colIndex]?.innerText.trim() || '';
 
-                // 🔥 第一優先：DLC序號（所有欄位都一致規則）
-                if (aDlc.typeIndex !== bDlc.typeIndex) {
-                    result = (sortState === 1)
-                        ? aDlc.typeIndex - bDlc.typeIndex
-                        : bDlc.typeIndex - aDlc.typeIndex;
+                // ===================================================
+                // ========【排序權重解析器】 ========
+                // ===================================================
+                function parseTextPriority(text) {
+
+                    return {
+
+                        // 是否為 ★ 開頭
+                        isStar: text.startsWith('★'),
+
+                        // 是否為 "-"
+                        isDash: text === '-',
+
+                        // 原始文字
+                        text: text
+                    };
                 }
-                else if (aDlc.num !== bDlc.num) {
-                    result = (sortState === 1)
-                        ? aDlc.num - bDlc.num
-                        : bDlc.num - aDlc.num;
-                }
-                else {
-                    // 第二才是文字
+
+                const aKey = parseTextPriority(aText);
+                const bKey = parseTextPriority(bText);
+
+                // ===================================================
+                // ========【第一優先】 ★ 特殊排序 ========
+                // ===================================================
+                if (aKey.isStar !== bKey.isStar) {
+
+                    // 正序：★ 永遠最前
                     if (sortState === 1) {
-                        if (aText === '-' && bText !== '-') return 1;
-                        if (aText !== '-' && bText === '-') return -1;
-                    } else {
-                        if (aText === '-' && bText !== '-') return -1;
-                        if (aText !== '-' && bText === '-') return 1;
+                        result = aKey.isStar ? -1 : 1;
                     }
+
+                    // 倒序：★ 永遠最後
+                    else {
+                        result = aKey.isStar ? 1 : -1;
+                    }
+                }
+
+                // ===================================================
+                // ========【第二優先】 "-" 特殊排序 ========
+                // ===================================================
+                else if (aKey.isDash !== bKey.isDash) {
+
+                    // 正序："-" 永遠最後
+                    if (sortState === 1) {
+                        result = aKey.isDash ? 1 : -1;
+                    }
+
+                    // 倒序："-" 永遠最前
+                    else {
+                        result = aKey.isDash ? -1 : 1;
+                    }
+                }
+
+                // ===================================================
+                // ========【第三優先】 一般文字排序 ========
+                // ===================================================
+                else {
 
                     result = (sortState === 1)
                         ? aText.localeCompare(bText, 'zh-Hant')
@@ -267,26 +314,40 @@ function sortTable(colIndex) {
             }
 
             // ===================================================
-            // 若排序結果相同，則依原始索引排列確保穩定排序
+            // ========【穩定排序】 相同結果時維持原始順序 ========
             // ===================================================
             return result !== 0
                 ? result
                 : Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex);
-
         });
     }
 
-    // 清空 tbody 並重新塞入排序後的 rows
+    // ===================================================
+    // ========【重新渲染排序後內容】 ========
+    // ===================================================
+
+    // 清空 tbody
     tbody.innerHTML = '';
+
+    // 重新插入排序後的 rows
     rows.forEach(row => tbody.appendChild(row));
 
-    // 更新標題樣式 (asc/desc 箭頭)
-    table.querySelectorAll('th').forEach(t =>
-        t.classList.remove('asc', 'desc')
-    );
+    // ===================================================
+    // ========【更新排序箭頭樣式】 ========
+    // ===================================================
 
-    if (sortState === 1) th.classList.add('desc');
-    else if (sortState === 2) th.classList.add('asc');
+    // 移除所有排序樣式
+    table.querySelectorAll('th').forEach(t => {
+        t.classList.remove('asc', 'desc');
+    });
+
+    // 加入當前排序樣式
+    if (sortState === 1) {
+        th.classList.add('desc');
+    }
+    else if (sortState === 2) {
+        th.classList.add('asc');
+    }
 }
 
 // ===================================================
