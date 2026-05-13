@@ -9,18 +9,20 @@
             
 <div class="filter-group">
   <span class="filter-label">查看：</span>
-  <label><input type="checkbox" checked onclick="ctrlCol(0)"> 序號</label>
-  <label><input type="checkbox" checked onclick="ctrlCol(1)"> 圖標</label>
-  <label><input type="checkbox" checked onclick="ctrlCol(2)"> 英文名稱</label>
-  <label><input type="checkbox" checked onclick="ctrlCol(3)"> 中文名稱</label>
-  <label><input type="checkbox" checked onclick="ctrlCol(4)"> 解鎖地圖</label>
-  <label><input type="checkbox" checked onclick="ctrlCol(5)"> 解鎖職業</label>
-  <label><input type="checkbox" checked onclick="ctrlCol(6)"> 解鎖種族</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(0)"> 發行日期</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(1)"> 序號</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(2)"> 圖標</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(3)"> 英文名稱</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(4)"> 中文名稱</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(5)"> 解鎖地圖</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(6)"> 解鎖職業</label>
+  <label><input type="checkbox" checked onclick="ctrlCol(7)"> 解鎖種族</label>
 </div>
 
 <div class="table-container">
   <table id="map-master-table">
     <thead>
+      <th>發行日期</th>
       <tr>
         <th onclick="sortTable(0)" style="cursor: pointer;">
           <div class="sort-wrapper">
@@ -40,6 +42,7 @@
     <tbody>
       
       <tr class="type-ep">
+        <th>2015/03/31</th>
         <td>EP01</td>
         <td><img src="icons/ep01.png" class="dlc-icon"></td>
         <td>Get to Work</td>
