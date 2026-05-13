@@ -130,40 +130,47 @@ function sortTable(colIndex) {
     // ========【一般文字】========
     else {
         rows.sort((a, b) => {
-            let aText = a.cells[colIndex].innerText.trim();
-            let bText = b.cells[colIndex].innerText.trim();
+            // 取得文字
+            const aText = a.cells[colIndex].innerText.trim();
+            const bText = b.cells[colIndex].innerText.trim();
 
-            // ========【- 排最後】========
+            // ========【第一下：正序（▼）】========
+            // 有內容在前，- 在後
             if (sortState === 1) {
-                if (aText === '-') return 1;
-                if (bText === '-') return -1;
+                if (aText === '-' && bText !== '-') {
+                    return 1;
+                }
+                if (aText !== '-' && bText === '-') {
+                return -1;
+                }
             }
-            else {
-                if (aText === '-') return -1;
-                if (bText === '-') return 1;
+                
+            // ========【第二下：倒序（▲）】========
+            // - 在前，有內容在後
+            else if (sortState === 2) {
+                if (aText === '-' && bText !== '-') {
+                    return -1;
+                }
+                if (aText !== '-' && bText === '-') {
+                    return 1;
+                }
             }
-            return sortState === 1
-                ? aText.localeCompare(bText, 'zh-Hant')
-                : bText.localeCompare(aText, 'zh-Hant');
+            
+            // 維持原本順序
+            return Number(a.dataset.originalIndex)
+                - Number(b.dataset.originalIndex);
         });
     }
-    
-    // 清空 tbody
-    tbody.innerHTML = '';
-    // 重新加入
-    rows.forEach(row => tbody.appendChild(row));
 
     // ========【箭頭狀態】========
-    // 清除全部
-    table.querySelectorAll('th').forEach(header => {
-        header.classList.remove('asc', 'desc');
-    });
-    // 套用狀態
+    // 第一下 ▼
     if (sortState === 1) {
-        th.classList.add('asc');
-    }
-    else if (sortState === 2) {
         th.classList.add('desc');
+    }
+        
+    // 第二下 ▲
+    else if (sortState === 2) {
+        th.classList.add('asc');
     }
 }
 
