@@ -301,6 +301,7 @@ body {
     /* 水平對齊 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
     /* 單一不拆不換行 */ white-space: nowrap;
+    /* 標籤右邊距離 */ margin-right: 8px;
 }
 .filter-group label {
     /* 選項置中 */ display: flex;
@@ -696,7 +697,6 @@ body {
     }
     /* 篩選面板：手機端緊湊排列 */
     .filter-group {
-        /* 項目間距 */ gap: 10px 15px;
         /* 左右內縮 */ padding: 0 10px;
     }
     .filter-group label {
@@ -818,7 +818,6 @@ body {
 
     /* ========【摺疊面板】 設定 - 篩選面板緊湊排列 ======== */
     .filter-group {
-        /* 項目間距 */ gap: 10px 15px;
         /* 左右內縮 */ padding: 0 10px;
     }
     .filter-group label {
