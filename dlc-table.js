@@ -218,32 +218,38 @@ function sortTable(colIndex) {
                 }
             }
 
-            // 其餘欄位：地圖 / 職業 / 種族 / 一般文字 / ★ / -
+            // 其餘欄位：地圖 / 職業 / 種族 / 一般文字 / ★ / -// 其餘欄位：地圖 / 職業 / 種族 / 一般文字 / ★ / -
             else {
                 const aText = a.cells[colIndex].innerText.trim();
                 const bText = b.cells[colIndex].innerText.trim();
-
-                // 🔥 第一優先：DLC 序號排序
                 const aDlc = parseDLC(a.cells[1]?.innerText || '');
                 const bDlc = parseDLC(b.cells[1]?.innerText || '');
-                if (aDlc.typeIndex !== bDlc.typeIndex) {
-                    result = (sortState === 1) ? aDlc.typeIndex - bDlc.typeIndex : bDlc.typeIndex - aDlc.typeIndex;
-                } else if (aDlc.num !== bDlc.num) {
-                    result = (sortState === 1) ? aDlc.num - bDlc.num : bDlc.num - aDlc.num;
-                } else {
-                    // 🔥 第二優先：文字內容與特殊符號排序
-                    const aIsStar = aText.includes('★');
-                    const bIsStar = bText.includes('★');
-                    const aIsDash = aText === '-';
-                    const bIsDash = bText === '-';
 
-                    // 1. 星號優先（正序最上 / 倒序最下）
-                    if (aIsStar && !bIsStar) result = -1;
-                    else if (!aIsStar && bIsStar) result = 1;
-                    // 2. 減號最下（正序最下 / 倒序最上）
-                    else if (aIsDash && !bIsDash) result = 1;
-                    else if (!aIsDash && bIsDash) result = -1;
-                    // 3. 一般文字比對
+                // 1. 定義權重 (數字越小越靠前)
+                const getWeight = (text) => {
+                    if (text.includes('★')) return 1; // 星星最優先
+                    if (text === '-') return 3;       // 減號最後
+                    return 2;                        // 一般文字在中間
+                };
+
+                const weightA = getWeight(aText);
+                const weightB = getWeight(bText);
+
+                // ======== 【第一步：比權重】 ========
+                if (weightA !== weightB) {
+                    result = (sortState === 1) ? weightA - weightB : weightB - weightA;
+                } 
+                // ======== 【第二步：權重一樣 (例如兩邊都是星星，或兩邊都是普通文字)】 ========
+                else {
+                    // 比 DLC 類型
+                    if (aDlc.typeIndex !== bDlc.typeIndex) {
+                        result = (sortState === 1) ? aDlc.typeIndex - bDlc.typeIndex : bDlc.typeIndex - aDlc.typeIndex;
+                    } 
+                    // 比 DLC 編號
+                    else if (aDlc.num !== bDlc.num) {
+                        result = (sortState === 1) ? aDlc.num - bDlc.num : bDlc.num - aDlc.num;
+                    }
+                    // ======== 【第三步：DLC 也一樣，比文字】 ========
                     else {
                         result = (sortState === 1)
                             ? aText.localeCompare(bText, 'zh-Hant')
