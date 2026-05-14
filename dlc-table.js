@@ -266,15 +266,25 @@ function sortTable(colIndex) {
     }
     
     // ===================================================
-    // ========【重新渲染排序後內容】 ========
+    // ========【重新渲染排序後內容】（高性能搬移版） ========
     // ===================================================
 
-    // 暫時隱藏 tbody 避免重排閃爍
-    tbody.style.display = 'none';
-    rows.forEach(row => tbody.appendChild(row));
+    // 1. 隱藏內容但保留佈局空間，防止排序時頁面高度塌陷或閃爍
+    tbody.style.visibility = 'hidden';
 
-    // 再顯示 tbody
-    tbody.style.display = '';
+    // 2. 建立 DocumentFragment（虛擬容器），在記憶體中進行操作
+    const fragment = document.createDocumentFragment();
+
+    // 3. 將 rows 中的行逐一搬移至 fragment
+    // 利用 appendChild 特性：節點被搬移到新位置時，會自動從原 tbody 移除
+    rows.forEach(row => fragment.appendChild(row));
+
+    // 4. 清空 tbody 確保乾淨（處理可能殘留的空白字元節點），隨後一次性塞入排好的內容
+    tbody.innerHTML = ''; 
+    tbody.appendChild(fragment);
+
+    // 5. 重新顯示 tbody，完成平滑更新
+    tbody.style.visibility = 'visible';
 
     // ===================================================
     // ========【更新排序箭頭樣式】 ========
