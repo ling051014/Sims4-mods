@@ -286,10 +286,12 @@ function sortTable(colIndex) {
     tbody.appendChild(fragment);
 
     // 5. 使用 requestAnimationFrame 確保瀏覽器畫完畫面後，再釋放高度限制
-    // 這能確保用戶不會看到內容消失又出現的彈跳感
     requestAnimationFrame(() => {
-        table.style.height = '';
-        table.style.minHeight = '';
+        // 雙重保險：確保在下一幀才釋放，給瀏覽器更多時間反應
+        setTimeout(() => {
+            table.style.removeProperty('height');
+            table.style.removeProperty('min-height');
+        }, 0);
     });
 
     // ===================================================
