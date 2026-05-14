@@ -218,7 +218,7 @@ function sortTable(colIndex) {
                 }
             }
 
-            // 其餘欄位：地圖 / 職業 / 種族 / 一般文字 / ★ / -// 其餘欄位：地圖 / 職業 / 種族 / 一般文字 / ★ / -
+            // 其餘欄位：地圖 / 職業 / 種族 / 一般文字 / ★ / -
             else {
                 const aText = a.cells[colIndex].innerText.trim();
                 const bText = b.cells[colIndex].innerText.trim();
