@@ -289,8 +289,7 @@ function sortTable(colIndex) {
     rows.forEach(row => fragment.appendChild(row));
 
     // 3. 清空並一次性塞入新內容
-    tbody.innerHTML = ''; 
-    tbody.appendChild(fragment);
+    tbody.replaceChildren(fragment);
 
     // 4. 釋放高度鎖定（使用 setTimeout 確保渲染完全完成，避免面板卡載入）
     requestAnimationFrame(() => {
