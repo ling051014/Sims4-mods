@@ -351,6 +351,10 @@ body {
     /* 文字顏色 */ color: #666;
     /* 統一字體 */ font-family: inherit;
 }
+.dlc-date {
+    /* 日期等寬 */ font-variant-numeric: tabular-nums;
+    /* 日期置中 */ text-align: center;
+}
 
 /* ========【摺疊面板】 設定 - Hover 與細節 ======== */
 #map-master-table tbody tr:hover,
