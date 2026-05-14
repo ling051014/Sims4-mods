@@ -150,47 +150,92 @@ function sortTable(colIndex) {
     const tbody = table.tBodies[0];
     if (!tbody) return;
 
+    // 取得被點擊的表頭 (th) 元素
     const th = table.querySelectorAll('th')[colIndex];
 
     // 切換排序狀態邏輯
     if (currentSortCol !== colIndex) {
+        // 若點擊新欄位，重置為正序
         currentSortCol = colIndex;
         sortState = 1;
     } else {
+        // 若點擊同欄位，在 0, 1, 2 之間循環
         sortState = (sortState + 1) % 3;
     }
 
-    // 複製原始陣列
+    // 複製原始陣列準備排序
     let rows = [...originalRows];
 
-    if (sortState !== 0) {
+    if (sortState === 0) {
+        // 回歸原始順序
+        rows = [...originalRows];
+    } else {
+        // 暫時隱藏 tbody 避免變形
+        tbody.style.display = 'none';
+
+        // 執行排序邏輯
         rows.sort((a, b) => {
             let result = 0;
 
-            // 取得 DLC 序號 (typeIndex + num) 做主排序
-            const aDlc = parseDLC(a.cells[1]?.innerText || '');
-            const bDlc = parseDLC(b.cells[1]?.innerText || '');
-
-            // 0：發行日期排序
+            // ① 欄位索引 0：發行日期
             if (colIndex === 0) {
+                // 定義日期解析函數
                 const parseDate = (text) => {
                     const m = text.trim().match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
-                    return m ? new Date(m[1], m[2] - 1, m[3]).getTime() : 0;
+                    if (!m) return 0;
+                    // 將日期轉為毫秒數值以便比對
+                    return new Date(m[1], m[2] - 1, m[3]).getTime();
                 };
+
                 const aTime = parseDate(a.cells[0]?.innerText || '');
                 const bTime = parseDate(b.cells[0]?.innerText || '');
-                result = (sortState === 1) ? aTime - bTime : bTime - aTime;
 
-                // 日期相同 → DLC 序號排序
-                if (result === 0) {
-                    result = (sortState === 1)
-                        ? aDlc.typeIndex - bDlc.typeIndex || aDlc.num - bDlc.num
-                        : bDlc.typeIndex - aDlc.typeIndex || bDlc.num - aDlc.num;
+                // 若日期不同，先比日期
+                if (aTime !== bTime) {
+                    result = (sortState === 1) ? aTime - bTime : bTime - aTime;
+                } else {
+                    // 日期相同時，依 DLC序號排序
+                    const aDlc = parseDLC(a.cells[1]?.innerText || '');
+                    const bDlc = parseDLC(b.cells[1]?.innerText || '');
+                    if (aDlc.typeIndex !== bDlc.typeIndex) {
+                        result = (sortState === 1)
+                            ? aDlc.typeIndex - bDlc.typeIndex
+                            : bDlc.typeIndex - aDlc.typeIndex;
+                    } else {
+                        result = (sortState === 1)
+                            ? aDlc.num - bDlc.num
+                            : bDlc.num - aDlc.num;
+                    }
                 }
             }
 
-            // 1：DLC 序號排序
+            // ② 欄位索引 1：DLC 序號
             else if (colIndex === 1) {
+                const aText = a.cells[1]?.innerText.trim() || '';
+                const bText = b.cells[1]?.innerText.trim() || '';
+                const aDlc = parseDLC(aText);
+                const bDlc = parseDLC(bText);
+
+                if (aDlc.typeIndex !== bDlc.typeIndex) {
+                    result = (sortState === 1)
+                        ? aDlc.typeIndex - bDlc.typeIndex
+                        : bDlc.typeIndex - aDlc.typeIndex;
+                } else {
+                    result = (sortState === 1)
+                        ? aDlc.num - bDlc.num
+                        : bDlc.num - aDlc.num;
+                }
+            }
+
+            // ③ 其餘欄位：地圖 / 職業 / 種族 / 一般文字
+            else {
+                const aText = a.cells[colIndex].innerText.trim();
+                const bText = b.cells[colIndex].innerText.trim();
+
+                const aDlc = parseDLC(a.cells[1]?.innerText || '');
+                const bDlc = parseDLC(b.cells[1]?.innerText || '');
+
+                // 🔥 DLC序號排序優先
                 if (aDlc.typeIndex !== bDlc.typeIndex) {
                     result = (sortState === 1)
                         ? aDlc.typeIndex - bDlc.typeIndex
@@ -200,77 +245,38 @@ function sortTable(colIndex) {
                         ? aDlc.num - bDlc.num
                         : bDlc.num - aDlc.num;
                 } else {
-                    const aText = a.cells[1]?.innerText.trim() || '';
-                    const bText = b.cells[1]?.innerText.trim() || '';
-                    result = (sortState === 1)
-                        ? aText.localeCompare(bText, 'zh-Hant')
-                        : bText.localeCompare(aText, 'zh-Hant');
+                    // 分離 "-" 與一般文字
+                    const aIsDash = aText === '-';
+                    const bIsDash = bText === '-';
+
+                    if (aIsDash && !bIsDash) result = 1;
+                    else if (!aIsDash && bIsDash) result = -1;
+                    else {
+                        // 同時是文字或同時為 "-"，依文字升降序
+                        result = (sortState === 1)
+                            ? aText.localeCompare(bText, 'zh-Hant')
+                            : bText.localeCompare(aText, 'zh-Hant');
+                    }
                 }
             }
 
-            // 其餘欄位：地圖 / 職業 / 種族
-            else {
-                const aText = a.cells[colIndex]?.innerText.trim() || '';
-                const bText = b.cells[colIndex]?.innerText.trim() || '';
-
-                // 🔥 文字優先權
-                const aKey = {
-                    isStar: aText.startsWith('★'),
-                    isDash: aText === '-',
-                    text: aText
-                };
-                const bKey = {
-                    isStar: bText.startsWith('★'),
-                    isDash: bText === '-',
-                    text: bText
-                };
-
-                // 先依 DLC 序號排序
-                if (aDlc.typeIndex !== bDlc.typeIndex) {
-                    result = (sortState === 1)
-                        ? aDlc.typeIndex - bDlc.typeIndex
-                        : bDlc.typeIndex - aDlc.typeIndex;
-                } else if (aDlc.num !== bDlc.num) {
-                    result = (sortState === 1)
-                        ? aDlc.num - bDlc.num
-                        : bDlc.num - aDlc.num;
-                }
-                // ★ 優先排序
-                else if (aKey.isStar !== bKey.isStar) {
-                    result = (sortState === 1)
-                        ? (aKey.isStar ? -1 : 1)
-                        : (aKey.isStar ? 1 : -1);
-                }
-                // "-" 排到最後
-                else if (aKey.isDash !== bKey.isDash) {
-                    result = (sortState === 1)
-                        ? (aKey.isDash ? 1 : -1)
-                        : (aKey.isDash ? -1 : 1);
-                }
-                // 一般文字排序
-                else {
-                    result = (sortState === 1)
-                        ? aKey.text.localeCompare(bKey.text, 'zh-Hant')
-                        : bKey.text.localeCompare(aKey.text, 'zh-Hant');
-                }
-            }
-
-            // 穩定排序
+            // 若排序結果相同，依原始索引保持穩定排序
             return result !== 0
                 ? result
                 : Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex);
         });
+
+        // 排序完成後顯示 tbody
+        tbody.style.display = '';
     }
     
     // ===================================================
     // ========【重新渲染排序後內容】 ========
     // ===================================================
 
-    // 隱藏 tbody 避免降序跳動
-    tbody.style.display = 'none';
+    // 清空 tbody 並重新塞入排序後的 rows
     tbody.innerHTML = '';
     rows.forEach(row => tbody.appendChild(row));
-    tbody.style.display = '';
 
     // ===================================================
     // ========【更新排序箭頭樣式】 ========
