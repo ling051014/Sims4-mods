@@ -269,9 +269,12 @@ function sortTable(colIndex) {
     // ========【重新渲染排序後內容】 ========
     // ===================================================
 
-    // 清空 tbody 並重新塞入排序後的 rows
-    tbody.innerHTML = '';
+    // 暫時隱藏 tbody 避免重排閃爍
+    tbody.style.display = 'none';
     rows.forEach(row => tbody.appendChild(row));
+
+    // 再顯示 tbody
+    tbody.style.display = '';
 
     // ===================================================
     // ========【更新排序箭頭樣式】 ========
