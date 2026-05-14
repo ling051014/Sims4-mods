@@ -167,6 +167,12 @@ function sortTable(colIndex) {
     // 複製原始陣列準備排序
     let rows = [...originalRows];
 
+    // 防禦性判斷
+    if (!tbody || !rows || !rows.length) {
+        console.warn("表格尚未就緒，取消排序");
+        return; 
+    }
+    
     if (sortState === 0) {
         // 回歸原始順序
         rows = [...originalRows];
@@ -266,39 +272,35 @@ function sortTable(colIndex) {
     }
     
     // ===================================================
-    // ========【重新渲染排序後內容】（鎖定容器高度版） ========
+    // ========【重新渲染排序後內容】（鎖定高度防擠壓版） ========
     // ===================================================
 
-    // 1. 取得 table 當前的實際高度（鎖定 table 會比鎖定 tbody 更穩固）
-    const table = tbody.closest('table');
-    const currentTableHeight = table.offsetHeight;
-
-    // 2. 暫時強制固定表格高度，防止內容搬移時整張表塌陷
-    table.style.height = currentTableHeight + 'px';
-    table.style.minHeight = currentTableHeight + 'px';
-
-    // 3. 建立虛擬容器搬移行（利用 appendChild 特性自動從原位置移除）
-    // 先確保 rows 變數是排序結果
-    let rows = [...originalRows];
-    if (sortState !== 0) {
-        rows.sort(...); // 你的排序邏輯
+    // 1. 取得 table 並鎖定物理空間，防止搬移時高度塌陷
+    const targetTable = tbody.closest('table');
+    if (targetTable) {
+        const currentTableHeight = targetTable.offsetHeight;
+        targetTable.style.height = currentTableHeight + 'px';
+        targetTable.style.minHeight = currentTableHeight + 'px';
+        targetTable.style.overflow = 'hidden'; // 強制鎖死內容，防止瞬間抖動
     }
 
-    // 再搬移行
+    // 2. 建立虛擬容器搬移行（注意：此處 rows 為你排序後的結果陣列）
     const fragment = document.createDocumentFragment();
     rows.forEach(row => fragment.appendChild(row));
 
-    // 4. 清空舊內容並一次性塞入新內容
+    // 3. 清空並一次性塞入新內容
     tbody.innerHTML = ''; 
     tbody.appendChild(fragment);
 
-    // 5. 使用 requestAnimationFrame 確保瀏覽器畫完畫面後，再釋放高度限制
+    // 4. 釋放高度鎖定（使用 setTimeout 確保渲染完全完成，避免面板卡載入）
     requestAnimationFrame(() => {
-        // 雙重保險：確保在下一幀才釋放，給瀏覽器更多時間反應
         setTimeout(() => {
-            table.style.removeProperty('height');
-            table.style.removeProperty('min-height');
-        }, 0);
+            if (targetTable) {
+                targetTable.style.removeProperty('height');
+                targetTable.style.removeProperty('min-height');
+                targetTable.style.removeProperty('overflow');
+            }
+        }, 10); 
     });
 
     // ===================================================
