@@ -312,10 +312,11 @@ function sortTable(colIndex) {
         t.classList.remove('asc', 'desc');
     });
 
-    // 加入當前排序樣式
+    // 正序給向下箭頭 ▼
     if (sortState === 1) {
         th.classList.add('desc');
     }
+    // 倒序給向上箭頭 ▲
     else if (sortState === 2) {
         th.classList.add('asc');
     }
