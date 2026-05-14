@@ -353,6 +353,7 @@ body {
 }
 #map-master-table tbody td:nth-child(1),
 #map-master-table tbody td:nth-child(2) {
+    /* 表格字體 */ font-family: "Consolas", "Monaco", "Courier New", monospace !important;
     /* 日期等寬 */ font-variant-numeric: tabular-nums;
     /* 日期置中 */ text-align: center;
     /* 禁止換行 */ white-space: nowrap;
