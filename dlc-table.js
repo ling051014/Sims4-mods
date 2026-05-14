@@ -266,25 +266,30 @@ function sortTable(colIndex) {
     }
     
     // ===================================================
-    // ========【重新渲染排序後內容】（高性能搬移版） ========
+    // ========【重新渲染排序後內容】（強制鎖定高度版） ========
     // ===================================================
 
-    // 1. 隱藏內容但保留佈局空間，防止排序時頁面高度塌陷或閃爍
-    tbody.style.visibility = 'hidden';
+    // 1. 取得表格當前的實際高度（包含 padding 和 border）
+    const table = tbody.closest('table');
+    const currentHeight = table.offsetHeight;
 
-    // 2. 建立 DocumentFragment（虛擬容器），在記憶體中進行操作
+    // 2. 暫時強制固定表格高度，防止內容抽離時頁面塌陷
+    table.style.height = currentHeight + 'px';
+    table.style.minHeight = currentHeight + 'px';
+
+    // 3. 搬移行（利用 DocumentFragment 減少重繪次數）
     const fragment = document.createDocumentFragment();
-
-    // 3. 將 rows 中的行逐一搬移至 fragment
-    // 利用 appendChild 特性：節點被搬移到新位置時，會自動從原 tbody 移除
     rows.forEach(row => fragment.appendChild(row));
 
-    // 4. 清空 tbody 確保乾淨（處理可能殘留的空白字元節點），隨後一次性塞入排好的內容
+    // 4. 清空並塞入
     tbody.innerHTML = ''; 
     tbody.appendChild(fragment);
 
-    // 5. 重新顯示 tbody，完成平滑更新
-    tbody.style.visibility = 'visible';
+    // 5. 使用 requestAnimationFrame 確保瀏覽器渲染完成後再釋放高度
+    requestAnimationFrame(() => {
+        table.style.height = '';
+        table.style.minHeight = '';
+    });
 
     // ===================================================
     // ========【更新排序箭頭樣式】 ========
