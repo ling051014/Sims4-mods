@@ -266,26 +266,27 @@ function sortTable(colIndex) {
     }
     
     // ===================================================
-    // ========【重新渲染排序後內容】（強制鎖定高度版） ========
+    // ========【重新渲染排序後內容】（鎖定容器高度版） ========
     // ===================================================
 
-    // 1. 取得表格當前的實際高度（包含 padding 和 border）
+    // 1. 取得 table 當前的實際高度（鎖定 table 會比鎖定 tbody 更穩固）
     const table = tbody.closest('table');
-    const currentHeight = table.offsetHeight;
+    const currentTableHeight = table.offsetHeight;
 
-    // 2. 暫時強制固定表格高度，防止內容抽離時頁面塌陷
-    table.style.height = currentHeight + 'px';
-    table.style.minHeight = currentHeight + 'px';
+    // 2. 暫時強制固定表格高度，防止內容搬移時整張表塌陷
+    table.style.height = currentTableHeight + 'px';
+    table.style.minHeight = currentTableHeight + 'px';
 
-    // 3. 搬移行（利用 DocumentFragment 減少重繪次數）
+    // 3. 建立虛擬容器搬移行（利用 appendChild 特性自動從原位置移除）
     const fragment = document.createDocumentFragment();
     rows.forEach(row => fragment.appendChild(row));
 
-    // 4. 清空並塞入
+    // 4. 清空舊內容並一次性塞入新內容
     tbody.innerHTML = ''; 
     tbody.appendChild(fragment);
 
-    // 5. 使用 requestAnimationFrame 確保瀏覽器渲染完成後再釋放高度
+    // 5. 使用 requestAnimationFrame 確保瀏覽器畫完畫面後，再釋放高度限制
+    // 這能確保用戶不會看到內容消失又出現的彈跳感
     requestAnimationFrame(() => {
         table.style.height = '';
         table.style.minHeight = '';
