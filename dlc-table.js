@@ -278,6 +278,13 @@ function sortTable(colIndex) {
     table.style.minHeight = currentTableHeight + 'px';
 
     // 3. 建立虛擬容器搬移行（利用 appendChild 特性自動從原位置移除）
+    // 先確保 rows 變數是排序結果
+    let rows = [...originalRows];
+    if (sortState !== 0) {
+        rows.sort(...); // 你的排序邏輯
+    }
+
+    // 再搬移行
     const fragment = document.createDocumentFragment();
     rows.forEach(row => fragment.appendChild(row));
 
