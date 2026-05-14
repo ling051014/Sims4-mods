@@ -235,24 +235,28 @@ function sortTable(colIndex) {
                 const aDlc = parseDLC(a.cells[1]?.innerText || '');
                 const bDlc = parseDLC(b.cells[1]?.innerText || '');
 
-                // 🔥 DLC序號排序優先
+                // 🔥 第一優先：DLC 序號排序
                 if (aDlc.typeIndex !== bDlc.typeIndex) {
-                    result = (sortState === 1)
-                        ? aDlc.typeIndex - bDlc.typeIndex
-                        : bDlc.typeIndex - aDlc.typeIndex;
-                } else if (aDlc.num !== bDlc.num) {
-                    result = (sortState === 1)
-                        ? aDlc.num - bDlc.num
-                        : bDlc.num - aDlc.num;
-                } else {
-                    // 分離 "-" 與一般文字
+                    result = (sortState === 1) ? aDlc.typeIndex - bDlc.typeIndex : bDlc.typeIndex - aDlc.typeIndex;
+                }
+                else if (aDlc.num !== bDlc.num) {
+                    result = (sortState === 1) ? aDlc.num - bDlc.num : bDlc.num - aDlc.num;
+                }
+                else {
+                    // 🔥 第二優先：處理特殊符號優先權
+                    const aIsStar = aText.includes('★');
+                    const bIsStar = bText.includes('★');
                     const aIsDash = aText === '-';
                     const bIsDash = bText === '-';
 
-                    if (aIsDash && !bIsDash) result = 1;
+                    // 1. 處理星星 (正序時最頂部)
+                    if (aIsStar && !bIsStar) result = -1;
+                    else if (!aIsStar && bIsStar) result = 1;
+                    // 2. 處理減號 (正序時最底部)
+                    else if (aIsDash && !bIsDash) result = 1;
                     else if (!aIsDash && bIsDash) result = -1;
+                    // 3. 一般文字比對
                     else {
-                        // 同時是文字或同時為 "-"，依文字升降序
                         result = (sortState === 1)
                             ? aText.localeCompare(bText, 'zh-Hant')
                             : bText.localeCompare(aText, 'zh-Hant');
