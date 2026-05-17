@@ -257,6 +257,7 @@ body {
 /* ========【模組卡片】 設定 - 折疊面板 ======== */
 .warning-accordion {
     /* 上方外距 */ margin-top: 10px;
+    /* 內容置中 */ text-align: center;
 }
 
 /* 點擊按鈕本體 */
