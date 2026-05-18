@@ -201,9 +201,11 @@ document.addEventListener("DOMContentLoaded", () => {
             text = text.replace(/_/g, '_<wbr>');
         }
         
-        // 2. 如果有英文點，在點 "." 後面加斷點（排除最後純副檔名的狀況）
+        // 2. 聰明處理點 "." 的斷點
         if (text.includes('.')) {
-            text = text.replace(/\./g, '.<wbr>');
+            // 規則 A：保護版本號 ➡️ 點的前後只要都是數字（\d\.\d），就絕對不加斷點
+            // 規則 B：保護副檔名 ➡️ 點的後面如果是英數字直到單字邊界（\.[a-z0-9]+$），也絕對不加斷點
+            text = text.replace(/\.(?!\d)(?![a-z0-9]+$)/gi, '.<wbr>');
         }
         
         // 寫回原本的標籤裡
