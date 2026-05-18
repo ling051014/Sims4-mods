@@ -188,16 +188,26 @@ function updateModCount() {
     }
 }
 
-// ======== 【隱形換行斷點】自動在模組檔名的底線（_）後方加入 ========
+// ======== 【隱形換行斷點】自動在模組檔名的底線（_）與點（.）後方加入 ========
 document.addEventListener("DOMContentLoaded", () => {
     // 抓取所有詳細資訊欄位裡的超連結與純文字
     const infoLinks = document.querySelectorAll('.info-row a, .info-row span');
     
     infoLinks.forEach(link => {
-        // 如果內容裡面有底線，就自動把 "_" 替換成 "_" + 隱形斷點標籤 <wbr>
-        if (link.innerHTML.includes('_')) {
-            link.innerHTML = link.innerHTML.replace(/_/g, '_<wbr>');
+        let text = link.innerHTML;
+        
+        // 1. 如果有底線，在底線 "_" 後面加斷點
+        if (text.includes('_')) {
+            text = text.replace(/_/g, '_<wbr>');
         }
+        
+        // 2. 如果有英文點，在點 "." 後面加斷點（排除最後純副檔名的狀況）
+        if (text.includes('.')) {
+            text = text.replace(/\./g, '.<wbr>');
+        }
+        
+        // 寫回原本的標籤裡
+        link.innerHTML = text;
     });
 });
 
