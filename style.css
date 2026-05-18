@@ -225,6 +225,7 @@ body {
 .info-row strong {
     /* 文字顏色 */ color: #aaa;
     /* 字體粗細 */ font-weight: 400;
+    /* ｜不換行 */ display: inline-block;
 }
 .info-row a {
     /* 連結顏色 */ color: #55acee;
