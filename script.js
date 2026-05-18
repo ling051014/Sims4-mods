@@ -188,6 +188,19 @@ function updateModCount() {
     }
 }
 
+// ======== 【隱形換行斷點】自動在模組檔名的底線（_）後方加入 ========
+document.addEventListener("DOMContentLoaded", () => {
+    // 抓取所有詳細資訊欄位裡的超連結與純文字
+    const infoLinks = document.querySelectorAll('.info-row a, .info-row span');
+    
+    infoLinks.forEach(link => {
+        // 如果內容裡面有底線，就自動把 "_" 替換成 "_" + 隱形斷點標籤 <wbr>
+        if (link.innerHTML.includes('_')) {
+            link.innerHTML = link.innerHTML.replace(/_/g, '_<wbr>');
+        }
+    });
+});
+
 // ========【滾動動畫】 設定 - 進入畫面時顯示 ========
 
 // IntersectionObserver 觸發條件
