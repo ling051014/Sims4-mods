@@ -221,6 +221,8 @@ body {
     /* 下方間距 */ margin-bottom: 8px;
     /* 文字顏色 */ color: #444;
     /* 行距設定 */ line-height: 1.6;
+    /* 自動換行 */ overflow-wrap: break-word;
+    /* 切斷換行 */ word-break: break-word;
 }
 .info-row strong {
     /* 文字顏色 */ color: #aaa;
