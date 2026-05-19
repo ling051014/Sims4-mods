@@ -210,7 +210,6 @@ body {
     /* 文字靠右 */ text-align: right;
     /* 下方間距 */ margin-bottom: 15px;
 }
-
 .author a {
     /* 作者連結 */ color: inherit;
 }
@@ -255,6 +254,12 @@ body {
     /* 備註裡的強調紅 */color: #ef8181; font-weight: 500; }
 .text-green { 
     /* 備註裡的綠色 */color: #88d8b0; font-weight: 500; }
+.text-yellow { 
+    /* 提醒用暖黃色 */color: #d9bf77; font-weight: 500; }
+.text-purple { 
+    /* 進階功能紫 */color: #b39ddb; font-weight: 500; }
+.text-bluegray { 
+    /* 備用藍灰色 */color: #9fb3c8; font-weight: 500; }
 
 /* ========【模組卡片】 設定 - 折疊面板 ======== */
 .warning-accordion {
