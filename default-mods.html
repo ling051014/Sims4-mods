@@ -9,7 +9,15 @@
 <body>
 
     <nav class="nav-menu">
-        <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">默認替換</a>
+        <div class="nav-links">
+            <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">默認替換</a>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="mod-search" placeholder="關鍵字搜尋..." onkeyup="searchMods()">
+            <div id="search-results" class="search-dropdown"></div>
+        </div>
+        
     </nav>
 
     <div class="mod-container">
