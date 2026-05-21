@@ -5,6 +5,14 @@ const tooltip = document.getElementById('global-skill-tooltip');
 const placeholder = document.getElementById('skill-table-placeholder');
 
 // ===================================================
+// ========【技能提示窗】 狀態與變數紀錄 ========
+// ===================================================
+// 用於延遲隱藏
+let hideTimeout = null;
+// 是否鎖定 tooltip 常駐
+let locked = false;
+
+// ===================================================
 // ========【技能對照表】 載入外部 HTML 檔案 ========
 // ===================================================
 fetch('skill-table.html')
@@ -19,39 +27,45 @@ fetch('skill-table.html')
     .then(html => {
         console.log('✔ 技能表格初始化完成'); // 顯示初始化成功訊息
         placeholder.innerHTML = html; // 插入 HTML 內容到容器
+
+        // ---------------------------------------------------
+        // 【優化版】初始化同步：配合 requestAnimationFrame 確保 DOM 渲染完畢後鎖定寬度
+        // ---------------------------------------------------
         
-        // 1. 暫時顯示 tooltip 但隱形，確保瀏覽器能正確渲染並計算真實寬度，避免 getBoundingClientRect 回傳 0
+        // 先暫時顯示 tooltip 但隱形，確保瀏覽器能正確準備渲染樹
         tooltip.style.visibility = 'hidden';
         tooltip.style.display = 'block';
 
-        // 2. 範圍精準限定：只抓取當前 tooltip 內部的 tbody 行元素
-        const tbodyTrs = tooltip.querySelectorAll('.skill-table tbody tr');
-        
-        if (tbodyTrs.length) {
-            // 3. 縱向掃描最大寬度（沿用你寫的完美 reduce 邏輯）
-            const maxWidths = Array.from(tbodyTrs)
-                .map(tr => Array.from(tr.children))
-                .reduce((acc, row) => {
-                    row.forEach((td, i) => {
-                        const w = td.getBoundingClientRect().width;
-                        acc[i] = Math.max(acc[i] || 0, w);
-                    });
-                    return acc;
-                }, []);
+        // 確保瀏覽器已將字體、CSS Padding 渲染完成，抓到的寬度才百分之百精準
+        requestAnimationFrame(() => {
+            const tbodyTrs = tooltip.querySelectorAll('.skill-table tbody tr');
+            
+            if (tbodyTrs.length) {
+                // 縱向掃描最大寬度（你寫的完美 reduce 邏輯）
+                const maxWidths = Array.from(tbodyTrs)
+                    .map(tr => Array.from(tr.children))
+                    .reduce((acc, row) => {
+                        row.forEach((td, i) => {
+                            const w = td.getBoundingClientRect().width;
+                            acc[i] = Math.max(acc[i] || 0, w);
+                        });
+                        return acc;
+                    }, []);
 
-            // 4. 表頭同步限定：精準將最大寬度鎖死到當前 tooltip 內部的 th 上
-            const ths = tooltip.querySelectorAll('.skill-table thead th');
-            ths.forEach((th, i) => {
-                if (maxWidths[i]) {
-                    th.style.width = maxWidths[i] + 'px';
-                    th.style.minWidth = maxWidths[i] + 'px';
-                }
-            });
-        }
+                // 表頭同步限定：精準鎖定並鎖死 th 寬度
+                const ths = tooltip.querySelectorAll('.skill-table thead th');
+                ths.forEach((th, i) => {
+                    if (maxWidths[i]) {
+                        th.style.width = maxWidths[i] + 'px';
+                        th.style.minWidth = maxWidths[i] + 'px';
+                    }
+                });
+            }
 
-        // 5. 計算完成後，立刻還原為隱藏狀態，交由事件監聽器控制顯示
-        tooltip.style.display = 'none';
-        tooltip.style.visibility = 'visible';
+            // 計算完全鎖死後，立刻歸位隱藏，等待觸發
+            tooltip.style.display = 'none';
+            tooltip.style.visibility = 'visible';
+        });
     })
     
     // 發生錯誤時（如檔案路徑錯誤），於主控台報錯並在畫面上顯示紅字提示
@@ -61,44 +75,63 @@ fetch('skill-table.html')
     });
 
 // ===================================================
-// ========【技能提示窗】 狀態與變數紀錄 ========
-// ===================================================
-// 用於延遲隱藏
-let hideTimeout = null;
-// 是否鎖定 tooltip 常駐
-let locked = false;
-
-// ===================================================
-// ========【技能提示窗】 顯示與定位核心函式 ========
+// ========【輔助函數】 唯一合一的顯示與定位功能 ========
 // ===================================================
 function showTooltip(trigger) {
-    // 解決第 5 點優化：在計算定位前，先讓 tooltip 閃現，確保 offsetWidth/Height 抓到的是自適應完的真實尺寸
+    // 關鍵優化：在計算定位前，先讓 tooltip 閃現，確保 offsetWidth/Height 抓到的是真實尺寸（非 0）
     tooltip.style.visibility = 'hidden';
     tooltip.style.display = 'block';
 
-    // 取得觸發文字（trigger）在視窗中的絕對位置
+    // 取得文字位置範圍
     const rect = trigger.getBoundingClientRect();
     
-    // 這裡可以使用精準的 tooltip.offsetWidth 和 tooltip.offsetHeight 來算你的 Top / Left 定位了
-    // 範例定位邏輯（你可以換成你原本寫的定位算式）：
-    let targetLeft = rect.left + window.scrollX;
-    let targetTop = rect.bottom + window.scrollY + 8; // 往下推 8px
+    // 取得 tooltip 的實際寬度與高度（此時絕對精準）
+    const tooltipWidth = tooltip.offsetWidth;
+    const tooltipHeight = tooltip.offsetHeight;
 
-    // 將算好的位置賦予給 tooltip
-    tooltip.style.left = targetLeft + 'px';
-    tooltip.style.top = targetTop + 'px';
+    // 設定浮窗初始位置：右側，並加上滾動偏移
+    let left = rect.right + 15 + window.scrollX;
+    let top = rect.top + window.scrollY - 10;
 
-    // 定位完成後，解除隱形，完美顯現出來
+    // 若超出瀏覽器右邊界，改為左側顯示
+    if (left + tooltipWidth > window.scrollX + window.innerWidth) {
+        left = rect.left - tooltipWidth - 15;
+    }
+    // 避免超出下方邊界
+    if (top + tooltipHeight > window.scrollY + window.innerHeight) {
+        top = window.scrollY + window.innerHeight - tooltipHeight - 10;
+    }
+    // 避免超出上方邊界
+    if (top < window.scrollY) {
+        top = window.scrollY + 10;
+    }
+
+    // 套用計算後的左邊距與頂邊距
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    
+    // 解除隱形，完美顯現出來 (opacity 過渡)
     tooltip.style.visibility = 'visible';
     tooltip.style.opacity = '1';
+
+    // 若有正在等待的隱藏計時器則清除
+    if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
 }
 
-// ===================================================
-// ========【技能提示窗】 隱藏核心函式 ========
-// ===================================================
 function hideTooltip() {
-    tooltip.style.display = 'none';
+    // 統一由 JS 先控制 opacity 達到淡出視覺
     tooltip.style.opacity = '0';
+    
+    // 與 CSS 過渡時間一致後關閉顯示（200ms）
+    setTimeout(() => {
+        // 確保在等待的這 200ms 內，使用者沒有重新移入，才真正關閉 display
+        if (tooltip.style.opacity === '0') {
+            tooltip.style.display = 'none';
+        }
+    }, 200);
 }
 
 // ===================================================
@@ -111,20 +144,14 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
         // 若已鎖定常駐，滑鼠進入不影響
         if (locked) return;
 
-        showTooltip(trigger); // 呼叫優化後的顯示與定位函式
-
-        // 若有正在等待的隱藏計時器則清除
-        if (hideTimeout) {
-            clearTimeout(hideTimeout);
-            hideTimeout = null;
-        }
+        showTooltip(trigger); // 呼叫唯一定義的顯示與定位核心
     });
 
     // 滑鼠離開 trigger
     trigger.addEventListener('mouseleave', () => {
         // 若鎖定則不自動隱藏
         if (locked) return;
-        // 延遲隱藏 tooltip
+        // 延遲隱藏，提供滑鼠有緩衝時間可以移入小視窗本體
         hideTimeout = setTimeout(() => {
             hideTooltip();
         }, 50);
@@ -135,7 +162,7 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
         e.stopPropagation(); // 避免冒泡到 document click
         locked = !locked;    // 切換鎖定狀態
         if (locked) {
-            showTooltip(trigger); // 鎖定常駐時，同樣確保走正確的定位流程
+            showTooltip(trigger); // 鎖定常駐時，同樣確保走正確的定位與閃現流程
         } else {
             hideTooltip(); // 解除鎖定並隱藏
         }
@@ -152,7 +179,7 @@ tooltip.addEventListener('mouseenter', () => {
         clearTimeout(hideTimeout);
         hideTimeout = null;
     }
-    // 保持提示窗顯示
+    // 保持提示窗顯示狀態
     tooltip.style.display = 'block';
     tooltip.style.opacity = '1';
 });
@@ -162,7 +189,9 @@ tooltip.addEventListener('mouseleave', () => {
     // 鎖定常駐時離開 tooltip 不隱藏
     if (locked) return;
     // 隱藏浮窗 (淡出)
-    hideTooltip();
+    hideTimeout = setTimeout(() => {
+        hideTooltip();
+    }, 50);
 });
 
 // ===================================================
@@ -179,45 +208,3 @@ document.addEventListener('click', (e) => {
     locked = false;
     hideTooltip();
 });
-
-// ===================================================
-// ========【輔助函數】 顯示與隱藏核心功能 ========
-// ===================================================
-function showTooltip(trigger) {
-    // 取得文字位置範圍
-    const rect = trigger.getBoundingClientRect();
-    // 設定浮窗初始位置：右側，並加上滾動偏移
-    let left = rect.right + 15 + window.scrollX;
-    let top = rect.top + window.scrollY - 10;
-
-    // 取得 tooltip 的實際寬度與高度
-    const tooltipWidth = tooltip.offsetWidth;
-    const tooltipHeight = tooltip.offsetHeight;
-
-    // 若超出瀏覽器右邊界，改為左側顯示
-    if (left + tooltipWidth > window.scrollX + window.innerWidth) left = rect.left - tooltipWidth - 15;
-    // 避免超出下方邊界
-    if (top + tooltipHeight > window.scrollY + window.innerHeight) top = window.scrollY + window.innerHeight - tooltipHeight - 10;
-    // 避免超出上方邊界
-    if (top < window.scrollY) top = window.scrollY + 10;
-
-    // 套用計算後的左邊距與頂邊距
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    // 顯示浮窗 (opacity 過渡)
-    tooltip.style.display = 'block';
-    tooltip.style.opacity = '1';
-
-    // 若有正在等待的隱藏計時器則清除
-    if (hideTimeout) {
-        clearTimeout(hideTimeout);
-        hideTimeout = null;
-    }
-}
-
-function hideTooltip() {
-    // 隱藏浮窗 (淡出)
-    tooltip.style.opacity = '0';
-    // 與 CSS 過渡時間一致後關閉顯示
-    setTimeout(() => { tooltip.style.display = 'none'; }, 200);
-}
