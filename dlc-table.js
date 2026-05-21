@@ -115,7 +115,10 @@ function loadDLCTable(containerId) {
                 initTable();
             });
         })
-        .catch(err => console.error("載入 HTML 失敗:", err));
+        .catch(error => {
+            console.error('載入DLC對照表失敗:', error);
+            skillPlaceholder.innerHTML = '表格載入失敗，請稍後再試。';
+        });
 }
 
 // ===================================================
