@@ -451,29 +451,27 @@ body {
     /* 完全不透 */ opacity: 1;
 }
 
-/* ========【浮動提示】 設定 - 內部滾動區 ======== */
+/* ========【浮動提示】 設定 - 內部滾動區（只控制 tbody） ======== */
 .tooltip-scroll-body {
+    /* 變成區塊容器 */ display: block;
     /* 最大高度 */ max-height: 320px;
     /* 超出才顯示卷軸 */ overflow-y: auto;
-    /* 超出才顯示橫向卷軸 */ overflow-x: auto;
+    /* 隱藏橫向卷軸 */ overflow-x: hidden;
 }
 
 /* ========【浮動提示】 設定 - 技能表格 ======== */
 .skill-table {
     /* 撐滿容器 */ width: 100%;
     /* 合併邊框 */ border-collapse: collapse;
-    /* 自適寬度 */ table-layout: auto;
+    /* 自動依內容調整欄寬 */ table-layout: auto;
     /* 柔和文字 */ color: #4b5563;
 }
 
-/* ========【浮動提示】 設定 - 表頭樣式 ======== */
+/* ========【浮動提示】 設定 - 表頭樣式（固定在表格內，不跟滾動） ======== */
 .skill-table thead th {
-    /* 固定表頭 */ position: sticky;
-    /* 貼齊頂部 */ top: 0;
     /* 表頭底色 */ background-color: #ece7df;
     /* 柔和主色 */ color: #6b7a8f;
     /* 文字加粗 */ font-weight: bold;
-    /* 顯示層級 */ z-index: 10;
 }
 
 /* ========【浮動提示】 設定 - 表格共用樣式 ======== */
@@ -497,7 +495,6 @@ body {
     /* 捲軸寬度 */ width: 6px;
     /* 橫向卷軸高度 */ height: 6px;
 }
-
 .tooltip-scroll-body::-webkit-scrollbar-thumb {
     /* 捲軸底色 */ background: #c7c0b5;
     /* 圓角外觀 */ border-radius: 3px;
