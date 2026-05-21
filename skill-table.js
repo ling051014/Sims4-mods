@@ -13,14 +13,14 @@ fetch('skill-table.html')
 
     // 成功抓取檔案後，將 HTML 內容塞入指定的浮空視窗區塊中
     .then(html => {
-        console.log('成功載入 skill-table.html');
+        console.log('✔ 技能表格初始化完成');
         placeholder.innerHTML = html;
     })
     
     // 發生錯誤時（如檔案路徑錯誤），於主控台報錯並在畫面上顯示紅字提示
     .catch(error => {
             console.error('載入 skill-table.html 失敗:', error);
-            skillPlaceholder.innerHTML = '<span style="color:red;">技能表載入失敗，請稍後再試。</span>';
+            skillPlaceholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。</span>';
         });
 
 // 監聽觸發文字
