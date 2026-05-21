@@ -291,8 +291,9 @@ tooltip.addEventListener('mouseleave', () => {
 });
 
 // ===================================================
-// ========【手機優化版】修正版：定位與安全防禦 ========
+// ========【響應式優化】通用定位與手機適配邏輯 ========
 // ===================================================
+
 function showTooltip(trigger) {
     currentTrigger = trigger;
     tooltip.style.visibility = 'hidden';
@@ -302,36 +303,35 @@ function showTooltip(trigger) {
     const tooltipWidth = tooltip.offsetWidth;
     const tooltipHeight = tooltip.offsetHeight;
     
-    // 【手機適配核心】增加一個邊緣安全閥值 (例如手機留邊 10px)
+    // 安全留邊，確保不會貼死螢幕邊緣
     const margin = 10; 
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    // 預設位置：試圖在右邊顯示
+    // 計算初始位置
     let left = rect.right + 15 + window.scrollX;
     let top = rect.top + window.scrollY - 10;
 
-    // 1. 【橫向防禦】如果右邊不夠放，強制靠左顯示，或是在手機窄螢幕直接置中/貼邊
+    // 1. 橫向防禦：若右側塞不下，強制往左翻轉
     if (left + tooltipWidth > window.scrollX + windowWidth - margin) {
         left = rect.left - tooltipWidth - 15 + window.scrollX;
-        // 如果左邊也塞不下（超窄螢幕），強制貼螢幕邊緣並縮小偏移
-        if (left < margin) {
-            left = margin;
-        }
     }
     
-    // 2. 【縱向防禦】防止頂部超出 (例如手機導覽列遮擋)
-    if (top < window.scrollY + margin) {
-        top = window.scrollY + margin;
+    // 2. 邊界防禦：若左側也塞不下（超窄螢幕），強制貼螢幕左邊邊緣
+    if (left < margin) {
+        left = margin;
     }
 
-    // 3. 【縱向防禦】防止底部超出 (防止捲軸無法捲動)
+    // 3. 縱向防禦：若底部超出視窗，強制向上對齊
     if (top + tooltipHeight > window.scrollY + windowHeight - margin) {
         top = window.scrollY + windowHeight - tooltipHeight - margin;
     }
     
-    // 最終強制對齊：確保不會覆蓋 trigger 導致無法點擊
+    // 4. 遮擋防禦：確保不會蓋住觸發文字
     top = Math.max(top, rect.bottom + window.scrollY + 5);
+    
+    // 5. 頂部防禦：確保不會衝出網頁最頂端
+    top = Math.max(top, window.scrollY + margin);
 
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
@@ -344,3 +344,45 @@ function showTooltip(trigger) {
         hideTimeout = null;
     }
 }
+
+function hideTooltip() {
+    currentTrigger = null;
+    tooltip.style.opacity = '0';
+    setTimeout(() => {
+        if (tooltip.style.opacity === '0') {
+            tooltip.style.display = 'none';
+        }
+    }, TRANSITION_TIME);
+}
+
+// 監聽螢幕縮放，自動修正位置
+window.addEventListener('resize', () => {
+    if (currentTrigger && tooltip.style.display === 'block') {
+        showTooltip(currentTrigger);
+    }
+});
+
+// 事件委派：點擊觸發 (包含手機點擊與桌機滑鼠)
+document.body.addEventListener('click', (e) => {
+    const trigger = e.target.closest('.skill-tooltip-trigger');
+    
+    if (trigger) {
+        e.stopPropagation();
+        // 如果是點同一個，鎖定狀態切換
+        if (currentTrigger === trigger && tooltip.style.display === 'block') {
+            locked = !locked;
+            if (!locked) hideTooltip();
+        } else {
+            // 如果點新的，強制顯示並鎖定
+            locked = true;
+            showTooltip(trigger);
+        }
+        return;
+    }
+
+    // 點擊空白處關閉
+    if (locked && !tooltip.contains(e.target)) {
+        locked = false;
+        hideTooltip();
+    }
+});
