@@ -391,3 +391,40 @@ document.body.addEventListener('click', (e) => {
         hideTooltip();
     }
 });
+
+// ===================================================
+// ========【除錯】事件委派 - 手機端偵錯版 ========
+// ===================================================
+document.body.addEventListener('click', (e) => {
+    // 取得點擊目標
+    const trigger = e.target.closest('.skill-tooltip-trigger');
+    
+    // 如果點擊到的是觸發器
+    if (trigger) {
+        // 記錄：確實點到了觸發器
+        debugLog('點擊觸發器: ' + trigger.innerText.substring(0, 5));
+        
+        // 阻止冒泡
+        e.stopPropagation();
+        debugLog('已執行 stopPropagation');
+        
+        // 處理顯示與切換
+        if (currentTrigger === trigger && tooltip.style.display === 'block') {
+            locked = !locked;
+            debugLog('觸發狀態更新，Locked: ' + locked);
+            if (!locked) hideTooltip();
+        } else {
+            locked = true;
+            debugLog('呼叫 showTooltip');
+            showTooltip(trigger);
+        }
+        return;
+    }
+
+    // 如果點擊的是其他地方
+    if (locked) {
+        debugLog('點擊空白處，準備關閉');
+        locked = false;
+        hideTooltip();
+    }
+});
