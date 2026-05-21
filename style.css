@@ -418,7 +418,97 @@ body {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
+/* ========【彈窗按鈕】 設定 - 觸發文字樣式 ======== */
+.open-skill-btn {
+    /* 移除背景 */ background: none;
+    /* 移除邊框 */ border: none;
+    /* 繼承顏色 */ color: inherit;
+    /* 繼承字體 */ font-family: inherit;
+    /* 繼承大小 */ font-size: inherit;
+    /* 文字靠左 */ text-align: left;
+    /* 移除內縮 */ padding: 0;
+    /* 指標手勢 */ cursor: pointer;
+    /* 底線裝飾 */ text-decoration: underline dotted #888;
+}
+.open-skill-btn span {
+    /* 字體大小 */ font-size: 11px;
+    /* 亮色強調 */ color: #00bcd4;
+    /* 左側外距 */ margin-left: 5px;
+}
 
+/* ========【技能彈窗】 設定 - 視窗本體樣式 ======== */
+.skill-modal {
+    /* 視窗邊框 */ border: 1px solid #444;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 深色背景 */ background-color: #222;
+    /* 文字顏色 */ color: #eee;
+    /* 移除內縮 */ padding: 0;
+    /* 限制寬度 */ max-width: 550px;
+    /* 視窗寬度 */ width: 90%;
+    /* 最大高度 */ max-height: 70vh;
+    /* 視窗陰影 */ box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* ========【技能彈窗】 設定 - 背景遮罩樣式 ======== */
+.skill-modal::backdrop {
+    /* 遮罩顏色 */ background: rgba(0, 0, 0, 0.6);
+    /* 毛玻璃感 */ backdrop-filter: blur(3px);
+}
+
+/* ========【技能彈窗】 設定 - 標題列區塊 ======== */
+.modal-header {
+    /* 彈性佈局 */ display: flex;
+    /* 兩端對齊 */ justify-content: space-between;
+    /* 垂直置中 */ align-items: center;
+    /* 內縮空間 */ padding: 12px 20px;
+    /* 標題底色 */ background-color: #1a1a1a;
+    /* 底部分隔 */ border-bottom: 1px solid #333;
+}
+.modal-header h3 {
+    /* 移除外距 */ margin: 0;
+    /* 標題大小 */ font-size: 16px;
+}
+
+/* ========【技能彈窗】 設定 - 關閉按鈕樣式 ======== */
+.close-modal-btn {
+    /* 移除背景 */ background: none;
+    /* 移除邊框 */ border: none;
+    /* 文字顏色 */ color: #aaa;
+    /* 字體大小 */ font-size: 20px;
+    /* 指標手勢 */ cursor: pointer;
+}
+.close-modal-btn:hover {
+    /* 懸停顏色 */ color: #fff;
+}
+
+/* ========【技能彈窗】 設定 - 內部滾動區域 ======== */
+.modal-body {
+    /* 內縮空間 */ padding: 15px;
+    /* 溢出捲動 */ overflow-y: auto;
+    /* 計算高度 */ max-height: calc(70vh - 60px);
+}
+
+/* ========【技能表格】 設定 - 表格本體樣式 ======== */
+.modal-table {
+    /* 寬度填滿 */ width: 100%;
+    /* 邊框合併 */ border-collapse: collapse;
+    /* 字體大小 */ font-size: 13px;
+    /* 文字靠左 */ text-align: left;
+}
+.modal-table th, 
+.modal-table td {
+    /* 內縮空間 */ padding: 8px 12px;
+    /* 底部分隔 */ border-bottom: 1px solid #333;
+}
+.modal-table th {
+    /* 標題底色 */ background-color: #2a2a2a;
+    /* 文字顏色 */ color: #fff;
+    /* 黏性定位 */ position: sticky;
+    /* 靠頂固定 */ top: 0;
+}
+.modal-table tr:hover {
+    /* 懸停底色 */ background-color: #2d2d2d;
+}
 
 
 
