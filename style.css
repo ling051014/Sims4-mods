@@ -422,6 +422,9 @@ body {
 .skill-tooltip-container {
     /* 相對定位 */ position: relative;
     /* 行內區塊 */ display: inline-block;
+
+/* ========【技能懸浮提示】 設定 - 觸發文字 ======== */
+.skill-tooltip-container {
     /* 幫助游標 */ cursor: help;
     /* 繼承顏色 */ color: inherit;
     /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
