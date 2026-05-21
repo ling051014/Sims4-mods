@@ -197,3 +197,8 @@ function showTooltip(trigger) {
 }
 
 function hideTooltip() {
+    // 隱藏浮窗 (淡出)
+    tooltip.style.opacity = '0';
+    // 與 CSS 過渡時間一致後關閉顯示
+    setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+}
