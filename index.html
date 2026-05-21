@@ -372,25 +372,24 @@
     
     <script>
         // ========【 自動引用技能外部 HTML 】========
-        // ========【 技能外部 HTML 隔離控制 】========
-const tooltip = document.getElementById('global-skill-tooltip');
-const placeholder = document.getElementById('skill-table-placeholder');
-const trigger = document.querySelector('.skill-tooltip-trigger');
-
-if (trigger && tooltip && placeholder) {
-    // 1. 先非同步載入技能表格內容
-    fetch('skill-table.html') 
-        .then(response => {
-            if (!response.ok) throw new Error('找不到技能檔案');
-            return response.text();
-        })
-        .then(htmlContent => {
-            placeholder.innerHTML = htmlContent;
-        })
-        .catch(error => {
-            console.error('載入技能表格失敗:', error);
-            placeholder.innerHTML = '<span style="color:red;">表格載入失敗，請檢查檔名。</span>';
-        });
+        const tooltip = document.getElementById('global-skill-tooltip');
+        const placeholder = document.getElementById('skill-table-placeholder');
+        const trigger = document.querySelector('.skill-tooltip-trigger');
+        
+        if (trigger && tooltip && placeholder) {
+            // 1. 先非同步載入技能表格內容
+            fetch('skill-table.html') 
+                .then(response => {
+                    if (!response.ok) throw new Error('找不到技能檔案');
+                    return response.text();
+                })
+                .then(htmlContent => {
+                    placeholder.innerHTML = htmlContent;
+                })
+                .catch(error => {
+                    console.error('載入技能表格失敗:', error);
+                    placeholder.innerHTML = '<span style="color:red;">表格載入失敗，請檢查檔名。</span>';
+                });
 
     // 2. 滑鼠移入：計算「技能等級設定」文字的位置，把浮空視窗定位在它右邊
     trigger.addEventListener('mouseenter', (e) => {
