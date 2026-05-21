@@ -28,52 +28,6 @@ fetch('skill-table.html')
     });
 
 // ===================================================
-// ========【技能提示窗】 監聽觸發文字與防超出機制 ========
-// ===================================================
-document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
-
-    // 滑鼠移入觸發文字
-    trigger.addEventListener('mouseenter', (e) => {
-        const rect = trigger.getBoundingClientRect(); // 取得文字位置範圍
-
-        // 設定浮窗初始位置：右側，並加上滾動偏移
-        let left = rect.right + 15 + window.scrollX;
-        let top = rect.top + window.scrollY - 10;
-
-        // 取得 tooltip 的實際寬度與高度
-        const tooltipWidth = tooltip.offsetWidth;
-        const tooltipHeight = tooltip.offsetHeight;
-
-        // 若超出瀏覽器右邊界，改為左側顯示
-        if (left + tooltipWidth > window.scrollX + window.innerWidth) {
-            left = rect.left - tooltipWidth - 15;
-        }
-
-        // 避免超出下方邊界
-        if (top + tooltipHeight > window.scrollY + window.innerHeight) {
-            top = window.scrollY + window.innerHeight - tooltipHeight - 10;
-        }
-
-        // 避免超出上方邊界
-        if (top < window.scrollY) top = window.scrollY + 10;
-
-        // 套用計算後的左邊距與頂邊距
-        tooltip.style.left = `${left}px`;
-        tooltip.style.top = `${top}px`;
-
-        // 顯示浮窗 (opacity 過渡)
-        tooltip.style.display = 'block';
-        tooltip.style.opacity = '1';
-    });
-
-    // 滑鼠移出觸發文字
-    trigger.addEventListener('mouseleave', () => {
-        tooltip.style.opacity = '0';
-        setTimeout(() => { tooltip.style.display = 'none'; }, 200); // 與 CSS 過渡時間一致
-    });
-});
-
-// ===================================================
 // ========【技能提示窗】 狀態與變數紀錄 ========
 // ===================================================
 // 用於延遲隱藏
