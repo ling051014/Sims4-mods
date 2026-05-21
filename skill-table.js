@@ -291,18 +291,56 @@ tooltip.addEventListener('mouseleave', () => {
 });
 
 // ===================================================
-// ========【響應式優化】 監聽瀏覽器視窗縮放事件 ========
+// ========【手機優化版】修正版：定位與安全防禦 ========
 // ===================================================
-// 當使用者縮放瀏覽器、調整視窗大小、或旋轉手機螢幕時觸發
-window.addEventListener('resize', () => {
-    // 只有在提示窗目前正在顯示、且確實有紀錄到對應的觸發文字時才進行重新定位
-    if (currentTrigger && tooltip.style.display === 'block') {
-        // 清除可能正在等待隱藏的計時器，避免縮放過程中提示窗突然死掉
-        if (hideTimeout) {
-            clearTimeout(hideTimeout);
-            hideTimeout = null;
+function showTooltip(trigger) {
+    currentTrigger = trigger;
+    tooltip.style.visibility = 'hidden';
+    tooltip.style.display = 'block';
+
+    const rect = trigger.getBoundingClientRect();
+    const tooltipWidth = tooltip.offsetWidth;
+    const tooltipHeight = tooltip.offsetHeight;
+    
+    // 【手機適配核心】增加一個邊緣安全閥值 (例如手機留邊 10px)
+    const margin = 10; 
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // 預設位置：試圖在右邊顯示
+    let left = rect.right + 15 + window.scrollX;
+    let top = rect.top + window.scrollY - 10;
+
+    // 1. 【橫向防禦】如果右邊不夠放，強制靠左顯示，或是在手機窄螢幕直接置中/貼邊
+    if (left + tooltipWidth > window.scrollX + windowWidth - margin) {
+        left = rect.left - tooltipWidth - 15 + window.scrollX;
+        // 如果左邊也塞不下（超窄螢幕），強制貼螢幕邊緣並縮小偏移
+        if (left < margin) {
+            left = margin;
         }
-        // 即時呼叫定位功能，讓提示窗死死黏在文字旁邊，防止座標飄移
-        showTooltip(currentTrigger);
     }
-});
+    
+    // 2. 【縱向防禦】防止頂部超出 (例如手機導覽列遮擋)
+    if (top < window.scrollY + margin) {
+        top = window.scrollY + margin;
+    }
+
+    // 3. 【縱向防禦】防止底部超出 (防止捲軸無法捲動)
+    if (top + tooltipHeight > window.scrollY + windowHeight - margin) {
+        top = window.scrollY + windowHeight - tooltipHeight - margin;
+    }
+    
+    // 最終強制對齊：確保不會覆蓋 trigger 導致無法點擊
+    top = Math.max(top, rect.bottom + window.scrollY + 5);
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    
+    tooltip.style.visibility = 'visible';
+    tooltip.style.opacity = '1';
+
+    if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
+}
