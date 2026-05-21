@@ -793,6 +793,34 @@ th.desc .sort-arrows::after {
         /* 左右推開 */ margin-right: -25px;
         /* 內容內縮 */ padding: 15px 25px;
     }
+    /* ========【手機版強制修正】======== */
+    #global-skill-tooltip {
+        /* 確保永遠在視窗內 */ position: fixed !important;
+        /* 強制置中 */ top: 50% !important;
+        /* 強制置中 */ left: 50% !important;
+        /* 強制置中 */ transform: translate(-50%, -50%) !important;
+        /* 設定手機版安全寬度 */ width: 90vw !important;
+        /* 設定手機版安全寬度 */ max-width: 90vw !important;
+        /* 設定高度上限，避免超出螢幕 */ max-height: 80vh !important;
+        /* 確保不被其他元素遮擋 */ z-index: 99999 !important;
+    }
+    /* 隱藏觸發點的 hover 效果，因為手機無 hover */
+    .skill-tooltip-trigger {
+        /* 明顯提示 */ border-bottom: 1px dotted #55acee;
+    }
+    #global-skill-tooltip {
+    /* 強制開啟彈窗內部的垂直與水平捲動 */ overflow-y: auto !important;
+    /* 強制開啟彈窗內部的垂直與水平捲動 */ overflow-x: auto !important;
+    /* 確保觸控滑動順暢 */ -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* 確保表格內容容器允許橫向超出並產生捲軸 */
+    #global-skill-tooltip .tooltip-scroll-body {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        white-space: nowrap; /* 確保內容不會被強行換行 */
+    }
     .home-tips-content {
         /* 縮減內縮 */ padding: 20px 15px !important; 
     }
@@ -915,21 +943,6 @@ th.desc .sort-arrows::after {
     }
     .content {
         /* 內容內縮 */ padding: 15px;
-    }
-    /* ========【手機版強制修正】======== */
-    #global-skill-tooltip {
-        /* 確保永遠在視窗內 */ position: fixed !important;
-        /* 強制置中 */ top: 50% !important;
-        /* 強制置中 */ left: 50% !important;
-        /* 強制置中 */ transform: translate(-50%, -50%) !important;
-        /* 設定手機版安全寬度 */ width: 90vw !important;
-        /* 設定手機版安全寬度 */ max-width: 90vw !important;
-        /* 設定高度上限，避免超出螢幕 */ max-height: 80vh !important;
-        /* 確保不被其他元素遮擋 */ z-index: 99999 !important;
-    }
-    /* 隱藏觸發點的 hover 效果，因為手機無 hover */
-    .skill-tooltip-trigger {
-        /* 明顯提示 */ border-bottom: 1px dotted #55acee;
     }
     .home-tips-container {
         /* 縮小上下距離 */margin: 20px auto;
