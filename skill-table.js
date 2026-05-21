@@ -296,10 +296,14 @@ tooltip.addEventListener('mouseleave', () => {
 function showTooltip(trigger) {
     currentTrigger = trigger; // 紀錄是哪一個觸發器，供螢幕旋轉時使用
     
-    // 強制將顯示狀態開啟，並設定為可見，這對手機版渲染至關重要
+    // 【強制重繪邏輯】確保手機瀏覽器能正確讀取到後續的 position: fixed 定位
+    tooltip.style.display = 'none'; 
+    tooltip.offsetHeight; 
     tooltip.style.display = 'block'; 
+
+    // 設定顯示狀態
     tooltip.style.visibility = 'visible'; 
-    tooltip.style.opacity = '1'; 
+    tooltip.style.opacity = '1';
 
     // 判斷是否為窄螢幕（手機環境），768px 為常見斷點
     const isMobile = window.innerWidth <= 768;
