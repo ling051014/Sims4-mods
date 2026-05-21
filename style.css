@@ -479,15 +479,16 @@ body {
 /* ========【技能懸浮提示】 設定 - 捲動外層（只捲 tbody 內容） ======== */
 .skill-tooltip-window .skill-table tbody {
     /* 最大高度 */ display: block;
-    /* ？？？？ */ max-height: 320px;
+    max-height: 320px;
     /* 垂直捲動 */ overflow-y: auto;
-    /* 水平寬度 */ width: 100%;
+    /* 水平自動撐滿 */ width: 100%;
 }
 
 /* ========【技能懸浮提示】 設定 - tbody 中的 tr 與 td 同步寬度 ======== */
 .skill-tooltip-window .skill-table tbody tr {
-    /* 表格排列 */ display: table;
-    /* 水平寬度 */ width: 100%;
+    /* 保持表格排列 */ display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 
 /* ========【技能懸浮提示】 設定 - 捲軸樣式 ======== */
