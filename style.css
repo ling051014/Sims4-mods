@@ -418,7 +418,14 @@ body {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
-
+/* ========【技能懸浮提示】 設定 - 觸發游標外殼 ======== */
+.skill-tooltip-container {
+    /* 相對定位 */ position: relative;
+    /* 行內區塊 */ display: inline-block;
+    /* 幫助游標 */ cursor: help;
+    /* 繼承顏色 */ color: inherit;
+    /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
+}
 
 
 /* ========【首頁貼士】 設定 - 容器佈局樣式 ======== */
