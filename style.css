@@ -48,7 +48,7 @@ body {
     /* 字距拉開 */ letter-spacing: 2px;
     /* 動畫效果 */ transition: 0.3s;
     /* 圓角弧度 */ border-radius: 4px;
-    /* ？？？？ */ flex: 0 1 calc(25% - 15px);
+    /* 欄位配比 */ flex: 0 1 calc(25% - 15px);
 }
 
 /* ========【目錄按鈕】 設定 - Hover 動畫 ======== */
@@ -343,7 +343,7 @@ body {
     /* 垂直置中 */ align-items: center;
     /* 單一不拆不換行 */ white-space: nowrap;
     /* 標籤右邊距離 */ margin-right: -15px;
-    /* ？？？？ */ padding-right: 5px;
+    /* 右側安全距離 */ padding-right: 5px;
 }
 .filter-group label {
     /* 選項置中 */ display: flex;
@@ -435,7 +435,7 @@ body {
     /* 虛線邊框 */ border: 1px dashed #ddd;
     /* 圓角弧度 */ border-radius: 12px;
     /* 內縮空間 */ padding: 30px;
-    /* ？？？？ */ display: inline-block;
+    /* 內置置中 */ display: inline-block;
 }
 .home-tips-content h3 {
     /* 標題大小 */ font-size: 16px;
