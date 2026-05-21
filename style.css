@@ -425,6 +425,12 @@ body {
     /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
 }
 
+/* ========【技能懸浮提示】 設定 - 顯示控制 ======== */
+.skill-tooltip-container:hover .skill-tooltip-window {
+    /* 顯示視窗 */ visibility: visible;
+    /* 完全不透 */ opacity: 1;
+}
+
 /* ========【技能懸浮提示】 設定 - 旁邊小視窗本體 ======== */
 .skill-tooltip-window {
     /* 預設隱藏 */ visibility: hidden;
@@ -441,12 +447,6 @@ body {
     /* 最大寬度 */ max-width: 720px;
     /* 防止溢出破版 */ overflow: hidden;
     /* 動態過渡 */ transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-/* ========【技能懸浮提示】 設定 - 顯示控制 ======== */
-.skill-tooltip-container:hover .skill-tooltip-window {
-    /* 顯示視窗 */ visibility: visible;
-    /* 完全不透 */ opacity: 1;
 }
 
 /* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
