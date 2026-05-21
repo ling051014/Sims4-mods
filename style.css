@@ -916,9 +916,20 @@ th.desc .sort-arrows::after {
     .content {
         /* 內容內縮 */ padding: 15px;
     }
+    /* ========【手機版強制修正】======== */
     #global-skill-tooltip {
-        /* 最大寬度為螢幕的 90% */ max-width: 90vw !important;
-        /* 手機上強制顯示為固定位置或確保不會跑出視窗 */z-index: 10000 !important;
+        /* 確保永遠在視窗內 */ position: fixed !important;
+        /* 強制置中 */ top: 50% !important;
+        /* 強制置中 */ left: 50% !important;
+        /* 強制置中 */ transform: translate(-50%, -50%) !important;
+        /* 設定手機版安全寬度 */ width: 90vw !important;
+        /* 設定手機版安全寬度 */ max-width: 90vw !important;
+        /* 設定高度上限，避免超出螢幕 */ max-height: 80vh !important;
+        /* 確保不被其他元素遮擋 */ z-index: 99999 !important;
+    }
+    /* 隱藏觸發點的 hover 效果，因為手機無 hover */
+    .skill-tooltip-trigger {
+        /* 明顯提示 */ border-bottom: 1px dotted #55acee;
     }
     .home-tips-container {
         /* 縮小上下距離 */margin: 20px auto;
