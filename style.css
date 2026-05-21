@@ -422,63 +422,96 @@ body {
 .skill-tooltip-container {
     /* 相對定位 */ position: relative;
     /* 行內區塊 */ display: inline-block;
-    /* 指標手勢 */ cursor: pointer;
-    /* 底線裝飾 */ text-decoration: underline dotted #888;
-}
-.skill-tooltip-container span {
-    /* 字體大小 */ font-size: 11px;
-    /* 亮色強調 */ color: #00bcd4;
-    /* 左側外距 */ margin-left: 5px;
+    /* 幫助游標 */ cursor: help;
+    /* 繼承顏色 */ color: inherit;
+    /* 底線虛線 */ border-bottom: 1px dotted #666;
 }
 
 /* ========【浮動提示】 設定 - 旁邊小視窗本體 ======== */
 .skill-tooltip-window {
-    /* 預設隱藏 */ display: none;
+    /* 區塊顯示 */ display: block;
+    /* 預設隱藏 */ visibility: hidden;
+    /* 預設透明 */ opacity: 0;
+    /* 穿透事件 */ pointer-events: none;
     /* 絕對定位 */ position: absolute;
-    /* 距離左側 */ left: 105%; /* 自動出現在文字右側外邊 */
-    /* 貼齊頂部 */ top: -50px;
-    /* 內部底色 */ background: #fff;
-    /* 視窗邊框 */ border: 1px solid #eee;
+    /* 距離左側 */ left: 102%;
+    /* 貼齊頂部 */ top: -20px;
+    /* 深色背景 */ background-color: #222222;
+    /* 視窗邊框 */ border: 1px solid #444444;
     /* 圓角弧度 */ border-radius: 8px;
-    /* 視窗陰影 */ box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    /* 內縮空間 */ padding: 10px;
+    /* 視窗陰影 */ box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    /* 移除內縮 */ padding: 0;
     /* 顯示層級 */ z-index: 999;
-    /* 寬度自適 */ width: max-content; /* 根據文字自動撐開不擠壓 */
+    /* 視窗寬度 */ width: 480px;
+    /* 動態過渡 */ transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* 懸停小視窗時保持顯示，避免滑鼠移入時消失 */
+.skill-tooltip-window:hover {
+    /* 觸發顯示 */ visibility: visible;
+    /* 完全不透 */ opacity: 1;
+    /* 啟用事件 */ pointer-events: auto;
+}
+
+/* 觸發顯示條件：滑鼠滑過或點擊選取時 */
+.skill-tooltip-container:hover .skill-tooltip-window,
+.skill-tooltip-container:active .skill-tooltip-window {
+    /* 觸發顯示 */ visibility: visible;
+    /* 完全不透 */ opacity: 1;
+    /* 啟用事件 */ pointer-events: auto;
+}
+
+/* ========【浮動提示】 設定 - 內部滾動限制 ======== */
+.tooltip-scroll-body {
+    /* 最大高度 */ max-height: 250px;
+    /* 溢出捲動 */ overflow-y: auto;
+}
+
+/* 自訂精緻細捲軸（不吃版面） */
+.tooltip-scroll-body::-webkit-scrollbar {
+    /* 捲軸寬度 */ width: 6px;
+}
+.tooltip-scroll-body::-webkit-scrollbar-thumb {
+    /* 捲軸底色 */ background: #444;
+    /* 圓角外觀 */ border-radius: 3px;
+}
+.tooltip-scroll-body::-webkit-scrollbar-thumb:hover {
+    /* 懸停亮藍 */ background: #00bcd4;
 }
 
 /* ========【浮動提示】 設定 - 橫向三欄佈局 ======== */
+.tooltip-header-row, 
 .tooltip-row {
     /* 彈性佈局 */ display: flex;
-    /* 欄位間距 */ gap: 15px;
-    /* 底部分隔 */ border-bottom: 1px solid #f9f9f9;
-    /* 上下內縮 */ padding: 6px 8px;
+    /* 底部分隔 */ border-bottom: 1px solid #333;
+    /* 文字靠左 */ text-align: left;
 }
+.tooltip-header-row div, 
 .tooltip-row div {
     /* 彈性均分 */ flex: 1;
+    /* 內縮空間 */ padding: 8px 12px;
     /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: #666;
     /* 禁止斷行 */ white-space: nowrap;
+    /* 溢出隱藏 */ overflow: hidden;
+    /* 省略符號 */ text-overflow: ellipsis;
 }
 
 /* ========【浮動提示】 設定 - 表格標頭樣式 ======== */
-.tooltip-header {
-    /* 標頭底色 */ background-color: #f5faff;
-    /* 圓角外觀 */ border-radius: 4px;
-}
-.tooltip-header div {
+.tooltip-header-row {
+    /* 標頭底色 */ background-color: #1a1a1a;
     /* 文字加粗 */ font-weight: bold;
-    /* 標頭顏色 */ color: #55acee;
+    /* 亮色強調 */ color: #00bcd4;
+    /* 左上圓角 */ border-top-left-radius: 7px;
+    /* 右上圓角 */ border-top-right-radius: 7px;
 }
 
-/* ========【浮動提示】 設定 - 滑過自動顯示 ======== */
-.skill-tooltip-container:hover .skill-tooltip-window {
-    /* 觸發顯示 */ display: block;
+/* ========【浮動提示】 設定 - 資料列與懸停 ======== */
+.tooltip-row div {
+    /* 文字顏色 */ color: #eee;
 }
-/* 行列懸停 */
-.tooltip-row:not(.tooltip-header):hover {
-    /* 懸停背景 */ background-color: #fafafa;
+.tooltip-row:not(.tooltip-header-row):hover {
+    /* 懸停底色 */ background-color: #2d2d2d;
 }
-
 
 
 
