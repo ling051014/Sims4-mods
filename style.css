@@ -425,7 +425,6 @@ body {
     /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
 }
 
-```css
 /* ========【技能懸浮提示】 設定 - 旁邊小視窗本體 ======== */
 .skill-tooltip-window {
     /* 預設隱藏 */ visibility: hidden;
@@ -505,7 +504,7 @@ body {
 .tooltip-scroll-body::-webkit-scrollbar-thumb:hover {
     /* 懸停顏色 */ background: #55acee;
 }
-```
+
 
 
 /* ========【首頁貼士】 設定 - 容器佈局樣式 ======== */
