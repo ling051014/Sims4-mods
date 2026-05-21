@@ -436,7 +436,7 @@ body {
     /* 顯示層級 */ z-index: 9999;
     /* 自動寬度 */ width: max-content;
     /* 最大寬度 */ max-width: 720px;
-    /* 防止溢出破版 */ overflow: hidden;
+    /* 不產生額外捲軸 */ overflow: visible;
     /* 動態過渡 */ transition: opacity 0.2s ease;
 }
 
@@ -481,6 +481,7 @@ body {
     /* 最大高度 */ max-height: 320px;
     /* 垂直捲動 */ overflow-y: auto;
     /* 水平捲動 */ overflow-x: auto;
+    /* 避免外層 tooltip 出現雙捲軸 */ display: block;
 }
 
 /* ========【技能懸浮提示】 設定 - 捲軸樣式 ======== */
