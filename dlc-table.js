@@ -117,7 +117,7 @@ function loadDLCTable(containerId) {
         })
         .catch(error => {
             console.error('載入DLC對照表失敗:', error);
-            skillPlaceholder.innerHTML = '表格載入失敗，請稍後再試。';
+            skillPlaceholder.innerHTML = '<span style="color:red;">表格載入失敗，請稍後再試。</span>';
         });
 }
 
