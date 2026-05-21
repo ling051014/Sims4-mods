@@ -1,8 +1,12 @@
-// ========【技能對照表】 設定 - 取得 HTML 中已存在的 tooltip 容器 ========
+// ===================================================
+// ========【技能對照表】 取得 HTML 容器 ========
+// ===================================================
 const tooltip = document.getElementById('global-skill-tooltip');
 const placeholder = document.getElementById('skill-table-placeholder');
 
-// ========【技能對照表】 設定 - 載入外部 HTML 檔案 ========
+// ===================================================
+// ========【技能對照表】 載入外部 HTML 檔案 ========
+// ===================================================
 fetch('skill-table.html')
     
     // 印出 HTTP 狀態碼，方便確認檔案是否成功讀取 (例如：200 成功、404 找不到)
@@ -23,7 +27,9 @@ fetch('skill-table.html')
         placeholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。</span>'; // 顯示紅字提示
     });
 
-// ========【技能提示窗】 設定 - 監聽觸發文字與防超出機制 ========
+// ===================================================
+// ========【技能提示窗】 監聽觸發文字與防超出機制 ========
+// ===================================================
 document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
 
     // 滑鼠移入觸發文字
@@ -67,12 +73,17 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
     });
 });
 
-// ========【 監聽觸發文字、滑鼠與點擊事件 】 ========
+// ===================================================
+// ========【技能提示窗】 狀態與變數紀錄 ========
+// ===================================================
 // 用於延遲隱藏
 let hideTimeout = null;
 // 是否鎖定 tooltip 常駐
 let locked = false;
 
+// ===================================================
+// ========【技能提示窗】 監聽觸發文字、滑鼠與點擊事件 ========
+// ===================================================
 document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
 
     // 滑鼠移入 trigger
@@ -140,7 +151,9 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
     });
 });
 
-// ========【技能提示窗】 設定 - 滑鼠移到 tooltip 上時保持顯示 ========
+// ===================================================
+// ========【技能提示窗】 提示窗本體顯示控制 ========
+// ===================================================
 // 滑鼠移入提示窗本身
 tooltip.addEventListener('mouseenter', () => {
     // 若有隱藏計時器則清除，避免消失
@@ -162,7 +175,33 @@ tooltip.addEventListener('mouseleave', () => {
     setTimeout(() => { tooltip.style.display = 'none'; }, 200);
 });
 
-// ========【點擊頁面其他地方自動關閉 tooltip】========
+// ===================================================
+// ========【技能提示窗】 提示窗本體顯示控制 ========
+// ===================================================
+// 滑鼠移入提示窗本身
+tooltip.addEventListener('mouseenter', () => {
+    // 若有隱藏計時器則清除，避免消失
+    if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
+    // 保持提示窗顯示
+    tooltip.style.display = 'block';
+    tooltip.style.opacity = '1';
+});
+
+// 滑鼠移出提示窗本身
+tooltip.addEventListener('mouseleave', () => {
+    // 鎖定常駐時離開 tooltip 不隱藏
+    if (locked) return; // 鎖定常駐時離開 tooltip 不隱藏
+    // 隱藏浮窗 (淡出)
+    tooltip.style.opacity = '0';
+    setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+});
+
+// ===================================================
+// ========【全域事件】 點擊外部自動關閉提示窗 ========
+// ===================================================
 document.addEventListener('click', (e) => {
     if (!locked) return; // 未鎖定不需處理
     // 點擊在 tooltip 或 trigger 上時不關閉
@@ -174,7 +213,9 @@ document.addEventListener('click', (e) => {
     document.querySelectorAll('.skill-tooltip-trigger.tooltip-locked').forEach(t => t.classList.remove('tooltip-locked'));
 });
 
-// ========【輔助函數】========
+// ===================================================
+// ========【輔助函數】 顯示與隱藏核心功能 ========
+// ===================================================
 function showTooltip(trigger) {
     // 取得文字位置範圍
     const rect = trigger.getBoundingClientRect();
