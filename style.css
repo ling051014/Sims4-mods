@@ -418,96 +418,65 @@ body {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
-/* ========【彈窗按鈕】 設定 - 觸發文字樣式 ======== */
-.open-skill-btn {
-    /* 移除背景 */ background: none;
-    /* 移除邊框 */ border: none;
-    /* 繼承顏色 */ color: inherit;
-    /* 繼承字體 */ font-family: inherit;
-    /* 繼承大小 */ font-size: inherit;
-    /* 文字靠左 */ text-align: left;
-    /* 移除內縮 */ padding: 0;
+/* ========【浮動提示】 設定 - 觸發游標外殼 ======== */
+.skill-tooltip-container {
+    /* 相對定位 */ position: relative;
+    /* 行內區塊 */ display: inline-block;
     /* 指標手勢 */ cursor: pointer;
     /* 底線裝飾 */ text-decoration: underline dotted #888;
 }
-.open-skill-btn span {
+.skill-tooltip-container span {
     /* 字體大小 */ font-size: 11px;
     /* 亮色強調 */ color: #00bcd4;
     /* 左側外距 */ margin-left: 5px;
 }
 
-/* ========【技能彈窗】 設定 - 視窗本體樣式 ======== */
-.skill-modal {
-    /* 視窗邊框 */ border: 1px solid #444;
+/* ========【浮動提示】 設定 - 旁邊小視窗本體 ======== */
+.skill-tooltip-window {
+    /* 預設隱藏 */ display: none;
+    /* 絕對定位 */ position: absolute;
+    /* 距離左側 */ left: 105%; /* 自動出現在文字右側外邊 */
+    /* 貼齊頂部 */ top: -50px;
+    /* 內部底色 */ background: #fff;
+    /* 視窗邊框 */ border: 1px solid #eee;
     /* 圓角弧度 */ border-radius: 8px;
-    /* 深色背景 */ background-color: #222;
-    /* 文字顏色 */ color: #eee;
-    /* 移除內縮 */ padding: 0;
-    /* 限制寬度 */ max-width: 550px;
-    /* 視窗寬度 */ width: 90%;
-    /* 最大高度 */ max-height: 70vh;
-    /* 視窗陰影 */ box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    /* 視窗陰影 */ box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    /* 內縮空間 */ padding: 10px;
+    /* 顯示層級 */ z-index: 999;
+    /* 寬度自適 */ width: max-content; /* 根據文字自動撐開不擠壓 */
 }
 
-/* ========【技能彈窗】 設定 - 背景遮罩樣式 ======== */
-.skill-modal::backdrop {
-    /* 遮罩顏色 */ background: rgba(0, 0, 0, 0.6);
-    /* 毛玻璃感 */ backdrop-filter: blur(3px);
-}
-
-/* ========【技能彈窗】 設定 - 標題列區塊 ======== */
-.modal-header {
+/* ========【浮動提示】 設定 - 橫向三欄佈局 ======== */
+.tooltip-row {
     /* 彈性佈局 */ display: flex;
-    /* 兩端對齊 */ justify-content: space-between;
-    /* 垂直置中 */ align-items: center;
-    /* 內縮空間 */ padding: 12px 20px;
-    /* 標題底色 */ background-color: #1a1a1a;
-    /* 底部分隔 */ border-bottom: 1px solid #333;
+    /* 欄位間距 */ gap: 15px;
+    /* 底部分隔 */ border-bottom: 1px solid #f9f9f9;
+    /* 上下內縮 */ padding: 6px 8px;
 }
-.modal-header h3 {
-    /* 移除外距 */ margin: 0;
-    /* 標題大小 */ font-size: 16px;
-}
-
-/* ========【技能彈窗】 設定 - 關閉按鈕樣式 ======== */
-.close-modal-btn {
-    /* 移除背景 */ background: none;
-    /* 移除邊框 */ border: none;
-    /* 文字顏色 */ color: #aaa;
-    /* 字體大小 */ font-size: 20px;
-    /* 指標手勢 */ cursor: pointer;
-}
-.close-modal-btn:hover {
-    /* 懸停顏色 */ color: #fff;
+.tooltip-row div {
+    /* 彈性均分 */ flex: 1;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: #666;
+    /* 禁止斷行 */ white-space: nowrap;
 }
 
-/* ========【技能彈窗】 設定 - 內部滾動區域 ======== */
-.modal-body {
-    /* 內縮空間 */ padding: 15px;
-    /* 溢出捲動 */ overflow-y: auto;
-    /* 計算高度 */ max-height: calc(70vh - 60px);
+/* ========【浮動提示】 設定 - 表格標頭樣式 ======== */
+.tooltip-header {
+    /* 標頭底色 */ background-color: #f5faff;
+    /* 圓角外觀 */ border-radius: 4px;
+}
+.tooltip-header div {
+    /* 文字加粗 */ font-weight: bold;
+    /* 標頭顏色 */ color: #55acee;
 }
 
-/* ========【技能表格】 設定 - 表格本體樣式 ======== */
-.modal-table {
-    /* 寬度填滿 */ width: 100%;
-    /* 邊框合併 */ border-collapse: collapse;
-    /* 字體大小 */ font-size: 13px;
-    /* 文字靠左 */ text-align: left;
+/* ========【浮動提示】 設定 - 滑過自動顯示 ======== */
+.skill-tooltip-container:hover .skill-tooltip-window {
+    /* 觸發顯示 */ display: block;
 }
-.modal-table th, 
-.modal-table td {
-    /* 內縮空間 */ padding: 8px 12px;
-    /* 底部分隔 */ border-bottom: 1px solid #333;
-}
-.modal-table th {
-    /* 標題底色 */ background-color: #2a2a2a;
-    /* 文字顏色 */ color: #fff;
-    /* 黏性定位 */ position: sticky;
-    /* 靠頂固定 */ top: 0;
-}
-.modal-table tr:hover {
-    /* 懸停底色 */ background-color: #2d2d2d;
+/* 行列懸停 */
+.tooltip-row:not(.tooltip-header):hover {
+    /* 懸停背景 */ background-color: #fafafa;
 }
 
 
