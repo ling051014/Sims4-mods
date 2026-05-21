@@ -17,6 +17,69 @@ const HIDE_DELAY = 150;
 const TRANSITION_TIME = 200; 
 // 紀錄提示窗目前是否處於點擊後的「鎖定常駐」狀態
 let locked = false;
+// 紀錄當前正在觸發提示窗的 DOM 元素，供 window resize 重新定位使用
+let currentTrigger = null;
+
+// ===================================================
+// ========【核心自適應】 重新計算並鎖定欄寬函式 ========
+// ===================================================
+// 當外部 HTML 載入更新、或表格內容有動態變更時，皆可獨立呼叫此函式刷新對齊
+function recalculateColumnWidths() {
+    // 暫時將提示窗設為 block 顯現但隱形，繞過 display:none 無法計算真實寬度的限制
+    tooltip.style.visibility = 'hidden';
+    // 設定透明度為 0，防範第一次淡入動畫閃爍
+    tooltip.style.opacity = '0';
+    // 臨時轉為區塊元素以利瀏覽器計算渲染樹
+    tooltip.style.display = 'block';
+
+    // 使用最高效能的 requestAnimationFrame，確保瀏覽器完全加載字體、CSS 內距後才執行計算
+    requestAnimationFrame(() => {
+        // 限定精準範圍：只撈取當前提示窗內的表格列
+        const tbodyTrs = tooltip.querySelectorAll('.skill-table tbody tr');
+        
+        // 確保表格內確實有內容列存在才執行
+        if (tbodyTrs.length) {
+            
+            // 執行你寫的完美對齊邏輯：縱向掃描整張表格，精準抓出每一欄所有 td 中的「最大絕對寬度」
+            // 將 NodeList 轉為陣列形式
+            const maxWidths = Array.from(tbodyTrs)
+                // 撈出每一列底下的所有單元格 (td)
+                .map(tr => Array.from(tr.children))
+                // 開始使用減量演算法縱向比較寬度
+                .reduce((acc, row) => {
+                    // 遍歷當前列的每一個 td
+                    row.forEach((td, i) => {
+                        // 抓取精準到小數點的真實渲染寬度
+                        const w = td.getBoundingClientRect().width;
+                        // 比較並保存該欄目前為止最大的寬度數值
+                        acc[i] = Math.max(acc[i] || 0, w);
+                    });
+                    // 回傳當前累積的寬度陣列結果
+                    return acc;
+                }, []);
+
+            // 終點線：將計算出來的每一欄最大絕對寬度，強制鎖死回對應的表頭 th 上
+            // 限定範圍：只抓取當前提示窗內的表頭
+            const ths = tooltip.querySelectorAll('.skill-table thead th');
+            // 遍歷每一個表頭單元格
+            ths.forEach((th, i) => {
+                // 若該欄有對應的計算最大寬度
+                if (maxWidths[i]) {
+                    // 強制鎖定寬度屬性
+                    th.style.width = maxWidths[i] + 'px';
+                    // 強制鎖定最小寬度，防止 tbody 捲動時表頭縮水
+                    th.style.minWidth = maxWidths[i] + 'px';
+                }
+            });
+        }
+
+        // 欄寬寬度完全同步鎖死後，立刻將提示窗重設回預設的隱藏狀態
+        // 隱藏區塊
+        tooltip.style.display = 'none';
+        // 還原視覺屬性，讓下次顯示能正常由事件接管
+        tooltip.style.visibility = 'visible';
+    });
+}
 
 // ===================================================
 // ========【技能對照表】 載入外部 HTML 檔案 ========
@@ -32,67 +95,14 @@ fetch('skill-table.html')
         return res.text();
     })
 
-    // 階段二：成功抓取檔案後，將 HTML 內容插入網頁，並在瀏覽器渲染完成後鎖定寬度
+    // 階段二：成功抓取檔案後，將 HTML 內容插入網頁，並呼叫鎖定欄寬函式
     .then(html => {
         // 於主控台顯示成功訊息
         console.log('✔ 技能表格初始化完成');
         // 將外部 HTML 表格正式塞入網頁容器中
         placeholder.innerHTML = html;
-
-        // 暫時將提示窗設為 block 顯現但隱形，繞過 display:none 無法計算真實寬度 (回傳 0) 的物理限制
-        tooltip.style.visibility = 'hidden';
-        // 設定透明度為 0，防範第一次淡入動畫閃爍
-        tooltip.style.opacity = '0';
-        // 臨時轉為區塊元素以利瀏覽器計算渲染樹
-        tooltip.style.display = 'block';
-
-        // 使用最高效能的 requestAnimationFrame，確保瀏覽器完全加載字體、CSS 內距後才執行計算
-        requestAnimationFrame(() => {
-            // 限定精準範圍：只撈取當前提示窗內的表格列
-            const tbodyTrs = tooltip.querySelectorAll('.skill-table tbody tr');
-            
-            // 確保表格內確實有內容列存在才執行
-            if (tbodyTrs.length) {
-                
-                // 執行你寫的完美對齊邏輯：縱向掃描整張表格，精準抓出每一欄所有 td 中的「最大絕對寬度」
-                // 將 NodeList 轉為陣列形式
-                const maxWidths = Array.from(tbodyTrs)
-                    // 撈出每一列底下的所有單元格 (td)
-                    .map(tr => Array.from(tr.children))
-                    // 開始使用減量演算法縱向比較寬度
-                    .reduce((acc, row) => {
-                        // 遍歷當前列的每一個 td
-                        row.forEach((td, i) => {
-                            // 抓取精準到小數點的真實渲染寬度
-                            const w = td.getBoundingClientRect().width;
-                            // 比較並保存該欄目前為止最大的寬度數值
-                            acc[i] = Math.max(acc[i] || 0, w);
-                        });
-                        // 回傳當前累積的寬度陣列結果
-                        return acc;
-                    }, []);
-
-                // 終點線：將計算出來的每一欄最大絕對寬度，強制鎖死回對應的表頭 th 上
-                // 限定範圍：只抓取當前提示窗內的表頭
-                const ths = tooltip.querySelectorAll('.skill-table thead th');
-                // 遍歷每一個表頭單元格
-                ths.forEach((th, i) => {
-                    // 若該欄有對應的計算最大寬度
-                    if (maxWidths[i]) {
-                        // 強制鎖定寬度屬性
-                        th.style.width = maxWidths[i] + 'px';
-                        // 強制鎖定最小寬度，防止 tbody 捲動時表頭縮水
-                        th.style.minWidth = maxWidths[i] + 'px';
-                    }
-                });
-            }
-
-            // 欄寬寬度完全同步鎖死後，立刻將提示窗重設回預設的隱藏狀態
-            // 隱藏區塊
-            tooltip.style.display = 'none';
-            // 還原視覺屬性，讓下次顯示能正常由事件接管
-            tooltip.style.visibility = 'visible';
-        });
+        // 呼叫封裝好的欄寬計算函式，進行初次同步對齊
+        recalculateColumnWidths();
     })
     
     // 階段三：發生非預期錯誤時 (例如檔案路徑打錯)，進行安全防禦回退
@@ -107,6 +117,8 @@ fetch('skill-table.html')
 // ========【輔助函數】 唯一合一的顯示與定位功能 ========
 // ===================================================
 function showTooltip(trigger) {
+    // 紀錄當前被觸發的 trigger 元素，供視窗縮放時重新計算座標
+    currentTrigger = trigger;
     // 在計算實際位置前先設為隱形
     tooltip.style.visibility = 'hidden';
     // 解除 display: none，確保 offsetWidth/Height 抓到的是真實尺寸
@@ -164,6 +176,8 @@ function showTooltip(trigger) {
 }
 
 function hideTooltip() {
+    // 當提示窗完全隱藏時，清空當前 trigger 紀錄
+    currentTrigger = null;
     // 觸發 CSS 中的 opacity 屬性，進入淡出動畫階段
     tooltip.style.opacity = '0';
     
@@ -240,7 +254,8 @@ document.body.addEventListener('click', (e) => {
     if (locked && !tooltip.contains(e.target)) {
         // 強制解除鎖定常駐狀態
         locked = false;
-        // 呼叫隱藏核心，讓提示窗自動淡出關閉
+        // 【成功捕捉臭蟲】補上漏掉的隱藏函式，讓提示窗在點擊空白處時能真正淡出關閉
+        hideTooltip();
     }
 });
 
@@ -273,4 +288,21 @@ tooltip.addEventListener('mouseleave', () => {
         // 緩衝時間到期後，執行隱藏淡出流程
         hideTooltip();
     }, HIDE_DELAY);
+});
+
+// ===================================================
+// ========【響應式優化】 監聽瀏覽器視窗縮放事件 ========
+// ===================================================
+// 當使用者縮放瀏覽器、調整視窗大小、或旋轉手機螢幕時觸發
+window.addEventListener('resize', () => {
+    // 只有在提示窗目前正在顯示、且確實有紀錄到對應的觸發文字時才進行重新定位
+    if (currentTrigger && tooltip.style.display === 'block') {
+        // 清除可能正在等待隱藏的計時器，避免縮放過程中提示窗突然死掉
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+        // 即時呼叫定位功能，讓提示窗死死黏在文字旁邊，防止座標飄移
+        showTooltip(currentTrigger);
+    }
 });
