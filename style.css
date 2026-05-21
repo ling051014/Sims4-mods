@@ -439,80 +439,72 @@ body {
     /* 圓角弧度 */ border-radius: 12px;
     /* 柔和陰影 */ box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
     /* 顯示層級 */ z-index: 999;
-    /* 最小寬度 */ min-width: 450px;
-    /* 最大寬度 */ max-width: 600px;
-    /* 溢出隱藏 */ overflow: hidden;
+    /* 最小寬度 */ min-width: 520px;
+    /* 最大寬度 */ max-width: 720px;
+    /* 超出隱藏 */ overflow: hidden;
     /* 動態過渡 */ transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* 懸停與選取時的顯示控制 */
-.skill-tooltip-window:hover {
-    /* 觸發顯示 */ visibility: visible;
+/* ========【浮動提示】 設定 - 懸停顯示控制 ======== */
+.skill-tooltip-container:hover .skill-tooltip-window {
+    /* 顯示視窗 */ visibility: visible;
     /* 完全不透 */ opacity: 1;
 }
 
-.skill-tooltip-container:hover .skill-tooltip-window,
-.skill-tooltip-container:active .skill-tooltip-window {
-    /* 觸發顯示 */ visibility: visible;
-    /* 完全不透 */ opacity: 1;
-}
-
-/* ========【浮動提示】 設定 - 內部滾動與表格化 ======== */
+/* ========【浮動提示】 設定 - 內部滾動區 ======== */
 .tooltip-scroll-body {
-    /* 最大高度 */ max-height: 250px;
-    /* 強制捲動 */ overflow-y: scroll;
-    /* 隱藏橫軸 */ overflow-x: hidden;
-    /* 表格佈局 */ display: table;
-    /* 寬度撐滿 */ width: 100%;
+    /* 最大高度 */ max-height: 320px;
+    /* 超出才顯示卷軸 */ overflow-y: auto;
+    /* 超出才顯示橫向卷軸 */ overflow-x: auto;
+}
+
+/* ========【浮動提示】 設定 - 技能表格 ======== */
+.skill-table {
+    /* 撐滿容器 */ width: 100%;
+    /* 合併邊框 */ border-collapse: collapse;
+    /* 自適寬度 */ table-layout: auto;
     /* 柔和文字 */ color: #4b5563;
 }
 
-/* ========【浮動提示】 設定 - 橫向表格列佈局 ======== */
-.tooltip-header-row,
-.tooltip-row {
-    /* 表格列化 */ display: table-row;
+/* ========【浮動提示】 設定 - 表頭樣式 ======== */
+.skill-table thead th {
+    /* 固定表頭 */ position: sticky;
+    /* 貼齊頂部 */ top: 0;
+    /* 表頭底色 */ background-color: #ece7df;
+    /* 柔和主色 */ color: #6b7a8f;
+    /* 文字加粗 */ font-weight: bold;
+    /* 顯示層級 */ z-index: 10;
 }
 
-.tooltip-header-row div,
-.tooltip-row div {
-    /* 表格儲存 */ display: table-cell;
+/* ========【浮動提示】 設定 - 表格共用樣式 ======== */
+.skill-table th,
+.skill-table td {
     /* 內縮空間 */ padding: 8px 14px;
     /* 字體大小 */ font-size: 12px;
     /* 文字置中 */ text-align: center;
     /* 垂直置中 */ vertical-align: middle;
-    /* 禁止斷行 */ white-space: nowrap;
+    /* 禁止換行 */ white-space: nowrap;
     /* 柔和分隔線 */ border-bottom: 1px solid #e5e0d8;
 }
 
-/* ========【浮動提示】 設定 - 表格標頭樣式 ======== */
-.tooltip-header-row div {
-    /* 標頭底色 */ background-color: #ece7df;
-    /* 文字加粗 */ font-weight: bold;
-    /* 柔和主色 */ color: #6b7a8f;
-    /* 標頭置頂 */ position: sticky;
-    /* 釘在頂部 */ top: 0;
-    /* 標頭層級 */ z-index: 10;
-}
-
 /* ========【浮動提示】 設定 - 資料列懸停效果 ======== */
-.tooltip-row:hover div {
+.skill-table tbody tr:hover {
     /* 懸停底色 */ background-color: #f1ede7;
 }
 
 /* ========【浮動提示】 設定 - 精緻細捲軸 ======== */
 .tooltip-scroll-body::-webkit-scrollbar {
     /* 捲軸寬度 */ width: 6px;
+    /* 橫向卷軸高度 */ height: 6px;
 }
 
 .tooltip-scroll-body::-webkit-scrollbar-thumb {
     /* 捲軸底色 */ background: #c7c0b5;
     /* 圓角外觀 */ border-radius: 3px;
 }
-
 .tooltip-scroll-body::-webkit-scrollbar-thumb:hover {
     /* 懸停顏色 */ background: #9fb3c8;
 }
-
 
 
 /* ========【首頁貼士】 設定 - 容器佈局樣式 ======== */
