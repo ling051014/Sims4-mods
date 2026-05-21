@@ -176,22 +176,31 @@ document.addEventListener('click', (e) => {
 
 // ========【輔助函數】========
 function showTooltip(trigger) {
+    // 取得文字位置範圍
     const rect = trigger.getBoundingClientRect();
+    // 設定浮窗初始位置：右側，並加上滾動偏移
     let left = rect.right + 15 + window.scrollX;
     let top = rect.top + window.scrollY - 10;
 
+    // 取得 tooltip 的實際寬度與高度
     const tooltipWidth = tooltip.offsetWidth;
     const tooltipHeight = tooltip.offsetHeight;
 
+    // 若超出瀏覽器右邊界，改為左側顯示
     if (left + tooltipWidth > window.scrollX + window.innerWidth) left = rect.left - tooltipWidth - 15;
+    // 避免超出下方邊界
     if (top + tooltipHeight > window.scrollY + window.innerHeight) top = window.scrollY + window.innerHeight - tooltipHeight - 10;
+    // 避免超出上方邊界
     if (top < window.scrollY) top = window.scrollY + 10;
 
+    // 套用計算後的左邊距與頂邊距
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
+    // 顯示浮窗 (opacity 過渡)
     tooltip.style.display = 'block';
     tooltip.style.opacity = '1';
 
+    // 若有正在等待的隱藏計時器則清除
     if (hideTimeout) {
         clearTimeout(hideTimeout);
         hideTimeout = null;
@@ -199,6 +208,8 @@ function showTooltip(trigger) {
 }
 
 function hideTooltip() {
+    // 隱藏浮窗 (淡出)
     tooltip.style.opacity = '0';
+    // 與 CSS 過渡時間一致後關閉顯示
     setTimeout(() => { tooltip.style.display = 'none'; }, 200);
 }
