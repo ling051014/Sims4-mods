@@ -238,39 +238,43 @@
                 </div>
 
                 <div class="table-container" style="margin-top: 15px;">
-                    <table class="hotkey-table">
-                        <thead>
-                            <tr>
-                                <th>技能與職業類</th>
-                                <th>密技</th>
-                                <th>範例</th>
-                            </tr>
-                        </thead>
-                        
-                        <tbody>
-                            
-                            <tr>
-                                <td>技能等級設定</td>
-                                <td>
-                                    <span class="skill-tooltip-trigger skill-tooltip-container">
-                                        stats.set_skill_level 技能名稱 等級數字
-                                    </span>
-                                </td>
-                                <td>stats.set_skill_level Major_Bartending 10</td>
-                            </tr>
-                            
-                            <tr>
-                                <td>職業晉升</td>
-                                <td>careers.promote 職業名稱</td>
-                                <td>careers.promote Doctor</td>
-                            </tr>
-                            <tr>
-                                <td>新增職業</td>
-                                <td>careers.add_career 職業名稱</td>
-                                <td>careers.add_career Writer</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="skill-tooltip-header">
+                        <table class="hotkey-table">
+                            <thead>
+                                <tr>
+                                    <th>技能與職業類</th>
+                                    <th>密技</th>
+                                    <th>範例</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="tooltip-scroll-body" style="max-height: 320px; overflow-y: auto; overflow-x: auto;">
+                        <table class="hotkey-table">
+                            <tbody>
+                                <tr>
+                                    <td>技能等級設定</td>
+                                    <td>
+                                        <span class="skill-tooltip-trigger skill-tooltip-container">
+                                            stats.set_skill_level 技能名稱 等級數字
+                                        </span>
+                                    </td>
+                                    <td>stats.set_skill_level Major_Bartending 10</td>
+                                </tr>
+                                <tr>
+                                    <td>職業晉升</td>
+                                    <td>careers.promote 職業名稱</td>
+                                    <td>careers.promote Doctor</td>
+                                </tr>
+                                <tr>
+                                    <td>新增職業</td>
+                                    <td>careers.add_career 職業名稱</td>
+                                    <td>careers.add_career Writer</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="table-container" style="margin-top: 15px;">
