@@ -67,7 +67,7 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
     });
 });
 
-// ========【技能提示窗】 設定 - 監聽觸發文字、滑鼠與點擊事件 ========
+// ========【 監聽觸發文字、滑鼠與點擊事件 】 ========
 // 用於延遲隱藏
 let hideTimeout = null;
 // 是否鎖定 tooltip 常駐
@@ -161,3 +161,44 @@ tooltip.addEventListener('mouseleave', () => {
     tooltip.style.opacity = '0';
     setTimeout(() => { tooltip.style.display = 'none'; }, 200);
 });
+
+// ========【點擊頁面其他地方自動關閉 tooltip】========
+document.addEventListener('click', (e) => {
+    if (!locked) return; // 未鎖定不需處理
+    // 點擊在 tooltip 或 trigger 上時不關閉
+    if (tooltip.contains(e.target) || e.target.classList.contains('skill-tooltip-trigger')) return;
+
+    // 解除鎖定並隱藏
+    locked = false;
+    hideTooltip();
+    document.querySelectorAll('.skill-tooltip-trigger.tooltip-locked').forEach(t => t.classList.remove('tooltip-locked'));
+});
+
+// ========【輔助函數】========
+function showTooltip(trigger) {
+    const rect = trigger.getBoundingClientRect();
+    let left = rect.right + 15 + window.scrollX;
+    let top = rect.top + window.scrollY - 10;
+
+    const tooltipWidth = tooltip.offsetWidth;
+    const tooltipHeight = tooltip.offsetHeight;
+
+    if (left + tooltipWidth > window.scrollX + window.innerWidth) left = rect.left - tooltipWidth - 15;
+    if (top + tooltipHeight > window.scrollY + window.innerHeight) top = window.scrollY + window.innerHeight - tooltipHeight - 10;
+    if (top < window.scrollY) top = window.scrollY + 10;
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.style.display = 'block';
+    tooltip.style.opacity = '1';
+
+    if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
+}
+
+function hideTooltip() {
+    tooltip.style.opacity = '0';
+    setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+}
