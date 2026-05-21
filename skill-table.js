@@ -362,27 +362,20 @@ window.addEventListener('resize', () => {
     }
 });
 
-// 事件委派：點擊觸發 (包含手機點擊與桌機滑鼠)
-document.body.addEventListener('click', (e) => {
-    const trigger = e.target.closest('.skill-tooltip-trigger');
-    
-    if (trigger) {
-        e.stopPropagation();
-        // 如果是點同一個，鎖定狀態切換
-        if (currentTrigger === trigger && tooltip.style.display === 'block') {
-            locked = !locked;
-            if (!locked) hideTooltip();
-        } else {
-            // 如果點新的，強制顯示並鎖定
-            locked = true;
-            showTooltip(trigger);
-        }
-        return;
+/* ========【提示窗手機版強制安全定位】 ======== */
+    #global-skill-tooltip {
+        /* 強制從 absolute 改為 fixed，讓它永遠相對於螢幕顯示 */
+        position: fixed !important;
+        /* 強制定位在螢幕中心區域，保證一定看得到 */
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        /* 手機強制寬度佔比 */
+        width: 85vw !important;
+        /* 手機強制高度佔比 */
+        max-height: 70vh !important;
+        /* 確保絕對在最上層 */
+        z-index: 20000 !important;
+        /* 確保觸發時顯示 */
+        display: block !important;
     }
-
-    // 點擊空白處關閉
-    if (locked && !tooltip.contains(e.target)) {
-        locked = false;
-        hideTooltip();
-    }
-});
