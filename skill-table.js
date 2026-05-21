@@ -27,10 +27,6 @@ fetch('skill-table.html')
     .then(html => {
         console.log('✔ 技能表格初始化完成'); // 顯示初始化成功訊息
         placeholder.innerHTML = html; // 插入 HTML 內容到容器
-
-        // ---------------------------------------------------
-        // 【優化版】初始化同步：配合 requestAnimationFrame 確保 DOM 渲染完畢後鎖定寬度
-        // ---------------------------------------------------
         
         // 先暫時顯示 tooltip 但隱形，確保瀏覽器能正確準備渲染樹
         tooltip.style.visibility = 'hidden';
