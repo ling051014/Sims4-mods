@@ -19,6 +19,7 @@ fetch('skill-table.html')
     .then(html => {
         console.log('✔ 技能表格初始化完成'); // 顯示初始化成功訊息
         placeholder.innerHTML = html; // 插入 HTML 內容到容器
+        tooltip.style.display = 'none'; // 確保初始隱藏，避免 fetch 前空白
     })
     
     // 發生錯誤時（如檔案路徑錯誤），於主控台報錯並在畫面上顯示紅字提示
@@ -58,16 +59,20 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
     trigger.addEventListener('mouseleave', () => {
         // 若鎖定則不自動隱藏
         if (locked) return;
-        // 延遲隱藏 tooltip
+        // 延遲隱藏 tooltip，避免快速移動閃爍
         hideTimeout = setTimeout(() => {
             hideTooltip();
-        }, 50);
+        }, 150);
     });
 
     // 點擊 trigger 鎖定/解除鎖定 tooltip
     trigger.addEventListener('click', (e) => {
         e.stopPropagation(); // 避免冒泡到 document click
         locked = !locked;    // 切換鎖定狀態
+
+        // 若 HTML 尚未載入完成，先不顯示 tooltip
+        if (!placeholder.innerHTML.trim()) return;
+
         if (locked) {
             tooltip.style.display = 'block'; // 鎖定常駐顯示
             tooltip.style.opacity = '1';
@@ -121,9 +126,15 @@ document.addEventListener('click', (e) => {
 function showTooltip(trigger) {
     // 取得文字位置範圍
     const rect = trigger.getBoundingClientRect();
+
     // 設定浮窗初始位置：右側，並加上滾動偏移
     let left = rect.right + 15 + window.scrollX;
-    let top = rect.top + window.scrollY - 10;
+    let top = rect.top + window.scrollY;
+
+    // 考慮 tooltip scroll-body padding-top（表頭高度），避免表頭被遮住
+    const scrollBody = tooltip.querySelector('.tooltip-scroll-body');
+    const headerHeight = scrollBody ? scrollBody.offsetTop : 0;
+    top -= headerHeight;
 
     // 取得 tooltip 的實際寬度與高度
     const tooltipWidth = tooltip.offsetWidth;
