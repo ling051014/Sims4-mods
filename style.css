@@ -449,13 +449,6 @@ body {
     /* 動態過渡 */ transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
-.tooltip-scroll-body {
-    /* 最大高度 */ max-height: 320px;
-    /* 垂直捲動 */ overflow-y: auto;
-    /* 水平捲動 */ overflow-x: auto;
-}
-
 /* ========【技能懸浮提示】 設定 - 技能表格 ======== */
 .skill-tooltip-window .skill-table {
     /* 撐滿容器 */ width: 100% !important;
@@ -490,6 +483,13 @@ body {
 /* ========【技能懸浮提示】 設定 - hover效果 ======== */
 .skill-tooltip-window .skill-table tbody tr:hover {
     /* 懸停底色 */ background-color: rgba(85, 172, 238, 0.08) !important;
+}
+
+/* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
+.tooltip-scroll-body {
+    /* 最大高度 */ max-height: 320px;
+    /* 垂直捲動 */ overflow-y: auto;
+    /* 水平捲動 */ overflow-x: auto;
 }
 
 /* ========【技能懸浮提示】 設定 - 捲軸樣式 ======== */
