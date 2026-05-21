@@ -1,77 +1,105 @@
 // ===================================================
 // ========【技能對照表】 取得 HTML 容器 ========
 // ===================================================
+// 取得全域浮空提示窗本體
 const tooltip = document.getElementById('global-skill-tooltip');
+// 取得用來塞入外部 HTML 的容器
 const placeholder = document.getElementById('skill-table-placeholder');
 
 // ===================================================
 // ========【技能提示窗】 狀態與變數紀錄 ========
 // ===================================================
-// 用於延遲隱藏（調整為 150ms 讓滑鼠在文字與彈窗間移動時更絲滑不閃爍）
+// 用於儲存延遲隱藏的計時器 ID
 let hideTimeout = null;
+// 滑鼠移出時的緩衝延遲時間 (單位: 毫秒)
 const HIDE_DELAY = 150; 
-
-// 動畫過渡時間（需與 CSS transition 保持一致，方便未來統一修改）
+// 必須與 CSS transition 動畫過渡時間完全同步 (單位: 毫秒)
 const TRANSITION_TIME = 200; 
-
-// 是否鎖定 tooltip 常駐
+// 紀錄提示窗目前是否處於點擊後的「鎖定常駐」狀態
 let locked = false;
 
 // ===================================================
 // ========【技能對照表】 載入外部 HTML 檔案 ========
 // ===================================================
+// 開始異步抓取外部的技能表格 HTML 檔案
 fetch('skill-table.html')
     
-    // 印出 HTTP 狀態碼，方便確認檔案是否成功讀取
+    // 階段一：接收回應，印出 HTTP 狀態碼以便開發除錯
     .then(res => {
+        // 於主控台印出狀態碼 (例如：200 成功、404 找不到)
         console.log('HTTP 狀態碼:', res.status);
+        // 將回應轉換為純文字 HTML 格式
         return res.text();
     })
 
-    // 成功抓取檔案後，將 HTML 內容塞入指定的浮空視窗區塊中
+    // 階段二：成功抓取檔案後，將 HTML 內容插入網頁，並在瀏覽器渲染完成後鎖定寬度
     .then(html => {
+        // 於主控台顯示成功訊息
         console.log('✔ 技能表格初始化完成');
+        // 將外部 HTML 表格正式塞入網頁容器中
         placeholder.innerHTML = html;
-        
-        // 暫時隱形顯示以供計算，同步加入 opacity: 0 確保第一次淡入動畫順暢不突兀
+
+        // 暫時將提示窗設為 block 顯現但隱形，繞過 display:none 無法計算真實寬度 (回傳 0) 的物理限制
         tooltip.style.visibility = 'hidden';
+        // 設定透明度為 0，防範第一次淡入動畫閃爍
         tooltip.style.opacity = '0';
+        // 臨時轉為區塊元素以利瀏覽器計算渲染樹
         tooltip.style.display = 'block';
 
+        // 使用最高效能的 requestAnimationFrame，確保瀏覽器完全加載字體、CSS 內距後才執行計算
         requestAnimationFrame(() => {
+            // 限定精準範圍：只撈取當前提示窗內的表格列
             const tbodyTrs = tooltip.querySelectorAll('.skill-table tbody tr');
             
+            // 確保表格內確實有內容列存在才執行
             if (tbodyTrs.length) {
-                // 縱向掃描最大欄寬
+                
+                // 執行你寫的完美對齊邏輯：縱向掃描整張表格，精準抓出每一欄所有 td 中的「最大絕對寬度」
+                // 將 NodeList 轉為陣列形式
                 const maxWidths = Array.from(tbodyTrs)
+                    // 撈出每一列底下的所有單元格 (td)
                     .map(tr => Array.from(tr.children))
+                    // 開始使用減量演算法縱向比較寬度
                     .reduce((acc, row) => {
+                        // 遍歷當前列的每一個 td
                         row.forEach((td, i) => {
+                            // 抓取精準到小數點的真實渲染寬度
                             const w = td.getBoundingClientRect().width;
+                            // 比較並保存該欄目前為止最大的寬度數值
                             acc[i] = Math.max(acc[i] || 0, w);
                         });
+                        // 回傳當前累積的寬度陣列結果
                         return acc;
                     }, []);
 
-                // 將最大寬度鎖死到表頭 th 上
+                // 終點線：將計算出來的每一欄最大絕對寬度，強制鎖死回對應的表頭 th 上
+                // 限定範圍：只抓取當前提示窗內的表頭
                 const ths = tooltip.querySelectorAll('.skill-table thead th');
+                // 遍歷每一個表頭單元格
                 ths.forEach((th, i) => {
+                    // 若該欄有對應的計算最大寬度
                     if (maxWidths[i]) {
+                        // 強制鎖定寬度屬性
                         th.style.width = maxWidths[i] + 'px';
+                        // 強制鎖定最小寬度，防止 tbody 捲動時表頭縮水
                         th.style.minWidth = maxWidths[i] + 'px';
                     }
                 });
             }
 
-            // 計算鎖死完成，還原狀態（保留 opacity: 0 讓下次 show 完美觸發 transition）
+            // 欄寬寬度完全同步鎖死後，立刻將提示窗重設回預設的隱藏狀態
+            // 隱藏區塊
             tooltip.style.display = 'none';
+            // 還原視覺屬性，讓下次顯示能正常由事件接管
             tooltip.style.visibility = 'visible';
         });
     })
     
-    // 發生錯誤時於主控台報錯並在畫面上顯示紅字提示
+    // 階段三：發生非預期錯誤時 (例如檔案路徑打錯)，進行安全防禦回退
     .catch(error => {
+        // 於主控台回報精準的錯誤原因
         console.error('載入技能表格失敗:', error);
+        // 於畫面上回饋紅字提示給使用者
         placeholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。</span>';
     });
 
@@ -79,134 +107,170 @@ fetch('skill-table.html')
 // ========【輔助函數】 唯一合一的顯示與定位功能 ========
 // ===================================================
 function showTooltip(trigger) {
-    // 定位前閃現準備，確保抓到真實 offsetWidth/Height
+    // 在計算實際位置前先設為隱形
     tooltip.style.visibility = 'hidden';
+    // 解除 display: none，確保 offsetWidth/Height 抓到的是真實尺寸
     tooltip.style.display = 'block';
 
-    // 取得文字位置範圍
+    // 取得觸發文字 (trigger) 在目前可視視窗中的絕對座標
     const rect = trigger.getBoundingClientRect();
+    // 取得提示窗由 JS 撐開後的真實總寬度
     const tooltipWidth = tooltip.offsetWidth;
+    // 取得提示窗由 JS 撐開後的真實總高度
     const tooltipHeight = tooltip.offsetHeight;
 
-    // 設定浮窗初始位置：預設右側，並加上滾動偏移
+    // 預設初始橫向位置：觸發文字右側，並補上滾動條偏移量
     let left = rect.right + 15 + window.scrollX;
+    // 預設初始縱向位置：觸發文字頂部對齊，稍微往上飄 10px
     let top = rect.top + window.scrollY - 10;
 
-    // 【優化邊界判定】若超出瀏覽器右邊界，改為左側顯示
+    // 【橫向邊界防禦】若右側空間不足以容納提示窗，自動翻轉改到觸發文字的左側顯示
     if (left + tooltipWidth > window.scrollX + window.innerWidth) {
+        // 改至左側顯示，並保留 15px 的安全美觀間距
         left = rect.left - tooltipWidth - 15;
     }
     
-    // 【微調優化】如果視窗過長往下掉，確保頂部 top 絕對不會往上蓋住 trigger 文字
+    // 【縱向邊界防禦一】優先防止提示窗底部沉出瀏覽器視窗下緣
     if (top + tooltipHeight > window.scrollY + window.innerHeight) {
+        // 強制將高度往上推，維持在視窗底部上方 10px
         top = window.scrollY + window.innerHeight - tooltipHeight - 10;
-        // 核心防遮擋：至少保持在 trigger 下方安全距離，不與文字重疊
-        top = Math.max(top, rect.bottom + window.scrollY + 5);
     }
     
-    // 避免超出上方邊界
-    if (top < window.scrollY) {
-        top = window.scrollY + 10;
-    }
+    // 【縱向邊界防禦二】若高提示窗被迫上推，啟用核心防遮擋機制，確保絕對不會蓋住觸發文字本身
+    // 強制設定頂部最小值，至少保持在文字下方 5px 的安全距離
+    top = Math.max(top, rect.bottom + window.scrollY + 5);
+    
+    // 【縱向邊界防禦三】終極防禦，確保提示窗頂部絕對不會衝出網頁的最頂端邊界
+    // 若頂部超出網頁邊界，強制鎖死在距離頂端 10px 處
+    top = Math.max(top, window.scrollY + 10);
 
-    // 套用精準計算後的座標
+    // 正式套用精準計算後的左邊距座標
     tooltip.style.left = `${left}px`;
+    // 正式套用精準計算後的頂邊距座標
     tooltip.style.top = `${top}px`;
     
-    // 完美淡入
+    // 解除隱形狀態
     tooltip.style.visibility = 'visible';
+    // 賦予不透明度，完美觸發 CSS opacity 的淡入過渡動畫
     tooltip.style.opacity = '1';
 
-    // 若有正在等待的隱藏計時器則清除
+    // 檢查是否有正在等待倒數的隱藏計時器
     if (hideTimeout) {
+        // 立刻清除該計時器，防止提示窗在顯示期間突兀消失
         clearTimeout(hideTimeout);
+        // 清空計時器變數
         hideTimeout = null;
     }
 }
 
 function hideTooltip() {
-    // 觸發 CSS opacity 過渡淡出
+    // 觸發 CSS 中的 opacity 屬性，進入淡出動畫階段
     tooltip.style.opacity = '0';
     
-    // 延遲與 CSS transition 時間同步
+    // 開啟延遲定時器，等待淡出動畫執行完畢
     setTimeout(() => {
-        // 安全防護：確認等待期間使用者沒有再次移入，才真正 display: none
+        // 安全二次防護：確認在等待期間使用者沒有重新移入
         if (tooltip.style.opacity === '0') {
+            // 確認完全淡出後，才正式關閉 display 隱藏節點
             tooltip.style.display = 'none';
         }
     }, TRANSITION_TIME);
 }
 
 // ===================================================
-// ========【技能提示窗】 監聽觸發文字、滑鼠與點擊事件 ========
+// ========【核心效能優化】事件委派 - 全網頁事件監聽 ========
 // ===================================================
-document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
 
-    // 滑鼠移入 trigger
-    trigger.addEventListener('mouseenter', () => {
-        if (locked) return;
+// 監聽全網頁的滑鼠移入事件 (不論頁面上有多少密技文字，都只佔用這一個記憶體監聽器)
+document.body.addEventListener('mouseover', (e) => {
+    // 檢查滑鼠移入的目標是否為觸發文字 (或其內部子元素)
+    const trigger = e.target.closest('.skill-tooltip-trigger');
+    // 如果不是觸發文字，或者提示窗目前處於點擊鎖定常駐狀態，則直接攔截不處理
+    if (!trigger || locked) return;
 
-        if (hideTimeout) {
-            clearTimeout(hideTimeout);
-            hideTimeout = null;
-        }
-
-        showTooltip(trigger);
-    });
-
-    // 滑鼠離開 trigger
-    trigger.addEventListener('mouseleave', () => {
-        if (locked) return;
-        // 使用優化後的緩衝時間（150ms），防止滑鼠快速滑過時畫面瘋狂閃爍
-        hideTimeout = setTimeout(() => {
-            hideTooltip();
-        }, HIDE_DELAY);
-    });
-
-    // 點擊 trigger 鎖定/解除鎖定 tooltip
-    trigger.addEventListener('click', (e) => {
-        e.stopPropagation(); 
-        locked = !locked;    
-        if (locked) {
-            showTooltip(trigger); 
-        } else {
-            hideTooltip(); 
-        }
-    });
-});
-
-// ===================================================
-// ========【技能提示窗】 提示窗本體顯示控制 ========
-// ===================================================
-// 滑鼠移入提示窗本身
-tooltip.addEventListener('mouseenter', () => {
-    // 移入本體時，立刻攔截並清除隱藏計時器，保持顯示
+    // 移入新觸發文字時，若有前一個準備隱藏的計時器正在倒數
     if (hideTimeout) {
+        // 立刻攔截並清除
         clearTimeout(hideTimeout);
+        // 清空變數
         hideTimeout = null;
     }
-    tooltip.style.display = 'block';
-    tooltip.style.opacity = '1';
+    // 呼叫唯一的顯示與定位核心函式
+    showTooltip(trigger);
 });
 
-// 滑鼠移出提示窗本身
-tooltip.addEventListener('mouseleave', () => {
-    if (locked) return;
-    // 移出本體同樣給予緩衝延遲，體驗更流暢
+// 監聽全網頁的滑鼠移出事件
+document.body.addEventListener('mouseout', (e) => {
+    // 檢查滑鼠移出的目標是否為觸發文字
+    const trigger = e.target.closest('.skill-tooltip-trigger');
+    // 如果不是觸發文字，或者目前處於點擊鎖定常駐狀態，則直接攔截不處理
+    if (!trigger || locked) return;
+
+    // 開啟緩衝倒數計時器
     hideTimeout = setTimeout(() => {
+        // 緩衝時間到期後，執行唯一的隱藏核心函式
         hideTooltip();
     }, HIDE_DELAY);
 });
 
-// ===================================================
-// ========【全域事件】 點擊外部自動關閉提示窗 ========
-// ===================================================
-document.addEventListener('click', (e) => {
-    if (!locked) return;
+// 監聽全網頁的點擊事件 (負責處理：點擊鎖定、點擊空白處自動關閉)
+document.body.addEventListener('click', (e) => {
+    // 檢查點擊目標是否為觸發文字
+    const trigger = e.target.closest('.skill-tooltip-trigger');
+    
+    // 情況 A：使用者點擊了某個觸發文字
+    if (trigger) {
+        // 立刻阻止事件向上冒泡，防止觸發下方的「點擊空白處關閉」邏輯
+        e.stopPropagation();
+        // 切換鎖定狀態 (true 變 false，false 變 true)
+        locked = !locked;
+        // 若切換為鎖定狀態
+        if (locked) {
+            // 呼叫顯示函式，確保此時走一遍正確的閃現定位流程
+            showTooltip(trigger);
+        // 若切換為解除鎖定
+        } else {
+            // 呼叫隱藏核心，讓提示窗淡出
+            hideTooltip();
+        }
+        return;
+    }
 
-    // 點擊在 tooltip 或 trigger 上時不關閉
-    if (tooltip.contains(e.target) || e.target.classList.contains('skill-tooltip-trigger')) return;
+    // 情況 B：目前提示窗處於鎖定常駐狀態，且使用者點擊了網頁的其他任意空白處 (排除提示窗本體內部)
+    if (locked && !tooltip.contains(e.target)) {
+        // 強制解除鎖定常駐狀態
+        locked = false;
+        // 呼叫隱藏核心，讓提示窗自動淡出關閉
+    }
+});
 
-    locked = false;
-    hideTooltip();
+// ===================================================
+// ========【技能提示窗】 提示窗本體滑鼠移入控制 ========
+// ===================================================
+
+// 當滑鼠從觸發文字移入「提示窗小視窗本身」時
+tooltip.addEventListener('mouseenter', () => {
+    // 立刻檢查是否有滑鼠離開觸發文字時留下的隱藏計時器
+    if (hideTimeout) {
+        // 成功攔截！立刻清除該計時器，防止小視窗在滑鼠移入後突然消失
+        clearTimeout(hideTimeout);
+        // 清空變數
+        hideTimeout = null;
+    }
+    // 強制維持提示窗的區塊顯示狀態
+    tooltip.style.display = 'block';
+    // 強制維持不透明度為 1 狀態
+    tooltip.style.opacity = '1';
+});
+
+// 當滑鼠從「提示窗小視窗本身」離開時
+tooltip.addEventListener('mouseleave', () => {
+    // 如果提示窗已經被點擊鎖定常駐，滑鼠移出不進行任何隱藏處理
+    if (locked) return;
+    
+    // 若未鎖定，開啟滑鼠移出緩衝計時器
+    hideTimeout = setTimeout(() => {
+        // 緩衝時間到期後，執行隱藏淡出流程
+        hideTooltip();
+    }, HIDE_DELAY);
 });
