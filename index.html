@@ -254,71 +254,91 @@
                                         <span>stats.set_skill_level 技能名稱 等級數字</span>
                                         
                                         <div class="skill-tooltip-window">
-                                            <div class="tooltip-row tooltip-header-row">
-                                                <div>原文</div>
-                                                <div>對應技能</div>
-                                                <div>對應 DLC</div>
+                                            <div class="tooltip-scroll-body">
+                                                <table class="skill-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>分類原文</th>
+                                                            <th>對應技能／職業</th>
+                                                            <th>對應 DLC</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        <tr><td>Major_HomestyleCooking</td><td>烹飪</td><td>-</td></tr>
+                                                        <tr><td>Major_Fishing</td><td>釣魚</td><td>-</td></tr>
+                                                        <tr><td>Major_Mischief</td><td>惡作劇</td><td>-</td></tr>
+                                                        <tr><td>Major_Guitar</td><td>吉他</td><td>-</td></tr>
+                                                        <tr><td>Major_Programming</td><td>程式設計</td><td>-</td></tr>
+                                                        
+                                                        <tr><td>Major_Gardening</td><td>園藝</td><td>-</td></tr>
+                                                        <tr><td>Major_GourmetCooking</td><td>美食烹飪</td><td>-</td></tr>
+                                                        <tr><td>Major_Comedy</td><td>喜劇</td><td>-</td></tr>
+                                                        <tr><td>Major_Charisma</td><td>魅力</td><td>-</td></tr>
+                                                        <tr><td>Major_Writing</td><td>寫作</td><td>-</td></tr>
+                                                        
+                                                        <tr><td>Major_VideoGaming</td><td>電玩遊戲</td><td>-</td></tr>
+                                                        <tr><td>Major_Violin</td><td>小提琴</td><td>-</td></tr>
+                                                        <tr><td>Major_RocketScience</td><td>火箭科學</td><td>-</td></tr>
+                                                        <tr><td>Major_Painting</td><td>繪畫</td><td>-</td></tr>
+                                                        <tr><td>Major_Piano</td><td>鋼琴</td><td>-</td></tr>
+                                                        
+                                                        <tr><td>Major_Logic</td><td>邏輯</td><td>-</td></tr>
+                                                        <tr><td>Major_Handiness</td><td>靈巧</td><td>-</td></tr>
+                                                        <tr><td>Major_Bartending</td><td>調酒</td><td>-</td></tr>
+                                                        <tr><td>Skill_Fitness</td><td>健身</td><td>-</td></tr>
+                                                        <tr><td>Major_Herbalism</td><td>藥草學</td><td>《露天度假》</td></tr>
+                                                        
+                                                        <tr><td>Major_Baking</td><td>烘焙</td><td>《來去上班》</td></tr>
+                                                        <tr><td>Major_Photography</td><td>攝影</td><td>-</td></tr>
+                                                        <tr><td>Skill_Bowling</td><td>保齡球</td><td>《保齡球之夜》</td></tr>
+                                                        <tr><td>Major_Wellness</td><td>健康</td><td>《Spa Day》</td></tr>
+                                                        <tr><td>Minor_Dancing</td><td>跳舞</td><td>《同歡共樂》</td></tr>
+                                                        
+                                                        <tr><td>Major_DJ</td><td>DJ混音</td><td>《同歡共樂》</td></tr>
+                                                        <tr><td>Major_Singing</td><td>唱歌</td><td>《都會生活》</td></tr>
+                                                        <tr><td>VampireLore</td><td>吸血鬼知識</td><td>《吸血鬼》</td></tr>
+                                                        <tr><td>Major_PipeOrgan</td><td>管風琴</td><td>《吸血鬼》</td></tr>
+                                                        <tr><td>AdultMajor_Parenting</td><td>育兒</td><td>《生兒育女》</td></tr>
+                                                        
+                                                        <tr><td>skill_Dog</td><td>寵物訓練</td><td>《貓狗總動員》</td></tr>
+                                                        <tr><td>Major_Vet</td><td>獸醫</td><td>《貓狗總動員》</td></tr>
+                                                        <tr><td>Skill_Hidden_TreadMill</td><td>跑步機（隱藏技能）</td><td>《健身樂活》</td></tr>
+                                                        <tr><td>Minor_LocalCulture</td><td>瑟瓦多拉達文化</td><td>《叢林探險》</td></tr>
+                                                        <tr><td>Major_Archaeology</td><td>考古學</td><td>《叢林探險》</td></tr>
+
+                                                        <tr><td>Hidden_Skating</td><td>溜冰技巧（隱藏技能）</td><td>《春夏秋冬》</td></tr>
+                                                        <tr><td>statistic_skill_AdultMajor_FlowerArranging</td><td>花藝技能</td><td>《春夏秋冬》</td></tr>
+                                                        <tr><td>Major_Acting</td><td>演藝</td><td>《星夢起飛》</td></tr>
+                                                        <tr><td>Minor_MediaProduction</td><td>媒體製作</td><td>《星夢起飛》</td></tr>
+                                                        <tr><td>Major_Robotics</td><td>機器人學</td><td>《玩轉大學》</td></tr>
+                                                        
+                                                        <tr><td>Major_ResearchDebate</td><td>研究與辯論</td><td>《玩轉大學》</td></tr>
+                                                        <tr><td>AdultMinor_JuiceFizzing</td><td>調製果汁汽水</td><td>《綠色生活》</td></tr>
+                                                        <tr><td>AdultMajor_Fabrication</td><td>製造</td><td>《綠色生活》</td></tr>
+                                                        <tr><td>AdultMajor_Knitting</td><td>針織</td><td>《巧手針織》（也適用於兒童）</td></tr>
+                                                        <tr><td>Skill_Fitness</td><td>健身／光劍</td><td>《巴圖星之旅》</td></tr>
+
+                                                        <tr><td>Major_RockClimbing</td><td>攀岩</td><td>《雪國勝地》</td></tr>
+                                                        <tr><td>Major_Skiing</td><td>滑雪</td><td>《雪國勝地》</td></tr>
+                                                        <tr><td>Major_Snowboarding</td><td>單板滑雪</td><td>《雪國勝地》</td></tr>
+                                                        <tr><td>Minor_Medium</td><td>通靈</td><td>《靈異大追擊》</td></tr>
+                                                        <tr><td>Skill_CrossStitch</td><td>十字繡</td><td>《鄉間生活》</td></tr>
+
+                                                        <tr><td>adultminor_entrepreneur</td><td>創業家</td><td>《高中歲月》</td></tr>
+                                                        <tr><td>AdultMajor_EquestrianSkill</td><td>騎馬</td><td>《駿馬牧場》</td></tr>
+                                                        <tr><td>AdultMinor_RanchNectar</td><td>製作佳釀</td><td>《駿馬牧場》</td></tr>
+                                                        <tr><td>Major_Gemology</td><td>寶石學</td><td>《晶彩創意》</td></tr>
+
+                                                        <tr><td>Major_Romance</td><td>浪漫</td><td>《怦然心動》</td></tr>
+                                                        <tr><td>Minor_Thanatology</td><td>死亡學</td><td>《生與死》</td></tr>
+                                                        <tr><td>Major_Pottery</td><td>陶藝</td><td>《事業與嗜好》</td></tr>
+                                                        <tr><td>Major_Tattooing</td><td>刺青</td><td>《事業與嗜好》</td></tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                            <div class="tooltip-row"><div>Major_HomestyleCooking</div><div>烹飪</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Fishing</div><div>釣魚</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Mischief</div><div>惡作劇</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Guitar</div><div>吉他</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Programming</div><div>程式設計</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Gardening</div><div>園藝</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_GourmetCooking</div><div>美食烹飪</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Comedy</div><div>喜劇</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Charisma</div><div>魅力</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Writing</div><div>寫作</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_VideoGaming</div><div>電玩遊戲</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Violin</div><div>小提琴</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_RocketScience</div><div>火箭科學</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Painting</div><div>繪畫</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Piano</div><div>鋼琴</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Logic</div><div>邏輯</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Handiness</div><div>靈巧</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Bartending</div><div>調酒</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Skill_Fitness</div><div>健身</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Major_Herbalism</div><div>藥草學</div><div>《露天度假》</div></div>
-                                            <div class="tooltip-row"><div>Major_Baking</div><div>烘焙</div><div>《來去上班》</div></div>
-                                            <div class="tooltip-row"><div>Major_Photography</div><div>攝影</div><div>-</div></div>
-                                            <div class="tooltip-row"><div>Skill_Bowling</div><div>保齡球</div><div>《保齡球之夜》</div></div>
-                                            <div class="tooltip-row"><div>Major_Wellness</div><div>健康</div><div>《Spa Day》</div></div>
-                                            <div class="tooltip-row"><div>Minor_Dancing</div><div>跳舞</div><div>《同歡共樂》</div></div>
-                                            <div class="tooltip-row"><div>Major_DJ</div><div>DJ混音</div><div>《同歡共樂》</div></div>
-                                            <div class="tooltip-row"><div>Major_Singing</div><div>唱歌</div><div>《都會生活》</div></div>
-                                            <div class="tooltip-row"><div>VampireLore</div><div>吸血鬼知識</div><div>《吸血鬼》</div></div>
-                                            <div class="tooltip-row"><div>Major_PipeOrgan</div><div>管風琴</div><div>《吸血鬼》</div></div>
-                                            <div class="tooltip-row"><div>AdultMajor_Parenting</div><div>育兒</div><div>《生兒育女》</div></div>
-                                            <div class="tooltip-row"><div>skill_Dog</div><div>寵物訓練</div><div>《貓狗總動員》</div></div>
-                                            <div class="tooltip-row"><div>Major_Vet</div><div>獸醫</div><div>《貓狗總動員》</div></div>
-                                            <div class="tooltip-row"><div>Skill_Hidden_TreadMill</div><div>跑步機（隱藏技能）</div><div>《健身樂活》</div></div>
-                                            <div class="tooltip-row"><div>Minor_LocalCulture</div><div>瑟瓦多拉達文化</div><div>《叢林探險》</div></div>
-                                            <div class="tooltip-row"><div>Major_Archaeology</div><div>考古學</div><div>《叢林探險》</div></div>
-                                            <div class="tooltip-row"><div>Hidden_Skating</div><div>溜冰技巧（隱藏技能）</div><div>《春夏秋冬》</div></div>
-                                            <div class="tooltip-row"><div>statistic_skill_AdultMajor_FlowerArranging</div><div>花藝技能</div><div>《春夏秋冬》</div></div>
-                                            <div class="tooltip-row"><div>Major_Acting</div><div>演藝</div><div>《星夢起飛》</div></div>
-                                            <div class="tooltip-row"><div>Minor_MediaProduction</div><div>媒體製作</div><div>《星夢起飛》</div></div>
-                                            <div class="tooltip-row"><div>Major_Robotics</div><div>機器人學</div><div>《玩轉大學》</div></div>
-                                            <div class="tooltip-row"><div>Major_ResearchDebate</div><div>研究與辯論</div><div>《玩轉大學》</div></div>
-                                            <div class="tooltip-row"><div>AdultMinor_JuiceFizzing</div><div>調製果汁汽水</div><div>《綠色生活》</div></div>
-                                            <div class="tooltip-row"><div>AdultMajor_Fabrication</div><div>製造</div><div>《綠色生活》</div></div>
-                                            <div class="tooltip-row"><div>AdultMajor_Knitting</div><div>針織</div><div>《巧手針織》（也適用於兒童）</div></div>
-                                            <div class="tooltip-row"><div>Skill_Fitness</div><div>健身／光劍</div><div>《星際大戰：巴圖星之旅》</div></div>
-                                            <div class="tooltip-row"><div>Major_RockClimbing</div><div>攀岩</div><div>《雪國勝地》</div></div>
-                                            <div class="tooltip-row"><div>Major_Skiing</div><div>滑雪</div><div>《雪國勝地》</div></div>
-                                            <div class="tooltip-row"><div>Major_Snowboarding</div><div>單板滑雪</div><div>《雪國勝地》</div></div>
-                                            <div class="tooltip-row"><div>Minor_Medium</div><div>通靈</div><div>《靈異大追擊》</div></div>
-                                            <div class="tooltip-row"><div>Skill_CrossStitch</div><div>十字繡</div><div>《鄉間生活》</div></div>
-                                            <div class="tooltip-row"><div>adultminor_entrepreneur</div><div>創業家</div><div>《高中歲月》</div></div>
-                                            <div class="tooltip-row"><div>AdultMajor_EquestrianSkill</div><div>騎馬</div><div>《駿馬牧場》</div></div>
-                                            <div class="tooltip-row"><div>AdultMinor_RanchNectar</div><div>製作佳釀</div><div>《駿馬牧場》</div></div>
-                                            <div class="tooltip-row"><div>Major_Gemology</div><div>寶石學</div><div>《晶彩創意》</div></div>
-                                            <div class="tooltip-row"><div>Major_Romance</div><div>浪漫</div><div>《怦然心動》</div></div>
-                                            <div class="tooltip-row"><div>Minor_Thanatology</div><div>死亡學</div><div>《生與死》</div></div>
-                                            <div class="tooltip-row"><div>Major_Pottery</div><div>陶藝</div><div>《事業與嗜好》</div></div>
-                                            <div class="tooltip-row"><div>Major_Tattooing</div><div>刺青</div><div>《事業與嗜好》</div></div>
                                         </div>
-                                    </div>
+                                        
                                 </td>
                                 <td>stats.set_skill_level Major_Bartending 10</td>
                             </tr>
