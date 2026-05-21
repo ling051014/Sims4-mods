@@ -372,6 +372,24 @@
     <script src="dlc-table.js"></script>
     
     <script>
+        // ========【 自動引用技能外部 HTML 】========
+        const skillPlaceholder = document.getElementById('skill-table-placeholder');
+        if (skillPlaceholder) {
+            // 請確保 'skills.html' 有改成你那個獨立 HTML 的正確檔名
+            fetch('skills.html') 
+                .then(response => {
+                    if (!response.ok) throw new Error('找不到技能檔案');
+                    return response.text();
+                })
+                .then(htmlContent => {
+                    skillPlaceholder.innerHTML = htmlContent;
+                })
+                .catch(error => {
+                    console.error('載入技能表格失敗:', error);
+                    skillPlaceholder.innerHTML = '表格載入失敗，請稍後再試。';
+                });
+        }
+        
         // ========【 UI 視覺進場控制 】========
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
