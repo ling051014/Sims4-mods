@@ -19,6 +19,26 @@ fetch('skill-table.html')
     .then(html => {
         console.log('✔ 技能表格初始化完成'); // 顯示初始化成功訊息
         placeholder.innerHTML = html; // 插入 HTML 內容到容器
+        
+        // 1. 縱向掃描整張表格，精準抓出每一欄所有 td 裡面的「最大絕對寬度」
+        const maxWidths = Array.from(document.querySelectorAll('.skill-table tbody tr'))
+            .map(tr => Array.from(tr.children))
+            .reduce((acc, row) => {
+                row.forEach((td, i) => {
+                    const w = td.getBoundingClientRect().width;
+                    acc[i] = Math.max(acc[i] || 0, w);
+                });
+                return acc;
+            }, []);
+
+        // 2. 將算出的最大寬度，死死塞回給對應的表頭 th 進行鎖定
+        const ths = document.querySelectorAll('.skill-table thead th');
+        ths.forEach((th, i) => {
+            if (maxWidths[i]) {
+                th.style.width = maxWidths[i] + 'px';
+                th.style.minWidth = maxWidths[i] + 'px';
+            }
+        });
     })
     
     // 發生錯誤時（如檔案路徑錯誤），於主控台報錯並在畫面上顯示紅字提示
