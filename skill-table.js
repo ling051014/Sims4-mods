@@ -338,31 +338,3 @@ function showTooltip(trigger) {
         hideTimeout = null;
     }
 }
-
-// ===================================================
-// ========【除錯】事件委派 - 防止冒泡衝突 ========
-// ===================================================
-document.body.addEventListener('click', (e) => {
-    const trigger = e.target.closest('.skill-tooltip-trigger');
-    
-    if (trigger) {
-        e.stopPropagation(); // 阻止冒泡
-        
-        // 點擊觸發：如果已經顯示且是同一個，則關閉；否則顯示
-        if (currentTrigger === trigger && tooltip.style.display === 'block') {
-            locked = false;
-            hideTooltip();
-        } else {
-            locked = true;
-            currentTrigger = trigger;
-            showTooltip(trigger);
-        }
-        return;
-    }
-
-    // 點擊空白處：只有鎖定狀態下才關閉
-    if (locked) {
-        locked = false;
-        hideTooltip();
-    }
-});
