@@ -363,49 +363,29 @@ window.addEventListener('resize', () => {
 });
 
 // ===================================================
-// ========【核心修正】事件委派 - 防止冒泡衝突 ========
+// ========【除錯】事件委派 - 防止冒泡衝突 ========
 // ===================================================
 document.body.addEventListener('click', (e) => {
-    // 檢查點擊的目標是否為觸發文字
     const trigger = e.target.closest('.skill-tooltip-trigger');
     
-    // 1. 如果點擊到觸發文字
     if (trigger) {
-        // 關鍵！阻止事件往上冒泡到 body，防止立刻觸發後面的「關閉」邏輯
-        e.stopPropagation();
+        e.stopPropagation(); // 阻止冒泡
         
-        // 鎖定/切換邏輯
+        // 點擊觸發：如果已經顯示且是同一個，則關閉；否則顯示
         if (currentTrigger === trigger && tooltip.style.display === 'block') {
-            locked = !locked;
-            if (!locked) hideTooltip();
+            locked = false;
+            hideTooltip();
         } else {
             locked = true;
+            currentTrigger = trigger;
             showTooltip(trigger);
         }
-        return; // 處理完觸發文字後，直接中斷執行
+        return;
     }
 
-    // 2. 如果點擊的是其他地方，且目前處於鎖定狀態，才關閉
+    // 點擊空白處：只有鎖定狀態下才關閉
     if (locked) {
         locked = false;
         hideTooltip();
-    }
-});
-
-// ===================================================
-// ========【除錯】事件委派 - 手機端偵錯版 ========
-// ===================================================
-document.body.addEventListener('click', (e) => {
-    // 【測試點 1】看看點擊有沒有反應
-    alert('點擊偵測成功！'); 
-
-    const trigger = e.target.closest('.skill-tooltip-trigger');
-    
-    if (trigger) {
-        // 【測試點 2】看看有沒有抓到觸發器
-        alert('抓到觸發器: ' + trigger.innerText);
-        
-        e.stopPropagation();
-        // ... 原本的邏輯
     }
 });
