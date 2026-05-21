@@ -362,20 +362,32 @@ window.addEventListener('resize', () => {
     }
 });
 
-/* ========【提示窗手機版強制安全定位】 ======== */
-    #global-skill-tooltip {
-        /* 強制從 absolute 改為 fixed，讓它永遠相對於螢幕顯示 */
-        position: fixed !important;
-        /* 強制定位在螢幕中心區域，保證一定看得到 */
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        /* 手機強制寬度佔比 */
-        width: 85vw !important;
-        /* 手機強制高度佔比 */
-        max-height: 70vh !important;
-        /* 確保絕對在最上層 */
-        z-index: 20000 !important;
-        /* 確保觸發時顯示 */
-        display: block !important;
+// ===================================================
+// ========【核心修正】事件委派 - 防止冒泡衝突 ========
+// ===================================================
+document.body.addEventListener('click', (e) => {
+    // 檢查點擊的目標是否為觸發文字
+    const trigger = e.target.closest('.skill-tooltip-trigger');
+    
+    // 1. 如果點擊到觸發文字
+    if (trigger) {
+        // 關鍵！阻止事件往上冒泡到 body，防止立刻觸發後面的「關閉」邏輯
+        e.stopPropagation();
+        
+        // 鎖定/切換邏輯
+        if (currentTrigger === trigger && tooltip.style.display === 'block') {
+            locked = !locked;
+            if (!locked) hideTooltip();
+        } else {
+            locked = true;
+            showTooltip(trigger);
+        }
+        return; // 處理完觸發文字後，直接中斷執行
     }
+
+    // 2. 如果點擊的是其他地方，且目前處於鎖定狀態，才關閉
+    if (locked) {
+        locked = false;
+        hideTooltip();
+    }
+});
