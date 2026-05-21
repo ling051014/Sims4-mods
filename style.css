@@ -916,6 +916,10 @@ th.desc .sort-arrows::after {
     .content {
         /* 內容內縮 */ padding: 15px;
     }
+    #global-skill-tooltip {
+        /* 最大寬度為螢幕的 90% */ max-width: 90vw !important;
+        /* 手機上強制顯示為固定位置或確保不會跑出視窗 */z-index: 10000 !important;
+    }
     .home-tips-container {
         /* 縮小上下距離 */margin: 20px auto;
         /* 減少左右內縮 */padding: 0 15px;
