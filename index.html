@@ -396,23 +396,23 @@
             
             // 2. 滑鼠移入：計算「技能等級設定」文字的位置，把浮空視窗定位在它右邊
             trigger.addEventListener('mouseenter', (e) => {
-            const rect = trigger.getBoundingClientRect();
-        
-            // 讓浮空視窗出現在文字右側 15px 的地方，高度與文字齊平
-            tooltip.style.left = `${rect.right + window.scrollX + 15}px`;
-            tooltip.style.top = `${rect.top + window.scrollY - 10}px`;
-            tooltip.style.display = 'block';
-        });
+                
+                const rect = trigger.getBoundingClientRect();
+                // 讓浮空視窗出現在文字右側 15px 的地方，高度與文字齊平
+                tooltip.style.left = `${rect.right + window.scrollX + 15}px`;
+                tooltip.style.top = `${rect.top + window.scrollY - 10}px`;
+                tooltip.style.display = 'block';
+            });
+            
+            // 3. 滑鼠移出：隱藏視窗
+            trigger.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
 
-        // 3. 滑鼠移出：隱藏視窗
-        trigger.addEventListener('mouseleave', () => {
-            tooltip.style.display = 'none';
-        });
-    
-        // 可選：滑鼠如果移進彈出視窗本身，保持顯示；移出才消失
-        tooltip.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
-        tooltip.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
-    }
+            // 可選：滑鼠如果移進彈出視窗本身，保持顯示；移出才消
+            tooltip.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
+            tooltip.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+        }
         
         // ========【 UI 視覺進場控制 】========
         const observer = new IntersectionObserver((entries) => {
