@@ -425,6 +425,21 @@
             btn.style.transition = "0.5s ease-out"; 
             observer.observe(btn);
         });
+
+        // 控制技能小視窗開啟
+        const skillDialog = document.getElementById('skill-dialog');
+        document.querySelectorAll('.open-skill-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                skillDialog.showModal(); // 顯示小視窗並鎖定背景
+            });
+        });
+
+        // 點擊視窗外面（遮罩層）也可以直接關閉小視窗
+        skillDialog.addEventListener('click', (e) => {
+            if (e.target === skillDialog) {
+                skillDialog.close();
+            }
+        });
     </script>
 </body>
 </html>
