@@ -436,7 +436,7 @@ body {
     /* 顯示層級 */ z-index: 9999;
     /* 自動寬度 */ width: max-content;
     /* 最大寬度 */ max-width: 720px;
-    /* 不產生額外捲軸 */ overflow: visible;
+    /* 外層不產生捲軸 */ overflow: visible;
     /* 動態過渡 */ transition: opacity 0.2s ease;
 }
 
@@ -476,24 +476,29 @@ body {
     /* 懸停底色 */ background-color: rgba(85, 172, 238, 0.08) !important;
 }
 
-/* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
-.tooltip-scroll-body {
-    /* 最大高度 */ max-height: 320px;
+/* ========【技能懸浮提示】 設定 - 捲動外層（只捲 tbody 內容） ======== */
+.skill-tooltip-window .skill-table tbody {
+    /* 最大高度 */ display: block;
+    /* ？？？？ */ max-height: 320px;
     /* 垂直捲動 */ overflow-y: auto;
-    /* 水平捲動 */ overflow-x: hidden;
-    /* 避免外層 tooltip 出現雙捲軸 */ display: block;
+    /* 水平寬度 */ width: 100%;
+}
+
+/* ========【技能懸浮提示】 設定 - tbody 中的 tr 與 td 同步寬度 ======== */
+.skill-tooltip-window .skill-table tbody tr {
+    /* 表格排列 */ display: table;
+    /* 水平寬度 */ width: 100%;
 }
 
 /* ========【技能懸浮提示】 設定 - 捲軸樣式 ======== */
-.tooltip-scroll-body::-webkit-scrollbar {
+.skill-tooltip-window .skill-table tbody::-webkit-scrollbar {
     /* 捲軸寬度 */ width: 6px;
-    /* 捲軸高度 */ height: 6px;
 }
-.tooltip-scroll-body::-webkit-scrollbar-thumb {
+.skill-tooltip-window .skill-table tbody::-webkit-scrollbar-thumb {
     /* 捲軸顏色 */ background: #eeeeee;
     /* 捲軸圓角 */ border-radius: 3px;
 }
-.tooltip-scroll-body::-webkit-scrollbar-thumb:hover {
+.skill-tooltip-window .skill-table tbody::-webkit-scrollbar-thumb:hover {
     /* 懸停顏色 */ background: #55acee;
 }
 
