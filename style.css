@@ -418,7 +418,6 @@ body {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
-我改成這樣了
 /* ========【技能懸浮提示】 設定 - 觸發文字 ======== */
 .skill-tooltip-container {
     /* 幫助游標 */ cursor: help;
@@ -437,13 +436,22 @@ body {
     /* 顯示層級 */ z-index: 9999;
     /* 自動寬度 */ width: max-content;
     /* 最大寬度 */ max-width: 720px;
-    /* 不產生額外捲軸 */ overflow: visible;
+    /* 隱藏超出內容 */ overflow: hidden;
     /* 動態過渡 */ transition: opacity 0.2s ease;
+}
+
+/* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
+.tooltip-scroll-body {
+    /* 最大高度 */ max-height: 320px;
+    /* 垂直捲動 */ overflow-y: auto;
+    /* 水平不捲動 */ overflow-x: hidden;
+    /* 區塊顯示 */ display: block;
 }
 
 /* ========【技能懸浮提示】 設定 - 技能表格 ======== */
 .skill-tooltip-window .skill-table {
-    /* 撐滿容器 */ width: 100% !important;
+    /* 自動依內容寬度 */ width: max-content !important;
+    /* 最小撐滿容器 */ min-width: 100% !important;
     /* 合併邊框 */ border-collapse: collapse !important;
     /* 自動欄寬 */ table-layout: auto !important;
     /* 文字顏色 */ color: #666666 !important;
@@ -475,14 +483,6 @@ body {
 /* ========【技能懸浮提示】 設定 - hover效果 ======== */
 .skill-tooltip-window .skill-table tbody tr:hover {
     /* 懸停底色 */ background-color: rgba(85, 172, 238, 0.08) !important;
-}
-
-/* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
-.tooltip-scroll-body {
-    /* 最大高度 */ max-height: 320px;
-    /* 垂直捲動 */ overflow-y: auto;
-    /* 水平捲動 */ overflow-x: hidden;
-    /* 避免外層 tooltip 出現雙捲軸 */ display: block;
 }
 
 /* ========【技能懸浮提示】 設定 - 捲軸樣式 ======== */
