@@ -419,14 +419,14 @@ body {
 .hide-item { display: none !important; }
 
 /* ========【技能懸浮提示】 設定 - 觸發文字 ======== */
-.skill-tooltip-container {
+.skill-tooltip-trigger {
     /* 幫助游標 */ cursor: help;
     /* 繼承顏色 */ color: inherit;
     /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
 }
 
 /* ========【技能懸浮提示】 設定 - 旁邊小視窗本體 ======== */
-.skill-tooltip-window {
+#global-skill-tooltip {
     /* 預設隱藏 */ display: none;
     /* 絕對定位 */ position: absolute;
     /* 柔和背景 */ background-color: #ffffff;
@@ -449,7 +449,7 @@ body {
 }
 
 /* ========【技能懸浮提示】 設定 - 技能表格 ======== */
-.skill-tooltip-window .skill-table {
+#global-skill-tooltip .skill-table {
     /* 自動依內容寬度 */ width: max-content !important;
     /* 最小撐滿容器 */ min-width: 100% !important;
     /* 合併邊框 */ border-collapse: collapse !important;
@@ -458,7 +458,7 @@ body {
 }
 
 /* ========【技能懸浮提示】 設定 - 表頭（固定） ======== */
-.skill-tooltip-window .skill-table thead th {
+#global-skill-tooltip .skill-table thead th {
     /* sticky定位 */ position: sticky !important;
     /* 釘在頂部 */ top: 0 !important;
     /* 表頭背景 */ background-color: #fafafa !important;
@@ -468,8 +468,8 @@ body {
 }
 
 /* ========【技能懸浮提示】 設定 - 表格共用樣式 ======== */
-.skill-tooltip-window .skill-table th,
-.skill-tooltip-window .skill-table td {
+#global-skill-tooltip .skill-table th,
+#global-skill-tooltip .skill-table td {
     /* 清除外層背景 */ background: transparent !important;
     /* 清除外層邊框 */ border: none !important;
     /* 內距 */ padding: 8px 14px !important;
@@ -481,7 +481,7 @@ body {
 }
 
 /* ========【技能懸浮提示】 設定 - hover效果 ======== */
-.skill-tooltip-window .skill-table tbody tr:hover {
+#global-skill-tooltip .skill-table tbody tr:hover {
     /* 懸停底色 */ background-color: rgba(85, 172, 238, 0.08) !important;
 }
 
