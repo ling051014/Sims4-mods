@@ -6,7 +6,10 @@ const placeholder = document.getElementById('skill-table-placeholder');
 fetch('skill-table.html')
     .then(res => res.text())
     .then(html => placeholder.innerHTML = html)
-    .catch(err => placeholder.innerHTML = '<span style="color:red;">表格載入失敗</span>');
+    .catch(error => {
+            console.error('載入DLC對照表失敗:', error);
+            skillPlaceholder.innerHTML = '<span style="color:red;">表格載入失敗，請稍後再試。</span>';
+        });
 
 // 顯示 / 隱藏浮窗
 function showTooltip(trigger) {
