@@ -250,10 +250,51 @@
                             <tr>
                                 <td>技能等級設定</td>
                                 <td>
-                                    <button type="button" class="open-skill-btn">
-                                        stats.set_skill_level 技能名稱 等級數字
-                                        <span>🔍 查看清單</span>
-                                    </button>
+                                    <div class="skill-tooltip-container">
+                                        <span>stats.set_skill_level 技能名稱 等級數字</span>
+                                        
+                                        <div class="skill-tooltip-window">
+                                            <div class="tooltip-row tooltip-header">
+                                                <div>分類原文</div>
+                                                <div>對應技能/職業</div>
+                                                <div>對應 DLC</div>
+                                            </div>
+                                            <div class="tooltip-row"><div>Major_HomestyleCooking</div><div>烹飪</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Fishing</div><div>釣魚</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Mischief</div><div>惡作劇</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Guitar</div><div>吉他</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Programming</div><div>程式設計</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Gardening</div><div>園藝</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_GourmetCooking</div><div>美食烹飪</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Comedy</div><div>喜劇</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Charisma</div><div>魅力</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Writing</div><div>寫作</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_VideoGaming</div><div>電玩遊戲</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Violin</div><div>小提琴</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_RocketScience</div><div>火箭科學</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Painting</div><div>繪畫</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Piano</div><div>鋼琴</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Logic</div><div>邏輯</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Handiness</div><div>靈巧</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Bartending</div><div>調酒</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Skill_Fitness</div><div>健身</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Major_Herbalism</div><div>藥草學</div><div>《露天度假》</div></div>
+                                            <div class="tooltip-row"><div>Major_Baking</div><div>烘焙</div><div>《來去上班》</div></div>
+                                            <div class="tooltip-row"><div>Major_Photography</div><div>攝影</div><div>-</div></div>
+                                            <div class="tooltip-row"><div>Skill_Bowling</div><div>保齡球</div><div>《保齡球之夜》</div></div>
+                                            <div class="tooltip-row"><div>Major_Wellness</div><div>健康</div><div>《Spa Day》</div></div>
+                                            <div class="tooltip-row"><div>Minor_Dancing</div><div>跳舞</div><div>《同歡共樂》</div></div>
+                                            <div class="tooltip-row"><div>Major_DJ</div><div>DJ混音</div><div>《同歡共樂》</div></div>
+                                            <div class="tooltip-row"><div>Major_Singing</div><div>唱歌</div><div>《都會生活》</div></div>
+                                            <div class="tooltip-row"><div>VampireLore</div><div>吸血鬼知識</div><div>《吸血鬼》</div></div>
+                                            <div class="tooltip-row"><div>Major_PipeOrgan</div><div>管風琴</div><div>《吸血鬼》</div></div>
+                                            <div class="tooltip-row"><div>AdultMajor_Parenting</div><div>育兒</div><div>《生兒育女》</div></div>
+                                            <div class="tooltip-row"><div>skill_Dog</div><div>寵物訓練</div><div>《貓狗總動員》</div></div>
+                                            <div class="tooltip-row"><div>Major_Vet</div><div>獸醫</div><div>《貓狗總動員》</div></div>
+                                            <div class="tooltip-row"><div>Skill_Hidden_TreadMill</div><div>跑步機（隱藏技能）</div><div>《健身樂活》</div></div>
+                                            <div class="tooltip-row"><div>Minor_LocalCulture</div><div>瑟瓦多拉達文化</div><div>《叢林探險》</div></div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>stats.set_skill_level Major_Bartending 10</td>
                             </tr>
