@@ -293,74 +293,51 @@ tooltip.addEventListener('mouseleave', () => {
 // ===================================================
 // ========【響應式優化】通用定位與手機適配邏輯 ========
 // ===================================================
-
 function showTooltip(trigger) {
-    currentTrigger = trigger;
-    tooltip.style.visibility = 'hidden';
-    tooltip.style.display = 'block';
-
-    const rect = trigger.getBoundingClientRect();
-    const tooltipWidth = tooltip.offsetWidth;
-    const tooltipHeight = tooltip.offsetHeight;
+    currentTrigger = trigger; // 紀錄是哪一個觸發器，供螢幕旋轉時使用
     
-    // 安全留邊，確保不會貼死螢幕邊緣
-    const margin = 10; 
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    // 強制將顯示狀態開啟，並設定為可見，這對手機版渲染至關重要
+    tooltip.style.display = 'block'; 
+    tooltip.style.visibility = 'visible'; 
+    tooltip.style.opacity = '1'; 
 
-    // 計算初始位置
-    let left = rect.right + 15 + window.scrollX;
-    let top = rect.top + window.scrollY - 10;
+    // 判斷是否為窄螢幕（手機環境），768px 為常見斷點
+    const isMobile = window.innerWidth <= 768;
 
-    // 1. 橫向防禦：若右側塞不下，強制往左翻轉
-    if (left + tooltipWidth > window.scrollX + windowWidth - margin) {
-        left = rect.left - tooltipWidth - 15 + window.scrollX;
+    if (isMobile) {
+        // 【手機版邏輯】
+        // 使用 fixed 定位，讓彈窗脫離網頁流，直接浮在螢幕最上層
+        tooltip.style.position = 'fixed';
+        // 將彈窗強制移動到螢幕正中央
+        tooltip.style.top = '50%';
+        tooltip.style.left = '50%';
+        // 使用 transform 將定位中心點修正為彈窗中心
+        tooltip.style.transform = 'translate(-50%, -50%)';
+        // 限制寬度為螢幕的 85%，防止彈窗過寬撐爆手機螢幕
+        tooltip.style.width = '85vw';
+        // 自動高度，並限制最大高度，確保超出時可滾動
+        tooltip.style.height = 'auto';
+        tooltip.style.maxHeight = '80vh';
+    } else {
+        // 【電腦版邏輯】
+        // 使用 absolute 跟隨滑鼠點擊位置
+        tooltip.style.position = 'absolute';
+        // 取得觸發器的位置資訊
+        const rect = trigger.getBoundingClientRect();
+        // 計算彈窗位置，使其顯示在觸發文字的下方，並保留 5px 間距
+        tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+        tooltip.style.left = (rect.left + window.scrollX) + 'px';
+        // 電腦版恢復預設的 transform 設定，避免影響絕對定位
+        tooltip.style.transform = 'none';
+        tooltip.style.width = 'auto'; // 恢復寬度自適應
     }
-    
-    // 2. 邊界防禦：若左側也塞不下（超窄螢幕），強制貼螢幕左邊邊緣
-    if (left < margin) {
-        left = margin;
-    }
 
-    // 3. 縱向防禦：若底部超出視窗，強制向上對齊
-    if (top + tooltipHeight > window.scrollY + windowHeight - margin) {
-        top = window.scrollY + windowHeight - tooltipHeight - margin;
-    }
-    
-    // 4. 遮擋防禦：確保不會蓋住觸發文字
-    top = Math.max(top, rect.bottom + window.scrollY + 5);
-    
-    // 5. 頂部防禦：確保不會衝出網頁最頂端
-    top = Math.max(top, window.scrollY + margin);
-
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    
-    tooltip.style.visibility = 'visible';
-    tooltip.style.opacity = '1';
-
+    // 若有等待關閉的計時器，則清除它，避免顯示時被自動關閉
     if (hideTimeout) {
         clearTimeout(hideTimeout);
         hideTimeout = null;
     }
 }
-
-function hideTooltip() {
-    currentTrigger = null;
-    tooltip.style.opacity = '0';
-    setTimeout(() => {
-        if (tooltip.style.opacity === '0') {
-            tooltip.style.display = 'none';
-        }
-    }, TRANSITION_TIME);
-}
-
-// 監聽螢幕縮放，自動修正位置
-window.addEventListener('resize', () => {
-    if (currentTrigger && tooltip.style.display === 'block') {
-        showTooltip(currentTrigger);
-    }
-});
 
 // ===================================================
 // ========【除錯】事件委派 - 防止冒泡衝突 ========
