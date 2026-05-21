@@ -505,6 +505,20 @@ body {
     /* 懸停顏色 */ background: #9fb3c8;
 }
 
+/* ========【浮動提示】設定 - 表格容器 ======== */
+.table-container {
+  /* 最大高度 */ max-height: 70vh;
+  /* 垂直捲動 */ overflow-y: auto;
+}
+
+/* ========【浮動提示】設定 - Sticky 固定表頭 ======== */
+#map-master-table thead th {
+  /* 定位方式 */ position: sticky;
+  /* 距離頂部 */ top: 0;
+  /* 背景顏色 */ background: white;
+  /* 顯示層級 */ z-index: 2;
+}
+
 
 /* ========【首頁貼士】 設定 - 容器佈局樣式 ======== */
 .home-tips-container {
