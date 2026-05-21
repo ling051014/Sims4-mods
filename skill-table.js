@@ -4,11 +4,23 @@ const placeholder = document.getElementById('skill-table-placeholder');
 
 // 載入技能表
 fetch('skill-table.html')
-    .then(res => res.text())
-    .then(html => placeholder.innerHTML = html)
+    
+    // 印出 HTTP 狀態碼，方便確認檔案是否成功讀取 (例如：200 成功、404 找不到)
+    .then(res => {
+        console.log('HTTP 狀態碼:', res.status); // 印出 HTTP 狀態碼
+        return res.text();
+    })
+
+    // 成功抓取檔案後，將 HTML 內容塞入指定的浮空視窗區塊中
+    .then(html => {
+        console.log('成功載入 skill-table.html');
+        placeholder.innerHTML = html;
+    })
+    
+    // 發生錯誤時（如檔案路徑錯誤），於主控台報錯並在畫面上顯示紅字提示
     .catch(error => {
-            console.error('載入DLC對照表失敗:', error);
-            skillPlaceholder.innerHTML = '<span style="color:red;">表格載入失敗，請稍後再試。</span>';
+            console.error('載入 skill-table.html 失敗:', error);
+            skillPlaceholder.innerHTML = '<span style="color:red;">技能表載入失敗，請稍後再試。</span>';
         });
 
 // 監聽觸發文字
