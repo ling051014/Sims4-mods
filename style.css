@@ -418,6 +418,7 @@ body {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
+我改成這樣了
 /* ========【技能懸浮提示】 設定 - 觸發文字 ======== */
 .skill-tooltip-container {
     /* 幫助游標 */ cursor: help;
@@ -436,7 +437,7 @@ body {
     /* 顯示層級 */ z-index: 9999;
     /* 自動寬度 */ width: max-content;
     /* 最大寬度 */ max-width: 720px;
-    /* 外層不產生捲軸 */ overflow: visible;
+    /* 不產生額外捲軸 */ overflow: visible;
     /* 動態過渡 */ transition: opacity 0.2s ease;
 }
 
@@ -476,30 +477,24 @@ body {
     /* 懸停底色 */ background-color: rgba(85, 172, 238, 0.08) !important;
 }
 
-/* ========【技能懸浮提示】 設定 - 捲動外層（只捲 tbody 內容） ======== */
-.skill-tooltip-window .skill-table tbody {
-    /* 最大高度 */ display: block;
-    max-height: 320px;
+/* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
+.tooltip-scroll-body {
+    /* 最大高度 */ max-height: 320px;
     /* 垂直捲動 */ overflow-y: auto;
-    /* 水平自動撐滿 */ width: 100%;
-}
-
-/* ========【技能懸浮提示】 設定 - tbody 中的 tr 與 td 同步寬度 ======== */
-.skill-tooltip-window .skill-table tbody tr {
-    /* 保持表格排列 */ display: table;
-    width: 100%;
-    table-layout: fixed;
+    /* 水平捲動 */ overflow-x: hidden;
+    /* 避免外層 tooltip 出現雙捲軸 */ display: block;
 }
 
 /* ========【技能懸浮提示】 設定 - 捲軸樣式 ======== */
-.skill-tooltip-window .skill-table tbody::-webkit-scrollbar {
+.tooltip-scroll-body::-webkit-scrollbar {
     /* 捲軸寬度 */ width: 6px;
+    /* 捲軸高度 */ height: 6px;
 }
-.skill-tooltip-window .skill-table tbody::-webkit-scrollbar-thumb {
+.tooltip-scroll-body::-webkit-scrollbar-thumb {
     /* 捲軸顏色 */ background: #eeeeee;
     /* 捲軸圓角 */ border-radius: 3px;
 }
-.skill-tooltip-window .skill-table tbody::-webkit-scrollbar-thumb:hover {
+.tooltip-scroll-body::-webkit-scrollbar-thumb:hover {
     /* 懸停顏色 */ background: #55acee;
 }
 
