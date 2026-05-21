@@ -25,7 +25,7 @@ fetch('skill-table.html')
             // 於主控台報錯
             console.error('載入技能表格失敗:', error);
             // 在畫面上顯示紅字提示
-            skillPlaceholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。</span>';
+            placeholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。</span>';
         });
 
 // ========【技能提示窗】 設定 - 監聽觸發文字與防超出機制 ========
