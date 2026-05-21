@@ -371,49 +371,10 @@
         </div>
     </div>
 
+    <script src="skill-table.js"></script>
     <script src="dlc-table.js"></script>
     
     <script>
-        // ========【 自動引用技能外部 HTML 】========
-        const tooltip = document.getElementById('global-skill-tooltip');
-        const placeholder = document.getElementById('skill-table-placeholder');
-        const trigger = document.querySelector('.skill-tooltip-trigger');
-        
-        if (trigger && tooltip && placeholder) {
-            // 1. 先非同步載入技能表格內容
-            fetch('skill-table.html') 
-                .then(response => {
-                    if (!response.ok) throw new Error('找不到技能檔案');
-                    return response.text();
-                })
-                .then(htmlContent => {
-                    placeholder.innerHTML = htmlContent;
-                })
-                .catch(error => {
-                    console.error('載入技能表格失敗:', error);
-                    placeholder.innerHTML = '<span style="color:red;">表格載入失敗，請檢查檔名。</span>';
-                });
-            
-            // 2. 滑鼠移入：計算「技能等級設定」文字的位置，把浮空視窗定位在它右邊
-            trigger.addEventListener('mouseenter', (e) => {
-                
-                const rect = trigger.getBoundingClientRect();
-                // 讓浮空視窗出現在文字右側 15px 的地方，高度與文字齊平
-                tooltip.style.left = `${rect.right + window.scrollX + 15}px`;
-                tooltip.style.top = `${rect.top + window.scrollY - 10}px`;
-                tooltip.style.display = 'block';
-            });
-            
-            // 3. 滑鼠移出：隱藏視窗
-            trigger.addEventListener('mouseleave', () => {
-                tooltip.style.display = 'none';
-            });
-
-            // 可選：滑鼠如果移進彈出視窗本身，保持顯示；移出才消
-            tooltip.addEventListener('mouseenter', () => { tooltip.style.display = 'block'; });
-            tooltip.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
-        }
-        
         // ========【 UI 視覺進場控制 】========
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
