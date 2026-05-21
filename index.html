@@ -376,7 +376,7 @@
         const skillPlaceholder = document.getElementById('skill-table-placeholder');
         if (skillPlaceholder) {
             // 請確保 'skills.html' 有改成你那個獨立 HTML 的正確檔名
-            fetch('skills-table.html') 
+            fetch('skill-table.html') 
                 .then(response => {
                     if (!response.ok) throw new Error('找不到技能檔案');
                     return response.text();
