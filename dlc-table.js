@@ -140,7 +140,7 @@ function initTable() {
         row.dataset.originalIndex = index;
     });
 
-    console.log("✔ 表格初始化完成");
+    console.log("✔ DLC對照表初始化完成");
 }
 
 // ===================================================
