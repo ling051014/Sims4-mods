@@ -440,15 +440,6 @@ body {
     /* 動態過渡 */ transition: opacity 0.2s ease;
 }
 
-/* ========【技能懸浮提示】 設定 - 技能表格外層捲動容器 ======== */
-.tooltip-scroll-body {
-    /* 最大高度 */ max-height: 320px;
-    /* 垂直捲動 */ overflow-y: auto;
-    /* 水平捲動 */ overflow-x: auto;
-    /* 預留頂部空間給標題，讓卷軸往下移 */ padding-top: 31px;
-    /* 開啟定位內容 */ position: relative;
-}
-
 /* ========【技能懸浮提示】 設定 - 技能表格 ======== */
 .skill-tooltip-window .skill-table {
     /* 撐滿容器 */ width: 100% !important;
@@ -460,7 +451,7 @@ body {
 /* ========【技能懸浮提示】 設定 - 表頭（固定） ======== */
 .skill-tooltip-window .skill-table thead th {
     /* sticky定位 */ position: sticky !important;
-    /* 配合外層 padding 往上釘在最頂端，避開卷軸 */ top: -31px !important;
+    /* 釘在頂部 */ top: 0 !important;
     /* 表頭背景 */ background-color: #fafafa !important;
     /* 層級優先 */ z-index: 10 !important;
     /* 文字加粗 */ font-weight: bold !important;
@@ -485,6 +476,13 @@ body {
     /* 懸停底色 */ background-color: rgba(85, 172, 238, 0.08) !important;
 }
 
+/* ========【技能懸浮提示】 設定 - 捲動外層 ======== */
+.tooltip-scroll-body {
+    /* 最大高度 */ max-height: 320px;
+    /* 垂直捲動 */ overflow-y: auto;
+    /* 水平捲動 */ overflow-x: auto;
+}
+
 /* ========【技能懸浮提示】 設定 - 捲軸樣式 ======== */
 .tooltip-scroll-body::-webkit-scrollbar {
     /* 捲軸寬度 */ width: 6px;
@@ -497,6 +495,8 @@ body {
 .tooltip-scroll-body::-webkit-scrollbar-thumb:hover {
     /* 懸停顏色 */ background: #55acee;
 }
+
+
 
 /* ========【首頁貼士】 設定 - 容器佈局樣式 ======== */
 .home-tips-container {
