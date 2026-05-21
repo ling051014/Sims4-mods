@@ -20,25 +20,38 @@ fetch('skill-table.html')
         console.log('✔ 技能表格初始化完成'); // 顯示初始化成功訊息
         placeholder.innerHTML = html; // 插入 HTML 內容到容器
         
-        // 1. 縱向掃描整張表格，精準抓出每一欄所有 td 裡面的「最大絕對寬度」
-        const maxWidths = Array.from(document.querySelectorAll('.skill-table tbody tr'))
-            .map(tr => Array.from(tr.children))
-            .reduce((acc, row) => {
-                row.forEach((td, i) => {
-                    const w = td.getBoundingClientRect().width;
-                    acc[i] = Math.max(acc[i] || 0, w);
-                });
-                return acc;
-            }, []);
+        // 1. 暫時顯示 tooltip 但設定 visibility: hidden 讓使用者完全看不到，以便瀏覽器計算真實寬度
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.display = 'block';
 
-        // 2. 將算出的最大寬度，死死塞回給對應的表頭 th 進行鎖定
-        const ths = document.querySelectorAll('.skill-table thead th');
-        ths.forEach((th, i) => {
-            if (maxWidths[i]) {
-                th.style.width = maxWidths[i] + 'px';
-                th.style.minWidth = maxWidths[i] + 'px';
-            }
-        });
+        // 2. 容器範圍限定：精準鎖定當前 tooltip 內部的 tbody
+        const tbody = tooltip.querySelector('.skill-table tbody');
+        
+        if (tbody) {
+            // 3. 縱向掃描精準限定在該 tbody 內的 tr，抓出每一欄 td 的「最大絕對寬度」
+            const maxWidths = Array.from(tbody.querySelectorAll('tr'))
+                .map(tr => Array.from(tr.children))
+                .reduce((acc, row) => {
+                    row.forEach((td, i) => {
+                        const w = td.getBoundingClientRect().width;
+                        acc[i] = Math.max(acc[i] || 0, w);
+                    });
+                    return acc;
+                }, []);
+
+            // 4. 表頭同步限定：精準鎖定當前 tooltip 內部的 th，並將算出的最大寬度死死塞入
+            const ths = tooltip.querySelectorAll('.skill-table thead th');
+            ths.forEach((th, i) => {
+                if (maxWidths[i]) {
+                    th.style.width = maxWidths[i] + 'px';
+                    th.style.minWidth = maxWidths[i] + 'px';
+                }
+            });
+        }
+
+        // 5. 計算完成後，立刻還原為原本的隱藏狀態與預設視覺屬性
+        tooltip.style.display = 'none';
+        tooltip.style.visibility = 'visible';
     })
     
     // 發生錯誤時（如檔案路徑錯誤），於主控台報錯並在畫面上顯示紅字提示
