@@ -89,31 +89,9 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
     // 滑鼠移入 trigger
     trigger.addEventListener('mouseenter', () => {
         // 若已鎖定常駐，滑鼠進入不影響
-        if (locked) return; // 若已鎖定常駐，滑鼠進入不影響
+        if (locked) return;
 
-        // 取得文字位置範圍
-        const rect = trigger.getBoundingClientRect();
-        // 設定浮窗初始位置：右側，並加上滾動偏移
-        let left = rect.right + 15 + window.scrollX;
-        let top = rect.top + window.scrollY - 10;
-
-        // 取得 tooltip 的實際寬度與高度
-        const tooltipWidth = tooltip.offsetWidth;
-        const tooltipHeight = tooltip.offsetHeight;
-
-        // 若超出瀏覽器右邊界，改為左側顯示
-        if (left + tooltipWidth > window.scrollX + window.innerWidth) left = rect.left - tooltipWidth - 15;
-        // 避免超出下方邊界
-        if (top + tooltipHeight > window.scrollY + window.innerHeight) top = window.scrollY + window.innerHeight - tooltipHeight - 10;
-        // 避免超出上方邊界
-        if (top < window.scrollY) top = window.scrollY + 10;
-
-        // 套用計算後的左邊距與頂邊距
-        tooltip.style.left = `${left}px`;
-        tooltip.style.top = `${top}px`;
-        // 顯示浮窗 (opacity 過渡)
-        tooltip.style.display = 'block';
-        tooltip.style.opacity = '1';
+        showTooltip(trigger); // 顯示 tooltip
 
         // 若有正在等待的隱藏計時器則清除
         if (hideTimeout) {
@@ -125,28 +103,22 @@ document.querySelectorAll('.skill-tooltip-trigger').forEach(trigger => {
     // 滑鼠離開 trigger
     trigger.addEventListener('mouseleave', () => {
         // 若鎖定則不自動隱藏
-        if (locked) return; // 若鎖定則不自動隱藏
-        // 設定延遲隱藏計時器
+        if (locked) return;
+        // 延遲隱藏 tooltip
         hideTimeout = setTimeout(() => {
-            // 隱藏浮窗 (淡出)
-            tooltip.style.opacity = '0';
-            // 與 CSS 過渡時間一致後關閉顯示
-            setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+            hideTooltip();
         }, 50);
     });
 
     // 點擊 trigger 鎖定/解除鎖定 tooltip
-    trigger.addEventListener('click', () => {
-        locked = !locked; // 切換鎖定狀態
-        // 判斷鎖定狀態進行顯示或隱藏
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation(); // 避免冒泡到 document click
+        locked = !locked;    // 切換鎖定狀態
         if (locked) {
-            // 鎖定常駐顯示
-            tooltip.style.display = 'block';
+            tooltip.style.display = 'block'; // 鎖定常駐顯示
             tooltip.style.opacity = '1';
         } else {
-            // 解除鎖定並隱藏
-            tooltip.style.opacity = '0';
-            setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+            hideTooltip(); // 解除鎖定並隱藏
         }
     });
 });
@@ -169,48 +141,24 @@ tooltip.addEventListener('mouseenter', () => {
 // 滑鼠移出提示窗本身
 tooltip.addEventListener('mouseleave', () => {
     // 鎖定常駐時離開 tooltip 不隱藏
-    if (locked) return; // 鎖定常駐時離開 tooltip 不隱藏
+    if (locked) return;
     // 隱藏浮窗 (淡出)
-    tooltip.style.opacity = '0';
-    setTimeout(() => { tooltip.style.display = 'none'; }, 200);
-});
-
-// ===================================================
-// ========【技能提示窗】 提示窗本體顯示控制 ========
-// ===================================================
-// 滑鼠移入提示窗本身
-tooltip.addEventListener('mouseenter', () => {
-    // 若有隱藏計時器則清除，避免消失
-    if (hideTimeout) {
-        clearTimeout(hideTimeout);
-        hideTimeout = null;
-    }
-    // 保持提示窗顯示
-    tooltip.style.display = 'block';
-    tooltip.style.opacity = '1';
-});
-
-// 滑鼠移出提示窗本身
-tooltip.addEventListener('mouseleave', () => {
-    // 鎖定常駐時離開 tooltip 不隱藏
-    if (locked) return; // 鎖定常駐時離開 tooltip 不隱藏
-    // 隱藏浮窗 (淡出)
-    tooltip.style.opacity = '0';
-    setTimeout(() => { tooltip.style.display = 'none'; }, 200);
+    hideTooltip();
 });
 
 // ===================================================
 // ========【全域事件】 點擊外部自動關閉提示窗 ========
 // ===================================================
 document.addEventListener('click', (e) => {
-    if (!locked) return; // 未鎖定不需處理
+    // 未鎖定不需處理
+    if (!locked) return;
+
     // 點擊在 tooltip 或 trigger 上時不關閉
     if (tooltip.contains(e.target) || e.target.classList.contains('skill-tooltip-trigger')) return;
 
     // 解除鎖定並隱藏
     locked = false;
     hideTooltip();
-    document.querySelectorAll('.skill-tooltip-trigger.tooltip-locked').forEach(t => t.classList.remove('tooltip-locked'));
 });
 
 // ===================================================
@@ -249,8 +197,3 @@ function showTooltip(trigger) {
 }
 
 function hideTooltip() {
-    // 隱藏浮窗 (淡出)
-    tooltip.style.opacity = '0';
-    // 與 CSS 過渡時間一致後關閉顯示
-    setTimeout(() => { tooltip.style.display = 'none'; }, 200);
-}
