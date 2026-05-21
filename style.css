@@ -424,7 +424,7 @@ body {
     /* 行內區塊 */ display: inline-block;
     /* 幫助游標 */ cursor: help;
     /* 繼承顏色 */ color: inherit;
-    /* 底線虛線 */ border-bottom: 1px dotted #666;
+    /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
 }
 
 /* ========【浮動提示】 設定 - 旁邊小視窗本體 ======== */
@@ -434,10 +434,10 @@ body {
     /* 絕對定位 */ position: absolute;
     /* 距離左側 */ left: 105%;
     /* 貼齊頂部 */ top: -20px;
-    /* 深色背景 */ background-color: #222222;
-    /* 視窗邊框 */ border: 1px solid #444444;
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 視窗陰影 */ box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    /* 柔和背景 */ background-color: #f7f5f2;
+    /* 淺色邊框 */ border: 1px solid #d8d2c8;
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 柔和陰影 */ box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
     /* 顯示層級 */ z-index: 999;
     /* 最小寬度 */ min-width: 450px;
     /* 最大寬度 */ max-width: 600px;
@@ -450,6 +450,7 @@ body {
     /* 觸發顯示 */ visibility: visible;
     /* 完全不透 */ opacity: 1;
 }
+
 .skill-tooltip-container:hover .skill-tooltip-window,
 .skill-tooltip-container:active .skill-tooltip-window {
     /* 觸發顯示 */ visibility: visible;
@@ -463,15 +464,16 @@ body {
     /* 隱藏橫軸 */ overflow-x: hidden;
     /* 表格佈局 */ display: table;
     /* 寬度撐滿 */ width: 100%;
+    /* 柔和文字 */ color: #4b5563;
 }
 
 /* ========【浮動提示】 設定 - 橫向表格列佈局 ======== */
-.tooltip-header-row, 
+.tooltip-header-row,
 .tooltip-row {
     /* 表格列化 */ display: table-row;
 }
 
-.tooltip-header-row div, 
+.tooltip-header-row div,
 .tooltip-row div {
     /* 表格儲存 */ display: table-cell;
     /* 內縮空間 */ padding: 8px 14px;
@@ -479,14 +481,14 @@ body {
     /* 文字置中 */ text-align: center;
     /* 垂直置中 */ vertical-align: middle;
     /* 禁止斷行 */ white-space: nowrap;
-    /* 底部分隔 */ border-bottom: 1px solid #333;
+    /* 柔和分隔線 */ border-bottom: 1px solid #e5e0d8;
 }
 
 /* ========【浮動提示】 設定 - 表格標頭樣式 ======== */
 .tooltip-header-row div {
-    /* 標頭底色 */ background-color: #1a1a1a;
+    /* 標頭底色 */ background-color: #ece7df;
     /* 文字加粗 */ font-weight: bold;
-    /* 亮色強調 */ color: #00bcd4;
+    /* 柔和主色 */ color: #6b7a8f;
     /* 標頭置頂 */ position: sticky;
     /* 釘在頂部 */ top: 0;
     /* 標頭層級 */ z-index: 10;
@@ -494,19 +496,21 @@ body {
 
 /* ========【浮動提示】 設定 - 資料列懸停效果 ======== */
 .tooltip-row:hover div {
-    /* 懸停底色 */ background-color: #2d2d2d;
+    /* 懸停底色 */ background-color: #f1ede7;
 }
 
 /* ========【浮動提示】 設定 - 精緻細捲軸 ======== */
 .tooltip-scroll-body::-webkit-scrollbar {
     /* 捲軸寬度 */ width: 6px;
 }
+
 .tooltip-scroll-body::-webkit-scrollbar-thumb {
-    /* 捲軸底色 */ background: #444;
+    /* 捲軸底色 */ background: #c7c0b5;
     /* 圓角外觀 */ border-radius: 3px;
 }
+
 .tooltip-scroll-body::-webkit-scrollbar-thumb:hover {
-    /* 懸停亮藍 */ background: #00bcd4;
+    /* 懸停顏色 */ background: #9fb3c8;
 }
 
 
