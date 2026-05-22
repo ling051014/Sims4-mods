@@ -805,14 +805,20 @@ th.desc .sort-arrows::after {
         /* 允許內容捲動 */ overflow-y: auto !important;
         /* 鎖定彈窗邊界 */ overflow-x: hidden !important;
         /* 順暢滑動特效 */ -webkit-overflow-scrolling: touch !important;
+        /* 禁止彈窗本身產生任何滑動效果 */ overscroll-behavior: contain !important;
+        /* 確保彈窗邊框堅硬，不隨觸控位移 */ touch-action: none !important;
     }
-    #global-skill-tooltip .tooltip-scroll-body {
+    #global-skill-tooltip .tooltip-scroll-body,
+    #global-skill-tooltip .table-container {
         /* 塊狀顯示 */ display: block !important;
         /* 寬度填滿 */ width: 100% !important;
         /* 僅容器內滑動 */ overflow-x: auto !important;
         /* 防止強制換行 */ white-space: nowrap;
         /* 包含邊框計算 */ box-sizing: border-box !important;
+        /* 即使滑到底了，也不准帶動外層容器晃動 */ overscroll-behavior: contain !important;
+        /* 讓觸控只發生在容器內 */ touch-action: pan-x pan-y !important;
     }
+
     #global-skill-tooltip table {
         /* 寬度撐滿 */ width: 100% !important;
         /* 設定最小寬度 */ min-width: 400px;
