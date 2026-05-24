@@ -191,6 +191,19 @@ body {
     /* 裁切填滿 */ object-fit: cover;
 }
 
+/* ========【模組卡片】 設定 - 影片預覽音量切換按鈕 ======== */
+.volume-btn {
+    /* 絕對定位 */ position: absolute;
+    /* 位置靠右下 */ bottom: 10px; right: 10px;
+    /* 背景顏色 */ background: rgba(0, 0, 0, 0.5);
+    /* 文字顏色 */ color: white;
+    /* 內距設定 */ padding: 5px 8px;
+    /* 圓角處理 */ border-radius: 20px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 字體大小 */ font-size: 14px;
+    /* 層級設定 */ z-index: 10;
+}
+
 /* ========【模組卡片】 設定 - 卡片標題與作者 ======== */
 .content {
     /* 內縮空間 */ padding: 20px;
