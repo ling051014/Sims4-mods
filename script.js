@@ -111,6 +111,26 @@ if (dlcModal) {
     });
 }
 
+// ========【影片預覽】 設定 - 切換靜音狀態 ========
+function toggleMute(btn) {
+    // 找到該按鈕的父容器 (preview-img)
+    const wrapper = btn.parentElement;
+    // 找到該容器內的影片元素
+    const video = wrapper.querySelector('video');
+    
+    if (video.muted) {
+        // 取消靜音
+        video.muted = false;
+        // 更換圖示文字
+        btn.innerText = "🔊";
+    } else {
+        // 變回靜音
+        video.muted = true;
+        // 更換圖示文字
+        btn.innerText = "🔇";
+    }
+}
+
 // ========【DLC對照表】 設定 - 載入外部 HTML ========
 function loadDLCTable(containerId, callback) {
     // 取得目標容器
