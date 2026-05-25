@@ -264,7 +264,7 @@ body {
     /* 虛線分隔 */ border-top: 1px dashed #eee;
 }
 .tips a,
-.warning-content a {{ 
+.warning-content a {
     /* 幫助游標 */ cursor: help;
     /* 繼承顏色 */ color: inherit;
     /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
