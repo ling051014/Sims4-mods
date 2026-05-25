@@ -263,6 +263,12 @@ body {
     /* 拉開資訊距離 */ margin-top: 15px;
     /* 虛線分隔 */ border-top: 1px dashed #eee;
 }
+.tips a,
+.warning-content a {{ 
+    /* 幫助游標 */ cursor: help;
+    /* 繼承顏色 */ color: inherit;
+    /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
+}
 .text-red { 
     /* 強調紅色 */color: #ef8181; font-weight: 500; }
 .text-orange { 
