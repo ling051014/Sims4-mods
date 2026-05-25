@@ -265,7 +265,7 @@ body {
 }
 .tips a,
 .warning-content a {
-    /* 幫助游標 */ cursor: help;
+    /* 指標手勢 */ cursor: pointer;
     /* 繼承顏色 */ color: inherit;
     /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
 }
