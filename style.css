@@ -267,7 +267,6 @@ body {
 .warning-content a {
     /* 指標手勢 */ cursor: pointer;
     /* 繼承顏色 */ color: inherit;
-    /* 柔和底線 */ border-bottom: 1px dotted #9aa7b1;
 }
 .text-red { 
     /* 強調紅色 */color: #ef8181; font-weight: 500; }
