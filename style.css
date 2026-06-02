@@ -360,6 +360,31 @@ body {
     /* 字距拉開 */ letter-spacing: 3px;
     /* 內縮空間 */ padding: 10px 20px;
     /* 下方虛線 */ border-bottom: 1px dashed #999;
+    /* 彈性佈局 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+}
+
+/* ========【摺疊面板】 設定 - 隱藏預設箭頭 ======== */
+.resource-detail summary::-webkit-details-marker {
+    /* 隱藏預設三角形 */ display: none;
+}
+
+/* ========【摺疊面板】 設定 - 自定義 CSS 三角形 ======== */
+.resource-detail summary::before {
+    /* 清空內容 */ content: "";
+    /* 繪製向右三角形 */ width: 0; height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 6px solid #333;
+    /* 右側間距 */ margin-right: 12px;
+    /* 動態過渡 */ transition: transform 0.2s ease;
+    /* 垂直對齊 */ vertical-align: middle;
+}
+
+/* ========【摺疊面板】 設定 - 展開時三角形旋轉 ======== */
+.resource-detail[open] summary::before {
+    /* 旋轉 90 度指向下方 */ transform: rotate(90deg);
 }
 
 /* ========【摺疊面板】 設定 - 篩選按鈕 ======== */
