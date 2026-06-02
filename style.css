@@ -281,13 +281,12 @@ body {
 .text-bluegray { 
     /* 備用藍灰色 */color: #9fb3c8; font-weight: 500; }
 
-/* ========【模組卡片】 設定 - 備註區折疊面板 ======== */
+/* ========【模組卡片】 設定 - 備註區塊折疊面板容器 ======== */
 .warning-accordion {
     /* 上方外距 */ margin-top: 10px;
-    /* 內容置中 */ text-align: center;
 }
 
-/* ========【模組卡片】 設定 - 折疊面板點擊按鈕本體 ======== */
+/* ========【模組卡片】 設定 - 備註區塊折疊按鈕本體 ======== */
 .warning-toggle-btn {
     /* 行內區塊 */ display: inline-block;
     /* 按鈕內縮 */ padding: 6px 12px;
@@ -301,15 +300,35 @@ body {
     /* 按鈕邊框 */ border: 1px solid #5a3333;
     /* 動態過渡 */ transition: all 0.2s ease;
     /* 停用選取 */ user-select: none;
+    /* 移除預設列表樣式 */ list-style: none;
 }
 
-/* ========【模組卡片】 設定 - 折疊面板滑鼠懸浮在按鈕上 ======== */
+/* ========【模組卡片】 設定 - 備註區塊折疊面板隱藏預設箭頭 ======== */
+.warning-toggle-btn::-webkit-details-marker {
+    /* 隱藏預設三角形 */ display: none;
+}
+
+/* ========【模組卡片】 設定 - 備註區塊折疊面板自定義三角形 ======== */
+.warning-toggle-btn::before {
+    /* 三角形圖示 */ content: "▶";
+    /* 右側間距 */ margin-right: 8px;
+    /* 圖示大小 */ font-size: 10px;
+    /* 行內顯示 */ display: inline-block;
+    /* 動態過渡 */ transition: transform 0.2s ease;
+}
+
+/* ========【模組卡片】 設定 - 備註區塊折疊面板展開時三角形旋轉 ======== */
+.warning-accordion[open] .warning-toggle-btn::before {
+    /* 旋轉 90 度 */ transform: rotate(90deg);
+}
+
+/* ========【模組卡片】 設定 - 備註區塊折疊面板按鈕懸浮效果 ======== */
 .warning-toggle-btn:hover {
     /* 深紅底色 */ background-color: #422525;
     /* 亮紅文字 */ color: #ffb3b3;
 }
 
-/* ========【模組卡片】 設定 - 折疊面板展開內容區塊======== */
+/* ========【模組卡片】 設定 - 備註區塊展開內容區塊 ======== */
 .warning-content {
     /* 上方外距 */ margin-top: 12px;
     /* 上下內縮 */ padding: 10px 0;
