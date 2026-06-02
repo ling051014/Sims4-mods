@@ -281,13 +281,13 @@ body {
 .text-bluegray { 
     /* 備用藍灰色 */color: #9fb3c8; font-weight: 500; }
 
-/* ========【模組卡片】 設定 - 折疊面板 ======== */
+/* ========【模組卡片】 設定 - 備註區折疊面板 ======== */
 .warning-accordion {
     /* 上方外距 */ margin-top: 10px;
     /* 內容置中 */ text-align: center;
 }
 
-/* 點擊按鈕本體（保持您的原始設定） */
+/* ========【模組卡片】 設定 - 折疊面板點擊按鈕本體 ======== */
 .warning-toggle-btn {
     /* 行內區塊 */ display: inline-block;
     /* 按鈕內縮 */ padding: 6px 12px;
@@ -303,20 +303,16 @@ body {
     /* 停用選取 */ user-select: none;
 }
 
-/* 滑鼠懸浮在按鈕上 */
+/* ========【模組卡片】 設定 - 折疊面板滑鼠懸浮在按鈕上 ======== */
 .warning-toggle-btn:hover {
     /* 深紅底色 */ background-color: #422525;
     /* 亮紅文字 */ color: #ffb3b3;
 }
 
-/* ========【模組卡片】 設定 - 折疊面板展開內容區塊 ======== */
+/* ========【模組卡片】 設定 - 折疊面板展開內容區塊======== */
 .warning-content {
     /* 上方外距 */ margin-top: 12px;
     /* 上下內縮 */ padding: 10px 0;
-    /* 左側連接線 */ border-left: 2px solid #5a3333;
-    /* 內容左縮排 */ margin-left: 12px;
-    /* 內距設定 */ padding-left: 15px;
-    /* 內容靠左 */ text-align: left;
 }
 
 
