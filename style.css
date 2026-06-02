@@ -281,36 +281,43 @@ body {
 .text-bluegray { 
     /* 備用藍灰色 */color: #9fb3c8; font-weight: 500; }
 
-/* ========【模組卡片】 設定 - 折疊面板 ======== */
+/* ========【模組卡片】 設定 - 折疊面板容器 ======== */
 .warning-accordion {
     /* 上方外距 */ margin-top: 10px;
-    /* 內容置中 */ text-align: center;
+    /* 內容靠左 */ text-align: left;
 }
 
-/* 點擊按鈕本體 */
+/* ========【模組卡片】 設定 - 折疊按鈕本體 ======== */
 .warning-toggle-btn {
-    /* 行內區塊 */ display: inline-block;
-    /* 按鈕內縮 */ padding: 6px 12px;
-    /* 暗紅底色 */ background-color: #2b1d1d; 
-    /* 淡紅文字 */ color: #ff9999; 
-    /* 字體大小 */ font-size: 12px; 
-    /* 取消斜體 */ font-style: normal; 
-    /* 文字粗體 */ font-weight: bold;
+    /* 行內彈性顯示 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 按鈕內縮 */ padding: 2px 4px;
+    /* 背景透明 */ background-color: transparent !important;
+    /* 取消邊框 */ border: none !important;
+    /* 文字顏色 */ color: #555 !important;
+    /* 字體大小 */ font-size: 13px;
+    /* 正常字體 */ font-style: normal;
+    /* 字體重量 */ font-weight: 500;
     /* 指標手勢 */ cursor: pointer;
-    /* 邊框圓角 */ border-radius: 4px;
-    /* 按鈕邊框 */ border: 1px solid #5a3333;
-    /* 動態過渡 */ transition: all 0.2s ease;
+    /* 過渡效果 */ transition: all 0.2s ease;
     /* 停用選取 */ user-select: none;
 }
-/* 滑鼠懸浮在按鈕上 */
+
+/* ========【模組卡片】 設定 - 折疊面板按鈕懸浮效果 ======== */
 .warning-toggle-btn:hover {
-    /* 深紅底色 */ background-color: #422525;
-    /* 亮紅文字 */ color: #ffb3b3;
+    /* 淡灰底色 */ background-color: rgba(0, 0, 0, 0.05) !important;
+    /* 文字變深 */ color: #222 !important;
+    /* 邊框圓角 */ border-radius: 3px;
 }
-/* 展開後的內容區塊 */
+
+/* ========【模組卡片】 設定 - 折疊面板展開內容區塊 ======== */
 .warning-content {
-    /* 上方外距 */ margin-top: 12px;
-    /* 上下內縮 */ padding: 10px 0;
+    /* 上方外距 */ margin-top: 4px;
+    /* 左側縮排 */ margin-left: 12px;
+    /* 內部空間 */ padding: 8px 12px;
+    /* 左側邊線 */ border-left: 2px solid #ddd;
+    /* 文字顏色 */ color: #444;
+    /* 字體大小 */ font-size: 13px;
 }
 
 
