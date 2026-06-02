@@ -293,7 +293,6 @@ body {
     /* 垂直置中 */ align-items: center;
     /* 水平置中 */ justify-content: center;
     /* 按鈕內縮 */ padding: 6px 12px;
-    /* 背景透明 */ background-color: transparent !important;
     /* 文字顏色 */ color: #37352f; 
     /* 字體大小 */ font-size: 12px; 
     /* 文字粗體 */ font-weight: 500;
@@ -301,7 +300,6 @@ body {
     /* 動態過渡 */ transition: all 0.2s ease;
     /* 停用選取 */ user-select: none;
     /* 移除預設標記 */ list-style: none;
-    /* 移除邊框 */ border: none !important;
 }
 
 /* ========【模組卡片】 設定 - 備註區塊折疊面板隱藏預設箭頭 ======== */
@@ -312,10 +310,10 @@ body {
 /* ========【模組卡片】 設定 - 備註區塊折疊面板自定義三角形 ======== */
 .warning-toggle-btn::before {
     /* 清空內容 */ content: "";
-    /* 繪製三角形 */ width: 0; height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 6px solid #37352f;
+    /* 繪製向右三角形 */ width: 0; height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 6px solid #37352f;
     /* 右側間距 */ margin-right: 8px;
     /* 動態過渡 */ transition: transform 0.2s ease;
     /* 垂直對齊修正 */ vertical-align: middle;
