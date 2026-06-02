@@ -284,23 +284,26 @@ body {
 /* ========【模組卡片】 設定 - 備註區塊折疊面板容器 ======== */
 .warning-accordion {
     /* 上方外距 */ margin-top: 10px;
+    /* 水平置中 */ text-align: center;
 }
 
 /* ========【模組卡片】 設定 - 備註區塊折疊按鈕本體 ======== */
 .warning-toggle-btn {
-    /* 行內區塊 */ display: inline-block;
+    /* 水平置中 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
     /* 按鈕內縮 */ padding: 6px 12px;
-    /* 暗紅底色 */ background-color: #2b1d1d; 
-    /* 淡紅文字 */ color: #ff9999; 
+    /* 背景顏色 */ background-color: #f1f1ef; 
+    /* 文字顏色 */ color: #37352f; 
     /* 字體大小 */ font-size: 12px; 
     /* 取消斜體 */ font-style: normal; 
-    /* 文字粗體 */ font-weight: bold;
+    /* 文字粗體 */ font-weight: 500;
     /* 指標手勢 */ cursor: pointer;
     /* 邊框圓角 */ border-radius: 4px;
-    /* 按鈕邊框 */ border: 1px solid #5a3333;
+    /* 按鈕邊框 */ border: 1px solid #e0e0de;
     /* 動態過渡 */ transition: all 0.2s ease;
     /* 停用選取 */ user-select: none;
-    /* 移除預設列表樣式 */ list-style: none;
+    /* 移除預設標記 */ list-style: none;
 }
 
 /* ========【模組卡片】 設定 - 備註區塊折疊面板隱藏預設箭頭 ======== */
@@ -324,8 +327,8 @@ body {
 
 /* ========【模組卡片】 設定 - 備註區塊折疊面板按鈕懸浮效果 ======== */
 .warning-toggle-btn:hover {
-    /* 深紅底色 */ background-color: #422525;
-    /* 亮紅文字 */ color: #ffb3b3;
+    /* 懸浮底色 */ background-color: #e0e0de;
+    /* 文字顏色 */ color: #37352f;
 }
 
 /* ========【模組卡片】 設定 - 備註區塊展開內容區塊 ======== */
