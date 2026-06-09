@@ -131,6 +131,71 @@ function toggleMute(btn) {
     }
 }
 
+// ========【懸浮小視窗】 設定 - 模組卡片用 ========
+(function() {
+    // 取得懸浮視窗的容器
+    const tooltip = document.getElementById('global-skill-tooltip');
+    if (!tooltip) return; // 若網頁上沒這個容器就直接跳過
+
+    let locked = false; // 紀錄視窗是否被點擊鎖定
+
+    // 顯示提示窗核心函式
+    function showTooltip(trigger) {
+        // 從 data-tooltip-id 屬性抓取對應的 HTML 內容
+        const contentId = trigger.getAttribute('data-tooltip-id');
+        const source = document.getElementById(contentId);
+        
+        // 將內容複製到懸浮視窗內
+        if (source) tooltip.innerHTML = source.innerHTML;
+
+        tooltip.style.display = 'block';
+        const rect = trigger.getBoundingClientRect();
+        
+        // 定位邏輯：顯示在觸發文字的下方
+        tooltip.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+        tooltip.style.left = (rect.left + window.scrollX) + 'px';
+        
+        // 觸發淡入動畫
+        setTimeout(() => tooltip.style.opacity = '1', 10);
+    }
+
+    // 隱藏提示窗核心函式
+    function hideTooltip() {
+        if (locked) return; // 若已鎖定則不隱藏
+        tooltip.style.opacity = '0';
+        setTimeout(() => tooltip.style.display = 'none', 200);
+    }
+
+    // 監聽滑鼠移入事件 (觸發器 class: tooltip-trigger)
+    document.body.addEventListener('mouseover', (e) => {
+        const trigger = e.target.closest('.tooltip-trigger');
+        if (!trigger || locked) return;
+        showTooltip(trigger);
+    });
+
+    // 監聽滑鼠移出事件
+    document.body.addEventListener('mouseout', (e) => {
+        const trigger = e.target.closest('.tooltip-trigger');
+        if (!trigger || locked) return;
+        hideTooltip();
+    });
+
+    // 監聽點擊事件 (負責鎖定/解除鎖定)
+    document.body.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.tooltip-trigger');
+        if (trigger) {
+            locked = !locked; // 切換鎖定狀態
+            if (!locked) hideTooltip(); // 解鎖則隱藏
+            return;
+        }
+        // 若點擊非提示窗的空白處，強制解除鎖定
+        if (locked && !tooltip.contains(e.target)) {
+            locked = false;
+            hideTooltip();
+        }
+    });
+})();
+
 // ========【DLC對照表】 設定 - 載入外部 HTML ========
 function loadDLCTable(containerId, callback) {
     // 取得目標容器
