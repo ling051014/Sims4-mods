@@ -343,6 +343,7 @@ body {
     /* 水平置中 */ margin: 5px auto;
 }
 .resource-detail summary {
+    /* 停用選取 */ user-select: none;
     /* 指標手勢 */ cursor: pointer;
     /* 自適應字數 */ width: fit-content;
     /* 水平置中 */ margin: 0 auto;
