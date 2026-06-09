@@ -330,12 +330,6 @@ body {
     /* 圓角處理 */ border-radius: 4px;
 }
 
-/* ========【模組卡片】 設定 - 備註區塊展開內容區塊 ======== */
-.warning-content {
-    /* 上方外距 */ margin-top: 12px;
-    /* 上下內縮 */ padding: 10px 0;
-}
-
 
 
 
