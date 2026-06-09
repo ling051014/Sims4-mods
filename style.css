@@ -292,6 +292,7 @@ body {
     /* 水平置中 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
     /* 水平置中 */ justify-content: center;
+    /* 按鈕內縮 */ padding: 6px 12px;
     /* 文字顏色 */ color: #37352f; 
     /* 字體大小 */ font-size: 12px; 
     /* 文字粗體 */ font-weight: 500;
