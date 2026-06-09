@@ -70,7 +70,7 @@ body {
     /* 背景顏色 */ background: #fff;
     /* 固定頂部 */ position: sticky;
     /* 置頂位置 */ top: 0;
-    /* 顯示層級 */ z-index: 100;
+    /* 顯示層級 */ z-index: 9999;
 }
 .nav-menu a {
     /* 移除底線 */ text-decoration: none;
@@ -336,7 +336,7 @@ body {
 #mod-tooltip {
     /* 預設隱藏 */ display: none;
     /* 絕對定位 */ position: absolute;
-    /* 顯示層級 */ z-index: 9999;
+    /* 顯示層級 */ z-index: 100;
     /* 背景顏色 */ background-color: #ffffff;
     /* 外框設定 */ border: 1px solid #eeeeee;
     /* 圓角弧度 */ border-radius: 8px;
