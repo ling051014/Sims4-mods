@@ -132,62 +132,123 @@ function toggleMute(btn) {
 }
 
 // ========【懸浮小視窗】 設定 - 模組卡片用 ========
-document.addEventListener('DOMContentLoaded', () => {
-    const tooltip = document.getElementById('mod-tooltip');
-    // 用於延遲隱藏，讓你滑鼠滑過去時不會因為中途經過空白而消失
-    let hideTimer = null;
+// 取得提示視窗 DOM 元素
+const tooltip = document.getElementById('mod-tooltip');
 
-    // 1. 處理滑鼠移入 (Trigger 或視窗本體)
-    document.body.addEventListener('mouseover', (e) => {
-        const trigger = e.target.closest('.tooltip-trigger');
-        const isTooltip = e.target.closest('#mod-tooltip');
+// 隱藏倒數計時器變數
+let hideTimeout = null;
+// 滑鼠離開後延遲隱藏的時間（毫秒），提供滑鼠移動至視窗內部的緩衝空間
+const HIDE_DELAY = 150; 
 
-        // 如果是移入「觸發文字」
-        if (trigger) {
-            // 取消隱藏倒數
-            clearTimeout(hideTimer);
-            
-            // 抓取對應資料
-            const noteId = trigger.getAttribute('data-tooltip-id');
-            const noteSource = document.getElementById(noteId);
-            
-            if (noteSource) {
-                tooltip.innerHTML = noteSource.innerHTML;
-                tooltip.style.display = 'block';
-                
-                // 定位：顯示在滑鼠旁
-                tooltip.style.left = (e.pageX + 15) + 'px';
-                tooltip.style.top = (e.pageY + 15) + 'px';
-                
-                requestAnimationFrame(() => { tooltip.style.opacity = '1'; });
-            }
+// 鎖定狀態（點擊後維持顯示不消失）
+let locked = false;
+// 紀錄當前觸發的元素
+let currentTrigger = null;
+
+// 顯示 Tooltip
+function showTooltip(trigger, event) {
+    currentTrigger = trigger;
+
+    // 根據 trigger 的 data-tooltip-id 屬性抓取隱藏的原始 HTML 內容
+    const noteId = trigger.getAttribute('data-tooltip-id');
+    const source = document.getElementById(noteId);
+
+    if (!source) return;
+
+    // 將內容複製到提示窗中
+    tooltip.innerHTML = source.innerHTML;
+
+    // 顯示視窗並觸發 CSS 過渡動畫
+    tooltip.style.display = 'block';
+    tooltip.style.opacity = '1';
+
+    // 計算位置：將提示窗定位在觸發元素的正下方
+    const rect = trigger.getBoundingClientRect();
+    tooltip.style.position = 'absolute';
+    tooltip.style.left = rect.left + window.scrollX + 'px';
+    tooltip.style.top = rect.bottom + window.scrollY + 5 + 'px';
+
+    // 若有隱藏倒數，立即清除，確保顯示過程中不會意外消失
+    clearTimeout(hideTimeout);
+}
+
+// 隱藏 Tooltip
+function hideTooltip() {
+    currentTrigger = null;
+    tooltip.style.opacity = '0';
+
+    // 等待 CSS 過渡動畫 (200ms) 結束後再將節點隱藏
+    setTimeout(() => {
+        if (tooltip.style.opacity === '0') {
+            tooltip.style.display = 'none';
         }
+    }, 200);
+}
 
-        // 如果是移入「視窗本體」，取消隱藏倒數，保持顯示
-        if (isTooltip) {
-            clearTimeout(hideTimer);
-        }
-    });
+// 延遲關閉排程
+function scheduleHide() {
+    // 若已鎖定（常駐顯示），則不進行自動隱藏
+    if (locked) return;
 
-    // 2. 處理滑鼠移出 (離開 Trigger 或視窗本體)
-    document.body.addEventListener('mouseout', (e) => {
-        const trigger = e.target.closest('.tooltip-trigger');
-        const isTooltip = e.target.closest('#mod-tooltip');
+    // 啟動計時器，過一段時間後執行隱藏
+    hideTimeout = setTimeout(() => {
+        hideTooltip();
+    }, HIDE_DELAY);
+}
 
-        if (trigger || isTooltip) {
-            // 設定 150ms 緩衝，讓滑鼠有時間從文字移動到視窗內
-            hideTimer = setTimeout(() => {
-                tooltip.style.opacity = '0';
-                setTimeout(() => { 
-                    if (tooltip.style.opacity === '0') {
-                        tooltip.style.display = 'none'; 
-                    }
-                }, 200); // 對應 CSS 的 transition 時間
-            }, 150);
-        }
-    });
+// Hover 觸發器：滑鼠進入
+document.body.addEventListener('mouseover', (e) => {
+    const trigger = e.target.closest('.tooltip-trigger');
+    // 若無觸發器或已鎖定，則忽略
+    if (!trigger || locked) return;
+
+    // 清除隱藏計時，立即顯示
+    clearTimeout(hideTimeout);
+    showTooltip(trigger);
 });
 
+// Hover 觸發器：滑鼠離開
+document.body.addEventListener('mouseout', (e) => {
+    const trigger = e.target.closest('.tooltip-trigger');
+    if (!trigger || locked) return;
+
+    // 觸發延遲隱藏機制
+    scheduleHide();
+});
+
+// Tooltip 本體控制：進入視窗時不關閉
+tooltip.addEventListener('mouseenter', () => {
+    clearTimeout(hideTimeout);
+});
+
+// Tooltip 本體控制：移出視窗時啟動隱藏排程
+tooltip.addEventListener('mouseleave', () => {
+    scheduleHide();
+});
+
+// 點擊事件：切換鎖定狀態
+document.body.addEventListener('click', (e) => {
+    const trigger = e.target.closest('.tooltip-trigger');
+
+    // 若點擊的是觸發器，切換鎖定狀態
+    if (trigger) {
+        e.stopPropagation(); // 阻止事件冒泡，防止觸發下方點擊空白處關閉的邏輯
+        locked = !locked;
+
+        if (locked) {
+            showTooltip(trigger);
+        } else {
+            hideTooltip();
+        }
+        return;
+    }
+
+    // 若處於鎖定狀態，且點擊區域不在提示窗內，則解鎖並隱藏
+    if (locked && !tooltip.contains(e.target)) {
+        locked = false;
+        hideTooltip();
+    }
+});
 // ========【DLC對照表】 設定 - 載入外部 HTML ========
 function loadDLCTable(containerId, callback) {
     // 取得目標容器
