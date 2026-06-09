@@ -135,9 +135,11 @@ function toggleMute(btn) {
 (function() {
     // 取得懸浮視窗的容器
     const tooltip = document.getElementById('mod-tooltip');
-    if (!tooltip) return; // 若網頁上沒這個容器就直接跳過
+    // 若網頁上沒這個容器就直接跳過
+    if (!tooltip) return;
 
-    let locked = false; // 紀錄視窗是否被點擊鎖定
+    // 紀錄視窗是否被點擊鎖定
+    let locked = false;
 
     // 顯示提示窗核心函式
     function showTooltip(trigger) {
@@ -161,7 +163,8 @@ function toggleMute(btn) {
 
     // 隱藏提示窗核心函式
     function hideTooltip() {
-        if (locked) return; // 若已鎖定則不隱藏
+        // 若已鎖定則不隱藏
+        if (locked) return;
         tooltip.style.opacity = '0';
         setTimeout(() => tooltip.style.display = 'none', 200);
     }
@@ -184,8 +187,10 @@ function toggleMute(btn) {
     document.body.addEventListener('click', (e) => {
         const trigger = e.target.closest('.tooltip-trigger');
         if (trigger) {
-            locked = !locked; // 切換鎖定狀態
-            if (!locked) hideTooltip(); // 解鎖則隱藏
+            // 切換鎖定狀態
+            locked = !locked;
+            // 解鎖則隱藏
+            if (!locked) hideTooltip();
             return;
         }
         // 若點擊非提示窗的空白處，強制解除鎖定
