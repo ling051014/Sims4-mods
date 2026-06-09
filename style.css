@@ -291,7 +291,9 @@ body {
 .warning-toggle-btn {
     /* 水平置中 */ display: flex;
     /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
+    /* 文字水平置中 */ justify-content: center;
+    /* 寬度自適 */ width: fit-content;
+    /* 按鈕水平置中 */ margin: 0 auto;
     /* 按鈕內縮 */ padding: 6px 12px;
     /* 文字顏色 */ color: #37352f; 
     /* 字體大小 */ font-size: 12px; 
