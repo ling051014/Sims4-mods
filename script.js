@@ -138,46 +138,53 @@ const tooltip = document.getElementById('mod-tooltip');
 // 隱藏倒數計時器變數
 let hideTimeout = null;
 // 滑鼠離開後延遲隱藏的時間（毫秒），提供滑鼠移動至視窗內部的緩衝空間
-const HIDE_DELAY = 150; 
+const HIDE_DELAY = 150;
 
-// 鎖定狀態（點擊後維持顯示不消失）
+// 鎖定狀態（點擊後維持顯示不消失，直到再次點擊或點擊外部）
 let locked = false;
 // 紀錄當前觸發的元素
 let currentTrigger = null;
 
 // 顯示 Tooltip
-function showTooltip(trigger, event) {
+function showTooltip(trigger) {
     currentTrigger = trigger;
 
-    // 根據 trigger 的 data-tooltip-id 屬性抓取隱藏的原始 HTML 內容
+    // 根據觸發器上的 data-tooltip-id 屬性抓取隱藏的原始 HTML 內容
     const noteId = trigger.getAttribute('data-tooltip-id');
     const source = document.getElementById(noteId);
-
+    
+    // 若找不到對應的內容區塊則終止
     if (!source) return;
 
-    // 將內容複製到提示窗中
+    // 將內容複製到提示窗本體中
     tooltip.innerHTML = source.innerHTML;
 
-    // 顯示視窗並觸發 CSS 過渡動畫
+    // 顯示視窗：將 display 設為 block，透明度設為 1
     tooltip.style.display = 'block';
     tooltip.style.opacity = '1';
+    tooltip.style.visibility = 'visible';
 
-    // 計算位置：將提示窗定位在觸發元素的正下方
+    // 定位邏輯：將提示窗放置在觸發元素的正下方
     const rect = trigger.getBoundingClientRect();
+
     tooltip.style.position = 'absolute';
     tooltip.style.left = rect.left + window.scrollX + 'px';
     tooltip.style.top = rect.bottom + window.scrollY + 5 + 'px';
 
-    // 若有隱藏倒數，立即清除，確保顯示過程中不會意外消失
-    clearTimeout(hideTimeout);
+    // 清除隱藏計時：確保提示窗顯示過程中不會被之前的倒數觸發關閉
+    if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+    }
 }
 
 // 隱藏 Tooltip
 function hideTooltip() {
     currentTrigger = null;
+    // 將不透明度降為 0 觸發 CSS 過渡動畫
     tooltip.style.opacity = '0';
 
-    // 等待 CSS 過渡動畫 (200ms) 結束後再將節點隱藏
+    // 等待 CSS 過渡動畫 (需與 CSS 設定時間同步，這裡預設 200ms) 結束後再隱藏節點
     setTimeout(() => {
         if (tooltip.style.opacity === '0') {
             tooltip.style.display = 'none';
@@ -185,7 +192,7 @@ function hideTooltip() {
     }, 200);
 }
 
-// 延遲關閉排程
+// 延遲隱藏（核心防閃爍機制）
 function scheduleHide() {
     // 若已鎖定（常駐顯示），則不進行自動隱藏
     if (locked) return;
@@ -196,59 +203,61 @@ function scheduleHide() {
     }, HIDE_DELAY);
 }
 
-// Hover 觸發器：滑鼠進入
+// Hover：進入 trigger 觸發顯示
 document.body.addEventListener('mouseover', (e) => {
     const trigger = e.target.closest('.tooltip-trigger');
-    // 若無觸發器或已鎖定，則忽略
+    // 若未點擊觸發器 或 處於鎖定狀態，則忽略
     if (!trigger || locked) return;
 
-    // 清除隱藏計時，立即顯示
+    // 清除任何排程中的隱藏，立即顯示
     clearTimeout(hideTimeout);
     showTooltip(trigger);
 });
 
-// Hover 觸發器：滑鼠離開
+// Hover：離開 trigger 啟動緩衝隱藏
 document.body.addEventListener('mouseout', (e) => {
     const trigger = e.target.closest('.tooltip-trigger');
     if (!trigger || locked) return;
 
-    // 觸發延遲隱藏機制
+    // 啟動緩衝隱藏排程
     scheduleHide();
 });
 
-// Tooltip 本體控制：進入視窗時不關閉
+// Tooltip 本體：滑鼠移入視窗內部時（取消隱藏排程，保持常駐）
 tooltip.addEventListener('mouseenter', () => {
     clearTimeout(hideTimeout);
 });
 
-// Tooltip 本體控制：移出視窗時啟動隱藏排程
+// Tooltip 本體：滑鼠移出視窗時（重新啟動隱藏排程）
 tooltip.addEventListener('mouseleave', () => {
     scheduleHide();
 });
 
-// 點擊事件：切換鎖定狀態
+// 點擊控制：處理「鎖定/解鎖」與「點擊外部關閉」
 document.body.addEventListener('click', (e) => {
     const trigger = e.target.closest('.tooltip-trigger');
 
-    // 若點擊的是觸發器，切換鎖定狀態
+    // 情況 A：點擊了 trigger 觸發器 → 切換鎖定狀態
     if (trigger) {
-        e.stopPropagation(); // 阻止事件冒泡，防止觸發下方點擊空白處關閉的邏輯
-        locked = !locked;
+        e.stopPropagation(); // 阻止冒泡，防止觸發下方全域點擊事件
+
+        locked = !locked; // 切換鎖定開關
 
         if (locked) {
-            showTooltip(trigger);
+            showTooltip(trigger); // 鎖定時維持顯示
         } else {
-            hideTooltip();
+            hideTooltip(); // 解鎖時關閉
         }
         return;
     }
 
-    // 若處於鎖定狀態，且點擊區域不在提示窗內，則解鎖並隱藏
+    // 情況 B：處於鎖定狀態下，點擊了提示窗以外的區域 → 解鎖並關閉
     if (locked && !tooltip.contains(e.target)) {
         locked = false;
         hideTooltip();
     }
 });
+
 // ========【DLC對照表】 設定 - 載入外部 HTML ========
 function loadDLCTable(containerId, callback) {
     // 取得目標容器
