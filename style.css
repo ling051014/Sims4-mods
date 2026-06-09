@@ -295,6 +295,8 @@ body {
     /* 寬度自適 */ width: fit-content;
     /* 按鈕水平置中 */ margin: 0 auto;
     /* 按鈕內縮 */ padding: 6px 12px;
+    line-height: 1;
+    padding: 2px 12px;
     /* 文字顏色 */ color: #37352f; 
     /* 字體大小 */ font-size: 12px; 
     /* 文字粗體 */ font-weight: 500;
