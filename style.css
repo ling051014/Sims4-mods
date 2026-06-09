@@ -292,12 +292,12 @@ body {
     /* 水平置中 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
     /* 水平置中 */ justify-content: center;
-    /* 按鈕內縮 */ padding: 6px 12px;
     /* 文字顏色 */ color: #37352f; 
     /* 字體大小 */ font-size: 12px; 
     /* 文字粗體 */ font-weight: 500;
     /* 指標手勢 */ cursor: pointer;
     /* 動態過渡 */ transition: all 0.2s ease;
+    /* 停用選取 */ user-select: none;
     /* 移除預設標記 */ list-style: none;
 }
 
