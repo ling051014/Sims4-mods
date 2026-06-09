@@ -289,7 +289,7 @@ body {
 
 /* ========【模組卡片】 設定 - 備註區塊折疊按鈕本體 ======== */
 .warning-toggle-btn {
-    /* 水平置中 */ display: inline-flex;
+    /* 水平置中 */ display: flex;
     /* 垂直置中 */ align-items: center;
     /* 水平置中 */ justify-content: center;
     /* 按鈕內縮 */ padding: 6px 12px;
