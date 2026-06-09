@@ -134,7 +134,7 @@ function toggleMute(btn) {
 // ========【懸浮小視窗】 設定 - 模組卡片用 ========
 (function() {
     // 取得懸浮視窗的容器
-    const tooltip = document.getElementById('global-skill-tooltip');
+    const tooltip = document.getElementById('mod-tooltip');
     if (!tooltip) return; // 若網頁上沒這個容器就直接跳過
 
     let locked = false; // 紀錄視窗是否被點擊鎖定
