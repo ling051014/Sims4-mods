@@ -332,7 +332,46 @@ body {
     /* 圓角處理 */ border-radius: 4px;
 }
 
+/* ========【模組卡片】 設定 - 懸浮視窗 ======== */
+#mod-tooltip {
+    /* 預設隱藏 */ display: none;
+    /* 絕對定位 */ position: absolute;
+    /* 顯示層級 */ z-index: 9999;
+    /* 背景顏色 */ background-color: #ffffff;
+    /* 外框設定 */ border: 1px solid #eeeeee;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 柔和陰影 */ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    /* 內縮空間 */ padding: 12px 16px;
+    /* 最大寬度 */ max-width: 300px;
+    /* 強制斷行 */ word-break: break-all;
+    /* 初始透明 */ opacity: 0;
+    /* 動態過渡 */ transition: opacity 0.2s ease;
+    /* 允許點擊 */ pointer-events: auto;
+}
 
+/* ========【模組卡片】 設定 - 懸浮提示區 ======== */
+.tooltip-trigger {
+    /* 指標手勢 */ cursor: pointer;
+    /* 下方虛線 */ border-bottom: 1px dashed #cca300;
+}
+
+/* ========【模組卡片】 設定 - 懸浮資料暫存區 ======== */
+.hidden-note {
+    /* 預設隱藏 */ display: none;
+}
+
+/* ========【模組卡片】 設定 - 懸浮標題樣式 ======== */
+.note-title {
+    /* 字體粗細 */ font-weight: bold;
+    /* 下方間距 */ margin-bottom: 5px;
+    /* 下方橫線 */ border-bottom: 1px solid #eee;
+}
+
+/* ========【模組卡片】 設定 - 懸浮項目樣式 ======== */
+.note-body {
+    /* 字體大小 */ font-size: 12px;
+    /* 行距設定 */ line-height: 1.6;
+}
 
 
 
