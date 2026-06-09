@@ -298,7 +298,6 @@ body {
     /* 文字粗體 */ font-weight: 500;
     /* 指標手勢 */ cursor: pointer;
     /* 動態過渡 */ transition: all 0.2s ease;
-    /* 停用選取 */ user-select: none;
     /* 移除預設標記 */ list-style: none;
 }
 
