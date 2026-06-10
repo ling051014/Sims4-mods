@@ -49,86 +49,70 @@ function loadKeywords(containerId, cats = null) {
 }
 
 // ==================================================
-// 【產生 HTML（雙層懸浮選單版）】
-// 功能：將資料依照 CAT 進行分組，並建立「類別標題 → 子選單表格」的結構
-// 第一層：CAT 分類 (點擊或 hover 時會展開)
-// 第二層：該分類下的詳細對照表
+// 【產生 HTML】
+// 建立「CAT手風琴單層展開結構」
 // ==================================================
 function generateKeywordHTML(data) {
 
-    // ========【資料分組】 設定 - 依 CAT 分類 ========
-    // 建立一個關聯物件，用於存放分組後的資料
+    // ========【資料分組】 設定 ========
     const groups = {};
-
-    // 遍歷所有項目，根據 cat 屬性將其歸類到對應陣列中
     data.forEach(item => {
-        // 如果該分類尚未初始化，則建立一個新陣列
         if (!groups[item.cat]) {
             groups[item.cat] = [];
         }
-        // 將項目加入對應分類
         groups[item.cat].push(item);
     });
 
     let html = "";
 
-    // ========【分類清單】 設定 - CAT 索引 ========
-    // 遍歷分類物件的 Key (即所有類別名稱)
+    // ========【外層容器】 設定 ========
+    html += `<div class="keyword-side-wrapper">`;
+
+    // ========【標題列】 設定 ========
+    html += `
+    <div class="keyword-side-title">
+        關鍵字對照表 ▶
+    </div>
+    `;
+
+    // ========【CAT清單】 設定 ========
     Object.keys(groups).forEach(cat => {
 
-        // 建立外層區塊，包含類別標題與隱藏的選單區
         html += `
         <div class="keyword-cat">
 
-            <div class="keyword-cat-title">
+            <div class="keyword-cat-trigger">
                 ${cat} ▶
             </div>
 
-            <div class="keyword-submenu">
+            <div class="keyword-cat-content">
 
                 <table class="keyword-table">
         `;
 
-        // ========【內容產生】 設定 - 產生該類別下的每一列 ========
         groups[cat].forEach(item => {
-
             html += `
             <tr>
-                <td class="keyword-zh">
-                    ${item.zh}
-                </td>
-
-                <td class="keyword-en">
-                    ${item.en}
-                </td>
-
+                <td class="keyword-zh">${item.zh}</td>
+                <td class="keyword-en">${item.en}</td>
                 <td>
-                    <button
-                        class="copy-btn"
-                        data-copy="${item.en}"
-                    >
-                        <img
-                            class="copy-icon"
-                            src="icons/copy.svg"
-                            alt=""
-                        >
+                    <button class="copy-btn" data-copy="${item.en}">
+                        <img src="icons/copy.svg" alt="">
                     </button>
                 </td>
             </tr>
             `;
-
         });
 
-        // 關閉表格與分類容器
         html += `
                 </table>
             </div>
-
         </div>
         `;
     });
 
-    // 將組裝完成的 HTML 字串回傳給外層呼叫函數
+    html += `</div>`;
+
     return html;
 }
 
