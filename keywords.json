@@ -1,1 +1,268 @@
+[
+  {
+    "cat": "CAS",
+    "en": "Aspirations",
+    "zh": "抱負"
+  },
+    {
+    "cat": "CAS",
+    "en": "Trait",
+    "zh": "特徵"
+  },
+  {
+    "cat": "CAS",
+    "en": "Default / Replacement",
+    "zh": "替換"
+  },
+  {
+    "cat": "CAS",
+    "en": "Overlay",
+    "zh": "覆蓋"
+  },
+  {
+    "cat": "CAS",
+    "en": "Preset",
+    "zh": "預設"
+  },
+  {
+    "cat": "CAS",
+    "en": "Sliders",
+    "zh": "拉桿"
+  },
 
+
+  {
+    "cat": "年齡與性別",
+    "en": "Infant",
+    "zh": "嬰兒"
+  },
+  {
+    "cat": "年齡與性別",
+    "en": "Toddler",
+    "zh": "幼兒"
+  },
+  {
+    "cat": "年齡與性別",
+    "en": "Child",
+    "zh": "兒童"
+  },
+  {
+    "cat": "年齡與性別",
+    "en": "Female",
+    "zh": "女人"
+  },
+  {
+    "cat": "年齡與性別",
+    "en": "Male",
+    "zh": "男人"
+  },
+  {
+    "cat": "年齡與性別",
+    "en": "Elder",
+    "zh": "老人"
+  },
+
+  {
+    "cat": "臉部",
+    "en": "Eye",
+    "zh": "眼睛"
+  },
+  {
+    "cat": "臉部",
+    "en": "Face",
+    "zh": "臉部"
+  },
+  {
+    "cat": "臉部",
+    "en": "Hair",
+    "zh": "頭髮"
+  },
+  {
+    "cat": "臉部",
+    "en": "Lip",
+    "zh": "嘴唇"
+  },
+  {
+    "cat": "臉部",
+    "en": "Nose",
+    "zh": "鼻子"
+  },
+  {
+    "cat": "臉部",
+    "en": "Skin",
+    "zh": "皮膚"
+  },
+  {
+    "cat": "臉部",
+    "en": "Torso / Body",
+    "zh": "身體"
+  },
+
+  {
+    "cat": "眼部",
+    "en": "Eyelid",
+    "zh": "眼瞼"
+  },
+  {
+    "cat": "眼部",
+    "en": "Eyelash",
+    "zh": "睫毛"
+  },
+  {
+    "cat": "眼部",
+    "en": "Eyeliner",
+    "zh": "眼線"
+  },
+  {
+    "cat": "眼部",
+    "en": "Eyeshadow",
+    "zh": "眼影"
+  },
+  {
+    "cat": "眼部",
+    "en": "Lens",
+    "zh": "美瞳"
+  },
+
+  {
+    "cat": "妝容",
+    "en": "Makeup",
+    "zh": "妝容"
+  },
+  {
+    "cat": "妝容",
+    "en": "Beard",
+    "zh": "鬍鬚"
+  },
+  {
+    "cat": "妝容",
+    "en": "Brows",
+    "zh": "眉毛"
+  },
+  {
+    "cat": "妝容",
+    "en": "Blush",
+    "zh": "腮紅"
+  },
+  {
+    "cat": "妝容",
+    "en": "Contour",
+    "zh": "修容"
+  },
+  {
+    "cat": "妝容",
+    "en": "Freckles",
+    "zh": "雀斑"
+  },
+  {
+    "cat": "妝容",
+    "en": "Hairline",
+    "zh": "髮際線"
+  },
+  {
+    "cat": "妝容",
+    "en": "Highlighter",
+    "zh": "高光"
+  },
+  {
+    "cat": "妝容",
+    "en": "Lipstick",
+    "zh": "口紅"
+  },
+  {
+    "cat": "妝容",
+    "en": "Lip Gloss",
+    "zh": "唇釉"
+  },
+  {
+    "cat": "妝容",
+    "en": "Mole",
+    "zh": "痣"
+  },
+  {
+    "cat": "妝容",
+    "en": "Tattoos",
+    "zh": "紋身"
+  },
+
+  {
+    "cat": "面部配飾",
+    "en": "Accessories",
+    "zh": "配飾"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Brooch",
+    "zh": "胸針"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Choker",
+    "zh": "項圈"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Collar",
+    "zh": "裝飾衣領"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Earring",
+    "zh": "耳環"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Glasses",
+    "zh": "眼鏡"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Hat",
+    "zh": "帽子"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Headband",
+    "zh": "髮帶"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Hair Clip / Hair Pin",
+    "zh": "髮夾"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Hair Ribbon",
+    "zh": "頭髮絲帶"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Hair Scrunchie",
+    "zh": "頭髮皮筋"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Mask",
+    "zh": "口罩、面具"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Necklace",
+    "zh": "項鍊"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Piercing",
+    "zh": "穿刺飾品"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Scarf",
+    "zh": "頭巾、圍巾"
+  },
+  {
+    "cat": "面部配飾",
+    "en": "Tiara",
+    "zh": "皇冠髮飾"
+  }
+]
