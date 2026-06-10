@@ -83,8 +83,19 @@ function generateKeywordHTML(data) {
                 </td>
 
                 <td>
-                    <button class="copy-btn" data-copy="${item.en}">
-                        <img src="icons/copy.svg" alt="複製">
+                    <!-- 【複製按鈕】 - 只顯示 icon -->
+                    <button
+                        class="copy-btn"
+                        data-copy="${item.en}"
+                        aria-label="copy"
+                    >
+                    
+                    <!-- 複製圖示 -->
+                    <img
+                         class="copy-icon"
+                         src="icons/copy.svg"
+                         alt=""
+                    >
                     </button>
                 </td>
             </tr>
