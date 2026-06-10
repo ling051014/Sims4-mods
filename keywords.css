@@ -31,7 +31,11 @@
     /* 佈局設定 */ margin: 8px 0;
     /* 動畫設定 */ transition: all 0.4s ease;
     /* 階梯動畫 */ transform: translateX(-20px); opacity: 0;
+    /* 圓弧外觀 */ background: #ffffff;
+    /* 邊角剪裁 */ border-radius: 0 50px 50px 0;
+    /* 溢出隱藏 */ overflow: hidden;
 }
+
 .keyword-side-wrapper:hover .keyword-cat {
     /* 顯示動畫 */ transform: translateX(0); opacity: 1;
 }
