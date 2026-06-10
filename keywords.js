@@ -9,31 +9,36 @@
 
 
 // ==================================================
-// 【載入 keywords】
-// 負責發送請求並將數據傳送給渲染器
+// 載入關鍵字資料並渲染至指定容器
+// @param {string} containerId - 目標容器的 HTML ID
+// @param {Array} cats - 選填參數，若傳入陣列則只顯示符合這些分類的項目
 // ==================================================
 function loadKeywords(containerId, cats = null) {
 
     const container = document.getElementById(containerId);
+    // 防錯機制：若目標容器不存在，則結束函式
     if (!container) return;
 
     fetch("keywords.json")
-        .then(res => res.json())
+        .then(res => res.json()) // 解析 JSON 數據
         .then(data => {
 
-            // === 分類過濾（新增功能）===
+            // === 分類過濾邏輯 ===
+            // 檢查是否有傳入 cats 參數且陣列非空
             if (cats && cats.length > 0) {
+                // 使用 filter 篩選出 cat 屬性存在於 cats 陣列中的項目
                 data = data.filter(item => cats.includes(item.cat));
             }
 
+            // 將篩選後的資料 (或完整資料) 傳入渲染函式並填入容器
             container.innerHTML = generateKeywordHTML(data);
         })
         .catch(err => {
+            // 錯誤處理：捕獲網路異常或 JSON 格式錯誤
             console.error("keywords 載入失敗：", err);
             container.innerHTML = "<span style='color:red;'>載入失敗</span>";
         });
 }
-
 
 // ==================================================
 // 【產生 HTML（依 cat 分組）】
