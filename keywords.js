@@ -1,20 +1,7 @@
 // ==================================================
-// 初始化一個空物件，用來儲存分類後的資料
-// 例如：{ "妝容": [...], "面部配飾": [...] }
+// 【資料容器】 設定 - 分類儲存物件
 // ==================================================
-const groups = {};
-
-// 遍歷原始資料陣列 (data)
-data.forEach(item => {
-    // 檢查該類別是否存在於 groups 中
-    // 如果該類別還沒被建立過，就先初始化為一個空陣列
-    if (!groups[item.cat]) {
-        groups[item.cat] = [];
-    }
-    
-    // 將當前的項目 (item) 推入對應類別的陣列中
-    groups[item.cat].push(item);
-});
+let keywordGroups = {};
 
 // ==================================================
 // 載入關鍵字資料並渲染至指定容器
@@ -49,112 +36,139 @@ function loadKeywords(containerId, cats = null) {
 }
 
 // ==================================================
-// 【產生 HTML】
-// 建立「CAT手風琴單層展開結構」
-// 功能：將資料依照類別分組，並組合成可摺疊的面板 HTML
+// 【資料載入】 設定 - 讀取 JSON
 // ==================================================
-function generateKeywordHTML(data) {
+function loadKeywords(containerId) {
 
-    // ========【資料分組】 設定 ========
-    // 建立一個物件，用於將所有關鍵字按其類別 (cat) 進行索引分類
-    const groups = {};
-    data.forEach(item => {
-        // 如果該類別尚未建立，則初始化為空陣列
-        if (!groups[item.cat]) {
-            groups[item.cat] = [];
-        }
-        // 將該項目加入到所屬的類別陣列中
-        groups[item.cat].push(item);
-    });
+    const container = document.getElementById(containerId);
+
+    // 防呆
+    if (!container) return;
+
+    fetch("keywords.json")
+        .then(res => res.json())
+        .then(data => {
+
+            // 【資料分類】 設定 - cat 分組
+            keywordGroups = {};
+
+            data.forEach(item => {
+                if (!keywordGroups[item.cat]) {
+                    keywordGroups[item.cat] = [];
+                }
+                keywordGroups[item.cat].push(item);
+            });
+
+            // 【畫面渲染】 設定 - 建立DOM
+            container.innerHTML = renderUI();
+
+            // 【事件綁定】 設定 - hover控制
+            bindEvent();
+
+        })
+        .catch(err => {
+            console.error(err);
+            container.innerHTML = "載入失敗";
+        });
+}
+
+// ==================================================
+// 【介面生成】 設定 - UI結構
+// ==================================================
+function renderUI() {
 
     let html = "";
 
-    // ========【外層容器】 設定 ========
-    // 建立一個包裹所有關鍵字組件的容器，方便透過 CSS 控制位置與顯示
-    html += `<div class="keyword-side-wrapper">`;
-
-    // ========【標題列】 設定 ========
-    // 面板的頂部固定標題，通常用於顯示列表名稱或收合總開關
     html += `
-    <div class="keyword-side-title">
-        關鍵字對照表 ▶
-    </div>
+    <div class="keyword-side-wrapper">
+
+        <!-- ===== 第一層：標題（固定）===== -->
+        <div class="keyword-side-title">
+            關鍵字對照表 ▶
+        </div>
+
+        <!-- ===== 第二層：CAT列表 ===== -->
+        <div class="keyword-cat-panel">
     `;
 
-    // ========【CAT清單】 設定 ========
-    // 遍歷所有分好的類別，為每個類別建立一個「手風琴」區塊
-    Object.keys(groups).forEach(cat => {
+    Object.keys(keywordGroups).forEach(cat => {
 
-        // 每個分類的容器，包含觸發開關與內容區域
         html += `
-        <div class="keyword-cat">
-
-            <div class="keyword-cat-trigger">
-                ${cat} ▶
-            </div>
-
-            <div class="keyword-cat-content">
-                <table class="keyword-table">
-        `;
-
-        // 產生該類別下所有的關鍵字行
-        groups[cat].forEach(item => {
-            html += `
-            <tr>
-                <td class="keyword-zh">${item.zh}</td>
-                <td class="keyword-en">${item.en}</td>
-                <td>
-                    <button class="copy-btn" data-copy="${item.en}">
-                        <img src="icons/copy.svg" alt="">
-                    </button>
-                </td>
-            </tr>
-            `;
-        });
-
-        // 關閉表格、內容區與分類容器
-        html += `
-                </table>
-            </div>
+        <div class="keyword-cat" data-cat="${cat}">
+            ${cat} ▶
         </div>
         `;
     });
 
-    // 關閉最外層的容器
-    html += `</div>`;
+    html += `
+        </div>
+
+        <!-- ===== 第三層：內容區 ===== -->
+        <div class="keyword-content-panel"></div>
+
+    </div>
+    `;
+
     return html;
 }
 
 // ==================================================
-// 【滑鼠互動】
-// CAT hover 展開 / 收合控制
-// 功能：監聽滑鼠懸浮事件，自動更新分類按鈕的選中狀態
+// 【互動控制】 設定 - hover行為
 // ==================================================
-document.addEventListener("mouseover", (e) => {
+function bindEvent() {
 
-    // 判斷滑鼠是否懸浮在某個分類區域 (.keyword-cat)
-    const cat = e.target.closest(".keyword-cat");
-    // 取得選單的最外層容器
     const wrapper = document.querySelector(".keyword-side-wrapper");
+    const content = document.querySelector(".keyword-content-panel");
 
-    // 防錯：若選單容器不存在，直接停止執行
     if (!wrapper) return;
 
-    // 取得所有分類按鈕的節點列表
-    const cats = document.querySelectorAll(".keyword-cat");
+    // 【面板展開】 設定 - 顯示CAT
+    wrapper.addEventListener("mouseenter", () => {
+        wrapper.classList.add("open");
+    });
 
-    // ========【重置狀態】 設定 ========
-    // 遍歷所有分類，將之前的 .active 樣式全部移除
-    // 這確保了同一時間只有一個類別會處於展開/選中狀態
-    cats.forEach(c => c.classList.remove("active"));
+    wrapper.addEventListener("mouseleave", () => {
+        wrapper.classList.remove("open");
+        content.innerHTML = "";
+    });
 
-    // 若當前滑鼠懸浮在某個分類上
-    if (cat) {
-        // 為該分類添加 .active 樣式
-        // 後續 CSS 可根據此類別控制子選單 (.keyword-submenu) 的顯示
-        cat.classList.add("active");
-    }
-});
+    // 【CAT hover】 設定 - 顯示對照表
+    document.querySelectorAll(".keyword-cat").forEach(el => {
+
+        el.addEventListener("mouseenter", () => {
+
+            const cat = el.dataset.cat;
+            const list = keywordGroups[cat] || [];
+
+            // 清除 active
+            document.querySelectorAll(".keyword-cat")
+                .forEach(c => c.classList.remove("active"));
+
+            el.classList.add("active");
+
+            // 【內容渲染】 設定 - 右側表格
+            content.innerHTML = `
+                <div class="keyword-content-box">
+                    <div class="keyword-content-title">${cat}</div>
+
+                    <table class="keyword-table">
+                        ${list.map(item => `
+                            <tr>
+                                <td class="keyword-zh">${item.zh}</td>
+                                <td class="keyword-en">${item.en}</td>
+                                <td>
+                                    <button class="copy-btn" data-copy="${item.en}">
+                                        📋
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </table>
+                </div>
+            `;
+        });
+    });
+}
 
 // ==================================================
 // 【對外接口】
