@@ -93,20 +93,74 @@
     /* 背景變化 */ background: #fafafa;
 }
 
-/* ========【響應式】 設定 - 手機版調整 ======== */
-@media (max-width: 768px) {
+/* ========【響應式設定】 設定 - 手機直向優化 ======== */
+@media (max-width: 600px) and (orientation: portrait) {
 
-    .keyword-zh {
-        /* 改為全寬 */ width: 45%;
+    /* ========【關鍵字容器】 設定 - 手機邊距調整 ======== */
+    #keywords-container {
+        /* 內距縮小 */ padding: 10px;
+    }
+
+    /* ========【分類區塊】 設定 - 手機版卡片間距 ======== */
+    .keyword-panel {
+        /* 下方間距縮小 */ margin-bottom: 25px;
+    }
+
+    /* ========【分類標籤】 設定 - 手機版縮小標題 ======== */
+    .keyword-tab {
+        /* 字體縮小 */ font-size: 12px;
+        /* 內距縮小 */ padding: 10px 12px;
+    }
+
+    /* ========【表格】 設定 - 改為更緊湊布局 ======== */
+    .keyword-table {
         /* 字體縮小 */ font-size: 12px;
     }
 
-    .keyword-en {
-        /* 字體縮小 */ font-size: 11px;
+    /* ========【中文欄位】 設定 - 手機版寬度調整 ======== */
+    .keyword-zh {
+        /* 寬度調整 */ width: 45%;
+        /* 字體縮小 */ font-size: 12px;
     }
 
+    /* ========【英文欄位】 設定 - 手機版縮小字距 ======== */
+    .keyword-en {
+        /* 字體縮小 */ font-size: 11px;
+        /* 減少字距 */ letter-spacing: 0.5px;
+    }
+
+    /* ========【複製按鈕】 設定 - 手機版縮小 ======== */
     .copy-btn img {
         /* 圖示縮小 */ width: 14px;
         /* 圖示縮小 */ height: 14px;
+    }
+}
+
+/* ========【響應式設定】 設定 - 手機橫向優化 ======== */
+@media (max-width: 900px) and (orientation: landscape) {
+
+    /* ========【關鍵字容器】 設定 - 橫向空間利用 ======== */
+    #keywords-container {
+        /* 內距縮小 */ padding: 15px;
+    }
+
+    /* ========【分類區塊】 設定 - 橫向壓縮間距 ======== */
+    .keyword-panel {
+        /* 間距縮小 */ margin-bottom: 30px;
+    }
+
+    /* ========【表格】 設定 - 橫向更密集排列 ======== */
+    .keyword-table {
+        /* 字體稍微縮小 */ font-size: 12px;
+    }
+
+    /* ========【中文欄位】 設定 - 橫向欄位比例調整 ======== */
+    .keyword-zh {
+        /* 寬度調整 */ width: 40%;
+    }
+
+    /* ========【英文欄位】 設定 - 橫向優化可讀性 ======== */
+    .keyword-en {
+        /* 字距微調 */ letter-spacing: 0.8px;
     }
 }
