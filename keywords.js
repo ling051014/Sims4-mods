@@ -51,24 +51,30 @@ function loadKeywords(containerId, cats = null) {
 // ==================================================
 // 【產生 HTML】
 // 建立「CAT手風琴單層展開結構」
+// 功能：將資料依照類別分組，並組合成可摺疊的面板 HTML
 // ==================================================
 function generateKeywordHTML(data) {
 
     // ========【資料分組】 設定 ========
+    // 建立一個物件，用於將所有關鍵字按其類別 (cat) 進行索引分類
     const groups = {};
     data.forEach(item => {
+        // 如果該類別尚未建立，則初始化為空陣列
         if (!groups[item.cat]) {
             groups[item.cat] = [];
         }
+        // 將該項目加入到所屬的類別陣列中
         groups[item.cat].push(item);
     });
 
     let html = "";
 
     // ========【外層容器】 設定 ========
+    // 建立一個包裹所有關鍵字組件的容器，方便透過 CSS 控制位置與顯示
     html += `<div class="keyword-side-wrapper">`;
 
     // ========【標題列】 設定 ========
+    // 面板的頂部固定標題，通常用於顯示列表名稱或收合總開關
     html += `
     <div class="keyword-side-title">
         關鍵字對照表 ▶
@@ -76,8 +82,10 @@ function generateKeywordHTML(data) {
     `;
 
     // ========【CAT清單】 設定 ========
+    // 遍歷所有分好的類別，為每個類別建立一個「手風琴」區塊
     Object.keys(groups).forEach(cat => {
 
+        // 每個分類的容器，包含觸發開關與內容區域
         html += `
         <div class="keyword-cat">
 
@@ -86,10 +94,10 @@ function generateKeywordHTML(data) {
             </div>
 
             <div class="keyword-cat-content">
-
                 <table class="keyword-table">
         `;
 
+        // 產生該類別下所有的關鍵字行
         groups[cat].forEach(item => {
             html += `
             <tr>
@@ -104,6 +112,7 @@ function generateKeywordHTML(data) {
             `;
         });
 
+        // 關閉表格、內容區與分類容器
         html += `
                 </table>
             </div>
@@ -111,10 +120,41 @@ function generateKeywordHTML(data) {
         `;
     });
 
+    // 關閉最外層的容器
     html += `</div>`;
-
     return html;
 }
+
+// ==================================================
+// 【滑鼠互動】
+// CAT hover 展開 / 收合控制
+// 功能：監聽滑鼠懸浮事件，自動更新分類按鈕的選中狀態
+// ==================================================
+document.addEventListener("mouseover", (e) => {
+
+    // 判斷滑鼠是否懸浮在某個分類區域 (.keyword-cat)
+    const cat = e.target.closest(".keyword-cat");
+    // 取得選單的最外層容器
+    const wrapper = document.querySelector(".keyword-side-wrapper");
+
+    // 防錯：若選單容器不存在，直接停止執行
+    if (!wrapper) return;
+
+    // 取得所有分類按鈕的節點列表
+    const cats = document.querySelectorAll(".keyword-cat");
+
+    // ========【重置狀態】 設定 ========
+    // 遍歷所有分類，將之前的 .active 樣式全部移除
+    // 這確保了同一時間只有一個類別會處於展開/選中狀態
+    cats.forEach(c => c.classList.remove("active"));
+
+    // 若當前滑鼠懸浮在某個分類上
+    if (cat) {
+        // 為該分類添加 .active 樣式
+        // 後續 CSS 可根據此類別控制子選單 (.keyword-submenu) 的顯示
+        cat.classList.add("active");
+    }
+});
 
 // ==================================================
 // 【對外接口】
