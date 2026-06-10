@@ -108,7 +108,7 @@ fetch('skill-table.html')
     // 階段三：發生非預期錯誤時 (例如檔案路徑打錯)，進行安全防禦回退
     .catch(error => {
         // 於主控台回報精準的錯誤原因
-        console.error('載入技能表格失敗:', error);
+        console.error('技能表格載入失敗:', error);
         // 於畫面上回饋紅字提示給使用者
         placeholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。</span>';
     });
