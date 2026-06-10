@@ -4,7 +4,7 @@
     /* 左側位置 */ left: 0;
     /* 垂直置中 */ top: 50%;
     /* 位移修正 */ transform: translateY(-50%) translateX(-290px);
-    /* 層級設定 */ z-index: 9999;
+    /* 層級設定 */ z-index: 999;
     /* 字體設定 */ font-family: "PingFang TC", sans-serif;
     /* 動畫效果 */ transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     /* 寬度設定 */ width: 340px;
@@ -31,6 +31,7 @@
 .keyword-cat {
     /* 區塊間距 */ margin-top: 6px;
     /* 位置修正 */ position: relative;
+    /* 階梯動畫 */ transition: all 0.4s ease;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT按鈕 ======== */
@@ -63,11 +64,11 @@
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
-.keyword-cat:nth-child(1) { transition-delay: 0.05s; }
-.keyword-cat:nth-child(2) { transition-delay: 0.10s; }
-.keyword-cat:nth-child(3) { transition-delay: 0.15s; }
-.keyword-cat:nth-child(4) { transition-delay: 0.20s; }
-.keyword-cat:nth-child(5) { transition-delay: 0.25s; }
+.keyword-cat:nth-of-type(1) { transition-delay: 0.05s; }
+.keyword-cat:nth-of-type(2) { transition-delay: 0.10s; }
+.keyword-cat:nth-of-type(3) { transition-delay: 0.15s; }
+.keyword-cat:nth-of-type(4) { transition-delay: 0.20s; }
+.keyword-cat:nth-of-type(5) { transition-delay: 0.25s; }
 
 /* ========【關鍵字側邊索引模組】 設定 - 表格設定 ======== */
 .keyword-table {
