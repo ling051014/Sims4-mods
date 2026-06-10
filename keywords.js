@@ -49,67 +49,60 @@ function loadKeywords(containerId, cats = null) {
 }
 
 // ==================================================
-// 【產生 HTML（依 cat 分組）】
-// 將扁平資料庫轉換為按分類聚合的 HTML 表格
+// 【產生 HTML（雙層索引懸浮版）】
+// 核心邏輯：將原始 JSON 資料轉化為具有分類結構的 HTML 面板
+// cat → 歸類為面板標題
+// item → 歸類為表格內的詳細記錄
 // ==================================================
 function generateKeywordHTML(data) {
 
-    // 暫存分組數據的物件
+    // ========【資料分組】 設定 - 依 cat 分類 ========
+    // 建立一個關聯陣列，將資料依照類別名稱進行聚合
     const groups = {};
 
-    // 資料分組：依照 item.cat 將項目歸類到對應陣列中
     data.forEach(item => {
+        // 如果該類別還沒被建立，先初始化為一個空陣列
         if (!groups[item.cat]) {
             groups[item.cat] = [];
         }
+        // 將項目壓入對應類別的陣列中
         groups[item.cat].push(item);
     });
 
     let html = "";
 
-    // 遍歷所有分類建立面板
+    // ========【雙層結構】 設定 - cat + 表格內容 ========
+    // 遍歷所有分類，開始生成網頁結構
     Object.keys(groups).forEach(cat => {
 
+        // 建立外層面板，包含標題區與內容區
         html += `
         <div class="keyword-panel">
+
             <div class="keyword-tab">${cat}</div>
 
             <div class="keyword-content">
                 <table class="keyword-table">
         `;
 
-        // 產生該分類下的每一列項目 (Row)
+        // 遍歷該分類下的所有關鍵字項目
         groups[cat].forEach(item => {
             html += `
             <tr>
-                <td class="keyword-zh">
-                    ${item.zh}
-                </td>
+                <td class="keyword-zh">${item.zh}</td>
 
-                <td class="keyword-en">
-                    ${item.en}
-                </td>
+                <td class="keyword-en">${item.en}</td>
 
                 <td>
-                    <!-- 【複製按鈕】 - 只顯示 icon -->
-                    <button
-                        class="copy-btn"
-                        data-copy="${item.en}"
-                        aria-label="copy"
-                    >
-                    
-                    <!-- 複製圖示 -->
-                    <img
-                         class="copy-icon"
-                         src="icons/copy.svg"
-                         alt=""
-                    >
+                    <button class="copy-btn" data-copy="${item.en}">
+                        <img class="copy-icon" src="icons/copy.svg" alt="">
                     </button>
                 </td>
             </tr>
             `;
         });
 
+        // 關閉表格與面板容器標籤
         html += `
                 </table>
             </div>
@@ -117,6 +110,7 @@ function generateKeywordHTML(data) {
         `;
     });
 
+    // 將組裝好的完整 HTML 字串返回
     return html;
 }
 
