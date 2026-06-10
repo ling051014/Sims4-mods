@@ -3,10 +3,10 @@
     /* 固定定位 */ position: fixed;
     /* 左側位置 */ left: 0;
     /* 垂直置中 */ top: 50%;
-    /* 位移修正 */ transform: translateY(-50%) translateX(calc(-100% + clamp(35px, 4vw, 55px)));
+    /* 位移修正 */ transform: translateY(-50%) translateX(calc(-100% + 50px));
     /* 層級 */ z-index: 9999;
     /* 字體 */ font-family: "PingFang TC", sans-serif;
-    /* 動畫效果 */ transition: transform 0.5s ease;
+    /* 動畫效果 */ transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑出效果 ======== */
