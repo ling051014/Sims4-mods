@@ -3,70 +3,60 @@
     /* 固定定位 */ position: fixed;
     /* 左側位置 */ left: 0;
     /* 垂直置中 */ top: 50%;
-    /* 位移修正 */ transform: translateY(-50%) translateX(-92%); /* 模仿 Tokyono-Sora 隱藏在側邊 */
-    /* 層級設定 */ z-index: 999;
-    /* 字體設定 */ font-family: "PingFang TC", sans-serif;
-    /* 動畫效果 */ transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-    /* 寬度設定 */ width: 340px;
-    /* 陰影效果 */ box-shadow: 5px 0 25px rgba(0,0,0,0.15);
-    /* 圓角設定 */ border-radius: 0 10px 10px 0;
-    /* 邊界顯示 */ overflow: visible;
+    /* 初始隱藏 */ transform: translateY(-50%) translateX(-300px);
+    /* 顯示層級 */ z-index: 999;
+    /* 過渡效果 */ transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* ========【關鍵字側邊索引模組】 設定 - 滑出效果 ======== */
+/* ========【關鍵字側邊索引模組】 設定 - 圓弧懸浮耳朵 ======== */
+.keyword-side-tab {
+    /* 絕對定位 */ position: absolute;
+    /* 靠右對齊 */ right: -40px;
+    /* 圓弧形狀 */ border-radius: 0 50px 50px 0;
+    /* 尺寸設定 */ width: 40px; height: 100px;
+    /* 背景顏色 */ background: #ffffff;
+    /* 陰影效果 */ box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+    /* 內容置中 */ display: flex; flex-direction: column; justify-content: center; align-items: center;
+    /* 文字處理 */ font-size: 13px; color: #666; cursor: pointer;
+}
+
+/* ========【關鍵字側邊索引模組】 設定 - 滑出面板本體 ======== */
 .keyword-side-wrapper:hover {
-    /* 滑入畫面 */ transform: translateY(-50%) translateX(0); /* Hover 時整塊面板滑入 */
+    /* 展開面板 */ transform: translateY(-50%) translateX(0);
 }
 
-/* ========【關鍵字側邊索引模組】 設定 - 標題列 ======== */
-.keyword-side-title {
-    /* 背景顏色 */ background: #ffffff;
-    /* 邊框樣式 */ border: 1px solid #eee;
-    /* 內距設定 */ padding: 10px 12px;
-    /* 字體大小 */ font-size: 13px;
-    /* 陰影效果 */ box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    /* 圓角設定 */ border-radius: 0 6px 6px 0;
-    /* 顯示設定 */ display: block;
-}
-
-/* ========【關鍵字側邊索引模組】 設定 - CAT區塊 ======== */
+/* ========【關鍵字側邊索引模組】 設定 - CAT獨立容器 ======== */
 .keyword-cat {
-    /* 區塊間距 */ margin-top: 6px;
-    /* 位置修正 */ position: relative;
-    /* 階梯動畫 */ transition: all 0.4s ease;
+    /* 佈局設定 */ margin: 8px 0;
+    /* 動畫設定 */ transition: all 0.4s ease;
+    /* 階梯動畫 */ transform: translateX(-20px); opacity: 0;
+}
+.keyword-side-wrapper:hover .keyword-cat {
+    /* 顯示動畫 */ transform: translateX(0); opacity: 1;
 }
 
-/* ========【關鍵字側邊索引模組】 設定 - CAT按鈕 ======== */
+/* ========【關鍵字側邊索引模組】 設定 - CAT觸發列 (展開前) ======== */
 .keyword-cat-trigger {
-    /* 背景顏色 */ background: #ffffff;
-    /* 邊框樣式 */ border: 1px solid #eee;
-    /* 內距設定 */ padding: 10px 12px;
+    /* 背景樣式 */ background: #ffffff;
+    /* 內距設定 */ padding: 10px 15px;
     /* 字體大小 */ font-size: 13px;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 陰影效果 */ box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     /* 圓角設定 */ border-radius: 0 6px 6px 0;
+    /* 陰影效果 */ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
 }
 
-/* ========【關鍵字側邊索引模組】 設定 - CAT內容 ======== */
+/* ========【關鍵字側邊索引模組】 設定 - CAT展開內容 (展開後) ======== */
 .keyword-cat-content {
-    /* 初始高度 */ max-height: 0;
-    /* 隱藏溢出 */ overflow: hidden;
-    /* 背景顏色 */ background: #ffffff;
-    /* 左側線條 */ border-left: 2px solid #eee;
-    /* 透明隱藏 */ opacity: 0;
-    /* 禁用互動 */ pointer-events: none;
-    /* 動畫效果 */ transition: max-height 0.4s ease, opacity 0.3s ease;
+    /* 高度隱藏 */ max-height: 0;
+    /* 溢出隱藏 */ overflow: hidden;
+    /* 動畫過渡 */ transition: max-height 0.4s ease;
+    /* 背景底色 */ background: #ffffff;
+    /* 邊框線條 */ border-left: 2px solid #ddd;
+}
+.keyword-cat:hover .keyword-cat-content {
+    /* 展開高度 */ max-height: 400px;
 }
 
-/* ========【關鍵字側邊索引模組】 設定 - CAT展開 ======== */
-/* 加入 :hover 支援，確保滑鼠移入分類時能正確向下展開 */
-.keyword-cat.active .keyword-cat-content,
-.keyword-cat:hover .keyword-cat-content {
-    /* 展開高度 */ max-height: 500px;
-    /* 透明度顯示 */ opacity: 1;
-    /* 啟用互動 */ pointer-events: auto;
-    /* 內容捲動 */ overflow-y: auto;
-}
 
 /* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
 .keyword-cat:nth-child(1) { transition-delay: 0.05s; }
