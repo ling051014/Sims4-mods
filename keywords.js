@@ -54,20 +54,19 @@ async function loadKeywords(placeholderId, categoryList) {
 // 【複製控制】執行剪貼與圖示切換
 // ==================================================
 function copyText(element, text) {
-    // 【寫入剪貼】執行複製動作
+    // 【寫入剪貼】系統執行複製動作
     navigator.clipboard.writeText(text);
     
-    // 【路徑設定】請確認您的資料夾內真的有這個檔案
-    // 如果檔案名稱不是 check.svg，請在此處修改為您實際的檔名
-    const checkIconPath = 'html icons/check.svg'; 
-    const originalSrc = element.src;
+    // 【路徑設定】定義前後兩個圖示的檔名
+    const originalIcon = 'html icons/copy.svg';
+    const checkIcon = 'html icons/check.svg'; // 若您的打勾檔名不同，請修改此處
     
-    // 【圖示變更】切換為打勾圖示
-    element.src = checkIconPath;
+    // 【點擊後】立即將圖片切換為打勾圖示
+    element.src = checkIcon;
     
-    // 【恢復圖示】1秒後切回原始圖示
+    // 【一秒後】切換回原本的 copy.svg
     setTimeout(() => { 
-        element.src = originalSrc; 
+        element.src = originalIcon; 
     }, 1000);
 }
 
