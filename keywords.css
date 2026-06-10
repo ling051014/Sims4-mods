@@ -1,0 +1,112 @@
+/* ========【關鍵字容器】 設定 - 整體外層包裝 ======== */
+#keywords-container {
+    /* 最大寬度 */ max-width: 1200px;
+    /* 水平置中 */ margin: 30px auto;
+    /* 內距空間 */ padding: 20px;
+}
+
+/* ========【分類區塊】 設定 - 每一組 cat 區塊 ======== */
+.keyword-panel {
+    /* 下方間距 */ margin-bottom: 40px;
+    /* 背景顏色 */ background: #fff;
+    /* 邊框設定 */ border: 1px solid #eee;
+    /* 圓角效果 */ border-radius: 6px;
+    /* 陰影效果 */ box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    /* 溢出控制 */ overflow: hidden;
+}
+
+/* ========【分類標籤】 設定 - 左側分類名稱 ======== */
+.keyword-tab {
+    /* 背景顏色 */ background: #fafafa;
+    /* 內距 */ padding: 12px 16px;
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 字距 */ letter-spacing: 2px;
+    /* 文字顏色 */ color: #555;
+    /* 底部分隔線 */ border-bottom: 1px solid #eee;
+}
+
+/* ========【內容區塊】 設定 - 表格外層容器 ======== */
+.keyword-content {
+    /* 內距 */ padding: 10px;
+}
+
+/* ========【關鍵字表格】 設定 - 主要資料表 ======== */
+.keyword-table {
+    /* 滿版寬度 */ width: 100%;
+    /* 合併邊框 */ border-collapse: collapse;
+}
+
+/* ========【表格列】 設定 - 每一列資料 ======== */
+.keyword-table tr {
+    /* 底部分隔線 */ border-bottom: 1px solid #f2f2f2;
+}
+
+/* ========【中文欄位】 設定 - 左側中文顯示 ======== */
+.keyword-zh {
+    /* 內距 */ padding: 10px;
+    /* 字體大小 */ font-size: 13px;
+    /* 文字顏色 */ color: #333;
+    /* 欄位寬度 */ width: 35%;
+}
+
+/* ========【英文欄位】 設定 - 中間英文顯示 ======== */
+.keyword-en {
+    /* 內距 */ padding: 10px;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: #999;
+    /* 字體樣式 */ font-family: "Courier New", monospace;
+    /* 字距 */ letter-spacing: 1px;
+}
+
+/* ========【複製按鈕欄位】 設定 - 右側操作區 ======== */
+.keyword-table td:last-child {
+    /* 文字置中 */ text-align: center;
+    /* 寬度固定 */ width: 60px;
+}
+
+/* ========【複製按鈕】 設定 - icon 按鈕 ======== */
+.copy-btn {
+    /* 背景透明 */ background: transparent;
+    /* 邊框移除 */ border: none;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 內距 */ padding: 5px;
+    /* 動畫效果 */ transition: 0.2s;
+    /* 透明度 */ opacity: 0.6;
+}
+
+/* ========【複製按鈕】 設定 - Hover 狀態 ======== */
+.copy-btn:hover {
+    /* 透明度 */ opacity: 1;
+    /* 放大效果 */ transform: scale(1.1);
+}
+
+/* ========【複製按鈕圖示】 設定 - icon 尺寸控制 ======== */
+.copy-btn img {
+    /* 圖片寬度 */ width: 16px;
+    /* 圖片高度 */ height: 16px;
+    /* 圖片顏色適配 */ filter: grayscale(1);
+}
+
+/* ========【Hover 行效果】 設定 - 表格滑過提示 ======== */
+.keyword-table tr:hover {
+    /* 背景變化 */ background: #fafafa;
+}
+
+/* ========【響應式】 設定 - 手機版調整 ======== */
+@media (max-width: 768px) {
+
+    .keyword-zh {
+        /* 改為全寬 */ width: 45%;
+        /* 字體縮小 */ font-size: 12px;
+    }
+
+    .keyword-en {
+        /* 字體縮小 */ font-size: 11px;
+    }
+
+    .copy-btn img {
+        /* 圖示縮小 */ width: 14px;
+        /* 圖示縮小 */ height: 14px;
+    }
+}
