@@ -1,6 +1,6 @@
 // ==================================================
 // 【關鍵字側邊索引模組】功能主程式
-//==================================================
+// ==================================================
 async function loadKeywords(placeholderId, categoryList) {
     const placeholder = document.getElementById(placeholderId);
     if (!placeholder) return;
@@ -45,8 +45,8 @@ async function loadKeywords(placeholderId, categoryList) {
         placeholder.innerHTML = html;
     } catch (error) {
         // 錯誤處理：捕獲網路異常或 JSON 格式錯誤
-            console.error("關鍵字對照表載入失敗：", err);
-            container.innerHTML = "<span style='color:red;'>對照表載入失敗，請稍後再試</span>";
+        console.error("關鍵字對照表載入失敗：", error);
+        placeholder.innerHTML = "<span style='color:red;'>對照表載入失敗，請稍後再試</span>";
     }
 }
 
@@ -59,7 +59,7 @@ function copyText(element, text) {
     
     // 【路徑設定】定義前後兩個圖示的檔名
     const originalIcon = 'html icons/copy.svg';
-    const checkIcon = 'html icons/check.svg'; // 若您的打勾檔名不同，請修改此處
+    const checkIcon = 'html icons/check.svg';
     
     // 【點擊後】立即將圖片切換為打勾圖示
     element.src = checkIcon;
@@ -69,4 +69,3 @@ function copyText(element, text) {
         element.src = originalIcon; 
     }, 1000);
 }
-
