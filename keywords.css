@@ -1,16 +1,16 @@
 /* ========【關鍵字側邊索引模組】 設定 - 外層容器 ======== */
 .keyword-side-wrapper {
-    /* 固定定位 */ position: fixed !important;
-    /* 左側位置 */ left: 0 !important;
-    /* 垂直置中 */ top: 50% !important;
-    /* 位移修正 */ transform: translateY(-50%) translateX(0px) !important;
-    /* 層級設定 */ z-index: 999999 !important;
+    /* 固定定位 */ position: fixed;
+    /* 左側位置 */ left: 0;
+    /* 垂直置中 */ top: 50%;
+    /* 位移修正 */ transform: translateY(-50%) translateX(-92%);
+    /* 層級設定 */ z-index: 999;
     /* 字體設定 */ font-family: "PingFang TC", sans-serif;
     /* 動畫效果 */ transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     /* 寬度設定 */ width: 340px;
-    /* 陰影效果 */ box-shadow: 5px 0 25px rgba(255,0,0,0.8);
+    /* 陰影效果 */ box-shadow: 5px 0 25px rgba(0,0,0,0.15);
     /* 圓角設定 */ border-radius: 0 10px 10px 0;
-    /* 邊界顯示 */ overflow: visible !important;
+    /* 邊界顯示 */ overflow: visible;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑出效果 ======== */
