@@ -114,6 +114,17 @@ function bindEvent() {
 }
 
 // ==================================================
+// 【關鍵字側邊索引模組】 設定 - CAT互斥
+// ==================================================
+const cats = document.querySelectorAll(".keyword-cat");
+cats.forEach(cat => {
+    cat.addEventListener("mouseenter", () => {
+        /* 取消其他展開 */ cats.forEach(c => c.classList.remove("active"));
+        /* 展開當前 */ cat.classList.add("active");
+    });
+});
+
+// ==================================================
 // 【對外接口】 將函數掛載至視窗物件，供 HTML 外部呼叫
 // ==================================================
 window.loadKeywords = loadKeywords;
