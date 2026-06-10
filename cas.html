@@ -157,11 +157,23 @@
                 </p>
             </div>
         </div>
+
+        <div class="home-tips-container">
+            <details class="resource-detail">
+                <summary>關鍵字對照表</summary>
+                <div class="filter-panel">
+                    <div id="keywords-placeholder">載入中...</div>
+                </div>
+            </details>
+        </div>
     
     </div>
     
     <script src="script.js"></script>
     <script src="keywords.js"></script>
+    <script>
+    loadKeywords("keywords-placeholder", "CAS", "年齡與性別", "臉部", "眼部", "妝容", "面部配飾", "身體配飾", "鞋類", "上裝", "下裝");
+    </script>
             
 </body>
 </html>
