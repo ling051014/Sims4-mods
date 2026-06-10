@@ -30,8 +30,9 @@ function loadKeywords(containerId) {
             bindEvent();
         })
         .catch(err => {
-            console.error("載入關鍵字失敗:", err);
-            container.innerHTML = "載入失敗";
+            // 錯誤處理：捕獲網路異常或 JSON 格式錯誤
+            console.error("關鍵字對照表載入失敗：", err);
+            container.innerHTML = "<span style='color:red;'>對照表載入失敗，請稍後再試</span>";
         });
 }
 
@@ -112,19 +113,6 @@ function bindEvent() {
         });
     });
 }
-
-// ==================================================
-// 【關鍵字側邊索引模組】 設定 - CAT互斥
-// ==================================================
-const cats = document.querySelectorAll(".keyword-cat-card");
-cats.forEach(cat => {
-    cat.addEventListener("mouseenter", () => {
-        // 取消其他展開
-        cats.forEach(c => c.classList.remove("active"));
-        // 展開當前
-        cat.classList.add("active");
-    });
-});
 
 // ==================================================
 // 【對外接口】 將函數掛載至視窗物件，供 HTML 外部呼叫
