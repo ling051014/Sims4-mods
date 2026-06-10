@@ -51,6 +51,44 @@ function bindEvent() {
         });
     });
 }
+// ==================================================
+// 為所有分類的標題觸發器 (.keyword-cat-trigger) 綁定事件
+// ==================================================
+document.querySelectorAll('.keyword-cat-trigger').forEach(trigger => {
+    
+    // 【展開邏輯】當滑鼠移入標題時
+    trigger.addEventListener('mouseenter', () => {
+        // 取得當前分類的父容器 (.keyword-cat)
+        const parentCat = trigger.parentElement;
+        
+        // 加入 active 類別以標記該項為選中狀態
+        parentCat.classList.add('active');
+        
+        // 設定內容區域的最大高度，觸發 CSS 的展開動畫 (假設 500px 足以顯示內容)
+        parentCat.querySelector('.keyword-cat-content').style.maxHeight = '500px';
+
+        // 【互斥收合邏輯】確保同一時間只有一個分類展開
+        // 遍歷所有分類容器，檢查是否為當前操作對象
+        document.querySelectorAll('.keyword-cat').forEach(cat => {
+            // 如果不是當前移入的分類，則將其收合並移除 active 狀態
+            if (cat !== parentCat) {
+                cat.classList.remove('active');
+                cat.querySelector('.keyword-cat-content').style.maxHeight = '0';
+            }
+        });
+    });
+
+    // 【收合邏輯】當滑鼠移出標題時
+    trigger.addEventListener('mouseleave', () => {
+        const parentCat = trigger.parentElement;
+        
+        // 移除 active 樣式
+        parentCat.classList.remove('active');
+        
+        // 將高度歸零，觸發 CSS 收合動畫
+        parentCat.querySelector('.keyword-cat-content').style.maxHeight = '0';
+    });
+});
 
 // ==================================================
 // 【對外接口】 將函數掛載至視窗物件，供 HTML 外部呼叫
