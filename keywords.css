@@ -104,6 +104,48 @@
     /* 變清晰 */ opacity: 1;
     /* 微放大 */ transform: scale(1.1);
 }
+/* ========【複製成功提示】 設定 - ✔ 文字顯示與動畫效果 ======== */
+.copy-check {
+    /* 字體大小 */ font-size: 14px;
+    /* 文字顏色 */ color: #2ecc71;
+    /* 顯示方式 */ display: inline-block;
+    /* 動畫效果 */ animation: copy-pop 0.3s ease;
+}
+
+/* ========【動畫效果】 設定 - ✔ 彈跳動畫 ======== */
+@keyframes copy-pop {
+    0% {
+        /* 初始縮小 */ transform: scale(0.6);
+        /* 初始透明 */ opacity: 0.3;
+    }
+    50% {
+        /* 放大彈跳 */ transform: scale(1.2);
+        /* 完全顯示 */ opacity: 1;
+    }
+    100% {
+        /* 回到正常 */ transform: scale(1);
+    }
+}
+
+/* ========【提示訊息】 設定 - tooltip 已複製 ======== */
+.copy-tooltip {
+    /* 絕對定位 */ position: absolute;
+    /* 背景顏色 */ background: #333;
+    /* 文字顏色 */ color: #fff;
+    /* 字體大小 */ font-size: 11px;
+    /* 內距 */ padding: 4px 8px;
+    /* 圓角 */ border-radius: 4px;
+    /* 不換行 */ white-space: nowrap;
+    /* 位移位置 */ transform: translate(-50%, -140%);
+    /* 初始透明 */ opacity: 0;
+    /* 不可點擊 */ pointer-events: none;
+    /* 淡入動畫 */ transition: 0.2s;
+}
+
+/* ========【提示訊息】 設定 - 顯示狀態 ======== */
+.copy-tooltip.show {
+    /* 顯示 */ opacity: 1;
+}
 
 /* ========【圖示】 設定 ======== */
 .copy-btn img {
