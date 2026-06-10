@@ -1,166 +1,141 @@
-/* ========【關鍵字容器】 設定 - 整體外層包裝 ======== */
+/* ========【關鍵字懸浮視窗】 設定 - 側邊滑出主容器 ======== */
 #keywords-container {
-    /* 最大寬度 */ max-width: 1200px;
-    /* 水平置中 */ margin: 30px auto;
-    /* 內距空間 */ padding: 20px;
+    /* 固定定位 */ position: fixed;
+    /* 靠左邊 */ left: 0;
+    /* 垂直置中 */ top: 50%;
+    /* 位移修正（只露出一小條） */ transform: translateY(-50%) translateX(-92%);
+    /* 寬度 */ width: 340px;
+    /* 最大高度 */ max-height: 80vh;
+    /* 背景 */ background: #fff;
+    /* 邊框 */ border: 1px solid #eee;
+    /* 圓角（右側圓角） */ border-radius: 0 10px 10px 0;
+    /* 陰影 */ box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    /* 層級 */ z-index: 9999;
+    /* 動畫 */ transition: 0.3s ease;
+    /* 防止內容溢出 */ overflow: hidden;
+    /* 字體 */ font-family: "PingFang TC", sans-serif;
 }
 
-/* ========【分類區塊】 設定 - 每一組 cat 區塊 ======== */
+/* ========【滑鼠移入展開】 設定 - 完整滑出 ======== */
+#keywords-container:hover {
+    /* 滑出畫面 */ transform: translateY(-50%) translateX(0);
+}
+
+/* ========【內容滾動區】 設定 - 內部可滾動 ======== */
+#keywords-container {
+    /* 內部結構 */ display: flex;
+    /* 垂直排列 */ flex-direction: column;
+}
+
+/* ========【整體內容包裝】 設定 ======== */
 .keyword-panel {
-    /* 下方間距 */ margin-bottom: 40px;
-    /* 背景顏色 */ background: #fff;
-    /* 邊框設定 */ border: 1px solid #eee;
-    /* 圓角效果 */ border-radius: 6px;
-    /* 陰影效果 */ box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    /* 溢出控制 */ overflow: hidden;
+    /* 間距 */ margin: 10px;
+    /* 背景 */ background: #fff;
+    /* 邊框 */ border: 1px solid #eee;
+    /* 圓角 */ border-radius: 8px;
+    /* 陰影 */ box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    /* 溢出 */ overflow: hidden;
 }
 
-/* ========【分類標籤】 設定 - 左側分類名稱 ======== */
+/* ========【分類標題】 設定 ======== */
 .keyword-tab {
-    /* 背景顏色 */ background: #fafafa;
-    /* 內距 */ padding: 12px 16px;
-    /* 字體大小 */ font-size: 13px;
-    /* 字體粗細 */ font-weight: 600;
-    /* 字距 */ letter-spacing: 2px;
-    /* 文字顏色 */ color: #555;
-    /* 底部分隔線 */ border-bottom: 1px solid #eee;
+    /* 背景 */ background: #fafafa;
+    /* 內距 */ padding: 10px 12px;
+    /* 字體 */ font-size: 12px;
+    /* 字重 */ font-weight: 600;
+    /* 字距 */ letter-spacing: 1px;
+    /* 顏色 */ color: #555;
+    /* 分隔線 */ border-bottom: 1px solid #eee;
+    /* 黏住頂部 */ position: sticky;
+    top: 0;
 }
 
-/* ========【內容區塊】 設定 - 表格外層容器 ======== */
+/* ========【內容區】 設定 ======== */
 .keyword-content {
-    /* 內距 */ padding: 10px;
+    /* 內距 */ padding: 8px;
 }
 
-/* ========【關鍵字表格】 設定 - 主要資料表 ======== */
+/* ========【表格】 設定 ======== */
 .keyword-table {
-    /* 滿版寬度 */ width: 100%;
+    /* 滿版 */ width: 100%;
     /* 合併邊框 */ border-collapse: collapse;
 }
 
-/* ========【表格列】 設定 - 每一列資料 ======== */
+/* ========【表格列】 設定 ======== */
 .keyword-table tr {
-    /* 底部分隔線 */ border-bottom: 1px solid #f2f2f2;
+    /* 分隔線 */ border-bottom: 1px solid #f3f3f3;
 }
 
-/* ========【中文欄位】 設定 - 左側中文顯示 ======== */
+/* ========【中文欄位】 設定 ======== */
 .keyword-zh {
-    /* 內距 */ padding: 10px;
-    /* 字體大小 */ font-size: 13px;
-    /* 文字顏色 */ color: #333;
-    /* 欄位寬度 */ width: 35%;
+    /* 內距 */ padding: 8px;
+    /* 字體 */ font-size: 12px;
+    /* 顏色 */ color: #333;
+    /* 寬度 */ width: 40%;
 }
 
-/* ========【英文欄位】 設定 - 中間英文顯示 ======== */
+/* ========【英文欄位】 設定 ======== */
 .keyword-en {
-    /* 內距 */ padding: 10px;
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: #999;
-    /* 字體樣式 */ font-family: "Courier New", monospace;
-    /* 字距 */ letter-spacing: 1px;
+    /* 內距 */ padding: 8px;
+    /* 字體 */ font-size: 11px;
+    /* 顏色 */ color: #888;
+    /* 等寬字體 */ font-family: "Courier New", monospace;
+    /* 字距 */ letter-spacing: 0.5px;
 }
 
-/* ========【複製按鈕欄位】 設定 - 右側操作區 ======== */
+/* ========【按鈕欄位】 設定 ======== */
 .keyword-table td:last-child {
-    /* 文字置中 */ text-align: center;
-    /* 寬度固定 */ width: 60px;
+    /* 置中 */ text-align: center;
+    /* 固定寬度 */ width: 50px;
 }
 
-/* ========【複製按鈕】 設定 - icon 按鈕 ======== */
+/* ========【複製按鈕】 設定 ======== */
 .copy-btn {
-    /* 背景透明 */ background: transparent;
-    /* 邊框移除 */ border: none;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 內距 */ padding: 5px;
-    /* 動畫效果 */ transition: 0.2s;
+    /* 背景 */ background: transparent;
+    /* 無邊框 */ border: none;
+    /* 滑鼠 */ cursor: pointer;
+    /* 內距 */ padding: 4px;
     /* 透明度 */ opacity: 0.6;
+    /* 動畫 */ transition: 0.2s;
 }
 
-/* ========【複製按鈕】 設定 - Hover 狀態 ======== */
+/* ========【複製按鈕 hover】 設定 ======== */
 .copy-btn:hover {
-    /* 透明度 */ opacity: 1;
-    /* 放大效果 */ transform: scale(1.1);
+    /* 變清晰 */ opacity: 1;
+    /* 微放大 */ transform: scale(1.1);
 }
 
-/* ========【複製按鈕圖示】 設定 - icon 尺寸控制 ======== */
+/* ========【圖示】 設定 ======== */
 .copy-btn img {
-    /* 圖片寬度 */ width: 16px;
-    /* 圖片高度 */ height: 16px;
-    /* 圖片顏色適配 */ filter: grayscale(1);
+    /* 大小 */ width: 14px;
+    height: 14px;
+    /* 灰階 */ filter: grayscale(1);
 }
 
-/* ========【Hover 行效果】 設定 - 表格滑過提示 ======== */
+/* ========【列 hover】 設定 ======== */
 .keyword-table tr:hover {
-    /* 背景變化 */ background: #fafafa;
+    /* 背景提示 */ background: #fafafa;
 }
+
 
 /* ========【響應式設定】 設定 - 手機直向優化 ======== */
 @media (max-width: 600px) and (orientation: portrait) {
-
-    /* ========【關鍵字容器】 設定 - 手機邊距調整 ======== */
     #keywords-container {
-        /* 內距縮小 */ padding: 10px;
+        /* 縮小寬度 */ width: 280px;
+        /* 滑出距離調整 */ transform: translateY(-50%) translateX(-93%);
     }
-
-    /* ========【分類區塊】 設定 - 手機版卡片間距 ======== */
-    .keyword-panel {
-        /* 下方間距縮小 */ margin-bottom: 25px;
-    }
-
-    /* ========【分類標籤】 設定 - 手機版縮小標題 ======== */
-    .keyword-tab {
-        /* 字體縮小 */ font-size: 12px;
-        /* 內距縮小 */ padding: 10px 12px;
-    }
-
-    /* ========【表格】 設定 - 改為更緊湊布局 ======== */
-    .keyword-table {
-        /* 字體縮小 */ font-size: 12px;
-    }
-
-    /* ========【中文欄位】 設定 - 手機版寬度調整 ======== */
-    .keyword-zh {
-        /* 寬度調整 */ width: 45%;
-        /* 字體縮小 */ font-size: 12px;
-    }
-
-    /* ========【英文欄位】 設定 - 手機版縮小字距 ======== */
     .keyword-en {
-        /* 字體縮小 */ font-size: 11px;
-        /* 減少字距 */ letter-spacing: 0.5px;
+        font-size: 10px;
     }
-
-    /* ========【複製按鈕】 設定 - 手機版縮小 ======== */
-    .copy-btn img {
-        /* 圖示縮小 */ width: 14px;
-        /* 圖示縮小 */ height: 14px;
+    .keyword-zh {
+        font-size: 11px;
     }
 }
 
+
 /* ========【響應式設定】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
-
-    /* ========【關鍵字容器】 設定 - 橫向空間利用 ======== */
     #keywords-container {
-        /* 內距縮小 */ padding: 15px;
-    }
-
-    /* ========【分類區塊】 設定 - 橫向壓縮間距 ======== */
-    .keyword-panel {
-        /* 間距縮小 */ margin-bottom: 30px;
-    }
-
-    /* ========【表格】 設定 - 橫向更密集排列 ======== */
-    .keyword-table {
-        /* 字體稍微縮小 */ font-size: 12px;
-    }
-
-    /* ========【中文欄位】 設定 - 橫向欄位比例調整 ======== */
-    .keyword-zh {
-        /* 寬度調整 */ width: 40%;
-    }
-
-    /* ========【英文欄位】 設定 - 橫向優化可讀性 ======== */
-    .keyword-en {
-        /* 字距微調 */ letter-spacing: 0.8px;
+        /* 橫向稍微放大 */ width: 300px;
     }
 }
