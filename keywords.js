@@ -35,8 +35,8 @@ function loadKeywords(containerId, cats = null) {
         })
         .catch(err => {
             // 錯誤處理：捕獲網路異常或 JSON 格式錯誤
-            console.error("keywords 載入失敗：", err);
-            container.innerHTML = "<span style='color:red;'>載入失敗</span>";
+            console.error("關鍵字對照表載入失敗：", err);
+            container.innerHTML = "<span style='color:red;'>對照表載入失敗，請稍後再試</span>";
         });
 }
 
