@@ -319,7 +319,7 @@ function updateModCount() {
 // ======== 【隱形換行斷點】自動在模組檔名的底線（_）與點（.）後方加入 ========
 document.addEventListener("DOMContentLoaded", () => {
     // 抓取所有詳細資訊欄位裡的超連結與純文字
-    const infoLinks = document.querySelectorAll('.info-row a, .info-row span');
+    const infoLinks = document.querySelectorAll('.info-row a, .info-row span, .warning-content span');
     
     infoLinks.forEach(link => {
         let text = link.innerHTML;
