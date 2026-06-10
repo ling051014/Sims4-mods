@@ -239,6 +239,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ========【複製按鈕】 設定 - 全域 HTML ========
+// 使用事件代理監聽整份文件的點擊事件
+document.addEventListener('click', async (e) => {
+    
+    // 找出點擊目標最近的 .copy-btn 元素
+    const btn = e.target.closest('.copy-btn');
+
+    // 若點擊的不是按鈕，則直接退出
+    if (!btn) return;
+
+    // 取得按鈕 data-copy 屬性中要複製的文字內容
+    const text = btn.dataset.copy;
+    
+    // 若沒有內容則跳過執行
+    if (!text) return;
+
+    try {
+        // 使用 Clipboard API 將文字寫入剪貼簿
+        await navigator.clipboard.writeText(text);
+
+        // 紀錄按鈕原本的內容 (例如文字或圖示)
+        const original = btn.innerHTML;
+
+        // 視覺回饋：將按鈕文字暫時改為「✓」以告知使用者複製成功
+        btn.innerHTML = '✓';
+
+        // 設定 1 秒 (1000毫秒) 後恢復按鈕原本的顯示內容
+        setTimeout(() => {
+            btn.innerHTML = original;
+        }, 1000);
+
+    } catch (err) {
+        // 若複製過程發生異常（如未授權），在主控台印出錯誤日誌
+        console.error('複製失敗', err);
+    }
+});
+
 // ========【DLC對照表】 設定 - 載入外部 HTML ========
 function loadDLCTable(containerId, callback) {
     // 取得目標容器
