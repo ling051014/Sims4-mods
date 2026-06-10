@@ -116,7 +116,7 @@ function bindEvent() {
 // ==================================================
 // 【關鍵字側邊索引模組】 設定 - CAT互斥
 // ==================================================
-const cats = document.querySelectorAll(".keyword-cat");
+const cats = document.querySelectorAll(".keyword-cat-card");
 cats.forEach(cat => {
     cat.addEventListener("mouseenter", () => {
         // 取消其他展開
