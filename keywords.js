@@ -1,75 +1,101 @@
 // ==================================================
-// 【關鍵字側邊面板】
-// 自動產生分類與表格
+// 【keywords.js】
+// 功能：
+// 1. 讀取 keywords.json（扁平資料）
+// 2. 自動依 cat 分組
+// 3. 生成分類表格
+// 4. 提供複製功能
 // ==================================================
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-    // 放置關鍵字面板的容器
-    const container =
-        document.getElementById("keywords-container");
+    const container = document.getElementById("keywords-container");
 
-    // 找不到容器就結束
     if (!container) return;
 
-    // 開始組 HTML
-    let html = "";
+    try {
 
-    keywordsData.forEach(group => {
+        // ==================================================
+        // 1. 讀取 JSON
+        // ==================================================
+        const res = await fetch("keywords.json");
+        const data = await res.json();
 
-        html += `
-        <div class="keyword-panel">
+        // ==================================================
+        // 2. 自動分組（關鍵）
+        // ==================================================
+        const groups = {};
 
-            <!-- 側邊露出的標籤 -->
-            <div class="keyword-tab">
-                ${group.cat}
-            </div>
+        data.forEach(item => {
 
-            <!-- 滑出的內容 -->
-            <div class="keyword-content">
+            if (!groups[item.cat]) {
+                groups[item.cat] = [];
+            }
 
-                <table class="keyword-table">
-        `;
+            groups[item.cat].push(item);
+        });
 
-        group.items.forEach(item => {
+        // ==================================================
+        // 3. 生成 HTML
+        // ==================================================
+        let html = "";
+
+        Object.keys(groups).forEach(cat => {
 
             html += `
-            <tr>
+            <div class="keyword-panel">
 
-                <td class="keyword-en">
-                    ${item.en}
-                </td>
+                <!-- 左側分類 -->
+                <div class="keyword-tab">
+                    ${cat}
+                </div>
 
-                <td class="keyword-zh">
-                    ${item.zh}
-                </td>
+                <!-- 右側內容 -->
+                <div class="keyword-content">
 
-                <td>
+                    <table class="keyword-table">
+            `;
 
-                    <button
-                        class="copy-btn"
-                        data-copy="${item.en}">
+            groups[cat].forEach(item => {
 
-                        <img
-                            src="icons/copy.svg"
-                            alt="複製">
+                html += `
+                <tr>
 
-                    </button>
+                    <!-- 英文 -->
+                    <td class="keyword-en">
+                        ${item.en}
+                    </td>
 
-                </td>
+                    <!-- 中文 -->
+                    <td class="keyword-zh">
+                        ${item.zh}
+                    </td>
 
-            </tr>
+                    <!-- 複製按鈕 -->
+                    <td>
+                        <button
+                            class="copy-btn"
+                            data-copy="${item.en}">
+
+                            <img src="icons/copy.svg">
+
+                        </button>
+                    </td>
+
+                </tr>
+                `;
+            });
+
+            html += `
+                    </table>
+                </div>
+            </div>
             `;
         });
 
-        html += `
-                </table>
+        container.innerHTML = html;
 
-            </div>
-
-        </div>
-        `;
-    });
-
-    container.innerHTML = html;
+    } catch (err) {
+        console.error("keywords 讀取失敗：", err);
+    }
 });
