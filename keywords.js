@@ -119,8 +119,10 @@ function bindEvent() {
 const cats = document.querySelectorAll(".keyword-cat");
 cats.forEach(cat => {
     cat.addEventListener("mouseenter", () => {
-        /* 取消其他展開 */ cats.forEach(c => c.classList.remove("active"));
-        /* 展開當前 */ cat.classList.add("active");
+        // 取消其他展開
+        cats.forEach(c => c.classList.remove("active"));
+        // 展開當前
+        cat.classList.add("active");
     });
 });
 
