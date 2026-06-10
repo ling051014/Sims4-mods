@@ -27,6 +27,7 @@
     /* 陰影效果 */ box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     /* 圓角設定 */ border-radius: 0 6px 6px 0;
     /* 顯示設定 */ display: block;
+    /* 層級提升 */ z-index: 1001;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT區塊 ======== */
@@ -49,20 +50,28 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT內容 ======== */
 .keyword-cat-content {
-    /* 初始高度 */ max-height: 0;
-    /* 隱藏溢出 */ overflow: hidden;
+    /* 絕對定位 */ position: absolute;
+    /* 右側滑出 */ left: 100%;
+    /* 頂部對齊 */ top: 0;
+    /* 寬度設定 */ width: 280px;
+    /* 高度限制 */ max-height: 400px;
+    /* 捲動設定 */ overflow-y: auto;
     /* 背景顏色 */ background: #ffffff;
-    /* 左側線條 */ border-left: 2px solid #eee;
+    /* 邊框樣式 */ border: 1px solid #eee;
+    /* 陰影設定 */ box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+    /* 圓角設定 */ border-radius: 0 6px 6px 0;
     /* 透明隱藏 */ opacity: 0;
-    /* 禁用互動 */ pointer-events: none;
-    /* 動畫效果 */ transition: max-height 0.4s ease, opacity 0.3s ease;
+    /* 可見隱藏 */ visibility: hidden;
+    /* 互動禁用 */ pointer-events: none;
+    /* 動畫效果 */ transition: opacity 0.3s ease, visibility 0.3s;
+    /* 層級控制 */ z-index: 1000;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT展開 ======== */
 .keyword-cat.active .keyword-cat-content {
-    /* 展開高度 */ max-height: 500px;
-    /* 透明度顯示 */ opacity: 1;
-    /* 啟用互動 */ pointer-events: auto;
+    /* 透明顯示 */ opacity: 1;
+    /* 可見顯示 */ visibility: visible;
+    /* 互動啟用 */ pointer-events: auto;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
@@ -99,30 +108,26 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 手機直向 ======== */
 @media (max-width: 600px) and (orientation: portrait) {
-    /* 外層收合距離 */ .keyword-side-wrapper {
-        transform: translateY(-50%) translateX(-210px);
+    .keyword-side-wrapper {
+        /* 外層收合 */ transform: translateY(-50%) translateX(-210px);
     }
-
-    /* CAT按鈕縮放 */ .keyword-cat-trigger {
-        font-size: 12px;
+    .keyword-cat-trigger {
+        /* 字體縮放 */ font-size: 12px;
     }
-
-    /* 中文縮小 */ .keyword-zh {
-        font-size: 11px;
+    .keyword-zh {
+        /* 中文縮放 */ font-size: 11px;
     }
-
-    /* 英文縮小 */ .keyword-en {
-        font-size: 10px;
+    .keyword-en {
+        /* 英文縮放 */ font-size: 10px;
     }
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 手機橫向 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
-    /* 外層收合距離 */ .keyword-side-wrapper {
-        transform: translateY(-50%) translateX(-220px);
+    .keyword-side-wrapper {
+        /* 外層收合 */ transform: translateY(-50%) translateX(-220px);
     }
-
-    /* 面板寬度調整 */ .keyword-cat-content {
-        max-height: 450px;
+    .keyword-cat-content {
+        /* 面板調整 */ max-height: 450px;
     }
 }
