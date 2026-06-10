@@ -3,7 +3,7 @@
     /* 固定定位 */ position: fixed;
     /* 左側位置 */ left: 0;
     /* 垂直置中 */ top: 50%;
-    /* 位移修正 */ transform: translateY(-50%) translateX(calc(-100% + 40px));
+    /* 位移修正 */ transform: translateY(-50%) translateX(calc(-100% + clamp(35px, 4vw, 55px)));
     /* 層級 */ z-index: 9999;
     /* 字體 */ font-family: "PingFang TC", sans-serif;
     /* 動畫效果 */ transition: transform 0.5s ease;
