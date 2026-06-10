@@ -51,6 +51,7 @@
     /* 左滑起始 */ transform: translateX(-20px);
     /* 透明隱藏 */ opacity: 0;
     /* 禁用互動 */ pointer-events: none;
+    /* 動畫效果 */ transition: transform 0.4s ease, opacity 0.4s ease, max-height 0.4s ease;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT展開 ======== */
@@ -60,6 +61,13 @@
     /* 透明度 */ opacity: 1;
     /* 啟用互動 */ pointer-events: auto;
 }
+
+/* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
+.keyword-cat:nth-child(1) { transition-delay: 0.05s; }
+.keyword-cat:nth-child(2) { transition-delay: 0.10s; }
+.keyword-cat:nth-child(3) { transition-delay: 0.15s; }
+.keyword-cat:nth-child(4) { transition-delay: 0.20s; }
+.keyword-cat:nth-child(5) { transition-delay: 0.25s; }
 
 /* ========【關鍵字側邊索引模組】 設定 - 表格設定 ======== */
 .keyword-table {
