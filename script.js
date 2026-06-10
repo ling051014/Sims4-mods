@@ -240,38 +240,65 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========【複製按鈕】 設定 - 全域 HTML ========
-// 使用事件代理監聽整份文件的點擊事件
 document.addEventListener('click', async (e) => {
-    
-    // 找出點擊目標最近的 .copy-btn 元素
+
+    // ========【取得目標按鈕】========
     const btn = e.target.closest('.copy-btn');
 
-    // 若點擊的不是按鈕，則直接退出
+    // 若不是複製按鈕則跳出
     if (!btn) return;
 
-    // 取得按鈕 data-copy 屬性中要複製的文字內容
+    // ========【取得要複製的文字】========
     const text = btn.dataset.copy;
-    
-    // 若沒有內容則跳過執行
+
+    // 若沒有內容則停止
     if (!text) return;
 
     try {
-        // 使用 Clipboard API 將文字寫入剪貼簿
+
+        // ========【1. 複製文字到剪貼簿】========
         await navigator.clipboard.writeText(text);
 
-        // 紀錄按鈕原本的內容 (例如文字或圖示)
-        const original = btn.innerHTML;
+        // ========【2. 手機震動回饋】========
+        if (navigator.vibrate) {
+            navigator.vibrate(80);
+        }
 
-        // 視覺回饋：將按鈕文字暫時改為「✓」以告知使用者複製成功
-        btn.innerHTML = '✓';
+        // ========【3. 建立 ✔ 動畫元素】========
+        const check = document.createElement('span');
+        check.textContent = '✔';
+        check.className = 'copy-check';
 
-        // 設定 1 秒 (1000毫秒) 後恢復按鈕原本的顯示內容
+        // 清空按鈕內容並加入 ✔
+        btn.innerHTML = '';
+        btn.appendChild(check);
+
+        // ========【4. 建立 tooltip 提示】========
+        const tooltip = document.createElement('div');
+        tooltip.className = 'copy-tooltip show';
+        tooltip.textContent = '已複製';
+
+        // 確保定位基準
+        btn.style.position = 'relative';
+        btn.appendChild(tooltip);
+
+        // ========【5. 1 秒後還原原始 icon】========
         setTimeout(() => {
-            btn.innerHTML = original;
+
+            // 清空內容
+            btn.innerHTML = '';
+
+            // 重建 copy icon
+            const img = document.createElement('img');
+            img.className = 'copy-icon';
+            img.src = 'icons/copy.svg';
+            img.alt = 'copy';
+
+            btn.appendChild(img);
+
         }, 1000);
 
     } catch (err) {
-        // 若複製過程發生異常（如未授權），在主控台印出錯誤日誌
         console.error('複製失敗', err);
     }
 });
