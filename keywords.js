@@ -49,104 +49,86 @@ function loadKeywords(containerId, cats = null) {
 }
 
 // ==================================================
-// 【產生 HTML（雙層索引懸浮版）】
-// 將資料分組後，分別構建「左側索引列」與「右側詳細內容區」
+// 【產生 HTML（雙層懸浮選單版）】
+// 第一層：CAT 分類
+// 第二層：該分類對照表
 // ==================================================
 function generateKeywordHTML(data) {
 
-    // ========【資料分組】 設定 - 依 cat 分類 ========
-    // 建立字典物件，將所有項目按 cat 屬性進行歸類
+    // ========【資料分組】 設定 - 依 CAT 分類 ========
     const groups = {};
+
     data.forEach(item => {
         if (!groups[item.cat]) {
             groups[item.cat] = [];
         }
+
         groups[item.cat].push(item);
     });
 
     let html = "";
 
-    // ========【主結構】 設定 - 包裹整個左右分欄的容器 ========
-    html += `<div class="keyword-cat-wrapper">`;
+    // ========【分類清單】 設定 - CAT 索引 ========
+    Object.keys(groups).forEach(cat => {
 
-    // ========【左側CAT】 設定 - 索引清單 ========
-    html += `<div class="keyword-cat-list">`;
-    // 遍歷所有類別，產生左側導航按鈕
-    Object.keys(groups).forEach((cat, index) => {
-        // 設定預設第一個類別為 active (啟動狀態)
         html += `
-        <div class="keyword-cat ${index === 0 ? 'active' : ''}" data-cat="${cat}">
-            ${cat}
-        </div>
-        `;
-    });
-    html += `</div>`;
+        <div class="keyword-cat">
 
-    // ========【右側內容】 設定 - 所有類別對應的內容區 ========
-    html += `<div class="keyword-content-area">`;
-    Object.keys(groups).forEach((cat, index) => {
-        // 只有預設的第一個內容區顯示 (show)
-        html += `
-        <div class="keyword-content ${index === 0 ? 'show' : ''}" data-cat="${cat}">
-            <table class="keyword-table">
+            <div class="keyword-cat-title">
+                ${cat} ▶
+            </div>
+
+            <div class="keyword-submenu">
+
+                <table class="keyword-table">
         `;
 
-        // 在該類別下生成對應的每一行數據
         groups[cat].forEach(item => {
+
             html += `
             <tr>
-                <td class="keyword-zh">${item.zh}</td>
-                <td class="keyword-en">${item.en}</td>
-                <td>
-                    <button class="copy-btn" data-copy="${item.en}">
-                        <img class="copy-icon" src="icons/copy.svg" alt="">
-                    </button>
+
+                <td class="keyword-zh">
+                    ${item.zh}
                 </td>
+
+                <td class="keyword-en">
+                    ${item.en}
+                </td>
+
+                <td>
+
+                    <button
+                        class="copy-btn"
+                        data-copy="${item.en}"
+                    >
+
+                        <img
+                            class="copy-icon"
+                            src="icons/copy.svg"
+                            alt=""
+                        >
+
+                    </button>
+
+                </td>
+
             </tr>
             `;
+
         });
 
         html += `
-            </table>
+                </table>
+
+            </div>
+
         </div>
         `;
     });
 
-    html += `</div></div>`; // 關閉內容區與主容器
-
     return html;
 }
-
-// ==================================================
-// 【滑鼠懸浮切換效果】
-// 監聽左側索引的滑鼠移入事件，自動同步顯示右側對應內容
-// ==================================================
-document.addEventListener("mouseover", (e) => {
-    // 透過事件代理找出點擊到的索引按鈕
-    const cat = e.target.closest(".keyword-cat");
-    if (!cat) return; // 若點擊的不是左側索引列，直接跳過
-
-    // 取得該索引按鈕對應的類別名稱
-    const target = cat.dataset.cat;
-
-    // 清除所有索引按鈕的 active 狀態
-    document.querySelectorAll(".keyword-cat").forEach(el => {
-        el.classList.remove("active");
-    });
-
-    // 清除所有內容區域的 show 狀態 (隱藏所有)
-    document.querySelectorAll(".keyword-content").forEach(el => {
-        el.classList.remove("show");
-    });
-
-    // 將當前滑鼠移入的按鈕標記為 active
-    cat.classList.add("active");
-
-    // 透過屬性選擇器找到對應類別的內容區，並加上 show 類別顯示出來
-    // (使用 ?. 安全取值運算子，防止找不到元素時報錯)
-    document.querySelector(`.keyword-content[data-cat="${target}"]`)
-        ?.classList.add("show");
-});
 
 // ==================================================
 // 【對外接口】
