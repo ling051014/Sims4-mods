@@ -1,8 +1,6 @@
-/**
- * ==================================================
- * 【關鍵字側邊索引模組】功能主程式
- * ==================================================
- */
+// ==================================================
+// 【關鍵字側邊索引模組】功能主程式
+//==================================================
 async function loadKeywords(placeholderId, categoryList) {
     const placeholder = document.getElementById(placeholderId);
     if (!placeholder) return;
@@ -51,14 +49,24 @@ async function loadKeywords(placeholderId, categoryList) {
     }
 }
 
-/**
- * 【複製控制】執行剪貼與圖示切換
- */
+// ==================================================
+// 【複製控制】執行剪貼與圖示切換
+// ==================================================
 function copyText(element, text) {
-    // 【寫入剪貼】系統複製動作
+    // 【寫入剪貼】執行複製動作
     navigator.clipboard.writeText(text);
-    // 【圖示變更】暫時切換顯示
+    
+    // 【路徑設定】請確認您的資料夾內真的有這個檔案
+    // 如果檔案名稱不是 check.svg，請在此處修改為您實際的檔名
+    const checkIconPath = 'html icons/check.svg'; 
     const originalSrc = element.src;
-    element.src = 'html icons/check.svg';
-    setTimeout(() => { element.src = originalSrc; }, 800);
+    
+    // 【圖示變更】切換為打勾圖示
+    element.src = checkIconPath;
+    
+    // 【恢復圖示】1秒後切回原始圖示
+    setTimeout(() => { 
+        element.src = originalSrc; 
+    }, 1000);
 }
+
