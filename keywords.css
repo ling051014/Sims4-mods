@@ -27,6 +27,7 @@
 /* ========【關鍵字側邊索引模組】 設定 - CAT區塊 ======== */
 .keyword-cat {
     /* 區塊間距 */ margin-top: 6px;
+    /* 位置修正 */ position: relative;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT按鈕 ======== */
@@ -47,11 +48,17 @@
     /* 動畫過渡 */ transition: max-height 0.4s ease;
     /* 背景顏色 */ background: #ffffff;
     /* 左側線條 */ border-left: 2px solid #eee;
+    /* 左滑起始 */ transform: translateX(-20px);
+    /* 透明隱藏 */ opacity: 0;
+    /* 禁用互動 */ pointer-events: none;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT展開 ======== */
 .keyword-cat.active .keyword-cat-content {
     /* 展開高度 */ max-height: 500px;
+    /* 滑入效果 */ transform: translateX(0);
+    /* 透明度 */ opacity: 1;
+    /* 啟用互動 */ pointer-events: auto;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 表格設定 ======== */
@@ -72,28 +79,6 @@
     /* 內距設定 */ padding: 8px;
     /* 字體大小 */ font-size: 11px;
     /* 文字顏色 */ color: #888;
-}
-
-/* ========【關鍵字側邊索引模組】 設定 - 複製按鈕 ======== */
-.copy-btn {
-    /* 背景透明 */ background: transparent;
-    /* 無邊框 */ border: none;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 透明度 */ opacity: 0.7;
-    /* 過渡效果 */ transition: 0.2s;
-}
-
-/* ========【關鍵字側邊索引模組】 設定 - 複製懸浮 ======== */
-.copy-btn:hover {
-    /* 透明度 */ opacity: 1;
-    /* 放大效果 */ transform: scale(1.1);
-}
-
-/* ========【關鍵字側邊索引模組】 設定 - 圖示大小 ======== */
-.copy-btn img {
-    /* 寬度設定 */ width: 14px;
-    /* 高度設定 */ height: 14px;
-    /* 灰階效果 */ filter: grayscale(1);
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 行列效果 ======== */
