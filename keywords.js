@@ -12,23 +12,25 @@
 // 【載入 keywords】
 // 負責發送請求並將數據傳送給渲染器
 // ==================================================
-function loadKeywords(containerId) {
+function loadKeywords(containerId, cats = null) {
 
     const container = document.getElementById(containerId);
-    // 防錯機制：如果網頁中沒有這個容器，則停止執行，避免報錯
     if (!container) return;
 
-    // 取得 JSON 檔案
     fetch("keywords.json")
-        .then(res => res.json()) // 將回應轉換為 JSON 格式
+        .then(res => res.json())
         .then(data => {
-            // 將生成的 HTML 字串寫入目標容器
+
+            // === 分類過濾（新增功能）===
+            if (cats && cats.length > 0) {
+                data = data.filter(item => cats.includes(item.cat));
+            }
+
             container.innerHTML = generateKeywordHTML(data);
         })
         .catch(err => {
-            // 異常處理：若檔案讀取失敗或 JSON 語法錯誤，顯示提示訊息
             console.error("keywords 載入失敗：", err);
-            container.innerHTML = "<span style='color:red;'>載入失敗，請檢查 JSON 格式或網路連接。</span>";
+            container.innerHTML = "<span style='color:red;'>載入失敗</span>";
         });
 }
 
