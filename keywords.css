@@ -153,7 +153,7 @@
     /* 背景 */ background: #fafafa;
 }
 
-/* ========【手機版】 設定 - 小螢幕 ======== */
+/* ========【響應式設定】 設定 - 手機直向優化 ======== */
 @media (max-width: 600px) and (orientation: portrait) {
     .keyword-side-panel {
         /* 寬度 */ width: 280px;
@@ -166,7 +166,7 @@
     }
 }
 
-/* ========【橫向模式】 設定 - 平板/橫向手機 ======== */
+/* ========【響應式設定】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
     .keyword-side-panel {
         /* 寬度 */ width: 300px;
