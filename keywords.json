@@ -95,25 +95,25 @@
   },
   {
     "cat": "性別與年齡",
+    "en": "Female (F)",
+    "zh": "女"
+  },
+  {
+    "cat": "性別與年齡",
     "en": "Adult Female (AF)",
     "zh": "成年女性",
     "note": ""
   },
   {
     "cat": "性別與年齡",
-    "en": "Female (F)",
-    "zh": "女人"
+    "en": "Male (M)",
+    "zh": "男"
   },
   {
     "cat": "性別與年齡",
     "en": "Adult Male (AM)",
     "zh": "成年男性",
     "note": ""
-  },
-  {
-    "cat": "性別與年齡",
-    "en": "Male (M)",
-    "zh": "男人"
   },
   {
     "cat": "性別與年齡",
@@ -185,19 +185,19 @@
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "Scar",
+    "en": "Neck Scar",
     "zh": "頸部疤痕",
     "note": ""
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "Scar",
+    "en": "Face Scar",
     "zh": "臉上疤痕",
     "note": ""
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "Mole",
+    "en": "Face Mole",
     "zh": "臉上痣",
     "note": ""
   },
