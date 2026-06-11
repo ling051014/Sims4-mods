@@ -56,7 +56,7 @@ async function loadKeywords(placeholderId, categoryList) {
         // 【階段三】發生異常時的安全防禦回退
         .catch(error => {
             console.error('關鍵字對照表載入失敗:', error);
-            placeholder.innerHTML = '<span style="color:red;">關鍵字對照表載入失敗，請稍後再試。</span>';
+            placeholder.innerHTML = '<span style="color:red;">關鍵字對照表載入失敗，請稍後再試。' + error.message + '</span>';
         });
 }
 
