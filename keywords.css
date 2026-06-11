@@ -30,7 +30,6 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次二：單個分類 ======== */
 .keyword-cat {
-    /* 區塊顯示 */ display: block;
     /* 自適寬度 */ width: fit-content;
     /* 初始高度 */ max-height: 40px;
     /* 外距設定 */ margin: 5px 0;
@@ -39,13 +38,12 @@
     /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     /* 溢出隱藏 */ overflow: hidden;
     /* 橫向位移 */ transform: translateX(-100px);
-    /* 動畫過渡 */ transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), max-height 0.4s ease, width 0.4s ease;
+    /* 動畫過渡 */ transition: transform 0.4s ease, max-height 0.4s ease;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 分類啟動狀態 ======== */
 .keyword-cat.active {
     /* 展開高度 */ max-height: 500px;
-    /* 展開寬度 */ width: auto;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑入觸發顯示 ======== */
@@ -61,10 +59,10 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次三：內容隱藏區 ======== */
 .keyword-cat-content {
-    /* 隱藏內容 */ overflow: hidden;
+    /* 內容隱藏 */ overflow: hidden;
     /* 內容邊距 */ padding: 0 10px 10px 10px;
-    /* 動畫過渡 */ transition: opacity 0.3s ease;
-    /* 預設隱藏 */ opacity: 0;
+    /* 透明過渡 */ transition: opacity 0.3s ease;
+    /* 預設透明 */ opacity: 0;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 互斥收合效果 ======== */
@@ -107,9 +105,6 @@
     }
     .keyword-en { 
         /* 字體大小 */ font-size: 10px; 
-    }
-    .keyword-cat-content { 
-        /* 寬度限制 */ max-width: 200px; 
     }
 }
 
