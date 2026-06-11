@@ -60,6 +60,7 @@
     /* 圓弧形狀 */ border-radius: 0 50px 50px 0;
     /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     /* 動畫過渡 */ transition: width 0.3s ease;
+    /* 最小寬度 */ min-width: 200px;
 }
 
 .keyword-cat-list {
@@ -68,7 +69,7 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑入互動區 ======== */
 .keyword-cat:hover .keyword-cat-content {
-    /* 展開高度 */ max-height: 250px;
+    /* 展開寬度 */ width: auto;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
