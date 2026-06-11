@@ -26,14 +26,12 @@
     /* 頂部對齊 */ top: 100%;
     /* 上方內距 */ padding-top: 10px;
     /* 左側對齊 */ left: 0;
-    /* 動畫過渡 */ transition: opacity 0.3s ease;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次二：單個分類 ======== */
 .keyword-cat {
-    /* 顯示彈性 */ display: flex;
+    /* 移除彈性 */ /* display: flex; 刪除以解決收合衝突 */
     /* 初始高度 */ max-height: 40px;
-    /* 垂直排列 */ flex-direction: column;
     /* 相對定位 */ position: relative;
     /* 外距設定 */ margin: 5px 0;
     /* 背景顏色 */ background: #fff;
@@ -42,12 +40,13 @@
     /* 自適寬度 */ width: fit-content;
     /* 溢出隱藏 */ overflow: hidden;
     /* 橫向位移 */ transform: translateX(-100px);
-    /* 動畫過渡 */ transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), max-height 0.4s ease;
+    /* 動畫過渡 */ transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), max-height 0.4s ease, width 0.4s ease;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 分類啟動狀態 ======== */
 .keyword-cat.active {
     /* 展開高度 */ max-height: 500px;
+    /* 展開寬度 */ width: auto;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑入觸發顯示 ======== */
@@ -63,17 +62,15 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次三：內容隱藏區 ======== */
 .keyword-cat-content {
-    /* 靜態定位 */ position: static;
-    /* 溢出隱藏 */ overflow: hidden;
+    /* 內容隱藏 */ overflow: hidden;
     /* 內容邊距 */ padding: 0 10px 10px 10px;
+    /* 動畫過渡 */ transition: opacity 0.3s ease;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 互斥收合效果 ======== */
-.keyword-cat.active .keyword-cat-content {
-    /* 展開寬度 */ width: auto;
-    /* 展開高度 */ max-height: 500px;
-    /* 顯示透明度 */ opacity: 1;
-    /* 內部邊距 */ padding: 0 10px 10px 10px;
+.keyword-cat:not(.active) .keyword-cat-content {
+    /* 透明隱藏 */ opacity: 0;
+    /* 顯示設定 */ display: none;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 表格設定 ======== */
@@ -112,21 +109,11 @@
     .keyword-en { 
         /* 字體大小 */ font-size: 10px; 
     }
-    .keyword-cat-content { 
-        /* 寬度限制 */ max-width: 200px; 
-    }
 }
 
 /* ========【響應式】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
     .keyword-side-wrapper { 
         /* 位置調整 */ top: 40%;
-    }
-    .keyword-cat-content { 
-        /* 展開高度 */ max-height: 300px;
-        /* 滾動功能 */ overflow-y: auto;
-    }
-    .keyword-cat-list {
-        /* 間距微調 */ padding-top: 40px;
     }
 }
