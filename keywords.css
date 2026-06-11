@@ -42,12 +42,8 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT觸發列 (展開前) ======== */
 .keyword-cat-trigger {
-    /* 背景樣式 */ background: #ffffff;
     /* 內距設定 */ padding: 10px 15px;
     /* 字體大小 */ font-size: 13px;
-    /* 圓角設定 */ border-radius: 0 6px 6px 0;
-    /* 陰影效果 */ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    cursor: pointer;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 內容隱藏區 ======== */
