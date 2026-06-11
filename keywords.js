@@ -22,7 +22,7 @@ async function loadKeywords(placeholderId, categoryList) {
             // 【結構生成】建立圓弧膠囊列表外框
             let html = `
             <div class="keyword-side-wrapper">
-                <div class="keyword-side-tab">關鍵字對照表</div>
+                <div class="keyword-side-tab">關鍵字</div>
                 <div class="keyword-cat-list">
             `;
 
