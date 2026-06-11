@@ -26,15 +26,18 @@
     /* 展開面板 */ transform: translateY(-50%) translateX(0);
 }
 
-/* ========【關鍵字側邊索引模組】 設定 - CAT獨立容器 ======== */
+/* ========【關鍵字側邊索引模組】 設定 - CAT獨立膠囊 ======== */
 .keyword-cat {
-    /* 佈局設定 */ margin: 8px 0;
-    /* 動畫設定 */ transition: all 0.4s ease;
+    /* 區塊間距 */ margin: 8px 0;
+    /* 動畫過渡 */ transition: all 0.4s ease;
     /* 階梯動畫 */ transform: translateX(-20px); opacity: 0;
-    /* 圓弧外觀 */ background: #ffffff;
-    /* 邊角剪裁 */ border-radius: 0 50px 50px 0;
+    /* 圓弧形狀 */ border-radius: 0 50px 50px 0;
+    /* 寬度適應 */ display: inline-block;
+    /* 背景顏色 */ background: #ffffff;
+    /* 陰影效果 */ box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
     /* 溢出隱藏 */ overflow: hidden;
 }
+
 
 .keyword-side-wrapper:hover .keyword-cat {
     /* 顯示動畫 */ transform: translateX(0); opacity: 1;
