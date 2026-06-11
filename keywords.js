@@ -26,7 +26,7 @@ async function loadKeywords(placeholderId, categoryList) {
                 <div class="keyword-cat-list">
             `;
 
-            categoryList.forEach(catName => {
+            categoryList.forEach((catName, index) => {
                 const list = allData.filter(i => i.cat === catName);
                 
                 // 【產生區塊】確保每個 CAT 為獨立容器且結構完整
