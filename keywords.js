@@ -29,7 +29,7 @@ async function loadKeywords(placeholderId, categoryList) {
             categoryList.forEach((catName, index) => {
                 const list = allData.filter(i => i.cat === catName);
                 
-                // 【產生區塊】確保每個 CAT 為獨立膠囊容器且結構完整
+                // 【產生區塊】確保每個 CAT 為獨立膠囊容器
                 html += `
                 <div class="keyword-cat" style="transition-delay: ${index * 0.05}s">
                     <div class="keyword-cat-trigger">${catName}</div>
