@@ -52,6 +52,22 @@ async function loadKeywords(placeholderId, categoryList) {
             html += `</div></div>`;
             placeholder.innerHTML = html;
         })
+
+        // 【互斥事件】在產生 HTML 後，加入這段事件監聽
+        const cats = document.querySelectorAll('.keyword-cat');
+        cats.forEach(cat => {
+            cat.addEventListener('mouseenter', () => {
+                // 【邏輯互斥】先移除所有人的 active 狀態
+                cats.forEach(c => c.classList.remove('active'));
+                // 【狀態啟用】幫當前 hover 的加上 active
+                cat.classList.add('active');
+            });
+            // 【滑出重置】確保滑鼠離開時清除選取狀態
+            cat.addEventListener('mouseleave', () => {
+                cat.classList.remove('active');
+            });
+        });
+    })
         
         // 【階段三】發生異常時的安全防禦回退
         .catch(error => {
@@ -59,18 +75,6 @@ async function loadKeywords(placeholderId, categoryList) {
             placeholder.innerHTML = '<span style="color:red;">關鍵字對照表載入失敗，請稍後再試。' + error.message + '</span>';
         });
 }
-
-// ==================================================
-// 【互斥事件】在產生 HTML 後，加入這段事件監聽
-// ==================================================
-document.querySelectorAll('.keyword-cat').forEach(cat => {
-    cat.addEventListener('mouseenter', () => {
-        // 先移除所有人的 active 狀態
-        document.querySelectorAll('.keyword-cat').forEach(c => c.classList.remove('active'));
-        // 幫當前 hover 的加上 active
-        cat.classList.add('active');
-    });
-});
 
 // ==================================================
 // 【複製控制】執行剪貼與圖示切換
