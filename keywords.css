@@ -40,7 +40,7 @@
 
 .keyword-side-wrapper:hover .keyword-cat {
     /* 滑出動畫 */ transform: translateX(0);
-    /* ？？？？ */ opacity: 1;
+    /* 顯示區塊 */ opacity: 1;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT觸發列 (展開前) ======== */
@@ -68,7 +68,7 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑入互動區 ======== */
 .keyword-cat:hover .keyword-cat-content {
-    /* 展開高度 */ max-height: 300px;
+    /* 展開高度 */ max-height: 250px;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
