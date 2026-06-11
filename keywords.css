@@ -1,7 +1,7 @@
 /* ========【關鍵字側邊索引模組】 設定 - 外層定位容器 ======== */
 .keyword-side-wrapper {
     /* 固定定位 */ position: fixed;
-    /* 垂直置中 */ top: 30%;
+    /* 垂直置中 */ top: 20%;
     /* 左側對齊 */ left: 0;
     /* 顯示層級 */ z-index: 999;
     /* 垂直偏移 */ transform: translateY(-50%);
@@ -26,20 +26,13 @@
     /* 頂部對齊 */ top: 100%;
     /* 上方內距 */ padding-top: 10px;
     /* 左側對齊 */ left: 0;
-    /* 透明隱藏 */ opacity: 0;
-    /* 事件禁用 */ pointer-events: none;
     /* 動畫過渡 */ transition: opacity 0.3s ease;
-}
-
-/* ========【關鍵字側邊索引模組】 設定 - 滑入觸發顯示 ======== */
-.keyword-side-wrapper:hover .keyword-cat-list {
-    /* 顯示區塊 */ opacity: 1;
-    /* 事件啟用 */ pointer-events: auto;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次二：單個分類 ======== */
 .keyword-cat {
     /* 顯示彈性 */ display: flex;
+    /* 初始高度 */ max-height: 40px;
     /* 垂直排列 */ flex-direction: column;
     /* 相對定位 */ position: relative;
     /* 外距設定 */ margin: 5px 0;
@@ -50,6 +43,10 @@
     /* 溢出隱藏 */ overflow: hidden;
     /* 橫向位移 */ transform: translateX(-100px);
     /* 動畫過渡 */ transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.keyword-cat.active {
+    /* 展開高度 */ max-height: 500px;
 }
 
 .keyword-side-wrapper:hover .keyword-cat {
@@ -65,13 +62,8 @@
 /* ========【關鍵字側邊索引模組】 設定 - 層次三：內容隱藏區 ======== */
 .keyword-cat-content {
     /* 靜態定位 */ position: static;
-    /* 高度隱藏 */ max-height: 0;
-    /* 寬度隱藏 */ width: 0;
     /* 溢出隱藏 */ overflow: hidden;
-    /* 背景顏色 */ background: #fff;
-    /* 圓弧外型 */ border-radius: 0 20px 20px 0;
-    /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-    /* 動畫過渡 */ transition: width 0.3s ease;
+    /* 內容邊距 */ padding: 0 10px 10px 10px;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 互斥收合效果 ======== */
@@ -84,7 +76,7 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 表格設定 ======== */
 .keyword-table {
-    /* 寬度設定 */ width: 100%;
+    /* 寬度設定 */ width: max-content;
     /* 邊框合併 */ border-collapse: collapse;
 }
 
