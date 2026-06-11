@@ -2,36 +2,35 @@
 // ========【關鍵字對照表】 載入外部資料模組 ========
 // ===================================================
 async function loadKeywords(placeholderId, categoryList) {
+    // 【獲取容器】取得對應頁面元素
     const placeholder = document.getElementById(placeholderId);
+    // 【異常檢查】若容器不存在則終止
     if (!placeholder) return;
 
-    // 【遠端讀取】開始異步抓取關鍵字資料
+    // 【遠端讀取】開始異步抓取資料
     fetch(`keywords.json?t=${new Date().getTime()}`)
-        
-        // 【階段一】接收回應，印出狀態碼以便除錯
+        // 【狀態檢查】檢查回應是否成功
         .then(res => {
-            console.log('HTTP 狀態碼:', res.status);
             if (!res.ok) throw new Error('讀取資料失敗');
             return res.json();
         })
-
-        // 【階段二】抓取資料後，生成並插入 HTML 結構
+        // 【資料處理】生成並插入 HTML 結構
         .then(allData => {
-            console.log('✔ 關鍵字對照表初始化完成');
-            
-            // 【結構生成】建立圓弧膠囊列表外框
+            // 【產生架構】定義主包裝容器
             let html = `
             <div class="keyword-side-wrapper">
-                <div class="keyword-side-tab">關鍵字</div>
+                <div class="keyword-side-tab">關鍵字對照表 ▶</div>
                 <div class="keyword-cat-list">
             `;
 
+            // 【迴圈生成】依照類別建立膠囊
             categoryList.forEach((catName, index) => {
+                // 【篩選資料】取出當前分類內容
                 const list = allData.filter(i => i.cat === catName);
                 
-                // 【產生區塊】確保每個 CAT 為獨立膠囊容器
+                // 【建立膠囊】注入階梯延遲變數
                 html += `
-                <div class="keyword-cat" style="transition-delay: ${index * 0.05}s">
+                <div class="keyword-cat" style="--delay: ${index * 0.08}s">
                     <div class="keyword-cat-trigger">${catName}</div>
                     <div class="keyword-cat-content">
                         <table class="keyword-table">
@@ -49,26 +48,32 @@ async function loadKeywords(placeholderId, categoryList) {
                 </div>`;
             });
 
+            // 【封裝結尾】完成所有節點生成
             html += `</div></div>`;
             placeholder.innerHTML = html;
 
-            // 【事件綁定】在產生 HTML 後，掛載互斥收合事件
+            // 【獲取物件】抓取側邊列與膠囊
             const wrapper = placeholder.querySelector('.keyword-side-wrapper');
             const cats = wrapper.querySelectorAll('.keyword-cat');
 
+            // 【事件綁定】滑入膠囊進行切換
             cats.forEach(cat => {
-                // 【滑入觸發】展開當前膠囊，並收回其他膠囊
                 cat.addEventListener('mouseenter', () => {
-                    // 【邏輯互斥】如果當前已經是 active，則不必重複操作
-                    if (!cat.classList.contains('active')) {
-                        cats.forEach(c => c.classList.remove('active'));
-                        cat.classList.add('active');
-                    }
+                    // 【啟動模式】加入選取狀態類別
+                    wrapper.classList.add('cat-selected');
+                    
+                    // 【互斥邏輯】移除其他 active
+                    cats.forEach(c => c.classList.remove('active'));
+                    // 【設定狀態】標記當前為 active
+                    cat.classList.add('active');
                 });
             });
 
-            // 【滑出重置】確保滑鼠離開整個側邊列時，全部膠囊恢復收合狀態
+            // 【重置狀態】滑鼠離開移除全部
             wrapper.addEventListener('mouseleave', () => {
+                // 【移除模式】離開區域即關閉
+                wrapper.classList.remove('cat-selected');
+                // 【清除狀態】重置所有 active
                 cats.forEach(c => c.classList.remove('active'));
             });
         })
