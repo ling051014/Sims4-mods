@@ -142,37 +142,37 @@
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "DimpleLeft",
+    "en": "Dimple Left",
     "zh": "左酒窩",
     "note": ""
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "DimpleRight",
+    "en": "Dimple Right",
     "zh": "右酒窩",
     "note": ""
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "Lip Mole",
+    "en": "Lip Mole Left",
     "zh": "左嘴角痣",
     "note": ""
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "Lip Mole",
+    "en": "Lip Mole Right",
     "zh": "右嘴角痣",
     "note": ""
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "Cheek Mole",
+    "en": "Cheek Mole Left",
     "zh": "左臉頰痣",
     "note": ""
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "Cheek Mole",
+    "en": "Cheek Mole Right",
     "zh": "右臉頰痣",
     "note": ""
   },
@@ -196,7 +196,7 @@
   },
   {
     "cat": "肌膚細節（預設）",
-    "en": "",
+    "en": "Mole",
     "zh": "臉上痣",
     "note": ""
   },
