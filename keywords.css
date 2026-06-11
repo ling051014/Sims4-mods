@@ -123,23 +123,32 @@
 
 /* ========【響應式】 設定 - 手機直向優化 ======== */
 @media (max-width: 600px) and (orientation: portrait) {
-    .keyword-side-tab { 
-        /* 標題縮小 */ font-size: 14px; 
+    .keyword-side-tab {
+        /* 標題縮小 */ font-size: 14px;
     }
-    .keyword-cat-trigger { 
-        /* 觸發縮小 */ font-size: 13px; 
+    .keyword-cat-trigger {
+        /* 觸發縮小 */ font-size: 13px;
+    }
+    .keyword-zh {
+        /* 中文縮小 */ font-size: 11px;
+    }
+    .keyword-en {
+        /* 英文縮小 */ font-size: 10px;
     }
 }
 
 /* ========【響應式】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
-    .keyword-side-wrapper { 
-        /* 位置調整 */ top: 40%; 
+    .keyword-side-wrapper {
+        /* 位置調整 */ top: 40%;
     }
-    .keyword-cat.active { 
-        /* 高度限制 */ max-height: 300px; 
+    .keyword-cat {
+        /* 最大寬度 */ max-width: 90vw;
     }
-    .keyword-cat-content { 
-        /* 啟用滾動 */ overflow-y: auto; 
+    .keyword-cat.active {
+        /* 高度限制 */ max-height: 400px;
+    }
+    .keyword-cat-content {
+        /* 啟用滾動 */ overflow: auto;
     }
 }
