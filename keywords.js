@@ -43,7 +43,9 @@ async function loadKeywords(placeholderId, categoryList) {
 
         html += `</div></div>`;
         placeholder.innerHTML = html;
-    } catch (error) {
+    }
+        
+    catch (error) {
         // 【錯誤處理】捕獲網路異常或 JSON 格式錯誤
         console.error("關鍵字對照表載入失敗：", error);
         placeholder.innerHTML = "<span style='color:red;'>對照表載入失敗，請稍後再試</span>";
