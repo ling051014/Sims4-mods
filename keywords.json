@@ -11,7 +11,7 @@
   },
   {
     "cat": "CAS",
-    "en": "Default / Replacement",
+    "en": "Replacement",
     "zh": "替換"
   },
   {
@@ -21,8 +21,38 @@
   },
   {
     "cat": "CAS",
+    "en": "Override",
+    "zh": "覆蓋",
+    "note": "會直接替換遊戲原廠物件，同一部位同時只能安裝一款"
+  },
+  {
+    "cat": "CAS",
     "en": "Preset",
     "zh": "預設"
+  },
+  {
+    "cat": "CAS",
+    "en": "Default",
+    "zh": "預設",
+    "note": "會直接替換遊戲原廠物件，同一部位同時只能安裝一款"
+  },
+  {
+    "cat": "CAS",
+    "en": "Non-default (ND)",
+    "zh": "非預設",
+    "note": "不覆蓋原檔，可同時在遊戲中擁有、使用多款"
+  },
+  {
+    "cat": "CAS",
+    "en": "Add-on",
+    "zh": "附加",
+    "note": "在現有模組基礎上增加更多顏色或選項"
+  },
+  {
+    "cat": "CAS",
+    "en": "Contact",
+    "zh": "隱形眼鏡",
+    "note": "遊戲中眼睛顏色或樣式的替換/新增模組"
   },
   {
     "cat": "CAS",
@@ -31,37 +61,73 @@
   },
 
 
+  
   {
-    "cat": "年齡與性別",
-    "en": "Infant",
-    "zh": "嬰兒"
+    "cat": "性別與年齡",
+    "en": "Unisex (U)",
+    "zh": "男女通用",
+    "note": ""
   },
   {
-    "cat": "年齡與性別",
+    "cat": "性別與年齡",
+    "en": "Infant (IU)",
+    "zh": "嬰兒",
+    "note": ""
+  },
+  {
+    "cat": "性別與年齡",
+    "en": "Toddler (TU)",
+    "zh": "幼兒",
+    "note": ""
+  },
+  {
+    "cat": "性別與年齡",
     "en": "Toddler",
-    "zh": "幼兒"
+    "zh": "幼兒",
+    "note": ""
   },
   {
-    "cat": "年齡與性別",
-    "en": "Child",
-    "zh": "兒童"
+    "cat": "性別與年齡",
+    "en": "Preschool (PU)",
+    "zh": "幼兒",
+    "note": ""
   },
   {
-    "cat": "年齡與性別",
+    "cat": "性別與年齡",
+    "en": "Child (CU)",
+    "zh": "兒童",
+    "note": ""
+  },
+  {
+    "cat": "性別與年齡",
+    "en": "Adult Female (AF)",
+    "zh": "成年女性",
+    "note": ""
+  },
+  {
+    "cat": "性別與年齡",
+    "en": "Adult Male (AM)",
+    "zh": "成年男性",
+    "note": ""
+  },
+  {
+    "cat": "性別與年齡",
     "en": "Female",
     "zh": "女人"
   },
   {
-    "cat": "年齡與性別",
+    "cat": "性別與年齡",
     "en": "Male",
     "zh": "男人"
   },
   {
-    "cat": "年齡與性別",
+    "cat": "性別與年齡",
     "en": "Elder",
     "zh": "老人"
   },
 
+
+  
   {
     "cat": "臉部",
     "en": "Eye",
