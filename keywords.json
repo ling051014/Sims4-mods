@@ -125,6 +125,16 @@
 
   {
     "cat": "五官（預設）",
+    "en": "Head Shape Preset",
+    "zh": "頭型"
+  },
+  {
+    "cat": "五官（預設）",
+    "en": "Ear Preset",
+    "zh": "耳朵"
+  },
+  {
+    "cat": "五官（預設）",
     "en": "Eye Preset",
     "zh": "眼睛"
   },
@@ -136,7 +146,27 @@
   {
     "cat": "五官（預設）",
     "en": "Lip Preset",
-    "zh": "嘴唇"
+    "zh": "嘴巴"
+  },
+  {
+    "cat": "五官（預設）",
+    "en": "Teeth Preset",
+    "zh": "牙齒"
+  },
+  {
+    "cat": "五官（預設）",
+    "en": "Cheek/Chin/Jaw Preset",
+    "zh": "下巴"
+  },
+  {
+    "cat": "五官（預設）",
+    "en": "？ Preset",
+    "zh": "臉頰"
+  },
+  {
+    "cat": "五官（預設）",
+    "en": "Eyebrow Preset",
+    "zh": "眉毛"
   },
 
 
@@ -339,13 +369,13 @@
   
   {
     "cat": "身體（預設）",
-    "en": "",
-    "zh": "體型（身材）",
+    "en": "Body Preset",
+    "zh": "體型/身材",
     "note": ""
   },
   {
     "cat": "身體（預設）",
-    "en": "",
+    "en": "Tatoo",
     "zh": "刺青",
     "note": ""
   },
