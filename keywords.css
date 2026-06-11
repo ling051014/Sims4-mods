@@ -22,10 +22,10 @@
     /* 彈性佈局 */ display: flex;
     /* 垂直排列 */ flex-direction: column;
     /* 左側對齊 */ align-items: flex-start;
-    /* 項目間距 */ gap: 4px;
+    /* 項目間距 */ gap: 6px;
     /* 絕對定位 */ position: absolute;
     /* 頂部對齊 */ top: 100%;
-    /* 位置補償 */ margin-top: -6px;
+    /* 位置補償 */ margin-top: 12px;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次二：單個膠囊 ======== */
