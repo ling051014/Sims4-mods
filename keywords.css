@@ -114,7 +114,14 @@
 
 /* ========【響應式】 設定 - 手機橫向優化 ======== */
 @media (max-width: 900px) and (orientation: landscape) {
+    .keyword-side-wrapper { 
+        /* 位置調整 */ top: 40%;
+    }
     .keyword-cat-content { 
-        /* 展開高度 */ max-height: 450px; 
+        /* 展開高度 */ max-height: 300px;
+        /* 滾動功能 */ overflow-y: auto;
+    }
+    .keyword-cat-list {
+        /* 間距微調 */ padding-top: 40px;
     }
 }
