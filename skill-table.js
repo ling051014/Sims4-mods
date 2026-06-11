@@ -110,7 +110,7 @@ fetch('skill-table.html')
         // 於主控台回報精準的錯誤原因
         console.error('技能表格載入失敗:', error);
         // 於畫面上回饋紅字提示給使用者
-        placeholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。</span>';
+        placeholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。' + error.message + '</span>';
     });
 
 // ===================================================
