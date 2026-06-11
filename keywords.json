@@ -336,11 +336,6 @@
   },
   {
     "cat": "妝容",
-    "en": "Brows",
-    "zh": "眉毛"
-  },
-  {
-    "cat": "妝容",
     "en": "Contour",
     "zh": "修容"
   },
@@ -359,11 +354,6 @@
     "en": "Lip Gloss",
     "zh": "唇釉"
   },
-  {
-    "cat": "妝容",
-    "en": "Tattoos",
-    "zh": "紋身"
-  },
 
   
   
@@ -375,7 +365,7 @@
   },
   {
     "cat": "身體（預設）",
-    "en": "Tatoo",
+    "en": "Tattoo",
     "zh": "刺青",
     "note": ""
   },
@@ -438,13 +428,13 @@
   },
   {
     "cat": "配件",
-    "en": "Finger Nail",
+    "en": "Fingernail",
     "zh": "手指甲",
     "note": ""
   },
   {
     "cat": "配件",
-    "en": "Toe Nail",
+    "en": "Toenail",
     "zh": "腳趾甲",
     "note": ""
   },
