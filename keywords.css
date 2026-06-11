@@ -38,6 +38,8 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次二：單個分類 ======== */
 .keyword-cat {
+    /* 顯示彈性 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
     /* 相對定位 */ position: relative;
     /* 外距設定 */ margin: 5px 0;
     /* 背景顏色 */ background: #fff;
@@ -56,10 +58,8 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次三：內容隱藏區 ======== */
 .keyword-cat-content {
-    /* 絕對定位 */ position: absolute;
+    /* 移除定位 */ position: static;
     /* 確保高度 */ height: auto;
-    /* 靠右對齊 */ left: 100%;
-    /* 頂部對齊 */ top: 0;
     /* 寬度隱藏 */ width: 0;
     /* 溢出隱藏 */ overflow: hidden;
     /* 背景顏色 */ background: #fff;
@@ -72,6 +72,7 @@
 /* ========【關鍵字側邊索引模組】 設定 - 互斥收合效果 ======== */
 .keyword-cat.active .keyword-cat-content {
     /* 展開寬度 */ width: 250px;
+    /* 內部邊距 */ padding-left: 10px;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 表格設定 ======== */
