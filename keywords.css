@@ -10,7 +10,7 @@
 .keyword-side-tab {
     /* 自適寬度 */ width: fit-content;
     /* 內距設定 */ padding: 15px;
-    /* 背景顏色 */ background: rgba(255,255,255,0.8);
+    /* 背景顏色 */ background: rgba(255,255,255,0.9);
     /* 圓弧外型 */ border-radius: 0 50px 50px 0;
     /* 陰影效果 */ box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
     /* 滑鼠指標 */ cursor: pointer;
@@ -22,7 +22,8 @@
 .keyword-cat-list {
     /* 絕對定位 */ position: absolute;
     /* 頂部對齊 */ top: 100%;
-    /* 上方內距 */ padding-top: 10px;
+    /* 間距補償 */ padding-top: 0;
+    /* 位置修正 */ margin-top: 5px;
     /* 左側對齊 */ left: 0;
 }
 
@@ -36,20 +37,28 @@
     /* 圓弧外型 */ border-radius: 999px;
     /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     /* 溢出隱藏 */ overflow: hidden;
-    /* 橫向位移 */ transform: translateX(-100px);
-    /* 動畫過渡 */ transition: transform 0.7s cubic-bezier(.22,1,.36,1), max-height 0.7s cubic-bezier(.22,1,.36,1), border-radius 0.3s 0.7s;
+    /* 初始狀態 */ transform: translateX(-120%);
+    /* 透明效果 */ opacity: 0;
+    /* 動畫過渡 */ transition: transform 0.6s cubic-bezier(.22,1,.36,1) var(--delay), opacity 0.3s var(--delay), max-height 0.7s cubic-bezier(.22,1,.36,1), border-radius 0.3s 0.7s;
+}
+
+/* ========【關鍵字側邊索引模組】 設定 - 觸發後顯示 ======== */
+.keyword-side-wrapper:hover .keyword-cat {
+    /* 位移重置 */ transform: translateX(0);
+    /* 透明顯示 */ opacity: 1;
+}
+
+/* ========【關鍵字側邊索引模組】 設定 - 選擇模式收合 ======== */
+.keyword-side-wrapper.cat-selected .keyword-cat:not(.active) {
+    /* 位移隱藏 */ transform: translateX(-120%);
+    /* 透明隱藏 */ opacity: 0;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 分類啟動狀態 ======== */
 .keyword-cat.active {
     /* 展開高度 */ max-height: 500px;
     /* 圓弧外型 */ border-radius: 12px;
-    /* 動畫過渡 */ transition: transform 0.7s cubic-bezier(.22,1,.36,1), max-height 0.7s cubic-bezier(.22,1,.36,1), border-radius 0.3s;
-}
-
-/* ========【關鍵字側邊索引模組】 設定 - 滑入觸發顯示 ======== */
-.keyword-side-wrapper:hover .keyword-cat {
-    /* 顯示位置 */ transform: translateX(0);
+    /* 動畫過渡 */ transition: max-height 0.7s cubic-bezier(.22,1,.36,1), border-radius 0.3s;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 標題觸發區 ======== */
@@ -61,14 +70,16 @@
 /* ========【關鍵字側邊索引模組】 設定 - 層次三：內容隱藏區 ======== */
 .keyword-cat-content {
     /* 內容隱藏 */ overflow: hidden;
-    /* 內容邊距 */ padding: 0 10px 10px 10px;
-    /* 透明過渡 */ transition: opacity 0.3s ease;
+    /* 內容邊距 */ padding: 0 15px 15px 15px;
+    /* 透明過渡 */ transition: opacity 0.3s 0.25s, transform 0.3s 0.25s;
     /* 預設透明 */ opacity: 0;
+    /* 初始位移 */ transform: translateY(-10px);
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 互斥收合效果 ======== */
 .keyword-cat.active .keyword-cat-content {
     /* 透明顯示 */ opacity: 1;
+    /* 位移重置 */ transform: translateY(0);
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 表格設定 ======== */
@@ -117,8 +128,5 @@
     .keyword-cat-content { 
         /* 展開高度 */ max-height: 300px;
         /* 滾動功能 */ overflow-y: auto;
-    }
-    .keyword-cat-list { 
-        /* 間距微調 */ padding-top: 40px; 
     }
 }
