@@ -22,7 +22,7 @@ async function loadKeywords(placeholderId, categoryList) {
             // 【結構生成】建立圓弧膠囊列表外框
             let html = `
             <div class="keyword-side-wrapper">
-                <div class="keyword-side-tab">關鍵字對照表</div>
+                <div class="keyword-side-tab">關鍵字</div>
                 <div class="keyword-cat-list">
             `;
 
@@ -30,7 +30,6 @@ async function loadKeywords(placeholderId, categoryList) {
                 const list = allData.filter(i => i.cat === catName);
                 
                 // 【產生區塊】確保每個 CAT 為獨立膠囊容器且結構完整
-                // 將 Trigger 與 Content 包在同一個 .keyword-cat 內，以共用膠囊背景
                 html += `
                 <div class="keyword-cat" style="transition-delay: ${index * 0.05}s">
                     <div class="keyword-cat-trigger">${catName}</div>
@@ -60,8 +59,11 @@ async function loadKeywords(placeholderId, categoryList) {
             cats.forEach(cat => {
                 // 【滑入觸發】展開當前膠囊，並收回其他膠囊
                 cat.addEventListener('mouseenter', () => {
-                    cats.forEach(c => c.classList.remove('active'));
-                    cat.classList.add('active');
+                    // 【邏輯互斥】如果當前已經是 active，則不必重複操作
+                    if (!cat.classList.contains('active')) {
+                        cats.forEach(c => c.classList.remove('active'));
+                        cat.classList.add('active');
+                    }
                 });
             });
 
