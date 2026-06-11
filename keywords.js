@@ -22,7 +22,7 @@ async function loadKeywords(placeholderId, categoryList) {
             // 【結構生成】建立圓弧膠囊列表外框
             let html = `
             <div class="keyword-side-wrapper">
-                <div class="keyword-side-tab">關鍵字<br>對照表</div>
+                <div class="keyword-side-tab">關鍵字對照表</div>
                 <div class="keyword-cat-list">
             `;
 
@@ -31,7 +31,7 @@ async function loadKeywords(placeholderId, categoryList) {
                 
                 // 【產生區塊】確保每個 CAT 為獨立容器且結構完整
                 html += `
-                <div class="keyword-cat">
+                <div class="keyword-cat" style="transition-delay: ${index * 0.05}s">
                     <div class="keyword-cat-trigger">${catName}</div>
                     <div class="keyword-cat-content">
                         <table class="keyword-table">
