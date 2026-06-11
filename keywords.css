@@ -119,5 +119,4 @@
     .keyword-side-wrapper {
         /* 外層收合距離 */ transform: translateY(-50%) translateX(-220px);
     }
-    .keyword-cat-content { max-height: 450px; }
 }
