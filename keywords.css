@@ -1,7 +1,7 @@
 /* ========【關鍵字側邊索引模組】 設定 - 外層定位容器 ======== */
 .keyword-side-wrapper {
     /* 固定定位 */ position: fixed;
-    /* 垂直置中 */ top: 50%;
+    /* 垂直置中 */ top: 80%;
     /* 左側對齊 */ left: 0;
     /* 顯示層級 */ z-index: 999;
     /* 垂直偏移 */ transform: translateY(-50%);
