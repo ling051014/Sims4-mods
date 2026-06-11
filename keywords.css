@@ -4,7 +4,7 @@
     /* 固定定位 */ position: fixed;
     /* 左側位置 */ left: 0;
     /* 垂直置中 */ top: 50%;
-    /* 初始隱藏 */ transform: translateY(-50%) translateX(-210px);
+    /* 初始隱藏 */ transform: translateY(-50%) translateX(0px);
     /* 顯示層級 */ z-index: 999;
     /* 過渡效果 */ transition: transform 0.5s ease;
 }
@@ -60,16 +60,26 @@
     /* 圓弧形狀 */ border-radius: 0 50px 50px 0;
     /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     /* 動畫過渡 */ transition: width 0.3s ease;
-    /* 最小寬度 */ min-width: 200px;
-}
-
-.keyword-cat-list {
-    /* 垂直堆疊 */ display: block; 
+    /* 最小寬度 */ min-width: 250px;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑入互動區 ======== */
 .keyword-cat:hover .keyword-cat-content {
     /* 展開寬度 */ width: 250px;
+}
+
+/* ========【關鍵字側邊索引模組】 設定 - 列表容器 ======== */
+.keyword-cat-list {
+    /* 垂直堆疊 */ display: block;
+    /* 絕對定位 */ position: absolute;
+    /* 左側對齊 */ left: 40px;
+    /* 初始隱藏 */ transform: translateX(-110%);
+    /* 動畫過渡 */ transition: transform 0.5s ease;
+}
+
+/* ========【關鍵字側邊索引模組】 設定 - 滑入展開區 ======== */
+.keyword-side-wrapper:hover .keyword-cat-list {
+    /* 展開顯示 */ transform: translateX(0);
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
