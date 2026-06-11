@@ -470,5 +470,145 @@
     "en": "Tights",
     "zh": "緊身褲襪"
   }
+    {
+    "cat": "房屋類型",
+    "en": "country house",
+    "zh": "鄉村別墅"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "mansion",
+    "zh": "莊園"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "castle",
+    "zh": "城堡"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "cottage",
+    "zh": "小屋"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "ranch",
+    "zh": "牧場住宅"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "semi-detached house",
+    "zh": "雙拼房屋"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "terraced/town house",
+    "zh": "聯排別墅"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "row house",
+    "zh": "排排屋"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "single story/Bungalow",
+    "zh": "只要一層樓"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "LOFT department",
+    "zh": "loft"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "split",
+    "zh": "錯層"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "floating",
+    "zh": "水上房屋"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "micro",
+    "zh": "迷你房"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "courtyard",
+    "zh": "庭院住宅"
+  },
+  {
+    "cat": "房屋類型",
+    "en": "siheyuan",
+    "zh": "中式住宅"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Victorian",
+    "zh": "維多利亞風"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Georgian",
+    "zh": "格魯吉亞風"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Tudor",
+    "zh": "都鐸"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Modernist",
+    "zh": "現代主義"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Minimalist",
+    "zh": "極簡主義"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Baroque",
+    "zh": "巴洛克"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Mid-century modern",
+    "zh": "中世紀現代風（綠洲之泉）"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Scandinavian",
+    "zh": "北歐風"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Colonial",
+    "zh": "殖民風"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Mediterranean",
+    "zh": "地中海風"
+  },
+  {
+    "cat": "房屋風格",
+    "en": "Industrial",
+    "zh": "工業風"
+  },
+  {
+    "cat": "其他",
+    "en": "BG/base game",
+    "zh": "沒有 DLC 的房子"
+  },
+  {
+    "cat": "其他",
+    "en": "family/big family",
+    "zh": "大家族入住"
+  }
 
 ]
