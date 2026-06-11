@@ -9,7 +9,7 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 層次一：常駐標題 ======== */
 .keyword-side-tab {
-    /* 固定寬度 */ width: 120px;
+    /* 自適寬度 */ width: fit-content;
     /* 內距設定 */ padding: 15px;
     /* 背景顏色 */ background: #ffffff;
     /* 圓弧外型 */ border-radius: 0 50px 50px 0;
