@@ -32,6 +32,7 @@
     /* 背景顏色 */ background: #ffffff;
     /* 圓弧形狀 */ border-radius: 0 50px 50px 0;
     /* 寬度適應 */ display: block;
+    /* 自適寬度 */ width: max-content;
     /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     /* 滑動過渡 */ transition: all 0.3s ease;
 }
