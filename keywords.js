@@ -4,7 +4,6 @@
 async function loadKeywords(placeholderId, categoryList) {
     // 【獲取容器】取得對應頁面元素
     const placeholder = document.getElementById(placeholderId);
-    // 【異常檢查】若容器不存在則終止
     if (!placeholder) return;
 
     // 【遠端讀取】開始異步抓取資料
@@ -19,7 +18,7 @@ async function loadKeywords(placeholderId, categoryList) {
             // 【產生架構】定義主包裝容器
             let html = `
             <div class="keyword-side-wrapper">
-                <div class="keyword-side-tab">關鍵字對照表 ▶</div>
+                <div class="keyword-side-tab">關鍵字</div>
                 <div class="keyword-cat-list">
             `;
 
@@ -61,7 +60,6 @@ async function loadKeywords(placeholderId, categoryList) {
                 cat.addEventListener('mouseenter', () => {
                     // 【啟動模式】加入選取狀態類別
                     wrapper.classList.add('cat-selected');
-                    
                     // 【互斥邏輯】移除其他 active
                     cats.forEach(c => c.classList.remove('active'));
                     // 【設定狀態】標記當前為 active
@@ -69,7 +67,7 @@ async function loadKeywords(placeholderId, categoryList) {
                 });
             });
 
-            // 【重置狀態】滑鼠離開移除全部
+            // 【滑出重置】離開區域即重置
             wrapper.addEventListener('mouseleave', () => {
                 // 【移除模式】離開區域即關閉
                 wrapper.classList.remove('cat-selected');
@@ -78,7 +76,7 @@ async function loadKeywords(placeholderId, categoryList) {
             });
         })
         
-        // 【階段三】發生異常時的安全防禦回退
+        // 【異常捕獲】處理錯誤提示顯示
         .catch(error => {
             console.error('關鍵字對照表載入失敗:', error);
             placeholder.innerHTML = '<span style="color:red;">關鍵字對照表載入失敗，請稍後再試。' + error.message + '</span>';
