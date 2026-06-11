@@ -28,11 +28,11 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 膠囊觸發區 ======== */
 .keyword-cat {
+    /* 相對定位 */ position: relative;
     /* 區塊間距 */ margin: 10px 0;
     /* 背景顏色 */ background: #ffffff;
     /* 圓弧形狀 */ border-radius: 0 50px 50px 0;
     /* 寬度適應 */ display: flex;
-    /* ？？？？ */ position: relative;
     /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     /* 滑動過渡 */ transition: all 0.3s ease;
     /* 預設隱藏 */ opacity: 0; 
@@ -51,9 +51,15 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 內容隱藏區 ======== */
 .keyword-cat-content {
-    /* 高度隱藏 */ max-height: 0;
+    /* 絕對定位 */ position: absolute;
+    /* 靠右對齊 */ left: 100%;
+    /* 頂部對齊 */ top: 0;
+    /* 寬度隱藏 */ width: 0;
     /* 溢出隱藏 */ overflow: hidden;
-    /* 動畫過渡 */ transition: max-height 0.3s ease;
+    /* 背景顏色 */ background: #ffffff;
+    /* 圓弧形狀 */ border-radius: 0 50px 50px 0;
+    /* 陰影效果 */ box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    /* 動畫過渡 */ transition: width 0.3s ease;
 }
 
 .keyword-cat-list {
@@ -62,7 +68,7 @@
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑入互動區 ======== */
 .keyword-cat:hover .keyword-cat-content {
-    /* 展開高度 */ max-height: 500px;
+    /* 展開高度 */ max-height: 300px;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 階梯式動畫 ======== */
