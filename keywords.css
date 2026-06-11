@@ -37,7 +37,8 @@
 }
 
 .keyword-side-wrapper:hover .keyword-cat {
-    /* 顯示動畫 */ transform: translateX(0); opacity: 1;
+    /* 顯示動畫 */ transform: translateX(0);
+    /* ？？？？ */ opacity: 1;
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - CAT觸發列 (展開前) ======== */
@@ -51,6 +52,10 @@
     /* 高度隱藏 */ max-height: 0;
     /* 溢出隱藏 */ overflow: hidden;
     /* 動畫過渡 */ transition: max-height 0.3s ease;
+}
+
+.keyword-cat-list {
+    /* 垂直堆疊 */ display: block; 
 }
 
 /* ========【關鍵字側邊索引模組】 設定 - 滑入互動區 ======== */
