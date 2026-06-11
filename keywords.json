@@ -76,19 +76,13 @@
   },
   {
     "cat": "性別與年齡",
-    "en": "Toddler (TU)",
-    "zh": "幼兒",
-    "note": ""
-  },
-  {
-    "cat": "性別與年齡",
-    "en": "Toddler",
-    "zh": "幼兒",
-    "note": ""
-  },
-  {
-    "cat": "性別與年齡",
     "en": "Preschool (PU)",
+    "zh": "幼兒",
+    "note": ""
+  },
+  {
+    "cat": "性別與年齡",
+    "en": "Toddler (TU)",
     "zh": "幼兒",
     "note": ""
   },
@@ -106,18 +100,18 @@
   },
   {
     "cat": "性別與年齡",
+    "en": "Female (F)",
+    "zh": "女人"
+  },
+  {
+    "cat": "性別與年齡",
     "en": "Adult Male (AM)",
     "zh": "成年男性",
     "note": ""
   },
   {
     "cat": "性別與年齡",
-    "en": "Female",
-    "zh": "女人"
-  },
-  {
-    "cat": "性別與年齡",
-    "en": "Male",
+    "en": "Male (M)",
     "zh": "男人"
   },
   {
