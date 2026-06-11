@@ -61,6 +61,18 @@ async function loadKeywords(placeholderId, categoryList) {
 }
 
 // ==================================================
+// 【互斥事件】在產生 HTML 後，加入這段事件監聽
+// ==================================================
+document.querySelectorAll('.keyword-cat').forEach(cat => {
+    cat.addEventListener('mouseenter', () => {
+        // 先移除所有人的 active 狀態
+        document.querySelectorAll('.keyword-cat').forEach(c => c.classList.remove('active'));
+        // 幫當前 hover 的加上 active
+        cat.classList.add('active');
+    });
+});
+
+// ==================================================
 // 【複製控制】執行剪貼與圖示切換
 // ==================================================
 function copyText(element, text) {
