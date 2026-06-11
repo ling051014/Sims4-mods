@@ -11,7 +11,7 @@ async function loadKeywords(placeholderId, categoryList) {
         if (!response.ok) throw new Error('讀取資料失敗');
         const allData = await response.json();
 
-        // 【結構生成】建立圓弧耳朵與分類列表
+        // 【結構生成】建立圓弧膠囊列表
         let html = `
         <div class="keyword-side-wrapper">
             <div class="keyword-side-tab">關鍵字<br>對照表</div>
@@ -21,7 +21,7 @@ async function loadKeywords(placeholderId, categoryList) {
         categoryList.forEach(catName => {
             const list = allData.filter(i => i.cat === catName);
             
-            // 【產生區塊】確保每個 CAT 為獨立容器
+            // 【產生區塊】獨立膠囊與內容
             html += `
             <div class="keyword-cat">
                 <div class="keyword-cat-trigger">${catName}</div>
@@ -44,7 +44,7 @@ async function loadKeywords(placeholderId, categoryList) {
         html += `</div></div>`;
         placeholder.innerHTML = html;
     } catch (error) {
-        // 錯誤處理：捕獲網路異常或 JSON 格式錯誤
+        // 【錯誤處理】捕獲網路異常或 JSON 格式錯誤
         console.error("關鍵字對照表載入失敗：", error);
         placeholder.innerHTML = "<span style='color:red;'>對照表載入失敗，請稍後再試</span>";
     }
@@ -57,14 +57,14 @@ function copyText(element, text) {
     // 【寫入剪貼】系統執行複製動作
     navigator.clipboard.writeText(text);
     
-    // 【路徑設定】定義前後兩個圖示的檔名
+    // 【路徑設定】定義前後兩個圖示
     const originalIcon = 'html icons/copy.svg';
     const checkIcon = 'html icons/check.svg';
     
-    // 【點擊後】立即將圖片切換為打勾圖示
+    // 【圖示變更】切換為打勾圖示
     element.src = checkIcon;
     
-    // 【一秒後】切換回原本的 copy.svg
+    // 【恢復圖示】一秒後變回原始
     setTimeout(() => { 
         element.src = originalIcon; 
     }, 1000);
