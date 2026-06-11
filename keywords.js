@@ -32,7 +32,7 @@ async function loadKeywords(placeholderId, categoryList) {
                 // 【產生區塊】確保每個 CAT 為獨立容器且結構完整
                 html += `
                 <div class="keyword-cat" style="transition-delay: ${index * 0.05}s">
-                    <div class="keyword-cat-trigger">${catName}</div>
+                    <div class="keyword-cat-trigger" style="padding:10px;">${catName}</div>
                     <div class="keyword-cat-content">
                         <table class="keyword-table">
                             ${list.map(i => `
@@ -51,23 +51,22 @@ async function loadKeywords(placeholderId, categoryList) {
 
             html += `</div></div>`;
             placeholder.innerHTML = html;
-        })
 
-        // 【互斥事件】在產生 HTML 後，加入這段事件監聽
-        const cats = document.querySelectorAll('.keyword-cat');
-        cats.forEach(cat => {
-            cat.addEventListener('mouseenter', () => {
-                // 【邏輯互斥】先移除所有人的 active 狀態
-                cats.forEach(c => c.classList.remove('active'));
-                // 【狀態啟用】幫當前 hover 的加上 active
-                cat.classList.add('active');
+            // 【事件綁定】在產生 HTML 後，正確加入事件監聽
+            const cats = document.querySelectorAll('.keyword-cat');
+            cats.forEach(cat => {
+                cat.addEventListener('mouseenter', () => {
+                    // 【邏輯互斥】先移除所有人的 active 狀態
+                    cats.forEach(c => c.classList.remove('active'));
+                    // 【狀態啟用】幫當前 hover 的加上 active
+                    cat.classList.add('active');
+                });
+                // 【滑出重置】確保滑鼠離開時清除選取狀態
+                cat.addEventListener('mouseleave', () => {
+                    cat.classList.remove('active');
+                });
             });
-            // 【滑出重置】確保滑鼠離開時清除選取狀態
-            cat.addEventListener('mouseleave', () => {
-                cat.classList.remove('active');
-            });
-        });
-    })
+        })
         
         // 【階段三】發生異常時的安全防禦回退
         .catch(error => {
