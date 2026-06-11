@@ -1,5 +1,5 @@
 // ===================================================
-// ========【關鍵字對照表】 強化除錯載入模組 ========
+// ========【關鍵字對照表】 載入外部資料模組 ========
 // ===================================================
 async function loadKeywords(placeholderId, categoryList) {
     const placeholder = document.getElementById(placeholderId);
@@ -8,26 +8,11 @@ async function loadKeywords(placeholderId, categoryList) {
     // 【遠端讀取】開始異步抓取關鍵字資料
     fetch(`keywords.json?t=${new Date().getTime()}`)
         
-        // 【階段一】檢查回應，特別是檔案內容
+        // 【階段一】接收回應，印出狀態碼以便除錯
         .then(res => {
-            console.log('HTTP 狀態碼:', res.status); 
-            // 如果狀態碼不是 200，這裡會拋出錯誤
-            if (!res.ok) throw new Error('HTTP 錯誤代碼: ' + res.status);
-            
-            // 【關鍵修改】先轉成文字，讓我們檢查內容是不是純文字，還是網頁 HTML
-            return res.text(); 
-        })
-        .then(text => {
-            // 【檢查點】如果控制台印出的不是 JSON 字串，而是 <!DOCTYPE html>...
-            // 那就是路徑指向了錯誤的檔案（例如 index.html）
-            console.log('實際抓取到的檔案內容前 50 字:', text.substring(0, 50));
-            
-            // 嘗試手動解析 JSON
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                throw new Error('JSON 解析失敗，檔案內容可能不是 JSON 格式');
-            }
+            console.log('HTTP 狀態碼:', res.status);
+            if (!res.ok) throw new Error('讀取資料失敗');
+            return res.json();
         })
 
         // 【階段二】抓取資料後，生成並插入 HTML 結構
@@ -44,6 +29,7 @@ async function loadKeywords(placeholderId, categoryList) {
             categoryList.forEach(catName => {
                 const list = allData.filter(i => i.cat === catName);
                 
+                // 【產生區塊】確保每個 CAT 為獨立容器且結構完整
                 html += `
                 <div class="keyword-cat">
                     <div class="keyword-cat-trigger">${catName}</div>
