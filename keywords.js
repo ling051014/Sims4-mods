@@ -21,26 +21,26 @@ async function loadKeywords(placeholderId, categoryList) {
         categoryList.forEach(catName => {
             const list = allData.filter(i => i.cat === catName);
             
-            // 【產生區塊】獨立膠囊與內容
+            // 【結構生成】建立標籤與滑出容器
             html += `
             <div class="keyword-cat">
                 <div class="keyword-cat-trigger">${catName}</div>
                 <div class="keyword-cat-content">
                     <table class="keyword-table">
                         ${list.map(i => `
-                            <tr>
-                                <td class="keyword-zh">${i.zh}</td>
-                                <td class="keyword-en">${i.en}</td>
-                                <td class="keyword-copy">
-                                    <img src="html icons/copy.svg" class="copy-btn" onclick="copyText(this, '${i.en}')">
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </table>
-                </div>
-            </div>`;
-        });
-
+                        <tr>
+                        <td class="keyword-zh">${i.zh}</td>
+                        <td class="keyword-en">${i.en}</td>
+                        <td class="keyword-copy">
+                            <img src="html icons/copy.svg" class="copy-btn" onclick="copyText(this, '${i.en}')">
+                        </td>
+                    </tr>
+                    `)
+                          .join('')}
+                          </table>
+                          </div>
+                          </div>`;
+            
         html += `</div></div>`;
         placeholder.innerHTML = html;
     }
