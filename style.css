@@ -4,6 +4,13 @@ body {
     /* 預設邊距 */ margin: 0;
     /* 全站字體 */ font-family: "PingFang TC", sans-serif;
 }
+/* ========【模組列表頁架構】 設定 - 頂條固定、內容獨立捲動 ======== */
+body.mod-list-page {
+    /* 使用完整視窗高度 */ height: 100vh;
+    /* 頂條與內容上下排列 */ display: flex;
+    /* 頂條與內容上下排列 */ flex-direction: column;
+    /* 禁止 body 本身產生卷軸 */ overflow: hidden;
+}
 
 /* ========【首頁標題區塊】 設定 - 頁面主標題區 ======== */
 .header-section {
