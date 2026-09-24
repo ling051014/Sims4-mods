@@ -4539,3 +4539,451 @@ body[data-theme="ling"] .sidebar-btn.danger:hover {
         /* 重設按鈕維持內容寬度 */ width: fit-content;
     }
 }
+
+/* ========【導覽配色 Token】 設定 - 下拉選單與導覽互動獨立於主題強調色 ======== */
+:root,
+body[data-theme="ling"] {
+    /* 下拉選單背景 */ --nav-dropdown-bg: #ffffff;
+    /* 下拉選單文字 */ --nav-dropdown-text: #4d5862;
+    /* 下拉選單邊框 */ --nav-dropdown-border: #e2e8ee;
+    /* 下拉選單分隔線 */ --nav-dropdown-divider: #f1f3f5;
+    /* 下拉選單懸停背景 */ --nav-dropdown-hover-bg: #f7f7f8;
+    /* 下拉選單懸停文字 */ --nav-dropdown-hover-text: #33383d;
+    /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #eceff2;
+    /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #2f353b;
+    /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f7f7f8;
+    /* 導覽選取背景 */ --nav-active-bg: #f2f3f4;
+    /* 導覽選取邊框 */ --nav-active-border: #d8dde2;
+    /* 導覽選取文字 */ --nav-active-text: #444b52;
+}
+body[data-theme="sage"] {
+    /* 下拉選單背景 */ --nav-dropdown-bg: #ffffff;
+    /* 下拉選單文字 */ --nav-dropdown-text: #344238;
+    /* 下拉選單邊框 */ --nav-dropdown-border: #d8e0d9;
+    /* 下拉選單分隔線 */ --nav-dropdown-divider: #edf1ed;
+    /* 下拉選單懸停背景 */ --nav-dropdown-hover-bg: #f2f4f2;
+    /* 下拉選單懸停文字 */ --nav-dropdown-hover-text: #303a32;
+    /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #e6ebe7;
+    /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #2e3831;
+    /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f2f4f2;
+    /* 導覽選取背景 */ --nav-active-bg: #e9ede9;
+    /* 導覽選取邊框 */ --nav-active-border: #d4dcd5;
+    /* 導覽選取文字 */ --nav-active-text: #3e4b41;
+}
+body[data-theme="rose"] {
+    /* 下拉選單背景 */ --nav-dropdown-bg: #fffdfd;
+    /* 下拉選單文字 */ --nav-dropdown-text: #4a363d;
+    /* 下拉選單邊框 */ --nav-dropdown-border: #e6dce0;
+    /* 下拉選單分隔線 */ --nav-dropdown-divider: #f2ecef;
+    /* 下拉選單懸停背景 */ --nav-dropdown-hover-bg: #f7f3f5;
+    /* 下拉選單懸停文字 */ --nav-dropdown-hover-text: #47383d;
+    /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #eee7ea;
+    /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #413439;
+    /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f7f3f5;
+    /* 導覽選取背景 */ --nav-active-bg: #f0eaec;
+    /* 導覽選取邊框 */ --nav-active-border: #ded5d9;
+    /* 導覽選取文字 */ --nav-active-text: #514147;
+}
+body[data-theme="amber"] {
+    /* 下拉選單背景 */ --nav-dropdown-bg: #fffdf9;
+    /* 下拉選單文字 */ --nav-dropdown-text: #493e31;
+    /* 下拉選單邊框 */ --nav-dropdown-border: #e5ded3;
+    /* 下拉選單分隔線 */ --nav-dropdown-divider: #f2eee7;
+    /* 下拉選單懸停背景 */ --nav-dropdown-hover-bg: #f6f3ee;
+    /* 下拉選單懸停文字 */ --nav-dropdown-hover-text: #443b31;
+    /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #ece6dc;
+    /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #3e372f;
+    /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f6f3ee;
+    /* 導覽選取背景 */ --nav-active-bg: #eee8df;
+    /* 導覽選取邊框 */ --nav-active-border: #ded6ca;
+    /* 導覽選取文字 */ --nav-active-text: #4e453a;
+}
+body[data-theme="midnight"] {
+    /* 下拉選單背景 */ --nav-dropdown-bg: #1a212a;
+    /* 下拉選單文字 */ --nav-dropdown-text: #edf3f8;
+    /* 下拉選單邊框 */ --nav-dropdown-border: #35404d;
+    /* 下拉選單分隔線 */ --nav-dropdown-divider: #28323d;
+    /* 下拉選單懸停背景 */ --nav-dropdown-hover-bg: #232c36;
+    /* 下拉選單懸停文字 */ --nav-dropdown-hover-text: #f6f8fa;
+    /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #2c3642;
+    /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #ffffff;
+    /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #222b35;
+    /* 導覽選取背景 */ --nav-active-bg: #29323d;
+    /* 導覽選取邊框 */ --nav-active-border: #3a4653;
+    /* 導覽選取文字 */ --nav-active-text: #edf3f8;
+}
+body[data-theme="custom"] {
+    /* 下拉選單背景 */ --nav-dropdown-bg: #ffffff;
+    /* 下拉選單文字 */ --nav-dropdown-text: #3f3f46;
+    /* 下拉選單邊框 */ --nav-dropdown-border: #e2e2e8;
+    /* 下拉選單分隔線 */ --nav-dropdown-divider: #f1f1f4;
+    /* 下拉選單懸停背景 */ --nav-dropdown-hover-bg: #f6f6f7;
+    /* 下拉選單懸停文字 */ --nav-dropdown-hover-text: #34343a;
+    /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #ececf0;
+    /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #303036;
+    /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f6f6f7;
+    /* 導覽選取背景 */ --nav-active-bg: #eeeeF1;
+    /* 導覽選取邊框 */ --nav-active-border: #dcdce2;
+    /* 導覽選取文字 */ --nav-active-text: #44444b;
+}
+
+/* ========【家族名稱編輯】 設定 - 筆圖示與永久可見的虛線輸入提示 ======== */
+.family-name-editor {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 7px;
+    /* 固定寬度 */ width: 154px;
+    /* 最小寬度 */ min-width: 154px;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.family-name-icon {
+    /* 元素寬度 */ width: 14px;
+    /* 元素高度 */ height: 14px;
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 透明度 */ opacity: .72;
+}
+.family-name-editor .brand-input {
+    /* 元素寬度 */ width: 100%;
+    /* 最小寬度 */ min-width: 0;
+    /* 內縮空間 */ padding: 5px 2px 4px;
+    /* 邊框移除 */ border: 0;
+    /* 下方虛線 */ border-bottom: 1px dashed color-mix(in srgb, var(--topbar-field-fg) 42%, transparent);
+    /* 圓角移除 */ border-radius: 0;
+    /* 背景透明 */ background: transparent;
+    /* 字體大小 */ font-size: 14px;
+    /* 字體粗細 */ font-weight: 500;
+    /* 字距設定 */ letter-spacing: .2px;
+    /* 文字陰影 */ text-shadow: none;
+    /* 單行顯示 */ white-space: nowrap;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 溢出隱藏 */ overflow: hidden;
+}
+.family-name-editor .brand-input:hover {
+    /* 背景透明 */ background: transparent;
+    /* 虛線加深 */ border-bottom-color: color-mix(in srgb, var(--topbar-field-fg) 65%, transparent);
+}
+.family-name-editor .brand-input:focus {
+    /* 背景透明 */ background: transparent;
+    /* 虛線改實線 */ border-bottom-style: solid;
+    /* 底線加深 */ border-bottom-color: var(--topbar-field-fg);
+}
+
+/* ========【頂部自訂下拉選單】 設定 - 參考專案搜尋結果樣式 ======== */
+.nav-select {
+    /* 相對定位 */ position: relative;
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.nav-native-select {
+    /* 從畫面隱藏 */ position: absolute !important;
+    /* 元素寬度 */ width: 1px !important;
+    /* 元素高度 */ height: 1px !important;
+    /* 溢出隱藏 */ overflow: hidden !important;
+    /* 裁切範圍 */ clip: rect(0 0 0 0) !important;
+    /* 裁切路徑 */ clip-path: inset(50%) !important;
+    /* 保持單行 */ white-space: nowrap !important;
+    /* 不透明度 */ opacity: 0 !important;
+    /* 滑鼠事件 */ pointer-events: none !important;
+}
+.nav-select-trigger {
+    /* 元素寬度 */ width: 100%;
+    /* 固定高度 */ height: 34px;
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平排列 */ justify-content: flex-start;
+    /* 項目間距 */ gap: 7px;
+    /* 內縮空間 */ padding: 0 10px;
+    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景顏色 */ background: var(--topbar-field-bg);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 400;
+    /* 字體設定 */ font-family: inherit;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+    /* 外框移除 */ outline: none;
+    /* 換行方式 */ white-space: nowrap;
+}
+.nav-select-trigger:hover,
+.nav-select-trigger:focus-visible,
+.nav-select.open .nav-select-trigger {
+    /* 背景顏色 */ background: var(--nav-button-hover-bg);
+    /* 邊框顏色 */ border-color: var(--nav-dropdown-border);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+}
+.nav-select-value {
+    /* 最小寬度 */ min-width: 0;
+    /* 溢出隱藏 */ overflow: hidden;
+    /* 文字省略 */ text-overflow: ellipsis;
+    /* 單行顯示 */ white-space: nowrap;
+}
+.nav-select-chevron {
+    /* 元素寬度 */ width: 12px;
+    /* 元素高度 */ height: 12px;
+    /* 左側自動推移 */ margin-left: auto;
+    /* 右側內縮 */ margin-right: 5px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 動畫過渡 */ transition: transform .18s ease;
+    /* 透明度 */ opacity: .72;
+}
+.nav-select.open .nav-select-chevron {
+    /* 展開旋轉 */ transform: rotate(180deg);
+}
+.nav-select-menu {
+    /* 絕對定位 */ position: absolute;
+    /* 頂部位置 */ top: calc(100% + 6px);
+    /* 左側位置 */ left: 0;
+    /* 最小寬度 */ min-width: 100%;
+    /* 元素寬度 */ width: max-content;
+    /* 最大寬度 */ max-width: 280px;
+    /* 背景顏色 */ background: var(--nav-dropdown-bg);
+    /* 文字顏色 */ color: var(--nav-dropdown-text);
+    /* 邊框設定 */ border: 1px solid var(--nav-dropdown-border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 元素陰影 */ box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    /* 溢出隱藏 */ overflow: hidden;
+    /* 顯示層級 */ z-index: 900;
+    /* 預設隱藏 */ display: none;
+}
+.nav-select.open .nav-select-menu {
+    /* 顯示方式 */ display: block;
+}
+.nav-select-option {
+    /* 元素寬度 */ width: 100%;
+    /* 最小寬度 */ min-width: 100%;
+    /* 內縮空間 */ padding: 11px 15px;
+    /* 邊框移除 */ border: 0;
+    /* 下方分隔線 */ border-bottom: 1px solid var(--nav-dropdown-divider);
+    /* 背景顏色 */ background: var(--nav-dropdown-bg);
+    /* 文字顏色 */ color: var(--nav-dropdown-text);
+    /* 文字置中 */ text-align: center;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 400;
+    /* 字體設定 */ font-family: inherit;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 換行方式 */ white-space: nowrap;
+    /* 動畫過渡 */ transition: background-color .16s ease, color .16s ease;
+}
+.nav-select-option:last-child {
+    /* 移除末項分隔線 */ border-bottom: 0;
+}
+.nav-select-option:hover,
+.nav-select-option:focus-visible {
+    /* 懸停背景 */ background: var(--nav-dropdown-hover-bg);
+    /* 懸停文字 */ color: var(--nav-dropdown-hover-text);
+    /* 外框移除 */ outline: none;
+}
+.nav-select-option.selected {
+    /* 選取背景 */ background: var(--nav-dropdown-selected-bg);
+    /* 選取文字 */ color: var(--nav-dropdown-selected-text);
+    /* 字體粗細 */ font-weight: 500;
+}
+.nav-select-family {
+    /* 固定寬度 */ width: 180px;
+    /* 最小寬度 */ min-width: 180px;
+    /* 最大寬度 */ max-width: 180px;
+}
+.nav-select-family .nav-select-value {
+    /* 彈性配比 */ flex: 1;
+    /* 文字靠左 */ text-align: left;
+}
+.nav-select-stage {
+    /* 固定寬度 */ width: 116px;
+    /* 最小寬度 */ min-width: 116px;
+}
+.nav-select-stage .nav-select-value {
+    /* 彈性配比 */ flex: 1;
+    /* 文字靠左 */ text-align: left;
+}
+.nav-select-language {
+    /* 自動寬度 */ width: auto;
+    /* 最小寬度移除 */ min-width: 0;
+    /* 內縮移除 */ padding: 0;
+    /* 邊框移除 */ border: 0;
+    /* 背景透明 */ background: transparent;
+}
+.nav-select-language .language-trigger {
+    /* 自動寬度 */ width: auto;
+    /* 最小寬度 */ min-width: 88px;
+    /* 水平置中 */ justify-content: center;
+    /* 內縮空間 */ padding: 0 11px;
+}
+.nav-select-language .language-icon {
+    /* 回到正常文流 */ position: static;
+    /* 元素寬度 */ width: 15px;
+    /* 元素高度 */ height: 15px;
+    /* 外距移除 */ margin: 0;
+    /* 位移移除 */ transform: none;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.nav-select-language .nav-select-value {
+    /* 文字置中 */ text-align: center;
+    /* 最小寬度 */ min-width: 24px;
+}
+.nav-select-language .nav-select-menu {
+    /* 左右置中定位 */ left: 50%;
+    /* 水平回拉 */ transform: translateX(-50%);
+    /* 最小寬度 */ min-width: 92px;
+}
+
+/* ========【頂部搜尋結果】 設定 - Hover 與選取維持中性灰階 ======== */
+.topbar-search-results {
+    /* 背景顏色 */ background: var(--nav-dropdown-bg);
+    /* 文字顏色 */ color: var(--nav-dropdown-text);
+    /* 邊框顏色 */ border-color: var(--nav-dropdown-border);
+}
+.topbar-search-result {
+    /* 文字顏色 */ color: var(--nav-dropdown-text);
+    /* 分隔線顏色 */ border-bottom-color: var(--nav-dropdown-divider);
+}
+.topbar-search-result:hover,
+.topbar-search-result:focus-visible {
+    /* 懸停背景 */ background: var(--nav-dropdown-hover-bg);
+    /* 懸停文字 */ color: var(--nav-dropdown-hover-text);
+}
+.topbar-search-result-meta {
+    /* 次要文字 */ color: color-mix(in srgb, var(--nav-dropdown-text) 68%, transparent);
+}
+
+/* ========【搜尋型下拉選單】 設定 - 所有主題維持可讀對比 ======== */
+.ss-dropdown {
+    /* 背景顏色 */ background: var(--nav-dropdown-bg);
+    /* 文字顏色 */ color: var(--nav-dropdown-text);
+    /* 邊框顏色 */ border-color: var(--nav-dropdown-border);
+}
+.ss-search {
+    /* 背景顏色 */ background: var(--nav-dropdown-bg);
+    /* 文字顏色 */ color: var(--nav-dropdown-text);
+    /* 邊框顏色 */ border-color: var(--nav-dropdown-border);
+}
+.ss-option {
+    /* 文字顏色 */ color: var(--nav-dropdown-text);
+}
+.ss-option:hover {
+    /* 懸停背景 */ background: var(--nav-dropdown-hover-bg);
+    /* 懸停文字 */ color: var(--nav-dropdown-hover-text);
+}
+.ss-option.selected {
+    /* 選取背景 */ background: var(--nav-dropdown-selected-bg);
+    /* 選取文字 */ color: var(--nav-dropdown-selected-text);
+}
+.ss-option.selected .check {
+    /* 勾選背景 */ background: var(--nav-dropdown-bg);
+    /* 勾選文字 */ color: var(--nav-dropdown-selected-text);
+    /* 勾選邊框 */ border-color: var(--nav-dropdown-border);
+}
+
+/* ========【導覽按鈕互動】 設定 - 一般狀態維持灰階、危險操作維持紅色 ======== */
+.sidebar-btn:hover {
+    /* 懸停背景 */ background: var(--nav-button-hover-bg);
+    /* 懸停邊框 */ border-color: var(--nav-active-border);
+    /* 懸停文字 */ color: var(--nav-active-text);
+    /* 視覺濾鏡移除 */ filter: none;
+}
+.sidebar-btn.primary,
+.sidebar-btn.active,
+.sidebar-btn.lock-active,
+body[data-theme="ling"] .sidebar-btn.primary,
+body[data-theme="ling"] .sidebar-btn.active,
+body[data-theme="ling"] .sidebar-btn.lock-active {
+    /* 選取背景 */ background: var(--nav-active-bg);
+    /* 選取邊框 */ border-color: var(--nav-active-border);
+    /* 選取文字 */ color: var(--nav-active-text);
+    /* 字體粗細 */ font-weight: 500;
+}
+.sidebar-btn.primary:hover,
+.sidebar-btn.active:hover,
+.sidebar-btn.lock-active:hover {
+    /* 懸停背景 */ background: var(--nav-button-hover-bg);
+    /* 懸停邊框 */ border-color: var(--nav-active-border);
+    /* 懸停文字 */ color: var(--nav-active-text);
+    /* 視覺濾鏡移除 */ filter: none;
+}
+.sidebar-btn.danger,
+body[data-theme="ling"] .sidebar-btn.danger {
+    /* 危險文字 */ color: #c44a3e;
+}
+.sidebar-btn.danger:hover,
+body[data-theme="ling"] .sidebar-btn.danger:hover {
+    /* 危險背景 */ background: rgba(200,60,40,.08);
+    /* 危險邊框 */ border-color: rgba(200,60,40,.22);
+    /* 危險文字 */ color: #b63f35;
+}
+.icon-btn:hover,
+.menu-toggle:hover {
+    /* 懸停背景 */ background: var(--nav-button-hover-bg);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+}
+
+/* ========【新增 SVG 圖示】 設定 - 下拉箭頭與家族名稱編輯筆 ======== */
+.icon-chevron-down {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/chevron-down.svg");
+}
+.icon-pencil {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/pencil.svg");
+}
+
+/* ========【響應式導覽】 設定 - 小螢幕維持固定欄位但避免擠壓 ======== */
+@media (max-width: 900px) {
+    .family-name-editor {
+        /* 小螢幕寬度 */ width: 118px;
+        /* 小螢幕最小寬度 */ min-width: 118px;
+    }
+    .nav-select-family {
+        /* 小螢幕固定寬度 */ width: 140px;
+        /* 小螢幕最小寬度 */ min-width: 140px;
+        /* 小螢幕最大寬度 */ max-width: 140px;
+    }
+    .nav-select-stage {
+        /* 小螢幕固定寬度 */ width: 104px;
+        /* 小螢幕最小寬度 */ min-width: 104px;
+    }
+}
+
+/* ========【語言按鈕容器】 修正 - 避免舊版 language-switch hover 產生第二層背景 ======== */
+.nav-select-language:hover,
+.nav-select-language:focus-within {
+    /* 容器背景透明 */ background: transparent;
+    /* 容器邊框透明 */ border-color: transparent;
+}
+
+/* ========【頂部下拉尺寸】 修正 - 欄位與結果面板維持固定寬度 ======== */
+.nav-select-family .nav-select-menu {
+    /* 固定寬度 */ width: 180px;
+    /* 最小寬度 */ min-width: 180px;
+    /* 最大寬度 */ max-width: 180px;
+}
+.nav-select-stage .nav-select-menu {
+    /* 固定寬度 */ width: 116px;
+    /* 最小寬度 */ min-width: 116px;
+    /* 最大寬度 */ max-width: 116px;
+}
+.nav-select-option {
+    /* 溢出隱藏 */ overflow: hidden;
+    /* 尾端省略 */ text-overflow: ellipsis;
+}
+.nav-select-language .language-trigger {
+    /* 自動寬度 */ width: auto;
+    /* 不強制放大 */ min-width: 0;
+    /* 與相鄰按鈕一致內縮 */ padding: 0 11px;
+}
+.nav-select-language .nav-select-menu {
+    /* 語言結果寬度 */ width: 72px;
+    /* 語言結果最小寬度 */ min-width: 72px;
+    /* 語言結果最大寬度 */ max-width: 72px;
+}
+@media (max-width: 900px) {
+    .nav-select-family .nav-select-menu {
+        /* 小螢幕固定寬度 */ width: 140px;
+        /* 小螢幕最小寬度 */ min-width: 140px;
+        /* 小螢幕最大寬度 */ max-width: 140px;
+    }
+    .nav-select-stage .nav-select-menu {
+        /* 小螢幕固定寬度 */ width: 104px;
+        /* 小螢幕最小寬度 */ min-width: 104px;
+        /* 小螢幕最大寬度 */ max-width: 104px;
+    }
+}
