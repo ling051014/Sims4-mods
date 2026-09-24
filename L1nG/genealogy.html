@@ -68,7 +68,7 @@
                             <span>匯入</span>
                             <input accept=".json" hidden id="importInput" type="file">
                         </label>
-                        <button class="icon-btn" id="exportBtn" title="匯出 JSON 備份"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
+                        <button class="icon-btn" id="exportBtn" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
                         <button class="icon-btn" id="bgBtn" title="外觀設定"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀</span></button>
                         <button class="icon-btn" id="tipsBtn" title="使用提示"><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>提示</span></button>
                     </div>
@@ -805,6 +805,72 @@
         </div>
 
         <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- ========【匯出面板】 設定 - 圖片匯出與 JSON 備份入口 ======== -->
+        <div class="export-mask" id="exportMask" aria-hidden="true">
+            <div class="export-modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+                <div class="export-header">
+                    <div class="export-title-group">
+                        <h2 id="exportTitle"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></h2>
+                        <p id="exportDesc">可選擇匯出目前完整族譜圖片，或匯出 JSON 備份。</p>
+                    </div>
+                    <button class="export-close" id="exportCloseBtn" type="button" aria-label="關閉">×</button>
+                </div>
+
+                <div class="export-grid">
+                    <section class="export-section">
+                        <div class="export-section-head">
+                            <h3><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>族譜圖片</span></h3>
+                            <p>匯出目前完整族譜畫面，不受目前縮放或平移視角限制。</p>
+                        </div>
+
+                        <div class="export-size-list" id="exportSizeList">
+                            <label class="export-size-option">
+                                <input type="radio" name="exportImageSize" value="standard" checked>
+                                <span class="export-size-card">
+                                    <span class="export-size-name">標準</span>
+                                    <span class="export-size-note">輸出目前完整族譜尺寸</span>
+                                </span>
+                            </label>
+                            <label class="export-size-option">
+                                <input type="radio" name="exportImageSize" value="hd">
+                                <span class="export-size-card">
+                                    <span class="export-size-name">高畫質</span>
+                                    <span class="export-size-note">輸出 2× 尺寸，適合一般分享與保存</span>
+                                </span>
+                            </label>
+                            <label class="export-size-option">
+                                <input type="radio" name="exportImageSize" value="uhd">
+                                <span class="export-size-card">
+                                    <span class="export-size-name">超高畫質</span>
+                                    <span class="export-size-note">輸出 3× 尺寸，適合高解析保存</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="export-actions">
+                            <button class="primary" id="exportImageBtn" type="button">匯出族譜圖片</button>
+                        </div>
+                    </section>
+
+                    <section class="export-section">
+                        <div class="export-section-head">
+                            <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>JSON 備份</span></h3>
+                            <p>保留完整族譜資料與圖片，可再次匯入本工具繼續編輯。</p>
+                        </div>
+
+                        <div class="export-json-note">
+                            <span class="l1ng-icon icon-info-circle" aria-hidden="true"></span>
+                            <span>JSON 備份會包含目前族譜資料，並將已儲存在瀏覽器中的圖片一併轉回 base64。</span>
+                        </div>
+
+                        <div class="export-actions">
+                            <button id="exportJsonBtn" type="button">匯出 JSON 備份</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
 
         <script src="genealogy.js"></script>
     </body>
