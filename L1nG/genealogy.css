@@ -543,10 +543,10 @@ button {
     /* 彈性收縮 */ flex-shrink: 0;
 }
 .family-select:hover {
-    /* 背景設定 */ background: var(--topbar-field-hover);
+    /* 背景顏色 */ background-color: var(--topbar-field-hover);
 }
 .family-select:focus {
-    /* 背景設定 */ background: var(--topbar-field-hover);
+    /* 背景顏色 */ background-color: var(--topbar-field-hover);
 }
 .topbar-search {
     /* 彈性配比 */ flex: 1;
@@ -581,10 +581,10 @@ button {
     /* 彈性收縮 */ flex-shrink: 0;
 }
 .topbar-select:hover {
-    /* 背景設定 */ background: var(--topbar-field-hover);
+    /* 背景顏色 */ background-color: var(--topbar-field-hover);
 }
 .topbar-select:focus {
-    /* 背景設定 */ background: var(--topbar-field-hover);
+    /* 背景顏色 */ background-color: var(--topbar-field-hover);
 }
 .topbar-spacer {
     /* 彈性配比 */ flex: 1;
@@ -3380,88 +3380,24 @@ body[data-theme="ling"] #viewport {
     /* 背景圖片 */ background-image: radial-gradient(circle, rgba(0,0,0,.055) 1px, transparent 1px);
     /* 背景尺寸 */ background-size: 24px 24px;
 }
-body[data-theme="ling"] .node {
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 邊框寬度 */ border-width: 1px;
-    /* 元素陰影 */ box-shadow: none;
-}
-body[data-theme="ling"] .node:hover {
-    /* 邊框顏色 */ border-color: #bbb;
-    /* 元素陰影 */ box-shadow: 0 8px 24px rgba(0,0,0,.08);
-}
-body[data-theme="ling"] .modal {
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 邊框設定 */ border: 1px solid #eee;
-    /* 元素陰影 */ box-shadow: 0 24px 70px rgba(0,0,0,.18);
-}
-body[data-theme="ling"] .modal h2 {
-    /* 文字顏色 */ color: #444;
-    /* 字體粗細 */ font-weight: 300;
-    /* 字距設定 */ letter-spacing: 2px;
-}
-body[data-theme="ling"] .grid input,
-body[data-theme="ling"] .grid select,
-body[data-theme="ling"] .grid textarea,
-body[data-theme="ling"] .ss-input,
-body[data-theme="ling"] .ss-search,
-body[data-theme="ling"] .topbar-select,
-body[data-theme="ling"] .topbar-search,
-body[data-theme="ling"] .family-select {
-    /* 圓角弧度 */ border-radius: 4px;
-}
-body[data-theme="ling"] .icon-btn,
-body[data-theme="ling"] .filebtn,
-body[data-theme="ling"] .modal-actions button,
-body[data-theme="ling"] .apply-btn {
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 元素陰影 */ box-shadow: none;
-}
-body[data-theme="ling"] .icon-btn:hover,
-body[data-theme="ling"] .filebtn:hover,
-body[data-theme="ling"] .modal-actions button:hover {
-    /* 邊框顏色 */ border-color: #999;
-    /* 文字顏色 */ color: #333;
-}
-body[data-theme="ling"] .modal-actions button.primary {
-    /* 背景設定 */ background: #333;
-    /* 邊框顏色 */ border-color: #333;
-}
-body[data-theme="ling"] .modal-actions button.primary:hover {
-    /* 背景設定 */ background: #000;
-    /* 邊框顏色 */ border-color: #000;
-}
-body[data-theme="ling"] .tag,
-body[data-theme="ling"] .n-gallery-badge,
-body[data-theme="ling"] .n-pet-chip {
-    /* 圓角弧度 */ border-radius: 3px;
-}
-body[data-theme="ling"] .theme-card {
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 元素陰影 */ box-shadow: none;
-}
-body[data-theme="ling"] .theme-card.selected {
-    /* 元素陰影 */ box-shadow: 0 0 0 2px rgba(85,172,238,.08);
-}
-body[data-theme="ling"] .info {
-    /* 背景設定 */ background: #fafafa;
-    /* 邊框設定 */ border: 1px solid #f0f0f0;
-}
-body[data-theme="ling"] .setting-group-title {
-    /* 字體粗細 */ font-weight: 500;
-    /* 字距設定 */ letter-spacing: 1px;
-}
-body[data-theme="ling"] .gallery-item {
-    /* 圓角弧度 */ border-radius: 5px;
-}
-body[data-theme="ling"] .gallery-item:hover {
-    /* 元素陰影 */ box-shadow: 0 5px 16px rgba(0,0,0,.08);
-}
-body[data-theme="ling"] .storage-bar {
-    /* 背景設定 */ background: #f1f1f1;
-}
-body[data-theme="ling"] .storage-bar-fill {
-    /* 背景設定 */ background: #55acee;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ========【語言切換】 設定 - 共用於所有主題 ======== */
 .language-switch {
@@ -3910,5 +3846,696 @@ html[lang="en"] body {
         /* 彈性配比 */ flex: 1;
         /* 最大寬度 */ max-width: none;
         /* 最小寬度 */ min-width: 80px;
+    }
+}
+
+/* ========【主題系統 v2】 設定 - 五套高辨識度工具型配色 ======== */
+:root,
+body[data-theme="ling"] {
+    /* 漸層起始色 */ --grad-1: #ffffff;
+    /* 漸層結束色 */ --grad-2: #f3f8fc;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(85,172,238,.10);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(85,172,238,.05);
+    /* 互動強調色 */ --accent: #55acee;
+    /* 懸停強調色 */ --accent-hover: #3e95d3;
+    /* 深色主色 */ --primary-dark: #315f83;
+    /* 頂欄文字顏色 */ --topbar-fg: #3f4852;
+    /* 頂欄次要文字 */ --topbar-fg-sub: #7d8790;
+    /* 頂欄欄位背景 */ --topbar-field-bg: #ffffff;
+    /* 頂欄欄位邊框 */ --topbar-field-border: #e2e8ee;
+    /* 頂欄欄位文字 */ --topbar-field-fg: #4d5862;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: #98a1aa;
+    /* 頂欄欄位懸停 */ --topbar-field-hover: #f5faff;
+    /* 頁面背景 */ --bg: #f6f8fb;
+    /* 背景紋理色 */ --bg-pattern: rgba(85,172,238,.075);
+    /* 主要文字 */ --ink: #24292f;
+    /* 次要文字 */ --sub: #6e7781;
+    /* 主要線條 */ --line: #d8dee4;
+    /* 卡片背景 */ --card: #ffffff;
+    /* 一般邊框 */ --border: #d8dee4;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(31,35,40,.34);
+    /* 面板背景 */ --panel-bg: #f6f8fa;
+    /* 面板項目背景 */ --panel-item: #ffffff;
+    /* 面板項目懸停 */ --panel-item-hover: #f5faff;
+    /* 標籤背景 */ --tag-bg: #eef5fb;
+    /* 標籤文字 */ --tag-ink: #466f90;
+    /* 配偶關係線 */ --spouse: #55acee;
+    /* 前任配偶線 */ --exspouse: #aeb7c0;
+    /* 領養關係線 */ --adopt: #73a88f;
+    /* 其他關係線 */ --other-line: #8896a4;
+    /* 男性識別色 */ --male-bar: #769bd4;
+    /* 女性識別色 */ --female-bar: #cc8fa8;
+    /* 其他性別識別色 */ --other-bar: #9c91b4;
+    /* 幽靈卡片背景 */ --ghost-bg: #f1f6fb;
+    /* 幽靈卡片邊框 */ --ghost-border: #c8d8e8;
+    /* 幽靈文字 */ --ghost-ink: #526e88;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #eaf2f9;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #c2d4e4;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #e5eef6;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #5b7893;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #819fbe;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #aa93a7;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #949fab;
+    /* 已故卡片背景 */ --dead-bg: #f4f1f1;
+    /* 已故卡片邊框 */ --dead-border: #d6cccc;
+    /* 已故文字 */ --dead-ink: #6f6666;
+    /* 已故標記背景 */ --dead-badge-bg: #eee8e4;
+    /* 已故標記邊框 */ --dead-badge-border: #d8cbc2;
+    /* 已故標籤背景 */ --dead-tag-bg: #e8e1dc;
+    /* 已故標籤文字 */ --dead-tag-ink: #74665d;
+    /* 已故男性識別色 */ --dead-male-bar: #989195;
+    /* 已故女性識別色 */ --dead-female-bar: #a98f99;
+    /* 已故其他性別識別色 */ --dead-other-bar: #9e9699;
+    /* 在世標記背景 */ --alive-badge-bg: #edf6ef;
+    /* 在世標記邊框 */ --alive-badge-border: #c4dcc8;
+    /* 關係標註背景 */ --label-bg: rgba(255,255,255,.97);
+    /* 關係標註邊框 */ --label-border: #d8dee4;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f5f7f9;
+    /* 頭像漸層結束 */ --avatar-bg-2: #e8edf2;
+    /* 頭像文字 */ --avatar-ink: #87919a;
+    /* 高亮顏色 */ --hl: rgba(85,172,238,.30);
+}
+
+body[data-theme="sage"] {
+    /* 漸層起始色 */ --grad-1: #dfe9e0;
+    /* 漸層結束色 */ --grad-2: #eef3ea;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(95,128,108,.13);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(137,157,126,.10);
+    /* 互動強調色 */ --accent: #5f806c;
+    /* 懸停強調色 */ --accent-hover: #4c6b59;
+    /* 深色主色 */ --primary-dark: #3f5849;
+    /* 頂欄文字顏色 */ --topbar-fg: #2f3a32;
+    /* 頂欄次要文字 */ --topbar-fg-sub: #68756b;
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.72);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.88);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #344238;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: #79867c;
+    /* 頂欄欄位懸停 */ --topbar-field-hover: #ffffff;
+    /* 頁面背景 */ --bg: #f2f6f1;
+    /* 背景紋理色 */ --bg-pattern: rgba(95,128,108,.10);
+    /* 主要文字 */ --ink: #303731;
+    /* 次要文字 */ --sub: #737b73;
+    /* 主要線條 */ --line: #d0dad0;
+    /* 卡片背景 */ --card: #ffffff;
+    /* 一般邊框 */ --border: #d8ded7;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(34,45,37,.38);
+    /* 面板背景 */ --panel-bg: #edf2ec;
+    /* 面板項目背景 */ --panel-item: #f8faf7;
+    /* 面板項目懸停 */ --panel-item-hover: #e8f0e8;
+    /* 標籤背景 */ --tag-bg: #e1ebe2;
+    /* 標籤文字 */ --tag-ink: #506b59;
+    /* 配偶關係線 */ --spouse: #7a9a83;
+    /* 前任配偶線 */ --exspouse: #a4afa6;
+    /* 領養關係線 */ --adopt: #6d9a8b;
+    /* 其他關係線 */ --other-line: #879789;
+    /* 男性識別色 */ --male-bar: #6f91a6;
+    /* 女性識別色 */ --female-bar: #b88995;
+    /* 其他性別識別色 */ --other-bar: #8f948a;
+    /* 幽靈卡片背景 */ --ghost-bg: #edf3f0;
+    /* 幽靈卡片邊框 */ --ghost-border: #bfd0c7;
+    /* 幽靈文字 */ --ghost-ink: #4e6b5e;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #e5efe9;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #b6ccbf;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #dbe9e0;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #526f60;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #7595a2;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #9f8f98;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #87978d;
+    /* 已故卡片背景 */ --dead-bg: #eceae3;
+    /* 已故卡片邊框 */ --dead-border: #cbc7b9;
+    /* 已故文字 */ --dead-ink: #666256;
+    /* 已故標記背景 */ --dead-badge-bg: #e8e3d8;
+    /* 已故標記邊框 */ --dead-badge-border: #cec5b2;
+    /* 已故標籤背景 */ --dead-tag-bg: #ded8ca;
+    /* 已故標籤文字 */ --dead-tag-ink: #6b6455;
+    /* 已故男性識別色 */ --dead-male-bar: #8d8b83;
+    /* 已故女性識別色 */ --dead-female-bar: #9d8b8e;
+    /* 已故其他性別識別色 */ --dead-other-bar: #939087;
+    /* 在世標記背景 */ --alive-badge-bg: #e3efe4;
+    /* 在世標記邊框 */ --alive-badge-border: #b8d0bc;
+    /* 關係標註背景 */ --label-bg: rgba(255,255,255,.96);
+    /* 關係標註邊框 */ --label-border: #d2ddd3;
+    /* 頭像漸層起始 */ --avatar-bg-1: #edf3ec;
+    /* 頭像漸層結束 */ --avatar-bg-2: #d9e3da;
+    /* 頭像文字 */ --avatar-ink: #708078;
+    /* 高亮顏色 */ --hl: rgba(95,128,108,.33);
+}
+
+body[data-theme="rose"] {
+    /* 漸層起始色 */ --grad-1: #e8c4d0;
+    /* 漸層結束色 */ --grad-2: #f4dfe6;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(165,82,112,.12);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(190,117,142,.09);
+    /* 互動強調色 */ --accent: #a55270;
+    /* 懸停強調色 */ --accent-hover: #8c425e;
+    /* 深色主色 */ --primary-dark: #703447;
+    /* 頂欄文字顏色 */ --topbar-fg: #4a2d37;
+    /* 頂欄次要文字 */ --topbar-fg-sub: #7d606a;
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.70);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.86);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #4a2d37;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: #8b7179;
+    /* 頂欄欄位懸停 */ --topbar-field-hover: #ffffff;
+    /* 頁面背景 */ --bg: #faf2f5;
+    /* 背景紋理色 */ --bg-pattern: rgba(165,82,112,.10);
+    /* 主要文字 */ --ink: #3c3035;
+    /* 次要文字 */ --sub: #817077;
+    /* 主要線條 */ --line: #ddcbd2;
+    /* 卡片背景 */ --card: #ffffff;
+    /* 一般邊框 */ --border: #e6d8de;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(54,34,42,.40);
+    /* 面板背景 */ --panel-bg: #f6e9ee;
+    /* 面板項目背景 */ --panel-item: #fffafb;
+    /* 面板項目懸停 */ --panel-item-hover: #f6e6ec;
+    /* 標籤背景 */ --tag-bg: #f2dde5;
+    /* 標籤文字 */ --tag-ink: #85475d;
+    /* 配偶關係線 */ --spouse: #b65f7d;
+    /* 前任配偶線 */ --exspouse: #b2a0a7;
+    /* 領養關係線 */ --adopt: #829da4;
+    /* 其他關係線 */ --other-line: #9d8794;
+    /* 男性識別色 */ --male-bar: #718daf;
+    /* 女性識別色 */ --female-bar: #b85f7f;
+    /* 其他性別識別色 */ --other-bar: #97899a;
+    /* 幽靈卡片背景 */ --ghost-bg: #eef1f7;
+    /* 幽靈卡片邊框 */ --ghost-border: #c4cedd;
+    /* 幽靈文字 */ --ghost-ink: #526278;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #e8edf5;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #bec9da;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #dde5f0;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #596d86;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #7990aa;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #a27d90;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #8a8798;
+    /* 已故卡片背景 */ --dead-bg: #eee4e6;
+    /* 已故卡片邊框 */ --dead-border: #d2bcc2;
+    /* 已故文字 */ --dead-ink: #66565a;
+    /* 已故標記背景 */ --dead-badge-bg: #ece0dc;
+    /* 已故標記邊框 */ --dead-badge-border: #d1beb4;
+    /* 已故標籤背景 */ --dead-tag-bg: #e3d3cc;
+    /* 已故標籤文字 */ --dead-tag-ink: #715a53;
+    /* 已故男性識別色 */ --dead-male-bar: #91858a;
+    /* 已故女性識別色 */ --dead-female-bar: #a47f8d;
+    /* 已故其他性別識別色 */ --dead-other-bar: #95898e;
+    /* 在世標記背景 */ --alive-badge-bg: #e9f2e8;
+    /* 在世標記邊框 */ --alive-badge-border: #bfd2bd;
+    /* 關係標註背景 */ --label-bg: rgba(255,255,255,.97);
+    /* 關係標註邊框 */ --label-border: #e3d4d9;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f5e7ec;
+    /* 頭像漸層結束 */ --avatar-bg-2: #e7d0d9;
+    /* 頭像文字 */ --avatar-ink: #8b727b;
+    /* 高亮顏色 */ --hl: rgba(165,82,112,.32);
+}
+
+body[data-theme="amber"] {
+    /* 漸層起始色 */ --grad-1: #e5c896;
+    /* 漸層結束色 */ --grad-2: #f2dfb9;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(166,107,47,.13);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(195,148,83,.10);
+    /* 互動強調色 */ --accent: #a66b2f;
+    /* 懸停強調色 */ --accent-hover: #8d5825;
+    /* 深色主色 */ --primary-dark: #6d441f;
+    /* 頂欄文字顏色 */ --topbar-fg: #493824;
+    /* 頂欄次要文字 */ --topbar-fg-sub: #796b58;
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.68);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.85);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #493824;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: #887967;
+    /* 頂欄欄位懸停 */ --topbar-field-hover: #ffffff;
+    /* 頁面背景 */ --bg: #fbf5e9;
+    /* 背景紋理色 */ --bg-pattern: rgba(166,107,47,.10);
+    /* 主要文字 */ --ink: #3c362e;
+    /* 次要文字 */ --sub: #7c7266;
+    /* 主要線條 */ --line: #ddd2c1;
+    /* 卡片背景 */ --card: #fffdf9;
+    /* 一般邊框 */ --border: #e3dcd0;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(55,43,27,.40);
+    /* 面板背景 */ --panel-bg: #f6eedf;
+    /* 面板項目背景 */ --panel-item: #fffaf1;
+    /* 面板項目懸停 */ --panel-item-hover: #f5ead8;
+    /* 標籤背景 */ --tag-bg: #efe1ca;
+    /* 標籤文字 */ --tag-ink: #76532e;
+    /* 配偶關係線 */ --spouse: #b27768;
+    /* 前任配偶線 */ --exspouse: #afa393;
+    /* 領養關係線 */ --adopt: #77988d;
+    /* 其他關係線 */ --other-line: #9a8b75;
+    /* 男性識別色 */ --male-bar: #768ba2;
+    /* 女性識別色 */ --female-bar: #b27882;
+    /* 其他性別識別色 */ --other-bar: #958674;
+    /* 幽靈卡片背景 */ --ghost-bg: #eef1ee;
+    /* 幽靈卡片邊框 */ --ghost-border: #c8cfca;
+    /* 幽靈文字 */ --ghost-ink: #55665d;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #e9efea;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #c2cec5;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #dde8df;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #5d7163;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #7f909d;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #9b8a8c;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #8c9187;
+    /* 已故卡片背景 */ --dead-bg: #eee7da;
+    /* 已故卡片邊框 */ --dead-border: #d0c3ab;
+    /* 已故文字 */ --dead-ink: #665d4d;
+    /* 已故標記背景 */ --dead-badge-bg: #e9dfcf;
+    /* 已故標記邊框 */ --dead-badge-border: #cdbda3;
+    /* 已故標籤背景 */ --dead-tag-bg: #ded0bb;
+    /* 已故標籤文字 */ --dead-tag-ink: #6b5d48;
+    /* 已故男性識別色 */ --dead-male-bar: #8e877c;
+    /* 已故女性識別色 */ --dead-female-bar: #9c8581;
+    /* 已故其他性別識別色 */ --dead-other-bar: #91897d;
+    /* 在世標記背景 */ --alive-badge-bg: #e9f0df;
+    /* 在世標記邊框 */ --alive-badge-border: #c3d1ae;
+    /* 關係標註背景 */ --label-bg: rgba(255,253,249,.97);
+    /* 關係標註邊框 */ --label-border: #e3d9ca;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f4ead8;
+    /* 頭像漸層結束 */ --avatar-bg-2: #e7d6bb;
+    /* 頭像文字 */ --avatar-ink: #857563;
+    /* 高亮顏色 */ --hl: rgba(166,107,47,.32);
+}
+
+body[data-theme="midnight"] {
+    /* 漸層起始色 */ --grad-1: #182535;
+    /* 漸層結束色 */ --grad-2: #243c5c;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(112,169,232,.12);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(112,169,232,.08);
+    /* 互動強調色 */ --accent: #70a9e8;
+    /* 懸停強調色 */ --accent-hover: #8bbaf0;
+    /* 深色主色 */ --primary-dark: #4f7fb8;
+    /* 頂欄文字顏色 */ --topbar-fg: #edf3f8;
+    /* 頂欄次要文字 */ --topbar-fg-sub: #a9b7c5;
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.08);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.15);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #edf3f8;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: #9eacba;
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.13);
+    /* 頁面背景 */ --bg: #10151c;
+    /* 背景紋理色 */ --bg-pattern: rgba(112,169,232,.075);
+    /* 主要文字 */ --ink: #f0f3f6;
+    /* 次要文字 */ --sub: #9da7b3;
+    /* 主要線條 */ --line: #303a46;
+    /* 卡片背景 */ --card: #1a212a;
+    /* 一般邊框 */ --border: #303a46;
+    /* 輸入欄背景 */ --input-bg: #151c24;
+    /* 遮罩背景 */ --mask-bg: rgba(0,0,0,.70);
+    /* 面板背景 */ --panel-bg: #151c24;
+    /* 面板項目背景 */ --panel-item: #1c2530;
+    /* 面板項目懸停 */ --panel-item-hover: #25313e;
+    /* 標籤背景 */ --tag-bg: #243241;
+    /* 標籤文字 */ --tag-ink: #b2c3d5;
+    /* 配偶關係線 */ --spouse: #b67b9e;
+    /* 前任配偶線 */ --exspouse: #626d79;
+    /* 領養關係線 */ --adopt: #5b918b;
+    /* 其他關係線 */ --other-line: #6e8298;
+    /* 男性識別色 */ --male-bar: #678bb9;
+    /* 女性識別色 */ --female-bar: #b67b9e;
+    /* 其他性別識別色 */ --other-bar: #818b98;
+    /* 幽靈卡片背景 */ --ghost-bg: #162331;
+    /* 幽靈卡片邊框 */ --ghost-border: #38506d;
+    /* 幽靈文字 */ --ghost-ink: #b2cee8;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #1c2d3f;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #3d5b7e;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #23384e;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #abc5df;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #6686a8;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #9b7690;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #76899d;
+    /* 已故卡片背景 */ --dead-bg: #1e252e;
+    /* 已故卡片邊框 */ --dead-border: #3a434d;
+    /* 已故文字 */ --dead-ink: #b7bec7;
+    /* 已故標記背景 */ --dead-badge-bg: #252d37;
+    /* 已故標記邊框 */ --dead-badge-border: #48525e;
+    /* 已故標籤背景 */ --dead-tag-bg: #303944;
+    /* 已故標籤文字 */ --dead-tag-ink: #b1bac5;
+    /* 已故男性識別色 */ --dead-male-bar: #6f747f;
+    /* 已故女性識別色 */ --dead-female-bar: #876e7b;
+    /* 已故其他性別識別色 */ --dead-other-bar: #7b8089;
+    /* 在世標記背景 */ --alive-badge-bg: #1b2d22;
+    /* 在世標記邊框 */ --alive-badge-border: #396246;
+    /* 關係標註背景 */ --label-bg: rgba(26,33,42,.97);
+    /* 關係標註邊框 */ --label-border: #3a4551;
+    /* 頭像漸層起始 */ --avatar-bg-1: #273442;
+    /* 頭像漸層結束 */ --avatar-bg-2: #1b232d;
+    /* 頭像文字 */ --avatar-ink: #99a7b5;
+    /* 高亮顏色 */ --hl: rgba(112,169,232,.40);
+}
+
+body[data-theme="custom"] {
+    /* 漸層起始色 */ --grad-1: #f0c050;
+    /* 漸層結束色 */ --grad-2: #a878c8;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(240,192,80,.14);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(168,120,200,.12);
+    /* 互動強調色 */ --accent: #8a5cb0;
+    /* 懸停強調色 */ --accent-hover: #724a98;
+    /* 深色主色 */ --primary-dark: #6a4688;
+    /* 頂欄文字顏色 */ --topbar-fg: #2f2f35;
+    /* 頂欄次要文字 */ --topbar-fg-sub: #707078;
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.70);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.86);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #2f2f35;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: #7d7d84;
+    /* 頂欄欄位懸停 */ --topbar-field-hover: #ffffff;
+    /* 頁面背景 */ --bg: #f8f8fa;
+    /* 背景紋理色 */ --bg-pattern: rgba(90,90,100,.08);
+    /* 主要文字 */ --ink: #34343a;
+    /* 次要文字 */ --sub: #777780;
+    /* 主要線條 */ --line: #ddddE4;
+    /* 卡片背景 */ --card: #ffffff;
+    /* 一般邊框 */ --border: #e2e2e8;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(35,35,45,.38);
+    /* 面板背景 */ --panel-bg: #f4f4f7;
+    /* 面板項目背景 */ --panel-item: #fbfbfc;
+    /* 面板項目懸停 */ --panel-item-hover: #f0eff5;
+    /* 標籤背景 */ --tag-bg: #eceaf3;
+    /* 標籤文字 */ --tag-ink: #655f75;
+    /* 配偶關係線 */ --spouse: #a6758e;
+    /* 前任配偶線 */ --exspouse: #a7a4ae;
+    /* 領養關係線 */ --adopt: #77998f;
+    /* 其他關係線 */ --other-line: #8c8798;
+    /* 男性識別色 */ --male-bar: #788eae;
+    /* 女性識別色 */ --female-bar: #ad7893;
+    /* 其他性別識別色 */ --other-bar: #93889a;
+    /* 幽靈卡片背景 */ --ghost-bg: #eef1f6;
+    /* 幽靈卡片邊框 */ --ghost-border: #c8d0dc;
+    /* 幽靈文字 */ --ghost-ink: #566578;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #e9edf4;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #c3ccd9;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #e0e6ef;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #5d6d82;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #7b90a8;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #9f8193;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #8d8998;
+    /* 已故卡片背景 */ --dead-bg: #efeaeb;
+    /* 已故卡片邊框 */ --dead-border: #d2c7ca;
+    /* 已故文字 */ --dead-ink: #675d60;
+    /* 已故標記背景 */ --dead-badge-bg: #ece4df;
+    /* 已故標記邊框 */ --dead-badge-border: #d1c3ba;
+    /* 已故標籤背景 */ --dead-tag-bg: #e2d6cf;
+    /* 已故標籤文字 */ --dead-tag-ink: #6f5e56;
+    /* 已故男性識別色 */ --dead-male-bar: #91898e;
+    /* 已故女性識別色 */ --dead-female-bar: #a1818f;
+    /* 已故其他性別識別色 */ --dead-other-bar: #958b90;
+    /* 在世標記背景 */ --alive-badge-bg: #e9f1e8;
+    /* 在世標記邊框 */ --alive-badge-border: #bfd1bd;
+    /* 關係標註背景 */ --label-bg: rgba(255,255,255,.97);
+    /* 關係標註邊框 */ --label-border: #e1e1e7;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f1eff5;
+    /* 頭像漸層結束 */ --avatar-bg-2: #e1ddea;
+    /* 頭像文字 */ --avatar-ink: #80788a;
+    /* 高亮顏色 */ --hl: rgba(138,92,176,.32);
+}
+
+/* ========【導覽危險操作】 設定 - 保留刪除／移出家族的紅色語意 ======== */
+body[data-theme="ling"] .sidebar-btn.danger {
+    /* 文字顏色 */ color: #c44a3e;
+}
+body[data-theme="ling"] .sidebar-btn.danger:hover {
+    /* 背景設定 */ background: rgba(200,60,40,.08);
+    /* 邊框顏色 */ border-color: rgba(200,60,40,.2);
+    /* 文字顏色 */ color: #b63f35;
+}
+
+/* ========【家族切換】 設定 - 固定欄位寬度、尾端省略與穩定箭頭 ======== */
+.family-select {
+    /* 固定寬度 */ width: 180px;
+    /* 最大寬度 */ max-width: 180px;
+    /* 最小寬度 */ min-width: 180px;
+    /* 單行顯示 */ white-space: nowrap;
+    /* 隱藏溢出 */ overflow: hidden;
+    /* 尾端省略 */ text-overflow: ellipsis;
+    /* 原生外觀 */ appearance: none;
+    /* WebKit 原生外觀 */ -webkit-appearance: none;
+    /* 右側內縮 */ padding-right: 40px;
+    /* 自訂箭頭 */ background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    /* 箭頭往左移 */ background-position: calc(100% - 23px) 50%, calc(100% - 18px) 50%;
+    /* 箭頭尺寸 */ background-size: 5px 5px, 5px 5px;
+    /* 背景不重複 */ background-repeat: no-repeat;
+}
+.family-select:hover,
+.family-select:focus {
+    /* 只換背景色，避免清掉自訂箭頭 */ background-color: var(--topbar-field-hover);
+}
+#stageFilter:hover,
+#stageFilter:focus {
+    /* 只換背景色，避免清掉自訂箭頭 */ background-color: var(--topbar-field-hover);
+}
+
+/* ========【語言切換】 設定 - 與相鄰工具按鈕一致置中 ======== */
+.language-switch {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 項目間距 */ gap: 6px;
+    /* 固定高度 */ height: 34px;
+    /* 最小寬度 */ min-width: 88px;
+    /* 內縮空間 */ padding: 0 10px;
+    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景顏色 */ background-color: var(--topbar-field-bg);
+    /* 動畫過渡 */ transition: .15s;
+}
+.language-switch:hover,
+.language-switch:focus-within {
+    /* 背景顏色 */ background-color: var(--topbar-field-hover);
+}
+.language-icon {
+    /* 回到正常文流 */ position: static;
+    /* 取消位移 */ transform: none;
+    /* 元素寬度 */ width: 15px;
+    /* 元素高度 */ height: 15px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+}
+.language-select {
+    /* 自動寬度 */ width: auto;
+    /* 移除最小寬度 */ min-width: 0;
+    /* 移除內縮 */ padding: 0;
+    /* 移除邊框 */ border: 0;
+    /* 背景透明 */ background: transparent !important;
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 400;
+    /* 文字置中 */ text-align: center;
+    /* 最後一行置中 */ text-align-last: center;
+    /* 原生外觀 */ appearance: none;
+    /* WebKit 原生外觀 */ -webkit-appearance: none;
+    /* 移除箭頭背景 */ background-image: none !important;
+    /* 元素陰影 */ box-shadow: none !important;
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+}
+.language-select::-ms-expand {
+    /* 隱藏舊版箭頭 */ display: none;
+}
+
+/* ========【關係名稱】 設定 - 英文與長文字依內容自適應 ======== */
+.edge-label-content {
+    /* 允許內容完整顯示 */ overflow: visible;
+}
+.edge-label-content span {
+    /* 不裁切文字 */ overflow: visible;
+    /* 不顯示省略號 */ text-overflow: clip;
+    /* 保持單行 */ white-space: nowrap;
+    /* 禁止縮小 */ flex-shrink: 0;
+}
+
+/* ========【恢復預設】 設定 - 介面設定與範例資料分開 ======== */
+.reset-actions {
+    /* 顯示方式 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 項目間距 */ gap: 8px;
+    /* 下方間距 */ margin-bottom: 8px;
+}
+.reset-actions button {
+    /* 內縮空間 */ padding: 8px 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+}
+.reset-actions button:hover {
+    /* 背景設定 */ background: var(--panel-item-hover);
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.reset-actions button.danger {
+    /* 文字顏色 */ color: #b04444;
+    /* 邊框顏色 */ border-color: rgba(176,68,68,.28);
+}
+.reset-actions button.danger:hover {
+    /* 背景設定 */ background: rgba(176,68,68,.08);
+    /* 邊框顏色 */ border-color: rgba(176,68,68,.55);
+    /* 文字顏色 */ color: #943434;
+}
+
+/* ========【共用 HTML 彈窗】 設定 - 取代瀏覽器原生彈窗 ======== */
+.ui-dialog-mask {
+    /* 固定定位 */ position: fixed;
+    /* 四邊貼齊 */ inset: 0;
+    /* 預設隱藏 */ display: none;
+    /* 水平對齊 */ align-items: center;
+    /* 垂直對齊 */ justify-content: center;
+    /* 內縮空間 */ padding: 20px;
+    /* 遮罩背景 */ background: rgba(0,0,0,.10);
+    /* 毛玻璃 */ backdrop-filter: blur(5px);
+    /* 顯示層級 */ z-index: 20000;
+}
+.ui-dialog-mask.show {
+    /* 顯示方式 */ display: flex;
+}
+.ui-dialog {
+    /* 相對定位 */ position: relative;
+    /* 元素寬度 */ width: min(420px, 92vw);
+    /* 背景設定 */ background: var(--card);
+    /* 文字顏色 */ color: var(--ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 元素陰影 */ box-shadow: 0 10px 40px rgba(0,0,0,.22);
+    /* 溢出處理 */ overflow: hidden;
+}
+.ui-dialog-header {
+    /* 相對定位 */ position: relative;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 內縮空間 */ padding: 15px 52px;
+    /* 背景設定 */ background: var(--panel-bg);
+    /* 下方邊框 */ border-bottom: 1px solid var(--border);
+    /* 字體大小 */ font-size: 16px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 文字置中 */ text-align: center;
+}
+.ui-dialog-close {
+    /* 絕對定位 */ position: absolute;
+    /* 右側位置 */ right: 16px;
+    /* 頂部位置 */ top: 50%;
+    /* 垂直置中 */ transform: translateY(-50%);
+    /* 元素寬度 */ width: 32px;
+    /* 元素高度 */ height: 32px;
+    /* 移除邊框 */ border: none;
+    /* 背景透明 */ background: transparent;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 22px;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 滑鼠指標 */ cursor: pointer;
+}
+.ui-dialog-close:hover {
+    /* 背景設定 */ background: var(--panel-item-hover);
+    /* 文字顏色 */ color: var(--ink);
+}
+.ui-dialog-body {
+    /* 內縮空間 */ padding: 22px 24px;
+}
+.ui-dialog-message {
+    /* 文字置中 */ text-align: center;
+    /* 行距設定 */ line-height: 1.75;
+    /* 保留換行 */ white-space: pre-wrap;
+    /* 字體大小 */ font-size: 13px;
+}
+.ui-dialog-input {
+    /* 元素寬度 */ width: 100%;
+    /* 上方間距 */ margin-top: 16px;
+    /* 內縮空間 */ padding: 10px 14px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 文字置中 */ text-align: center;
+    /* 移除外框 */ outline: none;
+    /* 預設隱藏 */ display: none;
+}
+.ui-dialog-input.show {
+    /* 顯示方式 */ display: block;
+}
+.ui-dialog-input:focus {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 元素陰影 */ box-shadow: 0 0 0 3px var(--grad-1-soft);
+}
+.ui-dialog-actions {
+    /* 顯示方式 */ display: flex;
+    /* 水平對齊 */ justify-content: flex-end;
+    /* 項目間距 */ gap: 8px;
+    /* 內縮空間 */ padding: 12px 16px 16px;
+}
+.ui-dialog-actions button {
+    /* 最小寬度 */ min-width: 86px;
+    /* 內縮空間 */ padding: 9px 16px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+}
+.ui-dialog-actions button:hover {
+    /* 背景設定 */ background: var(--panel-item-hover);
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: var(--accent);
+}
+.ui-dialog-actions button.primary {
+    /* 背景設定 */ background: var(--accent);
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: #fff;
+}
+.ui-dialog-actions button.primary:hover {
+    /* 背景設定 */ background: var(--accent-hover);
+    /* 邊框顏色 */ border-color: var(--accent-hover);
+    /* 文字顏色 */ color: #fff;
+}
+.ui-dialog[data-kind="danger"] .ui-dialog-actions button.primary {
+    /* 背景設定 */ background: #b44848;
+    /* 邊框顏色 */ border-color: #b44848;
+}
+.ui-dialog[data-kind="danger"] .ui-dialog-actions button.primary:hover {
+    /* 背景設定 */ background: #963838;
+    /* 邊框顏色 */ border-color: #963838;
+}
+.toast-region {
+    /* 固定定位 */ position: fixed;
+    /* 右側位置 */ right: 18px;
+    /* 下方位置 */ bottom: 18px;
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 8px;
+    /* 顯示層級 */ z-index: 21000;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.ui-toast {
+    /* 最大寬度 */ max-width: min(360px, 88vw);
+    /* 內縮空間 */ padding: 10px 14px;
+    /* 背景設定 */ background: var(--card);
+    /* 文字顏色 */ color: var(--ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 元素陰影 */ box-shadow: 0 8px 24px rgba(0,0,0,.16);
+    /* 字體大小 */ font-size: 12.5px;
+}
+
+
+
+/* ========【關係編輯】 設定 - 長英文名稱與多語系內容自適應 ======== */
+.rel-anno-item {
+    /* 關係名稱欄保留足夠彈性，不固定裁切英文 */ grid-template-columns: minmax(130px, 1.6fr) minmax(120px, 130px) minmax(110px, 1.4fr) auto;
+}
+.rel-anno-name {
+    /* 允許長關係名稱自然換行 */ white-space: normal;
+    /* 顯示完整內容 */ overflow: visible;
+    /* 移除省略號 */ text-overflow: clip;
+    /* 長字串可安全斷行 */ overflow-wrap: anywhere;
+    /* 行高設定 */ line-height: 1.35;
+}
+@media (max-width: 760px) {
+    .rel-anno-item {
+        /* 小螢幕改為較彈性的雙欄，避免英文欄位被壓縮 */ grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
+    }
+    .rel-anno-reset {
+        /* 重設按鈕維持內容寬度 */ width: fit-content;
     }
 }
