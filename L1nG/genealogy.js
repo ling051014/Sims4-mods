@@ -1,8 +1,7 @@
 /* ========【L1nG Genealogy】 設定 - 族譜工具核心程式 ======== */
 /*
- * 版本：v6.5.0
  * 主要來源語言：繁體中文（zh-Hant）
- * 支援語言：繁體中文／簡體中文／English
+ * 支援語言：繁體中文 / 簡體中文 / English
  * 圖示：本機 Bootstrap Icons SVG
  */
 
@@ -103,7 +102,7 @@ const RACE_PRESETS = {
 };
 
 const PET_SPECIES = {
-  // 哺乳類寵物統一以爪印表示「寵物」，避免愛心／圓形等圖示無法一眼辨識。
+  // 哺乳類寵物統一以爪印表示「寵物」，避免愛心 / 圓形等圖示無法一眼辨識。
   dog:    { icon:'paw', label:'狗' },
   cat:    { icon:'paw', label:'貓' },
   horse:  { icon:'paw', label:'馬' },
@@ -738,7 +737,7 @@ function openUiDialog({
     ? wholeMessage
     : rawMessage.split('\n').map(line => uiText(line)).join('\n');
   dialog.dataset.kind = kind;
-  // 讓 CSS 能只針對「兩顆按鈕」的確認／輸入彈窗置中，不影響單按鈕提示。
+  // 讓 CSS 能只針對「兩顆按鈕」的確認 / 輸入彈窗置中，不影響單按鈕提示。
   dialog.dataset.actionCount = mode === 'alert' ? '1' : '2';
   confirmBtn.textContent = uiText(confirmText);
   cancelBtn.textContent = uiText(cancelText);
@@ -919,7 +918,7 @@ function displayDataText(value, owner = null) {
   const isBuiltInOwner = owner && (isBuiltinSampleSim(owner) || isBuiltinSampleFamily(owner));
   if (!isBuiltInOwner) return text;
 
-  // 預設資料永遠以繁中 canonical 為基準。舊版若曾把簡中／英文顯示值寫回，
+  // 預設資料永遠以繁中 canonical 為基準。舊版若曾把簡中 / 英文顯示值寫回，
   // 先辨識回繁中，再依目前介面語言輸出；玩家自行修改的新文字不會被翻譯。
   const canonical = canonicalBuiltinSampleText(text);
   if (BUILTIN_SAMPLE_TEXT_VALUES.has(canonical)) return uiText(canonical);
@@ -2154,7 +2153,7 @@ function drawEdges() {
       start = cardVerticalAnchor(p0, childIsBelow ? 'bottom' : 'top');
     }
 
-    // 親子線只允許接到子女卡片的上／下正中央，不因水平拖曳改接左右側。
+    // 親子線只允許接到子女卡片的上 / 下正中央，不因水平拖曳改接左右側。
     const childAnchor = cardVerticalAnchor(a, start.y <= cardCenterY(a) ? 'top' : 'bottom');
     const x1 = start.x;
     const y1 = start.y;
@@ -3171,7 +3170,7 @@ const finishLabelDrag = e => {
 labelsSvg.addEventListener('pointerup', finishLabelDrag);
 labelsSvg.addEventListener('pointercancel', finishLabelDrag);
 
-// ========【智慧對齊與等距吸附】 設定 - 對齊邊緣／中心，同時支援水平與垂直等距 ========
+// ========【智慧對齊與等距吸附】 設定 - 對齊邊緣 / 中心，同時支援水平與垂直等距 ========
 function hideSmartGuides() {
   if (smartGuideVertical) smartGuideVertical.classList.remove('show');
   if (smartGuideHorizontal) smartGuideHorizontal.classList.remove('show');
@@ -5575,7 +5574,7 @@ Object.assign(ZH_HANS_EXACT, {
   '平移整個族譜畫布；': '平移整个族谱画布；',
   '超過拖曳門檻後會自動切換為「自由排列」，並儲存新位置': '超过拖动门槛后会自动切换为「自由排列」，并保存新位置',
   '智慧對齊輔助線': '智能对齐辅助线',
-  '會在卡片接近其他卡片的左／中／右或上／中／下位置時自動吸附': '会在卡片接近其他卡片的左／中／右或上／中／下位置时自动吸附',
+  '會在卡片接近其他卡片的左 / 中 / 右或上 / 中 / 下位置時自動吸附': '会在卡片接近其他卡片的左 / 中 / 右或上 / 中 / 下位置时自动吸附',
   '等距吸附': '等距吸附',
   '支援水平與垂直排列；接近相同間距時會顯示兩段間距與數值，只移動目前拖曳的卡片': '支持水平与垂直排列；接近相同间距时会显示两段间距与数值，只移动当前拖动的卡片',
   '鎖定排列': '锁定排列',
@@ -5584,7 +5583,7 @@ Object.assign(ZH_HANS_EXACT, {
   '側邊欄分隔線': '侧边栏分隔线',
   '可拖曳調整寬度；雙擊分隔線恢復預設寬度': '可拖动调整宽度；双击分隔线恢复默认宽度',
   '關係與關係位置': '关系与关系位置',
-  '顯示／隱藏關係': '显示／隐藏关系',
+  '顯示 / 隱藏關係': '显示 / 隐藏关系',
   '控制畫布上的關係名稱是否顯示': '控制画布上的关系名称是否显示',
   '關係未鎖定時可直接': '关系未锁定时可直接',
   '拖曳關係名稱': '拖动关系名称',
@@ -5597,8 +5596,11 @@ Object.assign(ZH_HANS_EXACT, {
   '可選擇': '可选择',
   '或': '或',
   '會輸出目前完整族譜，不受目前縮放或平移視角限制': '会输出当前完整族谱，不受当前缩放或平移视角限制',
+  '圖片會保留目前的': '图片会保留当前的',
+  '卡片位置 / 關係位置 / 主題 / 背景': '卡片位置 / 关系位置 / 主题 / 背景',
+  '，但不包含頂端導覽、側邊欄、智慧輔助線或拖曳狀態': '，但不包含顶部导航、侧边栏、智能辅助线或拖动状态',
   '族譜圖片可選擇': '族谱图片可选择',
-  '標準（1×）／高畫質（2×）／超高畫質（3×）': '标准（1×）／高清（2×）／超高清（3×）',
+  '標準（1×） / 高畫質（2×） / 超高畫質（3×）': '标准（1×） / 高清（2×） / 超高清（3×）',
   '保留可再次匯入的完整族譜資料，瀏覽器中的圖片會一併轉回 base64': '保留可再次导入的完整族谱数据，浏览器中的图片会一并转回 base64',
   '中，容量通常遠大於 localStorage': '中，容量通常远大于 localStorage',
   '復原上一個卡片或關係名稱拖曳；輸入欄位內仍使用瀏覽器原生文字復原': '撤销上一个卡片或关系名称拖动；输入框内仍使用浏览器原生文字撤销',
@@ -5626,7 +5628,7 @@ Object.assign(EN, {
   '平移整個族譜畫布；': ' pans the entire genealogy canvas; ',
   '超過拖曳門檻後會自動切換為「自由排列」，並儲存新位置': ' switches to Free Layout after the drag threshold and saves the new position.',
   '智慧對齊輔助線': 'Smart alignment guides',
-  '會在卡片接近其他卡片的左／中／右或上／中／下位置時自動吸附': ' snap the dragged card to matching left/center/right or top/middle/bottom positions.',
+  '會在卡片接近其他卡片的左 / 中 / 右或上 / 中 / 下位置時自動吸附': ' snap the dragged card to matching left/center/right or top/middle/bottom positions.',
   '等距吸附': 'Equal-spacing snapping',
   '支援水平與垂直排列；接近相同間距時會顯示兩段間距與數值，只移動目前拖曳的卡片': ' works horizontally and vertically. Near an equal gap, it shows both gap segments and the distance value; only the dragged card moves.',
   '鎖定排列': 'Lock Layout',
@@ -5635,7 +5637,7 @@ Object.assign(EN, {
   '側邊欄分隔線': 'Sidebar divider',
   '可拖曳調整寬度；雙擊分隔線恢復預設寬度': ' can be dragged to resize the sidebar; double-click it to restore the default width.',
   '關係與關係位置': 'Relationships & Label Positions',
-  '顯示／隱藏關係': 'Show / Hide Relationships',
+  '顯示 / 隱藏關係': 'Show / Hide Relationships',
   '控制畫布上的關係名稱是否顯示': ' controls whether relationship labels are shown on the canvas.',
   '關係未鎖定時可直接': 'When relationships are unlocked, you can ',
   '拖曳關係名稱': 'drag relationship labels',
@@ -5648,8 +5650,11 @@ Object.assign(EN, {
   '可選擇': ' to choose ',
   '或': ' or ',
   '會輸出目前完整族譜，不受目前縮放或平移視角限制': ' exports the complete current genealogy, independent of the current zoom or pan.',
+  '圖片會保留目前的': 'The image keeps the current ',
+  '卡片位置 / 關係位置 / 主題 / 背景': 'card positions / relationship-label positions / theme / background',
+  '，但不包含頂端導覽、側邊欄、智慧輔助線或拖曳狀態': ', while excluding the top navigation, sidebar, smart guides, and drag states.',
   '族譜圖片可選擇': 'Genealogy images can be exported as ',
-  '標準（1×）／高畫質（2×）／超高畫質（3×）': 'Standard (1×) / HD (2×) / Ultra HD (3×).',
+  '標準（1×） / 高畫質（2×） / 超高畫質（3×）': 'Standard (1×) / HD (2×) / Ultra HD (3×).',
   '保留可再次匯入的完整族譜資料，瀏覽器中的圖片會一併轉回 base64': ' preserves the complete editable genealogy data; browser-stored images are converted back to base64.',
   '中，容量通常遠大於 localStorage': ', which usually offers much more capacity than localStorage.',
   '復原上一個卡片或關係名稱拖曳；輸入欄位內仍使用瀏覽器原生文字復原': ' undoes the previous card or relationship-label drag; text fields keep the browser’s native text undo.',
@@ -5695,7 +5700,7 @@ Object.assign(EN, {
     const canonical = canonicalTraditional(value);
     if (ZH_HANS_EXACT[canonical] != null) return stripLegacyEmoji(ZH_HANS_EXACT[canonical]);
     let out = canonical;
-    // 先替換完整介面詞彙，再做字元層簡化，避免「設定／預設／相簿」等台灣用語直譯不自然。
+    // 先替換完整介面詞彙，再做字元層簡化，避免「設定 / 預設 / 相簿」等台灣用語直譯不自然。
     for (const key of ZH_HANS_UI_KEYS) out = out.split(key).join(ZH_HANS_UI_PHRASES[key]);
     out = Array.from(out).map(ch => HANT_HANS_CHAR_MAP[ch] || ch).join('');
     return stripLegacyEmoji(out);
