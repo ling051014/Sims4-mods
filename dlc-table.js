@@ -153,17 +153,39 @@ function sortTable(colIndex) {
     const tbody = table.tBodies[0];
     if (!tbody) return;
 
-    const modalBody = table.closest('.modal-body');
-    const tableBefore = table.getBoundingClientRect();
+        // ===================================================
+    // ========【排序版面診斷】 設定 - 記錄首頁垂直尺寸變化 ========
+    // ===================================================
 
-    console.log('【排序前】', {
-        tableHeight: tableBefore.height,
-        tableTop: tableBefore.top,
-        tableBottom: tableBefore.bottom,
-        modalHeight: modalBody?.getBoundingClientRect().height,
-        modalScrollTop: modalBody?.scrollTop,
-        modalScrollHeight: modalBody?.scrollHeight
-    });
+    const tableContainer = table.closest('.table-container');
+    const filterPanel = table.closest('.filter-panel');
+    const resourceDetail = table.closest('.resource-detail');
+
+    const logLayout = (label) => {
+        const tableRect = table.getBoundingClientRect();
+        const containerRect = tableContainer?.getBoundingClientRect();
+        const panelRect = filterPanel?.getBoundingClientRect();
+        const detailRect = resourceDetail?.getBoundingClientRect();
+
+        console.log(label, {
+            tableHeight: tableRect.height,
+            tableTop: tableRect.top,
+
+            containerHeight: containerRect?.height,
+            containerTop: containerRect?.top,
+
+            panelHeight: panelRect?.height,
+            panelTop: panelRect?.top,
+
+            detailHeight: detailRect?.height,
+            detailTop: detailRect?.top,
+
+            pageScrollY: window.scrollY,
+            pageScrollHeight: document.documentElement.scrollHeight
+        });
+    };
+
+    logLayout('【排序前】');
     
     // 取得被點擊的表頭 (th) 元素
     const th = table.querySelectorAll('th')[colIndex];
@@ -310,19 +332,17 @@ function sortTable(colIndex) {
     else if (sortState === 2) {
         th.classList.add('asc');
     }
+    // ===================================================
+    // ========【排序版面診斷】 設定 - 追蹤排序後 500ms ========
+    // ===================================================
+    
+    [0, 50, 100, 150, 200, 300, 500].forEach(delay => {
+        setTimeout(() => {
+            logLayout(`【排序後 ${delay}ms｜狀態 ${sortState}】`);
+        }, delay);
+    });
     requestAnimationFrame(() => {
         const tableAfter = table.getBoundingClientRect();
-
-        console.log('【排序後】', {
-            sortState,
-            tableHeight: tableAfter.height,
-            tableTop: tableAfter.top,
-            tableBottom: tableAfter.bottom,
-            modalHeight: modalBody?.getBoundingClientRect().height,
-            modalScrollTop: modalBody?.scrollTop,
-            modalScrollHeight: modalBody?.scrollHeight
-        });
-    });
 }
 
 // ===================================================
