@@ -341,9 +341,7 @@ function sortTable(colIndex) {
             logLayout(`【排序後 ${delay}ms｜狀態 ${sortState}】`);
         }, delay);
     });
-    requestAnimationFrame(() => {
-        const tableAfter = table.getBoundingClientRect();
-}
+    }
 
 // ===================================================
 // ========【點擊行選取】 ========
