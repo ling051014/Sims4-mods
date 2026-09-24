@@ -4987,3 +4987,161 @@ body[data-theme="ling"] .sidebar-btn.danger:hover {
         /* 小螢幕最大寬度 */ max-width: 104px;
     }
 }
+
+
+/* ========【本輪整合修正】 設定 - 導覽、下拉箭頭、側欄狀態與家族名稱輸入 ======== */
+:root {
+    /* 共用下拉箭頭 */ --select-chevron-image: url("../html%20icons/chevron-down.svg");
+}
+
+/* ========【家族名稱輸入】 修正 - 固定導覽槽位、虛線依文字寬度自適應 ======== */
+.family-name-editor {
+    /* 固定外層寬度，避免後方家族選單跟著名稱移動 */ width: 154px;
+    /* 固定最小寬度 */ min-width: 154px;
+    /* 溢出隱藏，避免長名稱碰到右側選單 */ overflow: hidden;
+}
+.family-name-icon {
+    /* 水平翻轉鉛筆方向 */ transform: scaleX(-1);
+    /* 以圖示中心翻轉 */ transform-origin: center;
+}
+.family-name-editor .brand-input {
+    /* 由 JavaScript 依實際文字寬度寫入，不再撐滿整個槽位 */ width: 72px;
+    /* 最短仍保留可辨識的輸入提示 */ min-width: 52px;
+    /* 最長不得超過外層剩餘空間 */ max-width: calc(100% - 21px);
+    /* 不自動填滿剩餘空間 */ flex: 0 1 auto;
+    /* 尺寸包含內距與虛線 */ box-sizing: border-box;
+}
+
+/* ========【語言切換】 修正 - 點擊範圍、尺寸與相鄰工具按鈕完全一致 ======== */
+.nav-select-language .language-trigger {
+    /* 寬度依 ICON + 文字自然決定 */ width: auto;
+    /* 不強制最小寬度 */ min-width: 0;
+    /* 與 icon-btn 相同的上下左右內距 */ padding: 7px 11px;
+    /* 不使用導覽 select 的固定高度 */ height: auto;
+    /* 與相鄰按鈕維持相同最低高度 */ min-height: 32px;
+    /* ICON 與文字間距與 icon-btn 一致 */ gap: 5px;
+    /* 整組內容水平置中 */ justify-content: center;
+    /* 整組內容垂直置中 */ align-items: center;
+    /* 統一行高，避免文字看起來上下偏移 */ line-height: 1.2;
+}
+.nav-select-language .language-icon {
+    /* 圖示寬度與旁邊工具按鈕一致 */ width: 1em;
+    /* 圖示高度與旁邊工具按鈕一致 */ height: 1em;
+    /* 圖示不額外位移 */ margin: 0;
+    /* 保持正常方向 */ transform: none;
+}
+.nav-select-language .nav-select-value {
+    /* 不保留額外固定文字寬度 */ min-width: 0;
+    /* 文字水平置中 */ text-align: center;
+}
+
+/* ========【頂部下拉結果】 修正 - 對齊既有專案搜尋結果的白底、細框、圓角與分隔線邏輯 ======== */
+.nav-select-menu {
+    /* 背景使用主題安全色 */ background: var(--nav-dropdown-bg);
+    /* 文字使用主題安全色 */ color: var(--nav-dropdown-text);
+    /* 細邊框 */ border: 1px solid var(--nav-dropdown-border);
+    /* 與專案搜尋結果一致的圓角 */ border-radius: 8px;
+    /* 使用低調陰影，不搶過內容 */ box-shadow: 0 5px 15px rgba(0,0,0,.10);
+}
+.nav-select-option {
+    /* 搜尋結果同級的垂直內距 */ padding: 12px 15px;
+    /* 搜尋結果同級字級 */ font-size: 12px;
+    /* 結果文字置中 */ text-align: center;
+    /* 項目分隔線 */ border-bottom: 1px solid var(--nav-dropdown-divider);
+}
+.nav-select-option:hover,
+.nav-select-option:focus-visible {
+    /* Hover 維持中性灰階，不使用主題 Accent */ background: var(--nav-dropdown-hover-bg);
+    /* Hover 保持足夠文字對比 */ color: var(--nav-dropdown-hover-text);
+}
+.nav-select-option.selected {
+    /* 已選項維持中性灰階，不使用主題 Accent */ background: var(--nav-dropdown-selected-bg);
+    /* 已選項保持足夠文字對比 */ color: var(--nav-dropdown-selected-text);
+}
+
+/* ========【側邊導覽狀態】 修正 - Dropdown 灰階不再污染 Sidebar Active ======== */
+.sidebar-btn.primary,
+.sidebar-btn.active,
+.sidebar-btn.lock-active,
+body[data-theme="ling"] .sidebar-btn.primary,
+body[data-theme="ling"] .sidebar-btn.active,
+body[data-theme="ling"] .sidebar-btn.lock-active {
+    /* 恢復原本主題淡色漸層 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 選取文字使用主題 Accent */ color: var(--accent);
+    /* 選取邊框使用主題 Accent */ border-color: var(--accent);
+    /* 選取狀態字重 */ font-weight: 600;
+}
+.sidebar-btn.primary:hover,
+.sidebar-btn.active:hover,
+.sidebar-btn.lock-active:hover,
+body[data-theme="ling"] .sidebar-btn.primary:hover,
+body[data-theme="ling"] .sidebar-btn.active:hover,
+body[data-theme="ling"] .sidebar-btn.lock-active:hover {
+    /* Active Hover 仍保留原本主題淡色漸層 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* Active Hover 文字維持主題 Accent */ color: var(--accent);
+    /* Active Hover 邊框維持主題 Accent */ border-color: var(--accent);
+    /* 輕微亮度回饋 */ filter: brightness(1.04);
+}
+.sidebar-btn.danger,
+body[data-theme="ling"] .sidebar-btn.danger {
+    /* 危險操作維持紅色文字 */ color: #c44a3e;
+}
+.sidebar-btn.danger:hover,
+body[data-theme="ling"] .sidebar-btn.danger:hover {
+    /* 危險操作維持淡紅背景 */ background: rgba(200,60,40,.08);
+    /* 危險操作維持紅色邊框 */ border-color: rgba(200,60,40,.22);
+    /* 危險操作維持紅色文字 */ color: #b63f35;
+    /* 危險操作不套用主題亮度濾鏡 */ filter: none;
+}
+
+/* ========【共用下拉箭頭】 設定 - 編輯頁與導覽共用 chevron-down.svg ======== */
+.modal select:not([multiple]),
+#galleryBrowserFilter {
+    /* 移除瀏覽器原生箭頭 */ appearance: none;
+    /* 移除 WebKit 原生箭頭 */ -webkit-appearance: none;
+    /* 預留箭頭空間 */ padding-right: 32px;
+    /* 使用與導覽相同的 Chevron SVG */ background-image: var(--select-chevron-image);
+    /* 箭頭不重複 */ background-repeat: no-repeat;
+    /* 箭頭向左內縮，不貼最右側 */ background-position: right 11px center;
+    /* 箭頭尺寸 */ background-size: 12px 12px;
+}
+.ss-input {
+    /* 預留搜尋型下拉箭頭空間 */ padding-right: 30px;
+    /* 使用與導覽相同的 Chevron SVG */ background-image: var(--select-chevron-image);
+    /* 箭頭不重複 */ background-repeat: no-repeat;
+    /* 箭頭向左內縮 */ background-position: right 10px center;
+    /* 箭頭尺寸 */ background-size: 12px 12px;
+}
+.modal select:not([multiple]) option,
+#galleryBrowserFilter option {
+    /* 原生 option 使用安全背景，避免主題中文字與背景同色 */ background: var(--nav-dropdown-bg);
+    /* 原生 option 使用安全文字色 */ color: var(--nav-dropdown-text);
+}
+body[data-theme="midnight"] select {
+    /* 深色主題提示瀏覽器使用深色原生控制項 */ color-scheme: dark;
+}
+body:not([data-theme="midnight"]) select {
+    /* 淺色主題提示瀏覽器使用淺色原生控制項 */ color-scheme: light;
+}
+
+/* ========【搜尋型下拉結果】 修正 - 主題安全色與中性 Hover / Selected ======== */
+.ss-dropdown {
+    /* 背景使用主題安全色 */ background: var(--nav-dropdown-bg);
+    /* 文字使用主題安全色 */ color: var(--nav-dropdown-text);
+    /* 邊框使用主題安全色 */ border-color: var(--nav-dropdown-border);
+}
+.ss-option:hover {
+    /* Hover 維持中性主題灰階 */ background: var(--nav-dropdown-hover-bg);
+    /* Hover 文字保持對比 */ color: var(--nav-dropdown-hover-text);
+}
+.ss-option.selected {
+    /* Selected 維持中性主題灰階 */ background: var(--nav-dropdown-selected-bg);
+    /* Selected 文字保持對比 */ color: var(--nav-dropdown-selected-text);
+}
+
+@media (max-width: 900px) {
+    .family-name-editor {
+        /* 小螢幕固定槽位，內部虛線仍由文字寬度決定 */ width: 118px;
+        /* 小螢幕固定最小槽位 */ min-width: 118px;
+    }
+}
