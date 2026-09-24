@@ -1,0 +1,3669 @@
+* {
+    /* 尺寸計算 */ box-sizing: border-box;
+}
+
+/* ========【主題配色】 設定 - 全站色彩變數與預設主題 ======== */
+:root,
+body[data-theme="peach"] {
+    /* 漸層起始色 */ --grad-1: #f8b4c4;
+    /* 漸層結束色 */ --grad-2: #a0d4e8;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(248,180,196,.18);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(160,212,232,.18);
+    /* 互動強調色 */ --accent: #c17898;
+    /* 懸停強調色 */ --accent-hover: #a8607e;
+    /* 深色主色 */ --primary-dark: #8a4a68;
+    /* 頂欄文字顏色 */ --topbar-fg: #3c2830;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(60,40,48,.7);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.55);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.75);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #3c2830;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(60,40,48,.5);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.75);
+    /* 頁面背景 */ --bg: #faf6f8;
+    /* 背景紋理色 */ --bg-pattern: rgba(200,150,170,.14);
+    /* 主要文字 */ --ink: #3c2830;
+    /* 次要文字 */ --sub: #987888;
+    /* 主要線條 */ --line: #e4cdd6;
+    /* 卡片背景 */ --card: #fffdfe;
+    /* 一般邊框 */ --border: #e8d4dc;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(55,25,40,.4);
+    /* 面板背景 */ --panel-bg: #faf0f4;
+    /* 面板項目背景 */ --panel-item: #fdf5f8;
+    /* 面板項目懸停 */ --panel-item-hover: #f6e6ee;
+    /* 標籤背景 */ --tag-bg: #f4dce6;
+    /* 標籤文字 */ --tag-ink: #8a4e68;
+    /* 配偶關係線 */ --spouse: #d07898;
+    /* 前任配偶線 */ --exspouse: #b8a0a8;
+    /* 領養關係線 */ --adopt: #98b8c8;
+    /* 其他關係線 */ --other-line: #a898b8;
+    /* 男性識別色 */ --male-bar: #8a9ec8;
+    /* 女性識別色 */ --female-bar: #d078a0;
+    /* 其他性別識別色 */ --other-bar: #a8a0b0;
+    /* 幽靈卡片背景 */ --ghost-bg: #e4eefa;
+    /* 幽靈卡片邊框 */ --ghost-border: #b0c8e4;
+    /* 幽靈文字 */ --ghost-ink: #3c5070;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #dde8f4;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #a9c5e0;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #ccdcec;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #425878;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #8a9ec0;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #b898b0;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #9ca8bc;
+    /* 已故卡片背景 */ --dead-bg: #ece0e2;
+    /* 已故卡片邊框 */ --dead-border: #c8b0b8;
+    /* 已故文字 */ --dead-ink: #564450;
+    /* 已故標記背景 */ --dead-badge-bg: #ecdcd0;
+    /* 已故標記邊框 */ --dead-badge-border: #ccbba0;
+    /* 已故標籤背景 */ --dead-tag-bg: #dcc8b8;
+    /* 已故標籤文字 */ --dead-tag-ink: #685040;
+    /* 已故男性識別色 */ --dead-male-bar: #9c8a90;
+    /* 已故女性識別色 */ --dead-female-bar: #a89098;
+    /* 已故其他性別識別色 */ --dead-other-bar: #a08a90;
+    /* 在世標記背景 */ --alive-badge-bg: #e0ecdc;
+    /* 在世標記邊框 */ --alive-badge-border: #aacba4;
+    /* 關係標註背景 */ --label-bg: rgba(255,253,254,.96);
+    /* 關係標註邊框 */ --label-border: #e8d4dc;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f0dce4;
+    /* 頭像漸層結束 */ --avatar-bg-2: #d4c4d8;
+    /* 頭像文字 */ --avatar-ink: #987888;
+    /* 高亮顏色 */ --hl: rgba(193,120,152,.5);
+}
+body[data-theme="orange"] {
+    /* 漸層起始色 */ --grad-1: #ff9c72;
+    /* 漸層結束色 */ --grad-2: #7ec9c9;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(255,156,114,.18);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(126,201,201,.18);
+    /* 互動強調色 */ --accent: #c87848;
+    /* 懸停強調色 */ --accent-hover: #a86038;
+    /* 深色主色 */ --primary-dark: #8a4a28;
+    /* 頂欄文字顏色 */ --topbar-fg: #3d1e10;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(61,30,16,.75);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.6);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.8);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #3d1e10;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(61,30,16,.5);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.8);
+    /* 頁面背景 */ --bg: #faf4ee;
+    /* 背景紋理色 */ --bg-pattern: rgba(200,150,120,.14);
+    /* 主要文字 */ --ink: #3d2c22;
+    /* 次要文字 */ --sub: #96785e;
+    /* 主要線條 */ --line: #e4cab2;
+    /* 卡片背景 */ --card: #fffcf8;
+    /* 一般邊框 */ --border: #e8d4c0;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(50,30,20,.4);
+    /* 面板背景 */ --panel-bg: #f8ece0;
+    /* 面板項目背景 */ --panel-item: #fcf4e8;
+    /* 面板項目懸停 */ --panel-item-hover: #f4e2ce;
+    /* 標籤背景 */ --tag-bg: #f4dcc4;
+    /* 標籤文字 */ --tag-ink: #8a5838;
+    /* 配偶關係線 */ --spouse: #d68a9c;
+    /* 前任配偶線 */ --exspouse: #b8a898;
+    /* 領養關係線 */ --adopt: #7eb0a0;
+    /* 其他關係線 */ --other-line: #a89078;
+    /* 男性識別色 */ --male-bar: #7a90b0;
+    /* 女性識別色 */ --female-bar: #c08a9c;
+    /* 其他性別識別色 */ --other-bar: #a89078;
+    /* 幽靈卡片背景 */ --ghost-bg: #e2ecf6;
+    /* 幽靈卡片邊框 */ --ghost-border: #b0c4dc;
+    /* 幽靈文字 */ --ghost-ink: #3c5070;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #dee8f4;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #b0c4dc;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #ccdce8;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #425872;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #8a9cc0;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #b89cb0;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #9ca0b8;
+    /* 已故卡片背景 */ --dead-bg: #eae0cc;
+    /* 已故卡片邊框 */ --dead-border: #c4b090;
+    /* 已故文字 */ --dead-ink: #544a38;
+    /* 已故標記背景 */ --dead-badge-bg: #ecdfc6;
+    /* 已故標記邊框 */ --dead-badge-border: #cbb490;
+    /* 已故標籤背景 */ --dead-tag-bg: #dcc9a8;
+    /* 已故標籤文字 */ --dead-tag-ink: #645540;
+    /* 已故男性識別色 */ --dead-male-bar: #94887a;
+    /* 已故女性識別色 */ --dead-female-bar: #a8908a;
+    /* 已故其他性別識別色 */ --dead-other-bar: #9a8e80;
+    /* 在世標記背景 */ --alive-badge-bg: #dcecc8;
+    /* 在世標記邊框 */ --alive-badge-border: #a8cc80;
+    /* 關係標註背景 */ --label-bg: rgba(255,252,248,.96);
+    /* 關係標註邊框 */ --label-border: #e8d4c0;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f2e0d0;
+    /* 頭像漸層結束 */ --avatar-bg-2: #e4c8b0;
+    /* 頭像文字 */ --avatar-ink: #96785e;
+    /* 高亮顏色 */ --hl: rgba(200,120,72,.5);
+}
+body[data-theme="cranberry"] {
+    /* 漸層起始色 */ --grad-1: #e85878;
+    /* 漸層結束色 */ --grad-2: #78a8d8;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(232,88,120,.16);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(120,168,216,.16);
+    /* 互動強調色 */ --accent: #c04870;
+    /* 懸停強調色 */ --accent-hover: #a03860;
+    /* 深色主色 */ --primary-dark: #882848;
+    /* 頂欄文字顏色 */ --topbar-fg: #3c1828;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(60,24,40,.75);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.6);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.8);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #3c1828;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(60,24,40,.5);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.8);
+    /* 頁面背景 */ --bg: #faf4f6;
+    /* 背景紋理色 */ --bg-pattern: rgba(200,140,160,.14);
+    /* 主要文字 */ --ink: #3c2830;
+    /* 次要文字 */ --sub: #987888;
+    /* 主要線條 */ --line: #e4c4ce;
+    /* 卡片背景 */ --card: #fffcfd;
+    /* 一般邊框 */ --border: #e8d0da;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(55,25,40,.4);
+    /* 面板背景 */ --panel-bg: #f8e8ee;
+    /* 面板項目背景 */ --panel-item: #fcf2f6;
+    /* 面板項目懸停 */ --panel-item-hover: #f4d8e4;
+    /* 標籤背景 */ --tag-bg: #f4d4dc;
+    /* 標籤文字 */ --tag-ink: #8a4860;
+    /* 配偶關係線 */ --spouse: #d06080;
+    /* 前任配偶線 */ --exspouse: #b8a0a8;
+    /* 領養關係線 */ --adopt: #88a8b8;
+    /* 其他關係線 */ --other-line: #a890b0;
+    /* 男性識別色 */ --male-bar: #7a90b8;
+    /* 女性識別色 */ --female-bar: #c06080;
+    /* 其他性別識別色 */ --other-bar: #a898a8;
+    /* 幽靈卡片背景 */ --ghost-bg: #e2ecf6;
+    /* 幽靈卡片邊框 */ --ghost-border: #b0c4dc;
+    /* 幽靈文字 */ --ghost-ink: #3c5068;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #dee8f4;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #b0c4dc;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #ccdcec;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #425870;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #8898b8;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #b098a8;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #9ca0b8;
+    /* 已故卡片背景 */ --dead-bg: #ecdfe0;
+    /* 已故卡片邊框 */ --dead-border: #c8b0b8;
+    /* 已故文字 */ --dead-ink: #564448;
+    /* 已故標記背景 */ --dead-badge-bg: #ecdcd0;
+    /* 已故標記邊框 */ --dead-badge-border: #ccbba0;
+    /* 已故標籤背景 */ --dead-tag-bg: #dcc8b8;
+    /* 已故標籤文字 */ --dead-tag-ink: #685040;
+    /* 已故男性識別色 */ --dead-male-bar: #988888;
+    /* 已故女性識別色 */ --dead-female-bar: #a88890;
+    /* 已故其他性別識別色 */ --dead-other-bar: #9c8a88;
+    /* 在世標記背景 */ --alive-badge-bg: #e0ecd4;
+    /* 在世標記邊框 */ --alive-badge-border: #aacc94;
+    /* 關係標註背景 */ --label-bg: rgba(255,252,253,.96);
+    /* 關係標註邊框 */ --label-border: #e8d0da;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f4dce4;
+    /* 頭像漸層結束 */ --avatar-bg-2: #e4c0cc;
+    /* 頭像文字 */ --avatar-ink: #987888;
+    /* 高亮顏色 */ --hl: rgba(192,72,112,.5);
+}
+body[data-theme="lime"] {
+    /* 漸層起始色 */ --grad-1: #9ad070;
+    /* 漸層結束色 */ --grad-2: #f0d048;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(154,208,112,.2);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(240,208,72,.18);
+    /* 互動強調色 */ --accent: #809830;
+    /* 懸停強調色 */ --accent-hover: #687c20;
+    /* 深色主色 */ --primary-dark: #587020;
+    /* 頂欄文字顏色 */ --topbar-fg: #2c3818;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(44,56,24,.7);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.55);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.75);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #2c3818;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(44,56,24,.5);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.75);
+    /* 頁面背景 */ --bg: #f5f8ec;
+    /* 背景紋理色 */ --bg-pattern: rgba(160,180,120,.14);
+    /* 主要文字 */ --ink: #2c3a28;
+    /* 次要文字 */ --sub: #7a8870;
+    /* 主要線條 */ --line: #d4e0bc;
+    /* 卡片背景 */ --card: #fdfef8;
+    /* 一般邊框 */ --border: #dde8c8;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(30,45,30,.4);
+    /* 面板背景 */ --panel-bg: #ecf2dc;
+    /* 面板項目背景 */ --panel-item: #f4f8e8;
+    /* 面板項目懸停 */ --panel-item-hover: #e4eece;
+    /* 標籤背景 */ --tag-bg: #dcecc0;
+    /* 標籤文字 */ --tag-ink: #586830;
+    /* 配偶關係線 */ --spouse: #c09098;
+    /* 前任配偶線 */ --exspouse: #a8b098;
+    /* 領養關係線 */ --adopt: #78a888;
+    /* 其他關係線 */ --other-line: #8ea898;
+    /* 男性識別色 */ --male-bar: #6a88a8;
+    /* 女性識別色 */ --female-bar: #b08898;
+    /* 其他性別識別色 */ --other-bar: #7e9478;
+    /* 幽靈卡片背景 */ --ghost-bg: #dfeade;
+    /* 幽靈卡片邊框 */ --ghost-border: #b0c8ac;
+    /* 幽靈文字 */ --ghost-ink: #365038;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #d7ead4;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #a8c8a8;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #c6dcc0;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #3e5c3c;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #7a98a0;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #a898a8;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #8aa488;
+    /* 已故卡片背景 */ --dead-bg: #eae4cc;
+    /* 已故卡片邊框 */ --dead-border: #c4bc94;
+    /* 已故文字 */ --dead-ink: #544e38;
+    /* 已故標記背景 */ --dead-badge-bg: #e8e2c4;
+    /* 已故標記邊框 */ --dead-badge-border: #c8be90;
+    /* 已故標籤背景 */ --dead-tag-bg: #d8d0a8;
+    /* 已故標籤文字 */ --dead-tag-ink: #5e563a;
+    /* 已故男性識別色 */ --dead-male-bar: #8a8878;
+    /* 已故女性識別色 */ --dead-female-bar: #9a8878;
+    /* 已故其他性別識別色 */ --dead-other-bar: #908a78;
+    /* 在世標記背景 */ --alive-badge-bg: #d8ecc0;
+    /* 在世標記邊框 */ --alive-badge-border: #a0c878;
+    /* 關係標註背景 */ --label-bg: rgba(253,254,248,.96);
+    /* 關係標註邊框 */ --label-border: #dde8c8;
+    /* 頭像漸層起始 */ --avatar-bg-1: #dcecd0;
+    /* 頭像漸層結束 */ --avatar-bg-2: #c0d0a0;
+    /* 頭像文字 */ --avatar-ink: #7a8870;
+    /* 高亮顏色 */ --hl: rgba(128,152,48,.5);
+}
+body[data-theme="thunder"] {
+    /* 漸層起始色 */ --grad-1: #f0c050;
+    /* 漸層結束色 */ --grad-2: #a878c8;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(240,192,80,.2);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(168,120,200,.18);
+    /* 互動強調色 */ --accent: #8a5cb0;
+    /* 懸停強調色 */ --accent-hover: #724a98;
+    /* 深色主色 */ --primary-dark: #6a4688;
+    /* 頂欄文字顏色 */ --topbar-fg: #2c1e38;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(44,30,56,.75);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.62);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.82);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #2c1e38;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(44,30,56,.5);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.82);
+    /* 頁面背景 */ --bg: #f8f5fa;
+    /* 背景紋理色 */ --bg-pattern: rgba(180,140,180,.14);
+    /* 主要文字 */ --ink: #3a2838;
+    /* 次要文字 */ --sub: #8a7a90;
+    /* 主要線條 */ --line: #dcccc8;
+    /* 卡片背景 */ --card: #fffdfe;
+    /* 一般邊框 */ --border: #e4d4dc;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(40,25,60,.4);
+    /* 面板背景 */ --panel-bg: #f2e8dc;
+    /* 面板項目背景 */ --panel-item: #f8eee2;
+    /* 面板項目懸停 */ --panel-item-hover: #f0dfc8;
+    /* 標籤背景 */ --tag-bg: #e8d8e8;
+    /* 標籤文字 */ --tag-ink: #6e4a76;
+    /* 配偶關係線 */ --spouse: #b888c0;
+    /* 前任配偶線 */ --exspouse: #a8a0b0;
+    /* 領養關係線 */ --adopt: #88a8b8;
+    /* 其他關係線 */ --other-line: #a090b0;
+    /* 男性識別色 */ --male-bar: #8088b0;
+    /* 女性識別色 */ --female-bar: #c080b0;
+    /* 其他性別識別色 */ --other-bar: #9c8898;
+    /* 幽靈卡片背景 */ --ghost-bg: #e4e4f4;
+    /* 幽靈卡片邊框 */ --ghost-border: #bcbce0;
+    /* 幽靈文字 */ --ghost-ink: #3c3c60;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #e0e0f4;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #b8b8e0;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #d0ccec;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #464680;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #8890b8;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #a890b8;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #9c94b8;
+    /* 已故卡片背景 */ --dead-bg: #e8dcd8;
+    /* 已故卡片邊框 */ --dead-border: #c4b0a8;
+    /* 已故文字 */ --dead-ink: #524438;
+    /* 已故標記背景 */ --dead-badge-bg: #e8d8cc;
+    /* 已故標記邊框 */ --dead-badge-border: #ccb8a4;
+    /* 已故標籤背景 */ --dead-tag-bg: #d8c8b8;
+    /* 已故標籤文字 */ --dead-tag-ink: #64544a;
+    /* 已故男性識別色 */ --dead-male-bar: #9488a0;
+    /* 已故女性識別色 */ --dead-female-bar: #a88898;
+    /* 已故其他性別識別色 */ --dead-other-bar: #9c8c98;
+    /* 在世標記背景 */ --alive-badge-bg: #e0ecd4;
+    /* 在世標記邊框 */ --alive-badge-border: #b0cc90;
+    /* 關係標註背景 */ --label-bg: rgba(255,253,254,.96);
+    /* 關係標註邊框 */ --label-border: #e4d4dc;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f0e0c4;
+    /* 頭像漸層結束 */ --avatar-bg-2: #d0b8d8;
+    /* 頭像文字 */ --avatar-ink: #8a7a90;
+    /* 高亮顏色 */ --hl: rgba(138,92,176,.5);
+}
+body[data-theme="midnight"] {
+    /* 漸層起始色 */ --grad-1: #1a2030;
+    /* 漸層結束色 */ --grad-2: #2a4570;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(107,168,224,.1);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(107,168,224,.08);
+    /* 互動強調色 */ --accent: #6ba8e0;
+    /* 懸停強調色 */ --accent-hover: #528cc8;
+    /* 深色主色 */ --primary-dark: #385c8a;
+    /* 頂欄文字顏色 */ --topbar-fg: #e0e8f4;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(224,232,244,.7);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.08);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.14);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #e0e8f4;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(224,232,244,.5);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.16);
+    /* 頁面背景 */ --bg: #131820;
+    /* 背景紋理色 */ --bg-pattern: rgba(107,168,224,.08);
+    /* 主要文字 */ --ink: #dde3ec;
+    /* 次要文字 */ --sub: #7d8896;
+    /* 主要線條 */ --line: #2a3140;
+    /* 卡片背景 */ --card: #1b212a;
+    /* 一般邊框 */ --border: #2a3140;
+    /* 輸入欄背景 */ --input-bg: #181d26;
+    /* 遮罩背景 */ --mask-bg: rgba(0,0,0,.68);
+    /* 面板背景 */ --panel-bg: #181d26;
+    /* 面板項目背景 */ --panel-item: #212730;
+    /* 面板項目懸停 */ --panel-item-hover: #2a313c;
+    /* 標籤背景 */ --tag-bg: #28303c;
+    /* 標籤文字 */ --tag-ink: #93a2b6;
+    /* 配偶關係線 */ --spouse: #a06b8e;
+    /* 前任配偶線 */ --exspouse: #4a5260;
+    /* 領養關係線 */ --adopt: #4a7a80;
+    /* 其他關係線 */ --other-line: #566a80;
+    /* 男性識別色 */ --male-bar: #5a7aa8;
+    /* 女性識別色 */ --female-bar: #a06b8e;
+    /* 其他性別識別色 */ --other-bar: #6a788a;
+    /* 幽靈卡片背景 */ --ghost-bg: #182230;
+    /* 幽靈卡片邊框 */ --ghost-border: #324864;
+    /* 幽靈文字 */ --ghost-ink: #a8c2dc;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #1f2c3c;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #3a5678;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #26354a;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #9dbbd4;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #5a7898;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #8868a0;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #6a80a0;
+    /* 已故卡片背景 */ --dead-bg: #20252e;
+    /* 已故卡片邊框 */ --dead-border: #384048;
+    /* 已故文字 */ --dead-ink: #b0b6c0;
+    /* 已故標記背景 */ --dead-badge-bg: #262c36;
+    /* 已故標記邊框 */ --dead-badge-border: #454c5a;
+    /* 已故標籤背景 */ --dead-tag-bg: #303842;
+    /* 已故標籤文字 */ --dead-tag-ink: #a8b0bc;
+    /* 已故男性識別色 */ --dead-male-bar: #686c7a;
+    /* 已故女性識別色 */ --dead-female-bar: #7e6876;
+    /* 已故其他性別識別色 */ --dead-other-bar: #747a86;
+    /* 在世標記背景 */ --alive-badge-bg: #1c2c22;
+    /* 在世標記邊框 */ --alive-badge-border: #34583c;
+    /* 關係標註背景 */ --label-bg: rgba(27,33,42,.96);
+    /* 關係標註邊框 */ --label-border: #3a424e;
+    /* 頭像漸層起始 */ --avatar-bg-1: #28303c;
+    /* 頭像漸層結束 */ --avatar-bg-2: #1b212a;
+    /* 頭像文字 */ --avatar-ink: #7d8896;
+    /* 高亮顏色 */ --hl: rgba(107,168,224,.5);
+}
+body[data-topbar-contrast="light"] {
+    /* 頂欄文字顏色 */ --topbar-fg: #2d2d2d;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(45,45,45,.72);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.62);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.82);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #2d2d2d;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(45,45,45,.5);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.82);
+}
+body[data-topbar-contrast="dark"] {
+    /* 頂欄文字顏色 */ --topbar-fg: #ffffff;
+    /* 頂欄次要文字 */ --topbar-fg-sub: rgba(255,255,255,.82);
+    /* 頂欄欄位背景 */ --topbar-field-bg: rgba(255,255,255,.2);
+    /* 頂欄欄位邊框 */ --topbar-field-border: rgba(255,255,255,.36);
+    /* 頂欄欄位文字 */ --topbar-field-fg: #ffffff;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: rgba(255,255,255,.68);
+    /* 頂欄欄位懸停 */ --topbar-field-hover: rgba(255,255,255,.36);
+}
+
+/* ========【全站基礎】 設定 - 頁面尺寸、字型與通用元件 ======== */
+html,
+body {
+    /* 元素高度 */ height: 100%;
+    /* 外距設定 */ margin: 0;
+    /* 溢出處理 */ overflow: hidden;
+}
+body {
+    /* 字體設定 */ font-family: "PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
+    /* 背景設定 */ background: var(--bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體大小 */ font-size: 14px;
+    /* 動畫過渡 */ transition: background-color .25s,color .25s;
+}
+input,
+select,
+textarea,
+button {
+    /* 字體設定 */ font-family: inherit;
+}
+button {
+    /* 字體設定 */ font-family: inherit;
+    /* 滑鼠指標 */ cursor: pointer;
+}
+.app {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 元素高度 */ height: 100vh;
+    /* 溢出處理 */ overflow: hidden;
+}
+
+/* ========【頂部導覽列】 設定 - 品牌、搜尋、語言與工具操作 ======== */
+.topbar {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: stretch;
+    /* 元素高度 */ height: 54px;
+    /* 背景設定 */ background: linear-gradient(120deg, var(--grad-1) 0%, var(--grad-2) 100%);
+    /* 文字顏色 */ color: var(--topbar-fg);
+    /* 顯示層級 */ z-index: 30;
+    /* 元素陰影 */ box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.topbar-brand {
+    /* 元素寬度 */ width: 220px;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 內縮空間 */ padding: 0 18px;
+    /* 字體大小 */ font-size: 15px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距設定 */ letter-spacing: .4px;
+    /* 右側邊框 */ border-right: 1px solid rgba(255,255,255,.18);
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 文字陰影 */ text-shadow: 0 1px 2px rgba(0,0,0,.08);
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+.topbar-main {
+    /* 彈性配比 */ flex: 1;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 10px;
+    /* 內縮空間 */ padding: 0 16px;
+    /* 最小寬度 */ min-width: 0;
+}
+.menu-toggle {
+    /* 顯示方式 */ display: none;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 元素寬度 */ width: 36px;
+    /* 元素高度 */ height: 34px;
+    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
+    /* 背景設定 */ background: var(--topbar-field-bg);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 字體大小 */ font-size: 16px;
+    /* 動畫過渡 */ transition: .15s;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.menu-toggle:hover {
+    /* 背景設定 */ background: var(--topbar-field-hover);
+}
+.brand-input {
+    /* 字體大小 */ font-size: 16px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距設定 */ letter-spacing: .8px;
+    /* 文字顏色 */ color: var(--topbar-fg);
+    /* 邊框設定 */ border: 1px solid transparent;
+    /* 背景設定 */ background: transparent;
+    /* 元素寬度 */ width: 160px;
+    /* 外框設定 */ outline: none;
+    /* 內縮空間 */ padding: 5px 8px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 字體設定 */ font-family: inherit;
+    /* 文字陰影 */ text-shadow: 0 1px 2px rgba(0,0,0,.08);
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.brand-input:hover {
+    /* 背景設定 */ background: var(--topbar-field-bg);
+}
+.brand-input:focus {
+    /* 背景設定 */ background: var(--topbar-field-bg);
+    /* 邊框顏色 */ border-color: var(--topbar-field-border);
+}
+.brand-input::placeholder {
+    /* 文字顏色 */ color: var(--topbar-field-placeholder);
+}
+.family-select {
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--topbar-field-bg);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 字體設定 */ font-family: inherit;
+    /* 最大寬度 */ max-width: 180px;
+    /* 動畫過渡 */ transition: .15s;
+    /* 背景濾鏡 */ backdrop-filter: blur(4px);
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.family-select:hover {
+    /* 背景設定 */ background: var(--topbar-field-hover);
+}
+.family-select:focus {
+    /* 背景設定 */ background: var(--topbar-field-hover);
+}
+.topbar-search {
+    /* 彈性配比 */ flex: 1;
+    /* 最大寬度 */ max-width: 240px;
+    /* 內縮空間 */ padding: 7px 12px;
+    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--topbar-field-bg);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 動畫過渡 */ transition: .15s;
+    /* 背景濾鏡 */ backdrop-filter: blur(4px);
+}
+.topbar-search::placeholder {
+    /* 文字顏色 */ color: var(--topbar-field-placeholder);
+}
+.topbar-search:focus {
+    /* 背景設定 */ background: var(--topbar-field-hover);
+}
+.topbar-select {
+    /* 內縮空間 */ padding: 7px 10px;
+    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--topbar-field-bg);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 字體設定 */ font-family: inherit;
+    /* 動畫過渡 */ transition: .15s;
+    /* 背景濾鏡 */ backdrop-filter: blur(4px);
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.topbar-select:hover {
+    /* 背景設定 */ background: var(--topbar-field-hover);
+}
+.topbar-select:focus {
+    /* 背景設定 */ background: var(--topbar-field-hover);
+}
+.topbar-spacer {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 8px;
+}
+.topbar-right {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.icon-btn {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 項目間距 */ gap: 5px;
+    /* 內縮空間 */ padding: 7px 11px;
+    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--topbar-field-bg);
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 字體大小 */ font-size: 13px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+    /* 換行方式 */ white-space: nowrap;
+    /* 背景濾鏡 */ backdrop-filter: blur(4px);
+}
+.icon-btn:hover {
+    /* 背景設定 */ background: var(--topbar-field-hover);
+}
+
+/* ========【主版面】 設定 - 側邊欄與族譜工作區 ======== */
+.app-body {
+    /* 彈性配比 */ flex: 1;
+    /* 顯示方式 */ display: flex;
+    /* 溢出處理 */ overflow: hidden;
+    /* 最小高度 */ min-height: 0;
+}
+.sidebar {
+    /* 元素寬度 */ width: 220px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 背景設定 */ background: var(--bg);
+    /* 右側邊框 */ border-right: 1px solid var(--border);
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 顯示層級 */ z-index: 30;
+    /* 溢出處理 */ overflow: hidden;
+}
+.sidebar-scroll {
+    /* 彈性配比 */ flex: 1;
+    /* 垂直溢出 */ overflow-y: auto;
+    /* 內縮空間 */ padding: 12px 8px;
+}
+.sidebar-group {
+    /* 下方外距 */ margin-bottom: 14px;
+}
+.sidebar-group-title {
+    /* 字體大小 */ font-size: 10px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 文字顏色 */ color: var(--sub);
+    /* 透明度 */ opacity: .75;
+    /* 字距設定 */ letter-spacing: 1.2px;
+    /* 文字轉換 */ text-transform: uppercase;
+    /* 內縮空間 */ padding: 2px 8px 6px;
+}
+.sidebar-btn {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 8px;
+    /* 元素寬度 */ width: 100%;
+    /* 內縮空間 */ padding: 8px 11px;
+    /* 下方外距 */ margin-bottom: 3px;
+    /* 字體大小 */ font-size: 13px;
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 邊框設定 */ border: 1px solid transparent;
+    /* 背景設定 */ background: transparent;
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 文字對齊 */ text-align: left;
+    /* 動畫過渡 */ transition: .15s;
+}
+.sidebar-btn:hover {
+    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 邊框顏色 */ border-color: var(--border);
+}
+.sidebar-btn.danger {
+    /* 文字顏色 */ color: #c44a3e;
+}
+.sidebar-btn.danger:hover {
+    /* 背景設定 */ background: rgba(200,60,40,.08);
+    /* 邊框顏色 */ border-color: rgba(200,60,40,.2);
+}
+.sidebar-btn.primary,
+.sidebar-btn.active {
+    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 文字顏色 */ color: var(--accent);
+    /* 邊框設定 */ border: 1px solid var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+}
+.sidebar-btn.primary:hover,
+.sidebar-btn.active:hover {
+    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 視覺濾鏡 */ filter: brightness(1.04);
+}
+.sidebar-btn.lock-active {
+    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 文字顏色 */ color: var(--accent);
+    /* 邊框設定 */ border: 1px solid var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+}
+.sidebar-footer {
+    /* 內縮空間 */ padding: 8px 16px;
+    /* 上方邊框 */ border-top: 1px solid var(--border);
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: space-between;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.sidebar-footer .ver {
+    /* 字體設定 */ font-family: ui-monospace,Consolas,monospace;
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+}
+.main-area {
+    /* 彈性配比 */ flex: 1;
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 溢出處理 */ overflow: hidden;
+    /* 最小寬度 */ min-width: 0;
+    /* 定位方式 */ position: relative;
+}
+
+/* ========【族譜畫布】 設定 - 平移、縮放、關係線與標註 ======== */
+#viewport {
+    /* 彈性配比 */ flex: 1;
+    /* 溢出處理 */ overflow: hidden;
+    /* 定位方式 */ position: relative;
+    /* 滑鼠指標 */ cursor: grab;
+    /* 文字選取 */ user-select: none;
+    /* 觸控行為 */ touch-action: none;
+    /* 背景圖片 */ background-image: radial-gradient(circle, var(--bg-pattern) 1px, transparent 1px);
+    /* 背景尺寸 */ background-size: 22px 22px;
+    /* WebKit 文字選取 */ -webkit-user-select: none;
+}
+#viewport::before {
+    /* 生成內容 */ content: "";
+    /* 定位方式 */ position: absolute;
+    /* 定位範圍 */ inset: 0;
+    /* 背景圖片 */ background-image: var(--custom-bg, none);
+    /* 背景尺寸 */ background-size: var(--custom-bg-size, cover);
+    /* 背景位置 */ background-position: center;
+    /* 背景重複 */ background-repeat: var(--custom-bg-repeat, no-repeat);
+    /* 透明度 */ opacity: 0;
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 動畫過渡 */ transition: opacity .3s,background-image .3s;
+    /* 顯示層級 */ z-index: 0;
+}
+#viewport.has-bg::before {
+    /* 透明度 */ opacity: var(--custom-bg-opacity,.5);
+}
+#viewport.dragging {
+    /* 滑鼠指標 */ cursor: grabbing;
+}
+#stage {
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 0;
+    /* 左側位置 */ left: 0;
+    /* 變形基準 */ transform-origin: 0 0;
+    /* 顯示層級 */ z-index: 1;
+}
+#links {
+    /* 定位方式 */ position: absolute;
+    /* 左側位置 */ left: 0;
+    /* 頂部位置 */ top: 0;
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 溢出處理 */ overflow: visible;
+    /* 顯示層級 */ z-index: 0;
+}
+#nodes {
+    /* 定位方式 */ position: absolute;
+    /* 左側位置 */ left: 0;
+    /* 頂部位置 */ top: 0;
+    /* 右側位置 */ right: 0;
+    /* 底部位置 */ bottom: 0;
+    /* 顯示層級 */ z-index: 1;
+}
+#labels {
+    /* 定位方式 */ position: absolute;
+    /* 左側位置 */ left: 0;
+    /* 頂部位置 */ top: 0;
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 溢出處理 */ overflow: visible;
+    /* 顯示層級 */ z-index: 2;
+}
+#labels .edge-label {
+    /* 滑鼠事件 */ pointer-events: auto;
+    /* 滑鼠指標 */ cursor: grab;
+    /* 觸控行為 */ touch-action: none;
+}
+#labels .edge-label:hover rect {
+    /* 線條顏色 */ stroke: var(--accent);
+}
+#labels .edge-label.dragging {
+    /* 滑鼠指標 */ cursor: grabbing;
+}
+#labels.labels-locked .edge-label {
+    /* 滑鼠指標 */ cursor: default;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.edge {
+    /* 填滿顏色 */ fill: none;
+    /* 線條端點 */ stroke-linecap: round;
+    /* 線條轉角 */ stroke-linejoin: round;
+}
+.edge-parent {
+    /* 線條顏色 */ stroke: var(--line);
+    /* 線條寬度 */ stroke-width: 2.6;
+}
+.edge-spouse {
+    /* 線條顏色 */ stroke: var(--spouse);
+    /* 線條寬度 */ stroke-width: 3.6;
+    /* 虛線樣式 */ stroke-dasharray: 8 5;
+}
+.edge-exspouse {
+    /* 線條顏色 */ stroke: var(--exspouse);
+    /* 線條寬度 */ stroke-width: 2.6;
+    /* 虛線樣式 */ stroke-dasharray: 3 5;
+}
+.edge-adopt {
+    /* 線條顏色 */ stroke: var(--adopt);
+    /* 線條寬度 */ stroke-width: 2.6;
+    /* 虛線樣式 */ stroke-dasharray: 1 6;
+}
+.edge-other {
+    /* 線條顏色 */ stroke: var(--other-line);
+    /* 線條寬度 */ stroke-width: 2.2;
+    /* 虛線樣式 */ stroke-dasharray: 4 5;
+    /* 透明度 */ opacity: .85;
+}
+.edge-label text {
+    /* 字體設定 */ font-family: inherit;
+    /* 字體粗細 */ font-weight: 600;
+}
+.edge-label-content {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 項目間距 */ gap: 4px;
+    /* 內縮空間 */ padding: 0 8px;
+    /* 尺寸計算 */ box-sizing: border-box;
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+}
+.edge-label-content .l1ng-icon {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--accent);
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.edge-label-content span {
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+
+/* ========【模擬市民卡片】 設定 - 卡片狀態、頭像與資料呈現 ======== */
+.node {
+    /* 定位方式 */ position: absolute;
+    /* 背景設定 */ background: var(--card);
+    /* 邊框設定 */ border: 1.5px solid var(--border);
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 內縮空間 */ padding: 10px 12px;
+    /* 滑鼠指標 */ cursor: grab;
+    /* 溢出處理 */ overflow: hidden;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 10px;
+    /* 元素陰影 */ box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    /* 動畫過渡 */ transition: box-shadow .16s,border-color .16s,background-color .25s;
+    /* 文字選取 */ user-select: none;
+    /* 觸控行為 */ touch-action: none;
+}
+.node:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 元素陰影 */ box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    /* 顯示層級 */ z-index: 9;
+}
+.node.male {
+    /* 左側邊框 */ border-left: 4px solid var(--male-bar);
+}
+.node.female {
+    /* 左側邊框 */ border-left: 4px solid var(--female-bar);
+}
+.node.other {
+    /* 左側邊框 */ border-left: 4px solid var(--other-bar);
+}
+.node.ghost {
+    /* 背景設定 */ background: var(--ghost-bg);
+    /* 邊框顏色 */ border-color: var(--ghost-border);
+    /* 邊框樣式 */ border-style: dotted;
+    /* 透明度 */ opacity: .9;
+}
+.node.ghost.male {
+    /* 左側邊框 */ border-left: 4px solid var(--ghost-male-bar);
+}
+.node.ghost.female {
+    /* 左側邊框 */ border-left: 4px solid var(--ghost-female-bar);
+}
+.node.ghost.other {
+    /* 左側邊框 */ border-left: 4px solid var(--ghost-other-bar);
+}
+.node.dead {
+    /* 背景設定 */ background: var(--dead-bg);
+    /* 邊框顏色 */ border-color: var(--dead-border);
+    /* 邊框樣式 */ border-style: dashed;
+    /* 透明度 */ opacity: .88;
+}
+.node.dead.male {
+    /* 左側邊框 */ border-left: 4px solid var(--dead-male-bar);
+}
+.node.dead.female {
+    /* 左側邊框 */ border-left: 4px solid var(--dead-female-bar);
+}
+.node.dead.other {
+    /* 左側邊框 */ border-left: 4px solid var(--dead-other-bar);
+}
+.node.inlaw {
+    /* 上方邊框 */ border-top: 2px dotted var(--spouse);
+}
+.node.inlaw .n-name::before {
+    /* 生成內容 */ content: "姻 ";
+    /* 字體大小 */ font-size: 10px;
+    /* 文字顏色 */ color: var(--spouse);
+    /* 字體粗細 */ font-weight: 400;
+}
+.node.hl {
+    /* 外框設定 */ outline: 3px solid var(--hl);
+    /* 外框偏移 */ outline-offset: 2px;
+    /* 顯示層級 */ z-index: 8;
+}
+.node.dim {
+    /* 透明度 */ opacity: .15;
+}
+.node.dragging {
+    /* 顯示層級 */ z-index: 100;
+    /* 滑鼠指標 */ cursor: grabbing;
+    /* 元素陰影 */ box-shadow: 0 18px 44px rgba(0,0,0,.24);
+    /* 元素變形 */ transform: scale(1.04);
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 動畫過渡 */ transition: none;
+}
+.n-avatar {
+    /* 元素寬度 */ width: 60px;
+    /* 元素高度 */ height: 60px;
+    /* 圓角弧度 */ border-radius: 9px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 溢出處理 */ overflow: hidden;
+    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 22px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 文字顏色 */ color: var(--avatar-ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 定位方式 */ position: relative;
+}
+.n-avatar img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.node.ghost .n-avatar::after {
+    /* 生成內容 */ content: "";
+    /* 定位方式 */ position: absolute;
+    /* 定位範圍 */ inset: 0;
+    /* 背景設定 */ background: rgba(155,183,212,.28);
+    /* 混合模式 */ mix-blend-mode: screen;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.node.dead .n-avatar {
+    /* 視覺濾鏡 */ filter: sepia(.45) saturate(.7) brightness(.95);
+}
+.n-body {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 0;
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 2px;
+    /* 水平對齊 */ justify-content: center;
+}
+.n-name {
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距設定 */ letter-spacing: .2px;
+    /* 行距設定 */ line-height: 1.28;
+    /* 顯示方式 */ display: -webkit-box;
+    /* WebKit 行數限制 */ -webkit-line-clamp: 2;
+    /* WebKit 排列方向 */ -webkit-box-orient: vertical;
+    /* 溢出處理 */ overflow: hidden;
+    /* 斷字方式 */ word-break: break-word;
+    /* 換行規則 */ overflow-wrap: anywhere;
+    /* 右側內縮 */ padding-right: 24px;
+}
+.node.dead .n-name {
+    /* 文字顏色 */ color: var(--dead-ink);
+}
+.node.ghost .n-name {
+    /* 文字顏色 */ color: var(--ghost-ink);
+}
+.n-title {
+    /* 字體大小 */ font-size: 10px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+.n-residence,
+.n-aspiration,
+.n-death {
+    /* 字體大小 */ font-size: 10px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 行距設定 */ line-height: 1.4;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 3px;
+}
+
+/* ========【介面圖示】 設定 - 共用 SVG Icon 顯示規則 ======== */
+.l1ng-icon {
+    /* 顯示方式 */ display: inline-block;
+    /* 元素寬度 */ width: 1em;
+    /* 元素高度 */ height: 1em;
+    /* 彈性配比 */ flex: 0 0 auto;
+    /* 垂直對齊 */ vertical-align: -0.12em;
+    /* 背景顏色 */ background-color: currentColor;
+    /* WebKit 遮罩圖片 */ -webkit-mask-image: var(--l1ng-icon);
+    /* 遮罩圖片 */ mask-image: var(--l1ng-icon);
+    /* WebKit 遮罩重複 */ -webkit-mask-repeat: no-repeat;
+    /* 遮罩重複 */ mask-repeat: no-repeat;
+    /* WebKit 遮罩位置 */ -webkit-mask-position: center;
+    /* 遮罩位置 */ mask-position: center;
+    /* WebKit 遮罩尺寸 */ -webkit-mask-size: contain;
+    /* 遮罩尺寸 */ mask-size: contain;
+}
+.icon-btn .l1ng-icon,
+.sidebar-btn .l1ng-icon,
+.filebtn .l1ng-icon,
+.modal-actions .l1ng-icon,
+.pet-add-btn .l1ng-icon,
+.gallery-add-btn .l1ng-icon {
+    /* 字體大小 */ font-size: 1.02em;
+}
+.info>.l1ng-icon,
+.gallery-drop-hint>.l1ng-icon {
+    /* 右側外距 */ margin-right: 6px;
+    /* 文字顏色 */ color: var(--accent);
+}
+.modal h2>.l1ng-icon,
+.modal h3>.l1ng-icon,
+.setting-group-title>.l1ng-icon,
+.rel-title>.l1ng-icon {
+    /* 右側外距 */ margin-right: 5px;
+    /* 文字顏色 */ color: var(--accent);
+}
+.n-residence .l1ng-icon,
+.n-aspiration .l1ng-icon,
+.n-death .l1ng-icon {
+    /* 字體大小 */ font-size: 10px;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.n-residence .l1ng-icon {
+    /* 文字顏色 */ color: var(--sub);
+}
+.n-aspiration .l1ng-icon {
+    /* 文字顏色 */ color: var(--accent);
+}
+.n-death .l1ng-icon {
+    /* 文字顏色 */ color: #a05a4a;
+}
+body[data-theme="midnight"] .n-death .l1ng-icon {
+    /* 文字顏色 */ color: #c08e78;
+}
+.status-icon,
+.race-icon,
+.pet-icon {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+}
+.n-aspiration {
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 500;
+}
+.n-death {
+    /* 文字顏色 */ color: #a05a4a;
+}
+body[data-theme="midnight"] .n-death {
+    /* 文字顏色 */ color: #c08e78;
+}
+.node.dead .n-residence,
+.node.dead .n-aspiration,
+.node.dead .n-death {
+    /* 文字顏色 */ color: var(--dead-ink);
+    /* 透明度 */ opacity: .9;
+}
+.node.ghost .n-residence,
+.node.ghost .n-aspiration,
+.node.ghost .n-death {
+    /* 文字顏色 */ color: var(--ghost-ink);
+    /* 透明度 */ opacity: .9;
+}
+.n-pets {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 3px;
+    /* 上方外距 */ margin-top: 3px;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 垂直對齊 */ align-items: center;
+    /* 字體大小 */ font-size: 10px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 行距設定 */ line-height: 1.4;
+}
+.n-pet-chip {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 2px;
+    /* 內縮空間 */ padding: 1px 5px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 字體大小 */ font-size: 9.5px;
+    /* 文字顏色 */ color: var(--ink);
+    /* 最大寬度 */ max-width: 88px;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+.node.dead .n-pet-chip {
+    /* 背景設定 */ background: var(--dead-tag-bg);
+    /* 文字顏色 */ color: var(--dead-tag-ink);
+}
+.node.ghost .n-pet-chip {
+    /* 背景設定 */ background: var(--ghost-tag-bg);
+    /* 文字顏色 */ color: var(--ghost-tag-ink);
+}
+.n-gallery-badge {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 2px;
+    /* 內縮空間 */ padding: 1px 5px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 背景設定 */ background: var(--tag-bg);
+    /* 文字顏色 */ color: var(--tag-ink);
+    /* 字體大小 */ font-size: 9.5px;
+    /* 行距設定 */ line-height: 1.4;
+    /* 上方外距 */ margin-top: 3px;
+}
+.node.ghost .n-gallery-badge {
+    /* 背景設定 */ background: var(--ghost-tag-bg);
+    /* 文字顏色 */ color: var(--ghost-tag-ink);
+}
+.node.dead .n-gallery-badge {
+    /* 背景設定 */ background: var(--dead-tag-bg);
+    /* 文字顏色 */ color: var(--dead-tag-ink);
+}
+.n-tags {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 3px;
+    /* 上方外距 */ margin-top: 3px;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 最大高度 */ max-height: 16px;
+}
+.tag {
+    /* 字體大小 */ font-size: 9px;
+    /* 行距設定 */ line-height: 1.35;
+    /* 內縮空間 */ padding: 1px 5px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 背景設定 */ background: var(--tag-bg);
+    /* 文字顏色 */ color: var(--tag-ink);
+    /* 換行方式 */ white-space: nowrap;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 最大寬度 */ max-width: 96px;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 顯示方式 */ display: inline-block;
+    /* 垂直對齊 */ vertical-align: middle;
+}
+.node.ghost .tag {
+    /* 背景設定 */ background: var(--ghost-tag-bg);
+    /* 文字顏色 */ color: var(--ghost-tag-ink);
+}
+.node.dead .tag {
+    /* 背景設定 */ background: var(--dead-tag-bg);
+    /* 文字顏色 */ color: var(--dead-tag-ink);
+}
+.tag-more {
+    /* 背景設定 */ background: var(--accent);
+    /* 文字顏色 */ color: #fff !important;
+    /* 字體粗細 */ font-weight: 600;
+    /* 最大寬度 */ max-width: none;
+    /* 內縮空間 */ padding: 1px 7px;
+}
+.stage-tag {
+    /* 字體大小 */ font-size: 9px;
+    /* 內縮空間 */ padding: 1px 4px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 文字顏色 */ color: #fff;
+    /* 換行方式 */ white-space: nowrap;
+    /* 顯示方式 */ display: inline-block;
+    /* 垂直對齊 */ vertical-align: middle;
+}
+.stage-嬰兒 {
+    /* 背景設定 */ background: #e8a8a8;
+}
+.stage-幼兒 {
+    /* 背景設定 */ background: #e8b890;
+}
+.stage-兒童 {
+    /* 背景設定 */ background: #e0c868;
+}
+.stage-青少年 {
+    /* 背景設定 */ background: #88c088;
+}
+.stage-青年 {
+    /* 背景設定 */ background: #78b8d8;
+}
+.stage-成年 {
+    /* 背景設定 */ background: #9090d8;
+}
+.stage-老年 {
+    /* 背景設定 */ background: #b0a090;
+}
+body[data-theme="midnight"] .stage-嬰兒 {
+    /* 背景設定 */ background: #8a5860;
+}
+body[data-theme="midnight"] .stage-幼兒 {
+    /* 背景設定 */ background: #8a6a50;
+}
+body[data-theme="midnight"] .stage-兒童 {
+    /* 背景設定 */ background: #8a7a40;
+}
+body[data-theme="midnight"] .stage-青少年 {
+    /* 背景設定 */ background: #587a58;
+}
+body[data-theme="midnight"] .stage-青年 {
+    /* 背景設定 */ background: #4a6c8a;
+}
+body[data-theme="midnight"] .stage-成年 {
+    /* 背景設定 */ background: #5a5a90;
+}
+body[data-theme="midnight"] .stage-老年 {
+    /* 背景設定 */ background: #6a6058;
+}
+.n-badge {
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 5px;
+    /* 右側位置 */ right: 5px;
+    /* 元素寬度 */ width: 22px;
+    /* 元素高度 */ height: 22px;
+    /* 圓角弧度 */ border-radius: 50%;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 13px;
+    /* 行距設定 */ line-height: 1;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 元素陰影 */ box-shadow: 0 1px 4px rgba(0,0,0,.18);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 顯示層級 */ z-index: 3;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.n-badge.alive {
+    /* 背景設定 */ background: var(--alive-badge-bg);
+    /* 邊框顏色 */ border-color: var(--alive-badge-border);
+}
+.n-badge.ghost {
+    /* 背景設定 */ background: var(--ghost-badge-bg);
+    /* 邊框顏色 */ border-color: var(--ghost-badge-border);
+}
+.n-badge.dead {
+    /* 背景設定 */ background: var(--dead-badge-bg);
+    /* 邊框顏色 */ border-color: var(--dead-badge-border);
+}
+.n-race-badge {
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 5px;
+    /* 左側位置 */ left: 5px;
+    /* 最小寬度 */ min-width: 22px;
+    /* 元素高度 */ height: 22px;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 內縮空間 */ padding: 0 4px;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 13px;
+    /* 行距設定 */ line-height: 1;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 元素陰影 */ box-shadow: 0 1px 4px rgba(0,0,0,.18);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 顯示層級 */ z-index: 3;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.node.ghost .n-race-badge {
+    /* 背景設定 */ background: var(--ghost-badge-bg);
+    /* 邊框顏色 */ border-color: var(--ghost-badge-border);
+}
+.node.dead .n-race-badge {
+    /* 背景設定 */ background: var(--dead-badge-bg);
+    /* 邊框顏色 */ border-color: var(--dead-badge-border);
+}
+.node.view {
+    /* 排列方向 */ flex-direction: column;
+    /* 水平對齊 */ justify-content: flex-start;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 4px;
+    /* 內縮空間 */ padding: 8px 6px 6px;
+}
+.node.view .n-race-badge {
+    /* 頂部位置 */ top: 3px;
+    /* 左側位置 */ left: 3px;
+    /* 最小寬度 */ min-width: 16px;
+    /* 元素高度 */ height: 16px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 內縮空間 */ padding: 0 3px;
+    /* 字體大小 */ font-size: 10px;
+}
+.node.view .n-badge {
+    /* 頂部位置 */ top: 3px;
+    /* 右側位置 */ right: 3px;
+    /* 元素寬度 */ width: 16px;
+    /* 元素高度 */ height: 16px;
+    /* 字體大小 */ font-size: 10px;
+}
+.n-view-avatar {
+    /* 元素寬度 */ width: 76px;
+    /* 元素高度 */ height: 76px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 溢出處理 */ overflow: hidden;
+    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 30px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 文字顏色 */ color: var(--avatar-ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 定位方式 */ position: relative;
+    /* 上方外距 */ margin-top: 4px;
+}
+.n-view-avatar img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.node.view.ghost .n-view-avatar::after {
+    /* 生成內容 */ content: "";
+    /* 定位方式 */ position: absolute;
+    /* 定位範圍 */ inset: 0;
+    /* 背景設定 */ background: rgba(155,183,212,.28);
+    /* 混合模式 */ mix-blend-mode: screen;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.node.view.dead .n-view-avatar {
+    /* 視覺濾鏡 */ filter: sepia(.45) saturate(.7) brightness(.95);
+}
+.n-view-name {
+    /* 元素寬度 */ width: 100%;
+    /* 字體大小 */ font-size: 11px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距設定 */ letter-spacing: .2px;
+    /* 行距設定 */ line-height: 1.2;
+    /* 文字對齊 */ text-align: center;
+    /* 顯示方式 */ display: -webkit-box;
+    /* WebKit 行數限制 */ -webkit-line-clamp: 2;
+    /* WebKit 排列方向 */ -webkit-box-orient: vertical;
+    /* 溢出處理 */ overflow: hidden;
+    /* 斷字方式 */ word-break: break-word;
+    /* 換行規則 */ overflow-wrap: anywhere;
+    /* 內縮空間 */ padding: 0 2px;
+    /* 最大高度 */ max-height: 26px;
+}
+.node.view.dead .n-view-name {
+    /* 文字顏色 */ color: var(--dead-ink);
+}
+.node.view.ghost .n-view-name {
+    /* 文字顏色 */ color: var(--ghost-ink);
+}
+.n-view-pets {
+    /* 字體大小 */ font-size: 9.5px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 行距設定 */ line-height: 1.3;
+    /* 文字對齊 */ text-align: center;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 最大寬度 */ max-width: 100%;
+    /* 內縮空間 */ padding: 0 2px;
+}
+.empty {
+    /* 定位方式 */ position: absolute;
+    /* 定位範圍 */ inset: 0;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 14px;
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 文字對齊 */ text-align: center;
+    /* 內縮空間 */ padding: 20px;
+}
+
+/* ========【彈出視窗】 設定 - 遮罩、表單與共用 Modal 元件 ======== */
+.mask {
+    /* 定位方式 */ position: fixed;
+    /* 定位範圍 */ inset: 0;
+    /* 背景設定 */ background: var(--mask-bg);
+    /* 背景濾鏡 */ backdrop-filter: blur(2px);
+    /* 顯示方式 */ display: none;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 顯示層級 */ z-index: 100;
+    /* 內縮空間 */ padding: 20px;
+    /* 過度捲動行為 */ overscroll-behavior: contain;
+}
+.mask.show {
+    /* 顯示方式 */ display: flex;
+}
+.mask.roster {
+    /* 顯示層級 */ z-index: 90;
+}
+.mask.nested {
+    /* 顯示層級 */ z-index: 150;
+}
+.mask.viewer {
+    /* 顯示層級 */ z-index: 210;
+}
+.modal {
+    /* 背景設定 */ background: var(--card);
+    /* 圓角弧度 */ border-radius: 14px;
+    /* 元素寬度 */ width: min(740px,100%);
+    /* 最大高度 */ max-height: 90vh;
+    /* 溢出處理 */ overflow: auto;
+    /* 內縮空間 */ padding: 20px 24px;
+    /* 元素陰影 */ box-shadow: 0 24px 60px rgba(0,0,0,.3);
+    /* 動畫設定 */ animation: pop .18s ease-out;
+}
+@keyframes pop {
+    from {
+        /* 元素變形 */ transform: scale(.96);
+        /* 透明度 */ opacity: 0;
+    }
+    to {
+        /* 元素變形 */ transform: scale(1);
+        /* 透明度 */ opacity: 1;
+    }
+}
+.modal h2 {
+    /* 外距設定 */ margin: 0 0 14px;
+    /* 字體大小 */ font-size: 17px;
+    /* 字距設定 */ letter-spacing: 1px;
+    /* 文字顏色 */ color: var(--accent);
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.modal h2 .family-name-chip {
+    /* 顯示方式 */ display: inline-block;
+    /* 內縮空間 */ padding: 1px 8px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體大小 */ font-size: 14px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 最大寬度 */ max-width: 280px;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 換行方式 */ white-space: nowrap;
+    /* 垂直對齊 */ vertical-align: middle;
+}
+.grid {
+    /* 顯示方式 */ display: grid;
+    /* 網格欄位 */ grid-template-columns: repeat(12,1fr);
+    /* 項目間距 */ gap: 9px 12px;
+}
+.grid label {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 4px;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 網格欄位範圍 */ grid-column: span 6;
+}
+.grid label.full {
+    /* 網格欄位範圍 */ grid-column: 1/-1;
+}
+.grid label.span-3 {
+    /* 網格欄位範圍 */ grid-column: span 3;
+}
+.grid label.span-4 {
+    /* 網格欄位範圍 */ grid-column: span 4;
+}
+.grid label.span-6 {
+    /* 網格欄位範圍 */ grid-column: span 6;
+}
+.grid label.span-8 {
+    /* 網格欄位範圍 */ grid-column: span 8;
+}
+.grid input,
+.grid select,
+.grid textarea {
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 內縮空間 */ padding: 6px 9px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 外框設定 */ outline: none;
+    /* 元素寬度 */ width: 100%;
+}
+.grid input:focus,
+.grid select:focus,
+.grid textarea:focus {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.grid textarea {
+    /* 調整尺寸 */ resize: vertical;
+}
+.grid .hint-below {
+    /* 字體大小 */ font-size: 10.5px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 透明度 */ opacity: .75;
+    /* 上方外距 */ margin-top: 1px;
+}
+.ss-wrap {
+    /* 定位方式 */ position: relative;
+}
+.ss-input {
+    /* 元素寬度 */ width: 100%;
+    /* 最小高度 */ min-height: 34px;
+    /* 內縮空間 */ padding: 4px 8px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 項目間距 */ gap: 3px;
+    /* 動畫過渡 */ transition: border-color .15s;
+}
+.ss-input:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.ss-wrap.ss-open .ss-input {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.ss-placeholder {
+    /* 文字顏色 */ color: var(--sub);
+    /* 內縮空間 */ padding: 3px 0;
+}
+.ss-tag {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 3px;
+    /* 內縮空間 */ padding: 1px 4px 1px 6px;
+    /* 背景設定 */ background: var(--accent);
+    /* 文字顏色 */ color: #fff;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 字體大小 */ font-size: 11px;
+    /* 行距設定 */ line-height: 1.4;
+    /* 最大寬度 */ max-width: 100%;
+}
+.ss-tag-x {
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 透明度 */ opacity: .85;
+    /* 字體大小 */ font-size: 12px;
+    /* 行距設定 */ line-height: 1;
+    /* 內縮空間 */ padding: 0 2px;
+}
+.ss-tag-x:hover {
+    /* 透明度 */ opacity: 1;
+}
+.ss-dropdown {
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 100%;
+    /* 左側位置 */ left: 0;
+    /* 右側位置 */ right: 0;
+    /* 背景設定 */ background: var(--card);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 上方外距 */ margin-top: 4px;
+    /* 元素陰影 */ box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    /* 顯示層級 */ z-index: 200;
+    /* 內縮空間 */ padding: 6px;
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+}
+.ss-search {
+    /* 元素寬度 */ width: 100%;
+    /* 內縮空間 */ padding: 6px 9px;
+    /* 字體大小 */ font-size: 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 5px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 外框設定 */ outline: none;
+    /* 下方外距 */ margin-bottom: 4px;
+    /* 字體設定 */ font-family: inherit;
+}
+.ss-search:focus {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.ss-options {
+    /* 垂直溢出 */ overflow-y: auto;
+    /* 最大高度 */ max-height: 200px;
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 1px;
+}
+.ss-option {
+    /* 內縮空間 */ padding: 6px 8px;
+    /* 字體大小 */ font-size: 12px;
+    /* 圓角弧度 */ border-radius: 5px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 文字顏色 */ color: var(--ink);
+    /* 動畫過渡 */ transition: background .1s;
+}
+.ss-option:hover {
+    /* 背景設定 */ background: var(--panel-item-hover);
+}
+.ss-option.selected {
+    /* 背景設定 */ background: var(--accent);
+    /* 文字顏色 */ color: #fff;
+}
+.ss-option.none {
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體樣式 */ font-style: italic;
+}
+.ss-option .check {
+    /* 元素寬度 */ width: 14px;
+    /* 元素高度 */ height: 14px;
+    /* 邊框設定 */ border: 1.5px solid var(--border);
+    /* 圓角弧度 */ border-radius: 3px;
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 10px;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.ss-option.selected .check {
+    /* 背景設定 */ background: #fff;
+    /* 文字顏色 */ color: var(--accent);
+    /* 邊框顏色 */ border-color: #fff;
+}
+.ss-empty {
+    /* 內縮空間 */ padding: 8px;
+    /* 文字對齊 */ text-align: center;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 12px;
+}
+.avatar-row {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 12px;
+    /* 垂直對齊 */ align-items: flex-start;
+}
+.avatar-preview {
+    /* 元素寬度 */ width: 80px;
+    /* 元素高度 */ height: 80px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 溢出處理 */ overflow: hidden;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 30px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 文字顏色 */ color: var(--avatar-ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+}
+.avatar-preview img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.avatar-actions {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 6px;
+    /* 彈性配比 */ flex: 1;
+    /* 水平對齊 */ justify-content: center;
+}
+.filebtn {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 項目間距 */ gap: 5px;
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 內縮空間 */ padding: 6px 12px;
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+}
+.filebtn:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: var(--accent);
+}
+.avatar-actions .filebtn {
+    /* 文字對齊 */ text-align: center;
+    /* 內縮空間 */ padding: 6px 12px;
+    /* 字體大小 */ font-size: 12px;
+}
+.avatar-tip {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 行距設定 */ line-height: 1.4;
+}
+.modal-actions {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 8px;
+    /* 上方外距 */ margin-top: 18px;
+    /* 垂直對齊 */ align-items: center;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.modal-actions .spacer {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 8px;
+}
+.modal-actions button {
+    /* 內縮空間 */ padding: 7px 14px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 字體大小 */ font-size: 13px;
+    /* 動畫過渡 */ transition: .15s;
+}
+.modal-actions button:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: var(--accent);
+}
+.modal-actions button.primary {
+    /* 背景設定 */ background: var(--accent);
+    /* 文字顏色 */ color: #fff;
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.modal-actions button.primary:hover {
+    /* 背景設定 */ background: var(--accent-hover);
+    /* 文字顏色 */ color: #fff;
+}
+.modal-actions button.danger {
+    /* 文字顏色 */ color: #b03a2e;
+    /* 邊框顏色 */ border-color: #e6c9c4;
+}
+.modal-actions button.danger:hover {
+    /* 背景設定 */ background: rgba(200,60,40,.06);
+}
+.info {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 背景設定 */ background: var(--panel-bg);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 下方外距 */ margin-bottom: 12px;
+    /* 行距設定 */ line-height: 1.5;
+}
+.bg-modal {
+    /* 元素寬度 */ width: min(640px,100%);
+}
+.setting-group-title {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+    /* 外距設定 */ margin: 14px 0 8px;
+    /* 下方內縮 */ padding-bottom: 6px;
+    /* 下方邊框 */ border-bottom: 1px dashed var(--border);
+    /* 字距設定 */ letter-spacing: .5px;
+}
+.setting-group-title:first-of-type {
+    /* 上方外距 */ margin-top: 0;
+}
+.theme-grid {
+    /* 顯示方式 */ display: grid;
+    /* 網格欄位 */ grid-template-columns: repeat(2,1fr);
+    /* 項目間距 */ gap: 10px;
+    /* 下方外距 */ margin-bottom: 8px;
+}
+.theme-card {
+    /* 邊框設定 */ border: 2px solid var(--border);
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 內縮空間 */ padding: 12px 14px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+    /* 背景設定 */ background: var(--card);
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 8px;
+}
+.theme-card:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.theme-card.selected {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 元素陰影 */ box-shadow: 0 0 0 3px var(--grad-1-soft), 0 0 0 6px var(--grad-2-soft);
+}
+.theme-preview {
+    /* 元素高度 */ height: 28px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 元素陰影 */ box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
+}
+.theme-card-name {
+    /* 文字對齊 */ text-align: center;
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 字距設定 */ letter-spacing: .5px;
+    /* 文字顏色 */ color: var(--ink);
+}
+.theme-card.selected .theme-card-name {
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 700;
+}
+.custom-theme {
+    /* 外距設定 */ margin: 12px 0 4px;
+    /* 內縮空間 */ padding: 12px 14px;
+    /* 邊框設定 */ border: 1px dashed var(--border);
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 背景設定 */ background: var(--panel-bg);
+}
+.custom-theme-row {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 10px;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+}
+.custom-theme-row label {
+    /* 字體粗細 */ font-weight: 600;
+    /* 文字顏色 */ color: var(--sub);
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 5px;
+}
+.custom-color-input {
+    /* 元素寬度 */ width: 42px;
+    /* 元素高度 */ height: 34px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 內縮空間 */ padding: 2px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 背景設定 */ background: transparent;
+}
+.custom-theme-preview {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 120px;
+    /* 元素高度 */ height: 28px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 元素陰影 */ box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
+    /* 背景設定 */ background: linear-gradient(120deg,#f0c050,#a878c8);
+}
+.apply-btn {
+    /* 內縮空間 */ padding: 7px 14px;
+    /* 字體大小 */ font-size: 12.5px;
+    /* 邊框設定 */ border: 1px solid var(--accent);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+}
+.apply-btn:hover {
+    /* 視覺濾鏡 */ filter: brightness(1.05);
+}
+.bg-preview {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 140px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 邊框設定 */ border: 1px dashed var(--border);
+    /* 背景設定 */ background: var(--panel-item);
+    /* 背景尺寸 */ background-size: cover;
+    /* 背景位置 */ background-position: center;
+    /* 背景重複 */ background-repeat: no-repeat;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 13px;
+    /* 下方外距 */ margin-bottom: 12px;
+}
+.bg-row {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 8px;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 下方外距 */ margin-bottom: 12px;
+}
+.bg-setting {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 6px;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 下方外距 */ margin-bottom: 12px;
+}
+.bg-setting input[type=range] {
+    /* 元素寬度 */ width: 100%;
+    /* 內縮空間 */ padding: 0;
+    /* 邊框設定 */ border: none;
+    /* 背景設定 */ background: transparent;
+    /* 控制項強調色 */ accent-color: var(--accent);
+    /* 滑鼠指標 */ cursor: pointer;
+}
+.bg-setting select {
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 字體設定 */ font-family: inherit;
+    /* 元素寬度 */ width: 100%;
+}
+.bg-value {
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+}
+.storage-bar {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 8px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 溢出處理 */ overflow: hidden;
+    /* 外距設定 */ margin: 6px 0;
+}
+.storage-bar-fill {
+    /* 元素高度 */ height: 100%;
+    /* 背景設定 */ background: linear-gradient(90deg, var(--grad-1), var(--grad-2));
+    /* 動畫過渡 */ transition: width .3s;
+}
+.storage-bar-fill.warn {
+    /* 背景設定 */ background: linear-gradient(90deg,#f0a050,#e85858);
+}
+
+/* ========【關係編輯】 設定 - 關係清單、自訂標註與操作 ======== */
+.rel-section {
+    /* 上方外距 */ margin-top: 14px;
+    /* 上方邊框 */ border-top: 1px dashed var(--border);
+    /* 上方內縮 */ padding-top: 12px;
+}
+.rel-title {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 下方外距 */ margin-bottom: 8px;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.rel-title .hint-inline {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 透明度 */ opacity: .7;
+    /* 字體粗細 */ font-weight: 400;
+}
+.rel-item {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: space-between;
+    /* 字體大小 */ font-size: 13px;
+    /* 內縮空間 */ padding: 5px 8px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 下方外距 */ margin-bottom: 5px;
+    /* 項目間距 */ gap: 8px;
+}
+.rel-item button {
+    /* 內縮空間 */ padding: 1px 7px;
+    /* 字體大小 */ font-size: 13px;
+    /* 行距設定 */ line-height: 1.3;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 背景設定 */ background: var(--input-bg);
+    /* 圓角弧度 */ border-radius: 5px;
+    /* 滑鼠指標 */ cursor: pointer;
+}
+.rel-empty {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 內縮空間 */ padding: 4px 0;
+}
+.rel-add {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 6px;
+    /* 上方外距 */ margin-top: 8px;
+    /* 垂直對齊 */ align-items: flex-start;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.rel-add > div:first-child {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 100px;
+}
+.rel-add input {
+    /* 內縮空間 */ padding: 6px 9px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 字體設定 */ font-family: inherit;
+}
+.rel-add button {
+    /* 內縮空間 */ padding: 6px 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 字體大小 */ font-size: 13px;
+}
+.rel-anno-item {
+    /* 顯示方式 */ display: grid;
+    /* 網格欄位 */ grid-template-columns: minmax(80px,1.2fr) 130px minmax(90px,1.4fr) auto;
+    /* 項目間距 */ gap: 6px;
+    /* 垂直對齊 */ align-items: center;
+    /* 下方外距 */ margin-bottom: 6px;
+}
+.rel-anno-name {
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 內縮空間 */ padding: 4px 6px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 文字顏色 */ color: var(--ink);
+}
+.rel-anno-item select,
+.rel-anno-item input {
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 12px;
+    /* 內縮空間 */ padding: 5px 7px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 外框設定 */ outline: none;
+    /* 元素寬度 */ width: 100%;
+}
+.rel-anno-reset {
+    /* 內縮空間 */ padding: 3px 8px;
+    /* 字體大小 */ font-size: 11px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 5px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 字體設定 */ font-family: inherit;
+    /* 文字顏色 */ color: var(--sub);
+}
+
+/* ========【寵物資料】 設定 - 寵物清單、頭像與編輯操作 ======== */
+.pet-item {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 10px;
+    /* 內縮空間 */ padding: 6px 8px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 下方外距 */ margin-bottom: 5px;
+}
+.pet-item-avatar {
+    /* 元素寬度 */ width: 36px;
+    /* 元素高度 */ height: 36px;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 溢出處理 */ overflow: hidden;
+    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 18px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+}
+.pet-item-avatar img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.pet-item-info {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 0;
+}
+.pet-item-name {
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+.pet-item-meta {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+.pet-item-actions {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 4px;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.pet-item-actions button {
+    /* 內縮空間 */ padding: 3px 9px;
+    /* 字體大小 */ font-size: 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 背景設定 */ background: var(--input-bg);
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 文字顏色 */ color: var(--ink);
+}
+.pet-item-actions button.danger {
+    /* 文字顏色 */ color: #b03a2e;
+    /* 邊框顏色 */ border-color: #e6c9c4;
+}
+.pet-add-btn {
+    /* 上方外距 */ margin-top: 8px;
+    /* 內縮空間 */ padding: 6px 12px;
+    /* 字體大小 */ font-size: 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+}
+
+/* ========【模擬市民相簿】 設定 - 圖片網格、拖放與圖片操作 ======== */
+.gallery-grid {
+    /* 顯示方式 */ display: grid;
+    /* 網格欄位 */ grid-template-columns: repeat(auto-fill,minmax(110px,1fr));
+    /* 項目間距 */ gap: 10px;
+    /* 下方外距 */ margin-bottom: 8px;
+    /* 最小高度 */ min-height: 20px;
+}
+.gallery-empty {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 內縮空間 */ padding: 14px 0;
+    /* 文字對齊 */ text-align: center;
+    /* 邊框設定 */ border: 1px dashed var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+}
+.gallery-item {
+    /* 定位方式 */ position: relative;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 溢出處理 */ overflow: hidden;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 長寬比例 */ aspect-ratio: 1/1;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 動畫過渡 */ transition: .15s;
+}
+.gallery-item:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 元素陰影 */ box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    /* 元素變形 */ transform: translateY(-1px);
+}
+.gallery-item img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.gallery-item-overlay {
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 4px;
+    /* 右側位置 */ right: 4px;
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 3px;
+    /* 透明度 */ opacity: 0;
+    /* 動畫過渡 */ transition: .15s;
+}
+.gallery-item:hover .gallery-item-overlay {
+    /* 透明度 */ opacity: 1;
+}
+.gallery-item-btn {
+    /* 元素寬度 */ width: 24px;
+    /* 元素高度 */ height: 24px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 邊框設定 */ border: none;
+    /* 背景設定 */ background: rgba(0,0,0,.62);
+    /* 文字顏色 */ color: #fff;
+    /* 字體大小 */ font-size: 12px;
+    /* 行距設定 */ line-height: 1;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 背景濾鏡 */ backdrop-filter: blur(4px);
+    /* 內縮空間 */ padding: 0;
+}
+.gallery-item-btn:hover {
+    /* 背景設定 */ background: rgba(0,0,0,.85);
+}
+.gallery-item-btn.danger:hover {
+    /* 背景設定 */ background: #c94a3a;
+}
+.gallery-item-title {
+    /* 定位方式 */ position: absolute;
+    /* 左側位置 */ left: 0;
+    /* 右側位置 */ right: 0;
+    /* 底部位置 */ bottom: 0;
+    /* 背景設定 */ background: linear-gradient(to top, rgba(0,0,0,.72), transparent);
+    /* 文字顏色 */ color: #fff;
+    /* 字體大小 */ font-size: 10.5px;
+    /* 內縮空間 */ padding: 12px 6px 4px;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.gallery-item-stage {
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 4px;
+    /* 左側位置 */ left: 4px;
+    /* 字體大小 */ font-size: 9px;
+    /* 內縮空間 */ padding: 1px 5px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 文字顏色 */ color: #fff;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.gallery-add-btn {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 項目間距 */ gap: 6px;
+    /* 元素寬度 */ width: 100%;
+    /* 內縮空間 */ padding: 10px 12px;
+    /* 上方外距 */ margin-top: 8px;
+    /* 字體大小 */ font-size: 13px;
+    /* 邊框設定 */ border: 1px dashed var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--panel-bg);
+    /* 文字顏色 */ color: var(--sub);
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+    /* 字體設定 */ font-family: inherit;
+}
+.gallery-add-btn:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: var(--accent);
+    /* 背景設定 */ background: var(--panel-item-hover);
+}
+.gallery-drop-hint {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 透明度 */ opacity: .75;
+    /* 上方外距 */ margin-top: 4px;
+    /* 文字對齊 */ text-align: center;
+}
+.gallery-grid.dragover {
+    /* 外框設定 */ outline: 2px dashed var(--accent);
+    /* 外框偏移 */ outline-offset: 4px;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--panel-bg);
+}
+
+/* ========【相簿瀏覽器】 設定 - V6.5 全域相簿檢視 ======== */
+.gallery-browser-modal {
+    /* 元素寬度 */ width: min(1000px,100%);
+}
+.gallery-browser-toolbar {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 8px;
+    /* 下方外距 */ margin-bottom: 14px;
+    /* 垂直對齊 */ align-items: center;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.gallery-browser-toolbar input {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 160px;
+    /* 內縮空間 */ padding: 8px 11px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+}
+.gallery-browser-toolbar input:focus {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.gallery-browser-toolbar select {
+    /* 內縮空間 */ padding: 8px 10px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 最小寬度 */ min-width: 150px;
+    /* 最大寬度 */ max-width: 200px;
+}
+.gallery-browser-toolbar select:focus {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.gallery-browser-list {
+    /* 最大高度 */ max-height: 62vh;
+    /* 溢出處理 */ overflow: auto;
+    /* 顯示方式 */ display: grid;
+    /* 網格欄位 */ grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    /* 項目間距 */ gap: 12px;
+    /* 內縮空間 */ padding: 4px;
+}
+.gb-item {
+    /* 定位方式 */ position: relative;
+    /* 長寬比例 */ aspect-ratio: 1/1;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 溢出處理 */ overflow: hidden;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 背景設定 */ background: var(--panel-item);
+    /* 動畫過渡 */ transition: .15s;
+}
+.gb-item:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 元素變形 */ transform: translateY(-2px);
+    /* 元素陰影 */ box-shadow: 0 8px 20px rgba(0,0,0,.14);
+}
+.gb-item img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.gb-overlay {
+    /* 定位方式 */ position: absolute;
+    /* 左側位置 */ left: 0;
+    /* 右側位置 */ right: 0;
+    /* 底部位置 */ bottom: 0;
+    /* 背景設定 */ background: linear-gradient(to top, rgba(0,0,0,.82), transparent);
+    /* 文字顏色 */ color: #fff;
+    /* 內縮空間 */ padding: 22px 8px 6px;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.gb-sim {
+    /* 字體大小 */ font-size: 10px;
+    /* 透明度 */ opacity: .9;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+.gb-title {
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+    /* 上方外距 */ margin-top: 1px;
+}
+.gb-stage {
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 6px;
+    /* 左側位置 */ left: 6px;
+    /* 字體大小 */ font-size: 9px;
+    /* 內縮空間 */ padding: 1px 5px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 文字顏色 */ color: #fff;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.gb-empty {
+    /* 網格欄位範圍 */ grid-column: 1/-1;
+    /* 文字對齊 */ text-align: center;
+    /* 內縮空間 */ padding: 50px 20px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 13px;
+}
+.photo-modal {
+    /* 元素寬度 */ width: min(560px,100%);
+}
+.photo-preview-wrap {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 8px;
+}
+.photo-preview {
+    /* 元素寬度 */ width: 100%;
+    /* 長寬比例 */ aspect-ratio: 16/10;
+    /* 最大高度 */ max-height: 260px;
+    /* 邊框設定 */ border: 1px dashed var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 背景尺寸 */ background-size: contain;
+    /* 背景位置 */ background-position: center;
+    /* 背景重複 */ background-repeat: no-repeat;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 13px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+    /* 溢出處理 */ overflow: hidden;
+}
+.photo-preview:hover {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 背景顏色 */ background-color: var(--panel-item-hover);
+}
+.photo-preview.has-image {
+    /* 邊框樣式 */ border-style: solid;
+    /* 背景顏色 */ background-color: #000;
+}
+.photo-actions-row {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 6px;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 垂直對齊 */ align-items: center;
+}
+.photo-actions-row .filebtn {
+    /* 字體大小 */ font-size: 12px;
+    /* 內縮空間 */ padding: 5px 10px;
+}
+.photo-size-tip {
+    /* 字體大小 */ font-size: 11.5px;
+    /* 文字顏色 */ color: var(--sub);
+}
+.photo-size-tip.warn {
+    /* 文字顏色 */ color: #c94a3a;
+    /* 字體粗細 */ font-weight: 600;
+}
+.viewer-modal {
+    /* 背景設定 */ background: transparent;
+    /* 內縮空間 */ padding: 0;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 最大寬度 */ max-width: none;
+    /* 最大高度 */ max-height: none;
+    /* 定位方式 */ position: relative;
+    /* 圓角弧度 */ border-radius: 0;
+    /* 動畫設定 */ animation: none;
+}
+.viewer-img-wrap {
+    /* 最大寬度 */ max-width: 90vw;
+    /* 最大高度 */ max-height: 82vh;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+}
+.viewer-img-wrap img {
+    /* 最大寬度 */ max-width: 90vw;
+    /* 最大高度 */ max-height: 82vh;
+    /* 圖片填滿方式 */ object-fit: contain;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 元素陰影 */ box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    /* 背景設定 */ background: #000;
+}
+.viewer-close {
+    /* 定位方式 */ position: fixed;
+    /* 頂部位置 */ top: 20px;
+    /* 右側位置 */ right: 24px;
+    /* 元素寬度 */ width: 40px;
+    /* 元素高度 */ height: 40px;
+    /* 圓角弧度 */ border-radius: 50%;
+    /* 邊框設定 */ border: none;
+    /* 背景設定 */ background: rgba(255,255,255,.16);
+    /* 文字顏色 */ color: #fff;
+    /* 字體大小 */ font-size: 20px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 背景濾鏡 */ backdrop-filter: blur(6px);
+    /* 動畫過渡 */ transition: .15s;
+}
+.viewer-close:hover {
+    /* 背景設定 */ background: rgba(255,255,255,.3);
+}
+.viewer-nav {
+    /* 定位方式 */ position: fixed;
+    /* 頂部位置 */ top: 50%;
+    /* 元素變形 */ transform: translateY(-50%);
+    /* 元素寬度 */ width: 48px;
+    /* 元素高度 */ height: 48px;
+    /* 圓角弧度 */ border-radius: 50%;
+    /* 邊框設定 */ border: none;
+    /* 背景設定 */ background: rgba(255,255,255,.16);
+    /* 文字顏色 */ color: #fff;
+    /* 字體大小 */ font-size: 24px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 背景濾鏡 */ backdrop-filter: blur(6px);
+    /* 動畫過渡 */ transition: .15s;
+}
+.viewer-nav:hover {
+    /* 背景設定 */ background: rgba(255,255,255,.3);
+}
+.viewer-nav.prev {
+    /* 左側位置 */ left: 24px;
+}
+.viewer-nav.next {
+    /* 右側位置 */ right: 24px;
+}
+.viewer-nav:disabled {
+    /* 透明度 */ opacity: .25;
+    /* 滑鼠指標 */ cursor: not-allowed;
+}
+.viewer-info {
+    /* 定位方式 */ position: fixed;
+    /* 左側位置 */ left: 50%;
+    /* 底部位置 */ bottom: 24px;
+    /* 元素變形 */ transform: translateX(-50%);
+    /* 背景設定 */ background: rgba(0,0,0,.62);
+    /* 文字顏色 */ color: #fff;
+    /* 內縮空間 */ padding: 10px 18px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 字體大小 */ font-size: 13px;
+    /* 最大寬度 */ max-width: 80vw;
+    /* 文字對齊 */ text-align: center;
+    /* 背景濾鏡 */ backdrop-filter: blur(8px);
+}
+.viewer-info .gv-title {
+    /* 字體粗細 */ font-weight: 700;
+    /* 字體大小 */ font-size: 14.5px;
+    /* 下方外距 */ margin-bottom: 3px;
+}
+.viewer-info .gv-note {
+    /* 字體大小 */ font-size: 12px;
+    /* 透明度 */ opacity: .85;
+    /* 下方外距 */ margin-bottom: 3px;
+    /* 最大寬度 */ max-width: 60vw;
+    /* 換行方式 */ white-space: pre-wrap;
+}
+.viewer-info .gv-counter {
+    /* 字體大小 */ font-size: 11px;
+    /* 透明度 */ opacity: .7;
+    /* 字體設定 */ font-family: ui-monospace,Consolas,monospace;
+}
+.roster-modal {
+    /* 元素寬度 */ width: min(780px,100%);
+}
+.roster-toolbar {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 8px;
+    /* 下方外距 */ margin-bottom: 14px;
+    /* 垂直對齊 */ align-items: center;
+}
+.roster-toolbar input {
+    /* 彈性配比 */ flex: 1;
+    /* 內縮空間 */ padding: 8px 11px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+}
+.roster-toolbar input:focus {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.roster-toolbar button {
+    /* 內縮空間 */ padding: 7px 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 字體大小 */ font-size: 13px;
+}
+.roster-toolbar button.primary {
+    /* 背景設定 */ background: var(--accent);
+    /* 文字顏色 */ color: #fff;
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.roster-count {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 換行方式 */ white-space: nowrap;
+}
+.roster-list {
+    /* 最大高度 */ max-height: 58vh;
+    /* 溢出處理 */ overflow: auto;
+    /* 右側內縮 */ padding-right: 4px;
+}
+.roster-item {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: space-between;
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 下方外距 */ margin-bottom: 6px;
+    /* 項目間距 */ gap: 10px;
+}
+.roster-main {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 10px;
+    /* 彈性配比 */ flex: 1;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 最小寬度 */ min-width: 0;
+    /* 溢出處理 */ overflow: hidden;
+}
+.roster-avatar {
+    /* 元素寬度 */ width: 38px;
+    /* 元素高度 */ height: 38px;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 溢出處理 */ overflow: hidden;
+    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 15px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 文字顏色 */ color: var(--avatar-ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+}
+.roster-avatar img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.roster-text {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 0;
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 1px;
+}
+.roster-name {
+    /* 字體粗細 */ font-weight: 600;
+    /* 字體大小 */ font-size: 13px;
+    /* 換行方式 */ white-space: nowrap;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.roster-meta {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 換行方式 */ white-space: nowrap;
+    /* 溢出處理 */ overflow: hidden;
+    /* 文字溢出 */ text-overflow: ellipsis;
+}
+.roster-actions {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 4px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 水平對齊 */ justify-content: flex-end;
+}
+.roster-actions button {
+    /* 內縮空間 */ padding: 3px 9px;
+    /* 字體大小 */ font-size: 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+}
+.roster-actions button.danger {
+    /* 文字顏色 */ color: #b03a2e;
+    /* 邊框顏色 */ border-color: #e6c9c4;
+}
+.roster-empty {
+    /* 文字對齊 */ text-align: center;
+    /* 內縮空間 */ padding: 40px 20px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 13px;
+}
+.roster-badge {
+    /* 字體大小 */ font-size: 12px;
+    /* 行距設定 */ line-height: 1;
+}
+.addmember-modal {
+    /* 元素寬度 */ width: min(680px,100%);
+}
+.addmember-toolbar {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 8px;
+    /* 下方外距 */ margin-bottom: 10px;
+    /* 垂直對齊 */ align-items: center;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.addmember-toolbar input {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 120px;
+    /* 內縮空間 */ padding: 8px 11px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 外框設定 */ outline: none;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+}
+.addmember-toolbar input:focus {
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.addmember-toolbar button {
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 字體大小 */ font-size: 12px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 滑鼠指標 */ cursor: pointer;
+}
+.addmember-list {
+    /* 最大高度 */ max-height: 52vh;
+    /* 溢出處理 */ overflow: auto;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 內縮空間 */ padding: 6px;
+    /* 背景設定 */ background: var(--panel-bg);
+}
+.addmember-item {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 10px;
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 下方外距 */ margin-bottom: 4px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: .15s;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 邊框設定 */ border: 1.5px solid transparent;
+}
+.addmember-item:hover {
+    /* 背景設定 */ background: var(--panel-item-hover);
+}
+.addmember-item.selected {
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 背景設定 */ background: var(--panel-item-hover);
+}
+.addmember-item.remove-selected {
+    /* 邊框顏色 */ border-color: #c94a3a;
+    /* 背景設定 */ background: rgba(200,60,40,.08);
+}
+.addmember-checkbox {
+    /* 元素寬度 */ width: 18px;
+    /* 元素高度 */ height: 18px;
+    /* 邊框設定 */ border: 1.5px solid var(--border);
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: transparent;
+    /* 字體粗細 */ font-weight: 700;
+    /* 動畫過渡 */ transition: .15s;
+    /* 背景設定 */ background: var(--input-bg);
+}
+.addmember-item.selected .addmember-checkbox {
+    /* 背景設定 */ background: var(--accent);
+    /* 文字顏色 */ color: #fff;
+    /* 邊框顏色 */ border-color: var(--accent);
+}
+.addmember-item.remove-selected .addmember-checkbox {
+    /* 背景設定 */ background: #c94a3a;
+    /* 文字顏色 */ color: #fff;
+    /* 邊框顏色 */ border-color: #c94a3a;
+}
+.addmember-item .roster-text {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 0;
+}
+.addmember-count {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 內縮空間 */ padding: 4px 10px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 圓角弧度 */ border-radius: 6px;
+}
+.addmember-count b {
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 700;
+}
+.addmember-count.remove-count b {
+    /* 文字顏色 */ color: #c94a3a;
+}
+.info-modal {
+    /* 元素寬度 */ width: min(480px,100%);
+}
+.info-card-header {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 14px;
+    /* 垂直對齊 */ align-items: center;
+    /* 下方內縮 */ padding-bottom: 12px;
+    /* 下方邊框 */ border-bottom: 1px dashed var(--border);
+    /* 下方外距 */ margin-bottom: 14px;
+}
+.info-card-avatar {
+    /* 元素寬度 */ width: 90px;
+    /* 元素高度 */ height: 90px;
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 溢出處理 */ overflow: hidden;
+    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 36px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 文字顏色 */ color: var(--avatar-ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 定位方式 */ position: relative;
+}
+.info-card-avatar img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.info-card-avatar.ghost::after {
+    /* 生成內容 */ content: "";
+    /* 定位方式 */ position: absolute;
+    /* 定位範圍 */ inset: 0;
+    /* 背景設定 */ background: rgba(155,183,212,.28);
+    /* 混合模式 */ mix-blend-mode: screen;
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.info-card-avatar.dead {
+    /* 視覺濾鏡 */ filter: sepia(.45) saturate(.7) brightness(.95);
+}
+.info-card-header-text {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 0;
+}
+.info-card-name-row {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.info-card-name {
+    /* 字體大小 */ font-size: 19px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距設定 */ letter-spacing: .5px;
+    /* 斷字方式 */ word-break: break-word;
+    /* 行距設定 */ line-height: 1.25;
+}
+.info-card-meta {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 上方外距 */ margin-top: 6px;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+}
+.info-card-meta .stage-tag {
+    /* 字體大小 */ font-size: 10px;
+    /* 內縮空間 */ padding: 2px 6px;
+}
+.info-card-meta .meta-pill {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 3px;
+    /* 內縮空間 */ padding: 2px 7px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--ink);
+}
+.info-card-body {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 10px;
+}
+.info-card-row {
+    /* 顯示方式 */ display: flex;
+    /* 項目間距 */ gap: 8px;
+    /* 垂直對齊 */ align-items: flex-start;
+    /* 字體大小 */ font-size: 13px;
+    /* 行距設定 */ line-height: 1.5;
+}
+.info-card-label {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 最小寬度 */ min-width: 64px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 上方內縮 */ padding-top: 1px;
+}
+.info-card-value {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 0;
+    /* 文字顏色 */ color: var(--ink);
+    /* 斷字方式 */ word-break: break-word;
+}
+.info-card-value.muted {
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體樣式 */ font-style: italic;
+}
+.info-card-traits {
+    /* 顯示方式 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 項目間距 */ gap: 4px;
+    /* 上方外距 */ margin-top: 2px;
+}
+.info-card-traits .tag {
+    /* 字體大小 */ font-size: 11px;
+    /* 內縮空間 */ padding: 2px 7px;
+    /* 最大寬度 */ max-width: none;
+}
+.info-card-bio {
+    /* 字體大小 */ font-size: 12.5px;
+    /* 行距設定 */ line-height: 1.6;
+    /* 文字顏色 */ color: var(--ink);
+    /* 背景設定 */ background: var(--panel-bg);
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 內縮空間 */ padding: 8px 10px;
+    /* 斷字方式 */ word-break: break-word;
+    /* 換行方式 */ white-space: pre-wrap;
+}
+.info-card-section {
+    /* 上方外距 */ margin-top: 2px;
+}
+.info-card-section-title {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 下方外距 */ margin-bottom: 6px;
+}
+.info-card-pets {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 5px;
+}
+.info-card-pet {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 8px;
+    /* 內縮空間 */ padding: 5px 8px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 圓角弧度 */ border-radius: 6px;
+}
+.info-card-pet-avatar {
+    /* 元素寬度 */ width: 34px;
+    /* 元素高度 */ height: 34px;
+    /* 圓角弧度 */ border-radius: 7px;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 溢出處理 */ overflow: hidden;
+    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 字體大小 */ font-size: 16px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+}
+.info-card-pet-avatar img {
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 100%;
+    /* 圖片填滿方式 */ object-fit: cover;
+    /* 顯示方式 */ display: block;
+}
+.info-card-pet-text {
+    /* 彈性配比 */ flex: 1;
+    /* 最小寬度 */ min-width: 0;
+}
+.info-card-pet-name {
+    /* 字體大小 */ font-size: 12.5px;
+    /* 字體粗細 */ font-weight: 600;
+}
+.info-card-pet-meta {
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+}
+.info-card-gallery {
+    /* 顯示方式 */ display: grid;
+    /* 網格欄位 */ grid-template-columns: repeat(4,1fr);
+    /* 項目間距 */ gap: 5px;
+}
+.info-card-gallery .gallery-item {
+    /* 長寬比例 */ aspect-ratio: 1/1;
+    /* 圓角弧度 */ border-radius: 6px;
+}
+.info-card-gallery .gallery-item-title {
+    /* 顯示方式 */ display: none;
+}
+.tips-modal {
+    /* 元素寬度 */ width: min(720px,100%);
+    /* 內縮空間 */ padding: 0;
+    /* 溢出處理 */ overflow: hidden;
+}
+.tips-header {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: space-between;
+    /* 內縮空間 */ padding: 16px 22px 12px;
+    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 下方邊框 */ border-bottom: 1px dashed var(--border);
+}
+.tips-header h2 {
+    /* 外距設定 */ margin: 0;
+    /* 字體大小 */ font-size: 18px;
+    /* 文字顏色 */ color: var(--accent);
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 8px;
+    /* 自動換行 */ flex-wrap: wrap;
+}
+.tips-header .tips-subtitle {
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體粗細 */ font-weight: 400;
+    /* 字距設定 */ letter-spacing: 0;
+}
+.tips-body {
+    /* 內縮空間 */ padding: 14px 22px 18px;
+    /* 最大高度 */ max-height: 70vh;
+    /* 溢出處理 */ overflow: auto;
+}
+.tips-section {
+    /* 下方外距 */ margin-bottom: 14px;
+    /* 內縮空間 */ padding: 10px 14px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 背景設定 */ background: var(--panel-bg);
+    /* 左側邊框 */ border-left: 3px solid var(--accent);
+}
+.tips-section:last-child {
+    /* 下方外距 */ margin-bottom: 0;
+}
+.tips-section h3 {
+    /* 外距設定 */ margin: 0 0 8px;
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 文字顏色 */ color: var(--accent);
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 字距設定 */ letter-spacing: .5px;
+}
+.tips-section ul {
+    /* 外距設定 */ margin: 0;
+    /* 左側內縮 */ padding-left: 18px;
+    /* 字體大小 */ font-size: 12.5px;
+    /* 行距設定 */ line-height: 1.85;
+    /* 文字顏色 */ color: var(--ink);
+}
+.tips-section li {
+    /* 下方外距 */ margin-bottom: 2px;
+}
+.tips-section li b {
+    /* 文字顏色 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+}
+.tips-section kbd {
+    /* 字體設定 */ font-family: inherit;
+    /* 字體大小 */ font-size: 11px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 內縮空間 */ padding: 1px 5px;
+    /* 元素陰影 */ box-shadow: 0 1px 0 var(--border);
+    /* 文字顏色 */ color: var(--ink);
+}
+.tips-footer {
+    /* 內縮空間 */ padding: 10px 22px 14px;
+    /* 上方邊框 */ border-top: 1px dashed var(--border);
+    /* 顯示方式 */ display: flex;
+    /* 水平對齊 */ justify-content: flex-end;
+    /* 項目間距 */ gap: 8px;
+}
+@media (max-width:900px) {
+    .topbar-brand {
+        /* 元素寬度 */ width: 180px;
+        /* 字體大小 */ font-size: 14px;
+        /* 內縮空間 */ padding: 0 12px;
+    }
+    .brand-input {
+        /* 元素寬度 */ width: 120px;
+        /* 字體大小 */ font-size: 14px;
+    }
+    .topbar-search {
+        /* 最大寬度 */ max-width: 160px;
+    }
+    .family-select {
+        /* 最大寬度 */ max-width: 140px;
+    }
+}
+@media (max-width:720px) {
+    .topbar-brand {
+        /* 顯示方式 */ display: none;
+    }
+    .menu-toggle {
+        /* 顯示方式 */ display: inline-flex;
+    }
+    .brand-input {
+        /* 元素寬度 */ width: 100px;
+        /* 字體大小 */ font-size: 14px;
+    }
+    .topbar-main {
+        /* 內縮空間 */ padding: 0 8px;
+        /* 項目間距 */ gap: 6px;
+    }
+    .topbar-search {
+        /* 最大寬度 */ max-width: none;
+        /* 彈性配比 */ flex: 1;
+        /* 最小寬度 */ min-width: 80px;
+    }
+    .family-select {
+        /* 顯示方式 */ display: none;
+    }
+    .topbar-select {
+        /* 內縮空間 */ padding: 6px 8px;
+        /* 字體大小 */ font-size: 12px;
+    }
+    .icon-btn span {
+        /* 顯示方式 */ display: none;
+    }
+    .icon-btn {
+        /* 內縮空間 */ padding: 6px 9px;
+    }
+    .sidebar {
+        /* 定位方式 */ position: fixed;
+        /* 頂部位置 */ top: 0;
+        /* 底部位置 */ bottom: 0;
+        /* 左側位置 */ left: 0;
+        /* 元素變形 */ transform: translateX(-100%);
+        /* 元素陰影 */ box-shadow: 6px 0 30px rgba(0,0,0,.2);
+        /* 顯示層級 */ z-index: 300;
+        /* 元素寬度 */ width: 240px;
+        /* 動畫過渡 */ transition: transform .25s ease;
+        /* 背景設定 */ background: var(--card);
+    }
+    .sidebar.open {
+        /* 元素變形 */ transform: translateX(0);
+    }
+    .sidebar-backdrop {
+        /* 顯示方式 */ display: none;
+        /* 定位方式 */ position: fixed;
+        /* 定位範圍 */ inset: 0;
+        /* 背景設定 */ background: rgba(0,0,0,.45);
+        /* 顯示層級 */ z-index: 299;
+    }
+    .sidebar-backdrop.show {
+        /* 顯示方式 */ display: block;
+    }
+    .grid label {
+        /* 網格欄位範圍 */ grid-column: 1/-1 !important;
+    }
+    .viewer-nav {
+        /* 元素寬度 */ width: 40px;
+        /* 元素高度 */ height: 40px;
+        /* 字體大小 */ font-size: 20px;
+    }
+    .viewer-nav.prev {
+        /* 左側位置 */ left: 8px;
+    }
+    .viewer-nav.next {
+        /* 右側位置 */ right: 8px;
+    }
+    .viewer-close {
+        /* 頂部位置 */ top: 10px;
+        /* 右側位置 */ right: 14px;
+        /* 元素寬度 */ width: 36px;
+        /* 元素高度 */ height: 36px;
+    }
+    .gallery-browser-list {
+        /* 網格欄位 */ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        /* 項目間距 */ gap: 8px;
+    }
+}
+
+/* ========【L1nG 視覺系統】 設定 - 延續 Sims4-mods 的開發者專區風格 ======== */
+
+/* 白／淺灰底、細線、低飽和文字、寬字距，並以藍色作為互動提示。 */
+body[data-theme="ling"] {
+    /* 漸層起始色 */ --grad-1: #ffffff;
+    /* 漸層結束色 */ --grad-2: #ffffff;
+    /* 淡色漸層起始 */ --grad-1-soft: rgba(85,172,238,.08);
+    /* 淡色漸層結束 */ --grad-2-soft: rgba(85,172,238,.04);
+    /* 互動強調色 */ --accent: #55acee;
+    /* 懸停強調色 */ --accent-hover: #3e95d3;
+    /* 深色主色 */ --primary-dark: #333333;
+    /* 頂欄文字顏色 */ --topbar-fg: #666666;
+    /* 頂欄次要文字 */ --topbar-fg-sub: #aaaaaa;
+    /* 頂欄欄位背景 */ --topbar-field-bg: #ffffff;
+    /* 頂欄欄位邊框 */ --topbar-field-border: #eeeeee;
+    /* 頂欄欄位文字 */ --topbar-field-fg: #666666;
+    /* 頂欄提示文字 */ --topbar-field-placeholder: #bbbbbb;
+    /* 頂欄欄位懸停 */ --topbar-field-hover: #fafafa;
+    /* 頁面背景 */ --bg: #fafafa;
+    /* 背景紋理色 */ --bg-pattern: rgba(0,0,0,.045);
+    /* 主要文字 */ --ink: #555555;
+    /* 次要文字 */ --sub: #aaaaaa;
+    /* 主要線條 */ --line: #dcdcdc;
+    /* 卡片背景 */ --card: #ffffff;
+    /* 一般邊框 */ --border: #eeeeee;
+    /* 輸入欄背景 */ --input-bg: #ffffff;
+    /* 遮罩背景 */ --mask-bg: rgba(30,30,30,.34);
+    /* 面板背景 */ --panel-bg: #fafafa;
+    /* 面板項目背景 */ --panel-item: #fcfcfc;
+    /* 面板項目懸停 */ --panel-item-hover: #f6f9fb;
+    /* 標籤背景 */ --tag-bg: #f4f4f4;
+    /* 標籤文字 */ --tag-ink: #777777;
+    /* 配偶關係線 */ --spouse: #55acee;
+    /* 前任配偶線 */ --exspouse: #aaaaaa;
+    /* 領養關係線 */ --adopt: #87bfa7;
+    /* 其他關係線 */ --other-line: #999999;
+    /* 男性識別色 */ --male-bar: #87aee5;
+    /* 女性識別色 */ --female-bar: #d7a7bc;
+    /* 其他性別識別色 */ --other-bar: #aaa3bb;
+    /* 幽靈卡片背景 */ --ghost-bg: #f5f8fb;
+    /* 幽靈卡片邊框 */ --ghost-border: #cfd9e4;
+    /* 幽靈文字 */ --ghost-ink: #60778e;
+    /* 幽靈標記背景 */ --ghost-badge-bg: #eef4f9;
+    /* 幽靈標記邊框 */ --ghost-badge-border: #cddae6;
+    /* 幽靈標籤背景 */ --ghost-tag-bg: #edf3f8;
+    /* 幽靈標籤文字 */ --ghost-tag-ink: #667f96;
+    /* 幽靈男性識別色 */ --ghost-male-bar: #8ba8c4;
+    /* 幽靈女性識別色 */ --ghost-female-bar: #b8a2b2;
+    /* 幽靈其他性別識別色 */ --ghost-other-bar: #9eaab6;
+    /* 已故卡片背景 */ --dead-bg: #f6f4f4;
+    /* 已故卡片邊框 */ --dead-border: #d9d1d1;
+    /* 已故文字 */ --dead-ink: #777070;
+    /* 已故標記背景 */ --dead-badge-bg: #f1ece8;
+    /* 已故標記邊框 */ --dead-badge-border: #ddd1c7;
+    /* 已故標籤背景 */ --dead-tag-bg: #eee8e3;
+    /* 已故標籤文字 */ --dead-tag-ink: #786c63;
+    /* 已故男性識別色 */ --dead-male-bar: #9d9696;
+    /* 已故女性識別色 */ --dead-female-bar: #ad969d;
+    /* 已故其他性別識別色 */ --dead-other-bar: #a49b9b;
+    /* 在世標記背景 */ --alive-badge-bg: #f1f7f1;
+    /* 在世標記邊框 */ --alive-badge-border: #cfe0cf;
+    /* 關係標註背景 */ --label-bg: rgba(255,255,255,.97);
+    /* 關係標註邊框 */ --label-border: #e8e8e8;
+    /* 頭像漸層起始 */ --avatar-bg-1: #f7f7f7;
+    /* 頭像漸層結束 */ --avatar-bg-2: #eeeeee;
+    /* 頭像文字 */ --avatar-ink: #aaaaaa;
+    /* 高亮顏色 */ --hl: rgba(85,172,238,.28);
+}
+body {
+    /* 字體設定 */ font-family: "PingFang TC","Noto Sans TC","Microsoft JhengHei","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    /* 字體粗細 */ font-weight: 400;
+}
+.topbar {
+    /* 元素高度 */ height: 58px;
+    /* 背景設定 */ background: #fff !important;
+    /* 下方邊框 */ border-bottom: 1px solid #eee;
+    /* 元素陰影 */ box-shadow: none;
+}
+.topbar-brand {
+    /* 元素寬度 */ width: 270px;
+    /* 內縮空間 */ padding: 0 20px;
+    /* 文字顏色 */ color: #555;
+    /* 右側邊框 */ border-right: 1px solid #eee;
+    /* 字體大小 */ font-size: 11px;
+    /* 字體粗細 */ font-weight: 400;
+    /* 字距設定 */ letter-spacing: 2.6px;
+    /* 文字陰影 */ text-shadow: none;
+}
+.brand-input {
+    /* 文字顏色 */ color: #555;
+    /* 文字陰影 */ text-shadow: none;
+    /* 字體粗細 */ font-weight: 400;
+    /* 字距設定 */ letter-spacing: 1.4px;
+}
+.sidebar {
+    /* 元素寬度 */ width: 220px;
+    /* 背景設定 */ background: #fff;
+    /* 右側邊框 */ border-right: 1px solid #eee;
+}
+.sidebar-group-title {
+    /* 字體大小 */ font-size: 9px;
+    /* 字體粗細 */ font-weight: 500;
+    /* 文字顏色 */ color: #bbb;
+    /* 字距設定 */ letter-spacing: 1.8px;
+}
+.sidebar-btn {
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 文字顏色 */ color: #777;
+    /* 字距設定 */ letter-spacing: .2px;
+}
+.sidebar-btn:hover {
+    /* 背景設定 */ background: #fafafa;
+    /* 邊框顏色 */ border-color: #eee;
+    /* 文字顏色 */ color: #333;
+}
+.sidebar-btn.primary,
+.sidebar-btn.active,
+.sidebar-btn.lock-active {
+    /* 背景設定 */ background: rgba(85,172,238,.06);
+    /* 文字顏色 */ color: #55acee;
+    /* 邊框顏色 */ border-color: rgba(85,172,238,.45);
+    /* 字體粗細 */ font-weight: 500;
+}
+.sidebar-footer {
+    /* 文字顏色 */ color: #bbb;
+    /* 上方邊框 */ border-top: 1px solid #eee;
+    /* 字距設定 */ letter-spacing: .8px;
+}
+.sidebar-footer .ver {
+    /* 文字顏色 */ color: #999;
+    /* 字體粗細 */ font-weight: 400;
+}
+#viewport {
+    /* 背景顏色 */ background-color: #fafafa;
+    /* 背景圖片 */ background-image: radial-gradient(circle, rgba(0,0,0,.055) 1px, transparent 1px);
+    /* 背景尺寸 */ background-size: 24px 24px;
+}
+.node {
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 邊框寬度 */ border-width: 1px;
+    /* 元素陰影 */ box-shadow: none;
+}
+.node:hover {
+    /* 邊框顏色 */ border-color: #bbb;
+    /* 元素陰影 */ box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+.modal {
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 邊框設定 */ border: 1px solid #eee;
+    /* 元素陰影 */ box-shadow: 0 24px 70px rgba(0,0,0,.18);
+}
+.modal h2 {
+    /* 文字顏色 */ color: #444;
+    /* 字體粗細 */ font-weight: 300;
+    /* 字距設定 */ letter-spacing: 2px;
+}
+.grid input,
+.grid select,
+.grid textarea,
+.ss-input,
+.ss-search,
+.topbar-select,
+.topbar-search,
+.family-select {
+    /* 圓角弧度 */ border-radius: 4px;
+}
+.icon-btn,
+.filebtn,
+.modal-actions button,
+.apply-btn {
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 元素陰影 */ box-shadow: none;
+}
+.icon-btn:hover,
+.filebtn:hover,
+.modal-actions button:hover {
+    /* 邊框顏色 */ border-color: #999;
+    /* 文字顏色 */ color: #333;
+}
+.modal-actions button.primary {
+    /* 背景設定 */ background: #333;
+    /* 邊框顏色 */ border-color: #333;
+}
+.modal-actions button.primary:hover {
+    /* 背景設定 */ background: #000;
+    /* 邊框顏色 */ border-color: #000;
+}
+.tag,
+.n-gallery-badge,
+.n-pet-chip {
+    /* 圓角弧度 */ border-radius: 3px;
+}
+.theme-card {
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 元素陰影 */ box-shadow: none;
+}
+.theme-card.selected {
+    /* 元素陰影 */ box-shadow: 0 0 0 2px rgba(85,172,238,.08);
+}
+.language-switch {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.language-select {
+    /* 最小寬度 */ min-width: 72px;
+    /* 文字對齊 */ text-align: center;
+    /* 字體大小 */ font-size: 11px;
+    /* 字距設定 */ letter-spacing: .8px;
+    /* 文字顏色 */ color: #777;
+}
+.info {
+    /* 背景設定 */ background: #fafafa;
+    /* 邊框設定 */ border: 1px solid #f0f0f0;
+}
+.setting-group-title {
+    /* 字體粗細 */ font-weight: 500;
+    /* 字距設定 */ letter-spacing: 1px;
+}
+.gallery-item {
+    /* 圓角弧度 */ border-radius: 5px;
+}
+.gallery-item:hover {
+    /* 元素陰影 */ box-shadow: 0 5px 16px rgba(0,0,0,.08);
+}
+.storage-bar {
+    /* 背景設定 */ background: #f1f1f1;
+}
+.storage-bar-fill {
+    /* 背景設定 */ background: #55acee;
+}
+
+/* ========【響應式設定】 設定 - 窄螢幕側欄與品牌寬度最佳化 ======== */
+@media (max-width:900px) {
+    .topbar-brand {
+        /* 元素寬度 */ width: auto;
+        /* 最大寬度 */ max-width: 180px;
+        /* 內縮空間 */ padding: 0 12px;
+        /* 字體大小 */ font-size: 9px;
+        /* 字距設定 */ letter-spacing: 1.6px;
+    }
+    .language-select {
+        /* 最小寬度 */ min-width: 58px;
+        /* 左側內縮 */ padding-left: 6px;
+        /* 右側內縮 */ padding-right: 6px;
+    }
+}
+
+/* ========【L1nG 專區】 設定 - 開發者工具 Icon 排列規範 ======== */
+.icon-btn,
+.sidebar-btn,
+.filebtn,
+.pet-add-btn,
+.gallery-add-btn {
+    /* 垂直對齊 */ align-items: center;
+}
+.icon-btn>span,
+.sidebar-btn>span,
+.filebtn>span,
+.pet-add-btn>span,
+.gallery-add-btn>span {
+    /* 最小寬度 */ min-width: 0;
+}
+.icon-only {
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+}
+
+/* ========【SVG 圖示資源】 設定 - 對應獨立 Bootstrap Icons SVG 檔案 ======== */
+.icon-activity {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/activity.svg");
+}
+.icon-arrow-counterclockwise {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/arrow-counterclockwise.svg");
+}
+.icon-asterisk {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/asterisk.svg");
+}
+.icon-box-arrow-in-down {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/box-arrow-in-down.svg");
+}
+.icon-box-arrow-up {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/box-arrow-up.svg");
+}
+.icon-broadcast {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/broadcast.svg");
+}
+.icon-bug {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/bug.svg");
+}
+.icon-bullseye {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/bullseye.svg");
+}
+.icon-check-circle {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/check-circle.svg");
+}
+.icon-check-lg {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/check-lg.svg");
+}
+.icon-circle {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/circle.svg");
+}
+.icon-cloud-haze2 {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/cloud-haze2.svg");
+}
+.icon-database {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/database.svg");
+}
+.icon-diagram-3 {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/diagram-3.svg");
+}
+.icon-exclamation-triangle {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/exclamation-triangle.svg");
+}
+.icon-eye {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/eye.svg");
+}
+.icon-feather {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/feather.svg");
+}
+.icon-file-earmark-text {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/file-earmark-text.svg");
+}
+.icon-flower1 {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/flower1.svg");
+}
+.icon-flower2 {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/flower2.svg");
+}
+.icon-gem {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gem.svg");
+}
+.icon-gender-ambiguous {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gender-ambiguous.svg");
+}
+.icon-gender-female {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gender-female.svg");
+}
+.icon-gender-male {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gender-male.svg");
+}
+.icon-heart {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/heart.svg");
+}
+.icon-heart-fill {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/heart-fill.svg");
+}
+.icon-heartbreak {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/heartbreak.svg");
+}
+.icon-hearts {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/hearts.svg");
+}
+.icon-house {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/house.svg");
+}
+.icon-house-heart {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/house-heart.svg");
+}
+.icon-image {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/image.svg");
+}
+.icon-images {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/images.svg");
+}
+.icon-info-circle {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/info-circle.svg");
+}
+.icon-keyboard {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/keyboard.svg");
+}
+.icon-lightbulb {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/lightbulb.svg");
+}
+.icon-lightning {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/lightning.svg");
+}
+.icon-list {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/list.svg");
+}
+.icon-magic {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/magic.svg");
+}
+.icon-moon {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/moon.svg");
+}
+.icon-moon-stars {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/moon-stars.svg");
+}
+.icon-mortarboard {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/mortarboard.svg");
+}
+.icon-mouse {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/mouse.svg");
+}
+.icon-palette {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/palette.svg");
+}
+.icon-pencil-square {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/pencil-square.svg");
+}
+.icon-people {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/people.svg");
+}
+.icon-person {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person.svg");
+}
+.icon-person-add {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-add.svg");
+}
+.icon-person-check {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-check.svg");
+}
+.icon-person-dash {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-dash.svg");
+}
+.icon-person-heart {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-heart.svg");
+}
+.icon-person-hearts {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-hearts.svg");
+}
+.icon-person-plus {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-plus.svg");
+}
+.icon-person-vcard {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-vcard.svg");
+}
+.icon-plus-lg {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/plus-lg.svg");
+}
+.icon-robot {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/robot.svg");
+}
+.icon-stars {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/stars.svg");
+}
+.icon-tag {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/tag.svg");
+}
+.icon-tags {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/tags.svg");
+}
+.icon-trash3 {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/trash3.svg");
+}
+.icon-unlock {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/unlock.svg");
+}
+.icon-water {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/water.svg");
+}
+.icon-x-lg {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/x-lg.svg");
+}
+
+/* ========【族譜縮放】 設定 - 提升文字、線條與圖片清晰度 ======== */
+#stage {
+    /* 文字繪製方式 */ text-rendering: optimizeLegibility;
+    /* WebKit 字體平滑 */ -webkit-font-smoothing: antialiased;
+    /* 背面顯示 */ backface-visibility: visible;
+}
+#stage.is-transforming {
+    /* 預先最佳化 */ will-change: transform;
+}
+#links,
+#labels {
+    /* 向量繪製精度 */ shape-rendering: geometricPrecision;
+    /* 文字繪製方式 */ text-rendering: geometricPrecision;
+}
+.edge {
+    /* 向量縮放行為 */ vector-effect: non-scaling-stroke;
+}
+.node,
+.edge-label-content {
+    /* 預先最佳化 */ will-change: auto;
+}
+.n-avatar img,
+.n-view-avatar img,
+.roster-avatar img,
+.pet-item-avatar img {
+    /* 圖片繪製方式 */ image-rendering: auto;
+}

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>LING'S SIMS 4 GENEALOGY</title>
+        <meta name="theme-color" content="#ffffff">
+        <link rel="stylesheet" href="genealogy.css">
+    </head>
+    <body data-theme="peach">
+
+        <div class="app">
+
+            <!-- ========【頂部導覽列】 設定 - 品牌、家族切換、搜尋與工具操作 ======== -->
+            <header class="topbar">
+                <div class="topbar-brand" title="The Sims 4 Genealogy Tool">LING'S SIMS 4 GENEALOGY</div>
+                <div class="topbar-main">
+                    <button class="menu-toggle" id="menuToggle" title="選單"><span class="l1ng-icon icon-list" aria-hidden="true"></span></button>
+                    <input class="brand-input" id="familyName" placeholder="家族名稱">
+                    <select class="family-select" id="familySelect"></select>
+                    <input class="topbar-search" id="search" placeholder="搜尋姓名 / 職業 / 居住地…" type="search">
+                    <select class="topbar-select" id="stageFilter">
+                        <option value="">全部階段</option>
+                        <option>嬰兒</option>
+                        <option>幼兒</option>
+                        <option>兒童</option>
+                        <option>青少年</option>
+                        <option>青年</option>
+                        <option>成年</option>
+                        <option>老年</option>
+                    </select>
+                    <span class="topbar-spacer"></span>
+                    <div class="topbar-right">
+                        <div class="language-switch" title="語言 / Language">
+                            <select aria-label="語言 / Language" class="topbar-select language-select" id="languageSelect">
+                                <option value="zh-Hant">繁中</option>
+                                <option value="zh-Hans">簡中</option>
+                                <option value="en">EN</option>
+                            </select>
+                        </div>
+                        <label class="icon-btn" title="匯入 JSON 備份">
+                            <span class="l1ng-icon icon-box-arrow-in-down" aria-hidden="true"></span>
+                            <span>匯入</span>
+                            <input accept=".json" hidden id="importInput" type="file">
+                        </label>
+                        <button class="icon-btn" id="exportBtn" title="匯出 JSON 備份"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
+                        <button class="icon-btn" id="bgBtn" title="外觀設定"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀</span></button>
+                        <button class="icon-btn" id="tipsBtn" title="使用提示"><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>提示</span></button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ========【主版面】 設定 - 側邊導覽與族譜畫布 ======== -->
+            <div class="app-body">
+                <aside class="sidebar" id="sidebar">
+                    <div class="sidebar-scroll">
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-title">家族</div>
+                            <button class="sidebar-btn" id="newFamilyBtn"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增家族</span></button>
+                            <button class="sidebar-btn danger" id="delFamilyBtn"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>刪除家族</span></button>
+                        </div>
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-title">模擬市民</div>
+                            <button class="sidebar-btn primary" id="addBtn"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增模擬市民</span></button>
+                            <button class="sidebar-btn" id="rosterBtn"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>全部模擬市民</span></button>
+                            <button class="sidebar-btn" id="addMemberBtn"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入家族</span></button>
+                            <button class="sidebar-btn danger" id="removeMemberBtn"><span class="l1ng-icon icon-person-dash" aria-hidden="true"></span><span>移出家族</span></button>
+                        </div>
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-title">相簿</div>
+                            <button class="sidebar-btn" id="galleryBrowserBtn"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿瀏覽器</span></button>
+                        </div>
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-title">檢視與佈局</div>
+                            <button class="sidebar-btn" id="modeToggle"><span class="l1ng-icon icon-eye" aria-hidden="true"></span><span>檢視模式</span></button>
+                            <button class="sidebar-btn" id="layoutToggle"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動佈局</span></button>
+                            <button class="sidebar-btn" id="lockToggle" style="display:none"><span class="l1ng-icon icon-unlock" aria-hidden="true"></span><span>未鎖定</span></button>
+                            <button class="sidebar-btn" id="resetLayoutBtn" style="display:none"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>重設位置</span></button>
+                            <button class="sidebar-btn active" id="labelToggle"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>顯示標註</span></button>
+                            <button class="sidebar-btn" id="labelLockToggle"><span class="l1ng-icon icon-unlock" aria-hidden="true"></span><span>標註未鎖</span></button>
+                        </div>
+                    </div>
+                    <div class="sidebar-footer"><span>桌面版</span><span class="ver" id="appVersion">v6.5.0</span></div>
+                </aside>
+                <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+                <div class="main-area">
+                    <div id="viewport">
+                        <div id="stage">
+                            <svg id="links"></svg>
+                            <div id="nodes"></div>
+                            <svg id="labels"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【編輯模擬市民】 設定 - 模擬市民資料、關係、寵物與相簿 ======== -->
+        <div class="mask" id="mask">
+            <div class="modal">
+                <h2 id="modalTitle">新增模擬市民</h2>
+                <div class="info"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span><span>每條連線可擁有獨立的關係標註；標註在畫布上可拖曳，避免遮擋卡片。</span></div>
+                <div class="grid">
+                    <label class="full">
+                        模擬市民頭像
+                        <div class="avatar-row">
+                            <div class="avatar-preview" id="avatarPreview">?</div>
+                            <div class="avatar-actions">
+                                <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="avatarInput" type="file"></label>
+                                <button id="avatarClearBtn" type="button">清除頭像</button>
+                                <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / GIF</div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="span-8">姓名<input id="fName" maxlength="30" placeholder="如：莫蒂默·高斯"></label>
+                    <label class="span-4">
+                        人生階段
+                        <select id="fStage">
+                            <option>嬰兒</option>
+                            <option>幼兒</option>
+                            <option>兒童</option>
+                            <option>青少年</option>
+                            <option>青年</option>
+                            <option>成年</option>
+                            <option>老年</option>
+                        </select>
+                    </label>
+                    <label class="span-3">
+                        性別
+                        <select id="fGender">
+                            <option>男</option>
+                            <option>女</option>
+                            <option>其他</option>
+                        </select>
+                    </label>
+                    <label class="span-3">
+                        狀態
+                        <select id="fStatus">
+                            <option>在世</option>
+                            <option>幽靈</option>
+                            <option>已故</option>
+                        </select>
+                    </label>
+                    <label class="span-3">
+                        種族
+                        <select id="fRace">
+                            <option value="">（不顯示）</option>
+                            <option value="human">人類</option>
+                            <option value="vampire">吸血鬼</option>
+                            <option value="alien">外星人</option>
+                            <option value="werewolf">狼人</option>
+                            <option value="mermaid">人魚</option>
+                            <option value="spellcaster">魔法師</option>
+                            <option value="fairy">仙子</option>
+                            <option value="plant">植物模擬市民</option>
+                            <option value="robot">機器人</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </label>
+                    <label class="span-3">
+                        領養關係
+                        <select id="fAdoptive">
+                            <option value="false">親生</option>
+                            <option value="true">領養</option>
+                        </select>
+                    </label>
+                    <label class="full" id="causeOfDeathLabel" style="display:none">
+                        死因
+                        <input id="fCauseOfDeath" list="causeOfDeathPresets" maxlength="40" placeholder="如：衰老 / 溺水 / 火災…">
+                        <datalist id="causeOfDeathPresets">
+                            <option value="衰老"></option>
+                            <option value="飢餓"></option>
+                            <option value="溺水"></option>
+                            <option value="火災"></option>
+                            <option value="電擊"></option>
+                            <option value="笑死"></option>
+                            <option value="尷尬死"></option>
+                            <option value="暴曬"></option>
+                            <option value="凍死"></option>
+                            <option value="牛頭人花"></option>
+                            <option value="河豚"></option>
+                            <option value="流星"></option>
+                            <option value="心臟病"></option>
+                            <option value="憤怒死"></option>
+                            <option value="羞憤死"></option>
+                            <option value="蒸汽浴"></option>
+                            <option value="神秘死"></option>
+                            <option value="吸血鬼灼燒"></option>
+                            <option value="其他"></option>
+                        </datalist>
+                    </label>
+                    <label class="span-6">職業 / 備註<input id="fCareer" placeholder="作家 / 學生 / 無"></label>
+                    <label class="span-6">居住地<input id="fResidence" maxlength="60" placeholder="如：柳溪 - 花園社區"></label>
+                    <label class="full">
+                        人生抱負
+                        <input id="fAspiration" list="aspirationPresets" maxlength="40" placeholder="如：暢銷作家 / 靈魂伴侶…">
+                        <datalist id="aspirationPresets">
+                            <option value="靈魂伴侶"></option>
+                            <option value="大家庭"></option>
+                            <option value="超級父母"></option>
+                            <option value="美食大師"></option>
+                            <option value="調酒大師"></option>
+                            <option value="財富創造者"></option>
+                            <option value="豪宅大亨"></option>
+                            <option value="電腦奇才"></option>
+                            <option value="卓越畫家"></option>
+                            <option value="暢銷作家"></option>
+                            <option value="音樂天才"></option>
+                            <option value="生物博士"></option>
+                            <option value="考古學家"></option>
+                            <option value="靈魂探索者"></option>
+                            <option value="連環浪漫"></option>
+                            <option value="情場達人"></option>
+                            <option value="自然主義者"></option>
+                            <option value="園藝大師"></option>
+                            <option value="釣魚大師"></option>
+                            <option value="派對王"></option>
+                            <option value="摯友"></option>
+                            <option value="名人"></option>
+                            <option value="世界之友"></option>
+                            <option value="健美運動員"></option>
+                            <option value="首席運動員"></option>
+                            <option value="極限運動員"></option>
+                            <option value="公敵"></option>
+                            <option value="都市傳說"></option>
+                            <option value="首領"></option>
+                            <option value="無所事事"></option>
+                        </datalist>
+                    </label>
+                    <label class="full">
+                        所屬家族
+                        <div class="ss-wrap" data-placeholder="點選選擇家族（可多選）…" data-ss-for="fFamilyIds">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋家族…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="fFamilyIds" multiple></select>
+                    </label>
+                    <label class="span-6">
+                        父母 A（血緣）
+                        <div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent1">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋姓名…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="fParent1"></select>
+                    </label>
+                    <label class="span-6">
+                        父母 B（可選）
+                        <div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent2">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋姓名…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="fParent2"></select>
+                    </label>
+                    <label class="span-6">
+                        現任配偶
+                        <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSpouse">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋姓名…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="fSpouse" multiple></select>
+                    </label>
+                    <label class="span-6">
+                        前任配偶
+                        <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fExSpouse">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋姓名…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="fExSpouse" multiple></select>
+                    </label>
+                    <label class="span-6">
+                        子女（血緣 / 收養）
+                        <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fChildren">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋姓名…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="fChildren" multiple></select>
+                        <span class="hint-below">勾選後自動加入對方父母清單</span>
+                    </label>
+                    <label class="span-6">
+                        兄弟姐妹（血緣 / 收養）
+                        <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋姓名…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="fSiblings" multiple></select>
+                        <span class="hint-below">勾選後建立「兄弟姐妹」關聯</span>
+                    </label>
+                    <label class="full">特徵（逗號分隔）<input id="fTraits" placeholder="有創造力, 熱愛戶外, 物質主義"></label>
+                    <label class="full">簡介<textarea id="fBio" placeholder="人物小傳、結局、備註…" rows="2"></textarea></label>
+                </div>
+                <div class="rel-section" id="petSection">
+                    <div class="rel-title">寵物<span class="hint-inline">（該模擬市民擁有的寵物）</span></div>
+                    <div id="petList"></div>
+                    <button class="pet-add-btn" id="btnAddPet" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增寵物</span></button>
+                </div>
+                <div class="rel-section" id="gallerySection">
+                    <div class="rel-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿</span><span class="hint-inline">（多張圖片 / 不同階段 / 合影）</span></div>
+                    <div class="gallery-grid" id="galleryGrid"></div>
+                    <button class="gallery-add-btn" id="btnAddPhoto" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增圖片</span></button>
+                    <div class="gallery-drop-hint"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span><span>支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖</span></div>
+                </div>
+                <div class="rel-section" id="relAnnoSection" style="display:none">
+                    <div class="rel-title">關係標註<span class="hint-inline">（每條連線獨立設定）</span></div>
+                    <div id="relAnnoList"></div>
+                </div>
+                <div class="rel-section" id="relSection" style="display:none">
+                    <div class="rel-title">新增其他關係（好友 / 仇敵 / 師承…）</div>
+                    <div id="relList"></div>
+                    <div class="rel-add">
+                        <input id="relType" placeholder="關係，如 好友">
+                        <div class="ss-wrap" data-placeholder="選擇目標…" data-ss-for="relTarget" style="flex:1.4">
+                            <div class="ss-input" tabindex="0"></div>
+                            <div class="ss-dropdown" style="display:none">
+                                <input class="ss-search" placeholder="搜尋姓名…" type="text">
+                                <div class="ss-options"></div>
+                            </div>
+                        </div>
+                        <select hidden id="relTarget"></select>
+                        <button id="btnAddRel" type="button">新增</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="danger" id="btnDelete" style="display:none">刪除模擬市民</button>
+                    <span class="spacer"></span>
+                    <button id="btnCancel">取消</button>
+                    <button class="primary" id="btnSave">儲存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【寵物編輯】 設定 - 寵物資料與頭像 ======== -->
+        <div class="mask nested" id="petMask">
+            <div class="modal" style="width:min(520px,100%)">
+                <h2 id="petModalTitle">新增寵物</h2>
+                <div class="grid">
+                    <label class="full">
+                        寵物頭像
+                        <div class="avatar-row">
+                            <div class="avatar-preview" id="petAvatarPreview">?</div>
+                            <div class="avatar-actions">
+                                <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="petAvatarInput" type="file"></label>
+                                <button id="petAvatarClearBtn" type="button">清除頭像</button>
+                                <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / GIF</div>
+                            </div>
+                        </div>
+                    </label>
+                    <label>名字<input id="pName" maxlength="30" placeholder="如：旺財 / 咪咪"></label>
+                    <label>
+                        種類
+                        <select id="pSpecies">
+                            <option value="dog">狗</option>
+                            <option value="cat">貓</option>
+                            <option value="horse">馬</option>
+                            <option value="rabbit">兔子</option>
+                            <option value="bird">鳥</option>
+                            <option value="hamster">倉鼠</option>
+                            <option value="fish">魚</option>
+                            <option value="lizard">蜥蜴</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </label>
+                    <label>品種<input id="pBreed" maxlength="40" placeholder="如：金毛、波斯貓…"></label>
+                    <label>
+                        性別
+                        <select id="pGender">
+                            <option>男</option>
+                            <option>女</option>
+                            <option>其他</option>
+                        </select>
+                    </label>
+                    <label>
+                        年齡階段
+                        <select id="pAgeStage">
+                            <option>幼年</option>
+                            <option>成年</option>
+                            <option>老年</option>
+                        </select>
+                    </label>
+                    <label>
+                        狀態
+                        <select id="pStatus">
+                            <option>在世</option>
+                            <option>幽靈</option>
+                            <option>已故</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="danger" id="pDelete" style="display:none">刪除寵物</button>
+                    <span class="spacer"></span>
+                    <button id="pCancel">取消</button>
+                    <button class="primary" id="pSave">儲存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【相簿圖片編輯】 設定 - 圖片、標題、人生階段與備註 ======== -->
+        <div class="mask nested" id="photoMask">
+            <div class="modal photo-modal">
+                <h2 id="photoModalTitle">新增圖片</h2>
+                <div class="grid">
+                    <label class="full">
+                        圖片
+                        <div class="photo-preview-wrap">
+                            <div class="photo-preview" id="photoPreview" tabindex="0">點選選擇 · 或拖曳 · 或 Ctrl+V 貼上</div>
+                            <div class="photo-actions-row">
+                                <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="photoInput" type="file"></label>
+                                <button id="photoClearBtn" type="button">清除圖片</button>
+                                <span class="photo-size-tip" id="photoSizeTip"></span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="full">
+                        標題
+                        <input id="phTitle" list="photoTitlePresets" maxlength="40" placeholder="如：幼兒期 / 婚禮合影 / 全家福">
+                        <datalist id="photoTitlePresets">
+                            <option value="嬰兒期"></option>
+                            <option value="幼兒期"></option>
+                            <option value="兒童期"></option>
+                            <option value="青少年"></option>
+                            <option value="青年期"></option>
+                            <option value="成年期"></option>
+                            <option value="老年期"></option>
+                            <option value="婚禮合影"></option>
+                            <option value="全家福"></option>
+                            <option value="畢業照"></option>
+                            <option value="度假照"></option>
+                            <option value="生日派對"></option>
+                        </datalist>
+                    </label>
+                    <label class="span-6">
+                        關聯階段（可選）
+                        <select id="phStage">
+                            <option value="">（不指定）</option>
+                            <option>嬰兒</option>
+                            <option>幼兒</option>
+                            <option>兒童</option>
+                            <option>青少年</option>
+                            <option>青年</option>
+                            <option>成年</option>
+                            <option>老年</option>
+                        </select>
+                    </label>
+                    <label class="full">備註<textarea id="phNote" placeholder="可選：拍攝場景、備註、想記錄的故事…" rows="2"></textarea></label>
+                </div>
+                <div class="modal-actions">
+                    <button class="danger" id="phDelete" style="display:none">刪除圖片</button>
+                    <span class="spacer"></span>
+                    <button id="phCancel">取消</button>
+                    <button class="primary" id="phSave">儲存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【圖片檢視器】 設定 - 相簿圖片放大與切換 ======== -->
+        <div class="mask viewer" id="galleryViewerMask">
+            <div class="modal viewer-modal">
+                <button class="viewer-close" id="gvClose" title="關閉 (Esc)"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
+                <button class="viewer-nav prev" id="gvPrev" title="上一張 (←)">‹</button>
+                <button class="viewer-nav next" id="gvNext" title="下一張 (→)">›</button>
+                <div class="viewer-img-wrap"><img alt="" id="gvImg" src=""></div>
+                <div class="viewer-info">
+                    <div class="gv-title" id="gvTitle"></div>
+                    <div class="gv-note" id="gvNote"></div>
+                    <div class="gv-counter" id="gvCounter"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【相簿瀏覽器】 設定 - 全部模擬市民相簿總覽 ======== -->
+        <div class="mask roster" id="galleryBrowserMask">
+            <div class="modal gallery-browser-modal">
+                <h2><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿瀏覽器</span><span class="roster-count" id="galleryBrowserCount"></span></h2>
+                <div class="gallery-browser-toolbar">
+                    <input id="galleryBrowserSearch" placeholder="搜尋標題 / 模擬市民名稱 / 備註…" type="search">
+                    <select id="galleryBrowserFilter">
+                        <option value="">全部模擬市民</option>
+                    </select>
+                    <button id="galleryBrowserClearFilter" style="padding:8px 12px;border:1px solid var(--border);border-radius:7px;background:var(--input-bg);color:var(--ink);cursor:pointer;font-size:13px" type="button">
+                        清除篩選
+                    </button>
+                </div>
+                <div class="gallery-browser-list" id="galleryBrowserList"></div>
+                <div class="modal-actions"><span class="spacer"></span><button id="galleryBrowserCloseBtn">關閉</button></div>
+            </div>
+        </div>
+
+        <!-- ========【模擬市民資訊卡】 設定 - 快速檢視人物資料 ======== -->
+        <div class="mask" id="infoMask">
+            <div class="modal info-modal">
+                <div class="info-card-header">
+                    <div class="info-card-avatar" id="infoCardAvatar">?</div>
+                    <div class="info-card-header-text">
+                        <div class="info-card-name-row"><span class="info-card-name" id="infoCardName">—</span></div>
+                        <div class="info-card-meta" id="infoCardMeta"></div>
+                    </div>
+                </div>
+                <div class="info-card-body" id="infoCardBody"></div>
+                <div class="modal-actions">
+                    <button id="infoEditBtn"><span class="l1ng-icon icon-pencil-square" aria-hidden="true"></span><span>編輯</span></button>
+                    <span class="spacer"></span>
+                    <button class="primary" id="infoCloseBtn">關閉</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【全部模擬市民】 設定 - 搜尋、檢視與編輯人物 ======== -->
+        <div class="mask roster" id="rosterMask">
+            <div class="modal roster-modal">
+                <h2>全部模擬市民<span class="roster-count" id="rosterCount"></span></h2>
+                <div class="roster-toolbar">
+                    <input id="rosterSearch" placeholder="搜尋姓名 / 特徵 / 職業…" type="search">
+                    <button class="primary" id="rosterAddBtn"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增</span></button>
+                </div>
+                <div class="roster-list" id="rosterList"></div>
+                <div class="modal-actions">
+                    <button id="rosterAddMemberBtn"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入家族</span></button>
+                    <button class="danger" id="rosterRemoveMemberBtn"><span class="l1ng-icon icon-person-dash" aria-hidden="true"></span><span>移出家族</span></button>
+                    <span class="spacer"></span>
+                    <button id="rosterCloseBtn">關閉</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【加入家族】 設定 - 將既有模擬市民加入目前家族 ======== -->
+        <div class="mask roster" id="addMemberMask">
+            <div class="modal addmember-modal">
+                <h2>新增模擬市民到<span class="family-name-chip" id="addMemberFamilyName">—</span></h2>
+                <div class="info"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span><span>勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。</span></div>
+                <div class="addmember-toolbar">
+                    <input id="addMemberSearch" placeholder="搜尋…" type="search">
+                    <button id="addMemberAllBtn" type="button">全選</button>
+                    <button id="addMemberNoneBtn" type="button">清空</button>
+                </div>
+                <div class="addmember-list" id="addMemberList"></div>
+                <div class="modal-actions">
+                    <span class="addmember-count" id="addMemberCount">已選<b>0</b>人</span>
+                    <span class="spacer"></span>
+                    <button id="addMemberCancelBtn">取消</button>
+                    <button class="primary" disabled id="addMemberConfirmBtn">加入家族</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【移出家族】 設定 - 將模擬市民移出目前家族 ======== -->
+        <div class="mask roster" id="removeMemberMask">
+            <div class="modal addmember-modal">
+                <h2>從<span class="family-name-chip" id="removeMemberFamilyName">—</span>移除</h2>
+                <div class="info"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span><span>他們仍保留在模擬市民池中，可隨時再次加入任何家族。</span></div>
+                <div class="addmember-toolbar">
+                    <input id="removeMemberSearch" placeholder="搜尋…" type="search">
+                    <button id="removeMemberAllBtn" type="button">全選</button>
+                    <button id="removeMemberNoneBtn" type="button">清空</button>
+                </div>
+                <div class="addmember-list" id="removeMemberList"></div>
+                <div class="modal-actions">
+                    <span class="addmember-count remove-count" id="removeMemberCount">已選<b>0</b>人</span>
+                    <span class="spacer"></span>
+                    <button id="removeMemberCancelBtn">取消</button>
+                    <button class="danger" disabled id="removeMemberConfirmBtn">從家族移除</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【外觀設定】 設定 - 主題、背景與圖片品質 ======== -->
+        <div class="mask" id="bgMask">
+            <div class="modal bg-modal">
+                <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></h2>
+                <div class="setting-group-title">主題配色（漸層）</div>
+                <div class="theme-grid" id="themeGrid"></div>
+                <div class="custom-theme">
+                    <div class="custom-theme-row" style="margin-bottom:10px;">
+                        <label>顏色 1</label>
+                        <input class="custom-color-input" id="customColor1" type="color" value="#f0c050">
+                        <label>顏色 2</label>
+                        <input class="custom-color-input" id="customColor2" type="color" value="#a878c8">
+                        <div class="custom-theme-preview" id="customThemePreview"></div>
+                    </div>
+                    <div class="custom-theme-row"><span style="flex:1;font-size:11.5px;">拖曳色票選擇兩種顏色，即時預覽漸層效果</span><button class="apply-btn" id="applyCustomBtn">套用自訂漸層</button></div>
+                </div>
+                <div class="setting-group-title">背景圖片</div>
+                <div class="bg-preview" id="bgPreview">尚未設定背景圖片</div>
+                <div class="bg-row">
+                    <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="bgInput" type="file"></label>
+                    <button class="danger" id="bgClearBtn" style="padding:6px 12px;border:1px solid #e6c9c4;border-radius:7px;background:var(--input-bg);color:#b03a2e;cursor:pointer;font-size:13px">
+                        移除背景
+                    </button>
+                </div>
+                <div class="bg-setting"><label>透明度：<span class="bg-value" id="bgOpacityVal">50%</span></label><input id="bgOpacity" max="100" min="0" type="range" value="50"></div>
+                <div class="bg-setting">
+                    <label>顯示方式</label>
+                    <select id="bgFit">
+                        <option value="cover">填滿（裁切超出部分）</option>
+                        <option value="contain">完整顯示（可能留白）</option>
+                        <option value="repeat">重複排列</option>
+                    </select>
+                </div>
+                <div class="setting-group-title">頭像畫質</div>
+                <div class="bg-setting">
+                    <label>模擬市民頭像</label>
+                    <select id="avatarProfile">
+                        <option value="compact">節省空間（192px）</option>
+                        <option value="balanced">平衡（384px · 預設）</option>
+                        <option value="hd">高畫質（768px）</option>
+                    </select>
+                    <div class="avatar-tip" id="avatarProfileHint"></div>
+                </div>
+                <div class="bg-setting">
+                    <label>寵物頭像</label>
+                    <select id="petAvatarProfile">
+                        <option value="compact">節省空間（192px）</option>
+                        <option value="balanced">平衡（384px · 預設）</option>
+                        <option value="hd">高畫質（768px）</option>
+                    </select>
+                    <div class="avatar-tip" id="petAvatarProfileHint"></div>
+                </div>
+                <div class="setting-group-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿圖片畫質</span></div>
+                <div class="bg-setting">
+                    <label>壓縮品質</label>
+                    <select id="galleryProfile">
+                        <option value="small">小型圖片（512px · 約 20–30KB/張）</option>
+                        <option value="medium">中型圖片（720px · 約 40–60KB/張 · 預設）</option>
+                        <option value="large">大型圖片（1080px · 約 80–120KB/張）</option>
+                        <option value="hd">高畫質（1440px · 約 150–250KB/張）</option>
+                        <option value="original">原始圖片（不壓縮 · 不限大小）</option>
+                    </select>
+                    <div class="avatar-tip" id="galleryProfileHint"></div>
+                </div>
+                <div class="setting-group-title"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>儲存空間使用量</span></div>
+                <div class="bg-setting">
+                    <div class="storage-bar">
+                        <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
+                    </div>
+                    <div class="avatar-tip" id="storageInfo">計算中…</div>
+                    <div class="bg-row" style="margin-top:8px">
+                        <button id="cleanupBtn" style="padding:6px 12px;border:1px solid var(--border);border-radius:7px;background:var(--input-bg);color:var(--ink);cursor:pointer;font-size:13px" type="button">
+                            <span class="l1ng-icon icon-trash3" aria-hidden="true"></span>
+                            <span>清理未使用的圖片</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="info">
+                    <span class="l1ng-icon icon-info-circle" aria-hidden="true"></span>
+                    <span>圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。</span>
+                </div>
+                <div class="modal-actions"><span class="spacer"></span><button id="bgCloseBtn">關閉</button></div>
+            </div>
+        </div>
+
+        <!-- ========【使用提示】 設定 - 操作說明、圖片儲存與快捷鍵 ======== -->
+        <div class="mask" id="tipsMask">
+            <div class="modal tips-modal">
+                <div class="tips-header"><h2><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>使用提示</span><span class="tips-subtitle">— 快速上手與快捷鍵</span></h2></div>
+                <div class="tips-body">
+                    <div class="tips-section">
+                        <h3><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>畫布操作</span></h3>
+                        <ul>
+                            <li><b>拖曳空白處</b>平移整個族譜畫布</li>
+                            <li><b>滾輪</b>以滑鼠位置為中心縮放</li>
+                            <li><b>雙擊空白處</b>自動適應螢幕</li>
+                            <li><b>拖曳卡片</b>自動切換為「自由排列」並儲存新位置</li>
+                        </ul>
+                    </div>
+                    <div class="tips-section">
+                        <h3><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿瀏覽器</span></h3>
+                        <ul>
+                            <li>側邊欄<b>相簿瀏覽器</b>：檢視所有模擬市民的相簿圖片</li>
+                            <li>頂端支援按<b>標題 / 模擬市民名稱 / 備註</b>搜尋，按<b>模擬市民篩選</b></li>
+                            <li>每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器</li>
+                            <li>檢視器中<kbd>←</kbd><kbd>→</kbd><b>跨模擬市民</b>瀏覽，<kbd>Esc</kbd>關閉</li>
+                            <li>不包含頭像 / 寵物頭像 / 背景圖</li>
+                        </ul>
+                    </div>
+                    <div class="tips-section">
+                        <h3><span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span><span>模擬市民相簿</span></h3>
+                        <ul>
+                            <li>編輯模擬市民 →<b>相簿</b>：為模擬市民新增多張圖片</li>
+                            <li>每張圖片可設定：<b>標題 / 關聯階段 / 備註</b></li>
+                            <li>支援<b>拖曳圖片檔案</b>到相簿網格，或按<kbd>Ctrl</kbd>+<kbd>V</kbd>貼上截圖</li>
+                        </ul>
+                    </div>
+                    <div class="tips-section">
+                        <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>圖片儲存</span></h3>
+                        <ul>
+                            <li>圖片儲存在瀏覽器<b>IndexedDB</b>中，容量是 localStorage 的<b>10 倍以上</b></li>
+                            <li>首次開啟會自動把舊資料（base64）遷移到 IndexedDB</li>
+                            <li><b>匯出 JSON</b>時仍會轉回 base64，與舊版工具完全互通</li>
+                            <li>可在外觀設定中檢視<b>儲存空間使用量</b>，並一鍵<b>清理未使用的圖片</b></li>
+                        </ul>
+                    </div>
+                    <div class="tips-section">
+                        <h3><span class="l1ng-icon icon-keyboard" aria-hidden="true"></span><span>快捷鍵</span></h3>
+                        <ul>
+                            <li><kbd>Esc</kbd>關閉目前彈出視窗</li>
+                            <li><kbd>←</kbd><kbd>→</kbd>圖片檢視器中切換上一張 / 下一張</li>
+                            <li><kbd>Ctrl</kbd>+<kbd>V</kbd>圖片編輯視窗內貼上剪貼簿圖片</li>
+                            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd>在編輯彈出視窗中快速儲存</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tips-footer"><button class="primary" id="tipsCloseBtn">知道了</button></div>
+            </div>
+        </div>
+
+        <!-- ========【核心程式】 設定 - 載入族譜功能腳本 ======== -->
+        <script src="genealogy.js"></script>
+    </body>
+</html>
