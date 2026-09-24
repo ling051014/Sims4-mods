@@ -1,6 +1,5 @@
 /* ========【L1nG Genealogy】 設定 - 族譜工具核心程式 ======== */
 /*
- * 版本：v6.5.0
  * 主要來源語言：繁體中文（zh-Hant）
  * 支援語言：繁體中文／簡體中文／English
  * 圖示：本機 Bootstrap Icons SVG
@@ -4870,6 +4869,75 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
+const _exportIconSvgCache = new Map();
+
+async function loadExportIconSvg(iconName) {
+  if (_exportIconSvgCache.has(iconName)) return _exportIconSvgCache.get(iconName);
+
+  if (CUSTOM_ICON_PREVIEW_DATA[iconName]) {
+    const svg = CUSTOM_ICON_PREVIEW_DATA[iconName];
+    _exportIconSvgCache.set(iconName, svg);
+    return svg;
+  }
+
+  const candidates = [
+    new URL(`../html%20icons/${iconName}.svg`, document.baseURI).href,
+    `${ICON_PREVIEW_FALLBACK_BASE}${iconName}.svg`
+  ];
+
+  let lastError = null;
+  for (const url of candidates) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const svg = await response.text();
+      if (!svg.includes('<svg')) throw new Error('Invalid SVG');
+      _exportIconSvgCache.set(iconName, svg);
+      return svg;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error(`Icon not found: ${iconName}`);
+}
+
+function colorizeExportSvg(svg, color) {
+  return String(svg)
+    .replace(/currentColor/g, color)
+    .replace(/fill=(['"])black\1/gi, `fill="${color}"`)
+    .replace(/fill=(['"])#000(?:000)?\1/gi, `fill="${color}"`)
+    .replace(/stroke=(['"])black\1/gi, `stroke="${color}"`)
+    .replace(/stroke=(['"])#000(?:000)?\1/gi, `stroke="${color}"`);
+}
+
+async function prepareCaptureIcons(captureRoot) {
+  const icons = [...captureRoot.querySelectorAll('.l1ng-icon')];
+  await Promise.all(icons.map(async icon => {
+    const iconClass = [...icon.classList].find(name => name.startsWith('icon-'));
+    if (!iconClass) return;
+    const iconName = iconClass.slice(5);
+
+    try {
+      const svg = await loadExportIconSvg(iconName);
+      const color = getComputedStyle(icon).color || '#5f6875';
+      const coloredSvg = colorizeExportSvg(svg, color);
+
+      // html2canvas 不支援 CSS mask。匯出 clone 直接改成同一顆彩色 SVG 背景，避免黑色方塊。
+      icon.style.setProperty('-webkit-mask-image', 'none', 'important');
+      icon.style.setProperty('mask-image', 'none', 'important');
+      icon.style.setProperty('background-color', 'transparent', 'important');
+      icon.style.setProperty('background-image', svgToDataUrl(coloredSvg), 'important');
+      icon.style.setProperty('background-repeat', 'no-repeat', 'important');
+      icon.style.setProperty('background-position', 'center', 'important');
+      icon.style.setProperty('background-size', 'contain', 'important');
+    } catch (err) {
+      // 圖示無法載入時寧可隱藏，也不要輸出成錯誤的實心方塊。
+      icon.style.setProperty('visibility', 'hidden', 'important');
+    }
+  }));
+}
+
 function buildGenealogyCaptureNode(stageWidth, stageHeight) {
   const captureViewport = viewport.cloneNode(true);
   captureViewport.classList.remove('dragging');
@@ -4905,6 +4973,53 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight) {
   return captureViewport;
 }
 
+function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
+  const captureStage = captureViewport.querySelector('#stage');
+  if (!captureStage) throw new Error('Genealogy stage was not found');
+
+  const stageRect = captureStage.getBoundingClientRect();
+  const content = [
+    ...captureStage.querySelectorAll('.node'),
+    ...captureStage.querySelectorAll('#links path'),
+    ...captureStage.querySelectorAll('#labels .edge-label')
+  ];
+
+  let minX = 0;
+  let minY = 0;
+  let maxX = stageWidth;
+  let maxY = stageHeight;
+
+  content.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (!Number.isFinite(rect.left) || !Number.isFinite(rect.top)) return;
+    if (rect.width === 0 && rect.height === 0) return;
+
+    minX = Math.min(minX, rect.left - stageRect.left);
+    minY = Math.min(minY, rect.top - stageRect.top);
+    maxX = Math.max(maxX, rect.right - stageRect.left);
+    maxY = Math.max(maxY, rect.bottom - stageRect.top);
+  });
+
+  // SVG stroke / shadow 需要少量安全邊界；原本 stage 內既有的留白仍完整保留。
+  const overflowPadding = 8;
+  if (minX < 0) minX -= overflowPadding;
+  if (minY < 0) minY -= overflowPadding;
+  if (maxX > stageWidth) maxX += overflowPadding;
+  if (maxY > stageHeight) maxY += overflowPadding;
+
+  const width = Math.max(1, Math.ceil(maxX - minX));
+  const height = Math.max(1, Math.ceil(maxY - minY));
+
+  captureViewport.style.width = `${width}px`;
+  captureViewport.style.height = `${height}px`;
+  captureViewport.style.minWidth = `${width}px`;
+  captureViewport.style.minHeight = `${height}px`;
+  captureStage.style.left = `${-minX}px`;
+  captureStage.style.top = `${-minY}px`;
+
+  return { width, height };
+}
+
 async function exportGenealogyImage(sizeKey = 'standard') {
   if (!db || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
 
@@ -4915,25 +5030,30 @@ async function exportGenealogyImage(sizeKey = 'standard') {
   const factor = factorMap[sizeKey] || 1;
   const stageWidth = Math.max(1, Math.ceil(parseFloat(stage.style.width) || stage.offsetWidth || 1));
   const stageHeight = Math.max(1, Math.ceil(parseFloat(stage.style.height) || stage.offsetHeight || 1));
-  const pixelWidth = Math.max(1, Math.round(stageWidth * factor));
-  const pixelHeight = Math.max(1, Math.round(stageHeight * factor));
-
-  if (pixelWidth > 32767 || pixelHeight > 32767 || pixelWidth * pixelHeight > 180000000) {
-    throw new Error('圖片尺寸超過瀏覽器可安全輸出的範圍，請改用較小的匯出尺寸。');
-  }
 
   const html2canvas = await ensureHtml2Canvas();
   const captureViewport = buildGenealogyCaptureNode(stageWidth, stageHeight);
   document.body.appendChild(captureViewport);
 
   try {
+    // 先讓 clone 套用完整 CSS，再把 mask icon 換成 html2canvas 能正確輸出的 SVG。
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await prepareCaptureIcons(captureViewport);
+    const captureSize = fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight);
+    const pixelWidth = Math.max(1, Math.round(captureSize.width * factor));
+    const pixelHeight = Math.max(1, Math.round(captureSize.height * factor));
+
+    if (pixelWidth > 32767 || pixelHeight > 32767 || pixelWidth * pixelHeight > 180000000) {
+      throw new Error('圖片尺寸超過瀏覽器可安全輸出的範圍，請改用較小的匯出尺寸。');
+    }
+
     const canvas = await html2canvas(captureViewport, {
       backgroundColor: null,
       scale: factor,
-      width: stageWidth,
-      height: stageHeight,
-      windowWidth: Math.max(document.documentElement.clientWidth, stageWidth),
-      windowHeight: Math.max(document.documentElement.clientHeight, stageHeight),
+      width: captureSize.width,
+      height: captureSize.height,
+      windowWidth: Math.max(document.documentElement.clientWidth, captureSize.width),
+      windowHeight: Math.max(document.documentElement.clientHeight, captureSize.height),
       scrollX: 0,
       scrollY: 0,
       useCORS: true,
