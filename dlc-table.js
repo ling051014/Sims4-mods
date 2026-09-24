@@ -275,34 +275,13 @@ function sortTable(colIndex) {
     }
     
     // ===================================================
-    // ========【重新渲染排序後內容】（鎖定高度防擠壓版） ========
+    // ========【重新排列排序後內容】 ========
     // ===================================================
-
-    // 1. 取得 table 並鎖定物理空間，防止搬移時高度塌陷
-    const targetTable = tbody.closest('table');
-    if (targetTable) {
-        const currentTableHeight = targetTable.offsetHeight;
-        targetTable.style.height = currentTableHeight + 'px';
-        targetTable.style.minHeight = currentTableHeight + 'px';
-        targetTable.style.overflow = 'hidden'; // 強制鎖死內容，防止瞬間抖動
-    }
-
-    // 2. 建立虛擬容器搬移行（注意：此處 rows 為你排序後的結果陣列）
-    const fragment = document.createDocumentFragment();
-    rows.forEach(row => fragment.appendChild(row));
-
-    // 3. 清空並一次性塞入新內容
-    tbody.replaceChildren(fragment);
-
-    // 4. 釋放高度鎖定（使用 setTimeout 確保渲染完全完成，避免面板卡載入）
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            if (targetTable) {
-                targetTable.style.removeProperty('height');
-                targetTable.style.removeProperty('min-height');
-                targetTable.style.removeProperty('overflow');
-            }
-        }, 10); 
+    
+    // 按照排序結果直接重新排列原有資料行
+    rows.forEach(row => {
+        // 將既有資料行移動到 tbody 最後方
+        tbody.appendChild(row);
     });
 
     // ===================================================
