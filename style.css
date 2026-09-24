@@ -4,12 +4,13 @@ body {
     /* 預設邊距 */ margin: 0;
     /* 全站字體 */ font-family: "PingFang TC", sans-serif;
 }
-/* ========【模組列表頁架構】 設定 - 頂條固定、內容獨立捲動 ======== */
+
+/* ========【模組列表頁面】 設定 - 固定頂部導覽與內容捲動區 ======== */
 body.mod-list-page {
-    /* 使用完整視窗高度 */ height: 100vh;
-    /* 頂條與內容上下排列 */ display: flex;
-    /* 頂條與內容上下排列 */ flex-direction: column;
-    /* 禁止 body 本身產生卷軸 */ overflow: hidden;
+    /* 視窗高度 */ height: 100vh;
+    /* 彈性佈局 */ display: flex;
+    /* 垂直排列 */ flex-direction: column;
+    /* 隱藏外層捲軸 */ overflow: hidden;
 }
 
 /* ========【首頁標題區塊】 設定 - 頁面主標題區 ======== */
@@ -75,15 +76,27 @@ body.mod-list-page {
     /* 尺寸計算 */ box-sizing: border-box;
     /* 底部分隔線 */ border-bottom: 1px solid #eee;
     /* 背景顏色 */ background: #fff;
-    /* 固定頂部 */ position: sticky;
-    /* 置頂位置 */ top: 0;
+    /* 禁止壓縮 */ flex-shrink: 0;
     /* 顯示層級 */ z-index: 9999;
 }
+
 .nav-menu a {
     /* 移除底線 */ text-decoration: none;
     /* 文字顏色 */ color: #aaa;
     /* 字體大小 */ font-size: 13px;
     /* 字距設定 */ letter-spacing: 2px;
+}
+
+/* ========【頁面捲動區】 設定 - 頂部導覽下方的主要內容區 ======== */
+.page-scroll {
+    /* 自動撐滿 */ flex-grow: 1;
+    /* 允許內容縮小 */ min-height: 0;
+    /* 滿版寬度 */ width: 100%;
+    /* 垂直捲動 */ overflow-y: auto;
+    /* 隱藏橫向捲動 */ overflow-x: hidden;
+    /* 限制捲動傳遞 */ overscroll-behavior-y: contain;
+    /* 保留捲軸空間 */ scrollbar-gutter: stable;
+    /* 行動裝置慣性捲動 */ -webkit-overflow-scrolling: touch;
 }
 
 /* ========【搜尋輸入框】 設定 - 搜尋框外殼 ======== */
