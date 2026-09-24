@@ -3692,6 +3692,35 @@ body[data-theme="midnight"] .stage-老年 {
     /* 項目間距 */ gap: 8px;
 }
 
+.tips-footer button {
+    /* 最小寬度 */ min-width: 96px;
+    /* 內縮空間 */ padding: 8px 16px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體大小 */ font-size: 13px;
+    /* 動畫過渡 */ transition: .15s;
+}
+
+.tips-footer button:hover {
+    /* 背景設定 */ background: var(--panel-item-hover);
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: var(--accent);
+}
+
+.tips-footer button.primary {
+    /* 背景設定 */ background: var(--accent);
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: #fff;
+}
+
+.tips-footer button.primary:hover {
+    /* 背景設定 */ background: var(--accent-hover);
+    /* 邊框顏色 */ border-color: var(--accent-hover);
+    /* 文字顏色 */ color: #fff;
+}
+
 @media (max-width:900px) {
     .topbar-brand {
         /* 元素寬度 */ width: var(--sidebar-width);
@@ -5142,7 +5171,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 
 .export-title-group p {
     /* 外距 */ margin: 0;
-    /* 顏色 */ color: var(--muted);
+    /* 顏色 */ color: var(--sub);
     /* 行高 */ line-height: 1.7;
 }
 
@@ -5154,7 +5183,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     /* 邊框 */ border: 1px solid var(--line);
     /* 圓角 */ border-radius: 14px;
     /* 背景設定 */ background: var(--panel-item);
-    /* 顏色 */ color: var(--text);
+    /* 顏色 */ color: var(--ink);
     /* 字級 */ font-size: 22px;
     /* 字重 */ font-weight: 700;
     /* 游標 */ cursor: pointer;
@@ -5164,7 +5193,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .export-close:hover,
 .export-close:focus-visible {
     /* 背景設定 */ background: var(--panel-item-hover);
-    /* 邊框 */ border-color: var(--line-strong);
+    /* 邊框 */ border-color: var(--border);
     /* 位移 */ transform: translateY(-1px);
 }
 
@@ -5199,7 +5228,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 
 .export-section-head p {
     /* 外距 */ margin: 0;
-    /* 顏色 */ color: var(--muted);
+    /* 顏色 */ color: var(--sub);
     /* 行高 */ line-height: 1.7;
 }
 
@@ -5232,7 +5261,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .export-size-option:hover .export-size-card,
 .export-size-option input:focus-visible + .export-size-card {
     /* 背景設定 */ background: var(--panel-item-hover);
-    /* 邊框 */ border-color: var(--line-strong);
+    /* 邊框 */ border-color: var(--border);
     /* 位移 */ transform: translateY(-1px);
 }
 
@@ -5244,11 +5273,11 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 
 .export-size-name {
     /* 字重 */ font-weight: 700;
-    /* 顏色 */ color: var(--text);
+    /* 顏色 */ color: var(--ink);
 }
 
 .export-size-note {
-    /* 顏色 */ color: var(--muted);
+    /* 顏色 */ color: var(--sub);
     /* 字級 */ font-size: 13px;
     /* 行高 */ line-height: 1.6;
 }
@@ -5261,18 +5290,51 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     /* 背景設定 */ background: var(--panel-item);
     /* 邊框 */ border: 1px solid var(--line);
     /* 圓角 */ border-radius: 16px;
-    /* 顏色 */ color: var(--muted);
+    /* 顏色 */ color: var(--sub);
     /* 行高 */ line-height: 1.7;
 }
 
 .export-actions {
     /* 版面配置 */ display: flex;
-    /* 對齊 */ justify-content: flex-end;
-    /* 上邊框 */ padding-top: 4px;
+    /* 水平對齊 */ justify-content: flex-end;
+    /* 垂直對齊 */ align-items: flex-end;
+    /* 上方內距 */ padding-top: 4px;
 }
 
 .export-actions button {
-    /* 最小寬度 */ min-width: 180px;
+    /* 最小寬度 */ min-width: 118px;
+    /* 內縮空間 */ padding: 8px 14px;
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景設定 */ background: var(--input-bg);
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 500;
+    /* 動畫過渡 */ transition: .15s;
+}
+
+.export-actions button:hover {
+    /* 背景設定 */ background: var(--panel-item-hover);
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: var(--accent);
+}
+
+.export-actions button.primary {
+    /* 最小寬度 */ min-width: 142px;
+    /* 背景設定 */ background: var(--accent);
+    /* 邊框顏色 */ border-color: var(--accent);
+    /* 文字顏色 */ color: #fff;
+}
+
+.export-actions button.primary:hover {
+    /* 背景設定 */ background: var(--accent-hover);
+    /* 邊框顏色 */ border-color: var(--accent-hover);
+    /* 文字顏色 */ color: #fff;
+}
+
+.export-actions button:disabled {
+    /* 透明度 */ opacity: .58;
+    /* 滑鼠指標 */ cursor: wait;
 }
 
 @media (max-width: 780px) {
