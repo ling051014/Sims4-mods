@@ -89,27 +89,29 @@ const REL_PRESETS = {
 const RACE_PRESETS = {
   '':           { icon:'', label:'（不顯示）' },
   human:        { icon:'person', label:'人類' },
-  vampire:      { icon:'moon-stars', label:'吸血鬼' },
-  alien:        { icon:'broadcast', label:'外星人' },
-  werewolf:     { icon:'moon', label:'狼人' },
-  mermaid:      { icon:'water', label:'人魚' },
+  // 種族圖示改用「看到圖形就能聯想到內容」的語意圖，不再拿抽象導覽圖示代用。
+  vampire:      { icon:'vampire-fangs', label:'吸血鬼' },
+  alien:        { icon:'alien-head', label:'外星人' },
+  werewolf:     { icon:'wolf-head', label:'狼人' },
+  mermaid:      { icon:'mermaid-tail', label:'人魚' },
   spellcaster:  { icon:'magic', label:'魔法師' },
-  fairy:        { icon:'stars', label:'仙子' },
+  fairy:        { icon:'fairy-wings', label:'仙子' },
   plant:        { icon:'flower2', label:'植物模擬市民' },
   robot:        { icon:'robot', label:'機器人' },
   other:        { icon:'asterisk', label:'其他' }
 };
 
 const PET_SPECIES = {
-  dog:    { icon:'heart', label:'狗' },
-  cat:    { icon:'heart', label:'貓' },
-  horse:  { icon:'activity', label:'馬' },
-  rabbit: { icon:'heart', label:'兔子' },
+  // 哺乳類寵物統一以爪印表示「寵物」，避免愛心／圓形等圖示無法一眼辨識。
+  dog:    { icon:'paw', label:'狗' },
+  cat:    { icon:'paw', label:'貓' },
+  horse:  { icon:'paw', label:'馬' },
+  rabbit: { icon:'paw', label:'兔子' },
   bird:   { icon:'feather', label:'鳥' },
-  hamster:{ icon:'circle', label:'倉鼠' },
+  hamster:{ icon:'paw', label:'倉鼠' },
   fish:   { icon:'water', label:'魚' },
   lizard: { icon:'bug', label:'蜥蜴' },
-  other:  { icon:'heart', label:'其他' }
+  other:  { icon:'paw', label:'其他' }
 };
 
 const VALID_THEMES = ['ling','sage','rose','amber','midnight'];
@@ -406,11 +408,32 @@ function setIconText(el, iconName, text) {
 const ICON_LOCAL_PROBE = '../html%20icons/check-circle.svg';
 const ICON_PREVIEW_FALLBACK_BASE = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/icons/';
 
+// 這幾顆是 Genealogy 專用的語意 SVG，不存在 Bootstrap CDN。
+// file:// 預覽時以 data URI 備援，正式網站仍讀取 html icons/ 內的獨立 SVG。
+const CUSTOM_ICON_PREVIEW_DATA = {
+  'paw': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M3.1 6.3c1 0 1.8-.9 1.8-2s-.8-2-1.8-2-1.7.9-1.7 2 .7 2 1.7 2Zm9.8 0c1 0 1.7-.9 1.7-2s-.7-2-1.7-2-1.8.9-1.8 2 .8 2 1.8 2ZM6.2 5.1c1 0 1.8-1 1.8-2.1S7.2.9 6.2.9 4.4 1.8 4.4 3s.8 2.1 1.8 2.1Zm3.6 0c1 0 1.8-1 1.8-2.1S10.8.9 9.8.9 8 1.8 8 3s.8 2.1 1.8 2.1ZM8 6.1c-2.6 0-5 2.8-5 5 0 1.8 1.4 3 3 3 .8 0 1.4-.4 2-.4s1.2.4 2 .4c1.6 0 3-1.2 3-3 0-2.2-2.4-5-5-5Z"/></svg>`,
+  'tombstone': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M5 12V6a3 3 0 0 1 6 0v6h1.5a.5.5 0 0 1 .5.5V14H3v-1.5a.5.5 0 0 1 .5-.5H5Zm2.4-7.7v1.2H6.2v1h1.2v2h1.2v-2h1.2v-1H8.6V4.3H7.4Z"/></svg>`,
+  'ghost-symbol': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M8 1.2A5.2 5.2 0 0 0 2.8 6.4V14l2-1.45L6.4 14 8 12.55 9.6 14l1.6-1.45 2 1.45V6.4A5.2 5.2 0 0 0 8 1.2Zm-1.8 5A1.1 1.1 0 1 1 6.2 4a1.1 1.1 0 0 1 0 2.2Zm3.6 0A1.1 1.1 0 1 1 9.8 4a1.1 1.1 0 0 1 0 2.2Z"/></svg>`,
+  'alien-head': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M8 1C4.6 1 2.4 3.3 2.4 6.2c0 3.7 3.8 7.8 5.6 8.8 1.8-1 5.6-5.1 5.6-8.8C13.6 3.3 11.4 1 8 1Zm-2.6 7.5c-1-.4-1.7-1.4-1.8-2.6 1.5-.1 2.7.4 3.5 1.5-.3.8-.9 1.2-1.7 1.1Zm5.2 0c-.8.1-1.4-.3-1.7-1.1.8-1.1 2-1.6 3.5-1.5-.1 1.2-.8 2.2-1.8 2.6ZM6.6 11h2.8c-.4.7-.9 1-1.4 1s-1-.3-1.4-1Z"/></svg>`,
+  'vampire-fangs': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M2 4.2C3.8 3.4 5.8 3 8 3s4.2.4 6 1.2v3.1c0 3.4-2.3 5.7-6 5.7s-6-2.3-6-5.7V4.2Zm2 2v1.1C4 9.6 5.5 11 8 11s4-1.4 4-3.7V6.2c-1.2-.4-2.6-.7-4-.7s-2.8.3-4 .7Zm1.2.2h2L6.8 9 5.2 6.4Zm3.6 0h2L9.2 9 8.8 6.4Z"/></svg>`,
+  'wolf-head': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="m2 1.5 3.2 2A7.8 7.8 0 0 1 8 3a7.8 7.8 0 0 1 2.8.5l3.2-2-.8 4.2c.5.9.8 2 .8 3.1 0 3.3-2.7 6-6 6s-6-2.7-6-6c0-1.1.3-2.2.8-3.1L2 1.5Zm3.1 5.2 1.8.5-.8 1.3-1-.4v-1.4Zm5.8 0v1.4l-1 .4-.8-1.3 1.8-.5ZM8 9.1l1.1 1.3L8 11.2l-1.1-.8L8 9.1Z"/></svg>`,
+  'mermaid-tail': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M3 1.3C5.6 1.8 7.3 3 8.2 4.8c.9-1.8 2.6-3 5.2-3.5-.2 2.6-1.2 4.3-3 5.1.7 1.1.9 2.3.5 3.5-.6 2-2.5 3.5-5.8 4.8.7-2.2 1.6-3.9 2.7-5.2.7-.9.9-1.8.4-2.8C7 4.1 5.3 2.3 3 1.3Z"/></svg>`,
+  'fairy-wings': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M7.3 7.2C5.8 3.1 3.7 1 1 1c-.1 3.2 1.4 5.6 4.6 7.1C2.9 9.2 1.5 11.2 1.4 14c2.7.1 4.6-1.6 5.9-5.1v-1.7Zm1.4 0C10.2 3.1 12.3 1 15 1c.1 3.2-1.4 5.6-4.6 7.1 2.7 1.1 4.1 3.1 4.2 5.9-2.7.1-4.6-1.6-5.9-5.1V7.2ZM7.4 6.3h1.2v4.4H7.4V6.3Z"/></svg>`
+};
+
+function svgToDataUrl(svg) {
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
 function applyPreviewIconFallback(root = document) {
   root.querySelectorAll('.l1ng-icon').forEach(icon => {
     const iconClass = [...icon.classList].find(name => name.startsWith('icon-'));
     if (!iconClass) return;
     const iconName = iconClass.slice(5);
+    if (CUSTOM_ICON_PREVIEW_DATA[iconName]) {
+      icon.style.setProperty('--l1ng-icon', svgToDataUrl(CUSTOM_ICON_PREVIEW_DATA[iconName]));
+      return;
+    }
     icon.style.setProperty('--l1ng-icon', `url("${ICON_PREVIEW_FALLBACK_BASE}${iconName}.svg")`);
   });
 }
@@ -1808,6 +1831,35 @@ function getVisibleIds(familyId) {
   return result;
 }
 
+// ========【配偶間距】 設定 - 依關係標籤實際寬度自適應 ========
+function relationshipBubbleWidth(info) {
+  if (!info) return 0;
+  const fs = 12;
+  const displayText = displayRelationshipText(info.text || '');
+  const iconSpace = info.icon ? 18 : 0;
+  return Math.max(Math.ceil(measureText(displayText, fs) + iconSpace + 24), 42);
+}
+
+function getAdaptiveSpouseGap(members, baseGap) {
+  if (!members || members.length < 2) return baseGap;
+
+  // 配偶標籤必須完整放在兩張卡片之間，左右各保留約 10px 呼吸空間。
+  // 英文、自訂長關係名稱都會依實際顯示文字重新量測；隱藏關係按鈕不會改變這個幾何間距。
+  let widestLabel = 0;
+  const head = members[0];
+  for (let i = 1; i < members.length; i += 1) {
+    const spouse = members[i];
+    const pairK = pairKey(head.id, spouse.id);
+    const info = getRelInfoByKey('spouse:' + pairK, 'spouse');
+    widestLabel = Math.max(widestLabel, relationshipBubbleWidth(info));
+  }
+
+  const visualMinimum = viewMode === 'view' ? 52 : 60;
+  const labelDrivenGap = widestLabel ? widestLabel + 20 : 0;
+  // 上限避免極長自訂關係把整棵族譜撐得過度鬆散。
+  return Math.min(Math.max(baseGap, visualMinimum, labelDrivenGap), 168);
+}
+
 function computeAutoPositions(visibleIds) {
   const { W: NODE_W, H: NODE_H } = getDims();
   const { SPOUSE: SPOUSE_GAP, SIBLING: SIBLING_GAP, LEVEL: LEVEL_GAP } = getGaps();
@@ -1831,7 +1883,14 @@ function computeAutoPositions(visibleIds) {
       const sp = byId.get(sid);
       if (sp && !placed.has(sp.id)) { members.push(sp); placed.add(sp.id); }
     });
-    return { members, width: members.length * NODE_W + (members.length - 1) * SPOUSE_GAP, x:0, y:0 };
+    const spouseGap = getAdaptiveSpouseGap(members, SPOUSE_GAP);
+    return {
+      members,
+      spouseGap,
+      width: members.length * NODE_W + (members.length - 1) * spouseGap,
+      x:0,
+      y:0
+    };
   }
   function layoutUnit(unit, depth) {
     const childHeads = [];
@@ -1860,7 +1919,8 @@ function computeAutoPositions(visibleIds) {
   sims.forEach(c => { if (!placed.has(c.id)) layoutUnit(makeUnit(c), 0); });
   const pos = new Map();
   units.forEach(u => {
-    u.members.forEach((m,i) => { pos.set(m.id, { x: u.x + i * (NODE_W + SPOUSE_GAP), y: u.y }); });
+    const spouseGap = Number.isFinite(u.spouseGap) ? u.spouseGap : SPOUSE_GAP;
+    u.members.forEach((m,i) => { pos.set(m.id, { x: u.x + i * (NODE_W + spouseGap), y: u.y }); });
   });
   let minX = Infinity;
   pos.forEach(p => { if (p.x < minX) minX = p.x; });
@@ -2203,14 +2263,14 @@ function avatarHTML(sim) {
   return esc(ch);
 }
 function statusBadgeHTML(sim) {
-  if (sim.status === '幽靈') return `<div class="n-badge ghost" title="${esc(uiText('幽靈'))}">${iconSvg('cloud-haze2')}</div>`;
-  if (sim.status === '已故') return `<div class="n-badge dead" title="${esc(uiText('已故'))}">${iconSvg('flower1')}</div>`;
-  return `<div class="n-badge alive" title="${esc(uiText('在世'))}">${iconSvg('check-circle')}</div>`;
+  if (sim.status === '幽靈') return `<div class="n-badge ghost" title="${esc(uiText('幽靈'))}">${iconSvg('ghost-symbol')}</div>`;
+  if (sim.status === '已故') return `<div class="n-badge dead" title="${esc(uiText('已故'))}">${iconSvg('tombstone')}</div>`;
+  return `<div class="n-badge alive" title="${esc(uiText('在世'))}">${iconSvg('heart')}</div>`;
 }
 function statusIconHTML(sim) {
-  if (sim.status === '幽靈') return `<span class="roster-badge status-icon" title="${esc(uiText('幽靈'))}">${iconSvg('cloud-haze2')}</span>`;
-  if (sim.status === '已故') return `<span class="roster-badge status-icon" title="${esc(uiText('已故'))}">${iconSvg('flower1')}</span>`;
-  return `<span class="roster-badge status-icon" title="${esc(uiText('在世'))}">${iconSvg('check-circle')}</span>`;
+  if (sim.status === '幽靈') return `<span class="roster-badge status-icon status-ghost" title="${esc(uiText('幽靈'))}">${iconSvg('ghost-symbol')}</span>`;
+  if (sim.status === '已故') return `<span class="roster-badge status-icon status-dead" title="${esc(uiText('已故'))}">${iconSvg('tombstone')}</span>`;
+  return `<span class="roster-badge status-icon status-alive" title="${esc(uiText('在世'))}">${iconSvg('heart')}</span>`;
 }
 function raceBadgeHTML(sim) {
   const r = (sim.race || '').trim();
@@ -2246,8 +2306,8 @@ function petSpeciesLabel(pet) {
   return uiText(sp.label);
 }
 function petStatusIcon(pet) {
-  if (pet.status === '幽靈') return iconSvg('cloud-haze2');
-  if (pet.status === '已故') return iconSvg('flower1');
+  if (pet.status === '幽靈') return iconSvg('ghost-symbol');
+  if (pet.status === '已故') return iconSvg('tombstone');
   return '';
 }
 function buildPetsChipsHTML(pets, owner = null) {
@@ -4051,14 +4111,29 @@ function renderRoster() {
     const spouseCount = (s.spouseIds||[]).length;
     const childCount = getChildrenOf(s.id).length;
     const galleryCount = (s.gallery||[]).length;
-    const metaParts = [fams];
-    if (spouseCount) metaParts.push(`${uiText('配偶')} ${spouseCount}`);
-    if (childCount) metaParts.push(`${uiText('子女')} ${childCount}`);
-    if (galleryCount) metaParts.push(`${iconSvg('images')} ${galleryCount}`);
-    if (s.residence) metaParts.push(`${iconSvg('house')} ${esc(displayDataText(s.residence, s))}`);
-    if ((s.status === '已故' || s.status === '幽靈') && s.causeOfDeath) metaParts.push(`${iconSvg('flower1')} ${esc(displayDataText(s.causeOfDeath, s))}`);
-    if ((s.pets||[]).length) metaParts.push(`${iconSvg('heart')} ${(s.pets||[]).map(p=>esc(displayDataText(p.name, s))).join('、')}`);
-    const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
+    const metaParts = [
+      { icon:'house-heart', text:fams, title:uiText('所屬家族') }
+    ];
+    if (spouseCount) metaParts.push({ icon:'heart', text:`${uiText('配偶')} ${spouseCount}` });
+    if (childCount) metaParts.push({ icon:'person-hearts', text:`${uiText('子女')} ${childCount}` });
+    if (galleryCount) metaParts.push({ icon:'images', text:String(galleryCount), title:uiText('相簿') });
+    if (s.residence) metaParts.push({ icon:'house', text:displayDataText(s.residence, s), title:uiText('居住地') });
+    if ((s.status === '已故' || s.status === '幽靈') && s.causeOfDeath) {
+      metaParts.push({ icon:'tombstone', text:displayDataText(s.causeOfDeath, s), title:uiText('死因') });
+    }
+    if ((s.pets||[]).length) {
+      metaParts.push({
+        icon:'paw',
+        text:(s.pets||[]).map(p => displayDataText(p.name, s)).join('、'),
+        title:uiText('寵物')
+      });
+    }
+    const genderIconName = s.gender === '男' ? 'gender-male' : s.gender === '女' ? 'gender-female' : 'gender-ambiguous';
+    const genderHTML = `<span class="roster-meta-part roster-meta-gender" title="${esc(uiText(s.gender))}">${iconSvg(genderIconName)}</span>`;
+    const metaHTML = metaParts.map(part => {
+      const title = part.title ? ` title="${esc(part.title)}"` : '';
+      return `<span class="roster-meta-part"${title}>${part.icon ? iconSvg(part.icon) : ''}<span>${esc(part.text)}</span></span>`;
+    }).join('<span class="roster-meta-separator" aria-hidden="true">·</span>');
     return `<div class="roster-item">
       <div class="roster-main" data-edit="${s.id}">
         <div class="roster-avatar">${avatarHTML(s)}</div>
@@ -4066,7 +4141,7 @@ function renderRoster() {
           <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
             <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
           </div>
-          <div class="roster-meta">${genderIcon} ${esc(metaParts.join(' · '))}</div>
+          <div class="roster-meta">${genderHTML}${metaHTML ? '<span class="roster-meta-separator" aria-hidden="true">·</span>' + metaHTML : ''}</div>
         </div>
       </div>
       <div class="roster-actions">
