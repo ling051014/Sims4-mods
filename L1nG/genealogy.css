@@ -3828,7 +3828,7 @@ body[data-theme="midnight"] .stage-老年 {
 
 /* ========【L1nG 視覺系統】 設定 - 延續 Sims4-mods 的開發者專區風格 ======== */
 
-/* 白／淺灰底、細線、低飽和文字、寬字距，並以藍色作為互動提示。 */
+/* 白 / 淺灰底、細線、低飽和文字、寬字距，並以藍色作為互動提示。 */
 
 /* ========【全站字體】 設定 - 與主專案使用習慣一致 ======== */
 
@@ -3867,8 +3867,11 @@ body[data-theme="ling"] .sidebar-group-title {
 
 body[data-theme="ling"] .sidebar-btn {
     /* 圓角弧度 */ border-radius: 4px;
-    /* 文字顏色 */ color: #666;
     /* 字距設定 */ letter-spacing: .2px;
+}
+
+body[data-theme="ling"] .sidebar-btn:not(.danger):not(.active):not(.lock-active) {
+    /* 一般狀態文字顏色；危險 / 啟用狀態沿用各自的正式狀態色 */ color: #666;
 }
 
 body[data-theme="ling"] #viewport {
