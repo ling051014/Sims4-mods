@@ -648,6 +648,8 @@ function openUiDialog({
     ? wholeMessage
     : rawMessage.split('\n').map(line => uiText(line)).join('\n');
   dialog.dataset.kind = kind;
+  // 讓 CSS 能只針對「兩顆按鈕」的確認／輸入彈窗置中，不影響單按鈕提示。
+  dialog.dataset.actionCount = mode === 'alert' ? '1' : '2';
   confirmBtn.textContent = uiText(confirmText);
   cancelBtn.textContent = uiText(cancelText);
   cancelBtn.style.display = mode === 'alert' ? 'none' : '';
@@ -3365,6 +3367,47 @@ function refreshSS(selectId) {
   const wrap = document.querySelector(`.ss-wrap[data-ss-for="${selectId}"]`);
   if (wrap && wrap._refresh) wrap._refresh();
 }
+
+
+// ========【共用單選箭頭】 設定 - 編輯頁與導覽共用同一顆 Chevron SVG ========
+function installSharedNativeSelectChevrons(root = document) {
+  const selector = '.modal select:not([multiple]), #galleryBrowserFilter';
+  const candidates = [];
+
+  if (root instanceof Element && root.matches(selector)) candidates.push(root);
+  if (root && root.querySelectorAll) candidates.push(...root.querySelectorAll(selector));
+
+  candidates.forEach(select => {
+    // 導覽列使用自己的自訂下拉；hidden select 是搜尋型下拉的資料來源，都不應包裝。
+    if (!select || select.hidden || select.hasAttribute('hidden') || select.classList.contains('nav-native-select')) return;
+    if (select.closest('.select-chevron-shell')) return;
+
+    const parent = select.parentNode;
+    if (!parent) return;
+
+    const shell = document.createElement('span');
+    shell.className = 'select-chevron-shell';
+    parent.insertBefore(shell, select);
+    shell.appendChild(select);
+
+    const icon = document.createElement('span');
+    icon.className = 'l1ng-icon icon-chevron-down select-chevron-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    shell.appendChild(icon);
+  });
+}
+
+function observeSharedNativeSelectChevrons() {
+  installSharedNativeSelectChevrons(document);
+  const observer = new MutationObserver(records => {
+    records.forEach(record => {
+      record.addedNodes.forEach(node => {
+        if (node instanceof Element) installSharedNativeSelectChevrons(node);
+      });
+    });
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+}
 function setupSearchSelects() {
   document.querySelectorAll('.ss-wrap').forEach(wrap => {
     const select = document.getElementById(wrap.dataset.ssFor);
@@ -3403,6 +3446,10 @@ function setupSearchSelects() {
         if (!sel || sel.value === '') input.innerHTML = `<span class="ss-placeholder">${esc(placeholder)}</span>`;
         else input.textContent = sel.textContent;
       }
+
+      // 搜尋型欄位與頂部導覽共用同一顆 chevron-down.svg；
+      // 以真正的 SVG ICON 呈現，顏色可直接跟隨各主題，不再被背景色蓋掉。
+      input.insertAdjacentHTML('beforeend', iconSvg('chevron-down', 'ss-chevron-icon'));
     }
     function renderOptions(filter = '') {
       const q = filter.trim().toLowerCase();
@@ -5211,4 +5258,5 @@ They will remain in the global Sim pool.`;
 
 LING_I18N.init();
 setupTopbarNavSelects();
+observeSharedNativeSelectChevrons();
 init();
