@@ -437,6 +437,13 @@ button {
     /* 字體設定 */ font-family: inherit;
     /* 滑鼠指標 */ cursor: pointer;
 }
+
+/* ========【側邊欄尺寸】 設定 - 左上品牌區與側邊欄共用同一寬度 ======== */
+:root {
+    /* 側邊欄目前寬度 */ --sidebar-width: 220px;
+    /* 側邊欄預設寬度 */ --sidebar-default-width: 220px;
+}
+
 .app {
     /* 顯示方式 */ display: flex;
     /* 排列方向 */ flex-direction: column;
@@ -456,7 +463,7 @@ button {
     /* 彈性收縮 */ flex-shrink: 0;
 }
 .topbar-brand {
-    /* 元素寬度 */ width: 220px;
+    /* 元素寬度 */ width: var(--sidebar-width);
     /* 顯示方式 */ display: flex;
     /* 垂直對齊 */ align-items: center;
     /* 內縮空間 */ padding: 0 18px;
@@ -617,7 +624,7 @@ button {
     /* 最小高度 */ min-height: 0;
 }
 .sidebar {
-    /* 元素寬度 */ width: 220px;
+    /* 元素寬度 */ width: var(--sidebar-width);
     /* 彈性收縮 */ flex-shrink: 0;
     /* 背景設定 */ background: var(--bg);
     /* 右側邊框 */ border-right: 1px solid var(--border);
@@ -626,6 +633,43 @@ button {
     /* 顯示層級 */ z-index: 30;
     /* 溢出處理 */ overflow: hidden;
 }
+/* ========【側邊欄寬度】 設定 - 拖曳分隔線調整桌面版側邊欄寬度 ======== */
+.sidebar-resizer {
+    /* 元素寬度 */ width: 7px;
+    /* 左側外距 */ margin-left: -4px;
+    /* 右側外距 */ margin-right: -3px;
+    /* 定位方式 */ position: relative;
+    /* 彈性收縮 */ flex-shrink: 0;
+    /* 顯示層級 */ z-index: 45;
+    /* 滑鼠指標 */ cursor: col-resize;
+    /* 觸控行為 */ touch-action: none;
+    /* 背景設定 */ background: transparent;
+    /* 外框設定 */ outline: none;
+}
+.sidebar-resizer::before {
+    /* 生成內容 */ content: "";
+    /* 定位方式 */ position: absolute;
+    /* 頂部位置 */ top: 0;
+    /* 底部位置 */ bottom: 0;
+    /* 左側位置 */ left: 3px;
+    /* 元素寬度 */ width: 1px;
+    /* 背景設定 */ background: transparent;
+    /* 動畫過渡 */ transition: background-color .15s ease, box-shadow .15s ease;
+}
+.sidebar-resizer:hover::before,
+.sidebar-resizer:focus-visible::before,
+body.sidebar-resizing .sidebar-resizer::before {
+    /* 背景設定 */ background: #55acee;
+    /* 元素陰影 */ box-shadow: 0 0 0 1px rgba(85,172,238,.08);
+}
+body.sidebar-resizing {
+    /* 滑鼠指標 */ cursor: col-resize;
+    /* 文字選取 */ user-select: none;
+}
+body.sidebar-resizing * {
+    /* 滑鼠指標 */ cursor: col-resize !important;
+}
+
 .sidebar-scroll {
     /* 彈性配比 */ flex: 1;
     /* 垂直溢出 */ overflow-y: auto;
@@ -785,6 +829,35 @@ button {
 #labels .edge-label.dragging {
     /* 滑鼠指標 */ cursor: grabbing;
 }
+/* ========【智慧對齊輔助線】 設定 - 卡片拖曳時提供邊緣與中心吸附提示 ======== */
+#smartGuides {
+    /* 定位方式 */ position: absolute;
+    /* 定位範圍 */ inset: 0;
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 顯示層級 */ z-index: 18;
+    /* 溢出處理 */ overflow: visible;
+}
+.smart-guide {
+    /* 定位方式 */ position: absolute;
+    /* 預設顯示 */ display: none;
+    /* 背景設定 */ background: #55acee;
+    /* 元素陰影 */ box-shadow: 0 0 0 .5px rgba(255,255,255,.85);
+    /* 滑鼠事件 */ pointer-events: none;
+}
+.smart-guide.show {
+    /* 顯示方式 */ display: block;
+}
+.smart-guide-vertical {
+    /* 頂部位置 */ top: 0;
+    /* 元素寬度 */ width: 1px;
+    /* 元素高度 */ height: 100%;
+}
+.smart-guide-horizontal {
+    /* 左側位置 */ left: 0;
+    /* 元素寬度 */ width: 100%;
+    /* 元素高度 */ height: 1px;
+}
+
 #labels.labels-locked .edge-label {
     /* 滑鼠指標 */ cursor: default;
     /* 滑鼠事件 */ pointer-events: none;
@@ -931,7 +1004,7 @@ button {
     /* 顯示層級 */ z-index: 100;
     /* 滑鼠指標 */ cursor: grabbing;
     /* 元素陰影 */ box-shadow: 0 18px 44px rgba(0,0,0,.24);
-    /* 元素變形 */ transform: scale(1.04);
+    /* 元素變形 */ transform: none;
     /* 邊框顏色 */ border-color: var(--accent);
     /* 動畫過渡 */ transition: none;
 }
@@ -3084,7 +3157,7 @@ body[data-theme="midnight"] .stage-老年 {
 }
 @media (max-width:900px) {
     .topbar-brand {
-        /* 元素寬度 */ width: 180px;
+        /* 元素寬度 */ width: var(--sidebar-width);
         /* 字體大小 */ font-size: 14px;
         /* 內縮空間 */ padding: 0 12px;
     }
@@ -3131,6 +3204,9 @@ body[data-theme="midnight"] .stage-老年 {
     }
     .icon-btn {
         /* 內縮空間 */ padding: 6px 9px;
+    }
+    .sidebar-resizer {
+        /* 顯示方式 */ display: none;
     }
     .sidebar {
         /* 定位方式 */ position: fixed;
@@ -3262,7 +3338,7 @@ body {
     /* 元素陰影 */ box-shadow: none;
 }
 .topbar-brand {
-    /* 元素寬度 */ width: 270px;
+    /* 元素寬度 */ width: var(--sidebar-width);
     /* 內縮空間 */ padding: 0 20px;
     /* 文字顏色 */ color: #555;
     /* 右側邊框 */ border-right: 1px solid #eee;
@@ -3278,7 +3354,7 @@ body {
     /* 字距設定 */ letter-spacing: 1.4px;
 }
 .sidebar {
-    /* 元素寬度 */ width: 220px;
+    /* 元素寬度 */ width: var(--sidebar-width);
     /* 背景設定 */ background: #fff;
     /* 右側邊框 */ border-right: 1px solid #eee;
 }
@@ -3418,8 +3494,8 @@ body {
 /* ========【響應式設定】 設定 - 窄螢幕側欄與品牌寬度最佳化 ======== */
 @media (max-width:900px) {
     .topbar-brand {
-        /* 元素寬度 */ width: auto;
-        /* 最大寬度 */ max-width: 180px;
+        /* 元素寬度 */ width: var(--sidebar-width);
+        /* 最大寬度 */ max-width: none;
         /* 內縮空間 */ padding: 0 12px;
         /* 字體大小 */ font-size: 9px;
         /* 字距設定 */ letter-spacing: 1.6px;
