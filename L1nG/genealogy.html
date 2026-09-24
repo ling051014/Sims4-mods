@@ -78,10 +78,10 @@
                             <div class="sidebar-group-title">檢視與佈局</div>
                             <button class="sidebar-btn" id="modeToggle"><span class="l1ng-icon icon-eye" aria-hidden="true"></span><span>檢視模式</span></button>
                             <button class="sidebar-btn" id="layoutToggle"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動佈局</span></button>
-                            <button class="sidebar-btn" id="lockToggle" style="display:none"><span class="l1ng-icon icon-unlock" aria-hidden="true"></span><span>未鎖定</span></button>
+                            <button class="sidebar-btn" id="lockToggle" style="display:none"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>未鎖定</span></button>
                             <button class="sidebar-btn" id="resetLayoutBtn" style="display:none"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>重設位置</span></button>
-                            <button class="sidebar-btn active" id="labelToggle"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>顯示標註</span></button>
-                            <button class="sidebar-btn" id="labelLockToggle"><span class="l1ng-icon icon-unlock" aria-hidden="true"></span><span>標註未鎖</span></button>
+                            <button class="sidebar-btn active" id="labelToggle"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>隱藏關係</span></button>
+                            <button class="sidebar-btn" id="labelLockToggle"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>鎖定關係</span></button>
                         </div>
                     </div>
                 </aside>
@@ -122,7 +122,7 @@
         <div class="mask" id="mask">
             <div class="modal">
                 <h2 id="modalTitle">新增模擬市民</h2>
-                <div class="info"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span><span>每條連線可擁有獨立的關係標註；標註在畫布上可拖曳，避免遮擋卡片。</span></div>
+                <div class="info"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span><span>每條連線可擁有獨立的關係；關係名稱可在畫布上拖曳，避免遮擋卡片。</span></div>
                 <div class="grid">
                     <label class="full">
                         模擬市民頭像
@@ -344,7 +344,7 @@
                     <div class="gallery-drop-hint"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span><span>支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖</span></div>
                 </div>
                 <div class="rel-section" id="relAnnoSection" style="display:none">
-                    <div class="rel-title">關係標註<span class="hint-inline">（每條連線獨立設定）</span></div>
+                    <div class="rel-title">關係<span class="hint-inline">（每條連線獨立設定）</span></div>
                     <div id="relAnnoList"></div>
                 </div>
                 <div class="rel-section" id="relSection" style="display:none">
@@ -687,6 +687,12 @@
                     <span class="l1ng-icon icon-info-circle" aria-hidden="true"></span>
                     <span>圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。</span>
                 </div>
+                <div class="setting-group-title">重設</div>
+                <div class="reset-actions">
+                    <button id="resetUiSettingsBtn" type="button">重設介面設定</button>
+                    <button class="danger" id="restoreSampleBtn" type="button">重建範例資料</button>
+                </div>
+                <div class="avatar-tip">「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。</div>
                 <div class="modal-actions"><span class="spacer"></span><button id="bgCloseBtn">關閉</button></div>
             </div>
         </div>
@@ -747,6 +753,26 @@
         </div>
 
         <!-- ========【核心程式】 設定 - 載入族譜功能腳本 ======== -->
+        <!-- ========【共用 HTML 彈窗】 設定 - 取代瀏覽器原生 alert / confirm / prompt ======== -->
+        <div class="ui-dialog-mask" id="uiDialogMask" aria-hidden="true">
+            <div class="ui-dialog" id="uiDialog" role="dialog" aria-modal="true" aria-labelledby="uiDialogTitle">
+                <div class="ui-dialog-header">
+                    <span id="uiDialogTitle">提示</span>
+                    <button class="ui-dialog-close" id="uiDialogClose" type="button" aria-label="關閉">×</button>
+                </div>
+                <div class="ui-dialog-body">
+                    <div class="ui-dialog-message" id="uiDialogMessage"></div>
+                    <input class="ui-dialog-input" id="uiDialogInput" type="text" autocomplete="off">
+                </div>
+                <div class="ui-dialog-actions">
+                    <button id="uiDialogCancel" type="button">取消</button>
+                    <button class="primary" id="uiDialogConfirm" type="button">確定</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
         <script src="genealogy.js"></script>
     </body>
 </html>
