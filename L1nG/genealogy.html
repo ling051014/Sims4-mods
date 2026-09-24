@@ -18,7 +18,10 @@
                     <button class="menu-toggle" id="menuToggle" title="選單"><span class="l1ng-icon icon-list" aria-hidden="true"></span></button>
                     <input class="brand-input" id="familyName" placeholder="家族名稱">
                     <select class="family-select" id="familySelect"></select>
-                    <input class="topbar-search" id="search" placeholder="搜尋姓名 / 職業 / 居住地…" type="search">
+                    <div class="topbar-search-wrap">
+                        <input class="topbar-search" id="search" placeholder="搜尋姓名 / 職業 / 居住地…" type="search" autocomplete="off">
+                        <div class="topbar-search-results" id="searchResults" role="listbox" aria-label="搜尋結果"></div>
+                    </div>
                     <select class="topbar-select" id="stageFilter">
                         <option value="">全部階段</option>
                         <option>嬰兒</option>
@@ -32,6 +35,7 @@
                     <span class="topbar-spacer"></span>
                     <div class="topbar-right">
                         <div class="language-switch" title="語言 / Language">
+                            <span class="l1ng-icon icon-globe2 language-icon" aria-hidden="true"></span>
                             <select aria-label="語言 / Language" class="topbar-select language-select" id="languageSelect">
                                 <option value="zh-Hant">繁中</option>
                                 <option value="zh-Hans">簡中</option>
