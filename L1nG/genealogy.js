@@ -2,6 +2,7 @@
 /*
  * 主要來源語言：繁體中文（zh-Hant）
  * 支援語言：繁體中文／簡體中文／English
+ * 圖示：本機 Bootstrap Icons SVG
  */
 
 
@@ -26,6 +27,7 @@ const PET_AVATAR_PROFILE_KEY = 'sims4_genealogy_pet_avatar_profile';
 const GALLERY_PROFILE_KEY = 'sims4_genealogy_gallery_profile';
 const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
 const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
+const LANG_KEY = 'ling_genealogy_language_v1';
 const SIDEBAR_DEFAULT_WIDTH = 220;
 const SIDEBAR_MIN_WIDTH = 180;
 const SIDEBAR_MAX_WIDTH = 420;
@@ -58,13 +60,11 @@ function getPetAvatarProfile() { return AVATAR_PROFILES[petAvatarProfile] || AVA
 function getGalleryProfile() { return GALLERY_PROFILES[galleryProfile] || GALLERY_PROFILES.medium; }
 
 const THEME_PRESETS = [
-  { id:'ling',      name:'LING Minimal', grad:'linear-gradient(120deg, #ffffff 0%, #f3f8fc 100%)' },
-  { id:'peach',     name:'蜜桃烏龍',   grad:'linear-gradient(120deg, #f8b4c4 0%, #a0d4e8 100%)' },
-  { id:'orange',    name:'橘子汽水',   grad:'linear-gradient(120deg, #ff9c72 0%, #7ec9c9 100%)' },
-  { id:'cranberry', name:'蔓越莓氣泡', grad:'linear-gradient(120deg, #e85878 0%, #78a8d8 100%)' },
-  { id:'lime',      name:'青檸茉莉',   grad:'linear-gradient(120deg, #9ad070 0%, #f0d048 100%)' },
-  { id:'thunder',   name:'愛上雷神',   grad:'linear-gradient(120deg, #f0c050 0%, #a878c8 100%)' },
-  { id:'midnight',  name:'午夜藍調',   grad:'linear-gradient(120deg, #1a2030 0%, #2a4570 100%)' }
+  { id:'ling',     name:'L1nG 晴空',     grad:'linear-gradient(120deg, #ffffff 0%, #dfeffc 100%)' },
+  { id:'sage',     name:'森霧鼠尾草',    grad:'linear-gradient(120deg, #dfe9e0 0%, #eef3ea 100%)' },
+  { id:'rose',     name:'莓果薄暮',      grad:'linear-gradient(120deg, #e8c4d0 0%, #f4dfe6 100%)' },
+  { id:'amber',    name:'琥珀紙頁',      grad:'linear-gradient(120deg, #e5c896 0%, #f2dfb9 100%)' },
+  { id:'midnight', name:'午夜靛藍',      grad:'linear-gradient(120deg, #182535 0%, #243c5c 100%)' }
 ];
 
 const BG_MAX = 1920;
@@ -110,7 +110,7 @@ const PET_SPECIES = {
   other:  { icon:'heart', label:'其他' }
 };
 
-const VALID_THEMES = ['ling','peach','orange','cranberry','lime','thunder','midnight'];
+const VALID_THEMES = ['ling','sage','rose','amber','midnight'];
 const VALID_MODES = ['view','edit'];
 const VALID_PROFILES = ['compact','balanced','hd'];
 const VALID_GALLERY_PROFILES = ['small','medium','large','hd','original'];
@@ -121,7 +121,7 @@ let removeMemberSelection = new Set();
 let labelDrag = null;
 let viewMode = 'view';
 let infoCardId = null;
-let currentThemeId = 'peach';
+let currentThemeId = 'ling';
 let customColors = { c1: '#f0c050', c2: '#a878c8' };
 
 let editingPets = [];
@@ -273,6 +273,8 @@ function ensureFamilyLayoutShape(fam) {
   if (typeof fam.locked !== 'boolean') fam.locked = false;
 }
 
+// ========【預設資料】 基準語言：繁體中文（zh-Hant） ========
+// 簡體中文與英文僅作顯示翻譯；預設資料的 canonical source 永遠保留繁體中文。
 function buildSample() {
   const sims = {};
   const add = o => { sims[o.id] = o; return o; };
@@ -316,7 +318,7 @@ function buildSample() {
     freeLayout: { view: false, edit: false },
     manualPos: { view: {}, edit: {} }, locked: false
   };
-  return {version:3,sims,families:[famGoth,famBache],links:[],relMap:{},labelPos:{},currentId:famGoth.id};
+  return {version:3,meta:{sample:true},sims,families:[famGoth,famBache],links:[],relMap:{},labelPos:{},currentId:famGoth.id};
 }
 
 let db = null, layoutCache = null, scale = 1;
@@ -417,6 +419,155 @@ function verifyLocalIconAssets() {
 verifyLocalIconAssets();
 
 
+// ========【共用 HTML 彈窗】 設定 - 取代瀏覽器原生 alert / confirm / prompt ========
+let _uiDialogResolve = null;
+let _uiDialogMode = 'alert';
+
+function closeUiDialog(result = null) {
+  const overlay = $('uiDialogMask');
+  if (!overlay || !overlay.classList.contains('show')) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  const resolve = _uiDialogResolve;
+  _uiDialogResolve = null;
+  if (resolve) resolve(result);
+}
+
+function openUiDialog({
+  title = '提示',
+  message = '',
+  mode = 'alert',
+  kind = 'default',
+  defaultValue = '',
+  confirmText = '確定',
+  cancelText = '取消'
+} = {}) {
+  const overlay = $('uiDialogMask');
+  const dialog = $('uiDialog');
+  const titleEl = $('uiDialogTitle');
+  const messageEl = $('uiDialogMessage');
+  const inputEl = $('uiDialogInput');
+  const cancelBtn = $('uiDialogCancel');
+  const confirmBtn = $('uiDialogConfirm');
+  const closeBtn = $('uiDialogClose');
+
+  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !confirmBtn || !closeBtn) {
+    return Promise.resolve(mode === 'confirm' ? false : mode === 'prompt' ? null : true);
+  }
+
+  if (_uiDialogResolve) closeUiDialog(null);
+  _uiDialogMode = mode;
+  titleEl.textContent = uiText(title);
+  // 先嘗試翻譯完整訊息，讓跨行確認文案與動態樣式能一次正確處理；
+  // 若沒有完整對應，再逐行翻譯，避免英文介面殘留繁中文字。
+  const rawMessage = String(message ?? '');
+  const wholeMessage = uiText(rawMessage);
+  messageEl.textContent = wholeMessage !== rawMessage
+    ? wholeMessage
+    : rawMessage.split('\n').map(line => uiText(line)).join('\n');
+  dialog.dataset.kind = kind;
+  confirmBtn.textContent = uiText(confirmText);
+  cancelBtn.textContent = uiText(cancelText);
+  cancelBtn.style.display = mode === 'alert' ? 'none' : '';
+  inputEl.classList.toggle('show', mode === 'prompt');
+  inputEl.value = mode === 'prompt' ? uiText(defaultValue) : '';
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+
+  return new Promise(resolve => {
+    _uiDialogResolve = resolve;
+
+    const finishConfirm = () => {
+      if (mode === 'prompt') closeUiDialog(inputEl.value);
+      else closeUiDialog(true);
+    };
+    const finishCancel = () => closeUiDialog(mode === 'confirm' ? false : null);
+
+    confirmBtn.onclick = finishConfirm;
+    cancelBtn.onclick = finishCancel;
+    closeBtn.onclick = finishCancel;
+    overlay.onclick = event => {
+      if (event.target === overlay) finishCancel();
+    };
+    inputEl.onkeydown = event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        finishConfirm();
+      }
+    };
+
+    requestAnimationFrame(() => {
+      if (mode === 'prompt') {
+        inputEl.focus();
+        inputEl.select();
+      } else {
+        confirmBtn.focus();
+      }
+    });
+  });
+}
+
+function uiAlert(message, options = {}) {
+  return openUiDialog({
+    title: options.title || '提示',
+    message,
+    mode: 'alert',
+    kind: options.kind || 'default',
+    confirmText: options.confirmText || '確定'
+  });
+}
+
+function uiConfirm(message, options = {}) {
+  return openUiDialog({
+    title: options.title || '請確認',
+    message,
+    mode: 'confirm',
+    kind: options.kind || 'default',
+    confirmText: options.confirmText || '確定',
+    cancelText: options.cancelText || '取消'
+  });
+}
+
+function uiPrompt(message, defaultValue = '', options = {}) {
+  return openUiDialog({
+    title: options.title || '輸入資料',
+    message,
+    mode: 'prompt',
+    kind: options.kind || 'default',
+    defaultValue,
+    confirmText: options.confirmText || '確定',
+    cancelText: options.cancelText || '取消'
+  });
+}
+
+function uiToast(message, duration = 2600) {
+  const region = $('toastRegion');
+  if (!region) return;
+  const toast = document.createElement('div');
+  toast.className = 'ui-toast';
+  toast.textContent = uiText(message);
+  region.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(6px)';
+    toast.style.transition = 'opacity .18s ease, transform .18s ease';
+    setTimeout(() => toast.remove(), 200);
+  }, duration);
+}
+
+
+document.addEventListener('keydown', event => {
+  const overlay = $('uiDialogMask');
+  if (!overlay || !overlay.classList.contains('show')) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    closeUiDialog(_uiDialogMode === 'confirm' ? false : null);
+  }
+});
+
+
 function debounce(fn, ms = 150) {
   let t;
   return function (...args) {
@@ -427,6 +578,58 @@ function debounce(fn, ms = 150) {
 
 function currentFamily() {
   return db.families.find(f => f.id === db.currentId) || db.families[0];
+}
+
+// ========【預設資料翻譯】 設定 - 繁中為唯一基準；只翻譯內建範例既有值 ========
+const BUILTIN_SAMPLE_SIM_IDS = new Set(['g1','g2','g3','g4','g5','g6']);
+const BUILTIN_SAMPLE_FAMILY_IDS = new Set(['fam_goth','fam_bacheler']);
+
+// 只有這些「原始繁中範例值」可跟著語言切換。
+// 玩家新增的資料，以及玩家把範例欄位改成的新文字，都保持原文，不做自動翻譯。
+const BUILTIN_SAMPLE_TEXT_VALUES = new Set([
+  '岡瑟·高斯','科妮莉亞·高斯','莫蒂默·高斯','貝拉·巴切勒','卡桑德拉·高斯','亞歷山大·高斯',
+  '高斯家族','巴切勒家族','柳溪 - 歐菲莉亞別墅','柳溪 - 花園社區',
+  '財富創造者','大家庭','暢銷作家','靈魂伴侶','卓越畫家','電腦奇才',
+  '衰老','雄心勃勃','天才','勢利','家庭觀念','愛整潔','美食家','有創造力','浪漫','陰沈',
+  '熱愛戶外','開朗','愛調情','物質主義','商業','作家','學生','無',
+  '高斯家族創始人之一，已故。','高斯家族女主人，已故。','現任高斯家族族長。',
+  '巴切勒家的女兒，嫁入高斯家。','莫蒂默和貝拉的女兒。','莫蒂默和貝拉的兒子。',
+  '午夜','黑貓','金毛','金毛尋回犬'
+]);
+
+function uiText(value) {
+  const text = String(value ?? '');
+  if (typeof LING_I18N !== 'undefined' && LING_I18N.translate) return LING_I18N.translate(text);
+  return text;
+}
+
+function sampleDbLooksBuiltIn() {
+  if (!db || !db.sims || !Array.isArray(db.families)) return false;
+  const hasSims = [...BUILTIN_SAMPLE_SIM_IDS].every(id => !!db.sims[id]);
+  const familyIds = new Set(db.families.map(f => f && f.id).filter(Boolean));
+  return hasSims && [...BUILTIN_SAMPLE_FAMILY_IDS].every(id => familyIds.has(id));
+}
+
+function isBuiltinSampleSim(sim) {
+  return !!(sim && BUILTIN_SAMPLE_SIM_IDS.has(sim.id) && (db?.meta?.sample || sampleDbLooksBuiltIn()));
+}
+
+function isBuiltinSampleFamily(family) {
+  return !!(family && BUILTIN_SAMPLE_FAMILY_IDS.has(family.id) && (db?.meta?.sample || sampleDbLooksBuiltIn()));
+}
+
+function displayDataText(value, owner = null) {
+  const text = String(value ?? '');
+  const isBuiltInOwner = owner && (isBuiltinSampleSim(owner) || isBuiltinSampleFamily(owner));
+  if (isBuiltInOwner && BUILTIN_SAMPLE_TEXT_VALUES.has(text)) return uiText(text);
+  return text;
+}
+
+const BUILTIN_RELATION_LABELS = new Set(Object.values(REL_PRESETS).map(item => item.label));
+function displayRelationshipText(value) {
+  const text = String(value ?? '');
+  // 只翻譯系統內建關係名稱；玩家自訂關係名稱保持原文。
+  return BUILTIN_RELATION_LABELS.has(text) ? uiText(text) : text;
 }
 
 function openSidebar() {
@@ -549,7 +752,7 @@ function _flushSave() {
     localStorage.setItem(STORE_KEY, JSON.stringify(db));
   } catch (e) {
     if (e.name === 'QuotaExceededError' || /quota/i.test(e.message || '')) {
-      alert('localStorage 已滿！\n\n建議：\n1. 等待圖片遷移到 IndexedDB 完成\n2. 或在「外觀設定」中清理未使用的圖片\n3. 或匯出備份後清空瀏覽器資料');
+      uiAlert('localStorage 已滿！\n\n建議：\n1. 等待圖片遷移到 IndexedDB 完成\n2. 或在「外觀設定」中清理未使用的圖片\n3. 或匯出備份後清空瀏覽器資料', { title: '儲存空間不足', kind: 'danger' });
     }
   }
 }
@@ -637,7 +840,7 @@ function applyTheme(name) {
 
 function applyCustomTheme(c1, c2) {
   clearCustomOverrides();
-  document.body.dataset.theme = 'peach';
+  document.body.dataset.theme = 'custom';
   currentThemeId = 'custom';
   document.body.style.setProperty('--grad-1', c1);
   document.body.style.setProperty('--grad-2', c2);
@@ -744,12 +947,12 @@ galleryProfileSelect.onchange = () => applyGalleryProfile(galleryProfileSelect.v
 function applyLabelLock(locked) {
   labelLocked = !!locked;
   if (labelLocked) {
-    setIconText(labelLockToggle, 'lock', '標註已鎖');
+    setIconText(labelLockToggle, 'unlock', '解鎖關係');
     labelLockToggle.classList.add('active');
     labelsSvg.classList.add('labels-locked');
     if (labelDrag) { labelDrag.el.classList.remove('dragging'); labelDrag = null; }
   } else {
-    setIconText(labelLockToggle, 'unlock', '標註未鎖');
+    setIconText(labelLockToggle, 'lock', '鎖定關係');
     labelLockToggle.classList.remove('active');
     labelsSvg.classList.remove('labels-locked');
   }
@@ -793,7 +996,7 @@ function applyBg() {
 }
 function saveBg() {
   try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); }
-  catch(e) { alert('背景圖片設定儲存失敗。'); }
+  catch(e) { uiAlert('背景圖片設定儲存失敗。', { title: '儲存失敗', kind: 'danger' }); }
 }
 function compressBgImage(file) {
   return new Promise((resolve, reject) => {
@@ -901,6 +1104,68 @@ $('bgBtn').onclick = () => {
 $('bgCloseBtn').onclick = () => bgMask.classList.remove('show');
 bgMask.onclick = e => { if (e.target === bgMask) bgMask.classList.remove('show'); };
 
+// ========【恢復預設】 設定 - 介面設定與範例資料分開處理 ========
+const resetUiSettingsBtn = $('resetUiSettingsBtn');
+if (resetUiSettingsBtn) {
+  resetUiSettingsBtn.onclick = async () => {
+    const ok = await uiConfirm(
+      '恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？\n族譜人物、關係與卡片位置不會被刪除。',
+      { title:'重設介面設定', confirmText:'重設', kind:'default' }
+    );
+    if (!ok) return;
+
+    [THEME_KEY, CUSTOM_COLORS_KEY, BG_KEY, MODE_KEY, LABELS_KEY,
+      AVATAR_PROFILE_KEY, PET_AVATAR_PROFILE_KEY, GALLERY_PROFILE_KEY,
+      LABEL_LOCK_KEY, SIDEBAR_WIDTH_KEY].forEach(key => {
+      try { localStorage.removeItem(key); } catch (_) {}
+    });
+
+    customColors = { c1:'#f0c050', c2:'#a878c8' };
+    bgSettings = { image:null, opacity:0.5, fit:'cover' };
+    showRelLabels = true;
+    applySidebarWidth(SIDEBAR_DEFAULT_WIDTH, { persist:false });
+    applyTheme('ling');
+    applyViewMode('view');
+    applyLabelLock(false);
+    applyAvatarProfile('balanced');
+    applyPetAvatarProfile('balanced');
+    applyGalleryProfile('medium');
+    applyBg();
+    updateBgPreview();
+    updateLayoutToggle();
+    const labelBtn = $('labelToggle');
+    if (labelBtn) {
+      labelBtn.classList.add('active');
+      setIconText(labelBtn, 'tags', '隱藏關係');
+    }
+    renderThemeGrid();
+    render();
+    requestAnimationFrame(fitScreen);
+    uiToast('介面設定已恢復預設。');
+  };
+}
+
+const restoreSampleBtn = $('restoreSampleBtn');
+if (restoreSampleBtn) {
+  restoreSampleBtn.onclick = async () => {
+    const ok = await uiConfirm(
+      '這會刪除目前族譜資料，並重新建立繁體中文的預設範例。\n此操作無法復原，建議先匯出 JSON 備份。',
+      { title:'重建範例資料', confirmText:'重建範例資料', kind:'danger' }
+    );
+    if (!ok) return;
+    closeEditor();
+    db = buildSample();
+    normalizeAllSims();
+    invalidateChildrenIndex();
+    save({ immediate:true });
+    refreshFamilyUI();
+    render();
+    bgMask.classList.remove('show');
+    requestAnimationFrame(fitScreen);
+    uiToast('已重建繁中範例資料。');
+  };
+}
+
 $('bgInput').onchange = async e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -910,7 +1175,7 @@ $('bgInput').onchange = async e => {
     if (id) bgSettings.image = id;
     else bgSettings.image = dataUrl;
     applyBg(); saveBg(); updateBgPreview();
-  } catch(err){ alert('背景處理失敗：' + err.message); }
+  } catch(err){ uiAlert('背景處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
   e.target.value = '';
 };
 $('bgOpacity').oninput = () => {
@@ -925,7 +1190,7 @@ $('bgFit').onchange = () => {
 };
 $('bgClearBtn').onclick = async () => {
   if (!bgSettings.image) return;
-  if (!confirm('確定清除目前背景圖片嗎？')) return;
+  if (!await uiConfirm('確定清除目前背景圖片嗎？', { title: '移除背景圖片', kind: 'danger', confirmText: '移除背景' })) return;
   if (isImageIdRef(bgSettings.image)) {
     try { await idbDeleteImage(bgSettings.image); } catch(e){}
     imageCache.delete(bgSettings.image);
@@ -936,9 +1201,9 @@ $('bgClearBtn').onclick = async () => {
 };
 
 $('cleanupBtn').onclick = async () => {
-  if (!confirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？')) return;
+  if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
   const n = await cleanupUnusedImages();
-  alert(`清理完成，共刪除 ${n} 張未使用圖片。`);
+  uiToast(`清理完成，共刪除 ${n} 張未使用圖片。`);
   updateStorageInfo();
 };
 
@@ -1155,11 +1420,18 @@ function getLabelOffset(key) {
 const _mc = document.createElement('canvas');
 const _mctx = _mc.getContext('2d');
 const _textMeasureCache = new Map();
+function getMeasureFontStack() {
+  const lang = document.documentElement.lang || 'zh-Hant';
+  if (lang === 'zh-Hans') return '"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif';
+  if (lang === 'en') return '"Segoe UI",Inter,Arial,system-ui,sans-serif';
+  return '"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif';
+}
 function measureText(t, fs) {
-  const key = fs + '\u0001' + t;
+  const fontStack = getMeasureFontStack();
+  const key = fontStack + '\u0001' + fs + '\u0001' + t;
   let v = _textMeasureCache.get(key);
   if (v !== undefined) return v;
-  _mctx.font = `${fs}px "PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif`;
+  _mctx.font = `${fs}px ${fontStack}`;
   v = _mctx.measureText(t).width;
   if (_textMeasureCache.size > 3000) _textMeasureCache.clear();
   _textMeasureCache.set(key, v);
@@ -1168,8 +1440,10 @@ function measureText(t, fs) {
 
 function makeLabelSVG(x, y, iconName, text, key) {
   const fs = 12;
+  const displayText = displayRelationshipText(text);
   const iconSpace = iconName ? 18 : 0;
-  const w = Math.max(measureText(text, fs) + iconSpace + 20, 42);
+  // 依實際顯示語言量測；英文較長時標籤會自動擴寬，不再被裁切。
+  const w = Math.max(Math.ceil(measureText(displayText, fs) + iconSpace + 24), 42);
   const h = 22;
   const off = getLabelOffset(key);
   const tx = (x + off.dx).toFixed(1);
@@ -1180,7 +1454,7 @@ function makeLabelSVG(x, y, iconName, text, key) {
     <rect x="${(-w/2).toFixed(1)}" y="${-h/2}" width="${w.toFixed(1)}" height="${h}" rx="${h/2}"
       fill="var(--label-bg)" stroke="var(--label-border)" stroke-width="1.5"/>
     <foreignObject x="${(-w/2).toFixed(1)}" y="${-h/2}" width="${w.toFixed(1)}" height="${h}">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="edge-label-content">${iconHtml}<span>${esc(text)}</span></div>
+      <div xmlns="http://www.w3.org/1999/xhtml" class="edge-label-content">${iconHtml}<span>${esc(displayText)}</span></div>
     </foreignObject>
   </g>`;
 }
@@ -1451,18 +1725,27 @@ function drawEdges() {
     if (!a) return;
     const p0 = pos.get(visPids[0]);
     if (!p0) return;
-    const y1 = p0.y + NODE_H + PAD;
-    const y2 = a.y + PAD;
-    const x2 = a.x + NODE_W/2 + PAD;
-    let x1;
+
+    // 雙親存在時，主幹必須直接接到兩位父母之間的配偶線。
+    // 舊版只取「雙親水平中點 + 第一位父母底部」，卡片距離拉大後會產生懸空斷點。
+    let start;
     if (visPids.length >= 2) {
-      const pA = pos.get(visPids[0]), pB = pos.get(visPids[1]);
-      x1 = ((pA.x + NODE_W/2) + (pB.x + NODE_W/2))/2 + PAD;
+      const pA = pos.get(visPids[0]);
+      const pB = pos.get(visPids[1]);
+      if (!pA || !pB) return;
+      start = pairJoinPoint(pA, pB);
     } else {
-      x1 = p0.x + NODE_W/2 + PAD;
+      start = cardAnchorToward(p0, a);
     }
-    const my = y1 + (y2-y1)/2;
+
+    const childAnchor = cardAnchorToward(a, start, true);
+    const x1 = start.x;
+    const y1 = start.y;
+    const x2 = childAnchor.x;
+    const y2 = childAnchor.y;
+    const my = y1 + (y2 - y1) / 2;
     const adopt = c.adoptive ? ' edge-adopt' : '';
+
     paths.push(`<path class="edge edge-parent${adopt}" d="M${x1} ${y1} V${my} H${x2} V${y2}"/>`);
     if (showRelLabels) {
       const key = 'parent:' + c.id;
@@ -1544,6 +1827,79 @@ function drawEdges() {
   labelsSvg.innerHTML = labels.join('');
 }
 
+// ========【族譜連線】 設定 - 取得配偶線真正的共用接點 ========
+function pairJoinPoint(a, b) {
+  const { W: NODE_W, H: NODE_H } = getDims();
+  const ax = a.x + NODE_W / 2 + PAD;
+  const ay = a.y + NODE_H / 2 + PAD;
+  const bx = b.x + NODE_W / 2 + PAD;
+  const by = b.y + NODE_H / 2 + PAD;
+  const dx = bx - ax;
+  const dy = by - ay;
+
+  // 水平距離較大：配偶線的中段位於兩張卡片之間。
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    let x1, x2;
+    if (dx > 0) {
+      x1 = a.x + NODE_W + PAD;
+      x2 = b.x + PAD;
+    } else {
+      x1 = a.x + PAD;
+      x2 = b.x + NODE_W + PAD;
+    }
+
+    // 同一高度時，直接取水平配偶線的正中央。
+    if (Math.abs(ay - by) < 2) {
+      return { x: (x1 + x2) / 2, y: ay };
+    }
+
+    // 高度不同時，pairPath 會在中央形成垂直段；取該垂直段中點。
+    return { x: (x1 + x2) / 2, y: (ay + by) / 2 };
+  }
+
+  // 垂直距離較大：pairPath 會在中央形成水平段。
+  let y1, y2;
+  if (dy > 0) {
+    y1 = a.y + NODE_H + PAD;
+    y2 = b.y + PAD;
+  } else {
+    y1 = a.y + PAD;
+    y2 = b.y + NODE_H + PAD;
+  }
+  return { x: (ax + bx) / 2, y: (y1 + y2) / 2 };
+}
+
+// ========【族譜連線】 設定 - 依相對位置取得卡片邊緣錨點 ========
+function cardAnchorToward(card, target, targetIsPoint = false) {
+  const { W: NODE_W, H: NODE_H } = getDims();
+  const cx = card.x + NODE_W / 2 + PAD;
+  const cy = card.y + NODE_H / 2 + PAD;
+
+  let tx, ty;
+  if (targetIsPoint) {
+    tx = target.x;
+    ty = target.y;
+  } else {
+    tx = target.x + NODE_W / 2 + PAD;
+    ty = target.y + NODE_H / 2 + PAD;
+  }
+
+  const dx = tx - cx;
+  const dy = ty - cy;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return {
+      x: dx >= 0 ? card.x + NODE_W + PAD : card.x + PAD,
+      y: cy
+    };
+  }
+
+  return {
+    x: cx,
+    y: dy >= 0 ? card.y + NODE_H + PAD : card.y + PAD
+  };
+}
+
 function pairPath(a, b) {
   const { W: NODE_W, H: NODE_H } = getDims();
   const ax = a.x + NODE_W/2 + PAD, ay = a.y + NODE_H/2 + PAD;
@@ -1568,35 +1924,35 @@ function pairPath(a, b) {
 function avatarHTML(sim) {
   const url = resolveImageUrl(sim.avatar);
   if (url) return `<img src="${esc(url)}" alt="" draggable="false">`;
-  const ch = (sim.name||'?').trim().charAt(0) || '?';
+  const ch = displayDataText(sim.name||'?', sim).trim().charAt(0) || '?';
   return esc(ch);
 }
 function statusBadgeHTML(sim) {
-  if (sim.status === '幽靈') return `<div class="n-badge ghost" title="幽靈">${iconSvg('cloud-haze2')}</div>`;
-  if (sim.status === '已故') return `<div class="n-badge dead" title="已故">${iconSvg('flower1')}</div>`;
-  return `<div class="n-badge alive" title="在世">${iconSvg('check-circle')}</div>`;
+  if (sim.status === '幽靈') return `<div class="n-badge ghost" title="${esc(uiText('幽靈'))}">${iconSvg('cloud-haze2')}</div>`;
+  if (sim.status === '已故') return `<div class="n-badge dead" title="${esc(uiText('已故'))}">${iconSvg('flower1')}</div>`;
+  return `<div class="n-badge alive" title="${esc(uiText('在世'))}">${iconSvg('check-circle')}</div>`;
 }
 function statusIconHTML(sim) {
-  if (sim.status === '幽靈') return `<span class="roster-badge status-icon" title="幽靈">${iconSvg('cloud-haze2')}</span>`;
-  if (sim.status === '已故') return `<span class="roster-badge status-icon" title="已故">${iconSvg('flower1')}</span>`;
-  return `<span class="roster-badge status-icon" title="在世">${iconSvg('check-circle')}</span>`;
+  if (sim.status === '幽靈') return `<span class="roster-badge status-icon" title="${esc(uiText('幽靈'))}">${iconSvg('cloud-haze2')}</span>`;
+  if (sim.status === '已故') return `<span class="roster-badge status-icon" title="${esc(uiText('已故'))}">${iconSvg('flower1')}</span>`;
+  return `<span class="roster-badge status-icon" title="${esc(uiText('在世'))}">${iconSvg('check-circle')}</span>`;
 }
 function raceBadgeHTML(sim) {
   const r = (sim.race || '').trim();
   if (!r) return '';
   const preset = RACE_PRESETS[r];
   if (!preset || !preset.icon) return '';
-  return `<div class="n-race-badge race-icon" title="${esc(preset.label)}">${iconSvg(preset.icon)}</div>`;
+  return `<div class="n-race-badge race-icon" title="${esc(uiText(preset.label))}">${iconSvg(preset.icon)}</div>`;
 }
 function raceIconHTML(sim) {
   const r = (sim.race || '').trim();
   if (!r) return '';
   const preset = RACE_PRESETS[r];
   if (!preset || !preset.icon) return '';
-  return `<span class="roster-badge race-icon" title="${esc(preset.label)}">${iconSvg(preset.icon)}</span>`;
+  return `<span class="roster-badge race-icon" title="${esc(uiText(preset.label))}">${iconSvg(preset.icon)}</span>`;
 }
-function buildTagsHTML(traits) {
-  const list = (traits||[]).filter(Boolean);
+function buildTagsHTML(traits, owner = null) {
+  const list = (traits||[]).filter(Boolean).map(value => displayDataText(value, owner));
   if (!list.length) return '';
   const shown = list.slice(0, MAX_TAGS);
   const rest = list.length - shown.length;
@@ -1612,21 +1968,23 @@ function petIconFor(pet) {
 }
 function petSpeciesLabel(pet) {
   const sp = PET_SPECIES[pet.species] || PET_SPECIES.other;
-  return sp.label;
+  return uiText(sp.label);
 }
 function petStatusIcon(pet) {
   if (pet.status === '幽靈') return iconSvg('cloud-haze2');
   if (pet.status === '已故') return iconSvg('flower1');
   return '';
 }
-function buildPetsChipsHTML(pets) {
+function buildPetsChipsHTML(pets, owner = null) {
   if (!pets || !pets.length) return '';
   const chips = pets.slice(0, 3).map(p => {
     const icon = petIconFor(p);
     const st = petStatusIcon(p);
-    return `<span class="n-pet-chip" title="${esc(p.name)} · ${esc(petSpeciesLabel(p))}${p.breed ? ' · ' + esc(p.breed) : ''}"><span class="pet-icon">${icon}</span>${st ? st : ''}${esc(p.name)}</span>`;
+    const petName = displayDataText(p.name, owner);
+    const breed = displayDataText(p.breed, owner);
+    return `<span class="n-pet-chip" title="${esc(petName)} · ${esc(petSpeciesLabel(p))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${st ? st : ''}${esc(petName)}</span>`;
   }).join('');
-  const rest = pets.length > 3 ? `<span class="n-pet-chip" title="${pets.length} 只寵物">+${pets.length-3}</span>` : '';
+  const rest = pets.length > 3 ? `<span class="n-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length-3}</span>` : '';
   return chips + rest;
 }
 function genderClass(sim) {
@@ -1662,38 +2020,47 @@ function drawNodes() {
     const p = pos.get(id);
     if (!c || !p) return '';
     const isInlaw = !memberSet.has(id);
-    const matchSearch = q && ((c.name||'').toLowerCase().includes(q)
-      || (c.career||'').toLowerCase().includes(q)
-      || (c.residence||'').toLowerCase().includes(q)
-      || (c.aspiration||'').toLowerCase().includes(q)
-      || (c.causeOfDeath||'').toLowerCase().includes(q)
-      || (c.traits||[]).some(t => (t||'').toLowerCase().includes(q))
-      || (c.pets||[]).some(pt => (pt.name||'').toLowerCase().includes(q) || (pt.breed||'').toLowerCase().includes(q)));
+
+    const dName = displayDataText(c.name, c);
+    const dCareer = displayDataText(c.career, c);
+    const dResidence = displayDataText(c.residence, c);
+    const dAspiration = displayDataText(c.aspiration, c);
+    const dCause = displayDataText(c.causeOfDeath, c);
+    const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
+    const searchable = [
+      c.name, dName, c.career, dCareer, c.residence, dResidence,
+      c.aspiration, dAspiration, c.causeOfDeath, dCause,
+      ...(c.traits||[]), ...dTraits,
+      ...(c.pets||[]).flatMap(pt => [pt.name, displayDataText(pt.name, c), pt.breed, displayDataText(pt.breed, c)])
+    ].filter(Boolean).join(' ').toLowerCase();
+    const matchSearch = !!q && searchable.includes(q);
     const matchStage = !stageVal || c.lifeStage === stageVal;
     const cls = commonNodeClasses(c, {viewMode:isView, isInlaw, matchSearch, matchStage});
+    const dStage = uiText(c.lifeStage);
 
     if (isView) {
       const petCount = (c.pets||[]).length;
-      const petsLine = petCount ? `<div class="n-view-pets" title="${esc((c.pets||[]).map(p=>p.name).join('、'))}">${(c.pets||[]).slice(0,2).map(p=>petIconFor(p)).join('')}${petCount>2?'…':''}</div>` : '';
+      const petNames = (c.pets||[]).map(pet => displayDataText(pet.name, c));
+      const petsLine = petCount ? `<div class="n-view-pets" title="${esc(petNames.join('、'))}">${(c.pets||[]).slice(0,2).map(pet=>petIconFor(pet)).join('')}${petCount>2?'…':''}</div>` : '';
       return `<div class="${cls}" data-id="${c.id}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
         ${raceBadgeHTML(c)}
         ${statusBadgeHTML(c)}
         <div class="n-view-avatar">${avatarHTML(c)}</div>
-        <div class="n-view-name" title="${esc(c.name)}">${esc(c.name)}</div>
+        <div class="n-view-name" title="${esc(dName)}">${esc(dName)}</div>
         ${petsLine}
       </div>`;
     }
 
-    const tagsHTML = buildTagsHTML(c.traits);
-    const residenceHTML = c.residence ? `<div class="n-residence" title="${esc(c.residence)}">${iconSvg('house')}${esc(c.residence)}</div>` : '';
-    const aspirationHTML = c.aspiration ? `<div class="n-aspiration" title="人生抱負：${esc(c.aspiration)}">${iconSvg('bullseye')}${esc(c.aspiration)}</div>` : '';
+    const tagsHTML = buildTagsHTML(c.traits, c);
+    const residenceHTML = c.residence ? `<div class="n-residence" title="${esc(dResidence)}">${iconSvg('house')}${esc(dResidence)}</div>` : '';
+    const aspirationHTML = c.aspiration ? `<div class="n-aspiration" title="${esc(uiText('人生抱負'))}：${esc(dAspiration)}">${iconSvg('bullseye')}${esc(dAspiration)}</div>` : '';
     const deathHTML = (c.status === '已故' || c.status === '幽靈') && c.causeOfDeath
-      ? `<div class="n-death" title="死因：${esc(c.causeOfDeath)}">${iconSvg('flower1')}${esc(c.causeOfDeath)}</div>` : '';
-    const petsHTML = (c.pets && c.pets.length) ? `<div class="n-pets">${buildPetsChipsHTML(c.pets)}</div>` : '';
+      ? `<div class="n-death" title="${esc(uiText('死因'))}：${esc(dCause)}">${iconSvg('flower1')}${esc(dCause)}</div>` : '';
+    const petsHTML = (c.pets && c.pets.length) ? `<div class="n-pets">${buildPetsChipsHTML(c.pets, c)}</div>` : '';
     const galleryCount = (c.gallery||[]).length;
     const galleryHTML = galleryCount
-      ? `<div class="n-gallery-badge" title="有 ${galleryCount} 張相簿圖片">${iconSvg('images')} ${galleryCount}</div>`
+      ? `<div class="n-gallery-badge" title="${esc(uiText('相簿'))} ${galleryCount}">${iconSvg('images')} ${galleryCount}</div>`
       : '';
 
     return `<div class="${cls}" data-id="${c.id}" data-stage="${c.lifeStage}"
@@ -1702,10 +2069,10 @@ function drawNodes() {
       ${statusBadgeHTML(c)}
       <div class="n-avatar">${avatarHTML(c)}</div>
       <div class="n-body">
-        <div class="n-name" title="${esc(c.name)}">${esc(c.name)}</div>
+        <div class="n-name" title="${esc(dName)}">${esc(dName)}</div>
         <div class="n-title">
-          <span class="stage-tag stage-${c.lifeStage}">${c.lifeStage}</span>
-          ${c.career ? ' · ' + esc(c.career) : ''}
+          <span class="stage-tag stage-${c.lifeStage}">${esc(dStage)}</span>
+          ${c.career ? ' · ' + esc(dCareer) : ''}
         </div>
         ${residenceHTML}
         ${aspirationHTML}
@@ -1717,47 +2084,56 @@ function drawNodes() {
     </div>`;
   }).join('');
   nodes.innerHTML = html ||
-    '<div class="empty">目前家族還沒有模擬市民，點選左側「➕ 新增模擬市民」開始記錄</div>';
+    `<div class="empty">${esc(uiText('目前家族還沒有模擬市民，點選左側「新增模擬市民」開始記錄'))}</div>`;
 }
 
 function openInfoCard(id) {
   const c = db.sims[id];
   if (!c) return;
   infoCardId = id;
+  const dName = displayDataText(c.name, c);
+  const dCareer = displayDataText(c.career, c);
+  const dResidence = displayDataText(c.residence, c);
+  const dAspiration = displayDataText(c.aspiration, c);
+  const dCause = displayDataText(c.causeOfDeath, c);
+  const dBio = displayDataText(c.bio, c);
+
   const av = $('infoCardAvatar');
   av.className = 'info-card-avatar';
   if (c.status === '幽靈') av.classList.add('ghost');
   if (c.status === '已故') av.classList.add('dead');
   const avUrl = resolveImageUrl(c.avatar);
   if (avUrl) av.innerHTML = `<img src="${esc(avUrl)}" alt="">`;
-  else av.textContent = (c.name||'?').trim().charAt(0) || '?';
+  else av.textContent = (dName||'?').trim().charAt(0) || '?';
 
   const nameEl = $('infoCardName');
-  nameEl.innerHTML = `${raceIconHTML(c)}${esc(c.name)}`;
+  nameEl.innerHTML = `${raceIconHTML(c)}${esc(dName)}`;
 
   const meta = $('infoCardMeta');
   const metaItems = [];
-  metaItems.push(`<span class="stage-tag stage-${c.lifeStage}">${c.lifeStage}</span>`);
-  metaItems.push(`<span class="meta-pill">${c.gender === '男' ? iconSvg('gender-male') + ' 男' : c.gender === '女' ? iconSvg('gender-female') + ' 女' : iconSvg('gender-ambiguous') + ' 其他'}</span>`);
-  metaItems.push(`<span class="meta-pill">${statusIconHTML(c)} ${esc(c.status || '在世')}</span>`);
+  metaItems.push(`<span class="stage-tag stage-${c.lifeStage}">${esc(uiText(c.lifeStage))}</span>`);
+  const genderText = uiText(c.gender || '其他');
+  const genderIcon = c.gender === '男' ? 'gender-male' : c.gender === '女' ? 'gender-female' : 'gender-ambiguous';
+  metaItems.push(`<span class="meta-pill">${iconSvg(genderIcon)} ${esc(genderText)}</span>`);
+  metaItems.push(`<span class="meta-pill">${statusIconHTML(c)} ${esc(uiText(c.status || '在世'))}</span>`);
   if (c.race && RACE_PRESETS[c.race] && RACE_PRESETS[c.race].icon) {
-    metaItems.push(`<span class="meta-pill">${iconSvg(RACE_PRESETS[c.race].icon)} ${esc(RACE_PRESETS[c.race].label)}</span>`);
+    metaItems.push(`<span class="meta-pill">${iconSvg(RACE_PRESETS[c.race].icon)} ${esc(uiText(RACE_PRESETS[c.race].label))}</span>`);
   }
-  if (c.adoptive) metaItems.push(`<span class="meta-pill">${iconSvg('house-heart')} 領養</span>`);
+  if (c.adoptive) metaItems.push(`<span class="meta-pill">${iconSvg('house-heart')} ${esc(uiText('領養'))}</span>`);
   meta.innerHTML = metaItems.join('');
 
   const body = $('infoCardBody');
   const rows = [];
-  if (c.career) rows.push(`<div class="info-card-row"><div class="info-card-label">職業</div><div class="info-card-value">${esc(c.career)}</div></div>`);
-  if (c.residence) rows.push(`<div class="info-card-row"><div class="info-card-label">居住地</div><div class="info-card-value">${iconSvg('house')} ${esc(c.residence)}</div></div>`);
-  if (c.aspiration) rows.push(`<div class="info-card-row"><div class="info-card-label">人生抱負</div><div class="info-card-value">${iconSvg('bullseye')} ${esc(c.aspiration)}</div></div>`);
+  if (c.career) rows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('職業'))}</div><div class="info-card-value">${esc(dCareer)}</div></div>`);
+  if (c.residence) rows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('居住地'))}</div><div class="info-card-value">${iconSvg('house')} ${esc(dResidence)}</div></div>`);
+  if (c.aspiration) rows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('人生抱負'))}</div><div class="info-card-value">${iconSvg('bullseye')} ${esc(dAspiration)}</div></div>`);
   if ((c.status === '已故' || c.status === '幽靈') && c.causeOfDeath) {
-    rows.push(`<div class="info-card-row"><div class="info-card-label">死因</div><div class="info-card-value">${iconSvg('flower1')} ${esc(c.causeOfDeath)}</div></div>`);
+    rows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('死因'))}</div><div class="info-card-value">${iconSvg('flower1')} ${esc(dCause)}</div></div>`);
   }
   if ((c.traits||[]).length) {
     rows.push(`<div class="info-card-section">
-      <div class="info-card-section-title">特徵</div>
-      <div class="info-card-traits">${(c.traits||[]).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div class="info-card-section-title">${esc(uiText('特徵'))}</div>
+      <div class="info-card-traits">${(c.traits||[]).map(t => `<span class="tag">${esc(displayDataText(t, c))}</span>`).join('')}</div>
     </div>`);
   }
   if ((c.gallery||[]).length) {
@@ -1768,7 +2144,7 @@ function openInfoCard(id) {
       </div>`;
     }).join('');
     rows.push(`<div class="info-card-section">
-      <div class="info-card-section-title">${iconSvg('images')} <span>相簿（${c.gallery.length}）</span></div>
+      <div class="info-card-section-title">${iconSvg('images')} <span>${esc(uiText('相簿'))}（${c.gallery.length}）</span></div>
       <div class="info-card-gallery">${imgs}</div>
     </div>`);
   }
@@ -1777,22 +2153,22 @@ function openInfoCard(id) {
       const icon = petIconFor(p);
       const st = petStatusIcon(p);
       const pUrl = resolveImageUrl(p.avatar);
-      const av = pUrl ? `<img src="${esc(pUrl)}" alt="">` : icon;
+      const petAvatar = pUrl ? `<img src="${esc(pUrl)}" alt="">` : icon;
       const metaParts = [petSpeciesLabel(p)];
-      if (p.breed) metaParts.push(p.breed);
-      if (p.gender) metaParts.push(p.gender);
-      if (p.ageStage) metaParts.push(p.ageStage);
-      if (p.status && p.status !== '在世') metaParts.push(st + ' ' + p.status);
+      if (p.breed) metaParts.push(displayDataText(p.breed, c));
+      if (p.gender) metaParts.push(uiText(p.gender));
+      if (p.ageStage) metaParts.push(uiText(p.ageStage));
+      if (p.status && p.status !== '在世') metaParts.push(`${st} ${uiText(p.status)}`);
       return `<div class="info-card-pet">
-        <div class="info-card-pet-avatar">${av}</div>
+        <div class="info-card-pet-avatar">${petAvatar}</div>
         <div class="info-card-pet-text">
-          <div class="info-card-pet-name">${esc(p.name) || '（未命名）'}</div>
+          <div class="info-card-pet-name">${esc(displayDataText(p.name, c)) || esc(uiText('（未命名）'))}</div>
           <div class="info-card-pet-meta">${esc(metaParts.join(' · '))}</div>
         </div>
       </div>`;
     }).join('');
     rows.push(`<div class="info-card-section">
-      <div class="info-card-section-title">${iconSvg('heart')} <span>寵物（${c.pets.length}）</span></div>
+      <div class="info-card-section-title">${iconSvg('heart')} <span>${esc(uiText('寵物'))}（${c.pets.length}）</span></div>
       <div class="info-card-pets">${petItems}</div>
     </div>`);
   }
@@ -1805,20 +2181,20 @@ function openInfoCard(id) {
     (l.label === SIBLING_LABEL || l.type === SIBLING_LABEL)
   ).length;
   const relParts = [];
-  if (parentCount) relParts.push(`父母 ${parentCount}`);
-  if (spouseCount) relParts.push(`配偶 ${spouseCount}`);
-  if (exCount) relParts.push(`前配偶 ${exCount}`);
-  if (childCount) relParts.push(`子女 ${childCount}`);
-  if (siblingCount) relParts.push(`兄弟姐妹 ${siblingCount}`);
-  if (relParts.length) rows.push(`<div class="info-card-row"><div class="info-card-label">關係</div><div class="info-card-value">${esc(relParts.join(' · '))}</div></div>`);
+  if (parentCount) relParts.push(`${uiText('父母')} ${parentCount}`);
+  if (spouseCount) relParts.push(`${uiText('配偶')} ${spouseCount}`);
+  if (exCount) relParts.push(`${uiText('前任配偶')} ${exCount}`);
+  if (childCount) relParts.push(`${uiText('子女')} ${childCount}`);
+  if (siblingCount) relParts.push(`${uiText('兄弟姐妹')} ${siblingCount}`);
+  if (relParts.length) rows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('關係'))}</div><div class="info-card-value">${esc(relParts.join(' · '))}</div></div>`);
 
-  const fams = db.families.filter(f => f.memberIds.includes(c.id)).map(f => f.name);
-  if (fams.length) rows.push(`<div class="info-card-row"><div class="info-card-label">家族</div><div class="info-card-value">${fams.map(esc).join(' · ')}</div></div>`);
+  const fams = db.families.filter(f => f.memberIds.includes(c.id)).map(f => displayDataText(f.name, f));
+  if (fams.length) rows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('家族'))}</div><div class="info-card-value">${fams.map(esc).join(' · ')}</div></div>`);
   if (c.bio) rows.push(`<div class="info-card-section">
-    <div class="info-card-section-title">簡介</div>
-    <div class="info-card-bio">${esc(c.bio)}</div>
+    <div class="info-card-section-title">${esc(uiText('簡介'))}</div>
+    <div class="info-card-bio">${esc(dBio)}</div>
   </div>`);
-  if (!rows.length) rows.push(`<div class="info-card-row"><div class="info-card-value muted">暫無更多資訊</div></div>`);
+  if (!rows.length) rows.push(`<div class="info-card-row"><div class="info-card-value muted">${esc(uiText('暫無更多資訊'))}</div></div>`);
   body.innerHTML = rows.join('');
 
   body.querySelectorAll('[data-info-gallery-idx]').forEach(el => {
@@ -1827,6 +2203,7 @@ function openInfoCard(id) {
 
   infoMask.classList.add('show');
 }
+
 function closeInfoCard() {
   infoMask.classList.remove('show');
   infoCardId = null;
@@ -1870,12 +2247,12 @@ function renderGalleryGrid() {
     btn.onclick = e => { e.stopPropagation(); openPhotoEditor(+btn.dataset.galleryEdit); };
   });
   galleryGrid.querySelectorAll('[data-gallery-del]').forEach(btn => {
-    btn.onclick = e => {
+    btn.onclick = async e => {
       e.stopPropagation();
       const i = +btn.dataset.galleryDel;
       const g = editingGallery[i];
       if (!g) return;
-      if (!confirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`)) return;
+      if (!await uiConfirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`, { title: '刪除圖片', kind: 'danger', confirmText: '刪除' })) return;
       editingGallery.splice(i, 1);
       renderGalleryGrid();
     };
@@ -1907,10 +2284,11 @@ async function handleGalleryFile(file) {
     const result = await compressGalleryImage(file);
     if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
       const mb = (result.sizeKB / 1024).toFixed(2);
-      const ok = confirm(
+      const ok = await uiConfirm(
         `原始圖片大小約 ${mb} MB。\n\n` +
         `IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。\n\n` +
-        `是否仍要儲存原始圖片？`
+        `是否仍要儲存原始圖片？`,
+        { title: '原始圖片容量提醒', confirmText: '仍要儲存' }
       );
       if (!ok) return;
     }
@@ -1920,7 +2298,7 @@ async function handleGalleryFile(file) {
     editingPhotoOriginal = result.isOriginal;
     openPhotoEditor(-1, true);
   } catch(err) {
-    alert('圖片處理失敗：' + err.message);
+    uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' });
   }
 }
 
@@ -1988,7 +2366,7 @@ function closePhotoEditor() {
 }
 
 function savePhoto() {
-  if (!editingPhotoImageRef) { alert('請先選擇一張圖片'); return; }
+  if (!editingPhotoImageRef) { uiAlert('請先選擇一張圖片', { title: '尚未選擇圖片' }); return; }
   const data = {
     id: (editingPhotoIndex >= 0 && editingGallery[editingPhotoIndex])
       ? editingGallery[editingPhotoIndex].id
@@ -2007,11 +2385,11 @@ function savePhoto() {
   closePhotoEditor();
 }
 
-function deletePhotoFromEditor() {
+async function deletePhotoFromEditor() {
   if (editingPhotoIndex < 0) return;
   const g = editingGallery[editingPhotoIndex];
   if (!g) return;
-  if (!confirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`)) return;
+  if (!await uiConfirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`, { title: '刪除圖片', kind: 'danger', confirmText: '刪除' })) return;
   editingGallery.splice(editingPhotoIndex, 1);
   renderGalleryGrid();
   closePhotoEditor();
@@ -2030,7 +2408,7 @@ $('photoInput').onchange = async e => {
     const result = await compressGalleryImage(file);
     if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
       const mb = (result.sizeKB / 1024).toFixed(2);
-      const ok = confirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`);
+      const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
       if (!ok) { e.target.value = ''; return; }
     }
     const id = await saveImageToIdb(result.dataUrl);
@@ -2039,7 +2417,7 @@ $('photoInput').onchange = async e => {
     editingPhotoOriginal = result.isOriginal;
     updatePhotoPreview();
   } catch(err) {
-    alert('圖片處理失敗：' + err.message);
+    uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' });
   }
   e.target.value = '';
 };
@@ -2063,7 +2441,7 @@ document.addEventListener('paste', async e => {
         const result = await compressGalleryImage(file);
         if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
           const mb = (result.sizeKB / 1024).toFixed(2);
-          const ok = confirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`);
+          const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
           if (!ok) return;
         }
         const id = await saveImageToIdb(result.dataUrl);
@@ -2071,7 +2449,7 @@ document.addEventListener('paste', async e => {
         editingPhotoSizeKB = result.sizeKB;
         editingPhotoOriginal = result.isOriginal;
         updatePhotoPreview();
-      } catch(err){ alert('圖片處理失敗：' + err.message); }
+      } catch(err){ uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
       return;
     }
   }
@@ -2171,7 +2549,7 @@ function buildGlobalGalleryList() {
       list.push({
         sim,
         simId: sim.id,
-        simName: sim.name || '（未命名）',
+        simName: displayDataText(sim.name, sim) || uiText('（未命名）'),
         id: g.id,
         title: g.title,
         note: g.note,
@@ -2195,7 +2573,7 @@ function renderGalleryBrowserFilter() {
   sel.innerHTML = '<option value="">全部模擬市民</option>' +
     withGallery.map(s => {
       const n = (s.gallery || []).length;
-      return `<option value="${esc(s.id)}">${esc(s.name || '（未命名）')} · ${n} 張</option>`;
+      return `<option value="${esc(s.id)}">${esc(displayDataText(s.name, s) || uiText('（未命名）'))} · ${n} ${esc(uiText('張圖片'))}</option>`;
     }).join('');
   if (prev && withGallery.some(s => s.id === prev)) sel.value = prev;
 }
@@ -2223,7 +2601,7 @@ function renderGalleryBrowser() {
     );
   }
 
-  countEl.textContent = `（${filtered.length} / ${total} 張）`;
+  countEl.textContent = uiText(`（${filtered.length} / ${total} 張）`);
 
   if (!total) {
     listEl.innerHTML = '<div class="gb-empty">還沒有任何相簿圖片。<br><br>開啟某個模擬市民的編輯彈出視窗 →「相簿」新增圖片後，會在這裡顯示。</div>';
@@ -2237,7 +2615,7 @@ function renderGalleryBrowser() {
   listEl.innerHTML = filtered.map((item, i) => {
     const url = resolveImageUrl(item.image);
     const stageTag = item.lifeStage
-      ? `<span class="gb-stage stage-${item.lifeStage}">${esc(item.lifeStage)}</span>`
+      ? `<span class="gb-stage stage-${item.lifeStage}">${esc(uiText(item.lifeStage))}</span>`
       : '';
     return `<div class="gb-item" data-global-idx="${i}">
       <img src="${esc(url)}" alt="" loading="lazy" draggable="false">
@@ -2508,6 +2886,9 @@ function expandStageToFit() {
   labelsSvg.setAttribute('width', sW);
   labelsSvg.setAttribute('height', sH);
   labelsSvg.setAttribute('viewBox', `0 0 ${sW} ${sH}`);
+
+  // 尺寸更新後再補一次連線重繪，避免快速拖曳後 SVG 還停留在舊幀。
+  scheduleEdgeRedraw();
 }
 
 function updateLayoutToggle() {
@@ -2552,10 +2933,10 @@ $('lockToggle').onclick = () => {
   fam.locked = !fam.locked;
   save(); updateLayoutToggle();
 };
-$('resetLayoutBtn').onclick = () => {
+$('resetLayoutBtn').onclick = async () => {
   const fam = currentFamily();
   const modeName = viewMode === 'view' ? '檢視' : '編輯';
-  if (!confirm(`清除「${modeName}模式」下本家族的所有手動位置，恢復自動樹狀。確定嗎？`)) return;
+  if (!await uiConfirm(`清除「${modeName}模式」下本家族的所有手動位置，恢復自動樹狀。確定嗎？`, { title: '重設卡片位置', kind: 'danger', confirmText: '重設位置' })) return;
   ensureFamilyLayoutShape(fam);
   fam.freeLayout[viewMode] = false;
   fam.manualPos[viewMode] = {};
@@ -2565,19 +2946,20 @@ $('resetLayoutBtn').onclick = () => {
 $('labelToggle').onclick = () => {
   showRelLabels = !showRelLabels;
   const btn = $('labelToggle');
-  if (showRelLabels) { btn.classList.add('active'); setIconText(btn, 'tags', '顯示標註'); }
-  else { btn.classList.remove('active'); setIconText(btn, 'tags', '隱藏標註'); }
+  if (showRelLabels) { btn.classList.add('active'); setIconText(btn, 'tags', '隱藏關係'); }
+  else { btn.classList.remove('active'); setIconText(btn, 'tags', '顯示關係'); }
   try { localStorage.setItem(LABELS_KEY, showRelLabels ? '1' : '0'); } catch(e){}
   if (layoutCache) drawEdges();
 };
 
 function refreshFamilyUI() {
   const fam = currentFamily();
-  familyNameInput.value = fam.name;
+  const familyName = displayDataText(fam.name, fam);
+  familyNameInput.value = familyName;
   familySelect.innerHTML = db.families.map(f =>
-    `<option value="${f.id}">${esc(f.name)}</option>`).join('');
+    `<option value="${f.id}">${esc(displayDataText(f.name, f))}</option>`).join('');
   familySelect.value = db.currentId;
-  document.title = fam.name + ' · 模擬市民族譜工具';
+  document.title = familyName + ' · ' + uiText('模擬市民族譜工具');
   updateLayoutToggle();
 }
 familySelect.onchange = () => {
@@ -2590,13 +2972,19 @@ familySelect.onchange = () => {
 };
 familyNameInput.onchange = () => {
   const fam = currentFamily();
-  const v = familyNameInput.value.trim() || '家族';
+  const shownBefore = displayDataText(fam.name, fam);
+  const v = familyNameInput.value.trim() || uiText('家族');
+  // 只是在其他語言下顯示內建範例名稱、沒有真的改字時，不回寫翻譯值。
+  if (isBuiltinSampleFamily(fam) && v === shownBefore) {
+    familyNameInput.value = shownBefore;
+    return;
+  }
   fam.name = v;
   familyNameInput.value = v;
   save(); refreshFamilyUI();
 };
-$('newFamilyBtn').onclick = () => {
-  const name = prompt('新家族名稱：', '新家族');
+$('newFamilyBtn').onclick = async () => {
+  const name = await uiPrompt('請輸入新家族名稱。', '新家族', { title: '新增家族', confirmText: '新增' });
   if (name === null) return;
   const fam = {
     id:uid('fam'), name:name.trim()||'新家族',
@@ -2611,10 +2999,10 @@ $('newFamilyBtn').onclick = () => {
   save(); refreshFamilyUI(); render();
   requestAnimationFrame(fitScreen);
 };
-$('delFamilyBtn').onclick = () => {
-  if (db.families.length <= 1) { alert('至少需要保留一個家族。'); return; }
+$('delFamilyBtn').onclick = async () => {
+  if (db.families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
   const fam = currentFamily();
-  if (!confirm(`確定刪除家族「${fam.name}」嗎？\n（家族內所有模擬市民仍保留在模擬市民池中）`)) return;
+  if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n（家族內所有模擬市民仍保留在模擬市民池中）`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
   db.families = db.families.filter(f => f.id !== fam.id);
   db.currentId = db.families[0].id;
   addMemberSelection.clear();
@@ -2636,9 +3024,11 @@ function setupSearchSelects() {
     const searchEl = wrap.querySelector('.ss-search');
     const optionsEl = wrap.querySelector('.ss-options');
     const isMultiple = select.multiple;
-    const placeholder = wrap.dataset.placeholder || '點選選擇…';
+    const rawPlaceholder = wrap.dataset.placeholder || '點選選擇…';
 
     function renderInput() {
+      // 自訂下拉選單的提示文字跟著目前介面語言即時切換。
+      const placeholder = uiText(rawPlaceholder);
       if (isMultiple) {
         const selected = [...select.options].filter(o => o.selected);
         if (!selected.length) {
@@ -2738,43 +3128,49 @@ function buildRelationEntries(simId) {
   const c = db.sims[simId];
   if (!c) return entries;
   if ((c.parentIds||[]).length) {
-    const names = c.parentIds.map(pid => db.sims[pid]?.name).filter(Boolean).join(' + ');
+    const names = c.parentIds.map(pid => {
+      const sim = db.sims[pid];
+      return sim ? displayDataText(sim.name, sim) : '';
+    }).filter(Boolean).join(' + ');
     if (names) {
       const key = 'parent:' + simId;
-      entries.push({key, label:'父母：' + names, kindHint: c.adoptive ? 'adoptive' : 'parent-child'});
+      entries.push({key, label:`${uiText('父母')}：${names}`, kindHint: c.adoptive ? 'adoptive' : 'parent-child'});
       seen.add(key);
     }
   }
-  getChildrenOf(simId).forEach(s => {
-    const key = 'parent:' + s.id;
+  getChildrenOf(simId).forEach(child => {
+    const key = 'parent:' + child.id;
     if (seen.has(key)) return;
     seen.add(key);
-    entries.push({key, label:'子女：' + s.name, kindHint: s.adoptive ? 'adoptive' : 'parent-child'});
+    entries.push({key, label:`${uiText('子女')}：${displayDataText(child.name, child)}`, kindHint: child.adoptive ? 'adoptive' : 'parent-child'});
   });
   (c.spouseIds||[]).forEach(sid => {
-    if (!db.sims[sid]) return;
+    const spouse = db.sims[sid];
+    if (!spouse) return;
     const key = 'spouse:' + pairKey(simId, sid);
     if (seen.has(key)) return;
     seen.add(key);
-    entries.push({key, label:'配偶：' + db.sims[sid].name, kindHint:'spouse'});
+    entries.push({key, label:`${uiText('配偶')}：${displayDataText(spouse.name, spouse)}`, kindHint:'spouse'});
   });
   (c.exSpouseIds||[]).forEach(sid => {
-    if (!db.sims[sid]) return;
+    const spouse = db.sims[sid];
+    if (!spouse) return;
     const key = 'exspouse:' + pairKey(simId, sid);
     if (seen.has(key)) return;
     seen.add(key);
-    entries.push({key, label:'前配偶：' + db.sims[sid].name, kindHint:'exspouse'});
+    entries.push({key, label:`${uiText('前任配偶')}：${displayDataText(spouse.name, spouse)}`, kindHint:'exspouse'});
   });
   (db.links||[]).forEach(l => {
     if (l.from !== simId && l.to !== simId) return;
     const otherId = l.from === simId ? l.to : l.from;
-    if (!db.sims[otherId]) return;
+    const other = db.sims[otherId];
+    if (!other) return;
     if (!l.id) l.id = uid('lnk');
     const key = 'link:' + l.id;
     if (seen.has(key)) return;
     seen.add(key);
-    const tag = l.label || l.type || '關聯';
-    entries.push({key, label: tag + '：' + db.sims[otherId].name, kindHint:'custom'});
+    const tag = displayRelationshipText(l.label || l.type || '關聯');
+    entries.push({key, label:`${tag}：${displayDataText(other.name, other)}`, kindHint:'custom'});
   });
   return entries;
 }
@@ -2784,10 +3180,10 @@ function renderRelAnno(simId) {
   if (!simId) { section.style.display = 'none'; list.innerHTML = ''; return; }
   section.style.display = '';
   const entries = buildRelationEntries(simId);
-  if (!entries.length) { list.innerHTML = '<div class="rel-empty">尚無關係連線</div>'; return; }
+  if (!entries.length) { list.innerHTML = `<div class="rel-empty">${esc(uiText('尚無關係連線'))}</div>`; return; }
   const optHTML = Object.entries(REL_PRESETS).map(([k,v]) => {
-    const label = v.label || '(不顯示)';
-    return `<option value="${k}">${v.icon ? v.icon + ' ' : ''}${esc(label)}</option>`;
+    const label = displayRelationshipText(v.label || '(不顯示)');
+    return `<option value="${k}">${esc(label)}</option>`;
   }).join('');
   list.innerHTML = entries.map(e => {
     const rm = db.relMap || {};
@@ -2806,9 +3202,9 @@ function renderRelAnno(simId) {
       data-kind-hint="${esc(e.kindHint)}"
       data-cur-kind="${esc(curKind)}">
       <div class="rel-anno-name" title="${esc(e.label)}">${esc(e.label)}</div>
-      <select><option value="">（預設）</option>${optHTML}</select>
-      <input type="text" placeholder="自訂文字（可選）" value="${esc(curText)}">
-      ${hasOffset ? `<button type="button" class="rel-anno-reset" data-reset-key="${esc(e.key)}" title="重設標註位置">重設</button>` : '<span></span>'}
+      <select><option value="">${esc(uiText('（預設）'))}</option>${optHTML}</select>
+      <input type="text" placeholder="${esc(uiText('自訂文字（可選）'))}" value="${esc(curText)}">
+      ${hasOffset ? `<button type="button" class="rel-anno-reset" data-reset-key="${esc(e.key)}" title="${esc(uiText('重設關係位置'))}">${esc(uiText('重設'))}</button>` : '<span></span>'}
     </div>`;
   }).join('');
   list.querySelectorAll('.rel-anno-item').forEach(item => {
@@ -2846,7 +3242,7 @@ $('petAvatarInput').onchange = async e => {
     const id = await saveImageToIdb(result.dataUrl);
     editingPetAvatar = id || result.dataUrl;
     renderPetAvatarPreview();
-  } catch(err){ alert('圖片處理失敗：' + err.message); }
+  } catch(err){ uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
   e.target.value = '';
 };
 $('petAvatarClearBtn').onclick = () => { editingPetAvatar = null; renderPetAvatarPreview(); };
@@ -2859,10 +3255,11 @@ function openPetEditor(index) {
     id: uid('pet'), name: '', species: 'dog', breed: '',
     gender: '男', ageStage: '成年', status: '在世', avatar: null
   };
-  $('petModalTitle').textContent = editingPetIndex >= 0 ? '編輯寵物' : '新增寵物';
-  $('pName').value = p.name || '';
+  const owner = editingId ? db.sims[editingId] : null;
+  $('petModalTitle').textContent = uiText(editingPetIndex >= 0 ? '編輯寵物' : '新增寵物');
+  $('pName').value = owner ? displayDataText(p.name, owner) : (p.name || '');
   $('pSpecies').value = p.species || 'dog';
-  $('pBreed').value = p.breed || '';
+  $('pBreed').value = owner ? displayDataText(p.breed, owner) : (p.breed || '');
   $('pGender').value = p.gender || '男';
   $('pAgeStage').value = p.ageStage || '成年';
   $('pStatus').value = p.status || '在世';
@@ -2878,13 +3275,20 @@ function closePetEditor() {
   editingPetAvatar = null;
 }
 function savePet() {
-  const name = $('pName').value.trim();
-  if (!name) { alert('請填寫寵物名字'); return; }
+  const owner = editingId ? db.sims[editingId] : null;
+  const originalPet = editingPetIndex >= 0 && editingPets[editingPetIndex] ? editingPets[editingPetIndex] : null;
+  const shownName = originalPet && owner ? displayDataText(originalPet.name, owner) : '';
+  const shownBreed = originalPet && owner ? displayDataText(originalPet.breed, owner) : '';
+  const inputName = $('pName').value.trim();
+  if (!inputName) { uiAlert('請填寫寵物名字', { title: '資料未完成' }); return; }
+  const name = originalPet && isBuiltinSampleSim(owner) && inputName === shownName ? originalPet.name : inputName;
+  const inputBreed = $('pBreed').value.trim();
+  const breed = originalPet && isBuiltinSampleSim(owner) && inputBreed === shownBreed ? originalPet.breed : inputBreed;
   const data = {
-    id: (editingPetIndex >= 0 && editingPets[editingPetIndex]) ? editingPets[editingPetIndex].id : uid('pet'),
+    id: originalPet ? originalPet.id : uid('pet'),
     name,
     species: $('pSpecies').value,
-    breed: $('pBreed').value.trim(),
+    breed,
     gender: $('pGender').value,
     ageStage: $('pAgeStage').value,
     status: $('pStatus').value,
@@ -2895,11 +3299,11 @@ function savePet() {
   renderPetsList();
   closePetEditor();
 }
-function deletePetFromEditor() {
+async function deletePetFromEditor() {
   if (editingPetIndex < 0) return;
   const p = editingPets[editingPetIndex];
   if (!p) return;
-  if (!confirm(`確定刪除寵物「${p.name}」嗎？`)) return;
+  if (!await uiConfirm(`確定刪除寵物「${p.name}」嗎？`, { title: '刪除寵物', kind: 'danger', confirmText: '刪除' })) return;
   editingPets.splice(editingPetIndex, 1);
   renderPetsList();
   closePetEditor();
@@ -2912,21 +3316,23 @@ petMask.onclick = e => { if (e.target === petMask) closePetEditor(); };
 function renderPetsList() {
   const list = $('petList');
   if (!list) return;
-  if (!editingPets.length) { list.innerHTML = '<div class="rel-empty">尚未新增寵物</div>'; return; }
+  if (!editingPets.length) { list.innerHTML = `<div class="rel-empty">${esc(uiText('尚未新增寵物'))}</div>`; return; }
+  const owner = editingId ? db.sims[editingId] : null;
   list.innerHTML = editingPets.map((p, i) => {
     const icon = petIconFor(p);
     const url = resolveImageUrl(p.avatar);
     const av = url ? `<img src="${esc(url)}" alt="">` : icon;
     const statusIcon = p.status === '幽靈' ? iconSvg('cloud-haze2') : p.status === '已故' ? iconSvg('flower1') : '';
     const metaParts = [petSpeciesLabel(p)];
-    if (p.breed) metaParts.push(p.breed);
-    if (p.gender) metaParts.push(p.gender);
-    if (p.ageStage) metaParts.push(p.ageStage);
-    if (p.status && p.status !== '在世') metaParts.push(statusIcon + ' ' + p.status);
+    if (p.breed) metaParts.push(owner ? displayDataText(p.breed, owner) : p.breed);
+    if (p.gender) metaParts.push(uiText(p.gender));
+    if (p.ageStage) metaParts.push(uiText(p.ageStage));
+    if (p.status && p.status !== '在世') metaParts.push(statusIcon + ' ' + uiText(p.status));
+    const displayName = owner ? displayDataText(p.name, owner) : p.name;
     return `<div class="pet-item">
       <div class="pet-item-avatar">${av}</div>
       <div class="pet-item-info">
-        <div class="pet-item-name">${esc(p.name) || '（未命名）'}</div>
+        <div class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</div>
         <div class="pet-item-meta">${esc(metaParts.join(' · '))}</div>
       </div>
       <div class="pet-item-actions">
@@ -2939,11 +3345,11 @@ function renderPetsList() {
     btn.onclick = () => openPetEditor(+btn.dataset.editPet);
   });
   list.querySelectorAll('[data-del-pet]').forEach(btn => {
-    btn.onclick = () => {
+    btn.onclick = async () => {
       const i = +btn.dataset.delPet;
       const p = editingPets[i];
       if (!p) return;
-      if (!confirm(`確定刪除寵物「${p.name}」嗎？`)) return;
+      if (!await uiConfirm(`確定刪除寵物「${p.name}」嗎？`, { title: '刪除寵物', kind: 'danger', confirmText: '刪除' })) return;
       editingPets.splice(i, 1);
       renderPetsList();
     };
@@ -2968,7 +3374,7 @@ $('avatarInput').onchange = async e => {
     const id = await saveImageToIdb(result.dataUrl);
     editingAvatar = id || result.dataUrl;
     updateAvatarPreview();
-  } catch(err){ alert('圖片處理失敗：' + err.message); }
+  } catch(err){ uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
   e.target.value = '';
 };
 $('avatarClearBtn').onclick = () => { editingAvatar = null; updateAvatarPreview(); };
@@ -2987,18 +3393,18 @@ $('fStatus').addEventListener('change', updateCauseOfDeathVisibility);
 function openEditor(id) {
   editingId = id || null;
   const c = id ? db.sims[id] : null;
-  $('modalTitle').textContent = c ? '編輯模擬市民' : '新增模擬市民';
-  $('fName').value = c ? c.name : '';
+  $('modalTitle').textContent = c ? uiText('編輯模擬市民') : uiText('新增模擬市民');
+  $('fName').value = c ? displayDataText(c.name, c) : '';
   $('fStage').value = c ? c.lifeStage : '成年';
   $('fGender').value = c ? (c.gender||'男') : '男';
   $('fStatus').value = c ? (c.status||'在世') : '在世';
   $('fRace').value = c ? (c.race||'') : '';
-  $('fResidence').value = c ? (c.residence||'') : '';
-  $('fAspiration').value = c ? (c.aspiration||'') : '';
-  $('fCauseOfDeath').value = c ? (c.causeOfDeath||'') : '';
-  $('fTraits').value = c ? (c.traits||[]).join('，') : '';
-  $('fCareer').value = c ? (c.career||'') : '';
-  $('fBio').value = c ? (c.bio||'') : '';
+  $('fResidence').value = c ? displayDataText(c.residence, c) : '';
+  $('fAspiration').value = c ? displayDataText(c.aspiration, c) : '';
+  $('fCauseOfDeath').value = c ? displayDataText(c.causeOfDeath, c) : '';
+  $('fTraits').value = c ? (c.traits||[]).map(value => displayDataText(value, c)).join('，') : '';
+  $('fCareer').value = c ? displayDataText(c.career, c) : '';
+  $('fBio').value = c ? displayDataText(c.bio, c) : '';
   $('fAdoptive').value = c ? String(c.adoptive||false) : 'false';
   editingAvatar = c ? (c.avatar||null) : null;
   updateAvatarPreview();
@@ -3009,7 +3415,7 @@ function openEditor(id) {
   updateCauseOfDeathVisibility();
 
   $('fFamilyIds').innerHTML = db.families.map(f =>
-    `<option value="${f.id}">${esc(f.name)}</option>`).join('');
+    `<option value="${f.id}">${esc(displayDataText(f.name, f))}</option>`).join('');
   const curFams = new Set();
   if (c) db.families.forEach(f => { if (f.memberIds.includes(c.id)) curFams.add(f.id); });
   else curFams.add(db.currentId);
@@ -3018,16 +3424,16 @@ function openEditor(id) {
   const allSims = Object.values(db.sims);
   const parentOptions = allSims
     .filter(x => !c || (x.id !== c.id && !isDescendant(c.id, x.id)))
-    .map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('');
-  $('fParent1').innerHTML = '<option value="">—（無 / 未知）</option>' + parentOptions;
-  $('fParent2').innerHTML = '<option value="">—（無 / 未知）</option>' + parentOptions;
+    .map(x => `<option value="${x.id}">${esc(displayDataText(x.name, x))}</option>`).join('');
+  $('fParent1').innerHTML = `<option value="">${esc(uiText('—（無 / 未知）'))}</option>` + parentOptions;
+  $('fParent2').innerHTML = `<option value="">${esc(uiText('—（無 / 未知）'))}</option>` + parentOptions;
   const pids = c ? (c.parentIds||[]) : [];
   $('fParent1').value = pids[0] || '';
   $('fParent2').value = pids[1] || '';
 
   const spouseOptions = allSims
     .filter(x => !c || x.id !== c.id)
-    .map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('');
+    .map(x => `<option value="${x.id}">${esc(displayDataText(x.name, x))}</option>`).join('');
   $('fSpouse').innerHTML = spouseOptions;
   const curSpouses = new Set(c ? (c.spouseIds||[]) : []);
   [...$('fSpouse').options].forEach(o => { o.selected = curSpouses.has(o.value); });
@@ -3053,7 +3459,7 @@ function openEditor(id) {
 
   $('relTarget').innerHTML = allSims
     .filter(x => !c || x.id !== c.id)
-    .map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('');
+    .map(x => `<option value="${x.id}">${esc(displayDataText(x.name, x))}</option>`).join('');
 
   renderRelList(c);
   renderRelAnno(c ? c.id : null);
@@ -3088,11 +3494,11 @@ function renderRelList(c) {
         const other = db.sims[otherId];
         const arrow = l.from === c.id ? '→' : '←';
         return `<div class="rel-item">
-          <span>${esc(l.label || l.type || '關聯')} ${arrow} ${esc(other ? other.name : '（已刪除）')}</span>
+          <span>${esc(displayRelationshipText(l.label || l.type || '關聯'))} ${arrow} ${esc(other ? displayDataText(other.name, other) : uiText('（已刪除）'))}</span>
           <button type="button" data-del="${i}" title="刪除">×</button>
         </div>`;
       }).join('')
-    : '<div class="rel-empty">暫無其他關係</div>';
+    : `<div class="rel-empty">${esc(uiText('暫無其他關係'))}</div>`;
   $('relList').querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = () => {
       const target = rels[+btn.dataset.del];
@@ -3198,10 +3604,28 @@ function collectRelAnnotations() {
 }
 
 function saveChar() {
-  const name = $('fName').value.trim();
-  if (!name) { alert('請填寫姓名'); return; }
+  const existing = editingId ? db.sims[editingId] : null;
+  const sampleOwner = existing && isBuiltinSampleSim(existing) ? existing : null;
+  const preserveSampleText = (field, inputValue) => {
+    const input = String(inputValue ?? '').trim();
+    if (!sampleOwner) return input;
+    const canonical = String(sampleOwner[field] ?? '');
+    return input === displayDataText(canonical, sampleOwner) ? canonical : input;
+  };
+  const preserveSampleTraits = inputTraits => {
+    if (!sampleOwner) return inputTraits;
+    const shown = (sampleOwner.traits || []).map(value => displayDataText(value, sampleOwner));
+    if (shown.length === inputTraits.length && shown.every((value, index) => value === inputTraits[index])) {
+      return [...(sampleOwner.traits || [])];
+    }
+    return inputTraits;
+  };
+
+  const rawName = $('fName').value.trim();
+  if (!rawName) { uiAlert('請填寫姓名', { title: '資料未完成' }); return; }
+  const name = preserveSampleText('name', rawName);
   const newFamilyIds = [...$('fFamilyIds').selectedOptions].map(o => o.value);
-  if (!newFamilyIds.length) { alert('請至少選擇一個所屬家族'); return; }
+  if (!newFamilyIds.length) { uiAlert('請至少選擇一個所屬家族', { title: '資料未完成' }); return; }
   const p1 = $('fParent1').value || null;
   const p2 = $('fParent2').value || null;
   const parentIds = [...new Set([p1, p2].filter(Boolean))];
@@ -3213,16 +3637,16 @@ function saveChar() {
     gender: $('fGender').value,
     status: st,
     race: $('fRace').value || '',
-    residence: $('fResidence').value.trim(),
-    aspiration: $('fAspiration').value.trim(),
-    causeOfDeath: (st === '已故' || st === '幽靈') ? $('fCauseOfDeath').value.trim() : '',
+    residence: preserveSampleText('residence', $('fResidence').value),
+    aspiration: preserveSampleText('aspiration', $('fAspiration').value),
+    causeOfDeath: (st === '已故' || st === '幽靈') ? preserveSampleText('causeOfDeath', $('fCauseOfDeath').value) : '',
     parentIds,
     spouseIds: [...$('fSpouse').selectedOptions].map(o => o.value),
     exSpouseIds: [...$('fExSpouse').selectedOptions].map(o => o.value),
     adoptive: $('fAdoptive').value === 'true',
-    traits: $('fTraits').value.split(/[,，\s]+/).filter(Boolean),
-    career: $('fCareer').value.trim(),
-    bio: $('fBio').value.trim(),
+    traits: preserveSampleTraits($('fTraits').value.split(/[,，\s]+/).filter(Boolean)),
+    career: preserveSampleText('career', $('fCareer').value),
+    bio: preserveSampleText('bio', $('fBio').value),
     avatar: editingAvatar || null,
     pets: JSON.parse(JSON.stringify(editingPets)),
     gallery: JSON.parse(JSON.stringify(editingGallery))
@@ -3231,8 +3655,13 @@ function saveChar() {
   const newSiblingIds = [...$('fSiblings').selectedOptions].map(o => o.value);
 
   let c;
-  if (editingId) { c = db.sims[editingId]; Object.assign(c, data); }
-  else { c = { id: uid('sim'), order: Object.keys(db.sims).length, ...data }; db.sims[c.id] = c; }
+  if (editingId) {
+    c = db.sims[editingId];
+    Object.assign(c, data);
+  } else {
+    c = { id: uid('sim'), order: Object.keys(db.sims).length, ...data };
+    db.sims[c.id] = c;
+  }
 
   syncSpouses(c);
   syncChildren(c, newChildIds);
@@ -3263,10 +3692,10 @@ function saveChar() {
   scheduleGC();
 }
 
-function deleteChar(id) {
+async function deleteChar(id) {
   const c = db.sims[id];
   if (!c) return;
-  if (!confirm(`確定徹底刪除「${c.name}」嗎？\n該操作會從所有家族中移除，並從模擬市民池永久刪除。\n\n（若只想從目前家族移除，請使用「移出家族」）`)) return;
+  if (!await uiConfirm(`確定徹底刪除「${displayDataText(c.name, c)}」嗎？\n該操作會從所有家族中移除，並從模擬市民池永久刪除。\n\n（若只想從目前家族移除，請使用「移出家族」）`, { title: '永久刪除模擬市民', kind: 'danger', confirmText: '永久刪除' })) return;
   db.families.forEach(f => {
     f.memberIds = f.memberIds.filter(x => x !== id);
     ensureFamilyLayoutShape(f);
@@ -3328,24 +3757,24 @@ function renderRoster() {
     return;
   }
   $('rosterList').innerHTML = filtered.map(s => {
-    const fams = db.families.filter(f => f.memberIds.includes(s.id)).map(f => f.name).join(' · ') || '（未歸屬）';
+    const fams = db.families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
     const spouseCount = (s.spouseIds||[]).length;
     const childCount = getChildrenOf(s.id).length;
     const galleryCount = (s.gallery||[]).length;
     const metaParts = [fams];
-    if (spouseCount) metaParts.push(`配偶 ${spouseCount}`);
-    if (childCount) metaParts.push(`子女 ${childCount}`);
+    if (spouseCount) metaParts.push(`${uiText('配偶')} ${spouseCount}`);
+    if (childCount) metaParts.push(`${uiText('子女')} ${childCount}`);
     if (galleryCount) metaParts.push(`${iconSvg('images')} ${galleryCount}`);
-    if (s.residence) metaParts.push(`${iconSvg('house')} ${esc(s.residence)}`);
-    if ((s.status === '已故' || s.status === '幽靈') && s.causeOfDeath) metaParts.push(`${iconSvg('flower1')} ${esc(s.causeOfDeath)}`);
-    if ((s.pets||[]).length) metaParts.push(`${iconSvg('heart')} ${(s.pets||[]).map(p=>esc(p.name)).join('、')}`);
+    if (s.residence) metaParts.push(`${iconSvg('house')} ${esc(displayDataText(s.residence, s))}`);
+    if ((s.status === '已故' || s.status === '幽靈') && s.causeOfDeath) metaParts.push(`${iconSvg('flower1')} ${esc(displayDataText(s.causeOfDeath, s))}`);
+    if ((s.pets||[]).length) metaParts.push(`${iconSvg('heart')} ${(s.pets||[]).map(p=>esc(displayDataText(p.name, s))).join('、')}`);
     const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
     return `<div class="roster-item">
       <div class="roster-main" data-edit="${s.id}">
         <div class="roster-avatar">${avatarHTML(s)}</div>
         <div class="roster-text">
-          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(s.name)}
-            <span class="stage-tag stage-${s.lifeStage}">${s.lifeStage}</span>
+          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
+            <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
           </div>
           <div class="roster-meta">${genderIcon} ${esc(metaParts.join(' · '))}</div>
         </div>
@@ -3389,7 +3818,7 @@ function renderAddMemberList() {
       || (s.residence||'').toLowerCase().includes(q)
       || (s.traits||[]).some(t => (t||'').toLowerCase().includes(q)));
   }
-  $('addMemberFamilyName').textContent = fam.name;
+  $('addMemberFamilyName').textContent = displayDataText(fam.name, fam);
   const list = $('addMemberList');
   if (!candidates.length) {
     list.innerHTML = all.length === memberSet.size
@@ -3397,15 +3826,15 @@ function renderAddMemberList() {
       : '<div class="roster-empty">沒有符合的項目</div>';
   } else {
     list.innerHTML = candidates.map(s => {
-      const fams = db.families.filter(f => f.memberIds.includes(s.id)).map(f => f.name).join(' · ') || '（未歸屬）';
+      const fams = db.families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
       const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
       const isSel = addMemberSelection.has(s.id);
       return `<div class="addmember-item${isSel ? ' selected' : ''}" data-add-id="${s.id}">
         <div class="addmember-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
         <div class="roster-avatar">${avatarHTML(s)}</div>
         <div class="roster-text">
-          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(s.name)}
-            <span class="stage-tag stage-${s.lifeStage}">${s.lifeStage}</span>
+          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
+            <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
           </div>
           <div class="roster-meta">${genderIcon} ${esc(fams)}</div>
         </div>
@@ -3463,7 +3892,7 @@ function renderRemoveMemberList() {
       || (s.career||'').toLowerCase().includes(q)
       || (s.traits||[]).some(t => (t||'').toLowerCase().includes(q)));
   }
-  $('removeMemberFamilyName').textContent = fam.name;
+  $('removeMemberFamilyName').textContent = displayDataText(fam.name, fam);
   const list = $('removeMemberList');
   if (!fam.memberIds.length) {
     list.innerHTML = '<div class="roster-empty">目前家族還沒有成員</div>';
@@ -3471,16 +3900,16 @@ function renderRemoveMemberList() {
     list.innerHTML = '<div class="roster-empty">沒有符合的項目</div>';
   } else {
     list.innerHTML = candidates.map(s => {
-      const otherFams = db.families.filter(f => f.id !== fam.id && f.memberIds.includes(s.id)).map(f => f.name).join(' · ');
-      const alsoIn = otherFams ? '也屬於：' + otherFams : '僅屬於本家族';
+      const otherFams = db.families.filter(f => f.id !== fam.id && f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ');
+      const alsoIn = otherFams ? uiText('也屬於：') + otherFams : uiText('僅屬於本家族');
       const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
       const isSel = removeMemberSelection.has(s.id);
       return `<div class="addmember-item${isSel ? ' remove-selected' : ''}" data-remove-id="${s.id}">
         <div class="addmember-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
         <div class="roster-avatar">${avatarHTML(s)}</div>
         <div class="roster-text">
-          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(s.name)}
-            <span class="stage-tag stage-${s.lifeStage}">${s.lifeStage}</span>
+          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
+            <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
           </div>
           <div class="roster-meta">${genderIcon} ${esc(alsoIn)}</div>
         </div>
@@ -3501,7 +3930,7 @@ function renderRemoveMemberList() {
 }
 $('removeMemberBtn').onclick = () => {
   const fam = currentFamily();
-  if (!fam.memberIds.length) { alert('目前家族還沒有成員，無需移除。'); return; }
+  if (!fam.memberIds.length) { uiAlert('目前家族還沒有成員，無需移除。', { title: '沒有可移除的成員' }); return; }
   removeMemberSelection.clear();
   $('removeMemberSearch').value = '';
   renderRemoveMemberList();
@@ -3516,12 +3945,12 @@ $('removeMemberAllBtn').onclick = () => {
   renderRemoveMemberList();
 };
 $('removeMemberNoneBtn').onclick = () => { removeMemberSelection.clear(); renderRemoveMemberList(); };
-$('removeMemberConfirmBtn').onclick = () => {
+$('removeMemberConfirmBtn').onclick = async () => {
   if (!removeMemberSelection.size) return;
   const fam = currentFamily();
   const ids = [...removeMemberSelection];
-  const names = ids.map(id => db.sims[id]?.name).filter(Boolean).join('、');
-  if (!confirm(`確定將以下 ${ids.length} 位從「${fam.name}」移除嗎？\n\n${names}\n\n他們仍保留在模擬市民池中。`)) return;
+  const names = ids.map(id => db.sims[id] ? displayDataText(db.sims[id].name, db.sims[id]) : '').filter(Boolean).join('、');
+  if (!await uiConfirm(`確定將以下 ${ids.length} 位從「${displayDataText(fam.name, fam)}」移除嗎？\n\n${names}\n\n他們仍保留在模擬市民池中。`, { title: '移出家族', kind: 'danger', confirmText: '移出家族' })) return;
   ensureFamilyLayoutShape(fam);
   ids.forEach(id => {
     fam.memberIds = fam.memberIds.filter(x => x !== id);
@@ -3564,6 +3993,11 @@ async function exportJSON() {
 
 function migrate(raw) {
   if (raw && raw.sims && Array.isArray(raw.families)) {
+    // 舊版內建高斯範例沒有 meta 標記；只有完整符合固定 ID 時才補上範例旗標。
+    if (['g1','g2','g3','g4','g5','g6'].every(id => raw.sims[id]) &&
+        raw.families.some(f => f.id === 'fam_goth') && raw.families.some(f => f.id === 'fam_bacheler')) {
+      raw.meta = { ...(raw.meta || {}), sample: true };
+    }
     if (!raw.relMap) raw.relMap = {};
     if (!raw.labelPos) raw.labelPos = {};
     raw.families.forEach(f => {
@@ -3712,7 +4146,7 @@ async function importJSON(file) {
       applyBg();
       render();
       requestAnimationFrame(fitScreen);
-    } catch(err){ alert('匯入失敗：' + err.message); }
+    } catch(err){ uiAlert('匯入失敗：' + err.message, { title: '匯入失敗', kind: 'danger' }); }
   };
   reader.readAsText(file);
 }
@@ -3752,10 +4186,8 @@ $('btnAddRel').onclick = () => {
 };
 
 // ========【頂部搜尋】 設定 - 保留原本族譜篩選並補上專案風格搜尋結果 ========
-function displayNavText(value) {
-  const text = String(value ?? '');
-  if (typeof LING_I18N !== 'undefined' && LING_I18N.translate) return LING_I18N.translate(text);
-  return text;
+function displayNavText(value, owner = null) {
+  return owner ? displayDataText(value, owner) : String(value ?? '');
 }
 
 function hideTopbarSearchResults() {
@@ -3783,7 +4215,7 @@ function renderTopbarSearchResults() {
       const raw = [c.name, c.career, c.residence].filter(Boolean).join(' ').toLowerCase();
       const translated = [c.name, c.career, c.residence]
         .filter(Boolean)
-        .map(displayNavText)
+        .map(value => displayNavText(value, c))
         .join(' ')
         .toLowerCase();
       return raw.includes(q) || translated.includes(q);
@@ -3797,10 +4229,10 @@ function renderTopbarSearchResults() {
   }
 
   searchResults.innerHTML = matches.map(c => {
-    const meta = [displayNavText(c.career), displayNavText(c.residence)].filter(Boolean).join(' · ');
+    const meta = [displayNavText(c.career, c), displayNavText(c.residence, c)].filter(Boolean).join(' · ');
     return `
       <div class="topbar-search-result" role="option" tabindex="0" data-search-sim-id="${esc(c.id)}">
-        <span class="topbar-search-result-name">${esc(displayNavText(c.name))}</span>
+        <span class="topbar-search-result-name">${esc(displayNavText(c.name, c))}</span>
         ${meta ? `<span class="topbar-search-result-meta">${esc(meta)}</span>` : ''}
       </div>`;
   }).join('');
@@ -3866,8 +4298,10 @@ async function init() {
     if (v === 'custom') savedTheme = 'custom';
     else if (v && VALID_THEMES.includes(v)) savedTheme = v;
     else if (v) {
-      const legacyMap = { blue:'peach', orange:'orange', pink:'cranberry',
-                          green:'lime', purple:'thunder', night:'midnight' };
+      const legacyMap = {
+        blue:'ling', peach:'rose', orange:'amber', pink:'rose', cranberry:'rose',
+        green:'sage', lime:'sage', purple:'amber', thunder:'amber', night:'midnight'
+      };
       savedTheme = legacyMap[v] || 'ling';
     }
   } catch(e){}
@@ -3916,8 +4350,8 @@ async function init() {
   } catch(e){ showRelLabels = true; }
   (function updateLabelBtn() {
     const btn = $('labelToggle');
-    if (showRelLabels) { btn.classList.add('active'); setIconText(btn, 'tags', '顯示標註'); }
-    else { btn.classList.remove('active'); setIconText(btn, 'tags', '隱藏標註'); }
+    if (showRelLabels) { btn.classList.add('active'); setIconText(btn, 'tags', '隱藏關係'); }
+    else { btn.classList.remove('active'); setIconText(btn, 'tags', '顯示關係'); }
   })();
 
   try {
@@ -3970,13 +4404,224 @@ async function init() {
  * 4. 舊版簡中存檔的列舉值由「舊版資料相容」區塊處理，不轉換玩家自行輸入的內容。
  */
 const LING_I18N = (() => {
-  const LANG_KEY = 'ling_genealogy_language_v1';
-
   /* ========【簡中翻譯】 設定 - 繁中完整文案對應簡中顯示值 ======== */
-  const ZH_HANS_EXACT = {"10 倍以上":"10 倍以上","IndexedDB 不可用":"IndexedDB 不可用","IndexedDB 被阻塞":"IndexedDB 被阻塞","localStorage 已滿！ 建議：\n1. 等待圖片遷移到 IndexedDB 完成\n2. 或在「外觀設定」中清理未使用圖片\n3. 或匯出備份後清空瀏覽器資料":"localStorage 已满！ 建议：\n1. 等待图片迁移到 IndexedDB 完成\n2. 或在「外观设置」中清理未使用图片\n3. 或导出备份后清空浏览器数据","— 快速上手與快捷鍵":"— 快速上手与快捷键","—（無 / 未知）":"—（无 / 未知）","↺ 重置位置":"↺ 重置位置","⌨ 快捷鍵":"⌨ 快捷键","中圖（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","平衡（256px · 預設）":"平衡（256px · 默认）","編輯":"编辑","其他":"其他","加入家族":"加入家族","新增":"新增","新增模擬市民":"新增模拟市民","新增家族":"新建家族","新增圖片":"添加图片","新增寵物":"添加宠物","移出家族":"移出家族","上一張 (←)":"上一张 (←)","下一張 (→)":"下一张 (→)","不包含頭像 / 寵物頭像 / 背景圖":"不包含头像 / 宠物头像 / 背景图","不壓縮 · 保留原始格式與畫質":"不压缩 · 保持原始格式与质量","喪偶":"丧偶","中型圖片":"中图","中，容量是 localStorage 的":"中，容量是 localStorage 的","主題配色（漸層）":"主题配色（渐变）","也屬於：":"也属于：","親生":"亲生","人":"人","人物小傳、結局、備註…":"人物小传、结局、备注…","人生抱負":"人生抱负","人生階段":"人生阶段","人類":"人类","人魚":"人鱼","僅屬於本家族":"仅属于本家族","仇敵":"仇敌","從":"从","從家族移除":"从家族移除","倉鼠":"仓鼠","仙子":"仙子","以滑鼠位置為中心縮放":"以鼠标位置为中心缩放","伴侶":"伴侣","作家 / 學生 / 無":"作家 / 学生 / 无","使用提示":"使用提示","側邊欄":"侧边栏","儲存":"保存","儲存圖片失敗":"保存图片失败","資訊卡彈出視窗":"信息卡弹窗","兒童":"儿童","兄妹":"兄妹","兄弟姐妹":"兄弟姐妹","兄弟姐妹（血緣 / 收養）":"兄弟姐妹（血缘 / 收养）","兔子":"兔子","全選":"全选","全部模擬市民":"全部模拟市民","全部階段":"全部阶段","關係":"关系","關係標註":"关系标注","關係，如 好友":"关系，如 好友","關聯":"关联","關聯階段（可選）":"关联阶段（可选）","關閉":"关闭","關閉 (Esc)":"关闭 (Esc)","關閉目前彈出視窗":"关闭当前弹窗","刪除":"删除","刪除圖片":"删除图片","刪除失敗":"删除失败","刪除寵物":"删除宠物","刪除模擬市民":"删除模拟市民","到相簿網格，或按":"到相册网格，或按","前任配偶":"前任配偶","勾選後建立「兄弟姐妹」關聯":"勾选后建立「兄弟姐妹」关联","勾選後自動加入對方父母清單":"勾选后自动加入对方父母列表","午夜藍調":"午夜蓝调","壓縮品質":"压缩档位","原始圖片":"原图","雙擊空白處":"双击空白处","取消":"取消","可選：拍攝場景、備註、想記錄的故事…":"可选：拍摄场景、备注、想记录的故事…","名字":"名字","吸血鬼":"吸血鬼","品種":"品种","圖片":"图片","圖片儲存在瀏覽器":"图片保存在浏览器","圖片檢視器":"图片查看器","圖片檢視器中切換上一張 / 下一張":"图片查看器中切换上一张 / 下一张","圖片編輯視窗內貼上剪貼簿圖片":"图片编辑器内粘贴剪贴板图片","在世":"在世","在編輯彈出視窗中快速儲存":"在编辑弹窗中快速保存","填滿（裁切超出部分）":"填充（裁剪超出部分）","備註":"备注","外星人":"外星人","外觀":"外观","外觀設定":"外观设置","可在外觀設定中檢視":"外观设置里可查看","大型圖片":"大图","頭像畫質":"头像清晰度","女":"女","如：幼兒期 / 婚禮合影 / 全家福":"如：幼儿期 / 婚礼合影 / 全家福","如：旺財 / 咪咪":"如：旺财 / 咪咪","如：柳溪 - 花園社區":"如：柳溪 - 花园社区","如：暢銷作家 / 靈魂伴侶…":"如：畅销作家 / 灵魂伴侣…","如：莫蒂默·高斯":"如：莫蒂默·高斯","如：衰老 / 溺水 / 火災…":"如：衰老 / 溺水 / 火灾…","如：金毛、波斯貓…":"如：金毛、波斯猫…","姓名":"姓名","嬰兒":"婴儿","子女":"子女","子女（血緣 / 收養）":"子女（血缘 / 收养）","儲存空間使用量":"存储用量","完整顯示（可能留白）":"完整显示（可能留白）","寵物":"宠物","寵物頭像":"宠物头像","寵物編輯彈出視窗":"宠物编辑弹窗","家族":"家族","家族名稱":"家族名称","家族名稱：":"家族名称：","匯入":"导入","匯入 JSON 備份":"导入 JSON 备份","匯入失敗：":"导入失败：","匯出":"导出","匯出 JSON":"导出 JSON","匯出 JSON 備份":"导出 JSON 备份","小型圖片":"小图","居住地":"居住地","已故":"已故","已選":"已选","師承":"师承","平移整個族譜視圖":"平移整个族谱视图","平衡":"平衡","重複排列":"平铺","年齡階段":"年龄阶段","幼兒":"幼儿","幼年":"幼年","幽靈":"幽灵","套用自訂漸層":"应用自定义渐变","目前":"当前","目前家族還沒有成員":"当前家族还没有成员","目前家族還沒有成員，無需移除。":"当前家族还没有成员，无需移除。","目前家族還沒有模擬市民，點選左側「 新增模擬市民」開始記錄":"当前家族还没有模拟市民，点击左侧「新增模拟市民」开始记录","性別":"性别","情人":"情人","成年":"成年","所屬家族":"所属家族","所有模擬市民都已在目前家族中":"所有模拟市民都已在当前家族中","拖曳卡片":"拖动卡片","拖曳色票選擇兩種顏色，即時預覽漸層效果":"拖动色板自选两种颜色，实时预览渐变效果","拖曳圖片檔案":"拖拽图片文件","拖曳空白處":"拖拽空白处","摯友":"挚友","提示":"提示","提示面板":"提示面板","搜尋…":"搜索…","搜尋姓名 / 特徵 / 職業…":"搜索姓名 / 特征 / 职业…","搜尋姓名…":"搜索姓名…","搜尋家族…":"搜索家族…","搜尋標題 / 模擬市民名稱 / 備註…":"搜索标题 / 模拟市民名称 / 备注…","搜尋，按":"搜索，按","支援":"支持","支援 JPG / PNG / GIF":"支持 JPG / PNG / GIF","新家族":"新家族","時仍會轉回 base64，與舊版工具完全互通":"时仍会转回 base64，与旧版工具完全互通","尚無關係連線":"暂无关系连线","目前沒有可清理的圖片":"暂无可清理的图片","尚未新增寵物":"暂无宠物","尚未設定背景圖片":"暂无背景图","有創造力, 熱愛戶外, 物質主義":"有创造力, 热爱户外, 物质主义","朋友":"朋友","機器人":"机器人","檢視器中":"查看器中","標題":"标题","標題 / 關聯階段 / 備註":"标题 / 关联阶段 / 备注","標題 / 模擬市民名稱 / 備註":"标题 / 模拟市民名称 / 备注","植物模擬市民":"植物模拟市民","模擬市民":"模拟市民","模擬市民頭像":"模拟市民头像","橘子汽水":"橘子汽水","計算中…":"正在计算…","死因":"死因","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"每张卡片显示来源模拟市民与标题；点击打开大图查看器","每張圖片可設定：":"每张图片可设置：","沒有符合的項目":"没有匹配","沒有符合的圖片":"没有匹配的图片","瀏覽，":"浏览，","新增其他關係（好友 / 仇敵 / 師承…）":"添加其他关系（好友 / 仇敌 / 师承…）","新增已有模擬市民":"添加已有模拟市民","新增模擬市民到":"添加模拟市民到","清理完成":"清理完成","清理未使用的圖片":"清理未使用图片","清空":"清空","清除圖片":"清除图片","清除頭像":"清除头像","清除篩選":"清除筛选","移除背景":"清除背景","滾輪":"滚轮","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"点击选择 · 或拖拽 · 或 Ctrl+V 粘贴","愛上雷神":"爱上雷神","父母 A（血緣）":"父母 A（血缘）","父母 B（可選）":"父母 B（可选）","特徵":"特征","特徵（逗號分隔）":"特征（逗号分隔）","狀態":"状态","狗":"狗","狼人":"狼人","貓":"猫","現任配偶":"现任配偶","電腦版":"电脑版","男":"男","相簿":"相册","相簿圖片編輯彈出視窗":"相册图片编辑弹窗","節省空間":"省空间","知道了":"知道了","確定刪除目前家族嗎？\n人物本身不會被刪除。":"确定删除当前家族吗？\n人物本身不会被删除。","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"确定删除这个模拟市民吗？此操作会同时清除相关关系。","離婚":"离婚","種族":"种族","種類":"种类","移除":"移除","簡中":"简中","簡介":"简介","貼上截圖":"粘贴截图","繁中":"繁中","編輯模擬市民 →":"编辑模拟市民 →","編輯模擬市民彈出視窗":"编辑模拟市民弹窗","老年":"老年","職業":"职业","職業 / 備註":"职业 / 备注","背景圖片":"背景图","自動切換為「自由排列」並儲存新位置":"自动切换为「自由排列」并保存新位置","自動適應螢幕":"自动适应屏幕","自訂":"自定义","至少需要保留一個家族。":"至少需要保留一个家族。","選單":"菜单","蔓越莓氣泡":"蔓越莓气泡","蜜桃烏龍":"蜜桃乌龙","蜥蜴":"蜥蜴","視圖與佈局":"视图与布局","模擬市民頭像":"模拟市民头像","模擬市民篩選":"模拟市民筛选","訂婚":"订婚","語言 / Language":"语言 / Language","請輸入家族名稱。":"请输入家族名称。","高畫質":"超清","跨模擬市民":"跨模拟市民","還沒有任何相簿圖片。 開啟某個模擬市民的編輯彈出視窗 →「 相簿」新增圖片後，會在這裡顯示。":"还没有任何相册图片。 打开某个模拟市民的编辑弹窗 →「相册」添加图片后，会在这里显示。","尚未新增相簿圖片":"还没有相册图片","顯示方式":"适应方式","透明度：":"透明度：","配偶":"配偶","青少年":"青少年","青年":"青年","青檸茉莉":"青柠茉莉","頂端支援按":"顶部支持按","領養":"领养","領養關係":"领养关系","顏色 1":"颜色 1","顏色 2":"颜色 2","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"首次打开会自动把旧数据（base64）迁移到 IndexedDB","馬":"马","魔法師":"魔法师","魚":"鱼","鳥":"鸟","（不指定）":"（不指定）","（不顯示）":"（不显示）","（多張圖片 / 不同階段 / 合影）":"（多张图片 / 不同阶段 / 合影）","（已刪除）":"（已删除）","（未命名）":"（未命名）","（未歸屬）":"（未归属）","（每條連線獨立設定）":"（每条连线独立设置）","（該模擬市民擁有的寵物）":"（该模拟市民拥有的宠物）","（預設）":"（默认）","，並一鍵":"，并一键","：為模擬市民新增多張圖片":"：为模拟市民添加多张图片","：檢視所有模擬市民的相簿圖片":"：查看所有模拟市民的相册图片","顯示標註":"显示标注","檢視模式":"查看模式","高畫質（384px）":"超清（384px）","高畫質（1440px · 約 150–250KB/張）":"高清（1440px · 约 150–250KB/张）","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"他们仍保留在模拟市民池中，可随时再次加入任何家族。","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"勾选后点击「加入家族」即可让它们出现在当前家族的族谱中。","圖片資料儲存在瀏覽器的 IndexedDB 中（容量數十 MB），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，與舊版工具完全相容。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"支持拖拽图片到此处，或在编辑器内按 Ctrl+V 粘贴截图","每條連線可擁有獨立的關係標註；標註在畫布上可拖曳，避免遮擋卡片。":"每条连线可拥有独立的关系标注；标注在画布上可拖动，避免遮挡卡片。","圖片儲存":"图片存储","大圖（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","相簿圖片畫質":"相册图片清晰度","相簿瀏覽器":"相册浏览器","模擬市民相簿":"角色相册","選擇圖片":"选择图片","搜尋姓名 / 職業 / 居住地…":"搜索姓名 / 职业 / 居住地…","自動佈局":"自动布局","未鎖定":"未锁定","標註未鎖":"标注未锁","畫布操作":"画布操作","原始圖片（不壓縮 · 大小不限）":"原图（不压缩 · 大小不限）","刪除家族":"删除家族","清理未使用圖片":"清理未使用图片","小圖（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","節節省空間（160px）":"省空间（160px）","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","節省空間（192px）":"省空间（192px）","平衡（384px · 預設）":"平衡（384px · 默认）","高畫質（768px）":"超清（768px）","192px · 約 10–16KB/張":"192px · 约 10–16KB/张","384px · 約 30–50KB/張":"384px · 约 30–50KB/张","768px · 約 70–130KB/張":"768px · 约 70–130KB/张","小型圖片（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","中型圖片（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","大型圖片（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","原始圖片（不壓縮 · 不限大小）":"原图（不压缩 · 大小不限）","目前品質：":"当前档位：","僅套用於之後上傳的頭像。":"仅对新上传头像生效。","僅套用於之後上傳的圖片。":"仅对新上传图片生效。"};
+  const ZH_HANS_EXACT = {"10 倍以上":"10 倍以上","IndexedDB 不可用":"IndexedDB 不可用","IndexedDB 被阻塞":"IndexedDB 被阻塞","localStorage 已滿！ 建議：\n1. 等待圖片遷移到 IndexedDB 完成\n2. 或在「外觀設定」中清理未使用圖片\n3. 或匯出備份後清空瀏覽器資料":"localStorage 已满！ 建议：\n1. 等待图片迁移到 IndexedDB 完成\n2. 或在「外观设置」中清理未使用图片\n3. 或导出备份后清空浏览器数据","— 快速上手與快捷鍵":"— 快速上手与快捷键","—（無 / 未知）":"—（无 / 未知）","↺ 重置位置":"↺ 重置位置","⌨ 快捷鍵":"⌨ 快捷键","中圖（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","平衡（256px · 預設）":"平衡（256px · 默认）","編輯":"编辑","其他":"其他","加入家族":"加入家族","新增":"新增","新增模擬市民":"新增模拟市民","新增家族":"新建家族","新增圖片":"添加图片","新增寵物":"添加宠物","移出家族":"移出家族","上一張 (←)":"上一张 (←)","下一張 (→)":"下一张 (→)","不包含頭像 / 寵物頭像 / 背景圖":"不包含头像 / 宠物头像 / 背景图","不壓縮 · 保留原始格式與畫質":"不压缩 · 保持原始格式与质量","喪偶":"丧偶","中型圖片":"中图","中，容量是 localStorage 的":"中，容量是 localStorage 的","主題配色（漸層）":"主题配色（渐变）","也屬於：":"也属于：","親生":"亲生","人":"人","人物小傳、結局、備註…":"人物小传、结局、备注…","人生抱負":"人生抱负","人生階段":"人生阶段","人類":"人类","人魚":"人鱼","僅屬於本家族":"仅属于本家族","仇敵":"仇敌","從":"从","從家族移除":"从家族移除","倉鼠":"仓鼠","仙子":"仙子","以滑鼠位置為中心縮放":"以鼠标位置为中心缩放","伴侶":"伴侣","作家 / 學生 / 無":"作家 / 学生 / 无","使用提示":"使用提示","側邊欄":"侧边栏","儲存":"保存","儲存圖片失敗":"保存图片失败","資訊卡彈出視窗":"信息卡弹窗","兒童":"儿童","兄妹":"兄妹","兄弟姐妹":"兄弟姐妹","兄弟姐妹（血緣 / 收養）":"兄弟姐妹（血缘 / 收养）","兔子":"兔子","全選":"全选","全部模擬市民":"全部模拟市民","全部階段":"全部阶段","關係":"关系","關係":"关系标注","關係，如 好友":"关系，如 好友","關聯":"关联","關聯階段（可選）":"关联阶段（可选）","關閉":"关闭","關閉 (Esc)":"关闭 (Esc)","關閉目前彈出視窗":"关闭当前弹窗","刪除":"删除","刪除圖片":"删除图片","刪除失敗":"删除失败","刪除寵物":"删除宠物","刪除模擬市民":"删除模拟市民","到相簿網格，或按":"到相册网格，或按","前任配偶":"前任配偶","勾選後建立「兄弟姐妹」關聯":"勾选后建立「兄弟姐妹」关联","勾選後自動加入對方父母清單":"勾选后自动加入对方父母列表","午夜藍調":"午夜蓝调","壓縮品質":"压缩档位","原始圖片":"原图","雙擊空白處":"双击空白处","取消":"取消","可選：拍攝場景、備註、想記錄的故事…":"可选：拍摄场景、备注、想记录的故事…","名字":"名字","吸血鬼":"吸血鬼","品種":"品种","圖片":"图片","圖片儲存在瀏覽器":"图片保存在浏览器","圖片檢視器":"图片查看器","圖片檢視器中切換上一張 / 下一張":"图片查看器中切换上一张 / 下一张","圖片編輯視窗內貼上剪貼簿圖片":"图片编辑器内粘贴剪贴板图片","在世":"在世","在編輯彈出視窗中快速儲存":"在编辑弹窗中快速保存","填滿（裁切超出部分）":"填充（裁剪超出部分）","備註":"备注","外星人":"外星人","外觀":"外观","外觀設定":"外观设置","可在外觀設定中檢視":"外观设置里可查看","大型圖片":"大图","頭像畫質":"头像清晰度","女":"女","如：幼兒期 / 婚禮合影 / 全家福":"如：幼儿期 / 婚礼合影 / 全家福","如：旺財 / 咪咪":"如：旺财 / 咪咪","如：柳溪 - 花園社區":"如：柳溪 - 花园社区","如：暢銷作家 / 靈魂伴侶…":"如：畅销作家 / 灵魂伴侣…","如：莫蒂默·高斯":"如：莫蒂默·高斯","如：衰老 / 溺水 / 火災…":"如：衰老 / 溺水 / 火灾…","如：金毛、波斯貓…":"如：金毛、波斯猫…","姓名":"姓名","嬰兒":"婴儿","子女":"子女","子女（血緣 / 收養）":"子女（血缘 / 收养）","儲存空間使用量":"存储用量","完整顯示（可能留白）":"完整显示（可能留白）","寵物":"宠物","寵物頭像":"宠物头像","寵物編輯彈出視窗":"宠物编辑弹窗","家族":"家族","家族名稱":"家族名称","家族名稱：":"家族名称：","匯入":"导入","匯入 JSON 備份":"导入 JSON 备份","匯入失敗：":"导入失败：","匯出":"导出","匯出 JSON":"导出 JSON","匯出 JSON 備份":"导出 JSON 备份","小型圖片":"小图","居住地":"居住地","已故":"已故","已選":"已选","師承":"师承","平移整個族譜視圖":"平移整个族谱视图","平衡":"平衡","重複排列":"平铺","年齡階段":"年龄阶段","幼兒":"幼儿","幼年":"幼年","幽靈":"幽灵","套用自訂漸層":"应用自定义渐变","目前":"当前","目前家族還沒有成員":"当前家族还没有成员","目前家族還沒有成員，無需移除。":"当前家族还没有成员，无需移除。","目前家族還沒有模擬市民，點選左側「 新增模擬市民」開始記錄":"当前家族还没有模拟市民，点击左侧「新增模拟市民」开始记录","性別":"性别","情人":"情人","成年":"成年","所屬家族":"所属家族","所有模擬市民都已在目前家族中":"所有模拟市民都已在当前家族中","拖曳卡片":"拖动卡片","拖曳色票選擇兩種顏色，即時預覽漸層效果":"拖动色板自选两种颜色，实时预览渐变效果","拖曳圖片檔案":"拖拽图片文件","拖曳空白處":"拖拽空白处","摯友":"挚友","提示":"提示","提示面板":"提示面板","搜尋…":"搜索…","搜尋姓名 / 特徵 / 職業…":"搜索姓名 / 特征 / 职业…","搜尋姓名…":"搜索姓名…","搜尋家族…":"搜索家族…","搜尋標題 / 模擬市民名稱 / 備註…":"搜索标题 / 模拟市民名称 / 备注…","搜尋，按":"搜索，按","支援":"支持","支援 JPG / PNG / GIF":"支持 JPG / PNG / GIF","新家族":"新家族","時仍會轉回 base64，與舊版工具完全互通":"时仍会转回 base64，与旧版工具完全互通","尚無關係連線":"暂无关系连线","目前沒有可清理的圖片":"暂无可清理的图片","尚未新增寵物":"暂无宠物","尚未設定背景圖片":"暂无背景图","有創造力, 熱愛戶外, 物質主義":"有创造力, 热爱户外, 物质主义","朋友":"朋友","機器人":"机器人","檢視器中":"查看器中","標題":"标题","標題 / 關聯階段 / 備註":"标题 / 关联阶段 / 备注","標題 / 模擬市民名稱 / 備註":"标题 / 模拟市民名称 / 备注","植物模擬市民":"植物模拟市民","模擬市民":"模拟市民","模擬市民頭像":"模拟市民头像","橘子汽水":"橘子汽水","計算中…":"正在计算…","死因":"死因","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"每张卡片显示来源模拟市民与标题；点击打开大图查看器","每張圖片可設定：":"每张图片可设置：","沒有符合的項目":"没有匹配","沒有符合的圖片":"没有匹配的图片","瀏覽，":"浏览，","新增其他關係（好友 / 仇敵 / 師承…）":"添加其他关系（好友 / 仇敌 / 师承…）","新增已有模擬市民":"添加已有模拟市民","新增模擬市民到":"添加模拟市民到","清理完成":"清理完成","清理未使用的圖片":"清理未使用图片","清空":"清空","清除圖片":"清除图片","清除頭像":"清除头像","清除篩選":"清除筛选","移除背景":"清除背景","滾輪":"滚轮","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"点击选择 · 或拖拽 · 或 Ctrl+V 粘贴","愛上雷神":"爱上雷神","父母 A（血緣）":"父母 A（血缘）","父母 B（可選）":"父母 B（可选）","特徵":"特征","特徵（逗號分隔）":"特征（逗号分隔）","狀態":"状态","狗":"狗","狼人":"狼人","貓":"猫","現任配偶":"现任配偶","電腦版":"电脑版","男":"男","相簿":"相册","相簿圖片編輯彈出視窗":"相册图片编辑弹窗","節省空間":"省空间","知道了":"知道了","確定刪除目前家族嗎？\n人物本身不會被刪除。":"确定删除当前家族吗？\n人物本身不会被删除。","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"确定删除这个模拟市民吗？此操作会同时清除相关关系。","離婚":"离婚","種族":"种族","種類":"种类","移除":"移除","簡中":"简中","簡介":"简介","貼上截圖":"粘贴截图","繁中":"繁中","編輯模擬市民 →":"编辑模拟市民 →","編輯模擬市民彈出視窗":"编辑模拟市民弹窗","老年":"老年","職業":"职业","職業 / 備註":"职业 / 备注","背景圖片":"背景图","自動切換為「自由排列」並儲存新位置":"自动切换为「自由排列」并保存新位置","自動適應螢幕":"自动适应屏幕","自訂":"自定义","至少需要保留一個家族。":"至少需要保留一个家族。","選單":"菜单","蔓越莓氣泡":"蔓越莓气泡","蜜桃烏龍":"蜜桃乌龙","蜥蜴":"蜥蜴","視圖與佈局":"视图与布局","模擬市民頭像":"模拟市民头像","模擬市民篩選":"模拟市民筛选","訂婚":"订婚","語言 / Language":"语言 / Language","請輸入家族名稱。":"请输入家族名称。","高畫質":"超清","跨模擬市民":"跨模拟市民","還沒有任何相簿圖片。 開啟某個模擬市民的編輯彈出視窗 →「 相簿」新增圖片後，會在這裡顯示。":"还没有任何相册图片。 打开某个模拟市民的编辑弹窗 →「相册」添加图片后，会在这里显示。","尚未新增相簿圖片":"还没有相册图片","顯示方式":"适应方式","透明度：":"透明度：","配偶":"配偶","青少年":"青少年","青年":"青年","青檸茉莉":"青柠茉莉","頂端支援按":"顶部支持按","領養":"领养","領養關係":"领养关系","顏色 1":"颜色 1","顏色 2":"颜色 2","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"首次打开会自动把旧数据（base64）迁移到 IndexedDB","馬":"马","魔法師":"魔法师","魚":"鱼","鳥":"鸟","（不指定）":"（不指定）","（不顯示）":"（不显示）","（多張圖片 / 不同階段 / 合影）":"（多张图片 / 不同阶段 / 合影）","（已刪除）":"（已删除）","（未命名）":"（未命名）","（未歸屬）":"（未归属）","（每條連線獨立設定）":"（每条连线独立设置）","（該模擬市民擁有的寵物）":"（该模拟市民拥有的宠物）","（預設）":"（默认）","，並一鍵":"，并一键","：為模擬市民新增多張圖片":"：为模拟市民添加多张图片","：檢視所有模擬市民的相簿圖片":"：查看所有模拟市民的相册图片","顯示標註":"显示标注","檢視模式":"查看模式","高畫質（384px）":"超清（384px）","高畫質（1440px · 約 150–250KB/張）":"高清（1440px · 约 150–250KB/张）","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"他们仍保留在模拟市民池中，可随时再次加入任何家族。","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"勾选后点击「加入家族」即可让它们出现在当前家族的族谱中。","圖片資料儲存在瀏覽器的 IndexedDB 中（容量數十 MB），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，與舊版工具完全相容。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"支持拖拽图片到此处，或在编辑器内按 Ctrl+V 粘贴截图","每條連線可擁有獨立的關係；標註在畫布上可拖曳，避免遮擋卡片。":"每条连线可拥有独立的关系标注；标注在画布上可拖动，避免遮挡卡片。","圖片儲存":"图片存储","大圖（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","相簿圖片畫質":"相册图片清晰度","相簿瀏覽器":"相册浏览器","模擬市民相簿":"角色相册","選擇圖片":"选择图片","搜尋姓名 / 職業 / 居住地…":"搜索姓名 / 职业 / 居住地…","自動佈局":"自动布局","未鎖定":"未锁定","標註未鎖":"标注未锁","畫布操作":"画布操作","原始圖片（不壓縮 · 大小不限）":"原图（不压缩 · 大小不限）","刪除家族":"删除家族","清理未使用圖片":"清理未使用图片","小圖（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","節節省空間（160px）":"省空间（160px）","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","節省空間（192px）":"省空间（192px）","平衡（384px · 預設）":"平衡（384px · 默认）","高畫質（768px）":"超清（768px）","192px · 約 10–16KB/張":"192px · 约 10–16KB/张","384px · 約 30–50KB/張":"384px · 约 30–50KB/张","768px · 約 70–130KB/張":"768px · 约 70–130KB/张","小型圖片（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","中型圖片（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","大型圖片（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","原始圖片（不壓縮 · 不限大小）":"原图（不压缩 · 大小不限）","目前品質：":"当前档位：","僅套用於之後上傳的頭像。":"仅对新上传头像生效。","僅套用於之後上傳的圖片。":"仅对新上传图片生效。"};
+  Object.assign(ZH_HANS_EXACT, {
+    '關係':'关系',
+    '顯示關係':'显示关系',
+    '隱藏關係':'隐藏关系',
+    '鎖定關係':'锁定关系',
+    '解鎖關係':'解锁关系',
+    '重設關係位置':'重置关系位置',
+    '每條連線可擁有獨立的關係；關係名稱可在畫布上拖曳，避免遮擋卡片。':'每条连线可拥有独立的关系；关系名称可在画布上拖动，避免遮挡卡片。',
+    'L1nG 晴空':'L1nG 晴空',
+    '森霧鼠尾草':'森雾鼠尾草',
+    '莓果薄暮':'莓果薄暮',
+    '琥珀紙頁':'琥珀纸页',
+    '午夜靛藍':'午夜靛蓝',
+    '重設':'重置',
+    '重設介面設定':'重置界面设置',
+    '重建範例資料':'重建示例数据',
+    '「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。':'“重置界面设置”不会删除族谱数据；“重建示例数据”会以繁中默认示例重新建立当前数据。',
+    '介面設定已恢復預設。':'界面设置已恢复默认。',
+    '已重建繁中範例資料。':'已重建繁中示例数据。',
+    '請確認':'请确认',
+    '輸入資料':'输入数据',
+    '重設卡片位置':'重置卡片位置',
+    '重設位置':'重置位置',
+    '新增家族':'新建家族',
+    '永久刪除模擬市民':'永久删除模拟市民',
+    '永久刪除':'永久删除',
+    '無法刪除家族':'无法删除家族',
+    '資料未完成':'数据未完成',
+    '父母':'父母',
+    '前任配偶':'前任配偶',
+    '暫無更多資訊':'暂无更多信息',
+    '恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？':'恢复主题、背景、侧边栏宽度、查看模式与图片质量等界面设置？',
+    '族譜人物、關係與卡片位置不會被刪除。':'族谱人物、关系与卡片位置不会被删除。',
+    '這會刪除目前族譜資料，並重新建立繁體中文的預設範例。':'这会删除当前族谱数据，并重新建立繁体中文的默认示例。',
+    '此操作無法復原，建議先匯出 JSON 備份。':'此操作无法撤销，建议先导出 JSON 备份。',
+    '儲存空間不足':'存储空间不足',
+    '儲存失敗':'保存失败',
+    '背景圖片設定儲存失敗。':'背景图片设置保存失败。',
+    '圖片處理失敗':'图片处理失败',
+    '背景處理失敗':'背景处理失败',
+    '移除背景圖片':'移除背景图片',
+    '確定清除目前背景圖片嗎？':'确定清除当前背景图片吗？',
+    '移除背景':'移除背景',
+    '清理未使用圖片':'清理未使用图片',
+    '將掃描所有未被引用的圖片並刪除。確定繼續嗎？':'将扫描所有未被引用的图片并删除。确定继续吗？',
+    '開始清理':'开始清理',
+    '刪除圖片':'删除图片',
+    '尚未選擇圖片':'尚未选择图片',
+    '請先選擇一張圖片':'请先选择一张图片',
+    '原始圖片容量提醒':'原始图片容量提醒',
+    '是否仍要儲存原始圖片？':'是否仍要保存原始图片？',
+    'IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。':'IndexedDB 容量虽然较大，但大图片仍会快速占满空间。',
+    '仍要儲存':'仍要保存',
+    '刪除寵物':'删除宠物',
+    '請填寫寵物名字':'请填写宠物名字',
+    '請填寫姓名':'请填写姓名',
+    '請至少選擇一個所屬家族':'请至少选择一个所属家族',
+    '沒有可移除的成員':'没有可移除的成员',
+    '匯入失敗':'导入失败',
+    '自訂文字（可選）':'自定义文字（可选）',
+    '張圖片':'张图片',
+    '暫無其他關係':'暂无其他关系',
+    '還沒有任何模擬市民':'还没有任何模拟市民',
+    '請選擇圖片檔案':'请选择图片文件',
+    '圖片載入失敗':'图片加载失败',
+    '檔案讀取失敗':'文件读取失败',
+    '目前瀏覽器 IndexedDB 不可用，圖片以 base64 存在 localStorage':'当前浏览器 IndexedDB 不可用，图片以 base64 保存在 localStorage',
+    '他們仍保留在模擬市民池中。':'他们仍保留在模拟市民池中。',
+    '點選選擇…':'点击选择…',
+    '點選選擇家族（可多選）…':'点击选择家族（可多选）…',
+    '點選選擇（可多選）…':'点击选择（可多选）…',
+    '選擇目標…':'选择目标…',
+    '還沒有任何相簿圖片。':'还没有任何相册图片。',
+    '開啟某個模擬市民的編輯彈出視窗 →「相簿」新增圖片後，會在這裡顯示。':'打开某个模拟市民的编辑弹窗 →「相册」添加图片后，会在这里显示。'
+  });
 
   /* ========【英文翻譯】 設定 - 繁中完整文案對應英文顯示值 ======== */
-  const EN = {"模擬市民族譜工具":"The Sims 4 Genealogy Tool","全部階段":"All Life Stages","嬰兒":"Infant","幼兒":"Toddler","兒童":"Child","青少年":"Teen","青年":"Young Adult","成年":"Adult","老年":"Elder","幼年":"Young","匯入":"Import","匯出":"Export","外觀":"Appearance","提示":"Help","家族":"Family","新增家族":"New Family","刪除家族":"Delete Family","模擬市民":"Sims","新增模擬市民":"Add Sim","全部模擬市民":"All Sims","加入家族":"Add to Family","移出家族":"Remove from Family","相簿":"Gallery","相簿瀏覽器":"Gallery Browser","視圖與佈局":"View & Layout","檢視模式":"View Mode","自動佈局":"Auto Layout","未鎖定":"Unlocked","↺ 重置位置":"↺ Reset Positions","顯示標註":"Show Labels","隱藏標註":"Hide Labels","標註未鎖":"Labels Unlocked","標註已鎖":"Labels Locked","電腦版":"Desktop","編輯模擬市民":"Edit Sim","每條連線可擁有獨立的關係標註；標註在畫布上可拖曳，避免遮擋卡片。":"Each connection can have its own relationship label. Drag labels on the canvas to keep them clear of cards.","模擬市民頭像":"Sim Portrait","選擇圖片":"Choose Image","清除頭像":"Clear Portrait","支援 JPG / PNG / GIF":"Supports JPG / PNG / GIF","姓名":"Name","人生階段":"Life Stage","性別":"Gender","男":"Male","女":"Female","其他":"Other","狀態":"Status","在世":"Alive","幽靈":"Ghost","已故":"Deceased","種族":"Occult Type","（不顯示）":"(Hidden)","(不顯示)":"(Hidden)","人類":"Human","吸血鬼":"Vampire","外星人":"Alien","狼人":"Werewolf","人魚":"Mermaid","魔法師":"Spellcaster","仙子":"Fairy","植物模擬市民":"PlantSim","機器人":"Robot","領養關係":"Adoption","親生":"Biological","領養":"Adopted","死因":"Cause of Death","職業 / 備註":"Career / Notes","居住地":"Residence","人生抱負":"Aspiration","所屬家族":"Families","父母 A（血緣）":"Parent A (Biological)","父母 B（可選）":"Parent B (Optional)","現任配偶":"Current Spouse","前任配偶":"Former Spouse","子女（血緣 / 收養）":"Children (Biological / Adopted)","勾選後自動加入對方父母清單":"Selected Sims are automatically updated with this Sim as a parent.","兄弟姐妹（血緣 / 收養）":"Siblings (Biological / Adopted)","勾選後建立「兄弟姐妹」關聯":"Selecting creates a sibling relationship.","特徵（逗號分隔）":"Traits (comma-separated)","簡介":"Biography","寵物":"Pets","（該模擬市民擁有的寵物）":"(Pets owned by this Sim)","新增寵物":"Add Pet","（多張圖片 / 不同階段 / 合影）":"(Multiple photos / life stages / group photos)","新增圖片":"Add Photo","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"Drag images here, or press Ctrl+V in the editor to paste a screenshot.","關係標註":"Relationship Labels","（每條連線獨立設定）":"(Configured per connection)","新增其他關係（好友 / 仇敵 / 師承…）":"Add Other Relationship (Friend / Rival / Mentor…)","新增":"Add","刪除模擬市民":"Delete Sim","取消":"Cancel","儲存":"Save","編輯寵物":"Edit Pet","寵物頭像":"Pet Portrait","名字":"Name","種類":"Species","狗":"Dog","貓":"Cat","馬":"Horse","兔子":"Rabbit","鳥":"Bird","倉鼠":"Hamster","魚":"Fish","蜥蜴":"Lizard","品種":"Breed","年齡階段":"Age Stage","刪除寵物":"Delete Pet","編輯圖片":"Edit Photo","圖片":"Image","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"Click to choose · drag and drop · or paste with Ctrl+V","清除圖片":"Clear Image","標題":"Title","關聯階段（可選）":"Linked Life Stage (Optional)","（不指定）":"(Not specified)","備註":"Notes","刪除圖片":"Delete Photo","圖片檢視器":"Image Viewer","清除篩選":"Clear Filter","關閉":"Close","編輯":"Edit","新增已有模擬市民":"Add Existing Sim","新增模擬市民到":"Add Sims to","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"Select Sims and choose “Add to Family” to include them in the current family tree.","全選":"Select All","清空":"Clear","已選":"Selected","人":"Sim(s)","從家族移除":"Remove from Family","從":"Remove from","移除":"Remove","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"They remain in the global Sim pool and can be added to any family again later.","外觀設定":"Appearance Settings","主題配色（漸層）":"Theme Colors (Gradient)","顏色 1":"Color 1","顏色 2":"Color 2","拖曳色票選擇兩種顏色，即時預覽漸層效果":"Choose two colors to preview the gradient in real time.","套用自訂漸層":"Apply Custom Gradient","背景圖片":"Background Image","尚未設定背景圖片":"No background image","移除背景":"Clear Background","透明度：":"Opacity:","顯示方式":"Fit Mode","填滿（裁切超出部分）":"Cover (crop overflow)","完整顯示（可能留白）":"Contain (may leave empty space)","重複排列":"Tile","頭像畫質":"Portrait Quality","模擬市民頭像":"Sim Portraits","節省空間（160px）":"Compact (160px)","平衡（256px · 預設）":"Balanced (256px · Default)","高畫質（384px）":"HD (384px)","相簿圖片畫質":"Gallery Image Quality","壓縮品質":"Compression Preset","小型圖片（512px · 約 20–30KB/張）":"Small (512px · about 20–30KB/image)","中型圖片（720px · 約 40–60KB/張 · 預設）":"Medium (720px · about 40–60KB/image · Default)","大型圖片（1080px · 約 80–120KB/張）":"Large (1080px · about 80–120KB/image)","高畫質（1440px · 約 150–250KB/張）":"HD (1440px · about 150–250KB/image)","原始圖片（不壓縮 · 不限大小）":"Original (no compression · no size limit)","儲存空間使用量":"Storage Usage","計算中…":"Calculating…","清理未使用的圖片":"Clean Unused Images","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"Images are stored in the browser’s IndexedDB while localStorage keeps only references. JSON export converts them back to base64 for compatibility with older versions.","使用提示":"Help & Tips","— 快速上手與快捷鍵":"— Quick Start & Shortcuts","畫布操作":"Canvas Controls","拖曳空白處":"Drag empty space","平移整個族譜視圖":"Pan the family tree","滾輪":"Mouse wheel","以滑鼠位置為中心縮放":"Zoom around the pointer","雙擊空白處":"Double-click empty space","自動適應螢幕":"Fit to screen","拖曳卡片":"Drag a card","自動切換為「自由排列」並儲存新位置":"Automatically switches to Free Layout and saves the new position","側邊欄":"Sidebar","：檢視所有模擬市民的相簿圖片":": browse gallery images from all Sims","頂端支援按":"Search by","標題 / 模擬市民名稱 / 備註":"title / Sim name / notes","搜尋，按":"and filter by","模擬市民篩選":"Sim","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"Each card shows the source Sim and title; click to open the image viewer.","檢視器中":"In the viewer, use","跨模擬市民":"across Sims","瀏覽，":"to browse,","不包含頭像 / 寵物頭像 / 背景圖":"Portraits, pet portraits, and background images are excluded.","模擬市民相簿":"Sim Gallery","編輯模擬市民 →":"Edit Sim →","：為模擬市民新增多張圖片":": add multiple images to a Sim","每張圖片可設定：":"Each image can include:","標題 / 關聯階段 / 備註":"title / linked life stage / notes","支援":"Supports","拖曳圖片檔案":"dragging image files","到相簿網格，或按":"into the gallery grid, or press","貼上截圖":"to paste a screenshot","圖片儲存":"Image Storage","圖片儲存在瀏覽器":"Images are stored in the browser’s","中，容量是 localStorage 的":"with much more capacity than localStorage","10 倍以上":"(10× or more)","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"On first launch, legacy base64 images are migrated to IndexedDB automatically.","匯出 JSON":"Exporting JSON","時仍會轉回 base64，與舊版工具完全互通":"converts images back to base64 for full backward compatibility.","可在外觀設定中檢視":"Appearance Settings shows","，並一鍵":"and lets you","⌨ 快捷鍵":"⌨ Shortcuts","關閉目前彈出視窗":"Close the current dialog","圖片檢視器中切換上一張 / 下一張":"Previous / next image in the viewer","圖片編輯視窗內貼上剪貼簿圖片":"Paste a clipboard image in the photo editor","在編輯彈出視窗中快速儲存":"Quick-save in an editor dialog","知道了":"Got it","選單":"Menu","家族名稱":"Family Name","搜尋姓名 / 職業 / 居住地…":"Search name / career / residence…","匯入 JSON 備份":"Import JSON Backup","匯出 JSON 備份":"Export JSON Backup","如：莫蒂默·高斯":"e.g. Mortimer Goth","如：衰老 / 溺水 / 火災…":"e.g. old age / drowning / fire…","作家 / 學生 / 無":"Writer / Student / None","如：柳溪 - 花園社區":"e.g. Willow Creek - Garden District","如：暢銷作家 / 靈魂伴侶…":"e.g. Bestselling Author / Soulmate…","搜尋家族…":"Search families…","搜尋姓名…":"Search names…","有創造力, 熱愛戶外, 物質主義":"Creative, Loves Outdoors, Materialistic","人物小傳、結局、備註…":"Biography, ending, notes…","關係，如 好友":"Relationship, e.g. Friend","如：旺財 / 咪咪":"e.g. Mochi / Luna","如：金毛、波斯貓…":"e.g. Golden Retriever, Persian…","如：幼兒期 / 婚禮合影 / 全家福":"e.g. Toddler years / wedding / family portrait","可選：拍攝場景、備註、想記錄的故事…":"Optional: scene, notes, or the story you want to remember…","關閉 (Esc)":"Close (Esc)","上一張 (←)":"Previous (←)","下一張 (→)":"Next (→)","搜尋標題 / 模擬市民名稱 / 備註…":"Search title / Sim / notes…","搜尋姓名 / 特徵 / 職業…":"Search name / traits / career…","搜尋…":"Search…","目前":"Current","職業":"Career","關係":"Relationships","尚無關係連線":"No relationship links","尚未新增寵物":"No pets","沒有符合的項目":"No matches","所有模擬市民都已在目前家族中":"All Sims are already in the current family","目前家族還沒有成員":"The current family has no members","（未命名）":"(Unnamed)","（預設）":"(Default)","—（無 / 未知）":"— (None / Unknown)","（未歸屬）":"(Unassigned)","僅屬於本家族":"Only in this family","關聯":"Relationship","（已刪除）":"(Deleted)","刪除":"Delete","尚未新增相簿圖片":"No gallery images yet","沒有符合的圖片":"No matching images","新家族":"New Family","家族名稱：":"Family name:","至少需要保留一個家族。":"At least one family must remain.","確定刪除目前家族嗎？\n人物本身不會被刪除。":"Delete the current family?\nThe Sims themselves will not be deleted.","請輸入家族名稱。":"Please enter a family name.","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"Delete this Sim? Related relationships will also be removed.","目前家族還沒有成員，無需移除。":"The current family has no members to remove.","匯入失敗：":"Import failed:","清理完成":"Cleanup complete","目前沒有可清理的圖片":"There are no unused images to clean up.","刪除失敗":"Delete failed","IndexedDB 不可用":"IndexedDB is unavailable","IndexedDB 被阻塞":"IndexedDB is blocked","儲存圖片失敗":"Failed to save image","蜜桃烏龍":"Peach Oolong","橘子汽水":"Orange Soda","蔓越莓氣泡":"Cranberry Fizz","青檸茉莉":"Lime Jasmine","愛上雷神":"Thunder","午夜藍調":"Midnight Blue","節省空間":"Compact","平衡":"Balanced","高畫質":"Ultra HD","小型圖片":"Small","中型圖片":"Medium","大型圖片":"Large","原始圖片":"Original","不壓縮 · 保留原始格式與畫質":"No compression · keep original format and quality","配偶":"Spouse","訂婚":"Engaged","伴侶":"Partner","情人":"Lover","離婚":"Divorced","喪偶":"Widowed","子女":"Child","兄弟姐妹":"Siblings","兄妹":"Sibling","摯友":"Best Friend","朋友":"Friend","仇敵":"Rival","師承":"Mentor","自訂":"Custom","編輯模擬市民彈出視窗":"Edit Sim Dialog","寵物編輯彈出視窗":"Pet Editor Dialog","相簿圖片編輯彈出視窗":"Gallery Photo Editor Dialog","資訊卡彈出視窗":"Sim Info Dialog","提示面板":"Help Panel","語言 / Language":"Language","160px · 約 8–12KB/張":"160px · about 8–12KB/image","256px · 約 15–25KB/張":"256px · about 15–25KB/image","384px · 約 30–50KB/張":"384px · about 30–50KB/image","512px · 約 20–30KB/張":"512px · about 20–30KB/image","720px · 約 40–60KB/張":"720px · about 40–60KB/image","1080px · 約 80–120KB/張":"1080px · about 80–120KB/image","1440px · 約 150–250KB/張":"1440px · about 150–250KB/image","岡瑟·高斯":"Gunther Goth","柳溪 - 歐菲莉亞別墅":"Willow Creek - Ophelia Villa","財富創造者":"Fabulously Wealthy","衰老":"Old Age","雄心勃勃":"Ambitious","天才":"Genius","勢利":"Snob","商業":"Business","高斯家族創始人之一，已故。":"One of the founders of the Goth family. Deceased.","科妮莉亞·高斯":"Cornelia Goth","大家庭":"Big Happy Family","家庭觀念":"Family-Oriented","愛整潔":"Neat","美食家":"Foodie","無":"None","高斯家族女主人，已故。":"Matriarch of the Goth family. Deceased.","莫蒂默·高斯":"Mortimer Goth","暢銷作家":"Bestselling Author","午夜":"Midnight","黑貓":"Black Cat","有創造力":"Creative","浪漫":"Romantic","陰沈":"Gloomy","作家":"Writer","現任高斯家族族長。":"Current head of the Goth family.","貝拉·巴切勒":"Bella Bachelor","靈魂伴侶":"Soulmate","金毛":"Goldie","金毛尋回犬":"Golden Retriever","熱愛戶外":"Loves Outdoors","開朗":"Cheerful","愛調情":"Romantic","巴切勒家的女兒，嫁入高斯家。":"Daughter of the Bachelor family, married into the Goth family.","卡桑德拉·高斯":"Cassandra Goth","柳溪 - 花園社區":"Willow Creek - Garden District","卓越畫家":"Painter Extraordinaire","物質主義":"Materialistic","學生":"Student","莫蒂默和貝拉的女兒。":"Daughter of Mortimer and Bella.","亞歷山大·高斯":"Alexander Goth","電腦奇才":"Computer Whiz","莫蒂默和貝拉的兒子。":"Son of Mortimer and Bella.","高斯家族":"Goth Family","巴切勒家族":"Bachelor Family","節省空間（192px）":"Compact (192px)","平衡（384px · 預設）":"Balanced (384px · Default)","高畫質（768px）":"HD (768px)","192px · 約 10–16KB/張":"192px · about 10–16KB/image","768px · 約 70–130KB/張":"768px · about 70–130KB/image"};
+  const EN = {"模擬市民族譜工具":"The Sims 4 Genealogy Tool","全部階段":"All Life Stages","嬰兒":"Infant","幼兒":"Toddler","兒童":"Child","青少年":"Teen","青年":"Young Adult","成年":"Adult","老年":"Elder","幼年":"Young","匯入":"Import","匯出":"Export","外觀":"Appearance","提示":"Help","家族":"Family","新增家族":"New Family","刪除家族":"Delete Family","模擬市民":"Sims","新增模擬市民":"Add Sim","全部模擬市民":"All Sims","加入家族":"Add to Family","移出家族":"Remove from Family","相簿":"Gallery","相簿瀏覽器":"Gallery Browser","視圖與佈局":"View & Layout","檢視模式":"View Mode","自動佈局":"Auto Layout","未鎖定":"Unlocked","↺ 重置位置":"↺ Reset Positions","顯示標註":"Show Labels","隱藏標註":"Hide Labels","標註未鎖":"Labels Unlocked","標註已鎖":"Labels Locked","電腦版":"Desktop","編輯模擬市民":"Edit Sim","每條連線可擁有獨立的關係；標註在畫布上可拖曳，避免遮擋卡片。":"Each connection can have its own relationship label. Drag labels on the canvas to keep them clear of cards.","模擬市民頭像":"Sim Portrait","選擇圖片":"Choose Image","清除頭像":"Clear Portrait","支援 JPG / PNG / GIF":"Supports JPG / PNG / GIF","姓名":"Name","人生階段":"Life Stage","性別":"Gender","男":"Male","女":"Female","其他":"Other","狀態":"Status","在世":"Alive","幽靈":"Ghost","已故":"Deceased","種族":"Occult Type","（不顯示）":"(Hidden)","(不顯示)":"(Hidden)","人類":"Human","吸血鬼":"Vampire","外星人":"Alien","狼人":"Werewolf","人魚":"Mermaid","魔法師":"Spellcaster","仙子":"Fairy","植物模擬市民":"PlantSim","機器人":"Robot","領養關係":"Adoption","親生":"Biological","領養":"Adopted","死因":"Cause of Death","職業 / 備註":"Career / Notes","居住地":"Residence","人生抱負":"Aspiration","所屬家族":"Families","父母 A（血緣）":"Parent A (Biological)","父母 B（可選）":"Parent B (Optional)","現任配偶":"Current Spouse","前任配偶":"Former Spouse","子女（血緣 / 收養）":"Children (Biological / Adopted)","勾選後自動加入對方父母清單":"Selected Sims are automatically updated with this Sim as a parent.","兄弟姐妹（血緣 / 收養）":"Siblings (Biological / Adopted)","勾選後建立「兄弟姐妹」關聯":"Selecting creates a sibling relationship.","特徵（逗號分隔）":"Traits (comma-separated)","簡介":"Biography","寵物":"Pets","（該模擬市民擁有的寵物）":"(Pets owned by this Sim)","新增寵物":"Add Pet","（多張圖片 / 不同階段 / 合影）":"(Multiple photos / life stages / group photos)","新增圖片":"Add Photo","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"Drag images here, or press Ctrl+V in the editor to paste a screenshot.","關係":"Relationship Labels","（每條連線獨立設定）":"(Configured per connection)","新增其他關係（好友 / 仇敵 / 師承…）":"Add Other Relationship (Friend / Rival / Mentor…)","新增":"Add","刪除模擬市民":"Delete Sim","取消":"Cancel","儲存":"Save","編輯寵物":"Edit Pet","寵物頭像":"Pet Portrait","名字":"Name","種類":"Species","狗":"Dog","貓":"Cat","馬":"Horse","兔子":"Rabbit","鳥":"Bird","倉鼠":"Hamster","魚":"Fish","蜥蜴":"Lizard","品種":"Breed","年齡階段":"Age Stage","刪除寵物":"Delete Pet","編輯圖片":"Edit Photo","圖片":"Image","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"Click to choose · drag and drop · or paste with Ctrl+V","清除圖片":"Clear Image","標題":"Title","關聯階段（可選）":"Linked Life Stage (Optional)","（不指定）":"(Not specified)","備註":"Notes","刪除圖片":"Delete Photo","圖片檢視器":"Image Viewer","清除篩選":"Clear Filter","關閉":"Close","編輯":"Edit","新增已有模擬市民":"Add Existing Sim","新增模擬市民到":"Add Sims to","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"Select Sims and choose “Add to Family” to include them in the current family tree.","全選":"Select All","清空":"Clear","已選":"Selected","人":"Sim(s)","從家族移除":"Remove from Family","從":"Remove from","移除":"Remove","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"They remain in the global Sim pool and can be added to any family again later.","外觀設定":"Appearance Settings","主題配色（漸層）":"Theme Colors (Gradient)","顏色 1":"Color 1","顏色 2":"Color 2","拖曳色票選擇兩種顏色，即時預覽漸層效果":"Choose two colors to preview the gradient in real time.","套用自訂漸層":"Apply Custom Gradient","背景圖片":"Background Image","尚未設定背景圖片":"No background image","移除背景":"Clear Background","透明度：":"Opacity:","顯示方式":"Fit Mode","填滿（裁切超出部分）":"Cover (crop overflow)","完整顯示（可能留白）":"Contain (may leave empty space)","重複排列":"Tile","頭像畫質":"Portrait Quality","模擬市民頭像":"Sim Portraits","節省空間（160px）":"Compact (160px)","平衡（256px · 預設）":"Balanced (256px · Default)","高畫質（384px）":"HD (384px)","相簿圖片畫質":"Gallery Image Quality","壓縮品質":"Compression Preset","小型圖片（512px · 約 20–30KB/張）":"Small (512px · about 20–30KB/image)","中型圖片（720px · 約 40–60KB/張 · 預設）":"Medium (720px · about 40–60KB/image · Default)","大型圖片（1080px · 約 80–120KB/張）":"Large (1080px · about 80–120KB/image)","高畫質（1440px · 約 150–250KB/張）":"HD (1440px · about 150–250KB/image)","原始圖片（不壓縮 · 不限大小）":"Original (no compression · no size limit)","儲存空間使用量":"Storage Usage","計算中…":"Calculating…","清理未使用的圖片":"Clean Unused Images","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"Images are stored in the browser’s IndexedDB while localStorage keeps only references. JSON export converts them back to base64 for compatibility with older versions.","使用提示":"Help & Tips","— 快速上手與快捷鍵":"— Quick Start & Shortcuts","畫布操作":"Canvas Controls","拖曳空白處":"Drag empty space","平移整個族譜視圖":"Pan the family tree","滾輪":"Mouse wheel","以滑鼠位置為中心縮放":"Zoom around the pointer","雙擊空白處":"Double-click empty space","自動適應螢幕":"Fit to screen","拖曳卡片":"Drag a card","自動切換為「自由排列」並儲存新位置":"Automatically switches to Free Layout and saves the new position","側邊欄":"Sidebar","：檢視所有模擬市民的相簿圖片":": browse gallery images from all Sims","頂端支援按":"Search by","標題 / 模擬市民名稱 / 備註":"title / Sim name / notes","搜尋，按":"and filter by","模擬市民篩選":"Sim","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"Each card shows the source Sim and title; click to open the image viewer.","檢視器中":"In the viewer, use","跨模擬市民":"across Sims","瀏覽，":"to browse,","不包含頭像 / 寵物頭像 / 背景圖":"Portraits, pet portraits, and background images are excluded.","模擬市民相簿":"Sim Gallery","編輯模擬市民 →":"Edit Sim →","：為模擬市民新增多張圖片":": add multiple images to a Sim","每張圖片可設定：":"Each image can include:","標題 / 關聯階段 / 備註":"title / linked life stage / notes","支援":"Supports","拖曳圖片檔案":"dragging image files","到相簿網格，或按":"into the gallery grid, or press","貼上截圖":"to paste a screenshot","圖片儲存":"Image Storage","圖片儲存在瀏覽器":"Images are stored in the browser’s","中，容量是 localStorage 的":"with much more capacity than localStorage","10 倍以上":"(10× or more)","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"On first launch, legacy base64 images are migrated to IndexedDB automatically.","匯出 JSON":"Exporting JSON","時仍會轉回 base64，與舊版工具完全互通":"converts images back to base64 for full backward compatibility.","可在外觀設定中檢視":"Appearance Settings shows","，並一鍵":"and lets you","⌨ 快捷鍵":"⌨ Shortcuts","關閉目前彈出視窗":"Close the current dialog","圖片檢視器中切換上一張 / 下一張":"Previous / next image in the viewer","圖片編輯視窗內貼上剪貼簿圖片":"Paste a clipboard image in the photo editor","在編輯彈出視窗中快速儲存":"Quick-save in an editor dialog","知道了":"Got it","選單":"Menu","家族名稱":"Family Name","搜尋姓名 / 職業 / 居住地…":"Search name / career / residence…","匯入 JSON 備份":"Import JSON Backup","匯出 JSON 備份":"Export JSON Backup","如：莫蒂默·高斯":"e.g. Mortimer Goth","如：衰老 / 溺水 / 火災…":"e.g. old age / drowning / fire…","作家 / 學生 / 無":"Writer / Student / None","如：柳溪 - 花園社區":"e.g. Willow Creek - Garden District","如：暢銷作家 / 靈魂伴侶…":"e.g. Bestselling Author / Soulmate…","搜尋家族…":"Search families…","搜尋姓名…":"Search names…","有創造力, 熱愛戶外, 物質主義":"Creative, Loves Outdoors, Materialistic","人物小傳、結局、備註…":"Biography, ending, notes…","關係，如 好友":"Relationship, e.g. Friend","如：旺財 / 咪咪":"e.g. Mochi / Luna","如：金毛、波斯貓…":"e.g. Golden Retriever, Persian…","如：幼兒期 / 婚禮合影 / 全家福":"e.g. Toddler years / wedding / family portrait","可選：拍攝場景、備註、想記錄的故事…":"Optional: scene, notes, or the story you want to remember…","關閉 (Esc)":"Close (Esc)","上一張 (←)":"Previous (←)","下一張 (→)":"Next (→)","搜尋標題 / 模擬市民名稱 / 備註…":"Search title / Sim / notes…","搜尋姓名 / 特徵 / 職業…":"Search name / traits / career…","搜尋…":"Search…","目前":"Current","職業":"Career","關係":"Relationships","尚無關係連線":"No relationship links","尚未新增寵物":"No pets","沒有符合的項目":"No matches","所有模擬市民都已在目前家族中":"All Sims are already in the current family","目前家族還沒有成員":"The current family has no members","（未命名）":"(Unnamed)","（預設）":"(Default)","—（無 / 未知）":"— (None / Unknown)","（未歸屬）":"(Unassigned)","僅屬於本家族":"Only in this family","關聯":"Relationship","（已刪除）":"(Deleted)","刪除":"Delete","尚未新增相簿圖片":"No gallery images yet","沒有符合的圖片":"No matching images","新家族":"New Family","家族名稱：":"Family name:","至少需要保留一個家族。":"At least one family must remain.","確定刪除目前家族嗎？\n人物本身不會被刪除。":"Delete the current family?\nThe Sims themselves will not be deleted.","請輸入家族名稱。":"Please enter a family name.","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"Delete this Sim? Related relationships will also be removed.","目前家族還沒有成員，無需移除。":"The current family has no members to remove.","匯入失敗：":"Import failed:","清理完成":"Cleanup complete","目前沒有可清理的圖片":"There are no unused images to clean up.","刪除失敗":"Delete failed","IndexedDB 不可用":"IndexedDB is unavailable","IndexedDB 被阻塞":"IndexedDB is blocked","儲存圖片失敗":"Failed to save image","蜜桃烏龍":"Peach Oolong","橘子汽水":"Orange Soda","蔓越莓氣泡":"Cranberry Fizz","青檸茉莉":"Lime Jasmine","愛上雷神":"Thunder","午夜藍調":"Midnight Blue","節省空間":"Compact","平衡":"Balanced","高畫質":"Ultra HD","小型圖片":"Small","中型圖片":"Medium","大型圖片":"Large","原始圖片":"Original","不壓縮 · 保留原始格式與畫質":"No compression · keep original format and quality","配偶":"Spouse","訂婚":"Engaged","伴侶":"Partner","情人":"Lover","離婚":"Divorced","喪偶":"Widowed","子女":"Child","兄弟姐妹":"Siblings","兄妹":"Sibling","摯友":"Best Friend","朋友":"Friend","仇敵":"Rival","師承":"Mentor","自訂":"Custom","編輯模擬市民彈出視窗":"Edit Sim Dialog","寵物編輯彈出視窗":"Pet Editor Dialog","相簿圖片編輯彈出視窗":"Gallery Photo Editor Dialog","資訊卡彈出視窗":"Sim Info Dialog","提示面板":"Help Panel","語言 / Language":"Language","160px · 約 8–12KB/張":"160px · about 8–12KB/image","256px · 約 15–25KB/張":"256px · about 15–25KB/image","384px · 約 30–50KB/張":"384px · about 30–50KB/image","512px · 約 20–30KB/張":"512px · about 20–30KB/image","720px · 約 40–60KB/張":"720px · about 40–60KB/image","1080px · 約 80–120KB/張":"1080px · about 80–120KB/image","1440px · 約 150–250KB/張":"1440px · about 150–250KB/image","岡瑟·高斯":"Gunther Goth","柳溪 - 歐菲莉亞別墅":"Willow Creek - Ophelia Villa","財富創造者":"Fabulously Wealthy","衰老":"Old Age","雄心勃勃":"Ambitious","天才":"Genius","勢利":"Snob","商業":"Business","高斯家族創始人之一，已故。":"One of the founders of the Goth family. Deceased.","科妮莉亞·高斯":"Cornelia Goth","大家庭":"Big Happy Family","家庭觀念":"Family-Oriented","愛整潔":"Neat","美食家":"Foodie","無":"None","高斯家族女主人，已故。":"Matriarch of the Goth family. Deceased.","莫蒂默·高斯":"Mortimer Goth","暢銷作家":"Bestselling Author","午夜":"Midnight","黑貓":"Black Cat","有創造力":"Creative","浪漫":"Romantic","陰沈":"Gloomy","作家":"Writer","現任高斯家族族長。":"Current head of the Goth family.","貝拉·巴切勒":"Bella Bachelor","靈魂伴侶":"Soulmate","金毛":"Goldie","金毛尋回犬":"Golden Retriever","熱愛戶外":"Loves Outdoors","開朗":"Cheerful","愛調情":"Romantic","巴切勒家的女兒，嫁入高斯家。":"Daughter of the Bachelor family, married into the Goth family.","卡桑德拉·高斯":"Cassandra Goth","柳溪 - 花園社區":"Willow Creek - Garden District","卓越畫家":"Painter Extraordinaire","物質主義":"Materialistic","學生":"Student","莫蒂默和貝拉的女兒。":"Daughter of Mortimer and Bella.","亞歷山大·高斯":"Alexander Goth","電腦奇才":"Computer Whiz","莫蒂默和貝拉的兒子。":"Son of Mortimer and Bella.","高斯家族":"Goth Family","巴切勒家族":"Bachelor Family","節省空間（192px）":"Compact (192px)","平衡（384px · 預設）":"Balanced (384px · Default)","高畫質（768px）":"HD (768px)","192px · 約 10–16KB/張":"192px · about 10–16KB/image","768px · 約 70–130KB/張":"768px · about 70–130KB/image"};
+  Object.assign(EN, {
+    '顯示關係':'Show Relationships',
+    '隱藏關係':'Hide Relationships',
+    '鎖定關係':'Lock Relationships',
+    '解鎖關係':'Unlock Relationships',
+    '重設關係位置':'Reset Relationship Position',
+    '每條連線可擁有獨立的關係；關係名稱可在畫布上拖曳，避免遮擋卡片。':'Each connection can have its own relationship. Drag relationship labels on the canvas to keep them clear of cards.',
+    'L1nG 晴空':'L1nG Clear Sky',
+    '森霧鼠尾草':'Sage Mist',
+    '莓果薄暮':'Berry Dusk',
+    '琥珀紙頁':'Amber Paper',
+    '午夜靛藍':'Midnight Indigo',
+    '重設':'Reset',
+    '重設介面設定':'Reset Interface Settings',
+    '重建範例資料':'Rebuild Sample Data',
+    '「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。':'Reset Interface Settings keeps your genealogy data. Rebuild Sample Data replaces the current data with the default Traditional Chinese sample.',
+    '介面設定已恢復預設。':'Interface settings restored to defaults.',
+    '已重建繁中範例資料。':'Traditional Chinese sample data rebuilt.',
+    '請確認':'Confirm',
+    '輸入資料':'Enter Information',
+    '重設卡片位置':'Reset Card Positions',
+    '重設位置':'Reset Positions',
+    '永久刪除模擬市民':'Permanently Delete Sim',
+    '永久刪除':'Permanently Delete',
+    '無法刪除家族':'Cannot Delete Family',
+    '資料未完成':'Incomplete Information',
+    '父母':'Parents',
+    '前任配偶':'Former Spouse',
+    '暫無更多資訊':'No additional information',
+    '自由排列':'Free Layout',
+    '已鎖定':'Locked',
+    '未鎖定':'Unlocked',
+    '關係':'Relationships',
+    '恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？':'Restore theme, background, sidebar width, view mode, and image-quality settings?',
+    '族譜人物、關係與卡片位置不會被刪除。':'Genealogy Sims, relationships, and card positions will not be deleted.',
+    '這會刪除目前族譜資料，並重新建立繁體中文的預設範例。':'This will delete the current genealogy data and rebuild the default Traditional Chinese sample.',
+    '此操作無法復原，建議先匯出 JSON 備份。':'This cannot be undone. Export a JSON backup first if you want to keep the current data.',
+    '儲存空間不足':'Storage Full',
+    '儲存失敗':'Save Failed',
+    '背景圖片設定儲存失敗。':'Failed to save the background-image settings.',
+    '圖片處理失敗':'Image Processing Failed',
+    '背景處理失敗':'Background Processing Failed',
+    '移除背景圖片':'Remove Background Image',
+    '確定清除目前背景圖片嗎？':'Remove the current background image?',
+    '移除背景':'Remove Background',
+    '清理未使用圖片':'Clean Up Unused Images',
+    '將掃描所有未被引用的圖片並刪除。確定繼續嗎？':'Scan for all unreferenced images and delete them?',
+    '開始清理':'Start Cleanup',
+    '刪除圖片':'Delete Image',
+    '尚未選擇圖片':'No Image Selected',
+    '請先選擇一張圖片':'Choose an image first.',
+    '原始圖片容量提醒':'Original Image Size Warning',
+    '是否仍要儲存原始圖片？':'Save the original image anyway?',
+    'IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。':'IndexedDB has more capacity, but large images can still fill it quickly.',
+    '仍要儲存':'Save Anyway',
+    '刪除寵物':'Delete Pet',
+    '請填寫寵物名字':'Enter a pet name.',
+    '請填寫姓名':'Enter a name.',
+    '請至少選擇一個所屬家族':'Select at least one family.',
+    '沒有可移除的成員':'No Members to Remove',
+    '匯入失敗':'Import Failed',
+    '自訂文字（可選）':'Custom text (optional)',
+    '編輯寵物':'Edit Pet',
+    '新增寵物':'Add Pet',
+    '張圖片':'image(s)',
+    '暫無其他關係':'No other relationships',
+    '還沒有任何模擬市民':'No Sims yet',
+    '請選擇圖片檔案':'Choose an image file.',
+    '圖片載入失敗':'Image failed to load.',
+    '檔案讀取失敗':'File read failed.',
+    '目前瀏覽器 IndexedDB 不可用，圖片以 base64 存在 localStorage':'IndexedDB is unavailable in this browser. Images are stored as base64 in localStorage.',
+    '他們仍保留在模擬市民池中。':'They will remain in the global Sim pool.',
+    '世界之友':'Friend of the World',
+    '健美運動員':'Bodybuilder',
+    '兒童期':'Childhood',
+    '全家福':'Family Portrait',
+    '公敵':'Public Enemy',
+    '凍死':'Freezing',
+    '名人':'Celebrity',
+    '吸血鬼灼燒':'Vampire Sunlight',
+    '園藝大師':'Freelance Botanist',
+    '婚禮合影':'Wedding Photo',
+    '嬰兒期':'Infancy',
+    '尷尬死':'Embarrassment',
+    '平移整個族譜畫布':'Pan the family-tree canvas',
+    '幼兒期':'Toddler Years',
+    '度假照':'Vacation Photo',
+    '心臟病':'Cardiac Explosion',
+    '快捷鍵':'Shortcuts',
+    '情場達人':'Serial Romantic',
+    '憤怒死':'Anger',
+    '成年期':'Adulthood',
+    '拖曳調整側邊欄寬度；雙擊恢復預設寬度':'Drag to resize the sidebar; double-click to restore the default width',
+    '搜尋結果':'Search Results',
+    '暴曬':'Overheating',
+    '極限運動員':'Extreme Sports Enthusiast',
+    '模擬市民 4 族譜工具':'The Sims 4 Genealogy Tool',
+    '檢視與佈局':'View & Layout',
+    '河豚':'Pufferfish',
+    '派對王':'Party Animal',
+    '流星':'Meteorite',
+    '溺水':'Drowning',
+    '火災':'Fire',
+    '無所事事':'Fabulously Filthy',
+    '牛頭人花':'Cowplant',
+    '生日派對':'Birthday Party',
+    '生物博士':'Curator',
+    '畢業照':'Graduation Photo',
+    '確定':'Confirm',
+    '神秘死':'Mysterious Death',
+    '笑死':'Hysteria',
+    '美食大師':'Master Chef',
+    '羞憤死':'Mortification',
+    '老年期':'Elder Years',
+    '考古學家':'Archaeology Scholar',
+    '自然主義者':'Outdoor Enthusiast',
+    '蒸汽浴':'Steam',
+    '調整側邊欄寬度':'Resize sidebar',
+    '調酒大師':'Master Mixologist',
+    '豪宅大亨':'Mansion Baron',
+    '超級父母':'Super Parent',
+    '連環浪漫':'Serial Romantic',
+    '都市傳說':'Urban Legend',
+    '釣魚大師':'Angling Ace',
+    '電擊':'Electrocution',
+    '靈魂探索者':'Inner Peace',
+    '青年期':'Young Adulthood',
+    '音樂天才':'Musical Genius',
+    '飢餓':'Starvation',
+    '首席運動員':'Chief of Mischief',
+    '首領':'Leader of the Pack',
+    '點選選擇…':'Click to choose…',
+    '點選選擇家族（可多選）…':'Choose families (multiple allowed)…',
+    '點選選擇（可多選）…':'Choose options (multiple allowed)…',
+    '選擇目標…':'Choose a target…',
+    '還沒有任何相簿圖片。':'No gallery images yet.',
+    '開啟某個模擬市民的編輯彈出視窗 →「相簿」新增圖片後，會在這裡顯示。':'Open a Sim editor and add images under “Gallery” to display them here.'
+  });
 
   /* ========【簡中字元】 設定 - 繁中字元對應簡中字元 ======== */
   const HANT_HANS_CHAR_MAP = {"與":"与","業":"业","兩":"两","喪":"丧","個":"个","為":"为","義":"义","烏":"乌","樂":"乐","於":"于","亞":"亚","親":"亲","僅":"仅","從":"从","倉":"仓","們":"们","優":"优","會":"会","傳":"传","侶":"侣","側":"侧","儲":"储","兒":"儿","關":"关","養":"养","內":"内","岡":"冈","冊":"册","寫":"写","凍":"冻","擊":"击","創":"创","刪":"删","別":"别","動":"动","勢":"势","區":"区","單":"单","佔":"占","歷":"历","壓":"压","雙":"双","變":"变","號":"号","後":"后","嗎":"吗","啓":"启","員":"员","園":"园","圖":"图","場":"场","處":"处","備":"备","復":"复","頭":"头","嬰":"婴","學":"学","實":"实","寵":"宠","對":"对","尋":"寻","導":"导","將":"将","尷":"尴","層":"层","屬":"属","師":"师","帶":"带","並":"并","應":"应","開":"开","異":"异","張":"张","彈":"弹","歸":"归","當":"当","錄":"录","徹":"彻","徵":"征","態":"态","總":"总","憤":"愤","戶":"户","擴":"扩","掃":"扫","擬":"拟","擁":"拥","擇":"择","摯":"挚","擋":"挡","換":"换","據":"据","攝":"摄","敵":"敌","數":"数","無":"无","舊":"旧","時":"时","顯":"显","曬":"晒","暫":"暂","機":"机","條":"条","來":"来","極":"极","檸":"柠","標":"标","棧":"栈","欄":"栏","樹":"树","檔":"档","歐":"欧","畢":"毕","氣":"气","沈":"沉","沒":"没","潔":"洁","淺":"浅","瀏":"浏","漸":"渐","滾":"滚","滿":"满","靈":"灵","災":"灾","點":"点","燒":"烧","熱":"热","愛":"爱","狀":"状","獨":"独","貓":"猫","環":"环","現":"现","電":"电","畫":"画","暢":"畅","礎":"础","確":"确","禮":"礼","離":"离","種":"种","稱":"称","篩":"筛","簡":"简","類":"类","約":"约","級":"级","線":"线","組":"组","結":"结","統":"统","繼":"继","續":"续","緩":"缓","編":"编","緣":"缘","縮":"缩","網":"网","職":"职","聯":"联","髒":"脏","腦":"脑","藝":"艺","節":"节","藍":"蓝","雖":"虽","觀":"观","視":"视","覽":"览","觸":"触","計":"计","訂":"订","認":"认","讓":"让","議":"议","記":"记","設":"设","該":"该","語":"语","誤":"误","說":"说","請":"请","讀":"读","調":"调","譜":"谱","貝":"贝","負":"负","財":"财","敗":"败","質":"质","貼":"贴","轉":"转","輪":"轮","載":"载","較":"较","輯":"辑","輸":"输","邊":"边","達":"达","遷":"迁","運":"运","還":"还","這":"这","連":"连","適":"适","選":"选","釣":"钓","鈕":"钮","鋪":"铺","銷":"销","鎖":"锁","鍵":"键","長":"长","閉":"闭","間":"间","陰":"阴","階":"阶","隨":"随","隱":"隐","頂":"顶","項":"项","預":"预","領":"领","題":"题","顏":"颜","額":"额","風":"风","飢":"饥","餓":"饿","馬":"马","魚":"鱼","鳥":"鸟","齡":"龄","龍":"龙"};
@@ -4058,6 +4703,28 @@ They will remain in the global Sim pool.`;
     if ((m = canonical.match(/^清理完成：刪除了 (\d+) 張未使用圖片。$/))) return `Cleanup complete: deleted ${m[1]} unused image(s).`;
     if ((m = canonical.match(/^儲存空間使用量：(.+)$/))) return `Storage usage: ${m[1]}`;
     if ((m = canonical.match(/^匯入失敗：(.+)$/))) return `Import failed: ${m[1]}`;
+    if ((m = canonical.match(/^確定刪除家族「(.+)」嗎？$/))) return `Delete family “${m[1]}”?`;
+    if (canonical === '（家族內所有模擬市民仍保留在模擬市民池中）') return '(All Sims in this family will remain in the global Sim pool.)';
+    if ((m = canonical.match(/^確定徹底刪除「(.+)」嗎？$/))) return `Permanently delete “${m[1]}”?`;
+    if (canonical === '該操作會從所有家族中移除，並從模擬市民池永久刪除。') return 'This removes the Sim from every family and permanently deletes it from the global Sim pool.';
+    if (canonical === '（若只想從目前家族移除，請使用「移出家族」）') return '(To remove the Sim only from this family, use “Remove from Family”.)';
+    if ((m = canonical.match(/^請輸入新家族名稱。$/))) return 'Enter a name for the new family.';
+    if ((m = canonical.match(/^（(\d+) \/ (\d+) 張）$/))) return `(${m[1]} / ${m[2]} images)`;
+    if ((m = canonical.match(/^(\d+) 只寵物$/))) return `${m[1]} pet(s)`;
+    if ((m = canonical.match(/^原始圖片大小約 ([\d.]+) MB。$/))) return `Original image size: about ${m[1]} MB.`;
+    if ((m = canonical.match(/^確定刪除圖片「(.+)」嗎？$/))) return `Delete image “${m[1]}”?`;
+    if ((m = canonical.match(/^確定刪除寵物「(.+)」嗎？$/))) return `Delete pet “${m[1]}”?`;
+    if ((m = canonical.match(/^圖片處理失敗：(.+)$/))) return `Image processing failed: ${translatePatterns(m[1])}`;
+    if ((m = canonical.match(/^背景處理失敗：(.+)$/))) return `Background processing failed: ${translatePatterns(m[1])}`;
+    if ((m = canonical.match(/^清除「(.+)模式」下本家族的所有手動位置，恢復自動樹狀。確定嗎？$/))) return `Clear all manual positions for this family in ${translatePatterns(m[1])} mode and restore automatic tree layout?`;
+    if ((m = canonical.match(/^確定將以下 (\d+) 位從「(.+)」移除嗎？$/))) return `Remove the following ${m[1]} Sim(s) from “${m[2]}”?`;
+    if (canonical === '他們仍保留在模擬市民池中。') return 'They will remain in the global Sim pool.';
+    if (canonical === '查看') return 'View';
+    if (canonical === '編輯') return 'Edit';
+    // 由系統組合出的短片語（例如「成年 · 作家」）逐段翻譯，避免英文殘留繁中。
+    if (canonical.includes(' · ')) {
+      return canonical.split(' · ').map(part => EN[part] != null ? stripLegacyEmoji(EN[part]) : part).join(' · ');
+    }
     return canonical;
   }
 
@@ -4114,18 +4781,19 @@ They will remain in the global Sim pool.`;
     const sel = document.getElementById('languageSelect');
     if (sel) sel.value = lang;
     translateTree(document.body, false);
+    // 關係標籤寬度與內建範例資料都依顯示語言重新計算。
+    _textMeasureCache.clear();
+    if (db && db.families && db.families.length) {
+      refreshFamilyUI();
+      render();
+      if (searchInput && searchInput.value.trim()) renderTopbarSearchResults();
+    }
   }
 
   function translateDialogMessage(message) {
     return String(message).split('\n').map(line => translatePatterns(line)).join('\n');
   }
 
-  function installDialogLocalization() {
-    const nativeAlert = window.alert.bind(window);
-    const nativeConfirm = window.confirm.bind(window);
-    window.alert = msg => nativeAlert(translateDialogMessage(msg));
-    window.confirm = msg => nativeConfirm(translateDialogMessage(msg));
-  }
 
   function observe() {
     if (observer) observer.disconnect();
@@ -4157,7 +4825,6 @@ They will remain in the global Sim pool.`;
       sel.value = language;
       sel.addEventListener('change', () => setLanguage(sel.value));
     }
-    installDialogLocalization();
     translateTree(document.body, true);
     observe();
   }
