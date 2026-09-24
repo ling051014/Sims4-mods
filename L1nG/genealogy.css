@@ -732,21 +732,6 @@ body.sidebar-resizing * {
     /* 邊框設定 */ border: 1px solid var(--accent);
     /* 字體粗細 */ font-weight: 600;
 }
-.sidebar-footer {
-    /* 內縮空間 */ padding: 8px 16px;
-    /* 上方邊框 */ border-top: 1px solid var(--border);
-    /* 字體大小 */ font-size: 11px;
-    /* 文字顏色 */ color: var(--sub);
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: space-between;
-    /* 彈性收縮 */ flex-shrink: 0;
-}
-.sidebar-footer .ver {
-    /* 字體設定 */ font-family: ui-monospace,Consolas,monospace;
-    /* 文字顏色 */ color: var(--accent);
-    /* 字體粗細 */ font-weight: 600;
-}
 .main-area {
     /* 彈性配比 */ flex: 1;
     /* 顯示方式 */ display: flex;
@@ -1091,6 +1076,7 @@ body.sidebar-resizing * {
 
 /* ========【介面圖示】 設定 - 共用 SVG Icon 顯示規則 ======== */
 .l1ng-icon {
+    /* 預設遮罩 */ --l1ng-icon: linear-gradient(transparent, transparent);
     /* 顯示方式 */ display: inline-block;
     /* 元素寬度 */ width: 1em;
     /* 元素高度 */ height: 1em;
@@ -3359,14 +3345,18 @@ body {
     /* 右側邊框 */ border-right: 1px solid #eee;
 }
 .sidebar-group-title {
-    /* 字體大小 */ font-size: 9px;
-    /* 字體粗細 */ font-weight: 500;
-    /* 文字顏色 */ color: #bbb;
-    /* 字距設定 */ letter-spacing: 1.8px;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 文字顏色 */ color: #777;
+    /* 透明度 */ opacity: 1;
+    /* 字距設定 */ letter-spacing: 1.2px;
+    /* 上下內縮 */ padding-top: 5px;
+    /* 下方內縮 */ padding-bottom: 8px;
 }
 .sidebar-btn {
     /* 圓角弧度 */ border-radius: 4px;
-    /* 文字顏色 */ color: #777;
+    /* 文字顏色 */ color: #666;
+    /* 字體大小 */ font-size: 14px;
     /* 字距設定 */ letter-spacing: .2px;
 }
 .sidebar-btn:hover {
@@ -3381,15 +3371,6 @@ body {
     /* 文字顏色 */ color: #55acee;
     /* 邊框顏色 */ border-color: rgba(85,172,238,.45);
     /* 字體粗細 */ font-weight: 500;
-}
-.sidebar-footer {
-    /* 文字顏色 */ color: #bbb;
-    /* 上方邊框 */ border-top: 1px solid #eee;
-    /* 字距設定 */ letter-spacing: .8px;
-}
-.sidebar-footer .ver {
-    /* 文字顏色 */ color: #999;
-    /* 字體粗細 */ font-weight: 400;
 }
 #viewport {
     /* 背景顏色 */ background-color: #fafafa;
@@ -3530,190 +3511,196 @@ body {
 
 /* ========【SVG 圖示資源】 設定 - 對應獨立 Bootstrap Icons SVG 檔案 ======== */
 .icon-activity {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/activity.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/activity.svg");
 }
 .icon-arrow-counterclockwise {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/arrow-counterclockwise.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/arrow-counterclockwise.svg");
+}
+.icon-arrows-move {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/arrows-move.svg");
 }
 .icon-asterisk {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/asterisk.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/asterisk.svg");
 }
 .icon-box-arrow-in-down {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/box-arrow-in-down.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/box-arrow-in-down.svg");
 }
 .icon-box-arrow-up {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/box-arrow-up.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/box-arrow-up.svg");
 }
 .icon-broadcast {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/broadcast.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/broadcast.svg");
 }
 .icon-bug {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/bug.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/bug.svg");
 }
 .icon-bullseye {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/bullseye.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/bullseye.svg");
 }
 .icon-check-circle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/check-circle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/check-circle.svg");
 }
 .icon-check-lg {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/check-lg.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/check-lg.svg");
 }
 .icon-circle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/circle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/circle.svg");
 }
 .icon-cloud-haze2 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/cloud-haze2.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/cloud-haze2.svg");
 }
 .icon-database {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/database.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/database.svg");
 }
 .icon-diagram-3 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/diagram-3.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/diagram-3.svg");
 }
 .icon-exclamation-triangle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/exclamation-triangle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/exclamation-triangle.svg");
 }
 .icon-eye {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/eye.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/eye.svg");
 }
 .icon-feather {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/feather.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/feather.svg");
 }
 .icon-file-earmark-text {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/file-earmark-text.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/file-earmark-text.svg");
 }
 .icon-flower1 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/flower1.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/flower1.svg");
 }
 .icon-flower2 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/flower2.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/flower2.svg");
 }
 .icon-gem {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gem.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/gem.svg");
 }
 .icon-gender-ambiguous {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gender-ambiguous.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/gender-ambiguous.svg");
 }
 .icon-gender-female {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gender-female.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/gender-female.svg");
 }
 .icon-gender-male {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/gender-male.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/gender-male.svg");
 }
 .icon-heart {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/heart.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/heart.svg");
 }
 .icon-heart-fill {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/heart-fill.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/heart-fill.svg");
 }
 .icon-heartbreak {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/heartbreak.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/heartbreak.svg");
 }
 .icon-hearts {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/hearts.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/hearts.svg");
 }
 .icon-house {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/house.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/house.svg");
 }
 .icon-house-heart {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/house-heart.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/house-heart.svg");
 }
 .icon-image {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/image.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/image.svg");
 }
 .icon-images {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/images.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/images.svg");
 }
 .icon-info-circle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/info-circle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/info-circle.svg");
 }
 .icon-keyboard {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/keyboard.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/keyboard.svg");
 }
 .icon-lightbulb {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/lightbulb.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/lightbulb.svg");
 }
 .icon-lightning {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/lightning.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/lightning.svg");
 }
 .icon-list {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/list.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/list.svg");
+}
+.icon-lock {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/lock.svg");
 }
 .icon-magic {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/magic.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/magic.svg");
 }
 .icon-moon {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/moon.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/moon.svg");
 }
 .icon-moon-stars {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/moon-stars.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/moon-stars.svg");
 }
 .icon-mortarboard {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/mortarboard.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/mortarboard.svg");
 }
 .icon-mouse {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/mouse.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/mouse.svg");
 }
 .icon-palette {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/palette.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/palette.svg");
 }
 .icon-pencil-square {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/pencil-square.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/pencil-square.svg");
 }
 .icon-people {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/people.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/people.svg");
 }
 .icon-person {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person.svg");
 }
 .icon-person-add {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-add.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person-add.svg");
 }
 .icon-person-check {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-check.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person-check.svg");
 }
 .icon-person-dash {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-dash.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person-dash.svg");
 }
 .icon-person-heart {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-heart.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person-heart.svg");
 }
 .icon-person-hearts {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-hearts.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person-hearts.svg");
 }
 .icon-person-plus {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-plus.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person-plus.svg");
 }
 .icon-person-vcard {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/person-vcard.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/person-vcard.svg");
 }
 .icon-plus-lg {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/plus-lg.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/plus-lg.svg");
 }
 .icon-robot {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/robot.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/robot.svg");
 }
 .icon-stars {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/stars.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/stars.svg");
 }
 .icon-tag {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/tag.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/tag.svg");
 }
 .icon-tags {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/tags.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/tags.svg");
 }
 .icon-trash3 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/trash3.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/trash3.svg");
 }
 .icon-unlock {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/unlock.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/unlock.svg");
 }
 .icon-water {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/water.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/water.svg");
 }
 .icon-x-lg {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../html icons/x-lg.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/x-lg.svg");
 }
 
 /* ========【族譜縮放】 設定 - 提升文字、線條與圖片清晰度 ======== */
