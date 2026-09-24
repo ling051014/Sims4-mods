@@ -821,6 +821,15 @@ body.sidebar-resizing * {
     /* 視覺濾鏡移除 */ filter: none;
 }
 
+.sidebar-btn.danger {
+    /* 文字顏色 */ color: #c44a3e;
+}
+
+.sidebar-btn.danger:hover {
+    /* 背景設定 */ background: rgba(200,60,40,.08);
+    /* 邊框顏色 */ border-color: rgba(200,60,40,.2);
+}
+
 .sidebar-btn.active,
 .sidebar-btn.lock-active {
     /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
