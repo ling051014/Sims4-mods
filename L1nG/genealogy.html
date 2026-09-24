@@ -16,31 +16,52 @@
                 <div class="topbar-brand" title="模擬市民 4 族譜工具">LING'S SIMS 4 GENEALOGY</div>
                 <div class="topbar-main">
                     <button class="menu-toggle" id="menuToggle" title="選單"><span class="l1ng-icon icon-list" aria-hidden="true"></span></button>
-                    <input class="brand-input" id="familyName" placeholder="家族名稱">
-                    <select class="family-select" id="familySelect"></select>
+                    <div class="family-name-editor" title="家族名稱">
+                        <span class="l1ng-icon icon-pencil family-name-icon" aria-hidden="true"></span>
+                        <input class="brand-input" id="familyName" placeholder="家族名稱" autocomplete="off">
+                    </div>
+                    <div class="nav-select nav-select-family" data-nav-select-for="familySelect">
+                        <select class="nav-native-select family-select" id="familySelect" tabindex="-1" aria-hidden="true"></select>
+                        <button class="nav-select-trigger" id="familySelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="nav-select-value"></span>
+                            <span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="nav-select-menu" role="listbox" aria-label="家族"></div>
+                    </div>
                     <div class="topbar-search-wrap">
                         <input class="topbar-search" id="search" placeholder="搜尋姓名 / 職業 / 居住地…" type="search" autocomplete="off">
                         <div class="topbar-search-results" id="searchResults" role="listbox" aria-label="搜尋結果"></div>
                     </div>
-                    <select class="topbar-select" id="stageFilter">
-                        <option value="">全部階段</option>
-                        <option>嬰兒</option>
-                        <option>幼兒</option>
-                        <option>兒童</option>
-                        <option>青少年</option>
-                        <option>青年</option>
-                        <option>成年</option>
-                        <option>老年</option>
-                    </select>
+                    <div class="nav-select nav-select-stage" data-nav-select-for="stageFilter">
+                        <select class="nav-native-select topbar-select" id="stageFilter" tabindex="-1" aria-hidden="true">
+                            <option value="">全部階段</option>
+                            <option value="嬰兒">嬰兒</option>
+                            <option value="幼兒">幼兒</option>
+                            <option value="兒童">兒童</option>
+                            <option value="青少年">青少年</option>
+                            <option value="青年">青年</option>
+                            <option value="成年">成年</option>
+                            <option value="老年">老年</option>
+                        </select>
+                        <button class="nav-select-trigger" id="stageFilterTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="nav-select-value"></span>
+                            <span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="nav-select-menu" role="listbox" aria-label="人生階段"></div>
+                    </div>
                     <span class="topbar-spacer"></span>
                     <div class="topbar-right">
-                        <div class="language-switch" title="語言 / Language">
-                            <span class="l1ng-icon icon-globe2 language-icon" aria-hidden="true"></span>
-                            <select aria-label="語言 / Language" class="topbar-select language-select" id="languageSelect">
+                        <div class="nav-select nav-select-language language-switch" data-nav-select-for="languageSelect" title="語言 / Language">
+                            <select aria-label="語言 / Language" class="nav-native-select language-select" id="languageSelect" tabindex="-1" aria-hidden="true">
                                 <option value="zh-Hant">繁中</option>
-                                <option value="zh-Hans">簡中</option>
+                                <option value="zh-Hans">简中</option>
                                 <option value="en">EN</option>
                             </select>
+                            <button class="nav-select-trigger language-trigger" id="languageSelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="l1ng-icon icon-globe2 language-icon" aria-hidden="true"></span>
+                                <span class="nav-select-value"></span>
+                            </button>
+                            <div class="nav-select-menu" role="listbox" aria-label="語言 / Language"></div>
                         </div>
                         <label class="icon-btn" title="匯入 JSON 備份">
                             <span class="l1ng-icon icon-box-arrow-in-down" aria-hidden="true"></span>
@@ -139,29 +160,29 @@
                     <label class="span-4">
                         人生階段
                         <select id="fStage">
-                            <option>嬰兒</option>
-                            <option>幼兒</option>
-                            <option>兒童</option>
-                            <option>青少年</option>
-                            <option>青年</option>
-                            <option>成年</option>
-                            <option>老年</option>
+                            <option value="嬰兒">嬰兒</option>
+                            <option value="幼兒">幼兒</option>
+                            <option value="兒童">兒童</option>
+                            <option value="青少年">青少年</option>
+                            <option value="青年">青年</option>
+                            <option value="成年">成年</option>
+                            <option value="老年">老年</option>
                         </select>
                     </label>
                     <label class="span-3">
                         性別
                         <select id="fGender">
-                            <option>男</option>
-                            <option>女</option>
-                            <option>其他</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                            <option value="其他">其他</option>
                         </select>
                     </label>
                     <label class="span-3">
                         狀態
                         <select id="fStatus">
-                            <option>在世</option>
-                            <option>幽靈</option>
-                            <option>已故</option>
+                            <option value="在世">在世</option>
+                            <option value="幽靈">幽靈</option>
+                            <option value="已故">已故</option>
                         </select>
                     </label>
                     <label class="span-3">
@@ -407,25 +428,25 @@
                     <label>
                         性別
                         <select id="pGender">
-                            <option>男</option>
-                            <option>女</option>
-                            <option>其他</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                            <option value="其他">其他</option>
                         </select>
                     </label>
                     <label>
                         年齡階段
                         <select id="pAgeStage">
-                            <option>幼年</option>
-                            <option>成年</option>
-                            <option>老年</option>
+                            <option value="幼年">幼年</option>
+                            <option value="成年">成年</option>
+                            <option value="老年">老年</option>
                         </select>
                     </label>
                     <label>
                         狀態
                         <select id="pStatus">
-                            <option>在世</option>
-                            <option>幽靈</option>
-                            <option>已故</option>
+                            <option value="在世">在世</option>
+                            <option value="幽靈">幽靈</option>
+                            <option value="已故">已故</option>
                         </select>
                     </label>
                 </div>
@@ -476,13 +497,13 @@
                         關聯階段（可選）
                         <select id="phStage">
                             <option value="">（不指定）</option>
-                            <option>嬰兒</option>
-                            <option>幼兒</option>
-                            <option>兒童</option>
-                            <option>青少年</option>
-                            <option>青年</option>
-                            <option>成年</option>
-                            <option>老年</option>
+                            <option value="嬰兒">嬰兒</option>
+                            <option value="幼兒">幼兒</option>
+                            <option value="兒童">兒童</option>
+                            <option value="青少年">青少年</option>
+                            <option value="青年">青年</option>
+                            <option value="成年">成年</option>
+                            <option value="老年">老年</option>
                         </select>
                     </label>
                     <label class="full">備註<textarea id="phNote" placeholder="可選：拍攝場景、備註、想記錄的故事…" rows="2"></textarea></label>
