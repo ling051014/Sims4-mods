@@ -830,25 +830,20 @@ body.sidebar-resizing * {
     /* 邊框顏色 */ border-color: rgba(200,60,40,.2);
 }
 
-.sidebar-btn.primary,
-.sidebar-btn.active {
-    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
-    /* 文字顏色 */ color: var(--accent);
-    /* 邊框設定 */ border: 1px solid var(--accent);
-    /* 字體粗細 */ font-weight: 600;
-}
-
-.sidebar-btn.primary:hover,
-.sidebar-btn.active:hover {
-    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
-    /* 視覺濾鏡 */ filter: brightness(1.04);
-}
-
+.sidebar-btn.active,
 .sidebar-btn.lock-active {
     /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
     /* 文字顏色 */ color: var(--accent);
     /* 邊框設定 */ border: 1px solid var(--accent);
     /* 字體粗細 */ font-weight: 600;
+}
+
+.sidebar-btn.active:hover,
+.sidebar-btn.lock-active:hover {
+    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
+    /* 文字顏色 */ color: var(--accent);
+    /* 邊框設定 */ border-color: var(--accent);
+    /* 視覺濾鏡 */ filter: brightness(1.04);
 }
 
 .main-area {
@@ -980,6 +975,63 @@ body.sidebar-resizing * {
     /* 左側位置 */ left: 0;
     /* 元素寬度 */ width: 100%;
     /* 元素高度 */ height: 1px;
+}
+
+/* ========【等距吸附提示】 設定 - 顯示兩段相等間距，不移動其他卡片 ======== */
+
+.smart-spacing {
+    /* 定位方式 */ position: absolute;
+    /* 預設顯示 */ display: none;
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 文字顏色 */ color: var(--accent);
+}
+
+.smart-spacing.show {
+    /* 顯示方式 */ display: block;
+}
+
+.smart-spacing-segment {
+    /* 定位方式 */ position: absolute;
+    /* 尺寸計算 */ box-sizing: border-box;
+}
+
+.smart-spacing-horizontal .smart-spacing-segment {
+    /* 元素高度 */ height: 6px;
+    /* 上方邊框 */ border-top: 1px solid var(--accent);
+    /* 左側邊框 */ border-left: 1px solid var(--accent);
+    /* 右側邊框 */ border-right: 1px solid var(--accent);
+}
+
+.smart-spacing-vertical .smart-spacing-segment {
+    /* 元素寬度 */ width: 6px;
+    /* 左側邊框 */ border-left: 1px solid var(--accent);
+    /* 上方邊框 */ border-top: 1px solid var(--accent);
+    /* 下方邊框 */ border-bottom: 1px solid var(--accent);
+}
+
+.smart-spacing-label {
+    /* 定位方式 */ position: absolute;
+    /* 最小寬度 */ min-width: 28px;
+    /* 內縮空間 */ padding: 2px 5px;
+    /* 背景顏色 */ background: var(--card);
+    /* 文字顏色 */ color: var(--accent);
+    /* 邊框樣式 */ border: 1px solid var(--accent);
+    /* 圓角設定 */ border-radius: 999px;
+    /* 字體大小 */ font-size: 10px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 行高設定 */ line-height: 1.2;
+    /* 文字對齊 */ text-align: center;
+    /* 保持單行 */ white-space: nowrap;
+    /* 尺寸計算 */ box-sizing: border-box;
+    /* 元素陰影 */ box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+.smart-spacing-horizontal .smart-spacing-label {
+    /* 水平位移 */ transform: translate(-50%, -100%);
+}
+
+.smart-spacing-vertical .smart-spacing-label {
+    /* 水平位移 */ transform: translate(0, -50%);
 }
 
 #labels.labels-locked .edge-label {
@@ -3790,21 +3842,6 @@ body[data-theme="ling"] .sidebar-btn {
     /* 字距設定 */ letter-spacing: .2px;
 }
 
-body[data-theme="ling"] .sidebar-btn:hover {
-    /* 背景設定 */ background: #fafafa;
-    /* 邊框顏色 */ border-color: #eee;
-    /* 文字顏色 */ color: #333;
-}
-
-body[data-theme="ling"] .sidebar-btn.primary,
-body[data-theme="ling"] .sidebar-btn.active,
-body[data-theme="ling"] .sidebar-btn.lock-active {
-    /* 背景設定 */ background: rgba(85,172,238,.06);
-    /* 文字顏色 */ color: #55acee;
-    /* 邊框顏色 */ border-color: rgba(85,172,238,.45);
-    /* 字體粗細 */ font-weight: 500;
-}
-
 body[data-theme="ling"] #viewport {
     /* 背景顏色 */ background-color: #fafafa;
     /* 背景圖片 */ background-image: radial-gradient(circle, rgba(0,0,0,.055) 1px, transparent 1px);
@@ -4292,18 +4329,6 @@ html[lang="en"] body {
         /* 最大寬度 */ max-width: none;
         /* 最小寬度 */ min-width: 80px;
     }
-}
-
-/* ========【導覽危險操作】 設定 - 保留刪除／移出家族的紅色語意 ======== */
-
-body[data-theme="ling"] .sidebar-btn.danger {
-    /* 文字顏色 */ color: #c44a3e;
-}
-
-body[data-theme="ling"] .sidebar-btn.danger:hover {
-    /* 背景設定 */ background: rgba(200,60,40,.08);
-    /* 邊框顏色 */ border-color: rgba(200,60,40,.2);
-    /* 文字顏色 */ color: #b63f35;
 }
 
 .family-select:hover,
@@ -4806,42 +4831,6 @@ body[data-theme="ling"] .sidebar-btn.danger:hover {
 
 /* ========【搜尋型下拉選單】 設定 - 所有主題維持可讀對比 ======== */
 
-/* ========【導覽按鈕互動】 設定 - 一般狀態維持灰階、危險操作維持紅色 ======== */
-
-.sidebar-btn.primary,
-.sidebar-btn.active,
-.sidebar-btn.lock-active,
-body[data-theme="ling"] .sidebar-btn.primary,
-body[data-theme="ling"] .sidebar-btn.active,
-body[data-theme="ling"] .sidebar-btn.lock-active {
-    /* 恢復原本主題淡色漸層 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
-    /* 選取文字使用主題 Accent */ color: var(--accent);
-    /* 選取邊框使用主題 Accent */ border-color: var(--accent);
-    /* 選取狀態字重 */ font-weight: 600;
-}
-
-.sidebar-btn.primary:hover,
-.sidebar-btn.active:hover,
-.sidebar-btn.lock-active:hover {
-    /* 懸停背景 */ background: var(--nav-button-hover-bg);
-    /* 懸停邊框 */ border-color: var(--nav-active-border);
-    /* 懸停文字 */ color: var(--nav-active-text);
-    /* 視覺濾鏡移除 */ filter: none;
-}
-
-.sidebar-btn.danger,
-body[data-theme="ling"] .sidebar-btn.danger {
-    /* 危險操作維持紅色文字 */ color: #c44a3e;
-}
-
-.sidebar-btn.danger:hover,
-body[data-theme="ling"] .sidebar-btn.danger:hover {
-    /* 危險操作維持淡紅背景 */ background: rgba(200,60,40,.08);
-    /* 危險操作維持紅色邊框 */ border-color: rgba(200,60,40,.22);
-    /* 危險操作維持紅色文字 */ color: #b63f35;
-    /* 危險操作不套用主題亮度濾鏡 */ filter: none;
-}
-
 .icon-btn:hover,
 .menu-toggle:hover {
     /* 懸停背景 */ background: var(--nav-button-hover-bg);
@@ -4916,20 +4905,6 @@ body[data-theme="ling"] .sidebar-btn.danger:hover {
 /* ========【語言切換】 設定 - 點擊範圍、尺寸與相鄰工具按鈕完全一致 ======== */
 
 /* ========【頂部下拉結果】 設定 - 對齊既有專案搜尋結果的白底、細框、圓角與分隔線邏輯 ======== */
-
-/* ========【側邊導覽狀態】 設定 - Dropdown 灰階不再污染 Sidebar Active ======== */
-
-.sidebar-btn.primary:hover,
-.sidebar-btn.active:hover,
-.sidebar-btn.lock-active:hover,
-body[data-theme="ling"] .sidebar-btn.primary:hover,
-body[data-theme="ling"] .sidebar-btn.active:hover,
-body[data-theme="ling"] .sidebar-btn.lock-active:hover {
-    /* Active Hover 仍保留原本主題淡色漸層 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
-    /* Active Hover 文字維持主題 Accent */ color: var(--accent);
-    /* Active Hover 邊框維持主題 Accent */ border-color: var(--accent);
-    /* 輕微亮度回饋 */ filter: brightness(1.04);
-}
 
 /* ========【共用下拉箭頭】 設定 - 編輯頁與導覽共用同一顆 chevron-down.svg ======== */
 
@@ -5114,4 +5089,213 @@ body:not([data-theme="midnight"]) select {
 
 body[data-theme="midnight"] .roster-badge.status-alive {
     /* 深色主題提高在世圖示亮度 */ color: #8fc59b;
+}
+
+/* ========【匯出面板】 設定 - 圖片匯出與 JSON 備份入口 ======== */
+.export-mask {
+    /* 定位 */ position: fixed;
+    /* 邊界 */ inset: 0;
+    /* 顯示層級 */ z-index: 1200;
+    /* 版面配置 */ display: none;
+    /* 對齊 */ align-items: center;
+    /* 對齊 */ justify-content: center;
+    /* 內距 */ padding: 24px;
+    /* 背景設定 */ background: rgba(0,0,0,.38);
+    /* 毛玻璃 */ backdrop-filter: blur(8px);
+}
+
+.export-mask.show {
+    /* 顯示 */ display: flex;
+}
+
+.export-modal {
+    /* 寬度 */ width: min(860px, 100%);
+    /* 最大高度 */ max-height: min(760px, calc(100vh - 48px));
+    /* 捲動 */ overflow: auto;
+    /* 背景設定 */ background: var(--card);
+    /* 圓角 */ border-radius: 24px;
+    /* 邊框 */ border: 1px solid var(--line);
+    /* 陰影 */ box-shadow: 0 32px 80px rgba(36, 32, 30, .22);
+}
+
+.export-header {
+    /* 版面配置 */ display: flex;
+    /* 對齊 */ align-items: flex-start;
+    /* 對齊 */ justify-content: space-between;
+    /* 間距 */ gap: 16px;
+    /* 內距 */ padding: 24px 24px 16px;
+    /* 邊框 */ border-bottom: 1px solid var(--line);
+}
+
+.export-title-group {
+    /* 版面配置 */ display: grid;
+    /* 間距 */ gap: 8px;
+}
+
+.export-title-group h2 {
+    /* 版面配置 */ display: inline-flex;
+    /* 對齊 */ align-items: center;
+    /* 間距 */ gap: 10px;
+    /* 外距 */ margin: 0;
+    /* 字級 */ font-size: 24px;
+}
+
+.export-title-group p {
+    /* 外距 */ margin: 0;
+    /* 顏色 */ color: var(--muted);
+    /* 行高 */ line-height: 1.7;
+}
+
+.export-close {
+    /* 寬度 */ width: 42px;
+    /* 高度 */ height: 42px;
+    /* 縮排 */ flex: 0 0 42px;
+    /* 外觀 */ appearance: none;
+    /* 邊框 */ border: 1px solid var(--line);
+    /* 圓角 */ border-radius: 14px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 顏色 */ color: var(--text);
+    /* 字級 */ font-size: 22px;
+    /* 字重 */ font-weight: 700;
+    /* 游標 */ cursor: pointer;
+    /* 動畫過渡 */ transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.export-close:hover,
+.export-close:focus-visible {
+    /* 背景設定 */ background: var(--panel-item-hover);
+    /* 邊框 */ border-color: var(--line-strong);
+    /* 位移 */ transform: translateY(-1px);
+}
+
+.export-grid {
+    /* 版面配置 */ display: grid;
+    /* 欄位 */ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    /* 間距 */ gap: 18px;
+    /* 內距 */ padding: 22px 24px 24px;
+}
+
+.export-section {
+    /* 版面配置 */ display: grid;
+    /* 間距 */ gap: 16px;
+    /* 內距 */ padding: 18px;
+    /* 背景設定 */ background: var(--panel-bg);
+    /* 圓角 */ border-radius: 20px;
+    /* 邊框 */ border: 1px solid var(--line);
+}
+
+.export-section-head {
+    /* 版面配置 */ display: grid;
+    /* 間距 */ gap: 8px;
+}
+
+.export-section-head h3 {
+    /* 版面配置 */ display: inline-flex;
+    /* 對齊 */ align-items: center;
+    /* 間距 */ gap: 10px;
+    /* 外距 */ margin: 0;
+    /* 字級 */ font-size: 18px;
+}
+
+.export-section-head p {
+    /* 外距 */ margin: 0;
+    /* 顏色 */ color: var(--muted);
+    /* 行高 */ line-height: 1.7;
+}
+
+.export-size-list {
+    /* 版面配置 */ display: grid;
+    /* 間距 */ gap: 12px;
+}
+
+.export-size-option {
+    /* 版面配置 */ display: block;
+    /* 游標 */ cursor: pointer;
+}
+
+.export-size-option input {
+    /* 隱藏 */ position: absolute;
+    /* 透明 */ opacity: 0;
+    /* 不接收 */ pointer-events: none;
+}
+
+.export-size-card {
+    /* 版面配置 */ display: grid;
+    /* 間距 */ gap: 6px;
+    /* 內距 */ padding: 14px 15px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 邊框 */ border: 1px solid var(--line);
+    /* 圓角 */ border-radius: 16px;
+    /* 動畫過渡 */ transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.export-size-option:hover .export-size-card,
+.export-size-option input:focus-visible + .export-size-card {
+    /* 背景設定 */ background: var(--panel-item-hover);
+    /* 邊框 */ border-color: var(--line-strong);
+    /* 位移 */ transform: translateY(-1px);
+}
+
+.export-size-option input:checked + .export-size-card {
+    /* 邊框 */ border-color: var(--accent);
+    /* 背景設定 */ background: color-mix(in srgb, var(--accent) 10%, var(--panel-item));
+    /* 陰影 */ box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.export-size-name {
+    /* 字重 */ font-weight: 700;
+    /* 顏色 */ color: var(--text);
+}
+
+.export-size-note {
+    /* 顏色 */ color: var(--muted);
+    /* 字級 */ font-size: 13px;
+    /* 行高 */ line-height: 1.6;
+}
+
+.export-json-note {
+    /* 版面配置 */ display: flex;
+    /* 對齊 */ align-items: flex-start;
+    /* 間距 */ gap: 10px;
+    /* 內距 */ padding: 14px 15px;
+    /* 背景設定 */ background: var(--panel-item);
+    /* 邊框 */ border: 1px solid var(--line);
+    /* 圓角 */ border-radius: 16px;
+    /* 顏色 */ color: var(--muted);
+    /* 行高 */ line-height: 1.7;
+}
+
+.export-actions {
+    /* 版面配置 */ display: flex;
+    /* 對齊 */ justify-content: flex-end;
+    /* 上邊框 */ padding-top: 4px;
+}
+
+.export-actions button {
+    /* 最小寬度 */ min-width: 180px;
+}
+
+@media (max-width: 780px) {
+    .export-grid {
+        /* 欄位 */ grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .export-mask {
+        /* 內距 */ padding: 14px;
+    }
+
+    .export-header {
+        /* 內距 */ padding: 18px 18px 14px;
+    }
+
+    .export-grid {
+        /* 內距 */ padding: 16px 18px 18px;
+    }
+
+    .export-actions button {
+        /* 寬度 */ width: 100%;
+        /* 最小寬度 */ min-width: 0;
+    }
 }
