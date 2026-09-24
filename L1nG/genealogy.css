@@ -3736,3 +3736,179 @@ body[data-theme="ling"] .storage-bar-fill {
 .pet-item-avatar img {
     /* 圖片繪製方式 */ image-rendering: auto;
 }
+
+/* ========【導覽精修】 設定 - 僅調整頂部導覽，不影響族譜編輯表單 ======== */
+.topbar-search-wrap {
+    /* 相對定位 */ position: relative;
+    /* 彈性配比 */ flex: 1;
+    /* 最大寬度 */ max-width: 240px;
+    /* 最小寬度 */ min-width: 120px;
+}
+.topbar-search-wrap .topbar-search {
+    /* 元素寬度 */ width: 100%;
+    /* 最大寬度 */ max-width: none;
+}
+.topbar-search-results {
+    /* 絕對定位 */ position: absolute;
+    /* 頂部位置 */ top: calc(100% + 7px);
+    /* 左側位置 */ left: 0;
+    /* 元素寬度 */ width: 100%;
+    /* 背景顏色 */ background: var(--card);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 元素陰影 */ box-shadow: 0 10px 24px rgba(0,0,0,.12);
+    /* 顯示層級 */ z-index: 600;
+    /* 最大高度 */ max-height: 280px;
+    /* 垂直溢出 */ overflow-y: auto;
+    /* 預設隱藏 */ display: none;
+    /* 內縮空間 */ padding: 4px 0;
+}
+.topbar-search-results.show {
+    /* 顯示方式 */ display: block;
+}
+.topbar-search-result {
+    /* 內縮空間 */ padding: 10px 14px;
+    /* 文字置中 */ text-align: center;
+    /* 文字顏色 */ color: var(--ink);
+    /* 字體大小 */ font-size: 12px;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 下方邊框 */ border-bottom: 1px solid var(--panel-bg);
+    /* 動畫過渡 */ transition: background-color .2s ease, color .2s ease;
+}
+.topbar-search-result:last-child {
+    /* 移除末項邊框 */ border-bottom: none;
+}
+.topbar-search-result:hover,
+.topbar-search-result:focus-visible {
+    /* 背景顏色 */ background: var(--panel-item-hover);
+    /* 文字顏色 */ color: var(--accent);
+    /* 移除外框 */ outline: none;
+}
+.topbar-search-result-name {
+    /* 區塊顯示 */ display: block;
+    /* 字體粗細 */ font-weight: 600;
+    /* 單行顯示 */ white-space: nowrap;
+    /* 隱藏溢出 */ overflow: hidden;
+    /* 尾端省略 */ text-overflow: ellipsis;
+}
+.topbar-search-result-meta {
+    /* 區塊顯示 */ display: block;
+    /* 上方間距 */ margin-top: 2px;
+    /* 字體大小 */ font-size: 11px;
+    /* 文字顏色 */ color: var(--sub);
+    /* 單行顯示 */ white-space: nowrap;
+    /* 隱藏溢出 */ overflow: hidden;
+    /* 尾端省略 */ text-overflow: ellipsis;
+}
+.topbar-search-empty {
+    /* 內縮空間 */ padding: 11px 14px;
+    /* 文字置中 */ text-align: center;
+    /* 字體大小 */ font-size: 12px;
+    /* 文字顏色 */ color: var(--sub);
+}
+
+/* ========【家族切換】 設定 - 固定欄位寬度與尾端省略 ======== */
+.family-select {
+    /* 固定寬度 */ width: 180px;
+    /* 最大寬度 */ max-width: 180px;
+    /* 最小寬度 */ min-width: 180px;
+    /* 單行顯示 */ white-space: nowrap;
+    /* 隱藏溢出 */ overflow: hidden;
+    /* 尾端省略 */ text-overflow: ellipsis;
+    /* 文字靠左 */ text-align: left;
+    /* 原生外觀 */ appearance: none;
+    /* WebKit 原生外觀 */ -webkit-appearance: none;
+    /* 右側內縮 */ padding-right: 34px;
+    /* 自訂箭頭 */ background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    /* 箭頭位置 */ background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+    /* 箭頭尺寸 */ background-size: 5px 5px, 5px 5px;
+    /* 背景不重複 */ background-repeat: no-repeat;
+}
+
+/* ========【階段篩選】 設定 - 固定欄位寬度與箭頭位置 ======== */
+#stageFilter {
+    /* 固定寬度 */ width: 116px;
+    /* 最小寬度 */ min-width: 116px;
+    /* 文字靠左 */ text-align: left;
+    /* 原生外觀 */ appearance: none;
+    /* WebKit 原生外觀 */ -webkit-appearance: none;
+    /* 右側內縮 */ padding-right: 32px;
+    /* 自訂箭頭 */ background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    /* 箭頭位置 */ background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+    /* 箭頭尺寸 */ background-size: 5px 5px, 5px 5px;
+    /* 背景不重複 */ background-repeat: no-repeat;
+}
+
+/* ========【語言切換】 設定 - 地球圖示、移除下拉箭頭並統一字級 ======== */
+.language-switch {
+    /* 相對定位 */ position: relative;
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 彈性收縮 */ flex-shrink: 0;
+}
+.language-icon {
+    /* 絕對定位 */ position: absolute;
+    /* 左側位置 */ left: 10px;
+    /* 頂部位置 */ top: 50%;
+    /* 垂直置中 */ transform: translateY(-50%);
+    /* 元素寬度 */ width: 15px;
+    /* 元素高度 */ height: 15px;
+    /* 文字顏色 */ color: var(--topbar-field-fg);
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 顯示層級 */ z-index: 2;
+}
+.language-select {
+    /* 固定寬度 */ width: 88px;
+    /* 最小寬度 */ min-width: 88px;
+    /* 左側內縮 */ padding-left: 31px;
+    /* 右側內縮 */ padding-right: 10px;
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 400;
+    /* 字距設定 */ letter-spacing: 0;
+    /* 文字靠左 */ text-align: left;
+    /* 原生外觀 */ appearance: none;
+    /* WebKit 原生外觀 */ -webkit-appearance: none;
+    /* 移除箭頭背景 */ background-image: none;
+}
+.language-select::-ms-expand {
+    /* 隱藏舊版箭頭 */ display: none;
+}
+
+/* ========【語系字型】 設定 - 繁中、簡中與英文各自使用合適字型 ======== */
+html[lang="zh-Hant"] body {
+    /* 繁中字型 */ font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+html[lang="zh-Hans"] body {
+    /* 簡中字型 */ font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+html[lang="en"] body {
+    /* 英文字型 */ font-family: "Segoe UI", Arial, system-ui, sans-serif;
+}
+
+/* ========【SVG 圖示資源】 設定 - 語言切換地球圖示 ======== */
+.icon-globe2 {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/globe2.svg");
+}
+
+/* ========【響應式設定】 設定 - 小螢幕維持固定欄位邏輯 ======== */
+@media (max-width:900px) {
+    .family-select {
+        /* 固定寬度 */ width: 140px;
+        /* 最大寬度 */ max-width: 140px;
+        /* 最小寬度 */ min-width: 140px;
+    }
+    .topbar-search-wrap {
+        /* 最大寬度 */ max-width: 160px;
+    }
+    .language-select {
+        /* 固定寬度 */ width: 80px;
+        /* 最小寬度 */ min-width: 80px;
+    }
+}
+@media (max-width:720px) {
+    .topbar-search-wrap {
+        /* 彈性配比 */ flex: 1;
+        /* 最大寬度 */ max-width: none;
+        /* 最小寬度 */ min-width: 80px;
+    }
+}
