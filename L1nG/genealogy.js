@@ -11,8 +11,10 @@ const NODE_DIMS = {
   view: { W: 108, H: 128 }
 };
 const GAPS = {
-  edit: { SPOUSE: 16, SIBLING: 40, LEVEL: 94 },
-  view: { SPOUSE: 12, SIBLING: 28, LEVEL: 70 }
+  // 編輯模式保留清楚的關係線長度，但避免過度留白。
+  edit: { SPOUSE: 30, SIBLING: 56, LEVEL: 118 },
+  // 檢視模式卡片較小，因此使用較緊湊但仍可辨識的間距。
+  view: { SPOUSE: 22, SIBLING: 40, LEVEL: 90 }
 };
 
 const PAD = 80;
@@ -356,6 +358,33 @@ const customColor2 = $('customColor2');
 const customThemePreview = $('customThemePreview');
 const galleryGrid = $('galleryGrid');
 
+// ========【家族名稱輸入】 設定 - 固定導覽欄位、虛線只跟著文字寬度 ========
+const _familyNameMeasureCanvas = document.createElement('canvas');
+const _familyNameMeasureContext = _familyNameMeasureCanvas.getContext('2d');
+
+function syncFamilyNameInputWidth() {
+  if (!familyNameInput || !_familyNameMeasureContext) return;
+  const editor = familyNameInput.closest('.family-name-editor');
+  if (!editor) return;
+
+  const icon = editor.querySelector('.family-name-icon');
+  const inputStyle = getComputedStyle(familyNameInput);
+  const editorStyle = getComputedStyle(editor);
+  const fontWeight = inputStyle.fontWeight || '500';
+  const fontSize = inputStyle.fontSize || '14px';
+  const fontFamily = inputStyle.fontFamily || 'sans-serif';
+  _familyNameMeasureContext.font = `${fontWeight} ${fontSize} ${fontFamily}`;
+
+  const source = familyNameInput.value || familyNameInput.placeholder || '';
+  const measured = _familyNameMeasureContext.measureText(source).width + 8;
+  const gap = parseFloat(editorStyle.columnGap || editorStyle.gap) || 7;
+  const iconWidth = icon ? (icon.getBoundingClientRect().width || 14) : 0;
+  const editorWidth = editor.getBoundingClientRect().width || 154;
+  const maxWidth = Math.max(52, editorWidth - iconWidth - gap);
+  const width = Math.max(52, Math.min(maxWidth, Math.ceil(measured)));
+  familyNameInput.style.width = `${width}px`;
+}
+
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
   m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
@@ -388,6 +417,13 @@ function applyPreviewIconFallback(root = document) {
 
 function enablePreviewIconFallback() {
   applyPreviewIconFallback(document);
+
+  // 原生單選 select 與搜尋型下拉欄位共用同一顆 chevron-down。
+  // file:// 預覽時 CSS 直接讀取本機 SVG 可能受瀏覽器限制，因此改用 HTTPS 備援。
+  document.documentElement.style.setProperty(
+    '--select-chevron-image',
+    `url("${ICON_PREVIEW_FALLBACK_BASE}chevron-down.svg")`
+  );
 
   const observer = new MutationObserver(records => {
     records.forEach(record => {
@@ -741,10 +777,37 @@ function isBuiltinSampleFamily(family) {
   return !!(family && BUILTIN_SAMPLE_FAMILY_IDS.has(family.id) && (db?.meta?.sample || sampleDbLooksBuiltIn()));
 }
 
+let _builtinSampleVariantToCanonical = null;
+function getBuiltinSampleVariantToCanonical() {
+  if (_builtinSampleVariantToCanonical) return _builtinSampleVariantToCanonical;
+  const map = new Map();
+  BUILTIN_SAMPLE_TEXT_VALUES.forEach(canonical => {
+    map.set(canonical, canonical);
+    if (typeof LING_I18N !== 'undefined' && LING_I18N.translateFor) {
+      const hans = String(LING_I18N.translateFor('zh-Hans', canonical) ?? '');
+      const en = String(LING_I18N.translateFor('en', canonical) ?? '');
+      if (hans) map.set(hans, canonical);
+      if (en) map.set(en, canonical);
+    }
+  });
+  _builtinSampleVariantToCanonical = map;
+  return map;
+}
+
+function canonicalBuiltinSampleText(value) {
+  const text = String(value ?? '');
+  return getBuiltinSampleVariantToCanonical().get(text) || text;
+}
+
 function displayDataText(value, owner = null) {
   const text = String(value ?? '');
   const isBuiltInOwner = owner && (isBuiltinSampleSim(owner) || isBuiltinSampleFamily(owner));
-  if (isBuiltInOwner && BUILTIN_SAMPLE_TEXT_VALUES.has(text)) return uiText(text);
+  if (!isBuiltInOwner) return text;
+
+  // 預設資料永遠以繁中 canonical 為基準。舊版若曾把簡中／英文顯示值寫回，
+  // 先辨識回繁中，再依目前介面語言輸出；玩家自行修改的新文字不會被翻譯。
+  const canonical = canonicalBuiltinSampleText(text);
+  if (BUILTIN_SAMPLE_TEXT_VALUES.has(canonical)) return uiText(canonical);
   return text;
 }
 
@@ -771,12 +834,18 @@ function normalizeBuiltinSampleToTraditional(targetDb) {
     const canonicalText = String(canonical ?? '');
     if (!canonicalText) return currentText;
 
+    const mappedCanonical = canonicalBuiltinSampleText(currentText);
+    if (mappedCanonical === canonicalText && currentText !== canonicalText) {
+      changed = true;
+      return canonicalText;
+    }
+
+    // 列舉值（人生階段、性別、狀態）不一定屬於範例文字集合，仍以各語言變體比對。
     const variants = new Set([canonicalText]);
     if (typeof LING_I18N !== 'undefined' && LING_I18N.translateFor) {
       variants.add(String(LING_I18N.translateFor('zh-Hans', canonicalText) ?? ''));
       variants.add(String(LING_I18N.translateFor('en', canonicalText) ?? ''));
     }
-
     if (variants.has(currentText) && currentText !== canonicalText) {
       changed = true;
       return canonicalText;
@@ -1935,29 +2004,28 @@ function drawEdges() {
     const y1 = start.y;
     const x2 = childAnchor.x;
     const y2 = childAnchor.y;
-    const my = y1 + (y2 - y1) / 2;
-    const adopt = c.adoptive ? ' edge-adopt' : '';
 
-    paths.push(`<path class="edge edge-parent${adopt}" d="M${x1} ${y1} V${my} H${x2} V${y2}"/>`);
+    // 親子關係的水平分支線與關係標籤必須共用同一個中點。
+    // 以「上一代卡片底部」與「下一代卡片頂部」之間的可用空間計算，
+    // 因此拉開代距後，線與文字會一起維持在視覺正中央。
+    let branchY = y1 + (y2 - y1) / 2;
+    const childTop = a.y + PAD;
+    if (childTop > y1) {
+      let upperBottom = p0.y + NODE_H + PAD;
+      if (visPids.length >= 2) {
+        const pA = pos.get(visPids[0]);
+        const pB = pos.get(visPids[1]);
+        if (pA && pB) upperBottom = Math.max(pA.y + NODE_H + PAD, pB.y + NODE_H + PAD);
+      }
+      if (childTop > upperBottom) branchY = upperBottom + (childTop - upperBottom) / 2;
+    }
+
+    const adopt = c.adoptive ? ' edge-adopt' : '';
+    paths.push(`<path class="edge edge-parent${adopt}" d="M${x1} ${y1} V${branchY} H${x2} V${y2}"/>`);
     if (showRelLabels) {
       const key = 'parent:' + c.id;
       const info = getRelInfoByKey(key, c.adoptive ? 'adoptive' : 'parent-child');
-      if (info) {
-        // 關係名稱預設放在「上下兩代卡片邊界」的真正中點，
-        // 不再以配偶線中心當起點，避免視覺上過度靠近上一輩。
-        let relationY = my;
-        const childTop = a.y + PAD;
-        if (childTop > y1) {
-          let upperBottom = p0.y + NODE_H + PAD;
-          if (visPids.length >= 2) {
-            const pA = pos.get(visPids[0]);
-            const pB = pos.get(visPids[1]);
-            if (pA && pB) upperBottom = Math.max(pA.y + NODE_H + PAD, pB.y + NODE_H + PAD);
-          }
-          if (childTop > upperBottom) relationY = upperBottom + (childTop - upperBottom) / 2;
-        }
-        labels.push(makeLabelSVG((x1+x2)/2, relationY, info.icon, info.text, key));
-      }
+      if (info) labels.push(makeLabelSVG((x1+x2)/2, branchY, info.icon, info.text, key));
     }
   });
 
@@ -2925,10 +2993,21 @@ labelsSvg.addEventListener('pointermove', e => {
     labelDrag.el.classList.add('dragging');
   }
   if (!labelDrag.moved) return;
-  const dx = labelDrag.startDx + rawDx;
-  const dy = labelDrag.startDy + rawDy;
+  const snapDistance = GUIDE_SNAP_PX / Math.max(scale, 0.001);
+  let dx = labelDrag.startDx + rawDx;
+  let dy = labelDrag.startDy + rawDy;
+
+  // X 軸接近 0 時吸附回關係線的水平中心；Y 軸接近 0 時吸附回原始關係線。
+  // 兩個方向彼此獨立，所以玩家仍可只沿著關係線水平移動，或只保持置中上下移動。
+  if (Math.abs(dx) <= snapDistance) dx = 0;
+  if (Math.abs(dy) <= snapDistance) dy = 0;
+
   if (!db.labelPos) db.labelPos = {};
-  db.labelPos[labelDrag.key] = { dx, dy };
+  if (dx === 0 && dy === 0) delete db.labelPos[labelDrag.key];
+  else db.labelPos[labelDrag.key] = { dx, dy };
+
+  labelDrag.currentDx = dx;
+  labelDrag.currentDy = dy;
   const tx = labelDrag.baseX + dx;
   const ty = labelDrag.baseY + dy;
   labelDrag.el.setAttribute('transform', `translate(${tx.toFixed(1)},${ty.toFixed(1)})`);
@@ -3163,6 +3242,7 @@ function refreshFamilyUI() {
   const fam = currentFamily();
   const familyName = displayDataText(fam.name, fam);
   familyNameInput.value = familyName;
+  syncFamilyNameInputWidth();
   familySelect.innerHTML = db.families.map(f =>
     `<option value="${f.id}">${esc(displayDataText(f.name, f))}</option>`).join('');
   familySelect.value = db.currentId;
@@ -3178,6 +3258,7 @@ familySelect.onchange = () => {
   save(); refreshFamilyUI(); render();
   requestAnimationFrame(fitScreen);
 };
+familyNameInput.addEventListener('input', syncFamilyNameInputWidth);
 familyNameInput.onchange = () => {
   const fam = currentFamily();
   const shownBefore = displayDataText(fam.name, fam);
@@ -3185,6 +3266,7 @@ familyNameInput.onchange = () => {
   // 只是在其他語言下顯示內建範例名稱、沒有真的改字時，不回寫翻譯值。
   if (isBuiltinSampleFamily(fam) && v === shownBefore) {
     familyNameInput.value = shownBefore;
+    syncFamilyNameInputWidth();
     return;
   }
   fam.name = v;
@@ -4995,6 +5077,7 @@ They will remain in the global Sim pool.`;
   function setLanguage(lang) {
     if (!['zh-Hant','zh-Hans','en'].includes(lang)) lang = 'zh-Hant';
     language = lang;
+    _builtinSampleVariantToCanonical = null;
     try { localStorage.setItem(LANG_KEY, lang); } catch(e) {}
     const sel = document.getElementById('languageSelect');
     if (sel) sel.value = lang;
