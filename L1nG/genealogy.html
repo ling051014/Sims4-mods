@@ -82,12 +82,32 @@
                     </div>
                     <div class="sidebar-footer"><span>桌面版</span><span class="ver" id="appVersion">v6.5.0</span></div>
                 </aside>
+
+                <!-- ========【側邊欄寬度】 設定 - 桌面版可拖曳調整側邊欄寬度 ======== -->
+                <div
+                    class="sidebar-resizer"
+                    id="sidebarResizer"
+                    role="separator"
+                    aria-label="調整側邊欄寬度"
+                    aria-orientation="vertical"
+                    tabindex="0"
+                    title="拖曳調整側邊欄寬度；雙擊恢復預設寬度"
+                ></div>
+
                 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
                 <div class="main-area">
                     <div id="viewport">
                         <div id="stage">
                             <svg id="links"></svg>
                             <div id="nodes"></div>
+
+                            <!-- ========【智慧對齊輔助線】 設定 - 拖曳卡片時顯示水平與垂直對齊線 ======== -->
+                            <div id="smartGuides" aria-hidden="true">
+                                <div class="smart-guide smart-guide-vertical" id="smartGuideVertical"></div>
+                                <div class="smart-guide smart-guide-horizontal" id="smartGuideHorizontal"></div>
+                            </div>
+
                             <svg id="labels"></svg>
                         </div>
                     </div>
