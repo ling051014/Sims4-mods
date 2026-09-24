@@ -4796,73 +4796,64 @@ function getSelectedExportImageSize() {
   return checked ? checked.value : 'standard';
 }
 
-function collectExportStylesText() {
-  return Array.from(document.styleSheets).map(sheet => {
-    try {
-      return Array.from(sheet.cssRules || []).map(rule => rule.cssText).join('\n');
-    } catch (err) {
-      return '';
-    }
-  }).join('\n');
-}
+let _html2CanvasPromise = null;
 
-function parseCssUrlValue(value) {
-  const raw = String(value || '').trim();
-  if (!raw) return '';
-  const m = raw.match(/^url\((['"]?)(.*?)\)$/);
-  return m ? m[2] : '';
-}
-
-function blobToDataURL(blob) {
+function loadScriptOnce(src) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
+    const existing = [...document.scripts].find(script => script.src === src);
+    if (existing) {
+      if (window.html2canvas) { resolve(); return; }
+      existing.addEventListener('load', resolve, { once: true });
+      existing.addEventListener('error', () => reject(new Error(`Script load failed: ${src}`)), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.onload = resolve;
+    script.onerror = () => {
+      script.remove();
+      reject(new Error(`Script load failed: ${src}`));
+    };
+    document.head.appendChild(script);
   });
 }
 
-async function urlToDataURL(url) {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return blobToDataURL(blob);
-}
+async function ensureHtml2Canvas() {
+  if (typeof window.html2canvas === 'function') return window.html2canvas;
+  if (_html2CanvasPromise) return _html2CanvasPromise;
 
-async function inlineExportResources(root) {
-  const imgs = [...root.querySelectorAll('img[src]')];
-  for (const img of imgs) {
-    const src = img.getAttribute('src') || '';
-    if (!src || src.startsWith('data:')) continue;
-    try {
-      const dataUrl = await urlToDataURL(src);
-      img.setAttribute('src', dataUrl);
-    } catch (err) {}
-  }
+  const sources = [
+    'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+  ];
 
-  const exportViewport = root.matches('#viewport') ? root : root.querySelector('#viewport');
-  if (exportViewport) {
-    const bgValue = exportViewport.style.getPropertyValue('--custom-bg');
-    const bgUrl = parseCssUrlValue(bgValue);
-    if (bgUrl && !bgUrl.startsWith('data:')) {
+  _html2CanvasPromise = (async () => {
+    let lastError = null;
+    for (const src of sources) {
       try {
-        const dataUrl = await urlToDataURL(bgUrl);
-        exportViewport.style.setProperty('--custom-bg', `url("${dataUrl}")`);
-      } catch (err) {}
+        await loadScriptOnce(src);
+        if (typeof window.html2canvas === 'function') return window.html2canvas;
+      } catch (err) {
+        lastError = err;
+      }
     }
-  }
-}
+    throw lastError || new Error('html2canvas is unavailable');
+  })();
 
-function waitForImageLoad(img) {
-  if (img.complete && img.naturalWidth) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    img.onload = () => resolve();
-    img.onerror = reject;
-  });
+  try {
+    return await _html2CanvasPromise;
+  } catch (err) {
+    _html2CanvasPromise = null;
+    throw err;
+  }
 }
 
 function sanitizeDownloadName(name) {
   return String(name || 'genealogy')
-    .replace(/[\/:*?"<>|]/g, '_')
+    .replace(/[\\/:*?"<>|]/g, '_')
     .replace(/\s+/g, ' ')
     .trim() || 'genealogy';
 }
@@ -4872,83 +4863,97 @@ function downloadBlob(blob, filename) {
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  a.hidden = true;
+  document.body.appendChild(a);
   a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1200);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+function buildGenealogyCaptureNode(stageWidth, stageHeight) {
+  const captureViewport = viewport.cloneNode(true);
+  captureViewport.classList.remove('dragging');
+  captureViewport.style.position = 'fixed';
+  captureViewport.style.left = '0';
+  captureViewport.style.top = '0';
+  captureViewport.style.zIndex = '-2147483647';
+  captureViewport.style.pointerEvents = 'none';
+  captureViewport.style.width = `${stageWidth}px`;
+  captureViewport.style.height = `${stageHeight}px`;
+  captureViewport.style.minWidth = `${stageWidth}px`;
+  captureViewport.style.minHeight = `${stageHeight}px`;
+  captureViewport.style.flex = 'none';
+  captureViewport.style.overflow = 'hidden';
+  captureViewport.style.cursor = 'default';
+
+  const captureStage = captureViewport.querySelector('#stage');
+  if (!captureStage) throw new Error('Genealogy stage was not found');
+  captureStage.classList.remove('is-transforming');
+  captureStage.style.transform = 'none';
+  captureStage.style.transformOrigin = '0 0';
+  captureStage.style.left = '0';
+  captureStage.style.top = '0';
+
+  const guides = captureViewport.querySelector('#smartGuides');
+  if (guides) guides.remove();
+
+  // 匯出只保留族譜內容，不帶入搜尋高亮、篩選淡化與拖曳中的操作狀態。
+  captureViewport.querySelectorAll('.hl, .dim, .dragging').forEach(el => {
+    el.classList.remove('hl', 'dim', 'dragging');
+  });
+
+  return captureViewport;
 }
 
 async function exportGenealogyImage(sizeKey = 'standard') {
+  if (!db || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
+
+  // 匯出前重新繪製，確保卡片、關係線與手動位置都是目前最新狀態。
+  render();
+
   const factorMap = { standard: 1, hd: 2, uhd: 3 };
   const factor = factorMap[sizeKey] || 1;
   const stageWidth = Math.max(1, Math.ceil(parseFloat(stage.style.width) || stage.offsetWidth || 1));
   const stageHeight = Math.max(1, Math.ceil(parseFloat(stage.style.height) || stage.offsetHeight || 1));
-  const family = currentFamily();
-  const familyName = displayDataText((family && family.name) || uiText('家族'), family || null);
-  const fileBase = sanitizeDownloadName(`${familyName}_族譜`);
+  const pixelWidth = Math.max(1, Math.round(stageWidth * factor));
+  const pixelHeight = Math.max(1, Math.round(stageHeight * factor));
 
-  const exportViewport = viewport.cloneNode(true);
-  exportViewport.id = 'exportViewport';
-  exportViewport.classList.remove('dragging');
-  exportViewport.style.width = `${stageWidth}px`;
-  exportViewport.style.height = `${stageHeight}px`;
-  exportViewport.style.minWidth = `${stageWidth}px`;
-  exportViewport.style.minHeight = `${stageHeight}px`;
-  exportViewport.style.overflow = 'hidden';
-
-  const exportStage = exportViewport.querySelector('#stage');
-  if (exportStage) {
-    exportStage.classList.remove('is-transforming');
-    exportStage.style.transform = 'none';
-    exportStage.style.transformOrigin = 'top left';
+  if (pixelWidth > 32767 || pixelHeight > 32767 || pixelWidth * pixelHeight > 180000000) {
+    throw new Error('圖片尺寸超過瀏覽器可安全輸出的範圍，請改用較小的匯出尺寸。');
   }
 
-  const guides = exportViewport.querySelector('#smartGuides');
-  if (guides) guides.remove();
-
-  await inlineExportResources(exportViewport);
-
-  const inlineStyles = collectExportStylesText();
-  const bodyTheme = document.body.getAttribute('data-theme') || '';
-  const bodyClass = document.body.className || '';
-  const exportMarkup = `
-    <body xmlns="http://www.w3.org/1999/xhtml" data-theme="${esc(bodyTheme)}" class="${esc(bodyClass)}" style="margin:0;padding:0;">
-      ${exportViewport.outerHTML}
-    </body>`;
-
-  const svgMarkup = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${stageWidth}" height="${stageHeight}" viewBox="0 0 ${stageWidth} ${stageHeight}">
-      <foreignObject x="0" y="0" width="100%" height="100%">
-        <style>
-          html, body { margin: 0; padding: 0; }
-          ${inlineStyles}
-        </style>
-        ${exportMarkup}
-      </foreignObject>
-    </svg>`;
-
-  const svgBlob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
-  const svgUrl = URL.createObjectURL(svgBlob);
+  const html2canvas = await ensureHtml2Canvas();
+  const captureViewport = buildGenealogyCaptureNode(stageWidth, stageHeight);
+  document.body.appendChild(captureViewport);
 
   try {
-    const img = new Image();
-    img.decoding = 'async';
-    img.src = svgUrl;
-    await waitForImageLoad(img);
-
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(stageWidth * factor);
-    canvas.height = Math.round(stageHeight * factor);
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    const blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(result => result ? resolve(result) : reject(new Error('canvas.toBlob failed')), 'image/png');
+    const canvas = await html2canvas(captureViewport, {
+      backgroundColor: null,
+      scale: factor,
+      width: stageWidth,
+      height: stageHeight,
+      windowWidth: Math.max(document.documentElement.clientWidth, stageWidth),
+      windowHeight: Math.max(document.documentElement.clientHeight, stageHeight),
+      scrollX: 0,
+      scrollY: 0,
+      useCORS: true,
+      allowTaint: false,
+      imageTimeout: 15000,
+      logging: false,
+      removeContainer: true
     });
 
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(result => result ? resolve(result) : reject(new Error('PNG encoding failed')), 'image/png');
+    });
+
+    const family = currentFamily();
+    const familyName = displayDataText((family && family.name) || uiText('家族'), family || null);
+    const fileBase = sanitizeDownloadName(`${familyName}_族譜`);
     const sizeLabel = sizeKey === 'uhd' ? '超高畫質' : sizeKey === 'hd' ? '高畫質' : '標準';
     downloadBlob(blob, `${fileBase}_${sizeLabel}.png`);
   } finally {
-    URL.revokeObjectURL(svgUrl);
+    captureViewport.remove();
   }
 }
 
@@ -5272,10 +5277,10 @@ if (exportImageBtn) exportImageBtn.onclick = async () => {
     exportImageBtn.textContent = uiText('正在匯出族譜圖片…');
     await exportGenealogyImage(getSelectedExportImageSize());
     closeExportPanel();
-    showToast('族譜圖片匯出完成');
+    uiToast('族譜圖片匯出完成');
   } catch (err) {
     console.error(err);
-    showToast('族譜圖片匯出失敗');
+    await uiAlert(`族譜圖片匯出失敗：${err && err.message ? err.message : 'Unknown error'}`, { title: '族譜圖片匯出失敗', kind: 'danger' });
   } finally {
     exportImageBtn.textContent = originalText;
     exportImageBtn.disabled = false;
