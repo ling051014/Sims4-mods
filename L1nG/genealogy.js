@@ -6,7 +6,6 @@
  * 圖示：本機 Bootstrap Icons SVG
  */
 
-const APP_VERSION = 'v6.5.0';
 
 const NODE_DIMS = {
   edit: { W: 220, H: 168 },
@@ -28,6 +27,11 @@ const AVATAR_PROFILE_KEY = 'sims4_genealogy_avatar_profile';
 const PET_AVATAR_PROFILE_KEY = 'sims4_genealogy_pet_avatar_profile';
 const GALLERY_PROFILE_KEY = 'sims4_genealogy_gallery_profile';
 const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
+const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
+const SIDEBAR_DEFAULT_WIDTH = 220;
+const SIDEBAR_MIN_WIDTH = 180;
+const SIDEBAR_MAX_WIDTH = 420;
+const GUIDE_SNAP_PX = 8;
 const SIBLING_LABEL = '兄弟姐妹';
 
 const IMG_DB_NAME = 'sims4_images_db';
@@ -341,16 +345,16 @@ const petAvatarProfileSelect = $('petAvatarProfile');
 const galleryProfileSelect = $('galleryProfile');
 const labelLockToggle = $('labelLockToggle');
 const sidebar = $('sidebar');
+const sidebarResizer = $('sidebarResizer');
 const sidebarBackdrop = $('sidebarBackdrop');
 const menuToggle = $('menuToggle');
+const smartGuideVertical = $('smartGuideVertical');
+const smartGuideHorizontal = $('smartGuideHorizontal');
 const themeGrid = $('themeGrid');
 const customColor1 = $('customColor1');
 const customColor2 = $('customColor2');
 const customThemePreview = $('customThemePreview');
 const galleryGrid = $('galleryGrid');
-
-// 將目前工具版本同步到側邊欄底部
-$('appVersion').textContent = APP_VERSION;
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
   m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -368,6 +372,44 @@ function setIconText(el, iconName, text) {
   if (!el) return;
   el.innerHTML = `${iconSvg(iconName)}<span>${esc(text)}</span>`;
 }
+
+// ========【SVG 圖示來源】 設定 - 本機預覽缺少專案資源時自動使用 Bootstrap Icons 備援 ========
+const ICON_LOCAL_PROBE = '../html%20icons/check-circle.svg';
+const ICON_PREVIEW_FALLBACK_BASE = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/icons/';
+
+function applyPreviewIconFallback(root = document) {
+  root.querySelectorAll('.l1ng-icon').forEach(icon => {
+    const iconClass = [...icon.classList].find(name => name.startsWith('icon-'));
+    if (!iconClass) return;
+    const iconName = iconClass.slice(5);
+    icon.style.setProperty('--l1ng-icon', `url("${ICON_PREVIEW_FALLBACK_BASE}${iconName}.svg")`);
+  });
+}
+
+function enablePreviewIconFallback() {
+  applyPreviewIconFallback(document);
+
+  const observer = new MutationObserver(records => {
+    records.forEach(record => {
+      record.addedNodes.forEach(node => {
+        if (!(node instanceof Element)) return;
+        if (node.matches('.l1ng-icon')) applyPreviewIconFallback(node.parentElement || document);
+        else applyPreviewIconFallback(node);
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function verifyLocalIconAssets() {
+  const probe = new Image();
+  probe.onload = () => {};
+  probe.onerror = enablePreviewIconFallback;
+  probe.src = new URL(ICON_LOCAL_PROBE, document.baseURI).href;
+}
+
+verifyLocalIconAssets();
 
 
 function debounce(fn, ms = 150) {
@@ -395,6 +437,96 @@ menuToggle.onclick = () => {
   else openSidebar();
 };
 sidebarBackdrop.onclick = closeSidebar;
+
+// ========【側邊欄寬度】 設定 - 桌面版拖曳調整並保存寬度 ========
+function getSidebarMaxWidth() {
+  // 避免側邊欄在較窄桌面畫面佔掉過多族譜工作區
+  return Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, Math.floor(window.innerWidth * 0.42)));
+}
+
+function clampSidebarWidth(value) {
+  const width = Number(value);
+  if (!Number.isFinite(width)) return SIDEBAR_DEFAULT_WIDTH;
+  return Math.max(SIDEBAR_MIN_WIDTH, Math.min(getSidebarMaxWidth(), Math.round(width)));
+}
+
+function applySidebarWidth(value, { persist = true } = {}) {
+  const width = clampSidebarWidth(value);
+  document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+  if (sidebarResizer) sidebarResizer.setAttribute('aria-valuenow', String(width));
+  if (persist) {
+    try { localStorage.setItem(SIDEBAR_WIDTH_KEY, String(width)); } catch (_) {}
+  }
+  return width;
+}
+
+function restoreSidebarWidth() {
+  let saved = SIDEBAR_DEFAULT_WIDTH;
+  try { saved = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY)) || SIDEBAR_DEFAULT_WIDTH; } catch (_) {}
+  applySidebarWidth(saved, { persist: false });
+}
+
+restoreSidebarWidth();
+
+if (sidebarResizer) {
+  sidebarResizer.setAttribute('aria-valuemin', String(SIDEBAR_MIN_WIDTH));
+  sidebarResizer.setAttribute('aria-valuemax', String(SIDEBAR_MAX_WIDTH));
+
+  sidebarResizer.addEventListener('pointerdown', e => {
+    if (window.innerWidth <= 720) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebar.getBoundingClientRect().width;
+    document.body.classList.add('sidebar-resizing');
+    try { sidebarResizer.setPointerCapture(e.pointerId); } catch (_) {}
+
+    const onMove = ev => {
+      applySidebarWidth(startWidth + (ev.clientX - startX));
+    };
+
+    const onUp = () => {
+      sidebarResizer.removeEventListener('pointermove', onMove);
+      sidebarResizer.removeEventListener('pointerup', onUp);
+      sidebarResizer.removeEventListener('pointercancel', onUp);
+      document.body.classList.remove('sidebar-resizing');
+    };
+
+    sidebarResizer.addEventListener('pointermove', onMove);
+    sidebarResizer.addEventListener('pointerup', onUp);
+    sidebarResizer.addEventListener('pointercancel', onUp);
+  });
+
+  sidebarResizer.addEventListener('dblclick', () => {
+    applySidebarWidth(SIDEBAR_DEFAULT_WIDTH);
+  });
+
+  sidebarResizer.addEventListener('keydown', e => {
+    if (window.innerWidth <= 720) return;
+    const current = sidebar.getBoundingClientRect().width;
+    const step = e.shiftKey ? 20 : 8;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      applySidebarWidth(current - step);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      applySidebarWidth(current + step);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      applySidebarWidth(SIDEBAR_MIN_WIDTH);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      applySidebarWidth(getSidebarMaxWidth());
+    }
+  });
+}
+
+window.addEventListener('resize', debounce(() => {
+  if (window.innerWidth > 720) {
+    const current = sidebar.getBoundingClientRect().width;
+    const clamped = clampSidebarWidth(current);
+    if (Math.abs(clamped - current) > 0.5) applySidebarWidth(clamped);
+  }
+}, 80));
 
 
 let _saveTimer = null, _pendingSave = false;
@@ -2221,6 +2353,64 @@ const finishLabelDrag = e => {
 labelsSvg.addEventListener('pointerup', finishLabelDrag);
 labelsSvg.addEventListener('pointercancel', finishLabelDrag);
 
+// ========【智慧對齊輔助線】 設定 - 拖曳卡片時比較邊緣與中心位置 ========
+function hideSmartGuides() {
+  if (smartGuideVertical) smartGuideVertical.classList.remove('show');
+  if (smartGuideHorizontal) smartGuideHorizontal.classList.remove('show');
+}
+
+function showSmartGuide(axis, stagePosition) {
+  const guide = axis === 'x' ? smartGuideVertical : smartGuideHorizontal;
+  if (!guide) return;
+  const oneScreenPixel = 1 / Math.max(scale, 0.001);
+  if (axis === 'x') {
+    guide.style.left = `${stagePosition + PAD}px`;
+    guide.style.width = `${oneScreenPixel}px`;
+  } else {
+    guide.style.top = `${stagePosition + PAD}px`;
+    guide.style.height = `${oneScreenPixel}px`;
+  }
+  guide.classList.add('show');
+}
+
+function getSmartSnap(id, rawX, rawY) {
+  const { W: NODE_W, H: NODE_H } = getDims();
+  const threshold = GUIDE_SNAP_PX / Math.max(scale, 0.001);
+  const draggedX = [rawX, rawX + NODE_W / 2, rawX + NODE_W];
+  const draggedY = [rawY, rawY + NODE_H / 2, rawY + NODE_H];
+  let bestX = null;
+  let bestY = null;
+
+  layoutCache.pos.forEach((p, otherId) => {
+    if (otherId === id) return;
+    const targetX = [p.x, p.x + NODE_W / 2, p.x + NODE_W];
+    const targetY = [p.y, p.y + NODE_H / 2, p.y + NODE_H];
+
+    for (let i = 0; i < draggedX.length; i += 1) {
+      const delta = targetX[i] - draggedX[i];
+      const distance = Math.abs(delta);
+      if (distance <= threshold && (!bestX || distance < bestX.distance)) {
+        bestX = { delta, distance, guide: targetX[i] };
+      }
+    }
+
+    for (let i = 0; i < draggedY.length; i += 1) {
+      const delta = targetY[i] - draggedY[i];
+      const distance = Math.abs(delta);
+      if (distance <= threshold && (!bestY || distance < bestY.distance)) {
+        bestY = { delta, distance, guide: targetY[i] };
+      }
+    }
+  });
+
+  return {
+    x: rawX + (bestX ? bestX.delta : 0),
+    y: rawY + (bestY ? bestY.delta : 0),
+    guideX: bestX ? bestX.guide : null,
+    guideY: bestY ? bestY.guide : null
+  };
+}
+
 nodes.addEventListener('pointerdown', e => {
   const el = e.target.closest('.node');
   if (!el) return;
@@ -2260,11 +2450,21 @@ nodes.addEventListener('pointerdown', e => {
     const dx = ev.clientX - sx, dy = ev.clientY - sy;
     if (!moved && Math.hypot(dx, dy) > 3) { moved = true; el.classList.add('dragging'); }
     if (!moved) return;
-    const nx = startPos.x + dx/scale, ny = startPos.y + dy/scale;
+    const rawX = startPos.x + dx / scale;
+    const rawY = startPos.y + dy / scale;
+    const snapped = getSmartSnap(id, rawX, rawY);
+    const nx = snapped.x;
+    const ny = snapped.y;
+
     manualPos[id] = {x:nx, y:ny};
     layoutCache.pos.set(id, {x:nx, y:ny});
     el.style.left = (nx+PAD)+'px';
     el.style.top = (ny+PAD)+'px';
+
+    hideSmartGuides();
+    if (snapped.guideX !== null) showSmartGuide('x', snapped.guideX);
+    if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
+
     scheduleEdgeRedraw();
   };
   const onUp = () => {
@@ -2272,6 +2472,7 @@ nodes.addEventListener('pointerdown', e => {
     document.removeEventListener('pointerup', onUp);
     document.removeEventListener('pointercancel', onUp);
     el.classList.remove('dragging');
+    hideSmartGuides();
     if (moved) { save(); expandStageToFit(); }
     else {
       if (viewMode === 'view') openInfoCard(id);
