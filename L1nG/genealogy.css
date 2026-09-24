@@ -821,15 +821,6 @@ body.sidebar-resizing * {
     /* 視覺濾鏡移除 */ filter: none;
 }
 
-.sidebar-btn.danger {
-    /* 文字顏色 */ color: #c44a3e;
-}
-
-.sidebar-btn.danger:hover {
-    /* 背景設定 */ background: rgba(200,60,40,.08);
-    /* 邊框顏色 */ border-color: rgba(200,60,40,.2);
-}
-
 .sidebar-btn.active,
 .sidebar-btn.lock-active {
     /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
@@ -5301,31 +5292,23 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     /* 上方內距 */ padding-top: 4px;
 }
 
-.export-actions button {
-    /* 最小寬度 */ min-width: 118px;
+.export-actions button,
+.export-actions button.primary {
+    /* 固定寬度 */ width: 148px;
+    /* 最小寬度 */ min-width: 148px;
+    /* 高度 */ min-height: 37px;
+    /* 不隨容器拉伸 */ flex: 0 0 auto;
     /* 內縮空間 */ padding: 8px 14px;
-    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 邊框設定 */ border: 1px solid var(--accent);
     /* 圓角弧度 */ border-radius: 8px;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 文字顏色 */ color: var(--ink);
+    /* 背景設定 */ background: var(--accent);
+    /* 文字顏色 */ color: #fff;
     /* 字體大小 */ font-size: 13px;
-    /* 字體粗細 */ font-weight: 500;
+    /* 字體粗細 */ font-weight: 600;
     /* 動畫過渡 */ transition: .15s;
 }
 
-.export-actions button:hover {
-    /* 背景設定 */ background: var(--panel-item-hover);
-    /* 邊框顏色 */ border-color: var(--accent);
-    /* 文字顏色 */ color: var(--accent);
-}
-
-.export-actions button.primary {
-    /* 最小寬度 */ min-width: 142px;
-    /* 背景設定 */ background: var(--accent);
-    /* 邊框顏色 */ border-color: var(--accent);
-    /* 文字顏色 */ color: #fff;
-}
-
+.export-actions button:hover,
 .export-actions button.primary:hover {
     /* 背景設定 */ background: var(--accent-hover);
     /* 邊框顏色 */ border-color: var(--accent-hover);
