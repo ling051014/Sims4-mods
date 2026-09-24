@@ -534,7 +534,7 @@ button {
     /* 圓角弧度 */ border-radius: 7px;
     /* 背景設定 */ background: var(--topbar-field-bg);
     /* 文字顏色 */ color: var(--topbar-field-fg);
-    /* 字體大小 */ font-size: 13px;
+    /* 字體大小 */ font-size: 14px;
     /* 外框設定 */ outline: none;
     /* 字體設定 */ font-family: inherit;
     /* 最大寬度 */ max-width: 180px;
@@ -659,8 +659,8 @@ button {
 .sidebar-resizer:hover::before,
 .sidebar-resizer:focus-visible::before,
 body.sidebar-resizing .sidebar-resizer::before {
-    /* 背景設定 */ background: #55acee;
-    /* 元素陰影 */ box-shadow: 0 0 0 1px rgba(85,172,238,.08);
+    /* 背景設定 */ background: var(--accent);
+    /* 元素陰影 */ box-shadow: 0 0 0 1px rgba(255,255,255,.65);
 }
 body.sidebar-resizing {
     /* 滑鼠指標 */ cursor: col-resize;
@@ -679,10 +679,10 @@ body.sidebar-resizing * {
     /* 下方外距 */ margin-bottom: 14px;
 }
 .sidebar-group-title {
-    /* 字體大小 */ font-size: 10px;
-    /* 字體粗細 */ font-weight: 700;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 600;
     /* 文字顏色 */ color: var(--sub);
-    /* 透明度 */ opacity: .75;
+    /* 透明度 */ opacity: 1;
     /* 字距設定 */ letter-spacing: 1.2px;
     /* 文字轉換 */ text-transform: uppercase;
     /* 內縮空間 */ padding: 2px 8px 6px;
@@ -825,7 +825,7 @@ body.sidebar-resizing * {
 .smart-guide {
     /* 定位方式 */ position: absolute;
     /* 預設顯示 */ display: none;
-    /* 背景設定 */ background: #55acee;
+    /* 背景設定 */ background: var(--accent);
     /* 元素陰影 */ box-shadow: 0 0 0 .5px rgba(255,255,255,.85);
     /* 滑鼠事件 */ pointer-events: none;
 }
@@ -3266,7 +3266,7 @@ body[data-theme="ling"] {
     /* 頁面背景 */ --bg: #fafafa;
     /* 背景紋理色 */ --bg-pattern: rgba(0,0,0,.045);
     /* 主要文字 */ --ink: #555555;
-    /* 次要文字 */ --sub: #aaaaaa;
+    /* 次要文字 */ --sub: #777777;
     /* 主要線條 */ --line: #dcdcdc;
     /* 卡片背景 */ --card: #ffffff;
     /* 一般邊框 */ --border: #eeeeee;
@@ -3313,132 +3313,157 @@ body[data-theme="ling"] {
     /* 頭像文字 */ --avatar-ink: #aaaaaa;
     /* 高亮顏色 */ --hl: rgba(85,172,238,.28);
 }
+
+/* ========【全站字體】 設定 - 與主專案使用習慣一致 ======== */
 body {
     /* 字體設定 */ font-family: "PingFang TC","Noto Sans TC","Microsoft JhengHei","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
     /* 字體粗細 */ font-weight: 400;
 }
-.topbar {
+
+/* ========【左上品牌】 設定 - 與側邊欄共用寬度並保持水平置中 ======== */
+.topbar-brand {
+    /* 元素寬度 */ width: var(--sidebar-width);
+    /* 水平對齊 */ justify-content: center;
+    /* 文字對齊 */ text-align: center;
+    /* 左右內縮 */ padding-left: 10px;
+    /* 左右內縮 */ padding-right: 10px;
+    /* 字體大小 */ font-size: 10.5px;
+    /* 字體粗細 */ font-weight: 500;
+    /* 字距設定 */ letter-spacing: 1.4px;
+}
+
+/* ========【LING Minimal】 設定 - 僅此主題套用 L1nG 白灰藍視覺 ======== */
+body[data-theme="ling"] .topbar {
     /* 元素高度 */ height: 58px;
     /* 背景設定 */ background: #fff !important;
     /* 下方邊框 */ border-bottom: 1px solid #eee;
     /* 元素陰影 */ box-shadow: none;
 }
-.topbar-brand {
-    /* 元素寬度 */ width: var(--sidebar-width);
-    /* 內縮空間 */ padding: 0 20px;
+body[data-theme="ling"] .topbar-brand {
     /* 文字顏色 */ color: #555;
     /* 右側邊框 */ border-right: 1px solid #eee;
-    /* 字體大小 */ font-size: 11px;
-    /* 字體粗細 */ font-weight: 400;
-    /* 字距設定 */ letter-spacing: 2.6px;
     /* 文字陰影 */ text-shadow: none;
 }
-.brand-input {
+body[data-theme="ling"] .brand-input {
     /* 文字顏色 */ color: #555;
     /* 文字陰影 */ text-shadow: none;
     /* 字體粗細 */ font-weight: 400;
     /* 字距設定 */ letter-spacing: 1.4px;
 }
-.sidebar {
-    /* 元素寬度 */ width: var(--sidebar-width);
+body[data-theme="ling"] .sidebar {
     /* 背景設定 */ background: #fff;
     /* 右側邊框 */ border-right: 1px solid #eee;
 }
-.sidebar-group-title {
-    /* 字體大小 */ font-size: 12px;
-    /* 字體粗細 */ font-weight: 600;
+body[data-theme="ling"] .sidebar-group-title {
     /* 文字顏色 */ color: #777;
-    /* 透明度 */ opacity: 1;
-    /* 字距設定 */ letter-spacing: 1.2px;
-    /* 上下內縮 */ padding-top: 5px;
-    /* 下方內縮 */ padding-bottom: 8px;
 }
-.sidebar-btn {
+body[data-theme="ling"] .sidebar-btn {
     /* 圓角弧度 */ border-radius: 4px;
     /* 文字顏色 */ color: #666;
-    /* 字體大小 */ font-size: 14px;
     /* 字距設定 */ letter-spacing: .2px;
 }
-.sidebar-btn:hover {
+body[data-theme="ling"] .sidebar-btn:hover {
     /* 背景設定 */ background: #fafafa;
     /* 邊框顏色 */ border-color: #eee;
     /* 文字顏色 */ color: #333;
 }
-.sidebar-btn.primary,
-.sidebar-btn.active,
-.sidebar-btn.lock-active {
+body[data-theme="ling"] .sidebar-btn.primary,
+body[data-theme="ling"] .sidebar-btn.active,
+body[data-theme="ling"] .sidebar-btn.lock-active {
     /* 背景設定 */ background: rgba(85,172,238,.06);
     /* 文字顏色 */ color: #55acee;
     /* 邊框顏色 */ border-color: rgba(85,172,238,.45);
     /* 字體粗細 */ font-weight: 500;
 }
-#viewport {
+body[data-theme="ling"] #viewport {
     /* 背景顏色 */ background-color: #fafafa;
     /* 背景圖片 */ background-image: radial-gradient(circle, rgba(0,0,0,.055) 1px, transparent 1px);
     /* 背景尺寸 */ background-size: 24px 24px;
 }
-.node {
+body[data-theme="ling"] .node {
     /* 圓角弧度 */ border-radius: 6px;
     /* 邊框寬度 */ border-width: 1px;
     /* 元素陰影 */ box-shadow: none;
 }
-.node:hover {
+body[data-theme="ling"] .node:hover {
     /* 邊框顏色 */ border-color: #bbb;
     /* 元素陰影 */ box-shadow: 0 8px 24px rgba(0,0,0,.08);
 }
-.modal {
+body[data-theme="ling"] .modal {
     /* 圓角弧度 */ border-radius: 8px;
     /* 邊框設定 */ border: 1px solid #eee;
     /* 元素陰影 */ box-shadow: 0 24px 70px rgba(0,0,0,.18);
 }
-.modal h2 {
+body[data-theme="ling"] .modal h2 {
     /* 文字顏色 */ color: #444;
     /* 字體粗細 */ font-weight: 300;
     /* 字距設定 */ letter-spacing: 2px;
 }
-.grid input,
-.grid select,
-.grid textarea,
-.ss-input,
-.ss-search,
-.topbar-select,
-.topbar-search,
-.family-select {
+body[data-theme="ling"] .grid input,
+body[data-theme="ling"] .grid select,
+body[data-theme="ling"] .grid textarea,
+body[data-theme="ling"] .ss-input,
+body[data-theme="ling"] .ss-search,
+body[data-theme="ling"] .topbar-select,
+body[data-theme="ling"] .topbar-search,
+body[data-theme="ling"] .family-select {
     /* 圓角弧度 */ border-radius: 4px;
 }
-.icon-btn,
-.filebtn,
-.modal-actions button,
-.apply-btn {
+body[data-theme="ling"] .icon-btn,
+body[data-theme="ling"] .filebtn,
+body[data-theme="ling"] .modal-actions button,
+body[data-theme="ling"] .apply-btn {
     /* 圓角弧度 */ border-radius: 4px;
     /* 元素陰影 */ box-shadow: none;
 }
-.icon-btn:hover,
-.filebtn:hover,
-.modal-actions button:hover {
+body[data-theme="ling"] .icon-btn:hover,
+body[data-theme="ling"] .filebtn:hover,
+body[data-theme="ling"] .modal-actions button:hover {
     /* 邊框顏色 */ border-color: #999;
     /* 文字顏色 */ color: #333;
 }
-.modal-actions button.primary {
+body[data-theme="ling"] .modal-actions button.primary {
     /* 背景設定 */ background: #333;
     /* 邊框顏色 */ border-color: #333;
 }
-.modal-actions button.primary:hover {
+body[data-theme="ling"] .modal-actions button.primary:hover {
     /* 背景設定 */ background: #000;
     /* 邊框顏色 */ border-color: #000;
 }
-.tag,
-.n-gallery-badge,
-.n-pet-chip {
+body[data-theme="ling"] .tag,
+body[data-theme="ling"] .n-gallery-badge,
+body[data-theme="ling"] .n-pet-chip {
     /* 圓角弧度 */ border-radius: 3px;
 }
-.theme-card {
+body[data-theme="ling"] .theme-card {
     /* 圓角弧度 */ border-radius: 6px;
     /* 元素陰影 */ box-shadow: none;
 }
-.theme-card.selected {
+body[data-theme="ling"] .theme-card.selected {
     /* 元素陰影 */ box-shadow: 0 0 0 2px rgba(85,172,238,.08);
 }
+body[data-theme="ling"] .info {
+    /* 背景設定 */ background: #fafafa;
+    /* 邊框設定 */ border: 1px solid #f0f0f0;
+}
+body[data-theme="ling"] .setting-group-title {
+    /* 字體粗細 */ font-weight: 500;
+    /* 字距設定 */ letter-spacing: 1px;
+}
+body[data-theme="ling"] .gallery-item {
+    /* 圓角弧度 */ border-radius: 5px;
+}
+body[data-theme="ling"] .gallery-item:hover {
+    /* 元素陰影 */ box-shadow: 0 5px 16px rgba(0,0,0,.08);
+}
+body[data-theme="ling"] .storage-bar {
+    /* 背景設定 */ background: #f1f1f1;
+}
+body[data-theme="ling"] .storage-bar-fill {
+    /* 背景設定 */ background: #55acee;
+}
+
+/* ========【語言切換】 設定 - 共用於所有主題 ======== */
 .language-switch {
     /* 顯示方式 */ display: flex;
     /* 垂直對齊 */ align-items: center;
@@ -3449,37 +3474,18 @@ body {
     /* 文字對齊 */ text-align: center;
     /* 字體大小 */ font-size: 11px;
     /* 字距設定 */ letter-spacing: .8px;
-    /* 文字顏色 */ color: #777;
-}
-.info {
-    /* 背景設定 */ background: #fafafa;
-    /* 邊框設定 */ border: 1px solid #f0f0f0;
-}
-.setting-group-title {
-    /* 字體粗細 */ font-weight: 500;
-    /* 字距設定 */ letter-spacing: 1px;
-}
-.gallery-item {
-    /* 圓角弧度 */ border-radius: 5px;
-}
-.gallery-item:hover {
-    /* 元素陰影 */ box-shadow: 0 5px 16px rgba(0,0,0,.08);
-}
-.storage-bar {
-    /* 背景設定 */ background: #f1f1f1;
-}
-.storage-bar-fill {
-    /* 背景設定 */ background: #55acee;
+    /* 文字顏色 */ color: var(--topbar-field-fg);
 }
 
-/* ========【響應式設定】 設定 - 窄螢幕側欄與品牌寬度最佳化 ======== */
+/* ========【響應式設定】 設定 - 窄螢幕側邊欄與品牌寬度最佳化 ======== */
 @media (max-width:900px) {
     .topbar-brand {
         /* 元素寬度 */ width: var(--sidebar-width);
         /* 最大寬度 */ max-width: none;
-        /* 內縮空間 */ padding: 0 12px;
-        /* 字體大小 */ font-size: 9px;
-        /* 字距設定 */ letter-spacing: 1.6px;
+        /* 左右內縮 */ padding-left: 8px;
+        /* 左右內縮 */ padding-right: 8px;
+        /* 字體大小 */ font-size: 10px;
+        /* 字距設定 */ letter-spacing: 1.1px;
     }
     .language-select {
         /* 最小寬度 */ min-width: 58px;
