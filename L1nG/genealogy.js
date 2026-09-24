@@ -129,6 +129,96 @@ let infoCardId = null;
 let currentThemeId = 'ling';
 let customColors = { c1: '#f0c050', c2: '#a878c8' };
 
+// ========【拖曳歷史】 設定 - 卡片與關係標籤共用 Ctrl+Z / Ctrl+Y ========
+const DRAG_HISTORY_LIMIT = 60;
+const dragHistory = {
+  undoStack: [],
+  redoStack: [],
+
+  push(entry) {
+    if (!entry) return;
+    this.undoStack.push(entry);
+    if (this.undoStack.length > DRAG_HISTORY_LIMIT) this.undoStack.shift();
+    this.redoStack.length = 0;
+  },
+
+  clear() {
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+  },
+
+  undo() {
+    const entry = this.undoStack.pop();
+    if (!entry) return false;
+    applyDragHistoryEntry(entry, 'before');
+    this.redoStack.push(entry);
+    return true;
+  },
+
+  redo() {
+    const entry = this.redoStack.pop();
+    if (!entry) return false;
+    applyDragHistoryEntry(entry, 'after');
+    this.undoStack.push(entry);
+    return true;
+  }
+};
+
+function cloneManualPositionMap(source) {
+  const copy = {};
+  Object.entries(source || {}).forEach(([id, pos]) => {
+    if (!pos || typeof pos !== 'object') return;
+    copy[id] = { x: Number(pos.x) || 0, y: Number(pos.y) || 0 };
+  });
+  return copy;
+}
+
+function captureLayoutHistoryState(fam, mode) {
+  ensureFamilyLayoutShape(fam);
+  return {
+    freeLayout: !!fam.freeLayout[mode],
+    manualPos: cloneManualPositionMap(fam.manualPos[mode])
+  };
+}
+
+function captureLabelHistoryState(key) {
+  const saved = db && db.labelPos ? db.labelPos[key] : null;
+  return saved ? { dx: Number(saved.dx) || 0, dy: Number(saved.dy) || 0 } : null;
+}
+
+function applyDragHistoryEntry(entry, stateKey) {
+  const state = entry[stateKey];
+  if (!state || !db) return;
+
+  if (entry.type === 'card-layout') {
+    const fam = db.families.find(item => item.id === entry.familyId);
+    if (!fam) return;
+    ensureFamilyLayoutShape(fam);
+    fam.freeLayout[entry.mode] = !!state.freeLayout;
+    fam.manualPos[entry.mode] = cloneManualPositionMap(state.manualPos);
+    save({ immediate: true });
+    if (db.currentId === entry.familyId && viewMode === entry.mode) {
+      render();
+      updateLayoutToggle();
+    }
+    return;
+  }
+
+  if (entry.type === 'relationship-label') {
+    if (!db.labelPos) db.labelPos = {};
+    if (state.offset) db.labelPos[entry.key] = { ...state.offset };
+    else delete db.labelPos[entry.key];
+    save({ immediate: true });
+    if (layoutCache) drawEdges();
+  }
+}
+
+function isNativeTextUndoTarget(target) {
+  if (!(target instanceof Element)) return false;
+  if (target.closest('[contenteditable="true"]')) return true;
+  return !!target.closest('input, textarea, select');
+}
+
 let editingPets = [];
 let editingPetIndex = -1;
 let editingPetAvatar = null;
@@ -341,6 +431,10 @@ const petMask = $('petMask');
 const photoMask = $('photoMask');
 const galleryViewerMask = $('galleryViewerMask');
 const galleryBrowserMask = $('galleryBrowserMask');
+const exportMask = $('exportMask');
+const exportCloseBtn = $('exportCloseBtn');
+const exportImageBtn = $('exportImageBtn');
+const exportJsonBtn = $('exportJsonBtn');
 const familyNameInput = $('familyName'), familySelect = $('familySelect');
 const searchInput = $('search'), stageFilter = $('stageFilter'), searchResults = $('searchResults');
 const rosterSearch = $('rosterSearch');
@@ -355,6 +449,8 @@ const sidebarBackdrop = $('sidebarBackdrop');
 const menuToggle = $('menuToggle');
 const smartGuideVertical = $('smartGuideVertical');
 const smartGuideHorizontal = $('smartGuideHorizontal');
+const smartSpacingHorizontal = $('smartSpacingHorizontal');
+const smartSpacingVertical = $('smartSpacingVertical');
 const themeGrid = $('themeGrid');
 const customColor1 = $('customColor1');
 const customColor2 = $('customColor2');
@@ -1167,6 +1263,7 @@ function applyViewMode(mode) {
   try { localStorage.setItem(MODE_KEY, mode); } catch(e){}
 }
 function toggleViewMode() {
+  dragHistory.clear();
   applyViewMode(viewMode === 'view' ? 'edit' : 'view');
   render();
   requestAnimationFrame(fitScreen);
@@ -1428,6 +1525,7 @@ if (restoreSampleBtn) {
     if (!ok) return;
     closeEditor();
     db = buildSample();
+    dragHistory.clear();
     normalizeAllSims(db);
     invalidateChildrenIndex();
     save({ immediate:true });
@@ -2052,10 +2150,12 @@ function drawEdges() {
       if (!pA || !pB) return;
       start = pairJoinPoint(pA, pB);
     } else {
-      start = cardAnchorToward(p0, a);
+      const childIsBelow = cardCenterY(a) >= cardCenterY(p0);
+      start = cardVerticalAnchor(p0, childIsBelow ? 'bottom' : 'top');
     }
 
-    const childAnchor = cardAnchorToward(a, start, true);
+    // 親子線只允許接到子女卡片的上／下正中央，不因水平拖曳改接左右側。
+    const childAnchor = cardVerticalAnchor(a, start.y <= cardCenterY(a) ? 'top' : 'bottom');
     const x1 = start.x;
     const y1 = start.y;
     const x2 = childAnchor.x;
@@ -2200,35 +2300,18 @@ function pairJoinPoint(a, b) {
   return { x: (ax + bx) / 2, y: (y1 + y2) / 2 };
 }
 
-// ========【族譜連線】 設定 - 依相對位置取得卡片邊緣錨點 ========
-function cardAnchorToward(card, target, targetIsPoint = false) {
+// ========【族譜連線】 設定 - 親子主線固定使用卡片上下正中央 ========
+function cardVerticalAnchor(card, side) {
   const { W: NODE_W, H: NODE_H } = getDims();
-  const cx = card.x + NODE_W / 2 + PAD;
-  const cy = card.y + NODE_H / 2 + PAD;
-
-  let tx, ty;
-  if (targetIsPoint) {
-    tx = target.x;
-    ty = target.y;
-  } else {
-    tx = target.x + NODE_W / 2 + PAD;
-    ty = target.y + NODE_H / 2 + PAD;
-  }
-
-  const dx = tx - cx;
-  const dy = ty - cy;
-
-  if (Math.abs(dx) > Math.abs(dy)) {
-    return {
-      x: dx >= 0 ? card.x + NODE_W + PAD : card.x + PAD,
-      y: cy
-    };
-  }
-
   return {
-    x: cx,
-    y: dy >= 0 ? card.y + NODE_H + PAD : card.y + PAD
+    x: card.x + NODE_W / 2 + PAD,
+    y: side === 'top' ? card.y + PAD : card.y + NODE_H + PAD
   };
+}
+
+function cardCenterY(card) {
+  const { H: NODE_H } = getDims();
+  return card.y + NODE_H / 2 + PAD;
 }
 
 function pairPath(a, b) {
@@ -3036,6 +3119,7 @@ labelsSvg.addEventListener('pointerdown', e => {
     key, el: g, baseX, baseY,
     startX: e.clientX, startY: e.clientY,
     startDx: cur.dx || 0, startDy: cur.dy || 0,
+    beforeOffset: captureLabelHistoryState(key),
     moved: false, pointerId: e.pointerId
   };
   try { g.setPointerCapture(e.pointerId); } catch(_){}
@@ -3072,16 +3156,27 @@ const finishLabelDrag = e => {
   if (!labelDrag) return;
   if (e && labelDrag.pointerId !== e.pointerId) return;
   labelDrag.el.classList.remove('dragging');
-  if (labelDrag.moved) save();
+  if (labelDrag.moved) {
+    const afterOffset = captureLabelHistoryState(labelDrag.key);
+    dragHistory.push({
+      type: 'relationship-label',
+      key: labelDrag.key,
+      before: { offset: labelDrag.beforeOffset },
+      after: { offset: afterOffset }
+    });
+    save();
+  }
   labelDrag = null;
 };
 labelsSvg.addEventListener('pointerup', finishLabelDrag);
 labelsSvg.addEventListener('pointercancel', finishLabelDrag);
 
-// ========【智慧對齊輔助線】 設定 - 拖曳卡片時比較邊緣與中心位置 ========
+// ========【智慧對齊與等距吸附】 設定 - 對齊邊緣／中心，同時支援水平與垂直等距 ========
 function hideSmartGuides() {
   if (smartGuideVertical) smartGuideVertical.classList.remove('show');
   if (smartGuideHorizontal) smartGuideHorizontal.classList.remove('show');
+  if (smartSpacingHorizontal) smartSpacingHorizontal.classList.remove('show');
+  if (smartSpacingVertical) smartSpacingVertical.classList.remove('show');
 }
 
 function showSmartGuide(axis, stagePosition) {
@@ -3098,7 +3193,7 @@ function showSmartGuide(axis, stagePosition) {
   guide.classList.add('show');
 }
 
-function getSmartSnap(id, rawX, rawY) {
+function getAlignmentSnap(id, rawX, rawY) {
   const { W: NODE_W, H: NODE_H } = getDims();
   const threshold = GUIDE_SNAP_PX / Math.max(scale, 0.001);
   const draggedX = [rawX, rawX + NODE_W / 2, rawX + NODE_W];
@@ -3115,7 +3210,7 @@ function getSmartSnap(id, rawX, rawY) {
       const delta = targetX[i] - draggedX[i];
       const distance = Math.abs(delta);
       if (distance <= threshold && (!bestX || distance < bestX.distance)) {
-        bestX = { delta, distance, guide: targetX[i] };
+        bestX = { value: rawX + delta, distance, guide: targetX[i] };
       }
     }
 
@@ -3123,16 +3218,278 @@ function getSmartSnap(id, rawX, rawY) {
       const delta = targetY[i] - draggedY[i];
       const distance = Math.abs(delta);
       if (distance <= threshold && (!bestY || distance < bestY.distance)) {
-        bestY = { delta, distance, guide: targetY[i] };
+        bestY = { value: rawY + delta, distance, guide: targetY[i] };
       }
     }
   });
 
+  return { x: bestX, y: bestY };
+}
+
+function pickCloserSnap(alignmentCandidate, spacingCandidate) {
+  if (!alignmentCandidate) return spacingCandidate;
+  if (!spacingCandidate) return alignmentCandidate;
+  return spacingCandidate.distance < alignmentCandidate.distance
+    ? spacingCandidate
+    : alignmentCandidate;
+}
+
+function buildHorizontalSpacingGuide(firstStart, firstEnd, secondStart, secondEnd, centerY, gap) {
   return {
-    x: rawX + (bestX ? bestX.delta : 0),
-    y: rawY + (bestY ? bestY.delta : 0),
-    guideX: bestX ? bestX.guide : null,
-    guideY: bestY ? bestY.guide : null
+    axis: 'x',
+    gap,
+    cross: centerY,
+    segments: [
+      { start: firstStart, end: firstEnd },
+      { start: secondStart, end: secondEnd }
+    ]
+  };
+}
+
+function buildVerticalSpacingGuide(firstStart, firstEnd, secondStart, secondEnd, centerX, gap) {
+  return {
+    axis: 'y',
+    gap,
+    cross: centerX,
+    segments: [
+      { start: firstStart, end: firstEnd },
+      { start: secondStart, end: secondEnd }
+    ]
+  };
+}
+
+function getHorizontalEqualSpacingSnap(id, rawX, rawY) {
+  const { W: NODE_W, H: NODE_H } = getDims();
+  const threshold = GUIDE_SNAP_PX / Math.max(scale, 0.001);
+  const rowTolerance = (GUIDE_SNAP_PX * 1.5) / Math.max(scale, 0.001);
+  const draggedCenterY = rawY + NODE_H / 2;
+  const rowNodes = [];
+
+  layoutCache.pos.forEach((p, otherId) => {
+    if (otherId === id) return;
+    const centerY = p.y + NODE_H / 2;
+    if (Math.abs(centerY - draggedCenterY) <= rowTolerance) {
+      rowNodes.push({ id: otherId, x: p.x, y: p.y, centerY });
+    }
+  });
+
+  rowNodes.sort((a, b) => a.x - b.x);
+  let best = null;
+
+  function consider(value, gap, guide) {
+    const distance = Math.abs(value - rawX);
+    if (distance > threshold) return;
+    if (!best || distance < best.distance) {
+      best = { value, distance, spacingGuide: guide };
+    }
+  }
+
+  for (let i = 0; i < rowNodes.length - 1; i += 1) {
+    const left = rowNodes[i];
+    const right = rowNodes[i + 1];
+    if (Math.abs(left.centerY - right.centerY) > rowTolerance) continue;
+
+    const existingGap = right.x - (left.x + NODE_W);
+    const rowCenterY = (left.centerY + right.centerY + draggedCenterY) / 3;
+
+    // 在既有兩張卡片的左側或右側延續相同間距。
+    if (existingGap >= 0) {
+      const rightTarget = right.x + NODE_W + existingGap;
+      consider(
+        rightTarget,
+        existingGap,
+        buildHorizontalSpacingGuide(
+          left.x + NODE_W,
+          right.x,
+          right.x + NODE_W,
+          rightTarget,
+          rowCenterY,
+          existingGap
+        )
+      );
+
+      const leftTarget = left.x - NODE_W - existingGap;
+      consider(
+        leftTarget,
+        existingGap,
+        buildHorizontalSpacingGuide(
+          leftTarget + NODE_W,
+          left.x,
+          left.x + NODE_W,
+          right.x,
+          rowCenterY,
+          existingGap
+        )
+      );
+    }
+
+    // 拖到兩張卡片之間時，平均分配左右兩段剩餘空間。
+    const available = right.x - (left.x + NODE_W);
+    if (available >= NODE_W) {
+      const middleGap = (available - NODE_W) / 2;
+      const middleTarget = left.x + NODE_W + middleGap;
+      consider(
+        middleTarget,
+        middleGap,
+        buildHorizontalSpacingGuide(
+          left.x + NODE_W,
+          middleTarget,
+          middleTarget + NODE_W,
+          right.x,
+          rowCenterY,
+          middleGap
+        )
+      );
+    }
+  }
+
+  return best;
+}
+
+function getVerticalEqualSpacingSnap(id, rawX, rawY) {
+  const { W: NODE_W, H: NODE_H } = getDims();
+  const threshold = GUIDE_SNAP_PX / Math.max(scale, 0.001);
+  const columnTolerance = (GUIDE_SNAP_PX * 1.5) / Math.max(scale, 0.001);
+  const draggedCenterX = rawX + NODE_W / 2;
+  const columnNodes = [];
+
+  layoutCache.pos.forEach((p, otherId) => {
+    if (otherId === id) return;
+    const centerX = p.x + NODE_W / 2;
+    if (Math.abs(centerX - draggedCenterX) <= columnTolerance) {
+      columnNodes.push({ id: otherId, x: p.x, y: p.y, centerX });
+    }
+  });
+
+  columnNodes.sort((a, b) => a.y - b.y);
+  let best = null;
+
+  function consider(value, gap, guide) {
+    const distance = Math.abs(value - rawY);
+    if (distance > threshold) return;
+    if (!best || distance < best.distance) {
+      best = { value, distance, spacingGuide: guide };
+    }
+  }
+
+  for (let i = 0; i < columnNodes.length - 1; i += 1) {
+    const top = columnNodes[i];
+    const bottom = columnNodes[i + 1];
+    if (Math.abs(top.centerX - bottom.centerX) > columnTolerance) continue;
+
+    const existingGap = bottom.y - (top.y + NODE_H);
+    const columnCenterX = (top.centerX + bottom.centerX + draggedCenterX) / 3;
+
+    // 在既有兩張卡片的上方或下方延續相同間距。
+    if (existingGap >= 0) {
+      const bottomTarget = bottom.y + NODE_H + existingGap;
+      consider(
+        bottomTarget,
+        existingGap,
+        buildVerticalSpacingGuide(
+          top.y + NODE_H,
+          bottom.y,
+          bottom.y + NODE_H,
+          bottomTarget,
+          columnCenterX,
+          existingGap
+        )
+      );
+
+      const topTarget = top.y - NODE_H - existingGap;
+      consider(
+        topTarget,
+        existingGap,
+        buildVerticalSpacingGuide(
+          topTarget + NODE_H,
+          top.y,
+          top.y + NODE_H,
+          bottom.y,
+          columnCenterX,
+          existingGap
+        )
+      );
+    }
+
+    // 拖到兩張卡片之間時，平均分配上下兩段剩餘空間。
+    const available = bottom.y - (top.y + NODE_H);
+    if (available >= NODE_H) {
+      const middleGap = (available - NODE_H) / 2;
+      const middleTarget = top.y + NODE_H + middleGap;
+      consider(
+        middleTarget,
+        middleGap,
+        buildVerticalSpacingGuide(
+          top.y + NODE_H,
+          middleTarget,
+          middleTarget + NODE_H,
+          bottom.y,
+          columnCenterX,
+          middleGap
+        )
+      );
+    }
+  }
+
+  return best;
+}
+
+function showEqualSpacingGuide(guideData) {
+  if (!guideData) return;
+  const target = guideData.axis === 'x' ? smartSpacingHorizontal : smartSpacingVertical;
+  if (!target) return;
+
+  const first = target.querySelector('.smart-spacing-first');
+  const second = target.querySelector('.smart-spacing-second');
+  const label = target.querySelector('.smart-spacing-label');
+  if (!first || !second || !label) return;
+
+  const firstStart = guideData.segments[0].start + PAD;
+  const firstEnd = guideData.segments[0].end + PAD;
+  const secondStart = guideData.segments[1].start + PAD;
+  const secondEnd = guideData.segments[1].end + PAD;
+  const gapText = `${Math.round(Math.max(0, guideData.gap))}`;
+
+  if (guideData.axis === 'x') {
+    const y = guideData.cross + PAD;
+    first.style.left = `${firstStart}px`;
+    first.style.top = `${y}px`;
+    first.style.width = `${Math.max(0, firstEnd - firstStart)}px`;
+    second.style.left = `${secondStart}px`;
+    second.style.top = `${y}px`;
+    second.style.width = `${Math.max(0, secondEnd - secondStart)}px`;
+    label.style.left = `${(secondStart + secondEnd) / 2}px`;
+    label.style.top = `${y - 3}px`;
+  } else {
+    const x = guideData.cross + PAD;
+    first.style.left = `${x}px`;
+    first.style.top = `${firstStart}px`;
+    first.style.height = `${Math.max(0, firstEnd - firstStart)}px`;
+    second.style.left = `${x}px`;
+    second.style.top = `${secondStart}px`;
+    second.style.height = `${Math.max(0, secondEnd - secondStart)}px`;
+    label.style.left = `${x + 8}px`;
+    label.style.top = `${(secondStart + secondEnd) / 2}px`;
+  }
+
+  label.textContent = gapText;
+  target.classList.add('show');
+}
+
+function getSmartSnap(id, rawX, rawY) {
+  const alignment = getAlignmentSnap(id, rawX, rawY);
+  const horizontalSpacing = getHorizontalEqualSpacingSnap(id, rawX, rawY);
+  const verticalSpacing = getVerticalEqualSpacingSnap(id, rawX, rawY);
+  const bestX = pickCloserSnap(alignment.x, horizontalSpacing);
+  const bestY = pickCloserSnap(alignment.y, verticalSpacing);
+
+  return {
+    x: bestX ? bestX.value : rawX,
+    y: bestY ? bestY.value : rawY,
+    guideX: bestX && bestX.guide !== undefined ? bestX.guide : null,
+    guideY: bestY && bestY.guide !== undefined ? bestY.guide : null,
+    spacingX: bestX && bestX.spacingGuide ? bestX.spacingGuide : null,
+    spacingY: bestY && bestY.spacingGuide ? bestY.spacingGuide : null
   };
 }
 
@@ -3156,25 +3513,35 @@ nodes.addEventListener('pointerdown', e => {
     return;
   }
   ensureFamilyLayoutShape(fam);
-  const manualPos = fam.manualPos[viewMode];
-  if (!fam.freeLayout[viewMode]) {
-    fam.freeLayout[viewMode] = true;
-    layoutCache.pos.forEach((p, sid) => { manualPos[sid] = {x:p.x, y:p.y}; });
-    updateLayoutToggle();
-  }
+  const dragMode = viewMode;
+  const beforeLayoutState = captureLayoutHistoryState(fam, dragMode);
+  const manualPos = fam.manualPos[dragMode];
   const sim = db.sims[id];
   if (!sim) return;
-  if (!manualPos[id]) {
-    const p = layoutCache.pos.get(id);
-    if (p) manualPos[id] = {x:p.x, y:p.y};
-  }
-  const startPos = {...manualPos[id]};
+  const initialPos = manualPos[id] || layoutCache.pos.get(id);
+  if (!initialPos) return;
+  const startPos = { x: initialPos.x, y: initialPos.y };
   const sx = e.clientX, sy = e.clientY;
   let moved = false;
+  let dragInitialized = false;
   const onMove = ev => {
     const dx = ev.clientX - sx, dy = ev.clientY - sy;
-    if (!moved && Math.hypot(dx, dy) > 3) { moved = true; el.classList.add('dragging'); }
+    if (!moved && Math.hypot(dx, dy) > 3) {
+      moved = true;
+      el.classList.add('dragging');
+    }
     if (!moved) return;
+
+    // 只有真正開始拖曳時才切換自由排列；單純點擊卡片不改變佈局模式。
+    if (!dragInitialized) {
+      if (!fam.freeLayout[dragMode]) {
+        fam.freeLayout[dragMode] = true;
+        layoutCache.pos.forEach((p, sid) => { manualPos[sid] = { x:p.x, y:p.y }; });
+        updateLayoutToggle();
+      }
+      if (!manualPos[id]) manualPos[id] = { ...startPos };
+      dragInitialized = true;
+    }
     const rawX = startPos.x + dx / scale;
     const rawY = startPos.y + dy / scale;
     const snapped = getSmartSnap(id, rawX, rawY);
@@ -3189,6 +3556,8 @@ nodes.addEventListener('pointerdown', e => {
     hideSmartGuides();
     if (snapped.guideX !== null) showSmartGuide('x', snapped.guideX);
     if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
+    if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
+    if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
 
     scheduleEdgeRedraw();
   };
@@ -3198,8 +3567,18 @@ nodes.addEventListener('pointerdown', e => {
     document.removeEventListener('pointercancel', onUp);
     el.classList.remove('dragging');
     hideSmartGuides();
-    if (moved) { save(); expandStageToFit(); }
-    else {
+    if (moved) {
+      const afterLayoutState = captureLayoutHistoryState(fam, dragMode);
+      dragHistory.push({
+        type: 'card-layout',
+        familyId: fam.id,
+        mode: dragMode,
+        before: beforeLayoutState,
+        after: afterLayoutState
+      });
+      save();
+      expandStageToFit();
+    } else {
       if (viewMode === 'view') openInfoCard(id);
       else openEditor(id);
     }
@@ -3307,6 +3686,7 @@ function refreshFamilyUI() {
   syncNavSelectControl('familySelect');
 }
 familySelect.onchange = () => {
+  dragHistory.clear();
   db.currentId = familySelect.value;
   addMemberSelection.clear();
   removeMemberSelection.clear();
@@ -3339,6 +3719,7 @@ $('newFamilyBtn').onclick = async () => {
     manualPos: { view: {}, edit: {} }, locked: false
   };
   db.families.push(fam);
+  dragHistory.clear();
   db.currentId = fam.id;
   addMemberSelection.clear();
   removeMemberSelection.clear();
@@ -3350,6 +3731,7 @@ $('delFamilyBtn').onclick = async () => {
   const fam = currentFamily();
   if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n（家族內所有模擬市民仍保留在模擬市民池中）`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
   db.families = db.families.filter(f => f.id !== fam.id);
+  dragHistory.clear();
   db.currentId = db.families[0].id;
   addMemberSelection.clear();
   removeMemberSelection.clear();
@@ -4397,6 +4779,179 @@ async function exportJSON() {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+function openExportPanel() {
+  if (!exportMask) return;
+  exportMask.classList.add('show');
+  exportMask.setAttribute('aria-hidden', 'false');
+}
+
+function closeExportPanel() {
+  if (!exportMask) return;
+  exportMask.classList.remove('show');
+  exportMask.setAttribute('aria-hidden', 'true');
+}
+
+function getSelectedExportImageSize() {
+  const checked = document.querySelector('input[name="exportImageSize"]:checked');
+  return checked ? checked.value : 'standard';
+}
+
+function collectExportStylesText() {
+  return Array.from(document.styleSheets).map(sheet => {
+    try {
+      return Array.from(sheet.cssRules || []).map(rule => rule.cssText).join('\n');
+    } catch (err) {
+      return '';
+    }
+  }).join('\n');
+}
+
+function parseCssUrlValue(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const m = raw.match(/^url\((['"]?)(.*?)\)$/);
+  return m ? m[2] : '';
+}
+
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function urlToDataURL(url) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return blobToDataURL(blob);
+}
+
+async function inlineExportResources(root) {
+  const imgs = [...root.querySelectorAll('img[src]')];
+  for (const img of imgs) {
+    const src = img.getAttribute('src') || '';
+    if (!src || src.startsWith('data:')) continue;
+    try {
+      const dataUrl = await urlToDataURL(src);
+      img.setAttribute('src', dataUrl);
+    } catch (err) {}
+  }
+
+  const exportViewport = root.matches('#viewport') ? root : root.querySelector('#viewport');
+  if (exportViewport) {
+    const bgValue = exportViewport.style.getPropertyValue('--custom-bg');
+    const bgUrl = parseCssUrlValue(bgValue);
+    if (bgUrl && !bgUrl.startsWith('data:')) {
+      try {
+        const dataUrl = await urlToDataURL(bgUrl);
+        exportViewport.style.setProperty('--custom-bg', `url("${dataUrl}")`);
+      } catch (err) {}
+    }
+  }
+}
+
+function waitForImageLoad(img) {
+  if (img.complete && img.naturalWidth) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = reject;
+  });
+}
+
+function sanitizeDownloadName(name) {
+  return String(name || 'genealogy')
+    .replace(/[\/:*?"<>|]/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim() || 'genealogy';
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1200);
+}
+
+async function exportGenealogyImage(sizeKey = 'standard') {
+  const factorMap = { standard: 1, hd: 2, uhd: 3 };
+  const factor = factorMap[sizeKey] || 1;
+  const stageWidth = Math.max(1, Math.ceil(parseFloat(stage.style.width) || stage.offsetWidth || 1));
+  const stageHeight = Math.max(1, Math.ceil(parseFloat(stage.style.height) || stage.offsetHeight || 1));
+  const family = currentFamily();
+  const familyName = displayDataText((family && family.name) || uiText('家族'), family || null);
+  const fileBase = sanitizeDownloadName(`${familyName}_族譜`);
+
+  const exportViewport = viewport.cloneNode(true);
+  exportViewport.id = 'exportViewport';
+  exportViewport.classList.remove('dragging');
+  exportViewport.style.width = `${stageWidth}px`;
+  exportViewport.style.height = `${stageHeight}px`;
+  exportViewport.style.minWidth = `${stageWidth}px`;
+  exportViewport.style.minHeight = `${stageHeight}px`;
+  exportViewport.style.overflow = 'hidden';
+
+  const exportStage = exportViewport.querySelector('#stage');
+  if (exportStage) {
+    exportStage.classList.remove('is-transforming');
+    exportStage.style.transform = 'none';
+    exportStage.style.transformOrigin = 'top left';
+  }
+
+  const guides = exportViewport.querySelector('#smartGuides');
+  if (guides) guides.remove();
+
+  await inlineExportResources(exportViewport);
+
+  const inlineStyles = collectExportStylesText();
+  const bodyTheme = document.body.getAttribute('data-theme') || '';
+  const bodyClass = document.body.className || '';
+  const exportMarkup = `
+    <body xmlns="http://www.w3.org/1999/xhtml" data-theme="${esc(bodyTheme)}" class="${esc(bodyClass)}" style="margin:0;padding:0;">
+      ${exportViewport.outerHTML}
+    </body>`;
+
+  const svgMarkup = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${stageWidth}" height="${stageHeight}" viewBox="0 0 ${stageWidth} ${stageHeight}">
+      <foreignObject x="0" y="0" width="100%" height="100%">
+        <style>
+          html, body { margin: 0; padding: 0; }
+          ${inlineStyles}
+        </style>
+        ${exportMarkup}
+      </foreignObject>
+    </svg>`;
+
+  const svgBlob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+  const svgUrl = URL.createObjectURL(svgBlob);
+
+  try {
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = svgUrl;
+    await waitForImageLoad(img);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(stageWidth * factor);
+    canvas.height = Math.round(stageHeight * factor);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(result => result ? resolve(result) : reject(new Error('canvas.toBlob failed')), 'image/png');
+    });
+
+    const sizeLabel = sizeKey === 'uhd' ? '超高畫質' : sizeKey === 'hd' ? '高畫質' : '標準';
+    downloadBlob(blob, `${fileBase}_${sizeLabel}.png`);
+  } finally {
+    URL.revokeObjectURL(svgUrl);
+  }
+}
+
 function migrate(raw) {
   if (raw && raw.sims && Array.isArray(raw.families)) {
     // 舊版內建高斯範例沒有 meta 標記；只有完整符合固定 ID 時才補上範例旗標。
@@ -4526,6 +5081,7 @@ async function importJSON(file) {
       const incomingBg = raw.bgSettings;
       const preparedResult = prepareDatabase(raw);
       db = preparedResult.prepared;
+      dragHistory.clear();
 
       if (_idbAvailable) {
         const tasks = [];
@@ -4572,6 +5128,21 @@ $('btnDelete').onclick = () => editingId && deleteChar(editingId);
 mask.onclick = e => { if (e.target === mask) closeEditor(); };
 
 document.addEventListener('keydown', e => {
+  const key = e.key.toLowerCase();
+  const modifier = e.ctrlKey || e.metaKey;
+
+  // 拖曳復原只在非文字編輯欄位攔截，輸入框仍保留瀏覽器原生 Ctrl+Z。
+  if (modifier && !isNativeTextUndoTarget(e.target)) {
+    if (key === 'z' && !e.shiftKey) {
+      if (dragHistory.undo()) e.preventDefault();
+      return;
+    }
+    if ((key === 'z' && e.shiftKey) || key === 'y') {
+      if (dragHistory.redo()) e.preventDefault();
+      return;
+    }
+  }
+
   if (e.key === 'Escape') { closeTopModal(); return; }
   if (galleryViewerMask.classList.contains('show')) {
     if (e.key === 'ArrowLeft') { e.preventDefault(); viewerNav(-1); return; }
@@ -4689,7 +5260,28 @@ document.addEventListener('click', e => {
   if (wrap && !wrap.contains(e.target)) hideTopbarSearchResults();
 });
 
-$('exportBtn').onclick = exportJSON;
+$('exportBtn').onclick = openExportPanel;
+if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
+if (exportMask) exportMask.onclick = e => { if (e.target === exportMask) closeExportPanel(); };
+if (exportJsonBtn) exportJsonBtn.onclick = async () => { closeExportPanel(); await exportJSON(); };
+if (exportImageBtn) exportImageBtn.onclick = async () => {
+  const originalText = exportImageBtn.textContent;
+  exportImageBtn.disabled = true;
+  exportJsonBtn && (exportJsonBtn.disabled = true);
+  try {
+    exportImageBtn.textContent = uiText('正在匯出族譜圖片…');
+    await exportGenealogyImage(getSelectedExportImageSize());
+    closeExportPanel();
+    showToast('族譜圖片匯出完成');
+  } catch (err) {
+    console.error(err);
+    showToast('族譜圖片匯出失敗');
+  } finally {
+    exportImageBtn.textContent = originalText;
+    exportImageBtn.disabled = false;
+    exportJsonBtn && (exportJsonBtn.disabled = false);
+  }
+};
 $('importInput').onchange = e => {
   const f = e.target.files[0];
   if (f) importJSON(f);
@@ -4831,6 +5423,44 @@ const LING_I18N = (() => {
   /* ========【簡中介面詞彙】 設定 - 台灣用語對應簡中常用介面詞彙 ======== */
   const ZH_HANS_UI_PHRASES = {"外觀設定":"外观设置","設定":"设置","預設":"默认","自訂":"自定义","套用自訂":"应用自定义","漸層":"渐变","相簿":"相册","儲存":"保存","資料":"数据","搜尋":"搜索","支援":"支持","滑鼠":"鼠标","螢幕":"屏幕","貼上":"粘贴","剪貼簿":"剪贴板","檔案":"文件","快取":"缓存","記憶體":"内存","匯入":"导入","匯出":"导出","相容":"兼容","拖曳":"拖动","新增":"新建","點選":"点击","上傳":"上传","下拉選單":"下拉列表","檢視器":"查看器","檢視模式":"查看模式","檢視所有":"查看所有","畫質":"质量","畫質設定":"画质档位","壓縮品質":"压缩档位","目前品質":"当前档位","節省空間":"省空间","高畫質":"高清","原始圖片":"原图","不壓縮 · 保留原始格式與畫質":"不压缩 · 保持原始格式与质量","顯示方式":"适应方式","填滿（裁切超出部分）":"填充（裁剪超出部分）","裁切":"裁剪","重複排列":"平铺","儲存空間使用量":"存储用量","計算中":"正在计算","目前家族":"当前家族","目前":"当前","即時":"实时","頂端":"顶部","首次開啟":"首次打开","開啟":"打开","關閉":"关闭","彈出視窗":"弹窗","網格":"网格","來源模擬市民":"来源模拟市民","模擬市民篩選":"模拟市民筛选","模擬市民名稱":"模拟市民名称","模擬市民相簿":"模拟市民相册","圖片編輯視窗":"图片编辑器","圖片檢視器":"图片查看器","數十 MB":"数十 MB","localStorage 僅儲存索引":"localStorage 只保存索引","側邊欄":"侧边栏","備註":"备注","資訊":"信息","選單":"菜单","清單":"列表","可在外觀設定中檢視":"外观设定里可查看","這裡":"这里","移除嗎":"移除吗","標註":"标注","佈局":"布局","檢視":"查看","模擬市民":"模拟市民","非同步":"异步","啟動":"启动","重設":"重置","堆疊":"栈"};
   const ZH_HANS_UI_KEYS = Object.keys(ZH_HANS_UI_PHRASES).sort((a,b) => b.length - a.length);
+
+Object.assign(ZH_HANS_EXACT, {
+  '匯出資料': '导出资料',
+  '可選擇匯出目前完整族譜圖片，或匯出 JSON 備份。': '可选择导出当前完整族谱图片，或导出 JSON 备份。',
+  '族譜圖片': '族谱图片',
+  '匯出目前完整族譜畫面，不受目前縮放或平移視角限制。': '导出当前完整族谱画面，不受当前缩放或平移视角限制。',
+  '標準': '标准',
+  '輸出目前完整族譜尺寸': '输出当前完整族谱尺寸',
+  '輸出 2× 尺寸，適合一般分享與保存': '输出 2× 尺寸，适合一般分享与保存',
+  '超高畫質': '超高清',
+  '輸出 3× 尺寸，適合高解析保存': '输出 3× 尺寸，适合高解析保存',
+  '匯出族譜圖片': '导出族谱图片',
+  'JSON 備份': 'JSON 备份',
+  '保留完整族譜資料與圖片，可再次匯入本工具繼續編輯。': '保留完整族谱数据与图片，可再次导入本工具继续编辑。',
+  'JSON 備份會包含目前族譜資料，並將已儲存在瀏覽器中的圖片一併轉回 base64。': 'JSON 备份会包含当前族谱数据，并将已保存在浏览器中的图片一并转回 base64。',
+  '正在匯出族譜圖片…': '正在导出族谱图片…',
+  '族譜圖片匯出完成': '族谱图片导出完成',
+  '族譜圖片匯出失敗': '族谱图片导出失败'
+});
+
+Object.assign(EN, {
+  '匯出資料': 'Export Data',
+  '可選擇匯出目前完整族譜圖片，或匯出 JSON 備份。': 'Choose to export the full genealogy image or a JSON backup.',
+  '族譜圖片': 'Genealogy Image',
+  '匯出目前完整族譜畫面，不受目前縮放或平移視角限制。': 'Export the complete genealogy canvas, regardless of the current zoom or pan.',
+  '標準': 'Standard',
+  '輸出目前完整族譜尺寸': 'Export at the full current genealogy size.',
+  '輸出 2× 尺寸，適合一般分享與保存': 'Export at 2× size, suitable for sharing and archiving.',
+  '超高畫質': 'Ultra HD',
+  '輸出 3× 尺寸，適合高解析保存': 'Export at 3× size, suitable for high-resolution archiving.',
+  '匯出族譜圖片': 'Export Genealogy Image',
+  'JSON 備份': 'JSON Backup',
+  '保留完整族譜資料與圖片，可再次匯入本工具繼續編輯。': 'Preserves the complete genealogy data and images so you can import and continue editing later.',
+  'JSON 備份會包含目前族譜資料，並將已儲存在瀏覽器中的圖片一併轉回 base64。': 'The JSON backup includes the current genealogy data and converts browser-stored images back to base64.',
+  '正在匯出族譜圖片…': 'Exporting genealogy image…',
+  '族譜圖片匯出完成': 'Genealogy image exported',
+  '族譜圖片匯出失敗': 'Failed to export genealogy image'
+});
 
   /* 圖示已改為 SVG；這裡只清理舊版翻譯資料可能殘留的表情符號。 */
   const LEGACY_EMOJI_PREFIX = /^[\s]*(?:[\u2600-\u27BF]|[\u{1F000}-\u{1FAFF}])+[\uFE0F\u200D\s]*/u;
@@ -5047,4 +5677,7 @@ They will remain in the global Sim pool.`;
 LING_I18N.init();
 setupTopbarNavSelects();
 observeSharedNativeSelectChevrons();
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && exportMask && exportMask.classList.contains('show')) closeExportPanel();
+});
 init();
