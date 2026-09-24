@@ -5145,3 +5145,112 @@ body:not([data-theme="midnight"]) select {
         /* 小螢幕固定最小槽位 */ min-width: 118px;
     }
 }
+
+/* ========【人物資訊語意圖示】 設定 - 種族、存歿、寵物使用可直接辨識的 SVG ======== */
+.icon-paw {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/paw.svg");
+}
+.icon-tombstone {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/tombstone.svg");
+}
+.icon-ghost-symbol {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/ghost-symbol.svg");
+}
+.icon-alien-head {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/alien-head.svg");
+}
+.icon-vampire-fangs {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/vampire-fangs.svg");
+}
+.icon-wolf-head {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/wolf-head.svg");
+}
+.icon-mermaid-tail {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/mermaid-tail.svg");
+}
+.icon-fairy-wings {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../html%20icons/fairy-wings.svg");
+}
+
+/* ========【全部模擬市民】 修正 - 保留 Genealogy 內部清單層次，不套成頂部導覽的純白結果列 ======== */
+:root,
+body[data-theme="ling"] {
+    /* L1nG 晴空人物列背景 */ --genealogy-roster-item-bg: #f8fafc;
+    /* L1nG 晴空人物列懸停 */ --genealogy-roster-item-hover: #f1f5f9;
+}
+body[data-theme="sage"] {
+    /* 森霧鼠尾草人物列背景 */ --genealogy-roster-item-bg: #f4f8f3;
+    /* 森霧鼠尾草人物列懸停 */ --genealogy-roster-item-hover: #ebf2ea;
+}
+body[data-theme="rose"] {
+    /* 莓果薄暮人物列背景 */ --genealogy-roster-item-bg: #fff5f8;
+    /* 莓果薄暮人物列懸停 */ --genealogy-roster-item-hover: #f9eaf0;
+}
+body[data-theme="amber"] {
+    /* 琥珀紙頁人物列背景 */ --genealogy-roster-item-bg: #fff9ef;
+    /* 琥珀紙頁人物列懸停 */ --genealogy-roster-item-hover: #f8eedc;
+}
+body[data-theme="midnight"] {
+    /* 午夜靛藍人物列背景 */ --genealogy-roster-item-bg: #1c2530;
+    /* 午夜靛藍人物列懸停 */ --genealogy-roster-item-hover: #25313e;
+}
+.roster-item {
+    /* 使用 Genealogy 專屬人物列背景 */ background: var(--genealogy-roster-item-bg, var(--panel-item));
+    /* 背景切換動畫 */ transition: background-color .15s ease;
+}
+.roster-item:hover {
+    /* 清單懸停保持同主題柔和層次 */ background: var(--genealogy-roster-item-hover, var(--panel-item-hover));
+}
+
+/* ========【人物資訊列】 修正 - SVG 保持真正 HTML，不再被 escape 成 <span> 純文字 ======== */
+.roster-meta {
+    /* 使用彈性排列讓 SVG 與文字保持同一基線 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 4px;
+    /* 不自動換行，維持原本單列資訊 */ flex-wrap: nowrap;
+    /* 允許內容縮小 */ min-width: 0;
+    /* 超出人物列時隱藏 */ overflow: hidden;
+    /* 文字顏色 */ color: var(--sub);
+    /* 字體大小 */ font-size: 11px;
+    /* 單行顯示 */ white-space: nowrap;
+}
+.roster-meta-part {
+    /* SVG 與文字並排 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* ICON 與文字距離 */ gap: 3px;
+    /* 允許欄位縮小 */ min-width: 0;
+    /* 一般欄位不強制撐滿 */ flex: 0 1 auto;
+}
+.roster-meta-part > span:last-child:not(.l1ng-icon) {
+    /* 過長人物資訊隱藏 */ overflow: hidden;
+    /* 過長人物資訊使用省略號 */ text-overflow: ellipsis;
+    /* 維持單行 */ white-space: nowrap;
+}
+.roster-meta-part .l1ng-icon {
+    /* 資訊 SVG 不被文字壓縮 */ flex-shrink: 0;
+    /* 資訊 SVG 稍微提高辨識度 */ font-size: 1.05em;
+}
+.roster-meta-separator {
+    /* 分隔點不被壓縮 */ flex-shrink: 0;
+    /* 分隔點透明度 */ opacity: .58;
+}
+.roster-meta-gender {
+    /* 性別圖示固定保留 */ flex-shrink: 0;
+}
+
+/* ========【人物狀態圖示】 設定 - 在世、已故、幽靈使用不同語意色 ======== */
+.roster-badge.status-alive {
+    /* 在世圖示使用柔和綠色 */ color: #5f8a69;
+}
+.roster-badge.status-dead {
+    /* 已故圖示沿用已故文字色 */ color: var(--dead-ink);
+}
+.roster-badge.status-ghost {
+    /* 幽靈圖示沿用幽靈文字色 */ color: var(--ghost-ink);
+}
+.roster-badge.race-icon {
+    /* 種族圖示使用主題強調色提高辨識度 */ color: var(--accent);
+}
+body[data-theme="midnight"] .roster-badge.status-alive {
+    /* 深色主題提高在世圖示亮度 */ color: #8fc59b;
+}
