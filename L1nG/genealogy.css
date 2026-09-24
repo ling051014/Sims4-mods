@@ -4497,6 +4497,18 @@ body[data-theme="ling"] .sidebar-btn.danger:hover {
     /* 背景設定 */ background: #963838;
     /* 邊框顏色 */ border-color: #963838;
 }
+
+/* ========【雙按鈕彈窗】 修正 - 只有兩顆操作按鈕時置中 ======== */
+.ui-dialog[data-action-count="2"] .ui-dialog-actions {
+    /* 確認 / 取消兩顆按鈕置中 */ justify-content: center;
+}
+/* 一般功能彈窗若操作列只有兩顆按鈕與 spacer，也一起置中；有計數器等其他資訊者維持原排版。 */
+.modal-actions:has(> button:nth-of-type(2)):not(:has(> button:nth-of-type(3))):not(:has(> :not(button):not(.spacer))) {
+    /* 兩顆按鈕置中 */ justify-content: center;
+}
+.modal-actions:has(> button:nth-of-type(2)):not(:has(> button:nth-of-type(3))):not(:has(> :not(button):not(.spacer))) > .spacer {
+    /* 移除中間撐開空間，避免按鈕被推到左右兩端 */ display: none;
+}
 .toast-region {
     /* 固定定位 */ position: fixed;
     /* 右側位置 */ right: 18px;
@@ -5094,24 +5106,71 @@ body[data-theme="ling"] .sidebar-btn.danger:hover {
     /* 危險操作不套用主題亮度濾鏡 */ filter: none;
 }
 
-/* ========【共用下拉箭頭】 設定 - 編輯頁與導覽共用 chevron-down.svg ======== */
-.modal select:not([multiple]),
-#galleryBrowserFilter {
+/* ========【共用下拉箭頭】 修正 - 編輯頁與導覽共用同一顆 chevron-down.svg ======== */
+/*
+ * 不再把 SVG 當成 select 的 background-image。
+ * 原因：背景圖無法可靠繼承主題文字色，深色主題容易出現箭頭被背景吃掉；
+ * 同時也可能和欄位本身的主題 background 規則互相覆蓋。
+ * 現在由 JavaScript 在原生單選 select 外包一層容器，並放入與導覽完全相同的
+ * .l1ng-icon.icon-chevron-down，讓箭頭直接繼承目前主題的 --sub 顏色。
+ */
+.select-chevron-shell {
+    /* 作為箭頭定位基準 */ position: relative;
+    /* 一般欄位佔滿原本可用寬度 */ display: block;
+    /* 佔滿父層 */ width: 100%;
+    /* 允許在 Grid / Flex 內縮小 */ min-width: 0;
+}
+.select-chevron-shell > select {
     /* 移除瀏覽器原生箭頭 */ appearance: none;
     /* 移除 WebKit 原生箭頭 */ -webkit-appearance: none;
-    /* 預留箭頭空間 */ padding-right: 32px;
-    /* 使用與導覽相同的 Chevron SVG */ background-image: var(--select-chevron-image);
-    /* 箭頭不重複 */ background-repeat: no-repeat;
-    /* 箭頭向左內縮，不貼最右側 */ background-position: right 11px center;
-    /* 箭頭尺寸 */ background-size: 12px 12px;
+    /* 保留主題自己的背景色，不再用 background shorthand 覆蓋 */ background-image: none !important;
+    /* 預留共用 Chevron 空間 */ padding-right: 32px !important;
 }
+.select-chevron-icon {
+    /* 固定在欄位右側 */ position: absolute;
+    /* 右側安全距離 */ right: 11px;
+    /* 垂直置中 */ top: 50%;
+    /* 精準垂直置中 */ transform: translateY(-50%);
+    /* 與導覽箭頭一致尺寸 */ width: 12px;
+    /* 與導覽箭頭一致尺寸 */ height: 12px;
+    /* 使用各主題的次要文字色，避免深淺主題消失 */ color: var(--sub);
+    /* 不攔截 select 點擊 */ pointer-events: none;
+    /* 不被壓縮 */ flex-shrink: 0;
+}
+.select-chevron-shell:focus-within .select-chevron-icon {
+    /* Focus 時稍微提高對比，但仍屬於目前主題 */ color: var(--ink);
+}
+/* 相簿瀏覽器的原生 select 原本是自動寬度，包裝後仍維持原尺寸。 */
+.gallery-browser-toolbar .select-chevron-shell {
+    /* 不強制撐滿整列 */ width: auto;
+    /* 不被 Flex 拉伸 */ flex: 0 0 auto;
+}
+.gallery-browser-toolbar .select-chevron-shell > select {
+    /* 延續原本自動寬度 */ width: auto;
+}
+
+/* 搜尋型自訂下拉不是原生 select，因此直接把同一顆 SVG ICON 放進欄位內。 */
 .ss-input {
-    /* 預留搜尋型下拉箭頭空間 */ padding-right: 30px;
-    /* 使用與導覽相同的 Chevron SVG */ background-image: var(--select-chevron-image);
-    /* 箭頭不重複 */ background-repeat: no-repeat;
-    /* 箭頭向左內縮 */ background-position: right 10px center;
-    /* 箭頭尺寸 */ background-size: 12px 12px;
+    /* 供 Chevron 絕對定位 */ position: relative;
+    /* 預留箭頭空間 */ padding-right: 30px;
+    /* 清掉舊版背景圖箭頭，避免與真正 SVG 重疊 */ background-image: none !important;
 }
+.ss-chevron-icon {
+    /* 固定在搜尋型下拉右側 */ position: absolute;
+    /* 右側安全距離 */ right: 10px;
+    /* 垂直置中 */ top: 50%;
+    /* 精準垂直置中 */ transform: translateY(-50%);
+    /* 與導覽箭頭一致尺寸 */ width: 12px;
+    /* 與導覽箭頭一致尺寸 */ height: 12px;
+    /* 跟著目前主題變化 */ color: var(--sub);
+    /* 不攔截欄位點擊 */ pointer-events: none;
+    /* 動畫過渡 */ transition: transform .15s ease, color .15s ease;
+}
+.ss-wrap.ss-open .ss-chevron-icon {
+    /* 展開時與頂部導覽一致旋轉 */ transform: translateY(-50%) rotate(180deg);
+    /* 展開時提高對比 */ color: var(--ink);
+}
+
 .modal select:not([multiple]) option,
 #galleryBrowserFilter option {
     /* 原生 option 使用安全背景，避免主題中文字與背景同色 */ background: var(--nav-dropdown-bg);
