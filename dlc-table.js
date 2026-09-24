@@ -153,6 +153,18 @@ function sortTable(colIndex) {
     const tbody = table.tBodies[0];
     if (!tbody) return;
 
+    const modalBody = table.closest('.modal-body');
+    const tableBefore = table.getBoundingClientRect();
+
+    console.log('【排序前】', {
+        tableHeight: tableBefore.height,
+        tableTop: tableBefore.top,
+        tableBottom: tableBefore.bottom,
+        modalHeight: modalBody?.getBoundingClientRect().height,
+        modalScrollTop: modalBody?.scrollTop,
+        modalScrollHeight: modalBody?.scrollHeight
+    });
+    
     // 取得被點擊的表頭 (th) 元素
     const th = table.querySelectorAll('th')[colIndex];
 
@@ -298,6 +310,19 @@ function sortTable(colIndex) {
     else if (sortState === 2) {
         th.classList.add('asc');
     }
+    requestAnimationFrame(() => {
+        const tableAfter = table.getBoundingClientRect();
+
+        console.log('【排序後】', {
+            sortState,
+            tableHeight: tableAfter.height,
+            tableTop: tableAfter.top,
+            tableBottom: tableAfter.bottom,
+            modalHeight: modalBody?.getBoundingClientRect().height,
+            modalScrollTop: modalBody?.scrollTop,
+            modalScrollHeight: modalBody?.scrollHeight
+        });
+    });
 }
 
 // ===================================================
