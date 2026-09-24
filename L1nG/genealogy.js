@@ -1,6 +1,5 @@
 /* ========【L1nG Genealogy】 設定 - 族譜工具核心程式 ======== */
 /*
- * 版本：v6.5.0
  * 主要來源語言：繁體中文（zh-Hant）
  * 支援語言：繁體中文／簡體中文／English
  * 圖示：本機 Bootstrap Icons SVG
