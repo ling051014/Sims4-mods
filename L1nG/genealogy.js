@@ -1,9 +1,7 @@
 /* ========【L1nG Genealogy】 設定 - 族譜工具核心程式 ======== */
 /*
- * 版本：v6.5.0
  * 主要來源語言：繁體中文（zh-Hant）
  * 支援語言：繁體中文／簡體中文／English
- * 圖示：本機 Bootstrap Icons SVG
  */
 
 
@@ -337,7 +335,7 @@ const photoMask = $('photoMask');
 const galleryViewerMask = $('galleryViewerMask');
 const galleryBrowserMask = $('galleryBrowserMask');
 const familyNameInput = $('familyName'), familySelect = $('familySelect');
-const searchInput = $('search'), stageFilter = $('stageFilter');
+const searchInput = $('search'), stageFilter = $('stageFilter'), searchResults = $('searchResults');
 const rosterSearch = $('rosterSearch');
 const modeToggle = $('modeToggle');
 const avatarProfileSelect = $('avatarProfile');
@@ -3753,8 +3751,97 @@ $('btnAddRel').onclick = () => {
   save(); render();
 };
 
-searchInput.oninput = debounce(() => { if (layoutCache) drawNodes(); }, 150);
-stageFilter.onchange = () => { if (layoutCache) drawNodes(); };
+// ========【頂部搜尋】 設定 - 保留原本族譜篩選並補上專案風格搜尋結果 ========
+function displayNavText(value) {
+  const text = String(value ?? '');
+  if (typeof LING_I18N !== 'undefined' && LING_I18N.translate) return LING_I18N.translate(text);
+  return text;
+}
+
+function hideTopbarSearchResults() {
+  if (!searchResults) return;
+  searchResults.classList.remove('show');
+  searchResults.innerHTML = '';
+}
+
+function renderTopbarSearchResults() {
+  if (!searchResults || !db) return;
+
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) {
+    hideTopbarSearchResults();
+    return;
+  }
+
+  const fam = currentFamily();
+  const stageValue = stageFilter.value;
+  const matches = (fam.memberIds || [])
+    .map(id => db.sims[id])
+    .filter(Boolean)
+    .filter(c => !stageValue || c.lifeStage === stageValue)
+    .filter(c => {
+      const raw = [c.name, c.career, c.residence].filter(Boolean).join(' ').toLowerCase();
+      const translated = [c.name, c.career, c.residence]
+        .filter(Boolean)
+        .map(displayNavText)
+        .join(' ')
+        .toLowerCase();
+      return raw.includes(q) || translated.includes(q);
+    })
+    .slice(0, 12);
+
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="topbar-search-empty">沒有符合的項目</div>';
+    searchResults.classList.add('show');
+    return;
+  }
+
+  searchResults.innerHTML = matches.map(c => {
+    const meta = [displayNavText(c.career), displayNavText(c.residence)].filter(Boolean).join(' · ');
+    return `
+      <div class="topbar-search-result" role="option" tabindex="0" data-search-sim-id="${esc(c.id)}">
+        <span class="topbar-search-result-name">${esc(displayNavText(c.name))}</span>
+        ${meta ? `<span class="topbar-search-result-meta">${esc(meta)}</span>` : ''}
+      </div>`;
+  }).join('');
+
+  searchResults.classList.add('show');
+
+  searchResults.querySelectorAll('[data-search-sim-id]').forEach(item => {
+    const openResult = () => {
+      const simId = item.dataset.searchSimId;
+      hideTopbarSearchResults();
+      if (simId) openInfoCard(simId);
+    };
+    item.onclick = openResult;
+    item.onkeydown = e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openResult();
+      }
+    };
+  });
+}
+
+searchInput.oninput = debounce(() => {
+  if (layoutCache) drawNodes();
+  renderTopbarSearchResults();
+}, 150);
+
+searchInput.onfocus = () => {
+  if (searchInput.value.trim()) renderTopbarSearchResults();
+};
+
+stageFilter.onchange = () => {
+  if (layoutCache) drawNodes();
+  if (searchInput.value.trim()) renderTopbarSearchResults();
+};
+
+document.addEventListener('click', e => {
+  if (!searchResults || !searchInput) return;
+  const wrap = searchInput.closest('.topbar-search-wrap');
+  if (wrap && !wrap.contains(e.target)) hideTopbarSearchResults();
+});
 
 $('exportBtn').onclick = exportJSON;
 $('importInput').onchange = e => {
@@ -4075,7 +4162,7 @@ They will remain in the global Sim pool.`;
     observe();
   }
 
-  return { init: initLanguage, setLanguage, get language(){ return language; } };
+  return { init: initLanguage, setLanguage, translate: translatePatterns, get language(){ return language; } };
 })();
 
 LING_I18N.init();
