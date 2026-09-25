@@ -644,71 +644,18 @@ function setIconText(el, iconName, text) {
   el.innerHTML = `${iconSvg(iconName)}<span>${esc(text)}</span>`;
 }
 
-// ========【SVG 圖示來源】 設定 - 本機預覽缺少專案資源時自動使用 Bootstrap Icons 備援 ========
-const ICON_LOCAL_PROBE = '../html%20icons/check-circle.svg';
-const ICON_PREVIEW_FALLBACK_BASE = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/icons/';
-
-// 這幾顆是 Genealogy 專用的語意 SVG，不存在 Bootstrap CDN。
-// file:// 預覽時以 data URI 備援，正式網站仍讀取 html icons/ 內的獨立 SVG。
-const CUSTOM_ICON_PREVIEW_DATA = {
-  'paw': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M3.1 6.3c1 0 1.8-.9 1.8-2s-.8-2-1.8-2-1.7.9-1.7 2 .7 2 1.7 2Zm9.8 0c1 0 1.7-.9 1.7-2s-.7-2-1.7-2-1.8.9-1.8 2 .8 2 1.8 2ZM6.2 5.1c1 0 1.8-1 1.8-2.1S7.2.9 6.2.9 4.4 1.8 4.4 3s.8 2.1 1.8 2.1Zm3.6 0c1 0 1.8-1 1.8-2.1S10.8.9 9.8.9 8 1.8 8 3s.8 2.1 1.8 2.1ZM8 6.1c-2.6 0-5 2.8-5 5 0 1.8 1.4 3 3 3 .8 0 1.4-.4 2-.4s1.2.4 2 .4c1.6 0 3-1.2 3-3 0-2.2-2.4-5-5-5Z"/></svg>`,
-  'tombstone': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M5 12V6a3 3 0 0 1 6 0v6h1.5a.5.5 0 0 1 .5.5V14H3v-1.5a.5.5 0 0 1 .5-.5H5Zm2.4-7.7v1.2H6.2v1h1.2v2h1.2v-2h1.2v-1H8.6V4.3H7.4Z"/></svg>`,
-  'ghost-symbol': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M8 1.2A5.2 5.2 0 0 0 2.8 6.4V14l2-1.45L6.4 14 8 12.55 9.6 14l1.6-1.45 2 1.45V6.4A5.2 5.2 0 0 0 8 1.2Zm-1.8 5A1.1 1.1 0 1 1 6.2 4a1.1 1.1 0 0 1 0 2.2Zm3.6 0A1.1 1.1 0 1 1 9.8 4a1.1 1.1 0 0 1 0 2.2Z"/></svg>`,
-  'alien-head': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M8 1C4.6 1 2.4 3.3 2.4 6.2c0 3.7 3.8 7.8 5.6 8.8 1.8-1 5.6-5.1 5.6-8.8C13.6 3.3 11.4 1 8 1Zm-2.6 7.5c-1-.4-1.7-1.4-1.8-2.6 1.5-.1 2.7.4 3.5 1.5-.3.8-.9 1.2-1.7 1.1Zm5.2 0c-.8.1-1.4-.3-1.7-1.1.8-1.1 2-1.6 3.5-1.5-.1 1.2-.8 2.2-1.8 2.6ZM6.6 11h2.8c-.4.7-.9 1-1.4 1s-1-.3-1.4-1Z"/></svg>`,
-  'vampire-fangs': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M2 4.2C3.8 3.4 5.8 3 8 3s4.2.4 6 1.2v3.1c0 3.4-2.3 5.7-6 5.7s-6-2.3-6-5.7V4.2Zm2 2v1.1C4 9.6 5.5 11 8 11s4-1.4 4-3.7V6.2c-1.2-.4-2.6-.7-4-.7s-2.8.3-4 .7Zm1.2.2h2L6.8 9 5.2 6.4Zm3.6 0h2L9.2 9 8.8 6.4Z"/></svg>`,
-  'wolf-head': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="m2 1.5 3.2 2A7.8 7.8 0 0 1 8 3a7.8 7.8 0 0 1 2.8.5l3.2-2-.8 4.2c.5.9.8 2 .8 3.1 0 3.3-2.7 6-6 6s-6-2.7-6-6c0-1.1.3-2.2.8-3.1L2 1.5Zm3.1 5.2 1.8.5-.8 1.3-1-.4v-1.4Zm5.8 0v1.4l-1 .4-.8-1.3 1.8-.5ZM8 9.1l1.1 1.3L8 11.2l-1.1-.8L8 9.1Z"/></svg>`,
-  'mermaid-tail': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M3 1.3C5.6 1.8 7.3 3 8.2 4.8c.9-1.8 2.6-3 5.2-3.5-.2 2.6-1.2 4.3-3 5.1.7 1.1.9 2.3.5 3.5-.6 2-2.5 3.5-5.8 4.8.7-2.2 1.6-3.9 2.7-5.2.7-.9.9-1.8.4-2.8C7 4.1 5.3 2.3 3 1.3Z"/></svg>`,
-  'fairy-wings': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="black" d="M7.3 7.2C5.8 3.1 3.7 1 1 1c-.1 3.2 1.4 5.6 4.6 7.1C2.9 9.2 1.5 11.2 1.4 14c2.7.1 4.6-1.6 5.9-5.1v-1.7Zm1.4 0C10.2 3.1 12.3 1 15 1c.1 3.2-1.4 5.6-4.6 7.1 2.7 1.1 4.1 3.1 4.2 5.9-2.7.1-4.6-1.6-5.9-5.1V7.2ZM7.4 6.3h1.2v4.4H7.4V6.3Z"/></svg>`
+// ========【UI 圖示】 Bootstrap Icons 統一輸出 ========
+const iconSvg = (name, extra = '') => {
+  const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
+  if (!safe) return '';
+  const extraClass = extra ? ' ' + extra : '';
+  return `<span class="l1ng-icon icon-${safe}${extraClass}" aria-hidden="true"></span>`;
 };
 
-function svgToDataUrl(svg) {
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+function setIconText(el, iconName, text) {
+  if (!el) return;
+  el.innerHTML = `${iconSvg(iconName)}<span>${esc(text)}</span>`;
 }
-
-function applyPreviewIconFallback(root = document) {
-  root.querySelectorAll('.l1ng-icon').forEach(icon => {
-    const iconClass = [...icon.classList].find(name => name.startsWith('icon-'));
-    if (!iconClass) return;
-    const iconName = iconClass.slice(5);
-    if (CUSTOM_ICON_PREVIEW_DATA[iconName]) {
-      icon.style.setProperty('--l1ng-icon', svgToDataUrl(CUSTOM_ICON_PREVIEW_DATA[iconName]));
-      return;
-    }
-    icon.style.setProperty('--l1ng-icon', `url("${ICON_PREVIEW_FALLBACK_BASE}${iconName}.svg")`);
-  });
-}
-
-function enablePreviewIconFallback() {
-  applyPreviewIconFallback(document);
-
-  const observer = new MutationObserver(records => {
-    records.forEach(record => {
-      record.addedNodes.forEach(node => {
-        if (!(node instanceof Element)) return;
-        if (node.matches('.l1ng-icon')) applyPreviewIconFallback(node.parentElement || document);
-        else applyPreviewIconFallback(node);
-      });
-    });
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-}
-
-function verifyLocalIconAssets() {
-  // 直接用 file:// 開啟 HTML 時，瀏覽器通常會阻擋 CSS mask 讀取其他本機 SVG。
-  // 因此本機預覽直接改用 HTTPS 備援；正式網站仍優先使用專案內的 html icons。
-  if (window.location.protocol === 'file:') {
-    enablePreviewIconFallback();
-    return;
-  }
-
-  const probe = new Image();
-  probe.onload = () => {};
-  probe.onerror = enablePreviewIconFallback;
-  probe.src = new URL(ICON_LOCAL_PROBE, document.baseURI).href;
-}
-
-verifyLocalIconAssets();
 
 // ========【頂部自訂下拉選單】 設定 - 取代瀏覽器原生 select 展開介面 ========
 const navSelectControls = new Map();
