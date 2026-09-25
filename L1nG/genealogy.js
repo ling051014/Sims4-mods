@@ -3776,22 +3776,41 @@ labelsSvg.addEventListener('pointermove', e => {
 });
 const finishLabelDrag = e => {
   if (!labelDrag) return;
-  if (e && labelDrag.pointerId !== e.pointerId) return;
-  labelDrag.el.classList.remove('dragging');
-  if (labelDrag.moved) {
-    const afterOffset = captureLabelHistoryState(labelDrag.key);
+  if (e && e.pointerId !== undefined && labelDrag.pointerId !== e.pointerId) return;
+
+  const activeDrag = labelDrag;
+
+  activeDrag.el.classList.remove('dragging');
+
+  // 明確釋放 pointer capture，避免關係標籤拖曳結束後
+  // 瀏覽器仍把後續 pointer 事件送回舊標籤。
+  try {
+    if (
+      activeDrag.el.hasPointerCapture &&
+      activeDrag.el.hasPointerCapture(activeDrag.pointerId)
+    ) {
+      activeDrag.el.releasePointerCapture(activeDrag.pointerId);
+    }
+  } catch (_) {}
+
+  if (activeDrag.moved) {
+    const afterOffset = captureLabelHistoryState(activeDrag.key);
+
     dragHistory.push({
       type: 'relationship-label',
-      key: labelDrag.key,
-      before: { offset: labelDrag.beforeOffset },
+      key: activeDrag.key,
+      before: { offset: activeDrag.beforeOffset },
       after: { offset: afterOffset }
     });
+
     save();
   }
+
   labelDrag = null;
 };
 labelsSvg.addEventListener('pointerup', finishLabelDrag);
 labelsSvg.addEventListener('pointercancel', finishLabelDrag);
+labelsSvg.addEventListener('lostpointercapture', finishLabelDrag);
 
 // ========【智慧對齊與等距吸附】 設定 - 對齊邊緣 / 中心，同時支援水平與垂直等距 ========
 function hideSmartGuides() {
@@ -4274,15 +4293,20 @@ nodes.addEventListener('pointerdown', e => {
     if (!moved) return;
 
     if (!dragInitialized) {
-      if (!fam.freeLayout[dragMode]) {
-        fam.freeLayout[dragMode] = true;
-        layoutCache.pos.forEach((p, sid) => { manualPos[sid] = { x:p.x, y:p.y }; });
-        arrangeTool = 'pan';
-        updateLayoutToggle();
-      }
-      if (!manualPos[id]) manualPos[id] = { ...startPos };
-      dragInitialized = true;
+    if (!fam.freeLayout[dragMode]) {
+      fam.freeLayout[dragMode] = true;
+      layoutCache.pos.forEach((p, sid) => { manualPos[sid] = { x:p.x, y:p.y }; });
+  
+      // 第一次手動拖曳人物代表玩家正在排列人物，
+      // 切入自由排列後應維持人物選取／拖曳工具，而不是切成畫布平移。
+      arrangeTool = 'select';
+  
+      updateLayoutToggle();
     }
+  
+    if (!manualPos[id]) manualPos[id] = { ...startPos };
+    dragInitialized = true;
+  }
     const rawX = startPos.x + dx / scale;
     const rawY = startPos.y + dy / scale;
     const snapped = getSmartSnap(id, rawX, rawY);
@@ -6345,31 +6369,92 @@ async function importGameGenealogy(file) {
       throw new Error('找不到遊戲族譜匯入模組。');
     }
 
+    showGameImportStatus('正在讀取 ZIP…');
+    await waitForImportPaint();
+
     const bundle = await window.L1nGGameImport.parseFile(file);
+
+    showGameImportStatus('正在整理人物與家族…');
+    await waitForImportPaint();
+
     const converted = window.L1nGGameImport.convertBundle(bundle);
     const preparedResult = prepareDatabase(converted);
 
+    showGameImportStatus('正在建立族譜畫面…');
+    await waitForImportPaint();
+
     db = preparedResult.prepared;
+
+    // 匯入新資料時，同時清除上一份族譜留下的操作狀態。
     dragHistory.clear();
+    clearNodeSelection();
+    finishMarquee();
+
+    labelDrag = null;
+    panning = false;
+    viewport.classList.remove('dragging');
+
+    arrangeTool = 'pan';
+
     invalidateChildrenIndex();
 
     save({ immediate: true });
     refreshFamilyUI();
     render();
 
-    requestAnimationFrame(() => {
-      fitScreen();
+    await new Promise(resolve => {
+      requestAnimationFrame(() => {
+        fitScreen();
+        resolve();
+      });
     });
 
     const stats = bundle.manifest && bundle.manifest.stats
       ? bundle.manifest.stats
       : {};
 
-    uiToast(
-      `遊戲族譜匯入完成：${stats.simCount || Object.keys(db.sims || {}).length} 位人物`
+    const simCount =
+      stats.simCount ||
+      Object.keys(db.sims || {}).length;
+
+    const familyCount =
+      Array.isArray(db.families)
+        ? db.families.length
+        : 0;
+
+    const activeFamily = currentFamily();
+    const activeFamilyName = activeFamily
+      ? displayDataText(activeFamily.name, activeFamily)
+      : '—';
+
+    hideGameImportStatus();
+
+    await uiAlert(
+      [
+        '遊戲族譜已成功匯入。',
+        '',
+        `人物：${simCount}`,
+        `家族：${familyCount}`,
+        `目前顯示：${activeFamilyName}`
+      ].join('\n'),
+      {
+        title: '遊戲族譜匯入完成',
+        confirmText: '查看族譜'
+      }
     );
 
+    // 完成後主動讓玩家看見家族清單。
+    if (window.innerWidth <= 720) {
+      openSidebar();
+    } else {
+      setFamilyPanelCollapsed(false);
+    }
+
+    requestAnimationFrame(fitScreen);
+
   } catch (err) {
+    hideGameImportStatus();
+
     console.error('[遊戲族譜匯入]', err);
 
     await uiAlert(
