@@ -2172,74 +2172,331 @@ function getAdaptiveSpouseGap(members, baseGap) {
   const visualMinimum = viewMode === 'view' ? 52 : 60;
   const labelDrivenGap = widestLabel ? widestLabel + 20 : 0;
   // 上限避免極長自訂關係把整棵族譜撐得過度鬆散。
-  return Math.min(Math.max(baseGap, visualMinimum, labelDrivenGap), 168);
+    return Math.min(Math.max(baseGap, visualMinimum, labelDrivenGap), 168);
+}
+
+// ========【族譜輩分計算】 設定 - 先依親子關係建立世代，再讓配偶共享同一世代 ========
+function computeGenerationLevels(sims, byId) {
+  const componentParent = new Map();
+
+  sims.forEach(sim => {
+    componentParent.set(sim.id, sim.id);
+  });
+
+  function findComponent(id) {
+    const parentId = componentParent.get(id);
+
+    if (parentId == null) return null;
+    if (parentId === id) return id;
+
+    const rootId = findComponent(parentId);
+    componentParent.set(id, rootId);
+
+    return rootId;
+  }
+
+  function mergeComponents(aId, bId) {
+    const aRoot = findComponent(aId);
+    const bRoot = findComponent(bId);
+
+    if (aRoot == null || bRoot == null || aRoot === bRoot) return;
+
+    componentParent.set(bRoot, aRoot);
+  }
+
+  // 目前配偶視為同一世代單位。
+  // 只合併世代，不改動真正的父母／子女資料。
+  sims.forEach(sim => {
+    (sim.spouseIds || []).forEach(spouseId => {
+      if (!byId.has(spouseId)) return;
+      mergeComponents(sim.id, spouseId);
+    });
+  });
+
+  const parentComponents = new Map();
+
+  sims.forEach(sim => {
+    const childRoot = findComponent(sim.id);
+    if (childRoot == null) return;
+
+    if (!parentComponents.has(childRoot)) {
+      parentComponents.set(childRoot, new Set());
+    }
+
+    (sim.parentIds || []).forEach(parentId => {
+      if (!byId.has(parentId)) return;
+
+      const parentRoot = findComponent(parentId);
+
+      if (parentRoot == null || parentRoot === childRoot) return;
+
+      parentComponents.get(childRoot).add(parentRoot);
+    });
+  });
+
+  const levelMemo = new Map();
+  const visiting = new Set();
+
+  function resolveComponentLevel(rootId) {
+    if (levelMemo.has(rootId)) {
+      return levelMemo.get(rootId);
+    }
+
+    // 異常循環資料的保護。
+    // 正常族譜不應存在「自己成為自己祖先」的循環。
+    if (visiting.has(rootId)) {
+      return 0;
+    }
+
+    visiting.add(rootId);
+
+    const parents = [...(parentComponents.get(rootId) || [])];
+
+    let level = 0;
+
+    if (parents.length) {
+      level = 1 + Math.max(
+        ...parents.map(parentRoot => resolveComponentLevel(parentRoot))
+      );
+    }
+
+    visiting.delete(rootId);
+    levelMemo.set(rootId, level);
+
+    return level;
+  }
+
+  const levels = new Map();
+
+  sims.forEach(sim => {
+    const rootId = findComponent(sim.id);
+    const level = rootId == null
+      ? 0
+      : resolveComponentLevel(rootId);
+
+    levels.set(sim.id, level);
+  });
+
+  return levels;
 }
 
 function computeAutoPositions(visibleIds) {
   const { W: NODE_W, H: NODE_H } = getDims();
-  const { SPOUSE: SPOUSE_GAP, SIBLING: SIBLING_GAP, LEVEL: LEVEL_GAP } = getGaps();
-  const sims = [...visibleIds].map(id => db.sims[id]).filter(Boolean);
-  const byId = new Map(sims.map(c => [c.id, c]));
+  const {
+    SPOUSE: SPOUSE_GAP,
+    SIBLING: SIBLING_GAP,
+    LEVEL: LEVEL_GAP
+  } = getGaps();
+
+  const sims = [...visibleIds]
+    .map(id => db.sims[id])
+    .filter(Boolean);
+
+  const byId = new Map(
+    sims.map(sim => [sim.id, sim])
+  );
+
+  // 先算出真正的世代，再處理畫面排列。
+  const generationLevels = computeGenerationLevels(sims, byId);
+
   const childrenOf = new Map();
-  sims.forEach(c => {
-    const visPids = (c.parentIds||[]).filter(pid => byId.has(pid));
-    if (visPids.length) {
-      const anchor = visPids[0];
-      if (!childrenOf.has(anchor)) childrenOf.set(anchor, []);
-      childrenOf.get(anchor).push(c);
-    }
-  });
-  childrenOf.forEach(arr => arr.sort((a,b) =>
-    (a.order??0) - (b.order??0) || String(a.name).localeCompare(String(b.name),'zh')));
-  const placed = new Set(); const units = []; let cursor = 0;
-  function makeUnit(head) {
-    const members = [head]; placed.add(head.id);
-    (head.spouseIds||[]).forEach(sid => {
-      const sp = byId.get(sid);
-      if (sp && !placed.has(sp.id)) { members.push(sp); placed.add(sp.id); }
+
+  // 一名子女可以同時登記在兩位父母下面。
+  // 不再只拿 parentIds[0] 當作唯一排列依據。
+  sims.forEach(sim => {
+    const visibleParents = (sim.parentIds || [])
+      .filter(parentId => byId.has(parentId));
+
+    visibleParents.forEach(parentId => {
+      if (!childrenOf.has(parentId)) {
+        childrenOf.set(parentId, []);
+      }
+
+      childrenOf.get(parentId).push(sim);
     });
-    const spouseGap = getAdaptiveSpouseGap(members, SPOUSE_GAP);
+  });
+
+  childrenOf.forEach(children => {
+    children.sort((a, b) =>
+      (a.order ?? 0) - (b.order ?? 0) ||
+      String(a.name).localeCompare(String(b.name), 'zh')
+    );
+  });
+
+  const placed = new Set();
+  const units = [];
+
+  let cursor = 0;
+
+  function makeUnit(head) {
+    const members = [head];
+
+    placed.add(head.id);
+
+    (head.spouseIds || []).forEach(spouseId => {
+      const spouse = byId.get(spouseId);
+
+      if (!spouse || placed.has(spouse.id)) return;
+
+      members.push(spouse);
+      placed.add(spouse.id);
+    });
+
+    const spouseGap = getAdaptiveSpouseGap(
+      members,
+      SPOUSE_GAP
+    );
+
     return {
       members,
       spouseGap,
-      width: members.length * NODE_W + (members.length - 1) * spouseGap,
-      x:0,
-      y:0
+      width:
+        members.length * NODE_W +
+        (members.length - 1) * spouseGap,
+      x: 0,
+      y: 0
     };
   }
-  function layoutUnit(unit, depth) {
+
+  function layoutUnit(unit) {
     const childHeads = [];
-    unit.members.forEach(m => {
-      (childrenOf.get(m.id)||[]).forEach(ch => { if (!placed.has(ch.id)) childHeads.push(ch); });
+    const seenChildren = new Set();
+
+    // 配偶雙方的子女都納入同一個家庭單位。
+    // 同一名子女如果同時出現在兩位父母下面，只加入一次。
+    unit.members.forEach(member => {
+      (childrenOf.get(member.id) || []).forEach(child => {
+        if (placed.has(child.id)) return;
+        if (seenChildren.has(child.id)) return;
+
+        seenChildren.add(child.id);
+        childHeads.push(child);
+      });
     });
+
+    childHeads.sort((a, b) =>
+      (generationLevels.get(a.id) ?? 0) -
+        (generationLevels.get(b.id) ?? 0) ||
+      (a.order ?? 0) - (b.order ?? 0) ||
+      String(a.name).localeCompare(String(b.name), 'zh')
+    );
+
     const childUnits = [];
-    childHeads.forEach(h => { if (!placed.has(h.id)) childUnits.push(makeUnit(h)); });
-    if (childUnits.length === 0) {
+
+    childHeads.forEach(child => {
+      if (placed.has(child.id)) return;
+
+      childUnits.push(
+        makeUnit(child)
+      );
+    });
+
+    if (!childUnits.length) {
       unit.x = cursor;
       cursor += unit.width + SIBLING_GAP;
     } else {
-      childUnits.forEach(cu => layoutUnit(cu, depth+1));
-      const first = childUnits[0], last = childUnits[childUnits.length - 1];
-      unit.x = (first.x + last.x + last.width) / 2 - unit.width / 2;
-      if (unit.x + unit.width + SIBLING_GAP > cursor) cursor = unit.x + unit.width + SIBLING_GAP;
+      childUnits.forEach(childUnit => {
+        layoutUnit(childUnit);
+      });
+
+      const firstChild = childUnits[0];
+      const lastChild = childUnits[childUnits.length - 1];
+
+      unit.x =
+        (
+          firstChild.x +
+          lastChild.x +
+          lastChild.width
+        ) / 2 -
+        unit.width / 2;
+
+      const unitRight =
+        unit.x +
+        unit.width +
+        SIBLING_GAP;
+
+      if (unitRight > cursor) {
+        cursor = unitRight;
+      }
     }
-    unit.y = depth * (NODE_H + LEVEL_GAP);
+
+    // Y 軸只由「輩分」決定。
+    // 不再由遞迴時誰先被走訪決定。
+    const unitGeneration = Math.max(
+      ...unit.members.map(member =>
+        generationLevels.get(member.id) ?? 0
+      )
+    );
+
+    unit.y =
+      unitGeneration *
+      (NODE_H + LEVEL_GAP);
+
     units.push(unit);
   }
-  sims.forEach(c => {
-    if (placed.has(c.id)) return;
-    if ((c.parentIds||[]).some(pid => byId.has(pid))) return;
-    layoutUnit(makeUnit(c), 0);
+
+  // 先從真正的第一代開始。
+  // 避免某人的配偶先被掃描到，就把有父母的人錯拉到第一排。
+  const orderedSims = [...sims].sort((a, b) =>
+    (generationLevels.get(a.id) ?? 0) -
+      (generationLevels.get(b.id) ?? 0) ||
+    (a.order ?? 0) - (b.order ?? 0) ||
+    String(a.name).localeCompare(String(b.name), 'zh')
+  );
+
+  orderedSims.forEach(sim => {
+    if (placed.has(sim.id)) return;
+
+    const generation =
+      generationLevels.get(sim.id) ?? 0;
+
+    if (generation !== 0) return;
+
+    layoutUnit(
+      makeUnit(sim)
+    );
   });
-  sims.forEach(c => { if (!placed.has(c.id)) layoutUnit(makeUnit(c), 0); });
+
+  // 保底處理斷開的支系、特殊 NPC 或異常資料。
+  orderedSims.forEach(sim => {
+    if (placed.has(sim.id)) return;
+
+    layoutUnit(
+      makeUnit(sim)
+    );
+  });
+
   const pos = new Map();
-  units.forEach(u => {
-    const spouseGap = Number.isFinite(u.spouseGap) ? u.spouseGap : SPOUSE_GAP;
-    u.members.forEach((m,i) => { pos.set(m.id, { x: u.x + i * (NODE_W + spouseGap), y: u.y }); });
+
+  units.forEach(unit => {
+    const spouseGap = Number.isFinite(unit.spouseGap)
+      ? unit.spouseGap
+      : SPOUSE_GAP;
+
+    unit.members.forEach((member, index) => {
+      pos.set(member.id, {
+        x:
+          unit.x +
+          index * (NODE_W + spouseGap),
+        y: unit.y
+      });
+    });
   });
+
   let minX = Infinity;
-  pos.forEach(p => { if (p.x < minX) minX = p.x; });
-  if (minX < 0) pos.forEach(p => { p.x -= minX; });
+
+  pos.forEach(position => {
+    if (position.x < minX) {
+      minX = position.x;
+    }
+  });
+
+  if (minX < 0) {
+    pos.forEach(position => {
+      position.x -= minX;
+    });
+  }
+
   return pos;
 }
 
