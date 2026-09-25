@@ -1,5 +1,5 @@
 /*
- * L1nG Genealogy Game Bundle Importer v0.1
+ * L1nG Genealogy Game Bundle Importer v0.2
  * 對應 L1nG Genealogy Exporter schemaVersion 1。
  *
  * 第一版 exporter 使用 ZIP_STORED，因此這裡不需要第三方 ZIP 函式庫。
@@ -75,6 +75,110 @@
     }
 
     return { manifest, genealogy, files };
+  }
+
+  // ========【遊戲頭像讀取】 設定 - 從遊戲匯出 ZIP 依 Sim ID 配對人物圖片 ========
+  function imageMimeType(path, bytes) {
+    const lower = String(path || '').toLowerCase();
+
+    if (bytes && bytes.length >= 8 &&
+        bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+        bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a) {
+      return 'image/png';
+    }
+
+    if (bytes && bytes.length >= 3 &&
+        bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+      return 'image/jpeg';
+    }
+
+    if (bytes && bytes.length >= 2 &&
+        bytes[0] === 0x42 && bytes[1] === 0x4d) {
+      return 'image/bmp';
+    }
+
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+    if (lower.endsWith('.bmp')) return 'image/bmp';
+
+    return '';
+  }
+
+  function bytesToDataUrl(bytes, mimeType) {
+    if (!bytes || !bytes.length || !mimeType) return null;
+
+    const chunkSize = 0x8000;
+    let binary = '';
+
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+      const chunk = bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length));
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+
+    return `data:${mimeType};base64,${btoa(binary)}`;
+  }
+
+  function explicitAvatarPaths(sim) {
+    if (!sim || typeof sim !== 'object') return [];
+
+    const values = [
+      sim.avatarPath,
+      sim.portraitPath,
+      sim.avatar && sim.avatar.path,
+      sim.portrait && sim.portrait.path
+    ];
+
+    return values
+      .filter(value => typeof value === 'string' && value.trim())
+      .map(value => value.replace(/^\.\//, '').replace(/\\/g, '/'));
+  }
+
+  function findSimAvatarPath(files, simId, sim) {
+    if (!files || !simId) return null;
+
+    const id = String(simId);
+    const candidates = [
+      ...explicitAvatarPaths(sim),
+      `avatars/${id}.png`,
+      `avatars/${id}.jpg`,
+      `avatars/${id}.jpeg`,
+      `avatars/${id}.bmp`
+    ];
+
+    for (const candidate of candidates) {
+      if (files.has(candidate)) return candidate;
+    }
+
+    return null;
+  }
+
+  function getSimAvatarAsset(bundle, simId, sim) {
+    if (!bundle || !bundle.files) return null;
+
+    const path = findSimAvatarPath(bundle.files, simId, sim);
+    if (!path) return null;
+
+    const bytes = bundle.files.get(path);
+    const mimeType = imageMimeType(path, bytes);
+
+    // DDS / 未知格式保留在 ZIP，但瀏覽器不直接當作人物頭像載入。
+    if (!mimeType) {
+      return {
+        path,
+        mimeType: null,
+        dataUrl: null,
+        byteLength: bytes ? bytes.length : 0,
+        supported: false
+      };
+    }
+
+    return {
+      path,
+      mimeType,
+      dataUrl: bytesToDataUrl(bytes, mimeType),
+      byteLength: bytes.length,
+      supported: true
+    };
   }
 
   function enumKey(value) {
@@ -241,6 +345,7 @@
         avatar: null,
         gameData: {
           simId: id,
+          avatarPath: findSimAvatarPath(bundle.files, id, sim),
           householdId: sim.householdId || null,
           recordState: sim.recordState || 'full',
           adoptedParentIds: rel.adoptedParentIds,
@@ -303,6 +408,8 @@
     parseFile,
     convertBundle,
     readStoredZip,
-    connectedComponents
+    connectedComponents,
+    findSimAvatarPath,
+    getSimAvatarAsset
   };
 })(window);
