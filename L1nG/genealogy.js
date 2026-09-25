@@ -632,13 +632,22 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g,
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const pairKey = (a,b) => [a,b].sort().join('::');
 
-// ========【UI 圖示】 Bootstrap Icons 統一輸出 ========
+// ========【UI 圖示】 專案 SVG 自動解析 ========
+const ICON_ASSET_BASE = '../html%20icons/';
+
 const iconSvg = (name, extra = '') => {
   const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
   if (!safe) return '';
-  const extraClass = extra ? ' ' + extra : '';
-  return `<span class="l1ng-icon icon-${safe}${extraClass}" aria-hidden="true"></span>`;
+
+  const extraClass = extra ? ` ${extra}` : '';
+
+  return `<span
+    class="l1ng-icon icon-${safe}${extraClass}"
+    style="--l1ng-icon:url('${ICON_ASSET_BASE}${safe}.svg')"
+    aria-hidden="true"
+  ></span>`;
 };
+
 function setIconText(el, iconName, text) {
   if (!el) return;
   el.innerHTML = `${iconSvg(iconName)}<span>${esc(text)}</span>`;
