@@ -199,11 +199,19 @@ section[id] {
 /* ========【首頁主視覺】 設定 - 英文小標 ======== */
 .hero-eyebrow,
 .section-kicker,
-.current-label {
+.current-label,
+.project-type,
+.visual-label {
+    /* 小型英文視覺標籤使用窄體字型 */ font-family:
+        "Bahnschrift SemiCondensed",
+        "Arial Narrow",
+        "Roboto Condensed",
+        sans-serif;
     /* 品牌藍 */ color: var(--accent);
-    /* 字體大小 */ font-size: 13px;
+    /* 字體大小 */ font-size: 12px;
     /* 字體粗細 */ font-weight: 700;
     /* 字距 */ letter-spacing: 0.16em;
+    /* 英文視覺標籤統一大寫 */ text-transform: uppercase;
 }
 
 
@@ -407,13 +415,9 @@ section[id] {
 
 /* ========【RealDate 主專案】 設定 - 專案狀態 ======== */
 .project-meta {
-    /* 品牌藍 */ color: var(--accent);
     /* 橫向排列 */ display: flex;
     /* 垂直置中 */ align-items: center;
     /* 項目間距 */ gap: 9px;
-    /* 字體大小 */ font-size: 12px;
-    /* 字體粗細 */ font-weight: 700;
-    /* 字距 */ letter-spacing: 0.13em;
 }
 
 
@@ -437,7 +441,7 @@ section[id] {
 }
 
 
-/* ========【RealDate 主專案】 設定 - 英文副標 ======== */
+/* ========【RealDate 主專案】 設定 - 專案一句話 ======== */
 .project-subtitle {
     /* 上方間距 */ margin: 17px 0 0;
     /* 深藍文字 */ color: var(--primary-dark);
@@ -491,7 +495,8 @@ section[id] {
     /* 淡化文字 */ color: var(--muted);
 }
 
-/* ========【RealDate 主專案】 設定 - 開發版與公開版狀態排列 ======== */
+
+/* ========【RealDate 主專案】 設定 - 公開版與開發版狀態排列 ======== */
 .realdate-release-state {
     /* 橫向排列 */ display: flex;
     /* 自動換行 */ flex-wrap: wrap;
@@ -499,7 +504,7 @@ section[id] {
 }
 
 
-/* ========【RealDate 主專案】 設定 - 更新日誌入口 ======== */
+/* ========【RealDate 主專案】 設定 - 專案網站入口 ======== */
 .project-action-link {
     /* 靠右排列 */ margin-left: auto;
     /* 橫向排列 */ display: inline-flex;
@@ -514,7 +519,7 @@ section[id] {
 }
 
 
-/* ========【RealDate 主專案】 設定 - 更新日誌入口懸停 ======== */
+/* ========【RealDate 主專案】 設定 - 專案網站入口懸停 ======== */
 .project-action-link:hover {
     /* 懸停藍色 */ color: var(--accent-hover);
     /* 微幅右移 */ transform: translateX(3px);
@@ -604,10 +609,8 @@ section[id] {
 
 /* ========【專案卡片】 設定 - 類型標籤 ======== */
 .project-type {
-    /* 淡化文字 */ color: var(--muted);
-    /* 字體大小 */ font-size: 11px;
-    /* 字體粗細 */ font-weight: 700;
-    /* 字距 */ letter-spacing: 0.14em;
+    /* 專案類型使用較淡的英文視覺標籤 */ color: var(--muted);
+    /* 稍微縮小 */ font-size: 11px;
 }
 
 
@@ -929,8 +932,23 @@ section[id] {
 /* ========【目前開發中】 設定 - 開發主題 ======== */
 .current-name {
     /* 上方間距 */ margin: 7px 0 0;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 15px;
+    /* 主要文字 */ color: var(--ink);
+    /* 字體大小 */ font-size: 16px;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【目前開發重點】 設定 - 英文主題副標 ======== */
+.current-name-en {
+    /* 上方間距 */ margin: 2px 0 0;
+    /* 淡化文字 */ color: var(--muted);
+    /* 窄體英文字型 */ font-family:
+        "Bahnschrift SemiCondensed",
+        "Arial Narrow",
+        "Roboto Condensed",
+        sans-serif;
+    /* 字體大小 */ font-size: 11px;
+    /* 字距 */ letter-spacing: 0.08em;
 }
 
 
@@ -958,6 +976,29 @@ section[id] {
     /* 移除外距 */ margin: 0;
     /* 次要文字 */ color: var(--sub);
     /* 字體大小 */ font-size: 14px;
+}
+
+
+/* ========【目前開發重點】 設定 - 開發藍圖入口 ======== */
+.current-action-link {
+    /* 上方間距 */ margin-top: 20px;
+    /* 橫向排列 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 7px;
+    /* 品牌藍 */ color: var(--accent);
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 動畫效果 */ transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* ========【目前開發重點】 設定 - 開發藍圖入口懸停 ======== */
+.current-action-link:hover {
+    /* 懸停藍色 */ color: var(--accent-hover);
+    /* 微幅右移 */ transform: translateX(3px);
 }
 
 
@@ -1070,9 +1111,9 @@ section[id] {
 /* ========【創作理念】 設定 - 英文主句 ======== */
 .philosophy-inner h2 {
     /* 上方間距 */ margin: 18px 0 0;
-    /* 響應式字體 */ font-size: clamp(46px, 8vw, 78px);
-    /* 行距 */ line-height: 1.02;
-    /* 字距 */ letter-spacing: -0.06em;
+    /* 響應式字體 */ font-size: clamp(42px, 7vw, 70px);
+    /* 行距 */ line-height: 1.16;
+    /* 中文標題不做過度負字距 */ letter-spacing: -0.035em;
 }
 
 
@@ -1367,15 +1408,6 @@ section[id] {
         /* 手機標題大小 */ font-size: 48px;
     }
 
-    .realdate-footer {
-        /* 手機改為上下排列 */ align-items: flex-start;
-        /* 垂直排列 */ flex-direction: column;
-    }
-
-    .project-action-link {
-        /* 手機取消自動推右 */ margin-left: 0;
-    }
-
 
     /* ========【專案卡片】 設定 - 手機卡片尺寸 ======== */
     .project-card {
@@ -1431,7 +1463,7 @@ section[id] {
     }
 
     .philosophy-inner h2 {
-        /* 手機理念標題 */ font-size: 48px;
+        /* 手機理念標題 */ font-size: 42px;
     }
 
 
