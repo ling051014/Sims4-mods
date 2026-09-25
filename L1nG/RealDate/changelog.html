@@ -1,1403 +1,963 @@
 <!DOCTYPE html>
-<html data-language="zh-Hant" lang="zh-Hant">
- <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>
-   RealDate 更新日誌 · L1nG
-  </title>
-  <meta content="RealDate 公開版本更新紀錄、修正與相容性變更。" name="description"/>
-  <meta content="#fafafa" name="theme-color"/>
-  <link href="realdate.css" rel="stylesheet"/>
-  <script defer="" src="realdate.js">
-  </script>
-  <link href="changelog.css" rel="stylesheet"/>
-  <script defer="True" src="changelog.js">
-  </script>
- </head>
- <body>
-  <header class="site-header" id="siteHeader">
-   <div class="site-header-inner">
-    <div class="site-brand-group">
-     <a class="creator-link" href="../index.html">
-      L1nG
-     </a>
-     <span class="brand-divider">
-      /
-     </span>
-     <a class="realdate-brand" href="index.html">
-      REALDATE
-     </a>
-    </div>
-    <button aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單" class="nav-toggle" id="navToggle" type="button">
-     <span>
-     </span>
-     <span>
-     </span>
-    </button>
-    <nav aria-label="RealDate" class="main-nav" id="mainNav">
-     <a class="" href="gameplay.html">
-      <span data-lang="zh-Hant">
-       玩法
-      </span>
-      <span data-lang="en">
-       Gameplay
-      </span>
-     </a>
-     <a class="" href="download.html">
-      <span data-lang="zh-Hant">
-       下載與安裝
-      </span>
-      <span data-lang="en">
-       Download &amp; Install
-      </span>
-     </a>
-     <a class="" href="compatibility.html">
-      <span data-lang="zh-Hant">
-       相容性
-      </span>
-      <span data-lang="en">
-       Compatibility
-      </span>
-     </a>
-     <a class="active" href="changelog.html">
-      <span data-lang="zh-Hant">
-       更新日誌
-      </span>
-      <span data-lang="en">
-       Changelog
-      </span>
-     </a>
-     <details class="nav-more">
-      <summary>
-       <span data-lang="zh-Hant">
-        更多
-       </span>
-       <span data-lang="en">
-        More
-       </span>
-       <span aria-hidden="true" class="nav-more-chevron">
-        ⌄
-       </span>
-      </summary>
-      <div class="nav-more-menu">
-       <a href="roadmap.html">
-        <span data-lang="zh-Hant">
-         開發藍圖
-        </span>
-        <span data-lang="en">
-         Roadmap
-        </span>
-       </a>
-       <a href="faq.html">
-        <span data-lang="zh-Hant">
-         常見問題
-        </span>
-        <span data-lang="en">
-         FAQ
-        </span>
-       </a>
-      </div>
-     </details>
-    </nav>
-    <div aria-label="Language" class="language-switch" role="group">
-     <button aria-pressed="true" class="language-button active" data-language-button="zh-Hant" type="button">
-      繁中
-     </button>
-     <span class="language-divider">
-      /
-     </span>
-     <button aria-pressed="false" class="language-button" data-language-button="en" type="button">
-      EN
-     </button>
-    </div>
-   </div>
-  </header>
-  <main>
-   <section class="page-hero">
-    <div class="page-hero-inner reveal">
-     <span class="eyebrow">
-      CHANGELOG
-     </span>
-     <h1 data-lang="zh-Hant">
-      版本更新紀錄
-     </h1>
-     <h1 data-lang="en">
-      Version History
-     </h1>
-     <p data-lang="zh-Hant">
-      這裡只記錄各版本新增、修正、相容性變更與重要限制。
-            想了解 RealDate 現在完整有哪些玩法，請查看「玩法」。
-     </p>
-     <p data-lang="en">
-      This page records additions, fixes, compatibility changes, and important limitations between releases.
-            For the complete current gameplay, see Gameplay.
-     </p>
-     <div class="changelog-current-release">
-      <div>
-       <span data-lang="zh-Hant">
-        最新公開版本
-       </span>
-       <span data-lang="en">
-        Latest public release
-       </span>
-       <strong>
-        v0.4 Beta
-       </strong>
-      </div>
-      <div>
-       <span data-lang="zh-Hant">
-        最後更新
-       </span>
-       <span data-lang="en">
-        Last updated
-       </span>
-       <strong>
-        2026.09.23 (UTC+8)
-       </strong>
-      </div>
-     </div>
-     <div class="hero-actions">
-      <a class="button button-primary" download="L1nG_RealDate_v0.4_Beta.zip" href="downloads/L1nG_RealDate_v0.4_Beta.zip">
-       <span data-lang="zh-Hant">
-        下載最新版本
-       </span>
-       <span data-lang="en">
-        Download Latest Release
-       </span>
-      </a>
-      <a class="button button-secondary" href="gameplay.html">
-       <span data-lang="zh-Hant">
-        查看完整玩法
-       </span>
-       <span data-lang="en">
-        View Complete Gameplay
-       </span>
-      </a>
-     </div>
-    </div>
-   </section>
-   <nav aria-label="版本快速導覽" class="changelog-version-index">
-    <a class="version-link active" data-version-target="v040" href="#v040">
-     v0.4
-    </a>
-    <a class="version-link" data-version-target="v030" href="#v030">
-     v0.3
-    </a>
-    <a class="version-link" data-version-target="v021" href="#v021">
-     v0.2.1
-    </a>
-    <a class="version-link" data-version-target="v020" href="#v020">
-     v0.2
-    </a>
-    <a class="version-link" data-version-target="v011" href="#v011">
-     v0.1.1
-    </a>
-    <a class="version-link" data-version-target="v010" href="#v010">
-     v0.1
-    </a>
-   </nav>
-   <section class="changelog-content">
-    <div class="release-list">
-     <article class="release" id="v040">
-      <div aria-hidden="true" class="release-marker">
-      </div>
-      <div class="release-content">
-       <header class="release-header">
-        <div>
-         <div class="release-version">
-          v0.4
-         </div>
-         <h2 data-lang="zh-Hant">
-          架構重構、生活玩法與相容性擴充
-         </h2>
-         <h2 data-lang="en">
-          Architecture, Life Gameplay &amp; Compatibility
-         </h2>
+<html lang="zh-Hant" data-language="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealDate 更新日誌 · L1nG</title>
+    <meta name="description" content="RealDate 公開版本更新紀錄、修正與相容性變更。">
+    <meta name="theme-color" content="#fafafa">
+    <link rel="stylesheet" href="realdate.css">
+    <script src="realdate.js" defer></script>
+    <link rel="stylesheet" href="changelog.css">
+    <script src="changelog.js" defer></script>
+</head>
+
+<body>
+
+    <!-- ========【RealDate 頂部導覽】 設定 - 品牌、頁面導覽與語言切換 ======== -->
+    <header class="site-header" id="siteHeader">
+        <div class="site-header-inner">
+            <div class="site-brand-group">
+                <a class="creator-link" href="../home.html">L1nG</a>
+                <span class="brand-divider">/</span>
+                <a class="realdate-brand" href="index.html">REALDATE</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
+            <nav class="main-nav" id="mainNav" aria-label="RealDate">
+                <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                <a class="active" href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                <details class="nav-more">
+                    <summary><span data-lang="zh-Hant">更多</span><span data-lang="en">More</span><span class="nav-more-chevron" aria-hidden="true">⌄</span></summary>
+                    <div class="nav-more-menu">
+                        <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                        <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                    </div>
+                </details>
+            </nav>
+            <div class="language-switch" role="group" aria-label="Language">
+                <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
+                <span class="language-divider">/</span>
+                <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
+            </div>
         </div>
-        <time datetime="2026-09-23">
-         2026.09.23 (UTC+8)
-        </time>
-       </header>
-       <p class="release-summary" data-lang="zh-Hant">
-        目前規模最大的一次架構重構與系統整合更新。新增生日社交、年號、星期校正與每日換日通知，並進一步整合生理時間軸、MCCC、RPO 與 Child Birth Mod。
-       </p>
-       <p class="release-summary" data-lang="en">
-        The largest architectural and systems-integration update so far. Adds birthday social gameplay, Eras, weekday recalibration, daily date-change notifications, and deeper integration with reproductive timelines, MCCC, RPO, and Child Birth Mod.
-       </p>
-       <div class="change-grid">
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          新增
-         </h3>
-         <h3 data-lang="en">
-          NEW
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           新增生日社交玩法：生日記憶為單向資訊，可詢問、告知或向第三人打聽生日；已知生日後可在生日前一天、當天與隔天送上不同祝福。
-          </li>
-          <li data-lang="en">
-           Added birthday social gameplay with directional birthday memories. Sims can ask, share, or learn a third Sim's birthday, then give different wishes the day before, on, or after the birthday.
-          </li>
-          <li data-lang="zh-Hant">
-           生日記憶會隨長期未慶祝而逐漸淡化，再次成功祝福可加深記憶；父母一般不會因時間流逝忘記子女生日。
-          </li>
-          <li data-lang="en">
-           Birthday memories can fade after long periods without celebration and be reinforced by successful wishes; parents do not normally forget their children's birthdays over time.
-          </li>
-          <li data-lang="zh-Hant">
-           新增年號玩法：可設定年號名稱、選擇顯示紀年、保存已結束年號的起訖日期，並管理年號歷史。
-          </li>
-          <li data-lang="en">
-           Added Era gameplay with custom Era names, optional Era-year reckoning, preserved start/end dates, and Era history management.
-          </li>
-          <li data-lang="zh-Hant">
-           日期回溯到歷史區間時會重新顯示當時正確的年號，不會重新觸發一次年號更替。
-          </li>
-          <li data-lang="en">
-           Moving the date back into a historical range restores the correct saved Era instead of replaying the Era transition.
-          </li>
-          <li data-lang="zh-Hant">
-           新增星期作弊，可重新校正目前 RealDate 日期與星期日～星期六的對應。
-          </li>
-          <li data-lang="en">
-           Added a Weekday Cheat to recalibrate which weekday corresponds to the current RealDate date.
-          </li>
-          <li data-lang="zh-Hant">
-           新增可選的每日換日通知，在遊戲自然跨過午夜、RealDate 進入新的一天時顯示通知。
-          </li>
-          <li data-lang="en">
-           Added optional daily date-change notifications when in-game time naturally crosses midnight and RealDate advances to a new day.
-          </li>
-         </ul>
+    </header>
+
+    <main>
+        <section class="page-hero">
+            <div class="page-hero-inner reveal">
+                <span class="eyebrow">CHANGELOG</span>
+                <h1 data-lang="zh-Hant">版本更新紀錄</h1>
+                <h1 data-lang="en">Version History</h1>
+                <p data-lang="zh-Hant">
+                    這裡只記錄各版本新增、修正、相容性變更與重要限制。
+                    想了解 RealDate 現在完整有哪些玩法，請查看「玩法」。
+                </p>
+                <p data-lang="en">
+                    This page records additions, fixes, compatibility changes, and important limitations between releases.
+                    For the complete current gameplay, see Gameplay.
+                </p>
+                <div class="changelog-current-release">
+                    <div>
+                        <span data-lang="zh-Hant">最新公開版本</span>
+                        <span data-lang="en">Latest public release</span>
+                        <strong>v0.4 Beta</strong>
+                    </div>
+                    <div>
+                        <span data-lang="zh-Hant">最後更新</span>
+                        <span data-lang="en">Last updated</span>
+                        <strong>2026.09.23 (UTC+8)</strong>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="downloads/L1nG_RealDate_v0.4_Beta.zip" download="L1nG_RealDate_v0.4_Beta.zip"><span data-lang="zh-Hant">下載最新版本</span><span data-lang="en">Download Latest Release</span></a>
+                    <a class="button button-secondary" href="gameplay.html"><span data-lang="zh-Hant">查看完整玩法</span><span data-lang="en">View Complete Gameplay</span></a>
+                </div>
+            </div>
         </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          生理時間軸
-         </h3>
-         <h3 data-lang="en">
-          TIMELINE
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           懷孕時間軸改以實際日期記錄與推算受孕時間、孕期與預產期；抵達預產期不會強迫立即生產。
-          </li>
-          <li data-lang="en">
-           Pregnancy timing now uses actual dates for conception estimates, pregnancy progress, and due dates; reaching the due date does not force immediate birth.
-          </li>
-          <li data-lang="zh-Hant">
-           改善生產後的產後恢復，以及修改日期、重新讀檔或旅行後的生理狀態與舊生產資料同步。
-          </li>
-          <li data-lang="en">
-           Improved postpartum recovery and synchronization after date changes, save reloads, and travel.
-          </li>
-          <li data-lang="zh-Hant">
-           強化初潮、月經週期與停經的時間判斷；停經仍以每位市民自己的 RealDate 年齡與停經時間為準。
-          </li>
-          <li data-lang="en">
-           Improved timing between menarche, menstrual cycles, and menopause; menopause remains based on each Sim's RealDate age and saved menopause timing.
-          </li>
-          <li data-lang="zh-Hant">
-           修改生日或年齡後，進一步重新同步 Slice of Life、WickedWhims 等相容模組中的週期與停經狀態。
-          </li>
-          <li data-lang="en">
-           Improved resynchronization of cycle and menopause states with compatible mods such as Slice of Life and WickedWhims after birthday or age changes.
-          </li>
-         </ul>
+
+        <nav class="changelog-version-index" aria-label="版本快速導覽">
+            <a class="version-link active" href="#v040" data-version-target="v040">
+                v0.4
+            </a>
+            <a class="version-link" href="#v030" data-version-target="v030">v0.3</a>
+            <a class="version-link" href="#v021" data-version-target="v021">v0.2.1</a>
+            <a class="version-link" href="#v020" data-version-target="v020">v0.2</a>
+            <a class="version-link" href="#v011" data-version-target="v011">v0.1.1</a>
+            <a class="version-link" href="#v010" data-version-target="v010">v0.1</a>
+        </nav>
+
+        <section class="changelog-content">
+            <div class="release-list">
+                <article class="release" id="v040">
+                    <div class="release-marker" aria-hidden="true"></div>
+                    <div class="release-content">
+                        <header class="release-header">
+                            <div>
+                                <div class="release-version">v0.4</div>
+                                <h2 data-lang="zh-Hant">架構重構、生活玩法與相容性擴充</h2>
+                                <h2 data-lang="en">Architecture, Life Gameplay &amp; Compatibility</h2>
+                            </div>
+                            <time datetime="2026-09-23">2026.09.23 (UTC+8)</time>
+                        </header>
+                        <p class="release-summary" data-lang="zh-Hant">目前規模最大的一次架構重構與系統整合更新。新增生日社交、年號、星期校正與每日換日通知，並進一步整合生理時間軸、MCCC、RPO 與 Child Birth Mod。</p>
+                        <p class="release-summary" data-lang="en">
+                            The largest architectural and systems-integration update so far. Adds birthday social gameplay, Eras, weekday recalibration, daily date-change notifications, and deeper integration with reproductive timelines, MCCC, RPO, and Child Birth Mod.
+                        </p>
+                        <div class="change-grid">
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">新增</h3>
+                                <h3 data-lang="en">NEW</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        新增生日社交玩法：生日記憶為單向資訊，可詢問、告知或向第三人打聽生日；已知生日後可在生日前一天、當天與隔天送上不同祝福。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added birthday social gameplay with directional birthday memories. Sims can ask, share, or learn a third Sim's birthday, then give different wishes the day before, on, or after the birthday.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        生日記憶會隨長期未慶祝而逐漸淡化，再次成功祝福可加深記憶；父母一般不會因時間流逝忘記子女生日。
+                                    </li>
+                                    <li data-lang="en">
+                                        Birthday memories can fade after long periods without celebration and be reinforced by successful wishes; parents do not normally forget their children's birthdays over time.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增年號玩法：可設定年號名稱、選擇顯示紀年、保存已結束年號的起訖日期，並管理年號歷史。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added Era gameplay with custom Era names, optional Era-year reckoning, preserved start/end dates, and Era history management.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        日期回溯到歷史區間時會重新顯示當時正確的年號，不會重新觸發一次年號更替。
+                                    </li>
+                                    <li data-lang="en">
+                                        Moving the date back into a historical range restores the correct saved Era instead of replaying the Era transition.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增星期作弊，可重新校正目前 RealDate 日期與星期日～星期六的對應。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added a Weekday Cheat to recalibrate which weekday corresponds to the current RealDate date.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增可選的每日換日通知，在遊戲自然跨過午夜、RealDate 進入新的一天時顯示通知。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added optional daily date-change notifications when in-game time naturally crosses midnight and RealDate advances to a new day.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">生理時間軸</h3>
+                                <h3 data-lang="en">TIMELINE</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        懷孕時間軸改以實際日期記錄與推算受孕時間、孕期與預產期；抵達預產期不會強迫立即生產。
+                                    </li>
+                                    <li data-lang="en">
+                                        Pregnancy timing now uses actual dates for conception estimates, pregnancy progress, and due dates; reaching the due date does not force immediate birth.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        改善生產後的產後恢復，以及修改日期、重新讀檔或旅行後的生理狀態與舊生產資料同步。
+                                    </li>
+                                    <li data-lang="en">
+                                        Improved postpartum recovery and synchronization after date changes, save reloads, and travel.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        強化初潮、月經週期與停經的時間判斷；停經仍以每位市民自己的 RealDate 年齡與停經時間為準。
+                                    </li>
+                                    <li data-lang="en">
+                                        Improved timing between menarche, menstrual cycles, and menopause; menopause remains based on each Sim's RealDate age and saved menopause timing.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修改生日或年齡後，進一步重新同步 Slice of Life、WickedWhims 等相容模組中的週期與停經狀態。
+                                    </li>
+                                    <li data-lang="en">
+                                        Improved resynchronization of cycle and menopause states with compatible mods such as Slice of Life and WickedWhims after birthday or age changes.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">相容性</h3>
+                                <h3 data-lang="en">COMPATIBILITY</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        新增 MCCC 年齡與生命週期相容：MCCC 市民資訊可顯示 RealDate 實際年齡，並協調停止增齡、自訂階段長度與隨機起始進度等設定；RealDate 不會自行改寫玩家的 MCCC 設定。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added MCCC age and lifecycle compatibility. MCCC Sim info can display RealDate ages, while RealDate coordinates with disabled aging, custom stage lengths, and randomized age progress without silently changing MCCC settings.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增 MCCC 懷孕相容：可辨識由 MCCC 作弊開始的懷孕，依可確認的進度推算受孕日期，並分開判斷取消／結束懷孕與真正生產。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added MCCC pregnancy compatibility. Pregnancies started through MCCC cheats are recognized, conception dates can be estimated from reliable progress, and pregnancy ending is handled separately from actual birth.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增 RPO 懷孕流程相容，可辨識懷孕開始、結束與生產結果；RPO 原本的關係、反應與結果仍由 RPO 處理。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added RPO pregnancy-flow compatibility for recognizing pregnancy starts, endings, and birth outcomes while leaving RPO's relationships, reactions, and outcomes to RPO.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增 PandaSama Child Birth Mod 懷孕與生產相容，維持 RealDate 的懷孕日期、生產時間與產後時間軸；產檢、待產與生產玩法仍由原模組處理。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added PandaSama Child Birth Mod compatibility to preserve RealDate pregnancy dates, delivery timing, and postpartum timelines while the original mod continues to handle prenatal care, labor, and delivery gameplay.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        Mood Pack Mod 可提供生日社交的更多情緒反應；未安裝時仍使用 EA 原生情緒。
+                                    </li>
+                                    <li data-lang="en">
+                                        Mood Pack Mod can provide more varied emotional reactions for birthday socials; without it, EA's native moodlets are used.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">修正</h3>
+                                <h3 data-lang="en">FIXED</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        修正少數已完成初始設定的存檔，偶爾仍再次要求重新設定日期的問題。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed some initialized saves occasionally being treated as uninitialized and asking for date setup again.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修正進入 MCCC CAS、返回地段或完成家庭搬遷後，市民可能異常跳到下一個年齡階段的問題。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed Sims unexpectedly jumping to the next life stage after entering MCCC CAS, returning to a lot, or completing a household move.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修正老年市民生日當天無法正常吹蠟燭／慶生。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed Elder Sims being unable to properly blow out birthday candles or celebrate their birthday.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修正月曆第一頁以後的日期可能無法建立或保存自訂節日。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed custom holidays failing to create or save on Calendar dates beyond the first page.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修正使用 RealDate 季節時間時，EA 原生排程可能在冬季約兩週後提前換季。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed EA's native season schedule advancing too early, around two weeks into winter, while using RealDate season timing.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修正部分存檔載入後「今天是……」通知偶爾顯示錯誤日期。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed the “Today is...” notification occasionally showing an incorrect date after loading certain saves.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">診斷</h3>
+                                <h3 data-lang="en">DIAGNOSTICS</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        擴充啟動診斷與日誌，記錄模組啟動、核心載入、必要掛載、家庭載入與載入畫面等階段。
+                                    </li>
+                                    <li data-lang="en">
+                                        Expanded startup diagnostics and logging across mod startup, core loading, required hooks, household loading, and loading-screen stages.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        此版測試環境包含 MCCC 2026.5.0、WickedWhims v185k、Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7、RPO v2.986、Child Birth Mod v1.965 與 Mood Pack Mod v1.677。
+                                    </li>
+                                    <li data-lang="en">
+                                        This release was tested with MCCC 2026.5.0, WickedWhims v185k, Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7, RPO v2.986, Child Birth Mod v1.965, and Mood Pack Mod v1.677.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">安裝備註</h3>
+                                <h3 data-lang="en">INSTALL NOTES</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        更新前請先移除舊版 .package 與 .ts4script，再放入 v0.4 新檔案。所有相容檔案需放在 Mods\Overrides。
+                                    </li>
+                                    <li data-lang="en">
+                                        Remove the old .package and .ts4script before installing v0.4. All compatibility packages must be placed in Mods\Overrides.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        UI Cheats、Quick Save、Quick Save + UI Cheats 三個相容檔只能擇一安裝，否則會互相衝突。
+                                    </li>
+                                    <li data-lang="en">
+                                        Only one of the UI Cheats, Quick Save, or Quick Save + UI Cheats compatibility packages may be installed at a time; installing more than one causes conflicts.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
+                        <div class="release-tags" aria-label="版本資訊">
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">Beta 測試版</span>
+                                <span data-lang="en">Beta</span>
+                            </span>
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">遊戲版本 1.127.41.1030</span>
+                                <span data-lang="en">Game 1.127.41.1030</span>
+                            </span>
+                            <span class="release-tag">Lot51 Core Library v1.43</span>
+                        </div>
+                        <a class="release-download-link" href="download.html#v040"><span data-lang="zh-Hant">查看此版本下載</span><span data-lang="en">View Release Download</span><span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+                <article class="release" id="v030">
+                    <div class="release-marker" aria-hidden="true"></div>
+                    <div class="release-content">
+                        <header class="release-header">
+                            <div>
+                                <div class="release-version">v0.3</div>
+                                <h2 data-lang="zh-Hant">RealDate 月曆、月齡與生理時間軸</h2>
+                                <h2 data-lang="en">Calendar, Age in Months &amp; Reproductive Timeline</h2>
+                            </div>
+                            <time datetime="2026-09-07">2026.09.07 (UTC+8)</time>
+                        </header>
+                        <p class="release-summary" data-lang="zh-Hant">把 RealDate 日期正式帶進 EA 月曆，加入未滿一歲的月齡系統，並重整月經、懷孕、初潮、停經與產後恢復的時間架構，同時新增診斷與除錯工具。</p>
+                        <p class="release-summary" data-lang="en">
+                            Integrates RealDate dates into EA's Calendar, adds age-in-months for Sims under one year old, rebuilds menstrual, pregnancy, menarche, menopause, and postpartum timing, and adds new diagnostic tools.
+                        </p>
+                        <div class="change-grid">
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">新增</h3>
+                                <h3 data-lang="en">NEW</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        RealDate 日期正式整合 EA 月曆：顯示日號、完整日期提示、家庭成員生日標記與 11 種日號顏色，並保留 EA 原本的活動、節日、天氣與月相。
+                                    </li>
+                                    <li data-lang="en">
+                                        Integrated RealDate directly into EA's Calendar with day numbers, full-date tooltips, household birthday markers, 11 day-number colors, and preservation of EA events, holidays, weather, and moon phases.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        月曆提供 365 天的 RealDate 日期範圍；EA 原本活動的實際排程仍由遊戲本身控制。
+                                    </li>
+                                    <li data-lang="en">
+                                        The Calendar provides 365 days of RealDate date data, while EA's existing event schedules remain controlled by the game.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增未滿一歲的月齡顯示：出生後顯示 0～11 個月，滿一歲後再改回歲數。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added age-in-months for Sims under one year old: ages display as 0–11 months before returning to years at age one.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        重新定義早期年齡階段：出生～未滿 1 個月為新生兒、滿 1 個月至 1 歲為嬰兒、2～6 歲為幼兒；之後維持 7／13／18／40／65 歲的階段門檻。
+                                    </li>
+                                    <li data-lang="en">
+                                        Reworked early life stages: birth to under 1 month is Newborn, 1 month to age 1 is Infant, and ages 2–6 are Toddler, with later thresholds at 7, 13, 18, 40, and 65.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新生兒滿 1 個月時沿用 EA 原生增齡流程進入嬰兒，但不視為生日，也不觸發 RealDate 生日通知。
+                                    </li>
+                                    <li data-lang="en">
+                                        At one month old, Newborns use EA's native age-up flow to become Infants, but the milestone is not treated as a birthday and does not trigger a RealDate birthday notification.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">生理時間軸</h3>
+                                <h3 data-lang="en">TIMELINE</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        新增市民專屬生理時間軸，可查看目前週期、預計經期、排卵日、易孕期與懷孕時的預產期等具體 RealDate 日期。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added a per-Sim reproductive timeline showing the current cycle, expected period, ovulation, fertile window, and pregnancy due dates as specific RealDate dates.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        可依存檔啟用／停用生理時間軸，並為個別市民設定不同週期與經期長度；預設為 28 天週期／5 天經期。
+                                    </li>
+                                    <li data-lang="en">
+                                        The reproductive timeline can be enabled per save, with individual cycle and period lengths per Sim; defaults are a 28-day cycle and 5-day period.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        月經時間軸資格改參考 CAS 懷孕能力，而不是只依男性／女性分類。
+                                    </li>
+                                    <li data-lang="en">
+                                        Menstrual-timeline eligibility now references CAS pregnancy capability settings instead of relying only on Male/Female categories.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增個別初潮與停經時間。初潮可在設定範圍內依實際日期發生；停經會在 45～55 歲之間為每位符合條件的市民決定並保存時間。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added individual menarche and menopause timing. Menarche occurs by actual date within a configurable range, while menopause timing is assigned and saved per eligible Sim between ages 45 and 55.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        停經不會中途切斷目前週期；若正在懷孕或產後恢復，會等待目前狀態結束後再生效。
+                                    </li>
+                                    <li data-lang="en">
+                                        Menopause does not abruptly cut off the current cycle; if a Sim is pregnant or postpartum, it waits until the current state ends.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        懷孕期間暫停一般週期預測並顯示孕期、推算受孕日與預產期；生產後預設進入 42 天產後恢復。
+                                    </li>
+                                    <li data-lang="en">
+                                        During pregnancy, normal cycle predictions pause and pregnancy stage, estimated conception, and due date are shown; after birth, postpartum recovery defaults to 42 days.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">相容性</h3>
+                                <h3 data-lang="en">COMPATIBILITY</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        WickedWhims：支援讀取月經週期與懷孕進度，並與 RealDate 生理時間軸同步支援的時間資料。
+                                    </li>
+                                    <li data-lang="en">
+                                        WickedWhims: supports reading menstrual-cycle and pregnancy progress and synchronizing supported timing with the RealDate reproductive timeline.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        Slice of Life Menstrual Cycle：支援同步 SOL 原本的經期與相關週期狀態。
+                                    </li>
+                                    <li data-lang="en">
+                                        Slice of Life Menstrual Cycle: supports synchronizing SOL's native periods and related cycle states.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        EA 原生懷孕：沒有 WickedWhims 時仍可讀取原生懷孕狀態與進度。
+                                    </li>
+                                    <li data-lang="en">
+                                        EA pregnancy: native pregnancy state and progress can still be read when WickedWhims is not installed.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        RPO：此版可偵測，但尚未支援精確的生理時間資料。
+                                    </li>
+                                    <li data-lang="en">
+                                        RPO: detectable in this release, but exact reproductive timeline data is not yet supported.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">工具與介面</h3>
+                                <h3 data-lang="en">TOOLS &amp; UI</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        新增 RealDate UI 資源衝突診斷，可掃描其他 package 是否修改 RealDate 使用的重要 UI 資源，結果寫入 Boot Log。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added a RealDate UI resource conflict diagnostic that scans for other packages modifying important RealDate UI resources and writes findings to the Boot Log.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增遊戲內詳細除錯日誌開關；關閉時仍保留重要 WARNING 與 ERROR。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added an in-game detailed debug logging toggle; important WARNING and ERROR messages remain recorded when detailed logging is off.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        重新整理 Pie Menu，將基礎設定、相容性、生理時間軸與診斷工具分開；RealDate 啟用／停用可直接從主選單操作。
+                                    </li>
+                                    <li data-lang="en">
+                                        Reorganized the Pie Menu into Basic Settings, Compatibility, Reproductive Timeline, and Diagnostics, with RealDate enable/disable available from the main menu.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        可從關係面板開啟不在目前地段市民的 RealDate 選單，也可查看睡眠中市民資訊而不必叫醒。
+                                    </li>
+                                    <li data-lang="en">
+                                        RealDate can be opened for off-lot Sims from the Relationship Panel, and sleeping Sims can be inspected without waking them.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">底層調整</h3>
+                                <h3 data-lang="en">UNDER THE HOOD</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        生理時間軸、初潮、停經與產後恢復狀態可隨存檔保存並在重新讀取後繼續。
+                                    </li>
+                                    <li data-lang="en">
+                                        Reproductive timelines, menarche, menopause, and postpartum states now persist with the save and continue after reloading.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        舊資料會自動遷移到 v0.3 的新儲存格式。
+                                    </li>
+                                    <li data-lang="en">
+                                        Existing data automatically migrates to the new v0.3 save format.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        手動修改日期或生日後，會重新對齊實際年齡、月齡、EA 年齡階段與相關懷孕時間軸。
+                                    </li>
+                                    <li data-lang="en">
+                                        Manual date or birthday changes now reconcile real age, age in months, EA life stage, and related pregnancy timelines.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        第三方模組資料讀取、月曆資料與載入／重新同步流程加入更多安全與穩定性保護。
+                                    </li>
+                                    <li data-lang="en">
+                                        Additional safety and stability safeguards were added to third-party data reading, Calendar data, and load/resynchronization flows.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">安裝備註</h3>
+                                <h3 data-lang="en">INSTALL NOTES</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        更新前請移除舊版 .package 與 .ts4script。UI Cheats、BetterBuildBuy 與 Slice of Life Menstrual 的相容檔皆為選擇性安裝。
+                                    </li>
+                                    <li data-lang="en">
+                                        Remove the old .package and .ts4script before updating. Compatibility packages for UI Cheats, BetterBuildBuy, and Slice of Life Menstrual are optional.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        所有相容檔案需放入 Mods\Overrides。
+                                    </li>
+                                    <li data-lang="en">
+                                        All compatibility packages must be placed in Mods\Overrides.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
+                        <div class="release-tags" aria-label="版本資訊">
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">Beta 測試版</span>
+                                <span data-lang="en">Beta</span>
+                            </span>
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">遊戲版本 1.127.41.1030</span>
+                                <span data-lang="en">Game 1.127.41.1030</span>
+                            </span>
+                            <span class="release-tag">Lot51 Core Library v1.43</span>
+                        </div>
+                        <a class="release-download-link" href="download.html#v030"><span data-lang="zh-Hant">查看此版本下載</span><span data-lang="en">View Release Download</span><span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+                <article class="release compact" id="v021">
+                    <div class="release-marker" aria-hidden="true"></div>
+                    <div class="release-content">
+                        <header class="release-header">
+                            <div>
+                                <div class="release-version">v0.2.1</div>
+                                <h2 data-lang="zh-Hant">午夜換日熱修復</h2>
+                                <h2 data-lang="en">Midnight Rollover Hotfix</h2>
+                            </div>
+                            <time datetime="2026-08-31">2026.08.31 (UTC+8)</time>
+                        </header>
+                        <p class="release-summary" data-lang="zh-Hant">獨立的 v0.2.1 修正版，集中處理午夜換日與生日當天可能卡住日期更新的問題。</p>
+                        <p class="release-summary" data-lang="en">A standalone v0.2.1 hotfix focused on midnight rollover and birthday-day date updates.</p>
+                        <div class="change-grid">
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">修正</h3>
+                                <h3 data-lang="en">FIXED</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        修正遊戲時間跨過午夜後，RealDate 偶爾無法立即更新日期、停留在前一天的問題。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed RealDate occasionally failing to update immediately after the in-game clock crossed midnight and remaining on the previous day.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修正主控家庭有市民生日當天，日期可能長時間停留在前一天、甚至幾乎不刷新的問題。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed the date remaining on the previous day for an extended period, or barely refreshing, when an active-household Sim had a birthday.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        包含其他小型穩定性調整。
+                                    </li>
+                                    <li data-lang="en">
+                                        Includes additional minor stability improvements.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
+                        <div class="release-tags" aria-label="版本資訊">
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">Beta 測試版</span>
+                                <span data-lang="en">Beta</span>
+                            </span>
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">熱修復</span>
+                                <span data-lang="en">Hotfix</span>
+                            </span>
+                        </div>
+                        <a class="release-download-link" href="download.html#v021"><span data-lang="zh-Hant">查看此版本下載</span><span data-lang="en">View Release Download</span><span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+                <article class="release" id="v020">
+                    <div class="release-marker" aria-hidden="true"></div>
+                    <div class="release-content">
+                        <header class="release-header">
+                            <div>
+                                <div class="release-version">v0.2</div>
+                                <h2 data-lang="zh-Hant">十二個月年份、季節與年齡介面整合</h2>
+                                <h2 data-lang="en">Twelve-Month Year, Seasons &amp; Aging UI</h2>
+                            </div>
+                            <time datetime="2026-08-28">2026.08.28 (UTC+8)</time>
+                        </header>
+                        <p class="release-summary" data-lang="zh-Hant">從 v0.1 的日期／生日基礎進一步延伸到季節、年齡進度與遊戲 UI，建立「3 個月 × 4 季＝12 個月」的第一版時間整合，並開始測試月經與長孕期同步。</p>
+                        <p class="release-summary" data-lang="en">
+                            Extends the v0.1 date and birthday foundation into seasons, aging progress, and game UI, introducing the first 3-month × 4-season = 12-month timeline and early menstrual/pregnancy synchronization.
+                        </p>
+                        <div class="change-grid">
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">新增</h3>
+                                <h3 data-lang="en">NEW</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        《春夏秋冬》新增「約 90 天（RealDate）」季節長度，依該季實際包含的三個月份計算天數，季節進度條也改依 RealDate 季節百分比前進。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added an “About 90 Days (RealDate)” season length for Seasons, calculated from the actual three calendar months in that season, with season progress based on RealDate percentages.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        建立 3 個月 × 4 季＝12 個月＝1 年的時間架構。
+                                    </li>
+                                    <li data-lang="en">
+                                        Established the 3 months × 4 seasons = 12 months = 1 year time structure.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        季節長度同時作為每個存檔的 RealDate 開關：7／14／28 天停用，約 90 天重新啟用；停用時資料保留且不補算停用期間。
+                                    </li>
+                                    <li data-lang="en">
+                                        Season length also acts as a per-save RealDate toggle: 7/14/28 days disables RealDate, while About 90 Days re-enables it; data is preserved and disabled time is not retroactively processed.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        季節／天氣懸停資訊改為顯示 RealDate 日期，格式依玩家的日期格式設定。
+                                    </li>
+                                    <li data-lang="en">
+                                        Season/weather tooltips now display the RealDate date using the player's selected date format.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        每次遊戲啟動後，各存檔第一次載入家庭時顯示一次「今天是 {日期}」通知。
+                                    </li>
+                                    <li data-lang="en">
+                                        After each game launch, the first household load in each save shows a one-time “Today is {date}” notification.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">年齡與生日</h3>
+                                <h3 data-lang="en">AGING &amp; BIRTHDAYS</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        模擬市民學的年齡進度條改按 RealDate 實際時間比例推進。
+                                    </li>
+                                    <li data-lang="en">
+                                        Simology aging progress now advances according to RealDate's actual time progression.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        年齡懸停資訊顯示距離增齡還有 X 年 X 個月 X 天；老年人改顯示已生活 X 年 X 個月 X 天。
+                                    </li>
+                                    <li data-lang="en">
+                                        Age tooltips show time until age-up in years, months, and days; Elders instead show total time lived.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        世界中市民頭頂名稱 UI 會在 EA 年齡階段之外顯示實際年齡。
+                                    </li>
+                                    <li data-lang="en">
+                                        World nameplate UI now shows a Sim's real age alongside the EA life stage.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        年齡特徵說明改為依 0～120+ 的人生區間使用不同敘事文本。
+                                    </li>
+                                    <li data-lang="en">
+                                        Age-trait descriptions now use different narrative text across life ranges from age 0 to 120+.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修改生日後除重新計算實際年齡與年齡特徵，也會同步調整 EA 年齡階段；一般市民仍不能安全改回新生兒。
+                                    </li>
+                                    <li data-lang="en">
+                                        Changing a birthday now also updates the EA life stage in addition to recalculating real age and age traits; regular Sims still cannot safely be converted back to Newborn.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">修正與保存</h3>
+                                <h3 data-lang="en">FIXED &amp; SAVING</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        修正 v0.1 的新生兒生日問題：出生後自動以出生當天 RealDate 日期建立生日，出生通知顯示姓名、出生日期與完成命名時的遊戲時間。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed the v0.1 newborn birthday issue: newborns automatically receive the current RealDate date as their birthday, and birth notifications show name, birth date, and the in-game time when naming is completed.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        若安裝 Zodiac Signs Mod V3，新生兒生日建立後會嘗試同步正確星座。
+                                    </li>
+                                    <li data-lang="en">
+                                        With Zodiac Signs Mod V3 installed, RealDate attempts to synchronize the correct zodiac sign after the newborn birthday is created.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        重新調整存檔行為：日期、生日與設定只在 EA 實際存檔成功時保存；未存檔直接退出或重讀會回到上次成功存檔狀態。
+                                    </li>
+                                    <li data-lang="en">
+                                        Reworked persistence so dates, birthdays, and settings are saved only when EA successfully saves; exiting or reloading without saving returns RealDate to the previous saved state.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        整理設定介面、通知、文本、圖標與選項顯示，並新增 RealDate 啟用狀態設定及週期／懷孕相容分類。
+                                    </li>
+                                    <li data-lang="en">
+                                        Refined settings, notifications, text, icons, and option presentation, adding a RealDate enable/disable setting and dedicated cycle/pregnancy compatibility categories.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">相容性</h3>
+                                <h3 data-lang="en">COMPATIBILITY</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        UI Cheats 切換季節時，RealDate 只會向未來推進到目標季節對應日期；若跳過期間有生日，會補上生日通知。
+                                    </li>
+                                    <li data-lang="en">
+                                        When UI Cheats changes seasons, RealDate moves forward only to the corresponding target-season date and adds birthday notifications for birthdays skipped along the way.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        開始測試 WickedWhims 與 Slice of Life Menstrual Cycle 的週期同步；基準為 28 天週期／5 天經期，懷孕期間暫停，產後預設 42 天恢復。
+                                    </li>
+                                    <li data-lang="en">
+                                        Began testing cycle synchronization with WickedWhims and Slice of Life Menstrual Cycle using a 28-day cycle / 5-day period baseline, paused during pregnancy with a default 42-day postpartum recovery.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        兩套月經模組可擇一或同時同步；v0.2 同步兩者時只統一週期與經期長度，實際開始／結束日期尚未完全對齊。
+                                    </li>
+                                    <li data-lang="en">
+                                        Either or both menstrual mods can be synchronized; in v0.2, syncing both aligns cycle and period lengths but does not yet guarantee exact matching start/end dates.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        開始測試約 10 個月的長孕期；此版支援 EA 原生懷孕與 WickedWhims，RPO 相容尚未完成。
+                                    </li>
+                                    <li data-lang="en">
+                                        Began testing an approximately 10-month pregnancy timeline. EA pregnancy and WickedWhims are supported in this release; RPO integration is not yet complete.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">安裝備註</h3>
+                                <h3 data-lang="en">INSTALL NOTES</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        更新前請移除舊版 .package 與 .ts4script。UI Cheats、BetterBuildBuy 與 Slice of Life Menstrual 的相容檔為選擇性安裝。
+                                    </li>
+                                    <li data-lang="en">
+                                        Remove the old .package and .ts4script before updating. Compatibility packages for UI Cheats, BetterBuildBuy, and Slice of Life Menstrual are optional.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        所有相容檔需放入 Mods\Overrides。
+                                    </li>
+                                    <li data-lang="en">
+                                        All compatibility packages must be placed in Mods\Overrides.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
+                        <div class="release-tags" aria-label="版本資訊">
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">Beta 測試版</span>
+                                <span data-lang="en">Beta</span>
+                            </span>
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">遊戲版本 1.127.41.1030</span>
+                                <span data-lang="en">Game 1.127.41.1030</span>
+                            </span>
+                            <span class="release-tag">Lot51 Core Library v1.43</span>
+                        </div>
+                        <a class="release-download-link" href="download.html#v020"><span data-lang="zh-Hant">查看此版本下載</span><span data-lang="en">View Release Download</span><span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+                <article class="release compact" id="v011">
+                    <div class="release-marker" aria-hidden="true"></div>
+                    <div class="release-content">
+                        <header class="release-header">
+                            <div>
+                                <div class="release-version">v0.1.1</div>
+                                <h2 data-lang="zh-Hant">ModGuard 相容性熱修復</h2>
+                                <h2 data-lang="en">ModGuard Compatibility Hotfix</h2>
+                            </div>
+                            <time datetime="2026-08-24">2026.08.24 (UTC+8)</time>
+                        </header>
+                        <p class="release-summary" data-lang="zh-Hant">獨立的 v0.1.1 修正版，處理 TwistedMexi ModGuard 的安全警告相容問題。</p>
+                        <p class="release-summary" data-lang="en">A standalone v0.1.1 hotfix addressing compatibility with TwistedMexi's ModGuard security warning.</p>
+                        <div class="change-grid">
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">修正</h3>
+                                <h3 data-lang="en">FIXED</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        修正 RealDate 可能觸發 TwistedMexi ModGuard 安全警告的問題。
+                                    </li>
+                                    <li data-lang="en">
+                                        Fixed an issue that could cause RealDate to trigger a security warning from TwistedMexi's ModGuard.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
+                        <div class="release-tags" aria-label="版本資訊">
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">Beta 測試版</span>
+                                <span data-lang="en">Beta</span>
+                            </span>
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">熱修復</span>
+                                <span data-lang="en">Hotfix</span>
+                            </span>
+                        </div>
+                        <a class="release-download-link" href="download.html#v011"><span data-lang="zh-Hant">查看此版本下載</span><span data-lang="en">View Release Download</span><span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+                <article class="release" id="v010">
+                    <div class="release-marker" aria-hidden="true"></div>
+                    <div class="release-content">
+                        <header class="release-header">
+                            <div>
+                                <div class="release-version">v0.1</div>
+                                <h2 data-lang="zh-Hant">日期、生日與實際年齡基礎</h2>
+                                <h2 data-lang="en">Date, Birthday &amp; Real-Age Foundation</h2>
+                            </div>
+                            <time datetime="2026-08-23">2026.08.23 (UTC+8)</time>
+                        </header>
+                        <p class="release-summary" data-lang="zh-Hant">RealDate 的第一個公開 Beta，建立以年、月、日為基礎的存檔日期、生日、實際年齡與年齡特徵系統，並加入第一個第三方模組聯動。</p>
+                        <p class="release-summary" data-lang="en">
+                            The first public RealDate Beta, establishing save-level dates, birthdays, real ages, age traits, and the first third-party mod integration.
+                        </p>
+                        <div class="change-grid">
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">新增</h3>
+                                <h3 data-lang="en">NEW</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        首次載入家庭時提供 RealDate 初始設定，可設定起始年份、南／北半球、起始月份與日期，以及偏好的日期顯示格式。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added initial RealDate setup on first household load, including starting year, Northern/Southern Hemisphere, starting month/day, and preferred date format.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        《春夏秋冬》不是必要資料片；安裝時會利用存檔起始季節與半球設定限制可選的起始月份。
+                                    </li>
+                                    <li data-lang="en">
+                                        Seasons is optional; when installed, the save's starting season and selected hemisphere determine the available starting months.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增手動生日設定與依 EA 年齡階段合理範圍隨機生成生日。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added manual birthday entry and random birthday generation within a reasonable range based on the current EA life stage.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        設定生日後依目前日期與出生日期計算實際年齡；修改出生年份時會重新計算年齡與年齡特徵。
+                                    </li>
+                                    <li data-lang="en">
+                                        Real age is calculated from the current date and birth date, and changing the birth year recalculates age and age traits.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        建立 RealDate 實際年齡與 EA 年齡階段的第一版對應，只有跨越階段門檻時才同步 EA 年齡階段，而不是每次生日都增齡。
+                                    </li>
+                                    <li data-lang="en">
+                                        Introduced the first RealDate real-age to EA life-stage mapping, changing EA life stage only when a threshold is crossed rather than on every birthday.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        新增 0～120+ 的年齡特徵，會隨實際年齡自動移除舊特徵並套用新特徵；超過 120 歲仍繼續計算年齡，但統一顯示 120+ 特徵。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added age traits from 0 through 120+, automatically replacing the previous trait as Sims age; ages above 120 continue to calculate but use the 120+ trait.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">星座聯動</h3>
+                                <h3 data-lang="en">ZODIAC INTEGRATION</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        新增 Vicky Sims (chingyu1023) Zodiac Signs Mod V3 聯動，由 RealDate 依實際出生月日判定並分配原作者星座特徵。
+                                    </li>
+                                    <li data-lang="en">
+                                        Added integration with Vicky Sims (chingyu1023)'s Zodiac Signs Mod V3, assigning the original mod's zodiac traits from the Sim's actual birth month and day.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        修改生日後會重新判定星座並移除舊的錯誤星座；不使用 EA 季節或隨機方式判定。
+                                    </li>
+                                    <li data-lang="en">
+                                        Changing a birthday recalculates the zodiac sign and removes the outdated trait; zodiac assignment does not use EA seasons or random selection.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        使用 RealDate 自動分配星座時，不應同時安裝原模組會依季節／隨機增齡分配星座、Auto Switch 或 CAS 可選星座等會干擾判定的附加檔。
+                                    </li>
+                                    <li data-lang="en">
+                                        When RealDate manages zodiac assignment, add-ons that assign signs by season/random age-up, Auto Switch, or make zodiac signs CAS-selectable should not be installed because they can interfere with RealDate's assignment.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">語言與支援</h3>
+                                <h3 data-lang="en">LANGUAGE &amp; SUPPORT</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        核心日期、出生年份、實際年齡與年齡特徵不依賴《春夏秋冬》。
+                                    </li>
+                                    <li data-lang="en">
+                                        Core date, birth-year, real-age, and age-trait features do not depend on Seasons.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        完整翻譯提供繁體中文、簡體中文與英文；其他遊戲語言可正常使用，未完整翻譯的 RealDate 文字會回退為英文。
+                                    </li>
+                                    <li data-lang="en">
+                                        Full translations are available in Traditional Chinese, Simplified Chinese, and English; other game languages remain usable with untranslated RealDate text falling back to English.
+                                    </li>
+                                </ul>
+                            </section>
+                            <section class="change-section">
+                                <h3 data-lang="zh-Hant">備註</h3>
+                                <h3 data-lang="en">NOTES</h3>
+                                <ul>
+                                    <li data-lang="zh-Hant">
+                                        必要前置：Lot 51 Core Library。
+                                    </li>
+                                    <li data-lang="en">
+                                        Required dependency: Lot 51 Core Library.
+                                    </li>
+                                    <li data-lang="zh-Hant">
+                                        此版本仍為早期 Beta，文本、翻譯、圖標與 UI 顯示並非最終版本。
+                                    </li>
+                                    <li data-lang="en">
+                                        This release is an early Beta; text, translations, icons, and UI presentation are not final.
+                                    </li>
+                                </ul>
+                            </section>
+                        </div>
+                        <div class="release-tags" aria-label="版本資訊">
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">Beta 測試版</span>
+                                <span data-lang="en">Beta</span>
+                            </span>
+                            <span class="release-tag">Lot51 Core Library</span>
+                            <span class="release-tag">
+                                <span data-lang="zh-Hant">《春夏秋冬》選擇性</span>
+                                <span data-lang="en">Seasons Optional</span>
+                            </span>
+                        </div>
+                        <a class="release-download-link" href="download.html#v010"><span data-lang="zh-Hant">查看此版本下載</span><span data-lang="en">View Release Download</span><span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+            </div>
         </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          相容性
-         </h3>
-         <h3 data-lang="en">
-          COMPATIBILITY
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           新增 MCCC 年齡與生命週期相容：MCCC 市民資訊可顯示 RealDate 實際年齡，並協調停止增齡、自訂階段長度與隨機起始進度等設定；RealDate 不會自行改寫玩家的 MCCC 設定。
-          </li>
-          <li data-lang="en">
-           Added MCCC age and lifecycle compatibility. MCCC Sim info can display RealDate ages, while RealDate coordinates with disabled aging, custom stage lengths, and randomized age progress without silently changing MCCC settings.
-          </li>
-          <li data-lang="zh-Hant">
-           新增 MCCC 懷孕相容：可辨識由 MCCC 作弊開始的懷孕，依可確認的進度推算受孕日期，並分開判斷取消／結束懷孕與真正生產。
-          </li>
-          <li data-lang="en">
-           Added MCCC pregnancy compatibility. Pregnancies started through MCCC cheats are recognized, conception dates can be estimated from reliable progress, and pregnancy ending is handled separately from actual birth.
-          </li>
-          <li data-lang="zh-Hant">
-           新增 RPO 懷孕流程相容，可辨識懷孕開始、結束與生產結果；RPO 原本的關係、反應與結果仍由 RPO 處理。
-          </li>
-          <li data-lang="en">
-           Added RPO pregnancy-flow compatibility for recognizing pregnancy starts, endings, and birth outcomes while leaving RPO's relationships, reactions, and outcomes to RPO.
-          </li>
-          <li data-lang="zh-Hant">
-           新增 PandaSama Child Birth Mod 懷孕與生產相容，維持 RealDate 的懷孕日期、生產時間與產後時間軸；產檢、待產與生產玩法仍由原模組處理。
-          </li>
-          <li data-lang="en">
-           Added PandaSama Child Birth Mod compatibility to preserve RealDate pregnancy dates, delivery timing, and postpartum timelines while the original mod continues to handle prenatal care, labor, and delivery gameplay.
-          </li>
-          <li data-lang="zh-Hant">
-           Mood Pack Mod 可提供生日社交的更多情緒反應；未安裝時仍使用 EA 原生情緒。
-          </li>
-          <li data-lang="en">
-           Mood Pack Mod can provide more varied emotional reactions for birthday socials; without it, EA's native moodlets are used.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          修正
-         </h3>
-         <h3 data-lang="en">
-          FIXED
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           修正少數已完成初始設定的存檔，偶爾仍再次要求重新設定日期的問題。
-          </li>
-          <li data-lang="en">
-           Fixed some initialized saves occasionally being treated as uninitialized and asking for date setup again.
-          </li>
-          <li data-lang="zh-Hant">
-           修正進入 MCCC CAS、返回地段或完成家庭搬遷後，市民可能異常跳到下一個年齡階段的問題。
-          </li>
-          <li data-lang="en">
-           Fixed Sims unexpectedly jumping to the next life stage after entering MCCC CAS, returning to a lot, or completing a household move.
-          </li>
-          <li data-lang="zh-Hant">
-           修正老年市民生日當天無法正常吹蠟燭／慶生。
-          </li>
-          <li data-lang="en">
-           Fixed Elder Sims being unable to properly blow out birthday candles or celebrate their birthday.
-          </li>
-          <li data-lang="zh-Hant">
-           修正月曆第一頁以後的日期可能無法建立或保存自訂節日。
-          </li>
-          <li data-lang="en">
-           Fixed custom holidays failing to create or save on Calendar dates beyond the first page.
-          </li>
-          <li data-lang="zh-Hant">
-           修正使用 RealDate 季節時間時，EA 原生排程可能在冬季約兩週後提前換季。
-          </li>
-          <li data-lang="en">
-           Fixed EA's native season schedule advancing too early, around two weeks into winter, while using RealDate season timing.
-          </li>
-          <li data-lang="zh-Hant">
-           修正部分存檔載入後「今天是……」通知偶爾顯示錯誤日期。
-          </li>
-          <li data-lang="en">
-           Fixed the “Today is...” notification occasionally showing an incorrect date after loading certain saves.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          診斷
-         </h3>
-         <h3 data-lang="en">
-          DIAGNOSTICS
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           擴充啟動診斷與日誌，記錄模組啟動、核心載入、必要掛載、家庭載入與載入畫面等階段。
-          </li>
-          <li data-lang="en">
-           Expanded startup diagnostics and logging across mod startup, core loading, required hooks, household loading, and loading-screen stages.
-          </li>
-          <li data-lang="zh-Hant">
-           此版測試環境包含 MCCC 2026.5.0、WickedWhims v185k、Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7、RPO v2.986、Child Birth Mod v1.965 與 Mood Pack Mod v1.677。
-          </li>
-          <li data-lang="en">
-           This release was tested with MCCC 2026.5.0, WickedWhims v185k, Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7, RPO v2.986, Child Birth Mod v1.965, and Mood Pack Mod v1.677.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          安裝備註
-         </h3>
-         <h3 data-lang="en">
-          INSTALL NOTES
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           更新前請先移除舊版 .package 與 .ts4script，再放入 v0.4 新檔案。所有相容檔案需放在 Mods\Overrides。
-          </li>
-          <li data-lang="en">
-           Remove the old .package and .ts4script before installing v0.4. All compatibility packages must be placed in Mods\Overrides.
-          </li>
-          <li data-lang="zh-Hant">
-           UI Cheats、Quick Save、Quick Save + UI Cheats 三個相容檔只能擇一安裝，否則會互相衝突。
-          </li>
-          <li data-lang="en">
-           Only one of the UI Cheats, Quick Save, or Quick Save + UI Cheats compatibility packages may be installed at a time; installing more than one causes conflicts.
-          </li>
-         </ul>
-        </section>
-       </div>
-       <div aria-label="版本資訊" class="release-tags">
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          Beta 測試版
-         </span>
-         <span data-lang="en">
-          Beta
-         </span>
-        </span>
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          遊戲版本 1.127.41.1030
-         </span>
-         <span data-lang="en">
-          Game 1.127.41.1030
-         </span>
-        </span>
-        <span class="release-tag">
-         Lot51 Core Library v1.43
-        </span>
-       </div>
-       <a class="release-download-link" href="download.html#v040">
-        <span data-lang="zh-Hant">
-         查看此版本下載
-        </span>
-        <span data-lang="en">
-         View Release Download
-        </span>
-        <span aria-hidden="true">
-         →
-        </span>
-       </a>
-      </div>
-     </article>
-     <article class="release" id="v030">
-      <div aria-hidden="true" class="release-marker">
-      </div>
-      <div class="release-content">
-       <header class="release-header">
-        <div>
-         <div class="release-version">
-          v0.3
-         </div>
-         <h2 data-lang="zh-Hant">
-          RealDate 月曆、月齡與生理時間軸
-         </h2>
-         <h2 data-lang="en">
-          Calendar, Age in Months &amp; Reproductive Timeline
-         </h2>
+    </main>
+
+    <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-identity">
+                <strong>REALDATE</strong>
+                <span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span>
+                <span data-lang="en">A time and life-system mod for The Sims 4</span>
+            </div>
+            <div class="footer-links">
+                <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+            </div>
+            <div class="footer-meta">
+                <span data-lang="zh-Hant">L1nG ·《模擬市民 4》模組作者</span>
+                <span data-lang="en">L1nG · THE SIMS 4 MOD CREATOR</span>
+                <span data-lang="zh-Hant">非 Electronic Arts 或 Maxis 官方網站。</span>
+                <span data-lang="en">Not affiliated with Electronic Arts or Maxis.</span>
+            </div>
         </div>
-        <time datetime="2026-09-07">
-         2026.09.07 (UTC+8)
-        </time>
-       </header>
-       <p class="release-summary" data-lang="zh-Hant">
-        把 RealDate 日期正式帶進 EA 月曆，加入未滿一歲的月齡系統，並重整月經、懷孕、初潮、停經與產後恢復的時間架構，同時新增診斷與除錯工具。
-       </p>
-       <p class="release-summary" data-lang="en">
-        Integrates RealDate dates into EA's Calendar, adds age-in-months for Sims under one year old, rebuilds menstrual, pregnancy, menarche, menopause, and postpartum timing, and adds new diagnostic tools.
-       </p>
-       <div class="change-grid">
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          新增
-         </h3>
-         <h3 data-lang="en">
-          NEW
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           RealDate 日期正式整合 EA 月曆：顯示日號、完整日期提示、家庭成員生日標記與 11 種日號顏色，並保留 EA 原本的活動、節日、天氣與月相。
-          </li>
-          <li data-lang="en">
-           Integrated RealDate directly into EA's Calendar with day numbers, full-date tooltips, household birthday markers, 11 day-number colors, and preservation of EA events, holidays, weather, and moon phases.
-          </li>
-          <li data-lang="zh-Hant">
-           月曆提供 365 天的 RealDate 日期範圍；EA 原本活動的實際排程仍由遊戲本身控制。
-          </li>
-          <li data-lang="en">
-           The Calendar provides 365 days of RealDate date data, while EA's existing event schedules remain controlled by the game.
-          </li>
-          <li data-lang="zh-Hant">
-           新增未滿一歲的月齡顯示：出生後顯示 0～11 個月，滿一歲後再改回歲數。
-          </li>
-          <li data-lang="en">
-           Added age-in-months for Sims under one year old: ages display as 0–11 months before returning to years at age one.
-          </li>
-          <li data-lang="zh-Hant">
-           重新定義早期年齡階段：出生～未滿 1 個月為新生兒、滿 1 個月至 1 歲為嬰兒、2～6 歲為幼兒；之後維持 7／13／18／40／65 歲的階段門檻。
-          </li>
-          <li data-lang="en">
-           Reworked early life stages: birth to under 1 month is Newborn, 1 month to age 1 is Infant, and ages 2–6 are Toddler, with later thresholds at 7, 13, 18, 40, and 65.
-          </li>
-          <li data-lang="zh-Hant">
-           新生兒滿 1 個月時沿用 EA 原生增齡流程進入嬰兒，但不視為生日，也不觸發 RealDate 生日通知。
-          </li>
-          <li data-lang="en">
-           At one month old, Newborns use EA's native age-up flow to become Infants, but the milestone is not treated as a birthday and does not trigger a RealDate birthday notification.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          生理時間軸
-         </h3>
-         <h3 data-lang="en">
-          TIMELINE
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           新增市民專屬生理時間軸，可查看目前週期、預計經期、排卵日、易孕期與懷孕時的預產期等具體 RealDate 日期。
-          </li>
-          <li data-lang="en">
-           Added a per-Sim reproductive timeline showing the current cycle, expected period, ovulation, fertile window, and pregnancy due dates as specific RealDate dates.
-          </li>
-          <li data-lang="zh-Hant">
-           可依存檔啟用／停用生理時間軸，並為個別市民設定不同週期與經期長度；預設為 28 天週期／5 天經期。
-          </li>
-          <li data-lang="en">
-           The reproductive timeline can be enabled per save, with individual cycle and period lengths per Sim; defaults are a 28-day cycle and 5-day period.
-          </li>
-          <li data-lang="zh-Hant">
-           月經時間軸資格改參考 CAS 懷孕能力，而不是只依男性／女性分類。
-          </li>
-          <li data-lang="en">
-           Menstrual-timeline eligibility now references CAS pregnancy capability settings instead of relying only on Male/Female categories.
-          </li>
-          <li data-lang="zh-Hant">
-           新增個別初潮與停經時間。初潮可在設定範圍內依實際日期發生；停經會在 45～55 歲之間為每位符合條件的市民決定並保存時間。
-          </li>
-          <li data-lang="en">
-           Added individual menarche and menopause timing. Menarche occurs by actual date within a configurable range, while menopause timing is assigned and saved per eligible Sim between ages 45 and 55.
-          </li>
-          <li data-lang="zh-Hant">
-           停經不會中途切斷目前週期；若正在懷孕或產後恢復，會等待目前狀態結束後再生效。
-          </li>
-          <li data-lang="en">
-           Menopause does not abruptly cut off the current cycle; if a Sim is pregnant or postpartum, it waits until the current state ends.
-          </li>
-          <li data-lang="zh-Hant">
-           懷孕期間暫停一般週期預測並顯示孕期、推算受孕日與預產期；生產後預設進入 42 天產後恢復。
-          </li>
-          <li data-lang="en">
-           During pregnancy, normal cycle predictions pause and pregnancy stage, estimated conception, and due date are shown; after birth, postpartum recovery defaults to 42 days.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          相容性
-         </h3>
-         <h3 data-lang="en">
-          COMPATIBILITY
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           WickedWhims：支援讀取月經週期與懷孕進度，並與 RealDate 生理時間軸同步支援的時間資料。
-          </li>
-          <li data-lang="en">
-           WickedWhims: supports reading menstrual-cycle and pregnancy progress and synchronizing supported timing with the RealDate reproductive timeline.
-          </li>
-          <li data-lang="zh-Hant">
-           Slice of Life Menstrual Cycle：支援同步 SOL 原本的經期與相關週期狀態。
-          </li>
-          <li data-lang="en">
-           Slice of Life Menstrual Cycle: supports synchronizing SOL's native periods and related cycle states.
-          </li>
-          <li data-lang="zh-Hant">
-           EA 原生懷孕：沒有 WickedWhims 時仍可讀取原生懷孕狀態與進度。
-          </li>
-          <li data-lang="en">
-           EA pregnancy: native pregnancy state and progress can still be read when WickedWhims is not installed.
-          </li>
-          <li data-lang="zh-Hant">
-           RPO：此版可偵測，但尚未支援精確的生理時間資料。
-          </li>
-          <li data-lang="en">
-           RPO: detectable in this release, but exact reproductive timeline data is not yet supported.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          工具與介面
-         </h3>
-         <h3 data-lang="en">
-          TOOLS &amp; UI
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           新增 RealDate UI 資源衝突診斷，可掃描其他 package 是否修改 RealDate 使用的重要 UI 資源，結果寫入 Boot Log。
-          </li>
-          <li data-lang="en">
-           Added a RealDate UI resource conflict diagnostic that scans for other packages modifying important RealDate UI resources and writes findings to the Boot Log.
-          </li>
-          <li data-lang="zh-Hant">
-           新增遊戲內詳細除錯日誌開關；關閉時仍保留重要 WARNING 與 ERROR。
-          </li>
-          <li data-lang="en">
-           Added an in-game detailed debug logging toggle; important WARNING and ERROR messages remain recorded when detailed logging is off.
-          </li>
-          <li data-lang="zh-Hant">
-           重新整理 Pie Menu，將基礎設定、相容性、生理時間軸與診斷工具分開；RealDate 啟用／停用可直接從主選單操作。
-          </li>
-          <li data-lang="en">
-           Reorganized the Pie Menu into Basic Settings, Compatibility, Reproductive Timeline, and Diagnostics, with RealDate enable/disable available from the main menu.
-          </li>
-          <li data-lang="zh-Hant">
-           可從關係面板開啟不在目前地段市民的 RealDate 選單，也可查看睡眠中市民資訊而不必叫醒。
-          </li>
-          <li data-lang="en">
-           RealDate can be opened for off-lot Sims from the Relationship Panel, and sleeping Sims can be inspected without waking them.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          底層調整
-         </h3>
-         <h3 data-lang="en">
-          UNDER THE HOOD
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           生理時間軸、初潮、停經與產後恢復狀態可隨存檔保存並在重新讀取後繼續。
-          </li>
-          <li data-lang="en">
-           Reproductive timelines, menarche, menopause, and postpartum states now persist with the save and continue after reloading.
-          </li>
-          <li data-lang="zh-Hant">
-           舊資料會自動遷移到 v0.3 的新儲存格式。
-          </li>
-          <li data-lang="en">
-           Existing data automatically migrates to the new v0.3 save format.
-          </li>
-          <li data-lang="zh-Hant">
-           手動修改日期或生日後，會重新對齊實際年齡、月齡、EA 年齡階段與相關懷孕時間軸。
-          </li>
-          <li data-lang="en">
-           Manual date or birthday changes now reconcile real age, age in months, EA life stage, and related pregnancy timelines.
-          </li>
-          <li data-lang="zh-Hant">
-           第三方模組資料讀取、月曆資料與載入／重新同步流程加入更多安全與穩定性保護。
-          </li>
-          <li data-lang="en">
-           Additional safety and stability safeguards were added to third-party data reading, Calendar data, and load/resynchronization flows.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          安裝備註
-         </h3>
-         <h3 data-lang="en">
-          INSTALL NOTES
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           更新前請移除舊版 .package 與 .ts4script。UI Cheats、BetterBuildBuy 與 Slice of Life Menstrual 的相容檔皆為選擇性安裝。
-          </li>
-          <li data-lang="en">
-           Remove the old .package and .ts4script before updating. Compatibility packages for UI Cheats, BetterBuildBuy, and Slice of Life Menstrual are optional.
-          </li>
-          <li data-lang="zh-Hant">
-           所有相容檔案需放入 Mods\Overrides。
-          </li>
-          <li data-lang="en">
-           All compatibility packages must be placed in Mods\Overrides.
-          </li>
-         </ul>
-        </section>
-       </div>
-       <div aria-label="版本資訊" class="release-tags">
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          Beta 測試版
-         </span>
-         <span data-lang="en">
-          Beta
-         </span>
-        </span>
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          遊戲版本 1.127.41.1030
-         </span>
-         <span data-lang="en">
-          Game 1.127.41.1030
-         </span>
-        </span>
-        <span class="release-tag">
-         Lot51 Core Library v1.43
-        </span>
-       </div>
-       <a class="release-download-link" href="download.html#v030">
-        <span data-lang="zh-Hant">
-         查看此版本下載
-        </span>
-        <span data-lang="en">
-         View Release Download
-        </span>
-        <span aria-hidden="true">
-         →
-        </span>
-       </a>
-      </div>
-     </article>
-     <article class="release compact" id="v021">
-      <div aria-hidden="true" class="release-marker">
-      </div>
-      <div class="release-content">
-       <header class="release-header">
-        <div>
-         <div class="release-version">
-          v0.2.1
-         </div>
-         <h2 data-lang="zh-Hant">
-          午夜換日熱修復
-         </h2>
-         <h2 data-lang="en">
-          Midnight Rollover Hotfix
-         </h2>
-        </div>
-        <time datetime="2026-08-31">
-         2026.08.31 (UTC+8)
-        </time>
-       </header>
-       <p class="release-summary" data-lang="zh-Hant">
-        獨立的 v0.2.1 修正版，集中處理午夜換日與生日當天可能卡住日期更新的問題。
-       </p>
-       <p class="release-summary" data-lang="en">
-        A standalone v0.2.1 hotfix focused on midnight rollover and birthday-day date updates.
-       </p>
-       <div class="change-grid">
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          修正
-         </h3>
-         <h3 data-lang="en">
-          FIXED
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           修正遊戲時間跨過午夜後，RealDate 偶爾無法立即更新日期、停留在前一天的問題。
-          </li>
-          <li data-lang="en">
-           Fixed RealDate occasionally failing to update immediately after the in-game clock crossed midnight and remaining on the previous day.
-          </li>
-          <li data-lang="zh-Hant">
-           修正主控家庭有市民生日當天，日期可能長時間停留在前一天、甚至幾乎不刷新的問題。
-          </li>
-          <li data-lang="en">
-           Fixed the date remaining on the previous day for an extended period, or barely refreshing, when an active-household Sim had a birthday.
-          </li>
-          <li data-lang="zh-Hant">
-           包含其他小型穩定性調整。
-          </li>
-          <li data-lang="en">
-           Includes additional minor stability improvements.
-          </li>
-         </ul>
-        </section>
-       </div>
-       <div aria-label="版本資訊" class="release-tags">
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          Beta 測試版
-         </span>
-         <span data-lang="en">
-          Beta
-         </span>
-        </span>
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          熱修復
-         </span>
-         <span data-lang="en">
-          Hotfix
-         </span>
-        </span>
-       </div>
-       <a class="release-download-link" href="download.html#v021">
-        <span data-lang="zh-Hant">
-         查看此版本下載
-        </span>
-        <span data-lang="en">
-         View Release Download
-        </span>
-        <span aria-hidden="true">
-         →
-        </span>
-       </a>
-      </div>
-     </article>
-     <article class="release" id="v020">
-      <div aria-hidden="true" class="release-marker">
-      </div>
-      <div class="release-content">
-       <header class="release-header">
-        <div>
-         <div class="release-version">
-          v0.2
-         </div>
-         <h2 data-lang="zh-Hant">
-          十二個月年份、季節與年齡介面整合
-         </h2>
-         <h2 data-lang="en">
-          Twelve-Month Year, Seasons &amp; Aging UI
-         </h2>
-        </div>
-        <time datetime="2026-08-28">
-         2026.08.28 (UTC+8)
-        </time>
-       </header>
-       <p class="release-summary" data-lang="zh-Hant">
-        從 v0.1 的日期／生日基礎進一步延伸到季節、年齡進度與遊戲 UI，建立「3 個月 × 4 季＝12 個月」的第一版時間整合，並開始測試月經與長孕期同步。
-       </p>
-       <p class="release-summary" data-lang="en">
-        Extends the v0.1 date and birthday foundation into seasons, aging progress, and game UI, introducing the first 3-month × 4-season = 12-month timeline and early menstrual/pregnancy synchronization.
-       </p>
-       <div class="change-grid">
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          新增
-         </h3>
-         <h3 data-lang="en">
-          NEW
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           《春夏秋冬》新增「約 90 天（RealDate）」季節長度，依該季實際包含的三個月份計算天數，季節進度條也改依 RealDate 季節百分比前進。
-          </li>
-          <li data-lang="en">
-           Added an “About 90 Days (RealDate)” season length for Seasons, calculated from the actual three calendar months in that season, with season progress based on RealDate percentages.
-          </li>
-          <li data-lang="zh-Hant">
-           建立 3 個月 × 4 季＝12 個月＝1 年的時間架構。
-          </li>
-          <li data-lang="en">
-           Established the 3 months × 4 seasons = 12 months = 1 year time structure.
-          </li>
-          <li data-lang="zh-Hant">
-           季節長度同時作為每個存檔的 RealDate 開關：7／14／28 天停用，約 90 天重新啟用；停用時資料保留且不補算停用期間。
-          </li>
-          <li data-lang="en">
-           Season length also acts as a per-save RealDate toggle: 7/14/28 days disables RealDate, while About 90 Days re-enables it; data is preserved and disabled time is not retroactively processed.
-          </li>
-          <li data-lang="zh-Hant">
-           季節／天氣懸停資訊改為顯示 RealDate 日期，格式依玩家的日期格式設定。
-          </li>
-          <li data-lang="en">
-           Season/weather tooltips now display the RealDate date using the player's selected date format.
-          </li>
-          <li data-lang="zh-Hant">
-           每次遊戲啟動後，各存檔第一次載入家庭時顯示一次「今天是 {日期}」通知。
-          </li>
-          <li data-lang="en">
-           After each game launch, the first household load in each save shows a one-time “Today is {date}” notification.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          年齡與生日
-         </h3>
-         <h3 data-lang="en">
-          AGING &amp; BIRTHDAYS
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           模擬市民學的年齡進度條改按 RealDate 實際時間比例推進。
-          </li>
-          <li data-lang="en">
-           Simology aging progress now advances according to RealDate's actual time progression.
-          </li>
-          <li data-lang="zh-Hant">
-           年齡懸停資訊顯示距離增齡還有 X 年 X 個月 X 天；老年人改顯示已生活 X 年 X 個月 X 天。
-          </li>
-          <li data-lang="en">
-           Age tooltips show time until age-up in years, months, and days; Elders instead show total time lived.
-          </li>
-          <li data-lang="zh-Hant">
-           世界中市民頭頂名稱 UI 會在 EA 年齡階段之外顯示實際年齡。
-          </li>
-          <li data-lang="en">
-           World nameplate UI now shows a Sim's real age alongside the EA life stage.
-          </li>
-          <li data-lang="zh-Hant">
-           年齡特徵說明改為依 0～120+ 的人生區間使用不同敘事文本。
-          </li>
-          <li data-lang="en">
-           Age-trait descriptions now use different narrative text across life ranges from age 0 to 120+.
-          </li>
-          <li data-lang="zh-Hant">
-           修改生日後除重新計算實際年齡與年齡特徵，也會同步調整 EA 年齡階段；一般市民仍不能安全改回新生兒。
-          </li>
-          <li data-lang="en">
-           Changing a birthday now also updates the EA life stage in addition to recalculating real age and age traits; regular Sims still cannot safely be converted back to Newborn.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          修正與保存
-         </h3>
-         <h3 data-lang="en">
-          FIXED &amp; SAVING
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           修正 v0.1 的新生兒生日問題：出生後自動以出生當天 RealDate 日期建立生日，出生通知顯示姓名、出生日期與完成命名時的遊戲時間。
-          </li>
-          <li data-lang="en">
-           Fixed the v0.1 newborn birthday issue: newborns automatically receive the current RealDate date as their birthday, and birth notifications show name, birth date, and the in-game time when naming is completed.
-          </li>
-          <li data-lang="zh-Hant">
-           若安裝 Zodiac Signs Mod V3，新生兒生日建立後會嘗試同步正確星座。
-          </li>
-          <li data-lang="en">
-           With Zodiac Signs Mod V3 installed, RealDate attempts to synchronize the correct zodiac sign after the newborn birthday is created.
-          </li>
-          <li data-lang="zh-Hant">
-           重新調整存檔行為：日期、生日與設定只在 EA 實際存檔成功時保存；未存檔直接退出或重讀會回到上次成功存檔狀態。
-          </li>
-          <li data-lang="en">
-           Reworked persistence so dates, birthdays, and settings are saved only when EA successfully saves; exiting or reloading without saving returns RealDate to the previous saved state.
-          </li>
-          <li data-lang="zh-Hant">
-           整理設定介面、通知、文本、圖標與選項顯示，並新增 RealDate 啟用狀態設定及週期／懷孕相容分類。
-          </li>
-          <li data-lang="en">
-           Refined settings, notifications, text, icons, and option presentation, adding a RealDate enable/disable setting and dedicated cycle/pregnancy compatibility categories.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          相容性
-         </h3>
-         <h3 data-lang="en">
-          COMPATIBILITY
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           UI Cheats 切換季節時，RealDate 只會向未來推進到目標季節對應日期；若跳過期間有生日，會補上生日通知。
-          </li>
-          <li data-lang="en">
-           When UI Cheats changes seasons, RealDate moves forward only to the corresponding target-season date and adds birthday notifications for birthdays skipped along the way.
-          </li>
-          <li data-lang="zh-Hant">
-           開始測試 WickedWhims 與 Slice of Life Menstrual Cycle 的週期同步；基準為 28 天週期／5 天經期，懷孕期間暫停，產後預設 42 天恢復。
-          </li>
-          <li data-lang="en">
-           Began testing cycle synchronization with WickedWhims and Slice of Life Menstrual Cycle using a 28-day cycle / 5-day period baseline, paused during pregnancy with a default 42-day postpartum recovery.
-          </li>
-          <li data-lang="zh-Hant">
-           兩套月經模組可擇一或同時同步；v0.2 同步兩者時只統一週期與經期長度，實際開始／結束日期尚未完全對齊。
-          </li>
-          <li data-lang="en">
-           Either or both menstrual mods can be synchronized; in v0.2, syncing both aligns cycle and period lengths but does not yet guarantee exact matching start/end dates.
-          </li>
-          <li data-lang="zh-Hant">
-           開始測試約 10 個月的長孕期；此版支援 EA 原生懷孕與 WickedWhims，RPO 相容尚未完成。
-          </li>
-          <li data-lang="en">
-           Began testing an approximately 10-month pregnancy timeline. EA pregnancy and WickedWhims are supported in this release; RPO integration is not yet complete.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          安裝備註
-         </h3>
-         <h3 data-lang="en">
-          INSTALL NOTES
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           更新前請移除舊版 .package 與 .ts4script。UI Cheats、BetterBuildBuy 與 Slice of Life Menstrual 的相容檔為選擇性安裝。
-          </li>
-          <li data-lang="en">
-           Remove the old .package and .ts4script before updating. Compatibility packages for UI Cheats, BetterBuildBuy, and Slice of Life Menstrual are optional.
-          </li>
-          <li data-lang="zh-Hant">
-           所有相容檔需放入 Mods\Overrides。
-          </li>
-          <li data-lang="en">
-           All compatibility packages must be placed in Mods\Overrides.
-          </li>
-         </ul>
-        </section>
-       </div>
-       <div aria-label="版本資訊" class="release-tags">
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          Beta 測試版
-         </span>
-         <span data-lang="en">
-          Beta
-         </span>
-        </span>
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          遊戲版本 1.127.41.1030
-         </span>
-         <span data-lang="en">
-          Game 1.127.41.1030
-         </span>
-        </span>
-        <span class="release-tag">
-         Lot51 Core Library v1.43
-        </span>
-       </div>
-       <a class="release-download-link" href="download.html#v020">
-        <span data-lang="zh-Hant">
-         查看此版本下載
-        </span>
-        <span data-lang="en">
-         View Release Download
-        </span>
-        <span aria-hidden="true">
-         →
-        </span>
-       </a>
-      </div>
-     </article>
-     <article class="release compact" id="v011">
-      <div aria-hidden="true" class="release-marker">
-      </div>
-      <div class="release-content">
-       <header class="release-header">
-        <div>
-         <div class="release-version">
-          v0.1.1
-         </div>
-         <h2 data-lang="zh-Hant">
-          ModGuard 相容性熱修復
-         </h2>
-         <h2 data-lang="en">
-          ModGuard Compatibility Hotfix
-         </h2>
-        </div>
-        <time datetime="2026-08-24">
-         2026.08.24 (UTC+8)
-        </time>
-       </header>
-       <p class="release-summary" data-lang="zh-Hant">
-        獨立的 v0.1.1 修正版，處理 TwistedMexi ModGuard 的安全警告相容問題。
-       </p>
-       <p class="release-summary" data-lang="en">
-        A standalone v0.1.1 hotfix addressing compatibility with TwistedMexi's ModGuard security warning.
-       </p>
-       <div class="change-grid">
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          修正
-         </h3>
-         <h3 data-lang="en">
-          FIXED
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           修正 RealDate 可能觸發 TwistedMexi ModGuard 安全警告的問題。
-          </li>
-          <li data-lang="en">
-           Fixed an issue that could cause RealDate to trigger a security warning from TwistedMexi's ModGuard.
-          </li>
-         </ul>
-        </section>
-       </div>
-       <div aria-label="版本資訊" class="release-tags">
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          Beta 測試版
-         </span>
-         <span data-lang="en">
-          Beta
-         </span>
-        </span>
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          熱修復
-         </span>
-         <span data-lang="en">
-          Hotfix
-         </span>
-        </span>
-       </div>
-       <a class="release-download-link" href="download.html#v011">
-        <span data-lang="zh-Hant">
-         查看此版本下載
-        </span>
-        <span data-lang="en">
-         View Release Download
-        </span>
-        <span aria-hidden="true">
-         →
-        </span>
-       </a>
-      </div>
-     </article>
-     <article class="release" id="v010">
-      <div aria-hidden="true" class="release-marker">
-      </div>
-      <div class="release-content">
-       <header class="release-header">
-        <div>
-         <div class="release-version">
-          v0.1
-         </div>
-         <h2 data-lang="zh-Hant">
-          日期、生日與實際年齡基礎
-         </h2>
-         <h2 data-lang="en">
-          Date, Birthday &amp; Real-Age Foundation
-         </h2>
-        </div>
-        <time datetime="2026-08-23">
-         2026.08.23 (UTC+8)
-        </time>
-       </header>
-       <p class="release-summary" data-lang="zh-Hant">
-        RealDate 的第一個公開 Beta，建立以年、月、日為基礎的存檔日期、生日、實際年齡與年齡特徵系統，並加入第一個第三方模組聯動。
-       </p>
-       <p class="release-summary" data-lang="en">
-        The first public RealDate Beta, establishing save-level dates, birthdays, real ages, age traits, and the first third-party mod integration.
-       </p>
-       <div class="change-grid">
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          新增
-         </h3>
-         <h3 data-lang="en">
-          NEW
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           首次載入家庭時提供 RealDate 初始設定，可設定起始年份、南／北半球、起始月份與日期，以及偏好的日期顯示格式。
-          </li>
-          <li data-lang="en">
-           Added initial RealDate setup on first household load, including starting year, Northern/Southern Hemisphere, starting month/day, and preferred date format.
-          </li>
-          <li data-lang="zh-Hant">
-           《春夏秋冬》不是必要資料片；安裝時會利用存檔起始季節與半球設定限制可選的起始月份。
-          </li>
-          <li data-lang="en">
-           Seasons is optional; when installed, the save's starting season and selected hemisphere determine the available starting months.
-          </li>
-          <li data-lang="zh-Hant">
-           新增手動生日設定與依 EA 年齡階段合理範圍隨機生成生日。
-          </li>
-          <li data-lang="en">
-           Added manual birthday entry and random birthday generation within a reasonable range based on the current EA life stage.
-          </li>
-          <li data-lang="zh-Hant">
-           設定生日後依目前日期與出生日期計算實際年齡；修改出生年份時會重新計算年齡與年齡特徵。
-          </li>
-          <li data-lang="en">
-           Real age is calculated from the current date and birth date, and changing the birth year recalculates age and age traits.
-          </li>
-          <li data-lang="zh-Hant">
-           建立 RealDate 實際年齡與 EA 年齡階段的第一版對應，只有跨越階段門檻時才同步 EA 年齡階段，而不是每次生日都增齡。
-          </li>
-          <li data-lang="en">
-           Introduced the first RealDate real-age to EA life-stage mapping, changing EA life stage only when a threshold is crossed rather than on every birthday.
-          </li>
-          <li data-lang="zh-Hant">
-           新增 0～120+ 的年齡特徵，會隨實際年齡自動移除舊特徵並套用新特徵；超過 120 歲仍繼續計算年齡，但統一顯示 120+ 特徵。
-          </li>
-          <li data-lang="en">
-           Added age traits from 0 through 120+, automatically replacing the previous trait as Sims age; ages above 120 continue to calculate but use the 120+ trait.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          星座聯動
-         </h3>
-         <h3 data-lang="en">
-          ZODIAC INTEGRATION
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           新增 Vicky Sims (chingyu1023) Zodiac Signs Mod V3 聯動，由 RealDate 依實際出生月日判定並分配原作者星座特徵。
-          </li>
-          <li data-lang="en">
-           Added integration with Vicky Sims (chingyu1023)'s Zodiac Signs Mod V3, assigning the original mod's zodiac traits from the Sim's actual birth month and day.
-          </li>
-          <li data-lang="zh-Hant">
-           修改生日後會重新判定星座並移除舊的錯誤星座；不使用 EA 季節或隨機方式判定。
-          </li>
-          <li data-lang="en">
-           Changing a birthday recalculates the zodiac sign and removes the outdated trait; zodiac assignment does not use EA seasons or random selection.
-          </li>
-          <li data-lang="zh-Hant">
-           使用 RealDate 自動分配星座時，不應同時安裝原模組會依季節／隨機增齡分配星座、Auto Switch 或 CAS 可選星座等會干擾判定的附加檔。
-          </li>
-          <li data-lang="en">
-           When RealDate manages zodiac assignment, add-ons that assign signs by season/random age-up, Auto Switch, or make zodiac signs CAS-selectable should not be installed because they can interfere with RealDate's assignment.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          語言與支援
-         </h3>
-         <h3 data-lang="en">
-          LANGUAGE &amp; SUPPORT
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           核心日期、出生年份、實際年齡與年齡特徵不依賴《春夏秋冬》。
-          </li>
-          <li data-lang="en">
-           Core date, birth-year, real-age, and age-trait features do not depend on Seasons.
-          </li>
-          <li data-lang="zh-Hant">
-           完整翻譯提供繁體中文、簡體中文與英文；其他遊戲語言可正常使用，未完整翻譯的 RealDate 文字會回退為英文。
-          </li>
-          <li data-lang="en">
-           Full translations are available in Traditional Chinese, Simplified Chinese, and English; other game languages remain usable with untranslated RealDate text falling back to English.
-          </li>
-         </ul>
-        </section>
-        <section class="change-section">
-         <h3 data-lang="zh-Hant">
-          備註
-         </h3>
-         <h3 data-lang="en">
-          NOTES
-         </h3>
-         <ul>
-          <li data-lang="zh-Hant">
-           必要前置：Lot 51 Core Library。
-          </li>
-          <li data-lang="en">
-           Required dependency: Lot 51 Core Library.
-          </li>
-          <li data-lang="zh-Hant">
-           此版本仍為早期 Beta，文本、翻譯、圖標與 UI 顯示並非最終版本。
-          </li>
-          <li data-lang="en">
-           This release is an early Beta; text, translations, icons, and UI presentation are not final.
-          </li>
-         </ul>
-        </section>
-       </div>
-       <div aria-label="版本資訊" class="release-tags">
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          Beta 測試版
-         </span>
-         <span data-lang="en">
-          Beta
-         </span>
-        </span>
-        <span class="release-tag">
-         Lot51 Core Library
-        </span>
-        <span class="release-tag">
-         <span data-lang="zh-Hant">
-          《春夏秋冬》選擇性
-         </span>
-         <span data-lang="en">
-          Seasons Optional
-         </span>
-        </span>
-       </div>
-       <a class="release-download-link" href="download.html#v010">
-        <span data-lang="zh-Hant">
-         查看此版本下載
-        </span>
-        <span data-lang="en">
-         View Release Download
-        </span>
-        <span aria-hidden="true">
-         →
-        </span>
-       </a>
-      </div>
-     </article>
-    </div>
-   </section>
-  </main>
-  <footer class="site-footer">
-   <div class="site-footer-inner">
-    <div class="footer-identity">
-     <strong>
-      REALDATE
-     </strong>
-     <span data-lang="zh-Hant">
-      《模擬市民 4》時間與人生系統模組
-     </span>
-     <span data-lang="en">
-      A time and life-system mod for The Sims 4
-     </span>
-    </div>
-    <div class="footer-links">
-     <a href="gameplay.html">
-      <span data-lang="zh-Hant">
-       玩法
-      </span>
-      <span data-lang="en">
-       Gameplay
-      </span>
-     </a>
-     <a href="download.html">
-      <span data-lang="zh-Hant">
-       下載與安裝
-      </span>
-      <span data-lang="en">
-       Download &amp; Install
-      </span>
-     </a>
-     <a href="compatibility.html">
-      <span data-lang="zh-Hant">
-       相容性
-      </span>
-      <span data-lang="en">
-       Compatibility
-      </span>
-     </a>
-     <a href="changelog.html">
-      <span data-lang="zh-Hant">
-       更新日誌
-      </span>
-      <span data-lang="en">
-       Changelog
-      </span>
-     </a>
-     <a href="roadmap.html">
-      <span data-lang="zh-Hant">
-       開發藍圖
-      </span>
-      <span data-lang="en">
-       Roadmap
-      </span>
-     </a>
-     <a href="faq.html">
-      <span data-lang="zh-Hant">
-       常見問題
-      </span>
-      <span data-lang="en">
-       FAQ
-      </span>
-     </a>
-    </div>
-    <div class="footer-meta">
-     <span data-lang="zh-Hant">
-      L1nG ·《模擬市民 4》模組作者
-     </span>
-     <span data-lang="en">
-      L1nG · THE SIMS 4 MOD CREATOR
-     </span>
-     <span data-lang="zh-Hant">
-      非 Electronic Arts 或 Maxis 官方網站。
-     </span>
-     <span data-lang="en">
-      Not affiliated with Electronic Arts or Maxis.
-     </span>
-    </div>
-   </div>
-  </footer>
- </body>
+    </footer>
+
+</body>
 </html>
