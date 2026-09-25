@@ -6362,6 +6362,59 @@ async function importJSON(file) {
   reader.readAsText(file);
 }
 
+// ========【遊戲族譜匯入狀態】 設定 - 顯示 ZIP 讀取與族譜建立進度 ========
+let gameImportStatusElement = null;
+
+function ensureGameImportStatus() {
+  if (gameImportStatusElement) return gameImportStatusElement;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'gameImportStatus';
+  overlay.className = 'game-import-status-mask';
+  overlay.setAttribute('aria-hidden', 'true');
+
+  overlay.innerHTML = `
+    <div class="game-import-status-card" role="status" aria-live="polite" aria-atomic="true">
+      <span class="game-import-spinner" aria-hidden="true"></span>
+
+      <div class="game-import-status-content">
+        <strong class="game-import-status-title">正在匯入遊戲族譜</strong>
+        <span class="game-import-status-text">準備中…</span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  gameImportStatusElement = overlay;
+
+  return overlay;
+}
+
+function showGameImportStatus(message) {
+  const overlay = ensureGameImportStatus();
+  const text = overlay.querySelector('.game-import-status-text');
+
+  if (text) text.textContent = uiText(message);
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function hideGameImportStatus() {
+  if (!gameImportStatusElement) return;
+
+  gameImportStatusElement.classList.remove('show');
+  gameImportStatusElement.setAttribute('aria-hidden', 'true');
+}
+
+function waitForImportPaint() {
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
+}
+
 // ========【遊戲族譜匯入】 設定 - 讀取 L1nG Genealogy Exporter ZIP ========
 async function importGameGenealogy(file) {
   try {
