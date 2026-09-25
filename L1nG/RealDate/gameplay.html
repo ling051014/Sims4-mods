@@ -1,1312 +1,639 @@
 <!DOCTYPE html>
-<html data-language="zh-Hant" lang="zh-Hant">
- <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>
-   RealDate 完整玩法 · L1nG
-  </title>
-  <meta content="RealDate v0.4 Beta 目前公開版本的完整累積玩法。" name="description"/>
-  <meta content="#fafafa" name="theme-color"/>
-  <link href="realdate.css" rel="stylesheet"/>
-  <script defer="" src="realdate.js">
-  </script>
- </head>
- <body>
-  <header class="site-header" id="siteHeader">
-   <div class="site-header-inner">
-    <div class="site-brand-group">
-     <a class="creator-link" href="../index.html">
-      L1nG
-     </a>
-     <span class="brand-divider">
-      /
-     </span>
-     <a class="realdate-brand" href="index.html">
-      REALDATE
-     </a>
-    </div>
-    <button aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單" class="nav-toggle" id="navToggle" type="button">
-     <span>
-     </span>
-     <span>
-     </span>
-    </button>
-    <nav aria-label="RealDate" class="main-nav" id="mainNav">
-     <a class="active" href="gameplay.html">
-      <span data-lang="zh-Hant">
-       玩法
-      </span>
-      <span data-lang="en">
-       Gameplay
-      </span>
-     </a>
-     <a class="" href="download.html">
-      <span data-lang="zh-Hant">
-       下載與安裝
-      </span>
-      <span data-lang="en">
-       Download &amp; Install
-      </span>
-     </a>
-     <a class="" href="compatibility.html">
-      <span data-lang="zh-Hant">
-       相容性
-      </span>
-      <span data-lang="en">
-       Compatibility
-      </span>
-     </a>
-     <a class="" href="changelog.html">
-      <span data-lang="zh-Hant">
-       更新日誌
-      </span>
-      <span data-lang="en">
-       Changelog
-      </span>
-     </a>
-     <details class="nav-more">
-      <summary>
-       <span data-lang="zh-Hant">
-        更多
-       </span>
-       <span data-lang="en">
-        More
-       </span>
-       <span aria-hidden="true" class="nav-more-chevron">
-        ⌄
-       </span>
-      </summary>
-      <div class="nav-more-menu">
-       <a href="roadmap.html">
-        <span data-lang="zh-Hant">
-         開發藍圖
-        </span>
-        <span data-lang="en">
-         Roadmap
-        </span>
-       </a>
-       <a href="faq.html">
-        <span data-lang="zh-Hant">
-         常見問題
-        </span>
-        <span data-lang="en">
-         FAQ
-        </span>
-       </a>
-      </div>
-     </details>
-    </nav>
-    <div aria-label="Language" class="language-switch" role="group">
-     <button aria-pressed="true" class="language-button active" data-language-button="zh-Hant" type="button">
-      繁中
-     </button>
-     <span class="language-divider">
-      /
-     </span>
-     <button aria-pressed="false" class="language-button" data-language-button="en" type="button">
-      EN
-     </button>
-    </div>
-   </div>
-  </header>
-  <main>
-   <section class="page-hero">
-    <div class="page-hero-inner reveal">
-     <span class="eyebrow">
-      GAMEPLAY GUIDE
-     </span>
-     <h1 data-lang="zh-Hant">
-      完整玩法
-     </h1>
-     <h1 data-lang="en">
-      Complete Gameplay
-     </h1>
-     <p data-lang="zh-Hant">
-      這裡整理的是目前公開版本 v0.4 Beta 累積至今的玩法，
-            依系統分類，而不是按 v0.1、v0.2、v0.3、v0.4 分開。
-     </p>
-     <p data-lang="en">
-      This page documents the complete cumulative gameplay of public v0.4 Beta,
-            organized by system rather than release version.
-     </p>
-     <div class="doc-note">
-      <span data-lang="zh-Hant">
-       v0.5 開發中的功能不列入目前公開玩法。
-      </span>
-      <span data-lang="en">
-       In-development v0.5 features are not presented as released gameplay.
-      </span>
-     </div>
-    </div>
-   </section>
-   <nav aria-label="Gameplay" class="doc-index">
-    <a href="#setup">
-     初始設定
-    </a>
-    <a href="#calendar">
-     月曆與季節
-    </a>
-    <a href="#aging">
-     年齡與生命階段
-    </a>
-    <a href="#birthdays">
-     生日與社交
-    </a>
-    <a href="#reproductive">
-     生理時間軸
-    </a>
-    <a href="#pregnancy">
-     懷孕與產後
-    </a>
-    <a href="#eras">
-     年號與星期
-    </a>
-    <a href="#zodiac">
-     星座聯動
-    </a>
-    <a href="#tools">
-     介面與診斷
-    </a>
-   </nav>
-   <section class="doc-section" id="setup">
-    <div class="doc-label">
-     <span>
-      01
-     </span>
-     <strong>
-      DATE &amp; INITIAL SETUP
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      日期與初始設定
-     </h2>
-     <h2 data-lang="en">
-      Date &amp; Initial Setup
-     </h2>
-     <p data-lang="zh-Hant">
-      第一次載入家庭後，RealDate 會建立這個存檔自己的日期設定。
-            可以指定起始年份、南 / 北半球、月份、日期與日期顯示格式；
-            之後仍可從 RealDate 選單重新調整。
-     </p>
-     <p data-lang="en">
-      On the first household load, RealDate creates a date setup for that save.
-            You can choose the starting year, hemisphere, month, day, and date format,
-            and change these settings later.
-     </p>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        起始年份
-       </strong>
-       <strong data-lang="en">
-        Starting year
-       </strong>
-       <p data-lang="zh-Hant">
-        使用 4 位數年份建立存檔的 RealDate 年份。
-       </p>
-       <p data-lang="en">
-        Use a four-digit year as the save's RealDate starting year.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        南 / 北半球
-       </strong>
-       <strong data-lang="en">
-        Northern / Southern Hemisphere
-       </strong>
-       <p data-lang="zh-Hant">
-        若有《春夏秋冬》，會依開局季節與半球提供對應的三個起始月份。
-       </p>
-       <p data-lang="en">
-        With Seasons installed, the starting season and hemisphere determine the three available starting months.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        日期格式
-       </strong>
-       <strong data-lang="en">
-        Date format
-       </strong>
-       <p data-lang="zh-Hant">
-        可選擇偏好的日期顯示格式，相關介面會沿用同一設定。
-       </p>
-       <p data-lang="en">
-        Choose a preferred date format used across supported RealDate displays.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        日期保存
-       </strong>
-       <strong data-lang="en">
-        Save behavior
-       </strong>
-       <p data-lang="zh-Hant">
-        日期、生日與設定跟著 EA 實際存檔成功時保存；未存檔退出則回到上次成功存檔狀態。
-       </p>
-       <p data-lang="en">
-        Dates, birthdays, and settings persist when EA successfully saves; exiting without saving returns to the previous saved state.
-       </p>
-      </div>
-     </div>
-     <div class="season-map">
-      <div>
-       <strong data-lang="zh-Hant">
-        北半球
-       </strong>
-       <strong data-lang="en">
-        Northern Hemisphere
-       </strong>
-       <span>
-        春 3–5 月
-       </span>
-       <span>
-        夏 6–8 月
-       </span>
-       <span>
-        秋 9–11 月
-       </span>
-       <span>
-        冬 12–2 月
-       </span>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        南半球
-       </strong>
-       <strong data-lang="en">
-        Southern Hemisphere
-       </strong>
-       <span>
-        春 9–11 月
-       </span>
-       <span>
-        夏 12–2 月
-       </span>
-       <span>
-        秋 3–5 月
-       </span>
-       <span>
-        冬 6–8 月
-       </span>
-      </div>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="calendar">
-    <div class="doc-label">
-     <span>
-      02
-     </span>
-     <strong>
-      CALENDAR &amp; SEASONS
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      月曆與季節
-     </h2>
-     <h2 data-lang="en">
-      Calendar &amp; Seasons
-     </h2>
-     <p data-lang="zh-Hant">
-      RealDate 將日期整合進 EA 月曆，但不重新建立 EA 原本的活動。
-            月曆中的事件、節日、天氣與月相仍由遊戲本身排程。
-     </p>
-     <p data-lang="en">
-      RealDate integrates dates into EA's Calendar without recreating EA events.
-            Events, holidays, weather, and moon phases remain scheduled by the game.
-     </p>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        365 天日期範圍
-       </strong>
-       <strong data-lang="en">
-        365-day date range
-       </strong>
-       <p data-lang="zh-Hant">
-        月曆提供 365 天 RealDate 日期、日號與完整日期提示。
-       </p>
-       <p data-lang="en">
-        The Calendar provides 365 days of RealDate dates, day numbers, and full-date tooltips.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        生日標記
-       </strong>
-       <strong data-lang="en">
-        Birthday markers
-       </strong>
-       <p data-lang="zh-Hant">
-        主控家庭已設定的生日會出現在對應日期。
-       </p>
-       <p data-lang="en">
-        Configured birthdays for active-household Sims appear on matching dates.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        11 種日號顏色
-       </strong>
-       <strong data-lang="en">
-        11 date colors
-       </strong>
-       <p data-lang="zh-Hant">
-        可以依月曆介面偏好選擇 RealDate 日號顏色。
-       </p>
-       <p data-lang="en">
-        Choose from 11 preset colors for RealDate day-number badges.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        三個月季節
-       </strong>
-       <strong data-lang="en">
-        Three-month seasons
-       </strong>
-       <p data-lang="zh-Hant">
-        約 90 天（RealDate）依該季實際三個月份計算長度，形成 12 個月的一年。
-       </p>
-       <p data-lang="en">
-        About 90 Days (RealDate) calculates season length from its actual three months, producing a twelve-month year.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        存檔級啟用 / 停用
-       </strong>
-       <strong data-lang="en">
-        Per-save enable / disable
-       </strong>
-       <p data-lang="zh-Hant">
-        7 / 14 / 28 天季節會停用目前存檔的 RealDate；約 90 天重新啟用，停用期間不補算。
-       </p>
-       <p data-lang="en">
-        7/14/28-day seasons disable RealDate for that save; About 90 Days re-enables it without retroactive catch-up.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        載入日期提示
-       </strong>
-       <strong data-lang="en">
-        Load-date notification
-       </strong>
-       <p data-lang="zh-Hant">
-        每次啟動遊戲後，各存檔第一次載入家庭時可顯示「今天是 {日期}」。
-       </p>
-       <p data-lang="en">
-        After each game launch, the first household load for a save can show “Today is {date}”.
-       </p>
-      </div>
-     </div>
-     <div class="doc-note">
-      <span data-lang="zh-Hant">
-       《春夏秋冬》不是 RealDate 核心日期、出生年份、實際年齡與年齡特徵的必要資料片。
-      </span>
-      <span data-lang="en">
-       Seasons is not required for RealDate's core date, birth-year, real-age, and age-trait features.
-      </span>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="aging">
-    <div class="doc-label">
-     <span>
-      03
-     </span>
-     <strong>
-      AGING &amp; LIFE STAGES
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      年齡與生命階段
-     </h2>
-     <h2 data-lang="en">
-      Aging &amp; Life Stages
-     </h2>
-     <p data-lang="zh-Hant">
-      RealDate 依目前日期與出生日期計算實際年齡。
-            市民每年仍會增加一歲，但只有真正跨越下一個 RealDate 階段門檻時，
-            才會啟動 EA 原本的增齡流程。
-     </p>
-     <p data-lang="en">
-      RealDate calculates real age from the current date and birth date.
-            Sims still grow one year older each year, but EA's native age-up flow only runs when a RealDate life-stage threshold is crossed.
-     </p>
-     <div class="life-stage-table">
-      <div>
-       <strong data-lang="zh-Hant">
-        出生～未滿 1 個月
-       </strong>
-       <strong data-lang="en">
-        Birth–under 1 month
-       </strong>
-       <span data-lang="zh-Hant">
-        新生兒
-       </span>
-       <span data-lang="en">
-        Newborn
-       </span>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        滿 1 個月～1 歲
-       </strong>
-       <strong data-lang="en">
-        1 month–Age 1
-       </strong>
-       <span data-lang="zh-Hant">
-        嬰兒
-       </span>
-       <span data-lang="en">
-        Infant
-       </span>
-      </div>
-      <div>
-       <strong>
-        2–6
-       </strong>
-       <span data-lang="zh-Hant">
-        幼兒
-       </span>
-       <span data-lang="en">
-        Toddler
-       </span>
-      </div>
-      <div>
-       <strong>
-        7–12
-       </strong>
-       <span data-lang="zh-Hant">
-        兒童
-       </span>
-       <span data-lang="en">
-        Child
-       </span>
-      </div>
-      <div>
-       <strong>
-        13–17
-       </strong>
-       <span data-lang="zh-Hant">
-        青少年
-       </span>
-       <span data-lang="en">
-        Teen
-       </span>
-      </div>
-      <div>
-       <strong>
-        18–39
-       </strong>
-       <span data-lang="zh-Hant">
-        青年
-       </span>
-       <span data-lang="en">
-        Young Adult
-       </span>
-      </div>
-      <div>
-       <strong>
-        40–64
-       </strong>
-       <span data-lang="zh-Hant">
-        成人
-       </span>
-       <span data-lang="en">
-        Adult
-       </span>
-      </div>
-      <div>
-       <strong>
-        65+
-       </strong>
-       <span data-lang="zh-Hant">
-        老年人
-       </span>
-       <span data-lang="en">
-        Elder
-       </span>
-      </div>
-     </div>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        0～11 個月月齡
-       </strong>
-       <strong data-lang="en">
-        0–11 months
-       </strong>
-       <p data-lang="zh-Hant">
-        未滿一歲時依 RealDate 日期顯示月齡，滿一歲後恢復以歲數顯示。
-       </p>
-       <p data-lang="en">
-        Sims under one year display age in months, returning to years after their first birthday.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        RealDate 年齡進度
-       </strong>
-       <strong data-lang="en">
-        RealDate aging progress
-       </strong>
-       <p data-lang="zh-Hant">
-        模擬市民學年齡進度依實際 RealDate 時間比例前進。
-       </p>
-       <p data-lang="en">
-        Simology aging progress follows actual RealDate time.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        增齡倒數
-       </strong>
-       <strong data-lang="en">
-        Age-up countdown
-       </strong>
-       <p data-lang="zh-Hant">
-        顯示距離增齡還有 X 年 X 個月 X 天；老年人則顯示已生活時間。
-       </p>
-       <p data-lang="en">
-        Shows years, months, and days until age-up; Elders instead show total time lived.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        0～120+ 年齡特徵
-       </strong>
-       <strong data-lang="en">
-        Age traits 0–120+
-       </strong>
-       <p data-lang="zh-Hant">
-        隨實際年齡自動更新；超過 120 歲仍繼續計算，但年齡特徵顯示 120+。
-       </p>
-       <p data-lang="en">
-        Traits update automatically with real age; ages beyond 120 continue calculating while using the 120+ trait.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        修改生日重新同步
-       </strong>
-       <strong data-lang="en">
-        Birthday resynchronization
-       </strong>
-       <p data-lang="zh-Hant">
-        修改生日後重新計算實際年齡、年齡特徵與 EA 年齡階段。
-       </p>
-       <p data-lang="en">
-        Changing a birthday recalculates real age, age traits, and EA life stage.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        世界名稱顯示
-       </strong>
-       <strong data-lang="en">
-        World nameplate display
-       </strong>
-       <p data-lang="zh-Hant">
-        滑鼠懸停世界中的市民時，可在 EA 年齡階段之外看到 RealDate 實際年齡。
-       </p>
-       <p data-lang="en">
-        World nameplates can show RealDate real age alongside EA's life stage.
-       </p>
-      </div>
-     </div>
-     <div class="doc-note">
-      <span data-lang="zh-Hant">
-       新生兒滿 1 個月時使用 EA 原生增齡流程進入嬰兒；滿月不是生日，不觸發 RealDate 年度生日通知，增齡視窗會使用「滿月了！」。
-      </span>
-      <span data-lang="en">
-       At one month old, Newborns use EA's native age-up flow to become Infants. This is not a birthday and does not trigger the yearly RealDate birthday notification.
-      </span>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="birthdays">
-    <div class="doc-label">
-     <span>
-      04
-     </span>
-     <strong>
-      BIRTHDAYS &amp; SOCIALS
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      生日、記憶與社交
-     </h2>
-     <h2 data-lang="en">
-      Birthdays, Memories &amp; Socials
-     </h2>
-     <p data-lang="zh-Hant">
-      生日可以手動輸入，也可以依 EA 年齡階段在合理範圍內隨機生成；
-            新生兒則會直接使用出生當天的 RealDate 日期。
-     </p>
-     <p data-lang="en">
-      Birthdays can be entered manually or randomly generated within a reasonable range for the Sim's EA life stage.
-            Newborns use their actual RealDate birth date.
-     </p>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        單向生日記憶
-       </strong>
-       <strong data-lang="en">
-        Directional birthday memories
-       </strong>
-       <p data-lang="zh-Hant">
-        A 記得 B 的生日，不代表 B 也記得 A 的生日。
-       </p>
-       <p data-lang="en">
-        A knowing B's birthday does not mean B knows A's birthday.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        家庭記憶
-       </strong>
-       <strong data-lang="en">
-        Family memories
-       </strong>
-       <p data-lang="zh-Hant">
-        父母自然記得子女生日；部分年長手足也可從弟弟 / 妹妹出生時記住。
-       </p>
-       <p data-lang="en">
-        Parents naturally remember their children's birthdays; some older siblings remember younger siblings from birth.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        詢問、告知與打聽
-       </strong>
-       <strong data-lang="en">
-        Ask, tell, and inquire
-       </strong>
-       <p data-lang="zh-Hant">
-        生日互動加入「友善 → 關於生日」；是否願意透露也會受到關係影響。
-       </p>
-       <p data-lang="en">
-        Birthday interactions appear under Friendly → About Birthdays, and willingness to share can depend on relationship.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        三種生日祝福時機
-       </strong>
-       <strong data-lang="en">
-        Three birthday-wish timings
-       </strong>
-       <p data-lang="zh-Hant">
-        生日前一天、生日當天與隔天可以送上不同祝福。
-       </p>
-       <p data-lang="en">
-        Different wishes are available the day before, on, and after the birthday.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        浪漫對象忘記生日
-       </strong>
-       <strong data-lang="en">
-        Romantic partners forgetting birthdays
-       </strong>
-       <p data-lang="zh-Hant">
-        記得生日卻忘了祝福可能產生不同情緒，隔天補祝福有機會化解。
-       </p>
-       <p data-lang="en">
-        A remembered-but-uncelebrated birthday can create reactions, while a belated wish may repair them.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        生日記憶會淡化
-       </strong>
-       <strong data-lang="en">
-        Birthday memories can fade
-       </strong>
-       <p data-lang="zh-Hant">
-        長期未慶祝可能逐漸忘記；成功祝福會加深記憶。父母不會因一般時間流逝忘記子女生日。
-       </p>
-       <p data-lang="en">
-        Memories may fade without celebration and can be reinforced by successful wishes; parents do not normally forget their children's birthdays.
-       </p>
-      </div>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="reproductive">
-    <div class="doc-label">
-     <span>
-      05
-     </span>
-     <strong>
-      REPRODUCTIVE TIMELINE
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      生理時間軸
-     </h2>
-     <h2 data-lang="en">
-      Reproductive Timeline
-     </h2>
-     <p data-lang="zh-Hant">
-      符合條件的市民可以直接查看 RealDate 日期化的週期資訊，
-            包括目前週期、預計經期、排卵日、易孕期與懷孕時的預計生產日期。
-     </p>
-     <p data-lang="en">
-      Eligible Sims can view date-based reproductive information including current cycle,
-            expected period, ovulation date, fertile window, and estimated due date.
-     </p>
-     <div class="timeline-flow">
-      <span data-lang="zh-Hant">
-       初潮
-      </span>
-      <span data-lang="en">
-       Menarche
-      </span>
-      <b>
-       →
-      </b>
-      <span data-lang="zh-Hant">
-       週期 / 經期
-      </span>
-      <span data-lang="en">
-       Cycle / Period
-      </span>
-      <b>
-       →
-      </b>
-      <span data-lang="zh-Hant">
-       懷孕
-      </span>
-      <span data-lang="en">
-       Pregnancy
-      </span>
-      <b>
-       →
-      </b>
-      <span data-lang="zh-Hant">
-       產後恢復
-      </span>
-      <span data-lang="en">
-       Postpartum
-      </span>
-      <b>
-       →
-      </b>
-      <span data-lang="zh-Hant">
-       停經
-      </span>
-      <span data-lang="en">
-       Menopause
-      </span>
-     </div>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        存檔級開關
-       </strong>
-       <strong data-lang="en">
-        Per-save toggle
-       </strong>
-       <p data-lang="zh-Hant">
-        可以針對目前存檔整體啟用或停用生理時間軸。
-       </p>
-       <p data-lang="en">
-        Enable or disable the reproductive timeline for the current save.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        個別週期設定
-       </strong>
-       <strong data-lang="en">
-        Individual cycle settings
-       </strong>
-       <p data-lang="zh-Hant">
-        預設 28 天週期 / 5 天經期；也可調整整個存檔或個別市民設定。
-       </p>
-       <p data-lang="en">
-        Defaults to a 28-day cycle / 5-day period, with save-level and individual adjustments.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        CAS 懷孕能力判定
-       </strong>
-       <strong data-lang="en">
-        CAS pregnancy-capability eligibility
-       </strong>
-       <p data-lang="zh-Hant">
-        月經時間軸資格參考 CAS 懷孕能力，不只按照男性 / 女性分類。
-       </p>
-       <p data-lang="en">
-        Menstrual-timeline eligibility references CAS pregnancy capability rather than only Male/Female categories.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        初潮
-       </strong>
-       <strong data-lang="en">
-        Menarche
-       </strong>
-       <p data-lang="zh-Hant">
-        依 RealDate 實際日期在合理年齡範圍內發生，範圍可由玩家調整。
-       </p>
-       <p data-lang="en">
-        Occurs by actual RealDate date within an adjustable age range.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        停經
-       </strong>
-       <strong data-lang="en">
-        Menopause
-       </strong>
-       <p data-lang="zh-Hant">
-        每位符合條件的市民會在 45～55 歲之間取得並保存自己的停經時間。
-       </p>
-       <p data-lang="en">
-        Each eligible Sim receives and keeps individual menopause timing between ages 45–55.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        不中途截斷狀態
-       </strong>
-       <strong data-lang="en">
-        No abrupt state cutoff
-       </strong>
-       <p data-lang="zh-Hant">
-        停經到達時，會先讓目前週期、懷孕或產後恢復正常結束。
-       </p>
-       <p data-lang="en">
-        Menopause waits for the current cycle, pregnancy, or postpartum state to finish naturally.
-       </p>
-      </div>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="pregnancy">
-    <div class="doc-label">
-     <span>
-      06
-     </span>
-     <strong>
-      PREGNANCY &amp; POSTPARTUM
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      懷孕與產後
-     </h2>
-     <h2 data-lang="en">
-      Pregnancy &amp; Postpartum
-     </h2>
-     <p data-lang="zh-Hant">
-      懷孕期間，RealDate 暫停一般週期預測，改用實際日期顯示孕期、
-            推算受孕日期、預產期與距離預產期時間。
-     </p>
-     <p data-lang="en">
-      During pregnancy, RealDate pauses normal cycle predictions and uses actual dates
-            for pregnancy stage, estimated conception date, due date, and time remaining.
-     </p>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        長孕期時間軸
-       </strong>
-       <strong data-lang="en">
-        Extended pregnancy timeline
-       </strong>
-       <p data-lang="zh-Hant">
-        懷孕跟著 RealDate 日期推進，並與生理時間軸使用同一套時間系統。
-       </p>
-       <p data-lang="en">
-        Pregnancy progresses with RealDate dates and shares the reproductive timeline.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        不強迫預產期生產
-       </strong>
-       <strong data-lang="en">
-        No forced birth at due date
-       </strong>
-       <p data-lang="zh-Hant">
-        到達預產期後，真正的懷孕與生產玩法仍由 EA 或其他模組控制。
-       </p>
-       <p data-lang="en">
-        Reaching the due date does not force birth; EA or other mods still control pregnancy and delivery gameplay.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        42 天產後恢復
-       </strong>
-       <strong data-lang="en">
-        42-day postpartum recovery
-       </strong>
-       <p data-lang="zh-Hant">
-        一般情況下，生產後預設 42 天再恢復週期預測。
-       </p>
-       <p data-lang="en">
-        Cycle predictions normally resume after 42 days of postpartum recovery.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        重新同步
-       </strong>
-       <strong data-lang="en">
-        Resynchronization
-       </strong>
-       <p data-lang="zh-Hant">
-        改善修改日期、重新讀檔或旅行後，生理狀態與舊生產資料不同步的問題。
-       </p>
-       <p data-lang="en">
-        Improves resynchronization after date changes, save reloads, and travel.
-       </p>
-      </div>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="eras">
-    <div class="doc-label">
-     <span>
-      07
-     </span>
-     <strong>
-      ERAS &amp; WEEKDAYS
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      年號、歷史與星期
-     </h2>
-     <h2 data-lang="en">
-      Eras, History &amp; Weekdays
-     </h2>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        自訂年號
-       </strong>
-       <strong data-lang="en">
-        Custom Eras
-       </strong>
-       <p data-lang="zh-Hant">
-        可以為 RealDate 日期區間設定名稱，之後再更換新的年號。
-       </p>
-       <p data-lang="en">
-        Assign names to RealDate date ranges and switch to new Eras later.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        元年紀年
-       </strong>
-       <strong data-lang="en">
-        Era-year reckoning
-       </strong>
-       <p data-lang="zh-Hant">
-        可選擇顯示年號紀年；開始使用的當年為元年，跨年後增加 1 年。
-       </p>
-       <p data-lang="en">
-        Optionally display Era-year reckoning; the start year is Year 1 and increments on January 1.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        年號歷史
-       </strong>
-       <strong data-lang="en">
-        Era history
-       </strong>
-       <p data-lang="zh-Hant">
-        結束後保留名稱與實際起訖日期，也可管理已使用過的歷史區間。
-       </p>
-       <p data-lang="en">
-        Completed Eras preserve names and actual date ranges and can be managed later.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        歷史日期回溯
-       </strong>
-       <strong data-lang="en">
-        Historical date restoration
-       </strong>
-       <p data-lang="zh-Hant">
-        把日期往回調整時，會依保存區間顯示當時正確的年號，不重新觸發更替。
-       </p>
-       <p data-lang="en">
-        Moving the date backward restores the appropriate saved Era without replaying the transition.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        星期校正
-       </strong>
-       <strong data-lang="en">
-        Weekday calibration
-       </strong>
-       <p data-lang="zh-Hant">
-        可以指定目前 RealDate 日期對應星期日～星期六中的哪一天，重新建立後續星期基準。
-       </p>
-       <p data-lang="en">
-        Assign the weekday for the current RealDate date and recalculate subsequent weekdays from that reference.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        每日換日通知
-       </strong>
-       <strong data-lang="en">
-        Daily date-change notification
-       </strong>
-       <p data-lang="zh-Hant">
-        可選擇在遊戲時間自然跨過午夜、RealDate 進入新一天時顯示通知。
-       </p>
-       <p data-lang="en">
-        Optionally notify when in-game time crosses midnight and RealDate enters a new day.
-       </p>
-      </div>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="zodiac">
-    <div class="doc-label">
-     <span>
-      08
-     </span>
-     <strong>
-      ZODIAC INTEGRATION
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      Zodiac Signs Mod V3 聯動
-     </h2>
-     <h2 data-lang="en">
-      Zodiac Signs Mod V3 Integration
-     </h2>
-     <p data-lang="zh-Hant">
-      RealDate 不取代原模組的星座玩法，而是依市民實際出生月日判斷應有星座，
-            並分配原作者的星座特徵；修改生日後也會重新判定。
-     </p>
-     <p data-lang="en">
-      RealDate does not replace the original zodiac gameplay. It determines zodiac traits
-            from the Sim's actual birth month and day and recalculates them after birthday changes.
-     </p>
-     <div class="doc-note">
-      <span data-lang="zh-Hant">
-       必要原模組檔案與「不要同時安裝」的 Zodiac 附加檔，已集中整理在「相容性」頁。
-      </span>
-      <span data-lang="en">
-       Required original files and incompatible Zodiac add-ons are documented on the Compatibility page.
-      </span>
-     </div>
-    </div>
-   </section>
-   <section class="doc-section" id="tools">
-    <div class="doc-label">
-     <span>
-      09
-     </span>
-     <strong>
-      UI, SETTINGS &amp; DIAGNOSTICS
-     </strong>
-    </div>
-    <div class="doc-content reveal">
-     <h2 data-lang="zh-Hant">
-      介面、設定與診斷
-     </h2>
-     <h2 data-lang="en">
-      UI, Settings &amp; Diagnostics
-     </h2>
-     <div class="feature-list">
-      <div>
-       <strong data-lang="zh-Hant">
-        設定選單分類
-       </strong>
-       <strong data-lang="en">
-        Settings categories
-       </strong>
-       <p data-lang="zh-Hant">
-        基礎設定、相容、生理時間軸與診斷工具分開整理。
-       </p>
-       <p data-lang="en">
-        Basic settings, compatibility, reproductive timeline, and diagnostics are organized separately.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        關係面板入口
-       </strong>
-       <strong data-lang="en">
-        Relationship Panel access
-       </strong>
-       <p data-lang="zh-Hant">
-        可從關係面板開啟不在目前地段市民的 RealDate 選單。
-       </p>
-       <p data-lang="en">
-        Open RealDate for off-lot Sims from the Relationship Panel.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        睡眠中查看
-       </strong>
-       <strong data-lang="en">
-        Inspect sleeping Sims
-       </strong>
-       <p data-lang="zh-Hant">
-        可以查看睡眠中的市民資訊，不必把市民叫醒。
-       </p>
-       <p data-lang="en">
-        Inspect sleeping Sims without waking them.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        介面資源衝突診斷
-       </strong>
-       <strong data-lang="en">
-        UI resource conflict scan
-       </strong>
-       <p data-lang="zh-Hant">
-        掃描 Mods 中是否有其他 package 同時修改 RealDate 使用的重要介面資源。
-       </p>
-       <p data-lang="en">
-        Scan Mods for packages that modify important UI resources also used by RealDate.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        詳細除錯日誌
-       </strong>
-       <strong data-lang="en">
-        Detailed debug logging
-       </strong>
-       <p data-lang="zh-Hant">
-        可在遊戲內切換；即使關閉詳細模式，重要警告與錯誤仍保留。
-       </p>
-       <p data-lang="en">
-        Toggle detailed logging in-game while important warnings and errors remain recorded.
-       </p>
-      </div>
-      <div>
-       <strong data-lang="zh-Hant">
-        啟動診斷
-       </strong>
-       <strong data-lang="en">
-        Boot diagnostics
-       </strong>
-       <p data-lang="zh-Hant">
-        記錄模組啟動、核心載入、必要掛載、家庭載入與載入畫面等階段。
-       </p>
-       <p data-lang="en">
-        Records startup, core loading, required hooks, household loading, and loading-screen stages.
-       </p>
-      </div>
-     </div>
-    </div>
-   </section>
-  </main>
-  <footer class="site-footer">
-   <div class="site-footer-inner">
-    <div class="footer-identity">
-     <strong>
-      REALDATE
-     </strong>
-     <span data-lang="zh-Hant">
-      《模擬市民 4》時間與人生系統模組
-     </span>
-     <span data-lang="en">
-      A time and life-system mod for The Sims 4
-     </span>
-    </div>
-    <div class="footer-links">
-     <a href="gameplay.html">
-      <span data-lang="zh-Hant">
-       玩法
-      </span>
-      <span data-lang="en">
-       Gameplay
-      </span>
-     </a>
-     <a href="download.html">
-      <span data-lang="zh-Hant">
-       下載與安裝
-      </span>
-      <span data-lang="en">
-       Download &amp; Install
-      </span>
-     </a>
-     <a href="compatibility.html">
-      <span data-lang="zh-Hant">
-       相容性
-      </span>
-      <span data-lang="en">
-       Compatibility
-      </span>
-     </a>
-     <a href="changelog.html">
-      <span data-lang="zh-Hant">
-       更新日誌
-      </span>
-      <span data-lang="en">
-       Changelog
-      </span>
-     </a>
-     <a href="roadmap.html">
-      <span data-lang="zh-Hant">
-       開發藍圖
-      </span>
-      <span data-lang="en">
-       Roadmap
-      </span>
-     </a>
-     <a href="faq.html">
-      <span data-lang="zh-Hant">
-       常見問題
-      </span>
-      <span data-lang="en">
-       FAQ
-      </span>
-     </a>
-    </div>
-    <div class="footer-meta">
-     <span data-lang="zh-Hant">
-      L1nG ·《模擬市民 4》模組作者
-     </span>
-     <span data-lang="en">
-      L1nG · THE SIMS 4 MOD CREATOR
-     </span>
-     <span data-lang="zh-Hant">
-      非 Electronic Arts 或 Maxis 官方網站。
-     </span>
-     <span data-lang="en">
-      Not affiliated with Electronic Arts or Maxis.
-     </span>
-    </div>
-   </div>
-  </footer>
- </body>
+<html lang="zh-Hant" data-language="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealDate 完整玩法 · L1nG</title>
+    <meta name="description" content="RealDate v0.4 Beta 目前公開版本的完整累積玩法。">
+    <meta name="theme-color" content="#fafafa">
+    <link rel="stylesheet" href="realdate.css">
+    <script src="realdate.js" defer></script>
+</head>
+
+<body>
+
+    <!-- ========【RealDate 頂部導覽】 設定 - 品牌、頁面導覽與語言切換 ======== -->
+    <header class="site-header" id="siteHeader">
+        <div class="site-header-inner">
+            <div class="site-brand-group">
+                <a class="creator-link" href="../home.html">L1nG</a>
+                <span class="brand-divider">/</span>
+                <a class="realdate-brand" href="index.html">REALDATE</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
+            <nav class="main-nav" id="mainNav" aria-label="RealDate">
+                <a class="active" href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                <details class="nav-more">
+                    <summary><span data-lang="zh-Hant">更多</span><span data-lang="en">More</span><span class="nav-more-chevron" aria-hidden="true">⌄</span></summary>
+                    <div class="nav-more-menu">
+                        <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                        <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                    </div>
+                </details>
+            </nav>
+            <div class="language-switch" role="group" aria-label="Language">
+                <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
+                <span class="language-divider">/</span>
+                <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-hero">
+            <div class="page-hero-inner reveal">
+                <span class="eyebrow">GAMEPLAY GUIDE</span>
+                <h1 data-lang="zh-Hant">完整玩法</h1>
+                <h1 data-lang="en">Complete Gameplay</h1>
+                <p data-lang="zh-Hant">
+                    這裡整理的是目前公開版本 v0.4 Beta 累積至今的玩法，
+                    依系統分類，而不是按 v0.1、v0.2、v0.3、v0.4 分開。
+                </p>
+                <p data-lang="en">
+                    This page documents the complete cumulative gameplay of public v0.4 Beta,
+                    organized by system rather than release version.
+                </p>
+                <div class="doc-note">
+                    <span data-lang="zh-Hant">v0.5 開發中的功能不列入目前公開玩法。</span>
+                    <span data-lang="en">In-development v0.5 features are not presented as released gameplay.</span>
+                </div>
+            </div>
+        </section>
+
+        <nav class="doc-index" aria-label="Gameplay">
+            <a href="#setup">初始設定</a>
+            <a href="#calendar">月曆與季節</a>
+            <a href="#aging">年齡與生命階段</a>
+            <a href="#birthdays">生日與社交</a>
+            <a href="#reproductive">生理時間軸</a>
+            <a href="#pregnancy">懷孕與產後</a>
+            <a href="#eras">年號與星期</a>
+            <a href="#zodiac">星座聯動</a>
+            <a href="#tools">介面與診斷</a>
+        </nav>
+
+        <section class="doc-section" id="setup">
+            <div class="doc-label">
+                <span>01</span>
+                <strong>DATE &amp; INITIAL SETUP</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">日期與初始設定</h2>
+                <h2 data-lang="en">Date &amp; Initial Setup</h2>
+                <p data-lang="zh-Hant">
+                    第一次載入家庭後，RealDate 會建立這個存檔自己的日期設定。
+                    可以指定起始年份、南 / 北半球、月份、日期與日期顯示格式；
+                    之後仍可從 RealDate 選單重新調整。
+                </p>
+                <p data-lang="en">
+                    On the first household load, RealDate creates a date setup for that save.
+                    You can choose the starting year, hemisphere, month, day, and date format,
+                    and change these settings later.
+                </p>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">起始年份</strong>
+                        <strong data-lang="en">Starting year</strong>
+                        <p data-lang="zh-Hant">使用 4 位數年份建立存檔的 RealDate 年份。</p>
+                        <p data-lang="en">Use a four-digit year as the save's RealDate starting year.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">南 / 北半球</strong>
+                        <strong data-lang="en">Northern / Southern Hemisphere</strong>
+                        <p data-lang="zh-Hant">若有《春夏秋冬》，會依開局季節與半球提供對應的三個起始月份。</p>
+                        <p data-lang="en">With Seasons installed, the starting season and hemisphere determine the three available starting months.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">日期格式</strong>
+                        <strong data-lang="en">Date format</strong>
+                        <p data-lang="zh-Hant">可選擇偏好的日期顯示格式，相關介面會沿用同一設定。</p>
+                        <p data-lang="en">Choose a preferred date format used across supported RealDate displays.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">日期保存</strong>
+                        <strong data-lang="en">Save behavior</strong>
+                        <p data-lang="zh-Hant">日期、生日與設定跟著 EA 實際存檔成功時保存；未存檔退出則回到上次成功存檔狀態。</p>
+                        <p data-lang="en">
+                            Dates, birthdays, and settings persist when EA successfully saves; exiting without saving returns to the previous saved state.
+                        </p>
+                    </div>
+                </div>
+                <div class="season-map">
+                    <div>
+                        <strong data-lang="zh-Hant">北半球</strong>
+                        <strong data-lang="en">Northern Hemisphere</strong>
+                        <span>春 3–5 月</span>
+                        <span>夏 6–8 月</span>
+                        <span>秋 9–11 月</span>
+                        <span>冬 12–2 月</span>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">南半球</strong>
+                        <strong data-lang="en">Southern Hemisphere</strong>
+                        <span>春 9–11 月</span>
+                        <span>夏 12–2 月</span>
+                        <span>秋 3–5 月</span>
+                        <span>冬 6–8 月</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="calendar">
+            <div class="doc-label">
+                <span>02</span>
+                <strong>CALENDAR &amp; SEASONS</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">月曆與季節</h2>
+                <h2 data-lang="en">Calendar &amp; Seasons</h2>
+                <p data-lang="zh-Hant">
+                    RealDate 將日期整合進 EA 月曆，但不重新建立 EA 原本的活動。
+                    月曆中的事件、節日、天氣與月相仍由遊戲本身排程。
+                </p>
+                <p data-lang="en">
+                    RealDate integrates dates into EA's Calendar without recreating EA events.
+                    Events, holidays, weather, and moon phases remain scheduled by the game.
+                </p>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">365 天日期範圍</strong>
+                        <strong data-lang="en">365-day date range</strong>
+                        <p data-lang="zh-Hant">月曆提供 365 天 RealDate 日期、日號與完整日期提示。</p>
+                        <p data-lang="en">The Calendar provides 365 days of RealDate dates, day numbers, and full-date tooltips.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">生日標記</strong>
+                        <strong data-lang="en">Birthday markers</strong>
+                        <p data-lang="zh-Hant">主控家庭已設定的生日會出現在對應日期。</p>
+                        <p data-lang="en">Configured birthdays for active-household Sims appear on matching dates.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">11 種日號顏色</strong>
+                        <strong data-lang="en">11 date colors</strong>
+                        <p data-lang="zh-Hant">可以依月曆介面偏好選擇 RealDate 日號顏色。</p>
+                        <p data-lang="en">Choose from 11 preset colors for RealDate day-number badges.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">三個月季節</strong>
+                        <strong data-lang="en">Three-month seasons</strong>
+                        <p data-lang="zh-Hant">約 90 天（RealDate）依該季實際三個月份計算長度，形成 12 個月的一年。</p>
+                        <p data-lang="en">About 90 Days (RealDate) calculates season length from its actual three months, producing a twelve-month year.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">存檔級啟用 / 停用</strong>
+                        <strong data-lang="en">Per-save enable / disable</strong>
+                        <p data-lang="zh-Hant">7 / 14 / 28 天季節會停用目前存檔的 RealDate；約 90 天重新啟用，停用期間不補算。</p>
+                        <p data-lang="en">7/14/28-day seasons disable RealDate for that save; About 90 Days re-enables it without retroactive catch-up.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">載入日期提示</strong>
+                        <strong data-lang="en">Load-date notification</strong>
+                        <p data-lang="zh-Hant">每次啟動遊戲後，各存檔第一次載入家庭時可顯示「今天是 {日期}」。</p>
+                        <p data-lang="en">After each game launch, the first household load for a save can show “Today is {date}”.</p>
+                    </div>
+                </div>
+                <div class="doc-note">
+                    <span data-lang="zh-Hant">《春夏秋冬》不是 RealDate 核心日期、出生年份、實際年齡與年齡特徵的必要資料片。</span>
+                    <span data-lang="en">Seasons is not required for RealDate's core date, birth-year, real-age, and age-trait features.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="aging">
+            <div class="doc-label">
+                <span>03</span>
+                <strong>AGING &amp; LIFE STAGES</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">年齡與生命階段</h2>
+                <h2 data-lang="en">Aging &amp; Life Stages</h2>
+                <p data-lang="zh-Hant">
+                    RealDate 依目前日期與出生日期計算實際年齡。
+                    市民每年仍會增加一歲，但只有真正跨越下一個 RealDate 階段門檻時，
+                    才會啟動 EA 原本的增齡流程。
+                </p>
+                <p data-lang="en">
+                    RealDate calculates real age from the current date and birth date.
+                    Sims still grow one year older each year, but EA's native age-up flow only runs when a RealDate life-stage threshold is crossed.
+                </p>
+                <div class="life-stage-table">
+                    <div>
+                        <strong data-lang="zh-Hant">出生～未滿 1 個月</strong>
+                        <strong data-lang="en">Birth–under 1 month</strong>
+                        <span data-lang="zh-Hant">新生兒</span>
+                        <span data-lang="en">Newborn</span>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">滿 1 個月～1 歲</strong>
+                        <strong data-lang="en">1 month–Age 1</strong>
+                        <span data-lang="zh-Hant">嬰兒</span>
+                        <span data-lang="en">Infant</span>
+                    </div>
+                    <div>
+                        <strong>2–6</strong>
+                        <span data-lang="zh-Hant">幼兒</span>
+                        <span data-lang="en">Toddler</span>
+                    </div>
+                    <div>
+                        <strong>7–12</strong>
+                        <span data-lang="zh-Hant">兒童</span>
+                        <span data-lang="en">Child</span>
+                    </div>
+                    <div>
+                        <strong>13–17</strong>
+                        <span data-lang="zh-Hant">青少年</span>
+                        <span data-lang="en">Teen</span>
+                    </div>
+                    <div>
+                        <strong>18–39</strong>
+                        <span data-lang="zh-Hant">青年</span>
+                        <span data-lang="en">Young Adult</span>
+                    </div>
+                    <div>
+                        <strong>40–64</strong>
+                        <span data-lang="zh-Hant">成人</span>
+                        <span data-lang="en">Adult</span>
+                    </div>
+                    <div>
+                        <strong>65+</strong>
+                        <span data-lang="zh-Hant">老年人</span>
+                        <span data-lang="en">Elder</span>
+                    </div>
+                </div>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">0～11 個月月齡</strong>
+                        <strong data-lang="en">0–11 months</strong>
+                        <p data-lang="zh-Hant">未滿一歲時依 RealDate 日期顯示月齡，滿一歲後恢復以歲數顯示。</p>
+                        <p data-lang="en">Sims under one year display age in months, returning to years after their first birthday.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">RealDate 年齡進度</strong>
+                        <strong data-lang="en">RealDate aging progress</strong>
+                        <p data-lang="zh-Hant">模擬市民學年齡進度依實際 RealDate 時間比例前進。</p>
+                        <p data-lang="en">Simology aging progress follows actual RealDate time.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">增齡倒數</strong>
+                        <strong data-lang="en">Age-up countdown</strong>
+                        <p data-lang="zh-Hant">顯示距離增齡還有 X 年 X 個月 X 天；老年人則顯示已生活時間。</p>
+                        <p data-lang="en">Shows years, months, and days until age-up; Elders instead show total time lived.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">0～120+ 年齡特徵</strong>
+                        <strong data-lang="en">Age traits 0–120+</strong>
+                        <p data-lang="zh-Hant">隨實際年齡自動更新；超過 120 歲仍繼續計算，但年齡特徵顯示 120+。</p>
+                        <p data-lang="en">Traits update automatically with real age; ages beyond 120 continue calculating while using the 120+ trait.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">修改生日重新同步</strong>
+                        <strong data-lang="en">Birthday resynchronization</strong>
+                        <p data-lang="zh-Hant">修改生日後重新計算實際年齡、年齡特徵與 EA 年齡階段。</p>
+                        <p data-lang="en">Changing a birthday recalculates real age, age traits, and EA life stage.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">世界名稱顯示</strong>
+                        <strong data-lang="en">World nameplate display</strong>
+                        <p data-lang="zh-Hant">滑鼠懸停世界中的市民時，可在 EA 年齡階段之外看到 RealDate 實際年齡。</p>
+                        <p data-lang="en">World nameplates can show RealDate real age alongside EA's life stage.</p>
+                    </div>
+                </div>
+                <div class="doc-note">
+                    <span data-lang="zh-Hant">新生兒滿 1 個月時使用 EA 原生增齡流程進入嬰兒；滿月不是生日，不觸發 RealDate 年度生日通知，增齡視窗會使用「滿月了！」。</span>
+                    <span data-lang="en">
+                        At one month old, Newborns use EA's native age-up flow to become Infants. This is not a birthday and does not trigger the yearly RealDate birthday notification.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="birthdays">
+            <div class="doc-label">
+                <span>04</span>
+                <strong>BIRTHDAYS &amp; SOCIALS</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">生日、記憶與社交</h2>
+                <h2 data-lang="en">Birthdays, Memories &amp; Socials</h2>
+                <p data-lang="zh-Hant">
+                    生日可以手動輸入，也可以依 EA 年齡階段在合理範圍內隨機生成；
+                    新生兒則會直接使用出生當天的 RealDate 日期。
+                </p>
+                <p data-lang="en">
+                    Birthdays can be entered manually or randomly generated within a reasonable range for the Sim's EA life stage.
+                    Newborns use their actual RealDate birth date.
+                </p>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">單向生日記憶</strong>
+                        <strong data-lang="en">Directional birthday memories</strong>
+                        <p data-lang="zh-Hant">A 記得 B 的生日，不代表 B 也記得 A 的生日。</p>
+                        <p data-lang="en">A knowing B's birthday does not mean B knows A's birthday.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">家庭記憶</strong>
+                        <strong data-lang="en">Family memories</strong>
+                        <p data-lang="zh-Hant">父母自然記得子女生日；部分年長手足也可從弟弟 / 妹妹出生時記住。</p>
+                        <p data-lang="en">Parents naturally remember their children's birthdays; some older siblings remember younger siblings from birth.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">詢問、告知與打聽</strong>
+                        <strong data-lang="en">Ask, tell, and inquire</strong>
+                        <p data-lang="zh-Hant">生日互動加入「友善 → 關於生日」；是否願意透露也會受到關係影響。</p>
+                        <p data-lang="en">Birthday interactions appear under Friendly → About Birthdays, and willingness to share can depend on relationship.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">三種生日祝福時機</strong>
+                        <strong data-lang="en">Three birthday-wish timings</strong>
+                        <p data-lang="zh-Hant">生日前一天、生日當天與隔天可以送上不同祝福。</p>
+                        <p data-lang="en">Different wishes are available the day before, on, and after the birthday.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">浪漫對象忘記生日</strong>
+                        <strong data-lang="en">Romantic partners forgetting birthdays</strong>
+                        <p data-lang="zh-Hant">記得生日卻忘了祝福可能產生不同情緒，隔天補祝福有機會化解。</p>
+                        <p data-lang="en">A remembered-but-uncelebrated birthday can create reactions, while a belated wish may repair them.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">生日記憶會淡化</strong>
+                        <strong data-lang="en">Birthday memories can fade</strong>
+                        <p data-lang="zh-Hant">長期未慶祝可能逐漸忘記；成功祝福會加深記憶。父母不會因一般時間流逝忘記子女生日。</p>
+                        <p data-lang="en">
+                            Memories may fade without celebration and can be reinforced by successful wishes; parents do not normally forget their children's birthdays.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="reproductive">
+            <div class="doc-label">
+                <span>05</span>
+                <strong>REPRODUCTIVE TIMELINE</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">生理時間軸</h2>
+                <h2 data-lang="en">Reproductive Timeline</h2>
+                <p data-lang="zh-Hant">
+                    符合條件的市民可以直接查看 RealDate 日期化的週期資訊，
+                    包括目前週期、預計經期、排卵日、易孕期與懷孕時的預計生產日期。
+                </p>
+                <p data-lang="en">
+                    Eligible Sims can view date-based reproductive information including current cycle,
+                    expected period, ovulation date, fertile window, and estimated due date.
+                </p>
+                <div class="timeline-flow">
+                    <span data-lang="zh-Hant">初潮</span>
+                    <span data-lang="en">Menarche</span>
+                    <b>→</b>
+                    <span data-lang="zh-Hant">週期 / 經期</span>
+                    <span data-lang="en">Cycle / Period</span>
+                    <b>→</b>
+                    <span data-lang="zh-Hant">懷孕</span>
+                    <span data-lang="en">Pregnancy</span>
+                    <b>→</b>
+                    <span data-lang="zh-Hant">產後恢復</span>
+                    <span data-lang="en">Postpartum</span>
+                    <b>→</b>
+                    <span data-lang="zh-Hant">停經</span>
+                    <span data-lang="en">Menopause</span>
+                </div>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">存檔級開關</strong>
+                        <strong data-lang="en">Per-save toggle</strong>
+                        <p data-lang="zh-Hant">可以針對目前存檔整體啟用或停用生理時間軸。</p>
+                        <p data-lang="en">Enable or disable the reproductive timeline for the current save.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">個別週期設定</strong>
+                        <strong data-lang="en">Individual cycle settings</strong>
+                        <p data-lang="zh-Hant">預設 28 天週期 / 5 天經期；也可調整整個存檔或個別市民設定。</p>
+                        <p data-lang="en">Defaults to a 28-day cycle / 5-day period, with save-level and individual adjustments.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">CAS 懷孕能力判定</strong>
+                        <strong data-lang="en">CAS pregnancy-capability eligibility</strong>
+                        <p data-lang="zh-Hant">月經時間軸資格參考 CAS 懷孕能力，不只按照男性 / 女性分類。</p>
+                        <p data-lang="en">Menstrual-timeline eligibility references CAS pregnancy capability rather than only Male/Female categories.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">初潮</strong>
+                        <strong data-lang="en">Menarche</strong>
+                        <p data-lang="zh-Hant">依 RealDate 實際日期在合理年齡範圍內發生，範圍可由玩家調整。</p>
+                        <p data-lang="en">Occurs by actual RealDate date within an adjustable age range.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">停經</strong>
+                        <strong data-lang="en">Menopause</strong>
+                        <p data-lang="zh-Hant">每位符合條件的市民會在 45～55 歲之間取得並保存自己的停經時間。</p>
+                        <p data-lang="en">Each eligible Sim receives and keeps individual menopause timing between ages 45–55.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">不中途截斷狀態</strong>
+                        <strong data-lang="en">No abrupt state cutoff</strong>
+                        <p data-lang="zh-Hant">停經到達時，會先讓目前週期、懷孕或產後恢復正常結束。</p>
+                        <p data-lang="en">Menopause waits for the current cycle, pregnancy, or postpartum state to finish naturally.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="pregnancy">
+            <div class="doc-label">
+                <span>06</span>
+                <strong>PREGNANCY &amp; POSTPARTUM</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">懷孕與產後</h2>
+                <h2 data-lang="en">Pregnancy &amp; Postpartum</h2>
+                <p data-lang="zh-Hant">
+                    懷孕期間，RealDate 暫停一般週期預測，改用實際日期顯示孕期、
+                    推算受孕日期、預產期與距離預產期時間。
+                </p>
+                <p data-lang="en">
+                    During pregnancy, RealDate pauses normal cycle predictions and uses actual dates
+                    for pregnancy stage, estimated conception date, due date, and time remaining.
+                </p>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">長孕期時間軸</strong>
+                        <strong data-lang="en">Extended pregnancy timeline</strong>
+                        <p data-lang="zh-Hant">懷孕跟著 RealDate 日期推進，並與生理時間軸使用同一套時間系統。</p>
+                        <p data-lang="en">Pregnancy progresses with RealDate dates and shares the reproductive timeline.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">不強迫預產期生產</strong>
+                        <strong data-lang="en">No forced birth at due date</strong>
+                        <p data-lang="zh-Hant">到達預產期後，真正的懷孕與生產玩法仍由 EA 或其他模組控制。</p>
+                        <p data-lang="en">Reaching the due date does not force birth; EA or other mods still control pregnancy and delivery gameplay.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">42 天產後恢復</strong>
+                        <strong data-lang="en">42-day postpartum recovery</strong>
+                        <p data-lang="zh-Hant">一般情況下，生產後預設 42 天再恢復週期預測。</p>
+                        <p data-lang="en">Cycle predictions normally resume after 42 days of postpartum recovery.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">重新同步</strong>
+                        <strong data-lang="en">Resynchronization</strong>
+                        <p data-lang="zh-Hant">改善修改日期、重新讀檔或旅行後，生理狀態與舊生產資料不同步的問題。</p>
+                        <p data-lang="en">Improves resynchronization after date changes, save reloads, and travel.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="eras">
+            <div class="doc-label">
+                <span>07</span>
+                <strong>ERAS &amp; WEEKDAYS</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">年號、歷史與星期</h2>
+                <h2 data-lang="en">Eras, History &amp; Weekdays</h2>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">自訂年號</strong>
+                        <strong data-lang="en">Custom Eras</strong>
+                        <p data-lang="zh-Hant">可以為 RealDate 日期區間設定名稱，之後再更換新的年號。</p>
+                        <p data-lang="en">Assign names to RealDate date ranges and switch to new Eras later.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">元年紀年</strong>
+                        <strong data-lang="en">Era-year reckoning</strong>
+                        <p data-lang="zh-Hant">可選擇顯示年號紀年；開始使用的當年為元年，跨年後增加 1 年。</p>
+                        <p data-lang="en">Optionally display Era-year reckoning; the start year is Year 1 and increments on January 1.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">年號歷史</strong>
+                        <strong data-lang="en">Era history</strong>
+                        <p data-lang="zh-Hant">結束後保留名稱與實際起訖日期，也可管理已使用過的歷史區間。</p>
+                        <p data-lang="en">Completed Eras preserve names and actual date ranges and can be managed later.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">歷史日期回溯</strong>
+                        <strong data-lang="en">Historical date restoration</strong>
+                        <p data-lang="zh-Hant">把日期往回調整時，會依保存區間顯示當時正確的年號，不重新觸發更替。</p>
+                        <p data-lang="en">Moving the date backward restores the appropriate saved Era without replaying the transition.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">星期校正</strong>
+                        <strong data-lang="en">Weekday calibration</strong>
+                        <p data-lang="zh-Hant">可以指定目前 RealDate 日期對應星期日～星期六中的哪一天，重新建立後續星期基準。</p>
+                        <p data-lang="en">Assign the weekday for the current RealDate date and recalculate subsequent weekdays from that reference.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">每日換日通知</strong>
+                        <strong data-lang="en">Daily date-change notification</strong>
+                        <p data-lang="zh-Hant">可選擇在遊戲時間自然跨過午夜、RealDate 進入新一天時顯示通知。</p>
+                        <p data-lang="en">Optionally notify when in-game time crosses midnight and RealDate enters a new day.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="zodiac">
+            <div class="doc-label">
+                <span>08</span>
+                <strong>ZODIAC INTEGRATION</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">Zodiac Signs Mod V3 聯動</h2>
+                <h2 data-lang="en">Zodiac Signs Mod V3 Integration</h2>
+                <p data-lang="zh-Hant">
+                    RealDate 不取代原模組的星座玩法，而是依市民實際出生月日判斷應有星座，
+                    並分配原作者的星座特徵；修改生日後也會重新判定。
+                </p>
+                <p data-lang="en">
+                    RealDate does not replace the original zodiac gameplay. It determines zodiac traits
+                    from the Sim's actual birth month and day and recalculates them after birthday changes.
+                </p>
+                <div class="doc-note">
+                    <span data-lang="zh-Hant">必要原模組檔案與「不要同時安裝」的 Zodiac 附加檔，已集中整理在「相容性」頁。</span>
+                    <span data-lang="en">Required original files and incompatible Zodiac add-ons are documented on the Compatibility page.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="doc-section" id="tools">
+            <div class="doc-label">
+                <span>09</span>
+                <strong>UI, SETTINGS &amp; DIAGNOSTICS</strong>
+            </div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">介面、設定與診斷</h2>
+                <h2 data-lang="en">UI, Settings &amp; Diagnostics</h2>
+                <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">設定選單分類</strong>
+                        <strong data-lang="en">Settings categories</strong>
+                        <p data-lang="zh-Hant">基礎設定、相容、生理時間軸與診斷工具分開整理。</p>
+                        <p data-lang="en">Basic settings, compatibility, reproductive timeline, and diagnostics are organized separately.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">關係面板入口</strong>
+                        <strong data-lang="en">Relationship Panel access</strong>
+                        <p data-lang="zh-Hant">可從關係面板開啟不在目前地段市民的 RealDate 選單。</p>
+                        <p data-lang="en">Open RealDate for off-lot Sims from the Relationship Panel.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">睡眠中查看</strong>
+                        <strong data-lang="en">Inspect sleeping Sims</strong>
+                        <p data-lang="zh-Hant">可以查看睡眠中的市民資訊，不必把市民叫醒。</p>
+                        <p data-lang="en">Inspect sleeping Sims without waking them.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">介面資源衝突診斷</strong>
+                        <strong data-lang="en">UI resource conflict scan</strong>
+                        <p data-lang="zh-Hant">掃描 Mods 中是否有其他 package 同時修改 RealDate 使用的重要介面資源。</p>
+                        <p data-lang="en">Scan Mods for packages that modify important UI resources also used by RealDate.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">詳細除錯日誌</strong>
+                        <strong data-lang="en">Detailed debug logging</strong>
+                        <p data-lang="zh-Hant">可在遊戲內切換；即使關閉詳細模式，重要警告與錯誤仍保留。</p>
+                        <p data-lang="en">Toggle detailed logging in-game while important warnings and errors remain recorded.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">啟動診斷</strong>
+                        <strong data-lang="en">Boot diagnostics</strong>
+                        <p data-lang="zh-Hant">記錄模組啟動、核心載入、必要掛載、家庭載入與載入畫面等階段。</p>
+                        <p data-lang="en">Records startup, core loading, required hooks, household loading, and loading-screen stages.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-identity">
+                <strong>REALDATE</strong>
+                <span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span>
+                <span data-lang="en">A time and life-system mod for The Sims 4</span>
+            </div>
+            <div class="footer-links">
+                <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+            </div>
+            <div class="footer-meta">
+                <span data-lang="zh-Hant">L1nG ·《模擬市民 4》模組作者</span>
+                <span data-lang="en">L1nG · THE SIMS 4 MOD CREATOR</span>
+                <span data-lang="zh-Hant">非 Electronic Arts 或 Maxis 官方網站。</span>
+                <span data-lang="en">Not affiliated with Electronic Arts or Maxis.</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
 </html>
