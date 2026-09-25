@@ -1,1189 +1,728 @@
 <!DOCTYPE html>
-<html data-language="zh-Hant" lang="zh-Hant">
- <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>
-   RealDate 相容性 · L1nG
-  </title>
-  <meta content="RealDate v0.4 Beta 相容模組、測試版本、相容檔與安裝限制。" name="description"/>
-  <meta content="#fafafa" name="theme-color"/>
-  <link href="realdate.css" rel="stylesheet"/>
-  <script defer="" src="realdate.js">
-  </script>
- </head>
- <body>
-  <header class="site-header" id="siteHeader">
-   <div class="site-header-inner">
-    <div class="site-brand-group">
-     <a class="creator-link" href="../index.html">
-      L1nG
-     </a>
-     <span class="brand-divider">
-      /
-     </span>
-     <a class="realdate-brand" href="index.html">
-      REALDATE
-     </a>
-    </div>
-    <button aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單" class="nav-toggle" id="navToggle" type="button">
-     <span>
-     </span>
-     <span>
-     </span>
-    </button>
-    <nav aria-label="RealDate" class="main-nav" id="mainNav">
-     <a class="" href="gameplay.html">
-      <span data-lang="zh-Hant">
-       玩法
-      </span>
-      <span data-lang="en">
-       Gameplay
-      </span>
-     </a>
-     <a class="" href="download.html">
-      <span data-lang="zh-Hant">
-       下載與安裝
-      </span>
-      <span data-lang="en">
-       Download &amp; Install
-      </span>
-     </a>
-     <a class="active" href="compatibility.html">
-      <span data-lang="zh-Hant">
-       相容性
-      </span>
-      <span data-lang="en">
-       Compatibility
-      </span>
-     </a>
-     <a class="" href="changelog.html">
-      <span data-lang="zh-Hant">
-       更新日誌
-      </span>
-      <span data-lang="en">
-       Changelog
-      </span>
-     </a>
-     <details class="nav-more">
-      <summary>
-       <span data-lang="zh-Hant">
-        更多
-       </span>
-       <span data-lang="en">
-        More
-       </span>
-       <span aria-hidden="true" class="nav-more-chevron">
-        ⌄
-       </span>
-      </summary>
-      <div class="nav-more-menu">
-       <a href="roadmap.html">
-        <span data-lang="zh-Hant">
-         開發藍圖
-        </span>
-        <span data-lang="en">
-         Roadmap
-        </span>
-       </a>
-       <a href="faq.html">
-        <span data-lang="zh-Hant">
-         常見問題
-        </span>
-        <span data-lang="en">
-         FAQ
-        </span>
-       </a>
-      </div>
-     </details>
-    </nav>
-    <div aria-label="Language" class="language-switch" role="group">
-     <button aria-pressed="true" class="language-button active" data-language-button="zh-Hant" type="button">
-      繁中
-     </button>
-     <span class="language-divider">
-      /
-     </span>
-     <button aria-pressed="false" class="language-button" data-language-button="en" type="button">
-      EN
-     </button>
-    </div>
-   </div>
-  </header>
-  <main>
-   <section class="page-hero">
-    <div class="page-hero-inner reveal">
-     <span class="eyebrow">
-      COMPATIBILITY
-     </span>
-     <h1 data-lang="zh-Hant">
-      相容性
-     </h1>
-     <h1 data-lang="en">
-      Compatibility
-     </h1>
-     <p data-lang="zh-Hant">
-      RealDate 的整合原則是：
-      <strong>
-       RealDate 負責「什麼時候」，原模組負責「發生什麼」。
-      </strong>
-      這一頁把測試版本、整合範圍、是否需要相容檔，以及原模組仍負責的內容分開寫清楚。
-     </p>
-     <p data-lang="en">
-      RealDate follows one rule:
-      <strong>
-       RealDate handles “when,” while the original mod handles “what happens.”
-      </strong>
-      Tested versions, integration scope, compatibility packages, and responsibility boundaries are documented separately below.
-     </p>
-    </div>
-   </section>
-   <section class="section">
-    <div class="section-heading reveal">
-     <span class="eyebrow">
-      TESTED ENVIRONMENT · v0.4
-     </span>
-     <h2 data-lang="zh-Hant">
-      v0.4 測試環境
-     </h2>
-     <h2 data-lang="en">
-      v0.4 Test Environment
-     </h2>
-     <p data-lang="zh-Hant">
-      這些是 v0.4 發布時實際使用 / 驗證的版本。較低或後續版本不自動視為已驗證。
-     </p>
-     <p data-lang="en">
-      These are the versions used / verified for the v0.4 release. Older or later versions are not automatically treated as tested.
-     </p>
-    </div>
-    <div class="environment-grid reveal">
-     <div>
-      <small data-lang="zh-Hant">
-       遊戲版本
-      </small>
-      <small data-lang="en">
-       Game
-      </small>
-      <strong>
-       1.127.41.1030
-      </strong>
-     </div>
-     <div>
-      <small data-lang="zh-Hant">
-       必要前置
-      </small>
-      <small data-lang="en">
-       Required
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://lot51.cc/mods/core-library" rel="noopener noreferrer" target="_blank">
-        Lot51 Core Library v1.43
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       UI Cheats
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://www.patreon.com/weerbesu/posts/ui-cheats-v1-59-26240068" rel="noopener noreferrer" target="_blank">
-        v1.59.1
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       MCCC
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://deaderpool-mccc.com/downloads" rel="noopener noreferrer" target="_blank">
-        2026.5.0
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       WickedWhims
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://wickedwhims.squarespace.com/download/" rel="noopener noreferrer" target="_blank">
-        v185k
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       Slice of Life
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://www.kawaii-stacie.com/post/slice-of-life-mod" rel="noopener noreferrer" target="_blank">
-        v1.2
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       Menstrual Cycle Strawberry
-      </small>
-      <strong>
-       0.7
-      </strong>
-     </div>
-     <div>
-      <small>
-       RPO
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://lumpinoumods.com/woohoo-wellness-and-pregnancy-overhaul/" rel="noopener noreferrer" target="_blank">
-        v2.986
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       Child Birth Mod
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://www.pandasama.com/child-birth-mod/" rel="noopener noreferrer" target="_blank">
-        v1.965
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       Mood Pack Mod
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://lumpinoumods.com/the-mood-pack-mod/" rel="noopener noreferrer" target="_blank">
-        v1.677
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small>
-       Zodiac Signs Mod
-      </small>
-      <strong>
-       <a class="external-name-link" href="https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946" rel="noopener noreferrer" target="_blank">
-        V3
-       </a>
-      </strong>
-     </div>
-     <div>
-      <small data-lang="zh-Hant">
-       《春夏秋冬》
-      </small>
-      <small data-lang="en">
-       Seasons
-      </small>
-      <strong data-lang="zh-Hant">
-       核心功能非必要
-      </strong>
-      <strong data-lang="en">
-       Not required for core features
-      </strong>
-     </div>
-    </div>
-   </section>
-   <section class="section section-tight">
-    <div class="section-heading reveal">
-     <span class="eyebrow">
-      QUICK OVERVIEW
-     </span>
-     <h2 data-lang="zh-Hant">
-      快速總覽
-     </h2>
-     <h2 data-lang="en">
-      Quick Overview
-     </h2>
-    </div>
-    <div class="compat-overview reveal">
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://www.patreon.com/weerbesu/posts/ui-cheats-v1-59-26240068" rel="noopener noreferrer" target="_blank">
-        UI Cheats
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       需要相容檔
-      </span>
-      <span data-lang="en">
-       Compatibility package required
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://deaderpool-mccc.com/downloads" rel="noopener noreferrer" target="_blank">
-        MCCC
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       年齡 / 生命週期 / 懷孕
-      </span>
-      <span data-lang="en">
-       Age / lifecycle / pregnancy
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://wickedwhims.squarespace.com/download/" rel="noopener noreferrer" target="_blank">
-        WickedWhims
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       週期 / 懷孕
-      </span>
-      <span data-lang="en">
-       Cycle / pregnancy
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://www.kawaii-stacie.com/post/slice-of-life-mod" rel="noopener noreferrer" target="_blank">
-        Slice of Life
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       週期；特徵卡另有相容檔
-      </span>
-      <span data-lang="en">
-       Cycle; optional trait-card package
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://lumpinoumods.com/woohoo-wellness-and-pregnancy-overhaul/" rel="noopener noreferrer" target="_blank">
-        RPO
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       懷孕流程
-      </span>
-      <span data-lang="en">
-       Pregnancy flow
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://www.pandasama.com/child-birth-mod/" rel="noopener noreferrer" target="_blank">
-        PandaSama Child Birth Mod
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       懷孕 / 生產 / 產後
-      </span>
-      <span data-lang="en">
-       Pregnancy / birth / postpartum
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://lumpinoumods.com/the-mood-pack-mod/" rel="noopener noreferrer" target="_blank">
-        Mood Pack Mod
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       選擇性生日社交情緒
-      </span>
-      <span data-lang="en">
-       Optional birthday social moods
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://www.twistedmexi.com/Mods/" rel="noopener noreferrer" target="_blank">
-        BetterBuildBuy
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       介面相容檔
-      </span>
-      <span data-lang="en">
-       UI compatibility package
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/quick-save-live-141300682" rel="noopener noreferrer" target="_blank">
-        Quick Save Button
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       需要對應相容檔
-      </span>
-      <span data-lang="en">
-       Matching compatibility package required
-      </span>
-     </div>
-     <div>
-      <strong>
-       <a class="external-name-link" href="https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946" rel="noopener noreferrer" target="_blank">
-        Zodiac Signs Mod V3
-       </a>
-      </strong>
-      <span data-lang="zh-Hant">
-       星座聯動 · 有額外安裝規則
-      </span>
-      <span data-lang="en">
-       Zodiac integration · special installation rules
-      </span>
-     </div>
-    </div>
-   </section>
-   <section class="section section-tight">
-    <div class="section-heading reveal">
-     <span class="eyebrow">
-      DETAILS
-     </span>
-     <h2 data-lang="zh-Hant">
-      完整相容說明
-     </h2>
-     <h2 data-lang="en">
-      Detailed Compatibility
-     </h2>
-    </div>
-    <div class="compat-details">
-     <details class="compat-detail reveal" open="">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://www.patreon.com/weerbesu/posts/ui-cheats-v1-59-26240068" rel="noopener noreferrer" target="_blank">
-          UI Cheats Extension
-         </a>
-        </strong>
-        <small>
-         v1.59.1
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        已支援 · 需要相容檔
-       </span>
-       <span class="compat-status" data-lang="en">
-        Supported · package required
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持自己的日期與時間一致性。
-                    RealDate 的 UI 相容檔則負責避免雙方修改同一介面資源時互相覆蓋。
-       </p>
-       <p data-lang="en">
-        RealDate keeps its date/time state consistent when UI Cheats is used on supported time-related UI.
-                    The compatibility package prevents both mods from overwriting the same UI resources.
-       </p>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          v0.4 測試版本
-         </small>
-         <small data-lang="en">
-          Tested with v0.4
-         </small>
-         <strong>
-          UI Cheats v1.59.1
-         </strong>
+<html lang="zh-Hant" data-language="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealDate 相容性 · L1nG</title>
+    <meta name="description" content="RealDate v0.4 Beta 相容模組、測試版本、相容檔與安裝限制。">
+    <meta name="theme-color" content="#fafafa">
+    <link rel="stylesheet" href="realdate.css">
+    <script src="realdate.js" defer></script>
+</head>
+
+<body>
+
+    <!-- ========【RealDate 頂部導覽】 設定 - 品牌、頁面導覽與語言切換 ======== -->
+    <header class="site-header" id="siteHeader">
+        <div class="site-header-inner">
+            <div class="site-brand-group">
+                <a class="creator-link" href="../home.html">L1nG</a>
+                <span class="brand-divider">/</span>
+                <a class="realdate-brand" href="index.html">REALDATE</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
+            <nav class="main-nav" id="mainNav" aria-label="RealDate">
+                <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                <a class="active" href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                <details class="nav-more">
+                    <summary><span data-lang="zh-Hant">更多</span><span data-lang="en">More</span><span class="nav-more-chevron" aria-hidden="true">⌄</span></summary>
+                    <div class="nav-more-menu">
+                        <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                        <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                    </div>
+                </details>
+            </nav>
+            <div class="language-switch" role="group" aria-label="Language">
+                <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
+                <span class="language-divider">/</span>
+                <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
+            </div>
         </div>
-        <div>
-         <small data-lang="zh-Hant">
-          只有 UI Cheats
-         </small>
-         <small data-lang="en">
-          UI Cheats only
-         </small>
-         <code>
-          L1nG_RealDate_Compat_UI_Cheats.package
-         </code>
+    </header>
+
+    <main>
+        <section class="page-hero">
+            <div class="page-hero-inner reveal">
+                <span class="eyebrow">COMPATIBILITY</span>
+                <h1 data-lang="zh-Hant">相容性</h1>
+                <h1 data-lang="en">Compatibility</h1>
+                <p data-lang="zh-Hant">
+                    RealDate 的整合原則是：
+                    <strong>RealDate 負責「什麼時候」，原模組負責「發生什麼」。</strong>
+                    這一頁把測試版本、整合範圍、是否需要相容檔，以及原模組仍負責的內容分開寫清楚。
+                </p>
+                <p data-lang="en">
+                    RealDate follows one rule:
+                    <strong>RealDate handles “when,” while the original mod handles “what happens.”</strong>
+                    Tested versions, integration scope, compatibility packages, and responsibility boundaries are documented separately below.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading reveal">
+                <span class="eyebrow">TESTED ENVIRONMENT · v0.4</span>
+                <h2 data-lang="zh-Hant">v0.4 測試環境</h2>
+                <h2 data-lang="en">v0.4 Test Environment</h2>
+                <p data-lang="zh-Hant">這些是 v0.4 發布時實際使用 / 驗證的版本。較低或後續版本不自動視為已驗證。</p>
+                <p data-lang="en">
+                    These are the versions used / verified for the v0.4 release. Older or later versions are not automatically treated as tested.
+                </p>
+            </div>
+            <div class="environment-grid reveal">
+                <div>
+                    <small data-lang="zh-Hant">遊戲版本</small>
+                    <small data-lang="en">Game</small>
+                    <strong>1.127.41.1030</strong>
+                </div>
+                <div>
+                    <small data-lang="zh-Hant">必要前置</small>
+                    <small data-lang="en">Required</small>
+                    <strong>
+                        <a class="external-name-link" href="https://lot51.cc/mods/core-library" target="_blank" rel="noopener noreferrer">
+                            Lot51 Core Library v1.43
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>UI Cheats</small>
+                    <strong>
+                        <a class="external-name-link" href="https://www.patreon.com/weerbesu/posts/ui-cheats-v1-59-26240068" target="_blank" rel="noopener noreferrer">
+                            v1.59.1
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>MCCC</small>
+                    <strong>
+                        <a class="external-name-link" href="https://deaderpool-mccc.com/downloads" target="_blank" rel="noopener noreferrer">
+                            2026.5.0
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>WickedWhims</small>
+                    <strong>
+                        <a class="external-name-link" href="https://wickedwhims.squarespace.com/download/" target="_blank" rel="noopener noreferrer">
+                            v185k
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>Slice of Life</small>
+                    <strong>
+                        <a class="external-name-link" href="https://www.kawaii-stacie.com/post/slice-of-life-mod" target="_blank" rel="noopener noreferrer">
+                            v1.2
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>Menstrual Cycle Strawberry</small>
+                    <strong>0.7</strong>
+                </div>
+                <div>
+                    <small>RPO</small>
+                    <strong>
+                        <a class="external-name-link" href="https://lumpinoumods.com/woohoo-wellness-and-pregnancy-overhaul/" target="_blank" rel="noopener noreferrer">
+                            v2.986
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>Child Birth Mod</small>
+                    <strong>
+                        <a class="external-name-link" href="https://www.pandasama.com/child-birth-mod/" target="_blank" rel="noopener noreferrer">
+                            v1.965
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>Mood Pack Mod</small>
+                    <strong>
+                        <a class="external-name-link" href="https://lumpinoumods.com/the-mood-pack-mod/" target="_blank" rel="noopener noreferrer">
+                            v1.677
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small>Zodiac Signs Mod</small>
+                    <strong>
+                        <a class="external-name-link" href="https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946" target="_blank" rel="noopener noreferrer">
+                            V3
+                        </a>
+                    </strong>
+                </div>
+                <div>
+                    <small data-lang="zh-Hant">《春夏秋冬》</small>
+                    <small data-lang="en">Seasons</small>
+                    <strong data-lang="zh-Hant">核心功能非必要</strong>
+                    <strong data-lang="en">Not required for core features</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-tight">
+            <div class="section-heading reveal">
+                <span class="eyebrow">QUICK OVERVIEW</span>
+                <h2 data-lang="zh-Hant">快速總覽</h2>
+                <h2 data-lang="en">Quick Overview</h2>
+            </div>
+            <div class="compat-overview reveal">
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://www.patreon.com/weerbesu/posts/ui-cheats-v1-59-26240068" target="_blank" rel="noopener noreferrer">
+                            UI Cheats
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">需要相容檔</span>
+                    <span data-lang="en">Compatibility package required</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://deaderpool-mccc.com/downloads" target="_blank" rel="noopener noreferrer">
+                            MCCC
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">年齡 / 生命週期 / 懷孕</span>
+                    <span data-lang="en">Age / lifecycle / pregnancy</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://wickedwhims.squarespace.com/download/" target="_blank" rel="noopener noreferrer">
+                            WickedWhims
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">週期 / 懷孕</span>
+                    <span data-lang="en">Cycle / pregnancy</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://www.kawaii-stacie.com/post/slice-of-life-mod" target="_blank" rel="noopener noreferrer">
+                            Slice of Life
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">週期；特徵卡另有相容檔</span>
+                    <span data-lang="en">Cycle; optional trait-card package</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://lumpinoumods.com/woohoo-wellness-and-pregnancy-overhaul/" target="_blank" rel="noopener noreferrer">
+                            RPO
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">懷孕流程</span>
+                    <span data-lang="en">Pregnancy flow</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://www.pandasama.com/child-birth-mod/" target="_blank" rel="noopener noreferrer">
+                            PandaSama Child Birth Mod
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">懷孕 / 生產 / 產後</span>
+                    <span data-lang="en">Pregnancy / birth / postpartum</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://lumpinoumods.com/the-mood-pack-mod/" target="_blank" rel="noopener noreferrer">
+                            Mood Pack Mod
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">選擇性生日社交情緒</span>
+                    <span data-lang="en">Optional birthday social moods</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://www.twistedmexi.com/Mods/" target="_blank" rel="noopener noreferrer">
+                            BetterBuildBuy
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">介面相容檔</span>
+                    <span data-lang="en">UI compatibility package</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/quick-save-live-141300682" target="_blank" rel="noopener noreferrer">
+                            Quick Save Button
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">需要對應相容檔</span>
+                    <span data-lang="en">Matching compatibility package required</span>
+                </div>
+                <div>
+                    <strong>
+                        <a class="external-name-link" href="https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946" target="_blank" rel="noopener noreferrer">
+                            Zodiac Signs Mod V3
+                        </a>
+                    </strong>
+                    <span data-lang="zh-Hant">星座聯動 · 有額外安裝規則</span>
+                    <span data-lang="en">Zodiac integration · special installation rules</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-tight">
+            <div class="section-heading reveal">
+                <span class="eyebrow">DETAILS</span>
+                <h2 data-lang="zh-Hant">完整相容說明</h2>
+                <h2 data-lang="en">Detailed Compatibility</h2>
+            </div>
+            <div class="compat-details">
+                <details class="compat-detail reveal" open>
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://www.patreon.com/weerbesu/posts/ui-cheats-v1-59-26240068" target="_blank" rel="noopener noreferrer">
+                                    UI Cheats Extension
+                                </a>
+                            </strong>
+                            <small>v1.59.1</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援 · 需要相容檔</span>
+                        <span class="compat-status" data-lang="en">Supported · package required</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">
+                            使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持自己的日期與時間一致性。
+                            RealDate 的 UI 相容檔則負責避免雙方修改同一介面資源時互相覆蓋。
+                        </p>
+                        <p data-lang="en">
+                            RealDate keeps its date/time state consistent when UI Cheats is used on supported time-related UI.
+                            The compatibility package prevents both mods from overwriting the same UI resources.
+                        </p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.4 測試版本</small>
+                                <small data-lang="en">Tested with v0.4</small>
+                                <strong>UI Cheats v1.59.1</strong>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">只有 UI Cheats</small>
+                                <small data-lang="en">UI Cheats only</small>
+                                <code>L1nG_RealDate_Compat_UI_Cheats.package</code>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">UI Cheats + Quick Save</small>
+                                <small data-lang="en">UI Cheats + Quick Save</small>
+                                <code>L1nG_RealDate_Compat_QuickSave_UI_Cheats.package</code>
+                            </div>
+                        </div>
+                        <div class="doc-note doc-note-warning">
+                            <span data-lang="zh-Hant">UI Cheats、Quick Save、Quick Save + UI Cheats 三個版本只能擇一安裝。</span>
+                            <span data-lang="en">Choose only one of UI Cheats, Quick Save, or Quick Save + UI Cheats compatibility packages.</span>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://deaderpool-mccc.com/downloads" target="_blank" rel="noopener noreferrer">
+                                    MC Command Center (MCCC)
+                                </a>
+                            </strong>
+                            <small>2026.5.0</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援</span>
+                        <span class="compat-status" data-lang="en">Supported</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <h4 data-lang="zh-Hant">RealDate 會處理</h4>
+                        <h4 data-lang="en">Handled by RealDate</h4>
+                        <ul>
+                            <li data-lang="zh-Hant">
+                                MCCC 市民資訊顯示 RealDate 實際年齡。
+                            </li>
+                            <li data-lang="en">
+                                Show RealDate age in MCCC Sim Info.
+                            </li>
+                            <li data-lang="zh-Hant">
+                                協調停止增齡、自訂生命階段長度與隨機起始進度等生命週期設定。
+                            </li>
+                            <li data-lang="en">
+                                Coordinate lifecycle settings such as disabled aging, custom stage lengths, and randomized starting progress.
+                            </li>
+                            <li data-lang="zh-Hant">
+                                辨識由 MCCC 作弊開始的懷孕，並在取得可靠進度時建立 / 推算 RealDate 懷孕時間軸。
+                            </li>
+                            <li data-lang="en">
+                                Recognize pregnancies started with MCCC cheats and build / estimate the RealDate pregnancy timeline from reliable progress.
+                            </li>
+                        </ul>
+                        <h4 data-lang="zh-Hant">RealDate 不會做</h4>
+                        <h4 data-lang="en">Not handled by RealDate</h4>
+                        <ul>
+                            <li data-lang="zh-Hant">
+                                不會自行改寫玩家的 MCCC 設定。
+                            </li>
+                            <li data-lang="en">
+                                Does not silently rewrite MCCC settings.
+                            </li>
+                            <li data-lang="zh-Hant">
+                                懷孕結束不會在沒有可靠生產證據時直接當作已生產。
+                            </li>
+                            <li data-lang="en">
+                                Does not treat every pregnancy ending as a birth without reliable birth evidence.
+                            </li>
+                        </ul>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.4 測試版本</small>
+                                <small data-lang="en">Tested with v0.4</small>
+                                <strong>MCCC 2026.5.0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://wickedwhims.squarespace.com/download/" target="_blank" rel="noopener noreferrer">
+                                    WickedWhims
+                                </a>
+                            </strong>
+                            <small>v185k</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援</span>
+                        <span class="compat-status" data-lang="en">Supported</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">
+                            RealDate 讀取可用的月經週期與懷孕進度，並把支援的時間資料同步進 RealDate 生理時間軸。
+                            WickedWhims 原本的情緒、症狀、用品、通知與互動仍由 WickedWhims 自己負責。
+                        </p>
+                        <p data-lang="en">
+                            RealDate reads supported menstrual-cycle and pregnancy progress and synchronizes timing into its reproductive timeline.
+                            WickedWhims continues to control its own moods, symptoms, products, notifications, and interactions.
+                        </p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.4 測試版本</small>
+                                <small data-lang="en">Tested with v0.4</small>
+                                <strong>WickedWhims v185k</strong>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://www.kawaii-stacie.com/post/slice-of-life-mod" target="_blank" rel="noopener noreferrer">
+                                    Slice of Life Menstrual Cycle
+                                </a>
+                            </strong>
+                            <small>Slice of Life v1.2 / Strawberry 0.7</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援 · 選擇性顯示相容檔</span>
+                        <span class="compat-status" data-lang="en">Supported · optional display package</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">
+                            RealDate 會同步 SOL 原本的經期與週期狀態；修改生日或年齡後，也會重新同步週期與停經狀態。
+                            額外相容檔只負責特徵卡說明顯示，不安裝也不影響核心週期同步。
+                        </p>
+                        <p data-lang="en">
+                            RealDate synchronizes SOL's native period/cycle states and resynchronizes cycle and menopause states after birthday or age changes.
+                            The extra package only handles trait-card display and is not required for core timing synchronization.
+                        </p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.4 測試版本</small>
+                                <small data-lang="en">Tested with v0.4</small>
+                                <strong>Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7</strong>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">選擇性相容檔</small>
+                                <small data-lang="en">Optional package</small>
+                                <code>L1nG_RealDate_Compat_SliceOfLife_Menstrual.package</code>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://lumpinoumods.com/woohoo-wellness-and-pregnancy-overhaul/" target="_blank" rel="noopener noreferrer">
+                                    Relationship &amp; Pregnancy Overhaul (RPO)
+                                </a>
+                            </strong>
+                            <small>v2.986</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援 · 懷孕流程</span>
+                        <span class="compat-status" data-lang="en">Supported · pregnancy flow</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">RealDate 會辨識 RPO 參與的懷孕開始、結束與生產結果，維持 RealDate 自己的受孕日期、孕期與產後時間線。</p>
+                        <p data-lang="en">
+                            RealDate recognizes RPO pregnancy starts, endings, and birth outcomes while maintaining its own conception, pregnancy, and postpartum timeline.
+                        </p>
+                        <div class="responsibility-grid">
+                            <div>
+                                <strong>RealDate</strong>
+                                <span data-lang="zh-Hant">日期、孕期時間、必要的同步判斷</span>
+                                <span data-lang="en">Dates, pregnancy timing, required synchronization</span>
+                            </div>
+                            <div>
+                                <strong>RPO</strong>
+                                <span data-lang="zh-Hant">關係、反應、結果與其他 RPO 玩法</span>
+                                <span data-lang="en">Relationships, reactions, outcomes, and other RPO gameplay</span>
+                            </div>
+                        </div>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.4 測試版本</small>
+                                <small data-lang="en">Tested with v0.4</small>
+                                <strong>RPO v2.986</strong>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://www.pandasama.com/child-birth-mod/" target="_blank" rel="noopener noreferrer">
+                                    PandaSama Child Birth Mod
+                                </a>
+                            </strong>
+                            <small>v1.965</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援</span>
+                        <span class="compat-status" data-lang="en">Supported</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">使用 Child Birth Mod 的生產玩法時，RealDate 維持懷孕日期、生產時間與後續產後時間線。</p>
+                        <p data-lang="en">
+                            When using Child Birth Mod delivery gameplay, RealDate preserves pregnancy dates, delivery timing, and the postpartum timeline.
+                        </p>
+                        <div class="responsibility-grid">
+                            <div>
+                                <strong>RealDate</strong>
+                                <span data-lang="zh-Hant">日期、時間與產後時間線</span>
+                                <span data-lang="en">Dates, timing, and postpartum timeline</span>
+                            </div>
+                            <div>
+                                <strong>Child Birth Mod</strong>
+                                <span data-lang="zh-Hant">產檢、待產、生產方式與其他生產玩法</span>
+                                <span data-lang="en">Prenatal care, labor, delivery methods, and birth gameplay</span>
+                            </div>
+                        </div>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.4 測試版本</small>
+                                <small data-lang="en">Tested with v0.4</small>
+                                <strong>Child Birth Mod v1.965</strong>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://lumpinoumods.com/the-mood-pack-mod/" target="_blank" rel="noopener noreferrer">
+                                    Mood Pack Mod
+                                </a>
+                            </strong>
+                            <small>v1.677</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">選擇性</span>
+                        <span class="compat-status" data-lang="en">Optional</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">安裝後，RealDate 生日社交可以使用更豐富的情緒反應；沒有安裝時仍可正常遊玩，改用 EA 原生情緒。</p>
+                        <p data-lang="en">
+                            Adds more varied emotional reactions to RealDate birthday socials.
+                            Without it, birthday gameplay still works using EA native moodlets.
+                        </p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.4 測試版本</small>
+                                <small data-lang="en">Tested with v0.4</small>
+                                <strong>Mood Pack Mod v1.677</strong>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">相容檔</small>
+                                <small data-lang="en">Package</small>
+                                <code>L1nG_RealDate_Compat_MoodPack.package</code>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://www.twistedmexi.com/Mods/" target="_blank" rel="noopener noreferrer">
+                                    BetterBuildBuy
+                                </a>
+                            </strong>
+                            <small data-lang="zh-Hant">發布文案未標測試版本</small>
+                            <small data-lang="en">tested version not listed</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">介面相容檔</span>
+                        <span class="compat-status" data-lang="en">UI package</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">
+                            相容檔保留滑鼠懸停市民時，頭頂名稱介面的 RealDate 實際年齡顯示，
+                            避免 BetterBuildBuy 的介面修改覆蓋 RealDate 對應資源。
+                        </p>
+                        <p data-lang="en">
+                            The compatibility package preserves RealDate real-age display in Sim nameplates
+                            when BetterBuildBuy modifies the same UI resources.
+                        </p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">相容檔</small>
+                                <small data-lang="en">Package</small>
+                                <code>L1nG_RealDate_Compat_BetterBuildBuy.package</code>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/quick-save-live-141300682" target="_blank" rel="noopener noreferrer">
+                                    SimMattically Quick Save Button
+                                </a>
+                            </strong>
+                            <small>2026.03.04 發布版本</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">需要相容檔</span>
+                        <span class="compat-status" data-lang="en">Package required</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">
+                            v0.4 提供 Quick Save 專用相容檔，也提供 Quick Save + UI Cheats 合併相容檔。
+                            相容檔是為了讓兩邊共用的介面修改能正確一起工作。
+                        </p>
+                        <p data-lang="en">
+                            v0.4 includes a Quick Save-specific package and a combined Quick Save + UI Cheats package
+                            so overlapping UI changes can work together correctly.
+                        </p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">只有 Quick Save</small>
+                                <small data-lang="en">Quick Save only</small>
+                                <code>L1nG_RealDate_Compat_QuickSave.package</code>
+                            </div>
+                            <div>
+                                <small>Quick Save + UI Cheats</small>
+                                <code>L1nG_RealDate_Compat_QuickSave_UI_Cheats.package</code>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">驗證版本</small>
+                                <small data-lang="en">Validated release</small>
+                                <strong>2026.03.04</strong>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                <details class="compat-detail reveal">
+                    <summary>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946" target="_blank" rel="noopener noreferrer">
+                                    Zodiac Signs Mod V3
+                                </a>
+                            </strong>
+                            <small>Vicky Sims (chingyu1023)</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援 · 特殊安裝規則</span>
+                        <span class="compat-status" data-lang="en">Supported · special installation rules</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">RealDate 依市民實際出生月日判斷星座，並分配原作者的星座特徵；修改生日後也會重新判定。</p>
+                        <p data-lang="en">
+                            RealDate assigns the original zodiac traits from the Sim's actual birth month/day
+                            and recalculates the sign after birthday changes.
+                        </p>
+                        <h4 data-lang="zh-Hant">必須保留原模組主檔</h4>
+                        <h4 data-lang="en">Required original files</h4>
+                        <div class="file-list">
+                            <code>chingyu_ZodiacSigns.package</code>
+                            <code>chingyu_ZodiacSigns.ts4script</code>
+                        </div>
+                        <h4 data-lang="zh-Hant">可選擇其一，也可以都不裝</h4>
+                        <h4 data-lang="en">Choose one or neither</h4>
+                        <div class="file-list">
+                            <code>!chingyu_addon_ZodiacStrongerCompatibility.package</code>
+                            <code>!chingyu_addon_ZodiacSubtleCompatibility.package</code>
+                        </div>
+                        <h4 data-lang="zh-Hant">使用 RealDate 自動分配星座時不要安裝</h4>
+                        <h4 data-lang="en">Do not install with RealDate automatic assignment</h4>
+                        <div class="file-list file-list-danger">
+                            <code>chingyu_addon_GrowUpAddSignsBySeasons_EP05.package</code>
+                            <code>chingyu_addon_GrowUpAddSignsRandomly.package</code>
+                            <code>chingyu_addon_ZodiacSignAutoSwitchVersion.package</code>
+                            <code>!chingyu_addon_ZodiacAvailableInCAS</code>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <section class="section section-tight">
+            <div class="section-heading reveal">
+                <span class="eyebrow">OPTIONAL COMPANION MODS</span>
+                <h2 data-lang="zh-Hant">推薦搭配，但不是必要前置</h2>
+                <h2 data-lang="en">Recommended, Not Required</h2>
+            </div>
+            <div class="optional-package-grid">
+                <article class="optional-package reveal">
+                    <h3>
+                        <a class="external-name-link" href="https://www.curseforge.com/sims4/mods/gradual-pregnancy-bump-changes" target="_blank" rel="noopener noreferrer">
+                            Gradual Pregnancy Bump Changes (medio)
+                        </a>
+                    </h3>
+                    <p data-lang="zh-Hant">讓孕肚變化分成更多漸進階段，適合搭配 RealDate 長孕期。</p>
+                    <p data-lang="en">Adds more gradual bump stages and pairs well with RealDate's extended pregnancy timeline.</p>
+                </article>
+                <article class="optional-package reveal">
+                    <h3>
+                        <a class="external-name-link" href="https://www.curseforge.com/sims4/mods/pregnancy-overhaul" target="_blank" rel="noopener noreferrer">
+                            Pregnancy Overhaul – Pregnancy Belly Size (LittleMsSam)
+                        </a>
+                    </h3>
+                    <p data-lang="zh-Hant">可以調整各孕期階段的孕肚大小。</p>
+                    <p data-lang="en">Adjusts pregnancy belly size across pregnancy stages.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-identity">
+                <strong>REALDATE</strong>
+                <span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span>
+                <span data-lang="en">A time and life-system mod for The Sims 4</span>
+            </div>
+            <div class="footer-links">
+                <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+            </div>
+            <div class="footer-meta">
+                <span data-lang="zh-Hant">L1nG ·《模擬市民 4》模組作者</span>
+                <span data-lang="en">L1nG · THE SIMS 4 MOD CREATOR</span>
+                <span data-lang="zh-Hant">非 Electronic Arts 或 Maxis 官方網站。</span>
+                <span data-lang="en">Not affiliated with Electronic Arts or Maxis.</span>
+            </div>
         </div>
-        <div>
-         <small data-lang="zh-Hant">
-          UI Cheats + Quick Save
-         </small>
-         <small data-lang="en">
-          UI Cheats + Quick Save
-         </small>
-         <code>
-          L1nG_RealDate_Compat_QuickSave_UI_Cheats.package
-         </code>
-        </div>
-       </div>
-       <div class="doc-note doc-note-warning">
-        <span data-lang="zh-Hant">
-         UI Cheats、Quick Save、Quick Save + UI Cheats 三個版本只能擇一安裝。
-        </span>
-        <span data-lang="en">
-         Choose only one of UI Cheats, Quick Save, or Quick Save + UI Cheats compatibility packages.
-        </span>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://deaderpool-mccc.com/downloads" rel="noopener noreferrer" target="_blank">
-          MC Command Center (MCCC)
-         </a>
-        </strong>
-        <small>
-         2026.5.0
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        已支援
-       </span>
-       <span class="compat-status" data-lang="en">
-        Supported
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <h4 data-lang="zh-Hant">
-        RealDate 會處理
-       </h4>
-       <h4 data-lang="en">
-        Handled by RealDate
-       </h4>
-       <ul>
-        <li data-lang="zh-Hant">
-         MCCC 市民資訊顯示 RealDate 實際年齡。
-        </li>
-        <li data-lang="en">
-         Show RealDate age in MCCC Sim Info.
-        </li>
-        <li data-lang="zh-Hant">
-         協調停止增齡、自訂生命階段長度與隨機起始進度等生命週期設定。
-        </li>
-        <li data-lang="en">
-         Coordinate lifecycle settings such as disabled aging, custom stage lengths, and randomized starting progress.
-        </li>
-        <li data-lang="zh-Hant">
-         辨識由 MCCC 作弊開始的懷孕，並在取得可靠進度時建立 / 推算 RealDate 懷孕時間軸。
-        </li>
-        <li data-lang="en">
-         Recognize pregnancies started with MCCC cheats and build / estimate the RealDate pregnancy timeline from reliable progress.
-        </li>
-       </ul>
-       <h4 data-lang="zh-Hant">
-        RealDate 不會做
-       </h4>
-       <h4 data-lang="en">
-        Not handled by RealDate
-       </h4>
-       <ul>
-        <li data-lang="zh-Hant">
-         不會自行改寫玩家的 MCCC 設定。
-        </li>
-        <li data-lang="en">
-         Does not silently rewrite MCCC settings.
-        </li>
-        <li data-lang="zh-Hant">
-         懷孕結束不會在沒有可靠生產證據時直接當作已生產。
-        </li>
-        <li data-lang="en">
-         Does not treat every pregnancy ending as a birth without reliable birth evidence.
-        </li>
-       </ul>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          v0.4 測試版本
-         </small>
-         <small data-lang="en">
-          Tested with v0.4
-         </small>
-         <strong>
-          MCCC 2026.5.0
-         </strong>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://wickedwhims.squarespace.com/download/" rel="noopener noreferrer" target="_blank">
-          WickedWhims
-         </a>
-        </strong>
-        <small>
-         v185k
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        已支援
-       </span>
-       <span class="compat-status" data-lang="en">
-        Supported
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        RealDate 讀取可用的月經週期與懷孕進度，並把支援的時間資料同步進 RealDate 生理時間軸。
-                    WickedWhims 原本的情緒、症狀、用品、通知與互動仍由 WickedWhims 自己負責。
-       </p>
-       <p data-lang="en">
-        RealDate reads supported menstrual-cycle and pregnancy progress and synchronizes timing into its reproductive timeline.
-                    WickedWhims continues to control its own moods, symptoms, products, notifications, and interactions.
-       </p>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          v0.4 測試版本
-         </small>
-         <small data-lang="en">
-          Tested with v0.4
-         </small>
-         <strong>
-          WickedWhims v185k
-         </strong>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://www.kawaii-stacie.com/post/slice-of-life-mod" rel="noopener noreferrer" target="_blank">
-          Slice of Life Menstrual Cycle
-         </a>
-        </strong>
-        <small>
-         Slice of Life v1.2 / Strawberry 0.7
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        已支援 · 選擇性顯示相容檔
-       </span>
-       <span class="compat-status" data-lang="en">
-        Supported · optional display package
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        RealDate 會同步 SOL 原本的經期與週期狀態；修改生日或年齡後，也會重新同步週期與停經狀態。
-                    額外相容檔只負責特徵卡說明顯示，不安裝也不影響核心週期同步。
-       </p>
-       <p data-lang="en">
-        RealDate synchronizes SOL's native period/cycle states and resynchronizes cycle and menopause states after birthday or age changes.
-                    The extra package only handles trait-card display and is not required for core timing synchronization.
-       </p>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          v0.4 測試版本
-         </small>
-         <small data-lang="en">
-          Tested with v0.4
-         </small>
-         <strong>
-          Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7
-         </strong>
-        </div>
-        <div>
-         <small data-lang="zh-Hant">
-          選擇性相容檔
-         </small>
-         <small data-lang="en">
-          Optional package
-         </small>
-         <code>
-          L1nG_RealDate_Compat_SliceOfLife_Menstrual.package
-         </code>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://lumpinoumods.com/woohoo-wellness-and-pregnancy-overhaul/" rel="noopener noreferrer" target="_blank">
-          Relationship &amp; Pregnancy Overhaul (RPO)
-         </a>
-        </strong>
-        <small>
-         v2.986
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        已支援 · 懷孕流程
-       </span>
-       <span class="compat-status" data-lang="en">
-        Supported · pregnancy flow
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        RealDate 會辨識 RPO 參與的懷孕開始、結束與生產結果，維持 RealDate 自己的受孕日期、孕期與產後時間線。
-       </p>
-       <p data-lang="en">
-        RealDate recognizes RPO pregnancy starts, endings, and birth outcomes while maintaining its own conception, pregnancy, and postpartum timeline.
-       </p>
-       <div class="responsibility-grid">
-        <div>
-         <strong>
-          RealDate
-         </strong>
-         <span data-lang="zh-Hant">
-          日期、孕期時間、必要的同步判斷
-         </span>
-         <span data-lang="en">
-          Dates, pregnancy timing, required synchronization
-         </span>
-        </div>
-        <div>
-         <strong>
-          RPO
-         </strong>
-         <span data-lang="zh-Hant">
-          關係、反應、結果與其他 RPO 玩法
-         </span>
-         <span data-lang="en">
-          Relationships, reactions, outcomes, and other RPO gameplay
-         </span>
-        </div>
-       </div>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          v0.4 測試版本
-         </small>
-         <small data-lang="en">
-          Tested with v0.4
-         </small>
-         <strong>
-          RPO v2.986
-         </strong>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://www.pandasama.com/child-birth-mod/" rel="noopener noreferrer" target="_blank">
-          PandaSama Child Birth Mod
-         </a>
-        </strong>
-        <small>
-         v1.965
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        已支援
-       </span>
-       <span class="compat-status" data-lang="en">
-        Supported
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        使用 Child Birth Mod 的生產玩法時，RealDate 維持懷孕日期、生產時間與後續產後時間線。
-       </p>
-       <p data-lang="en">
-        When using Child Birth Mod delivery gameplay, RealDate preserves pregnancy dates, delivery timing, and the postpartum timeline.
-       </p>
-       <div class="responsibility-grid">
-        <div>
-         <strong>
-          RealDate
-         </strong>
-         <span data-lang="zh-Hant">
-          日期、時間與產後時間線
-         </span>
-         <span data-lang="en">
-          Dates, timing, and postpartum timeline
-         </span>
-        </div>
-        <div>
-         <strong>
-          Child Birth Mod
-         </strong>
-         <span data-lang="zh-Hant">
-          產檢、待產、生產方式與其他生產玩法
-         </span>
-         <span data-lang="en">
-          Prenatal care, labor, delivery methods, and birth gameplay
-         </span>
-        </div>
-       </div>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          v0.4 測試版本
-         </small>
-         <small data-lang="en">
-          Tested with v0.4
-         </small>
-         <strong>
-          Child Birth Mod v1.965
-         </strong>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://lumpinoumods.com/the-mood-pack-mod/" rel="noopener noreferrer" target="_blank">
-          Mood Pack Mod
-         </a>
-        </strong>
-        <small>
-         v1.677
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        選擇性
-       </span>
-       <span class="compat-status" data-lang="en">
-        Optional
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        安裝後，RealDate 生日社交可以使用更豐富的情緒反應；沒有安裝時仍可正常遊玩，改用 EA 原生情緒。
-       </p>
-       <p data-lang="en">
-        Adds more varied emotional reactions to RealDate birthday socials.
-                    Without it, birthday gameplay still works using EA native moodlets.
-       </p>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          v0.4 測試版本
-         </small>
-         <small data-lang="en">
-          Tested with v0.4
-         </small>
-         <strong>
-          Mood Pack Mod v1.677
-         </strong>
-        </div>
-        <div>
-         <small data-lang="zh-Hant">
-          相容檔
-         </small>
-         <small data-lang="en">
-          Package
-         </small>
-         <code>
-          L1nG_RealDate_Compat_MoodPack.package
-         </code>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://www.twistedmexi.com/Mods/" rel="noopener noreferrer" target="_blank">
-          BetterBuildBuy
-         </a>
-        </strong>
-        <small data-lang="zh-Hant">
-         發布文案未標測試版本
-        </small>
-        <small data-lang="en">
-         tested version not listed
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        介面相容檔
-       </span>
-       <span class="compat-status" data-lang="en">
-        UI package
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        相容檔保留滑鼠懸停市民時，頭頂名稱介面的 RealDate 實際年齡顯示，
-                    避免 BetterBuildBuy 的介面修改覆蓋 RealDate 對應資源。
-       </p>
-       <p data-lang="en">
-        The compatibility package preserves RealDate real-age display in Sim nameplates
-                    when BetterBuildBuy modifies the same UI resources.
-       </p>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          相容檔
-         </small>
-         <small data-lang="en">
-          Package
-         </small>
-         <code>
-          L1nG_RealDate_Compat_BetterBuildBuy.package
-         </code>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/quick-save-live-141300682" rel="noopener noreferrer" target="_blank">
-          SimMattically Quick Save Button
-         </a>
-        </strong>
-        <small>
-         2026.03.04 發布版本
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        需要相容檔
-       </span>
-       <span class="compat-status" data-lang="en">
-        Package required
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        v0.4 提供 Quick Save 專用相容檔，也提供 Quick Save + UI Cheats 合併相容檔。
-                    相容檔是為了讓兩邊共用的介面修改能正確一起工作。
-       </p>
-       <p data-lang="en">
-        v0.4 includes a Quick Save-specific package and a combined Quick Save + UI Cheats package
-                    so overlapping UI changes can work together correctly.
-       </p>
-       <div class="compat-meta">
-        <div>
-         <small data-lang="zh-Hant">
-          只有 Quick Save
-         </small>
-         <small data-lang="en">
-          Quick Save only
-         </small>
-         <code>
-          L1nG_RealDate_Compat_QuickSave.package
-         </code>
-        </div>
-        <div>
-         <small>
-          Quick Save + UI Cheats
-         </small>
-         <code>
-          L1nG_RealDate_Compat_QuickSave_UI_Cheats.package
-         </code>
-        </div>
-        <div>
-         <small data-lang="zh-Hant">
-          驗證版本
-         </small>
-         <small data-lang="en">
-          Validated release
-         </small>
-         <strong>
-          2026.03.04
-         </strong>
-        </div>
-       </div>
-      </div>
-     </details>
-     <details class="compat-detail reveal">
-      <summary>
-       <span>
-        <strong>
-         <a class="external-name-link" href="https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946" rel="noopener noreferrer" target="_blank">
-          Zodiac Signs Mod V3
-         </a>
-        </strong>
-        <small>
-         Vicky Sims (chingyu1023)
-        </small>
-       </span>
-       <span class="compat-status" data-lang="zh-Hant">
-        已支援 · 特殊安裝規則
-       </span>
-       <span class="compat-status" data-lang="en">
-        Supported · special installation rules
-       </span>
-      </summary>
-      <div class="compat-detail-body">
-       <p data-lang="zh-Hant">
-        RealDate 依市民實際出生月日判斷星座，並分配原作者的星座特徵；修改生日後也會重新判定。
-       </p>
-       <p data-lang="en">
-        RealDate assigns the original zodiac traits from the Sim's actual birth month/day
-                    and recalculates the sign after birthday changes.
-       </p>
-       <h4 data-lang="zh-Hant">
-        必須保留原模組主檔
-       </h4>
-       <h4 data-lang="en">
-        Required original files
-       </h4>
-       <div class="file-list">
-        <code>
-         chingyu_ZodiacSigns.package
-        </code>
-        <code>
-         chingyu_ZodiacSigns.ts4script
-        </code>
-       </div>
-       <h4 data-lang="zh-Hant">
-        可選擇其一，也可以都不裝
-       </h4>
-       <h4 data-lang="en">
-        Choose one or neither
-       </h4>
-       <div class="file-list">
-        <code>
-         !chingyu_addon_ZodiacStrongerCompatibility.package
-        </code>
-        <code>
-         !chingyu_addon_ZodiacSubtleCompatibility.package
-        </code>
-       </div>
-       <h4 data-lang="zh-Hant">
-        使用 RealDate 自動分配星座時不要安裝
-       </h4>
-       <h4 data-lang="en">
-        Do not install with RealDate automatic assignment
-       </h4>
-       <div class="file-list file-list-danger">
-        <code>
-         chingyu_addon_GrowUpAddSignsBySeasons_EP05.package
-        </code>
-        <code>
-         chingyu_addon_GrowUpAddSignsRandomly.package
-        </code>
-        <code>
-         chingyu_addon_ZodiacSignAutoSwitchVersion.package
-        </code>
-        <code>
-         !chingyu_addon_ZodiacAvailableInCAS
-        </code>
-       </div>
-      </div>
-     </details>
-    </div>
-   </section>
-   <section class="section section-tight">
-    <div class="section-heading reveal">
-     <span class="eyebrow">
-      OPTIONAL COMPANION MODS
-     </span>
-     <h2 data-lang="zh-Hant">
-      推薦搭配，但不是必要前置
-     </h2>
-     <h2 data-lang="en">
-      Recommended, Not Required
-     </h2>
-    </div>
-    <div class="optional-package-grid">
-     <article class="optional-package reveal">
-      <h3>
-       <a class="external-name-link" href="https://www.curseforge.com/sims4/mods/gradual-pregnancy-bump-changes" rel="noopener noreferrer" target="_blank">
-        Gradual Pregnancy Bump Changes (medio)
-       </a>
-      </h3>
-      <p data-lang="zh-Hant">
-       讓孕肚變化分成更多漸進階段，適合搭配 RealDate 長孕期。
-      </p>
-      <p data-lang="en">
-       Adds more gradual bump stages and pairs well with RealDate's extended pregnancy timeline.
-      </p>
-     </article>
-     <article class="optional-package reveal">
-      <h3>
-       <a class="external-name-link" href="https://www.curseforge.com/sims4/mods/pregnancy-overhaul" rel="noopener noreferrer" target="_blank">
-        Pregnancy Overhaul – Pregnancy Belly Size (LittleMsSam)
-       </a>
-      </h3>
-      <p data-lang="zh-Hant">
-       可以調整各孕期階段的孕肚大小。
-      </p>
-      <p data-lang="en">
-       Adjusts pregnancy belly size across pregnancy stages.
-      </p>
-     </article>
-    </div>
-   </section>
-  </main>
-  <footer class="site-footer">
-   <div class="site-footer-inner">
-    <div class="footer-identity">
-     <strong>
-      REALDATE
-     </strong>
-     <span data-lang="zh-Hant">
-      《模擬市民 4》時間與人生系統模組
-     </span>
-     <span data-lang="en">
-      A time and life-system mod for The Sims 4
-     </span>
-    </div>
-    <div class="footer-links">
-     <a href="gameplay.html">
-      <span data-lang="zh-Hant">
-       玩法
-      </span>
-      <span data-lang="en">
-       Gameplay
-      </span>
-     </a>
-     <a href="download.html">
-      <span data-lang="zh-Hant">
-       下載與安裝
-      </span>
-      <span data-lang="en">
-       Download &amp; Install
-      </span>
-     </a>
-     <a href="compatibility.html">
-      <span data-lang="zh-Hant">
-       相容性
-      </span>
-      <span data-lang="en">
-       Compatibility
-      </span>
-     </a>
-     <a href="changelog.html">
-      <span data-lang="zh-Hant">
-       更新日誌
-      </span>
-      <span data-lang="en">
-       Changelog
-      </span>
-     </a>
-     <a href="roadmap.html">
-      <span data-lang="zh-Hant">
-       開發藍圖
-      </span>
-      <span data-lang="en">
-       Roadmap
-      </span>
-     </a>
-     <a href="faq.html">
-      <span data-lang="zh-Hant">
-       常見問題
-      </span>
-      <span data-lang="en">
-       FAQ
-      </span>
-     </a>
-    </div>
-    <div class="footer-meta">
-     <span data-lang="zh-Hant">
-      L1nG ·《模擬市民 4》模組作者
-     </span>
-     <span data-lang="en">
-      L1nG · THE SIMS 4 MOD CREATOR
-     </span>
-     <span data-lang="zh-Hant">
-      非 Electronic Arts 或 Maxis 官方網站。
-     </span>
-     <span data-lang="en">
-      Not affiliated with Electronic Arts or Maxis.
-     </span>
-    </div>
-   </div>
-  </footer>
- </body>
+    </footer>
+
+</body>
 </html>
