@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>L1nG | The Sims 4 Mods & Projects</title>
+
+    <meta
+        name="description"
+        content="L1nG 的《模擬市民 4》模組、族譜專案、工具與繁體中文漢化。"
+    >
+    <meta name="theme-color" content="#f6f8fb">
+
+    <link rel="stylesheet" href="home.css">
+    <script src="home.js" defer></script>
+</head>
+
+<body id="top">
+
+    <!-- ========【頂部導覽列】 設定 - L1nG 品牌、站內導覽與模組整理入口 ======== -->
+    <header class="site-header" id="siteHeader">
+        <div class="site-header-inner">
+
+            <a class="brand" href="#top" aria-label="返回 L1nG 首頁頂部">
+                L1nG
+            </a>
+
+            <button
+                class="nav-toggle"
+                id="navToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="mainNav"
+                aria-label="開啟導覽選單"
+            >
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="main-nav" id="mainNav" aria-label="主要導覽">
+                <a href="#projects">專案</a>
+                <a href="#translations">漢化</a>
+                <a href="#about">關於</a>
+
+                <a class="nav-external" href="../index.html">
+                    模組整理
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- ========【首頁主視覺】 設定 - 品牌名稱、簡介與主要入口 ======== -->
+        <section class="hero">
+
+            <div class="hero-decoration hero-decoration-left" aria-hidden="true"></div>
+            <div class="hero-decoration hero-decoration-right" aria-hidden="true"></div>
+
+            <div class="hero-inner reveal">
+
+                <div class="hero-eyebrow">
+                    THE SIMS 4 MODS &amp; PROJECTS
+                </div>
+
+                <h1 class="hero-title">
+                    L1nG
+                </h1>
+
+                <p class="hero-subtitle">
+                    做一些讓模擬人生更像「人生」的東西。
+                </p>
+
+                <p class="hero-description">
+                    從時間、關係、家庭到日常細節，
+                    把零散的遊戲系統慢慢連成一段真正有痕跡的人生。
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#projects">
+                        瀏覽專案
+                    </a>
+
+                    <a class="btn btn-secondary" href="#currently-building">
+                        目前開發中
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========【專案區塊】 設定 - L1nG 主要開發專案與目前狀態 ======== -->
+        <section class="section" id="projects">
+
+            <div class="section-heading reveal">
+                <div>
+                    <span class="section-kicker">PROJECTS</span>
+                    <h2>正在做的東西</h2>
+                </div>
+
+                <p>
+                    模組、網頁系統，以及那些覺得「遊戲裡如果有這個就好了」的想法。
+                </p>
+            </div>
+
+
+            <!-- ========【RealDate】 設定 - 主要長期開發專案 ======== -->
+            <article class="featured-project reveal">
+
+                <div class="featured-calendar" aria-hidden="true">
+                    <span class="featured-calendar-day">14</span>
+                    <span class="featured-calendar-month">OCT</span>
+                </div>
+
+                <div class="featured-project-content">
+
+                    <div class="project-meta">
+                        <span class="status-dot"></span>
+                        ACTIVE DEVELOPMENT
+                    </div>
+
+                    <h3>RealDate</h3>
+
+                    <p class="project-subtitle">
+                        A deeper timeline for your Sims' lives.
+                    </p>
+
+                    <p class="project-description">
+                        從真實日期出發，逐步把年齡、生日、季節、懷孕、
+                        關係與其他人生系統連接到同一條時間軸。
+                    </p>
+
+                    <div class="project-tags" aria-label="RealDate 系統範圍">
+                        <span>Time</span>
+                        <span>Aging</span>
+                        <span>Birthdays</span>
+                        <span>Pregnancy</span>
+                        <span>Relationships</span>
+                    </div>
+
+                    <div class="project-footer realdate-footer">
+                        <div class="realdate-release-state">
+                            <span>開發中 · v0.5 Beta</span>
+                            <span>最新公開 · v0.4 Beta</span>
+                        </div>
+
+                        <a class="project-action-link" href="changelog.html">
+                            查看更新日誌
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <div class="project-grid">
+
+                <!-- ========【Genealogy】 設定 - 網頁端與未來遊戲端整合的完整族譜專案 ======== -->
+                <a class="project-card project-card-link genealogy-card reveal" href="genealogy.html">
+
+                    <div class="project-card-top">
+                        <span class="project-type">GENEALOGY PROJECT</span>
+                        <span class="card-arrow" aria-hidden="true">→</span>
+                    </div>
+
+                    <div class="genealogy-graphic" aria-hidden="true">
+                        <span class="tree-node node-a"></span>
+                        <span class="tree-node node-b"></span>
+                        <span class="tree-node node-c"></span>
+                        <span class="tree-node node-d"></span>
+
+                        <span class="tree-line tree-line-1"></span>
+                        <span class="tree-line tree-line-2"></span>
+                        <span class="tree-line tree-line-3"></span>
+                    </div>
+
+                    <div class="project-card-content">
+                        <h3>Genealogy</h3>
+
+                        <p>
+                            建立、整理與保存模擬市民的族譜與人生資料，
+                            並規劃透過遊戲端模組直接提取存檔中的族譜資訊。
+                        </p>
+                    </div>
+
+                    <div class="project-state-list" aria-label="Genealogy 開發狀態">
+                        <div>
+                            <span>網頁端族譜系統</span>
+                            <strong class="state-available">已可使用</strong>
+                        </div>
+
+                        <div>
+                            <span>遊戲端資料提取模組</span>
+                            <strong class="state-planned">規劃中</strong>
+                        </div>
+                    </div>
+
+                    <div class="project-card-footer">
+                        <span>Web + Game Integration</span>
+                        <strong>查看 Genealogy</strong>
+                    </div>
+
+                </a>
+
+
+                <!-- ========【PersonalWallet】 設定 - 個人資金與家庭經濟系統 ======== -->
+                <article class="project-card reveal">
+
+                    <div class="project-card-top">
+                        <span class="project-type">GAMEPLAY MOD</span>
+                        <span class="project-status">DEVELOPMENT</span>
+                    </div>
+
+                    <div class="wallet-graphic" aria-hidden="true">
+                        <span class="wallet-symbol">§</span>
+                        <span class="wallet-number">12,450</span>
+                    </div>
+
+                    <div class="project-card-content">
+                        <h3>PersonalWallet</h3>
+
+                        <p>
+                            讓家庭資金不再只是所有人共用的一個數字，
+                            並逐步建立更貼近個人與家庭分工的資金系統。
+                        </p>
+                    </div>
+
+                    <div class="project-card-footer">
+                        <span>Personal Finance System</span>
+                        <span>開發中</span>
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <!-- ========【漢化專區入口】 設定 - L1nG 製作與維護的繁體中文漢化 ======== -->
+            <a class="translation-card reveal" href="#translations">
+
+                <div class="translation-card-mark" aria-hidden="true">
+                    文
+                </div>
+
+                <div class="translation-card-content">
+                    <span class="project-type">TRANSLATIONS</span>
+
+                    <h3>漢化專區</h3>
+
+                    <p>
+                        集中整理 L1nG 製作、維護與調整過的
+                        《模擬市民 4》繁體中文漢化。
+                    </p>
+                </div>
+
+                <div class="translation-card-action">
+                    查看專區
+                    <span aria-hidden="true">→</span>
+                </div>
+
+            </a>
+
+        </section>
+
+
+        <!-- ========【目前開發中】 設定 - 顯示現階段主要開發重點 ======== -->
+        <section class="section current-section" id="currently-building">
+
+            <div class="current-card reveal">
+
+                <div class="current-label">
+                    CURRENTLY BUILDING
+                </div>
+
+                <div class="current-content">
+
+                    <div>
+                        <h2>RealDate v0.5</h2>
+
+                        <p class="current-name">
+                            Relationship &amp; Life Chronicle
+                        </p>
+                    </div>
+
+                    <div class="development-state">
+                        <span class="status-dot"></span>
+                        In Development
+                    </div>
+
+                </div>
+
+                <div class="current-divider"></div>
+
+                <p class="current-description">
+                    持續擴充關係、生日與人生事件，
+                    讓角色曾經經歷過的事情能真正留在時間軸上。
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========【漢化專區】 設定 - 繁體中文漢化專區預告與未來入口 ======== -->
+        <section class="section translation-section" id="translations">
+
+            <div class="translation-panel reveal">
+
+                <div class="translation-panel-mark" aria-hidden="true">
+                    繁
+                </div>
+
+                <div class="translation-panel-content">
+
+                    <span class="section-kicker translation-kicker">
+                        TRANSLATIONS
+                    </span>
+
+                    <h2>漢化專區</h2>
+
+                    <p>
+                        這裡會集中整理 L1nG 製作、維護或調整過的
+                        《模擬市民 4》繁體中文漢化，
+                        並依模組分開整理版本、原作者連結與更新狀態。
+                    </p>
+
+                    <div class="translation-status">
+                        <span>專區頁面</span>
+                        <strong>準備中</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========【創作理念】 設定 - L1nG 專案共同核心概念 ======== -->
+        <section class="philosophy-section">
+
+            <div class="philosophy-inner reveal">
+
+                <span class="section-kicker">
+                    THE IDEA BEHIND L1nG
+                </span>
+
+                <h2>
+                    Details make<br>
+                    a life feel lived.
+                </h2>
+
+                <p>
+                    日期、生日、關係、家庭、金錢與人生事件，
+                    單獨看都只是很小的細節。
+                    當這些細節開始彼此連接，
+                    模擬市民的人生才會真正留下痕跡。
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========【關於 L1nG】 設定 - 創作者簡介與專案方向 ======== -->
+        <section class="section about-section" id="about">
+
+            <div class="about-grid reveal">
+
+                <div>
+                    <span class="section-kicker">ABOUT</span>
+                    <h2>Hi, I'm L1nG.</h2>
+                </div>
+
+                <div class="about-copy">
+
+                    <p>
+                        Independent creator making mods, systems and web projects
+                        for The Sims 4.
+                    </p>
+
+                    <p>
+                        主要關注時間、人生系統、真實感，
+                        以及那些平常很容易被忽略、卻會讓角色更像真正活過一段人生的小細節。
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ========【網站頁腳】 設定 - 品牌名稱、站內入口與返回頂部 ======== -->
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <div class="footer-brand">
+                <strong>L1nG</strong>
+                <span>The Sims 4 Mods &amp; Projects</span>
+            </div>
+
+            <div class="footer-links">
+                <a href="#projects">Projects</a>
+                <a href="#translations">Translations</a>
+                <a href="genealogy.html">Genealogy</a>
+                <a href="../index.html">模組整理</a>
+                <a href="#top">↑ 返回頂部</a>
+            </div>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>
