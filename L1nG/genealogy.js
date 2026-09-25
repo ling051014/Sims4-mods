@@ -644,19 +644,6 @@ function setIconText(el, iconName, text) {
   el.innerHTML = `${iconSvg(iconName)}<span>${esc(text)}</span>`;
 }
 
-// ========【UI 圖示】 Bootstrap Icons 統一輸出 ========
-const iconSvg = (name, extra = '') => {
-  const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
-  if (!safe) return '';
-  const extraClass = extra ? ' ' + extra : '';
-  return `<span class="l1ng-icon icon-${safe}${extraClass}" aria-hidden="true"></span>`;
-};
-
-function setIconText(el, iconName, text) {
-  if (!el) return;
-  el.innerHTML = `${iconSvg(iconName)}<span>${esc(text)}</span>`;
-}
-
 // ========【頂部自訂下拉選單】 設定 - 取代瀏覽器原生 select 展開介面 ========
 const navSelectControls = new Map();
 
