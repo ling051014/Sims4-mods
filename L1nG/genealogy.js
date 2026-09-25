@@ -6338,6 +6338,50 @@ async function importJSON(file) {
   reader.readAsText(file);
 }
 
+// ========【遊戲族譜匯入】 設定 - 讀取 L1nG Genealogy Exporter ZIP ========
+async function importGameGenealogy(file) {
+  try {
+    if (!window.L1nGGameImport) {
+      throw new Error('找不到遊戲族譜匯入模組。');
+    }
+
+    const bundle = await window.L1nGGameImport.parseFile(file);
+    const converted = window.L1nGGameImport.convertBundle(bundle);
+    const preparedResult = prepareDatabase(converted);
+
+    db = preparedResult.prepared;
+    dragHistory.clear();
+    invalidateChildrenIndex();
+
+    save({ immediate: true });
+    refreshFamilyUI();
+    render();
+
+    requestAnimationFrame(() => {
+      fitScreen();
+    });
+
+    const stats = bundle.manifest && bundle.manifest.stats
+      ? bundle.manifest.stats
+      : {};
+
+    uiToast(
+      `遊戲族譜匯入完成：${stats.simCount || Object.keys(db.sims || {}).length} 位人物`
+    );
+
+  } catch (err) {
+    console.error('[遊戲族譜匯入]', err);
+
+    await uiAlert(
+      `遊戲族譜匯入失敗：${err && err.message ? err.message : 'Unknown error'}`,
+      {
+        title: '遊戲族譜匯入失敗',
+        kind: 'danger'
+      }
+    );
+  }
+}
+
 $('addBtn').onclick = () => openEditor(null);
 $('btnCancel').onclick = closeEditor;
 $('btnSave').onclick = saveChar;
@@ -6550,6 +6594,20 @@ $('importInput').onchange = e => {
   if (f) importJSON(f);
   e.target.value = '';
 };
+
+const gameImportInput = $('gameImportInput');
+
+if (gameImportInput) {
+  gameImportInput.onchange = async e => {
+    const f = e.target.files[0];
+
+    if (f) {
+      await importGameGenealogy(f);
+    }
+
+    e.target.value = '';
+  };
+}
 
 async function init() {
   try {
