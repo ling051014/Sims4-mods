@@ -674,13 +674,133 @@ body.mod-list-page {
     /* 數字顏色 */ color: #888;
 }
 
-/* ========【網站底部】 設定 - 瀏覽次數 ======== */
+/* ========【網站頁腳】 設定 - 整體容器 ======== */
 .site-footer {
+    /* 上方留白 */ margin-top: 70px;
+    /* 頂部分隔線 */ border-top: 1px solid #eeeeee;
+    /* 背景顏色 */ background: #fafafa;
+    /* 文字顏色 */ color: #888888;
+}
+
+
+/* ========【網站頁腳】 設定 - 內容寬度 ======== */
+.footer-inner {
+    /* 最大寬度 */ max-width: 1100px;
+    /* 水平置中 */ margin: 0 auto;
+    /* 左右安全距離 */ padding: 38px 20px 28px;
+}
+
+
+/* ========【常用網站】 設定 - 區塊 ======== */
+.footer-links-section {
+    /* 下方留白 */ padding-bottom: 32px;
+    /* 底部分隔線 */ border-bottom: 1px solid #eeeeee;
+}
+
+
+/* ========【常用網站】 設定 - 標題 ======== */
+.footer-section-title {
+    /* 文字顏色 */ color: #555555;
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 500;
+    /* 字距 */ letter-spacing: 2px;
+    /* 下方間距 */ margin-bottom: 20px;
+}
+
+
+/* ========【常用網站】 設定 - 網格排列 ======== */
+.footer-links-grid {
+    /* 網格系統 */ display: grid;
+    /* 桌面四欄 */ grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* 欄列間距 */ gap: 13px 30px;
+}
+
+
+/* ========【常用網站】 設定 - 一般連結 ======== */
+.footer-links-grid a {
+    /* 文字顏色 */ color: #888888;
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 13px;
+    /* 動畫效果 */ transition: color 0.2s ease;
+}
+
+
+/* ========【常用網站】 設定 - 懸停效果 ======== */
+.footer-links-grid a:hover {
+    /* 品牌藍 */ color: #55acee;
+}
+
+
+/* ========【常用網站】 設定 - L1nG 入口 ======== */
+.footer-links-grid .footer-l1ng-link {
+    /* 稍微強調 */ color: #666666;
+    /* 字體粗細 */ font-weight: 500;
+}
+
+
+/* ========【本站資訊】 設定 - 內容區 ======== */
+.footer-site-info {
+    /* 上下內距 */ padding: 32px 0;
     /* 文字置中 */ text-align: center;
-    /* 文字顏色 */ color: #bbb;
+}
+
+
+/* ========【本站資訊】 設定 - 品牌名稱 ======== */
+.footer-brand {
+    /* 文字顏色 */ color: #555555;
+    /* 字體大小 */ font-size: 14px;
+    /* 字距 */ letter-spacing: 3px;
+    /* 字體粗細 */ font-weight: 500;
+}
+
+
+/* ========【本站資訊】 設定 - 版本資訊 ======== */
+.footer-version {
+    /* 上方間距 */ margin-top: 12px;
+    /* 文字顏色 */ color: #aaaaaa;
     /* 字體大小 */ font-size: 11px;
-    /* 字距設定 */ letter-spacing: 2px;
-    /* 上下外距 */ margin: 50px 0 30px;
+    /* 字距 */ letter-spacing: 1.5px;
+    /* 行距 */ line-height: 1.8;
+}
+
+
+/* ========【本站資訊】 設定 - 版權與非官方聲明 ======== */
+.footer-disclaimer {
+    /* 最大文字寬度 */ max-width: 620px;
+    /* 水平置中 */ margin: 20px auto 0;
+    /* 文字顏色 */ color: #aaaaaa;
+    /* 字體大小 */ font-size: 11px;
+    /* 行距 */ line-height: 1.9;
+    /* 字距 */ letter-spacing: 0.5px;
+}
+
+
+/* ========【網站頁腳】 設定 - 最底部資訊列 ======== */
+.footer-bottom {
+    /* 上方分隔線 */ border-top: 1px solid #eeeeee;
+    /* 上方內距 */ padding-top: 20px;
+    /* 橫向排列 */ display: flex;
+    /* 左右兩端排列 */ justify-content: space-between;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 20px;
+    /* 文字顏色 */ color: #bbbbbb;
+    /* 字體大小 */ font-size: 11px;
+    /* 字距 */ letter-spacing: 1px;
+}
+
+
+/* ========【網站頁腳】 設定 - 返回頂部 ======== */
+.back-to-top {
+    /* 文字顏色 */ color: #999999;
+    /* 移除底線 */ text-decoration: none;
+    /* 禁止換行 */ white-space: nowrap;
+    /* 動畫效果 */ transition: color 0.2s ease;
+}
+
+
+/* ========【網站頁腳】 設定 - 返回頂部懸停 ======== */
+.back-to-top:hover {
+    /* 品牌藍 */ color: #55acee;
 }
 
 /* ========【成年審核】 設定 - 全螢幕半透明 ======== */
@@ -1042,6 +1162,25 @@ th.desc .sort-arrows::after {
         /* 寬度填滿 */ width: 100%;
         /* 顯示層級 */ z-index: 5;
         /* 背景顏色 */ background: transparent;
+    }
+    /* ========【網站頁腳】 設定 - 手機直向 ======== */
+    .footer-inner {
+        /* 手機左右間距 */ padding: 30px 20px 24px;
+    }
+    .footer-links-grid {
+        /* 手機改為兩欄 */ grid-template-columns: repeat(2, minmax(0, 1fr));
+        /* 手機欄距 */ gap: 12px 20px;
+    }
+    .footer-links-grid a {
+        /* 手機字體大小 */ font-size: 12px;
+    }
+    .footer-disclaimer br {
+        /* 手機讓文字自然換行 */ display: none;
+    }
+    .footer-bottom {
+        /* 手機改為上下排列 */ flex-direction: column;
+        /* 靠左排列 */ align-items: flex-start;
+        /* 縮小項目間距 */ gap: 10px;
     }
 }
 
