@@ -1,0 +1,1379 @@
+/* ========【RealDate 全站變數】 設定 - 色彩、尺寸與共用視覺 ======== */
+:root {
+    --page-bg: #fafafa;
+    --surface: #ffffff;
+    --surface-soft: #f7fafc;
+    --text-strong: #262626;
+    --text-main: #5c5c5c;
+    --text-muted: #767676;
+    --text-soft: #989898;
+    --accent: #55acee;
+    --accent-hover: #3e95d3;
+    --accent-soft: rgba(85, 172, 238, .07);
+    --accent-border: rgba(85, 172, 238, .28);
+    --line: #e7e7e7;
+    --line-soft: #f0f0f0;
+    --warning: #9b6d42;
+    --page-width: 1180px;
+    --reading-width: 930px;
+    --header-height: 68px;
+}
+
+/* ========【RealDate 全站基礎】 設定 - 盒模型與捲動 ======== */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--text-main);
+    font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    font-size: 15px;
+    line-height: 1.82;
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+button, summary { font: inherit; }
+
+code {
+    font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    overflow-wrap: anywhere;
+}
+
+/* ========【RealDate 語言顯示】 設定 - 繁中 / 英文切換 ======== */
+html[data-language="zh-Hant"] [data-lang="en"] { display: none !important; }
+html[data-language="en"] [data-lang="zh-Hant"] { display: none !important; }
+
+/* ========【RealDate 英文視覺標籤】 設定 - 固定英文品牌小標 ======== */
+.eyebrow,
+.doc-label strong {
+    font-family: "Bahnschrift SemiCondensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+    font-stretch: condensed;
+    text-transform: uppercase;
+    letter-spacing: 2.2px;
+}
+
+.eyebrow {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+/* ========【RealDate 頂部導覽】 設定 - 固定主導覽 ======== */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: var(--header-height);
+    background: rgba(250, 250, 250, .95);
+    border-bottom: 1px solid rgba(231, 231, 231, .95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: background .2s ease, box-shadow .2s ease;
+}
+
+.site-header.scrolled {
+    background: rgba(255, 255, 255, .97);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .035);
+}
+
+.site-header-inner {
+    width: min(calc(100% - 40px), var(--page-width));
+    min-height: var(--header-height);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 28px;
+}
+
+.site-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+}
+
+.creator-link,
+.realdate-brand { text-decoration: none; }
+
+.creator-link {
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+}
+
+.brand-divider { color: #cccccc; }
+
+.realdate-brand {
+    color: var(--text-strong);
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: 2.2px;
+}
+
+.main-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 21px;
+    min-width: 0;
+}
+
+.main-nav > a,
+.nav-more > summary {
+    position: relative;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    list-style: none;
+    transition: color .2s ease;
+}
+
+.nav-more > summary::-webkit-details-marker { display: none; }
+
+.main-nav > a:hover,
+.main-nav > a.active,
+.nav-more > summary:hover,
+.nav-more.active > summary { color: var(--accent); }
+
+.main-nav > a.active::after,
+.nav-more.active > summary::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -9px;
+    height: 1px;
+    background: var(--accent);
+}
+
+.nav-more { position: relative; }
+.nav-more-chevron { margin-left: 4px; font-size: 11px; }
+
+.nav-more-menu {
+    position: absolute;
+    top: calc(100% + 16px);
+    right: 0;
+    min-width: 150px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .07);
+}
+
+.nav-more-menu a {
+    display: block;
+    padding: 8px 10px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.nav-more-menu a:hover { color: var(--accent); background: var(--accent-soft); }
+
+.language-switch { display: flex; align-items: center; gap: 6px; }
+
+.language-button {
+    padding: 8px 2px;
+    border: 0;
+    background: transparent;
+    color: var(--text-soft);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.language-button:hover,
+.language-button.active { color: var(--accent); }
+
+.language-divider { color: #cccccc; font-size: 11px; }
+
+.nav-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface);
+    cursor: pointer;
+}
+
+.nav-toggle span {
+    display: block;
+    width: 16px;
+    height: 1px;
+    margin: 5px auto;
+    background: var(--text-strong);
+}
+
+/* ========【RealDate 共用操作】 設定 - 按鈕與文字連結 ======== */
+.button {
+    min-height: 44px;
+    padding: 0 17px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 550;
+    transition: transform .2s ease, color .2s ease, background .2s ease, border-color .2s ease;
+}
+
+.button:hover { transform: translateY(-2px); }
+
+.button-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+.button-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.button-secondary {
+    background: var(--surface);
+    border-color: var(--line);
+    color: var(--text-strong);
+}
+
+.button-secondary:hover {
+    color: var(--accent);
+    border-color: var(--accent-border);
+}
+
+.text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.text-link-strong { font-weight: 600; }
+
+/* ========【RealDate 首頁主視覺】 設定 - 首屏內容 ======== */
+.hero {
+    background:
+        radial-gradient(circle at 78% 22%, rgba(85, 172, 238, .09), transparent 25rem),
+        linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+    border-bottom: 1px solid var(--line);
+}
+
+.hero-inner {
+    width: min(calc(100% - 40px), var(--page-width));
+    min-height: 680px;
+    margin: 0 auto;
+    padding: 88px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr);
+    align-items: center;
+    gap: 70px;
+}
+
+.hero h1 {
+    margin: 16px 0 0;
+    color: #222222;
+    font-size: clamp(70px, 10vw, 126px);
+    font-weight: 180;
+    line-height: .94;
+    letter-spacing: 5px;
+}
+
+.hero-lead {
+    max-width: 690px;
+    margin: 38px 0 0;
+    color: var(--text-strong);
+    font-size: clamp(22px, 2.5vw, 31px);
+    font-weight: 350;
+    line-height: 1.55;
+}
+
+.hero-description {
+    max-width: 650px;
+    margin: 18px 0 0;
+    color: var(--text-muted);
+}
+
+.hero-actions,
+.release-actions,
+.download-buttons,
+.history-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 11px;
+}
+
+.hero-actions { margin-top: 30px; }
+
+.hero-release {
+    margin-top: 42px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 34px;
+}
+
+.hero-release > span {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.hero-release small { color: var(--text-soft); font-size: 10px; }
+.hero-release strong { color: var(--text-strong); font-size: 12px; font-weight: 550; }
+
+/* ========【RealDate 首頁時間軸】 設定 - 日期與人生事件視覺 ======== */
+.timeline-visual { position: relative; min-height: 455px; }
+
+.calendar-card {
+    position: absolute;
+    top: 8px;
+    right: 25px;
+    width: 242px;
+    padding: 27px 28px 30px;
+    background: rgba(255, 255, 255, .93);
+    border: 1px solid var(--accent-border);
+    border-radius: 10px;
+    box-shadow: 0 24px 60px rgba(70, 119, 153, .08);
+    transform: rotate(3deg);
+    text-align: center;
+}
+
+.calendar-month {
+    color: var(--text-muted);
+    font-family: "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+}
+
+.calendar-day {
+    margin: 15px 0 6px;
+    color: var(--accent);
+    font-size: 94px;
+    font-weight: 180;
+    line-height: .95;
+}
+
+.calendar-weekday {
+    color: var(--text-soft);
+    font-family: "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.life-line {
+    position: absolute;
+    left: 44px;
+    top: 190px;
+    bottom: 10px;
+    border-left: 1px solid #d8e8f2;
+}
+
+.life-event { position: relative; margin: 0 0 27px 24px; }
+
+.event-dot {
+    position: absolute;
+    top: 8px;
+    left: -29px;
+    width: 9px;
+    height: 9px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 0 0 5px var(--page-bg);
+}
+
+.life-event strong,
+.life-event small { display: block; }
+
+.life-event strong { color: var(--text-strong); font-size: 13px; font-weight: 550; }
+.life-event small { color: var(--text-soft); font-size: 11px; }
+
+/* ========【RealDate 共用區塊】 設定 - 一般內容區 ======== */
+.section {
+    width: min(calc(100% - 40px), var(--page-width));
+    margin: 0 auto;
+    padding: 100px 0;
+}
+
+.section-tight { padding-top: 24px; }
+
+.section-heading {
+    max-width: 820px;
+    margin-bottom: 38px;
+}
+
+.section-heading h2 {
+    margin: 10px 0 0;
+    color: var(--text-strong);
+    font-size: clamp(31px, 4.4vw, 50px);
+    font-weight: 280;
+    line-height: 1.35;
+}
+
+.section-heading p {
+    max-width: 760px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.section-action { margin-top: 26px; }
+
+/* ========【RealDate 首頁系統總覽】 設定 - 純資訊卡 ======== */
+.system-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.system-card {
+    min-height: 205px;
+    padding: 25px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.system-number { color: #bbbbbb; font-size: 11px; }
+
+.system-card h3 {
+    margin: 33px 0 8px;
+    color: var(--text-strong);
+    font-size: 18px;
+    font-weight: 480;
+}
+
+.system-card p { margin: 0; color: var(--text-muted); font-size: 13px; }
+
+/* ========【RealDate 版本區】 設定 - 公開版與開發版 ======== */
+.release-section {
+    padding-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.release-panel {
+    padding: 35px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.release-panel-development {
+    background: linear-gradient(135deg, #ffffff 0%, #f7fbff 100%);
+    border-color: var(--accent-border);
+}
+
+.release-panel h2 {
+    margin: 10px 0 8px;
+    color: var(--text-strong);
+    font-size: 35px;
+    font-weight: 290;
+}
+
+.release-panel p { color: var(--text-muted); font-size: 13px; }
+
+.release-meta {
+    margin: 22px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+/* 只給直接子項目外框，避免雙語內層 span 再套一層框。 */
+.release-meta > span {
+    padding: 5px 8px;
+    background: var(--page-bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+/* ========【RealDate 內頁頁首】 設定 - 文件與資訊頁 ======== */
+.page-hero {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+
+.page-hero-inner {
+    width: min(calc(100% - 40px), var(--reading-width));
+    margin: 0 auto;
+    padding: 84px 0 70px;
+}
+
+.page-hero h1 {
+    margin: 11px 0 18px;
+    color: var(--text-strong);
+    font-size: clamp(42px, 6vw, 66px);
+    font-weight: 250;
+    line-height: 1.2;
+}
+
+.page-hero p {
+    max-width: 770px;
+    margin: 0 0 12px;
+    color: var(--text-muted);
+}
+
+/* ========【RealDate 文件快速導覽】 設定 - 頁內錨點 ======== */
+.doc-index {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 65;
+    width: min(100%, var(--reading-width));
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    background: rgba(250, 250, 250, .96);
+    border-bottom: 1px solid var(--line);
+    scrollbar-width: none;
+}
+
+.doc-index::-webkit-scrollbar { display: none; }
+
+.doc-index a {
+    flex: 0 0 auto;
+    padding: 6px 9px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 11px;
+    border-radius: 4px;
+}
+
+.doc-index a:hover { color: var(--accent); background: var(--accent-soft); }
+
+/* ========【RealDate 文件章節】 設定 - 編號與英文小標整合 ======== */
+.doc-section {
+    width: min(calc(100% - 40px), var(--reading-width));
+    margin: 0 auto;
+    padding: 86px 0;
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: calc(var(--header-height) + 55px);
+}
+
+.doc-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--accent);
+}
+
+.doc-label span { font-size: 10px; letter-spacing: 1px; }
+
+.doc-label span::after {
+    content: "/";
+    margin-left: 9px;
+    color: #bfc6cb;
+}
+
+.doc-label strong { font-size: 11px; font-weight: 650; }
+
+.doc-content h2 {
+    margin: 8px 0 20px;
+    color: var(--text-strong);
+    font-size: 34px;
+    font-weight: 300;
+}
+
+.doc-content > p {
+    max-width: 780px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.feature-list {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.feature-list > div,
+.optional-package,
+.required-files {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+}
+
+.feature-list strong { display: block; color: var(--text-strong); font-size: 14px; font-weight: 550; }
+
+.feature-list p,
+.optional-package p,
+.required-files p {
+    margin: 7px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.doc-note {
+    margin-top: 24px;
+    padding: 14px 16px;
+    background: var(--accent-soft);
+    border-left: 2px solid var(--accent);
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.doc-note-warning {
+    background: rgba(155, 109, 66, .05);
+    border-left-color: #b88a5e;
+}
+
+/* ========【RealDate 季節與生命階段】 設定 - 資料視覺 ======== */
+.season-map {
+    margin-top: 26px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.season-map > div {
+    padding: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+}
+
+.season-map strong { width: 100%; color: var(--text-strong); }
+
+.season-map span {
+    padding: 4px 7px;
+    background: var(--surface-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.life-stage-table {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.life-stage-table > div {
+    padding: 15px;
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+}
+
+.life-stage-table strong,
+.life-stage-table span { display: block; }
+
+.life-stage-table strong { color: var(--text-soft); font-size: 10px; font-weight: 500; }
+.life-stage-table span { margin-top: 4px; color: var(--text-strong); font-size: 13px; }
+
+.timeline-flow {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.timeline-flow span {
+    padding: 6px 9px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    font-size: 11px;
+}
+
+.timeline-flow b { color: #c5c5c5; font-weight: 400; }
+
+/* ========【下載與安裝】 設定 - 最新版本 ======== */
+.download-card {
+    padding: 34px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.download-card-featured {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fcff 100%);
+    border-color: var(--accent-border);
+}
+
+.download-version > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.download-version strong {
+    color: var(--text-strong);
+    font-size: 31px;
+    font-weight: 300;
+}
+
+.download-version span { color: var(--text-soft); font-size: 11px; }
+
+.download-facts {
+    margin: 28px 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+}
+
+.download-facts > div { padding: 15px 15px 15px 0; }
+
+.download-facts small,
+.environment-grid small,
+.history-facts small,
+.compat-meta small {
+    display: block;
+    color: var(--text-soft);
+    font-size: 9px;
+    letter-spacing: .5px;
+}
+
+.download-facts strong,
+.environment-grid strong,
+.history-facts strong,
+.compat-meta strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-strong);
+    font-size: 11px;
+    font-weight: 550;
+}
+
+.install-warning {
+    margin-top: 16px;
+    padding: 18px 20px;
+    background: rgba(155, 109, 66, .05);
+    border: 1px solid rgba(155, 109, 66, .16);
+    border-radius: 6px;
+}
+
+.install-warning > strong { color: var(--warning); }
+
+.install-warning p { margin: 6px 0 0; color: var(--text-muted); font-size: 12px; }
+
+/* ========【下載與安裝】 設定 - 安裝步驟與檔案 ======== */
+.install-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, .6fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.step-list { display: grid; gap: 10px; }
+
+.step-card {
+    padding: 22px;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+}
+
+.step-number {
+    color: var(--accent);
+    font-family: "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+    letter-spacing: 1px;
+}
+
+.step-card h3 { margin: 0 0 5px; color: var(--text-strong); font-size: 15px; font-weight: 550; }
+.step-card p { margin: 0; color: var(--text-muted); font-size: 12px; }
+
+.step-card code,
+.required-files code,
+.file-list code {
+    display: block;
+    margin-top: 5px;
+    color: var(--text-main);
+    font-size: 11px;
+}
+
+.required-files {
+    position: sticky;
+    top: calc(var(--header-height) + 60px);
+}
+
+.required-files h3 {
+    margin: 7px 0 12px;
+    color: var(--text-strong);
+    font-size: 17px;
+    font-weight: 500;
+}
+
+/* ========【下載與安裝】 設定 - 相容檔選擇 ======== */
+.compat-file-matrix {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.compat-file-matrix > div {
+    display: grid;
+    grid-template-columns: .85fr 1.15fr;
+}
+
+.compat-file-matrix > div > * {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.compat-file-matrix > div > *:nth-child(2) { border-left: 1px solid var(--line-soft); }
+
+.compat-file-matrix .matrix-head {
+    background: var(--surface-soft);
+    color: var(--text-soft);
+    font-size: 10px;
+}
+
+.compat-file-matrix > div:not(.matrix-head) {
+    background: var(--surface);
+    color: var(--text-main);
+    font-size: 12px;
+}
+
+.optional-package-grid {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.optional-package h3 {
+    margin: 0 0 8px;
+    color: var(--text-strong);
+    font-size: 15px;
+    font-weight: 550;
+}
+
+.optional-package code { color: var(--accent); font-size: 10px; }
+
+/* ========【下載與安裝】 設定 - 歷史版本 ======== */
+.history-list { display: grid; gap: 12px; }
+
+.history-card {
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    scroll-margin-top: calc(var(--header-height) + 40px);
+}
+
+.history-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 15px;
+}
+
+.history-title strong { color: var(--text-strong); font-size: 19px; font-weight: 500; }
+.history-title span { color: var(--text-soft); font-size: 10px; }
+
+.history-facts {
+    margin: 15px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px 26px;
+}
+
+.history-facts > span { min-width: 180px; }
+
+/* ========【相容性】 設定 - 測試環境與快速總覽 ======== */
+.environment-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.environment-grid > div {
+    padding: 15px;
+    background: var(--surface);
+}
+
+.compat-overview {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.compat-overview > div {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.compat-overview strong { color: var(--text-strong); font-size: 12px; }
+.compat-overview span { color: var(--text-muted); font-size: 11px; text-align: right; }
+
+/* ========【相容性】 設定 - 詳細可展開文件 ======== */
+.compat-details { display: grid; gap: 10px; }
+
+.compat-detail {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.compat-detail summary {
+    padding: 17px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.compat-detail summary::-webkit-details-marker { display: none; }
+
+.compat-detail summary > span:first-child {
+    display: flex;
+    flex-direction: column;
+}
+
+.compat-detail summary strong { color: var(--text-strong); font-size: 14px; font-weight: 550; }
+.compat-detail summary small { color: var(--text-soft); font-size: 10px; }
+.compat-status { color: var(--accent); font-size: 10px; white-space: nowrap; }
+
+.compat-detail-body {
+    padding: 0 18px 20px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.compat-detail-body > p { color: var(--text-muted); font-size: 12px; }
+.compat-detail-body h4 { margin: 20px 0 8px; color: var(--text-strong); font-size: 12px; }
+
+.compat-detail-body ul {
+    padding-left: 20px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.compat-meta {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+}
+
+.compat-meta code {
+    display: block;
+    margin-top: 3px;
+    color: var(--accent);
+    font-size: 10px;
+}
+
+.compat-small { color: var(--text-soft) !important; font-size: 11px !important; }
+
+.responsibility-grid {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.responsibility-grid > div {
+    padding: 14px;
+    background: var(--surface-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 5px;
+}
+
+.responsibility-grid strong,
+.responsibility-grid span { display: block; }
+
+.responsibility-grid strong { color: var(--accent); font-size: 11px; }
+.responsibility-grid span { margin-top: 4px; color: var(--text-muted); font-size: 11px; }
+
+.file-list { display: grid; gap: 5px; }
+
+.file-list code {
+    margin: 0;
+    padding: 7px 9px;
+    background: var(--surface-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+}
+
+.file-list-danger code { border-color: rgba(155, 109, 66, .18); }
+
+/* ========【開發藍圖】 設定 - 版本時間軸 ======== */
+.roadmap-timeline {
+    position: relative;
+    max-width: 780px;
+    margin: 0 auto;
+    padding-left: 36px;
+}
+
+.roadmap-timeline::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 10px;
+    left: 5px;
+    width: 1px;
+    background: #dfdfdf;
+}
+
+.roadmap-item { position: relative; margin-bottom: 50px; }
+
+.roadmap-marker {
+    position: absolute;
+    top: 7px;
+    left: -36px;
+    width: 11px;
+    height: 11px;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 5px var(--page-bg);
+}
+
+.roadmap-content {
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+}
+
+.roadmap-current {
+    border-color: var(--accent-border);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fcff 100%);
+}
+
+.roadmap-content h2 { margin: 12px 0 3px; color: var(--text-strong); font-size: 28px; font-weight: 300; }
+.roadmap-content h3 { margin: 0 0 10px; color: var(--accent); font-size: 14px; font-weight: 500; }
+.roadmap-content p { color: var(--text-muted); font-size: 12px; }
+
+.status-chip {
+    display: inline-block;
+    padding: 4px 7px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    border-radius: 4px;
+    font-size: 9px;
+}
+
+/* ========【常見問題】 設定 - FAQ ======== */
+.faq-list { max-width: var(--reading-width); }
+
+.faq-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom-width: 0;
+}
+
+.faq-item:last-child { border-bottom-width: 1px; }
+
+.faq-item summary {
+    padding: 18px 20px;
+    color: var(--text-strong);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.faq-item p {
+    margin: 0;
+    padding: 0 20px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* ========【RealDate 網站底部】 設定 - 專案資訊 ======== */
+.site-footer {
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+}
+
+.site-footer-inner {
+    width: min(calc(100% - 40px), var(--page-width));
+    margin: 0 auto;
+    padding: 40px 0 28px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 26px 45px;
+}
+
+.footer-identity { display: flex; flex-direction: column; }
+.footer-identity strong { color: var(--text-strong); font-size: 14px; letter-spacing: 2px; }
+
+.footer-identity span,
+.footer-meta { color: var(--text-soft); font-size: 10px; }
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.footer-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 11px;
+}
+
+.footer-links a:hover { color: var(--accent); }
+
+.footer-meta {
+    grid-column: 1 / -1;
+    padding-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px 20px;
+    border-top: 1px solid var(--line-soft);
+}
+
+/* ========【RealDate 進場動畫】 設定 - 輕量淡入 ======== */
+.js .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity .5s ease, transform .5s ease;
+}
+
+.js .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ========【RealDate 響應式】 設定 - 平板 ======== */
+@media (max-width: 980px) {
+    .site-header-inner { grid-template-columns: auto 1fr auto; }
+
+    .nav-toggle { display: block; justify-self: end; }
+
+    .main-nav {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 20px;
+        right: 20px;
+        padding: 8px;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, .08);
+    }
+
+    .main-nav.open { display: flex; }
+
+    .main-nav > a,
+    .nav-more > summary,
+    .nav-more-menu a { padding: 9px 10px; }
+
+    .main-nav > a.active::after,
+    .nav-more.active > summary::after { display: none; }
+
+    .nav-more-menu {
+        position: static;
+        margin: 5px 0;
+        border: 0;
+        box-shadow: none;
+        background: var(--surface-soft);
+    }
+
+    .hero-inner {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding: 74px 0;
+    }
+
+    .timeline-visual {
+        min-height: 400px;
+        max-width: 500px;
+    }
+
+    .system-grid,
+    .optional-package-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .release-section,
+    .install-layout { grid-template-columns: 1fr; }
+
+    .required-files { position: static; }
+
+    .environment-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ========【RealDate 響應式】 設定 - 手機 ======== */
+@media (max-width: 650px) {
+    :root { --header-height: 62px; }
+
+    .site-header-inner {
+        width: min(calc(100% - 28px), var(--page-width));
+        gap: 12px;
+    }
+
+    .creator-link,
+    .brand-divider { display: none; }
+
+    .language-button { font-size: 11px; }
+
+    .hero-inner,
+    .section { width: min(calc(100% - 30px), var(--page-width)); }
+
+    .hero h1 { font-size: 61px; letter-spacing: 2px; }
+    .hero-lead { font-size: 21px; }
+
+    .timeline-visual { min-height: 390px; }
+    .calendar-card { right: 0; width: 210px; }
+    .life-line { left: 20px; }
+
+    .section { padding: 72px 0; }
+
+    .system-grid,
+    .feature-list,
+    .season-map,
+    .optional-package-grid,
+    .release-section,
+    .environment-grid,
+    .compat-overview,
+    .responsibility-grid,
+    .download-facts { grid-template-columns: 1fr; }
+
+    .page-hero-inner,
+    .doc-section { width: min(calc(100% - 30px), var(--reading-width)); }
+
+    .page-hero-inner { padding: 62px 0 52px; }
+    .page-hero h1 { font-size: 41px; }
+
+    .doc-index {
+        width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .doc-section { padding: 64px 0; }
+    .doc-content h2 { font-size: 29px; }
+    .life-stage-table { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .compat-file-matrix > div { grid-template-columns: 1fr; }
+    .compat-file-matrix > div > *:nth-child(2) { border-left: 0; }
+
+    .history-title,
+    .compat-overview > div {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .compat-overview span { text-align: left; }
+
+    .compat-detail summary {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .site-footer-inner {
+        width: min(calc(100% - 30px), var(--page-width));
+        grid-template-columns: 1fr;
+    }
+
+    .footer-meta { grid-column: auto; }
+}
+
+/* ========【RealDate 無障礙】 設定 - 減少動畫偏好 ======== */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *,
+    *::before,
+    *::after { transition-duration: .01ms !important; }
+
+    .js .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+
+/* ========【外部模組連結】 設定 - 名稱本身可點，不增加額外箭頭 ======== */
+.external-name-link {
+    /* 繼承目前文字顏色 */ color: inherit;
+    /* 預設不顯示底線 */ text-decoration: none;
+    /* 底部保留細線位置 */ border-bottom: 1px solid transparent;
+    /* 動畫效果 */ transition: color .2s ease, border-color .2s ease;
+}
+
+.external-name-link:hover {
+    /* 品牌藍 */ color: var(--accent);
+    /* 淡藍底線 */ border-bottom-color: var(--accent-border);
+}
+
+
+/* ========【下載內容】 設定 - 顯示實際發布 ZIP 內含檔案 ======== */
+.package-contents {
+    /* 上方間距 */ margin-top: 28px;
+    /* 上方分隔線 */ padding-top: 22px;
+    /* 分隔線 */ border-top: 1px solid var(--line);
+}
+
+.package-contents h3 {
+    /* 移除外距 */ margin: 0 0 6px;
+    /* 品牌藍 */ color: var(--accent);
+    /* 英文窄體 */ font-family: "Bahnschrift SemiCondensed", "Arial Narrow", sans-serif;
+    /* 字體大小 */ font-size: 10px;
+    /* 字距 */ letter-spacing: 1.7px;
+}
+
+.package-contents p {
+    /* 上下外距 */ margin: 0 0 12px;
+    /* 次要文字 */ color: var(--text-muted);
+    /* 字體大小 */ font-size: 11px;
+}
+
+.package-file-list {
+    /* 網格排列 */ display: grid;
+    /* 兩欄 */ grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 間距 */ gap: 6px;
+}
+
+.package-file-list code {
+    /* 內縮空間 */ padding: 7px 9px;
+    /* 淡色背景 */ background: var(--surface-soft);
+    /* 淡色邊框 */ border: 1px solid var(--line-soft);
+    /* 圓角 */ border-radius: 4px;
+    /* 一般文字 */ color: var(--text-main);
+    /* 字體大小 */ font-size: 10px;
+}
+
+
+/* ========【下載內容響應式】 設定 - 手機單欄 ======== */
+@media (max-width: 650px) {
+    .package-file-list {
+        /* 手機單欄 */ grid-template-columns: 1fr;
+    }
+}

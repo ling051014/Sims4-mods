@@ -1,0 +1,303 @@
+/* ========【更新日誌頁首】 設定 - 最新版本資訊排列 ======== */
+.changelog-current-release {
+    /* 上方間距 */ margin-top: 30px;
+    /* 橫向排列 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 項目間距 */ gap: 32px;
+}
+
+.changelog-current-release > div {
+    /* 垂直排列 */ display: flex;
+    /* 垂直方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 3px;
+}
+
+.changelog-current-release span {
+    /* 淡化文字 */ color: var(--text-soft);
+    /* 字體大小 */ font-size: 11px;
+    /* 字距 */ letter-spacing: 1px;
+}
+
+.changelog-current-release strong {
+    /* 主要文字 */ color: var(--text-strong);
+    /* 字體大小 */ font-size: 14px;
+    /* 字體粗細 */ font-weight: 550;
+}
+
+
+/* ========【版本快速導覽】 設定 - RealDate 導覽下方固定版本列 ======== */
+.changelog-version-index {
+    /* 黏性定位 */ position: sticky;
+    /* 位於主導覽下方 */ top: var(--header-height);
+    /* 顯示層級 */ z-index: 70;
+    /* 最大寬度 */ width: min(100%, var(--reading-width));
+    /* 水平置中 */ margin: 0 auto;
+    /* 橫向排列 */ display: flex;
+    /* 水平置中 */ justify-content: center;
+    /* 允許橫向捲動 */ overflow-x: auto;
+    /* 項目間距 */ gap: 4px;
+    /* 內縮空間 */ padding: 10px 18px;
+    /* 半透明背景 */ background: rgba(250, 250, 250, .96);
+    /* 下方邊框 */ border-bottom: 1px solid var(--line);
+    /* 背景模糊 */ backdrop-filter: blur(12px);
+    /* 隱藏 Firefox 捲軸 */ scrollbar-width: none;
+}
+
+.changelog-version-index::-webkit-scrollbar {
+    /* 隱藏捲軸 */ display: none;
+}
+
+.version-link {
+    /* 防止縮小 */ flex: 0 0 auto;
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 移除底線 */ text-decoration: none;
+    /* 次要文字 */ color: var(--text-muted);
+    /* 字體大小 */ font-size: 12px;
+    /* 動畫效果 */ transition:
+        color .2s ease,
+        background .2s ease;
+}
+
+.version-link:hover {
+    /* 品牌藍 */ color: var(--accent);
+    /* 淡藍背景 */ background: var(--accent-soft);
+}
+
+.version-link.active {
+    /* 品牌藍 */ color: var(--accent);
+    /* 淡藍背景 */ background: var(--accent-soft);
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【更新日誌內容】 設定 - 整體閱讀區 ======== */
+.changelog-content {
+    /* 最大寬度 */ width: min(calc(100% - 40px), var(--reading-width));
+    /* 水平置中 */ margin: 0 auto;
+    /* 上下內距 */ padding: 80px 0 110px;
+}
+
+
+/* ========【更新日誌時間軸】 設定 - 版本列表 ======== */
+.release-list {
+    /* 相對定位 */ position: relative;
+    /* 左側留給時間軸 */ padding-left: 34px;
+}
+
+
+/* ========【更新日誌時間軸】 設定 - 垂直主線 ======== */
+.release-list::before {
+    /* 建立線條 */ content: "";
+    /* 絕對定位 */ position: absolute;
+    /* 左側位置 */ left: 5px;
+    /* 頂部位置 */ top: 12px;
+    /* 底部位置 */ bottom: 18px;
+    /* 線條寬度 */ width: 1px;
+    /* 淡色線條 */ background: #dfe8ee;
+}
+
+
+/* ========【更新日誌版本】 設定 - 單一版本 ======== */
+.release {
+    /* 相對定位 */ position: relative;
+    /* 下方間距 */ margin-bottom: 74px;
+    /* 錨點留白 */ scroll-margin-top: calc(var(--header-height) + 68px);
+}
+
+
+/* ========【更新日誌版本】 設定 - 最後一版 ======== */
+.release:last-child {
+    /* 移除最後外距 */ margin-bottom: 0;
+}
+
+
+/* ========【更新日誌版本】 設定 - 時間軸節點 ======== */
+.release-marker {
+    /* 絕對定位 */ position: absolute;
+    /* 左側回到時間軸 */ left: -34px;
+    /* 頂部位置 */ top: 17px;
+    /* 節點寬度 */ width: 11px;
+    /* 節點高度 */ height: 11px;
+    /* 圓形 */ border-radius: 50%;
+    /* 白色背景 */ background: var(--surface);
+    /* 品牌藍邊框 */ border: 2px solid var(--accent);
+    /* 與背景分離 */ box-shadow: 0 0 0 6px var(--page-bg);
+}
+
+
+/* ========【更新日誌版本】 設定 - 版本內容卡片 ======== */
+.release-content {
+    /* 內縮空間 */ padding: 30px;
+    /* 白色背景 */ background: var(--surface);
+    /* 一般邊框 */ border: 1px solid var(--line);
+    /* 圓角弧度 */ border-radius: 8px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 版本標題列 ======== */
+.release-header {
+    /* 橫向排列 */ display: flex;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 頂部對齊 */ align-items: flex-start;
+    /* 項目間距 */ gap: 25px;
+    /* 下方間距 */ margin-bottom: 16px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 版本號 ======== */
+.release-version {
+    /* 品牌藍 */ color: var(--accent);
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 650;
+    /* 字距 */ letter-spacing: 1px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 版本標題 ======== */
+.release-header h2 {
+    /* 上下外距 */ margin: 7px 0 0;
+    /* 主要文字 */ color: var(--text-strong);
+    /* 字體大小 */ font-size: 25px;
+    /* 字體粗細 */ font-weight: 330;
+    /* 行距 */ line-height: 1.45;
+}
+
+
+/* ========【更新日誌版本】 設定 - 發布日期 ======== */
+.release-header time {
+    /* 禁止換行 */ white-space: nowrap;
+    /* 淡化文字 */ color: var(--text-soft);
+    /* 字體大小 */ font-size: 11px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 版本摘要 ======== */
+.release-summary {
+    /* 最大寬度 */ max-width: 760px;
+    /* 上下外距 */ margin: 0 0 26px;
+    /* 次要文字 */ color: var(--text-muted);
+    /* 字體大小 */ font-size: 13px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 更新分類網格 ======== */
+.change-grid {
+    /* 網格系統 */ display: grid;
+    /* 兩欄排列 */ grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 間距 */ gap: 14px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 單一更新分類 ======== */
+.change-section {
+    /* 內縮空間 */ padding: 19px 20px;
+    /* 淡色背景 */ background: var(--surface-soft);
+    /* 淡色邊框 */ border: 1px solid var(--line-soft);
+    /* 圓角弧度 */ border-radius: 6px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 更新分類標題 ======== */
+.change-section h3 {
+    /* 上下外距 */ margin: 0 0 11px;
+    /* 主要文字 */ color: var(--text-strong);
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【更新日誌版本】 設定 - 更新項目列表 ======== */
+.change-section ul {
+    /* 移除下方外距 */ margin: 0;
+    /* 左側內距 */ padding-left: 19px;
+    /* 次要文字 */ color: var(--text-muted);
+    /* 字體大小 */ font-size: 12px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 單一更新項目 ======== */
+.change-section li {
+    /* 下方間距 */ margin-bottom: 8px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 最後更新項目 ======== */
+.change-section li:last-child {
+    /* 移除最後間距 */ margin-bottom: 0;
+}
+
+
+/* ========【更新日誌版本】 設定 - 版本資訊標籤 ======== */
+.release-tags {
+    /* 上方間距 */ margin-top: 22px;
+    /* 橫向排列 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 項目間距 */ gap: 7px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 單一版本標籤 ======== */
+.release-tags > .release-tag {
+    /* 內縮空間 */ padding: 5px 8px;
+    /* 頁面背景 */ background: var(--page-bg);
+    /* 一般邊框 */ border: 1px solid var(--line);
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 次要文字 */ color: var(--text-muted);
+    /* 字體大小 */ font-size: 10px;
+}
+
+
+/* ========【更新日誌版本】 設定 - 導向版本下載 ======== */
+.release-download-link {
+    /* 上方間距 */ margin-top: 20px;
+    /* 橫向排列 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 7px;
+    /* 品牌藍 */ color: var(--accent);
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【更新日誌響應式】 設定 - 手機 ======== */
+@media (max-width: 700px) {
+    .changelog-version-index {
+        /* 手機改為靠左 */ justify-content: flex-start;
+    }
+
+    .changelog-content {
+        /* 手機安全寬度 */ width: min(calc(100% - 30px), var(--reading-width));
+        /* 手機上下內距 */ padding: 62px 0 85px;
+    }
+
+    .release-list {
+        /* 縮小左側時間軸 */ padding-left: 24px;
+    }
+
+    .release-list::before {
+        /* 調整線條位置 */ left: 4px;
+    }
+
+    .release-marker {
+        /* 調整節點位置 */ left: -25px;
+    }
+
+    .release-content {
+        /* 手機內縮 */ padding: 22px 18px;
+    }
+
+    .release-header {
+        /* 手機上下排列 */ flex-direction: column;
+        /* 縮小間距 */ gap: 8px;
+    }
+
+    .release-header h2 {
+        /* 手機版本標題 */ font-size: 21px;
+    }
+
+    .change-grid {
+        /* 手機單欄 */ grid-template-columns: 1fr;
+    }
+}
