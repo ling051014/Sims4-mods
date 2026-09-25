@@ -1639,7 +1639,7 @@ function invalidateChildrenIndex() { _childrenIndex = null; }
 
 /* ========【舊版資料相容】 設定 - 將舊版簡中系統值正規化為繁中 ======== */
 /*
- * 注意：下列簡中文字串只用來辨識 v6.5.0 舊 JSON / localStorage 內的系統列舉值。
+ * 注意：下列簡中文字串只用來辨識舊 JSON / localStorage 內的系統列舉值。
  * 使用者自行輸入的姓名、簡介、備註、特徵等文字不會被自動轉換。
  */
 const LEGACY_SYSTEM_VALUE_MAP = Object.freeze({
@@ -4938,7 +4938,9 @@ async function prepareCaptureIcons(captureRoot) {
   }));
 }
 
-function buildGenealogyCaptureNode(stageWidth, stageHeight) {
+const EXPORT_TREE_PADDING_PX = 40;
+
+function buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale) {
   const captureViewport = viewport.cloneNode(true);
   captureViewport.classList.remove('dragging');
   captureViewport.style.position = 'fixed';
@@ -4946,10 +4948,10 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight) {
   captureViewport.style.top = '0';
   captureViewport.style.zIndex = '-2147483647';
   captureViewport.style.pointerEvents = 'none';
-  captureViewport.style.width = `${stageWidth}px`;
-  captureViewport.style.height = `${stageHeight}px`;
-  captureViewport.style.minWidth = `${stageWidth}px`;
-  captureViewport.style.minHeight = `${stageHeight}px`;
+  captureViewport.style.width = `${Math.max(1, Math.ceil(stageWidth * displayScale))}px`;
+  captureViewport.style.height = `${Math.max(1, Math.ceil(stageHeight * displayScale))}px`;
+  captureViewport.style.minWidth = captureViewport.style.width;
+  captureViewport.style.minHeight = captureViewport.style.height;
   captureViewport.style.flex = 'none';
   captureViewport.style.overflow = 'hidden';
   captureViewport.style.cursor = 'default';
@@ -4957,7 +4959,8 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight) {
   const captureStage = captureViewport.querySelector('#stage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
   captureStage.classList.remove('is-transforming');
-  captureStage.style.transform = 'none';
+  // 使用與「自動適應螢幕」相同的縮放倍率，只移除 pan；不受玩家當下手動縮放影響。
+  captureStage.style.transform = `scale(${displayScale})`;
   captureStage.style.transformOrigin = '0 0';
   captureStage.style.left = '0';
   captureStage.style.top = '0';
@@ -4973,51 +4976,73 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight) {
   return captureViewport;
 }
 
-function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
+function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight, displayScale) {
   const captureStage = captureViewport.querySelector('#stage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
 
-  const stageRect = captureStage.getBoundingClientRect();
+  const viewportRect = captureViewport.getBoundingClientRect();
   const content = [
     ...captureStage.querySelectorAll('.node'),
     ...captureStage.querySelectorAll('#links path'),
     ...captureStage.querySelectorAll('#labels .edge-label')
   ];
 
-  let minX = 0;
-  let minY = 0;
-  let maxX = stageWidth;
-  let maxY = stageHeight;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
 
   content.forEach(el => {
     const rect = el.getBoundingClientRect();
     if (!Number.isFinite(rect.left) || !Number.isFinite(rect.top)) return;
     if (rect.width === 0 && rect.height === 0) return;
 
-    minX = Math.min(minX, rect.left - stageRect.left);
-    minY = Math.min(minY, rect.top - stageRect.top);
-    maxX = Math.max(maxX, rect.right - stageRect.left);
-    maxY = Math.max(maxY, rect.bottom - stageRect.top);
+    minX = Math.min(minX, rect.left - viewportRect.left);
+    minY = Math.min(minY, rect.top - viewportRect.top);
+    maxX = Math.max(maxX, rect.right - viewportRect.left);
+    maxY = Math.max(maxY, rect.bottom - viewportRect.top);
   });
 
-  // SVG stroke / shadow 需要少量安全邊界；原本 stage 內既有的留白仍完整保留。
-  const overflowPadding = 8;
-  if (minX < 0) minX -= overflowPadding;
-  if (minY < 0) minY -= overflowPadding;
-  if (maxX > stageWidth) maxX += overflowPadding;
-  if (maxY > stageHeight) maxY += overflowPadding;
+  if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+    minX = 0;
+    minY = 0;
+    maxX = Math.max(1, stageWidth * displayScale);
+    maxY = Math.max(1, stageHeight * displayScale);
+  }
 
-  const width = Math.max(1, Math.ceil(maxX - minX));
-  const height = Math.max(1, Math.ceil(maxY - minY));
+  // 關係線 stroke、卡片陰影與外框需要安全邊界；四周固定相同留白，讓整棵族譜真正置中。
+  const safety = 8;
+  minX -= safety;
+  minY -= safety;
+  maxX += safety;
+  maxY += safety;
+
+  const contentWidth = Math.max(1, maxX - minX);
+  const contentHeight = Math.max(1, maxY - minY);
+  const width = Math.max(1, Math.ceil(contentWidth + EXPORT_TREE_PADDING_PX * 2));
+  const height = Math.max(1, Math.ceil(contentHeight + EXPORT_TREE_PADDING_PX * 2));
 
   captureViewport.style.width = `${width}px`;
   captureViewport.style.height = `${height}px`;
   captureViewport.style.minWidth = `${width}px`;
   captureViewport.style.minHeight = `${height}px`;
-  captureStage.style.left = `${-minX}px`;
-  captureStage.style.top = `${-minY}px`;
+  captureStage.style.left = `${EXPORT_TREE_PADDING_PX - minX}px`;
+  captureStage.style.top = `${EXPORT_TREE_PADDING_PX - minY}px`;
 
   return { width, height };
+}
+
+function getExportDisplayScale(stageWidth, stageHeight) {
+  // 與 fitScreen() 使用同一套公式：匯出保留網頁正常「適應螢幕」時的視覺比例，
+  // 但不受玩家當下滾輪縮放或平移位置影響。
+  const viewportWidth = Math.max(1, viewport.clientWidth || 1);
+  const viewportHeight = Math.max(1, viewport.clientHeight || 1);
+  const fitScale = Math.min(
+    Math.max(1, viewportWidth - 40) / Math.max(1, stageWidth),
+    Math.max(1, viewportHeight - 40) / Math.max(1, stageHeight),
+    1.4
+  );
+  return Math.max(fitScale, SCALE_MIN);
 }
 
 async function exportGenealogyImage(sizeKey = 'standard') {
@@ -5031,15 +5056,16 @@ async function exportGenealogyImage(sizeKey = 'standard') {
   const stageWidth = Math.max(1, Math.ceil(parseFloat(stage.style.width) || stage.offsetWidth || 1));
   const stageHeight = Math.max(1, Math.ceil(parseFloat(stage.style.height) || stage.offsetHeight || 1));
 
+  const displayScale = getExportDisplayScale(stageWidth, stageHeight);
   const html2canvas = await ensureHtml2Canvas();
-  const captureViewport = buildGenealogyCaptureNode(stageWidth, stageHeight);
+  const captureViewport = buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale);
   document.body.appendChild(captureViewport);
 
   try {
     // 先讓 clone 套用完整 CSS，再把 mask icon 換成 html2canvas 能正確輸出的 SVG。
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     await prepareCaptureIcons(captureViewport);
-    const captureSize = fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight);
+    const captureSize = fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight, displayScale);
     const pixelWidth = Math.max(1, Math.round(captureSize.width * factor));
     const pixelHeight = Math.max(1, Math.round(captureSize.height * factor));
 
