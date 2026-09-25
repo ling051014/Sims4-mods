@@ -453,12 +453,76 @@
                 }
             });
         });
+    
         document.querySelectorAll('.cat-btn').forEach(btn => {
-            btn.style.opacity = "0"; 
-            btn.style.transform = "translateY(20px)"; 
-            btn.style.transition = "0.5s ease-out"; 
+            btn.style.opacity = "0";
+            btn.style.transform = "translateY(20px)";
+            btn.style.transition = "0.5s ease-out";
             observer.observe(btn);
         });
+    
+    
+        // ========【返回頂部】 設定 - 平滑動畫並精準回到頁面最上方 ========
+        const backToTop = document.querySelector('.back-to-top');
+    
+        if (backToTop) {
+            backToTop.addEventListener('click', (event) => {
+                // 阻止 #top 原生錨點跳轉
+                event.preventDefault();
+    
+                // 取得目前捲動位置
+                const startY = window.scrollY;
+    
+                // 已經在最上方時不重複執行
+                if (startY <= 0) {
+                    window.scrollTo(0, 0);
+                    return;
+                }
+    
+                // 尊重系統的減少動畫設定
+                const reduceMotion = window.matchMedia(
+                    '(prefers-reduced-motion: reduce)'
+                ).matches;
+    
+                if (reduceMotion) {
+                    window.scrollTo(0, 0);
+                    return;
+                }
+    
+                // 動畫時間
+                const duration = 650;
+    
+                // 紀錄動畫開始時間
+                const startTime = performance.now();
+    
+                // ========【返回頂部】 設定 - Ease Out Quart 緩動 ========
+                const easeOutQuart = (progress) => {
+                    return 1 - Math.pow(1 - progress, 4);
+                };
+    
+                // ========【返回頂部】 設定 - 每一幀更新捲動位置 ========
+                const animateScroll = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easedProgress = easeOutQuart(progress);
+    
+                    const nextY =
+                        startY * (1 - easedProgress);
+    
+                    window.scrollTo(0, nextY);
+    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateScroll);
+                        return;
+                    }
+    
+                    // 最後強制校正為 0，確保真的回到文件最頂端
+                    window.scrollTo(0, 0);
+                };
+    
+                requestAnimationFrame(animateScroll);
+            });
+        }
     </script>
 </body>
 </html>
