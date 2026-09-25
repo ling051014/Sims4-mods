@@ -153,40 +153,6 @@ function sortTable(colIndex) {
     const tbody = table.tBodies[0];
     if (!tbody) return;
 
-        // ===================================================
-    // ========【排序版面診斷】 設定 - 記錄首頁垂直尺寸變化 ========
-    // ===================================================
-
-    const tableContainer = table.closest('.table-container');
-    const filterPanel = table.closest('.filter-panel');
-    const resourceDetail = table.closest('.resource-detail');
-
-    const logLayout = (label) => {
-        const tableRect = table.getBoundingClientRect();
-        const containerRect = tableContainer?.getBoundingClientRect();
-        const panelRect = filterPanel?.getBoundingClientRect();
-        const detailRect = resourceDetail?.getBoundingClientRect();
-
-        console.log(label, {
-            tableHeight: tableRect.height,
-            tableTop: tableRect.top,
-
-            containerHeight: containerRect?.height,
-            containerTop: containerRect?.top,
-
-            panelHeight: panelRect?.height,
-            panelTop: panelRect?.top,
-
-            detailHeight: detailRect?.height,
-            detailTop: detailRect?.top,
-
-            pageScrollY: window.scrollY,
-            pageScrollHeight: document.documentElement.scrollHeight
-        });
-    };
-
-    logLayout('【排序前】');
-    
     // 取得被點擊的表頭 (th) 元素
     const th = table.querySelectorAll('th')[colIndex];
 
@@ -309,11 +275,35 @@ function sortTable(colIndex) {
     }
     
     // ===================================================
-    // ========【重新排列排序後內容】 ========
+    // ========【重新渲染排序後內容】（鎖定高度防擠壓版） ========
     // ===================================================
-    
-    // 一次重新排列排序後的原有資料行
-    tbody.replaceChildren(...rows);
+
+    // 1. 取得 table 並鎖定物理空間，防止搬移時高度塌陷
+    const targetTable = tbody.closest('table');
+    if (targetTable) {
+        const currentTableHeight = targetTable.offsetHeight;
+        targetTable.style.height = currentTableHeight + 'px';
+        targetTable.style.minHeight = currentTableHeight + 'px';
+        targetTable.style.overflow = 'hidden'; // 強制鎖死內容，防止瞬間抖動
+    }
+
+    // 2. 建立虛擬容器搬移行（注意：此處 rows 為你排序後的結果陣列）
+    const fragment = document.createDocumentFragment();
+    rows.forEach(row => fragment.appendChild(row));
+
+    // 3. 清空並一次性塞入新內容
+    tbody.replaceChildren(fragment);
+
+    // 4. 釋放高度鎖定（使用 setTimeout 確保渲染完全完成，避免面板卡載入）
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            if (targetTable) {
+                targetTable.style.removeProperty('height');
+                targetTable.style.removeProperty('min-height');
+                targetTable.style.removeProperty('overflow');
+            }
+        }, 10); 
+    });
 
     // ===================================================
     // ========【更新排序箭頭樣式】 ========
@@ -332,16 +322,7 @@ function sortTable(colIndex) {
     else if (sortState === 2) {
         th.classList.add('asc');
     }
-    // ===================================================
-    // ========【排序版面診斷】 設定 - 追蹤排序後 500ms ========
-    // ===================================================
-    
-    [0, 50, 100, 150, 200, 300, 500].forEach(delay => {
-        setTimeout(() => {
-            logLayout(`【排序後 ${delay}ms｜狀態 ${sortState}】`);
-        }, delay);
-    });
-    }
+}
 
 // ===================================================
 // ========【點擊行選取】 ========
