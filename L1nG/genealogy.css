@@ -4527,8 +4527,72 @@ html[lang="en"] body {
     /* 字體大小 */ font-size: 12.5px;
 }
 
-/* ========【關係編輯】 設定 - 長英文名稱與多語系內容自適應 ======== */
+/* ========【遊戲族譜匯入狀態】 設定 - ZIP 讀取與資料轉換進度 ======== */
+.game-import-status-mask {
+    /* 定位方式 */ position: fixed;
+    /* 定位範圍 */ inset: 0;
+    /* 顯示層級 */ z-index: 22000;
+    /* 顯示方式 */ display: none;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 內縮空間 */ padding: 20px;
+    /* 背景設定 */ background: var(--mask-bg);
+    /* 背景濾鏡 */ backdrop-filter: blur(3px);
+}
 
+.game-import-status-mask.show {
+    /* 顯示方式 */ display: flex;
+}
+
+.game-import-status-card {
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 14px;
+    /* 最小寬度 */ min-width: min(340px, calc(100vw - 40px));
+    /* 最大寬度 */ max-width: 460px;
+    /* 內縮空間 */ padding: 18px 20px;
+    /* 背景設定 */ background: var(--card);
+    /* 文字顏色 */ color: var(--ink);
+    /* 邊框設定 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 元素陰影 */ box-shadow: 0 18px 48px rgba(0,0,0,.22);
+}
+
+.game-import-status-content {
+    /* 顯示方式 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 項目間距 */ gap: 4px;
+}
+
+.game-import-status-title {
+    /* 字體大小 */ font-size: 14px;
+    /* 行距設定 */ line-height: 1.4;
+    /* 文字顏色 */ color: var(--ink);
+}
+
+.game-import-status-text {
+    /* 字體大小 */ font-size: 12.5px;
+    /* 行距設定 */ line-height: 1.45;
+    /* 文字顏色 */ color: var(--sub);
+}
+
+.game-import-spinner {
+    /* 元素寬度 */ width: 22px;
+    /* 元素高度 */ height: 22px;
+    /* 彈性尺寸 */ flex: 0 0 22px;
+    /* 邊框設定 */ border: 2px solid var(--border);
+    /* 上方邊框 */ border-top-color: var(--accent);
+    /* 圓角弧度 */ border-radius: 50%;
+    /* 動畫設定 */ animation: game-import-spin .7s linear infinite;
+}
+
+@keyframes game-import-spin {
+    to {
+        /* 元素變形 */ transform: rotate(360deg);
+    }
+}
+
+/* ========【關係編輯】 設定 - 長英文名稱與多語系內容自適應 ======== */
 @media (max-width: 760px) {
     .rel-anno-item {
         /* 小螢幕改為較彈性的雙欄，避免英文欄位被壓縮 */ grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
