@@ -54,7 +54,19 @@
                         <div class="app-menu" id="topbarMoreMenu">
                             <button class="topbar-icon-only app-menu-trigger" id="topbarMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" title="更多"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
                             <div class="app-menu-popover topbar-more-popover" role="menu">
-                                <label class="app-menu-item" role="menuitem" tabindex="0"><span class="l1ng-icon icon-box-arrow-in-down" aria-hidden="true"></span><span>匯入 JSON 備份</span><input accept=".json" hidden id="importInput" type="file"></label>
+                                
+                                <label class="app-menu-item" role="menuitem" tabindex="0">
+                                    <span class="l1ng-icon icon-box-arrow-in-down" aria-hidden="true"></span>
+                                    <span>匯入 JSON 備份</span>
+                                    <input accept=".json" hidden id="importInput" type="file">
+                                </label>
+                                
+                                <label class="app-menu-item" role="menuitem" tabindex="0">
+                                    <span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span>
+                                    <span>匯入遊戲族譜</span>
+                                    <input accept=".zip" hidden id="gameImportInput" type="file">
+                                </label>
+                                
                                 <button class="app-menu-item" id="bgBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></button>
                                 <button class="app-menu-item" id="tipsBtn" type="button" role="menuitem"><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>使用提示</span></button>
                                 <div class="app-menu-divider"></div>
@@ -826,6 +838,7 @@
             </div>
         </div>
 
+        <script src="genealogy_gameImport.js"></script>
         <script src="genealogy.js"></script>
     </body>
 </html>
