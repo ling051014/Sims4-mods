@@ -2756,7 +2756,7 @@ body[data-theme="midnight"] .stage-老年 {
     /* 背景設定 */ background: var(--panel-bg);
 }
 
-/* ========【相簿瀏覽器】 設定 - V6.5 全域相簿檢視 ======== */
+/* ========【相簿瀏覽器】 設定 - 全域相簿檢視 ======== */
 
 .gallery-browser-modal {
     /* 元素寬度 */ width: min(1000px,100%);
