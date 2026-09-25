@@ -219,6 +219,7 @@ function isNativeTextUndoTarget(target) {
 }
 
 let editingPets = [];
+let editingTraits = [];
 let editingPetIndex = -1;
 let editingPetAvatar = null;
 
@@ -1276,7 +1277,7 @@ function applyAvatarProfile(name) {
   try { localStorage.setItem(AVATAR_PROFILE_KEY, name); } catch(e){}
   const p = getAvatarProfile();
   const hint = $('avatarProfileHint');
-  if (hint) hint.innerHTML = `${iconSvg('info-circle')} 目前品質：<b>${p.label}</b>（最大 ${p.max}px）。僅套用於之後上傳的頭像。`;
+  if (hint) hint.innerHTML = `目前品質：<b>${p.label}</b>（最大 ${p.max}px）。`;
   const avTip = $('avatarQualityHint');
   if (avTip) avTip.textContent = `支援 JPG / PNG / GIF，自動壓縮為 ${p.max}×${p.max}`;
 }
@@ -1289,7 +1290,7 @@ function applyPetAvatarProfile(name) {
   try { localStorage.setItem(PET_AVATAR_PROFILE_KEY, name); } catch(e){}
   const p = getPetAvatarProfile();
   const hint = $('petAvatarProfileHint');
-  if (hint) hint.innerHTML = `${iconSvg('info-circle')} 目前品質：<b>${p.label}</b>（最大 ${p.max}px）。`;
+  if (hint) hint.innerHTML = `目前品質：<b>${p.label}</b>（最大 ${p.max}px）。`;
   const tip = $('petAvatarQualityHint');
   if (tip) tip.textContent = `支援 JPG / PNG / GIF，自動壓縮為 ${p.max}×${p.max}`;
 }
@@ -1304,10 +1305,10 @@ function applyGalleryProfile(name) {
   const hint = $('galleryProfileHint');
   if (hint) {
     if (name === 'original') {
-      hint.innerHTML = `${iconSvg('info-circle')} 目前品質：<b>原始圖片</b>。不壓縮，保持原始格式與畫質。<br>
+      hint.innerHTML = `目前品質：<b>原始圖片</b>。不壓縮，保持原始格式與畫質。<br>
         ${iconSvg('exclamation-triangle')} IndexedDB 容量雖然較大，但大型圖片仍會快速佔滿空間。`;
     } else {
-      hint.innerHTML = `${iconSvg('info-circle')} 目前品質：<b>${p.label}</b>（最大 ${p.max}px · ${p.hint}）。僅套用於之後上傳的圖片。`;
+      hint.innerHTML = `目前品質：<b>${p.label}</b>（最大 ${p.max}px · ${p.hint}）。`;
     }
   }
 }
@@ -2533,6 +2534,13 @@ function openInfoCard(id) {
     metaItems.push(`<span class="meta-pill">${iconSvg(RACE_PRESETS[c.race].icon)} ${esc(uiText(RACE_PRESETS[c.race].label))}</span>`);
   }
   if (c.adoptive) metaItems.push(`<span class="meta-pill">${iconSvg('house-heart')} ${esc(uiText('領養'))}</span>`);
+  if (c.birthdayMonth && c.birthdayDay) {
+    metaItems.push(`<span class="meta-pill">${iconSvg('cake2')} ${esc(formatBirthdaySummary(c.birthdayMonth, c.birthdayDay))}</span>`);
+  }
+  if (c.age != null && c.age !== '') {
+    const ageText = (document.documentElement.lang || 'zh-Hant') === 'en' ? `${uiText('年齡')} ${c.age}` : `${c.age} ${uiText('歲')}`;
+    metaItems.push(`<span class="meta-pill">${iconSvg('hourglass-split')} ${esc(ageText)}</span>`);
+  }
   meta.innerHTML = metaItems.join('');
 
   const body = $('infoCardBody');
@@ -4162,6 +4170,192 @@ function updateCauseOfDeathVisibility() {
 }
 $('fStatus').addEventListener('change', updateCauseOfDeathVisibility);
 
+// ========【個人檔案編輯器】 設定 - 分頁、生日年齡摘要與特徵標籤 ========
+function getBirthdayDayLimit(monthValue) {
+  const month = Number(monthValue) || 0;
+  return [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1] || 31;
+}
+
+function populateBirthdayDays(preferredValue = null) {
+  const monthSelect = $('fBirthdayMonth');
+  const daySelect = $('fBirthdayDay');
+  if (!monthSelect || !daySelect) return;
+
+  const current = preferredValue !== null ? String(preferredValue || '') : String(daySelect.value || '');
+  const limit = monthSelect.value ? getBirthdayDayLimit(monthSelect.value) : 31;
+  daySelect.innerHTML = `<option value="">${esc(uiText('日'))}</option>` +
+    Array.from({ length: limit }, (_, index) => {
+      const day = String(index + 1);
+      return `<option value="${day}">${day}</option>`;
+    }).join('');
+  if (current && Number(current) <= limit) daySelect.value = current;
+}
+
+function formatBirthdaySummary(monthValue, dayValue) {
+  const month = Number(monthValue) || 0;
+  const day = Number(dayValue) || 0;
+  if (!month || !day) return uiText('生日未設定');
+
+  const lang = document.documentElement.lang || 'zh-Hant';
+  if (lang === 'en') {
+    try {
+      return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+        .format(new Date(Date.UTC(2000, month - 1, day)));
+    } catch (_) {}
+  }
+  return `${month} ${uiText('月')} ${day} ${uiText('日')}`;
+}
+
+function syncTraitHiddenInput() {
+  const hidden = $('fTraits');
+  if (hidden) hidden.value = editingTraits.join('，');
+}
+
+function renderTraitEditor() {
+  const list = $('traitChipList');
+  if (!list) return;
+  syncTraitHiddenInput();
+  list.innerHTML = editingTraits.map((trait, index) =>
+    `<span class="trait-chip"><span>${esc(trait)}</span><button type="button" class="trait-chip-remove" data-trait-index="${index}" aria-label="${esc(uiText('移除'))}" title="${esc(uiText('移除'))}">×</button></span>`
+  ).join('');
+  list.querySelectorAll('.trait-chip-remove').forEach(button => {
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.traitIndex);
+      if (!Number.isInteger(index) || index < 0 || index >= editingTraits.length) return;
+      editingTraits.splice(index, 1);
+      renderTraitEditor();
+    });
+  });
+}
+
+function addTraitFromEditor() {
+  const input = $('traitInput');
+  if (!input) return;
+  const pieces = input.value.split(/[,，\n]+/).map(value => value.trim()).filter(Boolean);
+  if (!pieces.length) return;
+  pieces.forEach(value => {
+    if (!editingTraits.some(existing => existing.toLocaleLowerCase() === value.toLocaleLowerCase())) {
+      editingTraits.push(value);
+    }
+  });
+  input.value = '';
+  renderTraitEditor();
+  input.focus();
+}
+
+function switchEditorTab(tabName = 'basic') {
+  const tabs = [...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
+  const panels = [...document.querySelectorAll('.sim-editor-panel[data-editor-panel]')];
+  if (!tabs.some(tab => tab.dataset.editorTab === tabName)) tabName = 'basic';
+
+  tabs.forEach(tab => {
+    const active = tab.dataset.editorTab === tabName;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+    tab.tabIndex = active ? 0 : -1;
+  });
+  panels.forEach(panel => {
+    const active = panel.dataset.editorPanel === tabName;
+    panel.classList.toggle('active', active);
+    panel.hidden = !active;
+  });
+
+  const content = document.querySelector('.sim-editor-content');
+  if (content) content.scrollTop = 0;
+}
+
+function syncProfilePreview() {
+  const name = ($('fName')?.value || '').trim();
+  const namePreview = $('profileNamePreview');
+  if (namePreview) namePreview.textContent = name || uiText(editingId ? '（未命名）' : '新增模擬市民');
+
+  const badgePreview = $('profileBadgePreview');
+  if (badgePreview) {
+    const stage = $('fStage')?.value || '';
+    const gender = $('fGender')?.value || '';
+    const status = $('fStatus')?.value || '';
+    const race = $('fRace')?.value || '';
+    const items = [];
+    if (stage) items.push(`<span class="stage-tag stage-${esc(stage)}">${esc(uiText(stage))}</span>`);
+    if (gender) {
+      const icon = gender === '男' ? 'gender-male' : gender === '女' ? 'gender-female' : 'gender-ambiguous';
+      items.push(`<span class="profile-pill">${iconSvg(icon)}<span>${esc(uiText(gender))}</span></span>`);
+    }
+    if (status) {
+      const icon = status === '幽靈' ? 'ghost-symbol' : status === '已故' ? 'tombstone' : 'heart';
+      items.push(`<span class="profile-pill">${iconSvg(icon)}<span>${esc(uiText(status))}</span></span>`);
+    }
+    if (race && RACE_PRESETS[race]) {
+      const preset = RACE_PRESETS[race];
+      items.push(`<span class="profile-pill">${preset.icon ? iconSvg(preset.icon) : ''}<span>${esc(uiText(preset.label))}</span></span>`);
+    }
+    badgePreview.innerHTML = items.join('');
+  }
+
+  const birthday = $('profileBirthdayPreview');
+  if (birthday) birthday.textContent = formatBirthdaySummary($('fBirthdayMonth')?.value, $('fBirthdayDay')?.value);
+
+  const age = $('profileAgePreview');
+  if (age) {
+    const rawAge = $('fAge')?.value;
+    if (rawAge === '' || rawAge == null) age.textContent = uiText('年齡未設定');
+    else if ((document.documentElement.lang || 'zh-Hant') === 'en') age.textContent = `${uiText('年齡')} ${rawAge}`;
+    else age.textContent = `${rawAge} ${uiText('歲')}`;
+  }
+
+  const residence = $('profileResidencePreview');
+  if (residence) residence.textContent = ($('fResidence')?.value || '').trim() || uiText('居住地未設定');
+}
+
+function setupSimEditorInteractions() {
+  document.querySelectorAll('.sim-editor-tab[data-editor-tab]').forEach(tab => {
+    tab.addEventListener('click', () => switchEditorTab(tab.dataset.editorTab));
+    tab.addEventListener('keydown', event => {
+      if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+      const tabs = [...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
+      const index = tabs.indexOf(tab);
+      if (index < 0) return;
+      event.preventDefault();
+      let nextIndex = index;
+      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = tabs.length - 1;
+      switchEditorTab(tabs[nextIndex].dataset.editorTab);
+      tabs[nextIndex].focus();
+    });
+  });
+
+  const traitAddBtn = $('traitAddBtn');
+  if (traitAddBtn) traitAddBtn.addEventListener('click', addTraitFromEditor);
+  const traitInput = $('traitInput');
+  if (traitInput) traitInput.addEventListener('keydown', event => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    addTraitFromEditor();
+  });
+
+  const month = $('fBirthdayMonth');
+  if (month) month.addEventListener('change', () => {
+    const previousDay = $('fBirthdayDay')?.value || '';
+    populateBirthdayDays(previousDay);
+    syncProfilePreview();
+  });
+  const day = $('fBirthdayDay');
+  if (day) day.addEventListener('change', syncProfilePreview);
+
+  ['fName','fAge','fResidence'].forEach(id => {
+    const element = $(id);
+    if (element) element.addEventListener('input', syncProfilePreview);
+  });
+  ['fStage','fGender','fStatus','fRace'].forEach(id => {
+    const element = $(id);
+    if (element) element.addEventListener('change', syncProfilePreview);
+  });
+}
+
+setupSimEditorInteractions();
+
 function openEditor(id) {
   editingId = id || null;
   const c = id ? db.sims[id] : null;
@@ -4171,10 +4365,15 @@ function openEditor(id) {
   $('fGender').value = c ? (c.gender||'男') : '男';
   $('fStatus').value = c ? (c.status||'在世') : '在世';
   $('fRace').value = c ? (c.race||'') : '';
+  $('fBirthdayMonth').value = c && c.birthdayMonth ? String(c.birthdayMonth) : '';
+  populateBirthdayDays(c && c.birthdayDay ? c.birthdayDay : '');
+  $('fAge').value = c && c.age != null ? String(c.age) : '';
   $('fResidence').value = c ? displayDataText(c.residence, c) : '';
   $('fAspiration').value = c ? displayDataText(c.aspiration, c) : '';
   $('fCauseOfDeath').value = c ? displayDataText(c.causeOfDeath, c) : '';
-  $('fTraits').value = c ? (c.traits||[]).map(value => displayDataText(value, c)).join('，') : '';
+  editingTraits = c ? (c.traits||[]).map(value => displayDataText(value, c)) : [];
+  renderTraitEditor();
+  if ($('traitInput')) $('traitInput').value = '';
   $('fCareer').value = c ? displayDataText(c.career, c) : '';
   $('fBio').value = c ? displayDataText(c.bio, c) : '';
   $('fAdoptive').value = c ? String(c.adoptive||false) : 'false';
@@ -4185,6 +4384,8 @@ function openEditor(id) {
   editingGallery = c ? JSON.parse(JSON.stringify(c.gallery || [])) : [];
   renderGalleryGrid();
   updateCauseOfDeathVisibility();
+  syncProfilePreview();
+  switchEditorTab('basic');
 
   $('fFamilyIds').innerHTML = db.families.map(f =>
     `<option value="${f.id}">${esc(displayDataText(f.name, f))}</option>`).join('');
@@ -4239,6 +4440,8 @@ function openEditor(id) {
 
   $('btnDelete').style.display = c ? '' : 'none';
   $('relSection').style.display = c ? '' : 'none';
+  const newRelHint = $('newSimRelationsHint');
+  if (newRelHint) newRelHint.hidden = !!c;
   mask.classList.add('show');
   setTimeout(() => $('fName').focus(), 60);
 }
@@ -4248,6 +4451,7 @@ function closeEditor() {
   editingId = null;
   editingAvatar = null;
   editingPets = [];
+  editingTraits = [];
   editingGallery = [];
   petMask.classList.remove('show');
   editingPetIndex = -1;
@@ -4409,6 +4613,9 @@ function saveChar() {
     gender: $('fGender').value,
     status: st,
     race: $('fRace').value || '',
+    birthdayMonth: $('fBirthdayMonth').value ? Number($('fBirthdayMonth').value) : null,
+    birthdayDay: $('fBirthdayDay').value ? Number($('fBirthdayDay').value) : null,
+    age: $('fAge').value === '' ? null : Math.min(999, Math.max(0, Number($('fAge').value) || 0)),
     residence: preserveSampleText('residence', $('fResidence').value),
     aspiration: preserveSampleText('aspiration', $('fAspiration').value),
     causeOfDeath: (st === '已故' || st === '幽靈') ? preserveSampleText('causeOfDeath', $('fCauseOfDeath').value) : '',
@@ -4416,7 +4623,7 @@ function saveChar() {
     spouseIds: [...$('fSpouse').selectedOptions].map(o => o.value),
     exSpouseIds: [...$('fExSpouse').selectedOptions].map(o => o.value),
     adoptive: $('fAdoptive').value === 'true',
-    traits: preserveSampleTraits($('fTraits').value.split(/[,，\s]+/).filter(Boolean)),
+    traits: preserveSampleTraits([...editingTraits]),
     career: preserveSampleText('career', $('fCareer').value),
     bio: preserveSampleText('bio', $('fBio').value),
     avatar: editingAvatar || null,
@@ -4923,14 +5130,20 @@ async function prepareCaptureIcons(captureRoot) {
       const color = getComputedStyle(icon).color || '#5f6875';
       const coloredSvg = colorizeExportSvg(svg, color);
 
-      // html2canvas 不支援 CSS mask。匯出 clone 直接改成同一顆彩色 SVG 背景，避免黑色方塊。
+      // 匯出與畫面共用同一顆 SVG 圖形：clone 中直接放入 inline SVG，避免 background/mask 形成第二套渲染。
+      const parsed = new DOMParser().parseFromString(coloredSvg, 'image/svg+xml');
+      const svgEl = parsed.documentElement;
+      if (!svgEl || String(svgEl.nodeName).toLowerCase() !== 'svg') throw new Error('Invalid SVG');
+      svgEl.setAttribute('width', '100%');
+      svgEl.setAttribute('height', '100%');
+      svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      icon.innerHTML = new XMLSerializer().serializeToString(svgEl);
       icon.style.setProperty('-webkit-mask-image', 'none', 'important');
       icon.style.setProperty('mask-image', 'none', 'important');
-      icon.style.setProperty('background-color', 'transparent', 'important');
-      icon.style.setProperty('background-image', svgToDataUrl(coloredSvg), 'important');
-      icon.style.setProperty('background-repeat', 'no-repeat', 'important');
-      icon.style.setProperty('background-position', 'center', 'important');
-      icon.style.setProperty('background-size', 'contain', 'important');
+      icon.style.setProperty('background', 'transparent', 'important');
+      icon.style.setProperty('display', 'inline-flex', 'important');
+      icon.style.setProperty('align-items', 'center', 'important');
+      icon.style.setProperty('justify-content', 'center', 'important');
     } catch (err) {
       // 圖示無法載入時寧可隱藏，也不要輸出成錯誤的實心方塊。
       icon.style.setProperty('visibility', 'hidden', 'important');
@@ -5048,7 +5261,10 @@ function getExportDisplayScale(stageWidth, stageHeight) {
 async function exportGenealogyImage(sizeKey = 'standard') {
   if (!db || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
 
-  // 匯出前重新繪製，確保卡片、關係線與手動位置都是目前最新狀態。
+  // 等待目前語系字型完成載入後再量測與繪製，避免 HTML 與 PNG 的文字基線、膠囊背景位置不同。
+  if (document.fonts && document.fonts.ready) {
+    try { await document.fonts.ready; } catch (_) {}
+  }
   render();
 
   const factorMap = { standard: 1, hd: 2, uhd: 3 };
@@ -5083,6 +5299,7 @@ async function exportGenealogyImage(sizeKey = 'standard') {
       scrollX: 0,
       scrollY: 0,
       useCORS: true,
+      foreignObjectRendering: true,
       allowTaint: false,
       imageTimeout: 15000,
       logging: false,
@@ -5687,6 +5904,88 @@ Object.assign(EN, {
   '重做上一個拖曳操作': ' redoes the previous drag operation.'
 });
 
+Object.assign(ZH_HANS_EXACT, {
+  '更換頭像': '更换头像',
+  '移除頭像': '移除头像',
+  '關係標註說明': '关系标注说明',
+  '基本資料': '基本资料',
+  '家庭關係': '家庭关系',
+  '其他關係': '其他关系',
+  '相簿與寵物': '相册与宠物',
+  '模擬市民編輯分類': '模拟市民编辑分类',
+  '生日': '生日',
+  '年齡': '年龄',
+  '月': '月',
+  '日': '日',
+  '歲': '岁',
+  '生日月份': '生日月份',
+  '生日日期': '生日日期',
+  '生日未設定': '生日未设置',
+  '年齡未設定': '年龄未设置',
+  '居住地未設定': '居住地未设置',
+  '可逐一新增或移除': '可逐项添加或移除',
+  '輸入特徵後按 Enter': '输入特征后按 Enter',
+  '子女關係說明': '子女关系说明',
+  '兄弟姐妹關係說明': '兄弟姐妹关系说明',
+  '關係設定說明': '关系设置说明',
+  '每條連線可獨立設定關係名稱，也可重設已拖曳的關係名稱位置。': '每条连线可独立设置关系名称，也可重置已拖动的关系名称位置。',
+  '寵物說明': '宠物说明',
+  '記錄該模擬市民擁有的寵物。': '记录该模拟市民拥有的宠物。',
+  '相簿操作說明': '相册操作说明',
+  '可記錄不同人生階段、合影等多張圖片；支援拖曳圖片到相簿，或在編輯器內按 Ctrl+V 貼上截圖。': '可记录不同人生阶段、合影等多张图片；支持拖拽图片到相册，或在编辑器内按 Ctrl+V 粘贴截图。',
+  '儲存模擬市民後即可新增其他關係。': '保存模拟市民后即可添加其他关系。',
+  '加入家族說明': '加入家族说明',
+  '移出家族說明': '移出家族说明',
+  '圖片儲存說明': '图片存储说明',
+  'JSON 備份說明': 'JSON 备份说明',
+  '模擬市民頭像畫質說明': '模拟市民头像画质说明',
+  '寵物頭像畫質說明': '宠物头像画质说明',
+  '相簿圖片畫質說明': '相册图片画质说明',
+  '僅套用於之後上傳的頭像。': '仅适用于之后上传的头像。',
+  '僅套用於之後上傳的圖片。': '仅适用于之后上传的图片。'
+});
+
+Object.assign(EN, {
+  '更換頭像': 'Change Portrait',
+  '移除頭像': 'Remove Portrait',
+  '關係標註說明': 'Relationship label help',
+  '基本資料': 'Profile',
+  '家庭關係': 'Family',
+  '其他關係': 'Other Relationships',
+  '相簿與寵物': 'Gallery & Pets',
+  '模擬市民編輯分類': 'Sim editor sections',
+  '生日': 'Birthday',
+  '年齡': 'Age',
+  '月': 'Month',
+  '日': 'Day',
+  '歲': 'years old',
+  '生日月份': 'Birthday month',
+  '生日日期': 'Birthday day',
+  '生日未設定': 'Birthday not set',
+  '年齡未設定': 'Age not set',
+  '居住地未設定': 'Residence not set',
+  '可逐一新增或移除': 'Add or remove traits individually',
+  '輸入特徵後按 Enter': 'Type a trait and press Enter',
+  '子女關係說明': 'Children relationship help',
+  '兄弟姐妹關係說明': 'Sibling relationship help',
+  '關係設定說明': 'Relationship settings help',
+  '每條連線可獨立設定關係名稱，也可重設已拖曳的關係名稱位置。': 'Each connection can have its own relationship label, and moved label positions can be reset.',
+  '寵物說明': 'Pet help',
+  '記錄該模擬市民擁有的寵物。': 'Record pets owned by this Sim.',
+  '相簿操作說明': 'Gallery help',
+  '可記錄不同人生階段、合影等多張圖片；支援拖曳圖片到相簿，或在編輯器內按 Ctrl+V 貼上截圖。': 'Store multiple photos from different life stages or group shots. Drag images into the gallery or press Ctrl+V in the editor to paste a screenshot.',
+  '儲存模擬市民後即可新增其他關係。': 'Save the Sim first, then you can add other relationships.',
+  '加入家族說明': 'Add to family help',
+  '移出家族說明': 'Remove from family help',
+  '圖片儲存說明': 'Image storage help',
+  'JSON 備份說明': 'JSON backup help',
+  '模擬市民頭像畫質說明': 'Sim portrait quality help',
+  '寵物頭像畫質說明': 'Pet portrait quality help',
+  '相簿圖片畫質說明': 'Gallery image quality help',
+  '僅套用於之後上傳的頭像。': 'Applies only to portraits uploaded from now on.',
+  '僅套用於之後上傳的圖片。': 'Applies only to images uploaded from now on.'
+});
+
   /* 圖示已改為 SVG；這裡只清理舊版翻譯資料可能殘留的表情符號。 */
   const LEGACY_EMOJI_PREFIX = /^[\s]*(?:[\u2600-\u27BF]|[\u{1F000}-\u{1FAFF}])+[\uFE0F\u200D\s]*/u;
   Object.entries(EN).forEach(([key, value]) => {
@@ -5812,7 +6111,7 @@ They will remain in the global Sim pool.`;
 
   function translateAttrs(el, refreshSource = false) {
     if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
-    const attrs = ['title','placeholder','aria-label','alt'];
+    const attrs = ['title','placeholder','aria-label','alt','data-tooltip'];
     let cache = attrSource.get(el);
     if (!cache) { cache = {}; attrSource.set(el, cache); }
     attrs.forEach(name => {
@@ -5853,6 +6152,11 @@ They will remain in the global Sim pool.`;
       refreshFamilyUI();
       render();
       if (searchInput && searchInput.value.trim()) renderTopbarSearchResults();
+    }
+    if (mask && mask.classList.contains('show')) {
+      const birthdayDay = $('fBirthdayDay') ? $('fBirthdayDay').value : '';
+      populateBirthdayDays(birthdayDay);
+      syncProfilePreview();
     }
     syncAllNavSelectControls();
   }
