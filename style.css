@@ -547,6 +547,79 @@ body.mod-list-page {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
+/* ========【快捷鍵提示】 設定 - 鍵盤按鍵 ======== */
+.shortcut-key {
+    /* 繼承網站字體 */ font-family: inherit;
+    /* 字體大小 */ font-size: 11px;
+    /* 背景顏色 */ background: #ffffff;
+    /* 邊框設定 */ border: 1px solid #dddddd;
+    /* 圓角弧度 */ border-radius: 4px;
+    /* 內縮空間 */ padding: 1px 5px;
+    /* 按鍵立體感 */ box-shadow: 0 1px 0 #dddddd;
+    /* 文字顏色 */ color: #666666;
+    /* 禁止按鍵文字換行 */ white-space: nowrap;
+}
+
+/* ========【快捷鍵提示】 設定 - 滑鼠外型 ======== */
+.mouse-hint {
+    /* 相對定位 */ position: relative;
+    /* 行內區塊 */ display: inline-block;
+    /* 滑鼠寬度 */ width: 19px;
+    /* 滑鼠高度 */ height: 24px;
+    /* 左右間距 */ margin: 0 4px 0 2px;
+    /* 與文字垂直對齊 */ vertical-align: -7px;
+    /* 外框線條 */ border: 1.35px solid currentColor;
+    /* 滑鼠圓角 */ border-radius: 8px 8px 9px 9px;
+    /* 外框顏色 */ color: #888888;
+    /* 背景顏色 */ background: #ffffff;
+    /* 隱藏超出內容 */ overflow: hidden;
+}
+
+/* ========【快捷鍵提示】 設定 - 滑鼠左右鍵區域 ======== */
+.mouse-hint::before,
+.mouse-hint::after {
+    /* 建立按鍵區域 */ content: "";
+    /* 絕對定位 */ position: absolute;
+    /* 頂部位置 */ top: 1px;
+    /* 按鍵寬度 */ width: 7px;
+    /* 按鍵高度 */ height: 8px;
+    /* 按鍵圓角 */ border-radius: 5px 3px 2px 2px;
+}
+.mouse-hint::before {
+    /* 左鍵位置 */ left: 1px;
+}
+.mouse-hint::after {
+    /* 右鍵位置 */ right: 1px;
+}
+
+/* ========【快捷鍵提示】 設定 - 左鍵與右鍵高亮 ======== */
+.mouse-hint.mouse-left::before,
+.mouse-hint.mouse-right::after {
+    /* 使用網站品牌藍 */ background: #55acee;
+}
+
+/* ========【快捷鍵提示】 設定 - 滑鼠滾輪 ======== */
+.mouse-hint-wheel {
+    /* 絕對定位 */ position: absolute;
+    /* 水平置中 */ left: 50%;
+    /* 頂部位置 */ top: 3px;
+    /* 滾輪寬度 */ width: 3px;
+    /* 滾輪高度 */ height: 6px;
+    /* 滾輪圓角 */ border-radius: 3px;
+    /* 預設滾輪顏色 */ background: #aaaaaa;
+    /* 水平置中修正 */ transform: translateX(-50%);
+}
+
+/* ========【快捷鍵提示】 設定 - 滾輪操作高亮 ======== */
+.mouse-hint.mouse-wheel .mouse-hint-wheel {
+    /* 使用網站品牌藍 */ background: #55acee;
+}
+
+.mouse-hint.mouse-wheel::before,
+.mouse-hint.mouse-wheel::after {
+    /* 滾輪模式不高亮左右鍵 */ background: transparent;
+}
+
 /* ========【技能懸浮提示】 設定 - 觸發文字 ======== */
 .skill-tooltip-trigger {
     /* 幫助游標 */ cursor: help;
