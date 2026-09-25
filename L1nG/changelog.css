@@ -1,0 +1,711 @@
+/* ============================================================
+   RealDate Changelog
+   核心架構：
+   1. Navbar 永遠位於可捲動區之外。
+   2. .changelog-scroll 是唯一垂直捲動容器。
+   3. 因此右側垂直卷軸從 Navbar 下方開始。
+   4. 同一份版本導覽捲過原位置後，直接搬入 Navbar 正中央。
+   5. 不使用第二條頂欄、不使用卷軸遮罩、不使用 CSS 補丁層。
+   ============================================================ */
+
+:root {
+    --page-width: 980px;
+    --top-nav-height: 64px;
+
+    --page-bg: #fafafa;
+    --surface: #ffffff;
+    --text-strong: #2f2f2f;
+    --text-main: #5c5c5c;
+    --text-muted: #777777;
+    --text-soft: #8a8a8a;
+    --line: #e9e9e9;
+    --line-soft: #f1f1f1;
+    --accent: #55acee;
+    --accent-soft: rgba(85, 172, 238, .07);
+    --accent-border: rgba(85, 172, 238, .42);
+
+    --font-body: 15px;
+    --font-secondary: 13px;
+    --font-small: 12px;
+    --font-heading: 21px;
+
+    --radius-card: 8px;
+    --radius-chip: 5px;
+}
+
+/* ========【全站基礎】 ======== */
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+
+    background: var(--page-bg);
+    color: var(--text-main);
+    font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    font-size: var(--font-body);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font-family: inherit;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ========【語言顯示】 ======== */
+html[data-language="zh-Hant"] [data-lang="en"] {
+    display: none !important;
+}
+
+html[data-language="en"] [data-lang="zh-Hant"] {
+    display: none !important;
+}
+
+/* ========【唯一頂部導覽】 ========
+   Navbar 是 body 的固定高度第一列，
+   不屬於 .changelog-scroll，因此卷軸不會穿過這裡。
+   ================================= */
+.changelog-nav {
+    position: relative;
+    z-index: 60;
+    flex: 0 0 var(--top-nav-height);
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 20px;
+
+    width: 100%;
+    min-height: var(--top-nav-height);
+    padding: 0 24px;
+
+    background: rgba(255, 255, 255, .97);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    color: var(--text-soft);
+    font-size: var(--font-small);
+    line-height: 1;
+}
+
+.changelog-nav-left {
+    justify-self: start;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    min-width: 0;
+    letter-spacing: 1.7px;
+}
+
+.changelog-back {
+    color: var(--text-muted);
+    transition: color .2s ease;
+}
+
+.changelog-back:hover {
+    color: var(--text-strong);
+}
+
+.changelog-divider,
+.language-divider {
+    color: #cfcfcf;
+}
+
+.changelog-current {
+    color: var(--text-strong);
+}
+
+/* ========【唯一垂直捲動容器】 ======== */
+.changelog-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+
+    background: var(--page-bg);
+    scroll-behavior: smooth;
+}
+
+/* ========【頂條中央版本區】 ========
+   平常為空；捲過版本原位後，同一份 .version-index
+   由 JS 移到這裡，不建立第二套版本 UI。
+   ================================= */
+.nav-version-center {
+    justify-self: center;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* ========【語言切換】 ======== */
+.language-switch {
+    justify-self: end;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-left: 0;
+}
+
+.language-button {
+    border: 0;
+    background: transparent;
+    padding: 9px 3px;
+
+    color: var(--text-soft);
+    font-size: var(--font-small);
+    line-height: 1;
+    letter-spacing: .8px;
+
+    cursor: pointer;
+    transition: color .2s ease;
+}
+
+.language-button:hover,
+.language-button.active {
+    color: var(--accent);
+}
+
+/* ========【共用內容寬度】 ======== */
+.changelog-page {
+    width: min(100%, var(--page-width));
+    margin: 0 auto;
+    padding-left: 28px;
+    padding-right: 28px;
+}
+
+/* ========【專案介紹】 ======== */
+.changelog-intro {
+    padding-top: 70px;
+    padding-bottom: 34px;
+}
+
+.project-header {
+    padding-bottom: 38px;
+    border-bottom: 1px solid var(--line);
+}
+
+.project-eyebrow {
+    margin-bottom: 15px;
+
+    color: var(--text-soft);
+    font-size: var(--font-small);
+    line-height: 1.4;
+    letter-spacing: 2.4px;
+}
+
+.project-header h1 {
+    margin: 0 0 19px;
+
+    color: #222222;
+    font-size: clamp(32px, 5vw, 50px);
+    font-weight: 200;
+    line-height: 1.12;
+    letter-spacing: 4px;
+}
+
+.project-description {
+    max-width: 780px;
+    margin: 0 0 23px;
+
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+.project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 26px;
+
+    color: var(--text-muted);
+    font-size: var(--font-secondary);
+    line-height: 1.6;
+    letter-spacing: .55px;
+}
+
+/* ========【版本導覽原位容器】 ======== */
+.version-index-home {
+    width: min(100%, var(--page-width));
+    margin: 0 auto;
+    padding: 0 28px 46px;
+}
+
+/* ========【版本導覽：頁面原位】 ======== */
+.version-index {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.version-link {
+    flex: 0 0 auto;
+
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-chip);
+    background: var(--surface);
+
+    color: var(--text-muted);
+    font-size: var(--font-secondary);
+    line-height: 1.15;
+    letter-spacing: .25px;
+
+    transition:
+        color .2s ease,
+        border-color .2s ease,
+        background-color .2s ease;
+}
+
+.version-link:hover,
+.version-link.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+}
+
+/* ========【版本導覽：融入 Navbar】 ========
+   無外框；active 只使用藍色文字與細底線。
+   ================================= */
+.nav-version-center .version-index {
+    flex-wrap: nowrap;
+    gap: 2px;
+
+    max-width: min(54vw, 560px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+}
+
+.nav-version-center .version-index::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-version-center .version-link {
+    position: relative;
+
+    padding: 8px 9px;
+
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+
+    color: var(--text-muted);
+    font-size: var(--font-secondary);
+    font-weight: 450;
+    line-height: 1.1;
+    letter-spacing: .15px;
+}
+
+.nav-version-center .version-link:hover,
+.nav-version-center .version-link.active {
+    color: var(--accent);
+    background: transparent;
+}
+
+.nav-version-center .version-link.active::after {
+    content: "";
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    bottom: 3px;
+
+    height: 1px;
+    background: var(--accent);
+}
+
+/* ========【更新內容區】 ======== */
+.changelog-releases {
+    padding-top: 0;
+    padding-bottom: 96px;
+}
+
+/* ========【更新時間軸】 ======== */
+.release-list {
+    position: relative;
+    padding-left: 34px;
+}
+
+.release-list::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 12px;
+    left: 5px;
+
+    width: 1px;
+    background: #e5e5e5;
+}
+
+.release {
+    position: relative;
+    margin-bottom: 44px;
+
+    /* 由 JS 做精準定位；此值保留給鍵盤 / 原生 hash 導航。 */
+    scroll-margin-top: 24px;
+}
+
+.release-marker {
+    position: absolute;
+    top: 8px;
+    left: -34px;
+
+    width: 11px;
+    height: 11px;
+
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 5px var(--page-bg);
+}
+
+/* ========【版本卡片】 ======== */
+.release-content {
+    padding: 30px 32px;
+
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+}
+
+.release-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 26px;
+
+    margin-bottom: 19px;
+}
+
+.release-version {
+    margin-bottom: 7px;
+
+    color: var(--accent);
+    font-size: var(--font-secondary);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 1px;
+}
+
+.release-header h2 {
+    margin: 0;
+
+    color: var(--text-strong);
+    font-size: var(--font-heading);
+    font-weight: 350;
+    line-height: 1.45;
+    letter-spacing: .55px;
+}
+
+.release-header time {
+    margin-top: 2px;
+
+    color: var(--text-muted);
+    font-size: var(--font-secondary);
+    line-height: 1.45;
+    letter-spacing: .25px;
+    white-space: nowrap;
+}
+
+.release-summary {
+    margin: 0 0 30px;
+
+    color: var(--text-muted);
+    font-size: var(--font-body);
+    line-height: 1.85;
+}
+
+/* ========【更新分類】 ======== */
+.change-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 38px;
+}
+
+.change-section h3 {
+    margin: 0 0 12px;
+
+    color: var(--text-muted);
+    font-size: var(--font-small);
+    font-weight: 650;
+    line-height: 1.45;
+    letter-spacing: 1.25px;
+}
+
+.change-section ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.change-section li {
+    margin-bottom: 10px;
+
+    color: var(--text-main);
+    font-size: 14px;
+    line-height: 1.82;
+}
+
+.change-section li:last-child {
+    margin-bottom: 0;
+}
+
+/* ========【版本標籤】 ======== */
+.release-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+
+    margin-top: 30px;
+    padding-top: 21px;
+
+    border-top: 1px solid var(--line-soft);
+}
+
+.release-tags span {
+    padding: 6px 9px;
+
+    background: var(--page-bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+
+    color: var(--text-muted);
+    font-size: var(--font-small);
+    line-height: 1.25;
+    letter-spacing: .25px;
+}
+
+/* ========【精簡 Hotfix 卡片】 ======== */
+.release.compact .release-content {
+    padding: 25px 28px;
+}
+
+.release.compact .release-header {
+    margin-bottom: 15px;
+}
+
+.release.compact .release-summary {
+    margin-bottom: 22px;
+}
+
+.release.compact .change-grid {
+    grid-template-columns: 1fr;
+}
+
+/* ========【網站底部】 ======== */
+.changelog-footer {
+    padding: 22px 24px 36px;
+
+    color: var(--text-muted);
+    font-size: var(--font-small);
+    line-height: 1.5;
+    letter-spacing: 1.3px;
+    text-align: center;
+}
+
+/* ========【平板與手機】 ======== */
+@media (max-width: 760px) {
+    :root {
+        --top-nav-height: 60px;
+        --font-body: 15px;
+        --font-secondary: 13px;
+        --font-small: 12px;
+        --font-heading: 20px;
+    }
+
+    .changelog-nav {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        column-gap: 10px;
+
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .changelog-nav-left {
+        gap: 7px;
+        letter-spacing: 1px;
+    }
+
+    .changelog-current,
+    .changelog-divider {
+        display: none;
+    }
+
+    .language-switch {
+        gap: 5px;
+    }
+
+    .nav-version-center {
+        min-width: 0;
+    }
+
+    .nav-version-center .version-index {
+        width: 100%;
+        max-width: 100%;
+        justify-content: flex-start;
+    }
+
+    .nav-version-center .version-link {
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 12px;
+    }
+
+    .nav-version-center .version-link.active::after {
+        left: 8px;
+        right: 8px;
+    }
+
+    .changelog-page {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .changelog-intro {
+        padding-top: 48px;
+        padding-bottom: 28px;
+    }
+
+    .project-header {
+        padding-bottom: 30px;
+    }
+
+    .project-header h1 {
+        letter-spacing: 2px;
+    }
+
+    .project-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .version-index-home {
+        width: 100%;
+        padding: 0 16px 36px;
+    }
+
+    .version-index-home .version-index {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        scroll-behavior: smooth;
+    }
+
+    .version-index-home .version-index::-webkit-scrollbar {
+        display: none;
+    }
+
+    .changelog-releases {
+        padding-bottom: 72px;
+    }
+
+    .release-list {
+        padding-left: 24px;
+    }
+
+    .release-list::before {
+        left: 4px;
+    }
+
+    .release {
+        margin-bottom: 34px;
+        scroll-margin-top: 20px;
+    }
+
+    .release-marker {
+        left: -25px;
+    }
+
+    .release-content,
+    .release.compact .release-content {
+        padding: 23px 20px;
+    }
+
+    .release-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .release-header time {
+        white-space: normal;
+    }
+
+    .change-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .change-section li {
+        font-size: 14px;
+        line-height: 1.85;
+    }
+}
+
+/* ========【極窄手機】 ======== */
+@media (max-width: 430px) {
+    .changelog-nav {
+        padding-left: 12px;
+        padding-right: 12px;
+        column-gap: 7px;
+    }
+
+    .changelog-nav-left {
+        letter-spacing: .5px;
+    }
+
+    .language-button {
+        padding-left: 1px;
+        padding-right: 1px;
+    }
+
+    .nav-version-center .version-link {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+
+    .release-content,
+    .release.compact .release-content {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}
