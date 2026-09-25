@@ -1,0 +1,1474 @@
+/* ========【全站基礎】 設定 - L1nG 創作者首頁共用色彩與尺寸 ======== */
+:root {
+    /* 互動強調色 */ --accent: #55acee;
+    /* 懸停強調色 */ --accent-hover: #3e95d3;
+    /* 深色主色 */ --primary-dark: #315f83;
+    /* 頁面背景 */ --bg: #f6f8fb;
+    /* 淡色背景 */ --bg-soft: #fbfcfe;
+    /* 卡片背景 */ --card: #ffffff;
+    /* 主要文字 */ --ink: #24292f;
+    /* 次要文字 */ --sub: #6e7781;
+    /* 淡化文字 */ --muted: #98a1aa;
+    /* 一般邊框 */ --border: #dfe5ea;
+    /* 淡色邊框 */ --border-soft: #edf1f4;
+    /* 淡藍背景 */ --blue-soft: #eef7fd;
+    /* 漢化強調色 */ --translation: #7f73b4;
+    /* 漢化淡色背景 */ --translation-soft: #f3f0fb;
+    /* 主要內容寬度 */ --max-width: 1180px;
+}
+
+
+/* ========【全站基礎】 設定 - 尺寸計算與頁面滾動 ======== */
+* {
+    /* 尺寸計算 */ box-sizing: border-box;
+}
+
+html {
+    /* 錨點平滑滾動 */ scroll-behavior: smooth;
+}
+
+
+/* ========【全站基礎】 設定 - 頁面字體、背景與文字 ======== */
+body {
+    /* 移除預設邊距 */ margin: 0;
+    /* 頁面背景 */ background:
+        radial-gradient(
+            circle at 20% 0%,
+            rgba(85, 172, 238, 0.07),
+            transparent 28rem
+        ),
+        var(--bg);
+    /* 主要文字 */ color: var(--ink);
+    /* 全站字體 */ font-family:
+        "PingFang TC",
+        "Microsoft JhengHei",
+        "Noto Sans TC",
+        sans-serif;
+    /* 全站行距 */ line-height: 1.75;
+}
+
+
+/* ========【全站基礎】 設定 - 錨點定位避開固定導覽列 ======== */
+section[id] {
+    /* 錨點上方保留空間 */ scroll-margin-top: 92px;
+}
+
+
+/* ========【頂部導覽列】 設定 - 固定導覽背景與分隔線 ======== */
+.site-header {
+    /* 固定於頂部 */ position: sticky;
+    /* 頂部座標 */ top: 0;
+    /* 顯示層級 */ z-index: 100;
+    /* 底部分隔線 */ border-bottom: 1px solid rgba(216, 222, 228, 0.78);
+    /* 半透明背景 */ background: rgba(246, 248, 251, 0.88);
+    /* 背景模糊 */ backdrop-filter: blur(18px);
+    /* Safari 背景模糊 */ -webkit-backdrop-filter: blur(18px);
+    /* 滾動狀態動畫 */ transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* ========【頂部導覽列】 設定 - 滾動後增加層次 ======== */
+.site-header.scrolled {
+    /* 滾動後背景 */ background: rgba(255, 255, 255, 0.92);
+    /* 滾動後陰影 */ box-shadow: 0 8px 28px rgba(47, 68, 82, 0.06);
+}
+
+
+/* ========【頂部導覽列】 設定 - 內容寬度與排列 ======== */
+.site-header-inner {
+    /* 安全寬度 */ width: min(calc(100% - 40px), var(--max-width));
+    /* 最小高度 */ min-height: 68px;
+    /* 水平置中 */ margin: 0 auto;
+    /* 橫向排列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 元素間距 */ gap: 30px;
+}
+
+
+/* ========【頂部導覽列】 設定 - L1nG 品牌文字 ======== */
+.brand {
+    /* 文字顏色 */ color: var(--ink);
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 19px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距 */ letter-spacing: 0.08em;
+}
+
+
+/* ========【頂部導覽列】 設定 - 導覽項目排列 ======== */
+.main-nav {
+    /* 橫向排列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 28px;
+}
+
+
+/* ========【頂部導覽列】 設定 - 一般導覽連結 ======== */
+.main-nav a {
+    /* 文字顏色 */ color: var(--sub);
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 14px;
+    /* 動畫效果 */ transition:
+        color 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+/* ========【頂部導覽列】 設定 - 導覽懸停效果 ======== */
+.main-nav a:hover {
+    /* 懸停文字 */ color: var(--accent);
+}
+
+
+/* ========【頂部導覽列】 設定 - 模組整理站內入口 ======== */
+.main-nav .nav-external {
+    /* 內縮空間 */ padding: 7px 12px;
+    /* 一般邊框 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 淡色背景 */ background: rgba(255, 255, 255, 0.72);
+}
+
+
+/* ========【頂部導覽列】 設定 - 模組整理入口懸停 ======== */
+.main-nav .nav-external:hover {
+    /* 邊框改為淡藍 */ border-color: rgba(85, 172, 238, 0.45);
+    /* 背景變白 */ background: #ffffff;
+}
+
+
+/* ========【頂部導覽列】 設定 - 手機導覽按鈕 ======== */
+.nav-toggle {
+    /* 桌面預設隱藏 */ display: none;
+    /* 固定尺寸 */ width: 40px;
+    /* 固定高度 */ height: 40px;
+    /* 移除背景 */ background: transparent;
+    /* 一般邊框 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 9px;
+    /* 指標手勢 */ cursor: pointer;
+    /* 內縮空間 */ padding: 0;
+}
+
+
+/* ========【頂部導覽列】 設定 - 手機導覽線條 ======== */
+.nav-toggle span {
+    /* 區塊顯示 */ display: block;
+    /* 線條寬度 */ width: 16px;
+    /* 線條高度 */ height: 1px;
+    /* 水平置中 */ margin: 5px auto;
+    /* 線條顏色 */ background: var(--ink);
+    /* 動畫效果 */ transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+/* ========【頂部導覽列】 設定 - 手機導覽展開狀態 ======== */
+.nav-toggle.active span:first-child {
+    /* 第一條旋轉 */ transform: translateY(3px) rotate(45deg);
+}
+
+.nav-toggle.active span:last-child {
+    /* 第二條旋轉 */ transform: translateY(-3px) rotate(-45deg);
+}
+
+
+/* ========【首頁主視覺】 設定 - 首屏高度與定位 ======== */
+.hero {
+    /* 相對定位 */ position: relative;
+    /* 首屏最小高度 */ min-height: 630px;
+    /* 隱藏裝飾溢出 */ overflow: hidden;
+    /* 啟用彈性佈局 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+}
+
+
+/* ========【首頁主視覺】 設定 - 內容寬度與間距 ======== */
+.hero-inner {
+    /* 相對定位 */ position: relative;
+    /* 顯示層級 */ z-index: 2;
+    /* 安全寬度 */ width: min(calc(100% - 40px), var(--max-width));
+    /* 水平置中 */ margin: 0 auto;
+    /* 上下內距 */ padding: 90px 0 100px;
+}
+
+
+/* ========【首頁主視覺】 設定 - 英文小標 ======== */
+.hero-eyebrow,
+.section-kicker,
+.current-label {
+    /* 品牌藍 */ color: var(--accent);
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距 */ letter-spacing: 0.16em;
+}
+
+
+/* ========【首頁主視覺】 設定 - L1nG 主標題 ======== */
+.hero-title {
+    /* 上下外距 */ margin: 12px 0 0;
+    /* 響應式字體 */ font-size: clamp(72px, 12vw, 150px);
+    /* 緊湊行距 */ line-height: 0.95;
+    /* 字距調整 */ letter-spacing: -0.06em;
+    /* 字體粗細 */ font-weight: 700;
+}
+
+
+/* ========【首頁主視覺】 設定 - 中文主述 ======== */
+.hero-subtitle {
+    /* 最大寬度 */ max-width: 720px;
+    /* 上方間距 */ margin: 34px 0 0;
+    /* 響應式字體 */ font-size: clamp(23px, 3vw, 34px);
+    /* 行距 */ line-height: 1.45;
+    /* 字體粗細 */ font-weight: 500;
+}
+
+
+/* ========【首頁主視覺】 設定 - 補充說明 ======== */
+.hero-description {
+    /* 最大寬度 */ max-width: 620px;
+    /* 上方間距 */ margin: 17px 0 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 16px;
+}
+
+
+/* ========【首頁主視覺】 設定 - 主要操作按鈕排列 ======== */
+.hero-actions {
+    /* 上方間距 */ margin-top: 34px;
+    /* 橫向排列 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 按鈕間距 */ gap: 12px;
+}
+
+
+/* ========【首頁主視覺】 設定 - 共用按鈕 ======== */
+.btn {
+    /* 最小高度 */ min-height: 46px;
+    /* 左右內距 */ padding: 0 18px;
+    /* 圓角弧度 */ border-radius: 9px;
+    /* 橫向排列 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 14px;
+    /* 字體粗細 */ font-weight: 600;
+    /* 動畫效果 */ transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* ========【首頁主視覺】 設定 - 按鈕懸停 ======== */
+.btn:hover {
+    /* 微幅上移 */ transform: translateY(-2px);
+}
+
+
+/* ========【首頁主視覺】 設定 - 主要按鈕 ======== */
+.btn-primary {
+    /* 品牌色邊框 */ border: 1px solid var(--accent);
+    /* 品牌色背景 */ background: var(--accent);
+    /* 白色文字 */ color: #ffffff;
+    /* 淡藍陰影 */ box-shadow: 0 10px 28px rgba(85, 172, 238, 0.18);
+}
+
+
+/* ========【首頁主視覺】 設定 - 主要按鈕懸停 ======== */
+.btn-primary:hover {
+    /* 懸停背景 */ background: var(--accent-hover);
+    /* 懸停邊框 */ border-color: var(--accent-hover);
+}
+
+
+/* ========【首頁主視覺】 設定 - 次要按鈕 ======== */
+.btn-secondary {
+    /* 一般邊框 */ border: 1px solid var(--border);
+    /* 白色背景 */ background: #ffffff;
+    /* 主要文字 */ color: var(--ink);
+}
+
+
+/* ========【首頁主視覺】 設定 - 次要按鈕懸停 ======== */
+.btn-secondary:hover {
+    /* 淡藍邊框 */ border-color: #c4d9e8;
+    /* 品牌藍文字 */ color: var(--accent);
+}
+
+
+/* ========【首頁主視覺】 設定 - 背景裝飾光暈 ======== */
+.hero-decoration {
+    /* 絕對定位 */ position: absolute;
+    /* 圓形 */ border-radius: 50%;
+    /* 裝飾不接收操作 */ pointer-events: none;
+}
+
+
+/* ========【首頁主視覺】 設定 - 左側光暈 ======== */
+.hero-decoration-left {
+    /* 裝飾寬度 */ width: 460px;
+    /* 裝飾高度 */ height: 460px;
+    /* 左側偏移 */ left: -190px;
+    /* 頂部位置 */ top: 30px;
+    /* 徑向漸層 */ background:
+        radial-gradient(
+            circle,
+            rgba(85, 172, 238, 0.12),
+            transparent 68%
+        );
+}
+
+
+/* ========【首頁主視覺】 設定 - 右側光暈 ======== */
+.hero-decoration-right {
+    /* 裝飾寬度 */ width: 560px;
+    /* 裝飾高度 */ height: 560px;
+    /* 右側偏移 */ right: -180px;
+    /* 底部偏移 */ bottom: -150px;
+    /* 徑向漸層 */ background:
+        radial-gradient(
+            circle,
+            rgba(49, 95, 131, 0.07),
+            transparent 70%
+        );
+}
+
+
+/* ========【共用區塊】 設定 - 主要內容寬度與上下間距 ======== */
+.section {
+    /* 安全寬度 */ width: min(calc(100% - 40px), var(--max-width));
+    /* 水平置中 */ margin: 0 auto;
+    /* 上下內距 */ padding: 90px 0;
+}
+
+
+/* ========【共用區塊】 設定 - 標題列排列 ======== */
+.section-heading {
+    /* 下方間距 */ margin-bottom: 34px;
+    /* 橫向排列 */ display: flex;
+    /* 底部對齊 */ align-items: flex-end;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 欄位間距 */ gap: 40px;
+}
+
+
+/* ========【共用區塊】 設定 - 標題字體 ======== */
+.section-heading h2,
+.translation-panel h2,
+.about-section h2 {
+    /* 上下外距 */ margin: 5px 0 0;
+    /* 響應式字體 */ font-size: clamp(30px, 4vw, 45px);
+    /* 行距 */ line-height: 1.2;
+    /* 字距 */ letter-spacing: -0.035em;
+}
+
+
+/* ========【共用區塊】 設定 - 標題補充說明 ======== */
+.section-heading > p {
+    /* 最大寬度 */ max-width: 480px;
+    /* 移除外距 */ margin: 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 14px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 大型專案卡片 ======== */
+.featured-project {
+    /* 相對定位 */ position: relative;
+    /* 最小高度 */ min-height: 410px;
+    /* 隱藏裝飾溢出 */ overflow: hidden;
+    /* 淡藍邊框 */ border: 1px solid #d7e6f1;
+    /* 圓角弧度 */ border-radius: 18px;
+    /* 淡色漸層 */ background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f8fcff 56%,
+            #eef7fd 100%
+        );
+    /* 淡色陰影 */ box-shadow: 0 22px 60px rgba(54, 89, 113, 0.06);
+}
+
+
+/* ========【RealDate 主專案】 設定 - 卡片內容 ======== */
+.featured-project-content {
+    /* 相對定位 */ position: relative;
+    /* 顯示層級 */ z-index: 2;
+    /* 最大寬度 */ max-width: 720px;
+    /* 內縮空間 */ padding: 56px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 專案狀態 ======== */
+.project-meta {
+    /* 品牌藍 */ color: var(--accent);
+    /* 橫向排列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 9px;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距 */ letter-spacing: 0.13em;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 狀態圓點 ======== */
+.status-dot {
+    /* 圓點寬度 */ width: 8px;
+    /* 圓點高度 */ height: 8px;
+    /* 禁止縮小 */ flex: 0 0 auto;
+    /* 圓形 */ border-radius: 50%;
+    /* 品牌藍背景 */ background: var(--accent);
+    /* 外圈光暈 */ box-shadow: 0 0 0 4px rgba(85, 172, 238, 0.12);
+}
+
+
+/* ========【RealDate 主專案】 設定 - 專案名稱 ======== */
+.featured-project h3 {
+    /* 上方間距 */ margin: 19px 0 0;
+    /* 響應式字體 */ font-size: clamp(43px, 7vw, 76px);
+    /* 行距 */ line-height: 1;
+    /* 字距 */ letter-spacing: -0.06em;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 英文副標 ======== */
+.project-subtitle {
+    /* 上方間距 */ margin: 17px 0 0;
+    /* 深藍文字 */ color: var(--primary-dark);
+    /* 字體大小 */ font-size: 20px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 專案說明 ======== */
+.project-description {
+    /* 最大寬度 */ max-width: 620px;
+    /* 上方間距 */ margin: 18px 0 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 15px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 系統標籤排列 ======== */
+.project-tags {
+    /* 上方間距 */ margin-top: 28px;
+    /* 橫向排列 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 標籤間距 */ gap: 8px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 系統標籤 ======== */
+.project-tags span {
+    /* 內縮空間 */ padding: 6px 10px;
+    /* 淡藍邊框 */ border: 1px solid #dceaf4;
+    /* 膠囊圓角 */ border-radius: 999px;
+    /* 半透明白底 */ background: rgba(255, 255, 255, 0.65);
+    /* 標籤文字 */ color: #52748e;
+    /* 字體大小 */ font-size: 12px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 卡片底部資訊 ======== */
+.project-footer {
+    /* 上方間距 */ margin-top: 34px;
+    /* 橫向排列 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 18px;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 12px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 尚未開放連結文字 ======== */
+.project-link-muted {
+    /* 淡化文字 */ color: var(--muted);
+}
+
+/* ========【RealDate 主專案】 設定 - 開發版與公開版狀態排列 ======== */
+.realdate-release-state {
+    /* 橫向排列 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 狀態間距 */ gap: 8px 18px;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 更新日誌入口 ======== */
+.project-action-link {
+    /* 靠右排列 */ margin-left: auto;
+    /* 橫向排列 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 文字與箭頭間距 */ gap: 7px;
+    /* 品牌藍 */ color: var(--accent);
+    /* 移除底線 */ text-decoration: none;
+    /* 字體粗細 */ font-weight: 600;
+    /* 動畫效果 */ transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 更新日誌入口懸停 ======== */
+.project-action-link:hover {
+    /* 懸停藍色 */ color: var(--accent-hover);
+    /* 微幅右移 */ transform: translateX(3px);
+}
+
+
+/* ========【RealDate 主專案】 設定 - 日曆裝飾 ======== */
+.featured-calendar {
+    /* 絕對定位 */ position: absolute;
+    /* 右側位置 */ right: 50px;
+    /* 垂直置中 */ top: 50%;
+    /* 固定寬度 */ width: 235px;
+    /* 固定高度 */ height: 235px;
+    /* 垂直置中並微旋轉 */ transform: translateY(-50%) rotate(4deg);
+    /* 淡藍邊框 */ border: 1px solid rgba(85, 172, 238, 0.13);
+    /* 圓角弧度 */ border-radius: 22px;
+    /* 半透明背景 */ background: rgba(255, 255, 255, 0.44);
+    /* 垂直排列 */ display: flex;
+    /* 垂直方向 */ flex-direction: column;
+    /* 水平置中 */ align-items: center;
+    /* 垂直置中 */ justify-content: center;
+    /* 裝飾文字 */ color: rgba(49, 95, 131, 0.12);
+    /* 禁止選取 */ user-select: none;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 日號 ======== */
+.featured-calendar-day {
+    /* 字體大小 */ font-size: 98px;
+    /* 行距 */ line-height: 0.9;
+    /* 字體粗細 */ font-weight: 700;
+}
+
+
+/* ========【RealDate 主專案】 設定 - 月份 ======== */
+.featured-calendar-month {
+    /* 上方間距 */ margin-top: 14px;
+    /* 字體大小 */ font-size: 18px;
+    /* 字距 */ letter-spacing: 0.35em;
+}
+
+
+/* ========【專案卡片】 設定 - 兩欄專案排列 ======== */
+.project-grid {
+    /* 上方間距 */ margin-top: 22px;
+    /* 網格系統 */ display: grid;
+    /* 桌面兩欄 */ grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 卡片間距 */ gap: 22px;
+}
+
+
+/* ========【專案卡片】 設定 - 共用卡片樣式 ======== */
+.project-card {
+    /* 最小高度 */ min-height: 390px;
+    /* 內縮空間 */ padding: 28px;
+    /* 一般邊框 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 16px;
+    /* 白色背景 */ background: var(--card);
+    /* 垂直排列 */ display: flex;
+    /* 垂直方向 */ flex-direction: column;
+    /* 移除底線 */ text-decoration: none;
+    /* 繼承文字顏色 */ color: inherit;
+    /* 動畫效果 */ transition:
+        transform 0.24s ease,
+        border-color 0.24s ease,
+        box-shadow 0.24s ease;
+}
+
+
+/* ========【專案卡片】 設定 - 可點擊卡片懸停 ======== */
+.project-card-link:hover {
+    /* 微幅上移 */ transform: translateY(-4px);
+    /* 淡藍邊框 */ border-color: #bfdced;
+    /* 淡色陰影 */ box-shadow: 0 18px 45px rgba(44, 73, 92, 0.08);
+}
+
+
+/* ========【專案卡片】 設定 - 卡片頂部與底部排列 ======== */
+.project-card-top,
+.project-card-footer {
+    /* 橫向排列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 項目間距 */ gap: 15px;
+}
+
+
+/* ========【專案卡片】 設定 - 類型標籤 ======== */
+.project-type {
+    /* 淡化文字 */ color: var(--muted);
+    /* 字體大小 */ font-size: 11px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 字距 */ letter-spacing: 0.14em;
+}
+
+
+/* ========【專案卡片】 設定 - 右側狀態文字 ======== */
+.project-status {
+    /* 淡化文字 */ color: var(--muted);
+    /* 字體大小 */ font-size: 11px;
+}
+
+
+/* ========【專案卡片】 設定 - 前往箭頭 ======== */
+.card-arrow {
+    /* 品牌藍 */ color: var(--accent);
+    /* 字體大小 */ font-size: 20px;
+    /* 動畫效果 */ transition: transform 0.2s ease;
+}
+
+
+/* ========【專案卡片】 設定 - 箭頭懸停位移 ======== */
+.project-card-link:hover .card-arrow {
+    /* 向右移動 */ transform: translateX(4px);
+}
+
+
+/* ========【專案卡片】 設定 - 文字內容靠近卡片下半部 ======== */
+.project-card-content {
+    /* 自動推到底部 */ margin-top: auto;
+}
+
+
+/* ========【專案卡片】 設定 - 專案名稱 ======== */
+.project-card-content h3 {
+    /* 移除外距 */ margin: 0;
+    /* 字體大小 */ font-size: 29px;
+    /* 字距 */ letter-spacing: -0.03em;
+}
+
+
+/* ========【專案卡片】 設定 - 專案說明 ======== */
+.project-card-content p {
+    /* 最大寬度 */ max-width: 500px;
+    /* 上方間距 */ margin: 10px 0 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 14px;
+}
+
+
+/* ========【專案卡片】 設定 - 卡片底部資訊 ======== */
+.project-card-footer {
+    /* 上方間距 */ margin-top: 22px;
+    /* 上方內距 */ padding-top: 18px;
+    /* 上方分隔線 */ border-top: 1px solid var(--border-soft);
+    /* 淡化文字 */ color: var(--muted);
+    /* 字體大小 */ font-size: 11px;
+}
+
+
+/* ========【專案卡片】 設定 - 卡片底部強調文字 ======== */
+.project-card-footer strong {
+    /* 品牌藍 */ color: var(--accent);
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【Genealogy】 設定 - 族譜裝飾圖容器 ======== */
+.genealogy-graphic {
+    /* 相對定位 */ position: relative;
+    /* 圖形寬度 */ width: 170px;
+    /* 圖形高度 */ height: 85px;
+    /* 上下外距 */ margin: 34px 0 28px;
+}
+
+
+/* ========【Genealogy】 設定 - 族譜人物節點 ======== */
+.tree-node {
+    /* 絕對定位 */ position: absolute;
+    /* 節點寬度 */ width: 21px;
+    /* 節點高度 */ height: 21px;
+    /* 白色外框 */ border: 3px solid #ffffff;
+    /* 圓形 */ border-radius: 50%;
+    /* 淡藍背景 */ background: #b9d9ed;
+    /* 淡藍外圈 */ box-shadow: 0 0 0 1px #bad3e3;
+}
+
+
+/* ========【Genealogy】 設定 - 第一層人物位置 ======== */
+.node-a {
+    /* 左側位置 */ left: 72px;
+    /* 頂部位置 */ top: 0;
+}
+
+
+/* ========【Genealogy】 設定 - 第二層左側人物位置 ======== */
+.node-b {
+    /* 左側位置 */ left: 23px;
+    /* 底部位置 */ bottom: 0;
+}
+
+
+/* ========【Genealogy】 設定 - 第二層中央人物位置 ======== */
+.node-c {
+    /* 左側位置 */ left: 72px;
+    /* 底部位置 */ bottom: 0;
+}
+
+
+/* ========【Genealogy】 設定 - 第二層右側人物位置 ======== */
+.node-d {
+    /* 右側位置 */ right: 23px;
+    /* 底部位置 */ bottom: 0;
+}
+
+
+/* ========【Genealogy】 設定 - 族譜連線共用 ======== */
+.tree-line {
+    /* 絕對定位 */ position: absolute;
+    /* 區塊顯示 */ display: block;
+    /* 連線顏色 */ background: #c8dce8;
+}
+
+
+/* ========【Genealogy】 設定 - 中央垂直連線 ======== */
+.tree-line-1 {
+    /* 左側位置 */ left: 82px;
+    /* 頂部位置 */ top: 20px;
+    /* 線條寬度 */ width: 1px;
+    /* 線條高度 */ height: 35px;
+}
+
+
+/* ========【Genealogy】 設定 - 水平連線 ======== */
+.tree-line-2 {
+    /* 左側位置 */ left: 33px;
+    /* 頂部位置 */ top: 47px;
+    /* 線條寬度 */ width: 100px;
+    /* 線條高度 */ height: 1px;
+}
+
+
+/* ========【Genealogy】 設定 - 三個子節點垂直連線 ======== */
+.tree-line-3 {
+    /* 左側位置 */ left: 33px;
+    /* 頂部位置 */ top: 47px;
+    /* 線條寬度 */ width: 1px;
+    /* 線條高度 */ height: 17px;
+    /* 複製另外兩條連線 */ box-shadow:
+        49px 0 0 #c8dce8,
+        98px 0 0 #c8dce8;
+}
+
+
+/* ========【Genealogy】 設定 - 網頁端與遊戲端狀態列表 ======== */
+.project-state-list {
+    /* 上方間距 */ margin-top: 22px;
+    /* 上方分隔線 */ border-top: 1px solid var(--border-soft);
+}
+
+
+/* ========【Genealogy】 設定 - 單一狀態列 ======== */
+.project-state-list > div {
+    /* 橫向排列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 項目間距 */ gap: 20px;
+    /* 上下內距 */ padding: 10px 0;
+    /* 底部分隔線 */ border-bottom: 1px solid var(--border-soft);
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 12px;
+}
+
+
+/* ========【Genealogy】 設定 - 已可使用狀態 ======== */
+.state-available {
+    /* 可用狀態文字 */ color: #4c7c63;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【Genealogy】 設定 - 規劃中狀態 ======== */
+.state-planned {
+    /* 規劃狀態文字 */ color: #8b7f9d;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【PersonalWallet】 設定 - 個人資金裝飾 ======== */
+.wallet-graphic {
+    /* 上下外距 */ margin: 40px 0 30px;
+    /* 橫向排列 */ display: flex;
+    /* 基線對齊 */ align-items: baseline;
+    /* 項目間距 */ gap: 8px;
+    /* 淡色文字 */ color: #8a9ba7;
+}
+
+
+/* ========【PersonalWallet】 設定 - 模擬幣符號 ======== */
+.wallet-symbol {
+    /* 品牌藍 */ color: var(--accent);
+    /* 字體大小 */ font-size: 31px;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【PersonalWallet】 設定 - 金額數字 ======== */
+.wallet-number {
+    /* 字體大小 */ font-size: 44px;
+    /* 字體粗細 */ font-weight: 300;
+    /* 字距 */ letter-spacing: -0.04em;
+}
+
+
+/* ========【漢化專區入口】 設定 - 跨欄大型入口 ======== */
+.translation-card {
+    /* 上方間距 */ margin-top: 22px;
+    /* 最小高度 */ min-height: 190px;
+    /* 內縮空間 */ padding: 30px 32px;
+    /* 漢化淡色邊框 */ border: 1px solid #ddd8ed;
+    /* 圓角弧度 */ border-radius: 16px;
+    /* 淡紫漸層 */ background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #faf8ff 100%
+        );
+    /* 橫向排列 */ display: grid;
+    /* 欄位配置 */ grid-template-columns: auto 1fr auto;
+    /* 垂直置中 */ align-items: center;
+    /* 欄位間距 */ gap: 26px;
+    /* 移除底線 */ text-decoration: none;
+    /* 主要文字 */ color: var(--ink);
+    /* 動畫效果 */ transition:
+        transform 0.24s ease,
+        border-color 0.24s ease,
+        box-shadow 0.24s ease;
+}
+
+
+/* ========【漢化專區入口】 設定 - 懸停效果 ======== */
+.translation-card:hover {
+    /* 微幅上移 */ transform: translateY(-3px);
+    /* 漢化邊框加深 */ border-color: #d1cae9;
+    /* 淡色陰影 */ box-shadow: 0 18px 45px rgba(86, 72, 126, 0.07);
+}
+
+
+/* ========【漢化專區入口】 設定 - 左側中文字圖形 ======== */
+.translation-card-mark {
+    /* 固定寬度 */ width: 78px;
+    /* 固定高度 */ height: 78px;
+    /* 圓角弧度 */ border-radius: 18px;
+    /* 垂直置中 */ display: flex;
+    /* 水平置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 淡紫背景 */ background: var(--translation-soft);
+    /* 漢化強調色 */ color: var(--translation);
+    /* 字體大小 */ font-size: 36px;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【漢化專區入口】 設定 - 文字內容 ======== */
+.translation-card-content h3 {
+    /* 上下外距 */ margin: 7px 0 0;
+    /* 字體大小 */ font-size: 29px;
+    /* 字距 */ letter-spacing: -0.03em;
+}
+
+
+/* ========【漢化專區入口】 設定 - 內容說明 ======== */
+.translation-card-content p {
+    /* 最大寬度 */ max-width: 650px;
+    /* 上方間距 */ margin: 8px 0 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 14px;
+}
+
+
+/* ========【漢化專區入口】 設定 - 右側操作文字 ======== */
+.translation-card-action {
+    /* 漢化強調色 */ color: var(--translation);
+    /* 字體大小 */ font-size: 13px;
+    /* 禁止換行 */ white-space: nowrap;
+}
+
+
+/* ========【目前開發中】 設定 - 區塊上方距離 ======== */
+.current-section {
+    /* 縮小上方內距 */ padding-top: 20px;
+}
+
+
+/* ========【目前開發中】 設定 - 開發狀態卡片 ======== */
+.current-card {
+    /* 內縮空間 */ padding: 42px;
+    /* 一般邊框 */ border: 1px solid var(--border);
+    /* 圓角弧度 */ border-radius: 17px;
+    /* 白色背景 */ background: #ffffff;
+}
+
+
+/* ========【目前開發中】 設定 - 標題與狀態排列 ======== */
+.current-content {
+    /* 上方間距 */ margin-top: 15px;
+    /* 橫向排列 */ display: flex;
+    /* 底部對齊 */ align-items: flex-end;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 項目間距 */ gap: 30px;
+}
+
+
+/* ========【目前開發中】 設定 - 版本標題 ======== */
+.current-content h2 {
+    /* 移除外距 */ margin: 0;
+    /* 響應式字體 */ font-size: clamp(30px, 5vw, 52px);
+    /* 字距 */ letter-spacing: -0.04em;
+}
+
+
+/* ========【目前開發中】 設定 - 開發主題 ======== */
+.current-name {
+    /* 上方間距 */ margin: 7px 0 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 15px;
+}
+
+
+/* ========【目前開發中】 設定 - 開發狀態 ======== */
+.development-state {
+    /* 橫向排列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 項目間距 */ gap: 11px;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 13px;
+}
+
+
+/* ========【目前開發中】 設定 - 卡片分隔線 ======== */
+.current-divider {
+    /* 線條高度 */ height: 1px;
+    /* 上下外距 */ margin: 29px 0 23px;
+    /* 淡色背景 */ background: var(--border-soft);
+}
+
+
+/* ========【目前開發中】 設定 - 開發說明 ======== */
+.current-description {
+    /* 最大寬度 */ max-width: 700px;
+    /* 移除外距 */ margin: 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 14px;
+}
+
+
+/* ========【漢化專區】 設定 - 區塊上方距離 ======== */
+.translation-section {
+    /* 縮小上方內距 */ padding-top: 40px;
+}
+
+
+/* ========【漢化專區】 設定 - 專區預告面板 ======== */
+.translation-panel {
+    /* 最小高度 */ min-height: 330px;
+    /* 隱藏溢出 */ overflow: hidden;
+    /* 漢化淡色邊框 */ border: 1px solid #ddd8ed;
+    /* 圓角弧度 */ border-radius: 19px;
+    /* 淡紫漸層 */ background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #faf8ff 100%
+        );
+    /* 網格系統 */ display: grid;
+    /* 左右欄比例 */ grid-template-columns: 0.85fr 1.15fr;
+}
+
+
+/* ========【漢化專區】 設定 - 左側大字裝飾 ======== */
+.translation-panel-mark {
+    /* 水平置中 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 淡紫背景 */ background:
+        radial-gradient(
+            circle,
+            #f4f1fb 0%,
+            #faf9fd 72%
+        );
+    /* 裝飾文字 */ color: rgba(127, 115, 180, 0.24);
+    /* 響應式字體 */ font-size: clamp(110px, 16vw, 190px);
+    /* 字體粗細 */ font-weight: 700;
+    /* 禁止選取 */ user-select: none;
+}
+
+
+/* ========【漢化專區】 設定 - 右側內容 ======== */
+.translation-panel-content {
+    /* 內縮空間 */ padding: 55px 55px 55px 20px;
+    /* 垂直置中 */ align-self: center;
+}
+
+
+/* ========【漢化專區】 設定 - 漢化英文小標 ======== */
+.translation-kicker {
+    /* 漢化強調色 */ color: var(--translation);
+}
+
+
+/* ========【漢化專區】 設定 - 專區說明 ======== */
+.translation-panel-content > p {
+    /* 最大寬度 */ max-width: 560px;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 14px;
+}
+
+
+/* ========【漢化專區】 設定 - 專區建置狀態 ======== */
+.translation-status {
+    /* 上方間距 */ margin-top: 24px;
+    /* 最大寬度 */ max-width: 370px;
+    /* 上方分隔線 */ border-top: 1px solid #ebe7f3;
+    /* 上方內距 */ padding-top: 16px;
+    /* 橫向排列 */ display: flex;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 項目間距 */ gap: 20px;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 12px;
+}
+
+
+/* ========【漢化專區】 設定 - 專區狀態強調 ======== */
+.translation-status strong {
+    /* 漢化強調色 */ color: var(--translation);
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【創作理念】 設定 - 全寬淡藍理念區塊 ======== */
+.philosophy-section {
+    /* 上方外距 */ margin-top: 80px;
+    /* 上下內距 */ padding: 120px 20px;
+    /* 淡藍漸層 */ background:
+        linear-gradient(
+            135deg,
+            #eef7fd,
+            #f8fbfd
+        );
+    /* 上方邊框 */ border-top: 1px solid #ddebf4;
+    /* 下方邊框 */ border-bottom: 1px solid #ddebf4;
+}
+
+
+/* ========【創作理念】 設定 - 內容置中 ======== */
+.philosophy-inner {
+    /* 最大寬度 */ width: min(100%, 800px);
+    /* 水平置中 */ margin: 0 auto;
+    /* 文字置中 */ text-align: center;
+}
+
+
+/* ========【創作理念】 設定 - 英文主句 ======== */
+.philosophy-inner h2 {
+    /* 上方間距 */ margin: 18px 0 0;
+    /* 響應式字體 */ font-size: clamp(46px, 8vw, 78px);
+    /* 行距 */ line-height: 1.02;
+    /* 字距 */ letter-spacing: -0.06em;
+}
+
+
+/* ========【創作理念】 設定 - 中文理念說明 ======== */
+.philosophy-inner p {
+    /* 最大寬度 */ max-width: 640px;
+    /* 水平置中 */ margin: 32px auto 0;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 15px;
+    /* 行距 */ line-height: 2;
+}
+
+
+/* ========【關於 L1nG】 設定 - 區塊上下距離 ======== */
+.about-section {
+    /* 上方內距 */ padding-top: 110px;
+    /* 下方內距 */ padding-bottom: 110px;
+}
+
+
+/* ========【關於 L1nG】 設定 - 兩欄內容 ======== */
+.about-grid {
+    /* 網格系統 */ display: grid;
+    /* 左右欄比例 */ grid-template-columns: 0.9fr 1.1fr;
+    /* 欄位間距 */ gap: 80px;
+}
+
+
+/* ========【關於 L1nG】 設定 - 右側文字底部對齊 ======== */
+.about-copy {
+    /* 底部對齊 */ align-self: end;
+}
+
+
+/* ========【關於 L1nG】 設定 - 介紹文字 ======== */
+.about-copy p {
+    /* 最大寬度 */ max-width: 610px;
+    /* 段落間距 */ margin: 0 0 14px;
+    /* 次要文字 */ color: var(--sub);
+    /* 字體大小 */ font-size: 15px;
+}
+
+
+/* ========【網站頁腳】 設定 - 頂部分隔線 ======== */
+.site-footer {
+    /* 上方邊框 */ border-top: 1px solid var(--border);
+}
+
+
+/* ========【網站頁腳】 設定 - 內容寬度與排列 ======== */
+.footer-inner {
+    /* 安全寬度 */ width: min(calc(100% - 40px), var(--max-width));
+    /* 最小高度 */ min-height: 120px;
+    /* 水平置中 */ margin: 0 auto;
+    /* 橫向排列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 兩端排列 */ justify-content: space-between;
+    /* 項目間距 */ gap: 30px;
+}
+
+
+/* ========【網站頁腳】 設定 - 品牌資訊排列 ======== */
+.footer-brand {
+    /* 垂直排列 */ display: flex;
+    /* 垂直方向 */ flex-direction: column;
+}
+
+
+/* ========【網站頁腳】 設定 - 品牌名稱 ======== */
+.footer-brand strong {
+    /* 字體大小 */ font-size: 17px;
+}
+
+
+/* ========【網站頁腳】 設定 - 品牌副標 ======== */
+.footer-brand span {
+    /* 淡化文字 */ color: var(--muted);
+    /* 字體大小 */ font-size: 12px;
+}
+
+
+/* ========【網站頁腳】 設定 - 頁尾連結排列 ======== */
+.footer-links {
+    /* 橫向排列 */ display: flex;
+    /* 自動換行 */ flex-wrap: wrap;
+    /* 項目間距 */ gap: 23px;
+}
+
+
+/* ========【網站頁腳】 設定 - 頁尾連結 ======== */
+.footer-links a {
+    /* 次要文字 */ color: var(--sub);
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 12px;
+}
+
+
+/* ========【網站頁腳】 設定 - 頁尾連結懸停 ======== */
+.footer-links a:hover {
+    /* 品牌藍 */ color: var(--accent);
+}
+
+
+/* ========【進場動畫】 設定 - 尚未進入畫面時的初始狀態 ======== */
+.js .reveal {
+    /* 初始透明 */ opacity: 0;
+    /* 初始下移 */ transform: translateY(18px);
+    /* 動畫效果 */ transition:
+        opacity 0.55s ease,
+        transform 0.55s ease;
+}
+
+
+/* ========【進場動畫】 設定 - 進入畫面後顯示 ======== */
+.js .reveal.visible {
+    /* 完全顯示 */ opacity: 1;
+    /* 回到原位 */ transform: translateY(0);
+}
+
+
+/* ========【響應式設定】 設定 - 平板與小尺寸桌面 ======== */
+@media (max-width: 850px) {
+
+    /* ========【頂部導覽列】 設定 - 平板導覽 ======== */
+    .site-header-inner {
+        /* 相對定位 */ position: relative;
+    }
+
+    .nav-toggle {
+        /* 顯示手機選單按鈕 */ display: block;
+    }
+
+    .main-nav {
+        /* 絕對定位 */ position: absolute;
+        /* 靠近頂欄底部 */ top: calc(100% + 8px);
+        /* 貼齊右側 */ right: 0;
+        /* 固定最小寬度 */ min-width: 190px;
+        /* 內縮空間 */ padding: 10px;
+        /* 一般邊框 */ border: 1px solid var(--border);
+        /* 圓角弧度 */ border-radius: 12px;
+        /* 白色背景 */ background: #ffffff;
+        /* 淡色陰影 */ box-shadow: 0 14px 36px rgba(42, 56, 66, 0.10);
+        /* 垂直排列 */ flex-direction: column;
+        /* 左側對齊 */ align-items: stretch;
+        /* 項目間距 */ gap: 4px;
+        /* 預設隱藏 */ display: none;
+    }
+
+    .main-nav.open {
+        /* 展開導覽 */ display: flex;
+    }
+
+    .main-nav a {
+        /* 增加點擊區 */ padding: 9px 10px;
+        /* 圓角弧度 */ border-radius: 8px;
+    }
+
+    .main-nav a:hover {
+        /* 懸停淡藍背景 */ background: #f5faff;
+    }
+
+    .main-nav .nav-external {
+        /* 移除額外邊框 */ border: none;
+        /* 移除額外背景 */ background: transparent;
+    }
+
+
+    /* ========【首頁主視覺】 設定 - 平板首屏 ======== */
+    .hero {
+        /* 平板最小高度 */ min-height: 560px;
+    }
+
+
+    /* ========【共用區塊】 設定 - 平板標題改為上下排列 ======== */
+    .section-heading {
+        /* 左側對齊 */ align-items: flex-start;
+        /* 垂直排列 */ flex-direction: column;
+        /* 縮小間距 */ gap: 12px;
+    }
+
+
+    /* ========【RealDate 主專案】 設定 - 平板內容內距 ======== */
+    .featured-project-content {
+        /* 平板內距 */ padding: 40px;
+    }
+
+    .featured-calendar {
+        /* 右側偏移 */ right: -70px;
+        /* 降低透明度 */ opacity: 0.55;
+    }
+
+
+    /* ========【專案卡片】 設定 - 平板改為單欄 ======== */
+    .project-grid {
+        /* 單欄排列 */ grid-template-columns: 1fr;
+    }
+
+
+    /* ========【漢化專區入口】 設定 - 平板三欄改為兩欄 ======== */
+    .translation-card {
+        /* 欄位配置 */ grid-template-columns: auto 1fr;
+    }
+
+    .translation-card-action {
+        /* 佔滿整列 */ grid-column: 1 / -1;
+        /* 靠右排列 */ justify-self: end;
+    }
+
+
+    /* ========【漢化專區】 設定 - 平板改為上下排列 ======== */
+    .translation-panel {
+        /* 單欄排列 */ grid-template-columns: 1fr;
+    }
+
+    .translation-panel-mark {
+        /* 最小高度 */ min-height: 190px;
+        /* 字體大小 */ font-size: 120px;
+    }
+
+    .translation-panel-content {
+        /* 平板內距 */ padding: 38px;
+    }
+
+
+    /* ========【關於 L1nG】 設定 - 平板改為單欄 ======== */
+    .about-grid {
+        /* 單欄排列 */ grid-template-columns: 1fr;
+        /* 縮小間距 */ gap: 25px;
+    }
+}
+
+
+/* ========【響應式設定】 設定 - 手機直向優化 ======== */
+@media (max-width: 600px) {
+
+    /* ========【頂部導覽列】 設定 - 手機寬度 ======== */
+    .site-header-inner {
+        /* 手機安全寬度 */ width: min(calc(100% - 30px), var(--max-width));
+    }
+
+
+    /* ========【首頁主視覺】 設定 - 手機內容寬度 ======== */
+    .hero-inner,
+    .section,
+    .footer-inner {
+        /* 手機安全寬度 */ width: min(calc(100% - 30px), var(--max-width));
+    }
+
+
+    /* ========【首頁主視覺】 設定 - 手機首屏高度 ======== */
+    .hero {
+        /* 手機最小高度 */ min-height: 520px;
+    }
+
+    .hero-inner {
+        /* 手機上下內距 */ padding: 70px 0;
+    }
+
+    .hero-title {
+        /* 手機主標大小 */ font-size: 76px;
+    }
+
+    .hero-subtitle {
+        /* 手機副標大小 */ font-size: 23px;
+    }
+
+    .hero-description {
+        /* 手機說明大小 */ font-size: 14px;
+    }
+
+
+    /* ========【共用區塊】 設定 - 手機上下間距 ======== */
+    .section {
+        /* 手機上下內距 */ padding: 65px 0;
+    }
+
+
+    /* ========【RealDate 主專案】 設定 - 手機卡片 ======== */
+    .featured-project {
+        /* 移除固定高度需求 */ min-height: auto;
+    }
+
+    .featured-project-content {
+        /* 手機內距 */ padding: 30px 24px;
+    }
+
+    .featured-calendar {
+        /* 手機隱藏裝飾 */ display: none;
+    }
+
+    .featured-project h3 {
+        /* 手機標題大小 */ font-size: 48px;
+    }
+
+    .realdate-footer {
+        /* 手機改為上下排列 */ align-items: flex-start;
+        /* 垂直排列 */ flex-direction: column;
+    }
+
+    .project-action-link {
+        /* 手機取消自動推右 */ margin-left: 0;
+    }
+
+
+    /* ========【專案卡片】 設定 - 手機卡片尺寸 ======== */
+    .project-card {
+        /* 手機最小高度 */ min-height: 360px;
+        /* 手機內距 */ padding: 23px;
+    }
+
+    .project-state-list > div {
+        /* 狀態列改為上下排列 */ align-items: flex-start;
+        /* 垂直排列 */ flex-direction: column;
+        /* 縮小間距 */ gap: 3px;
+    }
+
+    .wallet-number {
+        /* 手機金額字體 */ font-size: 37px;
+    }
+
+
+    /* ========【漢化專區入口】 設定 - 手機改為單欄 ======== */
+    .translation-card {
+        /* 單欄排列 */ grid-template-columns: 1fr;
+        /* 靠左排列 */ justify-items: start;
+        /* 手機內距 */ padding: 24px;
+    }
+
+    .translation-card-action {
+        /* 重設欄位 */ grid-column: auto;
+        /* 靠左排列 */ justify-self: start;
+    }
+
+
+    /* ========【目前開發中】 設定 - 手機卡片 ======== */
+    .current-card {
+        /* 手機內距 */ padding: 27px 23px;
+    }
+
+    .current-content {
+        /* 左側對齊 */ align-items: flex-start;
+        /* 垂直排列 */ flex-direction: column;
+    }
+
+
+    /* ========【漢化專區】 設定 - 手機內容 ======== */
+    .translation-panel-content {
+        /* 手機內距 */ padding: 30px 24px;
+    }
+
+
+    /* ========【創作理念】 設定 - 手機間距 ======== */
+    .philosophy-section {
+        /* 手機上方間距 */ margin-top: 30px;
+        /* 手機內距 */ padding: 85px 20px;
+    }
+
+    .philosophy-inner h2 {
+        /* 手機理念標題 */ font-size: 48px;
+    }
+
+
+    /* ========【關於 L1nG】 設定 - 手機上下間距 ======== */
+    .about-section {
+        /* 手機上方內距 */ padding-top: 75px;
+        /* 手機下方內距 */ padding-bottom: 75px;
+    }
+
+
+    /* ========【網站頁腳】 設定 - 手機改為上下排列 ======== */
+    .footer-inner {
+        /* 手機上下內距 */ padding: 28px 0;
+        /* 左側對齊 */ align-items: flex-start;
+        /* 垂直排列 */ flex-direction: column;
+        /* 縮小間距 */ gap: 18px;
+    }
+}
+
+
+/* ========【無障礙設定】 設定 - 減少動畫偏好 ======== */
+@media (prefers-reduced-motion: reduce) {
+
+    html {
+        /* 關閉平滑滾動 */ scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        /* 大幅縮短動畫 */ animation-duration: 0.01ms !important;
+        /* 僅執行一次 */ animation-iteration-count: 1 !important;
+        /* 大幅縮短過渡 */ transition-duration: 0.01ms !important;
+    }
+
+    .js .reveal {
+        /* 直接顯示 */ opacity: 1;
+        /* 取消位移 */ transform: none;
+    }
+}
