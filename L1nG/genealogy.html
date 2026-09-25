@@ -11,141 +11,183 @@
 
         <div class="app">
 
-            <!-- ========【頂部導覽列】 設定 - 品牌、家族切換、搜尋與工具操作 ======== -->
+            <!-- ========【頂部導覽列】 設定 - 全站搜尋、人物、相簿與低頻工具 ======== -->
             <header class="topbar">
-                <div class="topbar-brand" title="模擬市民 4 族譜工具">LING'S SIMS 4 GENEALOGY</div>
+                <div class="topbar-brand" title="模擬市民 4 族譜工具">
+                    <button class="menu-toggle" id="menuToggle" type="button" title="顯示 / 隱藏家族欄" aria-label="顯示 / 隱藏家族欄"><span class="l1ng-icon icon-list" aria-hidden="true"></span></button>
+                    <span class="topbar-brand-name">LING'S GENEALOGY</span>
+                </div>
                 <div class="topbar-main">
-                    <button class="menu-toggle" id="menuToggle" title="選單"><span class="l1ng-icon icon-list" aria-hidden="true"></span></button>
-                    <div class="family-name-editor" title="家族名稱">
-                        <span class="l1ng-icon icon-pencil family-name-icon" aria-hidden="true"></span>
-                        <input class="brand-input" id="familyName" placeholder="家族名稱" autocomplete="off">
-                    </div>
-                    <div class="nav-select nav-select-family" data-nav-select-for="familySelect">
-                        <select class="nav-native-select family-select" id="familySelect" tabindex="-1" aria-hidden="true"></select>
-                        <button class="nav-select-trigger" id="familySelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                            <span class="nav-select-value"></span>
-                            <span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span>
-                        </button>
-                        <div class="nav-select-menu" role="listbox" aria-label="家族"></div>
-                    </div>
                     <div class="topbar-search-wrap">
                         <input class="topbar-search" id="search" placeholder="搜尋姓名 / 職業 / 居住地…" type="search" autocomplete="off">
                         <div class="topbar-search-results" id="searchResults" role="listbox" aria-label="搜尋結果"></div>
                     </div>
-                    <div class="nav-select nav-select-stage" data-nav-select-for="stageFilter">
-                        <select class="nav-native-select topbar-select" id="stageFilter" tabindex="-1" aria-hidden="true">
-                            <option value="">全部階段</option>
-                            <option value="嬰兒">嬰兒</option>
-                            <option value="幼兒">幼兒</option>
-                            <option value="兒童">兒童</option>
-                            <option value="青少年">青少年</option>
-                            <option value="青年">青年</option>
-                            <option value="成年">成年</option>
-                            <option value="老年">老年</option>
-                        </select>
-                        <button class="nav-select-trigger" id="stageFilterTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                            <span class="nav-select-value"></span>
-                            <span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span>
+                    <div class="app-menu topbar-filter-menu" id="topbarFilterMenu">
+                        <button class="topbar-filter-btn app-menu-trigger" id="topbarFilterBtn" type="button" aria-haspopup="menu" aria-expanded="false" title="篩選">
+                            <span class="l1ng-icon icon-funnel" aria-hidden="true"></span>
+                            <span class="topbar-filter-label">篩選</span>
+                            <span class="topbar-filter-count" id="topbarFilterCount" hidden></span>
                         </button>
-                        <div class="nav-select-menu" role="listbox" aria-label="人生階段"></div>
+                        <div class="app-menu-popover topbar-filter-popover" role="menu" aria-label="篩選">
+                            <fieldset class="topbar-filter-group">
+                                <legend>狀態</legend>
+                                <label class="topbar-filter-option"><input type="radio" name="statusFilter" value="" checked><span>全部狀態</span></label>
+                                <label class="topbar-filter-option"><input type="radio" name="statusFilter" value="在世"><span>在世</span></label>
+                                <label class="topbar-filter-option"><input type="radio" name="statusFilter" value="幽靈"><span>幽靈</span></label>
+                                <label class="topbar-filter-option"><input type="radio" name="statusFilter" value="已故"><span>已故</span></label>
+                            </fieldset>
+                            <fieldset class="topbar-filter-group">
+                                <legend>性別</legend>
+                                <label class="topbar-filter-option"><input type="radio" name="genderFilter" value="" checked><span>全部性別</span></label>
+                                <label class="topbar-filter-option"><input type="radio" name="genderFilter" value="女"><span>女</span></label>
+                                <label class="topbar-filter-option"><input type="radio" name="genderFilter" value="男"><span>男</span></label>
+                                <label class="topbar-filter-option"><input type="radio" name="genderFilter" value="其他"><span>其他</span></label>
+                            </fieldset>
+                            <div class="topbar-filter-footer"><button id="filterResetBtn" type="button">重設篩選</button></div>
+                        </div>
                     </div>
                     <span class="topbar-spacer"></span>
-                    <div class="topbar-right">
-                        <div class="nav-select nav-select-language language-switch" data-nav-select-for="languageSelect" title="語言 / Language">
-                            <select aria-label="語言 / Language" class="nav-native-select language-select" id="languageSelect" tabindex="-1" aria-hidden="true">
-                                <option value="zh-Hant">繁中</option>
-                                <option value="zh-Hans">简中</option>
-                                <option value="en">EN</option>
-                            </select>
-                            <button class="nav-select-trigger language-trigger" id="languageSelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                                <span class="l1ng-icon icon-globe2 language-icon" aria-hidden="true"></span>
-                                <span class="nav-select-value"></span>
-                            </button>
-                            <div class="nav-select-menu" role="listbox" aria-label="語言 / Language"></div>
+                    <nav class="topbar-primary-actions" aria-label="主要功能">
+                        <button class="topbar-text-btn" id="rosterBtn" type="button"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span></button>
+                        <button class="topbar-text-btn" id="galleryBrowserBtn" type="button"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿</span></button>
+                        <button class="topbar-text-btn topbar-export-btn" id="exportBtn" type="button" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
+                        <div class="app-menu" id="topbarMoreMenu">
+                            <button class="topbar-icon-only app-menu-trigger" id="topbarMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" title="更多"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
+                            <div class="app-menu-popover topbar-more-popover" role="menu">
+                                <label class="app-menu-item" role="menuitem" tabindex="0"><span class="l1ng-icon icon-box-arrow-in-down" aria-hidden="true"></span><span>匯入 JSON 備份</span><input accept=".json" hidden id="importInput" type="file"></label>
+                                <button class="app-menu-item" id="bgBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></button>
+                                <button class="app-menu-item" id="tipsBtn" type="button" role="menuitem"><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>使用提示</span></button>
+                                <div class="app-menu-divider"></div>
+                                <div class="app-menu-language-row">
+                                    <span class="app-menu-language-label"><span class="l1ng-icon icon-globe2" aria-hidden="true"></span><span>語言</span></span>
+                                    <div class="nav-select nav-select-language language-switch" data-nav-select-for="languageSelect" title="語言 / Language">
+                                        <select aria-label="語言 / Language" class="nav-native-select language-select" id="languageSelect" tabindex="-1" aria-hidden="true">
+                                            <option value="zh-Hant">繁中</option>
+                                            <option value="zh-Hans">简中</option>
+                                            <option value="en">EN</option>
+                                        </select>
+                                        <button class="nav-select-trigger language-trigger" id="languageSelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span class="nav-select-value"></span><span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span></button>
+                                        <div class="nav-select-menu" role="listbox" aria-label="語言 / Language"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <label class="icon-btn" title="匯入 JSON 備份">
-                            <span class="l1ng-icon icon-box-arrow-in-down" aria-hidden="true"></span>
-                            <span>匯入</span>
-                            <input accept=".json" hidden id="importInput" type="file">
-                        </label>
-                        <button class="icon-btn" id="exportBtn" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
-                        <button class="icon-btn" id="bgBtn" title="外觀設定"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀</span></button>
-                        <button class="icon-btn" id="tipsBtn" title="使用提示"><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>提示</span></button>
-                    </div>
+                    </nav>
                 </div>
             </header>
 
-            <!-- ========【主版面】 設定 - 側邊導覽與族譜畫布 ======== -->
+            <!-- ========【主版面】 設定 - 家族檔案欄與族譜工作區 ======== -->
             <div class="app-body">
-                <aside class="sidebar" id="sidebar">
-                    <div class="sidebar-scroll">
-                        <div class="sidebar-group">
-                            <div class="sidebar-group-title">家族</div>
-                            <button class="sidebar-btn" id="newFamilyBtn"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增家族</span></button>
-                            <button class="sidebar-btn danger" id="delFamilyBtn"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>刪除家族</span></button>
-                        </div>
-                        <div class="sidebar-group">
-                            <div class="sidebar-group-title">模擬市民</div>
-                            <button class="sidebar-btn" id="addBtn"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增模擬市民</span></button>
-                            <button class="sidebar-btn" id="rosterBtn"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>全部模擬市民</span></button>
-                            <button class="sidebar-btn" id="addMemberBtn"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入家族</span></button>
-                            <button class="sidebar-btn danger" id="removeMemberBtn"><span class="l1ng-icon icon-person-dash" aria-hidden="true"></span><span>移出家族</span></button>
-                        </div>
-                        <div class="sidebar-group">
-                            <div class="sidebar-group-title">相簿</div>
-                            <button class="sidebar-btn" id="galleryBrowserBtn"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿瀏覽器</span></button>
-                        </div>
-                        <div class="sidebar-group">
-                            <div class="sidebar-group-title">檢視與佈局</div>
-                            <button class="sidebar-btn" id="modeToggle"><span class="l1ng-icon icon-eye" aria-hidden="true"></span><span>檢視模式</span></button>
-                            <button class="sidebar-btn" id="layoutToggle"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動佈局</span></button>
-                            <button class="sidebar-btn" id="lockToggle" style="display:none"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>未鎖定</span></button>
-                            <button class="sidebar-btn" id="resetLayoutBtn" style="display:none"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>重設位置</span></button>
-                            <button class="sidebar-btn active" id="labelToggle"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>隱藏關係</span></button>
-                            <button class="sidebar-btn" id="labelLockToggle"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>鎖定關係</span></button>
-                        </div>
+                <aside class="family-panel" id="sidebar" aria-label="家族檔案">
+                    <div class="family-panel-scroll">
+                        <section class="family-cover-section" aria-label="家庭合照">
+                            <div class="family-cover" id="familyCover">
+                                <img id="familyCoverImage" alt="" hidden>
+                                <div class="family-cover-collage" id="familyCoverCollage" aria-hidden="true"></div>
+                                <div class="family-cover-empty" id="familyCoverEmpty"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>家庭合照</span></div>
+                                <div class="family-cover-actions">
+                                    <label class="family-cover-action" title="更換合照"><span class="l1ng-icon icon-image" aria-hidden="true"></span><input accept="image/*" hidden id="familyCoverInput" type="file"></label>
+                                    <button class="family-cover-action" id="familyCoverClearBtn" type="button" title="移除家庭合照"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span></button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="family-profile-section">
+                            <div class="family-title-row">
+                                <div class="family-identity" id="familyIdentity">
+                                    <div class="family-name-editor" title="家族名稱">
+                                        <input class="brand-input" id="familyName" placeholder="家族名稱" autocomplete="off">
+                                        <button class="family-name-edit-btn" id="familyNameEditBtn" type="button" title="編輯家族名稱" aria-label="編輯家族名稱"><span class="l1ng-icon icon-pencil family-name-icon" aria-hidden="true"></span></button>
+                                    </div>
+                                    <div class="nav-select nav-select-family" data-nav-select-for="familySelect">
+                                        <select class="nav-native-select family-select" id="familySelect" tabindex="-1" aria-hidden="true"></select>
+                                        <button class="family-switch-btn nav-select-trigger" id="familySelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" title="切換家族" aria-label="切換家族"><span class="nav-select-value family-switch-current" aria-hidden="true"></span><span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span></button>
+                                        <div class="nav-select-menu" role="listbox" aria-label="家族"></div>
+                                    </div>
+                                </div>
+                                <div class="app-menu family-actions-menu">
+                                    <button class="family-title-menu-btn app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="家族管理"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
+                                    <div class="app-menu-popover family-actions-popover" role="menu">
+                                        <button class="app-menu-item" id="newFamilyBtn" type="button" role="menuitem"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增家族</span></button>
+                                        <button class="app-menu-item danger" id="delFamilyBtn" type="button" role="menuitem"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>刪除家族</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea class="family-bio" id="familyBio" rows="3" maxlength="360" placeholder="加入這個家族的簡介、背景或備註…" aria-label="家族簡介"></textarea>
+                            <div class="family-stats" aria-label="家族摘要">
+                                <span><strong id="familyMemberCount">0</strong><span> 位成員</span></span>
+                                <span class="family-stat-sep">·</span>
+                                <span><strong id="familyGenerationCount">0</strong><span> 代</span></span>
+                                <span class="family-stat-sep">·</span>
+                                <span><strong id="familyDeceasedCount">0</strong><span> 已故</span></span>
+                            </div>
+                        </section>
+
+                        <section class="family-members-section">
+                            <div class="family-section-heading">
+                                <span>成員</span>
+                                <div class="family-member-actions">
+                                    <div class="app-menu">
+                                        <button class="family-section-icon app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="新增成員"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span></button>
+                                        <div class="app-menu-popover member-add-popover" role="menu">
+                                            <button class="app-menu-item" id="addBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增模擬市民</span></button>
+                                            <button class="app-menu-item" id="addMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入既有人物</span></button>
+                                        </div>
+                                    </div>
+                                    <div class="app-menu">
+                                        <button class="family-section-icon app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="成員管理"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
+                                        <div class="app-menu-popover member-manage-popover" role="menu">
+                                            <button class="app-menu-item danger" id="removeMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-dash" aria-hidden="true"></span><span>移出家族</span></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="family-member-list" id="familyMemberList"></div>
+                        </section>
                     </div>
+                    <button class="family-panel-collapse" id="familyPanelCollapseBtn" type="button" title="收合家族欄" aria-label="收合家族欄"><span class="l1ng-icon icon-chevron-left" aria-hidden="true"></span></button>
                 </aside>
 
-                <!-- ========【側邊欄寬度】 設定 - 桌面版可拖曳調整側邊欄寬度 ======== -->
-                <div
-                    class="sidebar-resizer"
-                    id="sidebarResizer"
-                    role="separator"
-                    aria-label="調整側邊欄寬度"
-                    aria-orientation="vertical"
-                    tabindex="0"
-                    title="拖曳調整側邊欄寬度；雙擊恢復預設寬度"
-                ></div>
-
+                <div class="family-panel-resizer" id="sidebarResizer" role="separator" aria-label="調整家族欄寬度" aria-orientation="vertical" tabindex="0" title="拖曳調整家族欄寬度；雙擊恢復預設寬度"></div>
                 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
                 <div class="main-area">
+                    <div class="canvas-toolbar" id="canvasToolbar" aria-label="畫布工具">
+                        <button class="canvas-tool" id="modeToggle" type="button"><span class="l1ng-icon icon-eye" aria-hidden="true"></span><span>檢視模式</span></button>
+                        <button class="canvas-tool" id="layoutToggle" type="button"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動佈局</span></button>
+                        <span class="canvas-tool-divider arrange-tool-divider" id="arrangeToolDivider" style="display:none"></span>
+                        <button class="canvas-tool arrange-tool active" id="selectToolBtn" type="button" style="display:none" aria-pressed="true" title="選取工具：拖曳空白處框選人物"><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>選取</span></button>
+                        <button class="canvas-tool arrange-tool" id="panToolBtn" type="button" style="display:none" aria-pressed="false" title="拖曳工具：拖曳畫布進行平移"><span class="l1ng-icon icon-arrows-move" aria-hidden="true"></span><span>拖曳</span></button>
+                        <span class="canvas-tool-divider arrange-tool-divider" id="arrangeToolDividerEnd" style="display:none"></span>
+                        <button class="canvas-tool" id="lockToggle" type="button" style="display:none"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>未鎖定</span></button>
+                        <button class="canvas-tool" id="resetLayoutBtn" type="button" style="display:none"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>重設位置</span></button>
+                        <span class="canvas-tool-divider"></span>
+                        <button class="canvas-tool active" id="labelToggle" type="button"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>隱藏關係</span></button>
+                        <button class="canvas-tool" id="labelLockToggle" type="button"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>鎖定關係</span></button>
+                    </div>
+
                     <div id="viewport">
                         <div id="stage">
                             <svg id="links"></svg>
                             <div id="nodes"></div>
-
-                            <!-- ========【智慧對齊輔助線】 設定 - 拖曳卡片時顯示水平與垂直對齊線 ======== -->
                             <div id="smartGuides" aria-hidden="true">
                                 <div class="smart-guide smart-guide-vertical" id="smartGuideVertical"></div>
                                 <div class="smart-guide smart-guide-horizontal" id="smartGuideHorizontal"></div>
-
-                                <!-- 等距吸附提示：水平與垂直各保留兩段間距標記 -->
-                                <div class="smart-spacing smart-spacing-horizontal" id="smartSpacingHorizontal">
-                                    <div class="smart-spacing-segment smart-spacing-first"></div>
-                                    <div class="smart-spacing-segment smart-spacing-second"></div>
-                                    <div class="smart-spacing-label"></div>
-                                </div>
-                                <div class="smart-spacing smart-spacing-vertical" id="smartSpacingVertical">
-                                    <div class="smart-spacing-segment smart-spacing-first"></div>
-                                    <div class="smart-spacing-segment smart-spacing-second"></div>
-                                    <div class="smart-spacing-label"></div>
-                                </div>
+                                <div class="smart-spacing smart-spacing-horizontal" id="smartSpacingHorizontal"><div class="smart-spacing-segment smart-spacing-first"></div><div class="smart-spacing-segment smart-spacing-second"></div><div class="smart-spacing-label"></div></div>
+                                <div class="smart-spacing smart-spacing-vertical" id="smartSpacingVertical"><div class="smart-spacing-segment smart-spacing-first"></div><div class="smart-spacing-segment smart-spacing-second"></div><div class="smart-spacing-label"></div></div>
                             </div>
-
                             <svg id="labels"></svg>
                         </div>
+                        <div id="selectionMarquee" aria-hidden="true"></div>
+                        <div id="nodeContextMenu" class="node-context-menu" role="menu" aria-hidden="true"></div>
+                    </div>
+
+                    <div class="canvas-zoom" aria-label="縮放工具">
+                        <button id="zoomOutBtn" type="button" title="縮小" aria-label="縮小"><span class="l1ng-icon icon-dash-lg" aria-hidden="true"></span></button>
+                        <span id="zoomValue">100%</span>
+                        <button id="zoomInBtn" type="button" title="放大" aria-label="放大"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span></button>
+                        <span class="canvas-zoom-divider"></span>
+                        <button id="fitScreenBtn" type="button" title="適應畫面" aria-label="適應畫面"><span class="l1ng-icon icon-arrows-fullscreen" aria-hidden="true"></span></button>
                     </div>
                 </div>
             </div>
@@ -172,13 +214,22 @@
                             <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / GIF</div>
                         </div>
 
-                        <div class="sim-profile-summary">
-                            <div class="sim-profile-name" id="profileNamePreview">新增模擬市民</div>
-                            <div class="sim-profile-badges" id="profileBadgePreview"></div>
-                            <div class="sim-profile-facts">
-                                <span class="sim-profile-fact"><span class="l1ng-icon icon-cake2" aria-hidden="true"></span><span id="profileBirthdayPreview">生日未設定</span></span>
-                                <span class="sim-profile-fact"><span class="l1ng-icon icon-hourglass-split" aria-hidden="true"></span><span id="profileAgePreview">年齡未設定</span></span>
-                                <span class="sim-profile-fact sim-profile-residence-fact" id="profileResidenceFact"><span class="l1ng-icon icon-house" aria-hidden="true"></span><span id="profileResidencePreview">居住地未設定</span></span>
+                        <div class="sim-profile-edit-fields">
+                            <label class="profile-name-field"><span>姓名</span><input id="fName" maxlength="30" placeholder="如：莫蒂默·高斯"></label>
+                            <div class="profile-identity-row">
+                                <label><span>人生階段</span><select id="fStage">
+                                    <option value="嬰兒">嬰兒</option><option value="幼兒">幼兒</option><option value="兒童">兒童</option><option value="青少年">青少年</option><option value="青年">青年</option><option value="成年">成年</option><option value="老年">老年</option>
+                                </select></label>
+                                <label><span>性別</span><select id="fGender"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></label>
+                                <label><span>狀態</span><select id="fStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
+                                <label><span>種族</span><select id="fRace">
+                                    <option value="">（不顯示）</option><option value="human">人類</option><option value="vampire">吸血鬼</option><option value="alien">外星人</option><option value="werewolf">狼人</option><option value="mermaid">人魚</option><option value="spellcaster">魔法師</option><option value="fairy">仙子</option><option value="plant">植物模擬市民</option><option value="robot">機器人</option><option value="other">其他</option>
+                                </select></label>
+                            </div>
+                            <div class="profile-fact-edit-row">
+                                <label class="profile-birthday-field"><span class="profile-field-label"><span class="l1ng-icon icon-cake2" aria-hidden="true"></span><span>生日</span></span><div class="birthday-inputs"><select id="fBirthdayMonth" aria-label="生日月份"><option value="">月</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select id="fBirthdayDay" aria-label="生日日期"><option value="">日</option></select></div></label>
+                                <label class="profile-age-field"><span class="profile-field-label"><span class="l1ng-icon icon-hourglass-split" aria-hidden="true"></span><span>年齡</span></span><div class="age-input-wrap"><input id="fAge" min="0" max="999" inputmode="numeric" type="number" placeholder="42"><span class="age-input-suffix">歲</span></div></label>
+                                <label class="profile-residence-field"><span class="profile-field-label"><span class="l1ng-icon icon-house" aria-hidden="true"></span><span>居住地</span></span><input id="fResidence" maxlength="60" placeholder="如：柳溪 - 花園社區"></label>
                             </div>
                         </div>
                     </div>
@@ -193,181 +244,61 @@
 
                 <div class="sim-editor-content">
                     <section class="sim-editor-panel active" data-editor-panel="basic" role="tabpanel">
-                        <div class="grid profile-grid">
-                            <label class="full">姓名<input id="fName" maxlength="30" placeholder="如：莫蒂默·高斯"></label>
-
-                            <label class="span-3">
-                                人生階段
-                                <select id="fStage">
-                                    <option value="嬰兒">嬰兒</option>
-                                    <option value="幼兒">幼兒</option>
-                                    <option value="兒童">兒童</option>
-                                    <option value="青少年">青少年</option>
-                                    <option value="青年">青年</option>
-                                    <option value="成年">成年</option>
-                                    <option value="老年">老年</option>
-                                </select>
-                            </label>
-                            <label class="span-3">
-                                性別
-                                <select id="fGender">
-                                    <option value="男">男</option>
-                                    <option value="女">女</option>
-                                    <option value="其他">其他</option>
-                                </select>
-                            </label>
-                            <label class="span-3">
-                                狀態
-                                <select id="fStatus">
-                                    <option value="在世">在世</option>
-                                    <option value="幽靈">幽靈</option>
-                                    <option value="已故">已故</option>
-                                </select>
-                            </label>
-                            <label class="span-3">
-                                種族
-                                <select id="fRace">
-                                    <option value="">（不顯示）</option>
-                                    <option value="human">人類</option>
-                                    <option value="vampire">吸血鬼</option>
-                                    <option value="alien">外星人</option>
-                                    <option value="werewolf">狼人</option>
-                                    <option value="mermaid">人魚</option>
-                                    <option value="spellcaster">魔法師</option>
-                                    <option value="fairy">仙子</option>
-                                    <option value="plant">植物模擬市民</option>
-                                    <option value="robot">機器人</option>
-                                    <option value="other">其他</option>
-                                </select>
-                            </label>
-
-                            <label class="span-4">
-                                生日
-                                <div class="birthday-inputs">
-                                    <select id="fBirthdayMonth" aria-label="生日月份">
-                                        <option value="">月</option>
-                                        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-                                        <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
-                                        <option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                    </select>
-                                    <select id="fBirthdayDay" aria-label="生日日期"><option value="">日</option></select>
-                                </div>
-                            </label>
-                            <label class="span-4">
-                                年齡
-                                <div class="age-input-wrap"><input id="fAge" min="0" max="999" inputmode="numeric" type="number" placeholder="如：42"><span class="age-input-suffix">歲</span></div>
-                            </label>
-                            <label class="span-4">
-                                領養關係
-                                <select id="fAdoptive">
-                                    <option value="false">親生</option>
-                                    <option value="true">領養</option>
-                                </select>
-                            </label>
-
-                            <label class="full" id="causeOfDeathLabel" style="display:none">
-                                死因
-                                <input id="fCauseOfDeath" list="causeOfDeathPresets" maxlength="40" placeholder="如：衰老 / 溺水 / 火災…">
-                                <datalist id="causeOfDeathPresets">
-                                    <option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option>
-                                    <option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option>
-                                    <option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option>
-                                    <option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option>
-                                    <option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option>
-                                </datalist>
-                            </label>
-
+                        <div class="grid profile-grid profile-basic-grid">
                             <label class="span-6">職業 / 備註<input id="fCareer" placeholder="作家 / 學生 / 無"></label>
-                            <label class="span-6">居住地<input id="fResidence" maxlength="60" placeholder="如：柳溪 - 花園社區"></label>
-                            <label class="full">
-                                人生抱負
-                                <input id="fAspiration" list="aspirationPresets" maxlength="40" placeholder="如：暢銷作家 / 靈魂伴侶…">
-                                <datalist id="aspirationPresets">
-                                    <option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option>
-                                    <option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option>
-                                    <option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option>
-                                    <option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option>
-                                    <option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option>
-                                    <option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option>
-                                    <option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option>
-                                    <option value="首領"></option><option value="無所事事"></option>
-                                </datalist>
-                            </label>
-
-                            <label class="full trait-field">
-                                <span class="field-label-row"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span>
-                                <input id="fTraits" type="hidden">
-                                <div class="trait-editor" id="traitEditor">
-                                    <div class="trait-chip-list" id="traitChipList"></div>
-                                    <div class="trait-add-row">
-                                        <input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter">
-                                        <button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="full">簡介<textarea id="fBio" placeholder="人物小傳、結局、備註…" rows="4"></textarea></label>
+                            <label class="span-6">領養關係<select id="fAdoptive"><option value="false">親生</option><option value="true">領養</option></select></label>
+                            <label class="full" id="causeOfDeathLabel" style="display:none">死因<input id="fCauseOfDeath" list="causeOfDeathPresets" maxlength="40" placeholder="如：衰老 / 溺水 / 火災…"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></label>
+                            <label class="full">人生抱負<input id="fAspiration" list="aspirationPresets" maxlength="40" placeholder="如：暢銷作家 / 靈魂伴侶…"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></label>
+                            <label class="full trait-field"><span class="field-label-row"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></label>
+                            <label class="full">簡介<textarea id="fBio" placeholder="人物小傳、結局、備註…" rows="3"></textarea></label>
                         </div>
                     </section>
 
                     <section class="sim-editor-panel" data-editor-panel="family" role="tabpanel" hidden>
-                        <div class="grid profile-grid">
-                            <label class="full">
-                                所屬家族
-                                <div class="ss-wrap" data-placeholder="點選選擇家族（可多選）…" data-ss-for="fFamilyIds">
-                                    <div class="ss-input" tabindex="0"></div>
-                                    <div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋家族…" type="text"><div class="ss-options"></div></div>
-                                </div>
-                                <select hidden id="fFamilyIds" multiple></select>
-                            </label>
-                            <label class="span-6">
-                                父母 A（血緣）
-                                <div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent1">
-                                    <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
-                                </div>
-                                <select hidden id="fParent1"></select>
-                            </label>
-                            <label class="span-6">
-                                父母 B（可選）
-                                <div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent2">
-                                    <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
-                                </div>
-                                <select hidden id="fParent2"></select>
-                            </label>
-                            <label class="span-6">
-                                現任配偶
-                                <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSpouse">
-                                    <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
-                                </div>
-                                <select hidden id="fSpouse" multiple></select>
-                            </label>
-                            <label class="span-6">
-                                前任配偶
-                                <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fExSpouse">
-                                    <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
-                                </div>
-                                <select hidden id="fExSpouse" multiple></select>
-                            </label>
-                            <label class="span-6">
-                                <span class="field-label-row"><span>子女（血緣 / 收養）</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="子女關係說明" data-tooltip="勾選後自動加入對方父母清單"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></span>
-                                <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fChildren">
-                                    <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
-                                </div>
-                                <select hidden id="fChildren" multiple></select>
-                            </label>
-                            <label class="span-6">
-                                <span class="field-label-row"><span>兄弟姐妹（血緣 / 收養）</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="兄弟姐妹關係說明" data-tooltip="勾選後建立「兄弟姐妹」關聯"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></span>
-                                <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings">
-                                    <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
-                                </div>
-                                <select hidden id="fSiblings" multiple></select>
-                            </label>
+                        <div class="family-rel-editor">
+                            <section class="family-rel-block family-rel-block-wide">
+                                <div class="family-rel-block-head"><span>所屬家族</span><button class="family-rel-manage" type="button" data-family-editor-toggle="family-membership">管理…</button></div>
+                                <div class="family-rel-preview" id="editorFamilyMembershipPreview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="family-membership" hidden><div class="ss-wrap" data-placeholder="點選選擇家族（可多選）…" data-ss-for="fFamilyIds"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋家族…" type="text"><div class="ss-options"></div></div></div><select hidden id="fFamilyIds" multiple></select></div>
+                            </section>
+                            <section class="family-rel-block">
+                                <div class="family-rel-block-head"><span>父母 A</span><button class="family-rel-manage" type="button" data-family-editor-toggle="parent1">設定</button></div>
+                                <div class="family-rel-preview" id="editorParent1Preview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="parent1" hidden><label>父母 A（血緣）<div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent1"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fParent1"></select></label></div>
+                            </section>
+                            <section class="family-rel-block">
+                                <div class="family-rel-block-head"><span>父母 B</span><button class="family-rel-manage" type="button" data-family-editor-toggle="parent2">設定</button></div>
+                                <div class="family-rel-preview" id="editorParent2Preview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="parent2" hidden><label>父母 B（可選）<div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent2"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fParent2"></select></label></div>
+                            </section>
+                            <section class="family-rel-block">
+                                <div class="family-rel-block-head"><span>現任配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="spouse">設定</button></div>
+                                <div class="family-rel-preview" id="editorSpousePreview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="spouse" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSpouse"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSpouse" multiple></select></div>
+                            </section>
+                            <section class="family-rel-block">
+                                <div class="family-rel-block-head"><span>前任配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="exspouse">設定</button></div>
+                                <div class="family-rel-preview" id="editorExSpousePreview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="exspouse" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fExSpouse"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fExSpouse" multiple></select></div>
+                            </section>
+                            <section class="family-rel-block">
+                                <div class="family-rel-block-head"><span>子女</span><button class="family-rel-manage" type="button" data-family-editor-toggle="children">設定</button></div>
+                                <div class="family-rel-preview" id="editorChildrenPreview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="children" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fChildren"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fChildren" multiple></select></div>
+                            </section>
+                            <section class="family-rel-block">
+                                <div class="family-rel-block-head"><span>兄弟姐妹</span><button class="family-rel-manage" type="button" data-family-editor-toggle="siblings">設定</button></div>
+                                <div class="family-rel-preview" id="editorSiblingsPreview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="siblings" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSiblings" multiple></select></div>
+                            </section>
                         </div>
+                        <div class="rel-section family-rel-annotations" id="familyRelAnnoSection" style="display:none"><div class="rel-title"><span>家庭關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="家庭關係標註說明" data-tooltip="父母、子女、配偶、前任配偶與兄弟姐妹的關係名稱可在這裡個別調整，也可重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div><div id="familyRelAnnoList"></div></div>
                     </section>
 
                     <section class="sim-editor-panel" data-editor-panel="relations" role="tabpanel" hidden>
                         <div class="editor-empty-note" id="newSimRelationsHint" hidden>儲存模擬市民後即可新增其他關係。</div>
                         <div class="rel-section first" id="relAnnoSection" style="display:none">
-                            <div class="rel-title"><span>關係</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係設定說明" data-tooltip="每條連線可獨立設定關係名稱，也可重設已拖曳的關係名稱位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div class="rel-title"><span>其他關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係設定說明" data-tooltip="每條連線可獨立設定關係名稱，也可重設已拖曳的關係名稱位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                             <div id="relAnnoList"></div>
                         </div>
                         <div class="rel-section" id="relSection" style="display:none">
@@ -572,6 +503,7 @@
                     <div class="info-card-header-text">
                         <div class="info-card-name-row"><span class="info-card-name" id="infoCardName">—</span></div>
                         <div class="info-card-meta" id="infoCardMeta"></div>
+                        <div class="info-card-head-facts" id="infoCardHeadFacts"></div>
                     </div>
                 </div>
                 <div class="info-card-body" id="infoCardBody"></div>
@@ -592,12 +524,7 @@
                     <button class="primary" id="rosterAddBtn"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增</span></button>
                 </div>
                 <div class="roster-list" id="rosterList"></div>
-                <div class="modal-actions">
-                    <button id="rosterAddMemberBtn"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入家族</span></button>
-                    <button class="danger" id="rosterRemoveMemberBtn"><span class="l1ng-icon icon-person-dash" aria-hidden="true"></span><span>移出家族</span></button>
-                    <span class="spacer"></span>
-                    <button id="rosterCloseBtn">關閉</button>
-                </div>
+                <div class="modal-actions"><span class="spacer"></span><button id="rosterCloseBtn">關閉</button></div>
             </div>
         </div>
 
@@ -639,10 +566,10 @@
             </div>
         </div>
 
-        <!-- ========【外觀設定】 設定 - 主題、背景與圖片品質 ======== -->
+        <!-- ========【主題設定】 設定 - 主題、背景與圖片品質 ======== -->
         <div class="mask" id="bgMask">
             <div class="modal bg-modal">
-                <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></h2>
+                <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></h2>
                 <div class="setting-group-title">主題配色（漸層）</div>
                 <div class="theme-grid" id="themeGrid"></div>
                 <div class="custom-theme">
@@ -734,10 +661,14 @@
                     <div class="tips-section">
                         <h3><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>畫布與佈局</span></h3>
                         <ul>
-                            <li><b>拖曳空白處</b>平移整個族譜畫布；<b>滾輪</b>以滑鼠位置為中心縮放</li>
-                            <li><b>雙擊空白處</b>自動適應螢幕</li>
-                            <li><b>拖曳卡片</b>超過拖曳門檻後會自動切換為「自由排列」，並儲存新位置</li>
-                            <li><b>智慧對齊輔助線</b>會在卡片接近其他卡片的左 / 中 / 右或上 / 中 / 下位置時自動吸附</li>
+                            <li>自動佈局時，<span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳空白處</b>平移整個族譜畫布；<span class="mouse-hint mouse-wheel" role="img" aria-label="滾輪"><span class="mouse-hint-wheel"></span></span><b>滾輪</b>以滑鼠位置為中心縮放</li>
+                            <li><span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>雙擊空白處</b>自動適應螢幕</li>
+                            <li><span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳卡片</b>超過拖曳門檻後會自動切換為「自由排列」，並儲存新位置</li>
+                            <li>自由排列會出現<b>選取</b>與<b>拖曳</b>工具：選取工具下拖曳空白處可框選人物；拖曳工具下拖曳畫布可平移視角</li>
+                            <li>選取工具支援 <kbd>Shift</kbd> + <span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>左鍵</b>增減多選、<kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>A</kbd>全選目前畫布人物；拖曳任一已選人物可整組移動</li>
+                            <li>使用選取工具時可按住 <kbd>Space</kbd> + <span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>左鍵</b>暫時拖動畫布，放開後回到選取工具</li>
+                            <li>人物卡使用 <span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>左鍵</b>檢視模式查看資料 / 編輯模式編輯人物；<span class="mouse-hint mouse-right" role="img" aria-label="右鍵"><span class="mouse-hint-wheel"></span></span><b>右鍵</b>開啟卡片設定與人物快捷操作</li>
+                            <li><b>智慧對齊輔助線</b>會在單張卡片接近其他卡片的左 / 中 / 右或上 / 中 / 下位置時自動吸附</li>
                             <li><b>等距吸附</b>支援水平與垂直排列；接近相同間距時會顯示兩段間距與數值，只移動目前拖曳的卡片</li>
                             <li>自由排列時可使用<b>鎖定排列</b>避免誤拖；<b>重設位置</b>會清除目前模式的手動位置並恢復自動樹狀佈局</li>
                             <li><b>側邊欄分隔線</b>可拖曳調整寬度；雙擊分隔線恢復預設寬度</li>
@@ -765,7 +696,7 @@
                     <div class="tips-section">
                         <h3><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿瀏覽器</span></h3>
                         <ul>
-                            <li>側邊欄<b>相簿瀏覽器</b>：檢視所有模擬市民的相簿圖片</li>
+                            <li>頂端<b>相簿</b>：開啟相簿瀏覽器，檢視所有模擬市民的相簿圖片</li>
                             <li>頂端支援按<b>標題 / 模擬市民名稱 / 備註</b>搜尋，按<b>模擬市民篩選</b></li>
                             <li>每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器</li>
                             <li>檢視器中<kbd>←</kbd><kbd>→</kbd><b>跨模擬市民</b>瀏覽，<kbd>Esc</kbd>關閉</li>
@@ -785,7 +716,7 @@
                         <ul>
                             <li>圖片儲存在瀏覽器<b>IndexedDB</b>中，容量通常遠大於 localStorage</li>
                             <li>首次開啟會自動把舊資料（base64）遷移到 IndexedDB</li>
-                            <li>可在外觀設定中檢視<b>儲存空間使用量</b>，並一鍵<b>清理未使用的圖片</b></li>
+                            <li>可在主題設定中檢視<b>儲存空間使用量</b>，並一鍵<b>清理未使用的圖片</b></li>
                         </ul>
                     </div>
                     <div class="tips-section">
@@ -865,6 +796,15 @@
                                     <span class="export-size-note">輸出 3× 尺寸，適合高解析保存</span>
                                 </span>
                             </label>
+                        </div>
+
+                        <div class="export-background-block">
+                            <div class="export-option-label">背景</div>
+                            <div class="export-background-options" role="radiogroup" aria-label="匯出背景">
+                                <label class="export-background-option"><input type="radio" name="exportBackgroundMode" value="current" checked><span>目前背景圖片</span></label>
+                                <label class="export-background-option"><input type="radio" name="exportBackgroundMode" value="color"><span>背景顏色</span></label>
+                                <label class="export-background-option"><input type="radio" name="exportBackgroundMode" value="transparent"><span>透明背景（PNG）</span></label>
+                            </div>
                         </div>
 
                         <div class="export-actions">
