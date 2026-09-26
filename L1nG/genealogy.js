@@ -750,6 +750,172 @@ function formatCardAge(age) {
 // 簡體中文與英文僅作顯示翻譯；預設資料的 canonical source 永遠保留繁體中文。
 function buildSample() {
   const sims = {};
+
+  // ========【預設 EA NPC 範例】 設定 - 取自 2026-09-27 遊戲匯出；家庭只保留指定 EA Household ========
+  // Household 選單固定為：
+  // 史賓瑟．金．路易斯 / 朗德古拉伯 / 高斯 / 伊藤 / 維托 / 達榮
+  // sims 額外保留這 22 位 Household 成員實際 genealogy 連得到的 family-tree-only 節點，
+  // 讓 EA 族譜 / 大家族在預設資料中也能維持完整關係，不把祖先節點硬塞成 Household 成員。
+  const rows = [
+["944092612642014825","路易斯埃里克","男","青年","在世","human","柳溪 / 扁柏街道","豪宅大王",["物質主義","貪吃鬼","自信"],"",["944092612642014826"],["944092612642014827"],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],2008,3,1,18],
+["944092612642014826","路易斯薇薇安","女","老年","在世","human","柳溪 / 扁柏街道","快樂大家庭",["歡樂","以家庭為重","美食家"],"",[],[],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],1959,9,10,67],
+["944092612642014827","史賓瑟．金艾莉絲","女","青年","在世","human","柳溪 / 扁柏街道","非凡畫家",["創意","幼稚","熱愛戶外"],"",["944092612642014828"],["944092612642014825"],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],2002,9,22,24],
+["944092612642014828","金姆丹尼斯","男","老年","在世","human","柳溪 / 扁柏街道","顯赫家世",["整潔","完美主義者","熱愛戶外"],"",[],[],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],1943,2,14,83],
+["944092612642014829","金．路易斯奧莉維亞","女","兒童","在世","human","柳溪 / 扁柏街道","藝術天才",["傻瓜"],"小學生",["944092612642014825","944092612642014827"],[],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],2018,1,11,8],
+["944092612642081636","高斯貝拉","女","青年","在世","human","柳溪 / 歐菲莉亞維拉","派對動物",["浪漫","良好","以家庭為重"],"特務",[],["944092612642081637"],[],"944092612642081635","高斯","full",[],[],1994,12,6,31],
+["944092612642081637","高斯摩提梅爾","男","成年","在世","human","柳溪 / 歐菲莉亞維拉","文藝復興模擬市民",["外向","書呆子","創意"],"寫作",["944092612650249528"],["944092612642081636"],[],"944092612642081635","高斯","full",[],[],1965,3,16,61],
+["944092612642081638","高斯卡珊多拉","女","青少年","在世","human","柳溪 / 歐菲莉亞維拉","音樂天才",["創意","陰沉"],"高中學生",["944092612642081637","944092612642081636"],[],[],"944092612642081635","高斯","full",[],[],2011,1,15,15],
+["944092612642081639","高斯亞歷山大","男","兒童","在世","human","柳溪 / 歐菲莉亞維拉","神童",["書呆子"],"小學生",["944092612642081637","944092612642081636"],[],[],"944092612642081635","高斯","full",[],[],2015,8,27,11],
+["944092612642084275","傑思強尼","男","青年","在世","human","綠洲之泉 / 鬆散的灌木","喜劇之王",["傻瓜","外向","雄心壯志"],"演藝人員",["944092612642085336","944092612642085337"],[],[],"944092612642084274","傑斯","full",[],[],1990,3,4,36],
+["944092612642085336","朗德古拉伯傑佛瑞","男","成年","在世","human","綠洲之泉 / 阿福伊斯塔豪宅","顯赫家世",["良好","以家庭為重","外向"],"特務",[],["944092612642085337"],[],"944092612642085335","朗德古拉伯","full",[],[],1981,6,30,45],
+["944092612642085337","朗德古拉伯萳西","女","成年","在世","human","綠洲之泉 / 阿福伊斯塔豪宅","家財萬萬貫",["物質主義","諂媚勢利","雄心壯志"],"罪犯",[],["944092612642085336"],[],"944092612642085335","朗德古拉伯","full",[],[],1974,6,16,52],
+["944092612642085338","朗德古拉伯麥克倫","男","青少年","在世","human","綠洲之泉 / 阿福伊斯塔豪宅","全民公敵",["諂媚勢利","邪惡"],"高中學生",["944092612642085336","944092612642085337"],[],[],"944092612642085335","朗德古拉伯","full",[],[],2009,9,25,17],
+["944092612642294749","維托莉莉絲","女","青年","在世","vampire","遺忘山谷 / 附子草莊園","吸血鬼家族",["外向","創意","好動"],"",["944092612650249533"],[],[],"944092612642294748","維托","full",[],[],1998,8,30,28],
+["944092612642294750","維托迦勒","男","青年","在世","vampire","遺忘山谷 / 附子草莊園","善良吸血鬼",["美食家","雄心壯志","物質主義"],"",["944092612650249533"],[],[],"944092612642294748","維托","full",[],[],2002,7,12,24],
+["944092612642563314","伊藤直樹","男","青年","在世","human","木漏隙光山 / 2-5-1 若葉森","顯赫家世",["物質主義","刻薄","以家庭為重"],"商業",[],["944092612642563315"],[],"944092612642563313","伊藤","full",[],[],1989,3,11,37],
+["944092612642563315","伊藤惠","女","青年","在世","human","木漏隙光山 / 2-5-1 若葉森","極限運動愛好者",["愛冒險","體面","雄心壯志"],"商業",[],["944092612642563314"],[],"944092612642563313","伊藤","full",[],[],1996,3,1,30],
+["944092612642563316","伊藤清","男","青少年","在世","human","木漏隙光山 / 2-5-1 若葉森","極限運動愛好者",["愛冒險","浪漫"],"",["944092612642563314","944092612642563315"],[],[],"944092612642563313","伊藤","full",[],[],2013,1,23,13],
+["944092612642563317","伊藤七海","女","兒童","在世","human","木漏隙光山 / 2-5-1 若葉森","天生好動",["偷竊狂"],"小學生",["944092612642563314","944092612642563315"],[],[],"944092612642563313","伊藤","full",[],[],2016,5,15,10],
+["944092612642774243","達榮阿德科亞","男","老年","在世","human","昂達里昂 / 丹貝萊宮殿","暢銷作家",["書呆子","雄心壯志","完美主義者"],"",["944092612650249517","944092612650249518"],["944092612650249519"],[],"944092612642774242","達榮","full",[],[],1945,3,9,81],
+["944092612642774244","達榮賈瓦拉","女","青年","在世","human","昂達里昂 / 丹貝萊宮殿","快樂大家庭",["雄心壯志","良好","以家庭為重"],"貴族",["944092612642774243","944092612650249519"],[],[],"944092612642774242","達榮","full",[],[],2008,9,21,18],
+["944092612642774245","達榮阿瑪拉奇","女","青少年","在世","human","昂達里昂 / 丹貝萊宮殿","非凡畫家",["藝術愛好者","創意"],"高中學生",["944092612642774244"],[],[],"944092612642774242","達榮","full",[],[],2009,1,13,17],
+["944092612642774246","達榮歐比","男","兒童","在世","human","昂達里昂 / 丹貝萊宮殿","神童",["天才"],"小學生",["944092612642774244"],[],[],"944092612642774242","達榮","full",[],[],2017,7,14,9],
+["944092612650249511","莉娜．達榮","女","成年","在世","human","","",[],"",["944092612650249520"],["944092612650249512"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249512","賽夫．達榮","男","成年","在世","human","","",[],"",[],["944092612650249511"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249513","達麗拉．德里莫","女","成年","在世","human","","",[],"",["944092612650249511","944092612650249512"],["944092612650249514"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249514","戴維斯．德里莫","男","成年","在世","human","","",[],"",[],["944092612650249513"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249515","達倫．德里莫","男","成年","在世","human","","",[],"",["944092612650249513","944092612650249514"],["944092612650249516"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249516","達琳．德里莫","女","成年","在世","human","","",[],"",[],["944092612650249515"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249517","阿德．達榮","男","成年","在世","human","","",[],"",["944092612650249520"],["944092612650249518"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249518","艾尼歐拉．達榮","女","成年","在世","human","","",[],"",[],["944092612650249517"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249519","伊曼尼．達榮","女","成年","在世","human","","",[],"",[],["944092612642774243"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249520","未知","女","成年","在世","human","","",[],"",[],[],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249528","可妮莉雅．高斯","女","成年","在世","human","","",[],"",["944092612650249529","944092612650249530"],[],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249529","普魯登斯．克蘭普巴頓","女","成年","在世","human","","",[],"",[],["944092612650249530"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249530","賽門．克蘭普巴頓","男","成年","在世","human","","",[],"",[],["944092612650249529"],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249533","喬伊婭．瓦托雷","女","成年","在世","human","","",[],"",["944092612650249534"],[],[],null,"","family_tree_only",[],[],null,null,null,null],
+["944092612650249534","維托里歐．帕斯夸萊","男","成年","在世","human","","",[],"",[],[],[],null,"","family_tree_only",[],[],null,null,null,null]
+  ];
+
+  rows.forEach(([
+    id,name,gender,lifeStage,status,race,residence,aspiration,traits,career,
+    parentIds,spouseIds,exSpouseIds,householdId,householdName,recordState,
+    adoptedParentIds,adoptedChildIds,birthdayYear,birthdayMonth,birthdayDay,age
+  ]) => {
+    sims[id] = {
+      id,name,gender,lifeStage,status,race,residence,aspiration,
+      causeOfDeath:'',
+      pets:[],
+      gallery:[],
+      birthdayYear,
+      birthdayMonth,
+      birthdayDay,
+      age,
+      parentIds,
+      spouseIds,
+      exSpouseIds,
+      adoptive:adoptedParentIds.length > 0,
+      traits,
+      career,
+      bio:'',
+      order:0,
+      avatar:null,
+      gameData:{
+        simId:id,
+        householdId,
+        householdName,
+        recordState,
+        adoptedParentIds,
+        adoptedChildIds,
+        fianceIds:[],
+        steadyPartnerIds:[],
+        deceasedSpouseIds:[],
+        entityClass:
+          recordState === 'family_tree_only'
+            ? 'family_tree_only'
+            : householdId
+              ? 'household'
+              : 'unassigned_npc'
+      }
+    };
+  });
+
+  const makeHousehold = (id, name, memberIds, gameData) => ({
+    id,
+    name,
+    memberIds:[...memberIds],
+    bio:'',
+    coverImage:null,
+    freeLayout:{ view:false, edit:false },
+    manualPos:{ view:{}, edit:{} },
+    locked:false,
+    gameImport:true,
+    gameData:{
+      ...gameData,
+      householdMemberIds:[...memberIds],
+      petIds:[]
+    }
+  });
+
+  const families = [
+    makeHousehold(
+      'sample_hh_944092612642014824',
+      '史賓瑟．金．路易斯',
+      ['944092612642014825','944092612642014826','944092612642014827','944092612642014828','944092612642014829'],
+      { householdId:'944092612642014824', homeZoneId:'944092612642014166', worldId:'2474553381', neighborhoodId:'944092612642013589', regionId:'8086', lotName:'扁柏街道', worldName:'', neighborhoodName:'柳溪', hidden:false, isActiveHousehold:true, isPlayedHousehold:true, isPlayerHousehold:true }
+    ),
+    makeHousehold(
+      'sample_hh_944092612642085335',
+      '朗德古拉伯',
+      ['944092612642085336','944092612642085337','944092612642085338'],
+      { householdId:'944092612642085335', homeZoneId:'944092612642084491', worldId:'1185542770', neighborhoodId:'944092612642084078', regionId:'15740', lotName:'阿福伊斯塔豪宅', worldName:'', neighborhoodName:'綠洲之泉', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
+    ),
+    makeHousehold(
+      'sample_hh_944092612642081635',
+      '高斯',
+      ['944092612642081636','944092612642081637','944092612642081638','944092612642081639'],
+      { householdId:'944092612642081635', homeZoneId:'944092612642081327', worldId:'2280805822', neighborhoodId:'944092612642013589', regionId:'8086', lotName:'歐菲莉亞維拉', worldName:'', neighborhoodName:'柳溪', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
+    ),
+    makeHousehold(
+      'sample_hh_944092612642563313',
+      '伊藤',
+      ['944092612642563314','944092612642563315','944092612642563316','944092612642563317'],
+      { householdId:'944092612642563313', homeZoneId:'944092612642562894', worldId:'1491052508', neighborhoodId:'944092612642496440', regionId:'246370', lotName:'2-5-1 若葉森', worldName:'', neighborhoodName:'木漏隙光山', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
+    ),
+    makeHousehold(
+      'sample_hh_944092612642294748',
+      '維托',
+      ['944092612642294749','944092612642294750'],
+      { householdId:'944092612642294748', homeZoneId:'944092612642294464', worldId:'3950992577', neighborhoodId:'944092612642294034', regionId:'146196', lotName:'附子草莊園', worldName:'', neighborhoodName:'遺忘山谷', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
+    ),
+    makeHousehold(
+      'sample_hh_944092612642774242',
+      '達榮',
+      ['944092612642774243','944092612642774244','944092612642774245','944092612642774246'],
+      { householdId:'944092612642774242', homeZoneId:'944092612642773392', worldId:'312126436', neighborhoodId:'944092612642770511', regionId:'487001', lotName:'丹貝萊宮殿', worldName:'', neighborhoodName:'昂達里昂', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
+    )
+  ];
+
+  return {
+    version:3,
+    meta:{
+      sample:true,
+      sampleLanguage:'zh-Hant',
+      sampleVersion:2,
+      sampleSource:'ea-npc-20260927'
+    },
+    sims,
+    families,
+    links:[],
+    relMap:{},
+    labelPos:{},
+    currentId:families[0].id
+  };
+}
+
+// ========【舊內建範例遷移】 設定 - 僅辨識完全未修改的舊高斯 / 巴切勒範例 ========
+function buildLegacySampleV1() {
+  const sims = {};
   const add = o => { sims[o.id] = o; return o; };
   add({id:'g1',name:'岡瑟·高斯',gender:'男',lifeStage:'老年',status:'幽靈',race:'',
     residence:'柳溪 - 歐菲莉亞別墅', aspiration:'財富創造者', causeOfDeath:'衰老',
@@ -762,36 +928,50 @@ function buildSample() {
   add({id:'g3',name:'莫蒂默·高斯',gender:'男',lifeStage:'成年',status:'在世',race:'vampire',
     residence:'柳溪 - 歐菲莉亞別墅', aspiration:'暢銷作家', causeOfDeath:'',
     pets:[{ id:'pet_g3_1', name:'午夜', species:'cat', breed:'黑貓', gender:'女', ageStage:'成年', status:'在世', avatar:null }],
-    gallery:[],
-    parentIds:['g1','g2'],spouseIds:['g4'],exSpouseIds:[],adoptive:false,
+    gallery:[], parentIds:['g1','g2'],spouseIds:['g4'],exSpouseIds:[],adoptive:false,
     traits:['有創造力','浪漫','陰沈'],career:'作家',bio:'現任高斯家族族長。',order:0,avatar:null});
   add({id:'g4',name:'貝拉·巴切勒',gender:'女',lifeStage:'成年',status:'在世',race:'',
     residence:'柳溪 - 歐菲莉亞別墅', aspiration:'靈魂伴侶', causeOfDeath:'',
     pets:[{ id:'pet_g4_1', name:'金毛', species:'dog', breed:'金毛尋回犬', gender:'男', ageStage:'成年', status:'在世', avatar:null }],
-    gallery:[],
-    parentIds:[],spouseIds:['g3'],exSpouseIds:[],adoptive:false,
+    gallery:[], parentIds:[],spouseIds:['g3'],exSpouseIds:[],adoptive:false,
     traits:['熱愛戶外','開朗','愛調情'],career:'無',bio:'巴切勒家的女兒，嫁入高斯家。',order:0,avatar:null});
   add({id:'g5',name:'卡桑德拉·高斯',gender:'女',lifeStage:'青少年',status:'在世',race:'spellcaster',
     residence:'柳溪 - 花園社區', aspiration:'卓越畫家', causeOfDeath:'',
-    pets:[], gallery:[],
-    parentIds:['g3','g4'],spouseIds:[],exSpouseIds:[],adoptive:false,
+    pets:[], gallery:[], parentIds:['g3','g4'],spouseIds:[],exSpouseIds:[],adoptive:false,
     traits:['天才','陰沈','物質主義'],career:'學生',bio:'莫蒂默和貝拉的女兒。',order:0,avatar:null});
   add({id:'g6',name:'亞歷山大·高斯',gender:'男',lifeStage:'兒童',status:'在世',race:'',
     residence:'柳溪 - 花園社區', aspiration:'電腦奇才', causeOfDeath:'',
-    pets:[], gallery:[],
-    parentIds:['g3','g4'],spouseIds:[],exSpouseIds:[],adoptive:false,
+    pets:[], gallery:[], parentIds:['g3','g4'],spouseIds:[],exSpouseIds:[],adoptive:false,
     traits:['天才','有創造力','熱愛戶外'],career:'學生',bio:'莫蒂默和貝拉的兒子。',order:1,avatar:null});
   const famGoth = {
     id:'fam_goth', name:'高斯家族', memberIds:['g1','g2','g3','g5','g6'], bio:'', coverImage:null,
-    freeLayout: { view: false, edit: false },
-    manualPos: { view: {}, edit: {} }, locked: false
+    freeLayout:{ view:false, edit:false }, manualPos:{ view:{}, edit:{} }, locked:false
   };
   const famBache = {
     id:'fam_bacheler', name:'巴切勒家族', memberIds:['g4'], bio:'', coverImage:null,
-    freeLayout: { view: false, edit: false },
-    manualPos: { view: {}, edit: {} }, locked: false
+    freeLayout:{ view:false, edit:false }, manualPos:{ view:{}, edit:{} }, locked:false
   };
   return {version:3,meta:{sample:true,sampleLanguage:'zh-Hant'},sims,families:[famGoth,famBache],links:[],relMap:{},labelPos:{},currentId:famGoth.id};
+}
+
+function stableSampleSerialize(value) {
+  if (Array.isArray(value)) {
+    return '[' + value.map(stableSampleSerialize).join(',') + ']';
+  }
+
+  if (value && typeof value === 'object') {
+    return '{' + Object.keys(value)
+      .sort()
+      .map(key => JSON.stringify(key) + ':' + stableSampleSerialize(value[key]))
+      .join(',') + '}';
+  }
+
+  return JSON.stringify(value);
+}
+
+function legacyBuiltinSampleLooksUntouched(targetDb) {
+  if (!targetDb || targetDb.meta?.sample !== true) return false;
+  return stableSampleSerialize(targetDb) === stableSampleSerialize(buildLegacySampleV1());
 }
 
 let db = null, layoutCache = null, scale = 1;
@@ -2136,21 +2316,27 @@ function updateTopbarFilterUI() {
 
 // ========【預設資料翻譯】 設定 - 繁中為唯一基準；只翻譯內建範例既有值 ========
 // ========【預設資料翻譯】 設定 - 繁中為唯一基準；只翻譯內建範例既有值 ========
-const BUILTIN_SAMPLE_SIM_IDS = new Set(['g1','g2','g3','g4','g5','g6']);
-const BUILTIN_SAMPLE_FAMILY_IDS = new Set(['fam_goth','fam_bacheler']);
+const BUILTIN_SAMPLE_REFERENCE = buildSample();
+const BUILTIN_SAMPLE_SIM_IDS = new Set(
+  Object.keys(BUILTIN_SAMPLE_REFERENCE.sims)
+);
+const BUILTIN_SAMPLE_FAMILY_IDS = new Set(
+  BUILTIN_SAMPLE_REFERENCE.families.map(family => family.id)
+);
 
-// 只有這些「原始繁中範例值」可跟著語言切換。
-// 玩家新增的資料，以及玩家把範例欄位改成的新文字，都保持原文，不做自動翻譯。
+// 只有內建 EA NPC 範例自己的文字可以跟著內建翻譯走。
+// 目前 EA NPC 名稱 / Household 名稱以這份 zh-TW 遊戲匯出為 canonical；
+// 沒有對應翻譯時就保留遊戲原文，不去猜測或自動改寫 NPC 名稱。
 const BUILTIN_SAMPLE_TEXT_VALUES = new Set([
-  '岡瑟·高斯','科妮莉亞·高斯','莫蒂默·高斯','貝拉·巴切勒','卡桑德拉·高斯','亞歷山大·高斯',
-  '高斯家族','巴切勒家族','柳溪 - 歐菲莉亞別墅','柳溪 - 花園社區',
-  '財富創造者','大家庭','暢銷作家','靈魂伴侶','卓越畫家','電腦奇才',
-  '衰老','雄心勃勃','天才','勢利','家庭觀念','愛整潔','美食家','有創造力','浪漫','陰沈',
-  '熱愛戶外','開朗','愛調情','物質主義','商業','作家','學生','無',
-  '高斯家族創始人之一，已故。','高斯家族女主人，已故。','現任高斯家族族長。',
-  '巴切勒家的女兒，嫁入高斯家。','莫蒂默和貝拉的女兒。','莫蒂默和貝拉的兒子。',
-  '午夜','黑貓','金毛','金毛尋回犬'
-]);
+  ...BUILTIN_SAMPLE_REFERENCE.families.map(family => family.name),
+  ...Object.values(BUILTIN_SAMPLE_REFERENCE.sims).flatMap(sim => [
+    sim.name,
+    sim.residence,
+    sim.aspiration,
+    sim.career,
+    ...(sim.traits || [])
+  ])
+].filter(Boolean));
 
 function uiText(value) {
   const text = String(value ?? '');
@@ -8756,14 +8942,26 @@ function migrate(raw) {
 
 // ========【資料載入管線】 設定 - 遷移、範例正規化與結構正規化只走同一條流程 ========
 function prepareDatabase(raw) {
-  const prepared = migrate(raw);
+  let prepared = migrate(raw);
+
+  // 舊 sample 若完全沒有被玩家修改，才自動換成新版 EA NPC 範例。
+  // 只要人物、家庭、關係、位置或其他資料有任何變更，exact snapshot 就不相等，
+  // 因此不會覆蓋玩家在舊範例上做過的內容。
+  const legacySampleReplaced = legacyBuiltinSampleLooksUntouched(prepared);
+  if (legacySampleReplaced) {
+    prepared = buildSample();
+  }
+
   const sampleLanguageRepaired = normalizeBuiltinSampleToTraditional(prepared);
   normalizeAllSims(prepared);
   const householdMembershipRepaired = repairImportedHouseholdMembership(prepared);
   (prepared.links || []).forEach(link => { if (!link.id) link.id = uid('lnk'); });
   return {
     prepared,
-    changed:sampleLanguageRepaired || householdMembershipRepaired
+    changed:
+      legacySampleReplaced ||
+      sampleLanguageRepaired ||
+      householdMembershipRepaired
   };
 }
 
