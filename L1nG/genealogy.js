@@ -633,6 +633,29 @@ function getDims() {
   );
 }
 
+// ========【單張卡片尺寸】 設定 - 檢視卡依自己的內容增高；全域高度只保留給世代安全間距 ========
+function getNodeDimensions(sim) {
+  if (viewMode === 'view' && sim) {
+    return {
+      W:VIEW_CARD_LAYOUT.width,
+      H:estimateViewCardHeight(
+        sim,
+        getCardViewSettings()
+      )
+    };
+  }
+
+  return getDims();
+}
+
+function getNodeDimensionsById(id) {
+  return getNodeDimensions(
+    id && db && db.sims
+      ? db.sims[id]
+      : null
+  );
+}
+
 function getGaps() {
   return GAPS[viewMode] || GAPS.view;
 }
@@ -2767,10 +2790,11 @@ function computeAutoPositions(visibleIds) {
 
     unit.members.forEach((member, index) => {
       pos.set(member.id, {
+        id:member.id,
         x:
           unit.x +
           index * (NODE_W + spouseGap),
-        y: unit.y
+        y:unit.y
       });
     });
   });
@@ -2806,17 +2830,19 @@ function computeLayout() {
     sims.forEach(s => {
       const manual = manualPos[s.id];
       const p = manual || autoPos.get(s.id) || {x:0,y:0};
-      pos.set(s.id, {x:p.x, y:p.y});
-      maxX = Math.max(maxX, p.x + NODE_W);
-      maxY = Math.max(maxY, p.y + NODE_H);
+      const dims = getNodeDimensions(s);
+      pos.set(s.id, { id:s.id, x:p.x, y:p.y });
+      maxX = Math.max(maxX, p.x + dims.W);
+      maxY = Math.max(maxY, p.y + dims.H);
     });
     return {pos, width:maxX, height:maxY, byId, visibleIds};
   }
   const pos = computeAutoPositions(visibleIds);
   let maxX=0, maxY=0;
-  pos.forEach(p => {
-    maxX = Math.max(maxX, p.x + NODE_W);
-    maxY = Math.max(maxY, p.y + NODE_H);
+  pos.forEach((p, id) => {
+    const dims = getNodeDimensionsById(id);
+    maxX = Math.max(maxX, p.x + dims.W);
+    maxY = Math.max(maxY, p.y + dims.H);
   });
   return {pos, width:maxX, height:maxY, byId, visibleIds};
 }
@@ -3005,7 +3031,7 @@ function focusSimOnCanvas(simId) {
   if (!layoutCache || !layoutCache.pos?.has(simId)) render();
   const pos = layoutCache?.pos?.get(simId);
   if (!pos) return;
-  const { W, H } = getDims();
+  const { W, H } = getNodeDimensions(db.sims[simId]);
   // 尋找人物屬於使用者主動移動畫布，viewport 改變後保留目前世界中心。
   canvasViewState = 'manual';
 
@@ -3233,17 +3259,21 @@ function cardAvatarRect(card) {
 }
 
 function cardOuterRect(card) {
-  const { W:NODE_W, H:NODE_H } = getDims();
+  const dims =
+    card && card.id
+      ? getNodeDimensionsById(card.id)
+      : getDims();
+
   const left = card.x + PAD;
   const top = card.y + PAD;
 
   return {
     left,
     top,
-    right:left + NODE_W,
-    bottom:top + NODE_H,
-    centerX:left + NODE_W / 2,
-    centerY:top + NODE_H / 2
+    right:left + dims.W,
+    bottom:top + dims.H,
+    centerX:left + dims.W / 2,
+    centerY:top + dims.H / 2
   };
 }
 
@@ -3555,7 +3585,6 @@ function commonNodeClasses(c, opts) {
 }
 
 function drawNodes() {
-  const { W: NODE_W, H: NODE_H } = getDims();
   const fam = currentFamily();
   const memberSet = new Set(fam.memberIds);
   const {pos, byId, visibleIds} = layoutCache;
@@ -3568,6 +3597,12 @@ function drawNodes() {
     const c = byId.get(id);
     const p = pos.get(id);
     if (!c || !p) return '';
+
+    const {
+      W:NODE_W,
+      H:NODE_H
+    } = getNodeDimensions(c);
+
     const isInlaw = !memberSet.has(id);
 
     const dName = displayDataText(c.name, c);
@@ -4646,36 +4681,78 @@ function showSmartGuide(axis, stagePosition) {
 }
 
 function getAlignmentSnap(id, rawX, rawY) {
-  const { W: NODE_W, H: NODE_H } = getDims();
+  const draggedDims = getNodeDimensionsById(id);
   const threshold = GUIDE_SNAP_PX / Math.max(scale, 0.001);
-  const draggedX = [rawX, rawX + NODE_W / 2, rawX + NODE_W];
-  const draggedY = [rawY, rawY + NODE_H / 2, rawY + NODE_H];
+
+  const draggedX = [
+    rawX,
+    rawX + draggedDims.W / 2,
+    rawX + draggedDims.W
+  ];
+
+  const draggedY = [
+    rawY,
+    rawY + draggedDims.H / 2,
+    rawY + draggedDims.H
+  ];
+
   let bestX = null;
   let bestY = null;
 
   layoutCache.pos.forEach((p, otherId) => {
     if (otherId === id) return;
-    const targetX = [p.x, p.x + NODE_W / 2, p.x + NODE_W];
-    const targetY = [p.y, p.y + NODE_H / 2, p.y + NODE_H];
+
+    const targetDims = getNodeDimensionsById(otherId);
+
+    const targetX = [
+      p.x,
+      p.x + targetDims.W / 2,
+      p.x + targetDims.W
+    ];
+
+    const targetY = [
+      p.y,
+      p.y + targetDims.H / 2,
+      p.y + targetDims.H
+    ];
 
     for (let i = 0; i < draggedX.length; i += 1) {
       const delta = targetX[i] - draggedX[i];
       const distance = Math.abs(delta);
-      if (distance <= threshold && (!bestX || distance < bestX.distance)) {
-        bestX = { value: rawX + delta, distance, guide: targetX[i] };
+
+      if (
+        distance <= threshold &&
+        (!bestX || distance < bestX.distance)
+      ) {
+        bestX = {
+          value:rawX + delta,
+          distance,
+          guide:targetX[i]
+        };
       }
     }
 
     for (let i = 0; i < draggedY.length; i += 1) {
       const delta = targetY[i] - draggedY[i];
       const distance = Math.abs(delta);
-      if (distance <= threshold && (!bestY || distance < bestY.distance)) {
-        bestY = { value: rawY + delta, distance, guide: targetY[i] };
+
+      if (
+        distance <= threshold &&
+        (!bestY || distance < bestY.distance)
+      ) {
+        bestY = {
+          value:rawY + delta,
+          distance,
+          guide:targetY[i]
+        };
       }
     }
   });
 
-  return { x: bestX, y: bestY };
+  return {
+    x:bestX,
+    y:bestY
+  };
 }
 
 function pickCloserSnap(alignmentCandidate, spacingCandidate) {
@@ -4711,17 +4788,27 @@ function buildVerticalSpacingGuide(firstStart, firstEnd, secondStart, secondEnd,
 }
 
 function getHorizontalEqualSpacingSnap(id, rawX, rawY) {
-  const { W: NODE_W, H: NODE_H } = getDims();
+  const draggedDims = getNodeDimensionsById(id);
+  const NODE_W = draggedDims.W;
   const threshold = GUIDE_SNAP_PX / Math.max(scale, 0.001);
   const rowTolerance = (GUIDE_SNAP_PX * 1.5) / Math.max(scale, 0.001);
-  const draggedCenterY = rawY + NODE_H / 2;
+  const draggedCenterY = rawY + draggedDims.H / 2;
   const rowNodes = [];
 
   layoutCache.pos.forEach((p, otherId) => {
     if (otherId === id) return;
-    const centerY = p.y + NODE_H / 2;
+
+    const otherDims = getNodeDimensionsById(otherId);
+    const centerY = p.y + otherDims.H / 2;
+
     if (Math.abs(centerY - draggedCenterY) <= rowTolerance) {
-      rowNodes.push({ id: otherId, x: p.x, y: p.y, centerY });
+      rowNodes.push({
+        id:otherId,
+        x:p.x,
+        y:p.y,
+        width:otherDims.W,
+        centerY
+      });
     }
   });
 
@@ -4741,19 +4828,19 @@ function getHorizontalEqualSpacingSnap(id, rawX, rawY) {
     const right = rowNodes[i + 1];
     if (Math.abs(left.centerY - right.centerY) > rowTolerance) continue;
 
-    const existingGap = right.x - (left.x + NODE_W);
+    const existingGap = right.x - (left.x + left.width);
     const rowCenterY = (left.centerY + right.centerY + draggedCenterY) / 3;
 
     // 在既有兩張卡片的左側或右側延續相同間距。
     if (existingGap >= 0) {
-      const rightTarget = right.x + NODE_W + existingGap;
+      const rightTarget = right.x + right.width + existingGap;
       consider(
         rightTarget,
         existingGap,
         buildHorizontalSpacingGuide(
-          left.x + NODE_W,
+          left.x + left.width,
           right.x,
-          right.x + NODE_W,
+          right.x + right.width,
           rightTarget,
           rowCenterY,
           existingGap
@@ -4767,7 +4854,7 @@ function getHorizontalEqualSpacingSnap(id, rawX, rawY) {
         buildHorizontalSpacingGuide(
           leftTarget + NODE_W,
           left.x,
-          left.x + NODE_W,
+          left.x + left.width,
           right.x,
           rowCenterY,
           existingGap
@@ -4776,15 +4863,15 @@ function getHorizontalEqualSpacingSnap(id, rawX, rawY) {
     }
 
     // 拖到兩張卡片之間時，平均分配左右兩段剩餘空間。
-    const available = right.x - (left.x + NODE_W);
+    const available = right.x - (left.x + left.width);
     if (available >= NODE_W) {
       const middleGap = (available - NODE_W) / 2;
-      const middleTarget = left.x + NODE_W + middleGap;
+      const middleTarget = left.x + left.width + middleGap;
       consider(
         middleTarget,
         middleGap,
         buildHorizontalSpacingGuide(
-          left.x + NODE_W,
+          left.x + left.width,
           middleTarget,
           middleTarget + NODE_W,
           right.x,
@@ -4799,17 +4886,26 @@ function getHorizontalEqualSpacingSnap(id, rawX, rawY) {
 }
 
 function getVerticalEqualSpacingSnap(id, rawX, rawY) {
-  const { W: NODE_W, H: NODE_H } = getDims();
+  const draggedDims = getNodeDimensionsById(id);
   const threshold = GUIDE_SNAP_PX / Math.max(scale, 0.001);
   const columnTolerance = (GUIDE_SNAP_PX * 1.5) / Math.max(scale, 0.001);
-  const draggedCenterX = rawX + NODE_W / 2;
+  const draggedCenterX = rawX + draggedDims.W / 2;
   const columnNodes = [];
 
   layoutCache.pos.forEach((p, otherId) => {
     if (otherId === id) return;
-    const centerX = p.x + NODE_W / 2;
+
+    const dims = getNodeDimensionsById(otherId);
+    const centerX = p.x + dims.W / 2;
+
     if (Math.abs(centerX - draggedCenterX) <= columnTolerance) {
-      columnNodes.push({ id: otherId, x: p.x, y: p.y, centerX });
+      columnNodes.push({
+        id:otherId,
+        x:p.x,
+        y:p.y,
+        height:dims.H,
+        centerX
+      });
     }
   });
 
@@ -4819,43 +4915,64 @@ function getVerticalEqualSpacingSnap(id, rawX, rawY) {
   function consider(value, gap, guide) {
     const distance = Math.abs(value - rawY);
     if (distance > threshold) return;
+
     if (!best || distance < best.distance) {
-      best = { value, distance, spacingGuide: guide };
+      best = {
+        value,
+        distance,
+        spacingGuide:guide
+      };
     }
   }
 
   for (let i = 0; i < columnNodes.length - 1; i += 1) {
     const top = columnNodes[i];
     const bottom = columnNodes[i + 1];
+
     if (Math.abs(top.centerX - bottom.centerX) > columnTolerance) continue;
 
-    const existingGap = bottom.y - (top.y + NODE_H);
-    const columnCenterX = (top.centerX + bottom.centerX + draggedCenterX) / 3;
+    const existingGap =
+      bottom.y -
+      (top.y + top.height);
 
-    // 在既有兩張卡片的上方或下方延續相同間距。
+    const columnCenterX =
+      (
+        top.centerX +
+        bottom.centerX +
+        draggedCenterX
+      ) / 3;
+
     if (existingGap >= 0) {
-      const bottomTarget = bottom.y + NODE_H + existingGap;
+      const bottomTarget =
+        bottom.y +
+        bottom.height +
+        existingGap;
+
       consider(
         bottomTarget,
         existingGap,
         buildVerticalSpacingGuide(
-          top.y + NODE_H,
+          top.y + top.height,
           bottom.y,
-          bottom.y + NODE_H,
+          bottom.y + bottom.height,
           bottomTarget,
           columnCenterX,
           existingGap
         )
       );
 
-      const topTarget = top.y - NODE_H - existingGap;
+      const topTarget =
+        top.y -
+        draggedDims.H -
+        existingGap;
+
       consider(
         topTarget,
         existingGap,
         buildVerticalSpacingGuide(
-          topTarget + NODE_H,
+          topTarget + draggedDims.H,
           top.y,
-          top.y + NODE_H,
+          top.y + top.height,
           bottom.y,
           columnCenterX,
           existingGap
@@ -4863,18 +4980,26 @@ function getVerticalEqualSpacingSnap(id, rawX, rawY) {
       );
     }
 
-    // 拖到兩張卡片之間時，平均分配上下兩段剩餘空間。
-    const available = bottom.y - (top.y + NODE_H);
-    if (available >= NODE_H) {
-      const middleGap = (available - NODE_H) / 2;
-      const middleTarget = top.y + NODE_H + middleGap;
+    const available =
+      bottom.y -
+      (top.y + top.height);
+
+    if (available >= draggedDims.H) {
+      const middleGap =
+        (available - draggedDims.H) / 2;
+
+      const middleTarget =
+        top.y +
+        top.height +
+        middleGap;
+
       consider(
         middleTarget,
         middleGap,
         buildVerticalSpacingGuide(
-          top.y + NODE_H,
+          top.y + top.height,
           middleTarget,
-          middleTarget + NODE_H,
+          middleTarget + draggedDims.H,
           bottom.y,
           columnCenterX,
           middleGap
@@ -5167,13 +5292,14 @@ nodes.addEventListener('pointerdown', e => {
 });
 
 function expandStageToFit() {
-  const { W: NODE_W, H: NODE_H } = getDims();
   const fam = currentFamily();
   if (!getCurrentFreeLayout(fam)) return;
   let maxX=0, maxY=0;
-  layoutCache.pos.forEach(p => {
-    maxX = Math.max(maxX, p.x + NODE_W);
-    maxY = Math.max(maxY, p.y + NODE_H);
+
+  layoutCache.pos.forEach((p, id) => {
+    const dims = getNodeDimensionsById(id);
+    maxX = Math.max(maxX, p.x + dims.W);
+    maxY = Math.max(maxY, p.y + dims.H);
   });
   const sW = Math.max(maxX + PAD*2, 400);
   const sH = Math.max(maxY + PAD*2, 300);
