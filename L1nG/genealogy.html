@@ -111,7 +111,6 @@
                     <span class="topbar-spacer"></span>
                     <nav class="topbar-primary-actions" aria-label="主要功能">
                         <button class="topbar-text-btn" id="rosterBtn" type="button"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span></button>
-                        <button class="topbar-text-btn" id="galleryBrowserBtn" type="button"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿</span></button>
                         <button class="topbar-text-btn topbar-export-btn" id="exportBtn" type="button" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
                         <div class="app-menu" id="topbarMoreMenu">
                             <button class="topbar-icon-only app-menu-trigger" id="topbarMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" title="更多"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
@@ -134,7 +133,8 @@
                                     <span>族譜提取模組</span>
                                 </a>
                                 
-                                <button class="app-menu-item" id="bgBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></button>
+                                <button class="app-menu-item" id="bgBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></button>
+                                <button class="app-menu-item" id="storageBtn" type="button" role="menuitem"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>圖片與儲存</span></button>
                                 <div class="app-menu-divider"></div>
                                 <div class="app-menu-language-row">
                                     <span class="app-menu-language-label"><span class="l1ng-icon icon-globe2" aria-hidden="true"></span><span>語言</span></span>
@@ -275,7 +275,7 @@
             </div>
         </div>
 
-        <!-- ========【編輯模擬市民】 設定 - 個人檔案式編輯器、家庭關係、其他關係、寵物與相簿 ======== -->
+        <!-- ========【編輯模擬市民】 設定 - 個人檔案式編輯器、家庭關係、其他關係、寵物與人生照片 ======== -->
         <div class="mask" id="mask">
             <div class="modal sim-editor-modal">
                 <div class="sim-editor-top">
@@ -320,7 +320,7 @@
                         <button class="sim-editor-tab active" type="button" role="tab" aria-selected="true" data-editor-tab="basic">基本資料</button>
                         <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="family">家庭關係</button>
                         <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="relations">其他關係</button>
-                        <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="media">相簿與寵物</button>
+                        <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="media">人生照片與寵物</button>
                     </div>
                 </div>
 
@@ -404,7 +404,7 @@
                             <button class="pet-add-btn" id="btnAddPet" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增寵物</span></button>
                         </div>
                         <div class="rel-section" id="gallerySection">
-                            <div class="rel-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="相簿操作說明" data-tooltip="可記錄不同人生階段、合影等多張圖片；支援拖曳圖片到相簿，或在編輯器內按 Ctrl+V 貼上截圖。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div class="rel-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>人生照片</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="人生照片說明" data-tooltip="替這位人物保存幾張值得記錄的人生照片；可標記人生階段、標題與備註。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                             <div class="gallery-grid" id="galleryGrid"></div>
                             <button class="gallery-add-btn" id="btnAddPhoto" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增圖片</span></button>
                         </div>
@@ -486,7 +486,7 @@
             </div>
         </div>
 
-        <!-- ========【相簿圖片編輯】 設定 - 圖片、標題、人生階段與備註 ======== -->
+        <!-- ========【人生照片編輯】 設定 - 圖片、標題、人生階段與備註 ======== -->
         <div class="mask nested" id="photoMask">
             <div class="modal photo-modal">
                 <h2 id="photoModalTitle">新增圖片</h2>
@@ -544,36 +544,29 @@
             </div>
         </div>
 
-        <!-- ========【圖片檢視器】 設定 - 相簿圖片放大與切換 ======== -->
+        <!-- ========【人生照片檢視】 設定 - 僅瀏覽目前人物的人生照片 ======== -->
         <div class="mask viewer" id="galleryViewerMask">
             <div class="modal viewer-modal">
-                <button class="viewer-close" id="gvClose" title="關閉 (Esc)"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
-                <button class="viewer-nav prev" id="gvPrev" title="上一張 (←)">‹</button>
-                <button class="viewer-nav next" id="gvNext" title="下一張 (→)">›</button>
+                <div class="viewer-header">
+                    <div class="viewer-heading">
+                        <span class="viewer-person-name" id="gvPersonName">人物</span>
+                        <span class="viewer-heading-sep">/</span>
+                        <span>人生照片</span>
+                    </div>
+                    <button class="viewer-close" id="gvClose" type="button" title="關閉 (Esc)" aria-label="關閉"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
+                </div>
                 <div class="viewer-img-wrap"><img alt="" id="gvImg" src=""></div>
-                <div class="viewer-info">
-                    <div class="gv-title" id="gvTitle"></div>
-                    <div class="gv-note" id="gvNote"></div>
-                    <div class="gv-counter" id="gvCounter"></div>
+                <div class="viewer-footer">
+                    <div class="viewer-info">
+                        <div class="gv-title" id="gvTitle"></div>
+                        <div class="gv-note" id="gvNote"></div>
+                    </div>
+                    <div class="viewer-controls">
+                        <button class="viewer-nav prev" id="gvPrev" type="button" title="上一張 (←)">‹</button>
+                        <div class="gv-counter" id="gvCounter"></div>
+                        <button class="viewer-nav next" id="gvNext" type="button" title="下一張 (→)">›</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- ========【相簿瀏覽器】 設定 - 全部模擬市民相簿總覽 ======== -->
-        <div class="mask roster" id="galleryBrowserMask">
-            <div class="modal gallery-browser-modal">
-                <h2><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿瀏覽器</span><span class="roster-count" id="galleryBrowserCount"></span></h2>
-                <div class="gallery-browser-toolbar">
-                    <input id="galleryBrowserSearch" placeholder="搜尋標題 / 模擬市民名稱 / 備註…" type="search">
-                    <select id="galleryBrowserFilter">
-                        <option value="">全部模擬市民</option>
-                    </select>
-                    <button id="galleryBrowserClearFilter" style="padding:8px 12px;border:1px solid var(--border);border-radius:7px;background:var(--input-bg);color:var(--ink);cursor:pointer;font-size:13px" type="button">
-                        清除篩選
-                    </button>
-                </div>
-                <div class="gallery-browser-list" id="galleryBrowserList"></div>
-                <div class="modal-actions"><span class="spacer"></span><button id="galleryBrowserCloseBtn">關閉</button></div>
             </div>
         </div>
 
@@ -597,15 +590,32 @@
             </div>
         </div>
 
-        <!-- ========【全部模擬市民】 設定 - 搜尋、檢視與編輯人物 ======== -->
+        <!-- ========【人物庫】 設定 - 搜尋、精簡 / 詳細檢視與批量管理 ======== -->
         <div class="mask roster" id="rosterMask">
             <div class="modal roster-modal">
-                <h2>全部模擬市民<span class="roster-count" id="rosterCount"></span></h2>
-                <div class="roster-toolbar">
-                    <input id="rosterSearch" placeholder="搜尋姓名 / 特徵 / 職業…" type="search">
-                    <button class="primary" id="rosterAddBtn"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增</span></button>
+                <div class="roster-header">
+                    <h2><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span><span class="roster-count" id="rosterCount"></span></h2>
+                    <div class="roster-header-actions">
+                        <div class="roster-view-toggle" role="group" aria-label="人物顯示方式">
+                            <button id="rosterCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">☷</button>
+                            <button id="rosterDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">☰</button>
+                        </div>
+                        <button class="roster-batch-start" id="rosterBatchBtn" type="button"><span class="l1ng-icon icon-check2-square" aria-hidden="true"></span><span>批量管理</span></button>
+                        <button class="primary" id="rosterAddBtn" type="button"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增人物</span></button>
+                    </div>
                 </div>
-                <div class="roster-list" id="rosterList"></div>
+                <div class="roster-toolbar">
+                    <input id="rosterSearch" placeholder="搜尋人物…" type="search" autocomplete="off">
+                </div>
+                <div class="roster-batch-toolbar" id="rosterBatchToolbar" hidden>
+                    <span class="roster-batch-count" id="rosterBatchCount">已選 0 位</span>
+                    <span class="spacer"></span>
+                    <button id="rosterBatchAddFamilyBtn" type="button">加入目前家族</button>
+                    <button id="rosterBatchRemoveFamilyBtn" type="button">移出目前家族</button>
+                    <button class="danger" id="rosterBatchDeleteBtn" type="button">刪除人物</button>
+                    <button id="rosterBatchCancelBtn" type="button">取消</button>
+                </div>
+                <div class="roster-list detailed" id="rosterList"></div>
                 <div class="modal-actions"><span class="spacer"></span><button id="rosterCloseBtn">關閉</button></div>
             </div>
         </div>
@@ -629,90 +639,96 @@
             </div>
         </div>
 
-        <!-- ========【主題設定】 設定 - 主題、背景與圖片品質 ======== -->
+        <!-- ========【外觀設定】 設定 - 主題、背景與關係線外觀 ======== -->
         <div class="mask" id="bgMask">
-            <div class="modal bg-modal">
-                <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></h2>
-                <div class="setting-group-title">主題配色（漸層）</div>
-                <div class="theme-grid" id="themeGrid"></div>
-                <div class="custom-theme">
-                    <div class="custom-theme-row" style="margin-bottom:10px;">
-                        <label>顏色 1</label>
-                        <input class="custom-color-input" id="customColor1" type="color" value="#f0c050">
-                        <label>顏色 2</label>
-                        <input class="custom-color-input" id="customColor2" type="color" value="#a878c8">
-                        <div class="custom-theme-preview" id="customThemePreview"></div>
+            <div class="modal bg-modal appearance-modal">
+                <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></h2>
+
+                <section class="appearance-section">
+                    <div class="setting-group-title">主題</div>
+                    <div class="theme-grid" id="themeGrid"></div>
+                    <div class="custom-theme">
+                        <div class="custom-theme-row">
+                            <label>主色<input class="custom-color-input" id="customColor1" type="color" value="#f0c050"></label>
+                            <label>輔色<input class="custom-color-input" id="customColor2" type="color" value="#a878c8"></label>
+                            <div class="custom-theme-preview" id="customThemePreview"></div>
+                            <button class="apply-btn" id="applyCustomBtn" type="button">套用自訂配色</button>
+                        </div>
                     </div>
-                    <div class="custom-theme-row"><span style="flex:1;font-size:11.5px;">拖曳色票選擇兩種顏色，即時預覽漸層效果</span><button class="apply-btn" id="applyCustomBtn">套用自訂漸層</button></div>
-                </div>
-                <div class="setting-group-title">背景圖片</div>
-                <div class="bg-preview" id="bgPreview">尚未設定背景圖片</div>
-                <div class="bg-row">
-                    <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="bgInput" type="file"></label>
-                    <button class="danger" id="bgClearBtn" style="padding:6px 12px;border:1px solid #e6c9c4;border-radius:7px;background:var(--input-bg);color:#b03a2e;cursor:pointer;font-size:13px">
-                        移除背景
-                    </button>
-                </div>
-                <div class="bg-setting"><label>透明度：<span class="bg-value" id="bgOpacityVal">50%</span></label><input id="bgOpacity" max="100" min="0" type="range" value="50"></div>
-                <div class="bg-setting">
-                    <label>顯示方式</label>
-                    <select id="bgFit">
-                        <option value="cover">填滿（裁切超出部分）</option>
-                        <option value="contain">完整顯示（可能留白）</option>
-                        <option value="repeat">重複排列</option>
-                    </select>
-                </div>
-                <div class="setting-group-title">頭像畫質</div>
-                <div class="bg-setting">
-                    <label class="setting-label-with-help"><span>模擬市民頭像</span><span class="help-tooltip compact" id="avatarProfileHelp" tabindex="0" role="button" aria-label="模擬市民頭像畫質說明" data-tooltip="僅套用於之後上傳的頭像。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></label>
-                    <select id="avatarProfile">
-                        <option value="compact">節省空間（192px）</option>
-                        <option value="balanced">平衡（384px · 預設）</option>
-                        <option value="hd">高畫質（768px）</option>
-                    </select>
-                    <div class="avatar-tip" id="avatarProfileHint"></div>
-                </div>
-                <div class="bg-setting">
-                    <label class="setting-label-with-help"><span>寵物頭像</span><span class="help-tooltip compact" id="petAvatarProfileHelp" tabindex="0" role="button" aria-label="寵物頭像畫質說明" data-tooltip="僅套用於之後上傳的頭像。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></label>
-                    <select id="petAvatarProfile">
-                        <option value="compact">節省空間（192px）</option>
-                        <option value="balanced">平衡（384px · 預設）</option>
-                        <option value="hd">高畫質（768px）</option>
-                    </select>
-                    <div class="avatar-tip" id="petAvatarProfileHint"></div>
-                </div>
-                <div class="setting-group-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿圖片畫質</span></div>
-                <div class="bg-setting">
-                    <label class="setting-label-with-help"><span>壓縮品質</span><span class="help-tooltip compact" id="galleryProfileHelp" tabindex="0" role="button" aria-label="相簿圖片畫質說明" data-tooltip="僅套用於之後上傳的圖片。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></label>
-                    <select id="galleryProfile">
-                        <option value="small">小型圖片（512px · 約 20–30KB/張）</option>
-                        <option value="medium">中型圖片（720px · 約 40–60KB/張 · 預設）</option>
-                        <option value="large">大型圖片（1080px · 約 80–120KB/張）</option>
-                        <option value="hd">高畫質（1440px · 約 150–250KB/張）</option>
-                        <option value="original">原始圖片（不壓縮 · 不限大小）</option>
-                    </select>
-                    <div class="avatar-tip" id="galleryProfileHint"></div>
-                </div>
-                <div class="setting-group-title setting-title-with-help"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>儲存空間使用量</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="圖片儲存說明" data-tooltip="圖片會儲存在目前使用的瀏覽器中，不會自動上傳。匯出 JSON 備份時會連同圖片一起備份；清理未使用的圖片只會移除目前沒有被任何內容使用的圖片。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
-                <div class="bg-setting">
-                    <div class="storage-bar">
-                        <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
+                </section>
+
+                <section class="appearance-section">
+                    <div class="setting-group-title">族譜背景</div>
+                    <div class="bg-preview" id="bgPreview">尚未設定背景圖片</div>
+                    <div class="bg-row">
+                        <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換圖片</span><input accept="image/*" hidden id="bgInput" type="file"></label>
+                        <button class="danger" id="bgClearBtn" type="button">移除圖片</button>
                     </div>
-                    <div class="avatar-tip" id="storageInfo">計算中…</div>
-                    <div class="bg-row" style="margin-top:8px">
-                        <button id="cleanupBtn" style="padding:6px 12px;border:1px solid var(--border);border-radius:7px;background:var(--input-bg);color:var(--ink);cursor:pointer;font-size:13px" type="button">
-                            <span class="l1ng-icon icon-trash3" aria-hidden="true"></span>
-                            <span>清理未使用的圖片</span>
-                        </button>
+                    <div class="appearance-control-row"><label>透明度</label><input id="bgOpacity" max="100" min="0" type="range" value="50"><span class="bg-value" id="bgOpacityVal">50%</span></div>
+                    <div class="appearance-control-row"><label>圖片顯示</label><select id="bgFit"><option value="cover">填滿</option><option value="contain">完整顯示</option><option value="repeat">重複排列</option></select></div>
+                </section>
+
+                <section class="appearance-section relationship-style-section">
+                    <div class="setting-group-title">關係線</div>
+                    <div class="relationship-line-preview-list">
+                        <div class="relationship-line-preview"><span>父母 / 子女</span><i data-rel-preview="parent"></i></div>
+                        <div class="relationship-line-preview"><span>配偶</span><i data-rel-preview="spouse"></i></div>
+                        <div class="relationship-line-preview"><span>前任</span><i data-rel-preview="exspouse"></i></div>
+                        <div class="relationship-line-preview"><span>領養</span><i data-rel-preview="adopt"></i></div>
+                        <div class="relationship-line-preview"><span>其他關係</span><i data-rel-preview="other"></i></div>
                     </div>
-                </div>
-                <div class="setting-group-title">重設</div>
-                <div class="reset-actions">
-                    <button id="resetUiSettingsBtn" type="button">重設介面設定</button>
-                    <button class="danger" id="restoreSampleBtn" type="button">重建範例資料</button>
-                </div>
-                <div class="avatar-tip">「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。</div>
+                    <details class="appearance-advanced" id="relationshipLineAdvanced">
+                        <summary>自訂關係線外觀</summary>
+                        <div class="relationship-style-editor">
+                            <div class="relationship-style-row" data-rel-style-row="parent"><strong>父母 / 子女</strong><label>樣式<select data-rel-style="parent"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="parent" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="parent" type="color"></label></div>
+                            <div class="relationship-style-row" data-rel-style-row="spouse"><strong>配偶</strong><label>樣式<select data-rel-style="spouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="spouse" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="spouse" type="color"></label></div>
+                            <div class="relationship-style-row" data-rel-style-row="exspouse"><strong>前任</strong><label>樣式<select data-rel-style="exspouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="exspouse" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="exspouse" type="color"></label></div>
+                            <div class="relationship-style-row" data-rel-style-row="adopt"><strong>領養</strong><label>樣式<select data-rel-style="adopt"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="adopt" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="adopt" type="color"></label></div>
+                            <div class="relationship-style-row" data-rel-style-row="other"><strong>其他關係</strong><label>樣式<select data-rel-style="other"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="other" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="other" type="color"></label></div>
+                            <div class="relationship-style-actions"><button id="resetRelationshipStyleBtn" type="button">恢復關係線預設</button></div>
+                        </div>
+                    </details>
+                </section>
+
+                <section class="appearance-section">
+                    <div class="setting-group-title">重設外觀</div>
+                    <button id="resetUiSettingsBtn" type="button">恢復介面預設</button>
+                </section>
+
                 <div class="modal-actions"><span class="spacer"></span><button id="bgCloseBtn">關閉</button></div>
+            </div>
+        </div>
+
+        <!-- ========【圖片與儲存】 設定 - 圖片品質、瀏覽器儲存與資料維護 ======== -->
+        <div class="mask" id="storageMask">
+            <div class="modal storage-modal">
+                <h2><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>圖片與儲存</span></h2>
+
+                <section class="storage-section">
+                    <div class="setting-group-title">圖片品質</div>
+                    <div class="storage-quality-grid">
+                        <label><span>人物頭像</span><select id="avatarProfile"><option value="compact">節省空間（192px）</option><option value="balanced">平衡（384px · 預設）</option><option value="hd">高畫質（768px）</option></select><small id="avatarProfileHint"></small></label>
+                        <label><span>寵物頭像</span><select id="petAvatarProfile"><option value="compact">節省空間（192px）</option><option value="balanced">平衡（384px · 預設）</option><option value="hd">高畫質（768px）</option></select><small id="petAvatarProfileHint"></small></label>
+                        <label><span>人生照片</span><select id="galleryProfile"><option value="small">小型（512px）</option><option value="medium">中型（720px · 預設）</option><option value="large">大型（1080px）</option><option value="hd">高畫質（1440px）</option><option value="original">保留原始圖片</option></select><small id="galleryProfileHint"></small></label>
+                    </div>
+                    <p class="settings-note">圖片品質只會影響之後新增或更換的圖片，已儲存的圖片不會重新處理。</p>
+                </section>
+
+                <section class="storage-section">
+                    <div class="setting-group-title">目前儲存空間</div>
+                    <div class="storage-bar"><div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div></div>
+                    <div class="storage-summary" id="storageInfo">計算中…</div>
+                    <button id="cleanupBtn" type="button"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清理未使用的圖片</span></button>
+                    <p class="settings-note">圖片只會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器。</p>
+                </section>
+
+                <section class="storage-section">
+                    <div class="setting-group-title">資料管理</div>
+                    <button class="danger" id="restoreSampleBtn" type="button">重建範例資料</button>
+                    <p class="settings-note">重建範例資料會取代目前族譜內容；需要保留資料時請先匯出 JSON 備份。</p>
+                </section>
+
+                <div class="modal-actions"><span class="spacer"></span><button id="storageCloseBtn">關閉</button></div>
             </div>
         </div>
 
@@ -757,29 +773,19 @@
                         </ul>
                     </div>
                     <div class="tips-section">
-                        <h3><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>相簿瀏覽器</span></h3>
+                        <h3><span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span><span>人生照片</span></h3>
                         <ul>
-                            <li>頂端<b>相簿</b>：開啟相簿瀏覽器，檢視所有模擬市民的相簿圖片</li>
-                            <li>頂端支援按<b>標題 / 模擬市民名稱 / 備註</b>搜尋，按<b>模擬市民篩選</b></li>
-                            <li>每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器</li>
-                            <li>檢視器中<kbd>←</kbd><kbd>→</kbd><b>跨模擬市民</b>瀏覽，<kbd>Esc</kbd>關閉</li>
-                            <li>不包含頭像 / 寵物頭像 / 背景圖</li>
-                        </ul>
-                    </div>
-                    <div class="tips-section">
-                        <h3><span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span><span>模擬市民相簿</span></h3>
-                        <ul>
-                            <li>編輯模擬市民 →<b>相簿</b>：為模擬市民新增多張圖片</li>
+                            <li>編輯人物 →<b>人生照片</b>：替人物保存值得記錄的照片</li>
                             <li>每張圖片可設定：<b>標題 / 關聯階段 / 備註</b></li>
-                            <li>支援<b>拖曳圖片檔案</b>到相簿網格，或按<kbd>Ctrl</kbd>+<kbd>V</kbd>貼上截圖</li>
+                            <li>支援<b>拖曳圖片檔案</b>到人生照片區，或按<kbd>Ctrl</kbd>+<kbd>V</kbd>貼上截圖</li>
                         </ul>
                     </div>
                     <div class="tips-section">
                         <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>圖片儲存</span></h3>
                         <ul>
-                            <li>頭像、相簿圖片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器</li>
+                            <li>頭像、人生照片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器</li>
                             <li>匯出 <b>JSON 備份</b>時，圖片會自動一起放進備份；之後重新匯入時也會一併還原</li>
-                            <li><b>清理未使用的圖片</b>只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片</li>
+                            <li><b>清理未使用的圖片</b>只會移除目前沒有被人物、寵物、人生照片或背景使用的圖片，不會刪除仍在使用中的圖片</li>
                         </ul>
                     </div>
                     <div class="tips-section">
