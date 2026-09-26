@@ -1777,6 +1777,37 @@ function setupTopbarNavSelects() {
       }
     });
 
+    if (selectId === 'familySelect') {
+      menu.addEventListener('wheel', event => {
+        const maxScrollLeft = Math.max(0, menu.scrollWidth - menu.clientWidth);
+        if (maxScrollLeft <= 1) return;
+
+        let delta =
+          Math.abs(event.deltaY) >= Math.abs(event.deltaX)
+            ? event.deltaY
+            : event.deltaX;
+
+        if (!delta) return;
+
+        if (event.deltaMode === 1) {
+          delta *= 32;
+        } else if (event.deltaMode === 2) {
+          delta *= Math.max(180, menu.clientWidth);
+        }
+
+        const before = menu.scrollLeft;
+        const next = Math.max(
+          0,
+          Math.min(maxScrollLeft, before + delta)
+        );
+
+        if (Math.abs(next - before) < 0.5) return;
+
+        event.preventDefault();
+        menu.scrollLeft = next;
+      }, { passive:false });
+    }
+
     select.addEventListener('change', () => syncNavSelectControl(selectId));
     syncNavSelectControl(selectId);
   });
@@ -5833,16 +5864,78 @@ nodes.addEventListener('pointerdown', e => {
   // Space 是選取工具中的暫時平移：不攔截，交給 viewport 的平移手勢。
   if (isFree && spacePanHeld) return;
 
-  // 拖曳工具：拖曳卡片位置也用來平移畫布；單純點一下仍可開啟人物資料。
+  // 拖曳工具：按住空白處平移畫布；按住人物卡片則直接移動該卡片。
+  // 選取工具才負責多選 / 框選 / 整組拖曳，單張卡片移動不需要先進入選取狀態。
   if (isFree && arrangeTool === 'pan') {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const dragMode = viewMode;
+    const manualPos = fam.manualPos[dragMode];
+    const initialPos = manualPos[id] || layoutCache?.pos?.get(id) || null;
+    const startPos = initialPos ? { x:initialPos.x, y:initialPos.y } : null;
     const sx = e.clientX, sy = e.clientY;
-    const onUp = ev => {
+    const beforeLayoutState = captureLayoutHistoryState(fam, dragMode);
+    let moved = false;
+
+    const onMove = ev => {
+      if (fam.locked || !startPos) return;
+
+      const dx = ev.clientX - sx;
+      const dy = ev.clientY - sy;
+
+      if (!moved && Math.hypot(dx, dy) > 3) {
+        moved = true;
+        el.classList.add('dragging');
+      }
+
+      if (!moved) return;
+
+      const rawX = startPos.x + dx / scale;
+      const rawY = startPos.y + dy / scale;
+      const snapped = getSmartSnap(id, rawX, rawY);
+      const nx = snapped.x;
+      const ny = snapped.y;
+
+      manualPos[id] = { x:nx, y:ny };
+      layoutCache.pos.set(id, { x:nx, y:ny });
+
+      el.style.left = `${nx + PAD}px`;
+      el.style.top = `${ny + PAD}px`;
+
+      hideSmartGuides();
+      if (snapped.guideX !== null) showSmartGuide('x', snapped.guideX);
+      if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
+      if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
+      if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
+      scheduleEdgeRedraw();
+    };
+
+    const onUp = () => {
+      document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
       document.removeEventListener('pointercancel', onUp);
-      if (Math.hypot(ev.clientX - sx, ev.clientY - sy) < 5) {
-        if (viewMode === 'view') openInfoCard(id); else openEditor(id);
+
+      el.classList.remove('dragging');
+      hideSmartGuides();
+
+      if (moved) {
+        dragHistory.push({
+          type:'card-layout',
+          familyId:fam.id,
+          mode:dragMode,
+          before:beforeLayoutState,
+          after:captureLayoutHistoryState(fam, dragMode)
+        });
+        save();
+        expandStageToFit();
+      } else {
+        if (viewMode === 'view') openInfoCard(id);
+        else openEditor(id);
       }
     };
+
+    document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
     document.addEventListener('pointercancel', onUp);
     return;
