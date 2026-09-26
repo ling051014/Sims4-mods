@@ -5331,6 +5331,30 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .family-switch-btn:hover,.family-title-menu-btn:hover,.family-section-icon:hover { background:var(--nav-button-hover-bg); color:var(--ink); }
 .family-switch-btn .nav-select-value { display:none; }
 .family-title-row .nav-select-family .nav-select-menu { left:0; right:auto; width:max-content; min-width:100%; max-width:min(280px,calc(100vw - 24px)); }
+
+/* ========【家族下拉選單】 設定 - 脫離側欄裁切，先向下排列，超量才向右增加欄位 ======== */
+.nav-select-menu.family-nav-portal {
+    position:fixed;
+    z-index:1400;
+    display:grid;
+    grid-auto-flow:column;
+    grid-template-rows:repeat(var(--family-menu-rows, 8), minmax(30px, auto));
+    grid-auto-columns:minmax(168px, max-content);
+    align-content:start;
+    overflow-x:auto;
+    overflow-y:hidden;
+    width:max-content;
+    min-width:180px;
+    padding:5px;
+    border:1px solid var(--nav-dropdown-border);
+    border-radius:6px;
+    background:var(--nav-dropdown-bg);
+    box-shadow:0 10px 30px rgba(0,0,0,.16);
+}
+.nav-select-menu.family-nav-portal .nav-select-option {
+    min-width:168px;
+    white-space:nowrap;
+}
 .family-bio { width:100%; min-height:54px; margin-top:9px; padding:0; border:0; outline:none; resize:vertical; background:transparent; color:var(--sub); font:inherit; font-size:11.5px; line-height:1.55; }
 .family-bio::placeholder { color:color-mix(in srgb,var(--sub) 62%,transparent); }
 .family-bio:focus { color:var(--ink); }
@@ -5731,3 +5755,90 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 .node.card-gender-hidden.ghost { border-left-color: var(--ghost-border); }
 .node.card-gender-hidden.dead { border-left-color: var(--dead-border); }
+
+
+/* ========【全站載入骨架】 設定 - 初始化期間維持與正式介面相同的主要區塊比例 ======== */
+.app-skeleton {
+    position:fixed;
+    inset:0;
+    z-index:5000;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg);
+    opacity:1;
+    transition:opacity .18s ease;
+}
+.app-skeleton.is-hidden {
+    opacity:0;
+    pointer-events:none;
+}
+.app-skeleton-topbar {
+    height:52px;
+    flex:0 0 52px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 16px;
+    border-bottom:1px solid var(--border);
+    background:var(--card);
+}
+.app-skeleton-body {
+    flex:1;
+    min-height:0;
+    display:flex;
+}
+.app-skeleton-sidebar {
+    width:var(--sidebar-width);
+    flex:0 0 var(--sidebar-width);
+    padding:14px;
+    border-right:1px solid var(--border);
+    background:var(--card);
+}
+.app-skeleton-canvas {
+    position:relative;
+    flex:1;
+    min-width:0;
+    overflow:hidden;
+    background:var(--canvas-bg, var(--bg));
+}
+.skeleton-block,
+.skeleton-person,
+.skeleton-node {
+    display:block;
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb,var(--border) 68%,transparent) 20%,
+        color-mix(in srgb,var(--card) 88%,white) 50%,
+        color-mix(in srgb,var(--border) 68%,transparent) 80%
+      );
+    background-size:220% 100%;
+    animation:genealogy-skeleton-shimmer 1.25s linear infinite;
+}
+.skeleton-brand { width:150px; height:18px; border-radius:5px; }
+.skeleton-search { width:min(360px,34vw); height:30px; border-radius:5px; }
+.skeleton-action { width:64px; height:28px; border-radius:5px; }
+.skeleton-cover { width:100%; aspect-ratio:16/9; border-radius:7px; }
+.skeleton-line { width:72%; height:12px; margin-top:14px; border-radius:4px; }
+.skeleton-line.wide { width:86%; }
+.skeleton-line.short { width:48%; }
+.skeleton-people { margin-top:18px; display:flex; flex-direction:column; gap:9px; }
+.skeleton-person { height:46px; border-radius:6px; }
+.skeleton-node {
+    position:absolute;
+    width:176px;
+    height:142px;
+    border-radius:10px;
+}
+.skeleton-node-a { left:20%; top:22%; }
+.skeleton-node-b { left:54%; top:40%; }
+.skeleton-node-c { left:31%; top:63%; }
+@keyframes genealogy-skeleton-shimmer {
+    from { background-position:200% 0; }
+    to { background-position:-20% 0; }
+}
+@media (max-width:720px) {
+    .app-skeleton-sidebar { width:min(280px,72vw); flex-basis:min(280px,72vw); }
+    .skeleton-search { flex:1; width:auto; }
+    .skeleton-action { display:none; }
+}

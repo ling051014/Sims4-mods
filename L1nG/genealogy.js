@@ -852,9 +852,76 @@ function getNavSelectDisplayText(select, option) {
   return option.textContent || option.value || '';
 }
 
+function getNavSelectControlByHost(host) {
+  for (const control of navSelectControls.values()) {
+    if (control.host === host) return control;
+  }
+  return null;
+}
+
+function restoreFamilyNavSelectMenu(control) {
+  if (!control || control.select.id !== 'familySelect') return;
+
+  const { host, menu } = control;
+
+  if (menu.parentElement !== host) {
+    host.appendChild(menu);
+  }
+
+  menu.classList.remove('family-nav-portal');
+  menu.style.removeProperty('left');
+  menu.style.removeProperty('top');
+  menu.style.removeProperty('max-width');
+  menu.style.removeProperty('max-height');
+  menu.style.removeProperty('--family-menu-rows');
+}
+
+function positionFamilyNavSelectMenu(control) {
+  if (!control || control.select.id !== 'familySelect') return;
+
+  const { trigger, menu } = control;
+  const items = [...menu.querySelectorAll('.nav-select-option')];
+
+  if (!items.length) return;
+
+  if (menu.parentElement !== document.body) {
+    document.body.appendChild(menu);
+  }
+
+  menu.classList.add('family-nav-portal');
+
+  const rect = trigger.getBoundingClientRect();
+  const margin = 10;
+  const gap = 6;
+  const itemHeight = 32;
+  const availableHeight = Math.max(
+    itemHeight,
+    window.innerHeight - rect.bottom - gap - margin
+  );
+
+  const rows = Math.max(
+    1,
+    Math.min(
+      items.length,
+      Math.floor(availableHeight / itemHeight)
+    )
+  );
+
+  menu.style.setProperty('--family-menu-rows', String(rows));
+  menu.style.top = `${Math.round(rect.bottom + gap)}px`;
+  menu.style.left = `${Math.max(margin, Math.round(rect.left))}px`;
+  menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
+  menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
+}
+
 function closeNavSelect(host) {
   if (!host) return;
+
+  const control = getNavSelectControlByHost(host);
+  if (control) restoreFamilyNavSelectMenu(control);
+
   host.classList.remove('open');
+
   const trigger = host.querySelector('.nav-select-trigger');
   if (trigger) trigger.setAttribute('aria-expanded', 'false');
 }
@@ -923,9 +990,17 @@ function setupTopbarNavSelects() {
       trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
       if (willOpen) {
         syncNavSelectControl(selectId);
+
         requestAnimationFrame(() => {
-          const current = menu.querySelector('.nav-select-option.selected') || menu.querySelector('.nav-select-option');
-          if (current) current.focus({ preventScroll: true });
+          if (selectId === 'familySelect') {
+            positionFamilyNavSelectMenu(control);
+          }
+
+          const current =
+            menu.querySelector('.nav-select-option.selected') ||
+            menu.querySelector('.nav-select-option');
+
+          if (current) current.focus({ preventScroll:true });
         });
       }
     });
@@ -961,6 +1036,12 @@ function setupTopbarNavSelects() {
     const inside = event.target.closest && event.target.closest('.nav-select');
     closeAllNavSelects(inside || null);
   });
+
+  window.addEventListener('resize', debounce(() => {
+    const control = navSelectControls.get('familySelect');
+    if (!control || !control.host.classList.contains('open')) return;
+    positionFamilyNavSelectMenu(control);
+  }, 60));
 }
 
 
@@ -7741,6 +7822,18 @@ if (gameImportInput) {
   };
 }
 
+// ========【全站載入骨架】 設定 - 完成初始資料與圖片載入後一次移除 ========
+function hideAppSkeleton() {
+  const skeleton = $('appSkeleton');
+  if (!skeleton || skeleton.classList.contains('is-hidden')) return;
+
+  skeleton.classList.add('is-hidden');
+
+  window.setTimeout(() => {
+    skeleton.remove();
+  }, 180);
+}
+
 async function init() {
   try {
     const v = localStorage.getItem(CUSTOM_COLORS_KEY);
@@ -7855,7 +7948,11 @@ async function init() {
   setupSearchSelects();
   refreshFamilyUI();
   render();
-  requestAnimationFrame(fitScreen);
+
+  requestAnimationFrame(() => {
+    fitScreen();
+    requestAnimationFrame(hideAppSkeleton);
+  });
 }
 
 
