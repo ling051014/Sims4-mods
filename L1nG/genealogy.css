@@ -3771,7 +3771,6 @@ body[data-theme="ling"] .topbar {
 
 body[data-theme="ling"] .topbar-brand {
     /* 文字顏色 */ color: #555;
-    /* 右側邊框 */ border-right: 1px solid #eee;
     /* 文字陰影 */ text-shadow: none;
 }
 
