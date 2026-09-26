@@ -3549,6 +3549,70 @@ function petSpeciesLabel(pet) {
   const sp = PET_SPECIES[pet.species] || PET_SPECIES.other;
   return uiText(sp.label);
 }
+
+// ========【寵物血統】 設定 - 遊戲匯入血統只讀顯示，不改變既有手動寵物編輯流程 ========
+function getPetLineageInfo(pet) {
+  const lineage =
+    pet &&
+    pet.gameData &&
+    pet.gameData.lineage &&
+    typeof pet.gameData.lineage === 'object'
+      ? pet.gameData.lineage
+      : null;
+
+  if (!lineage) {
+    return {
+      parentNames:[],
+      childNames:[],
+      hasData:false
+    };
+  }
+
+  const cleanNames = values =>
+    Array.isArray(values)
+      ? values
+          .map(value => String(value || '').trim())
+          .filter(Boolean)
+      : [];
+
+  return {
+    parentNames:cleanNames(lineage.parentNames),
+    childNames:cleanNames(lineage.childNames),
+    hasData:
+      (Array.isArray(lineage.parentIds) && lineage.parentIds.length > 0) ||
+      (Array.isArray(lineage.childIds) && lineage.childIds.length > 0) ||
+      cleanNames(lineage.parentNames).length > 0 ||
+      cleanNames(lineage.childNames).length > 0
+  };
+}
+
+function petLineageHTML(pet) {
+  const lineage = getPetLineageInfo(pet);
+  if (!lineage.hasData) return '';
+
+  const parts = [];
+
+  if (lineage.parentNames.length) {
+    parts.push(
+      `<span><strong>${esc(uiText('父母'))}：</strong>${lineage.parentNames.map(esc).join(' / ')}</span>`
+    );
+  }
+
+  if (lineage.childNames.length) {
+    parts.push(
+      `<span><strong>${esc(uiText('子女'))}：</strong>${lineage.childNames.map(esc).join(' / ')}</span>`
+    );
+  }
+
+  if (!parts.length) {
+    parts.push(
+      `<span class="muted">${esc(uiText('血統資料已保留，但目前沒有可顯示的姓名'))}</span>`
+    );
+  }
+
+  return `<div class="pet-lineage">${parts.join('')}</div>`;
+}
+
 function petStatusIcon(pet) {
   if (pet.status === '幽靈') return iconSvg('ghost-symbol');
   if (pet.status === '已故') return iconSvg('tombstone');
@@ -3776,8 +3840,15 @@ function openInfoCard(id) {
     `<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('基本資料'))}</h3><div class="info-profile-list">${basicRows.join('')}</div></section>`
   );
 
+  const generationLabel =
+    getSimGenerationLabel(
+      c.id,
+      currentFamily()
+    );
+
   const familyRows = [
     row('所屬家族', familyNames.length ? familyNames.map(esc).join(' / ') : '—'),
+    ...(generationLabel ? [row('世代', esc(generationLabel))] : []),
     row('領養關係', esc(uiText(c.adoptive ? '領養' : '親生'))),
     row('父母 A', parentNames[0] ? esc(parentNames[0]) : '—'),
     row('父母 B', parentNames[1] ? esc(parentNames[1]) : '—'),
@@ -3803,7 +3874,7 @@ function openInfoCard(id) {
     const pUrl = resolveImageUrl(p.avatar);
     const avatar = pUrl ? `<img src="${esc(pUrl)}" alt="">` : petIconFor(p);
     const meta = [petSpeciesLabel(p), p.breed ? displayDataText(p.breed, c) : ''].filter(Boolean).join(' · ');
-    return `<div class="info-card-pet"><div class="info-card-pet-avatar">${avatar}</div><div class="info-card-pet-text"><div class="info-card-pet-name">${esc(displayDataText(p.name, c) || uiText('（未命名）'))}</div><div class="info-card-pet-meta">${esc(meta)}</div></div></div>`;
+    return `<div class="info-card-pet"><div class="info-card-pet-avatar">${avatar}</div><div class="info-card-pet-text"><div class="info-card-pet-name">${esc(displayDataText(p.name, c) || uiText('（未命名）'))}</div><div class="info-card-pet-meta">${esc(meta)}</div>${petLineageHTML(p)}</div></div>`;
   }).join('') || `<div class="info-card-value muted">—</div>`;
 
   const galleryItems = (c.gallery || []).slice(0, 8).map((g, i) => {
@@ -5382,22 +5453,59 @@ $('labelToggle').onclick = () => {
   if (layoutCache) drawEdges();
 };
 
+function getFamilyGenerationLevels(fam) {
+  const sims =
+    (fam && fam.memberIds || [])
+      .map(id => db.sims[id])
+      .filter(Boolean);
+
+  if (!sims.length) return new Map();
+
+  const byId =
+    new Map(
+      sims.map(sim => [sim.id, sim])
+    );
+
+  return computeGenerationLevels(sims, byId);
+}
+
 function calculateFamilyGenerationCount(fam) {
-  const ids = new Set((fam.memberIds || []).filter(id => db.sims[id]));
-  if (!ids.size) return 0;
-  const depthMemo = new Map();
-  const depth = (id, stack = new Set()) => {
-    if (depthMemo.has(id)) return depthMemo.get(id);
-    if (stack.has(id)) return 1;
-    const sim = db.sims[id];
-    if (!sim) return 1;
-    const parents = (sim.parentIds || []).filter(pid => ids.has(pid));
-    if (!parents.length) { depthMemo.set(id,1); return 1; }
-    const next = new Set(stack); next.add(id);
-    const value = 1 + Math.max(...parents.map(pid => depth(pid,next)));
-    depthMemo.set(id,value); return value;
-  };
-  return Math.max(...[...ids].map(id => depth(id)));
+  const levels = getFamilyGenerationLevels(fam);
+  if (!levels.size) return 0;
+
+  return (
+    Math.max(...levels.values()) +
+    1
+  );
+}
+
+function formatGenerationLabel(level) {
+  if (!Number.isFinite(level)) return '';
+
+  const generation = level + 1;
+  const language =
+    document.documentElement.lang ||
+    'zh-Hant';
+
+  if (language === 'en') {
+    return `Generation ${generation}`;
+  }
+
+  return `第 ${generation} 代`;
+}
+
+function getSimGenerationLabel(simId, fam = currentFamily()) {
+  if (!simId || !fam) return '';
+
+  const levels =
+    getFamilyGenerationLevels(fam);
+
+  const level =
+    levels.get(simId);
+
+  return Number.isFinite(level)
+    ? formatGenerationLabel(level)
+    : '';
 }
 
 function renderFamilyCover(fam) {
@@ -5421,9 +5529,22 @@ function renderFamilyMemberList(fam) {
   const list = $('familyMemberList'); if (!list) return;
   const members = (fam.memberIds || []).map(id => db.sims[id]).filter(Boolean);
   if (!members.length) { list.innerHTML = `<div class="family-member-empty">${esc(uiText('目前家族還沒有成員'))}</div>`; return; }
+
+  const generationLevels =
+    getFamilyGenerationLevels(fam);
+
   list.innerHTML = members.map(sim => {
     const url = resolveImageUrl(sim.avatar);
-    const meta = [displayDataText(sim.lifeStage,sim), displayDataText(sim.career,sim)].filter(Boolean).join(' · ');
+    const generation =
+      generationLevels.has(sim.id)
+        ? formatGenerationLabel(generationLevels.get(sim.id))
+        : '';
+
+    const meta = [
+      generation,
+      displayDataText(sim.lifeStage,sim),
+      displayDataText(sim.career,sim)
+    ].filter(Boolean).join(' · ');
     return `<div class="family-member-row" data-family-sim-id="${esc(sim.id)}" tabindex="0">
       <div class="family-member-avatar">${url ? `<img src="${esc(url)}" alt="">` : esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>
       <div class="family-member-copy"><div class="family-member-name">${esc(displayDataText(sim.name,sim))}</div><div class="family-member-meta">${esc(meta)}</div></div>
@@ -5851,15 +5972,23 @@ function savePet() {
   const name = originalPet && isBuiltinSampleSim(owner) && inputName === shownName ? originalPet.name : inputName;
   const inputBreed = $('pBreed').value.trim();
   const breed = originalPet && isBuiltinSampleSim(owner) && inputBreed === shownBreed ? originalPet.breed : inputBreed;
+  // 匯入寵物可能帶有 gameData / lineage 等不可由手動欄位重建的唯讀資料。
+  // 編輯一般欄位時保留未知欄位，避免一次儲存就把遊戲來源 metadata 洗掉。
+  const preservedPetData =
+    originalPet
+      ? JSON.parse(JSON.stringify(originalPet))
+      : {};
+
   const data = {
-    id: originalPet ? originalPet.id : uid('pet'),
+    ...preservedPetData,
+    id:originalPet ? originalPet.id : uid('pet'),
     name,
-    species: $('pSpecies').value,
+    species:$('pSpecies').value,
     breed,
-    gender: $('pGender').value,
-    ageStage: $('pAgeStage').value,
-    status: $('pStatus').value,
-    avatar: editingPetAvatar || null
+    gender:$('pGender').value,
+    ageStage:$('pAgeStage').value,
+    status:$('pStatus').value,
+    avatar:editingPetAvatar || null
   };
   if (editingPetIndex >= 0) editingPets[editingPetIndex] = data;
   else editingPets.push(data);
@@ -5901,6 +6030,7 @@ function renderPetsList() {
       <div class="pet-item-info">
         <div class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</div>
         <div class="pet-item-meta">${esc(metaParts.join(' · '))}</div>
+        ${petLineageHTML(p)}
       </div>
       <div class="pet-item-actions">
         <button type="button" data-edit-pet="${i}">編輯</button>
