@@ -2908,296 +2908,497 @@ body[data-theme="midnight"] .stage-老年 {
     /* 字體粗細 */ font-weight: 600;
 }
 
+/* ========【人生照片檢視】 設定 - 人物專屬照片視窗，不再使用全螢幕浮動按鈕 ======== */
 .viewer-modal {
-    /* 背景設定 */ background: transparent;
-    /* 內縮空間 */ padding: 0;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 元素寬度 */ width: 100%;
-    /* 元素高度 */ height: 100%;
-    /* 最大寬度 */ max-width: none;
-    /* 最大高度 */ max-height: none;
-    /* 定位方式 */ position: relative;
-    /* 圓角弧度 */ border-radius: 0;
-    /* 動畫設定 */ animation: none;
+    width:min(980px,calc(100vw - 32px));
+    height:min(760px,calc(100vh - 32px));
+    max-width:none;
+    max-height:none;
+    padding:0;
+    overflow:hidden;
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    background:var(--card);
 }
 
-.viewer-img-wrap {
-    /* 最大寬度 */ max-width: 90vw;
-    /* 最大高度 */ max-height: 82vh;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
+.viewer-header {
+    min-height:48px;
+    padding:0 14px 0 18px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
 }
 
-.viewer-img-wrap img {
-    /* 最大寬度 */ max-width: 90vw;
-    /* 最大高度 */ max-height: 82vh;
-    /* 圖片填滿方式 */ object-fit: contain;
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 元素陰影 */ box-shadow: 0 20px 60px rgba(0,0,0,.5);
-    /* 背景設定 */ background: #000;
+.viewer-heading {
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:var(--sub);
+    font-size:12px;
 }
+
+.viewer-person-name {
+    max-width:260px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--ink);
+    font-weight:650;
+}
+
+.viewer-heading-sep { color:var(--border); }
 
 .viewer-close {
-    /* 定位方式 */ position: fixed;
-    /* 頂部位置 */ top: 20px;
-    /* 右側位置 */ right: 24px;
-    /* 元素寬度 */ width: 40px;
-    /* 元素高度 */ height: 40px;
-    /* 圓角弧度 */ border-radius: 50%;
-    /* 邊框設定 */ border: none;
-    /* 背景設定 */ background: rgba(255,255,255,.16);
-    /* 文字顏色 */ color: #fff;
-    /* 字體大小 */ font-size: 20px;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 背景濾鏡 */ backdrop-filter: blur(6px);
-    /* 動畫過渡 */ transition: .15s;
+    width:31px;
+    height:31px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:0;
+    border-radius:5px;
+    background:transparent;
+    color:var(--sub);
 }
 
 .viewer-close:hover {
-    /* 背景設定 */ background: rgba(255,255,255,.3);
+    background:var(--panel-item-hover);
+    color:var(--ink);
 }
 
-.viewer-nav {
-    /* 定位方式 */ position: fixed;
-    /* 頂部位置 */ top: 50%;
-    /* 元素變形 */ transform: translateY(-50%);
-    /* 元素寬度 */ width: 48px;
-    /* 元素高度 */ height: 48px;
-    /* 圓角弧度 */ border-radius: 50%;
-    /* 邊框設定 */ border: none;
-    /* 背景設定 */ background: rgba(255,255,255,.16);
-    /* 文字顏色 */ color: #fff;
-    /* 字體大小 */ font-size: 24px;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 背景濾鏡 */ backdrop-filter: blur(6px);
-    /* 動畫過渡 */ transition: .15s;
+.viewer-img-wrap {
+    min-height:0;
+    padding:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--panel-bg);
+    overflow:hidden;
 }
 
-.viewer-nav:hover {
-    /* 背景設定 */ background: rgba(255,255,255,.3);
+.viewer-img-wrap img {
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    border-radius:4px;
+    box-shadow:0 8px 28px rgba(31,35,40,.14);
+    background:#000;
 }
 
-.viewer-nav.prev {
-    /* 左側位置 */ left: 24px;
-}
-
-.viewer-nav.next {
-    /* 右側位置 */ right: 24px;
-}
-
-.viewer-nav:disabled {
-    /* 透明度 */ opacity: .25;
-    /* 滑鼠指標 */ cursor: not-allowed;
+.viewer-footer {
+    min-height:74px;
+    padding:12px 16px 13px 18px;
+    border-top:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
 }
 
 .viewer-info {
-    /* 定位方式 */ position: fixed;
-    /* 左側位置 */ left: 50%;
-    /* 底部位置 */ bottom: 24px;
-    /* 元素變形 */ transform: translateX(-50%);
-    /* 背景設定 */ background: rgba(0,0,0,.62);
-    /* 文字顏色 */ color: #fff;
-    /* 內縮空間 */ padding: 10px 18px;
-    /* 圓角弧度 */ border-radius: 10px;
-    /* 字體大小 */ font-size: 13px;
-    /* 最大寬度 */ max-width: 80vw;
-    /* 文字對齊 */ text-align: center;
-    /* 背景濾鏡 */ backdrop-filter: blur(8px);
+    min-width:0;
+    position:static;
+    transform:none;
+    padding:0;
+    background:transparent;
+    color:var(--ink);
+    text-align:left;
+    backdrop-filter:none;
 }
 
 .viewer-info .gv-title {
-    /* 字體粗細 */ font-weight: 700;
-    /* 字體大小 */ font-size: 14.5px;
-    /* 下方外距 */ margin-bottom: 3px;
+    margin:0 0 3px;
+    font-size:13px;
+    font-weight:700;
 }
 
 .viewer-info .gv-note {
-    /* 字體大小 */ font-size: 12px;
-    /* 透明度 */ opacity: .85;
-    /* 下方外距 */ margin-bottom: 3px;
-    /* 最大寬度 */ max-width: 60vw;
-    /* 換行方式 */ white-space: pre-wrap;
+    max-width:620px;
+    margin:0;
+    color:var(--sub);
+    font-size:11.5px;
+    white-space:pre-wrap;
 }
 
-.viewer-info .gv-counter {
-    /* 字體大小 */ font-size: 11px;
-    /* 透明度 */ opacity: .7;
-    /* 字體設定 */ font-family: ui-monospace,Consolas,monospace;
+.viewer-controls {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex:0 0 auto;
 }
 
+.viewer-nav {
+    position:static;
+    transform:none;
+    width:30px;
+    height:30px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--border);
+    border-radius:5px;
+    background:var(--card);
+    color:var(--ink);
+    font-size:18px;
+}
+
+.viewer-nav:hover {
+    background:var(--panel-item-hover);
+    border-color:var(--accent);
+}
+
+.viewer-nav:disabled {
+    opacity:.35;
+    cursor:default;
+}
+
+.gv-counter {
+    min-width:52px;
+    text-align:center;
+    color:var(--sub);
+    font-size:10.5px;
+    font-variant-numeric:tabular-nums;
+}
+
+/* ========【人物庫】 設定 - 圓形頭像、精簡 / 詳細檢視與批量管理 ======== */
 .roster-modal {
-    /* 元素寬度 */ width: min(780px,100%);
+    width:min(860px,100%);
+    max-height:90vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.roster-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    margin-bottom:12px;
+}
+
+.roster-header h2 { margin:0; }
+
+.roster-header-actions {
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.roster-view-toggle {
+    display:inline-flex;
+    align-items:center;
+    padding:2px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--panel-bg);
+}
+
+.roster-view-toggle button {
+    width:30px;
+    height:28px;
+    padding:0;
+    border:0;
+    border-radius:4px;
+    background:transparent;
+    color:var(--sub);
+    font-size:17px;
+    line-height:1;
+}
+
+.roster-view-toggle button:hover {
+    color:var(--ink);
+    background:var(--card);
+}
+
+.roster-view-toggle button.active {
+    color:var(--accent);
+    background:var(--card);
+    box-shadow:0 1px 3px rgba(31,35,40,.08);
+}
+
+.roster-header-actions > button {
+    min-height:33px;
+    padding:6px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--input-bg);
+    color:var(--ink);
+    font:inherit;
+    font-size:11.5px;
+}
+
+.roster-header-actions > button.primary {
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
 }
 
 .roster-toolbar {
-    /* 顯示方式 */ display: flex;
-    /* 項目間距 */ gap: 8px;
-    /* 下方外距 */ margin-bottom: 14px;
-    /* 垂直對齊 */ align-items: center;
+    display:flex;
+    align-items:center;
+    margin-bottom:10px;
 }
 
 .roster-toolbar input {
-    /* 彈性配比 */ flex: 1;
-    /* 內縮空間 */ padding: 8px 11px;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 字體設定 */ font-family: inherit;
-    /* 字體大小 */ font-size: 13px;
-    /* 外框設定 */ outline: none;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 文字顏色 */ color: var(--ink);
+    width:100%;
+    min-height:35px;
+    padding:7px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--input-bg);
+    color:var(--ink);
+    font:inherit;
+    font-size:12.5px;
+    outline:none;
 }
 
 .roster-toolbar input:focus {
-    /* 邊框顏色 */ border-color: var(--accent);
-}
-
-.roster-toolbar button {
-    /* 內縮空間 */ padding: 7px 12px;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 文字顏色 */ color: var(--ink);
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 字體大小 */ font-size: 13px;
-}
-
-.roster-toolbar button.primary {
-    /* 背景設定 */ background: var(--accent);
-    /* 文字顏色 */ color: #fff;
-    /* 邊框顏色 */ border-color: var(--accent);
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px var(--grad-1-soft);
 }
 
 .roster-count {
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: var(--sub);
-    /* 換行方式 */ white-space: nowrap;
+    margin-left:5px;
+    color:var(--sub);
+    font-size:11px;
+    font-weight:500;
+    white-space:nowrap;
+}
+
+.roster-batch-toolbar {
+    min-height:40px;
+    margin:0 0 8px;
+    padding:6px 8px;
+    border:1px solid rgba(176,58,46,.22);
+    border-radius:7px;
+    background:rgba(176,58,46,.05);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+.roster-batch-toolbar[hidden] { display:none; }
+
+.roster-batch-count {
+    color:var(--sub);
+    font-size:11px;
+}
+
+.roster-batch-toolbar button {
+    min-height:28px;
+    padding:4px 8px;
+    border:1px solid var(--border);
+    border-radius:5px;
+    background:var(--card);
+    color:var(--ink);
+    font:inherit;
+    font-size:10.5px;
+}
+
+.roster-batch-toolbar button.danger {
+    color:#b03a2e;
+    border-color:rgba(176,58,46,.28);
+}
+
+.roster-batch-toolbar button:disabled {
+    opacity:.4;
+    cursor:default;
 }
 
 .roster-list {
-    /* 最大高度 */ max-height: 58vh;
-    /* 溢出處理 */ overflow: auto;
-    /* 右側內縮 */ padding-right: 4px;
+    flex:1 1 auto;
+    min-height:180px;
+    max-height:58vh;
+    overflow:auto;
+    padding-right:3px;
 }
 
 .roster-item {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: space-between;
-    /* 內縮空間 */ padding: 6px 10px;
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 下方外距 */ margin-bottom: 6px;
-    /* 項目間距 */ gap: 10px;
-    /* 使用 Genealogy 專屬人物列背景 */ background: var(--genealogy-roster-item-bg, var(--panel-item));
-    /* 背景切換動畫 */ transition: background-color .15s ease;
+    min-height:58px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 30px;
+    align-items:center;
+    gap:8px;
+    padding:6px 7px;
+    border-bottom:1px solid var(--border);
+    background:transparent;
+    transition:background-color .15s ease;
 }
 
+.roster-item:last-child { border-bottom:0; }
+.roster-item:hover { background:var(--genealogy-roster-item-hover); }
+.roster-item.batch-selected { background:rgba(176,58,46,.10); }
+
 .roster-main {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 10px;
-    /* 彈性配比 */ flex: 1;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 最小寬度 */ min-width: 0;
-    /* 溢出處理 */ overflow: hidden;
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+}
+
+.roster-avatar-wrap {
+    position:relative;
+    width:42px;
+    height:42px;
+    flex:0 0 42px;
 }
 
 .roster-avatar {
-    /* 元素寬度 */ width: 38px;
-    /* 元素高度 */ height: 38px;
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 彈性收縮 */ flex-shrink: 0;
-    /* 溢出處理 */ overflow: hidden;
-    /* 背景設定 */ background: linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 字體大小 */ font-size: 15px;
-    /* 字體粗細 */ font-weight: 700;
-    /* 文字顏色 */ color: var(--avatar-ink);
-    /* 邊框設定 */ border: 1px solid var(--border);
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2));
+    color:var(--avatar-ink);
+    font-size:15px;
+    font-weight:700;
+    border:1px solid var(--border);
 }
 
 .roster-avatar img {
-    /* 元素寬度 */ width: 100%;
-    /* 元素高度 */ height: 100%;
-    /* 圖片填滿方式 */ object-fit: cover;
-    /* 顯示方式 */ display: block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.roster-batch-select {
+    position:absolute;
+    inset:0;
+    width:42px;
+    height:42px;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:rgba(176,58,46,.36);
+    color:#fff;
+    opacity:0;
+    pointer-events:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.roster-item.batch-mode .roster-batch-select {
+    opacity:.42;
+    pointer-events:auto;
+}
+
+.roster-item.batch-mode .roster-batch-select.selected {
+    opacity:.64;
+    background:rgba(176,58,46,.56);
 }
 
 .roster-text {
-    /* 彈性配比 */ flex: 1;
-    /* 最小寬度 */ min-width: 0;
-    /* 顯示方式 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 項目間距 */ gap: 1px;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
 }
 
 .roster-name {
-    /* 字體粗細 */ font-weight: 600;
-    /* 字體大小 */ font-size: 13px;
-    /* 換行方式 */ white-space: nowrap;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 6px;
-    /* 自動換行 */ flex-wrap: wrap;
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:650;
 }
 
-.roster-meta {
-    /* 文字溢出 */ text-overflow: ellipsis;
-    /* 使用彈性排列讓 SVG 與文字保持同一基線 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 項目間距 */ gap: 4px;
-    /* 不自動換行，維持原本單列資訊 */ flex-wrap: nowrap;
-    /* 允許內容縮小 */ min-width: 0;
-    /* 超出人物列時隱藏 */ overflow: hidden;
-    /* 文字顏色 */ color: var(--sub);
-    /* 字體大小 */ font-size: 11px;
-    /* 單行顯示 */ white-space: nowrap;
+.roster-name > span:last-child {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
-.roster-actions {
-    /* 顯示方式 */ display: flex;
-    /* 項目間距 */ gap: 4px;
-    /* 彈性收縮 */ flex-shrink: 0;
-    /* 自動換行 */ flex-wrap: wrap;
-    /* 水平對齊 */ justify-content: flex-end;
+.roster-compact-meta,
+.roster-detailed-meta {
+    min-width:0;
+    color:var(--sub);
+    font-size:10.5px;
+    line-height:1.4;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
-.roster-actions button {
-    /* 內縮空間 */ padding: 3px 9px;
-    /* 字體大小 */ font-size: 12px;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 文字顏色 */ color: var(--ink);
-    /* 滑鼠指標 */ cursor: pointer;
+.roster-detailed-meta {
+    display:flex;
+    align-items:center;
+    gap:4px;
 }
 
-.roster-actions button.danger {
-    /* 文字顏色 */ color: #b03a2e;
-    /* 邊框顏色 */ border-color: #e6c9c4;
+.roster-list.detailed .roster-compact-meta { display:none; }
+.roster-list.compact .roster-detailed-meta { display:none; }
+
+.roster-list.compact .roster-item {
+    min-height:48px;
+    padding-top:3px;
+    padding-bottom:3px;
+}
+
+.roster-list.compact .roster-avatar-wrap,
+.roster-list.compact .roster-avatar,
+.roster-list.compact .roster-batch-select {
+    width:34px;
+    height:34px;
+    flex-basis:34px;
+}
+
+.roster-item-menu {
+    justify-self:end;
+    position:relative;
+}
+
+.roster-more {
+    width:28px;
+    height:28px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:0;
+    border-radius:5px;
+    background:transparent;
+    color:var(--sub);
+    opacity:.55;
+}
+
+.roster-item:hover .roster-more,
+.roster-more:focus-visible,
+.roster-item-menu.open .roster-more {
+    opacity:1;
+    background:var(--panel-item-hover);
+    color:var(--ink);
+}
+
+.roster-item.batch-mode .roster-item-menu {
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.roster-item-popover {
+    top:calc(100% + 4px);
+    right:0;
+    left:auto;
+    min-width:190px;
 }
 
 .roster-empty {
-    /* 文字對齊 */ text-align: center;
-    /* 內縮空間 */ padding: 40px 20px;
-    /* 文字顏色 */ color: var(--sub);
-    /* 字體大小 */ font-size: 13px;
-}
-
-.roster-badge {
-    /* 字體大小 */ font-size: 12px;
-    /* 行距設定 */ line-height: 1;
+    padding:42px 20px;
+    text-align:center;
+    color:var(--sub);
+    font-size:12px;
 }
 
 .addmember-modal {
