@@ -6546,127 +6546,410 @@ function saveChar() {
   scheduleGC();
 }
 
-async function deleteChar(id) {
+
+function purgeSimData(id) {
   const c = db.sims[id];
   if (!c) return;
-  if (!await uiConfirm(`確定徹底刪除「${displayDataText(c.name, c)}」嗎？\n該操作會從所有家族中移除，並從模擬市民池永久刪除。\n\n（若只想從目前家族移除，請使用「移出家族」）`, { title: '永久刪除模擬市民', kind: 'danger', confirmText: '永久刪除' })) return;
+
   db.families.forEach(f => {
     f.memberIds = f.memberIds.filter(x => x !== id);
     ensureFamilyLayoutShape(f);
     delete f.manualPos.view[id];
     delete f.manualPos.edit[id];
   });
+
   selectedNodeIds.delete(id);
   delete db.sims[id];
+
   Object.values(db.sims).forEach(s => {
-    s.parentIds = (s.parentIds||[]).filter(x => x !== id);
-    s.spouseIds = (s.spouseIds||[]).filter(x => x !== id);
-    s.exSpouseIds = (s.exSpouseIds||[]).filter(x => x !== id);
+    s.parentIds = (s.parentIds || []).filter(x => x !== id);
+    s.spouseIds = (s.spouseIds || []).filter(x => x !== id);
+    s.exSpouseIds = (s.exSpouseIds || []).filter(x => x !== id);
   });
-  const removedLinkIds = (db.links||[]).filter(l => l.from === id || l.to === id).map(l => l.id);
-  db.links = (db.links||[]).filter(l => l.from !== id && l.to !== id);
+
+  const removedLinkIds = (db.links || [])
+    .filter(l => l.from === id || l.to === id)
+    .map(l => l.id);
+
+  db.links = (db.links || []).filter(l => l.from !== id && l.to !== id);
+
   const rm = db.relMap || {};
   Object.keys(rm).forEach(k => {
     const colon = k.indexOf(':');
-    const raw = colon >= 0 ? k.slice(colon+1) : k;
+    const raw = colon >= 0 ? k.slice(colon + 1) : k;
     const parts = raw.split('::');
-    if (parts.includes(id)) { delete rm[k]; return; }
+    if (parts.includes(id)) {
+      delete rm[k];
+      return;
+    }
     if (k.startsWith('link:') && removedLinkIds.includes(k.slice(5))) delete rm[k];
   });
+
   const lp = db.labelPos || {};
   Object.keys(lp).forEach(k => {
     const colon = k.indexOf(':');
-    const raw = colon >= 0 ? k.slice(colon+1) : k;
+    const raw = colon >= 0 ? k.slice(colon + 1) : k;
     const parts = raw.split('::');
-    if (parts.includes(id)) { delete lp[k]; return; }
+    if (parts.includes(id)) {
+      delete lp[k];
+      return;
+    }
     if (k.startsWith('link:') && removedLinkIds.includes(k.slice(5))) delete lp[k];
   });
+
   addMemberSelection.delete(id);
   removeMemberSelection.delete(id);
+  rosterSelection.delete(id);
+}
+
+function finalizeSimDataChange() {
   invalidateChildrenIndex();
-  save(); refreshFamilyUI(); render(); closeEditor();
+  save();
+  refreshFamilyUI();
+  render();
+  closeEditor();
   scheduleGC();
+}
+
+async function deleteChar(id) {
+  const c = db.sims[id];
+  if (!c) return;
+
+  const message =
+    '確定徹底刪除「' + displayDataText(c.name, c) + '」嗎？\n' +
+    '該操作會從所有家族中移除，並從人物庫永久刪除。\n\n' +
+    '（若只想從目前家族移除，請使用「移出家族」）';
+
+  if (!await uiConfirm(message, {
+    title: '永久刪除人物',
+    kind: 'danger',
+    confirmText: '永久刪除'
+  })) return;
+
+  purgeSimData(id);
+  finalizeSimDataChange();
+  if (rosterMask.classList.contains('show')) renderRoster();
+}
+
+// ========【人物庫】 設定 - 精簡 / 詳細檢視、單人選單與批量管理 ========
+function updateRosterViewControls() {
+  const compact = $('rosterCompactBtn');
+  const detailed = $('rosterDetailedBtn');
+  const list = $('rosterList');
+
+  if (compact) {
+    compact.classList.toggle('active', rosterViewMode === 'compact');
+    compact.setAttribute('aria-pressed', rosterViewMode === 'compact' ? 'true' : 'false');
+  }
+
+  if (detailed) {
+    detailed.classList.toggle('active', rosterViewMode === 'detailed');
+    detailed.setAttribute('aria-pressed', rosterViewMode === 'detailed' ? 'true' : 'false');
+  }
+
+  if (list) {
+    list.classList.toggle('compact', rosterViewMode === 'compact');
+    list.classList.toggle('detailed', rosterViewMode === 'detailed');
+  }
+}
+
+function setRosterViewMode(mode) {
+  rosterViewMode = mode === 'compact' ? 'compact' : 'detailed';
+  try {
+    localStorage.setItem(ROSTER_VIEW_KEY, rosterViewMode);
+  } catch (_) {}
+  updateRosterViewControls();
+  renderRoster();
+}
+
+function updateRosterBatchToolbar() {
+  const count = rosterSelection.size;
+  const toolbar = $('rosterBatchToolbar');
+  const batchBtn = $('rosterBatchBtn');
+  const addBtn = $('rosterAddBtn');
+  const countEl = $('rosterBatchCount');
+
+  if (toolbar) toolbar.hidden = !rosterBatchMode;
+  if (batchBtn) batchBtn.hidden = rosterBatchMode;
+  if (addBtn) addBtn.hidden = rosterBatchMode;
+  if (countEl) countEl.textContent = '已選 ' + count + ' 位';
+
+  ['rosterBatchAddFamilyBtn', 'rosterBatchRemoveFamilyBtn', 'rosterBatchDeleteBtn'].forEach(id => {
+    const btn = $(id);
+    if (btn) btn.disabled = count === 0;
+  });
+}
+
+function setRosterBatchMode(enabled) {
+  rosterBatchMode = !!enabled;
+  rosterSelection.clear();
+  closeAppMenus();
+  updateRosterBatchToolbar();
+  renderRoster();
+}
+
+function toggleRosterSelection(id) {
+  if (!rosterBatchMode || !db.sims[id]) return;
+
+  if (rosterSelection.has(id)) rosterSelection.delete(id);
+  else rosterSelection.add(id);
+
+  renderRoster();
+}
+
+function rosterCompactMeta(sim) {
+  const parts = [displayDataText(sim.lifeStage, sim)];
+  if (sim.race) {
+    parts.push(displayDataText(RACE_PRESETS[sim.race]?.label || sim.race, sim));
+  }
+  return parts.filter(Boolean).join(' · ');
 }
 
 function renderRoster() {
   const fam = currentFamily();
-  const memberSet = new Set(fam.memberIds);
   const q = rosterSearch.value.trim().toLowerCase();
   const all = Object.values(db.sims);
-  all.sort((a,b) => String(a.name).localeCompare(String(b.name),'zh'));
+
+  all.sort((x, y) => String(x.name).localeCompare(String(y.name), 'zh'));
+
   const filtered = q ? all.filter(s =>
-    (s.name||'').toLowerCase().includes(q)
-    || (s.career||'').toLowerCase().includes(q)
-    || (s.residence||'').toLowerCase().includes(q)
-    || (s.aspiration||'').toLowerCase().includes(q)
-    || (s.causeOfDeath||'').toLowerCase().includes(q)
-    || (s.traits||[]).some(t => (t||'').toLowerCase().includes(q))
-    || (s.pets||[]).some(p => (p.name||'').toLowerCase().includes(q) || (p.breed||'').toLowerCase().includes(q))
-    || (s.gallery||[]).some(g => (g.title||'').toLowerCase().includes(q))
+    (s.name || '').toLowerCase().includes(q)
+    || (s.career || '').toLowerCase().includes(q)
+    || (s.residence || '').toLowerCase().includes(q)
+    || (s.aspiration || '').toLowerCase().includes(q)
+    || (s.causeOfDeath || '').toLowerCase().includes(q)
+    || (s.traits || []).some(t => (t || '').toLowerCase().includes(q))
+    || (s.pets || []).some(p =>
+      (p.name || '').toLowerCase().includes(q)
+      || (p.breed || '').toLowerCase().includes(q)
+    )
+    || (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q))
   ) : all;
-  $('rosterCount').textContent = `（${filtered.length}/${all.length}）`;
+
+  $('rosterCount').textContent = '（' + filtered.length + '/' + all.length + '）';
+  updateRosterViewControls();
+  updateRosterBatchToolbar();
+
+  const list = $('rosterList');
   if (!filtered.length) {
-    $('rosterList').innerHTML = all.length
-      ? '<div class="roster-empty">沒有符合的項目</div>'
-      : '<div class="roster-empty">還沒有任何模擬市民</div>';
+    list.innerHTML = all.length
+      ? '<div class="roster-empty">沒有符合的人物</div>'
+      : '<div class="roster-empty">還沒有任何人物</div>';
     return;
   }
-  $('rosterList').innerHTML = filtered.map(s => {
-    const fams = db.families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
-    const galleryCount = (s.gallery||[]).length;
-    const metaParts = [
-      { icon:'house-heart', text:fams, title:uiText('所屬家族') }
-    ];
-    if (galleryCount) metaParts.push({ icon:'images', text:String(galleryCount), title:uiText('相簿') });
-    if (s.residence) metaParts.push({ icon:'house', text:displayDataText(s.residence, s), title:uiText('居住地') });
-    if ((s.status === '已故' || s.status === '幽靈') && s.causeOfDeath) {
-      metaParts.push({ icon:'tombstone', text:displayDataText(s.causeOfDeath, s), title:uiText('死因') });
-    }
-    if ((s.pets||[]).length) {
-      metaParts.push({
-        icon:'paw',
-        text:(s.pets||[]).map(p => displayDataText(p.name, s)).join('、'),
-        title:uiText('寵物')
-      });
-    }
-    const genderIconName = s.gender === '男' ? 'gender-male' : s.gender === '女' ? 'gender-female' : 'gender-ambiguous';
-    const genderHTML = `<span class="roster-meta-part roster-meta-gender" title="${esc(uiText(s.gender))}">${iconSvg(genderIconName)}</span>`;
-    const metaHTML = metaParts.map(part => {
-      const title = part.title ? ` title="${esc(part.title)}"` : '';
-      return `<span class="roster-meta-part"${title}>${part.icon ? iconSvg(part.icon) : ''}<span>${esc(part.text)}</span></span>`;
-    }).join('<span class="roster-meta-separator" aria-hidden="true">·</span>');
-    return `<div class="roster-item">
-      <div class="roster-main" data-edit="${s.id}">
-        <div class="roster-avatar">${avatarHTML(s)}</div>
-        <div class="roster-text">
-          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
-            <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
-          </div>
-          <div class="roster-meta">${genderHTML}${metaHTML ? '<span class="roster-meta-separator" aria-hidden="true">·</span>' + metaHTML : ''}</div>
-        </div>
-      </div>
-      <div class="roster-actions">
-        <button data-edit="${s.id}">編輯</button>
-        <button class="danger" data-del="${s.id}">刪除</button>
-      </div>
-    </div>`;
+
+  list.innerHTML = filtered.map(s => {
+    const familyNames = db.families
+      .filter(f => f.memberIds.includes(s.id))
+      .map(f => displayDataText(f.name, f));
+
+    const selected = rosterSelection.has(s.id);
+    const compactMeta = rosterCompactMeta(s);
+    const detail = [
+      displayDataText(s.lifeStage, s),
+      s.race ? displayDataText(RACE_PRESETS[s.race]?.label || s.race, s) : '',
+      displayDataText(s.career, s),
+      displayDataText(s.residence, s),
+      familyNames.join(' · ') || uiText('（未歸屬）')
+    ].filter(Boolean);
+
+    const photoCount = (s.gallery || []).length;
+    const detailHtml = detail
+      .map(value => '<span>' + esc(value) + '</span>')
+      .join('<span class="roster-meta-separator" aria-hidden="true">·</span>');
+
+    const photoHtml = photoCount
+      ? '<span class="roster-meta-separator" aria-hidden="true">·</span>' +
+        '<span>' + iconSvg('images') + ' ' + photoCount + ' ' + esc(uiText('人生照片')) + '</span>'
+      : '';
+
+    const familyAction = fam.memberIds.includes(s.id) ? '移出目前家族' : '加入目前家族';
+    const familyIcon = fam.memberIds.includes(s.id) ? 'person-dash' : 'person-add';
+
+    return '<div class="roster-item' +
+        (rosterBatchMode ? ' batch-mode' : '') +
+        (selected ? ' batch-selected' : '') +
+        '" data-roster-id="' + esc(s.id) + '">' +
+      '<div class="roster-main">' +
+        '<div class="roster-avatar-wrap">' +
+          '<div class="roster-avatar">' + avatarHTML(s) + '</div>' +
+          '<button class="roster-batch-select' + (selected ? ' selected' : '') +
+            '" type="button" data-roster-select="' + esc(s.id) +
+            '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
+            (selected ? iconSvg('check-lg') : '') +
+          '</button>' +
+        '</div>' +
+        '<div class="roster-text">' +
+          '<div class="roster-name">' +
+            raceIconHTML(s) + statusIconHTML(s) +
+            '<span>' + esc(displayDataText(s.name, s)) + '</span>' +
+          '</div>' +
+          '<div class="roster-compact-meta">' + esc(compactMeta) + '</div>' +
+          '<div class="roster-detailed-meta">' + detailHtml + photoHtml + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="app-menu roster-item-menu">' +
+        '<button class="roster-more app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
+          iconSvg('three-dots') +
+        '</button>' +
+        '<div class="app-menu-popover roster-item-popover" role="menu">' +
+          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="view" data-roster-action-id="' + esc(s.id) + '">' +
+            iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span>' +
+          '</button>' +
+          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="edit" data-roster-action-id="' + esc(s.id) + '">' +
+            iconSvg('pencil-square') + '<span>' + esc(uiText('編輯模擬市民')) + '</span>' +
+          '</button>' +
+          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="locate" data-roster-action-id="' + esc(s.id) + '">' +
+            iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span>' +
+          '</button>' +
+          '<div class="app-menu-divider"></div>' +
+          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="toggle-family" data-roster-action-id="' + esc(s.id) + '">' +
+            iconSvg(familyIcon) + '<span>' + esc(uiText(familyAction)) + '</span>' +
+          '</button>' +
+          '<div class="app-menu-divider"></div>' +
+          '<button class="app-menu-item danger" type="button" role="menuitem" data-roster-action="delete" data-roster-action-id="' + esc(s.id) + '">' +
+            iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }).join('');
-  $('rosterList').querySelectorAll('[data-edit]').forEach(el => {
-    el.onclick = () => openEditor(el.dataset.edit);
+
+  list.querySelectorAll('[data-roster-id]').forEach(row => {
+    row.addEventListener('click', e => {
+      if (e.target.closest('.roster-item-menu, .roster-batch-select')) return;
+      const id = row.dataset.rosterId;
+      if (rosterBatchMode) toggleRosterSelection(id);
+      else openInfoCard(id);
+    });
   });
-  $('rosterList').querySelectorAll('[data-del]').forEach(el => {
-    el.onclick = e => { e.stopPropagation(); deleteChar(el.dataset.del); };
+
+  list.querySelectorAll('[data-roster-select]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleRosterSelection(btn.dataset.rosterSelect);
+    });
   });
+
+  list.querySelectorAll('[data-roster-action]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+
+      const id = btn.dataset.rosterActionId;
+      const action = btn.dataset.rosterAction;
+      if (!db.sims[id]) return;
+
+      if (action === 'view') {
+        openInfoCard(id);
+      } else if (action === 'edit') {
+        openEditor(id);
+      } else if (action === 'locate') {
+        rosterMask.classList.remove('show');
+        focusSimOnCanvas(id);
+      } else if (action === 'toggle-family') {
+        ensureFamilyLayoutShape(fam);
+
+        if (fam.memberIds.includes(id)) {
+          fam.memberIds = fam.memberIds.filter(x => x !== id);
+          delete fam.manualPos.view[id];
+          delete fam.manualPos.edit[id];
+        } else {
+          fam.memberIds.push(id);
+        }
+
+        save();
+        refreshFamilyUI();
+        render();
+        renderRoster();
+      } else if (action === 'delete') {
+        await deleteChar(id);
+      }
+    });
+  });
+
+  if (!rosterBatchMode) setupAppMenus();
 }
+
 $('rosterBtn').onclick = () => {
   rosterSearch.value = '';
+  rosterBatchMode = false;
+  rosterSelection.clear();
+  updateRosterViewControls();
   renderRoster();
   rosterMask.classList.add('show');
 };
-$('rosterCloseBtn').onclick = () => rosterMask.classList.remove('show');
-rosterMask.onclick = e => { if (e.target === rosterMask) rosterMask.classList.remove('show'); };
+
+$('rosterCloseBtn').onclick = () => {
+  rosterMask.classList.remove('show');
+  rosterBatchMode = false;
+  rosterSelection.clear();
+};
+
+rosterMask.onclick = e => {
+  if (e.target === rosterMask) {
+    rosterMask.classList.remove('show');
+    rosterBatchMode = false;
+    rosterSelection.clear();
+  }
+};
+
 rosterSearch.oninput = debounce(renderRoster, 150);
 $('rosterAddBtn').onclick = () => openEditor(null);
+$('rosterCompactBtn').onclick = () => setRosterViewMode('compact');
+$('rosterDetailedBtn').onclick = () => setRosterViewMode('detailed');
+$('rosterBatchBtn').onclick = () => setRosterBatchMode(true);
+$('rosterBatchCancelBtn').onclick = () => setRosterBatchMode(false);
+
+$('rosterBatchAddFamilyBtn').onclick = () => {
+  const fam = currentFamily();
+
+  rosterSelection.forEach(id => {
+    if (db.sims[id] && !fam.memberIds.includes(id)) fam.memberIds.push(id);
+  });
+
+  save();
+  refreshFamilyUI();
+  render();
+  setRosterBatchMode(false);
+};
+
+$('rosterBatchRemoveFamilyBtn').onclick = () => {
+  const fam = currentFamily();
+  ensureFamilyLayoutShape(fam);
+
+  [...rosterSelection].forEach(id => {
+    fam.memberIds = fam.memberIds.filter(x => x !== id);
+    delete fam.manualPos.view[id];
+    delete fam.manualPos.edit[id];
+  });
+
+  save();
+  refreshFamilyUI();
+  render();
+  setRosterBatchMode(false);
+};
+
+$('rosterBatchDeleteBtn').onclick = async () => {
+  const ids = [...rosterSelection].filter(id => db.sims[id]);
+  if (!ids.length) return;
+
+  const ok = await uiConfirm(
+    '確定永久刪除這 ' + ids.length + ' 位人物嗎？\n' +
+    '人物資料、關係與人生照片都會一併移除。\n\n' +
+    '此操作無法復原。',
+    {
+      title: '批量刪除人物',
+      kind: 'danger',
+      confirmText: '永久刪除'
+    }
+  );
+
+  if (!ok) return;
+
+  ids.forEach(purgeSimData);
+  finalizeSimDataChange();
+  setRosterBatchMode(false);
+}
 
 function renderAddMemberList() {
   const fam = currentFamily();
