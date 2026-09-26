@@ -160,7 +160,6 @@ const VALID_GALLERY_PROFILES = ['small','medium','large','hd','original'];
 let showRelLabels = true;
 let bgSettings = { image:null, opacity:0.5, fit:'cover' };
 let addMemberSelection = new Set();
-let removeMemberSelection = new Set();
 let labelDrag = null;
 let viewMode = 'view';
 let infoCardId = null;
@@ -769,7 +768,6 @@ const viewport = $('viewport'), stage = $('stage'), svg = $('links'), nodes = $(
 const labelsSvg = $('labels');
 const mask = $('mask'), rosterMask = $('rosterMask'), bgMask = $('bgMask');
 const addMemberMask = $('addMemberMask');
-const removeMemberMask = $('removeMemberMask');
 const tipsMask = $('tipsMask');
 const infoMask = $('infoMask');
 const petMask = $('petMask');
@@ -5559,7 +5557,10 @@ function renderFamilyMemberList(fam) {
       displayDataText(sim.career,sim)
     ].filter(Boolean).join(' · ');
     return `<div class="family-member-row" data-family-sim-id="${esc(sim.id)}" tabindex="0">
-      <div class="family-member-avatar">${url ? `<img src="${esc(url)}" alt="">` : esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>
+      <div class="family-member-avatar-wrap">
+        <div class="family-member-avatar">${url ? `<img src="${esc(url)}" alt="">` : esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>
+        <button class="family-member-remove" type="button" data-family-member-remove="${esc(sim.id)}" title="${esc(uiText('移出目前家族'))}" aria-label="${esc(uiText('移出目前家族'))}">${iconSvg('trash3')}</button>
+      </div>
       <div class="family-member-copy"><div class="family-member-name">${esc(displayDataText(sim.name,sim))}</div><div class="family-member-meta">${esc(meta)}</div></div>
       <div class="app-menu family-member-menu">
         <button class="family-member-more app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="${esc(uiText('更多'))}">${iconSvg('three-dots')}</button>
@@ -5567,8 +5568,6 @@ function renderFamilyMemberList(fam) {
           <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="view" data-family-member-id="${esc(sim.id)}">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
           <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="edit" data-family-member-id="${esc(sim.id)}">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
           <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="locate" data-family-member-id="${esc(sim.id)}">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-          <div class="app-menu-divider"></div>
-          <button class="app-menu-item danger" type="button" role="menuitem" data-family-member-action="remove" data-family-member-id="${esc(sim.id)}">${iconSvg('person-dash')}<span>${esc(uiText('移出目前家族'))}</span></button>
         </div>
       </div>
     </div>`;
@@ -5576,7 +5575,7 @@ function renderFamilyMemberList(fam) {
 
   list.querySelectorAll('[data-family-sim-id]').forEach(row => {
     const open = e => {
-      if (e?.target?.closest?.('.family-member-menu')) return;
+      if (e?.target?.closest?.('.family-member-menu, .family-member-remove')) return;
       openInfoCard(row.dataset.familySimId);
     };
     row.addEventListener('click', open);
@@ -5584,6 +5583,41 @@ function renderFamilyMemberList(fam) {
       if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest?.('.family-member-menu')) {
         e.preventDefault(); open(e);
       }
+    });
+  });
+
+  list.querySelectorAll('[data-family-member-remove]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const simId = btn.dataset.familyMemberRemove;
+      const activeFamily = currentFamily();
+      const sim = db.sims[simId];
+      if (!sim || !activeFamily || !(activeFamily.memberIds || []).includes(simId)) return;
+
+      const simName = displayDataText(sim.name, sim);
+      const familyName = displayDataText(activeFamily.name, activeFamily);
+      const ok = await uiConfirm(
+        `將「${simName}」移出「${familyName}」？\n人物本身仍會保留在人物資料中。`,
+        {
+          title:'移出目前家族',
+          kind:'danger',
+          confirmText:'移出家族'
+        }
+      );
+
+      if (!ok) return;
+
+      ensureFamilyLayoutShape(activeFamily);
+      activeFamily.memberIds = (activeFamily.memberIds || []).filter(id => id !== simId);
+      delete activeFamily.manualPos.view[simId];
+      delete activeFamily.manualPos.edit[simId];
+
+      save();
+      refreshFamilyUI();
+      render();
+      requestAnimationFrame(fitScreen);
     });
   });
 
@@ -5596,21 +5630,6 @@ function renderFamilyMemberList(fam) {
       if (action === 'view') openInfoCard(simId);
       else if (action === 'edit') openEditor(simId);
       else if (action === 'locate') focusSimOnCanvas(simId);
-      else if (action === 'remove') {
-        const activeFamily = currentFamily();
-        const sim = db.sims[simId];
-        const simName = displayDataText(sim.name, sim);
-        const familyName = displayDataText(activeFamily.name, activeFamily);
-        const ok = await uiConfirm(`將「${simName}」移出「${familyName}」？\n人物本身仍會保留在人物資料中。`, {
-          title: '移出目前家族', kind: 'danger', confirmText: '移出家族'
-        });
-        if (!ok) return;
-        activeFamily.memberIds = (activeFamily.memberIds || []).filter(id => id !== simId);
-        save();
-        refreshFamilyUI();
-        render();
-        requestAnimationFrame(fitScreen);
-      }
     });
   });
   setupAppMenus();
@@ -5645,7 +5664,6 @@ familySelect.onchange = () => {
   arrangeTool = 'pan';
   db.currentId = familySelect.value;
   addMemberSelection.clear();
-  removeMemberSelection.clear();
   closeEditor();
   save(); refreshFamilyUI(); render();
   requestAnimationFrame(fitScreen);
@@ -5709,7 +5727,6 @@ $('newFamilyBtn').onclick = async () => {
   dragHistory.clear();
   db.currentId = fam.id;
   addMemberSelection.clear();
-  removeMemberSelection.clear();
   save(); refreshFamilyUI(); render();
   requestAnimationFrame(fitScreen);
 };
@@ -5721,7 +5738,6 @@ $('delFamilyBtn').onclick = async () => {
   dragHistory.clear();
   db.currentId = db.families[0].id;
   addMemberSelection.clear();
-  removeMemberSelection.clear();
   closeEditor(); save(); refreshFamilyUI(); render();
   scheduleGC();
   requestAnimationFrame(fitScreen);
@@ -6800,90 +6816,6 @@ $('addMemberConfirmBtn').onclick = () => {
   save();
   addMemberSelection.clear();
   addMemberMask.classList.remove('show');
-  refreshFamilyProfilePanel();
-  render();
-  requestAnimationFrame(fitScreen);
-};
-
-function renderRemoveMemberList() {
-  const fam = currentFamily();
-  const q = $('removeMemberSearch').value.trim().toLowerCase();
-  let candidates = fam.memberIds.map(id => db.sims[id]).filter(Boolean);
-  candidates.sort((a,b) => String(a.name).localeCompare(String(b.name),'zh'));
-  if (q) {
-    candidates = candidates.filter(s =>
-      (s.name||'').toLowerCase().includes(q)
-      || (s.career||'').toLowerCase().includes(q)
-      || (s.traits||[]).some(t => (t||'').toLowerCase().includes(q)));
-  }
-  $('removeMemberFamilyName').textContent = displayDataText(fam.name, fam);
-  const list = $('removeMemberList');
-  if (!fam.memberIds.length) {
-    list.innerHTML = '<div class="roster-empty">目前家族還沒有成員</div>';
-  } else if (!candidates.length) {
-    list.innerHTML = '<div class="roster-empty">沒有符合的項目</div>';
-  } else {
-    list.innerHTML = candidates.map(s => {
-      const otherFams = db.families.filter(f => f.id !== fam.id && f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ');
-      const alsoIn = otherFams ? uiText('也屬於：') + otherFams : uiText('僅屬於本家族');
-      const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
-      const isSel = removeMemberSelection.has(s.id);
-      return `<div class="addmember-item${isSel ? ' remove-selected' : ''}" data-remove-id="${s.id}">
-        <div class="addmember-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
-        <div class="roster-avatar">${avatarHTML(s)}</div>
-        <div class="roster-text">
-          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
-            <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
-          </div>
-          <div class="roster-meta">${genderIcon} ${esc(alsoIn)}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  const count = removeMemberSelection.size;
-  $('removeMemberCount').innerHTML = `已選 <b>${count}</b> 人`;
-  $('removeMemberConfirmBtn').disabled = count === 0;
-  list.querySelectorAll('.addmember-item').forEach(el => {
-    el.onclick = () => {
-      const id = el.dataset.removeId;
-      if (removeMemberSelection.has(id)) removeMemberSelection.delete(id);
-      else removeMemberSelection.add(id);
-      renderRemoveMemberList();
-    };
-  });
-}
-$('removeMemberBtn').onclick = () => {
-  const fam = currentFamily();
-  if (!fam.memberIds.length) { uiAlert('目前家族還沒有成員，無需移除。', { title: '沒有可移除的成員' }); return; }
-  removeMemberSelection.clear();
-  $('removeMemberSearch').value = '';
-  renderRemoveMemberList();
-  removeMemberMask.classList.add('show');
-};
-$('removeMemberSearch').oninput = debounce(renderRemoveMemberList, 150);
-$('removeMemberCancelBtn').onclick = () => removeMemberMask.classList.remove('show');
-removeMemberMask.onclick = e => { if (e.target === removeMemberMask) removeMemberMask.classList.remove('show'); };
-$('removeMemberAllBtn').onclick = () => {
-  const fam = currentFamily();
-  fam.memberIds.forEach(id => removeMemberSelection.add(id));
-  renderRemoveMemberList();
-};
-$('removeMemberNoneBtn').onclick = () => { removeMemberSelection.clear(); renderRemoveMemberList(); };
-$('removeMemberConfirmBtn').onclick = async () => {
-  if (!removeMemberSelection.size) return;
-  const fam = currentFamily();
-  const ids = [...removeMemberSelection];
-  const names = ids.map(id => db.sims[id] ? displayDataText(db.sims[id].name, db.sims[id]) : '').filter(Boolean).join('、');
-  if (!await uiConfirm(`確定將以下 ${ids.length} 位從「${displayDataText(fam.name, fam)}」移除嗎？\n\n${names}\n\n他們仍保留在模擬市民池中。`, { title: '移出家族', kind: 'danger', confirmText: '移出家族' })) return;
-  ensureFamilyLayoutShape(fam);
-  ids.forEach(id => {
-    fam.memberIds = fam.memberIds.filter(x => x !== id);
-    delete fam.manualPos.view[id];
-    delete fam.manualPos.edit[id];
-  });
-  save();
-  removeMemberSelection.clear();
-  removeMemberMask.classList.remove('show');
   refreshFamilyProfilePanel();
   render();
   requestAnimationFrame(fitScreen);
@@ -8333,6 +8265,20 @@ Object.assign(ZH_HANS_EXACT, {
   '中，容量通常遠大於 localStorage': '中，容量通常远大于 localStorage',
   '復原上一個卡片或關係名稱拖曳；輸入欄位內仍使用瀏覽器原生文字復原': '撤销上一个卡片或关系名称拖动；输入框内仍使用浏览器原生文字撤销',
   '重做上一個拖曳操作': '重做上一个拖动操作'
+});
+
+Object.assign(ZH_HANS_EXACT, {
+  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引。匯出 JSON 備份時會自動把圖片一起放進備份；清理未使用的圖片只會移除目前沒有被任何內容引用的圖片。':'图片本体会保存在浏览器本机的 IndexedDB，族谱数据只保存图片索引。导出 JSON 备份时会自动把图片一起放进备份；清理未使用的图片只会移除目前没有被任何内容引用的图片。',
+  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引，不會把整張圖片塞進一般設定資料':'图片本体会保存在浏览器本机的 IndexedDB，族谱数据只保存图片索引，不会把整张图片塞进一般设置数据',
+  '匯出 JSON 備份時，圖片會自動一起放進備份；之後重新匯入時也會一併還原':'导出 JSON 备份时，图片会自动一起放进备份；之后重新导入时也会一并还原',
+  '清理未使用的圖片只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片':'清理未使用的图片只会移除目前没有被人物、宠物、相册或背景引用的图片，不会删除仍在使用中的图片'
+});
+
+Object.assign(EN, {
+  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引。匯出 JSON 備份時會自動把圖片一起放進備份；清理未使用的圖片只會移除目前沒有被任何內容引用的圖片。':'Image files are stored locally in your browser\'s IndexedDB while the genealogy data keeps only image references. JSON backups automatically include the images, and cleanup removes only images that are no longer referenced.',
+  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引，不會把整張圖片塞進一般設定資料':'Image files are stored locally in your browser\'s IndexedDB. The genealogy data keeps only image references instead of embedding the full images in regular settings.',
+  '匯出 JSON 備份時，圖片會自動一起放進備份；之後重新匯入時也會一併還原':'When you export a JSON backup, the images are included automatically and restored when you import the backup later.',
+  '清理未使用的圖片只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片':'Clean Unused Images removes only images that are no longer referenced by Sims, pets, galleries, or the background. Images still in use are kept.'
 });
 
 Object.assign(EN, {
