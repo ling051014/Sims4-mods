@@ -31,6 +31,7 @@ const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
 const FAMILY_PANEL_COLLAPSED_KEY = 'sims4_genealogy_family_panel_collapsed';
 const ROSTER_VIEW_KEY = 'sims4_genealogy_roster_view';
 const REL_LINE_STYLE_KEY = 'sims4_genealogy_relationship_line_style';
+const FAMILY_TREE_VIEW_MODE_KEY = 'sims4_genealogy_family_tree_view_mode';
 const LANG_KEY = 'ling_genealogy_language_v1';
 const SIDEBAR_DEFAULT_WIDTH = 300;
 const SIDEBAR_MIN_WIDTH = 260;
@@ -180,6 +181,14 @@ try {
 } catch (_) {}
 let rosterBatchMode = false;
 const rosterSelection = new Set();
+
+let familyTreeViewMode = 'extended';
+try {
+  const savedFamilyTreeViewMode = localStorage.getItem(FAMILY_TREE_VIEW_MODE_KEY);
+  if (savedFamilyTreeViewMode === 'ea' || savedFamilyTreeViewMode === 'extended') {
+    familyTreeViewMode = savedFamilyTreeViewMode;
+  }
+} catch (_) {}
 
 const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
   parent: { style:'solid', width:2.0, color:null },
@@ -902,6 +911,153 @@ function getNavSelectDisplayText(select, option) {
     return nativeNames[option.value] || option.textContent || option.value;
   }
   return option.textContent || option.value || '';
+}
+
+// ========【家族選擇器分類】 設定 - EA 族譜 / 大家族便利貼與需要時才出現的搜尋 ========
+function familyNavLanguage() {
+  const lang = document.documentElement.dataset.language || document.documentElement.lang || 'zh-Hant';
+  return String(lang).toLowerCase().startsWith('en')
+    ? 'en'
+    : String(lang).toLowerCase().includes('hans') || String(lang).toLowerCase().includes('cn')
+      ? 'zh-Hans'
+      : 'zh-Hant';
+}
+
+function familyNavModeLabel(mode) {
+  const lang = familyNavLanguage();
+
+  if (lang === 'en') {
+    return mode === 'ea'
+      ? '<span class="family-nav-tab-label family-nav-tab-label-en">EA TREE</span>'
+      : '<span class="family-nav-tab-label family-nav-tab-label-en">EXTENDED</span>';
+  }
+
+  if (mode === 'ea') {
+    return '<span class="family-nav-tab-ea">EA</span><span class="family-nav-tab-vertical">' +
+      esc(lang === 'zh-Hans' ? '族谱' : '族譜') +
+      '</span>';
+  }
+
+  return '<span class="family-nav-tab-vertical">' +
+    esc(lang === 'zh-Hans' ? '大家族' : '大家族') +
+    '</span>';
+}
+
+function familyNavModeAria(mode) {
+  const lang = familyNavLanguage();
+  if (lang === 'en') return mode === 'ea' ? 'EA Tree' : 'Extended Family';
+  if (lang === 'zh-Hans') return mode === 'ea' ? 'EA 族谱' : '大家族';
+  return mode === 'ea' ? 'EA 族譜' : '大家族';
+}
+
+function familyNavSearchPlaceholder() {
+  const lang = familyNavLanguage();
+  if (lang === 'en') return 'Search families…';
+  if (lang === 'zh-Hans') return '搜索家族…';
+  return '搜尋家族…';
+}
+
+function familyNavSearchAria() {
+  const lang = familyNavLanguage();
+  if (lang === 'en') return 'Search families';
+  if (lang === 'zh-Hans') return '搜索家族';
+  return '搜尋家族';
+}
+
+function getFamilyViewMemberIds(fam) {
+  if (!fam) return [];
+
+  const fullIds = (fam.memberIds || []).filter(id => db.sims[id]);
+  if (familyTreeViewMode !== 'ea') return fullIds;
+
+  const householdIds = (
+    fam.gameData &&
+    Array.isArray(fam.gameData.householdMemberIds)
+      ? fam.gameData.householdMemberIds
+      : []
+  )
+    .map(String)
+    .filter(id => db.sims[id]);
+
+  if (!householdIds.length) return fullIds;
+
+  const seed = new Set(householdIds);
+  const result = new Set(householdIds);
+
+  householdIds.forEach(id => {
+    const sim = db.sims[id];
+    if (!sim) return;
+
+    (sim.parentIds || []).forEach(relId => {
+      if (db.sims[relId]) result.add(relId);
+    });
+    (sim.spouseIds || []).forEach(relId => {
+      if (db.sims[relId]) result.add(relId);
+    });
+    (sim.exSpouseIds || []).forEach(relId => {
+      if (db.sims[relId]) result.add(relId);
+    });
+    (sim.gameData?.adoptedParentIds || []).forEach(relId => {
+      if (db.sims[relId]) result.add(relId);
+    });
+  });
+
+  Object.values(db.sims).forEach(sim => {
+    if (!sim) return;
+
+    const hasSeedParent = (sim.parentIds || []).some(parentId => seed.has(String(parentId)));
+    const hasSeedAdoptiveParent = (sim.gameData?.adoptedParentIds || []).some(parentId => seed.has(String(parentId)));
+
+    if (hasSeedParent || hasSeedAdoptiveParent) {
+      result.add(sim.id);
+    }
+  });
+
+  return [...result];
+}
+
+function applyFamilyNavSearch(control) {
+  if (!control || control.select.id !== 'familySelect') return;
+
+  const query = String(control.familySearchQuery || '').trim().toLocaleLowerCase();
+  const options = [...control.menu.querySelectorAll('.nav-select-option')];
+  let visibleCount = 0;
+
+  options.forEach(option => {
+    const label = String(option.textContent || '').toLocaleLowerCase();
+    const visible = !query || label.includes(query);
+    option.hidden = !visible;
+    if (visible) visibleCount += 1;
+  });
+
+  const empty = control.menu.querySelector('.family-nav-empty');
+  if (empty) empty.hidden = visibleCount !== 0;
+}
+
+function setFamilyTreeViewMode(mode, control = null) {
+  const nextMode = mode === 'ea' ? 'ea' : 'extended';
+  if (familyTreeViewMode === nextMode) return;
+
+  familyTreeViewMode = nextMode;
+  try {
+    localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, familyTreeViewMode);
+  } catch (_) {}
+
+  dragHistory.clear();
+  clearNodeSelection();
+  refreshFamilyProfilePanel();
+  render();
+
+  const activeControl = control || navSelectControls.get('familySelect');
+  if (activeControl) {
+    activeControl.menu.querySelectorAll('[data-family-tree-view-mode]').forEach(btn => {
+      const active = btn.dataset.familyTreeViewMode === familyTreeViewMode;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  requestAnimationFrame(fitScreen);
 }
 
 function getNavSelectControlByHost(host) {
