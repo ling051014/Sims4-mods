@@ -192,6 +192,7 @@
                                 <span class="family-stat-sep">·</span>
                                 <span><strong id="familyDeceasedCount">0</strong><span> 已故</span></span>
                             </div>
+                            <div class="family-game-date" id="familyGameDate" hidden></div>
                         </section>
 
                         <section class="family-members-section">
@@ -301,7 +302,7 @@
                                 </select></label>
                             </div>
                             <div class="profile-fact-edit-row">
-                                <label class="profile-birthday-field"><span class="profile-field-label"><span class="l1ng-icon icon-cake2" aria-hidden="true"></span><span>生日</span></span><div class="birthday-inputs"><select id="fBirthdayMonth" aria-label="生日月份"><option value="">月</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select id="fBirthdayDay" aria-label="生日日期"><option value="">日</option></select></div></label>
+                                <label class="profile-birthday-field"><span class="profile-field-label"><span class="l1ng-icon icon-cake2" aria-hidden="true"></span><span>生日</span></span><div class="birthday-inputs"><input id="fBirthdayYear" type="number" step="1" inputmode="numeric" placeholder="年" aria-label="生日年份"><select id="fBirthdayMonth" aria-label="生日月份"><option value="">月</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select id="fBirthdayDay" aria-label="生日日期"><option value="">日</option></select></div></label>
                                 <label class="profile-age-field"><span class="profile-field-label"><span class="l1ng-icon icon-hourglass-split" aria-hidden="true"></span><span>年齡</span></span><div class="age-input-wrap"><input id="fAge" min="0" max="999" inputmode="numeric" type="number" placeholder="42"><span class="age-input-suffix">歲</span></div></label>
                                 <label class="profile-residence-field"><span class="profile-field-label"><span class="l1ng-icon icon-house" aria-hidden="true"></span><span>居住地</span></span><input id="fResidence" maxlength="60" placeholder="如：柳溪 - 花園社區"></label>
                             </div>

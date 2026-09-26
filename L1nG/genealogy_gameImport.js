@@ -289,6 +289,36 @@
     return Array.isArray(value) ? value.map(String).filter(Boolean) : [];
   }
 
+  // ========【RealDate 資料正規化】 設定 - 保留生日、遊戲日期與年齡快照，供族譜網站直接讀取 ========
+  function finiteInteger(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.trunc(number) : null;
+  }
+
+  function normalizeDateTriple(value) {
+    if (!value || typeof value !== 'object') return null;
+
+    const year = finiteInteger(value.year);
+    const month = finiteInteger(value.month);
+    const day = finiteInteger(value.day);
+
+    if (year === null || month === null || day === null) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+    return { year, month, day };
+  }
+
+  function cloneRealDate(sim) {
+    const realDate = sim && sim.realDate;
+    if (!realDate || typeof realDate !== 'object') return null;
+
+    try {
+      return JSON.parse(JSON.stringify(realDate));
+    } catch (_) {
+      return null;
+    }
+  }
+
   function relationshipArrays(sim) {
     const rel = (sim && sim.relations) || {};
 
@@ -500,6 +530,16 @@
         sim.death && sim.death.deathType
           ? enumKey(sim.death.deathType)
           : '';
+      const realDate = cloneRealDate(sim);
+      const birthday = normalizeDateTriple(realDate && realDate.birthday);
+      const realDateAge =
+        realDate && realDate.age && typeof realDate.age === 'object'
+          ? realDate.age
+          : null;
+      const ageYears =
+        realDateAge && finiteInteger(realDateAge.years) !== null
+          ? finiteInteger(realDateAge.years)
+          : null;
 
       sims[id] = {
         id,
@@ -508,6 +548,10 @@
         lifeStage:mapLifeStage(sim.age),
         status:mapStatus(sim),
         race:mapOccultRace(sim.occult),
+        birthdayYear:birthday ? birthday.year : null,
+        birthdayMonth:birthday ? birthday.month : null,
+        birthdayDay:birthday ? birthday.day : null,
+        age:ageYears,
         residence:formatResidence(household),
         aspiration,
         causeOfDeath:deathType,
@@ -541,7 +585,8 @@
             sim.name && sim.name.localizedRef
               ? sim.name.localizedRef
               : null,
-          portrait:sim.portrait || null
+          portrait:sim.portrait || null,
+          realDate
         }
       };
     });
@@ -670,6 +715,12 @@
       }));
     }
 
+    const realDateCurrentDate =
+      Object.values(sourceSims)
+        .map(sim => normalizeDateTriple(sim && sim.realDate && sim.realDate.currentDate))
+        .find(Boolean) ||
+      null;
+
     return {
       version:3,
       meta:{
@@ -679,6 +730,7 @@
         exporterVersion:bundle.manifest.exporterVersion,
         gameLocale:bundle.manifest.gameLocale,
         exportedAt:bundle.manifest.exportedAt,
+        realDateCurrentDate,
         gameImportStats:{
           sourceSimCount:Object.keys(sourceSims).length,
           peopleCount:humanIds.size,

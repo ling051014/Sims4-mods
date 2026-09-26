@@ -564,7 +564,6 @@ button {
     /* 顯示方式 */ display: flex;
     /* 垂直對齊 */ align-items: center;
     /* 內縮空間 */ padding: 0 18px;
-    /* 右側邊框 */ border-right: 1px solid rgba(255,255,255,.18);
     /* 彈性收縮 */ flex-shrink: 0;
     /* 文字陰影 */ text-shadow: 0 1px 2px rgba(0,0,0,.08);
     /* 換行方式 */ white-space: nowrap;
@@ -1886,7 +1885,7 @@ body[data-theme="midnight"] .stage-老年 {
 .profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:end; }
 .profile-field-label { display:inline-flex; align-items:center; gap:4px; }
 .profile-field-label .l1ng-icon { color:var(--accent); }
-.profile-birthday-field .birthday-inputs { grid-template-columns:1fr 1fr; gap:5px; }
+.profile-birthday-field .birthday-inputs { grid-template-columns:1.3fr .85fr .85fr; gap:5px; }
 .profile-age-field .age-input-wrap { min-height:32px; border-radius:6px; }
 .profile-age-field .age-input-wrap input { min-height:30px; border:0; border-radius:0; box-shadow:none; background:transparent; padding-right:2px; }
 .sim-editor-tabs { display:flex; gap:0; overflow-x:auto; scrollbar-width:none; margin:0; padding:0; }
@@ -1904,7 +1903,7 @@ body[data-theme="midnight"] .stage-老年 {
 .profile-grid label { gap:4px; font-size:11.5px; font-weight:600; }
 .profile-grid input,.profile-grid select,.profile-grid textarea,.profile-grid .ss-input { min-height:34px; line-height:1.2; }
 .profile-basic-grid textarea { min-height:76px; }
-.birthday-inputs { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.birthday-inputs { display:grid; grid-template-columns:1.3fr .85fr .85fr; gap:6px; }
 .age-input-wrap { display:flex; align-items:center; min-height:34px; border:1px solid var(--border); border-radius:6px; background:var(--input-bg); overflow:hidden; transition:border-color .15s ease,box-shadow .15s ease; }
 .age-input-wrap:focus-within { border-color:var(--accent); box-shadow:0 0 0 2px var(--grad-1-soft); }
 .profile-grid .age-input-wrap input { flex:1 1 auto; min-width:0; width:0; min-height:32px; border:0; border-radius:0; box-shadow:none; background:transparent; padding-right:3px; }
@@ -5260,7 +5259,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .icon-arrows-fullscreen { --l1ng-icon:url("../html%20icons/arrows-fullscreen.svg"); }
 
 .topbar { height:52px; min-height:52px; align-items:stretch; border-bottom:1px solid var(--border); box-shadow:none; background:linear-gradient(120deg,var(--grad-1) 0%,var(--grad-2) 100%); }
-.topbar-brand { width:auto; min-width:210px; padding:0 14px; border-right:1px solid color-mix(in srgb,var(--border) 70%,transparent); justify-content:flex-start; gap:10px; font-size:10.5px; letter-spacing:1.15px; text-align:left; }
+.topbar-brand { width:auto; min-width:210px; padding:0 14px; justify-content:flex-start; gap:10px; font-size:10.5px; letter-spacing:1.15px; text-align:left; }
 .topbar-brand-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .menu-toggle { display:inline-flex; width:30px; height:30px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--topbar-fg); }
 .topbar-main { gap:8px; padding:0 12px; }
@@ -5373,6 +5372,8 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .family-stats { display:flex; align-items:center; flex-wrap:wrap; gap:5px; margin-top:7px; color:var(--sub); font-size:10.5px; line-height:1.4; }
 .family-stats strong { color:var(--ink); font-weight:650; }
 .family-stat-sep { opacity:.45; }
+.family-game-date { margin-top:5px; color:var(--sub); font-size:10.5px; line-height:1.4; font-variant-numeric:tabular-nums; }
+.family-game-date strong { color:var(--ink); font-weight:650; }
 
 .family-members-section {
     flex:1 1 auto;
@@ -5644,7 +5645,7 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
 
 body[data-theme="ling"] .family-panel { background:#fff; border-right-color:#eee; }
 body[data-theme="ling"] .topbar { height:52px; background:#fff; border-bottom:1px solid #eee; }
-body[data-theme="ling"] .topbar-brand { color:#555; border-right-color:#eee; }
+body[data-theme="ling"] .topbar-brand { color:#555; }
 body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .family-rel-annotations { margin-top:14px; }
 

@@ -452,7 +452,7 @@ function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
 
   if (settings.birthday && sim.birthdayMonth && sim.birthdayDay) {
     primary.push({
-      text:formatBirthdaySummary(sim.birthdayMonth, sim.birthdayDay),
+      text:formatBirthdaySummary(sim.birthdayMonth, sim.birthdayDay, sim.birthdayYear),
       icon:'cake2'
     });
   }
@@ -3667,7 +3667,7 @@ function drawNodes() {
     if (stageAge.length) editRows.push(`<div class="n-edit-meta">${esc(stageAge.join(' · '))}</div>`);
 
     if (cardSettings.birthday && c.birthdayMonth && c.birthdayDay) {
-      editRows.push(`<div class="n-edit-meta">${iconSvg('cake2')}<span>${esc(formatBirthdaySummary(c.birthdayMonth, c.birthdayDay))}</span></div>`);
+      editRows.push(`<div class="n-edit-meta">${iconSvg('cake2')}<span>${esc(formatBirthdaySummary(c.birthdayMonth, c.birthdayDay, c.birthdayYear))}</span></div>`);
     }
 
     const statusRace = [];
@@ -3736,7 +3736,7 @@ function openInfoCard(id) {
   $('infoCardMeta').innerHTML = metaItems.join('');
 
   const headFacts = [];
-  const birthdayText = c.birthdayMonth && c.birthdayDay ? formatBirthdaySummary(c.birthdayMonth, c.birthdayDay) : uiText('生日未知');
+  const birthdayText = c.birthdayMonth && c.birthdayDay ? formatBirthdaySummary(c.birthdayMonth, c.birthdayDay, c.birthdayYear) : uiText('生日未知');
   const ageText = c.age != null && c.age !== ''
     ? ((document.documentElement.lang || 'zh-Hant') === 'en' ? `${uiText('年齡')} ${c.age}` : `${c.age} ${uiText('歲')}`)
     : uiText('年齡未知');
@@ -5627,6 +5627,21 @@ function refreshFamilyProfilePanel() {
   if ($('familyMemberCount')) $('familyMemberCount').textContent = String(members.length);
   if ($('familyGenerationCount')) $('familyGenerationCount').textContent = String(calculateFamilyGenerationCount(fam));
   if ($('familyDeceasedCount')) $('familyDeceasedCount').textContent = String(members.filter(sim => sim.status === '已故' || sim.status === '幽靈').length);
+
+  const gameDate = $('familyGameDate');
+  if (gameDate) {
+    const dateText = formatGameDate(db && db.meta && db.meta.realDateCurrentDate);
+    if (dateText) {
+      gameDate.hidden = false;
+      gameDate.title = uiText('匯出時遊戲日期');
+      gameDate.innerHTML = `<span>${esc(uiText('遊戲日期'))}</span> <strong>${esc(dateText)}</strong>`;
+    } else {
+      gameDate.hidden = true;
+      gameDate.removeAttribute('title');
+      gameDate.textContent = '';
+    }
+  }
+
   renderFamilyCover(fam); renderFamilyMemberList(fam);
 }
 
@@ -6125,19 +6140,55 @@ function populateBirthdayDays(preferredValue = null) {
   if (current && Number(current) <= limit) daySelect.value = current;
 }
 
-function formatBirthdaySummary(monthValue, dayValue) {
+function formatBirthdaySummary(monthValue, dayValue, yearValue = null) {
   const month = Number(monthValue) || 0;
   const day = Number(dayValue) || 0;
+  const year = yearValue === null || yearValue === '' || !Number.isFinite(Number(yearValue))
+    ? null
+    : Math.trunc(Number(yearValue));
   if (!month || !day) return uiText('生日未知');
 
   const lang = document.documentElement.lang || 'zh-Hant';
   if (lang === 'en') {
     try {
-      return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', timeZone: 'UTC' })
-        .format(new Date(Date.UTC(2000, month - 1, day)));
+      const options = year === null
+        ? { month: 'short', day: 'numeric', timeZone: 'UTC' }
+        : { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
+      return new Intl.DateTimeFormat('en', options)
+        .format(new Date(Date.UTC(year === null ? 2000 : year, month - 1, day)));
     } catch (_) {}
   }
-  return `${month} ${uiText('月')} ${day} ${uiText('日')}`;
+
+  return year === null
+    ? `${month} ${uiText('月')} ${day} ${uiText('日')}`
+    : `${year} ${uiText('年')} ${month} ${uiText('月')} ${day} ${uiText('日')}`;
+}
+
+function formatGameDate(value) {
+  if (!value || typeof value !== 'object') return '';
+
+  const year = Number(value.year);
+  const month = Number(value.month);
+  const day = Number(value.day);
+  if (![year, month, day].every(Number.isFinite)) return '';
+
+  const normalizedYear = Math.trunc(year);
+  const normalizedMonth = Math.trunc(month);
+  const normalizedDay = Math.trunc(day);
+  const lang = document.documentElement.lang || 'zh-Hant';
+
+  if (lang === 'en') {
+    try {
+      return new Intl.DateTimeFormat('en', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'UTC'
+      }).format(new Date(Date.UTC(normalizedYear, normalizedMonth - 1, normalizedDay)));
+    } catch (_) {}
+  }
+
+  return `${normalizedYear} ${uiText('年')} ${normalizedMonth} ${uiText('月')} ${normalizedDay} ${uiText('日')}`;
 }
 
 function syncTraitHiddenInput() {
@@ -6302,6 +6353,7 @@ function openEditor(id) {
   $('fGender').value = c ? (c.gender||'男') : '男';
   $('fStatus').value = c ? (c.status||'在世') : '在世';
   $('fRace').value = c ? (c.race||'') : '';
+  $('fBirthdayYear').value = c && c.birthdayYear != null ? String(c.birthdayYear) : '';
   $('fBirthdayMonth').value = c && c.birthdayMonth ? String(c.birthdayMonth) : '';
   populateBirthdayDays(c && c.birthdayDay ? c.birthdayDay : '');
   $('fAge').value = c && c.age != null ? String(c.age) : '';
@@ -6551,6 +6603,7 @@ function saveChar() {
     gender: $('fGender').value,
     status: st,
     race: $('fRace').value || '',
+    birthdayYear: $('fBirthdayYear').value === '' ? null : Math.trunc(Number($('fBirthdayYear').value)),
     birthdayMonth: $('fBirthdayMonth').value ? Number($('fBirthdayMonth').value) : null,
     birthdayDay: $('fBirthdayDay').value ? Number($('fBirthdayDay').value) : null,
     age: $('fAge').value === '' ? null : Math.min(999, Math.max(0, Number($('fAge').value) || 0)),
@@ -7651,6 +7704,9 @@ async function importGameGenealogy(file) {
     const activeFamilyName = activeFamily
       ? displayDataText(activeFamily.name, activeFamily)
       : '—';
+    const importedGameDate = formatGameDate(
+      converted && converted.meta && converted.meta.realDateCurrentDate
+    );
 
     hideGameImportStatus();
 
@@ -7662,8 +7718,9 @@ async function importGameGenealogy(file) {
         `寵物：${petCount}`,
         `家族：${familyCount}`,
         `頭像：${avatarStats.saved}`,
+        importedGameDate ? `${uiText('遊戲日期')}：${importedGameDate}` : null,
         `目前顯示：${activeFamilyName}`
-      ].join('\n'),
+      ].filter(Boolean).join('\n'),
       {
         title: '遊戲族譜匯入完成',
         confirmText: '查看族譜'
@@ -8413,10 +8470,14 @@ Object.assign(ZH_HANS_EXACT, {
   '模擬市民編輯分類': '模拟市民编辑分类',
   '生日': '生日',
   '年齡': '年龄',
+  '年': '年',
   '月': '月',
   '日': '日',
   '歲': '岁',
+  '生日年份': '生日年份',
   '生日月份': '生日月份',
+  '遊戲日期': '游戏日期',
+  '匯出時遊戲日期': '导出时游戏日期',
   '生日日期': '生日日期',
   '生日未知': '生日未知',
   '年齡未知': '年龄未知',
@@ -8454,10 +8515,14 @@ Object.assign(EN, {
   '模擬市民編輯分類': 'Sim editor sections',
   '生日': 'Birthday',
   '年齡': 'Age',
+  '年': 'Year',
   '月': 'Month',
   '日': 'Day',
   '歲': 'years old',
+  '生日年份': 'Birthday year',
   '生日月份': 'Birthday month',
+  '遊戲日期': 'Game Date',
+  '匯出時遊戲日期': 'Game date at export',
   '生日日期': 'Birthday day',
   '生日未知': 'Birthday unknown',
   '年齡未知': 'Age unknown',
