@@ -190,6 +190,9 @@ try {
   }
 } catch (_) {}
 
+let familyTreeLastEaFamilyId = null;
+let familyTreeExtendedSelectionValue = null;
+
 const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
   parent: { style:'solid', width:2.0, color:null },
   spouse: { style:'solid', width:2.4, color:null },
@@ -942,6 +945,308 @@ function familyNavTabMarkup(mode) {
     '</span>';
 }
 
+// ========【家族選擇器分流】 設定 - EA 來源項目與完整 genealogy connected components 分開 ========
+function familyGenealogyNeighborIds(sim) {
+  if (!sim) return [];
+
+  return [
+    ...(sim.parentIds || []),
+    ...(sim.spouseIds || []),
+    ...(sim.gameData?.adoptedParentIds || []),
+    ...(sim.gameData?.adoptedChildIds || []),
+    ...(sim.gameData?.deceasedSpouseIds || [])
+  ].map(String).filter(Boolean);
+}
+
+function stableFamilyComponentKey(memberIds) {
+  const source = [...memberIds].map(String).sort().join('|');
+  let hash = 2166136261;
+
+  for (let index = 0; index < source.length; index += 1) {
+    hash ^= source.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return `component_${memberIds.length}_${(hash >>> 0).toString(16)}`;
+}
+
+function familySourceSeedIds(fam) {
+  if (!fam) return [];
+
+  const householdIds =
+    Array.isArray(fam.gameData?.householdMemberIds)
+      ? fam.gameData.householdMemberIds.map(String).filter(id => db.sims[id])
+      : [];
+
+  if (householdIds.length) return householdIds;
+
+  return (fam.memberIds || []).map(String).filter(id => db.sims[id]);
+}
+
+function buildExtendedFamilyComponents() {
+  if (!db || !db.sims || !Array.isArray(db.families)) return [];
+
+  const allIds = Object.keys(db.sims);
+  const adjacency = new Map(allIds.map(id => [id, new Set()]));
+
+  allIds.forEach(id => {
+    familyGenealogyNeighborIds(db.sims[id]).forEach(rawRelatedId => {
+      const relatedId = String(rawRelatedId);
+      if (!adjacency.has(relatedId)) return;
+      adjacency.get(id).add(relatedId);
+      adjacency.get(relatedId).add(id);
+    });
+  });
+
+  const components = [];
+  const componentById = new Map();
+  const seen = new Set();
+
+  allIds.forEach(startId => {
+    if (seen.has(startId)) return;
+
+    const stack = [startId];
+    const memberIds = [];
+    seen.add(startId);
+
+    while (stack.length) {
+      const id = stack.pop();
+      memberIds.push(id);
+
+      adjacency.get(id).forEach(relatedId => {
+        if (seen.has(relatedId)) return;
+        seen.add(relatedId);
+        stack.push(relatedId);
+      });
+    }
+
+    const component = {
+      key:stableFamilyComponentKey(memberIds),
+      memberIds:memberIds.sort()
+    };
+
+    components.push(component);
+    component.memberIds.forEach(id => componentById.set(id, component));
+  });
+
+  const importedFamilies = db.families.filter(fam => fam && fam.gameImport);
+  const manualFamilies = db.families.filter(fam => fam && !fam.gameImport);
+  const familyIndex = new Map(db.families.map((fam, index) => [fam.id, index]));
+  const preferredFamily =
+    familyTreeLastEaFamilyId
+      ? db.families.find(fam => fam.id === familyTreeLastEaFamilyId)
+      : null;
+
+  let preferredComponentKey = null;
+
+  if (preferredFamily) {
+    const counts = new Map();
+
+    familySourceSeedIds(preferredFamily).forEach(id => {
+      const component = componentById.get(id);
+      if (!component) return;
+      counts.set(component.key, (counts.get(component.key) || 0) + 1);
+    });
+
+    preferredComponentKey =
+      [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])[0]?.[0] ||
+      null;
+  }
+
+  const componentEntries = components
+    .map(component => {
+      const memberSet = new Set(component.memberIds);
+      const sourceFamilies = importedFamilies.filter(fam =>
+        familySourceSeedIds(fam).some(id => memberSet.has(id))
+      );
+
+      if (!sourceFamilies.length) return null;
+
+      let anchorFamily = null;
+
+      if (
+        preferredFamily &&
+        component.key === preferredComponentKey &&
+        sourceFamilies.some(fam => fam.id === preferredFamily.id)
+      ) {
+        anchorFamily = preferredFamily;
+      }
+
+      if (!anchorFamily) {
+        anchorFamily =
+          [...sourceFamilies]
+            .sort((a, b) => {
+              const aScore = familySourceSeedIds(a).filter(id => memberSet.has(id)).length;
+              const bScore = familySourceSeedIds(b).filter(id => memberSet.has(id)).length;
+
+              return (
+                bScore - aScore ||
+                (familyIndex.get(a.id) ?? 0) - (familyIndex.get(b.id) ?? 0)
+              );
+            })[0] ||
+          sourceFamilies[0];
+      }
+
+      return {
+        mode:'extended',
+        value:`extended:${component.key}`,
+        componentKey:component.key,
+        familyId:anchorFamily.id,
+        labelFamily:anchorFamily,
+        memberIds:component.memberIds,
+        sourceFamilyIds:sourceFamilies.map(fam => fam.id),
+        sortIndex:Math.min(...sourceFamilies.map(fam => familyIndex.get(fam.id) ?? Number.MAX_SAFE_INTEGER))
+      };
+    })
+    .filter(Boolean);
+
+  const manualEntries = manualFamilies.map(fam => ({
+    mode:'extended',
+    value:`manual:${fam.id}`,
+    componentKey:null,
+    familyId:fam.id,
+    labelFamily:fam,
+    memberIds:[...(fam.memberIds || [])],
+    sourceFamilyIds:[fam.id],
+    sortIndex:familyIndex.get(fam.id) ?? Number.MAX_SAFE_INTEGER
+  }));
+
+  return [...componentEntries, ...manualEntries]
+    .sort((a, b) => a.sortIndex - b.sortIndex);
+}
+
+function getFamilySelectorEntries() {
+  if (!db || !Array.isArray(db.families)) return [];
+
+  if (familyTreeViewMode === 'ea') {
+    return db.families.map((fam, index) => ({
+      mode:'ea',
+      value:fam.id,
+      familyId:fam.id,
+      labelFamily:fam,
+      memberIds:[...(fam.memberIds || [])],
+      sourceFamilyIds:[fam.id],
+      sortIndex:index
+    }));
+  }
+
+  return buildExtendedFamilyComponents();
+}
+
+function findBestExtendedEntryForFamily(fam, entries = buildExtendedFamilyComponents()) {
+  if (!fam || !entries.length) return entries[0] || null;
+
+  const seedSet = new Set(familySourceSeedIds(fam));
+
+  return (
+    [...entries]
+      .map(entry => ({
+        entry,
+        score:(entry.memberIds || []).reduce(
+          (total, id) => total + (seedSet.has(id) ? 1 : 0),
+          0
+        ),
+        sourceMatch:(entry.sourceFamilyIds || []).includes(fam.id) ? 1 : 0
+      }))
+      .sort((a, b) =>
+        b.score - a.score ||
+        b.sourceMatch - a.sourceMatch ||
+        a.entry.sortIndex - b.entry.sortIndex
+      )[0]?.entry ||
+    null
+  );
+}
+
+function getActiveExtendedFamilyEntry() {
+  if (familyTreeViewMode !== 'extended') return null;
+
+  const entries = buildExtendedFamilyComponents();
+  if (!entries.length) return null;
+
+  let entry = entries.find(item => item.value === familyTreeExtendedSelectionValue);
+
+  if (!entry) {
+    entry = findBestExtendedEntryForFamily(currentFamily(), entries);
+    familyTreeExtendedSelectionValue = entry?.value || null;
+  }
+
+  return entry || null;
+}
+
+function currentTreeFamily() {
+  const fam = currentFamily();
+  if (!fam || familyTreeViewMode !== 'extended') return fam;
+
+  const entry = getActiveExtendedFamilyEntry();
+  if (!entry || !(entry.memberIds || []).length) return fam;
+
+  return {
+    ...fam,
+    memberIds:[...entry.memberIds]
+  };
+}
+
+function setFamilyTreeViewMode(mode, control = null) {
+  const nextMode = mode === 'ea' ? 'ea' : 'extended';
+
+  if (nextMode === familyTreeViewMode) {
+    if (control) {
+      syncFamilyNavTabsPortal(control);
+      positionFamilyNavTabsPortal(control);
+    }
+    return;
+  }
+
+  const previousFamily = currentFamily();
+
+  if (familyTreeViewMode === 'ea' && previousFamily) {
+    familyTreeLastEaFamilyId = previousFamily.id;
+  }
+
+  familyTreeViewMode = nextMode;
+
+  try {
+    localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, familyTreeViewMode);
+  } catch (_) {}
+
+  if (familyTreeViewMode === 'extended') {
+    const entries = buildExtendedFamilyComponents();
+    const selected = findBestExtendedEntryForFamily(previousFamily, entries);
+
+    familyTreeExtendedSelectionValue = selected?.value || null;
+
+    if (selected?.familyId && db.families.some(fam => fam.id === selected.familyId)) {
+      db.currentId = selected.familyId;
+    }
+  } else {
+    const fallbackId =
+      familyTreeLastEaFamilyId &&
+      db.families.some(fam => fam.id === familyTreeLastEaFamilyId)
+        ? familyTreeLastEaFamilyId
+        : db.currentId;
+
+    if (fallbackId) db.currentId = fallbackId;
+  }
+
+  dragHistory.clear();
+  clearNodeSelection();
+  addMemberSelection.clear();
+  removeMemberSelection.clear();
+  removeMemberMode = false;
+
+  save();
+  refreshFamilyUI();
+  render();
+
+  requestAnimationFrame(() => {
+    if (control && control.host.classList.contains('open')) {
+      positionFamilyNavSelectMenu(control);
+    }
+    fitScreen();
+  });
+}
+
 function ensureFamilyNavTabsPortal(control) {
   if (!control || control.select.id !== 'familySelect') return null;
 
@@ -965,13 +1270,7 @@ function ensureFamilyNavTabsPortal(control) {
       event.preventDefault();
       event.stopPropagation();
 
-      familyTreeViewMode = mode;
-      try {
-        localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, familyTreeViewMode);
-      } catch (_) {}
-
-      syncFamilyNavTabsPortal(control);
-      positionFamilyNavTabsPortal(control);
+      setFamilyTreeViewMode(mode, control);
     });
 
     portal.appendChild(button);
@@ -2750,7 +3049,11 @@ function compressGalleryImage(file) {
 }
 
 function getVisibleIds(familyId) {
-  const fam = db.families.find(f => f.id === familyId);
+  const fam =
+    familyId === db.currentId
+      ? currentTreeFamily()
+      : db.families.find(f => f.id === familyId);
+
   if (!fam) return new Set();
   const result = new Set(fam.memberIds.filter(id => db.sims[id]));
   [...result].forEach(id => {
@@ -3884,7 +4187,7 @@ function commonNodeClasses(c, opts) {
 }
 
 function drawNodes() {
-  const fam = currentFamily();
+  const fam = currentTreeFamily();
   const memberSet = new Set(fam.memberIds);
   const {pos, byId, visibleIds} = layoutCache;
   const isView = viewMode === 'view';
@@ -5792,11 +6095,12 @@ function renderFamilyMemberList(fam) {
 
 function refreshFamilyProfilePanel() {
   const fam = currentFamily(); if (!fam) return;
+  const viewFamily = currentTreeFamily() || fam;
   ensureFamilyProfileShape(fam);
   const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value = fam.bio || '';
-  const members = (fam.memberIds || []).map(id => db.sims[id]).filter(Boolean);
+  const members = (viewFamily.memberIds || []).map(id => db.sims[id]).filter(Boolean);
   if ($('familyMemberCount')) $('familyMemberCount').textContent = String(members.length);
-  if ($('familyGenerationCount')) $('familyGenerationCount').textContent = String(calculateFamilyGenerationCount(fam));
+  if ($('familyGenerationCount')) $('familyGenerationCount').textContent = String(calculateFamilyGenerationCount(viewFamily));
   if ($('familyDeceasedCount')) $('familyDeceasedCount').textContent = String(members.filter(sim => sim.status === '已故' || sim.status === '幽靈').length);
 
   const gameDate = $('familyGameDate');
@@ -5813,26 +6117,60 @@ function refreshFamilyProfilePanel() {
     }
   }
 
-  renderFamilyCover(fam); renderFamilyMemberList(fam);
+  renderFamilyCover(viewFamily); renderFamilyMemberList(viewFamily);
 }
 
 function refreshFamilyUI() {
   const fam = currentFamily();
+  if (!fam) return;
+
   const familyName = displayDataText(fam.name, fam);
+  const selectorEntries = getFamilySelectorEntries();
+
   familyNameInput.value = familyName;
   syncFamilyNameInputWidth();
-  familySelect.innerHTML = db.families.map(f => `<option value="${f.id}">${esc(displayDataText(f.name, f))}</option>`).join('');
-  familySelect.value = db.currentId;
+
+  familySelect.innerHTML = selectorEntries
+    .map(entry =>
+      `<option value="${esc(entry.value)}">${esc(displayDataText(entry.labelFamily.name, entry.labelFamily))}</option>`
+    )
+    .join('');
+
+  if (familyTreeViewMode === 'extended') {
+    const selected =
+      selectorEntries.find(entry => entry.value === familyTreeExtendedSelectionValue) ||
+      findBestExtendedEntryForFamily(fam, selectorEntries);
+
+    if (selected) {
+      familyTreeExtendedSelectionValue = selected.value;
+      familySelect.value = selected.value;
+    }
+  } else {
+    familySelect.value = db.currentId;
+  }
+
   document.title = familyName + ' · ' + uiText('模擬市民族譜工具');
   updateLayoutToggle();
   syncNavSelectControl('familySelect');
   refreshFamilyProfilePanel();
 }
 familySelect.onchange = () => {
+  const selectorEntries = getFamilySelectorEntries();
+  const selectedEntry = selectorEntries.find(entry => entry.value === familySelect.value);
+  if (!selectedEntry) return;
+
   dragHistory.clear();
   clearNodeSelection();
   arrangeTool = 'pan';
-  db.currentId = familySelect.value;
+
+  if (familyTreeViewMode === 'extended') {
+    familyTreeExtendedSelectionValue = selectedEntry.value;
+    db.currentId = selectedEntry.familyId;
+  } else {
+    db.currentId = selectedEntry.familyId;
+    familyTreeLastEaFamilyId = selectedEntry.familyId;
+  }
+
   addMemberSelection.clear();
   removeMemberSelection.clear();
   removeMemberMode = false;

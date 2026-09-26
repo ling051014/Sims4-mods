@@ -5293,29 +5293,43 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     justify-content:center;
     border:1px solid var(--nav-dropdown-border);
     border-radius:8px 0 0 8px;
-    background:color-mix(in srgb,var(--nav-dropdown-bg) 82%,var(--panel-bg));
-    color:var(--sub);
+    background:color-mix(in srgb,var(--panel-bg) 88%,var(--nav-dropdown-bg));
+    color:color-mix(in srgb,var(--sub) 82%,transparent);
     font:inherit;
+    font-weight:600;
     cursor:pointer;
     box-sizing:border-box;
-    transition:background-color .15s ease,color .15s ease,border-color .15s ease;
+    transition:none;
+    animation:none;
 }
 
 .family-nav-index-tab + .family-nav-index-tab {
     margin-top:-1px;
 }
 
-.family-nav-index-tab:hover {
+.family-nav-index-tab:not(.active):hover {
     background:var(--nav-dropdown-hover-bg);
     color:var(--nav-dropdown-hover-text);
 }
 
 .family-nav-index-tab.active {
-    width:53px;
     z-index:2;
-    border-right:0;
+    border-right-color:transparent;
     background:var(--nav-dropdown-bg);
     color:var(--accent);
+    font-weight:750;
+}
+
+.family-nav-index-tab.active::after {
+    content:"";
+    position:absolute;
+    z-index:3;
+    top:-1px;
+    right:-2px;
+    bottom:-1px;
+    width:3px;
+    background:var(--nav-dropdown-bg);
+    pointer-events:none;
 }
 
 .family-nav-tab-lines {
