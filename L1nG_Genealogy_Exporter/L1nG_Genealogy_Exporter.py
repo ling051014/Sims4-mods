@@ -998,3 +998,249 @@ def _collect_households(sim_records, resolver):
             "neighborhoodName": location.get("neighborhoodName"),
             "regionId": location.get("regionId"),
             "regionName": location.get("regionName"),
+            "regionNameRef": location.get("regionNameRef"),
+            "hidden": bool(_safe_get(household, "hidden", False)),
+            "isActiveHousehold": bool(_safe_get(household, "is_active_household", False)),
+            "isPlayerHousehold": bool(_safe_get(household, "is_player_household", False)),
+            "isPlayedHousehold": bool(_safe_get(household, "is_played_household", False)),
+            "portrait": None,
+        }
+
+    for sid, sim in sim_records.items():
+        hid = sim.get("householdId")
+        if not hid:
+            continue
+        if hid not in households:
+            households[hid] = {
+                "householdId": hid,
+                "name": "",
+                "description": "",
+                "memberIds": [],
+                "homeZoneId": None,
+                "zoneId": None,
+                "lotName": None,
+                "worldId": None,
+                "worldDescriptionId": None,
+                "worldName": None,
+                "worldNameRef": None,
+                "neighborhoodId": None,
+                "neighborhoodName": None,
+                "regionId": None,
+                "regionName": None,
+                "regionNameRef": None,
+                "hidden": False,
+                "isActiveHousehold": False,
+                "isPlayerHousehold": False,
+                "isPlayedHousehold": False,
+                "portrait": None,
+            }
+        if sid not in households[hid]["memberIds"]:
+            households[hid]["memberIds"].append(sid)
+
+    return households
+
+
+def _validate_genealogy(genealogy):
+    errors = []
+    sims = genealogy.get("sims", {})
+    for sid, sim in sims.items():
+        if str(sim.get("simId")) != str(sid):
+            errors.append({"simId": str(sid), "error": "simId mismatch"})
+        rel = sim.get("relations") or {}
+        for key in (
+            "parentIds", "childIds", "spouseIds", "fianceIds",
+            "steadyPartnerIds", "adoptedParentIds", "adoptedChildIds",
+            "exSpouseIds", "deceasedSpouseIds"
+        ):
+            values = rel.get(key, [])
+            if not isinstance(values, list):
+                errors.append({"simId": str(sid), "error": "{} is not list".format(key)})
+    return errors
+
+
+def _collect_all():
+    resolver = _LocalizedTextResolver(_locale())
+    family_tree_service, graph, node_records, relation_map, edges = _collect_graph(resolver)
+    sim_info_manager = services.sim_info_manager()
+
+    sim_infos = {}
+    for sim_info in _iter_manager_values(sim_info_manager):
+        sid = _sim_id(sim_info)
+        if sid:
+            sim_infos[sid] = sim_info
+
+    all_ids = set(node_records.keys()) | set(sim_infos.keys())
+    sims = {}
+    errors = []
+    portrait_assets = {}
+
+    for sid in sorted(all_ids):
+        node_record = node_records.get(sid) or {
+            "simId": sid,
+            "isCulled": False,
+            "firstName": "",
+            "lastName": "",
+            "localizedFullName": None,
+            "localizedNameRef": None,
+            "gender": None,
+            "thumbnailResourceKey": None,
+            "thumbnailResourceObject": None,
+            "deathTraitOverrideId": None,
+        }
+        rels = relation_map.get(sid) or _empty_relations()
+        try:
+            sims[sid] = _sim_record(
+                sim_infos.get(sid),
+                node_record,
+                rels,
+                family_tree_service,
+                resolver,
+                portrait_assets,
+            )
+        except Exception as exc:
+            errors.append({"simId": sid, "error": str(exc)})
+            sims[sid] = {
+                "simId": sid,
+                "recordState": "error_partial",
+                "isCulled": bool(node_record.get("isCulled", False)),
+                "name": {
+                    "first": node_record.get("firstName", ""),
+                    "last": node_record.get("lastName", ""),
+                    "display": node_record.get("localizedFullName") or (
+                        node_record.get("firstName", "") + " " + node_record.get("lastName", "")
+                    ).strip(),
+                    "localizedRef": node_record.get("localizedNameRef"),
+                },
+                "relations": rels,
+                "familyTreeOverrides": {
+                    "localizedNameRef": node_record.get("localizedNameRef"),
+                    "thumbnailResourceKey": node_record.get("thumbnailResourceKey"),
+                    "deathTraitOverrideId": node_record.get("deathTraitOverrideId"),
+                },
+                "portrait": None,
+                "error": str(exc),
+            }
+
+    households = _collect_households(sims, resolver)
+    validation_errors = _validate_genealogy({"sims": sims})
+    errors.extend(validation_errors)
+
+    stats = {
+        "simCount": len(sims),
+        "fullSimInfoCount": sum(1 for x in sims.values() if x.get("recordState") == "full"),
+        "familyTreeOnlyCount": sum(1 for x in sims.values() if x.get("recordState") == "family_tree_only"),
+        "culledNodeCount": sum(1 for x in node_records.values() if x.get("isCulled")),
+        "householdCount": len(households),
+        "edgeCount": len(edges),
+        "errorCount": len(errors),
+        "simPortraitCount": len(portrait_assets),
+        "validationPassed": len(validation_errors) == 0,
+        "localizedStringTables": resolver.stats(),
+    }
+
+    genealogy = {
+        "schemaVersion": SCHEMA_VERSION,
+        "sims": sims,
+        "households": households,
+        "edges": edges,
+        "stats": stats,
+        "errors": errors,
+    }
+
+    return genealogy, portrait_assets, resolver
+
+
+def _manifest(genealogy, portrait_assets, resolver):
+    localization_stats = resolver.stats()
+    return {
+        "format": FORMAT_NAME,
+        "schemaVersion": SCHEMA_VERSION,
+        "exporterVersion": EXPORTER_VERSION,
+        "targetGameVersion": TARGET_GAME_VERSION,
+        "gameLocale": _locale(),
+        "exportedAt": _iso_now(),
+        "capabilities": {
+            "genealogy": True,
+            "households": True,
+            "traits": True,
+            "careers": True,
+            "aspiration": True,
+            "occult": True,
+            "death": True,
+            "localizedDisplayText": localization_stats.get("tableCount", 0) > 0,
+            "simPortraits": len(portrait_assets) > 0,
+            "simPortraitExport": True,
+            "dynamicSimPortraitBytes": False,
+            "persistentThumbnailResourceLoad": True,
+            "householdPortraits": False,
+            "familyTreeLocalizedNameRefs": True,
+            "worldLotMetadata": True,
+            "portraitZipPackaging": True,
+        },
+        "stats": genealogy.get("stats", {}),
+    }
+
+
+def export_genealogy_bundle():
+    genealogy, portrait_assets, resolver = _collect_all()
+    manifest = _manifest(genealogy, portrait_assets, resolver)
+    export_dir = _export_dir()
+    stamp = _timestamp_for_file()
+    zip_path = os.path.join(export_dir, "L1nG_Genealogy_Export_{}.zip".format(stamp))
+
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_STORED) as archive:
+        archive.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2))
+        archive.writestr("genealogy.json", json.dumps(genealogy, ensure_ascii=False, indent=2))
+        for path, data in sorted(portrait_assets.items()):
+            archive.writestr(path, data)
+
+    return zip_path, genealogy, manifest
+
+
+@Command("l1ng.genealogy.export", command_type=CommandType.Live)
+def l1ng_genealogy_export(_connection=None):
+    output = CheatOutput(_connection)
+    output("[L1nG Genealogy] 開始唯讀匯出目前存檔…")
+    try:
+        path, genealogy, manifest = export_genealogy_bundle()
+        stats = genealogy.get("stats", {})
+        output("[L1nG Genealogy] 匯出完成。")
+        output("人物：{}（完整 {} / 僅族譜 {}）".format(
+            stats.get("simCount", 0),
+            stats.get("fullSimInfoCount", 0),
+            stats.get("familyTreeOnlyCount", 0),
+        ))
+        output("家庭：{} / 關係邊：{} / 頭像：{} / 欄位錯誤：{}".format(
+            stats.get("householdCount", 0),
+            stats.get("edgeCount", 0),
+            stats.get("simPortraitCount", 0),
+            stats.get("errorCount", 0),
+        ))
+        output("驗證：{}".format("PASS" if stats.get("validationPassed") else "CHECK"))
+        output("檔案：{}".format(path))
+        logger.info("Genealogy export completed: {}", path)
+    except Exception as exc:
+        logger.exception("Genealogy export failed")
+        output("[L1nG Genealogy] 匯出失敗：{}".format(exc))
+        output("請提供 lastException.txt 與遊戲版本給 L1nG。")
+
+
+@Command("l1ng.genealogy.status", command_type=CommandType.Live)
+def l1ng_genealogy_status(_connection=None):
+    output = CheatOutput(_connection)
+    try:
+        service = services.family_tree_service()
+        graph = _safe_get(service, "family_tree_graph", None)
+        nodes = _safe_get(graph, "nodes", {}) if graph is not None else {}
+        sim_count = len(_iter_manager_values(services.sim_info_manager()))
+        household_count = len(_iter_manager_values(services.household_manager()))
+        resolver = _LocalizedTextResolver(_locale())
+        localization = resolver.stats()
+        output("[L1nG Genealogy] Exporter {}".format(EXPORTER_VERSION))
+        output("Locale：{} / STBL：{} tables".format(_locale(), localization.get("tableCount", 0)))
+        output("SimInfo：{} / FamilyTree nodes：{} / Households：{}".format(
+            sim_count, len(nodes or {}), household_count
+        ))
+        output("FamilyTree：{}".format("ready" if graph is not None else "not ready"))
+    except Exception as exc:
+        output("[L1nG Genealogy] 狀態讀取失敗：{}".format(exc))
