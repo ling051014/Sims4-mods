@@ -3563,133 +3563,90 @@ body[data-theme="midnight"] .stage-老年 {
 .info-card-gallery .gallery-item-title { display:none; }
 .info-modal > .modal-actions { margin:0; padding:10px 18px 12px; border-top:1px solid var(--border); }
 
+/* ========【使用提示】 設定 - 視窗外框沿用共用 Modal，只保留提示內容排版 ======== */
 .tips-modal {
-    /* 元素寬度 */ width: min(720px,100%);
-    /* 內縮空間 */ padding: 0;
-    /* 溢出處理 */ overflow: hidden;
-}
-
-.tips-header {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: space-between;
-    /* 內縮空間 */ padding: 16px 22px 12px;
-    /* 背景設定 */ background: linear-gradient(135deg, var(--grad-1-soft), var(--grad-2-soft));
-    /* 下方邊框 */ border-bottom: 1px dashed var(--border);
-}
-
-.tips-header h2 {
-    /* 外距設定 */ margin: 0;
-    /* 字體大小 */ font-size: 18px;
-    /* 文字顏色 */ color: var(--accent);
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 8px;
-    /* 自動換行 */ flex-wrap: wrap;
-}
-
-.tips-header .tips-subtitle {
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: var(--sub);
-    /* 字體粗細 */ font-weight: 400;
-    /* 字距設定 */ letter-spacing: 0;
+    width:min(740px,100%);
 }
 
 .tips-body {
-    /* 內縮空間 */ padding: 14px 22px 18px;
-    /* 最大高度 */ max-height: 70vh;
-    /* 溢出處理 */ overflow: auto;
+    max-height:64vh;
+    overflow:auto;
+    margin:0 -4px 2px 0;
+    padding-right:8px;
 }
 
 .tips-section {
-    /* 下方外距 */ margin-bottom: 14px;
-    /* 內縮空間 */ padding: 10px 14px;
-    /* 圓角弧度 */ border-radius: 10px;
-    /* 背景設定 */ background: var(--panel-bg);
-    /* 左側邊框 */ border-left: 3px solid var(--accent);
+    padding:12px 0 13px;
+    border-bottom:1px solid var(--border);
+}
+
+.tips-section:first-child {
+    padding-top:2px;
 }
 
 .tips-section:last-child {
-    /* 下方外距 */ margin-bottom: 0;
+    padding-bottom:2px;
+    border-bottom:0;
 }
 
 .tips-section h3 {
-    /* 外距設定 */ margin: 0 0 8px;
-    /* 字體大小 */ font-size: 13px;
-    /* 字體粗細 */ font-weight: 700;
-    /* 文字顏色 */ color: var(--accent);
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 6px;
-    /* 字距設定 */ letter-spacing: .5px;
+    margin:0 0 7px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:.15px;
+}
+
+.tips-section h3 .l1ng-icon {
+    width:14px;
+    height:14px;
+    color:var(--accent);
+    flex:0 0 auto;
 }
 
 .tips-section ul {
-    /* 外距設定 */ margin: 0;
-    /* 左側內縮 */ padding-left: 18px;
-    /* 字體大小 */ font-size: 12.5px;
-    /* 行距設定 */ line-height: 1.85;
-    /* 文字顏色 */ color: var(--ink);
+    margin:0;
+    padding-left:19px;
+    color:var(--sub);
+    font-size:12px;
+    line-height:1.65;
 }
 
 .tips-section li {
-    /* 下方外距 */ margin-bottom: 2px;
+    margin-bottom:5px;
+}
+
+.tips-section li:last-child {
+    margin-bottom:0;
 }
 
 .tips-section li b {
-    /* 文字顏色 */ color: var(--accent);
-    /* 字體粗細 */ font-weight: 600;
+    color:var(--ink);
+    font-weight:650;
 }
 
 .tips-section kbd {
-    /* 字體設定 */ font-family: inherit;
-    /* 字體大小 */ font-size: 11px;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 內縮空間 */ padding: 1px 5px;
-    /* 元素陰影 */ box-shadow: 0 1px 0 var(--border);
-    /* 文字顏色 */ color: var(--ink);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:20px;
+    padding:1px 5px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    background:var(--input-bg);
+    box-shadow:none;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:10.5px;
+    line-height:1;
 }
 
-.tips-footer {
-    /* 內縮空間 */ padding: 10px 22px 14px;
-    /* 上方邊框 */ border-top: 1px dashed var(--border);
-    /* 顯示方式 */ display: flex;
-    /* 水平對齊 */ justify-content: flex-end;
-    /* 項目間距 */ gap: 8px;
+.tips-modal > .modal-actions {
+    margin-top:14px;
 }
-
-.tips-footer button {
-    /* 最小寬度 */ min-width: 96px;
-    /* 內縮空間 */ padding: 8px 16px;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 文字顏色 */ color: var(--ink);
-    /* 字體大小 */ font-size: 13px;
-    /* 動畫過渡 */ transition: .15s;
-}
-
-.tips-footer button:hover {
-    /* 背景設定 */ background: var(--panel-item-hover);
-    /* 邊框顏色 */ border-color: var(--accent);
-    /* 文字顏色 */ color: var(--accent);
-}
-
-.tips-footer button.primary {
-    /* 背景設定 */ background: var(--accent);
-    /* 邊框顏色 */ border-color: var(--accent);
-    /* 文字顏色 */ color: #fff;
-}
-
-.tips-footer button.primary:hover {
-    /* 背景設定 */ background: var(--accent-hover);
-    /* 邊框顏色 */ border-color: var(--accent-hover);
-    /* 文字顏色 */ color: #fff;
-}
-
-
 
 @media (max-width:900px) {
     .topbar-brand {
