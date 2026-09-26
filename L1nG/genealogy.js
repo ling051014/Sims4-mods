@@ -904,18 +904,8 @@ function setIconText(el, iconName, text) {
 // ========【頂部自訂下拉選單】 設定 - 取代瀏覽器原生 select 展開介面 ========
 const navSelectControls = new Map();
 
-function getNavSelectDisplayText(select, option) {
-  if (!select || !option) return '';
-  if (select.id === 'languageSelect') {
-    const nativeNames = { 'zh-Hant':'繁中', 'zh-Hans':'简中', en:'EN' };
-    return nativeNames[option.value] || option.textContent || option.value;
-  }
-  return option.textContent || option.value || '';
-}
-
-// ========【家族選擇器分類】 設定 - EA 族譜 / 大家族便利貼與需要時才出現的搜尋 ========
 function familyNavLanguage() {
-  const lang = document.documentElement.dataset.language || document.documentElement.lang || 'zh-Hant';
+  const lang = document.documentElement.lang || 'zh-Hant';
   return String(lang).toLowerCase().startsWith('en')
     ? 'en'
     : String(lang).toLowerCase().includes('hans') || String(lang).toLowerCase().includes('cn')
@@ -930,114 +920,122 @@ function familyNavModeAria(mode) {
   return mode === 'ea' ? 'EA 族譜' : '大家族';
 }
 
-function familyNavSearchPlaceholder() {
+function familyNavTabMarkup(mode) {
   const lang = familyNavLanguage();
-  if (lang === 'en') return 'Search families…';
-  if (lang === 'zh-Hans') return '搜索家族…';
-  return '搜尋家族…';
-}
 
-function familyNavSearchAria() {
-  const lang = familyNavLanguage();
-  if (lang === 'en') return 'Search families';
-  if (lang === 'zh-Hans') return '搜索家族';
-  return '搜尋家族';
-}
-
-function getFamilyViewMemberIds(fam) {
-  if (!fam) return [];
-
-  const fullIds = (fam.memberIds || []).filter(id => db.sims[id]);
-  if (familyTreeViewMode !== 'ea') return fullIds;
-
-  const householdIds = (
-    fam.gameData &&
-    Array.isArray(fam.gameData.householdMemberIds)
-      ? fam.gameData.householdMemberIds
-      : []
-  )
-    .map(String)
-    .filter(id => db.sims[id]);
-
-  if (!householdIds.length) return fullIds;
-
-  const seed = new Set(householdIds);
-  const result = new Set(householdIds);
-
-  householdIds.forEach(id => {
-    const sim = db.sims[id];
-    if (!sim) return;
-
-    (sim.parentIds || []).forEach(relId => {
-      if (db.sims[relId]) result.add(relId);
-    });
-    (sim.spouseIds || []).forEach(relId => {
-      if (db.sims[relId]) result.add(relId);
-    });
-    (sim.exSpouseIds || []).forEach(relId => {
-      if (db.sims[relId]) result.add(relId);
-    });
-    (sim.gameData?.adoptedParentIds || []).forEach(relId => {
-      if (db.sims[relId]) result.add(relId);
-    });
-  });
-
-  Object.values(db.sims).forEach(sim => {
-    if (!sim) return;
-
-    const hasSeedParent = (sim.parentIds || []).some(parentId => seed.has(String(parentId)));
-    const hasSeedAdoptiveParent = (sim.gameData?.adoptedParentIds || []).some(parentId => seed.has(String(parentId)));
-
-    if (hasSeedParent || hasSeedAdoptiveParent) {
-      result.add(sim.id);
-    }
-  });
-
-  return [...result];
-}
-
-function applyFamilyNavSearch(control) {
-  if (!control || control.select.id !== 'familySelect') return;
-
-  const query = String(control.familySearchQuery || '').trim().toLocaleLowerCase();
-  const options = [...control.menu.querySelectorAll('.nav-select-option')];
-  let visibleCount = 0;
-
-  options.forEach(option => {
-    const label = String(option.textContent || '').toLocaleLowerCase();
-    const visible = !query || label.includes(query);
-    option.hidden = !visible;
-    if (visible) visibleCount += 1;
-  });
-
-  const empty = control.menu.querySelector('.family-nav-empty');
-  if (empty) empty.hidden = visibleCount !== 0;
-}
-
-function setFamilyTreeViewMode(mode, control = null) {
-  const nextMode = mode === 'ea' ? 'ea' : 'extended';
-  if (familyTreeViewMode === nextMode) return;
-
-  familyTreeViewMode = nextMode;
-  try {
-    localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, familyTreeViewMode);
-  } catch (_) {}
-
-  dragHistory.clear();
-  clearNodeSelection();
-  refreshFamilyProfilePanel();
-  render();
-
-  const activeControl = control || navSelectControls.get('familySelect');
-  if (activeControl) {
-    activeControl.menu.querySelectorAll('[data-family-tree-view-mode]').forEach(btn => {
-      const active = btn.dataset.familyTreeViewMode === familyTreeViewMode;
-      btn.classList.toggle('active', active);
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
+  if (lang === 'en') {
+    return '<span class="family-nav-tab-label-en">' +
+      (mode === 'ea' ? 'EA TREE' : 'EXTENDED FAMILY') +
+      '</span>';
   }
 
-  requestAnimationFrame(fitScreen);
+  if (mode === 'ea') {
+    return '<span class="family-nav-tab-lines">' +
+      '<span class="family-nav-tab-ea">EA</span>' +
+      '<span>' + (lang === 'zh-Hans' ? '族' : '族') + '</span>' +
+      '<span>' + (lang === 'zh-Hans' ? '谱' : '譜') + '</span>' +
+      '</span>';
+  }
+
+  return '<span class="family-nav-tab-lines">' +
+    '<span>大</span><span>家</span><span>族</span>' +
+    '</span>';
+}
+
+function ensureFamilyNavTabsPortal(control) {
+  if (!control || control.select.id !== 'familySelect') return null;
+
+  if (control.familyTabsPortal && control.familyTabsPortal.isConnected) {
+    return control.familyTabsPortal;
+  }
+
+  const portal = document.createElement('div');
+  portal.className = 'family-nav-tabs-portal';
+  portal.setAttribute('role', 'tablist');
+  portal.setAttribute('aria-label', familyNavModeAria('extended'));
+
+  ['ea', 'extended'].forEach(mode => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'family-nav-index-tab';
+    button.dataset.familyTreeViewMode = mode;
+    button.setAttribute('role', 'tab');
+
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      familyTreeViewMode = mode;
+      try {
+        localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, familyTreeViewMode);
+      } catch (_) {}
+
+      syncFamilyNavTabsPortal(control);
+      positionFamilyNavTabsPortal(control);
+    });
+
+    portal.appendChild(button);
+  });
+
+  document.body.appendChild(portal);
+  control.familyTabsPortal = portal;
+  syncFamilyNavTabsPortal(control);
+
+  return portal;
+}
+
+function syncFamilyNavTabsPortal(control) {
+  if (!control || control.select.id !== 'familySelect') return;
+
+  const portal = ensureFamilyNavTabsPortal(control);
+  if (!portal) return;
+
+  portal.querySelectorAll('.family-nav-index-tab').forEach(button => {
+    const mode = button.dataset.familyTreeViewMode;
+    const active = mode === familyTreeViewMode;
+
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', active ? 'true' : 'false');
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    button.setAttribute('aria-label', familyNavModeAria(mode));
+    button.title = familyNavModeAria(mode);
+    button.innerHTML = familyNavTabMarkup(mode);
+  });
+}
+
+function hideFamilyNavTabsPortal(control) {
+  if (!control || !control.familyTabsPortal) return;
+  control.familyTabsPortal.style.display = 'none';
+}
+
+function positionFamilyNavTabsPortal(control) {
+  if (!control || control.select.id !== 'familySelect') return;
+  if (!control.host.classList.contains('open')) {
+    hideFamilyNavTabsPortal(control);
+    return;
+  }
+
+  const portal = ensureFamilyNavTabsPortal(control);
+  if (!portal || control.menu.parentElement !== document.body) return;
+
+  syncFamilyNavTabsPortal(control);
+
+  const menuRect = control.menu.getBoundingClientRect();
+  const tabWidth = 52;
+
+  portal.style.display = 'flex';
+  portal.style.top = Math.round(menuRect.top) + 'px';
+  portal.style.left = Math.max(2, Math.round(menuRect.left - tabWidth + 1)) + 'px';
+}
+
+
+function getNavSelectDisplayText(select, option) {
+  if (!select || !option) return '';
+  if (select.id === 'languageSelect') {
+    const nativeNames = { 'zh-Hant':'繁中', 'zh-Hans':'简中', en:'EN' };
+    return nativeNames[option.value] || option.textContent || option.value;
+  }
+  return option.textContent || option.value || '';
 }
 
 function getNavSelectControlByHost(host) {
@@ -1059,20 +1057,19 @@ function restoreFamilyNavSelectMenu(control) {
   menu.classList.remove('family-nav-portal');
   menu.style.removeProperty('left');
   menu.style.removeProperty('top');
-  menu.style.removeProperty('width');
   menu.style.removeProperty('max-width');
   menu.style.removeProperty('max-height');
   menu.style.removeProperty('--family-menu-rows');
+  hideFamilyNavTabsPortal(control);
 }
 
 function positionFamilyNavSelectMenu(control) {
   if (!control || control.select.id !== 'familySelect') return;
 
   const { trigger, menu } = control;
-  const hasOptions = !!menu.querySelector('.nav-select-option');
-  const hasEmpty = !!menu.querySelector('.family-nav-empty');
+  const items = [...menu.querySelectorAll('.nav-select-option')];
 
-  if (!hasOptions && !hasEmpty) return;
+  if (!items.length) return;
 
   if (menu.parentElement !== document.body) {
     document.body.appendChild(menu);
@@ -1083,41 +1080,26 @@ function positionFamilyNavSelectMenu(control) {
   const rect = trigger.getBoundingClientRect();
   const margin = 10;
   const gap = 6;
-  const preferredWidth = 300;
-  const width = Math.min(
-    preferredWidth,
-    Math.max(238, window.innerWidth - margin * 2)
-  );
-
-  const left = Math.min(
-    Math.max(margin, rect.left - 48),
-    Math.max(margin, window.innerWidth - width - margin)
-  );
-
-  const below = window.innerHeight - rect.bottom - gap - margin;
-  const above = rect.top - gap - margin;
-  const openAbove = below < 210 && above > below;
+  const itemHeight = 32;
   const availableHeight = Math.max(
-    190,
-    Math.min(420, openAbove ? above : below)
+    itemHeight,
+    window.innerHeight - rect.bottom - gap - margin
   );
 
-  menu.style.removeProperty('--family-menu-rows');
-  menu.style.width = Math.round(width) + 'px';
-  menu.style.maxWidth = Math.round(width) + 'px';
-  menu.style.maxHeight = Math.floor(availableHeight) + 'px';
-  menu.style.left = Math.round(left) + 'px';
+  const rows = Math.max(
+    1,
+    Math.min(
+      items.length,
+      Math.floor(availableHeight / itemHeight)
+    )
+  );
 
-  requestAnimationFrame(() => {
-    const measuredHeight = Math.min(
-      menu.scrollHeight || availableHeight,
-      availableHeight
-    );
-
-    menu.style.top = openAbove
-      ? Math.round(Math.max(margin, rect.top - measuredHeight - gap)) + 'px'
-      : Math.round(rect.bottom + gap) + 'px';
-  });
+  menu.style.setProperty('--family-menu-rows', String(rows));
+  menu.style.top = `${Math.round(rect.bottom + gap)}px`;
+  menu.style.left = `${Math.max(margin, Math.round(rect.left))}px`;
+  menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
+  menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
+  positionFamilyNavTabsPortal(control);
 }
 
 function closeNavSelect(host) {
@@ -1141,200 +1123,35 @@ function closeAllNavSelects(exceptHost = null) {
 function syncNavSelectControl(selectId) {
   const control = navSelectControls.get(selectId);
   if (!control) return;
-
   const { select, host, trigger, valueEl, menu } = control;
   if (!select || !host || !trigger || !valueEl || !menu) return;
 
   const options = [...select.options];
   const selected = options.find(option => option.value === select.value) || options[0] || null;
-
   valueEl.textContent = selected ? getNavSelectDisplayText(select, selected) : '';
   valueEl.title = valueEl.textContent;
 
-  if (selectId === 'familySelect') {
-    const familyIndex = menu.querySelector('#familyNavIndex');
-    const eaTab = menu.querySelector('#familyNavEaTab');
-    const extendedTab = menu.querySelector('#familyNavExtendedTab');
-    const searchToggle = menu.querySelector('#familyNavSearchToggle');
-    const searchRow = menu.querySelector('#familyNavSearchRow');
-    const searchInput = menu.querySelector('#familyNavSearchInput');
-    const searchClear = menu.querySelector('#familyNavSearchClear');
-    const optionGrid = menu.querySelector('#familyNavOptionGrid');
-    const empty = menu.querySelector('#familyNavEmpty');
+  menu.innerHTML = options.map(option => {
+    const selectedClass = option.value === select.value ? ' selected' : '';
+    const label = getNavSelectDisplayText(select, option);
+    return `<button type="button" class="nav-select-option${selectedClass}" role="option" aria-selected="${option.value === select.value ? 'true' : 'false'}" data-nav-value="${esc(option.value)}" title="${esc(label)}">${esc(label)}</button>`;
+  }).join('');
 
-    if (
-      !familyIndex ||
-      !eaTab ||
-      !extendedTab ||
-      !searchToggle ||
-      !searchRow ||
-      !searchInput ||
-      !searchClear ||
-      !optionGrid ||
-      !empty
-    ) {
-      return;
-    }
-
-    const lang = familyNavLanguage();
-    familyIndex.dataset.language = lang;
-
-    [
-      [eaTab, 'ea'],
-      [extendedTab, 'extended']
-    ].forEach(([button, mode]) => {
-      const active = familyTreeViewMode === mode;
-      button.classList.toggle('active', active);
-      button.setAttribute('aria-selected', active ? 'true' : 'false');
-      button.setAttribute('aria-pressed', active ? 'true' : 'false');
-      button.title = familyNavModeAria(mode);
-      button.setAttribute('aria-label', familyNavModeAria(mode));
-
-      button.onclick = event => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        setFamilyTreeViewMode(mode, control);
-        syncNavSelectControl(selectId);
-
-        requestAnimationFrame(() => {
-          positionFamilyNavSelectMenu(control);
-        });
-      };
-    });
-
-    const searchAvailable = options.length >= 5;
-
-    if (!searchAvailable) {
-      control.familySearchOpen = false;
-      control.familySearchQuery = '';
-    }
-
-    const searchOpen =
-      searchAvailable &&
-      !!control.familySearchOpen;
-
-    searchToggle.hidden = !searchAvailable;
-    searchToggle.classList.toggle('active', searchOpen);
-    searchToggle.setAttribute('aria-pressed', searchOpen ? 'true' : 'false');
-    searchToggle.setAttribute('aria-label', familyNavSearchAria());
-    searchToggle.title = familyNavSearchAria();
-
-    searchRow.hidden = !searchOpen;
-    searchInput.value = String(control.familySearchQuery || '');
-    searchInput.placeholder = familyNavSearchPlaceholder();
-    searchInput.setAttribute('aria-label', familyNavSearchAria());
-
-    searchClear.setAttribute('aria-label', uiText('清除搜尋'));
-    searchClear.title = uiText('清除搜尋');
-
-    searchToggle.onclick = event => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      control.familySearchOpen = !control.familySearchOpen;
-
-      if (!control.familySearchOpen) {
-        control.familySearchQuery = '';
-      }
-
-      syncNavSelectControl(selectId);
-
-      requestAnimationFrame(() => {
-        positionFamilyNavSelectMenu(control);
-
-        if (control.familySearchOpen) {
-          const input = menu.querySelector('#familyNavSearchInput');
-          if (input) input.focus({ preventScroll:true });
-        }
-      });
-    };
-
-    searchInput.oninput = () => {
-      control.familySearchQuery = searchInput.value;
-      applyFamilyNavSearch(control);
-
-      requestAnimationFrame(() => {
-        positionFamilyNavSelectMenu(control);
-      });
-    };
-
-    searchInput.onclick = event => {
-      event.stopPropagation();
-    };
-
-    searchClear.onclick = event => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      control.familySearchQuery = '';
-      searchInput.value = '';
-      searchInput.focus({ preventScroll:true });
-
-      applyFamilyNavSearch(control);
-
-      requestAnimationFrame(() => {
-        positionFamilyNavSelectMenu(control);
-      });
-    };
-
-    optionGrid.querySelectorAll('.nav-select-option').forEach(optionButton => {
-      optionButton.remove();
-    });
-
-    options.forEach(option => {
-      const label = getNavSelectDisplayText(select, option);
-      const optionButton = document.createElement('button');
-
-      optionButton.type = 'button';
-      optionButton.className =
-        'nav-select-option' +
-        (option.value === select.value ? ' selected' : '');
-
-      optionButton.setAttribute('role', 'option');
-      optionButton.setAttribute(
-        'aria-selected',
-        option.value === select.value ? 'true' : 'false'
-      );
-
-      optionButton.dataset.navValue = option.value;
-      optionButton.title = label;
-      optionButton.textContent = label;
-
-      optionGrid.insertBefore(optionButton, empty);
-    });
-
-    applyFamilyNavSearch(control);
-  } else {
-    menu.innerHTML = options.map(option => {
-      const selectedClass = option.value === select.value ? ' selected' : '';
-      const label = getNavSelectDisplayText(select, option);
-
-      return '<button type="button" class="nav-select-option' + selectedClass +
-        '" role="option" aria-selected="' + (option.value === select.value ? 'true' : 'false') +
-        '" data-nav-value="' + esc(option.value) +
-        '" title="' + esc(label) + '">' +
-        esc(label) +
-        '</button>';
-    }).join('');
-  }
+  if (selectId === 'familySelect') syncFamilyNavTabsPortal(control);
 
   menu.querySelectorAll('.nav-select-option').forEach(optionButton => {
-    optionButton.onclick = event => {
+    optionButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-
       const nextValue = optionButton.dataset.navValue ?? '';
-
       if (select.value !== nextValue) {
         select.value = nextValue;
-        select.dispatchEvent(new Event('change', { bubbles:true }));
+        select.dispatchEvent(new Event('change', { bubbles: true }));
       }
-
       syncNavSelectControl(selectId);
       closeNavSelect(host);
       trigger.focus();
-    };
+    });
   });
 }
 
@@ -1351,15 +1168,7 @@ function setupTopbarNavSelects() {
     const menu = host.querySelector('.nav-select-menu');
     if (!select || !trigger || !valueEl || !menu) return;
 
-    const control = {
-      select,
-      host,
-      trigger,
-      valueEl,
-      menu,
-      familySearchOpen:false,
-      familySearchQuery:''
-    };
+    const control = { select, host, trigger, valueEl, menu };
     navSelectControls.set(selectId, control);
 
     trigger.addEventListener('click', event => {
@@ -1398,7 +1207,7 @@ function setupTopbarNavSelects() {
     });
 
     menu.addEventListener('keydown', event => {
-      const items = [...menu.querySelectorAll('.nav-select-option:not([hidden])')];
+      const items = [...menu.querySelectorAll('.nav-select-option')];
       const index = items.indexOf(document.activeElement);
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -2943,22 +2752,13 @@ function compressGalleryImage(file) {
 function getVisibleIds(familyId) {
   const fam = db.families.find(f => f.id === familyId);
   if (!fam) return new Set();
-
-  const result = new Set(
-    getFamilyViewMemberIds(fam)
-      .filter(id => db.sims[id])
-  );
-
-  // 大家族維持完整關係網的配偶 / 前任補入；
-  // EA 族譜則限制為目前家庭與一層直接親屬。
-  if (familyTreeViewMode === 'extended') {
-    [...result].forEach(id => {
-      const s = db.sims[id];
-      if (!s) return;
-      (s.spouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
-      (s.exSpouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
-    });
-  }
+  const result = new Set(fam.memberIds.filter(id => db.sims[id]));
+  [...result].forEach(id => {
+    const s = db.sims[id];
+    if (!s) return;
+    (s.spouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
+    (s.exSpouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
+  });
 
   // 篩選是真正的顯示篩選，不再只是把不符合的人物淡化。
   [...result].forEach(id => {
@@ -4085,7 +3885,7 @@ function commonNodeClasses(c, opts) {
 
 function drawNodes() {
   const fam = currentFamily();
-  const memberSet = new Set(getFamilyViewMemberIds(fam));
+  const memberSet = new Set(fam.memberIds);
   const {pos, byId, visibleIds} = layoutCache;
   const isView = viewMode === 'view';
   const cardSettings = isView ? getCardViewSettings() : getCardEditSettings();
