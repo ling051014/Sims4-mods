@@ -1240,8 +1240,9 @@ function setFamilyTreeViewMode(mode, control = null) {
   render();
 
   requestAnimationFrame(() => {
+    // 索引切換只更新內容與 active tab；dropdown 幾何維持本次展開時的固定值。
     if (control && control.host.classList.contains('open')) {
-      positionFamilyNavSelectMenu(control);
+      positionFamilyNavTabsPortal(control);
     }
     fitScreen();
   });
@@ -1356,13 +1357,19 @@ function restoreFamilyNavSelectMenu(control) {
   menu.classList.remove('family-nav-portal');
   menu.style.removeProperty('left');
   menu.style.removeProperty('top');
+  menu.style.removeProperty('width');
   menu.style.removeProperty('max-width');
   menu.style.removeProperty('max-height');
   menu.style.removeProperty('--family-menu-rows');
+
+  // 關閉後才解除本次展開的幾何鎖；下一次開啟可依新的 viewport 重新計算。
+  control.familyMenuRows = null;
+  control.familyMenuWidth = null;
+
   hideFamilyNavTabsPortal(control);
 }
 
-function positionFamilyNavSelectMenu(control) {
+function positionFamilyNavSelectMenu(control, { force = false } = {}) {
   if (!control || control.select.id !== 'familySelect') return;
 
   const { trigger, menu } = control;
@@ -1385,19 +1392,36 @@ function positionFamilyNavSelectMenu(control) {
     window.innerHeight - rect.bottom - gap - margin
   );
 
-  const rows = Math.max(
+  const rowCapacity = Math.max(
     1,
-    Math.min(
-      items.length,
-      Math.floor(availableHeight / itemHeight)
-    )
+    Math.floor(availableHeight / itemHeight)
   );
+
+  // 同一次 dropdown 展開期間鎖住列數。
+  // 切換 EA / 大家族只替換內容，不得因此改變右側內容面板高度。
+  const rows =
+    !force && Number.isFinite(control.familyMenuRows)
+      ? control.familyMenuRows
+      : Math.max(1, Math.min(items.length, rowCapacity));
+
+  control.familyMenuRows = rows;
 
   menu.style.setProperty('--family-menu-rows', String(rows));
   menu.style.top = `${Math.round(rect.bottom + gap)}px`;
   menu.style.left = `${Math.max(margin, Math.round(rect.left))}px`;
   menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
   menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
+
+  // 寬度也跟著本次展開固定，避免不同索引的項目數讓內容面板左右跳動。
+  if (force || !Number.isFinite(control.familyMenuWidth)) {
+    menu.style.removeProperty('width');
+    control.familyMenuWidth = menu.getBoundingClientRect().width;
+  }
+
+  if (Number.isFinite(control.familyMenuWidth)) {
+    menu.style.width = `${Math.round(control.familyMenuWidth)}px`;
+  }
+
   positionFamilyNavTabsPortal(control);
 }
 
@@ -1533,7 +1557,9 @@ function setupTopbarNavSelects() {
   window.addEventListener('resize', debounce(() => {
     const control = navSelectControls.get('familySelect');
     if (!control || !control.host.classList.contains('open')) return;
-    positionFamilyNavSelectMenu(control);
+
+    // 只有 viewport 真正改變時才解除一次幾何鎖並重新計算。
+    positionFamilyNavSelectMenu(control, { force:true });
   }, 60));
 }
 
