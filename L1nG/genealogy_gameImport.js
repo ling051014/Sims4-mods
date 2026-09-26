@@ -306,6 +306,39 @@
     };
   }
 
+  // ========【遊戲人物分類】 設定 - 分類只影響 UI 歸屬，不刪除任何匯入人物 ========
+  function classifyGamePerson(sim, household) {
+    const recordState = String((sim && sim.recordState) || '').toLowerCase();
+
+    if (recordState === 'family_tree_only') return 'family_tree_only';
+    if (household && household.hidden) return 'hidden_household';
+    if (household) return 'household';
+
+    const serviceHint =
+      sim && (
+        sim.serviceNpc ||
+        sim.serviceRole ||
+        sim.serviceRoleId ||
+        sim.serviceNpcType
+      );
+
+    if (serviceHint) return 'service_npc';
+    if (sim && sim.isCulled) return 'family_tree_only';
+
+    return 'unassigned_npc';
+  }
+
+  function householdShouldCreateFamily(household) {
+    if (!household || typeof household !== 'object') return false;
+
+    return (
+      !household.hidden ||
+      !!household.isActiveHousehold ||
+      !!household.isPlayedHousehold ||
+      !!household.isPlayerHousehold
+    );
+  }
+
   // ========【遊戲家族建立】 設定 - 每個 EA Household 保留為一個家族，沿正式 genealogy 展開 ========
   function genealogyNeighbors(sim) {
     const rel = relationshipArrays(sim);
@@ -503,6 +536,7 @@
           isCulled:!!sim.isCulled,
           isSelectable:!!sim.isSelectable,
           dataAvailability:sim.dataAvailability || null,
+          entityClass:classifyGamePerson(sim, household),
           localizedNameRef:
             sim.name && sim.name.localizedRef
               ? sim.name.localizedRef
@@ -522,6 +556,14 @@
           : null;
 
       const ownerIds = resolvePetOwnerIds(pet, household, humanIds);
+      const petRelations = relationshipArrays(pet);
+
+      const lineageNames = ids =>
+        ids
+          .map(parentId => sourceSims[String(parentId)])
+          .filter(Boolean)
+          .map(displaySimName)
+          .filter(Boolean);
 
       const petData = {
         id,
@@ -538,7 +580,15 @@
           householdId:pet.householdId || null,
           ownerIds,
           recordState:pet.recordState || 'full',
-          portrait:pet.portrait || null
+          portrait:pet.portrait || null,
+          lineage:{
+            parentIds:petRelations.parentIds,
+            childIds:petRelations.childIds,
+            adoptedParentIds:petRelations.adoptedParentIds,
+            adoptedChildIds:petRelations.adoptedChildIds,
+            parentNames:lineageNames(petRelations.parentIds),
+            childNames:lineageNames(petRelations.childIds)
+          }
         }
       };
 
@@ -555,10 +605,18 @@
     });
 
     const householdEntries = Object.entries(households);
+    const visibleHouseholdEntries = householdEntries.filter(([, household]) =>
+      householdShouldCreateFamily(household)
+    );
+    const familySourceEntries =
+      visibleHouseholdEntries.length
+        ? visibleHouseholdEntries
+        : householdEntries;
+
     let families = [];
 
-    if (householdEntries.length) {
-      families = householdEntries.map(([householdIdRaw, household], index) => {
+    if (familySourceEntries.length) {
+      families = familySourceEntries.map(([householdIdRaw, household], index) => {
         const householdId = String(householdIdRaw);
         const seedIds = stringIds(household.memberIds).filter(id => humanIds.has(id));
         const memberIds = expandHouseholdGenealogy(seedIds, sourceSims, humanIds);
@@ -620,7 +678,12 @@
           peopleCount:humanIds.size,
           petCount:petIds.size,
           householdCount:householdEntries.length,
+          visibleHouseholdCount:visibleHouseholdEntries.length,
+          hiddenHouseholdCount:householdEntries.filter(([, household]) => !!household.hidden).length,
           familyCount:families.length,
+          familyTreeOnlyCount:[...humanIds].filter(id => classifyGamePerson(sourceSims[id], sourceSims[id] && sourceSims[id].householdId != null ? households[String(sourceSims[id].householdId)] : null) === 'family_tree_only').length,
+          unassignedNpcCount:[...humanIds].filter(id => classifyGamePerson(sourceSims[id], sourceSims[id] && sourceSims[id].householdId != null ? households[String(sourceSims[id].householdId)] : null) === 'unassigned_npc').length,
+          serviceNpcCount:[...humanIds].filter(id => classifyGamePerson(sourceSims[id], sourceSims[id] && sourceSims[id].householdId != null ? households[String(sourceSims[id].householdId)] : null) === 'service_npc').length,
           unassignedPetCount:unassignedPets.length
         },
         unassignedPets
@@ -646,6 +709,8 @@
     readStoredZip,
     isPetSim,
     mapOccultRace,
+    classifyGamePerson,
+    householdShouldCreateFamily,
     expandHouseholdGenealogy,
     findSimAvatarPath,
     getSimAvatarAsset
