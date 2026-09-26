@@ -168,7 +168,7 @@
                 <h2 data-lang="zh-Hant">不是重做一份族譜，是把存檔裡已經存在的資料帶出來。</h2>
                 <h2 data-lang="en">It does not rebuild your family tree. It carries out what already exists in the save.</h2>
                 <p data-lang="zh-Hant">
-                    資料提取模組會先讀取 EA 的 FamilyTree、SimInfo 與 Household，再把可用欄位整理成網頁端可理解的格式。
+                    資料提取模組會先讀取遊戲中的族譜關係、人物資料與家庭資料，再把可用欄位整理成網頁端可理解的格式。
                 </p>
                 <p data-lang="en">
                     The exporter reads EA FamilyTree, SimInfo, and Household data, then normalizes available fields for the web tool.
@@ -180,18 +180,18 @@
                     <span class="feature-number">01</span>
                     <h3 data-lang="zh-Hant">人物與家庭</h3>
                     <h3 data-lang="en">Sims & Households</h3>
-                    <p data-lang="zh-Hant">目前存檔中的 SimInfo、家庭成員、家庭名稱與居住相關資料。</p>
+                    <p data-lang="zh-Hant">目前存檔中的人物資料、家庭成員、家庭名稱與居住相關資料。</p>
                     <p data-lang="en">SimInfo, household membership, household names, and available residence metadata.</p>
-                    <div class="feature-tags"><span>SimInfo</span><span>Household</span></div>
+                    <div class="feature-tags"><span data-lang="zh-Hant">人物資料</span><span data-lang="zh-Hant">家庭資料</span><span data-lang="en">SimInfo</span><span data-lang="en">Household</span></div>
                 </article>
 
                 <article class="feature-card reveal">
                     <span class="feature-number">02</span>
                     <h3 data-lang="zh-Hant">族譜關係</h3>
                     <h3 data-lang="en">Family Relationships</h3>
-                    <p data-lang="zh-Hant">讀取 FamilyTreeGraph，保留父母、子女與其他族譜節點關係，包含僅存在於族譜中的節點。</p>
+                    <p data-lang="zh-Hant">讀取遊戲原生族譜關係，保留父母、子女與其他族譜節點，包含已沒有完整人物資料、但仍存在於族譜中的人物。</p>
                     <p data-lang="en">Reads FamilyTreeGraph relationships, including family-tree-only nodes no longer backed by full SimInfo.</p>
-                    <div class="feature-tags"><span>FamilyTree</span><span>Lineage</span></div>
+                    <div class="feature-tags"><span data-lang="zh-Hant">族譜關係</span><span data-lang="zh-Hant">世系資料</span><span data-lang="en">FamilyTree</span><span data-lang="en">Lineage</span></div>
                 </article>
 
                 <article class="feature-card reveal">
@@ -200,16 +200,16 @@
                     <h3 data-lang="en">Sim Details</h3>
                     <p data-lang="zh-Hant">特徵、職業與職級、抱負、種族／超自然狀態、死亡資料等可取得欄位。</p>
                     <p data-lang="en">Available traits, careers and levels, aspiration, occult state, death information, and related fields.</p>
-                    <div class="feature-tags"><span>Traits</span><span>Career</span><span>Occult</span></div>
+                    <div class="feature-tags"><span data-lang="zh-Hant">特徵</span><span data-lang="zh-Hant">職業</span><span data-lang="zh-Hant">特殊種族</span><span data-lang="en">Traits</span><span data-lang="en">Career</span><span data-lang="en">Occult</span></div>
                 </article>
 
                 <article class="feature-card reveal">
                     <span class="feature-number">04</span>
                     <h3 data-lang="zh-Hant">目前遊戲語言文字</h3>
                     <h3 data-lang="en">Localized Game Text</h3>
-                    <p data-lang="zh-Hant">讀取目前遊戲語言的 STBL，盡量輸出玩家實際看得到的名稱，而不是只留下內部名稱。</p>
+                    <p data-lang="zh-Hant">讀取目前遊戲語言的文字資料，盡量輸出玩家實際看得到的名稱，而不是只留下遊戲內部名稱。</p>
                     <p data-lang="en">Reads STBL for the current game locale so exported data can use player-facing names when available.</p>
-                    <div class="feature-tags"><span>STBL</span><span>Locale-aware</span></div>
+                    <div class="feature-tags"><span data-lang="zh-Hant">遊戲文字</span><span data-lang="zh-Hant">依語言讀取</span><span data-lang="en">STBL</span><span data-lang="en">Locale-aware</span></div>
                 </article>
 
                 <article class="feature-card feature-card-accent reveal">
@@ -217,7 +217,7 @@
                     <h3><span data-lang="zh-Hant">RealDate 橋接</span><span data-lang="en">RealDate Bridge</span></h3>
                     <p data-lang="zh-Hant">目前開發測試版已能讀取 RealDate 的出生年月日、遊戲日期與年齡快照，並交給網頁端族譜系統工具使用。</p>
                     <p data-lang="en">Development builds can bridge RealDate birth dates, current game date, and age snapshots into Genealogy.</p>
-                    <div class="feature-tags"><span>Birthday</span><span>Game Date</span><span>Age</span></div>
+                    <div class="feature-tags"><span data-lang="zh-Hant">生日</span><span data-lang="zh-Hant">遊戲日期</span><span data-lang="zh-Hant">年齡</span><span data-lang="en">Birthday</span><span data-lang="en">Game Date</span><span data-lang="en">Age</span></div>
                 </article>
 
                 <article class="feature-card feature-card-pending reveal">
@@ -228,7 +228,7 @@
                     <h3 data-lang="en">Sim Portraits</h3>
                     <p data-lang="zh-Hant">目前仍無法穩定取得可直接匯出的市民頭像。沒有取得圖片時，資料提取模組不會用預設縮圖冒充人物照片。</p>
                     <p data-lang="en">Reliable portrait extraction is not complete. The exporter does not substitute generic thumbnails for missing Sim portraits.</p>
-                    <div class="feature-tags"><span>Portrait</span><span>Pending</span></div>
+                    <div class="feature-tags"><span data-lang="zh-Hant">人物頭像</span><span data-lang="zh-Hant">研究中</span><span data-lang="en">Portrait</span><span data-lang="en">Pending</span></div>
                 </article>
             </div>
         </section>
@@ -257,7 +257,7 @@
                     <div class="step-copy">
                         <h3 data-lang="zh-Hant">進入要匯出的存檔</h3>
                         <h3 data-lang="en">Load the save you want to export</h3>
-                        <p data-lang="zh-Hant">等待遊戲完成載入。資料提取模組需要目前存檔的 FamilyTreeService 已經準備完成。</p>
+                        <p data-lang="zh-Hant">等待遊戲完成載入，並確認遊戲的族譜資料已經準備完成。</p>
                         <p data-lang="en">Wait for the save to finish loading so FamilyTreeService is available.</p>
                     </div>
                     <code>l1ng.genealogy.status</code>
@@ -340,13 +340,13 @@
                         <strong data-lang="en">Verified</strong>
                     </div>
                     <ul>
-                        <li data-lang="zh-Hant">讀取 EA FamilyTreeGraph</li>
+                        <li data-lang="zh-Hant">讀取遊戲原生族譜關係</li>
                         <li data-lang="en">Read EA FamilyTreeGraph</li>
-                        <li data-lang="zh-Hant">SimInfo 與 Household 匯出</li>
+                        <li data-lang="zh-Hant">人物資料與家庭資料匯出</li>
                         <li data-lang="en">SimInfo and Household export</li>
                         <li data-lang="zh-Hant">族譜關係與僅族譜節點保留</li>
                         <li data-lang="en">Genealogy links and family-tree-only nodes</li>
-                        <li data-lang="zh-Hant">目前遊戲語言 STBL 文字解析</li>
+                        <li data-lang="zh-Hant">目前遊戲語言文字解析</li>
                         <li data-lang="en">Current-locale STBL resolution</li>
                         <li data-lang="zh-Hant">ZIP 建立與網頁端族譜工具匯入</li>
                         <li data-lang="en">ZIP packaging and Genealogy import</li>
