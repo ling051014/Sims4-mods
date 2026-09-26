@@ -4102,7 +4102,7 @@ document.addEventListener('paste', async e => {
 });
 
 /* =========================================================
- *  圖片檢視器（三種模式）
+ *  人生照片檢視器
  * ========================================================= */
 function openGalleryViewerPreview(idx) {
   const gal = editingGallery;
@@ -4110,6 +4110,7 @@ function openGalleryViewerPreview(idx) {
   viewerMode = 'edit';
   viewerSimId = null;
   viewerIndex = idx;
+  $('gvPersonName').textContent = $('fName')?.value?.trim() || uiText('人物');
   updateViewerContent(gal);
   galleryViewerMask.classList.add('show');
 }
@@ -4120,22 +4121,12 @@ function openGalleryViewer(simId, idx) {
   viewerMode = 'sim';
   viewerSimId = simId;
   viewerIndex = idx;
+  $('gvPersonName').textContent = displayDataText(sim.name, sim) || uiText('人物');
   updateViewerContent(sim.gallery || []);
   galleryViewerMask.classList.add('show');
 }
 
-function openGalleryViewerGlobal(idx) {
-  const list = viewerGlobalList;
-  if (!list || !list[idx]) return;
-  viewerMode = 'global';
-  viewerSimId = null;
-  viewerIndex = idx;
-  updateViewerContent(list);
-  galleryViewerMask.classList.add('show');
-}
-
 function getViewerGallery() {
-  if (viewerMode === 'global') return viewerGlobalList;
   if (viewerMode === 'sim' && viewerSimId) {
     const sim = db.sims[viewerSimId];
     return sim ? (sim.gallery || []) : [];
@@ -4149,12 +4140,11 @@ function updateViewerContent(gal) {
   if (viewerIndex >= gal.length) viewerIndex = gal.length - 1;
   const g = gal[viewerIndex];
   $('gvImg').src = resolveImageUrl(g.image) || '';
-  $('gvTitle').textContent = g.title || '（未命名）';
-  let noteText = g.note || '';
-  if (viewerMode === 'global' && g.simName) {
-    noteText = (noteText ? noteText + ' · ' : '') + `來自：${g.simName}`;
-  }
-  $('gvNote').textContent = noteText;
+  $('gvTitle').textContent = g.title || uiText('（未命名）');
+  const bits = [];
+  if (g.lifeStage) bits.push(uiText(g.lifeStage));
+  if (g.note) bits.push(g.note);
+  $('gvNote').textContent = bits.join(' · ');
   $('gvCounter').textContent = `${viewerIndex + 1} / ${gal.length}`;
   $('gvPrev').disabled = gal.length <= 1;
   $('gvNext').disabled = gal.length <= 1;
@@ -4171,7 +4161,6 @@ $('gvClose').onclick = () => {
   galleryViewerMask.classList.remove('show');
   viewerSimId = null;
   viewerMode = 'edit';
-  viewerGlobalList = [];
 };
 $('gvPrev').onclick = () => viewerNav(-1);
 $('gvNext').onclick = () => viewerNav(1);
@@ -4180,127 +4169,8 @@ galleryViewerMask.onclick = e => {
     galleryViewerMask.classList.remove('show');
     viewerSimId = null;
     viewerMode = 'edit';
-    viewerGlobalList = [];
   }
 };
-
-/* =========================================================
- *  相簿瀏覽器
- * ========================================================= */
-function buildGlobalGalleryList() {
-  const list = [];
-  Object.values(db.sims).forEach(sim => {
-    (sim.gallery || []).forEach(g => {
-      if (!g.image) return;
-      list.push({
-        sim,
-        simId: sim.id,
-        simName: displayDataText(sim.name, sim) || uiText('（未命名）'),
-        id: g.id,
-        title: g.title,
-        note: g.note,
-        lifeStage: g.lifeStage,
-        image: g.image,
-        addedAt: g.addedAt || 0
-      });
-    });
-  });
-  // 按 addedAt 降序（最新在前）
-  list.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
-  return list;
-}
-
-function renderGalleryBrowserFilter() {
-  const sel = $('galleryBrowserFilter');
-  const prev = sel.value;
-  // 收集有相簿圖片的模擬市民
-  const withGallery = Object.values(db.sims).filter(s => (s.gallery || []).length > 0);
-  withGallery.sort((a,b) => String(a.name).localeCompare(String(b.name), 'zh'));
-  sel.innerHTML = '<option value="">全部模擬市民</option>' +
-    withGallery.map(s => {
-      const n = (s.gallery || []).length;
-      return `<option value="${esc(s.id)}">${esc(displayDataText(s.name, s) || uiText('（未命名）'))} · ${n} ${esc(uiText('張圖片'))}</option>`;
-    }).join('');
-  if (prev && withGallery.some(s => s.id === prev)) sel.value = prev;
-}
-
-function renderGalleryBrowser() {
-  const searchEl = $('galleryBrowserSearch');
-  const filterEl = $('galleryBrowserFilter');
-  const listEl = $('galleryBrowserList');
-  const countEl = $('galleryBrowserCount');
-  if (!listEl) return;
-
-  const allList = buildGlobalGalleryList();
-  const total = allList.length;
-  const q = (searchEl.value || '').trim().toLowerCase();
-  const filterSimId = filterEl.value;
-
-  let filtered = allList;
-  if (filterSimId) filtered = filtered.filter(item => item.simId === filterSimId);
-  if (q) {
-    filtered = filtered.filter(item =>
-      (item.title || '').toLowerCase().includes(q)
-      || (item.simName || '').toLowerCase().includes(q)
-      || (item.note || '').toLowerCase().includes(q)
-      || (item.lifeStage || '').toLowerCase().includes(q)
-    );
-  }
-
-  countEl.textContent = uiText(`（${filtered.length} / ${total} 張）`);
-
-  if (!total) {
-    listEl.innerHTML = '<div class="gb-empty">還沒有任何相簿圖片。<br><br>開啟某個模擬市民的編輯彈出視窗 →「相簿」新增圖片後，會在這裡顯示。</div>';
-    return;
-  }
-  if (!filtered.length) {
-    listEl.innerHTML = '<div class="gb-empty">沒有符合的圖片</div>';
-    return;
-  }
-
-  listEl.innerHTML = filtered.map((item, i) => {
-    const url = resolveImageUrl(item.image);
-    const stageTag = item.lifeStage
-      ? `<span class="gb-stage stage-${item.lifeStage}">${esc(uiText(item.lifeStage))}</span>`
-      : '';
-    return `<div class="gb-item" data-global-idx="${i}">
-      <img src="${esc(url)}" alt="" loading="lazy" draggable="false">
-      ${stageTag}
-      <div class="gb-overlay">
-        <div class="gb-sim" title="${esc(item.simName)}">${iconSvg('person')} ${esc(item.simName)}</div>
-        <div class="gb-title" title="${esc(item.title || '（未命名）')}">${esc(item.title || '（未命名）')}</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // 更新 viewerGlobalList 為目前的 filtered
-  viewerGlobalList = filtered;
-
-  listEl.querySelectorAll('.gb-item').forEach(el => {
-    el.onclick = () => openGalleryViewerGlobal(+el.dataset.globalIdx);
-  });
-}
-
-function openGalleryBrowser() {
-  renderGalleryBrowserFilter();
-  $('galleryBrowserSearch').value = '';
-  renderGalleryBrowser();
-  galleryBrowserMask.classList.add('show');
-  closeSidebar();
-}
-
-$('galleryBrowserBtn').onclick = openGalleryBrowser;
-$('galleryBrowserCloseBtn').onclick = () => galleryBrowserMask.classList.remove('show');
-galleryBrowserMask.onclick = e => { if (e.target === galleryBrowserMask) galleryBrowserMask.classList.remove('show'); };
-
-$('galleryBrowserSearch').oninput = debounce(() => renderGalleryBrowser(), 150);
-$('galleryBrowserFilter').onchange = () => renderGalleryBrowser();
-$('galleryBrowserClearFilter').onclick = () => {
-  $('galleryBrowserSearch').value = '';
-  $('galleryBrowserFilter').value = '';
-  renderGalleryBrowser();
-};
-
 /* =========================================================
  *  自由排列選取 / 框選 + 平移 / 縮放
  * ========================================================= */
