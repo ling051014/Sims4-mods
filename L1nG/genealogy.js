@@ -2121,7 +2121,7 @@ async function updateStorageInfo() {
 
   const totalKB = imgSizeKB + lsSizeKB;
   let html = `${iconSvg('images')} 圖片 <b>${imgCount}</b> 張 · 約 <b>${(imgSizeKB/1024).toFixed(2)} MB</b>`;
-  html += `<br>${iconSvg('file-earmark-text')} 資料（localStorage）約 <b>${(lsSizeKB/1024).toFixed(2)} MB</b>`;
+  html += `<br>${iconSvg('file-earmark-text')} 族譜資料約 <b>${(lsSizeKB/1024).toFixed(2)} MB</b>`;
   if (quotaMB > 0) {
     html += `<br>${iconSvg('database')} 瀏覽器總用量 <b>${usedMB.toFixed(1)} MB</b> / 配額 <b>${quotaMB.toFixed(0)} MB</b>`;
     const pct = Math.min(100, (usedMB / quotaMB) * 100);
@@ -8850,6 +8850,92 @@ Object.assign(EN, {
     '主要功能':'Primary actions','畫布工具':'Canvas tools','縮放工具':'Zoom controls','縮小':'Zoom out','放大':'Zoom in','適應畫面':'Fit to Screen',
     '家庭關係標註':'Family Relationship Labels','家庭關係標註說明':'Family relationship label help','其他關係標註':'Other Relationship Labels',
     '父母、子女、配偶、前任配偶與兄弟姐妹的關係名稱可在這裡個別調整，也可重設已拖曳的位置。':'Parent, child, spouse, ex-spouse, and sibling labels can be adjusted individually here, and moved positions can be reset.'
+  });
+
+  Object.assign(ZH_HANS_EXACT, {
+    '外觀設定':'外观设置',
+    '圖片與儲存':'图片与存储',
+    '人物顯示方式':'人物显示方式',
+    '精簡檢視':'精简视图',
+    '詳細檢視':'详细视图',
+    '批量管理':'批量管理',
+    '新增人物':'新增人物',
+    '搜尋人物…':'搜索人物…',
+    '加入目前家族':'加入当前家族',
+    '移出目前家族':'移出当前家族',
+    '人生照片':'人生照片',
+    '人生照片與寵物':'人生照片与宠物',
+    '人生照片說明':'人生照片说明',
+    '族譜背景':'族谱背景',
+    '主色':'主色',
+    '輔色':'辅色',
+    '套用自訂配色':'应用自定义配色',
+    '圖片顯示':'图片显示',
+    '關係線':'关系线',
+    '父母 / 子女':'父母 / 子女',
+    '前任':'前任',
+    '其他關係':'其他关系',
+    '自訂關係線外觀':'自定义关系线外观',
+    '樣式':'样式',
+    '粗細':'粗细',
+    '顏色':'颜色',
+    '實線':'实线',
+    '短虛線':'短虚线',
+    '長虛線':'长虚线',
+    '點線':'点线',
+    '恢復關係線預設':'恢复关系线默认',
+    '圖片品質':'图片质量',
+    '人物頭像':'人物头像',
+    '目前儲存空間':'当前存储空间',
+    '資料管理':'数据管理',
+    '沒有符合的人物':'没有符合的人物',
+    '還沒有任何人物':'还没有任何人物',
+    '批量刪除人物':'批量删除人物',
+    '族譜資料約':'族谱数据约',
+    '目前瀏覽器已自動改用備用圖片儲存方式':'当前浏览器已自动改用备用图片存储方式'
+  });
+
+  Object.assign(EN, {
+    '外觀設定':'Appearance',
+    '圖片與儲存':'Images & Storage',
+    '人物顯示方式':'People display',
+    '精簡檢視':'Compact view',
+    '詳細檢視':'Detailed view',
+    '批量管理':'Batch Manage',
+    '新增人物':'Add Person',
+    '搜尋人物…':'Search people…',
+    '加入目前家族':'Add to Current Family',
+    '移出目前家族':'Remove from Current Family',
+    '人生照片':'Life Photos',
+    '人生照片與寵物':'Life Photos & Pets',
+    '人生照片說明':'Life photo help',
+    '族譜背景':'Genealogy Background',
+    '主色':'Primary',
+    '輔色':'Secondary',
+    '套用自訂配色':'Apply Custom Colors',
+    '圖片顯示':'Image Fit',
+    '關係線':'Relationship Lines',
+    '父母 / 子女':'Parent / Child',
+    '前任':'Ex',
+    '其他關係':'Other Relationships',
+    '自訂關係線外觀':'Customize Relationship Lines',
+    '樣式':'Style',
+    '粗細':'Width',
+    '顏色':'Color',
+    '實線':'Solid',
+    '短虛線':'Short Dash',
+    '長虛線':'Long Dash',
+    '點線':'Dotted',
+    '恢復關係線預設':'Reset Relationship Lines',
+    '圖片品質':'Image Quality',
+    '人物頭像':'Person Portrait',
+    '目前儲存空間':'Current Storage',
+    '資料管理':'Data Management',
+    '沒有符合的人物':'No matching people',
+    '還沒有任何人物':'No people yet',
+    '批量刪除人物':'Delete Multiple People',
+    '族譜資料約':'Genealogy data about',
+    '目前瀏覽器已自動改用備用圖片儲存方式':'The browser has automatically switched to a fallback image storage method'
   });
 
   const nodeSource = new WeakMap();
