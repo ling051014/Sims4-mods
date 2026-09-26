@@ -1876,7 +1876,7 @@ body[data-theme="midnight"] .stage-老年 {
 .sim-profile-avatar-actions { grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:6px; }
 .filebtn.compact,.avatar-clear-compact { min-height:28px; padding:4px 8px; border:1px solid var(--border); border-radius:6px; background:var(--input-bg); color:var(--ink); font:inherit; font-size:10.5px; line-height:1; white-space:nowrap; }
 .avatar-clear-compact:hover,.filebtn.compact:hover { border-color:var(--accent); color:var(--accent); }
-.sim-profile-avatar-block .avatar-tip { grid-column:1/-1; text-align:center; font-size:9.5px; line-height:1.25; margin:0; }
+.sim-profile-avatar-block .avatar-tip { grid-column:1/-1; text-align:center; font-size:10.5px; line-height:1.3; margin:0; }
 .sim-profile-edit-fields { min-width:0; display:grid; gap:8px; }
 .sim-profile-edit-fields label { min-width:0; display:grid; gap:4px; color:var(--sub); font-size:10.5px; font-weight:600; }
 .sim-profile-edit-fields input,.sim-profile-edit-fields select { width:100%; min-width:0; min-height:32px; padding:5px 8px; border:1px solid var(--border); border-radius:6px; background:var(--input-bg); color:var(--ink); font:inherit; font-size:12px; outline:none; }
@@ -1931,7 +1931,13 @@ body[data-theme="midnight"] .stage-老年 {
 .family-rel-person { display:flex; align-items:center; gap:7px; min-width:0; max-width:100%; padding:3px 2px; border:0; border-radius:5px; background:transparent; color:var(--ink); font-size:11.5px; }
 .family-rel-person-avatar { width:24px; height:24px; flex:0 0 24px; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:999px; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); color:var(--avatar-ink); font-size:10px; font-weight:700; }
 .family-rel-person-avatar img { width:100%; height:100%; object-fit:cover; }
-.family-rel-person-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.family-rel-person-name {
+    min-width:0;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.3;
+}
 .family-rel-edit { margin-top:7px; padding-top:7px; border-top:1px dashed var(--border); }
 .family-rel-edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
 .family-rel-edit-grid[hidden] { display:none; }
@@ -3490,7 +3496,13 @@ body[data-theme="midnight"] .stage-老年 {
 .info-card-head-facts { display:grid; gap:5px; margin-top:10px; color:var(--sub); font-size:11.5px; }
 .info-card-head-fact { display:flex; align-items:center; gap:5px; min-width:0; }
 .info-card-head-fact .l1ng-icon { color:var(--accent); flex:0 0 auto; }
-.info-card-head-fact span:last-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.info-card-head-fact span:last-child {
+    min-width:0;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.4;
+}
 .info-card-body { display:flex; flex-direction:column; gap:0; padding:0 18px; max-height:min(60vh,520px); overflow-y:auto; }
 .info-profile-section { padding:12px 0 13px; border-bottom:1px solid var(--border); }
 .info-profile-section:last-child { border-bottom:0; }
@@ -3513,7 +3525,14 @@ body[data-theme="midnight"] .stage-老年 {
 .info-card-pet-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
 .info-card-pet-text { flex:1; min-width:0; }
 .info-card-pet-name { font-size:11.5px; font-weight:600; }
-.info-card-pet-meta { color:var(--sub); font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.info-card-pet-meta {
+    color:var(--sub);
+    font-size:10.5px;
+    line-height:1.35;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+}
 .info-card-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
 .info-card-gallery .gallery-item { aspect-ratio:1/1; border-radius:5px; overflow:hidden; }
 .info-card-gallery .gallery-item-title { display:none; }

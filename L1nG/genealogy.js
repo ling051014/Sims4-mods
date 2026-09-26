@@ -3724,16 +3724,26 @@ function openInfoCard(id) {
   const basicRows = [];
   basicRows.push(row('職業', esc(dCareer || '—')));
   basicRows.push(row('人生抱負', esc(dAspiration || '—')));
-  basicRows.push(row('所屬家族', familyNames.length ? familyNames.map(esc).join(' / ') : '—'));
-  basicRows.push(row('領養關係', esc(uiText(c.adoptive ? '領養' : '親生'))));
-  if ((c.status === '已故' || c.status === '幽靈') && c.causeOfDeath) basicRows.push(row('死因', esc(dCause)));
+
+  if ((c.status === '已故' || c.status === '幽靈') && c.causeOfDeath) {
+    basicRows.push(row('死因', esc(dCause)));
+  }
+
   const traits = (c.traits || []).length
     ? `<div class="info-card-traits">${c.traits.map(t => `<span class="tag">${esc(displayDataText(t, c))}</span>`).join('')}</div>`
     : `<div class="info-card-value muted">—</div>`;
-  basicRows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('特徵'))}</div><div class="info-card-value">${traits}</div></div>`);
-  sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('基本資料'))}</h3><div class="info-profile-list">${basicRows.join('')}</div></section>`);
 
-  const relRows = [
+  basicRows.push(
+    `<div class="info-card-row"><div class="info-card-label">${esc(uiText('特徵'))}</div><div class="info-card-value">${traits}</div></div>`
+  );
+
+  sections.push(
+    `<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('基本資料'))}</h3><div class="info-profile-list">${basicRows.join('')}</div></section>`
+  );
+
+  const familyRows = [
+    row('所屬家族', familyNames.length ? familyNames.map(esc).join(' / ') : '—'),
+    row('領養關係', esc(uiText(c.adoptive ? '領養' : '親生'))),
     row('父母 A', parentNames[0] ? esc(parentNames[0]) : '—'),
     row('父母 B', parentNames[1] ? esc(parentNames[1]) : '—'),
     row('配偶', textOrDash(spouseNames)),
@@ -3741,8 +3751,16 @@ function openInfoCard(id) {
     row('子女', textOrDash(childNames)),
     row('兄弟姐妹', textOrDash(siblingNames))
   ];
-  if (otherRelations.length) relRows.push(row('其他關係', otherRelations.map(esc).join(' / ')));
-  sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('家庭與關係'))}</h3><div class="info-profile-list">${relRows.join('')}</div></section>`);
+
+  sections.push(
+    `<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('家庭關係'))}</h3><div class="info-profile-list">${familyRows.join('')}</div></section>`
+  );
+
+  if (otherRelations.length) {
+    sections.push(
+      `<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('其他關係'))}</h3><div class="info-profile-list">${row('關係', otherRelations.map(esc).join(' / '))}</div></section>`
+    );
+  }
 
   sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('簡介'))}</h3><div class="info-card-bio">${c.bio ? esc(dBio) : '—'}</div></section>`);
 
