@@ -1504,3 +1504,74 @@ section[id] {
         /* 取消位移 */ transform: none;
     }
 }
+
+
+/* ========【族譜專案入口】 設定 - 首頁同一卡片提供網頁工具與遊戲模組兩個獨立入口 ======== */
+.genealogy-project-actions {
+    margin-top:22px;
+    padding-top:16px;
+    border-top:1px solid var(--border-soft);
+    display:grid;
+    gap:8px;
+}
+
+.genealogy-project-action {
+    min-height:50px;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--card);
+    color:inherit;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    transition:border-color .18s ease, background-color .18s ease, transform .18s ease;
+}
+
+.genealogy-project-action:hover {
+    border-color:#bfdced;
+    background:#f8fbfd;
+    transform:translateX(2px);
+}
+
+.genealogy-project-action.primary {
+    border-color:#c8dfed;
+    background:#f7fbfe;
+}
+
+.genealogy-project-action > span:first-child {
+    min-width:0;
+    display:grid;
+    gap:2px;
+}
+
+.genealogy-project-action small {
+    color:var(--muted);
+    font-size:10px;
+    font-weight:500;
+}
+
+.genealogy-project-action strong {
+    color:var(--text);
+    font-size:12.5px;
+    font-weight:650;
+}
+
+.genealogy-project-action > span:last-child {
+    color:var(--accent);
+    font-size:18px;
+    flex:0 0 auto;
+}
+
+@media (max-width:640px) {
+    .genealogy-project-action {
+        min-height:48px;
+        padding:9px 10px;
+    }
+
+    .genealogy-project-action strong {
+        font-size:12px;
+    }
+}
