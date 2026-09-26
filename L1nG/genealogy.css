@@ -2842,133 +2842,7 @@ body[data-theme="midnight"] .stage-老年 {
     /* 背景設定 */ background: var(--panel-bg);
 }
 
-/* ========【相簿瀏覽器】 設定 - 全域相簿檢視 ======== */
-
-.gallery-browser-modal {
-    /* 元素寬度 */ width: min(1000px,100%);
-}
-
-.gallery-browser-toolbar {
-    /* 顯示方式 */ display: flex;
-    /* 項目間距 */ gap: 8px;
-    /* 下方外距 */ margin-bottom: 14px;
-    /* 垂直對齊 */ align-items: center;
-    /* 自動換行 */ flex-wrap: wrap;
-}
-
-.gallery-browser-toolbar input {
-    /* 彈性配比 */ flex: 1;
-    /* 最小寬度 */ min-width: 160px;
-    /* 內縮空間 */ padding: 8px 11px;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 字體設定 */ font-family: inherit;
-    /* 字體大小 */ font-size: 13px;
-    /* 外框設定 */ outline: none;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 文字顏色 */ color: var(--ink);
-}
-
-.gallery-browser-toolbar input:focus {
-    /* 邊框顏色 */ border-color: var(--accent);
-}
-
-.gallery-browser-toolbar select {
-    /* 內縮空間 */ padding: 8px 10px;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 字體設定 */ font-family: inherit;
-    /* 字體大小 */ font-size: 13px;
-    /* 外框設定 */ outline: none;
-    /* 背景設定 */ background: var(--input-bg);
-    /* 文字顏色 */ color: var(--ink);
-    /* 最小寬度 */ min-width: 150px;
-    /* 最大寬度 */ max-width: 200px;
-}
-
-.gallery-browser-toolbar select:focus {
-    /* 邊框顏色 */ border-color: var(--accent);
-}
-
-.gallery-browser-list {
-    /* 最大高度 */ max-height: 62vh;
-    /* 溢出處理 */ overflow: auto;
-    /* 顯示方式 */ display: grid;
-    /* 網格欄位 */ grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    /* 項目間距 */ gap: 12px;
-    /* 內縮空間 */ padding: 4px;
-}
-
-.gb-item {
-    /* 定位方式 */ position: relative;
-    /* 長寬比例 */ aspect-ratio: 1/1;
-    /* 圓角弧度 */ border-radius: 10px;
-    /* 溢出處理 */ overflow: hidden;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 背景設定 */ background: var(--panel-item);
-    /* 動畫過渡 */ transition: .15s;
-}
-
-.gb-item:hover {
-    /* 邊框顏色 */ border-color: var(--accent);
-    /* 元素變形 */ transform: translateY(-2px);
-    /* 元素陰影 */ box-shadow: 0 8px 20px rgba(0,0,0,.14);
-}
-
-.gb-item img {
-    /* 元素寬度 */ width: 100%;
-    /* 元素高度 */ height: 100%;
-    /* 圖片填滿方式 */ object-fit: cover;
-    /* 顯示方式 */ display: block;
-}
-
-.gb-overlay {
-    /* 定位方式 */ position: absolute;
-    /* 左側位置 */ left: 0;
-    /* 右側位置 */ right: 0;
-    /* 底部位置 */ bottom: 0;
-    /* 背景設定 */ background: linear-gradient(to top, rgba(0,0,0,.82), transparent);
-    /* 文字顏色 */ color: #fff;
-    /* 內縮空間 */ padding: 22px 8px 6px;
-    /* 滑鼠事件 */ pointer-events: none;
-}
-
-.gb-sim {
-    /* 字體大小 */ font-size: 10px;
-    /* 透明度 */ opacity: .9;
-    /* 換行方式 */ white-space: nowrap;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-}
-
-.gb-title {
-    /* 字體大小 */ font-size: 12px;
-    /* 字體粗細 */ font-weight: 600;
-    /* 換行方式 */ white-space: nowrap;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-    /* 上方外距 */ margin-top: 1px;
-}
-
-.gb-stage {
-    /* 定位方式 */ position: absolute;
-    /* 頂部位置 */ top: 6px;
-    /* 左側位置 */ left: 6px;
-    /* 字體大小 */ font-size: 9px;
-    /* 內縮空間 */ padding: 1px 5px;
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 文字顏色 */ color: #fff;
-    /* 滑鼠事件 */ pointer-events: none;
-}
-
-.gb-empty {
-    /* 網格欄位範圍 */ grid-column: 1/-1;
-    /* 文字對齊 */ text-align: center;
-    /* 內縮空間 */ padding: 50px 20px;
-    /* 文字顏色 */ color: var(--sub);
-    /* 字體大小 */ font-size: 13px;
-}
+/* ========【人生照片】 設定 - 人物檔案內的照片編輯 ======== */
 
 .photo-modal {
     /* 元素寬度 */ width: min(560px,100%);
@@ -3708,10 +3582,6 @@ body[data-theme="midnight"] .stage-老年 {
         /* 右側位置 */ right: 14px;
         /* 元素寬度 */ width: 36px;
         /* 元素高度 */ height: 36px;
-    }
-    .gallery-browser-list {
-        /* 網格欄位 */ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        /* 項目間距 */ gap: 8px;
     }
 }
 
@@ -4741,14 +4611,7 @@ html[lang="en"] body {
 
 /* 相簿瀏覽器的原生 select 原本是自動寬度，包裝後仍維持原尺寸。 */
 
-.gallery-browser-toolbar .select-chevron-shell {
-    /* 不強制撐滿整列 */ width: auto;
-    /* 不被 Flex 拉伸 */ flex: 0 0 auto;
-}
 
-.gallery-browser-toolbar .select-chevron-shell > select {
-    /* 延續原本自動寬度 */ width: auto;
-}
 
 /* 搜尋型自訂下拉不是原生 select，因此直接把同一顆 SVG ICON 放進欄位內。 */
 
@@ -4770,10 +4633,6 @@ html[lang="en"] body {
 }
 
 .modal select:not([multiple]) option,
-#galleryBrowserFilter option {
-    /* 原生 option 使用安全背景，避免主題中文字與背景同色 */ background: var(--nav-dropdown-bg);
-    /* 原生 option 使用安全文字色 */ color: var(--nav-dropdown-text);
-}
 
 body[data-theme="midnight"] select {
     /* 深色主題提示瀏覽器使用深色原生控制項 */ color-scheme: dark;
@@ -5561,7 +5420,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .canvas-zoom { bottom:8px; }
 }
 @media (max-width:520px) {
-  .topbar-primary-actions #galleryBrowserBtn { display:none; }
   .canvas-toolbar { max-width:calc(100% - 16px); overflow-x:auto; }
 }
 
