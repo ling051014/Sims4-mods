@@ -183,7 +183,8 @@
 
   function enumKey(value) {
     if (!value) return '';
-    return String(value.key || value.label || value.value || '');
+    if (typeof value === 'string' || typeof value === 'number') return String(value);
+    return String(value.key || value.label || value.value || value.raw || '');
   }
 
   function mapGender(value) {
@@ -204,14 +205,73 @@
     return key || '';
   }
 
-  function mapSpecies(value) {
-    const key = enumKey(value).toLowerCase();
-    if (key.includes('human')) return '人類';
-    if (key.includes('dog')) return '狗';
-    if (key.includes('cat')) return '貓';
-    if (key.includes('horse')) return '馬';
-    if (key.includes('fox')) return '狐狸';
-    return key || '';
+  // ========【遊戲資料正規化】 設定 - species 負責人物 / 寵物分類；occult 才是人物種族 ========
+  function speciesKey(value) {
+    return enumKey(value).toLowerCase();
+  }
+
+  function mapPetSpecies(value) {
+    const key = speciesKey(value);
+    if (key.includes('dog')) return 'dog';
+    if (key.includes('cat')) return 'cat';
+    if (key.includes('horse')) return 'horse';
+    return 'other';
+  }
+
+  function isPetSim(sim) {
+    const key = speciesKey(sim && sim.species);
+    return (
+      key.includes('dog') ||
+      key.includes('cat') ||
+      key.includes('horse') ||
+      key.includes('fox')
+    );
+  }
+
+  function mapOccultRace(value) {
+    const raw = enumKey(value).toLowerCase();
+
+    if (raw.includes('mermaid')) return 'mermaid';
+    if (raw.includes('alien')) return 'alien';
+    if (raw.includes('vampire')) return 'vampire';
+    if (raw.includes('werewolf')) return 'werewolf';
+    if (raw.includes('spellcaster')) return 'spellcaster';
+    if (raw.includes('fairy')) return 'fairy';
+    if (raw.includes('plant')) return 'plant';
+    if (raw.includes('robot')) return 'robot';
+    if (!raw || raw.includes('human')) return 'human';
+
+    return 'other';
+  }
+
+  function displaySimName(sim) {
+    const name = sim && sim.name;
+    if (!name || typeof name !== 'object') return '未知市民';
+
+    const display = String(name.display || '').trim();
+    if (display) return display;
+
+    const joined = `${name.first || ''} ${name.last || ''}`.trim();
+    return joined || '未知市民';
+  }
+
+  function optionalDisplayValue(value) {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    return value.localizedName || value.displayName || value.label || value.name || '';
+  }
+
+  function formatResidence(household) {
+    if (!household || typeof household !== 'object') return '';
+
+    const parts = [
+      optionalDisplayValue(household.worldName),
+      optionalDisplayValue(household.neighborhoodName),
+      optionalDisplayValue(household.lotName)
+    ].filter(Boolean);
+
+    if (parts.length) return parts.join(' / ');
+    return optionalDisplayValue(household.name);
   }
 
   function mapStatus(sim) {
@@ -225,176 +285,352 @@
     return item.localizedName || item.displayName || item.internalName || item.tuningId || '';
   }
 
+  function stringIds(value) {
+    return Array.isArray(value) ? value.map(String).filter(Boolean) : [];
+  }
+
   function relationshipArrays(sim) {
     const rel = (sim && sim.relations) || {};
+
     return {
-      parentIds: Array.isArray(rel.parentIds) ? rel.parentIds.map(String) : [],
-      spouseIds: Array.isArray(rel.spouseIds) ? rel.spouseIds.map(String) : [],
-      exSpouseIds: Array.isArray(rel.exSpouseIds) ? rel.exSpouseIds.map(String) : [],
-      adoptedParentIds: Array.isArray(rel.adoptedParentIds) ? rel.adoptedParentIds.map(String) : []
+      parentIds:stringIds(rel.parentIds),
+      childIds:stringIds(rel.childIds),
+      spouseIds:stringIds(rel.spouseIds),
+      deceasedSpouseIds:stringIds(rel.deceasedSpouseIds),
+      exSpouseIds:stringIds(rel.exSpouseIds),
+      fianceIds:stringIds(rel.fianceIds),
+      steadyPartnerIds:stringIds(rel.steadyPartnerIds),
+      adoptedParentIds:stringIds(rel.adoptedParentIds),
+      adoptedChildIds:stringIds(rel.adoptedChildIds),
+      ownerIds:stringIds(rel.ownerIds || rel.petOwnerIds || sim.ownerIds)
     };
   }
 
-  function connectedComponents(sims) {
-    const ids = Object.keys(sims);
-    const adjacency = new Map(ids.map(id => [id, new Set()]));
-
-    // 只用父母/子女（含領養）作為核心家族連通依據。
-    for (const [id, sim] of Object.entries(sims)) {
-      const rel = (sim && sim.relations) || {};
-      const related = []
-        .concat(rel.parentIds || [])
-        .concat(rel.childIds || []);
-      for (const raw of related) {
-        const other = String(raw);
-        if (!adjacency.has(other)) continue;
-        adjacency.get(id).add(other);
-        adjacency.get(other).add(id);
-      }
-    }
-
-    const seen = new Set();
-    const components = [];
-    for (const start of ids) {
-      if (seen.has(start)) continue;
-      const stack = [start];
-      const component = [];
-      seen.add(start);
-      while (stack.length) {
-        const id = stack.pop();
-        component.push(id);
-        for (const other of adjacency.get(id) || []) {
-          if (!seen.has(other)) {
-            seen.add(other);
-            stack.push(other);
-          }
-        }
-      }
-      components.push(component);
-    }
-    return components;
+  // ========【遊戲家族建立】 設定 - 每個 EA Household 保留為一個家族，沿正式 genealogy 展開 ========
+  function genealogyNeighbors(sim) {
+    const rel = relationshipArrays(sim);
+    return [
+      ...rel.parentIds,
+      ...rel.childIds,
+      ...rel.adoptedParentIds,
+      ...rel.adoptedChildIds,
+      ...rel.spouseIds,
+      ...rel.deceasedSpouseIds
+    ];
   }
 
-  function addDirectPartners(component, sims) {
-    const result = new Set(component);
-    for (const id of component) {
-      const rel = (sims[id] && sims[id].relations) || {};
-      for (const other of [].concat(rel.spouseIds || [], rel.fianceIds || [], rel.steadyPartnerIds || [])) {
-        if (sims[String(other)]) result.add(String(other));
-      }
+  function expandHouseholdGenealogy(seedIds, sourceSims, humanIds) {
+    const result = new Set(
+      seedIds.map(String).filter(id => humanIds.has(id))
+    );
+    const stack = [...result];
+
+    while (stack.length) {
+      const id = stack.pop();
+      const sim = sourceSims[id];
+      if (!sim) continue;
+
+      genealogyNeighbors(sim).forEach(rawId => {
+        const relatedId = String(rawId);
+        if (!humanIds.has(relatedId) || result.has(relatedId)) return;
+        result.add(relatedId);
+        stack.push(relatedId);
+      });
     }
+
     return [...result];
   }
 
-  function familyName(memberIds, sims, index) {
+  function explicitPetOwnerIds(pet, humanIds) {
+    return relationshipArrays(pet).ownerIds.filter(id => humanIds.has(id));
+  }
+
+  function resolvePetOwnerIds(pet, household, humanIds) {
+    const explicit = explicitPetOwnerIds(pet, humanIds);
+    if (explicit.length) return explicit;
+
+    const householdHumans = stringIds(household && household.memberIds)
+      .filter(id => humanIds.has(id));
+
+    return householdHumans.length === 1 ? householdHumans : [];
+  }
+
+  function familyNameFromHousehold(household, memberIds, sourceSims, index) {
+    const householdName = optionalDisplayValue(household && household.name).trim();
+    if (householdName) return householdName;
+
     const counts = new Map();
-    for (const id of memberIds) {
-      const last = sims[id] && sims[id].name && String(sims[id].name.last || '').trim();
-      if (!last) continue;
+
+    memberIds.forEach(id => {
+      const last =
+        sourceSims[id] &&
+        sourceSims[id].name &&
+        String(sourceSims[id].name.last || '').trim();
+
+      if (!last) return;
       counts.set(last, (counts.get(last) || 0) + 1);
-    }
-    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    });
+
+    const sorted = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
     return sorted.length ? `${sorted[0][0]}家族` : `遊戲家族 ${index + 1}`;
   }
 
-  function stableFamilyId(memberIds) {
-    const input = [...memberIds].sort().join('|');
+  function stableHouseholdFamilyId(householdId, memberIds) {
+    const source =
+      householdId != null && householdId !== ''
+        ? `household:${householdId}`
+        : `members:${[...memberIds].sort().join('|')}`;
+
     let hash = 2166136261;
-    for (let i = 0; i < input.length; i++) {
-      hash ^= input.charCodeAt(i);
+    for (let i = 0; i < source.length; i++) {
+      hash ^= source.charCodeAt(i);
       hash = Math.imul(hash, 16777619);
     }
     return `game_${(hash >>> 0).toString(16)}`;
+  }
+
+  function fallbackFamilies(sourceSims, humanIds) {
+    const adjacency = new Map([...humanIds].map(id => [id, new Set()]));
+
+    humanIds.forEach(id => {
+      genealogyNeighbors(sourceSims[id]).forEach(rawId => {
+        const relatedId = String(rawId);
+        if (!humanIds.has(relatedId)) return;
+        adjacency.get(id).add(relatedId);
+        adjacency.get(relatedId).add(id);
+      });
+    });
+
+    const seen = new Set();
+    const families = [];
+
+    humanIds.forEach(start => {
+      if (seen.has(start)) return;
+
+      const stack = [start];
+      const memberIds = [];
+      seen.add(start);
+
+      while (stack.length) {
+        const id = stack.pop();
+        memberIds.push(id);
+
+        adjacency.get(id).forEach(other => {
+          if (seen.has(other)) return;
+          seen.add(other);
+          stack.push(other);
+        });
+      }
+
+      families.push(memberIds);
+    });
+
+    return families;
   }
 
   function convertBundle(bundle) {
     const source = bundle.genealogy || {};
     const sourceSims = source.sims || {};
     const households = source.households || {};
+
+    const humanIds = new Set();
+    const petIds = new Set();
+
+    Object.entries(sourceSims).forEach(([idRaw, sim]) => {
+      const id = String(idRaw);
+      if (isPetSim(sim)) petIds.add(id);
+      else humanIds.add(id);
+    });
+
     const sims = {};
 
-    for (const [idRaw, sim] of Object.entries(sourceSims)) {
-      const id = String(idRaw);
+    humanIds.forEach(id => {
+      const sim = sourceSims[id];
       const rel = relationshipArrays(sim);
-      const household = sim.householdId ? households[String(sim.householdId)] : null;
-      const traits = Array.isArray(sim.traits) ? sim.traits.map(internalLabel).filter(Boolean) : [];
-      const careers = Array.isArray(sim.careers) ? sim.careers.map(internalLabel).filter(Boolean) : [];
+      const household =
+        sim.householdId != null
+          ? households[String(sim.householdId)]
+          : null;
+
+      const traits = Array.isArray(sim.traits)
+        ? sim.traits.map(internalLabel).filter(Boolean)
+        : [];
+
+      const careers = Array.isArray(sim.careers)
+        ? sim.careers.map(internalLabel).filter(Boolean)
+        : [];
+
       const aspiration = internalLabel(sim.aspiration);
-      const deathType = sim.death && sim.death.deathType ? enumKey(sim.death.deathType) : '';
+      const deathType =
+        sim.death && sim.death.deathType
+          ? enumKey(sim.death.deathType)
+          : '';
 
       sims[id] = {
         id,
-        name: (sim.name && (sim.name.display || `${sim.name.first || ''} ${sim.name.last || ''}`.trim())) || id,
-        gender: mapGender(sim.gender),
-        lifeStage: mapLifeStage(sim.age),
-        status: mapStatus(sim),
-        race: mapSpecies(sim.species),
-        residence: household ? (household.name || '') : '',
+        name:displaySimName(sim),
+        gender:mapGender(sim.gender),
+        lifeStage:mapLifeStage(sim.age),
+        status:mapStatus(sim),
+        race:mapOccultRace(sim.occult),
+        residence:formatResidence(household),
         aspiration,
-        causeOfDeath: deathType,
-        pets: [],
-        gallery: [],
-        parentIds: rel.parentIds,
-        spouseIds: rel.spouseIds,
-        exSpouseIds: rel.exSpouseIds,
-        adoptive: rel.adoptedParentIds.length > 0,
+        causeOfDeath:deathType,
+        pets:[],
+        gallery:[],
+        parentIds:rel.parentIds,
+        spouseIds:[...new Set([...rel.spouseIds, ...rel.deceasedSpouseIds])],
+        exSpouseIds:rel.exSpouseIds,
+        adoptive:rel.adoptedParentIds.length > 0,
         traits,
-        career: careers.join(' / '),
-        bio: '',
-        order: 0,
-        avatar: null,
-        gameData: {
-          simId: id,
-          avatarPath: findSimAvatarPath(bundle.files, id, sim),
-          householdId: sim.householdId || null,
-          recordState: sim.recordState || 'full',
-          adoptedParentIds: rel.adoptedParentIds,
-          lod: sim.lod || null,
-          dataAvailability: sim.dataAvailability || null
+        career:careers.join(' / '),
+        bio:'',
+        order:0,
+        avatar:null,
+        gameData:{
+          simId:id,
+          avatarPath:findSimAvatarPath(bundle.files, id, sim),
+          householdId:sim.householdId || null,
+          recordState:sim.recordState || 'full',
+          adoptedParentIds:rel.adoptedParentIds,
+          adoptedChildIds:rel.adoptedChildIds,
+          fianceIds:rel.fianceIds,
+          steadyPartnerIds:rel.steadyPartnerIds,
+          deceasedSpouseIds:rel.deceasedSpouseIds,
+          lod:sim.lod || null,
+          isCulled:!!sim.isCulled,
+          isSelectable:!!sim.isSelectable,
+          dataAvailability:sim.dataAvailability || null,
+          localizedNameRef:
+            sim.name && sim.name.localizedRef
+              ? sim.name.localizedRef
+              : null,
+          portrait:sim.portrait || null
         }
       };
-    }
+    });
 
-    const core = connectedComponents(sourceSims);
-    const families = core
-      .map(component => addDirectPartners(component, sourceSims))
-      .filter(memberIds => memberIds.length > 0)
-      .map((memberIds, index) => ({
-        id: stableFamilyId(memberIds),
-        name: familyName(memberIds, sourceSims, index),
+    const unassignedPets = [];
+
+    petIds.forEach(id => {
+      const pet = sourceSims[id];
+      const household =
+        pet.householdId != null
+          ? households[String(pet.householdId)]
+          : null;
+
+      const ownerIds = resolvePetOwnerIds(pet, household, humanIds);
+
+      const petData = {
+        id,
+        name:displaySimName(pet),
+        species:mapPetSpecies(pet.species),
+        breed:internalLabel(pet.breed) || optionalDisplayValue(pet.breedName) || '',
+        gender:mapGender(pet.gender),
+        ageStage:mapLifeStage(pet.age),
+        status:mapStatus(pet),
+        avatar:null,
+        gameData:{
+          simId:id,
+          avatarPath:findSimAvatarPath(bundle.files, id, pet),
+          householdId:pet.householdId || null,
+          ownerIds,
+          recordState:pet.recordState || 'full',
+          portrait:pet.portrait || null
+        }
+      };
+
+      if (!ownerIds.length) {
+        unassignedPets.push(petData);
+        return;
+      }
+
+      ownerIds.forEach(ownerId => {
+        const owner = sims[ownerId];
+        if (!owner) return;
+        owner.pets.push(JSON.parse(JSON.stringify(petData)));
+      });
+    });
+
+    const householdEntries = Object.entries(households);
+    let families = [];
+
+    if (householdEntries.length) {
+      families = householdEntries.map(([householdIdRaw, household], index) => {
+        const householdId = String(householdIdRaw);
+        const seedIds = stringIds(household.memberIds).filter(id => humanIds.has(id));
+        const memberIds = expandHouseholdGenealogy(seedIds, sourceSims, humanIds);
+
+        return {
+          id:stableHouseholdFamilyId(householdId, memberIds),
+          name:familyNameFromHousehold(household, memberIds, sourceSims, index),
+          memberIds,
+          bio:optionalDisplayValue(household.bio) || optionalDisplayValue(household.description) || '',
+          coverImage:null,
+          freeLayout:{ view:false, edit:false },
+          manualPos:{ view:{}, edit:{} },
+          locked:false,
+          gameImport:true,
+          gameData:{
+            householdId,
+            homeZoneId:household.homeZoneId || household.zoneId || null,
+            worldId:household.worldId || null,
+            neighborhoodId:household.neighborhoodId || null,
+            regionId:household.regionId || null,
+            lotName:optionalDisplayValue(household.lotName),
+            worldName:optionalDisplayValue(household.worldName),
+            neighborhoodName:optionalDisplayValue(household.neighborhoodName),
+            hidden:!!household.hidden,
+            isActiveHousehold:!!household.isActiveHousehold,
+            isPlayedHousehold:!!household.isPlayedHousehold,
+            isPlayerHousehold:!!household.isPlayerHousehold,
+            householdMemberIds:stringIds(household.memberIds),
+            petIds:stringIds(household.memberIds).filter(id => petIds.has(id))
+          }
+        };
+      });
+    } else {
+      families = fallbackFamilies(sourceSims, humanIds).map((memberIds, index) => ({
+        id:stableHouseholdFamilyId('', memberIds),
+        name:familyNameFromHousehold(null, memberIds, sourceSims, index),
         memberIds,
-        bio: '',
-        coverImage: null,
-        freeLayout: { view: false, edit: false },
-        manualPos: { view: {}, edit: {} },
-        locked: false,
-        gameImport: true
+        bio:'',
+        coverImage:null,
+        freeLayout:{ view:false, edit:false },
+        manualPos:{ view:{}, edit:{} },
+        locked:false,
+        gameImport:true,
+        gameData:{ householdId:null, householdMemberIds:[] }
       }));
-
-    // 僅配偶、沒有父母子女關係的兩位人物會各自成 singleton；將完全相同的延伸 family 去重。
-    const dedup = new Map();
-    for (const family of families) {
-      const key = [...family.memberIds].sort().join('|');
-      if (!dedup.has(key)) dedup.set(key, family);
     }
 
-    const finalFamilies = [...dedup.values()];
     return {
-      version: 3,
-      meta: {
-        gameImport: true,
-        sourceFormat: bundle.manifest.format,
-        sourceSchemaVersion: bundle.manifest.schemaVersion,
-        exporterVersion: bundle.manifest.exporterVersion,
-        gameLocale: bundle.manifest.gameLocale,
-        exportedAt: bundle.manifest.exportedAt
+      version:3,
+      meta:{
+        gameImport:true,
+        sourceFormat:bundle.manifest.format,
+        sourceSchemaVersion:bundle.manifest.schemaVersion,
+        exporterVersion:bundle.manifest.exporterVersion,
+        gameLocale:bundle.manifest.gameLocale,
+        exportedAt:bundle.manifest.exportedAt,
+        gameImportStats:{
+          sourceSimCount:Object.keys(sourceSims).length,
+          peopleCount:humanIds.size,
+          petCount:petIds.size,
+          householdCount:householdEntries.length,
+          familyCount:families.length,
+          unassignedPetCount:unassignedPets.length
+        },
+        unassignedPets
       },
       sims,
-      families: finalFamilies,
-      links: [],
-      relMap: {},
-      labelPos: {},
-      currentId: finalFamilies.length ? finalFamilies[0].id : null
+      families,
+      links:[],
+      relMap:{},
+      labelPos:{},
+      currentId:families.length ? families[0].id : null
     };
   }
 
@@ -408,7 +644,9 @@
     parseFile,
     convertBundle,
     readStoredZip,
-    connectedComponents,
+    isPetSim,
+    mapOccultRace,
+    expandHouseholdGenealogy,
     findSimAvatarPath,
     getSimAvatarAsset
   };
