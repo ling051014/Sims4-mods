@@ -784,7 +784,6 @@ const exportCloseBtn = $('exportCloseBtn');
 const exportImageBtn = $('exportImageBtn');
 const exportJsonBtn = $('exportJsonBtn');
 const familyNameInput = $('familyName'), familySelect = $('familySelect');
-const searchInput = $('search'), searchResults = $('searchResults');
 const statusFilterInputs = [...document.querySelectorAll('input[name="statusFilter"]')];
 const genderFilterInputs = [...document.querySelectorAll('input[name="genderFilter"]')];
 const raceFilterInputs = [...document.querySelectorAll('input[name="raceFilter"]')];
@@ -3590,8 +3589,7 @@ function commonNodeClasses(c, opts) {
     opts.viewMode ? 'view' : '',
     genderClass(c),
     statusClass(c),
-    opts.isInlaw ? 'inlaw' : '',
-    opts.matchSearch ? 'hl' : ''
+    opts.isInlaw ? 'inlaw' : ''
   ].filter(Boolean).join(' ');
 }
 
@@ -3599,7 +3597,6 @@ function drawNodes() {
   const fam = currentFamily();
   const memberSet = new Set(fam.memberIds);
   const {pos, byId, visibleIds} = layoutCache;
-  const q = searchInput.value.trim().toLowerCase();
   const isView = viewMode === 'view';
   const cardSettings = isView ? getCardViewSettings() : getCardEditSettings();
   const appearanceClass = isView ? cardViewAppearanceClass() : '';
@@ -3622,14 +3619,7 @@ function drawNodes() {
     const dAspiration = displayDataText(c.aspiration, c);
     const dCause = displayDataText(c.causeOfDeath, c);
     const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
-    const searchable = [
-      c.name, dName, c.career, dCareer, c.residence, dResidence,
-      c.aspiration, dAspiration, c.causeOfDeath, dCause,
-      ...(c.traits||[]), ...dTraits,
-      ...(c.pets||[]).flatMap(pt => [pt.name, displayDataText(pt.name, c), pt.breed, displayDataText(pt.breed, c)])
-    ].filter(Boolean).join(' ').toLowerCase();
-    const matchSearch = !!q && searchable.includes(q);
-    const cls = commonNodeClasses(c, {viewMode:isView, isInlaw, matchSearch});
+    const cls = commonNodeClasses(c, {viewMode:isView, isInlaw});
     const dStage = uiText(c.lifeStage);
     const displayName = cardSettings.name ? `${dName}${cardSettings.gender ? formatCardGender(c.gender) : ''}` : '';
     const genderBarHiddenClass = cardSettings.genderBar ? '' : ' card-gender-bar-hidden';
@@ -7994,88 +7984,10 @@ $('btnAddRel').onclick = () => {
   save(); render();
 };
 
-// ========【頂部搜尋】 設定 - 保留原本族譜篩選並補上專案風格搜尋結果 ========
-function displayNavText(value, owner = null) {
-  return owner ? displayDataText(value, owner) : String(value ?? '');
-}
-
-function hideTopbarSearchResults() {
-  if (!searchResults) return;
-  searchResults.classList.remove('show');
-  searchResults.innerHTML = '';
-}
-
-function renderTopbarSearchResults() {
-  if (!searchResults || !db) return;
-
-  const q = searchInput.value.trim().toLowerCase();
-  if (!q) {
-    hideTopbarSearchResults();
-    return;
-  }
-
-  const fam = currentFamily();
-  const matches = (fam.memberIds || [])
-    .map(id => db.sims[id])
-    .filter(Boolean)
-    .filter(simMatchesTopbarFilters)
-    .filter(c => {
-      const raw = [c.name, c.career, c.residence].filter(Boolean).join(' ').toLowerCase();
-      const translated = [c.name, c.career, c.residence]
-        .filter(Boolean)
-        .map(value => displayNavText(value, c))
-        .join(' ')
-        .toLowerCase();
-      return raw.includes(q) || translated.includes(q);
-    })
-    .slice(0, 12);
-
-  if (!matches.length) {
-    searchResults.innerHTML = '<div class="topbar-search-empty">沒有符合的項目</div>';
-    searchResults.classList.add('show');
-    return;
-  }
-
-  searchResults.innerHTML = matches.map(c => {
-    const meta = [displayNavText(c.career, c), displayNavText(c.residence, c)].filter(Boolean).join(' · ');
-    return `
-      <div class="topbar-search-result" role="option" tabindex="0" data-search-sim-id="${esc(c.id)}">
-        <span class="topbar-search-result-name">${esc(displayNavText(c.name, c))}</span>
-        ${meta ? `<span class="topbar-search-result-meta">${esc(meta)}</span>` : ''}
-      </div>`;
-  }).join('');
-
-  searchResults.classList.add('show');
-
-  searchResults.querySelectorAll('[data-search-sim-id]').forEach(item => {
-    const openResult = () => {
-      const simId = item.dataset.searchSimId;
-      hideTopbarSearchResults();
-      if (simId) openInfoCard(simId);
-    };
-    item.onclick = openResult;
-    item.onkeydown = e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openResult();
-      }
-    };
-  });
-}
-
-searchInput.oninput = debounce(() => {
-  if (layoutCache) drawNodes();
-  renderTopbarSearchResults();
-}, 150);
-
-searchInput.onfocus = () => {
-  if (searchInput.value.trim()) renderTopbarSearchResults();
-};
-
+// ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
 function applyTopbarFilters() {
   updateTopbarFilterUI();
   render();
-  if (searchInput.value.trim()) renderTopbarSearchResults();
 }
 
 [
@@ -8103,12 +8015,6 @@ $('filterResetBtn')?.addEventListener('click', event => {
 });
 
 updateTopbarFilterUI();
-
-document.addEventListener('click', e => {
-  if (!searchResults || !searchInput) return;
-  const wrap = searchInput.closest('.topbar-search-wrap');
-  if (wrap && !wrap.contains(e.target)) hideTopbarSearchResults();
-});
 
 const zoomCenter = () => { const r=viewport.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; };
 $('zoomInBtn')?.addEventListener('click',()=>{const p=zoomCenter();zoomAt(p.x,p.y,1.16);});
@@ -8786,7 +8692,6 @@ They will remain in the global Sim pool.`;
     if (db && db.families && db.families.length) {
       refreshFamilyUI();
       render();
-      if (searchInput && searchInput.value.trim()) renderTopbarSearchResults();
     }
     if (mask && mask.classList.contains('show')) {
       const birthdayDay = $('fBirthdayDay') ? $('fBirthdayDay').value : '';

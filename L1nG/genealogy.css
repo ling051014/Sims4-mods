@@ -637,28 +637,6 @@ button {
     /* 文字顏色 */ color: var(--topbar-field-placeholder);
 }
 
-.topbar-search {
-    /* 彈性配比 */ flex: 1;
-    /* 最大寬度 */ max-width: 240px;
-    /* 內縮空間 */ padding: 7px 12px;
-    /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 背景設定 */ background: var(--topbar-field-bg);
-    /* 文字顏色 */ color: var(--topbar-field-fg);
-    /* 字體大小 */ font-size: 13px;
-    /* 外框設定 */ outline: none;
-    /* 動畫過渡 */ transition: .15s;
-    /* 背景濾鏡 */ backdrop-filter: blur(4px);
-}
-
-.topbar-search::placeholder {
-    /* 文字顏色 */ color: var(--topbar-field-placeholder);
-}
-
-.topbar-search:focus {
-    /* 背景設定 */ background: var(--topbar-field-hover);
-}
-
 .topbar-select {
     /* 內縮空間 */ padding: 7px 10px;
     /* 邊框設定 */ border: 1px solid var(--topbar-field-border);
@@ -3657,9 +3635,6 @@ body[data-theme="midnight"] .stage-老年 {
         /* 元素寬度 */ width: 120px;
         /* 字體大小 */ font-size: 14px;
     }
-    .topbar-search {
-        /* 最大寬度 */ max-width: 160px;
-    }
     .family-select {
         /* 最大寬度 */ max-width: 140px;
     }
@@ -3679,11 +3654,6 @@ body[data-theme="midnight"] .stage-老年 {
     .topbar-main {
         /* 內縮空間 */ padding: 0 8px;
         /* 項目間距 */ gap: 6px;
-    }
-    .topbar-search {
-        /* 最大寬度 */ max-width: none;
-        /* 彈性配比 */ flex: 1;
-        /* 最小寬度 */ min-width: 80px;
     }
     .family-select {
         /* 顯示方式 */ display: none;
@@ -4149,87 +4119,6 @@ body[data-theme="ling"] #viewport {
 
 /* ========【導覽精修】 設定 - 僅調整頂部導覽，不影響族譜編輯表單 ======== */
 
-.topbar-search-wrap {
-    /* 相對定位 */ position: relative;
-    /* 彈性配比 */ flex: 1;
-    /* 最大寬度 */ max-width: 240px;
-    /* 最小寬度 */ min-width: 120px;
-}
-
-.topbar-search-wrap .topbar-search {
-    /* 元素寬度 */ width: 100%;
-    /* 最大寬度 */ max-width: none;
-}
-
-.topbar-search-results {
-    /* 絕對定位 */ position: absolute;
-    /* 頂部位置 */ top: calc(100% + 7px);
-    /* 左側位置 */ left: 0;
-    /* 元素寬度 */ width: 100%;
-    /* 邊框設定 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 元素陰影 */ box-shadow: 0 10px 24px rgba(0,0,0,.12);
-    /* 顯示層級 */ z-index: 600;
-    /* 最大高度 */ max-height: 280px;
-    /* 垂直溢出 */ overflow-y: auto;
-    /* 預設隱藏 */ display: none;
-    /* 內縮空間 */ padding: 4px 0;
-    /* 背景顏色 */ background: var(--nav-dropdown-bg);
-    /* 文字顏色 */ color: var(--nav-dropdown-text);
-    /* 邊框顏色 */ border-color: var(--nav-dropdown-border);
-}
-
-.topbar-search-results.show {
-    /* 顯示方式 */ display: block;
-}
-
-.topbar-search-result {
-    /* 內縮空間 */ padding: 10px 14px;
-    /* 文字置中 */ text-align: center;
-    /* 字體大小 */ font-size: 12px;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 下方邊框 */ border-bottom: 1px solid var(--panel-bg);
-    /* 動畫過渡 */ transition: background-color .2s ease, color .2s ease;
-    /* 文字顏色 */ color: var(--nav-dropdown-text);
-    /* 分隔線顏色 */ border-bottom-color: var(--nav-dropdown-divider);
-}
-
-.topbar-search-result:last-child {
-    /* 移除末項邊框 */ border-bottom: none;
-}
-
-.topbar-search-result:hover,
-.topbar-search-result:focus-visible {
-    /* 移除外框 */ outline: none;
-    /* 懸停背景 */ background: var(--nav-dropdown-hover-bg);
-    /* 懸停文字 */ color: var(--nav-dropdown-hover-text);
-}
-
-.topbar-search-result-name {
-    /* 區塊顯示 */ display: block;
-    /* 字體粗細 */ font-weight: 600;
-    /* 單行顯示 */ white-space: nowrap;
-    /* 隱藏溢出 */ overflow: hidden;
-    /* 尾端省略 */ text-overflow: ellipsis;
-}
-
-.topbar-search-result-meta {
-    /* 區塊顯示 */ display: block;
-    /* 上方間距 */ margin-top: 2px;
-    /* 字體大小 */ font-size: 11px;
-    /* 單行顯示 */ white-space: nowrap;
-    /* 隱藏溢出 */ overflow: hidden;
-    /* 尾端省略 */ text-overflow: ellipsis;
-    /* 次要文字 */ color: color-mix(in srgb, var(--nav-dropdown-text) 68%, transparent);
-}
-
-.topbar-search-empty {
-    /* 內縮空間 */ padding: 11px 14px;
-    /* 文字置中 */ text-align: center;
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: var(--sub);
-}
-
 .language-icon {
     /* 左側位置 */ left: 10px;
     /* 頂部位置 */ top: 50%;
@@ -4271,19 +4160,8 @@ html[lang="en"] body {
         /* 最大寬度 */ max-width: 140px;
         /* 最小寬度 */ min-width: 140px;
     }
-    .topbar-search-wrap {
-        /* 最大寬度 */ max-width: 160px;
-    }
     .language-select {
         /* 固定寬度 */ width: 80px;
-        /* 最小寬度 */ min-width: 80px;
-    }
-}
-
-@media (max-width:720px) {
-    .topbar-search-wrap {
-        /* 彈性配比 */ flex: 1;
-        /* 最大寬度 */ max-width: none;
         /* 最小寬度 */ min-width: 80px;
     }
 }
@@ -5259,11 +5137,14 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 
 .topbar { height:52px; min-height:52px; align-items:stretch; border-bottom:1px solid var(--border); box-shadow:none; background:linear-gradient(120deg,var(--grad-1) 0%,var(--grad-2) 100%); }
 .topbar-brand { width:auto; min-width:210px; padding:0 14px; justify-content:flex-start; gap:10px; font-size:10.5px; letter-spacing:1.15px; text-align:left; }
-.topbar-brand-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.topbar-brand-group { display:flex; align-items:center; gap:9px; min-width:0; white-space:nowrap; }
+.topbar-creator-link,.topbar-section-brand { text-decoration:none; }
+.topbar-creator-link { color:color-mix(in srgb,var(--topbar-fg) 64%,transparent); font-size:11px; letter-spacing:1.5px; transition:color .15s ease; }
+.topbar-creator-link:hover,.topbar-creator-link:focus-visible { color:var(--accent); outline:none; }
+.topbar-brand-divider { color:color-mix(in srgb,var(--topbar-fg) 35%,transparent); }
+.topbar-section-brand { color:var(--topbar-fg); font-size:12px; font-weight:650; letter-spacing:1.8px; }
 .menu-toggle { display:inline-flex; width:30px; height:30px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--topbar-fg); }
 .topbar-main { gap:8px; padding:0 12px; }
-.topbar-search-wrap { flex:1 1 340px; max-width:440px; min-width:160px; }
-.topbar-search { width:100%; max-width:none; height:34px; border-radius:6px; }
 .topbar-primary-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
 .topbar-text-btn,.topbar-icon-only { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:0 9px; border:0; border-radius:5px; background:transparent; color:var(--topbar-fg); font:inherit; font-size:12.5px; }
 .topbar-icon-only { width:32px; padding:0; }
@@ -5645,12 +5526,16 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
 body[data-theme="ling"] .family-panel { background:#fff; border-right-color:#eee; }
 body[data-theme="ling"] .topbar { height:52px; background:#fff; border-bottom:1px solid #eee; }
 body[data-theme="ling"] .topbar-brand { color:#555; }
+body[data-theme="ling"] .topbar-creator-link { color:#999; }
+body[data-theme="ling"] .topbar-creator-link:hover,
+body[data-theme="ling"] .topbar-creator-link:focus-visible { color:var(--accent); }
+body[data-theme="ling"] .topbar-brand-divider { color:#ccc; }
+body[data-theme="ling"] .topbar-section-brand { color:#555; }
 body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .family-rel-annotations { margin-top:14px; }
 
 @media (max-width:980px) {
   .topbar-brand { min-width:170px; }
-  .topbar-brand-name { display:none; }
   .topbar-brand { min-width:52px; width:52px; padding:0 10px; }
   .topbar-primary-actions .topbar-text-btn span:last-child { display:none; }
   .topbar-text-btn { width:32px; padding:0; }
@@ -5660,7 +5545,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 @media (max-width:720px) {
   .topbar-brand { display:flex; width:48px; min-width:48px; }
   .topbar-main { padding:0 7px; gap:5px; }
-  .topbar-search-wrap { min-width:80px; }
   .topbar-filter-btn { width:32px; padding:0; }
   .topbar-filter-label { display:none; }
   .topbar-filter-count { display:none !important; }
@@ -5678,7 +5562,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 @media (max-width:520px) {
   .topbar-primary-actions #galleryBrowserBtn { display:none; }
-  .topbar-search { font-size:12px; padding:6px 8px; }
   .canvas-toolbar { max-width:calc(100% - 16px); overflow-x:auto; }
 }
 
