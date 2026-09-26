@@ -1027,34 +1027,32 @@ body.sidebar-resizing * {
     /* 向量縮放行為 */ vector-effect: non-scaling-stroke;
 }
 
+/* ========【關係線】 設定 - 五種關係使用新的預設線型，並支援玩家自訂 ======== */
 .edge-parent {
-    /* 線條顏色 */ stroke: var(--line);
-    /* 線條寬度 */ stroke-width: 2.6;
+    stroke: var(--rel-parent-color,var(--line));
+    stroke-width: var(--rel-parent-width,2);
+    stroke-dasharray: var(--rel-parent-dash,none);
 }
-
 .edge-spouse {
-    /* 線條顏色 */ stroke: var(--spouse);
-    /* 線條寬度 */ stroke-width: 3.6;
-    /* 虛線樣式 */ stroke-dasharray: 8 5;
+    stroke: var(--rel-spouse-color,var(--spouse));
+    stroke-width: var(--rel-spouse-width,2.4);
+    stroke-dasharray: var(--rel-spouse-dash,none);
 }
-
 .edge-exspouse {
-    /* 線條顏色 */ stroke: var(--exspouse);
-    /* 線條寬度 */ stroke-width: 2.6;
-    /* 虛線樣式 */ stroke-dasharray: 3 5;
+    stroke: var(--rel-exspouse-color,var(--exspouse));
+    stroke-width: var(--rel-exspouse-width,1.7);
+    stroke-dasharray: var(--rel-exspouse-dash,4 3);
 }
-
 .edge-adopt {
-    /* 線條顏色 */ stroke: var(--adopt);
-    /* 線條寬度 */ stroke-width: 2.6;
-    /* 虛線樣式 */ stroke-dasharray: 1 6;
+    stroke: var(--rel-adopt-color,var(--adopt));
+    stroke-width: var(--rel-adopt-width,1.7);
+    stroke-dasharray: var(--rel-adopt-dash,10 6);
 }
-
 .edge-other {
-    /* 線條顏色 */ stroke: var(--other-line);
-    /* 線條寬度 */ stroke-width: 2.2;
-    /* 虛線樣式 */ stroke-dasharray: 4 5;
-    /* 透明度 */ opacity: .85;
+    stroke: var(--rel-other-color,var(--other-line));
+    stroke-width: var(--rel-other-width,1.5);
+    stroke-dasharray: var(--rel-other-dash,1 5);
+    opacity:.9;
 }
 
 .edge-label text {
@@ -1780,26 +1778,21 @@ body[data-theme="midnight"] .stage-老年 {
     /* 顯示層級 */ z-index: 210;
 }
 
+/* ========【共用彈出視窗】 設定 - 輕量外框、較小圓角與位移淡入 ======== */
 .modal {
-    /* 背景設定 */ background: var(--card);
-    /* 圓角弧度 */ border-radius: 14px;
-    /* 元素寬度 */ width: min(740px,100%);
-    /* 最大高度 */ max-height: 90vh;
-    /* 溢出處理 */ overflow: auto;
-    /* 內縮空間 */ padding: 20px 24px;
-    /* 元素陰影 */ box-shadow: 0 24px 60px rgba(0,0,0,.3);
-    /* 動畫設定 */ animation: pop .18s ease-out;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    width:min(740px,100%);
+    max-height:90vh;
+    overflow:auto;
+    padding:20px 24px;
+    box-shadow:0 16px 42px rgba(31,35,40,.18);
+    animation:l1ng-dialog-in .16s ease-out;
 }
-
-@keyframes pop {
-    from {
-        /* 元素變形 */ transform: scale(.96);
-        /* 透明度 */ opacity: 0;
-    }
-    to {
-        /* 元素變形 */ transform: scale(1);
-        /* 透明度 */ opacity: 1;
-    }
+@keyframes l1ng-dialog-in {
+    from { transform:translateY(7px); opacity:0; }
+    to { transform:translateY(0); opacity:1; }
 }
 
 .modal h2 {
