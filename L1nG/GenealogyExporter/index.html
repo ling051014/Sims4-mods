@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genealogy Exporter · L1nG</title>
-    <meta name="description" content="L1nG Genealogy Exporter 是《模擬市民 4》族譜資料提取模組，將目前存檔中的人物、家庭與族譜關係匯出到 Genealogy 網頁工具。">
+    <title>族譜資料提取模組 · L1nG</title>
+    <meta name="description" content="L1nG 族譜資料提取模組會將《模擬市民 4》目前存檔中的人物、家庭與族譜關係整理成可匯入網頁端族譜系統工具的資料。">
     <meta name="theme-color" content="#f6f8fb">
     <link rel="stylesheet" href="genealogy-exporter.css">
     <script src="genealogy-exporter.js" defer></script>
@@ -17,7 +17,7 @@
             <div class="site-brand-group">
                 <a class="creator-link" href="../home.html">L1nG</a>
                 <span class="brand-divider">/</span>
-                <a class="exporter-brand" href="index.html">GENEALOGY EXPORTER</a>
+                <span class="exporter-brand" aria-current="page"><span data-lang="zh-Hant">族譜資料提取模組</span><span data-lang="en">GENEALOGY EXPORTER</span></span>
             </div>
 
             <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單">
@@ -25,7 +25,7 @@
                 <span></span>
             </button>
 
-            <nav class="main-nav" id="mainNav" aria-label="Genealogy Exporter">
+            <nav class="main-nav" id="mainNav" aria-label="族譜資料提取模組">
                 <a href="#features"><span data-lang="zh-Hant">功能</span><span data-lang="en">Features</span></a>
                 <a href="#workflow"><span data-lang="zh-Hant">使用方式</span><span data-lang="en">How It Works</span></a>
                 <a href="#status"><span data-lang="zh-Hant">開發狀態</span><span data-lang="en">Status</span></a>
@@ -45,8 +45,8 @@
         <section class="hero">
             <div class="hero-grid">
                 <div class="hero-copy reveal">
-                    <div class="eyebrow">THE SIMS 4 · SAVE GENEALOGY BRIDGE</div>
-                    <h1>GENEALOGY<br>EXPORTER</h1>
+                    <div class="eyebrow"><span data-lang="zh-Hant">模擬市民 4 · 存檔族譜橋接</span><span data-lang="en">THE SIMS 4 · SAVE GENEALOGY BRIDGE</span></div>
+                    <h1><span data-lang="zh-Hant">族譜資料<br>提取模組</span><span data-lang="en">GENEALOGY<br>EXPORTER</span></h1>
 
                     <p class="hero-lead" data-lang="zh-Hant">
                         把遊戲裡已經存在的家族故事，帶進你的族譜。
@@ -56,8 +56,8 @@
                     </p>
 
                     <p class="hero-description" data-lang="zh-Hant">
-                        Genealogy Exporter 以唯讀方式讀取目前存檔中的模擬市民、家庭與族譜關係，
-                        整理成一份可直接匯入 L1nG Genealogy 網頁工具的 ZIP。
+                        族譜資料提取模組以唯讀方式讀取目前存檔中的模擬市民、家庭與族譜關係，
+                        整理成一份可直接匯入 L1nG 網頁端族譜系統工具的 ZIP。
                     </p>
                     <p class="hero-description" data-lang="en">
                         Genealogy Exporter reads Sims, households, and family-tree relationships from the current save
@@ -66,7 +66,7 @@
 
                     <div class="hero-actions">
                         <a class="button button-primary" href="../genealogy.html">
-                            <span data-lang="zh-Hant">開啟 Genealogy 族譜工具</span>
+                            <span data-lang="zh-Hant">開啟網頁端族譜系統工具</span>
                             <span data-lang="en">Open Genealogy Tool</span>
                         </a>
                         <a class="button button-secondary" href="#workflow">
@@ -107,7 +107,7 @@
                     <span class="bridge-line" aria-hidden="true"></span>
                     <div class="bridge-card bridge-module">
                         <span class="bridge-kicker">02</span>
-                        <strong>EXPORTER</strong>
+                        <strong><span data-lang="zh-Hant">資料提取模組</span><span data-lang="en">EXPORTER</span></strong>
                         <small data-lang="zh-Hant">唯讀提取</small>
                         <small data-lang="en">Read-only Export</small>
                     </div>
@@ -120,7 +120,7 @@
                     <span class="bridge-line" aria-hidden="true"></span>
                     <div class="bridge-card bridge-target">
                         <span class="bridge-kicker">04</span>
-                        <strong>GENEALOGY</strong>
+                        <strong><span data-lang="zh-Hant">族譜工具</span><span data-lang="en">GENEALOGY</span></strong>
                         <small data-lang="zh-Hant">網頁族譜</small>
                         <small data-lang="en">Web Genealogy</small>
                     </div>
@@ -164,7 +164,7 @@
         <!-- ========【提取內容】 設定 - 目前已驗證的資料範圍 ======== -->
         <section class="section" id="features">
             <div class="section-heading reveal">
-                <span class="section-kicker">WHAT IT EXPORTS</span>
+                <span class="section-kicker"><span data-lang="zh-Hant">可提取內容</span><span data-lang="en">WHAT IT EXPORTS</span></span>
                 <h2 data-lang="zh-Hant">不是重做一份族譜，是把存檔裡已經存在的資料帶出來。</h2>
                 <h2 data-lang="en">It does not rebuild your family tree. It carries out what already exists in the save.</h2>
                 <p data-lang="zh-Hant">
@@ -214,8 +214,8 @@
 
                 <article class="feature-card feature-card-accent reveal">
                     <span class="feature-number">05</span>
-                    <h3>RealDate Bridge</h3>
-                    <p data-lang="zh-Hant">目前開發測試版已能讀取 RealDate 的出生年月日、遊戲日期與年齡快照，並交給 Genealogy 網頁端使用。</p>
+                    <h3><span data-lang="zh-Hant">RealDate 橋接</span><span data-lang="en">RealDate Bridge</span></h3>
+                    <p data-lang="zh-Hant">目前開發測試版已能讀取 RealDate 的出生年月日、遊戲日期與年齡快照，並交給網頁端族譜系統工具使用。</p>
                     <p data-lang="en">Development builds can bridge RealDate birth dates, current game date, and age snapshots into Genealogy.</p>
                     <div class="feature-tags"><span>Birthday</span><span>Game Date</span><span>Age</span></div>
                 </article>
@@ -226,7 +226,7 @@
                     <div class="feature-state" data-lang="en">In Research</div>
                     <h3 data-lang="zh-Hant">人物頭像</h3>
                     <h3 data-lang="en">Sim Portraits</h3>
-                    <p data-lang="zh-Hant">目前仍無法穩定取得可直接匯出的市民頭像。沒有取得圖片時，Exporter 不會用預設縮圖冒充人物照片。</p>
+                    <p data-lang="zh-Hant">目前仍無法穩定取得可直接匯出的市民頭像。沒有取得圖片時，資料提取模組不會用預設縮圖冒充人物照片。</p>
                     <p data-lang="en">Reliable portrait extraction is not complete. The exporter does not substitute generic thumbnails for missing Sim portraits.</p>
                     <div class="feature-tags"><span>Portrait</span><span>Pending</span></div>
                 </article>
@@ -236,7 +236,7 @@
         <!-- ========【使用流程】 設定 - 從安裝模組到網頁匯入的完整操作 ======== -->
         <section class="section workflow-section" id="workflow">
             <div class="section-heading reveal">
-                <span class="section-kicker">WORKFLOW</span>
+                <span class="section-kicker"><span data-lang="zh-Hant">使用流程</span><span data-lang="en">WORKFLOW</span></span>
                 <h2 data-lang="zh-Hant">從遊戲到族譜，四個步驟。</h2>
                 <h2 data-lang="en">From the game to your family tree in four steps.</h2>
             </div>
@@ -245,7 +245,7 @@
                 <article class="workflow-step reveal">
                     <span class="step-index">01</span>
                     <div class="step-copy">
-                        <h3 data-lang="zh-Hant">安裝 Genealogy Exporter</h3>
+                        <h3 data-lang="zh-Hant">安裝族譜資料提取模組</h3>
                         <h3 data-lang="en">Install Genealogy Exporter</h3>
                         <p data-lang="zh-Hant">將模組放入 Mods，並確認遊戲已開啟「自訂內容與模組」以及「允許腳本模組」。</p>
                         <p data-lang="en">Place the mod in Mods and make sure Custom Content & Mods and Script Mods are enabled.</p>
@@ -257,7 +257,7 @@
                     <div class="step-copy">
                         <h3 data-lang="zh-Hant">進入要匯出的存檔</h3>
                         <h3 data-lang="en">Load the save you want to export</h3>
-                        <p data-lang="zh-Hant">等待遊戲完成載入。Exporter 需要目前存檔的 FamilyTreeService 已經準備完成。</p>
+                        <p data-lang="zh-Hant">等待遊戲完成載入。資料提取模組需要目前存檔的 FamilyTreeService 已經準備完成。</p>
                         <p data-lang="en">Wait for the save to finish loading so FamilyTreeService is available.</p>
                     </div>
                     <code>l1ng.genealogy.status</code>
@@ -277,9 +277,9 @@
                 <article class="workflow-step reveal">
                     <span class="step-index">04</span>
                     <div class="step-copy">
-                        <h3 data-lang="zh-Hant">把 ZIP 匯入 Genealogy</h3>
+                        <h3 data-lang="zh-Hant">把 ZIP 匯入族譜工具</h3>
                         <h3 data-lang="en">Import the ZIP into Genealogy</h3>
-                        <p data-lang="zh-Hant">打開 Genealogy 網頁工具，在「更多 → 匯入遊戲族譜」選擇剛剛輸出的 ZIP。</p>
+                        <p data-lang="zh-Hant">打開網頁端族譜系統工具，在「更多 → 匯入遊戲族譜」選擇剛剛輸出的 ZIP。</p>
                         <p data-lang="en">Open the Genealogy web tool, then choose More → Import Game Genealogy and select the exported ZIP.</p>
                     </div>
                     <a class="inline-link" href="../genealogy.html">
@@ -302,12 +302,12 @@
         <section class="section data-section">
             <div class="data-panel reveal">
                 <div class="data-copy">
-                    <span class="section-kicker">EXPORT BUNDLE</span>
+                    <span class="section-kicker"><span data-lang="zh-Hant">匯出檔案</span><span data-lang="en">EXPORT BUNDLE</span></span>
                     <h2 data-lang="zh-Hant">一份 ZIP，就是一次存檔快照。</h2>
                     <h2 data-lang="en">One ZIP is one snapshot of your save.</h2>
                     <p data-lang="zh-Hant">
-                        Exporter 不會建立線上帳號，也不會同步到伺服器。網頁工具讀取你手動選擇的 ZIP，
-                        再把人物與族譜資料轉成 Genealogy 自己的資料格式。
+                        資料提取模組不會建立線上帳號，也不會同步到伺服器。網頁工具讀取你手動選擇的 ZIP，
+                        再把人物與族譜資料轉成族譜工具自己的資料格式。
                     </p>
                     <p data-lang="en">
                         The exporter creates no online account and performs no server sync. The web tool reads the ZIP you explicitly choose
@@ -327,7 +327,7 @@
         <!-- ========【開發狀態】 設定 - 已驗證、測試中與尚未完成項目 ======== -->
         <section class="section" id="status">
             <div class="section-heading reveal">
-                <span class="section-kicker">DEVELOPMENT STATUS</span>
+                <span class="section-kicker"><span data-lang="zh-Hant">開發狀態</span><span data-lang="en">DEVELOPMENT STATUS</span></span>
                 <h2 data-lang="zh-Hant">現在能做什麼，哪些還不能，我會分開寫清楚。</h2>
                 <h2 data-lang="en">What works now and what does not are listed separately.</h2>
             </div>
@@ -348,7 +348,7 @@
                         <li data-lang="en">Genealogy links and family-tree-only nodes</li>
                         <li data-lang="zh-Hant">目前遊戲語言 STBL 文字解析</li>
                         <li data-lang="en">Current-locale STBL resolution</li>
-                        <li data-lang="zh-Hant">ZIP 建立與 Genealogy 網頁匯入</li>
+                        <li data-lang="zh-Hant">ZIP 建立與網頁端族譜工具匯入</li>
                         <li data-lang="en">ZIP packaging and Genealogy import</li>
                     </ul>
                 </div>
@@ -362,7 +362,7 @@
                     <ul>
                         <li data-lang="zh-Hant">RealDate 出生日期／遊戲日期橋接</li>
                         <li data-lang="en">RealDate birth date / game date bridge</li>
-                        <li data-lang="zh-Hant">更多 runtime 資料來源驗證</li>
+                        <li data-lang="zh-Hant">更多執行階段資料來源驗證</li>
                         <li data-lang="en">Additional runtime data-source validation</li>
                         <li data-lang="zh-Hant">不同存檔規模與模組環境測試</li>
                         <li data-lang="en">Testing across save sizes and mod setups</li>
@@ -391,11 +391,11 @@
         <section class="release-section">
             <div class="release-card reveal">
                 <div>
-                    <span class="release-label">DEVELOPMENT PREVIEW</span>
+                    <span class="release-label"><span data-lang="zh-Hant">開發測試中</span><span data-lang="en">DEVELOPMENT PREVIEW</span></span>
                     <h2 data-lang="zh-Hant">公開測試版尚未釋出。</h2>
                     <h2 data-lang="en">A public test build has not been released yet.</h2>
                     <p data-lang="zh-Hant">
-                        目前仍在處理人物頭像與 runtime 資料來源。正式提供下載時，這裡會放上版本、對應遊戲版本與安裝檔。
+                        目前仍在處理人物頭像與執行階段資料來源。正式提供下載時，這裡會放上版本、對應遊戲版本與安裝檔。
                     </p>
                     <p data-lang="en">
                         Portrait extraction and runtime sources are still under development. When a public build is ready,
@@ -404,7 +404,7 @@
                 </div>
                 <div class="release-actions">
                     <a class="button button-primary" href="../genealogy.html">
-                        <span data-lang="zh-Hant">先使用 Genealogy 網頁工具</span>
+                        <span data-lang="zh-Hant">先使用網頁端族譜系統工具</span>
                         <span data-lang="en">Use Genealogy Web Tool</span>
                     </a>
                     <a class="text-link" href="../home.html">
@@ -420,13 +420,13 @@
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-brand">
-                <strong>GENEALOGY EXPORTER</strong>
+                <strong><span data-lang="zh-Hant">族譜資料提取模組</span><span data-lang="en">GENEALOGY EXPORTER</span></strong>
                 <span data-lang="zh-Hant">L1nG ·《模擬市民 4》族譜資料提取模組</span>
                 <span data-lang="en">L1nG · The Sims 4 genealogy data exporter</span>
             </div>
             <div class="footer-links">
                 <a href="../home.html">L1nG</a>
-                <a href="../genealogy.html">Genealogy</a>
+                <a href="../genealogy.html"><span data-lang="zh-Hant">族譜工具</span><span data-lang="en">Genealogy</span></a>
                 <a href="../RealDate/index.html">RealDate</a>
                 <a href="#top"><span data-lang="zh-Hant">↑ 返回頂部</span><span data-lang="en">↑ Back to top</span></a>
             </div>
