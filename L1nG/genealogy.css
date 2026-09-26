@@ -4511,9 +4511,9 @@ html[lang="en"] body {
 /* ========【導覽配色 Token】 設定 - 下拉選單與導覽互動獨立於主題強調色 ======== */
 
 /* ========【家族名稱編輯】 設定 - 名稱底線自適應、鉛筆與文字同一水平線 ======== */
-.family-identity { position:relative; display:inline-flex; align-items:center; min-width:0; max-width:calc(100% - 34px); gap:4px; }
+.family-identity { position:relative; display:inline-flex; align-items:center; min-width:0; max-width:100%; gap:4px; }
 .family-name-editor { display:inline-flex; align-items:center; min-width:0; max-width:100%; flex:0 1 auto; gap:4px; overflow:visible; }
-.family-name-editor .brand-input { flex:0 0 auto; min-width:68px; max-width:none; width:88px; box-sizing:border-box; padding:2px 1px 3px; border:0; border-bottom:1px dashed color-mix(in srgb,var(--ink) 45%,transparent); border-radius:0; background:transparent; color:var(--ink); font-size:18px; font-weight:700; line-height:1.25; letter-spacing:.1px; outline:none; text-shadow:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.family-name-editor .brand-input { flex:0 1 auto; min-width:68px; max-width:100%; width:88px; box-sizing:border-box; padding:2px 1px 3px; border:0; border-bottom:1px dashed color-mix(in srgb,var(--ink) 45%,transparent); border-radius:0; background:transparent; color:var(--ink); font-size:18px; font-weight:700; line-height:1.25; letter-spacing:.1px; outline:none; text-shadow:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .family-name-editor .brand-input:hover { background:transparent; border-bottom-color:color-mix(in srgb,var(--ink) 68%,transparent); }
 .family-name-editor .brand-input:focus { background:transparent; border-bottom-style:solid; border-bottom-color:var(--accent); }
 .family-name-edit-btn { width:22px; height:26px; flex:0 0 22px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--sub); display:inline-flex; align-items:center; justify-content:center; }
@@ -5238,10 +5238,11 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .family-cover-action:hover { background:rgba(25,29,34,.84); }
 
 .family-profile-section { padding:14px 15px 13px; border-bottom:1px solid var(--border); }
-.family-title-row { display:flex; align-items:center; gap:4px; }
-.family-title-row .family-identity { flex:0 1 auto; min-width:0; }
-.family-title-row .family-name-editor { flex:0 1 auto; min-width:0; }
-.family-title-row .nav-select-family { flex:0 0 auto; width:auto; min-width:0; max-width:none; }
+.family-title-row { display:flex; align-items:center; gap:4px; min-width:0; }
+.family-title-row .family-identity { flex:1 1 auto; min-width:0; max-width:calc(100% - 30px); }
+.family-title-row .family-name-editor { flex:0 1 auto; min-width:0; max-width:calc(100% - 30px); }
+.family-title-row .nav-select-family { flex:0 0 26px; width:26px; min-width:26px; max-width:26px; }
+.family-title-row .family-actions-menu { flex:0 0 auto; }
 .family-switch-btn,.family-title-menu-btn,.family-section-icon { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; min-width:26px; padding:0; border:0; border-radius:4px; background:transparent; color:var(--sub); }
 .family-switch-btn:hover,.family-title-menu-btn:hover,.family-section-icon:hover { background:var(--nav-button-hover-bg); color:var(--ink); }
 .family-switch-btn .nav-select-value { display:none; }

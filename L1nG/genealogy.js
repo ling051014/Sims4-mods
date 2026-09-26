@@ -1035,22 +1035,86 @@ const _familyNameMeasureContext = _familyNameMeasureCanvas.getContext('2d');
 
 function syncFamilyNameInputWidth() {
   if (!familyNameInput || !_familyNameMeasureContext) return;
+
   const editor = familyNameInput.closest('.family-name-editor');
+  const identity = familyNameInput.closest('.family-identity');
   const row = familyNameInput.closest('.family-title-row');
+
   if (!editor) return;
 
   const inputStyle = getComputedStyle(familyNameInput);
   const fontWeight = inputStyle.fontWeight || '700';
   const fontSize = inputStyle.fontSize || '18px';
   const fontFamily = inputStyle.fontFamily || 'sans-serif';
-  _familyNameMeasureContext.font = `${fontWeight} ${fontSize} ${fontFamily}`;
 
-  const source = familyNameInput.value || familyNameInput.placeholder || '';
-  const measured = Math.ceil(_familyNameMeasureContext.measureText(source).width + 18);
-  const rowWidth = row ? row.clientWidth : 280;
-  // 預留鉛筆、家族切換箭頭與家族管理按鈕的寬度；底線只跟著實際名稱文字伸縮。
-  const maxWidth = Math.max(68, rowWidth - 78);
-  const width = Math.max(68, Math.min(maxWidth, measured));
+  _familyNameMeasureContext.font =
+    `${fontWeight} ${fontSize} ${fontFamily}`;
+
+  const source =
+    familyNameInput.value ||
+    familyNameInput.placeholder ||
+    '';
+
+  const measured = Math.ceil(
+    _familyNameMeasureContext.measureText(source).width + 18
+  );
+
+  const elementWidth = element => {
+    if (!element) return 0;
+    return element.getBoundingClientRect().width || element.offsetWidth || 0;
+  };
+
+  const gapWidth = element => {
+    if (!element) return 0;
+
+    const style = getComputedStyle(element);
+    const value = parseFloat(
+      style.columnGap && style.columnGap !== 'normal'
+        ? style.columnGap
+        : style.gap
+    );
+
+    return Number.isFinite(value) ? value : 0;
+  };
+
+  const editButton =
+    editor.querySelector('.family-name-edit-btn');
+
+  const familySwitch =
+    identity?.querySelector('.nav-select-family');
+
+  const actionMenu =
+    row?.querySelector('.family-actions-menu');
+
+  const fixedWidth =
+    elementWidth(editButton) +
+    elementWidth(familySwitch) +
+    elementWidth(actionMenu) +
+    gapWidth(editor) +
+    gapWidth(identity) +
+    gapWidth(row);
+
+  const rowWidth =
+    row?.clientWidth ||
+    row?.getBoundingClientRect().width ||
+    0;
+
+  // 名稱只使用扣除固定按鈕與實際 gap 後的剩餘空間；
+  // 桌機維持依文字長度自適應，手機空間不足時只縮名稱本身。
+  const availableWidth =
+    rowWidth > 0
+      ? Math.max(68, Math.floor(rowWidth - fixedWidth))
+      : measured;
+
+  const width =
+    Math.max(
+      68,
+      Math.min(
+        availableWidth,
+        measured
+      )
+    );
+
   familyNameInput.style.width = `${width}px`;
 }
 
