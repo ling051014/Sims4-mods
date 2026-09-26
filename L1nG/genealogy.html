@@ -179,8 +179,40 @@
                                     </div>
                                     <div class="nav-select nav-select-family" data-nav-select-for="familySelect">
                                         <select class="nav-native-select family-select" id="familySelect" tabindex="-1" aria-hidden="true"></select>
-                                        <button class="family-switch-btn nav-select-trigger" id="familySelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" title="切換家族" aria-label="切換家族"><span class="nav-select-value family-switch-current" aria-hidden="true"></span><span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span></button>
-                                        <div class="nav-select-menu" role="listbox" aria-label="家族"></div>
+                                        <button class="family-switch-btn nav-select-trigger" id="familySelectTrigger" type="button" aria-haspopup="dialog" aria-expanded="false" title="切換家族" aria-label="切換家族"><span class="nav-select-value family-switch-current" aria-hidden="true"></span><span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span></button>
+
+                                        <!-- ========【家族選擇器】 設定 - 左側便利貼切換 EA 族譜 / 大家族，五個以上才提供搜尋 ======== -->
+                                        <div class="nav-select-menu family-nav-menu" id="familyNavMenu" role="dialog" aria-label="家族選擇">
+                                            <div class="family-nav-index" id="familyNavIndex" role="tablist" aria-label="族譜顯示">
+                                                <button class="family-nav-index-tab" id="familyNavEaTab" type="button" data-family-tree-view-mode="ea" role="tab" aria-selected="false" aria-pressed="false">
+                                                    <span class="family-nav-tab-cn family-nav-tab-cn-ea">
+                                                        <span class="family-nav-tab-ea">EA</span>
+                                                        <span class="family-nav-tab-vertical">族譜</span>
+                                                    </span>
+                                                    <span class="family-nav-tab-label-en">EA TREE</span>
+                                                </button>
+
+                                                <button class="family-nav-index-tab active" id="familyNavExtendedTab" type="button" data-family-tree-view-mode="extended" role="tab" aria-selected="true" aria-pressed="true">
+                                                    <span class="family-nav-tab-cn">
+                                                        <span class="family-nav-tab-vertical">大家族</span>
+                                                    </span>
+                                                    <span class="family-nav-tab-label-en">EXTENDED</span>
+                                                </button>
+
+                                                <button class="family-nav-search-tab" id="familyNavSearchToggle" type="button" aria-label="搜尋家族" title="搜尋家族" aria-pressed="false" hidden>⌕</button>
+                                            </div>
+
+                                            <div class="family-nav-content">
+                                                <div class="family-nav-search-row" id="familyNavSearchRow" hidden>
+                                                    <input class="family-nav-search-input" id="familyNavSearchInput" type="search" autocomplete="off" placeholder="搜尋家族…" aria-label="搜尋家族">
+                                                    <button class="family-nav-search-clear" id="familyNavSearchClear" type="button" aria-label="清除搜尋" title="清除搜尋">×</button>
+                                                </div>
+
+                                                <div class="family-nav-option-grid" id="familyNavOptionGrid" role="listbox" aria-label="家族">
+                                                    <div class="family-nav-empty" id="familyNavEmpty" hidden>沒有符合的家族</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="app-menu family-actions-menu">
