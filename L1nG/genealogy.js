@@ -3673,117 +3673,10 @@ function getAdaptiveSpouseGap(members, baseGap) {
     return Math.min(Math.max(baseGap, visualMinimum, labelDrivenGap), 168);
 }
 
-// ========【族譜輩分計算】 設定 - 先依親子關係建立世代，再讓配偶共享同一世代 ========
-function computeGenerationLevels(sims, byId) {
-  const componentParent = new Map();
-
-  sims.forEach(sim => {
-    componentParent.set(sim.id, sim.id);
-  });
-
-  function findComponent(id) {
-    const parentId = componentParent.get(id);
-
-    if (parentId == null) return null;
-    if (parentId === id) return id;
-
-    const rootId = findComponent(parentId);
-    componentParent.set(id, rootId);
-
-    return rootId;
-  }
-
-  function mergeComponents(aId, bId) {
-    const aRoot = findComponent(aId);
-    const bRoot = findComponent(bId);
-
-    if (aRoot == null || bRoot == null || aRoot === bRoot) return;
-
-    componentParent.set(bRoot, aRoot);
-  }
-
-  // 目前配偶視為同一世代單位。
-  // 只合併世代，不改動真正的父母／子女資料。
-  sims.forEach(sim => {
-    (sim.spouseIds || []).forEach(spouseId => {
-      if (!byId.has(spouseId)) return;
-      mergeComponents(sim.id, spouseId);
-    });
-  });
-
-  const parentComponents = new Map();
-
-  sims.forEach(sim => {
-    const childRoot = findComponent(sim.id);
-    if (childRoot == null) return;
-
-    if (!parentComponents.has(childRoot)) {
-      parentComponents.set(childRoot, new Set());
-    }
-
-    (sim.parentIds || []).forEach(parentId => {
-      if (!byId.has(parentId)) return;
-
-      const parentRoot = findComponent(parentId);
-
-      if (parentRoot == null || parentRoot === childRoot) return;
-
-      parentComponents.get(childRoot).add(parentRoot);
-    });
-  });
-
-  const levelMemo = new Map();
-  const visiting = new Set();
-
-  function resolveComponentLevel(rootId) {
-    if (levelMemo.has(rootId)) {
-      return levelMemo.get(rootId);
-    }
-
-    // 異常循環資料的保護。
-    // 正常族譜不應存在「自己成為自己祖先」的循環。
-    if (visiting.has(rootId)) {
-      return 0;
-    }
-
-    visiting.add(rootId);
-
-    const parents = [...(parentComponents.get(rootId) || [])];
-
-    let level = 0;
-
-    if (parents.length) {
-      level = 1 + Math.max(
-        ...parents.map(parentRoot => resolveComponentLevel(parentRoot))
-      );
-    }
-
-    visiting.delete(rootId);
-    levelMemo.set(rootId, level);
-
-    return level;
-  }
-
-  const levels = new Map();
-
-  sims.forEach(sim => {
-    const rootId = findComponent(sim.id);
-    const level = rootId == null
-      ? 0
-      : resolveComponentLevel(rootId);
-
-    levels.set(sim.id, level);
-  });
-
-  return levels;
-}
-
-function computeAutoPositions(visibleIds) {
-  const { W: NODE_W, H: NODE_H } = getDims();
+// ========【族譜自動排版核心】 設定 - Family Unit / 世代分層 / 交叉最小化 ========
+function buildGenealogyLayoutModel(visibleIds) {
   const {
-    SPOUSE: SPOUSE_GAP,
-    SIBLING: SIBLING_GAP,
-    LEVEL: LEVEL_GAP
+    SPOUSE:SPOUSE_GAP
   } = getGaps();
 
   const sims = [...visibleIds]
@@ -3794,209 +3687,521 @@ function computeAutoPositions(visibleIds) {
     sims.map(sim => [sim.id, sim])
   );
 
-  // 先算出真正的世代，再處理畫面排列。
-  const generationLevels = computeGenerationLevels(sims, byId);
+  const componentParent = new Map(
+    sims.map(sim => [sim.id, sim.id])
+  );
 
-  const childrenOf = new Map();
+  const find = id => {
+    const parent = componentParent.get(id);
+    if (parent == null) return null;
+    if (parent === id) return id;
 
-  // 一名子女可以同時登記在兩位父母下面。
-  // 不再只拿 parentIds[0] 當作唯一排列依據。
+    const root = find(parent);
+    componentParent.set(id, root);
+    return root;
+  };
+
+  const union = (a, b) => {
+    const aRoot = find(a);
+    const bRoot = find(b);
+
+    if (aRoot == null || bRoot == null || aRoot === bRoot) return;
+    componentParent.set(bRoot, aRoot);
+  };
+
+  // 現任配偶是同一個 family unit。
+  // 前任配偶保留關係線，但不強迫與現任家庭綁成同一橫向單位。
   sims.forEach(sim => {
-    const visibleParents = (sim.parentIds || [])
-      .filter(parentId => byId.has(parentId));
-
-    visibleParents.forEach(parentId => {
-      if (!childrenOf.has(parentId)) {
-        childrenOf.set(parentId, []);
-      }
-
-      childrenOf.get(parentId).push(sim);
+    (sim.spouseIds || []).forEach(spouseId => {
+      if (byId.has(spouseId)) union(sim.id, spouseId);
     });
   });
 
-  childrenOf.forEach(children => {
-    children.sort((a, b) =>
-      (a.order ?? 0) - (b.order ?? 0) ||
-      String(a.name).localeCompare(String(b.name), 'zh')
-    );
+  const unitMembers = new Map();
+
+  sims.forEach(sim => {
+    const root = find(sim.id);
+    if (!unitMembers.has(root)) unitMembers.set(root, []);
+    unitMembers.get(root).push(sim);
   });
 
-  const placed = new Set();
   const units = [];
+  const unitBySim = new Map();
 
-  let cursor = 0;
-
-  function makeUnit(head) {
-    const members = [head];
-
-    placed.add(head.id);
-
-    (head.spouseIds || []).forEach(spouseId => {
-      const spouse = byId.get(spouseId);
-
-      if (!spouse || placed.has(spouse.id)) return;
-
-      members.push(spouse);
-      placed.add(spouse.id);
-    });
-
-    const spouseGap = getAdaptiveSpouseGap(
-      members,
-      SPOUSE_GAP
-    );
-
-    return {
-      members,
-      spouseGap,
-      width:
-        members.length * NODE_W +
-        (members.length - 1) * spouseGap,
-      x: 0,
-      y: 0
-    };
-  }
-
-  function layoutUnit(unit) {
-    const childHeads = [];
-    const seenChildren = new Set();
-
-    // 配偶雙方的子女都納入同一個家庭單位。
-    // 同一名子女如果同時出現在兩位父母下面，只加入一次。
-    unit.members.forEach(member => {
-      (childrenOf.get(member.id) || []).forEach(child => {
-        if (placed.has(child.id)) return;
-        if (seenChildren.has(child.id)) return;
-
-        seenChildren.add(child.id);
-        childHeads.push(child);
-      });
-    });
-
-    childHeads.sort((a, b) =>
-      (generationLevels.get(a.id) ?? 0) -
-        (generationLevels.get(b.id) ?? 0) ||
+  [...unitMembers.entries()].forEach(([root, members], sequence) => {
+    members.sort((a, b) =>
       (a.order ?? 0) - (b.order ?? 0) ||
-      String(a.name).localeCompare(String(b.name), 'zh')
+      String(a.name || '').localeCompare(String(b.name || ''), 'zh') ||
+      String(a.id).localeCompare(String(b.id))
     );
 
-    const childUnits = [];
+    let width = 0;
+    let height = 0;
+    let spouseGap = SPOUSE_GAP;
 
-    childHeads.forEach(child => {
-      if (placed.has(child.id)) return;
+    if (members.length === 2) {
+      spouseGap = getAdaptiveSpouseGap(
+        members,
+        SPOUSE_GAP
+      );
+    }
 
-      childUnits.push(
-        makeUnit(child)
+    members.forEach((member, index) => {
+      const dims = getNodeDimensions(member);
+      width += dims.W;
+      height = Math.max(height, dims.H);
+
+      if (index < members.length - 1) {
+        width += spouseGap;
+      }
+    });
+
+    const unit = {
+      id:'unit:' + root,
+      members,
+      memberIds:new Set(members.map(member => member.id)),
+      width,
+      height,
+      spouseGap,
+      sequence,
+      parentUnitIds:new Set(),
+      childUnitIds:new Set(),
+      generation:0,
+      x:0,
+      y:0
+    };
+
+    units.push(unit);
+    members.forEach(member => unitBySim.set(member.id, unit));
+  });
+
+  const unitById = new Map(
+    units.map(unit => [unit.id, unit])
+  );
+
+  // family unit 之間只由真正 parentIds 建立世代方向。
+  sims.forEach(child => {
+    const childUnit = unitBySim.get(child.id);
+    if (!childUnit) return;
+
+    (child.parentIds || []).forEach(parentId => {
+      if (!byId.has(parentId)) return;
+
+      const parentUnit = unitBySim.get(parentId);
+      if (!parentUnit || parentUnit.id === childUnit.id) return;
+
+      parentUnit.childUnitIds.add(childUnit.id);
+      childUnit.parentUnitIds.add(parentUnit.id);
+    });
+  });
+
+  const generationMemo = new Map();
+  const visiting = new Set();
+
+  const resolveGeneration = unitId => {
+    if (generationMemo.has(unitId)) {
+      return generationMemo.get(unitId);
+    }
+
+    if (visiting.has(unitId)) {
+      // 異常循環資料保護：正常 genealogy 不應形成祖先循環。
+      return 0;
+    }
+
+    visiting.add(unitId);
+
+    const unit = unitById.get(unitId);
+    const parentIds = unit
+      ? [...unit.parentUnitIds]
+      : [];
+
+    const generation = parentIds.length
+      ? 1 + Math.max(...parentIds.map(resolveGeneration))
+      : 0;
+
+    visiting.delete(unitId);
+    generationMemo.set(unitId, generation);
+
+    return generation;
+  };
+
+  units.forEach(unit => {
+    unit.generation = resolveGeneration(unit.id);
+  });
+
+  return {
+    sims,
+    byId,
+    units,
+    unitById,
+    unitBySim
+  };
+}
+
+function stableGenealogyUnitCompare(a, b) {
+  const aOrder = Math.min(
+    ...a.members.map(member => member.order ?? Number.MAX_SAFE_INTEGER)
+  );
+  const bOrder = Math.min(
+    ...b.members.map(member => member.order ?? Number.MAX_SAFE_INTEGER)
+  );
+
+  return (
+    aOrder - bOrder ||
+    a.sequence - b.sequence ||
+    String(a.members[0]?.name || '').localeCompare(
+      String(b.members[0]?.name || ''),
+      'zh'
+    )
+  );
+}
+
+function buildGenerationLayers(units) {
+  const layers = new Map();
+
+  units.forEach(unit => {
+    if (!layers.has(unit.generation)) {
+      layers.set(unit.generation, []);
+    }
+
+    layers.get(unit.generation).push(unit);
+  });
+
+  layers.forEach(layer => {
+    layer.sort(stableGenealogyUnitCompare);
+  });
+
+  return layers;
+}
+
+function buildNormalizedUnitRanks(layers) {
+  const ranks = new Map();
+
+  layers.forEach(layer => {
+    const denominator = Math.max(1, layer.length - 1);
+
+    layer.forEach((unit, index) => {
+      ranks.set(
+        unit.id,
+        layer.length <= 1
+          ? 0.5
+          : index / denominator
+      );
+    });
+  });
+
+  return ranks;
+}
+
+function reorderGenerationLayer(layer, relationField, ranks) {
+  const previousIndex = new Map(
+    layer.map((unit, index) => [unit.id, index])
+  );
+
+  layer.sort((a, b) => {
+    const score = unit => {
+      const neighbors = [...unit[relationField]]
+        .map(id => ranks.get(id))
+        .filter(Number.isFinite);
+
+      if (!neighbors.length) return null;
+
+      return neighbors.reduce((sum, value) => sum + value, 0) /
+        neighbors.length;
+    };
+
+    const aScore = score(a);
+    const bScore = score(b);
+
+    if (aScore == null && bScore == null) {
+      return previousIndex.get(a.id) - previousIndex.get(b.id);
+    }
+
+    if (aScore == null) return 1;
+    if (bScore == null) return -1;
+
+    return (
+      aScore - bScore ||
+      previousIndex.get(a.id) - previousIndex.get(b.id)
+    );
+  });
+}
+
+function minimizeGenealogyCrossings(layers) {
+  const generationNumbers = [...layers.keys()]
+    .sort((a, b) => a - b);
+
+  if (generationNumbers.length <= 1) return;
+
+  // 多輪上下 barycenter sweep。
+  // 這裡直接改 family unit 的左右順序，而不是等畫線時再繞路。
+  for (let iteration = 0; iteration < 6; iteration += 1) {
+    let ranks = buildNormalizedUnitRanks(layers);
+
+    generationNumbers.slice(1).forEach(generation => {
+      reorderGenerationLayer(
+        layers.get(generation),
+        'parentUnitIds',
+        ranks
+      );
+
+      ranks = buildNormalizedUnitRanks(layers);
+    });
+
+    ranks = buildNormalizedUnitRanks(layers);
+
+    generationNumbers
+      .slice(0, -1)
+      .reverse()
+      .forEach(generation => {
+        reorderGenerationLayer(
+          layers.get(generation),
+          'childUnitIds',
+          ranks
+        );
+
+        ranks = buildNormalizedUnitRanks(layers);
+      });
+  }
+}
+
+function setGenerationVerticalPositions(layers) {
+  const {
+    LEVEL:LEVEL_GAP
+  } = getGaps();
+
+  const generations = [...layers.keys()]
+    .sort((a, b) => a - b);
+
+  let cursorY = 0;
+
+  generations.forEach(generation => {
+    const layer = layers.get(generation);
+    const maxHeight = Math.max(
+      0,
+      ...layer.map(unit => unit.height)
+    );
+
+    layer.forEach(unit => {
+      unit.y = cursorY;
+    });
+
+    cursorY += maxHeight + LEVEL_GAP;
+  });
+}
+
+function packGenealogyLayer(layer, desiredCenters, gap) {
+  if (!layer || !layer.length) return;
+
+  const desiredLeft = layer.map(unit => {
+    const targetCenter = desiredCenters.get(unit.id);
+
+    return Number.isFinite(targetCenter)
+      ? targetCenter - unit.width / 2
+      : unit.x;
+  });
+
+  const packedLeft = [];
+
+  layer.forEach((unit, index) => {
+    let left = desiredLeft[index];
+
+    if (!Number.isFinite(left)) {
+      left =
+        index === 0
+          ? 0
+          : packedLeft[index - 1] +
+            layer[index - 1].width +
+            gap;
+    }
+
+    if (index > 0) {
+      const minimum =
+        packedLeft[index - 1] +
+        layer[index - 1].width +
+        gap;
+
+      left = Math.max(left, minimum);
+    }
+
+    packedLeft.push(left);
+  });
+
+  // 保留整層的目標重心，避免 forward packing 只往右漂移。
+  const desiredMean = desiredLeft
+    .filter(Number.isFinite)
+    .reduce((sum, value) => sum + value, 0) /
+    Math.max(
+      1,
+      desiredLeft.filter(Number.isFinite).length
+    );
+
+  const packedMean =
+    packedLeft.reduce((sum, value) => sum + value, 0) /
+    Math.max(1, packedLeft.length);
+
+  const shift =
+    Number.isFinite(desiredMean)
+      ? desiredMean - packedMean
+      : 0;
+
+  layer.forEach((unit, index) => {
+    unit.x = packedLeft[index] + shift;
+  });
+}
+
+function assignInitialGenealogyHorizontalPositions(layers) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = getGaps();
+
+  layers.forEach(layer => {
+    let cursorX = 0;
+
+    layer.forEach(unit => {
+      unit.x = cursorX;
+      cursorX += unit.width + SIBLING_GAP;
+    });
+  });
+}
+
+function relaxGenealogyHorizontalPositions(layers, unitById) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = getGaps();
+
+  const generations = [...layers.keys()]
+    .sort((a, b) => a - b);
+
+  const centerOf = unit =>
+    unit.x + unit.width / 2;
+
+  for (let iteration = 0; iteration < 5; iteration += 1) {
+    // 子代向父代對齊。
+    generations.slice(1).forEach(generation => {
+      const layer = layers.get(generation);
+      const desired = new Map();
+
+      layer.forEach(unit => {
+        const parents = [...unit.parentUnitIds]
+          .map(id => unitById.get(id))
+          .filter(Boolean);
+
+        if (!parents.length) return;
+
+        desired.set(
+          unit.id,
+          parents.reduce((sum, parent) => sum + centerOf(parent), 0) /
+            parents.length
+        );
+      });
+
+      packGenealogyLayer(
+        layer,
+        desired,
+        SIBLING_GAP
       );
     });
 
-    if (!childUnits.length) {
-      unit.x = cursor;
-      cursor += unit.width + SIBLING_GAP;
-    } else {
-      childUnits.forEach(childUnit => {
-        layoutUnit(childUnit);
+    // 父代再向整組子代中心靠攏。
+    generations
+      .slice(0, -1)
+      .reverse()
+      .forEach(generation => {
+        const layer = layers.get(generation);
+        const desired = new Map();
+
+        layer.forEach(unit => {
+          const children = [...unit.childUnitIds]
+            .map(id => unitById.get(id))
+            .filter(Boolean);
+
+          if (!children.length) return;
+
+          desired.set(
+            unit.id,
+            children.reduce((sum, child) => sum + centerOf(child), 0) /
+              children.length
+          );
+        });
+
+        packGenealogyLayer(
+          layer,
+          desired,
+          SIBLING_GAP
+        );
       });
-
-      const firstChild = childUnits[0];
-      const lastChild = childUnits[childUnits.length - 1];
-
-      unit.x =
-        (
-          firstChild.x +
-          lastChild.x +
-          lastChild.width
-        ) / 2 -
-        unit.width / 2;
-
-      const unitRight =
-        unit.x +
-        unit.width +
-        SIBLING_GAP;
-
-      if (unitRight > cursor) {
-        cursor = unitRight;
-      }
-    }
-
-    // Y 軸只由「輩分」決定。
-    // 不再由遞迴時誰先被走訪決定。
-    const unitGeneration = Math.max(
-      ...unit.members.map(member =>
-        generationLevels.get(member.id) ?? 0
-      )
-    );
-
-    unit.y =
-      unitGeneration *
-      (NODE_H + LEVEL_GAP);
-
-    units.push(unit);
   }
+}
 
-  // 先從真正的第一代開始。
-  // 避免某人的配偶先被掃描到，就把有父母的人錯拉到第一排。
-  const orderedSims = [...sims].sort((a, b) =>
-    (generationLevels.get(a.id) ?? 0) -
-      (generationLevels.get(b.id) ?? 0) ||
-    (a.order ?? 0) - (b.order ?? 0) ||
-    String(a.name).localeCompare(String(b.name), 'zh')
-  );
-
-  orderedSims.forEach(sim => {
-    if (placed.has(sim.id)) return;
-
-    const generation =
-      generationLevels.get(sim.id) ?? 0;
-
-    if (generation !== 0) return;
-
-    layoutUnit(
-      makeUnit(sim)
-    );
-  });
-
-  // 保底處理斷開的支系、特殊 NPC 或異常資料。
-  orderedSims.forEach(sim => {
-    if (placed.has(sim.id)) return;
-
-    layoutUnit(
-      makeUnit(sim)
-    );
-  });
-
+function placeGenealogyUnitMembers(units) {
   const pos = new Map();
 
   units.forEach(unit => {
-    const spouseGap = Number.isFinite(unit.spouseGap)
-      ? unit.spouseGap
-      : SPOUSE_GAP;
+    let cursorX = unit.x;
 
     unit.members.forEach((member, index) => {
       pos.set(member.id, {
         id:member.id,
-        x:
-          unit.x +
-          index * (NODE_W + spouseGap),
+        x:cursorX,
         y:unit.y
       });
+
+      cursorX += getNodeDimensions(member).W;
+
+      if (index < unit.members.length - 1) {
+        cursorX += unit.spouseGap;
+      }
     });
   });
 
   let minX = Infinity;
+  let minY = Infinity;
 
   pos.forEach(position => {
-    if (position.x < minX) {
-      minX = position.x;
-    }
+    minX = Math.min(minX, position.x);
+    minY = Math.min(minY, position.y);
   });
 
-  if (minX < 0) {
+  const shiftX =
+    Number.isFinite(minX) && minX < 0
+      ? -minX
+      : 0;
+
+  const shiftY =
+    Number.isFinite(minY) && minY < 0
+      ? -minY
+      : 0;
+
+  if (shiftX || shiftY) {
     pos.forEach(position => {
-      position.x -= minX;
+      position.x += shiftX;
+      position.y += shiftY;
     });
   }
 
   return pos;
+}
+
+function computeAutoPositions(visibleIds) {
+  const model =
+    buildGenealogyLayoutModel(visibleIds);
+
+  const layers =
+    buildGenerationLayers(model.units);
+
+  minimizeGenealogyCrossings(layers);
+  setGenerationVerticalPositions(layers);
+  assignInitialGenealogyHorizontalPositions(layers);
+
+  relaxGenealogyHorizontalPositions(
+    layers,
+    model.unitById
+  );
+
+  return placeGenealogyUnitMembers(
+    model.units
+  );
 }
 
 function computeLayout() {
@@ -4260,138 +4465,502 @@ function render() {
   if (addMemberMask.classList.contains('show')) renderAddMemberList();
 }
 
+function buildParentChildConnectorGroups(byId, visibleIds) {
+  const groups = new Map();
+
+  visibleIds.forEach(childId => {
+    const child = byId.get(childId);
+    if (!child) return;
+
+    const parentIds = [...new Set(
+      (child.parentIds || [])
+        .filter(parentId => byId.has(parentId))
+        .map(String)
+    )].sort();
+
+    if (!parentIds.length) return;
+
+    // 領養與一般親子線不可共用同一條 bus，避免虛線 / 實線語意混在一起。
+    const styleKey =
+      child.adoptive
+        ? 'adoptive'
+        : 'parent-child';
+
+    const key =
+      parentIds.join('|') +
+      '::' +
+      styleKey;
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        parentIds,
+        adoptive:!!child.adoptive,
+        children:[]
+      });
+    }
+
+    groups.get(key).children.push(childId);
+  });
+
+  return [...groups.values()];
+}
+
+function parentConnectorSource(group, pos, byId, paths) {
+  const parentPositions = group.parentIds
+    .map(parentId => ({
+      id:parentId,
+      sim:byId.get(parentId),
+      pos:pos.get(parentId)
+    }))
+    .filter(item => item.sim && item.pos);
+
+  if (!parentPositions.length) return null;
+
+  if (parentPositions.length === 1) {
+    return cardVerticalAnchor(
+      parentPositions[0].pos,
+      'bottom'
+    );
+  }
+
+  const [first, second] = parentPositions;
+  const firstSim = first.sim;
+  const secondId = second.id;
+
+  const isPartnerPair =
+    (firstSim.spouseIds || []).includes(secondId) ||
+    (firstSim.exSpouseIds || []).includes(secondId);
+
+  if (isPartnerPair) {
+    return pairJoinPoint(
+      first.pos,
+      second.pos
+    );
+  }
+
+  // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
+  // 直接從兩張父母卡片向下匯流，再由匯流點接往子女。
+  const firstAnchor =
+    cardVerticalAnchor(first.pos, 'bottom');
+  const secondAnchor =
+    cardVerticalAnchor(second.pos, 'bottom');
+
+  const bridgeY =
+    Math.max(firstAnchor.y, secondAnchor.y) +
+    18;
+
+  paths.push(
+    '<path class="edge edge-parent" d="' +
+    'M' + firstAnchor.x + ' ' + firstAnchor.y +
+    ' V' + bridgeY +
+    ' H' + secondAnchor.x +
+    ' V' + secondAnchor.y +
+    '"/>'
+  );
+
+  return {
+    x:(firstAnchor.x + secondAnchor.x) / 2,
+    y:bridgeY
+  };
+}
+
+function parentConnectorChildAnchor(childPosition, source) {
+  const childIsBelow =
+    cardCenterY(childPosition) >= source.y;
+
+  return cardVerticalAnchor(
+    childPosition,
+    childIsBelow
+      ? 'top'
+      : 'bottom'
+  );
+}
+
+function parentConnectorBranchY(source, childAnchors) {
+  if (!childAnchors.length) return source.y;
+
+  const below = childAnchors
+    .filter(anchor => anchor.y >= source.y);
+
+  const above = childAnchors
+    .filter(anchor => anchor.y < source.y);
+
+  if (below.length >= above.length) {
+    const nearestChildY = Math.min(
+      ...below.map(anchor => anchor.y)
+    );
+
+    return source.y +
+      (nearestChildY - source.y) / 2;
+  }
+
+  const nearestChildY = Math.max(
+    ...above.map(anchor => anchor.y)
+  );
+
+  return source.y +
+    (nearestChildY - source.y) / 2;
+}
+
+function drawParentConnectorGroup(group, pos, byId, paths, labels) {
+  const source =
+    parentConnectorSource(
+      group,
+      pos,
+      byId,
+      paths
+    );
+
+  if (!source) return;
+
+  const children = group.children
+    .map(childId => ({
+      id:childId,
+      sim:byId.get(childId),
+      pos:pos.get(childId)
+    }))
+    .filter(item => item.sim && item.pos)
+    .map(item => ({
+      ...item,
+      anchor:parentConnectorChildAnchor(
+        item.pos,
+        source
+      )
+    }));
+
+  if (!children.length) return;
+
+  const edgeClass =
+    'edge edge-parent' +
+    (group.adoptive ? ' edge-adopt' : '');
+
+  // 單一子女：能直就直，真的有水平位移才使用正交折線。
+  if (children.length === 1) {
+    const child = children[0];
+    const x1 = source.x;
+    const y1 = source.y;
+    const x2 = child.anchor.x;
+    const y2 = child.anchor.y;
+
+    let labelX =
+      (x1 + x2) / 2;
+
+    let labelY =
+      (y1 + y2) / 2;
+
+    if (Math.abs(x1 - x2) < 2) {
+      paths.push(
+        '<path class="' + edgeClass + '" d="' +
+        'M' + x1 + ' ' + y1 +
+        ' V' + y2 +
+        '"/>'
+      );
+
+      labelX = x1;
+    } else {
+      const branchY =
+        y1 + (y2 - y1) / 2;
+
+      paths.push(
+        '<path class="' + edgeClass + '" d="' +
+        'M' + x1 + ' ' + y1 +
+        ' V' + branchY +
+        ' H' + x2 +
+        ' V' + y2 +
+        '"/>'
+      );
+
+      labelY = branchY;
+    }
+
+    if (showRelLabels) {
+      const key = 'parent:' + child.id;
+      const info = getRelInfoByKey(
+        key,
+        group.adoptive
+          ? 'adoptive'
+          : 'parent-child'
+      );
+
+      if (info) {
+        labels.push(
+          makeLabelSVG(
+            labelX,
+            labelY,
+            info.icon,
+            info.text,
+            key
+          )
+        );
+      }
+    }
+
+    return;
+  }
+
+  // 多名子女：同一父母只保留一條主幹與一條 sibling bus。
+  const branchY =
+    parentConnectorBranchY(
+      source,
+      children.map(child => child.anchor)
+    );
+
+  const childXs =
+    children.map(child => child.anchor.x);
+
+  const busMinX =
+    Math.min(source.x, ...childXs);
+
+  const busMaxX =
+    Math.max(source.x, ...childXs);
+
+  let pathData =
+    'M' + source.x + ' ' + source.y +
+    ' V' + branchY;
+
+  if (Math.abs(busMaxX - busMinX) >= 2) {
+    pathData +=
+      ' M' + busMinX + ' ' + branchY +
+      ' H' + busMaxX;
+  }
+
+  children.forEach(child => {
+    pathData +=
+      ' M' + child.anchor.x + ' ' + branchY +
+      ' V' + child.anchor.y;
+  });
+
+  paths.push(
+    '<path class="' + edgeClass + '" d="' +
+    pathData +
+    '"/>'
+  );
+
+  if (showRelLabels) {
+    children.forEach(child => {
+      const key = 'parent:' + child.id;
+      const info = getRelInfoByKey(
+        key,
+        group.adoptive
+          ? 'adoptive'
+          : 'parent-child'
+      );
+
+      if (!info) return;
+
+      labels.push(
+        makeLabelSVG(
+          child.anchor.x,
+          branchY +
+            (child.anchor.y - branchY) / 2,
+          info.icon,
+          info.text,
+          key
+        )
+      );
+    });
+  }
+}
+
 function drawEdges() {
   if (!layoutCache) return;
-  const { W: NODE_W, H: NODE_H } = getDims();
-  const {pos, byId, visibleIds} = layoutCache;
-  const paths = [], labels = [];
 
-  visibleIds.forEach(id => {
-    const c = byId.get(id);
-    if (!c) return;
-    const visPids = (c.parentIds||[]).filter(pid => byId.has(pid));
-    if (!visPids.length) return;
-    const a = pos.get(c.id);
-    if (!a) return;
-    const p0 = pos.get(visPids[0]);
-    if (!p0) return;
+  const {
+    pos,
+    byId,
+    visibleIds
+  } = layoutCache;
 
-    // 雙親存在時，主幹必須直接接到兩位父母之間的配偶線。
-    // 雙親子女連線以實際配偶線接點作為共同起點，避免自由排列時產生懸空斷點。
-    let start;
-    if (visPids.length >= 2) {
-      const pA = pos.get(visPids[0]);
-      const pB = pos.get(visPids[1]);
-      if (!pA || !pB) return;
-      start = pairJoinPoint(pA, pB);
-    } else {
-      const childIsBelow = cardCenterY(a) >= cardCenterY(p0);
-      start = cardVerticalAnchor(p0, childIsBelow ? 'bottom' : 'top');
-    }
+  const paths = [];
+  const labels = [];
 
-    // 親子線只允許接到子女卡片的上 / 下正中央，不因水平拖曳改接左右側。
-    const childAnchor = cardVerticalAnchor(a, start.y <= cardCenterY(a) ? 'top' : 'bottom');
-    const x1 = start.x;
-    const y1 = start.y;
-    const x2 = childAnchor.x;
-    const y2 = childAnchor.y;
-
-    // 親子關係的水平分支線與關係標籤必須共用同一個中點。
-    // 以「上一代卡片底部」與「下一代卡片頂部」之間的可用空間計算，
-    // 因此拉開代距後，線與文字會一起維持在視覺正中央。
-    let branchY = y1 + (y2 - y1) / 2;
-    const childTop = cardVerticalAnchor(a, 'top').y;
-    if (childTop > y1) {
-      let upperBottom = cardVerticalAnchor(p0, 'bottom').y;
-      if (visPids.length >= 2) {
-        const pA = pos.get(visPids[0]);
-        const pB = pos.get(visPids[1]);
-        if (pA && pB) {
-          upperBottom = Math.max(
-            cardVerticalAnchor(pA, 'bottom').y,
-            cardVerticalAnchor(pB, 'bottom').y
-          );
-        }
-      }
-      if (childTop > upperBottom) branchY = upperBottom + (childTop - upperBottom) / 2;
-    }
-
-    const adopt = c.adoptive ? ' edge-adopt' : '';
-    paths.push(`<path class="edge edge-parent${adopt}" d="M${x1} ${y1} V${branchY} H${x2} V${y2}"/>`);
-    if (showRelLabels) {
-      const key = 'parent:' + c.id;
-      const info = getRelInfoByKey(key, c.adoptive ? 'adoptive' : 'parent-child');
-      if (info) labels.push(makeLabelSVG((x1+x2)/2, branchY, info.icon, info.text, key));
-    }
+  // 親子關係先依「同一組父母」整併。
+  // 不再每個 child 各自畫一條 V-H-V，避免大量重疊與平行折線。
+  buildParentChildConnectorGroups(
+    byId,
+    visibleIds
+  ).forEach(group => {
+    drawParentConnectorGroup(
+      group,
+      pos,
+      byId,
+      paths,
+      labels
+    );
   });
 
   const drawnPair = new Set();
+
   visibleIds.forEach(id => {
-    const c = byId.get(id);
-    if (!c) return;
-    (c.spouseIds||[]).forEach(sid => {
-      if (!visibleIds.has(sid)) return;
-      const pairK = pairKey(id, sid);
+    const sim = byId.get(id);
+    if (!sim) return;
+
+    (sim.spouseIds || []).forEach(spouseId => {
+      if (!visibleIds.has(spouseId)) return;
+
+      const pairK = pairKey(id, spouseId);
       if (drawnPair.has(pairK)) return;
+
       drawnPair.add(pairK);
-      const a = pos.get(id), b = pos.get(sid);
+
+      const a = pos.get(id);
+      const b = pos.get(spouseId);
+
       if (!a || !b) return;
-      paths.push(`<path class="edge edge-spouse" d="${pairPath(a,b)}"/>`);
-      if (showRelLabels) {
-        const key = 'spouse:' + pairK;
-        const info = getRelInfoByKey(key, 'spouse');
-        if (info) {
-          const join = pairJoinPoint(a, b);
-          labels.push(makeLabelSVG(join.x, join.y, info.icon, info.text, key));
-        }
-      }
+
+      paths.push(
+        '<path class="edge edge-spouse" d="' +
+        pairPath(a, b) +
+        '"/>'
+      );
+
+      if (!showRelLabels) return;
+
+      const key = 'spouse:' + pairK;
+      const info = getRelInfoByKey(
+        key,
+        'spouse'
+      );
+
+      if (!info) return;
+
+      const join = pairJoinPoint(a, b);
+
+      labels.push(
+        makeLabelSVG(
+          join.x,
+          join.y,
+          info.icon,
+          info.text,
+          key
+        )
+      );
     });
   });
 
   const drawnEx = new Set();
+
   visibleIds.forEach(id => {
-    const c = byId.get(id);
-    if (!c) return;
-    (c.exSpouseIds||[]).forEach(sid => {
-      if (!visibleIds.has(sid)) return;
-      const pairK = pairKey(id, sid);
+    const sim = byId.get(id);
+    if (!sim) return;
+
+    (sim.exSpouseIds || []).forEach(spouseId => {
+      if (!visibleIds.has(spouseId)) return;
+
+      const pairK = pairKey(id, spouseId);
       if (drawnEx.has(pairK)) return;
+
       drawnEx.add(pairK);
-      const a = pos.get(id), b = pos.get(sid);
+
+      const a = pos.get(id);
+      const b = pos.get(spouseId);
+
       if (!a || !b) return;
-      paths.push(`<path class="edge edge-exspouse" d="${pairPath(a,b)}"/>`);
-      if (showRelLabels) {
-        const key = 'exspouse:' + pairK;
-        const info = getRelInfoByKey(key, 'exspouse');
-        if (info) {
-          const join = pairJoinPoint(a, b);
-          labels.push(makeLabelSVG(join.x, join.y, info.icon, info.text, key));
-        }
-      }
+
+      paths.push(
+        '<path class="edge edge-exspouse" d="' +
+        pairPath(a, b) +
+        '"/>'
+      );
+
+      if (!showRelLabels) return;
+
+      const key = 'exspouse:' + pairK;
+      const info = getRelInfoByKey(
+        key,
+        'exspouse'
+      );
+
+      if (!info) return;
+
+      const join = pairJoinPoint(a, b);
+
+      labels.push(
+        makeLabelSVG(
+          join.x,
+          join.y,
+          info.icon,
+          info.text,
+          key
+        )
+      );
     });
   });
 
-  (db.links||[]).forEach(l => {
-    if (!visibleIds.has(l.from) || !visibleIds.has(l.to)) return;
-    const a = pos.get(l.from), b = pos.get(l.to);
-    if (!a || !b) return;
-    const fromAnchor = avatarBoundaryAnchor(a, b);
-    const toAnchor = avatarBoundaryAnchor(b, a);
-    const x1 = fromAnchor.x, y1 = fromAnchor.y;
-    const x2 = toAnchor.x, y2 = toAnchor.y;
-    const dx = x2-x1, dy = y2-y1;
-    const cx = (x1+x2)/2 - dy*0.15;
-    const cy = (y1+y2)/2 + dx*0.15;
-    paths.push(`<path class="edge edge-other" d="M${x1} ${y1} Q${cx} ${cy} ${x2} ${y2}"/>`);
-    if (showRelLabels) {
-      const key = 'link:' + l.id;
-      const info = getRelInfoByKey(key, 'custom');
-      if (info) {
-        const px = 0.25*x1 + 0.5*cx + 0.25*x2;
-        const py = 0.25*y1 + 0.5*cy + 0.25*y2;
-        labels.push(makeLabelSVG(px, py, info.icon, info.text, key));
-      }
+  // 自訂關係保留曲線語意，與 genealogy 主幹分離。
+  (db.links || []).forEach(link => {
+    if (
+      !visibleIds.has(link.from) ||
+      !visibleIds.has(link.to)
+    ) {
+      return;
     }
+
+    const a = pos.get(link.from);
+    const b = pos.get(link.to);
+
+    if (!a || !b) return;
+
+    const fromAnchor =
+      avatarBoundaryAnchor(a, b);
+
+    const toAnchor =
+      avatarBoundaryAnchor(b, a);
+
+    const x1 = fromAnchor.x;
+    const y1 = fromAnchor.y;
+    const x2 = toAnchor.x;
+    const y2 = toAnchor.y;
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+
+    const cx =
+      (x1 + x2) / 2 -
+      dy * 0.15;
+
+    const cy =
+      (y1 + y2) / 2 +
+      dx * 0.15;
+
+    paths.push(
+      '<path class="edge edge-other" d="' +
+      'M' + x1 + ' ' + y1 +
+      ' Q' + cx + ' ' + cy +
+      ' ' + x2 + ' ' + y2 +
+      '"/>'
+    );
+
+    if (!showRelLabels) return;
+
+    const key = 'link:' + link.id;
+    const info = getRelInfoByKey(
+      key,
+      'custom'
+    );
+
+    if (!info) return;
+
+    const px =
+      0.25 * x1 +
+      0.5 * cx +
+      0.25 * x2;
+
+    const py =
+      0.25 * y1 +
+      0.5 * cy +
+      0.25 * y2;
+
+    labels.push(
+      makeLabelSVG(
+        px,
+        py,
+        info.icon,
+        info.text,
+        key
+      )
+    );
   });
 
   svg.innerHTML = paths.join('');
@@ -6511,19 +7080,29 @@ $('labelToggle').onclick = () => {
 };
 
 function getFamilyGenerationLevels(fam) {
-  const sims =
+  const visibleIds = new Set(
     (fam && fam.memberIds || [])
-      .map(id => db.sims[id])
-      .filter(Boolean);
+      .map(String)
+      .filter(id => db.sims[id])
+  );
 
-  if (!sims.length) return new Map();
+  if (!visibleIds.size) return new Map();
 
-  const byId =
-    new Map(
-      sims.map(sim => [sim.id, sim])
-    );
+  const model =
+    buildGenealogyLayoutModel(visibleIds);
 
-  return computeGenerationLevels(sims, byId);
+  const levels = new Map();
+
+  model.units.forEach(unit => {
+    unit.members.forEach(member => {
+      levels.set(
+        member.id,
+        unit.generation
+      );
+    });
+  });
+
+  return levels;
 }
 
 function calculateFamilyGenerationCount(fam) {
