@@ -1250,35 +1250,48 @@ function getTopbarFilterState() {
   };
 }
 
+function topbarFilterGroupMatches(selectedValues, inputs, value) {
+  // 全部勾選代表「此分類不限制」；取消部分選項後，才依勾選項目進行 OR 篩選。
+  if (selectedValues.size === inputs.length) return true;
+
+  return selectedValues.has(value || '');
+}
+
 function simMatchesTopbarFilters(sim) {
   if (!sim) return false;
 
   const filters = getTopbarFilterState();
 
-  if (filters.status.size && !filters.status.has(sim.status || '')) return false;
-  if (filters.gender.size && !filters.gender.has(sim.gender || '')) return false;
-  if (filters.race.size && !filters.race.has(sim.race || '')) return false;
-  if (filters.lifeStage.size && !filters.lifeStage.has(sim.lifeStage || '')) return false;
+  if (!topbarFilterGroupMatches(filters.status, statusFilterInputs, sim.status)) return false;
+  if (!topbarFilterGroupMatches(filters.gender, genderFilterInputs, sim.gender)) return false;
+  if (!topbarFilterGroupMatches(filters.race, raceFilterInputs, sim.race)) return false;
+  if (!topbarFilterGroupMatches(filters.lifeStage, lifeStageFilterInputs, sim.lifeStage)) return false;
 
   return true;
 }
 
 function updateTopbarFilterUI() {
-  const filters = getTopbarFilterState();
-  const count =
-    filters.status.size +
-    filters.gender.size +
-    filters.race.size +
-    filters.lifeStage.size;
+  const groups = [
+    [statusFilterInputs, checkedTopbarFilterValues(statusFilterInputs)],
+    [genderFilterInputs, checkedTopbarFilterValues(genderFilterInputs)],
+    [raceFilterInputs, checkedTopbarFilterValues(raceFilterInputs)],
+    [lifeStageFilterInputs, checkedTopbarFilterValues(lifeStageFilterInputs)]
+  ];
+
+  const excludedCount = groups.reduce(
+    (total, [inputs, selectedValues]) =>
+      total + Math.max(0, inputs.length - selectedValues.size),
+    0
+  );
 
   const button = $('topbarFilterBtn');
   const countEl = $('topbarFilterCount');
 
-  if (button) button.classList.toggle('active', count > 0);
+  if (button) button.classList.toggle('active', excludedCount > 0);
 
   if (countEl) {
-    countEl.hidden = count === 0;
-    countEl.textContent = count ? `· ${count}` : '';
+    countEl.hidden = excludedCount === 0;
+    countEl.textContent = excludedCount ? `· ${excludedCount}` : '';
   }
 }
 
@@ -8035,7 +8048,7 @@ $('filterResetBtn')?.addEventListener('click', event => {
     ...raceFilterInputs,
     ...lifeStageFilterInputs
   ].forEach(input => {
-    input.checked = false;
+    input.checked = true;
   });
 
   applyTopbarFilters();
