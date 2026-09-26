@@ -406,6 +406,201 @@ function cardSettingsHasBody(settings) {
   return CARD_CONTENT_FIELD_KEYS.some(key => !!settings[key]);
 }
 
+// ========【檢視卡片內容模型】 設定 - 版型與外觀分離，render / 尺寸計算共用同一份資料 ========
+const VIEW_CARD_LAYOUT = Object.freeze({
+  width:176,
+  avatarSize:76,
+  horizontalPadding:20,
+  topPadding:12,
+  bottomPadding:10,
+  gap:4,
+  nameFontSize:11,
+  metaFontSize:10,
+  nameLineHeight:13.2,
+  metaLineHeight:12.5
+});
+
+function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
+  if (!sim) return { name:'', primary:[], details:[], hasText:false };
+
+  const dName = displayDataText(sim.name, sim);
+  const dCareer = displayDataText(sim.career, sim);
+  const dResidence = displayDataText(sim.residence, sim);
+  const dAspiration = displayDataText(sim.aspiration, sim);
+  const dTraits = (sim.traits || [])
+    .map(value => displayDataText(value, sim))
+    .filter(Boolean);
+
+  const name = settings.name
+    ? `${dName}${settings.gender ? formatCardGender(sim.gender) : ''}`
+    : '';
+
+  const primary = [];
+
+  if (!settings.name && settings.gender) {
+    primary.push({ text:uiText(sim.gender || '其他') });
+  }
+
+  const stageAge = [];
+  if (settings.lifeStage) stageAge.push(uiText(sim.lifeStage));
+  if (settings.age && sim.age != null && sim.age !== '') stageAge.push(formatCardAge(sim.age));
+  if (stageAge.length) primary.push({ text:stageAge.join(' · ') });
+
+  if (settings.birthday && sim.birthdayMonth && sim.birthdayDay) {
+    primary.push({
+      text:formatBirthdaySummary(sim.birthdayMonth, sim.birthdayDay),
+      icon:'cake2'
+    });
+  }
+
+  const statusRace = [];
+  if (settings.status) statusRace.push(uiText(sim.status || '在世'));
+  if (settings.race && sim.race && RACE_PRESETS[sim.race]) {
+    statusRace.push(uiText(RACE_PRESETS[sim.race].label));
+  }
+  if (statusRace.length) primary.push({ text:statusRace.join(' · ') });
+
+  const details = [];
+  if (settings.career && sim.career) details.push({ text:dCareer, detail:true });
+  if (settings.residence && sim.residence) details.push({ text:dResidence, icon:'house', detail:true });
+  if (settings.aspiration && sim.aspiration) details.push({ text:dAspiration, icon:'bullseye', detail:true });
+  if (settings.traits && dTraits.length) details.push({ text:dTraits.join(' / '), detail:true });
+
+  if (settings.pets || settings.gallery) {
+    const mediaBits = [];
+    if (settings.pets && (sim.pets || []).length) mediaBits.push(`${uiText('寵物')} ${(sim.pets || []).length}`);
+    if (settings.gallery && (sim.gallery || []).length) mediaBits.push(`${uiText('相簿')} ${(sim.gallery || []).length}`);
+    if (mediaBits.length) details.push({ text:mediaBits.join(' · ') });
+  }
+
+  return {
+    name,
+    primary,
+    details,
+    hasText:!!(name || primary.length || details.length)
+  };
+}
+
+function renderViewCardLine(line) {
+  const className = `n-view-meta${line.detail ? ' n-view-text' : ''}`;
+  const title = line.text ? ` title="${esc(line.text)}"` : '';
+  const body = line.icon
+    ? `${iconSvg(line.icon)}<span>${esc(line.text)}</span>`
+    : esc(line.text);
+
+  return `<div class="${className}"${title}>${body}</div>`;
+}
+
+function estimateWrappedRows(text, maxWidth, fontSize) {
+  const value = String(text || '').trim();
+  if (!value) return 0;
+
+  return Math.max(
+    1,
+    Math.ceil(
+      measureText(value, fontSize) /
+      Math.max(24, maxWidth)
+    )
+  );
+}
+
+function estimateViewCardHeight(sim, settings) {
+  const model = buildViewCardContentModel(sim, settings);
+  if (!model.hasText) return 100;
+
+  const innerWidth =
+    VIEW_CARD_LAYOUT.width -
+    VIEW_CARD_LAYOUT.horizontalPadding;
+
+  let height =
+    VIEW_CARD_LAYOUT.topPadding +
+    VIEW_CARD_LAYOUT.avatarSize +
+    VIEW_CARD_LAYOUT.gap;
+
+  if (model.name) {
+    height +=
+      estimateWrappedRows(
+        model.name,
+        innerWidth,
+        VIEW_CARD_LAYOUT.nameFontSize
+      ) *
+      VIEW_CARD_LAYOUT.nameLineHeight;
+
+    height += VIEW_CARD_LAYOUT.gap;
+  }
+
+  [...model.primary, ...model.details].forEach(line => {
+    const lineWidth =
+      Math.max(
+        24,
+        innerWidth - (line.icon ? 18 : 0)
+      );
+
+    height +=
+      estimateWrappedRows(
+        line.text,
+        lineWidth,
+        VIEW_CARD_LAYOUT.metaFontSize
+      ) *
+      VIEW_CARD_LAYOUT.metaLineHeight;
+
+    height += VIEW_CARD_LAYOUT.gap;
+  });
+
+  return Math.max(
+    100,
+    Math.ceil(
+      height +
+      VIEW_CARD_LAYOUT.bottomPadding
+    )
+  );
+}
+
+function getViewCardDimensions(settings) {
+  let maxHeight = 100;
+  let hasVisibleText = false;
+
+  if (db?.families?.length && db?.sims) {
+    const family = currentFamily();
+    const visibleIds = family
+      ? getVisibleIds(family.id)
+      : new Set();
+
+    visibleIds.forEach(id => {
+      const sim = db.sims[id];
+      if (!sim) return;
+
+      const model =
+        buildViewCardContentModel(
+          sim,
+          settings
+        );
+
+      hasVisibleText =
+        hasVisibleText ||
+        model.hasText;
+
+      maxHeight =
+        Math.max(
+          maxHeight,
+          estimateViewCardHeight(
+            sim,
+            settings
+          )
+        );
+    });
+  }
+
+  if (!hasVisibleText && !cardSettingsHasBody(settings)) {
+    return { W:100, H:100 };
+  }
+
+  return {
+    W:VIEW_CARD_LAYOUT.width,
+    H:maxHeight
+  };
+}
+
 function getDims() {
   if (viewMode === 'edit') {
     const settings = getCardEditSettings();
@@ -421,39 +616,23 @@ function getDims() {
       settings.pets,
       settings.gallery
     ].filter(Boolean).length;
-    if (!bodyRows) return { W: 92, H: 92 };
+
+    if (!bodyRows) return { W:92, H:92 };
+
     return {
-      W: NODE_DIMS.edit.W,
-      H: Math.max(98, 30 + Math.max(64, bodyRows * 18))
+      W:NODE_DIMS.edit.W,
+      H:Math.max(
+        98,
+        30 + Math.max(64, bodyRows * 18)
+      )
     };
   }
 
-  const settings = getCardViewSettings();
-  const compactMetaLine = settings.lifeStage || settings.age;
-  const statusLine = settings.status || settings.race;
-  const mediaLine = settings.pets || settings.gallery;
-  const genderOnlyLine = settings.gender && !settings.name;
-  const primaryRows = [genderOnlyLine, compactMetaLine, settings.birthday, statusLine].filter(Boolean).length;
-  const detailRows = [settings.career, settings.residence, settings.aspiration, settings.traits, mediaLine].filter(Boolean).length;
-  const hasAnyText = !!(settings.name || primaryRows || detailRows);
-
-  if (settings.appearance === 'minimal') {
-    if (!hasAnyText) return { W: 100, H: 100 };
-    const extraLines = primaryRows + detailRows;
-    const hasWideText = settings.name || settings.career || settings.residence || settings.aspiration || settings.traits;
-    const width = (settings.career || settings.residence || settings.aspiration || settings.traits) ? 164 : (hasWideText ? 136 : 108);
-    const baseHeight = settings.name ? 118 : 102;
-    return { W: width, H: Math.max(102, baseHeight + extraLines * 17) };
-  }
-
-  // 有外框時改用「頭像 + 主要資料」橫向頭部；額外資料再往下排，避免大面積空白。
-  if (!hasAnyText) return { W: 100, H: 100 };
-  const headTextRows = (settings.name ? 1 : 0) + primaryRows;
-  const headHeight = Math.max(64, headTextRows * 16 + (settings.name ? 3 : 0));
-  const width = 192;
-  const detailsHeight = detailRows ? (8 + detailRows * 17) : 0;
-  return { W: width, H: Math.max(88, 20 + headHeight + detailsHeight) };
+  return getViewCardDimensions(
+    getCardViewSettings()
+  );
 }
+
 function getGaps() {
   return GAPS[viewMode] || GAPS.view;
 }
@@ -550,6 +729,12 @@ function buildSample() {
 let db = null, layoutCache = null, scale = 1;
 let panX = 0, panY = 0, editingId = null, editingAvatar = null;
 
+// ========【畫布視角狀態】 設定 - 自動 Fit 與手動視角分離，viewport 改變時保留正確中心 ========
+let canvasViewState = 'fit';
+let viewportResizeObserver = null;
+let viewportResizeRaf = null;
+let lastViewportSize = { width:0, height:0 };
+
 // 自由排列工具：選取 / 框選與畫布拖曳分離。
 let arrangeTool = 'pan';
 const selectedNodeIds = new Set();
@@ -576,6 +761,8 @@ const familyNameInput = $('familyName'), familySelect = $('familySelect');
 const searchInput = $('search'), searchResults = $('searchResults');
 const statusFilterInputs = [...document.querySelectorAll('input[name="statusFilter"]')];
 const genderFilterInputs = [...document.querySelectorAll('input[name="genderFilter"]')];
+const raceFilterInputs = [...document.querySelectorAll('input[name="raceFilter"]')];
+const lifeStageFilterInputs = [...document.querySelectorAll('input[name="lifeStageFilter"]')];
 const rosterSearch = $('rosterSearch');
 const modeToggle = $('modeToggle');
 const selectToolBtn = $('selectToolBtn');
@@ -940,33 +1127,58 @@ function currentFamily() {
   return db.families.find(f => f.id === db.currentId) || db.families[0];
 }
 
-// ========【頂部人物篩選】 設定 - 狀態與性別可交叉篩選，取代單一人生階段篩選 ========
+// ========【頂部人物篩選】 設定 - 同類多選 OR、跨類別 AND ========
+function checkedTopbarFilterValues(inputs) {
+  return new Set(
+    inputs
+      .filter(input => input.checked)
+      .map(input => input.value)
+      .filter(Boolean)
+  );
+}
+
 function getTopbarFilterState() {
-  const status = document.querySelector('input[name="statusFilter"]:checked')?.value || '';
-  const gender = document.querySelector('input[name="genderFilter"]:checked')?.value || '';
-  return { status, gender };
+  return {
+    status:checkedTopbarFilterValues(statusFilterInputs),
+    gender:checkedTopbarFilterValues(genderFilterInputs),
+    race:checkedTopbarFilterValues(raceFilterInputs),
+    lifeStage:checkedTopbarFilterValues(lifeStageFilterInputs)
+  };
 }
 
 function simMatchesTopbarFilters(sim) {
   if (!sim) return false;
-  const { status, gender } = getTopbarFilterState();
-  if (status && sim.status !== status) return false;
-  if (gender && sim.gender !== gender) return false;
+
+  const filters = getTopbarFilterState();
+
+  if (filters.status.size && !filters.status.has(sim.status || '')) return false;
+  if (filters.gender.size && !filters.gender.has(sim.gender || '')) return false;
+  if (filters.race.size && !filters.race.has(sim.race || '')) return false;
+  if (filters.lifeStage.size && !filters.lifeStage.has(sim.lifeStage || '')) return false;
+
   return true;
 }
 
 function updateTopbarFilterUI() {
-  const { status, gender } = getTopbarFilterState();
-  const count = (status ? 1 : 0) + (gender ? 1 : 0);
+  const filters = getTopbarFilterState();
+  const count =
+    filters.status.size +
+    filters.gender.size +
+    filters.race.size +
+    filters.lifeStage.size;
+
   const button = $('topbarFilterBtn');
   const countEl = $('topbarFilterCount');
+
   if (button) button.classList.toggle('active', count > 0);
+
   if (countEl) {
     countEl.hidden = count === 0;
     countEl.textContent = count ? `· ${count}` : '';
   }
 }
 
+// ========【預設資料翻譯】 設定 - 繁中為唯一基準；只翻譯內建範例既有值 ========
 // ========【預設資料翻譯】 設定 - 繁中為唯一基準；只翻譯內建範例既有值 ========
 const BUILTIN_SAMPLE_SIM_IDS = new Set(['g1','g2','g3','g4','g5','g6']);
 const BUILTIN_SAMPLE_FAMILY_IDS = new Set(['fam_goth','fam_bacheler']);
@@ -1134,7 +1346,6 @@ function setFamilyPanelCollapsed(collapsed, { persist = true } = {}) {
     btn.setAttribute('aria-label', btn.title);
   }
   if (persist) { try { localStorage.setItem(FAMILY_PANEL_COLLAPSED_KEY, next ? '1' : '0'); } catch (_) {} }
-  requestAnimationFrame(() => { if (layoutCache) fitScreen(); });
 }
 function restoreFamilyPanelCollapsed() {
   let collapsed = false;
@@ -2556,25 +2767,156 @@ function applyTransform({ interacting = false } = {}) {
 }
 function zoomAt(clientX, clientY, factor) {
   const rect = viewport.getBoundingClientRect();
-  const mx = clientX - rect.left, my = clientY - rect.top;
-  const rawScale = Math.min(Math.max(scale*factor, SCALE_MIN), SCALE_MAX);
+  const mx = clientX - rect.left;
+  const my = clientY - rect.top;
+  const rawScale = Math.min(
+    Math.max(scale * factor, SCALE_MIN),
+    SCALE_MAX
+  );
   const ns = Math.round(rawScale * 40) / 40;
+
   if (ns === scale) return;
-  const wx = (mx - panX) / scale, wy = (my - panY) / scale;
+
+  const wx = (mx - panX) / scale;
+  const wy = (my - panY) / scale;
+
+  canvasViewState = 'manual';
   scale = ns;
   panX = mx - wx * scale;
   panY = my - wy * scale;
-  applyTransform({ interacting: true });
+
+  applyTransform({ interacting:true });
 }
-function fitScreen() {
+
+function fitScreen({ rememberState = true } = {}) {
   const w = parseFloat(stage.style.width) || 1;
   const h = parseFloat(stage.style.height) || 1;
-  const vw = viewport.clientWidth, vh = viewport.clientHeight;
-  scale = Math.min((vw-40)/w, (vh-40)/h, 1.4);
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight;
+
+  if (rememberState) {
+    canvasViewState = 'fit';
+  }
+
+  scale = Math.min(
+    (vw - 40) / w,
+    (vh - 40) / h,
+    1.4
+  );
+
   scale = Math.max(scale, SCALE_MIN);
-  panX = (vw - w*scale)/2;
-  panY = (vh - h*scale)/2;
+  panX = (vw - w * scale) / 2;
+  panY = (vh - h * scale) / 2;
+
   applyTransform();
+}
+
+function preserveWorldCenterAfterViewportResize(previousSize, nextSize) {
+  if (!layoutCache) return;
+
+  if (canvasViewState === 'fit') {
+    fitScreen({ rememberState:false });
+    return;
+  }
+
+  if (!previousSize.width || !previousSize.height) return;
+
+  const worldCenterX =
+    (previousSize.width / 2 - panX) /
+    scale;
+
+  const worldCenterY =
+    (previousSize.height / 2 - panY) /
+    scale;
+
+  panX =
+    nextSize.width / 2 -
+    worldCenterX * scale;
+
+  panY =
+    nextSize.height / 2 -
+    worldCenterY * scale;
+
+  applyTransform();
+}
+
+function setupViewportResizeObserver() {
+  if (!viewport || viewportResizeObserver) return;
+
+  lastViewportSize = {
+    width:viewport.clientWidth,
+    height:viewport.clientHeight
+  };
+
+  const handleResize = (width, height) => {
+    const nextSize = {
+      width:Math.max(1, Math.round(width)),
+      height:Math.max(1, Math.round(height))
+    };
+
+    const previousSize = lastViewportSize;
+
+    if (
+      nextSize.width === previousSize.width &&
+      nextSize.height === previousSize.height
+    ) {
+      return;
+    }
+
+    lastViewportSize = nextSize;
+
+    if (viewportResizeRaf) {
+      cancelAnimationFrame(viewportResizeRaf);
+    }
+
+    viewportResizeRaf = requestAnimationFrame(() => {
+      viewportResizeRaf = null;
+
+      preserveWorldCenterAfterViewportResize(
+        previousSize,
+        nextSize
+      );
+    });
+  };
+
+  if ('ResizeObserver' in window) {
+    viewportResizeObserver =
+      new ResizeObserver(entries => {
+        const entry = entries.find(
+          item => item.target === viewport
+        );
+
+        if (!entry) return;
+
+        handleResize(
+          entry.contentRect.width,
+          entry.contentRect.height
+        );
+      });
+
+    viewportResizeObserver.observe(viewport);
+    return;
+  }
+
+  const fallback = () => {
+    handleResize(
+      viewport.clientWidth,
+      viewport.clientHeight
+    );
+  };
+
+  viewportResizeObserver = {
+    disconnect:() =>
+      window.removeEventListener(
+        'resize',
+        fallback
+      )
+  };
+
+  window.addEventListener(
+    'resize',
+    fallback
+  );
 }
 
 function focusSimOnCanvas(simId) {
@@ -2583,6 +2925,9 @@ function focusSimOnCanvas(simId) {
   const pos = layoutCache?.pos?.get(simId);
   if (!pos) return;
   const { W, H } = getDims();
+  // 尋找人物屬於使用者主動移動畫布，viewport 改變後保留目前世界中心。
+  canvasViewState = 'manual';
+
   // 尋找人物時不強制改成固定倍率；只有畫面縮得太小時才稍微放大，避免失去上下文。
   if (scale < .72) scale = .72;
   const centerX = pos.x + PAD + W / 2;
@@ -2765,131 +3110,282 @@ function drawEdges() {
   labelsSvg.innerHTML = labels.join('');
 }
 
-// ========【族譜連線】 設定 - 無框卡接頭像；有外框卡接卡片邊界，避免線條延伸進卡片 ========
+// ========【族譜連線】 設定 - 橫向關係接頭像側邊；直向親子線保留完整資訊空間 ========
 function getCardAvatarGeometry() {
-  const { W: NODE_W } = getDims();
+  const { W:NODE_W } = getDims();
+
   if (viewMode === 'edit') {
     const settings = getCardEditSettings();
     const hasBody = cardSettingsHasBody(settings);
+
     return hasBody
-      ? { size:64, left:12, top:14, centered:false }
-      : { size:64, left:(NODE_W - 64) / 2, top:14, centered:false };
+      ? { size:64, left:12, top:14 }
+      : {
+          size:64,
+          left:(NODE_W - 64) / 2,
+          top:14
+        };
   }
 
-  const settings = getCardViewSettings();
-  const hasPrimary = !!(settings.name || settings.gender || settings.lifeStage || settings.age || settings.birthday || settings.status || settings.race);
-  if (settings.appearance !== 'minimal') {
-    return hasPrimary
-      ? { size:64, left:12, top:10, centered:false }
-      : { size:64, left:(NODE_W - 64) / 2, top:10, centered:false };
-  }
-  return { size:76, left:(NODE_W - 76) / 2, top:12, centered:false };
+  return {
+    size:VIEW_CARD_LAYOUT.avatarSize,
+    left:
+      (NODE_W - VIEW_CARD_LAYOUT.avatarSize) /
+      2,
+    top:12
+  };
 }
 
 function cardAvatarRect(card) {
   const geo = getCardAvatarGeometry();
   const left = card.x + PAD + geo.left;
   const top = card.y + PAD + geo.top;
+
   return {
     left,
     top,
-    right: left + geo.size,
-    bottom: top + geo.size,
-    centerX: left + geo.size / 2,
-    centerY: top + geo.size / 2
+    right:left + geo.size,
+    bottom:top + geo.size,
+    centerX:left + geo.size / 2,
+    centerY:top + geo.size / 2
   };
 }
 
 function cardOuterRect(card) {
-  const { W: NODE_W, H: NODE_H } = getDims();
+  const { W:NODE_W, H:NODE_H } = getDims();
   const left = card.x + PAD;
   const top = card.y + PAD;
+
   return {
     left,
     top,
-    right: left + NODE_W,
-    bottom: top + NODE_H,
-    centerX: left + NODE_W / 2,
-    centerY: top + NODE_H / 2
+    right:left + NODE_W,
+    bottom:top + NODE_H,
+    centerX:left + NODE_W / 2,
+    centerY:top + NODE_H / 2
   };
 }
 
-function lineAnchorUsesAvatar() {
-  // 極簡檢視卡沒有可見外框，線直接接頭像。
-  // 半透明／完整檢視卡與編輯卡都有可見外框，線停在卡片邊界，不再向內延伸到頭像。
-  return viewMode === 'view' && getCardViewSettings().appearance === 'minimal';
+function usesMinimalViewAnchors() {
+  return (
+    viewMode === 'view' &&
+    getCardViewSettings().appearance === 'minimal'
+  );
 }
 
-function lineAnchorRect(card) {
-  return lineAnchorUsesAvatar() ? cardAvatarRect(card) : cardOuterRect(card);
+function cardHorizontalConnectionRect(card) {
+  return usesMinimalViewAnchors()
+    ? cardAvatarRect(card)
+    : cardOuterRect(card);
 }
 
-function avatarVerticalAnchor(card, side) {
-  const rect = lineAnchorRect(card);
+function cardVerticalConnectionRect(card) {
+  if (!usesMinimalViewAnchors()) {
+    return cardOuterRect(card);
+  }
+
+  const avatar = cardAvatarRect(card);
+  const outer = cardOuterRect(card);
+
   return {
-    x: rect.centerX,
-    y: side === 'top' ? rect.top : rect.bottom
+    left:avatar.left,
+    right:avatar.right,
+    top:avatar.top,
+    bottom:outer.bottom,
+    centerX:avatar.centerX,
+    centerY:
+      (avatar.top + outer.bottom) /
+      2
   };
-}
-
-function avatarBoundaryAnchor(card, targetCard) {
-  const rect = lineAnchorRect(card);
-  const target = lineAnchorRect(targetCard);
-  const dx = target.centerX - rect.centerX;
-  const dy = target.centerY - rect.centerY;
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    return { x: dx >= 0 ? rect.right : rect.left, y: rect.centerY };
-  }
-  return { x: rect.centerX, y: dy >= 0 ? rect.bottom : rect.top };
-}
-
-function pairJoinPoint(a, b) {
-  const aRect = lineAnchorRect(a);
-  const bRect = lineAnchorRect(b);
-  const dx = bRect.centerX - aRect.centerX;
-  const dy = bRect.centerY - aRect.centerY;
-
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    const x1 = dx > 0 ? aRect.right : aRect.left;
-    const x2 = dx > 0 ? bRect.left : bRect.right;
-    if (Math.abs(aRect.centerY - bRect.centerY) < 2) {
-      return { x: (x1 + x2) / 2, y: aRect.centerY };
-    }
-    return { x: (x1 + x2) / 2, y: (aRect.centerY + bRect.centerY) / 2 };
-  }
-
-  const y1 = dy > 0 ? aRect.bottom : aRect.top;
-  const y2 = dy > 0 ? bRect.top : bRect.bottom;
-  return { x: (aRect.centerX + bRect.centerX) / 2, y: (y1 + y2) / 2 };
 }
 
 function cardVerticalAnchor(card, side) {
-  return avatarVerticalAnchor(card, side);
+  const rect =
+    cardVerticalConnectionRect(card);
+
+  return {
+    x:rect.centerX,
+    y:
+      side === 'top'
+        ? rect.top
+        : rect.bottom
+  };
 }
 
 function cardCenterY(card) {
-  return lineAnchorRect(card).centerY;
+  return cardOuterRect(card).centerY;
+}
+
+function avatarBoundaryAnchor(card, targetCard) {
+  const sourceOuter = cardOuterRect(card);
+  const targetOuter = cardOuterRect(targetCard);
+  const dx =
+    targetOuter.centerX -
+    sourceOuter.centerX;
+  const dy =
+    targetOuter.centerY -
+    sourceOuter.centerY;
+
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    const rect =
+      cardHorizontalConnectionRect(card);
+
+    return {
+      x:dx >= 0 ? rect.right : rect.left,
+      y:rect.centerY
+    };
+  }
+
+  const rect =
+    cardVerticalConnectionRect(card);
+
+  return {
+    x:rect.centerX,
+    y:dy >= 0 ? rect.bottom : rect.top
+  };
+}
+
+function getPairConnectionGeometry(a, b) {
+  const aOuter = cardOuterRect(a);
+  const bOuter = cardOuterRect(b);
+  const dx =
+    bOuter.centerX -
+    aOuter.centerX;
+  const dy =
+    bOuter.centerY -
+    aOuter.centerY;
+  const horizontal =
+    Math.abs(dx) >= Math.abs(dy);
+
+  return {
+    horizontal,
+    dx,
+    dy,
+    aRect:
+      horizontal
+        ? cardHorizontalConnectionRect(a)
+        : cardVerticalConnectionRect(a),
+    bRect:
+      horizontal
+        ? cardHorizontalConnectionRect(b)
+        : cardVerticalConnectionRect(b)
+  };
+}
+
+function pairJoinPoint(a, b) {
+  const {
+    horizontal,
+    dx,
+    dy,
+    aRect,
+    bRect
+  } = getPairConnectionGeometry(a, b);
+
+  if (horizontal) {
+    const x1 =
+      dx > 0
+        ? aRect.right
+        : aRect.left;
+
+    const x2 =
+      dx > 0
+        ? bRect.left
+        : bRect.right;
+
+    if (
+      Math.abs(
+        aRect.centerY -
+        bRect.centerY
+      ) < 2
+    ) {
+      return {
+        x:(x1 + x2) / 2,
+        y:aRect.centerY
+      };
+    }
+
+    return {
+      x:(x1 + x2) / 2,
+      y:
+        (
+          aRect.centerY +
+          bRect.centerY
+        ) /
+        2
+    };
+  }
+
+  const y1 =
+    dy > 0
+      ? aRect.bottom
+      : aRect.top;
+
+  const y2 =
+    dy > 0
+      ? bRect.top
+      : bRect.bottom;
+
+  return {
+    x:
+      (
+        aRect.centerX +
+        bRect.centerX
+      ) /
+      2,
+    y:(y1 + y2) / 2
+  };
 }
 
 function pairPath(a, b) {
-  const aRect = lineAnchorRect(a);
-  const bRect = lineAnchorRect(b);
-  const dx = bRect.centerX - aRect.centerX;
-  const dy = bRect.centerY - aRect.centerY;
+  const {
+    horizontal,
+    dx,
+    dy,
+    aRect,
+    bRect
+  } = getPairConnectionGeometry(a, b);
 
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    const x1 = dx > 0 ? aRect.right : aRect.left;
-    const x2 = dx > 0 ? bRect.left : bRect.right;
-    if (Math.abs(aRect.centerY - bRect.centerY) < 2) {
+  if (horizontal) {
+    const x1 =
+      dx > 0
+        ? aRect.right
+        : aRect.left;
+
+    const x2 =
+      dx > 0
+        ? bRect.left
+        : bRect.right;
+
+    if (
+      Math.abs(
+        aRect.centerY -
+        bRect.centerY
+      ) < 2
+    ) {
       return `M${x1} ${aRect.centerY} H${x2}`;
     }
-    const mx = (x1 + x2) / 2;
+
+    const mx =
+      (x1 + x2) /
+      2;
+
     return `M${x1} ${aRect.centerY} H${mx} V${bRect.centerY} H${x2}`;
   }
 
-  const y1 = dy > 0 ? aRect.bottom : aRect.top;
-  const y2 = dy > 0 ? bRect.top : bRect.bottom;
-  const my = (y1 + y2) / 2;
+  const y1 =
+    dy > 0
+      ? aRect.bottom
+      : aRect.top;
+
+  const y2 =
+    dy > 0
+      ? bRect.top
+      : bRect.bottom;
+
+  const my =
+    (y1 + y2) /
+    2;
+
   return `M${aRect.centerX} ${y1} V${my} H${bRect.centerX} V${y2}`;
 }
 
@@ -3012,66 +3508,23 @@ function drawNodes() {
     const genderHiddenClass = cardSettings.gender ? '' : ' card-gender-hidden';
 
     if (isView) {
-      const primaryLines = [];
-      const detailLines = [];
+      const model =
+        buildViewCardContentModel(
+          c,
+          cardSettings
+        );
 
-      if (!cardSettings.name && cardSettings.gender) {
-        primaryLines.push(`<div class="n-view-meta">${esc(uiText(c.gender || '其他'))}</div>`);
-      }
-
-      const stageAge = [];
-      if (cardSettings.lifeStage) stageAge.push(dStage);
-      if (cardSettings.age && c.age != null && c.age !== '') stageAge.push(formatCardAge(c.age));
-      if (stageAge.length) primaryLines.push(`<div class="n-view-meta">${esc(stageAge.join(' · '))}</div>`);
-
-      if (cardSettings.birthday && c.birthdayMonth && c.birthdayDay) {
-        primaryLines.push(`<div class="n-view-meta">${iconSvg('cake2')}<span>${esc(formatBirthdaySummary(c.birthdayMonth, c.birthdayDay))}</span></div>`);
-      }
-
-      const statusRace = [];
-      if (cardSettings.status) statusRace.push(uiText(c.status || '在世'));
-      if (cardSettings.race && c.race && RACE_PRESETS[c.race]) statusRace.push(uiText(RACE_PRESETS[c.race].label));
-      if (statusRace.length) primaryLines.push(`<div class="n-view-meta">${esc(statusRace.join(' · '))}</div>`);
-
-      if (cardSettings.career && c.career) detailLines.push(`<div class="n-view-meta n-view-text" title="${esc(dCareer)}">${esc(dCareer)}</div>`);
-      if (cardSettings.residence && c.residence) detailLines.push(`<div class="n-view-meta n-view-text" title="${esc(dResidence)}">${iconSvg('house')}<span>${esc(dResidence)}</span></div>`);
-      if (cardSettings.aspiration && c.aspiration) detailLines.push(`<div class="n-view-meta n-view-text" title="${esc(dAspiration)}">${iconSvg('bullseye')}<span>${esc(dAspiration)}</span></div>`);
-      if (cardSettings.traits && dTraits.length) {
-        const traitText = dTraits.slice(0, 2).join(' / ') + (dTraits.length > 2 ? ` +${dTraits.length - 2}` : '');
-        detailLines.push(`<div class="n-view-meta n-view-text" title="${esc(dTraits.join(' / '))}">${esc(traitText)}</div>`);
-      }
-      if (cardSettings.pets || cardSettings.gallery) {
-        const mediaBits = [];
-        if (cardSettings.pets && (c.pets||[]).length) mediaBits.push(`${uiText('寵物')} ${(c.pets||[]).length}`);
-        if (cardSettings.gallery && (c.gallery||[]).length) mediaBits.push(`${uiText('相簿')} ${(c.gallery||[]).length}`);
-        if (mediaBits.length) detailLines.push(`<div class="n-view-meta">${esc(mediaBits.join(' · '))}</div>`);
-      }
-
-      const configuredPrimary = !!(cardSettings.name || cardSettings.gender || cardSettings.lifeStage || cardSettings.age || cardSettings.birthday || cardSettings.status || cardSettings.race);
-      const configuredDetails = !!(cardSettings.career || cardSettings.residence || cardSettings.aspiration || cardSettings.traits || cardSettings.pets || cardSettings.gallery);
-      const hasAnyConfiguredText = configuredPrimary || configuredDetails;
-      const avatarOnlyClass = hasAnyConfiguredText ? '' : ' card-avatar-only';
-
-      if (cardSettings.appearance === 'minimal') {
-        return `<div class="${cls} mode-view ${appearanceClass}${genderHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
-          style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-          <div class="n-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
-          ${cardSettings.name ? `<div class="n-view-name" title="${esc(displayName)}">${esc(displayName)}</div>` : ''}
-          ${primaryLines.join('')}
-          ${detailLines.join('')}
-        </div>`;
-      }
+      const avatarOnlyClass =
+        model.hasText
+          ? ''
+          : ' card-avatar-only';
 
       return `<div class="${cls} mode-view ${appearanceClass}${genderHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-        <div class="n-view-card-head${configuredPrimary ? '' : ' avatar-only'}">
-          <div class="n-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
-          ${configuredPrimary ? `<div class="n-view-card-head-text">
-            ${cardSettings.name ? `<div class="n-view-name" title="${esc(displayName)}">${esc(displayName)}</div>` : ''}
-            ${primaryLines.join('') || `<div class="n-view-meta">—</div>`}
-          </div>` : ''}
-        </div>
-        ${configuredDetails ? `<div class="n-view-card-details">${detailLines.join('') || `<div class="n-view-meta">—</div>`}</div>` : ''}
+        <div class="n-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
+        ${model.name ? `<div class="n-view-name" title="${esc(model.name)}">${esc(model.name)}</div>` : ''}
+        ${model.primary.map(renderViewCardLine).join('')}
+        ${model.details.map(renderViewCardLine).join('')}
       </div>`;
     }
 
@@ -3156,12 +3609,12 @@ function openInfoCard(id) {
   $('infoCardMeta').innerHTML = metaItems.join('');
 
   const headFacts = [];
-  const birthdayText = c.birthdayMonth && c.birthdayDay ? formatBirthdaySummary(c.birthdayMonth, c.birthdayDay) : uiText('生日未設定');
+  const birthdayText = c.birthdayMonth && c.birthdayDay ? formatBirthdaySummary(c.birthdayMonth, c.birthdayDay) : uiText('生日未知');
   const ageText = c.age != null && c.age !== ''
     ? ((document.documentElement.lang || 'zh-Hant') === 'en' ? `${uiText('年齡')} ${c.age}` : `${c.age} ${uiText('歲')}`)
-    : uiText('年齡未設定');
+    : uiText('年齡未知');
   headFacts.push(`<div class="info-card-head-fact">${iconSvg('cake2')}<span>${esc(birthdayText)} · ${esc(ageText)}</span></div>`);
-  headFacts.push(`<div class="info-card-head-fact">${iconSvg('house')}<span>${esc(dResidence || uiText('居住地未設定'))}</span></div>`);
+  headFacts.push(`<div class="info-card-head-fact">${iconSvg('house')}<span>${esc(dResidence || uiText('居住地未知'))}</span></div>`);
   $('infoCardHeadFacts').innerHTML = headFacts.join('');
 
   const familyNames = db.families.filter(f => (f.memberIds || []).includes(c.id)).map(f => displayDataText(f.name, f));
@@ -3962,6 +4415,8 @@ viewport.addEventListener('mousedown', e => {
 window.addEventListener('mousemove', e => {
   if (marqueeState) updateMarquee(e.clientX, e.clientY);
   if (!panning) return;
+
+  canvasViewState = 'manual';
   panX = panStartPanX + (e.clientX - panStartX);
   panY = panStartPanY + (e.clientY - panStartY);
   applyTransform();
@@ -5301,7 +5756,7 @@ function populateBirthdayDays(preferredValue = null) {
 function formatBirthdaySummary(monthValue, dayValue) {
   const month = Number(monthValue) || 0;
   const day = Number(dayValue) || 0;
-  if (!month || !day) return uiText('生日未設定');
+  if (!month || !day) return uiText('生日未知');
 
   const lang = document.documentElement.lang || 'zh-Hant';
   if (lang === 'en') {
@@ -7106,16 +7561,27 @@ function applyTopbarFilters() {
   if (searchInput.value.trim()) renderTopbarSearchResults();
 }
 
-[...statusFilterInputs, ...genderFilterInputs].forEach(input => {
+[
+  ...statusFilterInputs,
+  ...genderFilterInputs,
+  ...raceFilterInputs,
+  ...lifeStageFilterInputs
+].forEach(input => {
   input.addEventListener('change', applyTopbarFilters);
 });
 
 $('filterResetBtn')?.addEventListener('click', event => {
   event.preventDefault();
-  const defaultStatus = statusFilterInputs.find(input => input.value === '');
-  const defaultGender = genderFilterInputs.find(input => input.value === '');
-  if (defaultStatus) defaultStatus.checked = true;
-  if (defaultGender) defaultGender.checked = true;
+
+  [
+    ...statusFilterInputs,
+    ...genderFilterInputs,
+    ...raceFilterInputs,
+    ...lifeStageFilterInputs
+  ].forEach(input => {
+    input.checked = false;
+  });
+
   applyTopbarFilters();
 });
 
@@ -7284,6 +7750,7 @@ async function init() {
   setupAppMenus();
   setupHelpTooltipPortal();
   restoreFamilyPanelCollapsed();
+  setupViewportResizeObserver();
   setupSearchSelects();
   refreshFamilyUI();
   render();
@@ -7453,9 +7920,9 @@ Object.assign(ZH_HANS_EXACT, {
   '歲': '岁',
   '生日月份': '生日月份',
   '生日日期': '生日日期',
-  '生日未設定': '生日未设置',
-  '年齡未設定': '年龄未设置',
-  '居住地未設定': '居住地未设置',
+  '生日未知': '生日未知',
+  '年齡未知': '年龄未知',
+  '居住地未知': '居住地未知',
   '可逐一新增或移除': '可逐项添加或移除',
   '輸入特徵後按 Enter': '输入特征后按 Enter',
   '子女關係說明': '子女关系说明',
@@ -7494,9 +7961,9 @@ Object.assign(EN, {
   '歲': 'years old',
   '生日月份': 'Birthday month',
   '生日日期': 'Birthday day',
-  '生日未設定': 'Birthday not set',
-  '年齡未設定': 'Age not set',
-  '居住地未設定': 'Residence not set',
+  '生日未知': 'Birthday unknown',
+  '年齡未知': 'Age unknown',
+  '居住地未知': 'Residence unknown',
   '可逐一新增或移除': 'Add or remove traits individually',
   '輸入特徵後按 Enter': 'Type a trait and press Enter',
   '子女關係說明': 'Children relationship help',
