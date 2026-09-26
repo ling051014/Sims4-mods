@@ -3369,148 +3369,80 @@ function avatarBoundaryAnchor(card, targetCard) {
   };
 }
 
+// ========【配偶關係連線】 設定 - 配偶固定為同世代橫向關係，不受卡片高度影響 ========
 function getPairConnectionGeometry(a, b) {
   const aOuter = cardOuterRect(a);
   const bOuter = cardOuterRect(b);
+  const aHorizontalRect = cardHorizontalConnectionRect(a);
+  const bHorizontalRect = cardHorizontalConnectionRect(b);
+  const aAvatar = cardAvatarRect(a);
+  const bAvatar = cardAvatarRect(b);
+
   const dx =
     bOuter.centerX -
     aOuter.centerX;
-  const dy =
-    bOuter.centerY -
-    aOuter.centerY;
-  const horizontal =
-    Math.abs(dx) >= Math.abs(dy);
+
+  // 配偶 / 前任配偶在族譜語意上永遠屬於同一世代的橫向關係。
+  // 不再用兩張卡片 centerY 的差距判斷方向，避免檢視卡內容高度不同時被誤判成直向關係。
+  const aX =
+    dx >= 0
+      ? aHorizontalRect.right
+      : aHorizontalRect.left;
+
+  const bX =
+    dx >= 0
+      ? bHorizontalRect.left
+      : bHorizontalRect.right;
+
+  // 橫向配偶線使用頭像中心高度作為穩定基準。
+  // 完整 / 半透明卡仍接在卡片外側，極簡卡則接頭像外側，但都不受文字內容高度影響。
+  const aY = aAvatar.centerY;
+  const bY = bAvatar.centerY;
 
   return {
-    horizontal,
+    horizontal:true,
     dx,
-    dy,
-    aRect:
-      horizontal
-        ? cardHorizontalConnectionRect(a)
-        : cardVerticalConnectionRect(a),
-    bRect:
-      horizontal
-        ? cardHorizontalConnectionRect(b)
-        : cardVerticalConnectionRect(b)
+    dy:bY - aY,
+    aX,
+    aY,
+    bX,
+    bY
   };
 }
 
 function pairJoinPoint(a, b) {
   const {
-    horizontal,
-    dx,
-    dy,
-    aRect,
-    bRect
+    aX,
+    aY,
+    bX,
+    bY
   } = getPairConnectionGeometry(a, b);
 
-  if (horizontal) {
-    const x1 =
-      dx > 0
-        ? aRect.right
-        : aRect.left;
-
-    const x2 =
-      dx > 0
-        ? bRect.left
-        : bRect.right;
-
-    if (
-      Math.abs(
-        aRect.centerY -
-        bRect.centerY
-      ) < 2
-    ) {
-      return {
-        x:(x1 + x2) / 2,
-        y:aRect.centerY
-      };
-    }
-
-    return {
-      x:(x1 + x2) / 2,
-      y:
-        (
-          aRect.centerY +
-          bRect.centerY
-        ) /
-        2
-    };
-  }
-
-  const y1 =
-    dy > 0
-      ? aRect.bottom
-      : aRect.top;
-
-  const y2 =
-    dy > 0
-      ? bRect.top
-      : bRect.bottom;
-
   return {
-    x:
-      (
-        aRect.centerX +
-        bRect.centerX
-      ) /
-      2,
-    y:(y1 + y2) / 2
+    x:(aX + bX) / 2,
+    y:(aY + bY) / 2
   };
 }
 
 function pairPath(a, b) {
   const {
-    horizontal,
-    dx,
-    dy,
-    aRect,
-    bRect
+    aX,
+    aY,
+    bX,
+    bY
   } = getPairConnectionGeometry(a, b);
 
-  if (horizontal) {
-    const x1 =
-      dx > 0
-        ? aRect.right
-        : aRect.left;
-
-    const x2 =
-      dx > 0
-        ? bRect.left
-        : bRect.right;
-
-    if (
-      Math.abs(
-        aRect.centerY -
-        bRect.centerY
-      ) < 2
-    ) {
-      return `M${x1} ${aRect.centerY} H${x2}`;
-    }
-
-    const mx =
-      (x1 + x2) /
-      2;
-
-    return `M${x1} ${aRect.centerY} H${mx} V${bRect.centerY} H${x2}`;
+  if (Math.abs(aY - bY) < 2) {
+    return `M${aX} ${aY} H${bX}`;
   }
 
-  const y1 =
-    dy > 0
-      ? aRect.bottom
-      : aRect.top;
-
-  const y2 =
-    dy > 0
-      ? bRect.top
-      : bRect.bottom;
-
-  const my =
-    (y1 + y2) /
+  // 自由排列若玩家真的把配偶拖到不同高度，仍維持「橫向配偶關係」語意，
+  // 只在兩張卡片之間以正交折線補足高度差，不切換成上下親子式連線。
+  const mx =
+    (aX + bX) /
     2;
 
-  return `M${aRect.centerX} ${y1} V${my} H${bRect.centerX} V${y2}`;
+  return `M${aX} ${aY} H${mx} V${bY} H${bX}`;
 }
 
 function avatarHTML(sim) {
