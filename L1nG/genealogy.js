@@ -2770,13 +2770,22 @@ function compressGalleryImage(file) {
 function getVisibleIds(familyId) {
   const fam = db.families.find(f => f.id === familyId);
   if (!fam) return new Set();
-  const result = new Set(fam.memberIds.filter(id => db.sims[id]));
-  [...result].forEach(id => {
-    const s = db.sims[id];
-    if (!s) return;
-    (s.spouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
-    (s.exSpouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
-  });
+
+  const result = new Set(
+    getFamilyViewMemberIds(fam)
+      .filter(id => db.sims[id])
+  );
+
+  // 大家族維持完整關係網的配偶 / 前任補入；
+  // EA 族譜則限制為目前家庭與一層直接親屬。
+  if (familyTreeViewMode === 'extended') {
+    [...result].forEach(id => {
+      const s = db.sims[id];
+      if (!s) return;
+      (s.spouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
+      (s.exSpouseIds||[]).forEach(sid => { if (db.sims[sid]) result.add(sid); });
+    });
+  }
 
   // 篩選是真正的顯示篩選，不再只是把不符合的人物淡化。
   [...result].forEach(id => {
@@ -3903,7 +3912,7 @@ function commonNodeClasses(c, opts) {
 
 function drawNodes() {
   const fam = currentFamily();
-  const memberSet = new Set(fam.memberIds);
+  const memberSet = new Set(getFamilyViewMemberIds(fam));
   const {pos, byId, visibleIds} = layoutCache;
   const isView = viewMode === 'view';
   const cardSettings = isView ? getCardViewSettings() : getCardEditSettings();
