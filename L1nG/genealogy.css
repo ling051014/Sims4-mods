@@ -6323,6 +6323,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 .relationship-line-item > summary {
+    position:relative;
     min-height:38px;
     padding:7px 9px;
     display:grid;
@@ -6352,17 +6353,19 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 .relationship-line-item > summary::after {
     content:"";
+    position:absolute;
+    right:11px;
+    top:50%;
     width:7px;
     height:7px;
-    justify-self:end;
     border-right:1.5px solid var(--sub);
     border-bottom:1.5px solid var(--sub);
-    transform:rotate(45deg);
+    transform:translateY(-65%) rotate(45deg);
     transition:transform .15s ease;
 }
 
 .relationship-line-item[open] > summary::after {
-    transform:rotate(225deg);
+    transform:translateY(-35%) rotate(225deg);
 }
 
 .relationship-line-item > summary > i {
