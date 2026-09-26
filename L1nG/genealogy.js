@@ -871,11 +871,11 @@ function buildSample() {
     };
   });
 
-  const makeHousehold = (id, name, memberIds, gameData) => ({
+  const makeHousehold = (id, name, memberIds, bio, gameData) => ({
     id,
     name,
     memberIds:[...memberIds],
-    bio:'',
+    bio,
     coverImage:null,
     freeLayout:{ view:false, edit:false },
     manualPos:{ view:{}, edit:{} },
@@ -893,36 +893,42 @@ function buildSample() {
       'sample_hh_944092612642014824',
       '史賓瑟．金．路易斯',
       ['944092612642014825','944092612642014826','944092612642014827','944092612642014828','944092612642014829'],
+      '好吧，以下是詳細分解：丹尼斯．金和莉迪亞．史賓瑟生了一個女兒叫做艾莉絲．史賓瑟．金，然後離婚了。艾莉絲嫁給艾瑞克．路易斯，然後有了她自己的女兒奧莉維亞．金．路易斯。他們和艾莉絲的父親（還記得丹尼斯吧？）和艾瑞克的母親薇薇安．路易斯一起住。喂，可從沒人說過家庭這回事很簡單！',
       { householdId:'944092612642014824', homeZoneId:'944092612642014166', worldId:'2474553381', neighborhoodId:'944092612642013589', regionId:'8086', lotName:'扁柏街道', worldName:'', neighborhoodName:'柳溪', hidden:false, isActiveHousehold:true, isPlayedHousehold:true, isPlayerHousehold:true }
     ),
     makeHousehold(
       'sample_hh_944092612642085335',
       '朗德古拉伯',
       ['944092612642085336','944092612642085337','944092612642085338'],
+      '朗德古拉伯一家似乎家庭美滿、有錢、有禮且勇敢。但萳西和傑佛瑞似乎隱藏著什麼。他們的秘密會讓他們走向陌路，還是會讓他們繼續建立起屬於自己的富裕王朝？',
       { householdId:'944092612642085335', homeZoneId:'944092612642084491', worldId:'1185542770', neighborhoodId:'944092612642084078', regionId:'15740', lotName:'阿福伊斯塔豪宅', worldName:'', neighborhoodName:'綠洲之泉', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
     ),
     makeHousehold(
       'sample_hh_944092612642081635',
       '高斯',
       ['944092612642081636','944092612642081637','944092612642081638','944092612642081639'],
+      '高斯是懷著貴族氣息，被陰鬱圍繞的家族。夾在摩提梅爾所寫的恐怖故事與貝拉的神祕消失之間，卡珊多拉與亞歷山大會不會也同樣長大成為陰沉的人？',
       { householdId:'944092612642081635', homeZoneId:'944092612642081327', worldId:'2280805822', neighborhoodId:'944092612642013589', regionId:'8086', lotName:'歐菲莉亞維拉', worldName:'', neighborhoodName:'柳溪', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
     ),
     makeHousehold(
       'sample_hh_944092612642563313',
       '伊藤',
       ['944092612642563314','944092612642563315','944092612642563316','944092612642563317'],
+      '伊藤惠從小在千葉町長大。身為金牌滑雪運動員，她希望讓自己的兒女也有相同的成長環境，但過往戀情的記憶卻可能令她分神。伊藤直樹也是拿過獎牌的運動員。身為充滿算計的商人，他打造木漏隙光山的願景極具爭議，包括更多觀光人潮、更多錢，以及更多現代化舉措。七海和清皆有著父母的運動天賦，但他們的心卻另繫他方…七海只想當個孩子，而清則迷戀起坡道外的其他事物…',
       { householdId:'944092612642563313', homeZoneId:'944092612642562894', worldId:'1491052508', neighborhoodId:'944092612642496440', regionId:'246370', lotName:'2-5-1 若葉森', worldName:'', neighborhoodName:'木漏隙光山', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
     ),
     makeHousehold(
       'sample_hh_944092612642294748',
       '維托',
       ['944092612642294749','944092612642294750'],
+      '維托家的兄弟姐妹幾年前搬進遺忘山谷並努力讓遺忘山谷成為他們的家。這有時並不容易，因位他們和弗拉德勞斯．斯特勞處得不是很好，但被問到這點時，他們只提到他們對烹飪的品味不太相同。',
       { householdId:'944092612642294748', homeZoneId:'944092612642294464', worldId:'3950992577', neighborhoodId:'944092612642294034', regionId:'146196', lotName:'附子草莊園', worldName:'', neighborhoodName:'遺忘山谷', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
     ),
     makeHousehold(
       'sample_hh_944092612642774242',
       '達榮',
       ['944092612642774243','944092612642774244','944092612642774245','944092612642774246'],
+      '「團結帶來力量」是達榮家族的家訓。他們也確實世世代代同心一體……但這真能永遠持續嗎？年邁的世家首領阿德科亞，自女兒賈瓦拉年幼時，便夢想她有朝一日成為女王。多年來，她也證明自己是絕佳人選，透過慈善事業在全王國贏得青睞。她登上王冠的道路似乎正一路順遂，直到丈夫猝不及防的早逝。彷彿這還不夠，隨著她的人氣日漸高漲，越來越多好事之徒開始打探達榮家，追究這個看似完美的家族是否真的毫無醜聞可言。挑戰接踵而來之際，賈瓦拉仍奮勇向前，集結摯愛家族的力量，支撐她在爭奪王冠的競逐中挺進。',
       { householdId:'944092612642774242', homeZoneId:'944092612642773392', worldId:'312126436', neighborhoodId:'944092612642770511', regionId:'487001', lotName:'丹貝萊宮殿', worldName:'', neighborhoodName:'昂達里昂', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
     )
   ];
@@ -932,7 +938,7 @@ function buildSample() {
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
-      sampleVersion:4,
+      sampleVersion:5,
       sampleSource:'ea-npc-20260927',
       gameImport:true,
       sourceFormat:'l1ng-genealogy',
@@ -959,7 +965,7 @@ function shouldReplaceBuiltinSample(targetDb) {
   if (!targetDb || targetDb.meta?.sample !== true) return false;
 
   const version = Number(targetDb.meta.sampleVersion || 0);
-  return !Number.isFinite(version) || version < 4;
+  return !Number.isFinite(version) || version < 5;
 }
 
 let db = null, layoutCache = null, scale = 1;
