@@ -756,6 +756,32 @@ function buildSample() {
   // 史賓瑟．金．路易斯 / 朗德古拉伯 / 高斯 / 伊藤 / 維托 / 達榮
   // sims 額外保留這 22 位 Household 成員實際 genealogy 連得到的 family-tree-only 節點，
   // 讓 EA 族譜 / 大家族在預設資料中也能維持完整關係，不把祖先節點硬塞成 Household 成員。
+  const sampleRealDateBySim = {
+    "944092612642014825":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2008,"month":3,"day":1},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":18,"months":7,"days":4,"displayValue":18,"displayUnit":"years"}},
+    "944092612642014826":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1959,"month":9,"day":10},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":67,"months":0,"days":25,"displayValue":67,"displayUnit":"years"}},
+    "944092612642014827":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2002,"month":9,"day":22},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":24,"months":0,"days":13,"displayValue":24,"displayUnit":"years"}},
+    "944092612642014828":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1943,"month":2,"day":14},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":83,"months":7,"days":21,"displayValue":83,"displayUnit":"years"}},
+    "944092612642014829":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2018,"month":1,"day":11},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":8,"months":8,"days":24,"displayValue":8,"displayUnit":"years"}},
+    "944092612642081636":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1994,"month":12,"day":6},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":31,"months":9,"days":29,"displayValue":31,"displayUnit":"years"}},
+    "944092612642081637":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1965,"month":3,"day":16},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":61,"months":6,"days":19,"displayValue":61,"displayUnit":"years"}},
+    "944092612642081638":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2011,"month":1,"day":15},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":15,"months":8,"days":20,"displayValue":15,"displayUnit":"years"}},
+    "944092612642081639":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2015,"month":8,"day":27},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":11,"months":1,"days":8,"displayValue":11,"displayUnit":"years"}},
+    "944092612642084275":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1990,"month":3,"day":4},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":36,"months":7,"days":1,"displayValue":36,"displayUnit":"years"}},
+    "944092612642085336":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1981,"month":6,"day":30},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":45,"months":3,"days":5,"displayValue":45,"displayUnit":"years"}},
+    "944092612642085337":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1974,"month":6,"day":16},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":52,"months":3,"days":19,"displayValue":52,"displayUnit":"years"}},
+    "944092612642085338":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2009,"month":9,"day":25},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":17,"months":0,"days":10,"displayValue":17,"displayUnit":"years"}},
+    "944092612642294749":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1998,"month":8,"day":30},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":28,"months":1,"days":5,"displayValue":28,"displayUnit":"years"}},
+    "944092612642294750":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2002,"month":7,"day":12},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":24,"months":2,"days":23,"displayValue":24,"displayUnit":"years"}},
+    "944092612642563314":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1989,"month":3,"day":11},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":37,"months":6,"days":24,"displayValue":37,"displayUnit":"years"}},
+    "944092612642563315":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1996,"month":3,"day":1},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":30,"months":7,"days":4,"displayValue":30,"displayUnit":"years"}},
+    "944092612642563316":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2013,"month":1,"day":23},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":13,"months":8,"days":12,"displayValue":13,"displayUnit":"years"}},
+    "944092612642563317":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2016,"month":5,"day":15},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":10,"months":4,"days":20,"displayValue":10,"displayUnit":"years"}},
+    "944092612642774243":{"source":"RealDate","runtimeActive":true,"birthday":{"year":1945,"month":3,"day":9},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":81,"months":6,"days":26,"displayValue":81,"displayUnit":"years"}},
+    "944092612642774244":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2008,"month":9,"day":21},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":18,"months":0,"days":14,"displayValue":18,"displayUnit":"years"}},
+    "944092612642774245":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2009,"month":1,"day":13},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":17,"months":8,"days":22,"displayValue":17,"displayUnit":"years"}},
+    "944092612642774246":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2017,"month":7,"day":14},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":9,"months":2,"days":21,"displayValue":9,"displayUnit":"years"}}
+  };
+
   const rows = [
 ["944092612642014825","路易斯埃里克","男","青年","在世","human","柳溪 / 扁柏街道","豪宅大王",["物質主義","貪吃鬼","自信"],"",["944092612642014826"],["944092612642014827"],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],2008,3,1,18],
 ["944092612642014826","路易斯薇薇安","女","老年","在世","human","柳溪 / 扁柏街道","快樂大家庭",["歡樂","以家庭為重","美食家"],"",[],[],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],1959,9,10,67],
@@ -802,15 +828,19 @@ function buildSample() {
     parentIds,spouseIds,exSpouseIds,householdId,householdName,recordState,
     adoptedParentIds,adoptedChildIds,birthdayYear,birthdayMonth,birthdayDay,age
   ]) => {
+    const realDate = sampleRealDateBySim[id]
+      ? JSON.parse(JSON.stringify(sampleRealDateBySim[id]))
+      : null;
+
     sims[id] = {
       id,name,gender,lifeStage,status,race,residence,aspiration,
       causeOfDeath:'',
       pets:[],
       gallery:[],
-      birthdayYear,
-      birthdayMonth,
-      birthdayDay,
-      age,
+      birthdayYear:realDate?.birthday?.year ?? birthdayYear,
+      birthdayMonth:realDate?.birthday?.month ?? birthdayMonth,
+      birthdayDay:realDate?.birthday?.day ?? birthdayDay,
+      age:realDate?.age?.years ?? age,
       parentIds,
       spouseIds,
       exSpouseIds,
@@ -830,6 +860,7 @@ function buildSample() {
         fianceIds:[],
         steadyPartnerIds:[],
         deceasedSpouseIds:[],
+        realDate,
         entityClass:
           recordState === 'family_tree_only'
             ? 'family_tree_only'
@@ -901,8 +932,16 @@ function buildSample() {
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
-      sampleVersion:2,
-      sampleSource:'ea-npc-20260927'
+      sampleVersion:3,
+      sampleSource:'ea-npc-20260927',
+      gameImport:true,
+      sourceFormat:'l1ng-genealogy',
+      sourceSchemaVersion:1,
+      exporterVersion:'0.4.3-runtime-test',
+      targetGameVersion:'1.128',
+      gameLocale:'zh-tw',
+      exportedAt:'2026-09-27T05:26:55.970318+08:00',
+      realDateCurrentDate:{ year:2026, month:10, day:5 }
     },
     sims,
     families,
@@ -913,65 +952,12 @@ function buildSample() {
   };
 }
 
-// ========【舊內建範例遷移】 設定 - 僅辨識完全未修改的舊高斯 / 巴切勒範例 ========
-function buildLegacySampleV1() {
-  const sims = {};
-  const add = o => { sims[o.id] = o; return o; };
-  add({id:'g1',name:'岡瑟·高斯',gender:'男',lifeStage:'老年',status:'幽靈',race:'',
-    residence:'柳溪 - 歐菲莉亞別墅', aspiration:'財富創造者', causeOfDeath:'衰老',
-    pets:[], gallery:[], parentIds:[], spouseIds:['g2'],exSpouseIds:[],adoptive:false,
-    traits:['雄心勃勃','天才','勢利'],career:'商業',bio:'高斯家族創始人之一，已故。',order:0,avatar:null});
-  add({id:'g2',name:'科妮莉亞·高斯',gender:'女',lifeStage:'老年',status:'幽靈',race:'',
-    residence:'柳溪 - 歐菲莉亞別墅', aspiration:'大家庭', causeOfDeath:'衰老',
-    pets:[], gallery:[], parentIds:[], spouseIds:['g1'],exSpouseIds:[],adoptive:false,
-    traits:['家庭觀念','愛整潔','美食家'],career:'無',bio:'高斯家族女主人，已故。',order:0,avatar:null});
-  add({id:'g3',name:'莫蒂默·高斯',gender:'男',lifeStage:'成年',status:'在世',race:'vampire',
-    residence:'柳溪 - 歐菲莉亞別墅', aspiration:'暢銷作家', causeOfDeath:'',
-    pets:[{ id:'pet_g3_1', name:'午夜', species:'cat', breed:'黑貓', gender:'女', ageStage:'成年', status:'在世', avatar:null }],
-    gallery:[], parentIds:['g1','g2'],spouseIds:['g4'],exSpouseIds:[],adoptive:false,
-    traits:['有創造力','浪漫','陰沈'],career:'作家',bio:'現任高斯家族族長。',order:0,avatar:null});
-  add({id:'g4',name:'貝拉·巴切勒',gender:'女',lifeStage:'成年',status:'在世',race:'',
-    residence:'柳溪 - 歐菲莉亞別墅', aspiration:'靈魂伴侶', causeOfDeath:'',
-    pets:[{ id:'pet_g4_1', name:'金毛', species:'dog', breed:'金毛尋回犬', gender:'男', ageStage:'成年', status:'在世', avatar:null }],
-    gallery:[], parentIds:[],spouseIds:['g3'],exSpouseIds:[],adoptive:false,
-    traits:['熱愛戶外','開朗','愛調情'],career:'無',bio:'巴切勒家的女兒，嫁入高斯家。',order:0,avatar:null});
-  add({id:'g5',name:'卡桑德拉·高斯',gender:'女',lifeStage:'青少年',status:'在世',race:'spellcaster',
-    residence:'柳溪 - 花園社區', aspiration:'卓越畫家', causeOfDeath:'',
-    pets:[], gallery:[], parentIds:['g3','g4'],spouseIds:[],exSpouseIds:[],adoptive:false,
-    traits:['天才','陰沈','物質主義'],career:'學生',bio:'莫蒂默和貝拉的女兒。',order:0,avatar:null});
-  add({id:'g6',name:'亞歷山大·高斯',gender:'男',lifeStage:'兒童',status:'在世',race:'',
-    residence:'柳溪 - 花園社區', aspiration:'電腦奇才', causeOfDeath:'',
-    pets:[], gallery:[], parentIds:['g3','g4'],spouseIds:[],exSpouseIds:[],adoptive:false,
-    traits:['天才','有創造力','熱愛戶外'],career:'學生',bio:'莫蒂默和貝拉的兒子。',order:1,avatar:null});
-  const famGoth = {
-    id:'fam_goth', name:'高斯家族', memberIds:['g1','g2','g3','g5','g6'], bio:'', coverImage:null,
-    freeLayout:{ view:false, edit:false }, manualPos:{ view:{}, edit:{} }, locked:false
-  };
-  const famBache = {
-    id:'fam_bacheler', name:'巴切勒家族', memberIds:['g4'], bio:'', coverImage:null,
-    freeLayout:{ view:false, edit:false }, manualPos:{ view:{}, edit:{} }, locked:false
-  };
-  return {version:3,meta:{sample:true,sampleLanguage:'zh-Hant'},sims,families:[famGoth,famBache],links:[],relMap:{},labelPos:{},currentId:famGoth.id};
-}
-
-function stableSampleSerialize(value) {
-  if (Array.isArray(value)) {
-    return '[' + value.map(stableSampleSerialize).join(',') + ']';
-  }
-
-  if (value && typeof value === 'object') {
-    return '{' + Object.keys(value)
-      .sort()
-      .map(key => JSON.stringify(key) + ':' + stableSampleSerialize(value[key]))
-      .join(',') + '}';
-  }
-
-  return JSON.stringify(value);
-}
-
-function legacyBuiltinSampleLooksUntouched(targetDb) {
+// ========【內建範例升級】 設定 - 目前僅作者本人使用，舊 sample 直接替換成最新 EA NPC sample ========
+function shouldReplaceBuiltinSample(targetDb) {
   if (!targetDb || targetDb.meta?.sample !== true) return false;
-  return stableSampleSerialize(targetDb) === stableSampleSerialize(buildLegacySampleV1());
+
+  const version = Number(targetDb.meta.sampleVersion || 0);
+  return !Number.isFinite(version) || version < 3;
 }
 
 let db = null, layoutCache = null, scale = 1;
@@ -8944,11 +8930,10 @@ function migrate(raw) {
 function prepareDatabase(raw) {
   let prepared = migrate(raw);
 
-  // 舊 sample 若完全沒有被玩家修改，才自動換成新版 EA NPC 範例。
-  // 只要人物、家庭、關係、位置或其他資料有任何變更，exact snapshot 就不相等，
-  // 因此不會覆蓋玩家在舊範例上做過的內容。
-  const legacySampleReplaced = legacyBuiltinSampleLooksUntouched(prepared);
-  if (legacySampleReplaced) {
+  // 目前只有作者本人使用：所有舊版內建 sample 直接升級成最新 EA NPC sample。
+  // 真正匯入的遊戲資料沒有 meta.sample，因此不會被這段替換。
+  const sampleVersionReplaced = shouldReplaceBuiltinSample(prepared);
+  if (sampleVersionReplaced) {
     prepared = buildSample();
   }
 
@@ -8959,7 +8944,7 @@ function prepareDatabase(raw) {
   return {
     prepared,
     changed:
-      legacySampleReplaced ||
+      sampleVersionReplaced ||
       sampleLanguageRepaired ||
       householdMembershipRepaired
   };
