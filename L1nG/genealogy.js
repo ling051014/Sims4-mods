@@ -7090,6 +7090,37 @@ async function prepareCaptureIcons(captureRoot) {
 
 const EXPORT_TREE_PADDING_PX = 40;
 
+// ========【族譜圖片主題背景】 設定 - 匯出時沿用目前主題的實際畫布底色與紋理 ========
+function isTransparentBackgroundColor(value) {
+  const normalized = String(value || '').replace(/\s+/g, '').toLowerCase();
+  if (!normalized || normalized === 'transparent') return true;
+  if (normalized === 'rgba(0,0,0,0)') return true;
+
+  const match = normalized.match(/^rgba\([^,]+,[^,]+,[^,]+,([\d.]+)\)$/);
+  return !!match && Number(match[1]) === 0;
+}
+
+function getThemeCanvasBackgroundStyle() {
+  const viewportStyle = getComputedStyle(viewport);
+  const bodyStyle = getComputedStyle(document.body);
+
+  // 多數主題的 viewport 底色是透明，實際顯示的是 body 的 --bg；
+  // L1nG 晴空則另外覆寫 viewport 底色，因此優先保留 viewport 的實際值。
+  const backgroundColor = isTransparentBackgroundColor(viewportStyle.backgroundColor)
+    ? bodyStyle.backgroundColor
+    : viewportStyle.backgroundColor;
+
+  return {
+    color: backgroundColor || '#ffffff',
+    image: viewportStyle.backgroundImage && viewportStyle.backgroundImage !== 'none'
+      ? viewportStyle.backgroundImage
+      : 'none',
+    size: viewportStyle.backgroundSize || 'auto',
+    position: viewportStyle.backgroundPosition || '0% 0%',
+    repeat: viewportStyle.backgroundRepeat || 'repeat'
+  };
+}
+
 function buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale, backgroundMode = 'current') {
   const captureViewport = viewport.cloneNode(true);
   captureViewport.classList.remove('dragging');
@@ -7107,16 +7138,23 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale, backgr
   captureViewport.style.cursor = 'default';
 
   if (backgroundMode === 'color' || backgroundMode === 'transparent') {
+    // 「主題背景顏色」與「透明背景」都不帶玩家另外上傳的背景圖片。
     captureViewport.classList.remove('has-bg');
     captureViewport.style.setProperty('--custom-bg', 'none');
     captureViewport.style.setProperty('--custom-bg-opacity', '0');
-    captureViewport.style.backgroundImage = 'none';
+
     if (backgroundMode === 'transparent') {
-      captureViewport.style.backgroundColor = 'transparent';
       captureViewport.style.background = 'transparent';
     } else {
-      const viewportStyle = getComputedStyle(viewport);
-      captureViewport.style.background = viewportStyle.backgroundColor || getComputedStyle(document.body).backgroundColor || '#ffffff';
+      const themeBackground = getThemeCanvasBackgroundStyle();
+
+      // 不只複製單一 background-color；連同目前主題畫布的點陣 / 紋理一起輸出。
+      captureViewport.style.background = 'none';
+      captureViewport.style.backgroundColor = themeBackground.color;
+      captureViewport.style.backgroundImage = themeBackground.image;
+      captureViewport.style.backgroundSize = themeBackground.size;
+      captureViewport.style.backgroundPosition = themeBackground.position;
+      captureViewport.style.backgroundRepeat = themeBackground.repeat;
     }
   }
 
