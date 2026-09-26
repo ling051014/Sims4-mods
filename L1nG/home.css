@@ -896,112 +896,6 @@ section[id] {
 }
 
 
-/* ========【目前開發中】 設定 - 區塊上方距離 ======== */
-.current-section {
-    /* 縮小上方內距 */ padding-top: 20px;
-}
-
-
-/* ========【目前開發中】 設定 - 開發狀態卡片 ======== */
-.current-card {
-    /* 內縮空間 */ padding: 42px;
-    /* 一般邊框 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 17px;
-    /* 白色背景 */ background: #ffffff;
-}
-
-
-/* ========【目前開發中】 設定 - 標題與狀態排列 ======== */
-.current-content {
-    /* 上方間距 */ margin-top: 15px;
-    /* 橫向排列 */ display: flex;
-    /* 底部對齊 */ align-items: flex-end;
-    /* 兩端排列 */ justify-content: space-between;
-    /* 項目間距 */ gap: 30px;
-}
-
-
-/* ========【目前開發中】 設定 - 版本標題 ======== */
-.current-content h2 {
-    /* 移除外距 */ margin: 0;
-    /* 響應式字體 */ font-size: clamp(30px, 5vw, 52px);
-    /* 字距 */ letter-spacing: -0.04em;
-}
-
-
-/* ========【目前開發中】 設定 - 開發主題 ======== */
-.current-name {
-    /* 上方間距 */ margin: 7px 0 0;
-    /* 主要文字 */ color: var(--ink);
-    /* 字體大小 */ font-size: 16px;
-    /* 字體粗細 */ font-weight: 600;
-}
-
-
-/* ========【目前開發重點】 設定 - 英文主題副標 ======== */
-.current-name-en {
-    /* 上方間距 */ margin: 2px 0 0;
-    /* 淡化文字 */ color: var(--muted);
-    /* 窄體英文字型 */ font-family:
-        "Bahnschrift SemiCondensed",
-        "Arial Narrow",
-        "Roboto Condensed",
-        sans-serif;
-    /* 字體大小 */ font-size: 11px;
-    /* 字距 */ letter-spacing: 0.08em;
-}
-
-
-/* ========【目前開發中】 設定 - 開發狀態 ======== */
-.development-state {
-    /* 橫向排列 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 項目間距 */ gap: 11px;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 13px;
-}
-
-
-/* ========【目前開發中】 設定 - 卡片分隔線 ======== */
-.current-divider {
-    /* 線條高度 */ height: 1px;
-    /* 上下外距 */ margin: 29px 0 23px;
-    /* 淡色背景 */ background: var(--border-soft);
-}
-
-
-/* ========【目前開發中】 設定 - 開發說明 ======== */
-.current-description {
-    /* 最大寬度 */ max-width: 700px;
-    /* 移除外距 */ margin: 0;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 14px;
-}
-
-
-/* ========【目前開發重點】 設定 - 開發藍圖入口 ======== */
-.current-action-link {
-    /* 上方間距 */ margin-top: 20px;
-    /* 橫向排列 */ display: inline-flex;
-    /* 垂直置中 */ align-items: center;
-    /* 項目間距 */ gap: 7px;
-    /* 品牌藍 */ color: var(--accent);
-    /* 移除底線 */ text-decoration: none;
-    /* 字體大小 */ font-size: 13px;
-    /* 字體粗細 */ font-weight: 600;
-    /* 動畫效果 */ transition:
-        color 0.2s ease,
-        transform 0.2s ease;
-}
-
-
-/* ========【目前開發重點】 設定 - 開發藍圖入口懸停 ======== */
-.current-action-link:hover {
-    /* 懸停藍色 */ color: var(--accent-hover);
-    /* 微幅右移 */ transform: translateX(3px);
-}
-
-
 /* ========【漢化專區】 設定 - 區塊上方距離 ======== */
 .translation-section {
     /* 縮小上方內距 */ padding-top: 40px;
@@ -1439,17 +1333,6 @@ section[id] {
     }
 
 
-    /* ========【目前開發中】 設定 - 手機卡片 ======== */
-    .current-card {
-        /* 手機內距 */ padding: 27px 23px;
-    }
-
-    .current-content {
-        /* 左側對齊 */ align-items: flex-start;
-        /* 垂直排列 */ flex-direction: column;
-    }
-
-
     /* ========【漢化專區】 設定 - 手機內容 ======== */
     .translation-panel-content {
         /* 手機內距 */ padding: 30px 24px;
@@ -1506,7 +1389,7 @@ section[id] {
 }
 
 
-/* ========【族譜專案入口】 設定 - 首頁同一卡片提供網頁工具與遊戲模組兩個獨立入口 ======== */
+/* ========【族譜專案入口】 設定 - 狀態與入口合併成兩個可直接操作的項目 ======== */
 .genealogy-project-actions {
     margin-top:22px;
     padding-top:16px;
@@ -1516,7 +1399,7 @@ section[id] {
 }
 
 .genealogy-project-action {
-    min-height:50px;
+    min-height:54px;
     padding:10px 12px;
     border:1px solid var(--border);
     border-radius:10px;
@@ -1541,37 +1424,38 @@ section[id] {
     background:#f7fbfe;
 }
 
-.genealogy-project-action > span:first-child {
+.genealogy-project-action-copy {
     min-width:0;
     display:grid;
-    gap:2px;
+    gap:3px;
 }
 
-.genealogy-project-action small {
-    color:var(--muted);
-    font-size:10px;
-    font-weight:500;
-}
-
-.genealogy-project-action strong {
-    color:var(--text);
+.genealogy-project-action-copy strong {
+    color:var(--ink);
     font-size:12.5px;
     font-weight:650;
 }
 
-.genealogy-project-action > span:last-child {
+.genealogy-project-action-copy small {
+    font-size:10px;
+    font-weight:600;
+}
+
+.genealogy-project-action-go {
     color:var(--accent);
-    font-size:18px;
+    font-size:12px;
+    font-weight:650;
+    white-space:nowrap;
     flex:0 0 auto;
 }
 
 @media (max-width:640px) {
     .genealogy-project-action {
-        min-height:48px;
+        min-height:50px;
         padding:9px 10px;
     }
 
-    .genealogy-project-action strong {
+    .genealogy-project-action-copy strong {
         font-size:12px;
     }
 }
