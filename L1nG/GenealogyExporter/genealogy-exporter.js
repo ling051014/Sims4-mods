@@ -11,6 +11,9 @@
         const next = language === 'en' ? 'en' : 'zh-Hant';
         root.dataset.language = next;
         root.lang = next === 'en' ? 'en' : 'zh-Hant';
+        document.title = next === 'en'
+            ? 'Genealogy Exporter · L1nG'
+            : '族譜資料提取模組 · L1nG';
 
         languageButtons.forEach(button => {
             const active = button.dataset.languageButton === next;
