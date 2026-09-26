@@ -205,12 +205,6 @@
                                             <button class="app-menu-item" id="addMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入既有人物</span></button>
                                         </div>
                                     </div>
-                                    <div class="app-menu">
-                                        <button class="family-section-icon app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="成員管理"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
-                                        <div class="app-menu-popover member-manage-popover" role="menu">
-                                            <button class="app-menu-item danger" id="removeMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-dash" aria-hidden="true"></span><span>移出家族</span></button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             <div class="family-member-list" id="familyMemberList"></div>
@@ -618,26 +612,7 @@
             </div>
         </div>
 
-        <!-- ========【移出家族】 設定 - 將模擬市民移出目前家族 ======== -->
-        <div class="mask roster" id="removeMemberMask">
-            <div class="modal addmember-modal">
-                <h2>從<span class="family-name-chip" id="removeMemberFamilyName">—</span>移除<span class="help-tooltip" tabindex="0" role="button" aria-label="移出家族說明" data-tooltip="他們仍保留在模擬市民池中，可隨時再次加入任何家族。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h2>
-                <div class="addmember-toolbar">
-                    <input id="removeMemberSearch" placeholder="搜尋…" type="search">
-                    <button id="removeMemberAllBtn" type="button">全選</button>
-                    <button id="removeMemberNoneBtn" type="button">清空</button>
-                </div>
-                <div class="addmember-list" id="removeMemberList"></div>
-                <div class="modal-actions">
-                    <span class="addmember-count remove-count" id="removeMemberCount">已選<b>0</b>人</span>
-                    <span class="spacer"></span>
-                    <button id="removeMemberCancelBtn">取消</button>
-                    <button class="danger" disabled id="removeMemberConfirmBtn">從家族移除</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========【主題設定】 設定 - 主題、背景與圖片品質 ======== -->
+<!-- ========【主題設定】 設定 - 主題、背景與圖片品質 ======== -->
         <div class="mask" id="bgMask">
             <div class="modal bg-modal">
                 <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></h2>
@@ -701,7 +676,7 @@
                     </select>
                     <div class="avatar-tip" id="galleryProfileHint"></div>
                 </div>
-                <div class="setting-group-title setting-title-with-help"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>儲存空間使用量</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="圖片儲存說明" data-tooltip="圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                <div class="setting-group-title setting-title-with-help"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>儲存空間使用量</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="圖片儲存說明" data-tooltip="圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引。匯出 JSON 備份時會自動把圖片一起放進備份；清理未使用的圖片只會移除目前沒有被任何內容引用的圖片。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                 <div class="bg-setting">
                     <div class="storage-bar">
                         <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
@@ -785,9 +760,9 @@
                     <div class="tips-section">
                         <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>圖片儲存</span></h3>
                         <ul>
-                            <li>圖片儲存在瀏覽器<b>IndexedDB</b>中，容量通常遠大於 localStorage</li>
-                            <li>首次開啟會自動把舊資料（base64）遷移到 IndexedDB</li>
-                            <li>可在主題設定中檢視<b>儲存空間使用量</b>，並一鍵<b>清理未使用的圖片</b></li>
+                            <li>圖片本體會儲存在瀏覽器本機的 <b>IndexedDB</b>，族譜資料只保存圖片索引，不會把整張圖片塞進一般設定資料</li>
+                            <li>匯出 <b>JSON 備份</b>時，圖片會自動一起放進備份；之後重新匯入時也會一併還原</li>
+                            <li><b>清理未使用的圖片</b>只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片</li>
                         </ul>
                     </div>
                     <div class="tips-section">
