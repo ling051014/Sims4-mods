@@ -923,26 +923,6 @@ function familyNavLanguage() {
       : 'zh-Hant';
 }
 
-function familyNavModeLabel(mode) {
-  const lang = familyNavLanguage();
-
-  if (lang === 'en') {
-    return mode === 'ea'
-      ? '<span class="family-nav-tab-label family-nav-tab-label-en">EA TREE</span>'
-      : '<span class="family-nav-tab-label family-nav-tab-label-en">EXTENDED</span>';
-  }
-
-  if (mode === 'ea') {
-    return '<span class="family-nav-tab-ea">EA</span><span class="family-nav-tab-vertical">' +
-      esc(lang === 'zh-Hans' ? '族谱' : '族譜') +
-      '</span>';
-  }
-
-  return '<span class="family-nav-tab-vertical">' +
-    esc(lang === 'zh-Hans' ? '大家族' : '大家族') +
-    '</span>';
-}
-
 function familyNavModeAria(mode) {
   const lang = familyNavLanguage();
   if (lang === 'en') return mode === 'ea' ? 'EA Tree' : 'Extended Family';
@@ -1161,136 +1141,168 @@ function closeAllNavSelects(exceptHost = null) {
 function syncNavSelectControl(selectId) {
   const control = navSelectControls.get(selectId);
   if (!control) return;
+
   const { select, host, trigger, valueEl, menu } = control;
   if (!select || !host || !trigger || !valueEl || !menu) return;
 
   const options = [...select.options];
   const selected = options.find(option => option.value === select.value) || options[0] || null;
+
   valueEl.textContent = selected ? getNavSelectDisplayText(select, selected) : '';
   valueEl.title = valueEl.textContent;
 
   if (selectId === 'familySelect') {
-    const searchAvailable = options.length >= 5;
-    const searchOpen = searchAvailable && !!control.familySearchOpen;
-    const searchQuery = String(control.familySearchQuery || '');
+    const familyIndex = menu.querySelector('#familyNavIndex');
+    const eaTab = menu.querySelector('#familyNavEaTab');
+    const extendedTab = menu.querySelector('#familyNavExtendedTab');
+    const searchToggle = menu.querySelector('#familyNavSearchToggle');
+    const searchRow = menu.querySelector('#familyNavSearchRow');
+    const searchInput = menu.querySelector('#familyNavSearchInput');
+    const searchClear = menu.querySelector('#familyNavSearchClear');
+    const optionGrid = menu.querySelector('#familyNavOptionGrid');
+    const empty = menu.querySelector('#familyNavEmpty');
 
-    const optionHtml = options.map(option => {
-      const selectedClass = option.value === select.value ? ' selected' : '';
-      const label = getNavSelectDisplayText(select, option);
+    if (
+      !familyIndex ||
+      !eaTab ||
+      !extendedTab ||
+      !searchToggle ||
+      !searchRow ||
+      !searchInput ||
+      !searchClear ||
+      !optionGrid ||
+      !empty
+    ) {
+      return;
+    }
 
-      return '<button type="button" class="nav-select-option' + selectedClass +
-        '" role="option" aria-selected="' + (option.value === select.value ? 'true' : 'false') +
-        '" data-nav-value="' + esc(option.value) +
-        '" title="' + esc(label) + '">' +
-        esc(label) +
-        '</button>';
-    }).join('');
+    const lang = familyNavLanguage();
+    familyIndex.dataset.language = lang;
 
-    const searchHtml = searchAvailable
-      ? '<div class="family-nav-search-row"' + (searchOpen ? '' : ' hidden') + '>' +
-          '<input class="family-nav-search-input" type="search" autocomplete="off" value="' +
-            esc(searchQuery) +
-            '" placeholder="' + esc(familyNavSearchPlaceholder()) +
-            '" aria-label="' + esc(familyNavSearchAria()) + '">' +
-          '<button type="button" class="family-nav-search-clear" aria-label="' +
-            esc(uiText('清除搜尋')) +
-            '" title="' + esc(uiText('清除搜尋')) + '">×</button>' +
-        '</div>'
-      : '';
+    [
+      [eaTab, 'ea'],
+      [extendedTab, 'extended']
+    ].forEach(([button, mode]) => {
+      const active = familyTreeViewMode === mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      button.title = familyNavModeAria(mode);
+      button.setAttribute('aria-label', familyNavModeAria(mode));
 
-    const searchTabHtml = searchAvailable
-      ? '<button type="button" class="family-nav-search-tab' + (searchOpen ? ' active' : '') +
-          '" data-family-nav-search-toggle aria-label="' + esc(familyNavSearchAria()) +
-          '" title="' + esc(familyNavSearchAria()) +
-          '" aria-pressed="' + (searchOpen ? 'true' : 'false') + '">⌕</button>'
-      : '';
-
-    menu.innerHTML =
-      '<div class="family-nav-index" role="tablist" aria-label="' + esc(uiText('族譜顯示')) + '">' +
-        '<button type="button" class="family-nav-index-tab' + (familyTreeViewMode === 'ea' ? ' active' : '') +
-          '" data-family-tree-view-mode="ea" role="tab" aria-selected="' + (familyTreeViewMode === 'ea' ? 'true' : 'false') +
-          '" aria-pressed="' + (familyTreeViewMode === 'ea' ? 'true' : 'false') +
-          '" title="' + esc(familyNavModeAria('ea')) + '">' +
-          familyNavModeLabel('ea') +
-        '</button>' +
-        '<button type="button" class="family-nav-index-tab' + (familyTreeViewMode === 'extended' ? ' active' : '') +
-          '" data-family-tree-view-mode="extended" role="tab" aria-selected="' + (familyTreeViewMode === 'extended' ? 'true' : 'false') +
-          '" aria-pressed="' + (familyTreeViewMode === 'extended' ? 'true' : 'false') +
-          '" title="' + esc(familyNavModeAria('extended')) + '">' +
-          familyNavModeLabel('extended') +
-        '</button>' +
-        searchTabHtml +
-      '</div>' +
-      '<div class="family-nav-content">' +
-        searchHtml +
-        '<div class="family-nav-option-grid">' +
-          optionHtml +
-          '<div class="family-nav-empty" hidden>' + esc(uiText('沒有符合的家族')) + '</div>' +
-        '</div>' +
-      '</div>';
-
-    menu.querySelectorAll('[data-family-tree-view-mode]').forEach(modeButton => {
-      modeButton.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        setFamilyTreeViewMode(modeButton.dataset.familyTreeViewMode, control);
-        syncNavSelectControl(selectId);
-        requestAnimationFrame(() => positionFamilyNavSelectMenu(control));
-      });
-    });
-
-    const searchToggle = menu.querySelector('[data-family-nav-search-toggle]');
-    if (searchToggle) {
-      searchToggle.addEventListener('click', event => {
+      button.onclick = event => {
         event.preventDefault();
         event.stopPropagation();
 
-        control.familySearchOpen = !control.familySearchOpen;
-        if (!control.familySearchOpen) {
-          control.familySearchQuery = '';
-        }
-
+        setFamilyTreeViewMode(mode, control);
         syncNavSelectControl(selectId);
 
         requestAnimationFrame(() => {
           positionFamilyNavSelectMenu(control);
-          const input = menu.querySelector('.family-nav-search-input');
-          if (control.familySearchOpen && input) {
-            input.focus({ preventScroll:true });
-          }
         });
-      });
+      };
+    });
+
+    const searchAvailable = options.length >= 5;
+
+    if (!searchAvailable) {
+      control.familySearchOpen = false;
+      control.familySearchQuery = '';
     }
 
-    const searchInput = menu.querySelector('.family-nav-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        control.familySearchQuery = searchInput.value;
-        applyFamilyNavSearch(control);
-        requestAnimationFrame(() => positionFamilyNavSelectMenu(control));
-      });
+    const searchOpen =
+      searchAvailable &&
+      !!control.familySearchOpen;
 
-      searchInput.addEventListener('click', event => {
-        event.stopPropagation();
-      });
-    }
+    searchToggle.hidden = !searchAvailable;
+    searchToggle.classList.toggle('active', searchOpen);
+    searchToggle.setAttribute('aria-pressed', searchOpen ? 'true' : 'false');
+    searchToggle.setAttribute('aria-label', familyNavSearchAria());
+    searchToggle.title = familyNavSearchAria();
 
-    const clearSearch = menu.querySelector('.family-nav-search-clear');
-    if (clearSearch) {
-      clearSearch.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
+    searchRow.hidden = !searchOpen;
+    searchInput.value = String(control.familySearchQuery || '');
+    searchInput.placeholder = familyNavSearchPlaceholder();
+    searchInput.setAttribute('aria-label', familyNavSearchAria());
 
+    searchClear.setAttribute('aria-label', uiText('清除搜尋'));
+    searchClear.title = uiText('清除搜尋');
+
+    searchToggle.onclick = event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      control.familySearchOpen = !control.familySearchOpen;
+
+      if (!control.familySearchOpen) {
         control.familySearchQuery = '';
-        if (searchInput) {
-          searchInput.value = '';
-          searchInput.focus({ preventScroll:true });
-        }
+      }
 
-        applyFamilyNavSearch(control);
-        requestAnimationFrame(() => positionFamilyNavSelectMenu(control));
+      syncNavSelectControl(selectId);
+
+      requestAnimationFrame(() => {
+        positionFamilyNavSelectMenu(control);
+
+        if (control.familySearchOpen) {
+          const input = menu.querySelector('#familyNavSearchInput');
+          if (input) input.focus({ preventScroll:true });
+        }
       });
-    }
+    };
+
+    searchInput.oninput = () => {
+      control.familySearchQuery = searchInput.value;
+      applyFamilyNavSearch(control);
+
+      requestAnimationFrame(() => {
+        positionFamilyNavSelectMenu(control);
+      });
+    };
+
+    searchInput.onclick = event => {
+      event.stopPropagation();
+    };
+
+    searchClear.onclick = event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      control.familySearchQuery = '';
+      searchInput.value = '';
+      searchInput.focus({ preventScroll:true });
+
+      applyFamilyNavSearch(control);
+
+      requestAnimationFrame(() => {
+        positionFamilyNavSelectMenu(control);
+      });
+    };
+
+    optionGrid.querySelectorAll('.nav-select-option').forEach(optionButton => {
+      optionButton.remove();
+    });
+
+    options.forEach(option => {
+      const label = getNavSelectDisplayText(select, option);
+      const optionButton = document.createElement('button');
+
+      optionButton.type = 'button';
+      optionButton.className =
+        'nav-select-option' +
+        (option.value === select.value ? ' selected' : '');
+
+      optionButton.setAttribute('role', 'option');
+      optionButton.setAttribute(
+        'aria-selected',
+        option.value === select.value ? 'true' : 'false'
+      );
+
+      optionButton.dataset.navValue = option.value;
+      optionButton.title = label;
+      optionButton.textContent = label;
+
+      optionGrid.insertBefore(optionButton, empty);
+    });
 
     applyFamilyNavSearch(control);
   } else {
@@ -1308,11 +1320,12 @@ function syncNavSelectControl(selectId) {
   }
 
   menu.querySelectorAll('.nav-select-option').forEach(optionButton => {
-    optionButton.addEventListener('click', event => {
+    optionButton.onclick = event => {
       event.preventDefault();
       event.stopPropagation();
 
       const nextValue = optionButton.dataset.navValue ?? '';
+
       if (select.value !== nextValue) {
         select.value = nextValue;
         select.dispatchEvent(new Event('change', { bubbles:true }));
@@ -1321,7 +1334,7 @@ function syncNavSelectControl(selectId) {
       syncNavSelectControl(selectId);
       closeNavSelect(host);
       trigger.focus();
-    });
+    };
   });
 }
 
