@@ -1036,25 +1036,29 @@ function setupTopbarNavSelects() {
     trigger.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      const willOpen = !host.classList.contains('open');
-      closeAllNavSelects(host);
-      host.classList.toggle('open', willOpen);
-      trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-      if (willOpen) {
-        syncNavSelectControl(selectId);
 
-        requestAnimationFrame(() => {
-          if (selectId === 'familySelect') {
-            positionFamilyNavSelectMenu(control);
-          }
-
-          const current =
-            menu.querySelector('.nav-select-option.selected') ||
-            menu.querySelector('.nav-select-option');
-
-          if (current) current.focus({ preventScroll:true });
-        });
+      const isOpen = host.classList.contains('open');
+      if (isOpen) {
+        closeNavSelect(host);
+        return;
       }
+
+      closeAllNavSelects(host);
+      host.classList.add('open');
+      trigger.setAttribute('aria-expanded', 'true');
+      syncNavSelectControl(selectId);
+
+      requestAnimationFrame(() => {
+        if (selectId === 'familySelect') {
+          positionFamilyNavSelectMenu(control);
+        }
+
+        const current =
+          menu.querySelector('.nav-select-option.selected') ||
+          menu.querySelector('.nav-select-option');
+
+        if (current) current.focus({ preventScroll:true });
+      });
     });
 
     trigger.addEventListener('keydown', event => {
@@ -8938,6 +8942,17 @@ Object.assign(EN, {
     '目前瀏覽器已自動改用備用圖片儲存方式':'The browser has automatically switched to a fallback image storage method'
   });
 
+  Object.assign(ZH_HANS_EXACT, {
+    '族譜工具':'族谱工具',
+    '網頁端族譜系統工具':'网页端族谱系统工具',
+    '遊戲端資料提取模組':'游戏端数据提取模组'
+  });
+  Object.assign(EN, {
+    '族譜工具':'Genealogy Tool',
+    '網頁端族譜系統工具':'Web Genealogy Tool',
+    '遊戲端資料提取模組':'Game Data Exporter Mod'
+  });
+
   const nodeSource = new WeakMap();
   const nodeOutput = new WeakMap();
   const attrSource = new WeakMap();
@@ -9078,7 +9093,11 @@ They will remain in the global Sim pool.`;
         else translateAttrs(node, refreshSource);
       }
       document.documentElement.lang = language;
-      document.title = "LING'S SIMS 4 GENEALOGY";
+      document.title = language === 'en'
+        ? "L1nG The Sims 4 Genealogy Tool"
+        : language === 'zh-Hans'
+          ? "L1nG 模拟市民族谱工具"
+          : "L1nG 模擬市民族譜工具";
     } finally { applying = false; }
   }
 
