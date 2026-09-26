@@ -5312,7 +5312,14 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .app-body { flex:1; display:flex; min-height:0; overflow:hidden; }
 .sidebar-backdrop { display:none; }
 .family-panel { position:relative; width:var(--sidebar-width); flex:0 0 var(--sidebar-width); min-width:0; display:flex; flex-direction:column; background:var(--card); border-right:1px solid var(--border); z-index:35; transition:width .22s ease,flex-basis .22s ease,transform .22s ease; overflow:hidden; }
-.family-panel-scroll { flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding-bottom:46px; }
+.family-panel-scroll {
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    padding-bottom:36px;
+}
 .family-cover-section { padding:14px 14px 0; }
 .family-cover { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; border-radius:7px; background:var(--panel-bg); border:1px solid var(--border); }
 .family-cover>img { width:100%; height:100%; object-fit:cover; display:block; }
@@ -5367,9 +5374,42 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .family-stats strong { color:var(--ink); font-weight:650; }
 .family-stat-sep { opacity:.45; }
 
-.family-members-section { padding:11px 8px 10px; }
-.family-section-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 7px 7px; color:var(--sub); font-size:11.5px; font-weight:650; letter-spacing:.3px; }
-.family-member-actions { display:flex; gap:1px; }
+.family-members-section {
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    padding:11px 8px 10px;
+}
+.family-section-heading {
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-width:0;
+    padding:0 7px 7px;
+    color:var(--sub);
+    font-size:11.5px;
+    font-weight:650;
+    letter-spacing:.3px;
+}
+.family-section-heading > span:first-child {
+    flex:0 0 auto;
+    white-space:nowrap;
+}
+.family-member-actions {
+    min-width:0;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:1px;
+}
+.family-member-actions #familyMemberAddMenu[hidden],
+.family-member-actions .family-section-batch-remove[hidden],
+.family-member-remove-toolbar[hidden] {
+    display:none;
+}
 .family-section-batch-remove {
     display:inline-flex;
     align-items:center;
@@ -5445,7 +5485,16 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     cursor:default;
 }
 
-.family-member-list { display:flex; flex-direction:column; gap:1px; }
+.family-member-list {
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+}
 .family-member-empty { padding:18px 8px; color:var(--sub); text-align:center; font-size:11.5px; line-height:1.5; }
 .family-member-row {
     display:grid;
@@ -5501,25 +5550,25 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     padding:0;
     border:0;
     border-radius:50%;
-    background:rgba(255,255,255,.10);
-    color:rgba(176,58,46,.72);
+    background:rgba(176,58,46,.42);
+    color:rgba(255,255,255,.92);
     opacity:0;
-    transform:scale(.94);
+    transform:scale(.97);
     pointer-events:none;
     cursor:pointer;
-    transition:opacity .22s ease,transform .22s ease,background-color .18s ease,color .18s ease;
+    transition:opacity .22s ease,transform .22s ease,background-color .18s ease;
 }
 .family-member-row.remove-mode .family-member-remove-select {
     pointer-events:auto;
 }
 .family-member-row.remove-mode .family-member-remove-select:not(.selected) {
-    animation:family-member-remove-pulse 1.15s ease-in-out infinite;
+    animation:family-member-remove-pulse 1.05s ease-in-out infinite;
 }
 .family-member-remove-select.selected {
-    opacity:.58;
+    opacity:.52;
     transform:scale(1);
-    background:rgba(176,58,46,.20);
-    color:rgba(176,58,46,.92);
+    background:rgba(176,58,46,.52);
+    color:#fff;
     animation:none;
 }
 .family-member-remove-select .l1ng-icon {
@@ -5528,11 +5577,11 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 }
 @keyframes family-member-remove-pulse {
     0%,100% {
-        opacity:.36;
-        transform:scale(.94);
+        opacity:.38;
+        transform:scale(.97);
     }
     50% {
-        opacity:.62;
+        opacity:.64;
         transform:scale(1);
     }
 }
@@ -5912,13 +5961,17 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     margin: 0;
 }
 
-/* 性別被取消顯示時，不再用左側色條偷偷保留性別提示。 */
-.node.card-gender-hidden {
-    border-left-width: 1.5px;
-    border-left-color: var(--border);
+/* ========【卡片性別顯示】 設定 - 性別色條與性別文字各自獨立控制 ======== */
+.node.card-gender-bar-hidden {
+    border-left-width:1.5px;
+    border-left-color:var(--border);
 }
-.node.card-gender-hidden.ghost { border-left-color: var(--ghost-border); }
-.node.card-gender-hidden.dead { border-left-color: var(--dead-border); }
+.node.card-gender-bar-hidden.ghost {
+    border-left-color:var(--ghost-border);
+}
+.node.card-gender-bar-hidden.dead {
+    border-left-color:var(--dead-border);
+}
 
 
 /* ========【全站載入骨架】 設定 - 初始化期間維持與正式介面相同的主要區塊比例 ======== */
