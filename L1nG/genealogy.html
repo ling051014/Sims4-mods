@@ -198,7 +198,7 @@
                             <div class="family-section-heading">
                                 <span>成員</span>
                                 <div class="family-member-actions">
-                                    <div class="app-menu">
+                                    <div class="app-menu" id="familyMemberAddMenu">
                                         <button class="family-section-icon app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="新增成員"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span></button>
                                         <div class="app-menu-popover member-add-popover" role="menu">
                                             <button class="app-menu-item" id="addBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增模擬市民</span></button>
@@ -209,6 +209,11 @@
                                         <span class="l1ng-icon icon-person-dash" aria-hidden="true"></span>
                                         <span>批量移除</span>
                                     </button>
+                                    <div class="family-member-remove-toolbar" id="familyMemberRemoveToolbar" hidden>
+                                        <span class="family-member-remove-count" id="familyMemberRemoveCount">已選 0 位</span>
+                                        <button class="family-member-remove-cancel" id="familyMemberRemoveCancelBtn" type="button">取消</button>
+                                        <button class="family-member-remove-confirm" id="familyMemberRemoveConfirmBtn" type="button" disabled>移除 0 位</button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="family-member-list" id="familyMemberList"></div>
@@ -612,25 +617,6 @@
                     <span class="spacer"></span>
                     <button id="addMemberCancelBtn">取消</button>
                     <button class="primary" disabled id="addMemberConfirmBtn">加入家族</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========【移出家族】 設定 - 將模擬市民移出目前家族 ======== -->
-        <div class="mask roster" id="removeMemberMask">
-            <div class="modal addmember-modal">
-                <h2>從<span class="family-name-chip" id="removeMemberFamilyName">—</span>移除<span class="help-tooltip" tabindex="0" role="button" aria-label="移出家族說明" data-tooltip="他們仍保留在模擬市民池中，可隨時再次加入任何家族。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h2>
-                <div class="addmember-toolbar">
-                    <input id="removeMemberSearch" placeholder="搜尋…" type="search">
-                    <button id="removeMemberAllBtn" type="button">全選</button>
-                    <button id="removeMemberNoneBtn" type="button">清空</button>
-                </div>
-                <div class="addmember-list" id="removeMemberList"></div>
-                <div class="modal-actions">
-                    <span class="addmember-count remove-count" id="removeMemberCount">已選<b>0</b>人</span>
-                    <span class="spacer"></span>
-                    <button id="removeMemberCancelBtn">取消</button>
-                    <button class="danger" disabled id="removeMemberConfirmBtn">從家族移除</button>
                 </div>
             </div>
         </div>
