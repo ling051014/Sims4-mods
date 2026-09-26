@@ -49,6 +49,9 @@
                         <span class="topbar-brand-divider" aria-hidden="true">/</span>
                         <span class="topbar-section-brand" aria-current="page">GENEALOGY</span>
                     </div>
+                    <button class="topbar-help-btn" id="tipsBtn" type="button" title="使用說明" aria-label="使用說明">
+                        <span class="l1ng-icon icon-question-circle" aria-hidden="true"></span>
+                    </button>
                 </div>
                 <div class="topbar-main">
                     <div class="app-menu topbar-filter-menu" id="topbarFilterMenu">
@@ -132,7 +135,6 @@
                                 </a>
                                 
                                 <button class="app-menu-item" id="bgBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></button>
-                                <button class="app-menu-item" id="tipsBtn" type="button" role="menuitem"><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>使用提示</span></button>
                                 <div class="app-menu-divider"></div>
                                 <div class="app-menu-language-row">
                                     <span class="app-menu-language-label"><span class="l1ng-icon icon-globe2" aria-hidden="true"></span><span>語言</span></span>
@@ -691,7 +693,7 @@
                     </select>
                     <div class="avatar-tip" id="galleryProfileHint"></div>
                 </div>
-                <div class="setting-group-title setting-title-with-help"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>儲存空間使用量</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="圖片儲存說明" data-tooltip="圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引。匯出 JSON 備份時會自動把圖片一起放進備份；清理未使用的圖片只會移除目前沒有被任何內容引用的圖片。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                <div class="setting-group-title setting-title-with-help"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>儲存空間使用量</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="圖片儲存說明" data-tooltip="圖片會儲存在目前使用的瀏覽器中，不會自動上傳。匯出 JSON 備份時會連同圖片一起備份；清理未使用的圖片只會移除目前沒有被任何內容使用的圖片。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                 <div class="bg-setting">
                     <div class="storage-bar">
                         <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
@@ -732,7 +734,7 @@
                             <li><b>智慧對齊輔助線</b>會在單張卡片接近其他卡片的左 / 中 / 右或上 / 中 / 下位置時自動吸附</li>
                             <li><b>等距吸附</b>支援水平與垂直排列；接近相同間距時會顯示兩段間距與數值，只移動目前拖曳的卡片</li>
                             <li>自由排列時可使用<b>鎖定排列</b>避免誤拖；<b>重設位置</b>會清除目前模式的手動位置並恢復自動樹狀佈局</li>
-                            <li><b>側邊欄分隔線</b>可拖曳調整寬度；雙擊分隔線恢復預設寬度</li>
+                            <li><b>電腦版：</b><b>側邊欄分隔線</b>可拖曳調整寬度；雙擊分隔線恢復預設寬度</li>
                         </ul>
                     </div>
                     <div class="tips-section">
@@ -751,7 +753,7 @@
                             <li><b>族譜圖片</b>會輸出目前完整族譜，不受目前縮放或平移視角限制</li>
                             <li>圖片會保留目前的<b>卡片位置 / 關係位置 / 主題 / 背景</b>，但不包含頂端導覽、側邊欄、智慧輔助線或拖曳狀態</li>
                             <li>族譜圖片可選擇<b>標準（1×） / 高畫質（2×） / 超高畫質（3×）</b></li>
-                            <li><b>JSON 備份</b>保留可再次匯入的完整族譜資料，瀏覽器中的圖片會一併轉回 base64</li>
+                            <li><b>JSON 備份</b>會包含完整族譜資料與圖片，可於之後重新匯入並繼續編輯</li>
                         </ul>
                     </div>
                     <div class="tips-section">
@@ -775,7 +777,7 @@
                     <div class="tips-section">
                         <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>圖片儲存</span></h3>
                         <ul>
-                            <li>圖片本體會儲存在瀏覽器本機的 <b>IndexedDB</b>，族譜資料只保存圖片索引，不會把整張圖片塞進一般設定資料</li>
+                            <li>頭像、相簿圖片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器</li>
                             <li>匯出 <b>JSON 備份</b>時，圖片會自動一起放進備份；之後重新匯入時也會一併還原</li>
                             <li><b>清理未使用的圖片</b>只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片</li>
                         </ul>
@@ -878,7 +880,7 @@
 
                     <section class="export-section">
                         <div class="export-section-head">
-                            <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>JSON 備份</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="JSON 備份說明" data-tooltip="JSON 備份會包含目前族譜資料，並將已儲存在瀏覽器中的圖片一併轉回 base64。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h3>
+                            <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>JSON 備份</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="JSON 備份說明" data-tooltip="JSON 備份會包含目前族譜資料與圖片，可於之後重新匯入並繼續編輯。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h3>
                             <p>保留完整族譜資料與圖片，可再次匯入本工具繼續編輯。</p>
                         </div>
 

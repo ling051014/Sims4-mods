@@ -7456,14 +7456,19 @@ async function importJSON(file) {
         });
         (db.families || []).forEach(fam => extract(fam, 'coverImage'));
         if (incomingBg && isBase64Ref(incomingBg.image)) {
-          const id = await saveImageToIdb(incomingBg.image);
-          if (id) incomingBg.image = id;
+          try {
+            const id = await saveImageToIdb(incomingBg.image);
+            if (id) incomingBg.image = id;
+          } catch(e) {}
         }
         await Promise.all(tasks);
-        if (incomingBg) {
-          bgSettings = { ...bgSettings, ...incomingBg };
-          try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); } catch(e){}
-        }
+      }
+
+      // 背景設定本身不依賴主要圖片儲存是否可用。
+      // 若主要圖片儲存不可用，備份中的背景圖片仍保留原始資料並可正常還原。
+      if (incomingBg) {
+        bgSettings = { ...bgSettings, ...incomingBg };
+        try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); } catch(e){}
       }
 
       save({ immediate: true });
@@ -8267,6 +8272,7 @@ Object.assign(ZH_HANS_EXACT, {
   '避免誤拖；': '避免误拖；',
   '會清除目前模式的手動位置並恢復自動樹狀佈局': '会清除当前模式的手动位置并恢复自动树状布局',
   '家族欄分隔線': '侧边栏分隔线',
+  '側邊欄分隔線': '侧边栏分隔线',
   '可拖曳調整寬度；雙擊分隔線恢復預設寬度': '可拖动调整宽度；双击分隔线恢复默认宽度',
   '關係與關係位置': '关系与关系位置',
   '顯示 / 隱藏關係': '显示 / 隐藏关系',
@@ -8294,15 +8300,23 @@ Object.assign(ZH_HANS_EXACT, {
 });
 
 Object.assign(ZH_HANS_EXACT, {
-  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引。匯出 JSON 備份時會自動把圖片一起放進備份；清理未使用的圖片只會移除目前沒有被任何內容引用的圖片。':'图片本体会保存在浏览器本机的 IndexedDB，族谱数据只保存图片索引。导出 JSON 备份时会自动把图片一起放进备份；清理未使用的图片只会移除目前没有被任何内容引用的图片。',
-  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引，不會把整張圖片塞進一般設定資料':'图片本体会保存在浏览器本机的 IndexedDB，族谱数据只保存图片索引，不会把整张图片塞进一般设置数据',
+  '使用說明':'使用说明',
+  '電腦版：':'电脑版：',
+  'JSON 備份會包含完整族譜資料與圖片，可於之後重新匯入並繼續編輯':'JSON 备份会包含完整族谱数据与图片，可在之后重新导入并继续编辑',
+  '頭像、相簿圖片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器':'头像、相册图片、宠物图片与背景图片会保存在当前使用的浏览器中，不会自动上传到网站或服务器',
+  '圖片會儲存在目前使用的瀏覽器中，不會自動上傳。匯出 JSON 備份時會連同圖片一起備份；清理未使用的圖片只會移除目前沒有被任何內容使用的圖片。':'图片会保存在当前使用的浏览器中，不会自动上传。导出 JSON 备份时会连同图片一起备份；清理未使用的图片只会移除当前没有被任何内容使用的图片。',
+  'JSON 備份會包含目前族譜資料與圖片，可於之後重新匯入並繼續編輯。':'JSON 备份会包含当前族谱数据与图片，可在之后重新导入并继续编辑。',
   '匯出 JSON 備份時，圖片會自動一起放進備份；之後重新匯入時也會一併還原':'导出 JSON 备份时，图片会自动一起放进备份；之后重新导入时也会一并还原',
-  '清理未使用的圖片只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片':'清理未使用的图片只会移除目前没有被人物、宠物、相册或背景引用的图片，不会删除仍在使用中的图片'
+  '清理未使用的圖片只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片':'清理未使用的图片只会移除当前没有被人物、宠物、相册或背景引用的图片，不会删除仍在使用中的图片'
 });
 
 Object.assign(EN, {
-  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引。匯出 JSON 備份時會自動把圖片一起放進備份；清理未使用的圖片只會移除目前沒有被任何內容引用的圖片。':'Image files are stored locally in your browser\'s IndexedDB while the genealogy data keeps only image references. JSON backups automatically include the images, and cleanup removes only images that are no longer referenced.',
-  '圖片本體會儲存在瀏覽器本機的 IndexedDB，族譜資料只保存圖片索引，不會把整張圖片塞進一般設定資料':'Image files are stored locally in your browser\'s IndexedDB. The genealogy data keeps only image references instead of embedding the full images in regular settings.',
+  '使用說明':'Help',
+  '電腦版：':'Desktop: ',
+  'JSON 備份會包含完整族譜資料與圖片，可於之後重新匯入並繼續編輯':'The JSON backup includes the complete genealogy data and images, so you can import it again later and continue editing.',
+  '頭像、相簿圖片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器':'Portraits, gallery images, pet images, and background images are stored in your current browser and are not uploaded automatically.',
+  '圖片會儲存在目前使用的瀏覽器中，不會自動上傳。匯出 JSON 備份時會連同圖片一起備份；清理未使用的圖片只會移除目前沒有被任何內容使用的圖片。':'Images are stored in your current browser and are not uploaded automatically. JSON backups include the images, and cleanup removes only images that are no longer in use.',
+  'JSON 備份會包含目前族譜資料與圖片，可於之後重新匯入並繼續編輯。':'The JSON backup includes the current genealogy data and images, so you can import it again later and continue editing.',
   '匯出 JSON 備份時，圖片會自動一起放進備份；之後重新匯入時也會一併還原':'When you export a JSON backup, the images are included automatically and restored when you import the backup later.',
   '清理未使用的圖片只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片':'Clean Unused Images removes only images that are no longer referenced by Sims, pets, galleries, or the background. Images still in use are kept.'
 });
@@ -8339,6 +8353,7 @@ Object.assign(EN, {
   '避免誤拖；': ' prevents accidental card dragging; ',
   '會清除目前模式的手動位置並恢復自動樹狀佈局': ' clears manual positions for the current mode and restores the automatic tree layout.',
   '家族欄分隔線': 'Sidebar divider',
+  '側邊欄分隔線': 'Sidebar divider',
   '可拖曳調整寬度；雙擊分隔線恢復預設寬度': ' can be dragged to resize the sidebar; double-click it to restore the default width.',
   '關係與關係位置': 'Relationships & Label Positions',
   '顯示 / 隱藏關係': 'Show / Hide Relationships',
