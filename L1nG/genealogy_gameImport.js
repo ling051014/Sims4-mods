@@ -616,39 +616,45 @@
     let families = [];
 
     if (familySourceEntries.length) {
-      families = familySourceEntries.map(([householdIdRaw, household], index) => {
-        const householdId = String(householdIdRaw);
-        const seedIds = stringIds(household.memberIds).filter(id => humanIds.has(id));
-        const memberIds = expandHouseholdGenealogy(seedIds, sourceSims, humanIds);
+      families = familySourceEntries
+        .map(([householdIdRaw, household], index) => {
+          const householdId = String(householdIdRaw);
+          const seedIds = stringIds(household.memberIds).filter(id => humanIds.has(id));
+          const memberIds = expandHouseholdGenealogy(seedIds, sourceSims, humanIds);
 
-        return {
-          id:stableHouseholdFamilyId(householdId, memberIds),
-          name:familyNameFromHousehold(household, memberIds, sourceSims, index),
-          memberIds,
-          bio:optionalDisplayValue(household.bio) || optionalDisplayValue(household.description) || '',
-          coverImage:null,
-          freeLayout:{ view:false, edit:false },
-          manualPos:{ view:{}, edit:{} },
-          locked:false,
-          gameImport:true,
-          gameData:{
-            householdId,
-            homeZoneId:household.homeZoneId || household.zoneId || null,
-            worldId:household.worldId || null,
-            neighborhoodId:household.neighborhoodId || null,
-            regionId:household.regionId || null,
-            lotName:optionalDisplayValue(household.lotName),
-            worldName:optionalDisplayValue(household.worldName),
-            neighborhoodName:optionalDisplayValue(household.neighborhoodName),
-            hidden:!!household.hidden,
-            isActiveHousehold:!!household.isActiveHousehold,
-            isPlayedHousehold:!!household.isPlayedHousehold,
-            isPlayerHousehold:!!household.isPlayerHousehold,
-            householdMemberIds:stringIds(household.memberIds),
-            petIds:stringIds(household.memberIds).filter(id => petIds.has(id))
-          }
-        };
-      });
+          // 純寵物 Household 不建立空白人物家族。
+          // 寵物本身仍保留在 pet pool / unassignedPets，不以空 memberIds 污染家族選單。
+          if (!memberIds.length) return null;
+
+          return {
+            id:stableHouseholdFamilyId(householdId, memberIds),
+            name:familyNameFromHousehold(household, memberIds, sourceSims, index),
+            memberIds,
+            bio:optionalDisplayValue(household.bio) || optionalDisplayValue(household.description) || '',
+            coverImage:null,
+            freeLayout:{ view:false, edit:false },
+            manualPos:{ view:{}, edit:{} },
+            locked:false,
+            gameImport:true,
+            gameData:{
+              householdId,
+              homeZoneId:household.homeZoneId || household.zoneId || null,
+              worldId:household.worldId || null,
+              neighborhoodId:household.neighborhoodId || null,
+              regionId:household.regionId || null,
+              lotName:optionalDisplayValue(household.lotName),
+              worldName:optionalDisplayValue(household.worldName),
+              neighborhoodName:optionalDisplayValue(household.neighborhoodName),
+              hidden:!!household.hidden,
+              isActiveHousehold:!!household.isActiveHousehold,
+              isPlayedHousehold:!!household.isPlayedHousehold,
+              isPlayerHousehold:!!household.isPlayerHousehold,
+              householdMemberIds:stringIds(household.memberIds),
+              petIds:stringIds(household.memberIds).filter(id => petIds.has(id))
+            }
+          };
+        })
+        .filter(Boolean);
     } else {
       families = fallbackFamilies(sourceSims, humanIds).map((memberIds, index) => ({
         id:stableHouseholdFamilyId('', memberIds),
