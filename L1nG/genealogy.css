@@ -5334,10 +5334,13 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .topbar-filter-btn.active { color:var(--accent); background:var(--grad-1-soft); }
 .topbar-filter-count { color:currentColor; font-size:11px; font-variant-numeric:tabular-nums; }
 .topbar-filter-popover { left:0; right:auto; top:calc(100% + 6px); width:min(520px,calc(100vw - 32px)); padding:10px 12px 8px; }
-.topbar-filter-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
-.topbar-filter-column { min-width:0; }
+.topbar-filter-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:18px; row-gap:0; align-items:start; }
+.topbar-filter-column { min-width:0; display:flex; flex-direction:column; }
+.topbar-filter-column:nth-child(1) { grid-column:1; grid-row:1; }
+.topbar-filter-column:nth-child(2) { grid-column:2; grid-row:1; }
+.topbar-filter-column:nth-child(3) { grid-column:3; grid-row:1; }
 .topbar-filter-group { margin:0; padding:0; border:0; min-width:0; }
-.topbar-filter-column .topbar-filter-group + .topbar-filter-group { margin-top:14px; padding-top:0; border-top:0; }
+.topbar-filter-column .topbar-filter-group + .topbar-filter-group { margin-top:24px; padding-top:0; border-top:0; }
 .topbar-filter-group legend { width:100%; margin:0 0 4px; padding:0; color:var(--sub); font-size:10.5px; font-weight:650; letter-spacing:.35px; }
 .topbar-filter-option { display:flex; align-items:center; gap:8px; min-height:29px; padding:3px 2px; color:var(--nav-dropdown-text); font-size:12px; cursor:pointer; }
 .topbar-filter-option input { width:14px; height:14px; margin:0; accent-color:var(--accent); flex:0 0 auto; }
