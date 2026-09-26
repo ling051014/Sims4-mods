@@ -8502,14 +8502,14 @@ document.addEventListener('keydown', e => {
 Object.assign(ZH_HANS_EXACT, {
   '編輯家族名稱':'编辑家族名称','管理…':'管理…','設定':'设置','家庭與關係':'家庭与关系','其他關係':'其他关系',
   '篩選':'筛选','全部狀態':'全部状态','全部性別':'全部性别','重設篩選':'重置筛选','父母 A':'父母 A','父母 B':'父母 B',
-  '背景':'背景','目前背景圖片':'当前背景图片','背景顏色':'背景颜色','透明背景（PNG）':'透明背景（PNG）',
+  '背景':'背景','目前背景圖片':'当前背景图片','主題背景顏色':'主题背景颜色','透明背景（PNG）':'透明背景（PNG）',
   '查看個人檔案':'查看个人资料','在族譜中定位':'在族谱中定位','移出目前家族':'移出当前家族',
   '卡片顯示內容':'卡片显示内容','卡片外觀':'卡片外观','檢視卡片外觀':'查看模式卡片外观','檢視模式顯示內容':'查看模式显示内容','編輯模式顯示內容':'编辑模式显示内容','極簡':'极简','半透明':'半透明','完整卡片':'完整卡片',
   '套用於所有檢視模式人物卡':'应用于所有查看模式人物卡','只套用於檢視模式人物卡':'仅应用于查看模式人物卡','只套用於編輯模式人物卡':'仅应用于编辑模式人物卡','顯示內容套用於檢視與編輯模式；外觀只套用檢視模式':'显示内容应用于查看与编辑模式；外观仅应用于查看模式','重設所選位置':'重置所选位置','移出所選人物':'移出所选人物','取消選取':'取消选择',
   '確定要將所選人物移出目前家族嗎？':'确定要将所选人物移出当前家族吗？','人物本身仍會保留在人物資料中。':'人物本身仍会保留在人物资料中。',
   '目前家族還沒有成員，使用「成員 ＋」新增或加入人物':'当前家族还没有成员，使用「成员 ＋」新建或加入人物',
   '圖片會保留目前的':'图片会保留当前的','卡片位置 / 關係位置 / 主題':'卡片位置 / 关系位置 / 主题',
-  '匯出時可另外選擇':'导出时可另外选择','目前背景圖片 / 背景顏色 / PNG 透明背景':'当前背景图片 / 背景颜色 / PNG 透明背景',
+  '匯出時可另外選擇':'导出时可另外选择','目前背景圖片 / 主題背景顏色 / PNG 透明背景':'当前背景图片 / 主题背景颜色 / PNG 透明背景',
   '匯出圖片不包含頂端導覽、家族欄、智慧輔助線或拖曳狀態':'导出图片不包含顶部导航、家族栏、智能辅助线或拖动状态',
   '頂端':'顶部','開啟相簿瀏覽器，檢視所有模擬市民的相簿圖片':'打开相册浏览器，查看所有模拟市民的相册图片'
 });
@@ -8532,14 +8532,14 @@ Object.assign(EN, {
 Object.assign(EN, {
   '編輯家族名稱':'Edit family name','管理…':'Manage…','設定':'Set','家庭與關係':'Family & Relationships','其他關係':'Other Relationships',
   '篩選':'Filter','全部狀態':'All statuses','全部性別':'All genders','重設篩選':'Reset filters','父母 A':'Parent A','父母 B':'Parent B',
-  '背景':'Background','目前背景圖片':'Current background image','背景顏色':'Background color','透明背景（PNG）':'Transparent background (PNG)',
+  '背景':'Background','目前背景圖片':'Current background image','主題背景顏色':'Theme background color','透明背景（PNG）':'Transparent background (PNG)',
   '查看個人檔案':'View Profile','在族譜中定位':'Locate in Tree','移出目前家族':'Remove from Current Family',
   '卡片顯示內容':'Card content','卡片外觀':'Card appearance','檢視卡片外觀':'View card appearance','檢視模式顯示內容':'View mode content','編輯模式顯示內容':'Edit mode content','極簡':'Minimal','半透明':'Translucent','完整卡片':'Full card',
   '套用於所有檢視模式人物卡':'Applies to all View Mode cards','只套用於檢視模式人物卡':'Applies only to View Mode cards','只套用於編輯模式人物卡':'Applies only to Edit Mode cards','顯示內容套用於檢視與編輯模式；外觀只套用檢視模式':'Content applies to both View and Edit modes; appearance applies only to View Mode','重設所選位置':'Reset selected positions','移出所選人物':'Remove selected Sims','取消選取':'Clear selection',
   '確定要將所選人物移出目前家族嗎？':'Remove the selected Sims from the current family?','人物本身仍會保留在人物資料中。':'The Sims will remain in the global Sim data.',
   '目前家族還沒有成員，使用「成員 ＋」新增或加入人物':'This family has no members yet. Use “Members +” to create or add someone.',
   '圖片會保留目前的':'The image keeps the current ','卡片位置 / 關係位置 / 主題':'card positions / relationship positions / theme',
-  '匯出時可另外選擇':'; for export, choose ','目前背景圖片 / 背景顏色 / PNG 透明背景':'current background image / background color / transparent PNG background',
+  '匯出時可另外選擇':'; for export, choose ','目前背景圖片 / 主題背景顏色 / PNG 透明背景':'current background image / theme background color / transparent PNG background',
   '匯出圖片不包含頂端導覽、家族欄、智慧輔助線或拖曳狀態':'The exported image excludes the top navigation, family panel, smart guides, and drag state.',
   '頂端':'Top bar','開啟相簿瀏覽器，檢視所有模擬市民的相簿圖片':' opens the Gallery Browser for all Sims.'
 });
