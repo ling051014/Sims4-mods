@@ -205,6 +205,10 @@
                                             <button class="app-menu-item" id="addMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入既有人物</span></button>
                                         </div>
                                     </div>
+                                    <button class="family-section-batch-remove" id="removeMemberBtn" type="button" title="批量移除" aria-label="批量移除">
+                                        <span class="l1ng-icon icon-person-dash" aria-hidden="true"></span>
+                                        <span>批量移除</span>
+                                    </button>
                                 </div>
                             </div>
                             <div class="family-member-list" id="familyMemberList"></div>
@@ -612,7 +616,26 @@
             </div>
         </div>
 
-<!-- ========【主題設定】 設定 - 主題、背景與圖片品質 ======== -->
+        <!-- ========【移出家族】 設定 - 將模擬市民移出目前家族 ======== -->
+        <div class="mask roster" id="removeMemberMask">
+            <div class="modal addmember-modal">
+                <h2>從<span class="family-name-chip" id="removeMemberFamilyName">—</span>移除<span class="help-tooltip" tabindex="0" role="button" aria-label="移出家族說明" data-tooltip="他們仍保留在模擬市民池中，可隨時再次加入任何家族。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h2>
+                <div class="addmember-toolbar">
+                    <input id="removeMemberSearch" placeholder="搜尋…" type="search">
+                    <button id="removeMemberAllBtn" type="button">全選</button>
+                    <button id="removeMemberNoneBtn" type="button">清空</button>
+                </div>
+                <div class="addmember-list" id="removeMemberList"></div>
+                <div class="modal-actions">
+                    <span class="addmember-count remove-count" id="removeMemberCount">已選<b>0</b>人</span>
+                    <span class="spacer"></span>
+                    <button id="removeMemberCancelBtn">取消</button>
+                    <button class="danger" disabled id="removeMemberConfirmBtn">從家族移除</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========【主題設定】 設定 - 主題、背景與圖片品質 ======== -->
         <div class="mask" id="bgMask">
             <div class="modal bg-modal">
                 <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>主題設定</span></h2>
