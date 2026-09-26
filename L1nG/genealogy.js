@@ -7128,6 +7128,87 @@ function waitForImportPaint() {
 }
 
 // ========【遊戲族譜匯入】 設定 - 讀取 L1nG Genealogy Exporter ZIP ========
+// ========【遊戲族譜頭像】 設定 - ZIP 內可顯示圖片寫入 IndexedDB，再回填人物 / 寵物 ========
+async function persistGameImportAvatars(bundle, converted) {
+  if (!window.L1nGGameImport || !bundle || !converted) {
+    return { saved:0, unsupported:0, missing:0 };
+  }
+
+  const sourceSims =
+    (bundle.genealogy && bundle.genealogy.sims) ||
+    {};
+
+  let saved = 0;
+  let unsupported = 0;
+  let missing = 0;
+
+  const persistAsset = async (target, simId) => {
+    const sourceSim = sourceSims[String(simId)];
+
+    const asset =
+      window.L1nGGameImport.getSimAvatarAsset(
+        bundle,
+        String(simId),
+        sourceSim
+      );
+
+    if (!asset) {
+      missing++;
+      return;
+    }
+
+    if (!asset.supported || !asset.dataUrl) {
+      unsupported++;
+      return;
+    }
+
+    const imageId =
+      await saveImageToIdb(asset.dataUrl);
+
+    target.avatar =
+      imageId ||
+      asset.dataUrl;
+
+    saved++;
+  };
+
+  for (const [simId, sim] of Object.entries(converted.sims || {})) {
+    await persistAsset(sim, simId);
+
+    for (const pet of sim.pets || []) {
+      const petSimId =
+        pet &&
+        pet.gameData &&
+        pet.gameData.simId;
+
+      if (!petSimId || pet.avatar) continue;
+      await persistAsset(pet, petSimId);
+    }
+  }
+
+  const unassignedPets =
+    converted.meta &&
+    Array.isArray(converted.meta.unassignedPets)
+      ? converted.meta.unassignedPets
+      : [];
+
+  for (const pet of unassignedPets) {
+    const petSimId =
+      pet &&
+      pet.gameData &&
+      pet.gameData.simId;
+
+    if (!petSimId || pet.avatar) continue;
+    await persistAsset(pet, petSimId);
+  }
+
+  return {
+    saved,
+    unsupported,
+    missing
+  };
+}
+
 async function importGameGenealogy(file) {
   try {
     if (!window.L1nGGameImport) {
@@ -7143,6 +7224,16 @@ async function importGameGenealogy(file) {
     await waitForImportPaint();
 
     const converted = window.L1nGGameImport.convertBundle(bundle);
+
+    showGameImportStatus('正在匯入人物頭像…');
+    await waitForImportPaint();
+
+    const avatarStats =
+      await persistGameImportAvatars(
+        bundle,
+        converted
+      );
+
     const preparedResult = prepareDatabase(converted);
 
     showGameImportStatus('正在建立族譜畫面…');
@@ -7178,9 +7269,19 @@ async function importGameGenealogy(file) {
       ? bundle.manifest.stats
       : {};
 
+    const normalizedStats =
+      converted.meta &&
+      converted.meta.gameImportStats
+        ? converted.meta.gameImportStats
+        : {};
+
     const simCount =
-      stats.simCount ||
+      normalizedStats.peopleCount ||
       Object.keys(db.sims || {}).length;
+
+    const petCount =
+      normalizedStats.petCount ||
+      0;
 
     const familyCount =
       Array.isArray(db.families)
@@ -7199,7 +7300,9 @@ async function importGameGenealogy(file) {
         '遊戲族譜已成功匯入。',
         '',
         `人物：${simCount}`,
+        `寵物：${petCount}`,
         `家族：${familyCount}`,
+        `頭像：${avatarStats.saved}`,
         `目前顯示：${activeFamilyName}`
       ].join('\n'),
       {
@@ -7214,8 +7317,6 @@ async function importGameGenealogy(file) {
     } else {
       setFamilyPanelCollapsed(false);
     }
-
-    requestAnimationFrame(fitScreen);
 
   } catch (err) {
     hideGameImportStatus();
