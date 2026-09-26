@@ -670,24 +670,53 @@
 
                 <section class="appearance-section relationship-style-section">
                     <div class="setting-group-title">關係線</div>
-                    <div class="relationship-line-preview-list">
-                        <div class="relationship-line-preview"><span>父母 / 子女</span><i data-rel-preview="parent"></i></div>
-                        <div class="relationship-line-preview"><span>配偶</span><i data-rel-preview="spouse"></i></div>
-                        <div class="relationship-line-preview"><span>前任</span><i data-rel-preview="exspouse"></i></div>
-                        <div class="relationship-line-preview"><span>領養</span><i data-rel-preview="adopt"></i></div>
-                        <div class="relationship-line-preview"><span>其他關係</span><i data-rel-preview="other"></i></div>
+                    <div class="relationship-line-list">
+                        <details class="relationship-line-item" data-rel-line-item="parent">
+                            <summary><span>父母 / 子女</span><i data-rel-preview="parent"></i></summary>
+                            <div class="relationship-line-controls">
+                                <label><span>樣式</span><select data-rel-style="parent"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
+                                <label><span>粗細</span><input data-rel-width="parent" type="range" min="1" max="4" step="0.1"></label>
+                                <label><span>顏色</span><input data-rel-color="parent" type="color"></label>
+                            </div>
+                        </details>
+
+                        <details class="relationship-line-item" data-rel-line-item="spouse">
+                            <summary><span>配偶</span><i data-rel-preview="spouse"></i></summary>
+                            <div class="relationship-line-controls">
+                                <label><span>樣式</span><select data-rel-style="spouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
+                                <label><span>粗細</span><input data-rel-width="spouse" type="range" min="1" max="4" step="0.1"></label>
+                                <label><span>顏色</span><input data-rel-color="spouse" type="color"></label>
+                            </div>
+                        </details>
+
+                        <details class="relationship-line-item" data-rel-line-item="exspouse">
+                            <summary><span>前任</span><i data-rel-preview="exspouse"></i></summary>
+                            <div class="relationship-line-controls">
+                                <label><span>樣式</span><select data-rel-style="exspouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
+                                <label><span>粗細</span><input data-rel-width="exspouse" type="range" min="1" max="4" step="0.1"></label>
+                                <label><span>顏色</span><input data-rel-color="exspouse" type="color"></label>
+                            </div>
+                        </details>
+
+                        <details class="relationship-line-item" data-rel-line-item="adopt">
+                            <summary><span>領養</span><i data-rel-preview="adopt"></i></summary>
+                            <div class="relationship-line-controls">
+                                <label><span>樣式</span><select data-rel-style="adopt"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
+                                <label><span>粗細</span><input data-rel-width="adopt" type="range" min="1" max="4" step="0.1"></label>
+                                <label><span>顏色</span><input data-rel-color="adopt" type="color"></label>
+                            </div>
+                        </details>
+
+                        <details class="relationship-line-item" data-rel-line-item="other">
+                            <summary><span>其他關係</span><i data-rel-preview="other"></i></summary>
+                            <div class="relationship-line-controls">
+                                <label><span>樣式</span><select data-rel-style="other"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
+                                <label><span>粗細</span><input data-rel-width="other" type="range" min="1" max="4" step="0.1"></label>
+                                <label><span>顏色</span><input data-rel-color="other" type="color"></label>
+                            </div>
+                        </details>
                     </div>
-                    <details class="appearance-advanced" id="relationshipLineAdvanced">
-                        <summary>自訂關係線外觀</summary>
-                        <div class="relationship-style-editor">
-                            <div class="relationship-style-row" data-rel-style-row="parent"><strong>父母 / 子女</strong><label>樣式<select data-rel-style="parent"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="parent" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="parent" type="color"></label></div>
-                            <div class="relationship-style-row" data-rel-style-row="spouse"><strong>配偶</strong><label>樣式<select data-rel-style="spouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="spouse" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="spouse" type="color"></label></div>
-                            <div class="relationship-style-row" data-rel-style-row="exspouse"><strong>前任</strong><label>樣式<select data-rel-style="exspouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="exspouse" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="exspouse" type="color"></label></div>
-                            <div class="relationship-style-row" data-rel-style-row="adopt"><strong>領養</strong><label>樣式<select data-rel-style="adopt"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="adopt" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="adopt" type="color"></label></div>
-                            <div class="relationship-style-row" data-rel-style-row="other"><strong>其他關係</strong><label>樣式<select data-rel-style="other"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label><label>粗細<input data-rel-width="other" type="range" min="1" max="4" step="0.1"></label><label>顏色<input data-rel-color="other" type="color"></label></div>
-                            <div class="relationship-style-actions"><button id="resetRelationshipStyleBtn" type="button">恢復關係線預設</button></div>
-                        </div>
-                    </details>
+                    <div class="relationship-style-actions"><button id="resetRelationshipStyleBtn" type="button">恢復關係線預設</button></div>
                 </section>
 
                 <section class="appearance-section">
