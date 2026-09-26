@@ -29,6 +29,8 @@ const GALLERY_PROFILE_KEY = 'sims4_genealogy_gallery_profile';
 const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
 const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
 const FAMILY_PANEL_COLLAPSED_KEY = 'sims4_genealogy_family_panel_collapsed';
+const ROSTER_VIEW_KEY = 'sims4_genealogy_roster_view';
+const REL_LINE_STYLE_KEY = 'sims4_genealogy_relationship_line_style';
 const LANG_KEY = 'ling_genealogy_language_v1';
 const SIDEBAR_DEFAULT_WIDTH = 300;
 const SIDEBAR_MIN_WIDTH = 260;
@@ -171,6 +173,32 @@ let infoCardId = null;
 let currentThemeId = 'ling';
 let customColors = { c1: '#f0c050', c2: '#a878c8' };
 
+let rosterViewMode = 'detailed';
+try {
+  const savedRosterView = localStorage.getItem(ROSTER_VIEW_KEY);
+  if (savedRosterView === 'compact' || savedRosterView === 'detailed') rosterViewMode = savedRosterView;
+} catch (_) {}
+let rosterBatchMode = false;
+const rosterSelection = new Set();
+
+const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
+  parent: { style:'solid', width:2.0, color:null },
+  spouse: { style:'solid', width:2.4, color:null },
+  exspouse: { style:'short-dash', width:1.7, color:null },
+  adopt: { style:'long-dash', width:1.7, color:null },
+  other: { style:'dot', width:1.5, color:null }
+});
+let relationshipLineSettings = JSON.parse(JSON.stringify(RELATIONSHIP_LINE_DEFAULTS));
+try {
+  const rawRelationshipStyle = localStorage.getItem(REL_LINE_STYLE_KEY);
+  if (rawRelationshipStyle) {
+    const parsed = JSON.parse(rawRelationshipStyle);
+    Object.keys(RELATIONSHIP_LINE_DEFAULTS).forEach(key => {
+      if (parsed && parsed[key]) relationshipLineSettings[key] = { ...relationshipLineSettings[key], ...parsed[key] };
+    });
+  }
+} catch (_) {}
+
 // ========【拖曳歷史】 設定 - 卡片與關係標籤共用 Ctrl+Z / Ctrl+Y ========
 const DRAG_HISTORY_LIMIT = 60;
 const dragHistory = {
@@ -272,11 +300,10 @@ let editingPhotoImageRef = '';
 let editingPhotoSizeKB = 0;
 let editingPhotoOriginal = false;
 
-/* 檢視器狀態 */
-let viewerMode = 'edit';         // 'edit' | 'sim' | 'global'
+/* ========【人生照片檢視】 設定 - 只切換目前人物的人生照片 ======== */
+let viewerMode = 'edit';
 let viewerSimId = null;
 let viewerIndex = 0;
-let viewerGlobalList = [];       // global 模式下的快照
 
 /* ===== IndexedDB 圖片層 ===== */
 let _imgDb = null;
@@ -772,13 +799,13 @@ const $ = id => document.getElementById(id);
 const viewport = $('viewport'), stage = $('stage'), svg = $('links'), nodes = $('nodes');
 const labelsSvg = $('labels');
 const mask = $('mask'), rosterMask = $('rosterMask'), bgMask = $('bgMask');
+const storageMask = $('storageMask');
 const addMemberMask = $('addMemberMask');
 const tipsMask = $('tipsMask');
 const infoMask = $('infoMask');
 const petMask = $('petMask');
 const photoMask = $('photoMask');
 const galleryViewerMask = $('galleryViewerMask');
-const galleryBrowserMask = $('galleryBrowserMask');
 const exportMask = $('exportMask');
 const exportCloseBtn = $('exportCloseBtn');
 const exportImageBtn = $('exportImageBtn');
@@ -1844,7 +1871,7 @@ function applyGalleryProfile(name) {
   if (hint) {
     if (name === 'original') {
       hint.innerHTML = `目前品質：<b>原始圖片</b>。不壓縮，保持原始格式與畫質。<br>
-        ${iconSvg('exclamation-triangle')} IndexedDB 容量雖然較大，但大型圖片仍會快速佔滿空間。`;
+        ${iconSvg('exclamation-triangle')} 原始圖片會較快佔用瀏覽器儲存空間。`;
     } else {
       hint.innerHTML = `目前品質：<b>${p.label}</b>（最大 ${p.max}px · ${p.hint}）。`;
     }
@@ -1993,7 +2020,7 @@ async function updateStorageInfo() {
   }
 
   if (!_idbAvailable) {
-    html += `<br><span style="color:#c94a3a">${iconSvg('exclamation-triangle')} 目前瀏覽器 IndexedDB 不可用，圖片以 base64 存在 localStorage</span>`;
+    html += `<br><span style="color:#c94a3a">${iconSvg('exclamation-triangle')} 目前瀏覽器已自動改用備用圖片儲存方式</span>`;
   }
 
   infoEl.innerHTML = html;
@@ -2127,8 +2154,7 @@ $('tipsCloseBtn').onclick = () => tipsMask.classList.remove('show');
 tipsMask.onclick = e => { if (e.target === tipsMask) tipsMask.classList.remove('show'); };
 
 const MODAL_STACK = ['photoMask','petMask','mask','infoMask','galleryViewerMask',
-                     'galleryBrowserMask','tipsMask',
-                     'rosterMask','addMemberMask','bgMask'];
+                     'tipsMask','rosterMask','addMemberMask','storageMask','bgMask'];
 function closeTopModal() {
   for (const id of MODAL_STACK) {
     const el = document.getElementById(id);
@@ -2141,7 +2167,6 @@ function closeTopModal() {
       if (id === 'galleryViewerMask') {
         viewerSimId = null;
         viewerMode = 'edit';
-        viewerGlobalList = [];
       }
       return true;
     }
@@ -3090,7 +3115,6 @@ function render() {
   updateLayoutToggle();
   if (rosterMask.classList.contains('show')) renderRoster();
   if (addMemberMask.classList.contains('show')) renderAddMemberList();
-  if (galleryBrowserMask.classList.contains('show')) renderGalleryBrowser();
 }
 
 function drawEdges() {
