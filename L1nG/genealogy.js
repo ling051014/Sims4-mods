@@ -3886,7 +3886,27 @@ function openInfoCard(id) {
   headFacts.push(`<div class="info-card-head-fact">${iconSvg('house')}<span>${esc(dResidence || uiText('居住地未知'))}</span></div>`);
   $('infoCardHeadFacts').innerHTML = headFacts.join('');
 
-  const familyNames = db.families.filter(f => (f.memberIds || []).includes(c.id)).map(f => displayDataText(f.name, f));
+  const householdId = c.gameData && c.gameData.householdId != null
+    ? String(c.gameData.householdId)
+    : '';
+  const importedHouseholdFamily = householdId
+    ? db.families.find(f => String(f.gameData?.householdId ?? '') === householdId)
+    : null;
+  const householdNameRaw =
+    (c.gameData && c.gameData.householdName) ||
+    (importedHouseholdFamily && importedHouseholdFamily.name) ||
+    '';
+  const householdName = householdNameRaw
+    ? displayDataText(householdNameRaw, importedHouseholdFamily || c)
+    : '';
+
+  // 「家庭」是遊戲存檔中的 Household；「家族」是族譜工具中的分組。
+  // 匯入時為了建立初始族譜而由 Household 自動產生的分組，不重複列在「所屬家族」。
+  const familyNames = db.families
+    .filter(f => (f.memberIds || []).includes(c.id))
+    .filter(f => !(householdId && String(f.gameData?.householdId ?? '') === householdId))
+    .map(f => displayDataText(f.name, f));
+
   const personNames = ids => (ids || []).map(pid => db.sims[pid]).filter(Boolean).map(sim => displayDataText(sim.name, sim));
   const parentNames = personNames(c.parentIds);
   const spouseNames = personNames(c.spouseIds);
@@ -3912,6 +3932,7 @@ function openInfoCard(id) {
   const basicRows = [];
   basicRows.push(row('職業', esc(dCareer || '—')));
   basicRows.push(row('人生抱負', esc(dAspiration || '—')));
+  basicRows.push(row('家庭', esc(householdName || '—')));
 
   if ((c.status === '已故' || c.status === '幽靈') && c.causeOfDeath) {
     basicRows.push(row('死因', esc(dCause)));
@@ -5805,7 +5826,8 @@ function observeSharedNativeSelectChevrons() {
 }
 function setupSearchSelects() {
   document.querySelectorAll('.ss-wrap').forEach(wrap => {
-    const select = document.getElementById(wrap.dataset.ssFor);
+    const selectId = wrap.dataset.ssFor;
+    const select = document.getElementById(selectId);
     if (!select) return;
     const input = wrap.querySelector('.ss-input');
     const dropdown = wrap.querySelector('.ss-dropdown');
@@ -5813,6 +5835,55 @@ function setupSearchSelects() {
     const optionsEl = wrap.querySelector('.ss-options');
     const isMultiple = select.multiple;
     const rawPlaceholder = wrap.dataset.placeholder || '點選選擇…';
+    const usePortalDropdown = selectId === 'relTarget';
+    const dropdownHome = {
+      parent: dropdown.parentNode,
+      next: dropdown.nextSibling
+    };
+
+    function restoreDropdownHome() {
+      if (!usePortalDropdown || dropdown.parentNode === dropdownHome.parent) return;
+      dropdown.classList.remove('ss-dropdown-portal');
+      dropdown.style.removeProperty('left');
+      dropdown.style.removeProperty('top');
+      dropdown.style.removeProperty('width');
+      dropdown.style.removeProperty('max-height');
+      if (dropdownHome.next && dropdownHome.next.parentNode === dropdownHome.parent) {
+        dropdownHome.parent.insertBefore(dropdown, dropdownHome.next);
+      } else {
+        dropdownHome.parent.appendChild(dropdown);
+      }
+    }
+
+    function positionPortalDropdown() {
+      if (!usePortalDropdown || !wrap.classList.contains('ss-open')) return;
+      if (dropdown.parentNode !== document.body) document.body.appendChild(dropdown);
+      dropdown.classList.add('ss-dropdown-portal');
+
+      const rect = input.getBoundingClientRect();
+      const margin = 10;
+      const gap = 5;
+      const minWidth = Math.max(280, rect.width);
+      const width = Math.min(
+        Math.max(minWidth, rect.width),
+        Math.max(280, window.innerWidth - margin * 2)
+      );
+      const left = Math.min(
+        Math.max(margin, rect.left),
+        Math.max(margin, window.innerWidth - width - margin)
+      );
+      const below = window.innerHeight - rect.bottom - gap - margin;
+      const above = rect.top - gap - margin;
+      const openAbove = below < 220 && above > below;
+      const maxHeight = Math.max(180, Math.min(360, openAbove ? above : below));
+
+      dropdown.style.width = Math.round(width) + 'px';
+      dropdown.style.left = Math.round(left) + 'px';
+      dropdown.style.maxHeight = Math.round(maxHeight) + 'px';
+      dropdown.style.top = openAbove
+        ? Math.round(Math.max(margin, rect.top - Math.min(maxHeight, dropdown.scrollHeight || maxHeight) - gap)) + 'px'
+        : Math.round(rect.bottom + gap) + 'px';
+    }
 
     function renderInput() {
       // 自訂下拉選單的提示文字跟著目前介面語言即時切換。
@@ -5878,21 +5949,27 @@ function setupSearchSelects() {
     }
     function openDropdown() {
       document.querySelectorAll('.ss-wrap.ss-open').forEach(w => {
-        if (w !== wrap) {
-          w.classList.remove('ss-open');
-          const dd = w.querySelector('.ss-dropdown');
-          if (dd) dd.style.display = 'none';
-        }
+        if (w !== wrap && w._closeDropdown) w._closeDropdown();
       });
       dropdown.style.display = '';
       wrap.classList.add('ss-open');
       searchEl.value = '';
       renderOptions();
+
+      if (usePortalDropdown) {
+        requestAnimationFrame(() => {
+          positionPortalDropdown();
+          requestAnimationFrame(positionPortalDropdown);
+        });
+      }
+
       setTimeout(() => searchEl.focus(), 30);
     }
+
     function closeDropdown() {
       dropdown.style.display = 'none';
       wrap.classList.remove('ss-open');
+      restoreDropdownHome();
     }
     input.onclick = e => {
       if (e.target.closest('.ss-tag-x')) return;
@@ -5905,11 +5982,23 @@ function setupSearchSelects() {
       if (e.key === 'Enter') e.preventDefault();
     };
     document.addEventListener('click', e => {
-      if (!wrap.contains(e.target)) closeDropdown();
+      if (!wrap.contains(e.target) && !dropdown.contains(e.target)) closeDropdown();
     });
+
+    if (usePortalDropdown) {
+      window.addEventListener('resize', debounce(positionPortalDropdown, 50));
+      document.addEventListener('scroll', () => {
+        if (wrap.classList.contains('ss-open')) positionPortalDropdown();
+      }, true);
+    }
+
+    wrap._closeDropdown = closeDropdown;
     wrap._refresh = () => {
       renderInput();
-      if (wrap.classList.contains('ss-open')) renderOptions(searchEl.value);
+      if (wrap.classList.contains('ss-open')) {
+        renderOptions(searchEl.value);
+        if (usePortalDropdown) requestAnimationFrame(positionPortalDropdown);
+      }
     };
     renderInput();
   });
@@ -8732,6 +8821,7 @@ Object.assign(ZH_HANS_EXACT, {
 });
 
 Object.assign(EN, {
+  '家庭': 'Household',
   '更換頭像': 'Change Portrait',
   '移除頭像': 'Remove Portrait',
   '關係標註說明': 'Relationship label help',
@@ -8783,6 +8873,7 @@ document.addEventListener('keydown', e => {
 });
 
 Object.assign(ZH_HANS_EXACT, {
+  '家庭':'家庭',
   '編輯家族名稱':'编辑家族名称','管理…':'管理…','設定':'设置','家庭與關係':'家庭与关系','其他關係':'其他关系',
   '篩選':'筛选','全部狀態':'全部状态','全部性別':'全部性别','重設篩選':'重置筛选','父母 A':'父母 A','父母 B':'父母 B',
   '背景':'背景','目前背景圖片':'当前背景图片','主題背景顏色':'主题背景颜色','透明背景（PNG）':'透明背景（PNG）',
