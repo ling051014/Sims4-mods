@@ -1502,74 +1502,42 @@ body[data-theme="midnight"] .n-death {
     /* 內縮空間 */ padding: 1px 7px;
 }
 
-.stage-tag {
-    /* 字體大小 */ font-size: 9px;
-    /* 固定文字盒，避免不同語系字型讓背景上下偏移 */ line-height: 1;
-    /* 最小高度 */ min-height: 16px;
-    /* 內縮空間 */ padding: 2px 5px;
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 文字顏色 */ color: #fff;
-    /* 換行方式 */ white-space: nowrap;
-    /* 顯示方式 */ display: inline-flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 文字基線 */ vertical-align: middle;
+/* ========【年齡階段標籤】 設定 - 使用低彩度底色與左側色線，取代舊版實心彩色標籤 ======== */
+.stage-tag,
+.gallery-item-stage {
+    --stage-accent:#8aa1b3;
+    --stage-bg:rgba(138,161,179,.12);
+    --stage-ink:var(--ink);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:20px;
+    padding:3px 7px 3px 8px;
+    border:1px solid color-mix(in srgb,var(--stage-accent) 38%,var(--border));
+    border-left:3px solid var(--stage-accent);
+    border-radius:5px;
+    background:var(--stage-bg);
+    color:var(--stage-ink);
+    font-size:10px;
+    font-weight:600;
+    line-height:1;
+    white-space:nowrap;
 }
 
-.stage-嬰兒 {
-    /* 背景設定 */ background: #e8a8a8;
-}
+.stage-新生兒 { --stage-accent:#bd8aa8; --stage-bg:rgba(189,138,168,.10); }
+.stage-嬰兒   { --stage-accent:#c59382; --stage-bg:rgba(197,147,130,.10); }
+.stage-幼兒   { --stage-accent:#c9a46e; --stage-bg:rgba(201,164,110,.10); }
+.stage-兒童   { --stage-accent:#b6ad65; --stage-bg:rgba(182,173,101,.10); }
+.stage-青少年 { --stage-accent:#79a681; --stage-bg:rgba(121,166,129,.10); }
+.stage-青年   { --stage-accent:#6f9fbd; --stage-bg:rgba(111,159,189,.10); }
+.stage-成年   { --stage-accent:#8585b2; --stage-bg:rgba(133,133,178,.10); }
+.stage-老年   { --stage-accent:#9d8f84; --stage-bg:rgba(157,143,132,.10); }
 
-.stage-幼兒 {
-    /* 背景設定 */ background: #e8b890;
-}
-
-.stage-兒童 {
-    /* 背景設定 */ background: #e0c868;
-}
-
-.stage-青少年 {
-    /* 背景設定 */ background: #88c088;
-}
-
-.stage-青年 {
-    /* 背景設定 */ background: #78b8d8;
-}
-
-.stage-成年 {
-    /* 背景設定 */ background: #9090d8;
-}
-
-.stage-老年 {
-    /* 背景設定 */ background: #b0a090;
-}
-
-body[data-theme="midnight"] .stage-嬰兒 {
-    /* 背景設定 */ background: #8a5860;
-}
-
-body[data-theme="midnight"] .stage-幼兒 {
-    /* 背景設定 */ background: #8a6a50;
-}
-
-body[data-theme="midnight"] .stage-兒童 {
-    /* 背景設定 */ background: #8a7a40;
-}
-
-body[data-theme="midnight"] .stage-青少年 {
-    /* 背景設定 */ background: #587a58;
-}
-
-body[data-theme="midnight"] .stage-青年 {
-    /* 背景設定 */ background: #4a6c8a;
-}
-
-body[data-theme="midnight"] .stage-成年 {
-    /* 背景設定 */ background: #5a5a90;
-}
-
-body[data-theme="midnight"] .stage-老年 {
-    /* 背景設定 */ background: #6a6058;
+body[data-theme="midnight"] .stage-tag,
+body[data-theme="midnight"] .gallery-item-stage {
+    --stage-ink:#edf3f8;
+    border-color:color-mix(in srgb,var(--stage-accent) 52%,#2f3945);
+    background:color-mix(in srgb,var(--stage-accent) 16%,#151c24);
 }
 
 .n-badge {
@@ -2793,14 +2761,10 @@ body[data-theme="midnight"] .stage-老年 {
 }
 
 .gallery-item-stage {
-    /* 定位方式 */ position: absolute;
-    /* 頂部位置 */ top: 4px;
-    /* 左側位置 */ left: 4px;
-    /* 字體大小 */ font-size: 9px;
-    /* 內縮空間 */ padding: 1px 5px;
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 文字顏色 */ color: #fff;
-    /* 滑鼠事件 */ pointer-events: none;
+    position:absolute;
+    top:4px;
+    left:4px;
+    pointer-events:none;
 }
 
 .gallery-add-btn {
@@ -6448,3 +6412,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         grid-template-columns:1fr;
     }
 }
+
+
+/* ========【家族切換選單】 設定 - Portal 只在家族切換器展開時顯示 ======== */
+.nav-select-menu.family-nav-portal { display:grid; }
