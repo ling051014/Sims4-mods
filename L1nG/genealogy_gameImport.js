@@ -369,7 +369,7 @@
     );
   }
 
-  // ========【遊戲家族建立】 設定 - 每個 EA Household 保留為一個家族，沿正式 genealogy 展開 ========
+  // ========【遊戲家庭建立】 設定 - family.memberIds 僅保存 EA Household 真正成員；genealogy 另行計算 ========
   function genealogyNeighbors(sim) {
     const rel = relationshipArrays(sim);
     return [
@@ -665,11 +665,13 @@
       families = familySourceEntries
         .map(([householdIdRaw, household], index) => {
           const householdId = String(householdIdRaw);
-          const seedIds = stringIds(household.memberIds).filter(id => humanIds.has(id));
-          const memberIds = expandHouseholdGenealogy(seedIds, sourceSims, humanIds);
+          const memberIds = stringIds(household.memberIds)
+            .filter(id => humanIds.has(id));
 
+          // family.memberIds 只保存 EA Household 的真正人物成員。
+          // genealogy 顯示範圍由網站的 EA 族譜 / 大家族模式另外計算，
+          // 不再把遞迴展開的親族網污染成 Household 成員。
           // 純寵物 Household 不建立空白人物家族。
-          // 寵物本身仍保留在 pet pool / unassignedPets，不以空 memberIds 污染家族選單。
           if (!memberIds.length) return null;
 
           return {

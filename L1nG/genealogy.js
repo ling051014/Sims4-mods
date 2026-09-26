@@ -1188,6 +1188,66 @@ function splitHouseholdIntoEaTreeSeedGroups(seedIds) {
   return [...groups.values()];
 }
 
+function splitVisibleFamilyMembersByRenderedEdges(memberIds) {
+  const visibleIds = [...new Set(
+    (memberIds || [])
+      .map(String)
+      .filter(id => db.sims[id])
+  )];
+
+  if (!visibleIds.length) return [];
+
+  const visibleSet = new Set(visibleIds);
+  const adjacency = new Map(
+    visibleIds.map(id => [id, new Set()])
+  );
+
+  const connect = (aRaw, bRaw) => {
+    const a = String(aRaw);
+    const b = String(bRaw);
+
+    if (a === b || !visibleSet.has(a) || !visibleSet.has(b)) return;
+
+    adjacency.get(a).add(b);
+    adjacency.get(b).add(a);
+  };
+
+  visibleIds.forEach(id => {
+    const sim = db.sims[id];
+    if (!sim) return;
+
+    (sim.parentIds || []).forEach(parentId => connect(id, parentId));
+    (sim.spouseIds || []).forEach(spouseId => connect(id, spouseId));
+    (sim.exSpouseIds || []).forEach(spouseId => connect(id, spouseId));
+  });
+
+  const seen = new Set();
+  const components = [];
+
+  visibleIds.forEach(startId => {
+    if (seen.has(startId)) return;
+
+    const stack = [startId];
+    const component = [];
+    seen.add(startId);
+
+    while (stack.length) {
+      const id = stack.pop();
+      component.push(id);
+
+      adjacency.get(id).forEach(relatedId => {
+        if (seen.has(relatedId)) return;
+        seen.add(relatedId);
+        stack.push(relatedId);
+      });
+    }
+
+    components.push(component);
+  });
+
+  return components;
+}
+
 function eaTreeEntryLabel(fam, seedIds, splitCount) {
   const base = displayDataText(fam.name, fam);
   if (splitCount <= 1) return base;
@@ -1231,19 +1291,40 @@ function buildEaTreeEntries() {
 
     const householdSeedIds = familySourceSeedIds(fam);
     const seedGroups = splitHouseholdIntoEaTreeSeedGroups(householdSeedIds);
+    const branches = [];
 
-    seedGroups.forEach((seedGroup, branchIndex) => {
-      const memberIds = collectEaTreeRange(seedGroup);
-      if (!memberIds.length) return;
+    seedGroups.forEach(seedGroup => {
+      const visibleIds = collectEaTreeRange(seedGroup);
+      if (!visibleIds.length) return;
 
+      const renderedComponents =
+        splitVisibleFamilyMembersByRenderedEdges(visibleIds);
+
+      renderedComponents.forEach(componentIds => {
+        const componentSet = new Set(componentIds);
+        const branchSeedIds =
+          seedGroup.filter(seedId => componentSet.has(seedId));
+
+        // EA 族譜的每一個選單項目都必須以至少一位 Household 成員為入口。
+        // 純粹因資料補充出現、但和入口畫面完全斷開的孤島不建立額外項目。
+        if (!branchSeedIds.length) return;
+
+        branches.push({
+          seedIds:branchSeedIds,
+          memberIds:componentIds
+        });
+      });
+    });
+
+    branches.forEach((branch, branchIndex) => {
       entries.push({
         mode:'ea',
-        value:`ea:${fam.id}:${stableFamilyComponentKey(seedGroup)}`,
+        value:`ea:${fam.id}:${stableFamilyComponentKey(branch.memberIds)}`,
         familyId:fam.id,
         labelFamily:fam,
-        label:eaTreeEntryLabel(fam, seedGroup, seedGroups.length),
-        memberIds,
-        seedIds:[...seedGroup],
+        label:eaTreeEntryLabel(fam, branch.seedIds, branches.length),
+        memberIds:branch.memberIds,
+        seedIds:[...branch.seedIds],
         sourceFamilyIds:[fam.id],
         sortIndex:familyIndex + branchIndex / 100
       });
@@ -3128,6 +3209,39 @@ function normalizeAllSims(targetDb) {
   targetDb.families.forEach(f => { ensureFamilyLayoutShape(f); ensureFamilyProfileShape(f); });
 }
 
+function repairImportedHouseholdMembership(targetDb) {
+  if (!targetDb || !targetDb.sims || !Array.isArray(targetDb.families)) return false;
+
+  let changed = false;
+
+  targetDb.families.forEach(fam => {
+    if (!fam || !fam.gameImport) return;
+    if (fam.gameData?.householdId == null) return;
+    if (!Array.isArray(fam.gameData?.householdMemberIds)) return;
+
+    const actualMemberIds = [...new Set(
+      fam.gameData.householdMemberIds
+        .map(String)
+        .filter(id => targetDb.sims[id])
+    )];
+
+    const currentMemberIds = Array.isArray(fam.memberIds)
+      ? fam.memberIds.map(String)
+      : [];
+
+    const same =
+      currentMemberIds.length === actualMemberIds.length &&
+      currentMemberIds.every((id, index) => id === actualMemberIds[index]);
+
+    if (same) return;
+
+    fam.memberIds = actualMemberIds;
+    changed = true;
+  });
+
+  return changed;
+}
+
 
 async function migrateBase64ToIdb() {
   if (!_idbAvailable) return 0;
@@ -4632,8 +4746,8 @@ function openInfoCard(id) {
   // 「家庭」是遊戲存檔中的 Household；「家族」是族譜工具中的分組。
   // 匯入時為了建立初始族譜而由 Household 自動產生的分組，不重複列在「所屬家族」。
   const familyNames = db.families
+    .filter(f => !f.gameImport)
     .filter(f => (f.memberIds || []).includes(c.id))
-    .filter(f => !(householdId && String(f.gameData?.householdId ?? '') === householdId))
     .map(f => displayDataText(f.name, f));
 
   const personNames = ids => (ids || []).map(pid => db.sims[pid]).filter(Boolean).map(sim => displayDataText(sim.name, sim));
@@ -8645,8 +8759,12 @@ function prepareDatabase(raw) {
   const prepared = migrate(raw);
   const sampleLanguageRepaired = normalizeBuiltinSampleToTraditional(prepared);
   normalizeAllSims(prepared);
+  const householdMembershipRepaired = repairImportedHouseholdMembership(prepared);
   (prepared.links || []).forEach(link => { if (!link.id) link.id = uid('lnk'); });
-  return { prepared, changed: sampleLanguageRepaired };
+  return {
+    prepared,
+    changed:sampleLanguageRepaired || householdMembershipRepaired
+  };
 }
 
 async function importJSON(file) {
