@@ -46,12 +46,12 @@ const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS, 'genderBar'];
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
   avatar: true,
   name: true,
-  gender: true,
-  genderBar: true,
+  gender: false,
+  genderBar: false,
   lifeStage: false,
   age: false,
   birthday: false,
-  status: false,
+  status: true,
   race: false,
   career: false,
   residence: false,
@@ -65,17 +65,17 @@ const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
 const DEFAULT_CARD_EDIT_SETTINGS = Object.freeze({
   avatar: true,
   name: true,
-  gender: true,
+  gender: false,
   genderBar: true,
   lifeStage: true,
-  age: false,
-  birthday: false,
+  age: true,
+  birthday: true,
   status: false,
   race: false,
-  career: true,
+  career: false,
   residence: true,
   aspiration: false,
-  traits: false,
+  traits: true,
   pets: false,
   gallery: false
 });
@@ -932,7 +932,7 @@ function buildSample() {
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
-      sampleVersion:3,
+      sampleVersion:4,
       sampleSource:'ea-npc-20260927',
       gameImport:true,
       sourceFormat:'l1ng-genealogy',
@@ -941,7 +941,9 @@ function buildSample() {
       targetGameVersion:'1.128',
       gameLocale:'zh-tw',
       exportedAt:'2026-09-27T05:26:55.970318+08:00',
-      realDateCurrentDate:{ year:2026, month:10, day:5 }
+      realDateCurrentDate:{ year:2026, month:10, day:5 },
+      cardView:{ ...DEFAULT_CARD_VIEW_SETTINGS },
+      cardEdit:{ ...DEFAULT_CARD_EDIT_SETTINGS }
     },
     sims,
     families,
@@ -957,7 +959,7 @@ function shouldReplaceBuiltinSample(targetDb) {
   if (!targetDb || targetDb.meta?.sample !== true) return false;
 
   const version = Number(targetDb.meta.sampleVersion || 0);
-  return !Number.isFinite(version) || version < 3;
+  return !Number.isFinite(version) || version < 4;
 }
 
 let db = null, layoutCache = null, scale = 1;
