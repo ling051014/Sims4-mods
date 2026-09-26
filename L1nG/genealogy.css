@@ -6416,3 +6416,203 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 /* ========【家族切換選單】 設定 - Portal 只在家族切換器展開時顯示 ======== */
 .nav-select-menu.family-nav-portal { display:grid; }
+
+
+/* ========【其他關係下拉視窗】 設定 - 脫離人物編輯視窗裁切，獨立浮在頁面最上層 ======== */
+.ss-dropdown.ss-dropdown-portal {
+    position:fixed;
+    z-index:5200;
+    right:auto;
+    margin:0;
+    overflow:hidden;
+    box-shadow:0 14px 34px rgba(0,0,0,.18);
+}
+
+.ss-dropdown.ss-dropdown-portal .ss-options {
+    max-height:min(300px,calc(100vh - 150px));
+}
+
+/* ========【關係線設定】 設定 - 每條關係線直接展開自己的設定 ======== */
+.relationship-line-list {
+    display:grid;
+    gap:4px;
+}
+
+.relationship-line-item {
+    border:1px solid var(--border);
+    border-radius:7px;
+    background:var(--card);
+    overflow:hidden;
+}
+
+.relationship-line-item > summary {
+    min-height:38px;
+    padding:7px 9px;
+    display:grid;
+    grid-template-columns:120px minmax(120px,1fr);
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+    list-style:none;
+    color:var(--ink);
+    font-size:11px;
+    font-weight:600;
+    transition:background-color .15s ease;
+}
+
+.relationship-line-item > summary::-webkit-details-marker {
+    display:none;
+}
+
+.relationship-line-item > summary:hover {
+    background:var(--panel-item-hover);
+}
+
+.relationship-line-item[open] > summary {
+    background:var(--grad-1-soft);
+    border-bottom:1px solid var(--border);
+}
+
+.relationship-line-item > summary::after {
+    content:"";
+    width:7px;
+    height:7px;
+    justify-self:end;
+    border-right:1.5px solid var(--sub);
+    border-bottom:1.5px solid var(--sub);
+    transform:rotate(45deg);
+    transition:transform .15s ease;
+}
+
+.relationship-line-item[open] > summary::after {
+    transform:rotate(225deg);
+}
+
+.relationship-line-item > summary > i {
+    grid-column:2;
+    grid-row:1;
+    margin-right:22px;
+    height:8px;
+    position:relative;
+    display:block;
+}
+
+.relationship-line-item > summary > i::before {
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:50%;
+    height:var(--preview-width,2px);
+    background:var(--preview-color,var(--line));
+    transform:translateY(-50%);
+}
+
+.relationship-line-item > summary > i[data-line-style="short-dash"]::before {
+    background:repeating-linear-gradient(90deg,var(--preview-color) 0 4px,transparent 4px 7px);
+}
+
+.relationship-line-item > summary > i[data-line-style="long-dash"]::before {
+    background:repeating-linear-gradient(90deg,var(--preview-color) 0 10px,transparent 10px 16px);
+}
+
+.relationship-line-item > summary > i[data-line-style="dot"]::before {
+    background:repeating-linear-gradient(90deg,var(--preview-color) 0 2px,transparent 2px 7px);
+}
+
+.relationship-line-controls {
+    padding:9px 10px 10px;
+    display:grid;
+    grid-template-columns:150px minmax(150px,1fr) 80px;
+    gap:10px;
+    align-items:end;
+    background:var(--panel-bg);
+}
+
+.relationship-line-controls label {
+    min-width:0;
+    display:grid;
+    gap:5px;
+    color:var(--sub);
+    font-size:10px;
+}
+
+.relationship-line-controls select {
+    width:100%;
+    min-height:30px;
+    padding:5px 32px 5px 8px;
+    border:1px solid var(--border);
+    border-radius:5px;
+    background:var(--input-bg);
+    color:var(--ink);
+    font:inherit;
+    font-size:10.5px;
+    outline:none;
+}
+
+.relationship-line-controls select:hover {
+    border-color:color-mix(in srgb,var(--accent) 38%,var(--border));
+}
+
+.relationship-line-controls select:focus {
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px var(--grad-1-soft);
+}
+
+.relationship-line-controls input[type="color"] {
+    width:42px;
+    height:30px;
+    padding:2px;
+    border:1px solid var(--border);
+    border-radius:5px;
+    background:var(--input-bg);
+}
+
+.relationship-style-actions {
+    margin-top:8px;
+}
+
+/* ========【外觀設定下拉欄位】 設定 - 與網站其他輸入欄位統一 ======== */
+.appearance-modal .select-chevron-shell {
+    width:100%;
+}
+
+.appearance-modal select {
+    width:100%;
+    min-height:32px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--input-bg);
+    color:var(--ink);
+    font:inherit;
+    font-size:11px;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.appearance-modal select:hover {
+    border-color:color-mix(in srgb,var(--accent) 40%,var(--border));
+}
+
+.appearance-modal select:focus {
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px var(--grad-1-soft);
+}
+
+.appearance-modal .select-chevron-icon {
+    color:var(--sub);
+}
+
+.appearance-modal .select-chevron-shell:focus-within .select-chevron-icon {
+    color:var(--accent);
+}
+
+@media (max-width:680px) {
+    .relationship-line-controls {
+        grid-template-columns:1fr;
+    }
+
+    .relationship-line-item > summary {
+        grid-template-columns:100px minmax(90px,1fr);
+    }
+}
