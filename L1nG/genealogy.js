@@ -4056,7 +4056,7 @@ async function handleGalleryFile(file) {
       const mb = (result.sizeKB / 1024).toFixed(2);
       const ok = await uiConfirm(
         `原始圖片大小約 ${mb} MB。\n\n` +
-        `IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。\n\n` +
+        `原始圖片會較快佔用瀏覽器儲存空間。\n\n` +
         `是否仍要儲存原始圖片？`,
         { title: '原始圖片容量提醒', confirmText: '仍要儲存' }
       );
@@ -4353,7 +4353,7 @@ function renderNodeContextMenu(simId, clientX, clientY) {
   const fieldRows = [
     ['name','姓名'], ['gender','性別文字'], ['genderBar','性別色條'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
     ['status','狀態'], ['race','種族'], ['career','職業'], ['residence','居住地'], ['aspiration','人生抱負'],
-    ['traits','特徵'], ['pets','寵物'], ['gallery','相簿']
+    ['traits','特徵'], ['pets','寵物'], ['gallery','人生照片']
   ].map(([key,label]) => `<label class="node-context-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
 
   const appearanceSection = isEditCard ? '' : `
@@ -5762,7 +5762,7 @@ function refreshSS(selectId) {
 
 // ========【共用單選箭頭】 設定 - 編輯頁與導覽共用同一顆 Chevron SVG ========
 function installSharedNativeSelectChevrons(root = document) {
-  const selector = '.modal select:not([multiple]), #galleryBrowserFilter';
+  const selector = '.modal select:not([multiple])';
   const candidates = [];
 
   if (root instanceof Element && root.matches(selector)) candidates.push(root);
