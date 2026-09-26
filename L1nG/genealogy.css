@@ -3533,6 +3533,31 @@ body[data-theme="midnight"] .stage-老年 {
     overflow-wrap:anywhere;
     word-break:break-word;
 }
+
+/* ========【寵物血統】 設定 - 匯入的父母／子女資料以次要資訊顯示 ======== */
+.pet-lineage {
+    /* 版面配置 */ display: grid;
+    /* 行距 */ gap: 2px;
+    /* 上方間距 */ margin-top: 4px;
+    /* 字體大小 */ font-size: 10.5px;
+    /* 行高 */ line-height: 1.45;
+    /* 文字顏色 */ color: var(--sub);
+    /* 長文字換行 */ overflow-wrap: anywhere;
+}
+
+.pet-lineage > span {
+    /* 顯示方式 */ display: block;
+    /* 最小寬度 */ min-width: 0;
+}
+
+.pet-lineage strong {
+    /* 標題顏色 */ color: var(--ink);
+    /* 字體粗細 */ font-weight: 650;
+}
+
+.pet-lineage .muted {
+    /* 次要提示透明度 */ opacity: .78;
+}
 .info-card-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
 .info-card-gallery .gallery-item { aspect-ratio:1/1; border-radius:5px; overflow:hidden; }
 .info-card-gallery .gallery-item-title { display:none; }
