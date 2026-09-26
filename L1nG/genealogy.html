@@ -59,47 +59,51 @@
                         </button>
                         <div class="app-menu-popover topbar-filter-popover" role="menu" aria-label="篩選">
                             <div class="topbar-filter-grid">
-                                <fieldset class="topbar-filter-group">
-                                    <legend>狀態</legend>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="statusFilter" value="在世"><span>在世</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="statusFilter" value="幽靈"><span>幽靈</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="statusFilter" value="已故"><span>已故</span></label>
-                                </fieldset>
-                                <fieldset class="topbar-filter-group">
-                                    <legend>性別</legend>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="genderFilter" value="女"><span>女</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="genderFilter" value="男"><span>男</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="genderFilter" value="其他"><span>其他</span></label>
-                                </fieldset>
-                                <fieldset class="topbar-filter-group">
-                                    <legend>種族</legend>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="human"><span>人類</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="vampire"><span>吸血鬼</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="alien"><span>外星人</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="werewolf"><span>狼人</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="mermaid"><span>人魚</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="spellcaster"><span>魔法師</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="fairy"><span>仙子</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="plant"><span>植物模擬市民</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="robot"><span>機器人</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="other"><span>其他</span></label>
-                                </fieldset>
-                                <fieldset class="topbar-filter-group">
-                                    <legend>人生階段</legend>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="新生兒"><span>新生兒</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="嬰兒"><span>嬰兒</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="幼兒"><span>幼兒</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="兒童"><span>兒童</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="青少年"><span>青少年</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="青年"><span>青年</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="成年"><span>成年</span></label>
-                                    <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="老年"><span>老年</span></label>
-                                </fieldset>
+                                <div class="topbar-filter-column">
+                                    <fieldset class="topbar-filter-group">
+                                        <legend>狀態</legend>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="statusFilter" value="在世"><span>在世</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="statusFilter" value="幽靈"><span>幽靈</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="statusFilter" value="已故"><span>已故</span></label>
+                                    </fieldset>
+                                    <fieldset class="topbar-filter-group">
+                                        <legend>性別</legend>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="genderFilter" value="女"><span>女</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="genderFilter" value="男"><span>男</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="genderFilter" value="其他"><span>其他</span></label>
+                                    </fieldset>
+                                </div>
+                                <div class="topbar-filter-column">
+                                    <fieldset class="topbar-filter-group">
+                                        <legend>種族</legend>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="human"><span>人類</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="vampire"><span>吸血鬼</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="alien"><span>外星人</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="werewolf"><span>狼人</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="mermaid"><span>人魚</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="spellcaster"><span>魔法師</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="fairy"><span>仙子</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="plant"><span>植物模擬市民</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="robot"><span>機器人</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="raceFilter" value="other"><span>其他</span></label>
+                                    </fieldset>
+                                </div>
+                                <div class="topbar-filter-column">
+                                    <fieldset class="topbar-filter-group">
+                                        <legend>人生階段</legend>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="新生兒"><span>新生兒</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="嬰兒"><span>嬰兒</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="幼兒"><span>幼兒</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="兒童"><span>兒童</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="青少年"><span>青少年</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="青年"><span>青年</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="成年"><span>成年</span></label>
+                                        <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="老年"><span>老年</span></label>
+                                    </fieldset>
+                                </div>
                             </div>
                             <div class="topbar-filter-footer"><button id="filterResetBtn" type="button">重設篩選</button></div>
                         </div>
-                    </div>
-                    <span class="topbar-spacer"></span>                        </div>
                     </div>
                     <span class="topbar-spacer"></span>
                     <nav class="topbar-primary-actions" aria-label="主要功能">
