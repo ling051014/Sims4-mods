@@ -2124,7 +2124,7 @@ tipsMask.onclick = e => { if (e.target === tipsMask) tipsMask.classList.remove('
 
 const MODAL_STACK = ['photoMask','petMask','mask','infoMask','galleryViewerMask',
                      'galleryBrowserMask','tipsMask',
-                     'removeMemberMask','rosterMask','addMemberMask','bgMask'];
+                     'rosterMask','addMemberMask','bgMask'];
 function closeTopModal() {
   for (const id of MODAL_STACK) {
     const el = document.getElementById(id);
@@ -3086,7 +3086,6 @@ function render() {
   updateLayoutToggle();
   if (rosterMask.classList.contains('show')) renderRoster();
   if (addMemberMask.classList.contains('show')) renderAddMemberList();
-  if (removeMemberMask.classList.contains('show')) renderRemoveMemberList();
   if (galleryBrowserMask.classList.contains('show')) renderGalleryBrowser();
 }
 
@@ -6657,7 +6656,6 @@ async function deleteChar(id) {
     if (k.startsWith('link:') && removedLinkIds.includes(k.slice(5))) delete lp[k];
   });
   addMemberSelection.delete(id);
-  removeMemberSelection.delete(id);
   invalidateChildrenIndex();
   save(); refreshFamilyUI(); render(); closeEditor();
   scheduleGC();
