@@ -185,12 +185,14 @@ const rosterSelection = new Set();
 let familyTreeViewMode = 'extended';
 try {
   const savedFamilyTreeViewMode = localStorage.getItem(FAMILY_TREE_VIEW_MODE_KEY);
-  if (savedFamilyTreeViewMode === 'ea' || savedFamilyTreeViewMode === 'extended') {
+  if (savedFamilyTreeViewMode === 'household' || savedFamilyTreeViewMode === 'ea' || savedFamilyTreeViewMode === 'extended') {
     familyTreeViewMode = savedFamilyTreeViewMode;
   }
 } catch (_) {}
 
-let familyTreeLastEaFamilyId = null;
+let familyTreeLastSourceFamilyId = null;
+let familyTreeHouseholdSelectionValue = null;
+let familyTreeEaSelectionValue = null;
 let familyTreeExtendedSelectionValue = null;
 
 const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
@@ -918,24 +920,49 @@ function familyNavLanguage() {
 
 function familyNavModeAria(mode) {
   const lang = familyNavLanguage();
-  if (lang === 'en') return mode === 'ea' ? 'EA Tree' : 'Extended Family';
-  if (lang === 'zh-Hans') return mode === 'ea' ? 'EA 族谱' : '大家族';
-  return mode === 'ea' ? 'EA 族譜' : '大家族';
+
+  if (lang === 'en') {
+    if (mode === 'household') return 'EA Household';
+    if (mode === 'ea') return 'EA Tree';
+    return 'Extended Family';
+  }
+
+  if (lang === 'zh-Hans') {
+    if (mode === 'household') return 'EA 家庭';
+    if (mode === 'ea') return 'EA 族谱';
+    return '大家族';
+  }
+
+  if (mode === 'household') return 'EA 家庭';
+  if (mode === 'ea') return 'EA 族譜';
+  return '大家族';
 }
 
 function familyNavTabMarkup(mode) {
   const lang = familyNavLanguage();
 
   if (lang === 'en') {
-    return '<span class="family-nav-tab-label-en">' +
-      (mode === 'ea' ? 'EA TREE' : 'EXTENDED FAMILY') +
+    const label =
+      mode === 'household'
+        ? 'EA HOUSEHOLD'
+        : mode === 'ea'
+          ? 'EA TREE'
+          : 'EXTENDED FAMILY';
+
+    return '<span class="family-nav-tab-label-en">' + label + '</span>';
+  }
+
+  if (mode === 'household') {
+    return '<span class="family-nav-tab-lines">' +
+      '<span class="family-nav-tab-ea">EA</span>' +
+      '<span>家</span><span>庭</span>' +
       '</span>';
   }
 
   if (mode === 'ea') {
     return '<span class="family-nav-tab-lines">' +
       '<span class="family-nav-tab-ea">EA</span>' +
-      '<span>' + (lang === 'zh-Hans' ? '族' : '族') + '</span>' +
+      '<span>族</span>' +
       '<span>' + (lang === 'zh-Hans' ? '谱' : '譜') + '</span>' +
       '</span>';
   }
@@ -945,7 +972,7 @@ function familyNavTabMarkup(mode) {
     '</span>';
 }
 
-// ========【家族選擇器分流】 設定 - EA 來源項目與完整 genealogy connected components 分開 ========
+// ========【家族選擇器分流】 設定 - EA 家庭 / EA 原生族譜範圍 / 完整大家族分開 ========
 function familyGenealogyNeighborIds(sim) {
   if (!sim) return [];
 
@@ -955,7 +982,46 @@ function familyGenealogyNeighborIds(sim) {
     ...(sim.gameData?.adoptedParentIds || []),
     ...(sim.gameData?.adoptedChildIds || []),
     ...(sim.gameData?.deceasedSpouseIds || [])
-  ].map(String).filter(Boolean);
+  ]
+    .map(String)
+    .filter(Boolean);
+}
+
+function familyLineageParentIds(sim) {
+  if (!sim) return [];
+
+  return [
+    ...(sim.parentIds || []),
+    ...(sim.gameData?.adoptedParentIds || [])
+  ]
+    .map(String)
+    .filter(id => db.sims[id]);
+}
+
+function familyLineageChildIds(simId) {
+  if (!simId) return [];
+
+  const childIds = getChildrenOf(String(simId))
+    .map(sim => String(sim.id));
+
+  const adoptedChildIds =
+    db.sims[String(simId)]?.gameData?.adoptedChildIds || [];
+
+  return [...new Set([
+    ...childIds,
+    ...adoptedChildIds.map(String)
+  ])]
+    .filter(id => db.sims[id]);
+}
+
+function familyDisplaySpouseIds(sim) {
+  if (!sim) return [];
+
+  return [...new Set([
+    ...(sim.spouseIds || []),
+    ...(sim.gameData?.deceasedSpouseIds || [])
+  ].map(String))]
+    .filter(id => db.sims[id]);
 }
 
 function stableFamilyComponentKey(memberIds) {
@@ -980,7 +1046,211 @@ function familySourceSeedIds(fam) {
 
   if (householdIds.length) return householdIds;
 
-  return (fam.memberIds || []).map(String).filter(id => db.sims[id]);
+  return (fam.memberIds || [])
+    .map(String)
+    .filter(id => db.sims[id]);
+}
+
+function buildHouseholdEntries() {
+  if (!db || !Array.isArray(db.families)) return [];
+
+  return db.families
+    .map((fam, index) => {
+      const imported = !!fam.gameImport;
+      const memberIds =
+        imported
+          ? familySourceSeedIds(fam)
+          : (fam.memberIds || []).map(String).filter(id => db.sims[id]);
+
+      if (!memberIds.length) return null;
+
+      return {
+        mode:'household',
+        value:`household:${fam.id}`,
+        familyId:fam.id,
+        labelFamily:fam,
+        label:displayDataText(fam.name, fam),
+        memberIds:[...memberIds],
+        sourceFamilyIds:[fam.id],
+        sortIndex:index
+      };
+    })
+    .filter(Boolean);
+}
+
+function collectEaTreeRange(seedIds) {
+  const seeds = [...new Set(seedIds.map(String).filter(id => db.sims[id]))];
+  if (!seeds.length) return [];
+
+  const coreIds = new Set(seeds);
+
+  let frontier = new Set(seeds);
+  for (let depth = 0; depth < 5 && frontier.size; depth += 1) {
+    const next = new Set();
+
+    frontier.forEach(id => {
+      familyLineageParentIds(db.sims[id]).forEach(parentId => {
+        if (!coreIds.has(parentId)) next.add(parentId);
+      });
+    });
+
+    next.forEach(id => coreIds.add(id));
+    frontier = next;
+  }
+
+  frontier = new Set(seeds);
+  for (let depth = 0; depth < 5 && frontier.size; depth += 1) {
+    const next = new Set();
+
+    frontier.forEach(id => {
+      familyLineageChildIds(id).forEach(childId => {
+        if (!coreIds.has(childId)) next.add(childId);
+      });
+    });
+
+    next.forEach(id => coreIds.add(id));
+    frontier = next;
+  }
+
+  const visibleIds = new Set(coreIds);
+
+  coreIds.forEach(id => {
+    familyDisplaySpouseIds(db.sims[id]).forEach(spouseId => {
+      visibleIds.add(spouseId);
+    });
+  });
+
+  return [...visibleIds];
+}
+
+function setsOverlap(a, b) {
+  if (!a || !b) return false;
+
+  for (const value of a) {
+    if (b.has(value)) return true;
+  }
+
+  return false;
+}
+
+function splitHouseholdIntoEaTreeSeedGroups(seedIds) {
+  const seeds = [...new Set(seedIds.map(String).filter(id => db.sims[id]))];
+  if (!seeds.length) return [];
+
+  const treeBySeed = new Map(
+    seeds.map(id => [id, new Set(collectEaTreeRange([id]))])
+  );
+
+  const parent = new Map(seeds.map(id => [id, id]));
+
+  const find = id => {
+    let root = id;
+
+    while (parent.get(root) !== root) {
+      root = parent.get(root);
+    }
+
+    let cursor = id;
+    while (parent.get(cursor) !== cursor) {
+      const next = parent.get(cursor);
+      parent.set(cursor, root);
+      cursor = next;
+    }
+
+    return root;
+  };
+
+  const union = (a, b) => {
+    const rootA = find(a);
+    const rootB = find(b);
+
+    if (rootA !== rootB) {
+      parent.set(rootB, rootA);
+    }
+  };
+
+  seeds.forEach((a, index) => {
+    seeds.slice(index + 1).forEach(b => {
+      if (setsOverlap(treeBySeed.get(a), treeBySeed.get(b))) {
+        union(a, b);
+      }
+    });
+  });
+
+  const groups = new Map();
+
+  seeds.forEach(id => {
+    const root = find(id);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root).push(id);
+  });
+
+  return [...groups.values()];
+}
+
+function eaTreeEntryLabel(fam, seedIds, splitCount) {
+  const base = displayDataText(fam.name, fam);
+  if (splitCount <= 1) return base;
+
+  const names = seedIds
+    .map(id => db.sims[id])
+    .filter(Boolean)
+    .map(sim => displayDataText(sim.name, sim))
+    .filter(Boolean)
+    .slice(0, 2);
+
+  return names.length
+    ? `${base} · ${names.join(' / ')}`
+    : base;
+}
+
+function buildEaTreeEntries() {
+  if (!db || !Array.isArray(db.families)) return [];
+
+  const entries = [];
+
+  db.families.forEach((fam, familyIndex) => {
+    if (!fam) return;
+
+    if (!fam.gameImport) {
+      const memberIds = (fam.memberIds || []).map(String).filter(id => db.sims[id]);
+      if (!memberIds.length) return;
+
+      entries.push({
+        mode:'ea',
+        value:`ea:manual:${fam.id}`,
+        familyId:fam.id,
+        labelFamily:fam,
+        label:displayDataText(fam.name, fam),
+        memberIds,
+        sourceFamilyIds:[fam.id],
+        sortIndex:familyIndex
+      });
+      return;
+    }
+
+    const householdSeedIds = familySourceSeedIds(fam);
+    const seedGroups = splitHouseholdIntoEaTreeSeedGroups(householdSeedIds);
+
+    seedGroups.forEach((seedGroup, branchIndex) => {
+      const memberIds = collectEaTreeRange(seedGroup);
+      if (!memberIds.length) return;
+
+      entries.push({
+        mode:'ea',
+        value:`ea:${fam.id}:${stableFamilyComponentKey(seedGroup)}`,
+        familyId:fam.id,
+        labelFamily:fam,
+        label:eaTreeEntryLabel(fam, seedGroup, seedGroups.length),
+        memberIds,
+        seedIds:[...seedGroup],
+        sourceFamilyIds:[fam.id],
+        sortIndex:familyIndex + branchIndex / 100
+      });
+    });
+  });
+
+  return entries.sort((a, b) => a.sortIndex - b.sortIndex);
 }
 
 function buildExtendedFamilyComponents() {
@@ -999,7 +1269,6 @@ function buildExtendedFamilyComponents() {
   });
 
   const components = [];
-  const componentById = new Map();
   const seen = new Set();
 
   allIds.forEach(startId => {
@@ -1020,41 +1289,18 @@ function buildExtendedFamilyComponents() {
       });
     }
 
-    const component = {
+    components.push({
       key:stableFamilyComponentKey(memberIds),
       memberIds:memberIds.sort()
-    };
-
-    components.push(component);
-    component.memberIds.forEach(id => componentById.set(id, component));
+    });
   });
 
   const importedFamilies = db.families.filter(fam => fam && fam.gameImport);
   const manualFamilies = db.families.filter(fam => fam && !fam.gameImport);
   const familyIndex = new Map(db.families.map((fam, index) => [fam.id, index]));
-  const preferredFamily =
-    familyTreeLastEaFamilyId
-      ? db.families.find(fam => fam.id === familyTreeLastEaFamilyId)
-      : null;
-
-  let preferredComponentKey = null;
-
-  if (preferredFamily) {
-    const counts = new Map();
-
-    familySourceSeedIds(preferredFamily).forEach(id => {
-      const component = componentById.get(id);
-      if (!component) return;
-      counts.set(component.key, (counts.get(component.key) || 0) + 1);
-    });
-
-    preferredComponentKey =
-      [...counts.entries()]
-        .sort((a, b) => b[1] - a[1])[0]?.[0] ||
-      null;
-  }
 
   const componentEntries = components
+    .filter(component => component.memberIds.length > 1)
     .map(component => {
       const memberSet = new Set(component.memberIds);
       const sourceFamilies = importedFamilies.filter(fam =>
@@ -1063,30 +1309,18 @@ function buildExtendedFamilyComponents() {
 
       if (!sourceFamilies.length) return null;
 
-      let anchorFamily = null;
+      const anchorFamily =
+        [...sourceFamilies]
+          .sort((a, b) => {
+            const aScore = familySourceSeedIds(a).filter(id => memberSet.has(id)).length;
+            const bScore = familySourceSeedIds(b).filter(id => memberSet.has(id)).length;
 
-      if (
-        preferredFamily &&
-        component.key === preferredComponentKey &&
-        sourceFamilies.some(fam => fam.id === preferredFamily.id)
-      ) {
-        anchorFamily = preferredFamily;
-      }
-
-      if (!anchorFamily) {
-        anchorFamily =
-          [...sourceFamilies]
-            .sort((a, b) => {
-              const aScore = familySourceSeedIds(a).filter(id => memberSet.has(id)).length;
-              const bScore = familySourceSeedIds(b).filter(id => memberSet.has(id)).length;
-
-              return (
-                bScore - aScore ||
-                (familyIndex.get(a.id) ?? 0) - (familyIndex.get(b.id) ?? 0)
-              );
-            })[0] ||
-          sourceFamilies[0];
-      }
+            return (
+              bScore - aScore ||
+              (familyIndex.get(a.id) ?? 0) - (familyIndex.get(b.id) ?? 0)
+            );
+          })[0] ||
+        sourceFamilies[0];
 
       return {
         mode:'extended',
@@ -1094,6 +1328,7 @@ function buildExtendedFamilyComponents() {
         componentKey:component.key,
         familyId:anchorFamily.id,
         labelFamily:anchorFamily,
+        label:displayDataText(anchorFamily.name, anchorFamily),
         memberIds:component.memberIds,
         sourceFamilyIds:sourceFamilies.map(fam => fam.id),
         sortIndex:Math.min(...sourceFamilies.map(fam => familyIndex.get(fam.id) ?? Number.MAX_SAFE_INTEGER))
@@ -1101,41 +1336,58 @@ function buildExtendedFamilyComponents() {
     })
     .filter(Boolean);
 
-  const manualEntries = manualFamilies.map(fam => ({
-    mode:'extended',
-    value:`manual:${fam.id}`,
-    componentKey:null,
-    familyId:fam.id,
-    labelFamily:fam,
-    memberIds:[...(fam.memberIds || [])],
-    sourceFamilyIds:[fam.id],
-    sortIndex:familyIndex.get(fam.id) ?? Number.MAX_SAFE_INTEGER
-  }));
+  const manualEntries = manualFamilies
+    .map(fam => {
+      const memberIds = (fam.memberIds || []).map(String).filter(id => db.sims[id]);
+      if (!memberIds.length) return null;
+
+      return {
+        mode:'extended',
+        value:`manual:${fam.id}`,
+        componentKey:null,
+        familyId:fam.id,
+        labelFamily:fam,
+        label:displayDataText(fam.name, fam),
+        memberIds,
+        sourceFamilyIds:[fam.id],
+        sortIndex:familyIndex.get(fam.id) ?? Number.MAX_SAFE_INTEGER
+      };
+    })
+    .filter(Boolean);
 
   return [...componentEntries, ...manualEntries]
     .sort((a, b) => a.sortIndex - b.sortIndex);
 }
 
-function getFamilySelectorEntries() {
+function getFamilySelectorEntries(mode = familyTreeViewMode) {
   if (!db || !Array.isArray(db.families)) return [];
 
-  if (familyTreeViewMode === 'ea') {
-    return db.families.map((fam, index) => ({
-      mode:'ea',
-      value:fam.id,
-      familyId:fam.id,
-      labelFamily:fam,
-      memberIds:[...(fam.memberIds || [])],
-      sourceFamilyIds:[fam.id],
-      sortIndex:index
-    }));
-  }
-
+  if (mode === 'household') return buildHouseholdEntries();
+  if (mode === 'ea') return buildEaTreeEntries();
   return buildExtendedFamilyComponents();
 }
 
-function findBestExtendedEntryForFamily(fam, entries = buildExtendedFamilyComponents()) {
-  if (!fam || !entries.length) return entries[0] || null;
+function getFamilyTreeSelectionValue(mode) {
+  if (mode === 'household') return familyTreeHouseholdSelectionValue;
+  if (mode === 'ea') return familyTreeEaSelectionValue;
+  return familyTreeExtendedSelectionValue;
+}
+
+function setFamilyTreeSelectionValue(mode, value) {
+  if (mode === 'household') familyTreeHouseholdSelectionValue = value;
+  else if (mode === 'ea') familyTreeEaSelectionValue = value;
+  else familyTreeExtendedSelectionValue = value;
+}
+
+function findBestFamilySelectorEntry(fam, entries) {
+  if (!entries.length) return null;
+  if (!fam) return entries[0];
+
+  const directSource = entries.find(entry =>
+    (entry.sourceFamilyIds || []).includes(fam.id)
+  );
+
+  if (directSource) return directSource;
 
   const seedSet = new Set(familySourceSeedIds(fam));
 
@@ -1146,29 +1398,26 @@ function findBestExtendedEntryForFamily(fam, entries = buildExtendedFamilyCompon
         score:(entry.memberIds || []).reduce(
           (total, id) => total + (seedSet.has(id) ? 1 : 0),
           0
-        ),
-        sourceMatch:(entry.sourceFamilyIds || []).includes(fam.id) ? 1 : 0
+        )
       }))
       .sort((a, b) =>
         b.score - a.score ||
-        b.sourceMatch - a.sourceMatch ||
         a.entry.sortIndex - b.entry.sortIndex
       )[0]?.entry ||
-    null
+    entries[0]
   );
 }
 
-function getActiveExtendedFamilyEntry() {
-  if (familyTreeViewMode !== 'extended') return null;
-
-  const entries = buildExtendedFamilyComponents();
+function getActiveFamilySelectorEntry(mode = familyTreeViewMode) {
+  const entries = getFamilySelectorEntries(mode);
   if (!entries.length) return null;
 
-  let entry = entries.find(item => item.value === familyTreeExtendedSelectionValue);
+  const selectedValue = getFamilyTreeSelectionValue(mode);
+  let entry = entries.find(item => item.value === selectedValue);
 
   if (!entry) {
-    entry = findBestExtendedEntryForFamily(currentFamily(), entries);
-    familyTreeExtendedSelectionValue = entry?.value || null;
+    entry = findBestFamilySelectorEntry(currentFamily(), entries);
+    setFamilyTreeSelectionValue(mode, entry?.value || null);
   }
 
   return entry || null;
@@ -1176,9 +1425,9 @@ function getActiveExtendedFamilyEntry() {
 
 function currentTreeFamily() {
   const fam = currentFamily();
-  if (!fam || familyTreeViewMode !== 'extended') return fam;
+  if (!fam) return fam;
 
-  const entry = getActiveExtendedFamilyEntry();
+  const entry = getActiveFamilySelectorEntry(familyTreeViewMode);
   if (!entry || !(entry.memberIds || []).length) return fam;
 
   return {
@@ -1188,7 +1437,10 @@ function currentTreeFamily() {
 }
 
 function setFamilyTreeViewMode(mode, control = null) {
-  const nextMode = mode === 'ea' ? 'ea' : 'extended';
+  const nextMode =
+    mode === 'household' || mode === 'ea'
+      ? mode
+      : 'extended';
 
   if (nextMode === familyTreeViewMode) {
     if (control) {
@@ -1200,8 +1452,8 @@ function setFamilyTreeViewMode(mode, control = null) {
 
   const previousFamily = currentFamily();
 
-  if (familyTreeViewMode === 'ea' && previousFamily) {
-    familyTreeLastEaFamilyId = previousFamily.id;
+  if (previousFamily) {
+    familyTreeLastSourceFamilyId = previousFamily.id;
   }
 
   familyTreeViewMode = nextMode;
@@ -1210,23 +1462,21 @@ function setFamilyTreeViewMode(mode, control = null) {
     localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, familyTreeViewMode);
   } catch (_) {}
 
-  if (familyTreeViewMode === 'extended') {
-    const entries = buildExtendedFamilyComponents();
-    const selected = findBestExtendedEntryForFamily(previousFamily, entries);
+  const entries = getFamilySelectorEntries(familyTreeViewMode);
+  const sourceFamily =
+    familyTreeLastSourceFamilyId
+      ? db.families.find(fam => fam.id === familyTreeLastSourceFamilyId)
+      : previousFamily;
 
-    familyTreeExtendedSelectionValue = selected?.value || null;
+  const selected = findBestFamilySelectorEntry(sourceFamily || previousFamily, entries);
 
-    if (selected?.familyId && db.families.some(fam => fam.id === selected.familyId)) {
-      db.currentId = selected.familyId;
-    }
-  } else {
-    const fallbackId =
-      familyTreeLastEaFamilyId &&
-      db.families.some(fam => fam.id === familyTreeLastEaFamilyId)
-        ? familyTreeLastEaFamilyId
-        : db.currentId;
+  setFamilyTreeSelectionValue(
+    familyTreeViewMode,
+    selected?.value || null
+  );
 
-    if (fallbackId) db.currentId = fallbackId;
+  if (selected?.familyId && db.families.some(fam => fam.id === selected.familyId)) {
+    db.currentId = selected.familyId;
   }
 
   dragHistory.clear();
@@ -1240,7 +1490,7 @@ function setFamilyTreeViewMode(mode, control = null) {
   render();
 
   requestAnimationFrame(() => {
-    // 索引切換只更新內容與 active tab；dropdown 幾何維持本次展開時的固定值。
+    // 只更新左側索引位置；切換分類不重新計算右側 dropdown 幾何。
     if (control && control.host.classList.contains('open')) {
       positionFamilyNavTabsPortal(control);
     }
@@ -1251,35 +1501,29 @@ function setFamilyTreeViewMode(mode, control = null) {
 function ensureFamilyNavTabsPortal(control) {
   if (!control || control.select.id !== 'familySelect') return null;
 
-  if (control.familyTabsPortal && control.familyTabsPortal.isConnected) {
-    return control.familyTabsPortal;
-  }
+  const portal =
+    control.familyTabsPortal ||
+    document.getElementById('familyNavTabs');
 
-  const portal = document.createElement('div');
-  portal.className = 'family-nav-tabs-portal';
-  portal.setAttribute('role', 'tablist');
-  portal.setAttribute('aria-label', familyNavModeAria('extended'));
+  if (!portal) return null;
 
-  ['ea', 'extended'].forEach(mode => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'family-nav-index-tab';
-    button.dataset.familyTreeViewMode = mode;
-    button.setAttribute('role', 'tab');
+  control.familyTabsPortal = portal;
+
+  portal.querySelectorAll('.family-nav-index-tab').forEach(button => {
+    if (button.dataset.familyNavBound === '1') return;
+
+    button.dataset.familyNavBound = '1';
 
     button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
 
-      setFamilyTreeViewMode(mode, control);
+      setFamilyTreeViewMode(
+        button.dataset.familyTreeViewMode,
+        control
+      );
     });
-
-    portal.appendChild(button);
   });
-
-  document.body.appendChild(portal);
-  control.familyTabsPortal = portal;
-  syncFamilyNavTabsPortal(control);
 
   return portal;
 }
@@ -1318,6 +1562,10 @@ function positionFamilyNavTabsPortal(control) {
   const portal = ensureFamilyNavTabsPortal(control);
   if (!portal || control.menu.parentElement !== document.body) return;
 
+  if (portal.parentElement !== document.body) {
+    document.body.appendChild(portal);
+  }
+
   syncFamilyNavTabsPortal(control);
 
   const menuRect = control.menu.getBoundingClientRect();
@@ -1354,6 +1602,11 @@ function restoreFamilyNavSelectMenu(control) {
     host.appendChild(menu);
   }
 
+  const portal = ensureFamilyNavTabsPortal(control);
+  if (portal && portal.parentElement !== host) {
+    host.appendChild(portal);
+  }
+
   menu.classList.remove('family-nav-portal');
   menu.style.removeProperty('left');
   menu.style.removeProperty('top');
@@ -1362,14 +1615,10 @@ function restoreFamilyNavSelectMenu(control) {
   menu.style.removeProperty('max-height');
   menu.style.removeProperty('--family-menu-rows');
 
-  // 關閉後才解除本次展開的幾何鎖；下一次開啟可依新的 viewport 重新計算。
-  control.familyMenuRows = null;
-  control.familyMenuWidth = null;
-
   hideFamilyNavTabsPortal(control);
 }
 
-function positionFamilyNavSelectMenu(control, { force = false } = {}) {
+function positionFamilyNavSelectMenu(control) {
   if (!control || control.select.id !== 'familySelect') return;
 
   const { trigger, menu } = control;
@@ -1392,36 +1641,19 @@ function positionFamilyNavSelectMenu(control, { force = false } = {}) {
     window.innerHeight - rect.bottom - gap - margin
   );
 
-  const rowCapacity = Math.max(
+  const rows = Math.max(
     1,
-    Math.floor(availableHeight / itemHeight)
+    Math.min(
+      items.length,
+      Math.floor(availableHeight / itemHeight)
+    )
   );
-
-  // 同一次 dropdown 展開期間鎖住列數。
-  // 切換 EA / 大家族只替換內容，不得因此改變右側內容面板高度。
-  const rows =
-    !force && Number.isFinite(control.familyMenuRows)
-      ? control.familyMenuRows
-      : Math.max(1, Math.min(items.length, rowCapacity));
-
-  control.familyMenuRows = rows;
 
   menu.style.setProperty('--family-menu-rows', String(rows));
   menu.style.top = `${Math.round(rect.bottom + gap)}px`;
   menu.style.left = `${Math.max(margin, Math.round(rect.left))}px`;
   menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
   menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
-
-  // 寬度也跟著本次展開固定，避免不同索引的項目數讓內容面板左右跳動。
-  if (force || !Number.isFinite(control.familyMenuWidth)) {
-    menu.style.removeProperty('width');
-    control.familyMenuWidth = menu.getBoundingClientRect().width;
-  }
-
-  if (Number.isFinite(control.familyMenuWidth)) {
-    menu.style.width = `${Math.round(control.familyMenuWidth)}px`;
-  }
-
   positionFamilyNavTabsPortal(control);
 }
 
@@ -1558,8 +1790,7 @@ function setupTopbarNavSelects() {
     const control = navSelectControls.get('familySelect');
     if (!control || !control.host.classList.contains('open')) return;
 
-    // 只有 viewport 真正改變時才解除一次幾何鎖並重新計算。
-    positionFamilyNavSelectMenu(control, { force:true });
+    positionFamilyNavSelectMenu(control);
   }, 60));
 }
 
@@ -6158,21 +6389,23 @@ function refreshFamilyUI() {
 
   familySelect.innerHTML = selectorEntries
     .map(entry =>
-      `<option value="${esc(entry.value)}">${esc(displayDataText(entry.labelFamily.name, entry.labelFamily))}</option>`
+      `<option value="${esc(entry.value)}">${esc(entry.label || displayDataText(entry.labelFamily.name, entry.labelFamily))}</option>`
     )
     .join('');
 
-  if (familyTreeViewMode === 'extended') {
-    const selected =
-      selectorEntries.find(entry => entry.value === familyTreeExtendedSelectionValue) ||
-      findBestExtendedEntryForFamily(fam, selectorEntries);
+  const selected =
+    selectorEntries.find(entry =>
+      entry.value === getFamilyTreeSelectionValue(familyTreeViewMode)
+    ) ||
+    findBestFamilySelectorEntry(fam, selectorEntries);
 
-    if (selected) {
-      familyTreeExtendedSelectionValue = selected.value;
-      familySelect.value = selected.value;
-    }
-  } else {
-    familySelect.value = db.currentId;
+  if (selected) {
+    setFamilyTreeSelectionValue(
+      familyTreeViewMode,
+      selected.value
+    );
+
+    familySelect.value = selected.value;
   }
 
   document.title = familyName + ' · ' + uiText('模擬市民族譜工具');
@@ -6189,13 +6422,13 @@ familySelect.onchange = () => {
   clearNodeSelection();
   arrangeTool = 'pan';
 
-  if (familyTreeViewMode === 'extended') {
-    familyTreeExtendedSelectionValue = selectedEntry.value;
-    db.currentId = selectedEntry.familyId;
-  } else {
-    db.currentId = selectedEntry.familyId;
-    familyTreeLastEaFamilyId = selectedEntry.familyId;
-  }
+  setFamilyTreeSelectionValue(
+    familyTreeViewMode,
+    selectedEntry.value
+  );
+
+  db.currentId = selectedEntry.familyId;
+  familyTreeLastSourceFamilyId = selectedEntry.familyId;
 
   addMemberSelection.clear();
   removeMemberSelection.clear();

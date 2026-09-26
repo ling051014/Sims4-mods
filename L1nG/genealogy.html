@@ -181,6 +181,33 @@
                                         <select class="nav-native-select family-select" id="familySelect" tabindex="-1" aria-hidden="true"></select>
                                         <button class="family-switch-btn nav-select-trigger" id="familySelectTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" title="切換家族" aria-label="切換家族"><span class="nav-select-value family-switch-current" aria-hidden="true"></span><span class="l1ng-icon icon-chevron-down nav-select-chevron" aria-hidden="true"></span></button>
                                         <div class="nav-select-menu" role="listbox" aria-label="家族"></div>
+
+                                        <!-- ========【家族選擇器索引】 設定 - EA 家庭 / EA 族譜 / 大家族三種固定分頁 ======== -->
+                                        <div class="family-nav-tabs-portal" id="familyNavTabs" role="tablist" aria-label="家族分類">
+                                            <button class="family-nav-index-tab" id="familyNavHouseholdTab" type="button" data-family-tree-view-mode="household" role="tab" aria-selected="false" aria-pressed="false">
+                                                <span class="family-nav-tab-lines">
+                                                    <span class="family-nav-tab-ea">EA</span>
+                                                    <span>家</span>
+                                                    <span>庭</span>
+                                                </span>
+                                            </button>
+
+                                            <button class="family-nav-index-tab" id="familyNavEaTab" type="button" data-family-tree-view-mode="ea" role="tab" aria-selected="false" aria-pressed="false">
+                                                <span class="family-nav-tab-lines">
+                                                    <span class="family-nav-tab-ea">EA</span>
+                                                    <span>族</span>
+                                                    <span>譜</span>
+                                                </span>
+                                            </button>
+
+                                            <button class="family-nav-index-tab" id="familyNavExtendedTab" type="button" data-family-tree-view-mode="extended" role="tab" aria-selected="true" aria-pressed="true">
+                                                <span class="family-nav-tab-lines">
+                                                    <span>大</span>
+                                                    <span>家</span>
+                                                    <span>族</span>
+                                                </span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="app-menu family-actions-menu">
