@@ -762,26 +762,6 @@ section[id] {
 }
 
 
-/* ========【Genealogy】 設定 - 網頁端與遊戲端狀態列表 ======== */
-.project-state-list {
-    /* 上方間距 */ margin-top: 22px;
-    /* 上方分隔線 */ border-top: 1px solid var(--border-soft);
-}
-
-
-/* ========【Genealogy】 設定 - 單一狀態列 ======== */
-.project-state-list > div {
-    /* 橫向排列 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 兩端排列 */ justify-content: space-between;
-    /* 項目間距 */ gap: 20px;
-    /* 上下內距 */ padding: 10px 0;
-    /* 底部分隔線 */ border-bottom: 1px solid var(--border-soft);
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 12px;
-}
-
-
 /* ========【Genealogy】 設定 - 已可使用狀態 ======== */
 .state-available {
     /* 可用狀態文字 */ color: #4c7c63;
@@ -1308,13 +1288,6 @@ section[id] {
         /* 手機最小高度 */ min-height: 360px;
         /* 手機內距 */ padding: 23px;
     }
-
-    .project-state-list > div {
-        /* 狀態列改為上下排列 */ align-items: flex-start;
-        /* 垂直排列 */ flex-direction: column;
-        /* 縮小間距 */ gap: 3px;
-    }
-
     .wallet-number {
         /* 手機金額字體 */ font-size: 37px;
     }
