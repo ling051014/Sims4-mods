@@ -570,6 +570,7 @@
           simId:id,
           avatarPath:findSimAvatarPath(bundle.files, id, sim),
           householdId:sim.householdId || null,
+          householdName:optionalDisplayValue(household && household.name),
           recordState:sim.recordState || 'full',
           adoptedParentIds:rel.adoptedParentIds,
           adoptedChildIds:rel.adoptedChildIds,
