@@ -38,11 +38,13 @@ const SIBLING_LABEL = '兄弟姐妹';
 
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
+const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS, 'genderBar'];
 
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
   avatar: true,
   name: true,
   gender: true,
+  genderBar: true,
   lifeStage: false,
   age: false,
   birthday: false,
@@ -61,6 +63,7 @@ const DEFAULT_CARD_EDIT_SETTINGS = Object.freeze({
   avatar: true,
   name: true,
   gender: true,
+  genderBar: true,
   lifeStage: true,
   age: false,
   birthday: false,
@@ -379,7 +382,7 @@ function getCardViewSettings() {
   if (!target.meta.cardView || typeof target.meta.cardView !== 'object') target.meta.cardView = {};
   const current = target.meta.cardView;
   current.avatar = true;
-  CARD_CONTENT_FIELD_KEYS.forEach(key => {
+  CARD_SETTING_FIELD_KEYS.forEach(key => {
     if (typeof current[key] !== 'boolean') current[key] = DEFAULT_CARD_VIEW_SETTINGS[key];
   });
   if (!['minimal','translucent','full'].includes(current.appearance)) current.appearance = DEFAULT_CARD_VIEW_SETTINGS.appearance;
@@ -393,7 +396,7 @@ function getCardEditSettings() {
   if (!target.meta.cardEdit || typeof target.meta.cardEdit !== 'object') target.meta.cardEdit = {};
   const current = target.meta.cardEdit;
   current.avatar = true;
-  CARD_CONTENT_FIELD_KEYS.forEach(key => {
+  CARD_SETTING_FIELD_KEYS.forEach(key => {
     if (typeof current[key] !== 'boolean') current[key] = DEFAULT_CARD_EDIT_SETTINGS[key];
   });
   return current;
@@ -3629,7 +3632,7 @@ function drawNodes() {
     const cls = commonNodeClasses(c, {viewMode:isView, isInlaw, matchSearch});
     const dStage = uiText(c.lifeStage);
     const displayName = cardSettings.name ? `${dName}${cardSettings.gender ? formatCardGender(c.gender) : ''}` : '';
-    const genderHiddenClass = cardSettings.gender ? '' : ' card-gender-hidden';
+    const genderBarHiddenClass = cardSettings.genderBar ? '' : ' card-gender-bar-hidden';
 
     if (isView) {
       const model =
@@ -3643,7 +3646,7 @@ function drawNodes() {
           ? ''
           : ' card-avatar-only';
 
-      return `<div class="${cls} mode-view ${appearanceClass}${genderHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
+      return `<div class="${cls} mode-view ${appearanceClass}${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
         <div class="n-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
         ${model.name ? `<div class="n-view-name" title="${esc(model.name)}">${esc(model.name)}</div>` : ''}
@@ -3686,7 +3689,7 @@ function drawNodes() {
     </div>` : '';
     const avatarOnlyClass = configuredEditBody ? '' : ' card-avatar-only';
 
-    return `<div class="${cls} mode-edit${genderHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
+    return `<div class="${cls} mode-edit${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
       style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
       <div class="n-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
       ${editBody}
@@ -4340,7 +4343,7 @@ function renderNodeContextMenu(simId, clientX, clientY) {
   const title = isMulti ? `${uiText('已選取')} ${selectedCount} ${uiText('人')}` : displayDataText(sim.name, sim);
 
   const fieldRows = [
-    ['name','姓名'], ['gender','性別'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
+    ['name','姓名'], ['gender','性別文字'], ['genderBar','性別色條'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
     ['status','狀態'], ['race','種族'], ['career','職業'], ['residence','居住地'], ['aspiration','人生抱負'],
     ['traits','特徵'], ['pets','寵物'], ['gallery','相簿']
   ].map(([key,label]) => `<label class="node-context-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
@@ -4413,7 +4416,7 @@ nodeContextMenu?.addEventListener('click', e => {
 });
 nodeContextMenu?.addEventListener('change', e => {
   const field = e.target?.dataset?.cardField;
-  if (field && CARD_CONTENT_FIELD_KEYS.includes(field)) {
+  if (field && CARD_SETTING_FIELD_KEYS.includes(field)) {
     const settings = nodeContextMenu.dataset.cardMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
     settings[field] = !!e.target.checked;
     save(); render();
