@@ -5311,6 +5311,14 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     transform:translateX(2px);
 }
 
+.family-nav-tab-cn {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+}
+
 .family-nav-tab-ea {
     display:block;
     font-size:10.5px;
@@ -5331,13 +5339,21 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 }
 
 .family-nav-tab-label-en {
-    display:block;
+    display:none;
     width:max-content;
     white-space:nowrap;
     font-size:9px;
     font-weight:700;
     letter-spacing:.65px;
     transform:rotate(-90deg);
+}
+
+.family-nav-index[data-language="en"] .family-nav-tab-cn {
+    display:none;
+}
+
+.family-nav-index[data-language="en"] .family-nav-tab-label-en {
+    display:block;
 }
 
 .family-nav-search-tab {
@@ -5349,6 +5365,10 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     font-size:20px;
     font-family:Arial,sans-serif;
     line-height:1;
+}
+
+.family-nav-search-tab[hidden] {
+    display:none;
 }
 
 .family-nav-search-tab.active {
