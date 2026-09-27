@@ -5415,14 +5415,25 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     outline:none;
 }
 .family-generation-sort-icon {
+    position:relative;
     width:18px;
     height:18px;
-    overflow:visible;
+    display:inline-block;
 }
-.generation-sort-arrow {
+.family-generation-sort-icon .generation-sort-arrow {
+    position:absolute;
+    inset:0;
+    width:18px;
+    height:18px;
     color:var(--sub);
     opacity:.32;
     transition:color .15s ease,opacity .15s ease;
+}
+.icon-sort-generation-up {
+    --l1ng-icon:url("../html%20icons/sort-generation-up.svg");
+}
+.icon-sort-generation-down {
+    --l1ng-icon:url("../html%20icons/sort-generation-down.svg");
 }
 .family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-up,
 .family-generation-sort[data-sort-order="desc"] .generation-sort-arrow-down {
