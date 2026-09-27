@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20260928-trait-behavior-only">
+        <link rel="stylesheet" href="genealogy.css?v=20260928-storage-player-ui">
     </head>
     <body data-theme="ling">
 
@@ -329,7 +329,7 @@
                                 <label class="filebtn compact"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/*" hidden id="avatarInput" type="file"></label>
                                 <button class="avatar-clear-compact" id="avatarClearBtn" type="button">移除頭像</button>
                             </div>
-                            <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / GIF</div>
+                            <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / GIF · 圖片會自動調整</div>
                         </div>
 
                         <div class="sim-profile-edit-fields">
@@ -468,7 +468,7 @@
                             <div class="avatar-actions">
                                 <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="petAvatarInput" type="file"></label>
                                 <button id="petAvatarClearBtn" type="button">清除頭像</button>
-                                <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / GIF</div>
+                                <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / GIF · 圖片會自動調整</div>
                             </div>
                         </div>
                     </label>
@@ -764,123 +764,52 @@
             </div>
         </div>
 
-        <!-- ========【圖片與儲存】 設定 - 目前 Blob Asset Store 的圖片處理、容量狀態與維護 ======== -->
+        <!-- ========【圖片與儲存】 設定 - 一般玩家只顯示必要的圖片使用量、備份與清理資訊 ======== -->
         <div class="mask" id="storageMask">
             <div class="modal storage-modal">
                 <h2><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>圖片與儲存</span></h2>
-                <p class="storage-intro">圖片本體儲存在目前瀏覽器；族譜資料只保存圖片索引。匯出 JSON 備份時會連同圖片一起帶走。</p>
+                <p class="storage-intro">你加入的頭像、寵物圖片、人生照片、家庭合照與背景圖片會保存在這台裝置的瀏覽器中，不會自動上傳。</p>
 
-                <section class="storage-section">
-                    <div class="storage-section-header">
-                        <div>
-                            <div class="setting-group-title">圖片品質</div>
-                            <p class="storage-section-description">只影響之後新增或更換的圖片；已經儲存的圖片不會重新壓縮。</p>
-                        </div>
-                        <button class="storage-reset-btn" id="resetImageQualityBtn" type="button">恢復預設</button>
-                    </div>
-
-                    <div class="storage-quality-list">
-                        <label class="storage-quality-row">
-                            <span class="storage-quality-copy">
-                                <strong>人物頭像</strong>
-                                <small>人物卡片與人物資料使用的頭像</small>
-                            </span>
-                            <span class="storage-quality-control">
-                                <select id="avatarProfile">
-                                    <option value="compact">節省空間（192px）</option>
-                                    <option value="balanced">平衡（384px · 預設）</option>
-                                    <option value="hd">高畫質（768px）</option>
-                                </select>
-                                <small id="avatarProfileHint"></small>
-                            </span>
-                        </label>
-
-                        <label class="storage-quality-row">
-                            <span class="storage-quality-copy">
-                                <strong>寵物頭像</strong>
-                                <small>寵物資料使用的頭像</small>
-                            </span>
-                            <span class="storage-quality-control">
-                                <select id="petAvatarProfile">
-                                    <option value="compact">節省空間（192px）</option>
-                                    <option value="balanced">平衡（384px · 預設）</option>
-                                    <option value="hd">高畫質（768px）</option>
-                                </select>
-                                <small id="petAvatarProfileHint"></small>
-                            </span>
-                        </label>
-
-                        <label class="storage-quality-row">
-                            <span class="storage-quality-copy">
-                                <strong>人生照片</strong>
-                                <small>人生照片與相簿圖片</small>
-                            </span>
-                            <span class="storage-quality-control">
-                                <select id="galleryProfile">
-                                    <option value="small">小型（512px）</option>
-                                    <option value="medium">中型（720px · 預設）</option>
-                                    <option value="large">大型（1080px）</option>
-                                    <option value="hd">高畫質（1440px）</option>
-                                    <option value="original">保留原始圖片</option>
-                                </select>
-                                <small id="galleryProfileHint"></small>
-                            </span>
-                        </label>
+                <section class="storage-section storage-overview-section">
+                    <div class="setting-group-title">目前使用量</div>
+                    <div class="storage-summary" aria-live="polite">
+                        <article class="storage-summary-item">
+                            <span>已儲存圖片</span>
+                            <div><strong id="storageAssetCount">—</strong><small>張</small></div>
+                        </article>
+                        <article class="storage-summary-item">
+                            <span>圖片使用空間</span>
+                            <div><strong id="storageAssetSize">—</strong></div>
+                        </article>
                     </div>
                 </section>
 
                 <section class="storage-section">
-                    <div class="setting-group-title">儲存狀態</div>
-                    <p class="storage-section-description">只有打開這個頁面時才會計算容量，不會在拖曳卡片或瀏覽族譜時掃描圖片庫。</p>
-
-                    <div class="storage-metric-grid" aria-live="polite">
-                        <article class="storage-metric-card">
-                            <span class="storage-metric-label">唯一圖片資產</span>
-                            <strong id="storageAssetCount">—</strong>
-                            <small id="storageAssetSize">計算中…</small>
-                        </article>
-                        <article class="storage-metric-card">
-                            <span class="storage-metric-label">圖片引用</span>
-                            <strong id="storageReferenceCount">—</strong>
-                            <small><span id="storageSharedCount">—</span> <span>次重複引用已自動共用</span></small>
-                        </article>
-                        <article class="storage-metric-card">
-                            <span class="storage-metric-label">族譜資料</span>
-                            <strong id="storageDataSize">—</strong>
-                            <small>不含圖片本體</small>
-                        </article>
-                        <article class="storage-metric-card">
-                            <span class="storage-metric-label">瀏覽器總用量</span>
-                            <strong id="storageBrowserUsage">—</strong>
-                            <small><span>配額</span> <span id="storageBrowserQuota">—</span></small>
-                        </article>
-                    </div>
-
-                    <div class="storage-quota-block">
-                        <div class="storage-quota-head">
-                            <span>瀏覽器儲存空間</span>
-                            <span><span id="storageUsagePercent">—</span><span>% 已使用</span></span>
+                    <div class="setting-group-title">圖片處理</div>
+                    <div class="storage-info-list">
+                        <div class="storage-info-row">
+                            <span class="l1ng-icon icon-image" aria-hidden="true"></span>
+                            <div>
+                                <strong>圖片會自動調整</strong>
+                                <p>新增或更換圖片時，工具會依照用途自動調整成適合族譜使用的大小，不需要另外設定畫質。</p>
+                            </div>
                         </div>
-                        <div class="storage-bar" aria-hidden="true">
-                            <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
+                        <div class="storage-info-row">
+                            <span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span>
+                            <div>
+                                <strong>備份會包含圖片</strong>
+                                <p>匯出 JSON 備份時，目前族譜使用中的圖片會一起保存；之後重新匯入也會一併還原。</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="storage-architecture-list" aria-label="圖片儲存架構">
-                        <span><span class="storage-status-dot" aria-hidden="true"></span>IndexedDB 圖片本體</span>
-                        <span><span class="storage-status-dot" aria-hidden="true"></span>SHA-256 自動去重</span>
-                        <span><span class="storage-status-dot" aria-hidden="true"></span>JSON 備份含圖片</span>
-                    </div>
-
-                    <p class="settings-note">圖片只會保存在目前使用的瀏覽器，不會自動上傳到網站或伺服器。</p>
                 </section>
 
                 <section class="storage-section">
-                    <div class="setting-group-title">維護</div>
+                    <div class="setting-group-title">清理空間</div>
                     <div class="storage-maintenance-card">
                         <div>
                             <strong>清理未使用的圖片</strong>
-                            <p>刪除目前沒有任何人物、寵物、人生照片、家庭合照或背景引用的圖片資產。</p>
+                            <p>只會刪除目前已經沒有被任何人物、寵物、人生照片、家庭合照或背景使用的圖片，不會影響仍在族譜中使用的圖片。</p>
                         </div>
                         <button id="cleanupBtn" type="button"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清理未使用的圖片</span></button>
                     </div>
@@ -1058,6 +987,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260928-trait-behavior-only"></script>
+        <script src="genealogy.js?v=20260928-storage-player-ui"></script>
     </body>
 </html>
