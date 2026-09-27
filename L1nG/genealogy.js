@@ -7571,7 +7571,21 @@ function updateArrangeToolUI() {
 
 function setArrangeTool(tool) {
   if (tool !== 'select' && tool !== 'pan') return;
+
+  const previousTool =
+    arrangeTool;
+
   arrangeTool = tool;
+
+  if (
+    previousTool === 'select' &&
+    tool === 'pan'
+  ) {
+    clearNodeSelection();
+    finishMarquee();
+    closeNodeContextMenu();
+  }
+
   updateArrangeToolUI();
 }
 
@@ -7911,12 +7925,7 @@ function getParentConnectorStraightSnap(id, rawX) {
     layoutCache.byId,
     layoutCache.visibleIds
   ).forEach(group => {
-    // 只有 direct parent-child connector 才能真正消除 V-H-V 折線。
-    // 多子女仍需要 sibling bus，不以單一子女強行改變整組主幹。
-    if (
-      group.children.length !== 1 ||
-      group.children[0] !== id
-    ) {
+    if (!group.children.includes(id)) {
       return;
     }
 
@@ -7930,28 +7939,58 @@ function getParentConnectorStraightSnap(id, rawX) {
 
     if (!source) return;
 
-    const targetX =
-      source.x -
-      draggedDims.W / 2;
+    // ========【親子分支吸附】 設定 - 接近既有垂直主幹 / sibling branch 時自動拉直 ========
+    // 候選軸包含：
+    // 1. 父母 connector 的共同主幹 X
+    // 2. 同一 sibling bus 上其他子女目前的垂直 branch X
+    // 拖曳中的子女本身不當候選，避免把自己的舊位置吸回去。
+    const connectorAxes =
+      [source.x];
 
-    const distance =
-      Math.abs(
-        targetX - rawX
+    group.children.forEach(childId => {
+      if (childId === id) return;
+
+      const childPosition =
+        layoutCache.pos.get(childId);
+
+      if (!childPosition) return;
+
+      const childAnchor =
+        parentConnectorChildAnchor(
+          childPosition,
+          source
+        );
+
+      connectorAxes.push(
+        childAnchor.x
       );
+    });
 
-    if (
-      distance <= threshold &&
-      (
-        !best ||
-        distance < best.distance
-      )
-    ) {
-      best = {
-        value:targetX,
-        distance,
-        guide:source.x
-      };
-    }
+    [...new Set(connectorAxes)]
+      .forEach(axisX => {
+        const targetX =
+          axisX -
+          draggedDims.W / 2;
+
+        const distance =
+          Math.abs(
+            targetX - rawX
+          );
+
+        if (
+          distance <= threshold &&
+          (
+            !best ||
+            distance < best.distance
+          )
+        ) {
+          best = {
+            value:targetX,
+            distance,
+            guide:axisX
+          };
+        }
+      });
   });
 
   return best;
