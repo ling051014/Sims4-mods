@@ -4699,6 +4699,15 @@ function normalizeFreePedigreeHorizontalPositions(pos, byId, visibleIds) {
     });
   };
 
+  const shiftUnitY = (unit, delta) => {
+    if (!unit || !Number.isFinite(delta) || Math.abs(delta) < 0.5) return;
+
+    unit.members.forEach(id => {
+      const p = pos.get(id);
+      if (p) p.y += delta;
+    });
+  };
+
   // 由上一代往下一代多輪投影到標準 pedigree 幾何。
   // 單一子女：union node 與子女人物中心完全同 X。
   // 多名子女：兄弟姊妹跨度中心對準 union node，形成標準 T 型分支。
@@ -4708,11 +4717,54 @@ function normalizeFreePedigreeHorizontalPositions(pos, byId, visibleIds) {
         .map(parentId => ({
           id:parentId,
           sim:byId.get(parentId),
-          pos:pos.get(parentId)
+          pos:pos.get(parentId),
+          unit:unitBySim.get(parentId)
         }))
         .filter(item => item.sim && item.pos);
 
       if (!parentPositions.length) return;
+
+      // 共同父母不論是否具有 spouse / ex-spouse 標記，
+      // 在 pedigree union 上都必須位於同一水平世代列。
+      if (parentPositions.length >= 2) {
+        const uniqueParentUnits = [];
+        const seenParentUnits = new Set();
+
+        parentPositions.forEach(parent => {
+          if (!parent.unit || seenParentUnits.has(parent.unit)) return;
+          seenParentUnits.add(parent.unit);
+          uniqueParentUnits.push(parent.unit);
+        });
+
+        const yValues = parentPositions
+          .map(parent => parent.pos.y)
+          .filter(Number.isFinite);
+
+        if (uniqueParentUnits.length && yValues.length) {
+          const sharedY =
+            yValues.reduce((sum, value) => sum + value, 0) /
+            yValues.length;
+
+          uniqueParentUnits.forEach(unit => {
+            const representativeId =
+              [...unit.members][0];
+            const representative =
+              pos.get(representativeId);
+
+            if (!representative) return;
+
+            shiftUnitY(
+              unit,
+              sharedY - representative.y
+            );
+          });
+
+          // family unit 已經移動，重新讀取 parent position。
+          parentPositions.forEach(parent => {
+            parent.pos = pos.get(parent.id);
+          });
+        }
+      }
 
       let sourceX;
 
