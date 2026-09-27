@@ -1232,14 +1232,7 @@ function familyGenealogyNeighborIds(sim) {
 }
 
 function familyLineageParentIds(sim) {
-  if (!sim) return [];
-
-  return [
-    ...(sim.parentIds || []),
-    ...(sim.gameData?.adoptedParentIds || [])
-  ]
-    .map(String)
-    .filter(id => genealogyData.sims[id]);
+  return genealogyParentIds(sim);
 }
 
 function familyLineageChildIds(simId) {
@@ -3284,35 +3277,161 @@ function closeTopModal() {
   return false;
 }
 
+function genealogyParentRelations(child, byId = null) {
+  if (!child) return [];
+
+  const childId = String(child.id || '');
+  const relationByParent = new Map();
+
+  const hasParent = parentId => {
+    const id = String(parentId || '');
+    if (!id || id === childId) return false;
+    return byId instanceof Map
+      ? byId.has(id)
+      : !!genealogyData?.sims?.[id];
+  };
+
+  const addRelation = (parentId, kind) => {
+    const id = String(parentId || '');
+    if (!hasParent(id)) return;
+
+    const current = relationByParent.get(id);
+    if (current === 'adoptive') return;
+
+    if (kind === 'adoptive' || !current) {
+      relationByParent.set(id, kind);
+    }
+  };
+
+  (child.parentIds || []).forEach(parentId => {
+    addRelation(parentId, 'parent-child');
+  });
+
+  const explicitAdoptedParentIds =
+    (child.gameData?.adoptedParentIds || [])
+      .map(String)
+      .filter(Boolean);
+
+  explicitAdoptedParentIds.forEach(parentId => {
+    addRelation(parentId, 'adoptive');
+  });
+
+  const parentPool =
+    byId instanceof Map
+      ? [...byId.values()]
+      : Object.values(genealogyData?.sims || {});
+
+  parentPool.forEach(parent => {
+    if (!parent || parent.id == null) return;
+
+    const adoptedChildIds =
+      (parent.gameData?.adoptedChildIds || [])
+        .map(String);
+
+    if (adoptedChildIds.includes(childId)) {
+      addRelation(parent.id, 'adoptive');
+    }
+  });
+
+  const hasExplicitAdoptive =
+    [...relationByParent.values()]
+      .includes('adoptive');
+
+  if (
+    child.adoptive &&
+    !hasExplicitAdoptive &&
+    explicitAdoptedParentIds.length === 0
+  ) {
+    (child.parentIds || []).forEach(parentId => {
+      addRelation(parentId, 'adoptive');
+    });
+  }
+
+  return [...relationByParent.entries()]
+    .map(([parentId, kind]) => ({ parentId, kind }))
+    .sort((left, right) =>
+      String(left.parentId).localeCompare(String(right.parentId))
+    );
+}
+
+function genealogyParentIds(child, byId = null) {
+  return genealogyParentRelations(child, byId)
+    .map(relation => relation.parentId);
+}
+
+function genealogyParentRelationGroups(child, byId = null) {
+  const groups = new Map();
+
+  genealogyParentRelations(child, byId)
+    .forEach(relation => {
+      if (!groups.has(relation.kind)) {
+        groups.set(relation.kind, []);
+      }
+      groups.get(relation.kind).push(relation.parentId);
+    });
+
+  return [...groups.entries()]
+    .map(([kind, parentIds]) => ({
+      kind,
+      parentIds:[...new Set(parentIds)].sort()
+    }))
+    .filter(group => group.parentIds.length);
+}
+
+function genealogyParentKindFor(child, parentId, byId = null) {
+  const id = String(parentId || '');
+  const relation =
+    genealogyParentRelations(child, byId)
+      .find(item => item.parentId === id);
+
+  return relation ? relation.kind : 'parent-child';
+}
+
 function isDescendant(ancestorId, nodeId) {
-  const queue = [nodeId]; const seen = new Set();
+  const queue = [nodeId];
+  const seen = new Set();
+
   while (queue.length) {
     const id = queue.shift();
     if (seen.has(id)) continue;
     seen.add(id);
-    const s = genealogyData.sims[id];
-    if (!s) continue;
-    for (const pid of (s.parentIds||[])) {
-      if (pid === ancestorId) return true;
-      queue.push(pid);
+
+    const sim = genealogyData.sims[id];
+    if (!sim) continue;
+
+    for (const parentId of genealogyParentIds(sim)) {
+      if (parentId === ancestorId) return true;
+      queue.push(parentId);
     }
   }
+
   return false;
 }
 
 let _childrenIndex = null;
 function getChildrenOf(id) {
+  const parentId = String(id || '');
+
   if (!_childrenIndex) {
     _childrenIndex = new Map();
-    Object.values(genealogyData.sims).forEach(s => {
-      (s.parentIds || []).forEach(pid => {
-        let arr = _childrenIndex.get(pid);
-        if (!arr) { arr = []; _childrenIndex.set(pid, arr); }
-        arr.push(s);
+
+    Object.values(genealogyData.sims)
+      .forEach(child => {
+        genealogyParentIds(child)
+          .forEach(pid => {
+            if (!_childrenIndex.has(pid)) {
+              _childrenIndex.set(pid, []);
+            }
+
+            const list = _childrenIndex.get(pid);
+            if (!list.some(item => String(item.id) === String(child.id))) {
+              list.push(child);
+            }
+          });
       });
-    });
   }
-  return _childrenIndex.get(id) || [];
+
+  return _childrenIndex.get(parentId) || [];
 }
 function invalidateChildrenIndex() { _childrenIndex = null; }
 
@@ -3832,14 +3951,13 @@ function buildGenealogyLayoutModel(visibleIds) {
     units.map(unit => [unit.id, unit])
   );
 
-  // family unit 之間只由真正 parentIds 建立世代方向。
+  // family unit 之間由 canonical 親子關係建立世代方向。
+  // 親生與領養都是真正的 parent-child；差異只留在線型與標籤。
   sims.forEach(child => {
     const childUnit = unitBySim.get(child.id);
     if (!childUnit) return;
 
-    (child.parentIds || []).forEach(parentId => {
-      if (!byId.has(parentId)) return;
-
+    genealogyParentIds(child, byId).forEach(parentId => {
       const parentUnit = unitBySim.get(parentId);
       if (!parentUnit || parentUnit.id === childUnit.id) return;
 
@@ -3894,7 +4012,7 @@ function buildGenealogyLayoutModel(visibleIds) {
     // 同一名子女的共同父母位於同一世代。
     sims.forEach(child => {
       const parentUnits = [...new Set(
-        (child.parentIds || [])
+        genealogyParentIds(child, byId)
           .map(parentId => unitBySim.get(parentId))
           .filter(Boolean)
       )];
@@ -5200,35 +5318,37 @@ function buildParentChildConnectorGroups(byId, visibleIds) {
     const child = byId.get(childId);
     if (!child) return;
 
-    const parentIds = [...new Set(
-      (child.parentIds || [])
-        .filter(parentId => byId.has(parentId))
-        .map(String)
-    )].sort();
+    genealogyParentRelationGroups(child, byId)
+      .forEach(relationGroup => {
+        const parentIds =
+          relationGroup.parentIds
+            .filter(parentId => byId.has(parentId))
+            .sort();
 
-    if (!parentIds.length) return;
+        if (!parentIds.length) return;
 
-    // 領養與一般親子線不可共用同一條 bus，避免虛線 / 實線語意混在一起。
-    const styleKey =
-      child.adoptive
-        ? 'adoptive'
-        : 'parent-child';
+        const key = parentIds.join('|');
 
-    const key =
-      parentIds.join('|') +
-      '::' +
-      styleKey;
+        if (!groups.has(key)) {
+          groups.set(key, {
+            key,
+            parentIds,
+            children:[],
+            childKinds:new Map()
+          });
+        }
 
-    if (!groups.has(key)) {
-      groups.set(key, {
-        key,
-        parentIds,
-        adoptive:!!child.adoptive,
-        children:[]
+        const group = groups.get(key);
+
+        if (!group.children.includes(childId)) {
+          group.children.push(childId);
+        }
+
+        const currentKind = group.childKinds.get(childId);
+        if (!currentKind || relationGroup.kind === 'adoptive') {
+          group.childKinds.set(childId, relationGroup.kind);
+        }
       });
-    }
-
-    groups.get(key).children.push(childId);
   });
 
   return [...groups.values()];
@@ -5332,57 +5452,39 @@ function parentConnectorBranchY(source, childAnchors) {
 }
 
 function drawParentConnectorGroup(group, pos, byId, paths, labels) {
-  const source =
-    parentConnectorSource(
-      group,
-      pos,
-      byId,
-      paths
-    );
-
+  const source = parentConnectorSource(group, pos, byId, paths);
   if (!source) return;
 
   const children = group.children
     .map(childId => ({
       id:childId,
       sim:byId.get(childId),
-      pos:pos.get(childId)
+      pos:pos.get(childId),
+      kind:group.childKinds?.get(childId) || 'parent-child'
     }))
     .filter(item => item.sim && item.pos)
     .map(item => ({
       ...item,
-      anchor:parentConnectorChildAnchor(
-        item.pos,
-        source
-      )
+      anchor:parentConnectorChildAnchor(item.pos, source)
     }));
 
   if (!children.length) return;
 
-  const edgeClass =
+  const edgeClassForChild = child =>
     'edge edge-parent' +
-    (group.adoptive ? ' edge-adopt' : '');
+    (child.kind === 'adoptive' ? ' edge-adopt' : '');
 
-  // ========【單一子女親子線】 設定 - 父母 union 到子女 anchor 必須完整連續 ========
-  // 自動排版正常時 source.x === child.anchor.x，只會得到一條純垂直主幹。
-  // 自由排列或異常資料若造成 X 不一致，使用正交三段式完整連接；
-  // 不允許直接從 child.x 起筆，否則父母 union 到主幹之間會憑空缺一節。
   if (children.length === 1) {
     const child = children[0];
+    const edgeClass = edgeClassForChild(child);
     const x1 = source.x;
     const y1 = source.y;
     const x2 = child.anchor.x;
     const y2 = child.anchor.y;
-    const aligned =
-      Math.abs(x1 - x2) < 0.75;
+    const aligned = Math.abs(x1 - x2) < 0.75;
 
-    let labelX =
-      aligned
-        ? x1
-        : (x1 + x2) / 2;
-
-    let labelY =
-      y1 + (y2 - y1) / 2;
+    let labelX = aligned ? x1 : (x1 + x2) / 2;
+    let labelY = y1 + (y2 - y1) / 2;
 
     if (aligned) {
       paths.push(
@@ -5392,9 +5494,7 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         '"/>'
       );
     } else {
-      const branchY =
-        y1 + (y2 - y1) / 2;
-
+      const branchY = y1 + (y2 - y1) / 2;
       paths.push(
         '<path class="' + edgeClass + '" d="' +
         'M' + x1 + ' ' + y1 +
@@ -5403,90 +5503,74 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         ' V' + y2 +
         '"/>'
       );
-
       labelY = branchY;
     }
 
     if (showRelLabels) {
       const key = 'parent:' + child.id;
-      const info = getRelInfoByKey(
-        key,
-        group.adoptive
-          ? 'adoptive'
-          : 'parent-child'
-      );
+      const info = getRelInfoByKey(key, child.kind);
 
       if (info) {
         labels.push(
-          makeLabelSVG(
-            labelX,
-            labelY,
-            info.icon,
-            info.text,
-            key
-          )
+          makeLabelSVG(labelX, labelY, info.icon, info.text, key)
         );
       }
     }
-
     return;
   }
 
-  // 多名子女：同一父母只保留一條主幹與一條 sibling bus。
   const branchY =
     parentConnectorBranchY(
       source,
       children.map(child => child.anchor)
     );
 
-  const childXs =
-    children.map(child => child.anchor.x);
+  const childXs = children.map(child => child.anchor.x);
+  const busMinX = Math.min(source.x, ...childXs);
+  const busMaxX = Math.max(source.x, ...childXs);
 
-  const busMinX =
-    Math.min(source.x, ...childXs);
+  const allAdoptive =
+    children.every(child => child.kind === 'adoptive');
 
-  const busMaxX =
-    Math.max(source.x, ...childXs);
+  const sharedEdgeClass =
+    'edge edge-parent' +
+    (allAdoptive ? ' edge-adopt' : '');
 
-  let pathData =
+  let sharedPathData =
     'M' + source.x + ' ' + source.y +
     ' V' + branchY;
 
   if (Math.abs(busMaxX - busMinX) >= 2) {
-    pathData +=
+    sharedPathData +=
       ' M' + busMinX + ' ' + branchY +
       ' H' + busMaxX;
   }
 
-  children.forEach(child => {
-    pathData +=
-      ' M' + child.anchor.x + ' ' + branchY +
-      ' V' + child.anchor.y;
-  });
-
   paths.push(
-    '<path class="' + edgeClass + '" d="' +
-    pathData +
+    '<path class="' + sharedEdgeClass + '" d="' +
+    sharedPathData +
     '"/>'
   );
+
+  children.forEach(child => {
+    paths.push(
+      '<path class="' + edgeClassForChild(child) + '" d="' +
+      'M' + child.anchor.x + ' ' + branchY +
+      ' V' + child.anchor.y +
+      '"/>'
+    );
+  });
 
   if (showRelLabels) {
     children.forEach(child => {
       const key = 'parent:' + child.id;
-      const info = getRelInfoByKey(
-        key,
-        group.adoptive
-          ? 'adoptive'
-          : 'parent-child'
-      );
-
+      const info = getRelInfoByKey(key, child.kind);
       if (!info) return;
 
       labels.push(
         makeLabelSVG(
           child.anchor.x,
-          branchY +
-            (child.anchor.y - branchY) / 2,
+          branchY + (child.anchor.y - branchY) / 2,
           info.icon,
           info.text,
           key
@@ -8576,23 +8660,103 @@ function setupSearchSelects() {
 }
 
 function buildRelationEntries(simId) {
-  const entries = []; const seen = new Set();
-  const c = genealogyData.sims[simId]; if (!c) return entries;
-  const push = (entry, group='family') => { entry.group = group; entries.push(entry); seen.add(entry.key); };
-  if ((c.parentIds||[]).length) {
-    const names = c.parentIds.map(pid => { const sim=genealogyData.sims[pid]; return sim ? displayDataText(sim.name,sim) : ''; }).filter(Boolean).join(' + ');
-    if (names) { const key='parent:'+simId; push({key,label:`${uiText('父母')}：${names}`,kindHint:c.adoptive?'adoptive':'parent-child'}); }
+  const entries = [];
+  const seen = new Set();
+  const c = genealogyData.sims[simId];
+  if (!c) return entries;
+
+  const push = (entry, group = 'family') => {
+    entry.group = group;
+    entries.push(entry);
+    seen.add(entry.key);
+  };
+
+  const parentRelations = genealogyParentRelations(c);
+
+  if (parentRelations.length) {
+    const names = parentRelations
+      .map(relation => {
+        const sim = genealogyData.sims[relation.parentId];
+        return sim ? displayDataText(sim.name, sim) : '';
+      })
+      .filter(Boolean)
+      .join(' + ');
+
+    if (names) {
+      const key = 'parent:' + simId;
+      const kindHint =
+        parentRelations.some(relation => relation.kind === 'adoptive')
+          ? 'adoptive'
+          : 'parent-child';
+
+      push({
+        key,
+        label:`${uiText('父母')}：${names}`,
+        kindHint
+      });
+    }
   }
-  getChildrenOf(simId).forEach(child => { const key='parent:'+child.id; if (seen.has(key)) return; push({key,label:`${uiText('子女')}：${displayDataText(child.name,child)}`,kindHint:child.adoptive?'adoptive':'parent-child'}); });
-  (c.spouseIds||[]).forEach(sid => { const spouse=genealogyData.sims[sid]; if(!spouse)return; const key='spouse:'+pairKey(simId,sid); if(seen.has(key))return; push({key,label:`${uiText('配偶')}：${displayDataText(spouse.name,spouse)}`,kindHint:'spouse'}); });
-  (c.exSpouseIds||[]).forEach(sid => { const spouse=genealogyData.sims[sid]; if(!spouse)return; const key='exspouse:'+pairKey(simId,sid); if(seen.has(key))return; push({key,label:`${uiText('前任配偶')}：${displayDataText(spouse.name,spouse)}`,kindHint:'exspouse'}); });
-  (genealogyData.links||[]).forEach(l => {
-    if (l.from!==simId && l.to!==simId) return; const otherId=l.from===simId?l.to:l.from; const other=genealogyData.sims[otherId]; if(!other)return;
-    if(!l.id)l.id=uid('lnk'); const key='link:'+l.id; if(seen.has(key))return;
-    const rawTag=l.label||l.type||'關聯'; const tag=displayRelationshipText(rawTag);
-    const isSibling = rawTag === SIBLING_LABEL || l.type === SIBLING_LABEL || l.label === SIBLING_LABEL;
-    push({key,label:`${tag}：${displayDataText(other.name,other)}`,kindHint:isSibling?'sibling':'custom'}, isSibling?'family':'other');
+
+  getChildrenOf(simId).forEach(child => {
+    const key = 'parent:' + child.id;
+    if (seen.has(key)) return;
+
+    push({
+      key,
+      label:`${uiText('子女')}：${displayDataText(child.name,child)}`,
+      kindHint:genealogyParentKindFor(child, simId)
+    });
   });
+
+  (c.spouseIds || []).forEach(sid => {
+    const spouse = genealogyData.sims[sid];
+    if (!spouse) return;
+    const key = 'spouse:' + pairKey(simId,sid);
+    if (seen.has(key)) return;
+    push({
+      key,
+      label:`${uiText('配偶')}：${displayDataText(spouse.name,spouse)}`,
+      kindHint:'spouse'
+    });
+  });
+
+  (c.exSpouseIds || []).forEach(sid => {
+    const spouse = genealogyData.sims[sid];
+    if (!spouse) return;
+    const key = 'exspouse:' + pairKey(simId,sid);
+    if (seen.has(key)) return;
+    push({
+      key,
+      label:`${uiText('前任配偶')}：${displayDataText(spouse.name,spouse)}`,
+      kindHint:'exspouse'
+    });
+  });
+
+  (genealogyData.links || []).forEach(link => {
+    if (link.from !== simId && link.to !== simId) return;
+
+    const otherId = link.from === simId ? link.to : link.from;
+    const other = genealogyData.sims[otherId];
+    if (!other) return;
+
+    if (!link.id) link.id = uid('lnk');
+    const key = 'link:' + link.id;
+    if (seen.has(key)) return;
+
+    const rawTag = link.label || link.type || '關聯';
+    const tag = displayRelationshipText(rawTag);
+    const isSibling =
+      rawTag === SIBLING_LABEL ||
+      link.type === SIBLING_LABEL ||
+      link.label === SIBLING_LABEL;
+
+    push({
+      key,
+      label:`${tag}：${displayDataText(other.name,other)}`,
+      kindHint:isSibling ? 'sibling' : 'custom'
+    }, isSibling ? 'family' : 'other');
+  });
+
   return entries;
 }
 function renderRelAnnoList(simId, sectionId, listId, entries) {
@@ -9977,34 +10141,30 @@ function downloadBlob(blob, filename) {
 const _exportIconSvgCache = new Map();
 
 async function loadExportIconSvg(iconName) {
-  if (_exportIconSvgCache.has(iconName)) return _exportIconSvgCache.get(iconName);
-
-  if (CUSTOM_ICON_PREVIEW_DATA[iconName]) {
-    const svg = CUSTOM_ICON_PREVIEW_DATA[iconName];
-    _exportIconSvgCache.set(iconName, svg);
-    return svg;
+  if (_exportIconSvgCache.has(iconName)) {
+    return _exportIconSvgCache.get(iconName);
   }
 
-  const candidates = [
-    new URL(`../html%20icons/${iconName}.svg`, document.baseURI).href,
-    `${ICON_PREVIEW_FALLBACK_BASE}${iconName}.svg`
-  ];
+  const url =
+    new URL(
+      `../html%20icons/${iconName}.svg`,
+      document.baseURI
+    ).href;
 
-  let lastError = null;
-  for (const url of candidates) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const svg = await response.text();
-      if (!svg.includes('<svg')) throw new Error('Invalid SVG');
-      _exportIconSvgCache.set(iconName, svg);
-      return svg;
-    } catch (err) {
-      lastError = err;
-    }
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${iconName}.svg`);
   }
 
-  throw lastError || new Error(`Icon not found: ${iconName}`);
+  const svg = await response.text();
+
+  if (!svg.includes('<svg')) {
+    throw new Error(`Invalid SVG: ${iconName}`);
+  }
+
+  _exportIconSvgCache.set(iconName, svg);
+  return svg;
 }
 
 function colorizeExportSvg(svg, color) {
@@ -10017,36 +10177,54 @@ function colorizeExportSvg(svg, color) {
 }
 
 async function prepareCaptureIcons(captureRoot) {
-  const icons = [...captureRoot.querySelectorAll('.l1ng-icon')];
-  await Promise.all(icons.map(async icon => {
-    const iconClass = [...icon.classList].find(name => name.startsWith('icon-'));
-    if (!iconClass) return;
-    const iconName = iconClass.slice(5);
+  const icons =
+    [...captureRoot.querySelectorAll('.l1ng-icon')];
 
-    try {
-      const svg = await loadExportIconSvg(iconName);
-      const color = getComputedStyle(icon).color || '#5f6875';
-      const coloredSvg = colorizeExportSvg(svg, color);
+  await Promise.all(
+    icons.map(async icon => {
+      const iconClass =
+        [...icon.classList]
+          .find(name => name.startsWith('icon-'));
 
-      // 匯出與畫面共用同一顆 SVG 圖形：clone 中直接放入 inline SVG，避免 background/mask 形成第二套渲染。
-      const parsed = new DOMParser().parseFromString(coloredSvg, 'image/svg+xml');
-      const svgEl = parsed.documentElement;
-      if (!svgEl || String(svgEl.nodeName).toLowerCase() !== 'svg') throw new Error('Invalid SVG');
-      svgEl.setAttribute('width', '100%');
-      svgEl.setAttribute('height', '100%');
-      svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-      icon.innerHTML = new XMLSerializer().serializeToString(svgEl);
-      icon.style.setProperty('-webkit-mask-image', 'none', 'important');
-      icon.style.setProperty('mask-image', 'none', 'important');
-      icon.style.setProperty('background', 'transparent', 'important');
-      icon.style.setProperty('display', 'inline-flex', 'important');
-      icon.style.setProperty('align-items', 'center', 'important');
-      icon.style.setProperty('justify-content', 'center', 'important');
-    } catch (err) {
-      // 圖示無法載入時寧可隱藏，也不要輸出成錯誤的實心方塊。
-      icon.style.setProperty('visibility', 'hidden', 'important');
-    }
-  }));
+      if (!iconClass) return;
+
+      const iconName = iconClass.slice(5);
+
+      try {
+        const svg = await loadExportIconSvg(iconName);
+        const color = getComputedStyle(icon).color || '#5f6875';
+        const coloredSvg = colorizeExportSvg(svg, color);
+
+        const dataUrl =
+          'data:image/svg+xml;charset=utf-8,' +
+          encodeURIComponent(coloredSvg);
+
+        const image = document.createElement('img');
+        image.alt = '';
+        image.setAttribute('aria-hidden', 'true');
+        image.style.width = '100%';
+        image.style.height = '100%';
+        image.style.display = 'block';
+        image.style.objectFit = 'contain';
+
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = reject;
+          image.src = dataUrl;
+        });
+
+        icon.replaceChildren(image);
+        icon.style.setProperty('-webkit-mask-image','none','important');
+        icon.style.setProperty('mask-image','none','important');
+        icon.style.setProperty('background','transparent','important');
+        icon.style.setProperty('display','inline-flex','important');
+        icon.style.setProperty('align-items','center','important');
+        icon.style.setProperty('justify-content','center','important');
+      } catch (err) {
+        icon.style.setProperty('visibility','hidden','important');
+      }
+    })
+  );
 }
 
 const EXPORT_TREE_PADDING_PX = 40;
