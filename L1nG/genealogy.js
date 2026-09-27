@@ -4641,224 +4641,6 @@ function computeAutoPositions(visibleIds) {
   );
 }
 
-function normalizeFreePedigreeHorizontalPositions(pos, byId, visibleIds) {
-  const groups =
-    buildParentChildConnectorGroups(
-      byId,
-      visibleIds
-    );
-
-  if (!groups.length) return;
-
-  // 現任配偶是不可拆開的 family unit；
-  // 對齊子女時整個 unit 一起水平平移，避免配偶線被拉斷。
-  const unitBySim = new Map();
-  const visited = new Set();
-
-  visibleIds.forEach(startId => {
-    if (visited.has(startId)) return;
-
-    const queue = [startId];
-    const members = [];
-
-    while (queue.length) {
-      const id = queue.shift();
-      if (visited.has(id)) continue;
-
-      visited.add(id);
-      members.push(id);
-
-      const sim = byId.get(id);
-      if (!sim) continue;
-
-      (sim.spouseIds || []).forEach(spouseId => {
-        if (
-          visibleIds.has(spouseId) &&
-          !visited.has(spouseId)
-        ) {
-          queue.push(spouseId);
-        }
-      });
-    }
-
-    const unit = {
-      members:new Set(members)
-    };
-
-    members.forEach(id => {
-      unitBySim.set(id, unit);
-    });
-  });
-
-  const shiftUnitX = (unit, delta) => {
-    if (!unit || !Number.isFinite(delta) || Math.abs(delta) < 0.5) return;
-
-    unit.members.forEach(id => {
-      const p = pos.get(id);
-      if (p) p.x += delta;
-    });
-  };
-
-  const shiftUnitY = (unit, delta) => {
-    if (!unit || !Number.isFinite(delta) || Math.abs(delta) < 0.5) return;
-
-    unit.members.forEach(id => {
-      const p = pos.get(id);
-      if (p) p.y += delta;
-    });
-  };
-
-  // 由上一代往下一代多輪投影到標準 pedigree 幾何。
-  // 單一子女：union node 與子女人物中心完全同 X。
-  // 多名子女：兄弟姊妹跨度中心對準 union node，形成標準 T 型分支。
-  for (let pass = 0; pass < 6; pass += 1) {
-    groups.forEach(group => {
-      const parentPositions = group.parentIds
-        .map(parentId => ({
-          id:parentId,
-          sim:byId.get(parentId),
-          pos:pos.get(parentId),
-          unit:unitBySim.get(parentId)
-        }))
-        .filter(item => item.sim && item.pos);
-
-      if (!parentPositions.length) return;
-
-      // 共同父母不論是否具有 spouse / ex-spouse 標記，
-      // 在 pedigree union 上都必須位於同一水平世代列。
-      if (parentPositions.length >= 2) {
-        const uniqueParentUnits = [];
-        const seenParentUnits = new Set();
-
-        parentPositions.forEach(parent => {
-          if (!parent.unit || seenParentUnits.has(parent.unit)) return;
-          seenParentUnits.add(parent.unit);
-          uniqueParentUnits.push(parent.unit);
-        });
-
-        const yValues = parentPositions
-          .map(parent => parent.pos.y)
-          .filter(Number.isFinite);
-
-        if (uniqueParentUnits.length && yValues.length) {
-          const sharedY =
-            yValues.reduce((sum, value) => sum + value, 0) /
-            yValues.length;
-
-          uniqueParentUnits.forEach(unit => {
-            const representativeId =
-              [...unit.members][0];
-            const representative =
-              pos.get(representativeId);
-
-            if (!representative) return;
-
-            shiftUnitY(
-              unit,
-              sharedY - representative.y
-            );
-          });
-
-          // family unit 已經移動，重新讀取 parent position。
-          parentPositions.forEach(parent => {
-            parent.pos = pos.get(parent.id);
-          });
-        }
-      }
-
-      let sourceX;
-
-      if (parentPositions.length === 1) {
-        sourceX =
-          cardVerticalAnchor(
-            parentPositions[0].pos,
-            'bottom'
-          ).x;
-      } else {
-        const first = parentPositions[0];
-        const second = parentPositions[1];
-        const geometry =
-          getPairConnectionGeometry(
-            first.pos,
-            second.pos
-          );
-
-        sourceX =
-          (geometry.aX + geometry.bX) / 2;
-      }
-
-      if (!Number.isFinite(sourceX)) return;
-
-      const childEntries = group.children
-        .map(childId => {
-          const childPos = pos.get(childId);
-          if (!childPos) return null;
-
-          return {
-            id:childId,
-            pos:childPos,
-            unit:unitBySim.get(childId),
-            anchorX:
-              cardVerticalAnchor(
-                childPos,
-                'top'
-              ).x
-          };
-        })
-        .filter(Boolean);
-
-      if (!childEntries.length) return;
-
-      // 同一 current-spouse unit 只計算一次，避免同一單位重複平移。
-      const uniqueEntries = [];
-      const seenUnits = new Set();
-
-      childEntries.forEach(entry => {
-        const key = entry.unit || entry.id;
-        if (seenUnits.has(key)) return;
-        seenUnits.add(key);
-        uniqueEntries.push(entry);
-      });
-
-      if (uniqueEntries.length === 1) {
-        const entry = uniqueEntries[0];
-
-        shiftUnitX(
-          entry.unit,
-          sourceX - entry.anchorX
-        );
-        return;
-      }
-
-      const xs =
-        uniqueEntries
-          .map(entry =>
-            cardVerticalAnchor(
-              pos.get(entry.id),
-              'top'
-            ).x
-          )
-          .filter(Number.isFinite);
-
-      if (!xs.length) return;
-
-      const spanCenter =
-        (Math.min(...xs) + Math.max(...xs)) / 2;
-
-      const delta =
-        sourceX - spanCenter;
-
-      const shiftedUnits = new Set();
-
-      uniqueEntries.forEach(entry => {
-        if (!entry.unit || shiftedUnits.has(entry.unit)) return;
-        shiftedUnits.add(entry.unit);
-        shiftUnitX(entry.unit, delta);
-      });
-    });
-  }
-}
-
 function computeLayout() {
   const { W: NODE_W, H: NODE_H } = getDims();
   const fam = currentFamily();
@@ -4947,12 +4729,6 @@ function computeLayout() {
         if (p) p.y = sharedY;
       });
     });
-
-    normalizeFreePedigreeHorizontalPositions(
-      pos,
-      byId,
-      visibleIds
-    );
 
     let maxX = 0;
     let maxY = 0;
@@ -5285,30 +5061,29 @@ function parentConnectorSource(group, pos, byId, paths) {
     );
   }
 
-  // ========【共同父母 Union】 設定 - 沒有配偶標記也使用標準族譜水平 union ========
-  // 「共同育有子女」本身就需要一個 pedigree union node。
-  // 不再從兩張卡片底部畫 V-H-V 下凹橋，避免看起來像折疊關係線。
-  const geometry =
-    getPairConnectionGeometry(
-      first.pos,
-      second.pos
-    );
+  // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
+  // 直接從兩張父母卡片向下匯流，再由匯流點接往子女。
+  const firstAnchor =
+    cardVerticalAnchor(first.pos, 'bottom');
+  const secondAnchor =
+    cardVerticalAnchor(second.pos, 'bottom');
 
-  const unionY =
-    Math.abs(geometry.aY - geometry.bY) < 2
-      ? (geometry.aY + geometry.bY) / 2
-      : geometry.aY;
+  const bridgeY =
+    Math.max(firstAnchor.y, secondAnchor.y) +
+    18;
 
   paths.push(
     '<path class="edge edge-parent" d="' +
-    'M' + geometry.aX + ' ' + unionY +
-    ' H' + geometry.bX +
+    'M' + firstAnchor.x + ' ' + firstAnchor.y +
+    ' V' + bridgeY +
+    ' H' + secondAnchor.x +
+    ' V' + secondAnchor.y +
     '"/>'
   );
 
   return {
-    x:(geometry.aX + geometry.bX) / 2,
-    y:unionY
+    x:(firstAnchor.x + secondAnchor.x) / 2,
+    y:bridgeY
   };
 }
 
@@ -5382,20 +5157,45 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
     'edge edge-parent' +
     (group.adoptive ? ' edge-adopt' : '');
 
-  // ========【單一子女親子線】 設定 - 只允許一條垂直 pedigree trunk ========
-  // 卡片排版先完成 X 對齊，畫線器本身不再有 V-H-V 折線 fallback。
+  // 單一子女：標準族譜由 union node 垂直連到子女人物中心。
+  // 自動排版會先完成 X 軸對齊；只有自由排列刻意錯位時才使用正交段補足，永遠不畫斜線。
   if (children.length === 1) {
     const child = children[0];
-    const x = source.x;
+    const x1 = source.x;
     const y1 = source.y;
+    const x2 = child.anchor.x;
     const y2 = child.anchor.y;
 
-    paths.push(
-      '<path class="' + edgeClass + '" d="' +
-      'M' + x + ' ' + y1 +
-      ' V' + y2 +
-      '"/>'
-    );
+    let labelX =
+      (x1 + x2) / 2;
+
+    let labelY =
+      (y1 + y2) / 2;
+
+    if (Math.abs(x1 - x2) < 2) {
+      paths.push(
+        '<path class="' + edgeClass + '" d="' +
+        'M' + x1 + ' ' + y1 +
+        ' V' + y2 +
+        '"/>'
+      );
+
+      labelX = x1;
+    } else {
+      const branchY =
+        y1 + (y2 - y1) / 2;
+
+      paths.push(
+        '<path class="' + edgeClass + '" d="' +
+        'M' + x1 + ' ' + y1 +
+        ' V' + branchY +
+        ' H' + x2 +
+        ' V' + y2 +
+        '"/>'
+      );
+
+      labelY = branchY;
+    }
 
     if (showRelLabels) {
       const key = 'parent:' + child.id;
@@ -5409,8 +5209,8 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
       if (info) {
         labels.push(
           makeLabelSVG(
-            x,
-            y1 + (y2 - y1) / 2,
+            labelX,
+            labelY,
             info.icon,
             info.text,
             key
