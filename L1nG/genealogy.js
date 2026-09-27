@@ -2207,6 +2207,9 @@ function openUiDialog({
       if (mode === 'prompt') {
         inputEl.focus();
         inputEl.select();
+      } else if (mode === 'confirm' && kind === 'danger') {
+        // 危險操作預設聚焦「取消」，避免鍵盤 Enter / Space 誤觸確認。
+        cancelBtn.focus();
       } else {
         confirmBtn.focus();
       }
@@ -3208,24 +3211,41 @@ if (resetUiSettingsBtn) {
 
 const restoreSampleBtn = $('restoreSampleBtn');
 if (restoreSampleBtn) {
-  restoreSampleBtn.onclick = async () => {
-    const ok = await uiConfirm(
-      '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。\n此操作無法復原，建議先匯出 JSON 備份。',
-      { title:'恢復預設族譜', confirmText:'恢復預設族譜', kind:'danger' }
-    );
-    if (!ok) return;
-    closeEditor();
-    genealogyData = buildSample();
-    dragHistory.clear();
-    normalizeCurrentDatabase(genealogyData);
-    invalidateChildrenIndex();
-    save({ immediate:true });
-    refreshFamilyUI();
-    render();
-    bgMask.classList.remove('show');
-    storageMask.classList.remove('show');
-    requestAnimationFrame(fitScreen);
-    uiToast('已恢復預設族譜。');
+  restoreSampleBtn.onclick = async event => {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    // 防止連點造成兩個確認流程同時存在。
+    if (restoreSampleBtn.dataset.confirmPending === '1') return;
+    restoreSampleBtn.dataset.confirmPending = '1';
+
+    try {
+      // 讓觸發按鈕的 click / key activation 完整結束後才顯示確認視窗，
+      // 避免同一個輸入事件落到確認按鈕。
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      const ok = await uiConfirm(
+        '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。\n此操作無法復原，建議先匯出 JSON 備份。',
+        { title:'恢復預設族譜', confirmText:'恢復預設族譜', kind:'danger' }
+      );
+
+      if (!ok) return;
+
+      closeEditor();
+      genealogyData = buildSample();
+      dragHistory.clear();
+      normalizeCurrentDatabase(genealogyData);
+      invalidateChildrenIndex();
+      save({ immediate:true });
+      refreshFamilyUI();
+      render();
+      bgMask.classList.remove('show');
+      storageMask.classList.remove('show');
+      requestAnimationFrame(fitScreen);
+      uiToast('已恢復預設族譜。');
+    } finally {
+      delete restoreSampleBtn.dataset.confirmPending;
+    }
   };
 }
 
@@ -10993,7 +11013,7 @@ $('addMemberConfirmBtn').onclick = () => {
   requestAnimationFrame(fitScreen);
 };
 
-// ========【家族成員批量移除】 設定 - 側邊欄原地選取，不開啟彈窗 ========
+// ========【家族成員批量移除】 設定 - 側邊欄原地選取，送出前必須二次確認 ========
 $('removeMemberBtn').onclick = () => {
   const fam = currentFamily();
   if (!fam.memberIds.length) return;
@@ -11004,11 +11024,28 @@ $('familyMemberRemoveCancelBtn').onclick = () => {
   setRemoveMemberMode(false);
 };
 
-$('familyMemberRemoveConfirmBtn').onclick = () => {
+$('familyMemberRemoveConfirmBtn').onclick = async event => {
   if (!removeMemberMode || !removeMemberSelection.size) return;
 
+  event?.preventDefault();
+  event?.stopPropagation();
+
   const fam = currentFamily();
-  const ids = [...removeMemberSelection];
+  const ids = [...removeMemberSelection]
+    .filter(id => fam.memberIds.includes(id));
+
+  if (!ids.length) return;
+
+  const ok = await uiConfirm(
+    `${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`,
+    {
+      title: uiText('移出所選人物'),
+      kind: 'danger',
+      confirmText: uiText('移出家族')
+    }
+  );
+
+  if (!ok) return;
 
   ensureFamilyLayoutShape(fam);
 
