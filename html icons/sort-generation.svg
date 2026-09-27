@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="3"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     aria-hidden="true">
+  <!-- 左：上箭頭，與右邊完全等長 -->
+  <path class="arrow-up" d="M7 20V4"/>
+  <path class="arrow-up" d="M7 4L3.5 7.5"/>
+
+  <!-- 右：下箭頭，與左邊完全等長 -->
+  <path class="arrow-down" d="M17 4V20"/>
+  <path class="arrow-down" d="M17 20L20.5 16.5"/>
+</svg>

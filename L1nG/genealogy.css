@@ -5415,35 +5415,15 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     outline:none;
 }
 .family-generation-sort-icon {
-    position:relative;
     width:18px;
     height:18px;
     display:inline-block;
-}
-.family-generation-sort-icon .generation-sort-arrow {
-    position:absolute;
-    inset:0;
-    width:18px;
-    height:18px;
     color:var(--sub);
-    opacity:.32;
-    transition:color .15s ease,opacity .15s ease;
+    --l1ng-icon:url("../html%20icons/sort-generation.svg");
 }
-.icon-sort-generation-up {
-    --l1ng-icon:url("../html%20icons/sort-generation-up.svg");
-}
-.icon-sort-generation-down {
-    --l1ng-icon:url("../html%20icons/sort-generation-down.svg");
-}
-.family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-up,
-.family-generation-sort[data-sort-order="desc"] .generation-sort-arrow-down {
+.family-generation-sort:hover .family-generation-sort-icon,
+.family-generation-sort:focus-visible .family-generation-sort-icon {
     color:var(--accent);
-    opacity:1;
-}
-.family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-down,
-.family-generation-sort[data-sort-order="desc"] .generation-sort-arrow-up {
-    color:var(--sub);
-    opacity:.28;
 }
 .family-member-actions {
     min-width:0;
