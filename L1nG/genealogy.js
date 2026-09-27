@@ -17,7 +17,8 @@ const GAPS = {
 };
 
 const PAD = 80;
-const STORE_KEY = 'sims4_genealogy_v3';
+const STORE_KEY = 'sims4_genealogy_v4';
+const DEVELOPMENT_STORE_KEY_V3 = 'sims4_genealogy_v3';
 const THEME_KEY = 'sims4_genealogy_theme';
 const CUSTOM_COLORS_KEY = 'sims4_custom_colors';
 const BG_KEY = 'sims4_genealogy_bg';
@@ -958,14 +959,6 @@ function buildSample() {
     labelPositions:{},
     currentFamilyId:families[0].id
   };
-}
-
-// ========【內建範例升級】 設定 - 目前僅作者本人使用，舊 sample 直接替換成最新 EA NPC sample ========
-function shouldReplaceBuiltinSample(targetDb) {
-  if (!targetDb || targetDb.meta?.sample !== true) return false;
-
-  const version = Number(targetDb.meta.sampleVersion || 0);
-  return !Number.isFinite(version) || version < 5;
 }
 
 let genealogyData = null, layoutCache = null, scale = 1;
@@ -2400,128 +2393,54 @@ function uiText(value) {
   return text;
 }
 
-function sampleDbLooksBuiltIn() {
-  if (!genealogyData || !genealogyData.sims || !Array.isArray(genealogyData.families)) return false;
-  const hasSims = [...BUILTIN_SAMPLE_SIM_IDS].every(id => !!genealogyData.sims[id]);
-  const familyIds = new Set(genealogyData.families.map(f => f && f.id).filter(Boolean));
-  return hasSims && [...BUILTIN_SAMPLE_FAMILY_IDS].every(id => familyIds.has(id));
-}
-
 function isBuiltinSampleSim(sim) {
-  return !!(sim && BUILTIN_SAMPLE_SIM_IDS.has(sim.id) && (genealogyData?.meta?.sample || sampleDbLooksBuiltIn()));
+  return !!(
+    sim &&
+    genealogyData?.meta?.sample === true &&
+    BUILTIN_SAMPLE_SIM_IDS.has(sim.id)
+  );
 }
 
 function isBuiltinSampleFamily(family) {
-  return !!(family && BUILTIN_SAMPLE_FAMILY_IDS.has(family.id) && (genealogyData?.meta?.sample || sampleDbLooksBuiltIn()));
-}
-
-let _builtinSampleVariantToCanonical = null;
-function getBuiltinSampleVariantToCanonical() {
-  if (_builtinSampleVariantToCanonical) return _builtinSampleVariantToCanonical;
-  const map = new Map();
-  BUILTIN_SAMPLE_TEXT_VALUES.forEach(canonical => {
-    map.set(canonical, canonical);
-    if (typeof LING_I18N !== 'undefined' && LING_I18N.translateFor) {
-      const hans = String(LING_I18N.translateFor('zh-Hans', canonical) ?? '');
-      const en = String(LING_I18N.translateFor('en', canonical) ?? '');
-      if (hans) map.set(hans, canonical);
-      if (en) map.set(en, canonical);
-    }
-  });
-  _builtinSampleVariantToCanonical = map;
-  return map;
-}
-
-function canonicalBuiltinSampleText(value) {
-  const text = String(value ?? '');
-  return getBuiltinSampleVariantToCanonical().get(text) || text;
+  return !!(
+    family &&
+    genealogyData?.meta?.sample === true &&
+    BUILTIN_SAMPLE_FAMILY_IDS.has(family.id)
+  );
 }
 
 function displayDataText(value, owner = null) {
   const text = String(value ?? '');
-  const isBuiltInOwner = owner && (isBuiltinSampleSim(owner) || isBuiltinSampleFamily(owner));
-  if (!isBuiltInOwner) return text;
+  const isBuiltInOwner =
+    owner &&
+    (
+      isBuiltinSampleSim(owner) ||
+      isBuiltinSampleFamily(owner)
+    );
 
-  // 預設資料永遠以繁中 canonical 為基準。舊版若曾把簡中 / 英文顯示值寫回，
-  // 先辨識回繁中，再依目前介面語言輸出；玩家自行修改的新文字不會被翻譯。
-  const canonical = canonicalBuiltinSampleText(text);
-  if (BUILTIN_SAMPLE_TEXT_VALUES.has(canonical)) return uiText(canonical);
+  if (
+    isBuiltInOwner &&
+    BUILTIN_SAMPLE_TEXT_VALUES.has(text)
+  ) {
+    return uiText(text);
+  }
+
   return text;
 }
 
-const BUILTIN_RELATION_LABELS = new Set(Object.values(REL_PRESETS).map(item => item.label));
+const BUILTIN_RELATION_LABELS =
+  new Set(
+    Object.values(REL_PRESETS)
+      .map(item => item.label)
+  );
+
 function displayRelationshipText(value) {
   const text = String(value ?? '');
+
   // 只翻譯系統內建關係名稱；玩家自訂關係名稱保持原文。
-  return BUILTIN_RELATION_LABELS.has(text) ? uiText(text) : text;
-}
-
-// ========【內建範例正規化】 設定 - 範例資料固定以繁中 canonical 儲存 ========
-function normalizeBuiltinSampleToTraditional(targetDb) {
-  if (!targetDb || !targetDb.sims || !Array.isArray(targetDb.families)) return false;
-
-  const canonicalDb = buildSample();
-  const hasBuiltinIds = Object.keys(canonicalDb.sims).every(id => !!targetDb.sims[id]);
-  const familyIds = new Set(targetDb.families.map(family => family && family.id).filter(Boolean));
-  const hasBuiltinFamilies = canonicalDb.families.every(family => familyIds.has(family.id));
-  if (!hasBuiltinIds || !hasBuiltinFamilies) return false;
-
-  let changed = false;
-  const canonicalize = (current, canonical) => {
-    const currentText = String(current ?? '');
-    const canonicalText = String(canonical ?? '');
-    if (!canonicalText) return currentText;
-
-    const mappedCanonical = canonicalBuiltinSampleText(currentText);
-    if (mappedCanonical === canonicalText && currentText !== canonicalText) {
-      changed = true;
-      return canonicalText;
-    }
-
-    // 列舉值（人生階段、性別、狀態）不一定屬於範例文字集合，仍以各語言變體比對。
-    const variants = new Set([canonicalText]);
-    if (typeof LING_I18N !== 'undefined' && LING_I18N.translateFor) {
-      variants.add(String(LING_I18N.translateFor('zh-Hans', canonicalText) ?? ''));
-      variants.add(String(LING_I18N.translateFor('en', canonicalText) ?? ''));
-    }
-    if (variants.has(currentText) && currentText !== canonicalText) {
-      changed = true;
-      return canonicalText;
-    }
-    return currentText;
-  };
-
-  canonicalDb.families.forEach(canonicalFamily => {
-    const family = targetDb.families.find(item => item && item.id === canonicalFamily.id);
-    if (!family) return;
-    family.name = canonicalize(family.name, canonicalFamily.name);
-  });
-
-  Object.entries(canonicalDb.sims).forEach(([id, canonicalSim]) => {
-    const sim = targetDb.sims[id];
-    if (!sim) return;
-
-    ['name','gender','lifeStage','status','residence','aspiration','causeOfDeath','career','bio'].forEach(field => {
-      sim[field] = canonicalize(sim[field], canonicalSim[field]);
-    });
-
-    if (Array.isArray(sim.traits) && Array.isArray(canonicalSim.traits) && sim.traits.length === canonicalSim.traits.length) {
-      sim.traits = sim.traits.map((value, index) => canonicalize(value, canonicalSim.traits[index]));
-    }
-
-    if (Array.isArray(sim.pets) && Array.isArray(canonicalSim.pets)) {
-      canonicalSim.pets.forEach((canonicalPet, index) => {
-        const pet = sim.pets[index];
-        if (!pet) return;
-        ['name','breed','gender','ageStage','status'].forEach(field => {
-          pet[field] = canonicalize(pet[field], canonicalPet[field]);
-        });
-      });
-    }
-  });
-
-  targetDb.meta = { ...(targetDb.meta || {}), sample: true, sampleLanguage: 'zh-Hant' };
-  return changed;
+  return BUILTIN_RELATION_LABELS.has(text)
+    ? uiText(text)
+    : text;
 }
 
 function openSidebar() {
@@ -3272,7 +3191,7 @@ if (restoreSampleBtn) {
     closeEditor();
     genealogyData = buildSample();
     dragHistory.clear();
-    normalizeAllSims(genealogyData);
+    normalizeCurrentDatabase(genealogyData);
     invalidateChildrenIndex();
     save({ immediate:true });
     refreshFamilyUI();
@@ -3383,72 +3302,121 @@ function getChildrenOf(id) {
 function invalidateChildrenIndex() { _childrenIndex = null; }
 
 
-/* ========【舊版資料相容】 設定 - 將舊版簡中系統值正規化為繁中 ======== */
-/*
- * 注意：下列簡中文字串只用來辨識舊 JSON / localStorage 內的系統列舉值。
- * 使用者自行輸入的姓名、簡介、備註、特徵等文字不會被自動轉換。
- */
-const LEGACY_SYSTEM_VALUE_MAP = Object.freeze({
-  // 舊版簡中列舉值
-  '婴儿':'嬰兒', '幼儿':'幼兒', '儿童':'兒童',
-  '幽灵':'幽靈',
-  '领养':'領養', '亲生':'親生',
+// ========【v4 資料正規化】 設定 - 只維護目前網站 canonical shape ========
+function normalizeCurrentDatabase(targetDb) {
+  Object.values(targetDb.sims || {}).forEach(sim => {
+    if (!sim || typeof sim !== 'object') return;
 
-  // 歷史版本可能保存過顯示語言值；載入時統一正規化為繁中 canonical 列舉值。
-  'Infant':'嬰兒', 'Toddler':'幼兒', 'Child':'兒童', 'Teen':'青少年',
-  'Young Adult':'青年', 'Adult':'成年', 'Elder':'老年', 'Young':'幼年',
-  'Male':'男', 'Female':'女', 'Other':'其他',
-  'Alive':'在世', 'Ghost':'幽靈', 'Deceased':'已故'
-});
+    sim.gender = sim.gender || '男';
+    sim.lifeStage = sim.lifeStage || '成年';
+    sim.status = sim.status || '在世';
 
-function normalizeLegacySystemValue(value) {
-  return LEGACY_SYSTEM_VALUE_MAP[value] || value;
-}
+    if (!Array.isArray(sim.parentIds)) sim.parentIds = [];
+    sim.parentIds = sim.parentIds
+      .map(String)
+      .filter(id => targetDb.sims[id]);
 
-function normalizeAllSims(targetDb) {
-  Object.values(targetDb.sims || {}).forEach(s => {
-    // 只正規化程式列舉值；玩家自行輸入的內容維持原樣。
-    s.gender = normalizeLegacySystemValue(s.gender || '男');
-    s.lifeStage = normalizeLegacySystemValue(s.lifeStage || '成年');
-    s.status = normalizeLegacySystemValue(s.status || '在世');
-    if (!Array.isArray(s.parentIds)) {
-      s.parentIds = s.parentId ? [s.parentId] : [];
-      delete s.parentId;
+    if (sim.parentIds.length > 2) {
+      sim.parentIds = sim.parentIds.slice(0, 2);
     }
-    s.parentIds = s.parentIds.filter(id => targetDb.sims[id]);
-    if (s.parentIds.length > 2) s.parentIds = s.parentIds.slice(0,2);
-    if (!Array.isArray(s.spouseIds)) s.spouseIds = [];
-    if (!Array.isArray(s.exSpouseIds)) s.exSpouseIds = [];
-    if (!Array.isArray(s.traits)) s.traits = [];
-    if (s.avatar === undefined) s.avatar = null;
-    if (s.race === undefined) s.race = '';
-    if (s.residence === undefined) s.residence = '';
-    if (s.aspiration === undefined) s.aspiration = '';
-    if (s.causeOfDeath === undefined) s.causeOfDeath = '';
-    if (!Array.isArray(s.pets)) s.pets = [];
-    s.pets = s.pets.filter(p => p && typeof p === 'object').map(p => ({
-      id: p.id || uid('pet'),
-      name: p.name || '',
-      species: p.species || 'other',
-      breed: p.breed || '',
-      gender: normalizeLegacySystemValue(p.gender || '男'),
-      ageStage: normalizeLegacySystemValue(p.ageStage || '成年'),
-      status: normalizeLegacySystemValue(p.status || '在世'),
-      avatar: p.avatar || null
-    }));
-    if (!Array.isArray(s.gallery)) s.gallery = [];
-    s.gallery = s.gallery.filter(g => g && typeof g === 'object').map(g => ({
-      id: g.id || uid('gal'),
-      title: g.title || '',
-      note: g.note || '',
-      lifeStage: normalizeLegacySystemValue(g.lifeStage || ''),
-      image: g.image || '',
-      addedAt: g.addedAt || Date.now()
-    }));
+
+    if (!Array.isArray(sim.spouseIds)) sim.spouseIds = [];
+    if (!Array.isArray(sim.exSpouseIds)) sim.exSpouseIds = [];
+    if (!Array.isArray(sim.traits)) sim.traits = [];
+
+    sim.spouseIds = sim.spouseIds
+      .map(String)
+      .filter(id => targetDb.sims[id]);
+
+    sim.exSpouseIds = sim.exSpouseIds
+      .map(String)
+      .filter(id => targetDb.sims[id]);
+
+    if (sim.avatar === undefined) sim.avatar = null;
+    if (sim.race === undefined) sim.race = '';
+    if (sim.residence === undefined) sim.residence = '';
+    if (sim.aspiration === undefined) sim.aspiration = '';
+    if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
+
+    if (!Array.isArray(sim.pets)) sim.pets = [];
+    sim.pets = sim.pets
+      .filter(pet => pet && typeof pet === 'object')
+      .map(pet => ({
+        ...pet,
+        id:pet.id || uid('pet'),
+        name:pet.name || '',
+        species:pet.species || 'other',
+        breed:pet.breed || '',
+        gender:pet.gender || '男',
+        ageStage:pet.ageStage || '成年',
+        status:pet.status || '在世',
+        avatar:pet.avatar || null
+      }));
+
+    if (!Array.isArray(sim.gallery)) sim.gallery = [];
+    sim.gallery = sim.gallery
+      .filter(item => item && typeof item === 'object')
+      .map(item => ({
+        ...item,
+        id:item.id || uid('gal'),
+        title:item.title || '',
+        note:item.note || '',
+        lifeStage:item.lifeStage || '',
+        image:item.image || '',
+        addedAt:item.addedAt || Date.now()
+      }));
   });
-  if (!targetDb.relationshipMap || typeof targetDb.relationshipMap !== 'object') targetDb.relationshipMap = {};
-  if (!targetDb.labelPositions || typeof targetDb.labelPositions !== 'object') targetDb.labelPositions = {};
-  targetDb.families.forEach(f => { ensureFamilyLayoutShape(f); ensureFamilyProfileShape(f); });
+
+  if (!Array.isArray(targetDb.links)) {
+    targetDb.links = [];
+  }
+
+  if (
+    !targetDb.relationshipMap ||
+    typeof targetDb.relationshipMap !== 'object' ||
+    Array.isArray(targetDb.relationshipMap)
+  ) {
+    targetDb.relationshipMap = {};
+  }
+
+  if (
+    !targetDb.labelPositions ||
+    typeof targetDb.labelPositions !== 'object' ||
+    Array.isArray(targetDb.labelPositions)
+  ) {
+    targetDb.labelPositions = {};
+  }
+
+  targetDb.families.forEach(family => {
+    if (!family || typeof family !== 'object') return;
+
+    if (!Array.isArray(family.memberIds)) {
+      family.memberIds = [];
+    }
+
+    family.memberIds = [...new Set(
+      family.memberIds
+        .map(String)
+        .filter(id => targetDb.sims[id])
+    )];
+
+    ensureFamilyLayoutShape(family);
+    ensureFamilyProfileShape(family);
+  });
+
+  const hasCurrentFamily =
+    targetDb.currentFamilyId != null &&
+    targetDb.families.some(
+      family =>
+        family &&
+        family.id === targetDb.currentFamilyId
+    );
+
+  if (!hasCurrentFamily) {
+    targetDb.currentFamilyId =
+      targetDb.families[0]?.id ||
+      null;
+  }
 }
 
 function repairImportedHouseholdMembership(targetDb) {
@@ -9913,232 +9881,168 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   }
 }
 
-// ========【舊版 Schema 命名相容】 設定 - 讀取舊欄位後立即轉成網站 canonical 名稱 ========
-function hasLegacySchemaNames(raw) {
-  if (!raw || typeof raw !== 'object') return false;
-
+// ========【開發期資料搬家】 設定 - 僅將作者目前瀏覽器的 v3 key 一次搬到 v4 ========
+// 網站尚未發布，因此不保留多代公開相容層。
+// 只接受最近一代「全域 sims + families」開發資料；成功搬家後刪除 v3 key。
+function upgradeDevelopmentStoreV3(raw) {
   if (
-    Object.prototype.hasOwnProperty.call(raw, 'relMap') ||
-    Object.prototype.hasOwnProperty.call(raw, 'labelPos') ||
-    Object.prototype.hasOwnProperty.call(raw, 'currentId')
+    !raw ||
+    typeof raw !== 'object' ||
+    !raw.sims ||
+    typeof raw.sims !== 'object' ||
+    Array.isArray(raw.sims) ||
+    !Array.isArray(raw.families)
   ) {
-    return true;
+    return null;
   }
 
-  return Array.isArray(raw.families) &&
-    raw.families.some(family =>
-      family &&
-      typeof family === 'object' &&
-      Object.prototype.hasOwnProperty.call(
-        family,
-        'manualPos'
-      )
-    );
-}
+  const upgraded = raw;
 
-function normalizeLegacySchemaNames(raw) {
-  if (!raw || typeof raw !== 'object') return raw;
-
-  const legacyRelationshipMap = raw['relMap'];
   if (
-    !raw.relationshipMap ||
-    typeof raw.relationshipMap !== 'object'
+    (!upgraded.relationshipMap ||
+      typeof upgraded.relationshipMap !== 'object') &&
+    upgraded.relMap &&
+    typeof upgraded.relMap === 'object'
   ) {
-    raw.relationshipMap =
-      legacyRelationshipMap &&
-      typeof legacyRelationshipMap === 'object'
-        ? legacyRelationshipMap
-        : {};
-  }
-
-  const legacyLabelPositions = raw['labelPos'];
-  if (
-    !raw.labelPositions ||
-    typeof raw.labelPositions !== 'object'
-  ) {
-    raw.labelPositions =
-      legacyLabelPositions &&
-      typeof legacyLabelPositions === 'object'
-        ? legacyLabelPositions
-        : {};
+    upgraded.relationshipMap = upgraded.relMap;
   }
 
   if (
-    raw.currentFamilyId == null &&
-    raw['currentId'] != null
+    (!upgraded.labelPositions ||
+      typeof upgraded.labelPositions !== 'object') &&
+    upgraded.labelPos &&
+    typeof upgraded.labelPos === 'object'
   ) {
-    raw.currentFamilyId = raw['currentId'];
+    upgraded.labelPositions = upgraded.labelPos;
   }
 
-  delete raw['relMap'];
-  delete raw['labelPos'];
-  delete raw['currentId'];
-
-  if (Array.isArray(raw.families)) {
-    raw.families.forEach(family => {
-      if (!family || typeof family !== 'object') return;
-
-      const legacyManualPositions =
-        family['manualPos'];
-
-      if (
-        (!family.manualPositions ||
-          typeof family.manualPositions !== 'object') &&
-        legacyManualPositions &&
-        typeof legacyManualPositions === 'object'
-      ) {
-        family.manualPositions =
-          legacyManualPositions;
-      }
-
-      delete family['manualPos'];
-    });
+  if (
+    upgraded.currentFamilyId == null &&
+    upgraded.currentId != null
+  ) {
+    upgraded.currentFamilyId = upgraded.currentId;
   }
 
-  return raw;
-}
+  upgraded.families.forEach(family => {
+    if (!family || typeof family !== 'object') return;
 
-function migrate(raw) {
-  raw = normalizeLegacySchemaNames(raw);
-  if (raw && raw.sims && Array.isArray(raw.families)) {
-    // 舊版內建高斯範例沒有 meta 標記；只有完整符合固定 ID 時才補上範例旗標。
-    if (['g1','g2','g3','g4','g5','g6'].every(id => raw.sims[id]) &&
-        raw.families.some(f => f.id === 'fam_goth') && raw.families.some(f => f.id === 'fam_bacheler')) {
-      raw.meta = { ...(raw.meta || {}), sample: true };
+    if (
+      (!family.manualPositions ||
+        typeof family.manualPositions !== 'object') &&
+      family.manualPos &&
+      typeof family.manualPos === 'object'
+    ) {
+      family.manualPositions = family.manualPos;
     }
-    if (!raw.relationshipMap) raw.relationshipMap = {};
-    if (!raw.labelPositions) raw.labelPositions = {};
-    raw.families.forEach(f => {
-      const existingManualPositions = f.manualPositions;
-      let isNewShape = false;
-      if (existingManualPositions && typeof existingManualPositions === 'object') {
-        isNewShape = (typeof existingManualPositions.view === 'object') && (typeof existingManualPositions.edit === 'object');
-      }
-      if (!isNewShape) {
-        const old = {};
-        if (existingManualPositions && typeof existingManualPositions === 'object') {
-          Object.keys(existingManualPositions).forEach(k => {
-            if (existingManualPositions[k] && typeof existingManualPositions[k] === 'object' && 'x' in existingManualPositions[k] && 'y' in existingManualPositions[k]) {
-              old[k] = { x: existingManualPositions[k].x, y: existingManualPositions[k].y };
-            }
-          });
-        }
-        f.manualPositions = { view: {}, edit: old };
-      }
-      if (typeof f.freeLayout === 'boolean') f.freeLayout = { view: false, edit: f.freeLayout };
-      ensureFamilyLayoutShape(f);
-      ensureFamilyProfileShape(f);
-    });
-    raw.version = 4;
-    return raw;
-  }
-  if (raw && Array.isArray(raw.families) && raw.families[0]?.sims) {
-    const newSims = {}, newFams = [], map = {};
-    raw.families.forEach(fam => {
-      const famId = fam.id || uid('fam');
-      const newFam = {
-        id:famId, name:fam.name||'家族', memberIds:[], bio:fam.bio||'', coverImage:fam.coverImage||null,
-        freeLayout: { view: false, edit: !!fam.freeLayout },
-        manualPositions: { view: {}, edit: {} },
-        locked: !!fam.locked
-      };
-      newFams.push(newFam);
-      const tf = newFam;
-      fam.sims.forEach(s => {
-        const newId = uid('sim');
-        map[`${fam.id}::${s.id}`] = newId;
-        newSims[newId] = {
-          id:newId, name:s.name||'', gender:s.gender||'男',
-          lifeStage:s.lifeStage||'成年', status:s.status||'在世',
-          race:s.race||'', residence:s.residence||'', aspiration:s.aspiration||'',
-          causeOfDeath:s.causeOfDeath||'',
-          pets: Array.isArray(s.pets) ? s.pets : [],
-          gallery: Array.isArray(s.gallery) ? s.gallery : [],
-          parentIds:[], spouseIds:[], exSpouseIds:[],
-          adoptive:!!s.adoptive, traits:s.traits||[],
-          career:s.career||'', bio:s.bio||'', order:s.order??0,
-          avatar:s.avatar||null
-        };
-        tf.memberIds.push(newId);
-        if (fam.freeLayout && s.manualPositions) tf.manualPositions.edit[newId] = { ...s.manualPositions };
-      });
-    });
-    raw.families.forEach(fam => {
-      fam.sims.forEach(s => {
-        const newId = map[`${fam.id}::${s.id}`];
-        const sim = newSims[newId];
-        const rawPids = s.parentIds || (s.parentId ? [s.parentId] : []);
-        sim.parentIds = rawPids.map(x => map[`${fam.id}::${x}`]).filter(Boolean);
-        sim.spouseIds = (s.spouseIds||[]).map(x => map[`${fam.id}::${x}`]).filter(Boolean);
-        sim.exSpouseIds = (s.exSpouseIds||[]).map(x => map[`${fam.id}::${x}`]).filter(Boolean);
-      });
-    });
-    const newLinks = [];
-    raw.families.forEach(fam => {
-      (fam.links||[]).forEach(l => {
-        const f = map[`${fam.id}::${l.from}`], t = map[`${fam.id}::${l.to}`];
-        if (f && t) newLinks.push({id:uid('lnk'), from:f, to:t, type:l.type, label:l.label});
-      });
-    });
-    return {version:4, sims:newSims, families:newFams, links:newLinks, relationshipMap:{}, labelPositions:{},
-      currentFamilyId: raw.currentFamilyId && newFams.some(f => f.id === raw.currentFamilyId) ? raw.currentFamilyId : newFams[0].id};
-  }
-  if (raw && Array.isArray(raw.sims)) {
-    const sims = {};
-    const fam = {
-      id:uid('fam'), name:raw.meta?.familyName||'家族', memberIds:[], bio:'', coverImage:null,
-      freeLayout: { view: false, edit: false },
-      manualPositions: { view: {}, edit: {} }, locked: false
-    };
-    raw.sims.forEach(s => {
-      const newId = s.id || uid('sim');
-      sims[newId] = {
-        id:newId, name:s.name||'', gender:s.gender||'男',
-        lifeStage:s.lifeStage||'成年', status:s.status||'在世',
-        race:s.race||'', residence:s.residence||'', aspiration:s.aspiration||'',
-        causeOfDeath:s.causeOfDeath||'',
-        pets: Array.isArray(s.pets) ? s.pets : [],
-        gallery: Array.isArray(s.gallery) ? s.gallery : [],
-        parentIds:s.parentIds || (s.parentId ? [s.parentId] : []),
-        spouseIds:s.spouseIds||[], exSpouseIds:s.exSpouseIds||[],
-        adoptive:!!s.adoptive, traits:s.traits||[],
-        career:s.career||'', bio:s.bio||'', order:s.order??0,
-        avatar:s.avatar||null
-      };
-      fam.memberIds.push(newId);
-    });
-    return {version:4, sims, families:[fam],
-      links:(raw.links||[]).map(l => ({id:uid('lnk'), ...l})), relationshipMap:{}, labelPositions:{}, currentFamilyId:fam.id};
-  }
-  return buildSample();
+
+    delete family.manualPos;
+  });
+
+  delete upgraded.relMap;
+  delete upgraded.labelPos;
+  delete upgraded.currentId;
+
+  upgraded.version = 4;
+  return upgraded;
 }
 
-// ========【資料載入管線】 設定 - 遷移、範例正規化與結構正規化只走同一條流程 ========
-function prepareDatabase(raw) {
-  const schemaMigrated =
-    hasLegacySchemaNames(raw) ||
-    Number(raw?.version || 0) !== 4;
+function readStoredGenealogyData() {
+  const currentRaw =
+    localStorage.getItem(STORE_KEY);
 
-  let prepared = migrate(raw);
-
-  // 目前只有作者本人使用：所有舊版內建 sample 直接升級成最新 EA NPC sample。
-  // 真正匯入的遊戲資料沒有 meta.sample，因此不會被這段替換。
-  const sampleVersionReplaced = shouldReplaceBuiltinSample(prepared);
-  if (sampleVersionReplaced) {
-    prepared = buildSample();
+  if (currentRaw) {
+    return {
+      data:JSON.parse(currentRaw),
+      migratedFromV3:false
+    };
   }
 
-  const sampleLanguageRepaired = normalizeBuiltinSampleToTraditional(prepared);
-  normalizeAllSims(prepared);
-  const householdMembershipRepaired = repairImportedHouseholdMembership(prepared);
-  (prepared.links || []).forEach(link => { if (!link.id) link.id = uid('lnk'); });
+  const developmentV3Raw =
+    localStorage.getItem(
+      DEVELOPMENT_STORE_KEY_V3
+    );
+
+  if (!developmentV3Raw) {
+    return {
+      data:null,
+      migratedFromV3:false
+    };
+  }
+
+  const upgraded =
+    upgradeDevelopmentStoreV3(
+      JSON.parse(developmentV3Raw)
+    );
+
+  return {
+    data:upgraded,
+    migratedFromV3:!!upgraded
+  };
+}
+
+function finalizeDevelopmentStoreMigration(data) {
+  try {
+    localStorage.setItem(
+      STORE_KEY,
+      JSON.stringify(data)
+    );
+
+    localStorage.removeItem(
+      DEVELOPMENT_STORE_KEY_V3
+    );
+
+    return true;
+  } catch (error) {
+    console.warn(
+      'v3 開發資料搬移到 v4 失敗，已保留原資料。',
+      error
+    );
+    return false;
+  }
+}
+
+// ========【v4 資料載入管線】 設定 - 網站正式只接受目前 canonical schema ========
+function isCurrentGenealogyData(raw) {
+  return !!(
+    raw &&
+    typeof raw === 'object' &&
+    Number(raw.version) === 4 &&
+    raw.sims &&
+    typeof raw.sims === 'object' &&
+    !Array.isArray(raw.sims) &&
+    Array.isArray(raw.families)
+  );
+}
+
+function prepareDatabase(raw) {
+  if (!isCurrentGenealogyData(raw)) {
+    throw new Error(
+      '不支援的網站資料格式。請使用目前 v4 族譜資料或遊戲族譜 ZIP。'
+    );
+  }
+
+  const prepared = raw;
+
+  normalizeCurrentDatabase(prepared);
+
+  const householdMembershipRepaired =
+    repairImportedHouseholdMembership(
+      prepared
+    );
+
+  let missingLinkIdRepaired = false;
+
+  prepared.links.forEach(link => {
+    if (!link || link.id) return;
+    link.id = uid('lnk');
+    missingLinkIdRepaired = true;
+  });
+
   return {
     prepared,
     changed:
-      schemaMigrated ||
-      sampleVersionReplaced ||
-      sampleLanguageRepaired ||
-      householdMembershipRepaired
+      householdMembershipRepaired ||
+      missingLinkIdRepaired
   };
 }
 
@@ -10878,17 +10782,61 @@ async function init() {
     _idbAvailable = false;
   }
 
-  const raw = localStorage.getItem(STORE_KEY);
+  let storedGenealogy = {
+    data:null,
+    migratedFromV3:false
+  };
+
   let preparedResult;
+
   try {
-    preparedResult = prepareDatabase(raw ? JSON.parse(raw) : buildSample());
-  } catch(e) {
-    preparedResult = prepareDatabase(buildSample());
+    storedGenealogy =
+      readStoredGenealogyData();
+
+    preparedResult =
+      prepareDatabase(
+        storedGenealogy.data ||
+        buildSample()
+      );
+  } catch (error) {
+    console.warn(
+      '族譜資料載入失敗，改用目前預設資料。',
+      error
+    );
+
+    storedGenealogy = {
+      data:null,
+      migratedFromV3:false
+    };
+
+    preparedResult =
+      prepareDatabase(
+        buildSample()
+      );
   }
-  genealogyData = preparedResult.prepared;
-  if (!genealogyData.families || !genealogyData.families.length) genealogyData = prepareDatabase(buildSample()).prepared;
+
+  genealogyData =
+    preparedResult.prepared;
+
+  if (
+    !genealogyData.families ||
+    !genealogyData.families.length
+  ) {
+    genealogyData =
+      prepareDatabase(
+        buildSample()
+      ).prepared;
+  }
+
   invalidateChildrenIndex();
-  if (preparedResult.changed) save();
+
+  if (storedGenealogy.migratedFromV3) {
+    finalizeDevelopmentStoreMigration(
+      genealogyData
+    );
+  } else if (preparedResult.changed) {
+    save();
+  }
 
   applyRelationshipLineSettings();
 loadSavedBg();
