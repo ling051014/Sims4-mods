@@ -5420,20 +5420,13 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     overflow:visible;
 }
 .generation-sort-arrow {
-    fill:none;
-    stroke:currentColor;
-    stroke-width:2;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    opacity:.38;
-    transition:stroke .15s ease,opacity .15s ease;
-}
-.family-generation-sort[data-sort-order="none"] .generation-sort-arrow {
-    opacity:.52;
+    color:var(--sub);
+    opacity:.32;
+    transition:color .15s ease,opacity .15s ease;
 }
 .family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-up,
 .family-generation-sort[data-sort-order="desc"] .generation-sort-arrow-down {
-    stroke:var(--accent);
+    color:var(--accent);
     opacity:1;
 }
 .family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-down,
