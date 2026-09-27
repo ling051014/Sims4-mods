@@ -10072,13 +10072,9 @@ function renderTraitEditor() {
     `<span class="trait-chip"><span>${esc(trait)}</span><button type="button" class="trait-chip-remove" data-trait-index="${index}" aria-label="${esc(uiText('移除'))}" title="${esc(uiText('移除'))}">×</button></span>`
   ).join('');
   list.querySelectorAll('.trait-chip-remove').forEach(button => {
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-
+    button.addEventListener('click', () => {
       const index = Number(button.dataset.traitIndex);
       if (!Number.isInteger(index) || index < 0 || index >= editingTraits.length) return;
-
       editingTraits.splice(index, 1);
       renderTraitEditor();
     });
