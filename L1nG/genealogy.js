@@ -4209,6 +4209,247 @@ function minimizeGenealogyCrossings(layers) {
   }
 }
 
+function enforceSiblingBranchContiguity(layers, model, connectorGroups) {
+  const generations =
+    [...layers.keys()].sort((a, b) => a - b);
+
+  generations.forEach(generation => {
+    const layer =
+      layers.get(generation);
+
+    if (!layer || layer.length < 2) return;
+
+    const indexByUnit =
+      new Map(
+        layer.map((unit, index) => [
+          unit.id,
+          index
+        ])
+      );
+
+    const adjacency =
+      new Map(
+        layer.map(unit => [
+          unit.id,
+          new Set()
+        ])
+      );
+
+    connectorGroups.forEach(group => {
+      const childUnitIds =
+        [...new Set(
+          group.children
+            .map(childId =>
+              model.unitBySim.get(childId)
+            )
+            .filter(unit =>
+              unit &&
+              unit.generation === generation &&
+              adjacency.has(unit.id)
+            )
+            .map(unit => unit.id)
+        )];
+
+      if (childUnitIds.length < 2) return;
+
+      const head =
+        childUnitIds[0];
+
+      childUnitIds
+        .slice(1)
+        .forEach(unitId => {
+          adjacency.get(head)?.add(unitId);
+          adjacency.get(unitId)?.add(head);
+        });
+    });
+
+    const visited = new Set();
+    const components = [];
+
+    layer.forEach(unit => {
+      if (visited.has(unit.id)) return;
+
+      const queue = [unit.id];
+      const ids = [];
+
+      while (queue.length) {
+        const unitId = queue.shift();
+        if (visited.has(unitId)) continue;
+
+        visited.add(unitId);
+        ids.push(unitId);
+
+        (adjacency.get(unitId) || [])
+          .forEach(nextId => {
+            if (!visited.has(nextId)) {
+              queue.push(nextId);
+            }
+          });
+      }
+
+      const units =
+        ids
+          .map(unitId =>
+            model.unitById.get(unitId)
+          )
+          .filter(Boolean)
+          .sort((left, right) =>
+            indexByUnit.get(left.id) -
+            indexByUnit.get(right.id)
+          );
+
+      const indexes =
+        units.map(unit =>
+          indexByUnit.get(unit.id)
+        );
+
+      components.push({
+        units,
+        center:
+          indexes.reduce(
+            (sum, value) => sum + value,
+            0
+          ) / Math.max(1, indexes.length),
+        first:Math.min(...indexes)
+      });
+    });
+
+    components.sort((left, right) =>
+      left.center - right.center ||
+      left.first - right.first
+    );
+
+    layer.splice(
+      0,
+      layer.length,
+      ...components.flatMap(
+        component => component.units
+      )
+    );
+  });
+}
+
+function genealogyFamilySideScore(member, unit, model, connectorGroups) {
+  const weighted = [];
+
+  // 兄弟姊妹所在位置最能代表「原生家系應該從夫妻哪一側延伸」。
+  connectorGroups.forEach(group => {
+    if (!group.children.includes(member.id)) return;
+
+    group.children.forEach(childId => {
+      const childUnit =
+        model.unitBySim.get(childId);
+
+      if (
+        !childUnit ||
+        childUnit.id === unit.id
+      ) {
+        return;
+      }
+
+      weighted.push({
+        value:
+          childUnit.x +
+          childUnit.width / 2,
+        weight:3
+      });
+    });
+  });
+
+  // 沒有兄弟姊妹時，父母家系的位置仍可決定夫妻左右方向。
+  genealogyParentIds(
+    member,
+    model.byId
+  ).forEach(parentId => {
+    const parentUnit =
+      model.unitBySim.get(parentId);
+
+    if (!parentUnit) return;
+
+    weighted.push({
+      value:
+        parentUnit.x +
+        parentUnit.width / 2,
+      weight:2
+    });
+  });
+
+  if (!weighted.length) {
+    return null;
+  }
+
+  const totalWeight =
+    weighted.reduce(
+      (sum, entry) =>
+        sum + entry.weight,
+      0
+    );
+
+  return weighted.reduce(
+    (sum, entry) =>
+      sum +
+      entry.value *
+      entry.weight,
+    0
+  ) / totalWeight;
+}
+
+function orientSpouseUnitsByLineage(model, connectorGroups) {
+  let changed = false;
+
+  model.units.forEach(unit => {
+    if (unit.members.length !== 2) return;
+
+    const [leftMember, rightMember] =
+      unit.members;
+
+    const leftScore =
+      genealogyFamilySideScore(
+        leftMember,
+        unit,
+        model,
+        connectorGroups
+      );
+
+    const rightScore =
+      genealogyFamilySideScore(
+        rightMember,
+        unit,
+        model,
+        connectorGroups
+      );
+
+    let shouldReverse = false;
+
+    if (
+      Number.isFinite(leftScore) &&
+      Number.isFinite(rightScore)
+    ) {
+      shouldReverse =
+        leftScore > rightScore + 0.5;
+    } else {
+      const unitCenter =
+        unit.x +
+        unit.width / 2;
+
+      if (Number.isFinite(leftScore)) {
+        shouldReverse =
+          leftScore > unitCenter;
+      } else if (Number.isFinite(rightScore)) {
+        shouldReverse =
+          rightScore < unitCenter;
+      }
+    }
+
+    if (!shouldReverse) return;
+
+    unit.members.reverse();
+    changed = true;
+  });
+
+  return changed;
+}
+
 function setGenerationVerticalPositions(layers) {
   const {
     LEVEL:LEVEL_GAP
@@ -4691,16 +4932,16 @@ function resolvePedigreeLayerCollisions(layers) {
   layers.forEach(layer => {
     if (!layer.length) return;
 
-    // 依目前實際 X 排序後只處理碰撞。
-    // 這不改變親緣順序；下一輪 anchor solver 會重新恢復 union 硬性對齊。
-    layer.sort((a, b) =>
-      a.x - b.x ||
-      stableGenealogyUnitCompare(a, b)
-    );
-
+    // ========【同世代防重疊】 設定 - 保留家系語意順序 ========
+    // layer 的順序已由 crossing minimization + sibling branch block 決定。
+    // collision pass 只能推開距離，不能再依目前 x 重新排序，
+    // 否則同父母子女會再次被其他家系插入。
     const targets =
       new Map(
-        layer.map(unit => [unit.id, unit.x])
+        layer.map(unit => [
+          unit.id,
+          unit.x
+        ])
       );
 
     packGenealogyLayer(
@@ -4807,6 +5048,15 @@ function computeAutoPositions(visibleIds) {
     );
 
   minimizeGenealogyCrossings(layers);
+
+  // 同父母子女先鎖成連續 branch block，
+  // 不允許其他 sibling component 插進中間。
+  enforceSiblingBranchContiguity(
+    layers,
+    model,
+    connectorGroups
+  );
+
   setGenerationVerticalPositions(layers);
   assignInitialGenealogyHorizontalPositions(layers);
 
@@ -4815,6 +5065,32 @@ function computeAutoPositions(visibleIds) {
     model,
     connectorGroups
   );
+
+  // 夫妻不能只按姓名 / order 決定左右。
+  // 依各自父母與兄弟姊妹所在方向，讓兩人的原生家系從正確側延伸。
+  const spouseOrientationChanged =
+    orientSpouseUnitsByLineage(
+      model,
+      connectorGroups
+    );
+
+  if (spouseOrientationChanged) {
+    enforceSiblingBranchContiguity(
+      layers,
+      model,
+      connectorGroups
+    );
+
+    assignInitialGenealogyHorizontalPositions(
+      layers
+    );
+
+    solvePedigreeHorizontalLayout(
+      layers,
+      model,
+      connectorGroups
+    );
+  }
 
   return placeGenealogyUnitMembers(
     model.units
