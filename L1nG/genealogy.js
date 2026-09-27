@@ -965,7 +965,6 @@ const viewport = $('viewport'), stage = $('stage'), svg = $('links'), nodes = $(
 const labelsSvg = $('labels');
 const mask = $('mask'), rosterMask = $('rosterMask'), bgMask = $('bgMask');
 const storageMask = $('storageMask');
-const dataMask = $('dataMask');
 const addMemberMask = $('addMemberMask');
 const tipsMask = $('tipsMask');
 const infoMask = $('infoMask');
@@ -3165,16 +3164,6 @@ if (resetImageQualityBtn) {
   };
 }
 
-const dataManageBtn = $('dataManageBtn');
-if (dataManageBtn && dataMask) {
-  dataManageBtn.onclick = () => dataMask.classList.add('show');
-}
-const dataCloseBtn = $('dataCloseBtn');
-if (dataCloseBtn && dataMask) {
-  dataCloseBtn.onclick = () => dataMask.classList.remove('show');
-  dataMask.onclick = e => { if (e.target === dataMask) dataMask.classList.remove('show'); };
-}
-
 // ========【恢復預設】 設定 - 介面設定與範例資料分開處理 ========
 const resetUiSettingsBtn = $('resetUiSettingsBtn');
 if (resetUiSettingsBtn) {
@@ -3221,8 +3210,8 @@ const restoreSampleBtn = $('restoreSampleBtn');
 if (restoreSampleBtn) {
   restoreSampleBtn.onclick = async () => {
     const ok = await uiConfirm(
-      '這會刪除目前族譜資料，並重新建立繁體中文的預設範例。\n此操作無法復原，建議先匯出 JSON 備份。',
-      { title:'重建範例資料', confirmText:'重建範例資料', kind:'danger' }
+      '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。\n此操作無法復原，建議先匯出 JSON 備份。',
+      { title:'恢復預設族譜', confirmText:'恢復預設族譜', kind:'danger' }
     );
     if (!ok) return;
     closeEditor();
@@ -3235,9 +3224,8 @@ if (restoreSampleBtn) {
     render();
     bgMask.classList.remove('show');
     storageMask.classList.remove('show');
-    dataMask?.classList.remove('show');
     requestAnimationFrame(fitScreen);
-    uiToast('已重建繁中範例資料。');
+    uiToast('已恢復預設族譜。');
   };
 }
 
@@ -3291,7 +3279,7 @@ $('tipsCloseBtn').onclick = () => tipsMask.classList.remove('show');
 tipsMask.onclick = e => { if (e.target === tipsMask) tipsMask.classList.remove('show'); };
 
 const MODAL_STACK = ['photoMask','petMask','mask','infoMask','galleryViewerMask',
-                     'tipsMask','rosterMask','addMemberMask','dataMask','storageMask','bgMask'];
+                     'tipsMask','rosterMask','addMemberMask','storageMask','bgMask'];
 function closeTopModal() {
   for (const id of MODAL_STACK) {
     const el = document.getElementById(id);
@@ -12765,6 +12753,9 @@ Object.assign(EN, {
     '這裡只放會直接改動族譜資料的操作。':'这里只有会直接改动族谱数据的操作。',
     '重建範例資料會取代目前族譜內容；需要保留資料時，請先匯出 JSON 備份。':'重建示例数据会替换当前族谱内容；需要保留数据时，请先导出 JSON 备份。',
     '圖片品質已恢復預設。':'图片质量已恢复默认。',
+    '恢復預設族譜':'恢复默认族谱',
+    '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。':'这会删除当前族谱数据，并恢复繁体中文的默认族谱。',
+    '已恢復預設族譜。':'已恢复默认族谱。',
     '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？':'恢复主题、背景、侧边栏宽度、查看模式与关系线等界面设置？'
   });
 
@@ -12833,6 +12824,9 @@ Object.assign(EN, {
     '這裡只放會直接改動族譜資料的操作。':'Only operations that directly change genealogy data are kept here.',
     '重建範例資料會取代目前族譜內容；需要保留資料時，請先匯出 JSON 備份。':'Rebuilding sample data replaces the current genealogy. Export a JSON backup first if you want to keep it.',
     '圖片品質已恢復預設。':'Image quality settings restored to defaults.',
+    '恢復預設族譜':'Restore Default Genealogy',
+    '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。':'This deletes the current genealogy and restores the default Traditional Chinese genealogy.',
+    '已恢復預設族譜。':'Default genealogy restored.',
     '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？':'Restore theme, background, sidebar width, view mode, and relationship-line settings?'
   });
 
