@@ -112,6 +112,7 @@
                     <nav class="topbar-primary-actions" aria-label="主要功能">
                         <button class="topbar-text-btn" id="rosterBtn" type="button"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span></button>
                         <button class="topbar-text-btn topbar-export-btn" id="exportBtn" type="button" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
+                        <button class="topbar-text-btn" id="restoreSampleBtn" type="button" title="恢復預設族譜"><span>恢復預設族譜</span></button>
                         <div class="app-menu" id="topbarMoreMenu">
                             <button class="topbar-icon-only app-menu-trigger" id="topbarMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" title="更多"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
                             <div class="app-menu-popover topbar-more-popover" role="menu">
@@ -135,7 +136,6 @@
                                 
                                 <button class="app-menu-item" id="bgBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></button>
                                 <button class="app-menu-item" id="storageBtn" type="button" role="menuitem"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>圖片與儲存</span></button>
-                                <button class="app-menu-item" id="dataManageBtn" type="button" role="menuitem"><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>資料管理</span></button>
                                 <div class="app-menu-divider"></div>
                                 <div class="app-menu-language-row">
                                     <span class="app-menu-language-label"><span class="l1ng-icon icon-globe2" aria-hidden="true"></span><span>語言</span></span>
@@ -887,26 +887,6 @@
                 </section>
 
                 <div class="modal-actions"><span class="spacer"></span><button id="storageCloseBtn">關閉</button></div>
-            </div>
-        </div>
-
-        <!-- ========【資料管理】 設定 - 與圖片維護分離的資料層破壞性操作 ======== -->
-        <div class="mask" id="dataMask">
-            <div class="modal data-modal">
-                <h2><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>資料管理</span></h2>
-                <p class="storage-intro">這裡只放會直接改動族譜資料的操作。</p>
-
-                <section class="data-management-section">
-                    <div class="data-danger-card">
-                        <div>
-                            <strong>重建範例資料</strong>
-                            <p>重建範例資料會取代目前族譜內容；需要保留資料時，請先匯出 JSON 備份。</p>
-                        </div>
-                        <button class="danger" id="restoreSampleBtn" type="button">重建範例資料</button>
-                    </div>
-                </section>
-
-                <div class="modal-actions"><span class="spacer"></span><button id="dataCloseBtn">關閉</button></div>
             </div>
         </div>
 
