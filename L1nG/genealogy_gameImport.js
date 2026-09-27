@@ -11,6 +11,9 @@
   const FORMAT = 'l1ng-genealogy';
   const SUPPORTED_SCHEMA = 1;
 
+  // ========【網站資料版本】 設定 - 遊戲 ZIP schema 與網站 L1nG v1 資料版本分開管理 ========
+  const WEBSITE_DATA_VERSION = 1;
+
   function u16(view, offset) { return view.getUint16(offset, true); }
   function u32(view, offset) { return view.getUint32(offset, true); }
 
@@ -713,7 +716,7 @@
       null;
 
     return {
-      version:4,
+      version:WEBSITE_DATA_VERSION,
       meta:{
         gameImport:true,
         sourceFormat:bundle.manifest.format,
