@@ -6746,3 +6746,19 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         grid-template-columns:100px minmax(90px,1fr);
     }
 }
+
+
+/* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料的操作統一使用紅色語意 ======== */
+.danger-action {
+    color:#b03a2e;
+}
+.danger-action .l1ng-icon {
+    color:currentColor;
+}
+button.danger-action:hover,
+button.danger-action:focus-visible {
+    color:#953126;
+    border-color:rgba(176,58,46,.38);
+    background:rgba(176,58,46,.07);
+    outline:none;
+}
