@@ -4575,6 +4575,10 @@ function alignPedigreeChildrenToParents(layers, model, connectorGroups) {
 }
 
 function alignPedigreeParentsToChildren(layers, model, connectorGroups) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = getGaps();
+
   const generations =
     [...layers.keys()].sort((a, b) => a - b);
 
@@ -4582,7 +4586,7 @@ function alignPedigreeParentsToChildren(layers, model, connectorGroups) {
     .slice(0, -1)
     .reverse()
     .forEach(generation => {
-      const requestedShifts = new Map();
+      const requestedLefts = new Map();
 
       connectorGroups.forEach(group => {
         const parents =
@@ -4605,10 +4609,6 @@ function alignPedigreeParentsToChildren(layers, model, connectorGroups) {
 
         if (!childXs.length) return;
 
-        // ========【長輩置中】 設定 - 父母 union 硬性對準所有子女本人 ========
-        // 單一子女：union X = 子女本人中心。
-        // 多名子女：union X = 最左與最右子女本人中心的中點。
-        // 子女的配偶、卡片寬度、標籤與後代都不參與這個中心。
         const targetX =
           childXs.length === 1
             ? childXs[0]
@@ -4636,28 +4636,50 @@ function alignPedigreeParentsToChildren(layers, model, connectorGroups) {
         });
 
         parentUnits.forEach(unit => {
-          if (!requestedShifts.has(unit.id)) {
-            requestedShifts.set(unit.id, []);
+          if (!requestedLefts.has(unit.id)) {
+            requestedLefts.set(unit.id, []);
           }
 
-          requestedShifts.get(unit.id).push(delta);
+          requestedLefts.get(unit.id)
+            .push(unit.x + delta);
         });
       });
 
-      const layer = layers.get(generation);
+      const layer =
+        layers.get(generation);
+
+      const desiredLefts =
+        new Map();
 
       layer.forEach(unit => {
-        const shifts =
-          requestedShifts.get(unit.id);
+        const requests =
+          requestedLefts.get(unit.id);
 
-        if (!shifts || !shifts.length) return;
+        if (!requests || !requests.length) {
+          desiredLefts.set(
+            unit.id,
+            unit.x
+          );
+          return;
+        }
 
-        const delta =
-          shifts.reduce((sum, value) => sum + value, 0) /
-          shifts.length;
-
-        unit.x += delta;
+        desiredLefts.set(
+          unit.id,
+          requests.reduce(
+            (sum, value) => sum + value,
+            0
+          ) / requests.length
+        );
       });
+
+      // 對齊父母時同時做 collision packing。
+      // 「不重疊」是硬約束；無法完全置中時交給正交關係線處理，
+      // 不再為了追求垂直主幹把另一個家系壓進來。
+      packGenealogyLayer(
+        layer,
+        desiredLefts,
+        SIBLING_GAP
+      );
     });
 }
 
@@ -4689,104 +4711,26 @@ function resolvePedigreeLayerCollisions(layers) {
   });
 }
 
-function shiftGenealogyDescendantBranch(rootUnit, deltaX, model, shifted = new Set()) {
-  if (
-    !rootUnit ||
-    !Number.isFinite(deltaX) ||
-    Math.abs(deltaX) < 0.01 ||
-    shifted.has(rootUnit.id)
-  ) {
-    return;
-  }
 
-  shifted.add(rootUnit.id);
-  rootUnit.x += deltaX;
-
-  rootUnit.childUnitIds.forEach(childUnitId => {
-    const childUnit =
-      model.unitById.get(childUnitId);
-
-    if (!childUnit) return;
-
-    shiftGenealogyDescendantBranch(
-      childUnit,
-      deltaX,
-      model,
-      shifted
-    );
-  });
-}
-
-function reconcilePedigreeBranchesTopDown(layers, model, connectorGroups) {
-  const {
-    SIBLING:SIBLING_GAP
-  } = getGaps();
-
-  const generations =
-    [...layers.keys()].sort((a, b) => a - b);
-
-  generations.slice(1).forEach(generation => {
-    const layer =
-      layers.get(generation);
-
-    if (!layer || !layer.length) return;
-
-    const layerIndex =
-      new Map(
-        layer.map((unit, index) => [unit.id, index])
-      );
-
-    connectorGroups.forEach(group => {
-      const targets =
-        buildPedigreeChildTargets(
-          group,
-          model,
-          generation,
-          layerIndex,
-          SIBLING_GAP
-        );
-
-      targets.forEach(target => {
-        const deltaX =
-          target.left -
-          target.unit.x;
-
-        // 這裡不能只移目前子女的 family unit。
-        // 中間世代本身也可能是下一代的父母；
-        // 因此必須把其整個後代分支一起平移，才能保留已建立的垂直血緣中心。
-        shiftGenealogyDescendantBranch(
-          target.unit,
-          deltaX,
-          model
-        );
-      });
-    });
-  });
-}
 
 function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
-  // ========【族譜幾何核心】 設定 - Anchor / Union constraint solver ========
-  // 族譜不再以 Family Unit 中心做來回鬆弛，也不再讓 renderer 補折線。
+  // ========【族譜幾何核心】 設定 - Collision-first pedigree solver ========
+  // 硬約束：
+  // 1. 同世代 family unit 不重疊。
+  // 2. 配偶維持同一世代。
   //
-  // 唯一幾何規則：
-  // 1. 配偶 / 前任：同世代水平。
-  // 2. 親子：人物中心是垂直 anchor。
-  // 3. 共同父母：union node 位於父母關係中心。
-  // 4. 多子女：父母 union 對準最左 / 最右「子女本人」的中心。
-  // 5. 配偶只提供碰撞安全空間，不參與血緣置中。
-  // 6. 非族譜自訂關係才允許曲線。
+  // 軟約束：
+  // 3. 父母 union 儘量對準子女群中心。
+  // 4. 子女群儘量以父母 union 為中心。
   //
-  // 前置迭代只負責找到不重疊的近似位置；
-  // 最後由祖先往下重新投影真正的 pedigree 約束，
-  // 並在移動中間世代時連同整個後代分支一起平移。
-  for (let iteration = 0; iteration < 12; iteration += 1) {
+  // 如果「完美置中」與「不重疊」衝突，永遠優先不重疊；
+  // renderer 使用水平 / 垂直正交線完成剩餘位移。
+  for (let iteration = 0; iteration < 10; iteration += 1) {
     alignPedigreeChildrenToParents(
       layers,
       model,
       connectorGroups
     );
-
-    resolvePedigreeLayerCollisions(layers);
 
     alignPedigreeParentsToChildren(
       layers,
@@ -4795,11 +4739,9 @@ function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
     );
   }
 
-  reconcilePedigreeBranchesTopDown(
-    layers,
-    model,
-    connectorGroups
-  );
+  // 最後一次硬性 collision pass。
+  // 後面不再執行任何會把 family unit 拉回去的步驟。
+  resolvePedigreeLayerCollisions(layers);
 }
 
 function placeGenealogyUnitMembers(units) {
@@ -5452,7 +5394,14 @@ function parentConnectorBranchY(source, childAnchors) {
 }
 
 function drawParentConnectorGroup(group, pos, byId, paths, labels) {
-  const source = parentConnectorSource(group, pos, byId, paths);
+  const source =
+    parentConnectorSource(
+      group,
+      pos,
+      byId,
+      paths
+    );
+
   if (!source) return;
 
   const children = group.children
@@ -5460,31 +5409,53 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
       id:childId,
       sim:byId.get(childId),
       pos:pos.get(childId),
-      kind:group.childKinds?.get(childId) || 'parent-child'
+      kind:
+        group.childKinds?.get(childId) ||
+        'parent-child'
     }))
     .filter(item => item.sim && item.pos)
     .map(item => ({
       ...item,
-      anchor:parentConnectorChildAnchor(item.pos, source)
+      anchor:
+        parentConnectorChildAnchor(
+          item.pos,
+          source
+        )
     }));
 
   if (!children.length) return;
 
-  const edgeClassForChild = child =>
+  const edgeClassForKind = kind =>
     'edge edge-parent' +
-    (child.kind === 'adoptive' ? ' edge-adopt' : '');
+    (
+      kind === 'adoptive'
+        ? ' edge-adopt'
+        : ''
+    );
+
+  const edgeClassForChild = child =>
+    edgeClassForKind(child.kind);
 
   if (children.length === 1) {
     const child = children[0];
-    const edgeClass = edgeClassForChild(child);
+    const edgeClass =
+      edgeClassForChild(child);
+
     const x1 = source.x;
     const y1 = source.y;
     const x2 = child.anchor.x;
     const y2 = child.anchor.y;
-    const aligned = Math.abs(x1 - x2) < 0.75;
 
-    let labelX = aligned ? x1 : (x1 + x2) / 2;
-    let labelY = y1 + (y2 - y1) / 2;
+    const aligned =
+      Math.abs(x1 - x2) < 0.75;
+
+    let labelX =
+      aligned
+        ? x1
+        : (x1 + x2) / 2;
+
+    let labelY =
+      y1 + (y2 - y1) / 2;
 
     if (aligned) {
       paths.push(
@@ -5494,7 +5465,9 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         '"/>'
       );
     } else {
-      const branchY = y1 + (y2 - y1) / 2;
+      const branchY =
+        y1 + (y2 - y1) / 2;
+
       paths.push(
         '<path class="' + edgeClass + '" d="' +
         'M' + x1 + ' ' + y1 +
@@ -5503,58 +5476,149 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         ' V' + y2 +
         '"/>'
       );
+
       labelY = branchY;
     }
 
     if (showRelLabels) {
-      const key = 'parent:' + child.id;
-      const info = getRelInfoByKey(key, child.kind);
+      const key =
+        'parent:' + child.id;
+
+      const info =
+        getRelInfoByKey(
+          key,
+          child.kind
+        );
 
       if (info) {
         labels.push(
-          makeLabelSVG(labelX, labelY, info.icon, info.text, key)
+          makeLabelSVG(
+            labelX,
+            labelY,
+            info.icon,
+            info.text,
+            key
+          )
         );
       }
     }
+
     return;
   }
 
   const branchY =
     parentConnectorBranchY(
       source,
-      children.map(child => child.anchor)
+      children.map(
+        child => child.anchor
+      )
     );
 
-  const childXs = children.map(child => child.anchor.x);
-  const busMinX = Math.min(source.x, ...childXs);
-  const busMaxX = Math.max(source.x, ...childXs);
-
   const allAdoptive =
-    children.every(child => child.kind === 'adoptive');
+    children.every(
+      child =>
+        child.kind === 'adoptive'
+    );
 
-  const sharedEdgeClass =
-    'edge edge-parent' +
-    (allAdoptive ? ' edge-adopt' : '');
-
-  let sharedPathData =
-    'M' + source.x + ' ' + source.y +
-    ' V' + branchY;
-
-  if (Math.abs(busMaxX - busMinX) >= 2) {
-    sharedPathData +=
-      ' M' + busMinX + ' ' + branchY +
-      ' H' + busMaxX;
-  }
-
+  // 父母到 sibling junction 的共同主幹：
+  // 全部都是領養子女時才整段使用領養線；
+  // 混合親生 / 領養時，真正分流前仍屬共同主幹。
   paths.push(
-    '<path class="' + sharedEdgeClass + '" d="' +
-    sharedPathData +
+    '<path class="' +
+    edgeClassForKind(
+      allAdoptive
+        ? 'adoptive'
+        : 'parent-child'
+    ) +
+    '" d="' +
+    'M' + source.x + ' ' + source.y +
+    ' V' + branchY +
     '"/>'
   );
 
+  // ========【Sibling Bus 分段】 設定 - 進入純領養分支後立刻使用領養線型 ========
+  // 不再先畫一整條實線 bus，再只把最後垂直段改成虛線。
+  // 每一小段水平 bus 都檢查「經過這一段的子女」：
+  // - 仍有親生子女共用 -> 一般親子線
+  // - 只剩領養子女 -> edge-adopt（沿用玩家設定的 dash）
+  const busPoints =
+    [...new Set([
+      source.x,
+      ...children.map(
+        child => child.anchor.x
+      )
+    ])]
+      .sort((a, b) => a - b);
+
+  for (
+    let index = 0;
+    index < busPoints.length - 1;
+    index += 1
+  ) {
+    const left =
+      busPoints[index];
+
+    const right =
+      busPoints[index + 1];
+
+    if (Math.abs(right - left) < 0.75) {
+      continue;
+    }
+
+    const mid =
+      (left + right) / 2;
+
+    const crossingChildren =
+      children.filter(child => {
+        const childX =
+          child.anchor.x;
+
+        const minX =
+          Math.min(
+            source.x,
+            childX
+          );
+
+        const maxX =
+          Math.max(
+            source.x,
+            childX
+          );
+
+        return (
+          mid > minX &&
+          mid < maxX
+        );
+      });
+
+    if (!crossingChildren.length) {
+      continue;
+    }
+
+    const segmentKind =
+      crossingChildren.every(
+        child =>
+          child.kind === 'adoptive'
+      )
+        ? 'adoptive'
+        : 'parent-child';
+
+    paths.push(
+      '<path class="' +
+      edgeClassForKind(segmentKind) +
+      '" d="' +
+      'M' + left + ' ' + branchY +
+      ' H' + right +
+      '"/>'
+    );
+  }
+
+  // 每個 child 的垂直 branch 保留自己的關係線型。
   children.forEach(child => {
     paths.push(
-      '<path class="' + edgeClassForChild(child) + '" d="' +
+      '<path class="' +
+      edgeClassForChild(child) +
+      '" d="' +
       'M' + child.anchor.x + ' ' + branchY +
       ' V' + child.anchor.y +
       '"/>'
@@ -5563,14 +5627,25 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
 
   if (showRelLabels) {
     children.forEach(child => {
-      const key = 'parent:' + child.id;
-      const info = getRelInfoByKey(key, child.kind);
+      const key =
+        'parent:' + child.id;
+
+      const info =
+        getRelInfoByKey(
+          key,
+          child.kind
+        );
+
       if (!info) return;
 
       labels.push(
         makeLabelSVG(
           child.anchor.x,
-          branchY + (child.anchor.y - branchY) / 2,
+          branchY +
+            (
+              child.anchor.y -
+              branchY
+            ) / 2,
           info.icon,
           info.text,
           key
