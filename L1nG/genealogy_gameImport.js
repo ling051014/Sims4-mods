@@ -681,7 +681,7 @@
             bio:optionalDisplayValue(household.bio) || optionalDisplayValue(household.description) || '',
             coverImage:null,
             freeLayout:{ view:false, edit:false },
-            manualPos:{ view:{}, edit:{} },
+            manualPositions:{ view:{}, edit:{} },
             locked:false,
             gameImport:true,
             gameData:{
@@ -711,7 +711,7 @@
         bio:'',
         coverImage:null,
         freeLayout:{ view:false, edit:false },
-        manualPos:{ view:{}, edit:{} },
+        manualPositions:{ view:{}, edit:{} },
         locked:false,
         gameImport:true,
         gameData:{ householdId:null, householdMemberIds:[] }
@@ -725,7 +725,7 @@
       null;
 
     return {
-      version:3,
+      version:4,
       meta:{
         gameImport:true,
         sourceFormat:bundle.manifest.format,
@@ -752,9 +752,9 @@
       sims,
       families,
       links:[],
-      relMap:{},
-      labelPos:{},
-      currentId:families.length ? families[0].id : null
+      relationshipMap:{},
+      labelPositions:{},
+      currentFamilyId:families.length ? families[0].id : null
     };
   }
 
