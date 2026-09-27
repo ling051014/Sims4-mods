@@ -4809,13 +4809,6 @@ body:not([data-theme="midnight"]) select {
 
 /* ========【搜尋型下拉結果】 設定 - 主題安全色與中性 Hover / Selected ======== */
 
-@media (max-width: 900px) {
-    .family-name-editor {
-        /* 小螢幕固定槽位，內部虛線仍由文字寬度決定 */ width: 118px;
-        /* 小螢幕固定最小槽位 */ min-width: 118px;
-    }
-}
-
 /* ========【人物資訊語意圖示】 設定 - 種族、存歿、寵物使用可直接辨識的 SVG ======== */
 
 .icon-paw {
@@ -5239,7 +5232,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 
 .family-profile-section { padding:14px 15px 13px; border-bottom:1px solid var(--border); }
 .family-title-row { display:flex; align-items:center; gap:4px; min-width:0; }
-.family-title-row .family-identity { flex:1 1 auto; min-width:0; max-width:calc(100% - 30px); }
+.family-title-row .family-identity { flex:1 1 auto; min-width:0; max-width:100%; }
 .family-title-row .family-name-editor { flex:0 1 auto; min-width:0; max-width:calc(100% - 30px); }
 .family-title-row .nav-select-family { flex:0 0 26px; width:26px; min-width:26px; max-width:26px; }
 .family-title-row .family-actions-menu { flex:0 0 auto; }

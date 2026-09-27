@@ -1038,9 +1038,8 @@ function syncFamilyNameInputWidth() {
 
   const editor = familyNameInput.closest('.family-name-editor');
   const identity = familyNameInput.closest('.family-identity');
-  const row = familyNameInput.closest('.family-title-row');
 
-  if (!editor) return;
+  if (!editor || !identity) return;
 
   const inputStyle = getComputedStyle(familyNameInput);
   const fontWeight = inputStyle.fontWeight || '700';
@@ -1081,29 +1080,28 @@ function syncFamilyNameInputWidth() {
     editor.querySelector('.family-name-edit-btn');
 
   const familySwitch =
-    identity?.querySelector('.nav-select-family');
+    identity.querySelector('.nav-select-family');
 
-  const actionMenu =
-    row?.querySelector('.family-actions-menu');
-
-  const fixedWidth =
+  const fixedInsideIdentity =
     elementWidth(editButton) +
     elementWidth(familySwitch) +
-    elementWidth(actionMenu) +
     gapWidth(editor) +
-    gapWidth(identity) +
-    gapWidth(row);
+    gapWidth(identity);
 
-  const rowWidth =
-    row?.clientWidth ||
-    row?.getBoundingClientRect().width ||
+  const identityWidth =
+    identity.clientWidth ||
+    identity.getBoundingClientRect().width ||
     0;
 
-  // 名稱只使用扣除固定按鈕與實際 gap 後的剩餘空間；
-  // 桌機維持依文字長度自適應，手機空間不足時只縮名稱本身。
+  // family-identity 本身已經由 Flex 自動扣除右側家族管理按鈕，
+  // 這裡只扣 identity 內部的鉛筆、家族切換箭頭與兩層 gap。
+  // 因此長名稱可以使用真正剩餘的最大寬度，不再被手機版重複預留空間。
   const availableWidth =
-    rowWidth > 0
-      ? Math.max(68, Math.floor(rowWidth - fixedWidth))
+    identityWidth > 0
+      ? Math.max(
+          68,
+          Math.floor(identityWidth - fixedInsideIdentity)
+        )
       : measured;
 
   const width =
