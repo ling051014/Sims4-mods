@@ -31,6 +31,7 @@ const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
 const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
 const FAMILY_PANEL_COLLAPSED_KEY = 'sims4_genealogy_family_panel_collapsed';
 const ROSTER_VIEW_KEY = 'sims4_genealogy_roster_view';
+const FAMILY_MEMBER_GENERATION_SORT_KEY = 'sims4_genealogy_family_member_generation_sort';
 const REL_LINE_STYLE_KEY = 'sims4_genealogy_relationship_line_style';
 const FAMILY_TREE_VIEW_MODE_KEY = 'sims4_genealogy_family_tree_view_mode';
 const LANG_KEY = 'ling_genealogy_language_v1';
@@ -182,6 +183,20 @@ try {
 } catch (_) {}
 let rosterBatchMode = false;
 const rosterSelection = new Set();
+
+let familyMemberGenerationSort = 'none';
+try {
+  const savedFamilyMemberGenerationSort =
+    localStorage.getItem(FAMILY_MEMBER_GENERATION_SORT_KEY);
+
+  if (
+    savedFamilyMemberGenerationSort === 'asc' ||
+    savedFamilyMemberGenerationSort === 'desc'
+  ) {
+    familyMemberGenerationSort =
+      savedFamilyMemberGenerationSort;
+  }
+} catch (_) {}
 
 let familyTreeViewMode = 'extended';
 try {
@@ -7689,6 +7704,90 @@ function renderFamilyCover(fam) {
   empty.style.display = withContent.length ? 'none' : '';
 }
 
+
+// ========【家族成員世代排序】 設定 - 只改側邊欄顯示順序，不改寫家族成員資料 ========
+function familyGenerationSortText(order) {
+  const lang = familyNavLanguage();
+
+  if (lang === 'en') {
+    if (order === 'asc') {
+      return 'Generation ascending · click for descending';
+    }
+    if (order === 'desc') {
+      return 'Generation descending · click for ascending';
+    }
+    return 'Sort by generation · click for ascending';
+  }
+
+  if (lang === 'zh-Hans') {
+    if (order === 'asc') {
+      return '世代升序 · 点击切换为降序';
+    }
+    if (order === 'desc') {
+      return '世代降序 · 点击切换为升序';
+    }
+    return '按世代排序 · 点击使用升序';
+  }
+
+  if (order === 'asc') {
+    return '世代升序 · 點擊切換為降序';
+  }
+  if (order === 'desc') {
+    return '世代降序 · 點擊切換為升序';
+  }
+  return '按世代排序 · 點擊使用升序';
+}
+
+function updateFamilyGenerationSortControl() {
+  const btn = $('familyGenerationSortBtn');
+  if (!btn) return;
+
+  btn.dataset.sortOrder =
+    familyMemberGenerationSort;
+
+  const label =
+    familyGenerationSortText(
+      familyMemberGenerationSort
+    );
+
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+}
+
+function setFamilyMemberGenerationSort(order) {
+  familyMemberGenerationSort =
+    order === 'desc'
+      ? 'desc'
+      : order === 'asc'
+        ? 'asc'
+        : 'none';
+
+  try {
+    localStorage.setItem(
+      FAMILY_MEMBER_GENERATION_SORT_KEY,
+      familyMemberGenerationSort
+    );
+  } catch (_) {}
+
+  updateFamilyGenerationSortControl();
+  renderFamilyMemberList(
+    currentTreeFamily() ||
+    currentFamily()
+  );
+}
+
+$('familyGenerationSortBtn')?.addEventListener(
+  'click',
+  () => {
+    const nextOrder =
+      familyMemberGenerationSort === 'asc'
+        ? 'desc'
+        : 'asc';
+
+    setFamilyMemberGenerationSort(nextOrder);
+  }
+);
+
 function updateFamilyMemberRemoveToolbar() {
   const startBtn = $('removeMemberBtn');
   const addMenu = $('familyMemberAddMenu');
@@ -7738,7 +7837,12 @@ function renderFamilyMemberList(fam) {
   const list = $('familyMemberList');
   if (!list) return;
 
-  const members = (fam.memberIds || []).map(id => genealogyData.sims[id]).filter(Boolean);
+  let members =
+    (fam.memberIds || [])
+      .map(id => genealogyData.sims[id])
+      .filter(Boolean);
+
+  updateFamilyGenerationSortControl();
 
   if (!members.length) {
     removeMemberMode = false;
@@ -7748,12 +7852,69 @@ function renderFamilyMemberList(fam) {
     return;
   }
 
-  const currentIds = new Set(members.map(sim => sim.id));
+  const currentIds =
+    new Set(members.map(sim => sim.id));
+
   [...removeMemberSelection].forEach(id => {
-    if (!currentIds.has(id)) removeMemberSelection.delete(id);
+    if (!currentIds.has(id)) {
+      removeMemberSelection.delete(id);
+    }
   });
 
-  const generationLevels = getFamilyGenerationLevels(fam);
+  const generationLevels =
+    getFamilyGenerationLevels(fam);
+
+  if (
+    familyMemberGenerationSort === 'asc' ||
+    familyMemberGenerationSort === 'desc'
+  ) {
+    const originalOrder =
+      new Map(
+        members.map(
+          (sim, index) => [sim.id, index]
+        )
+      );
+
+    const direction =
+      familyMemberGenerationSort === 'desc'
+        ? -1
+        : 1;
+
+    members = [...members].sort((a, b) => {
+      const aGeneration =
+        generationLevels.get(a.id);
+      const bGeneration =
+        generationLevels.get(b.id);
+
+      const aKnown =
+        Number.isFinite(aGeneration);
+      const bKnown =
+        Number.isFinite(bGeneration);
+
+      // 無法判定世代的人物固定放在清單最後，
+      // 避免升 / 降序切換時未連入族譜的人物跳到最前面。
+      if (aKnown !== bKnown) {
+        return aKnown ? -1 : 1;
+      }
+
+      if (
+        aKnown &&
+        bKnown &&
+        aGeneration !== bGeneration
+      ) {
+        return (
+          aGeneration -
+          bGeneration
+        ) * direction;
+      }
+
+      // 同一世代保持原始家族成員順序，避免每次切換排序都重新洗牌。
+      return (
+        (originalOrder.get(a.id) ?? 0) -
+        (originalOrder.get(b.id) ?? 0)
+      );
+    });
+  }
 
   list.innerHTML = members.map(sim => {
     const url = resolveImageUrl(sim.avatar);

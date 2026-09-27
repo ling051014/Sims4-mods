@@ -5384,9 +5384,62 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     font-weight:650;
     letter-spacing:.3px;
 }
-.family-section-heading > span:first-child {
+.family-section-title {
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:4px;
+}
+.family-section-title > span:first-child {
     flex:0 0 auto;
     white-space:nowrap;
+}
+.family-generation-sort {
+    width:24px;
+    height:24px;
+    flex:0 0 24px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:0;
+    border-radius:4px;
+    background:transparent;
+    color:var(--sub);
+    cursor:pointer;
+    transition:background-color .15s ease;
+}
+.family-generation-sort:hover,
+.family-generation-sort:focus-visible {
+    background:var(--panel-item-hover);
+    outline:none;
+}
+.family-generation-sort-icon {
+    width:18px;
+    height:18px;
+    overflow:visible;
+}
+.generation-sort-arrow {
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    opacity:.38;
+    transition:stroke .15s ease,opacity .15s ease;
+}
+.family-generation-sort[data-sort-order="none"] .generation-sort-arrow {
+    opacity:.52;
+}
+.family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-up,
+.family-generation-sort[data-sort-order="desc"] .generation-sort-arrow-down {
+    stroke:var(--accent);
+    opacity:1;
+}
+.family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-down,
+.family-generation-sort[data-sort-order="desc"] .generation-sort-arrow-up {
+    color:var(--sub);
+    opacity:.28;
 }
 .family-member-actions {
     min-width:0;

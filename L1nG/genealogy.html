@@ -231,7 +231,15 @@
 
                         <section class="family-members-section">
                             <div class="family-section-heading">
-                                <span>成員</span>
+                                <div class="family-section-title">
+                                    <span>成員</span>
+                                    <button class="family-generation-sort" id="familyGenerationSortBtn" type="button" data-sort-order="none" title="世代排序" aria-label="世代排序">
+                                        <svg class="family-generation-sort-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path class="generation-sort-arrow generation-sort-arrow-up" d="M7 20V4 M3.5 7.5L7 4L10.5 7.5"></path>
+                                            <path class="generation-sort-arrow generation-sort-arrow-down" d="M17 4V20 M13.5 16.5L17 20L20.5 16.5"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div class="family-member-actions">
                                     <div class="app-menu" id="familyMemberAddMenu">
                                         <button class="family-section-icon app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="新增成員"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span></button>
