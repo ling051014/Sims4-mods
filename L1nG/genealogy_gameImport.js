@@ -104,19 +104,7 @@
     return '';
   }
 
-  function bytesToDataUrl(bytes, mimeType) {
-    if (!bytes || !bytes.length || !mimeType) return null;
-
-    const chunkSize = 0x8000;
-    let binary = '';
-
-    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-      const chunk = bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length));
-      binary += String.fromCharCode.apply(null, chunk);
-    }
-
-    return `data:${mimeType};base64,${btoa(binary)}`;
-  }
+  
 
   function explicitAvatarPaths(sim) {
     if (!sim || typeof sim !== 'object') return [];
@@ -165,19 +153,19 @@
     if (!mimeType) {
       return {
         path,
-        mimeType: null,
-        dataUrl: null,
-        byteLength: bytes ? bytes.length : 0,
-        supported: false
+        mimeType:null,
+        bytes:null,
+        byteLength:bytes ? bytes.length : 0,
+        supported:false
       };
     }
 
     return {
       path,
       mimeType,
-      dataUrl: bytesToDataUrl(bytes, mimeType),
-      byteLength: bytes.length,
-      supported: true
+      bytes,
+      byteLength:bytes.length,
+      supported:true
     };
   }
 

@@ -82,10 +82,6 @@ const DEFAULT_CARD_EDIT_SETTINGS = Object.freeze({
 });
 
 
-const IMG_DB_NAME = 'sims4_images_db';
-const IMG_DB_VERSION = 1;
-const IMG_STORE = 'images';
-
 const AVATAR_PROFILES = {
   compact:  { max: 192, webp: 0.83, jpeg: 0.81, label: '節省空間', hint: '192px · 約 10–16KB/張' },
   balanced: { max: 384, webp: 0.87, jpeg: 0.84, label: '平衡',   hint: '384px · 約 30–50KB/張' },
@@ -334,98 +330,72 @@ let viewerMode = 'edit';
 let viewerSimId = null;
 let viewerIndex = 0;
 
-/* ===== IndexedDB 圖片層 ===== */
-let _imgDb = null;
-const imageCache = new Map();
-let _idbAvailable = true;
+// ========【圖片資產權威層】 設定 - genealogy.js 只保存 assetId；Blob / SHA-256 / Lazy URL 由獨立模組管理 ========
+const assetStore = window.L1nGGenealogyAssets;
+if (!assetStore) {
+  throw new Error('找不到 L1nG 圖片資產模組。');
+}
 
-function openImageDB() {
-  return new Promise((resolve, reject) => {
-    if (_imgDb) return resolve(_imgDb);
-    if (!_idbAvailable) return reject(new Error('IndexedDB 不可用'));
+let assetStoreReady = false;
+let assetRefreshRaf = 0;
+
+function scheduleResolvedAssetRefresh() {
+  if (assetRefreshRaf) return;
+
+  assetRefreshRaf = requestAnimationFrame(() => {
+    assetRefreshRaf = 0;
+
+    try { applyBg(); } catch (_) {}
+    try { updateBgPreview(); } catch (_) {}
     try {
-      const req = indexedDB.open(IMG_DB_NAME, IMG_DB_VERSION);
-      req.onupgradeneeded = e => {
-        const d = e.target.result;
-        if (!d.objectStoreNames.contains(IMG_STORE)) {
-          d.createObjectStore(IMG_STORE, { keyPath: 'id' });
-        }
-      };
-      req.onsuccess = e => { _imgDb = e.target.result; resolve(_imgDb); };
-      req.onerror = () => { _idbAvailable = false; reject(req.error); };
-      req.onblocked = () => { reject(new Error('IndexedDB 被阻塞')); };
-    } catch(e) { _idbAvailable = false; reject(e); }
+      const fam = currentFamily();
+      if (fam) renderFamilyCover(fam);
+    } catch (_) {}
+    try { render(); } catch (_) {}
+
+    try {
+      if (mask?.classList.contains('show')) {
+        updateAvatarPreview();
+        renderPetsList();
+        renderGalleryGrid();
+      }
+    } catch (_) {}
+    try {
+      if (petMask?.classList.contains('show')) renderPetAvatarPreview();
+    } catch (_) {}
+    try {
+      if (photoMask?.classList.contains('show')) updatePhotoPreview();
+    } catch (_) {}
   });
 }
 
-async function idbPutImage(id, dataUrl) {
-  const d = await openImageDB();
-  return new Promise((resolve, reject) => {
-    const tx = d.transaction(IMG_STORE, 'readwrite');
-    const sizeKB = Math.round((dataUrl || '').length * 0.75 / 1024);
-    tx.objectStore(IMG_STORE).put({ id, dataUrl, sizeKB, addedAt: Date.now() });
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+function isAssetId(ref) {
+  return assetStore.isAssetId(ref);
 }
 
-async function idbGetAllImages() {
-  const d = await openImageDB();
-  return new Promise((resolve, reject) => {
-    const tx = d.transaction(IMG_STORE, 'readonly');
-    const req = tx.objectStore(IMG_STORE).getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function idbDeleteImage(id) {
-  const d = await openImageDB();
-  return new Promise((resolve, reject) => {
-    const tx = d.transaction(IMG_STORE, 'readwrite');
-    tx.objectStore(IMG_STORE).delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function idbClearAll() {
-  const d = await openImageDB();
-  return new Promise((resolve, reject) => {
-    const tx = d.transaction(IMG_STORE, 'readwrite');
-    tx.objectStore(IMG_STORE).clear();
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-function isBase64Ref(ref) {
-  return typeof ref === 'string' && ref.startsWith('data:');
-}
-function isImageIdRef(ref) {
-  return typeof ref === 'string' && ref.startsWith('img_');
-}
 function resolveImageUrl(ref) {
-  if (!ref) return '';
-  if (isBase64Ref(ref)) return ref;
-  if (isImageIdRef(ref)) return imageCache.get(ref) || '';
+  if (!isAssetId(ref)) return '';
+
+  const cached = assetStore.peekUrl(ref);
+  if (cached) return cached;
+
+  assetStore.getUrl(ref)
+    .then(url => {
+      if (url) scheduleResolvedAssetRefresh();
+    })
+    .catch(error => {
+      console.warn('圖片資產載入失敗：', ref, error);
+    });
+
   return '';
 }
-function newImageId() {
-  return 'img_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
 
-async function saveImageToIdb(dataUrl) {
-  if (!_idbAvailable) return null;
-  try {
-    const id = newImageId();
-    await idbPutImage(id, dataUrl);
-    imageCache.set(id, dataUrl);
-    return id;
-  } catch(e) {
-    console.error('儲存圖片失敗', e);
-    return null;
+async function saveImageAsset(blob, metadata = {}) {
+  if (!assetStoreReady) {
+    await assetStore.openDb();
+    assetStoreReady = true;
   }
+  return assetStore.importBlob(blob, metadata);
 }
 
 let _dimsCache = { mode: null, dims: null };
@@ -3039,35 +3009,20 @@ function saveBg() {
   try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); }
   catch(e) { uiAlert('背景圖片設定儲存失敗。', { title: '儲存失敗', kind: 'danger' }); }
 }
-function compressBgImage(file) {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) { reject(new Error('請選擇圖片檔案')); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const ratio = Math.min(BG_MAX / img.width, BG_MAX / img.height, 1);
-          const w = Math.max(1, Math.round(img.width * ratio));
-          const h = Math.max(1, Math.round(img.height * ratio));
-          const c = document.createElement('canvas');
-          c.width = w; c.height = h;
-          const ctx = c.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          let dataUrl = '';
-          try { dataUrl = c.toDataURL('image/webp', BG_QUALITY); } catch(_){}
-          if (!dataUrl.startsWith('data:image/webp')) {
-            dataUrl = c.toDataURL('image/jpeg', BG_QUALITY);
-          }
-          resolve(dataUrl);
-        } catch(err){ reject(err); }
-      };
-      img.onerror = () => reject(new Error('圖片載入失敗'));
-      img.src = e.target.result;
-    };
-    reader.onerror = () => reject(new Error('檔案讀取失敗'));
-    reader.readAsDataURL(file);
+async function compressBgImage(file) {
+  const optimized = await assetStore.optimizeImage(file, {
+    maxDimension:BG_MAX,
+    webpQuality:BG_QUALITY,
+    jpegQuality:BG_QUALITY,
+    preserveAlpha:'auto'
   });
+
+  return {
+    blob:optimized.blob,
+    width:optimized.width,
+    height:optimized.height,
+    sizeKB:Math.round(optimized.byteSize / 1024)
+  };
 }
 function updateBgPreview() {
   const el = $('bgPreview');
@@ -3086,17 +3041,19 @@ async function updateStorageInfo() {
   const barEl = $('storageBarFill');
   if (!infoEl || !barEl) return;
 
-  let imgCount = 0, imgSizeKB = 0;
+  let imgCount = 0;
+  let imgSizeKB = 0;
+
   try {
-    const all = await idbGetAllImages();
-    imgCount = all.length;
-    imgSizeKB = all.reduce((sum, i) => sum + (i.sizeKB || 0), 0);
+    const stats = await assetStore.getStats();
+    imgCount = stats.count;
+    imgSizeKB = stats.byteSize / 1024;
   } catch(e) {}
 
   let lsSizeKB = 0;
   try {
     const raw = localStorage.getItem(STORE_KEY) || '';
-    lsSizeKB = Math.round(raw.length * 0.75 / 1024);
+    lsSizeKB = new Blob([raw]).size / 1024;
   } catch(e) {}
 
   let quotaMB = 0, usedMB = 0;
@@ -3111,6 +3068,7 @@ async function updateStorageInfo() {
   const totalKB = imgSizeKB + lsSizeKB;
   let html = `${iconSvg('images')} 圖片 <b>${imgCount}</b> 張 · 約 <b>${(imgSizeKB/1024).toFixed(2)} MB</b>`;
   html += `<br>${iconSvg('file-earmark-text')} 族譜資料約 <b>${(lsSizeKB/1024).toFixed(2)} MB</b>`;
+
   if (quotaMB > 0) {
     html += `<br>${iconSvg('database')} 瀏覽器總用量 <b>${usedMB.toFixed(1)} MB</b> / 配額 <b>${quotaMB.toFixed(0)} MB</b>`;
     const pct = Math.min(100, (usedMB / quotaMB) * 100);
@@ -3118,10 +3076,6 @@ async function updateStorageInfo() {
     barEl.classList.toggle('warn', pct > 75);
   } else {
     barEl.style.width = Math.min(100, totalKB / 50000 * 100) + '%';
-  }
-
-  if (!_idbAvailable) {
-    html += `<br><span style="color:#c94a3a">${iconSvg('exclamation-triangle')} 目前瀏覽器已自動改用備用圖片儲存方式</span>`;
   }
 
   infoEl.innerHTML = html;
@@ -3225,10 +3179,11 @@ $('bgInput').onchange = async e => {
   const file = e.target.files[0];
   if (!file) return;
   try {
-    const dataUrl = await compressBgImage(file);
-    const id = await saveImageToIdb(dataUrl);
-    if (id) bgSettings.image = id;
-    else bgSettings.image = dataUrl;
+    const result = await compressBgImage(file);
+    bgSettings.image = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
     applyBg(); saveBg(); updateBgPreview();
   } catch(err){ uiAlert('背景處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
   e.target.value = '';
@@ -3246,11 +3201,8 @@ $('bgFit').onchange = () => {
 $('bgClearBtn').onclick = async () => {
   if (!bgSettings.image) return;
   if (!await uiConfirm('確定清除目前背景圖片嗎？', { title: '移除背景圖片', kind: 'danger', confirmText: '移除背景' })) return;
-  if (isImageIdRef(bgSettings.image)) {
-    try { await idbDeleteImage(bgSettings.image); } catch(e){}
-    imageCache.delete(bgSettings.image);
-  }
   bgSettings.image = null;
+  scheduleGC();
   applyBg(); saveBg(); updateBgPreview();
   updateStorageInfo();
 };
@@ -3583,61 +3535,60 @@ function repairImportedHouseholdMembership(targetDb) {
 }
 
 
-async function migrateBase64ToIdb() {
-  if (!_idbAvailable) return 0;
-  let count = 0;
-  const tasks = [];
-  const migrateRef = (obj, key) => {
-    if (!isBase64Ref(obj[key])) return;
-    const dataUrl = obj[key];
-    tasks.push((async () => {
-      try {
-        const id = await saveImageToIdb(dataUrl);
-        if (id) { obj[key] = id; count++; }
-      } catch(e) {}
-    })());
+function collectReferencedAssetIds(targetDb = genealogyData, targetBg = bgSettings, { strict = false } = {}) {
+  const used = new Set();
+
+  const add = (ref, label) => {
+    if (!ref) return;
+    if (isAssetId(ref)) {
+      used.add(ref);
+      return;
+    }
+    if (strict) {
+      throw new Error(`${label || '圖片'}使用了目前不支援的舊圖片格式。`);
+    }
   };
-  Object.values(genealogyData.sims).forEach(sim => {
-    migrateRef(sim, 'avatar');
-    (sim.gallery || []).forEach(g => migrateRef(g, 'image'));
-    (sim.pets || []).forEach(p => migrateRef(p, 'avatar'));
+
+  Object.values(targetDb?.sims || {}).forEach(sim => {
+    add(sim.avatar, '人物頭像');
+    (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
+    (sim.pets || []).forEach(pet => add(pet.avatar, '寵物頭像'));
   });
-  (genealogyData.families || []).forEach(fam => migrateRef(fam, 'coverImage'));
-  if (bgSettings) migrateRef(bgSettings, 'image');
-  await Promise.all(tasks);
-  if (count > 0) {
-    save({ immediate: true });
-    try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); } catch(e){}
-    console.log(`[遷移] 已將 ${count} 張圖片從 localStorage 遷移到 IndexedDB`);
-  }
-  return count;
+
+  (targetDb?.families || []).forEach(fam => add(fam.coverImage, '家族封面'));
+  (targetDb?.meta?.unassignedPets || []).forEach(pet => add(pet.avatar, '未分配寵物頭像'));
+  add(targetBg?.image, '背景圖片');
+
+  return used;
+}
+
+function clearUnsupportedImageRefs(targetDb = genealogyData, targetBg = bgSettings) {
+  let cleared = 0;
+
+  const clean = (obj, key, emptyValue = null) => {
+    if (!obj || !obj[key] || isAssetId(obj[key])) return;
+    obj[key] = emptyValue;
+    cleared++;
+  };
+
+  Object.values(targetDb?.sims || {}).forEach(sim => {
+    clean(sim, 'avatar', null);
+    (sim.gallery || []).forEach(item => clean(item, 'image', ''));
+    (sim.pets || []).forEach(pet => clean(pet, 'avatar', null));
+  });
+
+  (targetDb?.families || []).forEach(fam => clean(fam, 'coverImage', null));
+  (targetDb?.meta?.unassignedPets || []).forEach(pet => clean(pet, 'avatar', null));
+  clean(targetBg, 'image', null);
+
+  return cleared;
 }
 
 async function cleanupUnusedImages() {
-  if (!_idbAvailable) return 0;
-  const used = new Set();
-  Object.values(genealogyData.sims).forEach(sim => {
-    if (sim.avatar && isImageIdRef(sim.avatar)) used.add(sim.avatar);
-    (sim.gallery || []).forEach(g => { if (g.image && isImageIdRef(g.image)) used.add(g.image); });
-    (sim.pets || []).forEach(p => { if (p.avatar && isImageIdRef(p.avatar)) used.add(p.avatar); });
-  });
-  (genealogyData.families || []).forEach(fam => { if (fam.coverImage && isImageIdRef(fam.coverImage)) used.add(fam.coverImage); });
-  if (bgSettings?.image && isImageIdRef(bgSettings.image)) used.add(bgSettings.image);
-
-  let orphans = [];
-  try {
-    const all = await idbGetAllImages();
-    orphans = all.filter(img => !used.has(img.id));
-  } catch(e) { return 0; }
-
-  for (const img of orphans) {
-    try {
-      await idbDeleteImage(img.id);
-      imageCache.delete(img.id);
-    } catch(e){}
-  }
-  if (orphans.length) console.log(`[GC] 清理了 ${orphans.length} 張未使用的圖片`);
-  return orphans.length;
+  const used = collectReferencedAssetIds();
+  const removed = await assetStore.garbageCollect(used);
+  if (removed) console.log(`[GC] 清理了 ${removed} 張未使用的圖片資產`);
+  return removed;
 }
 
 let _gcTimer = null;
@@ -3715,79 +3666,43 @@ function makeLabelSVG(x, y, iconName, text, key) {
   </g>`;
 }
 
-function compressImage(file, kind = 'sim') {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) { reject(new Error('請選擇圖片檔案')); return; }
-    const prof = (kind === 'pet') ? getPetAvatarProfile() : getAvatarProfile();
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const ratio = Math.min(prof.max / img.width, prof.max / img.height, 1);
-          const w = Math.max(1, Math.round(img.width * ratio));
-          const h = Math.max(1, Math.round(img.height * ratio));
-          const c = document.createElement('canvas');
-          c.width = w; c.height = h;
-          const ctx = c.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, w, h);
-          ctx.drawImage(img, 0, 0, w, h);
-          let dataUrl = '';
-          try { dataUrl = c.toDataURL('image/webp', prof.webp); } catch(_){}
-          if (!dataUrl.startsWith('data:image/webp')) {
-            dataUrl = c.toDataURL('image/jpeg', prof.jpeg);
-          }
-          resolve({ dataUrl, sizeKB: Math.round(dataUrl.length * 0.75 / 1024) });
-        } catch(err){ reject(err); }
-      };
-      img.onerror = () => reject(new Error('圖片載入失敗'));
-      img.src = e.target.result;
-    };
-    reader.onerror = () => reject(new Error('檔案讀取失敗'));
-    reader.readAsDataURL(file);
+async function compressImage(file, kind = 'sim') {
+  const prof = (kind === 'pet') ? getPetAvatarProfile() : getAvatarProfile();
+  const optimized = await assetStore.optimizeImage(file, {
+    maxDimension:prof.max,
+    webpQuality:prof.webp,
+    jpegQuality:prof.jpeg,
+    preserveAlpha:'auto'
   });
+
+  return {
+    blob:optimized.blob,
+    width:optimized.width,
+    height:optimized.height,
+    sizeKB:Math.round(optimized.byteSize / 1024),
+    isOriginal:optimized.usedOriginal
+  };
 }
 
-function compressGalleryImage(file) {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) { reject(new Error('請選擇圖片檔案')); return; }
-    const prof = getGalleryProfile();
-    const isOriginal = galleryProfile === 'original';
-    const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target.result;
-      if (isOriginal) {
-        const sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
-        resolve({ dataUrl, sizeKB, isOriginal: true });
-        return;
-      }
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const ratio = Math.min(prof.max / img.width, prof.max / img.height, 1);
-          const w = Math.max(1, Math.round(img.width * ratio));
-          const h = Math.max(1, Math.round(img.height * ratio));
-          const c = document.createElement('canvas');
-          c.width = w; c.height = h;
-          const ctx = c.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, w, h);
-          ctx.drawImage(img, 0, 0, w, h);
-          let out = '';
-          try { out = c.toDataURL('image/webp', prof.webp); } catch(_){}
-          if (!out.startsWith('data:image/webp')) {
-            out = c.toDataURL('image/jpeg', prof.jpeg);
-          }
-          resolve({ dataUrl: out, sizeKB: Math.round(out.length * 0.75 / 1024), isOriginal: false });
-        } catch(err) { reject(err); }
-      };
-      img.onerror = () => reject(new Error('圖片載入失敗'));
-      img.src = dataUrl;
-    };
-    reader.onerror = () => reject(new Error('檔案讀取失敗'));
-    reader.readAsDataURL(file);
+async function compressGalleryImage(file) {
+  const prof = getGalleryProfile();
+  const isOriginalProfile = galleryProfile === 'original';
+
+  const optimized = await assetStore.optimizeImage(file, {
+    maxDimension:isOriginalProfile ? null : prof.max,
+    webpQuality:prof.webp,
+    jpegQuality:prof.jpeg,
+    preserveAlpha:'auto',
+    keepOriginal:isOriginalProfile
   });
+
+  return {
+    blob:optimized.blob,
+    width:optimized.width,
+    height:optimized.height,
+    sizeKB:Math.round(optimized.byteSize / 1024),
+    isOriginal:isOriginalProfile || optimized.usedOriginal
+  };
 }
 
 function getVisibleIds(familyId) {
@@ -6833,8 +6748,10 @@ async function handleGalleryFile(file) {
       );
       if (!ok) return;
     }
-    const id = await saveImageToIdb(result.dataUrl);
-    editingPhotoImageRef = id || result.dataUrl;
+    editingPhotoImageRef = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
     editingPhotoSizeKB = result.sizeKB;
     editingPhotoOriginal = result.isOriginal;
     openPhotoEditor(-1, true);
@@ -6952,8 +6869,10 @@ $('photoInput').onchange = async e => {
       const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
       if (!ok) { e.target.value = ''; return; }
     }
-    const id = await saveImageToIdb(result.dataUrl);
-    editingPhotoImageRef = id || result.dataUrl;
+    editingPhotoImageRef = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
     editingPhotoSizeKB = result.sizeKB;
     editingPhotoOriginal = result.isOriginal;
     updatePhotoPreview();
@@ -6985,8 +6904,10 @@ document.addEventListener('paste', async e => {
           const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
           if (!ok) return;
         }
-        const id = await saveImageToIdb(result.dataUrl);
-        editingPhotoImageRef = id || result.dataUrl;
+        editingPhotoImageRef = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
         editingPhotoSizeKB = result.sizeKB;
         editingPhotoOriginal = result.isOriginal;
         updatePhotoPreview();
@@ -9380,10 +9301,12 @@ const familyCoverInput = $('familyCoverInput');
 if (familyCoverInput) familyCoverInput.onchange = async e => {
   const file = e.target.files?.[0]; e.target.value=''; if (!file) return;
   try {
-    const dataUrl = await compressBgImage(file);
+    const result = await compressBgImage(file);
     const fam = currentFamily(); ensureFamilyProfileShape(fam);
-    if (_idbAvailable) { const id = await saveImageToIdb(dataUrl); fam.coverImage = id || dataUrl; }
-    else fam.coverImage = dataUrl;
+    fam.coverImage = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
     save({ immediate:true }); renderFamilyCover(fam); scheduleGC();
   } catch(err) { uiAlert(err.message || '圖片處理失敗', { title:'圖片處理失敗', kind:'danger' }); }
 };
@@ -9784,8 +9707,10 @@ $('petAvatarInput').onchange = async e => {
   if (!file) return;
   try {
     const result = await compressImage(file, 'pet');
-    const id = await saveImageToIdb(result.dataUrl);
-    editingPetAvatar = id || result.dataUrl;
+    editingPetAvatar = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
     renderPetAvatarPreview();
   } catch(err){ uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
   e.target.value = '';
@@ -9925,8 +9850,10 @@ $('avatarInput').onchange = async e => {
   if (!file) return;
   try {
     const result = await compressImage(file, 'sim');
-    const id = await saveImageToIdb(result.dataUrl);
-    editingAvatar = id || result.dataUrl;
+    editingAvatar = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
     updateAvatarPreview();
   } catch(err){ uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
   e.target.value = '';
@@ -11004,31 +10931,30 @@ $('familyMemberRemoveConfirmBtn').onclick = () => {
 };
 
 async function exportJSON() {
-  const exportDb = JSON.parse(JSON.stringify(genealogyData));
-  const exportBg = { ...bgSettings };
+  try {
+    const exportDb = JSON.parse(JSON.stringify(genealogyData));
+    const exportBg = { ...bgSettings };
+    const assetIds = collectReferencedAssetIds(exportDb, exportBg, { strict:true });
+    const assets = await assetStore.serializeAssets(assetIds);
 
-  const resolve = ref => {
-    if (!ref) return ref;
-    if (isBase64Ref(ref)) return ref;
-    if (isImageIdRef(ref)) return imageCache.get(ref) || '';
-    return '';
-  };
+    const payload = {
+      ...exportDb,
+      bgSettings:exportBg,
+      backupFormat:'l1ng-genealogy-backup',
+      backupVersion:1,
+      assets
+    };
 
-  Object.values(exportDb.sims).forEach(sim => {
-    sim.avatar = resolve(sim.avatar) || null;
-    (sim.gallery || []).forEach(g => { g.image = resolve(g.image) || ''; });
-    (sim.pets || []).forEach(p => { p.avatar = resolve(p.avatar) || null; });
-  });
-  (exportDb.families || []).forEach(fam => { fam.coverImage = resolve(fam.coverImage) || null; });
-  exportBg.image = resolve(exportBg.image) || null;
-
-  const payload = { ...exportDb, bgSettings: exportBg };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '模擬市民4_族譜備份.json';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    // 備份以 compact JSON 輸出；Base64 只存在 portable backup，不回寫 runtime。
+    const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '模擬市民4_族譜備份.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  } catch (error) {
+    uiAlert('匯出失敗：' + error.message, { title:'匯出失敗', kind:'danger' });
+  }
 }
 
 function openExportPanel() {
@@ -11478,57 +11404,53 @@ function prepareDatabase(raw) {
 }
 
 async function importJSON(file) {
-  const reader = new FileReader();
-  reader.onload = async () => {
-    try {
-      const raw = JSON.parse(reader.result);
-      const incomingBg = raw.bgSettings;
-      const preparedResult = prepareDatabase(raw);
-      genealogyData = preparedResult.prepared;
-      dragHistory.clear();
+  try {
+    const raw = JSON.parse(await file.text());
 
-      if (_idbAvailable) {
-        const tasks = [];
-        const extract = (obj, key) => {
-          if (!isBase64Ref(obj[key])) return;
-          const dataUrl = obj[key];
-          tasks.push((async () => {
-            try {
-              const id = await saveImageToIdb(dataUrl);
-              if (id) obj[key] = id;
-            } catch(e) {}
-          })());
-        };
-        Object.values(genealogyData.sims).forEach(sim => {
-          extract(sim, 'avatar');
-          (sim.gallery || []).forEach(g => extract(g, 'image'));
-          (sim.pets || []).forEach(p => extract(p, 'avatar'));
-        });
-        (genealogyData.families || []).forEach(fam => extract(fam, 'coverImage'));
-        if (incomingBg && isBase64Ref(incomingBg.image)) {
-          try {
-            const id = await saveImageToIdb(incomingBg.image);
-            if (id) incomingBg.image = id;
-          } catch(e) {}
-        }
-        await Promise.all(tasks);
+    if (
+      raw?.backupFormat !== 'l1ng-genealogy-backup' ||
+      Number(raw?.backupVersion) !== 1
+    ) {
+      throw new Error('這不是目前 L1nG 圖片資產架構的完整 JSON 備份。');
+    }
+
+    const incomingBg = raw.bgSettings && typeof raw.bgSettings === 'object'
+      ? { ...raw.bgSettings }
+      : { image:null, opacity:0.5, fit:'cover' };
+
+    const rawDb = { ...raw };
+    delete rawDb.backupFormat;
+    delete rawDb.backupVersion;
+    delete rawDb.bgSettings;
+    delete rawDb.assets;
+
+    const preparedResult = prepareDatabase(rawDb);
+    const nextDb = preparedResult.prepared;
+    const requiredAssets = collectReferencedAssetIds(nextDb, incomingBg, { strict:true });
+    const serializedAssets = raw.assets || {};
+
+    for (const id of requiredAssets) {
+      if (!Object.prototype.hasOwnProperty.call(serializedAssets, id)) {
+        throw new Error(`備份缺少被族譜引用的圖片資產：${id}`);
       }
+    }
 
-      // 背景設定本身不依賴主要圖片儲存是否可用。
-      // 若主要圖片儲存不可用，備份中的背景圖片仍保留原始資料並可正常還原。
-      if (incomingBg) {
-        bgSettings = { ...bgSettings, ...incomingBg };
-        try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); } catch(e){}
-      }
+    await assetStore.importSerializedAssets(serializedAssets);
 
-      save({ immediate: true });
-      refreshFamilyUI();
-      applyBg();
-      render();
-      requestAnimationFrame(fitScreen);
-    } catch(err){ uiAlert('匯入失敗：' + err.message, { title: '匯入失敗', kind: 'danger' }); }
-  };
-  reader.readAsText(file);
+    genealogyData = nextDb;
+    dragHistory.clear();
+    bgSettings = { ...bgSettings, ...incomingBg };
+
+    save({ immediate:true });
+    saveBg();
+    refreshFamilyUI();
+    applyBg();
+    render();
+    scheduleGC();
+    requestAnimationFrame(fitScreen);
+  } catch(err) {
+    uiAlert('匯入失敗：' + err.message, { title:'匯入失敗', kind:'danger' });
+  }
 }
 
 // ========【遊戲族譜匯入狀態】 設定 - 顯示 ZIP 讀取與族譜建立進度 ========
@@ -11585,7 +11507,7 @@ function waitForImportPaint() {
 }
 
 // ========【遊戲族譜匯入】 設定 - 讀取 L1nG Genealogy Exporter ZIP ========
-// ========【遊戲族譜頭像】 設定 - ZIP 內可顯示圖片寫入 IndexedDB，再回填人物 / 寵物 ========
+// ========【遊戲族譜頭像】 設定 - ZIP 圖片直接進 Blob Asset Store，再回填人物 / 寵物 assetId ========
 async function persistGameImportAvatars(bundle, converted) {
   if (!window.L1nGGameImport || !bundle || !converted) {
     return { saved:0, unsupported:0, missing:0 };
@@ -11599,7 +11521,7 @@ async function persistGameImportAvatars(bundle, converted) {
   let unsupported = 0;
   let missing = 0;
 
-  const persistAsset = async (target, simId) => {
+  const persistAsset = async (target, simId, kind = 'sim') => {
     const sourceSim = sourceSims[String(simId)];
 
     const asset =
@@ -11614,17 +11536,18 @@ async function persistGameImportAvatars(bundle, converted) {
       return;
     }
 
-    if (!asset.supported || !asset.dataUrl) {
+    if (!asset.supported || !asset.bytes) {
       unsupported++;
       return;
     }
 
-    const imageId =
-      await saveImageToIdb(asset.dataUrl);
+    const sourceBlob = new Blob([asset.bytes], { type:asset.mimeType });
+    const result = await compressImage(sourceBlob, kind);
 
-    target.avatar =
-      imageId ||
-      asset.dataUrl;
+    target.avatar = await saveImageAsset(result.blob, {
+      width:result.width,
+      height:result.height
+    });
 
     saved++;
   };
@@ -11639,7 +11562,7 @@ async function persistGameImportAvatars(bundle, converted) {
         pet.gameData.simId;
 
       if (!petSimId || pet.avatar) continue;
-      await persistAsset(pet, petSimId);
+      await persistAsset(pet, petSimId, 'pet');
     }
   }
 
@@ -11656,7 +11579,7 @@ async function persistGameImportAvatars(bundle, converted) {
       pet.gameData.simId;
 
     if (!petSimId || pet.avatar) continue;
-    await persistAsset(pet, petSimId);
+    await persistAsset(pet, petSimId, 'pet');
   }
 
   return {
@@ -12229,6 +12152,7 @@ async function init() {
     const v = localStorage.getItem(LABELS_KEY);
     showRelLabels = (v === '0') ? false : true;
   } catch(e){ showRelLabels = true; }
+
   (function updateLabelBtn() {
     const btn = $('labelToggle');
     if (showRelLabels) { btn.classList.add('active'); setIconText(btn, 'tags', '隱藏關係'); }
@@ -12237,13 +12161,10 @@ async function init() {
   syncRelationshipToolbarVisibility();
 
   try {
-    await openImageDB();
-    const all = await idbGetAllImages();
-    all.forEach(img => imageCache.set(img.id, img.dataUrl));
-    console.log(`[圖片] 已從 IndexedDB 載入 ${all.length} 張圖片`);
-  } catch(e) {
-    console.warn('IndexedDB 不可用，將使用 localStorage 直接儲存 base64', e);
-    _idbAvailable = false;
+    await assetStore.openDb();
+    assetStoreReady = true;
+  } catch(error) {
+    throw new Error('圖片資產資料庫無法使用：' + error.message);
   }
 
   let preparedResult;
@@ -12266,8 +12187,7 @@ async function init() {
       );
   }
 
-  genealogyData =
-    preparedResult.prepared;
+  genealogyData = preparedResult.prepared;
 
   if (
     !genealogyData.families ||
@@ -12281,21 +12201,17 @@ async function init() {
 
   invalidateChildrenIndex();
 
-  if (preparedResult.changed) {
-    save();
-  }
-
   applyRelationshipLineSettings();
-loadSavedBg();
+  loadSavedBg();
 
-  if (_idbAvailable) {
-    migrateBase64ToIdb().then(n => {
-      if (n > 0) {
-        render();
-        applyBg();
-        console.log(`[遷移] 完成，共遷移 ${n} 張圖片`);
-      }
-    });
+  // clean-break：舊 img_* / dataURL 圖片引用不再進入新的 L1nG v1 圖片 schema。
+  const clearedImageRefs = clearUnsupportedImageRefs(genealogyData, bgSettings);
+  if (clearedImageRefs > 0) {
+    console.warn(`[圖片資產] 已清除 ${clearedImageRefs} 個舊圖片引用；請重新匯入或上傳圖片。`);
+    save({ immediate:true });
+    saveBg();
+  } else if (preparedResult.changed) {
+    save();
   }
 
   setupAppMenus();
