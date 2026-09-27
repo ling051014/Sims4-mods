@@ -6171,9 +6171,16 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 
 /* ========【外觀設定】 設定 - 列式主題、背景與可展開的關係線自訂 ======== */
-.bg-modal,
-.storage-modal {
+.bg-modal {
     width:min(720px,100%);
+}
+
+.storage-modal {
+    width:min(820px,100%);
+}
+
+.data-modal {
+    width:min(620px,100%);
 }
 
 .appearance-section,
@@ -6378,43 +6385,174 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     font-size:10.5px;
 }
 
-/* ========【圖片與儲存】 設定 - 圖片品質、空間資訊與資料維護 ======== */
-.storage-quality-grid {
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:8px;
+/* ========【圖片與儲存】 設定 - 對應 Blob Asset Store 的圖片處理、容量狀態與維護 ======== */
+.storage-modal > h2,
+.data-modal > h2 {
+    margin-bottom:6px;
 }
 
-.storage-quality-grid label {
+.storage-intro {
+    margin:0 0 14px;
+    color:var(--sub);
+    font-size:12.5px;
+    line-height:1.6;
+}
+
+.storage-section {
+    padding:12px 0 16px;
+}
+
+.storage-section .setting-group-title,
+.data-management-section .setting-group-title {
+    margin:0;
+    font-size:13px;
+    font-weight:700;
+}
+
+.storage-section-header {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:18px;
+    margin-bottom:10px;
+}
+
+.storage-section-description {
+    margin:4px 0 0;
+    color:var(--sub);
+    font-size:11.5px;
+    line-height:1.55;
+}
+
+.storage-reset-btn {
+    flex:0 0 auto;
+    min-height:30px;
+    padding:5px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--card);
+    color:var(--sub);
+    font:inherit;
+    font-size:11.5px;
+    cursor:pointer;
+}
+
+.storage-reset-btn:hover {
+    border-color:var(--accent);
+    color:var(--ink);
+}
+
+.storage-quality-list {
+    display:grid;
+    gap:6px;
+}
+
+.storage-quality-row {
     min-width:0;
     display:grid;
-    gap:5px;
-    color:var(--sub);
-    font-size:10.5px;
+    grid-template-columns:minmax(190px,.9fr) minmax(280px,1.25fr);
+    align-items:center;
+    gap:18px;
+    padding:10px 11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:var(--card);
 }
 
-.storage-quality-grid select {
+.storage-quality-copy,
+.storage-quality-control {
+    min-width:0;
+    display:grid;
+    gap:3px;
+}
+
+.storage-quality-copy strong {
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:700;
+}
+
+.storage-quality-copy small,
+.storage-quality-control small {
+    color:var(--sub);
+    font-size:10.5px;
+    line-height:1.45;
+}
+
+.storage-quality-control select {
     width:100%;
-    min-height:32px;
-    padding:4px 7px;
+    min-height:34px;
+    padding:5px 9px;
     border:1px solid var(--border);
-    border-radius:5px;
+    border-radius:6px;
     background:var(--input-bg);
     color:var(--ink);
     font:inherit;
-    font-size:10.5px;
+    font-size:12px;
 }
 
-.storage-quality-grid small {
-    min-height:28px;
+.storage-quality-control select:focus {
+    border-color:var(--accent);
+    outline:none;
+}
+
+.storage-metric-grid {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+    margin-top:10px;
+}
+
+.storage-metric-card {
+    min-width:0;
+    min-height:96px;
+    padding:11px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:var(--card);
+    display:flex;
+    flex-direction:column;
+}
+
+.storage-metric-label {
     color:var(--sub);
-    font-size:9.5px;
-    line-height:1.4;
+    font-size:10.5px;
+    line-height:1.3;
+}
+
+.storage-metric-card strong {
+    margin-top:8px;
+    color:var(--ink);
+    font-size:19px;
+    line-height:1.1;
+    font-weight:700;
+    overflow-wrap:anywhere;
+}
+
+.storage-metric-card small {
+    margin-top:auto;
+    padding-top:8px;
+    color:var(--sub);
+    font-size:10px;
+    line-height:1.35;
+}
+
+.storage-quota-block {
+    margin-top:12px;
+}
+
+.storage-quota-head {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    color:var(--sub);
+    font-size:10.5px;
 }
 
 .storage-section .storage-bar {
     height:8px;
-    margin:5px 0 7px;
+    margin:6px 0 0;
     border-radius:999px;
     overflow:hidden;
     background:var(--panel-bg);
@@ -6431,18 +6569,86 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:#c98a3a;
 }
 
-.storage-summary {
-    margin-bottom:8px;
+.storage-architecture-list {
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:11px;
+}
+
+.storage-architecture-list > span {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    min-height:27px;
+    padding:4px 8px;
+    border:1px solid var(--border);
+    border-radius:999px;
+    background:var(--panel-bg);
     color:var(--sub);
     font-size:10.5px;
-    line-height:1.45;
+}
+
+.storage-status-dot {
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent);
 }
 
 .settings-note {
-    margin:7px 0 0;
+    margin:9px 0 0;
     color:var(--sub);
-    font-size:10px;
+    font-size:11px;
+    line-height:1.55;
+}
+
+.storage-maintenance-card,
+.data-danger-card {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:var(--card);
+}
+
+.storage-maintenance-card > div,
+.data-danger-card > div {
+    min-width:0;
+}
+
+.storage-maintenance-card strong,
+.data-danger-card strong {
+    color:var(--ink);
+    font-size:12.5px;
+}
+
+.storage-maintenance-card p,
+.data-danger-card p {
+    margin:4px 0 0;
+    color:var(--sub);
+    font-size:10.5px;
     line-height:1.5;
+}
+
+.storage-maintenance-card button,
+.data-danger-card button {
+    flex:0 0 auto;
+    min-height:32px;
+    padding:5px 10px;
+}
+
+.data-management-section {
+    padding:8px 0 16px;
+}
+
+.data-danger-card {
+    border-color:rgba(176,58,46,.24);
+    background:color-mix(in srgb,var(--card) 93%,#b03a2e 7%);
 }
 
 @media (max-width:720px) {
@@ -6488,8 +6694,34 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         grid-column:1 / -1;
         width:100%;
     }
-    .storage-quality-grid {
+    .storage-section-header {
+        align-items:stretch;
+        flex-direction:column;
+        gap:8px;
+    }
+
+    .storage-reset-btn {
+        align-self:flex-start;
+    }
+
+    .storage-quality-row {
         grid-template-columns:1fr;
+        gap:8px;
+    }
+
+    .storage-metric-grid {
+        grid-template-columns:1fr 1fr;
+    }
+
+    .storage-maintenance-card,
+    .data-danger-card {
+        align-items:stretch;
+        flex-direction:column;
+    }
+
+    .storage-maintenance-card button,
+    .data-danger-card button {
+        align-self:flex-start;
     }
 }
 
