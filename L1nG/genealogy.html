@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css">
+        <link rel="stylesheet" href="genealogy.css?v=20260928-trait-field-structure">
     </head>
     <body data-theme="ling">
 
@@ -367,7 +367,7 @@
                             <label class="span-6">領養關係<select id="fAdoptive"><option value="false">親生</option><option value="true">領養</option></select></label>
                             <label class="full" id="causeOfDeathLabel" style="display:none">死因<input id="fCauseOfDeath" list="causeOfDeathPresets" maxlength="40" placeholder="如：衰老 / 溺水 / 火災…"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></label>
                             <label class="full">人生抱負<input id="fAspiration" list="aspirationPresets" maxlength="40" placeholder="如：暢銷作家 / 靈魂伴侶…"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></label>
-                            <label class="full trait-field"><span class="field-label-row"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></label>
+                            <div class="full trait-field"><div class="field-label-row"><span id="traitFieldLabel">特徵</span><span class="field-label-note">可逐一新增或移除</span></div><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="traitFieldLabel"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></div>
                             <label class="full">簡介<textarea id="fBio" placeholder="人物小傳、結局、備註…" rows="3"></textarea></label>
                         </div>
                     </section>
@@ -1058,6 +1058,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260928-confirm-guard"></script>
+        <script src="genealogy.js?v=20260928-trait-field-structure"></script>
     </body>
 </html>
