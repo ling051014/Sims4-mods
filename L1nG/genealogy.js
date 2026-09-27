@@ -17,8 +17,7 @@ const GAPS = {
 };
 
 const PAD = 80;
-const STORE_KEY = 'sims4_genealogy_v4';
-const DEVELOPMENT_STORE_KEY_V3 = 'sims4_genealogy_v3';
+const STORE_KEY = 'l1ng_genealogy_v1';
 const THEME_KEY = 'sims4_genealogy_theme';
 const CUSTOM_COLORS_KEY = 'sims4_custom_colors';
 const BG_KEY = 'sims4_genealogy_bg';
@@ -950,7 +949,7 @@ function buildSample() {
   ];
 
   return {
-    version:4,
+    version:1,
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
@@ -3433,7 +3432,7 @@ function getChildrenOf(id) {
 function invalidateChildrenIndex() { _childrenIndex = null; }
 
 
-// ========【v4 資料正規化】 設定 - 只維護目前網站 canonical shape ========
+// ========【L1nG v1 資料正規化】 設定 - 只維護目前網站 canonical shape ========
 function normalizeCurrentDatabase(targetDb) {
   Object.values(targetDb.sims || {}).forEach(sim => {
     if (!sim || typeof sim !== 'object') return;
@@ -11424,132 +11423,21 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   }
 }
 
-// ========【開發期資料搬家】 設定 - 僅將作者目前瀏覽器的 v3 key 一次搬到 v4 ========
-// 網站尚未發布，因此不保留多代公開相容層。
-// 只接受最近一代「全域 sims + families」開發資料；成功搬家後刪除 v3 key。
-function upgradeDevelopmentStoreV3(raw) {
-  if (
-    !raw ||
-    typeof raw !== 'object' ||
-    !raw.sims ||
-    typeof raw.sims !== 'object' ||
-    Array.isArray(raw.sims) ||
-    !Array.isArray(raw.families)
-  ) {
-    return null;
-  }
-
-  const upgraded = raw;
-
-  if (
-    (!upgraded.relationshipMap ||
-      typeof upgraded.relationshipMap !== 'object') &&
-    upgraded.relMap &&
-    typeof upgraded.relMap === 'object'
-  ) {
-    upgraded.relationshipMap = upgraded.relMap;
-  }
-
-  if (
-    (!upgraded.labelPositions ||
-      typeof upgraded.labelPositions !== 'object') &&
-    upgraded.labelPos &&
-    typeof upgraded.labelPos === 'object'
-  ) {
-    upgraded.labelPositions = upgraded.labelPos;
-  }
-
-  if (
-    upgraded.currentFamilyId == null &&
-    upgraded.currentId != null
-  ) {
-    upgraded.currentFamilyId = upgraded.currentId;
-  }
-
-  upgraded.families.forEach(family => {
-    if (!family || typeof family !== 'object') return;
-
-    if (
-      (!family.manualPositions ||
-        typeof family.manualPositions !== 'object') &&
-      family.manualPos &&
-      typeof family.manualPos === 'object'
-    ) {
-      family.manualPositions = family.manualPos;
-    }
-
-    delete family.manualPos;
-  });
-
-  delete upgraded.relMap;
-  delete upgraded.labelPos;
-  delete upgraded.currentId;
-
-  upgraded.version = 4;
-  return upgraded;
-}
-
+// ========【L1nG v1 資料載入】 設定 - 只讀取目前 schema，不承接舊版網站資料 ========
 function readStoredGenealogyData() {
   const currentRaw =
     localStorage.getItem(STORE_KEY);
 
-  if (currentRaw) {
-    return {
-      data:JSON.parse(currentRaw),
-      migratedFromV3:false
-    };
-  }
-
-  const developmentV3Raw =
-    localStorage.getItem(
-      DEVELOPMENT_STORE_KEY_V3
-    );
-
-  if (!developmentV3Raw) {
-    return {
-      data:null,
-      migratedFromV3:false
-    };
-  }
-
-  const upgraded =
-    upgradeDevelopmentStoreV3(
-      JSON.parse(developmentV3Raw)
-    );
-
-  return {
-    data:upgraded,
-    migratedFromV3:!!upgraded
-  };
+  return currentRaw
+    ? JSON.parse(currentRaw)
+    : null;
 }
 
-function finalizeDevelopmentStoreMigration(data) {
-  try {
-    localStorage.setItem(
-      STORE_KEY,
-      JSON.stringify(data)
-    );
-
-    localStorage.removeItem(
-      DEVELOPMENT_STORE_KEY_V3
-    );
-
-    return true;
-  } catch (error) {
-    console.warn(
-      'v3 開發資料搬移到 v4 失敗，已保留原資料。',
-      error
-    );
-    return false;
-  }
-}
-
-// ========【v4 資料載入管線】 設定 - 網站正式只接受目前 canonical schema ========
 function isCurrentGenealogyData(raw) {
   return !!(
     raw &&
     typeof raw === 'object' &&
-    Number(raw.version) === 4 &&
+    Number(raw.version) === 1 &&
     raw.sims &&
     typeof raw.sims === 'object' &&
     !Array.isArray(raw.sims) &&
@@ -11560,7 +11448,7 @@ function isCurrentGenealogyData(raw) {
 function prepareDatabase(raw) {
   if (!isCurrentGenealogyData(raw)) {
     throw new Error(
-      '不支援的網站資料格式。請使用目前 v4 族譜資料或遊戲族譜 ZIP。'
+      '不支援的網站資料格式。請使用目前 L1nG v1 族譜資料或遊戲族譜 ZIP。'
     );
   }
 
@@ -12358,20 +12246,12 @@ async function init() {
     _idbAvailable = false;
   }
 
-  let storedGenealogy = {
-    data:null,
-    migratedFromV3:false
-  };
-
   let preparedResult;
 
   try {
-    storedGenealogy =
-      readStoredGenealogyData();
-
     preparedResult =
       prepareDatabase(
-        storedGenealogy.data ||
+        readStoredGenealogyData() ||
         buildSample()
       );
   } catch (error) {
@@ -12379,11 +12259,6 @@ async function init() {
       '族譜資料載入失敗，改用目前預設資料。',
       error
     );
-
-    storedGenealogy = {
-      data:null,
-      migratedFromV3:false
-    };
 
     preparedResult =
       prepareDatabase(
@@ -12406,11 +12281,7 @@ async function init() {
 
   invalidateChildrenIndex();
 
-  if (storedGenealogy.migratedFromV3) {
-    finalizeDevelopmentStoreMigration(
-      genealogyData
-    );
-  } else if (preparedResult.changed) {
+  if (preparedResult.changed) {
     save();
   }
 
@@ -12449,7 +12320,7 @@ loadSavedBg();
  * 1. HTML、主程式文案、註解與系統新資料一律以繁體中文撰寫。
  * 2. ZH_HANS_EXACT / ZH_HANS_UI_PHRASES 的「值」才是簡體中文翻譯；繁中仍是索引鍵。
  * 3. EN 的索引鍵同樣使用繁中，避免主程式再以簡中作為 canonical source。
- * 4. 舊版簡中存檔的列舉值由「舊版資料相容」區塊處理，不轉換玩家自行輸入的內容。
+ * 4. 網站資料只接受目前 L1nG v1 schema；不維護舊版網站存檔欄位相容。
  */
 const LING_I18N = (() => {
   /* ========【簡中翻譯】 設定 - 繁中完整文案對應簡中顯示值 ======== */
