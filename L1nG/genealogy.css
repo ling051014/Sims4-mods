@@ -6379,220 +6379,111 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     font-size:10.5px;
 }
 
-/* ========【圖片與儲存】 設定 - 對應 Blob Asset Store 的圖片處理、容量狀態與維護 ======== */
+/* ========【圖片與儲存】 設定 - 玩家導向的圖片使用量、備份說明與清理操作 ======== */
+.storage-modal {
+    width:min(680px,100%);
+}
+
 .storage-modal > h2 {
-    margin-bottom:6px;
+    margin-bottom:7px;
 }
 
 .storage-intro {
-    margin:0 0 14px;
+    margin:0 0 18px;
     color:var(--sub);
-    font-size:12.5px;
-    line-height:1.6;
+    font-size:13px;
+    line-height:1.65;
 }
 
 .storage-section {
-    padding:12px 0 16px;
+    padding:15px 0 18px;
+    border-bottom:1px solid var(--border);
+}
+
+.storage-section:last-of-type {
+    border-bottom:0;
 }
 
 .storage-section .setting-group-title {
-    margin:0;
+    margin:0 0 10px;
+    padding:0;
+    border:0;
+    color:var(--ink);
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:.1px;
+}
+
+.storage-summary {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+}
+
+.storage-summary-item {
+    min-width:0;
+    padding:14px 15px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:var(--panel-bg);
+}
+
+.storage-summary-item > span {
+    display:block;
+    margin-bottom:7px;
+    color:var(--sub);
+    font-size:12.5px;
+}
+
+.storage-summary-item > div {
+    display:flex;
+    align-items:baseline;
+    gap:5px;
+}
+
+.storage-summary-item strong {
+    color:var(--ink);
+    font-size:22px;
+    line-height:1.15;
+    font-weight:700;
+}
+
+.storage-summary-item small {
+    color:var(--sub);
+    font-size:12px;
+}
+
+.storage-info-list {
+    display:grid;
+    gap:8px;
+}
+
+.storage-info-row {
+    display:grid;
+    grid-template-columns:24px minmax(0,1fr);
+    align-items:start;
+    gap:10px;
+    padding:11px 12px;
+    border-radius:7px;
+    background:var(--panel-bg);
+}
+
+.storage-info-row > .l1ng-icon {
+    margin-top:2px;
+    color:var(--accent);
+    font-size:16px;
+}
+
+.storage-info-row strong {
+    color:var(--ink);
     font-size:13px;
     font-weight:700;
 }
 
-.storage-section-header {
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:18px;
-    margin-bottom:10px;
-}
-
-.storage-section-description {
+.storage-info-row p {
     margin:4px 0 0;
     color:var(--sub);
-    font-size:11.5px;
-    line-height:1.55;
-}
-
-.storage-reset-btn {
-    flex:0 0 auto;
-    min-height:30px;
-    padding:5px 10px;
-    border:1px solid var(--border);
-    border-radius:6px;
-    background:var(--card);
-    color:var(--sub);
-    font:inherit;
-    font-size:11.5px;
-    cursor:pointer;
-}
-
-.storage-reset-btn:hover {
-    border-color:var(--accent);
-    color:var(--ink);
-}
-
-.storage-quality-list {
-    display:grid;
-    gap:6px;
-}
-
-.storage-quality-row {
-    min-width:0;
-    display:grid;
-    grid-template-columns:minmax(190px,.9fr) minmax(280px,1.25fr);
-    align-items:center;
-    gap:18px;
-    padding:10px 11px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    background:var(--card);
-}
-
-.storage-quality-copy,
-.storage-quality-control {
-    min-width:0;
-    display:grid;
-    gap:3px;
-}
-
-.storage-quality-copy strong {
-    color:var(--ink);
     font-size:12.5px;
-    font-weight:700;
-}
-
-.storage-quality-copy small,
-.storage-quality-control small {
-    color:var(--sub);
-    font-size:10.5px;
-    line-height:1.45;
-}
-
-.storage-quality-control select {
-    width:100%;
-    min-height:34px;
-    padding:5px 9px;
-    border:1px solid var(--border);
-    border-radius:6px;
-    background:var(--input-bg);
-    color:var(--ink);
-    font:inherit;
-    font-size:12px;
-}
-
-.storage-quality-control select:focus {
-    border-color:var(--accent);
-    outline:none;
-}
-
-.storage-metric-grid {
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:8px;
-    margin-top:10px;
-}
-
-.storage-metric-card {
-    min-width:0;
-    min-height:96px;
-    padding:11px 12px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    background:var(--card);
-    display:flex;
-    flex-direction:column;
-}
-
-.storage-metric-label {
-    color:var(--sub);
-    font-size:10.5px;
-    line-height:1.3;
-}
-
-.storage-metric-card strong {
-    margin-top:8px;
-    color:var(--ink);
-    font-size:19px;
-    line-height:1.1;
-    font-weight:700;
-    overflow-wrap:anywhere;
-}
-
-.storage-metric-card small {
-    margin-top:auto;
-    padding-top:8px;
-    color:var(--sub);
-    font-size:10px;
-    line-height:1.35;
-}
-
-.storage-quota-block {
-    margin-top:12px;
-}
-
-.storage-quota-head {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    color:var(--sub);
-    font-size:10.5px;
-}
-
-.storage-section .storage-bar {
-    height:8px;
-    margin:6px 0 0;
-    border-radius:999px;
-    overflow:hidden;
-    background:var(--panel-bg);
-    border:1px solid var(--border);
-}
-
-.storage-section .storage-bar-fill {
-    height:100%;
-    background:var(--accent);
-    transition:width .2s ease;
-}
-
-.storage-section .storage-bar-fill.warn {
-    background:#c98a3a;
-}
-
-.storage-architecture-list {
-    display:flex;
-    flex-wrap:wrap;
-    gap:6px;
-    margin-top:11px;
-}
-
-.storage-architecture-list > span {
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    min-height:27px;
-    padding:4px 8px;
-    border:1px solid var(--border);
-    border-radius:999px;
-    background:var(--panel-bg);
-    color:var(--sub);
-    font-size:10.5px;
-}
-
-.storage-status-dot {
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:var(--accent);
-    box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent);
-}
-
-.settings-note {
-    margin:9px 0 0;
-    color:var(--sub);
-    font-size:11px;
     line-height:1.55;
 }
 
@@ -6601,7 +6492,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     align-items:center;
     justify-content:space-between;
     gap:20px;
-    padding:12px;
+    padding:13px 14px;
     border:1px solid var(--border);
     border-radius:8px;
     background:var(--card);
@@ -6613,88 +6504,42 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 .storage-maintenance-card strong {
     color:var(--ink);
-    font-size:12.5px;
+    font-size:13px;
 }
 
 .storage-maintenance-card p {
     margin:4px 0 0;
     color:var(--sub);
-    font-size:10.5px;
-    line-height:1.5;
+    font-size:12.5px;
+    line-height:1.55;
 }
 
 .storage-maintenance-card button {
     flex:0 0 auto;
-    min-height:32px;
-    padding:5px 10px;
+    min-height:34px;
+    padding:6px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--input-bg);
+    color:var(--ink);
+    font:inherit;
+    font-size:12px;
+    cursor:pointer;
 }
 
+.storage-maintenance-card button:hover {
+    border-color:var(--accent);
+}
 
 @media (max-width:720px) {
-    .roster-header {
-        align-items:flex-start;
-        flex-direction:column;
-    }
-
-    .roster-header-actions {
-        width:100%;
-        flex-wrap:wrap;
-    }
-
-    .roster-header-actions #rosterAddBtn {
-        margin-left:auto;
-    }
-
-    .roster-batch-toolbar .spacer {
-        display:none;
-    }
-
-    .viewer-modal {
-        width:calc(100vw - 16px);
-        height:calc(100vh - 16px);
-    }
-
-    .viewer-footer {
-        align-items:flex-start;
-        flex-direction:column;
-        gap:8px;
-    }
-
-    .viewer-controls {
-        align-self:flex-end;
-    }
-
-    .appearance-section .custom-theme-row {
-        grid-template-columns:1fr 1fr;
-    }
-
-    .appearance-section .custom-theme-preview,
-    .appearance-section .apply-btn {
-        grid-column:1 / -1;
-        width:100%;
-    }
-    .storage-section-header {
-        align-items:stretch;
-        flex-direction:column;
-        gap:8px;
-    }
-
-    .storage-reset-btn {
-        align-self:flex-start;
-    }
-
-    .storage-quality-row {
+    .storage-summary {
         grid-template-columns:1fr;
-        gap:8px;
-    }
-
-    .storage-metric-grid {
-        grid-template-columns:1fr 1fr;
     }
 
     .storage-maintenance-card {
         align-items:stretch;
         flex-direction:column;
+        gap:12px;
     }
 
     .storage-maintenance-card button {
