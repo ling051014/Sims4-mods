@@ -5117,6 +5117,56 @@ body[data-theme="midnight"] .roster-badge.status-alive {
     /* 滑鼠指標 */ cursor: wait;
 }
 
+/* ========【圖片匯出狀態】 設定 - 匯出期間顯示跳動圓點，避免長時間處理看起來像卡住 ======== */
+.export-actions button.is-loading {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+}
+
+.export-loading-dots {
+    display:inline-flex;
+    align-items:flex-end;
+    gap:2px;
+    height:9px;
+}
+
+.export-loading-dots > span {
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:currentColor;
+    opacity:.45;
+    animation:genealogy-export-dot .9s ease-in-out infinite;
+}
+
+.export-loading-dots > span:nth-child(2) {
+    animation-delay:.12s;
+}
+
+.export-loading-dots > span:nth-child(3) {
+    animation-delay:.24s;
+}
+
+@keyframes genealogy-export-dot {
+    0%,60%,100% {
+        transform:translateY(0);
+        opacity:.45;
+    }
+    30% {
+        transform:translateY(-4px);
+        opacity:1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .export-loading-dots > span {
+        animation:none;
+        opacity:.8;
+    }
+}
+
 @media (max-width: 780px) {
     .export-grid {
         /* 欄位 */ grid-template-columns: 1fr;

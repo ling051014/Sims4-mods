@@ -7435,8 +7435,48 @@ async function handleNodeContextAction(action, simId) {
   if (action === 'reset-selected') {
     const fam = currentFamily();
     ensureFamilyLayoutShape(fam);
-    [...selectedNodeIds].forEach(id => { delete fam.manualPositions[viewMode][id]; });
-    save(); render(); closeNodeContextMenu();
+
+    const ids =
+      [...selectedNodeIds]
+        .filter(id =>
+          Object.prototype.hasOwnProperty.call(
+            fam.manualPositions[viewMode],
+            id
+          )
+        );
+
+    if (!ids.length) {
+      closeNodeContextMenu();
+      return;
+    }
+
+    const before =
+      captureLayoutHistoryState(
+        fam,
+        viewMode
+      );
+
+    ids.forEach(id => {
+      delete fam.manualPositions[viewMode][id];
+    });
+
+    render();
+    syncNodeSelectionClasses();
+    expandStageToFit();
+
+    dragHistory.push({
+      type:'card-layout',
+      familyId:fam.id,
+      mode:viewMode,
+      before,
+      after:captureLayoutHistoryState(
+        fam,
+        viewMode
+      )
+    });
+
+    save();
+    closeNodeContextMenu();
     return;
   }
   if (action === 'remove-selected') {
@@ -7847,6 +7887,76 @@ function pickCloserSnap(alignmentCandidate, spacingCandidate) {
     : alignmentCandidate;
 }
 
+function getParentConnectorStraightSnap(id, rawX) {
+  if (
+    !layoutCache ||
+    !layoutCache.byId ||
+    !layoutCache.visibleIds ||
+    !layoutCache.pos ||
+    !layoutCache.byId.has(id)
+  ) {
+    return null;
+  }
+
+  const draggedDims =
+    getNodeDimensionsById(id);
+
+  const threshold =
+    GUIDE_SNAP_PX /
+    Math.max(scale, 0.001);
+
+  let best = null;
+
+  buildParentChildConnectorGroups(
+    layoutCache.byId,
+    layoutCache.visibleIds
+  ).forEach(group => {
+    // 只有 direct parent-child connector 才能真正消除 V-H-V 折線。
+    // 多子女仍需要 sibling bus，不以單一子女強行改變整組主幹。
+    if (
+      group.children.length !== 1 ||
+      group.children[0] !== id
+    ) {
+      return;
+    }
+
+    const source =
+      parentConnectorSource(
+        group,
+        layoutCache.pos,
+        layoutCache.byId,
+        []
+      );
+
+    if (!source) return;
+
+    const targetX =
+      source.x -
+      draggedDims.W / 2;
+
+    const distance =
+      Math.abs(
+        targetX - rawX
+      );
+
+    if (
+      distance <= threshold &&
+      (
+        !best ||
+        distance < best.distance
+      )
+    ) {
+      best = {
+        value:targetX,
+        distance,
+        guide:source.x
+      };
+    }
+  });
+
+  return best;
+}
+
 function buildHorizontalSpacingGuide(firstStart, firstEnd, secondStart, secondEnd, centerY, gap) {
   return {
     axis: 'x',
@@ -8141,8 +8251,22 @@ function getSmartSnap(id, rawX, rawY) {
   const alignment = getAlignmentSnap(id, rawX, rawY);
   const horizontalSpacing = getHorizontalEqualSpacingSnap(id, rawX, rawY);
   const verticalSpacing = getVerticalEqualSpacingSnap(id, rawX, rawY);
-  const bestX = pickCloserSnap(alignment.x, horizontalSpacing);
-  const bestY = pickCloserSnap(alignment.y, verticalSpacing);
+  const parentConnector = getParentConnectorStraightSnap(id, rawX);
+
+  const bestX =
+    pickCloserSnap(
+      pickCloserSnap(
+        alignment.x,
+        horizontalSpacing
+      ),
+      parentConnector
+    );
+
+  const bestY =
+    pickCloserSnap(
+      alignment.y,
+      verticalSpacing
+    );
 
   return {
     x: bestX ? bestX.value : rawX,
@@ -12030,19 +12154,52 @@ if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
 if (exportMask) exportMask.onclick = e => { if (e.target === exportMask) closeExportPanel(); };
 if (exportJsonBtn) exportJsonBtn.onclick = async () => { closeExportPanel(); await exportJSON(); };
 if (exportImageBtn) exportImageBtn.onclick = async () => {
-  const originalText = exportImageBtn.textContent;
+  const originalHtml =
+    exportImageBtn.innerHTML;
+
   exportImageBtn.disabled = true;
+  exportImageBtn.classList.add('is-loading');
+  exportImageBtn.setAttribute('aria-busy', 'true');
   exportJsonBtn && (exportJsonBtn.disabled = true);
+
+  const loadingText =
+    uiText('正在匯出族譜圖片…')
+      .replace(/[.…]+$/u, '');
+
+  exportImageBtn.innerHTML =
+    `<span>${esc(loadingText)}</span>` +
+    '<span class="export-loading-dots" aria-hidden="true">' +
+      '<span></span><span></span><span></span>' +
+    '</span>';
+
   try {
-    exportImageBtn.textContent = uiText('正在匯出族譜圖片…');
-    await exportGenealogyImage(getSelectedExportImageSize(), getSelectedExportBackgroundMode());
+    // 先讓 loading 狀態真正畫到畫面上，再開始較重的族譜 capture。
+    await new Promise(resolve =>
+      requestAnimationFrame(resolve)
+    );
+
+    await exportGenealogyImage(
+      getSelectedExportImageSize(),
+      getSelectedExportBackgroundMode()
+    );
+
     closeExportPanel();
     uiToast('族譜圖片匯出完成');
   } catch (err) {
     console.error(err);
     await uiAlert(`族譜圖片匯出失敗：${err && err.message ? err.message : 'Unknown error'}`, { title: '族譜圖片匯出失敗', kind: 'danger' });
   } finally {
-    exportImageBtn.textContent = originalText;
+    exportImageBtn.innerHTML =
+      originalHtml;
+
+    exportImageBtn.classList.remove(
+      'is-loading'
+    );
+
+    exportImageBtn.removeAttribute(
+      'aria-busy'
+    );
+
     exportImageBtn.disabled = false;
     exportJsonBtn && (exportJsonBtn.disabled = false);
   }
