@@ -5223,7 +5223,7 @@ body[data-theme="midnight"] .roster-badge.status-alive {
 .app-menu.open>.app-menu-popover { display:block; }
 .topbar-more-popover { top:calc(100% + 8px); right:0; }
 .family-actions-popover,.member-add-popover,.member-manage-popover { top:calc(100% + 5px); right:0; }
-.app-menu-item { width:100%; display:flex; align-items:center; gap:8px; min-height:34px; padding:6px 9px; border:0; border-radius:4px; background:transparent; color:inherit; font:inherit; font-size:12px; text-align:left; white-space:nowrap; cursor:pointer; }
+.app-menu-item { width:100%; display:flex; align-items:center; gap:8px; min-height:34px; padding:6px 9px; border:0; border-radius:4px; background:transparent; color:inherit; font:inherit; font-size:12px; text-align:left; white-space:nowrap; cursor:pointer; text-decoration:none; }
 .app-menu-item:hover { background:var(--nav-dropdown-hover-bg); color:var(--nav-dropdown-hover-text); }
 .app-menu-item.danger { color:#b8483c; }
 .app-menu-divider { height:1px; margin:4px 3px; background:var(--nav-dropdown-divider); }
@@ -6179,10 +6179,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     width:min(820px,100%);
 }
 
-.data-modal {
-    width:min(620px,100%);
-}
-
 .appearance-section,
 .storage-section {
     padding:4px 0 16px;
@@ -6330,8 +6326,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .appearance-section .bg-row button,
 .appearance-section .bg-row .filebtn,
 #resetUiSettingsBtn,
-#cleanupBtn,
-#restoreSampleBtn {
+#cleanupBtn {
     min-height:30px;
     padding:5px 9px;
     border:1px solid var(--border);
@@ -6342,8 +6337,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     font-size:11px;
 }
 
-.appearance-section #bgClearBtn,
-#restoreSampleBtn {
+.appearance-section #bgClearBtn {
     color:#b03a2e;
     border-color:rgba(176,58,46,.25);
 }
@@ -6386,8 +6380,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 /* ========【圖片與儲存】 設定 - 對應 Blob Asset Store 的圖片處理、容量狀態與維護 ======== */
-.storage-modal > h2,
-.data-modal > h2 {
+.storage-modal > h2 {
     margin-bottom:6px;
 }
 
@@ -6402,8 +6395,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     padding:12px 0 16px;
 }
 
-.storage-section .setting-group-title,
-.data-management-section .setting-group-title {
+.storage-section .setting-group-title {
     margin:0;
     font-size:13px;
     font-weight:700;
@@ -6604,8 +6596,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     line-height:1.55;
 }
 
-.storage-maintenance-card,
-.data-danger-card {
+.storage-maintenance-card {
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -6616,40 +6607,28 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:var(--card);
 }
 
-.storage-maintenance-card > div,
-.data-danger-card > div {
+.storage-maintenance-card > div {
     min-width:0;
 }
 
-.storage-maintenance-card strong,
-.data-danger-card strong {
+.storage-maintenance-card strong {
     color:var(--ink);
     font-size:12.5px;
 }
 
-.storage-maintenance-card p,
-.data-danger-card p {
+.storage-maintenance-card p {
     margin:4px 0 0;
     color:var(--sub);
     font-size:10.5px;
     line-height:1.5;
 }
 
-.storage-maintenance-card button,
-.data-danger-card button {
+.storage-maintenance-card button {
     flex:0 0 auto;
     min-height:32px;
     padding:5px 10px;
 }
 
-.data-management-section {
-    padding:8px 0 16px;
-}
-
-.data-danger-card {
-    border-color:rgba(176,58,46,.24);
-    background:color-mix(in srgb,var(--card) 93%,#b03a2e 7%);
-}
 
 @media (max-width:720px) {
     .roster-header {
@@ -6713,14 +6692,12 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         grid-template-columns:1fr 1fr;
     }
 
-    .storage-maintenance-card,
-    .data-danger-card {
+    .storage-maintenance-card {
         align-items:stretch;
         flex-direction:column;
     }
 
-    .storage-maintenance-card button,
-    .data-danger-card button {
+    .storage-maintenance-card button {
         align-self:flex-start;
     }
 }
