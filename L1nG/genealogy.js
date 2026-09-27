@@ -4571,6 +4571,81 @@ function resolvePedigreeLayerCollisions(layers) {
   });
 }
 
+function shiftGenealogyDescendantBranch(rootUnit, deltaX, model, shifted = new Set()) {
+  if (
+    !rootUnit ||
+    !Number.isFinite(deltaX) ||
+    Math.abs(deltaX) < 0.01 ||
+    shifted.has(rootUnit.id)
+  ) {
+    return;
+  }
+
+  shifted.add(rootUnit.id);
+  rootUnit.x += deltaX;
+
+  rootUnit.childUnitIds.forEach(childUnitId => {
+    const childUnit =
+      model.unitById.get(childUnitId);
+
+    if (!childUnit) return;
+
+    shiftGenealogyDescendantBranch(
+      childUnit,
+      deltaX,
+      model,
+      shifted
+    );
+  });
+}
+
+function reconcilePedigreeBranchesTopDown(layers, model, connectorGroups) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = getGaps();
+
+  const generations =
+    [...layers.keys()].sort((a, b) => a - b);
+
+  generations.slice(1).forEach(generation => {
+    const layer =
+      layers.get(generation);
+
+    if (!layer || !layer.length) return;
+
+    const layerIndex =
+      new Map(
+        layer.map((unit, index) => [unit.id, index])
+      );
+
+    connectorGroups.forEach(group => {
+      const targets =
+        buildPedigreeChildTargets(
+          group,
+          model,
+          generation,
+          layerIndex,
+          SIBLING_GAP
+        );
+
+      targets.forEach(target => {
+        const deltaX =
+          target.left -
+          target.unit.x;
+
+        // 這裡不能只移目前子女的 family unit。
+        // 中間世代本身也可能是下一代的父母；
+        // 因此必須把其整個後代分支一起平移，才能保留已建立的垂直血緣中心。
+        shiftGenealogyDescendantBranch(
+          target.unit,
+          deltaX,
+          model
+        );
+      });
+    });
+  });
+}
+
 function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
   // ========【族譜幾何核心】 設定 - Anchor / Union constraint solver ========
   // 族譜不再以 Family Unit 中心做來回鬆弛，也不再讓 renderer 補折線。
@@ -4583,8 +4658,9 @@ function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
   // 5. 配偶只提供碰撞安全空間，不參與血緣置中。
   // 6. 非族譜自訂關係才允許曲線。
   //
-  // 每輪先建立子代 anchor，再把上一代 union 硬性拉回子女中心；
-  // collision pass 只負責避免卡片重疊，下一輪會重新投影族譜約束。
+  // 前置迭代只負責找到不重疊的近似位置；
+  // 最後由祖先往下重新投影真正的 pedigree 約束，
+  // 並在移動中間世代時連同整個後代分支一起平移。
   for (let iteration = 0; iteration < 12; iteration += 1) {
     alignPedigreeChildrenToParents(
       layers,
@@ -4601,9 +4677,7 @@ function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
     );
   }
 
-  // 最後一次只做 union 對齊，不再 pack，
-  // 保證輸出給畫線器時 parent source 與 child anchors 已符合真正族譜幾何。
-  alignPedigreeParentsToChildren(
+  reconcilePedigreeBranchesTopDown(
     layers,
     model,
     connectorGroups
@@ -4851,25 +4925,111 @@ function zoomAt(clientX, clientY, factor) {
   applyTransform({ interacting:true });
 }
 
+function getVisibleTreeContentBounds() {
+  if (
+    !layoutCache ||
+    !layoutCache.pos ||
+    !layoutCache.pos.size
+  ) {
+    return null;
+  }
+
+  let left = Infinity;
+  let top = Infinity;
+  let right = -Infinity;
+  let bottom = -Infinity;
+
+  layoutCache.pos.forEach((position, id) => {
+    const dims =
+      getNodeDimensionsById(id);
+
+    const x =
+      position.x + PAD;
+
+    const y =
+      position.y + PAD;
+
+    left = Math.min(left, x);
+    top = Math.min(top, y);
+    right = Math.max(right, x + dims.W);
+    bottom = Math.max(bottom, y + dims.H);
+  });
+
+  if (
+    !Number.isFinite(left) ||
+    !Number.isFinite(top) ||
+    !Number.isFinite(right) ||
+    !Number.isFinite(bottom)
+  ) {
+    return null;
+  }
+
+  return {
+    left,
+    top,
+    right,
+    bottom,
+    width:Math.max(1, right - left),
+    height:Math.max(1, bottom - top),
+    centerX:(left + right) / 2,
+    centerY:(top + bottom) / 2
+  };
+}
+
 function fitScreen({ rememberState = true } = {}) {
-  const w = parseFloat(stage.style.width) || 1;
-  const h = parseFloat(stage.style.height) || 1;
-  const vw = viewport.clientWidth;
-  const vh = viewport.clientHeight;
+  const vw =
+    viewport.clientWidth;
+
+  const vh =
+    viewport.clientHeight;
 
   if (rememberState) {
     canvasViewState = 'fit';
   }
 
+  const bounds =
+    getVisibleTreeContentBounds();
+
+  // 沒有人物時才退回 stage 外框。
+  if (!bounds) {
+    const w =
+      parseFloat(stage.style.width) || 1;
+
+    const h =
+      parseFloat(stage.style.height) || 1;
+
+    scale = Math.min(
+      (vw - 40) / w,
+      (vh - 40) / h,
+      1.4
+    );
+
+    scale = Math.max(scale, SCALE_MIN);
+    panX = (vw - w * scale) / 2;
+    panY = (vh - h * scale) / 2;
+    applyTransform();
+    return;
+  }
+
+  const fitPadding = 56;
+
   scale = Math.min(
-    (vw - 40) / w,
-    (vh - 40) / h,
+    (vw - fitPadding) / bounds.width,
+    (vh - fitPadding) / bounds.height,
     1.4
   );
 
   scale = Math.max(scale, SCALE_MIN);
-  panX = (vw - w * scale) / 2;
-  panY = (vh - h * scale) / 2;
+
+  // 直接把「實際人物內容中心」放到 viewport 中央。
+  // stage 的 400×300 最小尺寸與 PAD 不再影響視覺置中。
+  panX =
+    vw / 2 -
+    bounds.centerX * scale;
+
+  panY =
+    vh / 2 -
+    bounds.centerY * scale;
 
   applyTransform();
 }
@@ -5203,21 +5363,49 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
     'edge edge-parent' +
     (group.adoptive ? ' edge-adopt' : '');
 
-  // ========【單一子女親子線】 設定 - 僅允許一條垂直 pedigree trunk ========
-  // 自動排版已在 layout 階段保證 union node 與子女人物中心同 X。
-  // renderer 不再用 V-H-V 隱藏排版錯誤。
+  // ========【單一子女親子線】 設定 - 父母 union 到子女 anchor 必須完整連續 ========
+  // 自動排版正常時 source.x === child.anchor.x，只會得到一條純垂直主幹。
+  // 自由排列或異常資料若造成 X 不一致，使用正交三段式完整連接；
+  // 不允許直接從 child.x 起筆，否則父母 union 到主幹之間會憑空缺一節。
   if (children.length === 1) {
     const child = children[0];
-    const x = child.anchor.x;
+    const x1 = source.x;
     const y1 = source.y;
+    const x2 = child.anchor.x;
     const y2 = child.anchor.y;
+    const aligned =
+      Math.abs(x1 - x2) < 0.75;
 
-    paths.push(
-      '<path class="' + edgeClass + '" d="' +
-      'M' + x + ' ' + y1 +
-      ' V' + y2 +
-      '"/>'
-    );
+    let labelX =
+      aligned
+        ? x1
+        : (x1 + x2) / 2;
+
+    let labelY =
+      y1 + (y2 - y1) / 2;
+
+    if (aligned) {
+      paths.push(
+        '<path class="' + edgeClass + '" d="' +
+        'M' + x1 + ' ' + y1 +
+        ' V' + y2 +
+        '"/>'
+      );
+    } else {
+      const branchY =
+        y1 + (y2 - y1) / 2;
+
+      paths.push(
+        '<path class="' + edgeClass + '" d="' +
+        'M' + x1 + ' ' + y1 +
+        ' V' + branchY +
+        ' H' + x2 +
+        ' V' + y2 +
+        '"/>'
+      );
+
+      labelY = branchY;
+    }
 
     if (showRelLabels) {
       const key = 'parent:' + child.id;
@@ -5231,8 +5419,8 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
       if (info) {
         labels.push(
           makeLabelSVG(
-            x,
-            y1 + (y2 - y1) / 2,
+            labelX,
+            labelY,
             info.icon,
             info.text,
             key
@@ -6704,6 +6892,21 @@ viewport.addEventListener('mousedown', e => {
   const fam = currentFamily();
   const isFree = getCurrentFreeLayout(fam);
 
+  // 自由排列的框選會 preventDefault()，可能吃掉瀏覽器原生 dblclick。
+  // 第二次按下空白畫布時直接執行置中，確保所有排列模式都一致。
+  if (
+    e.detail >= 2 &&
+    !onNode &&
+    !onLabel
+  ) {
+    e.preventDefault();
+    finishMarquee();
+    panning = false;
+    viewport.classList.remove('dragging');
+    fitScreen();
+    return;
+  }
+
   if (isFree && arrangeTool === 'select' && !spacePanHeld && !onNode && !onLabel) {
     e.preventDefault();
     marqueeState = {
@@ -6740,6 +6943,11 @@ window.addEventListener('mouseup', () => {
 viewport.addEventListener('dblclick', e => {
   if (e.target.closest('.node')) return;
   if (e.target.closest('.edge-label')) return;
+
+  e.preventDefault();
+  finishMarquee();
+  panning = false;
+  viewport.classList.remove('dragging');
   fitScreen();
 });
 viewport.addEventListener('wheel', e => {
