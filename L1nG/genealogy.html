@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20260928-storage-player-ui">
+        <link rel="stylesheet" href="genealogy.css?v=20260928-small-ui-cleanup">
     </head>
     <body data-theme="ling">
 
@@ -112,7 +112,7 @@
                     <nav class="topbar-primary-actions" aria-label="主要功能">
                         <button class="topbar-text-btn" id="rosterBtn" type="button"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span></button>
                         <button class="topbar-text-btn topbar-export-btn" id="exportBtn" type="button" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
-                        <button class="topbar-text-btn" id="restoreSampleBtn" type="button" title="恢復預設族譜"><span>恢復預設族譜</span></button>
+                        <button class="topbar-text-btn danger-action" id="restoreSampleBtn" type="button" title="恢復預設族譜"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>恢復預設族譜</span></button>
                         <div class="app-menu" id="topbarMoreMenu">
                             <button class="topbar-icon-only app-menu-trigger" id="topbarMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" title="更多"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
                             <div class="app-menu-popover topbar-more-popover" role="menu">
@@ -249,7 +249,7 @@
                                             <button class="app-menu-item" id="addMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入既有人物</span></button>
                                         </div>
                                     </div>
-                                    <button class="family-section-batch-remove" id="removeMemberBtn" type="button" title="批量移除" aria-label="批量移除">
+                                    <button class="family-section-batch-remove danger-action" id="removeMemberBtn" type="button" title="批量移除" aria-label="批量移除">
                                         <span class="l1ng-icon icon-person-dash" aria-hidden="true"></span>
                                         <span>批量移除</span>
                                     </button>
@@ -272,7 +272,7 @@
                 <div class="main-area">
                     <div class="canvas-toolbar" id="canvasToolbar" aria-label="畫布工具">
                         <button class="canvas-tool" id="modeToggle" type="button"><span class="l1ng-icon icon-eye" aria-hidden="true"></span><span>檢視模式</span></button>
-                        <button class="canvas-tool" id="layoutToggle" type="button"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動佈局</span></button>
+                        <button class="canvas-tool" id="layoutToggle" type="button"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動排列</span></button>
                         <span class="canvas-tool-divider arrange-tool-divider" id="arrangeToolDivider" style="display:none"></span>
                         <button class="canvas-tool arrange-tool active" id="selectToolBtn" type="button" style="display:none" aria-pressed="true" title="選取工具：拖曳空白處框選人物"><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>選取</span></button>
                         <button class="canvas-tool arrange-tool" id="panToolBtn" type="button" style="display:none" aria-pressed="false" title="拖曳工具：拖曳畫布進行平移"><span class="l1ng-icon icon-arrows-move" aria-hidden="true"></span><span>拖曳</span></button>
@@ -327,7 +327,7 @@
                             <div class="avatar-preview sim-profile-avatar" id="avatarPreview">?</div>
                             <div class="sim-profile-avatar-actions">
                                 <label class="filebtn compact"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/*" hidden id="avatarInput" type="file"></label>
-                                <button class="avatar-clear-compact" id="avatarClearBtn" type="button">移除頭像</button>
+                                <button class="avatar-clear-compact danger-action" id="avatarClearBtn" type="button">移除頭像</button>
                             </div>
                             <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / GIF · 圖片會自動調整</div>
                         </div>
@@ -467,7 +467,7 @@
                             <div class="avatar-preview" id="petAvatarPreview">?</div>
                             <div class="avatar-actions">
                                 <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="petAvatarInput" type="file"></label>
-                                <button id="petAvatarClearBtn" type="button">清除頭像</button>
+                                <button class="danger-action" id="petAvatarClearBtn" type="button">清除頭像</button>
                                 <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / GIF · 圖片會自動調整</div>
                             </div>
                         </div>
@@ -533,7 +533,7 @@
                             <div class="photo-preview" id="photoPreview" tabindex="0">點選選擇 · 或拖曳 · 或 Ctrl+V 貼上</div>
                             <div class="photo-actions-row">
                                 <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="photoInput" type="file"></label>
-                                <button id="photoClearBtn" type="button">清除圖片</button>
+                                <button class="danger-action" id="photoClearBtn" type="button">清除圖片</button>
                                 <span class="photo-size-tip" id="photoSizeTip"></span>
                             </div>
                         </div>
@@ -647,7 +647,7 @@
                     <span class="roster-batch-count" id="rosterBatchCount">已選 0 位</span>
                     <span class="spacer"></span>
                     <button id="rosterBatchAddFamilyBtn" type="button">加入目前家族</button>
-                    <button id="rosterBatchRemoveFamilyBtn" type="button">移出目前家族</button>
+                    <button class="danger-action" id="rosterBatchRemoveFamilyBtn" type="button">移出目前家族</button>
                     <button class="danger" id="rosterBatchDeleteBtn" type="button">刪除人物</button>
                     <button id="rosterBatchCancelBtn" type="button">取消</button>
                 </div>
@@ -811,7 +811,7 @@
                             <strong>清理未使用的圖片</strong>
                             <p>只會刪除目前已經沒有被任何人物、寵物、人生照片、家庭合照或背景使用的圖片，不會影響仍在族譜中使用的圖片。</p>
                         </div>
-                        <button id="cleanupBtn" type="button"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清理未使用的圖片</span></button>
+                        <button class="danger-action" id="cleanupBtn" type="button"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清理未使用的圖片</span></button>
                     </div>
                 </section>
 
@@ -827,7 +827,7 @@
                     <div class="tips-section">
                         <h3><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>畫布與佈局</span></h3>
                         <ul>
-                            <li>自動佈局時，<span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳空白處</b>平移整個族譜畫布；<span class="mouse-hint mouse-wheel" role="img" aria-label="滾輪"><span class="mouse-hint-wheel"></span></span><b>滾輪</b>以滑鼠位置為中心縮放</li>
+                            <li>自動排列時，<span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳空白處</b>平移整個族譜畫布；<span class="mouse-hint mouse-wheel" role="img" aria-label="滾輪"><span class="mouse-hint-wheel"></span></span><b>滾輪</b>以滑鼠位置為中心縮放</li>
                             <li><span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>雙擊空白處</b>自動適應螢幕</li>
                             <li><span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳卡片</b>超過拖曳門檻後會自動切換為「自由排列」，並儲存新位置</li>
                             <li>自由排列會出現<b>選取</b>與<b>拖曳</b>工具：選取工具下拖曳空白處可框選人物；拖曳工具下拖曳畫布可平移視角</li>
@@ -987,6 +987,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260928-storage-player-ui"></script>
+        <script src="genealogy.js?v=20260928-small-ui-cleanup"></script>
     </body>
 </html>
