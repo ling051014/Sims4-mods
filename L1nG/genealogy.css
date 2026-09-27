@@ -1840,6 +1840,7 @@ body[data-theme="midnight"] .gallery-item-stage {
 .editor-empty-note { padding:10px 12px; border:1px dashed var(--border); border-radius:7px; background:var(--panel-bg); color:var(--sub); font-size:11.5px; line-height:1.45; }
 .profile-grid { gap:9px 11px; }
 .profile-grid label { gap:4px; font-size:11.5px; font-weight:600; }
+.profile-grid .trait-field { gap:4px; font-size:11.5px; font-weight:600; }
 .profile-grid input,.profile-grid select,.profile-grid textarea,.profile-grid .ss-input { min-height:34px; line-height:1.2; }
 .profile-basic-grid textarea { min-height:76px; }
 .birthday-inputs { display:grid; grid-template-columns:1.3fr .85fr .85fr; gap:6px; }
@@ -1850,8 +1851,8 @@ body[data-theme="midnight"] .gallery-item-stage {
 .trait-editor { border:1px solid var(--border); border-radius:7px; background:var(--input-bg); padding:7px; }
 .trait-chip-list { display:flex; align-items:center; flex-wrap:wrap; gap:5px; min-height:0; }
 .trait-chip-list:not(:empty) { margin-bottom:6px; }
-.trait-chip { display:inline-flex; align-items:center; gap:4px; min-height:23px; padding:3px 6px 3px 8px; border-radius:999px; background:var(--tag-bg); color:var(--tag-ink); font-size:10.5px; font-weight:500; line-height:1; }
-.trait-chip-remove { display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; padding:0; border:0; border-radius:999px; background:transparent; color:currentColor; font-size:13px; line-height:1; }
+.trait-chip { display:inline-flex; align-items:center; gap:4px; min-height:23px; padding:3px 6px 3px 8px; border-radius:999px; background:var(--tag-bg); color:var(--tag-ink); font-size:10.5px; font-weight:500; line-height:1; cursor:default; user-select:text; }
+.trait-chip-remove { display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; padding:0; border:0; border-radius:999px; background:transparent; color:currentColor; font-size:13px; line-height:1; cursor:pointer; }
 .trait-chip-remove:hover { background:rgba(0,0,0,.08); }
 .trait-add-row { display:flex; gap:6px; }
 .trait-add-row input { flex:1; min-width:0; }
@@ -1902,6 +1903,16 @@ body[data-theme="midnight"] .gallery-item-stage {
 
 .grid label.full {
     /* 網格欄位範圍 */ grid-column: 1/-1;
+}
+
+.grid .trait-field {
+    /* 特徵欄位不是 label，避免點整個區塊觸發 × 按鈕 */
+    grid-column: 1/-1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    color:var(--sub);
+    font-size:12px;
 }
 
 .grid label.span-3 {
