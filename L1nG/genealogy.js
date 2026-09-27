@@ -1124,6 +1124,16 @@ function syncFamilyNameInputWidth() {
   familyNameInput.style.width = `${width}px`;
 }
 
+let familyNameWidthSyncRaf = 0;
+function scheduleFamilyNameInputWidthSync() {
+  if (familyNameWidthSyncRaf) return;
+
+  familyNameWidthSyncRaf = requestAnimationFrame(() => {
+    familyNameWidthSyncRaf = 0;
+    syncFamilyNameInputWidth();
+  });
+}
+
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
   m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
@@ -2572,6 +2582,7 @@ function clampSidebarWidth(value) {
 function applySidebarWidth(value, { persist = true } = {}) {
   const width = clampSidebarWidth(value);
   document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+  scheduleFamilyNameInputWidthSync();
   if (sidebarResizer) sidebarResizer.setAttribute('aria-valuenow', String(width));
   if (persist) {
     try { localStorage.setItem(SIDEBAR_WIDTH_KEY, String(width)); } catch (_) {}
@@ -3332,20 +3343,6 @@ function genealogyParentRelations(child, byId = null) {
       addRelation(parent.id, 'adoptive');
     }
   });
-
-  const hasExplicitAdoptive =
-    [...relationByParent.values()]
-      .includes('adoptive');
-
-  if (
-    child.adoptive &&
-    !hasExplicitAdoptive &&
-    explicitAdoptedParentIds.length === 0
-  ) {
-    (child.parentIds || []).forEach(parentId => {
-      addRelation(parentId, 'adoptive');
-    });
-  }
 
   return [...relationByParent.entries()]
     .map(([parentId, kind]) => ({ parentId, kind }))
@@ -7116,6 +7113,218 @@ function positionNodeContextMenu(clientX, clientY) {
   });
 }
 
+function getSelectedLayoutNodeIds() {
+  return [...selectedNodeIds]
+    .filter(id => layoutCache?.pos?.has(id));
+}
+
+function getLayoutNodeBox(id, position = null) {
+  const pos =
+    position ||
+    layoutCache?.pos?.get(id);
+
+  if (!pos) return null;
+
+  const dims = getNodeDimensionsById(id);
+
+  return {
+    id,
+    x:pos.x,
+    y:pos.y,
+    width:dims.W,
+    height:dims.H,
+    right:pos.x + dims.W,
+    bottom:pos.y + dims.H,
+    centerX:pos.x + dims.W / 2,
+    centerY:pos.y + dims.H / 2
+  };
+}
+
+function applySelectedLayoutOperation(action) {
+  const fam = currentFamily();
+  if (!fam || !layoutCache) return false;
+
+  ensureFamilyLayoutShape(fam);
+
+  const ids = getSelectedLayoutNodeIds();
+  if (ids.length < 2) return false;
+
+  const boxes =
+    ids
+      .map(id => getLayoutNodeBox(id))
+      .filter(Boolean);
+
+  if (boxes.length < 2) return false;
+
+  if (
+    (action === 'distribute-horizontal' ||
+      action === 'distribute-vertical') &&
+    boxes.length < 3
+  ) {
+    return false;
+  }
+
+  const before =
+    captureLayoutHistoryState(
+      fam,
+      viewMode
+    );
+
+  const minLeft =
+    Math.min(...boxes.map(box => box.x));
+  const maxRight =
+    Math.max(...boxes.map(box => box.right));
+  const minTop =
+    Math.min(...boxes.map(box => box.y));
+  const maxBottom =
+    Math.max(...boxes.map(box => box.bottom));
+  const centerX =
+    (minLeft + maxRight) / 2;
+  const centerY =
+    (minTop + maxBottom) / 2;
+
+  const next =
+    new Map(
+      boxes.map(box => [
+        box.id,
+        { x:box.x, y:box.y }
+      ])
+    );
+
+  if (action === 'align-left') {
+    boxes.forEach(box => {
+      next.get(box.id).x = minLeft;
+    });
+  } else if (action === 'align-center-x') {
+    boxes.forEach(box => {
+      next.get(box.id).x =
+        centerX - box.width / 2;
+    });
+  } else if (action === 'align-right') {
+    boxes.forEach(box => {
+      next.get(box.id).x =
+        maxRight - box.width;
+    });
+  } else if (action === 'align-top') {
+    boxes.forEach(box => {
+      next.get(box.id).y = minTop;
+    });
+  } else if (action === 'align-center-y') {
+    boxes.forEach(box => {
+      next.get(box.id).y =
+        centerY - box.height / 2;
+    });
+  } else if (action === 'align-bottom') {
+    boxes.forEach(box => {
+      next.get(box.id).y =
+        maxBottom - box.height;
+    });
+  } else if (action === 'distribute-horizontal') {
+    const ordered =
+      [...boxes].sort(
+        (left, right) =>
+          left.x - right.x
+      );
+
+    const span =
+      ordered[ordered.length - 1].right -
+      ordered[0].x;
+
+    const occupied =
+      ordered.reduce(
+        (sum, box) =>
+          sum + box.width,
+        0
+      );
+
+    const gap =
+      (span - occupied) /
+      (ordered.length - 1);
+
+    let cursor =
+      ordered[0].x;
+
+    ordered.forEach(box => {
+      next.get(box.id).x = cursor;
+      cursor += box.width + gap;
+    });
+  } else if (action === 'distribute-vertical') {
+    const ordered =
+      [...boxes].sort(
+        (top, bottom) =>
+          top.y - bottom.y
+      );
+
+    const span =
+      ordered[ordered.length - 1].bottom -
+      ordered[0].y;
+
+    const occupied =
+      ordered.reduce(
+        (sum, box) =>
+          sum + box.height,
+        0
+      );
+
+    const gap =
+      (span - occupied) /
+      (ordered.length - 1);
+
+    let cursor =
+      ordered[0].y;
+
+    ordered.forEach(box => {
+      next.get(box.id).y = cursor;
+      cursor += box.height + gap;
+    });
+  } else {
+    return false;
+  }
+
+  const manualPositions =
+    fam.manualPositions[viewMode];
+
+  let changed = false;
+
+  next.forEach((pos, id) => {
+    const current =
+      layoutCache.pos.get(id);
+
+    if (
+      !current ||
+      Math.abs(current.x - pos.x) > 0.01 ||
+      Math.abs(current.y - pos.y) > 0.01
+    ) {
+      changed = true;
+    }
+
+    manualPositions[id] = {
+      x:pos.x,
+      y:pos.y
+    };
+  });
+
+  if (!changed) return false;
+
+  render();
+  syncNodeSelectionClasses();
+  expandStageToFit();
+
+  dragHistory.push({
+    type:'card-layout',
+    familyId:fam.id,
+    mode:viewMode,
+    before,
+    after:captureLayoutHistoryState(
+      fam,
+      viewMode
+    )
+  });
+
+  save();
+  return true;
+}
+
 function renderNodeContextMenu(simId, clientX, clientY) {
   if (!nodeContextMenu || !genealogyData?.sims?.[simId]) return;
   const sim = genealogyData.sims[simId];
@@ -7124,6 +7333,44 @@ function renderNodeContextMenu(simId, clientX, clientY) {
   const isMulti = selectedNodeIds.size > 1 && selectedNodeIds.has(simId);
   const selectedCount = isMulti ? selectedNodeIds.size : 1;
   const title = isMulti ? `${uiText('已選取')} ${selectedCount} ${uiText('人')}` : displayDataText(sim.name, sim);
+
+  if (isMulti) {
+    const canDistribute =
+      selectedCount >= 3;
+
+    nodeContextMenu.innerHTML = `
+      <div class="node-context-title">${esc(title)}</div>
+
+      <div class="node-context-section-title">${esc(uiText('對齊'))}</div>
+      <div class="node-context-grid">
+        <button class="node-context-action" type="button" data-node-context-action="align-left"><span>${esc(uiText('靠左'))}</span></button>
+        <button class="node-context-action" type="button" data-node-context-action="align-center-x"><span>${esc(uiText('水平置中'))}</span></button>
+        <button class="node-context-action" type="button" data-node-context-action="align-right"><span>${esc(uiText('靠右'))}</span></button>
+        <button class="node-context-action" type="button" data-node-context-action="align-top"><span>${esc(uiText('頂端'))}</span></button>
+        <button class="node-context-action" type="button" data-node-context-action="align-center-y"><span>${esc(uiText('垂直置中'))}</span></button>
+        <button class="node-context-action" type="button" data-node-context-action="align-bottom"><span>${esc(uiText('底端'))}</span></button>
+      </div>
+
+      <div class="node-context-divider"></div>
+      <div class="node-context-section-title">${esc(uiText('分佈'))}</div>
+      <div class="node-context-grid">
+        <button class="node-context-action" type="button" data-node-context-action="distribute-horizontal" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('水平均勻'))}</span></button>
+        <button class="node-context-action" type="button" data-node-context-action="distribute-vertical" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('垂直均勻'))}</span></button>
+      </div>
+
+      <div class="node-context-divider"></div>
+      <button class="node-context-action" type="button" data-node-context-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
+      <button class="node-context-action danger" type="button" data-node-context-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
+      <button class="node-context-action" type="button" data-node-context-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
+    `;
+
+    nodeContextMenu.dataset.simId = simId;
+    nodeContextMenu.dataset.cardMode = viewMode;
+    nodeContextMenu.classList.add('show');
+    nodeContextMenu.setAttribute('aria-hidden', 'false');
+    positionNodeContextMenu(clientX, clientY);
+    return;
+  }
 
   const fieldRows = [
     ['name','姓名'], ['gender','性別文字'], ['genderBar','性別色條'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
@@ -7169,6 +7416,22 @@ async function handleNodeContextAction(action, simId) {
   if (action === 'edit') { closeNodeContextMenu(); openEditor(simId); return; }
   if (action === 'locate') { closeNodeContextMenu(); focusSimOnCanvas(simId); return; }
   if (action === 'clear-selection') { closeNodeContextMenu(); clearNodeSelection(); return; }
+
+  if ([
+    'align-left',
+    'align-center-x',
+    'align-right',
+    'align-top',
+    'align-center-y',
+    'align-bottom',
+    'distribute-horizontal',
+    'distribute-vertical'
+  ].includes(action)) {
+    applySelectedLayoutOperation(action);
+    closeNodeContextMenu();
+    return;
+  }
+
   if (action === 'reset-selected') {
     const fam = currentFamily();
     ensureFamilyLayoutShape(fam);
@@ -7891,6 +8154,211 @@ function getSmartSnap(id, rawX, rawY) {
   };
 }
 
+function getDragSelectionBounds(dragIds, startPositions, deltaX = 0, deltaY = 0) {
+  const boxes =
+    dragIds
+      .map(id => {
+        const start =
+          startPositions.get(id);
+
+        if (!start) return null;
+
+        return getLayoutNodeBox(
+          id,
+          {
+            x:start.x + deltaX,
+            y:start.y + deltaY
+          }
+        );
+      })
+      .filter(Boolean);
+
+  if (!boxes.length) return null;
+
+  const left =
+    Math.min(...boxes.map(box => box.x));
+  const right =
+    Math.max(...boxes.map(box => box.right));
+  const top =
+    Math.min(...boxes.map(box => box.y));
+  const bottom =
+    Math.max(...boxes.map(box => box.bottom));
+
+  return {
+    left,
+    right,
+    top,
+    bottom,
+    centerX:(left + right) / 2,
+    centerY:(top + bottom) / 2
+  };
+}
+
+function getSelectionAlignmentSnap(dragIds, startPositions, rawDeltaX, rawDeltaY) {
+  const bounds =
+    getDragSelectionBounds(
+      dragIds,
+      startPositions,
+      rawDeltaX,
+      rawDeltaY
+    );
+
+  if (!bounds) {
+    return {
+      deltaX:rawDeltaX,
+      deltaY:rawDeltaY,
+      guideX:null,
+      guideY:null
+    };
+  }
+
+  const selected =
+    new Set(dragIds);
+
+  const threshold =
+    GUIDE_SNAP_PX /
+    Math.max(scale, 0.001);
+
+  const draggedX = [
+    bounds.left,
+    bounds.centerX,
+    bounds.right
+  ];
+
+  const draggedY = [
+    bounds.top,
+    bounds.centerY,
+    bounds.bottom
+  ];
+
+  let bestX = null;
+  let bestY = null;
+
+  layoutCache.pos.forEach((pos, otherId) => {
+    if (selected.has(otherId)) return;
+
+    const target =
+      getLayoutNodeBox(
+        otherId,
+        pos
+      );
+
+    if (!target) return;
+
+    const targetX = [
+      target.x,
+      target.centerX,
+      target.right
+    ];
+
+    const targetY = [
+      target.y,
+      target.centerY,
+      target.bottom
+    ];
+
+    for (let index = 0; index < 3; index += 1) {
+      const delta =
+        targetX[index] -
+        draggedX[index];
+
+      const distance =
+        Math.abs(delta);
+
+      if (
+        distance <= threshold &&
+        (!bestX || distance < bestX.distance)
+      ) {
+        bestX = {
+          delta,
+          distance,
+          guide:targetX[index]
+        };
+      }
+    }
+
+    for (let index = 0; index < 3; index += 1) {
+      const delta =
+        targetY[index] -
+        draggedY[index];
+
+      const distance =
+        Math.abs(delta);
+
+      if (
+        distance <= threshold &&
+        (!bestY || distance < bestY.distance)
+      ) {
+        bestY = {
+          delta,
+          distance,
+          guide:targetY[index]
+        };
+      }
+    }
+  });
+
+  return {
+    deltaX:
+      rawDeltaX +
+      (bestX ? bestX.delta : 0),
+    deltaY:
+      rawDeltaY +
+      (bestY ? bestY.delta : 0),
+    guideX:
+      bestX ? bestX.guide : null,
+    guideY:
+      bestY ? bestY.guide : null
+  };
+}
+
+function getDragSelectionSmartSnap(dragIds, startPositions, primaryId, rawDeltaX, rawDeltaY) {
+  if (dragIds.length === 1) {
+    const start =
+      startPositions.get(primaryId);
+
+    if (!start) {
+      return {
+        deltaX:rawDeltaX,
+        deltaY:rawDeltaY,
+        guideX:null,
+        guideY:null,
+        spacingX:null,
+        spacingY:null
+      };
+    }
+
+    const snapped =
+      getSmartSnap(
+        primaryId,
+        start.x + rawDeltaX,
+        start.y + rawDeltaY
+      );
+
+    return {
+      deltaX:
+        snapped.x - start.x,
+      deltaY:
+        snapped.y - start.y,
+      guideX:snapped.guideX,
+      guideY:snapped.guideY,
+      spacingX:snapped.spacingX,
+      spacingY:snapped.spacingY
+    };
+  }
+
+  return {
+    ...getSelectionAlignmentSnap(
+      dragIds,
+      startPositions,
+      rawDeltaX,
+      rawDeltaY
+    ),
+    spacingX:null,
+    spacingY:null
+  };
+}
+
 nodes.addEventListener('pointerdown', e => {
   // 只讓主滑鼠鍵進入人物卡的點擊／拖曳流程。
   // 右鍵必須完整保留給 contextmenu，避免自由排列模式的 preventDefault() 吃掉右鍵選單。
@@ -8018,14 +8486,22 @@ nodes.addEventListener('pointerdown', e => {
       }
       if (!moved) return;
 
-      const rawPrimaryX = primaryStart.x + dx / scale;
-      const rawPrimaryY = primaryStart.y + dy / scale;
-      // 多選整組移動時保留彼此相對位置；單選時仍使用智慧吸附。
-      const snapped = dragIds.length === 1
-        ? getSmartSnap(id, rawPrimaryX, rawPrimaryY)
-        : { x: rawPrimaryX, y: rawPrimaryY, guideX:null, guideY:null, spacingX:null, spacingY:null };
-      const deltaX = snapped.x - primaryStart.x;
-      const deltaY = snapped.y - primaryStart.y;
+      const rawDeltaX = dx / scale;
+      const rawDeltaY = dy / scale;
+
+      // 單張與多選共用同一拖曳 authority：
+      // 單張保留既有對齊 + 等距吸附；多選以整組外框做邊緣 / 中心吸附。
+      const snapped =
+        getDragSelectionSmartSnap(
+          dragIds,
+          startPositions,
+          id,
+          rawDeltaX,
+          rawDeltaY
+        );
+
+      const deltaX = snapped.deltaX;
+      const deltaY = snapped.deltaY;
       const manualPositions = fam.manualPositions[viewMode];
 
       startPositions.forEach((startPos, sid) => {
@@ -10611,7 +11087,7 @@ function getThemeCanvasBackgroundStyle() {
   };
 }
 
-function buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale, backgroundMode = 'current') {
+function buildGenealogyCaptureNode(stageWidth, stageHeight, backgroundMode = 'current') {
   const captureViewport = viewport.cloneNode(true);
   captureViewport.classList.remove('dragging');
   captureViewport.style.position = 'fixed';
@@ -10619,8 +11095,8 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale, backgr
   captureViewport.style.top = '0';
   captureViewport.style.zIndex = '-2147483647';
   captureViewport.style.pointerEvents = 'none';
-  captureViewport.style.width = `${Math.max(1, Math.ceil(stageWidth * displayScale))}px`;
-  captureViewport.style.height = `${Math.max(1, Math.ceil(stageHeight * displayScale))}px`;
+  captureViewport.style.width = `${Math.max(1, Math.ceil(stageWidth))}px`;
+  captureViewport.style.height = `${Math.max(1, Math.ceil(stageHeight))}px`;
   captureViewport.style.minWidth = captureViewport.style.width;
   captureViewport.style.minHeight = captureViewport.style.height;
   captureViewport.style.flex = 'none';
@@ -10651,8 +11127,8 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale, backgr
   const captureStage = captureViewport.querySelector('#stage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
   captureStage.classList.remove('is-transforming');
-  // 使用與「自動適應螢幕」相同的縮放倍率，只移除 pan；不受玩家當下手動縮放影響。
-  captureStage.style.transform = `scale(${displayScale})`;
+  // 匯出直接使用族譜世界座標 1:1；Fit / zoom / pan 只屬於瀏覽視角，不參與輸出解析度。
+  captureStage.style.transform = 'none';
   captureStage.style.transformOrigin = '0 0';
   captureStage.style.left = '0';
   captureStage.style.top = '0';
@@ -10668,7 +11144,7 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale, backgr
   return captureViewport;
 }
 
-function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight, displayScale) {
+function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
   const captureStage = captureViewport.querySelector('#stage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
 
@@ -10698,8 +11174,8 @@ function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight, disp
   if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
     minX = 0;
     minY = 0;
-    maxX = Math.max(1, stageWidth * displayScale);
-    maxY = Math.max(1, stageHeight * displayScale);
+    maxX = Math.max(1, stageWidth);
+    maxY = Math.max(1, stageHeight);
   }
 
   // 關係線 stroke、卡片陰影與外框需要安全邊界；四周固定相同留白，讓整棵族譜真正置中。
@@ -10724,19 +11200,6 @@ function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight, disp
   return { width, height };
 }
 
-function getExportDisplayScale(stageWidth, stageHeight) {
-  // 與 fitScreen() 使用同一套公式：匯出保留網頁正常「適應螢幕」時的視覺比例，
-  // 但不受玩家當下滾輪縮放或平移位置影響。
-  const viewportWidth = Math.max(1, viewport.clientWidth || 1);
-  const viewportHeight = Math.max(1, viewport.clientHeight || 1);
-  const fitScale = Math.min(
-    Math.max(1, viewportWidth - 40) / Math.max(1, stageWidth),
-    Math.max(1, viewportHeight - 40) / Math.max(1, stageHeight),
-    1.4
-  );
-  return Math.max(fitScale, SCALE_MIN);
-}
-
 async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'current') {
   if (!genealogyData || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
 
@@ -10751,16 +11214,15 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   const stageWidth = Math.max(1, Math.ceil(parseFloat(stage.style.width) || stage.offsetWidth || 1));
   const stageHeight = Math.max(1, Math.ceil(parseFloat(stage.style.height) || stage.offsetHeight || 1));
 
-  const displayScale = getExportDisplayScale(stageWidth, stageHeight);
   const html2canvas = await ensureHtml2Canvas();
-  const captureViewport = buildGenealogyCaptureNode(stageWidth, stageHeight, displayScale, backgroundMode);
+  const captureViewport = buildGenealogyCaptureNode(stageWidth, stageHeight, backgroundMode);
   document.body.appendChild(captureViewport);
 
   try {
     // 先讓 clone 套用完整 CSS，再把 mask icon 換成 html2canvas 能正確輸出的 SVG。
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     await prepareCaptureIcons(captureViewport);
-    const captureSize = fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight, displayScale);
+    const captureSize = fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight);
     const pixelWidth = Math.max(1, Math.round(captureSize.width * factor));
     const pixelHeight = Math.max(1, Math.round(captureSize.height * factor));
 
@@ -12071,6 +12533,7 @@ Object.assign(ZH_HANS_EXACT, {
   '篩選':'筛选','全部狀態':'全部状态','全部性別':'全部性别','重設篩選':'重置筛选','父母 A':'父母 A','父母 B':'父母 B',
   '背景':'背景','目前背景圖片':'当前背景图片','主題背景顏色':'主题背景颜色','透明背景（PNG）':'透明背景（PNG）',
   '查看個人檔案':'查看个人资料','在族譜中定位':'在族谱中定位','移出目前家族':'移出当前家族',
+  '對齊':'对齐','分佈':'分布','靠左':'左对齐','水平置中':'水平居中','靠右':'右对齐','頂端':'顶端对齐','垂直置中':'垂直居中','底端':'底端对齐','水平均勻':'水平平均分布','垂直均勻':'垂直平均分布',
   '卡片顯示內容':'卡片显示内容','卡片外觀':'卡片外观','檢視卡片外觀':'查看模式卡片外观','檢視模式顯示內容':'查看模式显示内容','編輯模式顯示內容':'编辑模式显示内容','極簡':'极简','半透明':'半透明','完整卡片':'完整卡片',
   '套用於所有檢視模式人物卡':'应用于所有查看模式人物卡','只套用於檢視模式人物卡':'仅应用于查看模式人物卡','只套用於編輯模式人物卡':'仅应用于编辑模式人物卡','顯示內容套用於檢視與編輯模式；外觀只套用檢視模式':'显示内容应用于查看与编辑模式；外观仅应用于查看模式','重設所選位置':'重置所选位置','移出所選人物':'移出所选人物','取消選取':'取消选择',
   '確定要將所選人物移出目前家族嗎？':'确定要将所选人物移出当前家族吗？','人物本身仍會保留在人物資料中。':'人物本身仍会保留在人物资料中。',
@@ -12101,6 +12564,7 @@ Object.assign(EN, {
   '篩選':'Filter','全部狀態':'All statuses','全部性別':'All genders','重設篩選':'Reset filters','父母 A':'Parent A','父母 B':'Parent B',
   '背景':'Background','目前背景圖片':'Current background image','主題背景顏色':'Theme background color','透明背景（PNG）':'Transparent background (PNG)',
   '查看個人檔案':'View Profile','在族譜中定位':'Locate in Tree','移出目前家族':'Remove from Current Family',
+  '對齊':'Align','分佈':'Distribute','靠左':'Align Left','水平置中':'Align Center','靠右':'Align Right','頂端':'Align Top','垂直置中':'Align Middle','底端':'Align Bottom','水平均勻':'Distribute Horizontally','垂直均勻':'Distribute Vertically',
   '卡片顯示內容':'Card content','卡片外觀':'Card appearance','檢視卡片外觀':'View card appearance','檢視模式顯示內容':'View mode content','編輯模式顯示內容':'Edit mode content','極簡':'Minimal','半透明':'Translucent','完整卡片':'Full card',
   '套用於所有檢視模式人物卡':'Applies to all View Mode cards','只套用於檢視模式人物卡':'Applies only to View Mode cards','只套用於編輯模式人物卡':'Applies only to Edit Mode cards','顯示內容套用於檢視與編輯模式；外觀只套用檢視模式':'Content applies to both View and Edit modes; appearance applies only to View Mode','重設所選位置':'Reset selected positions','移出所選人物':'Remove selected Sims','取消選取':'Clear selection',
   '確定要將所選人物移出目前家族嗎？':'Remove the selected Sims from the current family?','人物本身仍會保留在人物資料中。':'The Sims will remain in the global Sim data.',
