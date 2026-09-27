@@ -3727,6 +3727,38 @@ function getVisibleIds(familyId) {
   return result;
 }
 
+// ========【圖片預熱】 設定 - 只預先載入目前畫面會立即看到的圖片，避免 F5 後頭像逐張跳出 ========
+async function preloadCurrentViewAssets() {
+  if (!assetStoreReady || !genealogyData) return;
+
+  const assetIds = new Set();
+
+  const add = ref => {
+    if (isAssetId(ref)) assetIds.add(ref);
+  };
+
+  add(bgSettings?.image);
+
+  const family = currentTreeFamily() || currentFamily();
+  add(family?.coverImage);
+
+  const visibleIds = getVisibleIds(genealogyData.currentFamilyId);
+
+  visibleIds.forEach(id => {
+    const sim = genealogyData.sims[id];
+    if (!sim) return;
+    add(sim.avatar);
+  });
+
+  // 左側家庭成員列使用 Household 真正成員；可能不完全等同目前族譜展開範圍。
+  (currentFamily()?.memberIds || []).forEach(id => {
+    const sim = genealogyData.sims[id];
+    if (sim) add(sim.avatar);
+  });
+
+  await assetStore.preloadUrls(assetIds, { concurrency:12 });
+}
+
 // ========【配偶間距】 設定 - 依關係標籤實際寬度自適應 ========
 function relationshipBubbleWidth(info) {
   if (!info) return 0;
@@ -9243,7 +9275,7 @@ function refreshFamilyUI() {
   syncNavSelectControl('familySelect');
   refreshFamilyProfilePanel();
 }
-familySelect.onchange = () => {
+familySelect.onchange = async () => {
   const selectorEntries = getFamilySelectorEntries();
   const selectedEntry = selectorEntries.find(entry => entry.value === familySelect.value);
   if (!selectedEntry) return;
@@ -9264,7 +9296,11 @@ familySelect.onchange = () => {
   removeMemberSelection.clear();
   removeMemberMode = false;
   closeEditor();
-  save(); refreshFamilyUI(); render();
+
+  save();
+  await preloadCurrentViewAssets();
+  refreshFamilyUI();
+  render();
   requestAnimationFrame(fitScreen);
 };
 familyNameInput.addEventListener('input', syncFamilyNameInputWidth);
@@ -12219,6 +12255,11 @@ async function init() {
   restoreFamilyPanelCollapsed();
   setupViewportResizeObserver();
   setupSearchSelects();
+
+  // Skeleton 尚未移除時先把首屏需要的 Blob URL 準備好。
+  // 不預載人生照片，維持大型圖片庫的 Lazy Load 優勢。
+  await preloadCurrentViewAssets();
+
   refreshFamilyUI();
   render();
 

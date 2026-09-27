@@ -7,7 +7,7 @@
   const STORE_NAME = 'assets';
   const LEGACY_STORE_NAME = 'images';
   const ASSET_PREFIX = 'asset_';
-  const URL_CACHE_LIMIT = 96;
+  const URL_CACHE_LIMIT = 256;
 
   let dbPromise = null;
   const objectUrlCache = new Map();
@@ -130,6 +130,36 @@
     } finally {
       pendingUrlLoads.delete(id);
     }
+  }
+
+  async function preloadUrls(ids, { concurrency = 12 } = {}) {
+    const queue = [...new Set(ids || [])].filter(isAssetId);
+    if (!queue.length) return { requested:0, loaded:0 };
+
+    const workerCount = Math.max(1, Math.min(Number(concurrency) || 1, queue.length));
+    let cursor = 0;
+    let loaded = 0;
+
+    const worker = async () => {
+      while (cursor < queue.length) {
+        const index = cursor++;
+        const id = queue[index];
+
+        try {
+          const url = await getUrl(id);
+          if (url) loaded++;
+        } catch (_) {}
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length:workerCount }, () => worker())
+    );
+
+    return {
+      requested:queue.length,
+      loaded
+    };
   }
 
   async function deleteAsset(id) {
@@ -492,6 +522,7 @@
     optimizeImage,
     importBlob,
     getUrl,
+    preloadUrls,
     peekUrl,
     hasAsset,
     deleteAsset,
