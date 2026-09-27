@@ -965,6 +965,7 @@ const viewport = $('viewport'), stage = $('stage'), svg = $('links'), nodes = $(
 const labelsSvg = $('labels');
 const mask = $('mask'), rosterMask = $('rosterMask'), bgMask = $('bgMask');
 const storageMask = $('storageMask');
+const dataMask = $('dataMask');
 const addMemberMask = $('addMemberMask');
 const tipsMask = $('tipsMask');
 const infoMask = $('infoMask');
@@ -2807,7 +2808,7 @@ function applyAvatarProfile(name) {
   try { localStorage.setItem(AVATAR_PROFILE_KEY, name); } catch(e){}
   const p = getAvatarProfile();
   const hint = $('avatarProfileHint');
-  if (hint) hint.innerHTML = `目前品質：<b>${p.label}</b>（最大 ${p.max}px）。`;
+  if (hint) hint.textContent = p.hint;
   const avTip = $('avatarQualityHint');
   if (avTip) avTip.textContent = `支援 JPG / PNG / GIF，自動壓縮為 ${p.max}×${p.max}`;
 }
@@ -2820,7 +2821,7 @@ function applyPetAvatarProfile(name) {
   try { localStorage.setItem(PET_AVATAR_PROFILE_KEY, name); } catch(e){}
   const p = getPetAvatarProfile();
   const hint = $('petAvatarProfileHint');
-  if (hint) hint.innerHTML = `目前品質：<b>${p.label}</b>（最大 ${p.max}px）。`;
+  if (hint) hint.textContent = p.hint;
   const tip = $('petAvatarQualityHint');
   if (tip) tip.textContent = `支援 JPG / PNG / GIF，自動壓縮為 ${p.max}×${p.max}`;
 }
@@ -2833,14 +2834,7 @@ function applyGalleryProfile(name) {
   try { localStorage.setItem(GALLERY_PROFILE_KEY, name); } catch(e){}
   const p = getGalleryProfile();
   const hint = $('galleryProfileHint');
-  if (hint) {
-    if (name === 'original') {
-      hint.innerHTML = `目前品質：<b>原始圖片</b>。不壓縮，保持原始格式與畫質。<br>
-        ${iconSvg('exclamation-triangle')} 原始圖片會較快佔用瀏覽器儲存空間。`;
-    } else {
-      hint.innerHTML = `目前品質：<b>${p.label}</b>（最大 ${p.max}px · ${p.hint}）。`;
-    }
-  }
+  if (hint) hint.textContent = p.hint;
 }
 galleryProfileSelect.onchange = () => applyGalleryProfile(galleryProfileSelect.value);
 
@@ -3036,49 +3030,104 @@ function updateBgPreview() {
   }
 }
 
-async function updateStorageInfo() {
-  const infoEl = $('storageInfo');
-  const barEl = $('storageBarFill');
-  if (!infoEl || !barEl) return;
+function formatStorageSize(byteSize) {
+  const bytes = Math.max(0, Number(byteSize) || 0);
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(bytes < 10240 ? 1 : 0) + ' KB';
+  if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(bytes < 10 * 1024 * 1024 ? 2 : 1) + ' MB';
+  return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+}
 
-  let imgCount = 0;
-  let imgSizeKB = 0;
+// ========【圖片引用統計】 設定 - 只提供儲存頁顯示，不改變 GC / 匯出的資產權威邏輯 ========
+function getStorageReferenceStats(targetDb = genealogyData, targetBg = bgSettings) {
+  const uniqueIds = new Set();
+  let referenceCount = 0;
+
+  const add = ref => {
+    if (!isAssetId(ref)) return;
+    referenceCount++;
+    uniqueIds.add(ref);
+  };
+
+  Object.values(targetDb?.sims || {}).forEach(sim => {
+    add(sim.avatar);
+    (sim.gallery || []).forEach(item => add(item.image));
+    (sim.pets || []).forEach(pet => add(pet.avatar));
+  });
+
+  (targetDb?.families || []).forEach(fam => add(fam.coverImage));
+  (targetDb?.meta?.unassignedPets || []).forEach(pet => add(pet.avatar));
+  add(targetBg?.image);
+
+  return {
+    referenceCount,
+    uniqueReferenceCount:uniqueIds.size,
+    sharedReferenceCount:Math.max(0, referenceCount - uniqueIds.size)
+  };
+}
+
+async function updateStorageInfo() {
+  const assetCountEl = $('storageAssetCount');
+  const assetSizeEl = $('storageAssetSize');
+  const referenceCountEl = $('storageReferenceCount');
+  const sharedCountEl = $('storageSharedCount');
+  const dataSizeEl = $('storageDataSize');
+  const browserUsageEl = $('storageBrowserUsage');
+  const browserQuotaEl = $('storageBrowserQuota');
+  const usagePercentEl = $('storageUsagePercent');
+  const barEl = $('storageBarFill');
+
+  let assetCount = 0;
+  let assetBytes = 0;
 
   try {
     const stats = await assetStore.getStats();
-    imgCount = stats.count;
-    imgSizeKB = stats.byteSize / 1024;
-  } catch(e) {}
+    assetCount = Number(stats.count) || 0;
+    assetBytes = Number(stats.byteSize) || 0;
+  } catch (error) {
+    console.warn('讀取圖片儲存統計失敗：', error);
+  }
 
-  let lsSizeKB = 0;
+  let genealogyBytes = 0;
   try {
     const raw = localStorage.getItem(STORE_KEY) || '';
-    lsSizeKB = new Blob([raw]).size / 1024;
-  } catch(e) {}
+    genealogyBytes = new Blob([raw]).size;
+  } catch (_) {}
 
-  let quotaMB = 0, usedMB = 0;
+  const referenceStats = getStorageReferenceStats();
+
+  let browserUsageBytes = 0;
+  let browserQuotaBytes = 0;
   if (navigator.storage && navigator.storage.estimate) {
     try {
-      const est = await navigator.storage.estimate();
-      usedMB = est.usage / 1024 / 1024;
-      quotaMB = est.quota / 1024 / 1024;
-    } catch(e) {}
+      const estimate = await navigator.storage.estimate();
+      browserUsageBytes = Number(estimate.usage) || 0;
+      browserQuotaBytes = Number(estimate.quota) || 0;
+    } catch (error) {
+      console.warn('讀取瀏覽器儲存配額失敗：', error);
+    }
   }
 
-  const totalKB = imgSizeKB + lsSizeKB;
-  let html = `${iconSvg('images')} 圖片 <b>${imgCount}</b> 張 · 約 <b>${(imgSizeKB/1024).toFixed(2)} MB</b>`;
-  html += `<br>${iconSvg('file-earmark-text')} 族譜資料約 <b>${(lsSizeKB/1024).toFixed(2)} MB</b>`;
+  if (assetCountEl) assetCountEl.textContent = String(assetCount);
+  if (assetSizeEl) assetSizeEl.textContent = formatStorageSize(assetBytes);
+  if (referenceCountEl) referenceCountEl.textContent = String(referenceStats.referenceCount);
+  if (sharedCountEl) sharedCountEl.textContent = String(referenceStats.sharedReferenceCount);
+  if (dataSizeEl) dataSizeEl.textContent = formatStorageSize(genealogyBytes);
+  if (browserUsageEl) browserUsageEl.textContent = browserQuotaBytes > 0 ? formatStorageSize(browserUsageBytes) : '—';
+  if (browserQuotaEl) browserQuotaEl.textContent = browserQuotaBytes > 0 ? formatStorageSize(browserQuotaBytes) : '—';
 
-  if (quotaMB > 0) {
-    html += `<br>${iconSvg('database')} 瀏覽器總用量 <b>${usedMB.toFixed(1)} MB</b> / 配額 <b>${quotaMB.toFixed(0)} MB</b>`;
-    const pct = Math.min(100, (usedMB / quotaMB) * 100);
+  if (barEl) {
+    const pct = browserQuotaBytes > 0
+      ? Math.min(100, (browserUsageBytes / browserQuotaBytes) * 100)
+      : 0;
     barEl.style.width = pct + '%';
     barEl.classList.toggle('warn', pct > 75);
-  } else {
-    barEl.style.width = Math.min(100, totalKB / 50000 * 100) + '%';
+    if (usagePercentEl) usagePercentEl.textContent = browserQuotaBytes > 0
+      ? (pct >= 10 ? pct.toFixed(0) : pct.toFixed(1))
+      : '—';
+  } else if (usagePercentEl) {
+    usagePercentEl.textContent = '—';
   }
-
-  infoEl.innerHTML = html;
 }
 
 $('bgBtn').onclick = () => {
@@ -3106,18 +3155,37 @@ $('storageBtn').onclick = () => {
 $('storageCloseBtn').onclick = () => storageMask.classList.remove('show');
 storageMask.onclick = e => { if (e.target === storageMask) storageMask.classList.remove('show'); };
 
+const resetImageQualityBtn = $('resetImageQualityBtn');
+if (resetImageQualityBtn) {
+  resetImageQualityBtn.onclick = () => {
+    applyAvatarProfile('balanced');
+    applyPetAvatarProfile('balanced');
+    applyGalleryProfile('medium');
+    uiToast('圖片品質已恢復預設。');
+  };
+}
+
+const dataManageBtn = $('dataManageBtn');
+if (dataManageBtn && dataMask) {
+  dataManageBtn.onclick = () => dataMask.classList.add('show');
+}
+const dataCloseBtn = $('dataCloseBtn');
+if (dataCloseBtn && dataMask) {
+  dataCloseBtn.onclick = () => dataMask.classList.remove('show');
+  dataMask.onclick = e => { if (e.target === dataMask) dataMask.classList.remove('show'); };
+}
+
 // ========【恢復預設】 設定 - 介面設定與範例資料分開處理 ========
 const resetUiSettingsBtn = $('resetUiSettingsBtn');
 if (resetUiSettingsBtn) {
   resetUiSettingsBtn.onclick = async () => {
     const ok = await uiConfirm(
-      '恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？\n族譜人物、關係與卡片位置不會被刪除。',
+      '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？\n族譜人物、關係與卡片位置不會被刪除。',
       { title:'重設介面設定', confirmText:'重設', kind:'default' }
     );
     if (!ok) return;
 
     [THEME_KEY, CUSTOM_COLORS_KEY, BG_KEY, MODE_KEY, LABELS_KEY,
-      AVATAR_PROFILE_KEY, PET_AVATAR_PROFILE_KEY, GALLERY_PROFILE_KEY,
       LABEL_LOCK_KEY, SIDEBAR_WIDTH_KEY, FAMILY_PANEL_COLLAPSED_KEY,
       ROSTER_VIEW_KEY, REL_LINE_STYLE_KEY].forEach(key => {
       try { localStorage.removeItem(key); } catch (_) {}
@@ -3134,9 +3202,6 @@ if (resetUiSettingsBtn) {
     applyTheme('ling');
     applyViewMode('view');
     applyLabelLock(false);
-    applyAvatarProfile('balanced');
-    applyPetAvatarProfile('balanced');
-    applyGalleryProfile('medium');
     applyBg();
     updateBgPreview();
     updateLayoutToggle();
@@ -3170,6 +3235,7 @@ if (restoreSampleBtn) {
     render();
     bgMask.classList.remove('show');
     storageMask.classList.remove('show');
+    dataMask?.classList.remove('show');
     requestAnimationFrame(fitScreen);
     uiToast('已重建繁中範例資料。');
   };
@@ -3209,9 +3275,15 @@ $('bgClearBtn').onclick = async () => {
 
 $('cleanupBtn').onclick = async () => {
   if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
-  const n = await cleanupUnusedImages();
-  uiToast(`清理完成，共刪除 ${n} 張未使用圖片。`);
-  updateStorageInfo();
+  const button = $('cleanupBtn');
+  if (button) button.disabled = true;
+  try {
+    const n = await cleanupUnusedImages();
+    uiToast(n > 0 ? `清理完成：刪除了 ${n} 張未使用圖片。` : '目前沒有可清理的圖片。');
+    await updateStorageInfo();
+  } finally {
+    if (button) button.disabled = false;
+  }
 };
 
 $('tipsBtn').onclick = () => tipsMask.classList.add('show');
@@ -3219,7 +3291,7 @@ $('tipsCloseBtn').onclick = () => tipsMask.classList.remove('show');
 tipsMask.onclick = e => { if (e.target === tipsMask) tipsMask.classList.remove('show'); };
 
 const MODAL_STACK = ['photoMask','petMask','mask','infoMask','galleryViewerMask',
-                     'tipsMask','rosterMask','addMemberMask','storageMask','bgMask'];
+                     'tipsMask','rosterMask','addMemberMask','dataMask','storageMask','bgMask'];
 function closeTopModal() {
   for (const id of MODAL_STACK) {
     const el = document.getElementById(id);
@@ -12668,7 +12740,32 @@ Object.assign(EN, {
     '還沒有任何人物':'还没有任何人物',
     '批量刪除人物':'批量删除人物',
     '族譜資料約':'族谱数据约',
-    '目前瀏覽器已自動改用備用圖片儲存方式':'当前浏览器已自动改用备用图片存储方式'
+    '目前瀏覽器已自動改用備用圖片儲存方式':'当前浏览器已自动改用备用图片存储方式',
+    '儲存狀態':'存储状态',
+    '唯一圖片資產':'唯一图片资源',
+    '圖片引用':'图片引用',
+    '瀏覽器總用量':'浏览器总用量',
+    '不含圖片本體':'不含图片本体',
+    '配額':'配额',
+    '次重複引用已自動共用':'次重复引用已自动共用',
+    '瀏覽器儲存空間':'浏览器存储空间',
+    '% 已使用':'% 已使用',
+    'IndexedDB 圖片本體':'IndexedDB 图片本体',
+    'SHA-256 自動去重':'SHA-256 自动去重',
+    'JSON 備份含圖片':'JSON 备份含图片',
+    '維護':'维护',
+    '人物卡片與人物資料使用的頭像':'人物卡片与人物数据使用的头像',
+    '寵物資料使用的頭像':'宠物数据使用的头像',
+    '人生照片與相簿圖片':'人生照片与相册图片',
+    '圖片本體儲存在目前瀏覽器；族譜資料只保存圖片索引。匯出 JSON 備份時會連同圖片一起帶走。':'图片本体保存在当前浏览器；族谱数据只保存图片索引。导出 JSON 备份时会连同图片一起带走。',
+    '只影響之後新增或更換的圖片；已經儲存的圖片不會重新壓縮。':'只影响之后新增或更换的图片；已经保存的图片不会重新压缩。',
+    '只有打開這個頁面時才會計算容量，不會在拖曳卡片或瀏覽族譜時掃描圖片庫。':'只有打开这个页面时才会计算容量，不会在拖动卡片或浏览族谱时扫描图片库。',
+    '圖片只會保存在目前使用的瀏覽器，不會自動上傳到網站或伺服器。':'图片只会保存在当前使用的浏览器，不会自动上传到网站或服务器。',
+    '刪除目前沒有任何人物、寵物、人生照片、家庭合照或背景引用的圖片資產。':'删除当前没有任何人物、宠物、人生照片、家庭合照或背景引用的图片资源。',
+    '這裡只放會直接改動族譜資料的操作。':'这里只有会直接改动族谱数据的操作。',
+    '重建範例資料會取代目前族譜內容；需要保留資料時，請先匯出 JSON 備份。':'重建示例数据会替换当前族谱内容；需要保留数据时，请先导出 JSON 备份。',
+    '圖片品質已恢復預設。':'图片质量已恢复默认。',
+    '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？':'恢复主题、背景、侧边栏宽度、查看模式与关系线等界面设置？'
   });
 
   Object.assign(EN, {
@@ -12711,7 +12808,32 @@ Object.assign(EN, {
     '還沒有任何人物':'No people yet',
     '批量刪除人物':'Delete Multiple People',
     '族譜資料約':'Genealogy data about',
-    '目前瀏覽器已自動改用備用圖片儲存方式':'The browser has automatically switched to a fallback image storage method'
+    '目前瀏覽器已自動改用備用圖片儲存方式':'The browser has automatically switched to a fallback image storage method',
+    '儲存狀態':'Storage Status',
+    '唯一圖片資產':'Unique Image Assets',
+    '圖片引用':'Image References',
+    '瀏覽器總用量':'Browser Usage',
+    '不含圖片本體':'Images excluded',
+    '配額':'Quota',
+    '次重複引用已自動共用':'duplicate references share an existing asset',
+    '瀏覽器儲存空間':'Browser Storage',
+    '% 已使用':'% used',
+    'IndexedDB 圖片本體':'IndexedDB image blobs',
+    'SHA-256 自動去重':'SHA-256 deduplication',
+    'JSON 備份含圖片':'Images included in JSON backups',
+    '維護':'Maintenance',
+    '人物卡片與人物資料使用的頭像':'Portraits used by Sim cards and profiles',
+    '寵物資料使用的頭像':'Portraits used by pet profiles',
+    '人生照片與相簿圖片':'Life photos and gallery images',
+    '圖片本體儲存在目前瀏覽器；族譜資料只保存圖片索引。匯出 JSON 備份時會連同圖片一起帶走。':'Image blobs stay in this browser while genealogy data stores only image references. JSON backups include the images.',
+    '只影響之後新增或更換的圖片；已經儲存的圖片不會重新壓縮。':'Only new or replaced images use these settings. Existing images are not recompressed.',
+    '只有打開這個頁面時才會計算容量，不會在拖曳卡片或瀏覽族譜時掃描圖片庫。':'Storage is calculated only when this panel opens. Normal browsing and card dragging do not scan the image library.',
+    '圖片只會保存在目前使用的瀏覽器，不會自動上傳到網站或伺服器。':'Images stay in the current browser and are never uploaded automatically.',
+    '刪除目前沒有任何人物、寵物、人生照片、家庭合照或背景引用的圖片資產。':'Delete image assets that are no longer referenced by people, pets, life photos, family photos, or the background.',
+    '這裡只放會直接改動族譜資料的操作。':'Only operations that directly change genealogy data are kept here.',
+    '重建範例資料會取代目前族譜內容；需要保留資料時，請先匯出 JSON 備份。':'Rebuilding sample data replaces the current genealogy. Export a JSON backup first if you want to keep it.',
+    '圖片品質已恢復預設。':'Image quality settings restored to defaults.',
+    '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？':'Restore theme, background, sidebar width, view mode, and relationship-line settings?'
   });
 
   Object.assign(ZH_HANS_EXACT, {
