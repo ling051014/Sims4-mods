@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20260928-curve-toggle-appearance">
+        <link rel="stylesheet" href="genealogy.css?v=20260929-sim-pet-editor-refactor">
     </head>
     <body data-theme="ling">
 
@@ -165,7 +165,7 @@
                                 <div class="family-cover-collage" id="familyCoverCollage" aria-hidden="true"></div>
                                 <div class="family-cover-empty" id="familyCoverEmpty"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>家庭合照</span></div>
                                 <div class="family-cover-actions">
-                                    <label class="family-cover-action" title="更換合照"><span class="l1ng-icon icon-image" aria-hidden="true"></span><input accept="image/*" hidden id="familyCoverInput" type="file"></label>
+                                    <label class="family-cover-action" title="更換合照"><span class="l1ng-icon icon-image" aria-hidden="true"></span><input accept="image/jpeg,image/png,image/webp" hidden id="familyCoverInput" type="file"></label>
                                     <button class="family-cover-action" id="familyCoverClearBtn" type="button" title="移除家庭合照"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span></button>
                                 </div>
                             </div>
@@ -324,13 +324,14 @@
                     </h2>
 
                     <div class="sim-profile-header">
-                        <div class="sim-profile-avatar-block">
-                            <div class="avatar-preview sim-profile-avatar" id="avatarPreview">?</div>
-                            <div class="sim-profile-avatar-actions">
-                                <label class="filebtn compact"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/*" hidden id="avatarInput" type="file"></label>
-                                <button class="avatar-clear-compact danger-action" id="avatarClearBtn" type="button">移除頭像</button>
+                        <div class="sim-profile-avatar-block avatar-editor-block">
+                            <div class="avatar-preview sim-profile-avatar avatar-editor-preview" id="avatarPreview">?</div>
+                            <div class="sim-profile-avatar-actions avatar-editor-actions">
+                                <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="avatarInput" type="file"></label>
+                                <button class="avatar-editor-action" id="avatarAdjustBtn" type="button">調整範圍</button>
+                                <button class="avatar-clear-compact avatar-editor-action danger-action" id="avatarClearBtn" type="button">移除頭像</button>
                             </div>
-                            <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / GIF · 圖片會自動調整</div>
+                            <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / WEBP</div>
                         </div>
 
                         <div class="sim-profile-edit-fields">
@@ -355,6 +356,7 @@
 
                     <div class="sim-editor-tabs" role="tablist" aria-label="模擬市民編輯分類">
                         <button class="sim-editor-tab active" type="button" role="tab" aria-selected="true" data-editor-tab="basic">基本資料</button>
+                        <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="preview">預覽</button>
                         <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="family">家庭關係</button>
                         <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="relations">其他關係</button>
                         <button class="sim-editor-tab" type="button" role="tab" aria-selected="false" data-editor-tab="media">人生照片與寵物</button>
@@ -364,8 +366,7 @@
                 <div class="sim-editor-content">
                     <section class="sim-editor-panel active" data-editor-panel="basic" role="tabpanel">
                         <div class="grid profile-grid profile-basic-grid">
-                            <label class="span-6">職業 / 備註<input id="fCareer" placeholder="作家 / 學生 / 無"></label>
-                            <label class="span-6">領養關係<select id="fAdoptive"><option value="false">親生</option><option value="true">領養</option></select></label>
+                            <label class="full">職業 / 備註<input id="fCareer" placeholder="作家 / 學生 / 無"></label>
                             <label class="full" id="causeOfDeathLabel" style="display:none">死因<input id="fCauseOfDeath" list="causeOfDeathPresets" maxlength="40" placeholder="如：衰老 / 溺水 / 火災…"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></label>
                             <label class="full">人生抱負<input id="fAspiration" list="aspirationPresets" maxlength="40" placeholder="如：暢銷作家 / 靈魂伴侶…"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></label>
                             <label class="full trait-field" for="traitInput"><span class="field-label-row"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></label>
@@ -373,62 +374,70 @@
                         </div>
                     </section>
 
+                    <section class="sim-editor-panel" data-editor-panel="preview" role="tabpanel" hidden>
+                        <div class="editor-info-preview" id="editorInfoPreview"></div>
+                    </section>
+
                     <section class="sim-editor-panel" data-editor-panel="family" role="tabpanel" hidden>
                         <div class="family-rel-editor">
                             <section class="family-rel-block family-rel-block-wide">
                                 <div class="family-rel-block-head"><span>所屬家族</span><button class="family-rel-manage" type="button" data-family-editor-toggle="family-membership">管理…</button></div>
                                 <div class="family-rel-preview" id="editorFamilyMembershipPreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="family-membership" hidden><div class="ss-wrap" data-placeholder="點選選擇家族（可多選）…" data-ss-for="fFamilyIds"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋家族…" type="text"><div class="ss-options"></div></div></div><select hidden id="fFamilyIds" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="family-membership" hidden><div class="ss-wrap" data-placeholder="點選選擇家族（可多選）…" data-ss-for="fFamilyIds" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋家族…" type="text"><div class="ss-options"></div></div></div><select hidden id="fFamilyIds" multiple></select></div>
+                            </section>
+                            <section class="family-rel-block family-rel-block-wide">
+                                <div class="family-rel-block-head"><span>父母</span><button class="family-rel-manage" type="button" data-family-editor-toggle="parents">編輯</button></div>
+                                <div class="family-rel-preview" id="editorParentsPreview"></div>
+                                <div class="family-rel-edit" data-family-editor-edit="parents" hidden>
+                                    <div class="ss-wrap" data-placeholder="點選選擇父母（可多選）…" data-ss-for="fParents" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fParents" multiple></select>
+                                    <div class="family-rel-kind-list" id="editorParentKindList"></div>
+                                </div>
                             </section>
                             <section class="family-rel-block">
-                                <div class="family-rel-block-head"><span>父母 A</span><button class="family-rel-manage" type="button" data-family-editor-toggle="parent1">設定</button></div>
-                                <div class="family-rel-preview" id="editorParent1Preview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="parent1" hidden><label>父母 A（血緣）<div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent1"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fParent1"></select></label></div>
-                            </section>
-                            <section class="family-rel-block">
-                                <div class="family-rel-block-head"><span>父母 B</span><button class="family-rel-manage" type="button" data-family-editor-toggle="parent2">設定</button></div>
-                                <div class="family-rel-preview" id="editorParent2Preview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="parent2" hidden><label>父母 B（可選）<div class="ss-wrap" data-placeholder="—（無 / 未知）" data-ss-for="fParent2"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fParent2"></select></label></div>
-                            </section>
-                            <section class="family-rel-block">
-                                <div class="family-rel-block-head"><span>現任配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="spouse">設定</button></div>
+                                <div class="family-rel-block-head"><span>配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="spouse">編輯</button></div>
                                 <div class="family-rel-preview" id="editorSpousePreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="spouse" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSpouse"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSpouse" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="spouse" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSpouse" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSpouse" multiple></select></div>
                             </section>
                             <section class="family-rel-block">
-                                <div class="family-rel-block-head"><span>前任配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="exspouse">設定</button></div>
+                                <div class="family-rel-block-head"><span>前任配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="exspouse">編輯</button></div>
                                 <div class="family-rel-preview" id="editorExSpousePreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="exspouse" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fExSpouse"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fExSpouse" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="exspouse" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fExSpouse" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fExSpouse" multiple></select></div>
                             </section>
-                            <section class="family-rel-block">
-                                <div class="family-rel-block-head"><span>子女</span><button class="family-rel-manage" type="button" data-family-editor-toggle="children">設定</button></div>
+                            <section class="family-rel-block family-rel-block-wide">
+                                <div class="family-rel-block-head"><span>子女</span><button class="family-rel-manage" type="button" data-family-editor-toggle="children">編輯</button></div>
                                 <div class="family-rel-preview" id="editorChildrenPreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="children" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fChildren"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fChildren" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="children" hidden>
+                                    <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fChildren" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fChildren" multiple></select>
+                                    <div class="family-rel-kind-list" id="editorChildKindList"></div>
+                                </div>
                             </section>
-                            <section class="family-rel-block">
-                                <div class="family-rel-block-head"><span>兄弟姐妹</span><button class="family-rel-manage" type="button" data-family-editor-toggle="siblings">設定</button></div>
+                            <section class="family-rel-block family-rel-block-wide">
+                                <div class="family-rel-block-head"><span>兄弟姊妹</span><button class="family-rel-manage" type="button" data-family-editor-toggle="siblings">編輯</button></div>
                                 <div class="family-rel-preview" id="editorSiblingsPreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="siblings" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSiblings" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="siblings" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSiblings" multiple></select></div>
                             </section>
                         </div>
-                        <div class="rel-section family-rel-annotations" id="familyRelAnnoSection" style="display:none"><div class="rel-title"><span>家庭關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="家庭關係標註說明" data-tooltip="核心家庭連線會使用客觀關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div><div id="familyRelAnnoList"></div></div>
+                        <div class="rel-section family-rel-annotations" id="familyRelAnnoSection" style="display:none">
+                            <div class="rel-title"><span>關係線標籤</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係線標籤說明" data-tooltip="家庭關係線會使用客觀關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div id="familyRelAnnoList"></div>
+                        </div>
                     </section>
 
                     <section class="sim-editor-panel" data-editor-panel="relations" role="tabpanel" hidden>
                         <div class="editor-empty-note" id="newSimRelationsHint" hidden>儲存模擬市民後即可新增其他關係。</div>
                         <div class="rel-section first" id="relAnnoSection" style="display:none">
-                            <div class="rel-title"><span>其他關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係設定說明" data-tooltip="其他關係會直接使用實際關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div class="rel-title"><span>其他關係線標籤</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="其他關係線標籤說明" data-tooltip="其他關係會直接使用實際關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                             <div id="relAnnoList"></div>
                         </div>
                         <div class="rel-section" id="relSection" style="display:none">
                             <div class="rel-title">新增其他關係</div>
                             <div id="relList"></div>
                             <div class="rel-add">
-                                <div class="ss-wrap" data-placeholder="選擇或輸入關係…" data-ss-for="relType" data-ss-creatable="true" style="flex:1">
+                                <div class="ss-wrap" data-placeholder="選擇或輸入關係…" data-ss-for="relType" data-ss-creatable="true" data-ss-portal="true" style="flex:1">
                                     <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋或輸入關係…" type="text"><div class="ss-options"></div></div>
                                 </div>
                                 <select hidden id="relType"></select>
-                                <div class="ss-wrap" data-placeholder="選擇目標…" data-ss-for="relTarget" style="flex:1.4">
+                                <div class="ss-wrap" data-placeholder="選擇目標…" data-ss-for="relTarget" data-ss-portal="true" style="flex:1.4">
                                     <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
                                 </div>
                                 <select hidden id="relTarget"></select>
@@ -444,7 +453,7 @@
                             <button class="pet-add-btn" id="btnAddPet" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增寵物</span></button>
                         </div>
                         <div class="rel-section" id="gallerySection">
-                            <div class="rel-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>人生照片</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="人生照片說明" data-tooltip="替這位人物保存幾張值得記錄的人生照片；可標記人生階段、標題與備註。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div class="rel-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>人生照片</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="人生照片說明" data-tooltip="記錄這位模擬市民值得保存的人生照片；可標記人生階段、標題與備註。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                             <div class="gallery-grid" id="galleryGrid"></div>
                             <button class="gallery-add-btn" id="btnAddPhoto" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增圖片</span></button>
                         </div>
@@ -460,69 +469,41 @@
             </div>
         </div>
 
-        <!-- ========【寵物編輯】 設定 - 寵物資料與頭像 ======== -->
+        <!-- ========【寵物編輯】 設定 - 與模擬市民共用頭像編輯器、EA 寵物性別與資料欄位 ======== -->
         <div class="mask nested" id="petMask">
-            <div class="modal" style="width:min(520px,100%)">
+            <div class="modal pet-editor-modal">
                 <h2 id="petModalTitle">新增寵物</h2>
-                <div class="grid">
-                    <label class="full">
-                        寵物頭像
-                        <div class="avatar-row">
-                            <div class="avatar-preview" id="petAvatarPreview">?</div>
-                            <div class="avatar-actions">
-                                <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="petAvatarInput" type="file"></label>
-                                <button class="danger-action" id="petAvatarClearBtn" type="button">清除頭像</button>
-                                <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / GIF · 圖片會自動調整</div>
-                            </div>
+                <div class="pet-editor-layout">
+                    <div class="avatar-editor-block pet-avatar-editor-block">
+                        <div class="avatar-preview pet-avatar-editor-preview avatar-editor-preview" id="petAvatarPreview">?</div>
+                        <div class="avatar-editor-actions">
+                            <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="petAvatarInput" type="file"></label>
+                            <button class="avatar-editor-action" id="petAvatarAdjustBtn" type="button">調整範圍</button>
+                            <button class="avatar-clear-compact avatar-editor-action danger-action" id="petAvatarClearBtn" type="button">移除頭像</button>
                         </div>
-                    </label>
-                    <label>名字<input id="pName" maxlength="30" placeholder="如：旺財 / 咪咪"></label>
-                    <label>
-                        種類
-                        <select id="pSpecies">
-                            <option value="dog">狗</option>
-                            <option value="cat">貓</option>
-                            <option value="horse">馬</option>
-                            <option value="rabbit">兔子</option>
-                            <option value="bird">鳥</option>
-                            <option value="hamster">倉鼠</option>
-                            <option value="fish">魚</option>
-                            <option value="lizard">蜥蜴</option>
-                            <option value="other">其他</option>
-                        </select>
-                    </label>
-                    <label>品種<input id="pBreed" maxlength="40" placeholder="如：金毛、波斯貓…"></label>
-                    <label>
-                        性別
-                        <select id="pGender">
-                            <option value="男">男</option>
-                            <option value="女">女</option>
-                            <option value="其他">其他</option>
-                        </select>
-                    </label>
-                    <label>
-                        年齡階段
-                        <select id="pAgeStage">
-                            <option value="幼年">幼年</option>
-                            <option value="成年">成年</option>
-                            <option value="老年">老年</option>
-                        </select>
-                    </label>
-                    <label>
-                        狀態
-                        <select id="pStatus">
-                            <option value="在世">在世</option>
-                            <option value="幽靈">幽靈</option>
-                            <option value="已故">已故</option>
-                        </select>
-                    </label>
+                        <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / WEBP</div>
+                    </div>
+                    <div class="pet-editor-fields">
+                        <label class="pet-field-full">名字<input id="pName" maxlength="30" placeholder="如：旺財 / 咪咪"></label>
+                        <label>種類<select id="pSpecies"><option value="dog">狗</option><option value="cat">貓</option><option value="horse">馬</option><option value="rabbit">兔子</option><option value="bird">鳥</option><option value="hamster">倉鼠</option><option value="fish">魚</option><option value="lizard">蜥蜴</option><option value="other">其他</option></select></label>
+                        <label>品種<input id="pBreed" maxlength="40" placeholder="如：金毛、波斯貓…"></label>
+                        <label id="pGenderField">性別<select id="pGender"><option value="male">公</option><option value="female">母</option></select></label>
+                        <label>年齡階段<select id="pAgeStage"><option value="幼年">幼年</option><option value="成年">成年</option><option value="老年">老年</option></select></label>
+                        <label>狀態<select id="pStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
+                    </div>
                 </div>
-                <div class="modal-actions">
-                    <button class="danger" id="pDelete" style="display:none">刪除寵物</button>
-                    <span class="spacer"></span>
-                    <button id="pCancel">取消</button>
-                    <button class="primary" id="pSave">儲存</button>
-                </div>
+                <div class="modal-actions"><button class="danger" id="pDelete" style="display:none">刪除寵物</button><span class="spacer"></span><button id="pCancel">取消</button><button class="primary" id="pSave">儲存</button></div>
+            </div>
+        </div>
+
+        <!-- ========【頭像取景】 設定 - 模擬市民與寵物共用非破壞式位置與縮放 ======== -->
+        <div class="mask nested" id="avatarCropMask">
+            <div class="modal avatar-crop-modal">
+                <h2>調整頭像範圍</h2>
+                <div class="avatar-crop-stage" id="avatarCropStage"><img class="avatar-framed-image" id="avatarCropImage" alt="" draggable="false"></div>
+                <div class="avatar-crop-hint">拖曳調整焦點；使用縮放調整取景範圍。</div>
+                <label class="avatar-crop-zoom-row"><span>縮放</span><input id="avatarCropZoom" type="range" min="1" max="3" step="0.01" value="1"><output id="avatarCropZoomValue">100%</output></label>
+                <div class="modal-actions"><button id="avatarCropReset" type="button">重設</button><span class="spacer"></span><button id="avatarCropCancel" type="button">取消</button><button class="primary" id="avatarCropDone" type="button">完成</button></div>
             </div>
         </div>
 
@@ -536,7 +517,7 @@
                         <div class="photo-preview-wrap">
                             <div class="photo-preview" id="photoPreview" tabindex="0">點選選擇 · 或拖曳 · 或 Ctrl+V 貼上</div>
                             <div class="photo-actions-row">
-                                <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/*" hidden id="photoInput" type="file"></label>
+                                <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/jpeg,image/png,image/webp" hidden id="photoInput" type="file"></label>
                                 <button class="danger-action" id="photoClearBtn" type="button">清除圖片</button>
                                 <span class="photo-size-tip" id="photoSizeTip"></span>
                             </div>
@@ -613,15 +594,7 @@
         <!-- ========【模擬市民資訊卡】 設定 - 快速檢視人物資料 ======== -->
         <div class="mask" id="infoMask">
             <div class="modal info-modal">
-                <div class="info-card-header">
-                    <div class="info-card-avatar" id="infoCardAvatar">?</div>
-                    <div class="info-card-header-text">
-                        <div class="info-card-name-row"><span class="info-card-name" id="infoCardName">—</span></div>
-                        <div class="info-card-meta" id="infoCardMeta"></div>
-                        <div class="info-card-head-facts" id="infoCardHeadFacts"></div>
-                    </div>
-                </div>
-                <div class="info-card-body" id="infoCardBody"></div>
+                <div class="info-card-content" id="infoCardContent"></div>
                 <div class="modal-actions">
                     <button id="infoEditBtn"><span class="l1ng-icon icon-pencil-square" aria-hidden="true"></span><span>編輯</span></button>
                     <span class="spacer"></span>
@@ -701,7 +674,7 @@
                     <div class="setting-group-title">族譜背景</div>
                     <div class="bg-preview" id="bgPreview">尚未設定背景圖片</div>
                     <div class="bg-row">
-                        <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換圖片</span><input accept="image/*" hidden id="bgInput" type="file"></label>
+                        <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換圖片</span><input accept="image/jpeg,image/png,image/webp" hidden id="bgInput" type="file"></label>
                         <button class="danger" id="bgClearBtn" type="button">移除圖片</button>
                     </div>
                     <div class="appearance-control-row"><label>透明度</label><input id="bgOpacity" max="100" min="0" type="range" value="50"><span class="bg-value" id="bgOpacityVal">50%</span></div>
@@ -1011,6 +984,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260928-profile-kinship-relationship-library"></script>
+        <script src="genealogy.js?v=20260929-sim-pet-editor-refactor"></script>
     </body>
 </html>
