@@ -3007,6 +3007,50 @@ function explicitSiblingIds(simId) {
   )];
 }
 
+function inferredSiblingIdsForParents(
+  simId,
+  parentIds
+) {
+  const id =
+    String(simId || '');
+
+  const parentSet =
+    new Set(
+      (parentIds || [])
+        .map(String)
+        .filter(Boolean)
+    );
+
+  if (!parentSet.size) return [];
+
+  return Object.values(
+    genealogyData.sims || {}
+  )
+    .filter(candidate => {
+      if (!candidate) return false;
+
+      const candidateId =
+        String(candidate.id || '');
+
+      if (
+        !candidateId ||
+        candidateId === id
+      ) {
+        return false;
+      }
+
+      return genealogyParentIds(candidate)
+        .some(parentId =>
+          parentSet.has(
+            String(parentId)
+          )
+        );
+    })
+    .map(candidate =>
+      String(candidate.id)
+    );
+}
+
 function inferredSiblingIds(simId) {
   const id =
     String(simId || '');
@@ -3016,32 +3060,10 @@ function inferredSiblingIds(simId) {
 
   if (!sim) return [];
 
-  const parentIds =
-    new Set(
-      genealogyParentIds(sim)
-    );
-
-  if (!parentIds.size) return [];
-
-  return Object.values(
-    genealogyData.sims || {}
-  )
-    .filter(candidate => {
-      if (
-        !candidate ||
-        String(candidate.id) === id
-      ) {
-        return false;
-      }
-
-      return genealogyParentIds(candidate)
-        .some(parentId =>
-          parentIds.has(parentId)
-        );
-    })
-    .map(candidate =>
-      String(candidate.id)
-    );
+  return inferredSiblingIdsForParents(
+    id,
+    genealogyParentIds(sim)
+  );
 }
 
 function genealogySiblingIds(simId) {
@@ -3249,6 +3271,257 @@ function siblingKinshipLabel(
   if (gender === 'male') return '兄弟';
   if (gender === 'female') return '姊妹';
   return '兄弟姊妹';
+}
+
+function directFamilyKinshipLabel(
+  role,
+  target,
+  perspective,
+  kind = 'parent-child'
+) {
+  if (!target) return '';
+
+  if (role === 'parent') {
+    return kind === 'adoptive'
+      ? genderedKinship(
+          target,
+          '養父',
+          '養母',
+          '養親'
+        )
+      : genderedKinship(
+          target,
+          '父親',
+          '母親',
+          '父母'
+        );
+  }
+
+  if (role === 'child') {
+    return kind === 'adoptive'
+      ? genderedKinship(
+          target,
+          '養子',
+          '養女',
+          '養子女'
+        )
+      : genderedKinship(
+          target,
+          '兒子',
+          '女兒',
+          '子女'
+        );
+  }
+
+  if (role === 'spouse') {
+    return genderedKinship(
+      target,
+      '丈夫',
+      '妻子',
+      '配偶'
+    );
+  }
+
+  if (role === 'exspouse') {
+    return genderedKinship(
+      target,
+      '前夫',
+      '前妻',
+      '前任配偶'
+    );
+  }
+
+  if (role === 'sibling') {
+    return siblingKinshipLabel(
+      perspective,
+      target
+    );
+  }
+
+  return '';
+}
+
+// ========【家庭關係 Authority】 設定 - 所有 UI 共用同一份直接家庭關係模型 ========
+function resolveDirectFamilyRelationships(
+  simId
+) {
+  const id =
+    String(simId || '');
+
+  const subject =
+    genealogyData?.sims?.[id];
+
+  const empty = {
+    subjectId:id,
+    parents:[],
+    spouses:[],
+    exSpouses:[],
+    children:[],
+    siblings:[],
+    all:[]
+  };
+
+  if (!subject) return empty;
+
+  const makeEntry = (
+    role,
+    targetId,
+    options = {}
+  ) => {
+    const normalizedTargetId =
+      String(targetId || '');
+
+    const target =
+      genealogyData.sims[
+        normalizedTargetId
+      ];
+
+    if (!target) return null;
+
+    const kind =
+      options.kind ||
+      null;
+
+    return {
+      role,
+      targetId:normalizedTargetId,
+      target,
+      kind,
+      source:
+        options.source ||
+        'canonical',
+      storedExplicit:
+        !!options.storedExplicit,
+      derivedFromParents:
+        !!options.derivedFromParents,
+      editable:
+        options.editable !== false,
+      label:
+        directFamilyKinshipLabel(
+          role,
+          target,
+          subject,
+          kind ||
+            'parent-child'
+        )
+    };
+  };
+
+  const parents =
+    genealogyParentRelations(subject)
+      .map(relation =>
+        makeEntry(
+          'parent',
+          relation.parentId,
+          {
+            kind:relation.kind,
+            source:'canonical'
+          }
+        )
+      )
+      .filter(Boolean);
+
+  const spouses =
+    (subject.spouseIds || [])
+      .map(targetId =>
+        makeEntry(
+          'spouse',
+          targetId,
+          { source:'canonical' }
+        )
+      )
+      .filter(Boolean);
+
+  const exSpouses =
+    (subject.exSpouseIds || [])
+      .map(targetId =>
+        makeEntry(
+          'exspouse',
+          targetId,
+          { source:'canonical' }
+        )
+      )
+      .filter(Boolean);
+
+  const children =
+    getChildrenOf(id)
+      .map(child =>
+        makeEntry(
+          'child',
+          child.id,
+          {
+            kind:
+              genealogyParentKindFor(
+                child,
+                id
+              ),
+            source:'canonical'
+          }
+        )
+      )
+      .filter(Boolean);
+
+  const explicit =
+    new Set(
+      explicitSiblingIds(id)
+    );
+
+  const inferred =
+    new Set(
+      inferredSiblingIds(id)
+    );
+
+  const siblingIds =
+    [...new Set([
+      ...explicit,
+      ...inferred
+    ])];
+
+  const siblings =
+    siblingIds
+      .map(targetId => {
+        const isExplicit =
+          explicit.has(targetId);
+
+        const isInferred =
+          inferred.has(targetId);
+
+        return makeEntry(
+          'sibling',
+          targetId,
+          {
+            source:
+              isExplicit && isInferred
+                ? 'explicit+inferred'
+                : isExplicit
+                  ? 'explicit'
+                  : 'inferred',
+            storedExplicit:
+              isExplicit,
+            derivedFromParents:
+              isInferred,
+            editable:
+              isExplicit
+          }
+        );
+      })
+      .filter(Boolean);
+
+  return {
+    subjectId:id,
+    parents,
+    spouses,
+    exSpouses,
+    children,
+    siblings,
+    all:[
+      ...parents,
+      ...spouses,
+      ...exSpouses,
+      ...children,
+      ...siblings
+    ]
+  };
 }
 
 function findAncestorPath(
@@ -3991,48 +4264,18 @@ function resolveKinshipLabel(
     );
   }
 
-  if (
-    (root.spouseIds || [])
-      .map(String)
-      .includes(
-        String(target.id)
-      )
-  ) {
-    return genderedKinship(
-      target,
-      '丈夫',
-      '妻子',
-      '配偶'
-    );
-  }
-
-  if (
-    (root.exSpouseIds || [])
-      .map(String)
-      .includes(
-        String(target.id)
-      )
-  ) {
-    return genderedKinship(
-      target,
-      '前夫',
-      '前妻',
-      '前任配偶'
-    );
-  }
-
-  if (
-    genealogySiblingIds(
+  const directFamily =
+    resolveDirectFamilyRelationships(
       root.id
     )
-      .includes(
+      .all
+      .find(relation =>
+        relation.targetId ===
         String(target.id)
-      )
-  ) {
-    return siblingKinshipLabel(
-      root,
-      target
-    );
+      );
+
+  if (directFamily?.label) {
+    return directFamily.label;
   }
 
   const parentSibling =
@@ -10500,7 +10743,6 @@ function drawEdges() {
     paths.join('');
 
   if (
-    showRelLabels &&
     relationshipPerspectiveSimId
   ) {
     drawPerspectiveKinshipLabels(
@@ -11005,36 +11247,13 @@ function drawNodes() {
 
 // ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
 function profileDirectFamilyIds(simId) {
-  const id =
-    String(simId || '');
-
-  const sim =
-    genealogyData?.sims?.[id];
-
-  if (!sim) return [];
-
-  const ordered = [
-    ...genealogyParentIds(sim),
-    ...(sim.spouseIds || [])
-      .map(String),
-    ...(sim.exSpouseIds || [])
-      .map(String),
-    ...genealogySiblingIds(id),
-    ...getChildrenOf(id)
-      .map(child =>
-        String(child.id)
-      )
-  ];
-
-  return [...new Set(
-    ordered.filter(targetId =>
-      targetId &&
-      targetId !== id &&
-      genealogyData.sims[
-        targetId
-      ]
-    )
-  )];
+  return resolveDirectFamilyRelationships(
+    simId
+  )
+    .all
+    .map(relation =>
+      relation.targetId
+    );
 }
 
 function profileFamilyRelationshipRows(
@@ -11043,22 +11262,18 @@ function profileFamilyRelationshipRows(
   const groups =
     new Map();
 
-  profileDirectFamilyIds(simId)
-    .forEach(targetId => {
+  resolveDirectFamilyRelationships(
+    simId
+  )
+    .all
+    .forEach(relation => {
       const target =
-        genealogyData.sims[
-          targetId
-        ];
-
-      if (!target) return;
+        relation.target;
 
       const label =
-        resolveKinshipLabel(
-          simId,
-          targetId
-        );
+        relation.label;
 
-      if (!label) return;
+      if (!target || !label) return;
 
       if (!groups.has(label)) {
         groups.set(label, []);
@@ -14371,15 +14586,47 @@ function setupSearchSelects() {
         } else {
           input.innerHTML =
             selected
-              .map(option =>
-                '<span class="ss-tag">' +
-                esc(
-                  option.textContent
-                ) +
-                '<span class="ss-tag-x" data-remove="' +
-                esc(option.value) +
-                '" title="移除">×</span></span>'
-              )
+              .map(option => {
+                const locked =
+                  option.disabled;
+
+                const note =
+                  option.dataset.ssNote ||
+                  '';
+
+                return (
+                  '<span class="ss-tag' +
+                  (
+                    locked
+                      ? ' locked'
+                      : ''
+                  ) +
+                  '"' +
+                  (
+                    note
+                      ? ' title="' +
+                        esc(note) +
+                        '"'
+                      : ''
+                  ) +
+                  '>' +
+                  esc(
+                    option.textContent
+                  ) +
+                  (
+                    locked
+                      ? '<span class="ss-tag-note">' +
+                        esc(
+                          uiText('自動')
+                        ) +
+                        '</span>'
+                      : '<span class="ss-tag-x" data-remove="' +
+                        esc(option.value) +
+                        '" title="移除">×</span>'
+                  ) +
+                  '</span>'
+                );
+              })
               .join('');
         }
 
@@ -14547,10 +14794,20 @@ function setupSearchSelects() {
             const selected =
               option.selected;
 
+            const disabled =
+              option.disabled;
+
+            const note =
+              option.dataset.ssNote ||
+              '';
+
             const classes = [
               'ss-option',
               selected
                 ? 'selected'
+                : '',
+              disabled
+                ? 'disabled'
                 : '',
               isEmpty
                 ? 'none'
@@ -14578,13 +14835,27 @@ function setupSearchSelects() {
               classes +
               '" data-value="' +
               esc(option.value) +
-              '">' +
+              '"' +
+              (
+                disabled
+                  ? ' aria-disabled="true"'
+                  : ''
+              ) +
+              '>' +
               check +
               '<span>' +
               esc(
                 option.textContent
               ) +
-              '</span></div>'
+              '</span>' +
+              (
+                note
+                  ? '<span class="ss-option-note">' +
+                    esc(note) +
+                    '</span>'
+                  : ''
+              ) +
+              '</div>'
             );
           })
           .join('');
@@ -14643,7 +14914,12 @@ function setupSearchSelects() {
                   value
                 );
 
-            if (!option) return;
+            if (
+              !option ||
+              option.disabled
+            ) {
+              return;
+            }
 
             if (isMultiple) {
               option.selected =
@@ -16129,40 +16405,97 @@ function editorDraftSim(){
     };
   }
 
-  function directEditorKinshipLabel(role,target,perspective,kind='parent-child'){
-    if(!target)return'';
-
-    if(role==='parent'){
-      return kind==='adoptive'
-        ? genderedKinship(target,'養父','養母','養親')
-        : genderedKinship(target,'父親','母親','父母');
-    }
-
-    if(role==='child'){
-      return kind==='adoptive'
-        ? genderedKinship(target,'養子','養女','養子女')
-        : genderedKinship(target,'兒子','女兒','子女');
-    }
-
-    if(role==='spouse'){
-      return genderedKinship(target,'丈夫','妻子','配偶');
-    }
-
-    if(role==='exspouse'){
-      return genderedKinship(target,'前夫','前妻','前任配偶');
-    }
-
-    if(role==='sibling'){
-      return siblingKinshipLabel(perspective,target);
-    }
-
-    return'';
-  }
-
   function selectedEditorIds(selectId){
     return [...($(selectId)?.selectedOptions||[])]
       .map(option=>String(option.value||''))
       .filter(Boolean);
+  }
+
+  function selectedEditableEditorIds(selectId){
+    const select=$(selectId);
+
+    if(!select)return[];
+
+    return [...select.options]
+      .filter(option=>
+        option.selected&&
+        !option.disabled
+      )
+      .map(option=>
+        String(option.value||'')
+      )
+      .filter(Boolean);
+  }
+
+  function syncEditorSiblingAuthority(){
+    const select=$('fSiblings');
+    if(!select)return;
+
+    const manualSelected=
+      new Set(
+        selectedEditableEditorIds(
+          'fSiblings'
+        )
+      );
+
+    const inferred=
+      new Set(
+        inferredSiblingIdsForParents(
+          editingId
+            ? String(editingId)
+            : '',
+          selectedEditorIds(
+            'fParents'
+          )
+        )
+      );
+
+    [...select.options]
+      .forEach(option=>{
+        const siblingId=
+          String(
+            option.value||
+            ''
+          );
+
+        if(!siblingId)return;
+
+        const isManual=
+          manualSelected.has(
+            siblingId
+          );
+
+        const isDerived=
+          inferred.has(
+            siblingId
+          ) &&
+          !isManual;
+
+        option.disabled=
+          isDerived;
+
+        option.selected=
+          isManual||
+          isDerived;
+
+        if(isDerived){
+          option.dataset.relationshipSource=
+            'inferred';
+
+          option.dataset.ssNote=
+            uiText(
+              '由父母關係自動推導'
+            );
+        }else{
+          delete option.dataset
+            .relationshipSource;
+
+          delete option.dataset
+            .ssNote;
+        }
+      });
+
+    refreshSS('fSiblings');
   }
 
   function syncEditorRelationKindMap(selectId,kindMap){
@@ -16231,7 +16564,7 @@ function editorDraftSim(){
       if(!sim)return'';
 
       const kind=kindMap.get(id)||'parent-child';
-      const label=directEditorKinshipLabel(role,sim,draft,kind);
+      const label=directFamilyKinshipLabel(role,sim,draft,kind);
 
       return '<div class="family-rel-kind-row">'+
         '<div class="family-rel-kind-person">'+relationPersonMarkup(sim,label)+'</div>'+
@@ -16281,7 +16614,7 @@ function editorDraftSim(){
     renderEditorRelationPeople(
       'editorParentsPreview',
       selectedEditorIds('fParents'),
-      sim=>directEditorKinshipLabel(
+      sim=>directFamilyKinshipLabel(
         'parent',
         sim,
         editorDraftSim(),
@@ -16292,19 +16625,19 @@ function editorDraftSim(){
     renderEditorRelationPeople(
       'editorSpousePreview',
       selectedEditorIds('fSpouse'),
-      sim=>directEditorKinshipLabel('spouse',sim,editorDraftSim())
+      sim=>directFamilyKinshipLabel('spouse',sim,editorDraftSim())
     );
 
     renderEditorRelationPeople(
       'editorExSpousePreview',
       selectedEditorIds('fExSpouse'),
-      sim=>directEditorKinshipLabel('exspouse',sim,editorDraftSim())
+      sim=>directFamilyKinshipLabel('exspouse',sim,editorDraftSim())
     );
 
     renderEditorRelationPeople(
       'editorChildrenPreview',
       selectedEditorIds('fChildren'),
-      sim=>directEditorKinshipLabel(
+      sim=>directFamilyKinshipLabel(
         'child',
         sim,
         editorDraftSim(),
@@ -16315,7 +16648,7 @@ function editorDraftSim(){
     renderEditorRelationPeople(
       'editorSiblingsPreview',
       selectedEditorIds('fSiblings'),
-      sim=>directEditorKinshipLabel('sibling',sim,editorDraftSim())
+      sim=>directFamilyKinshipLabel('sibling',sim,editorDraftSim())
     );
 
     renderEditorRelationKindList(
@@ -16345,7 +16678,7 @@ function editorDraftSim(){
     selectedEditorIds('fParents').forEach(id=>{
       const sim=genealogyData.sims[id];
       add(
-        directEditorKinshipLabel(
+        directFamilyKinshipLabel(
           'parent',
           sim,
           draft,
@@ -16357,18 +16690,18 @@ function editorDraftSim(){
 
     selectedEditorIds('fSpouse').forEach(id=>{
       const sim=genealogyData.sims[id];
-      add(directEditorKinshipLabel('spouse',sim,draft),sim);
+      add(directFamilyKinshipLabel('spouse',sim,draft),sim);
     });
 
     selectedEditorIds('fExSpouse').forEach(id=>{
       const sim=genealogyData.sims[id];
-      add(directEditorKinshipLabel('exspouse',sim,draft),sim);
+      add(directFamilyKinshipLabel('exspouse',sim,draft),sim);
     });
 
     selectedEditorIds('fChildren').forEach(id=>{
       const sim=genealogyData.sims[id];
       add(
-        directEditorKinshipLabel(
+        directFamilyKinshipLabel(
           'child',
           sim,
           draft,
@@ -16380,7 +16713,7 @@ function editorDraftSim(){
 
     selectedEditorIds('fSiblings').forEach(id=>{
       const sim=genealogyData.sims[id];
-      add(directEditorKinshipLabel('sibling',sim,draft),sim);
+      add(directFamilyKinshipLabel('sibling',sim,draft),sim);
     });
 
     return [...groups.entries()].map(([label,names])=>({
@@ -16498,9 +16831,13 @@ function editorDraftSim(){
       $(id)?.addEventListener('change',()=>{
         if(id==='fParents'){
           syncEditorRelationKindMap('fParents',editingParentKinds);
+          syncEditorSiblingAuthority();
         }
         if(id==='fChildren'){
           syncEditorRelationKindMap('fChildren',editingChildKinds);
+        }
+        if(id==='fSiblings'){
+          syncEditorSiblingAuthority();
         }
 
         renderEditorFamilyPreviews();
@@ -16549,6 +16886,13 @@ function editorDraftSim(){
   function openEditor(id){
     editingId=id||null;
     const sim=id?genealogyData.sims[id]:null;
+
+    const familyAuthority=
+      sim
+        ? resolveDirectFamilyRelationships(
+            sim.id
+          )
+        : null;
 
     $('modalTitle').textContent=sim?uiText('編輯模擬市民'):uiText('新增模擬市民');
 
@@ -16643,10 +16987,14 @@ function editorDraftSim(){
 
     editingParentKinds=new Map();
 
-    if(sim){
-      genealogyParentRelations(sim).forEach(relation=>{
-        editingParentKinds.set(String(relation.parentId),relation.kind);
-      });
+    if(familyAuthority){
+      familyAuthority.parents
+        .forEach(relation=>{
+          editingParentKinds.set(
+            relation.targetId,
+            relation.kind
+          );
+        });
     }
 
     [...$('fParents').options].forEach(option=>{
@@ -16662,27 +17010,50 @@ function editorDraftSim(){
 
     $('fSpouse').innerHTML=relationOptions;
 
-    const currentSpouses=new Set(sim?(sim.spouseIds||[]).map(String):[]);
+    const currentSpouses=
+      new Set(
+        familyAuthority
+          ? familyAuthority.spouses
+              .map(relation=>
+                relation.targetId
+              )
+          : []
+      );
     [...$('fSpouse').options].forEach(option=>{
       option.selected=currentSpouses.has(String(option.value));
     });
 
     $('fExSpouse').innerHTML=relationOptions;
 
-    const currentExSpouses=new Set(sim?(sim.exSpouseIds||[]).map(String):[]);
+    const currentExSpouses=
+      new Set(
+        familyAuthority
+          ? familyAuthority.exSpouses
+              .map(relation=>
+                relation.targetId
+              )
+          : []
+      );
     [...$('fExSpouse').options].forEach(option=>{
       option.selected=currentExSpouses.has(String(option.value));
     });
 
-    const childRelations=sim
-      ? getChildrenOf(sim.id).map(child=>({
-          childId:String(child.id),
-          kind:genealogyParentKindFor(child,sim.id)
-        }))
-      : [];
+    const childRelations=
+      familyAuthority
+        ? familyAuthority.children
+            .map(relation=>({
+              childId:
+                relation.targetId,
+              kind:
+                relation.kind
+            }))
+        : [];
 
     editingChildKinds=new Map(
-      childRelations.map(relation=>[relation.childId,relation.kind])
+      childRelations.map(relation=>[
+        relation.childId,
+        relation.kind
+      ])
     );
 
     $('fChildren').innerHTML=relationOptions;
@@ -16690,19 +17061,30 @@ function editorDraftSim(){
       option.selected=editingChildKinds.has(String(option.value));
     });
 
-    const explicitSiblingIds=sim
-      ? (genealogyData.links||[])
-          .filter(link=>
-            (link.from===sim.id||link.to===sim.id)&&
-            isSiblingLink(link)
-          )
-          .map(link=>String(link.from===sim.id?link.to:link.from))
-      : [];
+    const storedSiblingIds=
+      new Set(
+        familyAuthority
+          ? familyAuthority.siblings
+              .filter(relation=>
+                relation.storedExplicit
+              )
+              .map(relation=>
+                relation.targetId
+              )
+          : []
+      );
 
     $('fSiblings').innerHTML=relationOptions;
-    [...$('fSiblings').options].forEach(option=>{
-      option.selected=explicitSiblingIds.includes(String(option.value));
-    });
+
+    [...$('fSiblings').options]
+      .forEach(option=>{
+        option.selected=
+          storedSiblingIds.has(
+            String(option.value)
+          );
+      });
+
+    syncEditorSiblingAuthority();
 
     $('relTarget').innerHTML=allSims
       .filter(candidate=>!sim||candidate.id!==sim.id)
@@ -17037,7 +17419,10 @@ function saveChar(){
     gallery:JSON.parse(JSON.stringify(editingGallery))
   };
 
-  const newSiblingIds=selectedEditorIds('fSiblings');
+  const newSiblingIds=
+    selectedEditableEditorIds(
+      'fSiblings'
+    );
   let sim;
 
   if(editingId){
@@ -19533,6 +19918,17 @@ Object.assign(EN, {
   });
   Object.assign(EN, {
     '拖曳圖片調整焦點；滾輪或下方滑桿可縮放。框外半透明區域不會出現在頭像中。':'Drag the image to reposition it. Use the mouse wheel or slider to zoom. The dimmed area outside the frame will not appear in the avatar.'
+  });
+
+  Object.assign(ZH_HANS_EXACT, {
+    '自動':'自动',
+    '由父母關係自動推導':'由父母关系自动推导',
+    '由父母關係推導的兄弟姊妹會自動同步；如需變更，請調整父母關係。':'由父母关系推导的兄弟姐妹会自动同步；如需变更，请调整父母关系。'
+  });
+  Object.assign(EN, {
+    '自動':'Auto',
+    '由父母關係自動推導':'Derived from parents',
+    '由父母關係推導的兄弟姊妹會自動同步；如需變更，請調整父母關係。':'Siblings derived from shared parents stay in sync automatically. To change them, edit the parent relationships.'
   });
 
   Object.assign(ZH_HANS_EXACT, {

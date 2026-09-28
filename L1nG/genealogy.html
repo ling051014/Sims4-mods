@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20260929-kinship-avatar-crop">
+        <link rel="stylesheet" href="genealogy.css?v=20260929-relationship-authority">
     </head>
     <body data-theme="ling">
 
@@ -414,7 +414,10 @@
                             <section class="family-rel-block family-rel-block-wide">
                                 <div class="family-rel-block-head"><span>兄弟姊妹</span><button class="family-rel-manage" type="button" data-family-editor-toggle="siblings">編輯</button></div>
                                 <div class="family-rel-preview" id="editorSiblingsPreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="siblings" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSiblings" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="siblings" hidden>
+                                    <div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings" data-ss-portal="true"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSiblings" multiple></select>
+                                    <div class="family-rel-derived-hint">由父母關係推導的兄弟姊妹會自動同步；如需變更，請調整父母關係。</div>
+                                </div>
                             </section>
                         </div>
                         <div class="rel-section family-rel-annotations" id="familyRelAnnoSection" style="display:none">
@@ -994,6 +997,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260929-kinship-avatar-crop"></script>
+        <script src="genealogy.js?v=20260929-relationship-authority"></script>
     </body>
 </html>
