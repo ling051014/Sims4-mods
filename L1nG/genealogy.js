@@ -2708,6 +2708,7 @@ const BUILTIN_RELATION_LABELS =
   new Set([
     ...Object.values(RELATIONSHIP_SEMANTICS)
       .map(item => item.label),
+    '親子 / 收養',
     ...Object.keys(SOCIAL_RELATIONSHIP_DEFINITIONS),
     ...KINSHIP_SYSTEM_LABELS
   ]);
@@ -2818,7 +2819,9 @@ function relationshipSemanticDescriptor(
     return {
       semanticType,
       icon:semantic.icon,
-      label:semantic.label
+      label:
+        defaultText ||
+        semantic.label
     };
   }
 
@@ -3659,13 +3662,24 @@ function spouseParentKinship(
         perspective
       );
 
-    if (perspectiveGender === 'male') {
+    const spouseGender =
+      relationshipGender(
+        spouse
+      );
+
+    if (
+      perspectiveGender === 'male' &&
+      spouseGender === 'female'
+    ) {
       if (targetGender === 'male') return '岳父';
       if (targetGender === 'female') return '岳母';
       return '配偶父母';
     }
 
-    if (perspectiveGender === 'female') {
+    if (
+      perspectiveGender === 'female' &&
+      spouseGender === 'male'
+    ) {
       if (targetGender === 'male') return '公公';
       if (targetGender === 'female') return '婆婆';
       return '配偶父母';
@@ -17466,6 +17480,7 @@ Object.assign(EN, {
 
   Object.assign(ZH_HANS_EXACT, {
     '親子':'亲子',
+    '親子 / 收養':'亲子 / 收养',
     '收養':'收养',
     '前任配偶':'前任配偶',
     '兄弟姊妹':'兄弟姐妹',
@@ -17496,6 +17511,7 @@ Object.assign(EN, {
   });
   Object.assign(EN, {
     '親子':'Parent / Child',
+    '親子 / 收養':'Parent / Child / Adoption',
     '收養':'Adoptive Parent / Child',
     '前任配偶':'Ex-spouse',
     '兄弟姊妹':'Sibling',
