@@ -35,6 +35,7 @@ const SIDEBAR_DEFAULT_WIDTH = 300;
 const SIDEBAR_MIN_WIDTH = 260;
 const SIDEBAR_MAX_WIDTH = 430;
 const GUIDE_SNAP_PX = 8;
+const RELATIONSHIP_VERTICAL_SNAP_PX = 10;
 const SIBLING_LABEL = '兄弟姐妹';
 
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
@@ -4835,6 +4836,319 @@ function resolvePedigreeLayerCollisions(layers) {
 
 
 
+
+// ========【親子垂直關係線】 設定 - 自動排列以單一子女直線為硬約束，不借用卡片智慧吸附 ========
+function packGenealogyLayerAroundRelationshipAnchors(
+  layer,
+  anchoredLefts,
+  gap
+) {
+  if (
+    !layer ||
+    !layer.length ||
+    !anchoredLefts ||
+    !anchoredLefts.size
+  ) {
+    return true;
+  }
+
+  const anchorIndexes =
+    layer
+      .map((unit, index) => ({
+        unit,
+        index,
+        target:anchoredLefts.get(unit.id)
+      }))
+      .filter(item =>
+        Number.isFinite(item.target)
+      );
+
+  if (!anchorIndexes.length) {
+    return true;
+  }
+
+  // 先確認固定垂直軸彼此有足夠空間。
+  // 若兩個硬約束物理上互相重疊，就交回既有 collision solver，
+  // 不用錯誤的重疊卡片換取假直線。
+  for (
+    let anchorIndex = 0;
+    anchorIndex < anchorIndexes.length - 1;
+    anchorIndex += 1
+  ) {
+    const leftAnchor =
+      anchorIndexes[anchorIndex];
+
+    const rightAnchor =
+      anchorIndexes[anchorIndex + 1];
+
+    let minimumRequired =
+      leftAnchor.unit.width +
+      gap;
+
+    for (
+      let index =
+        leftAnchor.index + 1;
+      index <
+        rightAnchor.index;
+      index += 1
+    ) {
+      minimumRequired +=
+        layer[index].width +
+        gap;
+    }
+
+    if (
+      rightAnchor.target -
+      leftAnchor.target <
+      minimumRequired
+    ) {
+      return false;
+    }
+  }
+
+  const nextX =
+    layer.map(unit =>
+      unit.x
+    );
+
+  anchorIndexes.forEach(anchor => {
+    nextX[anchor.index] =
+      anchor.target;
+  });
+
+  // 第一個 relationship anchor 左側往左收。
+  const firstAnchor =
+    anchorIndexes[0];
+
+  for (
+    let index =
+      firstAnchor.index - 1;
+    index >= 0;
+    index -= 1
+  ) {
+    const maximum =
+      nextX[index + 1] -
+      gap -
+      layer[index].width;
+
+    nextX[index] =
+      Math.min(
+        nextX[index],
+        maximum
+      );
+  }
+
+  // 每兩個 relationship anchors 之間，在不移動兩端硬約束的情況下排入其他 unit。
+  for (
+    let anchorIndex = 0;
+    anchorIndex < anchorIndexes.length - 1;
+    anchorIndex += 1
+  ) {
+    const leftAnchor =
+      anchorIndexes[anchorIndex];
+
+    const rightAnchor =
+      anchorIndexes[anchorIndex + 1];
+
+    let cursor =
+      nextX[leftAnchor.index] +
+      leftAnchor.unit.width +
+      gap;
+
+    for (
+      let index =
+        leftAnchor.index + 1;
+      index <
+        rightAnchor.index;
+      index += 1
+    ) {
+      let remainingWidth = 0;
+
+      for (
+        let remainingIndex =
+          index + 1;
+        remainingIndex <
+          rightAnchor.index;
+        remainingIndex += 1
+      ) {
+        remainingWidth +=
+          layer[remainingIndex].width +
+          gap;
+      }
+
+      const maximum =
+        nextX[rightAnchor.index] -
+        gap -
+        remainingWidth -
+        layer[index].width;
+
+      nextX[index] =
+        Math.min(
+          maximum,
+          Math.max(
+            cursor,
+            nextX[index]
+          )
+        );
+
+      cursor =
+        nextX[index] +
+        layer[index].width +
+        gap;
+    }
+  }
+
+  // 最後一個 relationship anchor 右側往右推。
+  const lastAnchor =
+    anchorIndexes[
+      anchorIndexes.length - 1
+    ];
+
+  for (
+    let index =
+      lastAnchor.index + 1;
+    index <
+      layer.length;
+    index += 1
+  ) {
+    const minimum =
+      nextX[index - 1] +
+      layer[index - 1].width +
+      gap;
+
+    nextX[index] =
+      Math.max(
+        nextX[index],
+        minimum
+      );
+  }
+
+  layer.forEach((unit, index) => {
+    unit.x =
+      nextX[index];
+  });
+
+  return true;
+}
+
+function alignAutoVerticalParentChildBranches(
+  layers,
+  model,
+  connectorGroups
+) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = getGaps();
+
+  const generations =
+    [...layers.keys()]
+      .sort((a, b) => a - b);
+
+  // 上一代先定位，下一代再依當下最新的 parent connector X 對齊。
+  // 因此連續單一子女會自然形成真正的垂直鏈。
+  generations
+    .slice(1)
+    .forEach(generation => {
+      const layer =
+        layers.get(generation);
+
+      if (!layer || !layer.length) return;
+
+      const requests =
+        new Map();
+
+      connectorGroups.forEach(group => {
+        if (group.children.length !== 1) {
+          return;
+        }
+
+        const childId =
+          group.children[0];
+
+        const unit =
+          model.unitBySim.get(childId);
+
+        if (
+          !unit ||
+          unit.generation !== generation
+        ) {
+          return;
+        }
+
+        const geometry =
+          genealogyUnitMemberLocalGeometry(
+            unit,
+            childId
+          );
+
+        const sourceX =
+          genealogyGroupSourceX(
+            group,
+            model
+          );
+
+        if (
+          !geometry ||
+          !Number.isFinite(sourceX)
+        ) {
+          return;
+        }
+
+        if (!requests.has(unit.id)) {
+          requests.set(
+            unit.id,
+            []
+          );
+        }
+
+        requests
+          .get(unit.id)
+          .push(
+            sourceX -
+            geometry.centerX
+          );
+      });
+
+      const anchoredLefts =
+        new Map();
+
+      requests.forEach((targets, unitId) => {
+        if (!targets.length) return;
+
+        const minimum =
+          Math.min(...targets);
+
+        const maximum =
+          Math.max(...targets);
+
+        // 同一 Family Unit 若被兩個互相衝突的 parent axes 要求，
+        // 不強迫它選邊；保留既有正交 routing。
+        if (
+          maximum - minimum >
+          0.75
+        ) {
+          return;
+        }
+
+        anchoredLefts.set(
+          unitId,
+          targets.reduce(
+            (sum, value) =>
+              sum + value,
+            0
+          ) / targets.length
+        );
+      });
+
+      if (!anchoredLefts.size) return;
+
+      packGenealogyLayerAroundRelationshipAnchors(
+        layer,
+        anchoredLefts,
+        SIBLING_GAP
+      );
+    });
+}
 function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
   // ========【族譜幾何核心】 設定 - Collision-first pedigree solver ========
   // 硬約束：
@@ -4972,6 +5286,14 @@ function computeAutoPositions(visibleIds) {
       connectorGroups
     );
   }
+
+  // ========【親子垂直線】 設定 - 只在自動排列最後一階段套用 relationship geometry constraint ========
+  // 不改卡片智慧線，也不把 V-H-V 當作自動排列的正常預設。
+  alignAutoVerticalParentChildBranches(
+    layers,
+    model,
+    connectorGroups
+  );
 
   return placeGenealogyUnitMembers(
     model.units
@@ -5603,18 +5925,26 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
     const x2 = child.anchor.x;
     const y2 = child.anchor.y;
 
-    const aligned =
-      Math.abs(x1 - x2) < 0.75;
+    // ========【垂直關係線靜默吸附】 設定 - V-V 接近時直接共線，不顯示任何智慧輔助線 ========
+    // 自動排列會在 layout 階段先把單一子女對到 parent axis；
+    // 玩家自由拖曳後，只要仍落在視覺吸附範圍內，renderer 也直接消掉中間 H。
+    const relationshipSnapThreshold =
+      RELATIONSHIP_VERTICAL_SNAP_PX /
+      Math.max(scale, 0.001);
+
+    const verticallySnapped =
+      Math.abs(x1 - x2) <=
+      relationshipSnapThreshold;
 
     let labelX =
-      aligned
+      verticallySnapped
         ? x1
         : (x1 + x2) / 2;
 
     let labelY =
       y1 + (y2 - y1) / 2;
 
-    if (aligned) {
+    if (verticallySnapped) {
       paths.push(
         '<path class="' + edgeClass + '" d="' +
         'M' + x1 + ' ' + y1 +
@@ -5622,6 +5952,8 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         '"/>'
       );
     } else {
+      // 玩家明確把人物拖離 parent axis 後，保留 V-H-V，
+      // 讓手動位置優先於自動垂直關係線。
       const branchY =
         y1 + (y2 - y1) / 2;
 
@@ -5677,9 +6009,8 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         child.kind === 'adoptive'
     );
 
-  // 父母到 sibling junction 的共同主幹：
-  // 全部都是領養子女時才整段使用領養線；
-  // 混合親生 / 領養時，真正分流前仍屬共同主幹。
+  // 多子女本來就是：垂直 parent trunk + sibling bus + 每名子女垂直 branch。
+  // 這裡不套用單一子女的 V-H-V fallback。
   paths.push(
     '<path class="' +
     edgeClassForKind(
@@ -5694,10 +6025,6 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
   );
 
   // ========【Sibling Bus 分段】 設定 - 進入純領養分支後立刻使用領養線型 ========
-  // 不再先畫一整條實線 bus，再只把最後垂直段改成虛線。
-  // 每一小段水平 bus 都檢查「經過這一段的子女」：
-  // - 仍有親生子女共用 -> 一般親子線
-  // - 只剩領養子女 -> edge-adopt（沿用玩家設定的 dash）
   const busPoints =
     [...new Set([
       source.x,
@@ -5770,7 +6097,6 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
     );
   }
 
-  // 每個 child 的垂直 branch 保留自己的關係線型。
   children.forEach(child => {
     paths.push(
       '<path class="' +
