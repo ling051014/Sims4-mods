@@ -6318,8 +6318,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 .appearance-section .bg-row button,
 .appearance-section .bg-row .filebtn,
-#resetUiSettingsBtn,
-#cleanupBtn {
+#resetUiSettingsBtn {
     min-height:30px;
     padding:5px 9px;
     border:1px solid var(--border);
@@ -6748,17 +6747,19 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 
-/* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料的操作統一使用紅色語意 ======== */
-.danger-action {
+/* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */
+/* 有既有外框的按鈕會連同外框變紅；border:0 的導覽 / 工具按鈕不會因此新增外框。 */
+button.danger-action {
     color:#b03a2e;
+    border-color:rgba(176,58,46,.34);
 }
-.danger-action .l1ng-icon {
+button.danger-action .l1ng-icon {
     color:currentColor;
 }
 button.danger-action:hover,
 button.danger-action:focus-visible {
     color:#953126;
-    border-color:rgba(176,58,46,.38);
+    border-color:rgba(176,58,46,.55);
     background:rgba(176,58,46,.07);
     outline:none;
 }
