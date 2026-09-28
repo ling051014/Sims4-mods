@@ -529,6 +529,8 @@ let avatarCropTarget = null;
 let avatarCropDraft = { ...DEFAULT_AVATAR_FRAME };
 let avatarCropUrl = '';
 let avatarCropPointer = null;
+let avatarCropNaturalSize = { width:0, height:0 };
+let avatarCropRenderMetrics = null;
 
 let editingGallery = [];
 let editingPhotoIndex = -1;
@@ -3254,84 +3256,60 @@ function findAncestorPath(
   targetId,
   maxDepth = 8
 ) {
-  const source =
-    String(sourceId || '');
+  const source = String(sourceId || '');
+  const target = String(targetId || '');
 
-  const target =
-    String(targetId || '');
-
-  if (
-    !source ||
-    !target ||
-    source === target
-  ) {
+  if (!source || !target || source === target) {
     return null;
   }
 
-  const queue = [{
-    id:source,
-    path:[]
-  }];
-
-  const bestDepth =
-    new Map([
-      [source, 0]
-    ]);
+  const queue = [{ id:source, path:[] }];
+  const bestDepth = new Map([[source, 0]]);
 
   while (queue.length) {
-    const current =
-      queue.shift();
+    const current = queue.shift();
 
-    if (
-      current.path.length >=
-      maxDepth
-    ) {
+    if (current.path.length >= maxDepth) {
       continue;
     }
 
-    const sim =
-      genealogyData?.sims?.[
-        current.id
-      ];
-
+    const sim = genealogyData?.sims?.[current.id];
     if (!sim) continue;
 
-    genealogyParentRelations(sim)
-      .forEach(relation => {
-        const nextId =
-          String(
-            relation.parentId
-          );
+    const relations = genealogyParentRelations(sim);
 
-        const nextPath = [
-          ...current.path,
-          nextId
-        ];
+    for (const relation of relations) {
+      const nextId = String(relation.parentId);
+      if (!nextId) continue;
 
-        if (nextId === target) {
-          return nextPath;
-        }
+      const nextPath = [
+        ...current.path,
+        nextId
+      ];
 
-        const known =
-          bestDepth.get(nextId);
+      if (nextId === target) {
+        return nextPath;
+      }
 
-        if (
-          known != null &&
-          known <= nextPath.length
-        ) {
-          return;
-        }
+      const known = bestDepth.get(nextId);
 
-        bestDepth.set(
-          nextId,
-          nextPath.length
-        );
+      if (
+        known != null &&
+        known <= nextPath.length
+      ) {
+        continue;
+      }
 
-        queue.push({
-          id:nextId,
-          path:nextPath
-        });
+      bestDepth.set(
+        nextId,
+        nextPath.length
+      );
+
+      queue.push({
+        id:nextId,
+        path:nextPath
       });
+    }
   }
 
   return null;
@@ -3342,75 +3320,57 @@ function findDescendantPath(
   targetId,
   maxDepth = 8
 ) {
-  const source =
-    String(sourceId || '');
+  const source = String(sourceId || '');
+  const target = String(targetId || '');
 
-  const target =
-    String(targetId || '');
-
-  if (
-    !source ||
-    !target ||
-    source === target
-  ) {
+  if (!source || !target || source === target) {
     return null;
   }
 
-  const queue = [{
-    id:source,
-    path:[]
-  }];
-
-  const bestDepth =
-    new Map([
-      [source, 0]
-    ]);
+  const queue = [{ id:source, path:[] }];
+  const bestDepth = new Map([[source, 0]]);
 
   while (queue.length) {
-    const current =
-      queue.shift();
+    const current = queue.shift();
 
-    if (
-      current.path.length >=
-      maxDepth
-    ) {
+    if (current.path.length >= maxDepth) {
       continue;
     }
 
-    getChildrenOf(current.id)
-      .forEach(child => {
-        const nextId =
-          String(child.id);
+    const children = getChildrenOf(current.id);
 
-        const nextPath = [
-          ...current.path,
-          nextId
-        ];
+    for (const child of children) {
+      const nextId = String(child.id);
+      if (!nextId) continue;
 
-        if (nextId === target) {
-          return nextPath;
-        }
+      const nextPath = [
+        ...current.path,
+        nextId
+      ];
 
-        const known =
-          bestDepth.get(nextId);
+      if (nextId === target) {
+        return nextPath;
+      }
 
-        if (
-          known != null &&
-          known <= nextPath.length
-        ) {
-          return;
-        }
+      const known = bestDepth.get(nextId);
 
-        bestDepth.set(
-          nextId,
-          nextPath.length
-        );
+      if (
+        known != null &&
+        known <= nextPath.length
+      ) {
+        continue;
+      }
 
-        queue.push({
-          id:nextId,
-          path:nextPath
-        });
+      bestDepth.set(
+        nextId,
+        nextPath.length
+      );
+
+      queue.push({
+        id:nextId,
+        path:nextPath
       });
+    }
   }
 
   return null;
@@ -11096,8 +11056,9 @@ function profileFamilyRelationshipRows(
         resolveKinshipLabel(
           simId,
           targetId
-        ) ||
-        '親屬';
+        );
+
+      if (!label) return;
 
       if (!groups.has(label)) {
         groups.set(label, []);
@@ -14904,137 +14865,419 @@ function setupSearchSelects() {
 }
 
 function getEditingAvatarCropSource(target){
-    return target==='pet'
-      ? {ref:editingPetAvatar,frame:editingPetAvatarFrame}
-      : {ref:editingAvatar,frame:editingAvatarFrame};
+  return target==='pet'
+    ? {ref:editingPetAvatar,frame:editingPetAvatarFrame}
+    : {ref:editingAvatar,frame:editingAvatarFrame};
+}
+
+function setEditingAvatarCropFrame(target,frame){
+  const normalized=normalizeAvatarFrame(frame);
+
+  if(target==='pet'){
+    editingPetAvatarFrame=normalized;
+    renderPetAvatarPreview();
+  }else{
+    editingAvatarFrame=normalized;
+    updateAvatarPreview();
+    renderEditorInfoPreviewIfActive();
+  }
+}
+
+function avatarCropBounds(){
+  const workspace=$('avatarCropWorkspace');
+  const windowEl=$('avatarCropWindow');
+
+  if(
+    !workspace||
+    !windowEl||
+    !avatarCropNaturalSize.width||
+    !avatarCropNaturalSize.height
+  ){
+    return null;
   }
 
-  function setEditingAvatarCropFrame(target,frame){
-    const normalized=normalizeAvatarFrame(frame);
-    if(target==='pet'){
-      editingPetAvatarFrame=normalized;
-      renderPetAvatarPreview();
-    }else{
-      editingAvatarFrame=normalized;
-      updateAvatarPreview();
-      renderEditorInfoPreviewIfActive();
+  const workspaceRect=workspace.getBoundingClientRect();
+  const cropRect=windowEl.getBoundingClientRect();
+
+  if(
+    !workspaceRect.width||
+    !workspaceRect.height||
+    !cropRect.width||
+    !cropRect.height
+  ){
+    return null;
+  }
+
+  const cropWidth=cropRect.width;
+  const cropHeight=cropRect.height;
+  const baseScale=Math.max(
+    cropWidth/avatarCropNaturalSize.width,
+    cropHeight/avatarCropNaturalSize.height
+  );
+  const zoom=Math.max(1,Number(avatarCropDraft.zoom)||1);
+  const scale=baseScale*zoom;
+  const imageWidth=avatarCropNaturalSize.width*scale;
+  const imageHeight=avatarCropNaturalSize.height*scale;
+
+  const minX=Math.min(.5,cropWidth/(2*imageWidth));
+  const maxX=Math.max(.5,1-minX);
+  const minY=Math.min(.5,cropHeight/(2*imageHeight));
+  const maxY=Math.max(.5,1-minY);
+
+  const cropCenterX=
+    cropRect.left-workspaceRect.left+
+    cropRect.width/2;
+  const cropCenterY=
+    cropRect.top-workspaceRect.top+
+    cropRect.height/2;
+
+  return{
+    workspaceRect,
+    cropRect,
+    cropCenterX,
+    cropCenterY,
+    imageWidth,
+    imageHeight,
+    minX,
+    maxX,
+    minY,
+    maxY
+  };
+}
+
+function clampAvatarCropDraft(){
+  const bounds=avatarCropBounds();
+  if(!bounds)return avatarCropDraft;
+
+  avatarCropDraft=normalizeAvatarFrame({
+    ...avatarCropDraft,
+    x:Math.min(
+      bounds.maxX,
+      Math.max(bounds.minX,avatarCropDraft.x)
+    ),
+    y:Math.min(
+      bounds.maxY,
+      Math.max(bounds.minY,avatarCropDraft.y)
+    )
+  });
+
+  return avatarCropDraft;
+}
+
+function renderAvatarCropPreview(){
+  const image=$('avatarCropImage');
+  const zoom=$('avatarCropZoom');
+  const output=$('avatarCropZoomValue');
+
+  if(!image)return;
+
+  if(avatarCropUrl&&image.src!==avatarCropUrl){
+    image.src=avatarCropUrl;
+  }
+
+  if(
+    !avatarCropNaturalSize.width||
+    !avatarCropNaturalSize.height
+  ){
+    return;
+  }
+
+  clampAvatarCropDraft();
+  const bounds=avatarCropBounds();
+  if(!bounds)return;
+
+  avatarCropRenderMetrics=bounds;
+
+  image.style.width=`${bounds.imageWidth}px`;
+  image.style.height=`${bounds.imageHeight}px`;
+  image.style.left=`${
+    bounds.cropCenterX-
+    avatarCropDraft.x*bounds.imageWidth
+  }px`;
+  image.style.top=`${
+    bounds.cropCenterY-
+    avatarCropDraft.y*bounds.imageHeight
+  }px`;
+
+  if(zoom)zoom.value=String(avatarCropDraft.zoom);
+  if(output){
+    output.textContent=
+      `${Math.round(avatarCropDraft.zoom*100)}%`;
+  }
+}
+
+async function loadAvatarCropImage(url){
+  const image=$('avatarCropImage');
+  if(!image)return false;
+
+  if(image.src!==url){
+    image.src=url;
+  }
+
+  try{
+    if(
+      !image.complete||
+      !image.naturalWidth
+    ){
+      await new Promise((resolve,reject)=>{
+        const onLoad=()=>{
+          cleanup();
+          resolve();
+        };
+        const onError=()=>{
+          cleanup();
+          reject(new Error('avatar image load failed'));
+        };
+        const cleanup=()=>{
+          image.removeEventListener('load',onLoad);
+          image.removeEventListener('error',onError);
+        };
+
+        image.addEventListener('load',onLoad,{once:true});
+        image.addEventListener('error',onError,{once:true});
+      });
+    }
+  }catch(_){
+    return false;
+  }
+
+  avatarCropNaturalSize={
+    width:image.naturalWidth||0,
+    height:image.naturalHeight||0
+  };
+
+  return !!(
+    avatarCropNaturalSize.width&&
+    avatarCropNaturalSize.height
+  );
+}
+
+async function openAvatarCropEditor(target){
+  const source=getEditingAvatarCropSource(target);
+  if(!source.ref)return;
+
+  let url=resolveImageUrl(source.ref);
+
+  if(!url){
+    try{
+      url=await assetStore.getUrl(source.ref);
+    }catch(_){
+      url='';
     }
   }
 
-  function renderAvatarCropPreview(){
-    const image=$('avatarCropImage');
-    const zoom=$('avatarCropZoom');
-    const output=$('avatarCropZoomValue');
-    if(!image)return;
-
-    if(avatarCropUrl)image.src=avatarCropUrl;
-    else image.removeAttribute('src');
-
-    applyAvatarFrameToElement(image,avatarCropDraft);
-    if(zoom)zoom.value=String(avatarCropDraft.zoom);
-    if(output)output.textContent=`${Math.round(avatarCropDraft.zoom*100)}%`;
+  if(!url){
+    uiAlert(
+      '頭像載入失敗，請重新選擇圖片。',
+      {title:'圖片處理失敗',kind:'danger'}
+    );
+    return;
   }
 
-  async function openAvatarCropEditor(target){
-    const source=getEditingAvatarCropSource(target);
-    if(!source.ref)return;
+  avatarCropTarget=target==='pet'?'pet':'sim';
+  avatarCropDraft=normalizeAvatarFrame(source.frame);
+  avatarCropUrl=url;
+  avatarCropPointer=null;
+  avatarCropRenderMetrics=null;
+  avatarCropNaturalSize={width:0,height:0};
 
-    let url=resolveImageUrl(source.ref);
-    if(!url){
-      try{url=await assetStore.getUrl(source.ref);}
-      catch(_){url='';}
-    }
-    if(!url){
-      uiAlert('頭像載入失敗，請重新選擇圖片。',{title:'圖片處理失敗',kind:'danger'});
-      return;
-    }
+  avatarCropMask.classList.add('show');
 
-    avatarCropTarget=target==='pet'?'pet':'sim';
-    avatarCropDraft=normalizeAvatarFrame(source.frame);
-    avatarCropUrl=url;
-    avatarCropPointer=null;
-    renderAvatarCropPreview();
-    avatarCropMask.classList.add('show');
-  }
+  const loaded=await loadAvatarCropImage(url);
 
-  function closeAvatarCropEditor(){
-    avatarCropMask.classList.remove('show');
-    avatarCropTarget=null;
-    avatarCropDraft={...DEFAULT_AVATAR_FRAME};
-    avatarCropUrl='';
-    avatarCropPointer=null;
-    $('avatarCropStage')?.classList.remove('dragging');
-  }
-
-  function resetAvatarCropEditor(){
-    avatarCropDraft={...DEFAULT_AVATAR_FRAME};
-    renderAvatarCropPreview();
-  }
-
-  function commitAvatarCropEditor(){
-    if(avatarCropTarget){
-      setEditingAvatarCropFrame(avatarCropTarget,avatarCropDraft);
-    }
+  if(!loaded){
     closeAvatarCropEditor();
+    uiAlert(
+      '頭像載入失敗，請重新選擇圖片。',
+      {title:'圖片處理失敗',kind:'danger'}
+    );
+    return;
   }
 
-  const avatarCropStage=$('avatarCropStage');
+  await new Promise(resolve=>requestAnimationFrame(resolve));
+  renderAvatarCropPreview();
+}
 
-  avatarCropStage?.addEventListener('pointerdown',event=>{
+function closeAvatarCropEditor(){
+  avatarCropMask.classList.remove('show');
+  avatarCropTarget=null;
+  avatarCropDraft={...DEFAULT_AVATAR_FRAME};
+  avatarCropUrl='';
+  avatarCropPointer=null;
+  avatarCropNaturalSize={width:0,height:0};
+  avatarCropRenderMetrics=null;
+  $('avatarCropWorkspace')?.classList.remove('dragging');
+}
+
+function resetAvatarCropEditor(){
+  avatarCropDraft={...DEFAULT_AVATAR_FRAME};
+  renderAvatarCropPreview();
+}
+
+function commitAvatarCropEditor(){
+  if(avatarCropTarget){
+    clampAvatarCropDraft();
+    setEditingAvatarCropFrame(
+      avatarCropTarget,
+      avatarCropDraft
+    );
+  }
+
+  closeAvatarCropEditor();
+}
+
+const avatarCropWorkspace=$('avatarCropWorkspace');
+
+avatarCropWorkspace?.addEventListener(
+  'pointerdown',
+  event=>{
     if(!avatarCropTarget)return;
+
     event.preventDefault();
-    avatarCropStage.setPointerCapture?.(event.pointerId);
-    avatarCropStage.classList.add('dragging');
+    avatarCropWorkspace.setPointerCapture?.(
+      event.pointerId
+    );
+
+    renderAvatarCropPreview();
+
+    avatarCropWorkspace.classList.add('dragging');
+
     avatarCropPointer={
       pointerId:event.pointerId,
       startX:event.clientX,
       startY:event.clientY,
-      frame:normalizeAvatarFrame(avatarCropDraft)
+      frame:normalizeAvatarFrame(avatarCropDraft),
+      imageWidth:
+        avatarCropRenderMetrics?.imageWidth||1,
+      imageHeight:
+        avatarCropRenderMetrics?.imageHeight||1
     };
-  });
+  }
+);
 
-  avatarCropStage?.addEventListener('pointermove',event=>{
-    if(!avatarCropPointer||avatarCropPointer.pointerId!==event.pointerId)return;
+avatarCropWorkspace?.addEventListener(
+  'pointermove',
+  event=>{
+    if(
+      !avatarCropPointer||
+      avatarCropPointer.pointerId!==event.pointerId
+    ){
+      return;
+    }
 
-    const rect=avatarCropStage.getBoundingClientRect();
-    if(!rect.width||!rect.height)return;
-
-    const zoom=Math.max(1,avatarCropPointer.frame.zoom);
-    const dx=event.clientX-avatarCropPointer.startX;
-    const dy=event.clientY-avatarCropPointer.startY;
+    const dx=
+      event.clientX-avatarCropPointer.startX;
+    const dy=
+      event.clientY-avatarCropPointer.startY;
 
     avatarCropDraft=normalizeAvatarFrame({
       ...avatarCropDraft,
-      x:avatarCropPointer.frame.x-dx/rect.width/zoom,
-      y:avatarCropPointer.frame.y-dy/rect.height/zoom
+      x:
+        avatarCropPointer.frame.x-
+        dx/avatarCropPointer.imageWidth,
+      y:
+        avatarCropPointer.frame.y-
+        dy/avatarCropPointer.imageHeight
     });
+
     renderAvatarCropPreview();
-  });
+  }
+);
 
-  const finishAvatarCropPointer=event=>{
-    if(!avatarCropPointer||avatarCropPointer.pointerId!==event.pointerId)return;
-    avatarCropPointer=null;
-    avatarCropStage?.classList.remove('dragging');
-  };
+const finishAvatarCropPointer=event=>{
+  if(
+    !avatarCropPointer||
+    avatarCropPointer.pointerId!==event.pointerId
+  ){
+    return;
+  }
 
-  avatarCropStage?.addEventListener('pointerup',finishAvatarCropPointer);
-  avatarCropStage?.addEventListener('pointercancel',finishAvatarCropPointer);
+  avatarCropPointer=null;
+  avatarCropWorkspace?.classList.remove('dragging');
+};
 
-  $('avatarCropZoom')?.addEventListener('input',event=>{
+avatarCropWorkspace?.addEventListener(
+  'pointerup',
+  finishAvatarCropPointer
+);
+avatarCropWorkspace?.addEventListener(
+  'pointercancel',
+  finishAvatarCropPointer
+);
+
+avatarCropWorkspace?.addEventListener(
+  'wheel',
+  event=>{
+    if(!avatarCropTarget)return;
+
+    event.preventDefault();
+
+    const direction=
+      event.deltaY<0
+        ? 1
+        : -1;
+
+    const step=
+      event.ctrlKey
+        ? .03
+        : .08;
+
+    avatarCropDraft=normalizeAvatarFrame({
+      ...avatarCropDraft,
+      zoom:
+        avatarCropDraft.zoom+
+        direction*step
+    });
+
+    renderAvatarCropPreview();
+  },
+  {passive:false}
+);
+
+$('avatarCropZoom')?.addEventListener(
+  'input',
+  event=>{
     avatarCropDraft=normalizeAvatarFrame({
       ...avatarCropDraft,
       zoom:Number(event.target.value)
     });
+
     renderAvatarCropPreview();
-  });
+  }
+);
 
-  $('avatarCropReset')?.addEventListener('click',resetAvatarCropEditor);
-  $('avatarCropCancel')?.addEventListener('click',closeAvatarCropEditor);
-  $('avatarCropDone')?.addEventListener('click',commitAvatarCropEditor);
+$('avatarCropReset')?.addEventListener(
+  'click',
+  resetAvatarCropEditor
+);
+$('avatarCropCancel')?.addEventListener(
+  'click',
+  closeAvatarCropEditor
+);
+$('avatarCropDone')?.addEventListener(
+  'click',
+  commitAvatarCropEditor
+);
 
-  avatarCropMask?.addEventListener('click',event=>{
-    if(event.target===avatarCropMask)closeAvatarCropEditor();
-  });
+avatarCropMask?.addEventListener(
+  'click',
+  event=>{
+    if(event.target===avatarCropMask){
+      closeAvatarCropEditor();
+    }
+  }
+);
+
+window.addEventListener(
+  'resize',
+  debounce(()=>{
+    if(
+      avatarCropMask?.classList.contains('show')
+    ){
+      renderAvatarCropPreview();
+    }
+  },80)
+);
 
 function buildRelationEntries(simId) {
   const entries = [];
@@ -15913,7 +16156,7 @@ function editorDraftSim(){
       return siblingKinshipLabel(perspective,target);
     }
 
-    return'親屬';
+    return'';
   }
 
   function selectedEditorIds(selectId){
@@ -19283,6 +19526,13 @@ Object.assign(EN, {
   });
   Object.assign(EN, {
     '預覽':'Preview','編輯':'Edit','關係線標籤':'Relationship Line Labels','其他關係線標籤':'Other Relationship Line Labels','親生':'Biological','公':'Male','母':'Female','調整範圍':'Adjust Crop','調整頭像範圍':'Adjust Avatar Crop','拖曳調整焦點；使用縮放調整取景範圍。':'Drag to reposition the image and use zoom to adjust the crop.','縮放':'Zoom','重設':'Reset','完成':'Done','支援 JPG / PNG / WEBP':'Supports JPG / PNG / WEBP','僅支援 JPG / PNG / WEBP':'Only JPG / PNG / WEBP are supported','記錄這位模擬市民值得保存的人生照片；可標記人生階段、標題與備註。':'Save meaningful life photos for this Sim; add a life stage, title, and notes.'
+  });
+
+  Object.assign(ZH_HANS_EXACT, {
+    '拖曳圖片調整焦點；滾輪或下方滑桿可縮放。框外半透明區域不會出現在頭像中。':'拖拽图片调整焦点；滚轮或下方滑杆可缩放。框外半透明区域不会出现在头像中。'
+  });
+  Object.assign(EN, {
+    '拖曳圖片調整焦點；滾輪或下方滑桿可縮放。框外半透明區域不會出現在頭像中。':'Drag the image to reposition it. Use the mouse wheel or slider to zoom. The dimmed area outside the frame will not appear in the avatar.'
   });
 
   Object.assign(ZH_HANS_EXACT, {

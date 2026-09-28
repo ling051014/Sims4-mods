@@ -2215,15 +2215,106 @@ button.avatar-editor-action { cursor:pointer; }
 .pet-editor-fields input:focus,.pet-editor-fields select:focus { border-color:var(--accent); }
 .pet-field-full { grid-column:1/-1; }
 
-.avatar-crop-modal { width:min(460px,100%); }
-.avatar-crop-stage { width:min(320px,72vw); aspect-ratio:1; margin:12px auto 10px; overflow:hidden; position:relative; border:1px solid var(--border); border-radius:12px; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); cursor:grab; touch-action:none; }
-.avatar-crop-stage.dragging { cursor:grabbing; }
-.avatar-crop-stage img { width:100%; height:100%; object-fit:cover; object-position:var(--avatar-x,50%) var(--avatar-y,50%); transform:scale(var(--avatar-zoom,1)); transform-origin:var(--avatar-x,50%) var(--avatar-y,50%); display:block; pointer-events:none; user-select:none; }
-.avatar-crop-stage::after { content:""; position:absolute; inset:0; border:1px solid color-mix(in srgb,var(--card) 78%,transparent); border-radius:inherit; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 12%,transparent); pointer-events:none; }
-.avatar-crop-hint { margin:0 auto 12px; max-width:320px; color:var(--sub); font-size:11.5px; line-height:1.45; text-align:center; }
-.avatar-crop-zoom-row { display:grid; grid-template-columns:auto minmax(0,1fr) 52px; align-items:center; gap:10px; color:var(--sub); font-size:12px; }
+.avatar-crop-modal { width:min(560px,100%); }
+.avatar-crop-workspace {
+    position:relative;
+    width:min(500px,82vw);
+    height:min(380px,62vh);
+    min-height:300px;
+    margin:12px auto 10px;
+    overflow:hidden;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:
+        linear-gradient(45deg,color-mix(in srgb,var(--sub) 8%,transparent) 25%,transparent 25%,transparent 75%,color-mix(in srgb,var(--sub) 8%,transparent) 75%),
+        linear-gradient(45deg,color-mix(in srgb,var(--sub) 8%,transparent) 25%,transparent 25%,transparent 75%,color-mix(in srgb,var(--sub) 8%,transparent) 75%),
+        var(--panel-bg);
+    background-position:0 0,8px 8px;
+    background-size:16px 16px;
+    cursor:grab;
+    touch-action:none;
+}
+.avatar-crop-workspace.dragging { cursor:grabbing; }
+.avatar-crop-workspace > img {
+    position:absolute;
+    display:block;
+    width:auto;
+    height:auto;
+    max-width:none;
+    max-height:none;
+    pointer-events:none;
+    user-select:none;
+    will-change:left,top,width,height;
+}
+.avatar-crop-window {
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:min(280px,64vw);
+    aspect-ratio:1;
+    transform:translate(-50%,-50%);
+    border:2px solid rgba(255,255,255,.96);
+    border-radius:10px;
+    box-shadow:
+        0 0 0 9999px rgba(0,0,0,.5),
+        0 0 0 1px rgba(0,0,0,.28),
+        0 8px 24px rgba(0,0,0,.18);
+    pointer-events:none;
+    z-index:2;
+}
+.avatar-crop-grid {
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transition:opacity .12s ease;
+    pointer-events:none;
+}
+.avatar-crop-workspace.dragging .avatar-crop-grid { opacity:1; }
+.avatar-crop-grid-v,
+.avatar-crop-grid-h {
+    position:absolute;
+    display:block;
+    background:rgba(255,255,255,.68);
+    box-shadow:0 0 0 1px rgba(0,0,0,.08);
+}
+.avatar-crop-grid-v { top:0; bottom:0; width:1px; }
+.avatar-crop-grid-v1 { left:33.333%; }
+.avatar-crop-grid-v2 { left:66.666%; }
+.avatar-crop-grid-h { left:0; right:0; height:1px; }
+.avatar-crop-grid-h1 { top:33.333%; }
+.avatar-crop-grid-h2 { top:66.666%; }
+.avatar-crop-hint {
+    margin:0 auto 12px;
+    max-width:500px;
+    color:var(--sub);
+    font-size:11.5px;
+    line-height:1.5;
+    text-align:center;
+}
+.avatar-crop-zoom-row {
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) 52px;
+    align-items:center;
+    gap:10px;
+    color:var(--sub);
+    font-size:12px;
+}
 .avatar-crop-zoom-row input { width:100%; }
-.avatar-crop-zoom-row output { color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
+.avatar-crop-zoom-row output {
+    color:var(--ink);
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+}
+@media (max-width:560px) {
+    .avatar-crop-workspace {
+        width:min(100%,88vw);
+        height:min(360px,56vh);
+        min-height:280px;
+    }
+    .avatar-crop-window {
+        width:min(250px,68vw);
+    }
+}
 
 .modal-actions {
     /* 顯示方式 */ display: flex;

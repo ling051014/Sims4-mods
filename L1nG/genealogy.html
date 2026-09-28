@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20260929-sim-pet-editor-refactor">
+        <link rel="stylesheet" href="genealogy.css?v=20260929-kinship-avatar-crop">
     </head>
     <body data-theme="ling">
 
@@ -496,12 +496,22 @@
             </div>
         </div>
 
-        <!-- ========【頭像取景】 設定 - 模擬市民與寵物共用非破壞式位置與縮放 ======== -->
+        <!-- ========【頭像取景】 設定 - 完整原圖工作區、遮罩、九宮格與非破壞式位置 / 縮放 ======== -->
         <div class="mask nested" id="avatarCropMask">
             <div class="modal avatar-crop-modal">
                 <h2>調整頭像範圍</h2>
-                <div class="avatar-crop-stage" id="avatarCropStage"><img class="avatar-framed-image" id="avatarCropImage" alt="" draggable="false"></div>
-                <div class="avatar-crop-hint">拖曳調整焦點；使用縮放調整取景範圍。</div>
+                <div class="avatar-crop-workspace" id="avatarCropWorkspace">
+                    <img id="avatarCropImage" alt="" draggable="false">
+                    <div class="avatar-crop-window" id="avatarCropWindow" aria-hidden="true">
+                        <div class="avatar-crop-grid">
+                            <span class="avatar-crop-grid-v avatar-crop-grid-v1"></span>
+                            <span class="avatar-crop-grid-v avatar-crop-grid-v2"></span>
+                            <span class="avatar-crop-grid-h avatar-crop-grid-h1"></span>
+                            <span class="avatar-crop-grid-h avatar-crop-grid-h2"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="avatar-crop-hint">拖曳圖片調整焦點；滾輪或下方滑桿可縮放。框外半透明區域不會出現在頭像中。</div>
                 <label class="avatar-crop-zoom-row"><span>縮放</span><input id="avatarCropZoom" type="range" min="1" max="3" step="0.01" value="1"><output id="avatarCropZoomValue">100%</output></label>
                 <div class="modal-actions"><button id="avatarCropReset" type="button">重設</button><span class="spacer"></span><button id="avatarCropCancel" type="button">取消</button><button class="primary" id="avatarCropDone" type="button">完成</button></div>
             </div>
@@ -984,6 +994,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260929-sim-pet-editor-refactor"></script>
+        <script src="genealogy.js?v=20260929-kinship-avatar-crop"></script>
     </body>
 </html>
