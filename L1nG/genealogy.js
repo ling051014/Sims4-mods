@@ -525,6 +525,8 @@ let editingPetAvatar = null;
 let editingPetAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
 let editingParentKinds = new Map();
 let editingChildKinds = new Map();
+let editingExplicitSiblingIds = new Set();
+let editingDerivedSiblingIds = new Set();
 let avatarCropTarget = null;
 let avatarCropDraft = { ...DEFAULT_AVATAR_FRAME };
 let avatarCropUrl = '';
@@ -3066,13 +3068,83 @@ function inferredSiblingIds(simId) {
   );
 }
 
-function genealogySiblingIds(simId) {
+function resolveSiblingRelationships(
+  simId,
+  {
+    parentIds = null,
+    explicitIds = null
+  } = {}
+) {
+  const id =
+    String(simId || '');
+
+  const subject =
+    genealogyData?.sims?.[id];
+
+  const canonicalParentIds =
+    parentIds == null
+      ? (
+          subject
+            ? genealogyParentIds(subject)
+            : []
+        )
+      : parentIds;
+
+  const canonicalExplicitIds =
+    explicitIds == null
+      ? explicitSiblingIds(id)
+      : explicitIds;
+
+  const explicit =
+    new Set(
+      (canonicalExplicitIds || [])
+        .map(String)
+        .filter(otherId =>
+          otherId &&
+          otherId !== id &&
+          genealogyData?.sims?.[otherId]
+        )
+    );
+
+  const inferred =
+    new Set(
+      inferredSiblingIdsForParents(
+        id,
+        canonicalParentIds || []
+      )
+    );
+
   return [...new Set([
-    ...explicitSiblingIds(simId),
-    ...inferredSiblingIds(simId)
+    ...explicit,
+    ...inferred
   ])]
-    .filter(id =>
-      genealogyData?.sims?.[id]
+    .filter(targetId =>
+      targetId &&
+      targetId !== id &&
+      genealogyData?.sims?.[targetId]
+    )
+    .map(targetId => ({
+      targetId,
+      storedExplicit:
+        explicit.has(targetId),
+      derivedFromParents:
+        inferred.has(targetId),
+      source:
+        explicit.has(targetId) &&
+        inferred.has(targetId)
+          ? 'explicit+inferred'
+          : explicit.has(targetId)
+            ? 'explicit'
+            : 'inferred'
+    }));
+}
+
+function genealogySiblingIds(simId) {
+  return resolveSiblingRelationships(
+    simId
+  )
+    .map(relation =>
+      relation.targetId
     );
 }
 
@@ -3461,50 +3533,25 @@ function resolveDirectFamilyRelationships(
       )
       .filter(Boolean);
 
-  const explicit =
-    new Set(
-      explicitSiblingIds(id)
-    );
-
-  const inferred =
-    new Set(
-      inferredSiblingIds(id)
-    );
-
-  const siblingIds =
-    [...new Set([
-      ...explicit,
-      ...inferred
-    ])];
-
   const siblings =
-    siblingIds
-      .map(targetId => {
-        const isExplicit =
-          explicit.has(targetId);
-
-        const isInferred =
-          inferred.has(targetId);
-
-        return makeEntry(
+    resolveSiblingRelationships(id)
+      .map(relation =>
+        makeEntry(
           'sibling',
-          targetId,
+          relation.targetId,
           {
             source:
-              isExplicit && isInferred
-                ? 'explicit+inferred'
-                : isExplicit
-                  ? 'explicit'
-                  : 'inferred',
+              relation.source,
             storedExplicit:
-              isExplicit,
+              relation.storedExplicit,
             derivedFromParents:
-              isInferred,
+              relation.derivedFromParents,
             editable:
-              isExplicit
+              relation.storedExplicit &&
+              !relation.derivedFromParents
           }
-        );
-      })
+        )
+      )
       .filter(Boolean);
 
   return {
@@ -16411,44 +16458,20 @@ function editorDraftSim(){
       .filter(Boolean);
   }
 
-  function selectedEditableEditorIds(selectId){
-    const select=$(selectId);
-
-    if(!select)return[];
-
-    return [...select.options]
-      .filter(option=>
-        option.selected&&
-        !option.disabled
-      )
-      .map(option=>
-        String(option.value||'')
-      )
-      .filter(Boolean);
+  function editorSiblingIds(){
+    return [...new Set([
+      ...editingExplicitSiblingIds,
+      ...editingDerivedSiblingIds
+    ])]
+      .filter(id =>
+        id &&
+        genealogyData?.sims?.[id]
+      );
   }
 
-  function syncEditorSiblingAuthority(){
+  function applyEditorSiblingStateToSelect(){
     const select=$('fSiblings');
     if(!select)return;
-
-    const manualSelected=
-      new Set(
-        selectedEditableEditorIds(
-          'fSiblings'
-        )
-      );
-
-    const inferred=
-      new Set(
-        inferredSiblingIdsForParents(
-          editingId
-            ? String(editingId)
-            : '',
-          selectedEditorIds(
-            'fParents'
-          )
-        )
-      );
 
     [...select.options]
       .forEach(option=>{
@@ -16460,22 +16483,19 @@ function editorDraftSim(){
 
         if(!siblingId)return;
 
-        const isManual=
-          manualSelected.has(
-            siblingId
-          );
+        const isExplicit=
+          editingExplicitSiblingIds
+            .has(siblingId);
 
         const isDerived=
-          inferred.has(
-            siblingId
-          ) &&
-          !isManual;
-
-        option.disabled=
-          isDerived;
+          editingDerivedSiblingIds
+            .has(siblingId);
 
         option.selected=
-          isManual||
+          isExplicit||
+          isDerived;
+
+        option.disabled=
           isDerived;
 
         if(isDerived){
@@ -16496,6 +16516,54 @@ function editorDraftSim(){
       });
 
     refreshSS('fSiblings');
+  }
+
+  function captureEditorExplicitSiblingSelection(){
+    const select=$('fSiblings');
+    if(!select)return;
+
+    editingExplicitSiblingIds=
+      new Set(
+        [...select.options]
+          .filter(option=>
+            option.selected&&
+            !option.disabled
+          )
+          .map(option=>
+            String(option.value||'')
+          )
+          .filter(Boolean)
+      );
+  }
+
+  function syncEditorSiblingAuthority(){
+    const relations=
+      resolveSiblingRelationships(
+        editingId
+          ? String(editingId)
+          : '',
+        {
+          parentIds:
+            selectedEditorIds(
+              'fParents'
+            ),
+          explicitIds:
+            [...editingExplicitSiblingIds]
+        }
+      );
+
+    editingDerivedSiblingIds=
+      new Set(
+        relations
+          .filter(relation =>
+            relation.derivedFromParents
+          )
+          .map(relation =>
+            relation.targetId
+          )
+      );
+
+    applyEditorSiblingStateToSelect();
   }
 
   function syncEditorRelationKindMap(selectId,kindMap){
@@ -16647,7 +16715,7 @@ function editorDraftSim(){
 
     renderEditorRelationPeople(
       'editorSiblingsPreview',
-      selectedEditorIds('fSiblings'),
+      editorSiblingIds(),
       sim=>directFamilyKinshipLabel('sibling',sim,editorDraftSim())
     );
 
@@ -16711,7 +16779,7 @@ function editorDraftSim(){
       );
     });
 
-    selectedEditorIds('fSiblings').forEach(id=>{
+    editorSiblingIds().forEach(id=>{
       const sim=genealogyData.sims[id];
       add(directFamilyKinshipLabel('sibling',sim,draft),sim);
     });
@@ -16837,6 +16905,7 @@ function editorDraftSim(){
           syncEditorRelationKindMap('fChildren',editingChildKinds);
         }
         if(id==='fSiblings'){
+          captureEditorExplicitSiblingSelection();
           syncEditorSiblingAuthority();
         }
 
@@ -17061,7 +17130,7 @@ function editorDraftSim(){
       option.selected=editingChildKinds.has(String(option.value));
     });
 
-    const storedSiblingIds=
+    editingExplicitSiblingIds=
       new Set(
         familyAuthority
           ? familyAuthority.siblings
@@ -17074,17 +17143,22 @@ function editorDraftSim(){
           : []
       );
 
+    editingDerivedSiblingIds=
+      new Set(
+        familyAuthority
+          ? familyAuthority.siblings
+              .filter(relation=>
+                relation.derivedFromParents
+              )
+              .map(relation=>
+                relation.targetId
+              )
+          : []
+      );
+
     $('fSiblings').innerHTML=relationOptions;
 
-    [...$('fSiblings').options]
-      .forEach(option=>{
-        option.selected=
-          storedSiblingIds.has(
-            String(option.value)
-          );
-      });
-
-    syncEditorSiblingAuthority();
+    applyEditorSiblingStateToSelect();
 
     $('relTarget').innerHTML=allSims
       .filter(candidate=>!sim||candidate.id!==sim.id)
@@ -17136,6 +17210,8 @@ function editorDraftSim(){
     editingGallery=[];
     editingParentKinds.clear();
     editingChildKinds.clear();
+    editingExplicitSiblingIds.clear();
+    editingDerivedSiblingIds.clear();
 
     petMask.classList.remove('show');
     editingPetIndex=-1;
@@ -17420,9 +17496,11 @@ function saveChar(){
   };
 
   const newSiblingIds=
-    selectedEditableEditorIds(
-      'fSiblings'
-    );
+    [...editingExplicitSiblingIds]
+      .filter(siblingId =>
+        !editingDerivedSiblingIds
+          .has(siblingId)
+      );
   let sim;
 
   if(editingId){
