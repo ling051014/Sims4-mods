@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20260928-other-relationship-appearance">
+        <link rel="stylesheet" href="genealogy.css?v=20260928-curve-toggle-appearance">
     </head>
     <body data-theme="ling">
 
@@ -728,11 +728,15 @@
                         <details class="relationship-line-item" data-rel-line-item="exspouse">
                             <summary><span>前任</span><i data-rel-preview="exspouse"></i></summary>
                             <div class="relationship-line-controls">
-                                <label><span>樣式</span><select data-rel-style="exspouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option><option value="curve">曲線</option></select></label>
+                                <label><span>樣式</span><select data-rel-style="exspouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
                                 <label><span>粗細</span><input data-rel-width="exspouse" type="range" min="1" max="4" step="0.1"></label>
                                 <label><span>顏色</span><input data-rel-color="exspouse" type="color"></label>
                             </div>
                             <div class="relationship-line-extra-controls">
+                                <label class="relationship-toggle-control">
+                                    <span>曲線</span>
+                                    <input data-rel-curved="exspouse" type="checkbox">
+                                </label>
                                 <label class="relationship-curve-control" data-rel-curve-row="exspouse">
                                     <span>曲線弧度</span>
                                     <div class="relationship-curve-slider">
@@ -1003,6 +1007,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260928-other-relationship-appearance"></script>
+        <script src="genealogy.js?v=20260928-curve-toggle-appearance"></script>
     </body>
 </html>
