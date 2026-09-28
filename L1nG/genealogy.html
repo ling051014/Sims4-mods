@@ -421,10 +421,13 @@
                             <div id="relAnnoList"></div>
                         </div>
                         <div class="rel-section" id="relSection" style="display:none">
-                            <div class="rel-title">新增其他關係（好友 / 仇敵 / 師承…）</div>
+                            <div class="rel-title">新增其他關係</div>
                             <div id="relList"></div>
                             <div class="rel-add">
-                                <input id="relType" placeholder="關係，如 好友">
+                                <div class="ss-wrap" data-placeholder="選擇或輸入關係…" data-ss-for="relType" data-ss-creatable="true" style="flex:1">
+                                    <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋或輸入關係…" type="text"><div class="ss-options"></div></div>
+                                </div>
+                                <select hidden id="relType"></select>
                                 <div class="ss-wrap" data-placeholder="選擇目標…" data-ss-for="relTarget" style="flex:1.4">
                                     <div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div>
                                 </div>
@@ -1008,6 +1011,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260928-relationship-semantics-perspective"></script>
+        <script src="genealogy.js?v=20260928-profile-kinship-relationship-library"></script>
     </body>
 </html>
