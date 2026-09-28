@@ -36,7 +36,8 @@ const SIDEBAR_MIN_WIDTH = 260;
 const SIDEBAR_MAX_WIDTH = 430;
 const GUIDE_SNAP_PX = 8;
 const RELATIONSHIP_VERTICAL_SNAP_PX = 10;
-const SIBLING_LABEL = '兄弟姐妹';
+const SIBLING_RELATION_TYPE = 'sibling';
+const SIBLING_RELATION_LABEL = '兄弟姊妹';
 
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
@@ -101,16 +102,60 @@ const SCALE_MIN = 0.12, SCALE_MAX = 3;
 const MAX_TAGS = 5;
 const ORIGINAL_WARN_KB = 2048;
 
-const REL_PRESETS = {
-  spouse:{icon:'heart',label:'配偶'}, engaged:{icon:'gem',label:'訂婚'},
-  partner:{icon:'hearts',label:'伴侶'}, lover:{icon:'heart-fill',label:'情人'},
-  exspouse:{icon:'heartbreak',label:'離婚'}, widow:{icon:'flower1',label:'喪偶'},
-  'parent-child':{icon:'person-hearts',label:'子女'}, adoptive:{icon:'house-heart',label:'領養'},
-  sibling:{icon:'people',label:'兄妹'}, bestfriend:{icon:'person-check',label:'摯友'},
-  friend:{icon:'person-heart',label:'朋友'}, rival:{icon:'lightning',label:'仇敵'},
-  mentor:{icon:'mortarboard',label:'師承'}, custom:{icon:'tag',label:'自訂'},
-  none:{icon:'',label:'(不顯示)'}
-};
+const RELATIONSHIP_SEMANTICS = Object.freeze({
+  'parent-child': Object.freeze({
+    icon:'person-hearts',
+    label:'親子'
+  }),
+  adoptive: Object.freeze({
+    icon:'house-heart',
+    label:'收養'
+  }),
+  spouse: Object.freeze({
+    icon:'heart',
+    label:'配偶'
+  }),
+  exspouse: Object.freeze({
+    icon:'heartbreak',
+    label:'前任配偶'
+  }),
+  sibling: Object.freeze({
+    icon:'people',
+    label:'兄弟姊妹'
+  })
+});
+
+const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
+  '訂婚':Object.freeze({ icon:'gem' }),
+  '伴侶':Object.freeze({ icon:'hearts' }),
+  '情人':Object.freeze({ icon:'heart-fill' }),
+  '喪偶':Object.freeze({ icon:'flower1' }),
+  '摯友':Object.freeze({ icon:'person-check' }),
+  '朋友':Object.freeze({ icon:'person-heart' }),
+  '仇敵':Object.freeze({ icon:'lightning' }),
+  '師承':Object.freeze({ icon:'mortarboard' })
+});
+
+const KINSHIP_SYSTEM_LABELS = Object.freeze([
+  '本人',
+  '父親','母親','父母',
+  '養父','養母','養親',
+  '兒子','女兒','子女',
+  '養子','養女','養子女',
+  '丈夫','妻子','配偶',
+  '前夫','前妻','前任配偶',
+  '哥哥','姐姐','弟弟','妹妹','兄弟','姊妹','兄弟姊妹',
+  '爺爺','奶奶','外公','外婆','祖父','祖母','祖父母',
+  '孫子','孫女','外孫','外孫女','孫輩',
+  '曾祖父','曾祖母','曾祖父母',
+  '高祖父','高祖母','高祖父母',
+  '曾孫','曾孫女','曾孫輩',
+  '伯父','叔叔','叔伯','姑姑','舅舅','阿姨','父母的兄弟姊妹',
+  '姪子','姪女','外甥','外甥女','兄弟姊妹的子女',
+  '堂哥','堂姐','堂弟','堂妹','堂兄弟姊妹',
+  '表哥','表姐','表弟','表妹','表兄弟姊妹',
+  '岳父','岳母','公公','婆婆','配偶父親','配偶母親','配偶父母'
+]);
 
 const RACE_PRESETS = {
   '':           { icon:'', label:'（不顯示）' },
@@ -143,6 +188,7 @@ const PET_SPECIES = {
 const VALID_THEMES = ['ling','sage','rose','amber','midnight'];
 const VALID_MODES = ['view','edit'];
 let showRelLabels = true;
+let relationshipPerspectiveSimId = null;
 let bgSettings = { image:null, opacity:0.5, fit:'cover' };
 let addMemberSelection = new Set();
 let removeMemberSelection = new Set();
@@ -1121,6 +1167,7 @@ const arrangeToolDividerEnd = $('arrangeToolDividerEnd');
 const selectionMarquee = $('selectionMarquee');
 const nodeContextMenu = $('nodeContextMenu');
 const labelLockToggle = $('labelLockToggle');
+const relationshipPerspectiveBtn = $('relationshipPerspectiveBtn');
 const sidebar = $('sidebar');
 const sidebarResizer = $('sidebarResizer');
 const sidebarBackdrop = $('sidebarBackdrop');
@@ -2658,18 +2705,1340 @@ function displayDataText(value, owner = null) {
 }
 
 const BUILTIN_RELATION_LABELS =
-  new Set(
-    Object.values(REL_PRESETS)
-      .map(item => item.label)
-  );
+  new Set([
+    ...Object.values(RELATIONSHIP_SEMANTICS)
+      .map(item => item.label),
+    ...Object.keys(SOCIAL_RELATIONSHIP_DEFINITIONS),
+    ...KINSHIP_SYSTEM_LABELS
+  ]);
 
 function displayRelationshipText(value) {
   const text = String(value ?? '');
 
-  // 只翻譯系統內建關係名稱；玩家自訂關係名稱保持原文。
+  // 系統語意與親屬稱謂會跟著介面語言切換；
+  // 玩家自己輸入的其他關係名稱維持原文。
   return BUILTIN_RELATION_LABELS.has(text)
     ? uiText(text)
     : text;
+}
+
+
+// ========【關係語意】 設定 - 客觀關係、社會關係與顯示覆寫分離 ========
+function isSiblingLink(link) {
+  if (!link) return false;
+
+  return (
+    link.type === SIBLING_RELATION_TYPE ||
+    link.label === SIBLING_RELATION_LABEL
+  );
+}
+
+function explicitSiblingIds(simId) {
+  const id =
+    String(simId || '');
+
+  return [...new Set(
+    (genealogyData?.links || [])
+      .filter(link =>
+        isSiblingLink(link) &&
+        (
+          String(link.from) === id ||
+          String(link.to) === id
+        )
+      )
+      .map(link =>
+        String(link.from) === id
+          ? String(link.to)
+          : String(link.from)
+      )
+      .filter(otherId =>
+        otherId &&
+        genealogyData?.sims?.[otherId]
+      )
+  )];
+}
+
+function inferredSiblingIds(simId) {
+  const id =
+    String(simId || '');
+
+  const sim =
+    genealogyData?.sims?.[id];
+
+  if (!sim) return [];
+
+  const parentIds =
+    new Set(
+      genealogyParentIds(sim)
+    );
+
+  if (!parentIds.size) return [];
+
+  return Object.values(
+    genealogyData.sims || {}
+  )
+    .filter(candidate => {
+      if (
+        !candidate ||
+        String(candidate.id) === id
+      ) {
+        return false;
+      }
+
+      return genealogyParentIds(candidate)
+        .some(parentId =>
+          parentIds.has(parentId)
+        );
+    })
+    .map(candidate =>
+      String(candidate.id)
+    );
+}
+
+function genealogySiblingIds(simId) {
+  return [...new Set([
+    ...explicitSiblingIds(simId),
+    ...inferredSiblingIds(simId)
+  ])]
+    .filter(id =>
+      genealogyData?.sims?.[id]
+    );
+}
+
+function relationshipSemanticDescriptor(
+  semanticType,
+  defaultText = null
+) {
+  const semantic =
+    RELATIONSHIP_SEMANTICS[
+      semanticType
+    ];
+
+  if (semantic) {
+    return {
+      semanticType,
+      icon:semantic.icon,
+      label:semantic.label
+    };
+  }
+
+  const text =
+    String(
+      defaultText ||
+      '關聯'
+    ).trim() ||
+    '關聯';
+
+  const social =
+    SOCIAL_RELATIONSHIP_DEFINITIONS[
+      text
+    ];
+
+  return {
+    semanticType:'social',
+    icon:
+      social?.icon ||
+      'tag',
+    label:text
+  };
+}
+
+function relationshipDisplayOverride(key) {
+  const saved =
+    genealogyData?.relationshipMap?.[key];
+
+  return (
+    saved &&
+    typeof saved === 'object' &&
+    !Array.isArray(saved)
+  )
+    ? saved
+    : {};
+}
+
+function relationshipGender(sim) {
+  const gender =
+    String(
+      sim?.gender ||
+      ''
+    ).trim();
+
+  if (
+    gender === '男' ||
+    gender.toLowerCase() === 'male'
+  ) {
+    return 'male';
+  }
+
+  if (
+    gender === '女' ||
+    gender.toLowerCase() === 'female'
+  ) {
+    return 'female';
+  }
+
+  return 'other';
+}
+
+function genderedKinship(
+  sim,
+  maleLabel,
+  femaleLabel,
+  neutralLabel
+) {
+  const gender =
+    relationshipGender(sim);
+
+  if (gender === 'male') {
+    return maleLabel;
+  }
+
+  if (gender === 'female') {
+    return femaleLabel;
+  }
+
+  return neutralLabel;
+}
+
+function simBirthOrderValue(sim) {
+  if (!sim) return null;
+
+  const year =
+    Number(sim.birthdayYear);
+
+  const month =
+    Number(sim.birthdayMonth);
+
+  const day =
+    Number(sim.birthdayDay);
+
+  if (
+    Number.isFinite(year) &&
+    Number.isFinite(month) &&
+    Number.isFinite(day) &&
+    month >= 1 &&
+    month <= 12 &&
+    day >= 1 &&
+    day <= 31
+  ) {
+    return (
+      Math.trunc(year) * 10000 +
+      Math.trunc(month) * 100 +
+      Math.trunc(day)
+    );
+  }
+
+  return null;
+}
+
+function compareSimBirthOrder(
+  left,
+  right
+) {
+  const leftDate =
+    simBirthOrderValue(left);
+
+  const rightDate =
+    simBirthOrderValue(right);
+
+  if (
+    leftDate != null &&
+    rightDate != null &&
+    leftDate !== rightDate
+  ) {
+    return leftDate < rightDate
+      ? -1
+      : 1;
+  }
+
+  const leftAge =
+    Number(left?.age);
+
+  const rightAge =
+    Number(right?.age);
+
+  if (
+    Number.isFinite(leftAge) &&
+    Number.isFinite(rightAge) &&
+    leftAge !== rightAge
+  ) {
+    return leftAge > rightAge
+      ? -1
+      : 1;
+  }
+
+  return 0;
+}
+
+function siblingKinshipLabel(
+  perspectiveSim,
+  siblingSim
+) {
+  const order =
+    compareSimBirthOrder(
+      siblingSim,
+      perspectiveSim
+    );
+
+  const gender =
+    relationshipGender(
+      siblingSim
+    );
+
+  if (order < 0) {
+    if (gender === 'male') return '哥哥';
+    if (gender === 'female') return '姐姐';
+  }
+
+  if (order > 0) {
+    if (gender === 'male') return '弟弟';
+    if (gender === 'female') return '妹妹';
+  }
+
+  if (gender === 'male') return '兄弟';
+  if (gender === 'female') return '姊妹';
+  return '兄弟姊妹';
+}
+
+function findAncestorPath(
+  sourceId,
+  targetId,
+  maxDepth = 8
+) {
+  const source =
+    String(sourceId || '');
+
+  const target =
+    String(targetId || '');
+
+  if (
+    !source ||
+    !target ||
+    source === target
+  ) {
+    return null;
+  }
+
+  const queue = [{
+    id:source,
+    path:[]
+  }];
+
+  const bestDepth =
+    new Map([
+      [source, 0]
+    ]);
+
+  while (queue.length) {
+    const current =
+      queue.shift();
+
+    if (
+      current.path.length >=
+      maxDepth
+    ) {
+      continue;
+    }
+
+    const sim =
+      genealogyData?.sims?.[
+        current.id
+      ];
+
+    if (!sim) continue;
+
+    genealogyParentRelations(sim)
+      .forEach(relation => {
+        const nextId =
+          String(
+            relation.parentId
+          );
+
+        const nextPath = [
+          ...current.path,
+          nextId
+        ];
+
+        if (nextId === target) {
+          return nextPath;
+        }
+
+        const known =
+          bestDepth.get(nextId);
+
+        if (
+          known != null &&
+          known <= nextPath.length
+        ) {
+          return;
+        }
+
+        bestDepth.set(
+          nextId,
+          nextPath.length
+        );
+
+        queue.push({
+          id:nextId,
+          path:nextPath
+        });
+      });
+  }
+
+  return null;
+}
+
+function findDescendantPath(
+  sourceId,
+  targetId,
+  maxDepth = 8
+) {
+  const source =
+    String(sourceId || '');
+
+  const target =
+    String(targetId || '');
+
+  if (
+    !source ||
+    !target ||
+    source === target
+  ) {
+    return null;
+  }
+
+  const queue = [{
+    id:source,
+    path:[]
+  }];
+
+  const bestDepth =
+    new Map([
+      [source, 0]
+    ]);
+
+  while (queue.length) {
+    const current =
+      queue.shift();
+
+    if (
+      current.path.length >=
+      maxDepth
+    ) {
+      continue;
+    }
+
+    getChildrenOf(current.id)
+      .forEach(child => {
+        const nextId =
+          String(child.id);
+
+        const nextPath = [
+          ...current.path,
+          nextId
+        ];
+
+        if (nextId === target) {
+          return nextPath;
+        }
+
+        const known =
+          bestDepth.get(nextId);
+
+        if (
+          known != null &&
+          known <= nextPath.length
+        ) {
+          return;
+        }
+
+        bestDepth.set(
+          nextId,
+          nextPath.length
+        );
+
+        queue.push({
+          id:nextId,
+          path:nextPath
+        });
+      });
+  }
+
+  return null;
+}
+
+function ancestorKinshipLabel(
+  perspectiveSim,
+  targetSim,
+  path
+) {
+  const depth =
+    path?.length || 0;
+
+  if (depth === 1) {
+    const relation =
+      genealogyParentRelations(
+        perspectiveSim
+      )
+        .find(item =>
+          String(item.parentId) ===
+          String(targetSim.id)
+        );
+
+    if (
+      relation?.kind ===
+      'adoptive'
+    ) {
+      return genderedKinship(
+        targetSim,
+        '養父',
+        '養母',
+        '養親'
+      );
+    }
+
+    return genderedKinship(
+      targetSim,
+      '父親',
+      '母親',
+      '父母'
+    );
+  }
+
+  if (depth === 2) {
+    const directParent =
+      genealogyData.sims[
+        path[0]
+      ];
+
+    const parentGender =
+      relationshipGender(
+        directParent
+      );
+
+    const targetGender =
+      relationshipGender(
+        targetSim
+      );
+
+    if (parentGender === 'male') {
+      if (targetGender === 'male') return '爺爺';
+      if (targetGender === 'female') return '奶奶';
+      return '祖父母';
+    }
+
+    if (parentGender === 'female') {
+      if (targetGender === 'male') return '外公';
+      if (targetGender === 'female') return '外婆';
+      return '祖父母';
+    }
+
+    return genderedKinship(
+      targetSim,
+      '祖父',
+      '祖母',
+      '祖父母'
+    );
+  }
+
+  if (depth === 3) {
+    return genderedKinship(
+      targetSim,
+      '曾祖父',
+      '曾祖母',
+      '曾祖父母'
+    );
+  }
+
+  if (depth === 4) {
+    return genderedKinship(
+      targetSim,
+      '高祖父',
+      '高祖母',
+      '高祖父母'
+    );
+  }
+
+  return (
+    '第 ' +
+    depth +
+    ' 代祖先'
+  );
+}
+
+function descendantKinshipLabel(
+  perspectiveSim,
+  targetSim,
+  path
+) {
+  const depth =
+    path?.length || 0;
+
+  if (depth === 1) {
+    const relationKind =
+      genealogyParentKindFor(
+        targetSim,
+        perspectiveSim.id
+      );
+
+    if (
+      relationKind ===
+      'adoptive'
+    ) {
+      return genderedKinship(
+        targetSim,
+        '養子',
+        '養女',
+        '養子女'
+      );
+    }
+
+    return genderedKinship(
+      targetSim,
+      '兒子',
+      '女兒',
+      '子女'
+    );
+  }
+
+  if (depth === 2) {
+    const directChild =
+      genealogyData.sims[
+        path[0]
+      ];
+
+    const childGender =
+      relationshipGender(
+        directChild
+      );
+
+    if (childGender === 'female') {
+      return genderedKinship(
+        targetSim,
+        '外孫',
+        '外孫女',
+        '孫輩'
+      );
+    }
+
+    return genderedKinship(
+      targetSim,
+      '孫子',
+      '孫女',
+      '孫輩'
+    );
+  }
+
+  if (depth === 3) {
+    return genderedKinship(
+      targetSim,
+      '曾孫',
+      '曾孫女',
+      '曾孫輩'
+    );
+  }
+
+  return (
+    '第 ' +
+    depth +
+    ' 代後代'
+  );
+}
+
+function parentSiblingKinship(
+  perspectiveId,
+  targetId
+) {
+  const perspective =
+    genealogyData?.sims?.[
+      perspectiveId
+    ];
+
+  const target =
+    genealogyData?.sims?.[
+      targetId
+    ];
+
+  if (!perspective || !target) {
+    return null;
+  }
+
+  for (
+    const parentId of
+    genealogyParentIds(perspective)
+  ) {
+    const siblings =
+      genealogySiblingIds(
+        parentId
+      );
+
+    if (
+      !siblings.includes(
+        String(targetId)
+      )
+    ) {
+      continue;
+    }
+
+    const parent =
+      genealogyData.sims[
+        parentId
+      ];
+
+    const parentGender =
+      relationshipGender(
+        parent
+      );
+
+    const targetGender =
+      relationshipGender(
+        target
+      );
+
+    if (parentGender === 'male') {
+      if (targetGender === 'female') {
+        return '姑姑';
+      }
+
+      if (targetGender === 'male') {
+        const order =
+          compareSimBirthOrder(
+            target,
+            parent
+          );
+
+        if (order < 0) return '伯父';
+        if (order > 0) return '叔叔';
+        return '叔伯';
+      }
+    }
+
+    if (parentGender === 'female') {
+      if (targetGender === 'male') {
+        return '舅舅';
+      }
+
+      if (targetGender === 'female') {
+        return '阿姨';
+      }
+    }
+
+    return '父母的兄弟姊妹';
+  }
+
+  return null;
+}
+
+function siblingChildKinship(
+  perspectiveId,
+  targetId
+) {
+  const target =
+    genealogyData?.sims?.[
+      targetId
+    ];
+
+  if (!target) return null;
+
+  for (
+    const siblingId of
+    genealogySiblingIds(
+      perspectiveId
+    )
+  ) {
+    const childIds =
+      getChildrenOf(
+        siblingId
+      )
+        .map(child =>
+          String(child.id)
+        );
+
+    if (
+      !childIds.includes(
+        String(targetId)
+      )
+    ) {
+      continue;
+    }
+
+    const sibling =
+      genealogyData.sims[
+        siblingId
+      ];
+
+    const siblingGender =
+      relationshipGender(
+        sibling
+      );
+
+    if (siblingGender === 'male') {
+      return genderedKinship(
+        target,
+        '姪子',
+        '姪女',
+        '兄弟姊妹的子女'
+      );
+    }
+
+    if (siblingGender === 'female') {
+      return genderedKinship(
+        target,
+        '外甥',
+        '外甥女',
+        '兄弟姊妹的子女'
+      );
+    }
+
+    return '兄弟姊妹的子女';
+  }
+
+  return null;
+}
+
+function cousinKinship(
+  perspectiveId,
+  targetId
+) {
+  const perspective =
+    genealogyData?.sims?.[
+      perspectiveId
+    ];
+
+  const target =
+    genealogyData?.sims?.[
+      targetId
+    ];
+
+  if (!perspective || !target) {
+    return null;
+  }
+
+  for (
+    const parentId of
+    genealogyParentIds(perspective)
+  ) {
+    const parent =
+      genealogyData.sims[
+        parentId
+      ];
+
+    for (
+      const parentSiblingId of
+      genealogySiblingIds(
+        parentId
+      )
+    ) {
+      const cousinIds =
+        getChildrenOf(
+          parentSiblingId
+        )
+          .map(child =>
+            String(child.id)
+          );
+
+      if (
+        !cousinIds.includes(
+          String(targetId)
+        )
+      ) {
+        continue;
+      }
+
+      const parentSibling =
+        genealogyData.sims[
+          parentSiblingId
+        ];
+
+      const paternalMaleBranch =
+        relationshipGender(parent) ===
+          'male' &&
+        relationshipGender(
+          parentSibling
+        ) === 'male';
+
+      const prefix =
+        paternalMaleBranch
+          ? '堂'
+          : '表';
+
+      const order =
+        compareSimBirthOrder(
+          target,
+          perspective
+        );
+
+      const gender =
+        relationshipGender(
+          target
+        );
+
+      if (
+        order < 0 &&
+        gender === 'male'
+      ) {
+        return prefix + '哥';
+      }
+
+      if (
+        order < 0 &&
+        gender === 'female'
+      ) {
+        return prefix + '姐';
+      }
+
+      if (
+        order > 0 &&
+        gender === 'male'
+      ) {
+        return prefix + '弟';
+      }
+
+      if (
+        order > 0 &&
+        gender === 'female'
+      ) {
+        return prefix + '妹';
+      }
+
+      return (
+        prefix +
+        '兄弟姊妹'
+      );
+    }
+  }
+
+  return null;
+}
+
+function spouseParentKinship(
+  perspectiveId,
+  targetId
+) {
+  const perspective =
+    genealogyData?.sims?.[
+      perspectiveId
+    ];
+
+  const target =
+    genealogyData?.sims?.[
+      targetId
+    ];
+
+  if (!perspective || !target) {
+    return null;
+  }
+
+  for (
+    const spouseId of
+    perspective.spouseIds || []
+  ) {
+    const spouse =
+      genealogyData.sims[
+        spouseId
+      ];
+
+    if (!spouse) continue;
+
+    if (
+      !genealogyParentIds(spouse)
+        .includes(
+          String(targetId)
+        )
+    ) {
+      continue;
+    }
+
+    const targetGender =
+      relationshipGender(
+        target
+      );
+
+    const perspectiveGender =
+      relationshipGender(
+        perspective
+      );
+
+    if (perspectiveGender === 'male') {
+      if (targetGender === 'male') return '岳父';
+      if (targetGender === 'female') return '岳母';
+      return '配偶父母';
+    }
+
+    if (perspectiveGender === 'female') {
+      if (targetGender === 'male') return '公公';
+      if (targetGender === 'female') return '婆婆';
+      return '配偶父母';
+    }
+
+    if (targetGender === 'male') {
+      return '配偶父親';
+    }
+
+    if (targetGender === 'female') {
+      return '配偶母親';
+    }
+
+    return '配偶父母';
+  }
+
+  return null;
+}
+
+function directSocialPerspectiveLabel(
+  perspectiveId,
+  targetId
+) {
+  const link =
+    (genealogyData?.links || [])
+      .find(candidate =>
+        !isSiblingLink(candidate) &&
+        (
+          (
+            String(candidate.from) ===
+              String(perspectiveId) &&
+            String(candidate.to) ===
+              String(targetId)
+          ) ||
+          (
+            String(candidate.to) ===
+              String(perspectiveId) &&
+            String(candidate.from) ===
+              String(targetId)
+          )
+        )
+      );
+
+  if (!link) return null;
+
+  return String(
+    link.label ||
+    link.type ||
+    '關聯'
+  ).trim() || '關聯';
+}
+
+function resolveKinshipLabel(
+  perspectiveId,
+  targetId
+) {
+  const root =
+    genealogyData?.sims?.[
+      perspectiveId
+    ];
+
+  const target =
+    genealogyData?.sims?.[
+      targetId
+    ];
+
+  if (!root || !target) {
+    return null;
+  }
+
+  if (
+    String(root.id) ===
+    String(target.id)
+  ) {
+    return '本人';
+  }
+
+  const ancestorPath =
+    findAncestorPath(
+      root.id,
+      target.id
+    );
+
+  if (ancestorPath) {
+    return ancestorKinshipLabel(
+      root,
+      target,
+      ancestorPath
+    );
+  }
+
+  const descendantPath =
+    findDescendantPath(
+      root.id,
+      target.id
+    );
+
+  if (descendantPath) {
+    return descendantKinshipLabel(
+      root,
+      target,
+      descendantPath
+    );
+  }
+
+  if (
+    (root.spouseIds || [])
+      .map(String)
+      .includes(
+        String(target.id)
+      )
+  ) {
+    return genderedKinship(
+      target,
+      '丈夫',
+      '妻子',
+      '配偶'
+    );
+  }
+
+  if (
+    (root.exSpouseIds || [])
+      .map(String)
+      .includes(
+        String(target.id)
+      )
+  ) {
+    return genderedKinship(
+      target,
+      '前夫',
+      '前妻',
+      '前任配偶'
+    );
+  }
+
+  if (
+    genealogySiblingIds(
+      root.id
+    )
+      .includes(
+        String(target.id)
+      )
+  ) {
+    return siblingKinshipLabel(
+      root,
+      target
+    );
+  }
+
+  const parentSibling =
+    parentSiblingKinship(
+      root.id,
+      target.id
+    );
+
+  if (parentSibling) {
+    return parentSibling;
+  }
+
+  const siblingChild =
+    siblingChildKinship(
+      root.id,
+      target.id
+    );
+
+  if (siblingChild) {
+    return siblingChild;
+  }
+
+  const cousin =
+    cousinKinship(
+      root.id,
+      target.id
+    );
+
+  if (cousin) {
+    return cousin;
+  }
+
+  const spouseParent =
+    spouseParentKinship(
+      root.id,
+      target.id
+    );
+
+  if (spouseParent) {
+    return spouseParent;
+  }
+
+  return directSocialPerspectiveLabel(
+    root.id,
+    target.id
+  );
+}
+
+function relationshipPerspectiveSim() {
+  const sim =
+    relationshipPerspectiveSimId
+      ? genealogyData?.sims?.[
+          relationshipPerspectiveSimId
+        ]
+      : null;
+
+  if (
+    relationshipPerspectiveSimId &&
+    !sim
+  ) {
+    relationshipPerspectiveSimId =
+      null;
+  }
+
+  return sim || null;
+}
+
+function relationshipPerspectiveActionText(
+  sim,
+  ending = false
+) {
+  const name =
+    displayDataText(
+      sim?.name ||
+      '',
+      sim
+    );
+
+  const lang =
+    document.documentElement.lang ||
+    'zh-Hant';
+
+  if (lang === 'en') {
+    return ending
+      ? 'End ' + name + ' perspective'
+      : 'View genealogy from ' +
+        name +
+        ' perspective';
+  }
+
+  if (lang === 'zh-Hans') {
+    return ending
+      ? '结束“' + name + '”视角'
+      : '以“' + name +
+        '”视角查看族谱';
+  }
+
+  return ending
+    ? '結束「' + name + '」視角'
+    : '以「' + name +
+      '」視角查看族譜';
+}
+
+function syncRelationshipPerspectiveUI() {
+  if (!relationshipPerspectiveBtn) {
+    return;
+  }
+
+  const sim =
+    relationshipPerspectiveSim();
+
+  relationshipPerspectiveBtn.hidden =
+    !sim;
+
+  relationshipPerspectiveBtn.style.display =
+    sim
+      ? ''
+      : 'none';
+
+  if (!sim) return;
+
+  relationshipPerspectiveBtn.classList.add(
+    'active'
+  );
+
+  setIconText(
+    relationshipPerspectiveBtn,
+    'person-vcard',
+    relationshipPerspectiveActionText(
+      sim,
+      true
+    )
+  );
+
+  relationshipPerspectiveBtn.title =
+    relationshipPerspectiveActionText(
+      sim,
+      true
+    );
+
+  relationshipPerspectiveBtn
+    .setAttribute(
+      'aria-label',
+      relationshipPerspectiveBtn.title
+    );
+}
+
+function setRelationshipPerspective(
+  simId
+) {
+  const id =
+    simId == null
+      ? null
+      : String(simId);
+
+  relationshipPerspectiveSimId =
+    id &&
+    genealogyData?.sims?.[id]
+      ? id
+      : null;
+
+  syncRelationshipPerspectiveUI();
+
+  if (layoutCache) {
+    drawEdges();
+  }
+}
+
+function drawPerspectiveKinshipLabels(
+  labels,
+  pos,
+  visibleIds
+) {
+  const root =
+    relationshipPerspectiveSim();
+
+  if (
+    !root ||
+    !visibleIds?.has(
+      String(root.id)
+    )
+  ) {
+    return;
+  }
+
+  visibleIds.forEach(targetId => {
+    const target =
+      genealogyData.sims[
+        targetId
+      ];
+
+    const card =
+      pos.get(targetId);
+
+    if (!target || !card) return;
+
+    const label =
+      resolveKinshipLabel(
+        root.id,
+        targetId
+      );
+
+    if (!label) return;
+
+    const rect =
+      cardOuterRect(card);
+
+    const key =
+      'perspective:' +
+      root.id +
+      ':' +
+      targetId;
+
+    labels.push(
+      makeLabelSVG(
+        rect.centerX,
+        Math.max(
+          12,
+          rect.top - 16
+        ),
+        '',
+        label,
+        key
+      )
+    );
+  });
 }
 
 function openSidebar() {
@@ -4918,12 +6287,72 @@ function normalizeCurrentDatabase(targetDb) {
     targetDb.links = [];
   }
 
+  targetDb.links = targetDb.links
+    .filter(link =>
+      link &&
+      typeof link === 'object'
+    )
+    .map(link => {
+      const next = { ...link };
+
+      const legacySibling =
+        next.type === '兄弟姐妹' ||
+        next.type === '兄弟姊妹' ||
+        next.label === '兄弟姐妹' ||
+        next.label === '兄弟姊妹';
+
+      if (legacySibling) {
+        next.type =
+          SIBLING_RELATION_TYPE;
+
+        next.label =
+          SIBLING_RELATION_LABEL;
+      }
+
+      return next;
+    });
+
   if (
     !targetDb.relationshipMap ||
     typeof targetDb.relationshipMap !== 'object' ||
     Array.isArray(targetDb.relationshipMap)
   ) {
     targetDb.relationshipMap = {};
+  } else {
+    const normalizedRelationshipMap = {};
+
+    Object.entries(
+      targetDb.relationshipMap
+    ).forEach(([key, saved]) => {
+      if (
+        !saved ||
+        typeof saved !== 'object' ||
+        Array.isArray(saved)
+      ) {
+        return;
+      }
+
+      const text =
+        typeof saved.text === 'string'
+          ? saved.text.trim()
+          : '';
+
+      const hidden =
+        saved.hidden === true ||
+        saved.kind === 'none';
+
+      if (!text && !hidden) {
+        return;
+      }
+
+      normalizedRelationshipMap[key] = {
+        ...(text ? { text } : {}),
+        ...(hidden ? { hidden:true } : {})
+      };
+    });
+
+    targetDb.relationshipMap =
+      normalizedRelationshipMap;
   }
 
   if (
@@ -5065,22 +6494,39 @@ function scheduleGC() {
   }, 5000);
 }
 
-function getRelInfoByKey(key, kindHint) {
-  const rm = genealogyData.relationshipMap || {};
-  let saved = rm[key];
-  if (!saved) {
-    const colon = key.indexOf(':');
-    if (colon >= 0) {
-      const raw = key.slice(colon+1);
-      if (rm[raw]) saved = rm[raw];
-    }
+function getRelInfoByKey(
+  key,
+  semanticType,
+  defaultText = null
+) {
+  const saved =
+    relationshipDisplayOverride(
+      key
+    );
+
+  if (saved.hidden === true) {
+    return null;
   }
-  saved = saved || {};
-  const kind = saved.kind || kindHint || 'custom';
-  if (kind === 'none') return null;
-  const preset = REL_PRESETS[kind] || REL_PRESETS.custom;
-  const text = (saved.text && saved.text.trim()) || preset.label;
-  return { icon: preset.icon, text, kind };
+
+  const descriptor =
+    relationshipSemanticDescriptor(
+      semanticType,
+      defaultText
+    );
+
+  const customText =
+    typeof saved.text === 'string'
+      ? saved.text.trim()
+      : '';
+
+  return {
+    icon:descriptor.icon,
+    text:
+      customText ||
+      descriptor.label,
+    semanticType:
+      descriptor.semanticType
+  };
 }
 
 function getLabelOffset(key) {
@@ -8025,6 +9471,7 @@ function render() {
   labelsSvg.setAttribute('width', sW);
   labelsSvg.setAttribute('height', sH);
   labelsSvg.setAttribute('viewBox', `0 0 ${sW} ${sH}`);
+  syncRelationshipPerspectiveUI();
   drawEdges();
   drawNodes();
   updateLayoutToggle();
@@ -8260,7 +9707,7 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
       labelY = branchY;
     }
 
-    if (showRelLabels) {
+    if (showRelLabels && !relationshipPerspectiveSimId) {
       const key =
         'parent:' + child.id;
 
@@ -8400,7 +9847,7 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
     );
   });
 
-  if (showRelLabels) {
+  if (showRelLabels && !relationshipPerspectiveSimId) {
     children.forEach(child => {
       const key =
         'parent:' + child.id;
@@ -8548,7 +9995,7 @@ function drawEdges() {
           '"/>'
         );
 
-        if (!showRelLabels) return;
+        if (!showRelLabels || relationshipPerspectiveSimId) return;
 
         const key =
           'spouse:' + pairK;
@@ -8626,7 +10073,7 @@ function drawEdges() {
           '"/>'
         );
 
-        if (!showRelLabels) return;
+        if (!showRelLabels || relationshipPerspectiveSimId) return;
 
         const key =
           'exspouse:' + pairK;
@@ -8701,7 +10148,7 @@ function drawEdges() {
         '/>'
       );
 
-      if (!showRelLabels) return;
+      if (!showRelLabels || relationshipPerspectiveSimId) return;
 
       const key =
         'link:' + link.id;
@@ -8709,7 +10156,12 @@ function drawEdges() {
       const info =
         getRelInfoByKey(
           key,
-          'custom'
+          isSiblingLink(link)
+            ? 'sibling'
+            : 'social',
+          isSiblingLink(link)
+            ? null
+            : type
         );
 
       if (!info) return;
@@ -8734,6 +10186,17 @@ function drawEdges() {
         : ''
     ) +
     paths.join('');
+
+  if (
+    showRelLabels &&
+    relationshipPerspectiveSimId
+  ) {
+    drawPerspectiveKinshipLabels(
+      labels,
+      pos,
+      visibleIds
+    );
+  }
 
   labelsSvg.innerHTML =
     labels.join('');
@@ -9284,12 +10747,12 @@ function openInfoCard(id) {
   const exSpouseNames = personNames(c.exSpouseIds);
   const childNames = getChildrenOf(c.id).map(sim => displayDataText(sim.name, sim));
   const siblingIds = [...new Set((genealogyData.links || []).filter(l =>
-    (l.from === c.id || l.to === c.id) && (l.label === SIBLING_LABEL || l.type === SIBLING_LABEL)
+    (l.from === c.id || l.to === c.id) && isSiblingLink(l)
   ).map(l => l.from === c.id ? l.to : l.from))];
   const siblingNames = personNames(siblingIds);
   const otherRelations = (genealogyData.links || []).filter(l => {
     if (l.from !== c.id && l.to !== c.id) return false;
-    return !(l.label === SIBLING_LABEL || l.type === SIBLING_LABEL);
+    return !isSiblingLink(l);
   }).map(l => {
     const other = genealogyData.sims[l.from === c.id ? l.to : l.from];
     if (!other) return null;
@@ -10020,6 +11483,7 @@ function renderNodeContextMenu(simId, clientX, clientY) {
     <button class="node-context-action" type="button" data-node-context-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
     <button class="node-context-action" type="button" data-node-context-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
     <button class="node-context-action" type="button" data-node-context-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
+    <button class="node-context-action" type="button" data-node-context-action="perspective">${iconSvg('person-vcard')}<span>${esc(relationshipPerspectiveActionText(sim, relationshipPerspectiveSimId === String(sim.id)))}</span></button>
     ${isMulti ? `
       <div class="node-context-divider"></div>
       <button class="node-context-action" type="button" data-node-context-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
@@ -10045,6 +11509,25 @@ async function handleNodeContextAction(action, simId) {
   if (action === 'view') { closeNodeContextMenu(); openInfoCard(simId); return; }
   if (action === 'edit') { closeNodeContextMenu(); openEditor(simId); return; }
   if (action === 'locate') { closeNodeContextMenu(); focusSimOnCanvas(simId); return; }
+  if (action === 'perspective') {
+    const same =
+      relationshipPerspectiveSimId ===
+      String(simId);
+
+    setRelationshipPerspective(
+      same
+        ? null
+        : simId
+    );
+
+    closeNodeContextMenu();
+
+    if (!same) {
+      focusSimOnCanvas(simId);
+    }
+
+    return;
+  }
   if (action === 'clear-selection') { closeNodeContextMenu(); clearNodeSelection(); return; }
 
   if ([
@@ -11700,6 +13183,13 @@ $('resetLayoutBtn').onclick = async () => {
   save(); updateLayoutToggle(); render();
   requestAnimationFrame(fitScreen);
 };
+relationshipPerspectiveBtn?.addEventListener(
+  'click',
+  () => {
+    setRelationshipPerspective(null);
+  }
+);
+
 $('labelToggle').onclick = () => {
   showRelLabels = !showRelLabels;
   const btn = $('labelToggle');
@@ -12130,6 +13620,9 @@ function refreshFamilyUI() {
   refreshFamilyProfilePanel();
 }
 familySelect.onchange = async () => {
+  relationshipPerspectiveSimId = null;
+  syncRelationshipPerspectiveUI();
+
   const selectorEntries = getFamilySelectorEntries();
   const selectedEntry = selectorEntries.find(entry => entry.value === familySelect.value);
   if (!selectedEntry) return;
@@ -12467,113 +13960,380 @@ function buildRelationEntries(simId) {
   const c = genealogyData.sims[simId];
   if (!c) return entries;
 
-  const push = (entry, group = 'family') => {
+  const push = (
+    entry,
+    group = 'family'
+  ) => {
     entry.group = group;
     entries.push(entry);
     seen.add(entry.key);
   };
 
-  const parentRelations = genealogyParentRelations(c);
+  const parentRelations =
+    genealogyParentRelations(c);
 
   if (parentRelations.length) {
-    const names = parentRelations
-      .map(relation => {
-        const sim = genealogyData.sims[relation.parentId];
-        return sim ? displayDataText(sim.name, sim) : '';
-      })
-      .filter(Boolean)
-      .join(' + ');
+    const names =
+      parentRelations
+        .map(relation => {
+          const sim =
+            genealogyData.sims[
+              relation.parentId
+            ];
+
+          return sim
+            ? displayDataText(
+                sim.name,
+                sim
+              )
+            : '';
+        })
+        .filter(Boolean)
+        .join(' + ');
 
     if (names) {
-      const key = 'parent:' + simId;
-      const kindHint =
-        parentRelations.some(relation => relation.kind === 'adoptive')
-          ? 'adoptive'
-          : 'parent-child';
+      const hasAdoptive =
+        parentRelations.some(
+          relation =>
+            relation.kind === 'adoptive'
+        );
+
+      const hasBiological =
+        parentRelations.some(
+          relation =>
+            relation.kind !== 'adoptive'
+        );
 
       push({
-        key,
-        label:`${uiText('父母')}：${names}`,
-        kindHint
+        key:'parent:' + simId,
+        label:
+          uiText('父母') +
+          '：' +
+          names,
+        semanticType:
+          hasAdoptive &&
+          !hasBiological
+            ? 'adoptive'
+            : 'parent-child',
+        defaultText:
+          hasAdoptive &&
+          hasBiological
+            ? '親子 / 收養'
+            : null
       });
     }
   }
 
-  getChildrenOf(simId).forEach(child => {
-    const key = 'parent:' + child.id;
-    if (seen.has(key)) return;
+  getChildrenOf(simId)
+    .forEach(child => {
+      const key =
+        'parent:' + child.id;
 
-    push({
-      key,
-      label:`${uiText('子女')}：${displayDataText(child.name,child)}`,
-      kindHint:genealogyParentKindFor(child, simId)
+      if (seen.has(key)) return;
+
+      const semanticType =
+        genealogyParentKindFor(
+          child,
+          simId
+        );
+
+      push({
+        key,
+        label:
+          uiText('子女') +
+          '：' +
+          displayDataText(
+            child.name,
+            child
+          ),
+        semanticType,
+        defaultText:null
+      });
     });
-  });
 
-  (c.spouseIds || []).forEach(sid => {
-    const spouse = genealogyData.sims[sid];
-    if (!spouse) return;
-    const key = 'spouse:' + pairKey(simId,sid);
-    if (seen.has(key)) return;
-    push({
-      key,
-      label:`${uiText('配偶')}：${displayDataText(spouse.name,spouse)}`,
-      kindHint:'spouse'
+  (c.spouseIds || [])
+    .forEach(sid => {
+      const spouse =
+        genealogyData.sims[sid];
+
+      if (!spouse) return;
+
+      const key =
+        'spouse:' +
+        pairKey(simId, sid);
+
+      if (seen.has(key)) return;
+
+      push({
+        key,
+        label:
+          uiText('配偶') +
+          '：' +
+          displayDataText(
+            spouse.name,
+            spouse
+          ),
+        semanticType:'spouse',
+        defaultText:null
+      });
     });
-  });
 
-  (c.exSpouseIds || []).forEach(sid => {
-    const spouse = genealogyData.sims[sid];
-    if (!spouse) return;
-    const key = 'exspouse:' + pairKey(simId,sid);
-    if (seen.has(key)) return;
-    push({
-      key,
-      label:`${uiText('前任配偶')}：${displayDataText(spouse.name,spouse)}`,
-      kindHint:'exspouse'
+  (c.exSpouseIds || [])
+    .forEach(sid => {
+      const spouse =
+        genealogyData.sims[sid];
+
+      if (!spouse) return;
+
+      const key =
+        'exspouse:' +
+        pairKey(simId, sid);
+
+      if (seen.has(key)) return;
+
+      push({
+        key,
+        label:
+          uiText('前任配偶') +
+          '：' +
+          displayDataText(
+            spouse.name,
+            spouse
+          ),
+        semanticType:'exspouse',
+        defaultText:null
+      });
     });
-  });
 
-  (genealogyData.links || []).forEach(link => {
-    if (link.from !== simId && link.to !== simId) return;
+  (genealogyData.links || [])
+    .forEach(link => {
+      if (
+        link.from !== simId &&
+        link.to !== simId
+      ) {
+        return;
+      }
 
-    const otherId = link.from === simId ? link.to : link.from;
-    const other = genealogyData.sims[otherId];
-    if (!other) return;
+      const otherId =
+        link.from === simId
+          ? link.to
+          : link.from;
 
-    if (!link.id) link.id = uid('lnk');
-    const key = 'link:' + link.id;
-    if (seen.has(key)) return;
+      const other =
+        genealogyData.sims[
+          otherId
+        ];
 
-    const rawTag = link.label || link.type || '關聯';
-    const tag = displayRelationshipText(rawTag);
-    const isSibling =
-      rawTag === SIBLING_LABEL ||
-      link.type === SIBLING_LABEL ||
-      link.label === SIBLING_LABEL;
+      if (!other) return;
 
-    push({
-      key,
-      label:`${tag}：${displayDataText(other.name,other)}`,
-      kindHint:isSibling ? 'sibling' : 'custom'
-    }, isSibling ? 'family' : 'other');
-  });
+      if (!link.id) {
+        link.id = uid('lnk');
+      }
+
+      const key =
+        'link:' + link.id;
+
+      if (seen.has(key)) return;
+
+      const sibling =
+        isSiblingLink(link);
+
+      const rawTag =
+        sibling
+          ? SIBLING_RELATION_LABEL
+          : String(
+              link.label ||
+              link.type ||
+              '關聯'
+            ).trim() ||
+            '關聯';
+
+      const tag =
+        displayRelationshipText(
+          rawTag
+        );
+
+      push({
+        key,
+        label:
+          tag +
+          '：' +
+          displayDataText(
+            other.name,
+            other
+          ),
+        semanticType:
+          sibling
+            ? 'sibling'
+            : 'social',
+        defaultText:
+          sibling
+            ? null
+            : rawTag
+      }, sibling ? 'family' : 'other');
+    });
 
   return entries;
 }
-function renderRelAnnoList(simId, sectionId, listId, entries) {
-  const section=$(sectionId), list=$(listId); if(!section||!list)return;
-  if(!simId){section.style.display='none';list.innerHTML='';return;}
-  section.style.display='';
-  if(!entries.length){list.innerHTML=`<div class="rel-empty">${esc(uiText('尚無關係連線'))}</div>`;return;}
-  const optHTML=Object.entries(REL_PRESETS).map(([k,v])=>`<option value="${k}">${esc(displayRelationshipText(v.label||'(不顯示)'))}</option>`).join('');
-  list.innerHTML=entries.map(e=>{
-    const rm=genealogyData.relationshipMap||{}; let saved=rm[e.key]; if(!saved){const colon=e.key.indexOf(':');const raw=colon>=0?e.key.slice(colon+1):e.key;if(rm[raw])saved=rm[raw];} saved=saved||{};
-    const curText=saved.text||'',curKind=saved.kind||''; const hasOffset=!!(genealogyData.labelPositions&&genealogyData.labelPositions[e.key]&&(genealogyData.labelPositions[e.key].dx||genealogyData.labelPositions[e.key].dy));
-    return `<div class="rel-anno-item" data-anno-key="${esc(e.key)}" data-kind-hint="${esc(e.kindHint)}" data-cur-kind="${esc(curKind)}"><div class="rel-anno-name" title="${esc(e.label)}">${esc(e.label)}</div><select><option value="">${esc(uiText('（預設）'))}</option>${optHTML}</select><input type="text" placeholder="${esc(uiText('自訂文字（可選）'))}" value="${esc(curText)}">${hasOffset?`<button type="button" class="rel-anno-reset" data-reset-key="${esc(e.key)}" title="${esc(uiText('重設關係位置'))}">${esc(uiText('重設'))}</button>`:'<span></span>'}</div>`;
-  }).join('');
-  list.querySelectorAll('.rel-anno-item').forEach(item=>{const curKind=item.dataset.curKind||'',sel=item.querySelector('select');sel.value=curKind&&Object.prototype.hasOwnProperty.call(REL_PRESETS,curKind)?curKind:'';});
-  list.querySelectorAll('[data-reset-key]').forEach(btn=>{btn.onclick=()=>{const key=btn.dataset.resetKey;if(genealogyData.labelPositions&&genealogyData.labelPositions[key]){delete genealogyData.labelPositions[key];save();render();renderRelAnno(simId);}};});
+function renderRelAnnoList(
+  simId,
+  sectionId,
+  listId,
+  entries
+) {
+  const section =
+    $(sectionId);
+
+  const list =
+    $(listId);
+
+  if (!section || !list) return;
+
+  if (!simId) {
+    section.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+
+  section.style.display = '';
+
+  if (!entries.length) {
+    list.innerHTML =
+      '<div class="rel-empty">' +
+      esc(uiText('尚無關係連線')) +
+      '</div>';
+
+    return;
+  }
+
+  list.innerHTML =
+    entries.map(entry => {
+      const saved =
+        relationshipDisplayOverride(
+          entry.key
+        );
+
+      const hidden =
+        saved.hidden === true;
+
+      const curText =
+        typeof saved.text === 'string'
+          ? saved.text
+          : '';
+
+      const descriptor =
+        relationshipSemanticDescriptor(
+          entry.semanticType,
+          entry.defaultText
+        );
+
+      const defaultLabel =
+        displayRelationshipText(
+          entry.defaultText ||
+          descriptor.label
+        );
+
+      const hasOffset =
+        !!(
+          genealogyData.labelPositions &&
+          genealogyData.labelPositions[
+            entry.key
+          ] &&
+          (
+            genealogyData.labelPositions[
+              entry.key
+            ].dx ||
+            genealogyData.labelPositions[
+              entry.key
+            ].dy
+          )
+        );
+
+      return (
+        '<div class="rel-anno-item" ' +
+        'data-anno-key="' +
+        esc(entry.key) +
+        '">' +
+          '<div class="rel-anno-name" title="' +
+          esc(entry.label) +
+          '">' +
+          esc(entry.label) +
+          '</div>' +
+          '<select data-rel-display-mode>' +
+            '<option value="default">' +
+              esc(
+                uiText('預設') +
+                ' · ' +
+                defaultLabel
+              ) +
+            '</option>' +
+            '<option value="none">' +
+              esc(uiText('（不顯示）')) +
+            '</option>' +
+          '</select>' +
+          '<input type="text" ' +
+          'placeholder="' +
+          esc(uiText('自訂文字（可選）')) +
+          '" value="' +
+          esc(curText) +
+          '">' +
+          (
+            hasOffset
+              ? '<button type="button" class="rel-anno-reset" data-reset-key="' +
+                esc(entry.key) +
+                '" title="' +
+                esc(uiText('重設關係位置')) +
+                '">' +
+                esc(uiText('重設')) +
+                '</button>'
+              : '<span></span>'
+          ) +
+        '</div>'
+      );
+    }).join('');
+
+  list.querySelectorAll(
+    '.rel-anno-item'
+  ).forEach(item => {
+    const key =
+      item.dataset.annoKey;
+
+    const saved =
+      relationshipDisplayOverride(key);
+
+    const select =
+      item.querySelector(
+        '[data-rel-display-mode]'
+      );
+
+    if (select) {
+      select.value =
+        saved.hidden === true
+          ? 'none'
+          : 'default';
+    }
+  });
+
+  list.querySelectorAll(
+    '[data-reset-key]'
+  ).forEach(btn => {
+    btn.onclick = () => {
+      const key =
+        btn.dataset.resetKey;
+
+      if (
+        genealogyData.labelPositions &&
+        genealogyData.labelPositions[key]
+      ) {
+        delete genealogyData
+          .labelPositions[key];
+
+        save();
+        render();
+        renderRelAnno(simId);
+      }
+    };
+  });
 }
 function renderRelAnno(simId) {
   if(!simId){renderRelAnnoList(null,'familyRelAnnoSection','familyRelAnnoList',[]);renderRelAnnoList(null,'relAnnoSection','relAnnoList',[]);return;}
@@ -13054,7 +14814,7 @@ function openEditor(id) {
   const siblingIds = c
     ? (genealogyData.links||[])
         .filter(l => (l.from === c.id || l.to === c.id) &&
-                     (l.label === SIBLING_LABEL || l.type === SIBLING_LABEL))
+                     isSiblingLink(l))
         .map(l => l.from === c.id ? l.to : l.from)
     : [];
   $('fSiblings').innerHTML = spouseOptions;
@@ -13095,7 +14855,7 @@ function closeEditor() {
 
 function renderRelList(c) {
   if (!c) { $('relList').innerHTML = ''; return; }
-  const rels = (genealogyData.links||[]).filter(l => (l.from === c.id || l.to === c.id) && !(l.label === SIBLING_LABEL || l.type === SIBLING_LABEL));
+  const rels = (genealogyData.links||[]).filter(l => (l.from === c.id || l.to === c.id) && !isSiblingLink(l));
   $('relList').innerHTML = rels.length
     ? rels.map((l, i) => {
         const otherId = l.from === c.id ? l.to : l.from;
@@ -13161,23 +14921,71 @@ function syncChildren(c, newChildIds) {
   });
 }
 
-function syncSiblings(c, newSiblingIds) {
-  const newSet = new Set(newSiblingIds);
-  genealogyData.links = genealogyData.links || [];
-  genealogyData.links = genealogyData.links.filter(l => {
-    if (l.from !== c.id && l.to !== c.id) return true;
-    const isSibling = (l.label === SIBLING_LABEL) || (l.type === SIBLING_LABEL);
-    if (!isSibling) return true;
-    const other = l.from === c.id ? l.to : l.from;
-    return newSet.has(other);
-  });
+function syncSiblings(
+  c,
+  newSiblingIds
+) {
+  const newSet =
+    new Set(
+      newSiblingIds.map(String)
+    );
+
+  genealogyData.links =
+    genealogyData.links || [];
+
+  genealogyData.links =
+    genealogyData.links
+      .filter(link => {
+        if (
+          link.from !== c.id &&
+          link.to !== c.id
+        ) {
+          return true;
+        }
+
+        if (!isSiblingLink(link)) {
+          return true;
+        }
+
+        const other =
+          link.from === c.id
+            ? String(link.to)
+            : String(link.from);
+
+        return newSet.has(other);
+      });
+
   newSiblingIds.forEach(sid => {
-    const exists = genealogyData.links.some(l =>
-      (l.from === c.id && l.to === sid) || (l.from === sid && l.to === c.id));
+    const siblingId =
+      String(sid);
+
+    const exists =
+      genealogyData.links
+        .some(link =>
+          isSiblingLink(link) &&
+          (
+            (
+              String(link.from) ===
+                String(c.id) &&
+              String(link.to) ===
+                siblingId
+            ) ||
+            (
+              String(link.to) ===
+                String(c.id) &&
+              String(link.from) ===
+                siblingId
+            )
+          )
+        );
+
     if (!exists) {
       genealogyData.links.push({
-        id: uid('lnk'), from: c.id, to: sid,
-        type: SIBLING_LABEL, label: SIBLING_LABEL
+        id:uid('lnk'),
+        from:c.id,
+        to:siblingId,
+        type:SIBLING_RELATION_TYPE,
+        label:SIBLING_RELATION_LABEL
       });
     }
   });
@@ -13198,16 +15006,42 @@ function applyFamilyMembership(simId, newFamilyIds) {
 }
 
 function collectRelAnnotations() {
-  const items = document.querySelectorAll('#familyRelAnnoList .rel-anno-item, #relAnnoList .rel-anno-item');
+  const items =
+    document.querySelectorAll(
+      '#familyRelAnnoList .rel-anno-item, #relAnnoList .rel-anno-item'
+    );
+
   items.forEach(item => {
-    const key = item.dataset.annoKey;
+    const key =
+      item.dataset.annoKey;
+
     if (!key) return;
-    const hint = item.dataset.kindHint || '';
-    const sel = item.querySelector('select').value;
-    const text = item.querySelector('input').value.trim();
-    const differs = (sel && sel !== hint) || !!text;
-    if (differs) genealogyData.relationshipMap[key] = { kind: sel || '', text };
-    else delete genealogyData.relationshipMap[key];
+
+    const select =
+      item.querySelector(
+        '[data-rel-display-mode]'
+      );
+
+    const input =
+      item.querySelector(
+        'input[type="text"]'
+      );
+
+    const hidden =
+      select?.value === 'none';
+
+    const text =
+      input?.value.trim() || '';
+
+    if (hidden || text) {
+      genealogyData.relationshipMap[key] = {
+        ...(text ? { text } : {}),
+        ...(hidden ? { hidden:true } : {})
+      };
+    } else {
+      delete genealogyData
+        .relationshipMap[key];
+    }
   });
 }
 
@@ -15628,6 +17462,70 @@ Object.assign(EN, {
     '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。':'This deletes the current genealogy and restores the default Traditional Chinese genealogy.',
     '已恢復預設族譜。':'Default genealogy restored.',
     '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？':'Restore theme, background, sidebar width, view mode, and relationship-line settings?'
+  });
+
+  Object.assign(ZH_HANS_EXACT, {
+    '親子':'亲子',
+    '收養':'收养',
+    '前任配偶':'前任配偶',
+    '兄弟姊妹':'兄弟姐妹',
+    '本人':'本人',
+    '父親':'父亲','母親':'母亲','父母':'父母',
+    '養父':'养父','養母':'养母','養親':'养亲',
+    '兒子':'儿子','女兒':'女儿','子女':'子女',
+    '養子':'养子','養女':'养女','養子女':'养子女',
+    '丈夫':'丈夫','妻子':'妻子',
+    '前夫':'前夫','前妻':'前妻',
+    '哥哥':'哥哥','姐姐':'姐姐','弟弟':'弟弟','妹妹':'妹妹',
+    '兄弟':'兄弟','姊妹':'姐妹',
+    '爺爺':'爷爷','奶奶':'奶奶','外公':'外公','外婆':'外婆',
+    '祖父':'祖父','祖母':'祖母','祖父母':'祖父母',
+    '孫子':'孙子','孫女':'孙女','外孫':'外孙','外孫女':'外孙女','孫輩':'孙辈',
+    '曾祖父':'曾祖父','曾祖母':'曾祖母','曾祖父母':'曾祖父母',
+    '高祖父':'高祖父','高祖母':'高祖母','高祖父母':'高祖父母',
+    '曾孫':'曾孙','曾孫女':'曾孙女','曾孫輩':'曾孙辈',
+    '伯父':'伯父','叔叔':'叔叔','叔伯':'叔伯','姑姑':'姑姑','舅舅':'舅舅','阿姨':'阿姨',
+    '父母的兄弟姊妹':'父母的兄弟姐妹',
+    '姪子':'侄子','姪女':'侄女','外甥':'外甥','外甥女':'外甥女',
+    '兄弟姊妹的子女':'兄弟姐妹的子女',
+    '堂哥':'堂哥','堂姐':'堂姐','堂弟':'堂弟','堂妹':'堂妹','堂兄弟姊妹':'堂兄弟姐妹',
+    '表哥':'表哥','表姐':'表姐','表弟':'表弟','表妹':'表妹','表兄弟姊妹':'表兄弟姐妹',
+    '岳父':'岳父','岳母':'岳母','公公':'公公','婆婆':'婆婆',
+    '配偶父親':'配偶父亲','配偶母親':'配偶母亲','配偶父母':'配偶父母',
+    '（不顯示）':'（不显示）'
+  });
+  Object.assign(EN, {
+    '親子':'Parent / Child',
+    '收養':'Adoptive Parent / Child',
+    '前任配偶':'Ex-spouse',
+    '兄弟姊妹':'Sibling',
+    '本人':'Self',
+    '父親':'Father','母親':'Mother','父母':'Parent',
+    '養父':'Adoptive Father','養母':'Adoptive Mother','養親':'Adoptive Parent',
+    '兒子':'Son','女兒':'Daughter','子女':'Child',
+    '養子':'Adoptive Son','養女':'Adoptive Daughter','養子女':'Adoptive Child',
+    '丈夫':'Husband','妻子':'Wife',
+    '前夫':'Ex-husband','前妻':'Ex-wife',
+    '哥哥':'Older Brother','姐姐':'Older Sister','弟弟':'Younger Brother','妹妹':'Younger Sister',
+    '兄弟':'Brother','姊妹':'Sister',
+    '爺爺':'Paternal Grandfather','奶奶':'Paternal Grandmother',
+    '外公':'Maternal Grandfather','外婆':'Maternal Grandmother',
+    '祖父':'Grandfather','祖母':'Grandmother','祖父母':'Grandparent',
+    '孫子':'Grandson','孫女':'Granddaughter','外孫':'Grandson','外孫女':'Granddaughter','孫輩':'Grandchild',
+    '曾祖父':'Great-grandfather','曾祖母':'Great-grandmother','曾祖父母':'Great-grandparent',
+    '高祖父':'2nd Great-grandfather','高祖母':'2nd Great-grandmother','高祖父母':'2nd Great-grandparent',
+    '曾孫':'Great-grandson','曾孫女':'Great-granddaughter','曾孫輩':'Great-grandchild',
+    '伯父':'Older Paternal Uncle','叔叔':'Younger Paternal Uncle','叔伯':'Paternal Uncle',
+    '姑姑':'Paternal Aunt','舅舅':'Maternal Uncle','阿姨':'Maternal Aunt',
+    '父母的兄弟姊妹':"Parent's Sibling",
+    '姪子':'Nephew','姪女':'Niece','外甥':'Nephew','外甥女':'Niece',
+    '兄弟姊妹的子女':"Sibling's Child",
+    '堂哥':'Older Paternal Cousin','堂姐':'Older Paternal Cousin',
+    '堂弟':'Younger Paternal Cousin','堂妹':'Younger Paternal Cousin','堂兄弟姊妹':'Paternal Cousin',
+    '表哥':'Older Cousin','表姐':'Older Cousin','表弟':'Younger Cousin','表妹':'Younger Cousin','表兄弟姊妹':'Cousin',
+    '岳父':'Father-in-law','岳母':'Mother-in-law','公公':'Father-in-law','婆婆':'Mother-in-law',
+    '配偶父親':"Spouse's Father",'配偶母親':"Spouse's Mother",'配偶父母':"Spouse's Parent",
+    '（不顯示）':'(Hidden)'
   });
 
   Object.assign(ZH_HANS_EXACT, {
