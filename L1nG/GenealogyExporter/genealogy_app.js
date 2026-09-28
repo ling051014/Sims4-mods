@@ -48,6 +48,8 @@ const genealogyInteraction =
   window.L1nGGenealogyInteraction ||
   null;
 
+let genealogyStore = null;
+
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
 const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS, 'genderBar'];
@@ -496,28 +498,49 @@ function captureLabelHistoryState(key) {
 
 function applyDragHistoryEntry(entry, stateKey) {
   const state = entry[stateKey];
-  if (!state || !genealogyData) return;
+  if (!state || !genealogyData || !genealogyStore) return;
 
   if (entry.type === 'card-layout') {
     const fam = genealogyData.families.find(item => item.id === entry.familyId);
     if (!fam) return;
-    ensureFamilyLayoutShape(fam);
-    fam.freeLayout[entry.mode] = !!state.freeLayout;
-    fam.manualPositions[entry.mode] = cloneManualPositionMap(state.manualPositions);
-    save({ immediate: true });
-    if (genealogyData.currentFamilyId === entry.familyId && viewMode === entry.mode) {
-      render();
+
+    const mutation =
+      genealogyStore.setFamilyLayoutState(
+        entry.familyId,
+        entry.mode,
+        {
+          freeLayout:!!state.freeLayout,
+          manualPositions:cloneManualPositionMap(state.manualPositions)
+        }
+      );
+
+    applyGenealogyMutation(mutation, {
+      immediateSave:true,
+      render:
+        genealogyData.currentFamilyId === entry.familyId &&
+        viewMode === entry.mode
+    });
+
+    if (
+      genealogyData.currentFamilyId === entry.familyId &&
+      viewMode === entry.mode
+    ) {
       updateLayoutToggle();
     }
+
     return;
   }
 
   if (entry.type === 'relationship-label') {
-    if (!genealogyData.labelPositions) genealogyData.labelPositions = {};
-    if (state.offset) genealogyData.labelPositions[entry.key] = { ...state.offset };
-    else delete genealogyData.labelPositions[entry.key];
-    save({ immediate: true });
-    if (layoutCache) drawEdges();
+    const mutation =
+      genealogyStore.setRelationshipLabelPosition(
+        entry.key,
+        state.offset || null
+      );
+
+    applyGenealogyMutation(mutation, {
+      immediateSave:true
+    });
   }
 }
 
@@ -1081,25 +1104,32 @@ function getCurrentFreeLayout(fam) {
   return !!fam.freeLayout[viewMode];
 }
 function ensureFamilyLayoutShape(fam) {
-  if (!fam.manualPositions || typeof fam.manualPositions !== 'object') {
-    fam.manualPositions = { view: {}, edit: {} };
-  } else {
-    if (!fam.manualPositions.view || typeof fam.manualPositions.view !== 'object') fam.manualPositions.view = {};
-    if (!fam.manualPositions.edit || typeof fam.manualPositions.edit !== 'object') fam.manualPositions.edit = {};
-  }
-  if (!fam.freeLayout || typeof fam.freeLayout !== 'object') {
-    fam.freeLayout = { view: false, edit: false };
-  } else {
-    if (typeof fam.freeLayout.view !== 'boolean') fam.freeLayout.view = false;
-    if (typeof fam.freeLayout.edit !== 'boolean') fam.freeLayout.edit = false;
-  }
-  if (typeof fam.locked !== 'boolean') fam.locked = false;
+  return !!(
+    fam &&
+    fam.manualPositions &&
+    typeof fam.manualPositions === 'object' &&
+    fam.manualPositions.view &&
+    typeof fam.manualPositions.view === 'object' &&
+    fam.manualPositions.edit &&
+    typeof fam.manualPositions.edit === 'object' &&
+    fam.freeLayout &&
+    typeof fam.freeLayout === 'object' &&
+    typeof fam.freeLayout.view === 'boolean' &&
+    typeof fam.freeLayout.edit === 'boolean' &&
+    typeof fam.locked === 'boolean'
+  );
 }
 
 function ensureFamilyProfileShape(fam) {
-  if (!fam || typeof fam !== 'object') return;
-  if (typeof fam.bio !== 'string') fam.bio = '';
-  if (fam.coverImage === undefined) fam.coverImage = null;
+  return !!(
+    fam &&
+    typeof fam === 'object' &&
+    typeof fam.bio === 'string' &&
+    Object.prototype.hasOwnProperty.call(
+      fam,
+      'coverImage'
+    )
+  );
 }
 
 function formatCardGender(gender) {
@@ -2960,47 +2990,6 @@ function relationshipTypeLibraryValues(db = genealogyData) {
         .map(normalizeRelationshipTypeText)
         .filter(Boolean)
     : [];
-}
-
-function rememberRelationshipType(
-  value,
-  db = genealogyData
-) {
-  if (!db) return false;
-
-  const type =
-    normalizeRelationshipTypeText(
-      value
-    );
-
-  if (
-    !type ||
-    type === '關聯' ||
-    isBuiltInSocialRelationshipType(type)
-  ) {
-    return false;
-  }
-
-  if (
-    !Array.isArray(
-      db.relationshipTypeLibrary
-    )
-  ) {
-    db.relationshipTypeLibrary = [];
-  }
-
-  if (
-    db.relationshipTypeLibrary
-      .some(saved =>
-        normalizeRelationshipTypeText(saved) ===
-        type
-      )
-  ) {
-    return false;
-  }
-
-  db.relationshipTypeLibrary.push(type);
-  return true;
 }
 
 function relationshipTypeOptions() {
@@ -6760,10 +6749,18 @@ if (restoreSampleBtn) {
       if (!ok) return;
 
       closeEditor();
-      genealogyData = buildSample();
+
+      const sampleDb =
+        buildSample();
+
+      normalizeCurrentDatabase(
+        sampleDb
+      );
+
+      genealogyData = sampleDb;
       dragHistory.clear();
-      normalizeCurrentDatabase(genealogyData);
       invalidateChildrenIndex();
+      invalidateRelationshipGraph();
       save({ immediate:true });
       refreshFamilyUI();
       render();
@@ -6944,7 +6941,7 @@ function genealogyParentKindFor(child, parentId, byId = null) {
   return relation ? relation.kind : 'parent-child';
 }
 
-function ensureAdoptionMetadata(sim){
+function normalizeAdoptionMetadataShape(sim){
     if(!sim)return null;
     if(!sim.gameData||typeof sim.gameData!=='object'||Array.isArray(sim.gameData))sim.gameData={};
     if(!Array.isArray(sim.gameData.adoptedParentIds))sim.gameData.adoptedParentIds=[];
@@ -6953,46 +6950,6 @@ function ensureAdoptionMetadata(sim){
     sim.gameData.adoptedChildIds=[...new Set(sim.gameData.adoptedChildIds.map(String).filter(Boolean))];
     return sim.gameData;
   }
-  function setCanonicalParentRelation(child,parentId,kind=null){
-    if(!child)return;
-    const childId=String(child.id||''),parentKey=String(parentId||'');
-    if(!childId||!parentKey||childId===parentKey)return;
-    if(!Array.isArray(child.parentIds))child.parentIds=[];
-    child.parentIds=child.parentIds.map(String).filter(id=>id&&id!==parentKey);
-    const childGameData=ensureAdoptionMetadata(child);
-    childGameData.adoptedParentIds=childGameData.adoptedParentIds.filter(id=>id!==parentKey);
-    const parent=genealogyData?.sims?.[parentKey];
-    if(parent){
-      const parentGameData=ensureAdoptionMetadata(parent);
-      parentGameData.adoptedChildIds=parentGameData.adoptedChildIds.filter(id=>id!==childId);
-    }
-    if(kind==='adoptive'){
-      childGameData.adoptedParentIds=[...new Set([...childGameData.adoptedParentIds,parentKey])];
-      if(parent)parent.gameData.adoptedChildIds=[...new Set([...parent.gameData.adoptedChildIds,childId])];
-    }else if(kind==='parent-child'){
-      child.parentIds=[...new Set([...child.parentIds,parentKey])];
-    }
-  }
-  function syncParentRelations(child,desiredRelations){
-    if(!child)return;
-    const desired=new Map((desiredRelations||[]).filter(item=>item&&item.parentId).map(item=>[String(item.parentId),item.kind==='adoptive'?'adoptive':'parent-child']));
-    const existing=genealogyParentRelations(child).map(item=>String(item.parentId));
-    new Set([...existing,...desired.keys()]).forEach(parentId=>setCanonicalParentRelation(child,parentId,desired.get(parentId)||null));
-    invalidateChildrenIndex();
-  }
-  function syncChildRelations(parent,desiredRelations){
-    if(!parent)return;
-    const parentId=String(parent.id||'');
-    const desired=new Map((desiredRelations||[]).filter(item=>item&&item.childId).map(item=>[String(item.childId),item.kind==='adoptive'?'adoptive':'parent-child']));
-    invalidateChildrenIndex();
-    const existing=getChildrenOf(parentId).map(child=>String(child.id));
-    new Set([...existing,...desired.keys()]).forEach(childId=>{
-      const child=genealogyData?.sims?.[childId];
-      if(child)setCanonicalParentRelation(child,parentId,desired.get(childId)||null);
-    });
-    invalidateChildrenIndex();
-  }
-
 function isDescendant(ancestorId, nodeId) {
   const queue = [nodeId];
   const seen = new Set();
@@ -7041,7 +6998,81 @@ function getChildrenOf(id) {
 }
 function invalidateChildrenIndex() {
   _childrenIndex = null;
-  genealogyRuntime?.invalidateRelationships?.();
+}
+
+function invalidateRelationshipGraph() {
+  return genealogyRuntime?.invalidateRelationships?.();
+}
+
+genealogyStore =
+  window.L1nGGenealogyStore?.create?.({
+    getData:() => genealogyData,
+    uid,
+    getParentRelations:(sim) => genealogyParentRelations(sim),
+    isSiblingLink,
+    siblingRelationType:SIBLING_RELATION_TYPE,
+    siblingRelationLabel:SIBLING_RELATION_LABEL,
+    normalizeRelationshipType:normalizeRelationshipTypeText,
+    isBuiltInRelationshipType:isBuiltInSocialRelationshipType
+  }) ||
+  null;
+
+if (!genealogyStore) {
+  throw new Error('Genealogy Store failed to initialize.');
+}
+
+function applyGenealogyMutation(
+  mutation,
+  {
+    immediateSave = false,
+    immediateRender = true,
+    render = true,
+    refreshFamily = true
+  } = {}
+) {
+  if (!mutation?.dataChanged) return mutation;
+
+  if (mutation.childrenIndexChanged) {
+    invalidateChildrenIndex();
+  }
+
+  if (mutation.relationshipGraphChanged) {
+    invalidateRelationshipGraph();
+  }
+
+  if (mutation.saveDirty) {
+    save({ immediate:immediateSave });
+  }
+
+  if (
+    refreshFamily &&
+    mutation.familyUiChanged
+  ) {
+    refreshFamilyUI();
+  }
+
+  if (render) {
+    const layers = {
+      layout:!!mutation.layoutChanged,
+      nodes:!!mutation.nodesChanged,
+      edges:!!mutation.edgesChanged,
+      chrome:!!mutation.chromeChanged,
+      lists:!!mutation.listsChanged
+    };
+
+    if (Object.values(layers).some(Boolean)) {
+      invalidateRender(
+        layers,
+        { immediate:immediateRender }
+      );
+    }
+  }
+
+  if (mutation.assetsChanged) {
+    scheduleGC();
+  }
+
+  return mutation;
 }
 
 
@@ -7077,7 +7108,7 @@ function normalizeCurrentDatabase(targetDb) {
     if (sim.residence === undefined) sim.residence = '';
     if (sim.aspiration === undefined) sim.aspiration = '';
     if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
-    ensureAdoptionMetadata(sim);
+    normalizeAdoptionMetadataShape(sim);
     sim.gameData.adoptedParentIds = sim.gameData.adoptedParentIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
     sim.gameData.adoptedChildIds = sim.gameData.adoptedChildIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
     delete sim.adoptive;
@@ -12612,9 +12643,7 @@ function applySelectedLayoutOperation(action) {
     return false;
   }
 
-  const manualPositions =
-    fam.manualPositions[viewMode];
-
+  const nextPositions = {};
   let changed = false;
 
   next.forEach((pos, id) => {
@@ -12629,7 +12658,7 @@ function applySelectedLayoutOperation(action) {
       changed = true;
     }
 
-    manualPositions[id] = {
+    nextPositions[id] = {
       x:pos.x,
       y:pos.y
     };
@@ -12637,7 +12666,14 @@ function applySelectedLayoutOperation(action) {
 
   if (!changed) return false;
 
-  render();
+  const mutation =
+    genealogyStore.setNodePositions(
+      fam.id,
+      viewMode,
+      nextPositions
+    );
+
+  applyGenealogyMutation(mutation);
   syncNodeSelectionClasses();
   expandStageToFit();
 
@@ -12652,7 +12688,6 @@ function applySelectedLayoutOperation(action) {
     )
   });
 
-  save();
   return true;
 }
 
@@ -12807,11 +12842,14 @@ async function handleNodeContextAction(action, simId) {
         viewMode
       );
 
-    ids.forEach(id => {
-      delete fam.manualPositions[viewMode][id];
-    });
+    const mutation =
+      genealogyStore.removeNodePositions(
+        fam.id,
+        viewMode,
+        ids
+      );
 
-    render();
+    applyGenealogyMutation(mutation);
     syncNodeSelectionClasses();
     expandStageToFit();
 
@@ -12826,7 +12864,6 @@ async function handleNodeContextAction(action, simId) {
       )
     });
 
-    save();
     closeNodeContextMenu();
     return;
   }
@@ -12838,9 +12875,15 @@ async function handleNodeContextAction(action, simId) {
       title: uiText('移出所選人物'), kind: 'danger', confirmText: uiText('移出家族')
     });
     if (!ok) return;
-    fam.memberIds = fam.memberIds.filter(id => !ids.includes(id));
+    const mutation =
+      genealogyStore.removeFamilyMembers(
+        fam.id,
+        ids
+      );
+
     clearNodeSelection();
-    save(); refreshFamilyUI(); render(); closeNodeContextMenu();
+    applyGenealogyMutation(mutation);
+    closeNodeContextMenu();
   }
 }
 
@@ -13069,56 +13112,91 @@ labelsSvg.addEventListener('pointerdown', e => {
   const key = g.dataset.key;
   if (!key) return;
   e.preventDefault(); e.stopPropagation();
+
   const baseX = parseFloat(g.dataset.x) || 0;
   const baseY = parseFloat(g.dataset.y) || 0;
   const cur = (genealogyData.labelPositions || {})[key] || { dx:0, dy:0 };
+
   labelDrag = {
-    key, el: g, baseX, baseY,
-    startX: e.clientX, startY: e.clientY,
-    startDx: cur.dx || 0, startDy: cur.dy || 0,
-    beforeOffset: captureLabelHistoryState(key),
-    moved: false, pointerId: e.pointerId
+    key,
+    el:g,
+    baseX,
+    baseY,
+    startX:e.clientX,
+    startY:e.clientY,
+    startDx:cur.dx || 0,
+    startDy:cur.dy || 0,
+    beforeOffset:captureLabelHistoryState(key),
+    mutation:null,
+    moved:false,
+    pointerId:e.pointerId
   };
+
   try { g.setPointerCapture(e.pointerId); } catch(_){}
 });
+
 labelsSvg.addEventListener('pointermove', e => {
   if (!labelDrag || labelDrag.pointerId !== e.pointerId) return;
+
   const rawDx = (e.clientX - labelDrag.startX) / scale;
   const rawDy = (e.clientY - labelDrag.startY) / scale;
-  if (!labelDrag.moved && Math.hypot(rawDx * scale, rawDy * scale) > 3) {
+
+  if (
+    !labelDrag.moved &&
+    Math.hypot(rawDx * scale, rawDy * scale) > 3
+  ) {
     labelDrag.moved = true;
     labelDrag.el.classList.add('dragging');
   }
+
   if (!labelDrag.moved) return;
-  const snapDistance = GUIDE_SNAP_PX / Math.max(scale, 0.001);
+
+  const snapDistance =
+    GUIDE_SNAP_PX /
+    Math.max(scale, 0.001);
+
   let dx = labelDrag.startDx + rawDx;
   let dy = labelDrag.startDy + rawDy;
 
-  // X 軸接近 0 時吸附回關係線的水平中心；Y 軸接近 0 時吸附回原始關係線。
-  // 兩個方向彼此獨立，所以玩家仍可只沿著關係線水平移動，或只保持置中上下移動。
   if (Math.abs(dx) <= snapDistance) dx = 0;
   if (Math.abs(dy) <= snapDistance) dy = 0;
 
-  if (!genealogyData.labelPositions) genealogyData.labelPositions = {};
-  if (dx === 0 && dy === 0) delete genealogyData.labelPositions[labelDrag.key];
-  else genealogyData.labelPositions[labelDrag.key] = { dx, dy };
+  labelDrag.mutation =
+    genealogyStore.mergeResults(
+      labelDrag.mutation,
+      genealogyStore.setRelationshipLabelPosition(
+        labelDrag.key,
+        dx === 0 && dy === 0
+          ? null
+          : { dx, dy }
+      )
+    );
 
   labelDrag.currentDx = dx;
   labelDrag.currentDy = dy;
+
   const tx = labelDrag.baseX + dx;
   const ty = labelDrag.baseY + dy;
-  labelDrag.el.setAttribute('transform', `translate(${tx.toFixed(1)},${ty.toFixed(1)})`);
+
+  labelDrag.el.setAttribute(
+    'transform',
+    `translate(${tx.toFixed(1)},${ty.toFixed(1)})`
+  );
 });
+
 const finishLabelDrag = e => {
   if (!labelDrag) return;
-  if (e && e.pointerId !== undefined && labelDrag.pointerId !== e.pointerId) return;
+  if (
+    e &&
+    e.pointerId !== undefined &&
+    labelDrag.pointerId !== e.pointerId
+  ) {
+    return;
+  }
 
   const activeDrag = labelDrag;
-
   activeDrag.el.classList.remove('dragging');
 
-  // 明確釋放 pointer capture，避免關係標籤拖曳結束後
-  // 瀏覽器仍把後續 pointer 事件送回舊標籤。
   try {
     if (
       activeDrag.el.hasPointerCapture &&
@@ -13129,25 +13207,36 @@ const finishLabelDrag = e => {
   } catch (_) {}
 
   if (activeDrag.moved) {
-    const afterOffset = captureLabelHistoryState(activeDrag.key);
+    const afterOffset =
+      captureLabelHistoryState(
+        activeDrag.key
+      );
 
     dragHistory.push({
-      type: 'relationship-label',
-      key: activeDrag.key,
-      before: { offset: activeDrag.beforeOffset },
-      after: { offset: afterOffset }
+      type:'relationship-label',
+      key:activeDrag.key,
+      before:{
+        offset:activeDrag.beforeOffset
+      },
+      after:{
+        offset:afterOffset
+      }
     });
 
-    save();
+    applyGenealogyMutation(
+      activeDrag.mutation,
+      { render:false }
+    );
   }
 
   labelDrag = null;
 };
+
 labelsSvg.addEventListener('pointerup', finishLabelDrag);
 labelsSvg.addEventListener('pointercancel', finishLabelDrag);
 labelsSvg.addEventListener('lostpointercapture', finishLabelDrag);
 
-// ========【智慧對齊與等距吸附】 設定 - 對齊邊緣 / 中心，同時支援水平與垂直等距 ========
+// ========【智慧對齊與等距吸附】// ========【智慧對齊與等距吸附】 設定 - 對齊邊緣 / 中心，同時支援水平與垂直等距 ========
 function hideSmartGuides() {
   if (smartGuideVertical) smartGuideVertical.classList.remove('show');
   if (smartGuideHorizontal) smartGuideHorizontal.classList.remove('show');
@@ -14303,6 +14392,7 @@ nodes.addEventListener('pointerdown', e => {
     const sx = e.clientX, sy = e.clientY;
     const beforeLayoutState = captureLayoutHistoryState(fam, dragMode);
     let moved = false;
+    let dragMutation = null;
 
     const dragPerformanceSession =
       createSingleDragPerformanceSession(
@@ -14334,7 +14424,17 @@ nodes.addEventListener('pointerdown', e => {
       const nx = snapped.x;
       const ny = snapped.y;
 
-      manualPositions[id] = { x:nx, y:ny };
+      dragMutation =
+        genealogyStore.mergeResults(
+          dragMutation,
+          genealogyStore.setNodePosition(
+            fam.id,
+            dragMode,
+            id,
+            { x:nx, y:ny }
+          )
+        );
+
       layoutCache.pos.set(id, { x:nx, y:ny });
 
       el.style.left = `${nx + PAD}px`;
@@ -14387,7 +14487,11 @@ nodes.addEventListener('pointerdown', e => {
           before:beforeLayoutState,
           after:captureLayoutHistoryState(fam, dragMode)
         });
-        save();
+
+        applyGenealogyMutation(
+          dragMutation,
+          { render:false }
+        );
         expandStageToFit();
       } else {
         if (viewMode === 'view') openInfoCard(id);
@@ -14408,6 +14512,7 @@ nodes.addEventListener('pointerdown', e => {
 
     const shift = e.shiftKey;
     const wasSelected = selectedNodeIds.has(id);
+
     if (!shift && !wasSelected) {
       selectedNodeIds.clear();
       selectedNodeIds.add(id);
@@ -14417,16 +14522,41 @@ nodes.addEventListener('pointerdown', e => {
       syncNodeSelectionClasses();
     }
 
-    const dragIds = [...selectedNodeIds].filter(sid => layoutCache?.pos?.has(sid));
+    const dragIds =
+      [...selectedNodeIds]
+        .filter(sid =>
+          layoutCache?.pos?.has(sid)
+        );
+
     const startPositions = new Map();
+
     dragIds.forEach(sid => {
-      const p = fam.manualPositions[viewMode][sid] || layoutCache.pos.get(sid);
-      if (p) startPositions.set(sid, { x: p.x, y: p.y });
+      const p =
+        fam.manualPositions[viewMode][sid] ||
+        layoutCache.pos.get(sid);
+
+      if (p) {
+        startPositions.set(
+          sid,
+          { x:p.x, y:p.y }
+        );
+      }
     });
-    const primaryStart = startPositions.get(id);
-    const sx = e.clientX, sy = e.clientY;
-    const beforeLayoutState = captureLayoutHistoryState(fam, viewMode);
+
+    const primaryStart =
+      startPositions.get(id);
+
+    const sx = e.clientX;
+    const sy = e.clientY;
+
+    const beforeLayoutState =
+      captureLayoutHistoryState(
+        fam,
+        viewMode
+      );
+
     let moved = false;
+    let dragMutation = null;
 
     const dragPerformanceSession =
       createGroupDragPerformanceSession(
@@ -14436,18 +14566,31 @@ nodes.addEventListener('pointerdown', e => {
 
     const applyMove = ev => {
       if (fam.locked || !primaryStart) return;
-      const dx = ev.clientX - sx, dy = ev.clientY - sy;
-      if (!moved && Math.hypot(dx, dy) > 3) {
+
+      const dx = ev.clientX - sx;
+      const dy = ev.clientY - sy;
+
+      if (
+        !moved &&
+        Math.hypot(dx, dy) > 3
+      ) {
         moved = true;
-        dragIds.forEach(sid => nodes.querySelector(`.node[data-id="${CSS.escape(sid)}"]`)?.classList.add('dragging'));
+
+        dragIds.forEach(sid =>
+          nodes
+            .querySelector(
+              `.node[data-id="${CSS.escape(sid)}"]`
+            )
+            ?.classList
+            .add('dragging')
+        );
       }
+
       if (!moved) return;
 
       const rawDeltaX = dx / scale;
       const rawDeltaY = dy / scale;
 
-      // 單張與多選共用同一拖曳 authority：
-      // 單張保留既有對齊 + 等距吸附；多選以整組外框做邊緣 / 中心吸附。
       const snapped =
         getDragSelectionSmartSnap(
           dragIds,
@@ -14460,25 +14603,74 @@ nodes.addEventListener('pointerdown', e => {
 
       const deltaX = snapped.deltaX;
       const deltaY = snapped.deltaY;
-      const manualPositions = fam.manualPositions[viewMode];
+      const nextPositions = {};
 
       startPositions.forEach((startPos, sid) => {
         const nx = startPos.x + deltaX;
         const ny = startPos.y + deltaY;
-        manualPositions[sid] = { x:nx, y:ny };
-        layoutCache.pos.set(sid, { x:nx, y:ny });
-        const nodeEl = nodes.querySelector(`.node[data-id="${CSS.escape(sid)}"]`);
+
+        nextPositions[sid] = {
+          x:nx,
+          y:ny
+        };
+
+        layoutCache.pos.set(
+          sid,
+          { x:nx, y:ny }
+        );
+
+        const nodeEl =
+          nodes.querySelector(
+            `.node[data-id="${CSS.escape(sid)}"]`
+          );
+
         if (nodeEl) {
-          nodeEl.style.left = `${nx + PAD}px`;
-          nodeEl.style.top = `${ny + PAD}px`;
+          nodeEl.style.left =
+            `${nx + PAD}px`;
+
+          nodeEl.style.top =
+            `${ny + PAD}px`;
         }
       });
 
+      dragMutation =
+        genealogyStore.mergeResults(
+          dragMutation,
+          genealogyStore.setNodePositions(
+            fam.id,
+            viewMode,
+            nextPositions
+          )
+        );
+
       hideSmartGuides();
-      if (snapped.guideX !== null) showSmartGuide('x', snapped.guideX);
-      if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
-      if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
-      if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
+
+      if (snapped.guideX !== null) {
+        showSmartGuide(
+          'x',
+          snapped.guideX
+        );
+      }
+
+      if (snapped.guideY !== null) {
+        showSmartGuide(
+          'y',
+          snapped.guideY
+        );
+      }
+
+      if (snapped.spacingX) {
+        showEqualSpacingGuide(
+          snapped.spacingX
+        );
+      }
+
+      if (snapped.spacingY) {
+        showEqualSpacingGuide(
+          snapped.spacingY
+        );
+      }
+
       scheduleEdgeRedraw();
     };
 
@@ -14506,10 +14698,31 @@ nodes.addEventListener('pointerdown', e => {
 
     const onUp = () => {
       moveFrame?.flush?.();
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', onUp);
-      document.removeEventListener('pointercancel', onUp);
-      dragIds.forEach(sid => nodes.querySelector(`.node[data-id="${CSS.escape(sid)}"]`)?.classList.remove('dragging'));
+
+      document.removeEventListener(
+        'pointermove',
+        onMove
+      );
+
+      document.removeEventListener(
+        'pointerup',
+        onUp
+      );
+
+      document.removeEventListener(
+        'pointercancel',
+        onUp
+      );
+
+      dragIds.forEach(sid =>
+        nodes
+          .querySelector(
+            `.node[data-id="${CSS.escape(sid)}"]`
+          )
+          ?.classList
+          .remove('dragging')
+      );
+
       hideSmartGuides();
 
       if (moved) {
@@ -14518,9 +14731,16 @@ nodes.addEventListener('pointerdown', e => {
           familyId:fam.id,
           mode:viewMode,
           before:beforeLayoutState,
-          after:captureLayoutHistoryState(fam, viewMode)
+          after:captureLayoutHistoryState(
+            fam,
+            viewMode
+          )
         });
-        save();
+
+        applyGenealogyMutation(
+          dragMutation,
+          { render:false }
+        );
         expandStageToFit();
       } else if (shift && wasSelected) {
         selectedNodeIds.delete(id);
@@ -14528,68 +14748,175 @@ nodes.addEventListener('pointerdown', e => {
       }
     };
 
-    document.addEventListener('pointermove', onMove);
-    document.addEventListener('pointerup', onUp);
-    document.addEventListener('pointercancel', onUp);
+    document.addEventListener(
+      'pointermove',
+      onMove
+    );
+
+    document.addEventListener(
+      'pointerup',
+      onUp
+    );
+
+    document.addEventListener(
+      'pointercancel',
+      onUp
+    );
+
     return;
   }
 
   // 自動排列沿用既有邏輯：拖動人物超過門檻後切換到自由排列。
-  e.preventDefault(); e.stopPropagation();
+  e.preventDefault();
+  e.stopPropagation();
+
   if (fam.locked) {
-    const sx = e.clientX, sy = e.clientY;
+    const sx = e.clientX;
+    const sy = e.clientY;
+
     const onUp = ev => {
-      document.removeEventListener('pointerup', onUp);
-      document.removeEventListener('pointercancel', onUp);
-      if (Math.hypot(ev.clientX-sx, ev.clientY-sy) < 5) {
-        if (viewMode === 'view') openInfoCard(id); else openEditor(id);
+      document.removeEventListener(
+        'pointerup',
+        onUp
+      );
+
+      document.removeEventListener(
+        'pointercancel',
+        onUp
+      );
+
+      if (
+        Math.hypot(
+          ev.clientX - sx,
+          ev.clientY - sy
+        ) < 5
+      ) {
+        if (viewMode === 'view') {
+          openInfoCard(id);
+        } else {
+          openEditor(id);
+        }
       }
     };
-    document.addEventListener('pointerup', onUp);
-    document.addEventListener('pointercancel', onUp);
+
+    document.addEventListener(
+      'pointerup',
+      onUp
+    );
+
+    document.addEventListener(
+      'pointercancel',
+      onUp
+    );
+
     return;
   }
+
   const dragMode = viewMode;
-  const beforeLayoutState = captureLayoutHistoryState(fam, dragMode);
-  const manualPositions = fam.manualPositions[dragMode];
-  const sim = genealogyData.sims[id];
+
+  const beforeLayoutState =
+    captureLayoutHistoryState(
+      fam,
+      dragMode
+    );
+
+  const manualPositions =
+    fam.manualPositions[dragMode];
+
+  const sim =
+    genealogyData.sims[id];
+
   if (!sim) return;
-  const initialPos = manualPositions[id] || layoutCache.pos.get(id);
+
+  const initialPos =
+    manualPositions[id] ||
+    layoutCache.pos.get(id);
+
   if (!initialPos) return;
-  const startPos = { x: initialPos.x, y: initialPos.y };
-  const sx = e.clientX, sy = e.clientY;
+
+  const startPos = {
+    x:initialPos.x,
+    y:initialPos.y
+  };
+
+  const sx = e.clientX;
+  const sy = e.clientY;
+
   let moved = false;
   let dragInitialized = false;
+  let dragMutation = null;
 
   const dragPerformanceSession =
     createSingleDragPerformanceSession(
       id
     );
+
   const applyMove = ev => {
-    const dx = ev.clientX - sx, dy = ev.clientY - sy;
-    if (!moved && Math.hypot(dx, dy) > 3) {
+    const dx = ev.clientX - sx;
+    const dy = ev.clientY - sy;
+
+    if (
+      !moved &&
+      Math.hypot(dx, dy) > 3
+    ) {
       moved = true;
       el.classList.add('dragging');
     }
+
     if (!moved) return;
 
     if (!dragInitialized) {
-    if (!fam.freeLayout[dragMode]) {
-      fam.freeLayout[dragMode] = true;
-      layoutCache.pos.forEach((p, sid) => { manualPositions[sid] = { x:p.x, y:p.y }; });
-  
-      // 第一次手動拖曳人物代表玩家正在排列人物，
-      // 切入自由排列後應維持人物選取／拖曳工具，而不是切成畫布平移。
-      arrangeTool = 'select';
-  
-      updateLayoutToggle();
+      if (!fam.freeLayout[dragMode]) {
+        const seededPositions = {};
+
+        layoutCache.pos.forEach(
+          (p, sid) => {
+            seededPositions[sid] = {
+              x:p.x,
+              y:p.y
+            };
+          }
+        );
+
+        dragMutation =
+          genealogyStore.mergeResults(
+            dragMutation,
+            genealogyStore.setFamilyLayoutState(
+              fam.id,
+              dragMode,
+              {
+                freeLayout:true,
+                manualPositions:seededPositions
+              }
+            )
+          );
+
+        arrangeTool = 'select';
+        updateLayoutToggle();
+      }
+
+      if (!manualPositions[id]) {
+        dragMutation =
+          genealogyStore.mergeResults(
+            dragMutation,
+            genealogyStore.setNodePosition(
+              fam.id,
+              dragMode,
+              id,
+              { ...startPos }
+            )
+          );
+      }
+
+      dragInitialized = true;
     }
-  
-    if (!manualPositions[id]) manualPositions[id] = { ...startPos };
-    dragInitialized = true;
-  }
-    const rawX = startPos.x + dx / scale;
-    const rawY = startPos.y + dy / scale;
+
+    const rawX =
+      startPos.x + dx / scale;
+
+    const rawY =
+      startPos.y + dy / scale;
+
     const snapped =
       getSmartSnap(
         id,
@@ -14597,19 +14924,60 @@ nodes.addEventListener('pointerdown', e => {
         rawY,
         dragPerformanceSession
       );
+
     const nx = snapped.x;
     const ny = snapped.y;
 
-    manualPositions[id] = {x:nx, y:ny};
-    layoutCache.pos.set(id, {x:nx, y:ny});
-    el.style.left = (nx+PAD)+'px';
-    el.style.top = (ny+PAD)+'px';
+    dragMutation =
+      genealogyStore.mergeResults(
+        dragMutation,
+        genealogyStore.setNodePosition(
+          fam.id,
+          dragMode,
+          id,
+          { x:nx, y:ny }
+        )
+      );
+
+    layoutCache.pos.set(
+      id,
+      { x:nx, y:ny }
+    );
+
+    el.style.left =
+      (nx + PAD) + 'px';
+
+    el.style.top =
+      (ny + PAD) + 'px';
 
     hideSmartGuides();
-    if (snapped.guideX !== null) showSmartGuide('x', snapped.guideX);
-    if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
-    if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
-    if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
+
+    if (snapped.guideX !== null) {
+      showSmartGuide(
+        'x',
+        snapped.guideX
+      );
+    }
+
+    if (snapped.guideY !== null) {
+      showSmartGuide(
+        'y',
+        snapped.guideY
+      );
+    }
+
+    if (snapped.spacingX) {
+      showEqualSpacingGuide(
+        snapped.spacingX
+      );
+    }
+
+    if (snapped.spacingY) {
+      showEqualSpacingGuide(
+        snapped.spacingY
+      );
+    }
+
     scheduleEdgeRedraw();
   };
 
@@ -14637,33 +15005,73 @@ nodes.addEventListener('pointerdown', e => {
 
   const onUp = () => {
     moveFrame?.flush?.();
-    document.removeEventListener('pointermove', onMove);
-    document.removeEventListener('pointerup', onUp);
-    document.removeEventListener('pointercancel', onUp);
+
+    document.removeEventListener(
+      'pointermove',
+      onMove
+    );
+
+    document.removeEventListener(
+      'pointerup',
+      onUp
+    );
+
+    document.removeEventListener(
+      'pointercancel',
+      onUp
+    );
+
     el.classList.remove('dragging');
     hideSmartGuides();
+
     if (moved) {
-      const afterLayoutState = captureLayoutHistoryState(fam, dragMode);
+      const afterLayoutState =
+        captureLayoutHistoryState(
+          fam,
+          dragMode
+        );
+
       dragHistory.push({
-        type: 'card-layout',
-        familyId: fam.id,
-        mode: dragMode,
-        before: beforeLayoutState,
-        after: afterLayoutState
+        type:'card-layout',
+        familyId:fam.id,
+        mode:dragMode,
+        before:beforeLayoutState,
+        after:afterLayoutState
       });
+
       selectedNodeIds.clear();
       selectedNodeIds.add(id);
       syncNodeSelectionClasses();
-      save();
+
+      applyGenealogyMutation(
+        dragMutation,
+        { render:false }
+      );
+
       expandStageToFit();
     } else {
-      if (viewMode === 'view') openInfoCard(id);
-      else openEditor(id);
+      if (viewMode === 'view') {
+        openInfoCard(id);
+      } else {
+        openEditor(id);
+      }
     }
   };
-  document.addEventListener('pointermove', onMove);
-  document.addEventListener('pointerup', onUp);
-  document.addEventListener('pointercancel', onUp);
+
+  document.addEventListener(
+    'pointermove',
+    onMove
+  );
+
+  document.addEventListener(
+    'pointerup',
+    onUp
+  );
+
+  document.addEventListener(
+    'pointercancel',
+    onUp
+  );
 });
 
 function expandStageToFit() {
@@ -14718,35 +15126,97 @@ function updateLayoutToggle() {
 $('layoutToggle').onclick = () => {
   const fam = currentFamily();
   ensureFamilyLayoutShape(fam);
-  const manualPositions = fam.manualPositions[viewMode];
+
+  let mutation;
+
   if (!fam.freeLayout[viewMode]) {
-    fam.freeLayout[viewMode] = true;
+    const manualPositions = {};
+
+    layoutCache.pos.forEach((p, sid) => {
+      manualPositions[sid] = {
+        x:p.x,
+        y:p.y
+      };
+    });
+
+    mutation =
+      genealogyStore.setFamilyLayoutState(
+        fam.id,
+        viewMode,
+        {
+          freeLayout:true,
+          manualPositions
+        }
+      );
+
     arrangeTool = 'pan';
-    layoutCache.pos.forEach((p, sid) => { manualPositions[sid] = {x:p.x, y:p.y}; });
   } else {
-    fam.freeLayout[viewMode] = false;
-    fam.manualPositions[viewMode] = {};
+    mutation =
+      genealogyStore.setFamilyLayoutState(
+        fam.id,
+        viewMode,
+        {
+          freeLayout:false,
+          manualPositions:{}
+        }
+      );
+
     clearNodeSelection();
   }
-  save(); updateLayoutToggle(); render();
+
+  applyGenealogyMutation(mutation);
+  updateLayoutToggle();
 };
+
 $('lockToggle').onclick = () => {
   const fam = currentFamily();
   if (!getCurrentFreeLayout(fam)) return;
-  fam.locked = !fam.locked;
-  save(); updateLayoutToggle();
+
+  const mutation =
+    genealogyStore.setFamilyLocked(
+      fam.id,
+      !fam.locked
+    );
+
+  applyGenealogyMutation(
+    mutation,
+    { render:false }
+  );
+  updateLayoutToggle();
 };
+
 $('resetLayoutBtn').onclick = async () => {
   const fam = currentFamily();
-  const modeName = viewMode === 'view' ? '檢視' : '編輯';
-  if (!await uiConfirm(`清除「${modeName}模式」下本家族的所有手動位置，恢復自動樹狀。確定嗎？`, { title: '重設卡片位置', kind: 'danger', confirmText: '重設位置' })) return;
-  ensureFamilyLayoutShape(fam);
-  fam.freeLayout[viewMode] = false;
-  fam.manualPositions[viewMode] = {};
+  const modeName =
+    viewMode === 'view'
+      ? '檢視'
+      : '編輯';
+
+  if (!await uiConfirm(
+    `清除「${modeName}模式」下本家族的所有手動位置，恢復自動樹狀。確定嗎？`,
+    {
+      title:'重設卡片位置',
+      kind:'danger',
+      confirmText:'重設位置'
+    }
+  )) return;
+
+  const mutation =
+    genealogyStore.setFamilyLayoutState(
+      fam.id,
+      viewMode,
+      {
+        freeLayout:false,
+        manualPositions:{}
+      }
+    );
+
   clearNodeSelection();
-  save(); updateLayoutToggle(); render();
+  applyGenealogyMutation(mutation);
+  updateLayoutToggle();
   requestAnimationFrame(fitScreen);
 };
+
 relationshipPerspectiveBtn?.addEventListener(
   'click',
   () => {
@@ -15230,17 +15700,31 @@ familyNameInput.onchange = () => {
     syncFamilyNameInputWidth();
     return;
   }
-  fam.name = v;
+  const mutation =
+    genealogyStore.updateFamily(
+      fam.id,
+      { name:v }
+    );
+
   familyNameInput.value = v;
-  save(); refreshFamilyUI();
+  applyGenealogyMutation(mutation, {
+    render:false
+  });
 };
 const familyBioInput = $('familyBio');
 if (familyBioInput) {
   familyBioInput.addEventListener('input', () => {
     const fam = currentFamily(); if (!fam) return;
-    ensureFamilyProfileShape(fam);
-    fam.bio = familyBioInput.value;
-    save();
+    const mutation =
+      genealogyStore.updateFamily(
+        fam.id,
+        { bio:familyBioInput.value }
+      );
+
+    applyGenealogyMutation(mutation, {
+      render:false,
+      refreshFamily:false
+    });
   });
 }
 const familyCoverInput = $('familyCoverInput');
@@ -15248,17 +15732,43 @@ if (familyCoverInput) familyCoverInput.onchange = async e => {
   const file = e.target.files?.[0]; e.target.value=''; if (!file) return;
   try {
     const result = await compressBgImage(file);
-    const fam = currentFamily(); ensureFamilyProfileShape(fam);
-    fam.coverImage = await saveImageAsset(result.blob, {
+    const fam = currentFamily();
+    const coverImage = await saveImageAsset(result.blob, {
       width:result.width,
       height:result.height
     });
-    save({ immediate:true }); renderFamilyCover(fam); scheduleGC();
+
+    const mutation =
+      genealogyStore.updateFamily(
+        fam.id,
+        { coverImage }
+      );
+
+    applyGenealogyMutation(mutation, {
+      immediateSave:true,
+      render:false,
+      refreshFamily:false
+    });
+    renderFamilyCover(fam);
+    scheduleGC();
   } catch(err) { uiAlert(err.message || '圖片處理失敗', { title:'圖片處理失敗', kind:'danger' }); }
 };
 $('familyCoverClearBtn')?.addEventListener('click', async () => {
   const fam = currentFamily(); if (!fam || !fam.coverImage) return;
-  fam.coverImage = null; save({ immediate:true }); renderFamilyCover(fam); scheduleGC();
+
+  const mutation =
+    genealogyStore.updateFamily(
+      fam.id,
+      { coverImage:null }
+    );
+
+  applyGenealogyMutation(mutation, {
+    immediateSave:true,
+    render:false,
+    refreshFamily:false
+  });
+  renderFamilyCover(fam);
+  scheduleGC();
 });
 
 $('newFamilyBtn').onclick = async () => {
@@ -15270,24 +15780,39 @@ $('newFamilyBtn').onclick = async () => {
     freeLayout: { view: false, edit: false },
     manualPositions: { view: {}, edit: {} }, locked: false
   };
-  genealogyData.families.push(fam);
+  const mutation =
+    genealogyStore.createFamily(
+      fam,
+      { makeCurrent:true }
+    );
+
   dragHistory.clear();
-  genealogyData.currentFamilyId = fam.id;
   addMemberSelection.clear();
   removeMemberSelection.clear();
-  save(); refreshFamilyUI(); render();
+  applyGenealogyMutation(mutation);
   requestAnimationFrame(fitScreen);
 };
 $('delFamilyBtn').onclick = async () => {
   if (genealogyData.families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
   const fam = currentFamily();
   if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n（家族內所有模擬市民仍保留在模擬市民池中）`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
-  genealogyData.families = genealogyData.families.filter(f => f.id !== fam.id);
+  const fallbackFamilyId =
+    genealogyData.families
+      .find(f => f.id !== fam.id)
+      ?.id ||
+    null;
+
+  const mutation =
+    genealogyStore.deleteFamily(
+      fam.id,
+      { fallbackFamilyId }
+    );
+
   dragHistory.clear();
-  genealogyData.currentFamilyId = genealogyData.families[0].id;
   addMemberSelection.clear();
   removeMemberSelection.clear();
-  closeEditor(); save(); refreshFamilyUI(); render();
+  closeEditor();
+  applyGenealogyMutation(mutation);
   scheduleGC();
   requestAnimationFrame(fitScreen);
 };
@@ -18181,134 +18706,29 @@ function renderRelList(c) {
   $('relList').querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = () => {
       const target = rels[+btn.dataset.del];
-      if (target && target.id) {
-        if (genealogyData.relationshipMap) delete genealogyData.relationshipMap['link:' + target.id];
-        if (genealogyData.labelPositions) delete genealogyData.labelPositions['link:' + target.id];
-      }
-      genealogyData.links = (genealogyData.links||[]).filter(l => l !== target);
+      if (!target?.id) return;
+
+      const mutation =
+        genealogyStore.removeRelationship(
+          target.id
+        );
+
       renderRelList(c);
       renderRelAnno(c.id);
-      save(); render();
+      applyGenealogyMutation(mutation);
     };
   });
 }
 
-function syncSpouses(c) {
-  Object.values(genealogyData.sims).forEach(o => {
-    if (o.id === c.id) return;
-    o.spouseIds = (o.spouseIds||[]).filter(id => id !== c.id);
-    o.exSpouseIds = (o.exSpouseIds||[]).filter(id => id !== c.id);
-  });
-  c.spouseIds = (c.spouseIds||[]).filter(id => id !== c.id && genealogyData.sims[id]);
-  c.exSpouseIds = (c.exSpouseIds||[]).filter(id => id !== c.id && genealogyData.sims[id]);
-  c.spouseIds.forEach(id => {
-    const o = genealogyData.sims[id];
-    if (!o) return;
-    o.spouseIds = o.spouseIds || [];
-    if (!o.spouseIds.includes(c.id)) o.spouseIds.push(c.id);
-  });
-  c.exSpouseIds.forEach(id => {
-    const o = genealogyData.sims[id];
-    if (!o) return;
-    o.exSpouseIds = o.exSpouseIds || [];
-    if (!o.exSpouseIds.includes(c.id)) o.exSpouseIds.push(c.id);
-  });
-}
-
-function syncSiblings(
-  c,
-  newSiblingIds
-) {
-  const newSet =
-    new Set(
-      newSiblingIds.map(String)
-    );
-
-  genealogyData.links =
-    genealogyData.links || [];
-
-  genealogyData.links =
-    genealogyData.links
-      .filter(link => {
-        if (
-          link.from !== c.id &&
-          link.to !== c.id
-        ) {
-          return true;
-        }
-
-        if (!isSiblingLink(link)) {
-          return true;
-        }
-
-        const other =
-          link.from === c.id
-            ? String(link.to)
-            : String(link.from);
-
-        return newSet.has(other);
-      });
-
-  newSiblingIds.forEach(sid => {
-    const siblingId =
-      String(sid);
-
-    const exists =
-      genealogyData.links
-        .some(link =>
-          isSiblingLink(link) &&
-          (
-            (
-              String(link.from) ===
-                String(c.id) &&
-              String(link.to) ===
-                siblingId
-            ) ||
-            (
-              String(link.to) ===
-                String(c.id) &&
-              String(link.from) ===
-                siblingId
-            )
-          )
-        );
-
-    if (!exists) {
-      genealogyData.links.push({
-        id:uid('lnk'),
-        from:c.id,
-        to:siblingId,
-        type:SIBLING_RELATION_TYPE,
-        label:SIBLING_RELATION_LABEL
-      });
-    }
-  });
-}
-
-function applyFamilyMembership(simId, newFamilyIds) {
-  genealogyData.families.forEach(f => {
-    const inList = f.memberIds.includes(simId);
-    const shouldBe = newFamilyIds.includes(f.id);
-    if (shouldBe && !inList) f.memberIds.push(simId);
-    else if (!shouldBe && inList) {
-      f.memberIds = f.memberIds.filter(id => id !== simId);
-      ensureFamilyLayoutShape(f);
-      delete f.manualPositions.view[simId];
-      delete f.manualPositions.edit[simId];
-    }
-  });
-}
-
-function collectRelAnnotations() {
+function collectRelAnnotationDraft() {
+  const entries = [];
   const items =
     document.querySelectorAll(
       '#familyRelAnnoList .rel-anno-item, #relAnnoList .rel-anno-item'
     );
 
   items.forEach(item => {
-    const key =
-      item.dataset.annoKey;
-
+    const key = item.dataset.annoKey;
     if (!key) return;
 
     const select =
@@ -18321,22 +18741,14 @@ function collectRelAnnotations() {
         'input[type="text"]'
       );
 
-    const hidden =
-      select?.value === 'none';
-
-    const text =
-      input?.value.trim() || '';
-
-    if (hidden || text) {
-      genealogyData.relationshipMap[key] = {
-        ...(text ? { text } : {}),
-        ...(hidden ? { hidden:true } : {})
-      };
-    } else {
-      delete genealogyData
-        .relationshipMap[key];
-    }
+    entries.push({
+      key,
+      hidden:select?.value === 'none',
+      text:input?.value.trim() || ''
+    });
   });
+
+  return entries;
 }
 
 function saveChar(){
@@ -18442,35 +18854,39 @@ function saveChar(){
         !editingDerivedSiblingIds
           .has(siblingId)
       );
-  let sim;
+  let mutation =
+    genealogyStore.saveSimDraft({
+      simId:editingId || null,
+      sim:data,
+      parentRelations,
+      childRelations,
+      spouseIds:data.spouseIds || [],
+      exSpouseIds:data.exSpouseIds || [],
+      siblingIds:newSiblingIds,
+      familyIds:newFamilyIds
+    });
 
-  if(editingId){
-    sim=genealogyData.sims[editingId];
-    Object.assign(sim,data);
-  }else{
-    sim={
-      id:uid('sim'),
-      order:Object.keys(genealogyData.sims).length,
-      parentIds:[],
-      gameData:{
-        adoptedParentIds:[],
-        adoptedChildIds:[]
-      },
-      ...data
-    };
+  const sim =
+    genealogyData.sims[
+      mutation.simId
+    ];
 
-    genealogyData.sims[sim.id]=sim;
+  if (!sim) {
+    uiAlert('人物資料儲存失敗。', {
+      title:'儲存失敗',
+      kind:'danger'
+    });
+    return;
   }
 
-  ensureAdoptionMetadata(sim);
-  syncParentRelations(sim,parentRelations);
-  syncSpouses(sim);
-  syncChildRelations(sim,childRelations);
-  syncSiblings(sim,newSiblingIds);
-  applyFamilyMembership(sim.id,newFamilyIds);
-
-  if(editingId){
-    collectRelAnnotations();
+  if (editingId) {
+    mutation =
+      genealogyStore.mergeResults(
+        mutation,
+        genealogyStore.setRelationshipAnnotations(
+          collectRelAnnotationDraft()
+        )
+      );
   }
 
   const family=currentFamily();
@@ -18487,10 +18903,12 @@ function saveChar(){
         .map(relation=>relation.parentId)
         .find(parentId=>manualPositions[parentId]);
 
+      let nextPosition;
+
       if(anchorParentId){
         const parentPosition=manualPositions[anchorParentId];
 
-        manualPositions[sim.id]={
+        nextPosition={
           x:parentPosition.x,
           y:parentPosition.y+NODE_H+LEVEL_GAP
         };
@@ -18501,86 +18919,45 @@ function saveChar(){
           maxY=Math.max(maxY,position.y+NODE_H);
         });
 
-        manualPositions[sim.id]={
+        nextPosition={
           x:0,
           y:maxY?maxY+40:0
         };
       }
+
+      mutation =
+        genealogyStore.mergeResults(
+          mutation,
+          genealogyStore.setNodePosition(
+            family.id,
+            viewMode,
+            sim.id,
+            nextPosition
+          )
+        );
     }
   }
 
-  invalidateChildrenIndex();
-  save();
-  refreshFamilyUI();
-  render();
+  applyGenealogyMutation(mutation);
   closeEditor();
+  scheduleGC();  closeEditor();
   scheduleGC();
 }
 
 function purgeSimData(id) {
-  const c = genealogyData.sims[id];
-  if (!c) return;
-
-  genealogyData.families.forEach(f => {
-    f.memberIds = f.memberIds.filter(x => x !== id);
-    ensureFamilyLayoutShape(f);
-    delete f.manualPositions.view[id];
-    delete f.manualPositions.edit[id];
-  });
+  const mutation =
+    genealogyStore.deleteSim(id);
 
   selectedNodeIds.delete(id);
-  delete genealogyData.sims[id];
-
-  Object.values(genealogyData.sims).forEach(s => {
-    s.parentIds = (s.parentIds || []).filter(x => x !== id);
-    s.spouseIds = (s.spouseIds || []).filter(x => x !== id);
-    s.exSpouseIds = (s.exSpouseIds || []).filter(x => x !== id);
-    if (s.gameData && typeof s.gameData === 'object') {
-      s.gameData.adoptedParentIds = (s.gameData.adoptedParentIds || []).map(String).filter(x => x !== String(id));
-      s.gameData.adoptedChildIds = (s.gameData.adoptedChildIds || []).map(String).filter(x => x !== String(id));
-    }
-  });
-
-  const removedLinkIds = (genealogyData.links || [])
-    .filter(l => l.from === id || l.to === id)
-    .map(l => l.id);
-
-  genealogyData.links = (genealogyData.links || []).filter(l => l.from !== id && l.to !== id);
-
-  const rm = genealogyData.relationshipMap || {};
-  Object.keys(rm).forEach(k => {
-    const colon = k.indexOf(':');
-    const raw = colon >= 0 ? k.slice(colon + 1) : k;
-    const parts = raw.split('::');
-    if (parts.includes(id)) {
-      delete rm[k];
-      return;
-    }
-    if (k.startsWith('link:') && removedLinkIds.includes(k.slice(5))) delete rm[k];
-  });
-
-  const lp = genealogyData.labelPositions || {};
-  Object.keys(lp).forEach(k => {
-    const colon = k.indexOf(':');
-    const raw = colon >= 0 ? k.slice(colon + 1) : k;
-    const parts = raw.split('::');
-    if (parts.includes(id)) {
-      delete lp[k];
-      return;
-    }
-    if (k.startsWith('link:') && removedLinkIds.includes(k.slice(5))) delete lp[k];
-  });
-
   addMemberSelection.delete(id);
   removeMemberSelection.delete(id);
   rosterSelection.delete(id);
+
+  return mutation;
 }
 
-function finalizeSimDataChange() {
-  invalidateChildrenIndex();
-  save();
-  refreshFamilyUI();
-  render();
+function finalizeSimDataChange(mutation) {
+  applyGenealogyMutation(mutation);
   closeEditor();
   scheduleGC();
 }
@@ -18600,9 +18977,12 @@ async function deleteChar(id) {
     confirmText: '永久刪除'
   })) return;
 
-  purgeSimData(id);
-  finalizeSimDataChange();
-  if (rosterMask.classList.contains('show')) renderRoster();
+  const mutation = purgeSimData(id);
+  finalizeSimDataChange(mutation);
+
+  if (rosterMask.classList.contains('show')) {
+    renderRoster();
+  }
 }
 
 // ========【人物庫】 設定 - 精簡 / 詳細檢視、單人選單與批量管理 ========
@@ -18821,19 +19201,12 @@ function renderRoster() {
         rosterMask.classList.remove('show');
         focusSimOnCanvas(id);
       } else if (action === 'toggle-family') {
-        ensureFamilyLayoutShape(fam);
+        const mutation =
+          fam.memberIds.includes(id)
+            ? genealogyStore.removeFamilyMember(fam.id, id)
+            : genealogyStore.addFamilyMember(fam.id, id);
 
-        if (fam.memberIds.includes(id)) {
-          fam.memberIds = fam.memberIds.filter(x => x !== id);
-          delete fam.manualPositions.view[id];
-          delete fam.manualPositions.edit[id];
-        } else {
-          fam.memberIds.push(id);
-        }
-
-        save();
-        refreshFamilyUI();
-        render();
+        applyGenealogyMutation(mutation);
         renderRoster();
       } else if (action === 'delete') {
         await deleteChar(id);
@@ -18877,29 +19250,27 @@ $('rosterBatchCancelBtn').onclick = () => setRosterBatchMode(false);
 $('rosterBatchAddFamilyBtn').onclick = () => {
   const fam = currentFamily();
 
-  rosterSelection.forEach(id => {
-    if (genealogyData.sims[id] && !fam.memberIds.includes(id)) fam.memberIds.push(id);
-  });
+  const mutation =
+    genealogyStore.addFamilyMembers(
+      fam.id,
+      [...rosterSelection]
+        .filter(id => genealogyData.sims[id])
+    );
 
-  save();
-  refreshFamilyUI();
-  render();
+  applyGenealogyMutation(mutation);
   setRosterBatchMode(false);
 };
 
 $('rosterBatchRemoveFamilyBtn').onclick = () => {
   const fam = currentFamily();
-  ensureFamilyLayoutShape(fam);
 
-  [...rosterSelection].forEach(id => {
-    fam.memberIds = fam.memberIds.filter(x => x !== id);
-    delete fam.manualPositions.view[id];
-    delete fam.manualPositions.edit[id];
-  });
+  const mutation =
+    genealogyStore.removeFamilyMembers(
+      fam.id,
+      [...rosterSelection]
+    );
 
-  save();
-  refreshFamilyUI();
-  render();
+  applyGenealogyMutation(mutation);
   setRosterBatchMode(false);
 };
 
@@ -18920,8 +19291,12 @@ $('rosterBatchDeleteBtn').onclick = async () => {
 
   if (!ok) return;
 
-  ids.forEach(purgeSimData);
-  finalizeSimDataChange();
+  const mutation =
+    genealogyStore.mergeResults(
+      ...ids.map(purgeSimData)
+    );
+
+  finalizeSimDataChange(mutation);
   setRosterBatchMode(false);
 }
 
@@ -18994,12 +19369,17 @@ $('addMemberConfirmBtn').onclick = () => {
   if (!addMemberSelection.size) return;
   const fam = currentFamily();
   const ids = [...addMemberSelection];
-  ids.forEach(id => { if (!fam.memberIds.includes(id)) fam.memberIds.push(id); });
-  save();
+
+  const mutation =
+    genealogyStore.addFamilyMembers(
+      fam.id,
+      ids
+    );
+
+  applyGenealogyMutation(mutation);
   addMemberSelection.clear();
   addMemberMask.classList.remove('show');
   refreshFamilyProfilePanel();
-  render();
   requestAnimationFrame(fitScreen);
 };
 
@@ -19037,19 +19417,15 @@ $('familyMemberRemoveConfirmBtn').onclick = async event => {
 
   if (!ok) return;
 
-  ensureFamilyLayoutShape(fam);
-
-  ids.forEach(id => {
-    fam.memberIds = fam.memberIds.filter(memberId => memberId !== id);
-    delete fam.manualPositions.view[id];
-    delete fam.manualPositions.edit[id];
-  });
+  const mutation =
+    genealogyStore.removeFamilyMembers(
+      fam.id,
+      ids
+    );
 
   removeMemberSelection.clear();
   removeMemberMode = false;
-  save();
-  refreshFamilyUI();
-  render();
+  applyGenealogyMutation(mutation);
   requestAnimationFrame(fitScreen);
 };
 
@@ -19756,6 +20132,7 @@ async function importGameGenealogy(file) {
     arrangeTool = 'pan';
 
     invalidateChildrenIndex();
+    invalidateRelationshipGraph();
 
     save({ immediate: true });
     refreshFamilyUI();
@@ -20128,21 +20505,13 @@ $('btnAddRel').onclick = () => {
     return;
   }
 
-  const addedToLibrary =
-    rememberRelationshipType(
-      type
-    );
-
-  genealogyData.links =
-    genealogyData.links || [];
-
-  genealogyData.links.push({
-    id:uid('lnk'),
-    from:c.id,
-    to:targetId,
-    type,
-    label:type
-  });
+  const mutation =
+    genealogyStore.addRelationship({
+      from:c.id,
+      to:targetId,
+      type,
+      label:type
+    });
 
   populateRelationshipTypePicker();
 
@@ -20155,13 +20524,7 @@ $('btnAddRel').onclick = () => {
   renderRelList(c);
   renderRelAnno(c.id);
 
-  save();
-  render();
-
-  if (addedToLibrary) {
-    // 詞庫已經寫進 genealogyData；
-    // 後續開啟任何市民編輯器都會直接取得這個選項。
-  }
+  applyGenealogyMutation(mutation);
 };
 
 // ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
@@ -20381,6 +20744,7 @@ async function init() {
   }
 
   invalidateChildrenIndex();
+  invalidateRelationshipGraph();
 
   applyRelationshipLineSettings();
   loadSavedBg();
