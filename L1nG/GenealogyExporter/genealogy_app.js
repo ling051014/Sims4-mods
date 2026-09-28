@@ -9274,6 +9274,48 @@ function showSmartGuide(axis, stagePosition) {
   guide.classList.add('show');
 }
 
+function showEqualSpacingGuide(guideData) {
+  if (!guideData) return;
+  const target = guideData.axis === 'x' ? smartSpacingHorizontal : smartSpacingVertical;
+  if (!target) return;
+
+  const first = target.querySelector('.smart-spacing-first');
+  const second = target.querySelector('.smart-spacing-second');
+  const label = target.querySelector('.smart-spacing-label');
+  if (!first || !second || !label) return;
+
+  const firstStart = guideData.segments[0].start + PAD;
+  const firstEnd = guideData.segments[0].end + PAD;
+  const secondStart = guideData.segments[1].start + PAD;
+  const secondEnd = guideData.segments[1].end + PAD;
+  const gapText = `${Math.round(Math.max(0, guideData.gap))}`;
+
+  if (guideData.axis === 'x') {
+    const y = guideData.cross + PAD;
+    first.style.left = `${firstStart}px`;
+    first.style.top = `${y}px`;
+    first.style.width = `${Math.max(0, firstEnd - firstStart)}px`;
+    second.style.left = `${secondStart}px`;
+    second.style.top = `${y}px`;
+    second.style.width = `${Math.max(0, secondEnd - secondStart)}px`;
+    label.style.left = `${(secondStart + secondEnd) / 2}px`;
+    label.style.top = `${y - 3}px`;
+  } else {
+    const x = guideData.cross + PAD;
+    first.style.left = `${x}px`;
+    first.style.top = `${firstStart}px`;
+    first.style.height = `${Math.max(0, firstEnd - firstStart)}px`;
+    second.style.left = `${x}px`;
+    second.style.top = `${secondStart}px`;
+    second.style.height = `${Math.max(0, secondEnd - secondStart)}px`;
+    label.style.left = `${x + 8}px`;
+    label.style.top = `${(secondStart + secondEnd) / 2}px`;
+  }
+
+  label.textContent = gapText;
+  target.classList.add('show');
+}
+
 // ========【Interaction Snap Orchestration】 設定 - Scene 提供 geometry，Interaction 執行對齊 / 等距 / 關係吸附 ========
 function getSmartSnap(id, rawX, rawY, performanceSession = null) {
   const session =
