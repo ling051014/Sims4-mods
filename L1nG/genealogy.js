@@ -193,30 +193,35 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     style:'solid',
     width:2.0,
     color:null,
+    curved:false,
     curveAmount:50
   }),
   spouse: Object.freeze({
     style:'solid',
     width:2.4,
     color:null,
+    curved:false,
     curveAmount:50
   }),
   exspouse: Object.freeze({
-    style:'curve',
+    style:'short-dash',
     width:1.7,
     color:null,
+    curved:true,
     curveAmount:50
   }),
   adopt: Object.freeze({
     style:'long-dash',
     width:1.7,
     color:null,
+    curved:false,
     curveAmount:50
   }),
   other: Object.freeze({
-    style:'curve',
+    style:'dot',
     width:1.5,
     color:null,
+    curved:true,
     curveAmount:50,
     bidirectional:false
   }),
@@ -234,6 +239,72 @@ function createRelationshipLineSettings() {
   };
 }
 
+function migrateRelationshipLineSetting(
+  key,
+  saved
+) {
+  const fallback =
+    RELATIONSHIP_LINE_DEFAULTS[key] ||
+    RELATIONSHIP_LINE_DEFAULTS.other;
+
+  if (
+    !saved ||
+    typeof saved !== 'object' ||
+    Array.isArray(saved)
+  ) {
+    return { ...fallback };
+  }
+
+  const migrated = {
+    ...fallback,
+    ...saved
+  };
+
+  // 2026-09-28 過渡版曾把 curve 當成第五種 stroke style。
+  // 現在 cleanly 拆成「線型 + curved + curveAmount」三個維度。
+  if (migrated.style === 'curve') {
+    migrated.style =
+      key === 'exspouse'
+        ? 'short-dash'
+        : key === 'other'
+          ? 'dot'
+          : fallback.style;
+
+    migrated.curved = true;
+  }
+
+  if (
+    !['solid','short-dash','long-dash','dot']
+      .includes(migrated.style)
+  ) {
+    migrated.style =
+      fallback.style;
+  }
+
+  migrated.curved =
+    typeof migrated.curved === 'boolean'
+      ? migrated.curved
+      : !!fallback.curved;
+
+  migrated.curveAmount =
+    Math.max(
+      10,
+      Math.min(
+        100,
+        Number(migrated.curveAmount) ||
+        fallback.curveAmount ||
+        50
+      )
+    );
+
+  if (key === 'other') {
+    migrated.bidirectional =
+      !!migrated.bidirectional;
+  }
+
+  return migrated;
+}
+
 let relationshipLineSettings =
   createRelationshipLineSettings();
 
@@ -249,42 +320,14 @@ try {
         rawRelationshipStyle
       );
 
-    ['parent','spouse','adopt']
+    ['parent','spouse','exspouse','adopt','other']
       .forEach(key => {
-        if (
-          parsed &&
-          parsed[key] &&
-          typeof parsed[key] === 'object'
-        ) {
-          relationshipLineSettings[key] = {
-            ...relationshipLineSettings[key],
-            ...parsed[key]
-          };
-        }
+        relationshipLineSettings[key] =
+          migrateRelationshipLineSetting(
+            key,
+            parsed?.[key]
+          );
       });
-
-    const savedEx =
-      parsed &&
-      parsed.exspouse &&
-      typeof parsed.exspouse === 'object'
-        ? parsed.exspouse
-        : null;
-
-    // 舊版預設「前任 = 短虛線」升級成新預設曲線；
-    // 玩家真的改過粗細／顏色／樣式時則保留自己的設定。
-    const savedExWasOldDefault =
-      savedEx &&
-      savedEx.style === 'short-dash' &&
-      Number(savedEx.width ?? 1.7) === 1.7 &&
-      !savedEx.color &&
-      savedEx.curveAmount == null;
-
-    if (savedEx && !savedExWasOldDefault) {
-      relationshipLineSettings.exspouse = {
-        ...relationshipLineSettings.exspouse,
-        ...savedEx
-      };
-    }
 
     if (
       parsed &&
@@ -303,10 +346,11 @@ try {
             return;
           }
 
-          relationshipLineSettings.otherTypes[type] = {
-            ...RELATIONSHIP_LINE_DEFAULTS.other,
-            ...setting
-          };
+          relationshipLineSettings.otherTypes[type] =
+            migrateRelationshipLineSetting(
+              'other',
+              setting
+            );
         });
     }
   }
@@ -3018,13 +3062,12 @@ const REL_LINE_DASH = {
   curve:'none'
 };
 
-const REL_SUPPLEMENTAL_STYLES =
+const REL_STROKE_STYLES =
   new Set([
     'solid',
     'short-dash',
     'long-dash',
-    'dot',
-    'curve'
+    'dot'
   ]);
 
 function clampRelationshipCurveAmount(value) {
@@ -3116,7 +3159,7 @@ function relationshipPairRenderGeometry(
   b,
   setting
 ) {
-  if (setting.style !== 'curve') {
+  if (!setting.curved) {
     const join =
       pairJoinPoint(a, b);
 
@@ -3170,7 +3213,7 @@ function relationshipOtherRenderGeometry(
   const y2 =
     toAnchor.y;
 
-  if (setting.style === 'curve') {
+  if (setting.curved) {
     return relationshipQuadraticGeometry(
       x1,
       y1,
@@ -3235,22 +3278,10 @@ function relationshipDefaultColor(key) {
 }
 
 function relationshipLineSetting(key) {
-  const fallback =
-    RELATIONSHIP_LINE_DEFAULTS[key] ||
-    RELATIONSHIP_LINE_DEFAULTS.other;
-
-  const setting =
-    relationshipLineSettings[key] ||
-    fallback;
-
-  return {
-    ...fallback,
-    ...setting,
-    curveAmount:
-      clampRelationshipCurveAmount(
-        setting.curveAmount
-      )
-  };
+  return migrateRelationshipLineSetting(
+    key,
+    relationshipLineSettings[key]
+  );
 }
 
 function relationshipOtherType(link) {
@@ -3298,35 +3329,11 @@ function getOtherRelationshipTypes() {
 function getOtherRelationshipLineSetting(
   type
 ) {
-  const saved =
+  return migrateRelationshipLineSetting(
+    'other',
     relationshipLineSettings
-      .otherTypes?.[type];
-
-  const setting = {
-    ...RELATIONSHIP_LINE_DEFAULTS.other,
-    ...(saved || {})
-  };
-
-  if (
-    !REL_SUPPLEMENTAL_STYLES
-      .has(setting.style)
-  ) {
-    setting.style = 'curve';
-  }
-
-  setting.width =
-    Number(setting.width) ||
-    RELATIONSHIP_LINE_DEFAULTS.other.width;
-
-  setting.curveAmount =
-    clampRelationshipCurveAmount(
-      setting.curveAmount
-    );
-
-  setting.bidirectional =
-    !!setting.bidirectional;
-
-  return setting;
+      .otherTypes?.[type]
+  );
 }
 
 function ensureOtherRelationshipLineSetting(
@@ -3435,6 +3442,11 @@ function updateRelationshipLinePreview(
   preview.dataset.lineStyle =
     setting.style;
 
+  preview.dataset.curved =
+    setting.curved
+      ? 'true'
+      : 'false';
+
   preview.style.setProperty(
     '--preview-color',
     color
@@ -3445,7 +3457,12 @@ function updateRelationshipLinePreview(
     String(setting.width) + 'px'
   );
 
-  if (setting.style === 'curve') {
+  if (setting.curved) {
+    const dash =
+      relationshipDashValue(
+        setting
+      );
+
     preview.innerHTML =
       '<svg class="relationship-curve-mini-preview" ' +
       'viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true">' +
@@ -3456,7 +3473,12 @@ function updateRelationshipLinePreview(
       '" style="stroke:' +
       color +
       ';stroke-width:' +
-      Math.max(1, Number(setting.width) || 1.5) +
+      Math.max(
+        1,
+        Number(setting.width) || 1.5
+      ) +
+      ';stroke-dasharray:' +
+      dash +
       '"/>' +
       '</svg>';
   } else {
@@ -3509,24 +3531,13 @@ function saveRelationshipLineSettings() {
   }
 }
 
-function relationshipStyleOptionsHTML(
-  includeCurve=false
-) {
-  const options = [
+function relationshipStyleOptionsHTML() {
+  return [
     ['solid','實線'],
     ['short-dash','短虛線'],
     ['long-dash','長虛線'],
     ['dot','點線']
-  ];
-
-  if (includeCurve) {
-    options.push([
-      'curve',
-      '曲線'
-    ]);
-  }
-
-  return options
+  ]
     .map(([value, label]) =>
       '<option value="' +
       value +
@@ -3621,7 +3632,7 @@ function renderOtherRelationshipLineControls() {
               '<select data-other-rel-style="' +
                 esc(key) +
               '">' +
-                relationshipStyleOptionsHTML(true) +
+                relationshipStyleOptionsHTML() +
               '</select>' +
             '</label>' +
             '<label>' +
@@ -3642,6 +3653,14 @@ function renderOtherRelationshipLineControls() {
             '</label>' +
           '</div>' +
           '<div class="relationship-line-extra-controls">' +
+            '<label class="relationship-toggle-control">' +
+              '<span>' +
+                esc(uiText('曲線')) +
+              '</span>' +
+              '<input data-other-rel-curved="' +
+                esc(key) +
+              '" type="checkbox">' +
+            '</label>' +
             '<label class="relationship-curve-control" data-other-rel-curve-row="' +
               esc(key) +
             '">' +
@@ -3718,6 +3737,11 @@ function syncOtherRelationshipLineControls() {
         '[data-other-rel-color]'
       );
 
+    const curvedEl =
+      item.querySelector(
+        '[data-other-rel-curved]'
+      );
+
     const curveEl =
       item.querySelector(
         '[data-other-rel-curve]'
@@ -3761,11 +3785,19 @@ function syncOtherRelationshipLineControls() {
         );
     }
 
+    if (curvedEl) {
+      curvedEl.checked =
+        !!setting.curved;
+    }
+
     if (curveEl) {
       curveEl.value =
         String(
           setting.curveAmount
         );
+
+      curveEl.disabled =
+        !setting.curved;
     }
 
     if (curveValueEl) {
@@ -3778,8 +3810,17 @@ function syncOtherRelationshipLineControls() {
     }
 
     if (curveRow) {
-      curveRow.hidden =
-        setting.style !== 'curve';
+      curveRow.classList.toggle(
+        'is-disabled',
+        !setting.curved
+      );
+
+      curveRow.setAttribute(
+        'aria-disabled',
+        setting.curved
+          ? 'false'
+          : 'true'
+      );
     }
 
     if (bidirectionalEl) {
@@ -3817,6 +3858,13 @@ function syncRelationshipLineControls() {
     const colorEl =
       document.querySelector(
         '[data-rel-color="' +
+        key +
+        '"]'
+      );
+
+    const curvedEl =
+      document.querySelector(
+        '[data-rel-curved="' +
         key +
         '"]'
       );
@@ -3865,9 +3913,17 @@ function syncRelationshipLineControls() {
         relationshipDefaultColor(key);
     }
 
+    if (curvedEl) {
+      curvedEl.checked =
+        !!setting.curved;
+    }
+
     if (curveEl) {
       curveEl.value =
         String(setting.curveAmount);
+
+      curveEl.disabled =
+        !setting.curved;
     }
 
     if (curveValueEl) {
@@ -3880,8 +3936,17 @@ function syncRelationshipLineControls() {
     }
 
     if (curveRow) {
-      curveRow.hidden =
-        setting.style !== 'curve';
+      curveRow.classList.toggle(
+        'is-disabled',
+        !setting.curved
+      );
+
+      curveRow.setAttribute(
+        'aria-disabled',
+        setting.curved
+          ? 'false'
+          : 'true'
+      );
     }
 
     updateRelationshipLinePreview(
@@ -3914,7 +3979,8 @@ function showRelationshipCurveLivePreview(
   if (
     !preview ||
     !path ||
-    !input
+    !input ||
+    input.disabled
   ) {
     return;
   }
@@ -3948,6 +4014,13 @@ function showRelationshipCurveLivePreview(
         1.5,
         Number(setting.width) || 1.5
       )
+    )
+  );
+
+  path.setAttribute(
+    'stroke-dasharray',
+    relationshipDashValue(
+      setting
     )
   );
 
@@ -4077,10 +4150,11 @@ function bindOtherRelationshipLineControls(
           );
 
         setting.style =
-          REL_SUPPLEMENTAL_STYLES
-            .has(el.value)
+          REL_STROKE_STYLES.has(
+            el.value
+          )
             ? el.value
-            : 'curve';
+            : 'dot';
 
         saveRelationshipLineSettings();
       }
@@ -4130,6 +4204,30 @@ function bindOtherRelationshipLineControls(
 
         setting.color =
           el.value;
+
+        saveRelationshipLineSettings();
+      }
+    );
+  });
+
+  root.querySelectorAll(
+    '[data-other-rel-curved]'
+  ).forEach(el => {
+    el.addEventListener(
+      'change',
+      () => {
+        const type =
+          otherRelationshipTypeFromDomKey(
+            el.dataset.otherRelCurved
+          );
+
+        const setting =
+          ensureOtherRelationshipLineSetting(
+            type
+          );
+
+        setting.curved =
+          el.checked;
 
         saveRelationshipLineSettings();
       }
@@ -4243,6 +4341,23 @@ document.querySelectorAll(
 
       relationshipLineSettings[key].color =
         el.value;
+
+      saveRelationshipLineSettings();
+    }
+  );
+});
+
+document.querySelectorAll(
+  '[data-rel-curved]'
+).forEach(el => {
+  el.addEventListener(
+    'change',
+    () => {
+      const key =
+        el.dataset.relCurved;
+
+      relationshipLineSettings[key].curved =
+        el.checked;
 
       saveRelationshipLineSettings();
     }
