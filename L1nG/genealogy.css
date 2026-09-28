@@ -6747,12 +6747,12 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 
-/* ========【曲線關係線】 設定 - 沿用原關係線 UI，只增加曲線專屬控制與即時預覽 ======== */
-.relationship-line-item > summary > i[data-line-style="curve"] {
+/* ========【曲線關係線】 設定 - 線型、曲線路徑與端點各自獨立控制 ======== */
+.relationship-line-item > summary > i[data-curved="true"] {
     height:18px;
 }
 
-.relationship-line-item > summary > i[data-line-style="curve"]::before {
+.relationship-line-item > summary > i[data-curved="true"]::before {
     display:none;
 }
 
@@ -6772,7 +6772,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-line-extra-controls {
     padding:0 10px 10px;
     display:grid;
-    grid-template-columns:minmax(180px,1fr) 130px;
+    grid-template-columns:130px minmax(180px,1fr) 130px;
     gap:10px;
     align-items:end;
     background:var(--panel-bg);
@@ -6782,16 +6782,38 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     display:none;
 }
 
+.relationship-toggle-control,
+.relationship-arrow-control {
+    min-height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    color:var(--sub);
+    font-size:10px;
+}
+
+.relationship-toggle-control input[type="checkbox"],
+.relationship-arrow-control input[type="checkbox"] {
+    flex:0 0 auto;
+}
+
 .relationship-curve-control {
     min-width:0;
     display:grid;
     gap:5px;
     color:var(--sub);
     font-size:10px;
+    opacity:1;
+    transition:opacity .15s ease;
 }
 
-.relationship-curve-control[hidden] {
-    display:none !important;
+.relationship-curve-control.is-disabled {
+    opacity:.42;
+}
+
+.relationship-curve-control.is-disabled input[type="range"] {
+    cursor:not-allowed;
 }
 
 .relationship-curve-slider {
@@ -6807,20 +6829,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     font-size:10.5px;
     font-variant-numeric:tabular-nums;
     text-align:right;
-}
-
-.relationship-arrow-control {
-    min-height:30px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    color:var(--sub);
-    font-size:10px;
-}
-
-.relationship-arrow-control input[type="checkbox"] {
-    flex:0 0 auto;
 }
 
 .other-relationship-line-list {
