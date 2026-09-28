@@ -4504,6 +4504,91 @@ function genealogyGroupSourceX(group, model) {
   ) / 2;
 }
 
+// ========【自動排列關係軸】 設定 - 使用與 renderer 完全相同的 parent source 幾何 ========
+function genealogyRelationshipGroupSourceX(group, model) {
+  const parentEntries =
+    group.parentIds
+      .map(parentId => {
+        const unit =
+          model.unitBySim.get(parentId);
+
+        const geometry =
+          genealogyUnitMemberLocalGeometry(
+            unit,
+            parentId
+          );
+
+        if (!unit || !geometry) {
+          return null;
+        }
+
+        return {
+          id:parentId,
+          sim:model.byId.get(parentId),
+          position:{
+            id:parentId,
+            x:unit.x + geometry.left,
+            y:unit.y
+          }
+        };
+      })
+      .filter(Boolean);
+
+  if (!parentEntries.length) {
+    return null;
+  }
+
+  if (parentEntries.length === 1) {
+    return (
+      cardVerticalAnchor(
+        parentEntries[0].position,
+        'bottom'
+      ).x -
+      PAD
+    );
+  }
+
+  const [first, second] =
+    parentEntries;
+
+  const isPartnerPair =
+    !!first.sim &&
+    (
+      (first.sim.spouseIds || []).includes(second.id) ||
+      (first.sim.exSpouseIds || []).includes(second.id)
+    );
+
+  if (isPartnerPair) {
+    return (
+      pairJoinPoint(
+        first.position,
+        second.position
+      ).x -
+      PAD
+    );
+  }
+
+  const firstX =
+    cardVerticalAnchor(
+      first.position,
+      'bottom'
+    ).x -
+    PAD;
+
+  const secondX =
+    cardVerticalAnchor(
+      second.position,
+      'bottom'
+    ).x -
+    PAD;
+
+  return (
+    firstX +
+    secondX
+  ) / 2;
+}
+
+
 function genealogyChildAnchorX(childId, model) {
   const unit = model.unitBySim.get(childId);
   const geometry =
@@ -5082,7 +5167,7 @@ function alignAutoVerticalParentChildBranches(
           );
 
         const sourceX =
-          genealogyGroupSourceX(
+          genealogyRelationshipGroupSourceX(
             group,
             model
           );
@@ -5105,7 +5190,10 @@ function alignAutoVerticalParentChildBranches(
           .get(unit.id)
           .push(
             sourceX -
-            geometry.centerX
+            geometry.left -
+            relationshipVerticalAnchorLocalX(
+              childId
+            )
           );
       });
 
@@ -5925,26 +6013,19 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
     const x2 = child.anchor.x;
     const y2 = child.anchor.y;
 
-    // ========【垂直關係線靜默吸附】 設定 - V-V 接近時直接共線，不顯示任何智慧輔助線 ========
-    // 自動排列會在 layout 階段先把單一子女對到 parent axis；
-    // 玩家自由拖曳後，只要仍落在視覺吸附範圍內，renderer 也直接消掉中間 H。
-    const relationshipSnapThreshold =
-      RELATIONSHIP_VERTICAL_SNAP_PX /
-      Math.max(scale, 0.001);
-
-    const verticallySnapped =
-      Math.abs(x1 - x2) <=
-      relationshipSnapThreshold;
+    // ========【單一子女路徑】 設定 - renderer 只忠實反映真實 anchor，不自行吸附 ========
+    const verticallyAligned =
+      Math.abs(x1 - x2) <= 0.75;
 
     let labelX =
-      verticallySnapped
+      verticallyAligned
         ? x1
         : (x1 + x2) / 2;
 
     let labelY =
       y1 + (y2 - y1) / 2;
 
-    if (verticallySnapped) {
+    if (verticallyAligned) {
       paths.push(
         '<path class="' + edgeClass + '" d="' +
         'M' + x1 + ' ' + y1 +
@@ -5952,8 +6033,6 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         '"/>'
       );
     } else {
-      // 玩家明確把人物拖離 parent axis 後，保留 V-H-V，
-      // 讓手動位置優先於自動垂直關係線。
       const branchY =
         y1 + (y2 - y1) / 2;
 
@@ -6434,6 +6513,23 @@ function cardVerticalConnectionRect(card) {
       2
   };
 }
+
+// ========【關係線錨點幾何】 設定 - 排列、拖曳、畫線共用同一個頭像／卡片中心 ========
+function relationshipVerticalAnchorOffsetX(id) {
+  return cardVerticalConnectionRect({
+    id,
+    x:0,
+    y:0
+  }).centerX;
+}
+
+function relationshipVerticalAnchorLocalX(id) {
+  return (
+    relationshipVerticalAnchorOffsetX(id) -
+    PAD
+  );
+}
+
 
 function cardVerticalAnchor(card, side) {
   const rect =
@@ -8224,11 +8320,8 @@ function getParentConnectorStraightSnap(id, rawX) {
     return null;
   }
 
-  const draggedDims =
-    getNodeDimensionsById(id);
-
   const threshold =
-    (GUIDE_SNAP_PX * 1.25) /
+    RELATIONSHIP_VERTICAL_SNAP_PX /
     Math.max(scale, 0.001);
 
   let best = null;
@@ -8237,7 +8330,12 @@ function getParentConnectorStraightSnap(id, rawX) {
     layoutCache.byId,
     layoutCache.visibleIds
   ).forEach(group => {
-    if (!group.children.includes(id)) {
+    // 多子女本來就各自擁有垂直 child branch；
+    // 只有單一子女才存在「V-H-V 是否收斂成 V」這個關係軸問題。
+    if (
+      group.children.length !== 1 ||
+      group.children[0] !== id
+    ) {
       return;
     }
 
@@ -8251,66 +8349,31 @@ function getParentConnectorStraightSnap(id, rawX) {
 
     if (!source) return;
 
-    const axes = [{
-      x:source.x,
-      priority:0
-    }];
+    // source.x 與 relationshipVerticalAnchorOffsetX()
+    // 都使用 renderer 的實際座標系，因此吸附後頭像／卡片中心必定落在線上。
+    const targetX =
+      source.x -
+      relationshipVerticalAnchorOffsetX(id);
 
-    // 兩名子女時，另一名子女的 branch 會提供「以父母主幹為中心的鏡像位置」。
-    // 這讓 B / C 能自然分居父母左右，而不是兩條 branch 靠肉眼反覆調整。
-    if (group.children.length === 2) {
-      const siblingId =
-        group.children.find(
-          childId => childId !== id
-        );
+    const distance =
+      Math.abs(
+        targetX -
+        rawX
+      );
 
-      const siblingPosition =
-        siblingId
-          ? layoutCache.pos.get(siblingId)
-          : null;
-
-      if (siblingPosition) {
-        const siblingAnchor =
-          parentConnectorChildAnchor(
-            siblingPosition,
-            source
-          );
-
-        axes.push({
-          x:
-            source.x * 2 -
-            siblingAnchor.x,
-          priority:1
-        });
-      }
-    }
-
-    axes.forEach(candidate => {
-      const targetX =
-        candidate.x -
-        draggedDims.W / 2;
-
-      const distance =
-        Math.abs(targetX - rawX);
-
-      if (distance > threshold) return;
-
-      if (
+    if (
+      distance <= threshold &&
+      (
         !best ||
-        distance < best.distance - 0.001 ||
-        (
-          Math.abs(distance - best.distance) <= 0.001 &&
-          candidate.priority < best.priority
-        )
-      ) {
-        best = {
-          value:targetX,
-          distance,
-          guide:candidate.x,
-          priority:candidate.priority
-        };
-      }
-    });
+        distance < best.distance
+      )
+    ) {
+      best = {
+        value:targetX,
+        distance,
+        relation:'parent-vertical-axis'
+      };
+    }
   });
 
   return best;
@@ -8606,38 +8669,139 @@ function showEqualSpacingGuide(guideData) {
   target.classList.add('show');
 }
 
-function getSmartSnap(id, rawX, rawY) {
-  const alignment = getAlignmentSnap(id, rawX, rawY);
-  const horizontalSpacing = getHorizontalEqualSpacingSnap(id, rawX, rawY);
-  const verticalSpacing = getVerticalEqualSpacingSnap(id, rawX, rawY);
-  const parentConnector = getParentConnectorStraightSnap(id, rawX);
-  const spouseRow = getSpouseRowSnap(id, rawY);
+function getCardSmartSnap(id, rawX, rawY) {
+  const alignment =
+    getAlignmentSnap(
+      id,
+      rawX,
+      rawY
+    );
+
+  const horizontalSpacing =
+    getHorizontalEqualSpacingSnap(
+      id,
+      rawX,
+      rawY
+    );
+
+  const verticalSpacing =
+    getVerticalEqualSpacingSnap(
+      id,
+      rawX,
+      rawY
+    );
 
   const bestX =
     pickCloserSnap(
-      pickCloserSnap(
-        alignment.x,
-        horizontalSpacing
-      ),
-      parentConnector
+      alignment.x,
+      horizontalSpacing
     );
 
-  // 配偶 / 前任配偶同列是關係語意約束，優先於一般幾何 Y 吸附。
-  // spouseRow 故意沒有 guide，因此吸附時不顯示額外水平輔助線。
   const bestY =
-    spouseRow ||
     pickCloserSnap(
       alignment.y,
       verticalSpacing
     );
 
   return {
-    x: bestX ? bestX.value : rawX,
-    y: bestY ? bestY.value : rawY,
-    guideX: bestX && bestX.guide !== undefined ? bestX.guide : null,
-    guideY: bestY && bestY.guide !== undefined ? bestY.guide : null,
-    spacingX: bestX && bestX.spacingGuide ? bestX.spacingGuide : null,
-    spacingY: bestY && bestY.spacingGuide ? bestY.spacingGuide : null
+    x:bestX ? bestX.value : rawX,
+    y:bestY ? bestY.value : rawY,
+    guideX:
+      bestX &&
+      bestX.guide !== undefined
+        ? bestX.guide
+        : null,
+    guideY:
+      bestY &&
+      bestY.guide !== undefined
+        ? bestY.guide
+        : null,
+    spacingX:
+      bestX &&
+      bestX.spacingGuide
+        ? bestX.spacingGuide
+        : null,
+    spacingY:
+      bestY &&
+      bestY.spacingGuide
+        ? bestY.spacingGuide
+        : null
+  };
+}
+
+function getRelationshipPositionSnap(id, rawX, rawY) {
+  const parentConnector =
+    getParentConnectorStraightSnap(
+      id,
+      rawX
+    );
+
+  const spouseRow =
+    getSpouseRowSnap(
+      id,
+      rawY
+    );
+
+  return {
+    x:
+      parentConnector
+        ? parentConnector.value
+        : null,
+    y:
+      spouseRow
+        ? spouseRow.value
+        : null
+  };
+}
+
+function getSmartSnap(id, rawX, rawY) {
+  const cardSnap =
+    getCardSmartSnap(
+      id,
+      rawX,
+      rawY
+    );
+
+  const relationshipSnap =
+    getRelationshipPositionSnap(
+      id,
+      rawX,
+      rawY
+    );
+
+  const relationshipOwnsX =
+    relationshipSnap.x !== null;
+
+  const relationshipOwnsY =
+    relationshipSnap.y !== null;
+
+  return {
+    x:
+      relationshipOwnsX
+        ? relationshipSnap.x
+        : cardSnap.x,
+    y:
+      relationshipOwnsY
+        ? relationshipSnap.y
+        : cardSnap.y,
+
+    // 關係吸附是靜默幾何約束，不顯示卡片智慧輔助線。
+    guideX:
+      relationshipOwnsX
+        ? null
+        : cardSnap.guideX,
+    guideY:
+      relationshipOwnsY
+        ? null
+        : cardSnap.guideY,
+    spacingX:
+      relationshipOwnsX
+        ? null
+        : cardSnap.spacingX,
+    spacingY:
+      relationshipOwnsY
+        ? null
+        : cardSnap.spacingY
   };
 }
 
