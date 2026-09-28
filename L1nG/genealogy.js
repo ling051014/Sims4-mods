@@ -553,29 +553,147 @@ if (!assetStore) {
 
 let assetStoreReady = false;
 let assetRefreshRaf = 0;
+const pendingResolvedAssets = new Map();
 
-function scheduleResolvedAssetRefresh(){
+function refreshResolvedAssetDom(
+  assetId,
+  url
+) {
+  if (!assetId || !url) return;
+
+  document
+    .querySelectorAll(
+      '[data-asset-id="' +
+      assetId +
+      '"]'
+    )
+    .forEach(element => {
+      if (
+        element instanceof
+        HTMLImageElement
+      ) {
+        if (element.src !== url) {
+          element.src = url;
+        }
+
+        element.classList.remove(
+          'asset-pending'
+        );
+      }
+    });
+
+  document
+    .querySelectorAll(
+      '[data-asset-bg-id="' +
+      assetId +
+      '"]'
+    )
+    .forEach(element => {
+      element.style.backgroundImage =
+        'url("' + url + '")';
+
+      element.classList.add(
+        'has-image'
+      );
+
+      if (
+        element.id ===
+        'photoPreview'
+      ) {
+        element.textContent = '';
+      }
+    });
+}
+
+// ========【資產局部刷新】 設定 - 圖片 ready 不再重算族譜 Layout ========
+function scheduleResolvedAssetRefresh(
+  assetId,
+  url
+){
+  if (assetId && url) {
+    pendingResolvedAssets.set(
+      String(assetId),
+      String(url)
+    );
+  }
+
   if(assetRefreshRaf)return;
+
   assetRefreshRaf=requestAnimationFrame(()=>{
     assetRefreshRaf=0;
-    try{applyBg();}catch(_){}
-    try{updateBgPreview();}catch(_){}
-    try{const fam=currentFamily();if(fam)renderFamilyCover(fam);}catch(_){}
-    try{render();}catch(_){}
+
+    const resolved =
+      [...pendingResolvedAssets.entries()];
+
+    pendingResolvedAssets.clear();
+
+    resolved.forEach(
+      ([id, assetUrl]) =>
+        refreshResolvedAssetDom(
+          id,
+          assetUrl
+        )
+    );
+
     try{
-      if(mask?.classList.contains('show')){
-        updateAvatarPreview();
-        renderEditorFamilyPreviews();
-        renderPetsList();
-        renderGalleryGrid();
-        renderEditorInfoPreviewIfActive();
+      if(
+        resolved.some(
+          ([id]) =>
+            id === bgSettings?.image
+        )
+      ){
+        applyBg();
+        updateBgPreview();
       }
     }catch(_){}
-    try{if(petMask?.classList.contains('show'))renderPetAvatarPreview();}catch(_){}
-    try{if(photoMask?.classList.contains('show'))updatePhotoPreview();}catch(_){}
+
     try{
-      if(infoMask?.classList.contains('show')&&infoCardId&&genealogyData?.sims?.[infoCardId]){
-        renderInfoCardContent($('infoCardContent'),genealogyData.sims[infoCardId]);
+      const fam=currentFamily();
+
+      if(
+        fam &&
+        resolved.some(
+          ([id]) =>
+            id === fam.coverImage
+        )
+      ){
+        renderFamilyCover(fam);
+      }
+    }catch(_){}
+
+    try{
+      if(
+        photoMask?.classList.contains('show') &&
+        resolved.some(
+          ([id]) =>
+            id === editingPhotoImageRef
+        )
+      ){
+        updatePhotoPreview();
+      }
+    }catch(_){}
+
+    try{
+      if(
+        galleryViewerMask?.classList.contains('show')
+      ){
+        const gallery =
+          getViewerGallery();
+
+        const active =
+          gallery?.[viewerIndex];
+
+        if(
+          active?.image &&
+          resolved.some(
+            ([id]) =>
+              id === active.image
+          )
+        ){
+          updateViewerContent(
+            gallery
+          );
+        }
       }
     }catch(_){}
   });
@@ -593,7 +711,12 @@ function resolveImageUrl(ref) {
 
   assetStore.getUrl(ref)
     .then(url => {
-      if (url) scheduleResolvedAssetRefresh();
+      if (url) {
+        scheduleResolvedAssetRefresh(
+          ref,
+          url
+        );
+      }
     })
     .catch(error => {
       console.warn('圖片資產載入失敗：', ref, error);
@@ -633,8 +756,11 @@ function clampAvatarValue(value,min,max,fallback){
     element.style.setProperty('--avatar-zoom',f.zoom.toFixed(3));
   }
   function framedAvatarImageHTML(ref,frame){
+    if(!isAssetId(ref))return'';
+
     const url=resolveImageUrl(ref);
-    return url?`<img class="avatar-framed-image" src="${esc(url)}" alt="" draggable="false" style="${avatarFrameInlineStyle(frame)}">`:'';
+
+    return `<img class="avatar-framed-image${url?'':' asset-pending'}" data-asset-id="${esc(ref)}"${url?` src="${esc(url)}"`:''} alt="" draggable="false" decoding="async" style="${avatarFrameInlineStyle(frame)}">`;
   }
   function validateSupportedImageFile(file){
     if(!file)throw new Error(uiText('尚未選擇圖片'));
@@ -7304,35 +7430,83 @@ function getVisibleIds(familyId) {
 }
 
 // ========【圖片預熱】 設定 - 只預先載入目前畫面會立即看到的圖片，避免 F5 後頭像逐張跳出 ========
-async function preloadCurrentViewAssets() {
-  if (!assetStoreReady || !genealogyData) return;
+function preloadCurrentViewAssets() {
+  if (!assetStoreReady || !genealogyData) {
+    return Promise.resolve({
+      requested:0,
+      loaded:0
+    });
+  }
 
-  const assetIds = new Set();
+  const priorityIds = new Set();
+  const secondaryIds = new Set();
 
-  const add = ref => {
-    if (isAssetId(ref)) assetIds.add(ref);
+  const addPriority = ref => {
+    if (isAssetId(ref)) {
+      priorityIds.add(ref);
+    }
   };
 
-  add(bgSettings?.image);
+  const addSecondary = ref => {
+    if (
+      isAssetId(ref) &&
+      !priorityIds.has(ref)
+    ) {
+      secondaryIds.add(ref);
+    }
+  };
 
-  const family = currentTreeFamily() || currentFamily();
-  add(family?.coverImage);
+  addPriority(bgSettings?.image);
 
-  const visibleIds = getVisibleIds(genealogyData.currentFamilyId);
+  const family =
+    currentTreeFamily() ||
+    currentFamily();
+
+  addPriority(family?.coverImage);
+
+  const visibleIds =
+    getVisibleIds(
+      genealogyData.currentFamilyId
+    );
 
   visibleIds.forEach(id => {
-    const sim = genealogyData.sims[id];
-    if (!sim) return;
-    add(sim.avatar);
+    const sim =
+      genealogyData.sims[id];
+
+    if (sim) {
+      addPriority(sim.avatar);
+    }
   });
 
-  // 左側家庭成員列使用 Household 真正成員；可能不完全等同目前族譜展開範圍。
-  (currentFamily()?.memberIds || []).forEach(id => {
-    const sim = genealogyData.sims[id];
-    if (sim) add(sim.avatar);
-  });
+  // 側邊欄中目前不在主畫布的成員降為第二優先，
+  // 不阻塞主畫布首次顯示。
+  (currentFamily()?.memberIds || [])
+    .forEach(id => {
+      const sim =
+        genealogyData.sims[id];
 
-  await assetStore.preloadUrls(assetIds, { concurrency:12 });
+      if (sim) {
+        addSecondary(sim.avatar);
+      }
+    });
+
+  const primary =
+    assetStore.preloadUrls(
+      priorityIds,
+      { concurrency:4 }
+    );
+
+  void primary
+    .catch(() => {})
+    .then(() =>
+      assetStore.preloadUrls(
+        secondaryIds,
+        { concurrency:2 }
+      )
+    )
+    .catch(() => {});
+
+  return primary;
 }
 
 // ========【配偶間距】 設定 - 依關係標籤實際寬度自適應 ========
@@ -10054,31 +10228,216 @@ function focusSimOnCanvas(simId) {
   }
 }
 
-let _edgeRaf = null;
-function scheduleEdgeRedraw() {
-  if (_edgeRaf) return;
-  _edgeRaf = requestAnimationFrame(() => { _edgeRaf = null; drawEdges(); });
+// ========【增量 Render Pipeline】 設定 - Layout / Node / Edge / UI 分層失效 ========
+const RENDER_DIRTY = Object.freeze({
+  layout:1,
+  nodes:2,
+  edges:4,
+  chrome:8,
+  lists:16
+});
+
+let renderDirtyMask = 0;
+let renderInvalidationRaf = 0;
+
+function renderMaskFromLayers(
+  layers = {}
+) {
+  let mask = 0;
+
+  if (layers.layout) {
+    mask |= RENDER_DIRTY.layout;
+  }
+  if (layers.nodes) {
+    mask |= RENDER_DIRTY.nodes;
+  }
+  if (layers.edges) {
+    mask |= RENDER_DIRTY.edges;
+  }
+  if (layers.chrome) {
+    mask |= RENDER_DIRTY.chrome;
+  }
+  if (layers.lists) {
+    mask |= RENDER_DIRTY.lists;
+  }
+
+  return mask;
 }
 
+function syncStageGeometryFromLayout() {
+  if (!layoutCache) return;
+
+  const {width, height} =
+    layoutCache;
+
+  const sW =
+    Math.max(
+      width + PAD * 2,
+      400
+    );
+
+  const sH =
+    Math.max(
+      height + PAD * 2,
+      300
+    );
+
+  stage.style.width =
+    sW + 'px';
+
+  stage.style.height =
+    sH + 'px';
+
+  svg.setAttribute(
+    'width',
+    sW
+  );
+
+  svg.setAttribute(
+    'height',
+    sH
+  );
+
+  svg.setAttribute(
+    'viewBox',
+    `0 0 ${sW} ${sH}`
+  );
+
+  labelsSvg.setAttribute(
+    'width',
+    sW
+  );
+
+  labelsSvg.setAttribute(
+    'height',
+    sH
+  );
+
+  labelsSvg.setAttribute(
+    'viewBox',
+    `0 0 ${sW} ${sH}`
+  );
+}
+
+function flushRenderInvalidation() {
+  if (renderInvalidationRaf) {
+    cancelAnimationFrame(
+      renderInvalidationRaf
+    );
+
+    renderInvalidationRaf = 0;
+  }
+
+  let mask = renderDirtyMask;
+  renderDirtyMask = 0;
+
+  if (!mask) return;
+
+  if (
+    mask &
+    RENDER_DIRTY.layout
+  ) {
+    layoutCache =
+      computeLayout();
+
+    syncStageGeometryFromLayout();
+
+    // Layout 變動一定會影響人物座標與關係線。
+    mask |=
+      RENDER_DIRTY.nodes |
+      RENDER_DIRTY.edges;
+  }
+
+  if (
+    mask &
+    RENDER_DIRTY.chrome
+  ) {
+    syncRelationshipPerspectiveUI();
+    updateLayoutToggle();
+  }
+
+  if (
+    mask &
+    RENDER_DIRTY.edges
+  ) {
+    drawEdges();
+  }
+
+  if (
+    mask &
+    RENDER_DIRTY.nodes
+  ) {
+    drawNodes();
+  }
+
+  if (
+    mask &
+    RENDER_DIRTY.lists
+  ) {
+    if (
+      rosterMask.classList
+        .contains('show')
+    ) {
+      renderRoster();
+    }
+
+    if (
+      addMemberMask.classList
+        .contains('show')
+    ) {
+      renderAddMemberList();
+    }
+  }
+}
+
+function invalidateRender(
+  layers,
+  {
+    immediate = false
+  } = {}
+) {
+  renderDirtyMask |=
+    renderMaskFromLayers(
+      layers
+    );
+
+  if (!renderDirtyMask) return;
+
+  if (immediate) {
+    flushRenderInvalidation();
+    return;
+  }
+
+  if (renderInvalidationRaf) {
+    return;
+  }
+
+  renderInvalidationRaf =
+    requestAnimationFrame(() => {
+      renderInvalidationRaf = 0;
+      flushRenderInvalidation();
+    });
+}
+
+function scheduleEdgeRedraw() {
+  invalidateRender({
+    edges:true
+  });
+}
+
+// 舊呼叫點仍把 render() 視為「完整內容失效」。
+// 新功能應優先呼叫 invalidateRender() 指定真正變動的層。
 function render() {
-  layoutCache = computeLayout();
-  const {width, height} = layoutCache;
-  const sW = Math.max(width + PAD*2, 400);
-  const sH = Math.max(height + PAD*2, 300);
-  stage.style.width = sW + 'px';
-  stage.style.height = sH + 'px';
-  svg.setAttribute('width', sW);
-  svg.setAttribute('height', sH);
-  svg.setAttribute('viewBox', `0 0 ${sW} ${sH}`);
-  labelsSvg.setAttribute('width', sW);
-  labelsSvg.setAttribute('height', sH);
-  labelsSvg.setAttribute('viewBox', `0 0 ${sW} ${sH}`);
-  syncRelationshipPerspectiveUI();
-  drawEdges();
-  drawNodes();
-  updateLayoutToggle();
-  if (rosterMask.classList.contains('show')) renderRoster();
-  if (addMemberMask.classList.contains('show')) renderAddMemberList();
+  invalidateRender(
+    {
+      layout:true,
+      nodes:true,
+      edges:true,
+      chrome:true,
+      lists:true
+    },
+    { immediate:true }
+  );
 }
 
 function buildParentChildConnectorGroups(byId, visibleIds) {
@@ -11444,7 +11803,7 @@ function infoCardDataText(value,owner,draft=false){
     if(otherRelationshipRows.length)sections.push('<section class="info-profile-section"><h3 class="info-profile-section-title">'+esc(uiText('其他關係'))+'</h3><div class="info-profile-list">'+otherRelationshipRows.map(item=>row(item.label,item.names.map(esc).join(' / '))).join('')+'</div></section>');
     sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('簡介'))}</h3><div class="info-card-bio">${c.bio?esc(dBio):'—'}</div></section>`);
     const petItems=(c.pets||[]).map(p=>{const petAvatar=framedAvatarImageHTML(p.avatar,p.avatarFrame)||petIconFor(p);const meta=[petSpeciesLabel(p),p.breed?infoCardDataText(p.breed,c,draft):'',petGenderLabel(p)].filter(Boolean).join(' · ');return`<div class="info-card-pet"><div class="info-card-pet-avatar">${petAvatar}</div><div class="info-card-pet-text"><div class="info-card-pet-name">${esc(infoCardDataText(p.name,c,draft)||uiText('（未命名）'))}</div><div class="info-card-pet-meta">${esc(meta)}</div>${petLineageHTML(p)}</div></div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
-    const galleryItems=(c.gallery||[]).slice(0,8).map((g,i)=>{const url=resolveImageUrl(g.image);return`<div class="gallery-item" data-info-gallery-idx="${i}" title="${esc(g.title||'')}">${url?`<img src="${esc(url)}" alt="">`:''}</div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
+    const galleryItems=(c.gallery||[]).slice(0,8).map((g,i)=>{const url=resolveImageUrl(g.image);const assetId=isAssetId(g.image)?String(g.image):'';return`<div class="gallery-item" data-info-gallery-idx="${i}" title="${esc(g.title||'')}">${assetId?`<img data-asset-id="${esc(assetId)}"${url?` src="${esc(url)}"`:''} alt="" loading="lazy" decoding="async">`:''}</div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
     sections.push(`<section class="info-profile-section"><div class="info-card-media"><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('寵物'))}</span><span class="info-card-media-count">${(c.pets||[]).length}</span></div><div class="info-card-pets">${petItems}</div></div><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('人生照片'))}</span><span class="info-card-media-count">${(c.gallery||[]).length}</span></div><div class="info-card-gallery">${galleryItems}</div></div></div></section>`);
     container.innerHTML=`<div class="info-card-header"><div class="${avatarClass}">${avatar}</div><div class="info-card-header-text"><div class="info-card-name-row"><span class="info-card-name">${esc(dName||'—')}</span></div><div class="info-card-meta">${metaItems.join('')}</div><div class="info-card-head-facts">${headFacts.join('')}</div></div></div><div class="info-card-body">${sections.join('')}</div>`;
     container.querySelectorAll('[data-info-gallery-idx]').forEach(element=>{element.onclick=()=>{const index=Number(element.dataset.infoGalleryIdx);if(typeof options.onGallery==='function')options.onGallery(index);else if(c.id&&genealogyData?.sims?.[c.id])openGalleryViewer(c.id,index);};});
@@ -11478,8 +11837,9 @@ function renderGalleryGrid() {
       : '';
     const title = g.title ? esc(g.title) : '';
     const url = resolveImageUrl(g.image);
+    const assetId = isAssetId(g.image) ? String(g.image) : '';
     return `<div class="gallery-item" data-gallery-idx="${i}">
-      <img src="${esc(url)}" alt="" draggable="false">
+      ${assetId ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" draggable="false" loading="lazy" decoding="async">` : ''}
       ${stageTag}
       <div class="gallery-item-overlay">
         <button type="button" class="gallery-item-btn" data-gallery-edit="${i}" title="編輯">${iconSvg('pencil-square')}</button>
@@ -11558,6 +11918,17 @@ async function handleGalleryFile(file) {
 
 function updatePhotoPreview() {
   const el = $('photoPreview');
+  const assetId =
+    isAssetId(editingPhotoImageRef)
+      ? String(editingPhotoImageRef)
+      : '';
+
+  if (assetId) {
+    el.dataset.assetBgId = assetId;
+  } else {
+    delete el.dataset.assetBgId;
+  }
+
   const url = resolveImageUrl(editingPhotoImageRef);
   if (url) {
     el.classList.add('has-image');
@@ -11751,7 +12122,26 @@ function updateViewerContent(gal) {
   if (viewerIndex < 0) viewerIndex = 0;
   if (viewerIndex >= gal.length) viewerIndex = gal.length - 1;
   const g = gal[viewerIndex];
-  $('gvImg').src = resolveImageUrl(g.image) || '';
+  const viewerImage = $('gvImg');
+  const viewerAssetId =
+    isAssetId(g.image)
+      ? String(g.image)
+      : '';
+  const viewerUrl =
+    resolveImageUrl(g.image) || '';
+
+  if (viewerAssetId) {
+    viewerImage.dataset.assetId =
+      viewerAssetId;
+  } else {
+    delete viewerImage.dataset.assetId;
+  }
+
+  if (viewerUrl) {
+    viewerImage.src = viewerUrl;
+  } else {
+    viewerImage.removeAttribute('src');
+  }
   $('gvTitle').textContent = g.title || uiText('（未命名）');
   const bits = [];
   if (g.lifeStage) bits.push(uiText(g.lifeStage));
@@ -14267,7 +14657,7 @@ familySelect.onchange = async () => {
   closeEditor();
 
   save();
-  await preloadCurrentViewAssets();
+  void preloadCurrentViewAssets();
   refreshFamilyUI();
   render();
   requestAnimationFrame(fitScreen);
@@ -19460,9 +19850,9 @@ async function init() {
   setupViewportResizeObserver();
   setupSearchSelects();
 
-  // Skeleton 尚未移除時先把首屏需要的 Blob URL 準備好。
-  // 不預載人生照片，維持大型圖片庫的 Lazy Load 優勢。
-  await preloadCurrentViewAssets();
+  // 首屏先渲染結構，再由資產層非阻塞載入圖片。
+  // 圖片 ready 只刷新對應 DOM，不再阻塞 Skeleton 或重算 Layout。
+  void preloadCurrentViewAssets();
 
   refreshFamilyUI();
   render();

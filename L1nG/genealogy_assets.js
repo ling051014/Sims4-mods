@@ -13,6 +13,192 @@
   const objectUrlCache = new Map();
   const pendingUrlLoads = new Map();
 
+  // ========【圖片處理佇列】 設定 - 同時間只處理一張大圖，避免 CPU / RAM 峰值 ========
+  const IMAGE_WORKER_URL =
+    'genealogy_image_worker.js?v=20260929-performance-p12';
+  let imageWorker = null;
+  let imageWorkerBroken = false;
+  let imageWorkerSequence = 0;
+  let imageOptimizationTail = Promise.resolve();
+  const imageWorkerJobs = new Map();
+
+  function emitImagePipelineState(state) {
+    try {
+      global.dispatchEvent(
+        new CustomEvent(
+          'l1ng:image-pipeline-state',
+          { detail:state }
+        )
+      );
+    } catch (_) {}
+  }
+
+  function createImageWorker() {
+    if (imageWorker || imageWorkerBroken) {
+      return imageWorker;
+    }
+
+    if (typeof global.Worker !== 'function') {
+      imageWorkerBroken = true;
+      return null;
+    }
+
+    try {
+      const workerUrl =
+        new URL(
+          IMAGE_WORKER_URL,
+          global.document?.baseURI ||
+          global.location?.href
+        );
+
+      imageWorker =
+        new Worker(
+          workerUrl.href,
+          { name:'L1nGImageWorker' }
+        );
+
+      imageWorker.addEventListener(
+        'message',
+        event => {
+          const message =
+            event.data || {};
+
+          if (
+            message.type !==
+              'optimize-image-result' ||
+            !message.jobId
+          ) {
+            return;
+          }
+
+          const job =
+            imageWorkerJobs.get(
+              message.jobId
+            );
+
+          if (!job) return;
+
+          imageWorkerJobs.delete(
+            message.jobId
+          );
+
+          if (message.ok) {
+            job.resolve(message.result);
+          } else {
+            const error =
+              new Error(
+                message.error?.message ||
+                '圖片處理失敗。'
+              );
+
+            error.code =
+              message.error?.code ||
+              '';
+
+            job.reject(error);
+          }
+        }
+      );
+
+      imageWorker.addEventListener(
+        'error',
+        event => {
+          imageWorkerBroken = true;
+
+          const error =
+            new Error(
+              event?.message ||
+              '圖片背景處理程序啟動失敗。'
+            );
+
+          for (
+            const job of
+            imageWorkerJobs.values()
+          ) {
+            job.reject(error);
+          }
+
+          imageWorkerJobs.clear();
+
+          try {
+            imageWorker?.terminate();
+          } catch (_) {}
+
+          imageWorker = null;
+        }
+      );
+    } catch (_) {
+      imageWorkerBroken = true;
+      imageWorker = null;
+    }
+
+    return imageWorker;
+  }
+
+  function enqueueImageOptimization(task) {
+    const run =
+      imageOptimizationTail
+        .catch(() => {})
+        .then(async () => {
+          emitImagePipelineState({
+            processing:true
+          });
+
+          try {
+            return await task();
+          } finally {
+            emitImagePipelineState({
+              processing:false
+            });
+          }
+        });
+
+    imageOptimizationTail =
+      run.catch(() => {});
+
+    return run;
+  }
+
+  function optimizeImageInWorker(
+    blob,
+    options
+  ) {
+    const worker =
+      createImageWorker();
+
+    if (!worker) {
+      const error =
+        new Error(
+          '目前瀏覽器不支援背景圖片處理。'
+        );
+
+      error.code =
+        'WORKER_IMAGE_PIPELINE_UNSUPPORTED';
+
+      return Promise.reject(error);
+    }
+
+    const jobId =
+      'image_job_' +
+      (++imageWorkerSequence);
+
+    return new Promise(
+      (resolve, reject) => {
+        imageWorkerJobs.set(
+          jobId,
+          { resolve, reject }
+        );
+
+        worker.postMessage({
+          type:'optimize-image',
+          jobId,
+          blob,
+          options
+        });
+      }
+    );
+  }
+
   function isAssetId(value) {
     return typeof value === 'string' && /^asset_[0-9a-f]{64}$/i.test(value);
   }
@@ -230,7 +416,7 @@
     });
   }
 
-  async function optimizeImage(blob, options = {}) {
+  async function optimizeImageOnMainThread(blob, options = {}) {
     if (!(blob instanceof Blob) || !String(blob.type || '').startsWith('image/')) {
       throw new Error('請選擇圖片檔案。');
     }
@@ -319,6 +505,54 @@
       usedOriginal:false,
       wasResized
     };
+  }
+
+  async function optimizeImage(blob, options = {}) {
+    if (
+      !(blob instanceof Blob) ||
+      !String(blob.type || '')
+        .startsWith('image/')
+    ) {
+      throw new Error('請選擇圖片檔案。');
+    }
+
+    return enqueueImageOptimization(
+      async () => {
+        if (!imageWorkerBroken) {
+          try {
+            return await optimizeImageInWorker(
+              blob,
+              options
+            );
+          } catch (error) {
+            if (
+              error?.code !==
+                'WORKER_IMAGE_PIPELINE_UNSUPPORTED'
+            ) {
+              console.warn(
+                '[圖片處理] Worker 失敗，改用主執行緒備援：',
+                error
+              );
+            }
+
+            imageWorkerBroken = true;
+
+            try {
+              imageWorker?.terminate();
+            } catch (_) {}
+
+            imageWorker = null;
+          }
+        }
+
+        // 舊瀏覽器 / Worker 啟動失敗時保留功能相容，
+        // 但新瀏覽器正常情況不會走到主執行緒。
+        return optimizeImageOnMainThread(
+          blob,
+          options
+        );
+      }
+    );
   }
 
   async function importBlob(blob, metadata = {}) {
@@ -512,6 +746,24 @@
     for (const id of [...objectUrlCache.keys()]) {
       revokeCachedUrl(id);
     }
+
+    try {
+      imageWorker?.terminate();
+    } catch (_) {}
+
+    imageWorker = null;
+
+    const error =
+      new Error('頁面已關閉，圖片處理已取消。');
+
+    for (
+      const job of
+      imageWorkerJobs.values()
+    ) {
+      job.reject(error);
+    }
+
+    imageWorkerJobs.clear();
   }
 
   global.addEventListener('beforeunload', dispose);
