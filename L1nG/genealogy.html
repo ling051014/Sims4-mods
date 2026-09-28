@@ -282,6 +282,7 @@
                         <span class="canvas-tool-divider"></span>
                         <button class="canvas-tool active" id="labelToggle" type="button"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>隱藏關係</span></button>
                         <button class="canvas-tool" id="labelLockToggle" type="button"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>鎖定關係</span></button>
+                        <button class="canvas-tool" id="relationshipPerspectiveBtn" type="button" style="display:none" hidden><span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span><span>結束人物視角</span></button>
                     </div>
 
                     <div id="viewport">
@@ -410,13 +411,13 @@
                                 <div class="family-rel-edit" data-family-editor-edit="siblings" hidden><div class="ss-wrap" data-placeholder="點選選擇（可多選）…" data-ss-for="fSiblings"><div class="ss-input" tabindex="0"></div><div class="ss-dropdown" style="display:none"><input class="ss-search" placeholder="搜尋姓名…" type="text"><div class="ss-options"></div></div></div><select hidden id="fSiblings" multiple></select></div>
                             </section>
                         </div>
-                        <div class="rel-section family-rel-annotations" id="familyRelAnnoSection" style="display:none"><div class="rel-title"><span>家庭關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="家庭關係標註說明" data-tooltip="父母、子女、配偶、前任配偶與兄弟姐妹的關係名稱可在這裡個別調整，也可重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div><div id="familyRelAnnoList"></div></div>
+                        <div class="rel-section family-rel-annotations" id="familyRelAnnoSection" style="display:none"><div class="rel-title"><span>家庭關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="家庭關係標註說明" data-tooltip="核心家庭連線會使用客觀關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div><div id="familyRelAnnoList"></div></div>
                     </section>
 
                     <section class="sim-editor-panel" data-editor-panel="relations" role="tabpanel" hidden>
                         <div class="editor-empty-note" id="newSimRelationsHint" hidden>儲存模擬市民後即可新增其他關係。</div>
                         <div class="rel-section first" id="relAnnoSection" style="display:none">
-                            <div class="rel-title"><span>其他關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係設定說明" data-tooltip="每條連線可獨立設定關係名稱，也可重設已拖曳的關係名稱位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div class="rel-title"><span>其他關係標註</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係設定說明" data-tooltip="其他關係會直接使用實際關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                             <div id="relAnnoList"></div>
                         </div>
                         <div class="rel-section" id="relSection" style="display:none">
@@ -1007,6 +1008,6 @@
 
         <script src="genealogy_assets.js"></script>
         <script src="genealogy_gameImport.js"></script>
-        <script src="genealogy.js?v=20260928-curve-toggle-appearance"></script>
+        <script src="genealogy.js?v=20260928-relationship-semantics-perspective"></script>
     </body>
 </html>
