@@ -189,20 +189,126 @@ let familyTreeEaSelectionValue = null;
 let familyTreeExtendedSelectionValue = null;
 
 const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
-  parent: { style:'solid', width:2.0, color:null },
-  spouse: { style:'solid', width:2.4, color:null },
-  exspouse: { style:'short-dash', width:1.7, color:null },
-  adopt: { style:'long-dash', width:1.7, color:null },
-  other: { style:'dot', width:1.5, color:null }
+  parent: Object.freeze({
+    style:'solid',
+    width:2.0,
+    color:null,
+    curveAmount:50
+  }),
+  spouse: Object.freeze({
+    style:'solid',
+    width:2.4,
+    color:null,
+    curveAmount:50
+  }),
+  exspouse: Object.freeze({
+    style:'curve',
+    width:1.7,
+    color:null,
+    curveAmount:50
+  }),
+  adopt: Object.freeze({
+    style:'long-dash',
+    width:1.7,
+    color:null,
+    curveAmount:50
+  }),
+  other: Object.freeze({
+    style:'curve',
+    width:1.5,
+    color:null,
+    curveAmount:50,
+    bidirectional:false
+  }),
+  otherTypes:Object.freeze({})
 });
-let relationshipLineSettings = JSON.parse(JSON.stringify(RELATIONSHIP_LINE_DEFAULTS));
+
+function createRelationshipLineSettings() {
+  return {
+    parent:{ ...RELATIONSHIP_LINE_DEFAULTS.parent },
+    spouse:{ ...RELATIONSHIP_LINE_DEFAULTS.spouse },
+    exspouse:{ ...RELATIONSHIP_LINE_DEFAULTS.exspouse },
+    adopt:{ ...RELATIONSHIP_LINE_DEFAULTS.adopt },
+    other:{ ...RELATIONSHIP_LINE_DEFAULTS.other },
+    otherTypes:{}
+  };
+}
+
+let relationshipLineSettings =
+  createRelationshipLineSettings();
+
 try {
-  const rawRelationshipStyle = localStorage.getItem(REL_LINE_STYLE_KEY);
+  const rawRelationshipStyle =
+    localStorage.getItem(
+      REL_LINE_STYLE_KEY
+    );
+
   if (rawRelationshipStyle) {
-    const parsed = JSON.parse(rawRelationshipStyle);
-    Object.keys(RELATIONSHIP_LINE_DEFAULTS).forEach(key => {
-      if (parsed && parsed[key]) relationshipLineSettings[key] = { ...relationshipLineSettings[key], ...parsed[key] };
-    });
+    const parsed =
+      JSON.parse(
+        rawRelationshipStyle
+      );
+
+    ['parent','spouse','adopt']
+      .forEach(key => {
+        if (
+          parsed &&
+          parsed[key] &&
+          typeof parsed[key] === 'object'
+        ) {
+          relationshipLineSettings[key] = {
+            ...relationshipLineSettings[key],
+            ...parsed[key]
+          };
+        }
+      });
+
+    const savedEx =
+      parsed &&
+      parsed.exspouse &&
+      typeof parsed.exspouse === 'object'
+        ? parsed.exspouse
+        : null;
+
+    // 舊版預設「前任 = 短虛線」升級成新預設曲線；
+    // 玩家真的改過粗細／顏色／樣式時則保留自己的設定。
+    const savedExWasOldDefault =
+      savedEx &&
+      savedEx.style === 'short-dash' &&
+      Number(savedEx.width ?? 1.7) === 1.7 &&
+      !savedEx.color &&
+      savedEx.curveAmount == null;
+
+    if (savedEx && !savedExWasOldDefault) {
+      relationshipLineSettings.exspouse = {
+        ...relationshipLineSettings.exspouse,
+        ...savedEx
+      };
+    }
+
+    if (
+      parsed &&
+      parsed.otherTypes &&
+      typeof parsed.otherTypes === 'object' &&
+      !Array.isArray(parsed.otherTypes)
+    ) {
+      Object.entries(parsed.otherTypes)
+        .forEach(([type, setting]) => {
+          if (
+            !type ||
+            !setting ||
+            typeof setting !== 'object' ||
+            Array.isArray(setting)
+          ) {
+            return;
+          }
+
+          relationshipLineSettings.otherTypes[type] = {
+            ...RELATIONSHIP_LINE_DEFAULTS.other,
+            ...setting
+          };
+        });
+    }
   }
 } catch (_) {}
 
@@ -2892,8 +2998,10 @@ function toggleViewMode() {
 }
 modeToggle.onclick = toggleViewMode;
 
-// ========【關係線外觀】 設定 - 預設簡潔，進階可自訂樣式、粗細與顏色 ========
-const REL_LINE_KEYS = ['parent','spouse','exspouse','adopt','other'];
+// ========【關係線外觀】 設定 - 沿用現有外觀 UI，次要關係增加曲線與個別類型設定 ========
+const REL_LINE_KEYS =
+  ['parent','spouse','exspouse','adopt','other'];
+
 const REL_LINE_DEFAULT_COLOR_VARS = {
   parent:'--line',
   spouse:'--spouse',
@@ -2901,102 +3009,1297 @@ const REL_LINE_DEFAULT_COLOR_VARS = {
   adopt:'--adopt',
   other:'--other-line'
 };
+
 const REL_LINE_DASH = {
   solid:'none',
   'short-dash':'4 3',
   'long-dash':'10 6',
-  dot:'1 5'
+  dot:'1 5',
+  curve:'none'
 };
 
-function normalizeColorForInput(value, fallback='#8896a4') {
-  const v = String(value || '').trim();
-  if (/^#[0-9a-f]{6}$/i.test(v)) return v;
-  if (/^#[0-9a-f]{3}$/i.test(v)) {
-    return '#' + v.slice(1).split('').map(c => c + c).join('');
+const REL_SUPPLEMENTAL_STYLES =
+  new Set([
+    'solid',
+    'short-dash',
+    'long-dash',
+    'dot',
+    'curve'
+  ]);
+
+function clampRelationshipCurveAmount(value) {
+  const number =
+    Number(value);
+
+  if (!Number.isFinite(number)) {
+    return 50;
   }
-  const m = v.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
-  return m ? rgbToHex(+m[1], +m[2], +m[3]) : fallback;
+
+  return Math.max(
+    10,
+    Math.min(100, number)
+  );
+}
+
+function relationshipCurveFactor(value) {
+  const percent =
+    clampRelationshipCurveAmount(
+      value
+    );
+
+  // 50% 對應舊版「其他關係」約 0.15 的固定曲率。
+  return (
+    0.03 +
+    (percent / 100) * 0.24
+  );
+}
+
+function relationshipQuadraticGeometry(
+  x1,
+  y1,
+  x2,
+  y2,
+  curveAmount
+) {
+  const dx =
+    x2 - x1;
+
+  const dy =
+    y2 - y1;
+
+  const distance =
+    Math.max(
+      1,
+      Math.hypot(dx, dy)
+    );
+
+  const normalX =
+    -dy / distance;
+
+  const normalY =
+    dx / distance;
+
+  const bend =
+    distance *
+    relationshipCurveFactor(
+      curveAmount
+    );
+
+  const cx =
+    (x1 + x2) / 2 +
+    normalX * bend;
+
+  const cy =
+    (y1 + y2) / 2 +
+    normalY * bend;
+
+  return {
+    d:
+      'M' + x1 + ' ' + y1 +
+      ' Q' + cx + ' ' + cy +
+      ' ' + x2 + ' ' + y2,
+    cx,
+    cy,
+    labelX:
+      0.25 * x1 +
+      0.5 * cx +
+      0.25 * x2,
+    labelY:
+      0.25 * y1 +
+      0.5 * cy +
+      0.25 * y2
+  };
+}
+
+function relationshipPairRenderGeometry(
+  a,
+  b,
+  setting
+) {
+  if (setting.style !== 'curve') {
+    const join =
+      pairJoinPoint(a, b);
+
+    return {
+      d:pairPath(a, b),
+      labelX:join.x,
+      labelY:join.y
+    };
+  }
+
+  const {
+    aX,
+    aY,
+    bX,
+    bY
+  } =
+    getPairConnectionGeometry(
+      a,
+      b
+    );
+
+  return relationshipQuadraticGeometry(
+    aX,
+    aY,
+    bX,
+    bY,
+    setting.curveAmount
+  );
+}
+
+function relationshipOtherRenderGeometry(
+  a,
+  b,
+  setting
+) {
+  const fromAnchor =
+    avatarBoundaryAnchor(a, b);
+
+  const toAnchor =
+    avatarBoundaryAnchor(b, a);
+
+  const x1 =
+    fromAnchor.x;
+
+  const y1 =
+    fromAnchor.y;
+
+  const x2 =
+    toAnchor.x;
+
+  const y2 =
+    toAnchor.y;
+
+  if (setting.style === 'curve') {
+    return relationshipQuadraticGeometry(
+      x1,
+      y1,
+      x2,
+      y2,
+      setting.curveAmount
+    );
+  }
+
+  return {
+    d:
+      'M' + x1 + ' ' + y1 +
+      ' L' + x2 + ' ' + y2,
+    labelX:(x1 + x2) / 2,
+    labelY:(y1 + y2) / 2
+  };
+}
+
+function normalizeColorForInput(
+  value,
+  fallback='#8896a4'
+) {
+  const v =
+    String(value || '').trim();
+
+  if (/^#[0-9a-f]{6}$/i.test(v)) {
+    return v;
+  }
+
+  if (/^#[0-9a-f]{3}$/i.test(v)) {
+    return (
+      '#' +
+      v.slice(1)
+        .split('')
+        .map(c => c + c)
+        .join('')
+    );
+  }
+
+  const m =
+    v.match(
+      /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i
+    );
+
+  return m
+    ? rgbToHex(
+        +m[1],
+        +m[2],
+        +m[3]
+      )
+    : fallback;
 }
 
 function relationshipDefaultColor(key) {
   return normalizeColorForInput(
-    getComputedStyle(document.body).getPropertyValue(REL_LINE_DEFAULT_COLOR_VARS[key]),
+    getComputedStyle(document.body)
+      .getPropertyValue(
+        REL_LINE_DEFAULT_COLOR_VARS[key]
+      ),
     '#8896a4'
   );
 }
 
+function relationshipLineSetting(key) {
+  const fallback =
+    RELATIONSHIP_LINE_DEFAULTS[key] ||
+    RELATIONSHIP_LINE_DEFAULTS.other;
+
+  const setting =
+    relationshipLineSettings[key] ||
+    fallback;
+
+  return {
+    ...fallback,
+    ...setting,
+    curveAmount:
+      clampRelationshipCurveAmount(
+        setting.curveAmount
+      )
+  };
+}
+
+function relationshipOtherType(link) {
+  const value =
+    String(
+      link?.label ||
+      link?.type ||
+      '關聯'
+    ).trim();
+
+  return value || '關聯';
+}
+
+function getOtherRelationshipTypes() {
+  const seen =
+    new Map();
+
+  (genealogyData?.links || [])
+    .forEach(link => {
+      const type =
+        relationshipOtherType(link);
+
+      if (!seen.has(type)) {
+        seen.set(
+          type,
+          displayRelationshipText(type)
+        );
+      }
+    });
+
+  return [...seen.entries()]
+    .map(([type, label]) => ({
+      type,
+      label
+    }))
+    .sort((left, right) =>
+      String(left.label)
+        .localeCompare(
+          String(right.label),
+          'zh'
+        )
+    );
+}
+
+function getOtherRelationshipLineSetting(
+  type
+) {
+  const saved =
+    relationshipLineSettings
+      .otherTypes?.[type];
+
+  const setting = {
+    ...RELATIONSHIP_LINE_DEFAULTS.other,
+    ...(saved || {})
+  };
+
+  if (
+    !REL_SUPPLEMENTAL_STYLES
+      .has(setting.style)
+  ) {
+    setting.style = 'curve';
+  }
+
+  setting.width =
+    Number(setting.width) ||
+    RELATIONSHIP_LINE_DEFAULTS.other.width;
+
+  setting.curveAmount =
+    clampRelationshipCurveAmount(
+      setting.curveAmount
+    );
+
+  setting.bidirectional =
+    !!setting.bidirectional;
+
+  return setting;
+}
+
+function ensureOtherRelationshipLineSetting(
+  type
+) {
+  if (
+    !relationshipLineSettings.otherTypes ||
+    typeof relationshipLineSettings.otherTypes !== 'object'
+  ) {
+    relationshipLineSettings.otherTypes = {};
+  }
+
+  if (
+    !relationshipLineSettings.otherTypes[type]
+  ) {
+    relationshipLineSettings.otherTypes[type] = {
+      ...RELATIONSHIP_LINE_DEFAULTS.other
+    };
+  }
+
+  return relationshipLineSettings
+    .otherTypes[type];
+}
+
+function relationshipResolvedColor(
+  setting,
+  key='other'
+) {
+  return normalizeColorForInput(
+    setting.color ||
+    relationshipDefaultColor(key),
+    relationshipDefaultColor(key)
+  );
+}
+
+function relationshipDashValue(
+  setting
+) {
+  return (
+    REL_LINE_DASH[setting.style] ||
+    'none'
+  );
+}
+
+function relationshipInlineSvgStyle(
+  setting,
+  key='other'
+) {
+  const color =
+    relationshipResolvedColor(
+      setting,
+      key
+    );
+
+  const width =
+    Math.max(
+      0.5,
+      Number(setting.width) ||
+      RELATIONSHIP_LINE_DEFAULTS.other.width
+    );
+
+  const dash =
+    relationshipDashValue(
+      setting
+    );
+
+  return (
+    'stroke:' + color + ';' +
+    'stroke-width:' + width + ';' +
+    'stroke-dasharray:' + dash + ';'
+  );
+}
+
+function relationshipCurvePreviewPath(
+  curveAmount
+) {
+  const amount =
+    clampRelationshipCurveAmount(
+      curveAmount
+    );
+
+  const amplitude =
+    2 +
+    (amount / 100) * 12;
+
+  return (
+    'M4 18 ' +
+    'Q60 ' + (18 - amplitude) +
+    ' 116 18'
+  );
+}
+
+function updateRelationshipLinePreview(
+  preview,
+  setting,
+  colorKey='other'
+) {
+  if (!preview) return;
+
+  const color =
+    relationshipResolvedColor(
+      setting,
+      colorKey
+    );
+
+  preview.dataset.lineStyle =
+    setting.style;
+
+  preview.style.setProperty(
+    '--preview-color',
+    color
+  );
+
+  preview.style.setProperty(
+    '--preview-width',
+    String(setting.width) + 'px'
+  );
+
+  if (setting.style === 'curve') {
+    preview.innerHTML =
+      '<svg class="relationship-curve-mini-preview" ' +
+      'viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path d="' +
+      relationshipCurvePreviewPath(
+        setting.curveAmount
+      ) +
+      '" style="stroke:' +
+      color +
+      ';stroke-width:' +
+      Math.max(1, Number(setting.width) || 1.5) +
+      '"/>' +
+      '</svg>';
+  } else {
+    preview.innerHTML = '';
+  }
+}
+
 function applyRelationshipLineSettings() {
   REL_LINE_KEYS.forEach(key => {
-    const setting = relationshipLineSettings[key] || RELATIONSHIP_LINE_DEFAULTS[key];
-    document.documentElement.style.setProperty('--rel-' + key + '-color', setting.color || relationshipDefaultColor(key));
-    document.documentElement.style.setProperty('--rel-' + key + '-width', String(Number(setting.width) || RELATIONSHIP_LINE_DEFAULTS[key].width));
-    document.documentElement.style.setProperty('--rel-' + key + '-dash', REL_LINE_DASH[setting.style] || 'none');
+    const setting =
+      relationshipLineSetting(key);
+
+    document.documentElement
+      .style.setProperty(
+        '--rel-' + key + '-color',
+        setting.color ||
+        relationshipDefaultColor(key)
+      );
+
+    document.documentElement
+      .style.setProperty(
+        '--rel-' + key + '-width',
+        String(setting.width)
+      );
+
+    document.documentElement
+      .style.setProperty(
+        '--rel-' + key + '-dash',
+        relationshipDashValue(setting)
+      );
   });
+
   syncRelationshipLineControls();
 }
 
 function saveRelationshipLineSettings() {
   try {
-    localStorage.setItem(REL_LINE_STYLE_KEY, JSON.stringify(relationshipLineSettings));
+    localStorage.setItem(
+      REL_LINE_STYLE_KEY,
+      JSON.stringify(
+        relationshipLineSettings
+      )
+    );
   } catch (_) {}
+
   applyRelationshipLineSettings();
-  if (layoutCache) drawEdges();
+
+  if (layoutCache) {
+    drawEdges();
+  }
+}
+
+function relationshipStyleOptionsHTML(
+  includeCurve=false
+) {
+  const options = [
+    ['solid','實線'],
+    ['short-dash','短虛線'],
+    ['long-dash','長虛線'],
+    ['dot','點線']
+  ];
+
+  if (includeCurve) {
+    options.push([
+      'curve',
+      '曲線'
+    ]);
+  }
+
+  return options
+    .map(([value, label]) =>
+      '<option value="' +
+      value +
+      '">' +
+      esc(uiText(label)) +
+      '</option>'
+    )
+    .join('');
+}
+
+function otherRelationshipDomKey(
+  type
+) {
+  return encodeURIComponent(
+    String(type)
+  );
+}
+
+function otherRelationshipTypeFromDomKey(
+  key
+) {
+  try {
+    return decodeURIComponent(
+      String(key || '')
+    );
+  } catch (_) {
+    return String(key || '');
+  }
+}
+
+function renderOtherRelationshipLineControls() {
+  const list =
+    $('otherRelationshipLineList');
+
+  if (!list) return;
+
+  const openKeys =
+    new Set(
+      [...list.querySelectorAll(
+        '.other-relationship-line-item[open]'
+      )]
+        .map(item =>
+          item.dataset.otherRelKey
+        )
+        .filter(Boolean)
+    );
+
+  const types =
+    getOtherRelationshipTypes();
+
+  if (!types.length) {
+    list.innerHTML =
+      '<div class="other-relationship-empty">' +
+      esc(uiText('尚無其他關係')) +
+      '</div>';
+
+    return;
+  }
+
+  list.innerHTML =
+    types.map(entry => {
+      const key =
+        otherRelationshipDomKey(
+          entry.type
+        );
+
+      const open =
+        openKeys.has(key)
+          ? ' open'
+          : '';
+
+      return (
+        '<details class="relationship-line-item other-relationship-line-item" ' +
+        'data-other-rel-key="' +
+        esc(key) +
+        '"' +
+        open +
+        '>' +
+          '<summary>' +
+            '<span>' +
+              esc(entry.label) +
+            '</span>' +
+            '<i data-other-rel-preview="' +
+              esc(key) +
+            '"></i>' +
+          '</summary>' +
+          '<div class="relationship-line-controls">' +
+            '<label>' +
+              '<span>' +
+                esc(uiText('樣式')) +
+              '</span>' +
+              '<select data-other-rel-style="' +
+                esc(key) +
+              '">' +
+                relationshipStyleOptionsHTML(true) +
+              '</select>' +
+            '</label>' +
+            '<label>' +
+              '<span>' +
+                esc(uiText('粗細')) +
+              '</span>' +
+              '<input data-other-rel-width="' +
+                esc(key) +
+              '" type="range" min="1" max="4" step="0.1">' +
+            '</label>' +
+            '<label>' +
+              '<span>' +
+                esc(uiText('顏色')) +
+              '</span>' +
+              '<input data-other-rel-color="' +
+                esc(key) +
+              '" type="color">' +
+            '</label>' +
+          '</div>' +
+          '<div class="relationship-line-extra-controls">' +
+            '<label class="relationship-curve-control" data-other-rel-curve-row="' +
+              esc(key) +
+            '">' +
+              '<span>' +
+                esc(uiText('曲線弧度')) +
+              '</span>' +
+              '<div class="relationship-curve-slider">' +
+                '<input data-other-rel-curve="' +
+                  esc(key) +
+                '" type="range" min="10" max="100" step="1">' +
+                '<output data-other-rel-curve-value="' +
+                  esc(key) +
+                '"></output>' +
+              '</div>' +
+            '</label>' +
+            '<label class="relationship-arrow-control">' +
+              '<span>' +
+                esc(uiText('雙向箭頭')) +
+              '</span>' +
+              '<input data-other-rel-bidirectional="' +
+                esc(key) +
+              '" type="checkbox">' +
+            '</label>' +
+          '</div>' +
+        '</details>'
+      );
+    }).join('');
+
+  installSharedNativeSelectChevrons(
+    list
+  );
+
+  bindOtherRelationshipLineControls(
+    list
+  );
+
+  syncOtherRelationshipLineControls();
+}
+
+function syncOtherRelationshipLineControls() {
+  const list =
+    $('otherRelationshipLineList');
+
+  if (!list) return;
+
+  list.querySelectorAll(
+    '.other-relationship-line-item'
+  ).forEach(item => {
+    const key =
+      item.dataset.otherRelKey || '';
+
+    const type =
+      otherRelationshipTypeFromDomKey(
+        key
+      );
+
+    const setting =
+      getOtherRelationshipLineSetting(
+        type
+      );
+
+    const styleEl =
+      item.querySelector(
+        '[data-other-rel-style]'
+      );
+
+    const widthEl =
+      item.querySelector(
+        '[data-other-rel-width]'
+      );
+
+    const colorEl =
+      item.querySelector(
+        '[data-other-rel-color]'
+      );
+
+    const curveEl =
+      item.querySelector(
+        '[data-other-rel-curve]'
+      );
+
+    const curveValueEl =
+      item.querySelector(
+        '[data-other-rel-curve-value]'
+      );
+
+    const curveRow =
+      item.querySelector(
+        '[data-other-rel-curve-row]'
+      );
+
+    const bidirectionalEl =
+      item.querySelector(
+        '[data-other-rel-bidirectional]'
+      );
+
+    const preview =
+      item.querySelector(
+        '[data-other-rel-preview]'
+      );
+
+    if (styleEl) {
+      styleEl.value =
+        setting.style;
+    }
+
+    if (widthEl) {
+      widthEl.value =
+        String(setting.width);
+    }
+
+    if (colorEl) {
+      colorEl.value =
+        relationshipResolvedColor(
+          setting,
+          'other'
+        );
+    }
+
+    if (curveEl) {
+      curveEl.value =
+        String(
+          setting.curveAmount
+        );
+    }
+
+    if (curveValueEl) {
+      curveValueEl.textContent =
+        String(
+          Math.round(
+            setting.curveAmount
+          )
+        ) + '%';
+    }
+
+    if (curveRow) {
+      curveRow.hidden =
+        setting.style !== 'curve';
+    }
+
+    if (bidirectionalEl) {
+      bidirectionalEl.checked =
+        !!setting.bidirectional;
+    }
+
+    updateRelationshipLinePreview(
+      preview,
+      setting,
+      'other'
+    );
+  });
 }
 
 function syncRelationshipLineControls() {
-  if (!document.querySelector('[data-rel-style]')) return;
-
   REL_LINE_KEYS.forEach(key => {
-    const setting = relationshipLineSettings[key] || RELATIONSHIP_LINE_DEFAULTS[key];
-    const styleEl = document.querySelector('[data-rel-style="' + key + '"]');
-    const widthEl = document.querySelector('[data-rel-width="' + key + '"]');
-    const colorEl = document.querySelector('[data-rel-color="' + key + '"]');
-    const preview = document.querySelector('[data-rel-preview="' + key + '"]');
+    const setting =
+      relationshipLineSetting(key);
 
-    if (styleEl) styleEl.value = setting.style;
-    if (widthEl) widthEl.value = String(setting.width);
-    if (colorEl) colorEl.value = setting.color || relationshipDefaultColor(key);
+    const styleEl =
+      document.querySelector(
+        '[data-rel-style="' +
+        key +
+        '"]'
+      );
 
-    if (preview) {
-      preview.dataset.lineStyle = setting.style;
-      preview.style.setProperty('--preview-color', setting.color || relationshipDefaultColor(key));
-      preview.style.setProperty('--preview-width', String(setting.width) + 'px');
+    const widthEl =
+      document.querySelector(
+        '[data-rel-width="' +
+        key +
+        '"]'
+      );
+
+    const colorEl =
+      document.querySelector(
+        '[data-rel-color="' +
+        key +
+        '"]'
+      );
+
+    const curveEl =
+      document.querySelector(
+        '[data-rel-curve="' +
+        key +
+        '"]'
+      );
+
+    const curveValueEl =
+      document.querySelector(
+        '[data-rel-curve-value="' +
+        key +
+        '"]'
+      );
+
+    const curveRow =
+      document.querySelector(
+        '[data-rel-curve-row="' +
+        key +
+        '"]'
+      );
+
+    const preview =
+      document.querySelector(
+        '[data-rel-preview="' +
+        key +
+        '"]'
+      );
+
+    if (styleEl) {
+      styleEl.value =
+        setting.style;
     }
+
+    if (widthEl) {
+      widthEl.value =
+        String(setting.width);
+    }
+
+    if (colorEl) {
+      colorEl.value =
+        setting.color ||
+        relationshipDefaultColor(key);
+    }
+
+    if (curveEl) {
+      curveEl.value =
+        String(setting.curveAmount);
+    }
+
+    if (curveValueEl) {
+      curveValueEl.textContent =
+        String(
+          Math.round(
+            setting.curveAmount
+          )
+        ) + '%';
+    }
+
+    if (curveRow) {
+      curveRow.hidden =
+        setting.style !== 'curve';
+    }
+
+    updateRelationshipLinePreview(
+      preview,
+      setting,
+      key
+    );
+  });
+
+  syncOtherRelationshipLineControls();
+}
+
+let relationshipCurvePreviewHideTimer =
+  null;
+
+function showRelationshipCurveLivePreview(
+  input,
+  setting,
+  colorKey='other'
+) {
+  const preview =
+    $('relationshipCurveLivePreview');
+
+  const path =
+    $('relationshipCurveLivePreviewPath');
+
+  const value =
+    $('relationshipCurveLivePreviewValue');
+
+  if (
+    !preview ||
+    !path ||
+    !input
+  ) {
+    return;
+  }
+
+  clearTimeout(
+    relationshipCurvePreviewHideTimer
+  );
+
+  const color =
+    relationshipResolvedColor(
+      setting,
+      colorKey
+    );
+
+  path.setAttribute(
+    'd',
+    relationshipCurvePreviewPath(
+      setting.curveAmount
+    )
+  );
+
+  path.setAttribute(
+    'stroke',
+    color
+  );
+
+  path.setAttribute(
+    'stroke-width',
+    String(
+      Math.max(
+        1.5,
+        Number(setting.width) || 1.5
+      )
+    )
+  );
+
+  if (value) {
+    value.textContent =
+      String(
+        Math.round(
+          setting.curveAmount
+        )
+      ) + '%';
+  }
+
+  const rect =
+    input.getBoundingClientRect();
+
+  const width = 260;
+  const estimatedHeight = 92;
+  const gap = 10;
+  const margin = 12;
+
+  const left =
+    Math.min(
+      Math.max(
+        margin,
+        rect.left +
+        rect.width / 2 -
+        width / 2
+      ),
+      Math.max(
+        margin,
+        window.innerWidth -
+        width -
+        margin
+      )
+    );
+
+  const canOpenAbove =
+    rect.top -
+    estimatedHeight -
+    gap >
+    margin;
+
+  const top =
+    canOpenAbove
+      ? rect.top -
+        estimatedHeight -
+        gap
+      : rect.bottom + gap;
+
+  preview.style.left =
+    Math.round(left) + 'px';
+
+  preview.style.top =
+    Math.round(top) + 'px';
+
+  preview.classList.add(
+    'show'
+  );
+
+  preview.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+}
+
+function hideRelationshipCurveLivePreview(
+  delay=180
+) {
+  const preview =
+    $('relationshipCurveLivePreview');
+
+  if (!preview) return;
+
+  clearTimeout(
+    relationshipCurvePreviewHideTimer
+  );
+
+  relationshipCurvePreviewHideTimer =
+    setTimeout(() => {
+      preview.classList.remove(
+        'show'
+      );
+
+      preview.setAttribute(
+        'aria-hidden',
+        'true'
+      );
+    }, delay);
+}
+
+function updateRelationshipCurveInput(
+  input,
+  setting,
+  colorKey='other'
+) {
+  setting.curveAmount =
+    clampRelationshipCurveAmount(
+      input.value
+    );
+
+  saveRelationshipLineSettings();
+
+  showRelationshipCurveLivePreview(
+    input,
+    setting,
+    colorKey
+  );
+}
+
+function bindOtherRelationshipLineControls(
+  root
+) {
+  root.querySelectorAll(
+    '[data-other-rel-style]'
+  ).forEach(el => {
+    el.addEventListener(
+      'change',
+      () => {
+        const type =
+          otherRelationshipTypeFromDomKey(
+            el.dataset.otherRelStyle
+          );
+
+        const setting =
+          ensureOtherRelationshipLineSetting(
+            type
+          );
+
+        setting.style =
+          REL_SUPPLEMENTAL_STYLES
+            .has(el.value)
+            ? el.value
+            : 'curve';
+
+        saveRelationshipLineSettings();
+      }
+    );
+  });
+
+  root.querySelectorAll(
+    '[data-other-rel-width]'
+  ).forEach(el => {
+    el.addEventListener(
+      'input',
+      () => {
+        const type =
+          otherRelationshipTypeFromDomKey(
+            el.dataset.otherRelWidth
+          );
+
+        const setting =
+          ensureOtherRelationshipLineSetting(
+            type
+          );
+
+        setting.width =
+          Number(el.value) ||
+          RELATIONSHIP_LINE_DEFAULTS.other.width;
+
+        saveRelationshipLineSettings();
+      }
+    );
+  });
+
+  root.querySelectorAll(
+    '[data-other-rel-color]'
+  ).forEach(el => {
+    el.addEventListener(
+      'input',
+      () => {
+        const type =
+          otherRelationshipTypeFromDomKey(
+            el.dataset.otherRelColor
+          );
+
+        const setting =
+          ensureOtherRelationshipLineSetting(
+            type
+          );
+
+        setting.color =
+          el.value;
+
+        saveRelationshipLineSettings();
+      }
+    );
+  });
+
+  root.querySelectorAll(
+    '[data-other-rel-curve]'
+  ).forEach(el => {
+    el.addEventListener(
+      'input',
+      () => {
+        const type =
+          otherRelationshipTypeFromDomKey(
+            el.dataset.otherRelCurve
+          );
+
+        const setting =
+          ensureOtherRelationshipLineSetting(
+            type
+          );
+
+        updateRelationshipCurveInput(
+          el,
+          setting,
+          'other'
+        );
+      }
+    );
+
+    el.addEventListener(
+      'pointerup',
+      () =>
+        hideRelationshipCurveLivePreview()
+    );
+
+    el.addEventListener(
+      'blur',
+      () =>
+        hideRelationshipCurveLivePreview()
+    );
+  });
+
+  root.querySelectorAll(
+    '[data-other-rel-bidirectional]'
+  ).forEach(el => {
+    el.addEventListener(
+      'change',
+      () => {
+        const type =
+          otherRelationshipTypeFromDomKey(
+            el.dataset.otherRelBidirectional
+          );
+
+        const setting =
+          ensureOtherRelationshipLineSetting(
+            type
+          );
+
+        setting.bidirectional =
+          el.checked;
+
+        saveRelationshipLineSettings();
+      }
+    );
   });
 }
 
-document.querySelectorAll('[data-rel-style]').forEach(el => {
-  el.addEventListener('change', () => {
-    const key = el.dataset.relStyle;
-    relationshipLineSettings[key].style = el.value;
-    saveRelationshipLineSettings();
-  });
+document.querySelectorAll(
+  '[data-rel-style]'
+).forEach(el => {
+  el.addEventListener(
+    'change',
+    () => {
+      const key =
+        el.dataset.relStyle;
+
+      relationshipLineSettings[key].style =
+        el.value;
+
+      saveRelationshipLineSettings();
+    }
+  );
 });
 
-document.querySelectorAll('[data-rel-width]').forEach(el => {
-  el.addEventListener('input', () => {
-    const key = el.dataset.relWidth;
-    relationshipLineSettings[key].width = Number(el.value);
-    saveRelationshipLineSettings();
-  });
+document.querySelectorAll(
+  '[data-rel-width]'
+).forEach(el => {
+  el.addEventListener(
+    'input',
+    () => {
+      const key =
+        el.dataset.relWidth;
+
+      relationshipLineSettings[key].width =
+        Number(el.value);
+
+      saveRelationshipLineSettings();
+    }
+  );
 });
 
-document.querySelectorAll('[data-rel-color]').forEach(el => {
-  el.addEventListener('input', () => {
-    const key = el.dataset.relColor;
-    relationshipLineSettings[key].color = el.value;
-    saveRelationshipLineSettings();
-  });
+document.querySelectorAll(
+  '[data-rel-color]'
+).forEach(el => {
+  el.addEventListener(
+    'input',
+    () => {
+      const key =
+        el.dataset.relColor;
+
+      relationshipLineSettings[key].color =
+        el.value;
+
+      saveRelationshipLineSettings();
+    }
+  );
 });
 
-$('resetRelationshipStyleBtn')?.addEventListener('click', () => {
-  relationshipLineSettings = JSON.parse(JSON.stringify(RELATIONSHIP_LINE_DEFAULTS));
-  try {
-    localStorage.removeItem(REL_LINE_STYLE_KEY);
-  } catch (_) {}
-  applyRelationshipLineSettings();
-  if (layoutCache) drawEdges();
+document.querySelectorAll(
+  '[data-rel-curve]'
+).forEach(el => {
+  el.addEventListener(
+    'input',
+    () => {
+      const key =
+        el.dataset.relCurve;
+
+      updateRelationshipCurveInput(
+        el,
+        relationshipLineSettings[key],
+        key
+      );
+    }
+  );
+
+  el.addEventListener(
+    'pointerup',
+    () =>
+      hideRelationshipCurveLivePreview()
+  );
+
+  el.addEventListener(
+    'blur',
+    () =>
+      hideRelationshipCurveLivePreview()
+  );
 });
+
+$('resetRelationshipStyleBtn')
+  ?.addEventListener(
+    'click',
+    () => {
+      relationshipLineSettings =
+        createRelationshipLineSettings();
+
+      try {
+        localStorage.removeItem(
+          REL_LINE_STYLE_KEY
+        );
+      } catch (_) {}
+
+      renderOtherRelationshipLineControls();
+      applyRelationshipLineSettings();
+
+      if (layoutCache) {
+        drawEdges();
+      }
+    }
+  );
 
 function applyLabelLock(locked) {
   labelLocked = !!locked;
@@ -3120,6 +4423,7 @@ $('bgBtn').onclick = () => {
   updateCustomPreview();
   renderThemeGrid();
   updateBgPreview();
+  renderOtherRelationshipLineControls();
   syncRelationshipLineControls();
   bgMask.classList.add('show');
 };
@@ -7022,9 +8326,61 @@ function drawEdges() {
 
   const paths = [];
   const labels = [];
+  const markerDefinitions = [];
+  const arrowMarkerByColor =
+    new Map();
 
-  // 親子關係先依「同一組父母」整併。
-  // 不再每個 child 各自畫一條 V-H-V，避免大量重疊與平行折線。
+  const bidirectionalMarkerAttributes =
+    setting => {
+      if (!setting.bidirectional) {
+        return '';
+      }
+
+      const color =
+        relationshipResolvedColor(
+          setting,
+          'other'
+        );
+
+      let markerId =
+        arrowMarkerByColor.get(
+          color
+        );
+
+      if (!markerId) {
+        markerId =
+          'rel-other-arrow-' +
+          arrowMarkerByColor.size;
+
+        arrowMarkerByColor.set(
+          color,
+          markerId
+        );
+
+        markerDefinitions.push(
+          '<marker id="' +
+          markerId +
+          '" viewBox="0 0 10 10" ' +
+          'refX="8.4" refY="5" ' +
+          'markerWidth="5.5" markerHeight="5.5" ' +
+          'orient="auto-start-reverse">' +
+            '<path d="M1 1 L9 5 L1 9 Z" fill="' +
+            color +
+            '" fill-opacity=".9"/>' +
+          '</marker>'
+        );
+      }
+
+      return (
+        ' marker-start="url(#' +
+        markerId +
+        ')" marker-end="url(#' +
+        markerId +
+        ')"'
+      );
+    };
+
+  // 親子關係維持既有 canonical genealogy topology。
   buildParentChildConnectorGroups(
     byId,
     visibleIds
@@ -7044,175 +8400,228 @@ function drawEdges() {
     const sim = byId.get(id);
     if (!sim) return;
 
-    (sim.spouseIds || []).forEach(spouseId => {
-      if (!visibleIds.has(spouseId)) return;
+    (sim.spouseIds || [])
+      .forEach(spouseId => {
+        if (
+          !visibleIds.has(spouseId)
+        ) {
+          return;
+        }
 
-      const pairK = pairKey(id, spouseId);
-      if (drawnPair.has(pairK)) return;
+        const pairK =
+          pairKey(id, spouseId);
 
-      drawnPair.add(pairK);
+        if (
+          drawnPair.has(pairK)
+        ) {
+          return;
+        }
 
-      const a = pos.get(id);
-      const b = pos.get(spouseId);
+        drawnPair.add(pairK);
 
-      if (!a || !b) return;
+        const a =
+          pos.get(id);
 
-      paths.push(
-        '<path class="edge edge-spouse" d="' +
-        pairPath(a, b) +
-        '"/>'
-      );
+        const b =
+          pos.get(spouseId);
 
-      if (!showRelLabels) return;
+        if (!a || !b) return;
 
-      const key = 'spouse:' + pairK;
-      const info = getRelInfoByKey(
-        key,
-        'spouse'
-      );
+        paths.push(
+          '<path class="edge edge-spouse" d="' +
+          pairPath(a, b) +
+          '"/>'
+        );
 
-      if (!info) return;
+        if (!showRelLabels) return;
 
-      const join = pairJoinPoint(a, b);
+        const key =
+          'spouse:' + pairK;
 
-      labels.push(
-        makeLabelSVG(
-          join.x,
-          join.y,
-          info.icon,
-          info.text,
-          key
-        )
-      );
-    });
+        const info =
+          getRelInfoByKey(
+            key,
+            'spouse'
+          );
+
+        if (!info) return;
+
+        const join =
+          pairJoinPoint(a, b);
+
+        labels.push(
+          makeLabelSVG(
+            join.x,
+            join.y,
+            info.icon,
+            info.text,
+            key
+          )
+        );
+      });
   });
 
   const drawnEx = new Set();
+  const exSetting =
+    relationshipLineSetting(
+      'exspouse'
+    );
 
   visibleIds.forEach(id => {
     const sim = byId.get(id);
     if (!sim) return;
 
-    (sim.exSpouseIds || []).forEach(spouseId => {
-      if (!visibleIds.has(spouseId)) return;
+    (sim.exSpouseIds || [])
+      .forEach(spouseId => {
+        if (
+          !visibleIds.has(spouseId)
+        ) {
+          return;
+        }
 
-      const pairK = pairKey(id, spouseId);
-      if (drawnEx.has(pairK)) return;
+        const pairK =
+          pairKey(id, spouseId);
 
-      drawnEx.add(pairK);
+        if (
+          drawnEx.has(pairK)
+        ) {
+          return;
+        }
 
-      const a = pos.get(id);
-      const b = pos.get(spouseId);
+        drawnEx.add(pairK);
+
+        const a =
+          pos.get(id);
+
+        const b =
+          pos.get(spouseId);
+
+        if (!a || !b) return;
+
+        const geometry =
+          relationshipPairRenderGeometry(
+            a,
+            b,
+            exSetting
+          );
+
+        paths.push(
+          '<path class="edge edge-exspouse" d="' +
+          geometry.d +
+          '"/>'
+        );
+
+        if (!showRelLabels) return;
+
+        const key =
+          'exspouse:' + pairK;
+
+        const info =
+          getRelInfoByKey(
+            key,
+            'exspouse'
+          );
+
+        if (!info) return;
+
+        labels.push(
+          makeLabelSVG(
+            geometry.labelX,
+            geometry.labelY,
+            info.icon,
+            info.text,
+            key
+          )
+        );
+      });
+  });
+
+  // ========【其他關係】 設定 - 每個具體關係類型擁有自己的外觀 ========
+  (genealogyData.links || [])
+    .forEach(link => {
+      if (
+        !visibleIds.has(link.from) ||
+        !visibleIds.has(link.to)
+      ) {
+        return;
+      }
+
+      const a =
+        pos.get(link.from);
+
+      const b =
+        pos.get(link.to);
 
       if (!a || !b) return;
 
+      const type =
+        relationshipOtherType(
+          link
+        );
+
+      const setting =
+        getOtherRelationshipLineSetting(
+          type
+        );
+
+      const geometry =
+        relationshipOtherRenderGeometry(
+          a,
+          b,
+          setting
+        );
+
       paths.push(
-        '<path class="edge edge-exspouse" d="' +
-        pairPath(a, b) +
-        '"/>'
+        '<path class="edge edge-other" d="' +
+        geometry.d +
+        '" style="' +
+        relationshipInlineSvgStyle(
+          setting,
+          'other'
+        ) +
+        '"' +
+        bidirectionalMarkerAttributes(
+          setting
+        ) +
+        '/>'
       );
 
       if (!showRelLabels) return;
 
-      const key = 'exspouse:' + pairK;
-      const info = getRelInfoByKey(
-        key,
-        'exspouse'
-      );
+      const key =
+        'link:' + link.id;
+
+      const info =
+        getRelInfoByKey(
+          key,
+          'custom'
+        );
 
       if (!info) return;
 
-      const join = pairJoinPoint(a, b);
-
       labels.push(
         makeLabelSVG(
-          join.x,
-          join.y,
+          geometry.labelX,
+          geometry.labelY,
           info.icon,
           info.text,
           key
         )
       );
     });
-  });
 
-  // 自訂關係保留曲線語意，與 genealogy 主幹分離。
-  (genealogyData.links || []).forEach(link => {
-    if (
-      !visibleIds.has(link.from) ||
-      !visibleIds.has(link.to)
-    ) {
-      return;
-    }
+  svg.innerHTML =
+    (
+      markerDefinitions.length
+        ? '<defs>' +
+          markerDefinitions.join('') +
+          '</defs>'
+        : ''
+    ) +
+    paths.join('');
 
-    const a = pos.get(link.from);
-    const b = pos.get(link.to);
-
-    if (!a || !b) return;
-
-    const fromAnchor =
-      avatarBoundaryAnchor(a, b);
-
-    const toAnchor =
-      avatarBoundaryAnchor(b, a);
-
-    const x1 = fromAnchor.x;
-    const y1 = fromAnchor.y;
-    const x2 = toAnchor.x;
-    const y2 = toAnchor.y;
-
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-
-    const cx =
-      (x1 + x2) / 2 -
-      dy * 0.15;
-
-    const cy =
-      (y1 + y2) / 2 +
-      dx * 0.15;
-
-    paths.push(
-      '<path class="edge edge-other" d="' +
-      'M' + x1 + ' ' + y1 +
-      ' Q' + cx + ' ' + cy +
-      ' ' + x2 + ' ' + y2 +
-      '"/>'
-    );
-
-    if (!showRelLabels) return;
-
-    const key = 'link:' + link.id;
-    const info = getRelInfoByKey(
-      key,
-      'custom'
-    );
-
-    if (!info) return;
-
-    const px =
-      0.25 * x1 +
-      0.5 * cx +
-      0.25 * x2;
-
-    const py =
-      0.25 * y1 +
-      0.5 * cy +
-      0.25 * y2;
-
-    labels.push(
-      makeLabelSVG(
-        px,
-        py,
-        info.icon,
-        info.text,
-        key
-      )
-    );
-  });
-
-  svg.innerHTML = paths.join('');
-  labelsSvg.innerHTML = labels.join('');
+  labelsSvg.innerHTML =
+    labels.join('');
 }
 
 // ========【族譜連線】 設定 - 橫向關係接頭像側邊；直向親子線保留完整資訊空間 ========
@@ -13985,6 +15394,11 @@ Object.assign(EN, {
     '短虛線':'短虚线',
     '長虛線':'长虚线',
     '點線':'点线',
+    '曲線':'曲线',
+    '曲線弧度':'曲线弧度',
+    '雙向箭頭':'双向箭头',
+    '即時預覽':'实时预览',
+    '尚無其他關係':'暂无其他关系',
     '恢復關係線預設':'恢复关系线默认',
     '圖片品質':'图片质量',
     '人物頭像':'人物头像',
@@ -14056,6 +15470,11 @@ Object.assign(EN, {
     '短虛線':'Short Dash',
     '長虛線':'Long Dash',
     '點線':'Dotted',
+    '曲線':'Curve',
+    '曲線弧度':'Curve Bend',
+    '雙向箭頭':'Bidirectional Arrows',
+    '即時預覽':'Live Preview',
+    '尚無其他關係':'No Other Relationships',
     '恢復關係線預設':'Reset Relationship Lines',
     '圖片品質':'Image Quality',
     '人物頭像':'Person Portrait',
