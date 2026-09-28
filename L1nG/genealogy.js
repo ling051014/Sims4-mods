@@ -4356,7 +4356,7 @@ function setGenerationVerticalPositions(layers) {
   });
 }
 
-function packGenealogyLayer(layer, desiredLefts, gap, subtreeWidths = null) {
+function packGenealogyLayer(layer, desiredLefts, gap) {
   if (!layer || !layer.length) return;
 
   const targets = layer.map(unit => {
@@ -4366,35 +4366,13 @@ function packGenealogyLayer(layer, desiredLefts, gap, subtreeWidths = null) {
 
   const packed = [...targets];
 
-  const reservePadding = unit => {
-    const reserved =
-      Math.max(
-        unit.width,
-        Number(subtreeWidths?.get(unit.id)) ||
-          unit.width
-      );
-
-    return Math.max(
-      0,
-      (reserved - unit.width) / 2
-    );
-  };
-
-  // ========【同世代防重疊】 設定 - 同時保留人物卡與其後代子樹的水平空間 ========
-  // 不只避免當代卡片相撞，也避免下一代更寬的 subtree 被另一個家系插進來。
+  // ========【同世代防重疊】 設定 - 只處理本世代實際 Family Unit，不拿整棵後代子樹當碰撞外框 ========
+  // 下一代可以比上一代自然變寬；不能把後代寬度一路回灌到祖先層，否則族譜會被無限撐開。
   for (let index = 1; index < layer.length; index += 1) {
-    const previous =
-      layer[index - 1];
-
-    const current =
-      layer[index];
-
     const minimum =
       packed[index - 1] +
-      previous.width +
-      reservePadding(previous) +
-      gap +
-      reservePadding(current);
+      layer[index - 1].width +
+      gap;
 
     if (packed[index] < minimum) {
       packed[index] = minimum;
@@ -4402,18 +4380,10 @@ function packGenealogyLayer(layer, desiredLefts, gap, subtreeWidths = null) {
   }
 
   for (let index = layer.length - 2; index >= 0; index -= 1) {
-    const current =
-      layer[index];
-
-    const next =
-      layer[index + 1];
-
     const maximum =
       packed[index + 1] -
-      reservePadding(next) -
-      gap -
-      current.width -
-      reservePadding(current);
+      layer[index].width -
+      gap;
 
     if (
       packed[index] > maximum &&
@@ -4430,83 +4400,8 @@ function packGenealogyLayer(layer, desiredLefts, gap, subtreeWidths = null) {
 
 
 // ========【後代子樹佔寬】 設定 - 下一代可自然比上一代更寬，避免不同家系互相穿插 ========
-function buildGenealogySubtreeWidthMap(model, gap) {
-  const memo = new Map();
-  const visiting = new Set();
 
-  const measure = unit => {
-    if (!unit) return 0;
-    if (memo.has(unit.id)) {
-      return memo.get(unit.id);
-    }
-
-    // 異常祖先循環保護：循環資料退回本 unit 寬度，不讓 solver 無限遞迴。
-    if (visiting.has(unit.id)) {
-      return unit.width;
-    }
-
-    visiting.add(unit.id);
-
-    const children =
-      [...unit.childUnitIds]
-        .map(childUnitId =>
-          model.unitById.get(childUnitId)
-        )
-        .filter(childUnit =>
-          childUnit &&
-          childUnit.id !== unit.id &&
-          childUnit.generation > unit.generation
-        )
-        .sort(stableGenealogyUnitCompare);
-
-    const childWidths =
-      children.map(childUnit =>
-        measure(childUnit)
-      );
-
-    const descendantsWidth =
-      childWidths.length
-        ? childWidths.reduce(
-            (sum, width) => sum + width,
-            0
-          ) +
-          gap * (childWidths.length - 1)
-        : 0;
-
-    const width =
-      Math.max(
-        unit.width,
-        descendantsWidth
-      );
-
-    visiting.delete(unit.id);
-    memo.set(unit.id, width);
-
-    return width;
-  };
-
-  model.units.forEach(unit => {
-    measure(unit);
-  });
-
-  return memo;
-}
-
-function genealogySubtreePadding(unit, subtreeWidths) {
-  const reserved =
-    Math.max(
-      unit.width,
-      Number(subtreeWidths?.get(unit.id)) ||
-        unit.width
-    );
-
-  return Math.max(
-    0,
-    (reserved - unit.width) / 2
-  );
-}
-
-function assignInitialGenealogyHorizontalPositions(layers, subtreeWidths = null) {
+function assignInitialGenealogyHorizontalPositions(layers) {
   const {
     SIBLING:SIBLING_GAP
   } = getGaps();
@@ -4515,20 +4410,9 @@ function assignInitialGenealogyHorizontalPositions(layers, subtreeWidths = null)
     let cursorX = 0;
 
     layer.forEach(unit => {
-      const reservedWidth =
-        Math.max(
-          unit.width,
-          Number(subtreeWidths?.get(unit.id)) ||
-            unit.width
-        );
-
-      // unit 本身置於自己的 subtree 保留區中央。
-      unit.x =
-        cursorX +
-        (reservedWidth - unit.width) / 2;
-
+      unit.x = cursorX;
       cursorX +=
-        reservedWidth +
+        unit.width +
         SIBLING_GAP;
     });
   });
@@ -4687,8 +4571,7 @@ function buildPedigreeChildTargets(
   model,
   generation,
   layerIndex,
-  gap,
-  subtreeWidths = null
+  gap
 ) {
   const sourceX =
     genealogyGroupSourceX(group, model);
@@ -4710,6 +4593,7 @@ function buildPedigreeChildTargets(
   if (entries.length === 1) {
     const entry = entries[0];
 
+    // 單一子女的最高優先級：本人 anchor 直接對準父母 connector 主幹。
     return [{
       unit:entry.unit,
       left:
@@ -4718,46 +4602,24 @@ function buildPedigreeChildTargets(
     }];
   }
 
-  // ========【兄弟姊妹子樹排列】 設定 - 子女本人仍是親子 anchor，但間距保留完整後代 subtree ========
-  // 這裡不只看當代 family unit 的寬度；每名子女下面的配偶 / 後代需要多少空間，
-  // 都會成為這一支 branch 的保留寬度，避免其他家系插進兄弟姊妹之間。
-  const branches =
-    entries.map(entry => {
-      const extra =
-        genealogySubtreePadding(
-          entry.unit,
-          subtreeWidths
-        );
-
-      return {
-        ...entry,
-        leftExtent:
-          entry.geometry.leftExtent +
-          extra,
-        rightExtent:
-          entry.geometry.rightExtent +
-          extra
-      };
-    });
-
+  // ========【兄弟姊妹排列】 設定 - 由上一代 union 向左右自然展開 ========
+  // 只依本代 Family Unit 的安全範圍排開，不用更深後代把兄弟姊妹彼此推到極遠。
   const anchorXs = [0];
 
-  for (let index = 1; index < branches.length; index += 1) {
+  for (let index = 1; index < entries.length; index += 1) {
     const previous =
-      branches[index - 1];
+      entries[index - 1];
 
     const current =
-      branches[index];
+      entries[index];
 
     anchorXs[index] =
       anchorXs[index - 1] +
-      previous.rightExtent +
+      previous.geometry.rightExtent +
       gap +
-      current.leftExtent;
+      current.geometry.leftExtent;
   }
 
-  // 不論左右 subtree 寬度是否不同，「第一名與最後一名子女的 anchor 中點」
-  // 都對準上一代父母 union；因此兩名子女會自然分居父母左右。
   const anchorCenter =
     (
       anchorXs[0] +
@@ -4768,7 +4630,7 @@ function buildPedigreeChildTargets(
     sourceX -
     anchorCenter;
 
-  return branches.map((entry, index) => {
+  return entries.map((entry, index) => {
     const anchorX =
       anchorXs[index] +
       shift;
@@ -4811,8 +4673,7 @@ function averagePedigreeLeftTargets(targets) {
 function alignPedigreeChildrenToParents(
   layers,
   model,
-  connectorGroups,
-  subtreeWidths = null
+  connectorGroups
 ) {
   const {
     SIBLING:SIBLING_GAP
@@ -4821,14 +4682,21 @@ function alignPedigreeChildrenToParents(
   const generations =
     [...layers.keys()].sort((a, b) => a - b);
 
+  // ========【世代主導】 設定 - 永遠由上一代決定下一代位置 ========
   generations.slice(1).forEach(generation => {
-    const layer = layers.get(generation);
+    const layer =
+      layers.get(generation);
+
     const layerIndex =
       new Map(
-        layer.map((unit, index) => [unit.id, index])
+        layer.map((unit, index) => [
+          unit.id,
+          index
+        ])
       );
 
-    const requestedLefts = new Map();
+    const requestedLefts =
+      new Map();
 
     connectorGroups.forEach(group => {
       buildPedigreeChildTargets(
@@ -4836,8 +4704,7 @@ function alignPedigreeChildrenToParents(
         model,
         generation,
         layerIndex,
-        SIBLING_GAP,
-        subtreeWidths
+        SIBLING_GAP
       ).forEach(target => {
         mergePedigreeLeftTarget(
           requestedLefts,
@@ -4849,12 +4716,137 @@ function alignPedigreeChildrenToParents(
 
     packGenealogyLayer(
       layer,
-      averagePedigreeLeftTargets(requestedLefts),
-      SIBLING_GAP,
-      subtreeWidths
+      averagePedigreeLeftTargets(
+        requestedLefts
+      ),
+      SIBLING_GAP
     );
   });
 }
+
+// ========【單一子女直線優先】 設定 - 空間允許時自動收斂 V-H-V，直接對準父母主幹 ========
+function straightenSingleChildPedigreeBranches(
+  layers,
+  model,
+  connectorGroups
+) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = getGaps();
+
+  const generations =
+    [...layers.keys()].sort((a, b) => a - b);
+
+  generations.slice(1).forEach(generation => {
+    const layer =
+      layers.get(generation);
+
+    if (!layer || !layer.length) return;
+
+    const layerIndex =
+      new Map(
+        layer.map((unit, index) => [
+          unit.id,
+          index
+        ])
+      );
+
+    const requests =
+      new Map();
+
+    connectorGroups.forEach(group => {
+      const entries =
+        pedigreeChildEntries(
+          group,
+          model,
+          generation,
+          layerIndex
+        );
+
+      if (entries.length !== 1) return;
+
+      const sourceX =
+        genealogyGroupSourceX(
+          group,
+          model
+        );
+
+      if (!Number.isFinite(sourceX)) return;
+
+      const entry =
+        entries[0];
+
+      const targetLeft =
+        sourceX -
+        entry.geometry.centerX;
+
+      if (!requests.has(entry.unit.id)) {
+        requests.set(
+          entry.unit.id,
+          []
+        );
+      }
+
+      requests
+        .get(entry.unit.id)
+        .push(targetLeft);
+    });
+
+    // 同一 unit 若同時被多組父母關係約束（例如複雜收養 / 多來源資料），
+    // 不強行選邊；只有唯一 parent-axis 的 unit 才執行「直線優先」。
+    requests.forEach((targets, unitId) => {
+      if (targets.length !== 1) return;
+
+      const index =
+        layer.findIndex(
+          unit => unit.id === unitId
+        );
+
+      if (index < 0) return;
+
+      const unit =
+        layer[index];
+
+      const targetLeft =
+        targets[0];
+
+      const previous =
+        index > 0
+          ? layer[index - 1]
+          : null;
+
+      const next =
+        index < layer.length - 1
+          ? layer[index + 1]
+          : null;
+
+      const minimum =
+        previous
+          ? previous.x +
+            previous.width +
+            SIBLING_GAP
+          : -Infinity;
+
+      const maximum =
+        next
+          ? next.x -
+            SIBLING_GAP -
+            unit.width
+          : Infinity;
+
+      // 能直線就精準直線；若會撞卡片，則移到最接近的安全位置。
+      unit.x =
+        Math.min(
+          maximum,
+          Math.max(
+            minimum,
+            targetLeft
+          )
+        );
+    });
+  });
+}
+
 
 function alignPedigreeParentsToChildren(
   layers,
@@ -4970,7 +4962,7 @@ function alignPedigreeParentsToChildren(
     });
 }
 
-function resolvePedigreeLayerCollisions(layers, subtreeWidths = null) {
+function resolvePedigreeLayerCollisions(layers) {
   const {
     SIBLING:SIBLING_GAP
   } = getGaps();
@@ -4989,8 +4981,7 @@ function resolvePedigreeLayerCollisions(layers, subtreeWidths = null) {
     packGenealogyLayer(
       layer,
       targets,
-      SIBLING_GAP,
-      subtreeWidths
+      SIBLING_GAP
     );
   });
 }
@@ -5000,38 +4991,28 @@ function resolvePedigreeLayerCollisions(layers, subtreeWidths = null) {
 function solvePedigreeHorizontalLayout(
   layers,
   model,
-  connectorGroups,
-  subtreeWidths = null
+  connectorGroups
 ) {
-  // ========【族譜幾何核心】 設定 - Subtree-aware pedigree solver ========
-  // 硬約束：
-  // 1. 同世代 family unit 不重疊。
-  // 2. 每個 family unit 為自己的完整後代 subtree 保留水平空間。
-  // 3. 配偶維持同一世代。
-  //
-  // 軟約束：
-  // 4. 同父母子女維持連續 branch block。
-  // 5. 子女群以上一代 union 為中心向左右展開。
-  // 6. 父母 union 儘量對準子女 anchor 群中心。
-  for (let iteration = 0; iteration < 10; iteration += 1) {
-    alignPedigreeChildrenToParents(
-      layers,
-      model,
-      connectorGroups,
-      subtreeWidths
-    );
-
-    alignPedigreeParentsToChildren(
-      layers,
-      model,
-      connectorGroups,
-      subtreeWidths
-    );
-  }
-
-  resolvePedigreeLayerCollisions(
+  // ========【族譜幾何核心】 設定 - Parent-led top-down solver ========
+  // 族譜的方向權威是上一代 -> 下一代。
+  // 不再讓下一代反向把父母拉走，避免祖先層被後代寬度越推越開。
+  alignPedigreeChildrenToParents(
     layers,
-    subtreeWidths
+    model,
+    connectorGroups
+  );
+
+  // 碰撞只處理當代卡片本身。
+  resolvePedigreeLayerCollisions(
+    layers
+  );
+
+  // 碰撞處理後再做一次單一子女直線收斂。
+  // 能對準父母主幹時，renderer 就會直接畫一條 V，而不是 V-H-V。
+  straightenSingleChildPedigreeBranches(
+    layers,
+    model,
+    connectorGroups
   );
 }
 
@@ -5097,20 +5078,10 @@ function computeAutoPositions(visibleIds) {
       visibleIds
     );
 
-  const {
-    SIBLING:SIBLING_GAP
-  } = getGaps();
-
-  // 每個 unit 先計算完整後代 subtree 寬度。
-  // 這是下一代可比上一代自然展開、且不同支系不互相插入的空間權威。
-  const subtreeWidths =
-    buildGenealogySubtreeWidthMap(
-      model,
-      SIBLING_GAP
-    );
-
   minimizeGenealogyCrossings(layers);
 
+  // 同父母子女保持為連續 branch block；
+  // 但每一代只由自己的上一代定位，不讓更深後代反向拉開祖先。
   enforceSiblingBranchContiguity(
     layers,
     model,
@@ -5118,19 +5089,18 @@ function computeAutoPositions(visibleIds) {
   );
 
   setGenerationVerticalPositions(layers);
-
   assignInitialGenealogyHorizontalPositions(
-    layers,
-    subtreeWidths
+    layers
   );
 
   solvePedigreeHorizontalLayout(
     layers,
     model,
-    connectorGroups,
-    subtreeWidths
+    connectorGroups
   );
 
+  // 夫妻左右方向仍依各自原生家系決定。
+  // 如果左右翻轉，重新跑一次同樣的 top-down solver。
   const spouseOrientationChanged =
     orientSpouseUnitsByLineage(
       model,
@@ -5145,15 +5115,13 @@ function computeAutoPositions(visibleIds) {
     );
 
     assignInitialGenealogyHorizontalPositions(
-      layers,
-      subtreeWidths
+      layers
     );
 
     solvePedigreeHorizontalLayout(
       layers,
       model,
-      connectorGroups,
-      subtreeWidths
+      connectorGroups
     );
   }
 
