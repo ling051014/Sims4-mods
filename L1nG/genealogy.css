@@ -1811,9 +1811,12 @@ body[data-theme="midnight"] .gallery-item-stage {
 .sim-profile-header { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:start; gap:18px; padding:0 0 11px; }
 .sim-profile-avatar-block { width:156px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto; align-items:center; gap:5px 6px; }
 .avatar-preview.sim-profile-avatar { grid-column:1/-1; width:104px; height:104px; margin:0 auto 1px; border-radius:11px; font-size:36px; }
-.sim-profile-avatar-actions { grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:6px; }
-.filebtn.compact,.avatar-clear-compact { min-height:28px; padding:4px 8px; border:1px solid var(--border); border-radius:6px; background:var(--input-bg); color:var(--ink); font:inherit; font-size:10.5px; line-height:1; white-space:nowrap; }
-.avatar-clear-compact:hover,.filebtn.compact:hover { border-color:var(--accent); color:var(--accent); }
+.sim-profile-avatar-actions { grid-column:1/-1; }
+.avatar-editor-actions { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; }
+.avatar-editor-action,.filebtn.compact,.avatar-clear-compact { min-height:28px; padding:4px 8px; border:1px solid var(--border); border-radius:6px; background:var(--input-bg); color:var(--ink); font:inherit; font-size:11px; line-height:1; white-space:nowrap; }
+button.avatar-editor-action { cursor:pointer; }
+.avatar-editor-action:hover,.avatar-clear-compact:hover,.filebtn.compact:hover { border-color:var(--accent); color:var(--accent); }
+.avatar-editor-action:disabled { opacity:.45; cursor:not-allowed; border-color:var(--border); color:var(--sub); }
 .sim-profile-avatar-block .avatar-tip { grid-column:1/-1; text-align:center; font-size:10.5px; line-height:1.3; margin:0; }
 .sim-profile-edit-fields { min-width:0; display:grid; gap:8px; }
 .sim-profile-edit-fields label { min-width:0; display:grid; gap:4px; color:var(--sub); font-size:10.5px; font-weight:600; }
@@ -1881,6 +1884,14 @@ body[data-theme="midnight"] .gallery-item-stage {
 .family-rel-edit-grid[hidden] { display:none; }
 .family-rel-edit label { display:grid; gap:4px; color:var(--sub); font-size:10.5px; font-weight:600; }
 .family-rel-edit .ss-input { min-height:34px; }
+.family-rel-kind-list { display:grid; gap:5px; margin-top:7px; }
+.family-rel-kind-list:empty { display:none; }
+.family-rel-kind-row { display:grid; grid-template-columns:minmax(0,1fr) 132px; align-items:center; gap:8px; min-height:34px; padding:5px 7px; border:1px solid var(--border); border-radius:6px; background:var(--panel-bg); }
+.family-rel-kind-person { display:flex; align-items:center; gap:7px; min-width:0; color:var(--ink); font-size:11.5px; }
+.family-rel-kind-person .family-rel-person-avatar { width:24px; height:24px; flex-basis:24px; }
+.family-rel-kind-row select { width:100%; min-width:0; min-height:30px; padding:4px 28px 4px 7px; border:1px solid var(--border); border-radius:6px; background-color:var(--input-bg); color:var(--ink); font:inherit; font-size:11px; }
+.family-rel-person-copy { display:grid; min-width:0; gap:1px; }
+.family-rel-person-kinship { color:var(--sub); font-size:10px; line-height:1.25; }
 .sim-editor-panel .rel-section.first { margin-top:0; padding-top:0; border-top:0; }
 .family-rel-annotations { margin-top:9px; padding-top:9px; }
 .sim-editor-actions { flex:0 0 auto; margin-top:0; padding:9px 18px 10px; border-top:1px solid var(--border); background:var(--card); box-shadow:none; position:relative; z-index:6; }
@@ -2139,6 +2150,16 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 圖片填滿方式 */ object-fit: cover;
     /* 顯示方式 */ display: block;
 }
+.avatar-framed-image {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:var(--avatar-x,50%) var(--avatar-y,50%);
+    transform:scale(var(--avatar-zoom,1));
+    transform-origin:var(--avatar-x,50%) var(--avatar-y,50%);
+    display:block;
+    user-select:none;
+}
 
 .avatar-actions {
     /* 顯示方式 */ display: flex;
@@ -2180,6 +2201,29 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 文字顏色 */ color: var(--sub);
     /* 行距設定 */ line-height: 1.4;
 }
+
+
+/* ========【共用頭像編輯器】 設定 - 模擬市民與寵物共用上傳、取景與移除操作 ======== */
+.pet-editor-modal { width:min(620px,100%); }
+.pet-editor-layout { display:grid; grid-template-columns:170px minmax(0,1fr); align-items:start; gap:18px; }
+.pet-avatar-editor-block { display:grid; align-content:start; gap:7px; min-width:0; }
+.pet-avatar-editor-preview { width:112px; height:112px; margin:0 auto; border-radius:11px; font-size:36px; }
+.pet-avatar-editor-block .avatar-tip { text-align:center; margin:0; font-size:10.5px; line-height:1.35; }
+.pet-editor-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 11px; }
+.pet-editor-fields label { min-width:0; display:grid; gap:4px; color:var(--sub); font-size:11.5px; font-weight:600; }
+.pet-editor-fields input,.pet-editor-fields select { width:100%; min-width:0; min-height:34px; padding:6px 9px; border:1px solid var(--border); border-radius:7px; background:var(--input-bg); color:var(--ink); font:inherit; font-size:13px; outline:none; }
+.pet-editor-fields input:focus,.pet-editor-fields select:focus { border-color:var(--accent); }
+.pet-field-full { grid-column:1/-1; }
+
+.avatar-crop-modal { width:min(460px,100%); }
+.avatar-crop-stage { width:min(320px,72vw); aspect-ratio:1; margin:12px auto 10px; overflow:hidden; position:relative; border:1px solid var(--border); border-radius:12px; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); cursor:grab; touch-action:none; }
+.avatar-crop-stage.dragging { cursor:grabbing; }
+.avatar-crop-stage img { width:100%; height:100%; object-fit:cover; object-position:var(--avatar-x,50%) var(--avatar-y,50%); transform:scale(var(--avatar-zoom,1)); transform-origin:var(--avatar-x,50%) var(--avatar-y,50%); display:block; pointer-events:none; user-select:none; }
+.avatar-crop-stage::after { content:""; position:absolute; inset:0; border:1px solid color-mix(in srgb,var(--card) 78%,transparent); border-radius:inherit; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 12%,transparent); pointer-events:none; }
+.avatar-crop-hint { margin:0 auto 12px; max-width:320px; color:var(--sub); font-size:11.5px; line-height:1.45; text-align:center; }
+.avatar-crop-zoom-row { display:grid; grid-template-columns:auto minmax(0,1fr) 52px; align-items:center; gap:10px; color:var(--sub); font-size:12px; }
+.avatar-crop-zoom-row input { width:100%; }
+.avatar-crop-zoom-row output { color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
 
 .modal-actions {
     /* 顯示方式 */ display: flex;
@@ -3491,6 +3535,8 @@ body[data-theme="midnight"] .gallery-item-stage {
 }
 
 .info-modal { width:min(560px,100%); padding:0; overflow:hidden; }
+.info-card-content { min-width:0; }
+.editor-info-preview { width:min(560px,100%); margin:0 auto; overflow:hidden; border:1px solid var(--border); border-radius:9px; background:var(--card); }
 .info-card-header { display:flex; gap:14px; align-items:flex-start; padding:16px 18px 14px; border-bottom:1px solid var(--border); margin:0; }
 .info-card-avatar { width:104px; height:104px; border-radius:10px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:var(--avatar-ink); border:1px solid var(--border); position:relative; }
 .info-card-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
@@ -5805,6 +5851,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .family-rel-editor { grid-template-columns:1fr; }
   .family-rel-block { border-bottom:1px solid var(--border) !important; }
   .family-rel-block:last-child { border-bottom:0 !important; }
+  .family-rel-kind-row { grid-template-columns:minmax(0,1fr) 120px; }
+  .pet-editor-layout { grid-template-columns:150px minmax(0,1fr); gap:14px; }
   .info-modal { width:min(540px,100%); }
 }
 @media (max-width:520px) {
@@ -5813,6 +5861,11 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .avatar-preview.sim-profile-avatar { grid-column:1; grid-row:1 / span 2; margin:0; }
   .sim-profile-avatar-actions { grid-column:2; justify-content:flex-start; flex-wrap:wrap; }
   .sim-profile-avatar-block .avatar-tip { grid-column:2; text-align:left; }
+  .pet-editor-layout { grid-template-columns:1fr; }
+  .pet-avatar-editor-block { width:100%; }
+  .pet-editor-fields { grid-template-columns:1fr; }
+  .pet-field-full { grid-column:auto; }
+  .family-rel-kind-row { grid-template-columns:1fr; }
   .profile-fact-edit-row { grid-template-columns:1fr; }
   .profile-residence-field { grid-column:auto; }
   .family-rel-edit-grid { grid-template-columns:1fr; }
@@ -6544,7 +6597,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .nav-select-menu.family-nav-portal { display:grid; }
 
 
-/* ========【其他關係下拉視窗】 設定 - 脫離人物編輯視窗裁切，獨立浮在頁面最上層 ======== */
+/* ========【搜尋型下拉視窗】 設定 - 由 data-ss-portal 控制是否脫離編輯視窗裁切 ======== */
 .ss-dropdown.ss-dropdown-portal {
     position:fixed;
     z-index:5200;
