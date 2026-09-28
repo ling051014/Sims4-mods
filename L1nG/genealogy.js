@@ -1266,6 +1266,7 @@ function buildHouseholdEntries() {
         labelFamily:fam,
         label:displayDataText(fam.name, fam),
         memberIds:[...memberIds],
+        primaryMemberIds:[...memberIds],
         sourceFamilyIds:[fam.id],
         sortIndex:index
       };
@@ -1273,49 +1274,104 @@ function buildHouseholdEntries() {
     .filter(Boolean);
 }
 
-function collectEaTreeRange(seedIds) {
-  const seeds = [...new Set(seedIds.map(String).filter(id => genealogyData.sims[id]))];
-  if (!seeds.length) return [];
+function collectEaTreeScope(seedIds) {
+  const seeds =
+    [...new Set(
+      seedIds
+        .map(String)
+        .filter(id =>
+          genealogyData.sims[id]
+        )
+    )];
 
-  const coreIds = new Set(seeds);
+  if (!seeds.length) {
+    return {
+      coreIds:[],
+      visibleIds:[]
+    };
+  }
 
-  let frontier = new Set(seeds);
-  for (let depth = 0; depth < 5 && frontier.size; depth += 1) {
-    const next = new Set();
+  // coreIds = 目前族譜真正的血緣主幹。
+  // 配偶只在最後加入 visibleIds，不反過來把自己的家系擴張進 core。
+  const coreIds =
+    new Set(seeds);
+
+  let frontier =
+    new Set(seeds);
+
+  for (
+    let depth = 0;
+    depth < 5 && frontier.size;
+    depth += 1
+  ) {
+    const next =
+      new Set();
 
     frontier.forEach(id => {
-      familyLineageParentIds(genealogyData.sims[id]).forEach(parentId => {
-        if (!coreIds.has(parentId)) next.add(parentId);
+      familyLineageParentIds(
+        genealogyData.sims[id]
+      ).forEach(parentId => {
+        if (!coreIds.has(parentId)) {
+          next.add(parentId);
+        }
       });
     });
 
-    next.forEach(id => coreIds.add(id));
+    next.forEach(id =>
+      coreIds.add(id)
+    );
+
     frontier = next;
   }
 
-  frontier = new Set(seeds);
-  for (let depth = 0; depth < 5 && frontier.size; depth += 1) {
-    const next = new Set();
+  frontier =
+    new Set(seeds);
+
+  for (
+    let depth = 0;
+    depth < 5 && frontier.size;
+    depth += 1
+  ) {
+    const next =
+      new Set();
 
     frontier.forEach(id => {
-      familyLineageChildIds(id).forEach(childId => {
-        if (!coreIds.has(childId)) next.add(childId);
-      });
+      familyLineageChildIds(id)
+        .forEach(childId => {
+          if (!coreIds.has(childId)) {
+            next.add(childId);
+          }
+        });
     });
 
-    next.forEach(id => coreIds.add(id));
+    next.forEach(id =>
+      coreIds.add(id)
+    );
+
     frontier = next;
   }
 
-  const visibleIds = new Set(coreIds);
+  const visibleIds =
+    new Set(coreIds);
 
   coreIds.forEach(id => {
-    familyDisplaySpouseIds(genealogyData.sims[id]).forEach(spouseId => {
+    familyDisplaySpouseIds(
+      genealogyData.sims[id]
+    ).forEach(spouseId => {
       visibleIds.add(spouseId);
     });
   });
 
-  return [...visibleIds];
+  return {
+    coreIds:[...coreIds],
+    visibleIds:[...visibleIds]
+  };
+}
+
+function collectEaTreeRange(seedIds) {
+  return collectEaTreeScope(
+    seedIds
+  ).visibleIds;
 }
 
 function setsOverlap(a, b) {
@@ -1478,6 +1534,7 @@ function buildEaTreeEntries() {
         labelFamily:fam,
         label:displayDataText(fam.name, fam),
         memberIds,
+        primaryMemberIds:[...memberIds],
         sourceFamilyIds:[fam.id],
         sortIndex:familyIndex
       });
@@ -1489,7 +1546,15 @@ function buildEaTreeEntries() {
     const branches = [];
 
     seedGroups.forEach(seedGroup => {
-      const visibleIds = collectEaTreeRange(seedGroup);
+      const treeScope =
+        collectEaTreeScope(seedGroup);
+
+      const visibleIds =
+        treeScope.visibleIds;
+
+      const primarySet =
+        new Set(treeScope.coreIds);
+
       if (!visibleIds.length) return;
 
       const renderedComponents =
@@ -1506,7 +1571,11 @@ function buildEaTreeEntries() {
 
         branches.push({
           seedIds:branchSeedIds,
-          memberIds:componentIds
+          memberIds:componentIds,
+          primaryMemberIds:
+            componentIds.filter(id =>
+              primarySet.has(id)
+            )
         });
       });
     });
@@ -1519,6 +1588,8 @@ function buildEaTreeEntries() {
         labelFamily:fam,
         label:eaTreeEntryLabel(fam, branch.seedIds, branches.length),
         memberIds:branch.memberIds,
+        primaryMemberIds:
+          [...branch.primaryMemberIds],
         seedIds:[...branch.seedIds],
         sourceFamilyIds:[fam.id],
         sortIndex:familyIndex + branchIndex / 100
@@ -1598,6 +1669,19 @@ function buildExtendedFamilyComponents() {
           })[0] ||
         sourceFamilies[0];
 
+      const anchorScope =
+        collectEaTreeScope(
+          familySourceSeedIds(
+            anchorFamily
+          )
+        );
+
+      const primaryMemberIds =
+        anchorScope.coreIds
+          .filter(id =>
+            memberSet.has(id)
+          );
+
       return {
         mode:'extended',
         value:`extended:${component.key}`,
@@ -1606,6 +1690,13 @@ function buildExtendedFamilyComponents() {
         labelFamily:anchorFamily,
         label:displayDataText(anchorFamily.name, anchorFamily),
         memberIds:component.memberIds,
+        primaryMemberIds:
+          primaryMemberIds.length
+            ? primaryMemberIds
+            : familySourceSeedIds(anchorFamily)
+                .filter(id =>
+                  memberSet.has(id)
+                ),
         sourceFamilyIds:sourceFamilies.map(fam => fam.id),
         sortIndex:Math.min(...sourceFamilies.map(fam => familyIndex.get(fam.id) ?? Number.MAX_SAFE_INTEGER))
       };
@@ -1625,6 +1716,7 @@ function buildExtendedFamilyComponents() {
         labelFamily:fam,
         label:displayDataText(fam.name, fam),
         memberIds,
+        primaryMemberIds:[...memberIds],
         sourceFamilyIds:[fam.id],
         sortIndex:familyIndex.get(fam.id) ?? Number.MAX_SAFE_INTEGER
       };
@@ -3982,6 +4074,599 @@ function stableGenealogyUnitCompare(a, b) {
   );
 }
 
+
+// ========【族譜排列身分】 設定 - 主家族與外部關係人物分離 ========
+function getActiveLayoutPrimaryIds(
+  visibleIds
+) {
+  const visible =
+    visibleIds instanceof Set
+      ? visibleIds
+      : new Set(visibleIds || []);
+
+  const entry =
+    getActiveFamilySelectorEntry(
+      familyTreeViewMode
+    );
+
+  const candidates =
+    (
+      entry &&
+      Array.isArray(
+        entry.primaryMemberIds
+      ) &&
+      entry.primaryMemberIds.length
+    )
+      ? entry.primaryMemberIds
+      : (
+          currentTreeFamily()?.memberIds ||
+          []
+        );
+
+  const primary =
+    new Set(
+      candidates
+        .map(String)
+        .filter(id =>
+          visible.has(id) &&
+          genealogyData.sims[id]
+        )
+    );
+
+  // 篩選可能暫時隱藏所有主家族成員。
+  // 這時退回目前 visible 集合，避免沒有排列權威。
+  if (!primary.size) {
+    visible.forEach(id => {
+      if (genealogyData.sims[id]) {
+        primary.add(id);
+      }
+    });
+  }
+
+  return primary;
+}
+
+function compareFamilyBranchPath(
+  leftPath,
+  rightPath
+) {
+  const left =
+    leftPath || [];
+
+  const right =
+    rightPath || [];
+
+  const length =
+    Math.max(
+      left.length,
+      right.length
+    );
+
+  for (
+    let index = 0;
+    index < length;
+    index += 1
+  ) {
+    if (left[index] == null) return -1;
+    if (right[index] == null) return 1;
+
+    if (left[index] !== right[index]) {
+      return (
+        left[index] -
+        right[index]
+      );
+    }
+  }
+
+  return 0;
+}
+
+function buildFamilyBranchOwnership(
+  model,
+  primarySimIds
+) {
+  const primaryUnitIds =
+    new Set();
+
+  model.units.forEach(unit => {
+    const primaryMemberIds =
+      new Set(
+        unit.members
+          .map(member => member.id)
+          .filter(id =>
+            primarySimIds.has(id)
+          )
+      );
+
+    const attachmentMemberIds =
+      new Set(
+        unit.members
+          .map(member => member.id)
+          .filter(id =>
+            !primarySimIds.has(id)
+          )
+      );
+
+    unit.primaryMemberIds =
+      primaryMemberIds;
+
+    unit.attachmentMemberIds =
+      attachmentMemberIds;
+
+    unit.isPrimaryBranch =
+      primaryMemberIds.size > 0;
+
+    if (unit.isPrimaryBranch) {
+      primaryUnitIds.add(unit.id);
+    }
+  });
+
+  // 若目前資料沒有可辨識的 primary unit，
+  // 所有 visible unit 都視為主族譜，保持安全退化。
+  if (!primaryUnitIds.size) {
+    model.units.forEach(unit => {
+      unit.isPrimaryBranch = true;
+      unit.primaryMemberIds =
+        new Set(
+          unit.members.map(
+            member => member.id
+          )
+        );
+      unit.attachmentMemberIds =
+        new Set();
+      primaryUnitIds.add(unit.id);
+    });
+  }
+
+  const primaryParents =
+    new Map();
+
+  const primaryChildren =
+    new Map();
+
+  model.units.forEach(unit => {
+    if (!primaryUnitIds.has(unit.id)) {
+      return;
+    }
+
+    primaryParents.set(
+      unit.id,
+      [...unit.parentUnitIds]
+        .filter(parentId =>
+          primaryUnitIds.has(parentId)
+        )
+    );
+
+    primaryChildren.set(
+      unit.id,
+      [...unit.childUnitIds]
+        .filter(childId =>
+          primaryUnitIds.has(childId)
+        )
+        .sort((leftId, rightId) =>
+          stableGenealogyUnitCompare(
+            model.unitById.get(leftId),
+            model.unitById.get(rightId)
+          )
+        )
+    );
+  });
+
+  const pathByUnit =
+    new Map();
+
+  const rootByUnit =
+    new Map();
+
+  const ownerParentByUnit =
+    new Map();
+
+  const roots =
+    model.units
+      .filter(unit =>
+        primaryUnitIds.has(unit.id) &&
+        !(
+          primaryParents.get(unit.id) ||
+          []
+        ).length
+      )
+      .sort(stableGenealogyUnitCompare);
+
+  let nextRootIndex = 0;
+
+  roots.forEach(root => {
+    pathByUnit.set(
+      root.id,
+      [nextRootIndex]
+    );
+
+    rootByUnit.set(
+      root.id,
+      root.id
+    );
+
+    nextRootIndex += 1;
+  });
+
+  const primaryUnitsByGeneration =
+    model.units
+      .filter(unit =>
+        primaryUnitIds.has(unit.id)
+      )
+      .sort((left, right) =>
+        left.generation -
+          right.generation ||
+        stableGenealogyUnitCompare(
+          left,
+          right
+        )
+      );
+
+  // generation DAG 由上往下建立遞迴 branch path。
+  // B branch = [root, B]；B 的所有後代都會保留這個 prefix，
+  // 因此其他 family 永遠無法插進 B / C branch 之間。
+  primaryUnitsByGeneration
+    .forEach(unit => {
+      if (pathByUnit.has(unit.id)) {
+        return;
+      }
+
+      const parentCandidates =
+        (
+          primaryParents.get(unit.id) ||
+          []
+        )
+          .filter(parentId =>
+            pathByUnit.has(parentId)
+          )
+          .sort((leftId, rightId) =>
+            compareFamilyBranchPath(
+              pathByUnit.get(leftId),
+              pathByUnit.get(rightId)
+            ) ||
+            stableGenealogyUnitCompare(
+              model.unitById.get(leftId),
+              model.unitById.get(rightId)
+            )
+          );
+
+      if (!parentCandidates.length) {
+        pathByUnit.set(
+          unit.id,
+          [nextRootIndex]
+        );
+
+        rootByUnit.set(
+          unit.id,
+          unit.id
+        );
+
+        nextRootIndex += 1;
+        return;
+      }
+
+      const ownerParentId =
+        parentCandidates[0];
+
+      const siblings =
+        primaryChildren.get(
+          ownerParentId
+        ) || [];
+
+      const siblingIndex =
+        Math.max(
+          0,
+          siblings.indexOf(unit.id)
+        );
+
+      pathByUnit.set(
+        unit.id,
+        [
+          ...pathByUnit.get(
+            ownerParentId
+          ),
+          siblingIndex
+        ]
+      );
+
+      rootByUnit.set(
+        unit.id,
+        rootByUnit.get(
+          ownerParentId
+        ) ||
+        ownerParentId
+      );
+
+      ownerParentByUnit.set(
+        unit.id,
+        ownerParentId
+      );
+    });
+
+  // 每個 generation 中，主家族的左右位置用來決定外部配偶應往哪一側掛。
+  const primarySideByUnit =
+    new Map();
+
+  const generations =
+    [...new Set(
+      model.units
+        .filter(unit =>
+          primaryUnitIds.has(unit.id)
+        )
+        .map(unit =>
+          unit.generation
+        )
+    )]
+      .sort((a, b) => a - b);
+
+  generations.forEach(generation => {
+    const primaryUnits =
+      model.units
+        .filter(unit =>
+          primaryUnitIds.has(unit.id) &&
+          unit.generation === generation
+        )
+        .sort((left, right) =>
+          compareFamilyBranchPath(
+            pathByUnit.get(left.id),
+            pathByUnit.get(right.id)
+          ) ||
+          stableGenealogyUnitCompare(
+            left,
+            right
+          )
+        );
+
+    const midpoint =
+      (primaryUnits.length - 1) / 2;
+
+    primaryUnits.forEach(
+      (unit, index) => {
+        primarySideByUnit.set(
+          unit.id,
+          index < midpoint
+            ? -1
+            : (
+                index > midpoint
+                  ? 1
+                  : 0
+              )
+        );
+      }
+    );
+  });
+
+  const attachmentOwnerByUnit =
+    new Map();
+
+  const attachmentSideByUnit =
+    new Map();
+
+  // Attachment unit（通常是前任）只找直接關聯的 primary owner，
+  // 不把它自己的親族遞迴帶進主家族。
+  model.units.forEach(unit => {
+    if (primaryUnitIds.has(unit.id)) {
+      return;
+    }
+
+    const candidates =
+      new Map();
+
+    unit.members.forEach(member => {
+      const relatedIds =
+        new Set([
+          ...(member.spouseIds || []),
+          ...(member.exSpouseIds || []),
+          ...genealogyParentIds(
+            member,
+            model.byId
+          ),
+          ...getChildrenOf(
+            String(member.id)
+          )
+            .map(child =>
+              String(child.id)
+            )
+        ]);
+
+      relatedIds.forEach(relatedId => {
+        const relatedUnit =
+          model.unitBySim.get(
+            String(relatedId)
+          );
+
+        if (
+          !relatedUnit ||
+          !primaryUnitIds.has(
+            relatedUnit.id
+          )
+        ) {
+          return;
+        }
+
+        const generationDistance =
+          Math.abs(
+            relatedUnit.generation -
+            unit.generation
+          );
+
+        const existing =
+          candidates.get(
+            relatedUnit.id
+          );
+
+        if (
+          !existing ||
+          generationDistance <
+            existing.generationDistance
+        ) {
+          candidates.set(
+            relatedUnit.id,
+            {
+              unit:relatedUnit,
+              generationDistance
+            }
+          );
+        }
+      });
+    });
+
+    const owner =
+      [...candidates.values()]
+        .sort((left, right) =>
+          left.generationDistance -
+            right.generationDistance ||
+          compareFamilyBranchPath(
+            pathByUnit.get(
+              left.unit.id
+            ),
+            pathByUnit.get(
+              right.unit.id
+            )
+          )
+        )[0]?.unit ||
+      null;
+
+    if (!owner) {
+      return;
+    }
+
+    attachmentOwnerByUnit.set(
+      unit.id,
+      owner.id
+    );
+
+    let side =
+      primarySideByUnit.get(
+        owner.id
+      ) || 0;
+
+    if (!side) {
+      side =
+        stableGenealogyUnitCompare(
+          unit,
+          owner
+        ) < 0
+          ? -1
+          : 1;
+    }
+
+    attachmentSideByUnit.set(
+      unit.id,
+      side
+    );
+  });
+
+  return {
+    primarySimIds,
+    primaryUnitIds,
+    pathByUnit,
+    rootByUnit,
+    ownerParentByUnit,
+    primarySideByUnit,
+    attachmentOwnerByUnit,
+    attachmentSideByUnit
+  };
+}
+
+function applyFamilyBranchOrdering(
+  layers,
+  model,
+  ownership
+) {
+  layers.forEach(layer => {
+    if (!layer || layer.length < 2) {
+      return;
+    }
+
+    const primary = [];
+    const leftAttachments = [];
+    const rightAttachments = [];
+
+    layer.forEach(unit => {
+      if (
+        ownership.primaryUnitIds
+          .has(unit.id)
+      ) {
+        primary.push(unit);
+        return;
+      }
+
+      const side =
+        ownership.attachmentSideByUnit
+          .get(unit.id) || 1;
+
+      (
+        side < 0
+          ? leftAttachments
+          : rightAttachments
+      ).push(unit);
+    });
+
+    primary.sort((left, right) =>
+      compareFamilyBranchPath(
+        ownership.pathByUnit.get(
+          left.id
+        ),
+        ownership.pathByUnit.get(
+          right.id
+        )
+      ) ||
+      stableGenealogyUnitCompare(
+        left,
+        right
+      )
+    );
+
+    const attachmentCompare =
+      (left, right) => {
+        const leftOwner =
+          ownership.attachmentOwnerByUnit
+            .get(left.id);
+
+        const rightOwner =
+          ownership.attachmentOwnerByUnit
+            .get(right.id);
+
+        const ownerOrder =
+          compareFamilyBranchPath(
+            ownership.pathByUnit.get(
+              leftOwner
+            ),
+            ownership.pathByUnit.get(
+              rightOwner
+            )
+          );
+
+        return (
+          ownerOrder ||
+          stableGenealogyUnitCompare(
+            left,
+            right
+          )
+        );
+      };
+
+    leftAttachments.sort(
+      attachmentCompare
+    );
+
+    rightAttachments.sort(
+      attachmentCompare
+    );
+
+    // 外部人物只能待在整個 Primary Family block 的外側。
+    // 不允許 [B branch][外人][C branch]。
+    layer.splice(
+      0,
+      layer.length,
+      ...leftAttachments,
+      ...primary,
+      ...rightAttachments
+    );
+  });
+}
+
 function buildGenerationLayers(units) {
   const layers = new Map();
 
@@ -3998,217 +4683,6 @@ function buildGenerationLayers(units) {
   });
 
   return layers;
-}
-
-function buildNormalizedUnitRanks(layers) {
-  const ranks = new Map();
-
-  layers.forEach(layer => {
-    const denominator = Math.max(1, layer.length - 1);
-
-    layer.forEach((unit, index) => {
-      ranks.set(
-        unit.id,
-        layer.length <= 1
-          ? 0.5
-          : index / denominator
-      );
-    });
-  });
-
-  return ranks;
-}
-
-function reorderGenerationLayer(layer, relationField, ranks) {
-  const previousIndex = new Map(
-    layer.map((unit, index) => [unit.id, index])
-  );
-
-  layer.sort((a, b) => {
-    const score = unit => {
-      const neighbors = [...unit[relationField]]
-        .map(id => ranks.get(id))
-        .filter(Number.isFinite);
-
-      if (!neighbors.length) return null;
-
-      return neighbors.reduce((sum, value) => sum + value, 0) /
-        neighbors.length;
-    };
-
-    const aScore = score(a);
-    const bScore = score(b);
-
-    if (aScore == null && bScore == null) {
-      return previousIndex.get(a.id) - previousIndex.get(b.id);
-    }
-
-    if (aScore == null) return 1;
-    if (bScore == null) return -1;
-
-    return (
-      aScore - bScore ||
-      previousIndex.get(a.id) - previousIndex.get(b.id)
-    );
-  });
-}
-
-function minimizeGenealogyCrossings(layers) {
-  const generationNumbers = [...layers.keys()]
-    .sort((a, b) => a - b);
-
-  if (generationNumbers.length <= 1) return;
-
-  // 多輪上下 barycenter sweep。
-  // 這裡直接改 family unit 的左右順序，而不是等畫線時再繞路。
-  for (let iteration = 0; iteration < 6; iteration += 1) {
-    let ranks = buildNormalizedUnitRanks(layers);
-
-    generationNumbers.slice(1).forEach(generation => {
-      reorderGenerationLayer(
-        layers.get(generation),
-        'parentUnitIds',
-        ranks
-      );
-
-      ranks = buildNormalizedUnitRanks(layers);
-    });
-
-    ranks = buildNormalizedUnitRanks(layers);
-
-    generationNumbers
-      .slice(0, -1)
-      .reverse()
-      .forEach(generation => {
-        reorderGenerationLayer(
-          layers.get(generation),
-          'childUnitIds',
-          ranks
-        );
-
-        ranks = buildNormalizedUnitRanks(layers);
-      });
-  }
-}
-
-function enforceSiblingBranchContiguity(layers, model, connectorGroups) {
-  const generations =
-    [...layers.keys()].sort((a, b) => a - b);
-
-  generations.forEach(generation => {
-    const layer =
-      layers.get(generation);
-
-    if (!layer || layer.length < 2) return;
-
-    const indexByUnit =
-      new Map(
-        layer.map((unit, index) => [
-          unit.id,
-          index
-        ])
-      );
-
-    const adjacency =
-      new Map(
-        layer.map(unit => [
-          unit.id,
-          new Set()
-        ])
-      );
-
-    connectorGroups.forEach(group => {
-      const childUnitIds =
-        [...new Set(
-          group.children
-            .map(childId =>
-              model.unitBySim.get(childId)
-            )
-            .filter(unit =>
-              unit &&
-              unit.generation === generation &&
-              adjacency.has(unit.id)
-            )
-            .map(unit => unit.id)
-        )];
-
-      if (childUnitIds.length < 2) return;
-
-      const head =
-        childUnitIds[0];
-
-      childUnitIds
-        .slice(1)
-        .forEach(unitId => {
-          adjacency.get(head)?.add(unitId);
-          adjacency.get(unitId)?.add(head);
-        });
-    });
-
-    const visited = new Set();
-    const components = [];
-
-    layer.forEach(unit => {
-      if (visited.has(unit.id)) return;
-
-      const queue = [unit.id];
-      const ids = [];
-
-      while (queue.length) {
-        const unitId = queue.shift();
-        if (visited.has(unitId)) continue;
-
-        visited.add(unitId);
-        ids.push(unitId);
-
-        (adjacency.get(unitId) || [])
-          .forEach(nextId => {
-            if (!visited.has(nextId)) {
-              queue.push(nextId);
-            }
-          });
-      }
-
-      const units =
-        ids
-          .map(unitId =>
-            model.unitById.get(unitId)
-          )
-          .filter(Boolean)
-          .sort((left, right) =>
-            indexByUnit.get(left.id) -
-            indexByUnit.get(right.id)
-          );
-
-      const indexes =
-        units.map(unit =>
-          indexByUnit.get(unit.id)
-        );
-
-      components.push({
-        units,
-        center:
-          indexes.reduce(
-            (sum, value) => sum + value,
-            0
-          ) / Math.max(1, indexes.length),
-        first:Math.min(...indexes)
-      });
-    });
-
-    components.sort((left, right) =>
-      left.center - right.center ||
-      left.first - right.first
-    );
-
-    layer.splice(
-      0,
-      layer.length,
-      ...components.flatMap(
-        component => component.units
-      )
-    );
-  });
 }
 
 function genealogyFamilySideScore(member, unit, model, connectorGroups) {
@@ -4276,15 +4750,60 @@ function genealogyFamilySideScore(member, unit, model, connectorGroups) {
   ) / totalWeight;
 }
 
-function orientSpouseUnitsByLineage(model, connectorGroups) {
+function orientSpouseUnitsByLineage(
+  model,
+  connectorGroups,
+  ownership = null
+) {
   let changed = false;
 
   model.units.forEach(unit => {
-    if (unit.members.length !== 2) return;
+    if (unit.members.length !== 2) {
+      return;
+    }
 
     const [leftMember, rightMember] =
       unit.members;
 
+    // ========【主家族配偶方向】 設定 - 外部配偶永遠朝主家族外側 ========
+    if (
+      ownership &&
+      unit.primaryMemberIds &&
+      unit.primaryMemberIds.size === 1 &&
+      unit.attachmentMemberIds &&
+      unit.attachmentMemberIds.size === 1
+    ) {
+      const primaryId =
+        [...unit.primaryMemberIds][0];
+
+      const primaryIsLeft =
+        leftMember.id === primaryId;
+
+      const side =
+        ownership.primarySideByUnit
+          .get(unit.id) || 0;
+
+      // 左 branch：X ─ B
+      // 右 branch：C ─ Y
+      if (side < 0 && primaryIsLeft) {
+        unit.members.reverse();
+        changed = true;
+        return;
+      }
+
+      if (side > 0 && !primaryIsLeft) {
+        unit.members.reverse();
+        changed = true;
+        return;
+      }
+
+      if (side !== 0) {
+        return;
+      }
+    }
+
+    // 主家族中央或兩人都屬於 primary 時，
+    // 沿用既有 lineage orientation。
     const leftScore =
       genealogyFamilySideScore(
         leftMember,
@@ -4308,7 +4827,8 @@ function orientSpouseUnitsByLineage(model, connectorGroups) {
       Number.isFinite(rightScore)
     ) {
       shouldReverse =
-        leftScore > rightScore + 0.5;
+        leftScore >
+        rightScore + 0.5;
     } else {
       const unitCenter =
         unit.x +
@@ -4317,7 +4837,9 @@ function orientSpouseUnitsByLineage(model, connectorGroups) {
       if (Number.isFinite(leftScore)) {
         shouldReverse =
           leftScore > unitCenter;
-      } else if (Number.isFinite(rightScore)) {
+      } else if (
+        Number.isFinite(rightScore)
+      ) {
         shouldReverse =
           rightScore < unitCenter;
       }
@@ -5407,7 +5929,7 @@ function solveAutoRelationshipGeometry(
 }
 
 function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
-  // ========【族譜幾何核心】 設定 - Collision-first pedigree solver ========
+  // ========【族譜幾何核心】 設定 - 在 Family Branch Ordering 內求解座標 ========
   // 硬約束：
   // 1. 同世代 family unit 不重疊。
   // 2. 配偶維持同一世代。
@@ -5416,9 +5938,9 @@ function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
   // 3. 父母 union 儘量對準子女群中心。
   // 4. 子女群儘量以父母 union 為中心。
   //
-  // 這一階段只產生穩定的初始排列。
-  // 單一子女的「預設必須垂直」由 solveAutoRelationshipGeometry()
-  // 在配偶方向確定後作為最終 hard constraint 統一處理。
+  // 這一階段只調整既定 branch order 下的座標，不得重新排序 unit。
+  // 單／多子女的 canonical relationship geometry
+  // 仍由 solveAutoRelationshipGeometry() 作為最終 hard constraint。
   for (let iteration = 0; iteration < 10; iteration += 1) {
     alignPedigreeChildrenToParents(
       layers,
@@ -5488,11 +6010,26 @@ function placeGenealogyUnitMembers(units) {
 }
 
 function computeAutoPositions(visibleIds) {
+  const primarySimIds =
+    getActiveLayoutPrimaryIds(
+      visibleIds
+    );
+
   const model =
-    buildGenealogyLayoutModel(visibleIds);
+    buildGenealogyLayoutModel(
+      visibleIds
+    );
+
+  const ownership =
+    buildFamilyBranchOwnership(
+      model,
+      primarySimIds
+    );
 
   const layers =
-    buildGenerationLayers(model.units);
+    buildGenerationLayers(
+      model.units
+    );
 
   const connectorGroups =
     buildParentChildConnectorGroups(
@@ -5500,39 +6037,46 @@ function computeAutoPositions(visibleIds) {
       visibleIds
     );
 
-  minimizeGenealogyCrossings(layers);
-
-  // 同父母子女保持為同一個連續 branch block。
-  enforceSiblingBranchContiguity(
+  // ========【Family Branch Ordering】 設定 - 先排家族，再排人物 ========
+  // 主家族的遞迴 branch path 是排序權威：
+  // A -> B branch / C branch 各自保持完整；
+  // 外部 relationship attachment 只能留在 Primary Family block 外側。
+  applyFamilyBranchOrdering(
     layers,
     model,
-    connectorGroups
+    ownership
   );
 
-  setGenerationVerticalPositions(layers);
+  setGenerationVerticalPositions(
+    layers
+  );
+
   assignInitialGenealogyHorizontalPositions(
     layers
   );
 
-  // 先完成一般 pedigree 排列與同代防重疊。
+  // 幾何 solver 只能在既定 branch order 下調整座標；
+  // 不再有 generation-global crossing minimization 可以把別家插回來。
   solvePedigreeHorizontalLayout(
     layers,
     model,
     connectorGroups
   );
 
-  // 配偶左右方向確定後，才建立最終 relationship geometry。
   const spouseOrientationChanged =
     orientSpouseUnitsByLineage(
       model,
-      connectorGroups
+      connectorGroups,
+      ownership
     );
 
   if (spouseOrientationChanged) {
-    enforceSiblingBranchContiguity(
+    // 只改 Family Unit 內的人物左右方向，
+    // branch ownership / generation order 保持不變。
+    applyFamilyBranchOrdering(
       layers,
       model,
-      connectorGroups
+      ownership
     );
 
     assignInitialGenealogyHorizontalPositions(
@@ -5546,11 +6090,8 @@ function computeAutoPositions(visibleIds) {
     );
   }
 
-  // ========【自動排列最終權威】 設定 - 單／多子女共用 canonical relationship geometry ========
-  // 這不是 renderer 修線，也不是卡片智慧吸附。
-  // AUTO 直接用實際 relationship anchor 排人物：
-  // 單子女保持純 V；多子女保持 parent trunk + sibling bus + 純垂直 child branches。
-  // V-H-V 只保留給玩家進入自由排列後主動改變位置的狀態。
+  // 前面已確認的 canonical relationship geometry 保持最終權威。
+  // Branch Ordering 只決定「誰在哪一側」，不改親子／配偶拓撲。
   solveAutoRelationshipGeometry(
     layers,
     model,
