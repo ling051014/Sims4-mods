@@ -4446,20 +4446,65 @@ function genealogyUnitMemberLocalGeometry(unit, simId) {
   return null;
 }
 
+// ========【族譜關係錨點】 設定 - 自動排列與 SVG 共用同一個頭像／卡片連接中心 ========
+function genealogyUnitMemberRelationshipGeometry(
+  unit,
+  simId
+) {
+  const base =
+    genealogyUnitMemberLocalGeometry(
+      unit,
+      simId
+    );
+
+  if (!unit || !base) {
+    return null;
+  }
+
+  const anchorLocalX =
+    base.left +
+    relationshipVerticalAnchorLocalX(
+      simId
+    );
+
+  return {
+    ...base,
+    anchorLocalX,
+
+    // sibling 排列的左右安全距離必須從真正的關係 anchor 算，
+    // 不能再從卡片幾何中心算。
+    leftExtent:anchorLocalX,
+    rightExtent:
+      unit.width -
+      anchorLocalX
+  };
+}
+
+
 function genealogyGroupParentEntries(group, model) {
   return group.parentIds
     .map(parentId => {
-      const unit = model.unitBySim.get(parentId);
-      const geometry =
-        genealogyUnitMemberLocalGeometry(unit, parentId);
+      const unit =
+        model.unitBySim.get(parentId);
 
-      if (!unit || !geometry) return null;
+      const geometry =
+        genealogyUnitMemberRelationshipGeometry(
+          unit,
+          parentId
+        );
+
+      if (!unit || !geometry) {
+        return null;
+      }
 
       return {
         id:parentId,
+        sim:model.byId.get(parentId),
         unit,
         geometry,
-        centerX:unit.x + geometry.centerX
+        anchorX:
+          unit.x +
+          geometry.anchorLocalX
       };
     })
     .filter(Boolean);
@@ -4467,81 +4512,27 @@ function genealogyGroupParentEntries(group, model) {
 
 function genealogyGroupSourceX(group, model) {
   const parents =
-    genealogyGroupParentEntries(group, model);
-
-  if (!parents.length) return null;
-  if (parents.length === 1) {
-    return parents[0].centerX;
-  }
-
-  const unitIds =
-    new Set(parents.map(parent => parent.unit.id));
-
-  // 共同父母位於同一現任配偶 family unit 時，
-  // union node 永遠是兩名父母卡片之間的配偶線中點。
-  if (unitIds.size === 1 && parents.length === 2) {
-    const [a, b] =
-      [...parents].sort(
-        (left, right) =>
-          left.geometry.centerX -
-          right.geometry.centerX
-      );
-
-    return (
-      a.unit.x +
-      (a.geometry.right + b.geometry.left) / 2
+    genealogyGroupParentEntries(
+      group,
+      model
     );
-  }
 
-  // 非同一 family unit 的共同父母，以父母本人中心的中點作為 union X。
-  // 畫線只使用水平 / 垂直段，不使用斜線。
-  const xs =
-    parents.map(parent => parent.centerX);
-
-  return (
-    Math.min(...xs) +
-    Math.max(...xs)
-  ) / 2;
-}
-
-// ========【自動排列關係軸】 設定 - 使用與 renderer 完全相同的 parent source 幾何 ========
-function genealogyRelationshipGroupSourceX(group, model) {
-  const parentEntries =
-    group.parentIds
-      .map(parentId => {
-        const unit =
-          model.unitBySim.get(parentId);
-
-        const geometry =
-          genealogyUnitMemberLocalGeometry(
-            unit,
-            parentId
-          );
-
-        if (!unit || !geometry) {
-          return null;
-        }
-
-        return {
-          id:parentId,
-          sim:model.byId.get(parentId),
-          position:{
-            id:parentId,
-            x:unit.x + geometry.left,
-            y:unit.y
-          }
-        };
-      })
-      .filter(Boolean);
-
-  if (!parentEntries.length) {
+  if (!parents.length) {
     return null;
   }
 
-  if (parentEntries.length === 1) {
+  const toPosition = parent => ({
+    id:parent.id,
+    x:
+      parent.unit.x +
+      parent.geometry.left,
+    y:parent.unit.y
+  });
+
+  if (parents.length === 1) {
     return (
       cardVerticalAnchor(
-        parentEntries[0].position,
+        toPosition(parents[0]),
         'bottom'
       ).x -
       PAD
@@ -4549,20 +4540,22 @@ function genealogyRelationshipGroupSourceX(group, model) {
   }
 
   const [first, second] =
-    parentEntries;
+    parents;
 
   const isPartnerPair =
     !!first.sim &&
     (
-      (first.sim.spouseIds || []).includes(second.id) ||
-      (first.sim.exSpouseIds || []).includes(second.id)
+      (first.sim.spouseIds || [])
+        .includes(second.id) ||
+      (first.sim.exSpouseIds || [])
+        .includes(second.id)
     );
 
   if (isPartnerPair) {
     return (
       pairJoinPoint(
-        first.position,
-        second.position
+        toPosition(first),
+        toPosition(second)
       ).x -
       PAD
     );
@@ -4570,14 +4563,14 @@ function genealogyRelationshipGroupSourceX(group, model) {
 
   const firstX =
     cardVerticalAnchor(
-      first.position,
+      toPosition(first),
       'bottom'
     ).x -
     PAD;
 
   const secondX =
     cardVerticalAnchor(
-      second.position,
+      toPosition(second),
       'bottom'
     ).x -
     PAD;
@@ -4588,59 +4581,77 @@ function genealogyRelationshipGroupSourceX(group, model) {
   ) / 2;
 }
 
+// ========【自動排列關係軸】 設定 - 使用與 renderer 完全相同的 parent source 幾何 ========
+
 
 function genealogyChildAnchorX(childId, model) {
-  const unit = model.unitBySim.get(childId);
+  const unit =
+    model.unitBySim.get(childId);
+
   const geometry =
-    genealogyUnitMemberLocalGeometry(unit, childId);
+    genealogyUnitMemberRelationshipGeometry(
+      unit,
+      childId
+    );
 
-  if (!unit || !geometry) return null;
+  if (!unit || !geometry) {
+    return null;
+  }
 
-  return unit.x + geometry.centerX;
+  return (
+    unit.x +
+    geometry.anchorLocalX
+  );
 }
 
 function pedigreeChildEntries(group, model, generation, layerIndex) {
-  const entries = group.children
-    .map(childId => {
-      const unit = model.unitBySim.get(childId);
+  const entries =
+    group.children
+      .map(childId => {
+        const unit =
+          model.unitBySim.get(childId);
 
-      if (
-        !unit ||
-        unit.generation !== generation
-      ) {
-        return null;
-      }
+        if (
+          !unit ||
+          unit.generation !== generation
+        ) {
+          return null;
+        }
 
-      const geometry =
-        genealogyUnitMemberLocalGeometry(
+        const geometry =
+          genealogyUnitMemberRelationshipGeometry(
+            unit,
+            childId
+          );
+
+        if (!geometry) return null;
+
+        return {
+          childId,
           unit,
-          childId
-        );
+          geometry,
+          order:
+            layerIndex.get(unit.id) ??
+            Number.MAX_SAFE_INTEGER
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) =>
+        a.order - b.order ||
+        a.geometry.anchorLocalX -
+          b.geometry.anchorLocalX
+      );
 
-      if (!geometry) return null;
-
-      return {
-        childId,
-        unit,
-        geometry,
-        order:
-          layerIndex.get(unit.id) ??
-          Number.MAX_SAFE_INTEGER
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) =>
-      a.order - b.order ||
-      a.geometry.centerX - b.geometry.centerX
-    );
-
-  // 同一 family unit 可能因夫妻雙方都屬於同一組父母而重複出現。
-  // 排版時每個 unit 只佔一個位置；真正畫線仍保留每位子女本人的 anchor。
+  // 同一 family unit 只佔一個自動排列位置；
+  // 真正 SVG 仍可保留每一位子女自己的 relationship anchor。
   const unique = [];
   const seen = new Set();
 
   entries.forEach(entry => {
-    if (seen.has(entry.unit.id)) return;
+    if (seen.has(entry.unit.id)) {
+      return;
+    }
+
     seen.add(entry.unit.id);
     unique.push(entry);
   });
@@ -4648,9 +4659,18 @@ function pedigreeChildEntries(group, model, generation, layerIndex) {
   return unique;
 }
 
-function buildPedigreeChildTargets(group, model, generation, layerIndex, gap) {
+function buildPedigreeChildTargets(
+  group,
+  model,
+  generation,
+  layerIndex,
+  gap
+) {
   const sourceX =
-    genealogyGroupSourceX(group, model);
+    genealogyGroupSourceX(
+      group,
+      model
+    );
 
   if (!Number.isFinite(sourceX)) {
     return [];
@@ -4664,27 +4684,37 @@ function buildPedigreeChildTargets(group, model, generation, layerIndex, gap) {
       layerIndex
     );
 
-  if (!entries.length) return [];
+  if (!entries.length) {
+    return [];
+  }
 
   if (entries.length === 1) {
-    const entry = entries[0];
+    const entry =
+      entries[0];
 
     return [{
       unit:entry.unit,
       left:
         sourceX -
-        entry.geometry.centerX
+        entry.geometry.anchorLocalX
     }];
   }
 
-  // ========【兄弟姊妹排列】 設定 - 以「子女本人 anchor」而不是 Family Unit 寬度置中 ========
-  // 每個子女的配偶只影響左右安全空間，不參與父母置中的中心計算。
-  // 先依人物 anchor 間需要的最小安全距離排開，再把「最左 / 最右子女本人」中點對準父母 union。
+  // ========【多子女 Relationship Bus】 設定 - 以真正 child relationship anchor 排 sibling ========
+  // 水平 sibling bus 是必要結構，但最後落到每名子女的 branch 必須是純垂直；
+  // 因此所有間距與置中都以實際 relationship anchor 為基準，不再使用卡片中心。
   const anchorXs = [0];
 
-  for (let index = 1; index < entries.length; index += 1) {
-    const previous = entries[index - 1];
-    const current = entries[index];
+  for (
+    let index = 1;
+    index < entries.length;
+    index += 1
+  ) {
+    const previous =
+      entries[index - 1];
+
+    const current =
+      entries[index];
 
     anchorXs[index] =
       anchorXs[index - 1] +
@@ -4693,26 +4723,32 @@ function buildPedigreeChildTargets(group, model, generation, layerIndex, gap) {
       current.geometry.leftExtent;
   }
 
-  const anchorCenter =
+  const busCenter =
     (
       anchorXs[0] +
-      anchorXs[anchorXs.length - 1]
+      anchorXs[
+        anchorXs.length - 1
+      ]
     ) / 2;
 
   const shift =
-    sourceX - anchorCenter;
+    sourceX -
+    busCenter;
 
-  return entries.map((entry, index) => {
-    const anchorX =
-      anchorXs[index] + shift;
+  return entries.map(
+    (entry, index) => {
+      const branchX =
+        anchorXs[index] +
+        shift;
 
-    return {
-      unit:entry.unit,
-      left:
-        anchorX -
-        entry.geometry.centerX
-    };
-  });
+      return {
+        unit:entry.unit,
+        left:
+          branchX -
+          entry.geometry.anchorLocalX
+      };
+    }
+  );
 }
 
 function mergePedigreeLeftTarget(targets, unitId, left) {
@@ -4932,56 +4968,18 @@ function buildAutoVerticalRelationshipConstraints(
   const constraints = [];
 
   connectorGroups.forEach(group => {
-    if (group.children.length !== 1) {
-      return;
-    }
-
-    const childId =
-      group.children[0];
-
-    const childUnit =
-      model.unitBySim.get(childId);
-
-    const childGeometry =
-      genealogyUnitMemberLocalGeometry(
-        childUnit,
-        childId
-      );
-
-    if (!childUnit || !childGeometry) {
-      return;
-    }
-
     const parentEntries =
-      group.parentIds
-        .map(parentId => {
-          const unit =
-            model.unitBySim.get(parentId);
-
-          const geometry =
-            genealogyUnitMemberLocalGeometry(
-              unit,
-              parentId
-            );
-
-          if (!unit || !geometry) {
-            return null;
-          }
-
-          return {
-            id:parentId,
-            unit,
-            geometry
-          };
-        })
-        .filter(Boolean);
+      genealogyGroupParentEntries(
+        group,
+        model
+      );
 
     if (!parentEntries.length) {
       return;
     }
 
     const sourceX =
-      genealogyRelationshipGroupSourceX(
+      genealogyGroupSourceX(
         group,
         model
       );
@@ -4990,9 +4988,6 @@ function buildAutoVerticalRelationshipConstraints(
       return;
     }
 
-    // parentConnectorSource() 對一位父母使用該人物 anchor；
-    // 對兩位父母使用兩人的中點 / pair join。
-    // 因此 source X 對涉及的 parent Family Unit 永遠是線性的。
     const parentUnitIds =
       [...new Set(
         parentEntries.map(
@@ -5010,7 +5005,8 @@ function buildAutoVerticalRelationshipConstraints(
       );
     } else {
       const weight =
-        1 / parentUnitIds.length;
+        1 /
+        parentUnitIds.length;
 
       parentUnitIds.forEach(unitId => {
         parentCoefficients.set(
@@ -5020,61 +5016,151 @@ function buildAutoVerticalRelationshipConstraints(
       });
     }
 
-    // sourceConstant 是「父母 Family Unit x = 0」時仍存在的局部 anchor 位移。
     const sourceConstant =
       sourceX -
       [...parentCoefficients.entries()]
         .reduce(
-          (sum, [unitId, coefficient]) =>
+          (
+            sum,
+            [unitId, coefficient]
+          ) =>
             sum +
             coefficient *
             (
-              model.unitById.get(unitId)?.x ||
+              model.unitById
+                .get(unitId)?.x ||
               0
             ),
           0
         );
 
-    const childAnchorLocal =
-      childGeometry.left +
-      relationshipVerticalAnchorLocalX(
-        childId
-      );
+    const children =
+      group.children
+        .map(childId => {
+          const unit =
+            model.unitBySim.get(
+              childId
+            );
 
-    // 等式：
-    // childUnit.x + childAnchorLocal
-    // =
-    // Σ(parentCoefficient * parentUnit.x) + sourceConstant
-    //
-    // 改寫為 Σ(a*x) = b，供同一個 hard-constraint solver 統一處理。
+          const geometry =
+            genealogyUnitMemberRelationshipGeometry(
+              unit,
+              childId
+            );
+
+          if (!unit || !geometry) {
+            return null;
+          }
+
+          return {
+            childId,
+            unit,
+            geometry,
+            anchorX:
+              unit.x +
+              geometry.anchorLocalX
+          };
+        })
+        .filter(Boolean)
+        .sort((left, right) =>
+          left.anchorX -
+            right.anchorX ||
+          String(left.childId)
+            .localeCompare(
+              String(right.childId)
+            )
+        );
+
+    if (!children.length) {
+      return;
+    }
+
     const coefficients =
-      new Map([
-        [childUnit.id, 1]
-      ]);
+      new Map();
 
-    parentCoefficients.forEach(
-      (coefficient, unitId) => {
+    const addCoefficient =
+      (unitId, value) => {
         coefficients.set(
           unitId,
           (
             coefficients.get(unitId) ||
             0
-          ) -
-          coefficient
+          ) +
+          value
+        );
+      };
+
+    parentCoefficients.forEach(
+      (coefficient, unitId) => {
+        addCoefficient(
+          unitId,
+          -coefficient
         );
       }
     );
 
+    let childConstant = 0;
+    let type = 'single-child-axis';
+
+    if (children.length === 1) {
+      const child =
+        children[0];
+
+      addCoefficient(
+        child.unit.id,
+        1
+      );
+
+      childConstant =
+        child.geometry.anchorLocalX;
+    } else {
+      // 多子女的 canonical 幾何：
+      // parent trunk 對準 sibling bus 的外側 child branches 中點。
+      // 中間子女可依實際 Family Unit 寬度自然展開，不被固定死。
+      const leftChild =
+        children[0];
+
+      const rightChild =
+        children[
+          children.length - 1
+        ];
+
+      addCoefficient(
+        leftChild.unit.id,
+        0.5
+      );
+
+      addCoefficient(
+        rightChild.unit.id,
+        0.5
+      );
+
+      childConstant =
+        (
+          leftChild.geometry.anchorLocalX +
+          rightChild.geometry.anchorLocalX
+        ) / 2;
+
+      type =
+        'multi-child-bus-center';
+    }
+
     constraints.push({
-      childId,
-      groupKey:
-        group.parentIds.join('|') +
-        '->' +
-        childId,
+      type,
+      groupKey:group.key,
+      childIds:
+        children.map(
+          child => child.childId
+        ),
       coefficients,
+
+      // child expression = parent source
+      // Σ(child coefficients * unit.x) + childConstant
+      // =
+      // Σ(parent coefficients * unit.x) + sourceConstant
       b:
         sourceConstant -
-        childAnchorLocal
+        childConstant
     });
   });
 
@@ -5085,317 +5171,159 @@ function projectAutoVerticalRelationshipConstraints(
   model,
   constraints
 ) {
-  if (!constraints.length) return;
-
-  // 由既有 solver 的結果出發，只修正滿足垂直關係所需的位移。
-  // 每次把誤差平均分配到該關係涉及的 Family Unit；
-  // 多條關係共同存在時反覆投影，直到所有垂直軸同時成立。
-  const maxPasses =
-    Math.max(
-      48,
-      constraints.length * 12
-    );
-
-  for (
-    let pass = 0;
-    pass < maxPasses;
-    pass += 1
-  ) {
-    let maxError = 0;
-
-    constraints.forEach(constraint => {
-      let current = 0;
-      let denominator = 0;
-
-      constraint.coefficients.forEach(
-        (coefficient, unitId) => {
-          const unit =
-            model.unitById.get(unitId);
-
-          if (!unit) return;
-
-          current +=
-            coefficient *
-            unit.x;
-
-          denominator +=
-            coefficient *
-            coefficient;
-        }
-      );
-
-      if (denominator <= 0) {
-        return;
-      }
-
-      const error =
-        constraint.b -
-        current;
-
-      maxError =
-        Math.max(
-          maxError,
-          Math.abs(error)
-        );
-
-      if (Math.abs(error) <= 0.0001) {
-        return;
-      }
-
-      const correction =
-        error /
-        denominator;
-
-      constraint.coefficients.forEach(
-        (coefficient, unitId) => {
-          const unit =
-            model.unitById.get(unitId);
-
-          if (!unit) return;
-
-          unit.x +=
-            coefficient *
-            correction;
-        }
-      );
-    });
-
-    if (maxError <= 0.0001) {
-      break;
-    }
-  }
-}
-
-function buildAutoVerticalConstraintComponents(
-  model,
-  constraints
-) {
-  const parent =
-    new Map(
-      model.units.map(unit => [
-        unit.id,
-        unit.id
-      ])
-    );
-
-  const find = unitId => {
-    const current =
-      parent.get(unitId);
-
-    if (
-      current == null ||
-      current === unitId
-    ) {
-      return current;
-    }
-
-    const root =
-      find(current);
-
-    parent.set(
-      unitId,
-      root
-    );
-
-    return root;
-  };
-
-  const union = (leftId, rightId) => {
-    const leftRoot =
-      find(leftId);
-
-    const rightRoot =
-      find(rightId);
-
-    if (
-      leftRoot == null ||
-      rightRoot == null ||
-      leftRoot === rightRoot
-    ) {
-      return;
-    }
-
-    parent.set(
-      rightRoot,
-      leftRoot
-    );
-  };
+  let maxError = 0;
 
   constraints.forEach(constraint => {
-    const unitIds =
-      [...constraint.coefficients.keys()]
-        .filter(unitId =>
-          model.unitById.has(unitId)
-        );
+    let current = 0;
+    let denominator = 0;
 
-    if (unitIds.length < 2) {
+    constraint.coefficients.forEach(
+      (coefficient, unitId) => {
+        const unit =
+          model.unitById.get(unitId);
+
+        if (!unit) return;
+
+        current +=
+          coefficient *
+          unit.x;
+
+        denominator +=
+          coefficient *
+          coefficient;
+      }
+    );
+
+    if (denominator <= 0) {
       return;
     }
 
-    const head =
-      unitIds[0];
+    const error =
+      constraint.b -
+      current;
 
-    unitIds
-      .slice(1)
-      .forEach(unitId => {
-        union(
-          head,
-          unitId
-        );
-      });
-  });
-
-  const components =
-    new Map();
-
-  const componentByUnit =
-    new Map();
-
-  model.units.forEach(unit => {
-    const root =
-      find(unit.id) ||
-      unit.id;
-
-    if (!components.has(root)) {
-      components.set(
-        root,
-        {
-          id:root,
-          units:[]
-        }
+    maxError =
+      Math.max(
+        maxError,
+        Math.abs(error)
       );
+
+    if (Math.abs(error) <= 0.0001) {
+      return;
     }
 
-    const component =
-      components.get(root);
+    const correction =
+      error /
+      denominator;
 
-    component.units.push(unit);
-    componentByUnit.set(
-      unit.id,
-      component
+    constraint.coefficients.forEach(
+      (coefficient, unitId) => {
+        const unit =
+          model.unitById.get(unitId);
+
+        if (!unit) return;
+
+        unit.x +=
+          coefficient *
+          correction;
+      }
     );
   });
 
-  return {
-    components,
-    componentByUnit
-  };
+  return maxError;
 }
 
-function translateAutoVerticalComponent(
-  component,
-  delta
-) {
-  if (
-    !component ||
-    !Number.isFinite(delta) ||
-    Math.abs(delta) <= 0.0001
-  ) {
-    return;
-  }
 
-  component.units.forEach(unit => {
-    unit.x += delta;
-  });
-}
-
-function resolveAutoVerticalComponentCollisions(
-  layers,
-  model,
-  constraints
+function projectAutoRelationshipLayerCollisions(
+  layers
 ) {
   const {
     SIBLING:SIBLING_GAP
   } = getGaps();
 
-  const {
-    componentByUnit
-  } =
-    buildAutoVerticalConstraintComponents(
-      model,
-      constraints
-    );
+  let maxOverlap = 0;
 
-  const maxPasses =
-    Math.max(
-      8,
-      model.units.length * 4
-    );
+  layers.forEach(layer => {
+    if (!layer || layer.length < 2) {
+      return;
+    }
 
-  // 垂直約束成立後，collision resolver 不能再單獨推某一張卡片。
-  // 它只能平移整個 relationship component，這樣所有 V 軸會保持精準共線。
-  for (
-    let pass = 0;
-    pass < maxPasses;
-    pass += 1
-  ) {
-    let moved = false;
+    for (
+      let index = 1;
+      index < layer.length;
+      index += 1
+    ) {
+      const left =
+        layer[index - 1];
 
-    const generations =
-      [...layers.keys()]
-        .sort((a, b) => a - b);
+      const right =
+        layer[index];
 
-    generations.forEach(generation => {
-      const layer =
-        layers.get(generation);
+      const required =
+        left.x +
+        left.width +
+        SIBLING_GAP;
 
-      if (!layer || layer.length < 2) {
-        return;
+      const overlap =
+        required -
+        right.x;
+
+      if (overlap <= 0.0001) {
+        continue;
       }
 
-      for (
-        let index = 1;
-        index < layer.length;
-        index += 1
-      ) {
-        const left =
-          layer[index - 1];
-
-        const right =
-          layer[index];
-
-        const minimumRight =
-          left.x +
-          left.width +
-          SIBLING_GAP;
-
-        const overlap =
-          minimumRight -
-          right.x;
-
-        if (overlap <= 0.0001) {
-          continue;
-        }
-
-        const leftComponent =
-          componentByUnit.get(left.id);
-
-        const rightComponent =
-          componentByUnit.get(right.id);
-
-        // 同一垂直 component 內的相對位置由關係等式決定。
-        // 正常 genealogy 幾何不應在同一世代產生內部重疊；
-        // 不以破壞垂直線的方式「修」這種異常資料。
-        if (
-          !rightComponent ||
-          leftComponent === rightComponent
-        ) {
-          continue;
-        }
-
-        translateAutoVerticalComponent(
-          rightComponent,
+      maxOverlap =
+        Math.max(
+          maxOverlap,
           overlap
         );
 
-        moved = true;
-      }
-    });
+      // 同代 collision 也是正式幾何約束。
+      // 左右各退一半，下一個 relationship projection 再把關係軸精準拉回。
+      const half =
+        overlap / 2;
 
-    if (!moved) {
-      break;
+      left.x -= half;
+      right.x += half;
     }
-  }
+  });
+
+  return maxOverlap;
+}
+
+function measureAutoRelationshipConstraintError(
+  model,
+  constraints
+) {
+  let maxError = 0;
+
+  constraints.forEach(constraint => {
+    let current = 0;
+
+    constraint.coefficients.forEach(
+      (coefficient, unitId) => {
+        const unit =
+          model.unitById.get(unitId);
+
+        if (!unit) return;
+
+        current +=
+          coefficient *
+          unit.x;
+      }
+    );
+
+    maxError =
+      Math.max(
+        maxError,
+        Math.abs(
+          constraint.b -
+          current
+        )
+      );
+  });
+
+  return maxError;
 }
 
 function solveAutoRelationshipGeometry(
@@ -5413,18 +5341,69 @@ function solveAutoRelationshipGeometry(
     return;
   }
 
-  // 第一階段：單一子女親子軸直接成為真正的排列等式。
-  projectAutoVerticalRelationshipConstraints(
-    model,
-    constraints
-  );
+  // ========【Auto Relationship Geometry Solver】 設定 - 單／多子女共用同一套幾何權威 ========
+  // Equality：
+  // - 單子女：parent source = child relationship anchor
+  // - 多子女：parent source = sibling bus 外側 child branches 的中點
+  //
+  // Inequality：
+  // - 同世代 Family Unit 保持最小安全距離
+  //
+  // 兩類約束交替投影；不再把整個家系鎖成剛體，也不再用 V-H-V 代替排列。
+  const maxPasses =
+    Math.max(
+      96,
+      constraints.length * 20 +
+      model.units.length * 8
+    );
 
-  // 第二階段：避讓只能整組平移，不能再把已經垂直的 parent / child 拆開。
-  resolveAutoVerticalComponentCollisions(
-    layers,
-    model,
-    constraints
-  );
+  for (
+    let pass = 0;
+    pass < maxPasses;
+    pass += 1
+  ) {
+    projectAutoVerticalRelationshipConstraints(
+      model,
+      constraints
+    );
+
+    const maxOverlap =
+      projectAutoRelationshipLayerCollisions(
+        layers
+      );
+
+    const maxRelationshipError =
+      measureAutoRelationshipConstraintError(
+        model,
+        constraints
+      );
+
+    if (
+      maxOverlap <= 0.01 &&
+      maxRelationshipError <= 0.01
+    ) {
+      break;
+    }
+  }
+
+  // 最後以 relationship geometry 收斂一次。
+  // 若仍有極小浮點誤差，renderer 的 0.75px 容差只負責數值噪音，
+  // 不再負責「看起來像吸附」。
+  for (
+    let settle = 0;
+    settle < 8;
+    settle += 1
+  ) {
+    const error =
+      projectAutoVerticalRelationshipConstraints(
+        model,
+        constraints
+      );
+
+    if (error <= 0.0001) {
+      break;
+    }
+  }
 }
 
 function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
@@ -5567,10 +5546,11 @@ function computeAutoPositions(visibleIds) {
     );
   }
 
-  // ========【自動排列最終權威】 設定 - 預設親子關係以垂直軸為硬約束 ========
+  // ========【自動排列最終權威】 設定 - 單／多子女共用 canonical relationship geometry ========
   // 這不是 renderer 修線，也不是卡片智慧吸附。
-  // AUTO 的人物位置本身就必須讓單一親子線為 V；
-  // V-H-V 只保留給玩家進入自由排列後主動拖離關係軸的狀態。
+  // AUTO 直接用實際 relationship anchor 排人物：
+  // 單子女保持純 V；多子女保持 parent trunk + sibling bus + 純垂直 child branches。
+  // V-H-V 只保留給玩家進入自由排列後主動改變位置的狀態。
   solveAutoRelationshipGeometry(
     layers,
     model,
@@ -6282,8 +6262,9 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
         child.kind === 'adoptive'
     );
 
-  // 多子女本來就是：垂直 parent trunk + sibling bus + 每名子女垂直 branch。
-  // 這裡不套用單一子女的 V-H-V fallback。
+  // 多子女 canonical topology：
+  // 垂直 parent trunk + 水平 sibling bus + 每名子女純垂直 child branch。
+  // branch X 直接來自該子女真實 relationship anchor；renderer 不自行修正位置。
   paths.push(
     '<path class="' +
     edgeClassForKind(
