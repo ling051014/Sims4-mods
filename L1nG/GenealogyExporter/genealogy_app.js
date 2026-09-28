@@ -1,4 +1,4 @@
-/* ========【L1nG Genealogy】 設定 - 族譜工具核心程式 ======== */
+/* ========【L1nG Genealogy App】 設定 - 族譜工具主程式與 UI 協調 ======== */
 /*
  * 主要來源語言：繁體中文（zh-Hant）
  * 支援語言：繁體中文 / 簡體中文 / English
@@ -38,6 +38,15 @@ const GUIDE_SNAP_PX = 8;
 const RELATIONSHIP_VERTICAL_SNAP_PX = 10;
 const SIBLING_RELATION_TYPE = 'sibling';
 const SIBLING_RELATION_LABEL = '兄弟姊妹';
+
+// ========【族譜 Runtime】 設定 - Cache / DOM / Save 由獨立執行層負責 ========
+const genealogyRuntime =
+  window.L1nGGenealogyRuntime?.create?.() ||
+  null;
+
+const genealogyInteraction =
+  window.L1nGGenealogyInteraction ||
+  null;
 
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
@@ -1482,7 +1491,7 @@ const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).
 const pairKey = (a,b) => [a,b].sort().join('::');
 
 // ========【UI 圖示】 專案 SVG 自動解析 ========
-const ICON_ASSET_BASE = '../html%20icons/';
+const ICON_ASSET_BASE = '../../html%20icons/';
 
 const iconSvg = (name, extra = '') => {
   const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
@@ -4613,7 +4622,9 @@ function setRelationshipPerspective(
   syncRelationshipPerspectiveUI();
 
   if (layoutCache) {
-    drawEdges();
+    invalidateRender({
+      edges:true
+    });
   }
 }
 
@@ -4634,6 +4645,14 @@ function drawPerspectiveKinshipLabels(
     return;
   }
 
+  const kinshipLabels =
+    genealogyRuntime?.getKinshipLabels?.(
+      root.id,
+      visibleIds,
+      resolveKinshipLabel
+    ) ||
+    null;
+
   visibleIds.forEach(targetId => {
     const target =
       genealogyData.sims[
@@ -4646,10 +4665,14 @@ function drawPerspectiveKinshipLabels(
     if (!target || !card) return;
 
     const label =
-      resolveKinshipLabel(
-        root.id,
-        targetId
-      );
+      kinshipLabels
+        ? kinshipLabels.get(
+            String(targetId)
+          )
+        : resolveKinshipLabel(
+            root.id,
+            targetId
+          );
 
     if (!label) return;
 
@@ -4875,29 +4898,143 @@ window.addEventListener('resize', debounce(() => {
 }, 80));
 
 
-let _saveTimer = null, _pendingSave = false;
-function save({ immediate = false } = {}) {
+// ========【資料儲存佇列】 設定 - 一般儲存延後到 idle；離頁 / 明確要求時同步 flush ========
+const genealogySaveCoordinator =
+  genealogyRuntime?.createSaveCoordinator?.({
+    delay:260,
+    idleTimeout:700,
+
+    serialize:() =>
+      JSON.stringify(
+        genealogyData
+      ),
+
+    write:serialized =>
+      localStorage.setItem(
+        STORE_KEY,
+        serialized
+      ),
+
+    getExisting:() =>
+      localStorage.getItem(
+        STORE_KEY
+      ) || null,
+
+    onError:error => {
+      if (
+        error?.name ===
+          'QuotaExceededError' ||
+        /quota/i.test(
+          error?.message || ''
+        )
+      ) {
+        uiAlert(
+          '瀏覽器可用的儲存空間不足。\n\n建議：\n1. 前往「圖片與儲存」清理未使用的圖片\n2. 先匯出 JSON 備份\n3. 再視需要整理瀏覽器網站資料',
+          {
+            title:'儲存空間不足',
+            kind:'danger'
+          }
+        );
+
+        return;
+      }
+
+      console.error(
+        '[族譜儲存]',
+        error
+      );
+    }
+  }) ||
+  null;
+
+let _saveTimer = null;
+let _pendingSave = false;
+
+function save({
+  immediate = false
+} = {}) {
+  if (genealogySaveCoordinator) {
+    return genealogySaveCoordinator
+      .request({
+        immediate
+      });
+  }
+
   _pendingSave = true;
-  if (immediate) return _flushSave();
+
+  if (immediate) {
+    return _flushSave();
+  }
+
   if (_saveTimer) return;
-  _saveTimer = setTimeout(_flushSave, 260);
+
+  _saveTimer =
+    setTimeout(
+      _flushSave,
+      260
+    );
 }
+
 function _flushSave() {
-  if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
+  if (genealogySaveCoordinator) {
+    return genealogySaveCoordinator
+      .flush();
+  }
+
+  if (_saveTimer) {
+    clearTimeout(
+      _saveTimer
+    );
+
+    _saveTimer = null;
+  }
+
   if (!_pendingSave) return;
+
   _pendingSave = false;
+
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(genealogyData));
-  } catch (e) {
-    if (e.name === 'QuotaExceededError' || /quota/i.test(e.message || '')) {
-      uiAlert('瀏覽器可用的儲存空間不足。\n\n建議：\n1. 前往「圖片與儲存」清理未使用的圖片\n2. 先匯出 JSON 備份\n3. 再視需要整理瀏覽器網站資料', { title: '儲存空間不足', kind: 'danger' });
+    localStorage.setItem(
+      STORE_KEY,
+      JSON.stringify(
+        genealogyData
+      )
+    );
+  } catch (error) {
+    if (
+      error.name ===
+        'QuotaExceededError' ||
+      /quota/i.test(
+        error.message || ''
+      )
+    ) {
+      uiAlert(
+        '瀏覽器可用的儲存空間不足。\n\n建議：\n1. 前往「圖片與儲存」清理未使用的圖片\n2. 先匯出 JSON 備份\n3. 再視需要整理瀏覽器網站資料',
+        {
+          title:'儲存空間不足',
+          kind:'danger'
+        }
+      );
     }
   }
 }
-window.addEventListener('beforeunload', () => _flushSave());
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') _flushSave();
-});
+
+window.addEventListener(
+  'beforeunload',
+  () => _flushSave()
+);
+
+document.addEventListener(
+  'visibilitychange',
+  () => {
+    if (
+      document.visibilityState ===
+      'hidden'
+    ) {
+      _flushSave();
+    }
+  }
+);
 
 function hexToRgb(hex) {
   const h = String(hex).replace('#','');
@@ -6902,7 +7039,10 @@ function getChildrenOf(id) {
 
   return _childrenIndex.get(parentId) || [];
 }
-function invalidateChildrenIndex() { _childrenIndex = null; }
+function invalidateChildrenIndex() {
+  _childrenIndex = null;
+  genealogyRuntime?.invalidateRelationships?.();
+}
 
 
 // ========【L1nG v1 資料正規化】 設定 - 只維護目前網站 canonical shape ========
@@ -11553,6 +11693,64 @@ function commonNodeClasses(c, opts) {
   ].filter(Boolean).join(' ');
 }
 
+function nodeRenderSignature(
+  sim,
+  {
+    isView,
+    isInlaw,
+    cardSettings,
+    appearanceClass
+  }
+) {
+  if (
+    !genealogyRuntime?.signature
+  ) {
+    return '';
+  }
+
+  return genealogyRuntime.signature({
+    lang:
+      document.documentElement.lang ||
+      'zh-Hant',
+
+    mode:
+      isView
+        ? 'view'
+        : 'edit',
+
+    isInlaw:
+      !!isInlaw,
+
+    appearanceClass:
+      appearanceClass || '',
+
+    cardSettings,
+
+    sim:{
+      id:sim.id,
+      name:sim.name,
+      gender:sim.gender,
+      lifeStage:sim.lifeStage,
+      age:sim.age,
+      birthdayYear:sim.birthdayYear,
+      birthdayMonth:sim.birthdayMonth,
+      birthdayDay:sim.birthdayDay,
+      status:sim.status,
+      race:sim.race,
+      career:sim.career,
+      residence:sim.residence,
+      aspiration:sim.aspiration,
+      causeOfDeath:sim.causeOfDeath,
+      avatar:sim.avatar,
+      avatarFrame:sim.avatarFrame,
+      traits:sim.traits,
+      pets:sim.pets,
+      galleryCount:
+        (sim.gallery || []).length
+    }
+  });
+}
+
 function drawNodes() {
   const fam = currentTreeFamily();
   const memberSet = new Set(fam.memberIds);
@@ -11584,6 +11782,17 @@ function drawNodes() {
     const displayName = cardSettings.name ? `${dName}${cardSettings.gender ? formatCardGender(c.gender) : ''}` : '';
     const genderBarHiddenClass = cardSettings.genderBar ? '' : ' card-gender-bar-hidden';
 
+    const renderKey =
+      nodeRenderSignature(
+        c,
+        {
+          isView,
+          isInlaw,
+          cardSettings,
+          appearanceClass
+        }
+      );
+
     if (isView) {
       const model =
         buildViewCardContentModel(
@@ -11596,7 +11805,7 @@ function drawNodes() {
           ? ''
           : ' card-avatar-only';
 
-      return `<div class="${cls} mode-view ${appearanceClass}${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
+      return `<div class="${cls} mode-view ${appearanceClass}${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
         <div class="n-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
         ${model.name ? `<div class="n-view-name" title="${esc(model.name)}">${esc(model.name)}</div>` : ''}
@@ -11639,15 +11848,31 @@ function drawNodes() {
     </div>` : '';
     const avatarOnlyClass = configuredEditBody ? '' : ' card-avatar-only';
 
-    return `<div class="${cls} mode-edit${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-stage="${c.lifeStage}"
+    return `<div class="${cls} mode-edit${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
       style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
       <div class="n-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
       ${editBody}
     </div>`;
   }).join('');
 
-  nodes.innerHTML = html ||
+  const nodeHtml =
+    html ||
     `<div class="empty">${esc(uiText('目前家族還沒有成員，使用「成員 ＋」新增或加入人物'))}</div>`;
+
+  if (
+    html &&
+    genealogyRuntime?.patchKeyedNodes
+  ) {
+    genealogyRuntime
+      .patchKeyedNodes(
+        nodes,
+        html
+      );
+  } else {
+    nodes.innerHTML =
+      nodeHtml;
+  }
+
   syncNodeSelectionClasses();
 }
 
@@ -13568,7 +13793,23 @@ function getRelationshipPositionSnap(id, rawX, rawY) {
   };
 }
 
-function getSmartSnap(id, rawX, rawY) {
+function getSmartSnap(
+  id,
+  rawX,
+  rawY,
+  performanceSession = null
+) {
+  if (
+    performanceSession?.snap
+  ) {
+    return performanceSession
+      .snap(
+        rawX,
+        rawY,
+        scale
+      );
+  }
+
   const cardSnap =
     getCardSmartSnap(
       id,
@@ -13777,7 +14018,14 @@ function getSelectionAlignmentSnap(dragIds, startPositions, rawDeltaX, rawDeltaY
   };
 }
 
-function getDragSelectionSmartSnap(dragIds, startPositions, primaryId, rawDeltaX, rawDeltaY) {
+function getDragSelectionSmartSnap(
+  dragIds,
+  startPositions,
+  primaryId,
+  rawDeltaX,
+  rawDeltaY,
+  performanceSession = null
+) {
   if (dragIds.length === 1) {
     const start =
       startPositions.get(primaryId);
@@ -13797,7 +14045,8 @@ function getDragSelectionSmartSnap(dragIds, startPositions, primaryId, rawDeltaX
       getSmartSnap(
         primaryId,
         start.x + rawDeltaX,
-        start.y + rawDeltaY
+        start.y + rawDeltaY,
+        performanceSession
       );
 
     return {
@@ -13812,6 +14061,20 @@ function getDragSelectionSmartSnap(dragIds, startPositions, primaryId, rawDeltaX
     };
   }
 
+  if (
+    performanceSession?.snapDelta
+  ) {
+    return {
+      ...performanceSession.snapDelta(
+        rawDeltaX,
+        rawDeltaY,
+        scale
+      ),
+      spacingX:null,
+      spacingY:null
+    };
+  }
+
   return {
     ...getSelectionAlignmentSnap(
       dragIds,
@@ -13822,6 +14085,195 @@ function getDragSelectionSmartSnap(dragIds, startPositions, primaryId, rawDeltaX
     spacingX:null,
     spacingY:null
   };
+}
+
+// ========【拖曳 Geometry Snapshot】 設定 - PointerMove 不再重建整張族譜幾何 ========
+function buildDragPerformanceGeometry() {
+  if (!layoutCache?.pos) {
+    return [];
+  }
+
+  const geometry = [];
+
+  layoutCache.pos.forEach(
+    (position, id) => {
+      const dimensions =
+        getNodeDimensionsById(id);
+
+      geometry.push({
+        id:String(id),
+        x:position.x,
+        y:position.y,
+        width:dimensions.W,
+        height:dimensions.H
+      });
+    }
+  );
+
+  return geometry;
+}
+
+function buildSingleDragRelationshipTargets(
+  id
+) {
+  const targets = {
+    x:[],
+    y:[]
+  };
+
+  if (
+    !layoutCache?.byId ||
+    !layoutCache?.visibleIds ||
+    !layoutCache?.pos
+  ) {
+    return targets;
+  }
+
+  buildParentChildConnectorGroups(
+    layoutCache.byId,
+    layoutCache.visibleIds
+  ).forEach(group => {
+    if (
+      group.children.length !== 1 ||
+      group.children[0] !== id
+    ) {
+      return;
+    }
+
+    const source =
+      parentConnectorSource(
+        group,
+        layoutCache.pos,
+        layoutCache.byId,
+        []
+      );
+
+    if (!source) return;
+
+    targets.x.push({
+      value:
+        source.x -
+        relationshipVerticalAnchorOffsetX(
+          id
+        ),
+      priority:0
+    });
+  });
+
+  const sim =
+    layoutCache.byId.get(id);
+
+  if (!sim) {
+    return targets;
+  }
+
+  const avatarGeometry =
+    getCardAvatarGeometry();
+
+  const draggedAvatarOffset =
+    avatarGeometry.top +
+    avatarGeometry.size / 2;
+
+  const seen =
+    new Set();
+
+  [
+    ...(sim.spouseIds || [])
+      .map(partnerId => ({
+        id:partnerId,
+        priority:0
+      })),
+
+    ...(sim.exSpouseIds || [])
+      .map(partnerId => ({
+        id:partnerId,
+        priority:1
+      }))
+  ].forEach(candidate => {
+    const partnerId =
+      String(candidate.id || '');
+
+    if (
+      !partnerId ||
+      seen.has(partnerId) ||
+      !layoutCache.visibleIds.has(
+        partnerId
+      )
+    ) {
+      return;
+    }
+
+    seen.add(partnerId);
+
+    const partnerPosition =
+      layoutCache.pos.get(
+        partnerId
+      );
+
+    if (!partnerPosition) return;
+
+    targets.y.push({
+      value:
+        cardAvatarRect(
+          partnerPosition
+        ).centerY -
+        PAD -
+        draggedAvatarOffset,
+
+      priority:
+        candidate.priority
+    });
+  });
+
+  return targets;
+}
+
+function createSingleDragPerformanceSession(
+  id
+) {
+  if (
+    !genealogyInteraction
+      ?.createSingleDragSession
+  ) {
+    return null;
+  }
+
+  return genealogyInteraction
+    .createSingleDragSession({
+      id,
+      geometry:
+        buildDragPerformanceGeometry(),
+      guideSnapPx:
+        GUIDE_SNAP_PX,
+      relationshipSnapPx:
+        RELATIONSHIP_VERTICAL_SNAP_PX,
+      relationshipTargets:
+        buildSingleDragRelationshipTargets(
+          id
+        )
+    });
+}
+
+function createGroupDragPerformanceSession(
+  dragIds,
+  startPositions
+) {
+  if (
+    !genealogyInteraction
+      ?.createGroupDragSession
+  ) {
+    return null;
+  }
+
+  return genealogyInteraction
+    .createGroupDragSession({
+      dragIds,
+      startPositions,
+      geometry:
+        buildDragPerformanceGeometry(),
+      guideSnapPx:
+        GUIDE_SNAP_PX
+    });
 }
 
 nodes.addEventListener('pointerdown', e => {
@@ -13852,7 +14304,12 @@ nodes.addEventListener('pointerdown', e => {
     const beforeLayoutState = captureLayoutHistoryState(fam, dragMode);
     let moved = false;
 
-    const onMove = ev => {
+    const dragPerformanceSession =
+      createSingleDragPerformanceSession(
+        id
+      );
+
+    const applyMove = ev => {
       if (fam.locked || !startPos) return;
 
       const dx = ev.clientX - sx;
@@ -13867,7 +14324,13 @@ nodes.addEventListener('pointerdown', e => {
 
       const rawX = startPos.x + dx / scale;
       const rawY = startPos.y + dy / scale;
-      const snapped = getSmartSnap(id, rawX, rawY);
+      const snapped =
+        getSmartSnap(
+          id,
+          rawX,
+          rawY,
+          dragPerformanceSession
+        );
       const nx = snapped.x;
       const ny = snapped.y;
 
@@ -13885,7 +14348,30 @@ nodes.addEventListener('pointerdown', e => {
       scheduleEdgeRedraw();
     };
 
+    const moveFrame =
+      genealogyInteraction
+        ?.createFrameScheduler
+        ? genealogyInteraction
+            .createFrameScheduler(
+              applyMove
+            )
+        : null;
+
+    const onMove = ev => {
+      const next = {
+        clientX:ev.clientX,
+        clientY:ev.clientY
+      };
+
+      if (moveFrame) {
+        moveFrame.push(next);
+      } else {
+        applyMove(next);
+      }
+    };
+
     const onUp = () => {
+      moveFrame?.flush?.();
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
       document.removeEventListener('pointercancel', onUp);
@@ -13942,7 +14428,13 @@ nodes.addEventListener('pointerdown', e => {
     const beforeLayoutState = captureLayoutHistoryState(fam, viewMode);
     let moved = false;
 
-    const onMove = ev => {
+    const dragPerformanceSession =
+      createGroupDragPerformanceSession(
+        dragIds,
+        startPositions
+      );
+
+    const applyMove = ev => {
       if (fam.locked || !primaryStart) return;
       const dx = ev.clientX - sx, dy = ev.clientY - sy;
       if (!moved && Math.hypot(dx, dy) > 3) {
@@ -13962,7 +14454,8 @@ nodes.addEventListener('pointerdown', e => {
           startPositions,
           id,
           rawDeltaX,
-          rawDeltaY
+          rawDeltaY,
+          dragPerformanceSession
         );
 
       const deltaX = snapped.deltaX;
@@ -13989,7 +14482,30 @@ nodes.addEventListener('pointerdown', e => {
       scheduleEdgeRedraw();
     };
 
+    const moveFrame =
+      genealogyInteraction
+        ?.createFrameScheduler
+        ? genealogyInteraction
+            .createFrameScheduler(
+              applyMove
+            )
+        : null;
+
+    const onMove = ev => {
+      const next = {
+        clientX:ev.clientX,
+        clientY:ev.clientY
+      };
+
+      if (moveFrame) {
+        moveFrame.push(next);
+      } else {
+        applyMove(next);
+      }
+    };
+
     const onUp = () => {
+      moveFrame?.flush?.();
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
       document.removeEventListener('pointercancel', onUp);
@@ -14044,7 +14560,12 @@ nodes.addEventListener('pointerdown', e => {
   const sx = e.clientX, sy = e.clientY;
   let moved = false;
   let dragInitialized = false;
-  const onMove = ev => {
+
+  const dragPerformanceSession =
+    createSingleDragPerformanceSession(
+      id
+    );
+  const applyMove = ev => {
     const dx = ev.clientX - sx, dy = ev.clientY - sy;
     if (!moved && Math.hypot(dx, dy) > 3) {
       moved = true;
@@ -14069,7 +14590,13 @@ nodes.addEventListener('pointerdown', e => {
   }
     const rawX = startPos.x + dx / scale;
     const rawY = startPos.y + dy / scale;
-    const snapped = getSmartSnap(id, rawX, rawY);
+    const snapped =
+      getSmartSnap(
+        id,
+        rawX,
+        rawY,
+        dragPerformanceSession
+      );
     const nx = snapped.x;
     const ny = snapped.y;
 
@@ -14085,7 +14612,31 @@ nodes.addEventListener('pointerdown', e => {
     if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
     scheduleEdgeRedraw();
   };
+
+  const moveFrame =
+    genealogyInteraction
+      ?.createFrameScheduler
+      ? genealogyInteraction
+          .createFrameScheduler(
+            applyMove
+          )
+      : null;
+
+  const onMove = ev => {
+    const next = {
+      clientX:ev.clientX,
+      clientY:ev.clientY
+    };
+
+    if (moveFrame) {
+      moveFrame.push(next);
+    } else {
+      applyMove(next);
+    }
+  };
+
   const onUp = () => {
+    moveFrame?.flush?.();
     document.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerup', onUp);
     document.removeEventListener('pointercancel', onUp);
@@ -18634,7 +19185,7 @@ async function loadExportIconSvg(iconName) {
 
   const url =
     new URL(
-      `../html%20icons/${iconName}.svg`,
+      `../../html%20icons/${iconName}.svg`,
       document.baseURI
     ).href;
 
