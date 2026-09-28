@@ -1792,15 +1792,33 @@ function getActiveFamilySelectorEntry(mode = familyTreeViewMode) {
 }
 
 function currentTreeFamily() {
-  const fam = currentFamily();
+  const fam =
+    currentFamily();
+
   if (!fam) return fam;
 
-  const entry = getActiveFamilySelectorEntry(familyTreeViewMode);
-  if (!entry || !(entry.memberIds || []).length) return fam;
+  const entry =
+    getActiveFamilySelectorEntry(
+      familyTreeViewMode
+    );
+
+  if (
+    !entry ||
+    !(entry.memberIds || []).length
+  ) {
+    return fam;
+  }
 
   return {
     ...fam,
-    memberIds:[...entry.memberIds]
+    memberIds:
+      [...entry.memberIds],
+    primaryMemberIds:
+      Array.isArray(
+        entry.primaryMemberIds
+      )
+        ? [...entry.primaryMemberIds]
+        : [...entry.memberIds]
   };
 }
 
@@ -3738,23 +3756,83 @@ async function compressGalleryImage(file) {
 
 function getVisibleIds(familyId) {
   const fam =
-    familyId === genealogyData.currentFamilyId
+    familyId ===
+      genealogyData.currentFamilyId
       ? currentTreeFamily()
-      : genealogyData.families.find(f => f.id === familyId);
+      : genealogyData.families.find(
+          f => f.id === familyId
+        );
 
-  if (!fam) return new Set();
-  const result = new Set(fam.memberIds.filter(id => genealogyData.sims[id]));
-  [...result].forEach(id => {
-    const s = genealogyData.sims[id];
-    if (!s) return;
-    (s.spouseIds||[]).forEach(sid => { if (genealogyData.sims[sid]) result.add(sid); });
-    (s.exSpouseIds||[]).forEach(sid => { if (genealogyData.sims[sid]) result.add(sid); });
+  if (!fam) {
+    return new Set();
+  }
+
+  const memberIds =
+    (fam.memberIds || [])
+      .map(String)
+      .filter(id =>
+        genealogyData.sims[id]
+      );
+
+  const result =
+    new Set(memberIds);
+
+  // ========【外部關係人物顯示範圍】 設定 - attachment 不再二次擴張 ========
+  // EA 家庭 / EA 族譜：
+  //   只從 primary 成員附加其直接配偶／前任。
+  //   已經附著進來的 X 不會再把 X 的其他伴侶／家系帶進來。
+  //
+  // 大家族：
+  //   保留原本「完整連通族譜」語意，memberIds 本身就是完整 component；
+  //   仍允許補上 component 邊界上的直接配偶／前任。
+  const relationshipSources =
+    familyId ===
+      genealogyData.currentFamilyId &&
+    familyTreeViewMode !== 'extended' &&
+    Array.isArray(
+      fam.primaryMemberIds
+    ) &&
+    fam.primaryMemberIds.length
+      ? fam.primaryMemberIds
+      : memberIds;
+
+  [...new Set(
+    relationshipSources.map(String)
+  )].forEach(id => {
+    const sim =
+      genealogyData.sims[id];
+
+    if (!sim) return;
+
+    [
+      ...(sim.spouseIds || []),
+      ...(sim.exSpouseIds || [])
+    ]
+      .map(String)
+      .forEach(relatedId => {
+        if (
+          genealogyData.sims[
+            relatedId
+          ]
+        ) {
+          result.add(
+            relatedId
+          );
+        }
+      });
   });
 
-  // 篩選是真正的顯示篩選，不再只是把不符合的人物淡化。
+  // 篩選是真正的顯示篩選。
   [...result].forEach(id => {
-    if (!simMatchesTopbarFilters(genealogyData.sims[id])) result.delete(id);
+    if (
+      !simMatchesTopbarFilters(
+        genealogyData.sims[id]
+      )
+    ) {
+      result.delete(id);
+    }
   });
+
   return result;
 }
 
