@@ -728,9 +728,18 @@
                         <details class="relationship-line-item" data-rel-line-item="exspouse">
                             <summary><span>前任</span><i data-rel-preview="exspouse"></i></summary>
                             <div class="relationship-line-controls">
-                                <label><span>樣式</span><select data-rel-style="exspouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
+                                <label><span>樣式</span><select data-rel-style="exspouse"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option><option value="curve">曲線</option></select></label>
                                 <label><span>粗細</span><input data-rel-width="exspouse" type="range" min="1" max="4" step="0.1"></label>
                                 <label><span>顏色</span><input data-rel-color="exspouse" type="color"></label>
+                            </div>
+                            <div class="relationship-line-extra-controls">
+                                <label class="relationship-curve-control" data-rel-curve-row="exspouse">
+                                    <span>曲線弧度</span>
+                                    <div class="relationship-curve-slider">
+                                        <input data-rel-curve="exspouse" type="range" min="10" max="100" step="1">
+                                        <output data-rel-curve-value="exspouse"></output>
+                                    </div>
+                                </label>
                             </div>
                         </details>
 
@@ -743,17 +752,23 @@
                             </div>
                         </details>
 
-                        <details class="relationship-line-item" data-rel-line-item="other">
+                        <details class="relationship-line-item other-relationship-line-group" data-rel-line-item="other">
                             <summary><span>其他關係</span><i data-rel-preview="other"></i></summary>
-                            <div class="relationship-line-controls">
-                                <label><span>樣式</span><select data-rel-style="other"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
-                                <label><span>粗細</span><input data-rel-width="other" type="range" min="1" max="4" step="0.1"></label>
-                                <label><span>顏色</span><input data-rel-color="other" type="color"></label>
-                            </div>
+                            <div class="other-relationship-line-list" id="otherRelationshipLineList"></div>
                         </details>
                     </div>
                     <div class="relationship-style-actions"><button id="resetRelationshipStyleBtn" type="button">恢復關係線預設</button></div>
                 </section>
+
+                <div class="relationship-curve-live-preview" id="relationshipCurveLivePreview" aria-hidden="true">
+                    <div class="relationship-curve-live-preview-head">
+                        <span>即時預覽</span>
+                        <strong id="relationshipCurveLivePreviewValue">50%</strong>
+                    </div>
+                    <svg viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true">
+                        <path id="relationshipCurveLivePreviewPath" d="M4 18 Q60 10 116 18"></path>
+                    </svg>
+                </div>
 
                 <section class="appearance-section">
                     <div class="setting-group-title">重設外觀</div>
