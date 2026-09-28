@@ -126,14 +126,37 @@ const RELATIONSHIP_SEMANTICS = Object.freeze({
 });
 
 const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
-  '訂婚':Object.freeze({ icon:'gem' }),
-  '伴侶':Object.freeze({ icon:'hearts' }),
-  '情人':Object.freeze({ icon:'heart-fill' }),
-  '喪偶':Object.freeze({ icon:'flower1' }),
-  '摯友':Object.freeze({ icon:'person-check' }),
-  '朋友':Object.freeze({ icon:'person-heart' }),
-  '仇敵':Object.freeze({ icon:'lightning' }),
-  '師承':Object.freeze({ icon:'mortarboard' })
+  // 戀愛 / 親密
+  '曖昧':Object.freeze({ icon:'hearts', category:'romance' }),
+  '訂婚':Object.freeze({ icon:'gem', category:'romance' }),
+  '伴侶':Object.freeze({ icon:'hearts', category:'romance' }),
+  '情人':Object.freeze({ icon:'heart-fill', category:'romance' }),
+  '秘密情人':Object.freeze({ icon:'heart-fill', category:'romance' }),
+  '外遇':Object.freeze({ icon:'heartbreak', category:'romance' }),
+  '前任情人':Object.freeze({ icon:'heartbreak', category:'romance' }),
+  '單戀':Object.freeze({ icon:'heart', category:'romance' }),
+  '互相暗戀':Object.freeze({ icon:'hearts', category:'romance' }),
+  '喪偶':Object.freeze({ icon:'flower1', category:'romance' }),
+
+  // 友誼
+  '朋友':Object.freeze({ icon:'person-heart', category:'friendship' }),
+  '好友':Object.freeze({ icon:'person-heart', category:'friendship' }),
+  '摯友':Object.freeze({ icon:'person-check', category:'friendship' }),
+  '青梅竹馬':Object.freeze({ icon:'person-heart', category:'friendship' }),
+  '網友':Object.freeze({ icon:'person-heart', category:'friendship' }),
+
+  // 負面
+  '仇敵':Object.freeze({ icon:'lightning', category:'negative' }),
+  '宿敵':Object.freeze({ icon:'lightning', category:'negative' }),
+  '死對頭':Object.freeze({ icon:'lightning', category:'negative' }),
+  '關係不睦':Object.freeze({ icon:'lightning', category:'negative' }),
+
+  // 生活 / 社會
+  '師生':Object.freeze({ icon:'mortarboard', category:'social' }),
+  '師承':Object.freeze({ icon:'mortarboard', category:'social' }),
+  '同事':Object.freeze({ icon:'people', category:'social' }),
+  '室友':Object.freeze({ icon:'house-heart', category:'social' }),
+  '鄰居':Object.freeze({ icon:'house-heart', category:'social' })
 });
 
 const KINSHIP_SYSTEM_LABELS = Object.freeze([
@@ -1117,6 +1140,7 @@ function buildSample() {
     sims,
     families,
     links:[],
+    relationshipTypeLibrary:[],
     relationshipMap:{},
     labelPositions:{},
     currentFamilyId:families[0].id
@@ -2723,6 +2747,185 @@ function displayRelationshipText(value) {
     : text;
 }
 
+
+// ========【其他關係詞庫】 設定 - 內建詞彙與玩家自訂詞彙分離；自訂詞彙跟著族譜資料保存 ========
+function builtInSocialRelationshipTypes() {
+  return Object.keys(
+    SOCIAL_RELATIONSHIP_DEFINITIONS
+  );
+}
+
+function isBuiltInSocialRelationshipType(value) {
+  return Object.prototype.hasOwnProperty.call(
+    SOCIAL_RELATIONSHIP_DEFINITIONS,
+    String(value || '').trim()
+  );
+}
+
+function normalizeRelationshipTypeText(value) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function relationshipTypeLibraryValues(db = genealogyData) {
+  if (!db) return [];
+
+  return Array.isArray(
+    db.relationshipTypeLibrary
+  )
+    ? db.relationshipTypeLibrary
+        .map(normalizeRelationshipTypeText)
+        .filter(Boolean)
+    : [];
+}
+
+function rememberRelationshipType(
+  value,
+  db = genealogyData
+) {
+  if (!db) return false;
+
+  const type =
+    normalizeRelationshipTypeText(
+      value
+    );
+
+  if (
+    !type ||
+    type === '關聯' ||
+    isBuiltInSocialRelationshipType(type)
+  ) {
+    return false;
+  }
+
+  if (
+    !Array.isArray(
+      db.relationshipTypeLibrary
+    )
+  ) {
+    db.relationshipTypeLibrary = [];
+  }
+
+  if (
+    db.relationshipTypeLibrary
+      .some(saved =>
+        normalizeRelationshipTypeText(saved) ===
+        type
+      )
+  ) {
+    return false;
+  }
+
+  db.relationshipTypeLibrary.push(type);
+  return true;
+}
+
+function relationshipTypeOptions() {
+  const builtIn =
+    builtInSocialRelationshipTypes()
+      .map(value => ({
+        value,
+        label:
+          displayRelationshipText(
+            value
+          ),
+        custom:false
+      }));
+
+  const custom =
+    relationshipTypeLibraryValues()
+      .filter(value =>
+        !isBuiltInSocialRelationshipType(
+          value
+        )
+      )
+      .map(value => ({
+        value,
+        label:value,
+        custom:true
+      }));
+
+  return [
+    ...builtIn,
+    ...custom
+  ];
+}
+
+function populateRelationshipTypePicker(
+  selectedValue = ''
+) {
+  const select =
+    $('relType');
+
+  if (!select) return;
+
+  const selected =
+    normalizeRelationshipTypeText(
+      selectedValue
+    );
+
+  const options =
+    relationshipTypeOptions();
+
+  if (
+    selected &&
+    !options.some(
+      option =>
+        option.value === selected
+    )
+  ) {
+    options.push({
+      value:selected,
+      label:selected,
+      custom:true
+    });
+  }
+
+  select.innerHTML =
+    '<option value=""></option>' +
+    options
+      .map(option =>
+        '<option value="' +
+        esc(option.value) +
+        '">' +
+        esc(option.label) +
+        '</option>'
+      )
+      .join('');
+
+  select.value =
+    selected &&
+    [...select.options]
+      .some(option =>
+        option.value === selected
+      )
+      ? selected
+      : '';
+
+  refreshSS('relType');
+}
+
+function relationshipCreateOptionText(value) {
+  const text =
+    normalizeRelationshipTypeText(
+      value
+    );
+
+  const lang =
+    document.documentElement.lang ||
+    'zh-Hant';
+
+  if (lang === 'en') {
+    return 'Add "' + text + '"';
+  }
+
+  if (lang === 'zh-Hans') {
+    return '新增“' + text + '”';
+  }
+
+  return '新增「' + text + '」';
+}
 
 // ========【關係語意】 設定 - 客觀關係、社會關係與顯示覆寫分離 ========
 function isSiblingLink(link) {
@@ -6325,6 +6528,43 @@ function normalizeCurrentDatabase(targetDb) {
 
       return next;
     });
+
+  const importedRelationshipTypeLibrary =
+    Array.isArray(
+      targetDb.relationshipTypeLibrary
+    )
+      ? targetDb.relationshipTypeLibrary
+      : [];
+
+  const relationshipTypesFromLinks =
+    targetDb.links
+      .filter(link =>
+        !isSiblingLink(link)
+      )
+      .map(link =>
+        normalizeRelationshipTypeText(
+          link.label ||
+          link.type ||
+          ''
+        )
+      )
+      .filter(Boolean);
+
+  targetDb.relationshipTypeLibrary =
+    [...new Set([
+      ...importedRelationshipTypeLibrary
+        .map(
+          normalizeRelationshipTypeText
+        )
+        .filter(Boolean),
+      ...relationshipTypesFromLinks
+    ])]
+      .filter(type =>
+        type !== '關聯' &&
+        !isBuiltInSocialRelationshipType(
+          type
+        )
+      );
 
   if (
     !targetDb.relationshipMap ||
@@ -10691,6 +10931,147 @@ function drawNodes() {
   syncNodeSelectionClasses();
 }
 
+// ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
+function profileDirectFamilyIds(simId) {
+  const id =
+    String(simId || '');
+
+  const sim =
+    genealogyData?.sims?.[id];
+
+  if (!sim) return [];
+
+  const ordered = [
+    ...genealogyParentIds(sim),
+    ...(sim.spouseIds || [])
+      .map(String),
+    ...(sim.exSpouseIds || [])
+      .map(String),
+    ...genealogySiblingIds(id),
+    ...getChildrenOf(id)
+      .map(child =>
+        String(child.id)
+      )
+  ];
+
+  return [...new Set(
+    ordered.filter(targetId =>
+      targetId &&
+      targetId !== id &&
+      genealogyData.sims[
+        targetId
+      ]
+    )
+  )];
+}
+
+function profileFamilyRelationshipRows(
+  simId
+) {
+  const groups =
+    new Map();
+
+  profileDirectFamilyIds(simId)
+    .forEach(targetId => {
+      const target =
+        genealogyData.sims[
+          targetId
+        ];
+
+      if (!target) return;
+
+      const label =
+        resolveKinshipLabel(
+          simId,
+          targetId
+        ) ||
+        '親屬';
+
+      if (!groups.has(label)) {
+        groups.set(label, []);
+      }
+
+      groups.get(label)
+        .push(
+          displayDataText(
+            target.name,
+            target
+          )
+        );
+    });
+
+  return [...groups.entries()]
+    .map(([label, names]) => ({
+      label,
+      names:[...new Set(names)]
+    }));
+}
+
+function profileOtherRelationshipRows(
+  simId
+) {
+  const id =
+    String(simId || '');
+
+  const groups =
+    new Map();
+
+  (genealogyData?.links || [])
+    .forEach(link => {
+      if (
+        isSiblingLink(link) ||
+        (
+          String(link.from) !== id &&
+          String(link.to) !== id
+        )
+      ) {
+        return;
+      }
+
+      const otherId =
+        String(link.from) === id
+          ? String(link.to)
+          : String(link.from);
+
+      const other =
+        genealogyData.sims[
+          otherId
+        ];
+
+      if (!other) return;
+
+      const type =
+        normalizeRelationshipTypeText(
+          link.label ||
+          link.type ||
+          '關聯'
+        ) ||
+        '關聯';
+
+      if (!groups.has(type)) {
+        groups.set(type, []);
+      }
+
+      groups.get(type)
+        .push(
+          displayDataText(
+            other.name,
+            other
+          )
+        );
+    });
+
+  return [...groups.entries()]
+    .map(([type, names]) => ({
+      type,
+      label:
+        displayRelationshipText(
+          type
+        ),
+      names:[...new Set(names)]
+    }));
+}
+
 function openInfoCard(id) {
   const c = genealogyData.sims[id];
   if (!c) return;
@@ -10755,26 +11136,31 @@ function openInfoCard(id) {
     .filter(f => (f.memberIds || []).includes(c.id))
     .map(f => displayDataText(f.name, f));
 
-  const personNames = ids => (ids || []).map(pid => genealogyData.sims[pid]).filter(Boolean).map(sim => displayDataText(sim.name, sim));
-  const parentNames = personNames(c.parentIds);
-  const spouseNames = personNames(c.spouseIds);
-  const exSpouseNames = personNames(c.exSpouseIds);
-  const childNames = getChildrenOf(c.id).map(sim => displayDataText(sim.name, sim));
-  const siblingIds = [...new Set((genealogyData.links || []).filter(l =>
-    (l.from === c.id || l.to === c.id) && isSiblingLink(l)
-  ).map(l => l.from === c.id ? l.to : l.from))];
-  const siblingNames = personNames(siblingIds);
-  const otherRelations = (genealogyData.links || []).filter(l => {
-    if (l.from !== c.id && l.to !== c.id) return false;
-    return !isSiblingLink(l);
-  }).map(l => {
-    const other = genealogyData.sims[l.from === c.id ? l.to : l.from];
-    if (!other) return null;
-    return `${displayRelationshipText(l.label || l.type || '關聯')}：${displayDataText(other.name, other)}`;
-  }).filter(Boolean);
+  const familyRelationshipRows =
+    profileFamilyRelationshipRows(
+      c.id
+    );
 
-  const row = (label, value, muted = false) => `<div class="info-card-row"><div class="info-card-label">${esc(uiText(label))}</div><div class="info-card-value${muted ? ' muted' : ''}">${value}</div></div>`;
-  const textOrDash = values => values.length ? values.map(esc).join(' / ') : '—';
+  const otherRelationshipRows =
+    profileOtherRelationshipRows(
+      c.id
+    );
+
+  const row = (
+    label,
+    value,
+    muted = false
+  ) =>
+    '<div class="info-card-row">' +
+      '<div class="info-card-label">' +
+        esc(uiText(label)) +
+      '</div>' +
+      '<div class="info-card-value' +
+        (muted ? ' muted' : '') +
+      '">' +
+        value +
+      '</div>' +
+    '</div>';
 
   const sections = [];
   const basicRows = [];
@@ -10805,24 +11191,58 @@ function openInfoCard(id) {
     );
 
   const familyRows = [
-    row('所屬家族', familyNames.length ? familyNames.map(esc).join(' / ') : '—'),
-    ...(generationLabel ? [row('世代', esc(generationLabel))] : []),
-    row('領養關係', esc(uiText(c.adoptive ? '領養' : '親生'))),
-    row('父母 A', parentNames[0] ? esc(parentNames[0]) : '—'),
-    row('父母 B', parentNames[1] ? esc(parentNames[1]) : '—'),
-    row('配偶', textOrDash(spouseNames)),
-    row('前任配偶', textOrDash(exSpouseNames)),
-    row('子女', textOrDash(childNames)),
-    row('兄弟姐妹', textOrDash(siblingNames))
+    row(
+      '所屬家族',
+      familyNames.length
+        ? familyNames
+            .map(esc)
+            .join(' / ')
+        : '—'
+    ),
+    ...(
+      generationLabel
+        ? [
+            row(
+              '世代',
+              esc(generationLabel)
+            )
+          ]
+        : []
+    ),
+    ...familyRelationshipRows
+      .map(item =>
+        row(
+          item.label,
+          item.names
+            .map(esc)
+            .join(' / ')
+        )
+      )
   ];
 
   sections.push(
     `<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('家庭關係'))}</h3><div class="info-profile-list">${familyRows.join('')}</div></section>`
   );
 
-  if (otherRelations.length) {
+  if (otherRelationshipRows.length) {
     sections.push(
-      `<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('其他關係'))}</h3><div class="info-profile-list">${row('關係', otherRelations.map(esc).join(' / '))}</div></section>`
+      '<section class="info-profile-section">' +
+        '<h3 class="info-profile-section-title">' +
+          esc(uiText('其他關係')) +
+        '</h3>' +
+        '<div class="info-profile-list">' +
+          otherRelationshipRows
+            .map(item =>
+              row(
+                item.label,
+                item.names
+                  .map(esc)
+                  .join(' / ')
+              )
+            )
+            .join('') +
+        '</div>' +
+      '</section>'
     );
   }
 
@@ -13789,181 +14209,731 @@ function observeSharedNativeSelectChevrons() {
   observer.observe(document.body, { childList: true, subtree: true });
 }
 function setupSearchSelects() {
-  document.querySelectorAll('.ss-wrap').forEach(wrap => {
-    const selectId = wrap.dataset.ssFor;
-    const select = document.getElementById(selectId);
+  document.querySelectorAll(
+    '.ss-wrap'
+  ).forEach(wrap => {
+    const selectId =
+      wrap.dataset.ssFor;
+
+    const select =
+      document.getElementById(
+        selectId
+      );
+
     if (!select) return;
-    const input = wrap.querySelector('.ss-input');
-    const dropdown = wrap.querySelector('.ss-dropdown');
-    const searchEl = wrap.querySelector('.ss-search');
-    const optionsEl = wrap.querySelector('.ss-options');
-    const isMultiple = select.multiple;
-    const rawPlaceholder = wrap.dataset.placeholder || '點選選擇…';
-    const usePortalDropdown = selectId === 'relTarget';
+
+    const input =
+      wrap.querySelector(
+        '.ss-input'
+      );
+
+    const dropdown =
+      wrap.querySelector(
+        '.ss-dropdown'
+      );
+
+    const searchEl =
+      wrap.querySelector(
+        '.ss-search'
+      );
+
+    const optionsEl =
+      wrap.querySelector(
+        '.ss-options'
+      );
+
+    const isMultiple =
+      select.multiple;
+
+    const isCreatable =
+      wrap.dataset.ssCreatable ===
+      'true';
+
+    const rawPlaceholder =
+      wrap.dataset.placeholder ||
+      '點選選擇…';
+
+    const usePortalDropdown =
+      selectId === 'relTarget' ||
+      selectId === 'relType';
+
     const dropdownHome = {
-      parent: dropdown.parentNode,
-      next: dropdown.nextSibling
+      parent:dropdown.parentNode,
+      next:dropdown.nextSibling
     };
 
     function restoreDropdownHome() {
-      if (!usePortalDropdown || dropdown.parentNode === dropdownHome.parent) return;
-      dropdown.classList.remove('ss-dropdown-portal');
-      dropdown.style.removeProperty('left');
-      dropdown.style.removeProperty('top');
-      dropdown.style.removeProperty('width');
-      dropdown.style.removeProperty('max-height');
-      if (dropdownHome.next && dropdownHome.next.parentNode === dropdownHome.parent) {
-        dropdownHome.parent.insertBefore(dropdown, dropdownHome.next);
+      if (
+        !usePortalDropdown ||
+        dropdown.parentNode ===
+          dropdownHome.parent
+      ) {
+        return;
+      }
+
+      dropdown.classList.remove(
+        'ss-dropdown-portal'
+      );
+
+      dropdown.style.removeProperty(
+        'left'
+      );
+
+      dropdown.style.removeProperty(
+        'top'
+      );
+
+      dropdown.style.removeProperty(
+        'width'
+      );
+
+      dropdown.style.removeProperty(
+        'max-height'
+      );
+
+      if (
+        dropdownHome.next &&
+        dropdownHome.next.parentNode ===
+          dropdownHome.parent
+      ) {
+        dropdownHome.parent.insertBefore(
+          dropdown,
+          dropdownHome.next
+        );
       } else {
-        dropdownHome.parent.appendChild(dropdown);
+        dropdownHome.parent.appendChild(
+          dropdown
+        );
       }
     }
 
     function positionPortalDropdown() {
-      if (!usePortalDropdown || !wrap.classList.contains('ss-open')) return;
-      if (dropdown.parentNode !== document.body) document.body.appendChild(dropdown);
-      dropdown.classList.add('ss-dropdown-portal');
+      if (
+        !usePortalDropdown ||
+        !wrap.classList.contains(
+          'ss-open'
+        )
+      ) {
+        return;
+      }
 
-      const rect = input.getBoundingClientRect();
+      if (
+        dropdown.parentNode !==
+        document.body
+      ) {
+        document.body.appendChild(
+          dropdown
+        );
+      }
+
+      dropdown.classList.add(
+        'ss-dropdown-portal'
+      );
+
+      const rect =
+        input.getBoundingClientRect();
+
       const margin = 10;
       const gap = 5;
-      const minWidth = Math.max(280, rect.width);
-      const width = Math.min(
-        Math.max(minWidth, rect.width),
-        Math.max(280, window.innerWidth - margin * 2)
-      );
-      const left = Math.min(
-        Math.max(margin, rect.left),
-        Math.max(margin, window.innerWidth - width - margin)
-      );
-      const below = window.innerHeight - rect.bottom - gap - margin;
-      const above = rect.top - gap - margin;
-      const openAbove = below < 220 && above > below;
-      const maxHeight = Math.max(180, Math.min(360, openAbove ? above : below));
 
-      dropdown.style.width = Math.round(width) + 'px';
-      dropdown.style.left = Math.round(left) + 'px';
-      dropdown.style.maxHeight = Math.round(maxHeight) + 'px';
-      dropdown.style.top = openAbove
-        ? Math.round(Math.max(margin, rect.top - Math.min(maxHeight, dropdown.scrollHeight || maxHeight) - gap)) + 'px'
-        : Math.round(rect.bottom + gap) + 'px';
+      const minWidth =
+        Math.max(
+          280,
+          rect.width
+        );
+
+      const width =
+        Math.min(
+          Math.max(
+            minWidth,
+            rect.width
+          ),
+          Math.max(
+            280,
+            window.innerWidth -
+              margin * 2
+          )
+        );
+
+      const left =
+        Math.min(
+          Math.max(
+            margin,
+            rect.left
+          ),
+          Math.max(
+            margin,
+            window.innerWidth -
+              width -
+              margin
+          )
+        );
+
+      const below =
+        window.innerHeight -
+        rect.bottom -
+        gap -
+        margin;
+
+      const above =
+        rect.top -
+        gap -
+        margin;
+
+      const openAbove =
+        below < 220 &&
+        above > below;
+
+      const maxHeight =
+        Math.max(
+          180,
+          Math.min(
+            360,
+            openAbove
+              ? above
+              : below
+          )
+        );
+
+      dropdown.style.width =
+        Math.round(width) + 'px';
+
+      dropdown.style.left =
+        Math.round(left) + 'px';
+
+      dropdown.style.maxHeight =
+        Math.round(maxHeight) +
+        'px';
+
+      dropdown.style.top =
+        openAbove
+          ? Math.round(
+              Math.max(
+                margin,
+                rect.top -
+                  Math.min(
+                    maxHeight,
+                    dropdown.scrollHeight ||
+                      maxHeight
+                  ) -
+                  gap
+              )
+            ) + 'px'
+          : Math.round(
+              rect.bottom + gap
+            ) + 'px';
     }
 
     function renderInput() {
-      // 自訂下拉選單的提示文字跟著目前介面語言即時切換。
-      const placeholder = uiText(rawPlaceholder);
+      const placeholder =
+        uiText(
+          rawPlaceholder
+        );
+
       if (isMultiple) {
-        const selected = [...select.options].filter(o => o.selected);
+        const selected =
+          [...select.options]
+            .filter(option =>
+              option.selected
+            );
+
         if (!selected.length) {
-          input.innerHTML = `<span class="ss-placeholder">${esc(placeholder)}</span>`;
+          input.innerHTML =
+            '<span class="ss-placeholder">' +
+            esc(placeholder) +
+            '</span>';
         } else {
-          input.innerHTML = selected.map(o =>
-            `<span class="ss-tag">${esc(o.textContent)}<span class="ss-tag-x" data-remove="${esc(o.value)}" title="移除">×</span></span>`
-          ).join('');
+          input.innerHTML =
+            selected
+              .map(option =>
+                '<span class="ss-tag">' +
+                esc(
+                  option.textContent
+                ) +
+                '<span class="ss-tag-x" data-remove="' +
+                esc(option.value) +
+                '" title="移除">×</span></span>'
+              )
+              .join('');
         }
-        input.querySelectorAll('.ss-tag-x').forEach(x => {
-          x.onclick = ev => {
-            ev.stopPropagation();
-            const opt = [...select.options].find(o => o.value === x.dataset.remove);
-            if (opt) opt.selected = false;
-            renderInput();
-            renderOptions(searchEl.value);
-            select.dispatchEvent(new Event('change', {bubbles:true}));
-          };
+
+        input.querySelectorAll(
+          '.ss-tag-x'
+        ).forEach(remove => {
+          remove.onclick =
+            event => {
+              event.stopPropagation();
+
+              const option =
+                [...select.options]
+                  .find(candidate =>
+                    candidate.value ===
+                    remove.dataset.remove
+                  );
+
+              if (option) {
+                option.selected =
+                  false;
+              }
+
+              renderInput();
+              renderOptions(
+                searchEl.value
+              );
+
+              select.dispatchEvent(
+                new Event(
+                  'change',
+                  { bubbles:true }
+                )
+              );
+            };
         });
       } else {
-        const sel = select.options[select.selectedIndex];
-        if (!sel || sel.value === '') input.innerHTML = `<span class="ss-placeholder">${esc(placeholder)}</span>`;
-        else input.textContent = sel.textContent;
+        const selected =
+          select.options[
+            select.selectedIndex
+          ];
+
+        if (
+          !selected ||
+          selected.value === ''
+        ) {
+          input.innerHTML =
+            '<span class="ss-placeholder">' +
+            esc(placeholder) +
+            '</span>';
+        } else {
+          input.textContent =
+            selected.textContent;
+        }
       }
 
-      // 搜尋型欄位與頂部導覽共用同一顆 chevron-down.svg；
-      // 以真正的 SVG ICON 呈現，顏色可直接跟隨各主題，不再被背景色蓋掉。
-      input.insertAdjacentHTML('beforeend', iconSvg('chevron-down', 'ss-chevron-icon'));
+      input.insertAdjacentHTML(
+        'beforeend',
+        iconSvg(
+          'chevron-down',
+          'ss-chevron-icon'
+        )
+      );
     }
-    function renderOptions(filter = '') {
-      const q = filter.trim().toLowerCase();
-      const opts = [...select.options];
-      const filtered = q ? opts.filter(o => o.textContent.toLowerCase().includes(q)) : opts;
-      if (!filtered.length) { optionsEl.innerHTML = '<div class="ss-empty">沒有符合的項目</div>'; return; }
-      optionsEl.innerHTML = filtered.map(o => {
-        const isEmpty = o.value === '';
-        const selected = o.selected;
-        const cls = ['ss-option', selected ? 'selected' : '', isEmpty ? 'none' : ''].filter(Boolean).join(' ');
-        const check = isMultiple && !isEmpty ? `<span class="check">${selected ? iconSvg('check-lg') : ''}</span>` : '';
-        return `<div class="${cls}" data-value="${esc(o.value)}">${check}<span>${esc(o.textContent)}</span></div>`;
-      }).join('');
-      optionsEl.querySelectorAll('.ss-option').forEach(el => {
-        el.onclick = e => {
-          e.stopPropagation();
-          const val = el.dataset.value;
-          const opt = [...select.options].find(o => o.value === val);
-          if (!opt) return;
-          if (isMultiple) opt.selected = !opt.selected;
-          else {
-            [...select.options].forEach(o => { o.selected = false; });
-            opt.selected = true;
-            closeDropdown();
-          }
-          renderInput();
-          renderOptions(searchEl.value);
-          select.dispatchEvent(new Event('change', {bubbles:true}));
-        };
+
+    function selectSingleOption(
+      option
+    ) {
+      [...select.options]
+        .forEach(candidate => {
+          candidate.selected =
+            false;
+        });
+
+      option.selected = true;
+
+      closeDropdown();
+      renderInput();
+
+      select.dispatchEvent(
+        new Event(
+          'change',
+          { bubbles:true }
+        )
+      );
+    }
+
+    function commitCreatableValue(
+      rawValue
+    ) {
+      if (!isCreatable) {
+        return '';
+      }
+
+      const value =
+        normalizeRelationshipTypeText(
+          rawValue
+        );
+
+      if (!value) return '';
+
+      let option =
+        [...select.options]
+          .find(candidate =>
+            candidate.value === value ||
+            candidate.textContent
+              .trim()
+              .toLowerCase() ===
+              value.toLowerCase()
+          );
+
+      if (!option) {
+        option =
+          document.createElement(
+            'option'
+          );
+
+        option.value = value;
+        option.textContent = value;
+
+        select.appendChild(option);
+      }
+
+      selectSingleOption(option);
+      return option.value;
+    }
+
+    function renderOptions(
+      filter = ''
+    ) {
+      const raw =
+        String(filter || '').trim();
+
+      const q =
+        raw.toLowerCase();
+
+      const options =
+        [...select.options];
+
+      const filtered =
+        q
+          ? options.filter(
+              option =>
+                option.textContent
+                  .toLowerCase()
+                  .includes(q)
+            )
+          : options;
+
+      const hasExact =
+        !!raw &&
+        options.some(option =>
+          option.value === raw ||
+          option.textContent
+            .trim()
+            .toLowerCase() ===
+            q
+        );
+
+      const optionHTML =
+        filtered
+          .map(option => {
+            const isEmpty =
+              option.value === '';
+
+            const selected =
+              option.selected;
+
+            const classes = [
+              'ss-option',
+              selected
+                ? 'selected'
+                : '',
+              isEmpty
+                ? 'none'
+                : ''
+            ]
+              .filter(Boolean)
+              .join(' ');
+
+            const check =
+              isMultiple &&
+              !isEmpty
+                ? '<span class="check">' +
+                  (
+                    selected
+                      ? iconSvg(
+                          'check-lg'
+                        )
+                      : ''
+                  ) +
+                  '</span>'
+                : '';
+
+            return (
+              '<div class="' +
+              classes +
+              '" data-value="' +
+              esc(option.value) +
+              '">' +
+              check +
+              '<span>' +
+              esc(
+                option.textContent
+              ) +
+              '</span></div>'
+            );
+          })
+          .join('');
+
+      const createHTML =
+        isCreatable &&
+        raw &&
+        !hasExact
+          ? (
+              '<div class="ss-option" data-create-value="' +
+              esc(raw) +
+              '"><span>' +
+              esc(
+                relationshipCreateOptionText(
+                  raw
+                )
+              ) +
+              '</span></div>'
+            )
+          : '';
+
+      if (
+        !optionHTML &&
+        !createHTML
+      ) {
+        optionsEl.innerHTML =
+          '<div class="ss-empty">' +
+          esc(
+            uiText(
+              '沒有符合的項目'
+            )
+          ) +
+          '</div>';
+
+        return;
+      }
+
+      optionsEl.innerHTML =
+        optionHTML +
+        createHTML;
+
+      optionsEl.querySelectorAll(
+        '.ss-option[data-value]'
+      ).forEach(element => {
+        element.onclick =
+          event => {
+            event.stopPropagation();
+
+            const value =
+              element.dataset.value;
+
+            const option =
+              [...select.options]
+                .find(candidate =>
+                  candidate.value ===
+                  value
+                );
+
+            if (!option) return;
+
+            if (isMultiple) {
+              option.selected =
+                !option.selected;
+
+              renderInput();
+              renderOptions(
+                searchEl.value
+              );
+
+              select.dispatchEvent(
+                new Event(
+                  'change',
+                  { bubbles:true }
+                )
+              );
+            } else {
+              selectSingleOption(
+                option
+              );
+            }
+          };
+      });
+
+      optionsEl.querySelectorAll(
+        '[data-create-value]'
+      ).forEach(element => {
+        element.onclick =
+          event => {
+            event.stopPropagation();
+
+            commitCreatableValue(
+              element.dataset
+                .createValue
+            );
+          };
       });
     }
+
     function openDropdown() {
-      document.querySelectorAll('.ss-wrap.ss-open').forEach(w => {
-        if (w !== wrap && w._closeDropdown) w._closeDropdown();
+      document.querySelectorAll(
+        '.ss-wrap.ss-open'
+      ).forEach(other => {
+        if (
+          other !== wrap &&
+          other._closeDropdown
+        ) {
+          other._closeDropdown();
+        }
       });
+
       dropdown.style.display = '';
-      wrap.classList.add('ss-open');
+      wrap.classList.add(
+        'ss-open'
+      );
+
       searchEl.value = '';
       renderOptions();
 
       if (usePortalDropdown) {
-        requestAnimationFrame(() => {
-          positionPortalDropdown();
-          requestAnimationFrame(positionPortalDropdown);
-        });
+        requestAnimationFrame(
+          () => {
+            positionPortalDropdown();
+
+            requestAnimationFrame(
+              positionPortalDropdown
+            );
+          }
+        );
       }
 
-      setTimeout(() => searchEl.focus(), 30);
+      setTimeout(
+        () => searchEl.focus(),
+        30
+      );
     }
 
     function closeDropdown() {
-      dropdown.style.display = 'none';
-      wrap.classList.remove('ss-open');
+      dropdown.style.display =
+        'none';
+
+      wrap.classList.remove(
+        'ss-open'
+      );
+
       restoreDropdownHome();
     }
-    input.onclick = e => {
-      if (e.target.closest('.ss-tag-x')) return;
-      if (wrap.classList.contains('ss-open')) closeDropdown();
-      else openDropdown();
-    };
-    searchEl.oninput = () => renderOptions(searchEl.value);
-    searchEl.onkeydown = e => {
-      if (e.key === 'Escape') { closeDropdown(); input.focus(); }
-      if (e.key === 'Enter') e.preventDefault();
-    };
-    document.addEventListener('click', e => {
-      if (!wrap.contains(e.target) && !dropdown.contains(e.target)) closeDropdown();
-    });
 
-    if (usePortalDropdown) {
-      window.addEventListener('resize', debounce(positionPortalDropdown, 50));
-      document.addEventListener('scroll', () => {
-        if (wrap.classList.contains('ss-open')) positionPortalDropdown();
-      }, true);
-    }
+    input.onclick = event => {
+      if (
+        event.target.closest(
+          '.ss-tag-x'
+        )
+      ) {
+        return;
+      }
 
-    wrap._closeDropdown = closeDropdown;
-    wrap._refresh = () => {
-      renderInput();
-      if (wrap.classList.contains('ss-open')) {
-        renderOptions(searchEl.value);
-        if (usePortalDropdown) requestAnimationFrame(positionPortalDropdown);
+      if (
+        wrap.classList.contains(
+          'ss-open'
+        )
+      ) {
+        closeDropdown();
+      } else {
+        openDropdown();
       }
     };
+
+    searchEl.oninput =
+      () => {
+        renderOptions(
+          searchEl.value
+        );
+      };
+
+    searchEl.onkeydown =
+      event => {
+        if (
+          event.key === 'Escape'
+        ) {
+          closeDropdown();
+          input.focus();
+          return;
+        }
+
+        if (
+          event.key === 'Enter'
+        ) {
+          event.preventDefault();
+
+          if (
+            isCreatable &&
+            searchEl.value.trim()
+          ) {
+            commitCreatableValue(
+              searchEl.value
+            );
+          }
+        }
+      };
+
+    document.addEventListener(
+      'click',
+      event => {
+        if (
+          !wrap.contains(
+            event.target
+          ) &&
+          !dropdown.contains(
+            event.target
+          )
+        ) {
+          closeDropdown();
+        }
+      }
+    );
+
+    if (usePortalDropdown) {
+      window.addEventListener(
+        'resize',
+        debounce(
+          positionPortalDropdown,
+          50
+        )
+      );
+
+      document.addEventListener(
+        'scroll',
+        () => {
+          if (
+            wrap.classList.contains(
+              'ss-open'
+            )
+          ) {
+            positionPortalDropdown();
+          }
+        },
+        true
+      );
+    }
+
+    wrap._closeDropdown =
+      closeDropdown;
+
+    wrap._refresh =
+      () => {
+        renderInput();
+
+        if (
+          wrap.classList.contains(
+            'ss-open'
+          )
+        ) {
+          renderOptions(
+            searchEl.value
+          );
+
+          if (
+            usePortalDropdown
+          ) {
+            requestAnimationFrame(
+              positionPortalDropdown
+            );
+          }
+        }
+      };
+
+    wrap._pendingValue =
+      () =>
+        normalizeRelationshipTypeText(
+          searchEl.value
+        );
+
+    wrap._commitCreatableValue =
+      commitCreatableValue;
+
     renderInput();
   });
 }
@@ -14838,9 +15808,11 @@ function openEditor(id) {
     .filter(x => !c || x.id !== c.id)
     .map(x => `<option value="${x.id}">${esc(displayDataText(x.name, x))}</option>`).join('');
 
+  populateRelationshipTypePicker();
+
   renderRelList(c);
   renderRelAnno(c ? c.id : null);
-  ['fFamilyIds','fParent1','fParent2','fSpouse','fExSpouse','fChildren','fSiblings','relTarget'].forEach(refreshSS);
+  ['fFamilyIds','fParent1','fParent2','fSpouse','fExSpouse','fChildren','fSiblings','relType','relTarget'].forEach(refreshSS);
   resetEditorFamilyPanels();
   renderEditorFamilyPreviews();
 
@@ -16704,17 +17676,96 @@ window.addEventListener('blur', () => {
 
 $('btnAddRel').onclick = () => {
   if (!editingId) return;
-  const c = genealogyData.sims[editingId];
+
+  const c =
+    genealogyData.sims[
+      editingId
+    ];
+
   if (!c) return;
-  const type = $('relType').value.trim() || '關聯';
-  const targetId = $('relTarget').value;
-  if (!targetId) return;
-  genealogyData.links = genealogyData.links || [];
-  genealogyData.links.push({id:uid('lnk'), from:c.id, to:targetId, type, label:type});
-  $('relType').value = '';
+
+  const typeSelect =
+    $('relType');
+
+  const typeWrap =
+    document.querySelector(
+      '.ss-wrap[data-ss-for="relType"]'
+    );
+
+  let type =
+    normalizeRelationshipTypeText(
+      typeSelect?.value
+    );
+
+  if (
+    !type &&
+    typeWrap?._pendingValue
+  ) {
+    type =
+      normalizeRelationshipTypeText(
+        typeWrap._pendingValue()
+      );
+  }
+
+  if (!type) {
+    uiAlert(
+      '請選擇或輸入關係。',
+      {
+        title:'資料未完成'
+      }
+    );
+
+    return;
+  }
+
+  const targetId =
+    $('relTarget').value;
+
+  if (!targetId) {
+    uiAlert(
+      '請選擇關係對象。',
+      {
+        title:'資料未完成'
+      }
+    );
+
+    return;
+  }
+
+  const addedToLibrary =
+    rememberRelationshipType(
+      type
+    );
+
+  genealogyData.links =
+    genealogyData.links || [];
+
+  genealogyData.links.push({
+    id:uid('lnk'),
+    from:c.id,
+    to:targetId,
+    type,
+    label:type
+  });
+
+  populateRelationshipTypePicker();
+
+  if (typeSelect) {
+    typeSelect.value = '';
+  }
+
+  refreshSS('relType');
+
   renderRelList(c);
   renderRelAnno(c.id);
-  save(); render();
+
+  save();
+  render();
+
+  if (addedToLibrary) {
+    // 詞庫已經寫進 genealogyData；
+    // 後續開啟任何市民編輯器都會直接取得這個選項。
+  }
 };
 
 // ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
@@ -17507,7 +18558,26 @@ Object.assign(EN, {
     '表哥':'表哥','表姐':'表姐','表弟':'表弟','表妹':'表妹','表兄弟姊妹':'表兄弟姐妹',
     '岳父':'岳父','岳母':'岳母','公公':'公公','婆婆':'婆婆',
     '配偶父親':'配偶父亲','配偶母親':'配偶母亲','配偶父母':'配偶父母',
-    '（不顯示）':'（不显示）'
+    '（不顯示）':'（不显示）',
+    '曖昧':'暧昧',
+    '秘密情人':'秘密情人',
+    '外遇':'出轨关系',
+    '前任情人':'前任情人',
+    '單戀':'单恋',
+    '互相暗戀':'互相暗恋',
+    '好友':'好友',
+    '青梅竹馬':'青梅竹马',
+    '網友':'网友',
+    '宿敵':'宿敌',
+    '死對頭':'死对头',
+    '關係不睦':'关系不睦',
+    '師生':'师生',
+    '同事':'同事',
+    '室友':'室友',
+    '鄰居':'邻居',
+    '選擇或輸入關係…':'选择或输入关系…',
+    '搜尋或輸入關係…':'搜索或输入关系…',
+    '沒有符合的項目':'没有符合的项目'
   });
   Object.assign(EN, {
     '親子':'Parent / Child',
@@ -17541,7 +18611,26 @@ Object.assign(EN, {
     '表哥':'Older Cousin','表姐':'Older Cousin','表弟':'Younger Cousin','表妹':'Younger Cousin','表兄弟姊妹':'Cousin',
     '岳父':'Father-in-law','岳母':'Mother-in-law','公公':'Father-in-law','婆婆':'Mother-in-law',
     '配偶父親':"Spouse's Father",'配偶母親':"Spouse's Mother",'配偶父母':"Spouse's Parent",
-    '（不顯示）':'(Hidden)'
+    '（不顯示）':'(Hidden)',
+    '曖昧':'Situationship',
+    '秘密情人':'Secret Lover',
+    '外遇':'Affair',
+    '前任情人':'Former Lover',
+    '單戀':'Unrequited Love',
+    '互相暗戀':'Mutual Crush',
+    '好友':'Close Friend',
+    '青梅竹馬':'Childhood Friend',
+    '網友':'Online Friend',
+    '宿敵':'Archrival',
+    '死對頭':'Nemesis',
+    '關係不睦':'Strained Relationship',
+    '師生':'Teacher / Student',
+    '同事':'Coworker',
+    '室友':'Roommate',
+    '鄰居':'Neighbor',
+    '選擇或輸入關係…':'Choose or type a relationship…',
+    '搜尋或輸入關係…':'Search or type a relationship…',
+    '沒有符合的項目':'No matching items'
   });
 
   Object.assign(ZH_HANS_EXACT, {
