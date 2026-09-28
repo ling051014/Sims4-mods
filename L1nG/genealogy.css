@@ -6747,6 +6747,161 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 
+/* ========【曲線關係線】 設定 - 沿用原關係線 UI，只增加曲線專屬控制與即時預覽 ======== */
+.relationship-line-item > summary > i[data-line-style="curve"] {
+    height:18px;
+}
+
+.relationship-line-item > summary > i[data-line-style="curve"]::before {
+    display:none;
+}
+
+.relationship-curve-mini-preview {
+    width:100%;
+    height:18px;
+    display:block;
+    overflow:visible;
+}
+
+.relationship-curve-mini-preview path {
+    fill:none;
+    vector-effect:non-scaling-stroke;
+    stroke-linecap:round;
+}
+
+.relationship-line-extra-controls {
+    padding:0 10px 10px;
+    display:grid;
+    grid-template-columns:minmax(180px,1fr) 130px;
+    gap:10px;
+    align-items:end;
+    background:var(--panel-bg);
+}
+
+.relationship-line-extra-controls:empty {
+    display:none;
+}
+
+.relationship-curve-control {
+    min-width:0;
+    display:grid;
+    gap:5px;
+    color:var(--sub);
+    font-size:10px;
+}
+
+.relationship-curve-control[hidden] {
+    display:none !important;
+}
+
+.relationship-curve-slider {
+    min-width:0;
+    display:grid;
+    grid-template-columns:minmax(120px,1fr) 44px;
+    align-items:center;
+    gap:8px;
+}
+
+.relationship-curve-slider output {
+    color:var(--ink);
+    font-size:10.5px;
+    font-variant-numeric:tabular-nums;
+    text-align:right;
+}
+
+.relationship-arrow-control {
+    min-height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    color:var(--sub);
+    font-size:10px;
+}
+
+.relationship-arrow-control input[type="checkbox"] {
+    flex:0 0 auto;
+}
+
+.other-relationship-line-list {
+    padding:6px;
+    display:grid;
+    gap:4px;
+    background:var(--panel-bg);
+}
+
+.other-relationship-line-item {
+    background:var(--card);
+}
+
+.other-relationship-empty {
+    padding:12px 10px;
+    color:var(--sub);
+    font-size:11px;
+    text-align:center;
+}
+
+.relationship-curve-live-preview {
+    position:fixed;
+    z-index:5300;
+    width:260px;
+    padding:10px 12px 9px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:var(--card);
+    box-shadow:0 10px 26px rgba(0,0,0,.18);
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(3px);
+    transition:opacity .12s ease,transform .12s ease,visibility .12s;
+}
+
+.relationship-curve-live-preview.show {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+
+.relationship-curve-live-preview-head {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:4px;
+    color:var(--sub);
+    font-size:10.5px;
+}
+
+.relationship-curve-live-preview-head strong {
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+}
+
+.relationship-curve-live-preview svg {
+    width:100%;
+    height:42px;
+    display:block;
+    overflow:visible;
+}
+
+.relationship-curve-live-preview path {
+    fill:none;
+    stroke-linecap:round;
+    vector-effect:non-scaling-stroke;
+}
+
+@media (max-width:680px) {
+    .relationship-line-extra-controls {
+        grid-template-columns:1fr;
+    }
+
+    .relationship-curve-live-preview {
+        width:min(260px,calc(100vw - 24px));
+    }
+}
+
+
 /* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */
 /* 有既有外框的按鈕會連同外框變紅；border:0 的導覽 / 工具按鈕不會因此新增外框。 */
 button.danger-action {
