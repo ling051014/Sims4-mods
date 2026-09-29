@@ -6951,18 +6951,6 @@ async function compressBgImage(file) {
     sizeKB:Math.round(optimized.byteSize / 1024)
   };
 }
-function paintCanvasBackgroundPreview() {
-  const el = $('appearanceBackgroundPreview');
-  const url = resolveImageUrl(bgSettings.image);
-  if (url) {
-    el.style.backgroundImage = `url("${url}")`;
-    el.textContent = '';
-  } else {
-    el.style.backgroundImage = '';
-    el.textContent = '尚未設定背景圖片';
-  }
-}
-
 function formatStorageSize(byteSize) {
   const bytes = Math.max(0, Number(byteSize) || 0);
   if (bytes < 1024) return bytes + ' B';
