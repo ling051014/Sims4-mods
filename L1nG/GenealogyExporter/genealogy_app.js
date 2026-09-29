@@ -754,7 +754,7 @@ function scheduleResolvedAssetRefresh(
 
     try{
       if(
-        photoMask?.classList.contains('show') &&
+        lifePhotoEditorDialog?.classList.contains('show') &&
         resolved.some(
           ([id]) =>
             id === lifePhotoState.editor.imageRef
@@ -766,7 +766,7 @@ function scheduleResolvedAssetRefresh(
 
     try{
       if(
-        galleryViewerMask?.classList.contains('show')
+        lifePhotoViewerDialog?.classList.contains('show')
       ){
         const gallery =
           lifePhotoWorkspace.viewerGallery();
@@ -1722,15 +1722,15 @@ const $ = id => document.getElementById(id);
 const viewport = $('genealogyCanvasViewport'), stage = $('genealogyCanvasStage'), svg = $('genealogyRelationshipLayer'), nodes = $('genealogyPersonLayer');
 const labelsSvg = $('genealogyRelationshipLabelLayer');
 const mask = $('simEditorDialog'), personLibraryDialog = $('personLibraryDialog'), appearanceDialog = $('appearanceDialog');
-const storageMask = $('storageDialog');
+const storageDialog = $('storageDialog');
 const familyMemberPickerDialog = $('familyMemberPickerDialog');
-const tipsMask = $('helpDialog');
+const helpDialog = $('helpDialog');
 const personProfileDialog = $('personProfileDialog');
-const petMask = $('petEditorDialog');
-const avatarCropMask = $('avatarCropDialog');
-const photoMask = $('lifePhotoEditorDialog');
-const galleryViewerMask = $('lifePhotoViewerDialog');
-const exportMask = $('exportDialog');
+const petEditorDialog = $('petEditorDialog');
+const avatarCropDialog = $('avatarCropDialog');
+const lifePhotoEditorDialog = $('lifePhotoEditorDialog');
+const lifePhotoViewerDialog = $('lifePhotoViewerDialog');
+const exportDialog = $('exportDialog');
 const exportCloseBtn = $('exportCloseBtn');
 const exportImageBtn = $('exportImageBtn');
 const exportJsonBtn = $('exportJsonBtn');
@@ -1761,7 +1761,7 @@ const appearanceThemeGrid = $('appearanceThemeGrid');
 const customColor1 = $('customColor1');
 const customColor2 = $('customColor2');
 const appearanceCustomThemePreview = $('appearanceCustomThemePreview');
-const galleryGrid = $('galleryGrid');
+const lifePhotoGrid = $('lifePhotoGrid');
 
 // ========【家族名稱輸入】 設定 - 固定導覽欄位、虛線只跟著文字寬度 ========
 const _familyNameMeasureCanvas = document.createElement('canvas');
@@ -7047,10 +7047,10 @@ appearanceDialog.onclick = event => {
 
 $('storageBtn').onclick = () => {
   updateStorageInfo();
-  storageMask.classList.add('show');
+  storageDialog.classList.add('show');
 };
-$('storageCloseBtn').onclick = () => storageMask.classList.remove('show');
-storageMask.onclick = e => { if (e.target === storageMask) storageMask.classList.remove('show'); };
+$('storageCloseBtn').onclick = () => storageDialog.classList.remove('show');
+storageDialog.onclick = e => { if (e.target === storageDialog) storageDialog.classList.remove('show'); };
 
 // ========【恢復預設】 設定 - 介面設定與範例資料分開處理 ========
 const resetUiSettingsBtn = $('resetUiSettingsBtn');
@@ -7133,7 +7133,7 @@ if (restoreSampleBtn) {
       refreshFamilyUI();
       render();
       appearanceDialog.classList.remove('show');
-      storageMask.classList.remove('show');
+      storageDialog.classList.remove('show');
       requestAnimationFrame(fitScreen);
       uiToast('已恢復預設族譜。');
     } finally {
@@ -7188,9 +7188,9 @@ $('cleanupBtn').onclick = async () => {
   }
 };
 
-$('tipsBtn').onclick = () => tipsMask.classList.add('show');
-$('tipsCloseBtn').onclick = () => tipsMask.classList.remove('show');
-tipsMask.onclick = e => { if (e.target === tipsMask) tipsMask.classList.remove('show'); };
+$('helpBtn').onclick = () => helpDialog.classList.add('show');
+$('helpCloseBtn').onclick = () => helpDialog.classList.remove('show');
+helpDialog.onclick = e => { if (e.target === helpDialog) helpDialog.classList.remove('show'); };
 
 const MODAL_STACK = ['avatarCropDialog','lifePhotoEditorDialog','petEditorDialog','simEditorDialog','personProfileDialog','lifePhotoViewerDialog',
                      'helpDialog','personLibraryDialog','familyMemberPickerDialog','storageDialog','appearanceDialog'];
@@ -8972,7 +8972,7 @@ function renderPersonProfileLifePhotoItem(
 
   return `
     <div
-      class="gallery-item"
+      class="life-photo-item"
       data-person-profile-life-photo-index="${index}"
       title="${esc(photo.title || '')}"
     >
@@ -9402,12 +9402,12 @@ const lifePhotoWorkspace = {
       entry ? '' : 'none';
 
     this.refreshPreview();
-    photoMask.classList.add('show');
+    lifePhotoEditorDialog.classList.add('show');
     setTimeout(() => $('phTitle').focus(), 60);
   },
 
   closeEditor() {
-    photoMask.classList.remove('show');
+    lifePhotoEditorDialog.classList.remove('show');
     this.resetEditorState();
   },
 
@@ -9509,22 +9509,22 @@ const lifePhotoWorkspace = {
   },
 
   renderList() {
-    if (!galleryGrid) return;
+    if (!lifePhotoGrid) return;
 
     if (!editingGallery.length) {
-      galleryGrid.innerHTML =
-        '<div class="gallery-empty" style="grid-column:1/-1;">尚未新增人生照片</div>';
+      lifePhotoGrid.innerHTML =
+        '<div class="life-photo-empty" style="grid-column:1/-1;">尚未新增人生照片</div>';
       return;
     }
 
-    galleryGrid.innerHTML =
+    lifePhotoGrid.innerHTML =
       editingGallery
         .map((entry, index) => {
           const stage = entry.lifeStage
-            ? `<span class="gallery-item-stage stage-${esc(entry.lifeStage)}">${esc(entry.lifeStage)}</span>`
+            ? `<span class="life-photo-stage stage-${esc(entry.lifeStage)}">${esc(entry.lifeStage)}</span>`
             : '';
           const title = entry.title
-            ? `<div class="gallery-item-title">${esc(entry.title)}</div>`
+            ? `<div class="life-photo-title">${esc(entry.title)}</div>`
             : '';
           const assetId = isAssetId(entry.image)
             ? String(entry.image)
@@ -9532,12 +9532,12 @@ const lifePhotoWorkspace = {
           const url = resolveImageUrl(entry.image);
 
           return `
-            <div class="gallery-item" data-life-photo-index="${index}">
+            <div class="life-photo-item" data-life-photo-index="${index}">
               ${assetId ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" draggable="false" loading="lazy" decoding="async">` : ''}
               ${stage}
-              <div class="gallery-item-overlay">
-                <button type="button" class="gallery-item-btn" data-life-photo-action="edit" data-life-photo-index="${index}" title="編輯">${iconSvg('pencil-square')}</button>
-                <button type="button" class="gallery-item-btn danger" data-life-photo-action="delete" data-life-photo-index="${index}" title="刪除">${iconSvg('trash3')}</button>
+              <div class="life-photo-item-overlay">
+                <button type="button" class="life-photo-action" data-life-photo-action="edit" data-life-photo-index="${index}" title="編輯">${iconSvg('pencil-square')}</button>
+                <button type="button" class="life-photo-action danger" data-life-photo-action="delete" data-life-photo-index="${index}" title="刪除">${iconSvg('trash3')}</button>
               </div>
               ${title}
             </div>
@@ -9545,8 +9545,8 @@ const lifePhotoWorkspace = {
         })
         .join('');
 
-    galleryGrid
-      .querySelectorAll('.gallery-item[data-life-photo-index]')
+    lifePhotoGrid
+      .querySelectorAll('.life-photo-item[data-life-photo-index]')
       .forEach(card => {
         card.addEventListener('click', event => {
           if (event.target.closest('[data-life-photo-action]')) return;
@@ -9556,7 +9556,7 @@ const lifePhotoWorkspace = {
         });
       });
 
-    galleryGrid
+    lifePhotoGrid
       .querySelectorAll('[data-life-photo-action="edit"]')
       .forEach(button => {
         button.addEventListener('click', event => {
@@ -9567,7 +9567,7 @@ const lifePhotoWorkspace = {
         });
       });
 
-    galleryGrid
+    lifePhotoGrid
       .querySelectorAll('[data-life-photo-action="delete"]')
       .forEach(button => {
         button.addEventListener('click', async event => {
@@ -9614,12 +9614,12 @@ const lifePhotoWorkspace = {
     lifePhotoState.viewer.simId = null;
     lifePhotoState.viewer.index = index;
 
-    $('gvPersonName').textContent =
+    $('photoViewerPersonName').textContent =
       $('fName')?.value?.trim() ||
       uiText('人物');
 
     this.refreshViewer();
-    galleryViewerMask.classList.add('show');
+    lifePhotoViewerDialog.classList.add('show');
   },
 
   openSavedViewer(simId, index) {
@@ -9630,12 +9630,12 @@ const lifePhotoWorkspace = {
     lifePhotoState.viewer.simId = simId;
     lifePhotoState.viewer.index = index;
 
-    $('gvPersonName').textContent =
+    $('photoViewerPersonName').textContent =
       displayDataText(sim.name, sim) ||
       uiText('人物');
 
     this.refreshViewer();
-    galleryViewerMask.classList.add('show');
+    lifePhotoViewerDialog.classList.add('show');
   },
 
   refreshViewer() {
@@ -9653,7 +9653,7 @@ const lifePhotoWorkspace = {
 
     const entry =
       gallery[lifePhotoState.viewer.index];
-    const image = $('gvImg');
+    const image = $('photoViewerImage');
     const assetId = isAssetId(entry.image)
       ? String(entry.image)
       : '';
@@ -9665,7 +9665,7 @@ const lifePhotoWorkspace = {
     if (url) image.src = url;
     else image.removeAttribute('src');
 
-    $('gvTitle').textContent =
+    $('photoViewerTitle').textContent =
       entry.title || uiText('（未命名）');
 
     const details = [];
@@ -9674,13 +9674,13 @@ const lifePhotoWorkspace = {
     }
     if (entry.note) details.push(entry.note);
 
-    $('gvNote').textContent = details.join(' · ');
-    $('gvCounter').textContent =
+    $('photoViewerNote').textContent = details.join(' · ');
+    $('photoViewerCounter').textContent =
       `${lifePhotoState.viewer.index + 1} / ${gallery.length}`;
 
     const single = gallery.length <= 1;
-    $('gvPrev').disabled = single;
-    $('gvNext').disabled = single;
+    $('photoViewerPrevBtn').disabled = single;
+    $('photoViewerNextBtn').disabled = single;
   },
 
   moveViewer(delta) {
@@ -9698,7 +9698,7 @@ const lifePhotoWorkspace = {
   },
 
   closeViewer() {
-    galleryViewerMask.classList.remove('show');
+    lifePhotoViewerDialog.classList.remove('show');
     lifePhotoState.viewer.mode = 'draft';
     lifePhotoState.viewer.simId = null;
     lifePhotoState.viewer.index = 0;
@@ -9709,19 +9709,19 @@ $('btnAddPhoto').onclick = () => {
   lifePhotoWorkspace.openEditor();
 };
 
-galleryGrid.addEventListener('dragover', event => {
+lifePhotoGrid.addEventListener('dragover', event => {
   event.preventDefault();
   event.stopPropagation();
-  galleryGrid.classList.add('dragover');
+  lifePhotoGrid.classList.add('dragover');
 });
-galleryGrid.addEventListener('dragleave', event => {
+lifePhotoGrid.addEventListener('dragleave', event => {
   event.preventDefault();
-  galleryGrid.classList.remove('dragover');
+  lifePhotoGrid.classList.remove('dragover');
 });
-galleryGrid.addEventListener('drop', async event => {
+lifePhotoGrid.addEventListener('drop', async event => {
   event.preventDefault();
   event.stopPropagation();
-  galleryGrid.classList.remove('dragover');
+  lifePhotoGrid.classList.remove('dragover');
 
   const files =
     Array.from(event.dataTransfer?.files || [])
@@ -9751,8 +9751,8 @@ $('phCancel').onclick = () => {
 $('phDelete').onclick = () => {
   lifePhotoWorkspace.deleteEditorEntry();
 };
-photoMask.onclick = event => {
-  if (event.target === photoMask) {
+lifePhotoEditorDialog.onclick = event => {
+  if (event.target === lifePhotoEditorDialog) {
     lifePhotoWorkspace.closeEditor();
   }
 };
@@ -9780,7 +9780,7 @@ $('photoClearBtn').onclick = () => {
 };
 
 document.addEventListener('paste', async event => {
-  if (!photoMask.classList.contains('show')) return;
+  if (!lifePhotoEditorDialog.classList.contains('show')) return;
 
   const imageItem =
     Array.from(event.clipboardData?.items || [])
@@ -9803,17 +9803,17 @@ document.addEventListener('paste', async event => {
   }
 });
 
-$('gvClose').onclick = () => {
+$('photoViewerCloseBtn').onclick = () => {
   lifePhotoWorkspace.closeViewer();
 };
-$('gvPrev').onclick = () => {
+$('photoViewerPrevBtn').onclick = () => {
   lifePhotoWorkspace.moveViewer(-1);
 };
-$('gvNext').onclick = () => {
+$('photoViewerNextBtn').onclick = () => {
   lifePhotoWorkspace.moveViewer(1);
 };
-galleryViewerMask.onclick = event => {
-  if (event.target === galleryViewerMask) {
+lifePhotoViewerDialog.onclick = event => {
+  if (event.target === lifePhotoViewerDialog) {
     lifePhotoWorkspace.closeViewer();
   }
 };
@@ -13330,7 +13330,7 @@ async function openAvatarCropEditor(target){
   avatarCropRenderMetrics=null;
   avatarCropNaturalSize={width:0,height:0};
 
-  avatarCropMask.classList.add('show');
+  avatarCropDialog.classList.add('show');
 
   const loaded=await loadAvatarCropImage(url);
 
@@ -13348,7 +13348,7 @@ async function openAvatarCropEditor(target){
 }
 
 function closeAvatarCropEditor(){
-  avatarCropMask.classList.remove('show');
+  avatarCropDialog.classList.remove('show');
   avatarCropTarget=null;
   avatarCropDraft={...DEFAULT_AVATAR_FRAME};
   avatarCropUrl='';
@@ -13508,10 +13508,10 @@ $('avatarCropDone')?.addEventListener(
   commitAvatarCropEditor
 );
 
-avatarCropMask?.addEventListener(
+avatarCropDialog?.addEventListener(
   'click',
   event=>{
-    if(event.target===avatarCropMask){
+    if(event.target===avatarCropDialog){
       closeAvatarCropEditor();
     }
   }
@@ -13521,7 +13521,7 @@ window.addEventListener(
   'resize',
   debounce(()=>{
     if(
-      avatarCropMask?.classList.contains('show')
+      avatarCropDialog?.classList.contains('show')
     ){
       renderAvatarCropPreview();
     }
@@ -14055,7 +14055,7 @@ const petEditorController = {
       validIndex ? '' : 'none';
 
     this.populateForm(pet);
-    petMask.classList.add('show');
+    petEditorDialog.classList.add('show');
 
     setTimeout(
       () => $('pName').focus(),
@@ -14064,7 +14064,7 @@ const petEditorController = {
   },
 
   close() {
-    petMask.classList.remove('show');
+    petEditorDialog.classList.remove('show');
 
     if (avatarCropTarget === 'pet') {
       closeAvatarCropEditor();
@@ -14414,8 +14414,8 @@ $('pDelete').onclick = () => {
   petEditorController.removeCurrent();
 };
 
-petMask.onclick = event => {
-  if (event.target === petMask) {
+petEditorDialog.onclick = event => {
+  if (event.target === petEditorDialog) {
     petEditorController.close();
   }
 };
@@ -15380,7 +15380,7 @@ function editorDraftSim(){
   );
 
   if (
-    avatarCropMask
+    avatarCropDialog
       ?.classList
       .contains('show')
   ) {
@@ -15389,7 +15389,7 @@ function editorDraftSim(){
 
   resetSimEditorDraftState();
 
-  petMask.classList.remove(
+  petEditorDialog.classList.remove(
     'show'
   );
 
@@ -15399,7 +15399,7 @@ function editorDraftSim(){
     ...DEFAULT_AVATAR_FRAME
   };
 
-  photoMask.classList.remove(
+  lifePhotoEditorDialog.classList.remove(
     'show'
   );
 
@@ -16386,7 +16386,7 @@ function renderFamilyMemberPickerList() {
           <div class="family-member-picker-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
             <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
           </div>
-          <div class="roster-meta">${genderIcon} ${esc(fams)}</div>
+          <div class="family-member-picker-meta">${genderIcon} ${esc(fams)}</div>
         </div>
       </div>`;
     }).join('');
@@ -16473,15 +16473,15 @@ async function exportJSON() {
 }
 
 function openExportPanel() {
-  if (!exportMask) return;
-  exportMask.classList.add('show');
-  exportMask.setAttribute('aria-hidden', 'false');
+  if (!exportDialog) return;
+  exportDialog.classList.add('show');
+  exportDialog.setAttribute('aria-hidden', 'false');
 }
 
 function closeExportPanel() {
-  if (!exportMask) return;
-  exportMask.classList.remove('show');
-  exportMask.setAttribute('aria-hidden', 'true');
+  if (!exportDialog) return;
+  exportDialog.classList.remove('show');
+  exportDialog.setAttribute('aria-hidden', 'true');
 }
 
 function getSelectedExportImageSize() {
@@ -17441,13 +17441,13 @@ document.addEventListener('keydown', e => {
     if (!closeTopModal() && selectedNodeIds.size) clearNodeSelection();
     return;
   }
-  if (galleryViewerMask.classList.contains('show')) {
+  if (lifePhotoViewerDialog.classList.contains('show')) {
     if (e.key === 'ArrowLeft') { e.preventDefault(); lifePhotoWorkspace.moveViewer(-1); return; }
     if (e.key === 'ArrowRight') { e.preventDefault(); lifePhotoWorkspace.moveViewer(1); return; }
   }
   if (e.key === 'Enter' && e.ctrlKey) {
-    if (photoMask.classList.contains('show')) lifePhotoWorkspace.commitEditor();
-    else if (petMask.classList.contains('show')) petEditorController.commit();
+    if (lifePhotoEditorDialog.classList.contains('show')) lifePhotoWorkspace.commitEditor();
+    else if (petEditorDialog.classList.contains('show')) petEditorController.commit();
     else if (mask.classList.contains('show')) saveChar();
   }
 });
@@ -17582,7 +17582,7 @@ $('fitScreenBtn')?.addEventListener('click',fitScreen);
 
 $('exportBtn').onclick = openExportPanel;
 if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
-if (exportMask) exportMask.onclick = e => { if (e.target === exportMask) closeExportPanel(); };
+if (exportDialog) exportDialog.onclick = e => { if (e.target === exportDialog) closeExportPanel(); };
 if (exportJsonBtn) exportJsonBtn.onclick = async () => { closeExportPanel(); await exportJSON(); };
 if (exportImageBtn) exportImageBtn.onclick = async () => {
   const originalHtml =
@@ -18655,6 +18655,6 @@ LING_I18N.init();
 setupTopbarNavSelects();
 observeSharedNativeSelectChevrons();
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && exportMask && exportMask.classList.contains('show')) closeExportPanel();
+  if (e.key === 'Escape' && exportDialog && exportDialog.classList.contains('show')) closeExportPanel();
 });
 init();

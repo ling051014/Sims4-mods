@@ -1321,12 +1321,12 @@ body.sidebar-resizing * {
 .filebtn .l1ng-icon,
 .ui-dialog-actions .l1ng-icon,
 .pet-add-btn .l1ng-icon,
-.gallery-add-btn .l1ng-icon {
+.life-photo-add-btn .l1ng-icon {
     /* 字體大小 */ font-size: 1.02em;
 }
 
 .info>.l1ng-icon,
-.gallery-drop-hint>.l1ng-icon {
+.life-photo-drop-hint>.l1ng-icon {
     /* 右側外距 */ margin-right: 6px;
     /* 文字顏色 */ color: var(--accent);
 }
@@ -1504,7 +1504,7 @@ body[data-theme="midnight"] .person-card-death {
 
 /* ========【年齡階段標籤】 設定 - 使用低彩度底色與左側色線，取代舊版實心彩色標籤 ======== */
 .stage-tag,
-.gallery-item-stage {
+.life-photo-stage {
     --stage-accent:#8aa1b3;
     --stage-bg:rgba(138,161,179,.12);
     --stage-ink:var(--ink);
@@ -1534,7 +1534,7 @@ body[data-theme="midnight"] .person-card-death {
 .stage-老年   { --stage-accent:#9d8f84; --stage-bg:rgba(157,143,132,.10); }
 
 body[data-theme="midnight"] .stage-tag,
-body[data-theme="midnight"] .gallery-item-stage {
+body[data-theme="midnight"] .life-photo-stage {
     --stage-ink:#edf3f8;
     border-color:color-mix(in srgb,var(--stage-accent) 52%,#2f3945);
     background:color-mix(in srgb,var(--stage-accent) 16%,#151c24);
@@ -1742,7 +1742,7 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 顯示層級 */ z-index: 150;
 }
 
-.ui-dialog-backdrop.viewer {
+.ui-dialog-backdrop.photo-viewer-backdrop {
     /* 顯示層級 */ z-index: 210;
 }
 
@@ -2840,7 +2840,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 /* ========【模擬市民相簿】 設定 - 圖片網格、拖放與圖片操作 ======== */
 
-.gallery-grid {
+.life-photo-grid {
     /* 顯示方式 */ display: grid;
     /* 網格欄位 */ grid-template-columns: repeat(auto-fill,minmax(110px,1fr));
     /* 項目間距 */ gap: 10px;
@@ -2848,7 +2848,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 最小高度 */ min-height: 20px;
 }
 
-.gallery-empty {
+.life-photo-empty {
     /* 字體大小 */ font-size: 12px;
     /* 文字顏色 */ color: var(--sub);
     /* 內縮空間 */ padding: 14px 0;
@@ -2857,7 +2857,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 圓角弧度 */ border-radius: 8px;
 }
 
-.gallery-item {
+.life-photo-item {
     /* 定位方式 */ position: relative;
     /* 圓角弧度 */ border-radius: 8px;
     /* 溢出處理 */ overflow: hidden;
@@ -2868,20 +2868,20 @@ button.avatar-editor-action { cursor:pointer; }
     /* 動畫過渡 */ transition: .15s;
 }
 
-.gallery-item:hover {
+.life-photo-item:hover {
     /* 邊框顏色 */ border-color: var(--accent);
     /* 元素陰影 */ box-shadow: 0 4px 12px rgba(0,0,0,.1);
     /* 元素變形 */ transform: translateY(-1px);
 }
 
-.gallery-item img {
+.life-photo-item img {
     /* 元素寬度 */ width: 100%;
     /* 元素高度 */ height: 100%;
     /* 圖片填滿方式 */ object-fit: cover;
     /* 顯示方式 */ display: block;
 }
 
-.gallery-item-overlay {
+.life-photo-item-overlay {
     /* 定位方式 */ position: absolute;
     /* 頂部位置 */ top: 4px;
     /* 右側位置 */ right: 4px;
@@ -2891,11 +2891,11 @@ button.avatar-editor-action { cursor:pointer; }
     /* 動畫過渡 */ transition: .15s;
 }
 
-.gallery-item:hover .gallery-item-overlay {
+.life-photo-item:hover .life-photo-item-overlay {
     /* 透明度 */ opacity: 1;
 }
 
-.gallery-item-btn {
+.life-photo-action {
     /* 元素寬度 */ width: 24px;
     /* 元素高度 */ height: 24px;
     /* 圓角弧度 */ border-radius: 6px;
@@ -2912,15 +2912,15 @@ button.avatar-editor-action { cursor:pointer; }
     /* 內縮空間 */ padding: 0;
 }
 
-.gallery-item-btn:hover {
+.life-photo-action:hover {
     /* 背景設定 */ background: rgba(0,0,0,.85);
 }
 
-.gallery-item-btn.danger:hover {
+.life-photo-action.danger:hover {
     /* 背景設定 */ background: #c94a3a;
 }
 
-.gallery-item-title {
+.life-photo-title {
     /* 定位方式 */ position: absolute;
     /* 左側位置 */ left: 0;
     /* 右側位置 */ right: 0;
@@ -2935,14 +2935,14 @@ button.avatar-editor-action { cursor:pointer; }
     /* 滑鼠事件 */ pointer-events: none;
 }
 
-.gallery-item-stage {
+.life-photo-stage {
     position:absolute;
     top:4px;
     left:4px;
     pointer-events:none;
 }
 
-.gallery-add-btn {
+.life-photo-add-btn {
     /* 顯示方式 */ display: flex;
     /* 垂直對齊 */ align-items: center;
     /* 水平對齊 */ justify-content: center;
@@ -2960,13 +2960,13 @@ button.avatar-editor-action { cursor:pointer; }
     /* 字體設定 */ font-family: inherit;
 }
 
-.gallery-add-btn:hover {
+.life-photo-add-btn:hover {
     /* 邊框顏色 */ border-color: var(--accent);
     /* 文字顏色 */ color: var(--accent);
     /* 背景設定 */ background: var(--panel-item-hover);
 }
 
-.gallery-drop-hint {
+.life-photo-drop-hint {
     /* 字體大小 */ font-size: 11px;
     /* 文字顏色 */ color: var(--sub);
     /* 透明度 */ opacity: .75;
@@ -2974,7 +2974,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 文字對齊 */ text-align: center;
 }
 
-.gallery-grid.dragover {
+.life-photo-grid.dragover {
     /* 外框設定 */ outline: 2px dashed var(--accent);
     /* 外框偏移 */ outline-offset: 4px;
     /* 圓角弧度 */ border-radius: 8px;
@@ -3048,7 +3048,7 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 /* ========【人生照片檢視】 設定 - 人物專屬照片視窗，不再使用全螢幕浮動按鈕 ======== */
-.viewer-modal {
+.photo-viewer-panel {
     width:min(980px,calc(100vw - 32px));
     height:min(760px,calc(100vh - 32px));
     max-width:none;
@@ -3060,7 +3060,7 @@ button.avatar-editor-action { cursor:pointer; }
     background:var(--card);
 }
 
-.viewer-header {
+.photo-viewer-header {
     min-height:48px;
     padding:0 14px 0 18px;
     border-bottom:1px solid var(--border);
@@ -3070,7 +3070,7 @@ button.avatar-editor-action { cursor:pointer; }
     gap:12px;
 }
 
-.viewer-heading {
+.photo-viewer-heading {
     min-width:0;
     display:flex;
     align-items:center;
@@ -3079,7 +3079,7 @@ button.avatar-editor-action { cursor:pointer; }
     font-size:12px;
 }
 
-.viewer-person-name {
+.photo-viewer-person-name {
     max-width:260px;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -3088,9 +3088,9 @@ button.avatar-editor-action { cursor:pointer; }
     font-weight:650;
 }
 
-.viewer-heading-sep { color:var(--border); }
+.photo-viewer-heading-separator { color:var(--border); }
 
-.viewer-close {
+.photo-viewer-close {
     width:31px;
     height:31px;
     display:inline-flex;
@@ -3103,12 +3103,12 @@ button.avatar-editor-action { cursor:pointer; }
     color:var(--sub);
 }
 
-.viewer-close:hover {
+.photo-viewer-close:hover {
     background:var(--panel-item-hover);
     color:var(--ink);
 }
 
-.viewer-img-wrap {
+.photo-viewer-image-wrap {
     min-height:0;
     padding:18px;
     display:flex;
@@ -3118,7 +3118,7 @@ button.avatar-editor-action { cursor:pointer; }
     overflow:hidden;
 }
 
-.viewer-img-wrap img {
+.photo-viewer-image-wrap img {
     max-width:100%;
     max-height:100%;
     object-fit:contain;
@@ -3127,7 +3127,7 @@ button.avatar-editor-action { cursor:pointer; }
     background:#000;
 }
 
-.viewer-footer {
+.photo-viewer-footer {
     min-height:74px;
     padding:12px 16px 13px 18px;
     border-top:1px solid var(--border);
@@ -3137,7 +3137,7 @@ button.avatar-editor-action { cursor:pointer; }
     gap:18px;
 }
 
-.viewer-info {
+.photo-viewer-info {
     min-width:0;
     position:static;
     transform:none;
@@ -3148,13 +3148,13 @@ button.avatar-editor-action { cursor:pointer; }
     backdrop-filter:none;
 }
 
-.viewer-info .gv-title {
+.photo-viewer-info .gv-title {
     margin:0 0 3px;
     font-size:13px;
     font-weight:700;
 }
 
-.viewer-info .gv-note {
+.photo-viewer-info .gv-note {
     max-width:620px;
     margin:0;
     color:var(--sub);
@@ -3162,14 +3162,14 @@ button.avatar-editor-action { cursor:pointer; }
     white-space:pre-wrap;
 }
 
-.viewer-controls {
+.photo-viewer-controls {
     display:flex;
     align-items:center;
     gap:8px;
     flex:0 0 auto;
 }
 
-.viewer-nav {
+.photo-viewer-nav {
     position:static;
     transform:none;
     width:30px;
@@ -3184,12 +3184,12 @@ button.avatar-editor-action { cursor:pointer; }
     font-size:18px;
 }
 
-.viewer-nav:hover {
+.photo-viewer-nav:hover {
     background:var(--panel-item-hover);
     border-color:var(--accent);
 }
 
-.viewer-nav:disabled {
+.photo-viewer-nav:disabled {
     opacity:.35;
     cursor:default;
 }
@@ -3751,37 +3751,37 @@ button.avatar-editor-action { cursor:pointer; }
     /* 次要提示透明度 */ opacity: .78;
 }
 .person-profile-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
-.person-profile-gallery .gallery-item { aspect-ratio:1/1; border-radius:5px; overflow:hidden; }
-.person-profile-gallery .gallery-item-title { display:none; }
+.person-profile-gallery .life-photo-item { aspect-ratio:1/1; border-radius:5px; overflow:hidden; }
+.person-profile-gallery .life-photo-title { display:none; }
 .person-profile-panel > .ui-dialog-actions { margin:0; padding:10px 18px 12px; border-top:1px solid var(--border); }
 
 /* ========【使用提示】 設定 - 視窗外框沿用共用 Modal，只保留提示內容排版 ======== */
-.tips-modal {
+.help-panel {
     width:min(740px,100%);
 }
 
-.tips-body {
+.help-body {
     max-height:64vh;
     overflow:auto;
     margin:0 -4px 2px 0;
     padding-right:8px;
 }
 
-.tips-section {
+.help-section {
     padding:12px 0 13px;
     border-bottom:1px solid var(--border);
 }
 
-.tips-section:first-child {
+.help-section:first-child {
     padding-top:2px;
 }
 
-.tips-section:last-child {
+.help-section:last-child {
     padding-bottom:2px;
     border-bottom:0;
 }
 
-.tips-section h3 {
+.help-section h3 {
     margin:0 0 7px;
     display:flex;
     align-items:center;
@@ -3792,14 +3792,14 @@ button.avatar-editor-action { cursor:pointer; }
     letter-spacing:.15px;
 }
 
-.tips-section h3 .l1ng-icon {
+.help-section h3 .l1ng-icon {
     width:14px;
     height:14px;
     color:var(--accent);
     flex:0 0 auto;
 }
 
-.tips-section ul {
+.help-section ul {
     margin:0;
     padding-left:19px;
     color:var(--sub);
@@ -3807,20 +3807,20 @@ button.avatar-editor-action { cursor:pointer; }
     line-height:1.65;
 }
 
-.tips-section li {
+.help-section li {
     margin-bottom:5px;
 }
 
-.tips-section li:last-child {
+.help-section li:last-child {
     margin-bottom:0;
 }
 
-.tips-section li b {
+.help-section li b {
     color:var(--ink);
     font-weight:650;
 }
 
-.tips-section kbd {
+.help-section kbd {
     display:inline-flex;
     align-items:center;
     justify-content:center;
@@ -3836,7 +3836,7 @@ button.avatar-editor-action { cursor:pointer; }
     line-height:1;
 }
 
-.tips-modal > .ui-dialog-actions {
+.help-panel > .ui-dialog-actions {
     margin-top:14px;
 }
 
@@ -3914,18 +3914,18 @@ button.avatar-editor-action { cursor:pointer; }
     .grid label {
         /* 網格欄位範圍 */ grid-column: 1/-1 !important;
     }
-    .viewer-nav {
+    .photo-viewer-nav {
         /* 元素寬度 */ width: 40px;
         /* 元素高度 */ height: 40px;
         /* 字體大小 */ font-size: 20px;
     }
-    .viewer-nav.prev {
+    .photo-viewer-nav.prev {
         /* 左側位置 */ left: 8px;
     }
-    .viewer-nav.next {
+    .photo-viewer-nav.next {
         /* 右側位置 */ right: 8px;
     }
-    .viewer-close {
+    .photo-viewer-close {
         /* 頂部位置 */ top: 10px;
         /* 右側位置 */ right: 14px;
         /* 元素寬度 */ width: 36px;
@@ -4028,7 +4028,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 .sidebar-btn,
 .filebtn,
 .pet-add-btn,
-.gallery-add-btn {
+.life-photo-add-btn {
     /* 垂直對齊 */ align-items: center;
 }
 
@@ -4036,7 +4036,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 .sidebar-btn>span,
 .filebtn>span,
 .pet-add-btn>span,
-.gallery-add-btn>span {
+.life-photo-add-btn>span {
     /* 最小寬度 */ min-width: 0;
 }
 
@@ -6172,7 +6172,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 /* ========【使用提示】 設定 - 鍵盤 keycap 與滑鼠左右鍵 / 滾輪視覺語言 ======== */
-.tips-section .mouse-hint {
+.help-section .mouse-hint {
     position:relative;
     display:inline-block;
     width:19px;
@@ -6185,8 +6185,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:var(--input-bg);
     overflow:hidden;
 }
-.tips-section .mouse-hint::before,
-.tips-section .mouse-hint::after {
+.help-section .mouse-hint::before,
+.help-section .mouse-hint::after {
     content:"";
     position:absolute;
     top:1px;
@@ -6194,11 +6194,11 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     height:8px;
     border-radius:5px 3px 2px 2px;
 }
-.tips-section .mouse-hint::before { left:1px; }
-.tips-section .mouse-hint::after { right:1px; }
-.tips-section .mouse-hint.mouse-left::before,
-.tips-section .mouse-hint.mouse-right::after { background:var(--accent); }
-.tips-section .mouse-hint-wheel {
+.help-section .mouse-hint::before { left:1px; }
+.help-section .mouse-hint::after { right:1px; }
+.help-section .mouse-hint.mouse-left::before,
+.help-section .mouse-hint.mouse-right::after { background:var(--accent); }
+.help-section .mouse-hint-wheel {
     position:absolute;
     left:50%;
     top:3px;
@@ -6208,9 +6208,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:color-mix(in srgb,var(--sub) 55%,transparent);
     transform:translateX(-50%);
 }
-.tips-section .mouse-hint.mouse-wheel .mouse-hint-wheel { background:var(--accent); }
-.tips-section .mouse-hint.mouse-wheel::before,
-.tips-section .mouse-hint.mouse-wheel::after { background:transparent; }
+.help-section .mouse-hint.mouse-wheel .mouse-hint-wheel { background:var(--accent); }
+.help-section .mouse-hint.mouse-wheel::before,
+.help-section .mouse-hint.mouse-wheel::after { background:transparent; }
 
 /* ========【檢視卡片版型】 設定 - 檢視模式固定直向，appearance 只控制視覺效果 ======== */
 .person-card.view.card-appearance-translucent,
