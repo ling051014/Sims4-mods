@@ -1719,18 +1719,18 @@ let spacePanHeld = false;
 let marqueeState = null;
 
 const $ = id => document.getElementById(id);
-const viewport = $('viewport'), stage = $('stage'), svg = $('links'), nodes = $('nodes');
-const labelsSvg = $('labels');
-const mask = $('mask'), rosterMask = $('rosterMask'), bgMask = $('bgMask');
-const storageMask = $('storageMask');
-const addMemberMask = $('addMemberMask');
-const tipsMask = $('tipsMask');
-const infoMask = $('infoMask');
-const petMask = $('petMask');
-const avatarCropMask = $('avatarCropMask');
-const photoMask = $('photoMask');
-const galleryViewerMask = $('galleryViewerMask');
-const exportMask = $('exportMask');
+const viewport = $('genealogyCanvasViewport'), stage = $('genealogyCanvasStage'), svg = $('genealogyRelationshipLayer'), nodes = $('genealogyPersonLayer');
+const labelsSvg = $('genealogyRelationshipLabelLayer');
+const mask = $('simEditorDialog'), rosterMask = $('personLibraryDialog'), bgMask = $('appearanceDialog');
+const storageMask = $('storageDialog');
+const addMemberMask = $('familyMemberPickerDialog');
+const tipsMask = $('helpDialog');
+const infoMask = $('personProfileDialog');
+const petMask = $('petEditorDialog');
+const avatarCropMask = $('avatarCropDialog');
+const photoMask = $('lifePhotoEditorDialog');
+const galleryViewerMask = $('lifePhotoViewerDialog');
+const exportMask = $('exportDialog');
 const exportCloseBtn = $('exportCloseBtn');
 const exportImageBtn = $('exportImageBtn');
 const exportJsonBtn = $('exportJsonBtn');
@@ -1746,7 +1746,7 @@ const panToolBtn = $('panToolBtn');
 const arrangeToolDivider = $('arrangeToolDivider');
 const arrangeToolDividerEnd = $('arrangeToolDividerEnd');
 const selectionMarquee = $('selectionMarquee');
-const nodeContextMenu = $('nodeContextMenu');
+const nodeContextMenu = $('personCardContextMenu');
 const labelLockToggle = $('labelLockToggle');
 const relationshipPerspectiveBtn = $('relationshipPerspectiveBtn');
 const sidebar = $('sidebar');
@@ -2994,7 +2994,7 @@ let _uiDialogResolve = null;
 let _uiDialogMode = 'alert';
 
 function closeUiDialog(result = null) {
-  const overlay = $('uiDialogMask');
+  const overlay = $('confirmationDialog');
   if (!overlay || !overlay.classList.contains('show')) return;
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden', 'true');
@@ -3012,7 +3012,7 @@ function openUiDialog({
   confirmText = '確定',
   cancelText = '取消'
 } = {}) {
-  const overlay = $('uiDialogMask');
+  const overlay = $('confirmationDialog');
   const dialog = $('uiDialog');
   const titleEl = $('uiDialogTitle');
   const messageEl = $('uiDialogMessage');
@@ -3133,7 +3133,7 @@ function uiToast(message, duration = 2600) {
 
 
 document.addEventListener('keydown', event => {
-  const overlay = $('uiDialogMask');
+  const overlay = $('confirmationDialog');
   if (!overlay || !overlay.classList.contains('show')) return;
   if (event.key === 'Escape') {
     event.preventDefault();
@@ -5001,16 +5001,16 @@ $('familyPanelCollapseBtn')?.addEventListener('click', () => setFamilyPanelColla
 
 // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
 function closeAppMenus(except = null) {
-  document.querySelectorAll('.app-menu.open').forEach(menu => {
+  document.querySelectorAll('.ui-menu.open').forEach(menu => {
     if (menu === except) return;
     menu.classList.remove('open');
-    menu.querySelector('.app-menu-trigger')?.setAttribute('aria-expanded','false');
+    menu.querySelector('.ui-menu-trigger')?.setAttribute('aria-expanded','false');
   });
 }
 let _appMenuGlobalBound = false;
 function setupAppMenus() {
-  document.querySelectorAll('.app-menu').forEach(menu => {
-    const trigger = menu.querySelector(':scope > .app-menu-trigger');
+  document.querySelectorAll('.ui-menu').forEach(menu => {
+    const trigger = menu.querySelector(':scope > .ui-menu-trigger');
     if (!trigger || trigger.dataset.menuBound === '1') return;
     trigger.dataset.menuBound = '1';
     trigger.addEventListener('click', e => {
@@ -5020,13 +5020,13 @@ function setupAppMenus() {
       menu.classList.toggle('open', willOpen);
       trigger.setAttribute('aria-expanded', willOpen ? 'true':'false');
     });
-    menu.querySelectorAll('.app-menu-item').forEach(item => item.addEventListener('click', () => {
+    menu.querySelectorAll('.ui-menu-item').forEach(item => item.addEventListener('click', () => {
       setTimeout(() => closeAppMenus(), 0);
     }));
   });
   if (!_appMenuGlobalBound) {
     _appMenuGlobalBound = true;
-    document.addEventListener('click', e => { if (!e.target.closest?.('.app-menu')) closeAppMenus(); });
+    document.addEventListener('click', e => { if (!e.target.closest?.('.ui-menu')) closeAppMenus(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAppMenus(); });
   }
 }
@@ -7192,21 +7192,21 @@ $('tipsBtn').onclick = () => tipsMask.classList.add('show');
 $('tipsCloseBtn').onclick = () => tipsMask.classList.remove('show');
 tipsMask.onclick = e => { if (e.target === tipsMask) tipsMask.classList.remove('show'); };
 
-const MODAL_STACK = ['avatarCropMask','photoMask','petMask','mask','infoMask','galleryViewerMask',
-                     'tipsMask','rosterMask','addMemberMask','storageMask','bgMask'];
+const MODAL_STACK = ['avatarCropDialog','lifePhotoEditorDialog','petEditorDialog','simEditorDialog','personProfileDialog','lifePhotoViewerDialog',
+                     'helpDialog','personLibraryDialog','familyMemberPickerDialog','storageDialog','appearanceDialog'];
 function closeTopModal() {
   for (const id of MODAL_STACK) {
     const el = document.getElementById(id);
     if (el && el.classList.contains('show')) {
       el.classList.remove('show');
-      if (id === 'mask') {
+      if (id === 'simEditorDialog') {
     resetSimEditorDraftState();
   }
-      if (id === 'petMask') { petEditorState.index=-1; petEditorState.avatar=null; petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME}; }
-      if (id === 'avatarCropMask') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
-      if (id === 'photoMask') { lifePhotoState.editor.index = -1; lifePhotoState.editor.imageRef = ''; }
-      if (id === 'infoMask') infoCardId = null;
-      if (id === 'galleryViewerMask') {
+      if (id === 'petEditorDialog') { petEditorState.index=-1; petEditorState.avatar=null; petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME}; }
+      if (id === 'avatarCropDialog') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
+      if (id === 'lifePhotoEditorDialog') { lifePhotoState.editor.index = -1; lifePhotoState.editor.imageRef = ''; }
+      if (id === 'personProfileDialog') infoCardId = null;
+      if (id === 'lifePhotoViewerDialog') {
         lifePhotoState.viewer.simId = null;
         lifePhotoState.viewer.mode = 'draft';
       }
@@ -10317,7 +10317,7 @@ nodes.addEventListener('contextmenu', e => {
 });
 
 document.addEventListener('pointerdown', e => {
-  if (nodeContextMenu?.classList.contains('show') && !e.target.closest('#nodeContextMenu')) closeNodeContextMenu();
+  if (nodeContextMenu?.classList.contains('show') && !e.target.closest('#personCardContextMenu')) closeNodeContextMenu();
 }, true);
 window.addEventListener('resize', closeNodeContextMenu);
 window.addEventListener('blur', closeNodeContextMenu);
@@ -11990,14 +11990,14 @@ function renderFamilyMemberList(fam) {
         </button>
       </div>
       <div class="family-member-copy"><div class="family-member-name">${esc(displayDataText(sim.name,sim))}</div><div class="family-member-meta">${esc(meta)}</div></div>
-      <div class="app-menu family-member-menu">
-        <button class="family-member-more app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="${esc(uiText('更多'))}">${iconSvg('three-dots')}</button>
-        <div class="app-menu-popover family-member-popover" role="menu">
-          <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="view" data-family-member-id="${esc(sim.id)}">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
-          <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="edit" data-family-member-id="${esc(sim.id)}">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
-          <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="locate" data-family-member-id="${esc(sim.id)}">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-          <div class="app-menu-divider"></div>
-          <button class="app-menu-item danger" type="button" role="menuitem" data-family-member-action="remove" data-family-member-id="${esc(sim.id)}">${iconSvg('person-dash')}<span>${esc(uiText('移出目前家族'))}</span></button>
+      <div class="ui-menu family-member-menu">
+        <button class="family-member-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="${esc(uiText('更多'))}">${iconSvg('three-dots')}</button>
+        <div class="ui-menu-popover family-member-popover" role="menu">
+          <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="view" data-family-member-id="${esc(sim.id)}">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
+          <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="edit" data-family-member-id="${esc(sim.id)}">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
+          <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="locate" data-family-member-id="${esc(sim.id)}">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
+          <div class="ui-menu-divider"></div>
+          <button class="ui-menu-item danger" type="button" role="menuitem" data-family-member-action="remove" data-family-member-id="${esc(sim.id)}">${iconSvg('person-dash')}<span>${esc(uiText('移出目前家族'))}</span></button>
         </div>
       </div>
     </div>`;
@@ -12278,14 +12278,14 @@ $('delFamilyBtn').onclick = async () => {
 };
 
 function refreshSS(selectId) {
-  const wrap = document.querySelector(`.ss-wrap[data-ss-for="${selectId}"]`);
+  const wrap = document.querySelector(`.ui-select-wrap[data-ui-select-for="${selectId}"]`);
   if (wrap && wrap._refresh) wrap._refresh();
 }
 
 
 // ========【共用單選箭頭】 設定 - 編輯頁與導覽共用同一顆 Chevron SVG ========
 function installSharedNativeSelectChevrons(root = document) {
-  const selector = '.modal select:not([multiple])';
+  const selector = '.ui-dialog-panel select:not([multiple])';
   const candidates = [];
 
   if (root instanceof Element && root.matches(selector)) candidates.push(root);
@@ -12324,7 +12324,7 @@ function observeSharedNativeSelectChevrons() {
 }
 function setupSearchSelects() {
   document.querySelectorAll(
-    '.ss-wrap'
+    '.ui-select-wrap'
   ).forEach(wrap => {
     const selectId =
       wrap.dataset.ssFor;
@@ -12338,22 +12338,22 @@ function setupSearchSelects() {
 
     const input =
       wrap.querySelector(
-        '.ss-input'
+        '.ui-select-input'
       );
 
     const dropdown =
       wrap.querySelector(
-        '.ss-dropdown'
+        '.ui-select-dropdown'
       );
 
     const searchEl =
       wrap.querySelector(
-        '.ss-search'
+        '.ui-select-search'
       );
 
     const optionsEl =
       wrap.querySelector(
-        '.ss-options'
+        '.ui-select-options'
       );
 
     const isMultiple =
@@ -12386,7 +12386,7 @@ function setupSearchSelects() {
       }
 
       dropdown.classList.remove(
-        'ss-dropdown-portal'
+        'ui-select-dropdown-portal'
       );
 
       dropdown.style.removeProperty(
@@ -12425,7 +12425,7 @@ function setupSearchSelects() {
       if (
         !usePortalDropdown ||
         !wrap.classList.contains(
-          'ss-open'
+          'ui-select-open'
         )
       ) {
         return;
@@ -12441,7 +12441,7 @@ function setupSearchSelects() {
       }
 
       dropdown.classList.add(
-        'ss-dropdown-portal'
+        'ui-select-dropdown-portal'
       );
 
       const rect =
@@ -12553,7 +12553,7 @@ function setupSearchSelects() {
 
         if (!selected.length) {
           input.innerHTML =
-            '<span class="ss-placeholder">' +
+            '<span class="ui-select-placeholder">' +
             esc(placeholder) +
             '</span>';
         } else {
@@ -12568,7 +12568,7 @@ function setupSearchSelects() {
                   '';
 
                 return (
-                  '<span class="ss-tag' +
+                  '<span class="ui-select-tag' +
                   (
                     locked
                       ? ' locked'
@@ -12588,12 +12588,12 @@ function setupSearchSelects() {
                   ) +
                   (
                     locked
-                      ? '<span class="ss-tag-note">' +
+                      ? '<span class="ui-select-tag-note">' +
                         esc(
                           uiText('自動')
                         ) +
                         '</span>'
-                      : '<span class="ss-tag-x" data-remove="' +
+                      : '<span class="ui-select-tag-x" data-remove="' +
                         esc(option.value) +
                         '" title="移除">×</span>'
                   ) +
@@ -12604,7 +12604,7 @@ function setupSearchSelects() {
         }
 
         input.querySelectorAll(
-          '.ss-tag-x'
+          '.ui-select-tag-x'
         ).forEach(remove => {
           remove.onclick =
             event => {
@@ -12646,7 +12646,7 @@ function setupSearchSelects() {
           selected.value === ''
         ) {
           input.innerHTML =
-            '<span class="ss-placeholder">' +
+            '<span class="ui-select-placeholder">' +
             esc(placeholder) +
             '</span>';
         } else {
@@ -12659,7 +12659,7 @@ function setupSearchSelects() {
         'beforeend',
         iconSvg(
           'chevron-down',
-          'ss-chevron-icon'
+          'ui-select-chevron-icon'
         )
       );
     }
@@ -12775,7 +12775,7 @@ function setupSearchSelects() {
               '';
 
             const classes = [
-              'ss-option',
+              'ui-select-option',
               selected
                 ? 'selected'
                 : '',
@@ -12823,7 +12823,7 @@ function setupSearchSelects() {
               '</span>' +
               (
                 note
-                  ? '<span class="ss-option-note">' +
+                  ? '<span class="ui-select-option-note">' +
                     esc(note) +
                     '</span>'
                   : ''
@@ -12838,7 +12838,7 @@ function setupSearchSelects() {
         raw &&
         !hasExact
           ? (
-              '<div class="ss-option" data-create-value="' +
+              '<div class="ui-select-option" data-create-value="' +
               esc(raw) +
               '"><span>' +
               esc(
@@ -12855,7 +12855,7 @@ function setupSearchSelects() {
         !createHTML
       ) {
         optionsEl.innerHTML =
-          '<div class="ss-empty">' +
+          '<div class="ui-select-empty">' +
           esc(
             uiText(
               '沒有符合的項目'
@@ -12871,7 +12871,7 @@ function setupSearchSelects() {
         createHTML;
 
       optionsEl.querySelectorAll(
-        '.ss-option[data-value]'
+        '.ui-select-option[data-value]'
       ).forEach(element => {
         element.onclick =
           event => {
@@ -12934,7 +12934,7 @@ function setupSearchSelects() {
 
     function openDropdown() {
       document.querySelectorAll(
-        '.ss-wrap.ss-open'
+        '.ui-select-wrap.ui-select-open'
       ).forEach(other => {
         if (
           other !== wrap &&
@@ -12946,7 +12946,7 @@ function setupSearchSelects() {
 
       dropdown.style.display = '';
       wrap.classList.add(
-        'ss-open'
+        'ui-select-open'
       );
 
       searchEl.value = '';
@@ -12975,7 +12975,7 @@ function setupSearchSelects() {
         'none';
 
       wrap.classList.remove(
-        'ss-open'
+        'ui-select-open'
       );
 
       restoreDropdownHome();
@@ -12984,7 +12984,7 @@ function setupSearchSelects() {
     input.onclick = event => {
       if (
         event.target.closest(
-          '.ss-tag-x'
+          '.ui-select-tag-x'
         )
       ) {
         return;
@@ -12992,7 +12992,7 @@ function setupSearchSelects() {
 
       if (
         wrap.classList.contains(
-          'ss-open'
+          'ui-select-open'
         )
       ) {
         closeDropdown();
@@ -13064,7 +13064,7 @@ function setupSearchSelects() {
         () => {
           if (
             wrap.classList.contains(
-              'ss-open'
+              'ui-select-open'
             )
           ) {
             positionPortalDropdown();
@@ -13083,7 +13083,7 @@ function setupSearchSelects() {
 
         if (
           wrap.classList.contains(
-            'ss-open'
+            'ui-select-open'
           )
         ) {
           renderOptions(
@@ -15106,7 +15106,7 @@ function editorDraftSim(){
         button.setAttribute('aria-expanded',willOpen?'true':'false');
 
         if(willOpen){
-          panel.querySelector('.ss-input')?.focus({preventScroll:true});
+          panel.querySelector('.ui-select-input')?.focus({preventScroll:true});
         }
       });
     });
@@ -16186,26 +16186,26 @@ function renderRoster() {
           '<div class="roster-detailed-meta">' + detailHtml + photoHtml + '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="app-menu roster-item-menu">' +
-        '<button class="roster-more app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
+      '<div class="ui-menu roster-item-menu">' +
+        '<button class="roster-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') +
         '</button>' +
-        '<div class="app-menu-popover roster-item-popover" role="menu">' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="view" data-roster-action-id="' + esc(s.id) + '">' +
+        '<div class="ui-menu-popover roster-item-popover" role="menu">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="view" data-roster-action-id="' + esc(s.id) + '">' +
             iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span>' +
           '</button>' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="edit" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="edit" data-roster-action-id="' + esc(s.id) + '">' +
             iconSvg('pencil-square') + '<span>' + esc(uiText('編輯模擬市民')) + '</span>' +
           '</button>' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="locate" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="locate" data-roster-action-id="' + esc(s.id) + '">' +
             iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span>' +
           '</button>' +
-          '<div class="app-menu-divider"></div>' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="toggle-family" data-roster-action-id="' + esc(s.id) + '">' +
+          '<div class="ui-menu-divider"></div>' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="toggle-family" data-roster-action-id="' + esc(s.id) + '">' +
             iconSvg(familyIcon) + '<span>' + esc(uiText(familyAction)) + '</span>' +
           '</button>' +
-          '<div class="app-menu-divider"></div>' +
-          '<button class="app-menu-item danger" type="button" role="menuitem" data-roster-action="delete" data-roster-action-id="' + esc(s.id) + '">' +
+          '<div class="ui-menu-divider"></div>' +
+          '<button class="ui-menu-item danger" type="button" role="menuitem" data-roster-action="delete" data-roster-action-id="' + esc(s.id) + '">' +
             iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span>' +
           '</button>' +
         '</div>' +
@@ -16727,7 +16727,7 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, backgroundMode = 'cu
     }
   }
 
-  const captureStage = captureViewport.querySelector('#stage');
+  const captureStage = captureViewport.querySelector('#genealogyCanvasStage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
   captureStage.classList.remove('is-transforming');
   // 匯出直接使用族譜世界座標 1:1；Fit / zoom / pan 只屬於瀏覽視角，不參與輸出解析度。
@@ -16748,14 +16748,14 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, backgroundMode = 'cu
 }
 
 function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
-  const captureStage = captureViewport.querySelector('#stage');
+  const captureStage = captureViewport.querySelector('#genealogyCanvasStage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
 
   const viewportRect = captureViewport.getBoundingClientRect();
   const content = [
     ...captureStage.querySelectorAll('.node'),
-    ...captureStage.querySelectorAll('#links path'),
-    ...captureStage.querySelectorAll('#labels .edge-label')
+    ...captureStage.querySelectorAll('#genealogyRelationshipLayer path'),
+    ...captureStage.querySelectorAll('#genealogyRelationshipLabelLayer .edge-label')
   ];
 
   let minX = Infinity;
@@ -17478,7 +17478,7 @@ $('btnAddRel').onclick = () => {
 
   const typeWrap =
     document.querySelector(
-      '.ss-wrap[data-ss-for="relType"]'
+      '.ui-select-wrap[data-ui-select-for="relType"]'
     );
 
   let type =
