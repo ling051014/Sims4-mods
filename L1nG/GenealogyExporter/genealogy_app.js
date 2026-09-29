@@ -228,9 +228,16 @@ const VALID_MODES = ['view','edit'];
 let showRelLabels = true;
 let relationshipPerspectiveSimId = null;
 let bgSettings = { image:null, opacity:0.5, fit:'cover' };
-let addMemberSelection = new Set();
-let removeMemberSelection = new Set();
-let removeMemberMode = false;
+const personLibraryState = {
+  batchMode:false,
+  selection:new Set(),
+  addSelection:new Set()
+};
+
+const familyMemberOperationState = {
+  removeMode:false,
+  selection:new Set()
+};
 let labelDrag = null;
 let viewMode = 'view';
 let infoCardId = null;
@@ -242,8 +249,34 @@ try {
   const savedRosterView = localStorage.getItem(ROSTER_VIEW_KEY);
   if (savedRosterView === 'compact' || savedRosterView === 'detailed') rosterViewMode = savedRosterView;
 } catch (_) {}
-let rosterBatchMode = false;
-const rosterSelection = new Set();
+
+
+function resetPersonLibraryOperations({
+  batch = true,
+  add = true
+} = {}) {
+  if (batch) {
+    personLibraryState.batchMode = false;
+    personLibraryState.selection.clear();
+  }
+  if (add) {
+    personLibraryState.addSelection.clear();
+  }
+}
+
+function resetFamilyMemberOperations() {
+  familyMemberOperationState.removeMode = false;
+  familyMemberOperationState.selection.clear();
+}
+
+function removePersonFromOperationState(id) {
+  const simId = String(id || '');
+  if (!simId) return;
+
+  personLibraryState.selection.delete(simId);
+  personLibraryState.addSelection.delete(simId);
+  familyMemberOperationState.selection.delete(simId);
+}
 
 let familyMemberGenerationSort = 'asc';
 try {
@@ -2585,9 +2618,8 @@ function setFamilyTreeViewMode(mode, control = null) {
 
   dragHistory.clear();
   clearNodeSelection();
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
-  removeMemberMode = false;
+  resetPersonLibraryOperations({ batch:false, add:true });
+  resetFamilyMemberOperations();
 
   save();
   refreshFamilyUI();
@@ -11744,50 +11776,92 @@ $('familyGenerationSortBtn')?.addEventListener(
   }
 );
 
-function updateFamilyMemberRemoveToolbar() {
-  const startBtn = $('removeMemberBtn');
-  const addMenu = $('familyMemberAddMenu');
-  const toolbar = $('familyMemberRemoveToolbar');
-  const countEl = $('familyMemberRemoveCount');
-  const confirmBtn = $('familyMemberRemoveConfirmBtn');
-  const count = removeMemberSelection.size;
+const familyMemberController = {
+  syncRemoveToolbar() {
+    const startBtn = $('removeMemberBtn');
+    const addMenu = $('familyMemberAddMenu');
+    const toolbar = $('familyMemberRemoveToolbar');
+    const countEl = $('familyMemberRemoveCount');
+    const confirmBtn = $('familyMemberRemoveConfirmBtn');
+    const count = familyMemberOperationState.selection.size;
 
-  if (startBtn) startBtn.hidden = removeMemberMode;
-  if (addMenu) addMenu.hidden = removeMemberMode;
-  if (toolbar) toolbar.hidden = !removeMemberMode;
-  if (countEl) countEl.textContent = `已選 ${count} 位`;
+    if (startBtn) startBtn.hidden = familyMemberOperationState.removeMode;
+    if (addMenu) addMenu.hidden = familyMemberOperationState.removeMode;
+    if (toolbar) toolbar.hidden = !familyMemberOperationState.removeMode;
+    if (countEl) countEl.textContent = `已選 ${count} 位`;
 
-  if (confirmBtn) {
-    confirmBtn.disabled = count === 0;
-    confirmBtn.textContent = `移除 ${count} 位`;
+    if (confirmBtn) {
+      confirmBtn.disabled = count === 0;
+      confirmBtn.textContent = `移除 ${count} 位`;
+    }
+  },
+
+  setRemoveMode(enabled, selectedIds = []) {
+    familyMemberOperationState.removeMode = !!enabled;
+    familyMemberOperationState.selection.clear();
+
+    if (familyMemberOperationState.removeMode) {
+      selectedIds.forEach(id => {
+        if (id && genealogyData.sims[id]) {
+          familyMemberOperationState.selection.add(id);
+        }
+      });
+    }
+
+    if (typeof closeAppMenus === 'function') closeAppMenus();
+    renderFamilyMemberList(currentFamily());
+  },
+
+  toggleSelection(simId) {
+    if (!familyMemberOperationState.removeMode || !simId) return;
+
+    if (familyMemberOperationState.selection.has(simId)) {
+      familyMemberOperationState.selection.delete(simId);
+    } else {
+      familyMemberOperationState.selection.add(simId);
+    }
+
+    renderFamilyMemberList(currentFamily());
+  },
+
+  async confirmRemoveSelected(event) {
+    if (
+      !familyMemberOperationState.removeMode ||
+      !familyMemberOperationState.selection.size
+    ) {
+      return;
+    }
+
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const family = currentFamily();
+    const ids = [...familyMemberOperationState.selection]
+      .filter(id => family.memberIds.includes(id));
+
+    if (!ids.length) return;
+
+    const confirmed = await uiConfirm(
+      `${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`,
+      {
+        title:uiText('移出所選人物'),
+        kind:'danger',
+        confirmText:uiText('移出家族')
+      }
+    );
+
+    if (!confirmed) return;
+
+    const mutation = genealogyStore.removeFamilyMembers(
+      family.id,
+      ids
+    );
+
+    resetFamilyMemberOperations();
+    applyGenealogyMutation(mutation);
+    requestAnimationFrame(fitScreen);
   }
-}
-
-function setRemoveMemberMode(enabled, selectedIds = []) {
-  removeMemberMode = !!enabled;
-  removeMemberSelection.clear();
-
-  if (removeMemberMode) {
-    selectedIds.forEach(id => {
-      if (id && genealogyData.sims[id]) removeMemberSelection.add(id);
-    });
-  }
-
-  if (typeof closeAppMenus === 'function') closeAppMenus();
-  renderFamilyMemberList(currentFamily());
-}
-
-function toggleRemoveMemberSelection(simId) {
-  if (!removeMemberMode || !simId) return;
-
-  if (removeMemberSelection.has(simId)) {
-    removeMemberSelection.delete(simId);
-  } else {
-    removeMemberSelection.add(simId);
-  }
-
-  renderFamilyMemberList(currentFamily());
-}
+};
 
 function renderFamilyMemberList(fam) {
   const list = $('familyMemberList');
@@ -11801,9 +11875,8 @@ function renderFamilyMemberList(fam) {
   updateFamilyGenerationSortControl();
 
   if (!members.length) {
-    removeMemberMode = false;
-    removeMemberSelection.clear();
-    updateFamilyMemberRemoveToolbar();
+    resetFamilyMemberOperations();
+    familyMemberController.syncRemoveToolbar();
     list.innerHTML = `<div class="family-member-empty">${esc(uiText('目前家族還沒有成員'))}</div>`;
     return;
   }
@@ -11811,9 +11884,9 @@ function renderFamilyMemberList(fam) {
   const currentIds =
     new Set(members.map(sim => sim.id));
 
-  [...removeMemberSelection].forEach(id => {
+  [...familyMemberOperationState.selection].forEach(id => {
     if (!currentIds.has(id)) {
-      removeMemberSelection.delete(id);
+      familyMemberOperationState.selection.delete(id);
     }
   });
 
@@ -11878,9 +11951,9 @@ function renderFamilyMemberList(fam) {
       displayDataText(sim.career,sim)
     ].filter(Boolean).join(' · ');
 
-    const selected = removeMemberSelection.has(sim.id);
+    const selected = familyMemberOperationState.selection.has(sim.id);
 
-    return `<div class="family-member-row${removeMemberMode ? ' remove-mode' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" tabindex="0">
+    return `<div class="family-member-row${familyMemberOperationState.removeMode ? ' remove-mode' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" tabindex="0">
       <div class="family-member-avatar-wrap">
         <div class="family-member-avatar">${framedAvatarImageHTML(sim.avatar, sim.avatarFrame) || esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>
         <button class="family-member-remove-select${selected ? ' selected' : ''}" type="button" data-family-member-remove-select="${esc(sim.id)}" aria-pressed="${selected ? 'true' : 'false'}" title="${esc(uiText(selected ? '取消選取' : '批量移除'))}">
@@ -11904,8 +11977,8 @@ function renderFamilyMemberList(fam) {
   list.querySelectorAll('[data-family-sim-id]').forEach(row => {
     const handle = e => {
       if (e?.target?.closest?.('.family-member-menu, .family-member-remove-select')) return;
-      if (removeMemberMode) {
-        toggleRemoveMemberSelection(row.dataset.familySimId);
+      if (familyMemberOperationState.removeMode) {
+        familyMemberController.toggleSelection(row.dataset.familySimId);
         return;
       }
       openInfoCard(row.dataset.familySimId);
@@ -11924,7 +11997,7 @@ function renderFamilyMemberList(fam) {
     btn.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
-      toggleRemoveMemberSelection(btn.dataset.familyMemberRemoveSelect);
+      familyMemberController.toggleSelection(btn.dataset.familyMemberRemoveSelect);
     });
   });
 
@@ -11939,12 +12012,12 @@ function renderFamilyMemberList(fam) {
       if (action === 'view') openInfoCard(simId);
       else if (action === 'edit') openEditor(simId);
       else if (action === 'locate') focusSimOnCanvas(simId);
-      else if (action === 'remove') setRemoveMemberMode(true, [simId]);
+      else if (action === 'remove') familyMemberController.setRemoveMode(true, [simId]);
     });
   });
 
-  updateFamilyMemberRemoveToolbar();
-  if (!removeMemberMode) setupAppMenus();
+  familyMemberController.syncRemoveToolbar();
+  if (!familyMemberOperationState.removeMode) setupAppMenus();
 }
 
 function refreshFamilyProfilePanel() {
@@ -12030,9 +12103,9 @@ familySelect.onchange = async () => {
   genealogyData.currentFamilyId = selectedEntry.familyId;
   familyTreeLastSourceFamilyId = selectedEntry.familyId;
 
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
-  removeMemberMode = false;
+  resetPersonLibraryOperations({ batch:false, add:true });
+  resetFamilyMemberOperations();
+  familyMemberOperationState.removeMode = false;
   closeEditor();
 
   save();
@@ -12145,8 +12218,8 @@ $('newFamilyBtn').onclick = async () => {
     );
 
   dragHistory.clear();
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
+  personLibraryState.addSelection.clear();
+  familyMemberOperationState.selection.clear();
   applyGenealogyMutation(mutation);
   requestAnimationFrame(fitScreen);
 };
@@ -12167,8 +12240,8 @@ $('delFamilyBtn').onclick = async () => {
     );
 
   dragHistory.clear();
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
+  personLibraryState.addSelection.clear();
+  familyMemberOperationState.selection.clear();
   closeEditor();
   applyGenealogyMutation(mutation);
   scheduleGC();
@@ -15552,9 +15625,7 @@ function purgeSimData(id) {
     genealogyStore.deleteSim(id);
 
   selectedNodeIds.delete(id);
-  addMemberSelection.delete(id);
-  removeMemberSelection.delete(id);
-  rosterSelection.delete(id);
+  removePersonFromOperationState(id);
 
   return mutation;
 }
@@ -15589,70 +15660,139 @@ async function deleteChar(id) {
 }
 
 // ========【人物庫】 設定 - 精簡 / 詳細檢視、單人選單與批量管理 ========
-function updateRosterViewControls() {
-  const compact = $('rosterCompactBtn');
-  const detailed = $('rosterDetailedBtn');
-  const list = $('rosterList');
+const personLibraryController = {
+  syncViewControls() {
+    const compact = $('rosterCompactBtn');
+    const detailed = $('rosterDetailedBtn');
+    const list = $('rosterList');
 
-  if (compact) {
-    compact.classList.toggle('active', rosterViewMode === 'compact');
-    compact.setAttribute('aria-pressed', rosterViewMode === 'compact' ? 'true' : 'false');
+    if (compact) {
+      const active = rosterViewMode === 'compact';
+      compact.classList.toggle('active', active);
+      compact.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+
+    if (detailed) {
+      const active = rosterViewMode === 'detailed';
+      detailed.classList.toggle('active', active);
+      detailed.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+
+    if (list) {
+      list.classList.toggle('compact', rosterViewMode === 'compact');
+      list.classList.toggle('detailed', rosterViewMode === 'detailed');
+    }
+  },
+
+  setViewMode(mode) {
+    rosterViewMode = mode === 'compact' ? 'compact' : 'detailed';
+    try {
+      localStorage.setItem(ROSTER_VIEW_KEY, rosterViewMode);
+    } catch (_) {}
+
+    this.syncViewControls();
+    renderRoster();
+  },
+
+  syncBatchToolbar() {
+    const count = personLibraryState.selection.size;
+    const toolbar = $('rosterBatchToolbar');
+    const batchBtn = $('rosterBatchBtn');
+    const addBtn = $('rosterAddBtn');
+    const countEl = $('rosterBatchCount');
+
+    if (toolbar) toolbar.hidden = !personLibraryState.batchMode;
+    if (batchBtn) batchBtn.hidden = personLibraryState.batchMode;
+    if (addBtn) addBtn.hidden = personLibraryState.batchMode;
+    if (countEl) countEl.textContent = '已選 ' + count + ' 位';
+
+    ['rosterBatchAddFamilyBtn','rosterBatchRemoveFamilyBtn','rosterBatchDeleteBtn']
+      .forEach(id => {
+        const button = $(id);
+        if (button) button.disabled = count === 0;
+      });
+  },
+
+  setBatchMode(enabled) {
+    personLibraryState.batchMode = !!enabled;
+    personLibraryState.selection.clear();
+    closeAppMenus();
+    this.syncBatchToolbar();
+    renderRoster();
+  },
+
+  toggleSelection(id) {
+    if (!personLibraryState.batchMode || !genealogyData.sims[id]) return;
+
+    if (personLibraryState.selection.has(id)) {
+      personLibraryState.selection.delete(id);
+    } else {
+      personLibraryState.selection.add(id);
+    }
+
+    renderRoster();
+  },
+
+  open() {
+    rosterSearch.value = '';
+    resetPersonLibraryOperations({ batch:true, add:false });
+    this.syncViewControls();
+    renderRoster();
+    rosterMask.classList.add('show');
+  },
+
+  close() {
+    rosterMask.classList.remove('show');
+    resetPersonLibraryOperations({ batch:true, add:false });
+  },
+
+  addSelectionToCurrentFamily() {
+    const family = currentFamily();
+    const mutation = genealogyStore.addFamilyMembers(
+      family.id,
+      [...personLibraryState.selection].filter(id => genealogyData.sims[id])
+    );
+    applyGenealogyMutation(mutation);
+    this.setBatchMode(false);
+  },
+
+  removeSelectionFromCurrentFamily() {
+    const family = currentFamily();
+    const mutation = genealogyStore.removeFamilyMembers(
+      family.id,
+      [...personLibraryState.selection]
+    );
+    applyGenealogyMutation(mutation);
+    this.setBatchMode(false);
+  },
+
+  async deleteSelection() {
+    const ids = [...personLibraryState.selection]
+      .filter(id => genealogyData.sims[id]);
+
+    if (!ids.length) return;
+
+    const confirmed = await uiConfirm(
+      '確定永久刪除這 ' + ids.length + ' 位人物嗎？\n' +
+      '人物資料、關係與人生照片都會一併移除。\n\n' +
+      '此操作無法復原。',
+      {
+        title:'批量刪除人物',
+        kind:'danger',
+        confirmText:'永久刪除'
+      }
+    );
+
+    if (!confirmed) return;
+
+    const mutation = genealogyStore.mergeResults(
+      ...ids.map(purgeSimData)
+    );
+
+    finalizeSimDataChange(mutation);
+    this.setBatchMode(false);
   }
-
-  if (detailed) {
-    detailed.classList.toggle('active', rosterViewMode === 'detailed');
-    detailed.setAttribute('aria-pressed', rosterViewMode === 'detailed' ? 'true' : 'false');
-  }
-
-  if (list) {
-    list.classList.toggle('compact', rosterViewMode === 'compact');
-    list.classList.toggle('detailed', rosterViewMode === 'detailed');
-  }
-}
-
-function setRosterViewMode(mode) {
-  rosterViewMode = mode === 'compact' ? 'compact' : 'detailed';
-  try {
-    localStorage.setItem(ROSTER_VIEW_KEY, rosterViewMode);
-  } catch (_) {}
-  updateRosterViewControls();
-  renderRoster();
-}
-
-function updateRosterBatchToolbar() {
-  const count = rosterSelection.size;
-  const toolbar = $('rosterBatchToolbar');
-  const batchBtn = $('rosterBatchBtn');
-  const addBtn = $('rosterAddBtn');
-  const countEl = $('rosterBatchCount');
-
-  if (toolbar) toolbar.hidden = !rosterBatchMode;
-  if (batchBtn) batchBtn.hidden = rosterBatchMode;
-  if (addBtn) addBtn.hidden = rosterBatchMode;
-  if (countEl) countEl.textContent = '已選 ' + count + ' 位';
-
-  ['rosterBatchAddFamilyBtn', 'rosterBatchRemoveFamilyBtn', 'rosterBatchDeleteBtn'].forEach(id => {
-    const btn = $(id);
-    if (btn) btn.disabled = count === 0;
-  });
-}
-
-function setRosterBatchMode(enabled) {
-  rosterBatchMode = !!enabled;
-  rosterSelection.clear();
-  closeAppMenus();
-  updateRosterBatchToolbar();
-  renderRoster();
-}
-
-function toggleRosterSelection(id) {
-  if (!rosterBatchMode || !genealogyData.sims[id]) return;
-
-  if (rosterSelection.has(id)) rosterSelection.delete(id);
-  else rosterSelection.add(id);
-
-  renderRoster();
-}
+};
 
 function rosterCompactMeta(sim) {
   const parts = [displayDataText(sim.lifeStage, sim)];
@@ -15684,8 +15824,8 @@ function renderRoster() {
   ) : all;
 
   $('rosterCount').textContent = '（' + filtered.length + '/' + all.length + '）';
-  updateRosterViewControls();
-  updateRosterBatchToolbar();
+  personLibraryController.syncViewControls();
+  personLibraryController.syncBatchToolbar();
 
   const list = $('rosterList');
   if (!filtered.length) {
@@ -15700,7 +15840,7 @@ function renderRoster() {
       .filter(f => f.memberIds.includes(s.id))
       .map(f => displayDataText(f.name, f));
 
-    const selected = rosterSelection.has(s.id);
+    const selected = personLibraryState.selection.has(s.id);
     const compactMeta = rosterCompactMeta(s);
     const detail = [
       displayDataText(s.lifeStage, s),
@@ -15724,7 +15864,7 @@ function renderRoster() {
     const familyIcon = fam.memberIds.includes(s.id) ? 'person-dash' : 'person-add';
 
     return '<div class="roster-item' +
-        (rosterBatchMode ? ' batch-mode' : '') +
+        (personLibraryState.batchMode ? ' batch-mode' : '') +
         (selected ? ' batch-selected' : '') +
         '" data-roster-id="' + esc(s.id) + '">' +
       '<div class="roster-main">' +
@@ -15776,7 +15916,7 @@ function renderRoster() {
     row.addEventListener('click', e => {
       if (e.target.closest('.roster-item-menu, .roster-batch-select')) return;
       const id = row.dataset.rosterId;
-      if (rosterBatchMode) toggleRosterSelection(id);
+      if (personLibraryState.batchMode) personLibraryController.toggleSelection(id);
       else openInfoCard(id);
     });
   });
@@ -15784,7 +15924,7 @@ function renderRoster() {
   list.querySelectorAll('[data-roster-select]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      toggleRosterSelection(btn.dataset.rosterSelect);
+      personLibraryController.toggleSelection(btn.dataset.rosterSelect);
     });
   });
 
@@ -15817,91 +15957,101 @@ function renderRoster() {
     });
   });
 
-  if (!rosterBatchMode) setupAppMenus();
+  if (!personLibraryState.batchMode) setupAppMenus();
 }
 
 $('rosterBtn').onclick = () => {
-  rosterSearch.value = '';
-  rosterBatchMode = false;
-  rosterSelection.clear();
-  updateRosterViewControls();
-  renderRoster();
-  rosterMask.classList.add('show');
+  personLibraryController.open();
 };
 
 $('rosterCloseBtn').onclick = () => {
-  rosterMask.classList.remove('show');
-  rosterBatchMode = false;
-  rosterSelection.clear();
+  personLibraryController.close();
 };
 
-rosterMask.onclick = e => {
-  if (e.target === rosterMask) {
-    rosterMask.classList.remove('show');
-    rosterBatchMode = false;
-    rosterSelection.clear();
+rosterMask.onclick = event => {
+  if (event.target === rosterMask) {
+    personLibraryController.close();
   }
 };
 
 rosterSearch.oninput = debounce(renderRoster, 150);
+
 $('rosterAddBtn').onclick = () => openEditor(null);
 $('rosterCompactBtn').onclick = () => setRosterViewMode('compact');
 $('rosterDetailedBtn').onclick = () => setRosterViewMode('detailed');
-$('rosterBatchBtn').onclick = () => setRosterBatchMode(true);
-$('rosterBatchCancelBtn').onclick = () => setRosterBatchMode(false);
+$('rosterBatchBtn').onclick = () => personLibraryController.setBatchMode(true);
+$('rosterBatchCancelBtn').onclick = () => personLibraryController.setBatchMode(false);
 
 $('rosterBatchAddFamilyBtn').onclick = () => {
-  const fam = currentFamily();
-
-  const mutation =
-    genealogyStore.addFamilyMembers(
-      fam.id,
-      [...rosterSelection]
-        .filter(id => genealogyData.sims[id])
-    );
-
-  applyGenealogyMutation(mutation);
-  setRosterBatchMode(false);
+  personLibraryController.addSelectionToCurrentFamily();
 };
 
 $('rosterBatchRemoveFamilyBtn').onclick = () => {
-  const fam = currentFamily();
-
-  const mutation =
-    genealogyStore.removeFamilyMembers(
-      fam.id,
-      [...rosterSelection]
-    );
-
-  applyGenealogyMutation(mutation);
-  setRosterBatchMode(false);
+  personLibraryController.removeSelectionFromCurrentFamily();
 };
 
-$('rosterBatchDeleteBtn').onclick = async () => {
-  const ids = [...rosterSelection].filter(id => genealogyData.sims[id]);
-  if (!ids.length) return;
+$('rosterBatchDeleteBtn').onclick = () => {
+  personLibraryController.deleteSelection();
+};
 
-  const ok = await uiConfirm(
-    '確定永久刪除這 ' + ids.length + ' 位人物嗎？\n' +
-    '人物資料、關係與人生照片都會一併移除。\n\n' +
-    '此操作無法復原。',
-    {
-      title: '批量刪除人物',
-      kind: 'danger',
-      confirmText: '永久刪除'
+const addMemberController = {
+  open() {
+    personLibraryState.addSelection.clear();
+    $('addMemberSearch').value = '';
+    renderAddMemberList();
+    addMemberMask.classList.add('show');
+  },
+
+  close() {
+    addMemberMask.classList.remove('show');
+    personLibraryState.addSelection.clear();
+  },
+
+  toggle(id) {
+    if (!genealogyData.sims[id]) return;
+
+    if (personLibraryState.addSelection.has(id)) {
+      personLibraryState.addSelection.delete(id);
+    } else {
+      personLibraryState.addSelection.add(id);
     }
-  );
 
-  if (!ok) return;
+    renderAddMemberList();
+  },
 
-  const mutation =
-    genealogyStore.mergeResults(
-      ...ids.map(purgeSimData)
+  selectAllCandidates() {
+    const family = currentFamily();
+    const memberSet = new Set(family.memberIds);
+
+    Object.values(genealogyData.sims).forEach(sim => {
+      if (!memberSet.has(sim.id)) {
+        personLibraryState.addSelection.add(sim.id);
+      }
+    });
+
+    renderAddMemberList();
+  },
+
+  clearSelection() {
+    personLibraryState.addSelection.clear();
+    renderAddMemberList();
+  },
+
+  commit() {
+    if (!personLibraryState.addSelection.size) return;
+
+    const family = currentFamily();
+    const mutation = genealogyStore.addFamilyMembers(
+      family.id,
+      [...personLibraryState.addSelection]
     );
 
-  finalizeSimDataChange(mutation);
-  setRosterBatchMode(false);
-}
+    applyGenealogyMutation(mutation);
+    this.close();
+    refreshFamilyProfilePanel();
+    requestAnimationFrame(fitScreen);
+  }
+};
 
 function renderAddMemberList() {
   const fam = currentFamily();
@@ -15927,7 +16077,7 @@ function renderAddMemberList() {
     list.innerHTML = candidates.map(s => {
       const fams = genealogyData.families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
       const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
-      const isSel = addMemberSelection.has(s.id);
+      const isSel = personLibraryState.addSelection.has(s.id);
       return `<div class="addmember-item${isSel ? ' selected' : ''}" data-add-id="${s.id}">
         <div class="addmember-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
         <div class="roster-avatar">${avatarHTML(s)}</div>
@@ -15940,96 +16090,58 @@ function renderAddMemberList() {
       </div>`;
     }).join('');
   }
-  const count = addMemberSelection.size;
+  const count = personLibraryState.addSelection.size;
   $('addMemberCount').innerHTML = `已選 <b>${count}</b> 人`;
   $('addMemberConfirmBtn').disabled = count === 0;
   list.querySelectorAll('.addmember-item').forEach(el => {
     el.onclick = () => {
       const id = el.dataset.addId;
-      if (addMemberSelection.has(id)) addMemberSelection.delete(id);
-      else addMemberSelection.add(id);
-      renderAddMemberList();
+      addMemberController.toggle(id);
     };
   });
 }
 $('addMemberBtn').onclick = () => {
-  addMemberSelection.clear();
-  $('addMemberSearch').value = '';
-  renderAddMemberList();
-  addMemberMask.classList.add('show');
+  addMemberController.open();
 };
+
 $('addMemberSearch').oninput = debounce(renderAddMemberList, 150);
-$('addMemberCancelBtn').onclick = () => addMemberMask.classList.remove('show');
-addMemberMask.onclick = e => { if (e.target === addMemberMask) addMemberMask.classList.remove('show'); };
-$('addMemberAllBtn').onclick = () => {
-  const fam = currentFamily();
-  const memberSet = new Set(fam.memberIds);
-  Object.values(genealogyData.sims).forEach(s => { if (!memberSet.has(s.id)) addMemberSelection.add(s.id); });
-  renderAddMemberList();
+
+$('addMemberCancelBtn').onclick = () => {
+  addMemberController.close();
 };
-$('addMemberNoneBtn').onclick = () => { addMemberSelection.clear(); renderAddMemberList(); };
+
+addMemberMask.onclick = event => {
+  if (event.target === addMemberMask) {
+    addMemberController.close();
+  }
+};
+
+$('addMemberAllBtn').onclick = () => {
+  addMemberController.selectAllCandidates();
+};
+
+$('addMemberNoneBtn').onclick = () => {
+  addMemberController.clearSelection();
+};
+
 $('addMemberConfirmBtn').onclick = () => {
-  if (!addMemberSelection.size) return;
-  const fam = currentFamily();
-  const ids = [...addMemberSelection];
-
-  const mutation =
-    genealogyStore.addFamilyMembers(
-      fam.id,
-      ids
-    );
-
-  applyGenealogyMutation(mutation);
-  addMemberSelection.clear();
-  addMemberMask.classList.remove('show');
-  refreshFamilyProfilePanel();
-  requestAnimationFrame(fitScreen);
+  addMemberController.commit();
 };
 
 // ========【家族成員批量移除】 設定 - 側邊欄原地選取，送出前必須二次確認 ========
 $('removeMemberBtn').onclick = () => {
-  const fam = currentFamily();
-  if (!fam.memberIds.length) return;
-  setRemoveMemberMode(true);
+  const family = currentFamily();
+  if (!family.memberIds.length) return;
+
+  familyMemberController.setRemoveMode(true);
 };
 
 $('familyMemberRemoveCancelBtn').onclick = () => {
-  setRemoveMemberMode(false);
+  familyMemberController.setRemoveMode(false);
 };
 
-$('familyMemberRemoveConfirmBtn').onclick = async event => {
-  if (!removeMemberMode || !removeMemberSelection.size) return;
-
-  event?.preventDefault();
-  event?.stopPropagation();
-
-  const fam = currentFamily();
-  const ids = [...removeMemberSelection]
-    .filter(id => fam.memberIds.includes(id));
-
-  if (!ids.length) return;
-
-  const ok = await uiConfirm(
-    `${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`,
-    {
-      title: uiText('移出所選人物'),
-      kind: 'danger',
-      confirmText: uiText('移出家族')
-    }
-  );
-
-  if (!ok) return;
-
-  const mutation =
-    genealogyStore.removeFamilyMembers(
-      fam.id,
-      ids
-    );
-
-  removeMemberSelection.clear();
-  removeMemberMode = false;
-  applyGenealogyMutation(mutation);
-  requestAnimationFrame(fitScreen);
+$('familyMemberRemoveConfirmBtn').onclick = event => {
+  familyMemberController.confirmRemoveSelected(event);
 };
 
 async function exportJSON() {
