@@ -1097,7 +1097,7 @@ body.sidebar-resizing * {
 
 /* ========【模擬市民卡片】 設定 - 卡片狀態、頭像與資料呈現 ======== */
 
-.node {
+.person-card {
     /* 定位方式 */ position: absolute;
     /* 背景設定 */ background: var(--card);
     /* 邊框設定 */ border: 1.5px solid var(--border);
@@ -1114,84 +1114,84 @@ body.sidebar-resizing * {
     /* 觸控行為 */ touch-action: none;
 }
 
-.node:hover {
+.person-card:hover {
     /* 邊框顏色 */ border-color: var(--accent);
     /* 元素陰影 */ box-shadow: 0 8px 20px rgba(0,0,0,.12);
     /* 顯示層級 */ z-index: 9;
 }
 
-.node.male {
+.person-card.male {
     /* 左側邊框 */ border-left: 4px solid var(--male-bar);
 }
 
-.node.female {
+.person-card.female {
     /* 左側邊框 */ border-left: 4px solid var(--female-bar);
 }
 
-.node.other {
+.person-card.other {
     /* 左側邊框 */ border-left: 4px solid var(--other-bar);
 }
 
-.node.ghost {
+.person-card.ghost {
     /* 背景設定 */ background: var(--ghost-bg);
     /* 邊框顏色 */ border-color: var(--ghost-border);
     /* 邊框樣式 */ border-style: dotted;
     /* 透明度 */ opacity: .9;
 }
 
-.node.ghost.male {
+.person-card.ghost.male {
     /* 左側邊框 */ border-left: 4px solid var(--ghost-male-bar);
 }
 
-.node.ghost.female {
+.person-card.ghost.female {
     /* 左側邊框 */ border-left: 4px solid var(--ghost-female-bar);
 }
 
-.node.ghost.other {
+.person-card.ghost.other {
     /* 左側邊框 */ border-left: 4px solid var(--ghost-other-bar);
 }
 
-.node.dead {
+.person-card.dead {
     /* 背景設定 */ background: var(--dead-bg);
     /* 邊框顏色 */ border-color: var(--dead-border);
     /* 邊框樣式 */ border-style: dashed;
     /* 透明度 */ opacity: .88;
 }
 
-.node.dead.male {
+.person-card.dead.male {
     /* 左側邊框 */ border-left: 4px solid var(--dead-male-bar);
 }
 
-.node.dead.female {
+.person-card.dead.female {
     /* 左側邊框 */ border-left: 4px solid var(--dead-female-bar);
 }
 
-.node.dead.other {
+.person-card.dead.other {
     /* 左側邊框 */ border-left: 4px solid var(--dead-other-bar);
 }
 
-.node.inlaw {
+.person-card.inlaw {
     /* 上方邊框 */ border-top: 2px dotted var(--spouse);
 }
 
-.node.inlaw .n-name::before {
+.person-card.inlaw .person-card-name::before {
     /* 生成內容 */ content: "姻 ";
     /* 字體大小 */ font-size: 10px;
     /* 文字顏色 */ color: var(--spouse);
     /* 字體粗細 */ font-weight: 400;
 }
 
-.node.hl {
+.person-card.hl {
     /* 外框設定 */ outline: 3px solid var(--hl);
     /* 外框偏移 */ outline-offset: 2px;
     /* 顯示層級 */ z-index: 8;
 }
 
-.node.dim {
+.person-card.dim {
     /* 透明度 */ opacity: .15;
 }
 
-.node.dragging {
+.person-card.dragging {
     /* 顯示層級 */ z-index: 100;
     /* 滑鼠指標 */ cursor: grabbing;
     /* 元素陰影 */ box-shadow: 0 18px 44px rgba(0,0,0,.24);
@@ -1200,7 +1200,7 @@ body.sidebar-resizing * {
     /* 動畫過渡 */ transition: none;
 }
 
-.n-avatar {
+.person-card-avatar {
     /* 元素寬度 */ width: 60px;
     /* 元素高度 */ height: 60px;
     /* 圓角弧度 */ border-radius: 9px;
@@ -1217,14 +1217,14 @@ body.sidebar-resizing * {
     /* 定位方式 */ position: relative;
 }
 
-.n-avatar img {
+.person-card-avatar img {
     /* 元素寬度 */ width: 100%;
     /* 元素高度 */ height: 100%;
     /* 圖片填滿方式 */ object-fit: cover;
     /* 顯示方式 */ display: block;
 }
 
-.node.ghost .n-avatar::after {
+.person-card.ghost .person-card-avatar::after {
     /* 生成內容 */ content: "";
     /* 定位方式 */ position: absolute;
     /* 定位範圍 */ inset: 0;
@@ -1233,11 +1233,11 @@ body.sidebar-resizing * {
     /* 滑鼠事件 */ pointer-events: none;
 }
 
-.node.dead .n-avatar {
+.person-card.dead .person-card-avatar {
     /* 視覺濾鏡 */ filter: sepia(.45) saturate(.7) brightness(.95);
 }
 
-.n-body {
+.person-card-body {
     /* 彈性配比 */ flex: 1;
     /* 最小寬度 */ min-width: 0;
     /* 顯示方式 */ display: flex;
@@ -1246,7 +1246,7 @@ body.sidebar-resizing * {
     /* 水平對齊 */ justify-content: center;
 }
 
-.n-name {
+.person-card-name {
     /* 字體大小 */ font-size: 13px;
     /* 字體粗細 */ font-weight: 700;
     /* 字距設定 */ letter-spacing: .2px;
@@ -1260,15 +1260,15 @@ body.sidebar-resizing * {
     /* 右側內縮 */ padding-right: 24px;
 }
 
-.node.dead .n-name {
+.person-card.dead .person-card-name {
     /* 文字顏色 */ color: var(--dead-ink);
 }
 
-.node.ghost .n-name {
+.person-card.ghost .person-card-name {
     /* 文字顏色 */ color: var(--ghost-ink);
 }
 
-.n-title {
+.person-card-title {
     /* 字體大小 */ font-size: 10px;
     /* 文字顏色 */ color: var(--sub);
     /* 換行方式 */ white-space: nowrap;
@@ -1276,9 +1276,9 @@ body.sidebar-resizing * {
     /* 文字溢出 */ text-overflow: ellipsis;
 }
 
-.n-residence,
-.n-aspiration,
-.n-death {
+.person-card-residence,
+.person-card-aspiration,
+.person-card-death {
     /* 字體大小 */ font-size: 10px;
     /* 文字顏色 */ color: var(--sub);
     /* 換行方式 */ white-space: nowrap;
@@ -1339,26 +1339,26 @@ body.sidebar-resizing * {
     /* 文字顏色 */ color: var(--accent);
 }
 
-.n-residence .l1ng-icon,
-.n-aspiration .l1ng-icon,
-.n-death .l1ng-icon {
+.person-card-residence .l1ng-icon,
+.person-card-aspiration .l1ng-icon,
+.person-card-death .l1ng-icon {
     /* 字體大小 */ font-size: 10px;
     /* 彈性收縮 */ flex-shrink: 0;
 }
 
-.n-residence .l1ng-icon {
+.person-card-residence .l1ng-icon {
     /* 文字顏色 */ color: var(--sub);
 }
 
-.n-aspiration .l1ng-icon {
+.person-card-aspiration .l1ng-icon {
     /* 文字顏色 */ color: var(--accent);
 }
 
-.n-death .l1ng-icon {
+.person-card-death .l1ng-icon {
     /* 文字顏色 */ color: #a05a4a;
 }
 
-body[data-theme="midnight"] .n-death .l1ng-icon {
+body[data-theme="midnight"] .person-card-death .l1ng-icon {
     /* 文字顏色 */ color: #c08e78;
 }
 
@@ -1370,34 +1370,34 @@ body[data-theme="midnight"] .n-death .l1ng-icon {
     /* 水平對齊 */ justify-content: center;
 }
 
-.n-aspiration {
+.person-card-aspiration {
     /* 文字顏色 */ color: var(--accent);
     /* 字體粗細 */ font-weight: 500;
 }
 
-.n-death {
+.person-card-death {
     /* 文字顏色 */ color: #a05a4a;
 }
 
-body[data-theme="midnight"] .n-death {
+body[data-theme="midnight"] .person-card-death {
     /* 文字顏色 */ color: #c08e78;
 }
 
-.node.dead .n-residence,
-.node.dead .n-aspiration,
-.node.dead .n-death {
+.person-card.dead .person-card-residence,
+.person-card.dead .person-card-aspiration,
+.person-card.dead .person-card-death {
     /* 文字顏色 */ color: var(--dead-ink);
     /* 透明度 */ opacity: .9;
 }
 
-.node.ghost .n-residence,
-.node.ghost .n-aspiration,
-.node.ghost .n-death {
+.person-card.ghost .person-card-residence,
+.person-card.ghost .person-card-aspiration,
+.person-card.ghost .person-card-death {
     /* 文字顏色 */ color: var(--ghost-ink);
     /* 透明度 */ opacity: .9;
 }
 
-.n-pets {
+.person-card-pets {
     /* 顯示方式 */ display: flex;
     /* 項目間距 */ gap: 3px;
     /* 上方外距 */ margin-top: 3px;
@@ -1408,7 +1408,7 @@ body[data-theme="midnight"] .n-death {
     /* 行距設定 */ line-height: 1.4;
 }
 
-.n-pet-chip {
+.person-card-pet-chip {
     /* 顯示方式 */ display: inline-flex;
     /* 垂直對齊 */ align-items: center;
     /* 項目間距 */ gap: 2px;
@@ -1423,17 +1423,17 @@ body[data-theme="midnight"] .n-death {
     /* 文字溢出 */ text-overflow: ellipsis;
 }
 
-.node.dead .n-pet-chip {
+.person-card.dead .person-card-pet-chip {
     /* 背景設定 */ background: var(--dead-tag-bg);
     /* 文字顏色 */ color: var(--dead-tag-ink);
 }
 
-.node.ghost .n-pet-chip {
+.person-card.ghost .person-card-pet-chip {
     /* 背景設定 */ background: var(--ghost-tag-bg);
     /* 文字顏色 */ color: var(--ghost-tag-ink);
 }
 
-.n-gallery-badge {
+.person-card-life-photo-badge {
     /* 顯示方式 */ display: inline-flex;
     /* 垂直對齊 */ align-items: center;
     /* 項目間距 */ gap: 2px;
@@ -1446,17 +1446,17 @@ body[data-theme="midnight"] .n-death {
     /* 上方外距 */ margin-top: 3px;
 }
 
-.node.ghost .n-gallery-badge {
+.person-card.ghost .person-card-life-photo-badge {
     /* 背景設定 */ background: var(--ghost-tag-bg);
     /* 文字顏色 */ color: var(--ghost-tag-ink);
 }
 
-.node.dead .n-gallery-badge {
+.person-card.dead .person-card-life-photo-badge {
     /* 背景設定 */ background: var(--dead-tag-bg);
     /* 文字顏色 */ color: var(--dead-tag-ink);
 }
 
-.n-tags {
+.person-card-tags {
     /* 顯示方式 */ display: flex;
     /* 項目間距 */ gap: 3px;
     /* 上方外距 */ margin-top: 3px;
@@ -1484,12 +1484,12 @@ body[data-theme="midnight"] .n-death {
     /* 文字基線 */ vertical-align: middle;
 }
 
-.node.ghost .tag {
+.person-card.ghost .tag {
     /* 背景設定 */ background: var(--ghost-tag-bg);
     /* 文字顏色 */ color: var(--ghost-tag-ink);
 }
 
-.node.dead .tag {
+.person-card.dead .tag {
     /* 背景設定 */ background: var(--dead-tag-bg);
     /* 文字顏色 */ color: var(--dead-tag-ink);
 }
@@ -1540,7 +1540,7 @@ body[data-theme="midnight"] .gallery-item-stage {
     background:color-mix(in srgb,var(--stage-accent) 16%,#151c24);
 }
 
-.n-badge {
+.person-card-status-badge {
     /* 定位方式 */ position: absolute;
     /* 頂部位置 */ top: 5px;
     /* 右側位置 */ right: 5px;
@@ -1559,22 +1559,22 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 滑鼠事件 */ pointer-events: none;
 }
 
-.n-badge.alive {
+.person-card-status-badge.alive {
     /* 背景設定 */ background: var(--alive-badge-bg);
     /* 邊框顏色 */ border-color: var(--alive-badge-border);
 }
 
-.n-badge.ghost {
+.person-card-status-badge.ghost {
     /* 背景設定 */ background: var(--ghost-badge-bg);
     /* 邊框顏色 */ border-color: var(--ghost-badge-border);
 }
 
-.n-badge.dead {
+.person-card-status-badge.dead {
     /* 背景設定 */ background: var(--dead-badge-bg);
     /* 邊框顏色 */ border-color: var(--dead-badge-border);
 }
 
-.n-race-badge {
+.person-card-race-badge {
     /* 定位方式 */ position: absolute;
     /* 頂部位置 */ top: 5px;
     /* 左側位置 */ left: 5px;
@@ -1594,17 +1594,17 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 滑鼠事件 */ pointer-events: none;
 }
 
-.node.ghost .n-race-badge {
+.person-card.ghost .person-card-race-badge {
     /* 背景設定 */ background: var(--ghost-badge-bg);
     /* 邊框顏色 */ border-color: var(--ghost-badge-border);
 }
 
-.node.dead .n-race-badge {
+.person-card.dead .person-card-race-badge {
     /* 背景設定 */ background: var(--dead-badge-bg);
     /* 邊框顏色 */ border-color: var(--dead-badge-border);
 }
 
-.node.view {
+.person-card.view {
     /* 排列方向 */ flex-direction: column;
     /* 水平對齊 */ justify-content: flex-start;
     /* 垂直對齊 */ align-items: center;
@@ -1612,7 +1612,7 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 內縮空間 */ padding: 8px 6px 6px;
 }
 
-.node.view .n-race-badge {
+.person-card.view .person-card-race-badge {
     /* 頂部位置 */ top: 3px;
     /* 左側位置 */ left: 3px;
     /* 最小寬度 */ min-width: 16px;
@@ -1622,7 +1622,7 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 字體大小 */ font-size: 10px;
 }
 
-.node.view .n-badge {
+.person-card.view .person-card-status-badge {
     /* 頂部位置 */ top: 3px;
     /* 右側位置 */ right: 3px;
     /* 元素寬度 */ width: 16px;
@@ -1630,7 +1630,7 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 字體大小 */ font-size: 10px;
 }
 
-.n-view-avatar {
+.person-card-view-avatar {
     /* 元素寬度 */ width: 76px;
     /* 元素高度 */ height: 76px;
     /* 圓角弧度 */ border-radius: 10px;
@@ -1648,14 +1648,14 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 上方外距 */ margin-top: 4px;
 }
 
-.n-view-avatar img {
+.person-card-view-avatar img {
     /* 元素寬度 */ width: 100%;
     /* 元素高度 */ height: 100%;
     /* 圖片填滿方式 */ object-fit: cover;
     /* 顯示方式 */ display: block;
 }
 
-.node.view.ghost .n-view-avatar::after {
+.person-card.view.ghost .person-card-view-avatar::after {
     /* 生成內容 */ content: "";
     /* 定位方式 */ position: absolute;
     /* 定位範圍 */ inset: 0;
@@ -1664,11 +1664,11 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 滑鼠事件 */ pointer-events: none;
 }
 
-.node.view.dead .n-view-avatar {
+.person-card.view.dead .person-card-view-avatar {
     /* 視覺濾鏡 */ filter: sepia(.45) saturate(.7) brightness(.95);
 }
 
-.n-view-name {
+.person-card-view-name {
     /* 元素寬度 */ width:100%;
     /* 字體大小 */ font-size:11px;
     /* 字體粗細 */ font-weight:700;
@@ -1682,15 +1682,15 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 內縮空間 */ padding:0 2px;
 }
 
-.node.view.dead .n-view-name {
+.person-card.view.dead .person-card-view-name {
     /* 文字顏色 */ color: var(--dead-ink);
 }
 
-.node.view.ghost .n-view-name {
+.person-card.view.ghost .person-card-view-name {
     /* 文字顏色 */ color: var(--ghost-ink);
 }
 
-.n-view-pets {
+.person-card-view-pets {
     /* 字體大小 */ font-size: 9.5px;
     /* 文字顏色 */ color: var(--sub);
     /* 行距設定 */ line-height: 1.3;
@@ -4314,13 +4314,13 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* 文字繪製方式 */ text-rendering: geometricPrecision;
 }
 
-.node,
+.person-card,
 .edge-label-content {
     /* 預先最佳化 */ will-change: auto;
 }
 
-.n-avatar img,
-.n-view-avatar img,
+.person-card-avatar img,
+.person-card-view-avatar img,
 .roster-avatar img,
 .pet-item-avatar img {
     /* 圖片繪製方式 */ image-rendering: auto;
@@ -5906,20 +5906,20 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
     box-shadow:0 0 0 1px color-mix(in srgb,var(--card) 70%,transparent) inset;
 }
 #selectionMarquee.show { display:block; }
-.node.node-selected {
+.person-card.person-card-selected {
     outline:2px solid var(--accent);
     outline-offset:3px;
     z-index:10;
 }
 #genealogyCanvasViewport.selection-tool-active { cursor:crosshair; }
-#genealogyCanvasViewport.selection-tool-active .node { cursor:default; }
-#genealogyCanvasViewport.selection-tool-active .node.node-selected { cursor:move; }
+#genealogyCanvasViewport.selection-tool-active .person-card { cursor:default; }
+#genealogyCanvasViewport.selection-tool-active .person-card.person-card-selected { cursor:move; }
 #genealogyCanvasViewport.pan-tool-active,
 #genealogyCanvasViewport.temporary-pan { cursor:grab; }
 #genealogyCanvasViewport.pan-tool-active.dragging,
 #genealogyCanvasViewport.temporary-pan.dragging { cursor:grabbing; }
-#genealogyCanvasViewport.pan-tool-active .node,
-#genealogyCanvasViewport.temporary-pan .node { cursor:grab; }
+#genealogyCanvasViewport.pan-tool-active .person-card,
+#genealogyCanvasViewport.temporary-pan .person-card { cursor:grab; }
 .canvas-zoom { position:absolute; left:50%; bottom:14px; z-index:24; display:flex; align-items:center; gap:2px; height:34px; padding:3px 5px; border:1px solid var(--border); border-radius:6px; background:color-mix(in srgb,var(--card) 94%,transparent); box-shadow:0 4px 15px rgba(0,0,0,.07); backdrop-filter:blur(8px); transform:translateX(-50%); }
 .canvas-zoom button { width:27px; height:27px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:4px; background:transparent; color:var(--sub); }
 .canvas-zoom button:hover { background:var(--panel-item-hover); color:var(--ink); }
@@ -6019,7 +6019,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   0%,100% { box-shadow:0 0 0 0 transparent; }
   28% { box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 38%,transparent),0 5px 18px rgba(0,0,0,.12); }
 }
-.node.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
+.person-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
 
 
 /* ========【人物媒體分頁】 設定 - 寵物與相簿並列，減少縱向留白 ======== */
@@ -6032,7 +6032,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 
 /* ========【人物卡右鍵選單】 設定 - 人物操作、卡片內容與外觀 ======== */
-.node-context-menu {
+.person-card-menu {
     position:fixed;
     z-index:5000;
     display:none;
@@ -6047,52 +6047,52 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     box-shadow:0 14px 36px rgba(0,0,0,.18);
     font-size:12px;
 }
-.node-context-menu.show { display:block; }
-.node-context-title { padding:7px 9px 8px; font-size:12.5px; font-weight:700; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.node-context-action { width:100%; min-height:31px; display:flex; align-items:center; gap:8px; padding:6px 9px; border:0; border-radius:5px; background:transparent; color:var(--ink); font:inherit; text-align:left; }
-.node-context-action:hover:not(:disabled) { background:var(--panel-item-hover); }
-.node-context-action:disabled { opacity:.4; cursor:default; }
-.node-context-action.danger { color:#b03a2e; }
-.node-context-divider { height:1px; margin:5px 3px; background:var(--border); }
-.node-context-section-title { padding:5px 9px 4px; color:var(--sub); font-size:10.5px; font-weight:700; letter-spacing:.35px; }
-.node-context-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 3px; }
-.node-context-check,.node-context-radio { min-height:29px; display:flex; align-items:center; gap:7px; padding:4px 8px; border-radius:5px; cursor:pointer; user-select:none; }
-.node-context-check:hover,.node-context-radio:hover { background:var(--panel-item-hover); }
-.node-context-check.fixed { color:var(--sub); cursor:default; }
-.node-context-check.fixed:hover { background:transparent; }
-.node-context-check input,.node-context-radio input { margin:0; accent-color:var(--accent); }
-.node-context-note { padding:5px 9px 7px; color:var(--sub); font-size:10px; line-height:1.4; }
+.person-card-menu.show { display:block; }
+.person-card-menu-title { padding:7px 9px 8px; font-size:12.5px; font-weight:700; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.person-card-menu-action { width:100%; min-height:31px; display:flex; align-items:center; gap:8px; padding:6px 9px; border:0; border-radius:5px; background:transparent; color:var(--ink); font:inherit; text-align:left; }
+.person-card-menu-action:hover:not(:disabled) { background:var(--panel-item-hover); }
+.person-card-menu-action:disabled { opacity:.4; cursor:default; }
+.person-card-menu-action.danger { color:#b03a2e; }
+.person-card-menu-divider { height:1px; margin:5px 3px; background:var(--border); }
+.person-card-menu-section-title { padding:5px 9px 4px; color:var(--sub); font-size:10.5px; font-weight:700; letter-spacing:.35px; }
+.person-card-menu-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 3px; }
+.person-card-menu-check,.person-card-menu-radio { min-height:29px; display:flex; align-items:center; gap:7px; padding:4px 8px; border-radius:5px; cursor:pointer; user-select:none; }
+.person-card-menu-check:hover,.person-card-menu-radio:hover { background:var(--panel-item-hover); }
+.person-card-menu-check.fixed { color:var(--sub); cursor:default; }
+.person-card-menu-check.fixed:hover { background:transparent; }
+.person-card-menu-check input,.person-card-menu-radio input { margin:0; accent-color:var(--accent); }
+.person-card-menu-note { padding:5px 9px 7px; color:var(--sub); font-size:10px; line-height:1.4; }
 
 /* ========【人物卡片外觀】 設定 - 檢視模式外觀；檢視 / 編輯顯示內容各自獨立 ======== */
-.node.view.card-appearance-minimal {
+.person-card.view.card-appearance-minimal {
     background:transparent;
     border-color:transparent;
     border-left-color:transparent;
     box-shadow:none;
 }
-.node.view.card-appearance-minimal:hover {
+.person-card.view.card-appearance-minimal:hover {
     background:color-mix(in srgb,var(--card) 48%,transparent);
     border-color:color-mix(in srgb,var(--accent) 58%,transparent);
     box-shadow:none;
 }
-.node.view.card-appearance-minimal.ghost,
-.node.view.card-appearance-minimal.dead {
+.person-card.view.card-appearance-minimal.ghost,
+.person-card.view.card-appearance-minimal.dead {
     background:transparent;
     border-color:transparent;
     border-left-color:transparent;
     border-style:solid;
 }
-.node.view.card-appearance-translucent {
+.person-card.view.card-appearance-translucent {
     background:color-mix(in srgb,var(--card) 76%,transparent);
     border-color:color-mix(in srgb,var(--border) 74%,transparent);
     box-shadow:0 2px 10px rgba(0,0,0,.05);
     backdrop-filter:blur(5px);
 }
-.node.view.card-appearance-full {
+.person-card.view.card-appearance-full {
     background:var(--card);
 }
-.node.view.card-no-avatar { justify-content:center; }
-.n-view-meta {
+.person-card.view.card-no-avatar { justify-content:center; }
+.person-card-view-meta {
     width:100%;
     min-height:14px;
     display:flex;
@@ -6108,20 +6108,20 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     overflow-wrap:anywhere;
     word-break:break-word;
 }
-.n-view-meta .l1ng-icon { flex:0 0 auto; margin-top:1px; }
-.n-view-meta > span { min-width:0; overflow-wrap:anywhere; word-break:break-word; }
-.n-view-text { overflow:visible; text-overflow:clip; white-space:normal; }
+.person-card-view-meta .l1ng-icon { flex:0 0 auto; margin-top:1px; }
+.person-card-view-meta > span { min-width:0; overflow-wrap:anywhere; word-break:break-word; }
+.person-card-view-text { overflow:visible; text-overflow:clip; white-space:normal; }
 
 
 /* ========【編輯模式人物卡】 設定 - 與檢視卡分離的橫向管理版型 ======== */
-.node.mode-edit {
+.person-card.mode-edit {
     /* 編輯卡維持較大的橫向管理版型；右鍵只共用「顯示哪些資料」，不共用檢視卡外觀。 */
     padding:12px 14px 12px 12px;
     align-items:flex-start;
     gap:12px;
     background:var(--card);
 }
-.node.mode-edit .n-avatar {
+.person-card.mode-edit .person-card-avatar {
     width:64px;
     height:64px;
     flex:0 0 64px;
@@ -6129,17 +6129,17 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     border-radius:10px;
     font-size:24px;
 }
-.node.mode-edit .n-body {
+.person-card.mode-edit .person-card-body {
     justify-content:flex-start;
     gap:4px;
     padding-top:0;
 }
-.node.mode-edit .n-name {
+.person-card.mode-edit .person-card-name {
     padding-right:0;
     font-size:13px;
     line-height:1.3;
 }
-.n-edit-meta {
+.person-card-edit-meta {
     min-height:15px;
     display:flex;
     align-items:center;
@@ -6148,18 +6148,18 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     font-size:10px;
     line-height:1.35;
 }
-.n-edit-meta .l1ng-icon { flex:0 0 auto; }
-.n-edit-text {
+.person-card-edit-meta .l1ng-icon { flex:0 0 auto; }
+.person-card-edit-text {
     max-width:100%;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
 }
-.node.mode-edit .n-tags,
-.node.mode-edit .n-pets {
+.person-card.mode-edit .person-card-tags,
+.person-card.mode-edit .person-card-pets {
     margin-top:1px;
 }
-.node.mode-edit .n-gallery-badge {
+.person-card.mode-edit .person-card-life-photo-badge {
     align-self:flex-start;
     margin-top:1px;
 }
@@ -6206,8 +6206,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .tips-section .mouse-hint.mouse-wheel::after { background:transparent; }
 
 /* ========【檢視卡片版型】 設定 - 檢視模式固定直向，appearance 只控制視覺效果 ======== */
-.node.view.card-appearance-translucent,
-.node.view.card-appearance-full {
+.person-card.view.card-appearance-translucent,
+.person-card.view.card-appearance-full {
     flex-direction:column;
     align-items:center;
     justify-content:flex-start;
@@ -6215,8 +6215,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     padding:10px 10px 8px;
 }
 
-.node.view.card-appearance-translucent .n-view-avatar,
-.node.view.card-appearance-full .n-view-avatar {
+.person-card.view.card-appearance-translucent .person-card-view-avatar,
+.person-card.view.card-appearance-full .person-card-view-avatar {
     width:76px;
     height:76px;
     flex:0 0 76px;
@@ -6225,18 +6225,18 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     font-size:30px;
 }
 
-.node.view.card-appearance-translucent .n-view-name,
-.node.view.card-appearance-full .n-view-name,
-.node.view.card-appearance-translucent .n-view-meta,
-.node.view.card-appearance-full .n-view-meta {
+.person-card.view.card-appearance-translucent .person-card-view-name,
+.person-card.view.card-appearance-full .person-card-view-name,
+.person-card.view.card-appearance-translucent .person-card-view-meta,
+.person-card.view.card-appearance-full .person-card-view-meta {
     width:100%;
     text-align:center;
     justify-content:center;
 }
 
 /* 只剩頭像時，任何有框樣式都收成真正的小卡，不保留空白資訊欄。 */
-.node.view.card-avatar-only.card-appearance-translucent,
-.node.view.card-avatar-only.card-appearance-full {
+.person-card.view.card-avatar-only.card-appearance-translucent,
+.person-card.view.card-avatar-only.card-appearance-full {
     padding: 11px;
     align-items: center;
     justify-content: center;
@@ -6244,25 +6244,25 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 /* 編輯模式若玩家把所有文字資訊都關掉，也只保留頭像本身的操作區。 */
-.node.mode-edit.card-avatar-only {
+.person-card.mode-edit.card-avatar-only {
     padding: 14px;
     align-items: center;
     justify-content: center;
     gap: 0;
 }
-.node.mode-edit.card-avatar-only .n-avatar {
+.person-card.mode-edit.card-avatar-only .person-card-avatar {
     margin: 0;
 }
 
 /* ========【卡片性別顯示】 設定 - 性別色條與性別文字各自獨立控制 ======== */
-.node.card-gender-bar-hidden {
+.person-card.card-gender-bar-hidden {
     border-left-width:1.5px;
     border-left-color:var(--border);
 }
-.node.card-gender-bar-hidden.ghost {
+.person-card.card-gender-bar-hidden.ghost {
     border-left-color:var(--ghost-border);
 }
-.node.card-gender-bar-hidden.dead {
+.person-card.card-gender-bar-hidden.dead {
     border-left-color:var(--dead-border);
 }
 

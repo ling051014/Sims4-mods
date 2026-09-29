@@ -1252,7 +1252,7 @@ function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
 }
 
 function renderViewCardLine(line) {
-  const className = `n-view-meta${line.detail ? ' n-view-text' : ''}`;
+  const className = `person-card-view-meta${line.detail ? ' person-card-view-text' : ''}`;
   const title = line.text ? ` title="${esc(line.text)}"` : '';
   const body = line.icon
     ? `${iconSvg(line.icon)}<span>${esc(line.text)}</span>`
@@ -1746,7 +1746,7 @@ const panToolBtn = $('panToolBtn');
 const arrangeToolDivider = $('arrangeToolDivider');
 const arrangeToolDividerEnd = $('arrangeToolDividerEnd');
 const selectionMarquee = $('selectionMarquee');
-const nodeContextMenu = $('personCardContextMenu');
+const personCardMenu = $('personCardContextMenu');
 const labelLockToggle = $('labelLockToggle');
 const relationshipPerspectiveBtn = $('relationshipPerspectiveBtn');
 const sidebar = $('sidebar');
@@ -8314,7 +8314,7 @@ function focusSimOnCanvas(simId) {
   panX = viewport.clientWidth / 2 - centerX * scale;
   panY = viewport.clientHeight / 2 - centerY * scale;
   applyTransform();
-  const node = [...nodes.querySelectorAll('.node[data-id]')].find(el => el.dataset.id === simId);
+  const node = [...nodes.querySelectorAll('.person-card[data-id]')].find(el => el.dataset.id === simId);
   if (node) {
     node.classList.remove('focus-pulse');
     void node.offsetWidth;
@@ -8368,7 +8368,7 @@ function statusBadgeHTML(sim) {
 
   if (!status) return '';
 
-  return `<div class="n-badge ${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</div>`;
+  return `<div class="person-card-status-badge ${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</div>`;
 }
 
 function statusIconHTML(sim) {
@@ -8388,7 +8388,7 @@ function raceBadgeHTML(sim) {
 
   if (!race?.icon) return '';
 
-  return `<div class="n-race-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</div>`;
+  return `<div class="person-card-race-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</div>`;
 }
 
 function raceIconHTML(sim) {
@@ -8616,13 +8616,13 @@ function buildPetsChipsHTML(pets, owner = null) {
             owner
           );
 
-        return `<span class="n-pet-chip" title="${esc(petName)} · ${esc(formatPetSpecies(pet))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${status || ''}${esc(petName)}</span>`;
+        return `<span class="person-card-pet-chip" title="${esc(petName)} · ${esc(formatPetSpecies(pet))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${status || ''}${esc(petName)}</span>`;
       })
       .join('');
 
   const rest =
     pets.length > 3
-      ? `<span class="n-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length - 3}</span>`
+      ? `<span class="person-card-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length - 3}</span>`
       : '';
 
   return chips + rest;
@@ -9823,9 +9823,9 @@ galleryViewerMask.onclick = event => {
  * ========================================================= */
 function syncNodeSelectionClasses() {
   const visible = new Set();
-  nodes.querySelectorAll('.node[data-id]').forEach(el => {
+  nodes.querySelectorAll('.person-card[data-id]').forEach(el => {
     visible.add(el.dataset.id);
-    el.classList.toggle('node-selected', selectedNodeIds.has(el.dataset.id));
+    el.classList.toggle('person-card-selected', selectedNodeIds.has(el.dataset.id));
   });
   [...selectedNodeIds].forEach(id => { if (!visible.has(id)) selectedNodeIds.delete(id); });
 }
@@ -9843,24 +9843,24 @@ function selectVisibleNodes() {
   syncNodeSelectionClasses();
 }
 
-function closeNodeContextMenu() {
-  if (!nodeContextMenu) return;
-  nodeContextMenu.classList.remove('show');
-  nodeContextMenu.setAttribute('aria-hidden', 'true');
-  nodeContextMenu.innerHTML = '';
+function closePersonCardMenu() {
+  if (!personCardMenu) return;
+  personCardMenu.classList.remove('show');
+  personCardMenu.setAttribute('aria-hidden', 'true');
+  personCardMenu.innerHTML = '';
 }
 
-function positionNodeContextMenu(clientX, clientY) {
-  if (!nodeContextMenu) return;
-  nodeContextMenu.style.left = `${clientX}px`;
-  nodeContextMenu.style.top = `${clientY}px`;
+function positionPersonCardMenu(clientX, clientY) {
+  if (!personCardMenu) return;
+  personCardMenu.style.left = `${clientX}px`;
+  personCardMenu.style.top = `${clientY}px`;
   requestAnimationFrame(() => {
-    const rect = nodeContextMenu.getBoundingClientRect();
+    const rect = personCardMenu.getBoundingClientRect();
     const pad = 8;
     const left = Math.max(pad, Math.min(clientX, window.innerWidth - rect.width - pad));
     const top = Math.max(pad, Math.min(clientY, window.innerHeight - rect.height - pad));
-    nodeContextMenu.style.left = `${left}px`;
-    nodeContextMenu.style.top = `${top}px`;
+    personCardMenu.style.left = `${left}px`;
+    personCardMenu.style.top = `${top}px`;
   });
 }
 
@@ -10080,8 +10080,8 @@ function applySelectedLayoutOperation(action) {
   return true;
 }
 
-function renderNodeContextMenu(simId, clientX, clientY) {
-  if (!nodeContextMenu || !genealogyData?.sims?.[simId]) return;
+function renderPersonCardMenu(simId, clientX, clientY) {
+  if (!personCardMenu || !genealogyData?.sims?.[simId]) return;
   const sim = genealogyData.sims[simId];
   const settings = viewMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
   const isEditCard = viewMode === 'edit';
@@ -10093,37 +10093,37 @@ function renderNodeContextMenu(simId, clientX, clientY) {
     const canDistribute =
       selectedCount >= 3;
 
-    nodeContextMenu.innerHTML = `
-      <div class="node-context-title">${esc(title)}</div>
+    personCardMenu.innerHTML = `
+      <div class="person-card-menu-title">${esc(title)}</div>
 
-      <div class="node-context-section-title">${esc(uiText('對齊'))}</div>
-      <div class="node-context-grid">
-        <button class="node-context-action" type="button" data-node-context-action="align-left"><span>${esc(uiText('靠左'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-center-x"><span>${esc(uiText('水平置中'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-right"><span>${esc(uiText('靠右'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-top"><span>${esc(uiText('頂端'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-center-y"><span>${esc(uiText('垂直置中'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-bottom"><span>${esc(uiText('底端'))}</span></button>
+      <div class="person-card-menu-section-title">${esc(uiText('對齊'))}</div>
+      <div class="person-card-menu-grid">
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-left"><span>${esc(uiText('靠左'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-center-x"><span>${esc(uiText('水平置中'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-right"><span>${esc(uiText('靠右'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-top"><span>${esc(uiText('頂端'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-center-y"><span>${esc(uiText('垂直置中'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-bottom"><span>${esc(uiText('底端'))}</span></button>
       </div>
 
-      <div class="node-context-divider"></div>
-      <div class="node-context-section-title">${esc(uiText('分佈'))}</div>
-      <div class="node-context-grid">
-        <button class="node-context-action" type="button" data-node-context-action="distribute-horizontal" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('水平均勻'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="distribute-vertical" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('垂直均勻'))}</span></button>
+      <div class="person-card-menu-divider"></div>
+      <div class="person-card-menu-section-title">${esc(uiText('分佈'))}</div>
+      <div class="person-card-menu-grid">
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-horizontal" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('水平均勻'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-vertical" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('垂直均勻'))}</span></button>
       </div>
 
-      <div class="node-context-divider"></div>
-      <button class="node-context-action" type="button" data-node-context-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
-      <button class="node-context-action danger" type="button" data-node-context-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
-      <button class="node-context-action" type="button" data-node-context-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
+      <div class="person-card-menu-divider"></div>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
+      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
     `;
 
-    nodeContextMenu.dataset.simId = simId;
-    nodeContextMenu.dataset.cardMode = viewMode;
-    nodeContextMenu.classList.add('show');
-    nodeContextMenu.setAttribute('aria-hidden', 'false');
-    positionNodeContextMenu(clientX, clientY);
+    personCardMenu.dataset.simId = simId;
+    personCardMenu.dataset.cardMode = viewMode;
+    personCardMenu.classList.add('show');
+    personCardMenu.setAttribute('aria-hidden', 'false');
+    positionPersonCardMenu(clientX, clientY);
     return;
   }
 
@@ -10131,46 +10131,46 @@ function renderNodeContextMenu(simId, clientX, clientY) {
     ['name','姓名'], ['gender','性別文字'], ['genderBar','性別色條'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
     ['status','狀態'], ['race','種族'], ['career','職業'], ['residence','居住地'], ['aspiration','人生抱負'],
     ['traits','特徵'], ['pets','寵物'], ['gallery','人生照片']
-  ].map(([key,label]) => `<label class="node-context-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
+  ].map(([key,label]) => `<label class="person-card-menu-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
 
   const appearanceSection = isEditCard ? '' : `
-    <div class="node-context-divider"></div>
-    <div class="node-context-section-title">${esc(uiText('檢視卡片外觀'))}</div>
-    <label class="node-context-radio"><input type="radio" name="nodeCardAppearance" value="minimal" ${settings.appearance === 'minimal' ? 'checked' : ''}><span>${esc(uiText('極簡'))}</span></label>
-    <label class="node-context-radio"><input type="radio" name="nodeCardAppearance" value="translucent" ${settings.appearance === 'translucent' ? 'checked' : ''}><span>${esc(uiText('半透明'))}</span></label>
-    <label class="node-context-radio"><input type="radio" name="nodeCardAppearance" value="full" ${settings.appearance === 'full' ? 'checked' : ''}><span>${esc(uiText('完整卡片'))}</span></label>`;
+    <div class="person-card-menu-divider"></div>
+    <div class="person-card-menu-section-title">${esc(uiText('檢視卡片外觀'))}</div>
+    <label class="person-card-menu-radio"><input type="radio" name="nodeCardAppearance" value="minimal" ${settings.appearance === 'minimal' ? 'checked' : ''}><span>${esc(uiText('極簡'))}</span></label>
+    <label class="person-card-menu-radio"><input type="radio" name="nodeCardAppearance" value="translucent" ${settings.appearance === 'translucent' ? 'checked' : ''}><span>${esc(uiText('半透明'))}</span></label>
+    <label class="person-card-menu-radio"><input type="radio" name="nodeCardAppearance" value="full" ${settings.appearance === 'full' ? 'checked' : ''}><span>${esc(uiText('完整卡片'))}</span></label>`;
 
-  nodeContextMenu.innerHTML = `
-    <div class="node-context-title">${esc(title)}</div>
-    <button class="node-context-action" type="button" data-node-context-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
-    <button class="node-context-action" type="button" data-node-context-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
-    <button class="node-context-action" type="button" data-node-context-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-    <button class="node-context-action" type="button" data-node-context-action="perspective">${iconSvg('person-vcard')}<span>${esc(relationshipPerspectiveActionText(sim, relationshipPerspectiveSimId === String(sim.id)))}</span></button>
+  personCardMenu.innerHTML = `
+    <div class="person-card-menu-title">${esc(title)}</div>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="perspective">${iconSvg('person-vcard')}<span>${esc(relationshipPerspectiveActionText(sim, relationshipPerspectiveSimId === String(sim.id)))}</span></button>
     ${isMulti ? `
-      <div class="node-context-divider"></div>
-      <button class="node-context-action" type="button" data-node-context-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
-      <button class="node-context-action danger" type="button" data-node-context-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
-      <button class="node-context-action" type="button" data-node-context-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
+      <div class="person-card-menu-divider"></div>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
+      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
     ` : ''}
-    <div class="node-context-divider"></div>
-    <div class="node-context-section-title">${esc(uiText(isEditCard ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
-    <label class="node-context-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
-    <div class="node-context-grid">${fieldRows}</div>
+    <div class="person-card-menu-divider"></div>
+    <div class="person-card-menu-section-title">${esc(uiText(isEditCard ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
+    <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
+    <div class="person-card-menu-grid">${fieldRows}</div>
     ${appearanceSection}
-    <div class="node-context-note">${esc(uiText(isEditCard ? '只套用於編輯模式人物卡' : '只套用於檢視模式人物卡'))}</div>`;
+    <div class="person-card-menu-note">${esc(uiText(isEditCard ? '只套用於編輯模式人物卡' : '只套用於檢視模式人物卡'))}</div>`;
 
-  nodeContextMenu.dataset.simId = simId;
-  nodeContextMenu.dataset.cardMode = viewMode;
-  nodeContextMenu.classList.add('show');
-  nodeContextMenu.setAttribute('aria-hidden', 'false');
-  positionNodeContextMenu(clientX, clientY);
+  personCardMenu.dataset.simId = simId;
+  personCardMenu.dataset.cardMode = viewMode;
+  personCardMenu.classList.add('show');
+  personCardMenu.setAttribute('aria-hidden', 'false');
+  positionPersonCardMenu(clientX, clientY);
 }
 
-async function handleNodeContextAction(action, simId) {
+async function handlePersonCardMenuAction(action, simId) {
   if (!action) return;
-  if (action === 'view') { closeNodeContextMenu(); openInfoCard(simId); return; }
-  if (action === 'edit') { closeNodeContextMenu(); openEditor(simId); return; }
-  if (action === 'locate') { closeNodeContextMenu(); focusSimOnCanvas(simId); return; }
+  if (action === 'view') { closePersonCardMenu(); openInfoCard(simId); return; }
+  if (action === 'edit') { closePersonCardMenu(); openEditor(simId); return; }
+  if (action === 'locate') { closePersonCardMenu(); focusSimOnCanvas(simId); return; }
   if (action === 'perspective') {
     const same =
       relationshipPerspectiveSimId ===
@@ -10182,7 +10182,7 @@ async function handleNodeContextAction(action, simId) {
         : simId
     );
 
-    closeNodeContextMenu();
+    closePersonCardMenu();
 
     if (!same) {
       focusSimOnCanvas(simId);
@@ -10190,7 +10190,7 @@ async function handleNodeContextAction(action, simId) {
 
     return;
   }
-  if (action === 'clear-selection') { closeNodeContextMenu(); clearNodeSelection(); return; }
+  if (action === 'clear-selection') { closePersonCardMenu(); clearNodeSelection(); return; }
 
   if ([
     'align-left',
@@ -10203,7 +10203,7 @@ async function handleNodeContextAction(action, simId) {
     'distribute-vertical'
   ].includes(action)) {
     applySelectedLayoutOperation(action);
-    closeNodeContextMenu();
+    closePersonCardMenu();
     return;
   }
 
@@ -10221,7 +10221,7 @@ async function handleNodeContextAction(action, simId) {
         );
 
     if (!ids.length) {
-      closeNodeContextMenu();
+      closePersonCardMenu();
       return;
     }
 
@@ -10253,13 +10253,13 @@ async function handleNodeContextAction(action, simId) {
       )
     });
 
-    closeNodeContextMenu();
+    closePersonCardMenu();
     return;
   }
   if (action === 'remove-selected') {
     const fam = currentFamily();
     const ids = [...selectedNodeIds].filter(id => fam.memberIds.includes(id));
-    if (!ids.length) { closeNodeContextMenu(); return; }
+    if (!ids.length) { closePersonCardMenu(); return; }
     const ok = await uiConfirm(`${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`, {
       title: uiText('移出所選人物'), kind: 'danger', confirmText: uiText('移出家族')
     });
@@ -10272,24 +10272,24 @@ async function handleNodeContextAction(action, simId) {
 
     clearNodeSelection();
     applyGenealogyMutation(mutation);
-    closeNodeContextMenu();
+    closePersonCardMenu();
   }
 }
 
-nodeContextMenu?.addEventListener('click', e => {
-  const actionBtn = e.target.closest('[data-node-context-action]');
+personCardMenu?.addEventListener('click', e => {
+  const actionBtn = e.target.closest('[data-person-card-menu-action]');
   if (actionBtn) {
     e.preventDefault(); e.stopPropagation();
-    handleNodeContextAction(actionBtn.dataset.nodeContextAction, nodeContextMenu.dataset.simId);
+    handlePersonCardMenuAction(actionBtn.dataset.personCardMenuAction, personCardMenu.dataset.simId);
   }
 });
-nodeContextMenu?.addEventListener('change', e => {
+personCardMenu?.addEventListener('change', e => {
   const field = e.target?.dataset?.cardField;
   if (field && CARD_SETTING_FIELD_KEYS.includes(field)) {
-    const settings = nodeContextMenu.dataset.cardMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
+    const settings = personCardMenu.dataset.cardMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
     settings[field] = !!e.target.checked;
     save(); render();
-    positionNodeContextMenu(parseFloat(nodeContextMenu.style.left) || 0, parseFloat(nodeContextMenu.style.top) || 0);
+    positionPersonCardMenu(parseFloat(personCardMenu.style.left) || 0, parseFloat(personCardMenu.style.top) || 0);
     return;
   }
   if (e.target?.name === 'nodeCardAppearance') {
@@ -10297,13 +10297,13 @@ nodeContextMenu?.addEventListener('change', e => {
     if (['minimal','translucent','full'].includes(value)) {
       getCardViewSettings().appearance = value;
       save(); render();
-      positionNodeContextMenu(parseFloat(nodeContextMenu.style.left) || 0, parseFloat(nodeContextMenu.style.top) || 0);
+      positionPersonCardMenu(parseFloat(personCardMenu.style.left) || 0, parseFloat(personCardMenu.style.top) || 0);
     }
   }
 });
 
 nodes.addEventListener('contextmenu', e => {
-  const el = e.target.closest('.node[data-id]');
+  const el = e.target.closest('.person-card[data-id]');
   if (!el) return;
   e.preventDefault();
   e.stopPropagation();
@@ -10313,14 +10313,14 @@ nodes.addEventListener('contextmenu', e => {
     selectedNodeIds.add(id);
     syncNodeSelectionClasses();
   }
-  renderNodeContextMenu(id, e.clientX, e.clientY);
+  renderPersonCardMenu(id, e.clientX, e.clientY);
 });
 
 document.addEventListener('pointerdown', e => {
-  if (nodeContextMenu?.classList.contains('show') && !e.target.closest('#personCardContextMenu')) closeNodeContextMenu();
+  if (personCardMenu?.classList.contains('show') && !e.target.closest('#personCardContextMenu')) closePersonCardMenu();
 }, true);
-window.addEventListener('resize', closeNodeContextMenu);
-window.addEventListener('blur', closeNodeContextMenu);
+window.addEventListener('resize', closePersonCardMenu);
+window.addEventListener('blur', closePersonCardMenu);
 
 function updateArrangeToolUI() {
   const fam = genealogyData ? currentFamily() : null;
@@ -10366,7 +10366,7 @@ function setArrangeTool(tool) {
   ) {
     clearNodeSelection();
     finishMarquee();
-    closeNodeContextMenu();
+    closePersonCardMenu();
   }
 
   updateArrangeToolUI();
@@ -10399,7 +10399,7 @@ function updateMarquee(clientX, clientY) {
   selectionMarquee.classList.add('show');
 
   const next = new Set(marqueeState.baseSelection);
-  nodes.querySelectorAll('.node[data-id]').forEach(el => {
+  nodes.querySelectorAll('.person-card[data-id]').forEach(el => {
     const r = el.getBoundingClientRect();
     const intersects = r.right >= leftClient && r.left <= rightClient && r.bottom >= topClient && r.top <= bottomClient;
     if (intersects) next.add(el.dataset.id);
@@ -10422,7 +10422,7 @@ function finishMarquee() {
 let panning = false, panStartX = 0, panStartY = 0, panStartPanX = 0, panStartPanY = 0;
 viewport.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
-  const onNode = !!e.target.closest('.node');
+  const onNode = !!e.target.closest('.person-card');
   const onLabel = !!e.target.closest('.edge-label');
   const fam = currentFamily();
   const isFree = getCurrentFreeLayout(fam);
@@ -10476,7 +10476,7 @@ window.addEventListener('mouseup', () => {
   if (panning) { panning = false; viewport.classList.remove('dragging'); }
 });
 viewport.addEventListener('dblclick', e => {
-  if (e.target.closest('.node')) return;
+  if (e.target.closest('.person-card')) return;
   if (e.target.closest('.edge-label')) return;
 
   e.preventDefault();
@@ -10832,7 +10832,7 @@ nodes.addEventListener('pointerdown', e => {
   // 只讓主滑鼠鍵進入人物卡的點擊／拖曳流程。
   // 右鍵必須完整保留給 contextmenu，避免自由排列模式的 preventDefault() 吃掉右鍵選單。
   if (e.button !== 0) return;
-  const el = e.target.closest('.node');
+  const el = e.target.closest('.person-card');
   if (!el) return;
   const id = el.dataset.id;
   const fam = currentFamily();
@@ -11042,7 +11042,7 @@ nodes.addEventListener('pointerdown', e => {
         dragIds.forEach(sid =>
           nodes
             .querySelector(
-              `.node[data-id="${CSS.escape(sid)}"]`
+              `.person-card[data-id="${CSS.escape(sid)}"]`
             )
             ?.classList
             .add('dragging')
@@ -11081,7 +11081,7 @@ nodes.addEventListener('pointerdown', e => {
 
         const nodeEl =
           nodes.querySelector(
-            `.node[data-id="${CSS.escape(sid)}"]`
+            `.person-card[data-id="${CSS.escape(sid)}"]`
           );
 
         if (nodeEl) {
@@ -11177,7 +11177,7 @@ nodes.addEventListener('pointerdown', e => {
       dragIds.forEach(sid =>
         nodes
           .querySelector(
-            `.node[data-id="${CSS.escape(sid)}"]`
+            `.person-card[data-id="${CSS.escape(sid)}"]`
           )
           ?.classList
           .remove('dragging')
@@ -16753,7 +16753,7 @@ function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
 
   const viewportRect = captureViewport.getBoundingClientRect();
   const content = [
-    ...captureStage.querySelectorAll('.node'),
+    ...captureStage.querySelectorAll('.person-card'),
     ...captureStage.querySelectorAll('#genealogyRelationshipLayer path'),
     ...captureStage.querySelectorAll('#genealogyRelationshipLabelLayer .edge-label')
   ];
@@ -18064,7 +18064,7 @@ Object.assign(EN, {
 
 // 右鍵選單快捷關閉
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && nodeContextMenu?.classList.contains('show')) closeNodeContextMenu();
+  if (e.key === 'Escape' && personCardMenu?.classList.contains('show')) closePersonCardMenu();
 });
 
 Object.assign(ZH_HANS_EXACT, {

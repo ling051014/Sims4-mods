@@ -3701,7 +3701,7 @@ function pairPath(a, b) {
 function commonNodeClasses(c, opts) {
   opts = opts || {};
   return [
-    'node',
+    'person-card',
     opts.viewMode ? 'view' : '',
     genderClass(c),
     statusClass(c),
@@ -3823,8 +3823,8 @@ function drawNodes() {
 
       return `<div class="${cls} mode-view ${appearanceClass}${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-        <div class="n-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
-        ${model.name ? `<div class="n-view-name" title="${esc(model.name)}">${esc(model.name)}</div>` : ''}
+        <div class="person-card-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
+        ${model.name ? `<div class="person-card-view-name" title="${esc(model.name)}">${esc(model.name)}</div>` : ''}
         ${model.primary.map(renderViewCardLine).join('')}
         ${model.details.map(renderViewCardLine).join('')}
       </div>`;
@@ -3833,40 +3833,40 @@ function drawNodes() {
     // 編輯模式有自己的顯示內容設定，不再跟檢視模式同步。
     const editRows = [];
     if (!cardSettings.name && cardSettings.gender) {
-      editRows.push(`<div class="n-edit-meta">${esc(uiText(c.gender || '其他'))}</div>`);
+      editRows.push(`<div class="person-card-edit-meta">${esc(uiText(c.gender || '其他'))}</div>`);
     }
 
     const stageAge = [];
     if (cardSettings.lifeStage) stageAge.push(dStage);
     if (cardSettings.age && c.age != null && c.age !== '') stageAge.push(formatCardAge(c.age));
-    if (stageAge.length) editRows.push(`<div class="n-edit-meta">${esc(stageAge.join(' · '))}</div>`);
+    if (stageAge.length) editRows.push(`<div class="person-card-edit-meta">${esc(stageAge.join(' · '))}</div>`);
 
     if (cardSettings.birthday && c.birthdayMonth && c.birthdayDay) {
-      editRows.push(`<div class="n-edit-meta">${iconSvg('cake2')}<span>${esc(formatBirthdaySummary(c.birthdayMonth, c.birthdayDay, c.birthdayYear))}</span></div>`);
+      editRows.push(`<div class="person-card-edit-meta">${iconSvg('cake2')}<span>${esc(formatBirthdaySummary(c.birthdayMonth, c.birthdayDay, c.birthdayYear))}</span></div>`);
     }
 
     const statusRace = [];
     if (cardSettings.status) statusRace.push(uiText(c.status || '在世'));
     if (cardSettings.race && c.race && RACE_PRESETS[c.race]) statusRace.push(uiText(RACE_PRESETS[c.race].label));
-    if (statusRace.length) editRows.push(`<div class="n-edit-meta">${esc(statusRace.join(' · '))}</div>`);
+    if (statusRace.length) editRows.push(`<div class="person-card-edit-meta">${esc(statusRace.join(' · '))}</div>`);
 
-    if (cardSettings.career && c.career) editRows.push(`<div class="n-edit-meta n-edit-text" title="${esc(dCareer)}">${esc(dCareer)}</div>`);
-    if (cardSettings.residence && c.residence) editRows.push(`<div class="n-residence" title="${esc(dResidence)}">${iconSvg('house')}${esc(dResidence)}</div>`);
-    if (cardSettings.aspiration && c.aspiration) editRows.push(`<div class="n-aspiration" title="${esc(uiText('人生抱負'))}：${esc(dAspiration)}">${iconSvg('bullseye')}${esc(dAspiration)}</div>`);
-    if (cardSettings.traits && dTraits.length) editRows.push(`<div class="n-tags">${buildTagsHTML(c.traits, c)}</div>`);
-    if (cardSettings.pets && (c.pets||[]).length) editRows.push(`<div class="n-pets">${buildPetsChipsHTML(c.pets, c)}</div>`);
-    if (cardSettings.gallery && (c.gallery||[]).length) editRows.push(`<div class="n-gallery-badge" title="${esc(uiText('人生照片'))} ${(c.gallery||[]).length}">${iconSvg('images')} ${(c.gallery||[]).length}</div>`);
+    if (cardSettings.career && c.career) editRows.push(`<div class="person-card-edit-meta person-card-edit-text" title="${esc(dCareer)}">${esc(dCareer)}</div>`);
+    if (cardSettings.residence && c.residence) editRows.push(`<div class="person-card-residence" title="${esc(dResidence)}">${iconSvg('house')}${esc(dResidence)}</div>`);
+    if (cardSettings.aspiration && c.aspiration) editRows.push(`<div class="person-card-aspiration" title="${esc(uiText('人生抱負'))}：${esc(dAspiration)}">${iconSvg('bullseye')}${esc(dAspiration)}</div>`);
+    if (cardSettings.traits && dTraits.length) editRows.push(`<div class="person-card-tags">${buildTagsHTML(c.traits, c)}</div>`);
+    if (cardSettings.pets && (c.pets||[]).length) editRows.push(`<div class="person-card-pets">${buildPetsChipsHTML(c.pets, c)}</div>`);
+    if (cardSettings.gallery && (c.gallery||[]).length) editRows.push(`<div class="person-card-life-photo-badge" title="${esc(uiText('人生照片'))} ${(c.gallery||[]).length}">${iconSvg('images')} ${(c.gallery||[]).length}</div>`);
 
     const configuredEditBody = cardSettingsHasBody(cardSettings);
-    const editBody = configuredEditBody ? `<div class="n-body">
-      ${cardSettings.name ? `<div class="n-name" title="${esc(displayName)}">${esc(displayName)}</div>` : ''}
-      ${editRows.join('') || (cardSettings.name ? '' : `<div class="n-edit-meta">—</div>`)}
+    const editBody = configuredEditBody ? `<div class="person-card-body">
+      ${cardSettings.name ? `<div class="person-card-name" title="${esc(displayName)}">${esc(displayName)}</div>` : ''}
+      ${editRows.join('') || (cardSettings.name ? '' : `<div class="person-card-edit-meta">—</div>`)}
     </div>` : '';
     const avatarOnlyClass = configuredEditBody ? '' : ' card-avatar-only';
 
     return `<div class="${cls} mode-edit${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
       style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-      <div class="n-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
+      <div class="person-card-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
       ${editBody}
     </div>`;
   }).join('');
