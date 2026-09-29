@@ -6,12 +6,35 @@
     const genealogyRuntime = runtime || null;
     const { stage, svg, labelsSvg, nodes } = dom;
     if (!stage || !svg || !labelsSvg || !nodes) throw new Error('Genealogy Scene requires Canvas DOM references.');
-    const { PAD, VIEW_CARD_LAYOUT, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX } = constants;
+    const { PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX } = constants;
+
+    // ========【Scene 卡片幾何】 設定 - 卡片尺寸 / 間距 / 檢視版型由 Scene 唯一持有 ========
+    const NODE_DIMS = Object.freeze({
+      edit:Object.freeze({ W:220, H:148 }),
+      view:Object.freeze({ W:136, H:118 })
+    });
+
+    const GAPS = Object.freeze({
+      edit:Object.freeze({ SPOUSE:30, SIBLING:56, LEVEL:118 }),
+      view:Object.freeze({ SPOUSE:22, SIBLING:40, LEVEL:90 })
+    });
+
+    const VIEW_CARD_LAYOUT = Object.freeze({
+      width:176,
+      avatarSize:76,
+      horizontalPadding:20,
+      topPadding:12,
+      bottomPadding:10,
+      gap:4,
+      nameFontSize:11,
+      metaFontSize:10,
+      nameLineHeight:13.2,
+      metaLineHeight:12.5
+    });
     const { getData, getViewMode, getFamilyTreeViewMode, getShowRelLabels, getRelationshipPerspectiveId, getScale } = state;
     const {
       getCardViewSettings, getCardEditSettings, cardViewAppearanceClass, cardSettingsHasBody,
-      buildViewCardContentModel, renderViewCardLine, getDims, getNodeDimensions, getNodeDimensionsById,
-      getGaps, getCurrentManualPositions, getCurrentFreeLayout, formatCardGender, formatCardAge,
+      buildViewCardContentModel, renderViewCardLine, formatCardGender, formatCardAge,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
@@ -33,6 +56,276 @@
       showRelLabels = getShowRelLabels();
       relationshipPerspectiveSimId = getRelationshipPerspectiveId();
       scale = getScale();
+    }
+
+    function estimateWrappedRows(
+      text,
+      maxWidth,
+      fontSize
+    ) {
+      const value =
+        String(text || '').trim();
+
+      if (!value) return 0;
+
+      return Math.max(
+        1,
+        Math.ceil(
+          measureText(
+            value,
+            fontSize
+          ) /
+          Math.max(
+            24,
+            maxWidth
+          )
+        )
+      );
+    }
+
+    function estimateViewCardHeight(
+      sim,
+      settings
+    ) {
+      const model =
+        buildViewCardContentModel(
+          sim,
+          settings
+        );
+
+      if (!model.hasText) return 100;
+
+      const innerWidth =
+        VIEW_CARD_LAYOUT.width -
+        VIEW_CARD_LAYOUT.horizontalPadding;
+
+      let height =
+        VIEW_CARD_LAYOUT.topPadding +
+        VIEW_CARD_LAYOUT.avatarSize +
+        VIEW_CARD_LAYOUT.gap;
+
+      if (model.name) {
+        height +=
+          estimateWrappedRows(
+            model.name,
+            innerWidth,
+            VIEW_CARD_LAYOUT.nameFontSize
+          ) *
+          VIEW_CARD_LAYOUT.nameLineHeight;
+
+        height +=
+          VIEW_CARD_LAYOUT.gap;
+      }
+
+      [
+        ...model.primary,
+        ...model.details
+      ].forEach(line => {
+        const lineWidth =
+          Math.max(
+            24,
+            innerWidth -
+              (line.icon ? 18 : 0)
+          );
+
+        height +=
+          estimateWrappedRows(
+            line.text,
+            lineWidth,
+            VIEW_CARD_LAYOUT.metaFontSize
+          ) *
+          VIEW_CARD_LAYOUT.metaLineHeight;
+
+        height +=
+          VIEW_CARD_LAYOUT.gap;
+      });
+
+      return Math.max(
+        100,
+        Math.ceil(
+          height +
+          VIEW_CARD_LAYOUT.bottomPadding
+        )
+      );
+    }
+
+    function getViewCardDimensions(
+      settings
+    ) {
+      let maxHeight = 100;
+      let hasVisibleText = false;
+
+      if (
+        genealogyData?.families?.length &&
+        genealogyData?.sims
+      ) {
+        const family =
+          currentFamily();
+
+        const visibleIds =
+          family
+            ? getVisibleIds(
+                family.id
+              )
+            : new Set();
+
+        visibleIds.forEach(id => {
+          const sim =
+            genealogyData.sims[id];
+
+          if (!sim) return;
+
+          const model =
+            buildViewCardContentModel(
+              sim,
+              settings
+            );
+
+          hasVisibleText =
+            hasVisibleText ||
+            model.hasText;
+
+          maxHeight =
+            Math.max(
+              maxHeight,
+              estimateViewCardHeight(
+                sim,
+                settings
+              )
+            );
+        });
+      }
+
+      if (
+        !hasVisibleText &&
+        !cardSettingsHasBody(
+          settings
+        )
+      ) {
+        return {
+          W:100,
+          H:100
+        };
+      }
+
+      return {
+        W:VIEW_CARD_LAYOUT.width,
+        H:maxHeight
+      };
+    }
+
+    function getDims() {
+      if (viewMode === 'edit') {
+        const settings =
+          getCardEditSettings();
+
+        const bodyRows = [
+          settings.name ||
+            settings.gender,
+          settings.lifeStage ||
+            settings.age,
+          settings.birthday,
+          settings.status ||
+            settings.race,
+          settings.career,
+          settings.residence,
+          settings.aspiration,
+          settings.traits,
+          settings.pets,
+          settings.gallery
+        ].filter(Boolean).length;
+
+        if (!bodyRows) {
+          return {
+            W:92,
+            H:92
+          };
+        }
+
+        return {
+          W:NODE_DIMS.edit.W,
+          H:Math.max(
+            98,
+            30 +
+            Math.max(
+              64,
+              bodyRows * 18
+            )
+          )
+        };
+      }
+
+      return getViewCardDimensions(
+        getCardViewSettings()
+      );
+    }
+
+    function getNodeDimensions(
+      sim
+    ) {
+      if (
+        viewMode === 'view' &&
+        sim
+      ) {
+        return {
+          W:VIEW_CARD_LAYOUT.width,
+          H:estimateViewCardHeight(
+            sim,
+            getCardViewSettings()
+          )
+        };
+      }
+
+      return getDims();
+    }
+
+    function getNodeDimensionsById(
+      id
+    ) {
+      return getNodeDimensions(
+        id &&
+        genealogyData?.sims
+          ? genealogyData.sims[id]
+          : null
+      );
+    }
+
+    function getGaps() {
+      return (
+        GAPS[viewMode] ||
+        GAPS.view
+      );
+    }
+
+    function getCurrentManualPositions(
+      fam
+    ) {
+      if (!fam?.manualPositions) {
+        return {};
+      }
+
+      return (
+        fam.manualPositions[
+          viewMode
+        ] ||
+        {}
+      );
+    }
+
+    function getCurrentFreeLayout(
+      fam
+    ) {
+      if (
+        !fam?.freeLayout ||
+        typeof fam.freeLayout !==
+          'object'
+      ) {
+        return false;
+      }
+
+      return !!fam.freeLayout[
+        viewMode
+      ];
     }
 function relationshipCurveFactor(value) {
   const percent =
@@ -4342,6 +4635,9 @@ function expandStageToFit() {
       buildDragPerformanceGeometry:withState(buildDragPerformanceGeometry),
       buildSingleDragRelationshipTargets:withState(buildSingleDragRelationshipTargets),
       expandStageToFit:withState(expandStageToFit),
+      getNodeDimensions:withState(getNodeDimensions),
+      getNodeDimensionsById:withState(getNodeDimensionsById),
+      getCurrentFreeLayout:withState(getCurrentFreeLayout),
       getGenerationLevels,
       syncStageGeometry:withState(syncStageGeometryFromLayout)
     });

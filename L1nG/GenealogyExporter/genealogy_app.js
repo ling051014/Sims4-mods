@@ -6,16 +6,6 @@
  */
 
 
-const NODE_DIMS = {
-  // 編輯模式保留較大的管理卡，檢視模式則維持精簡卡。
-  edit: { W: 220, H: 148 },
-  view: { W: 136, H: 118 }
-};
-const GAPS = {
-  edit: { SPOUSE: 30, SIBLING: 56, LEVEL: 118 },
-  view: { SPOUSE: 22, SIBLING: 40, LEVEL: 90 }
-};
-
 const PAD = 80;
 const STORE_KEY = 'l1ng_genealogy_v1';
 const THEME_KEY = 'l1ng_genealogy_theme_v1';
@@ -1027,20 +1017,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
   };
 }
 
-// ========【檢視卡片內容模型】 設定 - 版型與外觀分離，render / 尺寸計算共用同一份資料 ========
-const VIEW_CARD_LAYOUT = Object.freeze({
-  width:176,
-  avatarSize:76,
-  horizontalPadding:20,
-  topPadding:12,
-  bottomPadding:10,
-  gap:4,
-  nameFontSize:11,
-  metaFontSize:10,
-  nameLineHeight:13.2,
-  metaLineHeight:12.5
-});
-
+// ========【檢視卡片內容模型】 設定 - 卡片內容由 App 提供；版型與幾何由 Scene 負責 ========
 function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
   const presentation =
     buildPersonPresentation(sim);
@@ -1225,183 +1202,6 @@ function renderViewCardLine(line) {
   return `<div class="${className}"${title}>${body}</div>`;
 }
 
-function estimateWrappedRows(text, maxWidth, fontSize) {
-  const value = String(text || '').trim();
-  if (!value) return 0;
-
-  return Math.max(
-    1,
-    Math.ceil(
-      measureText(value, fontSize) /
-      Math.max(24, maxWidth)
-    )
-  );
-}
-
-function estimateViewCardHeight(sim, settings) {
-  const model = buildViewCardContentModel(sim, settings);
-  if (!model.hasText) return 100;
-
-  const innerWidth =
-    VIEW_CARD_LAYOUT.width -
-    VIEW_CARD_LAYOUT.horizontalPadding;
-
-  let height =
-    VIEW_CARD_LAYOUT.topPadding +
-    VIEW_CARD_LAYOUT.avatarSize +
-    VIEW_CARD_LAYOUT.gap;
-
-  if (model.name) {
-    height +=
-      estimateWrappedRows(
-        model.name,
-        innerWidth,
-        VIEW_CARD_LAYOUT.nameFontSize
-      ) *
-      VIEW_CARD_LAYOUT.nameLineHeight;
-
-    height += VIEW_CARD_LAYOUT.gap;
-  }
-
-  [...model.primary, ...model.details].forEach(line => {
-    const lineWidth =
-      Math.max(
-        24,
-        innerWidth - (line.icon ? 18 : 0)
-      );
-
-    height +=
-      estimateWrappedRows(
-        line.text,
-        lineWidth,
-        VIEW_CARD_LAYOUT.metaFontSize
-      ) *
-      VIEW_CARD_LAYOUT.metaLineHeight;
-
-    height += VIEW_CARD_LAYOUT.gap;
-  });
-
-  return Math.max(
-    100,
-    Math.ceil(
-      height +
-      VIEW_CARD_LAYOUT.bottomPadding
-    )
-  );
-}
-
-function getViewCardDimensions(settings) {
-  let maxHeight = 100;
-  let hasVisibleText = false;
-
-  if (genealogyData?.families?.length && genealogyData?.sims) {
-    const family = currentFamily();
-    const visibleIds = family
-      ? getVisibleIds(family.id)
-      : new Set();
-
-    visibleIds.forEach(id => {
-      const sim = genealogyData.sims[id];
-      if (!sim) return;
-
-      const model =
-        buildViewCardContentModel(
-          sim,
-          settings
-        );
-
-      hasVisibleText =
-        hasVisibleText ||
-        model.hasText;
-
-      maxHeight =
-        Math.max(
-          maxHeight,
-          estimateViewCardHeight(
-            sim,
-            settings
-          )
-        );
-    });
-  }
-
-  if (!hasVisibleText && !cardSettingsHasBody(settings)) {
-    return { W:100, H:100 };
-  }
-
-  return {
-    W:VIEW_CARD_LAYOUT.width,
-    H:maxHeight
-  };
-}
-
-function getDims() {
-  if (viewMode === 'edit') {
-    const settings = getCardEditSettings();
-    const bodyRows = [
-      settings.name || settings.gender,
-      settings.lifeStage || settings.age,
-      settings.birthday,
-      settings.status || settings.race,
-      settings.career,
-      settings.residence,
-      settings.aspiration,
-      settings.traits,
-      settings.pets,
-      settings.gallery
-    ].filter(Boolean).length;
-
-    if (!bodyRows) return { W:92, H:92 };
-
-    return {
-      W:NODE_DIMS.edit.W,
-      H:Math.max(
-        98,
-        30 + Math.max(64, bodyRows * 18)
-      )
-    };
-  }
-
-  return getViewCardDimensions(
-    getCardViewSettings()
-  );
-}
-
-// ========【單張卡片尺寸】 設定 - 檢視卡依自己的內容增高；全域高度只保留給世代安全間距 ========
-function getNodeDimensions(sim) {
-  if (viewMode === 'view' && sim) {
-    return {
-      W:VIEW_CARD_LAYOUT.width,
-      H:estimateViewCardHeight(
-        sim,
-        getCardViewSettings()
-      )
-    };
-  }
-
-  return getDims();
-}
-
-function getNodeDimensionsById(id) {
-  return getNodeDimensions(
-    id && genealogyData && genealogyData.sims
-      ? genealogyData.sims[id]
-      : null
-  );
-}
-
-function getGaps() {
-  return GAPS[viewMode] || GAPS.view;
-}
-
-function getCurrentManualPositions(fam) {
-  if (!fam.manualPositions) return {};
-  return fam.manualPositions[viewMode] || {};
-}
-function getCurrentFreeLayout(fam) {
-  if (!fam.freeLayout || typeof fam.freeLayout !== 'object') return false;
-  return !!fam.freeLayout[viewMode];
-}
 function ensureFamilyLayoutShape(fam) {
   return !!(
     fam &&
@@ -7968,7 +7768,7 @@ genealogyScene =
   window.L1nGGenealogyScene?.create?.({
     runtime:genealogyRuntime,
     dom:{ stage, svg, labelsSvg, nodes },
-    constants:{ PAD, VIEW_CARD_LAYOUT, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX },
+    constants:{ PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX },
     state:{
       getData:() => genealogyData,
       getViewMode:() => viewMode,
@@ -7979,8 +7779,7 @@ genealogyScene =
     },
     helpers:{
       getCardViewSettings, getCardEditSettings, cardViewAppearanceClass, cardSettingsHasBody,
-      buildViewCardContentModel, renderViewCardLine, getDims, getNodeDimensions, getNodeDimensionsById,
-      getGaps, getCurrentManualPositions, getCurrentFreeLayout, formatCardGender, formatCardAge,
+      buildViewCardContentModel, renderViewCardLine, formatCardGender, formatCardAge,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
@@ -8211,7 +8010,7 @@ function focusSimOnCanvas(simId) {
   if (!getSceneLayout() || !getSceneLayout().pos?.has(simId)) render();
   const pos = getSceneLayout()?.pos?.get(simId);
   if (!pos) return;
-  const { W, H } = getNodeDimensions(genealogyData.sims[simId]);
+  const { W, H } = genealogyScene.getNodeDimensions(genealogyData.sims[simId]);
   // 尋找人物屬於使用者主動移動畫布，viewport 改變後保留目前世界中心。
   canvasViewState = 'manual';
 
@@ -9743,7 +9542,7 @@ function clearNodeSelection() {
 }
 
 function selectVisibleNodes() {
-  if (!getSceneLayout() || !getCurrentFreeLayout(currentFamily()) || arrangeTool !== 'select') return;
+  if (!getSceneLayout() || !genealogyScene.getCurrentFreeLayout(currentFamily()) || arrangeTool !== 'select') return;
   selectedNodeIds.clear();
   getSceneLayout().visibleIds.forEach(id => selectedNodeIds.add(id));
   syncNodeSelectionClasses();
@@ -9782,7 +9581,7 @@ function getLayoutNodeBox(id, position = null) {
 
   if (!pos) return null;
 
-  const dims = getNodeDimensionsById(id);
+  const dims = genealogyScene.getNodeDimensionsById(id);
 
   return {
     id,
@@ -10214,7 +10013,7 @@ nodes.addEventListener('contextmenu', e => {
   e.preventDefault();
   e.stopPropagation();
   const id = el.dataset.id;
-  if (getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select' && !selectedNodeIds.has(id)) {
+  if (genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select' && !selectedNodeIds.has(id)) {
     selectedNodeIds.clear();
     selectedNodeIds.add(id);
     syncNodeSelectionClasses();
@@ -10230,7 +10029,7 @@ window.addEventListener('blur', closePersonCardMenu);
 
 function updateArrangeToolUI() {
   const fam = genealogyData ? currentFamily() : null;
-  const isFree = !!fam && getCurrentFreeLayout(fam);
+  const isFree = !!fam && genealogyScene.getCurrentFreeLayout(fam);
   const display = isFree ? '' : 'none';
   if (selectToolBtn) selectToolBtn.style.display = display;
   if (panToolBtn) panToolBtn.style.display = display;
@@ -10287,7 +10086,7 @@ function isTextInteractionTarget(target) {
 
 function isPanGestureActive() {
   const fam = genealogyData ? currentFamily() : null;
-  return !!fam && getCurrentFreeLayout(fam) && (arrangeTool === 'pan' || spacePanHeld);
+  return !!fam && genealogyScene.getCurrentFreeLayout(fam) && (arrangeTool === 'pan' || spacePanHeld);
 }
 
 function updateMarquee(clientX, clientY) {
@@ -10331,7 +10130,7 @@ viewport.addEventListener('mousedown', e => {
   const onNode = !!e.target.closest('.person-card');
   const onLabel = !!e.target.closest('.edge-label');
   const fam = currentFamily();
-  const isFree = getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.getCurrentFreeLayout(fam);
 
   // 自由排列的框選會 preventDefault()，可能吃掉瀏覽器原生 dblclick。
   // 第二次按下空白畫布時直接執行置中，確保所有排列模式都一致。
@@ -10735,7 +10534,7 @@ nodes.addEventListener('pointerdown', e => {
   const id = el.dataset.id;
   const fam = currentFamily();
   ensureFamilyLayoutShape(fam);
-  const isFree = getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.getCurrentFreeLayout(fam);
 
   // Space 是選取工具中的暫時平移：不攔截，交給 viewport 的平移手勢。
   if (isFree && spacePanHeld) return;
@@ -11431,7 +11230,7 @@ nodes.addEventListener('pointerdown', e => {
 
 function updateLayoutToggle() {
   const fam = currentFamily();
-  const isFree = getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.getCurrentFreeLayout(fam);
   const btn = $('layoutToggle'), lockBtn = $('lockToggle');
   if (isFree) {
     setIconText(btn, 'arrows-move', '自由排列');
@@ -11500,7 +11299,7 @@ $('layoutToggle').onclick = () => {
 
 $('lockToggle').onclick = () => {
   const fam = currentFamily();
-  if (!getCurrentFreeLayout(fam)) return;
+  if (!genealogyScene.getCurrentFreeLayout(fam)) return;
 
   const mutation =
     genealogyStore.setFamilyLocked(
@@ -15814,13 +15613,13 @@ document.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   const modifier = e.ctrlKey || e.metaKey;
 
-  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
+  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
     spacePanHeld = true;
     updateArrangeToolUI();
     e.preventDefault();
   }
 
-  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
+  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
     selectVisibleNodes();
     e.preventDefault();
     return;
