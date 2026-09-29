@@ -568,15 +568,19 @@ let avatarCropNaturalSize = { width:0, height:0 };
 let avatarCropRenderMetrics = null;
 
 let editingGallery = [];
-let editingPhotoIndex = -1;
-let editingPhotoImageRef = '';
-let editingPhotoSizeKB = 0;
-let editingPhotoOriginal = false;
-
-/* ========【人生照片檢視】 設定 - 只切換目前人物的人生照片 ======== */
-let viewerMode = 'edit';
-let viewerSimId = null;
-let viewerIndex = 0;
+const lifePhotoState = {
+  editor:{
+    index:-1,
+    imageRef:'',
+    sizeKB:0,
+    isOriginal:false
+  },
+  viewer:{
+    mode:'draft',
+    simId:null,
+    index:0
+  }
+};
 
 // ========【圖片資產權威層】 設定 - genealogy.js 只保存 assetId；Blob / SHA-256 / Lazy URL 由獨立模組管理 ========
 const assetStore = window.L1nGGenealogyAssets;
@@ -699,7 +703,7 @@ function scheduleResolvedAssetRefresh(
         photoMask?.classList.contains('show') &&
         resolved.some(
           ([id]) =>
-            id === editingPhotoImageRef
+            id === lifePhotoState.editor.imageRef
         )
       ){
         updatePhotoPreview();
@@ -714,7 +718,7 @@ function scheduleResolvedAssetRefresh(
           getViewerGallery();
 
         const active =
-          gallery?.[viewerIndex];
+          gallery?.[lifePhotoState.viewer.index];
 
         if(
           active?.image &&
@@ -6624,11 +6628,11 @@ function closeTopModal() {
       if (id === 'mask') { editingId=null; editingAvatar=null; editingAvatarFrame={...DEFAULT_AVATAR_FRAME}; editingPets=[]; editingGallery=[]; editingParentKinds.clear(); editingChildKinds.clear(); }
       if (id === 'petMask') { editingPetIndex=-1; editingPetAvatar=null; editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME}; }
       if (id === 'avatarCropMask') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
-      if (id === 'photoMask') { editingPhotoIndex = -1; editingPhotoImageRef = ''; }
+      if (id === 'photoMask') { lifePhotoState.editor.index = -1; lifePhotoState.editor.imageRef = ''; }
       if (id === 'infoMask') infoCardId = null;
       if (id === 'galleryViewerMask') {
-        viewerSimId = null;
-        viewerMode = 'edit';
+        lifePhotoState.viewer.simId = null;
+        lifePhotoState.viewer.mode = 'draft';
       }
       return true;
     }
@@ -8078,7 +8082,7 @@ function infoCardDataText(value,owner,draft=false){
     const galleryItems=(c.gallery||[]).slice(0,8).map((g,i)=>{const url=resolveImageUrl(g.image);const assetId=isAssetId(g.image)?String(g.image):'';return`<div class="gallery-item" data-info-gallery-idx="${i}" title="${esc(g.title||'')}">${assetId?`<img data-asset-id="${esc(assetId)}"${url?` src="${esc(url)}"`:''} alt="" loading="lazy" decoding="async">`:''}</div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
     sections.push(`<section class="info-profile-section"><div class="info-card-media"><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('寵物'))}</span><span class="info-card-media-count">${(c.pets||[]).length}</span></div><div class="info-card-pets">${petItems}</div></div><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('人生照片'))}</span><span class="info-card-media-count">${(c.gallery||[]).length}</span></div><div class="info-card-gallery">${galleryItems}</div></div></div></section>`);
     container.innerHTML=`<div class="info-card-header"><div class="${avatarClass}">${avatar}</div><div class="info-card-header-text"><div class="info-card-name-row"><span class="info-card-name">${esc(dName||'—')}</span></div><div class="info-card-meta">${metaItems.join('')}</div><div class="info-card-head-facts">${headFacts.join('')}</div></div></div><div class="info-card-body">${sections.join('')}</div>`;
-    container.querySelectorAll('[data-info-gallery-idx]').forEach(element=>{element.onclick=()=>{const index=Number(element.dataset.infoGalleryIdx);if(typeof options.onGallery==='function')options.onGallery(index);else if(c.id&&genealogyData?.sims?.[c.id])openGalleryViewer(c.id,index);};});
+    container.querySelectorAll('[data-info-gallery-idx]').forEach(element=>{element.onclick=()=>{const index=Number(element.dataset.infoGalleryIdx);if(typeof options.onGallery==='function')options.onGallery(index);else if(c.id&&genealogyData?.sims?.[c.id])lifePhotoWorkspace.openSavedViewer(c.id,index);};});
   }
   function openInfoCard(id){
     const c=genealogyData.sims[id];
@@ -8097,354 +8101,518 @@ $('infoEditBtn').onclick = () => {
   const id = infoCardId; closeInfoCard(); if (id) openEditor(id);
 };
 
-function renderGalleryGrid() {
-  if (!galleryGrid) return;
-  if (!editingGallery.length) {
-    galleryGrid.innerHTML = '<div class="gallery-empty" style="grid-column:1/-1;">尚未新增人生照片</div>';
-    return;
-  }
-  galleryGrid.innerHTML = editingGallery.map((g, i) => {
-    const stageTag = g.lifeStage
-      ? `<span class="gallery-item-stage stage-${g.lifeStage}">${esc(g.lifeStage)}</span>`
+const lifePhotoWorkspace = {
+  currentEditorEntry() {
+    const index = lifePhotoState.editor.index;
+    return index >= 0 && editingGallery[index]
+      ? editingGallery[index]
+      : null;
+  },
+
+  resetEditorState() {
+    lifePhotoState.editor.index = -1;
+    lifePhotoState.editor.imageRef = '';
+    lifePhotoState.editor.sizeKB = 0;
+    lifePhotoState.editor.isOriginal = false;
+  },
+
+  fillEditorFields(entry = null) {
+    $('phTitle').value = entry?.title || '';
+    $('phNote').value = entry?.note || '';
+    $('phStage').value = entry?.lifeStage || '';
+  },
+
+  refreshPreview() {
+    const preview = $('photoPreview');
+    const imageRef = lifePhotoState.editor.imageRef;
+    const assetId = isAssetId(imageRef)
+      ? String(imageRef)
       : '';
-    const title = g.title ? esc(g.title) : '';
-    const url = resolveImageUrl(g.image);
-    const assetId = isAssetId(g.image) ? String(g.image) : '';
-    return `<div class="gallery-item" data-gallery-idx="${i}">
-      ${assetId ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" draggable="false" loading="lazy" decoding="async">` : ''}
-      ${stageTag}
-      <div class="gallery-item-overlay">
-        <button type="button" class="gallery-item-btn" data-gallery-edit="${i}" title="編輯">${iconSvg('pencil-square')}</button>
-        <button type="button" class="gallery-item-btn danger" data-gallery-del="${i}" title="刪除">${iconSvg('trash3')}</button>
-      </div>
-      ${title ? `<div class="gallery-item-title">${title}</div>` : ''}
-    </div>`;
-  }).join('');
+    const url = resolveImageUrl(imageRef);
 
-  galleryGrid.querySelectorAll('.gallery-item').forEach(el => {
-    el.onclick = e => {
-      if (e.target.closest('.gallery-item-btn')) return;
-      openGalleryViewerPreview(+el.dataset.galleryIdx);
-    };
-  });
-  galleryGrid.querySelectorAll('[data-gallery-edit]').forEach(btn => {
-    btn.onclick = e => { e.stopPropagation(); openPhotoEditor(+btn.dataset.galleryEdit); };
-  });
-  galleryGrid.querySelectorAll('[data-gallery-del]').forEach(btn => {
-    btn.onclick = async e => {
-      e.stopPropagation();
-      const i = +btn.dataset.galleryDel;
-      const g = editingGallery[i];
-      if (!g) return;
-      if (!await uiConfirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`, { title: '刪除圖片', kind: 'danger', confirmText: '刪除' })) return;
-      editingGallery.splice(i, 1);
-      renderGalleryGrid();
-    };
-  });
-}
+    if (assetId) preview.dataset.assetBgId = assetId;
+    else delete preview.dataset.assetBgId;
 
-$('btnAddPhoto').onclick = () => openPhotoEditor(-1);
+    preview.classList.toggle('has-image', !!url);
+    preview.style.backgroundImage =
+      url ? `url("${url}")` : '';
+    preview.textContent =
+      url ? '' : '點選選擇 · 或拖曳 · 或 Ctrl+V 貼上';
 
-galleryGrid.addEventListener('dragover', e => {
-  e.preventDefault(); e.stopPropagation();
-  galleryGrid.classList.add('dragover');
-});
-galleryGrid.addEventListener('dragleave', e => {
-  e.preventDefault(); galleryGrid.classList.remove('dragover');
-});
-galleryGrid.addEventListener('drop', async e => {
-  e.preventDefault(); e.stopPropagation();
-  galleryGrid.classList.remove('dragover');
-  const files = e.dataTransfer.files;
-  if (!files || !files.length) return;
-  for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
-    await handleGalleryFile(file);
-  }
-});
-
-async function handleGalleryFile(file) {
-  try {
-    const result = await compressGalleryImage(file);
-    if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
-      const mb = (result.sizeKB / 1024).toFixed(2);
-      const ok = await uiConfirm(
-        `原始圖片大小約 ${mb} MB。\n\n` +
-        `原始圖片會較快佔用瀏覽器儲存空間。\n\n` +
-        `是否仍要儲存原始圖片？`,
-        { title: '原始圖片容量提醒', confirmText: '仍要儲存' }
-      );
-      if (!ok) return;
-    }
-    editingPhotoImageRef = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
-    editingPhotoSizeKB = result.sizeKB;
-    editingPhotoOriginal = result.isOriginal;
-    openPhotoEditor(-1, true);
-  } catch(err) {
-    uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' });
-  }
-}
-
-function updatePhotoPreview() {
-  const el = $('photoPreview');
-  const assetId =
-    isAssetId(editingPhotoImageRef)
-      ? String(editingPhotoImageRef)
-      : '';
-
-  if (assetId) {
-    el.dataset.assetBgId = assetId;
-  } else {
-    delete el.dataset.assetBgId;
-  }
-
-  const url = resolveImageUrl(editingPhotoImageRef);
-  if (url) {
-    el.classList.add('has-image');
-    el.style.backgroundImage = `url("${url}")`;
-    el.textContent = '';
-  } else {
-    el.classList.remove('has-image');
-    el.style.backgroundImage = '';
-    el.textContent = '點選選擇 · 或拖曳 · 或 Ctrl+V 貼上';
-  }
-  const tip = $('photoSizeTip');
-  if (url) {
-    const kb = editingPhotoSizeKB;
-    const sizeText = kb >= 1024 ? `約 ${(kb/1024).toFixed(2)} MB` : `約 ${kb} KB`;
-    const isLarge = kb > ORIGINAL_WARN_KB && editingPhotoOriginal;
-    tip.textContent = `${editingPhotoOriginal ? '原始圖片' : '壓縮'} · ${sizeText}`;
-    tip.classList.toggle('warn', isLarge);
-  } else {
-    tip.textContent = '';
-    tip.classList.remove('warn');
-  }
-}
-
-function openPhotoEditor(index, fromDrop = false) {
-  editingPhotoIndex = (typeof index === 'number') ? index : -1;
-  const p = editingPhotoIndex >= 0 ? editingGallery[editingPhotoIndex] : null;
-  $('photoModalTitle').textContent = editingPhotoIndex >= 0 ? '編輯圖片' : '新增圖片';
-  if (editingPhotoIndex >= 0 && !fromDrop) {
-    editingPhotoImageRef = p.image || '';
-    const url = resolveImageUrl(editingPhotoImageRef);
-    editingPhotoSizeKB = Math.round((url||'').length * 0.75 / 1024);
-    editingPhotoOriginal = false;
-    $('phTitle').value = p.title || '';
-    $('phNote').value = p.note || '';
-    $('phStage').value = p.lifeStage || '';
-  } else if (!fromDrop) {
-    editingPhotoImageRef = '';
-    editingPhotoSizeKB = 0;
-    editingPhotoOriginal = false;
-    $('phTitle').value = '';
-    $('phNote').value = '';
-    $('phStage').value = '';
-  } else {
-    $('phTitle').value = '';
-    $('phNote').value = '';
-    $('phStage').value = '';
-  }
-  $('phDelete').style.display = editingPhotoIndex >= 0 ? '' : 'none';
-  updatePhotoPreview();
-  photoMask.classList.add('show');
-  setTimeout(() => $('phTitle').focus(), 60);
-}
-
-function closePhotoEditor() {
-  photoMask.classList.remove('show');
-  editingPhotoIndex = -1;
-  editingPhotoImageRef = '';
-  editingPhotoSizeKB = 0;
-  editingPhotoOriginal = false;
-}
-
-function savePhoto() {
-  if (!editingPhotoImageRef) { uiAlert('請先選擇一張圖片', { title: '尚未選擇圖片' }); return; }
-  const data = {
-    id: (editingPhotoIndex >= 0 && editingGallery[editingPhotoIndex])
-      ? editingGallery[editingPhotoIndex].id
-      : uid('gal'),
-    title: $('phTitle').value.trim(),
-    note: $('phNote').value.trim(),
-    lifeStage: $('phStage').value,
-    image: editingPhotoImageRef,
-    addedAt: (editingPhotoIndex >= 0 && editingGallery[editingPhotoIndex])
-      ? editingGallery[editingPhotoIndex].addedAt
-      : Date.now()
-  };
-  if (editingPhotoIndex >= 0) editingGallery[editingPhotoIndex] = data;
-  else editingGallery.push(data);
-  renderGalleryGrid();
-  closePhotoEditor();
-}
-
-async function deletePhotoFromEditor() {
-  if (editingPhotoIndex < 0) return;
-  const g = editingGallery[editingPhotoIndex];
-  if (!g) return;
-  if (!await uiConfirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`, { title: '刪除圖片', kind: 'danger', confirmText: '刪除' })) return;
-  editingGallery.splice(editingPhotoIndex, 1);
-  renderGalleryGrid();
-  closePhotoEditor();
-}
-
-$('phSave').onclick = savePhoto;
-$('phCancel').onclick = closePhotoEditor;
-$('phDelete').onclick = deletePhotoFromEditor;
-photoMask.onclick = e => { if (e.target === photoMask) closePhotoEditor(); };
-
-$('photoPreview').onclick = () => $('photoInput').click();
-$('photoInput').onchange = async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const result = await compressGalleryImage(file);
-    if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
-      const mb = (result.sizeKB / 1024).toFixed(2);
-      const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
-      if (!ok) { e.target.value = ''; return; }
-    }
-    editingPhotoImageRef = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
-    editingPhotoSizeKB = result.sizeKB;
-    editingPhotoOriginal = result.isOriginal;
-    updatePhotoPreview();
-  } catch(err) {
-    uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' });
-  }
-  e.target.value = '';
-};
-$('photoClearBtn').onclick = () => {
-  editingPhotoImageRef = '';
-  editingPhotoSizeKB = 0;
-  editingPhotoOriginal = false;
-  updatePhotoPreview();
-};
-
-document.addEventListener('paste', async e => {
-  if (!photoMask.classList.contains('show')) return;
-  const items = e.clipboardData && e.clipboardData.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      e.preventDefault();
-      const file = item.getAsFile();
-      if (!file) continue;
-      try {
-        const result = await compressGalleryImage(file);
-        if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
-          const mb = (result.sizeKB / 1024).toFixed(2);
-          const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
-          if (!ok) return;
-        }
-        editingPhotoImageRef = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
-        editingPhotoSizeKB = result.sizeKB;
-        editingPhotoOriginal = result.isOriginal;
-        updatePhotoPreview();
-      } catch(err){ uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
+    const tip = $('photoSizeTip');
+    if (!url) {
+      tip.textContent = '';
+      tip.classList.remove('warn');
       return;
     }
+
+    const sizeKB = Math.max(
+      0,
+      Number(lifePhotoState.editor.sizeKB) || 0
+    );
+    const sizeText = sizeKB >= 1024
+      ? `約 ${(sizeKB / 1024).toFixed(2)} MB`
+      : `約 ${Math.round(sizeKB)} KB`;
+
+    tip.textContent =
+      `${lifePhotoState.editor.isOriginal ? '原始圖片' : '壓縮'} · ${sizeText}`;
+    tip.classList.toggle(
+      'warn',
+      lifePhotoState.editor.isOriginal &&
+      sizeKB > ORIGINAL_WARN_KB
+    );
+  },
+
+  openEditor(index = -1, { keepPreparedImage = false } = {}) {
+    const validIndex =
+      Number.isInteger(index) &&
+      index >= 0 &&
+      !!editingGallery[index];
+
+    lifePhotoState.editor.index =
+      validIndex ? index : -1;
+
+    const entry =
+      validIndex ? editingGallery[index] : null;
+
+    if (!keepPreparedImage) {
+      lifePhotoState.editor.imageRef =
+        entry?.image || '';
+
+      const url =
+        resolveImageUrl(lifePhotoState.editor.imageRef);
+
+      lifePhotoState.editor.sizeKB =
+        url
+          ? Math.round(url.length * 0.75 / 1024)
+          : 0;
+
+      lifePhotoState.editor.isOriginal = false;
+    }
+
+    this.fillEditorFields(entry);
+    $('photoModalTitle').textContent =
+      entry ? '編輯圖片' : '新增圖片';
+    $('phDelete').style.display =
+      entry ? '' : 'none';
+
+    this.refreshPreview();
+    photoMask.classList.add('show');
+    setTimeout(() => $('phTitle').focus(), 60);
+  },
+
+  closeEditor() {
+    photoMask.classList.remove('show');
+    this.resetEditorState();
+  },
+
+  commitEditor() {
+    if (!lifePhotoState.editor.imageRef) {
+      uiAlert(
+        '請先選擇一張圖片',
+        { title:'尚未選擇圖片' }
+      );
+      return;
+    }
+
+    const previous = this.currentEditorEntry();
+    const entry = {
+      id:previous?.id || uid('photo'),
+      title:$('phTitle').value.trim(),
+      note:$('phNote').value.trim(),
+      lifeStage:$('phStage').value,
+      image:lifePhotoState.editor.imageRef,
+      addedAt:previous?.addedAt || Date.now()
+    };
+
+    if (previous) {
+      editingGallery[lifePhotoState.editor.index] = entry;
+    } else {
+      editingGallery.push(entry);
+    }
+
+    this.renderList();
+    this.closeEditor();
+  },
+
+  async deleteEditorEntry() {
+    const entry = this.currentEditorEntry();
+    if (!entry) return;
+
+    const confirmed = await uiConfirm(
+      `確定刪除圖片「${entry.title || '未命名'}」嗎？`,
+      {
+        title:'刪除圖片',
+        kind:'danger',
+        confirmText:'刪除'
+      }
+    );
+    if (!confirmed) return;
+
+    editingGallery.splice(
+      lifePhotoState.editor.index,
+      1
+    );
+    this.renderList();
+    this.closeEditor();
+  },
+
+  async prepareFile(file, { openEditor = false } = {}) {
+    const result = await compressGalleryImage(file);
+
+    if (
+      result.isOriginal &&
+      result.sizeKB > ORIGINAL_WARN_KB
+    ) {
+      const confirmed = await uiConfirm(
+        `原始圖片大小約 ${(result.sizeKB / 1024).toFixed(2)} MB。\n\n原始圖片會較快佔用瀏覽器儲存空間。\n\n是否仍要儲存原始圖片？`,
+        {
+          title:'原始圖片容量提醒',
+          confirmText:'仍要儲存'
+        }
+      );
+      if (!confirmed) return false;
+    }
+
+    lifePhotoState.editor.imageRef =
+      await saveImageAsset(
+        result.blob,
+        {
+          width:result.width,
+          height:result.height
+        }
+      );
+    lifePhotoState.editor.sizeKB = result.sizeKB;
+    lifePhotoState.editor.isOriginal = result.isOriginal;
+
+    if (openEditor) {
+      this.openEditor(
+        -1,
+        { keepPreparedImage:true }
+      );
+    } else {
+      this.refreshPreview();
+    }
+    return true;
+  },
+
+  clearPreparedImage() {
+    lifePhotoState.editor.imageRef = '';
+    lifePhotoState.editor.sizeKB = 0;
+    lifePhotoState.editor.isOriginal = false;
+    this.refreshPreview();
+  },
+
+  renderList() {
+    if (!galleryGrid) return;
+
+    if (!editingGallery.length) {
+      galleryGrid.innerHTML =
+        '<div class="gallery-empty" style="grid-column:1/-1;">尚未新增人生照片</div>';
+      return;
+    }
+
+    galleryGrid.innerHTML =
+      editingGallery
+        .map((entry, index) => {
+          const stage = entry.lifeStage
+            ? `<span class="gallery-item-stage stage-${esc(entry.lifeStage)}">${esc(entry.lifeStage)}</span>`
+            : '';
+          const title = entry.title
+            ? `<div class="gallery-item-title">${esc(entry.title)}</div>`
+            : '';
+          const assetId = isAssetId(entry.image)
+            ? String(entry.image)
+            : '';
+          const url = resolveImageUrl(entry.image);
+
+          return `
+            <div class="gallery-item" data-life-photo-index="${index}">
+              ${assetId ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" draggable="false" loading="lazy" decoding="async">` : ''}
+              ${stage}
+              <div class="gallery-item-overlay">
+                <button type="button" class="gallery-item-btn" data-life-photo-action="edit" data-life-photo-index="${index}" title="編輯">${iconSvg('pencil-square')}</button>
+                <button type="button" class="gallery-item-btn danger" data-life-photo-action="delete" data-life-photo-index="${index}" title="刪除">${iconSvg('trash3')}</button>
+              </div>
+              ${title}
+            </div>
+          `;
+        })
+        .join('');
+
+    galleryGrid
+      .querySelectorAll('.gallery-item[data-life-photo-index]')
+      .forEach(card => {
+        card.addEventListener('click', event => {
+          if (event.target.closest('[data-life-photo-action]')) return;
+          this.openDraftViewer(
+            Number(card.dataset.lifePhotoIndex)
+          );
+        });
+      });
+
+    galleryGrid
+      .querySelectorAll('[data-life-photo-action="edit"]')
+      .forEach(button => {
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          this.openEditor(
+            Number(button.dataset.lifePhotoIndex)
+          );
+        });
+      });
+
+    galleryGrid
+      .querySelectorAll('[data-life-photo-action="delete"]')
+      .forEach(button => {
+        button.addEventListener('click', async event => {
+          event.stopPropagation();
+          const index =
+            Number(button.dataset.lifePhotoIndex);
+          const entry = editingGallery[index];
+          if (!entry) return;
+
+          const confirmed = await uiConfirm(
+            `確定刪除圖片「${entry.title || '未命名'}」嗎？`,
+            {
+              title:'刪除圖片',
+              kind:'danger',
+              confirmText:'刪除'
+            }
+          );
+          if (!confirmed) return;
+
+          editingGallery.splice(index, 1);
+          this.renderList();
+        });
+      });
+  },
+
+  viewerGallery() {
+    if (
+      lifePhotoState.viewer.mode === 'saved' &&
+      lifePhotoState.viewer.simId
+    ) {
+      return (
+        genealogyData.sims[
+          lifePhotoState.viewer.simId
+        ]?.gallery || []
+      );
+    }
+    return editingGallery;
+  },
+
+  openDraftViewer(index) {
+    if (!editingGallery[index]) return;
+
+    lifePhotoState.viewer.mode = 'draft';
+    lifePhotoState.viewer.simId = null;
+    lifePhotoState.viewer.index = index;
+
+    $('gvPersonName').textContent =
+      $('fName')?.value?.trim() ||
+      uiText('人物');
+
+    this.refreshViewer();
+    galleryViewerMask.classList.add('show');
+  },
+
+  openSavedViewer(simId, index) {
+    const sim = genealogyData.sims[simId];
+    if (!sim) return;
+
+    lifePhotoState.viewer.mode = 'saved';
+    lifePhotoState.viewer.simId = simId;
+    lifePhotoState.viewer.index = index;
+
+    $('gvPersonName').textContent =
+      displayDataText(sim.name, sim) ||
+      uiText('人物');
+
+    this.refreshViewer();
+    galleryViewerMask.classList.add('show');
+  },
+
+  refreshViewer() {
+    const gallery = this.viewerGallery();
+    if (!gallery.length) return;
+
+    lifePhotoState.viewer.index =
+      Math.max(
+        0,
+        Math.min(
+          gallery.length - 1,
+          lifePhotoState.viewer.index
+        )
+      );
+
+    const entry =
+      gallery[lifePhotoState.viewer.index];
+    const image = $('gvImg');
+    const assetId = isAssetId(entry.image)
+      ? String(entry.image)
+      : '';
+    const url = resolveImageUrl(entry.image);
+
+    if (assetId) image.dataset.assetId = assetId;
+    else delete image.dataset.assetId;
+
+    if (url) image.src = url;
+    else image.removeAttribute('src');
+
+    $('gvTitle').textContent =
+      entry.title || uiText('（未命名）');
+
+    const details = [];
+    if (entry.lifeStage) {
+      details.push(uiText(entry.lifeStage));
+    }
+    if (entry.note) details.push(entry.note);
+
+    $('gvNote').textContent = details.join(' · ');
+    $('gvCounter').textContent =
+      `${lifePhotoState.viewer.index + 1} / ${gallery.length}`;
+
+    const single = gallery.length <= 1;
+    $('gvPrev').disabled = single;
+    $('gvNext').disabled = single;
+  },
+
+  moveViewer(delta) {
+    const gallery = this.viewerGallery();
+    if (gallery.length <= 1) return;
+
+    lifePhotoState.viewer.index =
+      (
+        lifePhotoState.viewer.index +
+        delta +
+        gallery.length
+      ) % gallery.length;
+
+    this.refreshViewer();
+  },
+
+  closeViewer() {
+    galleryViewerMask.classList.remove('show');
+    lifePhotoState.viewer.mode = 'draft';
+    lifePhotoState.viewer.simId = null;
+    lifePhotoState.viewer.index = 0;
+  }
+};
+
+$('btnAddPhoto').onclick = () => {
+  lifePhotoWorkspace.openEditor();
+};
+
+galleryGrid.addEventListener('dragover', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  galleryGrid.classList.add('dragover');
+});
+galleryGrid.addEventListener('dragleave', event => {
+  event.preventDefault();
+  galleryGrid.classList.remove('dragover');
+});
+galleryGrid.addEventListener('drop', async event => {
+  event.preventDefault();
+  event.stopPropagation();
+  galleryGrid.classList.remove('dragover');
+
+  const files =
+    Array.from(event.dataTransfer?.files || [])
+      .filter(file => file.type.startsWith('image/'));
+
+  for (const file of files) {
+    try {
+      await lifePhotoWorkspace.prepareFile(
+        file,
+        { openEditor:true }
+      );
+    } catch (error) {
+      uiAlert(
+        '圖片處理失敗：' + error.message,
+        { title:'圖片處理失敗', kind:'danger' }
+      );
+    }
   }
 });
 
-/* =========================================================
- *  人生照片檢視器
- * ========================================================= */
-function openGalleryViewerPreview(idx) {
-  const gal = editingGallery;
-  if (!gal || !gal[idx]) return;
-  viewerMode = 'edit';
-  viewerSimId = null;
-  viewerIndex = idx;
-  $('gvPersonName').textContent = $('fName')?.value?.trim() || uiText('人物');
-  updateViewerContent(gal);
-  galleryViewerMask.classList.add('show');
-}
-
-function openGalleryViewer(simId, idx) {
-  const sim = genealogyData.sims[simId];
-  if (!sim) return;
-  viewerMode = 'sim';
-  viewerSimId = simId;
-  viewerIndex = idx;
-  $('gvPersonName').textContent = displayDataText(sim.name, sim) || uiText('人物');
-  updateViewerContent(sim.gallery || []);
-  galleryViewerMask.classList.add('show');
-}
-
-function getViewerGallery() {
-  if (viewerMode === 'sim' && viewerSimId) {
-    const sim = genealogyData.sims[viewerSimId];
-    return sim ? (sim.gallery || []) : [];
+$('phSave').onclick = () => {
+  lifePhotoWorkspace.commitEditor();
+};
+$('phCancel').onclick = () => {
+  lifePhotoWorkspace.closeEditor();
+};
+$('phDelete').onclick = () => {
+  lifePhotoWorkspace.deleteEditorEntry();
+};
+photoMask.onclick = event => {
+  if (event.target === photoMask) {
+    lifePhotoWorkspace.closeEditor();
   }
-  return editingGallery;
-}
+};
 
-function updateViewerContent(gal) {
-  if (!gal || !gal.length) return;
-  if (viewerIndex < 0) viewerIndex = 0;
-  if (viewerIndex >= gal.length) viewerIndex = gal.length - 1;
-  const g = gal[viewerIndex];
-  const viewerImage = $('gvImg');
-  const viewerAssetId =
-    isAssetId(g.image)
-      ? String(g.image)
-      : '';
-  const viewerUrl =
-    resolveImageUrl(g.image) || '';
+$('photoPreview').onclick = () => {
+  $('photoInput').click();
+};
+$('photoInput').onchange = async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-  if (viewerAssetId) {
-    viewerImage.dataset.assetId =
-      viewerAssetId;
-  } else {
-    delete viewerImage.dataset.assetId;
+  try {
+    await lifePhotoWorkspace.prepareFile(file);
+  } catch (error) {
+    uiAlert(
+      '圖片處理失敗：' + error.message,
+      { title:'圖片處理失敗', kind:'danger' }
+    );
+  } finally {
+    event.target.value = '';
   }
+};
+$('photoClearBtn').onclick = () => {
+  lifePhotoWorkspace.clearPreparedImage();
+};
 
-  if (viewerUrl) {
-    viewerImage.src = viewerUrl;
-  } else {
-    viewerImage.removeAttribute('src');
+document.addEventListener('paste', async event => {
+  if (!photoMask.classList.contains('show')) return;
+
+  const imageItem =
+    Array.from(event.clipboardData?.items || [])
+      .find(item => item.type.startsWith('image/'));
+
+  if (!imageItem) return;
+
+  const file = imageItem.getAsFile();
+  if (!file) return;
+
+  event.preventDefault();
+
+  try {
+    await lifePhotoWorkspace.prepareFile(file);
+  } catch (error) {
+    uiAlert(
+      '圖片處理失敗：' + error.message,
+      { title:'圖片處理失敗', kind:'danger' }
+    );
   }
-  $('gvTitle').textContent = g.title || uiText('（未命名）');
-  const bits = [];
-  if (g.lifeStage) bits.push(uiText(g.lifeStage));
-  if (g.note) bits.push(g.note);
-  $('gvNote').textContent = bits.join(' · ');
-  $('gvCounter').textContent = `${viewerIndex + 1} / ${gal.length}`;
-  $('gvPrev').disabled = gal.length <= 1;
-  $('gvNext').disabled = gal.length <= 1;
-}
-
-function viewerNav(delta) {
-  const gal = getViewerGallery();
-  if (!gal || gal.length <= 1) return;
-  viewerIndex = (viewerIndex + delta + gal.length) % gal.length;
-  updateViewerContent(gal);
-}
+});
 
 $('gvClose').onclick = () => {
-  galleryViewerMask.classList.remove('show');
-  viewerSimId = null;
-  viewerMode = 'edit';
+  lifePhotoWorkspace.closeViewer();
 };
-$('gvPrev').onclick = () => viewerNav(-1);
-$('gvNext').onclick = () => viewerNav(1);
-galleryViewerMask.onclick = e => {
-  if (e.target === galleryViewerMask) {
-    galleryViewerMask.classList.remove('show');
-    viewerSimId = null;
-    viewerMode = 'edit';
+$('gvPrev').onclick = () => {
+  lifePhotoWorkspace.moveViewer(-1);
+};
+$('gvNext').onclick = () => {
+  lifePhotoWorkspace.moveViewer(1);
+};
+galleryViewerMask.onclick = event => {
+  if (event.target === galleryViewerMask) {
+    lifePhotoWorkspace.closeViewer();
   }
 };
+
 /* =========================================================
  *  自由排列選取 / 框選 + 平移 / 縮放
  * ========================================================= */
@@ -13524,7 +13692,7 @@ function editorDraftSim(){
     editingGallery=sim
       ? JSON.parse(JSON.stringify(sim.gallery||[]))
       : [];
-    renderGalleryGrid();
+    lifePhotoWorkspace.renderList();
 
     updateCauseOfDeathVisibility();
     switchEditorTab('basic');
@@ -13731,8 +13899,8 @@ function editorDraftSim(){
     editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
 
     photoMask.classList.remove('show');
-    editingPhotoIndex=-1;
-    editingPhotoImageRef='';
+    lifePhotoState.editor.index=-1;
+    lifePhotoState.editor.imageRef='';
   }
 
 function renderRelList(c) {
@@ -15472,11 +15640,11 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (galleryViewerMask.classList.contains('show')) {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); viewerNav(-1); return; }
-    if (e.key === 'ArrowRight') { e.preventDefault(); viewerNav(1); return; }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); lifePhotoWorkspace.moveViewer(-1); return; }
+    if (e.key === 'ArrowRight') { e.preventDefault(); lifePhotoWorkspace.moveViewer(1); return; }
   }
   if (e.key === 'Enter' && e.ctrlKey) {
-    if (photoMask.classList.contains('show')) savePhoto();
+    if (photoMask.classList.contains('show')) lifePhotoWorkspace.commitEditor();
     else if (petMask.classList.contains('show')) savePet();
     else if (mask.classList.contains('show')) saveChar();
   }
