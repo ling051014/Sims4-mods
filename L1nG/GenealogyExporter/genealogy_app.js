@@ -13124,7 +13124,7 @@ function setEditingAvatarCropFrame(target,frame){
 
   if(target==='pet'){
     petEditorState.avatarFrame=normalized;
-    renderPetAvatarPreview();
+    petEditorController.refreshAvatarPreview();
   }else{
     simEditorState.avatarFrame=normalized;
     updateAvatarPreview();
@@ -13895,17 +13895,16 @@ function renderRelAnnoList(
       const key =
         btn.dataset.resetKey;
 
-      if (
-        genealogyData.labelPositions &&
-        genealogyData.labelPositions[key]
-      ) {
-        delete genealogyData
-          .labelPositions[key];
+      const mutation =
+        genealogyStore.setRelationshipLabelPosition(
+          key,
+          null
+        );
 
-        save();
-        render();
-        renderRelAnno(simId);
-      }
+      if (!mutation.dataChanged) return;
+
+      applyGenealogyMutation(mutation);
+      renderRelAnno(simId);
     };
   });
 }
