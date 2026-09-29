@@ -134,7 +134,7 @@
                                     <span>族譜提取模組</span>
                                 </a>
                                 
-                                <button class="ui-menu-item" id="bgBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></button>
+                                <button class="ui-menu-item" id="appearanceBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></button>
                                 <button class="ui-menu-item" id="storageBtn" type="button" role="menuitem"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>圖片與儲存</span></button>
                                 <div class="ui-menu-divider"></div>
                                 <div class="ui-menu-language-row">
@@ -420,43 +420,43 @@
                                 </div>
                             </section>
                         </div>
-                        <div class="rel-section family-rel-annotations" id="familyRelAnnoSection" style="display:none">
-                            <div class="rel-title"><span>關係線標籤</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係線標籤說明" data-tooltip="家庭關係線會使用客觀關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
-                            <div id="familyRelAnnoList"></div>
+                        <div class="relationship-section family-rel-annotations" id="familyRelationshipAnnotationSection" style="display:none">
+                            <div class="relationship-section-title"><span>關係線標籤</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="關係線標籤說明" data-tooltip="家庭關係線會使用客觀關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div id="familyRelationshipAnnotationList"></div>
                         </div>
                     </section>
 
                     <section class="sim-editor-panel" data-editor-panel="relations" role="tabpanel" hidden>
-                        <div class="editor-empty-note" id="newSimRelationsHint" hidden>儲存模擬市民後即可新增其他關係。</div>
-                        <div class="rel-section first" id="relAnnoSection" style="display:none">
-                            <div class="rel-title"><span>其他關係線標籤</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="其他關係線標籤說明" data-tooltip="其他關係會直接使用實際關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
-                            <div id="relAnnoList"></div>
+                        <div class="editor-empty-note" id="newSimRelationshipsHint" hidden>儲存模擬市民後即可新增其他關係。</div>
+                        <div class="relationship-section first" id="relationshipAnnotationSection" style="display:none">
+                            <div class="relationship-section-title"><span>其他關係線標籤</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="其他關係線標籤說明" data-tooltip="其他關係會直接使用實際關係名稱；可個別自訂文字、隱藏標籤，或重設已拖曳的位置。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                            <div id="relationshipAnnotationList"></div>
                         </div>
-                        <div class="rel-section" id="relSection" style="display:none">
-                            <div class="rel-title">新增其他關係</div>
-                            <div id="relList"></div>
-                            <div class="rel-add">
-                                <div class="ui-select-wrap" data-placeholder="選擇或輸入關係…" data-ui-select-for="relType" data-ui-select-creatable="true" data-ui-select-portal="true" style="flex:1">
+                        <div class="relationship-section" id="relationshipSection" style="display:none">
+                            <div class="relationship-section-title">新增其他關係</div>
+                            <div id="relationshipList"></div>
+                            <div class="relationship-add-row">
+                                <div class="ui-select-wrap" data-placeholder="選擇或輸入關係…" data-ui-select-for="relationshipType" data-ui-select-creatable="true" data-ui-select-portal="true" style="flex:1">
                                     <div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋或輸入關係…" type="text"><div class="ui-select-options"></div></div>
                                 </div>
-                                <select hidden id="relType"></select>
-                                <div class="ui-select-wrap" data-placeholder="選擇目標…" data-ui-select-for="relTarget" data-ui-select-portal="true" style="flex:1.4">
+                                <select hidden id="relationshipType"></select>
+                                <div class="ui-select-wrap" data-placeholder="選擇目標…" data-ui-select-for="relationshipTarget" data-ui-select-portal="true" style="flex:1.4">
                                     <div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名…" type="text"><div class="ui-select-options"></div></div>
                                 </div>
-                                <select hidden id="relTarget"></select>
-                                <button id="btnAddRel" type="button">新增</button>
+                                <select hidden id="relationshipTarget"></select>
+                                <button id="relationshipAddBtn" type="button">新增</button>
                             </div>
                         </div>
                     </section>
 
                     <section class="sim-editor-panel" data-editor-panel="media" role="tabpanel" hidden>
-                        <div class="rel-section first" id="petSection">
-                            <div class="rel-title"><span>寵物</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="寵物說明" data-tooltip="記錄該模擬市民擁有的寵物。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                        <div class="relationship-section first" id="petSection">
+                            <div class="relationship-section-title"><span>寵物</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="寵物說明" data-tooltip="記錄該模擬市民擁有的寵物。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                             <div id="petList"></div>
                             <button class="pet-add-btn" id="btnAddPet" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增寵物</span></button>
                         </div>
-                        <div class="rel-section" id="gallerySection">
-                            <div class="rel-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>人生照片</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="人生照片說明" data-tooltip="記錄這位模擬市民值得保存的人生照片；可標記人生階段、標題與備註。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
+                        <div class="relationship-section" id="gallerySection">
+                            <div class="relationship-section-title"><span class="l1ng-icon icon-images" aria-hidden="true"></span><span>人生照片</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="人生照片說明" data-tooltip="記錄這位模擬市民值得保存的人生照片；可標記人生階段、標題與備註。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
                             <div class="gallery-grid" id="galleryGrid"></div>
                             <button class="gallery-add-btn" id="btnAddPhoto" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增圖片</span></button>
                         </div>
@@ -667,17 +667,17 @@
 
         <!-- ========【外觀設定】 設定 - 主題、背景與關係線外觀 ======== -->
         <div class="ui-dialog-backdrop" id="appearanceDialog">
-            <div class="ui-dialog-panel bg-modal appearance-modal">
+            <div class="ui-dialog-panel appearance-panel appearance-modal">
                 <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>外觀設定</span></h2>
 
                 <section class="appearance-section">
                     <div class="setting-group-title">主題</div>
-                    <div class="theme-grid" id="themeGrid"></div>
-                    <div class="custom-theme">
-                        <div class="custom-theme-row">
+                    <div class="appearance-theme-grid" id="appearanceThemeGrid"></div>
+                    <div class="appearance-custom-theme">
+                        <div class="appearance-custom-theme-row">
                             <label>主色<input class="custom-color-input" id="customColor1" type="color" value="#f0c050"></label>
                             <label>輔色<input class="custom-color-input" id="customColor2" type="color" value="#a878c8"></label>
-                            <div class="custom-theme-preview" id="customThemePreview"></div>
+                            <div class="appearance-custom-theme-preview" id="appearanceCustomThemePreview"></div>
                             <button class="apply-btn" id="applyCustomBtn" type="button">套用自訂配色</button>
                         </div>
                     </div>
@@ -685,13 +685,13 @@
 
                 <section class="appearance-section">
                     <div class="setting-group-title">族譜背景</div>
-                    <div class="bg-preview" id="bgPreview">尚未設定背景圖片</div>
-                    <div class="bg-row">
-                        <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換圖片</span><input accept="image/jpeg,image/png,image/webp" hidden id="bgInput" type="file"></label>
-                        <button class="danger" id="bgClearBtn" type="button">移除圖片</button>
+                    <div class="appearance-background-preview" id="appearanceBackgroundPreview">尚未設定背景圖片</div>
+                    <div class="appearance-background-row">
+                        <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換圖片</span><input accept="image/jpeg,image/png,image/webp" hidden id="appearanceBackgroundInput" type="file"></label>
+                        <button class="danger" id="appearanceBackgroundClearBtn" type="button">移除圖片</button>
                     </div>
-                    <div class="appearance-control-row"><label>透明度</label><input id="bgOpacity" max="100" min="0" type="range" value="50"><span class="bg-value" id="bgOpacityVal">50%</span></div>
-                    <div class="appearance-control-row"><label>圖片顯示</label><select id="bgFit"><option value="cover">填滿</option><option value="contain">完整顯示</option><option value="repeat">重複排列</option></select></div>
+                    <div class="appearance-control-row"><label>透明度</label><input id="appearanceBackgroundOpacity" max="100" min="0" type="range" value="50"><span class="appearance-background-value" id="appearanceBackgroundOpacityValue">50%</span></div>
+                    <div class="appearance-control-row"><label>圖片顯示</label><select id="appearanceBackgroundFit"><option value="cover">填滿</option><option value="contain">完整顯示</option><option value="repeat">重複排列</option></select></div>
                 </section>
 
                 <section class="appearance-section relationship-style-section">
@@ -760,7 +760,7 @@
                     <button id="resetUiSettingsBtn" type="button">恢復介面預設</button>
                 </section>
 
-                <div class="ui-dialog-actions"><span class="spacer"></span><button id="bgCloseBtn">關閉</button></div>
+                <div class="ui-dialog-actions"><span class="spacer"></span><button id="appearanceCloseBtn">關閉</button></div>
             </div>
 
             <div class="relationship-curve-live-preview" id="relationshipCurveLivePreview" aria-hidden="true">

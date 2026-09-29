@@ -1721,7 +1721,7 @@ let marqueeState = null;
 const $ = id => document.getElementById(id);
 const viewport = $('genealogyCanvasViewport'), stage = $('genealogyCanvasStage'), svg = $('genealogyRelationshipLayer'), nodes = $('genealogyPersonLayer');
 const labelsSvg = $('genealogyRelationshipLabelLayer');
-const mask = $('simEditorDialog'), personLibraryDialog = $('personLibraryDialog'), bgMask = $('appearanceDialog');
+const mask = $('simEditorDialog'), personLibraryDialog = $('personLibraryDialog'), appearanceDialog = $('appearanceDialog');
 const storageMask = $('storageDialog');
 const familyMemberPickerDialog = $('familyMemberPickerDialog');
 const tipsMask = $('helpDialog');
@@ -1757,10 +1757,10 @@ const smartGuideVertical = $('smartGuideVertical');
 const smartGuideHorizontal = $('smartGuideHorizontal');
 const smartSpacingHorizontal = $('smartSpacingHorizontal');
 const smartSpacingVertical = $('smartSpacingVertical');
-const themeGrid = $('themeGrid');
+const appearanceThemeGrid = $('appearanceThemeGrid');
 const customColor1 = $('customColor1');
 const customColor2 = $('customColor2');
-const customThemePreview = $('customThemePreview');
+const appearanceCustomThemePreview = $('appearanceCustomThemePreview');
 const galleryGrid = $('galleryGrid');
 
 // ========【家族名稱輸入】 設定 - 固定導覽欄位、虛線只跟著文字寬度 ========
@@ -3371,7 +3371,7 @@ function populateRelationshipTypePicker(
   selectedValue = ''
 ) {
   const select =
-    $('relType');
+    $('relationshipType');
 
   if (!select) return;
 
@@ -3418,7 +3418,7 @@ function populateRelationshipTypePicker(
       ? selected
       : '';
 
-  refreshSS('relType');
+  refreshSS('relationshipType');
 }
 
 function relationshipCreateOptionText(value) {
@@ -5348,7 +5348,7 @@ function resetThemeSurface() {
 }
 
 function paintThemeChoices() {
-  if (!themeGrid) return;
+  if (!appearanceThemeGrid) return;
 
   const choices = THEME_PRESETS.map(theme => ({
     id:theme.id,
@@ -5363,7 +5363,7 @@ function paintThemeChoices() {
       `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`
   });
 
-  themeGrid.innerHTML = choices.map(choice => {
+  appearanceThemeGrid.innerHTML = choices.map(choice => {
     const selected = choice.id === currentThemeId;
     const previewId =
       choice.id === 'custom'
@@ -5372,19 +5372,19 @@ function paintThemeChoices() {
 
     return `
       <button
-        class="theme-card${selected ? ' selected' : ''}"
+        class="appearance-theme-card${selected ? ' selected' : ''}"
         type="button"
         data-theme-id="${esc(choice.id)}"
         aria-pressed="${selected ? 'true' : 'false'}"
       >
-        <span class="theme-radio" aria-hidden="true"></span>
-        <span class="theme-card-name">${esc(choice.name)}</span>
-        <span class="theme-preview"${previewId} style="background:${choice.gradient}"></span>
+        <span class="appearance-theme-radio" aria-hidden="true"></span>
+        <span class="appearance-theme-card-name">${esc(choice.name)}</span>
+        <span class="appearance-theme-preview"${previewId} style="background:${choice.gradient}"></span>
       </button>
     `;
   }).join('');
 
-  themeGrid
+  appearanceThemeGrid
     .querySelectorAll('[data-theme-id]')
     .forEach(button => {
       button.addEventListener('click', () => {
@@ -5404,7 +5404,7 @@ function paintThemeChoices() {
 }
 
 function syncThemeChoiceDisplay() {
-  themeGrid
+  appearanceThemeGrid
     ?.querySelectorAll('[data-theme-id]')
     .forEach(button => {
       const selected =
@@ -5493,9 +5493,9 @@ function chooseCustomTheme(primary, secondary, { persist = true } = {}) {
 }
 
 function paintCustomThemePreview() {
-  if (!customThemePreview) return;
+  if (!appearanceCustomThemePreview) return;
 
-  customThemePreview.style.background =
+  appearanceCustomThemePreview.style.background =
     `linear-gradient(120deg, ${customColor1.value} 0%, ${customColor2.value} 100%)`;
 }
 
@@ -6880,7 +6880,7 @@ function persistCanvasBackground() {
 }
 
 function paintCanvasBackgroundPreview() {
-  const preview = $('bgPreview');
+  const preview = $('appearanceBackgroundPreview');
   if (!preview) return;
 
   const url = resolveImageUrl(bgSettings.image);
@@ -6893,11 +6893,11 @@ function paintCanvasBackgroundPreview() {
 }
 
 function openAppearancePanel() {
-  $('bgOpacity').value =
+  $('appearanceBackgroundOpacity').value =
     Math.round(bgSettings.opacity * 100);
-  $('bgOpacityVal').textContent =
+  $('appearanceBackgroundOpacityValue').textContent =
     Math.round(bgSettings.opacity * 100) + '%';
-  $('bgFit').value = bgSettings.fit;
+  $('appearanceBackgroundFit').value = bgSettings.fit;
 
   customColor1.value = customColors.c1;
   customColor2.value = customColors.c2;
@@ -6908,11 +6908,11 @@ function openAppearancePanel() {
   renderOtherRelationshipLineControls();
   syncRelationshipLineControls();
 
-  bgMask.classList.add('show');
+  appearanceDialog.classList.add('show');
 }
 
 function closeAppearancePanel() {
-  bgMask.classList.remove('show');
+  appearanceDialog.classList.remove('show');
 }
 
 async function replaceCanvasBackground(file) {
@@ -6942,7 +6942,7 @@ function setCanvasBackgroundOpacity(percent) {
     );
 
   bgSettings.opacity = value / 100;
-  $('bgOpacityVal').textContent =
+  $('appearanceBackgroundOpacityValue').textContent =
     Math.round(value) + '%';
 
   renderCanvasBackground();
@@ -6999,7 +6999,7 @@ async function compressBgImage(file) {
   };
 }
 function paintCanvasBackgroundPreview() {
-  const el = $('bgPreview');
+  const el = $('appearanceBackgroundPreview');
   const url = resolveImageUrl(bgSettings.image);
   if (url) {
     el.style.backgroundImage = `url("${url}")`;
@@ -7037,10 +7037,10 @@ async function updateStorageInfo() {
   if (assetSizeEl) assetSizeEl.textContent = formatStorageSize(assetBytes);
 }
 
-$('bgBtn').onclick = openAppearancePanel;
-$('bgCloseBtn').onclick = closeAppearancePanel;
-bgMask.onclick = event => {
-  if (event.target === bgMask) {
+$('appearanceBtn').onclick = openAppearancePanel;
+$('appearanceCloseBtn').onclick = closeAppearancePanel;
+appearanceDialog.onclick = event => {
+  if (event.target === appearanceDialog) {
     closeAppearancePanel();
   }
 };
@@ -7132,7 +7132,7 @@ if (restoreSampleBtn) {
       save({ immediate:true });
       refreshFamilyUI();
       render();
-      bgMask.classList.remove('show');
+      appearanceDialog.classList.remove('show');
       storageMask.classList.remove('show');
       requestAnimationFrame(fitScreen);
       uiToast('已恢復預設族譜。');
@@ -7142,7 +7142,7 @@ if (restoreSampleBtn) {
   };
 }
 
-$('bgInput').onchange = async event => {
+$('appearanceBackgroundInput').onchange = async event => {
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -7161,19 +7161,19 @@ $('bgInput').onchange = async event => {
   }
 };
 
-$('bgOpacity').oninput = event => {
+$('appearanceBackgroundOpacity').oninput = event => {
   setCanvasBackgroundOpacity(
     event.currentTarget.value
   );
 };
 
-$('bgFit').onchange = event => {
+$('appearanceBackgroundFit').onchange = event => {
   setCanvasBackgroundFit(
     event.currentTarget.value
   );
 };
 
-$('bgClearBtn').onclick = removeCanvasBackground;
+$('appearanceBackgroundClearBtn').onclick = removeCanvasBackground;
 
 $('cleanupBtn').onclick = async () => {
   if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
@@ -13773,7 +13773,7 @@ function renderRelAnnoList(
 
   if (!entries.length) {
     list.innerHTML =
-      '<div class="rel-empty">' +
+      '<div class="relationship-empty">' +
       esc(uiText('尚無關係連線')) +
       '</div>';
 
@@ -13824,11 +13824,11 @@ function renderRelAnnoList(
         );
 
       return (
-        '<div class="rel-anno-item" ' +
+        '<div class="relationship-annotation-item" ' +
         'data-anno-key="' +
         esc(entry.key) +
         '">' +
-          '<div class="rel-anno-name" title="' +
+          '<div class="relationship-annotation-name" title="' +
           esc(entry.label) +
           '">' +
           esc(entry.label) +
@@ -13853,7 +13853,7 @@ function renderRelAnnoList(
           '">' +
           (
             hasOffset
-              ? '<button type="button" class="rel-anno-reset" data-reset-key="' +
+              ? '<button type="button" class="relationship-annotation-reset" data-reset-key="' +
                 esc(entry.key) +
                 '" title="' +
                 esc(uiText('重設關係位置')) +
@@ -13867,7 +13867,7 @@ function renderRelAnnoList(
     }).join('');
 
   list.querySelectorAll(
-    '.rel-anno-item'
+    '.relationship-annotation-item'
   ).forEach(item => {
     const key =
       item.dataset.annoKey;
@@ -13910,10 +13910,10 @@ function renderRelAnnoList(
   });
 }
 function renderRelAnno(simId) {
-  if(!simId){renderRelAnnoList(null,'familyRelAnnoSection','familyRelAnnoList',[]);renderRelAnnoList(null,'relAnnoSection','relAnnoList',[]);return;}
+  if(!simId){renderRelAnnoList(null,'familyRelationshipAnnotationSection','familyRelationshipAnnotationList',[]);renderRelAnnoList(null,'relationshipAnnotationSection','relationshipAnnotationList',[]);return;}
   const entries=buildRelationEntries(simId);
-  renderRelAnnoList(simId,'familyRelAnnoSection','familyRelAnnoList',entries.filter(e=>e.group==='family'));
-  renderRelAnnoList(simId,'relAnnoSection','relAnnoList',entries.filter(e=>e.group==='other'));
+  renderRelAnnoList(simId,'familyRelationshipAnnotationSection','familyRelationshipAnnotationList',entries.filter(e=>e.group==='family'));
+  renderRelAnnoList(simId,'relationshipAnnotationSection','relationshipAnnotationList',entries.filter(e=>e.group==='other'));
 }
 
 const petEditorController = {
@@ -14239,7 +14239,7 @@ function renderPetDraftList() {
 
   if (!editingPets.length) {
     list.innerHTML =
-      `<div class="rel-empty">${esc(uiText('尚未新增寵物'))}</div>`;
+      `<div class="relationship-empty">${esc(uiText('尚未新增寵物'))}</div>`;
     renderEditorInfoPreviewIfActive();
     return;
   }
@@ -15339,7 +15339,7 @@ function editorDraftSim(){
 
     applyEditorSiblingStateToSelect();
 
-    $('relTarget').innerHTML=allSims
+    $('relationshipTarget').innerHTML=allSims
       .filter(candidate=>!sim||candidate.id!==sim.id)
       .map(candidate=>
         `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
@@ -15357,17 +15357,17 @@ function editorDraftSim(){
       'fExSpouse',
       'fChildren',
       'fSiblings',
-      'relType',
-      'relTarget'
+      'relationshipType',
+      'relationshipTarget'
     ].forEach(refreshSS);
 
     resetEditorFamilyPanels();
     renderEditorFamilyPreviews();
 
     $('btnDelete').style.display=sim?'':'none';
-    $('relSection').style.display=sim?'':'none';
+    $('relationshipSection').style.display=sim?'':'none';
 
-    const newRelHint=$('newSimRelationsHint');
+    const newRelHint=$('newSimRelationshipsHint');
     if(newRelHint)newRelHint.hidden=!!sim;
 
     mask.classList.add('show');
@@ -15410,20 +15410,20 @@ function editorDraftSim(){
 }
 
 function renderRelList(c) {
-  if (!c) { $('relList').innerHTML = ''; return; }
+  if (!c) { $('relationshipList').innerHTML = ''; return; }
   const rels = (genealogyData.links||[]).filter(l => (l.from === c.id || l.to === c.id) && !isSiblingLink(l));
-  $('relList').innerHTML = rels.length
+  $('relationshipList').innerHTML = rels.length
     ? rels.map((l, i) => {
         const otherId = l.from === c.id ? l.to : l.from;
         const other = genealogyData.sims[otherId];
         const arrow = l.from === c.id ? '→' : '←';
-        return `<div class="rel-item">
+        return `<div class="relationship-item">
           <span>${esc(displayRelationshipText(l.label || l.type || '關聯'))} ${arrow} ${esc(other ? displayDataText(other.name, other) : uiText('（已刪除）'))}</span>
           <button type="button" data-del="${i}" title="刪除">×</button>
         </div>`;
       }).join('')
-    : `<div class="rel-empty">${esc(uiText('暫無其他關係'))}</div>`;
-  $('relList').querySelectorAll('[data-del]').forEach(btn => {
+    : `<div class="relationship-empty">${esc(uiText('暫無其他關係'))}</div>`;
+  $('relationshipList').querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = () => {
       const target = rels[+btn.dataset.del];
       if (!target?.id) return;
@@ -15444,7 +15444,7 @@ function collectRelAnnotationDraft() {
   const entries = [];
   const items =
     document.querySelectorAll(
-      '#familyRelAnnoList .rel-anno-item, #relAnnoList .rel-anno-item'
+      '#familyRelationshipAnnotationList .relationship-annotation-item, #relationshipAnnotationList .relationship-annotation-item'
     );
 
   items.forEach(item => {
@@ -17463,7 +17463,7 @@ window.addEventListener('blur', () => {
   updateArrangeToolUI();
 });
 
-$('btnAddRel').onclick = () => {
+$('relationshipAddBtn').onclick = () => {
   if (!simEditorState.simId) return;
 
   const c =
@@ -17474,11 +17474,11 @@ $('btnAddRel').onclick = () => {
   if (!c) return;
 
   const typeSelect =
-    $('relType');
+    $('relationshipType');
 
   const typeWrap =
     document.querySelector(
-      '.ui-select-wrap[data-ui-select-for="relType"]'
+      '.ui-select-wrap[data-ui-select-for="relationshipType"]'
     );
 
   let type =
@@ -17508,7 +17508,7 @@ $('btnAddRel').onclick = () => {
   }
 
   const targetId =
-    $('relTarget').value;
+    $('relationshipTarget').value;
 
   if (!targetId) {
     uiAlert(
@@ -17535,7 +17535,7 @@ $('btnAddRel').onclick = () => {
     typeSelect.value = '';
   }
 
-  refreshSS('relType');
+  refreshSS('relationshipType');
 
   renderRelList(c);
   renderRelAnno(c.id);
