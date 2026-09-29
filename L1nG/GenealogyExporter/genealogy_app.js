@@ -17055,13 +17055,15 @@ async function persistGameImportAvatars(bundle, converted) {
       return;
     }
 
-    const sourceBlob = new Blob([asset.bytes], { type:asset.mimeType });
-    const result = await compressImage(sourceBlob, kind);
+    // 遊戲端 Genealogy Exporter ZIP 已提供 EA 原始頭像 bytes。
+    // 這裡直接保存原始 Blob，避免再次經過一般手動上傳使用的
+    // 384px 縮圖與 JPEG / WEBP 重新編碼，保留遊戲匯出的原始畫質。
+    const sourceBlob = new Blob(
+      [asset.bytes],
+      { type:asset.mimeType }
+    );
 
-    target.avatar = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
+    target.avatar = await saveImageAsset(sourceBlob);
 
     saved++;
   };
