@@ -26,7 +26,7 @@ const LABELS_KEY = 'sims4_genealogy_labels';
 const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
 const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
 const FAMILY_PANEL_COLLAPSED_KEY = 'sims4_genealogy_family_panel_collapsed';
-const ROSTER_VIEW_KEY = 'sims4_genealogy_roster_view';
+const PERSON_LIBRARY_VIEW_KEY = 'sims4_genealogy_person_library_view';
 const FAMILY_MEMBER_GENERATION_SORT_KEY = 'sims4_genealogy_family_member_generation_sort';
 const REL_LINE_STYLE_KEY = 'sims4_genealogy_relationship_line_style';
 const FAMILY_TREE_VIEW_MODE_KEY = 'sims4_genealogy_family_tree_view_mode';
@@ -240,14 +240,14 @@ const familyMemberOperationState = {
 };
 let labelDrag = null;
 let viewMode = 'view';
-let infoCardId = null;
+let personProfilePersonId = null;
 let currentThemeId = 'ling';
 let customColors = { c1: '#f0c050', c2: '#a878c8' };
 
-let rosterViewMode = 'detailed';
+let personLibraryViewMode = 'detailed';
 try {
-  const savedRosterView = localStorage.getItem(ROSTER_VIEW_KEY);
-  if (savedRosterView === 'compact' || savedRosterView === 'detailed') rosterViewMode = savedRosterView;
+  const savedPersonLibraryView = localStorage.getItem(PERSON_LIBRARY_VIEW_KEY);
+  if (savedPersonLibraryView === 'compact' || savedPersonLibraryView === 'detailed') personLibraryViewMode = savedPersonLibraryView;
 } catch (_) {}
 
 
@@ -1721,11 +1721,11 @@ let marqueeState = null;
 const $ = id => document.getElementById(id);
 const viewport = $('genealogyCanvasViewport'), stage = $('genealogyCanvasStage'), svg = $('genealogyRelationshipLayer'), nodes = $('genealogyPersonLayer');
 const labelsSvg = $('genealogyRelationshipLabelLayer');
-const mask = $('simEditorDialog'), rosterMask = $('personLibraryDialog'), bgMask = $('appearanceDialog');
+const mask = $('simEditorDialog'), personLibraryDialog = $('personLibraryDialog'), bgMask = $('appearanceDialog');
 const storageMask = $('storageDialog');
-const addMemberMask = $('familyMemberPickerDialog');
+const familyMemberPickerDialog = $('familyMemberPickerDialog');
 const tipsMask = $('helpDialog');
-const infoMask = $('personProfileDialog');
+const personProfileDialog = $('personProfileDialog');
 const petMask = $('petEditorDialog');
 const avatarCropMask = $('avatarCropDialog');
 const photoMask = $('lifePhotoEditorDialog');
@@ -1739,7 +1739,7 @@ const statusFilterInputs = [...document.querySelectorAll('input[name="statusFilt
 const genderFilterInputs = [...document.querySelectorAll('input[name="genderFilter"]')];
 const raceFilterInputs = [...document.querySelectorAll('input[name="raceFilter"]')];
 const lifeStageFilterInputs = [...document.querySelectorAll('input[name="lifeStageFilter"]')];
-const rosterSearch = $('rosterSearch');
+const personLibrarySearch = $('personLibrarySearch');
 const modeToggle = $('modeToggle');
 const selectToolBtn = $('selectToolBtn');
 const panToolBtn = $('panToolBtn');
@@ -7064,14 +7064,14 @@ if (resetUiSettingsBtn) {
 
     [THEME_KEY, CUSTOM_COLORS_KEY, BG_KEY, MODE_KEY, LABELS_KEY,
       LABEL_LOCK_KEY, SIDEBAR_WIDTH_KEY, FAMILY_PANEL_COLLAPSED_KEY,
-      ROSTER_VIEW_KEY, REL_LINE_STYLE_KEY].forEach(key => {
+      PERSON_LIBRARY_VIEW_KEY, REL_LINE_STYLE_KEY].forEach(key => {
       try { localStorage.removeItem(key); } catch (_) {}
     });
 
     customColors = { c1:'#f0c050', c2:'#a878c8' };
     bgSettings = { image:null, opacity:0.5, fit:'cover' };
     showRelLabels = true;
-    rosterViewMode = 'detailed';
+    personLibraryViewMode = 'detailed';
     relationshipLineSettings = JSON.parse(JSON.stringify(RELATIONSHIP_LINE_DEFAULTS));
     applyRelationshipLineSettings();
     applySidebarWidth(SIDEBAR_DEFAULT_WIDTH, { persist:false });
@@ -7205,7 +7205,7 @@ function closeTopModal() {
       if (id === 'petEditorDialog') { petEditorState.index=-1; petEditorState.avatar=null; petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME}; }
       if (id === 'avatarCropDialog') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
       if (id === 'lifePhotoEditorDialog') { lifePhotoState.editor.index = -1; lifePhotoState.editor.imageRef = ''; }
-      if (id === 'personProfileDialog') infoCardId = null;
+      if (id === 'personProfileDialog') personProfilePersonId = null;
       if (id === 'lifePhotoViewerDialog') {
         lifePhotoState.viewer.simId = null;
         lifePhotoState.viewer.mode = 'draft';
@@ -8334,8 +8334,8 @@ function flushAppRenderInvalidation() {
   if (!mask) return;
   if (mask & APP_RENDER_DIRTY.chrome) { syncRelationshipPerspectiveUI(); updateLayoutToggle(); }
   if (mask & APP_RENDER_DIRTY.lists) {
-    if (rosterMask.classList.contains('show')) renderRoster();
-    if (addMemberMask.classList.contains('show')) renderAddMemberList();
+    if (personLibraryDialog.classList.contains('show')) renderPersonLibrary();
+    if (familyMemberPickerDialog.classList.contains('show')) renderFamilyMemberPickerList();
   }
 }
 function invalidateRender(layers, { immediate = false } = {}) {
@@ -8378,7 +8378,7 @@ function statusIconHTML(sim) {
 
   if (!status) return '';
 
-  return `<span class="roster-badge status-icon status-${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</span>`;
+  return `<span class="person-meta-icon status-icon status-${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</span>`;
 }
 
 function raceBadgeHTML(sim) {
@@ -8398,7 +8398,7 @@ function raceIconHTML(sim) {
 
   if (!race?.icon) return '';
 
-  return `<span class="roster-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</span>`;
+  return `<span class="person-meta-icon race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</span>`;
 }
 
 function buildTagsHTML(traits, owner = null) {
@@ -8771,7 +8771,7 @@ function profileOtherRelationshipRows(
     }));
 }
 
-function buildInfoCardPresentation(person, options = {}) {
+function buildPersonProfilePresentation(person, options = {}) {
   if (!person) return null;
 
   const draft =
@@ -8886,32 +8886,32 @@ function buildInfoCardPresentation(person, options = {}) {
   };
 }
 
-function renderInfoCardRow(
+function renderPersonProfileRow(
   label,
   valueHtml,
   { muted = false } = {}
 ) {
   return `
-    <div class="info-card-row">
-      <div class="info-card-label">${esc(uiText(label))}</div>
-      <div class="info-card-value${muted ? ' muted' : ''}">${valueHtml}</div>
+    <div class="person-profile-row">
+      <div class="person-profile-label">${esc(uiText(label))}</div>
+      <div class="person-profile-value${muted ? ' muted' : ''}">${valueHtml}</div>
     </div>
   `;
 }
 
-function renderInfoCardSection(
+function renderPersonProfileSection(
   title,
   content
 ) {
   return `
-    <section class="info-profile-section">
-      <h3 class="info-profile-section-title">${esc(uiText(title))}</h3>
+    <section class="person-profile-section">
+      <h3 class="person-profile-section-title">${esc(uiText(title))}</h3>
       ${content}
     </section>
   `;
 }
 
-function renderInfoCardPet(
+function renderPersonProfilePet(
   pet,
   model
 ) {
@@ -8945,18 +8945,18 @@ function renderInfoCardPet(
     uiText('（未命名）');
 
   return `
-    <div class="info-card-pet">
-      <div class="info-card-pet-avatar">${avatar}</div>
-      <div class="info-card-pet-text">
-        <div class="info-card-pet-name">${esc(name)}</div>
-        <div class="info-card-pet-meta">${esc(meta)}</div>
+    <div class="person-profile-pet">
+      <div class="person-profile-pet-avatar">${avatar}</div>
+      <div class="person-profile-pet-text">
+        <div class="person-profile-pet-name">${esc(name)}</div>
+        <div class="person-profile-pet-meta">${esc(meta)}</div>
         ${petLineageHTML(pet)}
       </div>
     </div>
   `;
 }
 
-function renderInfoCardGalleryItem(
+function renderPersonProfileLifePhotoItem(
   photo,
   index
 ) {
@@ -8973,7 +8973,7 @@ function renderInfoCardGalleryItem(
   return `
     <div
       class="gallery-item"
-      data-info-gallery-idx="${index}"
+      data-person-profile-life-photo-index="${index}"
       title="${esc(photo.title || '')}"
     >
       ${
@@ -8985,7 +8985,7 @@ function renderInfoCardGalleryItem(
   `;
 }
 
-function renderInfoCardContent(
+function renderPersonProfileContent(
   container,
   person,
   options = {}
@@ -8998,7 +8998,7 @@ function renderInfoCardContent(
   }
 
   const model =
-    buildInfoCardPresentation(
+    buildPersonProfilePresentation(
       person,
       options
     );
@@ -9010,7 +9010,7 @@ function renderInfoCardContent(
   } = model;
 
   const avatarClass = [
-    'info-card-avatar',
+    'person-profile-avatar',
     presentation.status.value ===
       '幽靈'
       ? 'ghost'
@@ -9036,26 +9036,26 @@ function renderInfoCardContent(
   }
 
   const headFacts = [
-    `<div class="info-card-head-fact">${iconSvg('cake2')}<span>${esc(presentation.birthdayText)} · ${esc(presentation.ageText)}</span></div>`,
-    `<div class="info-card-head-fact">${iconSvg('house')}<span>${esc(presentation.residence || uiText('居住地未知'))}</span></div>`
+    `<div class="person-profile-head-fact">${iconSvg('cake2')}<span>${esc(presentation.birthdayText)} · ${esc(presentation.ageText)}</span></div>`,
+    `<div class="person-profile-head-fact">${iconSvg('house')}<span>${esc(presentation.residence || uiText('居住地未知'))}</span></div>`
   ];
 
   const basicRows = [
-    renderInfoCardRow(
+    renderPersonProfileRow(
       '職業',
       esc(
         presentation.career ||
         '—'
       )
     ),
-    renderInfoCardRow(
+    renderPersonProfileRow(
       '人生抱負',
       esc(
         presentation.aspiration ||
         '—'
       )
     ),
-    renderInfoCardRow(
+    renderPersonProfileRow(
       '家庭',
       esc(
         model.householdName ||
@@ -9074,7 +9074,7 @@ function renderInfoCardContent(
     presentation.causeOfDeath
   ) {
     basicRows.push(
-      renderInfoCardRow(
+      renderPersonProfileRow(
         '死因',
         esc(
           presentation.causeOfDeath
@@ -9085,25 +9085,25 @@ function renderInfoCardContent(
 
   const traitsHtml =
     presentation.traits.length
-      ? `<div class="info-card-traits">${presentation.traits.map(trait => `<span class="tag">${esc(trait)}</span>`).join('')}</div>`
-      : '<div class="info-card-value muted">—</div>';
+      ? `<div class="person-profile-traits">${presentation.traits.map(trait => `<span class="tag">${esc(trait)}</span>`).join('')}</div>`
+      : '<div class="person-profile-value muted">—</div>';
 
   basicRows.push(
-    renderInfoCardRow(
+    renderPersonProfileRow(
       '特徵',
       traitsHtml
     )
   );
 
   const sections = [
-    renderInfoCardSection(
+    renderPersonProfileSection(
       '基本資料',
-      `<div class="info-profile-list">${basicRows.join('')}</div>`
+      `<div class="person-profile-list">${basicRows.join('')}</div>`
     )
   ];
 
   const familyRows = [
-    renderInfoCardRow(
+    renderPersonProfileRow(
       '所屬家族',
       model.familyNames.length
         ? model.familyNames
@@ -9115,7 +9115,7 @@ function renderInfoCardContent(
 
   if (model.generationLabel) {
     familyRows.push(
-      renderInfoCardRow(
+      renderPersonProfileRow(
         '世代',
         esc(
           model.generationLabel
@@ -9127,7 +9127,7 @@ function renderInfoCardContent(
   model.familyRelationshipRows
     .forEach(item => {
       familyRows.push(
-        renderInfoCardRow(
+        renderPersonProfileRow(
           item.label,
           item.names
             .map(esc)
@@ -9137,9 +9137,9 @@ function renderInfoCardContent(
     });
 
   sections.push(
-    renderInfoCardSection(
+    renderPersonProfileSection(
       '家庭關係',
-      `<div class="info-profile-list">${familyRows.join('')}</div>`
+      `<div class="person-profile-list">${familyRows.join('')}</div>`
     )
   );
 
@@ -9150,7 +9150,7 @@ function renderInfoCardContent(
     const otherRows =
       model.otherRelationshipRows
         .map(item =>
-          renderInfoCardRow(
+          renderPersonProfileRow(
             item.label,
             item.names
               .map(esc)
@@ -9160,60 +9160,60 @@ function renderInfoCardContent(
         .join('');
 
     sections.push(
-      renderInfoCardSection(
+      renderPersonProfileSection(
         '其他關係',
-        `<div class="info-profile-list">${otherRows}</div>`
+        `<div class="person-profile-list">${otherRows}</div>`
       )
     );
   }
 
   sections.push(
-    renderInfoCardSection(
+    renderPersonProfileSection(
       '簡介',
-      `<div class="info-card-bio">${person.bio ? esc(presentation.bio) : '—'}</div>`
+      `<div class="person-profile-bio">${person.bio ? esc(presentation.bio) : '—'}</div>`
     )
   );
 
   const petItems =
     (person.pets || [])
       .map(pet =>
-        renderInfoCardPet(
+        renderPersonProfilePet(
           pet,
           model
         )
       )
       .join('') ||
-    '<div class="info-card-value muted">—</div>';
+    '<div class="person-profile-value muted">—</div>';
 
   const galleryItems =
     (person.gallery || [])
       .slice(0, 8)
       .map((photo, index) =>
-        renderInfoCardGalleryItem(
+        renderPersonProfileLifePhotoItem(
           photo,
           index
         )
       )
       .join('') ||
-    '<div class="info-card-value muted">—</div>';
+    '<div class="person-profile-value muted">—</div>';
 
   sections.push(
     `
-      <section class="info-profile-section">
-        <div class="info-card-media">
-          <div class="info-card-media-column">
-            <div class="info-card-media-head">
+      <section class="person-profile-section">
+        <div class="person-profile-media">
+          <div class="person-profile-media-column">
+            <div class="person-profile-media-head">
               <span>${esc(uiText('寵物'))}</span>
-              <span class="info-card-media-count">${(person.pets || []).length}</span>
+              <span class="person-profile-media-count">${(person.pets || []).length}</span>
             </div>
-            <div class="info-card-pets">${petItems}</div>
+            <div class="person-profile-pets">${petItems}</div>
           </div>
-          <div class="info-card-media-column">
-            <div class="info-card-media-head">
+          <div class="person-profile-media-column">
+            <div class="person-profile-media-head">
               <span>${esc(uiText('人生照片'))}</span>
-              <span class="info-card-media-count">${(person.gallery || []).length}</span>
+              <span class="person-profile-media-count">${(person.gallery || []).length}</span>
             </div>
-            <div class="info-card-gallery">${galleryItems}</div>
+            <div class="person-profile-gallery">${galleryItems}</div>
           </div>
         </div>
       </section>
@@ -9221,28 +9221,28 @@ function renderInfoCardContent(
   );
 
   container.innerHTML = `
-    <div class="info-card-header">
+    <div class="person-profile-header">
       <div class="${avatarClass}">${presentation.avatarHtml}</div>
-      <div class="info-card-header-text">
-        <div class="info-card-name-row">
-          <span class="info-card-name">${esc(presentation.name || '—')}</span>
+      <div class="person-profile-header-text">
+        <div class="person-profile-name-row">
+          <span class="person-profile-name">${esc(presentation.name || '—')}</span>
         </div>
-        <div class="info-card-meta">${metaItems.join('')}</div>
-        <div class="info-card-head-facts">${headFacts.join('')}</div>
+        <div class="person-profile-meta">${metaItems.join('')}</div>
+        <div class="person-profile-head-facts">${headFacts.join('')}</div>
       </div>
     </div>
-    <div class="info-card-body">${sections.join('')}</div>
+    <div class="person-profile-body">${sections.join('')}</div>
   `;
 
   container
     .querySelectorAll(
-      '[data-info-gallery-idx]'
+      '[data-person-profile-life-photo-index]'
     )
     .forEach(element => {
       element.onclick = () => {
         const index =
           Number(
-            element.dataset.infoGalleryIdx
+            element.dataset.personProfileLifePhotoIndex
           );
 
         if (model.onGallery) {
@@ -9263,43 +9263,43 @@ function renderInfoCardContent(
     });
 }
 
-function openInfoCard(id) {
+function openPersonProfile(id) {
   const person =
     genealogyData.sims[id];
 
   if (!person) return;
 
-  infoCardId = id;
+  personProfilePersonId = id;
 
-  renderInfoCardContent(
-    $('infoCardContent'),
+  renderPersonProfileContent(
+    $('personProfileContent'),
     person
   );
 
-  infoMask.classList.add(
+  personProfileDialog.classList.add(
     'show'
   );
 }
 
-function closeInfoCard() {
-  infoMask.classList.remove(
+function closePersonProfile() {
+  personProfileDialog.classList.remove(
     'show'
   );
-  infoCardId = null;
+  personProfilePersonId = null;
 }
 
-$('infoCloseBtn').onclick =
-  closeInfoCard;
+$('personProfileCloseBtn').onclick =
+  closePersonProfile;
 
-infoMask.onclick = event => {
-  if (event.target === infoMask) {
-    closeInfoCard();
+personProfileDialog.onclick = event => {
+  if (event.target === personProfileDialog) {
+    closePersonProfile();
   }
 };
 
-$('infoEditBtn').onclick = () => {
-  const id = infoCardId;
-  closeInfoCard();
+$('personProfileEditBtn').onclick = () => {
+  const id = personProfilePersonId;
+  closePersonProfile();
 
   if (id) {
     openEditor(id);
@@ -10168,7 +10168,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
 
 async function handlePersonCardMenuAction(action, simId) {
   if (!action) return;
-  if (action === 'view') { closePersonCardMenu(); openInfoCard(simId); return; }
+  if (action === 'view') { closePersonCardMenu(); openPersonProfile(simId); return; }
   if (action === 'edit') { closePersonCardMenu(); openEditor(simId); return; }
   if (action === 'locate') { closePersonCardMenu(); focusSimOnCanvas(simId); return; }
   if (action === 'perspective') {
@@ -10957,7 +10957,7 @@ nodes.addEventListener('pointerdown', e => {
         );
         expandStageToFit();
       } else {
-        if (viewMode === 'view') openInfoCard(id);
+        if (viewMode === 'view') openPersonProfile(id);
         else openEditor(id);
       }
     };
@@ -11252,7 +11252,7 @@ nodes.addEventListener('pointerdown', e => {
         ) < 5
       ) {
         if (viewMode === 'view') {
-          openInfoCard(id);
+          openPersonProfile(id);
         } else {
           openEditor(id);
         }
@@ -11508,7 +11508,7 @@ nodes.addEventListener('pointerdown', e => {
       expandStageToFit();
     } else {
       if (viewMode === 'view') {
-        openInfoCard(id);
+        openPersonProfile(id);
       } else {
         openEditor(id);
       }
@@ -12010,7 +12010,7 @@ function renderFamilyMemberList(fam) {
         familyMemberController.toggleSelection(row.dataset.familySimId);
         return;
       }
-      openInfoCard(row.dataset.familySimId);
+      openPersonProfile(row.dataset.familySimId);
     };
 
     row.addEventListener('click', handle);
@@ -12038,7 +12038,7 @@ function renderFamilyMemberList(fam) {
       const action = btn.dataset.familyMemberAction;
       if (!simId || !genealogyData.sims[simId]) return;
 
-      if (action === 'view') openInfoCard(simId);
+      if (action === 'view') openPersonProfile(simId);
       else if (action === 'edit') openEditor(simId);
       else if (action === 'locate') focusSimOnCanvas(simId);
       else if (action === 'remove') familyMemberController.setRemoveMode(true, [simId]);
@@ -14973,7 +14973,7 @@ function editorDraftSim(){
       .filter(family=>family&&!family.gameImport)
       .map(family=>displayDataText(family.name,family));
 
-    renderInfoCardContent(target,draft,{
+    renderPersonProfileContent(target,draft,{
       draft:true,
       familyNames,
       familyRelationshipRows:buildEditorFamilyRelationshipRows(draft),
@@ -15955,59 +15955,59 @@ async function deleteChar(id) {
   const mutation = purgeSimData(id);
   finalizeSimDataChange(mutation);
 
-  if (rosterMask.classList.contains('show')) {
-    renderRoster();
+  if (personLibraryDialog.classList.contains('show')) {
+    renderPersonLibrary();
   }
 }
 
 // ========【人物庫】 設定 - 精簡 / 詳細檢視、單人選單與批量管理 ========
 const personLibraryController = {
   syncViewControls() {
-    const compact = $('rosterCompactBtn');
-    const detailed = $('rosterDetailedBtn');
-    const list = $('rosterList');
+    const compact = $('personLibraryCompactBtn');
+    const detailed = $('personLibraryDetailedBtn');
+    const list = $('personLibraryList');
 
     if (compact) {
-      const active = rosterViewMode === 'compact';
+      const active = personLibraryViewMode === 'compact';
       compact.classList.toggle('active', active);
       compact.setAttribute('aria-pressed', active ? 'true' : 'false');
     }
 
     if (detailed) {
-      const active = rosterViewMode === 'detailed';
+      const active = personLibraryViewMode === 'detailed';
       detailed.classList.toggle('active', active);
       detailed.setAttribute('aria-pressed', active ? 'true' : 'false');
     }
 
     if (list) {
-      list.classList.toggle('compact', rosterViewMode === 'compact');
-      list.classList.toggle('detailed', rosterViewMode === 'detailed');
+      list.classList.toggle('compact', personLibraryViewMode === 'compact');
+      list.classList.toggle('detailed', personLibraryViewMode === 'detailed');
     }
   },
 
   setViewMode(mode) {
-    rosterViewMode = mode === 'compact' ? 'compact' : 'detailed';
+    personLibraryViewMode = mode === 'compact' ? 'compact' : 'detailed';
     try {
-      localStorage.setItem(ROSTER_VIEW_KEY, rosterViewMode);
+      localStorage.setItem(PERSON_LIBRARY_VIEW_KEY, personLibraryViewMode);
     } catch (_) {}
 
     this.syncViewControls();
-    renderRoster();
+    renderPersonLibrary();
   },
 
   syncBatchToolbar() {
     const count = personLibraryState.selection.size;
-    const toolbar = $('rosterBatchToolbar');
-    const batchBtn = $('rosterBatchBtn');
-    const addBtn = $('rosterAddBtn');
-    const countEl = $('rosterBatchCount');
+    const toolbar = $('personLibraryBatchToolbar');
+    const batchBtn = $('personLibraryBatchBtn');
+    const addBtn = $('personLibraryAddBtn');
+    const countEl = $('personLibraryBatchCount');
 
     if (toolbar) toolbar.hidden = !personLibraryState.batchMode;
     if (batchBtn) batchBtn.hidden = personLibraryState.batchMode;
     if (addBtn) addBtn.hidden = personLibraryState.batchMode;
     if (countEl) countEl.textContent = '已選 ' + count + ' 位';
 
-    ['rosterBatchAddFamilyBtn','rosterBatchRemoveFamilyBtn','rosterBatchDeleteBtn']
+    ['personLibraryBatchAddFamilyBtn','personLibraryBatchRemoveFamilyBtn','personLibraryBatchDeleteBtn']
       .forEach(id => {
         const button = $(id);
         if (button) button.disabled = count === 0;
@@ -16019,7 +16019,7 @@ const personLibraryController = {
     personLibraryState.selection.clear();
     closeAppMenus();
     this.syncBatchToolbar();
-    renderRoster();
+    renderPersonLibrary();
   },
 
   toggleSelection(id) {
@@ -16031,19 +16031,19 @@ const personLibraryController = {
       personLibraryState.selection.add(id);
     }
 
-    renderRoster();
+    renderPersonLibrary();
   },
 
   open() {
-    rosterSearch.value = '';
+    personLibrarySearch.value = '';
     resetPersonLibraryOperations({ batch:true, add:false });
     this.syncViewControls();
-    renderRoster();
-    rosterMask.classList.add('show');
+    renderPersonLibrary();
+    personLibraryDialog.classList.add('show');
   },
 
   close() {
-    rosterMask.classList.remove('show');
+    personLibraryDialog.classList.remove('show');
     resetPersonLibraryOperations({ batch:true, add:false });
   },
 
@@ -16095,7 +16095,7 @@ const personLibraryController = {
   }
 };
 
-function rosterCompactMeta(sim) {
+function personLibraryCompactMeta(sim) {
   const parts = [displayDataText(sim.lifeStage, sim)];
   if (sim.race) {
     parts.push(displayDataText(RACE_PRESETS[sim.race]?.label || sim.race, sim));
@@ -16103,9 +16103,9 @@ function rosterCompactMeta(sim) {
   return parts.filter(Boolean).join(' · ');
 }
 
-function renderRoster() {
+function renderPersonLibrary() {
   const fam = currentFamily();
-  const q = rosterSearch.value.trim().toLowerCase();
+  const q = personLibrarySearch.value.trim().toLowerCase();
   const all = Object.values(genealogyData.sims);
 
   all.sort((x, y) => String(x.name).localeCompare(String(y.name), 'zh'));
@@ -16124,15 +16124,15 @@ function renderRoster() {
     || (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q))
   ) : all;
 
-  $('rosterCount').textContent = '（' + filtered.length + '/' + all.length + '）';
+  $('personLibraryCount').textContent = '（' + filtered.length + '/' + all.length + '）';
   personLibraryController.syncViewControls();
   personLibraryController.syncBatchToolbar();
 
-  const list = $('rosterList');
+  const list = $('personLibraryList');
   if (!filtered.length) {
     list.innerHTML = all.length
-      ? '<div class="roster-empty">沒有符合的人物</div>'
-      : '<div class="roster-empty">還沒有任何人物</div>';
+      ? '<div class="person-library-empty">沒有符合的人物</div>'
+      : '<div class="person-library-empty">還沒有任何人物</div>';
     return;
   }
 
@@ -16142,7 +16142,7 @@ function renderRoster() {
       .map(f => displayDataText(f.name, f));
 
     const selected = personLibraryState.selection.has(s.id);
-    const compactMeta = rosterCompactMeta(s);
+    const compactMeta = personLibraryCompactMeta(s);
     const detail = [
       displayDataText(s.lifeStage, s),
       s.race ? displayDataText(RACE_PRESETS[s.race]?.label || s.race, s) : '',
@@ -16154,58 +16154,58 @@ function renderRoster() {
     const photoCount = (s.gallery || []).length;
     const detailHtml = detail
       .map(value => '<span>' + esc(value) + '</span>')
-      .join('<span class="roster-meta-separator" aria-hidden="true">·</span>');
+      .join('<span class="person-library-meta-separator" aria-hidden="true">·</span>');
 
     const photoHtml = photoCount
-      ? '<span class="roster-meta-separator" aria-hidden="true">·</span>' +
+      ? '<span class="person-library-meta-separator" aria-hidden="true">·</span>' +
         '<span>' + iconSvg('images') + ' ' + photoCount + ' ' + esc(uiText('人生照片')) + '</span>'
       : '';
 
     const familyAction = fam.memberIds.includes(s.id) ? '移出目前家族' : '加入目前家族';
     const familyIcon = fam.memberIds.includes(s.id) ? 'person-dash' : 'person-add';
 
-    return '<div class="roster-item' +
+    return '<div class="person-library-item' +
         (personLibraryState.batchMode ? ' batch-mode' : '') +
         (selected ? ' batch-selected' : '') +
-        '" data-roster-id="' + esc(s.id) + '">' +
-      '<div class="roster-main">' +
-        '<div class="roster-avatar-wrap">' +
-          '<div class="roster-avatar">' + avatarHTML(s) + '</div>' +
-          '<button class="roster-batch-select' + (selected ? ' selected' : '') +
-            '" type="button" data-roster-select="' + esc(s.id) +
+        '" data-person-library-id="' + esc(s.id) + '">' +
+      '<div class="person-library-main">' +
+        '<div class="person-library-avatar-wrap">' +
+          '<div class="person-library-avatar">' + avatarHTML(s) + '</div>' +
+          '<button class="person-library-batch-select' + (selected ? ' selected' : '') +
+            '" type="button" data-person-library-select="' + esc(s.id) +
             '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
             (selected ? iconSvg('check-lg') : '') +
           '</button>' +
         '</div>' +
-        '<div class="roster-text">' +
-          '<div class="roster-name">' +
+        '<div class="person-library-text">' +
+          '<div class="person-library-name">' +
             raceIconHTML(s) + statusIconHTML(s) +
             '<span>' + esc(displayDataText(s.name, s)) + '</span>' +
           '</div>' +
-          '<div class="roster-compact-meta">' + esc(compactMeta) + '</div>' +
-          '<div class="roster-detailed-meta">' + detailHtml + photoHtml + '</div>' +
+          '<div class="person-library-compact-meta">' + esc(compactMeta) + '</div>' +
+          '<div class="person-library-detailed-meta">' + detailHtml + photoHtml + '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="ui-menu roster-item-menu">' +
-        '<button class="roster-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
+      '<div class="ui-menu person-library-item-menu">' +
+        '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') +
         '</button>' +
-        '<div class="ui-menu-popover roster-item-popover" role="menu">' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="view" data-roster-action-id="' + esc(s.id) + '">' +
+        '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="view" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span>' +
           '</button>' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="edit" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="edit" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('pencil-square') + '<span>' + esc(uiText('編輯模擬市民')) + '</span>' +
           '</button>' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="locate" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="locate" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span>' +
           '</button>' +
           '<div class="ui-menu-divider"></div>' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-roster-action="toggle-family" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="toggle-family" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg(familyIcon) + '<span>' + esc(uiText(familyAction)) + '</span>' +
           '</button>' +
           '<div class="ui-menu-divider"></div>' +
-          '<button class="ui-menu-item danger" type="button" role="menuitem" data-roster-action="delete" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item danger" type="button" role="menuitem" data-person-library-action="delete" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span>' +
           '</button>' +
         '</div>' +
@@ -16213,36 +16213,36 @@ function renderRoster() {
     '</div>';
   }).join('');
 
-  list.querySelectorAll('[data-roster-id]').forEach(row => {
+  list.querySelectorAll('[data-person-library-id]').forEach(row => {
     row.addEventListener('click', e => {
-      if (e.target.closest('.roster-item-menu, .roster-batch-select')) return;
-      const id = row.dataset.rosterId;
+      if (e.target.closest('.person-library-item-menu, .person-library-batch-select')) return;
+      const id = row.dataset.personLibraryId;
       if (personLibraryState.batchMode) personLibraryController.toggleSelection(id);
-      else openInfoCard(id);
+      else openPersonProfile(id);
     });
   });
 
-  list.querySelectorAll('[data-roster-select]').forEach(btn => {
+  list.querySelectorAll('[data-person-library-select]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      personLibraryController.toggleSelection(btn.dataset.rosterSelect);
+      personLibraryController.toggleSelection(btn.dataset.personLibrarySelect);
     });
   });
 
-  list.querySelectorAll('[data-roster-action]').forEach(btn => {
+  list.querySelectorAll('[data-person-library-action]').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
 
-      const id = btn.dataset.rosterActionId;
-      const action = btn.dataset.rosterAction;
+      const id = btn.dataset.personLibraryActionId;
+      const action = btn.dataset.personLibraryAction;
       if (!genealogyData.sims[id]) return;
 
       if (action === 'view') {
-        openInfoCard(id);
+        openPersonProfile(id);
       } else if (action === 'edit') {
         openEditor(id);
       } else if (action === 'locate') {
-        rosterMask.classList.remove('show');
+        personLibraryDialog.classList.remove('show');
         focusSimOnCanvas(id);
       } else if (action === 'toggle-family') {
         const mutation =
@@ -16251,7 +16251,7 @@ function renderRoster() {
             : genealogyStore.addFamilyMember(fam.id, id);
 
         applyGenealogyMutation(mutation);
-        renderRoster();
+        renderPersonLibrary();
       } else if (action === 'delete') {
         await deleteChar(id);
       }
@@ -16261,50 +16261,50 @@ function renderRoster() {
   if (!personLibraryState.batchMode) setupAppMenus();
 }
 
-$('rosterBtn').onclick = () => {
+$('personLibraryBtn').onclick = () => {
   personLibraryController.open();
 };
 
-$('rosterCloseBtn').onclick = () => {
+$('personLibraryCloseBtn').onclick = () => {
   personLibraryController.close();
 };
 
-rosterMask.onclick = event => {
-  if (event.target === rosterMask) {
+personLibraryDialog.onclick = event => {
+  if (event.target === personLibraryDialog) {
     personLibraryController.close();
   }
 };
 
-rosterSearch.oninput = debounce(renderRoster, 150);
+personLibrarySearch.oninput = debounce(renderPersonLibrary, 150);
 
-$('rosterAddBtn').onclick = () => openEditor(null);
-$('rosterCompactBtn').onclick = () => setRosterViewMode('compact');
-$('rosterDetailedBtn').onclick = () => setRosterViewMode('detailed');
-$('rosterBatchBtn').onclick = () => personLibraryController.setBatchMode(true);
-$('rosterBatchCancelBtn').onclick = () => personLibraryController.setBatchMode(false);
+$('personLibraryAddBtn').onclick = () => openEditor(null);
+$('personLibraryCompactBtn').onclick = () => setPersonLibraryViewMode('compact');
+$('personLibraryDetailedBtn').onclick = () => setPersonLibraryViewMode('detailed');
+$('personLibraryBatchBtn').onclick = () => personLibraryController.setBatchMode(true);
+$('personLibraryBatchCancelBtn').onclick = () => personLibraryController.setBatchMode(false);
 
-$('rosterBatchAddFamilyBtn').onclick = () => {
+$('personLibraryBatchAddFamilyBtn').onclick = () => {
   personLibraryController.addSelectionToCurrentFamily();
 };
 
-$('rosterBatchRemoveFamilyBtn').onclick = () => {
+$('personLibraryBatchRemoveFamilyBtn').onclick = () => {
   personLibraryController.removeSelectionFromCurrentFamily();
 };
 
-$('rosterBatchDeleteBtn').onclick = () => {
+$('personLibraryBatchDeleteBtn').onclick = () => {
   personLibraryController.deleteSelection();
 };
 
 const addMemberController = {
   open() {
     personLibraryState.addSelection.clear();
-    $('addMemberSearch').value = '';
-    renderAddMemberList();
-    addMemberMask.classList.add('show');
+    $('familyMemberPickerSearch').value = '';
+    renderFamilyMemberPickerList();
+    familyMemberPickerDialog.classList.add('show');
   },
 
   close() {
-    addMemberMask.classList.remove('show');
+    familyMemberPickerDialog.classList.remove('show');
     personLibraryState.addSelection.clear();
   },
 
@@ -16317,7 +16317,7 @@ const addMemberController = {
       personLibraryState.addSelection.add(id);
     }
 
-    renderAddMemberList();
+    renderFamilyMemberPickerList();
   },
 
   selectAllCandidates() {
@@ -16330,12 +16330,12 @@ const addMemberController = {
       }
     });
 
-    renderAddMemberList();
+    renderFamilyMemberPickerList();
   },
 
   clearSelection() {
     personLibraryState.addSelection.clear();
-    renderAddMemberList();
+    renderFamilyMemberPickerList();
   },
 
   commit() {
@@ -16354,10 +16354,10 @@ const addMemberController = {
   }
 };
 
-function renderAddMemberList() {
+function renderFamilyMemberPickerList() {
   const fam = currentFamily();
   const memberSet = new Set(fam.memberIds);
-  const q = $('addMemberSearch').value.trim().toLowerCase();
+  const q = $('familyMemberPickerSearch').value.trim().toLowerCase();
   const all = Object.values(genealogyData.sims);
   all.sort((a,b) => String(a.name).localeCompare(String(b.name),'zh'));
   let candidates = all.filter(s => !memberSet.has(s.id));
@@ -16368,22 +16368,22 @@ function renderAddMemberList() {
       || (s.residence||'').toLowerCase().includes(q)
       || (s.traits||[]).some(t => (t||'').toLowerCase().includes(q)));
   }
-  $('addMemberFamilyName').textContent = displayDataText(fam.name, fam);
-  const list = $('addMemberList');
+  $('familyMemberPickerFamilyName').textContent = displayDataText(fam.name, fam);
+  const list = $('familyMemberPickerList');
   if (!candidates.length) {
     list.innerHTML = all.length === memberSet.size
-      ? '<div class="roster-empty">所有模擬市民都已在目前家族中</div>'
-      : '<div class="roster-empty">沒有符合的項目</div>';
+      ? '<div class="family-member-picker-empty">所有模擬市民都已在目前家族中</div>'
+      : '<div class="family-member-picker-empty">沒有符合的項目</div>';
   } else {
     list.innerHTML = candidates.map(s => {
       const fams = genealogyData.families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
       const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
       const isSel = personLibraryState.addSelection.has(s.id);
-      return `<div class="addmember-item${isSel ? ' selected' : ''}" data-add-id="${s.id}">
-        <div class="addmember-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
-        <div class="roster-avatar">${avatarHTML(s)}</div>
-        <div class="roster-text">
-          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
+      return `<div class="family-member-picker-item${isSel ? ' selected' : ''}" data-family-member-picker-id="${s.id}">
+        <div class="family-member-picker-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
+        <div class="family-member-picker-avatar">${avatarHTML(s)}</div>
+        <div class="family-member-picker-text">
+          <div class="family-member-picker-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
             <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
           </div>
           <div class="roster-meta">${genderIcon} ${esc(fams)}</div>
@@ -16392,11 +16392,11 @@ function renderAddMemberList() {
     }).join('');
   }
   const count = personLibraryState.addSelection.size;
-  $('addMemberCount').innerHTML = `已選 <b>${count}</b> 人`;
-  $('addMemberConfirmBtn').disabled = count === 0;
-  list.querySelectorAll('.addmember-item').forEach(el => {
+  $('familyMemberPickerCount').innerHTML = `已選 <b>${count}</b> 人`;
+  $('familyMemberPickerConfirmBtn').disabled = count === 0;
+  list.querySelectorAll('.family-member-picker-item').forEach(el => {
     el.onclick = () => {
-      const id = el.dataset.addId;
+      const id = el.dataset.familyMemberPickerId;
       addMemberController.toggle(id);
     };
   });
@@ -16405,27 +16405,27 @@ $('addMemberBtn').onclick = () => {
   addMemberController.open();
 };
 
-$('addMemberSearch').oninput = debounce(renderAddMemberList, 150);
+$('familyMemberPickerSearch').oninput = debounce(renderFamilyMemberPickerList, 150);
 
-$('addMemberCancelBtn').onclick = () => {
+$('familyMemberPickerCancelBtn').onclick = () => {
   addMemberController.close();
 };
 
-addMemberMask.onclick = event => {
-  if (event.target === addMemberMask) {
+familyMemberPickerDialog.onclick = event => {
+  if (event.target === familyMemberPickerDialog) {
     addMemberController.close();
   }
 };
 
-$('addMemberAllBtn').onclick = () => {
+$('familyMemberPickerAllBtn').onclick = () => {
   addMemberController.selectAllCandidates();
 };
 
-$('addMemberNoneBtn').onclick = () => {
+$('familyMemberPickerNoneBtn').onclick = () => {
   addMemberController.clearSelection();
 };
 
-$('addMemberConfirmBtn').onclick = () => {
+$('familyMemberPickerConfirmBtn').onclick = () => {
   addMemberController.commit();
 };
 

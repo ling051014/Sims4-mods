@@ -1734,7 +1734,7 @@ body[data-theme="midnight"] .gallery-item-stage {
     /* 顯示方式 */ display: flex;
 }
 
-.ui-dialog-backdrop.roster {
+.ui-dialog-backdrop.person-library-backdrop {
     /* 顯示層級 */ z-index: 90;
 }
 
@@ -3203,7 +3203,7 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 /* ========【人物庫】 設定 - 圓形頭像、精簡 / 詳細檢視與批量管理 ======== */
-.roster-modal {
+.person-library-panel {
     width:min(860px,100%);
     max-height:90vh;
     display:flex;
@@ -3211,7 +3211,7 @@ button.avatar-editor-action { cursor:pointer; }
     overflow:hidden;
 }
 
-.roster-header {
+.person-library-header {
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -3219,15 +3219,15 @@ button.avatar-editor-action { cursor:pointer; }
     margin-bottom:12px;
 }
 
-.roster-header h2 { margin:0; }
+.person-library-header h2 { margin:0; }
 
-.roster-header-actions {
+.person-library-header-actions {
     display:flex;
     align-items:center;
     gap:6px;
 }
 
-.roster-view-toggle {
+.person-library-view-toggle {
     display:inline-flex;
     align-items:center;
     padding:2px;
@@ -3236,7 +3236,7 @@ button.avatar-editor-action { cursor:pointer; }
     background:var(--panel-bg);
 }
 
-.roster-view-toggle button {
+.person-library-view-toggle button {
     width:30px;
     height:28px;
     padding:0;
@@ -3248,18 +3248,18 @@ button.avatar-editor-action { cursor:pointer; }
     line-height:1;
 }
 
-.roster-view-toggle button:hover {
+.person-library-view-toggle button:hover {
     color:var(--ink);
     background:var(--card);
 }
 
-.roster-view-toggle button.active {
+.person-library-view-toggle button.active {
     color:var(--accent);
     background:var(--card);
     box-shadow:0 1px 3px rgba(31,35,40,.08);
 }
 
-.roster-header-actions > button {
+.person-library-header-actions > button {
     min-height:33px;
     padding:6px 10px;
     border:1px solid var(--border);
@@ -3270,19 +3270,19 @@ button.avatar-editor-action { cursor:pointer; }
     font-size:11.5px;
 }
 
-.roster-header-actions > button.primary {
+.person-library-header-actions > button.primary {
     background:var(--accent);
     color:#fff;
     border-color:var(--accent);
 }
 
-.roster-toolbar {
+.person-library-toolbar {
     display:flex;
     align-items:center;
     margin-bottom:10px;
 }
 
-.roster-toolbar input {
+.person-library-toolbar input {
     width:100%;
     min-height:35px;
     padding:7px 10px;
@@ -3295,12 +3295,12 @@ button.avatar-editor-action { cursor:pointer; }
     outline:none;
 }
 
-.roster-toolbar input:focus {
+.person-library-toolbar input:focus {
     border-color:var(--accent);
     box-shadow:0 0 0 2px var(--grad-1-soft);
 }
 
-.roster-count {
+.person-library-count {
     margin-left:5px;
     color:var(--sub);
     font-size:11px;
@@ -3308,7 +3308,7 @@ button.avatar-editor-action { cursor:pointer; }
     white-space:nowrap;
 }
 
-.roster-batch-toolbar {
+.person-library-batch-toolbar {
     min-height:40px;
     margin:0 0 8px;
     padding:6px 8px;
@@ -3321,14 +3321,14 @@ button.avatar-editor-action { cursor:pointer; }
     flex-wrap:wrap;
 }
 
-.roster-batch-toolbar[hidden] { display:none; }
+.person-library-batch-toolbar[hidden] { display:none; }
 
-.roster-batch-count {
+.person-library-batch-count {
     color:var(--sub);
     font-size:11px;
 }
 
-.roster-batch-toolbar button {
+.person-library-batch-toolbar button {
     min-height:28px;
     padding:4px 8px;
     border:1px solid var(--border);
@@ -3339,17 +3339,17 @@ button.avatar-editor-action { cursor:pointer; }
     font-size:10.5px;
 }
 
-.roster-batch-toolbar button.danger {
+.person-library-batch-toolbar button.danger {
     color:#b03a2e;
     border-color:rgba(176,58,46,.28);
 }
 
-.roster-batch-toolbar button:disabled {
+.person-library-batch-toolbar button:disabled {
     opacity:.4;
     cursor:default;
 }
 
-.roster-list {
+.person-library-list {
     flex:1 1 auto;
     min-height:180px;
     max-height:58vh;
@@ -3357,7 +3357,7 @@ button.avatar-editor-action { cursor:pointer; }
     padding-right:3px;
 }
 
-.roster-item {
+.person-library-item {
     min-height:58px;
     display:grid;
     grid-template-columns:minmax(0,1fr) 30px;
@@ -3369,11 +3369,11 @@ button.avatar-editor-action { cursor:pointer; }
     transition:background-color .15s ease;
 }
 
-.roster-item:last-child { border-bottom:0; }
-.roster-item:hover { background:var(--genealogy-roster-item-hover); }
-.roster-item.batch-selected { background:rgba(176,58,46,.10); }
+.person-library-item:last-child { border-bottom:0; }
+.person-library-item:hover { background:var(--genealogy-roster-item-hover); }
+.person-library-item.batch-selected { background:rgba(176,58,46,.10); }
 
-.roster-main {
+.person-library-main {
     min-width:0;
     display:flex;
     align-items:center;
@@ -3381,14 +3381,15 @@ button.avatar-editor-action { cursor:pointer; }
     cursor:pointer;
 }
 
-.roster-avatar-wrap {
+.person-library-avatar-wrap {
     position:relative;
     width:42px;
     height:42px;
     flex:0 0 42px;
 }
 
-.roster-avatar {
+.person-library-avatar,
+.family-member-picker-avatar {
     width:42px;
     height:42px;
     border-radius:50%;
@@ -3403,14 +3404,15 @@ button.avatar-editor-action { cursor:pointer; }
     border:1px solid var(--border);
 }
 
-.roster-avatar img {
+.person-library-avatar img,
+.family-member-picker-avatar img {
     width:100%;
     height:100%;
     object-fit:cover;
     display:block;
 }
 
-.roster-batch-select {
+.person-library-batch-select {
     position:absolute;
     inset:0;
     width:42px;
@@ -3427,24 +3429,26 @@ button.avatar-editor-action { cursor:pointer; }
     justify-content:center;
 }
 
-.roster-item.batch-mode .roster-batch-select {
+.person-library-item.batch-mode .person-library-batch-select {
     opacity:.42;
     pointer-events:auto;
 }
 
-.roster-item.batch-mode .roster-batch-select.selected {
+.person-library-item.batch-mode .person-library-batch-select.selected {
     opacity:.64;
     background:rgba(176,58,46,.56);
 }
 
-.roster-text {
+.person-library-text,
+.family-member-picker-text {
     min-width:0;
     display:flex;
     flex-direction:column;
     gap:3px;
 }
 
-.roster-name {
+.person-library-name,
+.family-member-picker-name {
     min-width:0;
     display:flex;
     align-items:center;
@@ -3454,14 +3458,15 @@ button.avatar-editor-action { cursor:pointer; }
     font-weight:650;
 }
 
-.roster-name > span:last-child {
+.person-library-name > span:last-child,
+.family-member-picker-name > span:last-child {
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
 }
 
-.roster-compact-meta,
-.roster-detailed-meta {
+.person-library-compact-meta,
+.person-library-detailed-meta {
     min-width:0;
     color:var(--sub);
     font-size:10.5px;
@@ -3471,35 +3476,35 @@ button.avatar-editor-action { cursor:pointer; }
     white-space:nowrap;
 }
 
-.roster-detailed-meta {
+.person-library-detailed-meta {
     display:flex;
     align-items:center;
     gap:4px;
 }
 
-.roster-list.detailed .roster-compact-meta { display:none; }
-.roster-list.compact .roster-detailed-meta { display:none; }
+.person-library-list.detailed .person-library-compact-meta { display:none; }
+.person-library-list.compact .person-library-detailed-meta { display:none; }
 
-.roster-list.compact .roster-item {
+.person-library-list.compact .person-library-item {
     min-height:48px;
     padding-top:3px;
     padding-bottom:3px;
 }
 
-.roster-list.compact .roster-avatar-wrap,
-.roster-list.compact .roster-avatar,
-.roster-list.compact .roster-batch-select {
+.person-library-list.compact .person-library-avatar-wrap,
+.person-library-list.compact .person-library-avatar,
+.person-library-list.compact .person-library-batch-select {
     width:34px;
     height:34px;
     flex-basis:34px;
 }
 
-.roster-item-menu {
+.person-library-item-menu {
     justify-self:end;
     position:relative;
 }
 
-.roster-more {
+.person-library-more {
     width:28px;
     height:28px;
     display:inline-flex;
@@ -3513,38 +3518,39 @@ button.avatar-editor-action { cursor:pointer; }
     opacity:.55;
 }
 
-.roster-item:hover .roster-more,
-.roster-more:focus-visible,
-.roster-item-menu.open .roster-more {
+.person-library-item:hover .person-library-more,
+.person-library-more:focus-visible,
+.person-library-item-menu.open .person-library-more {
     opacity:1;
     background:var(--panel-item-hover);
     color:var(--ink);
 }
 
-.roster-item.batch-mode .roster-item-menu {
+.person-library-item.batch-mode .person-library-item-menu {
     visibility:hidden;
     pointer-events:none;
 }
 
-.roster-item-popover {
+.person-library-item-popover {
     top:calc(100% + 4px);
     right:0;
     left:auto;
     min-width:190px;
 }
 
-.roster-empty {
+.person-library-empty,
+.family-member-picker-empty {
     padding:42px 20px;
     text-align:center;
     color:var(--sub);
     font-size:12px;
 }
 
-.addmember-modal {
+.family-member-picker-panel {
     /* 元素寬度 */ width: min(680px,100%);
 }
 
-.addmember-toolbar {
+.family-member-picker-toolbar {
     /* 顯示方式 */ display: flex;
     /* 項目間距 */ gap: 8px;
     /* 下方外距 */ margin-bottom: 10px;
@@ -3552,7 +3558,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 自動換行 */ flex-wrap: wrap;
 }
 
-.addmember-toolbar input {
+.family-member-picker-toolbar input {
     /* 彈性配比 */ flex: 1;
     /* 最小寬度 */ min-width: 120px;
     /* 內縮空間 */ padding: 8px 11px;
@@ -3565,11 +3571,11 @@ button.avatar-editor-action { cursor:pointer; }
     /* 文字顏色 */ color: var(--ink);
 }
 
-.addmember-toolbar input:focus {
+.family-member-picker-toolbar input:focus {
     /* 邊框顏色 */ border-color: var(--accent);
 }
 
-.addmember-toolbar button {
+.family-member-picker-toolbar button {
     /* 內縮空間 */ padding: 6px 10px;
     /* 字體大小 */ font-size: 12px;
     /* 邊框設定 */ border: 1px solid var(--border);
@@ -3579,7 +3585,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 滑鼠指標 */ cursor: pointer;
 }
 
-.addmember-list {
+.family-member-picker-list {
     /* 最大高度 */ max-height: 52vh;
     /* 溢出處理 */ overflow: auto;
     /* 邊框設定 */ border: 1px solid var(--border);
@@ -3588,7 +3594,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 背景設定 */ background: var(--panel-bg);
 }
 
-.addmember-item {
+.family-member-picker-item {
     /* 顯示方式 */ display: flex;
     /* 垂直對齊 */ align-items: center;
     /* 項目間距 */ gap: 10px;
@@ -3601,21 +3607,21 @@ button.avatar-editor-action { cursor:pointer; }
     /* 邊框設定 */ border: 1.5px solid transparent;
 }
 
-.addmember-item:hover {
+.family-member-picker-item:hover {
     /* 背景設定 */ background: var(--panel-item-hover);
 }
 
-.addmember-item.selected {
+.family-member-picker-item.selected {
     /* 邊框顏色 */ border-color: var(--accent);
     /* 背景設定 */ background: var(--panel-item-hover);
 }
 
-.addmember-item.remove-selected {
+.family-member-picker-item.remove-selected {
     /* 邊框顏色 */ border-color: #c94a3a;
     /* 背景設定 */ background: rgba(200,60,40,.08);
 }
 
-.addmember-checkbox {
+.family-member-picker-checkbox {
     /* 元素寬度 */ width: 18px;
     /* 元素高度 */ height: 18px;
     /* 邊框設定 */ border: 1.5px solid var(--border);
@@ -3631,24 +3637,24 @@ button.avatar-editor-action { cursor:pointer; }
     /* 背景設定 */ background: var(--input-bg);
 }
 
-.addmember-item.selected .addmember-checkbox {
+.family-member-picker-item.selected .family-member-picker-checkbox {
     /* 背景設定 */ background: var(--accent);
     /* 文字顏色 */ color: #fff;
     /* 邊框顏色 */ border-color: var(--accent);
 }
 
-.addmember-item.remove-selected .addmember-checkbox {
+.family-member-picker-item.remove-selected .family-member-picker-checkbox {
     /* 背景設定 */ background: #c94a3a;
     /* 文字顏色 */ color: #fff;
     /* 邊框顏色 */ border-color: #c94a3a;
 }
 
-.addmember-item .roster-text {
+.family-member-picker-item .family-member-picker-text {
     /* 彈性配比 */ flex: 1;
     /* 最小寬度 */ min-width: 0;
 }
 
-.addmember-count {
+.family-member-picker-count {
     /* 字體大小 */ font-size: 12px;
     /* 文字顏色 */ color: var(--sub);
     /* 內縮空間 */ padding: 4px 10px;
@@ -3656,62 +3662,62 @@ button.avatar-editor-action { cursor:pointer; }
     /* 圓角弧度 */ border-radius: 6px;
 }
 
-.addmember-count b {
+.family-member-picker-count b {
     /* 文字顏色 */ color: var(--accent);
     /* 字體粗細 */ font-weight: 700;
 }
 
-.addmember-count.remove-count b {
+.family-member-picker-count.remove-count b {
     /* 文字顏色 */ color: #c94a3a;
 }
 
-.info-modal { width:min(560px,100%); padding:0; overflow:hidden; }
-.info-card-content { min-width:0; }
+.person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
+.person-profile-content { min-width:0; }
 .editor-info-preview { width:min(560px,100%); margin:0 auto; overflow:hidden; border:1px solid var(--border); border-radius:9px; background:var(--card); }
-.info-card-header { display:flex; gap:14px; align-items:flex-start; padding:16px 18px 14px; border-bottom:1px solid var(--border); margin:0; }
-.info-card-avatar { width:104px; height:104px; border-radius:10px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:var(--avatar-ink); border:1px solid var(--border); position:relative; }
-.info-card-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
-.info-card-avatar.ghost::after { content:""; position:absolute; inset:0; background:rgba(155,183,212,.28); mix-blend-mode:screen; pointer-events:none; }
-.info-card-avatar.dead { filter:sepia(.45) saturate(.7) brightness(.95); }
-.info-card-header-text { flex:1; min-width:0; padding-top:1px; }
-.info-card-name-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.info-card-name { font-size:20px; font-weight:750; letter-spacing:.2px; word-break:break-word; line-height:1.25; }
-.info-card-meta { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:6px; color:var(--sub); }
-.info-card-meta .stage-tag,.info-card-meta .meta-pill { min-height:21px; padding:3px 7px; display:inline-flex; align-items:center; gap:3px; border-radius:999px; font-size:10.5px; line-height:1; }
-.info-card-meta .meta-pill { background:var(--panel-item); color:var(--ink); border:1px solid var(--border); }
-.info-card-head-facts { display:grid; gap:5px; margin-top:10px; color:var(--sub); font-size:11.5px; }
-.info-card-head-fact { display:flex; align-items:center; gap:5px; min-width:0; }
-.info-card-head-fact .l1ng-icon { color:var(--accent); flex:0 0 auto; }
-.info-card-head-fact span:last-child {
+.person-profile-header { display:flex; gap:14px; align-items:flex-start; padding:16px 18px 14px; border-bottom:1px solid var(--border); margin:0; }
+.person-profile-avatar { width:104px; height:104px; border-radius:10px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:var(--avatar-ink); border:1px solid var(--border); position:relative; }
+.person-profile-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.person-profile-avatar.ghost::after { content:""; position:absolute; inset:0; background:rgba(155,183,212,.28); mix-blend-mode:screen; pointer-events:none; }
+.person-profile-avatar.dead { filter:sepia(.45) saturate(.7) brightness(.95); }
+.person-profile-header-text { flex:1; min-width:0; padding-top:1px; }
+.person-profile-name-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.person-profile-name { font-size:20px; font-weight:750; letter-spacing:.2px; word-break:break-word; line-height:1.25; }
+.person-profile-meta { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:6px; color:var(--sub); }
+.person-profile-meta .stage-tag,.person-profile-meta .meta-pill { min-height:21px; padding:3px 7px; display:inline-flex; align-items:center; gap:3px; border-radius:999px; font-size:10.5px; line-height:1; }
+.person-profile-meta .meta-pill { background:var(--panel-item); color:var(--ink); border:1px solid var(--border); }
+.person-profile-head-facts { display:grid; gap:5px; margin-top:10px; color:var(--sub); font-size:11.5px; }
+.person-profile-head-fact { display:flex; align-items:center; gap:5px; min-width:0; }
+.person-profile-head-fact .l1ng-icon { color:var(--accent); flex:0 0 auto; }
+.person-profile-head-fact span:last-child {
     min-width:0;
     white-space:normal;
     overflow-wrap:anywhere;
     word-break:break-word;
     line-height:1.4;
 }
-.info-card-body { display:flex; flex-direction:column; gap:0; padding:0 18px; max-height:min(60vh,520px); overflow-y:auto; }
-.info-profile-section { padding:12px 0 13px; border-bottom:1px solid var(--border); }
-.info-profile-section:last-child { border-bottom:0; }
-.info-profile-section-title { margin:0 0 8px; color:var(--ink); font-size:12px; font-weight:700; }
-.info-profile-list { display:grid; gap:6px; }
-.info-card-row { display:grid; grid-template-columns:86px minmax(0,1fr); gap:10px; align-items:start; font-size:12.5px; line-height:1.45; }
-.info-card-label { color:var(--sub); min-width:0; padding:0; font-size:11.5px; }
-.info-card-value { min-width:0; color:var(--ink); word-break:break-word; }
-.info-card-value.muted { color:var(--sub); font-style:italic; }
-.info-card-traits { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
-.info-card-traits .tag { font-size:10.5px; padding:3px 7px; max-width:none; }
-.info-card-bio { font-size:12.5px; line-height:1.55; color:var(--ink); word-break:break-word; white-space:pre-wrap; }
-.info-card-media { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:16px; }
-.info-card-media-column { min-width:0; }
-.info-card-media-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:7px; color:var(--ink); font-size:12px; font-weight:700; }
-.info-card-media-count { color:var(--sub); font-size:10.5px; font-weight:500; }
-.info-card-pets { display:flex; flex-direction:column; gap:5px; }
-.info-card-pet { display:flex; align-items:center; gap:7px; padding:4px 6px; background:var(--panel-item); border-radius:6px; }
-.info-card-pet-avatar { width:30px; height:30px; border-radius:7px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); display:flex; align-items:center; justify-content:center; font-size:14px; border:1px solid var(--border); }
-.info-card-pet-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
-.info-card-pet-text { flex:1; min-width:0; }
-.info-card-pet-name { font-size:11.5px; font-weight:600; }
-.info-card-pet-meta {
+.person-profile-body { display:flex; flex-direction:column; gap:0; padding:0 18px; max-height:min(60vh,520px); overflow-y:auto; }
+.person-profile-section { padding:12px 0 13px; border-bottom:1px solid var(--border); }
+.person-profile-section:last-child { border-bottom:0; }
+.person-profile-section-title { margin:0 0 8px; color:var(--ink); font-size:12px; font-weight:700; }
+.person-profile-list { display:grid; gap:6px; }
+.person-profile-row { display:grid; grid-template-columns:86px minmax(0,1fr); gap:10px; align-items:start; font-size:12.5px; line-height:1.45; }
+.person-profile-label { color:var(--sub); min-width:0; padding:0; font-size:11.5px; }
+.person-profile-value { min-width:0; color:var(--ink); word-break:break-word; }
+.person-profile-value.muted { color:var(--sub); font-style:italic; }
+.person-profile-traits { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+.person-profile-traits .tag { font-size:10.5px; padding:3px 7px; max-width:none; }
+.person-profile-bio { font-size:12.5px; line-height:1.55; color:var(--ink); word-break:break-word; white-space:pre-wrap; }
+.person-profile-media { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:16px; }
+.person-profile-media-column { min-width:0; }
+.person-profile-media-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:7px; color:var(--ink); font-size:12px; font-weight:700; }
+.person-profile-media-count { color:var(--sub); font-size:10.5px; font-weight:500; }
+.person-profile-pets { display:flex; flex-direction:column; gap:5px; }
+.person-profile-pet { display:flex; align-items:center; gap:7px; padding:4px 6px; background:var(--panel-item); border-radius:6px; }
+.person-profile-pet-avatar { width:30px; height:30px; border-radius:7px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-bg-1),var(--avatar-bg-2)); display:flex; align-items:center; justify-content:center; font-size:14px; border:1px solid var(--border); }
+.person-profile-pet-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.person-profile-pet-text { flex:1; min-width:0; }
+.person-profile-pet-name { font-size:11.5px; font-weight:600; }
+.person-profile-pet-meta {
     color:var(--sub);
     font-size:10.5px;
     line-height:1.35;
@@ -3744,10 +3750,10 @@ button.avatar-editor-action { cursor:pointer; }
 .pet-lineage .muted {
     /* 次要提示透明度 */ opacity: .78;
 }
-.info-card-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
-.info-card-gallery .gallery-item { aspect-ratio:1/1; border-radius:5px; overflow:hidden; }
-.info-card-gallery .gallery-item-title { display:none; }
-.info-modal > .ui-dialog-actions { margin:0; padding:10px 18px 12px; border-top:1px solid var(--border); }
+.person-profile-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+.person-profile-gallery .gallery-item { aspect-ratio:1/1; border-radius:5px; overflow:hidden; }
+.person-profile-gallery .gallery-item-title { display:none; }
+.person-profile-panel > .ui-dialog-actions { margin:0; padding:10px 18px 12px; border-top:1px solid var(--border); }
 
 /* ========【使用提示】 設定 - 視窗外框沿用共用 Modal，只保留提示內容排版 ======== */
 .tips-modal {
@@ -4321,7 +4327,8 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 
 .person-card-avatar img,
 .person-card-view-avatar img,
-.roster-avatar img,
+.person-library-avatar img,
+.family-member-picker-avatar img,
 .pet-item-avatar img {
     /* 圖片繪製方式 */ image-rendering: auto;
 }
@@ -5022,13 +5029,13 @@ body:not([data-theme="midnight"]) select {
 
 /* ========【全部模擬市民】 設定 - 保留 Genealogy 內部清單層次，不套成頂部導覽的純白結果列 ======== */
 
-.roster-item:hover {
+.person-library-item:hover {
     /* 清單懸停保持同主題柔和層次 */ background: var(--genealogy-roster-item-hover, var(--panel-item-hover));
 }
 
 /* ========【人物資訊列】 設定 - SVG 保持真正 HTML，不再被 escape 成 <span> 純文字 ======== */
 
-.roster-meta-part {
+.person-library-meta-part {
     /* SVG 與文字並排 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
     /* ICON 與文字距離 */ gap: 3px;
@@ -5036,45 +5043,45 @@ body:not([data-theme="midnight"]) select {
     /* 一般欄位不強制撐滿 */ flex: 0 1 auto;
 }
 
-.roster-meta-part > span:last-child:not(.l1ng-icon) {
+.person-library-meta-part > span:last-child:not(.l1ng-icon) {
     /* 過長人物資訊隱藏 */ overflow: hidden;
     /* 過長人物資訊使用省略號 */ text-overflow: ellipsis;
     /* 維持單行 */ white-space: nowrap;
 }
 
-.roster-meta-part .l1ng-icon {
+.person-library-meta-part .l1ng-icon {
     /* 資訊 SVG 不被文字壓縮 */ flex-shrink: 0;
     /* 資訊 SVG 稍微提高辨識度 */ font-size: 1.05em;
 }
 
-.roster-meta-separator {
+.person-library-meta-separator {
     /* 分隔點不被壓縮 */ flex-shrink: 0;
     /* 分隔點透明度 */ opacity: .58;
 }
 
-.roster-meta-gender {
+.person-library-meta-gender {
     /* 性別圖示固定保留 */ flex-shrink: 0;
 }
 
 /* ========【人物狀態圖示】 設定 - 在世、已故、幽靈使用不同語意色 ======== */
 
-.roster-badge.status-alive {
+.person-meta-icon.status-alive {
     /* 在世圖示使用柔和綠色 */ color: #5f8a69;
 }
 
-.roster-badge.status-dead {
+.person-meta-icon.status-dead {
     /* 已故圖示沿用已故文字色 */ color: var(--dead-ink);
 }
 
-.roster-badge.status-ghost {
+.person-meta-icon.status-ghost {
     /* 幽靈圖示沿用幽靈文字色 */ color: var(--ghost-ink);
 }
 
-.roster-badge.race-icon {
+.person-meta-icon.race-icon {
     /* 種族圖示使用主題強調色提高辨識度 */ color: var(--accent);
 }
 
-body[data-theme="midnight"] .roster-badge.status-alive {
+body[data-theme="midnight"] .person-meta-icon.status-alive {
     /* 深色主題提高在世圖示亮度 */ color: #8fc59b;
 }
 
@@ -5984,7 +5991,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .family-rel-block:last-child { border-bottom:0 !important; }
   .family-rel-kind-row { grid-template-columns:minmax(0,1fr) 120px; }
   .pet-editor-layout { grid-template-columns:150px minmax(0,1fr); gap:14px; }
-  .info-modal { width:min(540px,100%); }
+  .person-profile-panel { width:min(540px,100%); }
 }
 @media (max-width:520px) {
   .sim-profile-header { grid-template-columns:1fr; }
@@ -6000,9 +6007,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .profile-fact-edit-row { grid-template-columns:1fr; }
   .profile-residence-field { grid-column:auto; }
   .family-rel-edit-grid { grid-template-columns:1fr; }
-  .info-card-header { align-items:center; }
-  .info-card-avatar { width:88px; height:88px; }
-  .info-card-media { grid-template-columns:1fr; }
+  .person-profile-header { align-items:center; }
+  .person-profile-avatar { width:88px; height:88px; }
+  .person-profile-media { grid-template-columns:1fr; }
   .export-background-options { grid-template-columns:1fr; }
 }
 

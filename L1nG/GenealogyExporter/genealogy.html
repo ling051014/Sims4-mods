@@ -110,7 +110,7 @@
                     </div>
                     <span class="topbar-spacer"></span>
                     <nav class="topbar-primary-actions" aria-label="主要功能">
-                        <button class="topbar-text-btn" id="rosterBtn" type="button"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span></button>
+                        <button class="topbar-text-btn" id="personLibraryBtn" type="button"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span></button>
                         <button class="topbar-text-btn topbar-export-btn" id="exportBtn" type="button" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
                         <button class="topbar-text-btn danger-action" id="restoreSampleBtn" type="button" title="恢復預設族譜"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>恢復預設族譜</span></button>
                         <div class="ui-menu" id="topbarMoreMenu">
@@ -606,61 +606,61 @@
 
         <!-- ========【模擬市民資訊卡】 設定 - 快速檢視人物資料 ======== -->
         <div class="ui-dialog-backdrop" id="personProfileDialog">
-            <div class="ui-dialog-panel info-modal">
-                <div class="info-card-content" id="infoCardContent"></div>
+            <div class="ui-dialog-panel person-profile-panel">
+                <div class="person-profile-content" id="personProfileContent"></div>
                 <div class="ui-dialog-actions">
-                    <button id="infoEditBtn"><span class="l1ng-icon icon-pencil-square" aria-hidden="true"></span><span>編輯</span></button>
+                    <button id="personProfileEditBtn"><span class="l1ng-icon icon-pencil-square" aria-hidden="true"></span><span>編輯</span></button>
                     <span class="spacer"></span>
-                    <button class="primary" id="infoCloseBtn">關閉</button>
+                    <button class="primary" id="personProfileCloseBtn">關閉</button>
                 </div>
             </div>
         </div>
 
         <!-- ========【人物庫】 設定 - 搜尋、精簡 / 詳細檢視與批量管理 ======== -->
-        <div class="ui-dialog-backdrop roster" id="personLibraryDialog">
-            <div class="ui-dialog-panel roster-modal">
-                <div class="roster-header">
-                    <h2><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span><span class="roster-count" id="rosterCount"></span></h2>
-                    <div class="roster-header-actions">
-                        <div class="roster-view-toggle" role="group" aria-label="人物顯示方式">
-                            <button id="rosterCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">☷</button>
-                            <button id="rosterDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">☰</button>
+        <div class="ui-dialog-backdrop person-library-backdrop" id="personLibraryDialog">
+            <div class="ui-dialog-panel person-library-panel">
+                <div class="person-library-header">
+                    <h2><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span><span class="person-library-count" id="personLibraryCount"></span></h2>
+                    <div class="person-library-header-actions">
+                        <div class="person-library-view-toggle" role="group" aria-label="人物顯示方式">
+                            <button id="personLibraryCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">☷</button>
+                            <button id="personLibraryDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">☰</button>
                         </div>
-                        <button class="roster-batch-start" id="rosterBatchBtn" type="button"><span class="l1ng-icon icon-person-check" aria-hidden="true"></span><span>批量管理</span></button>
-                        <button class="primary" id="rosterAddBtn" type="button"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增人物</span></button>
+                        <button class="person-library-batch-start" id="personLibraryBatchBtn" type="button"><span class="l1ng-icon icon-person-check" aria-hidden="true"></span><span>批量管理</span></button>
+                        <button class="primary" id="personLibraryAddBtn" type="button"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增人物</span></button>
                     </div>
                 </div>
-                <div class="roster-toolbar">
-                    <input id="rosterSearch" placeholder="搜尋人物…" type="search" autocomplete="off">
+                <div class="person-library-toolbar">
+                    <input id="personLibrarySearch" placeholder="搜尋人物…" type="search" autocomplete="off">
                 </div>
-                <div class="roster-batch-toolbar" id="rosterBatchToolbar" hidden>
-                    <span class="roster-batch-count" id="rosterBatchCount">已選 0 位</span>
+                <div class="person-library-batch-toolbar" id="personLibraryBatchToolbar" hidden>
+                    <span class="person-library-batch-count" id="personLibraryBatchCount">已選 0 位</span>
                     <span class="spacer"></span>
-                    <button id="rosterBatchAddFamilyBtn" type="button">加入目前家族</button>
-                    <button class="danger-action" id="rosterBatchRemoveFamilyBtn" type="button">移出目前家族</button>
-                    <button class="danger" id="rosterBatchDeleteBtn" type="button">刪除人物</button>
-                    <button id="rosterBatchCancelBtn" type="button">取消</button>
+                    <button id="personLibraryBatchAddFamilyBtn" type="button">加入目前家族</button>
+                    <button class="danger-action" id="personLibraryBatchRemoveFamilyBtn" type="button">移出目前家族</button>
+                    <button class="danger" id="personLibraryBatchDeleteBtn" type="button">刪除人物</button>
+                    <button id="personLibraryBatchCancelBtn" type="button">取消</button>
                 </div>
-                <div class="roster-list detailed" id="rosterList"></div>
-                <div class="ui-dialog-actions"><span class="spacer"></span><button id="rosterCloseBtn">關閉</button></div>
+                <div class="person-library-list detailed" id="personLibraryList"></div>
+                <div class="ui-dialog-actions"><span class="spacer"></span><button id="personLibraryCloseBtn">關閉</button></div>
             </div>
         </div>
 
         <!-- ========【加入家族】 設定 - 將既有模擬市民加入目前家族 ======== -->
-        <div class="ui-dialog-backdrop roster" id="familyMemberPickerDialog">
-            <div class="ui-dialog-panel addmember-modal">
-                <h2>新增模擬市民到<span class="family-name-chip" id="addMemberFamilyName">—</span><span class="help-tooltip" tabindex="0" role="button" aria-label="加入家族說明" data-tooltip="勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h2>
-                <div class="addmember-toolbar">
-                    <input id="addMemberSearch" placeholder="搜尋…" type="search">
-                    <button id="addMemberAllBtn" type="button">全選</button>
-                    <button id="addMemberNoneBtn" type="button">清空</button>
+        <div class="ui-dialog-backdrop person-library-backdrop" id="familyMemberPickerDialog">
+            <div class="ui-dialog-panel family-member-picker-panel">
+                <h2>新增模擬市民到<span class="family-name-chip" id="familyMemberPickerFamilyName">—</span><span class="help-tooltip" tabindex="0" role="button" aria-label="加入家族說明" data-tooltip="勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h2>
+                <div class="family-member-picker-toolbar">
+                    <input id="familyMemberPickerSearch" placeholder="搜尋…" type="search">
+                    <button id="familyMemberPickerAllBtn" type="button">全選</button>
+                    <button id="familyMemberPickerNoneBtn" type="button">清空</button>
                 </div>
-                <div class="addmember-list" id="addMemberList"></div>
+                <div class="family-member-picker-list" id="familyMemberPickerList"></div>
                 <div class="ui-dialog-actions">
-                    <span class="addmember-count" id="addMemberCount">已選<b>0</b>人</span>
+                    <span class="family-member-picker-count" id="familyMemberPickerCount">已選<b>0</b>人</span>
                     <span class="spacer"></span>
-                    <button id="addMemberCancelBtn">取消</button>
-                    <button class="primary" disabled id="addMemberConfirmBtn">加入家族</button>
+                    <button id="familyMemberPickerCancelBtn">取消</button>
+                    <button class="primary" disabled id="familyMemberPickerConfirmBtn">加入家族</button>
                 </div>
             </div>
         </div>
