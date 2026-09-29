@@ -848,6 +848,171 @@ function cardSettingsHasBody(settings) {
   return CARD_CONTENT_FIELD_KEYS.some(key => !!settings[key]);
 }
 
+// ========【人物呈現模型】 設定 - 畫布卡片、個人檔案與人物清單共用同一份顯示資料 ========
+function personDisplayText(value, owner, draft = false) {
+  if (value == null) return '';
+  return draft
+    ? String(value)
+    : displayDataText(value, owner);
+}
+
+function buildPersonPresentation(sim, { draft = false } = {}) {
+  if (!sim) return null;
+
+  const name =
+    personDisplayText(
+      sim.name,
+      sim,
+      draft
+    );
+
+  const career =
+    personDisplayText(
+      sim.career,
+      sim,
+      draft
+    );
+
+  const residence =
+    personDisplayText(
+      sim.residence,
+      sim,
+      draft
+    );
+
+  const aspiration =
+    personDisplayText(
+      sim.aspiration,
+      sim,
+      draft
+    );
+
+  const causeOfDeath =
+    personDisplayText(
+      sim.causeOfDeath,
+      sim,
+      draft
+    );
+
+  const bio =
+    personDisplayText(
+      sim.bio,
+      sim,
+      draft
+    );
+
+  const traits =
+    (sim.traits || [])
+      .map(value =>
+        personDisplayText(
+          value,
+          sim,
+          draft
+        )
+      )
+      .filter(Boolean);
+
+  const genderValue =
+    sim.gender || '其他';
+
+  const genderIcon =
+    genderValue === '男'
+      ? 'gender-male'
+      : genderValue === '女'
+        ? 'gender-female'
+        : 'gender-ambiguous';
+
+  const statusValue =
+    sim.status || '在世';
+
+  const statusIcon =
+    statusValue === '幽靈'
+      ? 'ghost-symbol'
+      : statusValue === '已故'
+        ? 'tombstone'
+        : 'heart';
+
+  const statusClass =
+    statusValue === '幽靈'
+      ? 'ghost'
+      : statusValue === '已故'
+        ? 'dead'
+        : 'alive';
+
+  const racePreset =
+    sim.race
+      ? RACE_PRESETS[sim.race]
+      : null;
+
+  const birthdayText =
+    sim.birthdayMonth &&
+    sim.birthdayDay
+      ? formatBirthdaySummary(
+          sim.birthdayMonth,
+          sim.birthdayDay,
+          sim.birthdayYear
+        )
+      : uiText('生日未知');
+
+  const ageText =
+    sim.age != null &&
+    sim.age !== ''
+      ? (
+          (document.documentElement.lang || 'zh-Hant') === 'en'
+            ? `${uiText('年齡')} ${sim.age}`
+            : `${sim.age} ${uiText('歲')}`
+        )
+      : uiText('年齡未知');
+
+  return {
+    source:sim,
+    name,
+    career,
+    residence,
+    aspiration,
+    causeOfDeath,
+    bio,
+    traits,
+    lifeStage:{
+      value:sim.lifeStage || '成年',
+      text:uiText(
+        sim.lifeStage || '成年'
+      )
+    },
+    gender:{
+      value:genderValue,
+      text:uiText(genderValue),
+      icon:genderIcon
+    },
+    status:{
+      value:statusValue,
+      text:uiText(statusValue),
+      icon:statusIcon,
+      className:statusClass
+    },
+    race:racePreset
+      ? {
+          value:sim.race,
+          text:uiText(racePreset.label),
+          icon:racePreset.icon || ''
+        }
+      : null,
+    birthdayText,
+    ageText,
+    avatarHtml:
+      framedAvatarImageHTML(
+        sim.avatar,
+        sim.avatarFrame
+      ) ||
+      esc(
+        (name || '?')
+          .trim()
+          .charAt(0) ||
+        '?'
+      )
+  };
+}
+
 // ========【檢視卡片內容模型】 設定 - 版型與外觀分離，render / 尺寸計算共用同一份資料 ========
 const VIEW_CARD_LAYOUT = Object.freeze({
   width:176,
@@ -863,63 +1028,176 @@ const VIEW_CARD_LAYOUT = Object.freeze({
 });
 
 function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
-  if (!sim) return { name:'', primary:[], details:[], hasText:false };
+  const presentation =
+    buildPersonPresentation(sim);
 
-  const dName = displayDataText(sim.name, sim);
-  const dCareer = displayDataText(sim.career, sim);
-  const dResidence = displayDataText(sim.residence, sim);
-  const dAspiration = displayDataText(sim.aspiration, sim);
-  const dTraits = (sim.traits || [])
-    .map(value => displayDataText(value, sim))
-    .filter(Boolean);
+  if (!presentation) {
+    return {
+      name:'',
+      primary:[],
+      details:[],
+      hasText:false
+    };
+  }
 
-  const name = settings.name
-    ? `${dName}${settings.gender ? formatCardGender(sim.gender) : ''}`
-    : '';
+  const name =
+    settings.name
+      ? `${presentation.name}${settings.gender ? formatCardGender(presentation.gender.value) : ''}`
+      : '';
 
   const primary = [];
 
-  if (!settings.name && settings.gender) {
-    primary.push({ text:uiText(sim.gender || '其他') });
+  if (
+    !settings.name &&
+    settings.gender
+  ) {
+    primary.push({
+      text:presentation.gender.text
+    });
   }
 
   const stageAge = [];
-  if (settings.lifeStage) stageAge.push(uiText(sim.lifeStage));
-  if (settings.age && sim.age != null && sim.age !== '') stageAge.push(formatCardAge(sim.age));
-  if (stageAge.length) primary.push({ text:stageAge.join(' · ') });
 
-  if (settings.birthday && sim.birthdayMonth && sim.birthdayDay) {
+  if (settings.lifeStage) {
+    stageAge.push(
+      presentation.lifeStage.text
+    );
+  }
+
+  if (
+    settings.age &&
+    sim.age != null &&
+    sim.age !== ''
+  ) {
+    stageAge.push(
+      formatCardAge(sim.age)
+    );
+  }
+
+  if (stageAge.length) {
     primary.push({
-      text:formatBirthdaySummary(sim.birthdayMonth, sim.birthdayDay, sim.birthdayYear),
+      text:stageAge.join(' · ')
+    });
+  }
+
+  if (
+    settings.birthday &&
+    sim.birthdayMonth &&
+    sim.birthdayDay
+  ) {
+    primary.push({
+      text:presentation.birthdayText,
       icon:'cake2'
     });
   }
 
   const statusRace = [];
-  if (settings.status) statusRace.push(uiText(sim.status || '在世'));
-  if (settings.race && sim.race && RACE_PRESETS[sim.race]) {
-    statusRace.push(uiText(RACE_PRESETS[sim.race].label));
+
+  if (settings.status) {
+    statusRace.push(
+      presentation.status.text
+    );
   }
-  if (statusRace.length) primary.push({ text:statusRace.join(' · ') });
+
+  if (
+    settings.race &&
+    presentation.race
+  ) {
+    statusRace.push(
+      presentation.race.text
+    );
+  }
+
+  if (statusRace.length) {
+    primary.push({
+      text:statusRace.join(' · ')
+    });
+  }
 
   const details = [];
-  if (settings.career && sim.career) details.push({ text:dCareer, detail:true });
-  if (settings.residence && sim.residence) details.push({ text:dResidence, icon:'house', detail:true });
-  if (settings.aspiration && sim.aspiration) details.push({ text:dAspiration, icon:'bullseye', detail:true });
-  if (settings.traits && dTraits.length) details.push({ text:dTraits.join(' / '), detail:true });
 
-  if (settings.pets || settings.gallery) {
+  if (
+    settings.career &&
+    presentation.career
+  ) {
+    details.push({
+      text:presentation.career,
+      detail:true
+    });
+  }
+
+  if (
+    settings.residence &&
+    presentation.residence
+  ) {
+    details.push({
+      text:presentation.residence,
+      icon:'house',
+      detail:true
+    });
+  }
+
+  if (
+    settings.aspiration &&
+    presentation.aspiration
+  ) {
+    details.push({
+      text:presentation.aspiration,
+      icon:'bullseye',
+      detail:true
+    });
+  }
+
+  if (
+    settings.traits &&
+    presentation.traits.length
+  ) {
+    details.push({
+      text:presentation.traits.join(' / '),
+      detail:true
+    });
+  }
+
+  if (
+    settings.pets ||
+    settings.gallery
+  ) {
     const mediaBits = [];
-    if (settings.pets && (sim.pets || []).length) mediaBits.push(`${uiText('寵物')} ${(sim.pets || []).length}`);
-    if (settings.gallery && (sim.gallery || []).length) mediaBits.push(`${uiText('人生照片')} ${(sim.gallery || []).length}`);
-    if (mediaBits.length) details.push({ text:mediaBits.join(' · ') });
+
+    if (
+      settings.pets &&
+      (sim.pets || []).length
+    ) {
+      mediaBits.push(
+        `${uiText('寵物')} ${(sim.pets || []).length}`
+      );
+    }
+
+    if (
+      settings.gallery &&
+      (sim.gallery || []).length
+    ) {
+      mediaBits.push(
+        `${uiText('人生照片')} ${(sim.gallery || []).length}`
+      );
+    }
+
+    if (mediaBits.length) {
+      details.push({
+        text:mediaBits.join(' · ')
+      });
+    }
   }
 
   return {
     name,
     primary,
     details,
-    hasText:!!(name || primary.length || details.length)
+    hasText:!!(
+      name ||
+      primary.length ||
+      details.length
+    )
   };
 }
 
@@ -8014,71 +8292,161 @@ function render() {
   invalidateRender({ layout:true, nodes:true, edges:true, chrome:true, lists:true }, { immediate:true });
 }
 
-function avatarHTML(sim){
-  const image=framedAvatarImageHTML(sim.avatar,sim.avatarFrame);
-  if(image)return image;
-  const ch=displayDataText(sim.name||'?',sim).trim().charAt(0)||'?';
-  return esc(ch);
-}
-function statusBadgeHTML(sim) {
-  if (sim.status === '幽靈') return `<div class="n-badge ghost" title="${esc(uiText('幽靈'))}">${iconSvg('ghost-symbol')}</div>`;
-  if (sim.status === '已故') return `<div class="n-badge dead" title="${esc(uiText('已故'))}">${iconSvg('tombstone')}</div>`;
-  return `<div class="n-badge alive" title="${esc(uiText('在世'))}">${iconSvg('heart')}</div>`;
-}
-function statusIconHTML(sim) {
-  if (sim.status === '幽靈') return `<span class="roster-badge status-icon status-ghost" title="${esc(uiText('幽靈'))}">${iconSvg('ghost-symbol')}</span>`;
-  if (sim.status === '已故') return `<span class="roster-badge status-icon status-dead" title="${esc(uiText('已故'))}">${iconSvg('tombstone')}</span>`;
-  return `<span class="roster-badge status-icon status-alive" title="${esc(uiText('在世'))}">${iconSvg('heart')}</span>`;
-}
-function raceBadgeHTML(sim) {
-  const r = (sim.race || '').trim();
-  if (!r) return '';
-  const preset = RACE_PRESETS[r];
-  if (!preset || !preset.icon) return '';
-  return `<div class="n-race-badge race-icon" title="${esc(uiText(preset.label))}">${iconSvg(preset.icon)}</div>`;
-}
-function raceIconHTML(sim) {
-  const r = (sim.race || '').trim();
-  if (!r) return '';
-  const preset = RACE_PRESETS[r];
-  if (!preset || !preset.icon) return '';
-  return `<span class="roster-badge race-icon" title="${esc(uiText(preset.label))}">${iconSvg(preset.icon)}</span>`;
-}
-function buildTagsHTML(traits, owner = null) {
-  const list = (traits||[]).filter(Boolean).map(value => displayDataText(value, owner));
-  if (!list.length) return '';
-  const shown = list.slice(0, MAX_TAGS);
-  const rest = list.length - shown.length;
-  let html = shown.map(t => `<span class="tag" title="${esc(t)}">${esc(t)}</span>`).join('');
-  if (rest > 0) {
-    html += `<span class="tag tag-more" title="${esc(list.slice(MAX_TAGS).join('、'))}">+${rest}</span>`;
-  }
-  return html;
-}
-function petIconFor(pet) {
-  const sp = PET_SPECIES[pet.species] || PET_SPECIES.other;
-  return iconSvg(sp.icon, 'pet-icon');
-}
-function formatPetSpecies(pet) {
-  const species =
-    PET_SPECIES[String(pet?.species || '')] ||
-    PET_SPECIES.other;
-  return uiText(species.label);
+function avatarHTML(sim) {
+  return (
+    buildPersonPresentation(sim)
+      ?.avatarHtml ||
+    '?'
+  );
 }
 
-function isEaCasPetSpecies(species){return ['dog','cat','horse'].includes(String(species||''));}
-  function normalizePetGender(value){
-    const text=String(value||'').trim().toLowerCase();
-    if(['male','男','公'].includes(text))return'male';
-    if(['female','女','母'].includes(text))return'female';
-    return'';
+function statusBadgeHTML(sim) {
+  const status =
+    buildPersonPresentation(sim)
+      ?.status;
+
+  if (!status) return '';
+
+  return `<div class="n-badge ${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</div>`;
+}
+
+function statusIconHTML(sim) {
+  const status =
+    buildPersonPresentation(sim)
+      ?.status;
+
+  if (!status) return '';
+
+  return `<span class="roster-badge status-icon status-${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</span>`;
+}
+
+function raceBadgeHTML(sim) {
+  const race =
+    buildPersonPresentation(sim)
+      ?.race;
+
+  if (!race?.icon) return '';
+
+  return `<div class="n-race-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</div>`;
+}
+
+function raceIconHTML(sim) {
+  const race =
+    buildPersonPresentation(sim)
+      ?.race;
+
+  if (!race?.icon) return '';
+
+  return `<span class="roster-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</span>`;
+}
+
+function buildTagsHTML(traits, owner = null) {
+  const list =
+    (traits || [])
+      .filter(Boolean)
+      .map(value =>
+        personDisplayText(
+          value,
+          owner
+        )
+      );
+
+  if (!list.length) return '';
+
+  const shown =
+    list.slice(0, MAX_TAGS);
+
+  const rest =
+    list.length -
+    shown.length;
+
+  let html =
+    shown
+      .map(text =>
+        `<span class="tag" title="${esc(text)}">${esc(text)}</span>`
+      )
+      .join('');
+
+  if (rest > 0) {
+    html +=
+      `<span class="tag tag-more" title="${esc(list.slice(MAX_TAGS).join('、'))}">+${rest}</span>`;
   }
-  function petGenderLabel(pet){
-    const value=normalizePetGender(pet?.gender);
-    if(value==='male')return uiText('公');
-    if(value==='female')return uiText('母');
-    return'';
+
+  return html;
+}
+
+function petIconFor(pet) {
+  const species =
+    PET_SPECIES[pet.species] ||
+    PET_SPECIES.other;
+
+  return iconSvg(
+    species.icon,
+    'pet-icon'
+  );
+}
+
+function formatPetSpecies(pet) {
+  const species =
+    PET_SPECIES[
+      String(pet?.species || '')
+    ] ||
+    PET_SPECIES.other;
+
+  return uiText(
+    species.label
+  );
+}
+
+function isEaCasPetSpecies(species) {
+  return [
+    'dog',
+    'cat',
+    'horse'
+  ].includes(
+    String(species || '')
+  );
+}
+
+function normalizePetGender(value) {
+  const text =
+    String(value || '')
+      .trim()
+      .toLowerCase();
+
+  if (
+    ['male','男','公']
+      .includes(text)
+  ) {
+    return 'male';
   }
+
+  if (
+    ['female','女','母']
+      .includes(text)
+  ) {
+    return 'female';
+  }
+
+  return '';
+}
+
+function petGenderLabel(pet) {
+  const value =
+    normalizePetGender(
+      pet?.gender
+    );
+
+  if (value === 'male') {
+    return uiText('公');
+  }
+
+  if (value === 'female') {
+    return uiText('母');
+  }
+
+  return '';
+}
 
 // ========【寵物血統】 設定 - 遊戲匯入血統只讀顯示，不改變既有手動寵物編輯流程 ========
 function getPetLineageInfo(pet) {
@@ -8117,7 +8485,9 @@ function getPetLineageInfo(pet) {
 }
 
 function petLineageHTML(pet) {
-  const lineage = getPetLineageInfo(pet);
+  const lineage =
+    getPetLineageInfo(pet);
+
   if (!lineage.hasData) return '';
 
   const parts = [];
@@ -8144,29 +8514,87 @@ function petLineageHTML(pet) {
 }
 
 function renderPetLifeStatusIcon(pet) {
-  const status = String(pet?.status || '');
-  if (status === '幽靈') return iconSvg('ghost-symbol');
-  if (status === '已故') return iconSvg('tombstone');
+  const status =
+    String(pet?.status || '');
+
+  if (status === '幽靈') {
+    return iconSvg('ghost-symbol');
+  }
+
+  if (status === '已故') {
+    return iconSvg('tombstone');
+  }
+
   return '';
 }
+
 function buildPetsChipsHTML(pets, owner = null) {
-  if (!pets || !pets.length) return '';
-  const chips = pets.slice(0, 3).map(p => {
-    const icon = petIconFor(p);
-    const st = renderPetLifeStatusIcon(p);
-    const petName = displayDataText(p.name, owner);
-    const breed = displayDataText(p.breed, owner);
-    return `<span class="n-pet-chip" title="${esc(petName)} · ${esc(formatPetSpecies(p))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${st ? st : ''}${esc(petName)}</span>`;
-  }).join('');
-  const rest = pets.length > 3 ? `<span class="n-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length-3}</span>` : '';
+  if (!pets?.length) return '';
+
+  const chips =
+    pets
+      .slice(0, 3)
+      .map(pet => {
+        const icon =
+          petIconFor(pet);
+
+        const status =
+          renderPetLifeStatusIcon(
+            pet
+          );
+
+        const petName =
+          personDisplayText(
+            pet.name,
+            owner
+          );
+
+        const breed =
+          personDisplayText(
+            pet.breed,
+            owner
+          );
+
+        return `<span class="n-pet-chip" title="${esc(petName)} · ${esc(formatPetSpecies(pet))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${status || ''}${esc(petName)}</span>`;
+      })
+      .join('');
+
+  const rest =
+    pets.length > 3
+      ? `<span class="n-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length - 3}</span>`
+      : '';
+
   return chips + rest;
 }
+
 function genderClass(sim) {
-  return sim.gender === '男' ? 'male' : sim.gender === '女' ? 'female' : 'other';
+  const gender =
+    buildPersonPresentation(sim)
+      ?.gender
+      .value;
+
+  return gender === '男'
+    ? 'male'
+    : gender === '女'
+      ? 'female'
+      : 'other';
 }
+
 function statusClass(sim) {
-  return sim.status === '幽靈' ? 'ghost' : sim.status === '已故' ? 'dead' : '';
+  const status =
+    buildPersonPresentation(sim)
+      ?.status
+      .value;
+
+  return status === '幽靈'
+    ? 'ghost'
+    : status === '已故'
+      ? 'dead'
+      : '';
 }
+
+// ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
+
 // ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
 function profileDirectFamilyIds(simId) {
   return resolveDirectFamilyRelationships(
@@ -8282,63 +8710,539 @@ function profileOtherRelationshipRows(
     }));
 }
 
-function infoCardDataText(value,owner,draft=false){
-    if(value==null)return'';
-    return draft?String(value):displayDataText(value,owner);
+function buildInfoCardPresentation(person, options = {}) {
+  if (!person) return null;
+
+  const draft =
+    options.draft === true;
+
+  const presentation =
+    buildPersonPresentation(
+      person,
+      { draft }
+    );
+
+  const householdId =
+    person.gameData &&
+    person.gameData.householdId != null
+      ? String(
+          person.gameData.householdId
+        )
+      : '';
+
+  const importedHouseholdFamily =
+    householdId
+      ? genealogyData.families.find(
+          family =>
+            String(
+              family.gameData?.householdId ??
+              ''
+            ) === householdId
+        )
+      : null;
+
+  const householdNameRaw =
+    (
+      person.gameData &&
+      person.gameData.householdName
+    ) ||
+    importedHouseholdFamily?.name ||
+    '';
+
+  const householdName =
+    householdNameRaw
+      ? personDisplayText(
+          householdNameRaw,
+          importedHouseholdFamily ||
+          person,
+          draft
+        )
+      : '';
+
+  const familyNames =
+    Array.isArray(
+      options.familyNames
+    )
+      ? options.familyNames
+      : genealogyData.families
+          .filter(family =>
+            !family.gameImport
+          )
+          .filter(family =>
+            (
+              family.memberIds ||
+              []
+            ).includes(person.id)
+          )
+          .map(family =>
+            displayDataText(
+              family.name,
+              family
+            )
+          );
+
+  const familyRelationshipRows =
+    Array.isArray(
+      options.familyRelationshipRows
+    )
+      ? options.familyRelationshipRows
+      : profileFamilyRelationshipRows(
+          person.id
+        );
+
+  const otherRelationshipRows =
+    Array.isArray(
+      options.otherRelationshipRows
+    )
+      ? options.otherRelationshipRows
+      : profileOtherRelationshipRows(
+          person.id
+        );
+
+  const generationLabel =
+    options.generationLabel !==
+      undefined
+      ? options.generationLabel
+      : getSimGenerationLabel(
+          person.id,
+          currentFamily()
+        );
+
+  return {
+    person,
+    draft,
+    presentation,
+    householdName,
+    familyNames,
+    familyRelationshipRows,
+    otherRelationshipRows,
+    generationLabel,
+    onGallery:
+      typeof options.onGallery ===
+      'function'
+        ? options.onGallery
+        : null
+  };
+}
+
+function renderInfoCardRow(
+  label,
+  valueHtml,
+  { muted = false } = {}
+) {
+  return `
+    <div class="info-card-row">
+      <div class="info-card-label">${esc(uiText(label))}</div>
+      <div class="info-card-value${muted ? ' muted' : ''}">${valueHtml}</div>
+    </div>
+  `;
+}
+
+function renderInfoCardSection(
+  title,
+  content
+) {
+  return `
+    <section class="info-profile-section">
+      <h3 class="info-profile-section-title">${esc(uiText(title))}</h3>
+      ${content}
+    </section>
+  `;
+}
+
+function renderInfoCardPet(
+  pet,
+  model
+) {
+  const avatar =
+    framedAvatarImageHTML(
+      pet.avatar,
+      pet.avatarFrame
+    ) ||
+    petIconFor(pet);
+
+  const meta = [
+    formatPetSpecies(pet),
+    pet.breed
+      ? personDisplayText(
+          pet.breed,
+          model.person,
+          model.draft
+        )
+      : '',
+    petGenderLabel(pet)
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const name =
+    personDisplayText(
+      pet.name,
+      model.person,
+      model.draft
+    ) ||
+    uiText('（未命名）');
+
+  return `
+    <div class="info-card-pet">
+      <div class="info-card-pet-avatar">${avatar}</div>
+      <div class="info-card-pet-text">
+        <div class="info-card-pet-name">${esc(name)}</div>
+        <div class="info-card-pet-meta">${esc(meta)}</div>
+        ${petLineageHTML(pet)}
+      </div>
+    </div>
+  `;
+}
+
+function renderInfoCardGalleryItem(
+  photo,
+  index
+) {
+  const url =
+    resolveImageUrl(
+      photo.image
+    );
+
+  const assetId =
+    isAssetId(photo.image)
+      ? String(photo.image)
+      : '';
+
+  return `
+    <div
+      class="gallery-item"
+      data-info-gallery-idx="${index}"
+      title="${esc(photo.title || '')}"
+    >
+      ${
+        assetId
+          ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" loading="lazy" decoding="async">`
+          : ''
+      }
+    </div>
+  `;
+}
+
+function renderInfoCardContent(
+  container,
+  person,
+  options = {}
+) {
+  if (
+    !container ||
+    !person
+  ) {
+    return;
   }
-  function renderInfoCardContent(container,c,options={}){
-    if(!container||!c)return;
-    const draft=options.draft===true;
-    const dName=infoCardDataText(c.name,c,draft),dCareer=infoCardDataText(c.career,c,draft),dResidence=infoCardDataText(c.residence,c,draft),dAspiration=infoCardDataText(c.aspiration,c,draft),dCause=infoCardDataText(c.causeOfDeath,c,draft),dBio=infoCardDataText(c.bio,c,draft);
-    const avatarClass=['info-card-avatar',c.status==='幽靈'?'ghost':'',c.status==='已故'?'dead':''].filter(Boolean).join(' ');
-    const avatar=framedAvatarImageHTML(c.avatar,c.avatarFrame)||esc((dName||'?').trim().charAt(0)||'?');
-    const metaItems=[`<span class="stage-tag stage-${esc(c.lifeStage||'')}">${esc(uiText(c.lifeStage||'成年'))}</span>`];
-    const genderText=uiText(c.gender||'其他'),genderIcon=c.gender==='男'?'gender-male':c.gender==='女'?'gender-female':'gender-ambiguous';
-    metaItems.push(`<span class="meta-pill">${iconSvg(genderIcon)}<span>${esc(genderText)}</span></span>`);
-    metaItems.push(`<span class="meta-pill">${statusIconHTML(c)}<span>${esc(uiText(c.status||'在世'))}</span></span>`);
-    if(c.race&&RACE_PRESETS[c.race]){const race=RACE_PRESETS[c.race];metaItems.push(`<span class="meta-pill">${race.icon?iconSvg(race.icon):''}<span>${esc(uiText(race.label))}</span></span>`);}
-    const birthdayText=c.birthdayMonth&&c.birthdayDay?formatBirthdaySummary(c.birthdayMonth,c.birthdayDay,c.birthdayYear):uiText('生日未知');
-    const ageText=c.age!=null&&c.age!==''?((document.documentElement.lang||'zh-Hant')==='en'?`${uiText('年齡')} ${c.age}`:`${c.age} ${uiText('歲')}`):uiText('年齡未知');
-    const headFacts=[`<div class="info-card-head-fact">${iconSvg('cake2')}<span>${esc(birthdayText)} · ${esc(ageText)}</span></div>`,`<div class="info-card-head-fact">${iconSvg('house')}<span>${esc(dResidence||uiText('居住地未知'))}</span></div>`];
-    const householdId=c.gameData&&c.gameData.householdId!=null?String(c.gameData.householdId):'';
-    const importedHouseholdFamily=householdId?genealogyData.families.find(f=>String(f.gameData?.householdId??'')===householdId):null;
-    const householdNameRaw=(c.gameData&&c.gameData.householdName)||(importedHouseholdFamily&&importedHouseholdFamily.name)||'';
-    const householdName=householdNameRaw?infoCardDataText(householdNameRaw,importedHouseholdFamily||c,draft):'';
-    const familyNames=Array.isArray(options.familyNames)?options.familyNames:genealogyData.families.filter(f=>!f.gameImport).filter(f=>(f.memberIds||[]).includes(c.id)).map(f=>displayDataText(f.name,f));
-    const familyRelationshipRows=Array.isArray(options.familyRelationshipRows)?options.familyRelationshipRows:profileFamilyRelationshipRows(c.id);
-    const otherRelationshipRows=Array.isArray(options.otherRelationshipRows)?options.otherRelationshipRows:profileOtherRelationshipRows(c.id);
-    const generationLabel=options.generationLabel!==undefined?options.generationLabel:getSimGenerationLabel(c.id,currentFamily());
-    const row=(label,value,muted=false)=>'<div class="info-card-row"><div class="info-card-label">'+esc(uiText(label))+'</div><div class="info-card-value'+(muted?' muted':'')+'">'+value+'</div></div>';
-    const sections=[],basicRows=[row('職業',esc(dCareer||'—')),row('人生抱負',esc(dAspiration||'—')),row('家庭',esc(householdName||'—'))];
-    if((c.status==='已故'||c.status==='幽靈')&&c.causeOfDeath)basicRows.push(row('死因',esc(dCause)));
-    const traits=(c.traits||[]).length?`<div class="info-card-traits">${c.traits.map(t=>`<span class="tag">${esc(infoCardDataText(t,c,draft))}</span>`).join('')}</div>`:`<div class="info-card-value muted">—</div>`;
-    basicRows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('特徵'))}</div><div class="info-card-value">${traits}</div></div>`);
-    sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('基本資料'))}</h3><div class="info-profile-list">${basicRows.join('')}</div></section>`);
-    const familyRows=[row('所屬家族',familyNames.length?familyNames.map(esc).join(' / '):'—'),...(generationLabel?[row('世代',esc(generationLabel))]:[]),...familyRelationshipRows.map(item=>row(item.label,item.names.map(esc).join(' / ')))];
-    sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('家庭關係'))}</h3><div class="info-profile-list">${familyRows.join('')}</div></section>`);
-    if(otherRelationshipRows.length)sections.push('<section class="info-profile-section"><h3 class="info-profile-section-title">'+esc(uiText('其他關係'))+'</h3><div class="info-profile-list">'+otherRelationshipRows.map(item=>row(item.label,item.names.map(esc).join(' / '))).join('')+'</div></section>');
-    sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('簡介'))}</h3><div class="info-card-bio">${c.bio?esc(dBio):'—'}</div></section>`);
-    const petItems=(c.pets||[]).map(p=>{const petAvatar=framedAvatarImageHTML(p.avatar,p.avatarFrame)||petIconFor(p);const meta=[formatPetSpecies(p),p.breed?infoCardDataText(p.breed,c,draft):'',petGenderLabel(p)].filter(Boolean).join(' · ');return`<div class="info-card-pet"><div class="info-card-pet-avatar">${petAvatar}</div><div class="info-card-pet-text"><div class="info-card-pet-name">${esc(infoCardDataText(p.name,c,draft)||uiText('（未命名）'))}</div><div class="info-card-pet-meta">${esc(meta)}</div>${petLineageHTML(p)}</div></div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
-    const galleryItems=(c.gallery||[]).slice(0,8).map((g,i)=>{const url=resolveImageUrl(g.image);const assetId=isAssetId(g.image)?String(g.image):'';return`<div class="gallery-item" data-info-gallery-idx="${i}" title="${esc(g.title||'')}">${assetId?`<img data-asset-id="${esc(assetId)}"${url?` src="${esc(url)}"`:''} alt="" loading="lazy" decoding="async">`:''}</div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
-    sections.push(`<section class="info-profile-section"><div class="info-card-media"><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('寵物'))}</span><span class="info-card-media-count">${(c.pets||[]).length}</span></div><div class="info-card-pets">${petItems}</div></div><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('人生照片'))}</span><span class="info-card-media-count">${(c.gallery||[]).length}</span></div><div class="info-card-gallery">${galleryItems}</div></div></div></section>`);
-    container.innerHTML=`<div class="info-card-header"><div class="${avatarClass}">${avatar}</div><div class="info-card-header-text"><div class="info-card-name-row"><span class="info-card-name">${esc(dName||'—')}</span></div><div class="info-card-meta">${metaItems.join('')}</div><div class="info-card-head-facts">${headFacts.join('')}</div></div></div><div class="info-card-body">${sections.join('')}</div>`;
-    container.querySelectorAll('[data-info-gallery-idx]').forEach(element=>{element.onclick=()=>{const index=Number(element.dataset.infoGalleryIdx);if(typeof options.onGallery==='function')options.onGallery(index);else if(c.id&&genealogyData?.sims?.[c.id])lifePhotoWorkspace.openSavedViewer(c.id,index);};});
+
+  const model =
+    buildInfoCardPresentation(
+      person,
+      options
+    );
+
+  if (!model) return;
+
+  const {
+    presentation
+  } = model;
+
+  const avatarClass = [
+    'info-card-avatar',
+    presentation.status.value ===
+      '幽靈'
+      ? 'ghost'
+      : '',
+    presentation.status.value ===
+      '已故'
+      ? 'dead'
+      : ''
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const metaItems = [
+    `<span class="stage-tag stage-${esc(presentation.lifeStage.value)}">${esc(presentation.lifeStage.text)}</span>`,
+    `<span class="meta-pill">${iconSvg(presentation.gender.icon)}<span>${esc(presentation.gender.text)}</span></span>`,
+    `<span class="meta-pill">${statusIconHTML(person)}<span>${esc(presentation.status.text)}</span></span>`
+  ];
+
+  if (presentation.race) {
+    metaItems.push(
+      `<span class="meta-pill">${presentation.race.icon ? iconSvg(presentation.race.icon) : ''}<span>${esc(presentation.race.text)}</span></span>`
+    );
   }
-  function openInfoCard(id){
-    const c=genealogyData.sims[id];
-    if(!c)return;
-    infoCardId=id;
-    renderInfoCardContent($('infoCardContent'),c);
-    infoMask.classList.add('show');
+
+  const headFacts = [
+    `<div class="info-card-head-fact">${iconSvg('cake2')}<span>${esc(presentation.birthdayText)} · ${esc(presentation.ageText)}</span></div>`,
+    `<div class="info-card-head-fact">${iconSvg('house')}<span>${esc(presentation.residence || uiText('居住地未知'))}</span></div>`
+  ];
+
+  const basicRows = [
+    renderInfoCardRow(
+      '職業',
+      esc(
+        presentation.career ||
+        '—'
+      )
+    ),
+    renderInfoCardRow(
+      '人生抱負',
+      esc(
+        presentation.aspiration ||
+        '—'
+      )
+    ),
+    renderInfoCardRow(
+      '家庭',
+      esc(
+        model.householdName ||
+        '—'
+      )
+    )
+  ];
+
+  if (
+    (
+      presentation.status.value ===
+        '已故' ||
+      presentation.status.value ===
+        '幽靈'
+    ) &&
+    presentation.causeOfDeath
+  ) {
+    basicRows.push(
+      renderInfoCardRow(
+        '死因',
+        esc(
+          presentation.causeOfDeath
+        )
+      )
+    );
   }
+
+  const traitsHtml =
+    presentation.traits.length
+      ? `<div class="info-card-traits">${presentation.traits.map(trait => `<span class="tag">${esc(trait)}</span>`).join('')}</div>`
+      : '<div class="info-card-value muted">—</div>';
+
+  basicRows.push(
+    renderInfoCardRow(
+      '特徵',
+      traitsHtml
+    )
+  );
+
+  const sections = [
+    renderInfoCardSection(
+      '基本資料',
+      `<div class="info-profile-list">${basicRows.join('')}</div>`
+    )
+  ];
+
+  const familyRows = [
+    renderInfoCardRow(
+      '所屬家族',
+      model.familyNames.length
+        ? model.familyNames
+            .map(esc)
+            .join(' / ')
+        : '—'
+    )
+  ];
+
+  if (model.generationLabel) {
+    familyRows.push(
+      renderInfoCardRow(
+        '世代',
+        esc(
+          model.generationLabel
+        )
+      )
+    );
+  }
+
+  model.familyRelationshipRows
+    .forEach(item => {
+      familyRows.push(
+        renderInfoCardRow(
+          item.label,
+          item.names
+            .map(esc)
+            .join(' / ')
+        )
+      );
+    });
+
+  sections.push(
+    renderInfoCardSection(
+      '家庭關係',
+      `<div class="info-profile-list">${familyRows.join('')}</div>`
+    )
+  );
+
+  if (
+    model.otherRelationshipRows
+      .length
+  ) {
+    const otherRows =
+      model.otherRelationshipRows
+        .map(item =>
+          renderInfoCardRow(
+            item.label,
+            item.names
+              .map(esc)
+              .join(' / ')
+          )
+        )
+        .join('');
+
+    sections.push(
+      renderInfoCardSection(
+        '其他關係',
+        `<div class="info-profile-list">${otherRows}</div>`
+      )
+    );
+  }
+
+  sections.push(
+    renderInfoCardSection(
+      '簡介',
+      `<div class="info-card-bio">${person.bio ? esc(presentation.bio) : '—'}</div>`
+    )
+  );
+
+  const petItems =
+    (person.pets || [])
+      .map(pet =>
+        renderInfoCardPet(
+          pet,
+          model
+        )
+      )
+      .join('') ||
+    '<div class="info-card-value muted">—</div>';
+
+  const galleryItems =
+    (person.gallery || [])
+      .slice(0, 8)
+      .map((photo, index) =>
+        renderInfoCardGalleryItem(
+          photo,
+          index
+        )
+      )
+      .join('') ||
+    '<div class="info-card-value muted">—</div>';
+
+  sections.push(
+    `
+      <section class="info-profile-section">
+        <div class="info-card-media">
+          <div class="info-card-media-column">
+            <div class="info-card-media-head">
+              <span>${esc(uiText('寵物'))}</span>
+              <span class="info-card-media-count">${(person.pets || []).length}</span>
+            </div>
+            <div class="info-card-pets">${petItems}</div>
+          </div>
+          <div class="info-card-media-column">
+            <div class="info-card-media-head">
+              <span>${esc(uiText('人生照片'))}</span>
+              <span class="info-card-media-count">${(person.gallery || []).length}</span>
+            </div>
+            <div class="info-card-gallery">${galleryItems}</div>
+          </div>
+        </div>
+      </section>
+    `
+  );
+
+  container.innerHTML = `
+    <div class="info-card-header">
+      <div class="${avatarClass}">${presentation.avatarHtml}</div>
+      <div class="info-card-header-text">
+        <div class="info-card-name-row">
+          <span class="info-card-name">${esc(presentation.name || '—')}</span>
+        </div>
+        <div class="info-card-meta">${metaItems.join('')}</div>
+        <div class="info-card-head-facts">${headFacts.join('')}</div>
+      </div>
+    </div>
+    <div class="info-card-body">${sections.join('')}</div>
+  `;
+
+  container
+    .querySelectorAll(
+      '[data-info-gallery-idx]'
+    )
+    .forEach(element => {
+      element.onclick = () => {
+        const index =
+          Number(
+            element.dataset.infoGalleryIdx
+          );
+
+        if (model.onGallery) {
+          model.onGallery(index);
+        } else if (
+          person.id &&
+          genealogyData?.sims?.[
+            person.id
+          ]
+        ) {
+          lifePhotoWorkspace
+            .openSavedViewer(
+              person.id,
+              index
+            );
+        }
+      };
+    });
+}
+
+function openInfoCard(id) {
+  const person =
+    genealogyData.sims[id];
+
+  if (!person) return;
+
+  infoCardId = id;
+
+  renderInfoCardContent(
+    $('infoCardContent'),
+    person
+  );
+
+  infoMask.classList.add(
+    'show'
+  );
+}
+
 function closeInfoCard() {
-  infoMask.classList.remove('show');
+  infoMask.classList.remove(
+    'show'
+  );
   infoCardId = null;
 }
-$('infoCloseBtn').onclick = closeInfoCard;
-infoMask.onclick = e => { if (e.target === infoMask) closeInfoCard(); };
+
+$('infoCloseBtn').onclick =
+  closeInfoCard;
+
+infoMask.onclick = event => {
+  if (event.target === infoMask) {
+    closeInfoCard();
+  }
+};
+
 $('infoEditBtn').onclick = () => {
-  const id = infoCardId; closeInfoCard(); if (id) openEditor(id);
+  const id = infoCardId;
+  closeInfoCard();
+
+  if (id) {
+    openEditor(id);
+  }
 };
 
 const lifePhotoWorkspace = {
