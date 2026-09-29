@@ -18,9 +18,9 @@ const GAPS = {
 
 const PAD = 80;
 const STORE_KEY = 'l1ng_genealogy_v1';
-const THEME_KEY = 'sims4_genealogy_theme';
-const CUSTOM_COLORS_KEY = 'sims4_custom_colors';
-const BG_KEY = 'sims4_genealogy_bg';
+const THEME_KEY = 'l1ng_genealogy_theme_v1';
+const CUSTOM_COLORS_KEY = 'l1ng_genealogy_custom_theme_v1';
+const BG_KEY = 'l1ng_genealogy_background_v1';
 const MODE_KEY = 'sims4_genealogy_mode';
 const LABELS_KEY = 'sims4_genealogy_labels';
 const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
@@ -679,8 +679,8 @@ function scheduleResolvedAssetRefresh(
             id === bgSettings?.image
         )
       ){
-        applyBg();
-        updateBgPreview();
+        renderCanvasBackground();
+        paintCanvasBackgroundPreview();
       }
     }catch(_){}
 
@@ -4995,94 +4995,186 @@ function adjustLightness(hex, delta) {
   return rgbToHex(adj(r), adj(g), adj(b));
 }
 
-function clearCustomOverrides() {
-  const props = ['--grad-1','--grad-2','--grad-1-soft','--grad-2-soft',
-                 '--accent','--accent-hover','--primary-dark','--hl'];
-  props.forEach(p => document.body.style.removeProperty(p));
+function resetThemeSurface() {
+  [
+    '--grad-1','--grad-2',
+    '--grad-1-soft','--grad-2-soft',
+    '--accent','--accent-hover',
+    '--primary-dark','--hl'
+  ].forEach(property => {
+    document.body.style.removeProperty(property);
+  });
+
   document.body.removeAttribute('data-topbar-contrast');
 }
 
-function renderThemeGrid() {
-  const cells = THEME_PRESETS.map(t =>
-    '<button class="theme-card' + (currentThemeId === t.id ? ' selected' : '') +
-    '" type="button" data-theme-id="' + esc(t.id) + '">' +
-      '<span class="theme-radio" aria-hidden="true"></span>' +
-      '<span class="theme-card-name">' + esc(t.name) + '</span>' +
-      '<span class="theme-preview" style="background:' + t.grad + '"></span>' +
-    '</button>'
-  ).join('');
+function paintThemeChoices() {
+  if (!themeGrid) return;
 
-  const customCard =
-    '<button class="theme-card' + (currentThemeId === 'custom' ? ' selected' : '') +
-    '" type="button" data-theme-id="custom">' +
-      '<span class="theme-radio" aria-hidden="true"></span>' +
-      '<span class="theme-card-name">自訂配色</span>' +
-      '<span class="theme-preview" id="customCardPreview" style="background:linear-gradient(120deg, ' +
-        customColors.c1 + ' 0%, ' + customColors.c2 + ' 100%)"></span>' +
-    '</button>';
+  const choices = THEME_PRESETS.map(theme => ({
+    id:theme.id,
+    name:theme.name,
+    gradient:theme.grad
+  }));
 
-  themeGrid.innerHTML = cells + customCard;
-
-  themeGrid.querySelectorAll('.theme-card').forEach(card => {
-    card.onclick = () => {
-      const id = card.dataset.themeId;
-      if (id === 'custom') applyCustomTheme(customColors.c1, customColors.c2);
-      else applyTheme(id);
-    };
+  choices.push({
+    id:'custom',
+    name:'自訂配色',
+    gradient:
+      `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`
   });
+
+  themeGrid.innerHTML = choices.map(choice => {
+    const selected = choice.id === currentThemeId;
+    const previewId =
+      choice.id === 'custom'
+        ? ' id="customCardPreview"'
+        : '';
+
+    return `
+      <button
+        class="theme-card${selected ? ' selected' : ''}"
+        type="button"
+        data-theme-id="${esc(choice.id)}"
+        aria-pressed="${selected ? 'true' : 'false'}"
+      >
+        <span class="theme-radio" aria-hidden="true"></span>
+        <span class="theme-card-name">${esc(choice.name)}</span>
+        <span class="theme-preview"${previewId} style="background:${choice.gradient}"></span>
+      </button>
+    `;
+  }).join('');
+
+  themeGrid
+    .querySelectorAll('[data-theme-id]')
+    .forEach(button => {
+      button.addEventListener('click', () => {
+        const themeId = button.dataset.themeId || '';
+
+        if (themeId === 'custom') {
+          chooseCustomTheme(
+            customColors.c1,
+            customColors.c2
+          );
+          return;
+        }
+
+        chooseThemePreset(themeId);
+      });
+    });
 }
 
-function applyTheme(name) {
-  if (!VALID_THEMES.includes(name)) name = 'ling';
-  clearCustomOverrides();
-  document.body.dataset.theme = name;
-  currentThemeId = name;
-  try { localStorage.setItem(THEME_KEY, name); } catch(e){}
-  updateThemeSelection();
-  applyRelationshipLineSettings();
-}
+function syncThemeChoiceDisplay() {
+  themeGrid
+    ?.querySelectorAll('[data-theme-id]')
+    .forEach(button => {
+      const selected =
+        button.dataset.themeId === currentThemeId;
 
-function applyCustomTheme(c1, c2) {
-  clearCustomOverrides();
-  document.body.dataset.theme = 'custom';
-  currentThemeId = 'custom';
-  document.body.style.setProperty('--grad-1', c1);
-  document.body.style.setProperty('--grad-2', c2);
-  document.body.style.setProperty('--grad-1-soft', hexToRgba(c1, 0.2));
-  document.body.style.setProperty('--grad-2-soft', hexToRgba(c2, 0.2));
-  const lum = (relLum(c1) + relLum(c2)) / 2;
-  document.body.setAttribute('data-topbar-contrast', lum > 0.62 ? 'light' : 'dark');
-  const mix = mixHex(c1, c2, 0.5);
-  const accent = adjustLightness(mix, -0.28);
-  document.body.style.setProperty('--accent', accent);
-  document.body.style.setProperty('--accent-hover', adjustLightness(accent, -0.12));
-  document.body.style.setProperty('--primary-dark', adjustLightness(mix, -0.4));
-  document.body.style.setProperty('--hl', hexToRgba(accent, 0.5));
-  try {
-    localStorage.setItem(THEME_KEY, 'custom');
-    localStorage.setItem(CUSTOM_COLORS_KEY, JSON.stringify({ c1, c2 }));
-  } catch(e){}
-  customColors = { c1, c2 };
-  updateThemeSelection();
-  applyRelationshipLineSettings();
-}
+      button.classList.toggle('selected', selected);
+      button.setAttribute(
+        'aria-pressed',
+        selected ? 'true' : 'false'
+      );
+    });
 
-function updateThemeSelection() {
-  themeGrid.querySelectorAll('.theme-card').forEach(c => {
-    c.classList.toggle('selected', c.dataset.themeId === currentThemeId);
-  });
-  const preview = document.getElementById('customCardPreview');
-  if (preview) {
-    preview.style.background = `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`;
+  const customPreview =
+    document.getElementById('customCardPreview');
+
+  if (customPreview) {
+    customPreview.style.background =
+      `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`;
   }
 }
 
-function updateCustomPreview() {
-  customThemePreview.style.background = `linear-gradient(120deg, ${customColor1.value} 0%, ${customColor2.value} 100%)`;
+function chooseThemePreset(themeId, { persist = true } = {}) {
+  const nextTheme =
+    VALID_THEMES.includes(themeId)
+      ? themeId
+      : 'ling';
+
+  resetThemeSurface();
+  document.body.dataset.theme = nextTheme;
+  currentThemeId = nextTheme;
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_KEY, nextTheme);
+    } catch (_) {}
+  }
+
+  syncThemeChoiceDisplay();
+  applyRelationshipLineSettings();
 }
-customColor1.addEventListener('input', updateCustomPreview);
-customColor2.addEventListener('input', updateCustomPreview);
-$('applyCustomBtn').onclick = () => applyCustomTheme(customColor1.value, customColor2.value);
+
+function chooseCustomTheme(primary, secondary, { persist = true } = {}) {
+  const c1 = String(primary || '#f0c050');
+  const c2 = String(secondary || '#a878c8');
+  const mix = mixHex(c1, c2, 0.5);
+  const accent = adjustLightness(mix, -0.28);
+  const averageLuminance =
+    (relLum(c1) + relLum(c2)) / 2;
+
+  resetThemeSurface();
+  document.body.dataset.theme = 'custom';
+
+  [
+    ['--grad-1', c1],
+    ['--grad-2', c2],
+    ['--grad-1-soft', hexToRgba(c1, 0.2)],
+    ['--grad-2-soft', hexToRgba(c2, 0.2)],
+    ['--accent', accent],
+    ['--accent-hover', adjustLightness(accent, -0.12)],
+    ['--primary-dark', adjustLightness(mix, -0.4)],
+    ['--hl', hexToRgba(accent, 0.5)]
+  ].forEach(([property, value]) => {
+    document.body.style.setProperty(property, value);
+  });
+
+  document.body.setAttribute(
+    'data-topbar-contrast',
+    averageLuminance > 0.62 ? 'light' : 'dark'
+  );
+
+  currentThemeId = 'custom';
+  customColors = { c1, c2 };
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_KEY, 'custom');
+      localStorage.setItem(
+        CUSTOM_COLORS_KEY,
+        JSON.stringify(customColors)
+      );
+    } catch (_) {}
+  }
+
+  syncThemeChoiceDisplay();
+  applyRelationshipLineSettings();
+}
+
+function paintCustomThemePreview() {
+  if (!customThemePreview) return;
+
+  customThemePreview.style.background =
+    `linear-gradient(120deg, ${customColor1.value} 0%, ${customColor2.value} 100%)`;
+}
+
+customColor1.addEventListener(
+  'input',
+  paintCustomThemePreview
+);
+customColor2.addEventListener(
+  'input',
+  paintCustomThemePreview
+);
+
+$('applyCustomBtn').onclick = () => {
+  chooseCustomTheme(
+    customColor1.value,
+    customColor2.value
+  );
+};
 
 function applyViewMode(mode) {
   if (!VALID_MODES.includes(mode)) mode = 'edit';
@@ -6363,44 +6455,194 @@ function syncRelationshipToolbarVisibility() {
 }
 labelLockToggle.onclick = () => applyLabelLock(!labelLocked);
 
-function loadSavedBg() {
+function restoreCanvasBackground() {
+  let restored = null;
+
   try {
-    const raw = localStorage.getItem(BG_KEY);
-    if (raw) {
-      const obj = JSON.parse(raw);
-      bgSettings = { image:obj.image||null,
-        opacity: typeof obj.opacity==='number' ? obj.opacity : 0.5,
-        fit: obj.fit||'cover' };
-    }
-  } catch(e){}
-  applyBg();
+    const serialized = localStorage.getItem(BG_KEY);
+    if (serialized) restored = JSON.parse(serialized);
+  } catch (_) {
+    restored = null;
+  }
+
+  if (
+    restored &&
+    typeof restored === 'object' &&
+    !Array.isArray(restored)
+  ) {
+    const opacity = Number(restored.opacity);
+
+    bgSettings = {
+      image:restored.image || null,
+      opacity:Number.isFinite(opacity)
+        ? Math.max(0, Math.min(1, opacity))
+        : 0.5,
+      fit:['cover','contain','repeat'].includes(restored.fit)
+        ? restored.fit
+        : 'cover'
+    };
+  }
+
+  renderCanvasBackground();
 }
-function applyBg() {
+
+function renderCanvasBackground() {
   const root = document.documentElement;
   const url = resolveImageUrl(bgSettings.image);
-  if (url) {
-    root.style.setProperty('--custom-bg', `url("${url}")`);
-    root.style.setProperty('--custom-bg-opacity', bgSettings.opacity);
-    if (bgSettings.fit === 'repeat') {
-      root.style.setProperty('--custom-bg-size', 'auto');
-      root.style.setProperty('--custom-bg-repeat', 'repeat');
-    } else {
-      root.style.setProperty('--custom-bg-size', bgSettings.fit);
-      root.style.setProperty('--custom-bg-repeat', 'no-repeat');
-    }
-    viewport.classList.add('has-bg');
-  } else {
-    root.style.removeProperty('--custom-bg');
-    root.style.removeProperty('--custom-bg-opacity');
-    root.style.removeProperty('--custom-bg-size');
-    root.style.removeProperty('--custom-bg-repeat');
+
+  if (!url) {
+    [
+      '--custom-bg',
+      '--custom-bg-opacity',
+      '--custom-bg-size',
+      '--custom-bg-repeat'
+    ].forEach(property => {
+      root.style.removeProperty(property);
+    });
+
     viewport.classList.remove('has-bg');
+    return;
+  }
+
+  const repeated = bgSettings.fit === 'repeat';
+
+  root.style.setProperty('--custom-bg', `url("${url}")`);
+  root.style.setProperty(
+    '--custom-bg-opacity',
+    String(bgSettings.opacity)
+  );
+  root.style.setProperty(
+    '--custom-bg-size',
+    repeated ? 'auto' : bgSettings.fit
+  );
+  root.style.setProperty(
+    '--custom-bg-repeat',
+    repeated ? 'repeat' : 'no-repeat'
+  );
+
+  viewport.classList.add('has-bg');
+}
+
+function persistCanvasBackground() {
+  try {
+    localStorage.setItem(
+      BG_KEY,
+      JSON.stringify(bgSettings)
+    );
+  } catch (_) {
+    uiAlert(
+      '背景圖片設定儲存失敗。',
+      {
+        title:'儲存失敗',
+        kind:'danger'
+      }
+    );
   }
 }
-function saveBg() {
-  try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); }
-  catch(e) { uiAlert('背景圖片設定儲存失敗。', { title: '儲存失敗', kind: 'danger' }); }
+
+function paintCanvasBackgroundPreview() {
+  const preview = $('bgPreview');
+  if (!preview) return;
+
+  const url = resolveImageUrl(bgSettings.image);
+
+  preview.style.backgroundImage =
+    url ? `url("${url}")` : '';
+
+  preview.textContent =
+    url ? '' : '尚未設定背景圖片';
 }
+
+function openAppearancePanel() {
+  $('bgOpacity').value =
+    Math.round(bgSettings.opacity * 100);
+  $('bgOpacityVal').textContent =
+    Math.round(bgSettings.opacity * 100) + '%';
+  $('bgFit').value = bgSettings.fit;
+
+  customColor1.value = customColors.c1;
+  customColor2.value = customColors.c2;
+
+  paintCustomThemePreview();
+  paintThemeChoices();
+  paintCanvasBackgroundPreview();
+  renderOtherRelationshipLineControls();
+  syncRelationshipLineControls();
+
+  bgMask.classList.add('show');
+}
+
+function closeAppearancePanel() {
+  bgMask.classList.remove('show');
+}
+
+async function replaceCanvasBackground(file) {
+  const result = await compressBgImage(file);
+
+  bgSettings.image = await saveImageAsset(
+    result.blob,
+    {
+      width:result.width,
+      height:result.height
+    }
+  );
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+  paintCanvasBackgroundPreview();
+}
+
+function setCanvasBackgroundOpacity(percent) {
+  const value =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(percent) || 0
+      )
+    );
+
+  bgSettings.opacity = value / 100;
+  $('bgOpacityVal').textContent =
+    Math.round(value) + '%';
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+}
+
+function setCanvasBackgroundFit(fit) {
+  bgSettings.fit =
+    ['cover','contain','repeat'].includes(fit)
+      ? fit
+      : 'cover';
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+}
+
+async function removeCanvasBackground() {
+  if (!bgSettings.image) return;
+
+  const confirmed = await uiConfirm(
+    '確定清除目前背景圖片嗎？',
+    {
+      title:'移除背景圖片',
+      kind:'danger',
+      confirmText:'移除背景'
+    }
+  );
+
+  if (!confirmed) return;
+
+  bgSettings.image = null;
+  scheduleGC();
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+  paintCanvasBackgroundPreview();
+  await updateStorageInfo();
+}
+
 async function compressBgImage(file) {
   validateSupportedImageFile(file);
   const optimized = await assetStore.optimizeImage(file, {
@@ -6417,7 +6659,7 @@ async function compressBgImage(file) {
     sizeKB:Math.round(optimized.byteSize / 1024)
   };
 }
-function updateBgPreview() {
+function paintCanvasBackgroundPreview() {
   const el = $('bgPreview');
   const url = resolveImageUrl(bgSettings.image);
   if (url) {
@@ -6456,21 +6698,13 @@ async function updateStorageInfo() {
   if (assetSizeEl) assetSizeEl.textContent = formatStorageSize(assetBytes);
 }
 
-$('bgBtn').onclick = () => {
-  $('bgOpacity').value = Math.round(bgSettings.opacity * 100);
-  $('bgOpacityVal').textContent = Math.round(bgSettings.opacity * 100) + '%';
-  $('bgFit').value = bgSettings.fit;
-  customColor1.value = customColors.c1;
-  customColor2.value = customColors.c2;
-  updateCustomPreview();
-  renderThemeGrid();
-  updateBgPreview();
-  renderOtherRelationshipLineControls();
-  syncRelationshipLineControls();
-  bgMask.classList.add('show');
+$('bgBtn').onclick = openAppearancePanel;
+$('bgCloseBtn').onclick = closeAppearancePanel;
+bgMask.onclick = event => {
+  if (event.target === bgMask) {
+    closeAppearancePanel();
+  }
 };
-$('bgCloseBtn').onclick = () => bgMask.classList.remove('show');
-bgMask.onclick = e => { if (e.target === bgMask) bgMask.classList.remove('show'); };
 
 $('storageBtn').onclick = () => {
   updateStorageInfo();
@@ -6503,18 +6737,18 @@ if (resetUiSettingsBtn) {
     applyRelationshipLineSettings();
     applySidebarWidth(SIDEBAR_DEFAULT_WIDTH, { persist:false });
     setFamilyPanelCollapsed(false, { persist:false });
-    applyTheme('ling');
+    chooseThemePreset('ling');
     applyViewMode('view');
     applyLabelLock(false);
-    applyBg();
-    updateBgPreview();
+    renderCanvasBackground();
+    paintCanvasBackgroundPreview();
     updateLayoutToggle();
     const labelBtn = $('labelToggle');
     if (labelBtn) {
       labelBtn.classList.add('active');
       setIconText(labelBtn, 'tags', '隱藏關係');
     }
-    renderThemeGrid();
+    paintThemeChoices();
     render();
     requestAnimationFrame(fitScreen);
     uiToast('介面設定已恢復預設。');
@@ -6569,37 +6803,38 @@ if (restoreSampleBtn) {
   };
 }
 
-$('bgInput').onchange = async e => {
-  const file = e.target.files[0];
+$('bgInput').onchange = async event => {
+  const file = event.target.files?.[0];
   if (!file) return;
+
   try {
-    const result = await compressBgImage(file);
-    bgSettings.image = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
-    applyBg(); saveBg(); updateBgPreview();
-  } catch(err){ uiAlert('背景處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
-  e.target.value = '';
+    await replaceCanvasBackground(file);
+  } catch (error) {
+    uiAlert(
+      '背景處理失敗：' + error.message,
+      {
+        title:'圖片處理失敗',
+        kind:'danger'
+      }
+    );
+  } finally {
+    event.target.value = '';
+  }
 };
-$('bgOpacity').oninput = () => {
-  const v = +$('bgOpacity').value;
-  bgSettings.opacity = v / 100;
-  $('bgOpacityVal').textContent = v + '%';
-  applyBg(); saveBg();
+
+$('bgOpacity').oninput = event => {
+  setCanvasBackgroundOpacity(
+    event.currentTarget.value
+  );
 };
-$('bgFit').onchange = () => {
-  bgSettings.fit = $('bgFit').value;
-  applyBg(); saveBg();
+
+$('bgFit').onchange = event => {
+  setCanvasBackgroundFit(
+    event.currentTarget.value
+  );
 };
-$('bgClearBtn').onclick = async () => {
-  if (!bgSettings.image) return;
-  if (!await uiConfirm('確定清除目前背景圖片嗎？', { title: '移除背景圖片', kind: 'danger', confirmText: '移除背景' })) return;
-  bgSettings.image = null;
-  scheduleGC();
-  applyBg(); saveBg(); updateBgPreview();
-  updateStorageInfo();
-};
+
+$('bgClearBtn').onclick = removeCanvasBackground;
 
 $('cleanupBtn').onclick = async () => {
   if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
@@ -15155,9 +15390,9 @@ async function importJSON(file) {
     bgSettings = { ...bgSettings, ...incomingBg };
 
     save({ immediate:true });
-    saveBg();
+    persistCanvasBackground();
     refreshFamilyUI();
-    applyBg();
+    renderCanvasBackground();
     render();
     scheduleGC();
     requestAnimationFrame(fitScreen);
@@ -15880,17 +16115,11 @@ async function init() {
     const v = localStorage.getItem(THEME_KEY);
     if (v === 'custom') savedTheme = 'custom';
     else if (v && VALID_THEMES.includes(v)) savedTheme = v;
-    else if (v) {
-      const legacyMap = {
-        blue:'ling', peach:'rose', orange:'amber', pink:'rose', cranberry:'rose',
-        green:'sage', lime:'sage', purple:'amber', thunder:'amber', night:'midnight'
-      };
-      savedTheme = legacyMap[v] || 'ling';
-    }
+
   } catch(e){}
 
-  if (savedTheme === 'custom') applyCustomTheme(customColors.c1, customColors.c2);
-  else applyTheme(savedTheme);
+  if (savedTheme === 'custom') chooseCustomTheme(customColors.c1, customColors.c2);
+  else chooseThemePreset(savedTheme);
 
   let savedMode = 'view';
   try {
@@ -15961,14 +16190,14 @@ async function init() {
   invalidateRelationshipGraph();
 
   applyRelationshipLineSettings();
-  loadSavedBg();
+  restoreCanvasBackground();
 
   // clean-break：舊 img_* / dataURL 圖片引用不再進入新的 L1nG v1 圖片 schema。
   const clearedImageRefs = clearUnsupportedImageRefs(genealogyData, bgSettings);
   if (clearedImageRefs > 0) {
     console.warn(`[圖片資產] 已清除 ${clearedImageRefs} 個舊圖片引用；請重新匯入或上傳圖片。`);
     save({ immediate:true });
-    saveBg();
+    persistCanvasBackground();
   } else if (preparedResult.changed) {
     save();
   }
