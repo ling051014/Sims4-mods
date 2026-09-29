@@ -553,9 +553,11 @@ function isNativeTextUndoTarget(target) {
 
 let editingPets = [];
 let editingTraits = [];
-let editingPetIndex = -1;
-let editingPetAvatar = null;
-let editingPetAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+const petEditorState = {
+  index:-1,
+  avatar:null,
+  avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
+};
 let editingParentKinds = new Map();
 let editingChildKinds = new Map();
 let editingExplicitSiblingIds = new Set();
@@ -6861,7 +6863,7 @@ function closeTopModal() {
     if (el && el.classList.contains('show')) {
       el.classList.remove('show');
       if (id === 'mask') { editingId=null; editingAvatar=null; editingAvatarFrame={...DEFAULT_AVATAR_FRAME}; editingPets=[]; editingGallery=[]; editingParentKinds.clear(); editingChildKinds.clear(); }
-      if (id === 'petMask') { editingPetIndex=-1; editingPetAvatar=null; editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME}; }
+      if (id === 'petMask') { petEditorState.index=-1; petEditorState.avatar=null; petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME}; }
       if (id === 'avatarCropMask') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
       if (id === 'photoMask') { lifePhotoState.editor.index = -1; lifePhotoState.editor.imageRef = ''; }
       if (id === 'infoMask') infoCardId = null;
@@ -8057,9 +8059,11 @@ function petIconFor(pet) {
   const sp = PET_SPECIES[pet.species] || PET_SPECIES.other;
   return iconSvg(sp.icon, 'pet-icon');
 }
-function petSpeciesLabel(pet) {
-  const sp = PET_SPECIES[pet.species] || PET_SPECIES.other;
-  return uiText(sp.label);
+function formatPetSpecies(pet) {
+  const species =
+    PET_SPECIES[String(pet?.species || '')] ||
+    PET_SPECIES.other;
+  return uiText(species.label);
 }
 
 function isEaCasPetSpecies(species){return ['dog','cat','horse'].includes(String(species||''));}
@@ -8139,19 +8143,20 @@ function petLineageHTML(pet) {
   return `<div class="pet-lineage">${parts.join('')}</div>`;
 }
 
-function petStatusIcon(pet) {
-  if (pet.status === '幽靈') return iconSvg('ghost-symbol');
-  if (pet.status === '已故') return iconSvg('tombstone');
+function renderPetLifeStatusIcon(pet) {
+  const status = String(pet?.status || '');
+  if (status === '幽靈') return iconSvg('ghost-symbol');
+  if (status === '已故') return iconSvg('tombstone');
   return '';
 }
 function buildPetsChipsHTML(pets, owner = null) {
   if (!pets || !pets.length) return '';
   const chips = pets.slice(0, 3).map(p => {
     const icon = petIconFor(p);
-    const st = petStatusIcon(p);
+    const st = renderPetLifeStatusIcon(p);
     const petName = displayDataText(p.name, owner);
     const breed = displayDataText(p.breed, owner);
-    return `<span class="n-pet-chip" title="${esc(petName)} · ${esc(petSpeciesLabel(p))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${st ? st : ''}${esc(petName)}</span>`;
+    return `<span class="n-pet-chip" title="${esc(petName)} · ${esc(formatPetSpecies(p))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${st ? st : ''}${esc(petName)}</span>`;
   }).join('');
   const rest = pets.length > 3 ? `<span class="n-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length-3}</span>` : '';
   return chips + rest;
@@ -8313,7 +8318,7 @@ function infoCardDataText(value,owner,draft=false){
     sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('家庭關係'))}</h3><div class="info-profile-list">${familyRows.join('')}</div></section>`);
     if(otherRelationshipRows.length)sections.push('<section class="info-profile-section"><h3 class="info-profile-section-title">'+esc(uiText('其他關係'))+'</h3><div class="info-profile-list">'+otherRelationshipRows.map(item=>row(item.label,item.names.map(esc).join(' / '))).join('')+'</div></section>');
     sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('簡介'))}</h3><div class="info-card-bio">${c.bio?esc(dBio):'—'}</div></section>`);
-    const petItems=(c.pets||[]).map(p=>{const petAvatar=framedAvatarImageHTML(p.avatar,p.avatarFrame)||petIconFor(p);const meta=[petSpeciesLabel(p),p.breed?infoCardDataText(p.breed,c,draft):'',petGenderLabel(p)].filter(Boolean).join(' · ');return`<div class="info-card-pet"><div class="info-card-pet-avatar">${petAvatar}</div><div class="info-card-pet-text"><div class="info-card-pet-name">${esc(infoCardDataText(p.name,c,draft)||uiText('（未命名）'))}</div><div class="info-card-pet-meta">${esc(meta)}</div>${petLineageHTML(p)}</div></div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
+    const petItems=(c.pets||[]).map(p=>{const petAvatar=framedAvatarImageHTML(p.avatar,p.avatarFrame)||petIconFor(p);const meta=[formatPetSpecies(p),p.breed?infoCardDataText(p.breed,c,draft):'',petGenderLabel(p)].filter(Boolean).join(' · ');return`<div class="info-card-pet"><div class="info-card-pet-avatar">${petAvatar}</div><div class="info-card-pet-text"><div class="info-card-pet-name">${esc(infoCardDataText(p.name,c,draft)||uiText('（未命名）'))}</div><div class="info-card-pet-meta">${esc(meta)}</div>${petLineageHTML(p)}</div></div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
     const galleryItems=(c.gallery||[]).slice(0,8).map((g,i)=>{const url=resolveImageUrl(g.image);const assetId=isAssetId(g.image)?String(g.image):'';return`<div class="gallery-item" data-info-gallery-idx="${i}" title="${esc(g.title||'')}">${assetId?`<img data-asset-id="${esc(assetId)}"${url?` src="${esc(url)}"`:''} alt="" loading="lazy" decoding="async">`:''}</div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
     sections.push(`<section class="info-profile-section"><div class="info-card-media"><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('寵物'))}</span><span class="info-card-media-count">${(c.pets||[]).length}</span></div><div class="info-card-pets">${petItems}</div></div><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('人生照片'))}</span><span class="info-card-media-count">${(c.gallery||[]).length}</span></div><div class="info-card-gallery">${galleryItems}</div></div></div></section>`);
     container.innerHTML=`<div class="info-card-header"><div class="${avatarClass}">${avatar}</div><div class="info-card-header-text"><div class="info-card-name-row"><span class="info-card-name">${esc(dName||'—')}</span></div><div class="info-card-meta">${metaItems.join('')}</div><div class="info-card-head-facts">${headFacts.join('')}</div></div></div><div class="info-card-body">${sections.join('')}</div>`;
@@ -12104,7 +12109,7 @@ function setupSearchSelects() {
 
 function getEditingAvatarCropSource(target){
   return target==='pet'
-    ? {ref:editingPetAvatar,frame:editingPetAvatarFrame}
+    ? {ref:petEditorState.avatar,frame:petEditorState.avatarFrame}
     : {ref:editingAvatar,frame:editingAvatarFrame};
 }
 
@@ -12112,7 +12117,7 @@ function setEditingAvatarCropFrame(target,frame){
   const normalized=normalizeAvatarFrame(frame);
 
   if(target==='pet'){
-    editingPetAvatarFrame=normalized;
+    petEditorState.avatarFrame=normalized;
     renderPetAvatarPreview();
   }else{
     editingAvatarFrame=normalized;
@@ -12905,268 +12910,513 @@ function renderRelAnno(simId) {
   renderRelAnnoList(simId,'relAnnoSection','relAnnoList',entries.filter(e=>e.group==='other'));
 }
 
-function renderPetAvatarPreview(){
-    const el=$('petAvatarPreview');
-    const avatar=framedAvatarImageHTML(editingPetAvatar,editingPetAvatarFrame);
+const petEditorController = {
+  owner() {
+    return editingId
+      ? genealogyData.sims[editingId]
+      : null;
+  },
 
-    if(avatar){
-      el.innerHTML=avatar;
-    }else{
-      const name=$('pName').value.trim();
-      const species=PET_SPECIES[$('pSpecies').value]||PET_SPECIES.other;
-      el.innerHTML=name?esc(name.charAt(0)):iconSvg(species.icon);
+  currentPet() {
+    return (
+      petEditorState.index >= 0 &&
+      editingPets[petEditorState.index]
+    )
+      ? editingPets[petEditorState.index]
+      : null;
+  },
+
+  createBlankPet() {
+    return {
+      id:uid('pet'),
+      name:'',
+      species:'dog',
+      breed:'',
+      gender:'male',
+      ageStage:'成年',
+      status:'在世',
+      avatar:null,
+      avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
+    };
+  },
+
+  refreshAvatarPreview() {
+    const preview = $('petAvatarPreview');
+    const avatar =
+      framedAvatarImageHTML(
+        petEditorState.avatar,
+        petEditorState.avatarFrame
+      );
+
+    if (avatar) {
+      preview.innerHTML = avatar;
+    } else {
+      const name = $('pName').value.trim();
+      const species =
+        PET_SPECIES[$('pSpecies').value] ||
+        PET_SPECIES.other;
+
+      preview.innerHTML =
+        name
+          ? esc(name.charAt(0))
+          : iconSvg(species.icon);
     }
 
-    const adjust=$('petAvatarAdjustBtn');
-    if(adjust)adjust.disabled=!editingPetAvatar;
-  }
-
-  function syncPetGenderField(){
-    const field=$('pGenderField');
-    const select=$('pGender');
-    const species=$('pSpecies').value;
-    const visible=isEaCasPetSpecies(species);
-
-    if(field)field.hidden=!visible;
-
-    if(select){
-      if(visible){
-        select.value=normalizePetGender(select.value)||'male';
-      }else{
-        select.value='';
-      }
+    const adjust = $('petAvatarAdjustBtn');
+    if (adjust) {
+      adjust.disabled = !petEditorState.avatar;
     }
-  }
+  },
 
-  $('petAvatarInput').onchange=async event=>{
-    const file=event.target.files[0];
-    if(!file)return;
+  syncGenderVisibility() {
+    const field = $('pGenderField');
+    const select = $('pGender');
+    const species = $('pSpecies').value;
+    const visible = isEaCasPetSpecies(species);
 
-    try{
-      const result=await compressImage(file,'pet');
-      editingPetAvatar=await saveImageAsset(result.blob,{
-        width:result.width,
-        height:result.height
-      });
-      editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
-      renderPetAvatarPreview();
-    }catch(error){
-      uiAlert('圖片處理失敗：'+error.message,{title:'圖片處理失敗',kind:'danger'});
+    if (field) {
+      field.hidden = !visible;
     }
-    event.target.value='';
-  };
 
-  $('petAvatarAdjustBtn').onclick=()=>openAvatarCropEditor('pet');
+    if (!select) return;
 
-  $('petAvatarClearBtn').onclick=()=>{
-    editingPetAvatar=null;
-    editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
-    renderPetAvatarPreview();
-  };
+    select.value =
+      visible
+        ? (normalizePetGender(select.value) || 'male')
+        : '';
+  },
 
-  $('pName').addEventListener('input',renderPetAvatarPreview);
-  $('pSpecies').addEventListener('change',()=>{
-    syncPetGenderField();
-    renderPetAvatarPreview();
-  });
+  populateForm(pet) {
+    const owner = this.owner();
 
-  function openPetEditor(index){
-    editingPetIndex=typeof index==='number'?index:-1;
+    $('pName').value =
+      owner
+        ? displayDataText(pet.name, owner)
+        : (pet.name || '');
 
-    const pet=editingPetIndex>=0
-      ? editingPets[editingPetIndex]
-      : {
-          id:uid('pet'),
-          name:'',
-          species:'dog',
-          breed:'',
-          gender:'male',
-          ageStage:'成年',
-          status:'在世',
-          avatar:null,
-          avatarFrame:{...DEFAULT_AVATAR_FRAME}
-        };
+    $('pSpecies').value =
+      pet.species || 'dog';
 
-    const owner=editingId?genealogyData.sims[editingId]:null;
+    $('pBreed').value =
+      owner
+        ? displayDataText(pet.breed, owner)
+        : (pet.breed || '');
 
-    $('petModalTitle').textContent=uiText(editingPetIndex>=0?'編輯寵物':'新增寵物');
-    $('pName').value=owner?displayDataText(pet.name,owner):(pet.name||'');
-    $('pSpecies').value=pet.species||'dog';
-    $('pBreed').value=owner?displayDataText(pet.breed,owner):(pet.breed||'');
-    $('pGender').value=normalizePetGender(pet.gender)||'male';
-    $('pAgeStage').value=pet.ageStage||'成年';
-    $('pStatus').value=pet.status||'在世';
+    $('pGender').value =
+      normalizePetGender(pet.gender) ||
+      'male';
 
-    editingPetAvatar=pet.avatar||null;
-    editingPetAvatarFrame=normalizeAvatarFrame(pet.avatarFrame);
+    $('pAgeStage').value =
+      pet.ageStage || '成年';
 
-    $('pDelete').style.display=editingPetIndex>=0?'':'none';
+    $('pStatus').value =
+      pet.status || '在世';
 
-    syncPetGenderField();
-    renderPetAvatarPreview();
+    petEditorState.avatar =
+      pet.avatar || null;
+
+    petEditorState.avatarFrame =
+      normalizeAvatarFrame(
+        pet.avatarFrame
+      );
+
+    this.syncGenderVisibility();
+    this.refreshAvatarPreview();
+  },
+
+  open(index = -1) {
+    const validIndex =
+      Number.isInteger(index) &&
+      index >= 0 &&
+      !!editingPets[index];
+
+    petEditorState.index =
+      validIndex ? index : -1;
+
+    const pet =
+      validIndex
+        ? editingPets[index]
+        : this.createBlankPet();
+
+    $('petModalTitle').textContent =
+      uiText(
+        validIndex
+          ? '編輯寵物'
+          : '新增寵物'
+      );
+
+    $('pDelete').style.display =
+      validIndex ? '' : 'none';
+
+    this.populateForm(pet);
     petMask.classList.add('show');
-    setTimeout(()=>$('pName').focus(),60);
-  }
 
-  function closePetEditor(){
+    setTimeout(
+      () => $('pName').focus(),
+      60
+    );
+  },
+
+  close() {
     petMask.classList.remove('show');
 
-    if(avatarCropTarget==='pet'){
+    if (avatarCropTarget === 'pet') {
       closeAvatarCropEditor();
     }
 
-    editingPetIndex=-1;
-    editingPetAvatar=null;
-    editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
-  }
+    petEditorState.index = -1;
+    petEditorState.avatar = null;
+    petEditorState.avatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+  },
 
-  function savePet(){
-    const owner=editingId?genealogyData.sims[editingId]:null;
-    const originalPet=editingPetIndex>=0&&editingPets[editingPetIndex]
-      ? editingPets[editingPetIndex]
-      : null;
+  collectForm() {
+    const owner = this.owner();
+    const previous = this.currentPet();
+    const inputName = $('pName').value.trim();
 
-    const shownName=originalPet&&owner?displayDataText(originalPet.name,owner):'';
-    const shownBreed=originalPet&&owner?displayDataText(originalPet.breed,owner):'';
-    const inputName=$('pName').value.trim();
-
-    if(!inputName){
-      uiAlert('請填寫寵物名字',{title:'資料未完成'});
-      return;
+    if (!inputName) {
+      uiAlert(
+        '請填寫寵物名字',
+        { title:'資料未完成' }
+      );
+      return null;
     }
 
-    const name=originalPet&&isBuiltinSampleSim(owner)&&inputName===shownName
-      ? originalPet.name
-      : inputName;
+    const shownName =
+      previous && owner
+        ? displayDataText(
+            previous.name,
+            owner
+          )
+        : '';
 
-    const inputBreed=$('pBreed').value.trim();
-    const breed=originalPet&&isBuiltinSampleSim(owner)&&inputBreed===shownBreed
-      ? originalPet.breed
-      : inputBreed;
+    const shownBreed =
+      previous && owner
+        ? displayDataText(
+            previous.breed,
+            owner
+          )
+        : '';
 
-    const preservedPetData=originalPet
-      ? JSON.parse(JSON.stringify(originalPet))
-      : {};
+    const inputBreed =
+      $('pBreed').value.trim();
 
-    const species=$('pSpecies').value;
+    const name =
+      previous &&
+      isBuiltinSampleSim(owner) &&
+      inputName === shownName
+        ? previous.name
+        : inputName;
 
-    const data={
-      ...preservedPetData,
-      id:originalPet?originalPet.id:uid('pet'),
+    const breed =
+      previous &&
+      isBuiltinSampleSim(owner) &&
+      inputBreed === shownBreed
+        ? previous.breed
+        : inputBreed;
+
+    const species =
+      $('pSpecies').value;
+
+    return {
+      ...(previous
+        ? JSON.parse(JSON.stringify(previous))
+        : {}),
+      id:
+        previous?.id ||
+        uid('pet'),
       name,
       species,
       breed,
-      gender:isEaCasPetSpecies(species)
-        ? (normalizePetGender($('pGender').value)||'male')
-        : '',
-      ageStage:$('pAgeStage').value,
-      status:$('pStatus').value,
-      avatar:editingPetAvatar||null,
-      avatarFrame:normalizeAvatarFrame(editingPetAvatarFrame)
+      gender:
+        isEaCasPetSpecies(species)
+          ? (
+              normalizePetGender(
+                $('pGender').value
+              ) ||
+              'male'
+            )
+          : '',
+      ageStage:
+        $('pAgeStage').value,
+      status:
+        $('pStatus').value,
+      avatar:
+        petEditorState.avatar ||
+        null,
+      avatarFrame:
+        normalizeAvatarFrame(
+          petEditorState.avatarFrame
+        )
     };
+  },
 
-    if(editingPetIndex>=0){
-      editingPets[editingPetIndex]=data;
-    }else{
-      editingPets.push(data);
+  commit() {
+    const pet = this.collectForm();
+    if (!pet) return;
+
+    if (petEditorState.index >= 0) {
+      editingPets[
+        petEditorState.index
+      ] = pet;
+    } else {
+      editingPets.push(pet);
     }
 
-    renderPetsList();
+    renderPetDraftList();
     renderEditorInfoPreviewIfActive();
-    closePetEditor();
-  }
+    this.close();
+  },
 
-  async function deletePetFromEditor(){
-    if(editingPetIndex<0)return;
+  async removeCurrent() {
+    const pet = this.currentPet();
+    if (!pet) return;
 
-    const pet=editingPets[editingPetIndex];
-    if(!pet)return;
+    const confirmed = await uiConfirm(
+      `確定刪除寵物「${pet.name}」嗎？`,
+      {
+        title:'刪除寵物',
+        kind:'danger',
+        confirmText:'刪除'
+      }
+    );
 
-    if(!await uiConfirm(`確定刪除寵物「${pet.name}」嗎？`,{
-      title:'刪除寵物',
-      kind:'danger',
-      confirmText:'刪除'
-    }))return;
+    if (!confirmed) return;
 
-    editingPets.splice(editingPetIndex,1);
-    renderPetsList();
+    editingPets.splice(
+      petEditorState.index,
+      1
+    );
+
+    renderPetDraftList();
     renderEditorInfoPreviewIfActive();
-    closePetEditor();
+    this.close();
+  },
+
+  async setAvatarFile(file) {
+    const result =
+      await compressImage(
+        file,
+        'pet'
+      );
+
+    petEditorState.avatar =
+      await saveImageAsset(
+        result.blob,
+        {
+          width:result.width,
+          height:result.height
+        }
+      );
+
+    petEditorState.avatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+
+    this.refreshAvatarPreview();
+  },
+
+  clearAvatar() {
+    petEditorState.avatar = null;
+    petEditorState.avatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+    this.refreshAvatarPreview();
   }
+};
 
-  $('pSave').onclick=savePet;
-  $('pCancel').onclick=closePetEditor;
-  $('pDelete').onclick=deletePetFromEditor;
+function renderPetDraftList() {
+  const list = $('petList');
+  if (!list) return;
 
-  petMask.onclick=event=>{
-    if(event.target===petMask)closePetEditor();
-  };
-
-function renderPetsList(){
-  const list=$('petList');
-  if(!list)return;
-
-  if(!editingPets.length){
-    list.innerHTML=`<div class="rel-empty">${esc(uiText('尚未新增寵物'))}</div>`;
+  if (!editingPets.length) {
+    list.innerHTML =
+      `<div class="rel-empty">${esc(uiText('尚未新增寵物'))}</div>`;
     renderEditorInfoPreviewIfActive();
     return;
   }
 
-  const owner=editingId?genealogyData.sims[editingId]:null;
+  const owner = petEditorController.owner();
 
-  list.innerHTML=editingPets.map((pet,index)=>{
-    const avatar=framedAvatarImageHTML(pet.avatar,pet.avatarFrame)||petIconFor(pet);
-    const meta=[petSpeciesLabel(pet)];
+  list.innerHTML =
+    editingPets.map((pet, index) => {
+      const avatar =
+        framedAvatarImageHTML(
+          pet.avatar,
+          pet.avatarFrame
+        ) ||
+        petIconFor(pet);
 
-    if(pet.breed){
-      meta.push(owner?displayDataText(pet.breed,owner):pet.breed);
-    }
+      const meta = [
+        formatPetSpecies(pet)
+      ];
 
-    const gender=petGenderLabel(pet);
-    if(gender)meta.push(gender);
-    if(pet.ageStage)meta.push(uiText(pet.ageStage));
-    if(pet.status&&pet.status!=='在世')meta.push(uiText(pet.status));
+      if (pet.breed) {
+        meta.push(
+          owner
+            ? displayDataText(
+                pet.breed,
+                owner
+              )
+            : pet.breed
+        );
+      }
 
-    const displayName=owner?displayDataText(pet.name,owner):pet.name;
+      const gender =
+        petGenderLabel(pet);
 
-    return `<div class="pet-item">
-      <div class="pet-item-avatar">${avatar}</div>
-      <div class="pet-item-info">
-        <div class="pet-item-name">${esc(displayName)||esc(uiText('（未命名）'))}</div>
-        <div class="pet-item-meta">${esc(meta.join(' · '))}</div>
-        ${petLineageHTML(pet)}
-      </div>
-      <div class="pet-item-actions">
-        <button type="button" data-edit-pet="${index}">編輯</button>
-        <button type="button" class="danger" data-del-pet="${index}">刪除</button>
-      </div>
-    </div>`;
-  }).join('');
+      if (gender) meta.push(gender);
+      if (pet.ageStage) {
+        meta.push(
+          uiText(pet.ageStage)
+        );
+      }
 
-  list.querySelectorAll('[data-edit-pet]').forEach(button=>{
-    button.onclick=()=>openPetEditor(+button.dataset.editPet);
-  });
+      if (
+        pet.status &&
+        pet.status !== '在世'
+      ) {
+        meta.push(
+          uiText(pet.status)
+        );
+      }
 
-  list.querySelectorAll('[data-del-pet]').forEach(button=>{
-    button.onclick=async()=>{
-      const index=+button.dataset.delPet;
-      const pet=editingPets[index];
-      if(!pet)return;
+      const displayName =
+        owner
+          ? displayDataText(
+              pet.name,
+              owner
+            )
+          : pet.name;
 
-      if(!await uiConfirm(`確定刪除寵物「${pet.name}」嗎？`,{
-        title:'刪除寵物',
-        kind:'danger',
-        confirmText:'刪除'
-      }))return;
+      return `
+        <div class="pet-item" data-pet-draft-index="${index}">
+          <div class="pet-item-avatar">${avatar}</div>
+          <div class="pet-item-info">
+            <div class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</div>
+            <div class="pet-item-meta">${esc(meta.join(' · '))}</div>
+            ${petLineageHTML(pet)}
+          </div>
+          <div class="pet-item-actions">
+            <button
+              type="button"
+              data-pet-action="edit"
+              data-pet-index="${index}"
+            >編輯</button>
+            <button
+              type="button"
+              class="danger"
+              data-pet-action="delete"
+              data-pet-index="${index}"
+            >刪除</button>
+          </div>
+        </div>
+      `;
+    }).join('');
 
-      editingPets.splice(index,1);
-      renderPetsList();
-    };
-  });
+  list
+    .querySelectorAll('[data-pet-action="edit"]')
+    .forEach(button => {
+      button.addEventListener('click', () => {
+        petEditorController.open(
+          Number(button.dataset.petIndex)
+        );
+      });
+    });
+
+  list
+    .querySelectorAll('[data-pet-action="delete"]')
+    .forEach(button => {
+      button.addEventListener(
+        'click',
+        async () => {
+          const index =
+            Number(button.dataset.petIndex);
+          const pet = editingPets[index];
+
+          if (!pet) return;
+
+          const confirmed =
+            await uiConfirm(
+              `確定刪除寵物「${pet.name}」嗎？`,
+              {
+                title:'刪除寵物',
+                kind:'danger',
+                confirmText:'刪除'
+              }
+            );
+
+          if (!confirmed) return;
+
+          editingPets.splice(index, 1);
+          renderPetDraftList();
+          renderEditorInfoPreviewIfActive();
+        }
+      );
+    });
 
   renderEditorInfoPreviewIfActive();
 }
-$('btnAddPet').onclick = () => openPetEditor(-1);
+
+$('petAvatarInput').onchange = async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    await petEditorController.setAvatarFile(file);
+  } catch (error) {
+    uiAlert(
+      '圖片處理失敗：' + error.message,
+      {
+        title:'圖片處理失敗',
+        kind:'danger'
+      }
+    );
+  } finally {
+    event.target.value = '';
+  }
+};
+
+$('petAvatarAdjustBtn').onclick = () => {
+  openAvatarCropEditor('pet');
+};
+
+$('petAvatarClearBtn').onclick = () => {
+  petEditorController.clearAvatar();
+};
+
+$('pName').addEventListener('input', () => {
+  petEditorController.refreshAvatarPreview();
+});
+
+$('pSpecies').addEventListener('change', () => {
+  petEditorController.syncGenderVisibility();
+  petEditorController.refreshAvatarPreview();
+});
+
+$('pSave').onclick = () => {
+  petEditorController.commit();
+};
+
+$('pCancel').onclick = () => {
+  petEditorController.close();
+};
+
+$('pDelete').onclick = () => {
+  petEditorController.removeCurrent();
+};
+
+petMask.onclick = event => {
+  if (event.target === petMask) {
+    petEditorController.close();
+  }
+};
+
+$('btnAddPet').onclick = () => {
+  petEditorController.open();
+};
 
 function updateAvatarPreview(){
     const element=$('avatarPreview');
@@ -13922,7 +14172,7 @@ function editorDraftSim(){
     editingPets=sim
       ? JSON.parse(JSON.stringify(sim.pets||[]))
       : [];
-    renderPetsList();
+    renderPetDraftList();
 
     editingGallery=sim
       ? JSON.parse(JSON.stringify(sim.gallery||[]))
@@ -14129,9 +14379,9 @@ function editorDraftSim(){
     editingDerivedSiblingIds.clear();
 
     petMask.classList.remove('show');
-    editingPetIndex=-1;
-    editingPetAvatar=null;
-    editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
+    petEditorState.index=-1;
+    petEditorState.avatar=null;
+    petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
 
     photoMask.classList.remove('show');
     lifePhotoState.editor.index=-1;
@@ -15880,7 +16130,7 @@ document.addEventListener('keydown', e => {
   }
   if (e.key === 'Enter' && e.ctrlKey) {
     if (photoMask.classList.contains('show')) lifePhotoWorkspace.commitEditor();
-    else if (petMask.classList.contains('show')) savePet();
+    else if (petMask.classList.contains('show')) petEditorController.commit();
     else if (mask.classList.contains('show')) saveChar();
   }
 });
