@@ -5114,7 +5114,7 @@ window.addEventListener('resize', debounce(() => {
 }, 80));
 
 
-// ========【資料儲存佇列】 設定 - 一般儲存延後到 idle；離頁 / 明確要求時同步 flush ========
+// ========【資料儲存佇列】 設定 - Runtime Save Coordinator 為唯一儲存 Authority ========
 const genealogySaveCoordinator =
   genealogyRuntime?.createSaveCoordinator?.({
     delay:260,
@@ -5163,76 +5163,24 @@ const genealogySaveCoordinator =
   }) ||
   null;
 
-let _saveTimer = null;
-let _pendingSave = false;
+if (!genealogySaveCoordinator) {
+  throw new Error(
+    'Genealogy Runtime Save Coordinator is required.'
+  );
+}
 
 function save({
   immediate = false
 } = {}) {
-  if (genealogySaveCoordinator) {
-    return genealogySaveCoordinator
-      .request({
-        immediate
-      });
-  }
-
-  _pendingSave = true;
-
-  if (immediate) {
-    return _flushSave();
-  }
-
-  if (_saveTimer) return;
-
-  _saveTimer =
-    setTimeout(
-      _flushSave,
-      260
-    );
+  return genealogySaveCoordinator
+    .request({
+      immediate
+    });
 }
 
 function _flushSave() {
-  if (genealogySaveCoordinator) {
-    return genealogySaveCoordinator
-      .flush();
-  }
-
-  if (_saveTimer) {
-    clearTimeout(
-      _saveTimer
-    );
-
-    _saveTimer = null;
-  }
-
-  if (!_pendingSave) return;
-
-  _pendingSave = false;
-
-  try {
-    localStorage.setItem(
-      STORE_KEY,
-      JSON.stringify(
-        genealogyData
-      )
-    );
-  } catch (error) {
-    if (
-      error.name ===
-        'QuotaExceededError' ||
-      /quota/i.test(
-        error.message || ''
-      )
-    ) {
-      uiAlert(
-        '瀏覽器可用的儲存空間不足。\n\n建議：\n1. 前往「圖片與儲存」清理未使用的圖片\n2. 先匯出 JSON 備份\n3. 再視需要整理瀏覽器網站資料',
-        {
-          title:'儲存空間不足',
-          kind:'danger'
-        }
-      );
-    }
-  }
+  return genealogySaveCoordinator
+    .flush();
 }
 
 window.addEventListener(
@@ -5837,7 +5785,7 @@ function saveRelationshipLineSettings() {
   applyRelationshipLineSettings();
 
   if (getSceneLayout()) {
-    drawEdges();
+    genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
   }
 }
 
@@ -6721,7 +6669,7 @@ $('resetRelationshipStyleBtn')
       applyRelationshipLineSettings();
 
       if (getSceneLayout()) {
-        drawEdges();
+        genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
       }
     }
   );
@@ -6990,8 +6938,16 @@ $('storageBtn').onclick = () => {
   updateStorageInfo();
   storageDialog.classList.add('show');
 };
-$('storageCloseBtn').onclick = () => storageDialog.classList.remove('show');
-storageDialog.onclick = e => { if (e.target === storageDialog) storageDialog.classList.remove('show'); };
+function closeStoragePanel() {
+  storageDialog.classList.remove('show');
+}
+
+$('storageCloseBtn').onclick = closeStoragePanel;
+storageDialog.onclick = event => {
+  if (event.target === storageDialog) {
+    closeStoragePanel();
+  }
+};
 
 // ========【恢復預設】 設定 - 介面設定與範例資料分開處理 ========
 const resetUiSettingsBtn = $('resetUiSettingsBtn');
@@ -7129,31 +7085,46 @@ $('cleanupBtn').onclick = async () => {
   }
 };
 
-$('helpBtn').onclick = () => helpDialog.classList.add('show');
-$('helpCloseBtn').onclick = () => helpDialog.classList.remove('show');
-helpDialog.onclick = e => { if (e.target === helpDialog) helpDialog.classList.remove('show'); };
+function closeHelpPanel() {
+  helpDialog.classList.remove('show');
+}
 
-const MODAL_STACK = ['avatarCropDialog','lifePhotoEditorDialog','petEditorDialog','simEditorDialog','personProfileDialog','lifePhotoViewerDialog',
-                     'helpDialog','personLibraryDialog','familyMemberPickerDialog','storageDialog','appearanceDialog'];
+$('helpBtn').onclick = () => helpDialog.classList.add('show');
+$('helpCloseBtn').onclick = closeHelpPanel;
+helpDialog.onclick = event => {
+  if (event.target === helpDialog) {
+    closeHelpPanel();
+  }
+};
+
+// ========【彈窗 Lifecycle】 設定 - Esc 只找最上層彈窗；各 subsystem 自己清理狀態 ========
+const MODAL_LIFECYCLE_STACK = [
+  { dialog:avatarCropDialog, close:() => closeAvatarCropEditor() },
+  { dialog:lifePhotoEditorDialog, close:() => lifePhotoWorkspace.closeEditor() },
+  { dialog:petEditorDialog, close:() => petEditorController.close() },
+  { dialog:mask, close:() => personEditor.close() },
+  { dialog:personProfileDialog, close:() => closePersonProfile() },
+  { dialog:lifePhotoViewerDialog, close:() => lifePhotoWorkspace.closeViewer() },
+  { dialog:helpDialog, close:() => closeHelpPanel() },
+  { dialog:personLibraryDialog, close:() => personLibraryController.close() },
+  { dialog:familyMemberPickerDialog, close:() => addMemberController.close() },
+  { dialog:storageDialog, close:() => closeStoragePanel() },
+  { dialog:appearanceDialog, close:() => closeAppearancePanel() }
+];
+
 function closeTopModal() {
-  for (const id of MODAL_STACK) {
-    const el = document.getElementById(id);
-    if (el && el.classList.contains('show')) {
-      el.classList.remove('show');
-      if (id === 'simEditorDialog') {
-    personEditor.resetDraftState();
-  }
-      if (id === 'petEditorDialog') { petEditorState.index=-1; petEditorState.avatar=null; petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME}; }
-      if (id === 'avatarCropDialog') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
-      if (id === 'lifePhotoEditorDialog') { lifePhotoState.editor.index = -1; lifePhotoState.editor.imageRef = ''; }
-      if (id === 'personProfileDialog') personProfilePersonId = null;
-      if (id === 'lifePhotoViewerDialog') {
-        lifePhotoState.viewer.simId = null;
-        lifePhotoState.viewer.mode = 'draft';
-      }
-      return true;
+  for (const lifecycle of MODAL_LIFECYCLE_STACK) {
+    if (
+      !lifecycle.dialog ||
+      !lifecycle.dialog.classList.contains('show')
+    ) {
+      continue;
     }
+
+    lifecycle.close();
+    return true;
   }
+
   return false;
 }
 
@@ -8069,10 +8040,6 @@ function zoomAt(clientX, clientY, factor) {
   applyTransform({ interacting:true });
 }
 
-function getVisibleTreeContentBounds() {
-  return genealogyScene?.getContentBounds?.() || null;
-}
-
 function fitScreen({ rememberState = true } = {}) {
   const vw =
     viewport.clientWidth;
@@ -8085,7 +8052,7 @@ function fitScreen({ rememberState = true } = {}) {
   }
 
   const bounds =
-    getVisibleTreeContentBounds();
+    genealogyScene?.getContentBounds?.() || null;
 
   // 沒有人物時才退回 stage 外框。
   if (!bounds) {
@@ -8288,8 +8255,6 @@ function invalidateRender(layers, { immediate = false } = {}) {
   if (appRenderInvalidationRaf) return;
   appRenderInvalidationRaf = requestAnimationFrame(() => { appRenderInvalidationRaf = 0; flushAppRenderInvalidation(); });
 }
-function scheduleEdgeRedraw() { genealogyScene?.scheduleEdgeRedraw?.(); }
-function drawEdges() { genealogyScene?.invalidate?.({ edges:true }, { immediate:true }); }
 function render() {
   invalidateRender({ layout:true, nodes:true, edges:true, chrome:true, lists:true }, { immediate:true });
 }
@@ -10005,7 +9970,7 @@ function applySelectedLayoutOperation(action) {
 
   applyGenealogyMutation(mutation);
   syncNodeSelectionClasses();
-  expandStageToFit();
+  genealogyScene?.expandStageToFit?.();
 
   dragHistory.push({
     type:'card-layout',
@@ -10181,7 +10146,7 @@ async function handlePersonCardMenuAction(action, simId) {
 
     applyGenealogyMutation(mutation);
     syncNodeSelectionClasses();
-    expandStageToFit();
+    genealogyScene?.expandStageToFit?.();
 
     dragHistory.push({
       type:'card-layout',
@@ -10713,14 +10678,6 @@ function getDragSelectionSmartSnap(
   };
 }
 // ========【拖曳 Geometry Snapshot】 設定 - PointerMove 不再重建整張族譜幾何 ========
-function buildDragPerformanceGeometry() {
-  return genealogyScene?.buildDragPerformanceGeometry?.() || [];
-}
-
-function buildSingleDragRelationshipTargets(id) {
-  return genealogyScene?.buildSingleDragRelationshipTargets?.(id) || { x:[], y:[] };
-}
-
 function createSingleDragPerformanceSession(
   id
 ) {
@@ -10735,15 +10692,15 @@ function createSingleDragPerformanceSession(
     .createSingleDragSession({
       id,
       geometry:
-        buildDragPerformanceGeometry(),
+        genealogyScene?.buildDragPerformanceGeometry?.() || [],
       guideSnapPx:
         GUIDE_SNAP_PX,
       relationshipSnapPx:
         RELATIONSHIP_VERTICAL_SNAP_PX,
       relationshipTargets:
-        buildSingleDragRelationshipTargets(
+        genealogyScene?.buildSingleDragRelationshipTargets?.(
           id
-        )
+        ) || { x:[], y:[] }
     });
 }
 
@@ -10763,7 +10720,7 @@ function createGroupDragPerformanceSession(
       dragIds,
       startPositions,
       geometry:
-        buildDragPerformanceGeometry(),
+        genealogyScene?.buildDragPerformanceGeometry?.() || [],
       guideSnapPx:
         GUIDE_SNAP_PX
     });
@@ -10849,7 +10806,7 @@ nodes.addEventListener('pointerdown', e => {
       if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
       if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
       if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
-      scheduleEdgeRedraw();
+      genealogyScene?.scheduleEdgeRedraw?.();
     };
 
     const moveFrame =
@@ -10896,7 +10853,7 @@ nodes.addEventListener('pointerdown', e => {
           dragMutation,
           { render:false }
         );
-        expandStageToFit();
+        genealogyScene?.expandStageToFit?.();
       } else {
         if (viewMode === 'view') openPersonProfile(id);
         else personEditor.open(id);
@@ -11072,7 +11029,7 @@ nodes.addEventListener('pointerdown', e => {
         );
       }
 
-      scheduleEdgeRedraw();
+      genealogyScene?.scheduleEdgeRedraw?.();
     };
 
     const moveFrame =
@@ -11142,7 +11099,7 @@ nodes.addEventListener('pointerdown', e => {
           dragMutation,
           { render:false }
         );
-        expandStageToFit();
+        genealogyScene?.expandStageToFit?.();
       } else if (shift && wasSelected) {
         selectedNodeIds.delete(id);
         syncNodeSelectionClasses();
@@ -11376,7 +11333,7 @@ nodes.addEventListener('pointerdown', e => {
       );
     }
 
-    scheduleEdgeRedraw();
+    genealogyScene?.scheduleEdgeRedraw?.();
   };
 
   const moveFrame =
@@ -11446,7 +11403,7 @@ nodes.addEventListener('pointerdown', e => {
         { render:false }
       );
 
-      expandStageToFit();
+      genealogyScene?.expandStageToFit?.();
     } else {
       if (viewMode === 'view') {
         openPersonProfile(id);
@@ -11471,10 +11428,6 @@ nodes.addEventListener('pointerdown', e => {
     onUp
   );
 });
-
-function expandStageToFit() {
-  genealogyScene?.expandStageToFit?.();
-}
 
 function updateLayoutToggle() {
   const fam = currentFamily();
@@ -11608,7 +11561,7 @@ $('labelToggle').onclick = () => {
   else { btn.classList.remove('active'); setIconText(btn, 'tags', '顯示關係'); }
   syncRelationshipToolbarVisibility();
   try { localStorage.setItem(LABELS_KEY, showRelLabels ? '1' : '0'); } catch(e){}
-  if (getSceneLayout()) drawEdges();
+  if (getSceneLayout()) genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
 };
 
 function getFamilyGenerationLevels(fam) {
