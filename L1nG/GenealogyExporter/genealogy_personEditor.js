@@ -2,6 +2,23 @@
 (function (global) {
   'use strict';
 
+  let genealogyStoreAuthority = null;
+
+  function bindStore(store) {
+    if (!store || typeof store.getData !== 'function') {
+      throw new Error('Person Editor requires Genealogy Store.');
+    }
+    genealogyStoreAuthority = store;
+  }
+
+  function currentGenealogyData() {
+    const data = genealogyStoreAuthority?.getData?.();
+    if (!data) {
+      throw new Error('Person Editor has no active genealogy database.');
+    }
+    return data;
+  }
+
   const DEFAULT_AVATAR_FRAME =
     Object.freeze({
       x:0.5,
@@ -57,7 +74,7 @@
 
   function currentSimEditorPerson() {
     return simEditorState.simId
-      ? genealogyData?.sims?.[
+      ? currentGenealogyData()?.sims?.[
           simEditorState.simId
         ] || null
       : null;
@@ -262,7 +279,7 @@ function buildPersonEditorDraft(){
     ])]
       .filter(id =>
         id &&
-        genealogyData?.sims?.[id]
+        currentGenealogyData()?.sims?.[id]
       );
   }
 
@@ -406,7 +423,7 @@ function buildPersonEditorDraft(){
     const draft=buildPersonEditorDraft();
 
     target.innerHTML=unique.map(id=>{
-      const sim=genealogyData.sims[id];
+      const sim=currentGenealogyData().sims[id];
       if(!sim)return'';
 
       const label=typeof labelResolver==='function'
@@ -425,7 +442,7 @@ function buildPersonEditorDraft(){
     const draft=buildPersonEditorDraft();
 
     list.innerHTML=selectedEditorIds(selectId).map(id=>{
-      const sim=genealogyData.sims[id];
+      const sim=currentGenealogyData().sims[id];
       if(!sim)return'';
 
       const kind=kindMap.get(id)||'parent-child';
@@ -459,7 +476,7 @@ function buildPersonEditorDraft(){
 
     if(familyTarget){
       const names=selectedEditorIds('fFamilyIds')
-        .map(id=>genealogyData.families.find(family=>String(family.id)===id))
+        .map(id=>currentGenealogyData().families.find(family=>String(family.id)===id))
         .filter(Boolean)
         .map(family=>displayDataText(family.name,family));
 
@@ -541,7 +558,7 @@ function buildPersonEditorDraft(){
     };
 
     selectedEditorIds('fParents').forEach(id=>{
-      const sim=genealogyData.sims[id];
+      const sim=currentGenealogyData().sims[id];
       add(
         directFamilyKinshipLabel(
           'parent',
@@ -554,17 +571,17 @@ function buildPersonEditorDraft(){
     });
 
     selectedEditorIds('fSpouse').forEach(id=>{
-      const sim=genealogyData.sims[id];
+      const sim=currentGenealogyData().sims[id];
       add(directFamilyKinshipLabel('spouse',sim,draft),sim);
     });
 
     selectedEditorIds('fExSpouse').forEach(id=>{
-      const sim=genealogyData.sims[id];
+      const sim=currentGenealogyData().sims[id];
       add(directFamilyKinshipLabel('exspouse',sim,draft),sim);
     });
 
     selectedEditorIds('fChildren').forEach(id=>{
-      const sim=genealogyData.sims[id];
+      const sim=currentGenealogyData().sims[id];
       add(
         directFamilyKinshipLabel(
           'child',
@@ -577,7 +594,7 @@ function buildPersonEditorDraft(){
     });
 
     editorSiblingIds().forEach(id=>{
-      const sim=genealogyData.sims[id];
+      const sim=currentGenealogyData().sims[id];
       add(directFamilyKinshipLabel('sibling',sim,draft),sim);
     });
 
@@ -594,7 +611,7 @@ function buildPersonEditorDraft(){
     const draft=buildPersonEditorDraft();
 
     const familyNames=selectedEditorIds('fFamilyIds')
-      .map(id=>genealogyData.families.find(family=>String(family.id)===id))
+      .map(id=>currentGenealogyData().families.find(family=>String(family.id)===id))
       .filter(family=>family&&!family.gameImport)
       .map(family=>displayDataText(family.name,family));
 
@@ -756,7 +773,7 @@ function buildPersonEditorDraft(){
 
     const sim=
       id
-        ? genealogyData.sims[id]
+        ? currentGenealogyData().sims[id]
         : null;
 
     const familyAuthority=
@@ -826,27 +843,27 @@ function buildPersonEditorDraft(){
     syncPersonEditorCauseOfDeathVisibility();
     switchEditorTab('basic');
 
-    $('fFamilyIds').innerHTML=genealogyData.families
+    $('fFamilyIds').innerHTML=currentGenealogyData().families
       .map(family=>`<option value="${family.id}">${esc(displayDataText(family.name,family))}</option>`)
       .join('');
 
     const currentFamilies=new Set();
 
     if(sim){
-      genealogyData.families.forEach(family=>{
+      currentGenealogyData().families.forEach(family=>{
         if(family.memberIds.includes(sim.id)){
           currentFamilies.add(String(family.id));
         }
       });
-    }else if(genealogyData.currentFamilyId){
-      currentFamilies.add(String(genealogyData.currentFamilyId));
+    }else if(currentGenealogyData().currentFamilyId){
+      currentFamilies.add(String(currentGenealogyData().currentFamilyId));
     }
 
     [...$('fFamilyIds').options].forEach(option=>{
       option.selected=currentFamilies.has(String(option.value));
     });
 
-    const allSims=Object.values(genealogyData.sims);
+    const allSims=Object.values(currentGenealogyData().sims);
 
     const parentOptions=allSims
       .filter(candidate=>
@@ -1041,11 +1058,11 @@ function buildPersonEditorDraft(){
 
 function renderPersonEditorRelationshipList(c) {
   if (!c) { $('relationshipList').innerHTML = ''; return; }
-  const rels = (genealogyData.links||[]).filter(l => (l.from === c.id || l.to === c.id) && !isSiblingLink(l));
+  const rels = (currentGenealogyData().links||[]).filter(l => (l.from === c.id || l.to === c.id) && !isSiblingLink(l));
   $('relationshipList').innerHTML = rels.length
     ? rels.map((l, i) => {
         const otherId = l.from === c.id ? l.to : l.from;
-        const other = genealogyData.sims[otherId];
+        const other = currentGenealogyData().sims[otherId];
         const arrow = l.from === c.id ? '→' : '←';
         return `<div class="relationship-item">
           <span>${esc(displayRelationshipText(l.label || l.type || '關聯'))} ${arrow} ${esc(other ? displayDataText(other.name, other) : uiText('（已刪除）'))}</span>
@@ -1059,7 +1076,7 @@ function renderPersonEditorRelationshipList(c) {
       if (!target?.id) return;
 
       const mutation =
-        genealogyStore.removeRelationship(
+        genealogyStoreAuthority.removeRelationship(
           target.id
         );
 
@@ -1467,10 +1484,10 @@ function ensureSavedSimManualPosition(
     };
   }
 
-  return genealogyStore
+  return genealogyStoreAuthority
     .mergeResults(
       mutation,
-      genealogyStore
+      genealogyStoreAuthority
         .setNodePosition(
           family.id,
           viewMode,
@@ -1487,7 +1504,7 @@ function commitPersonEditorDraft() {
   if (!request) return;
 
   let mutation =
-    genealogyStore.saveSimDraft({
+    genealogyStoreAuthority.saveSimDraft({
       simId:request.simId,
       sim:request.sim,
       parentRelations:
@@ -1505,7 +1522,7 @@ function commitPersonEditorDraft() {
     });
 
   const sim =
-    genealogyData.sims[
+    currentGenealogyData().sims[
       mutation.simId
     ];
 
@@ -1522,10 +1539,10 @@ function commitPersonEditorDraft() {
 
   if (request.annotations) {
     mutation =
-      genealogyStore
+      genealogyStoreAuthority
         .mergeResults(
           mutation,
-          genealogyStore
+          genealogyStoreAuthority
             .setRelationshipAnnotations(
               request.annotations
             )
@@ -1612,6 +1629,7 @@ function commitPersonEditorDraft() {
     Object.freeze({
       DEFAULT_AVATAR_FRAME,
       state,
+      bindStore,
       mount:mountPersonEditor,
       resetDraftState:resetPersonEditorDraftState,
       open:openPersonEditor,

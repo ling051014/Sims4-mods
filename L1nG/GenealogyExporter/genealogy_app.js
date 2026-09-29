@@ -525,16 +525,16 @@ function captureLayoutHistoryState(fam, mode) {
 }
 
 function captureLabelHistoryState(key) {
-  const saved = genealogyData && genealogyData.labelPositions ? genealogyData.labelPositions[key] : null;
+  const saved = currentGenealogyData() && currentGenealogyData().labelPositions ? currentGenealogyData().labelPositions[key] : null;
   return saved ? { dx: Number(saved.dx) || 0, dy: Number(saved.dy) || 0 } : null;
 }
 
 function applyDragHistoryEntry(entry, stateKey) {
   const state = entry[stateKey];
-  if (!state || !genealogyData || !genealogyStore) return;
+  if (!state || !currentGenealogyData() || !genealogyStore) return;
 
   if (entry.type === 'card-layout') {
-    const fam = genealogyData.families.find(item => item.id === entry.familyId);
+    const fam = currentGenealogyData().families.find(item => item.id === entry.familyId);
     if (!fam) return;
 
     const mutation =
@@ -550,12 +550,12 @@ function applyDragHistoryEntry(entry, stateKey) {
     applyGenealogyMutation(mutation, {
       immediateSave:true,
       render:
-        genealogyData.currentFamilyId === entry.familyId &&
+        currentGenealogyData().currentFamilyId === entry.familyId &&
         viewMode === entry.mode
     });
 
     if (
-      genealogyData.currentFamilyId === entry.familyId &&
+      currentGenealogyData().currentFamilyId === entry.familyId &&
       viewMode === entry.mode
     ) {
       updateLayoutToggle();
@@ -818,7 +818,7 @@ let _dimsCache = { mode: null, dims: null };
 let _gapsCache = { mode: null, gaps: null };
 
 function getCardViewSettings() {
-  const target = (typeof genealogyData !== 'undefined' && genealogyData) ? genealogyData : null;
+  const target = (typeof currentGenealogyData() !== 'undefined' && currentGenealogyData()) ? currentGenealogyData() : null;
   if (!target) return { ...DEFAULT_CARD_VIEW_SETTINGS };
   if (!target.meta || typeof target.meta !== 'object') target.meta = {};
   if (!target.meta.cardView || typeof target.meta.cardView !== 'object') target.meta.cardView = {};
@@ -832,7 +832,7 @@ function getCardViewSettings() {
 }
 
 function getCardEditSettings() {
-  const target = (typeof genealogyData !== 'undefined' && genealogyData) ? genealogyData : null;
+  const target = (typeof currentGenealogyData() !== 'undefined' && currentGenealogyData()) ? currentGenealogyData() : null;
   if (!target) return { ...DEFAULT_CARD_EDIT_SETTINGS };
   if (!target.meta || typeof target.meta !== 'object') target.meta = {};
   if (!target.meta.cardEdit || typeof target.meta.cardEdit !== 'object') target.meta.cardEdit = {};
@@ -1456,7 +1456,11 @@ function buildSample() {
   };
 }
 
-let genealogyData = null, scale = 1;
+let scale = 1;
+
+function currentGenealogyData() {
+  return genealogyStore?.getData?.() || null;
+}
 let panX = 0, panY = 0;
 
 // ========【畫布視角狀態】 設定 - 自動 Fit 與手動視角分離，viewport 改變時保留正確中心 ========
@@ -1731,13 +1735,13 @@ function familyLineageChildIds(simId) {
     .map(sim => String(sim.id));
 
   const adoptedChildIds =
-    genealogyData.sims[String(simId)]?.gameData?.adoptedChildIds || [];
+    currentGenealogyData().sims[String(simId)]?.gameData?.adoptedChildIds || [];
 
   return [...new Set([
     ...childIds,
     ...adoptedChildIds.map(String)
   ])]
-    .filter(id => genealogyData.sims[id]);
+    .filter(id => currentGenealogyData().sims[id]);
 }
 
 function familyDisplaySpouseIds(sim) {
@@ -1747,7 +1751,7 @@ function familyDisplaySpouseIds(sim) {
     ...(sim.spouseIds || []),
     ...(sim.gameData?.deceasedSpouseIds || [])
   ].map(String))]
-    .filter(id => genealogyData.sims[id]);
+    .filter(id => currentGenealogyData().sims[id]);
 }
 
 function stableFamilyComponentKey(memberIds) {
@@ -1767,26 +1771,26 @@ function familySourceSeedIds(fam) {
 
   const householdIds =
     Array.isArray(fam.gameData?.householdMemberIds)
-      ? fam.gameData.householdMemberIds.map(String).filter(id => genealogyData.sims[id])
+      ? fam.gameData.householdMemberIds.map(String).filter(id => currentGenealogyData().sims[id])
       : [];
 
   if (householdIds.length) return householdIds;
 
   return (fam.memberIds || [])
     .map(String)
-    .filter(id => genealogyData.sims[id]);
+    .filter(id => currentGenealogyData().sims[id]);
 }
 
 function buildHouseholdEntries() {
-  if (!genealogyData || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
-  return genealogyData.families
+  return currentGenealogyData().families
     .map((fam, index) => {
       const imported = !!fam.gameImport;
       const memberIds =
         imported
           ? familySourceSeedIds(fam)
-          : (fam.memberIds || []).map(String).filter(id => genealogyData.sims[id]);
+          : (fam.memberIds || []).map(String).filter(id => currentGenealogyData().sims[id]);
 
       if (!memberIds.length) return null;
 
@@ -1811,7 +1815,7 @@ function collectEaTreeScope(seedIds) {
       seedIds
         .map(String)
         .filter(id =>
-          genealogyData.sims[id]
+          currentGenealogyData().sims[id]
         )
     )];
 
@@ -1840,7 +1844,7 @@ function collectEaTreeScope(seedIds) {
 
     frontier.forEach(id => {
       familyLineageParentIds(
-        genealogyData.sims[id]
+        currentGenealogyData().sims[id]
       ).forEach(parentId => {
         if (!coreIds.has(parentId)) {
           next.add(parentId);
@@ -1887,7 +1891,7 @@ function collectEaTreeScope(seedIds) {
 
   coreIds.forEach(id => {
     familyDisplaySpouseIds(
-      genealogyData.sims[id]
+      currentGenealogyData().sims[id]
     ).forEach(spouseId => {
       visibleIds.add(spouseId);
     });
@@ -1916,7 +1920,7 @@ function setsOverlap(a, b) {
 }
 
 function splitHouseholdIntoEaTreeSeedGroups(seedIds) {
-  const seeds = [...new Set(seedIds.map(String).filter(id => genealogyData.sims[id]))];
+  const seeds = [...new Set(seedIds.map(String).filter(id => currentGenealogyData().sims[id]))];
   if (!seeds.length) return [];
 
   const treeBySeed = new Map(
@@ -1974,7 +1978,7 @@ function splitVisibleFamilyMembersByRenderedEdges(memberIds) {
   const visibleIds = [...new Set(
     (memberIds || [])
       .map(String)
-      .filter(id => genealogyData.sims[id])
+      .filter(id => currentGenealogyData().sims[id])
   )];
 
   if (!visibleIds.length) return [];
@@ -1995,7 +1999,7 @@ function splitVisibleFamilyMembersByRenderedEdges(memberIds) {
   };
 
   visibleIds.forEach(id => {
-    const sim = genealogyData.sims[id];
+    const sim = currentGenealogyData().sims[id];
     if (!sim) return;
 
     (sim.parentIds || []).forEach(parentId => connect(id, parentId));
@@ -2035,7 +2039,7 @@ function eaTreeEntryLabel(fam, seedIds, splitCount) {
   if (splitCount <= 1) return base;
 
   const names = seedIds
-    .map(id => genealogyData.sims[id])
+    .map(id => currentGenealogyData().sims[id])
     .filter(Boolean)
     .map(sim => displayDataText(sim.name, sim))
     .filter(Boolean)
@@ -2047,15 +2051,15 @@ function eaTreeEntryLabel(fam, seedIds, splitCount) {
 }
 
 function buildEaTreeEntries() {
-  if (!genealogyData || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
   const entries = [];
 
-  genealogyData.families.forEach((fam, familyIndex) => {
+  currentGenealogyData().families.forEach((fam, familyIndex) => {
     if (!fam) return;
 
     if (!fam.gameImport) {
-      const memberIds = (fam.memberIds || []).map(String).filter(id => genealogyData.sims[id]);
+      const memberIds = (fam.memberIds || []).map(String).filter(id => currentGenealogyData().sims[id]);
       if (!memberIds.length) return;
 
       entries.push({
@@ -2132,13 +2136,13 @@ function buildEaTreeEntries() {
 }
 
 function buildExtendedFamilyComponents() {
-  if (!genealogyData || !genealogyData.sims || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !currentGenealogyData().sims || !Array.isArray(currentGenealogyData().families)) return [];
 
-  const allIds = Object.keys(genealogyData.sims);
+  const allIds = Object.keys(currentGenealogyData().sims);
   const adjacency = new Map(allIds.map(id => [id, new Set()]));
 
   allIds.forEach(id => {
-    familyGenealogyNeighborIds(genealogyData.sims[id]).forEach(rawRelatedId => {
+    familyGenealogyNeighborIds(currentGenealogyData().sims[id]).forEach(rawRelatedId => {
       const relatedId = String(rawRelatedId);
       if (!adjacency.has(relatedId)) return;
       adjacency.get(id).add(relatedId);
@@ -2173,9 +2177,9 @@ function buildExtendedFamilyComponents() {
     });
   });
 
-  const importedFamilies = genealogyData.families.filter(fam => fam && fam.gameImport);
-  const manualFamilies = genealogyData.families.filter(fam => fam && !fam.gameImport);
-  const familyIndex = new Map(genealogyData.families.map((fam, index) => [fam.id, index]));
+  const importedFamilies = currentGenealogyData().families.filter(fam => fam && fam.gameImport);
+  const manualFamilies = currentGenealogyData().families.filter(fam => fam && !fam.gameImport);
+  const familyIndex = new Map(currentGenealogyData().families.map((fam, index) => [fam.id, index]));
 
   const componentEntries = components
     .filter(component => component.memberIds.length > 1)
@@ -2236,7 +2240,7 @@ function buildExtendedFamilyComponents() {
 
   const manualEntries = manualFamilies
     .map(fam => {
-      const memberIds = (fam.memberIds || []).map(String).filter(id => genealogyData.sims[id]);
+      const memberIds = (fam.memberIds || []).map(String).filter(id => currentGenealogyData().sims[id]);
       if (!memberIds.length) return null;
 
       return {
@@ -2259,7 +2263,7 @@ function buildExtendedFamilyComponents() {
 }
 
 function getFamilySelectorEntries(mode = familyTreeViewMode) {
-  if (!genealogyData || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
   if (mode === 'household') return buildHouseholdEntries();
   if (mode === 'ea') return buildEaTreeEntries();
@@ -2382,7 +2386,7 @@ function setFamilyTreeViewMode(mode, control = null) {
   const entries = getFamilySelectorEntries(familyTreeViewMode);
   const sourceFamily =
     familyTreeLastSourceFamilyId
-      ? genealogyData.families.find(fam => fam.id === familyTreeLastSourceFamilyId)
+      ? currentGenealogyData().families.find(fam => fam.id === familyTreeLastSourceFamilyId)
       : previousFamily;
 
   const selected = findBestFamilySelectorEntry(sourceFamily || previousFamily, entries);
@@ -2392,8 +2396,8 @@ function setFamilyTreeViewMode(mode, control = null) {
     selected?.value || null
   );
 
-  if (selected?.familyId && genealogyData.families.some(fam => fam.id === selected.familyId)) {
-    genealogyData.currentFamilyId = selected.familyId;
+  if (selected?.familyId && currentGenealogyData().families.some(fam => fam.id === selected.familyId)) {
+    genealogyStore.setCurrentFamilyId(selected.familyId);
   }
 
   dragHistory.clear();
@@ -2905,7 +2909,7 @@ function debounce(fn, ms = 150) {
 }
 
 function currentFamily() {
-  return genealogyData.families.find(f => f.id === genealogyData.currentFamilyId) || genealogyData.families[0];
+  return genealogyStore.getCurrentFamily();
 }
 
 // ========【頂部人物篩選】 設定 - 同類多選 OR、跨類別 AND ========
@@ -3005,7 +3009,7 @@ function uiText(value) {
 function isBuiltinSampleSim(sim) {
   return !!(
     sim &&
-    genealogyData?.meta?.sample === true &&
+    currentGenealogyData()?.meta?.sample === true &&
     BUILTIN_SAMPLE_SIM_IDS.has(sim.id)
   );
 }
@@ -3013,7 +3017,7 @@ function isBuiltinSampleSim(sim) {
 function isBuiltinSampleFamily(family) {
   return !!(
     family &&
-    genealogyData?.meta?.sample === true &&
+    currentGenealogyData()?.meta?.sample === true &&
     BUILTIN_SAMPLE_FAMILY_IDS.has(family.id)
   );
 }
@@ -3077,7 +3081,7 @@ function normalizeRelationshipTypeText(value) {
     .trim();
 }
 
-function relationshipTypeLibraryValues(db = genealogyData) {
+function relationshipTypeLibraryValues(db = currentGenealogyData()) {
   if (!db) return [];
 
   return Array.isArray(
@@ -3210,7 +3214,7 @@ function explicitSiblingIds(simId) {
     String(simId || '');
 
   return [...new Set(
-    (genealogyData?.links || [])
+    (currentGenealogyData()?.links || [])
       .filter(link =>
         isSiblingLink(link) &&
         (
@@ -3225,7 +3229,7 @@ function explicitSiblingIds(simId) {
       )
       .filter(otherId =>
         otherId &&
-        genealogyData?.sims?.[otherId]
+        currentGenealogyData()?.sims?.[otherId]
       )
   )];
 }
@@ -3247,7 +3251,7 @@ function inferredSiblingIdsForParents(
   if (!parentSet.size) return [];
 
   return Object.values(
-    genealogyData.sims || {}
+    currentGenealogyData().sims || {}
   )
     .filter(candidate => {
       if (!candidate) return false;
@@ -3279,7 +3283,7 @@ function inferredSiblingIds(simId) {
     String(simId || '');
 
   const sim =
-    genealogyData?.sims?.[id];
+    currentGenealogyData()?.sims?.[id];
 
   if (!sim) return [];
 
@@ -3300,7 +3304,7 @@ function resolveSiblingRelationships(
     String(simId || '');
 
   const subject =
-    genealogyData?.sims?.[id];
+    currentGenealogyData()?.sims?.[id];
 
   const canonicalParentIds =
     parentIds == null
@@ -3323,7 +3327,7 @@ function resolveSiblingRelationships(
         .filter(otherId =>
           otherId &&
           otherId !== id &&
-          genealogyData?.sims?.[otherId]
+          currentGenealogyData()?.sims?.[otherId]
         )
     );
 
@@ -3342,7 +3346,7 @@ function resolveSiblingRelationships(
     .filter(targetId =>
       targetId &&
       targetId !== id &&
-      genealogyData?.sims?.[targetId]
+      currentGenealogyData()?.sims?.[targetId]
     )
     .map(targetId => ({
       targetId,
@@ -3411,7 +3415,7 @@ function relationshipSemanticDescriptor(
 
 function relationshipDisplayOverride(key) {
   const saved =
-    genealogyData?.relationshipMap?.[key];
+    currentGenealogyData()?.relationshipMap?.[key];
 
   return (
     saved &&
@@ -3642,7 +3646,7 @@ function resolveDirectFamilyRelationships(
     String(simId || '');
 
   const subject =
-    genealogyData?.sims?.[id];
+    currentGenealogyData()?.sims?.[id];
 
   const empty = {
     subjectId:id,
@@ -3665,7 +3669,7 @@ function resolveDirectFamilyRelationships(
       String(targetId || '');
 
     const target =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         normalizedTargetId
       ];
 
@@ -3814,7 +3818,7 @@ function findAncestorPath(
       continue;
     }
 
-    const sim = genealogyData?.sims?.[current.id];
+    const sim = currentGenealogyData()?.sims?.[current.id];
     if (!sim) continue;
 
     const relations = genealogyParentRelations(sim);
@@ -3957,7 +3961,7 @@ function ancestorKinshipLabel(
 
   if (depth === 2) {
     const directParent =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         path[0]
       ];
 
@@ -4053,7 +4057,7 @@ function descendantKinshipLabel(
 
   if (depth === 2) {
     const directChild =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         path[0]
       ];
 
@@ -4100,12 +4104,12 @@ function parentSiblingKinship(
   targetId
 ) {
   const perspective =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4131,7 +4135,7 @@ function parentSiblingKinship(
     }
 
     const parent =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         parentId
       ];
 
@@ -4184,7 +4188,7 @@ function siblingChildKinship(
   targetId
 ) {
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4213,7 +4217,7 @@ function siblingChildKinship(
     }
 
     const sibling =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         siblingId
       ];
 
@@ -4251,12 +4255,12 @@ function cousinKinship(
   targetId
 ) {
   const perspective =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4269,7 +4273,7 @@ function cousinKinship(
     genealogyParentIds(perspective)
   ) {
     const parent =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         parentId
       ];
 
@@ -4296,7 +4300,7 @@ function cousinKinship(
       }
 
       const parentSibling =
-        genealogyData.sims[
+        currentGenealogyData().sims[
           parentSiblingId
         ];
 
@@ -4366,12 +4370,12 @@ function spouseParentKinship(
   targetId
 ) {
   const perspective =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4384,7 +4388,7 @@ function spouseParentKinship(
     perspective.spouseIds || []
   ) {
     const spouse =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         spouseId
       ];
 
@@ -4451,7 +4455,7 @@ function directSocialPerspectiveLabel(
   targetId
 ) {
   const link =
-    (genealogyData?.links || [])
+    (currentGenealogyData()?.links || [])
       .find(candidate =>
         !isSiblingLink(candidate) &&
         (
@@ -4484,12 +4488,12 @@ function resolveKinshipLabel(
   targetId
 ) {
   const root =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4595,7 +4599,7 @@ function resolveKinshipLabel(
 function relationshipPerspectiveSim() {
   const sim =
     relationshipPerspectiveSimId
-      ? genealogyData?.sims?.[
+      ? currentGenealogyData()?.sims?.[
           relationshipPerspectiveSimId
         ]
       : null;
@@ -4701,7 +4705,7 @@ function setRelationshipPerspective(
 
   relationshipPerspectiveSimId =
     id &&
-    genealogyData?.sims?.[id]
+    currentGenealogyData()?.sims?.[id]
       ? id
       : null;
 
@@ -4922,7 +4926,7 @@ const genealogySaveCoordinator =
 
     serialize:() =>
       JSON.stringify(
-        genealogyData
+        currentGenealogyData()
       ),
 
     write:serialized =>
@@ -5357,7 +5361,7 @@ function getOtherRelationshipTypes() {
   const seen =
     new Map();
 
-  (genealogyData?.links || [])
+  (currentGenealogyData()?.links || [])
     .forEach(link => {
       const type =
         relationshipOtherType(link);
@@ -6822,7 +6826,7 @@ if (restoreSampleBtn) {
         sampleDb
       );
 
-      genealogyData = sampleDb;
+      genealogyStore.replaceDatabase(sampleDb);
       dragHistory.clear();
       invalidateChildrenIndex();
       invalidateRelationshipGraph();
@@ -6939,7 +6943,7 @@ function genealogyParentRelations(child, byId = null) {
     if (!id || id === childId) return false;
     return byId instanceof Map
       ? byId.has(id)
-      : !!genealogyData?.sims?.[id];
+      : !!currentGenealogyData()?.sims?.[id];
   };
 
   const addRelation = (parentId, kind) => {
@@ -6970,7 +6974,7 @@ function genealogyParentRelations(child, byId = null) {
   const parentPool =
     byId instanceof Map
       ? [...byId.values()]
-      : Object.values(genealogyData?.sims || {});
+      : Object.values(currentGenealogyData()?.sims || {});
 
   parentPool.forEach(parent => {
     if (!parent || parent.id == null) return;
@@ -7042,7 +7046,7 @@ function isDescendant(ancestorId, nodeId) {
     if (seen.has(id)) continue;
     seen.add(id);
 
-    const sim = genealogyData.sims[id];
+    const sim = currentGenealogyData().sims[id];
     if (!sim) continue;
 
     for (const parentId of genealogyParentIds(sim)) {
@@ -7061,7 +7065,7 @@ function getChildrenOf(id) {
   if (!_childrenIndex) {
     _childrenIndex = new Map();
 
-    Object.values(genealogyData.sims)
+    Object.values(currentGenealogyData().sims)
       .forEach(child => {
         genealogyParentIds(child)
           .forEach(pid => {
@@ -7089,7 +7093,6 @@ function invalidateRelationshipGraph() {
 
 genealogyStore =
   window.L1nGGenealogyStore?.create?.({
-    getData:() => genealogyData,
     uid,
     getParentRelations:(sim) => genealogyParentRelations(sim),
     isSiblingLink,
@@ -7103,6 +7106,8 @@ genealogyStore =
 if (!genealogyStore) {
   throw new Error('Genealogy Store failed to initialize.');
 }
+
+personEditor.bindStore(genealogyStore);
 
 function applyGenealogyMutation(
   mutation,
@@ -7409,7 +7414,7 @@ function repairImportedHouseholdMembership(targetDb) {
 }
 
 
-function collectReferencedAssetIds(targetDb = genealogyData, targetBg = bgSettings, { strict = false } = {}) {
+function collectReferencedAssetIds(targetDb = currentGenealogyData(), targetBg = bgSettings, { strict = false } = {}) {
   const used = new Set();
 
   const add = (ref, label) => {
@@ -7436,7 +7441,7 @@ function collectReferencedAssetIds(targetDb = genealogyData, targetBg = bgSettin
   return used;
 }
 
-function clearUnsupportedImageRefs(targetDb = genealogyData, targetBg = bgSettings) {
+function clearUnsupportedImageRefs(targetDb = currentGenealogyData(), targetBg = bgSettings) {
   let cleared = 0;
 
   const clean = (obj, key, emptyValue = null) => {
@@ -7511,7 +7516,7 @@ function getRelInfoByKey(
 
 function getLabelOffset(key) {
   if (!key) return { dx:0, dy:0 };
-  const o = (genealogyData.labelPositions || {})[key] || {};
+  const o = (currentGenealogyData().labelPositions || {})[key] || {};
   return { dx: o.dx || 0, dy: o.dy || 0 };
 }
 
@@ -7604,9 +7609,9 @@ async function compressGalleryImage(file) {
 function getVisibleIds(familyId) {
   const fam =
     familyId ===
-      genealogyData.currentFamilyId
+      currentGenealogyData().currentFamilyId
       ? currentTreeFamily()
-      : genealogyData.families.find(
+      : currentGenealogyData().families.find(
           f => f.id === familyId
         );
 
@@ -7618,7 +7623,7 @@ function getVisibleIds(familyId) {
     (fam.memberIds || [])
       .map(String)
       .filter(id =>
-        genealogyData.sims[id]
+        currentGenealogyData().sims[id]
       );
 
   const result =
@@ -7634,7 +7639,7 @@ function getVisibleIds(familyId) {
   //   仍允許補上 component 邊界上的直接配偶／前任。
   const relationshipSources =
     familyId ===
-      genealogyData.currentFamilyId &&
+      currentGenealogyData().currentFamilyId &&
     familyTreeViewMode !== 'extended' &&
     Array.isArray(
       fam.primaryMemberIds
@@ -7647,7 +7652,7 @@ function getVisibleIds(familyId) {
     relationshipSources.map(String)
   )].forEach(id => {
     const sim =
-      genealogyData.sims[id];
+      currentGenealogyData().sims[id];
 
     if (!sim) return;
 
@@ -7658,7 +7663,7 @@ function getVisibleIds(familyId) {
       .map(String)
       .forEach(relatedId => {
         if (
-          genealogyData.sims[
+          currentGenealogyData().sims[
             relatedId
           ]
         ) {
@@ -7673,7 +7678,7 @@ function getVisibleIds(familyId) {
   [...result].forEach(id => {
     if (
       !simMatchesTopbarFilters(
-        genealogyData.sims[id]
+        currentGenealogyData().sims[id]
       )
     ) {
       result.delete(id);
@@ -7685,7 +7690,7 @@ function getVisibleIds(familyId) {
 
 // ========【圖片預熱】 設定 - 只預先載入目前畫面會立即看到的圖片，避免 F5 後頭像逐張跳出 ========
 function preloadCurrentViewAssets() {
-  if (!assetStoreReady || !genealogyData) {
+  if (!assetStoreReady || !currentGenealogyData()) {
     return Promise.resolve({
       requested:0,
       loaded:0
@@ -7720,12 +7725,12 @@ function preloadCurrentViewAssets() {
 
   const visibleIds =
     getVisibleIds(
-      genealogyData.currentFamilyId
+      currentGenealogyData().currentFamilyId
     );
 
   visibleIds.forEach(id => {
     const sim =
-      genealogyData.sims[id];
+      currentGenealogyData().sims[id];
 
     if (sim) {
       addPriority(sim.avatar);
@@ -7737,7 +7742,7 @@ function preloadCurrentViewAssets() {
   (currentFamily()?.memberIds || [])
     .forEach(id => {
       const sim =
-        genealogyData.sims[id];
+        currentGenealogyData().sims[id];
 
       if (sim) {
         addSecondary(sim.avatar);
@@ -7770,7 +7775,7 @@ genealogyScene =
     dom:{ stage, svg, labelsSvg, nodes },
     constants:{ PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX },
     state:{
-      getData:() => genealogyData,
+      getData:() => genealogyStore.getData(),
       getViewMode:() => viewMode,
       getFamilyTreeViewMode:() => familyTreeViewMode,
       getShowRelLabels:() => showRelLabels,
@@ -8006,11 +8011,11 @@ function setupViewportResizeObserver() {
 }
 
 function focusSimOnCanvas(simId) {
-  if (!simId || !genealogyData?.sims?.[simId]) return;
+  if (!simId || !currentGenealogyData()?.sims?.[simId]) return;
   if (!getSceneLayout() || !getSceneLayout().pos?.has(simId)) render();
   const pos = getSceneLayout()?.pos?.get(simId);
   if (!pos) return;
-  const { W, H } = genealogyScene.getNodeDimensions(genealogyData.sims[simId]);
+  const { W, H } = genealogyScene.getNodeDimensions(currentGenealogyData().sims[simId]);
   // 尋找人物屬於使用者主動移動畫布，viewport 改變後保留目前世界中心。
   canvasViewState = 'manual';
 
@@ -8420,7 +8425,7 @@ function profileOtherRelationshipRows(
   const groups =
     new Map();
 
-  (genealogyData?.links || [])
+  (currentGenealogyData()?.links || [])
     .forEach(link => {
       if (
         isSiblingLink(link) ||
@@ -8438,7 +8443,7 @@ function profileOtherRelationshipRows(
           : String(link.from);
 
       const other =
-        genealogyData.sims[
+        currentGenealogyData().sims[
           otherId
         ];
 
@@ -8498,7 +8503,7 @@ function buildPersonProfilePresentation(person, options = {}) {
 
   const importedHouseholdFamily =
     householdId
-      ? genealogyData.families.find(
+      ? currentGenealogyData().families.find(
           family =>
             String(
               family.gameData?.householdId ??
@@ -8530,7 +8535,7 @@ function buildPersonProfilePresentation(person, options = {}) {
       options.familyNames
     )
       ? options.familyNames
-      : genealogyData.families
+      : currentGenealogyData().families
           .filter(family =>
             !family.gameImport
           )
@@ -8954,7 +8959,7 @@ function renderPersonProfileContent(
           model.onGallery(index);
         } else if (
           person.id &&
-          genealogyData?.sims?.[
+          currentGenealogyData()?.sims?.[
             person.id
           ]
         ) {
@@ -8970,7 +8975,7 @@ function renderPersonProfileContent(
 
 function openPersonProfile(id) {
   const person =
-    genealogyData.sims[id];
+    currentGenealogyData().sims[id];
 
   if (!person) return;
 
@@ -9304,7 +9309,7 @@ const lifePhotoWorkspace = {
       lifePhotoState.viewer.simId
     ) {
       return (
-        genealogyData.sims[
+        currentGenealogyData().sims[
           lifePhotoState.viewer.simId
         ]?.gallery || []
       );
@@ -9328,7 +9333,7 @@ const lifePhotoWorkspace = {
   },
 
   openSavedViewer(simId, index) {
-    const sim = genealogyData.sims[simId];
+    const sim = currentGenealogyData().sims[simId];
     if (!sim) return;
 
     lifePhotoState.viewer.mode = 'saved';
@@ -9786,8 +9791,8 @@ function applySelectedLayoutOperation(action) {
 }
 
 function renderPersonCardMenu(simId, clientX, clientY) {
-  if (!personCardMenu || !genealogyData?.sims?.[simId]) return;
-  const sim = genealogyData.sims[simId];
+  if (!personCardMenu || !currentGenealogyData()?.sims?.[simId]) return;
+  const sim = currentGenealogyData().sims[simId];
   const settings = viewMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
   const isEditCard = viewMode === 'edit';
   const isMulti = selectedNodeIds.size > 1 && selectedNodeIds.has(simId);
@@ -10028,7 +10033,7 @@ window.addEventListener('resize', closePersonCardMenu);
 window.addEventListener('blur', closePersonCardMenu);
 
 function updateArrangeToolUI() {
-  const fam = genealogyData ? currentFamily() : null;
+  const fam = currentGenealogyData() ? currentFamily() : null;
   const isFree = !!fam && genealogyScene.getCurrentFreeLayout(fam);
   const display = isFree ? '' : 'none';
   if (selectToolBtn) selectToolBtn.style.display = display;
@@ -10085,7 +10090,7 @@ function isTextInteractionTarget(target) {
 }
 
 function isPanGestureActive() {
-  const fam = genealogyData ? currentFamily() : null;
+  const fam = currentGenealogyData() ? currentFamily() : null;
   return !!fam && genealogyScene.getCurrentFreeLayout(fam) && (arrangeTool === 'pan' || spacePanHeld);
 }
 
@@ -10209,7 +10214,7 @@ labelsSvg.addEventListener('pointerdown', e => {
 
   const baseX = parseFloat(g.dataset.x) || 0;
   const baseY = parseFloat(g.dataset.y) || 0;
-  const cur = (genealogyData.labelPositions || {})[key] || { dx:0, dy:0 };
+  const cur = (currentGenealogyData().labelPositions || {})[key] || { dx:0, dy:0 };
 
   labelDrag = {
     key,
@@ -10981,7 +10986,7 @@ nodes.addEventListener('pointerdown', e => {
     fam.manualPositions[dragMode];
 
   const sim =
-    genealogyData.sims[id];
+    currentGenealogyData().sims[id];
 
   if (!sim) return;
 
@@ -11419,7 +11424,7 @@ function renderFamilyCover(fam) {
     img.src = coverUrl; img.hidden = false; collage.innerHTML=''; empty.style.display='none'; return;
   }
   img.hidden = true; img.removeAttribute('src');
-  const members = (fam.memberIds || []).map(id => genealogyData.sims[id]).filter(Boolean).slice(0,4);
+  const members = (fam.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean).slice(0,4);
   const withContent = members.filter(Boolean);
   collage.innerHTML = withContent.map(sim => {
     const avatar = framedAvatarImageHTML(sim.avatar, sim.avatarFrame);
@@ -11524,7 +11529,7 @@ const familyMemberController = {
 
     if (familyMemberOperationState.removeMode) {
       selectedIds.forEach(id => {
-        if (id && genealogyData.sims[id]) {
+        if (id && currentGenealogyData().sims[id]) {
           familyMemberOperationState.selection.add(id);
         }
       });
@@ -11591,7 +11596,7 @@ function renderFamilyMemberList(fam) {
 
   let members =
     (fam.memberIds || [])
-      .map(id => genealogyData.sims[id])
+      .map(id => currentGenealogyData().sims[id])
       .filter(Boolean);
 
   updateFamilyGenerationSortControl();
@@ -11729,7 +11734,7 @@ function renderFamilyMemberList(fam) {
       e.stopPropagation();
       const simId = btn.dataset.familyMemberId;
       const action = btn.dataset.familyMemberAction;
-      if (!simId || !genealogyData.sims[simId]) return;
+      if (!simId || !currentGenealogyData().sims[simId]) return;
 
       if (action === 'view') openPersonProfile(simId);
       else if (action === 'edit') personEditor.open(simId);
@@ -11747,14 +11752,14 @@ function refreshFamilyProfilePanel() {
   const viewFamily = currentTreeFamily() || fam;
   ensureFamilyProfileShape(fam);
   const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value = fam.bio || '';
-  const members = (viewFamily.memberIds || []).map(id => genealogyData.sims[id]).filter(Boolean);
+  const members = (viewFamily.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean);
   if ($('familyMemberCount')) $('familyMemberCount').textContent = String(members.length);
   if ($('familyGenerationCount')) $('familyGenerationCount').textContent = String(calculateFamilyGenerationCount(viewFamily));
   if ($('familyDeceasedCount')) $('familyDeceasedCount').textContent = String(members.filter(sim => sim.status === '已故' || sim.status === '幽靈').length);
 
   const gameDate = $('familyGameDate');
   if (gameDate) {
-    const dateText = formatGameDate(genealogyData && genealogyData.meta && genealogyData.meta.realDateCurrentDate);
+    const dateText = formatGameDate(currentGenealogyData() && currentGenealogyData().meta && currentGenealogyData().meta.realDateCurrentDate);
     if (dateText) {
       gameDate.hidden = false;
       gameDate.title = uiText('匯出時遊戲日期');
@@ -11822,7 +11827,7 @@ familySelect.onchange = async () => {
     selectedEntry.value
   );
 
-  genealogyData.currentFamilyId = selectedEntry.familyId;
+  genealogyStore.setCurrentFamilyId(selectedEntry.familyId);
   familyTreeLastSourceFamilyId = selectedEntry.familyId;
 
   resetPersonLibraryOperations({ batch:false, add:true });
@@ -11946,11 +11951,11 @@ $('newFamilyBtn').onclick = async () => {
   requestAnimationFrame(fitScreen);
 };
 $('delFamilyBtn').onclick = async () => {
-  if (genealogyData.families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
+  if (currentGenealogyData().families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
   const fam = currentFamily();
   if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n（家族內所有模擬市民仍保留在模擬市民池中）`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
   const fallbackFamilyId =
-    genealogyData.families
+    currentGenealogyData().families
       .find(f => f.id !== fam.id)
       ?.id ||
     null;
@@ -13224,7 +13229,7 @@ window.addEventListener(
 function buildRelationEntries(simId) {
   const entries = [];
   const seen = new Set();
-  const c = genealogyData.sims[simId];
+  const c = currentGenealogyData().sims[simId];
   if (!c) return entries;
 
   const push = (
@@ -13244,7 +13249,7 @@ function buildRelationEntries(simId) {
       parentRelations
         .map(relation => {
           const sim =
-            genealogyData.sims[
+            currentGenealogyData().sims[
               relation.parentId
             ];
 
@@ -13321,7 +13326,7 @@ function buildRelationEntries(simId) {
   (c.spouseIds || [])
     .forEach(sid => {
       const spouse =
-        genealogyData.sims[sid];
+        currentGenealogyData().sims[sid];
 
       if (!spouse) return;
 
@@ -13348,7 +13353,7 @@ function buildRelationEntries(simId) {
   (c.exSpouseIds || [])
     .forEach(sid => {
       const spouse =
-        genealogyData.sims[sid];
+        currentGenealogyData().sims[sid];
 
       if (!spouse) return;
 
@@ -13372,7 +13377,7 @@ function buildRelationEntries(simId) {
       });
     });
 
-  (genealogyData.links || [])
+  (currentGenealogyData().links || [])
     .forEach(link => {
       if (
         link.from !== simId &&
@@ -13387,7 +13392,7 @@ function buildRelationEntries(simId) {
           : link.from;
 
       const other =
-        genealogyData.sims[
+        currentGenealogyData().sims[
           otherId
         ];
 
@@ -13502,15 +13507,15 @@ function renderRelAnnoList(
 
       const hasOffset =
         !!(
-          genealogyData.labelPositions &&
-          genealogyData.labelPositions[
+          currentGenealogyData().labelPositions &&
+          currentGenealogyData().labelPositions[
             entry.key
           ] &&
           (
-            genealogyData.labelPositions[
+            currentGenealogyData().labelPositions[
               entry.key
             ].dx ||
-            genealogyData.labelPositions[
+            currentGenealogyData().labelPositions[
               entry.key
             ].dy
           )
@@ -13611,7 +13616,7 @@ function renderRelAnno(simId) {
 const petEditorController = {
   owner() {
     return simEditorState.simId
-      ? genealogyData.sims[simEditorState.simId]
+      ? currentGenealogyData().sims[simEditorState.simId]
       : null;
   },
 
@@ -14136,7 +14141,7 @@ function finalizeSimDataChange(mutation) {
 }
 
 async function deleteChar(id) {
-  const c = genealogyData.sims[id];
+  const c = currentGenealogyData().sims[id];
   if (!c) return;
 
   const message =
@@ -14221,7 +14226,7 @@ const personLibraryController = {
   },
 
   toggleSelection(id) {
-    if (!personLibraryState.batchMode || !genealogyData.sims[id]) return;
+    if (!personLibraryState.batchMode || !currentGenealogyData().sims[id]) return;
 
     if (personLibraryState.selection.has(id)) {
       personLibraryState.selection.delete(id);
@@ -14249,7 +14254,7 @@ const personLibraryController = {
     const family = currentFamily();
     const mutation = genealogyStore.addFamilyMembers(
       family.id,
-      [...personLibraryState.selection].filter(id => genealogyData.sims[id])
+      [...personLibraryState.selection].filter(id => currentGenealogyData().sims[id])
     );
     applyGenealogyMutation(mutation);
     this.setBatchMode(false);
@@ -14267,7 +14272,7 @@ const personLibraryController = {
 
   async deleteSelection() {
     const ids = [...personLibraryState.selection]
-      .filter(id => genealogyData.sims[id]);
+      .filter(id => currentGenealogyData().sims[id]);
 
     if (!ids.length) return;
 
@@ -14304,7 +14309,7 @@ function personLibraryCompactMeta(sim) {
 function renderPersonLibrary() {
   const fam = currentFamily();
   const q = personLibrarySearch.value.trim().toLowerCase();
-  const all = Object.values(genealogyData.sims);
+  const all = Object.values(currentGenealogyData().sims);
 
   all.sort((x, y) => String(x.name).localeCompare(String(y.name), 'zh'));
 
@@ -14335,7 +14340,7 @@ function renderPersonLibrary() {
   }
 
   list.innerHTML = filtered.map(s => {
-    const familyNames = genealogyData.families
+    const familyNames = currentGenealogyData().families
       .filter(f => f.memberIds.includes(s.id))
       .map(f => displayDataText(f.name, f));
 
@@ -14433,7 +14438,7 @@ function renderPersonLibrary() {
 
       const id = btn.dataset.personLibraryActionId;
       const action = btn.dataset.personLibraryAction;
-      if (!genealogyData.sims[id]) return;
+      if (!currentGenealogyData().sims[id]) return;
 
       if (action === 'view') {
         openPersonProfile(id);
@@ -14507,7 +14512,7 @@ const addMemberController = {
   },
 
   toggle(id) {
-    if (!genealogyData.sims[id]) return;
+    if (!currentGenealogyData().sims[id]) return;
 
     if (personLibraryState.addSelection.has(id)) {
       personLibraryState.addSelection.delete(id);
@@ -14522,7 +14527,7 @@ const addMemberController = {
     const family = currentFamily();
     const memberSet = new Set(family.memberIds);
 
-    Object.values(genealogyData.sims).forEach(sim => {
+    Object.values(currentGenealogyData().sims).forEach(sim => {
       if (!memberSet.has(sim.id)) {
         personLibraryState.addSelection.add(sim.id);
       }
@@ -14556,7 +14561,7 @@ function renderFamilyMemberPickerList() {
   const fam = currentFamily();
   const memberSet = new Set(fam.memberIds);
   const q = $('familyMemberPickerSearch').value.trim().toLowerCase();
-  const all = Object.values(genealogyData.sims);
+  const all = Object.values(currentGenealogyData().sims);
   all.sort((a,b) => String(a.name).localeCompare(String(b.name),'zh'));
   let candidates = all.filter(s => !memberSet.has(s.id));
   if (q) {
@@ -14574,7 +14579,7 @@ function renderFamilyMemberPickerList() {
       : '<div class="family-member-picker-empty">沒有符合的項目</div>';
   } else {
     list.innerHTML = candidates.map(s => {
-      const fams = genealogyData.families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
+      const fams = currentGenealogyData().families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
       const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
       const isSel = personLibraryState.addSelection.has(s.id);
       return `<div class="family-member-picker-item${isSel ? ' selected' : ''}" data-family-member-picker-id="${s.id}">
@@ -14645,7 +14650,7 @@ $('familyMemberRemoveConfirmBtn').onclick = event => {
 
 async function exportJSON() {
   try {
-    const exportDb = JSON.parse(JSON.stringify(genealogyData));
+    const exportDb = JSON.parse(JSON.stringify(currentGenealogyData()));
     const exportBg = { ...bgSettings };
     const assetIds = collectReferencedAssetIds(exportDb, exportBg, { strict:true });
     const assets = await assetStore.serializeAssets(assetIds);
@@ -15002,7 +15007,7 @@ function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
 }
 
 async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'current') {
-  if (!genealogyData || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
+  if (!currentGenealogyData() || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
 
   // 等待目前語系字型完成載入後再量測與繪製，避免 HTML 與 PNG 的文字基線、膠囊背景位置不同。
   if (document.fonts && document.fonts.ready) {
@@ -15150,7 +15155,7 @@ async function importJSON(file) {
 
     await assetStore.importSerializedAssets(serializedAssets);
 
-    genealogyData = nextDb;
+    genealogyStore.replaceDatabase(nextDb);
     dragHistory.clear();
     bgSettings = { ...bgSettings, ...incomingBg };
 
@@ -15334,7 +15339,7 @@ async function importGameGenealogy(file) {
     showGameImportStatus('正在建立族譜畫面…');
     await waitForImportPaint();
 
-    genealogyData = preparedResult.prepared;
+    genealogyStore.replaceDatabase(preparedResult.prepared);
 
     // 匯入新資料時，同時清除上一份族譜留下的操作狀態。
     dragHistory.clear();
@@ -15373,15 +15378,15 @@ async function importGameGenealogy(file) {
 
     const simCount =
       normalizedStats.peopleCount ||
-      Object.keys(genealogyData.sims || {}).length;
+      Object.keys(currentGenealogyData().sims || {}).length;
 
     const petCount =
       normalizedStats.petCount ||
       0;
 
     const familyCount =
-      Array.isArray(genealogyData.families)
-        ? genealogyData.families.length
+      Array.isArray(currentGenealogyData().families)
+        ? currentGenealogyData().families.length
         : 0;
 
     const activeFamily = currentFamily();
@@ -15667,7 +15672,7 @@ $('relationshipAddBtn').onclick = () => {
   if (!simEditorState.simId) return;
 
   const c =
-    genealogyData.sims[
+    currentGenealogyData().sims[
       simEditorState.simId
     ];
 
@@ -15941,26 +15946,37 @@ async function init() {
       );
   }
 
-  genealogyData = preparedResult.prepared;
+  let initialDatabase =
+    preparedResult.prepared;
 
   if (
-    !genealogyData.families ||
-    !genealogyData.families.length
+    !initialDatabase.families ||
+    !initialDatabase.families.length
   ) {
-    genealogyData =
+    preparedResult =
       prepareDatabase(
         buildSample()
-      ).prepared;
+      );
+    initialDatabase =
+      preparedResult.prepared;
   }
-
-  invalidateChildrenIndex();
-  invalidateRelationshipGraph();
 
   applyRelationshipLineSettings();
   restoreCanvasBackground();
 
-  // clean-break：舊 img_* / dataURL 圖片引用不再進入新的 L1nG v1 圖片 schema。
-  const clearedImageRefs = clearUnsupportedImageRefs(genealogyData, bgSettings);
+  // clean-break：先清理候選資料，再交由 Store 接管 canonical ownership。
+  const clearedImageRefs =
+    clearUnsupportedImageRefs(
+      initialDatabase,
+      bgSettings
+    );
+
+  genealogyStore.replaceDatabase(
+    initialDatabase
+  );
+
+  invalidateChildrenIndex();
+  invalidateRelationshipGraph();
   if (clearedImageRefs > 0) {
     console.warn(`[圖片資產] 已清除 ${clearedImageRefs} 個舊圖片引用；請重新匯入或上傳圖片。`);
     save({ immediate:true });
@@ -16797,7 +16813,7 @@ They will remain in the global Sim pool.`;
     translateTree(document.body, false);
     // 關係標籤寬度與內建範例資料都依顯示語言重新計算。
     _textMeasureCache.clear();
-    if (genealogyData && genealogyData.families && genealogyData.families.length) {
+    if (currentGenealogyData() && currentGenealogyData().families && currentGenealogyData().families.length) {
       refreshFamilyUI();
       render();
     }

@@ -1,4 +1,4 @@
-/* ========【L1nG Genealogy Store】 設定 - canonical genealogy data 的唯一修改入口 ======== */
+/* ========【L1nG Genealogy Store】 設定 - canonical genealogy data 的唯一持有者與修改入口 ======== */
 (function (global) {
   'use strict';
 
@@ -117,7 +117,6 @@
   }
 
   function create({
-    getData,
     uid,
     getParentRelations,
     isSiblingLink,
@@ -126,16 +125,16 @@
     normalizeRelationshipType = value => String(value || '').trim(),
     isBuiltInRelationshipType = () => false
   } = {}) {
-    if (typeof getData !== 'function') {
-      throw new Error('Genealogy Store requires getData().');
-    }
+    let activeData = null;
 
-    function data() {
-      const current = getData();
-      if (!current || typeof current !== 'object') {
-        throw new Error('Genealogy Store has no active canonical database.');
+    function normalizeDatabaseShape(current) {
+      if (!current || typeof current !== 'object' || Array.isArray(current)) {
+        throw new Error('Genealogy Store requires a canonical database object.');
       }
-      current.sims = current.sims || {};
+      current.sims =
+        current.sims && typeof current.sims === 'object' && !Array.isArray(current.sims)
+          ? current.sims
+          : {};
       current.families = Array.isArray(current.families) ? current.families : [];
       current.links = Array.isArray(current.links) ? current.links : [];
       current.relationshipMap =
@@ -152,6 +151,22 @@
       return current;
     }
 
+    function getData() {
+      return activeData;
+    }
+
+    function replaceDatabase(nextData) {
+      activeData = normalizeDatabaseShape(nextData);
+      return activeData;
+    }
+
+    function data() {
+      if (!activeData) {
+        throw new Error('Genealogy Store has no active canonical database.');
+      }
+      return normalizeDatabaseShape(activeData);
+    }
+
     function simById(simId) {
       return data().sims[String(simId || '')] || null;
     }
@@ -159,6 +174,21 @@
     function familyById(familyId) {
       const key = String(familyId || '');
       return data().families.find(family => family && String(family.id) === key) || null;
+    }
+
+    function getCurrentFamily() {
+      const db = data();
+      const key = String(db.currentFamilyId || '');
+      return db.families.find(family => family && String(family.id) === key) || db.families[0] || null;
+    }
+
+    function setCurrentFamilyId(familyId) {
+      const db = data();
+      const key = String(familyId || '');
+      if (!key || !db.families.some(family => family && String(family.id) === key)) return false;
+      if (String(db.currentFamilyId || '') === key) return false;
+      db.currentFamilyId = key;
+      return true;
     }
 
     function ensureAdoptionMetadata(sim) {
@@ -1329,6 +1359,12 @@
     }
 
     return Object.freeze({
+      getData,
+      replaceDatabase,
+      getSim:simById,
+      getFamily:familyById,
+      getCurrentFamily,
+      setCurrentFamilyId,
       mergeResults,
       createSim,
       updateSim,
