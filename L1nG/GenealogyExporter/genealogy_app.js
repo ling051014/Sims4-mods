@@ -585,22 +585,41 @@ function isNativeTextUndoTarget(target) {
 }
 
 let editingPets = [];
-let editingTraits = [];
 const petEditorState = {
   index:-1,
   avatar:null,
   avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
 };
-let editingParentKinds = new Map();
-let editingChildKinds = new Map();
-let editingExplicitSiblingIds = new Set();
-let editingDerivedSiblingIds = new Set();
 let avatarCropTarget = null;
 let avatarCropDraft = { ...DEFAULT_AVATAR_FRAME };
 let avatarCropUrl = '';
 let avatarCropPointer = null;
 let avatarCropNaturalSize = { width:0, height:0 };
 let avatarCropRenderMetrics = null;
+
+function currentSimEditorPerson() {
+  return simEditorState.simId
+    ? genealogyData?.sims?.[
+        simEditorState.simId
+      ] || null
+    : null;
+}
+
+function resetSimEditorDraftState() {
+  simEditorState.simId = null;
+  simEditorState.avatar = null;
+  simEditorState.avatarFrame = {
+    ...DEFAULT_AVATAR_FRAME
+  };
+  simEditorState.traits = [];
+  simEditorState.parentKinds.clear();
+  simEditorState.childKinds.clear();
+  simEditorState.explicitSiblingIds.clear();
+  simEditorState.derivedSiblingIds.clear();
+
+  editingPets = [];
+  editingGallery = [];
+}
 
 let editingGallery = [];
 const lifePhotoState = {
@@ -741,7 +760,7 @@ function scheduleResolvedAssetRefresh(
             id === lifePhotoState.editor.imageRef
         )
       ){
-        updatePhotoPreview();
+        lifePhotoWorkspace.refreshPreview();
       }
     }catch(_){}
 
@@ -750,7 +769,7 @@ function scheduleResolvedAssetRefresh(
         galleryViewerMask?.classList.contains('show')
       ){
         const gallery =
-          getViewerGallery();
+          lifePhotoWorkspace.viewerGallery();
 
         const active =
           gallery?.[lifePhotoState.viewer.index];
@@ -762,9 +781,7 @@ function scheduleResolvedAssetRefresh(
               id === active.image
           )
         ){
-          updateViewerContent(
-            gallery
-          );
+          lifePhotoWorkspace.refreshViewer();
         }
       }
     }catch(_){}
@@ -1676,8 +1693,18 @@ function buildSample() {
 }
 
 let genealogyData = null, scale = 1;
-let panX = 0, panY = 0, editingId = null, editingAvatar = null;
-let editingAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+let panX = 0, panY = 0;
+
+const simEditorState = {
+  simId:null,
+  avatar:null,
+  avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+  traits:[],
+  parentKinds:new Map(),
+  childKinds:new Map(),
+  explicitSiblingIds:new Set(),
+  derivedSiblingIds:new Set()
+};
 
 // ========【畫布視角狀態】 設定 - 自動 Fit 與手動視角分離，viewport 改變時保留正確中心 ========
 let canvasViewState = 'fit';
@@ -7172,7 +7199,9 @@ function closeTopModal() {
     const el = document.getElementById(id);
     if (el && el.classList.contains('show')) {
       el.classList.remove('show');
-      if (id === 'mask') { editingId=null; editingAvatar=null; editingAvatarFrame={...DEFAULT_AVATAR_FRAME}; editingPets=[]; editingGallery=[]; editingParentKinds.clear(); editingChildKinds.clear(); }
+      if (id === 'mask') {
+    resetSimEditorDraftState();
+  }
       if (id === 'petMask') { petEditorState.index=-1; petEditorState.avatar=null; petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME}; }
       if (id === 'avatarCropMask') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
       if (id === 'photoMask') { lifePhotoState.editor.index = -1; lifePhotoState.editor.imageRef = ''; }
@@ -13087,7 +13116,7 @@ function setupSearchSelects() {
 function getEditingAvatarCropSource(target){
   return target==='pet'
     ? {ref:petEditorState.avatar,frame:petEditorState.avatarFrame}
-    : {ref:editingAvatar,frame:editingAvatarFrame};
+    : {ref:simEditorState.avatar,frame:simEditorState.avatarFrame};
 }
 
 function setEditingAvatarCropFrame(target,frame){
@@ -13097,7 +13126,7 @@ function setEditingAvatarCropFrame(target,frame){
     petEditorState.avatarFrame=normalized;
     renderPetAvatarPreview();
   }else{
-    editingAvatarFrame=normalized;
+    simEditorState.avatarFrame=normalized;
     updateAvatarPreview();
     renderEditorInfoPreviewIfActive();
   }
@@ -13889,8 +13918,8 @@ function renderRelAnno(simId) {
 
 const petEditorController = {
   owner() {
-    return editingId
-      ? genealogyData.sims[editingId]
+    return simEditorState.simId
+      ? genealogyData.sims[simEditorState.simId]
       : null;
   },
 
@@ -14397,7 +14426,7 @@ $('btnAddPet').onclick = () => {
 
 function updateAvatarPreview(){
     const element=$('avatarPreview');
-    const avatar=framedAvatarImageHTML(editingAvatar,editingAvatarFrame);
+    const avatar=framedAvatarImageHTML(simEditorState.avatar,simEditorState.avatarFrame);
 
     if(avatar){
       element.innerHTML=avatar;
@@ -14407,7 +14436,7 @@ function updateAvatarPreview(){
     }
 
     const adjust=$('avatarAdjustBtn');
-    if(adjust)adjust.disabled=!editingAvatar;
+    if(adjust)adjust.disabled=!simEditorState.avatar;
   }
 
   $('avatarInput').onchange=async event=>{
@@ -14416,11 +14445,11 @@ function updateAvatarPreview(){
 
     try{
       const result=await compressImage(file,'sim');
-      editingAvatar=await saveImageAsset(result.blob,{
+      simEditorState.avatar=await saveImageAsset(result.blob,{
         width:result.width,
         height:result.height
       });
-      editingAvatarFrame={...DEFAULT_AVATAR_FRAME};
+      simEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
       updateAvatarPreview();
       renderEditorInfoPreviewIfActive();
     }catch(error){
@@ -14435,14 +14464,14 @@ function updateAvatarPreview(){
   $('avatarAdjustBtn').onclick=()=>openAvatarCropEditor('sim');
 
   $('avatarClearBtn').onclick=()=>{
-    editingAvatar=null;
-    editingAvatarFrame={...DEFAULT_AVATAR_FRAME};
+    simEditorState.avatar=null;
+    simEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
     updateAvatarPreview();
     renderEditorInfoPreviewIfActive();
   };
 
   $('fName').addEventListener('input',()=>{
-    if(!editingAvatar)updateAvatarPreview();
+    if(!simEditorState.avatar)updateAvatarPreview();
     renderEditorInfoPreviewIfActive();
   });
 
@@ -14528,21 +14557,21 @@ function formatGameDate(value) {
 
 function syncTraitHiddenInput() {
   const hidden = $('fTraits');
-  if (hidden) hidden.value = editingTraits.join('，');
+  if (hidden) hidden.value = simEditorState.traits.join('，');
 }
 
 function renderTraitEditor() {
   const list = $('traitChipList');
   if (!list) return;
   syncTraitHiddenInput();
-  list.innerHTML = editingTraits.map((trait, index) =>
+  list.innerHTML = simEditorState.traits.map((trait, index) =>
     `<span class="trait-chip"><span>${esc(trait)}</span><button type="button" class="trait-chip-remove" data-trait-index="${index}" aria-label="${esc(uiText('移除'))}" title="${esc(uiText('移除'))}">×</button></span>`
   ).join('');
   list.querySelectorAll('.trait-chip-remove').forEach(button => {
     button.addEventListener('click', () => {
       const index = Number(button.dataset.traitIndex);
-      if (!Number.isInteger(index) || index < 0 || index >= editingTraits.length) return;
-      editingTraits.splice(index, 1);
+      if (!Number.isInteger(index) || index < 0 || index >= simEditorState.traits.length) return;
+      simEditorState.traits.splice(index, 1);
       renderTraitEditor();
     });
   });
@@ -14554,8 +14583,8 @@ function addTraitFromEditor() {
   const pieces = input.value.split(/[,，\n]+/).map(value => value.trim()).filter(Boolean);
   if (!pieces.length) return;
   pieces.forEach(value => {
-    if (!editingTraits.some(existing => existing.toLocaleLowerCase() === value.toLocaleLowerCase())) {
-      editingTraits.push(value);
+    if (!simEditorState.traits.some(existing => existing.toLocaleLowerCase() === value.toLocaleLowerCase())) {
+      simEditorState.traits.push(value);
     }
   });
   input.value = '';
@@ -14564,14 +14593,15 @@ function addTraitFromEditor() {
 }
 
 function editorDraftSim(){
-    const existing=editingId?genealogyData.sims[editingId]:null;
+    const existing=
+      currentSimEditorPerson();
     const status=$('fStatus').value;
 
     return {
       ...(existing
         ? {gameData:existing.gameData?JSON.parse(JSON.stringify(existing.gameData)):undefined}
         : {}),
-      id:editingId||'__editor_preview__',
+      id:simEditorState.simId||'__editor_preview__',
       name:$('fName').value.trim(),
       lifeStage:$('fStage').value,
       gender:$('fGender').value,
@@ -14584,11 +14614,11 @@ function editorDraftSim(){
       residence:$('fResidence').value.trim(),
       aspiration:$('fAspiration').value.trim(),
       causeOfDeath:status==='已故'||status==='幽靈'?$('fCauseOfDeath').value.trim():'',
-      traits:[...editingTraits],
+      traits:[...simEditorState.traits],
       career:$('fCareer').value.trim(),
       bio:$('fBio').value.trim(),
-      avatar:editingAvatar||null,
-      avatarFrame:normalizeAvatarFrame(editingAvatarFrame),
+      avatar:simEditorState.avatar||null,
+      avatarFrame:normalizeAvatarFrame(simEditorState.avatarFrame),
       pets:JSON.parse(JSON.stringify(editingPets)),
       gallery:JSON.parse(JSON.stringify(editingGallery))
     };
@@ -14602,8 +14632,8 @@ function editorDraftSim(){
 
   function editorSiblingIds(){
     return [...new Set([
-      ...editingExplicitSiblingIds,
-      ...editingDerivedSiblingIds
+      ...simEditorState.explicitSiblingIds,
+      ...simEditorState.derivedSiblingIds
     ])]
       .filter(id =>
         id &&
@@ -14626,11 +14656,11 @@ function editorDraftSim(){
         if(!siblingId)return;
 
         const isExplicit=
-          editingExplicitSiblingIds
+          simEditorState.explicitSiblingIds
             .has(siblingId);
 
         const isDerived=
-          editingDerivedSiblingIds
+          simEditorState.derivedSiblingIds
             .has(siblingId);
 
         option.selected=
@@ -14664,7 +14694,7 @@ function editorDraftSim(){
     const select=$('fSiblings');
     if(!select)return;
 
-    editingExplicitSiblingIds=
+    simEditorState.explicitSiblingIds=
       new Set(
         [...select.options]
           .filter(option=>
@@ -14681,8 +14711,8 @@ function editorDraftSim(){
   function syncEditorSiblingAuthority(){
     const relations=
       resolveSiblingRelationships(
-        editingId
-          ? String(editingId)
+        simEditorState.simId
+          ? String(simEditorState.simId)
           : '',
         {
           parentIds:
@@ -14690,11 +14720,11 @@ function editorDraftSim(){
               'fParents'
             ),
           explicitIds:
-            [...editingExplicitSiblingIds]
+            [...simEditorState.explicitSiblingIds]
         }
       );
 
-    editingDerivedSiblingIds=
+    simEditorState.derivedSiblingIds=
       new Set(
         relations
           .filter(relation =>
@@ -14789,8 +14819,8 @@ function editorDraftSim(){
       select.onchange=()=>{
         const id=select.dataset.editorRelationId;
         const targetMap=select.dataset.editorRelationKind==='parent'
-          ? editingParentKinds
-          : editingChildKinds;
+          ? simEditorState.parentKinds
+          : simEditorState.childKinds;
 
         targetMap.set(id,select.value==='adoptive'?'adoptive':'parent-child');
         renderEditorFamilyPreviews();
@@ -14818,8 +14848,8 @@ function editorDraftSim(){
         : '<span class="family-rel-empty">—</span>';
     }
 
-    syncEditorRelationKindMap('fParents',editingParentKinds);
-    syncEditorRelationKindMap('fChildren',editingChildKinds);
+    syncEditorRelationKindMap('fParents',simEditorState.parentKinds);
+    syncEditorRelationKindMap('fChildren',simEditorState.childKinds);
 
     renderEditorRelationPeople(
       'editorParentsPreview',
@@ -14828,7 +14858,7 @@ function editorDraftSim(){
         'parent',
         sim,
         editorDraftSim(),
-        editingParentKinds.get(String(sim.id))||'parent-child'
+        simEditorState.parentKinds.get(String(sim.id))||'parent-child'
       )
     );
 
@@ -14851,7 +14881,7 @@ function editorDraftSim(){
         'child',
         sim,
         editorDraftSim(),
-        editingChildKinds.get(String(sim.id))||'parent-child'
+        simEditorState.childKinds.get(String(sim.id))||'parent-child'
       )
     );
 
@@ -14864,14 +14894,14 @@ function editorDraftSim(){
     renderEditorRelationKindList(
       'editorParentKindList',
       'fParents',
-      editingParentKinds,
+      simEditorState.parentKinds,
       'parent'
     );
 
     renderEditorRelationKindList(
       'editorChildKindList',
       'fChildren',
-      editingChildKinds,
+      simEditorState.childKinds,
       'child'
     );
   }
@@ -14892,7 +14922,7 @@ function editorDraftSim(){
           'parent',
           sim,
           draft,
-          editingParentKinds.get(id)||'parent-child'
+          simEditorState.parentKinds.get(id)||'parent-child'
         ),
         sim
       );
@@ -14915,7 +14945,7 @@ function editorDraftSim(){
           'child',
           sim,
           draft,
-          editingChildKinds.get(id)||'parent-child'
+          simEditorState.childKinds.get(id)||'parent-child'
         ),
         sim
       );
@@ -14947,13 +14977,13 @@ function editorDraftSim(){
       draft:true,
       familyNames,
       familyRelationshipRows:buildEditorFamilyRelationshipRows(draft),
-      otherRelationshipRows:editingId
-        ? profileOtherRelationshipRows(editingId)
+      otherRelationshipRows:simEditorState.simId
+        ? profileOtherRelationshipRows(simEditorState.simId)
         : [],
-      generationLabel:editingId
-        ? getSimGenerationLabel(editingId,currentFamily())
+      generationLabel:simEditorState.simId
+        ? getSimGenerationLabel(simEditorState.simId,currentFamily())
         : '',
-      onGallery:index=>openGalleryViewerPreview(index)
+      onGallery:index=>lifePhotoWorkspace.openDraftViewer(index)
     });
   }
 
@@ -15040,11 +15070,11 @@ function editorDraftSim(){
     ['fFamilyIds','fParents','fSpouse','fExSpouse','fChildren','fSiblings'].forEach(id=>{
       $(id)?.addEventListener('change',()=>{
         if(id==='fParents'){
-          syncEditorRelationKindMap('fParents',editingParentKinds);
+          syncEditorRelationKindMap('fParents',simEditorState.parentKinds);
           syncEditorSiblingAuthority();
         }
         if(id==='fChildren'){
-          syncEditorRelationKindMap('fChildren',editingChildKinds);
+          syncEditorRelationKindMap('fChildren',simEditorState.childKinds);
         }
         if(id==='fSiblings'){
           captureEditorExplicitSiblingSelection();
@@ -15095,8 +15125,15 @@ function editorDraftSim(){
   setupSimEditorInteractions();
 
   function openEditor(id){
-    editingId=id||null;
-    const sim=id?genealogyData.sims[id]:null;
+    resetSimEditorDraftState();
+
+    simEditorState.simId=
+      id || null;
+
+    const sim=
+      id
+        ? genealogyData.sims[id]
+        : null;
 
     const familyAuthority=
       sim
@@ -15131,7 +15168,7 @@ function editorDraftSim(){
     $('fAspiration').value=sim?displayDataText(sim.aspiration,sim):'';
     $('fCauseOfDeath').value=sim?displayDataText(sim.causeOfDeath,sim):'';
 
-    editingTraits=sim
+    simEditorState.traits=sim
       ? (sim.traits||[]).map(value=>displayDataText(value,sim))
       : [];
 
@@ -15142,8 +15179,8 @@ function editorDraftSim(){
     $('fCareer').value=sim?displayDataText(sim.career,sim):'';
     $('fBio').value=sim?displayDataText(sim.bio,sim):'';
 
-    editingAvatar=sim?(sim.avatar||null):null;
-    editingAvatarFrame=normalizeAvatarFrame(sim?.avatarFrame);
+    simEditorState.avatar=sim?(sim.avatar||null):null;
+    simEditorState.avatarFrame=normalizeAvatarFrame(sim?.avatarFrame);
     updateAvatarPreview();
 
     editingPets=sim
@@ -15196,12 +15233,12 @@ function editorDraftSim(){
 
     $('fParents').innerHTML=parentOptions;
 
-    editingParentKinds=new Map();
+    simEditorState.parentKinds=new Map();
 
     if(familyAuthority){
       familyAuthority.parents
         .forEach(relation=>{
-          editingParentKinds.set(
+          simEditorState.parentKinds.set(
             relation.targetId,
             relation.kind
           );
@@ -15209,7 +15246,7 @@ function editorDraftSim(){
     }
 
     [...$('fParents').options].forEach(option=>{
-      option.selected=editingParentKinds.has(String(option.value));
+      option.selected=simEditorState.parentKinds.has(String(option.value));
     });
 
     const relationOptions=allSims
@@ -15260,7 +15297,7 @@ function editorDraftSim(){
             }))
         : [];
 
-    editingChildKinds=new Map(
+    simEditorState.childKinds=new Map(
       childRelations.map(relation=>[
         relation.childId,
         relation.kind
@@ -15269,10 +15306,10 @@ function editorDraftSim(){
 
     $('fChildren').innerHTML=relationOptions;
     [...$('fChildren').options].forEach(option=>{
-      option.selected=editingChildKinds.has(String(option.value));
+      option.selected=simEditorState.childKinds.has(String(option.value));
     });
 
-    editingExplicitSiblingIds=
+    simEditorState.explicitSiblingIds=
       new Set(
         familyAuthority
           ? familyAuthority.siblings
@@ -15285,7 +15322,7 @@ function editorDraftSim(){
           : []
       );
 
-    editingDerivedSiblingIds=
+    simEditorState.derivedSiblingIds=
       new Set(
         familyAuthority
           ? familyAuthority.siblings
@@ -15337,33 +15374,40 @@ function editorDraftSim(){
     setTimeout(()=>$('fName').focus(),60);
   }
 
-  function closeEditor(){
-    mask.classList.remove('show');
+  function closeEditor() {
+  mask.classList.remove(
+    'show'
+  );
 
-    if(avatarCropMask?.classList.contains('show')){
-      closeAvatarCropEditor();
-    }
-
-    editingId=null;
-    editingAvatar=null;
-    editingAvatarFrame={...DEFAULT_AVATAR_FRAME};
-    editingPets=[];
-    editingTraits=[];
-    editingGallery=[];
-    editingParentKinds.clear();
-    editingChildKinds.clear();
-    editingExplicitSiblingIds.clear();
-    editingDerivedSiblingIds.clear();
-
-    petMask.classList.remove('show');
-    petEditorState.index=-1;
-    petEditorState.avatar=null;
-    petEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
-
-    photoMask.classList.remove('show');
-    lifePhotoState.editor.index=-1;
-    lifePhotoState.editor.imageRef='';
+  if (
+    avatarCropMask
+      ?.classList
+      .contains('show')
+  ) {
+    closeAvatarCropEditor();
   }
+
+  resetSimEditorDraftState();
+
+  petMask.classList.remove(
+    'show'
+  );
+
+  petEditorState.index = -1;
+  petEditorState.avatar = null;
+  petEditorState.avatarFrame = {
+    ...DEFAULT_AVATAR_FRAME
+  };
+
+  photoMask.classList.remove(
+    'show'
+  );
+
+  lifePhotoState.editor.index = -1;
+  lifePhotoState.editor.imageRef = '';
+  lifePhotoState.editor.sizeKB = 0;
+  lifePhotoState.editor.isOriginal = false;
+}
 
 function renderRelList(c) {
   if (!c) { $('relList').innerHTML = ''; return; }
@@ -15427,119 +15471,407 @@ function collectRelAnnotationDraft() {
   return entries;
 }
 
-function saveChar(){
-  const existing=editingId?genealogyData.sims[editingId]:null;
-  const sampleOwner=existing&&isBuiltinSampleSim(existing)?existing:null;
+function preserveEditorSampleText(
+  existing,
+  field,
+  inputValue
+) {
+  const input =
+    String(
+      inputValue ??
+      ''
+    ).trim();
 
-  const preserveSampleText=(field,inputValue)=>{
-    const input=String(inputValue??'').trim();
+  if (
+    !existing ||
+    !isBuiltinSampleSim(existing)
+  ) {
+    return input;
+  }
 
-    if(!sampleOwner)return input;
+  const canonical =
+    String(
+      existing[field] ??
+      ''
+    );
 
-    const canonical=String(sampleOwner[field]??'');
+  return (
+    input ===
+    displayDataText(
+      canonical,
+      existing
+    )
+  )
+    ? canonical
+    : input;
+}
 
-    return input===displayDataText(canonical,sampleOwner)
-      ? canonical
-      : input;
-  };
-
-  const preserveSampleTraits=inputTraits=>{
-    if(!sampleOwner)return inputTraits;
-
-    const shown=(sampleOwner.traits||[])
-      .map(value=>displayDataText(value,sampleOwner));
-
-    if(
-      shown.length===inputTraits.length&&
-      shown.every((value,index)=>value===inputTraits[index])
-    ){
-      return [...(sampleOwner.traits||[])];
-    }
-
+function preserveEditorSampleTraits(
+  existing,
+  inputTraits
+) {
+  if (
+    !existing ||
+    !isBuiltinSampleSim(existing)
+  ) {
     return inputTraits;
-  };
-
-  const rawName=$('fName').value.trim();
-
-  if(!rawName){
-    uiAlert('請填寫姓名',{title:'資料未完成'});
-    return;
   }
 
-  const name=preserveSampleText('name',rawName);
-  const newFamilyIds=selectedEditorIds('fFamilyIds');
+  const shown =
+    (existing.traits || [])
+      .map(value =>
+        displayDataText(
+          value,
+          existing
+        )
+      );
 
-  if(!newFamilyIds.length){
-    uiAlert('請至少選擇一個所屬家族',{title:'資料未完成'});
-    return;
+  if (
+    shown.length ===
+      inputTraits.length &&
+    shown.every(
+      (value, index) =>
+        value ===
+        inputTraits[index]
+    )
+  ) {
+    return [
+      ...(existing.traits || [])
+    ];
   }
 
-  const parentRelations=selectedEditorIds('fParents').map(parentId=>({
-    parentId,
-    kind:editingParentKinds.get(parentId)==='adoptive'
-      ? 'adoptive'
-      : 'parent-child'
-  }));
+  return inputTraits;
+}
 
-  const childRelations=selectedEditorIds('fChildren').map(childId=>({
-    childId,
-    kind:editingChildKinds.get(childId)==='adoptive'
-      ? 'adoptive'
-      : 'parent-child'
-  }));
+function collectSimEditorSaveRequest() {
+  const existing =
+    currentSimEditorPerson();
 
-  const status=$('fStatus').value;
+  const rawName =
+    $('fName').value.trim();
 
-  const data={
-    name,
-    lifeStage:$('fStage').value,
-    gender:$('fGender').value,
+  if (!rawName) {
+    uiAlert(
+      '請填寫姓名',
+      { title:'資料未完成' }
+    );
+    return null;
+  }
+
+  const familyIds =
+    selectedEditorIds(
+      'fFamilyIds'
+    );
+
+  if (!familyIds.length) {
+    uiAlert(
+      '請至少選擇一個所屬家族',
+      { title:'資料未完成' }
+    );
+    return null;
+  }
+
+  const parentRelations =
+    selectedEditorIds(
+      'fParents'
+    )
+      .map(parentId => ({
+        parentId,
+        kind:
+          simEditorState.parentKinds
+            .get(parentId) ===
+            'adoptive'
+              ? 'adoptive'
+              : 'parent-child'
+      }));
+
+  const childRelations =
+    selectedEditorIds(
+      'fChildren'
+    )
+      .map(childId => ({
+        childId,
+        kind:
+          simEditorState.childKinds
+            .get(childId) ===
+            'adoptive'
+              ? 'adoptive'
+              : 'parent-child'
+      }));
+
+  const status =
+    $('fStatus').value;
+
+  const sim = {
+    name:
+      preserveEditorSampleText(
+        existing,
+        'name',
+        rawName
+      ),
+    lifeStage:
+      $('fStage').value,
+    gender:
+      $('fGender').value,
     status,
-    race:$('fRace').value||'',
-    birthdayYear:$('fBirthdayYear').value===''
-      ? null
-      : Math.trunc(Number($('fBirthdayYear').value)),
-    birthdayMonth:$('fBirthdayMonth').value
-      ? Number($('fBirthdayMonth').value)
-      : null,
-    birthdayDay:$('fBirthdayDay').value
-      ? Number($('fBirthdayDay').value)
-      : null,
-    age:$('fAge').value===''
-      ? null
-      : Math.min(999,Math.max(0,Number($('fAge').value)||0)),
-    residence:preserveSampleText('residence',$('fResidence').value),
-    aspiration:preserveSampleText('aspiration',$('fAspiration').value),
-    causeOfDeath:status==='已故'||status==='幽靈'
-      ? preserveSampleText('causeOfDeath',$('fCauseOfDeath').value)
-      : '',
-    spouseIds:selectedEditorIds('fSpouse'),
-    exSpouseIds:selectedEditorIds('fExSpouse'),
-    traits:preserveSampleTraits([...editingTraits]),
-    career:preserveSampleText('career',$('fCareer').value),
-    bio:preserveSampleText('bio',$('fBio').value),
-    avatar:editingAvatar||null,
-    avatarFrame:normalizeAvatarFrame(editingAvatarFrame),
-    pets:JSON.parse(JSON.stringify(editingPets)),
-    gallery:JSON.parse(JSON.stringify(editingGallery))
+    race:
+      $('fRace').value || '',
+    birthdayYear:
+      $('fBirthdayYear').value === ''
+        ? null
+        : Math.trunc(
+            Number(
+              $('fBirthdayYear').value
+            )
+          ),
+    birthdayMonth:
+      $('fBirthdayMonth').value
+        ? Number(
+            $('fBirthdayMonth').value
+          )
+        : null,
+    birthdayDay:
+      $('fBirthdayDay').value
+        ? Number(
+            $('fBirthdayDay').value
+          )
+        : null,
+    age:
+      $('fAge').value === ''
+        ? null
+        : Math.min(
+            999,
+            Math.max(
+              0,
+              Number(
+                $('fAge').value
+              ) || 0
+            )
+          ),
+    residence:
+      preserveEditorSampleText(
+        existing,
+        'residence',
+        $('fResidence').value
+      ),
+    aspiration:
+      preserveEditorSampleText(
+        existing,
+        'aspiration',
+        $('fAspiration').value
+      ),
+    causeOfDeath:
+      status === '已故' ||
+      status === '幽靈'
+        ? preserveEditorSampleText(
+            existing,
+            'causeOfDeath',
+            $('fCauseOfDeath').value
+          )
+        : '',
+    spouseIds:
+      selectedEditorIds(
+        'fSpouse'
+      ),
+    exSpouseIds:
+      selectedEditorIds(
+        'fExSpouse'
+      ),
+    traits:
+      preserveEditorSampleTraits(
+        existing,
+        [
+          ...simEditorState.traits
+        ]
+      ),
+    career:
+      preserveEditorSampleText(
+        existing,
+        'career',
+        $('fCareer').value
+      ),
+    bio:
+      preserveEditorSampleText(
+        existing,
+        'bio',
+        $('fBio').value
+      ),
+    avatar:
+      simEditorState.avatar ||
+      null,
+    avatarFrame:
+      normalizeAvatarFrame(
+        simEditorState.avatarFrame
+      ),
+    pets:
+      JSON.parse(
+        JSON.stringify(
+          editingPets
+        )
+      ),
+    gallery:
+      JSON.parse(
+        JSON.stringify(
+          editingGallery
+        )
+      )
   };
 
-  const newSiblingIds=
-    [...editingExplicitSiblingIds]
+  const siblingIds =
+    [
+      ...simEditorState
+        .explicitSiblingIds
+    ]
       .filter(siblingId =>
-        !editingDerivedSiblingIds
+        !simEditorState
+          .derivedSiblingIds
           .has(siblingId)
       );
+
+  return {
+    simId:
+      simEditorState.simId ||
+      null,
+    sim,
+    parentRelations,
+    childRelations,
+    spouseIds:
+      sim.spouseIds,
+    exSpouseIds:
+      sim.exSpouseIds,
+    siblingIds,
+    familyIds,
+    annotations:
+      simEditorState.simId
+        ? collectRelAnnotationDraft()
+        : null
+  };
+}
+
+function ensureSavedSimManualPosition(
+  sim,
+  parentRelations,
+  mutation
+) {
+  const family =
+    currentFamily();
+
+  ensureFamilyLayoutShape(
+    family
+  );
+
+  if (
+    !family.freeLayout[
+      viewMode
+    ]
+  ) {
+    return mutation;
+  }
+
+  const manualPositions =
+    family.manualPositions[
+      viewMode
+    ];
+
+  if (
+    manualPositions[sim.id]
+  ) {
+    return mutation;
+  }
+
+  const {
+    H:NODE_H
+  } = getDims();
+
+  const {
+    LEVEL:LEVEL_GAP
+  } = getGaps();
+
+  const anchorParentId =
+    parentRelations
+      .map(relation =>
+        relation.parentId
+      )
+      .find(parentId =>
+        manualPositions[
+          parentId
+        ]
+      );
+
+  let nextPosition;
+
+  if (anchorParentId) {
+    const parentPosition =
+      manualPositions[
+        anchorParentId
+      ];
+
+    nextPosition = {
+      x:parentPosition.x,
+      y:
+        parentPosition.y +
+        NODE_H +
+        LEVEL_GAP
+    };
+  } else {
+    let maxY = 0;
+
+    Object.values(
+      manualPositions
+    )
+      .forEach(position => {
+        maxY =
+          Math.max(
+            maxY,
+            position.y +
+            NODE_H
+          );
+      });
+
+    nextPosition = {
+      x:0,
+      y:
+        maxY
+          ? maxY + 40
+          : 0
+    };
+  }
+
+  return genealogyStore
+    .mergeResults(
+      mutation,
+      genealogyStore
+        .setNodePosition(
+          family.id,
+          viewMode,
+          sim.id,
+          nextPosition
+        )
+    );
+}
+
+function commitSimEditorDraft() {
+  const request =
+    collectSimEditorSaveRequest();
+
+  if (!request) return;
+
   let mutation =
     genealogyStore.saveSimDraft({
-      simId:editingId || null,
-      sim:data,
-      parentRelations,
-      childRelations,
-      spouseIds:data.spouseIds || [],
-      exSpouseIds:data.exSpouseIds || [],
-      siblingIds:newSiblingIds,
-      familyIds:newFamilyIds
+      simId:request.simId,
+      sim:request.sim,
+      parentRelations:
+        request.parentRelations,
+      childRelations:
+        request.childRelations,
+      spouseIds:
+        request.spouseIds,
+      exSpouseIds:
+        request.exSpouseIds,
+      siblingIds:
+        request.siblingIds,
+      familyIds:
+        request.familyIds
     });
 
   const sim =
@@ -15548,76 +15880,45 @@ function saveChar(){
     ];
 
   if (!sim) {
-    uiAlert('人物資料儲存失敗。', {
-      title:'儲存失敗',
-      kind:'danger'
-    });
+    uiAlert(
+      '人物資料儲存失敗。',
+      {
+        title:'儲存失敗',
+        kind:'danger'
+      }
+    );
     return;
   }
 
-  if (editingId) {
+  if (request.annotations) {
     mutation =
-      genealogyStore.mergeResults(
-        mutation,
-        genealogyStore.setRelationshipAnnotations(
-          collectRelAnnotationDraft()
-        )
-      );
-  }
-
-  const family=currentFamily();
-  ensureFamilyLayoutShape(family);
-
-  const {H:NODE_H}=getDims();
-  const {LEVEL:LEVEL_GAP}=getGaps();
-
-  if(family.freeLayout[viewMode]){
-    const manualPositions=family.manualPositions[viewMode];
-
-    if(!manualPositions[sim.id]){
-      const anchorParentId=parentRelations
-        .map(relation=>relation.parentId)
-        .find(parentId=>manualPositions[parentId]);
-
-      let nextPosition;
-
-      if(anchorParentId){
-        const parentPosition=manualPositions[anchorParentId];
-
-        nextPosition={
-          x:parentPosition.x,
-          y:parentPosition.y+NODE_H+LEVEL_GAP
-        };
-      }else{
-        let maxY=0;
-
-        Object.values(manualPositions).forEach(position=>{
-          maxY=Math.max(maxY,position.y+NODE_H);
-        });
-
-        nextPosition={
-          x:0,
-          y:maxY?maxY+40:0
-        };
-      }
-
-      mutation =
-        genealogyStore.mergeResults(
+      genealogyStore
+        .mergeResults(
           mutation,
-          genealogyStore.setNodePosition(
-            family.id,
-            viewMode,
-            sim.id,
-            nextPosition
-          )
+          genealogyStore
+            .setRelationshipAnnotations(
+              request.annotations
+            )
         );
-    }
   }
 
-  applyGenealogyMutation(mutation);
+  mutation =
+    ensureSavedSimManualPosition(
+      sim,
+      request.parentRelations,
+      mutation
+    );
+
+  applyGenealogyMutation(
+    mutation
+  );
+
   closeEditor();
-  scheduleGC();  closeEditor();
   scheduleGC();
+}
+
+function saveChar() {
+  commitSimEditorDraft();
 }
 
 function purgeSimData(id) {
@@ -17105,7 +17406,7 @@ window.addEventListener('resize', () => {
 $('addBtn').onclick = () => openEditor(null);
 $('btnCancel').onclick = closeEditor;
 $('btnSave').onclick = saveChar;
-$('btnDelete').onclick = () => editingId && deleteChar(editingId);
+$('btnDelete').onclick = () => simEditorState.simId && deleteChar(simEditorState.simId);
 mask.onclick = e => { if (e.target === mask) closeEditor(); };
 
 document.addEventListener('keydown', e => {
@@ -17163,11 +17464,11 @@ window.addEventListener('blur', () => {
 });
 
 $('btnAddRel').onclick = () => {
-  if (!editingId) return;
+  if (!simEditorState.simId) return;
 
   const c =
     genealogyData.sims[
-      editingId
+      simEditorState.simId
     ];
 
   if (!c) return;
