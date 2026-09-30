@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20261001-selection-overlay-v6">
+        <link rel="stylesheet" href="genealogy.css?v=20261001-design-system-selects-r1">
     </head>
     <body data-theme="ling">
 
@@ -335,21 +335,21 @@
                         </div>
 
                         <div class="sim-profile-edit-fields">
-                            <label class="profile-name-field"><span>姓名</span><input id="fName" maxlength="30" placeholder="如：莫蒂默·高斯"></label>
+                            <div class="profile-name-field form-field"><span class="form-field-title" id="fNameLabel">姓名</span><input id="fName" maxlength="30" placeholder="如：莫蒂默·高斯" aria-labelledby="fNameLabel"></div>
                             <div class="profile-identity-row">
-                                <label><span>人生階段</span><select id="fStage">
+                                <div class="form-field"><span class="form-field-title" id="fStageLabel">人生階段</span><select id="fStage" aria-labelledby="fStageLabel">
                                     <option value="嬰兒">嬰兒</option><option value="幼兒">幼兒</option><option value="兒童">兒童</option><option value="青少年">青少年</option><option value="青年">青年</option><option value="成年">成年</option><option value="老年">老年</option>
-                                </select></label>
-                                <label><span>性別</span><select id="fGender"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></label>
-                                <label><span>狀態</span><select id="fStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
-                                <label><span>種族</span><select id="fRace">
+                                </select></div>
+                                <div class="form-field"><span class="form-field-title" id="fGenderLabel">性別</span><select id="fGender" aria-labelledby="fGenderLabel"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></div>
+                                <div class="form-field"><span class="form-field-title" id="fStatusLabel">狀態</span><select id="fStatus" aria-labelledby="fStatusLabel"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></div>
+                                <div class="form-field"><span class="form-field-title" id="fRaceLabel">種族</span><select id="fRace" aria-labelledby="fRaceLabel">
                                     <option value="">（不顯示）</option><option value="human">人類</option><option value="vampire">吸血鬼</option><option value="alien">外星人</option><option value="werewolf">狼人</option><option value="mermaid">人魚</option><option value="spellcaster">魔法師</option><option value="fairy">仙子</option><option value="plant">植物模擬市民</option><option value="robot">機器人</option><option value="other">其他</option>
-                                </select></label>
+                                </select></div>
                             </div>
                             <div class="profile-fact-edit-row">
-                                <label class="profile-birthday-field"><span class="profile-field-label"><span class="l1ng-icon icon-cake2" aria-hidden="true"></span><span>生日</span></span><div class="birthday-inputs"><input id="fBirthdayYear" type="number" step="1" inputmode="numeric" placeholder="年" aria-label="生日年份"><select id="fBirthdayMonth" aria-label="生日月份"><option value="">月</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select id="fBirthdayDay" aria-label="生日日期"><option value="">日</option></select></div></label>
-                                <label class="profile-age-field"><span class="profile-field-label"><span class="l1ng-icon icon-hourglass-split" aria-hidden="true"></span><span>年齡</span></span><div class="age-input-wrap"><input id="fAge" min="0" max="999" inputmode="numeric" type="number" placeholder="42"><span class="age-input-suffix">歲</span></div></label>
-                                <label class="profile-residence-field"><span class="profile-field-label"><span class="l1ng-icon icon-house" aria-hidden="true"></span><span>居住地</span></span><input id="fResidence" maxlength="60" placeholder="如：柳溪 - 花園社區"></label>
+                                <div class="profile-birthday-field form-field"><span class="profile-field-label form-field-title" id="fBirthdayLabel"><span class="l1ng-icon icon-cake2" aria-hidden="true"></span><span>生日</span></span><div class="birthday-inputs" role="group" aria-labelledby="fBirthdayLabel"><input id="fBirthdayYear" type="number" step="1" inputmode="numeric" placeholder="年" aria-label="生日年份"><select id="fBirthdayMonth" aria-label="生日月份"><option value="">月</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><select id="fBirthdayDay" aria-label="生日日期"><option value="">日</option></select></div></div>
+                                <div class="profile-age-field form-field"><span class="profile-field-label form-field-title" id="fAgeLabel"><span class="l1ng-icon icon-hourglass-split" aria-hidden="true"></span><span>年齡</span></span><div class="age-input-wrap"><input id="fAge" min="0" max="999" inputmode="numeric" type="number" placeholder="42" aria-labelledby="fAgeLabel"><span class="age-input-suffix">歲</span></div></div>
+                                <div class="profile-residence-field form-field"><span class="profile-field-label form-field-title" id="fResidenceLabel"><span class="l1ng-icon icon-house" aria-hidden="true"></span><span>居住地</span></span><input id="fResidence" maxlength="60" placeholder="如：柳溪 - 花園社區" aria-labelledby="fResidenceLabel"></div>
                             </div>
                         </div>
                     </div>
@@ -366,11 +366,11 @@
                 <div class="sim-editor-content">
                     <section class="sim-editor-panel active" data-editor-panel="basic" role="tabpanel">
                         <div class="grid profile-grid profile-basic-grid">
-                            <label class="full">職業 / 備註<input id="fCareer" placeholder="作家 / 學生 / 無"></label>
-                            <label class="full" id="causeOfDeathLabel" style="display:none">死因<input id="fCauseOfDeath" list="causeOfDeathPresets" maxlength="40" placeholder="如：衰老 / 溺水 / 火災…"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></label>
-                            <label class="full">人生抱負<input id="fAspiration" list="aspirationPresets" maxlength="40" placeholder="如：暢銷作家 / 靈魂伴侶…"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></label>
-                            <label class="full trait-field" for="traitInput"><span class="field-label-row"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></label>
-                            <label class="full">簡介<textarea id="fBio" placeholder="人物小傳、結局、備註…" rows="3"></textarea></label>
+                            <div class="form-field full"><span class="form-field-title" id="fCareerLabel">職業 / 備註</span><input id="fCareer" placeholder="作家 / 學生 / 無" aria-labelledby="fCareerLabel"></div>
+                            <div class="form-field full" id="causeOfDeathLabel" style="display:none"><span class="form-field-title" id="fCauseOfDeathLabelText">死因</span><input id="fCauseOfDeath" data-ui-suggestion-list="causeOfDeathPresets" maxlength="40" placeholder="如：衰老 / 溺水 / 火災…" aria-labelledby="fCauseOfDeathLabelText"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></div>
+                            <div class="form-field full"><span class="form-field-title" id="fAspirationLabel">人生抱負</span><input id="fAspiration" data-ui-suggestion-list="aspirationPresets" maxlength="40" placeholder="如：暢銷作家 / 靈魂伴侶…" aria-labelledby="fAspirationLabel"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></div>
+                            <div class="form-field full trait-field"><span class="field-label-row form-field-title" id="traitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="traitFieldLabel"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></div>
+                            <div class="form-field full"><span class="form-field-title" id="fBioLabel">簡介</span><textarea id="fBio" placeholder="人物小傳、結局、備註…" rows="3" aria-labelledby="fBioLabel"></textarea></div>
                         </div>
                     </section>
 
@@ -538,7 +538,7 @@
                     </label>
                     <label class="full">
                         標題
-                        <input id="phTitle" list="photoTitlePresets" maxlength="40" placeholder="如：幼兒期 / 婚禮合影 / 全家福">
+                        <input id="phTitle" data-ui-suggestion-list="photoTitlePresets" maxlength="40" placeholder="如：幼兒期 / 婚禮合影 / 全家福">
                         <datalist id="photoTitlePresets">
                             <option value="嬰兒期"></option>
                             <option value="幼兒期"></option>
@@ -1001,10 +1001,10 @@
 <script src="genealogy_store.js?v=20260930-card-settings-store-authority"></script>
 <script src="genealogy_interaction.js?v=20260929-performance-p345"></script>
 <script src="genealogy_viewport.js?v=20260930-viewport-authority-round1"></script>
-<script src="genealogy_ui.js?v=20260930-ui-authority-round2"></script>
+<script src="genealogy_ui.js?v=20261001-design-system-selects-r1"></script>
 <script src="genealogy_scene.js?v=20261001-mode-aware-dimensions-v4"></script>
-<script src="genealogy_personEditor.js?v=20260930-avatar-crop-flow"></script>
+<script src="genealogy_personEditor.js?v=20261001-design-system-selects-r1"></script>
   <script src="genealogy_i18n.js?v=20260930-i18n-json"></script>
-  <script src="genealogy_app.js?v=20261001-cross-mode-free-layout-v4"></script>
+  <script src="genealogy_app.js?v=20261001-design-system-selects-r1"></script>
     </body>
 </html>

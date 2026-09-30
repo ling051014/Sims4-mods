@@ -149,6 +149,8 @@ function populatePersonEditorBirthdayDays(preferredValue = null) {
       return `<option value="${day}">${day}</option>`;
     }).join('');
   if (current && Number(current) <= limit) daySelect.value = current;
+
+  refreshEditorSelect('fBirthdayDay');
 }
 
 function syncTraitHiddenInput() {
@@ -952,6 +954,14 @@ function buildPersonEditorDraft(){
     renderRelAnno(sim?sim.id:null);
 
     [
+      'fStage',
+      'fGender',
+      'fStatus',
+      'fRace',
+      'fBirthdayMonth',
+      'fBirthdayDay',
+      'fAspiration',
+      'fCauseOfDeath',
       'fFamilyIds',
       'fParents',
       'fSpouse',

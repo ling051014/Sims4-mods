@@ -5414,10 +5414,10 @@ function adjustLightness(hex, delta) {
 
 function resetThemeSurface() {
   [
-    '--grad-1','--grad-2',
-    '--grad-1-soft','--grad-2-soft',
-    '--accent','--accent-hover',
-    '--primary-dark','--hl'
+    '--brand-gradient-start','--brand-gradient-end',
+    '--brand-tint-start','--brand-tint-end',
+    '--action-primary','--action-primary-hover',
+    '--action-primary-strong','--selection-highlight'
   ].forEach(property => {
     document.body.style.removeProperty(property);
   });
@@ -5536,14 +5536,14 @@ function chooseCustomTheme(primary, secondary, { persist = true } = {}) {
   document.body.dataset.theme = 'custom';
 
   [
-    ['--grad-1', c1],
-    ['--grad-2', c2],
-    ['--grad-1-soft', hexToRgba(c1, 0.2)],
-    ['--grad-2-soft', hexToRgba(c2, 0.2)],
-    ['--accent', accent],
-    ['--accent-hover', adjustLightness(accent, -0.12)],
-    ['--primary-dark', adjustLightness(mix, -0.4)],
-    ['--hl', hexToRgba(accent, 0.5)]
+    ['--brand-gradient-start', c1],
+    ['--brand-gradient-end', c2],
+    ['--brand-tint-start', hexToRgba(c1, 0.2)],
+    ['--brand-tint-end', hexToRgba(c2, 0.2)],
+    ['--action-primary', accent],
+    ['--action-primary-hover', adjustLightness(accent, -0.12)],
+    ['--action-primary-strong', adjustLightness(mix, -0.4)],
+    ['--selection-highlight', hexToRgba(accent, 0.5)]
   ].forEach(([property, value]) => {
     document.body.style.setProperty(property, value);
   });
@@ -5978,11 +5978,11 @@ const REL_LINE_KEYS =
   ['parent','spouse','exspouse','adopt','other'];
 
 const REL_LINE_DEFAULT_COLOR_VARS = {
-  parent:'--line',
-  spouse:'--spouse',
-  exspouse:'--exspouse',
-  adopt:'--adopt',
-  other:'--other-line'
+  parent:'--relationship-parent',
+  spouse:'--relationship-spouse',
+  exspouse:'--relationship-former-spouse',
+  adopt:'--relationship-adoptive',
+  other:'--relationship-other'
 };
 
 const REL_LINE_DASH = {
@@ -7371,6 +7371,7 @@ function openAppearancePanel() {
   paintCanvasBackgroundPreview();
   renderOtherRelationshipLineControls();
   syncRelationshipLineControls();
+  genealogyUI.refreshAllControls();
 
   appearanceDialog.classList.add('show');
 }
@@ -8457,8 +8458,8 @@ function makeLabelSVG(x, y, iconName, text, key) {
       width="${w.toFixed(1)}"
       height="${h}"
       rx="${h / 2}"
-      fill="var(--label-bg)"
-      stroke="var(--label-border)"
+      fill="var(--relationship-label-surface)"
+      stroke="var(--relationship-label-border)"
       stroke-width="1.5"
     />
     ${iconMarkup}
@@ -9754,6 +9755,9 @@ const lifePhotoWorkspace = {
     $('phTitle').value = entry?.title || '';
     $('phNote').value = entry?.note || '';
     $('phStage').value = entry?.lifeStage || '';
+
+    genealogyUI.refreshSelect('phTitle');
+    genealogyUI.refreshSelect('phStage');
   },
 
   refreshPreview() {
@@ -13041,7 +13045,7 @@ $('delFamilyBtn').onclick = async () => {
   requestAnimationFrame(() => genealogyViewport.fit());
 };
 
-// ========【共用 UI Controller】 設定 - 搜尋型選擇器 / 原生下拉箭頭由獨立 UI 模組負責 ========
+// ========【共用 UI Controller】 設定 - 單選 / 搜尋 / 多選 / 可輸入建議由獨立 UI 模組負責 ========
 const genealogyUI =
   window.L1nGGenealogyUI?.create?.({
     helpers:{
@@ -13964,6 +13968,8 @@ const petEditorController = {
       visible
         ? (normalizePetGender(select.value) || 'male')
         : '';
+
+    genealogyUI.refreshSelect('pGender');
   },
 
   populateForm(pet) {
@@ -14002,6 +14008,15 @@ const petEditorController = {
 
     this.syncGenderVisibility();
     this.refreshAvatarPreview();
+
+    [
+      'pSpecies',
+      'pGender',
+      'pAgeStage',
+      'pStatus'
+    ].forEach(id =>
+      genealogyUI.refreshSelect(id)
+    );
   },
 
   open(index = -1) {
@@ -15173,7 +15188,7 @@ function getThemeCanvasBackgroundStyle() {
   const viewportStyle = getComputedStyle(viewport);
   const bodyStyle = getComputedStyle(document.body);
 
-  // 多數主題的 viewport 底色是透明，實際顯示的是 body 的 --bg；
+  // 多數主題的 viewport 底色是透明，實際顯示的是 body 的 --surface-canvas；
   // L1nG 晴空則另外覆寫 viewport 底色，因此優先保留 viewport 的實際值。
   const backgroundColor = isTransparentBackgroundColor(viewportStyle.backgroundColor)
     ? bodyStyle.backgroundColor
@@ -15768,7 +15783,7 @@ function ensureCanvasImportDropOverlay() {
     gap: '8px',
     boxSizing: 'border-box',
     padding: '24px',
-    border: '2px dashed var(--accent, #5a7fa3)',
+    border: '2px dashed var(--action-primary, #5a7fa3)',
     borderRadius: '18px',
     background: 'rgba(255,255,255,.92)',
     boxShadow: '0 18px 50px rgba(35,48,61,.18)',
@@ -16384,7 +16399,7 @@ function initializeGenealogyWorkspace() {
   setupHelpTooltipPortal();
   restoreFamilyPanelCollapsed();
   genealogyViewport.observeResize();
-  genealogyUI.mountSearchableSelects();
+  genealogyUI.mountFormControls();
 
   void preloadCurrentViewAssets();
 
@@ -16426,6 +16441,7 @@ function handleGenealogyLanguageChanged() {
     personEditor.renderFamilyPreviews();
   }
 
+  genealogyUI.refreshAllControls();
   syncAllNavSelectControls();
 }
 
@@ -16448,7 +16464,7 @@ async function bootstrapGenealogyApp() {
   await LING_I18N.init();
 
   setupTopbarNavSelects();
-  genealogyUI.observeNativeSelectChevrons();
+  genealogyUI.observeFormControls();
 
   initializeGenealogyWorkspace();
 }
