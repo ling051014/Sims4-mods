@@ -1795,6 +1795,23 @@ function familySourceSeedIds(fam) {
     .filter(id => currentGenealogyData().sims[id]);
 }
 
+// ========【Family Selector Cache】 設定 - 家族範圍只在 genealogy 結構改變時重建 ========
+const familySelectorCache = {
+  entriesByMode:new Map(),
+  activeByMode:new Map()
+};
+
+function invalidateFamilySelectorCache() {
+  familySelectorCache.entriesByMode.clear();
+  familySelectorCache.activeByMode.clear();
+}
+
+function normalizeFamilySelectorMode(mode) {
+  return mode === 'household' || mode === 'ea'
+    ? mode
+    : 'extended';
+}
+
 function buildHouseholdEntries() {
   if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
@@ -2280,9 +2297,34 @@ function buildExtendedFamilyComponents() {
 function getFamilySelectorEntries(mode = familyTreeViewMode) {
   if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
-  if (mode === 'household') return buildHouseholdEntries();
-  if (mode === 'ea') return buildEaTreeEntries();
-  return buildExtendedFamilyComponents();
+  const normalizedMode =
+    normalizeFamilySelectorMode(
+      mode
+    );
+
+  if (
+    familySelectorCache.entriesByMode.has(
+      normalizedMode
+    )
+  ) {
+    return familySelectorCache.entriesByMode.get(
+      normalizedMode
+    );
+  }
+
+  const entries =
+    normalizedMode === 'household'
+      ? buildHouseholdEntries()
+      : normalizedMode === 'ea'
+        ? buildEaTreeEntries()
+        : buildExtendedFamilyComponents();
+
+  familySelectorCache.entriesByMode.set(
+    normalizedMode,
+    entries
+  );
+
+  return entries;
 }
 
 function getFamilyTreeSelectionValue(mode) {
@@ -2292,9 +2334,22 @@ function getFamilyTreeSelectionValue(mode) {
 }
 
 function setFamilyTreeSelectionValue(mode, value) {
-  if (mode === 'household') familyTreeHouseholdSelectionValue = value;
-  else if (mode === 'ea') familyTreeEaSelectionValue = value;
-  else familyTreeExtendedSelectionValue = value;
+  const normalizedMode =
+    normalizeFamilySelectorMode(
+      mode
+    );
+
+  if (normalizedMode === 'household') {
+    familyTreeHouseholdSelectionValue = value;
+  } else if (normalizedMode === 'ea') {
+    familyTreeEaSelectionValue = value;
+  } else {
+    familyTreeExtendedSelectionValue = value;
+  }
+
+  familySelectorCache.activeByMode.delete(
+    normalizedMode
+  );
 }
 
 function findBestFamilySelectorEntry(fam, entries) {
@@ -2327,15 +2382,73 @@ function findBestFamilySelectorEntry(fam, entries) {
 }
 
 function getActiveFamilySelectorEntry(mode = familyTreeViewMode) {
-  const entries = getFamilySelectorEntries(mode);
+  const normalizedMode =
+    normalizeFamilySelectorMode(
+      mode
+    );
+
+  const entries =
+    getFamilySelectorEntries(
+      normalizedMode
+    );
+
   if (!entries.length) return null;
 
-  const selectedValue = getFamilyTreeSelectionValue(mode);
-  let entry = entries.find(item => item.value === selectedValue);
+  const selectedValue =
+    getFamilyTreeSelectionValue(
+      normalizedMode
+    );
+
+  const activeKey =
+    [
+      selectedValue || '',
+      currentFamily()?.id || ''
+    ].join('|');
+
+  const cached =
+    familySelectorCache.activeByMode.get(
+      normalizedMode
+    );
+
+  if (
+    cached &&
+    cached.key === activeKey &&
+    entries.includes(cached.entry)
+  ) {
+    return cached.entry;
+  }
+
+  let entry =
+    entries.find(item =>
+      item.value === selectedValue
+    );
 
   if (!entry) {
-    entry = findBestFamilySelectorEntry(currentFamily(), entries);
-    setFamilyTreeSelectionValue(mode, entry?.value || null);
+    entry =
+      findBestFamilySelectorEntry(
+        currentFamily(),
+        entries
+      );
+
+    setFamilyTreeSelectionValue(
+      normalizedMode,
+      entry?.value || null
+    );
+  }
+
+  if (entry) {
+    familySelectorCache.activeByMode.set(
+      normalizedMode,
+      {
+        key:[
+          getFamilyTreeSelectionValue(
+            normalizedMode
+          ) || '',
+          currentFamily()?.id || ''
+        ].join('|'),
+        entry
+      }
+    );
   }
 
   return entry || null;
@@ -7422,6 +7535,15 @@ function applyGenealogyMutation(
     invalidateRelationshipGraph();
   }
 
+  if (
+    mutation.relationshipGraphChanged ||
+    mutation.familyMembershipChanged ||
+    mutation.familiesChanged
+  ) {
+    invalidateFamilySelectorCache();
+    genealogyScene?.invalidateTopologyCache?.();
+  }
+
   if (mutation.saveDirty) {
     save({ immediate:immediateSave });
   }
@@ -9825,6 +9947,44 @@ function getLayoutNodeBox(id, position = null) {
   };
 }
 
+function seedVisibleScenePositionsForFreeLayout(
+  fam,
+  mode
+) {
+  const scene =
+    getSceneLayout();
+
+  if (!fam || !scene?.pos) {
+    return null;
+  }
+
+  const seeded =
+    cloneManualPositionMap(
+      fam.manualPositions?.[mode]
+    );
+
+  scene.visibleIds.forEach(id => {
+    const position =
+      scene.pos.get(id);
+
+    if (!position) return;
+
+    seeded[id] = {
+      x:position.x,
+      y:position.y
+    };
+  });
+
+  return genealogyStore.setFamilyLayoutState(
+    fam.id,
+    mode,
+    {
+      freeLayout:true,
+      manualPositions:seeded
+    }
+  );
+}
+
 function applySelectedLayoutOperation(action) {
   const fam = currentFamily();
   if (!fam || !getSceneLayout()) return false;
@@ -9854,6 +10014,9 @@ function applySelectedLayoutOperation(action) {
       fam,
       viewMode
     );
+
+  const activateFreeLayout =
+    !fam.freeLayout[viewMode];
 
   const minLeft =
     Math.min(...boxes.map(box => box.x));
@@ -9987,13 +10150,29 @@ function applySelectedLayoutOperation(action) {
     };
   });
 
-  if (!changed) return false;
+  if (!changed && !activateFreeLayout) {
+    return false;
+  }
 
-  const mutation =
+  const freeLayoutMutation =
+    activateFreeLayout
+      ? seedVisibleScenePositionsForFreeLayout(
+          fam,
+          viewMode
+        )
+      : null;
+
+  const positionMutation =
     genealogyStore.setNodePositions(
       fam.id,
       viewMode,
       nextPositions
+    );
+
+  const mutation =
+    genealogyStore.mergeResults(
+      freeLayoutMutation,
+      positionMutation
     );
 
   applyGenealogyMutation(mutation);
@@ -10043,8 +10222,8 @@ function renderPersonCardMenu(simId, clientX, clientY) {
       <div class="person-card-menu-divider"></div>
       <div class="person-card-menu-section-title">${esc(uiText('分佈'))}</div>
       <div class="person-card-menu-grid">
-        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-horizontal" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('水平均勻'))}</span></button>
-        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-vertical" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('垂直均勻'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-horizontal" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('水平等距'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-vertical" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('垂直等距'))}</span></button>
       </div>
 
       <div class="person-card-menu-divider"></div>
@@ -10923,7 +11102,7 @@ nodes.addEventListener('pointerdown', e => {
       if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
       if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
       if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
-      genealogyScene?.requestRelationshipPreviewUpdate?.();
+      genealogyScene?.requestRelationshipPreviewUpdate?.([id]);
     };
 
     const moveFrame =
@@ -11169,7 +11348,7 @@ nodes.addEventListener('pointerdown', e => {
         );
       }
 
-      genealogyScene?.requestRelationshipPreviewUpdate?.();
+      genealogyScene?.requestRelationshipPreviewUpdate?.([id]);
     };
 
     const moveFrame =
@@ -11478,7 +11657,7 @@ nodes.addEventListener('pointerdown', e => {
       );
     }
 
-    genealogyScene?.requestRelationshipPreviewUpdate?.();
+    genealogyScene?.requestRelationshipPreviewUpdate?.(dragIds);
   };
 
   const moveFrame =
@@ -15667,6 +15846,8 @@ function initializeGenealogyWorkspace() {
     initialDatabase
   );
 
+  invalidateFamilySelectorCache();
+  genealogyScene?.invalidateTopologyCache?.();
   invalidateChildrenIndex();
   invalidateRelationshipGraph();
 
@@ -15709,8 +15890,9 @@ function initializeGenealogyWorkspace() {
 
 /* ========【多語系介面回呼】 設定 - 語言切換後刷新 App 專屬畫面狀態 ======== */
 function handleGenealogyLanguageChanged() {
-  // 關係標籤寬度與內建範例資料仍依顯示語言重新計算。
+  // 關係標籤寬度與 selector 顯示文字都依目前語言重新計算。
   _textMeasureCache.clear();
+  invalidateFamilySelectorCache();
 
   if (
     currentGenealogyData() &&

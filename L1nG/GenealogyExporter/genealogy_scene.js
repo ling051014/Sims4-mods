@@ -58,6 +58,796 @@
       scale = getScale();
     }
 
+    // ========【Genealogy Scene Cache】 設定 - 拓撲、卡片幾何與拖曳關係索引分層快取 ========
+    const GEOMETRY_BUCKET_SIZE = 256;
+    let nodeDimensionCache = new Map();
+    let genealogyTopologyCache = new Map();
+    let relationshipEdgeRecords = new Map();
+    let relationshipEdgesBySim = new Map();
+    let relationshipEdgeElements = new Map();
+    let pendingRelationshipPreviewIds = new Set();
+
+    function resetNodeDimensionCache() {
+      nodeDimensionCache = new Map();
+    }
+
+    function visibleScopeCacheKey(visibleIds) {
+      return [...(visibleIds || [])]
+        .map(String)
+        .sort()
+        .join('\u001f');
+    }
+
+    function invalidateTopologyCache() {
+      genealogyTopologyCache.clear();
+      relationshipEdgeRecords.clear();
+      relationshipEdgesBySim.clear();
+      relationshipEdgeElements.clear();
+      pendingRelationshipPreviewIds.clear();
+    }
+
+    function buildCachedGenealogyTopology(
+      visibleIds
+    ) {
+      const sims =
+        [...visibleIds]
+          .map(id =>
+            genealogyData.sims[id]
+          )
+          .filter(Boolean);
+
+      const byId =
+        new Map(
+          sims.map(sim => [
+            sim.id,
+            sim
+          ])
+        );
+
+      const parentGroups =
+        buildParentChildConnectorGroups(
+          byId,
+          new Set(byId.keys())
+        );
+
+      const parentToChildren =
+        new Map(
+          sims.map(sim => [
+            String(sim.id),
+            new Set()
+          ])
+        );
+
+      const childToParents =
+        new Map(
+          sims.map(sim => [
+            String(sim.id),
+            new Set()
+          ])
+        );
+
+      parentGroups.forEach(group => {
+        group.parentIds.forEach(parentId => {
+          if (!parentToChildren.has(parentId)) {
+            parentToChildren.set(
+              parentId,
+              new Set()
+            );
+          }
+
+          group.children.forEach(childId => {
+            parentToChildren
+              .get(parentId)
+              .add(childId);
+
+            if (!childToParents.has(childId)) {
+              childToParents.set(
+                childId,
+                new Set()
+              );
+            }
+
+            childToParents
+              .get(childId)
+              .add(parentId);
+          });
+        });
+      });
+
+      const generationBySim =
+        new Map();
+
+      const visiting =
+        new Set();
+
+      const resolveGeneration = simId => {
+        if (
+          generationBySim.has(simId)
+        ) {
+          return generationBySim.get(
+            simId
+          );
+        }
+
+        if (visiting.has(simId)) {
+          return 0;
+        }
+
+        visiting.add(simId);
+
+        const sim =
+          byId.get(simId);
+
+        const parents =
+          sim
+            ? genealogyParentIds(
+                sim,
+                byId
+              )
+            : [];
+
+        const generation =
+          parents.length
+            ? 1 + Math.max(
+                ...parents.map(
+                  resolveGeneration
+                )
+              )
+            : 0;
+
+        visiting.delete(simId);
+
+        generationBySim.set(
+          simId,
+          generation
+        );
+
+        return generation;
+      };
+
+      sims.forEach(sim => {
+        resolveGeneration(sim.id);
+      });
+
+      const maxGenerationPasses =
+        Math.max(
+          4,
+          sims.length * 4
+        );
+
+      for (
+        let pass = 0;
+        pass < maxGenerationPasses;
+        pass += 1
+      ) {
+        let changed = false;
+
+        parentGroups.forEach(group => {
+          const parents =
+            group.parentIds
+              .filter(id =>
+                generationBySim.has(id)
+              );
+
+          if (parents.length >= 2) {
+            const targetGeneration =
+              Math.max(
+                ...parents.map(id =>
+                  generationBySim.get(id)
+                )
+              );
+
+            parents.forEach(id => {
+              if (
+                generationBySim.get(id) ===
+                targetGeneration
+              ) {
+                return;
+              }
+
+              generationBySim.set(
+                id,
+                targetGeneration
+              );
+
+              changed = true;
+            });
+          }
+
+          const parentGenerations =
+            parents.map(id =>
+              generationBySim.get(id)
+            );
+
+          if (!parentGenerations.length) {
+            return;
+          }
+
+          const childMinimum =
+            Math.max(
+              ...parentGenerations
+            ) + 1;
+
+          group.children.forEach(childId => {
+            if (
+              !generationBySim.has(
+                childId
+              ) ||
+              generationBySim.get(
+                childId
+              ) >= childMinimum
+            ) {
+              return;
+            }
+
+            generationBySim.set(
+              childId,
+              childMinimum
+            );
+
+            changed = true;
+          });
+        });
+
+        if (!changed) break;
+      }
+
+      return {
+        sims,
+        byId,
+        parentGroups,
+        parentToChildren,
+        childToParents,
+        generationBySim
+      };
+    }
+
+    function getCachedGenealogyTopology(
+      visibleIds
+    ) {
+      const key =
+        visibleScopeCacheKey(
+          visibleIds
+        );
+
+      if (
+        genealogyTopologyCache.has(
+          key
+        )
+      ) {
+        return genealogyTopologyCache.get(
+          key
+        );
+      }
+
+      if (
+        genealogyTopologyCache.size >
+        12
+      ) {
+        genealogyTopologyCache.clear();
+      }
+
+      const topology =
+        buildCachedGenealogyTopology(
+          visibleIds
+        );
+
+      genealogyTopologyCache.set(
+        key,
+        topology
+      );
+
+      return topology;
+    }
+
+    function geometryBucketKey(
+      x,
+      y
+    ) {
+      return x + ':' + y;
+    }
+
+    function geometryBucketKeysForRect(
+      rect
+    ) {
+      const left =
+        Math.floor(
+          rect.left /
+          GEOMETRY_BUCKET_SIZE
+        );
+
+      const right =
+        Math.floor(
+          rect.right /
+          GEOMETRY_BUCKET_SIZE
+        );
+
+      const top =
+        Math.floor(
+          rect.top /
+          GEOMETRY_BUCKET_SIZE
+        );
+
+      const bottom =
+        Math.floor(
+          rect.bottom /
+          GEOMETRY_BUCKET_SIZE
+        );
+
+      const keys = [];
+
+      for (
+        let x = left;
+        x <= right;
+        x += 1
+      ) {
+        for (
+          let y = top;
+          y <= bottom;
+          y += 1
+        ) {
+          keys.push(
+            geometryBucketKey(
+              x,
+              y
+            )
+          );
+        }
+      }
+
+      return keys;
+    }
+
+    function addGeometryRectToSpatialIndex(
+      geometry,
+      id,
+      rect
+    ) {
+      const key =
+        String(id);
+
+      const bucketKeys =
+        geometryBucketKeysForRect(
+          rect
+        );
+
+      geometry.bucketKeysById.set(
+        key,
+        bucketKeys
+      );
+
+      bucketKeys.forEach(bucketKey => {
+        if (
+          !geometry.spatialBuckets.has(
+            bucketKey
+          )
+        ) {
+          geometry.spatialBuckets.set(
+            bucketKey,
+            new Set()
+          );
+        }
+
+        geometry.spatialBuckets
+          .get(bucketKey)
+          .add(key);
+      });
+    }
+
+    function removeGeometryRectFromSpatialIndex(
+      geometry,
+      id
+    ) {
+      const key =
+        String(id);
+
+      (
+        geometry.bucketKeysById.get(
+          key
+        ) ||
+        []
+      ).forEach(bucketKey => {
+        const bucket =
+          geometry.spatialBuckets.get(
+            bucketKey
+          );
+
+        if (!bucket) return;
+
+        bucket.delete(key);
+
+        if (!bucket.size) {
+          geometry.spatialBuckets.delete(
+            bucketKey
+          );
+        }
+      });
+
+      geometry.bucketKeysById.delete(
+        key
+      );
+    }
+
+    function rawCardOuterRect(
+      position,
+      dimensions
+    ) {
+      const left =
+        position.x + PAD;
+
+      const top =
+        position.y + PAD;
+
+      return {
+        left,
+        top,
+        right:
+          left +
+          dimensions.W,
+        bottom:
+          top +
+          dimensions.H,
+        centerX:
+          left +
+          dimensions.W / 2,
+        centerY:
+          top +
+          dimensions.H / 2
+      };
+    }
+
+    function rawCardAvatarRect(
+      position
+    ) {
+      const geometry =
+        getCardAvatarGeometry();
+
+      const left =
+        position.x +
+        PAD +
+        geometry.left;
+
+      const top =
+        position.y +
+        PAD +
+        geometry.top;
+
+      return {
+        left,
+        top,
+        right:left + geometry.size,
+        bottom:top + geometry.size,
+        centerX:left + geometry.size / 2,
+        centerY:top + geometry.size / 2
+      };
+    }
+
+    function updateSceneGeometryCard(
+      geometry,
+      id,
+      position
+    ) {
+      if (!geometry || !position) {
+        return;
+      }
+
+      const key =
+        String(id);
+
+      removeGeometryRectFromSpatialIndex(
+        geometry,
+        key
+      );
+
+      const dimensions =
+        getNodeDimensionsById(
+          key
+        );
+
+      const rect =
+        rawCardOuterRect(
+          position,
+          dimensions
+        );
+
+      geometry.dimensions.set(
+        key,
+        dimensions
+      );
+
+      geometry.rects.set(
+        key,
+        rect
+      );
+
+      geometry.avatars.set(
+        key,
+        rawCardAvatarRect(
+          position
+        )
+      );
+
+      addGeometryRectToSpatialIndex(
+        geometry,
+        key,
+        rect
+      );
+    }
+
+    function buildSceneGeometry(
+      pos,
+      visibleIds
+    ) {
+      const geometry = {
+        dimensions:new Map(),
+        rects:new Map(),
+        avatars:new Map(),
+        spatialBuckets:new Map(),
+        bucketKeysById:new Map(),
+        width:0,
+        height:0
+      };
+
+      visibleIds.forEach(id => {
+        const position =
+          pos.get(id);
+
+        if (!position) return;
+
+        updateSceneGeometryCard(
+          geometry,
+          id,
+          position
+        );
+
+        const dimensions =
+          geometry.dimensions.get(
+            String(id)
+          );
+
+        geometry.width =
+          Math.max(
+            geometry.width,
+            position.x +
+              dimensions.W
+          );
+
+        geometry.height =
+          Math.max(
+            geometry.height,
+            position.y +
+              dimensions.H
+          );
+      });
+
+      return geometry;
+    }
+
+    function queryGeometryCandidatesForSegment(
+      geometry,
+      x1,
+      y1,
+      x2,
+      y2
+    ) {
+      if (!geometry) {
+        return null;
+      }
+
+      const bounds = {
+        left:Math.min(x1, x2),
+        right:Math.max(x1, x2),
+        top:Math.min(y1, y2),
+        bottom:Math.max(y1, y2)
+      };
+
+      const candidates =
+        new Set();
+
+      geometryBucketKeysForRect(
+        bounds
+      ).forEach(bucketKey => {
+        (
+          geometry.spatialBuckets.get(
+            bucketKey
+          ) ||
+          []
+        ).forEach(id => {
+          candidates.add(id);
+        });
+      });
+
+      return candidates;
+    }
+
+    function validManualPosition(
+      position
+    ) {
+      return !!(
+        position &&
+        Number.isFinite(
+          Number(position.x)
+        ) &&
+        Number.isFinite(
+          Number(position.y)
+        )
+      );
+    }
+
+    function buildFreeLayoutFallbackPositions(
+      visibleIds,
+      manualPositions
+    ) {
+      const topology =
+        getCachedGenealogyTopology(
+          visibleIds
+        );
+
+      const {
+        SIBLING:SIBLING_GAP,
+        LEVEL:LEVEL_GAP
+      } =
+        resolveLayoutGaps();
+
+      const validManual =
+        [...visibleIds]
+          .map(id => ({
+            id,
+            position:
+              manualPositions[id]
+          }))
+          .filter(item =>
+            validManualPosition(
+              item.position
+            )
+          );
+
+      let manualRight = 0;
+      let manualTop = 0;
+      let hasManual = false;
+
+      validManual.forEach(item => {
+        const dimensions =
+          getNodeDimensionsById(
+            item.id
+          );
+
+        manualRight =
+          Math.max(
+            manualRight,
+            Number(item.position.x) +
+              dimensions.W
+          );
+
+        manualTop =
+          hasManual
+            ? Math.min(
+                manualTop,
+                Number(item.position.y)
+              )
+            : Number(item.position.y);
+
+        hasManual = true;
+      });
+
+      const missing =
+        [...visibleIds]
+          .filter(id =>
+            !validManualPosition(
+              manualPositions[id]
+            )
+          )
+          .sort((left, right) =>
+            (
+              topology.generationBySim.get(
+                left
+              ) || 0
+            ) -
+              (
+                topology.generationBySim.get(
+                  right
+                ) || 0
+              ) ||
+            (
+              topology.byId.get(left)?.order ??
+              0
+            ) -
+              (
+                topology.byId.get(right)?.order ??
+                0
+              ) ||
+            String(left).localeCompare(
+              String(right)
+            )
+          );
+
+      if (!missing.length) {
+        return new Map();
+      }
+
+      const maxCardHeight =
+        Math.max(
+          ...missing.map(id =>
+            getNodeDimensionsById(id).H
+          ),
+          resolveDefaultCardDimensions().H
+        );
+
+      const generations =
+        [...new Set(
+          missing.map(id =>
+            topology.generationBySim.get(
+              id
+            ) || 0
+          )
+        )]
+          .sort((a, b) => a - b);
+
+      const firstGeneration =
+        generations[0] || 0;
+
+      const baseX =
+        hasManual
+          ? manualRight +
+            SIBLING_GAP
+          : 0;
+
+      const baseY =
+        hasManual
+          ? manualTop
+          : 0;
+
+      const fallback =
+        new Map();
+
+      generations.forEach(generation => {
+        let cursorX =
+          baseX;
+
+        const rowY =
+          baseY +
+          (
+            generation -
+            firstGeneration
+          ) *
+          (
+            maxCardHeight +
+            LEVEL_GAP
+          );
+
+        missing
+          .filter(id =>
+            (
+              topology.generationBySim.get(
+                id
+              ) || 0
+            ) === generation
+          )
+          .forEach(id => {
+            const dimensions =
+              getNodeDimensionsById(
+                id
+              );
+
+            fallback.set(
+              id,
+              {
+                id,
+                x:cursorX,
+                y:rowY
+              }
+            );
+
+            cursorX +=
+              dimensions.W +
+              SIBLING_GAP;
+          });
+      });
+
+      return fallback;
+    }
+
+
     function estimateWrappedRows(
       text,
       maxWidth,
@@ -263,20 +1053,44 @@
     function getNodeDimensions(
       sim
     ) {
+      const cacheKey =
+        sim?.id != null
+          ? String(sim.id)
+          : null;
+
       if (
-        viewMode === 'view' &&
-        sim
+        cacheKey &&
+        nodeDimensionCache.has(
+          cacheKey
+        )
       ) {
-        return {
-          W:VIEW_CARD_LAYOUT.width,
-          H:estimateViewCardHeight(
-            sim,
-            getCardViewSettings()
-          )
-        };
+        return nodeDimensionCache.get(
+          cacheKey
+        );
       }
 
-      return resolveDefaultCardDimensions();
+      const dimensions =
+        (
+          viewMode === 'view' &&
+          sim
+        )
+          ? {
+              W:VIEW_CARD_LAYOUT.width,
+              H:estimateViewCardHeight(
+                sim,
+                getCardViewSettings()
+              )
+            }
+          : resolveDefaultCardDimensions();
+
+      if (cacheKey) {
+        nodeDimensionCache.set(
+          cacheKey,
+          dimensions
+        );
+      }
+
+      return dimensions;
     }
 
     function getNodeDimensionsById(
@@ -414,15 +1228,50 @@ function relationshipBlockingCard(
       )
     ]);
 
+  const geometry =
+    routeContext.geometry ||
+    (
+      routeContext.pos ===
+        layoutCache?.pos
+        ? layoutCache.geometry
+        : null
+    );
+
+  const candidates =
+    queryGeometryCandidatesForSegment(
+      geometry,
+      x1,
+      y1,
+      x2,
+      y2
+    );
+
+  const candidateIds =
+    candidates ||
+    new Set(
+      [...routeContext.pos.keys()]
+        .map(String)
+    );
+
   for (
-    const [id, position]
-    of routeContext.pos.entries()
+    const id
+    of candidateIds
   ) {
     if (ignored.has(String(id))) {
       continue;
     }
 
+    const position =
+      routeContext.pos.get(id);
+
+    if (!position) {
+      continue;
+    }
+
     const rect =
+      geometry?.rects?.get(
+        String(id)
+      ) ||
       cardOuterRect(
         position
       );
@@ -740,160 +1589,21 @@ function buildGenealogyLayoutModel(visibleIds) {
     SPOUSE:SPOUSE_GAP
   } = resolveLayoutGaps();
 
-  const sims = [...visibleIds]
-    .map(id => genealogyData.sims[id])
-    .filter(Boolean);
-
-  const byId = new Map(
-    sims.map(sim => [sim.id, sim])
-  );
-
-  const parentGroups =
-    buildParentChildConnectorGroups(
-      byId,
-      new Set(byId.keys())
+  const topology =
+    getCachedGenealogyTopology(
+      visibleIds
     );
 
-  // ========【血緣世代】 設定 - 只由親子 / 領養決定上下層級 ========
+  const {
+    sims,
+    byId,
+    parentGroups
+  } = topology;
+
   const generationBySim =
-    new Map();
-
-  const visiting =
-    new Set();
-
-  const resolveGeneration = simId => {
-    if (
-      generationBySim.has(simId)
-    ) {
-      return generationBySim.get(
-        simId
-      );
-    }
-
-    if (visiting.has(simId)) {
-      return 0;
-    }
-
-    visiting.add(simId);
-
-    const sim =
-      byId.get(simId);
-
-    const parents =
-      sim
-        ? genealogyParentIds(
-            sim,
-            byId
-          )
-        : [];
-
-    const generation =
-      parents.length
-        ? 1 + Math.max(
-            ...parents.map(
-              resolveGeneration
-            )
-          )
-        : 0;
-
-    visiting.delete(simId);
-
-    generationBySim.set(
-      simId,
-      generation
+    new Map(
+      topology.generationBySim
     );
-
-    return generation;
-  };
-
-  sims.forEach(sim => {
-    resolveGeneration(sim.id);
-  });
-
-  // 同一名子女的共同父母固定於同一個 parent generation。
-  // 這仍然只由「共同擁有這名子女」推導，不讓感情狀態改寫血緣世代。
-  const maxGenerationPasses =
-    Math.max(
-      4,
-      sims.length * 4
-    );
-
-  for (
-    let pass = 0;
-    pass < maxGenerationPasses;
-    pass += 1
-  ) {
-    let changed = false;
-
-    parentGroups.forEach(group => {
-      const parents =
-        group.parentIds
-          .filter(id =>
-            generationBySim.has(id)
-          );
-
-      if (parents.length >= 2) {
-        const targetGeneration =
-          Math.max(
-            ...parents.map(id =>
-              generationBySim.get(id)
-            )
-          );
-
-        parents.forEach(id => {
-          if (
-            generationBySim.get(id) ===
-            targetGeneration
-          ) {
-            return;
-          }
-
-          generationBySim.set(
-            id,
-            targetGeneration
-          );
-
-          changed = true;
-        });
-      }
-
-      const parentGenerations =
-        parents.map(id =>
-          generationBySim.get(id)
-        );
-
-      if (!parentGenerations.length) {
-        return;
-      }
-
-      const childMinimum =
-        Math.max(
-          ...parentGenerations
-        ) + 1;
-
-      group.children.forEach(childId => {
-        if (
-          !generationBySim.has(
-            childId
-          ) ||
-          generationBySim.get(
-            childId
-          ) >= childMinimum
-        ) {
-          return;
-        }
-
-        generationBySim.set(
-          childId,
-          childMinimum
-        );
-
-        changed = true;
-      });
-    });
-
-    if (!changed) break;
-  }
 
   const pairCandidates =
     collectGenealogyHorizontalPairCandidates(
@@ -3682,21 +4392,27 @@ function solveAutoRelationshipGeometry(
     return;
   }
 
-  // ========【Auto Relationship Geometry Solver】 設定 - 單／多子女共用同一套幾何權威 ========
-  // Equality：
-  // - 單子女：parent source = child relationship anchor
-  // - 多子女：parent source = sibling bus 外側 child branches 的中點
-  //
-  // Inequality：
-  // - 同世代 layout unit 保持最小安全距離
-  //
-  // 兩類約束交替投影；不再把整個家系鎖成剛體，也不再用 V-H-V 代替排列。
+  // ========【Auto Relationship Geometry Solver】 設定 - 問題規模線性上限 + 停滯偵測 ========
+  // 每一輪都會完整投影 relationship equality 與同代 collision。
+  // 上限改為接近「一輪覆蓋所有 active unit / constraint」的線性規模，
+  // 並設硬上限，避免大型族譜因難收斂而在主執行緒跑數千輪。
+  const problemSize =
+    model.units.length +
+    constraints.length;
+
   const maxPasses =
-    Math.max(
-      96,
-      constraints.length * 20 +
-      model.units.length * 8
+    Math.min(
+      192,
+      Math.max(
+        32,
+        problemSize + 8
+      )
     );
+
+  let previousError =
+    Number.POSITIVE_INFINITY;
+
+  let stagnantPasses = 0;
 
   for (
     let pass = 0;
@@ -3719,20 +4435,50 @@ function solveAutoRelationshipGeometry(
         constraints
       );
 
+    const currentError =
+      Math.max(
+        maxOverlap,
+        maxRelationshipError
+      );
+
+    if (currentError <= 0.01) {
+      break;
+    }
+
+    const improvement =
+      previousError -
+      currentError;
+
+    const minimumUsefulImprovement =
+      Math.max(
+        0.001,
+        Number.isFinite(
+          previousError
+        )
+          ? previousError * 0.0001
+          : 0.001
+      );
+
     if (
-      maxOverlap <= 0.01 &&
-      maxRelationshipError <= 0.01
+      improvement <=
+      minimumUsefulImprovement
     ) {
+      stagnantPasses += 1;
+    } else {
+      stagnantPasses = 0;
+    }
+
+    previousError =
+      currentError;
+
+    if (stagnantPasses >= 12) {
       break;
     }
   }
 
-  // 最後以 relationship geometry 收斂一次。
-  // 若仍有極小浮點誤差，renderer 的 0.75px 容差只負責數值噪音，
-  // 不再負責「看起來像吸附」。
   for (
     let settle = 0;
-    settle < 8;
+    settle < 4;
     settle += 1
   ) {
     const error =
@@ -3851,10 +4597,7 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     );
 
   const connectorGroups =
-    buildParentChildConnectorGroups(
-      model.byId,
-      visibleIds
-    );
+    model.parentGroups;
 
   // ========【Family Branch Ordering】 設定 - 先排家族，再排人物 ========
   // 主家族的遞迴 branch path 是排序權威：
@@ -3923,59 +4666,97 @@ function solveAutomaticGenealogyPositions(visibleIds) {
 }
 
 function composeScenePlan() {
-  const { W: NODE_W, H: NODE_H } = resolveDefaultCardDimensions();
-  const fam = currentFamily();
-  const visibleIds = getVisibleIds(fam.id);
-  const sims = [...visibleIds].map(id => genealogyData.sims[id]).filter(Boolean);
-  const byId = new Map(sims.map(c => [c.id, c]));
-  const manualPositions = getCurrentManualPositions(fam);
-  const isFree = isFreeLayoutActive(fam);
+  const fam =
+    currentFamily();
+
+  const visibleIds =
+    getVisibleIds(
+      fam.id
+    );
+
+  const sims =
+    [...visibleIds]
+      .map(id =>
+        genealogyData.sims[id]
+      )
+      .filter(Boolean);
+
+  const byId =
+    new Map(
+      sims.map(sim => [
+        sim.id,
+        sim
+      ])
+    );
+
+  const manualPositions =
+    getCurrentManualPositions(
+      fam
+    );
+
+  const isFree =
+    isFreeLayoutActive(
+      fam
+    );
+
+  let pos =
+    new Map();
+
   if (isFree) {
-    const autoPos = solveAutomaticGenealogyPositions(visibleIds);
-    const pos = new Map();
+    const fallback =
+      buildFreeLayoutFallbackPositions(
+        visibleIds,
+        manualPositions
+      );
 
-    sims.forEach(s => {
-      const manual = manualPositions[s.id];
-      const p =
-        manual ||
-        autoPos.get(s.id) ||
-        {x:0,y:0};
+    sims.forEach(sim => {
+      const manual =
+        manualPositions[
+          sim.id
+        ];
 
-      pos.set(s.id, {
-        id:s.id,
-        x:p.x,
-        y:p.y
-      });
+      const source =
+        validManualPosition(
+          manual
+        )
+          ? manual
+          : fallback.get(
+              sim.id
+            ) || {
+              x:0,
+              y:0
+            };
+
+      pos.set(
+        sim.id,
+        {
+          id:sim.id,
+          x:Number(source.x) || 0,
+          y:Number(source.y) || 0
+        }
+      );
     });
-
-    // 自由排列尊重玩家手動位置。
-    // 配偶 / 前任同高時維持水平直線；高度被玩家拖開後，
-    // 由 renderer 以兩端真實卡片 anchor 改畫 H-V-H。
-    let maxX = 0;
-    let maxY = 0;
-
-    pos.forEach((p, id) => {
-      const dims = getNodeDimensionsById(id);
-      maxX = Math.max(maxX, p.x + dims.W);
-      maxY = Math.max(maxY, p.y + dims.H);
-    });
-
-    return {
-      pos,
-      width:maxX,
-      height:maxY,
-      byId,
-      visibleIds
-    };
+  } else {
+    pos =
+      solveAutomaticGenealogyPositions(
+        visibleIds
+      );
   }
-  const pos = solveAutomaticGenealogyPositions(visibleIds);
-  let maxX=0, maxY=0;
-  pos.forEach((p, id) => {
-    const dims = getNodeDimensionsById(id);
-    maxX = Math.max(maxX, p.x + dims.W);
-    maxY = Math.max(maxY, p.y + dims.H);
-  });
-  return {pos, width:maxX, height:maxY, byId, visibleIds};
+
+  const geometry =
+    buildSceneGeometry(
+      pos,
+      visibleIds
+    );
+
+  return {
+    pos,
+    width:geometry.width,
+    height:geometry.height,
+    geometry,
+    byId,
+    visibleIds
+  };
 }
 
 
@@ -4015,34 +4796,71 @@ function flushRenderInvalidation() {
     renderInvalidationRaf = 0;
   }
 
-  let mask = renderDirtyMask;
+  let mask =
+    renderDirtyMask;
+
   renderDirtyMask = 0;
 
   if (!mask) return;
 
   const layoutWasDirty =
-    !!(mask & RENDER_DIRTY.layout);
+    !!(
+      mask &
+      RENDER_DIRTY.layout
+    );
 
   if (layoutWasDirty) {
     relationshipPreviewPending = false;
-    layoutCache = composeScenePlan();
+    pendingRelationshipPreviewIds.clear();
+    resetNodeDimensionCache();
+
+    layoutCache =
+      composeScenePlan();
+
     syncStageGeometryFromLayout();
-    mask |= RENDER_DIRTY.nodes | RENDER_DIRTY.edges;
+
+    mask |=
+      RENDER_DIRTY.nodes |
+      RENDER_DIRTY.edges;
   }
 
-  if (mask & RENDER_DIRTY.edges) {
+  if (
+    mask &
+    RENDER_DIRTY.edges
+  ) {
     const previewOnly =
       relationshipPreviewPending &&
-      !layoutWasDirty;
+      !layoutWasDirty &&
+      pendingRelationshipPreviewIds.size > 0;
 
     relationshipPreviewPending = false;
 
-    paintRelationshipLayer({
-      includeLabels:!previewOnly
-    });
+    if (previewOnly) {
+      const updated =
+        paintRelationshipPreview(
+          pendingRelationshipPreviewIds
+        );
+
+      pendingRelationshipPreviewIds.clear();
+
+      if (!updated) {
+        paintRelationshipLayer({
+          includeLabels:true
+        });
+      }
+    } else {
+      pendingRelationshipPreviewIds.clear();
+
+      paintRelationshipLayer({
+        includeLabels:true
+      });
+    }
   }
 
-  if (mask & RENDER_DIRTY.nodes) {
+  if (
+    mask &
+    RENDER_DIRTY.nodes
+  ) {
     paintPersonLayer();
   }
 }
@@ -4072,17 +4890,50 @@ function requestSceneUpdate(
 
 function requestRelationshipLayerUpdate() {
   relationshipPreviewPending = false;
+  pendingRelationshipPreviewIds.clear();
   requestSceneUpdate({ edges:true });
 }
 
-function requestRelationshipPreviewUpdate() {
+function requestRelationshipPreviewUpdate(
+  simIds = []
+) {
   if (
-    !(renderDirtyMask & RENDER_DIRTY.layout)
+    renderDirtyMask &
+    RENDER_DIRTY.layout
   ) {
-    relationshipPreviewPending = true;
+    relationshipPreviewPending = false;
+    pendingRelationshipPreviewIds.clear();
+    requestSceneUpdate({
+      edges:true
+    });
+    return;
   }
 
-  requestSceneUpdate({ edges:true });
+  const ids =
+    [...(simIds || [])]
+      .map(String)
+      .filter(Boolean);
+
+  if (!ids.length) {
+    relationshipPreviewPending = false;
+    pendingRelationshipPreviewIds.clear();
+    requestSceneUpdate({
+      edges:true
+    });
+    return;
+  }
+
+  ids.forEach(id => {
+    pendingRelationshipPreviewIds.add(
+      id
+    );
+  });
+
+  relationshipPreviewPending = true;
+
+  requestSceneUpdate({
+    edges:true
+  });
 }
 
 function renderSceneImmediately() {
@@ -4099,10 +4950,41 @@ function renderSceneImmediately() {
 function readScenePlan() { return layoutCache; }
 function readPersonPosition(id) { const pos = layoutCache?.pos?.get(String(id)); return pos ? { ...pos } : null; }
 function updateTransientPersonPosition(id, position) {
-  if (!layoutCache?.pos || !position) return false;
-  const key = String(id);
-  if (!layoutCache.pos.has(key)) return false;
-  layoutCache.pos.set(key, { id:key, x:Number(position.x)||0, y:Number(position.y)||0 });
+  if (
+    !layoutCache?.pos ||
+    !position
+  ) {
+    return false;
+  }
+
+  const key =
+    String(id);
+
+  if (
+    !layoutCache.pos.has(
+      key
+    )
+  ) {
+    return false;
+  }
+
+  const next = {
+    id:key,
+    x:Number(position.x) || 0,
+    y:Number(position.y) || 0
+  };
+
+  layoutCache.pos.set(
+    key,
+    next
+  );
+
+  updateSceneGeometryCard(
+    layoutCache.geometry,
+    key,
+    next
+  );
+
   return true;
 }
 
@@ -4574,7 +5456,8 @@ function paintRelationshipLayer({
   const {
     pos,
     byId,
-    visibleIds
+    visibleIds,
+    geometry
   } = layoutCache;
 
   const paths = [];
@@ -4582,9 +5465,53 @@ function paintRelationshipLayer({
     includeLabels
       ? []
       : null;
+
+  const labelTarget =
+    labels || [];
+
   const markerDefinitions = [];
   const arrowMarkerByColor =
     new Map();
+
+  const records =
+    new Map();
+
+  const edgesBySim =
+    new Map();
+
+  const registerEdge = (
+    record,
+    html
+  ) => {
+    records.set(
+      record.key,
+      record
+    );
+
+    record.simIds.forEach(id => {
+      const key =
+        String(id);
+
+      if (!edgesBySim.has(key)) {
+        edgesBySim.set(
+          key,
+          new Set()
+        );
+      }
+
+      edgesBySim
+        .get(key)
+        .add(record.key);
+    });
+
+    paths.push(
+      '<g data-relationship-edge-key="' +
+      esc(record.key) +
+      '">' +
+      html +
+      '</g>'
+    );
+  };
 
   const bidirectionalMarkerAttributes =
     setting => {
@@ -4636,21 +5563,40 @@ function paintRelationshipLayer({
       );
     };
 
-  // 親子關係維持既有 canonical genealogy topology。
-  buildParentChildConnectorGroups(
-    byId,
-    visibleIds
-  ).forEach(group => {
+  const topology =
+    getCachedGenealogyTopology(
+      visibleIds
+    );
+
+  topology.parentGroups.forEach(group => {
+    const groupPaths = [];
+
     drawParentConnectorGroup(
       group,
       pos,
       byId,
-      paths,
-      labels
+      groupPaths,
+      labelTarget
+    );
+
+    registerEdge(
+      {
+        key:
+          'parent:' +
+          group.key,
+        kind:'parent',
+        group,
+        simIds:[
+          ...group.parentIds,
+          ...group.children
+        ].map(String)
+      },
+      groupPaths.join('')
     );
   });
 
-  const drawnPair = new Set();
+  const drawnPair =
+    new Set();
 
   const spouseSetting =
     relationshipLineSetting(
@@ -4658,27 +5604,38 @@ function paintRelationshipLayer({
     );
 
   visibleIds.forEach(id => {
-    const sim = byId.get(id);
+    const sim =
+      byId.get(id);
+
     if (!sim) return;
 
     (sim.spouseIds || [])
       .forEach(spouseId => {
         if (
-          !visibleIds.has(spouseId)
+          !visibleIds.has(
+            spouseId
+          )
         ) {
           return;
         }
 
         const pairK =
-          pairKey(id, spouseId);
+          pairKey(
+            id,
+            spouseId
+          );
 
         if (
-          drawnPair.has(pairK)
+          drawnPair.has(
+            pairK
+          )
         ) {
           return;
         }
 
-        drawnPair.add(pairK);
+        drawnPair.add(
+          pairK
+        );
 
         const a =
           pos.get(id);
@@ -4688,7 +5645,7 @@ function paintRelationshipLayer({
 
         if (!a || !b) return;
 
-        const geometry =
+        const geometryResult =
           relationshipPairRenderGeometry(
             a,
             b,
@@ -4697,20 +5654,42 @@ function paintRelationshipLayer({
               fromId:id,
               toId:spouseId,
               pos,
-              byId
+              byId,
+              geometry
             }
           );
 
-        paths.push(
+        registerEdge(
+          {
+            key:
+              'spouse:' +
+              pairK,
+            kind:'pair',
+            fromId:String(id),
+            toId:String(spouseId),
+            setting:spouseSetting,
+            edgeClass:'edge edge-spouse',
+            simIds:[
+              String(id),
+              String(spouseId)
+            ]
+          },
           '<path class="edge edge-spouse" d="' +
-          geometry.d +
+          geometryResult.d +
           '"/>'
         );
 
-        if (!includeLabels || !showRelLabels || relationshipPerspectiveSimId) return;
+        if (
+          !includeLabels ||
+          !showRelLabels ||
+          relationshipPerspectiveSimId
+        ) {
+          return;
+        }
 
         const key =
-          'spouse:' + pairK;
+          'spouse:' +
+          pairK;
 
         const info =
           getRelInfoByKey(
@@ -4722,8 +5701,8 @@ function paintRelationshipLayer({
 
         labels.push(
           makeLabelSVG(
-            geometry.labelX,
-            geometry.labelY,
+            geometryResult.labelX,
+            geometryResult.labelY,
             info.icon,
             info.text,
             key
@@ -4743,10 +5722,131 @@ function paintRelationshipLayer({
   };
 
   visibleIds.forEach(id => {
-    const sim = byId.get(id);
+    const sim =
+      byId.get(id);
+
     if (!sim) return;
 
-    (sim.gameData?.deceasedSpouseIds || [])
+    (
+      sim.gameData
+        ?.deceasedSpouseIds ||
+      []
+    ).forEach(spouseId => {
+      if (
+        !visibleIds.has(
+          spouseId
+        )
+      ) {
+        return;
+      }
+
+      const pairK =
+        pairKey(
+          id,
+          spouseId
+        );
+
+      if (
+        drawnDeceased.has(
+          pairK
+        )
+      ) {
+        return;
+      }
+
+      drawnDeceased.add(
+        pairK
+      );
+
+      const a =
+        pos.get(id);
+
+      const b =
+        pos.get(spouseId);
+
+      if (!a || !b) return;
+
+      const geometryResult =
+        relationshipPairRenderGeometry(
+          a,
+          b,
+          deceasedSetting,
+          {
+            fromId:id,
+            toId:spouseId,
+            pos,
+            byId,
+            geometry
+          }
+        );
+
+      registerEdge(
+        {
+          key:
+            'deceased-spouse:' +
+            pairK,
+          kind:'pair',
+          fromId:String(id),
+          toId:String(spouseId),
+          setting:deceasedSetting,
+          edgeClass:'edge edge-exspouse',
+          simIds:[
+            String(id),
+            String(spouseId)
+          ]
+        },
+        '<path class="edge edge-exspouse" d="' +
+        geometryResult.d +
+        '"/>'
+      );
+
+      if (
+        !includeLabels ||
+        !showRelLabels ||
+        relationshipPerspectiveSimId
+      ) {
+        return;
+      }
+
+      const key =
+        'deceased-spouse:' +
+        pairK;
+
+      const info =
+        getRelInfoByKey(
+          key,
+          'deceased-spouse'
+        );
+
+      if (!info) return;
+
+      labels.push(
+        makeLabelSVG(
+          geometryResult.labelX,
+          geometryResult.labelY,
+          info.icon,
+          info.text,
+          key
+        )
+      );
+    });
+  });
+
+  const drawnEx =
+    new Set();
+
+  const exSetting =
+    relationshipLineSetting(
+      'exspouse'
+    );
+
+  visibleIds.forEach(id => {
+    const sim =
+      byId.get(id);
+
+    if (!sim) return;
+
+    (sim.exSpouseIds || [])
       .forEach(spouseId => {
         if (
           !visibleIds.has(
@@ -4757,17 +5857,20 @@ function paintRelationshipLayer({
         }
 
         const pairK =
-          pairKey(id, spouseId);
+          pairKey(
+            id,
+            spouseId
+          );
 
         if (
-          drawnDeceased.has(
+          drawnEx.has(
             pairK
           )
         ) {
           return;
         }
 
-        drawnDeceased.add(
+        drawnEx.add(
           pairK
         );
 
@@ -4779,94 +5882,7 @@ function paintRelationshipLayer({
 
         if (!a || !b) return;
 
-        const geometry =
-          relationshipPairRenderGeometry(
-            a,
-            b,
-            deceasedSetting,
-            {
-              fromId:id,
-              toId:spouseId,
-              pos,
-              byId
-            }
-          );
-
-        paths.push(
-          '<path class="edge edge-exspouse" d="' +
-          geometry.d +
-          '"/>'
-        );
-
-        if (
-          !showRelLabels ||
-          relationshipPerspectiveSimId
-        ) {
-          return;
-        }
-
-        const key =
-          'deceased-spouse:' +
-          pairK;
-
-        const info =
-          getRelInfoByKey(
-            key,
-            'deceased-spouse'
-          );
-
-        if (!info) return;
-
-        labels.push(
-          makeLabelSVG(
-            geometry.labelX,
-            geometry.labelY,
-            info.icon,
-            info.text,
-            key
-          )
-        );
-      });
-  });
-
-  const drawnEx = new Set();
-  const exSetting =
-    relationshipLineSetting(
-      'exspouse'
-    );
-
-  visibleIds.forEach(id => {
-    const sim = byId.get(id);
-    if (!sim) return;
-
-    (sim.exSpouseIds || [])
-      .forEach(spouseId => {
-        if (
-          !visibleIds.has(spouseId)
-        ) {
-          return;
-        }
-
-        const pairK =
-          pairKey(id, spouseId);
-
-        if (
-          drawnEx.has(pairK)
-        ) {
-          return;
-        }
-
-        drawnEx.add(pairK);
-
-        const a =
-          pos.get(id);
-
-        const b =
-          pos.get(spouseId);
-
-        if (!a || !b) return;
-
-        const geometry =
+        const geometryResult =
           relationshipPairRenderGeometry(
             a,
             b,
@@ -4875,20 +5891,42 @@ function paintRelationshipLayer({
               fromId:id,
               toId:spouseId,
               pos,
-              byId
+              byId,
+              geometry
             }
           );
 
-        paths.push(
+        registerEdge(
+          {
+            key:
+              'exspouse:' +
+              pairK,
+            kind:'pair',
+            fromId:String(id),
+            toId:String(spouseId),
+            setting:exSetting,
+            edgeClass:'edge edge-exspouse',
+            simIds:[
+              String(id),
+              String(spouseId)
+            ]
+          },
           '<path class="edge edge-exspouse" d="' +
-          geometry.d +
+          geometryResult.d +
           '"/>'
         );
 
-        if (!includeLabels || !showRelLabels || relationshipPerspectiveSimId) return;
+        if (
+          !includeLabels ||
+          !showRelLabels ||
+          relationshipPerspectiveSimId
+        ) {
+          return;
+        }
 
         const key =
-          'exspouse:' + pairK;
+          'exspouse:' +
+          pairK;
 
         const info =
           getRelInfoByKey(
@@ -4900,8 +5938,8 @@ function paintRelationshipLayer({
 
         labels.push(
           makeLabelSVG(
-            geometry.labelX,
-            geometry.labelY,
+            geometryResult.labelX,
+            geometryResult.labelY,
             info.icon,
             info.text,
             key
@@ -4910,21 +5948,28 @@ function paintRelationshipLayer({
       });
   });
 
-  // ========【其他關係】 設定 - 每個具體關係類型擁有自己的外觀 ========
   (genealogyData.links || [])
     .forEach(link => {
       if (
-        !visibleIds.has(link.from) ||
-        !visibleIds.has(link.to)
+        !visibleIds.has(
+          link.from
+        ) ||
+        !visibleIds.has(
+          link.to
+        )
       ) {
         return;
       }
 
       const a =
-        pos.get(link.from);
+        pos.get(
+          link.from
+        );
 
       const b =
-        pos.get(link.to);
+        pos.get(
+          link.to
+        );
 
       if (!a || !b) return;
 
@@ -4938,7 +5983,7 @@ function paintRelationshipLayer({
           type
         );
 
-      const geometry =
+      const geometryResult =
         relationshipOtherRenderGeometry(
           a,
           b,
@@ -4947,29 +5992,52 @@ function paintRelationshipLayer({
             fromId:link.from,
             toId:link.to,
             pos,
-            byId
+            byId,
+            geometry
           }
         );
 
-      paths.push(
+      const markerAttributes =
+        bidirectionalMarkerAttributes(
+          setting
+        );
+
+      registerEdge(
+        {
+          key:
+            'link:' +
+            link.id,
+          kind:'other',
+          link,
+          setting,
+          simIds:[
+            String(link.from),
+            String(link.to)
+          ]
+        },
         '<path class="edge edge-other" d="' +
-        geometry.d +
+        geometryResult.d +
         '" style="' +
         relationshipInlineSvgStyle(
           setting,
           'other'
         ) +
         '"' +
-        bidirectionalMarkerAttributes(
-          setting
-        ) +
+        markerAttributes +
         '/>'
       );
 
-      if (!includeLabels || !showRelLabels || relationshipPerspectiveSimId) return;
+      if (
+        !includeLabels ||
+        !showRelLabels ||
+        relationshipPerspectiveSimId
+      ) {
+        return;
+      }
 
       const key =
-        'link:' + link.id;
+        'link:' +
+        link.id;
 
       const info =
         getRelInfoByKey(
@@ -4986,14 +6054,20 @@ function paintRelationshipLayer({
 
       labels.push(
         makeLabelSVG(
-          geometry.labelX,
-          geometry.labelY,
+          geometryResult.labelX,
+          geometryResult.labelY,
           info.icon,
           info.text,
           key
         )
       );
     });
+
+  relationshipEdgeRecords =
+    records;
+
+  relationshipEdgesBySim =
+    edgesBySim;
 
   svg.innerHTML =
     (
@@ -5004,6 +6078,22 @@ function paintRelationshipLayer({
         : ''
     ) +
     paths.join('');
+
+  relationshipEdgeElements =
+    new Map();
+
+  svg
+    .querySelectorAll(
+      '[data-relationship-edge-key]'
+    )
+    .forEach(element => {
+      relationshipEdgeElements.set(
+        element.getAttribute(
+          'data-relationship-edge-key'
+        ),
+        element
+      );
+    });
 
   if (includeLabels) {
     if (
@@ -5020,6 +6110,160 @@ function paintRelationshipLayer({
       labels.join('');
   }
 }
+
+function paintRelationshipPreview(
+  simIds
+) {
+  if (
+    !layoutCache ||
+    !relationshipEdgeRecords.size
+  ) {
+    return false;
+  }
+
+  const affectedKeys =
+    new Set();
+
+  [...simIds]
+    .map(String)
+    .forEach(id => {
+      (
+        relationshipEdgesBySim.get(
+          id
+        ) ||
+        []
+      ).forEach(key => {
+        affectedKeys.add(key);
+      });
+    });
+
+  if (!affectedKeys.size) {
+    return true;
+  }
+
+  const {
+    pos,
+    byId,
+    geometry
+  } = layoutCache;
+
+  affectedKeys.forEach(key => {
+    const record =
+      relationshipEdgeRecords.get(
+        key
+      );
+
+    const element =
+      relationshipEdgeElements.get(
+        key
+      );
+
+    if (!record || !element) {
+      return;
+    }
+
+    if (
+      record.kind ===
+      'parent'
+    ) {
+      const groupPaths = [];
+
+      drawParentConnectorGroup(
+        record.group,
+        pos,
+        byId,
+        groupPaths,
+        []
+      );
+
+      element.innerHTML =
+        groupPaths.join('');
+
+      return;
+    }
+
+    const fromId =
+      record.fromId ||
+      record.link?.from;
+
+    const toId =
+      record.toId ||
+      record.link?.to;
+
+    const a =
+      pos.get(
+        fromId
+      );
+
+    const b =
+      pos.get(
+        toId
+      );
+
+    if (!a || !b) return;
+
+    const path =
+      element.querySelector(
+        'path'
+      );
+
+    if (!path) return;
+
+    if (
+      record.kind ===
+      'pair'
+    ) {
+      const result =
+        relationshipPairRenderGeometry(
+          a,
+          b,
+          record.setting,
+          {
+            fromId,
+            toId,
+            pos,
+            byId,
+            geometry
+          }
+        );
+
+      path.setAttribute(
+        'd',
+        result.d
+      );
+
+      return;
+    }
+
+    if (
+      record.kind ===
+      'other'
+    ) {
+      const result =
+        relationshipOtherRenderGeometry(
+          a,
+          b,
+          record.setting,
+          {
+            fromId,
+            toId,
+            pos,
+            byId,
+            geometry
+          }
+        );
+
+      path.setAttribute(
+        'd',
+        result.d
+      );
+    }
+  });
+
+  return true;
+}
+
+
 
 // ========【族譜連線】 設定 - 橫向關係接頭像側邊；直向親子線保留完整資訊空間 ========
 function getCardAvatarGeometry() {
@@ -5048,37 +6292,61 @@ function getCardAvatarGeometry() {
 }
 
 function cardAvatarRect(card) {
-  const geo = getCardAvatarGeometry();
-  const left = card.x + PAD + geo.left;
-  const top = card.y + PAD + geo.top;
+  const key =
+    card?.id != null
+      ? String(card.id)
+      : null;
 
-  return {
-    left,
-    top,
-    right:left + geo.size,
-    bottom:top + geo.size,
-    centerX:left + geo.size / 2,
-    centerY:top + geo.size / 2
-  };
+  if (
+    key &&
+    layoutCache?.pos?.get(key) === card
+  ) {
+    const cached =
+      layoutCache.geometry
+        ?.avatars
+        ?.get(key);
+
+    if (cached) {
+      return cached;
+    }
+  }
+
+  return rawCardAvatarRect(
+    card
+  );
 }
 
 function cardOuterRect(card) {
-  const dims =
-    card && card.id
-      ? getNodeDimensionsById(card.id)
+  const key =
+    card?.id != null
+      ? String(card.id)
+      : null;
+
+  if (
+    key &&
+    layoutCache?.pos?.get(key) === card
+  ) {
+    const cached =
+      layoutCache.geometry
+        ?.rects
+        ?.get(key);
+
+    if (cached) {
+      return cached;
+    }
+  }
+
+  const dimensions =
+    key
+      ? getNodeDimensionsById(
+          key
+        )
       : resolveDefaultCardDimensions();
 
-  const left = card.x + PAD;
-  const top = card.y + PAD;
-
-  return {
-    left,
-    top,
-    right:left + dims.W,
-    bottom:top + dims.H,
-    centerX:left + dims.W / 2,
-    centerY:top + dims.H / 2
-  };
+  return rawCardOuterRect(
+    card,
+    dimensions
+  );
 }
 
 function usesMinimalViewAnchors() {
@@ -5711,6 +6979,9 @@ function buildDragPerformanceGeometry() {
   layoutCache.pos.forEach(
     (position, id) => {
       const dimensions =
+        layoutCache.geometry
+          ?.dimensions
+          ?.get(String(id)) ||
         getNodeDimensionsById(id);
 
       geometry.push({
@@ -5742,10 +7013,9 @@ function buildSingleDragRelationshipTargets(
     return targets;
   }
 
-  buildParentChildConnectorGroups(
-    layoutCache.byId,
+  getCachedGenealogyTopology(
     layoutCache.visibleIds
-  ).forEach(group => {
+  ).parentGroups.forEach(group => {
     if (
       group.children.length !== 1 ||
       group.children[0] !== id
@@ -5842,27 +7112,62 @@ function buildSingleDragRelationshipTargets(
 }
 
 function resizeStageToContent() {
-  const fam = currentFamily();
-  if (!isFreeLayoutActive(fam)) return;
-  let maxX=0, maxY=0;
+  const fam =
+    currentFamily();
 
-  layoutCache.pos.forEach((p, id) => {
-    const dims = getNodeDimensionsById(id);
-    maxX = Math.max(maxX, p.x + dims.W);
-    maxY = Math.max(maxY, p.y + dims.H);
+  if (
+    !isFreeLayoutActive(
+      fam
+    ) ||
+    !layoutCache?.pos
+  ) {
+    return;
+  }
+
+  let maxX = 0;
+  let maxY = 0;
+
+  layoutCache.pos.forEach((position, id) => {
+    const dimensions =
+      layoutCache.geometry
+        ?.dimensions
+        ?.get(String(id)) ||
+      getNodeDimensionsById(
+        id
+      );
+
+    maxX =
+      Math.max(
+        maxX,
+        position.x +
+          dimensions.W
+      );
+
+    maxY =
+      Math.max(
+        maxY,
+        position.y +
+          dimensions.H
+      );
   });
-  const sW = Math.max(maxX + PAD*2, 400);
-  const sH = Math.max(maxY + PAD*2, 300);
-  stage.style.width = sW + 'px';
-  stage.style.height = sH + 'px';
-  svg.setAttribute('width', sW);
-  svg.setAttribute('height', sH);
-  svg.setAttribute('viewBox', `0 0 ${sW} ${sH}`);
-  labelsSvg.setAttribute('width', sW);
-  labelsSvg.setAttribute('height', sH);
-  labelsSvg.setAttribute('viewBox', `0 0 ${sW} ${sH}`);
 
-  // 尺寸更新後再補一次連線重繪，避免快速拖曳後 SVG 還停留在舊幀。
+  layoutCache.width =
+    maxX;
+
+  layoutCache.height =
+    maxY;
+
+  if (layoutCache.geometry) {
+    layoutCache.geometry.width =
+      maxX;
+
+    layoutCache.geometry.height =
+      maxY;
+  }
+
+  syncStageGeometryFromLayout();
+
+  // 拖曳結束後做一次 authoritative full redraw；拖曳幀內只更新受影響線條。
   requestRelationshipLayerUpdate();
 }
     function getGenerationLevels(simIds) {
@@ -5907,6 +7212,7 @@ function resizeStageToContent() {
       renderImmediately:renderSceneImmediately,
       requestRelationshipUpdate:requestRelationshipLayerUpdate,
       requestRelationshipPreviewUpdate,
+      invalidateTopologyCache,
       readScenePlan,
       readPersonPosition,
       updateTransientPersonPosition,
