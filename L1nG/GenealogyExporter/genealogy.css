@@ -5895,14 +5895,10 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
 }
 #selectionMarquee.show { display:block; }
 .person-card.person-card-selected {
-    border-top-color:var(--accent);
-    border-right-color:var(--accent);
-    border-bottom-color:var(--accent);
+    /* 選取狀態使用獨立外框，不覆寫人物卡本身的性別條 / 生死 / appearance 邊框。 */
+    outline:2px solid var(--accent);
+    outline-offset:2px;
     z-index:10;
-}
-
-.person-card.card-gender-bar-hidden.person-card-selected {
-    border-left-color:var(--accent);
 }
 #genealogyCanvasViewport.selection-tool-active { cursor:crosshair; }
 #genealogyCanvasViewport.selection-tool-active .person-card { cursor:default; }
