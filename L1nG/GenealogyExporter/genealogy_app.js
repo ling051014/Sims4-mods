@@ -111,7 +111,6 @@ const THEME_PRESETS = [
 
 const BG_MAX = 1920;
 const BG_QUALITY = 0.72;
-const SCALE_MIN = 0.12, SCALE_MAX = 3;
 const MAX_TAGS = 5;
 const ORIGINAL_WARN_KB = 2048;
 
@@ -1446,18 +1445,11 @@ function buildSample() {
   };
 }
 
-let scale = 1;
+let genealogyViewport = null;
 
 function currentGenealogyData() {
   return genealogyStore?.getData?.() || null;
 }
-let panX = 0, panY = 0;
-
-// ========【畫布視角狀態】 設定 - 自動 Fit 與手動視角分離，viewport 改變時保留正確中心 ========
-let canvasViewState = 'fit';
-let viewportResizeObserver = null;
-let viewportResizeRaf = null;
-let lastViewportSize = { width:0, height:0 };
 
 // 自由排列工具：選取 / 框選與畫布拖曳分離。
 let arrangeTool = 'pan';
@@ -2404,7 +2396,7 @@ function setFamilyTreeViewMode(mode, control = null) {
     if (control && control.host.classList.contains('open')) {
       positionFamilyNavTabsPortal(control);
     }
-    fitScreen();
+    genealogyViewport.fit();
   });
 }
 
@@ -5282,7 +5274,7 @@ function toggleViewMode() {
   arrangeTool = 'pan';
   applyViewMode(viewMode === 'view' ? 'edit' : 'view');
   render();
-  requestAnimationFrame(fitScreen);
+  requestAnimationFrame(() => genealogyViewport.fit());
 }
 modeToggle.onclick = toggleViewMode;
 
@@ -6832,7 +6824,7 @@ if (resetUiSettingsBtn) {
     }
     paintThemeChoices();
     render();
-    requestAnimationFrame(fitScreen);
+    requestAnimationFrame(() => genealogyViewport.fit());
     uiToast('介面設定已恢復預設。');
   };
 }
@@ -6877,7 +6869,7 @@ if (restoreSampleBtn) {
       render();
       appearanceDialog.classList.remove('show');
       storageDialog.classList.remove('show');
-      requestAnimationFrame(fitScreen);
+      requestAnimationFrame(() => genealogyViewport.fit());
       uiToast('已恢復預設族譜。');
     } finally {
       delete restoreSampleBtn.dataset.confirmPending;
@@ -7814,6 +7806,27 @@ function preloadCurrentViewAssets() {
   return primary;
 }
 
+// ========【族譜 Viewport】 設定 - 視角狀態與座標換算由獨立模組唯一管理 ========
+genealogyViewport =
+  window.L1nGGenealogyViewport?.create?.({
+    dom:{
+      viewport,
+      stage,
+      zoomValue:$('zoomValue')
+    },
+    getContentBounds:() =>
+      genealogyScene?.getContentBounds?.() ||
+      null,
+    hasSceneLayout:() =>
+      !!getSceneLayout()
+  }) || null;
+
+if (!genealogyViewport) {
+  throw new Error(
+    'Genealogy Viewport failed to initialize.'
+  );
+}
+
 // ========【族譜 Scene】 設定 - Layout / Relationship Geometry / Renderer 唯一 Canvas Authority ========
 genealogyScene =
   window.L1nGGenealogyScene?.create?.({
@@ -7826,7 +7839,7 @@ genealogyScene =
       getFamilyTreeViewMode:() => familyTreeViewMode,
       getShowRelLabels:() => showRelLabels,
       getRelationshipPerspectiveId:() => relationshipPerspectiveSimId,
-      getScale:() => scale
+      getScale:() => genealogyViewport.getScale()
     },
     helpers:{
       getCardViewSettings, getCardEditSettings, cardViewAppearanceClass, cardSettingsHasBody,
@@ -7842,236 +7855,24 @@ genealogyScene =
   }) || null;
 if (!genealogyScene) throw new Error('Genealogy Scene failed to initialize.');
 function getSceneLayout() { return genealogyScene?.getLayoutSnapshot?.() || null; }
-let _transformSettleTimer = null;
-function applyTransform({ interacting = false } = {}) {
-  // 對齊實體像素，避免非整數位移讓文字與卡片邊框變糊。
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
-  const crispX = Math.round(panX * dpr) / dpr;
-  const crispY = Math.round(panY * dpr) / dpr;
-  stage.style.transform = `translate(${crispX}px, ${crispY}px) scale(${scale})`;
-
-  // 只在互動期間提示瀏覽器建立合成層；停止縮放後移除，讓文字重新光柵化。
-  if (interacting) {
-    stage.classList.add('is-transforming');
-    clearTimeout(_transformSettleTimer);
-    _transformSettleTimer = setTimeout(() => {
-      stage.classList.remove('is-transforming');
-      // 強制重新計算目前 transform，讓 Chromium/Edge 重新以目前倍率繪製文字。
-      void stage.offsetWidth;
-      const dpr2 = Math.max(1, window.devicePixelRatio || 1);
-      const x2 = Math.round(panX * dpr2) / dpr2;
-      const y2 = Math.round(panY * dpr2) / dpr2;
-      stage.style.transform = `translate(${x2}px, ${y2}px) scale(${scale})`;
-    }, 140);
-  }
-  const zoomValue = $('zoomValue');
-  if (zoomValue) zoomValue.textContent = `${Math.round(scale * 100)}%`;
-}
-function zoomAt(clientX, clientY, factor) {
-  const rect = viewport.getBoundingClientRect();
-  const mx = clientX - rect.left;
-  const my = clientY - rect.top;
-  const rawScale = Math.min(
-    Math.max(scale * factor, SCALE_MIN),
-    SCALE_MAX
-  );
-  const ns = Math.round(rawScale * 40) / 40;
-
-  if (ns === scale) return;
-
-  const wx = (mx - panX) / scale;
-  const wy = (my - panY) / scale;
-
-  canvasViewState = 'manual';
-  scale = ns;
-  panX = mx - wx * scale;
-  panY = my - wy * scale;
-
-  applyTransform({ interacting:true });
-}
-
-function fitScreen({ rememberState = true } = {}) {
-  const vw =
-    viewport.clientWidth;
-
-  const vh =
-    viewport.clientHeight;
-
-  if (rememberState) {
-    canvasViewState = 'fit';
-  }
-
-  const bounds =
-    genealogyScene?.getContentBounds?.() || null;
-
-  // 沒有人物時才退回 stage 外框。
-  if (!bounds) {
-    const w =
-      parseFloat(stage.style.width) || 1;
-
-    const h =
-      parseFloat(stage.style.height) || 1;
-
-    scale = Math.min(
-      (vw - 40) / w,
-      (vh - 40) / h,
-      1.4
-    );
-
-    scale = Math.max(scale, SCALE_MIN);
-    panX = (vw - w * scale) / 2;
-    panY = (vh - h * scale) / 2;
-    applyTransform();
-    return;
-  }
-
-  const fitPadding = 56;
-
-  scale = Math.min(
-    (vw - fitPadding) / bounds.width,
-    (vh - fitPadding) / bounds.height,
-    1.4
-  );
-
-  scale = Math.max(scale, SCALE_MIN);
-
-  // 直接把「實際人物內容中心」放到 viewport 中央。
-  // stage 的 400×300 最小尺寸與 PAD 不再影響視覺置中。
-  panX =
-    vw / 2 -
-    bounds.centerX * scale;
-
-  panY =
-    vh / 2 -
-    bounds.centerY * scale;
-
-  applyTransform();
-}
-
-function preserveWorldCenterAfterViewportResize(previousSize, nextSize) {
-  if (!getSceneLayout()) return;
-
-  if (canvasViewState === 'fit') {
-    fitScreen({ rememberState:false });
-    return;
-  }
-
-  if (!previousSize.width || !previousSize.height) return;
-
-  const worldCenterX =
-    (previousSize.width / 2 - panX) /
-    scale;
-
-  const worldCenterY =
-    (previousSize.height / 2 - panY) /
-    scale;
-
-  panX =
-    nextSize.width / 2 -
-    worldCenterX * scale;
-
-  panY =
-    nextSize.height / 2 -
-    worldCenterY * scale;
-
-  applyTransform();
-}
-
-function setupViewportResizeObserver() {
-  if (!viewport || viewportResizeObserver) return;
-
-  lastViewportSize = {
-    width:viewport.clientWidth,
-    height:viewport.clientHeight
-  };
-
-  const handleResize = (width, height) => {
-    const nextSize = {
-      width:Math.max(1, Math.round(width)),
-      height:Math.max(1, Math.round(height))
-    };
-
-    const previousSize = lastViewportSize;
-
-    if (
-      nextSize.width === previousSize.width &&
-      nextSize.height === previousSize.height
-    ) {
-      return;
-    }
-
-    lastViewportSize = nextSize;
-
-    if (viewportResizeRaf) {
-      cancelAnimationFrame(viewportResizeRaf);
-    }
-
-    viewportResizeRaf = requestAnimationFrame(() => {
-      viewportResizeRaf = null;
-
-      preserveWorldCenterAfterViewportResize(
-        previousSize,
-        nextSize
-      );
-    });
-  };
-
-  if ('ResizeObserver' in window) {
-    viewportResizeObserver =
-      new ResizeObserver(entries => {
-        const entry = entries.find(
-          item => item.target === viewport
-        );
-
-        if (!entry) return;
-
-        handleResize(
-          entry.contentRect.width,
-          entry.contentRect.height
-        );
-      });
-
-    viewportResizeObserver.observe(viewport);
-    return;
-  }
-
-  const fallback = () => {
-    handleResize(
-      viewport.clientWidth,
-      viewport.clientHeight
-    );
-  };
-
-  viewportResizeObserver = {
-    disconnect:() =>
-      window.removeEventListener(
-        'resize',
-        fallback
-      )
-  };
-
-  window.addEventListener(
-    'resize',
-    fallback
-  );
-}
-
+// Viewport transform / zoom / fit / resize lifecycle 已移至 genealogy_viewport.js。
 function focusSimOnCanvas(simId) {
   if (!simId || !currentGenealogyData()?.sims?.[simId]) return;
   if (!getSceneLayout() || !getSceneLayout().pos?.has(simId)) render();
   const pos = getSceneLayout()?.pos?.get(simId);
   if (!pos) return;
   const { W, H } = genealogyScene.getNodeDimensions(currentGenealogyData().sims[simId]);
-  // 尋找人物屬於使用者主動移動畫布，viewport 改變後保留目前世界中心。
-  canvasViewState = 'manual';
+  const centerX =
+    pos.x + PAD + W / 2;
 
-  // 尋找人物時不強制改成固定倍率；只有畫面縮得太小時才稍微放大，避免失去上下文。
-  if (scale < .72) scale = .72;
-  const centerX = pos.x + PAD + W / 2;
-  const centerY = pos.y + PAD + H / 2;
-  panX = viewport.clientWidth / 2 - centerX * scale;
-  panY = viewport.clientHeight / 2 - centerY * scale;
-  applyTransform();
+  const centerY =
+    pos.y + PAD + H / 2;
+
+  genealogyViewport.focusWorldPoint(
+    centerX,
+    centerY,
+    { minFocusScale:0.72 }
+  );
   const node = [...nodes.querySelectorAll('.person-card[data-id]')].find(el => el.dataset.id === simId);
   if (node) {
     node.classList.remove('focus-pulse');
@@ -10217,7 +10018,6 @@ function finishMarquee() {
   }
 }
 
-let panning = false, panStartX = 0, panStartY = 0, panStartPanX = 0, panStartPanY = 0;
 viewport.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   const onNode = !!e.target.closest('.person-card');
@@ -10234,9 +10034,8 @@ viewport.addEventListener('mousedown', e => {
   ) {
     e.preventDefault();
     finishMarquee();
-    panning = false;
-    viewport.classList.remove('dragging');
-    fitScreen();
+    genealogyViewport.cancelPan();
+    genealogyViewport.fit();
     return;
   }
 
@@ -10255,23 +10054,30 @@ viewport.addEventListener('mousedown', e => {
   if (onNode && !isPanGestureActive()) return;
   if (onLabel) return;
   e.preventDefault();
-  panning = true;
-  viewport.classList.add('dragging');
-  panStartX = e.clientX; panStartY = e.clientY;
-  panStartPanX = panX; panStartPanY = panY;
-});
-window.addEventListener('mousemove', e => {
-  if (marqueeState) updateMarquee(e.clientX, e.clientY);
-  if (!panning) return;
 
-  canvasViewState = 'manual';
-  panX = panStartPanX + (e.clientX - panStartX);
-  panY = panStartPanY + (e.clientY - panStartY);
-  applyTransform();
+  genealogyViewport.beginPan(
+    e.clientX,
+    e.clientY
+  );
 });
+
+window.addEventListener('mousemove', e => {
+  if (marqueeState) {
+    updateMarquee(
+      e.clientX,
+      e.clientY
+    );
+  }
+
+  genealogyViewport.movePan(
+    e.clientX,
+    e.clientY
+  );
+});
+
 window.addEventListener('mouseup', () => {
   finishMarquee();
-  if (panning) { panning = false; viewport.classList.remove('dragging'); }
+  genealogyViewport.endPan();
 });
 viewport.addEventListener('dblclick', e => {
   if (e.target.closest('.person-card')) return;
@@ -10279,9 +10085,8 @@ viewport.addEventListener('dblclick', e => {
 
   e.preventDefault();
   finishMarquee();
-  panning = false;
-  viewport.classList.remove('dragging');
-  fitScreen();
+  genealogyViewport.cancelPan();
+  genealogyViewport.fit();
 });
 viewport.addEventListener('wheel', e => {
   e.preventDefault();
@@ -10289,7 +10094,11 @@ viewport.addEventListener('wheel', e => {
   if (d === 0) return;
   const step = Math.min(Math.abs(d)/100, 2);
   const factor = d < 0 ? Math.pow(1.12, step) : Math.pow(1/1.12, step);
-  zoomAt(e.clientX, e.clientY, factor);
+  genealogyViewport.zoomAt(
+    e.clientX,
+    e.clientY,
+    factor
+  );
 }, { passive: false });
 
 labelsSvg.addEventListener('pointerdown', e => {
@@ -10325,12 +10134,29 @@ labelsSvg.addEventListener('pointerdown', e => {
 labelsSvg.addEventListener('pointermove', e => {
   if (!labelDrag || labelDrag.pointerId !== e.pointerId) return;
 
-  const rawDx = (e.clientX - labelDrag.startX) / scale;
-  const rawDy = (e.clientY - labelDrag.startY) / scale;
+  const screenDx =
+    e.clientX -
+    labelDrag.startX;
+
+  const screenDy =
+    e.clientY -
+    labelDrag.startY;
+
+  const worldDelta =
+    genealogyViewport.screenDeltaToWorld(
+      screenDx,
+      screenDy
+    );
+
+  const rawDx = worldDelta.x;
+  const rawDy = worldDelta.y;
 
   if (
     !labelDrag.moved &&
-    Math.hypot(rawDx * scale, rawDy * scale) > 3
+    Math.hypot(
+      screenDx,
+      screenDy
+    ) > 3
   ) {
     labelDrag.moved = true;
     labelDrag.el.classList.add('dragging');
@@ -10339,8 +10165,10 @@ labelsSvg.addEventListener('pointermove', e => {
   if (!labelDrag.moved) return;
 
   const snapDistance =
-    GUIDE_SNAP_PX /
-    Math.max(scale, 0.001);
+    genealogyViewport
+      .screenPixelsToWorld(
+        GUIDE_SNAP_PX
+      );
 
   let dx = labelDrag.startDx + rawDx;
   let dy = labelDrag.startDy + rawDy;
@@ -10434,7 +10262,9 @@ function hideSmartGuides() {
 function showSmartGuide(axis, stagePosition) {
   const guide = axis === 'x' ? smartGuideVertical : smartGuideHorizontal;
   if (!guide) return;
-  const oneScreenPixel = 1 / Math.max(scale, 0.001);
+  const oneScreenPixel =
+    genealogyViewport
+      .screenPixelsToWorld(1);
   if (axis === 'x') {
     guide.style.left = `${stagePosition + PAD}px`;
     guide.style.width = `${oneScreenPixel}px`;
@@ -10494,7 +10324,11 @@ function getSmartSnap(id, rawX, rawY, performanceSession = null) {
     createSingleDragPerformanceSession(id);
 
   if (session?.snap) {
-    return session.snap(rawX, rawY, scale);
+    return session.snap(
+      rawX,
+      rawY,
+      genealogyViewport.getScale()
+    );
   }
 
   return {
@@ -10554,7 +10388,11 @@ function getDragSelectionSmartSnap(
 
   if (session?.snapDelta) {
     return {
-      ...session.snapDelta(rawDeltaX, rawDeltaY, scale),
+      ...session.snapDelta(
+        rawDeltaX,
+        rawDeltaY,
+        genealogyViewport.getScale()
+      ),
       spacingX:null,
       spacingY:null
     };
@@ -10665,8 +10503,20 @@ nodes.addEventListener('pointerdown', e => {
 
       if (!moved) return;
 
-      const rawX = startPos.x + dx / scale;
-      const rawY = startPos.y + dy / scale;
+      const worldDelta =
+        genealogyViewport
+          .screenDeltaToWorld(
+            dx,
+            dy
+          );
+
+      const rawX =
+        startPos.x +
+        worldDelta.x;
+
+      const rawY =
+        startPos.y +
+        worldDelta.y;
       const snapped =
         getSmartSnap(
           id,
@@ -10841,8 +10691,18 @@ nodes.addEventListener('pointerdown', e => {
 
       if (!moved) return;
 
-      const rawDeltaX = dx / scale;
-      const rawDeltaY = dy / scale;
+      const worldDelta =
+        genealogyViewport
+          .screenDeltaToWorld(
+            dx,
+            dy
+          );
+
+      const rawDeltaX =
+        worldDelta.x;
+
+      const rawDeltaY =
+        worldDelta.y;
 
       const snapped =
         getDragSelectionSmartSnap(
@@ -11161,11 +11021,20 @@ nodes.addEventListener('pointerdown', e => {
       dragInitialized = true;
     }
 
+    const worldDelta =
+      genealogyViewport
+        .screenDeltaToWorld(
+          dx,
+          dy
+        );
+
     const rawX =
-      startPos.x + dx / scale;
+      startPos.x +
+      worldDelta.x;
 
     const rawY =
-      startPos.y + dy / scale;
+      startPos.y +
+      worldDelta.y;
 
     const snapped =
       getSmartSnap(
@@ -11454,7 +11323,7 @@ $('resetLayoutBtn').onclick = async () => {
     )
   });
 
-  requestAnimationFrame(fitScreen);
+  requestAnimationFrame(() => genealogyViewport.fit());
 };
 
 relationshipPerspectiveBtn?.addEventListener(
@@ -11692,7 +11561,7 @@ const familyMemberController = {
 
     resetFamilyMemberOperations();
     applyGenealogyMutation(mutation);
-    requestAnimationFrame(fitScreen);
+    requestAnimationFrame(() => genealogyViewport.fit());
   }
 };
 
@@ -11945,7 +11814,7 @@ familySelect.onchange = async () => {
   void preloadCurrentViewAssets();
   refreshFamilyUI();
   render();
-  requestAnimationFrame(fitScreen);
+  requestAnimationFrame(() => genealogyViewport.fit());
 };
 familyNameInput.addEventListener('input', syncFamilyNameInputWidth);
 $('familyNameEditBtn')?.addEventListener('click', () => {
@@ -12054,7 +11923,7 @@ $('newFamilyBtn').onclick = async () => {
   personLibraryState.addSelection.clear();
   familyMemberOperationState.selection.clear();
   applyGenealogyMutation(mutation);
-  requestAnimationFrame(fitScreen);
+  requestAnimationFrame(() => genealogyViewport.fit());
 };
 $('delFamilyBtn').onclick = async () => {
   if (currentGenealogyData().families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
@@ -12078,7 +11947,7 @@ $('delFamilyBtn').onclick = async () => {
   personEditor.close();
   applyGenealogyMutation(mutation);
   scheduleGC();
-  requestAnimationFrame(fitScreen);
+  requestAnimationFrame(() => genealogyViewport.fit());
 };
 
 function refreshSS(selectId) {
@@ -14659,7 +14528,7 @@ const addMemberController = {
     applyGenealogyMutation(mutation);
     this.close();
     refreshFamilyProfilePanel();
-    requestAnimationFrame(fitScreen);
+    requestAnimationFrame(() => genealogyViewport.fit());
   }
 };
 
@@ -15271,7 +15140,7 @@ async function importJSON(file) {
     renderCanvasBackground();
     render();
     scheduleGC();
-    requestAnimationFrame(fitScreen);
+    requestAnimationFrame(() => genealogyViewport.fit());
   } catch(err) {
     uiAlert('匯入失敗：' + err.message, { title:'匯入失敗', kind:'danger' });
   }
@@ -15453,8 +15322,7 @@ async function importGameGenealogy(file) {
     finishMarquee();
 
     labelDrag = null;
-    panning = false;
-    viewport.classList.remove('dragging');
+    genealogyViewport.cancelPan();
 
     arrangeTool = 'pan';
 
@@ -15467,7 +15335,7 @@ async function importGameGenealogy(file) {
 
     await new Promise(resolve => {
       requestAnimationFrame(() => {
-        fitScreen();
+        genealogyViewport.fit();
         resolve();
       });
     });
@@ -15887,9 +15755,9 @@ $('filterResetBtn')?.addEventListener('click', event => {
 updateTopbarFilterUI();
 
 const zoomCenter = () => { const r=viewport.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; };
-$('zoomInBtn')?.addEventListener('click',()=>{const p=zoomCenter();zoomAt(p.x,p.y,1.16);});
-$('zoomOutBtn')?.addEventListener('click',()=>{const p=zoomCenter();zoomAt(p.x,p.y,1/1.16);});
-$('fitScreenBtn')?.addEventListener('click',fitScreen);
+$('zoomInBtn')?.addEventListener('click',()=>{const p=zoomCenter();genealogyViewport.zoomAt(p.x,p.y,1.16);});
+$('zoomOutBtn')?.addEventListener('click',()=>{const p=zoomCenter();genealogyViewport.zoomAt(p.x,p.y,1/1.16);});
+$('fitScreenBtn')?.addEventListener('click', () => genealogyViewport.fit());
 
 $('exportBtn').onclick = openExportPanel;
 if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
@@ -15978,56 +15846,127 @@ function hideAppSkeleton() {
   }, 180);
 }
 
-async function init() {
+function restoreWorkspacePreferences() {
   try {
-    const v = localStorage.getItem(CUSTOM_COLORS_KEY);
-    if (v) {
-      const obj = JSON.parse(v);
-      if (obj.c1) customColors.c1 = obj.c1;
-      if (obj.c2) customColors.c2 = obj.c2;
+    const value =
+      localStorage.getItem(
+        CUSTOM_COLORS_KEY
+      );
+
+    if (value) {
+      const parsed =
+        JSON.parse(value);
+
+      if (parsed.c1) {
+        customColors.c1 =
+          parsed.c1;
+      }
+
+      if (parsed.c2) {
+        customColors.c2 =
+          parsed.c2;
+      }
     }
-  } catch(e){}
+  } catch (_) {}
 
   let savedTheme = 'ling';
+
   try {
-    const v = localStorage.getItem(THEME_KEY);
-    if (v === 'custom') savedTheme = 'custom';
-    else if (v && VALID_THEMES.includes(v)) savedTheme = v;
+    const value =
+      localStorage.getItem(
+        THEME_KEY
+      );
 
-  } catch(e){}
+    if (value === 'custom') {
+      savedTheme = 'custom';
+    } else if (
+      value &&
+      VALID_THEMES.includes(value)
+    ) {
+      savedTheme = value;
+    }
+  } catch (_) {}
 
-  if (savedTheme === 'custom') chooseCustomTheme(customColors.c1, customColors.c2);
-  else chooseThemePreset(savedTheme);
+  if (savedTheme === 'custom') {
+    chooseCustomTheme(
+      customColors.c1,
+      customColors.c2
+    );
+  } else {
+    chooseThemePreset(
+      savedTheme
+    );
+  }
 
   let savedMode = 'view';
+
   try {
-    const v = localStorage.getItem(MODE_KEY);
-    if (v && VALID_MODES.includes(v)) savedMode = v;
-  } catch(e){}
+    const value =
+      localStorage.getItem(
+        MODE_KEY
+      );
+
+    if (
+      value &&
+      VALID_MODES.includes(value)
+    ) {
+      savedMode = value;
+    }
+  } catch (_) {}
+
   applyViewMode(savedMode);
 
-  let savedLock = false;
-  try {
-    const v = localStorage.getItem(LABEL_LOCK_KEY);
-    savedLock = (v === '1');
-  } catch(e){ savedLock = false; }
-  applyLabelLock(savedLock);
+  let savedLabelLock = false;
 
   try {
-    const v = localStorage.getItem(LABELS_KEY);
-    showRelLabels = (v === '0') ? false : true;
-  } catch(e){ showRelLabels = true; }
+    savedLabelLock =
+      localStorage.getItem(
+        LABEL_LOCK_KEY
+      ) === '1';
+  } catch (_) {}
 
-  (function updateLabelBtn() {
-    const btn = $('labelToggle');
-    if (showRelLabels) { btn.classList.add('active'); setIconText(btn, 'tags', '隱藏關係'); }
-    else { btn.classList.remove('active'); setIconText(btn, 'tags', '顯示關係'); }
-  })();
+  applyLabelLock(
+    savedLabelLock
+  );
+
+  try {
+    showRelLabels =
+      localStorage.getItem(
+        LABELS_KEY
+      ) !== '0';
+  } catch (_) {
+    showRelLabels = true;
+  }
+
+  const labelButton =
+    $('labelToggle');
+
+  if (showRelLabels) {
+    labelButton.classList.add(
+      'active'
+    );
+
+    setIconText(
+      labelButton,
+      'tags',
+      '隱藏關係'
+    );
+  } else {
+    labelButton.classList.remove(
+      'active'
+    );
+
+    setIconText(
+      labelButton,
+      'tags',
+      '顯示關係'
+    );
+  }
+
   syncRelationshipToolbarVisibility();
+}
 
-  // 圖片資產層不得阻塞主程式啟動。
-  // IndexedDB 在部分瀏覽器 / 舊連線情況下可能長時間停在 pending，
-  // 因此只在背景建立連線；真正需要存取圖片時再由資產層自行等待。
+function connectAssetStoreInBackground() {
   void assetStore.openDb()
     .then(() => {
       assetStoreReady = true;
@@ -16040,7 +15979,9 @@ async function init() {
         error
       );
     });
+}
 
+function prepareInitialWorkspaceDatabase() {
   let preparedResult;
 
   try {
@@ -16072,14 +16013,30 @@ async function init() {
       prepareDatabase(
         buildSample()
       );
+
     initialDatabase =
       preparedResult.prepared;
   }
 
+  return {
+    preparedResult,
+    initialDatabase
+  };
+}
+
+function initializeGenealogyWorkspace() {
+  restoreWorkspacePreferences();
+  connectAssetStoreInBackground();
+
+  const {
+    preparedResult,
+    initialDatabase
+  } =
+    prepareInitialWorkspaceDatabase();
+
   applyRelationshipLineSettings();
   restoreCanvasBackground();
 
-  // clean-break：先清理候選資料，再交由 Store 接管 canonical ownership。
   const clearedImageRefs =
     clearUnsupportedImageRefs(
       initialDatabase,
@@ -16092,33 +16049,42 @@ async function init() {
 
   invalidateChildrenIndex();
   invalidateRelationshipGraph();
+
   if (clearedImageRefs > 0) {
-    console.warn(`[圖片資產] 已清除 ${clearedImageRefs} 個舊圖片引用；請重新匯入或上傳圖片。`);
-    save({ immediate:true });
+    console.warn(
+      `[圖片資產] 已清除 ${clearedImageRefs} 個舊圖片引用；請重新匯入或上傳圖片。`
+    );
+
+    save({
+      immediate:true
+    });
+
     persistCanvasBackground();
-  } else if (preparedResult.changed) {
+  } else if (
+    preparedResult.changed
+  ) {
     save();
   }
 
   setupAppMenus();
   setupHelpTooltipPortal();
   restoreFamilyPanelCollapsed();
-  setupViewportResizeObserver();
+  genealogyViewport.observeResize();
   setupSearchSelects();
 
-  // 首屏先渲染結構，再由資產層非阻塞載入圖片。
-  // 圖片 ready 只刷新對應 DOM，不再阻塞 Skeleton 或重算 Layout。
   void preloadCurrentViewAssets();
 
   refreshFamilyUI();
   render();
 
   requestAnimationFrame(() => {
-    fitScreen();
-    requestAnimationFrame(hideAppSkeleton);
+    genealogyViewport.fit();
+
+    requestAnimationFrame(
+      hideAppSkeleton
+    );
   });
 }
-
 
 
 /* ========【多語系介面回呼】 設定 - 語言切換後刷新 App 專屬畫面狀態 ======== */
@@ -16169,7 +16135,7 @@ async function bootstrapGenealogyApp() {
   setupTopbarNavSelects();
   observeSharedNativeSelectChevrons();
 
-  await init();
+  initializeGenealogyWorkspace();
 }
 
 bootstrapGenealogyApp().catch(error => {
