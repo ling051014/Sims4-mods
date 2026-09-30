@@ -39,7 +39,7 @@
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, relationshipResolvedColor, relationshipInlineSvgStyle,
-      genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureText,
+      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureText,
       makeLabelSVG, getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, buildTagsHTML, buildPetsChipsHTML, genderClass, statusClass
     } = helpers;
@@ -340,12 +340,141 @@ function relationshipCurveFactor(value) {
   );
 }
 
+function relationshipSegmentIntersectsRect(
+  x1,
+  y1,
+  x2,
+  y2,
+  rect,
+  padding = 6
+) {
+  const left =
+    rect.left - padding;
+  const right =
+    rect.right + padding;
+  const top =
+    rect.top - padding;
+  const bottom =
+    rect.bottom + padding;
+
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  let t0 = 0;
+  let t1 = 1;
+
+  const clip = (p, q) => {
+    if (Math.abs(p) < 0.000001) {
+      return q >= 0;
+    }
+
+    const ratio = q / p;
+
+    if (p < 0) {
+      if (ratio > t1) return false;
+      if (ratio > t0) t0 = ratio;
+    } else {
+      if (ratio < t0) return false;
+      if (ratio < t1) t1 = ratio;
+    }
+
+    return true;
+  };
+
+  return (
+    clip(-dx, x1 - left) &&
+    clip(dx, right - x1) &&
+    clip(-dy, y1 - top) &&
+    clip(dy, bottom - y1) &&
+    t0 <= t1
+  );
+}
+
+function relationshipBlockingCard(
+  routeContext,
+  x1,
+  y1,
+  x2,
+  y2
+) {
+  if (
+    !routeContext?.pos ||
+    !routeContext?.byId
+  ) {
+    return null;
+  }
+
+  const ignored =
+    new Set([
+      String(
+        routeContext.fromId || ''
+      ),
+      String(
+        routeContext.toId || ''
+      )
+    ]);
+
+  for (
+    const [id, position]
+    of routeContext.pos.entries()
+  ) {
+    if (ignored.has(String(id))) {
+      continue;
+    }
+
+    const rect =
+      cardOuterRect(
+        position
+      );
+
+    if (
+      relationshipSegmentIntersectsRect(
+        x1,
+        y1,
+        x2,
+        y2,
+        rect
+      )
+    ) {
+      return {
+        id:String(id),
+        rect
+      };
+    }
+  }
+
+  return null;
+}
+
+function relationshipCurveDirection(
+  blocker,
+  x1,
+  y1,
+  x2,
+  y2
+) {
+  if (!blocker?.rect) {
+    return 1;
+  }
+
+  const cross =
+    (x2 - x1) *
+      (blocker.rect.centerY - y1) -
+    (y2 - y1) *
+      (blocker.rect.centerX - x1);
+
+  return cross >= 0
+    ? -1
+    : 1;
+}
+
 function relationshipQuadraticGeometry(
   x1,
   y1,
   x2,
   y2,
-  curveAmount
+  curveAmount,
+  direction = 1
 ) {
   const dx =
     x2 - x1;
@@ -369,6 +498,11 @@ function relationshipQuadraticGeometry(
     distance *
     relationshipCurveFactor(
       curveAmount
+    ) *
+    (
+      direction < 0
+        ? -1
+        : 1
     );
 
   const cx =
@@ -400,19 +534,9 @@ function relationshipQuadraticGeometry(
 function relationshipPairRenderGeometry(
   a,
   b,
-  setting
+  setting,
+  routeContext = null
 ) {
-  if (!setting.curved) {
-    const join =
-      pairJoinPoint(a, b);
-
-    return {
-      d:createPartnerConnectionPath(a, b),
-      labelX:join.x,
-      labelY:join.y
-    };
-  }
-
   const {
     aX,
     aY,
@@ -424,19 +548,52 @@ function relationshipPairRenderGeometry(
       b
     );
 
+  const blocker =
+    relationshipBlockingCard(
+      routeContext,
+      aX,
+      aY,
+      bX,
+      bY
+    );
+
+  const useCurve =
+    setting.routing === 'manual'
+      ? !!setting.curved
+      : !!blocker;
+
+  if (!useCurve) {
+    const join =
+      pairJoinPoint(a, b);
+
+    return {
+      d:createPartnerConnectionPath(a, b),
+      labelX:join.x,
+      labelY:join.y
+    };
+  }
+
   return relationshipQuadraticGeometry(
     aX,
     aY,
     bX,
     bY,
-    setting.curveAmount
+    setting.curveAmount,
+    relationshipCurveDirection(
+      blocker,
+      aX,
+      aY,
+      bX,
+      bY
+    )
   );
 }
 
 function relationshipOtherRenderGeometry(
   a,
   b,
-  setting
+  setting,
+  routeContext = null
 ) {
   const fromAnchor =
     avatarBoundaryAnchor(a, b);
@@ -456,13 +613,34 @@ function relationshipOtherRenderGeometry(
   const y2 =
     toAnchor.y;
 
-  if (setting.curved) {
+  const blocker =
+    relationshipBlockingCard(
+      routeContext,
+      x1,
+      y1,
+      x2,
+      y2
+    );
+
+  const useCurve =
+    setting.routing === 'manual'
+      ? !!setting.curved
+      : !!blocker;
+
+  if (useCurve) {
     return relationshipQuadraticGeometry(
       x1,
       y1,
       x2,
       y2,
-      setting.curveAmount
+      setting.curveAmount,
+      relationshipCurveDirection(
+        blocker,
+        x1,
+        y1,
+        x2,
+        y2
+      )
     );
   }
 
@@ -576,7 +754,7 @@ function getAdaptiveSpouseGap(members, baseGap) {
     return Math.min(Math.max(baseGap, visualMinimum, labelDrivenGap), 168);
 }
 
-// ========【族譜自動排版核心】 設定 - Family Unit / 世代分層 / 交叉最小化 ========
+// ========【族譜自動排版核心】 設定 - Parent Group / 主要水平配對 / 血緣世代 ========
 function buildGenealogyLayoutModel(visibleIds) {
   const {
     SPOUSE:SPOUSE_GAP
@@ -590,213 +768,146 @@ function buildGenealogyLayoutModel(visibleIds) {
     sims.map(sim => [sim.id, sim])
   );
 
-  const componentParent = new Map(
-    sims.map(sim => [sim.id, sim.id])
-  );
-
-  const find = id => {
-    const parent = componentParent.get(id);
-    if (parent == null) return null;
-    if (parent === id) return id;
-
-    const root = find(parent);
-    componentParent.set(id, root);
-    return root;
-  };
-
-  const union = (a, b) => {
-    const aRoot = find(a);
-    const bRoot = find(b);
-
-    if (aRoot == null || bRoot == null || aRoot === bRoot) return;
-    componentParent.set(bRoot, aRoot);
-  };
-
-  // 現任配偶是同一個 family unit。
-  // 前任配偶保留關係線，但不強迫與現任家庭綁成同一橫向單位。
-  sims.forEach(sim => {
-    (sim.spouseIds || []).forEach(spouseId => {
-      if (byId.has(spouseId)) union(sim.id, spouseId);
-    });
-  });
-
-  const unitMembers = new Map();
-
-  sims.forEach(sim => {
-    const root = find(sim.id);
-    if (!unitMembers.has(root)) unitMembers.set(root, []);
-    unitMembers.get(root).push(sim);
-  });
-
-  const units = [];
-  const unitBySim = new Map();
-
-  [...unitMembers.entries()].forEach(([root, members], sequence) => {
-    members.sort((a, b) =>
-      (a.order ?? 0) - (b.order ?? 0) ||
-      String(a.name || '').localeCompare(String(b.name || ''), 'zh') ||
-      String(a.id).localeCompare(String(b.id))
+  const parentGroups =
+    buildParentChildConnectorGroups(
+      byId,
+      new Set(byId.keys())
     );
 
-    let width = 0;
-    let height = 0;
-    let spouseGap = SPOUSE_GAP;
+  // ========【血緣世代】 設定 - 只由親子 / 領養決定上下層級 ========
+  const generationBySim =
+    new Map();
 
-    if (members.length === 2) {
-      spouseGap = getAdaptiveSpouseGap(
-        members,
-        SPOUSE_GAP
+  const visiting =
+    new Set();
+
+  const resolveGeneration = simId => {
+    if (
+      generationBySim.has(simId)
+    ) {
+      return generationBySim.get(
+        simId
       );
     }
 
-    members.forEach((member, index) => {
-      const dims = getNodeDimensions(member);
-      width += dims.W;
-      height = Math.max(height, dims.H);
-
-      if (index < members.length - 1) {
-        width += spouseGap;
-      }
-    });
-
-    const unit = {
-      id:'unit:' + root,
-      members,
-      memberIds:new Set(members.map(member => member.id)),
-      width,
-      height,
-      spouseGap,
-      sequence,
-      parentUnitIds:new Set(),
-      childUnitIds:new Set(),
-      generation:0,
-      x:0,
-      y:0
-    };
-
-    units.push(unit);
-    members.forEach(member => unitBySim.set(member.id, unit));
-  });
-
-  const unitById = new Map(
-    units.map(unit => [unit.id, unit])
-  );
-
-  // family unit 之間由 canonical 親子關係建立世代方向。
-  // 親生與領養都是真正的 parent-child；差異只留在線型與標籤。
-  sims.forEach(child => {
-    const childUnit = unitBySim.get(child.id);
-    if (!childUnit) return;
-
-    genealogyParentIds(child, byId).forEach(parentId => {
-      const parentUnit = unitBySim.get(parentId);
-      if (!parentUnit || parentUnit.id === childUnit.id) return;
-
-      parentUnit.childUnitIds.add(childUnit.id);
-      childUnit.parentUnitIds.add(parentUnit.id);
-    });
-  });
-
-  const generationMemo = new Map();
-  const visiting = new Set();
-
-  const resolveGeneration = unitId => {
-    if (generationMemo.has(unitId)) {
-      return generationMemo.get(unitId);
-    }
-
-    if (visiting.has(unitId)) {
-      // 異常循環資料保護：正常 genealogy 不應形成祖先循環。
+    if (visiting.has(simId)) {
       return 0;
     }
 
-    visiting.add(unitId);
+    visiting.add(simId);
 
-    const unit = unitById.get(unitId);
-    const parentIds = unit
-      ? [...unit.parentUnitIds]
-      : [];
+    const sim =
+      byId.get(simId);
 
-    const generation = parentIds.length
-      ? 1 + Math.max(...parentIds.map(resolveGeneration))
-      : 0;
+    const parents =
+      sim
+        ? genealogyParentIds(
+            sim,
+            byId
+          )
+        : [];
 
-    visiting.delete(unitId);
-    generationMemo.set(unitId, generation);
+    const generation =
+      parents.length
+        ? 1 + Math.max(
+            ...parents.map(
+              resolveGeneration
+            )
+          )
+        : 0;
+
+    visiting.delete(simId);
+
+    generationBySim.set(
+      simId,
+      generation
+    );
 
     return generation;
   };
 
-  units.forEach(unit => {
-    unit.generation = resolveGeneration(unit.id);
+  sims.forEach(sim => {
+    resolveGeneration(sim.id);
   });
 
-  // ========【族譜世代約束】 設定 - 共同父母 / 前任伴侶固定於同一世代列 ========
-  // 只調整畫面上的世代，不改寫任何關係資料。
-  // 標準族譜的伴侶關係必須是水平線，因此不能讓共同父母或前任落在不同高度。
+  // 同一名子女的共同父母固定於同一個 parent generation。
+  // 這仍然只由「共同擁有這名子女」推導，不讓感情狀態改寫血緣世代。
   const maxGenerationPasses =
-    Math.max(4, units.length * 4);
+    Math.max(
+      4,
+      sims.length * 4
+    );
 
-  for (let pass = 0; pass < maxGenerationPasses; pass += 1) {
+  for (
+    let pass = 0;
+    pass < maxGenerationPasses;
+    pass += 1
+  ) {
     let changed = false;
 
-    // 同一名子女的共同父母位於同一世代。
-    sims.forEach(child => {
-      const parentUnits = [...new Set(
-        genealogyParentIds(child, byId)
-          .map(parentId => unitBySim.get(parentId))
-          .filter(Boolean)
-      )];
+    parentGroups.forEach(group => {
+      const parents =
+        group.parentIds
+          .filter(id =>
+            generationBySim.has(id)
+          );
 
-      if (parentUnits.length < 2) return;
-
-      const targetGeneration = Math.max(
-        ...parentUnits.map(unit => unit.generation)
-      );
-
-      parentUnits.forEach(unit => {
-        if (unit.generation === targetGeneration) return;
-        unit.generation = targetGeneration;
-        changed = true;
-      });
-    });
-
-    // 前任配偶仍屬於族譜中的伴侶關係，固定同一世代列。
-    sims.forEach(sim => {
-      const unit = unitBySim.get(sim.id);
-      if (!unit) return;
-
-      (sim.exSpouseIds || []).forEach(exId => {
-        const exUnit = unitBySim.get(exId);
-        if (!exUnit || exUnit.id === unit.id) return;
-
+      if (parents.length >= 2) {
         const targetGeneration =
-          Math.max(unit.generation, exUnit.generation);
+          Math.max(
+            ...parents.map(id =>
+              generationBySim.get(id)
+            )
+          );
 
-        if (unit.generation !== targetGeneration) {
-          unit.generation = targetGeneration;
+        parents.forEach(id => {
+          if (
+            generationBySim.get(id) ===
+            targetGeneration
+          ) {
+            return;
+          }
+
+          generationBySim.set(
+            id,
+            targetGeneration
+          );
+
           changed = true;
+        });
+      }
+
+      const parentGenerations =
+        parents.map(id =>
+          generationBySim.get(id)
+        );
+
+      if (!parentGenerations.length) {
+        return;
+      }
+
+      const childMinimum =
+        Math.max(
+          ...parentGenerations
+        ) + 1;
+
+      group.children.forEach(childId => {
+        if (
+          !generationBySim.has(
+            childId
+          ) ||
+          generationBySim.get(
+            childId
+          ) >= childMinimum
+        ) {
+          return;
         }
 
-        if (exUnit.generation !== targetGeneration) {
-          exUnit.generation = targetGeneration;
-          changed = true;
-        }
-      });
-    });
+        generationBySim.set(
+          childId,
+          childMinimum
+        );
 
-    // 上一代被對齊後，子代至少必須再往下一代。
-    units.forEach(parentUnit => {
-      parentUnit.childUnitIds.forEach(childUnitId => {
-        const childUnit = unitById.get(childUnitId);
-        if (!childUnit) return;
-
-        const minimumGeneration =
-          parentUnit.generation + 1;
-
-        if (childUnit.generation >= minimumGeneration) return;
-
-        childUnit.generation = minimumGeneration;
         changed = true;
       });
     });
@@ -804,13 +915,894 @@ function buildGenealogyLayoutModel(visibleIds) {
     if (!changed) break;
   }
 
+  const pairCandidates =
+    collectGenealogyHorizontalPairCandidates(
+      sims,
+      byId,
+      parentGroups
+    );
+
+  // 不同血緣 component 可以整塊上下平移，讓沒有共同祖先的配偶 / 伴侶 / 情人保持同列。
+  // component 內部的親子世代差完全不改。
+  alignIndependentLineageGenerations(
+    sims,
+    byId,
+    generationBySim,
+    pairCandidates
+  );
+
+  const pairSelection =
+    selectPrimaryHorizontalPairs(
+      pairCandidates,
+      generationBySim
+    );
+
+  const pairedIds =
+    new Set();
+
+  const units = [];
+  const unitBySim =
+    new Map();
+
+  const createUnit = (
+    members,
+    pairInfo = null
+  ) => {
+    const ordered =
+      [...members].sort(
+        (left, right) =>
+          (left.order ?? 0) -
+            (right.order ?? 0) ||
+          String(left.name || '')
+            .localeCompare(
+              String(right.name || ''),
+              'zh'
+            ) ||
+          String(left.id)
+            .localeCompare(
+              String(right.id)
+            )
+      );
+
+    let width = 0;
+    let height = 0;
+    let spouseGap = 0;
+
+    if (ordered.length === 2) {
+      spouseGap =
+        getAdaptiveHorizontalPairGap(
+          ordered,
+          SPOUSE_GAP
+        );
+    }
+
+    ordered.forEach(
+      (member, index) => {
+        const dims =
+          getNodeDimensions(
+            member
+          );
+
+        width += dims.W;
+
+        height =
+          Math.max(
+            height,
+            dims.H
+          );
+
+        if (
+          index <
+          ordered.length - 1
+        ) {
+          width += spouseGap;
+        }
+      }
+    );
+
+    const generation =
+      Math.max(
+        ...ordered.map(member =>
+          generationBySim.get(
+            member.id
+          ) || 0
+        )
+      );
+
+    const unit = {
+      id:
+        'unit:' +
+        ordered
+          .map(member => member.id)
+          .sort()
+          .join('|'),
+      members:ordered,
+      memberIds:
+        new Set(
+          ordered.map(
+            member => member.id
+          )
+        ),
+      width,
+      height,
+      spouseGap,
+      pairInfo,
+      sequence:units.length,
+      parentUnitIds:new Set(),
+      childUnitIds:new Set(),
+      generation,
+      x:0,
+      y:0
+    };
+
+    units.push(unit);
+
+    ordered.forEach(member => {
+      pairedIds.add(member.id);
+      unitBySim.set(
+        member.id,
+        unit
+      );
+    });
+
+    return unit;
+  };
+
+  pairSelection.forEach(pair => {
+    const first =
+      byId.get(pair.a);
+
+    const second =
+      byId.get(pair.b);
+
+    if (!first || !second) return;
+
+    createUnit(
+      [first, second],
+      pair
+    );
+  });
+
+  sims.forEach(sim => {
+    if (pairedIds.has(sim.id)) {
+      return;
+    }
+
+    createUnit([sim], null);
+  });
+
+  const unitById =
+    new Map(
+      units.map(unit => [
+        unit.id,
+        unit
+      ])
+    );
+
+  // Parent Group 是族譜真正的骨架。同一個人可以同時參與多個 Parent Group，
+  // 但人物卡只存在一次，不再因多配偶 / 多共同生育對象被 union 成三人以上 Family Unit。
+  parentGroups.forEach(group => {
+    group.parentUnitIds =
+      [...new Set(
+        group.parentIds
+          .map(parentId =>
+            unitBySim.get(
+              parentId
+            )?.id
+          )
+          .filter(Boolean)
+      )];
+
+    group.childUnitIds =
+      [...new Set(
+        group.children
+          .map(childId =>
+            unitBySim.get(
+              childId
+            )?.id
+          )
+          .filter(Boolean)
+      )];
+
+    group.parentUnitIds
+      .forEach(parentUnitId => {
+        const parentUnit =
+          unitById.get(
+            parentUnitId
+          );
+
+        if (!parentUnit) return;
+
+        group.childUnitIds
+          .forEach(childUnitId => {
+            const childUnit =
+              unitById.get(
+                childUnitId
+              );
+
+            if (
+              !childUnit ||
+              childUnit.id ===
+                parentUnit.id
+            ) {
+              return;
+            }
+
+            parentUnit.childUnitIds
+              .add(
+                childUnit.id
+              );
+
+            childUnit.parentUnitIds
+              .add(
+                parentUnit.id
+              );
+          });
+      });
+  });
+
   return {
     sims,
     byId,
     units,
     unitById,
-    unitBySim
+    unitBySim,
+    parentGroups,
+    pairCandidates,
+    pairSelection,
+    generationBySim
   };
+}
+
+function relationshipPairKey(
+  firstId,
+  secondId
+) {
+  return pairKey(
+    String(firstId),
+    String(secondId)
+  );
+}
+
+function pairRelationshipInfo(
+  first,
+  second
+) {
+  if (!first || !second) {
+    return null;
+  }
+
+  const firstId =
+    String(first.id);
+
+  const secondId =
+    String(second.id);
+
+  const pairK =
+    pairKey(
+      firstId,
+      secondId
+    );
+
+  if (
+    (first.spouseIds || [])
+      .map(String)
+      .includes(secondId)
+  ) {
+    return getRelInfoByKey(
+      'spouse:' + pairK,
+      'spouse'
+    );
+  }
+
+  if (
+    (first.gameData
+      ?.deceasedSpouseIds || [])
+      .map(String)
+      .includes(secondId)
+  ) {
+    return getRelInfoByKey(
+      'deceased-spouse:' +
+        pairK,
+      'deceased-spouse'
+    );
+  }
+
+  if (
+    (first.exSpouseIds || [])
+      .map(String)
+      .includes(secondId)
+  ) {
+    return getRelInfoByKey(
+      'exspouse:' + pairK,
+      'exspouse'
+    );
+  }
+
+  const link =
+    (genealogyData.links || [])
+      .find(entry =>
+        entry &&
+        !isSiblingLink(entry) &&
+        (
+          (
+            String(entry.from) ===
+              firstId &&
+            String(entry.to) ===
+              secondId
+          ) ||
+          (
+            String(entry.from) ===
+              secondId &&
+            String(entry.to) ===
+              firstId
+          )
+        )
+      );
+
+  if (link) {
+    return getRelInfoByKey(
+      'link:' + link.id,
+      'social',
+      relationshipOtherType(
+        link
+      )
+    );
+  }
+
+  return null;
+}
+
+function getAdaptiveHorizontalPairGap(
+  members,
+  baseGap
+) {
+  if (
+    !members ||
+    members.length !== 2
+  ) {
+    return baseGap;
+  }
+
+  const info =
+    pairRelationshipInfo(
+      members[0],
+      members[1]
+    );
+
+  const labelWidth =
+    info
+      ? relationshipBubbleWidth(
+          info
+        )
+      : 0;
+
+  const visualMinimum =
+    viewMode === 'view'
+      ? 52
+      : 60;
+
+  const labelDrivenGap =
+    labelWidth
+      ? labelWidth + 20
+      : 0;
+
+  return Math.min(
+    Math.max(
+      baseGap,
+      visualMinimum,
+      labelDrivenGap
+    ),
+    168
+  );
+}
+
+function collectGenealogyHorizontalPairCandidates(
+  sims,
+  byId,
+  parentGroups
+) {
+  const candidates =
+    new Map();
+
+  const add = (
+    firstId,
+    secondId,
+    score,
+    meta = {}
+  ) => {
+    const a =
+      String(firstId || '');
+
+    const b =
+      String(secondId || '');
+
+    if (
+      !a ||
+      !b ||
+      a === b ||
+      !byId.has(a) ||
+      !byId.has(b)
+    ) {
+      return;
+    }
+
+    const key =
+      relationshipPairKey(
+        a,
+        b
+      );
+
+    const candidate = {
+      key,
+      a,
+      b,
+      score:
+        Number(score) || 0,
+      ...meta
+    };
+
+    const existing =
+      candidates.get(key);
+
+    if (
+      !existing ||
+      candidate.score >
+        existing.score
+    ) {
+      candidates.set(
+        key,
+        candidate
+      );
+    }
+  };
+
+  // 有共同子女時優先保住 Parent Group。
+  parentGroups.forEach(group => {
+    const parents =
+      group.parentIds
+        .filter(id =>
+          byId.has(id)
+        );
+
+    for (
+      let firstIndex = 0;
+      firstIndex < parents.length;
+      firstIndex += 1
+    ) {
+      for (
+        let secondIndex =
+          firstIndex + 1;
+        secondIndex < parents.length;
+        secondIndex += 1
+      ) {
+        add(
+          parents[firstIndex],
+          parents[secondIndex],
+          1100 +
+            group.children.length *
+              25,
+          {
+            kind:'parent-group',
+            parentGroupKey:
+              group.key
+          }
+        );
+      }
+    }
+  });
+
+  sims.forEach(sim => {
+    const deceased =
+      new Set(
+        (
+          sim.gameData
+            ?.deceasedSpouseIds ||
+          []
+        ).map(String)
+      );
+
+    (sim.spouseIds || [])
+      .forEach(spouseId => {
+        add(
+          sim.id,
+          spouseId,
+          deceased.has(
+            String(spouseId)
+          )
+            ? 180
+            : 900,
+          {
+            kind:
+              deceased.has(
+                String(spouseId)
+              )
+                ? 'deceased-spouse'
+                : 'spouse'
+          }
+        );
+      });
+
+    (sim.exSpouseIds || [])
+      .forEach(spouseId => {
+        add(
+          sim.id,
+          spouseId,
+          220,
+          {
+            kind:'exspouse'
+          }
+        );
+      });
+  });
+
+  (genealogyData.links || [])
+    .forEach(link => {
+      if (
+        !link ||
+        isSiblingLink(link) ||
+        !byId.has(
+          String(link.from)
+        ) ||
+        !byId.has(
+          String(link.to)
+        )
+      ) {
+        return;
+      }
+
+      const type =
+        relationshipOtherType(
+          link
+        );
+
+      const priority =
+        relationshipLayoutPriority(
+          type
+        );
+
+      if (priority <= 0) {
+        return;
+      }
+
+      add(
+        link.from,
+        link.to,
+        priority,
+        {
+          kind:'social',
+          type,
+          linkId:
+            link.id || null
+        }
+      );
+    });
+
+  return [...candidates.values()]
+    .sort((left, right) =>
+      right.score -
+        left.score ||
+      String(left.key)
+        .localeCompare(
+          String(right.key)
+        )
+    );
+}
+
+function buildPersonLineageComponents(
+  sims,
+  byId
+) {
+  const adjacency =
+    new Map(
+      sims.map(sim => [
+        sim.id,
+        new Set()
+      ])
+    );
+
+  sims.forEach(sim => {
+    genealogyParentIds(
+      sim,
+      byId
+    ).forEach(parentId => {
+      if (!byId.has(parentId)) {
+        return;
+      }
+
+      adjacency.get(sim.id)
+        .add(parentId);
+
+      adjacency.get(parentId)
+        .add(sim.id);
+    });
+  });
+
+  const componentBySim =
+    new Map();
+
+  let nextComponent = 0;
+
+  sims.forEach(sim => {
+    if (
+      componentBySim.has(
+        sim.id
+      )
+    ) {
+      return;
+    }
+
+    const componentId =
+      'lineage:' +
+      nextComponent++;
+
+    const stack = [
+      sim.id
+    ];
+
+    componentBySim.set(
+      sim.id,
+      componentId
+    );
+
+    while (stack.length) {
+      const id =
+        stack.pop();
+
+      (
+        adjacency.get(id) ||
+        []
+      ).forEach(relatedId => {
+        if (
+          componentBySim.has(
+            relatedId
+          )
+        ) {
+          return;
+        }
+
+        componentBySim.set(
+          relatedId,
+          componentId
+        );
+
+        stack.push(
+          relatedId
+        );
+      });
+    }
+  });
+
+  return componentBySim;
+}
+
+function alignIndependentLineageGenerations(
+  sims,
+  byId,
+  generationBySim,
+  pairCandidates
+) {
+  const componentBySim =
+    buildPersonLineageComponents(
+      sims,
+      byId
+    );
+
+  const adjacency =
+    new Map();
+
+  componentBySim.forEach(
+    componentId => {
+      if (
+        !adjacency.has(
+          componentId
+        )
+      ) {
+        adjacency.set(
+          componentId,
+          []
+        );
+      }
+    }
+  );
+
+  pairCandidates
+    .filter(candidate =>
+      candidate.score >= 500
+    )
+    .forEach(candidate => {
+      const aComponent =
+        componentBySim.get(
+          candidate.a
+        );
+
+      const bComponent =
+        componentBySim.get(
+          candidate.b
+        );
+
+      if (
+        !aComponent ||
+        !bComponent ||
+        aComponent ===
+          bComponent
+      ) {
+        return;
+      }
+
+      const delta =
+        (
+          generationBySim.get(
+            candidate.a
+          ) || 0
+        ) -
+        (
+          generationBySim.get(
+            candidate.b
+          ) || 0
+        );
+
+      adjacency.get(aComponent)
+        .push({
+          target:bComponent,
+          delta,
+          score:candidate.score
+        });
+
+      adjacency.get(bComponent)
+        .push({
+          target:aComponent,
+          delta:-delta,
+          score:candidate.score
+        });
+    });
+
+  adjacency.forEach(edges => {
+    edges.sort(
+      (left, right) =>
+        right.score -
+        left.score
+    );
+  });
+
+  const offsetByComponent =
+    new Map();
+
+  [...adjacency.keys()]
+    .forEach(start => {
+      if (
+        offsetByComponent.has(
+          start
+        )
+      ) {
+        return;
+      }
+
+      offsetByComponent.set(
+        start,
+        0
+      );
+
+      const queue = [start];
+
+      while (queue.length) {
+        const component =
+          queue.shift();
+
+        const baseOffset =
+          offsetByComponent.get(
+            component
+          ) || 0;
+
+        (
+          adjacency.get(
+            component
+          ) ||
+          []
+        ).forEach(edge => {
+          if (
+            offsetByComponent.has(
+              edge.target
+            )
+          ) {
+            return;
+          }
+
+          offsetByComponent.set(
+            edge.target,
+            baseOffset +
+              edge.delta
+          );
+
+          queue.push(
+            edge.target
+          );
+        });
+      }
+    });
+
+  sims.forEach(sim => {
+    const component =
+      componentBySim.get(
+        sim.id
+      );
+
+    generationBySim.set(
+      sim.id,
+      (
+        generationBySim.get(
+          sim.id
+        ) || 0
+      ) +
+        (
+          offsetByComponent.get(
+            component
+          ) || 0
+        )
+    );
+  });
+
+  const minGeneration =
+    Math.min(
+      0,
+      ...sims.map(sim =>
+        generationBySim.get(
+          sim.id
+        ) || 0
+      )
+    );
+
+  if (minGeneration < 0) {
+    sims.forEach(sim => {
+      generationBySim.set(
+        sim.id,
+        (
+          generationBySim.get(
+            sim.id
+          ) || 0
+        ) -
+          minGeneration
+      );
+    });
+  }
+}
+
+function selectPrimaryHorizontalPairs(
+  candidates,
+  generationBySim
+) {
+  const used =
+    new Set();
+
+  const selected = [];
+
+  candidates.forEach(candidate => {
+    if (
+      used.has(candidate.a) ||
+      used.has(candidate.b) ||
+      (
+        generationBySim.get(
+          candidate.a
+        ) || 0
+      ) !==
+        (
+          generationBySim.get(
+            candidate.b
+          ) || 0
+        )
+    ) {
+      return;
+    }
+
+    used.add(candidate.a);
+    used.add(candidate.b);
+
+    selected.push(
+      candidate
+    );
+  });
+
+  return selected;
 }
 
 function stableGenealogyUnitCompare(a, b) {
@@ -981,6 +1973,43 @@ function buildFamilyBranchOwnership(
   const primaryChildren =
     new Map();
 
+  const childGroupKeyByOwner =
+    new Map();
+
+  (model.parentGroups || [])
+    .forEach(group => {
+      const parentUnitIds =
+        (group.parentUnitIds || [])
+          .filter(parentUnitId =>
+            primaryUnitIds.has(
+              parentUnitId
+            )
+          );
+
+      const childUnitIds =
+        (group.childUnitIds || [])
+          .filter(childUnitId =>
+            primaryUnitIds.has(
+              childUnitId
+            )
+          );
+
+      parentUnitIds.forEach(
+        parentUnitId => {
+          childUnitIds.forEach(
+            childUnitId => {
+              childGroupKeyByOwner.set(
+                parentUnitId +
+                  '\u0001' +
+                  childUnitId,
+                group.key
+              );
+            }
+          );
+        }
+      );
+    });
+
   model.units.forEach(unit => {
     if (!primaryUnitIds.has(unit.id)) {
       return;
@@ -1000,12 +2029,31 @@ function buildFamilyBranchOwnership(
         .filter(childId =>
           primaryUnitIds.has(childId)
         )
-        .sort((leftId, rightId) =>
-          stableGenealogyUnitCompare(
-            model.unitById.get(leftId),
-            model.unitById.get(rightId)
-          )
-        )
+        .sort((leftId, rightId) => {
+          const leftGroup =
+            childGroupKeyByOwner.get(
+              unit.id +
+                '\u0001' +
+                leftId
+            ) || '';
+
+          const rightGroup =
+            childGroupKeyByOwner.get(
+              unit.id +
+                '\u0001' +
+                rightId
+            ) || '';
+
+          return (
+            leftGroup.localeCompare(
+              rightGroup
+            ) ||
+            stableGenealogyUnitCompare(
+              model.unitById.get(leftId),
+              model.unitById.get(rightId)
+            )
+          );
+        })
     );
   });
 
@@ -1210,10 +2258,36 @@ function buildFamilyBranchOwnership(
       new Map();
 
     unit.members.forEach(member => {
+      const socialAttachmentIds =
+        (genealogyData.links || [])
+          .filter(link =>
+            link &&
+            !isSiblingLink(link) &&
+            relationshipLayoutPriority(
+              relationshipOtherType(
+                link
+              )
+            ) > 0 &&
+            (
+              String(link.from) ===
+                String(member.id) ||
+              String(link.to) ===
+                String(member.id)
+            )
+          )
+          .map(link =>
+            String(link.from) ===
+              String(member.id)
+              ? String(link.to)
+              : String(link.from)
+          );
+
       const relatedIds =
         new Set([
           ...(member.spouseIds || []),
           ...(member.exSpouseIds || []),
+          ...(member.gameData?.deceasedSpouseIds || []),
+          ...socialAttachmentIds,
           ...genealogyParentIds(
             member,
             model.byId
@@ -1507,7 +2581,7 @@ function genealogyFamilySideScore(member, unit, model, connectorGroups) {
   ) / totalWeight;
 }
 
-function orientSpouseUnitsByLineage(
+function orientHorizontalPairUnitsByLineage(
   model,
   connectorGroups,
   ownership = null
@@ -1821,16 +2895,12 @@ function genealogyGroupSourceX(group, model) {
   const [first, second] =
     parents;
 
-  const isPartnerPair =
-    !!first.sim &&
-    (
-      (first.sim.spouseIds || [])
-        .includes(second.id) ||
-      (first.sim.exSpouseIds || [])
-        .includes(second.id)
-    );
+  const isHorizontalPair =
+    first.unit.id ===
+      second.unit.id &&
+    first.unit.members.length === 2;
 
-  if (isPartnerPair) {
+  if (isHorizontalPair) {
     return (
       pairJoinPoint(
         toPosition(first),
@@ -2820,14 +3890,14 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     connectorGroups
   );
 
-  const spouseOrientationChanged =
-    orientSpouseUnitsByLineage(
+  const horizontalPairOrientationChanged =
+    orientHorizontalPairUnitsByLineage(
       model,
       connectorGroups,
       ownership
     );
 
-  if (spouseOrientationChanged) {
+  if (horizontalPairOrientationChanged) {
     // 只改 Family Unit 內的人物左右方向，
     // branch ownership / generation order 保持不變。
     applyFamilyBranchOrdering(
@@ -3109,15 +4179,77 @@ function parentConnectorSource(group, pos, byId, paths) {
   const firstSim = first.sim;
   const secondId = second.id;
 
-  const isPartnerPair =
-    (firstSim.spouseIds || []).includes(secondId) ||
-    (firstSim.exSpouseIds || []).includes(secondId);
+  const pairLink =
+    (genealogyData.links || [])
+      .find(link =>
+        link &&
+        !isSiblingLink(link) &&
+        (
+          (
+            String(link.from) ===
+              String(first.id) &&
+            String(link.to) ===
+              String(second.id)
+          ) ||
+          (
+            String(link.from) ===
+              String(second.id) &&
+            String(link.to) ===
+              String(first.id)
+          )
+        ) &&
+        relationshipLayoutPriority(
+          relationshipOtherType(
+            link
+          )
+        ) > 0
+      );
 
-  if (isPartnerPair) {
-    return pairJoinPoint(
-      first.pos,
-      second.pos
-    );
+  const hasVisibleHorizontalRelation =
+    (firstSim.spouseIds || [])
+      .map(String)
+      .includes(String(secondId)) ||
+    (firstSim.exSpouseIds || [])
+      .map(String)
+      .includes(String(secondId)) ||
+    (firstSim.gameData?.deceasedSpouseIds || [])
+      .map(String)
+      .includes(String(secondId)) ||
+    !!pairLink;
+
+  if (hasVisibleHorizontalRelation) {
+    const geometry =
+      getPairConnectionGeometry(
+        first.pos,
+        second.pos
+      );
+
+    const blocker =
+      relationshipBlockingCard(
+        {
+          fromId:first.id,
+          toId:second.id,
+          pos,
+          byId
+        },
+        geometry.aX,
+        geometry.aY,
+        geometry.bX,
+        geometry.bY
+      );
+
+    if (
+      Math.abs(
+        geometry.aY -
+        geometry.bY
+      ) <= 0.75 &&
+      !blocker
+    ) {
+      return pairJoinPoint(
+        first.pos,
+        second.pos
+      );
+    }
   }
 
   // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
@@ -3528,6 +4660,11 @@ function paintRelationshipLayer({
 
   const drawnPair = new Set();
 
+  const spouseSetting =
+    relationshipLineSetting(
+      'spouse'
+    );
+
   visibleIds.forEach(id => {
     const sim = byId.get(id);
     if (!sim) return;
@@ -3559,9 +4696,22 @@ function paintRelationshipLayer({
 
         if (!a || !b) return;
 
+        const geometry =
+          relationshipPairRenderGeometry(
+            a,
+            b,
+            spouseSetting,
+            {
+              fromId:id,
+              toId:spouseId,
+              pos,
+              byId
+            }
+          );
+
         paths.push(
           '<path class="edge edge-spouse" d="' +
-          createPartnerConnectionPath(a, b) +
+          geometry.d +
           '"/>'
         );
 
@@ -3578,13 +4728,107 @@ function paintRelationshipLayer({
 
         if (!info) return;
 
-        const join =
-          pairJoinPoint(a, b);
+        labels.push(
+          makeLabelSVG(
+            geometry.labelX,
+            geometry.labelY,
+            info.icon,
+            info.text,
+            key
+          )
+        );
+      });
+  });
+
+  const drawnDeceased =
+    new Set();
+
+  const deceasedSetting = {
+    ...relationshipLineSetting(
+      'exspouse'
+    ),
+    routing:'auto'
+  };
+
+  visibleIds.forEach(id => {
+    const sim = byId.get(id);
+    if (!sim) return;
+
+    (sim.gameData?.deceasedSpouseIds || [])
+      .forEach(spouseId => {
+        if (
+          !visibleIds.has(
+            spouseId
+          )
+        ) {
+          return;
+        }
+
+        const pairK =
+          pairKey(id, spouseId);
+
+        if (
+          drawnDeceased.has(
+            pairK
+          )
+        ) {
+          return;
+        }
+
+        drawnDeceased.add(
+          pairK
+        );
+
+        const a =
+          pos.get(id);
+
+        const b =
+          pos.get(spouseId);
+
+        if (!a || !b) return;
+
+        const geometry =
+          relationshipPairRenderGeometry(
+            a,
+            b,
+            deceasedSetting,
+            {
+              fromId:id,
+              toId:spouseId,
+              pos,
+              byId
+            }
+          );
+
+        paths.push(
+          '<path class="edge edge-exspouse" d="' +
+          geometry.d +
+          '"/>'
+        );
+
+        if (
+          !showRelLabels ||
+          relationshipPerspectiveSimId
+        ) {
+          return;
+        }
+
+        const key =
+          'deceased-spouse:' +
+          pairK;
+
+        const info =
+          getRelInfoByKey(
+            key,
+            'deceased-spouse'
+          );
+
+        if (!info) return;
 
         labels.push(
           makeLabelSVG(
-            join.x,
-            join.y,
+            geometry.labelX,
+            geometry.labelY,
             info.icon,
             info.text,
             key
@@ -3634,7 +4878,13 @@ function paintRelationshipLayer({
           relationshipPairRenderGeometry(
             a,
             b,
-            exSetting
+            exSetting,
+            {
+              fromId:id,
+              toId:spouseId,
+              pos,
+              byId
+            }
           );
 
         paths.push(
@@ -3700,7 +4950,13 @@ function paintRelationshipLayer({
         relationshipOtherRenderGeometry(
           a,
           b,
-          setting
+          setting,
+          {
+            fromId:link.from,
+            toId:link.to,
+            pos,
+            byId
+          }
         );
 
       paths.push(
