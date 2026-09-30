@@ -6585,6 +6585,12 @@ function syncOtherRelationshipLineControls() {
     if (styleEl) {
       styleEl.value =
         setting.style;
+
+      window
+        .L1nGGenealogyUIController
+        ?.refreshControl?.(
+          styleEl
+        );
     }
 
     if (widthEl) {
@@ -6715,6 +6721,12 @@ function syncRelationshipLineControls() {
     if (styleEl) {
       styleEl.value =
         setting.style;
+
+      window
+        .L1nGGenealogyUIController
+        ?.refreshControl?.(
+          styleEl
+        );
     }
 
     if (widthEl) {
@@ -6772,10 +6784,6 @@ function syncRelationshipLineControls() {
   });
 
   syncOtherRelationshipLineControls();
-
-  window
-    .L1nGGenealogyUIController
-    ?.refreshAllControls?.();
 }
 
 let relationshipCurvePreviewHideTimer =
@@ -7374,10 +7382,18 @@ function openAppearancePanel() {
   paintThemeChoices();
   paintCanvasBackgroundPreview();
   renderOtherRelationshipLineControls();
-  syncRelationshipLineControls();
-  genealogyUI.refreshAllControls();
 
   appearanceDialog.classList.add('show');
+
+  genealogyUI.mountFormControls(
+    appearanceDialog
+  );
+
+  genealogyUI.refreshControl(
+    $('appearanceBackgroundFit')
+  );
+
+  syncRelationshipLineControls();
 }
 
 function closeAppearancePanel() {

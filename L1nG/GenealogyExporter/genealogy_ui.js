@@ -982,6 +982,14 @@
       controllerById.get(String(sourceId || ''))?.refresh();
     }
 
+    function refreshControl(source) {
+      if (!source) return;
+
+      controllerBySource
+        .get(source)
+        ?.refresh();
+    }
+
     function refreshAllControls() {
       pruneDisconnectedControllers();
 
@@ -1101,6 +1109,7 @@
       mountSingleSelects,
       mountSuggestionInputs,
       refreshSelect,
+      refreshControl,
       refreshAllControls,
       readPendingValue,
       observeFormControls,
