@@ -1229,7 +1229,11 @@
     ) {
       const cacheKey =
         sim?.id != null
-          ? String(sim.id)
+          ? (
+              String(viewMode) +
+              '\u0001' +
+              String(sim.id)
+            )
           : null;
 
       if (

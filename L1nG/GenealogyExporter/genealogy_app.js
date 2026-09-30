@@ -5593,6 +5593,290 @@ $('applyCustomBtn').onclick = () => {
   );
 };
 
+// ========【自由排列跨模式映射】 設定 - 檢視 / 編輯共用同一份視覺構圖 ========
+function medianNumber(values) {
+  const list =
+    (values || [])
+      .map(Number)
+      .filter(Number.isFinite)
+      .sort((a, b) => a - b);
+
+  if (!list.length) {
+    return 1;
+  }
+
+  const middle =
+    Math.floor(
+      list.length / 2
+    );
+
+  return list.length % 2
+    ? list[middle]
+    : (
+        list[middle - 1] +
+        list[middle]
+      ) / 2;
+}
+
+function captureFreeLayoutModeSnapshot(
+  fam,
+  mode
+) {
+  if (
+    !fam ||
+    !fam.freeLayout?.[mode] ||
+    !getSceneLayout()?.pos
+  ) {
+    return null;
+  }
+
+  const entries = [];
+
+  getSceneLayout()
+    .visibleIds
+    .forEach(id => {
+      const position =
+        getSceneLayout().pos.get(id);
+
+      if (!position) {
+        return;
+      }
+
+      const dimensions =
+        genealogyScene
+          .measurePersonCardById(
+            id
+          );
+
+      if (
+        !dimensions ||
+        !Number.isFinite(
+          dimensions.W
+        ) ||
+        !Number.isFinite(
+          dimensions.H
+        )
+      ) {
+        return;
+      }
+
+      entries.push({
+        id:String(id),
+        x:Number(position.x) || 0,
+        y:Number(position.y) || 0,
+        width:dimensions.W,
+        height:dimensions.H,
+        centerX:
+          (Number(position.x) || 0) +
+          dimensions.W / 2,
+        centerY:
+          (Number(position.y) || 0) +
+          dimensions.H / 2
+      });
+    });
+
+  if (!entries.length) {
+    return null;
+  }
+
+  const minX =
+    Math.min(
+      ...entries.map(entry =>
+        entry.x
+      )
+    );
+
+  const minY =
+    Math.min(
+      ...entries.map(entry =>
+        entry.y
+      )
+    );
+
+  const maxX =
+    Math.max(
+      ...entries.map(entry =>
+        entry.x +
+        entry.width
+      )
+    );
+
+  const maxY =
+    Math.max(
+      ...entries.map(entry =>
+        entry.y +
+        entry.height
+      )
+    );
+
+  return {
+    sourceMode:mode,
+    entries,
+    minX,
+    minY,
+    centerX:
+      (minX + maxX) / 2,
+    centerY:
+      (minY + maxY) / 2
+  };
+}
+
+function mapFreeLayoutSnapshotToMode(
+  fam,
+  targetMode,
+  snapshot
+) {
+  if (
+    !fam ||
+    !snapshot?.entries?.length
+  ) {
+    return null;
+  }
+
+  const mappedEntries =
+    snapshot.entries
+      .map(entry => {
+        const dimensions =
+          genealogyScene
+            .measurePersonCardById(
+              entry.id
+            );
+
+        if (
+          !dimensions ||
+          !Number.isFinite(
+            dimensions.W
+          ) ||
+          !Number.isFinite(
+            dimensions.H
+          )
+        ) {
+          return null;
+        }
+
+        return {
+          ...entry,
+          targetWidth:
+            dimensions.W,
+          targetHeight:
+            dimensions.H
+        };
+      })
+      .filter(Boolean);
+
+  if (!mappedEntries.length) {
+    return null;
+  }
+
+  // 檢視卡是直向、編輯卡是橫向；
+  // 用兩種卡片尺寸的中位比例縮放人物中心間距，
+  // 不直接複製 top / left，避免模式切換後整張圖擠在一起。
+  const scaleX =
+    medianNumber(
+      mappedEntries.map(entry =>
+        entry.targetWidth /
+        Math.max(
+          1,
+          entry.width
+        )
+      )
+    );
+
+  const scaleY =
+    medianNumber(
+      mappedEntries.map(entry =>
+        entry.targetHeight /
+        Math.max(
+          1,
+          entry.height
+        )
+      )
+    );
+
+  const next = {};
+
+  const provisional =
+    mappedEntries.map(entry => {
+      const centerX =
+        snapshot.centerX +
+        (
+          entry.centerX -
+          snapshot.centerX
+        ) *
+        scaleX;
+
+      const centerY =
+        snapshot.centerY +
+        (
+          entry.centerY -
+          snapshot.centerY
+        ) *
+        scaleY;
+
+      return {
+        id:entry.id,
+        x:
+          centerX -
+          entry.targetWidth / 2,
+        y:
+          centerY -
+          entry.targetHeight / 2,
+        width:
+          entry.targetWidth,
+        height:
+          entry.targetHeight
+      };
+    });
+
+  const nextMinX =
+    Math.min(
+      ...provisional.map(entry =>
+        entry.x
+      )
+    );
+
+  const nextMinY =
+    Math.min(
+      ...provisional.map(entry =>
+        entry.y
+      )
+    );
+
+  const translateX =
+    snapshot.minX -
+    nextMinX;
+
+  const translateY =
+    snapshot.minY -
+    nextMinY;
+
+  provisional.forEach(entry => {
+    next[entry.id] = {
+      x:
+        entry.x +
+        translateX,
+      y:
+        entry.y +
+        translateY
+    };
+  });
+
+  // 保留目前 selector 範圍以外、但玩家先前在目標模式排過的位置。
+  const merged =
+    cloneManualPositionMap(
+      fam.manualPositions?.[
+        targetMode
+      ]
+    );
+
+  Object.assign(
+    merged,
+    next
+  );
+
+  return merged;
+}
+
 function applyViewMode(mode) {
   if (!VALID_MODES.includes(mode)) mode = 'edit';
   viewMode = mode;
@@ -5608,12 +5892,84 @@ function applyViewMode(mode) {
   try { localStorage.setItem(MODE_KEY, mode); } catch(e){}
 }
 function toggleViewMode() {
+  const fam =
+    currentFamily();
+
+  ensureFamilyLayoutShape(
+    fam
+  );
+
+  const sourceMode =
+    viewMode;
+
+  const targetMode =
+    sourceMode === 'view'
+      ? 'edit'
+      : 'view';
+
+  const sourceWasFree =
+    !!fam.freeLayout[
+      sourceMode
+    ];
+
+  const transferSnapshot =
+    sourceWasFree
+      ? captureFreeLayoutModeSnapshot(
+          fam,
+          sourceMode
+        )
+      : null;
+
   dragHistory.clear();
   clearNodeSelection();
   arrangeTool = 'pan';
-  applyViewMode(viewMode === 'view' ? 'edit' : 'view');
+
+  applyViewMode(
+    targetMode
+  );
+
+  let mutation = null;
+
+  if (
+    sourceWasFree &&
+    transferSnapshot
+  ) {
+    const mappedPositions =
+      mapFreeLayoutSnapshotToMode(
+        fam,
+        targetMode,
+        transferSnapshot
+      );
+
+    if (mappedPositions) {
+      mutation =
+        genealogyStore
+          .setFamilyLayoutState(
+            fam.id,
+            targetMode,
+            {
+              freeLayout:true,
+              manualPositions:
+                mappedPositions
+            }
+          );
+    }
+  }
+
+  if (mutation) {
+    applyGenealogyMutation(
+      mutation,
+      {
+        render:false
+      }
+    );
+  }
+
   render();
-  requestAnimationFrame(() => genealogyViewport.fit());
+
+  requestAnimationFrame(() =>
+    genealogyViewport.fit()
+  );
 }
 modeToggle.onclick = toggleViewMode;
 
@@ -11163,20 +11519,6 @@ nodes.addEventListener('pointerdown', e => {
       }
 
       if (!moved) return;
-
-      if (!dragInitialized) {
-        dragMutation =
-          genealogyStore.mergeResults(
-            dragMutation,
-            seedVisibleScenePositionsForFreeLayout(
-              fam,
-              viewMode
-            )
-          );
-
-        dragInitialized = true;
-        updateLayoutToggle();
-      }
 
       const worldDelta =
         genealogyViewport
