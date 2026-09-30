@@ -29,6 +29,16 @@
   }
 
   function syncOuterAttributes(current, next) {
+    const transientClasses = [
+      'person-card-selected',
+      'dragging',
+      'focus-pulse'
+    ].filter(className =>
+      current.classList?.contains(
+        className
+      )
+    );
+
     [...current.attributes].forEach(attribute => {
       if (!next.hasAttribute(attribute.name)) {
         current.removeAttribute(attribute.name);
@@ -39,6 +49,12 @@
       current.setAttribute(
         attribute.name,
         attribute.value
+      );
+    });
+
+    transientClasses.forEach(className => {
+      current.classList.add(
+        className
       );
     });
   }
