@@ -818,30 +818,21 @@ let _dimsCache = { mode: null, dims: null };
 let _gapsCache = { mode: null, gaps: null };
 
 function getCardViewSettings() {
-  const target = (typeof currentGenealogyData() !== 'undefined' && currentGenealogyData()) ? currentGenealogyData() : null;
-  if (!target) return { ...DEFAULT_CARD_VIEW_SETTINGS };
-  if (!target.meta || typeof target.meta !== 'object') target.meta = {};
-  if (!target.meta.cardView || typeof target.meta.cardView !== 'object') target.meta.cardView = {};
-  const current = target.meta.cardView;
-  current.avatar = true;
-  CARD_SETTING_FIELD_KEYS.forEach(key => {
-    if (typeof current[key] !== 'boolean') current[key] = DEFAULT_CARD_VIEW_SETTINGS[key];
-  });
-  if (!['minimal','translucent','full'].includes(current.appearance)) current.appearance = DEFAULT_CARD_VIEW_SETTINGS.appearance;
-  return current;
+  return (
+    genealogyStore?.getCardSettings?.(
+      'view'
+    ) ||
+    { ...DEFAULT_CARD_VIEW_SETTINGS }
+  );
 }
 
 function getCardEditSettings() {
-  const target = (typeof currentGenealogyData() !== 'undefined' && currentGenealogyData()) ? currentGenealogyData() : null;
-  if (!target) return { ...DEFAULT_CARD_EDIT_SETTINGS };
-  if (!target.meta || typeof target.meta !== 'object') target.meta = {};
-  if (!target.meta.cardEdit || typeof target.meta.cardEdit !== 'object') target.meta.cardEdit = {};
-  const current = target.meta.cardEdit;
-  current.avatar = true;
-  CARD_SETTING_FIELD_KEYS.forEach(key => {
-    if (typeof current[key] !== 'boolean') current[key] = DEFAULT_CARD_EDIT_SETTINGS[key];
-  });
-  return current;
+  return (
+    genealogyStore?.getCardSettings?.(
+      'edit'
+    ) ||
+    { ...DEFAULT_CARD_EDIT_SETTINGS }
+  );
 }
 
 function cardViewAppearanceClass() {
@@ -7099,7 +7090,11 @@ genealogyStore =
     siblingRelationType:SIBLING_RELATION_TYPE,
     siblingRelationLabel:SIBLING_RELATION_LABEL,
     normalizeRelationshipType:normalizeRelationshipTypeText,
-    isBuiltInRelationshipType:isBuiltInSocialRelationshipType
+    isBuiltInRelationshipType:isBuiltInSocialRelationshipType,
+    cardSettingFieldKeys:CARD_SETTING_FIELD_KEYS,
+    defaultCardViewSettings:DEFAULT_CARD_VIEW_SETTINGS,
+    defaultCardEditSettings:DEFAULT_CARD_EDIT_SETTINGS,
+    cardViewAppearances:['minimal','translucent','full']
   }) ||
   null;
 
@@ -9995,20 +9990,62 @@ personCardMenu?.addEventListener('click', e => {
 });
 personCardMenu?.addEventListener('change', e => {
   const field = e.target?.dataset?.cardField;
-  if (field && CARD_SETTING_FIELD_KEYS.includes(field)) {
-    const settings = personCardMenu.dataset.cardMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
-    settings[field] = !!e.target.checked;
-    save(); render();
-    positionPersonCardMenu(parseFloat(personCardMenu.style.left) || 0, parseFloat(personCardMenu.style.top) || 0);
+
+  if (
+    field &&
+    CARD_SETTING_FIELD_KEYS.includes(field)
+  ) {
+    const mode =
+      personCardMenu.dataset.cardMode === 'edit'
+        ? 'edit'
+        : 'view';
+
+    const mutation =
+      genealogyStore.setCardField(
+        mode,
+        field,
+        !!e.target.checked
+      );
+
+    applyGenealogyMutation(
+      mutation,
+      { refreshFamily:false }
+    );
+
+    positionPersonCardMenu(
+      parseFloat(
+        personCardMenu.style.left
+      ) || 0,
+      parseFloat(
+        personCardMenu.style.top
+      ) || 0
+    );
+
     return;
   }
-  if (e.target?.name === 'nodeCardAppearance') {
-    const value = e.target.value;
-    if (['minimal','translucent','full'].includes(value)) {
-      getCardViewSettings().appearance = value;
-      save(); render();
-      positionPersonCardMenu(parseFloat(personCardMenu.style.left) || 0, parseFloat(personCardMenu.style.top) || 0);
-    }
+
+  if (
+    e.target?.name ===
+    'nodeCardAppearance'
+  ) {
+    const mutation =
+      genealogyStore.setCardAppearance(
+        e.target.value
+      );
+
+    applyGenealogyMutation(
+      mutation,
+      { refreshFamily:false }
+    );
+
+    positionPersonCardMenu(
+      parseFloat(
+        personCardMenu.style.left
+      ) || 0,
+      parseFloat(
+        personCardMenu.style.top
+      ) || 0
+    );
   }
 });
 

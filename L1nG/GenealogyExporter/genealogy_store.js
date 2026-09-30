@@ -123,9 +123,96 @@
     siblingRelationType = 'sibling',
     siblingRelationLabel = '兄弟姊妹',
     normalizeRelationshipType = value => String(value || '').trim(),
-    isBuiltInRelationshipType = () => false
+    isBuiltInRelationshipType = () => false,
+    cardSettingFieldKeys = [],
+    defaultCardViewSettings = {},
+    defaultCardEditSettings = {},
+    cardViewAppearances = ['minimal','translucent','full']
   } = {}) {
     let activeData = null;
+
+    const cardSettingFields = new Set(
+      (cardSettingFieldKeys || [])
+        .map(String)
+        .filter(Boolean)
+    );
+
+    const cardAppearanceValues = new Set(
+      (cardViewAppearances || [])
+        .map(String)
+        .filter(Boolean)
+    );
+
+    function normalizeCardSettings(mode, current) {
+      const normalizedMode =
+        mode === 'edit'
+          ? 'edit'
+          : 'view';
+
+      const defaults =
+        normalizedMode === 'edit'
+          ? defaultCardEditSettings
+          : defaultCardViewSettings;
+
+      const settings =
+        current &&
+        typeof current === 'object' &&
+        !Array.isArray(current)
+          ? current
+          : {};
+
+      settings.avatar = true;
+
+      cardSettingFields.forEach(field => {
+        if (typeof settings[field] !== 'boolean') {
+          settings[field] = !!defaults[field];
+        }
+      });
+
+      if (normalizedMode === 'view') {
+        const fallbackAppearance =
+          cardAppearanceValues.has(
+            String(defaults.appearance || '')
+          )
+            ? String(defaults.appearance)
+            : 'minimal';
+
+        if (
+          !cardAppearanceValues.has(
+            String(settings.appearance || '')
+          )
+        ) {
+          settings.appearance =
+            fallbackAppearance;
+        }
+      }
+
+      return settings;
+    }
+
+    function ensureCardSettings(current) {
+      if (
+        !current.meta ||
+        typeof current.meta !== 'object' ||
+        Array.isArray(current.meta)
+      ) {
+        current.meta = {};
+      }
+
+      current.meta.cardView =
+        normalizeCardSettings(
+          'view',
+          current.meta.cardView
+        );
+
+      current.meta.cardEdit =
+        normalizeCardSettings(
+          'edit',
+          current.meta.cardEdit
+        );
+
+      return current.meta;
+    }
 
     function normalizeDatabaseShape(current) {
       if (!current || typeof current !== 'object' || Array.isArray(current)) {
@@ -148,6 +235,7 @@
       current.relationshipTypeLibrary = Array.isArray(current.relationshipTypeLibrary)
         ? current.relationshipTypeLibrary
         : [];
+      ensureCardSettings(current);
       return current;
     }
 
@@ -189,6 +277,97 @@
       if (String(db.currentFamilyId || '') === key) return false;
       db.currentFamilyId = key;
       return true;
+    }
+
+    function getCardSettings(mode) {
+      const db = data();
+      const normalizedMode =
+        mode === 'edit'
+          ? 'edit'
+          : 'view';
+
+      ensureCardSettings(db);
+
+      const settings =
+        normalizedMode === 'edit'
+          ? db.meta.cardEdit
+          : db.meta.cardView;
+
+      return Object.freeze({
+        ...settings
+      });
+    }
+
+    function setCardField(
+      mode,
+      field,
+      enabled
+    ) {
+      const db = data();
+      const result = rawResult();
+      const normalizedMode =
+        mode === 'edit'
+          ? 'edit'
+          : 'view';
+      const key = String(field || '');
+
+      if (!cardSettingFields.has(key)) {
+        return finalized(result);
+      }
+
+      ensureCardSettings(db);
+
+      const settings =
+        normalizedMode === 'edit'
+          ? db.meta.cardEdit
+          : db.meta.cardView;
+      const next = !!enabled;
+
+      if (settings[key] === next) {
+        return finalized(result);
+      }
+
+      settings[key] = next;
+
+      mark(result, {
+        dataChanged:true,
+        layoutChanged:true,
+        nodesChanged:true,
+        edgesChanged:true,
+        saveDirty:true
+      });
+
+      return finalized(result);
+    }
+
+    function setCardAppearance(appearance) {
+      const db = data();
+      const result = rawResult();
+      const next =
+        String(appearance || '');
+
+      if (!cardAppearanceValues.has(next)) {
+        return finalized(result);
+      }
+
+      ensureCardSettings(db);
+
+      if (
+        db.meta.cardView.appearance === next
+      ) {
+        return finalized(result);
+      }
+
+      db.meta.cardView.appearance =
+        next;
+
+      mark(result, {
+        dataChanged:true,
+        nodesChanged:true,
+        saveDirty:true
+      });
+
+      return finalized(result);
     }
 
     function ensureAdoptionMetadata(sim) {
@@ -1365,6 +1544,9 @@
       getFamily:familyById,
       getCurrentFamily,
       setCurrentFamilyId,
+      getCardSettings,
+      setCardField,
+      setCardAppearance,
       mergeResults,
       createSim,
       updateSim,
