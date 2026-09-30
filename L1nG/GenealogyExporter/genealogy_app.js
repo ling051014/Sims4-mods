@@ -4791,34 +4791,227 @@ sidebarBackdrop.onclick = closeSidebar;
 $('familyPanelCollapseBtn')?.addEventListener('click', () => setFamilyPanelCollapsed(true));
 
 // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
-function closeAppMenus(except = null) {
-  document.querySelectorAll('.ui-menu.open').forEach(menu => {
-    if (menu === except) return;
-    menu.classList.remove('open');
-    menu.querySelector('.ui-menu-trigger')?.setAttribute('aria-expanded','false');
-  });
+function restoreAppMenuPortal(menu) {
+  const popover =
+    menu?._bodyPortalPopover;
+
+  if (!popover) return;
+
+  popover.classList.remove(
+    'ui-menu-body-portal'
+  );
+
+  popover.style.removeProperty('top');
+  popover.style.removeProperty('left');
+  popover.style.removeProperty('right');
+  popover.style.removeProperty('bottom');
+
+  menu.appendChild(popover);
+  menu._bodyPortalPopover = null;
 }
-let _appMenuGlobalBound = false;
-function setupAppMenus() {
-  document.querySelectorAll('.ui-menu').forEach(menu => {
-    const trigger = menu.querySelector(':scope > .ui-menu-trigger');
-    if (!trigger || trigger.dataset.menuBound === '1') return;
-    trigger.dataset.menuBound = '1';
-    trigger.addEventListener('click', e => {
-      e.preventDefault(); e.stopPropagation();
-      const willOpen = !menu.classList.contains('open');
-      closeAppMenus(menu);
-      menu.classList.toggle('open', willOpen);
-      trigger.setAttribute('aria-expanded', willOpen ? 'true':'false');
+
+function positionAppMenuPortal(
+  menu,
+  trigger,
+  popover
+) {
+  const margin = 8;
+  const gap = 4;
+  const triggerRect =
+    trigger.getBoundingClientRect();
+
+  document.body.appendChild(popover);
+
+  popover.classList.add(
+    'ui-menu-body-portal'
+  );
+
+  const popoverRect =
+    popover.getBoundingClientRect();
+
+  const left =
+    Math.max(
+      margin,
+      Math.min(
+        triggerRect.right -
+          popoverRect.width,
+        window.innerWidth -
+          popoverRect.width -
+          margin
+      )
+    );
+
+  const belowTop =
+    triggerRect.bottom + gap;
+
+  const aboveTop =
+    triggerRect.top -
+    popoverRect.height -
+    gap;
+
+  const top =
+    belowTop +
+      popoverRect.height <=
+        window.innerHeight -
+          margin
+      ? belowTop
+      : Math.max(
+          margin,
+          aboveTop
+        );
+
+  popover.style.left =
+    Math.round(left) + 'px';
+
+  popover.style.top =
+    Math.round(top) + 'px';
+
+  popover.style.right = 'auto';
+  popover.style.bottom = 'auto';
+
+  menu._bodyPortalPopover =
+    popover;
+}
+
+function closeAppMenu(menu) {
+  if (!menu) return;
+
+  menu.classList.remove('open');
+
+  menu
+    .querySelector(
+      ':scope > .ui-menu-trigger'
+    )
+    ?.setAttribute(
+      'aria-expanded',
+      'false'
+    );
+
+  restoreAppMenuPortal(menu);
+}
+
+function closeAppMenus(except = null) {
+  document
+    .querySelectorAll(
+      '.ui-menu.open'
+    )
+    .forEach(menu => {
+      if (menu === except) return;
+      closeAppMenu(menu);
     });
-    menu.querySelectorAll('.ui-menu-item').forEach(item => item.addEventListener('click', () => {
-      setTimeout(() => closeAppMenus(), 0);
-    }));
-  });
+}
+
+let _appMenuGlobalBound = false;
+
+function setupAppMenus() {
+  document
+    .querySelectorAll('.ui-menu')
+    .forEach(menu => {
+      const trigger =
+        menu.querySelector(
+          ':scope > .ui-menu-trigger'
+        );
+
+      if (
+        !trigger ||
+        trigger.dataset.menuBound === '1'
+      ) {
+        return;
+      }
+
+      trigger.dataset.menuBound = '1';
+
+      trigger.addEventListener(
+        'click',
+        e => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const willOpen =
+            !menu.classList.contains(
+              'open'
+            );
+
+          closeAppMenus(menu);
+
+          if (!willOpen) {
+            closeAppMenu(menu);
+            return;
+          }
+
+          menu.classList.add('open');
+
+          trigger.setAttribute(
+            'aria-expanded',
+            'true'
+          );
+
+          if (
+            menu.dataset.menuPortal ===
+            'body'
+          ) {
+            const popover =
+              menu.querySelector(
+                ':scope > .ui-menu-popover'
+              );
+
+            if (popover) {
+              positionAppMenuPortal(
+                menu,
+                trigger,
+                popover
+              );
+            }
+          }
+        }
+      );
+
+      menu
+        .querySelectorAll(
+          '.ui-menu-item'
+        )
+        .forEach(item =>
+          item.addEventListener(
+            'click',
+            () => {
+              setTimeout(
+                () => closeAppMenus(),
+                0
+              );
+            }
+          )
+        );
+    });
+
   if (!_appMenuGlobalBound) {
     _appMenuGlobalBound = true;
-    document.addEventListener('click', e => { if (!e.target.closest?.('.ui-menu')) closeAppMenus(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAppMenus(); });
+
+    document.addEventListener(
+      'click',
+      e => {
+        if (
+          !e.target.closest?.(
+            '.ui-menu, .ui-menu-body-portal'
+          )
+        ) {
+          closeAppMenus();
+        }
+      }
+    );
+
+    document.addEventListener(
+      'keydown',
+      e => {
+        if (e.key === 'Escape') {
+          closeAppMenus();
+        }
+      }
+    );
+
+    window.addEventListener(
+      'resize',
+      () => closeAppMenus()
+    );
   }
 }
 
@@ -10773,10 +10966,14 @@ nodes.addEventListener('pointerdown', e => {
     let previewPositions = null;
 
     const dragPerformanceSession =
-      createGroupDragPerformanceSession(
-        dragIds,
-        startPositions
-      );
+      dragIds.length === 1
+        ? createSingleDragPerformanceSession(
+            id
+          )
+        : createGroupDragPerformanceSession(
+            dragIds,
+            startPositions
+          );
 
     const applyMove = ev => {
       if (fam.locked || !primaryStart) return;
@@ -13580,6 +13777,8 @@ function personLibraryCompactMeta(sim) {
 }
 
 function renderPersonLibrary() {
+  closeAppMenus();
+
   const fam = currentFamily();
   const q = personLibrarySearch.value.trim().toLowerCase();
   const all = Object.values(currentGenealogyData().sims);
@@ -13605,6 +13804,21 @@ function renderPersonLibrary() {
   personLibraryController.syncBatchToolbar();
 
   const list = $('personLibraryList');
+
+  if (
+    list &&
+    list.dataset.menuScrollBound !==
+      '1'
+  ) {
+    list.dataset.menuScrollBound = '1';
+
+    list.addEventListener(
+      'scroll',
+      () => closeAppMenus(),
+      { passive:true }
+    );
+  }
+
   if (!filtered.length) {
     list.innerHTML = all.length
       ? '<div class="person-library-empty">沒有符合的人物</div>'
@@ -13662,7 +13876,7 @@ function renderPersonLibrary() {
           '<div class="person-library-detailed-meta">' + detailHtml + photoHtml + '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="ui-menu person-library-item-menu">' +
+      '<div class="ui-menu person-library-item-menu" data-menu-portal="body">' +
         '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') +
         '</button>' +

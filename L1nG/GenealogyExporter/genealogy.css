@@ -5379,6 +5379,13 @@ body[data-theme="midnight"] .person-meta-icon.status-alive {
 .ui-menu { position:relative; display:inline-flex; }
 .ui-menu-popover { display:none; position:absolute; z-index:800; min-width:188px; padding:5px; border:1px solid var(--nav-dropdown-border); border-radius:7px; background:var(--nav-dropdown-bg); color:var(--nav-dropdown-text); box-shadow:0 10px 28px rgba(0,0,0,.12); }
 .ui-menu.open>.ui-menu-popover { display:block; }
+
+.ui-menu-popover.ui-menu-body-portal {
+    display:block;
+    position:fixed;
+    z-index:5200;
+}
+
 .topbar-more-popover { top:calc(100% + 8px); right:0; }
 .family-actions-popover,.member-add-popover,.member-manage-popover { top:calc(100% + 5px); right:0; }
 .ui-menu-item { width:100%; display:flex; align-items:center; gap:8px; min-height:34px; padding:6px 9px; border:0; border-radius:4px; background:transparent; color:inherit; font:inherit; font-size:12px; text-align:left; white-space:nowrap; cursor:pointer; text-decoration:none; }
@@ -5888,9 +5895,14 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
 }
 #selectionMarquee.show { display:block; }
 .person-card.person-card-selected {
-    outline:2px solid var(--accent);
-    outline-offset:3px;
+    border-top-color:var(--accent);
+    border-right-color:var(--accent);
+    border-bottom-color:var(--accent);
     z-index:10;
+}
+
+.person-card.card-gender-bar-hidden.person-card-selected {
+    border-left-color:var(--accent);
 }
 #genealogyCanvasViewport.selection-tool-active { cursor:crosshair; }
 #genealogyCanvasViewport.selection-tool-active .person-card { cursor:default; }
