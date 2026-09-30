@@ -6504,7 +6504,7 @@ function renderOtherRelationshipLineControls() {
       );
     }).join('');
 
-  installSharedNativeSelectChevrons(
+  genealogyUI.mountFormControls(
     list
   );
 
