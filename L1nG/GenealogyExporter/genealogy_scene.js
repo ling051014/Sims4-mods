@@ -65,6 +65,7 @@
     let relationshipEdgeRecords = new Map();
     let relationshipEdgesBySim = new Map();
     let relationshipEdgeElements = new Map();
+    let relationshipLabelElements = new Map();
     let pendingRelationshipPreviewIds = new Set();
 
     function resetNodeDimensionCache() {
@@ -83,6 +84,7 @@
       relationshipEdgeRecords.clear();
       relationshipEdgesBySim.clear();
       relationshipEdgeElements.clear();
+      relationshipLabelElements.clear();
       pendingRelationshipPreviewIds.clear();
     }
 
@@ -5031,7 +5033,15 @@ function buildParentChildConnectorGroups(byId, visibleIds) {
   return [...groups.values()];
 }
 
-function parentConnectorSource(group, pos, byId, paths) {
+function parentConnectorSource(
+  group,
+  pos,
+  byId,
+  paths,
+  {
+    collisionRouting = true
+  } = {}
+) {
   const parentPositions = group.parentIds
     .map(parentId => ({
       id:parentId,
@@ -5097,6 +5107,15 @@ function parentConnectorSource(group, pos, byId, paths) {
         first.pos,
         second.pos
       );
+
+    // 拖曳 preview 沿用 main 的穩定關係幾何：
+    // 不在每一幀因為 blocker 進出而切換 parent source。
+    if (!collisionRouting) {
+      return pairJoinPoint(
+        first.pos,
+        second.pos
+      );
+    }
 
     const blocker =
       relationshipBlockingCard(
@@ -5190,13 +5209,21 @@ function parentConnectorBranchY(source, childAnchors) {
     (nearestChildY - source.y) / 2;
 }
 
-function drawParentConnectorGroup(group, pos, byId, paths, labels) {
+function drawParentConnectorGroup(
+  group,
+  pos,
+  byId,
+  paths,
+  labels,
+  options = {}
+) {
   const source =
     parentConnectorSource(
       group,
       pos,
       byId,
-      paths
+      paths,
+      options
     );
 
   if (!source) return;
@@ -5668,6 +5695,7 @@ function paintRelationshipLayer({
             fromId:String(id),
             toId:String(spouseId),
             setting:spouseSetting,
+            labelKind:'spouse',
             edgeClass:'edge edge-spouse',
             simIds:[
               String(id),
@@ -5905,6 +5933,7 @@ function paintRelationshipLayer({
             fromId:String(id),
             toId:String(spouseId),
             setting:exSetting,
+            labelKind:'exspouse',
             edgeClass:'edge edge-exspouse',
             simIds:[
               String(id),
@@ -6108,7 +6137,226 @@ function paintRelationshipLayer({
 
     labelsSvg.innerHTML =
       labels.join('');
+
+    relationshipLabelElements =
+      new Map();
+
+    labelsSvg
+      .querySelectorAll(
+        '.edge-label[data-key]'
+      )
+      .forEach(element => {
+        relationshipLabelElements.set(
+          element.getAttribute(
+            'data-key'
+          ),
+          element
+        );
+      });
   }
+}
+
+function relationshipPairPreviewGeometry(
+  a,
+  b,
+  setting
+) {
+  // main 的拖曳感：拖動途中不做 blocker 判斷，
+  // 只有玩家明確指定曲線時才維持曲線。
+  if (
+    setting.routing === 'manual' &&
+    setting.curved
+  ) {
+    const {
+      aX,
+      aY,
+      bX,
+      bY
+    } =
+      getPairConnectionGeometry(
+        a,
+        b
+      );
+
+    return relationshipQuadraticGeometry(
+      aX,
+      aY,
+      bX,
+      bY,
+      setting.curveAmount
+    );
+  }
+
+  const {
+    aX,
+    aY,
+    bX,
+    bY
+  } =
+    getPairConnectionGeometry(
+      a,
+      b
+    );
+
+  const y =
+    Math.abs(aY - bY) < 2
+      ? (aY + bY) / 2
+      : aY;
+
+  const join = {
+    x:(aX + bX) / 2,
+    y:(aY + bY) / 2
+  };
+
+  return {
+    d:
+      'M' + aX + ' ' + y +
+      ' H' + bX,
+    labelX:join.x,
+    labelY:join.y
+  };
+}
+
+function relationshipOtherPreviewGeometry(
+  a,
+  b,
+  setting
+) {
+  const fromAnchor =
+    avatarBoundaryAnchor(a, b);
+
+  const toAnchor =
+    avatarBoundaryAnchor(b, a);
+
+  const x1 =
+    fromAnchor.x;
+
+  const y1 =
+    fromAnchor.y;
+
+  const x2 =
+    toAnchor.x;
+
+  const y2 =
+    toAnchor.y;
+
+  if (
+    setting.routing === 'manual' &&
+    setting.curved
+  ) {
+    return relationshipQuadraticGeometry(
+      x1,
+      y1,
+      x2,
+      y2,
+      setting.curveAmount
+    );
+  }
+
+  return {
+    d:
+      'M' + x1 + ' ' + y1 +
+      ' L' + x2 + ' ' + y2,
+    labelX:(x1 + x2) / 2,
+    labelY:(y1 + y2) / 2
+  };
+}
+
+function replaceRelationshipPreviewLabelMarkup(
+  markup
+) {
+  if (!markup) return;
+
+  const scratch =
+    document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg'
+    );
+
+  scratch.innerHTML =
+    markup;
+
+  const next =
+    scratch.firstElementChild;
+
+  if (!next) return;
+
+  const key =
+    next.getAttribute(
+      'data-key'
+    );
+
+  if (!key) return;
+
+  const current =
+    relationshipLabelElements.get(
+      key
+    );
+
+  if (current) {
+    current.replaceWith(next);
+  } else {
+    labelsSvg.appendChild(next);
+  }
+
+  relationshipLabelElements.set(
+    key,
+    next
+  );
+}
+
+function updateRelationshipPreviewLabel(
+  record,
+  x,
+  y
+) {
+  if (
+    !showRelLabels ||
+    relationshipPerspectiveSimId ||
+    !record
+  ) {
+    return;
+  }
+
+  let info = null;
+
+  if (record.kind === 'pair') {
+    info =
+      getRelInfoByKey(
+        record.key,
+        record.labelKind
+      );
+  } else if (
+    record.kind === 'other'
+  ) {
+    const type =
+      relationshipOtherType(
+        record.link
+      );
+
+    info =
+      getRelInfoByKey(
+        record.key,
+        isSiblingLink(record.link)
+          ? 'sibling'
+          : 'social',
+        isSiblingLink(record.link)
+          ? null
+          : type
+      );
+  }
+
+  if (!info) return;
+
+  replaceRelationshipPreviewLabelMarkup(
+    makeLabelSVG(
+      x,
+      y,
+      info.icon,
+      info.text,
+      record.key
+    )
+  );
 }
 
 function paintRelationshipPreview(
@@ -6118,6 +6366,12 @@ function paintRelationshipPreview(
     !layoutCache ||
     !relationshipEdgeRecords.size
   ) {
+    return false;
+  }
+
+  // 親屬視角標籤不是 edge-local，而是整體由 root 推導；
+  // 這個特殊模式沿用 authoritative full redraw。
+  if (relationshipPerspectiveSimId) {
     return false;
   }
 
@@ -6143,8 +6397,7 @@ function paintRelationshipPreview(
 
   const {
     pos,
-    byId,
-    geometry
+    byId
   } = layoutCache;
 
   affectedKeys.forEach(key => {
@@ -6167,17 +6420,25 @@ function paintRelationshipPreview(
       'parent'
     ) {
       const groupPaths = [];
+      const groupLabels = [];
 
       drawParentConnectorGroup(
         record.group,
         pos,
         byId,
         groupPaths,
-        []
+        groupLabels,
+        {
+          collisionRouting:false
+        }
       );
 
       element.innerHTML =
         groupPaths.join('');
+
+      groupLabels.forEach(
+        replaceRelationshipPreviewLabelMarkup
+      );
 
       return;
     }
@@ -6214,22 +6475,21 @@ function paintRelationshipPreview(
       'pair'
     ) {
       const result =
-        relationshipPairRenderGeometry(
+        relationshipPairPreviewGeometry(
           a,
           b,
-          record.setting,
-          {
-            fromId,
-            toId,
-            pos,
-            byId,
-            geometry
-          }
+          record.setting
         );
 
       path.setAttribute(
         'd',
         result.d
+      );
+
+      updateRelationshipPreviewLabel(
+        record,
+        result.labelX,
+        result.labelY
       );
 
       return;
@@ -6240,22 +6500,21 @@ function paintRelationshipPreview(
       'other'
     ) {
       const result =
-        relationshipOtherRenderGeometry(
+        relationshipOtherPreviewGeometry(
           a,
           b,
-          record.setting,
-          {
-            fromId,
-            toId,
-            pos,
-            byId,
-            geometry
-          }
+          record.setting
         );
 
       path.setAttribute(
         'd',
         result.d
+      );
+
+      updateRelationshipPreviewLabel(
+        record,
+        result.labelX,
+        result.labelY
       );
     }
   });
