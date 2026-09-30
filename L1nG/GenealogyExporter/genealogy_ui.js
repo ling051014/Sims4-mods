@@ -29,11 +29,72 @@
 
     function registerController(controller, source) {
       controllers.add(controller);
+
       if (source) {
-        controllerBySource.set(source, controller);
-        if (source.id) controllerById.set(source.id, controller);
+        controllerBySource.set(
+          source,
+          controller
+        );
+
+        if (source.id) {
+          controllerById.set(
+            source.id,
+            controller
+          );
+        }
       }
+
       return controller;
+    }
+
+    function unregisterController(controller) {
+      if (!controller) return;
+
+      try {
+        controller.close?.();
+      } catch (_) {}
+
+      controller.popup?.remove?.();
+      controllers.delete(controller);
+
+      const source =
+        controller.source;
+
+      if (source) {
+        controllerBySource.delete(
+          source
+        );
+
+        if (
+          source.id &&
+          controllerById.get(
+            source.id
+          ) === controller
+        ) {
+          controllerById.delete(
+            source.id
+          );
+        }
+      }
+
+      clearActive(controller);
+    }
+
+    function pruneDisconnectedControllers() {
+      [...controllers]
+        .forEach(controller => {
+          const source =
+            controller.source;
+
+          if (
+            source &&
+            !source.isConnected
+          ) {
+            unregisterController(
+              controller
+            );
+          }
+        });
     }
 
     function clearActive(controller) {
@@ -444,6 +505,7 @@
         position,
         pendingValue:() => normalizeCreatableValue(search.value),
         commit,
+        popup:dropdown,
         containsTarget:target => wrap.contains(target) || dropdown.contains(target)
       };
 
@@ -690,6 +752,7 @@
         open,
         close,
         position,
+        popup:menu,
         containsTarget:target => host.contains(target) || menu.contains(target)
       };
 
@@ -875,6 +938,7 @@
         open,
         close,
         position,
+        popup:menu,
         containsTarget:target => host.contains(target) || menu.contains(target)
       };
 
@@ -919,7 +983,12 @@
     }
 
     function refreshAllControls() {
-      controllers.forEach(controller => controller.refresh());
+      pruneDisconnectedControllers();
+
+      controllers.forEach(
+        controller =>
+          controller.refresh()
+      );
     }
 
     function readPendingValue(selectId) {
@@ -962,15 +1031,28 @@
 
       formObserver = new MutationObserver(records => {
         records.forEach(record => {
-          refreshMutationSource(record.target);
+          refreshMutationSource(
+            record.target
+          );
 
-          record.addedNodes.forEach(node => {
-            if (node instanceof global.Element) {
-              mountFormControls(node);
-              refreshMutationSource(node);
-            }
-          });
+          record.addedNodes
+            .forEach(node => {
+              if (
+                node instanceof
+                global.Element
+              ) {
+                mountFormControls(
+                  node
+                );
+
+                refreshMutationSource(
+                  node
+                );
+              }
+            });
         });
+
+        pruneDisconnectedControllers();
       });
 
       formObserver.observe(document.body, {
@@ -998,12 +1080,19 @@
 
     function dispose() {
       activeController?.close?.();
-      controllers.forEach(controller => controller.close());
+
+      [...controllers]
+        .forEach(
+          unregisterController
+        );
+
       controllers.clear();
       controllerById.clear();
+
       formObserver?.disconnect?.();
       formObserver = null;
       activeController = null;
+      activeKeyboardIndex = -1;
     }
 
     return Object.freeze({

@@ -6772,6 +6772,10 @@ function syncRelationshipLineControls() {
   });
 
   syncOtherRelationshipLineControls();
+
+  window
+    .L1nGGenealogyUIController
+    ?.refreshAllControls?.();
 }
 
 let relationshipCurvePreviewHideTimer =
