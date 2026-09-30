@@ -6,27 +6,17 @@
  */
 
 
-const NODE_DIMS = {
-  // 編輯模式保留較大的管理卡，檢視模式則維持精簡卡。
-  edit: { W: 220, H: 148 },
-  view: { W: 136, H: 118 }
-};
-const GAPS = {
-  edit: { SPOUSE: 30, SIBLING: 56, LEVEL: 118 },
-  view: { SPOUSE: 22, SIBLING: 40, LEVEL: 90 }
-};
-
 const PAD = 80;
 const STORE_KEY = 'l1ng_genealogy_v1';
-const THEME_KEY = 'sims4_genealogy_theme';
-const CUSTOM_COLORS_KEY = 'sims4_custom_colors';
-const BG_KEY = 'sims4_genealogy_bg';
+const THEME_KEY = 'l1ng_genealogy_theme_v1';
+const CUSTOM_COLORS_KEY = 'l1ng_genealogy_custom_theme_v1';
+const BG_KEY = 'l1ng_genealogy_background_v1';
 const MODE_KEY = 'sims4_genealogy_mode';
 const LABELS_KEY = 'sims4_genealogy_labels';
 const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
 const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
 const FAMILY_PANEL_COLLAPSED_KEY = 'sims4_genealogy_family_panel_collapsed';
-const ROSTER_VIEW_KEY = 'sims4_genealogy_roster_view';
+const PERSON_LIBRARY_VIEW_KEY = 'sims4_genealogy_person_library_view';
 const FAMILY_MEMBER_GENERATION_SORT_KEY = 'sims4_genealogy_family_member_generation_sort';
 const REL_LINE_STYLE_KEY = 'sims4_genealogy_relationship_line_style';
 const FAMILY_TREE_VIEW_MODE_KEY = 'sims4_genealogy_family_tree_view_mode';
@@ -101,7 +91,16 @@ const IMAGE_PROCESSING_POLICY = Object.freeze({
 });
 const SUPPORTED_IMAGE_MIME_TYPES = Object.freeze(['image/jpeg','image/png','image/webp']);
 const SUPPORTED_IMAGE_EXTENSIONS = Object.freeze(['jpg','jpeg','png','webp']);
-const DEFAULT_AVATAR_FRAME = Object.freeze({ x:0.5, y:0.5, zoom:1 });
+const personEditor = window.L1nGGenealogyPersonEditor;
+if (!personEditor) {
+  throw new Error('找不到 L1nG 人物編輯器模組。');
+}
+const DEFAULT_AVATAR_FRAME = personEditor.DEFAULT_AVATAR_FRAME;
+const simEditorState = personEditor.state.sim;
+const editingPets = personEditor.state.pets;
+const petEditorState = personEditor.state.pet;
+const editingGallery = personEditor.state.gallery;
+const lifePhotoState = personEditor.state.lifePhoto;
 
 const THEME_PRESETS = [
   { id:'ling',     name:'L1nG 晴空',     grad:'linear-gradient(120deg, #ffffff 0%, #dfeffc 100%)' },
@@ -228,22 +227,55 @@ const VALID_MODES = ['view','edit'];
 let showRelLabels = true;
 let relationshipPerspectiveSimId = null;
 let bgSettings = { image:null, opacity:0.5, fit:'cover' };
-let addMemberSelection = new Set();
-let removeMemberSelection = new Set();
-let removeMemberMode = false;
+const personLibraryState = {
+  batchMode:false,
+  selection:new Set(),
+  addSelection:new Set()
+};
+
+const familyMemberOperationState = {
+  removeMode:false,
+  selection:new Set()
+};
 let labelDrag = null;
 let viewMode = 'view';
-let infoCardId = null;
+let personProfilePersonId = null;
 let currentThemeId = 'ling';
 let customColors = { c1: '#f0c050', c2: '#a878c8' };
 
-let rosterViewMode = 'detailed';
+let personLibraryViewMode = 'detailed';
 try {
-  const savedRosterView = localStorage.getItem(ROSTER_VIEW_KEY);
-  if (savedRosterView === 'compact' || savedRosterView === 'detailed') rosterViewMode = savedRosterView;
+  const savedPersonLibraryView = localStorage.getItem(PERSON_LIBRARY_VIEW_KEY);
+  if (savedPersonLibraryView === 'compact' || savedPersonLibraryView === 'detailed') personLibraryViewMode = savedPersonLibraryView;
 } catch (_) {}
-let rosterBatchMode = false;
-const rosterSelection = new Set();
+
+
+function resetPersonLibraryOperations({
+  batch = true,
+  add = true
+} = {}) {
+  if (batch) {
+    personLibraryState.batchMode = false;
+    personLibraryState.selection.clear();
+  }
+  if (add) {
+    personLibraryState.addSelection.clear();
+  }
+}
+
+function resetFamilyMemberOperations() {
+  familyMemberOperationState.removeMode = false;
+  familyMemberOperationState.selection.clear();
+}
+
+function removePersonFromOperationState(id) {
+  const simId = String(id || '');
+  if (!simId) return;
+
+  personLibraryState.selection.delete(simId);
+  personLibraryState.addSelection.delete(simId);
+  familyMemberOperationState.selection.delete(simId);
+}
 
 let familyMemberGenerationSort = 'asc';
 try {
@@ -493,16 +525,16 @@ function captureLayoutHistoryState(fam, mode) {
 }
 
 function captureLabelHistoryState(key) {
-  const saved = genealogyData && genealogyData.labelPositions ? genealogyData.labelPositions[key] : null;
+  const saved = currentGenealogyData() && currentGenealogyData().labelPositions ? currentGenealogyData().labelPositions[key] : null;
   return saved ? { dx: Number(saved.dx) || 0, dy: Number(saved.dy) || 0 } : null;
 }
 
 function applyDragHistoryEntry(entry, stateKey) {
   const state = entry[stateKey];
-  if (!state || !genealogyData || !genealogyStore) return;
+  if (!state || !currentGenealogyData() || !genealogyStore) return;
 
   if (entry.type === 'card-layout') {
-    const fam = genealogyData.families.find(item => item.id === entry.familyId);
+    const fam = currentGenealogyData().families.find(item => item.id === entry.familyId);
     if (!fam) return;
 
     const mutation =
@@ -518,12 +550,12 @@ function applyDragHistoryEntry(entry, stateKey) {
     applyGenealogyMutation(mutation, {
       immediateSave:true,
       render:
-        genealogyData.currentFamilyId === entry.familyId &&
+        currentGenealogyData().currentFamilyId === entry.familyId &&
         viewMode === entry.mode
     });
 
     if (
-      genealogyData.currentFamilyId === entry.familyId &&
+      currentGenealogyData().currentFamilyId === entry.familyId &&
       viewMode === entry.mode
     ) {
       updateLayoutToggle();
@@ -551,32 +583,12 @@ function isNativeTextUndoTarget(target) {
   return !!target.closest('input, textarea, select');
 }
 
-let editingPets = [];
-let editingTraits = [];
-let editingPetIndex = -1;
-let editingPetAvatar = null;
-let editingPetAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
-let editingParentKinds = new Map();
-let editingChildKinds = new Map();
-let editingExplicitSiblingIds = new Set();
-let editingDerivedSiblingIds = new Set();
 let avatarCropTarget = null;
 let avatarCropDraft = { ...DEFAULT_AVATAR_FRAME };
 let avatarCropUrl = '';
 let avatarCropPointer = null;
 let avatarCropNaturalSize = { width:0, height:0 };
 let avatarCropRenderMetrics = null;
-
-let editingGallery = [];
-let editingPhotoIndex = -1;
-let editingPhotoImageRef = '';
-let editingPhotoSizeKB = 0;
-let editingPhotoOriginal = false;
-
-/* ========【人生照片檢視】 設定 - 只切換目前人物的人生照片 ======== */
-let viewerMode = 'edit';
-let viewerSimId = null;
-let viewerIndex = 0;
 
 // ========【圖片資產權威層】 設定 - genealogy.js 只保存 assetId；Blob / SHA-256 / Lazy URL 由獨立模組管理 ========
 const assetStore = window.L1nGGenealogyAssets;
@@ -675,8 +687,8 @@ function scheduleResolvedAssetRefresh(
             id === bgSettings?.image
         )
       ){
-        applyBg();
-        updateBgPreview();
+        renderCanvasBackground();
+        paintCanvasBackgroundPreview();
       }
     }catch(_){}
 
@@ -696,25 +708,25 @@ function scheduleResolvedAssetRefresh(
 
     try{
       if(
-        photoMask?.classList.contains('show') &&
+        lifePhotoEditorDialog?.classList.contains('show') &&
         resolved.some(
           ([id]) =>
-            id === editingPhotoImageRef
+            id === lifePhotoState.editor.imageRef
         )
       ){
-        updatePhotoPreview();
+        lifePhotoWorkspace.refreshPreview();
       }
     }catch(_){}
 
     try{
       if(
-        galleryViewerMask?.classList.contains('show')
+        lifePhotoViewerDialog?.classList.contains('show')
       ){
         const gallery =
-          getViewerGallery();
+          lifePhotoWorkspace.viewerGallery();
 
         const active =
-          gallery?.[viewerIndex];
+          gallery?.[lifePhotoState.viewer.index];
 
         if(
           active?.image &&
@@ -723,9 +735,7 @@ function scheduleResolvedAssetRefresh(
               id === active.image
           )
         ){
-          updateViewerContent(
-            gallery
-          );
+          lifePhotoWorkspace.refreshViewer();
         }
       }
     }catch(_){}
@@ -808,30 +818,21 @@ let _dimsCache = { mode: null, dims: null };
 let _gapsCache = { mode: null, gaps: null };
 
 function getCardViewSettings() {
-  const target = (typeof genealogyData !== 'undefined' && genealogyData) ? genealogyData : null;
-  if (!target) return { ...DEFAULT_CARD_VIEW_SETTINGS };
-  if (!target.meta || typeof target.meta !== 'object') target.meta = {};
-  if (!target.meta.cardView || typeof target.meta.cardView !== 'object') target.meta.cardView = {};
-  const current = target.meta.cardView;
-  current.avatar = true;
-  CARD_SETTING_FIELD_KEYS.forEach(key => {
-    if (typeof current[key] !== 'boolean') current[key] = DEFAULT_CARD_VIEW_SETTINGS[key];
-  });
-  if (!['minimal','translucent','full'].includes(current.appearance)) current.appearance = DEFAULT_CARD_VIEW_SETTINGS.appearance;
-  return current;
+  return (
+    genealogyStore?.getCardSettings?.(
+      'view'
+    ) ||
+    { ...DEFAULT_CARD_VIEW_SETTINGS }
+  );
 }
 
 function getCardEditSettings() {
-  const target = (typeof genealogyData !== 'undefined' && genealogyData) ? genealogyData : null;
-  if (!target) return { ...DEFAULT_CARD_EDIT_SETTINGS };
-  if (!target.meta || typeof target.meta !== 'object') target.meta = {};
-  if (!target.meta.cardEdit || typeof target.meta.cardEdit !== 'object') target.meta.cardEdit = {};
-  const current = target.meta.cardEdit;
-  current.avatar = true;
-  CARD_SETTING_FIELD_KEYS.forEach(key => {
-    if (typeof current[key] !== 'boolean') current[key] = DEFAULT_CARD_EDIT_SETTINGS[key];
-  });
-  return current;
+  return (
+    genealogyStore?.getCardSettings?.(
+      'edit'
+    ) ||
+    { ...DEFAULT_CARD_EDIT_SETTINGS }
+  );
 }
 
 function cardViewAppearanceClass() {
@@ -842,83 +843,348 @@ function cardSettingsHasBody(settings) {
   return CARD_CONTENT_FIELD_KEYS.some(key => !!settings[key]);
 }
 
-// ========【檢視卡片內容模型】 設定 - 版型與外觀分離，render / 尺寸計算共用同一份資料 ========
-const VIEW_CARD_LAYOUT = Object.freeze({
-  width:176,
-  avatarSize:76,
-  horizontalPadding:20,
-  topPadding:12,
-  bottomPadding:10,
-  gap:4,
-  nameFontSize:11,
-  metaFontSize:10,
-  nameLineHeight:13.2,
-  metaLineHeight:12.5
-});
+// ========【人物呈現模型】 設定 - 畫布卡片、個人檔案與人物清單共用同一份顯示資料 ========
+function personDisplayText(value, owner, draft = false) {
+  if (value == null) return '';
+  return draft
+    ? String(value)
+    : displayDataText(value, owner);
+}
 
+function buildPersonPresentation(sim, { draft = false } = {}) {
+  if (!sim) return null;
+
+  const name =
+    personDisplayText(
+      sim.name,
+      sim,
+      draft
+    );
+
+  const career =
+    personDisplayText(
+      sim.career,
+      sim,
+      draft
+    );
+
+  const residence =
+    personDisplayText(
+      sim.residence,
+      sim,
+      draft
+    );
+
+  const aspiration =
+    personDisplayText(
+      sim.aspiration,
+      sim,
+      draft
+    );
+
+  const causeOfDeath =
+    personDisplayText(
+      sim.causeOfDeath,
+      sim,
+      draft
+    );
+
+  const bio =
+    personDisplayText(
+      sim.bio,
+      sim,
+      draft
+    );
+
+  const traits =
+    (sim.traits || [])
+      .map(value =>
+        personDisplayText(
+          value,
+          sim,
+          draft
+        )
+      )
+      .filter(Boolean);
+
+  const genderValue =
+    sim.gender || '其他';
+
+  const genderIcon =
+    genderValue === '男'
+      ? 'gender-male'
+      : genderValue === '女'
+        ? 'gender-female'
+        : 'gender-ambiguous';
+
+  const statusValue =
+    sim.status || '在世';
+
+  const statusIcon =
+    statusValue === '幽靈'
+      ? 'ghost-symbol'
+      : statusValue === '已故'
+        ? 'tombstone'
+        : 'heart';
+
+  const statusClass =
+    statusValue === '幽靈'
+      ? 'ghost'
+      : statusValue === '已故'
+        ? 'dead'
+        : 'alive';
+
+  const racePreset =
+    sim.race
+      ? RACE_PRESETS[sim.race]
+      : null;
+
+  const birthdayText =
+    sim.birthdayMonth &&
+    sim.birthdayDay
+      ? formatBirthdaySummary(
+          sim.birthdayMonth,
+          sim.birthdayDay,
+          sim.birthdayYear
+        )
+      : uiText('生日未知');
+
+  const ageText =
+    sim.age != null &&
+    sim.age !== ''
+      ? (
+          (document.documentElement.lang || 'zh-Hant') === 'en'
+            ? `${uiText('年齡')} ${sim.age}`
+            : `${sim.age} ${uiText('歲')}`
+        )
+      : uiText('年齡未知');
+
+  return {
+    source:sim,
+    name,
+    career,
+    residence,
+    aspiration,
+    causeOfDeath,
+    bio,
+    traits,
+    lifeStage:{
+      value:sim.lifeStage || '成年',
+      text:uiText(
+        sim.lifeStage || '成年'
+      )
+    },
+    gender:{
+      value:genderValue,
+      text:uiText(genderValue),
+      icon:genderIcon
+    },
+    status:{
+      value:statusValue,
+      text:uiText(statusValue),
+      icon:statusIcon,
+      className:statusClass
+    },
+    race:racePreset
+      ? {
+          value:sim.race,
+          text:uiText(racePreset.label),
+          icon:racePreset.icon || ''
+        }
+      : null,
+    birthdayText,
+    ageText,
+    avatarHtml:
+      framedAvatarImageHTML(
+        sim.avatar,
+        sim.avatarFrame
+      ) ||
+      esc(
+        (name || '?')
+          .trim()
+          .charAt(0) ||
+        '?'
+      )
+  };
+}
+
+// ========【檢視卡片內容模型】 設定 - 卡片內容由 App 提供；版型與幾何由 Scene 負責 ========
 function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
-  if (!sim) return { name:'', primary:[], details:[], hasText:false };
+  const presentation =
+    buildPersonPresentation(sim);
 
-  const dName = displayDataText(sim.name, sim);
-  const dCareer = displayDataText(sim.career, sim);
-  const dResidence = displayDataText(sim.residence, sim);
-  const dAspiration = displayDataText(sim.aspiration, sim);
-  const dTraits = (sim.traits || [])
-    .map(value => displayDataText(value, sim))
-    .filter(Boolean);
+  if (!presentation) {
+    return {
+      name:'',
+      primary:[],
+      details:[],
+      hasText:false
+    };
+  }
 
-  const name = settings.name
-    ? `${dName}${settings.gender ? formatCardGender(sim.gender) : ''}`
-    : '';
+  const name =
+    settings.name
+      ? `${presentation.name}${settings.gender ? formatCardGender(presentation.gender.value) : ''}`
+      : '';
 
   const primary = [];
 
-  if (!settings.name && settings.gender) {
-    primary.push({ text:uiText(sim.gender || '其他') });
+  if (
+    !settings.name &&
+    settings.gender
+  ) {
+    primary.push({
+      text:presentation.gender.text
+    });
   }
 
   const stageAge = [];
-  if (settings.lifeStage) stageAge.push(uiText(sim.lifeStage));
-  if (settings.age && sim.age != null && sim.age !== '') stageAge.push(formatCardAge(sim.age));
-  if (stageAge.length) primary.push({ text:stageAge.join(' · ') });
 
-  if (settings.birthday && sim.birthdayMonth && sim.birthdayDay) {
+  if (settings.lifeStage) {
+    stageAge.push(
+      presentation.lifeStage.text
+    );
+  }
+
+  if (
+    settings.age &&
+    sim.age != null &&
+    sim.age !== ''
+  ) {
+    stageAge.push(
+      formatCardAge(sim.age)
+    );
+  }
+
+  if (stageAge.length) {
     primary.push({
-      text:formatBirthdaySummary(sim.birthdayMonth, sim.birthdayDay, sim.birthdayYear),
+      text:stageAge.join(' · ')
+    });
+  }
+
+  if (
+    settings.birthday &&
+    sim.birthdayMonth &&
+    sim.birthdayDay
+  ) {
+    primary.push({
+      text:presentation.birthdayText,
       icon:'cake2'
     });
   }
 
   const statusRace = [];
-  if (settings.status) statusRace.push(uiText(sim.status || '在世'));
-  if (settings.race && sim.race && RACE_PRESETS[sim.race]) {
-    statusRace.push(uiText(RACE_PRESETS[sim.race].label));
+
+  if (settings.status) {
+    statusRace.push(
+      presentation.status.text
+    );
   }
-  if (statusRace.length) primary.push({ text:statusRace.join(' · ') });
+
+  if (
+    settings.race &&
+    presentation.race
+  ) {
+    statusRace.push(
+      presentation.race.text
+    );
+  }
+
+  if (statusRace.length) {
+    primary.push({
+      text:statusRace.join(' · ')
+    });
+  }
 
   const details = [];
-  if (settings.career && sim.career) details.push({ text:dCareer, detail:true });
-  if (settings.residence && sim.residence) details.push({ text:dResidence, icon:'house', detail:true });
-  if (settings.aspiration && sim.aspiration) details.push({ text:dAspiration, icon:'bullseye', detail:true });
-  if (settings.traits && dTraits.length) details.push({ text:dTraits.join(' / '), detail:true });
 
-  if (settings.pets || settings.gallery) {
+  if (
+    settings.career &&
+    presentation.career
+  ) {
+    details.push({
+      text:presentation.career,
+      detail:true
+    });
+  }
+
+  if (
+    settings.residence &&
+    presentation.residence
+  ) {
+    details.push({
+      text:presentation.residence,
+      icon:'house',
+      detail:true
+    });
+  }
+
+  if (
+    settings.aspiration &&
+    presentation.aspiration
+  ) {
+    details.push({
+      text:presentation.aspiration,
+      icon:'bullseye',
+      detail:true
+    });
+  }
+
+  if (
+    settings.traits &&
+    presentation.traits.length
+  ) {
+    details.push({
+      text:presentation.traits.join(' / '),
+      detail:true
+    });
+  }
+
+  if (
+    settings.pets ||
+    settings.gallery
+  ) {
     const mediaBits = [];
-    if (settings.pets && (sim.pets || []).length) mediaBits.push(`${uiText('寵物')} ${(sim.pets || []).length}`);
-    if (settings.gallery && (sim.gallery || []).length) mediaBits.push(`${uiText('人生照片')} ${(sim.gallery || []).length}`);
-    if (mediaBits.length) details.push({ text:mediaBits.join(' · ') });
+
+    if (
+      settings.pets &&
+      (sim.pets || []).length
+    ) {
+      mediaBits.push(
+        `${uiText('寵物')} ${(sim.pets || []).length}`
+      );
+    }
+
+    if (
+      settings.gallery &&
+      (sim.gallery || []).length
+    ) {
+      mediaBits.push(
+        `${uiText('人生照片')} ${(sim.gallery || []).length}`
+      );
+    }
+
+    if (mediaBits.length) {
+      details.push({
+        text:mediaBits.join(' · ')
+      });
+    }
   }
 
   return {
     name,
     primary,
     details,
-    hasText:!!(name || primary.length || details.length)
+    hasText:!!(
+      name ||
+      primary.length ||
+      details.length
+    )
   };
 }
 
 function renderViewCardLine(line) {
-  const className = `n-view-meta${line.detail ? ' n-view-text' : ''}`;
+  const className = `person-card-view-meta${line.detail ? ' person-card-view-text' : ''}`;
   const title = line.text ? ` title="${esc(line.text)}"` : '';
   const body = line.icon
     ? `${iconSvg(line.icon)}<span>${esc(line.text)}</span>`
@@ -927,183 +1193,6 @@ function renderViewCardLine(line) {
   return `<div class="${className}"${title}>${body}</div>`;
 }
 
-function estimateWrappedRows(text, maxWidth, fontSize) {
-  const value = String(text || '').trim();
-  if (!value) return 0;
-
-  return Math.max(
-    1,
-    Math.ceil(
-      measureText(value, fontSize) /
-      Math.max(24, maxWidth)
-    )
-  );
-}
-
-function estimateViewCardHeight(sim, settings) {
-  const model = buildViewCardContentModel(sim, settings);
-  if (!model.hasText) return 100;
-
-  const innerWidth =
-    VIEW_CARD_LAYOUT.width -
-    VIEW_CARD_LAYOUT.horizontalPadding;
-
-  let height =
-    VIEW_CARD_LAYOUT.topPadding +
-    VIEW_CARD_LAYOUT.avatarSize +
-    VIEW_CARD_LAYOUT.gap;
-
-  if (model.name) {
-    height +=
-      estimateWrappedRows(
-        model.name,
-        innerWidth,
-        VIEW_CARD_LAYOUT.nameFontSize
-      ) *
-      VIEW_CARD_LAYOUT.nameLineHeight;
-
-    height += VIEW_CARD_LAYOUT.gap;
-  }
-
-  [...model.primary, ...model.details].forEach(line => {
-    const lineWidth =
-      Math.max(
-        24,
-        innerWidth - (line.icon ? 18 : 0)
-      );
-
-    height +=
-      estimateWrappedRows(
-        line.text,
-        lineWidth,
-        VIEW_CARD_LAYOUT.metaFontSize
-      ) *
-      VIEW_CARD_LAYOUT.metaLineHeight;
-
-    height += VIEW_CARD_LAYOUT.gap;
-  });
-
-  return Math.max(
-    100,
-    Math.ceil(
-      height +
-      VIEW_CARD_LAYOUT.bottomPadding
-    )
-  );
-}
-
-function getViewCardDimensions(settings) {
-  let maxHeight = 100;
-  let hasVisibleText = false;
-
-  if (genealogyData?.families?.length && genealogyData?.sims) {
-    const family = currentFamily();
-    const visibleIds = family
-      ? getVisibleIds(family.id)
-      : new Set();
-
-    visibleIds.forEach(id => {
-      const sim = genealogyData.sims[id];
-      if (!sim) return;
-
-      const model =
-        buildViewCardContentModel(
-          sim,
-          settings
-        );
-
-      hasVisibleText =
-        hasVisibleText ||
-        model.hasText;
-
-      maxHeight =
-        Math.max(
-          maxHeight,
-          estimateViewCardHeight(
-            sim,
-            settings
-          )
-        );
-    });
-  }
-
-  if (!hasVisibleText && !cardSettingsHasBody(settings)) {
-    return { W:100, H:100 };
-  }
-
-  return {
-    W:VIEW_CARD_LAYOUT.width,
-    H:maxHeight
-  };
-}
-
-function getDims() {
-  if (viewMode === 'edit') {
-    const settings = getCardEditSettings();
-    const bodyRows = [
-      settings.name || settings.gender,
-      settings.lifeStage || settings.age,
-      settings.birthday,
-      settings.status || settings.race,
-      settings.career,
-      settings.residence,
-      settings.aspiration,
-      settings.traits,
-      settings.pets,
-      settings.gallery
-    ].filter(Boolean).length;
-
-    if (!bodyRows) return { W:92, H:92 };
-
-    return {
-      W:NODE_DIMS.edit.W,
-      H:Math.max(
-        98,
-        30 + Math.max(64, bodyRows * 18)
-      )
-    };
-  }
-
-  return getViewCardDimensions(
-    getCardViewSettings()
-  );
-}
-
-// ========【單張卡片尺寸】 設定 - 檢視卡依自己的內容增高；全域高度只保留給世代安全間距 ========
-function getNodeDimensions(sim) {
-  if (viewMode === 'view' && sim) {
-    return {
-      W:VIEW_CARD_LAYOUT.width,
-      H:estimateViewCardHeight(
-        sim,
-        getCardViewSettings()
-      )
-    };
-  }
-
-  return getDims();
-}
-
-function getNodeDimensionsById(id) {
-  return getNodeDimensions(
-    id && genealogyData && genealogyData.sims
-      ? genealogyData.sims[id]
-      : null
-  );
-}
-
-function getGaps() {
-  return GAPS[viewMode] || GAPS.view;
-}
-
-function getCurrentManualPositions(fam) {
-  if (!fam.manualPositions) return {};
-  return fam.manualPositions[viewMode] || {};
-}
-function getCurrentFreeLayout(fam) {
-  if (!fam.freeLayout || typeof fam.freeLayout !== 'object') return false;
-  return !!fam.freeLayout[viewMode];
-}
 function ensureFamilyLayoutShape(fam) {
   return !!(
     fam &&
@@ -1358,9 +1447,12 @@ function buildSample() {
   };
 }
 
-let genealogyData = null, scale = 1;
-let panX = 0, panY = 0, editingId = null, editingAvatar = null;
-let editingAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+let scale = 1;
+
+function currentGenealogyData() {
+  return genealogyStore?.getData?.() || null;
+}
+let panX = 0, panY = 0;
 
 // ========【畫布視角狀態】 設定 - 自動 Fit 與手動視角分離，viewport 改變時保留正確中心 ========
 let canvasViewState = 'fit';
@@ -1375,18 +1467,18 @@ let spacePanHeld = false;
 let marqueeState = null;
 
 const $ = id => document.getElementById(id);
-const viewport = $('viewport'), stage = $('stage'), svg = $('links'), nodes = $('nodes');
-const labelsSvg = $('labels');
-const mask = $('mask'), rosterMask = $('rosterMask'), bgMask = $('bgMask');
-const storageMask = $('storageMask');
-const addMemberMask = $('addMemberMask');
-const tipsMask = $('tipsMask');
-const infoMask = $('infoMask');
-const petMask = $('petMask');
-const avatarCropMask = $('avatarCropMask');
-const photoMask = $('photoMask');
-const galleryViewerMask = $('galleryViewerMask');
-const exportMask = $('exportMask');
+const viewport = $('genealogyCanvasViewport'), stage = $('genealogyCanvasStage'), svg = $('genealogyRelationshipLayer'), nodes = $('genealogyPersonLayer');
+const labelsSvg = $('genealogyRelationshipLabelLayer');
+const mask = $('simEditorDialog'), personLibraryDialog = $('personLibraryDialog'), appearanceDialog = $('appearanceDialog');
+const storageDialog = $('storageDialog');
+const familyMemberPickerDialog = $('familyMemberPickerDialog');
+const helpDialog = $('helpDialog');
+const personProfileDialog = $('personProfileDialog');
+const petEditorDialog = $('petEditorDialog');
+const avatarCropDialog = $('avatarCropDialog');
+const lifePhotoEditorDialog = $('lifePhotoEditorDialog');
+const lifePhotoViewerDialog = $('lifePhotoViewerDialog');
+const exportDialog = $('exportDialog');
 const exportCloseBtn = $('exportCloseBtn');
 const exportImageBtn = $('exportImageBtn');
 const exportJsonBtn = $('exportJsonBtn');
@@ -1395,14 +1487,14 @@ const statusFilterInputs = [...document.querySelectorAll('input[name="statusFilt
 const genderFilterInputs = [...document.querySelectorAll('input[name="genderFilter"]')];
 const raceFilterInputs = [...document.querySelectorAll('input[name="raceFilter"]')];
 const lifeStageFilterInputs = [...document.querySelectorAll('input[name="lifeStageFilter"]')];
-const rosterSearch = $('rosterSearch');
+const personLibrarySearch = $('personLibrarySearch');
 const modeToggle = $('modeToggle');
 const selectToolBtn = $('selectToolBtn');
 const panToolBtn = $('panToolBtn');
 const arrangeToolDivider = $('arrangeToolDivider');
 const arrangeToolDividerEnd = $('arrangeToolDividerEnd');
 const selectionMarquee = $('selectionMarquee');
-const nodeContextMenu = $('nodeContextMenu');
+const personCardMenu = $('personCardContextMenu');
 const labelLockToggle = $('labelLockToggle');
 const relationshipPerspectiveBtn = $('relationshipPerspectiveBtn');
 const sidebar = $('sidebar');
@@ -1413,11 +1505,11 @@ const smartGuideVertical = $('smartGuideVertical');
 const smartGuideHorizontal = $('smartGuideHorizontal');
 const smartSpacingHorizontal = $('smartSpacingHorizontal');
 const smartSpacingVertical = $('smartSpacingVertical');
-const themeGrid = $('themeGrid');
+const appearanceThemeGrid = $('appearanceThemeGrid');
 const customColor1 = $('customColor1');
 const customColor2 = $('customColor2');
-const customThemePreview = $('customThemePreview');
-const galleryGrid = $('galleryGrid');
+const appearanceCustomThemePreview = $('appearanceCustomThemePreview');
+const lifePhotoGrid = $('lifePhotoGrid');
 
 // ========【家族名稱輸入】 設定 - 固定導覽欄位、虛線只跟著文字寬度 ========
 const _familyNameMeasureCanvas = document.createElement('canvas');
@@ -1634,13 +1726,13 @@ function familyLineageChildIds(simId) {
     .map(sim => String(sim.id));
 
   const adoptedChildIds =
-    genealogyData.sims[String(simId)]?.gameData?.adoptedChildIds || [];
+    currentGenealogyData().sims[String(simId)]?.gameData?.adoptedChildIds || [];
 
   return [...new Set([
     ...childIds,
     ...adoptedChildIds.map(String)
   ])]
-    .filter(id => genealogyData.sims[id]);
+    .filter(id => currentGenealogyData().sims[id]);
 }
 
 function familyDisplaySpouseIds(sim) {
@@ -1650,7 +1742,7 @@ function familyDisplaySpouseIds(sim) {
     ...(sim.spouseIds || []),
     ...(sim.gameData?.deceasedSpouseIds || [])
   ].map(String))]
-    .filter(id => genealogyData.sims[id]);
+    .filter(id => currentGenealogyData().sims[id]);
 }
 
 function stableFamilyComponentKey(memberIds) {
@@ -1670,26 +1762,26 @@ function familySourceSeedIds(fam) {
 
   const householdIds =
     Array.isArray(fam.gameData?.householdMemberIds)
-      ? fam.gameData.householdMemberIds.map(String).filter(id => genealogyData.sims[id])
+      ? fam.gameData.householdMemberIds.map(String).filter(id => currentGenealogyData().sims[id])
       : [];
 
   if (householdIds.length) return householdIds;
 
   return (fam.memberIds || [])
     .map(String)
-    .filter(id => genealogyData.sims[id]);
+    .filter(id => currentGenealogyData().sims[id]);
 }
 
 function buildHouseholdEntries() {
-  if (!genealogyData || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
-  return genealogyData.families
+  return currentGenealogyData().families
     .map((fam, index) => {
       const imported = !!fam.gameImport;
       const memberIds =
         imported
           ? familySourceSeedIds(fam)
-          : (fam.memberIds || []).map(String).filter(id => genealogyData.sims[id]);
+          : (fam.memberIds || []).map(String).filter(id => currentGenealogyData().sims[id]);
 
       if (!memberIds.length) return null;
 
@@ -1714,7 +1806,7 @@ function collectEaTreeScope(seedIds) {
       seedIds
         .map(String)
         .filter(id =>
-          genealogyData.sims[id]
+          currentGenealogyData().sims[id]
         )
     )];
 
@@ -1743,7 +1835,7 @@ function collectEaTreeScope(seedIds) {
 
     frontier.forEach(id => {
       familyLineageParentIds(
-        genealogyData.sims[id]
+        currentGenealogyData().sims[id]
       ).forEach(parentId => {
         if (!coreIds.has(parentId)) {
           next.add(parentId);
@@ -1790,7 +1882,7 @@ function collectEaTreeScope(seedIds) {
 
   coreIds.forEach(id => {
     familyDisplaySpouseIds(
-      genealogyData.sims[id]
+      currentGenealogyData().sims[id]
     ).forEach(spouseId => {
       visibleIds.add(spouseId);
     });
@@ -1819,7 +1911,7 @@ function setsOverlap(a, b) {
 }
 
 function splitHouseholdIntoEaTreeSeedGroups(seedIds) {
-  const seeds = [...new Set(seedIds.map(String).filter(id => genealogyData.sims[id]))];
+  const seeds = [...new Set(seedIds.map(String).filter(id => currentGenealogyData().sims[id]))];
   if (!seeds.length) return [];
 
   const treeBySeed = new Map(
@@ -1877,7 +1969,7 @@ function splitVisibleFamilyMembersByRenderedEdges(memberIds) {
   const visibleIds = [...new Set(
     (memberIds || [])
       .map(String)
-      .filter(id => genealogyData.sims[id])
+      .filter(id => currentGenealogyData().sims[id])
   )];
 
   if (!visibleIds.length) return [];
@@ -1898,7 +1990,7 @@ function splitVisibleFamilyMembersByRenderedEdges(memberIds) {
   };
 
   visibleIds.forEach(id => {
-    const sim = genealogyData.sims[id];
+    const sim = currentGenealogyData().sims[id];
     if (!sim) return;
 
     (sim.parentIds || []).forEach(parentId => connect(id, parentId));
@@ -1938,7 +2030,7 @@ function eaTreeEntryLabel(fam, seedIds, splitCount) {
   if (splitCount <= 1) return base;
 
   const names = seedIds
-    .map(id => genealogyData.sims[id])
+    .map(id => currentGenealogyData().sims[id])
     .filter(Boolean)
     .map(sim => displayDataText(sim.name, sim))
     .filter(Boolean)
@@ -1950,15 +2042,15 @@ function eaTreeEntryLabel(fam, seedIds, splitCount) {
 }
 
 function buildEaTreeEntries() {
-  if (!genealogyData || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
   const entries = [];
 
-  genealogyData.families.forEach((fam, familyIndex) => {
+  currentGenealogyData().families.forEach((fam, familyIndex) => {
     if (!fam) return;
 
     if (!fam.gameImport) {
-      const memberIds = (fam.memberIds || []).map(String).filter(id => genealogyData.sims[id]);
+      const memberIds = (fam.memberIds || []).map(String).filter(id => currentGenealogyData().sims[id]);
       if (!memberIds.length) return;
 
       entries.push({
@@ -2035,13 +2127,13 @@ function buildEaTreeEntries() {
 }
 
 function buildExtendedFamilyComponents() {
-  if (!genealogyData || !genealogyData.sims || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !currentGenealogyData().sims || !Array.isArray(currentGenealogyData().families)) return [];
 
-  const allIds = Object.keys(genealogyData.sims);
+  const allIds = Object.keys(currentGenealogyData().sims);
   const adjacency = new Map(allIds.map(id => [id, new Set()]));
 
   allIds.forEach(id => {
-    familyGenealogyNeighborIds(genealogyData.sims[id]).forEach(rawRelatedId => {
+    familyGenealogyNeighborIds(currentGenealogyData().sims[id]).forEach(rawRelatedId => {
       const relatedId = String(rawRelatedId);
       if (!adjacency.has(relatedId)) return;
       adjacency.get(id).add(relatedId);
@@ -2076,9 +2168,9 @@ function buildExtendedFamilyComponents() {
     });
   });
 
-  const importedFamilies = genealogyData.families.filter(fam => fam && fam.gameImport);
-  const manualFamilies = genealogyData.families.filter(fam => fam && !fam.gameImport);
-  const familyIndex = new Map(genealogyData.families.map((fam, index) => [fam.id, index]));
+  const importedFamilies = currentGenealogyData().families.filter(fam => fam && fam.gameImport);
+  const manualFamilies = currentGenealogyData().families.filter(fam => fam && !fam.gameImport);
+  const familyIndex = new Map(currentGenealogyData().families.map((fam, index) => [fam.id, index]));
 
   const componentEntries = components
     .filter(component => component.memberIds.length > 1)
@@ -2139,7 +2231,7 @@ function buildExtendedFamilyComponents() {
 
   const manualEntries = manualFamilies
     .map(fam => {
-      const memberIds = (fam.memberIds || []).map(String).filter(id => genealogyData.sims[id]);
+      const memberIds = (fam.memberIds || []).map(String).filter(id => currentGenealogyData().sims[id]);
       if (!memberIds.length) return null;
 
       return {
@@ -2162,7 +2254,7 @@ function buildExtendedFamilyComponents() {
 }
 
 function getFamilySelectorEntries(mode = familyTreeViewMode) {
-  if (!genealogyData || !Array.isArray(genealogyData.families)) return [];
+  if (!currentGenealogyData() || !Array.isArray(currentGenealogyData().families)) return [];
 
   if (mode === 'household') return buildHouseholdEntries();
   if (mode === 'ea') return buildEaTreeEntries();
@@ -2285,7 +2377,7 @@ function setFamilyTreeViewMode(mode, control = null) {
   const entries = getFamilySelectorEntries(familyTreeViewMode);
   const sourceFamily =
     familyTreeLastSourceFamilyId
-      ? genealogyData.families.find(fam => fam.id === familyTreeLastSourceFamilyId)
+      ? currentGenealogyData().families.find(fam => fam.id === familyTreeLastSourceFamilyId)
       : previousFamily;
 
   const selected = findBestFamilySelectorEntry(sourceFamily || previousFamily, entries);
@@ -2295,15 +2387,14 @@ function setFamilyTreeViewMode(mode, control = null) {
     selected?.value || null
   );
 
-  if (selected?.familyId && genealogyData.families.some(fam => fam.id === selected.familyId)) {
-    genealogyData.currentFamilyId = selected.familyId;
+  if (selected?.familyId && currentGenealogyData().families.some(fam => fam.id === selected.familyId)) {
+    genealogyStore.setCurrentFamilyId(selected.familyId);
   }
 
   dragHistory.clear();
   clearNodeSelection();
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
-  removeMemberMode = false;
+  resetPersonLibraryOperations({ batch:false, add:true });
+  resetFamilyMemberOperations();
 
   save();
   refreshFamilyUI();
@@ -2651,7 +2742,7 @@ let _uiDialogResolve = null;
 let _uiDialogMode = 'alert';
 
 function closeUiDialog(result = null) {
-  const overlay = $('uiDialogMask');
+  const overlay = $('confirmationDialog');
   if (!overlay || !overlay.classList.contains('show')) return;
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden', 'true');
@@ -2669,7 +2760,7 @@ function openUiDialog({
   confirmText = '確定',
   cancelText = '取消'
 } = {}) {
-  const overlay = $('uiDialogMask');
+  const overlay = $('confirmationDialog');
   const dialog = $('uiDialog');
   const titleEl = $('uiDialogTitle');
   const messageEl = $('uiDialogMessage');
@@ -2790,7 +2881,7 @@ function uiToast(message, duration = 2600) {
 
 
 document.addEventListener('keydown', event => {
-  const overlay = $('uiDialogMask');
+  const overlay = $('confirmationDialog');
   if (!overlay || !overlay.classList.contains('show')) return;
   if (event.key === 'Escape') {
     event.preventDefault();
@@ -2809,7 +2900,7 @@ function debounce(fn, ms = 150) {
 }
 
 function currentFamily() {
-  return genealogyData.families.find(f => f.id === genealogyData.currentFamilyId) || genealogyData.families[0];
+  return genealogyStore.getCurrentFamily();
 }
 
 // ========【頂部人物篩選】 設定 - 同類多選 OR、跨類別 AND ========
@@ -2906,10 +2997,62 @@ function uiText(value) {
   return text;
 }
 
+// ========【日期顯示格式】 設定 - 生日與遊戲日期屬於 App 呈現層，不由人物編輯器持有 ========
+function formatBirthdaySummary(monthValue, dayValue, yearValue = null) {
+  const month = Number(monthValue) || 0;
+  const day = Number(dayValue) || 0;
+  const year = yearValue === null || yearValue === '' || !Number.isFinite(Number(yearValue))
+    ? null
+    : Math.trunc(Number(yearValue));
+  if (!month || !day) return uiText('生日未知');
+
+  const lang = document.documentElement.lang || 'zh-Hant';
+  if (lang === 'en') {
+    try {
+      const options = year === null
+        ? { month: 'short', day: 'numeric', timeZone: 'UTC' }
+        : { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
+      return new Intl.DateTimeFormat('en', options)
+        .format(new Date(Date.UTC(year === null ? 2000 : year, month - 1, day)));
+    } catch (_) {}
+  }
+
+  return year === null
+    ? `${month} ${uiText('月')} ${day} ${uiText('日')}`
+    : `${year} ${uiText('年')} ${month} ${uiText('月')} ${day} ${uiText('日')}`;
+}
+
+function formatGameDate(value) {
+  if (!value || typeof value !== 'object') return '';
+
+  const year = Number(value.year);
+  const month = Number(value.month);
+  const day = Number(value.day);
+  if (![year, month, day].every(Number.isFinite)) return '';
+
+  const normalizedYear = Math.trunc(year);
+  const normalizedMonth = Math.trunc(month);
+  const normalizedDay = Math.trunc(day);
+  const lang = document.documentElement.lang || 'zh-Hant';
+
+  if (lang === 'en') {
+    try {
+      return new Intl.DateTimeFormat('en', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'UTC'
+      }).format(new Date(Date.UTC(normalizedYear, normalizedMonth - 1, normalizedDay)));
+    } catch (_) {}
+  }
+
+  return `${normalizedYear} ${uiText('年')} ${normalizedMonth} ${uiText('月')} ${normalizedDay} ${uiText('日')}`;
+}
+
 function isBuiltinSampleSim(sim) {
   return !!(
     sim &&
-    genealogyData?.meta?.sample === true &&
+    currentGenealogyData()?.meta?.sample === true &&
     BUILTIN_SAMPLE_SIM_IDS.has(sim.id)
   );
 }
@@ -2917,7 +3060,7 @@ function isBuiltinSampleSim(sim) {
 function isBuiltinSampleFamily(family) {
   return !!(
     family &&
-    genealogyData?.meta?.sample === true &&
+    currentGenealogyData()?.meta?.sample === true &&
     BUILTIN_SAMPLE_FAMILY_IDS.has(family.id)
   );
 }
@@ -2981,7 +3124,7 @@ function normalizeRelationshipTypeText(value) {
     .trim();
 }
 
-function relationshipTypeLibraryValues(db = genealogyData) {
+function relationshipTypeLibraryValues(db = currentGenealogyData()) {
   if (!db) return [];
 
   return Array.isArray(
@@ -3028,7 +3171,7 @@ function populateRelationshipTypePicker(
   selectedValue = ''
 ) {
   const select =
-    $('relType');
+    $('relationshipType');
 
   if (!select) return;
 
@@ -3075,7 +3218,7 @@ function populateRelationshipTypePicker(
       ? selected
       : '';
 
-  refreshSS('relType');
+  refreshSS('relationshipType');
 }
 
 function relationshipCreateOptionText(value) {
@@ -3114,7 +3257,7 @@ function explicitSiblingIds(simId) {
     String(simId || '');
 
   return [...new Set(
-    (genealogyData?.links || [])
+    (currentGenealogyData()?.links || [])
       .filter(link =>
         isSiblingLink(link) &&
         (
@@ -3129,7 +3272,7 @@ function explicitSiblingIds(simId) {
       )
       .filter(otherId =>
         otherId &&
-        genealogyData?.sims?.[otherId]
+        currentGenealogyData()?.sims?.[otherId]
       )
   )];
 }
@@ -3151,7 +3294,7 @@ function inferredSiblingIdsForParents(
   if (!parentSet.size) return [];
 
   return Object.values(
-    genealogyData.sims || {}
+    currentGenealogyData().sims || {}
   )
     .filter(candidate => {
       if (!candidate) return false;
@@ -3183,7 +3326,7 @@ function inferredSiblingIds(simId) {
     String(simId || '');
 
   const sim =
-    genealogyData?.sims?.[id];
+    currentGenealogyData()?.sims?.[id];
 
   if (!sim) return [];
 
@@ -3204,7 +3347,7 @@ function resolveSiblingRelationships(
     String(simId || '');
 
   const subject =
-    genealogyData?.sims?.[id];
+    currentGenealogyData()?.sims?.[id];
 
   const canonicalParentIds =
     parentIds == null
@@ -3227,7 +3370,7 @@ function resolveSiblingRelationships(
         .filter(otherId =>
           otherId &&
           otherId !== id &&
-          genealogyData?.sims?.[otherId]
+          currentGenealogyData()?.sims?.[otherId]
         )
     );
 
@@ -3246,7 +3389,7 @@ function resolveSiblingRelationships(
     .filter(targetId =>
       targetId &&
       targetId !== id &&
-      genealogyData?.sims?.[targetId]
+      currentGenealogyData()?.sims?.[targetId]
     )
     .map(targetId => ({
       targetId,
@@ -3315,7 +3458,7 @@ function relationshipSemanticDescriptor(
 
 function relationshipDisplayOverride(key) {
   const saved =
-    genealogyData?.relationshipMap?.[key];
+    currentGenealogyData()?.relationshipMap?.[key];
 
   return (
     saved &&
@@ -3546,7 +3689,7 @@ function resolveDirectFamilyRelationships(
     String(simId || '');
 
   const subject =
-    genealogyData?.sims?.[id];
+    currentGenealogyData()?.sims?.[id];
 
   const empty = {
     subjectId:id,
@@ -3569,7 +3712,7 @@ function resolveDirectFamilyRelationships(
       String(targetId || '');
 
     const target =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         normalizedTargetId
       ];
 
@@ -3718,7 +3861,7 @@ function findAncestorPath(
       continue;
     }
 
-    const sim = genealogyData?.sims?.[current.id];
+    const sim = currentGenealogyData()?.sims?.[current.id];
     if (!sim) continue;
 
     const relations = genealogyParentRelations(sim);
@@ -3861,7 +4004,7 @@ function ancestorKinshipLabel(
 
   if (depth === 2) {
     const directParent =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         path[0]
       ];
 
@@ -3957,7 +4100,7 @@ function descendantKinshipLabel(
 
   if (depth === 2) {
     const directChild =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         path[0]
       ];
 
@@ -4004,12 +4147,12 @@ function parentSiblingKinship(
   targetId
 ) {
   const perspective =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4035,7 +4178,7 @@ function parentSiblingKinship(
     }
 
     const parent =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         parentId
       ];
 
@@ -4088,7 +4231,7 @@ function siblingChildKinship(
   targetId
 ) {
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4117,7 +4260,7 @@ function siblingChildKinship(
     }
 
     const sibling =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         siblingId
       ];
 
@@ -4155,12 +4298,12 @@ function cousinKinship(
   targetId
 ) {
   const perspective =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4173,7 +4316,7 @@ function cousinKinship(
     genealogyParentIds(perspective)
   ) {
     const parent =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         parentId
       ];
 
@@ -4200,7 +4343,7 @@ function cousinKinship(
       }
 
       const parentSibling =
-        genealogyData.sims[
+        currentGenealogyData().sims[
           parentSiblingId
         ];
 
@@ -4270,12 +4413,12 @@ function spouseParentKinship(
   targetId
 ) {
   const perspective =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4288,7 +4431,7 @@ function spouseParentKinship(
     perspective.spouseIds || []
   ) {
     const spouse =
-      genealogyData.sims[
+      currentGenealogyData().sims[
         spouseId
       ];
 
@@ -4355,7 +4498,7 @@ function directSocialPerspectiveLabel(
   targetId
 ) {
   const link =
-    (genealogyData?.links || [])
+    (currentGenealogyData()?.links || [])
       .find(candidate =>
         !isSiblingLink(candidate) &&
         (
@@ -4388,12 +4531,12 @@ function resolveKinshipLabel(
   targetId
 ) {
   const root =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       perspectiveId
     ];
 
   const target =
-    genealogyData?.sims?.[
+    currentGenealogyData()?.sims?.[
       targetId
     ];
 
@@ -4499,7 +4642,7 @@ function resolveKinshipLabel(
 function relationshipPerspectiveSim() {
   const sim =
     relationshipPerspectiveSimId
-      ? genealogyData?.sims?.[
+      ? currentGenealogyData()?.sims?.[
           relationshipPerspectiveSimId
         ]
       : null;
@@ -4605,7 +4748,7 @@ function setRelationshipPerspective(
 
   relationshipPerspectiveSimId =
     id &&
-    genealogyData?.sims?.[id]
+    currentGenealogyData()?.sims?.[id]
       ? id
       : null;
 
@@ -4658,16 +4801,16 @@ $('familyPanelCollapseBtn')?.addEventListener('click', () => setFamilyPanelColla
 
 // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
 function closeAppMenus(except = null) {
-  document.querySelectorAll('.app-menu.open').forEach(menu => {
+  document.querySelectorAll('.ui-menu.open').forEach(menu => {
     if (menu === except) return;
     menu.classList.remove('open');
-    menu.querySelector('.app-menu-trigger')?.setAttribute('aria-expanded','false');
+    menu.querySelector('.ui-menu-trigger')?.setAttribute('aria-expanded','false');
   });
 }
 let _appMenuGlobalBound = false;
 function setupAppMenus() {
-  document.querySelectorAll('.app-menu').forEach(menu => {
-    const trigger = menu.querySelector(':scope > .app-menu-trigger');
+  document.querySelectorAll('.ui-menu').forEach(menu => {
+    const trigger = menu.querySelector(':scope > .ui-menu-trigger');
     if (!trigger || trigger.dataset.menuBound === '1') return;
     trigger.dataset.menuBound = '1';
     trigger.addEventListener('click', e => {
@@ -4677,13 +4820,13 @@ function setupAppMenus() {
       menu.classList.toggle('open', willOpen);
       trigger.setAttribute('aria-expanded', willOpen ? 'true':'false');
     });
-    menu.querySelectorAll('.app-menu-item').forEach(item => item.addEventListener('click', () => {
+    menu.querySelectorAll('.ui-menu-item').forEach(item => item.addEventListener('click', () => {
       setTimeout(() => closeAppMenus(), 0);
     }));
   });
   if (!_appMenuGlobalBound) {
     _appMenuGlobalBound = true;
-    document.addEventListener('click', e => { if (!e.target.closest?.('.app-menu')) closeAppMenus(); });
+    document.addEventListener('click', e => { if (!e.target.closest?.('.ui-menu')) closeAppMenus(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAppMenus(); });
   }
 }
@@ -4818,7 +4961,7 @@ window.addEventListener('resize', debounce(() => {
 }, 80));
 
 
-// ========【資料儲存佇列】 設定 - 一般儲存延後到 idle；離頁 / 明確要求時同步 flush ========
+// ========【資料儲存佇列】 設定 - Runtime Save Coordinator 為唯一儲存 Authority ========
 const genealogySaveCoordinator =
   genealogyRuntime?.createSaveCoordinator?.({
     delay:260,
@@ -4826,7 +4969,7 @@ const genealogySaveCoordinator =
 
     serialize:() =>
       JSON.stringify(
-        genealogyData
+        currentGenealogyData()
       ),
 
     write:serialized =>
@@ -4867,76 +5010,24 @@ const genealogySaveCoordinator =
   }) ||
   null;
 
-let _saveTimer = null;
-let _pendingSave = false;
+if (!genealogySaveCoordinator) {
+  throw new Error(
+    'Genealogy Runtime Save Coordinator is required.'
+  );
+}
 
 function save({
   immediate = false
 } = {}) {
-  if (genealogySaveCoordinator) {
-    return genealogySaveCoordinator
-      .request({
-        immediate
-      });
-  }
-
-  _pendingSave = true;
-
-  if (immediate) {
-    return _flushSave();
-  }
-
-  if (_saveTimer) return;
-
-  _saveTimer =
-    setTimeout(
-      _flushSave,
-      260
-    );
+  return genealogySaveCoordinator
+    .request({
+      immediate
+    });
 }
 
 function _flushSave() {
-  if (genealogySaveCoordinator) {
-    return genealogySaveCoordinator
-      .flush();
-  }
-
-  if (_saveTimer) {
-    clearTimeout(
-      _saveTimer
-    );
-
-    _saveTimer = null;
-  }
-
-  if (!_pendingSave) return;
-
-  _pendingSave = false;
-
-  try {
-    localStorage.setItem(
-      STORE_KEY,
-      JSON.stringify(
-        genealogyData
-      )
-    );
-  } catch (error) {
-    if (
-      error.name ===
-        'QuotaExceededError' ||
-      /quota/i.test(
-        error.message || ''
-      )
-    ) {
-      uiAlert(
-        '瀏覽器可用的儲存空間不足。\n\n建議：\n1. 前往「圖片與儲存」清理未使用的圖片\n2. 先匯出 JSON 備份\n3. 再視需要整理瀏覽器網站資料',
-        {
-          title:'儲存空間不足',
-          kind:'danger'
-        }
-      );
-    }
-  }
+  return genealogySaveCoordinator
+    .flush();
 }
 
 window.addEventListener(
@@ -4991,94 +5082,186 @@ function adjustLightness(hex, delta) {
   return rgbToHex(adj(r), adj(g), adj(b));
 }
 
-function clearCustomOverrides() {
-  const props = ['--grad-1','--grad-2','--grad-1-soft','--grad-2-soft',
-                 '--accent','--accent-hover','--primary-dark','--hl'];
-  props.forEach(p => document.body.style.removeProperty(p));
+function resetThemeSurface() {
+  [
+    '--grad-1','--grad-2',
+    '--grad-1-soft','--grad-2-soft',
+    '--accent','--accent-hover',
+    '--primary-dark','--hl'
+  ].forEach(property => {
+    document.body.style.removeProperty(property);
+  });
+
   document.body.removeAttribute('data-topbar-contrast');
 }
 
-function renderThemeGrid() {
-  const cells = THEME_PRESETS.map(t =>
-    '<button class="theme-card' + (currentThemeId === t.id ? ' selected' : '') +
-    '" type="button" data-theme-id="' + esc(t.id) + '">' +
-      '<span class="theme-radio" aria-hidden="true"></span>' +
-      '<span class="theme-card-name">' + esc(t.name) + '</span>' +
-      '<span class="theme-preview" style="background:' + t.grad + '"></span>' +
-    '</button>'
-  ).join('');
+function paintThemeChoices() {
+  if (!appearanceThemeGrid) return;
 
-  const customCard =
-    '<button class="theme-card' + (currentThemeId === 'custom' ? ' selected' : '') +
-    '" type="button" data-theme-id="custom">' +
-      '<span class="theme-radio" aria-hidden="true"></span>' +
-      '<span class="theme-card-name">自訂配色</span>' +
-      '<span class="theme-preview" id="customCardPreview" style="background:linear-gradient(120deg, ' +
-        customColors.c1 + ' 0%, ' + customColors.c2 + ' 100%)"></span>' +
-    '</button>';
+  const choices = THEME_PRESETS.map(theme => ({
+    id:theme.id,
+    name:theme.name,
+    gradient:theme.grad
+  }));
 
-  themeGrid.innerHTML = cells + customCard;
-
-  themeGrid.querySelectorAll('.theme-card').forEach(card => {
-    card.onclick = () => {
-      const id = card.dataset.themeId;
-      if (id === 'custom') applyCustomTheme(customColors.c1, customColors.c2);
-      else applyTheme(id);
-    };
+  choices.push({
+    id:'custom',
+    name:'自訂配色',
+    gradient:
+      `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`
   });
+
+  appearanceThemeGrid.innerHTML = choices.map(choice => {
+    const selected = choice.id === currentThemeId;
+    const previewId =
+      choice.id === 'custom'
+        ? ' id="customCardPreview"'
+        : '';
+
+    return `
+      <button
+        class="appearance-theme-card${selected ? ' selected' : ''}"
+        type="button"
+        data-theme-id="${esc(choice.id)}"
+        aria-pressed="${selected ? 'true' : 'false'}"
+      >
+        <span class="appearance-theme-radio" aria-hidden="true"></span>
+        <span class="appearance-theme-card-name">${esc(choice.name)}</span>
+        <span class="appearance-theme-preview"${previewId} style="background:${choice.gradient}"></span>
+      </button>
+    `;
+  }).join('');
+
+  appearanceThemeGrid
+    .querySelectorAll('[data-theme-id]')
+    .forEach(button => {
+      button.addEventListener('click', () => {
+        const themeId = button.dataset.themeId || '';
+
+        if (themeId === 'custom') {
+          chooseCustomTheme(
+            customColors.c1,
+            customColors.c2
+          );
+          return;
+        }
+
+        chooseThemePreset(themeId);
+      });
+    });
 }
 
-function applyTheme(name) {
-  if (!VALID_THEMES.includes(name)) name = 'ling';
-  clearCustomOverrides();
-  document.body.dataset.theme = name;
-  currentThemeId = name;
-  try { localStorage.setItem(THEME_KEY, name); } catch(e){}
-  updateThemeSelection();
-  applyRelationshipLineSettings();
-}
+function syncThemeChoiceDisplay() {
+  appearanceThemeGrid
+    ?.querySelectorAll('[data-theme-id]')
+    .forEach(button => {
+      const selected =
+        button.dataset.themeId === currentThemeId;
 
-function applyCustomTheme(c1, c2) {
-  clearCustomOverrides();
-  document.body.dataset.theme = 'custom';
-  currentThemeId = 'custom';
-  document.body.style.setProperty('--grad-1', c1);
-  document.body.style.setProperty('--grad-2', c2);
-  document.body.style.setProperty('--grad-1-soft', hexToRgba(c1, 0.2));
-  document.body.style.setProperty('--grad-2-soft', hexToRgba(c2, 0.2));
-  const lum = (relLum(c1) + relLum(c2)) / 2;
-  document.body.setAttribute('data-topbar-contrast', lum > 0.62 ? 'light' : 'dark');
-  const mix = mixHex(c1, c2, 0.5);
-  const accent = adjustLightness(mix, -0.28);
-  document.body.style.setProperty('--accent', accent);
-  document.body.style.setProperty('--accent-hover', adjustLightness(accent, -0.12));
-  document.body.style.setProperty('--primary-dark', adjustLightness(mix, -0.4));
-  document.body.style.setProperty('--hl', hexToRgba(accent, 0.5));
-  try {
-    localStorage.setItem(THEME_KEY, 'custom');
-    localStorage.setItem(CUSTOM_COLORS_KEY, JSON.stringify({ c1, c2 }));
-  } catch(e){}
-  customColors = { c1, c2 };
-  updateThemeSelection();
-  applyRelationshipLineSettings();
-}
+      button.classList.toggle('selected', selected);
+      button.setAttribute(
+        'aria-pressed',
+        selected ? 'true' : 'false'
+      );
+    });
 
-function updateThemeSelection() {
-  themeGrid.querySelectorAll('.theme-card').forEach(c => {
-    c.classList.toggle('selected', c.dataset.themeId === currentThemeId);
-  });
-  const preview = document.getElementById('customCardPreview');
-  if (preview) {
-    preview.style.background = `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`;
+  const customPreview =
+    document.getElementById('customCardPreview');
+
+  if (customPreview) {
+    customPreview.style.background =
+      `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`;
   }
 }
 
-function updateCustomPreview() {
-  customThemePreview.style.background = `linear-gradient(120deg, ${customColor1.value} 0%, ${customColor2.value} 100%)`;
+function chooseThemePreset(themeId, { persist = true } = {}) {
+  const nextTheme =
+    VALID_THEMES.includes(themeId)
+      ? themeId
+      : 'ling';
+
+  resetThemeSurface();
+  document.body.dataset.theme = nextTheme;
+  currentThemeId = nextTheme;
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_KEY, nextTheme);
+    } catch (_) {}
+  }
+
+  syncThemeChoiceDisplay();
+  applyRelationshipLineSettings();
 }
-customColor1.addEventListener('input', updateCustomPreview);
-customColor2.addEventListener('input', updateCustomPreview);
-$('applyCustomBtn').onclick = () => applyCustomTheme(customColor1.value, customColor2.value);
+
+function chooseCustomTheme(primary, secondary, { persist = true } = {}) {
+  const c1 = String(primary || '#f0c050');
+  const c2 = String(secondary || '#a878c8');
+  const mix = mixHex(c1, c2, 0.5);
+  const accent = adjustLightness(mix, -0.28);
+  const averageLuminance =
+    (relLum(c1) + relLum(c2)) / 2;
+
+  resetThemeSurface();
+  document.body.dataset.theme = 'custom';
+
+  [
+    ['--grad-1', c1],
+    ['--grad-2', c2],
+    ['--grad-1-soft', hexToRgba(c1, 0.2)],
+    ['--grad-2-soft', hexToRgba(c2, 0.2)],
+    ['--accent', accent],
+    ['--accent-hover', adjustLightness(accent, -0.12)],
+    ['--primary-dark', adjustLightness(mix, -0.4)],
+    ['--hl', hexToRgba(accent, 0.5)]
+  ].forEach(([property, value]) => {
+    document.body.style.setProperty(property, value);
+  });
+
+  document.body.setAttribute(
+    'data-topbar-contrast',
+    averageLuminance > 0.62 ? 'light' : 'dark'
+  );
+
+  currentThemeId = 'custom';
+  customColors = { c1, c2 };
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_KEY, 'custom');
+      localStorage.setItem(
+        CUSTOM_COLORS_KEY,
+        JSON.stringify(customColors)
+      );
+    } catch (_) {}
+  }
+
+  syncThemeChoiceDisplay();
+  applyRelationshipLineSettings();
+}
+
+function paintCustomThemePreview() {
+  if (!appearanceCustomThemePreview) return;
+
+  appearanceCustomThemePreview.style.background =
+    `linear-gradient(120deg, ${customColor1.value} 0%, ${customColor2.value} 100%)`;
+}
+
+customColor1.addEventListener(
+  'input',
+  paintCustomThemePreview
+);
+customColor2.addEventListener(
+  'input',
+  paintCustomThemePreview
+);
+
+$('applyCustomBtn').onclick = () => {
+  chooseCustomTheme(
+    customColor1.value,
+    customColor2.value
+  );
+};
 
 function applyViewMode(mode) {
   if (!VALID_MODES.includes(mode)) mode = 'edit';
@@ -5221,7 +5404,7 @@ function getOtherRelationshipTypes() {
   const seen =
     new Map();
 
-  (genealogyData?.links || [])
+  (currentGenealogyData()?.links || [])
     .forEach(link => {
       const type =
         relationshipOtherType(link);
@@ -5449,7 +5632,7 @@ function saveRelationshipLineSettings() {
   applyRelationshipLineSettings();
 
   if (getSceneLayout()) {
-    drawEdges();
+    genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
   }
 }
 
@@ -6333,7 +6516,7 @@ $('resetRelationshipStyleBtn')
       applyRelationshipLineSettings();
 
       if (getSceneLayout()) {
-        drawEdges();
+        genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
       }
     }
   );
@@ -6359,44 +6542,194 @@ function syncRelationshipToolbarVisibility() {
 }
 labelLockToggle.onclick = () => applyLabelLock(!labelLocked);
 
-function loadSavedBg() {
+function restoreCanvasBackground() {
+  let restored = null;
+
   try {
-    const raw = localStorage.getItem(BG_KEY);
-    if (raw) {
-      const obj = JSON.parse(raw);
-      bgSettings = { image:obj.image||null,
-        opacity: typeof obj.opacity==='number' ? obj.opacity : 0.5,
-        fit: obj.fit||'cover' };
-    }
-  } catch(e){}
-  applyBg();
+    const serialized = localStorage.getItem(BG_KEY);
+    if (serialized) restored = JSON.parse(serialized);
+  } catch (_) {
+    restored = null;
+  }
+
+  if (
+    restored &&
+    typeof restored === 'object' &&
+    !Array.isArray(restored)
+  ) {
+    const opacity = Number(restored.opacity);
+
+    bgSettings = {
+      image:restored.image || null,
+      opacity:Number.isFinite(opacity)
+        ? Math.max(0, Math.min(1, opacity))
+        : 0.5,
+      fit:['cover','contain','repeat'].includes(restored.fit)
+        ? restored.fit
+        : 'cover'
+    };
+  }
+
+  renderCanvasBackground();
 }
-function applyBg() {
+
+function renderCanvasBackground() {
   const root = document.documentElement;
   const url = resolveImageUrl(bgSettings.image);
-  if (url) {
-    root.style.setProperty('--custom-bg', `url("${url}")`);
-    root.style.setProperty('--custom-bg-opacity', bgSettings.opacity);
-    if (bgSettings.fit === 'repeat') {
-      root.style.setProperty('--custom-bg-size', 'auto');
-      root.style.setProperty('--custom-bg-repeat', 'repeat');
-    } else {
-      root.style.setProperty('--custom-bg-size', bgSettings.fit);
-      root.style.setProperty('--custom-bg-repeat', 'no-repeat');
-    }
-    viewport.classList.add('has-bg');
-  } else {
-    root.style.removeProperty('--custom-bg');
-    root.style.removeProperty('--custom-bg-opacity');
-    root.style.removeProperty('--custom-bg-size');
-    root.style.removeProperty('--custom-bg-repeat');
+
+  if (!url) {
+    [
+      '--custom-bg',
+      '--custom-bg-opacity',
+      '--custom-bg-size',
+      '--custom-bg-repeat'
+    ].forEach(property => {
+      root.style.removeProperty(property);
+    });
+
     viewport.classList.remove('has-bg');
+    return;
+  }
+
+  const repeated = bgSettings.fit === 'repeat';
+
+  root.style.setProperty('--custom-bg', `url("${url}")`);
+  root.style.setProperty(
+    '--custom-bg-opacity',
+    String(bgSettings.opacity)
+  );
+  root.style.setProperty(
+    '--custom-bg-size',
+    repeated ? 'auto' : bgSettings.fit
+  );
+  root.style.setProperty(
+    '--custom-bg-repeat',
+    repeated ? 'repeat' : 'no-repeat'
+  );
+
+  viewport.classList.add('has-bg');
+}
+
+function persistCanvasBackground() {
+  try {
+    localStorage.setItem(
+      BG_KEY,
+      JSON.stringify(bgSettings)
+    );
+  } catch (_) {
+    uiAlert(
+      '背景圖片設定儲存失敗。',
+      {
+        title:'儲存失敗',
+        kind:'danger'
+      }
+    );
   }
 }
-function saveBg() {
-  try { localStorage.setItem(BG_KEY, JSON.stringify(bgSettings)); }
-  catch(e) { uiAlert('背景圖片設定儲存失敗。', { title: '儲存失敗', kind: 'danger' }); }
+
+function paintCanvasBackgroundPreview() {
+  const preview = $('appearanceBackgroundPreview');
+  if (!preview) return;
+
+  const url = resolveImageUrl(bgSettings.image);
+
+  preview.style.backgroundImage =
+    url ? `url("${url}")` : '';
+
+  preview.textContent =
+    url ? '' : '尚未設定背景圖片';
 }
+
+function openAppearancePanel() {
+  $('appearanceBackgroundOpacity').value =
+    Math.round(bgSettings.opacity * 100);
+  $('appearanceBackgroundOpacityValue').textContent =
+    Math.round(bgSettings.opacity * 100) + '%';
+  $('appearanceBackgroundFit').value = bgSettings.fit;
+
+  customColor1.value = customColors.c1;
+  customColor2.value = customColors.c2;
+
+  paintCustomThemePreview();
+  paintThemeChoices();
+  paintCanvasBackgroundPreview();
+  renderOtherRelationshipLineControls();
+  syncRelationshipLineControls();
+
+  appearanceDialog.classList.add('show');
+}
+
+function closeAppearancePanel() {
+  appearanceDialog.classList.remove('show');
+}
+
+async function replaceCanvasBackground(file) {
+  const result = await compressBgImage(file);
+
+  bgSettings.image = await saveImageAsset(
+    result.blob,
+    {
+      width:result.width,
+      height:result.height
+    }
+  );
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+  paintCanvasBackgroundPreview();
+}
+
+function setCanvasBackgroundOpacity(percent) {
+  const value =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(percent) || 0
+      )
+    );
+
+  bgSettings.opacity = value / 100;
+  $('appearanceBackgroundOpacityValue').textContent =
+    Math.round(value) + '%';
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+}
+
+function setCanvasBackgroundFit(fit) {
+  bgSettings.fit =
+    ['cover','contain','repeat'].includes(fit)
+      ? fit
+      : 'cover';
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+}
+
+async function removeCanvasBackground() {
+  if (!bgSettings.image) return;
+
+  const confirmed = await uiConfirm(
+    '確定清除目前背景圖片嗎？',
+    {
+      title:'移除背景圖片',
+      kind:'danger',
+      confirmText:'移除背景'
+    }
+  );
+
+  if (!confirmed) return;
+
+  bgSettings.image = null;
+  scheduleGC();
+
+  renderCanvasBackground();
+  persistCanvasBackground();
+  paintCanvasBackgroundPreview();
+  await updateStorageInfo();
+}
+
 async function compressBgImage(file) {
   validateSupportedImageFile(file);
   const optimized = await assetStore.optimizeImage(file, {
@@ -6413,18 +6746,6 @@ async function compressBgImage(file) {
     sizeKB:Math.round(optimized.byteSize / 1024)
   };
 }
-function updateBgPreview() {
-  const el = $('bgPreview');
-  const url = resolveImageUrl(bgSettings.image);
-  if (url) {
-    el.style.backgroundImage = `url("${url}")`;
-    el.textContent = '';
-  } else {
-    el.style.backgroundImage = '';
-    el.textContent = '尚未設定背景圖片';
-  }
-}
-
 function formatStorageSize(byteSize) {
   const bytes = Math.max(0, Number(byteSize) || 0);
   if (bytes < 1024) return bytes + ' B';
@@ -6452,28 +6773,28 @@ async function updateStorageInfo() {
   if (assetSizeEl) assetSizeEl.textContent = formatStorageSize(assetBytes);
 }
 
-$('bgBtn').onclick = () => {
-  $('bgOpacity').value = Math.round(bgSettings.opacity * 100);
-  $('bgOpacityVal').textContent = Math.round(bgSettings.opacity * 100) + '%';
-  $('bgFit').value = bgSettings.fit;
-  customColor1.value = customColors.c1;
-  customColor2.value = customColors.c2;
-  updateCustomPreview();
-  renderThemeGrid();
-  updateBgPreview();
-  renderOtherRelationshipLineControls();
-  syncRelationshipLineControls();
-  bgMask.classList.add('show');
+$('appearanceBtn').onclick = openAppearancePanel;
+$('appearanceCloseBtn').onclick = closeAppearancePanel;
+appearanceDialog.onclick = event => {
+  if (event.target === appearanceDialog) {
+    closeAppearancePanel();
+  }
 };
-$('bgCloseBtn').onclick = () => bgMask.classList.remove('show');
-bgMask.onclick = e => { if (e.target === bgMask) bgMask.classList.remove('show'); };
 
 $('storageBtn').onclick = () => {
   updateStorageInfo();
-  storageMask.classList.add('show');
+  storageDialog.classList.add('show');
 };
-$('storageCloseBtn').onclick = () => storageMask.classList.remove('show');
-storageMask.onclick = e => { if (e.target === storageMask) storageMask.classList.remove('show'); };
+function closeStoragePanel() {
+  storageDialog.classList.remove('show');
+}
+
+$('storageCloseBtn').onclick = closeStoragePanel;
+storageDialog.onclick = event => {
+  if (event.target === storageDialog) {
+    closeStoragePanel();
+  }
+};
 
 // ========【恢復預設】 設定 - 介面設定與範例資料分開處理 ========
 const resetUiSettingsBtn = $('resetUiSettingsBtn');
@@ -6487,30 +6808,30 @@ if (resetUiSettingsBtn) {
 
     [THEME_KEY, CUSTOM_COLORS_KEY, BG_KEY, MODE_KEY, LABELS_KEY,
       LABEL_LOCK_KEY, SIDEBAR_WIDTH_KEY, FAMILY_PANEL_COLLAPSED_KEY,
-      ROSTER_VIEW_KEY, REL_LINE_STYLE_KEY].forEach(key => {
+      PERSON_LIBRARY_VIEW_KEY, REL_LINE_STYLE_KEY].forEach(key => {
       try { localStorage.removeItem(key); } catch (_) {}
     });
 
     customColors = { c1:'#f0c050', c2:'#a878c8' };
     bgSettings = { image:null, opacity:0.5, fit:'cover' };
     showRelLabels = true;
-    rosterViewMode = 'detailed';
+    personLibraryViewMode = 'detailed';
     relationshipLineSettings = JSON.parse(JSON.stringify(RELATIONSHIP_LINE_DEFAULTS));
     applyRelationshipLineSettings();
     applySidebarWidth(SIDEBAR_DEFAULT_WIDTH, { persist:false });
     setFamilyPanelCollapsed(false, { persist:false });
-    applyTheme('ling');
+    chooseThemePreset('ling');
     applyViewMode('view');
     applyLabelLock(false);
-    applyBg();
-    updateBgPreview();
+    renderCanvasBackground();
+    paintCanvasBackgroundPreview();
     updateLayoutToggle();
     const labelBtn = $('labelToggle');
     if (labelBtn) {
       labelBtn.classList.add('active');
       setIconText(labelBtn, 'tags', '隱藏關係');
     }
-    renderThemeGrid();
+    paintThemeChoices();
     render();
     requestAnimationFrame(fitScreen);
     uiToast('介面設定已恢復預設。');
@@ -6539,7 +6860,7 @@ if (restoreSampleBtn) {
 
       if (!ok) return;
 
-      closeEditor();
+      personEditor.close();
 
       const sampleDb =
         buildSample();
@@ -6548,15 +6869,15 @@ if (restoreSampleBtn) {
         sampleDb
       );
 
-      genealogyData = sampleDb;
+      genealogyStore.replaceDatabase(sampleDb);
       dragHistory.clear();
       invalidateChildrenIndex();
       invalidateRelationshipGraph();
       save({ immediate:true });
       refreshFamilyUI();
       render();
-      bgMask.classList.remove('show');
-      storageMask.classList.remove('show');
+      appearanceDialog.classList.remove('show');
+      storageDialog.classList.remove('show');
       requestAnimationFrame(fitScreen);
       uiToast('已恢復預設族譜。');
     } finally {
@@ -6565,37 +6886,38 @@ if (restoreSampleBtn) {
   };
 }
 
-$('bgInput').onchange = async e => {
-  const file = e.target.files[0];
+$('appearanceBackgroundInput').onchange = async event => {
+  const file = event.target.files?.[0];
   if (!file) return;
+
   try {
-    const result = await compressBgImage(file);
-    bgSettings.image = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
-    applyBg(); saveBg(); updateBgPreview();
-  } catch(err){ uiAlert('背景處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
-  e.target.value = '';
+    await replaceCanvasBackground(file);
+  } catch (error) {
+    uiAlert(
+      '背景處理失敗：' + error.message,
+      {
+        title:'圖片處理失敗',
+        kind:'danger'
+      }
+    );
+  } finally {
+    event.target.value = '';
+  }
 };
-$('bgOpacity').oninput = () => {
-  const v = +$('bgOpacity').value;
-  bgSettings.opacity = v / 100;
-  $('bgOpacityVal').textContent = v + '%';
-  applyBg(); saveBg();
+
+$('appearanceBackgroundOpacity').oninput = event => {
+  setCanvasBackgroundOpacity(
+    event.currentTarget.value
+  );
 };
-$('bgFit').onchange = () => {
-  bgSettings.fit = $('bgFit').value;
-  applyBg(); saveBg();
+
+$('appearanceBackgroundFit').onchange = event => {
+  setCanvasBackgroundFit(
+    event.currentTarget.value
+  );
 };
-$('bgClearBtn').onclick = async () => {
-  if (!bgSettings.image) return;
-  if (!await uiConfirm('確定清除目前背景圖片嗎？', { title: '移除背景圖片', kind: 'danger', confirmText: '移除背景' })) return;
-  bgSettings.image = null;
-  scheduleGC();
-  applyBg(); saveBg(); updateBgPreview();
-  updateStorageInfo();
-};
+
+$('appearanceBackgroundClearBtn').onclick = removeCanvasBackground;
 
 $('cleanupBtn').onclick = async () => {
   if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
@@ -6610,29 +6932,46 @@ $('cleanupBtn').onclick = async () => {
   }
 };
 
-$('tipsBtn').onclick = () => tipsMask.classList.add('show');
-$('tipsCloseBtn').onclick = () => tipsMask.classList.remove('show');
-tipsMask.onclick = e => { if (e.target === tipsMask) tipsMask.classList.remove('show'); };
+function closeHelpPanel() {
+  helpDialog.classList.remove('show');
+}
 
-const MODAL_STACK = ['avatarCropMask','photoMask','petMask','mask','infoMask','galleryViewerMask',
-                     'tipsMask','rosterMask','addMemberMask','storageMask','bgMask'];
-function closeTopModal() {
-  for (const id of MODAL_STACK) {
-    const el = document.getElementById(id);
-    if (el && el.classList.contains('show')) {
-      el.classList.remove('show');
-      if (id === 'mask') { editingId=null; editingAvatar=null; editingAvatarFrame={...DEFAULT_AVATAR_FRAME}; editingPets=[]; editingGallery=[]; editingParentKinds.clear(); editingChildKinds.clear(); }
-      if (id === 'petMask') { editingPetIndex=-1; editingPetAvatar=null; editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME}; }
-      if (id === 'avatarCropMask') { avatarCropTarget=null; avatarCropDraft={...DEFAULT_AVATAR_FRAME}; avatarCropUrl=''; avatarCropPointer=null; }
-      if (id === 'photoMask') { editingPhotoIndex = -1; editingPhotoImageRef = ''; }
-      if (id === 'infoMask') infoCardId = null;
-      if (id === 'galleryViewerMask') {
-        viewerSimId = null;
-        viewerMode = 'edit';
-      }
-      return true;
-    }
+$('helpBtn').onclick = () => helpDialog.classList.add('show');
+$('helpCloseBtn').onclick = closeHelpPanel;
+helpDialog.onclick = event => {
+  if (event.target === helpDialog) {
+    closeHelpPanel();
   }
+};
+
+// ========【彈窗 Lifecycle】 設定 - Esc 只找最上層彈窗；各 subsystem 自己清理狀態 ========
+const MODAL_LIFECYCLE_STACK = [
+  { dialog:avatarCropDialog, close:() => closeAvatarCropEditor() },
+  { dialog:lifePhotoEditorDialog, close:() => lifePhotoWorkspace.closeEditor() },
+  { dialog:petEditorDialog, close:() => petEditorController.close() },
+  { dialog:mask, close:() => personEditor.close() },
+  { dialog:personProfileDialog, close:() => closePersonProfile() },
+  { dialog:lifePhotoViewerDialog, close:() => lifePhotoWorkspace.closeViewer() },
+  { dialog:helpDialog, close:() => closeHelpPanel() },
+  { dialog:personLibraryDialog, close:() => personLibraryController.close() },
+  { dialog:familyMemberPickerDialog, close:() => addMemberController.close() },
+  { dialog:storageDialog, close:() => closeStoragePanel() },
+  { dialog:appearanceDialog, close:() => closeAppearancePanel() }
+];
+
+function closeTopModal() {
+  for (const lifecycle of MODAL_LIFECYCLE_STACK) {
+    if (
+      !lifecycle.dialog ||
+      !lifecycle.dialog.classList.contains('show')
+    ) {
+      continue;
+    }
+
+    lifecycle.close();
+    return true;
+  }
+
   return false;
 }
 
@@ -6647,7 +6986,7 @@ function genealogyParentRelations(child, byId = null) {
     if (!id || id === childId) return false;
     return byId instanceof Map
       ? byId.has(id)
-      : !!genealogyData?.sims?.[id];
+      : !!currentGenealogyData()?.sims?.[id];
   };
 
   const addRelation = (parentId, kind) => {
@@ -6678,7 +7017,7 @@ function genealogyParentRelations(child, byId = null) {
   const parentPool =
     byId instanceof Map
       ? [...byId.values()]
-      : Object.values(genealogyData?.sims || {});
+      : Object.values(currentGenealogyData()?.sims || {});
 
   parentPool.forEach(parent => {
     if (!parent || parent.id == null) return;
@@ -6750,7 +7089,7 @@ function isDescendant(ancestorId, nodeId) {
     if (seen.has(id)) continue;
     seen.add(id);
 
-    const sim = genealogyData.sims[id];
+    const sim = currentGenealogyData().sims[id];
     if (!sim) continue;
 
     for (const parentId of genealogyParentIds(sim)) {
@@ -6769,7 +7108,7 @@ function getChildrenOf(id) {
   if (!_childrenIndex) {
     _childrenIndex = new Map();
 
-    Object.values(genealogyData.sims)
+    Object.values(currentGenealogyData().sims)
       .forEach(child => {
         genealogyParentIds(child)
           .forEach(pid => {
@@ -6797,20 +7136,25 @@ function invalidateRelationshipGraph() {
 
 genealogyStore =
   window.L1nGGenealogyStore?.create?.({
-    getData:() => genealogyData,
     uid,
     getParentRelations:(sim) => genealogyParentRelations(sim),
     isSiblingLink,
     siblingRelationType:SIBLING_RELATION_TYPE,
     siblingRelationLabel:SIBLING_RELATION_LABEL,
     normalizeRelationshipType:normalizeRelationshipTypeText,
-    isBuiltInRelationshipType:isBuiltInSocialRelationshipType
+    isBuiltInRelationshipType:isBuiltInSocialRelationshipType,
+    cardSettingFieldKeys:CARD_SETTING_FIELD_KEYS,
+    defaultCardViewSettings:DEFAULT_CARD_VIEW_SETTINGS,
+    defaultCardEditSettings:DEFAULT_CARD_EDIT_SETTINGS,
+    cardViewAppearances:['minimal','translucent','full']
   }) ||
   null;
 
 if (!genealogyStore) {
   throw new Error('Genealogy Store failed to initialize.');
 }
+
+personEditor.bindStore(genealogyStore);
 
 function applyGenealogyMutation(
   mutation,
@@ -7117,7 +7461,7 @@ function repairImportedHouseholdMembership(targetDb) {
 }
 
 
-function collectReferencedAssetIds(targetDb = genealogyData, targetBg = bgSettings, { strict = false } = {}) {
+function collectReferencedAssetIds(targetDb = currentGenealogyData(), targetBg = bgSettings, { strict = false } = {}) {
   const used = new Set();
 
   const add = (ref, label) => {
@@ -7144,7 +7488,7 @@ function collectReferencedAssetIds(targetDb = genealogyData, targetBg = bgSettin
   return used;
 }
 
-function clearUnsupportedImageRefs(targetDb = genealogyData, targetBg = bgSettings) {
+function clearUnsupportedImageRefs(targetDb = currentGenealogyData(), targetBg = bgSettings) {
   let cleared = 0;
 
   const clean = (obj, key, emptyValue = null) => {
@@ -7219,7 +7563,7 @@ function getRelInfoByKey(
 
 function getLabelOffset(key) {
   if (!key) return { dx:0, dy:0 };
-  const o = (genealogyData.labelPositions || {})[key] || {};
+  const o = (currentGenealogyData().labelPositions || {})[key] || {};
   return { dx: o.dx || 0, dy: o.dy || 0 };
 }
 
@@ -7312,9 +7656,9 @@ async function compressGalleryImage(file) {
 function getVisibleIds(familyId) {
   const fam =
     familyId ===
-      genealogyData.currentFamilyId
+      currentGenealogyData().currentFamilyId
       ? currentTreeFamily()
-      : genealogyData.families.find(
+      : currentGenealogyData().families.find(
           f => f.id === familyId
         );
 
@@ -7326,7 +7670,7 @@ function getVisibleIds(familyId) {
     (fam.memberIds || [])
       .map(String)
       .filter(id =>
-        genealogyData.sims[id]
+        currentGenealogyData().sims[id]
       );
 
   const result =
@@ -7342,7 +7686,7 @@ function getVisibleIds(familyId) {
   //   仍允許補上 component 邊界上的直接配偶／前任。
   const relationshipSources =
     familyId ===
-      genealogyData.currentFamilyId &&
+      currentGenealogyData().currentFamilyId &&
     familyTreeViewMode !== 'extended' &&
     Array.isArray(
       fam.primaryMemberIds
@@ -7355,7 +7699,7 @@ function getVisibleIds(familyId) {
     relationshipSources.map(String)
   )].forEach(id => {
     const sim =
-      genealogyData.sims[id];
+      currentGenealogyData().sims[id];
 
     if (!sim) return;
 
@@ -7366,7 +7710,7 @@ function getVisibleIds(familyId) {
       .map(String)
       .forEach(relatedId => {
         if (
-          genealogyData.sims[
+          currentGenealogyData().sims[
             relatedId
           ]
         ) {
@@ -7381,7 +7725,7 @@ function getVisibleIds(familyId) {
   [...result].forEach(id => {
     if (
       !simMatchesTopbarFilters(
-        genealogyData.sims[id]
+        currentGenealogyData().sims[id]
       )
     ) {
       result.delete(id);
@@ -7393,7 +7737,7 @@ function getVisibleIds(familyId) {
 
 // ========【圖片預熱】 設定 - 只預先載入目前畫面會立即看到的圖片，避免 F5 後頭像逐張跳出 ========
 function preloadCurrentViewAssets() {
-  if (!assetStoreReady || !genealogyData) {
+  if (!assetStoreReady || !currentGenealogyData()) {
     return Promise.resolve({
       requested:0,
       loaded:0
@@ -7428,12 +7772,12 @@ function preloadCurrentViewAssets() {
 
   const visibleIds =
     getVisibleIds(
-      genealogyData.currentFamilyId
+      currentGenealogyData().currentFamilyId
     );
 
   visibleIds.forEach(id => {
     const sim =
-      genealogyData.sims[id];
+      currentGenealogyData().sims[id];
 
     if (sim) {
       addPriority(sim.avatar);
@@ -7445,7 +7789,7 @@ function preloadCurrentViewAssets() {
   (currentFamily()?.memberIds || [])
     .forEach(id => {
       const sim =
-        genealogyData.sims[id];
+        currentGenealogyData().sims[id];
 
       if (sim) {
         addSecondary(sim.avatar);
@@ -7476,9 +7820,9 @@ genealogyScene =
   window.L1nGGenealogyScene?.create?.({
     runtime:genealogyRuntime,
     dom:{ stage, svg, labelsSvg, nodes },
-    constants:{ PAD, VIEW_CARD_LAYOUT, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX },
+    constants:{ PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX },
     state:{
-      getData:() => genealogyData,
+      getData:() => genealogyStore.getData(),
       getViewMode:() => viewMode,
       getFamilyTreeViewMode:() => familyTreeViewMode,
       getShowRelLabels:() => showRelLabels,
@@ -7487,8 +7831,7 @@ genealogyScene =
     },
     helpers:{
       getCardViewSettings, getCardEditSettings, cardViewAppearanceClass, cardSettingsHasBody,
-      buildViewCardContentModel, renderViewCardLine, getDims, getNodeDimensions, getNodeDimensionsById,
-      getGaps, getCurrentManualPositions, getCurrentFreeLayout, formatCardGender, formatCardAge,
+      buildViewCardContentModel, renderViewCardLine, formatCardGender, formatCardAge,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
@@ -7548,10 +7891,6 @@ function zoomAt(clientX, clientY, factor) {
   applyTransform({ interacting:true });
 }
 
-function getVisibleTreeContentBounds() {
-  return genealogyScene?.getContentBounds?.() || null;
-}
-
 function fitScreen({ rememberState = true } = {}) {
   const vw =
     viewport.clientWidth;
@@ -7564,7 +7903,7 @@ function fitScreen({ rememberState = true } = {}) {
   }
 
   const bounds =
-    getVisibleTreeContentBounds();
+    genealogyScene?.getContentBounds?.() || null;
 
   // 沒有人物時才退回 stage 外框。
   if (!bounds) {
@@ -7719,11 +8058,11 @@ function setupViewportResizeObserver() {
 }
 
 function focusSimOnCanvas(simId) {
-  if (!simId || !genealogyData?.sims?.[simId]) return;
+  if (!simId || !currentGenealogyData()?.sims?.[simId]) return;
   if (!getSceneLayout() || !getSceneLayout().pos?.has(simId)) render();
   const pos = getSceneLayout()?.pos?.get(simId);
   if (!pos) return;
-  const { W, H } = getNodeDimensions(genealogyData.sims[simId]);
+  const { W, H } = genealogyScene.getNodeDimensions(currentGenealogyData().sims[simId]);
   // 尋找人物屬於使用者主動移動畫布，viewport 改變後保留目前世界中心。
   canvasViewState = 'manual';
 
@@ -7734,7 +8073,7 @@ function focusSimOnCanvas(simId) {
   panX = viewport.clientWidth / 2 - centerX * scale;
   panY = viewport.clientHeight / 2 - centerY * scale;
   applyTransform();
-  const node = [...nodes.querySelectorAll('.node[data-id]')].find(el => el.dataset.id === simId);
+  const node = [...nodes.querySelectorAll('.person-card[data-id]')].find(el => el.dataset.id === simId);
   if (node) {
     node.classList.remove('focus-pulse');
     void node.offsetWidth;
@@ -7754,8 +8093,8 @@ function flushAppRenderInvalidation() {
   if (!mask) return;
   if (mask & APP_RENDER_DIRTY.chrome) { syncRelationshipPerspectiveUI(); updateLayoutToggle(); }
   if (mask & APP_RENDER_DIRTY.lists) {
-    if (rosterMask.classList.contains('show')) renderRoster();
-    if (addMemberMask.classList.contains('show')) renderAddMemberList();
+    if (personLibraryDialog.classList.contains('show')) renderPersonLibrary();
+    if (familyMemberPickerDialog.classList.contains('show')) renderFamilyMemberPickerList();
   }
 }
 function invalidateRender(layers, { immediate = false } = {}) {
@@ -7767,75 +8106,165 @@ function invalidateRender(layers, { immediate = false } = {}) {
   if (appRenderInvalidationRaf) return;
   appRenderInvalidationRaf = requestAnimationFrame(() => { appRenderInvalidationRaf = 0; flushAppRenderInvalidation(); });
 }
-function scheduleEdgeRedraw() { genealogyScene?.scheduleEdgeRedraw?.(); }
-function drawEdges() { genealogyScene?.invalidate?.({ edges:true }, { immediate:true }); }
 function render() {
   invalidateRender({ layout:true, nodes:true, edges:true, chrome:true, lists:true }, { immediate:true });
 }
 
-function avatarHTML(sim){
-  const image=framedAvatarImageHTML(sim.avatar,sim.avatarFrame);
-  if(image)return image;
-  const ch=displayDataText(sim.name||'?',sim).trim().charAt(0)||'?';
-  return esc(ch);
-}
-function statusBadgeHTML(sim) {
-  if (sim.status === '幽靈') return `<div class="n-badge ghost" title="${esc(uiText('幽靈'))}">${iconSvg('ghost-symbol')}</div>`;
-  if (sim.status === '已故') return `<div class="n-badge dead" title="${esc(uiText('已故'))}">${iconSvg('tombstone')}</div>`;
-  return `<div class="n-badge alive" title="${esc(uiText('在世'))}">${iconSvg('heart')}</div>`;
-}
-function statusIconHTML(sim) {
-  if (sim.status === '幽靈') return `<span class="roster-badge status-icon status-ghost" title="${esc(uiText('幽靈'))}">${iconSvg('ghost-symbol')}</span>`;
-  if (sim.status === '已故') return `<span class="roster-badge status-icon status-dead" title="${esc(uiText('已故'))}">${iconSvg('tombstone')}</span>`;
-  return `<span class="roster-badge status-icon status-alive" title="${esc(uiText('在世'))}">${iconSvg('heart')}</span>`;
-}
-function raceBadgeHTML(sim) {
-  const r = (sim.race || '').trim();
-  if (!r) return '';
-  const preset = RACE_PRESETS[r];
-  if (!preset || !preset.icon) return '';
-  return `<div class="n-race-badge race-icon" title="${esc(uiText(preset.label))}">${iconSvg(preset.icon)}</div>`;
-}
-function raceIconHTML(sim) {
-  const r = (sim.race || '').trim();
-  if (!r) return '';
-  const preset = RACE_PRESETS[r];
-  if (!preset || !preset.icon) return '';
-  return `<span class="roster-badge race-icon" title="${esc(uiText(preset.label))}">${iconSvg(preset.icon)}</span>`;
-}
-function buildTagsHTML(traits, owner = null) {
-  const list = (traits||[]).filter(Boolean).map(value => displayDataText(value, owner));
-  if (!list.length) return '';
-  const shown = list.slice(0, MAX_TAGS);
-  const rest = list.length - shown.length;
-  let html = shown.map(t => `<span class="tag" title="${esc(t)}">${esc(t)}</span>`).join('');
-  if (rest > 0) {
-    html += `<span class="tag tag-more" title="${esc(list.slice(MAX_TAGS).join('、'))}">+${rest}</span>`;
-  }
-  return html;
-}
-function petIconFor(pet) {
-  const sp = PET_SPECIES[pet.species] || PET_SPECIES.other;
-  return iconSvg(sp.icon, 'pet-icon');
-}
-function petSpeciesLabel(pet) {
-  const sp = PET_SPECIES[pet.species] || PET_SPECIES.other;
-  return uiText(sp.label);
+function avatarHTML(sim) {
+  return (
+    buildPersonPresentation(sim)
+      ?.avatarHtml ||
+    '?'
+  );
 }
 
-function isEaCasPetSpecies(species){return ['dog','cat','horse'].includes(String(species||''));}
-  function normalizePetGender(value){
-    const text=String(value||'').trim().toLowerCase();
-    if(['male','男','公'].includes(text))return'male';
-    if(['female','女','母'].includes(text))return'female';
-    return'';
+function statusBadgeHTML(sim) {
+  const status =
+    buildPersonPresentation(sim)
+      ?.status;
+
+  if (!status) return '';
+
+  return `<div class="person-card-status-badge ${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</div>`;
+}
+
+function statusIconHTML(sim) {
+  const status =
+    buildPersonPresentation(sim)
+      ?.status;
+
+  if (!status) return '';
+
+  return `<span class="person-meta-icon status-icon status-${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</span>`;
+}
+
+function raceBadgeHTML(sim) {
+  const race =
+    buildPersonPresentation(sim)
+      ?.race;
+
+  if (!race?.icon) return '';
+
+  return `<div class="person-card-race-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</div>`;
+}
+
+function raceIconHTML(sim) {
+  const race =
+    buildPersonPresentation(sim)
+      ?.race;
+
+  if (!race?.icon) return '';
+
+  return `<span class="person-meta-icon race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</span>`;
+}
+
+function buildTagsHTML(traits, owner = null) {
+  const list =
+    (traits || [])
+      .filter(Boolean)
+      .map(value =>
+        personDisplayText(
+          value,
+          owner
+        )
+      );
+
+  if (!list.length) return '';
+
+  const shown =
+    list.slice(0, MAX_TAGS);
+
+  const rest =
+    list.length -
+    shown.length;
+
+  let html =
+    shown
+      .map(text =>
+        `<span class="tag" title="${esc(text)}">${esc(text)}</span>`
+      )
+      .join('');
+
+  if (rest > 0) {
+    html +=
+      `<span class="tag tag-more" title="${esc(list.slice(MAX_TAGS).join('、'))}">+${rest}</span>`;
   }
-  function petGenderLabel(pet){
-    const value=normalizePetGender(pet?.gender);
-    if(value==='male')return uiText('公');
-    if(value==='female')return uiText('母');
-    return'';
+
+  return html;
+}
+
+function petIconFor(pet) {
+  const species =
+    PET_SPECIES[pet.species] ||
+    PET_SPECIES.other;
+
+  return iconSvg(
+    species.icon,
+    'pet-icon'
+  );
+}
+
+function formatPetSpecies(pet) {
+  const species =
+    PET_SPECIES[
+      String(pet?.species || '')
+    ] ||
+    PET_SPECIES.other;
+
+  return uiText(
+    species.label
+  );
+}
+
+function isEaCasPetSpecies(species) {
+  return [
+    'dog',
+    'cat',
+    'horse'
+  ].includes(
+    String(species || '')
+  );
+}
+
+function normalizePetGender(value) {
+  const text =
+    String(value || '')
+      .trim()
+      .toLowerCase();
+
+  if (
+    ['male','男','公']
+      .includes(text)
+  ) {
+    return 'male';
   }
+
+  if (
+    ['female','女','母']
+      .includes(text)
+  ) {
+    return 'female';
+  }
+
+  return '';
+}
+
+function petGenderLabel(pet) {
+  const value =
+    normalizePetGender(
+      pet?.gender
+    );
+
+  if (value === 'male') {
+    return uiText('公');
+  }
+
+  if (value === 'female') {
+    return uiText('母');
+  }
+
+  return '';
+}
 
 // ========【寵物血統】 設定 - 遊戲匯入血統只讀顯示，不改變既有手動寵物編輯流程 ========
 function getPetLineageInfo(pet) {
@@ -7874,7 +8303,9 @@ function getPetLineageInfo(pet) {
 }
 
 function petLineageHTML(pet) {
-  const lineage = getPetLineageInfo(pet);
+  const lineage =
+    getPetLineageInfo(pet);
+
   if (!lineage.hasData) return '';
 
   const parts = [];
@@ -7900,29 +8331,88 @@ function petLineageHTML(pet) {
   return `<div class="pet-lineage">${parts.join('')}</div>`;
 }
 
-function petStatusIcon(pet) {
-  if (pet.status === '幽靈') return iconSvg('ghost-symbol');
-  if (pet.status === '已故') return iconSvg('tombstone');
+function renderPetLifeStatusIcon(pet) {
+  const status =
+    String(pet?.status || '');
+
+  if (status === '幽靈') {
+    return iconSvg('ghost-symbol');
+  }
+
+  if (status === '已故') {
+    return iconSvg('tombstone');
+  }
+
   return '';
 }
+
 function buildPetsChipsHTML(pets, owner = null) {
-  if (!pets || !pets.length) return '';
-  const chips = pets.slice(0, 3).map(p => {
-    const icon = petIconFor(p);
-    const st = petStatusIcon(p);
-    const petName = displayDataText(p.name, owner);
-    const breed = displayDataText(p.breed, owner);
-    return `<span class="n-pet-chip" title="${esc(petName)} · ${esc(petSpeciesLabel(p))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${st ? st : ''}${esc(petName)}</span>`;
-  }).join('');
-  const rest = pets.length > 3 ? `<span class="n-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length-3}</span>` : '';
+  if (!pets?.length) return '';
+
+  const chips =
+    pets
+      .slice(0, 3)
+      .map(pet => {
+        const icon =
+          petIconFor(pet);
+
+        const status =
+          renderPetLifeStatusIcon(
+            pet
+          );
+
+        const petName =
+          personDisplayText(
+            pet.name,
+            owner
+          );
+
+        const breed =
+          personDisplayText(
+            pet.breed,
+            owner
+          );
+
+        return `<span class="person-card-pet-chip" title="${esc(petName)} · ${esc(formatPetSpecies(pet))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${status || ''}${esc(petName)}</span>`;
+      })
+      .join('');
+
+  const rest =
+    pets.length > 3
+      ? `<span class="person-card-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length - 3}</span>`
+      : '';
+
   return chips + rest;
 }
+
 function genderClass(sim) {
-  return sim.gender === '男' ? 'male' : sim.gender === '女' ? 'female' : 'other';
+  const gender =
+    buildPersonPresentation(sim)
+      ?.gender
+      .value;
+
+  return gender === '男'
+    ? 'male'
+    : gender === '女'
+      ? 'female'
+      : 'other';
 }
+
 function statusClass(sim) {
-  return sim.status === '幽靈' ? 'ghost' : sim.status === '已故' ? 'dead' : '';
+  const status =
+    buildPersonPresentation(sim)
+      ?.status
+      .value;
+
+  return status === '幽靈'
+    ? 'ghost'
+    : status === '已故'
+      ? 'dead'
+      : '';
 }
+
+// ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
+
 // ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
 function profileDirectFamilyIds(simId) {
   return resolveDirectFamilyRelationships(
@@ -7982,7 +8472,7 @@ function profileOtherRelationshipRows(
   const groups =
     new Map();
 
-  (genealogyData?.links || [])
+  (currentGenealogyData()?.links || [])
     .forEach(link => {
       if (
         isSiblingLink(link) ||
@@ -8000,7 +8490,7 @@ function profileOtherRelationshipRows(
           : String(link.from);
 
       const other =
-        genealogyData.sims[
+        currentGenealogyData().sims[
           otherId
         ];
 
@@ -8038,421 +8528,1061 @@ function profileOtherRelationshipRows(
     }));
 }
 
-function infoCardDataText(value,owner,draft=false){
-    if(value==null)return'';
-    return draft?String(value):displayDataText(value,owner);
-  }
-  function renderInfoCardContent(container,c,options={}){
-    if(!container||!c)return;
-    const draft=options.draft===true;
-    const dName=infoCardDataText(c.name,c,draft),dCareer=infoCardDataText(c.career,c,draft),dResidence=infoCardDataText(c.residence,c,draft),dAspiration=infoCardDataText(c.aspiration,c,draft),dCause=infoCardDataText(c.causeOfDeath,c,draft),dBio=infoCardDataText(c.bio,c,draft);
-    const avatarClass=['info-card-avatar',c.status==='幽靈'?'ghost':'',c.status==='已故'?'dead':''].filter(Boolean).join(' ');
-    const avatar=framedAvatarImageHTML(c.avatar,c.avatarFrame)||esc((dName||'?').trim().charAt(0)||'?');
-    const metaItems=[`<span class="stage-tag stage-${esc(c.lifeStage||'')}">${esc(uiText(c.lifeStage||'成年'))}</span>`];
-    const genderText=uiText(c.gender||'其他'),genderIcon=c.gender==='男'?'gender-male':c.gender==='女'?'gender-female':'gender-ambiguous';
-    metaItems.push(`<span class="meta-pill">${iconSvg(genderIcon)}<span>${esc(genderText)}</span></span>`);
-    metaItems.push(`<span class="meta-pill">${statusIconHTML(c)}<span>${esc(uiText(c.status||'在世'))}</span></span>`);
-    if(c.race&&RACE_PRESETS[c.race]){const race=RACE_PRESETS[c.race];metaItems.push(`<span class="meta-pill">${race.icon?iconSvg(race.icon):''}<span>${esc(uiText(race.label))}</span></span>`);}
-    const birthdayText=c.birthdayMonth&&c.birthdayDay?formatBirthdaySummary(c.birthdayMonth,c.birthdayDay,c.birthdayYear):uiText('生日未知');
-    const ageText=c.age!=null&&c.age!==''?((document.documentElement.lang||'zh-Hant')==='en'?`${uiText('年齡')} ${c.age}`:`${c.age} ${uiText('歲')}`):uiText('年齡未知');
-    const headFacts=[`<div class="info-card-head-fact">${iconSvg('cake2')}<span>${esc(birthdayText)} · ${esc(ageText)}</span></div>`,`<div class="info-card-head-fact">${iconSvg('house')}<span>${esc(dResidence||uiText('居住地未知'))}</span></div>`];
-    const householdId=c.gameData&&c.gameData.householdId!=null?String(c.gameData.householdId):'';
-    const importedHouseholdFamily=householdId?genealogyData.families.find(f=>String(f.gameData?.householdId??'')===householdId):null;
-    const householdNameRaw=(c.gameData&&c.gameData.householdName)||(importedHouseholdFamily&&importedHouseholdFamily.name)||'';
-    const householdName=householdNameRaw?infoCardDataText(householdNameRaw,importedHouseholdFamily||c,draft):'';
-    const familyNames=Array.isArray(options.familyNames)?options.familyNames:genealogyData.families.filter(f=>!f.gameImport).filter(f=>(f.memberIds||[]).includes(c.id)).map(f=>displayDataText(f.name,f));
-    const familyRelationshipRows=Array.isArray(options.familyRelationshipRows)?options.familyRelationshipRows:profileFamilyRelationshipRows(c.id);
-    const otherRelationshipRows=Array.isArray(options.otherRelationshipRows)?options.otherRelationshipRows:profileOtherRelationshipRows(c.id);
-    const generationLabel=options.generationLabel!==undefined?options.generationLabel:getSimGenerationLabel(c.id,currentFamily());
-    const row=(label,value,muted=false)=>'<div class="info-card-row"><div class="info-card-label">'+esc(uiText(label))+'</div><div class="info-card-value'+(muted?' muted':'')+'">'+value+'</div></div>';
-    const sections=[],basicRows=[row('職業',esc(dCareer||'—')),row('人生抱負',esc(dAspiration||'—')),row('家庭',esc(householdName||'—'))];
-    if((c.status==='已故'||c.status==='幽靈')&&c.causeOfDeath)basicRows.push(row('死因',esc(dCause)));
-    const traits=(c.traits||[]).length?`<div class="info-card-traits">${c.traits.map(t=>`<span class="tag">${esc(infoCardDataText(t,c,draft))}</span>`).join('')}</div>`:`<div class="info-card-value muted">—</div>`;
-    basicRows.push(`<div class="info-card-row"><div class="info-card-label">${esc(uiText('特徵'))}</div><div class="info-card-value">${traits}</div></div>`);
-    sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('基本資料'))}</h3><div class="info-profile-list">${basicRows.join('')}</div></section>`);
-    const familyRows=[row('所屬家族',familyNames.length?familyNames.map(esc).join(' / '):'—'),...(generationLabel?[row('世代',esc(generationLabel))]:[]),...familyRelationshipRows.map(item=>row(item.label,item.names.map(esc).join(' / ')))];
-    sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('家庭關係'))}</h3><div class="info-profile-list">${familyRows.join('')}</div></section>`);
-    if(otherRelationshipRows.length)sections.push('<section class="info-profile-section"><h3 class="info-profile-section-title">'+esc(uiText('其他關係'))+'</h3><div class="info-profile-list">'+otherRelationshipRows.map(item=>row(item.label,item.names.map(esc).join(' / '))).join('')+'</div></section>');
-    sections.push(`<section class="info-profile-section"><h3 class="info-profile-section-title">${esc(uiText('簡介'))}</h3><div class="info-card-bio">${c.bio?esc(dBio):'—'}</div></section>`);
-    const petItems=(c.pets||[]).map(p=>{const petAvatar=framedAvatarImageHTML(p.avatar,p.avatarFrame)||petIconFor(p);const meta=[petSpeciesLabel(p),p.breed?infoCardDataText(p.breed,c,draft):'',petGenderLabel(p)].filter(Boolean).join(' · ');return`<div class="info-card-pet"><div class="info-card-pet-avatar">${petAvatar}</div><div class="info-card-pet-text"><div class="info-card-pet-name">${esc(infoCardDataText(p.name,c,draft)||uiText('（未命名）'))}</div><div class="info-card-pet-meta">${esc(meta)}</div>${petLineageHTML(p)}</div></div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
-    const galleryItems=(c.gallery||[]).slice(0,8).map((g,i)=>{const url=resolveImageUrl(g.image);const assetId=isAssetId(g.image)?String(g.image):'';return`<div class="gallery-item" data-info-gallery-idx="${i}" title="${esc(g.title||'')}">${assetId?`<img data-asset-id="${esc(assetId)}"${url?` src="${esc(url)}"`:''} alt="" loading="lazy" decoding="async">`:''}</div>`;}).join('')||`<div class="info-card-value muted">—</div>`;
-    sections.push(`<section class="info-profile-section"><div class="info-card-media"><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('寵物'))}</span><span class="info-card-media-count">${(c.pets||[]).length}</span></div><div class="info-card-pets">${petItems}</div></div><div class="info-card-media-column"><div class="info-card-media-head"><span>${esc(uiText('人生照片'))}</span><span class="info-card-media-count">${(c.gallery||[]).length}</span></div><div class="info-card-gallery">${galleryItems}</div></div></div></section>`);
-    container.innerHTML=`<div class="info-card-header"><div class="${avatarClass}">${avatar}</div><div class="info-card-header-text"><div class="info-card-name-row"><span class="info-card-name">${esc(dName||'—')}</span></div><div class="info-card-meta">${metaItems.join('')}</div><div class="info-card-head-facts">${headFacts.join('')}</div></div></div><div class="info-card-body">${sections.join('')}</div>`;
-    container.querySelectorAll('[data-info-gallery-idx]').forEach(element=>{element.onclick=()=>{const index=Number(element.dataset.infoGalleryIdx);if(typeof options.onGallery==='function')options.onGallery(index);else if(c.id&&genealogyData?.sims?.[c.id])openGalleryViewer(c.id,index);};});
-  }
-  function openInfoCard(id){
-    const c=genealogyData.sims[id];
-    if(!c)return;
-    infoCardId=id;
-    renderInfoCardContent($('infoCardContent'),c);
-    infoMask.classList.add('show');
-  }
-function closeInfoCard() {
-  infoMask.classList.remove('show');
-  infoCardId = null;
-}
-$('infoCloseBtn').onclick = closeInfoCard;
-infoMask.onclick = e => { if (e.target === infoMask) closeInfoCard(); };
-$('infoEditBtn').onclick = () => {
-  const id = infoCardId; closeInfoCard(); if (id) openEditor(id);
-};
+function buildPersonProfilePresentation(person, options = {}) {
+  if (!person) return null;
 
-function renderGalleryGrid() {
-  if (!galleryGrid) return;
-  if (!editingGallery.length) {
-    galleryGrid.innerHTML = '<div class="gallery-empty" style="grid-column:1/-1;">尚未新增人生照片</div>';
+  const draft =
+    options.draft === true;
+
+  const presentation =
+    buildPersonPresentation(
+      person,
+      { draft }
+    );
+
+  const householdId =
+    person.gameData &&
+    person.gameData.householdId != null
+      ? String(
+          person.gameData.householdId
+        )
+      : '';
+
+  const importedHouseholdFamily =
+    householdId
+      ? currentGenealogyData().families.find(
+          family =>
+            String(
+              family.gameData?.householdId ??
+              ''
+            ) === householdId
+        )
+      : null;
+
+  const householdNameRaw =
+    (
+      person.gameData &&
+      person.gameData.householdName
+    ) ||
+    importedHouseholdFamily?.name ||
+    '';
+
+  const householdName =
+    householdNameRaw
+      ? personDisplayText(
+          householdNameRaw,
+          importedHouseholdFamily ||
+          person,
+          draft
+        )
+      : '';
+
+  const familyNames =
+    Array.isArray(
+      options.familyNames
+    )
+      ? options.familyNames
+      : currentGenealogyData().families
+          .filter(family =>
+            !family.gameImport
+          )
+          .filter(family =>
+            (
+              family.memberIds ||
+              []
+            ).includes(person.id)
+          )
+          .map(family =>
+            displayDataText(
+              family.name,
+              family
+            )
+          );
+
+  const familyRelationshipRows =
+    Array.isArray(
+      options.familyRelationshipRows
+    )
+      ? options.familyRelationshipRows
+      : profileFamilyRelationshipRows(
+          person.id
+        );
+
+  const otherRelationshipRows =
+    Array.isArray(
+      options.otherRelationshipRows
+    )
+      ? options.otherRelationshipRows
+      : profileOtherRelationshipRows(
+          person.id
+        );
+
+  const generationLabel =
+    options.generationLabel !==
+      undefined
+      ? options.generationLabel
+      : getSimGenerationLabel(
+          person.id,
+          currentFamily()
+        );
+
+  return {
+    person,
+    draft,
+    presentation,
+    householdName,
+    familyNames,
+    familyRelationshipRows,
+    otherRelationshipRows,
+    generationLabel,
+    onGallery:
+      typeof options.onGallery ===
+      'function'
+        ? options.onGallery
+        : null
+  };
+}
+
+function renderPersonProfileRow(
+  label,
+  valueHtml,
+  { muted = false } = {}
+) {
+  return `
+    <div class="person-profile-row">
+      <div class="person-profile-label">${esc(uiText(label))}</div>
+      <div class="person-profile-value${muted ? ' muted' : ''}">${valueHtml}</div>
+    </div>
+  `;
+}
+
+function renderPersonProfileSection(
+  title,
+  content
+) {
+  return `
+    <section class="person-profile-section">
+      <h3 class="person-profile-section-title">${esc(uiText(title))}</h3>
+      ${content}
+    </section>
+  `;
+}
+
+function renderPersonProfilePet(
+  pet,
+  model
+) {
+  const avatar =
+    framedAvatarImageHTML(
+      pet.avatar,
+      pet.avatarFrame
+    ) ||
+    petIconFor(pet);
+
+  const meta = [
+    formatPetSpecies(pet),
+    pet.breed
+      ? personDisplayText(
+          pet.breed,
+          model.person,
+          model.draft
+        )
+      : '',
+    petGenderLabel(pet)
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const name =
+    personDisplayText(
+      pet.name,
+      model.person,
+      model.draft
+    ) ||
+    uiText('（未命名）');
+
+  return `
+    <div class="person-profile-pet">
+      <div class="person-profile-pet-avatar">${avatar}</div>
+      <div class="person-profile-pet-text">
+        <div class="person-profile-pet-name">${esc(name)}</div>
+        <div class="person-profile-pet-meta">${esc(meta)}</div>
+        ${petLineageHTML(pet)}
+      </div>
+    </div>
+  `;
+}
+
+function renderPersonProfileLifePhotoItem(
+  photo,
+  index
+) {
+  const url =
+    resolveImageUrl(
+      photo.image
+    );
+
+  const assetId =
+    isAssetId(photo.image)
+      ? String(photo.image)
+      : '';
+
+  return `
+    <div
+      class="life-photo-item"
+      data-person-profile-life-photo-index="${index}"
+      title="${esc(photo.title || '')}"
+    >
+      ${
+        assetId
+          ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" loading="lazy" decoding="async">`
+          : ''
+      }
+    </div>
+  `;
+}
+
+function renderPersonProfileContent(
+  container,
+  person,
+  options = {}
+) {
+  if (
+    !container ||
+    !person
+  ) {
     return;
   }
-  galleryGrid.innerHTML = editingGallery.map((g, i) => {
-    const stageTag = g.lifeStage
-      ? `<span class="gallery-item-stage stage-${g.lifeStage}">${esc(g.lifeStage)}</span>`
-      : '';
-    const title = g.title ? esc(g.title) : '';
-    const url = resolveImageUrl(g.image);
-    const assetId = isAssetId(g.image) ? String(g.image) : '';
-    return `<div class="gallery-item" data-gallery-idx="${i}">
-      ${assetId ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" draggable="false" loading="lazy" decoding="async">` : ''}
-      ${stageTag}
-      <div class="gallery-item-overlay">
-        <button type="button" class="gallery-item-btn" data-gallery-edit="${i}" title="編輯">${iconSvg('pencil-square')}</button>
-        <button type="button" class="gallery-item-btn danger" data-gallery-del="${i}" title="刪除">${iconSvg('trash3')}</button>
-      </div>
-      ${title ? `<div class="gallery-item-title">${title}</div>` : ''}
-    </div>`;
-  }).join('');
 
-  galleryGrid.querySelectorAll('.gallery-item').forEach(el => {
-    el.onclick = e => {
-      if (e.target.closest('.gallery-item-btn')) return;
-      openGalleryViewerPreview(+el.dataset.galleryIdx);
-    };
-  });
-  galleryGrid.querySelectorAll('[data-gallery-edit]').forEach(btn => {
-    btn.onclick = e => { e.stopPropagation(); openPhotoEditor(+btn.dataset.galleryEdit); };
-  });
-  galleryGrid.querySelectorAll('[data-gallery-del]').forEach(btn => {
-    btn.onclick = async e => {
-      e.stopPropagation();
-      const i = +btn.dataset.galleryDel;
-      const g = editingGallery[i];
-      if (!g) return;
-      if (!await uiConfirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`, { title: '刪除圖片', kind: 'danger', confirmText: '刪除' })) return;
-      editingGallery.splice(i, 1);
-      renderGalleryGrid();
-    };
-  });
-}
+  const model =
+    buildPersonProfilePresentation(
+      person,
+      options
+    );
 
-$('btnAddPhoto').onclick = () => openPhotoEditor(-1);
+  if (!model) return;
 
-galleryGrid.addEventListener('dragover', e => {
-  e.preventDefault(); e.stopPropagation();
-  galleryGrid.classList.add('dragover');
-});
-galleryGrid.addEventListener('dragleave', e => {
-  e.preventDefault(); galleryGrid.classList.remove('dragover');
-});
-galleryGrid.addEventListener('drop', async e => {
-  e.preventDefault(); e.stopPropagation();
-  galleryGrid.classList.remove('dragover');
-  const files = e.dataTransfer.files;
-  if (!files || !files.length) return;
-  for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
-    await handleGalleryFile(file);
+  const {
+    presentation
+  } = model;
+
+  const avatarClass = [
+    'person-profile-avatar',
+    presentation.status.value ===
+      '幽靈'
+      ? 'ghost'
+      : '',
+    presentation.status.value ===
+      '已故'
+      ? 'dead'
+      : ''
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const metaItems = [
+    `<span class="stage-tag stage-${esc(presentation.lifeStage.value)}">${esc(presentation.lifeStage.text)}</span>`,
+    `<span class="meta-pill">${iconSvg(presentation.gender.icon)}<span>${esc(presentation.gender.text)}</span></span>`,
+    `<span class="meta-pill">${statusIconHTML(person)}<span>${esc(presentation.status.text)}</span></span>`
+  ];
+
+  if (presentation.race) {
+    metaItems.push(
+      `<span class="meta-pill">${presentation.race.icon ? iconSvg(presentation.race.icon) : ''}<span>${esc(presentation.race.text)}</span></span>`
+    );
   }
-});
 
-async function handleGalleryFile(file) {
-  try {
-    const result = await compressGalleryImage(file);
-    if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
-      const mb = (result.sizeKB / 1024).toFixed(2);
-      const ok = await uiConfirm(
-        `原始圖片大小約 ${mb} MB。\n\n` +
-        `原始圖片會較快佔用瀏覽器儲存空間。\n\n` +
-        `是否仍要儲存原始圖片？`,
-        { title: '原始圖片容量提醒', confirmText: '仍要儲存' }
+  const headFacts = [
+    `<div class="person-profile-head-fact">${iconSvg('cake2')}<span>${esc(presentation.birthdayText)} · ${esc(presentation.ageText)}</span></div>`,
+    `<div class="person-profile-head-fact">${iconSvg('house')}<span>${esc(presentation.residence || uiText('居住地未知'))}</span></div>`
+  ];
+
+  const basicRows = [
+    renderPersonProfileRow(
+      '職業',
+      esc(
+        presentation.career ||
+        '—'
+      )
+    ),
+    renderPersonProfileRow(
+      '人生抱負',
+      esc(
+        presentation.aspiration ||
+        '—'
+      )
+    ),
+    renderPersonProfileRow(
+      '家庭',
+      esc(
+        model.householdName ||
+        '—'
+      )
+    )
+  ];
+
+  if (
+    (
+      presentation.status.value ===
+        '已故' ||
+      presentation.status.value ===
+        '幽靈'
+    ) &&
+    presentation.causeOfDeath
+  ) {
+    basicRows.push(
+      renderPersonProfileRow(
+        '死因',
+        esc(
+          presentation.causeOfDeath
+        )
+      )
+    );
+  }
+
+  const traitsHtml =
+    presentation.traits.length
+      ? `<div class="person-profile-traits">${presentation.traits.map(trait => `<span class="tag">${esc(trait)}</span>`).join('')}</div>`
+      : '<div class="person-profile-value muted">—</div>';
+
+  basicRows.push(
+    renderPersonProfileRow(
+      '特徵',
+      traitsHtml
+    )
+  );
+
+  const sections = [
+    renderPersonProfileSection(
+      '基本資料',
+      `<div class="person-profile-list">${basicRows.join('')}</div>`
+    )
+  ];
+
+  const familyRows = [
+    renderPersonProfileRow(
+      '所屬家族',
+      model.familyNames.length
+        ? model.familyNames
+            .map(esc)
+            .join(' / ')
+        : '—'
+    )
+  ];
+
+  if (model.generationLabel) {
+    familyRows.push(
+      renderPersonProfileRow(
+        '世代',
+        esc(
+          model.generationLabel
+        )
+      )
+    );
+  }
+
+  model.familyRelationshipRows
+    .forEach(item => {
+      familyRows.push(
+        renderPersonProfileRow(
+          item.label,
+          item.names
+            .map(esc)
+            .join(' / ')
+        )
       );
-      if (!ok) return;
-    }
-    editingPhotoImageRef = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
     });
-    editingPhotoSizeKB = result.sizeKB;
-    editingPhotoOriginal = result.isOriginal;
-    openPhotoEditor(-1, true);
-  } catch(err) {
-    uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' });
+
+  sections.push(
+    renderPersonProfileSection(
+      '家庭關係',
+      `<div class="person-profile-list">${familyRows.join('')}</div>`
+    )
+  );
+
+  if (
+    model.otherRelationshipRows
+      .length
+  ) {
+    const otherRows =
+      model.otherRelationshipRows
+        .map(item =>
+          renderPersonProfileRow(
+            item.label,
+            item.names
+              .map(esc)
+              .join(' / ')
+          )
+        )
+        .join('');
+
+    sections.push(
+      renderPersonProfileSection(
+        '其他關係',
+        `<div class="person-profile-list">${otherRows}</div>`
+      )
+    );
   }
-}
 
-function updatePhotoPreview() {
-  const el = $('photoPreview');
-  const assetId =
-    isAssetId(editingPhotoImageRef)
-      ? String(editingPhotoImageRef)
-      : '';
+  sections.push(
+    renderPersonProfileSection(
+      '簡介',
+      `<div class="person-profile-bio">${person.bio ? esc(presentation.bio) : '—'}</div>`
+    )
+  );
 
-  if (assetId) {
-    el.dataset.assetBgId = assetId;
-  } else {
-    delete el.dataset.assetBgId;
-  }
+  const petItems =
+    (person.pets || [])
+      .map(pet =>
+        renderPersonProfilePet(
+          pet,
+          model
+        )
+      )
+      .join('') ||
+    '<div class="person-profile-value muted">—</div>';
 
-  const url = resolveImageUrl(editingPhotoImageRef);
-  if (url) {
-    el.classList.add('has-image');
-    el.style.backgroundImage = `url("${url}")`;
-    el.textContent = '';
-  } else {
-    el.classList.remove('has-image');
-    el.style.backgroundImage = '';
-    el.textContent = '點選選擇 · 或拖曳 · 或 Ctrl+V 貼上';
-  }
-  const tip = $('photoSizeTip');
-  if (url) {
-    const kb = editingPhotoSizeKB;
-    const sizeText = kb >= 1024 ? `約 ${(kb/1024).toFixed(2)} MB` : `約 ${kb} KB`;
-    const isLarge = kb > ORIGINAL_WARN_KB && editingPhotoOriginal;
-    tip.textContent = `${editingPhotoOriginal ? '原始圖片' : '壓縮'} · ${sizeText}`;
-    tip.classList.toggle('warn', isLarge);
-  } else {
-    tip.textContent = '';
-    tip.classList.remove('warn');
-  }
-}
+  const galleryItems =
+    (person.gallery || [])
+      .slice(0, 8)
+      .map((photo, index) =>
+        renderPersonProfileLifePhotoItem(
+          photo,
+          index
+        )
+      )
+      .join('') ||
+    '<div class="person-profile-value muted">—</div>';
 
-function openPhotoEditor(index, fromDrop = false) {
-  editingPhotoIndex = (typeof index === 'number') ? index : -1;
-  const p = editingPhotoIndex >= 0 ? editingGallery[editingPhotoIndex] : null;
-  $('photoModalTitle').textContent = editingPhotoIndex >= 0 ? '編輯圖片' : '新增圖片';
-  if (editingPhotoIndex >= 0 && !fromDrop) {
-    editingPhotoImageRef = p.image || '';
-    const url = resolveImageUrl(editingPhotoImageRef);
-    editingPhotoSizeKB = Math.round((url||'').length * 0.75 / 1024);
-    editingPhotoOriginal = false;
-    $('phTitle').value = p.title || '';
-    $('phNote').value = p.note || '';
-    $('phStage').value = p.lifeStage || '';
-  } else if (!fromDrop) {
-    editingPhotoImageRef = '';
-    editingPhotoSizeKB = 0;
-    editingPhotoOriginal = false;
-    $('phTitle').value = '';
-    $('phNote').value = '';
-    $('phStage').value = '';
-  } else {
-    $('phTitle').value = '';
-    $('phNote').value = '';
-    $('phStage').value = '';
-  }
-  $('phDelete').style.display = editingPhotoIndex >= 0 ? '' : 'none';
-  updatePhotoPreview();
-  photoMask.classList.add('show');
-  setTimeout(() => $('phTitle').focus(), 60);
-}
+  sections.push(
+    `
+      <section class="person-profile-section">
+        <div class="person-profile-media">
+          <div class="person-profile-media-column">
+            <div class="person-profile-media-head">
+              <span>${esc(uiText('寵物'))}</span>
+              <span class="person-profile-media-count">${(person.pets || []).length}</span>
+            </div>
+            <div class="person-profile-pets">${petItems}</div>
+          </div>
+          <div class="person-profile-media-column">
+            <div class="person-profile-media-head">
+              <span>${esc(uiText('人生照片'))}</span>
+              <span class="person-profile-media-count">${(person.gallery || []).length}</span>
+            </div>
+            <div class="person-profile-gallery">${galleryItems}</div>
+          </div>
+        </div>
+      </section>
+    `
+  );
 
-function closePhotoEditor() {
-  photoMask.classList.remove('show');
-  editingPhotoIndex = -1;
-  editingPhotoImageRef = '';
-  editingPhotoSizeKB = 0;
-  editingPhotoOriginal = false;
-}
+  container.innerHTML = `
+    <div class="person-profile-header">
+      <div class="${avatarClass}">${presentation.avatarHtml}</div>
+      <div class="person-profile-header-text">
+        <div class="person-profile-name-row">
+          <span class="person-profile-name">${esc(presentation.name || '—')}</span>
+        </div>
+        <div class="person-profile-meta">${metaItems.join('')}</div>
+        <div class="person-profile-head-facts">${headFacts.join('')}</div>
+      </div>
+    </div>
+    <div class="person-profile-body">${sections.join('')}</div>
+  `;
 
-function savePhoto() {
-  if (!editingPhotoImageRef) { uiAlert('請先選擇一張圖片', { title: '尚未選擇圖片' }); return; }
-  const data = {
-    id: (editingPhotoIndex >= 0 && editingGallery[editingPhotoIndex])
-      ? editingGallery[editingPhotoIndex].id
-      : uid('gal'),
-    title: $('phTitle').value.trim(),
-    note: $('phNote').value.trim(),
-    lifeStage: $('phStage').value,
-    image: editingPhotoImageRef,
-    addedAt: (editingPhotoIndex >= 0 && editingGallery[editingPhotoIndex])
-      ? editingGallery[editingPhotoIndex].addedAt
-      : Date.now()
-  };
-  if (editingPhotoIndex >= 0) editingGallery[editingPhotoIndex] = data;
-  else editingGallery.push(data);
-  renderGalleryGrid();
-  closePhotoEditor();
-}
+  container
+    .querySelectorAll(
+      '[data-person-profile-life-photo-index]'
+    )
+    .forEach(element => {
+      element.onclick = () => {
+        const index =
+          Number(
+            element.dataset.personProfileLifePhotoIndex
+          );
 
-async function deletePhotoFromEditor() {
-  if (editingPhotoIndex < 0) return;
-  const g = editingGallery[editingPhotoIndex];
-  if (!g) return;
-  if (!await uiConfirm(`確定刪除圖片「${g.title || '未命名'}」嗎？`, { title: '刪除圖片', kind: 'danger', confirmText: '刪除' })) return;
-  editingGallery.splice(editingPhotoIndex, 1);
-  renderGalleryGrid();
-  closePhotoEditor();
-}
-
-$('phSave').onclick = savePhoto;
-$('phCancel').onclick = closePhotoEditor;
-$('phDelete').onclick = deletePhotoFromEditor;
-photoMask.onclick = e => { if (e.target === photoMask) closePhotoEditor(); };
-
-$('photoPreview').onclick = () => $('photoInput').click();
-$('photoInput').onchange = async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const result = await compressGalleryImage(file);
-    if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
-      const mb = (result.sizeKB / 1024).toFixed(2);
-      const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
-      if (!ok) { e.target.value = ''; return; }
-    }
-    editingPhotoImageRef = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
-    editingPhotoSizeKB = result.sizeKB;
-    editingPhotoOriginal = result.isOriginal;
-    updatePhotoPreview();
-  } catch(err) {
-    uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' });
-  }
-  e.target.value = '';
-};
-$('photoClearBtn').onclick = () => {
-  editingPhotoImageRef = '';
-  editingPhotoSizeKB = 0;
-  editingPhotoOriginal = false;
-  updatePhotoPreview();
-};
-
-document.addEventListener('paste', async e => {
-  if (!photoMask.classList.contains('show')) return;
-  const items = e.clipboardData && e.clipboardData.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      e.preventDefault();
-      const file = item.getAsFile();
-      if (!file) continue;
-      try {
-        const result = await compressGalleryImage(file);
-        if (result.isOriginal && result.sizeKB > ORIGINAL_WARN_KB) {
-          const mb = (result.sizeKB / 1024).toFixed(2);
-          const ok = await uiConfirm(`原始圖片大小約 ${mb} MB。\n\n是否仍要儲存原始圖片？`, { title: '原始圖片容量提醒', confirmText: '仍要儲存' });
-          if (!ok) return;
+        if (model.onGallery) {
+          model.onGallery(index);
+        } else if (
+          person.id &&
+          currentGenealogyData()?.sims?.[
+            person.id
+          ]
+        ) {
+          lifePhotoWorkspace
+            .openSavedViewer(
+              person.id,
+              index
+            );
         }
-        editingPhotoImageRef = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
+      };
     });
-        editingPhotoSizeKB = result.sizeKB;
-        editingPhotoOriginal = result.isOriginal;
-        updatePhotoPreview();
-      } catch(err){ uiAlert('圖片處理失敗：' + err.message, { title: '圖片處理失敗', kind: 'danger' }); }
+}
+
+function openPersonProfile(id) {
+  const person =
+    currentGenealogyData().sims[id];
+
+  if (!person) return;
+
+  personProfilePersonId = id;
+
+  renderPersonProfileContent(
+    $('personProfileContent'),
+    person
+  );
+
+  personProfileDialog.classList.add(
+    'show'
+  );
+}
+
+function closePersonProfile() {
+  personProfileDialog.classList.remove(
+    'show'
+  );
+  personProfilePersonId = null;
+}
+
+$('personProfileCloseBtn').onclick =
+  closePersonProfile;
+
+personProfileDialog.onclick = event => {
+  if (event.target === personProfileDialog) {
+    closePersonProfile();
+  }
+};
+
+$('personProfileEditBtn').onclick = () => {
+  const id = personProfilePersonId;
+  closePersonProfile();
+
+  if (id) {
+    personEditor.open(id);
+  }
+};
+
+const lifePhotoWorkspace = {
+  currentEditorEntry() {
+    const index = lifePhotoState.editor.index;
+    return index >= 0 && editingGallery[index]
+      ? editingGallery[index]
+      : null;
+  },
+
+  resetEditorState() {
+    lifePhotoState.editor.index = -1;
+    lifePhotoState.editor.imageRef = '';
+    lifePhotoState.editor.sizeKB = 0;
+    lifePhotoState.editor.isOriginal = false;
+  },
+
+  fillEditorFields(entry = null) {
+    $('phTitle').value = entry?.title || '';
+    $('phNote').value = entry?.note || '';
+    $('phStage').value = entry?.lifeStage || '';
+  },
+
+  refreshPreview() {
+    const preview = $('photoPreview');
+    const imageRef = lifePhotoState.editor.imageRef;
+    const assetId = isAssetId(imageRef)
+      ? String(imageRef)
+      : '';
+    const url = resolveImageUrl(imageRef);
+
+    if (assetId) preview.dataset.assetBgId = assetId;
+    else delete preview.dataset.assetBgId;
+
+    preview.classList.toggle('has-image', !!url);
+    preview.style.backgroundImage =
+      url ? `url("${url}")` : '';
+    preview.textContent =
+      url ? '' : '點選選擇 · 或拖曳 · 或 Ctrl+V 貼上';
+
+    const tip = $('photoSizeTip');
+    if (!url) {
+      tip.textContent = '';
+      tip.classList.remove('warn');
       return;
     }
+
+    const sizeKB = Math.max(
+      0,
+      Number(lifePhotoState.editor.sizeKB) || 0
+    );
+    const sizeText = sizeKB >= 1024
+      ? `約 ${(sizeKB / 1024).toFixed(2)} MB`
+      : `約 ${Math.round(sizeKB)} KB`;
+
+    tip.textContent =
+      `${lifePhotoState.editor.isOriginal ? '原始圖片' : '壓縮'} · ${sizeText}`;
+    tip.classList.toggle(
+      'warn',
+      lifePhotoState.editor.isOriginal &&
+      sizeKB > ORIGINAL_WARN_KB
+    );
+  },
+
+  openEditor(index = -1, { keepPreparedImage = false } = {}) {
+    const validIndex =
+      Number.isInteger(index) &&
+      index >= 0 &&
+      !!editingGallery[index];
+
+    lifePhotoState.editor.index =
+      validIndex ? index : -1;
+
+    const entry =
+      validIndex ? editingGallery[index] : null;
+
+    if (!keepPreparedImage) {
+      lifePhotoState.editor.imageRef =
+        entry?.image || '';
+
+      const url =
+        resolveImageUrl(lifePhotoState.editor.imageRef);
+
+      lifePhotoState.editor.sizeKB =
+        url
+          ? Math.round(url.length * 0.75 / 1024)
+          : 0;
+
+      lifePhotoState.editor.isOriginal = false;
+    }
+
+    this.fillEditorFields(entry);
+    $('photoModalTitle').textContent =
+      entry ? '編輯圖片' : '新增圖片';
+    $('phDelete').style.display =
+      entry ? '' : 'none';
+
+    this.refreshPreview();
+    lifePhotoEditorDialog.classList.add('show');
+    setTimeout(() => $('phTitle').focus(), 60);
+  },
+
+  closeEditor() {
+    lifePhotoEditorDialog.classList.remove('show');
+    this.resetEditorState();
+  },
+
+  commitEditor() {
+    if (!lifePhotoState.editor.imageRef) {
+      uiAlert(
+        '請先選擇一張圖片',
+        { title:'尚未選擇圖片' }
+      );
+      return;
+    }
+
+    const previous = this.currentEditorEntry();
+    const entry = {
+      id:previous?.id || uid('photo'),
+      title:$('phTitle').value.trim(),
+      note:$('phNote').value.trim(),
+      lifeStage:$('phStage').value,
+      image:lifePhotoState.editor.imageRef,
+      addedAt:previous?.addedAt || Date.now()
+    };
+
+    if (previous) {
+      editingGallery[lifePhotoState.editor.index] = entry;
+    } else {
+      editingGallery.push(entry);
+    }
+
+    this.renderList();
+    this.closeEditor();
+  },
+
+  async deleteEditorEntry() {
+    const entry = this.currentEditorEntry();
+    if (!entry) return;
+
+    const confirmed = await uiConfirm(
+      `確定刪除圖片「${entry.title || '未命名'}」嗎？`,
+      {
+        title:'刪除圖片',
+        kind:'danger',
+        confirmText:'刪除'
+      }
+    );
+    if (!confirmed) return;
+
+    editingGallery.splice(
+      lifePhotoState.editor.index,
+      1
+    );
+    this.renderList();
+    this.closeEditor();
+  },
+
+  async prepareFile(file, { openEditor = false } = {}) {
+    const result = await compressGalleryImage(file);
+
+    if (
+      result.isOriginal &&
+      result.sizeKB > ORIGINAL_WARN_KB
+    ) {
+      const confirmed = await uiConfirm(
+        `原始圖片大小約 ${(result.sizeKB / 1024).toFixed(2)} MB。\n\n原始圖片會較快佔用瀏覽器儲存空間。\n\n是否仍要儲存原始圖片？`,
+        {
+          title:'原始圖片容量提醒',
+          confirmText:'仍要儲存'
+        }
+      );
+      if (!confirmed) return false;
+    }
+
+    lifePhotoState.editor.imageRef =
+      await saveImageAsset(
+        result.blob,
+        {
+          width:result.width,
+          height:result.height
+        }
+      );
+    lifePhotoState.editor.sizeKB = result.sizeKB;
+    lifePhotoState.editor.isOriginal = result.isOriginal;
+
+    if (openEditor) {
+      this.openEditor(
+        -1,
+        { keepPreparedImage:true }
+      );
+    } else {
+      this.refreshPreview();
+    }
+    return true;
+  },
+
+  clearPreparedImage() {
+    lifePhotoState.editor.imageRef = '';
+    lifePhotoState.editor.sizeKB = 0;
+    lifePhotoState.editor.isOriginal = false;
+    this.refreshPreview();
+  },
+
+  renderList() {
+    if (!lifePhotoGrid) return;
+
+    if (!editingGallery.length) {
+      lifePhotoGrid.innerHTML =
+        '<div class="life-photo-empty" style="grid-column:1/-1;">尚未新增人生照片</div>';
+      return;
+    }
+
+    lifePhotoGrid.innerHTML =
+      editingGallery
+        .map((entry, index) => {
+          const stage = entry.lifeStage
+            ? `<span class="life-photo-stage stage-${esc(entry.lifeStage)}">${esc(entry.lifeStage)}</span>`
+            : '';
+          const title = entry.title
+            ? `<div class="life-photo-title">${esc(entry.title)}</div>`
+            : '';
+          const assetId = isAssetId(entry.image)
+            ? String(entry.image)
+            : '';
+          const url = resolveImageUrl(entry.image);
+
+          return `
+            <div class="life-photo-item" data-life-photo-index="${index}">
+              ${assetId ? `<img data-asset-id="${esc(assetId)}"${url ? ` src="${esc(url)}"` : ''} alt="" draggable="false" loading="lazy" decoding="async">` : ''}
+              ${stage}
+              <div class="life-photo-item-overlay">
+                <button type="button" class="life-photo-action" data-life-photo-action="edit" data-life-photo-index="${index}" title="編輯">${iconSvg('pencil-square')}</button>
+                <button type="button" class="life-photo-action danger" data-life-photo-action="delete" data-life-photo-index="${index}" title="刪除">${iconSvg('trash3')}</button>
+              </div>
+              ${title}
+            </div>
+          `;
+        })
+        .join('');
+
+    lifePhotoGrid
+      .querySelectorAll('.life-photo-item[data-life-photo-index]')
+      .forEach(card => {
+        card.addEventListener('click', event => {
+          if (event.target.closest('[data-life-photo-action]')) return;
+          this.openDraftViewer(
+            Number(card.dataset.lifePhotoIndex)
+          );
+        });
+      });
+
+    lifePhotoGrid
+      .querySelectorAll('[data-life-photo-action="edit"]')
+      .forEach(button => {
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          this.openEditor(
+            Number(button.dataset.lifePhotoIndex)
+          );
+        });
+      });
+
+    lifePhotoGrid
+      .querySelectorAll('[data-life-photo-action="delete"]')
+      .forEach(button => {
+        button.addEventListener('click', async event => {
+          event.stopPropagation();
+          const index =
+            Number(button.dataset.lifePhotoIndex);
+          const entry = editingGallery[index];
+          if (!entry) return;
+
+          const confirmed = await uiConfirm(
+            `確定刪除圖片「${entry.title || '未命名'}」嗎？`,
+            {
+              title:'刪除圖片',
+              kind:'danger',
+              confirmText:'刪除'
+            }
+          );
+          if (!confirmed) return;
+
+          editingGallery.splice(index, 1);
+          this.renderList();
+        });
+      });
+  },
+
+  viewerGallery() {
+    if (
+      lifePhotoState.viewer.mode === 'saved' &&
+      lifePhotoState.viewer.simId
+    ) {
+      return (
+        currentGenealogyData().sims[
+          lifePhotoState.viewer.simId
+        ]?.gallery || []
+      );
+    }
+    return editingGallery;
+  },
+
+  openDraftViewer(index) {
+    if (!editingGallery[index]) return;
+
+    lifePhotoState.viewer.mode = 'draft';
+    lifePhotoState.viewer.simId = null;
+    lifePhotoState.viewer.index = index;
+
+    $('photoViewerPersonName').textContent =
+      $('fName')?.value?.trim() ||
+      uiText('人物');
+
+    this.refreshViewer();
+    lifePhotoViewerDialog.classList.add('show');
+  },
+
+  openSavedViewer(simId, index) {
+    const sim = currentGenealogyData().sims[simId];
+    if (!sim) return;
+
+    lifePhotoState.viewer.mode = 'saved';
+    lifePhotoState.viewer.simId = simId;
+    lifePhotoState.viewer.index = index;
+
+    $('photoViewerPersonName').textContent =
+      displayDataText(sim.name, sim) ||
+      uiText('人物');
+
+    this.refreshViewer();
+    lifePhotoViewerDialog.classList.add('show');
+  },
+
+  refreshViewer() {
+    const gallery = this.viewerGallery();
+    if (!gallery.length) return;
+
+    lifePhotoState.viewer.index =
+      Math.max(
+        0,
+        Math.min(
+          gallery.length - 1,
+          lifePhotoState.viewer.index
+        )
+      );
+
+    const entry =
+      gallery[lifePhotoState.viewer.index];
+    const image = $('photoViewerImage');
+    const assetId = isAssetId(entry.image)
+      ? String(entry.image)
+      : '';
+    const url = resolveImageUrl(entry.image);
+
+    if (assetId) image.dataset.assetId = assetId;
+    else delete image.dataset.assetId;
+
+    if (url) image.src = url;
+    else image.removeAttribute('src');
+
+    $('photoViewerTitle').textContent =
+      entry.title || uiText('（未命名）');
+
+    const details = [];
+    if (entry.lifeStage) {
+      details.push(uiText(entry.lifeStage));
+    }
+    if (entry.note) details.push(entry.note);
+
+    $('photoViewerNote').textContent = details.join(' · ');
+    $('photoViewerCounter').textContent =
+      `${lifePhotoState.viewer.index + 1} / ${gallery.length}`;
+
+    const single = gallery.length <= 1;
+    $('photoViewerPrevBtn').disabled = single;
+    $('photoViewerNextBtn').disabled = single;
+  },
+
+  moveViewer(delta) {
+    const gallery = this.viewerGallery();
+    if (gallery.length <= 1) return;
+
+    lifePhotoState.viewer.index =
+      (
+        lifePhotoState.viewer.index +
+        delta +
+        gallery.length
+      ) % gallery.length;
+
+    this.refreshViewer();
+  },
+
+  closeViewer() {
+    lifePhotoViewerDialog.classList.remove('show');
+    lifePhotoState.viewer.mode = 'draft';
+    lifePhotoState.viewer.simId = null;
+    lifePhotoState.viewer.index = 0;
+  }
+};
+
+$('btnAddPhoto').onclick = () => {
+  lifePhotoWorkspace.openEditor();
+};
+
+lifePhotoGrid.addEventListener('dragover', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  lifePhotoGrid.classList.add('dragover');
+});
+lifePhotoGrid.addEventListener('dragleave', event => {
+  event.preventDefault();
+  lifePhotoGrid.classList.remove('dragover');
+});
+lifePhotoGrid.addEventListener('drop', async event => {
+  event.preventDefault();
+  event.stopPropagation();
+  lifePhotoGrid.classList.remove('dragover');
+
+  const files =
+    Array.from(event.dataTransfer?.files || [])
+      .filter(file => file.type.startsWith('image/'));
+
+  for (const file of files) {
+    try {
+      await lifePhotoWorkspace.prepareFile(
+        file,
+        { openEditor:true }
+      );
+    } catch (error) {
+      uiAlert(
+        '圖片處理失敗：' + error.message,
+        { title:'圖片處理失敗', kind:'danger' }
+      );
+    }
   }
 });
 
-/* =========================================================
- *  人生照片檢視器
- * ========================================================= */
-function openGalleryViewerPreview(idx) {
-  const gal = editingGallery;
-  if (!gal || !gal[idx]) return;
-  viewerMode = 'edit';
-  viewerSimId = null;
-  viewerIndex = idx;
-  $('gvPersonName').textContent = $('fName')?.value?.trim() || uiText('人物');
-  updateViewerContent(gal);
-  galleryViewerMask.classList.add('show');
-}
-
-function openGalleryViewer(simId, idx) {
-  const sim = genealogyData.sims[simId];
-  if (!sim) return;
-  viewerMode = 'sim';
-  viewerSimId = simId;
-  viewerIndex = idx;
-  $('gvPersonName').textContent = displayDataText(sim.name, sim) || uiText('人物');
-  updateViewerContent(sim.gallery || []);
-  galleryViewerMask.classList.add('show');
-}
-
-function getViewerGallery() {
-  if (viewerMode === 'sim' && viewerSimId) {
-    const sim = genealogyData.sims[viewerSimId];
-    return sim ? (sim.gallery || []) : [];
-  }
-  return editingGallery;
-}
-
-function updateViewerContent(gal) {
-  if (!gal || !gal.length) return;
-  if (viewerIndex < 0) viewerIndex = 0;
-  if (viewerIndex >= gal.length) viewerIndex = gal.length - 1;
-  const g = gal[viewerIndex];
-  const viewerImage = $('gvImg');
-  const viewerAssetId =
-    isAssetId(g.image)
-      ? String(g.image)
-      : '';
-  const viewerUrl =
-    resolveImageUrl(g.image) || '';
-
-  if (viewerAssetId) {
-    viewerImage.dataset.assetId =
-      viewerAssetId;
-  } else {
-    delete viewerImage.dataset.assetId;
-  }
-
-  if (viewerUrl) {
-    viewerImage.src = viewerUrl;
-  } else {
-    viewerImage.removeAttribute('src');
-  }
-  $('gvTitle').textContent = g.title || uiText('（未命名）');
-  const bits = [];
-  if (g.lifeStage) bits.push(uiText(g.lifeStage));
-  if (g.note) bits.push(g.note);
-  $('gvNote').textContent = bits.join(' · ');
-  $('gvCounter').textContent = `${viewerIndex + 1} / ${gal.length}`;
-  $('gvPrev').disabled = gal.length <= 1;
-  $('gvNext').disabled = gal.length <= 1;
-}
-
-function viewerNav(delta) {
-  const gal = getViewerGallery();
-  if (!gal || gal.length <= 1) return;
-  viewerIndex = (viewerIndex + delta + gal.length) % gal.length;
-  updateViewerContent(gal);
-}
-
-$('gvClose').onclick = () => {
-  galleryViewerMask.classList.remove('show');
-  viewerSimId = null;
-  viewerMode = 'edit';
+$('phSave').onclick = () => {
+  lifePhotoWorkspace.commitEditor();
 };
-$('gvPrev').onclick = () => viewerNav(-1);
-$('gvNext').onclick = () => viewerNav(1);
-galleryViewerMask.onclick = e => {
-  if (e.target === galleryViewerMask) {
-    galleryViewerMask.classList.remove('show');
-    viewerSimId = null;
-    viewerMode = 'edit';
+$('phCancel').onclick = () => {
+  lifePhotoWorkspace.closeEditor();
+};
+$('phDelete').onclick = () => {
+  lifePhotoWorkspace.deleteEditorEntry();
+};
+lifePhotoEditorDialog.onclick = event => {
+  if (event.target === lifePhotoEditorDialog) {
+    lifePhotoWorkspace.closeEditor();
   }
 };
+
+$('photoPreview').onclick = () => {
+  $('photoInput').click();
+};
+$('photoInput').onchange = async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    await lifePhotoWorkspace.prepareFile(file);
+  } catch (error) {
+    uiAlert(
+      '圖片處理失敗：' + error.message,
+      { title:'圖片處理失敗', kind:'danger' }
+    );
+  } finally {
+    event.target.value = '';
+  }
+};
+$('photoClearBtn').onclick = () => {
+  lifePhotoWorkspace.clearPreparedImage();
+};
+
+document.addEventListener('paste', async event => {
+  if (!lifePhotoEditorDialog.classList.contains('show')) return;
+
+  const imageItem =
+    Array.from(event.clipboardData?.items || [])
+      .find(item => item.type.startsWith('image/'));
+
+  if (!imageItem) return;
+
+  const file = imageItem.getAsFile();
+  if (!file) return;
+
+  event.preventDefault();
+
+  try {
+    await lifePhotoWorkspace.prepareFile(file);
+  } catch (error) {
+    uiAlert(
+      '圖片處理失敗：' + error.message,
+      { title:'圖片處理失敗', kind:'danger' }
+    );
+  }
+});
+
+$('photoViewerCloseBtn').onclick = () => {
+  lifePhotoWorkspace.closeViewer();
+};
+$('photoViewerPrevBtn').onclick = () => {
+  lifePhotoWorkspace.moveViewer(-1);
+};
+$('photoViewerNextBtn').onclick = () => {
+  lifePhotoWorkspace.moveViewer(1);
+};
+lifePhotoViewerDialog.onclick = event => {
+  if (event.target === lifePhotoViewerDialog) {
+    lifePhotoWorkspace.closeViewer();
+  }
+};
+
 /* =========================================================
  *  自由排列選取 / 框選 + 平移 / 縮放
  * ========================================================= */
 function syncNodeSelectionClasses() {
   const visible = new Set();
-  nodes.querySelectorAll('.node[data-id]').forEach(el => {
+  nodes.querySelectorAll('.person-card[data-id]').forEach(el => {
     visible.add(el.dataset.id);
-    el.classList.toggle('node-selected', selectedNodeIds.has(el.dataset.id));
+    el.classList.toggle('person-card-selected', selectedNodeIds.has(el.dataset.id));
   });
   [...selectedNodeIds].forEach(id => { if (!visible.has(id)) selectedNodeIds.delete(id); });
 }
@@ -8464,30 +9594,30 @@ function clearNodeSelection() {
 }
 
 function selectVisibleNodes() {
-  if (!getSceneLayout() || !getCurrentFreeLayout(currentFamily()) || arrangeTool !== 'select') return;
+  if (!getSceneLayout() || !genealogyScene.getCurrentFreeLayout(currentFamily()) || arrangeTool !== 'select') return;
   selectedNodeIds.clear();
   getSceneLayout().visibleIds.forEach(id => selectedNodeIds.add(id));
   syncNodeSelectionClasses();
 }
 
-function closeNodeContextMenu() {
-  if (!nodeContextMenu) return;
-  nodeContextMenu.classList.remove('show');
-  nodeContextMenu.setAttribute('aria-hidden', 'true');
-  nodeContextMenu.innerHTML = '';
+function closePersonCardMenu() {
+  if (!personCardMenu) return;
+  personCardMenu.classList.remove('show');
+  personCardMenu.setAttribute('aria-hidden', 'true');
+  personCardMenu.innerHTML = '';
 }
 
-function positionNodeContextMenu(clientX, clientY) {
-  if (!nodeContextMenu) return;
-  nodeContextMenu.style.left = `${clientX}px`;
-  nodeContextMenu.style.top = `${clientY}px`;
+function positionPersonCardMenu(clientX, clientY) {
+  if (!personCardMenu) return;
+  personCardMenu.style.left = `${clientX}px`;
+  personCardMenu.style.top = `${clientY}px`;
   requestAnimationFrame(() => {
-    const rect = nodeContextMenu.getBoundingClientRect();
+    const rect = personCardMenu.getBoundingClientRect();
     const pad = 8;
     const left = Math.max(pad, Math.min(clientX, window.innerWidth - rect.width - pad));
     const top = Math.max(pad, Math.min(clientY, window.innerHeight - rect.height - pad));
-    nodeContextMenu.style.left = `${left}px`;
-    nodeContextMenu.style.top = `${top}px`;
+    personCardMenu.style.left = `${left}px`;
+    personCardMenu.style.top = `${top}px`;
   });
 }
 
@@ -8503,7 +9633,7 @@ function getLayoutNodeBox(id, position = null) {
 
   if (!pos) return null;
 
-  const dims = getNodeDimensionsById(id);
+  const dims = genealogyScene.getNodeDimensionsById(id);
 
   return {
     id,
@@ -8691,7 +9821,7 @@ function applySelectedLayoutOperation(action) {
 
   applyGenealogyMutation(mutation);
   syncNodeSelectionClasses();
-  expandStageToFit();
+  genealogyScene?.expandStageToFit?.();
 
   dragHistory.push({
     type:'card-layout',
@@ -8707,9 +9837,9 @@ function applySelectedLayoutOperation(action) {
   return true;
 }
 
-function renderNodeContextMenu(simId, clientX, clientY) {
-  if (!nodeContextMenu || !genealogyData?.sims?.[simId]) return;
-  const sim = genealogyData.sims[simId];
+function renderPersonCardMenu(simId, clientX, clientY) {
+  if (!personCardMenu || !currentGenealogyData()?.sims?.[simId]) return;
+  const sim = currentGenealogyData().sims[simId];
   const settings = viewMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
   const isEditCard = viewMode === 'edit';
   const isMulti = selectedNodeIds.size > 1 && selectedNodeIds.has(simId);
@@ -8720,37 +9850,37 @@ function renderNodeContextMenu(simId, clientX, clientY) {
     const canDistribute =
       selectedCount >= 3;
 
-    nodeContextMenu.innerHTML = `
-      <div class="node-context-title">${esc(title)}</div>
+    personCardMenu.innerHTML = `
+      <div class="person-card-menu-title">${esc(title)}</div>
 
-      <div class="node-context-section-title">${esc(uiText('對齊'))}</div>
-      <div class="node-context-grid">
-        <button class="node-context-action" type="button" data-node-context-action="align-left"><span>${esc(uiText('靠左'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-center-x"><span>${esc(uiText('水平置中'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-right"><span>${esc(uiText('靠右'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-top"><span>${esc(uiText('頂端'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-center-y"><span>${esc(uiText('垂直置中'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="align-bottom"><span>${esc(uiText('底端'))}</span></button>
+      <div class="person-card-menu-section-title">${esc(uiText('對齊'))}</div>
+      <div class="person-card-menu-grid">
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-left"><span>${esc(uiText('靠左'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-center-x"><span>${esc(uiText('水平置中'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-right"><span>${esc(uiText('靠右'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-top"><span>${esc(uiText('頂端'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-center-y"><span>${esc(uiText('垂直置中'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="align-bottom"><span>${esc(uiText('底端'))}</span></button>
       </div>
 
-      <div class="node-context-divider"></div>
-      <div class="node-context-section-title">${esc(uiText('分佈'))}</div>
-      <div class="node-context-grid">
-        <button class="node-context-action" type="button" data-node-context-action="distribute-horizontal" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('水平均勻'))}</span></button>
-        <button class="node-context-action" type="button" data-node-context-action="distribute-vertical" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('垂直均勻'))}</span></button>
+      <div class="person-card-menu-divider"></div>
+      <div class="person-card-menu-section-title">${esc(uiText('分佈'))}</div>
+      <div class="person-card-menu-grid">
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-horizontal" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('水平均勻'))}</span></button>
+        <button class="person-card-menu-action" type="button" data-person-card-menu-action="distribute-vertical" ${canDistribute ? '' : 'disabled'}><span>${esc(uiText('垂直均勻'))}</span></button>
       </div>
 
-      <div class="node-context-divider"></div>
-      <button class="node-context-action" type="button" data-node-context-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
-      <button class="node-context-action danger" type="button" data-node-context-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
-      <button class="node-context-action" type="button" data-node-context-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
+      <div class="person-card-menu-divider"></div>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
+      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
     `;
 
-    nodeContextMenu.dataset.simId = simId;
-    nodeContextMenu.dataset.cardMode = viewMode;
-    nodeContextMenu.classList.add('show');
-    nodeContextMenu.setAttribute('aria-hidden', 'false');
-    positionNodeContextMenu(clientX, clientY);
+    personCardMenu.dataset.simId = simId;
+    personCardMenu.dataset.cardMode = viewMode;
+    personCardMenu.classList.add('show');
+    personCardMenu.setAttribute('aria-hidden', 'false');
+    positionPersonCardMenu(clientX, clientY);
     return;
   }
 
@@ -8758,46 +9888,46 @@ function renderNodeContextMenu(simId, clientX, clientY) {
     ['name','姓名'], ['gender','性別文字'], ['genderBar','性別色條'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
     ['status','狀態'], ['race','種族'], ['career','職業'], ['residence','居住地'], ['aspiration','人生抱負'],
     ['traits','特徵'], ['pets','寵物'], ['gallery','人生照片']
-  ].map(([key,label]) => `<label class="node-context-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
+  ].map(([key,label]) => `<label class="person-card-menu-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
 
   const appearanceSection = isEditCard ? '' : `
-    <div class="node-context-divider"></div>
-    <div class="node-context-section-title">${esc(uiText('檢視卡片外觀'))}</div>
-    <label class="node-context-radio"><input type="radio" name="nodeCardAppearance" value="minimal" ${settings.appearance === 'minimal' ? 'checked' : ''}><span>${esc(uiText('極簡'))}</span></label>
-    <label class="node-context-radio"><input type="radio" name="nodeCardAppearance" value="translucent" ${settings.appearance === 'translucent' ? 'checked' : ''}><span>${esc(uiText('半透明'))}</span></label>
-    <label class="node-context-radio"><input type="radio" name="nodeCardAppearance" value="full" ${settings.appearance === 'full' ? 'checked' : ''}><span>${esc(uiText('完整卡片'))}</span></label>`;
+    <div class="person-card-menu-divider"></div>
+    <div class="person-card-menu-section-title">${esc(uiText('檢視卡片外觀'))}</div>
+    <label class="person-card-menu-radio"><input type="radio" name="nodeCardAppearance" value="minimal" ${settings.appearance === 'minimal' ? 'checked' : ''}><span>${esc(uiText('極簡'))}</span></label>
+    <label class="person-card-menu-radio"><input type="radio" name="nodeCardAppearance" value="translucent" ${settings.appearance === 'translucent' ? 'checked' : ''}><span>${esc(uiText('半透明'))}</span></label>
+    <label class="person-card-menu-radio"><input type="radio" name="nodeCardAppearance" value="full" ${settings.appearance === 'full' ? 'checked' : ''}><span>${esc(uiText('完整卡片'))}</span></label>`;
 
-  nodeContextMenu.innerHTML = `
-    <div class="node-context-title">${esc(title)}</div>
-    <button class="node-context-action" type="button" data-node-context-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
-    <button class="node-context-action" type="button" data-node-context-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
-    <button class="node-context-action" type="button" data-node-context-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-    <button class="node-context-action" type="button" data-node-context-action="perspective">${iconSvg('person-vcard')}<span>${esc(relationshipPerspectiveActionText(sim, relationshipPerspectiveSimId === String(sim.id)))}</span></button>
+  personCardMenu.innerHTML = `
+    <div class="person-card-menu-title">${esc(title)}</div>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="perspective">${iconSvg('person-vcard')}<span>${esc(relationshipPerspectiveActionText(sim, relationshipPerspectiveSimId === String(sim.id)))}</span></button>
     ${isMulti ? `
-      <div class="node-context-divider"></div>
-      <button class="node-context-action" type="button" data-node-context-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
-      <button class="node-context-action danger" type="button" data-node-context-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
-      <button class="node-context-action" type="button" data-node-context-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
+      <div class="person-card-menu-divider"></div>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
+      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
     ` : ''}
-    <div class="node-context-divider"></div>
-    <div class="node-context-section-title">${esc(uiText(isEditCard ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
-    <label class="node-context-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
-    <div class="node-context-grid">${fieldRows}</div>
+    <div class="person-card-menu-divider"></div>
+    <div class="person-card-menu-section-title">${esc(uiText(isEditCard ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
+    <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
+    <div class="person-card-menu-grid">${fieldRows}</div>
     ${appearanceSection}
-    <div class="node-context-note">${esc(uiText(isEditCard ? '只套用於編輯模式人物卡' : '只套用於檢視模式人物卡'))}</div>`;
+    <div class="person-card-menu-note">${esc(uiText(isEditCard ? '只套用於編輯模式人物卡' : '只套用於檢視模式人物卡'))}</div>`;
 
-  nodeContextMenu.dataset.simId = simId;
-  nodeContextMenu.dataset.cardMode = viewMode;
-  nodeContextMenu.classList.add('show');
-  nodeContextMenu.setAttribute('aria-hidden', 'false');
-  positionNodeContextMenu(clientX, clientY);
+  personCardMenu.dataset.simId = simId;
+  personCardMenu.dataset.cardMode = viewMode;
+  personCardMenu.classList.add('show');
+  personCardMenu.setAttribute('aria-hidden', 'false');
+  positionPersonCardMenu(clientX, clientY);
 }
 
-async function handleNodeContextAction(action, simId) {
+async function handlePersonCardMenuAction(action, simId) {
   if (!action) return;
-  if (action === 'view') { closeNodeContextMenu(); openInfoCard(simId); return; }
-  if (action === 'edit') { closeNodeContextMenu(); openEditor(simId); return; }
-  if (action === 'locate') { closeNodeContextMenu(); focusSimOnCanvas(simId); return; }
+  if (action === 'view') { closePersonCardMenu(); openPersonProfile(simId); return; }
+  if (action === 'edit') { closePersonCardMenu(); personEditor.open(simId); return; }
+  if (action === 'locate') { closePersonCardMenu(); focusSimOnCanvas(simId); return; }
   if (action === 'perspective') {
     const same =
       relationshipPerspectiveSimId ===
@@ -8809,7 +9939,7 @@ async function handleNodeContextAction(action, simId) {
         : simId
     );
 
-    closeNodeContextMenu();
+    closePersonCardMenu();
 
     if (!same) {
       focusSimOnCanvas(simId);
@@ -8817,7 +9947,7 @@ async function handleNodeContextAction(action, simId) {
 
     return;
   }
-  if (action === 'clear-selection') { closeNodeContextMenu(); clearNodeSelection(); return; }
+  if (action === 'clear-selection') { closePersonCardMenu(); clearNodeSelection(); return; }
 
   if ([
     'align-left',
@@ -8830,7 +9960,7 @@ async function handleNodeContextAction(action, simId) {
     'distribute-vertical'
   ].includes(action)) {
     applySelectedLayoutOperation(action);
-    closeNodeContextMenu();
+    closePersonCardMenu();
     return;
   }
 
@@ -8848,7 +9978,7 @@ async function handleNodeContextAction(action, simId) {
         );
 
     if (!ids.length) {
-      closeNodeContextMenu();
+      closePersonCardMenu();
       return;
     }
 
@@ -8867,7 +9997,7 @@ async function handleNodeContextAction(action, simId) {
 
     applyGenealogyMutation(mutation);
     syncNodeSelectionClasses();
-    expandStageToFit();
+    genealogyScene?.expandStageToFit?.();
 
     dragHistory.push({
       type:'card-layout',
@@ -8880,13 +10010,13 @@ async function handleNodeContextAction(action, simId) {
       )
     });
 
-    closeNodeContextMenu();
+    closePersonCardMenu();
     return;
   }
   if (action === 'remove-selected') {
     const fam = currentFamily();
     const ids = [...selectedNodeIds].filter(id => fam.memberIds.includes(id));
-    if (!ids.length) { closeNodeContextMenu(); return; }
+    if (!ids.length) { closePersonCardMenu(); return; }
     const ok = await uiConfirm(`${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`, {
       title: uiText('移出所選人物'), kind: 'danger', confirmText: uiText('移出家族')
     });
@@ -8899,59 +10029,101 @@ async function handleNodeContextAction(action, simId) {
 
     clearNodeSelection();
     applyGenealogyMutation(mutation);
-    closeNodeContextMenu();
+    closePersonCardMenu();
   }
 }
 
-nodeContextMenu?.addEventListener('click', e => {
-  const actionBtn = e.target.closest('[data-node-context-action]');
+personCardMenu?.addEventListener('click', e => {
+  const actionBtn = e.target.closest('[data-person-card-menu-action]');
   if (actionBtn) {
     e.preventDefault(); e.stopPropagation();
-    handleNodeContextAction(actionBtn.dataset.nodeContextAction, nodeContextMenu.dataset.simId);
+    handlePersonCardMenuAction(actionBtn.dataset.personCardMenuAction, personCardMenu.dataset.simId);
   }
 });
-nodeContextMenu?.addEventListener('change', e => {
+personCardMenu?.addEventListener('change', e => {
   const field = e.target?.dataset?.cardField;
-  if (field && CARD_SETTING_FIELD_KEYS.includes(field)) {
-    const settings = nodeContextMenu.dataset.cardMode === 'edit' ? getCardEditSettings() : getCardViewSettings();
-    settings[field] = !!e.target.checked;
-    save(); render();
-    positionNodeContextMenu(parseFloat(nodeContextMenu.style.left) || 0, parseFloat(nodeContextMenu.style.top) || 0);
+
+  if (
+    field &&
+    CARD_SETTING_FIELD_KEYS.includes(field)
+  ) {
+    const mode =
+      personCardMenu.dataset.cardMode === 'edit'
+        ? 'edit'
+        : 'view';
+
+    const mutation =
+      genealogyStore.setCardField(
+        mode,
+        field,
+        !!e.target.checked
+      );
+
+    applyGenealogyMutation(
+      mutation,
+      { refreshFamily:false }
+    );
+
+    positionPersonCardMenu(
+      parseFloat(
+        personCardMenu.style.left
+      ) || 0,
+      parseFloat(
+        personCardMenu.style.top
+      ) || 0
+    );
+
     return;
   }
-  if (e.target?.name === 'nodeCardAppearance') {
-    const value = e.target.value;
-    if (['minimal','translucent','full'].includes(value)) {
-      getCardViewSettings().appearance = value;
-      save(); render();
-      positionNodeContextMenu(parseFloat(nodeContextMenu.style.left) || 0, parseFloat(nodeContextMenu.style.top) || 0);
-    }
+
+  if (
+    e.target?.name ===
+    'nodeCardAppearance'
+  ) {
+    const mutation =
+      genealogyStore.setCardAppearance(
+        e.target.value
+      );
+
+    applyGenealogyMutation(
+      mutation,
+      { refreshFamily:false }
+    );
+
+    positionPersonCardMenu(
+      parseFloat(
+        personCardMenu.style.left
+      ) || 0,
+      parseFloat(
+        personCardMenu.style.top
+      ) || 0
+    );
   }
 });
 
 nodes.addEventListener('contextmenu', e => {
-  const el = e.target.closest('.node[data-id]');
+  const el = e.target.closest('.person-card[data-id]');
   if (!el) return;
   e.preventDefault();
   e.stopPropagation();
   const id = el.dataset.id;
-  if (getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select' && !selectedNodeIds.has(id)) {
+  if (genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select' && !selectedNodeIds.has(id)) {
     selectedNodeIds.clear();
     selectedNodeIds.add(id);
     syncNodeSelectionClasses();
   }
-  renderNodeContextMenu(id, e.clientX, e.clientY);
+  renderPersonCardMenu(id, e.clientX, e.clientY);
 });
 
 document.addEventListener('pointerdown', e => {
-  if (nodeContextMenu?.classList.contains('show') && !e.target.closest('#nodeContextMenu')) closeNodeContextMenu();
+  if (personCardMenu?.classList.contains('show') && !e.target.closest('#personCardContextMenu')) closePersonCardMenu();
 }, true);
-window.addEventListener('resize', closeNodeContextMenu);
-window.addEventListener('blur', closeNodeContextMenu);
+window.addEventListener('resize', closePersonCardMenu);
+window.addEventListener('blur', closePersonCardMenu);
 
 function updateArrangeToolUI() {
-  const fam = genealogyData ? currentFamily() : null;
-  const isFree = !!fam && getCurrentFreeLayout(fam);
+  const fam = currentGenealogyData() ? currentFamily() : null;
+  const isFree = !!fam && genealogyScene.getCurrentFreeLayout(fam);
   const display = isFree ? '' : 'none';
   if (selectToolBtn) selectToolBtn.style.display = display;
   if (panToolBtn) panToolBtn.style.display = display;
@@ -8993,7 +10165,7 @@ function setArrangeTool(tool) {
   ) {
     clearNodeSelection();
     finishMarquee();
-    closeNodeContextMenu();
+    closePersonCardMenu();
   }
 
   updateArrangeToolUI();
@@ -9007,8 +10179,8 @@ function isTextInteractionTarget(target) {
 }
 
 function isPanGestureActive() {
-  const fam = genealogyData ? currentFamily() : null;
-  return !!fam && getCurrentFreeLayout(fam) && (arrangeTool === 'pan' || spacePanHeld);
+  const fam = currentGenealogyData() ? currentFamily() : null;
+  return !!fam && genealogyScene.getCurrentFreeLayout(fam) && (arrangeTool === 'pan' || spacePanHeld);
 }
 
 function updateMarquee(clientX, clientY) {
@@ -9026,7 +10198,7 @@ function updateMarquee(clientX, clientY) {
   selectionMarquee.classList.add('show');
 
   const next = new Set(marqueeState.baseSelection);
-  nodes.querySelectorAll('.node[data-id]').forEach(el => {
+  nodes.querySelectorAll('.person-card[data-id]').forEach(el => {
     const r = el.getBoundingClientRect();
     const intersects = r.right >= leftClient && r.left <= rightClient && r.bottom >= topClient && r.top <= bottomClient;
     if (intersects) next.add(el.dataset.id);
@@ -9049,10 +10221,10 @@ function finishMarquee() {
 let panning = false, panStartX = 0, panStartY = 0, panStartPanX = 0, panStartPanY = 0;
 viewport.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
-  const onNode = !!e.target.closest('.node');
+  const onNode = !!e.target.closest('.person-card');
   const onLabel = !!e.target.closest('.edge-label');
   const fam = currentFamily();
-  const isFree = getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.getCurrentFreeLayout(fam);
 
   // 自由排列的框選會 preventDefault()，可能吃掉瀏覽器原生 dblclick。
   // 第二次按下空白畫布時直接執行置中，確保所有排列模式都一致。
@@ -9103,7 +10275,7 @@ window.addEventListener('mouseup', () => {
   if (panning) { panning = false; viewport.classList.remove('dragging'); }
 });
 viewport.addEventListener('dblclick', e => {
-  if (e.target.closest('.node')) return;
+  if (e.target.closest('.person-card')) return;
   if (e.target.closest('.edge-label')) return;
 
   e.preventDefault();
@@ -9131,7 +10303,7 @@ labelsSvg.addEventListener('pointerdown', e => {
 
   const baseX = parseFloat(g.dataset.x) || 0;
   const baseY = parseFloat(g.dataset.y) || 0;
-  const cur = (genealogyData.labelPositions || {})[key] || { dx:0, dy:0 };
+  const cur = (currentGenealogyData().labelPositions || {})[key] || { dx:0, dy:0 };
 
   labelDrag = {
     key,
@@ -9399,14 +10571,6 @@ function getDragSelectionSmartSnap(
   };
 }
 // ========【拖曳 Geometry Snapshot】 設定 - PointerMove 不再重建整張族譜幾何 ========
-function buildDragPerformanceGeometry() {
-  return genealogyScene?.buildDragPerformanceGeometry?.() || [];
-}
-
-function buildSingleDragRelationshipTargets(id) {
-  return genealogyScene?.buildSingleDragRelationshipTargets?.(id) || { x:[], y:[] };
-}
-
 function createSingleDragPerformanceSession(
   id
 ) {
@@ -9421,15 +10585,15 @@ function createSingleDragPerformanceSession(
     .createSingleDragSession({
       id,
       geometry:
-        buildDragPerformanceGeometry(),
+        genealogyScene?.buildDragPerformanceGeometry?.() || [],
       guideSnapPx:
         GUIDE_SNAP_PX,
       relationshipSnapPx:
         RELATIONSHIP_VERTICAL_SNAP_PX,
       relationshipTargets:
-        buildSingleDragRelationshipTargets(
+        genealogyScene?.buildSingleDragRelationshipTargets?.(
           id
-        )
+        ) || { x:[], y:[] }
     });
 }
 
@@ -9449,7 +10613,7 @@ function createGroupDragPerformanceSession(
       dragIds,
       startPositions,
       geometry:
-        buildDragPerformanceGeometry(),
+        genealogyScene?.buildDragPerformanceGeometry?.() || [],
       guideSnapPx:
         GUIDE_SNAP_PX
     });
@@ -9459,12 +10623,12 @@ nodes.addEventListener('pointerdown', e => {
   // 只讓主滑鼠鍵進入人物卡的點擊／拖曳流程。
   // 右鍵必須完整保留給 contextmenu，避免自由排列模式的 preventDefault() 吃掉右鍵選單。
   if (e.button !== 0) return;
-  const el = e.target.closest('.node');
+  const el = e.target.closest('.person-card');
   if (!el) return;
   const id = el.dataset.id;
   const fam = currentFamily();
   ensureFamilyLayoutShape(fam);
-  const isFree = getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.getCurrentFreeLayout(fam);
 
   // Space 是選取工具中的暫時平移：不攔截，交給 viewport 的平移手勢。
   if (isFree && spacePanHeld) return;
@@ -9535,7 +10699,7 @@ nodes.addEventListener('pointerdown', e => {
       if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
       if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
       if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
-      scheduleEdgeRedraw();
+      genealogyScene?.scheduleEdgeRedraw?.();
     };
 
     const moveFrame =
@@ -9582,10 +10746,10 @@ nodes.addEventListener('pointerdown', e => {
           dragMutation,
           { render:false }
         );
-        expandStageToFit();
+        genealogyScene?.expandStageToFit?.();
       } else {
-        if (viewMode === 'view') openInfoCard(id);
-        else openEditor(id);
+        if (viewMode === 'view') openPersonProfile(id);
+        else personEditor.open(id);
       }
     };
 
@@ -9669,7 +10833,7 @@ nodes.addEventListener('pointerdown', e => {
         dragIds.forEach(sid =>
           nodes
             .querySelector(
-              `.node[data-id="${CSS.escape(sid)}"]`
+              `.person-card[data-id="${CSS.escape(sid)}"]`
             )
             ?.classList
             .add('dragging')
@@ -9708,7 +10872,7 @@ nodes.addEventListener('pointerdown', e => {
 
         const nodeEl =
           nodes.querySelector(
-            `.node[data-id="${CSS.escape(sid)}"]`
+            `.person-card[data-id="${CSS.escape(sid)}"]`
           );
 
         if (nodeEl) {
@@ -9758,7 +10922,7 @@ nodes.addEventListener('pointerdown', e => {
         );
       }
 
-      scheduleEdgeRedraw();
+      genealogyScene?.scheduleEdgeRedraw?.();
     };
 
     const moveFrame =
@@ -9804,7 +10968,7 @@ nodes.addEventListener('pointerdown', e => {
       dragIds.forEach(sid =>
         nodes
           .querySelector(
-            `.node[data-id="${CSS.escape(sid)}"]`
+            `.person-card[data-id="${CSS.escape(sid)}"]`
           )
           ?.classList
           .remove('dragging')
@@ -9828,7 +10992,7 @@ nodes.addEventListener('pointerdown', e => {
           dragMutation,
           { render:false }
         );
-        expandStageToFit();
+        genealogyScene?.expandStageToFit?.();
       } else if (shift && wasSelected) {
         selectedNodeIds.delete(id);
         syncNodeSelectionClasses();
@@ -9879,9 +11043,9 @@ nodes.addEventListener('pointerdown', e => {
         ) < 5
       ) {
         if (viewMode === 'view') {
-          openInfoCard(id);
+          openPersonProfile(id);
         } else {
-          openEditor(id);
+          personEditor.open(id);
         }
       }
     };
@@ -9911,7 +11075,7 @@ nodes.addEventListener('pointerdown', e => {
     fam.manualPositions[dragMode];
 
   const sim =
-    genealogyData.sims[id];
+    currentGenealogyData().sims[id];
 
   if (!sim) return;
 
@@ -10062,7 +11226,7 @@ nodes.addEventListener('pointerdown', e => {
       );
     }
 
-    scheduleEdgeRedraw();
+    genealogyScene?.scheduleEdgeRedraw?.();
   };
 
   const moveFrame =
@@ -10132,12 +11296,12 @@ nodes.addEventListener('pointerdown', e => {
         { render:false }
       );
 
-      expandStageToFit();
+      genealogyScene?.expandStageToFit?.();
     } else {
       if (viewMode === 'view') {
-        openInfoCard(id);
+        openPersonProfile(id);
       } else {
-        openEditor(id);
+        personEditor.open(id);
       }
     }
   };
@@ -10158,13 +11322,9 @@ nodes.addEventListener('pointerdown', e => {
   );
 });
 
-function expandStageToFit() {
-  genealogyScene?.expandStageToFit?.();
-}
-
 function updateLayoutToggle() {
   const fam = currentFamily();
-  const isFree = getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.getCurrentFreeLayout(fam);
   const btn = $('layoutToggle'), lockBtn = $('lockToggle');
   if (isFree) {
     setIconText(btn, 'arrows-move', '自由排列');
@@ -10233,7 +11393,7 @@ $('layoutToggle').onclick = () => {
 
 $('lockToggle').onclick = () => {
   const fam = currentFamily();
-  if (!getCurrentFreeLayout(fam)) return;
+  if (!genealogyScene.getCurrentFreeLayout(fam)) return;
 
   const mutation =
     genealogyStore.setFamilyLocked(
@@ -10294,7 +11454,7 @@ $('labelToggle').onclick = () => {
   else { btn.classList.remove('active'); setIconText(btn, 'tags', '顯示關係'); }
   syncRelationshipToolbarVisibility();
   try { localStorage.setItem(LABELS_KEY, showRelLabels ? '1' : '0'); } catch(e){}
-  if (getSceneLayout()) drawEdges();
+  if (getSceneLayout()) genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
 };
 
 function getFamilyGenerationLevels(fam) {
@@ -10353,7 +11513,7 @@ function renderFamilyCover(fam) {
     img.src = coverUrl; img.hidden = false; collage.innerHTML=''; empty.style.display='none'; return;
   }
   img.hidden = true; img.removeAttribute('src');
-  const members = (fam.memberIds || []).map(id => genealogyData.sims[id]).filter(Boolean).slice(0,4);
+  const members = (fam.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean).slice(0,4);
   const withContent = members.filter(Boolean);
   collage.innerHTML = withContent.map(sim => {
     const avatar = framedAvatarImageHTML(sim.avatar, sim.avatarFrame);
@@ -10432,50 +11592,92 @@ $('familyGenerationSortBtn')?.addEventListener(
   }
 );
 
-function updateFamilyMemberRemoveToolbar() {
-  const startBtn = $('removeMemberBtn');
-  const addMenu = $('familyMemberAddMenu');
-  const toolbar = $('familyMemberRemoveToolbar');
-  const countEl = $('familyMemberRemoveCount');
-  const confirmBtn = $('familyMemberRemoveConfirmBtn');
-  const count = removeMemberSelection.size;
+const familyMemberController = {
+  syncRemoveToolbar() {
+    const startBtn = $('removeMemberBtn');
+    const addMenu = $('familyMemberAddMenu');
+    const toolbar = $('familyMemberRemoveToolbar');
+    const countEl = $('familyMemberRemoveCount');
+    const confirmBtn = $('familyMemberRemoveConfirmBtn');
+    const count = familyMemberOperationState.selection.size;
 
-  if (startBtn) startBtn.hidden = removeMemberMode;
-  if (addMenu) addMenu.hidden = removeMemberMode;
-  if (toolbar) toolbar.hidden = !removeMemberMode;
-  if (countEl) countEl.textContent = `已選 ${count} 位`;
+    if (startBtn) startBtn.hidden = familyMemberOperationState.removeMode;
+    if (addMenu) addMenu.hidden = familyMemberOperationState.removeMode;
+    if (toolbar) toolbar.hidden = !familyMemberOperationState.removeMode;
+    if (countEl) countEl.textContent = `已選 ${count} 位`;
 
-  if (confirmBtn) {
-    confirmBtn.disabled = count === 0;
-    confirmBtn.textContent = `移除 ${count} 位`;
+    if (confirmBtn) {
+      confirmBtn.disabled = count === 0;
+      confirmBtn.textContent = `移除 ${count} 位`;
+    }
+  },
+
+  setRemoveMode(enabled, selectedIds = []) {
+    familyMemberOperationState.removeMode = !!enabled;
+    familyMemberOperationState.selection.clear();
+
+    if (familyMemberOperationState.removeMode) {
+      selectedIds.forEach(id => {
+        if (id && currentGenealogyData().sims[id]) {
+          familyMemberOperationState.selection.add(id);
+        }
+      });
+    }
+
+    if (typeof closeAppMenus === 'function') closeAppMenus();
+    renderFamilyMemberList(currentFamily());
+  },
+
+  toggleSelection(simId) {
+    if (!familyMemberOperationState.removeMode || !simId) return;
+
+    if (familyMemberOperationState.selection.has(simId)) {
+      familyMemberOperationState.selection.delete(simId);
+    } else {
+      familyMemberOperationState.selection.add(simId);
+    }
+
+    renderFamilyMemberList(currentFamily());
+  },
+
+  async confirmRemoveSelected(event) {
+    if (
+      !familyMemberOperationState.removeMode ||
+      !familyMemberOperationState.selection.size
+    ) {
+      return;
+    }
+
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const family = currentFamily();
+    const ids = [...familyMemberOperationState.selection]
+      .filter(id => family.memberIds.includes(id));
+
+    if (!ids.length) return;
+
+    const confirmed = await uiConfirm(
+      `${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`,
+      {
+        title:uiText('移出所選人物'),
+        kind:'danger',
+        confirmText:uiText('移出家族')
+      }
+    );
+
+    if (!confirmed) return;
+
+    const mutation = genealogyStore.removeFamilyMembers(
+      family.id,
+      ids
+    );
+
+    resetFamilyMemberOperations();
+    applyGenealogyMutation(mutation);
+    requestAnimationFrame(fitScreen);
   }
-}
-
-function setRemoveMemberMode(enabled, selectedIds = []) {
-  removeMemberMode = !!enabled;
-  removeMemberSelection.clear();
-
-  if (removeMemberMode) {
-    selectedIds.forEach(id => {
-      if (id && genealogyData.sims[id]) removeMemberSelection.add(id);
-    });
-  }
-
-  if (typeof closeAppMenus === 'function') closeAppMenus();
-  renderFamilyMemberList(currentFamily());
-}
-
-function toggleRemoveMemberSelection(simId) {
-  if (!removeMemberMode || !simId) return;
-
-  if (removeMemberSelection.has(simId)) {
-    removeMemberSelection.delete(simId);
-  } else {
-    removeMemberSelection.add(simId);
-  }
-
-  renderFamilyMemberList(currentFamily());
-}
+};
 
 function renderFamilyMemberList(fam) {
   const list = $('familyMemberList');
@@ -10483,15 +11685,14 @@ function renderFamilyMemberList(fam) {
 
   let members =
     (fam.memberIds || [])
-      .map(id => genealogyData.sims[id])
+      .map(id => currentGenealogyData().sims[id])
       .filter(Boolean);
 
   updateFamilyGenerationSortControl();
 
   if (!members.length) {
-    removeMemberMode = false;
-    removeMemberSelection.clear();
-    updateFamilyMemberRemoveToolbar();
+    resetFamilyMemberOperations();
+    familyMemberController.syncRemoveToolbar();
     list.innerHTML = `<div class="family-member-empty">${esc(uiText('目前家族還沒有成員'))}</div>`;
     return;
   }
@@ -10499,9 +11700,9 @@ function renderFamilyMemberList(fam) {
   const currentIds =
     new Set(members.map(sim => sim.id));
 
-  [...removeMemberSelection].forEach(id => {
+  [...familyMemberOperationState.selection].forEach(id => {
     if (!currentIds.has(id)) {
-      removeMemberSelection.delete(id);
+      familyMemberOperationState.selection.delete(id);
     }
   });
 
@@ -10566,9 +11767,9 @@ function renderFamilyMemberList(fam) {
       displayDataText(sim.career,sim)
     ].filter(Boolean).join(' · ');
 
-    const selected = removeMemberSelection.has(sim.id);
+    const selected = familyMemberOperationState.selection.has(sim.id);
 
-    return `<div class="family-member-row${removeMemberMode ? ' remove-mode' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" tabindex="0">
+    return `<div class="family-member-row${familyMemberOperationState.removeMode ? ' remove-mode' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" tabindex="0">
       <div class="family-member-avatar-wrap">
         <div class="family-member-avatar">${framedAvatarImageHTML(sim.avatar, sim.avatarFrame) || esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>
         <button class="family-member-remove-select${selected ? ' selected' : ''}" type="button" data-family-member-remove-select="${esc(sim.id)}" aria-pressed="${selected ? 'true' : 'false'}" title="${esc(uiText(selected ? '取消選取' : '批量移除'))}">
@@ -10576,14 +11777,14 @@ function renderFamilyMemberList(fam) {
         </button>
       </div>
       <div class="family-member-copy"><div class="family-member-name">${esc(displayDataText(sim.name,sim))}</div><div class="family-member-meta">${esc(meta)}</div></div>
-      <div class="app-menu family-member-menu">
-        <button class="family-member-more app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="${esc(uiText('更多'))}">${iconSvg('three-dots')}</button>
-        <div class="app-menu-popover family-member-popover" role="menu">
-          <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="view" data-family-member-id="${esc(sim.id)}">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
-          <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="edit" data-family-member-id="${esc(sim.id)}">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
-          <button class="app-menu-item" type="button" role="menuitem" data-family-member-action="locate" data-family-member-id="${esc(sim.id)}">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-          <div class="app-menu-divider"></div>
-          <button class="app-menu-item danger" type="button" role="menuitem" data-family-member-action="remove" data-family-member-id="${esc(sim.id)}">${iconSvg('person-dash')}<span>${esc(uiText('移出目前家族'))}</span></button>
+      <div class="ui-menu family-member-menu">
+        <button class="family-member-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="${esc(uiText('更多'))}">${iconSvg('three-dots')}</button>
+        <div class="ui-menu-popover family-member-popover" role="menu">
+          <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="view" data-family-member-id="${esc(sim.id)}">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
+          <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="edit" data-family-member-id="${esc(sim.id)}">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
+          <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="locate" data-family-member-id="${esc(sim.id)}">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
+          <div class="ui-menu-divider"></div>
+          <button class="ui-menu-item danger" type="button" role="menuitem" data-family-member-action="remove" data-family-member-id="${esc(sim.id)}">${iconSvg('person-dash')}<span>${esc(uiText('移出目前家族'))}</span></button>
         </div>
       </div>
     </div>`;
@@ -10592,11 +11793,11 @@ function renderFamilyMemberList(fam) {
   list.querySelectorAll('[data-family-sim-id]').forEach(row => {
     const handle = e => {
       if (e?.target?.closest?.('.family-member-menu, .family-member-remove-select')) return;
-      if (removeMemberMode) {
-        toggleRemoveMemberSelection(row.dataset.familySimId);
+      if (familyMemberOperationState.removeMode) {
+        familyMemberController.toggleSelection(row.dataset.familySimId);
         return;
       }
-      openInfoCard(row.dataset.familySimId);
+      openPersonProfile(row.dataset.familySimId);
     };
 
     row.addEventListener('click', handle);
@@ -10612,7 +11813,7 @@ function renderFamilyMemberList(fam) {
     btn.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
-      toggleRemoveMemberSelection(btn.dataset.familyMemberRemoveSelect);
+      familyMemberController.toggleSelection(btn.dataset.familyMemberRemoveSelect);
     });
   });
 
@@ -10622,17 +11823,17 @@ function renderFamilyMemberList(fam) {
       e.stopPropagation();
       const simId = btn.dataset.familyMemberId;
       const action = btn.dataset.familyMemberAction;
-      if (!simId || !genealogyData.sims[simId]) return;
+      if (!simId || !currentGenealogyData().sims[simId]) return;
 
-      if (action === 'view') openInfoCard(simId);
-      else if (action === 'edit') openEditor(simId);
+      if (action === 'view') openPersonProfile(simId);
+      else if (action === 'edit') personEditor.open(simId);
       else if (action === 'locate') focusSimOnCanvas(simId);
-      else if (action === 'remove') setRemoveMemberMode(true, [simId]);
+      else if (action === 'remove') familyMemberController.setRemoveMode(true, [simId]);
     });
   });
 
-  updateFamilyMemberRemoveToolbar();
-  if (!removeMemberMode) setupAppMenus();
+  familyMemberController.syncRemoveToolbar();
+  if (!familyMemberOperationState.removeMode) setupAppMenus();
 }
 
 function refreshFamilyProfilePanel() {
@@ -10640,14 +11841,14 @@ function refreshFamilyProfilePanel() {
   const viewFamily = currentTreeFamily() || fam;
   ensureFamilyProfileShape(fam);
   const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value = fam.bio || '';
-  const members = (viewFamily.memberIds || []).map(id => genealogyData.sims[id]).filter(Boolean);
+  const members = (viewFamily.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean);
   if ($('familyMemberCount')) $('familyMemberCount').textContent = String(members.length);
   if ($('familyGenerationCount')) $('familyGenerationCount').textContent = String(calculateFamilyGenerationCount(viewFamily));
   if ($('familyDeceasedCount')) $('familyDeceasedCount').textContent = String(members.filter(sim => sim.status === '已故' || sim.status === '幽靈').length);
 
   const gameDate = $('familyGameDate');
   if (gameDate) {
-    const dateText = formatGameDate(genealogyData && genealogyData.meta && genealogyData.meta.realDateCurrentDate);
+    const dateText = formatGameDate(currentGenealogyData() && currentGenealogyData().meta && currentGenealogyData().meta.realDateCurrentDate);
     if (dateText) {
       gameDate.hidden = false;
       gameDate.title = uiText('匯出時遊戲日期');
@@ -10715,13 +11916,13 @@ familySelect.onchange = async () => {
     selectedEntry.value
   );
 
-  genealogyData.currentFamilyId = selectedEntry.familyId;
+  genealogyStore.setCurrentFamilyId(selectedEntry.familyId);
   familyTreeLastSourceFamilyId = selectedEntry.familyId;
 
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
-  removeMemberMode = false;
-  closeEditor();
+  resetPersonLibraryOperations({ batch:false, add:true });
+  resetFamilyMemberOperations();
+  familyMemberOperationState.removeMode = false;
+  personEditor.close();
 
   save();
   void preloadCurrentViewAssets();
@@ -10833,17 +12034,17 @@ $('newFamilyBtn').onclick = async () => {
     );
 
   dragHistory.clear();
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
+  personLibraryState.addSelection.clear();
+  familyMemberOperationState.selection.clear();
   applyGenealogyMutation(mutation);
   requestAnimationFrame(fitScreen);
 };
 $('delFamilyBtn').onclick = async () => {
-  if (genealogyData.families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
+  if (currentGenealogyData().families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
   const fam = currentFamily();
   if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n（家族內所有模擬市民仍保留在模擬市民池中）`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
   const fallbackFamilyId =
-    genealogyData.families
+    currentGenealogyData().families
       .find(f => f.id !== fam.id)
       ?.id ||
     null;
@@ -10855,23 +12056,23 @@ $('delFamilyBtn').onclick = async () => {
     );
 
   dragHistory.clear();
-  addMemberSelection.clear();
-  removeMemberSelection.clear();
-  closeEditor();
+  personLibraryState.addSelection.clear();
+  familyMemberOperationState.selection.clear();
+  personEditor.close();
   applyGenealogyMutation(mutation);
   scheduleGC();
   requestAnimationFrame(fitScreen);
 };
 
 function refreshSS(selectId) {
-  const wrap = document.querySelector(`.ss-wrap[data-ss-for="${selectId}"]`);
+  const wrap = document.querySelector(`.ui-select-wrap[data-ui-select-for="${selectId}"]`);
   if (wrap && wrap._refresh) wrap._refresh();
 }
 
 
 // ========【共用單選箭頭】 設定 - 編輯頁與導覽共用同一顆 Chevron SVG ========
 function installSharedNativeSelectChevrons(root = document) {
-  const selector = '.modal select:not([multiple])';
+  const selector = '.ui-dialog-panel select:not([multiple])';
   const candidates = [];
 
   if (root instanceof Element && root.matches(selector)) candidates.push(root);
@@ -10910,7 +12111,7 @@ function observeSharedNativeSelectChevrons() {
 }
 function setupSearchSelects() {
   document.querySelectorAll(
-    '.ss-wrap'
+    '.ui-select-wrap'
   ).forEach(wrap => {
     const selectId =
       wrap.dataset.ssFor;
@@ -10924,22 +12125,22 @@ function setupSearchSelects() {
 
     const input =
       wrap.querySelector(
-        '.ss-input'
+        '.ui-select-input'
       );
 
     const dropdown =
       wrap.querySelector(
-        '.ss-dropdown'
+        '.ui-select-dropdown'
       );
 
     const searchEl =
       wrap.querySelector(
-        '.ss-search'
+        '.ui-select-search'
       );
 
     const optionsEl =
       wrap.querySelector(
-        '.ss-options'
+        '.ui-select-options'
       );
 
     const isMultiple =
@@ -10972,7 +12173,7 @@ function setupSearchSelects() {
       }
 
       dropdown.classList.remove(
-        'ss-dropdown-portal'
+        'ui-select-dropdown-portal'
       );
 
       dropdown.style.removeProperty(
@@ -11011,7 +12212,7 @@ function setupSearchSelects() {
       if (
         !usePortalDropdown ||
         !wrap.classList.contains(
-          'ss-open'
+          'ui-select-open'
         )
       ) {
         return;
@@ -11027,7 +12228,7 @@ function setupSearchSelects() {
       }
 
       dropdown.classList.add(
-        'ss-dropdown-portal'
+        'ui-select-dropdown-portal'
       );
 
       const rect =
@@ -11139,7 +12340,7 @@ function setupSearchSelects() {
 
         if (!selected.length) {
           input.innerHTML =
-            '<span class="ss-placeholder">' +
+            '<span class="ui-select-placeholder">' +
             esc(placeholder) +
             '</span>';
         } else {
@@ -11154,7 +12355,7 @@ function setupSearchSelects() {
                   '';
 
                 return (
-                  '<span class="ss-tag' +
+                  '<span class="ui-select-tag' +
                   (
                     locked
                       ? ' locked'
@@ -11174,12 +12375,12 @@ function setupSearchSelects() {
                   ) +
                   (
                     locked
-                      ? '<span class="ss-tag-note">' +
+                      ? '<span class="ui-select-tag-note">' +
                         esc(
                           uiText('自動')
                         ) +
                         '</span>'
-                      : '<span class="ss-tag-x" data-remove="' +
+                      : '<span class="ui-select-tag-x" data-remove="' +
                         esc(option.value) +
                         '" title="移除">×</span>'
                   ) +
@@ -11190,7 +12391,7 @@ function setupSearchSelects() {
         }
 
         input.querySelectorAll(
-          '.ss-tag-x'
+          '.ui-select-tag-x'
         ).forEach(remove => {
           remove.onclick =
             event => {
@@ -11232,7 +12433,7 @@ function setupSearchSelects() {
           selected.value === ''
         ) {
           input.innerHTML =
-            '<span class="ss-placeholder">' +
+            '<span class="ui-select-placeholder">' +
             esc(placeholder) +
             '</span>';
         } else {
@@ -11245,7 +12446,7 @@ function setupSearchSelects() {
         'beforeend',
         iconSvg(
           'chevron-down',
-          'ss-chevron-icon'
+          'ui-select-chevron-icon'
         )
       );
     }
@@ -11361,7 +12562,7 @@ function setupSearchSelects() {
               '';
 
             const classes = [
-              'ss-option',
+              'ui-select-option',
               selected
                 ? 'selected'
                 : '',
@@ -11409,7 +12610,7 @@ function setupSearchSelects() {
               '</span>' +
               (
                 note
-                  ? '<span class="ss-option-note">' +
+                  ? '<span class="ui-select-option-note">' +
                     esc(note) +
                     '</span>'
                   : ''
@@ -11424,7 +12625,7 @@ function setupSearchSelects() {
         raw &&
         !hasExact
           ? (
-              '<div class="ss-option" data-create-value="' +
+              '<div class="ui-select-option" data-create-value="' +
               esc(raw) +
               '"><span>' +
               esc(
@@ -11441,7 +12642,7 @@ function setupSearchSelects() {
         !createHTML
       ) {
         optionsEl.innerHTML =
-          '<div class="ss-empty">' +
+          '<div class="ui-select-empty">' +
           esc(
             uiText(
               '沒有符合的項目'
@@ -11457,7 +12658,7 @@ function setupSearchSelects() {
         createHTML;
 
       optionsEl.querySelectorAll(
-        '.ss-option[data-value]'
+        '.ui-select-option[data-value]'
       ).forEach(element => {
         element.onclick =
           event => {
@@ -11520,7 +12721,7 @@ function setupSearchSelects() {
 
     function openDropdown() {
       document.querySelectorAll(
-        '.ss-wrap.ss-open'
+        '.ui-select-wrap.ui-select-open'
       ).forEach(other => {
         if (
           other !== wrap &&
@@ -11532,7 +12733,7 @@ function setupSearchSelects() {
 
       dropdown.style.display = '';
       wrap.classList.add(
-        'ss-open'
+        'ui-select-open'
       );
 
       searchEl.value = '';
@@ -11561,7 +12762,7 @@ function setupSearchSelects() {
         'none';
 
       wrap.classList.remove(
-        'ss-open'
+        'ui-select-open'
       );
 
       restoreDropdownHome();
@@ -11570,7 +12771,7 @@ function setupSearchSelects() {
     input.onclick = event => {
       if (
         event.target.closest(
-          '.ss-tag-x'
+          '.ui-select-tag-x'
         )
       ) {
         return;
@@ -11578,7 +12779,7 @@ function setupSearchSelects() {
 
       if (
         wrap.classList.contains(
-          'ss-open'
+          'ui-select-open'
         )
       ) {
         closeDropdown();
@@ -11650,7 +12851,7 @@ function setupSearchSelects() {
         () => {
           if (
             wrap.classList.contains(
-              'ss-open'
+              'ui-select-open'
             )
           ) {
             positionPortalDropdown();
@@ -11669,7 +12870,7 @@ function setupSearchSelects() {
 
         if (
           wrap.classList.contains(
-            'ss-open'
+            'ui-select-open'
           )
         ) {
           renderOptions(
@@ -11701,20 +12902,20 @@ function setupSearchSelects() {
 
 function getEditingAvatarCropSource(target){
   return target==='pet'
-    ? {ref:editingPetAvatar,frame:editingPetAvatarFrame}
-    : {ref:editingAvatar,frame:editingAvatarFrame};
+    ? {ref:petEditorState.avatar,frame:petEditorState.avatarFrame}
+    : {ref:simEditorState.avatar,frame:simEditorState.avatarFrame};
 }
 
 function setEditingAvatarCropFrame(target,frame){
   const normalized=normalizeAvatarFrame(frame);
 
   if(target==='pet'){
-    editingPetAvatarFrame=normalized;
-    renderPetAvatarPreview();
+    petEditorState.avatarFrame=normalized;
+    petEditorController.refreshAvatarPreview();
   }else{
-    editingAvatarFrame=normalized;
-    updateAvatarPreview();
-    renderEditorInfoPreviewIfActive();
+    simEditorState.avatarFrame=normalized;
+    personEditor.renderAvatarPreview();
+    personEditor.renderInfoPreviewIfActive();
   }
 }
 
@@ -11916,7 +13117,7 @@ async function openAvatarCropEditor(target){
   avatarCropRenderMetrics=null;
   avatarCropNaturalSize={width:0,height:0};
 
-  avatarCropMask.classList.add('show');
+  avatarCropDialog.classList.add('show');
 
   const loaded=await loadAvatarCropImage(url);
 
@@ -11934,7 +13135,7 @@ async function openAvatarCropEditor(target){
 }
 
 function closeAvatarCropEditor(){
-  avatarCropMask.classList.remove('show');
+  avatarCropDialog.classList.remove('show');
   avatarCropTarget=null;
   avatarCropDraft={...DEFAULT_AVATAR_FRAME};
   avatarCropUrl='';
@@ -12094,10 +13295,10 @@ $('avatarCropDone')?.addEventListener(
   commitAvatarCropEditor
 );
 
-avatarCropMask?.addEventListener(
+avatarCropDialog?.addEventListener(
   'click',
   event=>{
-    if(event.target===avatarCropMask){
+    if(event.target===avatarCropDialog){
       closeAvatarCropEditor();
     }
   }
@@ -12107,7 +13308,7 @@ window.addEventListener(
   'resize',
   debounce(()=>{
     if(
-      avatarCropMask?.classList.contains('show')
+      avatarCropDialog?.classList.contains('show')
     ){
       renderAvatarCropPreview();
     }
@@ -12117,7 +13318,7 @@ window.addEventListener(
 function buildRelationEntries(simId) {
   const entries = [];
   const seen = new Set();
-  const c = genealogyData.sims[simId];
+  const c = currentGenealogyData().sims[simId];
   if (!c) return entries;
 
   const push = (
@@ -12137,7 +13338,7 @@ function buildRelationEntries(simId) {
       parentRelations
         .map(relation => {
           const sim =
-            genealogyData.sims[
+            currentGenealogyData().sims[
               relation.parentId
             ];
 
@@ -12214,7 +13415,7 @@ function buildRelationEntries(simId) {
   (c.spouseIds || [])
     .forEach(sid => {
       const spouse =
-        genealogyData.sims[sid];
+        currentGenealogyData().sims[sid];
 
       if (!spouse) return;
 
@@ -12241,7 +13442,7 @@ function buildRelationEntries(simId) {
   (c.exSpouseIds || [])
     .forEach(sid => {
       const spouse =
-        genealogyData.sims[sid];
+        currentGenealogyData().sims[sid];
 
       if (!spouse) return;
 
@@ -12265,7 +13466,7 @@ function buildRelationEntries(simId) {
       });
     });
 
-  (genealogyData.links || [])
+  (currentGenealogyData().links || [])
     .forEach(link => {
       if (
         link.from !== simId &&
@@ -12280,7 +13481,7 @@ function buildRelationEntries(simId) {
           : link.from;
 
       const other =
-        genealogyData.sims[
+        currentGenealogyData().sims[
           otherId
         ];
 
@@ -12359,7 +13560,7 @@ function renderRelAnnoList(
 
   if (!entries.length) {
     list.innerHTML =
-      '<div class="rel-empty">' +
+      '<div class="relationship-empty">' +
       esc(uiText('尚無關係連線')) +
       '</div>';
 
@@ -12395,26 +13596,26 @@ function renderRelAnnoList(
 
       const hasOffset =
         !!(
-          genealogyData.labelPositions &&
-          genealogyData.labelPositions[
+          currentGenealogyData().labelPositions &&
+          currentGenealogyData().labelPositions[
             entry.key
           ] &&
           (
-            genealogyData.labelPositions[
+            currentGenealogyData().labelPositions[
               entry.key
             ].dx ||
-            genealogyData.labelPositions[
+            currentGenealogyData().labelPositions[
               entry.key
             ].dy
           )
         );
 
       return (
-        '<div class="rel-anno-item" ' +
+        '<div class="relationship-annotation-item" ' +
         'data-anno-key="' +
         esc(entry.key) +
         '">' +
-          '<div class="rel-anno-name" title="' +
+          '<div class="relationship-annotation-name" title="' +
           esc(entry.label) +
           '">' +
           esc(entry.label) +
@@ -12439,7 +13640,7 @@ function renderRelAnnoList(
           '">' +
           (
             hasOffset
-              ? '<button type="button" class="rel-anno-reset" data-reset-key="' +
+              ? '<button type="button" class="relationship-annotation-reset" data-reset-key="' +
                 esc(entry.key) +
                 '" title="' +
                 esc(uiText('重設關係位置')) +
@@ -12453,7 +13654,7 @@ function renderRelAnnoList(
     }).join('');
 
   list.querySelectorAll(
-    '.rel-anno-item'
+    '.relationship-annotation-item'
   ).forEach(item => {
     const key =
       item.dataset.annoKey;
@@ -12481,1535 +13682,555 @@ function renderRelAnnoList(
       const key =
         btn.dataset.resetKey;
 
-      if (
-        genealogyData.labelPositions &&
-        genealogyData.labelPositions[key]
-      ) {
-        delete genealogyData
-          .labelPositions[key];
+      const mutation =
+        genealogyStore.setRelationshipLabelPosition(
+          key,
+          null
+        );
 
-        save();
-        render();
-        renderRelAnno(simId);
-      }
+      if (!mutation.dataChanged) return;
+
+      applyGenealogyMutation(mutation);
+      renderRelAnno(simId);
     };
   });
 }
 function renderRelAnno(simId) {
-  if(!simId){renderRelAnnoList(null,'familyRelAnnoSection','familyRelAnnoList',[]);renderRelAnnoList(null,'relAnnoSection','relAnnoList',[]);return;}
+  if(!simId){renderRelAnnoList(null,'familyRelationshipAnnotationSection','familyRelationshipAnnotationList',[]);renderRelAnnoList(null,'relationshipAnnotationSection','relationshipAnnotationList',[]);return;}
   const entries=buildRelationEntries(simId);
-  renderRelAnnoList(simId,'familyRelAnnoSection','familyRelAnnoList',entries.filter(e=>e.group==='family'));
-  renderRelAnnoList(simId,'relAnnoSection','relAnnoList',entries.filter(e=>e.group==='other'));
+  renderRelAnnoList(simId,'familyRelationshipAnnotationSection','familyRelationshipAnnotationList',entries.filter(e=>e.group==='family'));
+  renderRelAnnoList(simId,'relationshipAnnotationSection','relationshipAnnotationList',entries.filter(e=>e.group==='other'));
 }
 
-function renderPetAvatarPreview(){
-    const el=$('petAvatarPreview');
-    const avatar=framedAvatarImageHTML(editingPetAvatar,editingPetAvatarFrame);
+const petEditorController = {
+  owner() {
+    return simEditorState.simId
+      ? currentGenealogyData().sims[simEditorState.simId]
+      : null;
+  },
 
-    if(avatar){
-      el.innerHTML=avatar;
-    }else{
-      const name=$('pName').value.trim();
-      const species=PET_SPECIES[$('pSpecies').value]||PET_SPECIES.other;
-      el.innerHTML=name?esc(name.charAt(0)):iconSvg(species.icon);
+  currentPet() {
+    return (
+      petEditorState.index >= 0 &&
+      editingPets[petEditorState.index]
+    )
+      ? editingPets[petEditorState.index]
+      : null;
+  },
+
+  createBlankPet() {
+    return {
+      id:uid('pet'),
+      name:'',
+      species:'dog',
+      breed:'',
+      gender:'male',
+      ageStage:'成年',
+      status:'在世',
+      avatar:null,
+      avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
+    };
+  },
+
+  refreshAvatarPreview() {
+    const preview = $('petAvatarPreview');
+    const avatar =
+      framedAvatarImageHTML(
+        petEditorState.avatar,
+        petEditorState.avatarFrame
+      );
+
+    if (avatar) {
+      preview.innerHTML = avatar;
+    } else {
+      const name = $('pName').value.trim();
+      const species =
+        PET_SPECIES[$('pSpecies').value] ||
+        PET_SPECIES.other;
+
+      preview.innerHTML =
+        name
+          ? esc(name.charAt(0))
+          : iconSvg(species.icon);
     }
 
-    const adjust=$('petAvatarAdjustBtn');
-    if(adjust)adjust.disabled=!editingPetAvatar;
-  }
-
-  function syncPetGenderField(){
-    const field=$('pGenderField');
-    const select=$('pGender');
-    const species=$('pSpecies').value;
-    const visible=isEaCasPetSpecies(species);
-
-    if(field)field.hidden=!visible;
-
-    if(select){
-      if(visible){
-        select.value=normalizePetGender(select.value)||'male';
-      }else{
-        select.value='';
-      }
+    const adjust = $('petAvatarAdjustBtn');
+    if (adjust) {
+      adjust.disabled = !petEditorState.avatar;
     }
-  }
+  },
 
-  $('petAvatarInput').onchange=async event=>{
-    const file=event.target.files[0];
-    if(!file)return;
+  syncGenderVisibility() {
+    const field = $('pGenderField');
+    const select = $('pGender');
+    const species = $('pSpecies').value;
+    const visible = isEaCasPetSpecies(species);
 
-    try{
-      const result=await compressImage(file,'pet');
-      editingPetAvatar=await saveImageAsset(result.blob,{
-        width:result.width,
-        height:result.height
-      });
-      editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
-      renderPetAvatarPreview();
-    }catch(error){
-      uiAlert('圖片處理失敗：'+error.message,{title:'圖片處理失敗',kind:'danger'});
+    if (field) {
+      field.hidden = !visible;
     }
-    event.target.value='';
-  };
 
-  $('petAvatarAdjustBtn').onclick=()=>openAvatarCropEditor('pet');
+    if (!select) return;
 
-  $('petAvatarClearBtn').onclick=()=>{
-    editingPetAvatar=null;
-    editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
-    renderPetAvatarPreview();
-  };
+    select.value =
+      visible
+        ? (normalizePetGender(select.value) || 'male')
+        : '';
+  },
 
-  $('pName').addEventListener('input',renderPetAvatarPreview);
-  $('pSpecies').addEventListener('change',()=>{
-    syncPetGenderField();
-    renderPetAvatarPreview();
-  });
+  populateForm(pet) {
+    const owner = this.owner();
 
-  function openPetEditor(index){
-    editingPetIndex=typeof index==='number'?index:-1;
+    $('pName').value =
+      owner
+        ? displayDataText(pet.name, owner)
+        : (pet.name || '');
 
-    const pet=editingPetIndex>=0
-      ? editingPets[editingPetIndex]
-      : {
-          id:uid('pet'),
-          name:'',
-          species:'dog',
-          breed:'',
-          gender:'male',
-          ageStage:'成年',
-          status:'在世',
-          avatar:null,
-          avatarFrame:{...DEFAULT_AVATAR_FRAME}
-        };
+    $('pSpecies').value =
+      pet.species || 'dog';
 
-    const owner=editingId?genealogyData.sims[editingId]:null;
+    $('pBreed').value =
+      owner
+        ? displayDataText(pet.breed, owner)
+        : (pet.breed || '');
 
-    $('petModalTitle').textContent=uiText(editingPetIndex>=0?'編輯寵物':'新增寵物');
-    $('pName').value=owner?displayDataText(pet.name,owner):(pet.name||'');
-    $('pSpecies').value=pet.species||'dog';
-    $('pBreed').value=owner?displayDataText(pet.breed,owner):(pet.breed||'');
-    $('pGender').value=normalizePetGender(pet.gender)||'male';
-    $('pAgeStage').value=pet.ageStage||'成年';
-    $('pStatus').value=pet.status||'在世';
+    $('pGender').value =
+      normalizePetGender(pet.gender) ||
+      'male';
 
-    editingPetAvatar=pet.avatar||null;
-    editingPetAvatarFrame=normalizeAvatarFrame(pet.avatarFrame);
+    $('pAgeStage').value =
+      pet.ageStage || '成年';
 
-    $('pDelete').style.display=editingPetIndex>=0?'':'none';
+    $('pStatus').value =
+      pet.status || '在世';
 
-    syncPetGenderField();
-    renderPetAvatarPreview();
-    petMask.classList.add('show');
-    setTimeout(()=>$('pName').focus(),60);
-  }
+    petEditorState.avatar =
+      pet.avatar || null;
 
-  function closePetEditor(){
-    petMask.classList.remove('show');
+    petEditorState.avatarFrame =
+      normalizeAvatarFrame(
+        pet.avatarFrame
+      );
 
-    if(avatarCropTarget==='pet'){
+    this.syncGenderVisibility();
+    this.refreshAvatarPreview();
+  },
+
+  open(index = -1) {
+    const validIndex =
+      Number.isInteger(index) &&
+      index >= 0 &&
+      !!editingPets[index];
+
+    petEditorState.index =
+      validIndex ? index : -1;
+
+    const pet =
+      validIndex
+        ? editingPets[index]
+        : this.createBlankPet();
+
+    $('petModalTitle').textContent =
+      uiText(
+        validIndex
+          ? '編輯寵物'
+          : '新增寵物'
+      );
+
+    $('pDelete').style.display =
+      validIndex ? '' : 'none';
+
+    this.populateForm(pet);
+    petEditorDialog.classList.add('show');
+
+    setTimeout(
+      () => $('pName').focus(),
+      60
+    );
+  },
+
+  close() {
+    petEditorDialog.classList.remove('show');
+
+    if (avatarCropTarget === 'pet') {
       closeAvatarCropEditor();
     }
 
-    editingPetIndex=-1;
-    editingPetAvatar=null;
-    editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
-  }
+    petEditorState.index = -1;
+    petEditorState.avatar = null;
+    petEditorState.avatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+  },
 
-  function savePet(){
-    const owner=editingId?genealogyData.sims[editingId]:null;
-    const originalPet=editingPetIndex>=0&&editingPets[editingPetIndex]
-      ? editingPets[editingPetIndex]
-      : null;
+  collectForm() {
+    const owner = this.owner();
+    const previous = this.currentPet();
+    const inputName = $('pName').value.trim();
 
-    const shownName=originalPet&&owner?displayDataText(originalPet.name,owner):'';
-    const shownBreed=originalPet&&owner?displayDataText(originalPet.breed,owner):'';
-    const inputName=$('pName').value.trim();
-
-    if(!inputName){
-      uiAlert('請填寫寵物名字',{title:'資料未完成'});
-      return;
+    if (!inputName) {
+      uiAlert(
+        '請填寫寵物名字',
+        { title:'資料未完成' }
+      );
+      return null;
     }
 
-    const name=originalPet&&isBuiltinSampleSim(owner)&&inputName===shownName
-      ? originalPet.name
-      : inputName;
+    const shownName =
+      previous && owner
+        ? displayDataText(
+            previous.name,
+            owner
+          )
+        : '';
 
-    const inputBreed=$('pBreed').value.trim();
-    const breed=originalPet&&isBuiltinSampleSim(owner)&&inputBreed===shownBreed
-      ? originalPet.breed
-      : inputBreed;
+    const shownBreed =
+      previous && owner
+        ? displayDataText(
+            previous.breed,
+            owner
+          )
+        : '';
 
-    const preservedPetData=originalPet
-      ? JSON.parse(JSON.stringify(originalPet))
-      : {};
+    const inputBreed =
+      $('pBreed').value.trim();
 
-    const species=$('pSpecies').value;
+    const name =
+      previous &&
+      isBuiltinSampleSim(owner) &&
+      inputName === shownName
+        ? previous.name
+        : inputName;
 
-    const data={
-      ...preservedPetData,
-      id:originalPet?originalPet.id:uid('pet'),
+    const breed =
+      previous &&
+      isBuiltinSampleSim(owner) &&
+      inputBreed === shownBreed
+        ? previous.breed
+        : inputBreed;
+
+    const species =
+      $('pSpecies').value;
+
+    return {
+      ...(previous
+        ? JSON.parse(JSON.stringify(previous))
+        : {}),
+      id:
+        previous?.id ||
+        uid('pet'),
       name,
       species,
       breed,
-      gender:isEaCasPetSpecies(species)
-        ? (normalizePetGender($('pGender').value)||'male')
-        : '',
-      ageStage:$('pAgeStage').value,
-      status:$('pStatus').value,
-      avatar:editingPetAvatar||null,
-      avatarFrame:normalizeAvatarFrame(editingPetAvatarFrame)
+      gender:
+        isEaCasPetSpecies(species)
+          ? (
+              normalizePetGender(
+                $('pGender').value
+              ) ||
+              'male'
+            )
+          : '',
+      ageStage:
+        $('pAgeStage').value,
+      status:
+        $('pStatus').value,
+      avatar:
+        petEditorState.avatar ||
+        null,
+      avatarFrame:
+        normalizeAvatarFrame(
+          petEditorState.avatarFrame
+        )
     };
+  },
 
-    if(editingPetIndex>=0){
-      editingPets[editingPetIndex]=data;
-    }else{
-      editingPets.push(data);
+  commit() {
+    const pet = this.collectForm();
+    if (!pet) return;
+
+    if (petEditorState.index >= 0) {
+      editingPets[
+        petEditorState.index
+      ] = pet;
+    } else {
+      editingPets.push(pet);
     }
 
-    renderPetsList();
-    renderEditorInfoPreviewIfActive();
-    closePetEditor();
-  }
+    renderPetDraftList();
+    personEditor.renderInfoPreviewIfActive();
+    this.close();
+  },
 
-  async function deletePetFromEditor(){
-    if(editingPetIndex<0)return;
+  async removeCurrent() {
+    const pet = this.currentPet();
+    if (!pet) return;
 
-    const pet=editingPets[editingPetIndex];
-    if(!pet)return;
-
-    if(!await uiConfirm(`確定刪除寵物「${pet.name}」嗎？`,{
-      title:'刪除寵物',
-      kind:'danger',
-      confirmText:'刪除'
-    }))return;
-
-    editingPets.splice(editingPetIndex,1);
-    renderPetsList();
-    renderEditorInfoPreviewIfActive();
-    closePetEditor();
-  }
-
-  $('pSave').onclick=savePet;
-  $('pCancel').onclick=closePetEditor;
-  $('pDelete').onclick=deletePetFromEditor;
-
-  petMask.onclick=event=>{
-    if(event.target===petMask)closePetEditor();
-  };
-
-function renderPetsList(){
-  const list=$('petList');
-  if(!list)return;
-
-  if(!editingPets.length){
-    list.innerHTML=`<div class="rel-empty">${esc(uiText('尚未新增寵物'))}</div>`;
-    renderEditorInfoPreviewIfActive();
-    return;
-  }
-
-  const owner=editingId?genealogyData.sims[editingId]:null;
-
-  list.innerHTML=editingPets.map((pet,index)=>{
-    const avatar=framedAvatarImageHTML(pet.avatar,pet.avatarFrame)||petIconFor(pet);
-    const meta=[petSpeciesLabel(pet)];
-
-    if(pet.breed){
-      meta.push(owner?displayDataText(pet.breed,owner):pet.breed);
-    }
-
-    const gender=petGenderLabel(pet);
-    if(gender)meta.push(gender);
-    if(pet.ageStage)meta.push(uiText(pet.ageStage));
-    if(pet.status&&pet.status!=='在世')meta.push(uiText(pet.status));
-
-    const displayName=owner?displayDataText(pet.name,owner):pet.name;
-
-    return `<div class="pet-item">
-      <div class="pet-item-avatar">${avatar}</div>
-      <div class="pet-item-info">
-        <div class="pet-item-name">${esc(displayName)||esc(uiText('（未命名）'))}</div>
-        <div class="pet-item-meta">${esc(meta.join(' · '))}</div>
-        ${petLineageHTML(pet)}
-      </div>
-      <div class="pet-item-actions">
-        <button type="button" data-edit-pet="${index}">編輯</button>
-        <button type="button" class="danger" data-del-pet="${index}">刪除</button>
-      </div>
-    </div>`;
-  }).join('');
-
-  list.querySelectorAll('[data-edit-pet]').forEach(button=>{
-    button.onclick=()=>openPetEditor(+button.dataset.editPet);
-  });
-
-  list.querySelectorAll('[data-del-pet]').forEach(button=>{
-    button.onclick=async()=>{
-      const index=+button.dataset.delPet;
-      const pet=editingPets[index];
-      if(!pet)return;
-
-      if(!await uiConfirm(`確定刪除寵物「${pet.name}」嗎？`,{
+    const confirmed = await uiConfirm(
+      `確定刪除寵物「${pet.name}」嗎？`,
+      {
         title:'刪除寵物',
         kind:'danger',
         confirmText:'刪除'
-      }))return;
+      }
+    );
 
-      editingPets.splice(index,1);
-      renderPetsList();
-    };
-  });
+    if (!confirmed) return;
 
-  renderEditorInfoPreviewIfActive();
-}
-$('btnAddPet').onclick = () => openPetEditor(-1);
+    editingPets.splice(
+      petEditorState.index,
+      1
+    );
 
-function updateAvatarPreview(){
-    const element=$('avatarPreview');
-    const avatar=framedAvatarImageHTML(editingAvatar,editingAvatarFrame);
+    renderPetDraftList();
+    personEditor.renderInfoPreviewIfActive();
+    this.close();
+  },
 
-    if(avatar){
-      element.innerHTML=avatar;
-    }else{
-      const name=$('fName').value.trim();
-      element.textContent=name?name.charAt(0):'?';
-    }
-
-    const adjust=$('avatarAdjustBtn');
-    if(adjust)adjust.disabled=!editingAvatar;
-  }
-
-  $('avatarInput').onchange=async event=>{
-    const file=event.target.files[0];
-    if(!file)return;
-
-    try{
-      const result=await compressImage(file,'sim');
-      editingAvatar=await saveImageAsset(result.blob,{
-        width:result.width,
-        height:result.height
-      });
-      editingAvatarFrame={...DEFAULT_AVATAR_FRAME};
-      updateAvatarPreview();
-      renderEditorInfoPreviewIfActive();
-    }catch(error){
-      uiAlert('圖片處理失敗：'+error.message,{
-        title:'圖片處理失敗',
-        kind:'danger'
-      });
-    }
-    event.target.value='';
-  };
-
-  $('avatarAdjustBtn').onclick=()=>openAvatarCropEditor('sim');
-
-  $('avatarClearBtn').onclick=()=>{
-    editingAvatar=null;
-    editingAvatarFrame={...DEFAULT_AVATAR_FRAME};
-    updateAvatarPreview();
-    renderEditorInfoPreviewIfActive();
-  };
-
-  $('fName').addEventListener('input',()=>{
-    if(!editingAvatar)updateAvatarPreview();
-    renderEditorInfoPreviewIfActive();
-  });
-
-function updateCauseOfDeathVisibility() {
-  const st = $('fStatus').value;
-  const label = $('causeOfDeathLabel');
-  if (st === '已故' || st === '幽靈') label.style.display = '';
-  else label.style.display = 'none';
-}
-$('fStatus').addEventListener('change', updateCauseOfDeathVisibility);
-
-// ========【個人檔案編輯器】 設定 - 分頁、生日年齡摘要與特徵標籤 ========
-function getBirthdayDayLimit(monthValue) {
-  const month = Number(monthValue) || 0;
-  return [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1] || 31;
-}
-
-function populateBirthdayDays(preferredValue = null) {
-  const monthSelect = $('fBirthdayMonth');
-  const daySelect = $('fBirthdayDay');
-  if (!monthSelect || !daySelect) return;
-
-  const current = preferredValue !== null ? String(preferredValue || '') : String(daySelect.value || '');
-  const limit = monthSelect.value ? getBirthdayDayLimit(monthSelect.value) : 31;
-  daySelect.innerHTML = `<option value="">${esc(uiText('日'))}</option>` +
-    Array.from({ length: limit }, (_, index) => {
-      const day = String(index + 1);
-      return `<option value="${day}">${day}</option>`;
-    }).join('');
-  if (current && Number(current) <= limit) daySelect.value = current;
-}
-
-function formatBirthdaySummary(monthValue, dayValue, yearValue = null) {
-  const month = Number(monthValue) || 0;
-  const day = Number(dayValue) || 0;
-  const year = yearValue === null || yearValue === '' || !Number.isFinite(Number(yearValue))
-    ? null
-    : Math.trunc(Number(yearValue));
-  if (!month || !day) return uiText('生日未知');
-
-  const lang = document.documentElement.lang || 'zh-Hant';
-  if (lang === 'en') {
-    try {
-      const options = year === null
-        ? { month: 'short', day: 'numeric', timeZone: 'UTC' }
-        : { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
-      return new Intl.DateTimeFormat('en', options)
-        .format(new Date(Date.UTC(year === null ? 2000 : year, month - 1, day)));
-    } catch (_) {}
-  }
-
-  return year === null
-    ? `${month} ${uiText('月')} ${day} ${uiText('日')}`
-    : `${year} ${uiText('年')} ${month} ${uiText('月')} ${day} ${uiText('日')}`;
-}
-
-function formatGameDate(value) {
-  if (!value || typeof value !== 'object') return '';
-
-  const year = Number(value.year);
-  const month = Number(value.month);
-  const day = Number(value.day);
-  if (![year, month, day].every(Number.isFinite)) return '';
-
-  const normalizedYear = Math.trunc(year);
-  const normalizedMonth = Math.trunc(month);
-  const normalizedDay = Math.trunc(day);
-  const lang = document.documentElement.lang || 'zh-Hant';
-
-  if (lang === 'en') {
-    try {
-      return new Intl.DateTimeFormat('en', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        timeZone: 'UTC'
-      }).format(new Date(Date.UTC(normalizedYear, normalizedMonth - 1, normalizedDay)));
-    } catch (_) {}
-  }
-
-  return `${normalizedYear} ${uiText('年')} ${normalizedMonth} ${uiText('月')} ${normalizedDay} ${uiText('日')}`;
-}
-
-function syncTraitHiddenInput() {
-  const hidden = $('fTraits');
-  if (hidden) hidden.value = editingTraits.join('，');
-}
-
-function renderTraitEditor() {
-  const list = $('traitChipList');
-  if (!list) return;
-  syncTraitHiddenInput();
-  list.innerHTML = editingTraits.map((trait, index) =>
-    `<span class="trait-chip"><span>${esc(trait)}</span><button type="button" class="trait-chip-remove" data-trait-index="${index}" aria-label="${esc(uiText('移除'))}" title="${esc(uiText('移除'))}">×</button></span>`
-  ).join('');
-  list.querySelectorAll('.trait-chip-remove').forEach(button => {
-    button.addEventListener('click', () => {
-      const index = Number(button.dataset.traitIndex);
-      if (!Number.isInteger(index) || index < 0 || index >= editingTraits.length) return;
-      editingTraits.splice(index, 1);
-      renderTraitEditor();
-    });
-  });
-}
-
-function addTraitFromEditor() {
-  const input = $('traitInput');
-  if (!input) return;
-  const pieces = input.value.split(/[,，\n]+/).map(value => value.trim()).filter(Boolean);
-  if (!pieces.length) return;
-  pieces.forEach(value => {
-    if (!editingTraits.some(existing => existing.toLocaleLowerCase() === value.toLocaleLowerCase())) {
-      editingTraits.push(value);
-    }
-  });
-  input.value = '';
-  renderTraitEditor();
-  input.focus();
-}
-
-function editorDraftSim(){
-    const existing=editingId?genealogyData.sims[editingId]:null;
-    const status=$('fStatus').value;
-
-    return {
-      ...(existing
-        ? {gameData:existing.gameData?JSON.parse(JSON.stringify(existing.gameData)):undefined}
-        : {}),
-      id:editingId||'__editor_preview__',
-      name:$('fName').value.trim(),
-      lifeStage:$('fStage').value,
-      gender:$('fGender').value,
-      status,
-      race:$('fRace').value||'',
-      birthdayYear:$('fBirthdayYear').value===''?null:Math.trunc(Number($('fBirthdayYear').value)),
-      birthdayMonth:$('fBirthdayMonth').value?Number($('fBirthdayMonth').value):null,
-      birthdayDay:$('fBirthdayDay').value?Number($('fBirthdayDay').value):null,
-      age:$('fAge').value===''?null:Math.min(999,Math.max(0,Number($('fAge').value)||0)),
-      residence:$('fResidence').value.trim(),
-      aspiration:$('fAspiration').value.trim(),
-      causeOfDeath:status==='已故'||status==='幽靈'?$('fCauseOfDeath').value.trim():'',
-      traits:[...editingTraits],
-      career:$('fCareer').value.trim(),
-      bio:$('fBio').value.trim(),
-      avatar:editingAvatar||null,
-      avatarFrame:normalizeAvatarFrame(editingAvatarFrame),
-      pets:JSON.parse(JSON.stringify(editingPets)),
-      gallery:JSON.parse(JSON.stringify(editingGallery))
-    };
-  }
-
-  function selectedEditorIds(selectId){
-    return [...($(selectId)?.selectedOptions||[])]
-      .map(option=>String(option.value||''))
-      .filter(Boolean);
-  }
-
-  function editorSiblingIds(){
-    return [...new Set([
-      ...editingExplicitSiblingIds,
-      ...editingDerivedSiblingIds
-    ])]
-      .filter(id =>
-        id &&
-        genealogyData?.sims?.[id]
+  async setAvatarFile(file) {
+    const result =
+      await compressImage(
+        file,
+        'pet'
       );
-  }
 
-  function applyEditorSiblingStateToSelect(){
-    const select=$('fSiblings');
-    if(!select)return;
-
-    [...select.options]
-      .forEach(option=>{
-        const siblingId=
-          String(
-            option.value||
-            ''
-          );
-
-        if(!siblingId)return;
-
-        const isExplicit=
-          editingExplicitSiblingIds
-            .has(siblingId);
-
-        const isDerived=
-          editingDerivedSiblingIds
-            .has(siblingId);
-
-        option.selected=
-          isExplicit||
-          isDerived;
-
-        option.disabled=
-          isDerived;
-
-        if(isDerived){
-          option.dataset.relationshipSource=
-            'inferred';
-
-          option.dataset.ssNote=
-            uiText(
-              '由父母關係自動推導'
-            );
-        }else{
-          delete option.dataset
-            .relationshipSource;
-
-          delete option.dataset
-            .ssNote;
-        }
-      });
-
-    refreshSS('fSiblings');
-  }
-
-  function captureEditorExplicitSiblingSelection(){
-    const select=$('fSiblings');
-    if(!select)return;
-
-    editingExplicitSiblingIds=
-      new Set(
-        [...select.options]
-          .filter(option=>
-            option.selected&&
-            !option.disabled
-          )
-          .map(option=>
-            String(option.value||'')
-          )
-          .filter(Boolean)
-      );
-  }
-
-  function syncEditorSiblingAuthority(){
-    const relations=
-      resolveSiblingRelationships(
-        editingId
-          ? String(editingId)
-          : '',
+    petEditorState.avatar =
+      await saveImageAsset(
+        result.blob,
         {
-          parentIds:
-            selectedEditorIds(
-              'fParents'
-            ),
-          explicitIds:
-            [...editingExplicitSiblingIds]
+          width:result.width,
+          height:result.height
         }
       );
 
-    editingDerivedSiblingIds=
-      new Set(
-        relations
-          .filter(relation =>
-            relation.derivedFromParents
-          )
-          .map(relation =>
-            relation.targetId
-          )
-      );
-
-    applyEditorSiblingStateToSelect();
-  }
-
-  function syncEditorRelationKindMap(selectId,kindMap){
-    const selected=new Set(selectedEditorIds(selectId));
-
-    [...kindMap.keys()].forEach(id=>{
-      if(!selected.has(id))kindMap.delete(id);
-    });
-
-    selected.forEach(id=>{
-      if(!kindMap.has(id))kindMap.set(id,'parent-child');
-    });
-  }
-
-  function relationPersonMarkup(sim,relationLabel=''){
-    if(!sim)return'';
-
-    const name=displayDataText(sim.name,sim);
-    const avatar=framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((name||'?').charAt(0));
-
-    return '<span class="family-rel-person">'+
-      '<span class="family-rel-person-avatar">'+avatar+'</span>'+
-      '<span class="family-rel-person-copy">'+
-        '<span class="family-rel-person-name">'+esc(name)+'</span>'+
-        (relationLabel
-          ? '<span class="family-rel-person-kinship">'+esc(displayRelationshipText(relationLabel))+'</span>'
-          : '')+
-      '</span>'+
-    '</span>';
-  }
-
-  function renderEditorRelationPeople(targetId,ids,labelResolver=null,emptyText='—'){
-    const target=$(targetId);
-    if(!target)return;
-
-    const unique=[...new Set((ids||[]).map(String).filter(Boolean))];
-
-    if(!unique.length){
-      target.innerHTML=`<span class="family-rel-empty">${esc(uiText(emptyText))}</span>`;
-      return;
-    }
-
-    const draft=editorDraftSim();
-
-    target.innerHTML=unique.map(id=>{
-      const sim=genealogyData.sims[id];
-      if(!sim)return'';
-
-      const label=typeof labelResolver==='function'
-        ? labelResolver(sim,draft)
-        : '';
-
-      return relationPersonMarkup(sim,label);
-    }).join('')||`<span class="family-rel-empty">${esc(uiText(emptyText))}</span>`;
-  }
-
-  function renderEditorRelationKindList(listId,selectId,kindMap,role){
-    const list=$(listId);
-    if(!list)return;
-
-    syncEditorRelationKindMap(selectId,kindMap);
-    const draft=editorDraftSim();
-
-    list.innerHTML=selectedEditorIds(selectId).map(id=>{
-      const sim=genealogyData.sims[id];
-      if(!sim)return'';
-
-      const kind=kindMap.get(id)||'parent-child';
-      const label=directFamilyKinshipLabel(role,sim,draft,kind);
-
-      return '<div class="family-rel-kind-row">'+
-        '<div class="family-rel-kind-person">'+relationPersonMarkup(sim,label)+'</div>'+
-        '<select data-editor-relation-kind="'+esc(role)+'" data-editor-relation-id="'+esc(id)+'">'+
-          '<option value="parent-child"'+(kind==='parent-child'?' selected':'')+'>'+esc(uiText('親生'))+'</option>'+
-          '<option value="adoptive"'+(kind==='adoptive'?' selected':'')+'>'+esc(uiText('收養'))+'</option>'+
-        '</select>'+
-      '</div>';
-    }).join('');
-
-    list.querySelectorAll('[data-editor-relation-kind]').forEach(select=>{
-      select.onchange=()=>{
-        const id=select.dataset.editorRelationId;
-        const targetMap=select.dataset.editorRelationKind==='parent'
-          ? editingParentKinds
-          : editingChildKinds;
-
-        targetMap.set(id,select.value==='adoptive'?'adoptive':'parent-child');
-        renderEditorFamilyPreviews();
-        renderEditorInfoPreviewIfActive();
-      };
-    });
-  }
-
-  function renderEditorFamilyPreviews(){
-    const familyTarget=$('editorFamilyMembershipPreview');
-
-    if(familyTarget){
-      const names=selectedEditorIds('fFamilyIds')
-        .map(id=>genealogyData.families.find(family=>String(family.id)===id))
-        .filter(Boolean)
-        .map(family=>displayDataText(family.name,family));
-
-      familyTarget.innerHTML=names.length
-        ? names.map(name=>
-            '<span class="family-rel-person family-rel-family">'+
-              '<span class="family-rel-person-avatar">'+iconSvg('people')+'</span>'+
-              '<span class="family-rel-person-name">'+esc(name)+'</span>'+
-            '</span>'
-          ).join('')
-        : '<span class="family-rel-empty">—</span>';
-    }
-
-    syncEditorRelationKindMap('fParents',editingParentKinds);
-    syncEditorRelationKindMap('fChildren',editingChildKinds);
-
-    renderEditorRelationPeople(
-      'editorParentsPreview',
-      selectedEditorIds('fParents'),
-      sim=>directFamilyKinshipLabel(
-        'parent',
-        sim,
-        editorDraftSim(),
-        editingParentKinds.get(String(sim.id))||'parent-child'
-      )
-    );
-
-    renderEditorRelationPeople(
-      'editorSpousePreview',
-      selectedEditorIds('fSpouse'),
-      sim=>directFamilyKinshipLabel('spouse',sim,editorDraftSim())
-    );
-
-    renderEditorRelationPeople(
-      'editorExSpousePreview',
-      selectedEditorIds('fExSpouse'),
-      sim=>directFamilyKinshipLabel('exspouse',sim,editorDraftSim())
-    );
-
-    renderEditorRelationPeople(
-      'editorChildrenPreview',
-      selectedEditorIds('fChildren'),
-      sim=>directFamilyKinshipLabel(
-        'child',
-        sim,
-        editorDraftSim(),
-        editingChildKinds.get(String(sim.id))||'parent-child'
-      )
-    );
-
-    renderEditorRelationPeople(
-      'editorSiblingsPreview',
-      editorSiblingIds(),
-      sim=>directFamilyKinshipLabel('sibling',sim,editorDraftSim())
-    );
-
-    renderEditorRelationKindList(
-      'editorParentKindList',
-      'fParents',
-      editingParentKinds,
-      'parent'
-    );
-
-    renderEditorRelationKindList(
-      'editorChildKindList',
-      'fChildren',
-      editingChildKinds,
-      'child'
-    );
-  }
-
-  function buildEditorFamilyRelationshipRows(draft){
-    const groups=new Map();
-
-    const add=(label,sim)=>{
-      if(!label||!sim)return;
-      if(!groups.has(label))groups.set(label,[]);
-      groups.get(label).push(displayDataText(sim.name,sim));
+    petEditorState.avatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
     };
 
-    selectedEditorIds('fParents').forEach(id=>{
-      const sim=genealogyData.sims[id];
-      add(
-        directFamilyKinshipLabel(
-          'parent',
-          sim,
-          draft,
-          editingParentKinds.get(id)||'parent-child'
-        ),
-        sim
-      );
-    });
+    this.refreshAvatarPreview();
+  },
 
-    selectedEditorIds('fSpouse').forEach(id=>{
-      const sim=genealogyData.sims[id];
-      add(directFamilyKinshipLabel('spouse',sim,draft),sim);
-    });
+  clearAvatar() {
+    petEditorState.avatar = null;
+    petEditorState.avatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+    this.refreshAvatarPreview();
+  }
+};
 
-    selectedEditorIds('fExSpouse').forEach(id=>{
-      const sim=genealogyData.sims[id];
-      add(directFamilyKinshipLabel('exspouse',sim,draft),sim);
-    });
+function renderPetDraftList() {
+  const list = $('petList');
+  if (!list) return;
 
-    selectedEditorIds('fChildren').forEach(id=>{
-      const sim=genealogyData.sims[id];
-      add(
-        directFamilyKinshipLabel(
-          'child',
-          sim,
-          draft,
-          editingChildKinds.get(id)||'parent-child'
-        ),
-        sim
-      );
-    });
-
-    editorSiblingIds().forEach(id=>{
-      const sim=genealogyData.sims[id];
-      add(directFamilyKinshipLabel('sibling',sim,draft),sim);
-    });
-
-    return [...groups.entries()].map(([label,names])=>({
-      label,
-      names:[...new Set(names)]
-    }));
+  if (!editingPets.length) {
+    list.innerHTML =
+      `<div class="relationship-empty">${esc(uiText('尚未新增寵物'))}</div>`;
+    personEditor.renderInfoPreviewIfActive();
+    return;
   }
 
-  function renderEditorInfoPreview(){
-    const target=$('editorInfoPreview');
-    if(!target)return;
+  const owner = petEditorController.owner();
 
-    const draft=editorDraftSim();
+  list.innerHTML =
+    editingPets.map((pet, index) => {
+      const avatar =
+        framedAvatarImageHTML(
+          pet.avatar,
+          pet.avatarFrame
+        ) ||
+        petIconFor(pet);
 
-    const familyNames=selectedEditorIds('fFamilyIds')
-      .map(id=>genealogyData.families.find(family=>String(family.id)===id))
-      .filter(family=>family&&!family.gameImport)
-      .map(family=>displayDataText(family.name,family));
+      const meta = [
+        formatPetSpecies(pet)
+      ];
 
-    renderInfoCardContent(target,draft,{
-      draft:true,
-      familyNames,
-      familyRelationshipRows:buildEditorFamilyRelationshipRows(draft),
-      otherRelationshipRows:editingId
-        ? profileOtherRelationshipRows(editingId)
-        : [],
-      generationLabel:editingId
-        ? getSimGenerationLabel(editingId,currentFamily())
-        : '',
-      onGallery:index=>openGalleryViewerPreview(index)
-    });
-  }
-
-  function renderEditorInfoPreviewIfActive(){
-    const panel=document.querySelector('.sim-editor-panel[data-editor-panel="preview"]');
-    if(panel&&!panel.hidden)renderEditorInfoPreview();
-  }
-
-  function switchEditorTab(tabName='basic'){
-    const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
-    const panels=[...document.querySelectorAll('.sim-editor-panel[data-editor-panel]')];
-
-    if(!tabs.some(tab=>tab.dataset.editorTab===tabName)){
-      tabName='basic';
-    }
-
-    tabs.forEach(tab=>{
-      const active=tab.dataset.editorTab===tabName;
-      tab.classList.toggle('active',active);
-      tab.setAttribute('aria-selected',active?'true':'false');
-      tab.tabIndex=active?0:-1;
-    });
-
-    panels.forEach(panel=>{
-      const active=panel.dataset.editorPanel===tabName;
-      panel.classList.toggle('active',active);
-      panel.hidden=!active;
-    });
-
-    const content=document.querySelector('.sim-editor-content');
-    if(content)content.scrollTop=0;
-
-    if(tabName==='preview'){
-      renderEditorInfoPreview();
-    }
-  }
-
-  function resetEditorFamilyPanels(){
-    document.querySelectorAll('[data-family-editor-edit]').forEach(panel=>{
-      panel.hidden=true;
-    });
-
-    document.querySelectorAll('[data-family-editor-toggle]').forEach(button=>{
-      button.setAttribute('aria-expanded','false');
-    });
-  }
-
-  function setupSimEditorInteractions(){
-    document.querySelectorAll('.sim-editor-tab[data-editor-tab]').forEach(tab=>{
-      tab.addEventListener('click',()=>switchEditorTab(tab.dataset.editorTab));
-
-      tab.addEventListener('keydown',event=>{
-        if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
-
-        const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
-        const index=tabs.indexOf(tab);
-        if(index<0)return;
-
-        event.preventDefault();
-
-        let nextIndex=index;
-        if(event.key==='ArrowLeft')nextIndex=(index-1+tabs.length)%tabs.length;
-        if(event.key==='ArrowRight')nextIndex=(index+1)%tabs.length;
-        if(event.key==='Home')nextIndex=0;
-        if(event.key==='End')nextIndex=tabs.length-1;
-
-        switchEditorTab(tabs[nextIndex].dataset.editorTab);
-        tabs[nextIndex].focus();
-      });
-    });
-
-    $('traitAddBtn')?.addEventListener('click',addTraitFromEditor);
-
-    $('traitInput')?.addEventListener('keydown',event=>{
-      if(event.key!=='Enter')return;
-      event.preventDefault();
-      addTraitFromEditor();
-    });
-
-    $('fBirthdayMonth')?.addEventListener('change',()=>{
-      populateBirthdayDays($('fBirthdayDay')?.value||'');
-    });
-
-    ['fFamilyIds','fParents','fSpouse','fExSpouse','fChildren','fSiblings'].forEach(id=>{
-      $(id)?.addEventListener('change',()=>{
-        if(id==='fParents'){
-          syncEditorRelationKindMap('fParents',editingParentKinds);
-          syncEditorSiblingAuthority();
-        }
-        if(id==='fChildren'){
-          syncEditorRelationKindMap('fChildren',editingChildKinds);
-        }
-        if(id==='fSiblings'){
-          captureEditorExplicitSiblingSelection();
-          syncEditorSiblingAuthority();
-        }
-
-        renderEditorFamilyPreviews();
-        renderEditorInfoPreviewIfActive();
-      });
-    });
-
-    document.querySelectorAll('[data-family-editor-toggle]').forEach(button=>{
-      button.addEventListener('click',()=>{
-        const key=button.dataset.familyEditorToggle;
-        const panel=document.querySelector(`[data-family-editor-edit="${key}"]`);
-        if(!panel)return;
-
-        const willOpen=panel.hidden;
-
-        document.querySelectorAll('[data-family-editor-edit]').forEach(other=>{
-          if(other!==panel)other.hidden=true;
-        });
-
-        document.querySelectorAll('[data-family-editor-toggle]').forEach(other=>{
-          other.setAttribute('aria-expanded','false');
-        });
-
-        panel.hidden=!willOpen;
-        button.setAttribute('aria-expanded',willOpen?'true':'false');
-
-        if(willOpen){
-          panel.querySelector('.ss-input')?.focus({preventScroll:true});
-        }
-      });
-    });
-
-    const editorModal=document.querySelector('.sim-editor-modal');
-
-    editorModal?.addEventListener('input',()=>{
-      renderEditorInfoPreviewIfActive();
-    });
-
-    editorModal?.addEventListener('change',()=>{
-      renderEditorInfoPreviewIfActive();
-    });
-  }
-
-  setupSimEditorInteractions();
-
-  function openEditor(id){
-    editingId=id||null;
-    const sim=id?genealogyData.sims[id]:null;
-
-    const familyAuthority=
-      sim
-        ? resolveDirectFamilyRelationships(
-            sim.id
-          )
-        : null;
-
-    $('modalTitle').textContent=sim?uiText('編輯模擬市民'):uiText('新增模擬市民');
-
-    $('fName').value=sim?displayDataText(sim.name,sim):'';
-    $('fStage').value=sim?sim.lifeStage:'成年';
-    $('fGender').value=sim?(sim.gender||'男'):'男';
-    $('fStatus').value=sim?(sim.status||'在世'):'在世';
-    $('fRace').value=sim?(sim.race||''):'';
-
-    $('fBirthdayYear').value=sim&&sim.birthdayYear!=null
-      ? String(sim.birthdayYear)
-      : '';
-
-    $('fBirthdayMonth').value=sim&&sim.birthdayMonth
-      ? String(sim.birthdayMonth)
-      : '';
-
-    populateBirthdayDays(sim&&sim.birthdayDay?sim.birthdayDay:'');
-
-    $('fAge').value=sim&&sim.age!=null
-      ? String(sim.age)
-      : '';
-
-    $('fResidence').value=sim?displayDataText(sim.residence,sim):'';
-    $('fAspiration').value=sim?displayDataText(sim.aspiration,sim):'';
-    $('fCauseOfDeath').value=sim?displayDataText(sim.causeOfDeath,sim):'';
-
-    editingTraits=sim
-      ? (sim.traits||[]).map(value=>displayDataText(value,sim))
-      : [];
-
-    renderTraitEditor();
-
-    if($('traitInput'))$('traitInput').value='';
-
-    $('fCareer').value=sim?displayDataText(sim.career,sim):'';
-    $('fBio').value=sim?displayDataText(sim.bio,sim):'';
-
-    editingAvatar=sim?(sim.avatar||null):null;
-    editingAvatarFrame=normalizeAvatarFrame(sim?.avatarFrame);
-    updateAvatarPreview();
-
-    editingPets=sim
-      ? JSON.parse(JSON.stringify(sim.pets||[]))
-      : [];
-    renderPetsList();
-
-    editingGallery=sim
-      ? JSON.parse(JSON.stringify(sim.gallery||[]))
-      : [];
-    renderGalleryGrid();
-
-    updateCauseOfDeathVisibility();
-    switchEditorTab('basic');
-
-    $('fFamilyIds').innerHTML=genealogyData.families
-      .map(family=>`<option value="${family.id}">${esc(displayDataText(family.name,family))}</option>`)
-      .join('');
-
-    const currentFamilies=new Set();
-
-    if(sim){
-      genealogyData.families.forEach(family=>{
-        if(family.memberIds.includes(sim.id)){
-          currentFamilies.add(String(family.id));
-        }
-      });
-    }else if(genealogyData.currentFamilyId){
-      currentFamilies.add(String(genealogyData.currentFamilyId));
-    }
-
-    [...$('fFamilyIds').options].forEach(option=>{
-      option.selected=currentFamilies.has(String(option.value));
-    });
-
-    const allSims=Object.values(genealogyData.sims);
-
-    const parentOptions=allSims
-      .filter(candidate=>
-        !sim||
-        (
-          candidate.id!==sim.id&&
-          !isDescendant(sim.id,candidate.id)
-        )
-      )
-      .map(candidate=>
-        `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-      )
-      .join('');
-
-    $('fParents').innerHTML=parentOptions;
-
-    editingParentKinds=new Map();
-
-    if(familyAuthority){
-      familyAuthority.parents
-        .forEach(relation=>{
-          editingParentKinds.set(
-            relation.targetId,
-            relation.kind
-          );
-        });
-    }
-
-    [...$('fParents').options].forEach(option=>{
-      option.selected=editingParentKinds.has(String(option.value));
-    });
-
-    const relationOptions=allSims
-      .filter(candidate=>!sim||candidate.id!==sim.id)
-      .map(candidate=>
-        `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-      )
-      .join('');
-
-    $('fSpouse').innerHTML=relationOptions;
-
-    const currentSpouses=
-      new Set(
-        familyAuthority
-          ? familyAuthority.spouses
-              .map(relation=>
-                relation.targetId
+      if (pet.breed) {
+        meta.push(
+          owner
+            ? displayDataText(
+                pet.breed,
+                owner
               )
-          : []
-      );
-    [...$('fSpouse').options].forEach(option=>{
-      option.selected=currentSpouses.has(String(option.value));
-    });
-
-    $('fExSpouse').innerHTML=relationOptions;
-
-    const currentExSpouses=
-      new Set(
-        familyAuthority
-          ? familyAuthority.exSpouses
-              .map(relation=>
-                relation.targetId
-              )
-          : []
-      );
-    [...$('fExSpouse').options].forEach(option=>{
-      option.selected=currentExSpouses.has(String(option.value));
-    });
-
-    const childRelations=
-      familyAuthority
-        ? familyAuthority.children
-            .map(relation=>({
-              childId:
-                relation.targetId,
-              kind:
-                relation.kind
-            }))
-        : [];
-
-    editingChildKinds=new Map(
-      childRelations.map(relation=>[
-        relation.childId,
-        relation.kind
-      ])
-    );
-
-    $('fChildren').innerHTML=relationOptions;
-    [...$('fChildren').options].forEach(option=>{
-      option.selected=editingChildKinds.has(String(option.value));
-    });
-
-    editingExplicitSiblingIds=
-      new Set(
-        familyAuthority
-          ? familyAuthority.siblings
-              .filter(relation=>
-                relation.storedExplicit
-              )
-              .map(relation=>
-                relation.targetId
-              )
-          : []
-      );
-
-    editingDerivedSiblingIds=
-      new Set(
-        familyAuthority
-          ? familyAuthority.siblings
-              .filter(relation=>
-                relation.derivedFromParents
-              )
-              .map(relation=>
-                relation.targetId
-              )
-          : []
-      );
-
-    $('fSiblings').innerHTML=relationOptions;
-
-    applyEditorSiblingStateToSelect();
-
-    $('relTarget').innerHTML=allSims
-      .filter(candidate=>!sim||candidate.id!==sim.id)
-      .map(candidate=>
-        `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-      )
-      .join('');
-
-    populateRelationshipTypePicker();
-    renderRelList(sim);
-    renderRelAnno(sim?sim.id:null);
-
-    [
-      'fFamilyIds',
-      'fParents',
-      'fSpouse',
-      'fExSpouse',
-      'fChildren',
-      'fSiblings',
-      'relType',
-      'relTarget'
-    ].forEach(refreshSS);
-
-    resetEditorFamilyPanels();
-    renderEditorFamilyPreviews();
-
-    $('btnDelete').style.display=sim?'':'none';
-    $('relSection').style.display=sim?'':'none';
-
-    const newRelHint=$('newSimRelationsHint');
-    if(newRelHint)newRelHint.hidden=!!sim;
-
-    mask.classList.add('show');
-    setTimeout(()=>$('fName').focus(),60);
-  }
-
-  function closeEditor(){
-    mask.classList.remove('show');
-
-    if(avatarCropMask?.classList.contains('show')){
-      closeAvatarCropEditor();
-    }
-
-    editingId=null;
-    editingAvatar=null;
-    editingAvatarFrame={...DEFAULT_AVATAR_FRAME};
-    editingPets=[];
-    editingTraits=[];
-    editingGallery=[];
-    editingParentKinds.clear();
-    editingChildKinds.clear();
-    editingExplicitSiblingIds.clear();
-    editingDerivedSiblingIds.clear();
-
-    petMask.classList.remove('show');
-    editingPetIndex=-1;
-    editingPetAvatar=null;
-    editingPetAvatarFrame={...DEFAULT_AVATAR_FRAME};
-
-    photoMask.classList.remove('show');
-    editingPhotoIndex=-1;
-    editingPhotoImageRef='';
-  }
-
-function renderRelList(c) {
-  if (!c) { $('relList').innerHTML = ''; return; }
-  const rels = (genealogyData.links||[]).filter(l => (l.from === c.id || l.to === c.id) && !isSiblingLink(l));
-  $('relList').innerHTML = rels.length
-    ? rels.map((l, i) => {
-        const otherId = l.from === c.id ? l.to : l.from;
-        const other = genealogyData.sims[otherId];
-        const arrow = l.from === c.id ? '→' : '←';
-        return `<div class="rel-item">
-          <span>${esc(displayRelationshipText(l.label || l.type || '關聯'))} ${arrow} ${esc(other ? displayDataText(other.name, other) : uiText('（已刪除）'))}</span>
-          <button type="button" data-del="${i}" title="刪除">×</button>
-        </div>`;
-      }).join('')
-    : `<div class="rel-empty">${esc(uiText('暫無其他關係'))}</div>`;
-  $('relList').querySelectorAll('[data-del]').forEach(btn => {
-    btn.onclick = () => {
-      const target = rels[+btn.dataset.del];
-      if (!target?.id) return;
-
-      const mutation =
-        genealogyStore.removeRelationship(
-          target.id
+            : pet.breed
         );
-
-      renderRelList(c);
-      renderRelAnno(c.id);
-      applyGenealogyMutation(mutation);
-    };
-  });
-}
-
-function collectRelAnnotationDraft() {
-  const entries = [];
-  const items =
-    document.querySelectorAll(
-      '#familyRelAnnoList .rel-anno-item, #relAnnoList .rel-anno-item'
-    );
-
-  items.forEach(item => {
-    const key = item.dataset.annoKey;
-    if (!key) return;
-
-    const select =
-      item.querySelector(
-        '[data-rel-display-mode]'
-      );
-
-    const input =
-      item.querySelector(
-        'input[type="text"]'
-      );
-
-    entries.push({
-      key,
-      hidden:select?.value === 'none',
-      text:input?.value.trim() || ''
-    });
-  });
-
-  return entries;
-}
-
-function saveChar(){
-  const existing=editingId?genealogyData.sims[editingId]:null;
-  const sampleOwner=existing&&isBuiltinSampleSim(existing)?existing:null;
-
-  const preserveSampleText=(field,inputValue)=>{
-    const input=String(inputValue??'').trim();
-
-    if(!sampleOwner)return input;
-
-    const canonical=String(sampleOwner[field]??'');
-
-    return input===displayDataText(canonical,sampleOwner)
-      ? canonical
-      : input;
-  };
-
-  const preserveSampleTraits=inputTraits=>{
-    if(!sampleOwner)return inputTraits;
-
-    const shown=(sampleOwner.traits||[])
-      .map(value=>displayDataText(value,sampleOwner));
-
-    if(
-      shown.length===inputTraits.length&&
-      shown.every((value,index)=>value===inputTraits[index])
-    ){
-      return [...(sampleOwner.traits||[])];
-    }
-
-    return inputTraits;
-  };
-
-  const rawName=$('fName').value.trim();
-
-  if(!rawName){
-    uiAlert('請填寫姓名',{title:'資料未完成'});
-    return;
-  }
-
-  const name=preserveSampleText('name',rawName);
-  const newFamilyIds=selectedEditorIds('fFamilyIds');
-
-  if(!newFamilyIds.length){
-    uiAlert('請至少選擇一個所屬家族',{title:'資料未完成'});
-    return;
-  }
-
-  const parentRelations=selectedEditorIds('fParents').map(parentId=>({
-    parentId,
-    kind:editingParentKinds.get(parentId)==='adoptive'
-      ? 'adoptive'
-      : 'parent-child'
-  }));
-
-  const childRelations=selectedEditorIds('fChildren').map(childId=>({
-    childId,
-    kind:editingChildKinds.get(childId)==='adoptive'
-      ? 'adoptive'
-      : 'parent-child'
-  }));
-
-  const status=$('fStatus').value;
-
-  const data={
-    name,
-    lifeStage:$('fStage').value,
-    gender:$('fGender').value,
-    status,
-    race:$('fRace').value||'',
-    birthdayYear:$('fBirthdayYear').value===''
-      ? null
-      : Math.trunc(Number($('fBirthdayYear').value)),
-    birthdayMonth:$('fBirthdayMonth').value
-      ? Number($('fBirthdayMonth').value)
-      : null,
-    birthdayDay:$('fBirthdayDay').value
-      ? Number($('fBirthdayDay').value)
-      : null,
-    age:$('fAge').value===''
-      ? null
-      : Math.min(999,Math.max(0,Number($('fAge').value)||0)),
-    residence:preserveSampleText('residence',$('fResidence').value),
-    aspiration:preserveSampleText('aspiration',$('fAspiration').value),
-    causeOfDeath:status==='已故'||status==='幽靈'
-      ? preserveSampleText('causeOfDeath',$('fCauseOfDeath').value)
-      : '',
-    spouseIds:selectedEditorIds('fSpouse'),
-    exSpouseIds:selectedEditorIds('fExSpouse'),
-    traits:preserveSampleTraits([...editingTraits]),
-    career:preserveSampleText('career',$('fCareer').value),
-    bio:preserveSampleText('bio',$('fBio').value),
-    avatar:editingAvatar||null,
-    avatarFrame:normalizeAvatarFrame(editingAvatarFrame),
-    pets:JSON.parse(JSON.stringify(editingPets)),
-    gallery:JSON.parse(JSON.stringify(editingGallery))
-  };
-
-  const newSiblingIds=
-    [...editingExplicitSiblingIds]
-      .filter(siblingId =>
-        !editingDerivedSiblingIds
-          .has(siblingId)
-      );
-  let mutation =
-    genealogyStore.saveSimDraft({
-      simId:editingId || null,
-      sim:data,
-      parentRelations,
-      childRelations,
-      spouseIds:data.spouseIds || [],
-      exSpouseIds:data.exSpouseIds || [],
-      siblingIds:newSiblingIds,
-      familyIds:newFamilyIds
-    });
-
-  const sim =
-    genealogyData.sims[
-      mutation.simId
-    ];
-
-  if (!sim) {
-    uiAlert('人物資料儲存失敗。', {
-      title:'儲存失敗',
-      kind:'danger'
-    });
-    return;
-  }
-
-  if (editingId) {
-    mutation =
-      genealogyStore.mergeResults(
-        mutation,
-        genealogyStore.setRelationshipAnnotations(
-          collectRelAnnotationDraft()
-        )
-      );
-  }
-
-  const family=currentFamily();
-  ensureFamilyLayoutShape(family);
-
-  const {H:NODE_H}=getDims();
-  const {LEVEL:LEVEL_GAP}=getGaps();
-
-  if(family.freeLayout[viewMode]){
-    const manualPositions=family.manualPositions[viewMode];
-
-    if(!manualPositions[sim.id]){
-      const anchorParentId=parentRelations
-        .map(relation=>relation.parentId)
-        .find(parentId=>manualPositions[parentId]);
-
-      let nextPosition;
-
-      if(anchorParentId){
-        const parentPosition=manualPositions[anchorParentId];
-
-        nextPosition={
-          x:parentPosition.x,
-          y:parentPosition.y+NODE_H+LEVEL_GAP
-        };
-      }else{
-        let maxY=0;
-
-        Object.values(manualPositions).forEach(position=>{
-          maxY=Math.max(maxY,position.y+NODE_H);
-        });
-
-        nextPosition={
-          x:0,
-          y:maxY?maxY+40:0
-        };
       }
 
-      mutation =
-        genealogyStore.mergeResults(
-          mutation,
-          genealogyStore.setNodePosition(
-            family.id,
-            viewMode,
-            sim.id,
-            nextPosition
-          )
-        );
-    }
-  }
+      const gender =
+        petGenderLabel(pet);
 
-  applyGenealogyMutation(mutation);
-  closeEditor();
-  scheduleGC();  closeEditor();
-  scheduleGC();
+      if (gender) meta.push(gender);
+      if (pet.ageStage) {
+        meta.push(
+          uiText(pet.ageStage)
+        );
+      }
+
+      if (
+        pet.status &&
+        pet.status !== '在世'
+      ) {
+        meta.push(
+          uiText(pet.status)
+        );
+      }
+
+      const displayName =
+        owner
+          ? displayDataText(
+              pet.name,
+              owner
+            )
+          : pet.name;
+
+      return `
+        <div class="pet-item" data-pet-draft-index="${index}">
+          <div class="pet-item-avatar">${avatar}</div>
+          <div class="pet-item-info">
+            <div class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</div>
+            <div class="pet-item-meta">${esc(meta.join(' · '))}</div>
+            ${petLineageHTML(pet)}
+          </div>
+          <div class="pet-item-actions">
+            <button
+              type="button"
+              data-pet-action="edit"
+              data-pet-index="${index}"
+            >編輯</button>
+            <button
+              type="button"
+              class="danger"
+              data-pet-action="delete"
+              data-pet-index="${index}"
+            >刪除</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  list
+    .querySelectorAll('[data-pet-action="edit"]')
+    .forEach(button => {
+      button.addEventListener('click', () => {
+        petEditorController.open(
+          Number(button.dataset.petIndex)
+        );
+      });
+    });
+
+  list
+    .querySelectorAll('[data-pet-action="delete"]')
+    .forEach(button => {
+      button.addEventListener(
+        'click',
+        async () => {
+          const index =
+            Number(button.dataset.petIndex);
+          const pet = editingPets[index];
+
+          if (!pet) return;
+
+          const confirmed =
+            await uiConfirm(
+              `確定刪除寵物「${pet.name}」嗎？`,
+              {
+                title:'刪除寵物',
+                kind:'danger',
+                confirmText:'刪除'
+              }
+            );
+
+          if (!confirmed) return;
+
+          editingPets.splice(index, 1);
+          renderPetDraftList();
+          personEditor.renderInfoPreviewIfActive();
+        }
+      );
+    });
+
+  personEditor.renderInfoPreviewIfActive();
 }
+
+$('petAvatarInput').onchange = async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    await petEditorController.setAvatarFile(file);
+  } catch (error) {
+    uiAlert(
+      '圖片處理失敗：' + error.message,
+      {
+        title:'圖片處理失敗',
+        kind:'danger'
+      }
+    );
+  } finally {
+    event.target.value = '';
+  }
+};
+
+$('petAvatarAdjustBtn').onclick = () => {
+  openAvatarCropEditor('pet');
+};
+
+$('petAvatarClearBtn').onclick = () => {
+  petEditorController.clearAvatar();
+};
+
+$('pName').addEventListener('input', () => {
+  petEditorController.refreshAvatarPreview();
+});
+
+$('pSpecies').addEventListener('change', () => {
+  petEditorController.syncGenderVisibility();
+  petEditorController.refreshAvatarPreview();
+});
+
+$('pSave').onclick = () => {
+  petEditorController.commit();
+};
+
+$('pCancel').onclick = () => {
+  petEditorController.close();
+};
+
+$('pDelete').onclick = () => {
+  petEditorController.removeCurrent();
+};
+
+petEditorDialog.onclick = event => {
+  if (event.target === petEditorDialog) {
+    petEditorController.close();
+  }
+};
+
+$('btnAddPet').onclick = () => {
+  petEditorController.open();
+};
+
+// ========【人物編輯器 Authority】 設定 - Draft / lifecycle / 關係編輯由獨立模組負責 ========
+personEditor.mount();
 
 function purgeSimData(id) {
   const mutation =
     genealogyStore.deleteSim(id);
 
   selectedNodeIds.delete(id);
-  addMemberSelection.delete(id);
-  removeMemberSelection.delete(id);
-  rosterSelection.delete(id);
+  removePersonFromOperationState(id);
 
   return mutation;
 }
 
 function finalizeSimDataChange(mutation) {
   applyGenealogyMutation(mutation);
-  closeEditor();
+  personEditor.close();
   scheduleGC();
 }
 
 async function deleteChar(id) {
-  const c = genealogyData.sims[id];
+  const c = currentGenealogyData().sims[id];
   if (!c) return;
 
   const message =
@@ -14026,78 +14247,147 @@ async function deleteChar(id) {
   const mutation = purgeSimData(id);
   finalizeSimDataChange(mutation);
 
-  if (rosterMask.classList.contains('show')) {
-    renderRoster();
+  if (personLibraryDialog.classList.contains('show')) {
+    renderPersonLibrary();
   }
 }
 
 // ========【人物庫】 設定 - 精簡 / 詳細檢視、單人選單與批量管理 ========
-function updateRosterViewControls() {
-  const compact = $('rosterCompactBtn');
-  const detailed = $('rosterDetailedBtn');
-  const list = $('rosterList');
+const personLibraryController = {
+  syncViewControls() {
+    const compact = $('personLibraryCompactBtn');
+    const detailed = $('personLibraryDetailedBtn');
+    const list = $('personLibraryList');
 
-  if (compact) {
-    compact.classList.toggle('active', rosterViewMode === 'compact');
-    compact.setAttribute('aria-pressed', rosterViewMode === 'compact' ? 'true' : 'false');
+    if (compact) {
+      const active = personLibraryViewMode === 'compact';
+      compact.classList.toggle('active', active);
+      compact.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+
+    if (detailed) {
+      const active = personLibraryViewMode === 'detailed';
+      detailed.classList.toggle('active', active);
+      detailed.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+
+    if (list) {
+      list.classList.toggle('compact', personLibraryViewMode === 'compact');
+      list.classList.toggle('detailed', personLibraryViewMode === 'detailed');
+    }
+  },
+
+  setViewMode(mode) {
+    personLibraryViewMode = mode === 'compact' ? 'compact' : 'detailed';
+    try {
+      localStorage.setItem(PERSON_LIBRARY_VIEW_KEY, personLibraryViewMode);
+    } catch (_) {}
+
+    this.syncViewControls();
+    renderPersonLibrary();
+  },
+
+  syncBatchToolbar() {
+    const count = personLibraryState.selection.size;
+    const toolbar = $('personLibraryBatchToolbar');
+    const batchBtn = $('personLibraryBatchBtn');
+    const addBtn = $('personLibraryAddBtn');
+    const countEl = $('personLibraryBatchCount');
+
+    if (toolbar) toolbar.hidden = !personLibraryState.batchMode;
+    if (batchBtn) batchBtn.hidden = personLibraryState.batchMode;
+    if (addBtn) addBtn.hidden = personLibraryState.batchMode;
+    if (countEl) countEl.textContent = '已選 ' + count + ' 位';
+
+    ['personLibraryBatchAddFamilyBtn','personLibraryBatchRemoveFamilyBtn','personLibraryBatchDeleteBtn']
+      .forEach(id => {
+        const button = $(id);
+        if (button) button.disabled = count === 0;
+      });
+  },
+
+  setBatchMode(enabled) {
+    personLibraryState.batchMode = !!enabled;
+    personLibraryState.selection.clear();
+    closeAppMenus();
+    this.syncBatchToolbar();
+    renderPersonLibrary();
+  },
+
+  toggleSelection(id) {
+    if (!personLibraryState.batchMode || !currentGenealogyData().sims[id]) return;
+
+    if (personLibraryState.selection.has(id)) {
+      personLibraryState.selection.delete(id);
+    } else {
+      personLibraryState.selection.add(id);
+    }
+
+    renderPersonLibrary();
+  },
+
+  open() {
+    personLibrarySearch.value = '';
+    resetPersonLibraryOperations({ batch:true, add:false });
+    this.syncViewControls();
+    renderPersonLibrary();
+    personLibraryDialog.classList.add('show');
+  },
+
+  close() {
+    personLibraryDialog.classList.remove('show');
+    resetPersonLibraryOperations({ batch:true, add:false });
+  },
+
+  addSelectionToCurrentFamily() {
+    const family = currentFamily();
+    const mutation = genealogyStore.addFamilyMembers(
+      family.id,
+      [...personLibraryState.selection].filter(id => currentGenealogyData().sims[id])
+    );
+    applyGenealogyMutation(mutation);
+    this.setBatchMode(false);
+  },
+
+  removeSelectionFromCurrentFamily() {
+    const family = currentFamily();
+    const mutation = genealogyStore.removeFamilyMembers(
+      family.id,
+      [...personLibraryState.selection]
+    );
+    applyGenealogyMutation(mutation);
+    this.setBatchMode(false);
+  },
+
+  async deleteSelection() {
+    const ids = [...personLibraryState.selection]
+      .filter(id => currentGenealogyData().sims[id]);
+
+    if (!ids.length) return;
+
+    const confirmed = await uiConfirm(
+      '確定永久刪除這 ' + ids.length + ' 位人物嗎？\n' +
+      '人物資料、關係與人生照片都會一併移除。\n\n' +
+      '此操作無法復原。',
+      {
+        title:'批量刪除人物',
+        kind:'danger',
+        confirmText:'永久刪除'
+      }
+    );
+
+    if (!confirmed) return;
+
+    const mutation = genealogyStore.mergeResults(
+      ...ids.map(purgeSimData)
+    );
+
+    finalizeSimDataChange(mutation);
+    this.setBatchMode(false);
   }
+};
 
-  if (detailed) {
-    detailed.classList.toggle('active', rosterViewMode === 'detailed');
-    detailed.setAttribute('aria-pressed', rosterViewMode === 'detailed' ? 'true' : 'false');
-  }
-
-  if (list) {
-    list.classList.toggle('compact', rosterViewMode === 'compact');
-    list.classList.toggle('detailed', rosterViewMode === 'detailed');
-  }
-}
-
-function setRosterViewMode(mode) {
-  rosterViewMode = mode === 'compact' ? 'compact' : 'detailed';
-  try {
-    localStorage.setItem(ROSTER_VIEW_KEY, rosterViewMode);
-  } catch (_) {}
-  updateRosterViewControls();
-  renderRoster();
-}
-
-function updateRosterBatchToolbar() {
-  const count = rosterSelection.size;
-  const toolbar = $('rosterBatchToolbar');
-  const batchBtn = $('rosterBatchBtn');
-  const addBtn = $('rosterAddBtn');
-  const countEl = $('rosterBatchCount');
-
-  if (toolbar) toolbar.hidden = !rosterBatchMode;
-  if (batchBtn) batchBtn.hidden = rosterBatchMode;
-  if (addBtn) addBtn.hidden = rosterBatchMode;
-  if (countEl) countEl.textContent = '已選 ' + count + ' 位';
-
-  ['rosterBatchAddFamilyBtn', 'rosterBatchRemoveFamilyBtn', 'rosterBatchDeleteBtn'].forEach(id => {
-    const btn = $(id);
-    if (btn) btn.disabled = count === 0;
-  });
-}
-
-function setRosterBatchMode(enabled) {
-  rosterBatchMode = !!enabled;
-  rosterSelection.clear();
-  closeAppMenus();
-  updateRosterBatchToolbar();
-  renderRoster();
-}
-
-function toggleRosterSelection(id) {
-  if (!rosterBatchMode || !genealogyData.sims[id]) return;
-
-  if (rosterSelection.has(id)) rosterSelection.delete(id);
-  else rosterSelection.add(id);
-
-  renderRoster();
-}
-
-function rosterCompactMeta(sim) {
+function personLibraryCompactMeta(sim) {
   const parts = [displayDataText(sim.lifeStage, sim)];
   if (sim.race) {
     parts.push(displayDataText(RACE_PRESETS[sim.race]?.label || sim.race, sim));
@@ -14105,10 +14395,10 @@ function rosterCompactMeta(sim) {
   return parts.filter(Boolean).join(' · ');
 }
 
-function renderRoster() {
+function renderPersonLibrary() {
   const fam = currentFamily();
-  const q = rosterSearch.value.trim().toLowerCase();
-  const all = Object.values(genealogyData.sims);
+  const q = personLibrarySearch.value.trim().toLowerCase();
+  const all = Object.values(currentGenealogyData().sims);
 
   all.sort((x, y) => String(x.name).localeCompare(String(y.name), 'zh'));
 
@@ -14126,25 +14416,25 @@ function renderRoster() {
     || (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q))
   ) : all;
 
-  $('rosterCount').textContent = '（' + filtered.length + '/' + all.length + '）';
-  updateRosterViewControls();
-  updateRosterBatchToolbar();
+  $('personLibraryCount').textContent = '（' + filtered.length + '/' + all.length + '）';
+  personLibraryController.syncViewControls();
+  personLibraryController.syncBatchToolbar();
 
-  const list = $('rosterList');
+  const list = $('personLibraryList');
   if (!filtered.length) {
     list.innerHTML = all.length
-      ? '<div class="roster-empty">沒有符合的人物</div>'
-      : '<div class="roster-empty">還沒有任何人物</div>';
+      ? '<div class="person-library-empty">沒有符合的人物</div>'
+      : '<div class="person-library-empty">還沒有任何人物</div>';
     return;
   }
 
   list.innerHTML = filtered.map(s => {
-    const familyNames = genealogyData.families
+    const familyNames = currentGenealogyData().families
       .filter(f => f.memberIds.includes(s.id))
       .map(f => displayDataText(f.name, f));
 
-    const selected = rosterSelection.has(s.id);
-    const compactMeta = rosterCompactMeta(s);
+    const selected = personLibraryState.selection.has(s.id);
+    const compactMeta = personLibraryCompactMeta(s);
     const detail = [
       displayDataText(s.lifeStage, s),
       s.race ? displayDataText(RACE_PRESETS[s.race]?.label || s.race, s) : '',
@@ -14156,58 +14446,58 @@ function renderRoster() {
     const photoCount = (s.gallery || []).length;
     const detailHtml = detail
       .map(value => '<span>' + esc(value) + '</span>')
-      .join('<span class="roster-meta-separator" aria-hidden="true">·</span>');
+      .join('<span class="person-library-meta-separator" aria-hidden="true">·</span>');
 
     const photoHtml = photoCount
-      ? '<span class="roster-meta-separator" aria-hidden="true">·</span>' +
+      ? '<span class="person-library-meta-separator" aria-hidden="true">·</span>' +
         '<span>' + iconSvg('images') + ' ' + photoCount + ' ' + esc(uiText('人生照片')) + '</span>'
       : '';
 
     const familyAction = fam.memberIds.includes(s.id) ? '移出目前家族' : '加入目前家族';
     const familyIcon = fam.memberIds.includes(s.id) ? 'person-dash' : 'person-add';
 
-    return '<div class="roster-item' +
-        (rosterBatchMode ? ' batch-mode' : '') +
+    return '<div class="person-library-item' +
+        (personLibraryState.batchMode ? ' batch-mode' : '') +
         (selected ? ' batch-selected' : '') +
-        '" data-roster-id="' + esc(s.id) + '">' +
-      '<div class="roster-main">' +
-        '<div class="roster-avatar-wrap">' +
-          '<div class="roster-avatar">' + avatarHTML(s) + '</div>' +
-          '<button class="roster-batch-select' + (selected ? ' selected' : '') +
-            '" type="button" data-roster-select="' + esc(s.id) +
+        '" data-person-library-id="' + esc(s.id) + '">' +
+      '<div class="person-library-main">' +
+        '<div class="person-library-avatar-wrap">' +
+          '<div class="person-library-avatar">' + avatarHTML(s) + '</div>' +
+          '<button class="person-library-batch-select' + (selected ? ' selected' : '') +
+            '" type="button" data-person-library-select="' + esc(s.id) +
             '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
             (selected ? iconSvg('check-lg') : '') +
           '</button>' +
         '</div>' +
-        '<div class="roster-text">' +
-          '<div class="roster-name">' +
+        '<div class="person-library-text">' +
+          '<div class="person-library-name">' +
             raceIconHTML(s) + statusIconHTML(s) +
             '<span>' + esc(displayDataText(s.name, s)) + '</span>' +
           '</div>' +
-          '<div class="roster-compact-meta">' + esc(compactMeta) + '</div>' +
-          '<div class="roster-detailed-meta">' + detailHtml + photoHtml + '</div>' +
+          '<div class="person-library-compact-meta">' + esc(compactMeta) + '</div>' +
+          '<div class="person-library-detailed-meta">' + detailHtml + photoHtml + '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="app-menu roster-item-menu">' +
-        '<button class="roster-more app-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
+      '<div class="ui-menu person-library-item-menu">' +
+        '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') +
         '</button>' +
-        '<div class="app-menu-popover roster-item-popover" role="menu">' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="view" data-roster-action-id="' + esc(s.id) + '">' +
+        '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="view" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span>' +
           '</button>' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="edit" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="edit" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('pencil-square') + '<span>' + esc(uiText('編輯模擬市民')) + '</span>' +
           '</button>' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="locate" data-roster-action-id="' + esc(s.id) + '">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="locate" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span>' +
           '</button>' +
-          '<div class="app-menu-divider"></div>' +
-          '<button class="app-menu-item" type="button" role="menuitem" data-roster-action="toggle-family" data-roster-action-id="' + esc(s.id) + '">' +
+          '<div class="ui-menu-divider"></div>' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-person-library-action="toggle-family" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg(familyIcon) + '<span>' + esc(uiText(familyAction)) + '</span>' +
           '</button>' +
-          '<div class="app-menu-divider"></div>' +
-          '<button class="app-menu-item danger" type="button" role="menuitem" data-roster-action="delete" data-roster-action-id="' + esc(s.id) + '">' +
+          '<div class="ui-menu-divider"></div>' +
+          '<button class="ui-menu-item danger" type="button" role="menuitem" data-person-library-action="delete" data-person-library-action-id="' + esc(s.id) + '">' +
             iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span>' +
           '</button>' +
         '</div>' +
@@ -14215,36 +14505,36 @@ function renderRoster() {
     '</div>';
   }).join('');
 
-  list.querySelectorAll('[data-roster-id]').forEach(row => {
+  list.querySelectorAll('[data-person-library-id]').forEach(row => {
     row.addEventListener('click', e => {
-      if (e.target.closest('.roster-item-menu, .roster-batch-select')) return;
-      const id = row.dataset.rosterId;
-      if (rosterBatchMode) toggleRosterSelection(id);
-      else openInfoCard(id);
+      if (e.target.closest('.person-library-item-menu, .person-library-batch-select')) return;
+      const id = row.dataset.personLibraryId;
+      if (personLibraryState.batchMode) personLibraryController.toggleSelection(id);
+      else openPersonProfile(id);
     });
   });
 
-  list.querySelectorAll('[data-roster-select]').forEach(btn => {
+  list.querySelectorAll('[data-person-library-select]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      toggleRosterSelection(btn.dataset.rosterSelect);
+      personLibraryController.toggleSelection(btn.dataset.personLibrarySelect);
     });
   });
 
-  list.querySelectorAll('[data-roster-action]').forEach(btn => {
+  list.querySelectorAll('[data-person-library-action]').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
 
-      const id = btn.dataset.rosterActionId;
-      const action = btn.dataset.rosterAction;
-      if (!genealogyData.sims[id]) return;
+      const id = btn.dataset.personLibraryActionId;
+      const action = btn.dataset.personLibraryAction;
+      if (!currentGenealogyData().sims[id]) return;
 
       if (action === 'view') {
-        openInfoCard(id);
+        openPersonProfile(id);
       } else if (action === 'edit') {
-        openEditor(id);
+        personEditor.open(id);
       } else if (action === 'locate') {
-        rosterMask.classList.remove('show');
+        personLibraryDialog.classList.remove('show');
         focusSimOnCanvas(id);
       } else if (action === 'toggle-family') {
         const mutation =
@@ -14253,104 +14543,114 @@ function renderRoster() {
             : genealogyStore.addFamilyMember(fam.id, id);
 
         applyGenealogyMutation(mutation);
-        renderRoster();
+        renderPersonLibrary();
       } else if (action === 'delete') {
         await deleteChar(id);
       }
     });
   });
 
-  if (!rosterBatchMode) setupAppMenus();
+  if (!personLibraryState.batchMode) setupAppMenus();
 }
 
-$('rosterBtn').onclick = () => {
-  rosterSearch.value = '';
-  rosterBatchMode = false;
-  rosterSelection.clear();
-  updateRosterViewControls();
-  renderRoster();
-  rosterMask.classList.add('show');
+$('personLibraryBtn').onclick = () => {
+  personLibraryController.open();
 };
 
-$('rosterCloseBtn').onclick = () => {
-  rosterMask.classList.remove('show');
-  rosterBatchMode = false;
-  rosterSelection.clear();
+$('personLibraryCloseBtn').onclick = () => {
+  personLibraryController.close();
 };
 
-rosterMask.onclick = e => {
-  if (e.target === rosterMask) {
-    rosterMask.classList.remove('show');
-    rosterBatchMode = false;
-    rosterSelection.clear();
+personLibraryDialog.onclick = event => {
+  if (event.target === personLibraryDialog) {
+    personLibraryController.close();
   }
 };
 
-rosterSearch.oninput = debounce(renderRoster, 150);
-$('rosterAddBtn').onclick = () => openEditor(null);
-$('rosterCompactBtn').onclick = () => setRosterViewMode('compact');
-$('rosterDetailedBtn').onclick = () => setRosterViewMode('detailed');
-$('rosterBatchBtn').onclick = () => setRosterBatchMode(true);
-$('rosterBatchCancelBtn').onclick = () => setRosterBatchMode(false);
+personLibrarySearch.oninput = debounce(renderPersonLibrary, 150);
 
-$('rosterBatchAddFamilyBtn').onclick = () => {
-  const fam = currentFamily();
+$('personLibraryAddBtn').onclick = () => personEditor.open(null);
+$('personLibraryCompactBtn').onclick = () => setPersonLibraryViewMode('compact');
+$('personLibraryDetailedBtn').onclick = () => setPersonLibraryViewMode('detailed');
+$('personLibraryBatchBtn').onclick = () => personLibraryController.setBatchMode(true);
+$('personLibraryBatchCancelBtn').onclick = () => personLibraryController.setBatchMode(false);
 
-  const mutation =
-    genealogyStore.addFamilyMembers(
-      fam.id,
-      [...rosterSelection]
-        .filter(id => genealogyData.sims[id])
-    );
-
-  applyGenealogyMutation(mutation);
-  setRosterBatchMode(false);
+$('personLibraryBatchAddFamilyBtn').onclick = () => {
+  personLibraryController.addSelectionToCurrentFamily();
 };
 
-$('rosterBatchRemoveFamilyBtn').onclick = () => {
-  const fam = currentFamily();
-
-  const mutation =
-    genealogyStore.removeFamilyMembers(
-      fam.id,
-      [...rosterSelection]
-    );
-
-  applyGenealogyMutation(mutation);
-  setRosterBatchMode(false);
+$('personLibraryBatchRemoveFamilyBtn').onclick = () => {
+  personLibraryController.removeSelectionFromCurrentFamily();
 };
 
-$('rosterBatchDeleteBtn').onclick = async () => {
-  const ids = [...rosterSelection].filter(id => genealogyData.sims[id]);
-  if (!ids.length) return;
+$('personLibraryBatchDeleteBtn').onclick = () => {
+  personLibraryController.deleteSelection();
+};
 
-  const ok = await uiConfirm(
-    '確定永久刪除這 ' + ids.length + ' 位人物嗎？\n' +
-    '人物資料、關係與人生照片都會一併移除。\n\n' +
-    '此操作無法復原。',
-    {
-      title: '批量刪除人物',
-      kind: 'danger',
-      confirmText: '永久刪除'
+const addMemberController = {
+  open() {
+    personLibraryState.addSelection.clear();
+    $('familyMemberPickerSearch').value = '';
+    renderFamilyMemberPickerList();
+    familyMemberPickerDialog.classList.add('show');
+  },
+
+  close() {
+    familyMemberPickerDialog.classList.remove('show');
+    personLibraryState.addSelection.clear();
+  },
+
+  toggle(id) {
+    if (!currentGenealogyData().sims[id]) return;
+
+    if (personLibraryState.addSelection.has(id)) {
+      personLibraryState.addSelection.delete(id);
+    } else {
+      personLibraryState.addSelection.add(id);
     }
-  );
 
-  if (!ok) return;
+    renderFamilyMemberPickerList();
+  },
 
-  const mutation =
-    genealogyStore.mergeResults(
-      ...ids.map(purgeSimData)
+  selectAllCandidates() {
+    const family = currentFamily();
+    const memberSet = new Set(family.memberIds);
+
+    Object.values(currentGenealogyData().sims).forEach(sim => {
+      if (!memberSet.has(sim.id)) {
+        personLibraryState.addSelection.add(sim.id);
+      }
+    });
+
+    renderFamilyMemberPickerList();
+  },
+
+  clearSelection() {
+    personLibraryState.addSelection.clear();
+    renderFamilyMemberPickerList();
+  },
+
+  commit() {
+    if (!personLibraryState.addSelection.size) return;
+
+    const family = currentFamily();
+    const mutation = genealogyStore.addFamilyMembers(
+      family.id,
+      [...personLibraryState.addSelection]
     );
 
-  finalizeSimDataChange(mutation);
-  setRosterBatchMode(false);
-}
+    applyGenealogyMutation(mutation);
+    this.close();
+    refreshFamilyProfilePanel();
+    requestAnimationFrame(fitScreen);
+  }
+};
 
-function renderAddMemberList() {
+function renderFamilyMemberPickerList() {
   const fam = currentFamily();
   const memberSet = new Set(fam.memberIds);
-  const q = $('addMemberSearch').value.trim().toLowerCase();
-  const all = Object.values(genealogyData.sims);
+  const q = $('familyMemberPickerSearch').value.trim().toLowerCase();
+  const all = Object.values(currentGenealogyData().sims);
   all.sort((a,b) => String(a.name).localeCompare(String(b.name),'zh'));
   let candidates = all.filter(s => !memberSet.has(s.id));
   if (q) {
@@ -14360,124 +14660,86 @@ function renderAddMemberList() {
       || (s.residence||'').toLowerCase().includes(q)
       || (s.traits||[]).some(t => (t||'').toLowerCase().includes(q)));
   }
-  $('addMemberFamilyName').textContent = displayDataText(fam.name, fam);
-  const list = $('addMemberList');
+  $('familyMemberPickerFamilyName').textContent = displayDataText(fam.name, fam);
+  const list = $('familyMemberPickerList');
   if (!candidates.length) {
     list.innerHTML = all.length === memberSet.size
-      ? '<div class="roster-empty">所有模擬市民都已在目前家族中</div>'
-      : '<div class="roster-empty">沒有符合的項目</div>';
+      ? '<div class="family-member-picker-empty">所有模擬市民都已在目前家族中</div>'
+      : '<div class="family-member-picker-empty">沒有符合的項目</div>';
   } else {
     list.innerHTML = candidates.map(s => {
-      const fams = genealogyData.families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
+      const fams = currentGenealogyData().families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
       const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
-      const isSel = addMemberSelection.has(s.id);
-      return `<div class="addmember-item${isSel ? ' selected' : ''}" data-add-id="${s.id}">
-        <div class="addmember-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
-        <div class="roster-avatar">${avatarHTML(s)}</div>
-        <div class="roster-text">
-          <div class="roster-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
+      const isSel = personLibraryState.addSelection.has(s.id);
+      return `<div class="family-member-picker-item${isSel ? ' selected' : ''}" data-family-member-picker-id="${s.id}">
+        <div class="family-member-picker-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
+        <div class="family-member-picker-avatar">${avatarHTML(s)}</div>
+        <div class="family-member-picker-text">
+          <div class="family-member-picker-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
             <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
           </div>
-          <div class="roster-meta">${genderIcon} ${esc(fams)}</div>
+          <div class="family-member-picker-meta">${genderIcon} ${esc(fams)}</div>
         </div>
       </div>`;
     }).join('');
   }
-  const count = addMemberSelection.size;
-  $('addMemberCount').innerHTML = `已選 <b>${count}</b> 人`;
-  $('addMemberConfirmBtn').disabled = count === 0;
-  list.querySelectorAll('.addmember-item').forEach(el => {
+  const count = personLibraryState.addSelection.size;
+  $('familyMemberPickerCount').innerHTML = `已選 <b>${count}</b> 人`;
+  $('familyMemberPickerConfirmBtn').disabled = count === 0;
+  list.querySelectorAll('.family-member-picker-item').forEach(el => {
     el.onclick = () => {
-      const id = el.dataset.addId;
-      if (addMemberSelection.has(id)) addMemberSelection.delete(id);
-      else addMemberSelection.add(id);
-      renderAddMemberList();
+      const id = el.dataset.familyMemberPickerId;
+      addMemberController.toggle(id);
     };
   });
 }
 $('addMemberBtn').onclick = () => {
-  addMemberSelection.clear();
-  $('addMemberSearch').value = '';
-  renderAddMemberList();
-  addMemberMask.classList.add('show');
+  addMemberController.open();
 };
-$('addMemberSearch').oninput = debounce(renderAddMemberList, 150);
-$('addMemberCancelBtn').onclick = () => addMemberMask.classList.remove('show');
-addMemberMask.onclick = e => { if (e.target === addMemberMask) addMemberMask.classList.remove('show'); };
-$('addMemberAllBtn').onclick = () => {
-  const fam = currentFamily();
-  const memberSet = new Set(fam.memberIds);
-  Object.values(genealogyData.sims).forEach(s => { if (!memberSet.has(s.id)) addMemberSelection.add(s.id); });
-  renderAddMemberList();
+
+$('familyMemberPickerSearch').oninput = debounce(renderFamilyMemberPickerList, 150);
+
+$('familyMemberPickerCancelBtn').onclick = () => {
+  addMemberController.close();
 };
-$('addMemberNoneBtn').onclick = () => { addMemberSelection.clear(); renderAddMemberList(); };
-$('addMemberConfirmBtn').onclick = () => {
-  if (!addMemberSelection.size) return;
-  const fam = currentFamily();
-  const ids = [...addMemberSelection];
 
-  const mutation =
-    genealogyStore.addFamilyMembers(
-      fam.id,
-      ids
-    );
+familyMemberPickerDialog.onclick = event => {
+  if (event.target === familyMemberPickerDialog) {
+    addMemberController.close();
+  }
+};
 
-  applyGenealogyMutation(mutation);
-  addMemberSelection.clear();
-  addMemberMask.classList.remove('show');
-  refreshFamilyProfilePanel();
-  requestAnimationFrame(fitScreen);
+$('familyMemberPickerAllBtn').onclick = () => {
+  addMemberController.selectAllCandidates();
+};
+
+$('familyMemberPickerNoneBtn').onclick = () => {
+  addMemberController.clearSelection();
+};
+
+$('familyMemberPickerConfirmBtn').onclick = () => {
+  addMemberController.commit();
 };
 
 // ========【家族成員批量移除】 設定 - 側邊欄原地選取，送出前必須二次確認 ========
 $('removeMemberBtn').onclick = () => {
-  const fam = currentFamily();
-  if (!fam.memberIds.length) return;
-  setRemoveMemberMode(true);
+  const family = currentFamily();
+  if (!family.memberIds.length) return;
+
+  familyMemberController.setRemoveMode(true);
 };
 
 $('familyMemberRemoveCancelBtn').onclick = () => {
-  setRemoveMemberMode(false);
+  familyMemberController.setRemoveMode(false);
 };
 
-$('familyMemberRemoveConfirmBtn').onclick = async event => {
-  if (!removeMemberMode || !removeMemberSelection.size) return;
-
-  event?.preventDefault();
-  event?.stopPropagation();
-
-  const fam = currentFamily();
-  const ids = [...removeMemberSelection]
-    .filter(id => fam.memberIds.includes(id));
-
-  if (!ids.length) return;
-
-  const ok = await uiConfirm(
-    `${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`,
-    {
-      title: uiText('移出所選人物'),
-      kind: 'danger',
-      confirmText: uiText('移出家族')
-    }
-  );
-
-  if (!ok) return;
-
-  const mutation =
-    genealogyStore.removeFamilyMembers(
-      fam.id,
-      ids
-    );
-
-  removeMemberSelection.clear();
-  removeMemberMode = false;
-  applyGenealogyMutation(mutation);
-  requestAnimationFrame(fitScreen);
+$('familyMemberRemoveConfirmBtn').onclick = event => {
+  familyMemberController.confirmRemoveSelected(event);
 };
 
 async function exportJSON() {
   try {
-    const exportDb = JSON.parse(JSON.stringify(genealogyData));
+    const exportDb = JSON.parse(JSON.stringify(currentGenealogyData()));
     const exportBg = { ...bgSettings };
     const assetIds = collectReferencedAssetIds(exportDb, exportBg, { strict:true });
     const assets = await assetStore.serializeAssets(assetIds);
@@ -14503,15 +14765,15 @@ async function exportJSON() {
 }
 
 function openExportPanel() {
-  if (!exportMask) return;
-  exportMask.classList.add('show');
-  exportMask.setAttribute('aria-hidden', 'false');
+  if (!exportDialog) return;
+  exportDialog.classList.add('show');
+  exportDialog.setAttribute('aria-hidden', 'false');
 }
 
 function closeExportPanel() {
-  if (!exportMask) return;
-  exportMask.classList.remove('show');
-  exportMask.setAttribute('aria-hidden', 'true');
+  if (!exportDialog) return;
+  exportDialog.classList.remove('show');
+  exportDialog.setAttribute('aria-hidden', 'true');
 }
 
 function getSelectedExportImageSize() {
@@ -14757,7 +15019,7 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, backgroundMode = 'cu
     }
   }
 
-  const captureStage = captureViewport.querySelector('#stage');
+  const captureStage = captureViewport.querySelector('#genealogyCanvasStage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
   captureStage.classList.remove('is-transforming');
   // 匯出直接使用族譜世界座標 1:1；Fit / zoom / pan 只屬於瀏覽視角，不參與輸出解析度。
@@ -14778,14 +15040,14 @@ function buildGenealogyCaptureNode(stageWidth, stageHeight, backgroundMode = 'cu
 }
 
 function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
-  const captureStage = captureViewport.querySelector('#stage');
+  const captureStage = captureViewport.querySelector('#genealogyCanvasStage');
   if (!captureStage) throw new Error('Genealogy stage was not found');
 
   const viewportRect = captureViewport.getBoundingClientRect();
   const content = [
-    ...captureStage.querySelectorAll('.node'),
-    ...captureStage.querySelectorAll('#links path'),
-    ...captureStage.querySelectorAll('#labels .edge-label')
+    ...captureStage.querySelectorAll('.person-card'),
+    ...captureStage.querySelectorAll('#genealogyRelationshipLayer path'),
+    ...captureStage.querySelectorAll('#genealogyRelationshipLabelLayer .edge-label')
   ];
 
   let minX = Infinity;
@@ -14834,7 +15096,7 @@ function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
 }
 
 async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'current') {
-  if (!genealogyData || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
+  if (!currentGenealogyData() || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
 
   // 等待目前語系字型完成載入後再量測與繪製，避免 HTML 與 PNG 的文字基線、膠囊背景位置不同。
   if (document.fonts && document.fonts.ready) {
@@ -14982,14 +15244,14 @@ async function importJSON(file) {
 
     await assetStore.importSerializedAssets(serializedAssets);
 
-    genealogyData = nextDb;
+    genealogyStore.replaceDatabase(nextDb);
     dragHistory.clear();
     bgSettings = { ...bgSettings, ...incomingBg };
 
     save({ immediate:true });
-    saveBg();
+    persistCanvasBackground();
     refreshFamilyUI();
-    applyBg();
+    renderCanvasBackground();
     render();
     scheduleGC();
     requestAnimationFrame(fitScreen);
@@ -15086,13 +15348,15 @@ async function persistGameImportAvatars(bundle, converted) {
       return;
     }
 
-    const sourceBlob = new Blob([asset.bytes], { type:asset.mimeType });
-    const result = await compressImage(sourceBlob, kind);
+    // 遊戲端 Genealogy Exporter ZIP 已提供 EA 原始頭像 bytes。
+    // 這裡直接保存原始 Blob，避免再次經過一般手動上傳使用的
+    // 384px 縮圖與 JPEG / WEBP 重新編碼，保留遊戲匯出的原始畫質。
+    const sourceBlob = new Blob(
+      [asset.bytes],
+      { type:asset.mimeType }
+    );
 
-    target.avatar = await saveImageAsset(result.blob, {
-      width:result.width,
-      height:result.height
-    });
+    target.avatar = await saveImageAsset(sourceBlob);
 
     saved++;
   };
@@ -15164,7 +15428,7 @@ async function importGameGenealogy(file) {
     showGameImportStatus('正在建立族譜畫面…');
     await waitForImportPaint();
 
-    genealogyData = preparedResult.prepared;
+    genealogyStore.replaceDatabase(preparedResult.prepared);
 
     // 匯入新資料時，同時清除上一份族譜留下的操作狀態。
     dragHistory.clear();
@@ -15203,15 +15467,15 @@ async function importGameGenealogy(file) {
 
     const simCount =
       normalizedStats.peopleCount ||
-      Object.keys(genealogyData.sims || {}).length;
+      Object.keys(currentGenealogyData().sims || {}).length;
 
     const petCount =
       normalizedStats.petCount ||
       0;
 
     const familyCount =
-      Array.isArray(genealogyData.families)
-        ? genealogyData.families.length
+      Array.isArray(currentGenealogyData().families)
+        ? currentGenealogyData().families.length
         : 0;
 
     const activeFamily = currentFamily();
@@ -15433,23 +15697,23 @@ window.addEventListener('resize', () => {
   }
 });
 
-$('addBtn').onclick = () => openEditor(null);
-$('btnCancel').onclick = closeEditor;
-$('btnSave').onclick = saveChar;
-$('btnDelete').onclick = () => editingId && deleteChar(editingId);
-mask.onclick = e => { if (e.target === mask) closeEditor(); };
+$('addBtn').onclick = () => personEditor.open(null);
+$('btnCancel').onclick = personEditor.close;
+$('btnSave').onclick = personEditor.commit;
+$('btnDelete').onclick = () => simEditorState.simId && deleteChar(simEditorState.simId);
+mask.onclick = e => { if (e.target === mask) personEditor.close(); };
 
 document.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   const modifier = e.ctrlKey || e.metaKey;
 
-  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
+  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
     spacePanHeld = true;
     updateArrangeToolUI();
     e.preventDefault();
   }
 
-  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
+  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
     selectVisibleNodes();
     e.preventDefault();
     return;
@@ -15471,14 +15735,14 @@ document.addEventListener('keydown', e => {
     if (!closeTopModal() && selectedNodeIds.size) clearNodeSelection();
     return;
   }
-  if (galleryViewerMask.classList.contains('show')) {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); viewerNav(-1); return; }
-    if (e.key === 'ArrowRight') { e.preventDefault(); viewerNav(1); return; }
+  if (lifePhotoViewerDialog.classList.contains('show')) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); lifePhotoWorkspace.moveViewer(-1); return; }
+    if (e.key === 'ArrowRight') { e.preventDefault(); lifePhotoWorkspace.moveViewer(1); return; }
   }
   if (e.key === 'Enter' && e.ctrlKey) {
-    if (photoMask.classList.contains('show')) savePhoto();
-    else if (petMask.classList.contains('show')) savePet();
-    else if (mask.classList.contains('show')) saveChar();
+    if (lifePhotoEditorDialog.classList.contains('show')) lifePhotoWorkspace.commitEditor();
+    else if (petEditorDialog.classList.contains('show')) petEditorController.commit();
+    else if (mask.classList.contains('show')) personEditor.commit();
   }
 });
 
@@ -15493,22 +15757,22 @@ window.addEventListener('blur', () => {
   updateArrangeToolUI();
 });
 
-$('btnAddRel').onclick = () => {
-  if (!editingId) return;
+$('relationshipAddBtn').onclick = () => {
+  if (!simEditorState.simId) return;
 
   const c =
-    genealogyData.sims[
-      editingId
+    currentGenealogyData().sims[
+      simEditorState.simId
     ];
 
   if (!c) return;
 
   const typeSelect =
-    $('relType');
+    $('relationshipType');
 
   const typeWrap =
     document.querySelector(
-      '.ss-wrap[data-ss-for="relType"]'
+      '.ui-select-wrap[data-ui-select-for="relationshipType"]'
     );
 
   let type =
@@ -15538,7 +15802,7 @@ $('btnAddRel').onclick = () => {
   }
 
   const targetId =
-    $('relTarget').value;
+    $('relationshipTarget').value;
 
   if (!targetId) {
     uiAlert(
@@ -15565,9 +15829,9 @@ $('btnAddRel').onclick = () => {
     typeSelect.value = '';
   }
 
-  refreshSS('relType');
+  refreshSS('relationshipType');
 
-  renderRelList(c);
+  personEditor.renderRelationshipList(c);
   renderRelAnno(c.id);
 
   applyGenealogyMutation(mutation);
@@ -15612,7 +15876,7 @@ $('fitScreenBtn')?.addEventListener('click',fitScreen);
 
 $('exportBtn').onclick = openExportPanel;
 if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
-if (exportMask) exportMask.onclick = e => { if (e.target === exportMask) closeExportPanel(); };
+if (exportDialog) exportDialog.onclick = e => { if (e.target === exportDialog) closeExportPanel(); };
 if (exportJsonBtn) exportJsonBtn.onclick = async () => { closeExportPanel(); await exportJSON(); };
 if (exportImageBtn) exportImageBtn.onclick = async () => {
   const originalHtml =
@@ -15712,17 +15976,11 @@ async function init() {
     const v = localStorage.getItem(THEME_KEY);
     if (v === 'custom') savedTheme = 'custom';
     else if (v && VALID_THEMES.includes(v)) savedTheme = v;
-    else if (v) {
-      const legacyMap = {
-        blue:'ling', peach:'rose', orange:'amber', pink:'rose', cranberry:'rose',
-        green:'sage', lime:'sage', purple:'amber', thunder:'amber', night:'midnight'
-      };
-      savedTheme = legacyMap[v] || 'ling';
-    }
+
   } catch(e){}
 
-  if (savedTheme === 'custom') applyCustomTheme(customColors.c1, customColors.c2);
-  else applyTheme(savedTheme);
+  if (savedTheme === 'custom') chooseCustomTheme(customColors.c1, customColors.c2);
+  else chooseThemePreset(savedTheme);
 
   let savedMode = 'view';
   try {
@@ -15750,12 +16008,21 @@ async function init() {
   })();
   syncRelationshipToolbarVisibility();
 
-  try {
-    await assetStore.openDb();
-    assetStoreReady = true;
-  } catch(error) {
-    throw new Error('圖片資產資料庫無法使用：' + error.message);
-  }
+  // 圖片資產層不得阻塞主程式啟動。
+  // IndexedDB 在部分瀏覽器 / 舊連線情況下可能長時間停在 pending，
+  // 因此只在背景建立連線；真正需要存取圖片時再由資產層自行等待。
+  void assetStore.openDb()
+    .then(() => {
+      assetStoreReady = true;
+    })
+    .catch(error => {
+      assetStoreReady = false;
+
+      console.warn(
+        '圖片資產資料庫目前無法使用；族譜主功能將繼續運作。',
+        error
+      );
+    });
 
   let preparedResult;
 
@@ -15777,30 +16044,41 @@ async function init() {
       );
   }
 
-  genealogyData = preparedResult.prepared;
+  let initialDatabase =
+    preparedResult.prepared;
 
   if (
-    !genealogyData.families ||
-    !genealogyData.families.length
+    !initialDatabase.families ||
+    !initialDatabase.families.length
   ) {
-    genealogyData =
+    preparedResult =
       prepareDatabase(
         buildSample()
-      ).prepared;
+      );
+    initialDatabase =
+      preparedResult.prepared;
   }
+
+  applyRelationshipLineSettings();
+  restoreCanvasBackground();
+
+  // clean-break：先清理候選資料，再交由 Store 接管 canonical ownership。
+  const clearedImageRefs =
+    clearUnsupportedImageRefs(
+      initialDatabase,
+      bgSettings
+    );
+
+  genealogyStore.replaceDatabase(
+    initialDatabase
+  );
 
   invalidateChildrenIndex();
   invalidateRelationshipGraph();
-
-  applyRelationshipLineSettings();
-  loadSavedBg();
-
-  // clean-break：舊 img_* / dataURL 圖片引用不再進入新的 L1nG v1 圖片 schema。
-  const clearedImageRefs = clearUnsupportedImageRefs(genealogyData, bgSettings);
   if (clearedImageRefs > 0) {
     console.warn(`[圖片資產] 已清除 ${clearedImageRefs} 個舊圖片引用；請重新匯入或上傳圖片。`);
     save({ immediate:true });
-    saveBg();
+    persistCanvasBackground();
   } else if (preparedResult.changed) {
     save();
   }
@@ -15836,16 +16114,16 @@ async function init() {
  */
 const LING_I18N = (() => {
   /* ========【簡中翻譯】 設定 - 繁中完整文案對應簡中顯示值 ======== */
-  const ZH_HANS_EXACT = {"你加入的頭像、寵物圖片、人生照片、家庭合照與背景圖片會保存在這台裝置的瀏覽器中，不會自動上傳。":"你添加的头像、宠物图片、人生照片、家庭合照和背景图片会保存在这台设备的浏览器中，不会自动上传。","目前使用量":"当前使用量","已儲存圖片":"已保存图片","圖片使用空間":"图片使用空间","圖片處理":"图片处理","圖片會自動調整":"图片会自动调整","新增或更換圖片時，工具會依照用途自動調整成適合族譜使用的大小，不需要另外設定畫質。":"添加或更换图片时，工具会根据用途自动调整为适合族谱使用的大小，不需要另外设置画质。","備份會包含圖片":"备份会包含图片","匯出 JSON 備份時，目前族譜使用中的圖片會一起保存；之後重新匯入也會一併還原。":"导出 JSON 备份时，当前族谱使用中的图片会一起保存；之后重新导入也会一并还原。","清理空間":"清理空间","只會刪除目前已經沒有被任何人物、寵物、人生照片、家庭合照或背景使用的圖片，不會影響仍在族譜中使用的圖片。":"只会删除当前已不再被任何人物、宠物、人生照片、家庭合照或背景使用的图片，不会影响仍在族谱中使用的图片。","支援 JPG / PNG / GIF · 圖片會自動調整":"支持 JPG / PNG / GIF · 图片会自动调整","世代":"世代","血統資料已保留，但目前沒有可顯示的姓名":"血统数据已保留，但目前没有可显示的姓名","10 倍以上":"10 倍以上","IndexedDB 不可用":"IndexedDB 不可用","IndexedDB 被阻塞":"IndexedDB 被阻塞","localStorage 已滿！ 建議：\n1. 等待圖片遷移到 IndexedDB 完成\n2. 或在「主題設定」中清理未使用圖片\n3. 或匯出備份後清空瀏覽器資料":"localStorage 已满！ 建议：\n1. 等待图片迁移到 IndexedDB 完成\n2. 或在「主题设置」中清理未使用图片\n3. 或导出备份后清空浏览器数据","— 快速上手與快捷鍵":"— 快速上手与快捷键","—（無 / 未知）":"—（无 / 未知）","↺ 重置位置":"↺ 重置位置","⌨ 快捷鍵":"⌨ 快捷键","中圖（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","平衡（256px · 預設）":"平衡（256px · 默认）","編輯":"编辑","其他":"其他","加入家族":"加入家族","新增":"新增","新增模擬市民":"新增模拟市民","新增家族":"新建家族","新增圖片":"添加图片","新增寵物":"添加宠物","移出家族":"移出家族","上一張 (←)":"上一张 (←)","下一張 (→)":"下一张 (→)","不包含頭像 / 寵物頭像 / 背景圖":"不包含头像 / 宠物头像 / 背景图","不壓縮 · 保留原始格式與畫質":"不压缩 · 保持原始格式与质量","喪偶":"丧偶","中型圖片":"中图","中，容量是 localStorage 的":"中，容量是 localStorage 的","主題配色（漸層）":"主题配色（渐变）","也屬於：":"也属于：","親生":"亲生","人":"人","人物小傳、結局、備註…":"人物小传、结局、备注…","人生抱負":"人生抱负","人生階段":"人生阶段","人類":"人类","人魚":"人鱼","僅屬於本家族":"仅属于本家族","仇敵":"仇敌","從":"从","從家族移除":"从家族移除","倉鼠":"仓鼠","仙子":"仙子","以滑鼠位置為中心縮放":"以鼠标位置为中心缩放","伴侶":"伴侣","作家 / 學生 / 無":"作家 / 学生 / 无","使用提示":"使用提示","側邊欄":"侧边栏","儲存":"保存","儲存圖片失敗":"保存图片失败","資訊卡彈出視窗":"信息卡弹窗","兒童":"儿童","兄妹":"兄妹","兄弟姐妹":"兄弟姐妹","兄弟姐妹（血緣 / 收養）":"兄弟姐妹（血缘 / 收养）","兔子":"兔子","全選":"全选","全部模擬市民":"全部模拟市民","全部階段":"全部阶段","關係":"关系","關係，如 好友":"关系，如 好友","關聯":"关联","關聯階段（可選）":"关联阶段（可选）","關閉":"关闭","關閉 (Esc)":"关闭 (Esc)","關閉目前彈出視窗":"关闭当前弹窗","刪除":"删除","刪除圖片":"删除图片","刪除失敗":"删除失败","刪除寵物":"删除宠物","刪除模擬市民":"删除模拟市民","到相簿網格，或按":"到相册网格，或按","前任配偶":"前任配偶","勾選後建立「兄弟姐妹」關聯":"勾选后建立「兄弟姐妹」关联","勾選後自動加入對方父母清單":"勾选后自动加入对方父母列表","午夜藍調":"午夜蓝调","壓縮品質":"压缩档位","原始圖片":"原图","雙擊空白處":"双击空白处","取消":"取消","可選：拍攝場景、備註、想記錄的故事…":"可选：拍摄场景、备注、想记录的故事…","名字":"名字","吸血鬼":"吸血鬼","品種":"品种","圖片":"图片","圖片儲存在瀏覽器":"图片保存在浏览器","圖片檢視器":"图片查看器","圖片檢視器中切換上一張 / 下一張":"图片查看器中切换上一张 / 下一张","圖片編輯視窗內貼上剪貼簿圖片":"图片编辑器内粘贴剪贴板图片","在世":"在世","在編輯彈出視窗中快速儲存":"在编辑弹窗中快速保存","填滿（裁切超出部分）":"填充（裁剪超出部分）","備註":"备注","外星人":"外星人","外觀":"外观","主題設定":"主题设置","可在主題設定中檢視":"主题设置里可查看","大型圖片":"大图","頭像畫質":"头像清晰度","女":"女","如：幼兒期 / 婚禮合影 / 全家福":"如：幼儿期 / 婚礼合影 / 全家福","如：旺財 / 咪咪":"如：旺财 / 咪咪","如：柳溪 - 花園社區":"如：柳溪 - 花园社区","如：暢銷作家 / 靈魂伴侶…":"如：畅销作家 / 灵魂伴侣…","如：莫蒂默·高斯":"如：莫蒂默·高斯","如：衰老 / 溺水 / 火災…":"如：衰老 / 溺水 / 火灾…","如：金毛、波斯貓…":"如：金毛、波斯猫…","姓名":"姓名","嬰兒":"婴儿","子女":"子女","子女（血緣 / 收養）":"子女（血缘 / 收养）","儲存空間使用量":"存储用量","完整顯示（可能留白）":"完整显示（可能留白）","寵物":"宠物","寵物頭像":"宠物头像","寵物編輯彈出視窗":"宠物编辑弹窗","家族":"家族","家族名稱":"家族名称","家族名稱：":"家族名称：","匯入":"导入","匯入 JSON 備份":"导入 JSON 备份","匯入失敗：":"导入失败：","匯出":"导出","匯出 JSON":"导出 JSON","匯出 JSON 備份":"导出 JSON 备份","小型圖片":"小图","居住地":"居住地","已故":"已故","已選":"已选","師承":"师承","平移整個族譜視圖":"平移整个族谱视图","平衡":"平衡","重複排列":"平铺","年齡階段":"年龄阶段","幼兒":"幼儿","幼年":"幼年","幽靈":"幽灵","套用自訂漸層":"应用自定义渐变","目前":"当前","目前家族還沒有成員":"当前家族还没有成员","目前家族還沒有成員，無需移除。":"当前家族还没有成员，无需移除。","目前家族還沒有模擬市民，點選左側「 新增模擬市民」開始記錄":"当前家族还没有模拟市民，点击左侧「新增模拟市民」开始记录","性別":"性别","情人":"情人","成年":"成年","所屬家族":"所属家族","所有模擬市民都已在目前家族中":"所有模拟市民都已在当前家族中","拖曳卡片":"拖动卡片","拖曳色票選擇兩種顏色，即時預覽漸層效果":"拖动色板自选两种颜色，实时预览渐变效果","拖曳圖片檔案":"拖拽图片文件","拖曳空白處":"拖拽空白处","摯友":"挚友","提示":"提示","提示面板":"提示面板","搜尋…":"搜索…","搜尋姓名 / 特徵 / 職業…":"搜索姓名 / 特征 / 职业…","搜尋姓名…":"搜索姓名…","搜尋家族…":"搜索家族…","搜尋標題 / 模擬市民名稱 / 備註…":"搜索标题 / 模拟市民名称 / 备注…","搜尋，按":"搜索，按","支援":"支持","支援 JPG / PNG / GIF":"支持 JPG / PNG / GIF","新家族":"新家族","時仍會轉回 base64，與舊版工具完全互通":"时仍会转回 base64，与旧版工具完全互通","尚無關係連線":"暂无关系连线","目前沒有可清理的圖片":"暂无可清理的图片","尚未新增寵物":"暂无宠物","尚未設定背景圖片":"暂无背景图","有創造力, 熱愛戶外, 物質主義":"有创造力, 热爱户外, 物质主义","朋友":"朋友","機器人":"机器人","檢視器中":"查看器中","標題":"标题","標題 / 關聯階段 / 備註":"标题 / 关联阶段 / 备注","標題 / 模擬市民名稱 / 備註":"标题 / 模拟市民名称 / 备注","植物模擬市民":"植物模拟市民","模擬市民":"模拟市民","模擬市民頭像":"模拟市民头像","橘子汽水":"橘子汽水","計算中…":"正在计算…","死因":"死因","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"每张卡片显示来源模拟市民与标题；点击打开大图查看器","每張圖片可設定：":"每张图片可设置：","沒有符合的項目":"没有匹配","沒有符合的圖片":"没有匹配的图片","瀏覽，":"浏览，","新增其他關係（好友 / 仇敵 / 師承…）":"添加其他关系（好友 / 仇敌 / 师承…）","新增已有模擬市民":"添加已有模拟市民","新增模擬市民到":"添加模拟市民到","清理完成":"清理完成","清理未使用的圖片":"清理未使用图片","清空":"清空","清除圖片":"清除图片","清除頭像":"清除头像","清除篩選":"清除筛选","移除背景":"移除背景","滾輪":"滚轮","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"点击选择 · 或拖拽 · 或 Ctrl+V 粘贴","愛上雷神":"爱上雷神","父母 A（血緣）":"父母 A（血缘）","父母 B（可選）":"父母 B（可选）","特徵":"特征","特徵（逗號分隔）":"特征（逗号分隔）","狀態":"状态","狗":"狗","狼人":"狼人","貓":"猫","現任配偶":"现任配偶","電腦版":"电脑版","男":"男","相簿":"相册","相簿圖片編輯彈出視窗":"相册图片编辑弹窗","節省空間":"省空间","知道了":"知道了","確定刪除目前家族嗎？\n人物本身不會被刪除。":"确定删除当前家族吗？\n人物本身不会被删除。","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"确定删除这个模拟市民吗？此操作会同时清除相关关系。","離婚":"离婚","種族":"种族","種類":"种类","移除":"移除","簡中":"简中","簡介":"简介","貼上截圖":"粘贴截图","繁中":"繁中","編輯模擬市民 →":"编辑模拟市民 →","編輯模擬市民彈出視窗":"编辑模拟市民弹窗","老年":"老年","職業":"职业","職業 / 備註":"职业 / 备注","背景圖片":"背景图","自動切換為「自由排列」並儲存新位置":"自动切换为「自由排列」并保存新位置","自動適應螢幕":"自动适应屏幕","自訂":"自定义","至少需要保留一個家族。":"至少需要保留一个家族。","選單":"菜单","蔓越莓氣泡":"蔓越莓气泡","蜜桃烏龍":"蜜桃乌龙","蜥蜴":"蜥蜴","視圖與佈局":"视图与布局","模擬市民篩選":"模拟市民筛选","訂婚":"订婚","語言 / Language":"语言 / Language","請輸入家族名稱。":"请输入家族名称。","高畫質":"超清","跨模擬市民":"跨模拟市民","還沒有任何相簿圖片。 開啟某個模擬市民的編輯彈出視窗 →「 相簿」新增圖片後，會在這裡顯示。":"还没有任何相册图片。 打开某个模拟市民的编辑弹窗 →「相册」添加图片后，会在这里显示。","尚未新增人生照片":"还没有相册图片","顯示方式":"适应方式","透明度：":"透明度：","配偶":"配偶","青少年":"青少年","青年":"青年","青檸茉莉":"青柠茉莉","頂端支援按":"顶部支持按","領養":"领养","領養關係":"领养关系","顏色 1":"颜色 1","顏色 2":"颜色 2","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"首次打开会自动把旧数据（base64）迁移到 IndexedDB","馬":"马","魔法師":"魔法师","魚":"鱼","鳥":"鸟","（不指定）":"（不指定）","（不顯示）":"（不显示）","（多張圖片 / 不同階段 / 合影）":"（多张图片 / 不同阶段 / 合影）","（已刪除）":"（已删除）","（未命名）":"（未命名）","（未歸屬）":"（未归属）","（每條連線獨立設定）":"（每条连线独立设置）","（該模擬市民擁有的寵物）":"（该模拟市民拥有的宠物）","（預設）":"（默认）","，並一鍵":"，并一键","：為模擬市民新增多張圖片":"：为模拟市民添加多张图片","：檢視所有模擬市民的相簿圖片":"：查看所有模拟市民的相册图片","顯示標註":"显示标注","檢視模式":"查看模式","高畫質（384px）":"超清（384px）","高畫質（1440px · 約 150–250KB/張）":"高清（1440px · 约 150–250KB/张）","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"他们仍保留在模拟市民池中，可随时再次加入任何家族。","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"勾选后点击「加入家族」即可让它们出现在当前家族的族谱中。","圖片資料儲存在瀏覽器的 IndexedDB 中（容量數十 MB），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，與舊版工具完全相容。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"支持拖拽图片到此处，或在编辑器内按 Ctrl+V 粘贴截图","每條連線可擁有獨立的關係；標註在畫布上可拖曳，避免遮擋卡片。":"每条连线可拥有独立的关系标注；标注在画布上可拖动，避免遮挡卡片。","圖片儲存":"图片存储","大圖（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","相簿圖片畫質":"相册图片清晰度","相簿瀏覽器":"相册浏览器","模擬市民相簿":"角色相册","選擇圖片":"选择图片","搜尋姓名 / 職業 / 居住地…":"搜索姓名 / 职业 / 居住地…","自動排列":"自动布局","未鎖定":"未锁定","標註未鎖":"标注未锁","畫布操作":"画布操作","原始圖片（不壓縮 · 大小不限）":"原图（不压缩 · 大小不限）","刪除家族":"删除家族","清理未使用圖片":"清理未使用图片","小圖（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","節節省空間（160px）":"省空间（160px）","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","節省空間（192px）":"省空间（192px）","平衡（384px · 預設）":"平衡（384px · 默认）","高畫質（768px）":"超清（768px）","192px · 約 10–16KB/張":"192px · 约 10–16KB/张","384px · 約 30–50KB/張":"384px · 约 30–50KB/张","768px · 約 70–130KB/張":"768px · 约 70–130KB/张","小型圖片（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","中型圖片（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","大型圖片（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","原始圖片（不壓縮 · 不限大小）":"原图（不压缩 · 大小不限）","目前品質：":"当前档位：","僅套用於之後上傳的頭像。":"仅对新上传头像生效。","僅套用於之後上傳的圖片。":"仅对新上传图片生效。","顯示關係":"显示关系","隱藏關係":"隐藏关系","鎖定關係":"锁定关系","解鎖關係":"解锁关系","重設關係位置":"重置关系位置","每條連線可擁有獨立的關係；關係名稱可在畫布上拖曳，避免遮擋卡片。":"每条连线可拥有独立的关系；关系名称可在画布上拖动，避免遮挡卡片。","L1nG 晴空":"L1nG 晴空","森霧鼠尾草":"森雾鼠尾草","莓果薄暮":"莓果薄暮","琥珀紙頁":"琥珀纸页","午夜靛藍":"午夜靛蓝","重設":"重置","重設介面設定":"重置界面设置","重建範例資料":"重建示例数据","「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。":"“重置界面设置”不会删除族谱数据；“重建示例数据”会以繁中默认示例重新建立当前数据。","介面設定已恢復預設。":"界面设置已恢复默认。","已重建繁中範例資料。":"已重建繁中示例数据。","請確認":"请确认","輸入資料":"输入数据","重設卡片位置":"重置卡片位置","重設位置":"重置位置","永久刪除模擬市民":"永久删除模拟市民","永久刪除":"永久删除","無法刪除家族":"无法删除家族","資料未完成":"数据未完成","父母":"父母","暫無更多資訊":"暂无更多信息","恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？":"恢复主题、背景、侧边栏宽度、查看模式与图片质量等界面设置？","族譜人物、關係與卡片位置不會被刪除。":"族谱人物、关系与卡片位置不会被删除。","這會刪除目前族譜資料，並重新建立繁體中文的預設範例。":"这会删除当前族谱数据，并重新建立繁体中文的默认示例。","此操作無法復原，建議先匯出 JSON 備份。":"此操作无法撤销，建议先导出 JSON 备份。","儲存空間不足":"存储空间不足","儲存失敗":"保存失败","背景圖片設定儲存失敗。":"背景图片设置保存失败。","圖片處理失敗":"图片处理失败","背景處理失敗":"背景处理失败","移除背景圖片":"移除背景图片","確定清除目前背景圖片嗎？":"确定清除当前背景图片吗？","將掃描所有未被引用的圖片並刪除。確定繼續嗎？":"将扫描所有未被引用的图片并删除。确定继续吗？","開始清理":"开始清理","尚未選擇圖片":"尚未选择图片","請先選擇一張圖片":"请先选择一张图片","原始圖片容量提醒":"原始图片容量提醒","是否仍要儲存原始圖片？":"是否仍要保存原始图片？","IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。":"IndexedDB 容量虽然较大，但大图片仍会快速占满空间。","仍要儲存":"仍要保存","請填寫寵物名字":"请填写宠物名字","請填寫姓名":"请填写姓名","請至少選擇一個所屬家族":"请至少选择一个所属家族","沒有可移除的成員":"没有可移除的成员","匯入失敗":"导入失败","自訂文字（可選）":"自定义文字（可选）","張圖片":"张图片","暫無其他關係":"暂无其他关系","還沒有任何模擬市民":"还没有任何模拟市民","請選擇圖片檔案":"请选择图片文件","圖片載入失敗":"图片加载失败","檔案讀取失敗":"文件读取失败","目前瀏覽器已自動改用備用圖片儲存方式":"当前浏览器 IndexedDB 不可用，图片以 base64 保存在 localStorage","他們仍保留在模擬市民池中。":"他们仍保留在模拟市民池中。","點選選擇…":"点击选择…","點選選擇家族（可多選）…":"点击选择家族（可多选）…","點選選擇（可多選）…":"点击选择（可多选）…","選擇目標…":"选择目标…","還沒有任何相簿圖片。":"还没有任何相册图片。","開啟某個模擬市民的編輯彈出視窗 →「相簿」新增圖片後，會在這裡顯示。":"打开某个模拟市民的编辑弹窗 →「相册」添加图片后，会在这里显示。"};
+  const ZH_HANS_EXACT = {"你加入的頭像、寵物圖片、人生照片、家庭合照與背景圖片會保存在這台裝置的瀏覽器中，不會自動上傳。":"你添加的头像、宠物图片、人生照片、家庭合照和背景图片会保存在这台设备的浏览器中，不会自动上传。","目前使用量":"当前使用量","已儲存圖片":"已保存图片","圖片使用空間":"图片使用空间","圖片處理":"图片处理","圖片會自動調整":"图片会自动调整","新增或更換圖片時，工具會依照用途自動調整成適合族譜使用的大小，不需要另外設定畫質。":"添加或更换图片时，工具会根据用途自动调整为适合族谱使用的大小，不需要另外设置画质。","備份會包含圖片":"备份会包含图片","匯出 JSON 備份時，目前族譜使用中的圖片會一起保存；之後重新匯入也會一併還原。":"导出 JSON 备份时，当前族谱使用中的图片会一起保存；之后重新导入也会一并还原。","清理空間":"清理空间","只會刪除目前已經沒有被任何人物、寵物、人生照片、家庭合照或背景使用的圖片，不會影響仍在族譜中使用的圖片。":"只会删除当前已不再被任何人物、宠物、人生照片、家庭合照或背景使用的图片，不会影响仍在族谱中使用的图片。","支援 JPG / PNG / GIF · 圖片會自動調整":"支持 JPG / PNG / GIF · 图片会自动调整","世代":"世代","血統資料已保留，但目前沒有可顯示的姓名":"血统数据已保留，但目前没有可显示的姓名","10 倍以上":"10 倍以上","IndexedDB 不可用":"IndexedDB 不可用","IndexedDB 被阻塞":"IndexedDB 被阻塞","— 快速上手與快捷鍵":"— 快速上手与快捷键","—（無 / 未知）":"—（无 / 未知）","↺ 重置位置":"↺ 重置位置","⌨ 快捷鍵":"⌨ 快捷键","中圖（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","平衡（256px · 預設）":"平衡（256px · 默认）","編輯":"编辑","其他":"其他","加入家族":"加入家族","新增":"新增","新增模擬市民":"新增模拟市民","新增家族":"新建家族","新增圖片":"添加图片","新增寵物":"添加宠物","移出家族":"移出家族","上一張 (←)":"上一张 (←)","下一張 (→)":"下一张 (→)","不包含頭像 / 寵物頭像 / 背景圖":"不包含头像 / 宠物头像 / 背景图","不壓縮 · 保留原始格式與畫質":"不压缩 · 保持原始格式与质量","喪偶":"丧偶","中型圖片":"中图","中，容量是 localStorage 的":"中，容量是 localStorage 的","主題配色（漸層）":"主题配色（渐变）","也屬於：":"也属于：","親生":"亲生","人":"人","人物小傳、結局、備註…":"人物小传、结局、备注…","人生抱負":"人生抱负","人生階段":"人生阶段","人類":"人类","人魚":"人鱼","僅屬於本家族":"仅属于本家族","仇敵":"仇敌","從":"从","從家族移除":"从家族移除","倉鼠":"仓鼠","仙子":"仙子","以滑鼠位置為中心縮放":"以鼠标位置为中心缩放","伴侶":"伴侣","作家 / 學生 / 無":"作家 / 学生 / 无","側邊欄":"侧边栏","儲存":"保存","儲存圖片失敗":"保存图片失败","兒童":"儿童","兄妹":"兄妹","兄弟姐妹":"兄弟姐妹","兄弟姐妹（血緣 / 收養）":"兄弟姐妹（血缘 / 收养）","兔子":"兔子","全選":"全选","全部模擬市民":"全部模拟市民","全部階段":"全部阶段","關係":"关系","關係，如 好友":"关系，如 好友","關聯":"关联","關聯階段（可選）":"关联阶段（可选）","關閉":"关闭","關閉 (Esc)":"关闭 (Esc)","刪除":"删除","刪除圖片":"删除图片","刪除失敗":"删除失败","刪除寵物":"删除宠物","刪除模擬市民":"删除模拟市民","前任配偶":"前任配偶","勾選後建立「兄弟姐妹」關聯":"勾选后建立「兄弟姐妹」关联","勾選後自動加入對方父母清單":"勾选后自动加入对方父母列表","午夜藍調":"午夜蓝调","壓縮品質":"压缩档位","原始圖片":"原图","雙擊空白處":"双击空白处","取消":"取消","可選：拍攝場景、備註、想記錄的故事…":"可选：拍摄场景、备注、想记录的故事…","名字":"名字","吸血鬼":"吸血鬼","品種":"品种","圖片":"图片","圖片儲存在瀏覽器":"图片保存在浏览器","圖片檢視器":"图片查看器","圖片檢視器中切換上一張 / 下一張":"图片查看器中切换上一张 / 下一张","圖片編輯視窗內貼上剪貼簿圖片":"图片编辑器内粘贴剪贴板图片","在世":"在世","填滿（裁切超出部分）":"填充（裁剪超出部分）","備註":"备注","外星人":"外星人","外觀":"外观","大型圖片":"大图","頭像畫質":"头像清晰度","女":"女","如：幼兒期 / 婚禮合影 / 全家福":"如：幼儿期 / 婚礼合影 / 全家福","如：旺財 / 咪咪":"如：旺财 / 咪咪","如：柳溪 - 花園社區":"如：柳溪 - 花园社区","如：暢銷作家 / 靈魂伴侶…":"如：畅销作家 / 灵魂伴侣…","如：莫蒂默·高斯":"如：莫蒂默·高斯","如：衰老 / 溺水 / 火災…":"如：衰老 / 溺水 / 火灾…","如：金毛、波斯貓…":"如：金毛、波斯猫…","姓名":"姓名","嬰兒":"婴儿","子女":"子女","子女（血緣 / 收養）":"子女（血缘 / 收养）","儲存空間使用量":"存储用量","完整顯示（可能留白）":"完整显示（可能留白）","寵物":"宠物","寵物頭像":"宠物头像","家族":"家族","家族名稱":"家族名称","家族名稱：":"家族名称：","匯入":"导入","匯入 JSON 備份":"导入 JSON 备份","匯入失敗：":"导入失败：","匯出":"导出","匯出 JSON":"导出 JSON","匯出 JSON 備份":"导出 JSON 备份","小型圖片":"小图","居住地":"居住地","已故":"已故","已選":"已选","師承":"师承","平移整個族譜視圖":"平移整个族谱视图","平衡":"平衡","重複排列":"平铺","年齡階段":"年龄阶段","幼兒":"幼儿","幼年":"幼年","幽靈":"幽灵","套用自訂漸層":"应用自定义渐变","目前":"当前","目前家族還沒有成員":"当前家族还没有成员","目前家族還沒有成員，無需移除。":"当前家族还没有成员，无需移除。","目前家族還沒有模擬市民，點選左側「 新增模擬市民」開始記錄":"当前家族还没有模拟市民，点击左侧「新增模拟市民」开始记录","性別":"性别","情人":"情人","成年":"成年","所屬家族":"所属家族","所有模擬市民都已在目前家族中":"所有模拟市民都已在当前家族中","拖曳卡片":"拖动卡片","拖曳色票選擇兩種顏色，即時預覽漸層效果":"拖动色板自选两种颜色，实时预览渐变效果","拖曳圖片檔案":"拖拽图片文件","拖曳空白處":"拖拽空白处","摯友":"挚友","提示":"提示","搜尋…":"搜索…","搜尋姓名 / 特徵 / 職業…":"搜索姓名 / 特征 / 职业…","搜尋姓名…":"搜索姓名…","搜尋家族…":"搜索家族…","搜尋標題 / 模擬市民名稱 / 備註…":"搜索标题 / 模拟市民名称 / 备注…","搜尋，按":"搜索，按","支援":"支持","支援 JPG / PNG / GIF":"支持 JPG / PNG / GIF","新家族":"新家族","時仍會轉回 base64，與舊版工具完全互通":"时仍会转回 base64，与旧版工具完全互通","尚無關係連線":"暂无关系连线","目前沒有可清理的圖片":"暂无可清理的图片","尚未新增寵物":"暂无宠物","尚未設定背景圖片":"暂无背景图","有創造力, 熱愛戶外, 物質主義":"有创造力, 热爱户外, 物质主义","朋友":"朋友","機器人":"机器人","檢視器中":"查看器中","標題":"标题","標題 / 關聯階段 / 備註":"标题 / 关联阶段 / 备注","標題 / 模擬市民名稱 / 備註":"标题 / 模拟市民名称 / 备注","植物模擬市民":"植物模拟市民","模擬市民":"模拟市民","模擬市民頭像":"模拟市民头像","橘子汽水":"橘子汽水","計算中…":"正在计算…","死因":"死因","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"每张卡片显示来源模拟市民与标题；点击打开大图查看器","每張圖片可設定：":"每张图片可设置：","沒有符合的項目":"没有匹配","沒有符合的圖片":"没有匹配的图片","瀏覽，":"浏览，","新增其他關係（好友 / 仇敵 / 師承…）":"添加其他关系（好友 / 仇敌 / 师承…）","新增已有模擬市民":"添加已有模拟市民","新增模擬市民到":"添加模拟市民到","清理完成":"清理完成","清理未使用的圖片":"清理未使用图片","清空":"清空","清除圖片":"清除图片","清除頭像":"清除头像","清除篩選":"清除筛选","移除背景":"移除背景","滾輪":"滚轮","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"点击选择 · 或拖拽 · 或 Ctrl+V 粘贴","愛上雷神":"爱上雷神","父母 A（血緣）":"父母 A（血缘）","父母 B（可選）":"父母 B（可选）","特徵":"特征","特徵（逗號分隔）":"特征（逗号分隔）","狀態":"状态","狗":"狗","狼人":"狼人","貓":"猫","現任配偶":"现任配偶","電腦版":"电脑版","男":"男","節省空間":"省空间","知道了":"知道了","確定刪除目前家族嗎？\n人物本身不會被刪除。":"确定删除当前家族吗？\n人物本身不会被删除。","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"确定删除这个模拟市民吗？此操作会同时清除相关关系。","離婚":"离婚","種族":"种族","種類":"种类","移除":"移除","簡中":"简中","簡介":"简介","貼上截圖":"粘贴截图","繁中":"繁中","編輯模擬市民 →":"编辑模拟市民 →","老年":"老年","職業":"职业","職業 / 備註":"职业 / 备注","背景圖片":"背景图","自動切換為「自由排列」並儲存新位置":"自动切换为「自由排列」并保存新位置","自動適應螢幕":"自动适应屏幕","自訂":"自定义","至少需要保留一個家族。":"至少需要保留一个家族。","選單":"菜单","蔓越莓氣泡":"蔓越莓气泡","蜜桃烏龍":"蜜桃乌龙","蜥蜴":"蜥蜴","視圖與佈局":"视图与布局","模擬市民篩選":"模拟市民筛选","訂婚":"订婚","語言 / Language":"语言 / Language","請輸入家族名稱。":"请输入家族名称。","高畫質":"超清","跨模擬市民":"跨模拟市民","尚未新增人生照片":"还没有相册图片","顯示方式":"适应方式","透明度：":"透明度：","配偶":"配偶","青少年":"青少年","青年":"青年","青檸茉莉":"青柠茉莉","頂端支援按":"顶部支持按","領養":"领养","領養關係":"领养关系","顏色 1":"颜色 1","顏色 2":"颜色 2","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"首次打开会自动把旧数据（base64）迁移到 IndexedDB","馬":"马","魔法師":"魔法师","魚":"鱼","鳥":"鸟","（不指定）":"（不指定）","（不顯示）":"（不显示）","（多張圖片 / 不同階段 / 合影）":"（多张图片 / 不同阶段 / 合影）","（已刪除）":"（已删除）","（未命名）":"（未命名）","（未歸屬）":"（未归属）","（每條連線獨立設定）":"（每条连线独立设置）","（該模擬市民擁有的寵物）":"（该模拟市民拥有的宠物）","（預設）":"（默认）","，並一鍵":"，并一键","：為模擬市民新增多張圖片":"：为模拟市民添加多张图片","顯示標註":"显示标注","檢視模式":"查看模式","高畫質（384px）":"超清（384px）","高畫質（1440px · 約 150–250KB/張）":"高清（1440px · 约 150–250KB/张）","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"他们仍保留在模拟市民池中，可随时再次加入任何家族。","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"勾选后点击「加入家族」即可让它们出现在当前家族的族谱中。","圖片資料儲存在瀏覽器的 IndexedDB 中（容量數十 MB），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，與舊版工具完全相容。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"支持拖拽图片到此处，或在编辑器内按 Ctrl+V 粘贴截图","每條連線可擁有獨立的關係；標註在畫布上可拖曳，避免遮擋卡片。":"每条连线可拥有独立的关系标注；标注在画布上可拖动，避免遮挡卡片。","圖片儲存":"图片存储","大圖（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","選擇圖片":"选择图片","搜尋姓名 / 職業 / 居住地…":"搜索姓名 / 职业 / 居住地…","自動排列":"自动布局","未鎖定":"未锁定","標註未鎖":"标注未锁","畫布操作":"画布操作","原始圖片（不壓縮 · 大小不限）":"原图（不压缩 · 大小不限）","刪除家族":"删除家族","清理未使用圖片":"清理未使用图片","小圖（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","節節省空間（160px）":"省空间（160px）","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"图片数据保存在浏览器的 IndexedDB 中（容量数十 MB），localStorage 只保存索引。导出 JSON 时会自动转回 base64，与旧版工具完全兼容。","節省空間（192px）":"省空间（192px）","平衡（384px · 預設）":"平衡（384px · 默认）","高畫質（768px）":"超清（768px）","192px · 約 10–16KB/張":"192px · 约 10–16KB/张","384px · 約 30–50KB/張":"384px · 约 30–50KB/张","768px · 約 70–130KB/張":"768px · 约 70–130KB/张","小型圖片（512px · 約 20–30KB/張）":"小图（512px · 约 20–30KB/张）","中型圖片（720px · 約 40–60KB/張 · 預設）":"中图（720px · 约 40–60KB/张 · 默认）","大型圖片（1080px · 約 80–120KB/張）":"大图（1080px · 约 80–120KB/张）","原始圖片（不壓縮 · 不限大小）":"原图（不压缩 · 大小不限）","目前品質：":"当前档位：","僅套用於之後上傳的頭像。":"仅对新上传头像生效。","僅套用於之後上傳的圖片。":"仅对新上传图片生效。","顯示關係":"显示关系","隱藏關係":"隐藏关系","鎖定關係":"锁定关系","解鎖關係":"解锁关系","重設關係位置":"重置关系位置","每條連線可擁有獨立的關係；關係名稱可在畫布上拖曳，避免遮擋卡片。":"每条连线可拥有独立的关系；关系名称可在画布上拖动，避免遮挡卡片。","L1nG 晴空":"L1nG 晴空","森霧鼠尾草":"森雾鼠尾草","莓果薄暮":"莓果薄暮","琥珀紙頁":"琥珀纸页","午夜靛藍":"午夜靛蓝","重設":"重置","重設介面設定":"重置界面设置","重建範例資料":"重建示例数据","「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。":"“重置界面设置”不会删除族谱数据；“重建示例数据”会以繁中默认示例重新建立当前数据。","介面設定已恢復預設。":"界面设置已恢复默认。","已重建繁中範例資料。":"已重建繁中示例数据。","請確認":"请确认","輸入資料":"输入数据","重設卡片位置":"重置卡片位置","重設位置":"重置位置","永久刪除模擬市民":"永久删除模拟市民","永久刪除":"永久删除","無法刪除家族":"无法删除家族","資料未完成":"数据未完成","父母":"父母","暫無更多資訊":"暂无更多信息","恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？":"恢复主题、背景、侧边栏宽度、查看模式与图片质量等界面设置？","族譜人物、關係與卡片位置不會被刪除。":"族谱人物、关系与卡片位置不会被删除。","這會刪除目前族譜資料，並重新建立繁體中文的預設範例。":"这会删除当前族谱数据，并重新建立繁体中文的默认示例。","此操作無法復原，建議先匯出 JSON 備份。":"此操作无法撤销，建议先导出 JSON 备份。","儲存空間不足":"存储空间不足","儲存失敗":"保存失败","背景圖片設定儲存失敗。":"背景图片设置保存失败。","圖片處理失敗":"图片处理失败","背景處理失敗":"背景处理失败","移除背景圖片":"移除背景图片","確定清除目前背景圖片嗎？":"确定清除当前背景图片吗？","將掃描所有未被引用的圖片並刪除。確定繼續嗎？":"将扫描所有未被引用的图片并删除。确定继续吗？","開始清理":"开始清理","尚未選擇圖片":"尚未选择图片","請先選擇一張圖片":"请先选择一张图片","原始圖片容量提醒":"原始图片容量提醒","是否仍要儲存原始圖片？":"是否仍要保存原始图片？","IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。":"IndexedDB 容量虽然较大，但大图片仍会快速占满空间。","仍要儲存":"仍要保存","請填寫寵物名字":"请填写宠物名字","請填寫姓名":"请填写姓名","請至少選擇一個所屬家族":"请至少选择一个所属家族","沒有可移除的成員":"没有可移除的成员","匯入失敗":"导入失败","自訂文字（可選）":"自定义文字（可选）","張圖片":"张图片","暫無其他關係":"暂无其他关系","還沒有任何模擬市民":"还没有任何模拟市民","請選擇圖片檔案":"请选择图片文件","圖片載入失敗":"图片加载失败","檔案讀取失敗":"文件读取失败","目前瀏覽器已自動改用備用圖片儲存方式":"当前浏览器 IndexedDB 不可用，图片以 base64 保存在 localStorage","他們仍保留在模擬市民池中。":"他们仍保留在模拟市民池中。","點選選擇…":"点击选择…","點選選擇家族（可多選）…":"点击选择家族（可多选）…","點選選擇（可多選）…":"点击选择（可多选）…","選擇目標…":"选择目标…",};
 
   /* ========【英文翻譯】 設定 - 繁中完整文案對應英文顯示值 ======== */
-  const EN = {"你加入的頭像、寵物圖片、人生照片、家庭合照與背景圖片會保存在這台裝置的瀏覽器中，不會自動上傳。":"Portraits, pet images, life photos, family photos, and backgrounds are stored in this browser on this device and are not uploaded automatically.","目前使用量":"Current Usage","已儲存圖片":"Saved Images","圖片使用空間":"Image Storage","圖片處理":"Image Handling","圖片會自動調整":"Images Are Adjusted Automatically","新增或更換圖片時，工具會依照用途自動調整成適合族譜使用的大小，不需要另外設定畫質。":"When you add or replace an image, the tool automatically adjusts it for its use in the genealogy. No quality setting is needed.","備份會包含圖片":"Backups Include Images","匯出 JSON 備份時，目前族譜使用中的圖片會一起保存；之後重新匯入也會一併還原。":"When you export a JSON backup, images currently used by the genealogy are included and restored when you import the backup again.","清理空間":"Free Up Space","只會刪除目前已經沒有被任何人物、寵物、人生照片、家庭合照或背景使用的圖片，不會影響仍在族譜中使用的圖片。":"Only images no longer used by any Sim, pet, life photo, family photo, or background are removed. Images still in use are kept.","支援 JPG / PNG / GIF · 圖片會自動調整":"Supports JPG / PNG / GIF · images are adjusted automatically","世代":"Generation","血統資料已保留，但目前沒有可顯示的姓名":"Lineage data is preserved, but no names are currently available","放開即可匯入族譜檔案":"Drop to import the genealogy file","支援遊戲族譜 ZIP 與 JSON 備份":"Supports game genealogy ZIP and JSON backups","正在匯入 JSON 備份…":"Importing JSON backup…","不支援這個檔案。請使用遊戲族譜 ZIP 或 JSON 備份。":"Unsupported file. Use a game genealogy ZIP or JSON backup.","請一次只拖曳一個族譜檔案。":"Drop one genealogy file at a time.","模擬市民族譜工具":"The Sims 4 Genealogy Tool","全部階段":"All Life Stages","嬰兒":"Infant","幼兒":"Toddler","兒童":"Child","青少年":"Teen","青年":"Young Adult","成年":"Adult","老年":"Elder","幼年":"Young","匯入":"Import","匯出":"Export","外觀":"Appearance","提示":"Help","家族":"Family","新增家族":"New Family","刪除家族":"Delete Family","模擬市民":"Sims","新增模擬市民":"Add Sim","全部模擬市民":"All Sims","加入家族":"Add to Family","移出家族":"Remove from Family","相簿":"Gallery","相簿瀏覽器":"Gallery Browser","視圖與佈局":"View & Layout","檢視模式":"View Mode","自動排列":"Auto Layout","未鎖定":"Unlocked","↺ 重置位置":"↺ Reset Positions","顯示標註":"Show Labels","隱藏標註":"Hide Labels","標註未鎖":"Labels Unlocked","標註已鎖":"Labels Locked","電腦版":"Desktop","編輯模擬市民":"Edit Sim","每條連線可擁有獨立的關係；標註在畫布上可拖曳，避免遮擋卡片。":"Each connection can have its own relationship label. Drag labels on the canvas to keep them clear of cards.","模擬市民頭像":"Sim Portraits","選擇圖片":"Choose Image","清除頭像":"Clear Portrait","支援 JPG / PNG / GIF":"Supports JPG / PNG / GIF","姓名":"Name","人生階段":"Life Stage","性別":"Gender","男":"Male","女":"Female","其他":"Other","狀態":"Status","在世":"Alive","幽靈":"Ghost","已故":"Deceased","種族":"Occult Type","（不顯示）":"(Hidden)","(不顯示)":"(Hidden)","人類":"Human","吸血鬼":"Vampire","外星人":"Alien","狼人":"Werewolf","人魚":"Mermaid","魔法師":"Spellcaster","仙子":"Fairy","植物模擬市民":"PlantSim","機器人":"Robot","領養關係":"Adoption","親生":"Biological","領養":"Adopted","死因":"Cause of Death","職業 / 備註":"Career / Notes","居住地":"Residence","人生抱負":"Aspiration","所屬家族":"Families","父母 A（血緣）":"Parent A (Biological)","父母 B（可選）":"Parent B (Optional)","現任配偶":"Current Spouse","前任配偶":"Former Spouse","子女（血緣 / 收養）":"Children (Biological / Adopted)","勾選後自動加入對方父母清單":"Selected Sims are automatically updated with this Sim as a parent.","兄弟姐妹（血緣 / 收養）":"Siblings (Biological / Adopted)","勾選後建立「兄弟姐妹」關聯":"Selecting creates a sibling relationship.","特徵（逗號分隔）":"Traits (comma-separated)","簡介":"Biography","寵物":"Pets","（該模擬市民擁有的寵物）":"(Pets owned by this Sim)","新增寵物":"Add Pet","（多張圖片 / 不同階段 / 合影）":"(Multiple photos / life stages / group photos)","新增圖片":"Add Photo","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"Drag images here, or press Ctrl+V in the editor to paste a screenshot.","關係":"Relationships","（每條連線獨立設定）":"(Configured per connection)","新增其他關係（好友 / 仇敵 / 師承…）":"Add Other Relationship (Friend / Rival / Mentor…)","新增":"Add","刪除模擬市民":"Delete Sim","取消":"Cancel","儲存":"Save","編輯寵物":"Edit Pet","寵物頭像":"Pet Portrait","名字":"Name","種類":"Species","狗":"Dog","貓":"Cat","馬":"Horse","兔子":"Rabbit","鳥":"Bird","倉鼠":"Hamster","魚":"Fish","蜥蜴":"Lizard","品種":"Breed","年齡階段":"Age Stage","刪除寵物":"Delete Pet","編輯圖片":"Edit Photo","圖片":"Image","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"Click to choose · drag and drop · or paste with Ctrl+V","清除圖片":"Clear Image","標題":"Title","關聯階段（可選）":"Linked Life Stage (Optional)","（不指定）":"(Not specified)","備註":"Notes","刪除圖片":"Delete Image","圖片檢視器":"Image Viewer","清除篩選":"Clear Filter","關閉":"Close","編輯":"Edit","新增已有模擬市民":"Add Existing Sim","新增模擬市民到":"Add Sims to","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"Select Sims and choose “Add to Family” to include them in the current family tree.","全選":"Select All","清空":"Clear","已選":"Selected","人":"Sim(s)","從家族移除":"Remove from Family","從":"Remove from","移除":"Remove","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"They remain in the global Sim pool and can be added to any family again later.","主題設定":"Theme Settings","主題配色（漸層）":"Theme Colors (Gradient)","顏色 1":"Color 1","顏色 2":"Color 2","拖曳色票選擇兩種顏色，即時預覽漸層效果":"Choose two colors to preview the gradient in real time.","套用自訂漸層":"Apply Custom Gradient","背景圖片":"Background Image","尚未設定背景圖片":"No background image","移除背景":"Remove Background","透明度：":"Opacity:","顯示方式":"Fit Mode","填滿（裁切超出部分）":"Cover (crop overflow)","完整顯示（可能留白）":"Contain (may leave empty space)","重複排列":"Tile","頭像畫質":"Portrait Quality","節省空間（160px）":"Compact (160px)","平衡（256px · 預設）":"Balanced (256px · Default)","高畫質（384px）":"HD (384px)","相簿圖片畫質":"Gallery Image Quality","壓縮品質":"Compression Preset","小型圖片（512px · 約 20–30KB/張）":"Small (512px · about 20–30KB/image)","中型圖片（720px · 約 40–60KB/張 · 預設）":"Medium (720px · about 40–60KB/image · Default)","大型圖片（1080px · 約 80–120KB/張）":"Large (1080px · about 80–120KB/image)","高畫質（1440px · 約 150–250KB/張）":"HD (1440px · about 150–250KB/image)","原始圖片（不壓縮 · 不限大小）":"Original (no compression · no size limit)","儲存空間使用量":"Storage Usage","計算中…":"Calculating…","清理未使用的圖片":"Clean Unused Images","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"Images are stored in the browser’s IndexedDB while localStorage keeps only references. JSON export converts them back to base64 for compatibility with older versions.","使用提示":"Help & Tips","— 快速上手與快捷鍵":"— Quick Start & Shortcuts","畫布操作":"Canvas Controls","拖曳空白處":"Drag empty space","平移整個族譜視圖":"Pan the family tree","滾輪":"Mouse wheel","以滑鼠位置為中心縮放":"Zoom around the pointer","雙擊空白處":"Double-click empty space","自動適應螢幕":"Fit to screen","拖曳卡片":"Drag a card","自動切換為「自由排列」並儲存新位置":"Automatically switches to Free Layout and saves the new position","側邊欄":"Sidebar","：檢視所有模擬市民的相簿圖片":": browse gallery images from all Sims","頂端支援按":"Search by","標題 / 模擬市民名稱 / 備註":"title / Sim name / notes","搜尋，按":"and filter by","模擬市民篩選":"Sim","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"Each card shows the source Sim and title; click to open the image viewer.","檢視器中":"In the viewer, use","跨模擬市民":"across Sims","瀏覽，":"to browse,","不包含頭像 / 寵物頭像 / 背景圖":"Portraits, pet portraits, and background images are excluded.","模擬市民相簿":"Sim Gallery","編輯模擬市民 →":"Edit Sim →","：為模擬市民新增多張圖片":": add multiple images to a Sim","每張圖片可設定：":"Each image can include:","標題 / 關聯階段 / 備註":"title / linked life stage / notes","支援":"Supports","拖曳圖片檔案":"dragging image files","到相簿網格，或按":"into the gallery grid, or press","貼上截圖":"to paste a screenshot","圖片儲存":"Image Storage","圖片儲存在瀏覽器":"Images are stored in the browser’s","中，容量是 localStorage 的":"with much more capacity than localStorage","10 倍以上":"(10× or more)","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"On first launch, legacy base64 images are migrated to IndexedDB automatically.","匯出 JSON":"Exporting JSON","時仍會轉回 base64，與舊版工具完全互通":"converts images back to base64 for full backward compatibility.","可在主題設定中檢視":"Theme Settings shows","，並一鍵":"and lets you","⌨ 快捷鍵":"⌨ Shortcuts","關閉目前彈出視窗":"Close the current dialog","圖片檢視器中切換上一張 / 下一張":"Previous / next image in the viewer","圖片編輯視窗內貼上剪貼簿圖片":"Paste a clipboard image in the photo editor","在編輯彈出視窗中快速儲存":"Quick-save in an editor dialog","知道了":"Got it","選單":"Menu","家族名稱":"Family Name","搜尋姓名 / 職業 / 居住地…":"Search name / career / residence…","匯入 JSON 備份":"Import JSON Backup","匯出 JSON 備份":"Export JSON Backup","如：莫蒂默·高斯":"e.g. Mortimer Goth","如：衰老 / 溺水 / 火災…":"e.g. old age / drowning / fire…","作家 / 學生 / 無":"Writer / Student / None","如：柳溪 - 花園社區":"e.g. Willow Creek - Garden District","如：暢銷作家 / 靈魂伴侶…":"e.g. Bestselling Author / Soulmate…","搜尋家族…":"Search families…","搜尋姓名…":"Search names…","有創造力, 熱愛戶外, 物質主義":"Creative, Loves Outdoors, Materialistic","人物小傳、結局、備註…":"Biography, ending, notes…","關係，如 好友":"Relationship, e.g. Friend","如：旺財 / 咪咪":"e.g. Mochi / Luna","如：金毛、波斯貓…":"e.g. Golden Retriever, Persian…","如：幼兒期 / 婚禮合影 / 全家福":"e.g. Toddler years / wedding / family portrait","可選：拍攝場景、備註、想記錄的故事…":"Optional: scene, notes, or the story you want to remember…","關閉 (Esc)":"Close (Esc)","上一張 (←)":"Previous (←)","下一張 (→)":"Next (→)","搜尋標題 / 模擬市民名稱 / 備註…":"Search title / Sim / notes…","搜尋姓名 / 特徵 / 職業…":"Search name / traits / career…","搜尋…":"Search…","目前":"Current","職業":"Career","尚無關係連線":"No relationship links","尚未新增寵物":"No pets","沒有符合的項目":"No matches","所有模擬市民都已在目前家族中":"All Sims are already in the current family","目前家族還沒有成員":"The current family has no members","（未命名）":"(Unnamed)","（預設）":"(Default)","—（無 / 未知）":"— (None / Unknown)","（未歸屬）":"(Unassigned)","僅屬於本家族":"Only in this family","關聯":"Relationship","（已刪除）":"(Deleted)","刪除":"Delete","尚未新增人生照片":"No gallery images yet","沒有符合的圖片":"No matching images","新家族":"New Family","家族名稱：":"Family name:","至少需要保留一個家族。":"At least one family must remain.","確定刪除目前家族嗎？\n人物本身不會被刪除。":"Delete the current family?\nThe Sims themselves will not be deleted.","請輸入家族名稱。":"Please enter a family name.","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"Delete this Sim? Related relationships will also be removed.","目前家族還沒有成員，無需移除。":"The current family has no members to remove.","匯入失敗：":"Import failed:","清理完成":"Cleanup complete","目前沒有可清理的圖片":"There are no unused images to clean up.","刪除失敗":"Delete failed","IndexedDB 不可用":"IndexedDB is unavailable","IndexedDB 被阻塞":"IndexedDB is blocked","儲存圖片失敗":"Failed to save image","蜜桃烏龍":"Peach Oolong","橘子汽水":"Orange Soda","蔓越莓氣泡":"Cranberry Fizz","青檸茉莉":"Lime Jasmine","愛上雷神":"Thunder","午夜藍調":"Midnight Blue","節省空間":"Compact","平衡":"Balanced","高畫質":"Ultra HD","小型圖片":"Small","中型圖片":"Medium","大型圖片":"Large","原始圖片":"Original","不壓縮 · 保留原始格式與畫質":"No compression · keep original format and quality","配偶":"Spouse","訂婚":"Engaged","伴侶":"Partner","情人":"Lover","離婚":"Divorced","喪偶":"Widowed","子女":"Child","兄弟姐妹":"Siblings","兄妹":"Sibling","摯友":"Best Friend","朋友":"Friend","仇敵":"Rival","師承":"Mentor","自訂":"Custom","編輯模擬市民彈出視窗":"Edit Sim Dialog","寵物編輯彈出視窗":"Pet Editor Dialog","相簿圖片編輯彈出視窗":"Gallery Photo Editor Dialog","資訊卡彈出視窗":"Sim Info Dialog","提示面板":"Help Panel","語言 / Language":"Language","160px · 約 8–12KB/張":"160px · about 8–12KB/image","256px · 約 15–25KB/張":"256px · about 15–25KB/image","384px · 約 30–50KB/張":"384px · about 30–50KB/image","512px · 約 20–30KB/張":"512px · about 20–30KB/image","720px · 約 40–60KB/張":"720px · about 40–60KB/image","1080px · 約 80–120KB/張":"1080px · about 80–120KB/image","1440px · 約 150–250KB/張":"1440px · about 150–250KB/image","岡瑟·高斯":"Gunther Goth","柳溪 - 歐菲莉亞別墅":"Willow Creek - Ophelia Villa","財富創造者":"Fabulously Wealthy","衰老":"Old Age","雄心勃勃":"Ambitious","天才":"Genius","勢利":"Snob","商業":"Business","高斯家族創始人之一，已故。":"One of the founders of the Goth family. Deceased.","科妮莉亞·高斯":"Cornelia Goth","大家庭":"Big Happy Family","家庭觀念":"Family-Oriented","愛整潔":"Neat","美食家":"Foodie","無":"None","高斯家族女主人，已故。":"Matriarch of the Goth family. Deceased.","莫蒂默·高斯":"Mortimer Goth","暢銷作家":"Bestselling Author","午夜":"Midnight","黑貓":"Black Cat","有創造力":"Creative","浪漫":"Romantic","陰沈":"Gloomy","作家":"Writer","現任高斯家族族長。":"Current head of the Goth family.","貝拉·巴切勒":"Bella Bachelor","靈魂伴侶":"Soulmate","金毛":"Goldie","金毛尋回犬":"Golden Retriever","熱愛戶外":"Loves Outdoors","開朗":"Cheerful","愛調情":"Romantic","巴切勒家的女兒，嫁入高斯家。":"Daughter of the Bachelor family, married into the Goth family.","卡桑德拉·高斯":"Cassandra Goth","柳溪 - 花園社區":"Willow Creek - Garden District","卓越畫家":"Painter Extraordinaire","物質主義":"Materialistic","學生":"Student","莫蒂默和貝拉的女兒。":"Daughter of Mortimer and Bella.","亞歷山大·高斯":"Alexander Goth","電腦奇才":"Computer Whiz","莫蒂默和貝拉的兒子。":"Son of Mortimer and Bella.","高斯家族":"Goth Family","巴切勒家族":"Bachelor Family","節省空間（192px）":"Compact (192px)","平衡（384px · 預設）":"Balanced (384px · Default)","高畫質（768px）":"HD (768px)","192px · 約 10–16KB/張":"192px · about 10–16KB/image","768px · 約 70–130KB/張":"768px · about 70–130KB/image","顯示關係":"Show Relationships","隱藏關係":"Hide Relationships","鎖定關係":"Lock Relationships","解鎖關係":"Unlock Relationships","重設關係位置":"Reset Relationship Position","每條連線可擁有獨立的關係；關係名稱可在畫布上拖曳，避免遮擋卡片。":"Each connection can have its own relationship. Drag relationship labels on the canvas to keep them clear of cards.","L1nG 晴空":"L1nG Clear Sky","森霧鼠尾草":"Sage Mist","莓果薄暮":"Berry Dusk","琥珀紙頁":"Amber Paper","午夜靛藍":"Midnight Indigo","重設":"Reset","重設介面設定":"Reset Interface Settings","重建範例資料":"Rebuild Sample Data","「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。":"Reset Interface Settings keeps your genealogy data. Rebuild Sample Data replaces the current data with the default Traditional Chinese sample.","介面設定已恢復預設。":"Interface settings restored to defaults.","已重建繁中範例資料。":"Traditional Chinese sample data rebuilt.","請確認":"Confirm","輸入資料":"Enter Information","重設卡片位置":"Reset Card Positions","重設位置":"Reset Positions","永久刪除模擬市民":"Permanently Delete Sim","永久刪除":"Permanently Delete","無法刪除家族":"Cannot Delete Family","資料未完成":"Incomplete Information","父母":"Parents","暫無更多資訊":"No additional information","自由排列":"Free Layout","已鎖定":"Locked","恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？":"Restore theme, background, sidebar width, view mode, and image-quality settings?","族譜人物、關係與卡片位置不會被刪除。":"Genealogy Sims, relationships, and card positions will not be deleted.","這會刪除目前族譜資料，並重新建立繁體中文的預設範例。":"This will delete the current genealogy data and rebuild the default Traditional Chinese sample.","此操作無法復原，建議先匯出 JSON 備份。":"This cannot be undone. Export a JSON backup first if you want to keep the current data.","儲存空間不足":"Storage Full","儲存失敗":"Save Failed","背景圖片設定儲存失敗。":"Failed to save the background-image settings.","圖片處理失敗":"Image Processing Failed","背景處理失敗":"Background Processing Failed","移除背景圖片":"Remove Background Image","確定清除目前背景圖片嗎？":"Remove the current background image?","清理未使用圖片":"Clean Up Unused Images","將掃描所有未被引用的圖片並刪除。確定繼續嗎？":"Scan for all unreferenced images and delete them?","開始清理":"Start Cleanup","尚未選擇圖片":"No Image Selected","請先選擇一張圖片":"Choose an image first.","原始圖片容量提醒":"Original Image Size Warning","是否仍要儲存原始圖片？":"Save the original image anyway?","IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。":"IndexedDB has more capacity, but large images can still fill it quickly.","仍要儲存":"Save Anyway","請填寫寵物名字":"Enter a pet name.","請填寫姓名":"Enter a name.","請至少選擇一個所屬家族":"Select at least one family.","沒有可移除的成員":"No Members to Remove","匯入失敗":"Import Failed","自訂文字（可選）":"Custom text (optional)","張圖片":"image(s)","暫無其他關係":"No other relationships","還沒有任何模擬市民":"No Sims yet","請選擇圖片檔案":"Choose an image file.","圖片載入失敗":"Image failed to load.","檔案讀取失敗":"File read failed.","目前瀏覽器 IndexedDB 不可用，圖片以 base64 存在 localStorage":"IndexedDB is unavailable in this browser. Images are stored as base64 in localStorage.","他們仍保留在模擬市民池中。":"They will remain in the global Sim pool.","世界之友":"Friend of the World","健美運動員":"Bodybuilder","兒童期":"Childhood","全家福":"Family Portrait","公敵":"Public Enemy","凍死":"Freezing","名人":"Celebrity","吸血鬼灼燒":"Vampire Sunlight","園藝大師":"Freelance Botanist","婚禮合影":"Wedding Photo","嬰兒期":"Infancy","尷尬死":"Embarrassment","平移整個族譜畫布":"Pan the family-tree canvas","幼兒期":"Toddler Years","度假照":"Vacation Photo","心臟病":"Cardiac Explosion","快捷鍵":"Shortcuts","情場達人":"Serial Romantic","憤怒死":"Anger","成年期":"Adulthood","拖曳調整側邊欄寬度；雙擊恢復預設寬度":"Drag to resize the sidebar; double-click to restore the default width","搜尋結果":"Search Results","暴曬":"Overheating","極限運動員":"Extreme Sports Enthusiast","模擬市民 4 族譜工具":"The Sims 4 Genealogy Tool","檢視與佈局":"View & Layout","河豚":"Pufferfish","派對王":"Party Animal","流星":"Meteorite","溺水":"Drowning","火災":"Fire","無所事事":"Fabulously Filthy","牛頭人花":"Cowplant","生日派對":"Birthday Party","生物博士":"Curator","畢業照":"Graduation Photo","確定":"Confirm","神秘死":"Mysterious Death","笑死":"Hysteria","美食大師":"Master Chef","羞憤死":"Mortification","老年期":"Elder Years","考古學家":"Archaeology Scholar","自然主義者":"Outdoor Enthusiast","蒸汽浴":"Steam","調整側邊欄寬度":"Resize sidebar","調酒大師":"Master Mixologist","豪宅大亨":"Mansion Baron","超級父母":"Super Parent","連環浪漫":"Serial Romantic","都市傳說":"Urban Legend","釣魚大師":"Angling Ace","電擊":"Electrocution","靈魂探索者":"Inner Peace","青年期":"Young Adulthood","音樂天才":"Musical Genius","飢餓":"Starvation","首席運動員":"Chief of Mischief","首領":"Leader of the Pack","點選選擇…":"Click to choose…","點選選擇家族（可多選）…":"Choose families (multiple allowed)…","點選選擇（可多選）…":"Choose options (multiple allowed)…","選擇目標…":"Choose a target…","還沒有任何相簿圖片。":"No gallery images yet.","開啟某個模擬市民的編輯彈出視窗 →「相簿」新增圖片後，會在這裡顯示。":"Open a Sim editor and add images under “Gallery” to display them here."};
+  const EN = {"你加入的頭像、寵物圖片、人生照片、家庭合照與背景圖片會保存在這台裝置的瀏覽器中，不會自動上傳。":"Portraits, pet images, life photos, family photos, and backgrounds are stored in this browser on this device and are not uploaded automatically.","目前使用量":"Current Usage","已儲存圖片":"Saved Images","圖片使用空間":"Image Storage","圖片處理":"Image Handling","圖片會自動調整":"Images Are Adjusted Automatically","新增或更換圖片時，工具會依照用途自動調整成適合族譜使用的大小，不需要另外設定畫質。":"When you add or replace an image, the tool automatically adjusts it for its use in the genealogy. No quality setting is needed.","備份會包含圖片":"Backups Include Images","匯出 JSON 備份時，目前族譜使用中的圖片會一起保存；之後重新匯入也會一併還原。":"When you export a JSON backup, images currently used by the genealogy are included and restored when you import the backup again.","清理空間":"Free Up Space","只會刪除目前已經沒有被任何人物、寵物、人生照片、家庭合照或背景使用的圖片，不會影響仍在族譜中使用的圖片。":"Only images no longer used by any Sim, pet, life photo, family photo, or background are removed. Images still in use are kept.","支援 JPG / PNG / GIF · 圖片會自動調整":"Supports JPG / PNG / GIF · images are adjusted automatically","世代":"Generation","血統資料已保留，但目前沒有可顯示的姓名":"Lineage data is preserved, but no names are currently available","放開即可匯入族譜檔案":"Drop to import the genealogy file","支援遊戲族譜 ZIP 與 JSON 備份":"Supports game genealogy ZIP and JSON backups","正在匯入 JSON 備份…":"Importing JSON backup…","不支援這個檔案。請使用遊戲族譜 ZIP 或 JSON 備份。":"Unsupported file. Use a game genealogy ZIP or JSON backup.","請一次只拖曳一個族譜檔案。":"Drop one genealogy file at a time.","模擬市民族譜工具":"The Sims 4 Genealogy Tool","全部階段":"All Life Stages","嬰兒":"Infant","幼兒":"Toddler","兒童":"Child","青少年":"Teen","青年":"Young Adult","成年":"Adult","老年":"Elder","幼年":"Young","匯入":"Import","匯出":"Export","外觀":"Appearance","提示":"Help","家族":"Family","新增家族":"New Family","刪除家族":"Delete Family","模擬市民":"Sims","新增模擬市民":"Add Sim","全部模擬市民":"All Sims","加入家族":"Add to Family","移出家族":"Remove from Family","視圖與佈局":"View & Layout","檢視模式":"View Mode","自動排列":"Auto Layout","未鎖定":"Unlocked","↺ 重置位置":"↺ Reset Positions","顯示標註":"Show Labels","隱藏標註":"Hide Labels","標註未鎖":"Labels Unlocked","標註已鎖":"Labels Locked","電腦版":"Desktop","編輯模擬市民":"Edit Sim","每條連線可擁有獨立的關係；標註在畫布上可拖曳，避免遮擋卡片。":"Each connection can have its own relationship label. Drag labels on the canvas to keep them clear of cards.","模擬市民頭像":"Sim Portraits","選擇圖片":"Choose Image","清除頭像":"Clear Portrait","支援 JPG / PNG / GIF":"Supports JPG / PNG / GIF","姓名":"Name","人生階段":"Life Stage","性別":"Gender","男":"Male","女":"Female","其他":"Other","狀態":"Status","在世":"Alive","幽靈":"Ghost","已故":"Deceased","種族":"Occult Type","（不顯示）":"(Hidden)","(不顯示)":"(Hidden)","人類":"Human","吸血鬼":"Vampire","外星人":"Alien","狼人":"Werewolf","人魚":"Mermaid","魔法師":"Spellcaster","仙子":"Fairy","植物模擬市民":"PlantSim","機器人":"Robot","領養關係":"Adoption","親生":"Biological","領養":"Adopted","死因":"Cause of Death","職業 / 備註":"Career / Notes","居住地":"Residence","人生抱負":"Aspiration","所屬家族":"Families","父母 A（血緣）":"Parent A (Biological)","父母 B（可選）":"Parent B (Optional)","現任配偶":"Current Spouse","前任配偶":"Former Spouse","子女（血緣 / 收養）":"Children (Biological / Adopted)","勾選後自動加入對方父母清單":"Selected Sims are automatically updated with this Sim as a parent.","兄弟姐妹（血緣 / 收養）":"Siblings (Biological / Adopted)","勾選後建立「兄弟姐妹」關聯":"Selecting creates a sibling relationship.","特徵（逗號分隔）":"Traits (comma-separated)","簡介":"Biography","寵物":"Pets","（該模擬市民擁有的寵物）":"(Pets owned by this Sim)","新增寵物":"Add Pet","（多張圖片 / 不同階段 / 合影）":"(Multiple photos / life stages / group photos)","新增圖片":"Add Photo","支援拖曳圖片到此處，或在編輯器內按 Ctrl+V 貼上截圖":"Drag images here, or press Ctrl+V in the editor to paste a screenshot.","關係":"Relationships","（每條連線獨立設定）":"(Configured per connection)","新增其他關係（好友 / 仇敵 / 師承…）":"Add Other Relationship (Friend / Rival / Mentor…)","新增":"Add","刪除模擬市民":"Delete Sim","取消":"Cancel","儲存":"Save","編輯寵物":"Edit Pet","寵物頭像":"Pet Portrait","名字":"Name","種類":"Species","狗":"Dog","貓":"Cat","馬":"Horse","兔子":"Rabbit","鳥":"Bird","倉鼠":"Hamster","魚":"Fish","蜥蜴":"Lizard","品種":"Breed","年齡階段":"Age Stage","刪除寵物":"Delete Pet","編輯圖片":"Edit Photo","圖片":"Image","點選選擇 · 或拖曳 · 或 Ctrl+V 貼上":"Click to choose · drag and drop · or paste with Ctrl+V","清除圖片":"Clear Image","標題":"Title","關聯階段（可選）":"Linked Life Stage (Optional)","（不指定）":"(Not specified)","備註":"Notes","刪除圖片":"Delete Image","圖片檢視器":"Image Viewer","清除篩選":"Clear Filter","關閉":"Close","編輯":"Edit","新增已有模擬市民":"Add Existing Sim","新增模擬市民到":"Add Sims to","勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。":"Select Sims and choose “Add to Family” to include them in the current family tree.","全選":"Select All","清空":"Clear","已選":"Selected","人":"Sim(s)","從家族移除":"Remove from Family","從":"Remove from","移除":"Remove","他們仍保留在模擬市民池中，可隨時再次加入任何家族。":"They remain in the global Sim pool and can be added to any family again later.","主題配色（漸層）":"Theme Colors (Gradient)","顏色 1":"Color 1","顏色 2":"Color 2","拖曳色票選擇兩種顏色，即時預覽漸層效果":"Choose two colors to preview the gradient in real time.","套用自訂漸層":"Apply Custom Gradient","背景圖片":"Background Image","尚未設定背景圖片":"No background image","移除背景":"Remove Background","透明度：":"Opacity:","顯示方式":"Fit Mode","填滿（裁切超出部分）":"Cover (crop overflow)","完整顯示（可能留白）":"Contain (may leave empty space)","重複排列":"Tile","頭像畫質":"Portrait Quality","節省空間（160px）":"Compact (160px)","平衡（256px · 預設）":"Balanced (256px · Default)","高畫質（384px）":"HD (384px)","壓縮品質":"Compression Preset","小型圖片（512px · 約 20–30KB/張）":"Small (512px · about 20–30KB/image)","中型圖片（720px · 約 40–60KB/張 · 預設）":"Medium (720px · about 40–60KB/image · Default)","大型圖片（1080px · 約 80–120KB/張）":"Large (1080px · about 80–120KB/image)","高畫質（1440px · 約 150–250KB/張）":"HD (1440px · about 150–250KB/image)","原始圖片（不壓縮 · 不限大小）":"Original (no compression · no size limit)","儲存空間使用量":"Storage Usage","計算中…":"Calculating…","清理未使用的圖片":"Clean Unused Images","圖片資料儲存在瀏覽器的 IndexedDB 中（可用空間通常遠大於 localStorage），localStorage 僅儲存索引。匯出 JSON 時會自動轉回 base64，並維持與舊版工具的相容性。":"Images are stored in the browser’s IndexedDB while localStorage keeps only references. JSON export converts them back to base64 for compatibility with older versions.","— 快速上手與快捷鍵":"— Quick Start & Shortcuts","畫布操作":"Canvas Controls","拖曳空白處":"Drag empty space","平移整個族譜視圖":"Pan the family tree","滾輪":"Mouse wheel","以滑鼠位置為中心縮放":"Zoom around the pointer","雙擊空白處":"Double-click empty space","自動適應螢幕":"Fit to screen","拖曳卡片":"Drag a card","自動切換為「自由排列」並儲存新位置":"Automatically switches to Free Layout and saves the new position","側邊欄":"Sidebar","頂端支援按":"Search by","標題 / 模擬市民名稱 / 備註":"title / Sim name / notes","搜尋，按":"and filter by","模擬市民篩選":"Sim","每張卡片顯示來源模擬市民與標題；點選開啟大圖檢視器":"Each card shows the source Sim and title; click to open the image viewer.","檢視器中":"In the viewer, use","跨模擬市民":"across Sims","瀏覽，":"to browse,","不包含頭像 / 寵物頭像 / 背景圖":"Portraits, pet portraits, and background images are excluded.","編輯模擬市民 →":"Edit Sim →","：為模擬市民新增多張圖片":": add multiple images to a Sim","每張圖片可設定：":"Each image can include:","標題 / 關聯階段 / 備註":"title / linked life stage / notes","支援":"Supports","拖曳圖片檔案":"dragging image files","貼上截圖":"to paste a screenshot","圖片儲存":"Image Storage","圖片儲存在瀏覽器":"Images are stored in the browser’s","中，容量是 localStorage 的":"with much more capacity than localStorage","10 倍以上":"(10× or more)","首次開啟會自動把舊資料（base64）遷移到 IndexedDB":"On first launch, legacy base64 images are migrated to IndexedDB automatically.","匯出 JSON":"Exporting JSON","時仍會轉回 base64，與舊版工具完全互通":"converts images back to base64 for full backward compatibility.","，並一鍵":"and lets you","⌨ 快捷鍵":"⌨ Shortcuts","圖片檢視器中切換上一張 / 下一張":"Previous / next image in the viewer","圖片編輯視窗內貼上剪貼簿圖片":"Paste a clipboard image in the photo editor","知道了":"Got it","選單":"Menu","家族名稱":"Family Name","搜尋姓名 / 職業 / 居住地…":"Search name / career / residence…","匯入 JSON 備份":"Import JSON Backup","匯出 JSON 備份":"Export JSON Backup","如：莫蒂默·高斯":"e.g. Mortimer Goth","如：衰老 / 溺水 / 火災…":"e.g. old age / drowning / fire…","作家 / 學生 / 無":"Writer / Student / None","如：柳溪 - 花園社區":"e.g. Willow Creek - Garden District","如：暢銷作家 / 靈魂伴侶…":"e.g. Bestselling Author / Soulmate…","搜尋家族…":"Search families…","搜尋姓名…":"Search names…","有創造力, 熱愛戶外, 物質主義":"Creative, Loves Outdoors, Materialistic","人物小傳、結局、備註…":"Biography, ending, notes…","關係，如 好友":"Relationship, e.g. Friend","如：旺財 / 咪咪":"e.g. Mochi / Luna","如：金毛、波斯貓…":"e.g. Golden Retriever, Persian…","如：幼兒期 / 婚禮合影 / 全家福":"e.g. Toddler years / wedding / family portrait","可選：拍攝場景、備註、想記錄的故事…":"Optional: scene, notes, or the story you want to remember…","關閉 (Esc)":"Close (Esc)","上一張 (←)":"Previous (←)","下一張 (→)":"Next (→)","搜尋標題 / 模擬市民名稱 / 備註…":"Search title / Sim / notes…","搜尋姓名 / 特徵 / 職業…":"Search name / traits / career…","搜尋…":"Search…","目前":"Current","職業":"Career","尚無關係連線":"No relationship links","尚未新增寵物":"No pets","沒有符合的項目":"No matches","所有模擬市民都已在目前家族中":"All Sims are already in the current family","目前家族還沒有成員":"The current family has no members","（未命名）":"(Unnamed)","（預設）":"(Default)","—（無 / 未知）":"— (None / Unknown)","（未歸屬）":"(Unassigned)","僅屬於本家族":"Only in this family","關聯":"Relationship","（已刪除）":"(Deleted)","刪除":"Delete","尚未新增人生照片":"No gallery images yet","沒有符合的圖片":"No matching images","新家族":"New Family","家族名稱：":"Family name:","至少需要保留一個家族。":"At least one family must remain.","確定刪除目前家族嗎？\n人物本身不會被刪除。":"Delete the current family?\nThe Sims themselves will not be deleted.","請輸入家族名稱。":"Please enter a family name.","確定刪除這個模擬市民嗎？此操作會同時清除相關關係。":"Delete this Sim? Related relationships will also be removed.","目前家族還沒有成員，無需移除。":"The current family has no members to remove.","匯入失敗：":"Import failed:","清理完成":"Cleanup complete","目前沒有可清理的圖片":"There are no unused images to clean up.","刪除失敗":"Delete failed","IndexedDB 不可用":"IndexedDB is unavailable","IndexedDB 被阻塞":"IndexedDB is blocked","儲存圖片失敗":"Failed to save image","蜜桃烏龍":"Peach Oolong","橘子汽水":"Orange Soda","蔓越莓氣泡":"Cranberry Fizz","青檸茉莉":"Lime Jasmine","愛上雷神":"Thunder","午夜藍調":"Midnight Blue","節省空間":"Compact","平衡":"Balanced","高畫質":"Ultra HD","小型圖片":"Small","中型圖片":"Medium","大型圖片":"Large","原始圖片":"Original","不壓縮 · 保留原始格式與畫質":"No compression · keep original format and quality","配偶":"Spouse","訂婚":"Engaged","伴侶":"Partner","情人":"Lover","離婚":"Divorced","喪偶":"Widowed","子女":"Child","兄弟姐妹":"Siblings","兄妹":"Sibling","摯友":"Best Friend","朋友":"Friend","仇敵":"Rival","師承":"Mentor","自訂":"Custom","語言 / Language":"Language","160px · 約 8–12KB/張":"160px · about 8–12KB/image","256px · 約 15–25KB/張":"256px · about 15–25KB/image","384px · 約 30–50KB/張":"384px · about 30–50KB/image","512px · 約 20–30KB/張":"512px · about 20–30KB/image","720px · 約 40–60KB/張":"720px · about 40–60KB/image","1080px · 約 80–120KB/張":"1080px · about 80–120KB/image","1440px · 約 150–250KB/張":"1440px · about 150–250KB/image","岡瑟·高斯":"Gunther Goth","柳溪 - 歐菲莉亞別墅":"Willow Creek - Ophelia Villa","財富創造者":"Fabulously Wealthy","衰老":"Old Age","雄心勃勃":"Ambitious","天才":"Genius","勢利":"Snob","商業":"Business","高斯家族創始人之一，已故。":"One of the founders of the Goth family. Deceased.","科妮莉亞·高斯":"Cornelia Goth","大家庭":"Big Happy Family","家庭觀念":"Family-Oriented","愛整潔":"Neat","美食家":"Foodie","無":"None","高斯家族女主人，已故。":"Matriarch of the Goth family. Deceased.","莫蒂默·高斯":"Mortimer Goth","暢銷作家":"Bestselling Author","午夜":"Midnight","黑貓":"Black Cat","有創造力":"Creative","浪漫":"Romantic","陰沈":"Gloomy","作家":"Writer","現任高斯家族族長。":"Current head of the Goth family.","貝拉·巴切勒":"Bella Bachelor","靈魂伴侶":"Soulmate","金毛":"Goldie","金毛尋回犬":"Golden Retriever","熱愛戶外":"Loves Outdoors","開朗":"Cheerful","愛調情":"Romantic","巴切勒家的女兒，嫁入高斯家。":"Daughter of the Bachelor family, married into the Goth family.","卡桑德拉·高斯":"Cassandra Goth","柳溪 - 花園社區":"Willow Creek - Garden District","卓越畫家":"Painter Extraordinaire","物質主義":"Materialistic","學生":"Student","莫蒂默和貝拉的女兒。":"Daughter of Mortimer and Bella.","亞歷山大·高斯":"Alexander Goth","電腦奇才":"Computer Whiz","莫蒂默和貝拉的兒子。":"Son of Mortimer and Bella.","高斯家族":"Goth Family","巴切勒家族":"Bachelor Family","節省空間（192px）":"Compact (192px)","平衡（384px · 預設）":"Balanced (384px · Default)","高畫質（768px）":"HD (768px)","192px · 約 10–16KB/張":"192px · about 10–16KB/image","768px · 約 70–130KB/張":"768px · about 70–130KB/image","顯示關係":"Show Relationships","隱藏關係":"Hide Relationships","鎖定關係":"Lock Relationships","解鎖關係":"Unlock Relationships","重設關係位置":"Reset Relationship Position","每條連線可擁有獨立的關係；關係名稱可在畫布上拖曳，避免遮擋卡片。":"Each connection can have its own relationship. Drag relationship labels on the canvas to keep them clear of cards.","L1nG 晴空":"L1nG Clear Sky","森霧鼠尾草":"Sage Mist","莓果薄暮":"Berry Dusk","琥珀紙頁":"Amber Paper","午夜靛藍":"Midnight Indigo","重設":"Reset","重設介面設定":"Reset Interface Settings","重建範例資料":"Rebuild Sample Data","「重設介面設定」不會刪除族譜資料；「重建範例資料」會以繁中預設範例重新建立目前資料。":"Reset Interface Settings keeps your genealogy data. Rebuild Sample Data replaces the current data with the default Traditional Chinese sample.","介面設定已恢復預設。":"Interface settings restored to defaults.","已重建繁中範例資料。":"Traditional Chinese sample data rebuilt.","請確認":"Confirm","輸入資料":"Enter Information","重設卡片位置":"Reset Card Positions","重設位置":"Reset Positions","永久刪除模擬市民":"Permanently Delete Sim","永久刪除":"Permanently Delete","無法刪除家族":"Cannot Delete Family","資料未完成":"Incomplete Information","父母":"Parents","暫無更多資訊":"No additional information","自由排列":"Free Layout","已鎖定":"Locked","恢復主題、背景、側邊欄寬度、檢視模式與圖片品質等介面設定？":"Restore theme, background, sidebar width, view mode, and image-quality settings?","族譜人物、關係與卡片位置不會被刪除。":"Genealogy Sims, relationships, and card positions will not be deleted.","這會刪除目前族譜資料，並重新建立繁體中文的預設範例。":"This will delete the current genealogy data and rebuild the default Traditional Chinese sample.","此操作無法復原，建議先匯出 JSON 備份。":"This cannot be undone. Export a JSON backup first if you want to keep the current data.","儲存空間不足":"Storage Full","儲存失敗":"Save Failed","背景圖片設定儲存失敗。":"Failed to save the background-image settings.","圖片處理失敗":"Image Processing Failed","背景處理失敗":"Background Processing Failed","移除背景圖片":"Remove Background Image","確定清除目前背景圖片嗎？":"Remove the current background image?","清理未使用圖片":"Clean Up Unused Images","將掃描所有未被引用的圖片並刪除。確定繼續嗎？":"Scan for all unreferenced images and delete them?","開始清理":"Start Cleanup","尚未選擇圖片":"No Image Selected","請先選擇一張圖片":"Choose an image first.","原始圖片容量提醒":"Original Image Size Warning","是否仍要儲存原始圖片？":"Save the original image anyway?","IndexedDB 容量雖然較大，但大圖片仍會快速佔滿空間。":"IndexedDB has more capacity, but large images can still fill it quickly.","仍要儲存":"Save Anyway","請填寫寵物名字":"Enter a pet name.","請填寫姓名":"Enter a name.","請至少選擇一個所屬家族":"Select at least one family.","沒有可移除的成員":"No Members to Remove","匯入失敗":"Import Failed","自訂文字（可選）":"Custom text (optional)","張圖片":"image(s)","暫無其他關係":"No other relationships","還沒有任何模擬市民":"No Sims yet","請選擇圖片檔案":"Choose an image file.","圖片載入失敗":"Image failed to load.","檔案讀取失敗":"File read failed.","目前瀏覽器 IndexedDB 不可用，圖片以 base64 存在 localStorage":"IndexedDB is unavailable in this browser. Images are stored as base64 in localStorage.","他們仍保留在模擬市民池中。":"They will remain in the global Sim pool.","世界之友":"Friend of the World","健美運動員":"Bodybuilder","兒童期":"Childhood","全家福":"Family Portrait","公敵":"Public Enemy","凍死":"Freezing","名人":"Celebrity","吸血鬼灼燒":"Vampire Sunlight","園藝大師":"Freelance Botanist","婚禮合影":"Wedding Photo","嬰兒期":"Infancy","尷尬死":"Embarrassment","平移整個族譜畫布":"Pan the family-tree canvas","幼兒期":"Toddler Years","度假照":"Vacation Photo","心臟病":"Cardiac Explosion","快捷鍵":"Shortcuts","情場達人":"Serial Romantic","憤怒死":"Anger","成年期":"Adulthood","拖曳調整側邊欄寬度；雙擊恢復預設寬度":"Drag to resize the sidebar; double-click to restore the default width","搜尋結果":"Search Results","暴曬":"Overheating","極限運動員":"Extreme Sports Enthusiast","模擬市民 4 族譜工具":"The Sims 4 Genealogy Tool","檢視與佈局":"View & Layout","河豚":"Pufferfish","派對王":"Party Animal","流星":"Meteorite","溺水":"Drowning","火災":"Fire","無所事事":"Fabulously Filthy","牛頭人花":"Cowplant","生日派對":"Birthday Party","生物博士":"Curator","畢業照":"Graduation Photo","確定":"Confirm","神秘死":"Mysterious Death","笑死":"Hysteria","美食大師":"Master Chef","羞憤死":"Mortification","老年期":"Elder Years","考古學家":"Archaeology Scholar","自然主義者":"Outdoor Enthusiast","蒸汽浴":"Steam","調整側邊欄寬度":"Resize sidebar","調酒大師":"Master Mixologist","豪宅大亨":"Mansion Baron","超級父母":"Super Parent","連環浪漫":"Serial Romantic","都市傳說":"Urban Legend","釣魚大師":"Angling Ace","電擊":"Electrocution","靈魂探索者":"Inner Peace","青年期":"Young Adulthood","音樂天才":"Musical Genius","飢餓":"Starvation","首席運動員":"Chief of Mischief","首領":"Leader of the Pack","點選選擇…":"Click to choose…","點選選擇家族（可多選）…":"Choose families (multiple allowed)…","點選選擇（可多選）…":"Choose options (multiple allowed)…","選擇目標…":"Choose a target…",};
 
   /* ========【簡中字元】 設定 - 繁中字元對應簡中字元 ======== */
   const HANT_HANS_CHAR_MAP = {"與":"与","業":"业","兩":"两","喪":"丧","個":"个","為":"为","義":"义","烏":"乌","樂":"乐","於":"于","亞":"亚","親":"亲","僅":"仅","從":"从","倉":"仓","們":"们","優":"优","會":"会","傳":"传","侶":"侣","側":"侧","儲":"储","兒":"儿","關":"关","養":"养","內":"内","岡":"冈","冊":"册","寫":"写","凍":"冻","擊":"击","創":"创","刪":"删","別":"别","動":"动","勢":"势","區":"区","單":"单","佔":"占","歷":"历","壓":"压","雙":"双","變":"变","號":"号","後":"后","嗎":"吗","啓":"启","員":"员","園":"园","圖":"图","場":"场","處":"处","備":"备","復":"复","頭":"头","嬰":"婴","學":"学","實":"实","寵":"宠","對":"对","尋":"寻","導":"导","將":"将","尷":"尴","層":"层","屬":"属","師":"师","帶":"带","並":"并","應":"应","開":"开","異":"异","張":"张","彈":"弹","歸":"归","當":"当","錄":"录","徹":"彻","徵":"征","態":"态","總":"总","憤":"愤","戶":"户","擴":"扩","掃":"扫","擬":"拟","擁":"拥","擇":"择","摯":"挚","擋":"挡","換":"换","據":"据","攝":"摄","敵":"敌","數":"数","無":"无","舊":"旧","時":"时","顯":"显","曬":"晒","暫":"暂","機":"机","條":"条","來":"来","極":"极","檸":"柠","標":"标","棧":"栈","欄":"栏","樹":"树","檔":"档","歐":"欧","畢":"毕","氣":"气","沈":"沉","沒":"没","潔":"洁","淺":"浅","瀏":"浏","漸":"渐","滾":"滚","滿":"满","靈":"灵","災":"灾","點":"点","燒":"烧","熱":"热","愛":"爱","狀":"状","獨":"独","貓":"猫","環":"环","現":"现","電":"电","畫":"画","暢":"畅","礎":"础","確":"确","禮":"礼","離":"离","種":"种","稱":"称","篩":"筛","簡":"简","類":"类","約":"约","級":"级","線":"线","組":"组","結":"结","統":"统","繼":"继","續":"续","緩":"缓","編":"编","緣":"缘","縮":"缩","網":"网","職":"职","聯":"联","髒":"脏","腦":"脑","藝":"艺","節":"节","藍":"蓝","雖":"虽","觀":"观","視":"视","覽":"览","觸":"触","計":"计","訂":"订","認":"认","讓":"让","議":"议","記":"记","設":"设","該":"该","語":"语","誤":"误","說":"说","請":"请","讀":"读","調":"调","譜":"谱","貝":"贝","負":"负","財":"财","敗":"败","質":"质","貼":"贴","轉":"转","輪":"轮","載":"载","較":"较","輯":"辑","輸":"输","邊":"边","達":"达","遷":"迁","運":"运","還":"还","這":"这","連":"连","適":"适","選":"选","釣":"钓","鈕":"钮","鋪":"铺","銷":"销","鎖":"锁","鍵":"键","長":"长","閉":"闭","間":"间","陰":"阴","階":"阶","隨":"随","隱":"隐","頂":"顶","項":"项","預":"预","領":"领","題":"题","顏":"颜","額":"额","風":"风","飢":"饥","餓":"饿","馬":"马","魚":"鱼","鳥":"鸟","齡":"龄","龍":"龙"};
 
   /* ========【簡中介面詞彙】 設定 - 台灣用語對應簡中常用介面詞彙 ======== */
-  const ZH_HANS_UI_PHRASES = {"主題設定":"主题设置","設定":"设置","預設":"默认","自訂":"自定义","套用自訂":"应用自定义","漸層":"渐变","相簿":"相册","儲存":"保存","資料":"数据","搜尋":"搜索","支援":"支持","滑鼠":"鼠标","螢幕":"屏幕","貼上":"粘贴","剪貼簿":"剪贴板","檔案":"文件","快取":"缓存","記憶體":"内存","匯入":"导入","匯出":"导出","相容":"兼容","拖曳":"拖动","新增":"新建","點選":"点击","上傳":"上传","下拉選單":"下拉列表","檢視器":"查看器","檢視模式":"查看模式","檢視所有":"查看所有","畫質":"质量","畫質設定":"画质档位","壓縮品質":"压缩档位","目前品質":"当前档位","節省空間":"省空间","高畫質":"高清","原始圖片":"原图","不壓縮 · 保留原始格式與畫質":"不压缩 · 保持原始格式与质量","顯示方式":"适应方式","填滿（裁切超出部分）":"填充（裁剪超出部分）","裁切":"裁剪","重複排列":"平铺","儲存空間使用量":"存储用量","計算中":"正在计算","目前家族":"当前家族","目前":"当前","即時":"实时","頂端":"顶部","首次開啟":"首次打开","開啟":"打开","關閉":"关闭","彈出視窗":"弹窗","網格":"网格","來源模擬市民":"来源模拟市民","模擬市民篩選":"模拟市民筛选","模擬市民名稱":"模拟市民名称","模擬市民相簿":"模拟市民相册","圖片編輯視窗":"图片编辑器","圖片檢視器":"图片查看器","數十 MB":"数十 MB","localStorage 僅儲存索引":"localStorage 只保存索引","側邊欄":"侧边栏","備註":"备注","資訊":"信息","選單":"菜单","清單":"列表","可在主題設定中檢視":"主题设置里可查看","這裡":"这里","移除嗎":"移除吗","標註":"标注","佈局":"布局","檢視":"查看","模擬市民":"模拟市民","非同步":"异步","啟動":"启动","重設":"重置","堆疊":"栈"};
+  const ZH_HANS_UI_PHRASES = {"設定":"设置","預設":"默认","自訂":"自定义","套用自訂":"应用自定义","漸層":"渐变","儲存":"保存","資料":"数据","搜尋":"搜索","支援":"支持","滑鼠":"鼠标","螢幕":"屏幕","貼上":"粘贴","剪貼簿":"剪贴板","檔案":"文件","快取":"缓存","記憶體":"内存","匯入":"导入","匯出":"导出","相容":"兼容","拖曳":"拖动","新增":"新建","點選":"点击","上傳":"上传","下拉選單":"下拉列表","檢視器":"查看器","檢視模式":"查看模式","檢視所有":"查看所有","畫質":"质量","畫質設定":"画质档位","壓縮品質":"压缩档位","目前品質":"当前档位","節省空間":"省空间","高畫質":"高清","原始圖片":"原图","不壓縮 · 保留原始格式與畫質":"不压缩 · 保持原始格式与质量","顯示方式":"适应方式","填滿（裁切超出部分）":"填充（裁剪超出部分）","裁切":"裁剪","重複排列":"平铺","儲存空間使用量":"存储用量","計算中":"正在计算","目前家族":"当前家族","目前":"当前","即時":"实时","頂端":"顶部","首次開啟":"首次打开","開啟":"打开","關閉":"关闭","網格":"网格","來源模擬市民":"来源模拟市民","模擬市民篩選":"模拟市民筛选","模擬市民名稱":"模拟市民名称","圖片編輯視窗":"图片编辑器","圖片檢視器":"图片查看器","數十 MB":"数十 MB","localStorage 僅儲存索引":"localStorage 只保存索引","側邊欄":"侧边栏","備註":"备注","資訊":"信息","選單":"菜单","清單":"列表","這裡":"这里","移除嗎":"移除吗","標註":"标注","佈局":"布局","檢視":"查看","模擬市民":"模拟市民","非同步":"异步","啟動":"启动","重設":"重置","堆疊":"栈"};
   const ZH_HANS_UI_KEYS = Object.keys(ZH_HANS_UI_PHRASES).sort((a,b) => b.length - a.length);
 
 Object.assign(ZH_HANS_EXACT, {
@@ -15926,23 +16204,21 @@ Object.assign(ZH_HANS_EXACT, {
   '使用說明':'使用说明',
   '電腦版：':'电脑版：',
   'JSON 備份會包含完整族譜資料與圖片，可於之後重新匯入並繼續編輯':'JSON 备份会包含完整族谱数据与图片，可在之后重新导入并继续编辑',
-  '頭像、相簿圖片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器':'头像、相册图片、宠物图片与背景图片会保存在当前使用的浏览器中，不会自动上传到网站或服务器',
+  
   '圖片會儲存在目前使用的瀏覽器中，不會自動上傳。匯出 JSON 備份時會連同圖片一起備份；清理未使用的圖片只會移除目前沒有被任何內容使用的圖片。':'图片会保存在当前使用的浏览器中，不会自动上传。导出 JSON 备份时会连同图片一起备份；清理未使用的图片只会移除当前没有被任何内容使用的图片。',
   'JSON 備份會包含目前族譜資料與圖片，可於之後重新匯入並繼續編輯。':'JSON 备份会包含当前族谱数据与图片，可在之后重新导入并继续编辑。',
   '匯出 JSON 備份時，圖片會自動一起放進備份；之後重新匯入時也會一併還原':'导出 JSON 备份时，图片会自动一起放进备份；之后重新导入时也会一并还原',
-  '清理未使用的圖片只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片':'清理未使用的图片只会移除当前没有被人物、宠物、相册或背景引用的图片，不会删除仍在使用中的图片'
-});
+  });
 
 Object.assign(EN, {
   '使用說明':'Help',
   '電腦版：':'Desktop: ',
   'JSON 備份會包含完整族譜資料與圖片，可於之後重新匯入並繼續編輯':'The JSON backup includes the complete genealogy data and images, so you can import it again later and continue editing.',
-  '頭像、相簿圖片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器':'Portraits, gallery images, pet images, and background images are stored in your current browser and are not uploaded automatically.',
+  
   '圖片會儲存在目前使用的瀏覽器中，不會自動上傳。匯出 JSON 備份時會連同圖片一起備份；清理未使用的圖片只會移除目前沒有被任何內容使用的圖片。':'Images are stored in your current browser and are not uploaded automatically. JSON backups include the images, and cleanup removes only images that are no longer in use.',
   'JSON 備份會包含目前族譜資料與圖片，可於之後重新匯入並繼續編輯。':'The JSON backup includes the current genealogy data and images, so you can import it again later and continue editing.',
   '匯出 JSON 備份時，圖片會自動一起放進備份；之後重新匯入時也會一併還原':'When you export a JSON backup, the images are included automatically and restored when you import the backup later.',
-  '清理未使用的圖片只會移除目前沒有被人物、寵物、相簿或背景引用的圖片，不會刪除仍在使用中的圖片':'Clean Unused Images removes only images that are no longer referenced by Sims, pets, galleries, or the background. Images still in use are kept.'
-});
+  });
 
 Object.assign(EN, {
   '批量移除':'Remove Multiple'
@@ -16010,7 +16286,7 @@ Object.assign(ZH_HANS_EXACT, {
   '基本資料': '基本资料',
   '家庭關係': '家庭关系',
   '其他關係': '其他关系',
-  '相簿與寵物': '相册与宠物',
+  
   '模擬市民編輯分類': '模拟市民编辑分类',
   '生日': '生日',
   '年齡': '年龄',
@@ -16034,8 +16310,8 @@ Object.assign(ZH_HANS_EXACT, {
   '每條連線可獨立設定關係名稱，也可重設已拖曳的關係名稱位置。': '每条连线可独立设置关系名称，也可重置已拖动的关系名称位置。',
   '寵物說明': '宠物说明',
   '記錄該模擬市民擁有的寵物。': '记录该模拟市民拥有的宠物。',
-  '相簿操作說明': '相册操作说明',
-  '可記錄不同人生階段、合影等多張圖片；支援拖曳圖片到相簿，或在編輯器內按 Ctrl+V 貼上截圖。': '可记录不同人生阶段、合影等多张图片；支持拖拽图片到相册，或在编辑器内按 Ctrl+V 粘贴截图。',
+  
+  
   '儲存模擬市民後即可新增其他關係。': '保存模拟市民后即可添加其他关系。',
   '加入家族說明': '加入家族说明',
   '移出家族說明': '移出家族说明',
@@ -16043,7 +16319,7 @@ Object.assign(ZH_HANS_EXACT, {
   'JSON 備份說明': 'JSON 备份说明',
   '模擬市民頭像畫質說明': '模拟市民头像画质说明',
   '寵物頭像畫質說明': '宠物头像画质说明',
-  '相簿圖片畫質說明': '相册图片画质说明',
+  
   '僅套用於之後上傳的頭像。': '仅适用于之后上传的头像。',
   '僅套用於之後上傳的圖片。': '仅适用于之后上传的图片。'
 });
@@ -16059,7 +16335,7 @@ Object.assign(EN, {
   '基本資料': 'Profile',
   '家庭關係': 'Family',
   '其他關係': 'Other Relationships',
-  '相簿與寵物': 'Gallery & Pets',
+  
   '模擬市民編輯分類': 'Sim editor sections',
   '生日': 'Birthday',
   '年齡': 'Age',
@@ -16083,8 +16359,8 @@ Object.assign(EN, {
   '每條連線可獨立設定關係名稱，也可重設已拖曳的關係名稱位置。': 'Each connection can have its own relationship label, and moved label positions can be reset.',
   '寵物說明': 'Pet help',
   '記錄該模擬市民擁有的寵物。': 'Record pets owned by this Sim.',
-  '相簿操作說明': 'Gallery help',
-  '可記錄不同人生階段、合影等多張圖片；支援拖曳圖片到相簿，或在編輯器內按 Ctrl+V 貼上截圖。': 'Store multiple photos from different life stages or group shots. Drag images into the gallery or press Ctrl+V in the editor to paste a screenshot.',
+  
+  
   '儲存模擬市民後即可新增其他關係。': 'Save the Sim first, then you can add other relationships.',
   '加入家族說明': 'Add to family help',
   '移出家族說明': 'Remove from family help',
@@ -16092,7 +16368,7 @@ Object.assign(EN, {
   'JSON 備份說明': 'JSON backup help',
   '模擬市民頭像畫質說明': 'Sim portrait quality help',
   '寵物頭像畫質說明': 'Pet portrait quality help',
-  '相簿圖片畫質說明': 'Gallery image quality help',
+  
   '僅套用於之後上傳的頭像。': 'Applies only to portraits uploaded from now on.',
   '僅套用於之後上傳的圖片。': 'Applies only to images uploaded from now on.'
 });
@@ -16100,7 +16376,7 @@ Object.assign(EN, {
 
 // 右鍵選單快捷關閉
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && nodeContextMenu?.classList.contains('show')) closeNodeContextMenu();
+  if (e.key === 'Escape' && personCardMenu?.classList.contains('show')) closePersonCardMenu();
 });
 
 Object.assign(ZH_HANS_EXACT, {
@@ -16120,8 +16396,7 @@ Object.assign(ZH_HANS_EXACT, {
   '圖片會保留目前的':'图片会保留当前的','卡片位置 / 關係位置 / 主題':'卡片位置 / 关系位置 / 主题',
   '匯出時可另外選擇':'导出时可另外选择','目前背景圖片 / 主題背景顏色 / PNG 透明背景':'当前背景图片 / 主题背景颜色 / PNG 透明背景',
   '匯出圖片不包含頂端導覽、家族欄、智慧輔助線或拖曳狀態':'导出图片不包含顶部导航、家族栏、智能辅助线或拖动状态',
-  '頂端':'顶部','開啟相簿瀏覽器，檢視所有模擬市民的相簿圖片':'打开相册浏览器，查看所有模拟市民的相册图片'
-});
+  '頂端':'顶部',});
 Object.assign(EN, {
   '選取': 'Select',
   '拖曳': 'Pan',
@@ -16151,8 +16426,7 @@ Object.assign(EN, {
   '圖片會保留目前的':'The image keeps the current ','卡片位置 / 關係位置 / 主題':'card positions / relationship positions / theme',
   '匯出時可另外選擇':'; for export, choose ','目前背景圖片 / 主題背景顏色 / PNG 透明背景':'current background image / theme background color / transparent PNG background',
   '匯出圖片不包含頂端導覽、家族欄、智慧輔助線或拖曳狀態':'The exported image excludes the top navigation, family panel, smart guides, and drag state.',
-  '頂端':'Top bar','開啟相簿瀏覽器，檢視所有模擬市民的相簿圖片':' opens the Gallery Browser for all Sims.'
-});
+  '頂端':'Top bar',});
 
   /* 圖示已改為 SVG；這裡只清理舊版翻譯資料可能殘留的表情符號。 */
   const LEGACY_EMOJI_PREFIX = /^[\s]*(?:[\u2600-\u27BF]|[\u{1F000}-\u{1FAFF}])+[\uFE0F\u200D\s]*/u;
@@ -16244,7 +16518,7 @@ Object.assign(EN, {
     '維護':'维护',
     '人物卡片與人物資料使用的頭像':'人物卡片与人物数据使用的头像',
     '寵物資料使用的頭像':'宠物数据使用的头像',
-    '人生照片與相簿圖片':'人生照片与相册图片',
+    
     '圖片本體儲存在目前瀏覽器；族譜資料只保存圖片索引。匯出 JSON 備份時會連同圖片一起帶走。':'图片本体保存在当前浏览器；族谱数据只保存图片索引。导出 JSON 备份时会连同图片一起带走。',
     '只影響之後新增或更換的圖片；已經儲存的圖片不會重新壓縮。':'只影响之后新增或更换的图片；已经保存的图片不会重新压缩。',
     '只有打開這個頁面時才會計算容量，不會在拖曳卡片或瀏覽族譜時掃描圖片庫。':'只有打开这个页面时才会计算容量，不会在拖动卡片或浏览族谱时扫描图片库。',
@@ -16320,7 +16594,7 @@ Object.assign(EN, {
     '維護':'Maintenance',
     '人物卡片與人物資料使用的頭像':'Portraits used by Sim cards and profiles',
     '寵物資料使用的頭像':'Portraits used by pet profiles',
-    '人生照片與相簿圖片':'Life photos and gallery images',
+    
     '圖片本體儲存在目前瀏覽器；族譜資料只保存圖片索引。匯出 JSON 備份時會連同圖片一起帶走。':'Image blobs stay in this browser while genealogy data stores only image references. JSON backups include the images.',
     '只影響之後新增或更換的圖片；已經儲存的圖片不會重新壓縮。':'Only new or replaced images use these settings. Existing images are not recompressed.',
     '只有打開這個頁面時才會計算容量，不會在拖曳卡片或瀏覽族譜時掃描圖片庫。':'Storage is calculated only when this panel opens. Normal browsing and card dragging do not scan the image library.',
@@ -16506,7 +16780,7 @@ Object.assign(EN, {
     const canonical = canonicalTraditional(value);
     if (ZH_HANS_EXACT[canonical] != null) return stripLegacyEmoji(ZH_HANS_EXACT[canonical]);
     let out = canonical;
-    // 先替換完整介面詞彙，再做字元層簡化，避免「設定 / 預設 / 相簿」等台灣用語直譯不自然。
+    // 先替換完整介面詞彙，再做字元層簡化，避免介面詞彙直譯不自然。
     for (const key of ZH_HANS_UI_KEYS) out = out.split(key).join(ZH_HANS_UI_PHRASES[key]);
     out = Array.from(out).map(ch => HANT_HANS_CHAR_MAP[ch] || ch).join('');
     return stripLegacyEmoji(out);
@@ -16534,7 +16808,6 @@ Object.assign(EN, {
     if (EN[canonical] != null) return stripLegacyEmoji(EN[canonical]);
     let m;
     if ((m = canonical.match(/^已選\s*(\d+)\s*人$/))) return `Selected ${m[1]} Sim(s)`;
-    if ((m = canonical.match(/^相簿（(\d+)）$/))) return `Gallery (${m[1]})`;
     if ((m = canonical.match(/^寵物（(\d+)）$/))) return `Pets (${m[1]})`;
     if ((m = canonical.match(/^來自：(.+)$/))) return `From: ${m[1]}`;
     if ((m = canonical.match(/^也屬於：(.+)$/))) return `Also in: ${m[1]}`;
@@ -16633,14 +16906,14 @@ They will remain in the global Sim pool.`;
     translateTree(document.body, false);
     // 關係標籤寬度與內建範例資料都依顯示語言重新計算。
     _textMeasureCache.clear();
-    if (genealogyData && genealogyData.families && genealogyData.families.length) {
+    if (currentGenealogyData() && currentGenealogyData().families && currentGenealogyData().families.length) {
       refreshFamilyUI();
       render();
     }
     if (mask && mask.classList.contains('show')) {
       const birthdayDay = $('fBirthdayDay') ? $('fBirthdayDay').value : '';
-      populateBirthdayDays(birthdayDay);
-      renderEditorFamilyPreviews();
+      personEditor.populateBirthdayDays(birthdayDay);
+      personEditor.renderFamilyPreviews();
     }
     syncAllNavSelectControls();
   }
@@ -16691,6 +16964,23 @@ LING_I18N.init();
 setupTopbarNavSelects();
 observeSharedNativeSelectChevrons();
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && exportMask && exportMask.classList.contains('show')) closeExportPanel();
+  if (e.key === 'Escape' && exportDialog && exportDialog.classList.contains('show')) closeExportPanel();
 });
-init();
+init().catch(error => {
+  console.error(
+    '族譜工具初始化失敗：',
+    error
+  );
+
+  // Skeleton 只代表「仍在初始化」，不能在 fatal error 後永久遮住頁面。
+  hideAppSkeleton();
+
+  void uiAlert(
+    '族譜工具載入失敗：' +
+    (error?.message || String(error)),
+    {
+      title:'族譜工具載入失敗',
+      kind:'danger'
+    }
+  );
+});
