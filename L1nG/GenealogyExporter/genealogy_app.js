@@ -96,6 +96,7 @@ if (!personEditor) {
   throw new Error('找不到 L1nG 人物編輯器模組。');
 }
 const DEFAULT_AVATAR_FRAME = personEditor.DEFAULT_AVATAR_FRAME;
+const formatBirthdaySummary = personEditor.formatBirthdaySummary;
 const simEditorState = personEditor.state.sim;
 const editingPets = personEditor.state.pets;
 const petEditorState = personEditor.state.pet;

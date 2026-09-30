@@ -1637,6 +1637,7 @@ function commitPersonEditorDraft() {
       commit:commitPersonEditorDraft,
       renderAvatarPreview:renderPersonEditorAvatarPreview,
       populateBirthdayDays:populatePersonEditorBirthdayDays,
+      formatBirthdaySummary,
       renderFamilyPreviews:renderPersonEditorFamilyPreviews,
       renderInfoPreviewIfActive:renderPersonEditorInfoPreviewIfActive,
       renderRelationshipList:renderPersonEditorRelationshipList,
