@@ -10581,6 +10581,7 @@ nodes.addEventListener('pointerdown', e => {
     const beforeLayoutState = captureLayoutHistoryState(fam, dragMode);
     let moved = false;
     let dragMutation = null;
+    let previewPosition = null;
 
     const dragPerformanceSession =
       createSingleDragPerformanceSession(
@@ -10624,18 +10625,15 @@ nodes.addEventListener('pointerdown', e => {
       const nx = snapped.x;
       const ny = snapped.y;
 
-      dragMutation =
-        genealogyStore.mergeResults(
-          dragMutation,
-          genealogyStore.setNodePosition(
-            fam.id,
-            dragMode,
-            id,
-            { x:nx, y:ny }
-          )
-        );
+      previewPosition = {
+        x:nx,
+        y:ny
+      };
 
-      genealogyScene.updateTransientPersonPosition(id, { x:nx, y:ny });
+      genealogyScene.updateTransientPersonPosition(
+        id,
+        previewPosition
+      );
 
       el.style.left = `${nx + PAD}px`;
       el.style.top = `${ny + PAD}px`;
@@ -10645,7 +10643,7 @@ nodes.addEventListener('pointerdown', e => {
       if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
       if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
       if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
-      genealogyScene?.requestRelationshipUpdate?.();
+      genealogyScene?.requestRelationshipPreviewUpdate?.();
     };
 
     const moveFrame =
@@ -10679,19 +10677,34 @@ nodes.addEventListener('pointerdown', e => {
       el.classList.remove('dragging');
       hideSmartGuides();
 
-      if (moved) {
+      if (moved && previewPosition) {
+        dragMutation =
+          genealogyStore.mergeResults(
+            dragMutation,
+            genealogyStore.setNodePosition(
+              fam.id,
+              dragMode,
+              id,
+              previewPosition
+            )
+          );
+
         dragHistory.push({
           type:'card-layout',
           familyId:fam.id,
           mode:dragMode,
           before:beforeLayoutState,
-          after:captureLayoutHistoryState(fam, dragMode)
+          after:captureLayoutHistoryState(
+            fam,
+            dragMode
+          )
         });
 
         applyGenealogyMutation(
           dragMutation,
           { render:false }
         );
+
         genealogyScene?.resizeStageToContent?.();
       } else {
         if (viewMode === 'view') openPersonProfile(id);
@@ -10757,6 +10770,7 @@ nodes.addEventListener('pointerdown', e => {
 
     let moved = false;
     let dragMutation = null;
+    let previewPositions = null;
 
     const dragPerformanceSession =
       createGroupDragPerformanceSession(
@@ -10840,15 +10854,8 @@ nodes.addEventListener('pointerdown', e => {
         }
       });
 
-      dragMutation =
-        genealogyStore.mergeResults(
-          dragMutation,
-          genealogyStore.setNodePositions(
-            fam.id,
-            viewMode,
-            nextPositions
-          )
-        );
+      previewPositions =
+        nextPositions;
 
       hideSmartGuides();
 
@@ -10878,7 +10885,7 @@ nodes.addEventListener('pointerdown', e => {
         );
       }
 
-      genealogyScene?.requestRelationshipUpdate?.();
+      genealogyScene?.requestRelationshipPreviewUpdate?.();
     };
 
     const moveFrame =
@@ -10932,7 +10939,17 @@ nodes.addEventListener('pointerdown', e => {
 
       hideSmartGuides();
 
-      if (moved) {
+      if (moved && previewPositions) {
+        dragMutation =
+          genealogyStore.mergeResults(
+            dragMutation,
+            genealogyStore.setNodePositions(
+              fam.id,
+              viewMode,
+              previewPositions
+            )
+          );
+
         dragHistory.push({
           type:'card-layout',
           familyId:fam.id,
@@ -10948,6 +10965,7 @@ nodes.addEventListener('pointerdown', e => {
           dragMutation,
           { render:false }
         );
+
         genealogyScene?.resizeStageToContent?.();
       } else if (shift && wasSelected) {
         selectedNodeIds.delete(id);
@@ -11052,6 +11070,7 @@ nodes.addEventListener('pointerdown', e => {
   let moved = false;
   let dragInitialized = false;
   let dragMutation = null;
+  let previewPosition = null;
 
   const dragPerformanceSession =
     createSingleDragPerformanceSession(
@@ -11102,19 +11121,6 @@ nodes.addEventListener('pointerdown', e => {
         updateLayoutToggle();
       }
 
-      if (!manualPositions[id]) {
-        dragMutation =
-          genealogyStore.mergeResults(
-            dragMutation,
-            genealogyStore.setNodePosition(
-              fam.id,
-              dragMode,
-              id,
-              { ...startPos }
-            )
-          );
-      }
-
       dragInitialized = true;
     }
 
@@ -11144,18 +11150,15 @@ nodes.addEventListener('pointerdown', e => {
     const nx = snapped.x;
     const ny = snapped.y;
 
-    dragMutation =
-      genealogyStore.mergeResults(
-        dragMutation,
-        genealogyStore.setNodePosition(
-          fam.id,
-          dragMode,
-          id,
-          { x:nx, y:ny }
-        )
-      );
+    previewPosition = {
+      x:nx,
+      y:ny
+    };
 
-    genealogyScene.updateTransientPersonPosition(id, { x:nx, y:ny });
+    genealogyScene.updateTransientPersonPosition(
+      id,
+      previewPosition
+    );
 
     el.style.left =
       (nx + PAD) + 'px';
@@ -11191,7 +11194,7 @@ nodes.addEventListener('pointerdown', e => {
       );
     }
 
-    genealogyScene?.requestRelationshipUpdate?.();
+    genealogyScene?.requestRelationshipPreviewUpdate?.();
   };
 
   const moveFrame =
@@ -11237,7 +11240,18 @@ nodes.addEventListener('pointerdown', e => {
     el.classList.remove('dragging');
     hideSmartGuides();
 
-    if (moved) {
+    if (moved && previewPosition) {
+      dragMutation =
+        genealogyStore.mergeResults(
+          dragMutation,
+          genealogyStore.setNodePosition(
+            fam.id,
+            dragMode,
+            id,
+            previewPosition
+          )
+        );
+
       const afterLayoutState =
         captureLayoutHistoryState(
           fam,

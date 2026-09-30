@@ -2923,6 +2923,7 @@ const RENDER_DIRTY = Object.freeze({ layout:1, nodes:2, edges:4 });
 let layoutCache = null;
 let renderDirtyMask = 0;
 let renderInvalidationRaf = 0;
+let relationshipPreviewPending = false;
 function renderMaskFromLayers(layers = {}) {
   let mask = 0;
   if (layers.layout) mask |= RENDER_DIRTY.layout;
@@ -2946,27 +2947,93 @@ function syncStageGeometryFromLayout() {
 }
 function flushRenderInvalidation() {
   syncState();
-  if (renderInvalidationRaf) { cancelAnimationFrame(renderInvalidationRaf); renderInvalidationRaf = 0; }
+
+  if (renderInvalidationRaf) {
+    cancelAnimationFrame(renderInvalidationRaf);
+    renderInvalidationRaf = 0;
+  }
+
   let mask = renderDirtyMask;
   renderDirtyMask = 0;
+
   if (!mask) return;
-  if (mask & RENDER_DIRTY.layout) {
+
+  const layoutWasDirty =
+    !!(mask & RENDER_DIRTY.layout);
+
+  if (layoutWasDirty) {
+    relationshipPreviewPending = false;
     layoutCache = composeScenePlan();
     syncStageGeometryFromLayout();
     mask |= RENDER_DIRTY.nodes | RENDER_DIRTY.edges;
   }
-  if (mask & RENDER_DIRTY.edges) paintRelationshipLayer();
-  if (mask & RENDER_DIRTY.nodes) paintPersonLayer();
+
+  if (mask & RENDER_DIRTY.edges) {
+    const previewOnly =
+      relationshipPreviewPending &&
+      !layoutWasDirty;
+
+    relationshipPreviewPending = false;
+
+    paintRelationshipLayer({
+      includeLabels:!previewOnly
+    });
+  }
+
+  if (mask & RENDER_DIRTY.nodes) {
+    paintPersonLayer();
+  }
 }
-function requestSceneUpdate(layers, { immediate = false } = {}) {
-  renderDirtyMask |= renderMaskFromLayers(layers);
+
+function requestSceneUpdate(
+  layers,
+  { immediate = false } = {}
+) {
+  renderDirtyMask |=
+    renderMaskFromLayers(layers);
+
   if (!renderDirtyMask) return;
-  if (immediate) { flushRenderInvalidation(); return; }
+
+  if (immediate) {
+    flushRenderInvalidation();
+    return;
+  }
+
   if (renderInvalidationRaf) return;
-  renderInvalidationRaf = requestAnimationFrame(() => { renderInvalidationRaf = 0; flushRenderInvalidation(); });
+
+  renderInvalidationRaf =
+    requestAnimationFrame(() => {
+      renderInvalidationRaf = 0;
+      flushRenderInvalidation();
+    });
 }
-function requestRelationshipLayerUpdate() { requestSceneUpdate({ edges:true }); }
-function renderSceneImmediately() { requestSceneUpdate({ layout:true, nodes:true, edges:true }, { immediate:true }); }
+
+function requestRelationshipLayerUpdate() {
+  relationshipPreviewPending = false;
+  requestSceneUpdate({ edges:true });
+}
+
+function requestRelationshipPreviewUpdate() {
+  if (
+    !(renderDirtyMask & RENDER_DIRTY.layout)
+  ) {
+    relationshipPreviewPending = true;
+  }
+
+  requestSceneUpdate({ edges:true });
+}
+
+function renderSceneImmediately() {
+  relationshipPreviewPending = false;
+  requestSceneUpdate(
+    {
+      layout:true,
+      nodes:true,
+      edges:true
+    },
+    { immediate:true }
+  );
+}
 function readScenePlan() { return layoutCache; }
 function readPersonPosition(id) { const pos = layoutCache?.pos?.get(String(id)); return pos ? { ...pos } : null; }
 function updateTransientPersonPosition(id, position) {
@@ -3205,7 +3272,7 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
       labelY = branchY;
     }
 
-    if (showRelLabels && !relationshipPerspectiveSimId) {
+    if (labels && showRelLabels && !relationshipPerspectiveSimId) {
       const key =
         'parent:' + child.id;
 
@@ -3345,7 +3412,7 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
     );
   });
 
-  if (showRelLabels && !relationshipPerspectiveSimId) {
+  if (labels && showRelLabels && !relationshipPerspectiveSimId) {
     children.forEach(child => {
       const key =
         'parent:' + child.id;
@@ -3375,7 +3442,9 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
   }
 }
 
-function paintRelationshipLayer() {
+function paintRelationshipLayer({
+  includeLabels = true
+} = {}) {
   if (!layoutCache) return;
 
   const {
@@ -3385,7 +3454,10 @@ function paintRelationshipLayer() {
   } = layoutCache;
 
   const paths = [];
-  const labels = [];
+  const labels =
+    includeLabels
+      ? []
+      : null;
   const markerDefinitions = [];
   const arrowMarkerByColor =
     new Map();
@@ -3493,7 +3565,7 @@ function paintRelationshipLayer() {
           '"/>'
         );
 
-        if (!showRelLabels || relationshipPerspectiveSimId) return;
+        if (!includeLabels || !showRelLabels || relationshipPerspectiveSimId) return;
 
         const key =
           'spouse:' + pairK;
@@ -3571,7 +3643,7 @@ function paintRelationshipLayer() {
           '"/>'
         );
 
-        if (!showRelLabels || relationshipPerspectiveSimId) return;
+        if (!includeLabels || !showRelLabels || relationshipPerspectiveSimId) return;
 
         const key =
           'exspouse:' + pairK;
@@ -3646,7 +3718,7 @@ function paintRelationshipLayer() {
         '/>'
       );
 
-      if (!showRelLabels || relationshipPerspectiveSimId) return;
+      if (!includeLabels || !showRelLabels || relationshipPerspectiveSimId) return;
 
       const key =
         'link:' + link.id;
@@ -3685,18 +3757,20 @@ function paintRelationshipLayer() {
     ) +
     paths.join('');
 
-  if (
-    relationshipPerspectiveSimId
-  ) {
-    drawPerspectiveKinshipLabels(
-      labels,
-      pos,
-      visibleIds
-    );
-  }
+  if (includeLabels) {
+    if (
+      relationshipPerspectiveSimId
+    ) {
+      drawPerspectiveKinshipLabels(
+        labels,
+        pos,
+        visibleIds
+      );
+    }
 
-  labelsSvg.innerHTML =
-    labels.join('');
+    labelsSvg.innerHTML =
+      labels.join('');
+  }
 }
 
 // ========【族譜連線】 設定 - 橫向關係接頭像側邊；直向親子線保留完整資訊空間 ========
@@ -4584,6 +4658,7 @@ function resizeStageToContent() {
       requestUpdate:requestSceneUpdate,
       renderImmediately:renderSceneImmediately,
       requestRelationshipUpdate:requestRelationshipLayerUpdate,
+      requestRelationshipPreviewUpdate,
       readScenePlan,
       readPersonPosition,
       updateTransientPersonPosition,
