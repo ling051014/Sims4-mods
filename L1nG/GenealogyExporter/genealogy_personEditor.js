@@ -146,57 +146,6 @@ function populatePersonEditorBirthdayDays(preferredValue = null) {
   if (current && Number(current) <= limit) daySelect.value = current;
 }
 
-function formatBirthdaySummary(monthValue, dayValue, yearValue = null) {
-  const month = Number(monthValue) || 0;
-  const day = Number(dayValue) || 0;
-  const year = yearValue === null || yearValue === '' || !Number.isFinite(Number(yearValue))
-    ? null
-    : Math.trunc(Number(yearValue));
-  if (!month || !day) return uiText('生日未知');
-
-  const lang = document.documentElement.lang || 'zh-Hant';
-  if (lang === 'en') {
-    try {
-      const options = year === null
-        ? { month: 'short', day: 'numeric', timeZone: 'UTC' }
-        : { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
-      return new Intl.DateTimeFormat('en', options)
-        .format(new Date(Date.UTC(year === null ? 2000 : year, month - 1, day)));
-    } catch (_) {}
-  }
-
-  return year === null
-    ? `${month} ${uiText('月')} ${day} ${uiText('日')}`
-    : `${year} ${uiText('年')} ${month} ${uiText('月')} ${day} ${uiText('日')}`;
-}
-
-function formatGameDate(value) {
-  if (!value || typeof value !== 'object') return '';
-
-  const year = Number(value.year);
-  const month = Number(value.month);
-  const day = Number(value.day);
-  if (![year, month, day].every(Number.isFinite)) return '';
-
-  const normalizedYear = Math.trunc(year);
-  const normalizedMonth = Math.trunc(month);
-  const normalizedDay = Math.trunc(day);
-  const lang = document.documentElement.lang || 'zh-Hant';
-
-  if (lang === 'en') {
-    try {
-      return new Intl.DateTimeFormat('en', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        timeZone: 'UTC'
-      }).format(new Date(Date.UTC(normalizedYear, normalizedMonth - 1, normalizedDay)));
-    } catch (_) {}
-  }
-
-  return `${normalizedYear} ${uiText('年')} ${normalizedMonth} ${uiText('月')} ${normalizedDay} ${uiText('日')}`;
-}
-
 function syncTraitHiddenInput() {
   const hidden = $('fTraits');
   if (hidden) hidden.value = simEditorState.traits.join('，');
@@ -1637,7 +1586,6 @@ function commitPersonEditorDraft() {
       commit:commitPersonEditorDraft,
       renderAvatarPreview:renderPersonEditorAvatarPreview,
       populateBirthdayDays:populatePersonEditorBirthdayDays,
-      formatBirthdaySummary,
       renderFamilyPreviews:renderPersonEditorFamilyPreviews,
       renderInfoPreviewIfActive:renderPersonEditorInfoPreviewIfActive,
       renderRelationshipList:renderPersonEditorRelationshipList,

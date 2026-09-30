@@ -96,7 +96,6 @@ if (!personEditor) {
   throw new Error('找不到 L1nG 人物編輯器模組。');
 }
 const DEFAULT_AVATAR_FRAME = personEditor.DEFAULT_AVATAR_FRAME;
-const formatBirthdaySummary = personEditor.formatBirthdaySummary;
 const simEditorState = personEditor.state.sim;
 const editingPets = personEditor.state.pets;
 const petEditorState = personEditor.state.pet;
@@ -2996,6 +2995,58 @@ function uiText(value) {
   const text = String(value ?? '');
   if (typeof LING_I18N !== 'undefined' && LING_I18N.translate) return LING_I18N.translate(text);
   return text;
+}
+
+// ========【日期顯示格式】 設定 - 生日與遊戲日期屬於 App 呈現層，不由人物編輯器持有 ========
+function formatBirthdaySummary(monthValue, dayValue, yearValue = null) {
+  const month = Number(monthValue) || 0;
+  const day = Number(dayValue) || 0;
+  const year = yearValue === null || yearValue === '' || !Number.isFinite(Number(yearValue))
+    ? null
+    : Math.trunc(Number(yearValue));
+  if (!month || !day) return uiText('生日未知');
+
+  const lang = document.documentElement.lang || 'zh-Hant';
+  if (lang === 'en') {
+    try {
+      const options = year === null
+        ? { month: 'short', day: 'numeric', timeZone: 'UTC' }
+        : { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
+      return new Intl.DateTimeFormat('en', options)
+        .format(new Date(Date.UTC(year === null ? 2000 : year, month - 1, day)));
+    } catch (_) {}
+  }
+
+  return year === null
+    ? `${month} ${uiText('月')} ${day} ${uiText('日')}`
+    : `${year} ${uiText('年')} ${month} ${uiText('月')} ${day} ${uiText('日')}`;
+}
+
+function formatGameDate(value) {
+  if (!value || typeof value !== 'object') return '';
+
+  const year = Number(value.year);
+  const month = Number(value.month);
+  const day = Number(value.day);
+  if (![year, month, day].every(Number.isFinite)) return '';
+
+  const normalizedYear = Math.trunc(year);
+  const normalizedMonth = Math.trunc(month);
+  const normalizedDay = Math.trunc(day);
+  const lang = document.documentElement.lang || 'zh-Hant';
+
+  if (lang === 'en') {
+    try {
+      return new Intl.DateTimeFormat('en', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'UTC'
+      }).format(new Date(Date.UTC(normalizedYear, normalizedMonth - 1, normalizedDay)));
+    } catch (_) {}
+  }
+
+  return `${normalizedYear} ${uiText('年')} ${normalizedMonth} ${uiText('月')} ${normalizedDay} ${uiText('日')}`;
 }
 
 function isBuiltinSampleSim(sim) {
