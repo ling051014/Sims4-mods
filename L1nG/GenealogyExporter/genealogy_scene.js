@@ -2753,7 +2753,7 @@ function alignIndependentLineageGenerations(
 
 function selectPrimaryHorizontalPairs(
   candidates,
-  generationBySim
+  layoutGenerationBySim
 ) {
   const used =
     new Set();
