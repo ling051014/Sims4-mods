@@ -549,7 +549,7 @@
         pets:[],
         gallery:[],
         parentIds:rel.parentIds,
-        spouseIds:[...new Set([...rel.spouseIds, ...rel.deceasedSpouseIds])],
+        spouseIds:rel.spouseIds,
         exSpouseIds:rel.exSpouseIds,
         adoptive:rel.adoptedParentIds.length > 0,
         traits,

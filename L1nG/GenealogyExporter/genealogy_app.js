@@ -131,6 +131,10 @@ const RELATIONSHIP_SEMANTICS = Object.freeze({
     icon:'heartbreak',
     label:'前任配偶'
   }),
+  'deceased-spouse': Object.freeze({
+    icon:'flower1',
+    label:'已故配偶'
+  }),
   sibling: Object.freeze({
     icon:'people',
     label:'兄弟姊妹'
@@ -139,16 +143,19 @@ const RELATIONSHIP_SEMANTICS = Object.freeze({
 
 const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   // 戀愛 / 親密
-  '曖昧':Object.freeze({ icon:'hearts', category:'romance' }),
-  '訂婚':Object.freeze({ icon:'gem', category:'romance' }),
-  '伴侶':Object.freeze({ icon:'hearts', category:'romance' }),
-  '情人':Object.freeze({ icon:'heart-fill', category:'romance' }),
-  '秘密情人':Object.freeze({ icon:'heart-fill', category:'romance' }),
-  '外遇':Object.freeze({ icon:'heartbreak', category:'romance' }),
-  '前任情人':Object.freeze({ icon:'heartbreak', category:'romance' }),
-  '單戀':Object.freeze({ icon:'heart', category:'romance' }),
-  '互相暗戀':Object.freeze({ icon:'hearts', category:'romance' }),
-  '喪偶':Object.freeze({ icon:'flower1', category:'romance' }),
+  '曖昧':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'short-dash', layoutPriority:260 }),
+  '訂婚':Object.freeze({ icon:'gem', category:'romance', lineStyle:'solid', layoutPriority:780 }),
+  '伴侶':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'solid', layoutPriority:740 }),
+  '情人':Object.freeze({ icon:'heart-fill', category:'romance', lineStyle:'short-dash', layoutPriority:600 }),
+  '秘密情人':Object.freeze({ icon:'lock', category:'romance', lineStyle:'short-dash', layoutPriority:580 }),
+  '外遇':Object.freeze({ icon:'heartbreak', category:'romance', lineStyle:'short-dash', layoutPriority:500 }),
+  '砲友':Object.freeze({ icon:'activity', category:'intimacy', lineStyle:'short-dash', layoutPriority:420 }),
+  '一夜情':Object.freeze({ icon:'moon-stars', category:'intimacy', lineStyle:'dot', layoutPriority:180 }),
+  '前任伴侶':Object.freeze({ icon:'heartbreak', category:'romance', lineStyle:'short-dash', layoutPriority:260 }),
+  '前任情人':Object.freeze({ icon:'heartbreak', category:'romance', lineStyle:'short-dash', layoutPriority:240 }),
+  '單戀':Object.freeze({ icon:'heart', category:'romance', lineStyle:'dot', layoutPriority:120 }),
+  '互相暗戀':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'short-dash', layoutPriority:300 }),
+  '喪偶':Object.freeze({ icon:'flower1', category:'romance', lineStyle:'short-dash', layoutPriority:180 }),
 
   // 友誼
   '朋友':Object.freeze({ icon:'person-heart', category:'friendship' }),
@@ -170,6 +177,14 @@ const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   '室友':Object.freeze({ icon:'house-heart', category:'social' }),
   '鄰居':Object.freeze({ icon:'house-heart', category:'social' })
 });
+
+function relationshipLayoutPriority(value) {
+  return Number(
+    SOCIAL_RELATIONSHIP_DEFINITIONS[
+      String(value || '').trim()
+    ]?.layoutPriority
+  ) || 0;
+}
 
 const KINSHIP_SYSTEM_LABELS = Object.freeze([
   '本人',
@@ -315,14 +330,16 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     width:2.4,
     color:null,
     curved:false,
-    curveAmount:50
+    curveAmount:50,
+    routing:'auto'
   }),
   exspouse: Object.freeze({
     style:'short-dash',
     width:1.7,
     color:null,
     curved:false,
-    curveAmount:50
+    curveAmount:50,
+    routing:'auto'
   }),
   adopt: Object.freeze({
     style:'long-dash',
@@ -335,8 +352,9 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     style:'dot',
     width:1.5,
     color:null,
-    curved:true,
+    curved:false,
     curveAmount:50,
+    routing:'auto',
     bidirectional:false
   }),
   otherTypes:Object.freeze({})
@@ -355,9 +373,11 @@ function createRelationshipLineSettings() {
 
 function migrateRelationshipLineSetting(
   key,
-  saved
+  saved,
+  fallbackOverride = null
 ) {
   const fallback =
+    fallbackOverride ||
     RELATIONSHIP_LINE_DEFAULTS[key] ||
     RELATIONSHIP_LINE_DEFAULTS.other;
 
@@ -399,6 +419,18 @@ function migrateRelationshipLineSetting(
     typeof migrated.curved === 'boolean'
       ? migrated.curved
       : !!fallback.curved;
+
+  migrated.routing =
+    ['auto','manual'].includes(
+      migrated.routing
+    )
+      ? migrated.routing
+      : (
+          ['spouse','exspouse','other']
+            .includes(key)
+            ? 'auto'
+            : 'manual'
+        );
 
   migrated.curveAmount =
     Math.max(
@@ -1987,6 +2019,7 @@ function splitVisibleFamilyMembersByRenderedEdges(memberIds) {
     (sim.parentIds || []).forEach(parentId => connect(id, parentId));
     (sim.spouseIds || []).forEach(spouseId => connect(id, spouseId));
     (sim.exSpouseIds || []).forEach(spouseId => connect(id, spouseId));
+    (sim.gameData?.deceasedSpouseIds || []).forEach(spouseId => connect(id, spouseId));
   });
 
   const seen = new Set();
@@ -5615,13 +5648,35 @@ function getOtherRelationshipTypes() {
     );
 }
 
+function relationshipOtherDefaultSetting(
+  type
+) {
+  const definition =
+    SOCIAL_RELATIONSHIP_DEFINITIONS[
+      String(type || '').trim()
+    ];
+
+  return {
+    ...RELATIONSHIP_LINE_DEFAULTS.other,
+    style:
+      definition?.lineStyle ||
+      RELATIONSHIP_LINE_DEFAULTS.other.style
+  };
+}
+
 function getOtherRelationshipLineSetting(
   type
 ) {
+  const fallback =
+    relationshipOtherDefaultSetting(
+      type
+    );
+
   return migrateRelationshipLineSetting(
     'other',
     relationshipLineSettings
-      .otherTypes?.[type]
+      .otherTypes?.[type],
+    fallback
   );
 }
 
@@ -5639,7 +5694,9 @@ function ensureOtherRelationshipLineSetting(
     !relationshipLineSettings.otherTypes[type]
   ) {
     relationshipLineSettings.otherTypes[type] = {
-      ...RELATIONSHIP_LINE_DEFAULTS.other
+      ...relationshipOtherDefaultSetting(
+        type
+      )
     };
   }
 
@@ -6518,6 +6575,9 @@ function bindOtherRelationshipLineControls(
         setting.curved =
           el.checked;
 
+        setting.routing =
+          'manual';
+
         saveRelationshipLineSettings();
       }
     );
@@ -6647,6 +6707,9 @@ document.querySelectorAll(
 
       relationshipLineSettings[key].curved =
         el.checked;
+
+      relationshipLineSettings[key].routing =
+        'manual';
 
       saveRelationshipLineSettings();
     }
@@ -7428,6 +7491,19 @@ function normalizeCurrentDatabase(targetDb) {
     if (sim.aspiration === undefined) sim.aspiration = '';
     if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
     normalizeAdoptionMetadataShape(sim);
+
+    if (!Array.isArray(sim.gameData.deceasedSpouseIds)) {
+      sim.gameData.deceasedSpouseIds = [];
+    }
+
+    sim.gameData.deceasedSpouseIds =
+      sim.gameData.deceasedSpouseIds
+        .map(String)
+        .filter(id =>
+          targetDb.sims[id] &&
+          id !== String(sim.id)
+        );
+
     sim.gameData.adoptedParentIds = sim.gameData.adoptedParentIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
     sim.gameData.adoptedChildIds = sim.gameData.adoptedChildIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
     delete sim.adoptive;
@@ -7773,7 +7849,7 @@ function measureText(t, fs) {
 }
 
 const RELATIONSHIP_LABEL_ICON_SPRITE =
-  '../../html%20icons/relationship-label-icons.svg?v=20260930-pure-svg-labels';
+  '../../html%20icons/relationship-label-icons.svg?v=20260930-relationship-catalog';
 
 function makeLabelSVG(x, y, iconName, text, key) {
   const fs = 12;
@@ -8138,7 +8214,7 @@ genealogyScene =
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, relationshipResolvedColor, relationshipInlineSvgStyle,
-      genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureText,
+      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureText,
       makeLabelSVG, getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, buildTagsHTML, buildPetsChipsHTML, genderClass, statusClass
     }
@@ -12813,6 +12889,33 @@ function buildRelationEntries(simId) {
             spouse
           ),
         semanticType:'spouse',
+        defaultText:null
+      });
+    });
+
+  (c.gameData?.deceasedSpouseIds || [])
+    .forEach(sid => {
+      const spouse =
+        currentGenealogyData().sims[sid];
+
+      if (!spouse) return;
+
+      const key =
+        'deceased-spouse:' +
+        pairKey(simId, sid);
+
+      if (seen.has(key)) return;
+
+      push({
+        key,
+        label:
+          uiText('已故配偶') +
+          '：' +
+          displayDataText(
+            spouse.name,
+            spouse
+          ),
+        semanticType:'deceased-spouse',
         defaultText:null
       });
     });
