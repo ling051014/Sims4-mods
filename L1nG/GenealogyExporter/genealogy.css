@@ -4907,7 +4907,7 @@ html[lang="en"] body {
 /* ========【網站表單選擇器】 設定 - 單選 / 可輸入建議 / 搜尋多選共用同一套 UI ======== */
 
 .ui-control-source {
-    /* 原生 select 只保留資料與既有程式 API，不再直接顯示作業系統選單 */ display: none !important;
+    /* 原生 select 只保留資料與既有程式 API，不再直接顯示作業系統選單 */ display: none;
 }
 
 .ui-single-select,
@@ -4967,7 +4967,7 @@ html[lang="en"] body {
 }
 
 .ui-suggestion-combobox > input {
-    /* 為右側展開按鈕保留空間 */ padding-right: 34px !important;
+    /* 為右側展開按鈕保留空間 */ padding-right: 34px;
 }
 
 .ui-suggestion-toggle {
