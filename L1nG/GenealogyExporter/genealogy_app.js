@@ -15956,17 +15956,21 @@ async function init() {
   })();
   syncRelationshipToolbarVisibility();
 
-  try {
-    await assetStore.openDb();
-    assetStoreReady = true;
-  } catch(error) {
-    assetStoreReady = false;
+  // 圖片資產層不得阻塞主程式啟動。
+  // IndexedDB 在部分瀏覽器 / 舊連線情況下可能長時間停在 pending，
+  // 因此只在背景建立連線；真正需要存取圖片時再由資產層自行等待。
+  void assetStore.openDb()
+    .then(() => {
+      assetStoreReady = true;
+    })
+    .catch(error => {
+      assetStoreReady = false;
 
-    console.warn(
-      '圖片資產資料庫目前無法使用；族譜主功能將繼續載入。',
-      error
-    );
-  }
+      console.warn(
+        '圖片資產資料庫目前無法使用；族譜主功能將繼續運作。',
+        error
+      );
+    });
 
   let preparedResult;
 
@@ -16915,4 +16919,21 @@ observeSharedNativeSelectChevrons();
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && exportDialog && exportDialog.classList.contains('show')) closeExportPanel();
 });
-init();
+init().catch(error => {
+  console.error(
+    '族譜工具初始化失敗：',
+    error
+  );
+
+  // Skeleton 只代表「仍在初始化」，不能在 fatal error 後永久遮住頁面。
+  hideAppSkeleton();
+
+  void uiAlert(
+    '族譜工具載入失敗：' +
+    (error?.message || String(error)),
+    {
+      title:'族譜工具載入失敗',
+      kind:'danger'
+    }
+  );
+});
