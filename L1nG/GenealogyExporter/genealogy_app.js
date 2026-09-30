@@ -9910,9 +9910,21 @@ function clearNodeSelection() {
 }
 
 function selectVisibleNodes() {
-  if (!getSceneLayout() || !genealogyScene.isFreeLayoutActive(currentFamily()) || arrangeTool !== 'select') return;
+  if (
+    !getSceneLayout() ||
+    arrangeTool !== 'select'
+  ) {
+    return;
+  }
+
   selectedNodeIds.clear();
-  getSceneLayout().visibleIds.forEach(id => selectedNodeIds.add(id));
+
+  getSceneLayout()
+    .visibleIds
+    .forEach(id =>
+      selectedNodeIds.add(id)
+    );
+
   syncNodeSelectionClasses();
 }
 
@@ -10193,6 +10205,7 @@ function applySelectedLayoutOperation(action) {
     );
 
   applyGenealogyMutation(mutation);
+  updateLayoutToggle();
   syncNodeSelectionClasses();
   genealogyScene?.resizeStageToContent?.();
 
@@ -10495,32 +10508,106 @@ window.addEventListener('resize', closePersonCardMenu);
 window.addEventListener('blur', closePersonCardMenu);
 
 function updateArrangeToolUI() {
-  const fam = currentGenealogyData() ? currentFamily() : null;
-  const isFree = !!fam && genealogyScene.isFreeLayoutActive(fam);
-  const display = isFree ? '' : 'none';
-  if (selectToolBtn) selectToolBtn.style.display = display;
-  if (panToolBtn) panToolBtn.style.display = display;
-  if (arrangeToolDivider) arrangeToolDivider.style.display = display;
-  if (arrangeToolDividerEnd) arrangeToolDividerEnd.style.display = display;
+  const fam =
+    currentGenealogyData()
+      ? currentFamily()
+      : null;
 
-  viewport.classList.toggle('selection-tool-active', isFree && arrangeTool === 'select' && !spacePanHeld);
-  viewport.classList.toggle('pan-tool-active', isFree && arrangeTool === 'pan' && !spacePanHeld);
-  viewport.classList.toggle('temporary-pan', isFree && spacePanHeld);
+  const hasFamily =
+    !!fam;
+
+  const display =
+    hasFamily
+      ? ''
+      : 'none';
 
   if (selectToolBtn) {
-    const active = isFree && arrangeTool === 'select';
-    selectToolBtn.classList.toggle('active', active);
-    selectToolBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    selectToolBtn.style.display =
+      display;
   }
+
   if (panToolBtn) {
-    const active = isFree && arrangeTool === 'pan';
-    panToolBtn.classList.toggle('active', active);
-    panToolBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    panToolBtn.style.display =
+      display;
   }
-  if (!isFree) {
+
+  if (arrangeToolDivider) {
+    arrangeToolDivider.style.display =
+      display;
+  }
+
+  if (arrangeToolDividerEnd) {
+    arrangeToolDividerEnd.style.display =
+      display;
+  }
+
+  viewport.classList.toggle(
+    'selection-tool-active',
+    hasFamily &&
+      arrangeTool === 'select' &&
+      !spacePanHeld
+  );
+
+  viewport.classList.toggle(
+    'pan-tool-active',
+    hasFamily &&
+      arrangeTool === 'pan' &&
+      !spacePanHeld
+  );
+
+  viewport.classList.toggle(
+    'temporary-pan',
+    hasFamily &&
+      spacePanHeld
+  );
+
+  if (selectToolBtn) {
+    const active =
+      hasFamily &&
+      arrangeTool === 'select';
+
+    selectToolBtn.classList.toggle(
+      'active',
+      active
+    );
+
+    selectToolBtn.setAttribute(
+      'aria-pressed',
+      active
+        ? 'true'
+        : 'false'
+    );
+  }
+
+  if (panToolBtn) {
+    const active =
+      hasFamily &&
+      arrangeTool === 'pan';
+
+    panToolBtn.classList.toggle(
+      'active',
+      active
+    );
+
+    panToolBtn.setAttribute(
+      'aria-pressed',
+      active
+        ? 'true'
+        : 'false'
+    );
+  }
+
+  // selection 是互動狀態，不屬於 free-layout 資料。
+  // 切換自動 / 自由排列不再清掉目前多選。
+  if (!hasFamily) {
     clearNodeSelection();
     marqueeState = null;
-    if (selectionMarquee) selectionMarquee.classList.remove('show');
+
+    if (selectionMarquee) {
+      selectionMarquee.classList.remove(
+        'show'
+      );
+    }
   }
 }
 
@@ -10612,7 +10699,7 @@ viewport.addEventListener('mousedown', e => {
     return;
   }
 
-  if (isFree && arrangeTool === 'select' && !spacePanHeld && !onNode && !onLabel) {
+  if (arrangeTool === 'select' && !spacePanHeld && !onNode && !onLabel) {
     e.preventDefault();
     marqueeState = {
       startX: e.clientX,
@@ -11077,6 +11164,20 @@ nodes.addEventListener('pointerdown', e => {
 
       if (!moved) return;
 
+      if (!dragInitialized) {
+        dragMutation =
+          genealogyStore.mergeResults(
+            dragMutation,
+            seedVisibleScenePositionsForFreeLayout(
+              fam,
+              viewMode
+            )
+          );
+
+        dragInitialized = true;
+        updateLayoutToggle();
+      }
+
       const worldDelta =
         genealogyViewport
           .screenDeltaToWorld(
@@ -11195,7 +11296,7 @@ nodes.addEventListener('pointerdown', e => {
   }
 
   // 自由排列 + 選取工具：左鍵負責單選 / Shift 多選 / 拖曳已選人物。
-  if (isFree && arrangeTool === 'select') {
+  if (arrangeTool === 'select') {
     e.preventDefault();
     e.stopPropagation();
 
@@ -11221,8 +11322,12 @@ nodes.addEventListener('pointerdown', e => {
 
     dragIds.forEach(sid => {
       const p =
-        fam.manualPositions[viewMode][sid] ||
-        getSceneLayout().pos.get(sid);
+        isFree
+          ? (
+              fam.manualPositions[viewMode][sid] ||
+              getSceneLayout().pos.get(sid)
+            )
+          : getSceneLayout().pos.get(sid);
 
       if (p) {
         startPositions.set(
@@ -11247,6 +11352,8 @@ nodes.addEventListener('pointerdown', e => {
     let moved = false;
     let dragMutation = null;
     let previewPositions = null;
+    let dragInitialized =
+      isFree;
 
     const dragPerformanceSession =
       dragIds.length === 1
@@ -11365,7 +11472,7 @@ nodes.addEventListener('pointerdown', e => {
         );
       }
 
-      genealogyScene?.requestRelationshipPreviewUpdate?.([id]);
+      genealogyScene?.requestRelationshipPreviewUpdate?.(dragIds);
     };
 
     const moveFrame =
@@ -11674,7 +11781,7 @@ nodes.addEventListener('pointerdown', e => {
       );
     }
 
-    genealogyScene?.requestRelationshipPreviewUpdate?.(dragIds);
+    genealogyScene?.requestRelationshipPreviewUpdate?.([id]);
   };
 
   const moveFrame =
@@ -11806,48 +11913,99 @@ function updateLayoutToggle() {
   updateArrangeToolUI();
 }
 $('layoutToggle').onclick = () => {
-  const fam = currentFamily();
-  ensureFamilyLayoutShape(fam);
+  const fam =
+    currentFamily();
+
+  ensureFamilyLayoutShape(
+    fam
+  );
+
+  const before =
+    captureLayoutHistoryState(
+      fam,
+      viewMode
+    );
 
   let mutation;
 
   if (!fam.freeLayout[viewMode]) {
-    const manualPositions = {};
+    const savedManual =
+      fam.manualPositions[
+        viewMode
+      ] || {};
 
-    getSceneLayout().pos.forEach((p, sid) => {
-      manualPositions[sid] = {
-        x:p.x,
-        y:p.y
-      };
-    });
+    const visibleIds =
+      getSceneLayout()
+        ?.visibleIds ||
+      new Set();
 
-    mutation =
-      genealogyStore.setFamilyLayoutState(
-        fam.id,
-        viewMode,
-        {
-          freeLayout:true,
-          manualPositions
-        }
-      );
+    const hasSavedManual =
+      [...visibleIds]
+        .some(id => {
+          const position =
+            savedManual[id];
 
-    arrangeTool = 'pan';
+          return !!(
+            position &&
+            Number.isFinite(
+              Number(position.x)
+            ) &&
+            Number.isFinite(
+              Number(position.y)
+            )
+          );
+        });
+
+    if (hasSavedManual) {
+      // 回到自由排列：恢復玩家上次手動成果。
+      mutation =
+        genealogyStore.setFamilyLayoutState(
+          fam.id,
+          viewMode,
+          {
+            freeLayout:true
+          }
+        );
+    } else {
+      // 第一次進入自由排列：以目前畫面位置建立 snapshot。
+      mutation =
+        seedVisibleScenePositionsForFreeLayout(
+          fam,
+          viewMode
+        );
+    }
+
+    arrangeTool =
+      'pan';
   } else {
+    // 自動排列只切換顯示來源；manualPositions 必須保留。
+    // 真正刪除手動成果只有「重設位置」能做。
     mutation =
       genealogyStore.setFamilyLayoutState(
         fam.id,
         viewMode,
         {
-          freeLayout:false,
-          manualPositions:{}
+          freeLayout:false
         }
       );
-
-    clearNodeSelection();
   }
 
-  applyGenealogyMutation(mutation);
+  applyGenealogyMutation(
+    mutation
+  );
+
   updateLayoutToggle();
+
+  dragHistory.push({
+    type:'card-layout',
+    familyId:fam.id,
+    mode:viewMode,
+    before,
+    after:captureLayoutHistoryState(
+      fam,
+      viewMode
+    )
+  });
 };
 
 $('lockToggle').onclick = () => {

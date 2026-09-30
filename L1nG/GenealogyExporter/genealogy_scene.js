@@ -5380,6 +5380,284 @@ function placeGenealogyUnitMembers(units) {
   return pos;
 }
 
+// ========【親子直線優先】 設定 - 排列器先對齊，renderer 才需要最少折線 ========
+function genealogyLayerForUnit(
+  layers,
+  unit
+) {
+  if (!unit) return null;
+  return layers.get(unit.generation) || null;
+}
+
+function canPlaceGenealogyUnitAtX(
+  unit,
+  targetX,
+  layer,
+  gap
+) {
+  if (
+    !unit ||
+    !layer ||
+    !Number.isFinite(targetX)
+  ) {
+    return false;
+  }
+
+  const left =
+    targetX;
+
+  const right =
+    targetX +
+    unit.width;
+
+  return layer.every(other => {
+    if (other.id === unit.id) {
+      return true;
+    }
+
+    return (
+      right + gap <= other.x ||
+      left >= other.x + other.width + gap
+    );
+  });
+}
+
+function alignDirectParentChildGroups(
+  layers,
+  model,
+  connectorGroups
+) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = resolveLayoutGaps();
+
+  const parentGroupsByChild =
+    new Map();
+
+  const childGroupsByParent =
+    new Map();
+
+  connectorGroups.forEach(group => {
+    group.children.forEach(childId => {
+      if (!parentGroupsByChild.has(childId)) {
+        parentGroupsByChild.set(
+          childId,
+          []
+        );
+      }
+
+      parentGroupsByChild
+        .get(childId)
+        .push(group);
+    });
+
+    group.parentIds.forEach(parentId => {
+      if (!childGroupsByParent.has(parentId)) {
+        childGroupsByParent.set(
+          parentId,
+          []
+        );
+      }
+
+      childGroupsByParent
+        .get(parentId)
+        .push(group);
+    });
+  });
+
+  const groups =
+    connectorGroups
+      .filter(group =>
+        group.children.length === 1
+      )
+      .sort((left, right) => {
+        const leftChild =
+          model.unitBySim.get(
+            left.children[0]
+          );
+
+        const rightChild =
+          model.unitBySim.get(
+            right.children[0]
+          );
+
+        return (
+          (leftChild?.generation || 0) -
+          (rightChild?.generation || 0)
+        );
+      });
+
+  groups.forEach(group => {
+    const childId =
+      group.children[0];
+
+    const childUnit =
+      model.unitBySim.get(
+        childId
+      );
+
+    const childGeometry =
+      genealogyUnitMemberRelationshipGeometry(
+        childUnit,
+        childId
+      );
+
+    if (!childUnit || !childGeometry) {
+      return;
+    }
+
+    const childAnchorX =
+      childUnit.x +
+      childGeometry.anchorLocalX;
+
+    // 單一父 / 母 → 單一子女：
+    // 優先把沒有上一代的根節點移到子女正上方。
+    if (group.parentIds.length === 1) {
+      const parentId =
+        group.parentIds[0];
+
+      const parentUnit =
+        model.unitBySim.get(
+          parentId
+        );
+
+      const parentGeometry =
+        genealogyUnitMemberRelationshipGeometry(
+          parentUnit,
+          parentId
+        );
+
+      if (!parentUnit || !parentGeometry) {
+        return;
+      }
+
+      const parentHasOwnParents =
+        (
+          parentGroupsByChild.get(
+            parentId
+          ) || []
+        ).length > 0;
+
+      const childHasOwnChildren =
+        (
+          childGroupsByParent.get(
+            childId
+          ) || []
+        ).length > 0;
+
+      const parentTargetX =
+        childAnchorX -
+        parentGeometry.anchorLocalX;
+
+      const parentLayer =
+        genealogyLayerForUnit(
+          layers,
+          parentUnit
+        );
+
+      if (
+        !parentHasOwnParents &&
+        canPlaceGenealogyUnitAtX(
+          parentUnit,
+          parentTargetX,
+          parentLayer,
+          SIBLING_GAP
+        )
+      ) {
+        parentUnit.x =
+          parentTargetX;
+
+        return;
+      }
+
+      const sourceX =
+        genealogyGroupSourceX(
+          group,
+          model
+        );
+
+      const childTargetX =
+        Number.isFinite(sourceX)
+          ? sourceX -
+            childGeometry.anchorLocalX
+          : null;
+
+      const childLayer =
+        genealogyLayerForUnit(
+          layers,
+          childUnit
+        );
+
+      if (
+        !childHasOwnChildren &&
+        canPlaceGenealogyUnitAtX(
+          childUnit,
+          childTargetX,
+          childLayer,
+          SIBLING_GAP
+        )
+      ) {
+        childUnit.x =
+          childTargetX;
+      }
+
+      return;
+    }
+
+    // 雙親已經是一個水平 pair，只有一名子女時，
+    // 子女直接放在 pair join 正下方；只有真的會撞卡片才保留折線。
+    if (group.parentIds.length === 2) {
+      const firstUnit =
+        model.unitBySim.get(
+          group.parentIds[0]
+        );
+
+      const secondUnit =
+        model.unitBySim.get(
+          group.parentIds[1]
+        );
+
+      if (
+        !firstUnit ||
+        !secondUnit ||
+        firstUnit.id !== secondUnit.id
+      ) {
+        return;
+      }
+
+      const sourceX =
+        genealogyGroupSourceX(
+          group,
+          model
+        );
+
+      const childTargetX =
+        Number.isFinite(sourceX)
+          ? sourceX -
+            childGeometry.anchorLocalX
+          : null;
+
+      const childLayer =
+        genealogyLayerForUnit(
+          layers,
+          childUnit
+        );
+
+      if (
+        canPlaceGenealogyUnitAtX(
+          childUnit,
+          childTargetX,
+          childLayer,
+          SIBLING_GAP
+        )
+      ) {
+        childUnit.x =
+          childTargetX;
+      }
+    }
+  });
+}
+
 function solveAutomaticGenealogyPositions(visibleIds) {
   const primarySimIds =
     getActiveLayoutPrimaryIds(
@@ -5443,6 +5721,13 @@ function solveAutomaticGenealogyPositions(visibleIds) {
       ownership
     );
   }
+
+  // 先滿足最簡單、最可讀的親子直線；只有碰撞時才交給 renderer 畫折線。
+  alignDirectParentChildGroups(
+    layers,
+    model,
+    connectorGroups
+  );
 
   // Family Branch Block 本身就是最終水平幾何權威。
   // 不再執行 generation-global packing，避免把已保留的 Parent Group block 再推壞。
