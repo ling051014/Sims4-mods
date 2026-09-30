@@ -1055,44 +1055,19 @@ body.sidebar-resizing * {
     opacity:.9;
 }
 
-.edge-label text {
-    /* 字體設定 */ font-family: inherit;
-    /* 字體粗細 */ font-weight: 600;
-}
-
-.edge-label-content {
-    /* 元素寬度 */ width: 100%;
-    /* 元素高度 */ height: 100%;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 項目間距 */ gap: 4px;
-    /* 內縮空間 */ padding: 0 8px;
-    /* 尺寸計算 */ box-sizing: border-box;
-    /* 文字顏色 */ color: var(--ink);
+.edge-label-text {
     /* 字體設定 */ font-family: inherit;
     /* 字體大小 */ font-size: 12px;
     /* 字體粗細 */ font-weight: 600;
-    /* 固定文字盒高度，避免匯出時文字與 SVG 背景不同步 */ line-height: 1;
-    /* 換行方式 */ white-space: nowrap;
-    /* 允許內容完整顯示 */ overflow: visible;
+    /* 文字顏色 */ fill: var(--ink);
+    /* 標籤拖曳事件交給外層群組 */ pointer-events: none;
+    /* 禁止選取 SVG 文字 */ user-select: none;
 }
 
-.edge-label-content .l1ng-icon {
-    /* 字體大小 */ font-size: 11px;
-    /* 文字顏色 */ color: var(--accent);
-    /* 彈性收縮 */ flex-shrink: 0;
-}
-
-.edge-label-content span {
-    /* 顯示方式 */ display: inline-flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 元素高度 */ height: 100%;
-    /* 行距固定 */ line-height: 1;
-    /* 不裁切文字 */ overflow: visible;
-    /* 不顯示省略號 */ text-overflow: clip;
-    /* 保持單行 */ white-space: nowrap;
-    /* 禁止縮小 */ flex-shrink: 0;
+.edge-label-icon {
+    /* 圖示顏色 */ color: var(--accent);
+    /* 圖示填滿 */ fill: var(--accent);
+    /* 標籤拖曳事件交給外層群組 */ pointer-events: none;
 }
 
 /* ========【模擬市民卡片】 設定 - 卡片狀態、頭像與資料呈現 ======== */
@@ -4320,8 +4295,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* 文字繪製方式 */ text-rendering: geometricPrecision;
 }
 
-.person-card,
-.edge-label-content {
+.person-card {
     /* 預先最佳化 */ will-change: auto;
 }
 

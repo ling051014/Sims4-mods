@@ -1520,8 +1520,23 @@ function commitPersonEditorDraft() {
 
 
   let mounted = false;
+  let avatarCropOpener = null;
 
-  function mountPersonEditor() {
+  function mountPersonEditor({
+    openAvatarCropEditor
+  } = {}) {
+    if (
+      typeof openAvatarCropEditor !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires avatar crop opener.'
+      );
+    }
+
+    avatarCropOpener =
+      openAvatarCropEditor;
+
     if (mounted) return;
     mounted = true;
 
@@ -1538,6 +1553,8 @@ function commitPersonEditorDraft() {
         simEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
         renderPersonEditorAvatarPreview();
         renderPersonEditorInfoPreviewIfActive();
+
+        await avatarCropOpener('sim');
       }catch(error){
         uiAlert('圖片處理失敗：'+error.message,{
           title:'圖片處理失敗',
@@ -1548,7 +1565,9 @@ function commitPersonEditorDraft() {
       event.target.value='';
     };
 
-    $('avatarAdjustBtn').onclick=()=>openAvatarCropEditor('sim');
+    $('avatarAdjustBtn').onclick=()=>{
+      void avatarCropOpener('sim');
+    };
 
     $('avatarClearBtn').onclick=()=>{
       simEditorState.avatar=null;

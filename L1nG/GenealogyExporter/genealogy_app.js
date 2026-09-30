@@ -7579,24 +7579,121 @@ function measureText(t, fs) {
   return v;
 }
 
+const RELATIONSHIP_LABEL_ICON_SPRITE =
+  '../../html%20icons/relationship-label-icons.svg?v=20260930-pure-svg-labels';
+
 function makeLabelSVG(x, y, iconName, text, key) {
   const fs = 12;
-  const displayText = displayRelationshipText(text);
-  const iconSpace = iconName ? 18 : 0;
+  const displayText =
+    displayRelationshipText(text);
+
+  const safeIcon =
+    String(iconName || '')
+      .replace(
+        /[^a-z0-9-]/gi,
+        ''
+      );
+
+  const hasIcon =
+    !!safeIcon;
+
+  const iconSize = 11;
+  const iconGap = 4;
+
+  const textWidth =
+    measureText(
+      displayText,
+      fs
+    );
+
+  const contentWidth =
+    textWidth +
+    (
+      hasIcon
+        ? iconSize + iconGap
+        : 0
+    );
+
   // 依實際顯示語言量測；英文較長時標籤會自動擴寬，不再被裁切。
-  const w = Math.max(Math.ceil(measureText(displayText, fs) + iconSpace + 24), 42);
+  const w =
+    Math.max(
+      Math.ceil(
+        contentWidth + 24
+      ),
+      42
+    );
+
   const h = 22;
-  const off = getLabelOffset(key);
-  const tx = (x + off.dx).toFixed(1);
-  const ty = (y + off.dy).toFixed(1);
-  const keyAttr = key ? ` data-key="${esc(key)}"` : '';
-  const iconHtml = iconName ? iconSvg(iconName) : '';
-  return `<g class="edge-label"${keyAttr} data-x="${x.toFixed(1)}" data-y="${y.toFixed(1)}" transform="translate(${tx},${ty})">
-    <rect x="${(-w/2).toFixed(1)}" y="${-h/2}" width="${w.toFixed(1)}" height="${h}" rx="${h/2}"
-      fill="var(--label-bg)" stroke="var(--label-border)" stroke-width="1.5"/>
-    <foreignObject x="${(-w/2).toFixed(1)}" y="${-h/2}" width="${w.toFixed(1)}" height="${h}">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="edge-label-content">${iconHtml}<span>${esc(displayText)}</span></div>
-    </foreignObject>
+  const contentStart =
+    -contentWidth / 2;
+
+  const iconX =
+    contentStart;
+
+  const iconY =
+    -iconSize / 2;
+
+  const textX =
+    hasIcon
+      ? contentStart +
+        iconSize +
+        iconGap
+      : 0;
+
+  const off =
+    getLabelOffset(key);
+
+  const tx =
+    (x + off.dx)
+      .toFixed(1);
+
+  const ty =
+    (y + off.dy)
+      .toFixed(1);
+
+  const keyAttr =
+    key
+      ? ` data-key="${esc(key)}"`
+      : '';
+
+  const iconMarkup =
+    hasIcon
+      ? `<use
+          class="edge-label-icon"
+          href="${RELATIONSHIP_LABEL_ICON_SPRITE}#rel-${safeIcon}"
+          x="${iconX.toFixed(1)}"
+          y="${iconY.toFixed(1)}"
+          width="${iconSize}"
+          height="${iconSize}"
+          aria-hidden="true"
+        />`
+      : '';
+
+  return `<g
+    class="edge-label"
+    ${keyAttr}
+    data-x="${x.toFixed(1)}"
+    data-y="${y.toFixed(1)}"
+    transform="translate(${tx},${ty})"
+  >
+    <rect
+      x="${(-w / 2).toFixed(1)}"
+      y="${-h / 2}"
+      width="${w.toFixed(1)}"
+      height="${h}"
+      rx="${h / 2}"
+      fill="var(--label-bg)"
+      stroke="var(--label-border)"
+      stroke-width="1.5"
+    />
+    ${iconMarkup}
+    <text
+      class="edge-label-text"
+      x="${textX.toFixed(1)}"
+      y="0"
+      text-anchor="${hasIcon ? 'start' : 'middle'}"
+      dominant-baseline="middle"
+    >${esc(displayText)}</text>
   </g>`;
 }
 
@@ -13228,6 +13325,7 @@ $('petAvatarInput').onchange = async event => {
 
   try {
     await petEditorController.setAvatarFile(file);
+    await openAvatarCropEditor('pet');
   } catch (error) {
     uiAlert(
       '圖片處理失敗：' + error.message,
@@ -13281,7 +13379,9 @@ $('btnAddPet').onclick = () => {
 };
 
 // ========【人物編輯器 Authority】 設定 - Draft / lifecycle / 關係編輯由獨立模組負責 ========
-personEditor.mount();
+personEditor.mount({
+  openAvatarCropEditor
+});
 
 function purgeSimData(id) {
   const mutation =
