@@ -15960,7 +15960,12 @@ async function init() {
     await assetStore.openDb();
     assetStoreReady = true;
   } catch(error) {
-    throw new Error('圖片資產資料庫無法使用：' + error.message);
+    assetStoreReady = false;
+
+    console.warn(
+      '圖片資產資料庫目前無法使用；族譜主功能將繼續載入。',
+      error
+    );
   }
 
   let preparedResult;

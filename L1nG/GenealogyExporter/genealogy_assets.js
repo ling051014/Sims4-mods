@@ -2,14 +2,14 @@
   'use strict';
 
   // ========【圖片資產儲存】 設定 - Blob 為唯一圖片本體；SHA-256 作為資產識別 ========
-  const DB_NAME = 'sims4_images_db';
-  const DB_VERSION = 2;
+  const DB_NAME = 'l1ng_genealogy_assets_v1';
+  const DB_VERSION = 1;
   const STORE_NAME = 'assets';
-  const LEGACY_STORE_NAME = 'images';
   const ASSET_PREFIX = 'asset_';
   const URL_CACHE_LIMIT = 256;
 
   let dbPromise = null;
+  let dbConnection = null;
   const objectUrlCache = new Map();
   const pendingUrlLoads = new Map();
 
@@ -212,19 +212,36 @@
       request.onupgradeneeded = event => {
         const db = event.target.result;
 
-        // 網站尚未正式發布：v2 直接淘汰舊 dataURL 圖片庫，不保留雙格式相容層。
-        if (db.objectStoreNames.contains(LEGACY_STORE_NAME)) {
-          db.deleteObjectStore(LEGACY_STORE_NAME);
-        }
-
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id' });
         }
       };
 
-      request.onsuccess = event => resolve(event.target.result);
-      request.onerror = () => reject(request.error || new Error('圖片資產資料庫開啟失敗。'));
-      request.onblocked = () => reject(new Error('圖片資產資料庫正在被其他分頁使用，無法升級。'));
+      request.onsuccess = event => {
+        const db = event.target.result;
+        dbConnection = db;
+
+        db.onversionchange = () => {
+          db.close();
+
+          if (dbConnection === db) {
+            dbConnection = null;
+          }
+
+          dbPromise = null;
+        };
+
+        resolve(db);
+      };
+
+      request.onerror = () => reject(
+        request.error ||
+        new Error('圖片資產資料庫開啟失敗。')
+      );
+
+      request.onblocked = () => reject(
+        new Error('圖片資產資料庫目前無法開啟。')
+      );
     });
 
     dbPromise.catch(() => {
@@ -764,6 +781,16 @@
     }
 
     imageWorkerJobs.clear();
+
+    if (dbConnection) {
+      try {
+        dbConnection.close();
+      } catch (_) {}
+
+      dbConnection = null;
+    }
+
+    dbPromise = null;
   }
 
   global.addEventListener('beforeunload', dispose);
