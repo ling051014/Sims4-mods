@@ -3375,6 +3375,8 @@ function buildFamilyBranchOwnership(
   return {
     primarySimIds,
     primaryUnitIds,
+    primaryParents,
+    primaryChildren,
     pathByUnit,
     rootByUnit,
     ownerParentByUnit,
@@ -3382,6 +3384,376 @@ function buildFamilyBranchOwnership(
     attachmentOwnerByUnit,
     attachmentSideByUnit
   };
+}
+
+// ========【Family Branch Block Layout】 設定 - 先保留整個子孫分支，再放人物 ========
+function buildFamilyBranchBlockMetrics(
+  model,
+  ownership
+) {
+  const {
+    SIBLING:SIBLING_GAP
+  } = resolveLayoutGaps();
+
+  const widthByUnit =
+    new Map();
+
+  const visiting =
+    new Set();
+
+  const measure = unitId => {
+    if (widthByUnit.has(unitId)) {
+      return widthByUnit.get(unitId);
+    }
+
+    const unit =
+      model.unitById.get(unitId);
+
+    if (!unit) {
+      return 0;
+    }
+
+    if (visiting.has(unitId)) {
+      return unit.width;
+    }
+
+    visiting.add(unitId);
+
+    const children =
+      (
+        ownership.primaryChildren
+          .get(unitId) ||
+        []
+      )
+        .filter(childId =>
+          ownership.ownerParentByUnit
+            .get(childId) === unitId
+        );
+
+    const childWidths =
+      children.map(measure);
+
+    const childrenWidth =
+      childWidths.length
+        ? childWidths.reduce(
+            (sum, value) => sum + value,
+            0
+          ) +
+          SIBLING_GAP *
+            (
+              childWidths.length - 1
+            )
+        : 0;
+
+    const width =
+      Math.max(
+        unit.width,
+        childrenWidth
+      );
+
+    visiting.delete(unitId);
+
+    widthByUnit.set(
+      unitId,
+      width
+    );
+
+    return width;
+  };
+
+  ownership.primaryUnitIds
+    .forEach(measure);
+
+  return {
+    widthByUnit,
+    gap:SIBLING_GAP
+  };
+}
+
+function assignFamilyBranchBlockPositions(
+  layers,
+  model,
+  ownership
+) {
+  const metrics =
+    buildFamilyBranchBlockMetrics(
+      model,
+      ownership
+    );
+
+  const {
+    widthByUnit,
+    gap
+  } = metrics;
+
+  const primaryRoots =
+    [...ownership.primaryUnitIds]
+      .filter(unitId =>
+        !ownership.ownerParentByUnit
+          .has(unitId)
+      )
+      .sort((leftId, rightId) =>
+        compareFamilyBranchPath(
+          ownership.pathByUnit.get(
+            leftId
+          ),
+          ownership.pathByUnit.get(
+            rightId
+          )
+        ) ||
+        stableGenealogyUnitCompare(
+          model.unitById.get(leftId),
+          model.unitById.get(rightId)
+        )
+      );
+
+  const placed =
+    new Set();
+
+  const placeBranch = (
+    unitId,
+    blockLeft
+  ) => {
+    const unit =
+      model.unitById.get(unitId);
+
+    if (!unit || placed.has(unitId)) {
+      return;
+    }
+
+    placed.add(unitId);
+
+    const blockWidth =
+      widthByUnit.get(unitId) ||
+      unit.width;
+
+    unit.x =
+      blockLeft +
+      (
+        blockWidth -
+        unit.width
+      ) / 2;
+
+    const children =
+      (
+        ownership.primaryChildren
+          .get(unitId) ||
+        []
+      )
+        .filter(childId =>
+          ownership.ownerParentByUnit
+            .get(childId) === unitId
+        )
+        .sort((leftId, rightId) =>
+          compareFamilyBranchPath(
+            ownership.pathByUnit.get(
+              leftId
+            ),
+            ownership.pathByUnit.get(
+              rightId
+            )
+          ) ||
+          stableGenealogyUnitCompare(
+            model.unitById.get(leftId),
+            model.unitById.get(rightId)
+          )
+        );
+
+    if (!children.length) {
+      return;
+    }
+
+    const childWidths =
+      children.map(childId =>
+        widthByUnit.get(childId) ||
+        model.unitById.get(childId)?.width ||
+        0
+      );
+
+    const totalChildWidth =
+      childWidths.reduce(
+        (sum, value) => sum + value,
+        0
+      ) +
+      gap *
+        (
+          childWidths.length - 1
+        );
+
+    let childLeft =
+      blockLeft +
+      (
+        blockWidth -
+        totalChildWidth
+      ) / 2;
+
+    children.forEach(
+      (childId, index) => {
+        placeBranch(
+          childId,
+          childLeft
+        );
+
+        childLeft +=
+          childWidths[index] +
+          gap;
+      }
+    );
+  };
+
+  let cursorX = 0;
+
+  primaryRoots.forEach(rootId => {
+    const width =
+      widthByUnit.get(rootId) ||
+      model.unitById.get(rootId)?.width ||
+      0;
+
+    placeBranch(
+      rootId,
+      cursorX
+    );
+
+    cursorX +=
+      width +
+      gap * 2;
+  });
+
+  // 多父母 DAG 中若有 unit 沒被 owner-tree 走到，
+  // 仍依 branch path 安全追加，不讓它落回 generation-global packing。
+  [...ownership.primaryUnitIds]
+    .filter(unitId =>
+      !placed.has(unitId)
+    )
+    .sort((leftId, rightId) =>
+      compareFamilyBranchPath(
+        ownership.pathByUnit.get(
+          leftId
+        ),
+        ownership.pathByUnit.get(
+          rightId
+        )
+      ) ||
+      stableGenealogyUnitCompare(
+        model.unitById.get(leftId),
+        model.unitById.get(rightId)
+      )
+    )
+    .forEach(unitId => {
+      const unit =
+        model.unitById.get(unitId);
+
+      if (!unit) return;
+
+      unit.x = cursorX;
+
+      cursorX +=
+        unit.width +
+        gap * 2;
+    });
+
+  // Attachment 只放在主族譜 block 外側。
+  // 不允許第三人插進配偶 / Parent Group 的內部保留區。
+  layers.forEach(layer => {
+    const primary =
+      layer.filter(unit =>
+        ownership.primaryUnitIds
+          .has(unit.id)
+      );
+
+    const attachments =
+      layer.filter(unit =>
+        !ownership.primaryUnitIds
+          .has(unit.id)
+      );
+
+    if (!attachments.length) {
+      return;
+    }
+
+    let primaryLeft =
+      primary.length
+        ? Math.min(
+            ...primary.map(unit =>
+              unit.x
+            )
+          )
+        : 0;
+
+    let primaryRight =
+      primary.length
+        ? Math.max(
+            ...primary.map(unit =>
+              unit.x +
+              unit.width
+            )
+          )
+        : 0;
+
+    const left =
+      attachments
+        .filter(unit =>
+          (
+            ownership.attachmentSideByUnit
+              .get(unit.id) ||
+            1
+          ) < 0
+        )
+        .sort((a, b) =>
+          stableGenealogyUnitCompare(
+            a,
+            b
+          )
+        );
+
+    const right =
+      attachments
+        .filter(unit =>
+          (
+            ownership.attachmentSideByUnit
+              .get(unit.id) ||
+            1
+          ) >= 0
+        )
+        .sort((a, b) =>
+          stableGenealogyUnitCompare(
+            a,
+            b
+          )
+        );
+
+    let leftCursor =
+      primaryLeft -
+      gap;
+
+    [...left]
+      .reverse()
+      .forEach(unit => {
+        leftCursor -=
+          unit.width;
+
+        unit.x =
+          leftCursor;
+
+        leftCursor -=
+          gap;
+      });
+
+    let rightCursor =
+      primaryRight +
+      gap;
+
+    right.forEach(unit => {
+      unit.x =
+        rightCursor;
+
+      rightCursor +=
+        unit.width +
+        gap;
+    });
+  });
+
+  return metrics;
 }
 
 function applyFamilyBranchOrdering(
@@ -4269,7 +4641,7 @@ function resolvePedigreeLayerCollisions(layers) {
     if (!layer.length) return;
 
     // ========【同世代防重疊】 設定 - 保留家系語意順序 ========
-    // layer 的順序已由 crossing minimization + sibling branch block 決定。
+    // layer 的順序與初始空間已由 Family Branch Block Layout 決定。
     // collision pass 只能推開距離，不能再依目前 x 重新排序，
     // 否則同父母子女會再次被其他家系插入。
     const targets =
@@ -4881,10 +5253,8 @@ function solveAutomaticGenealogyPositions(visibleIds) {
   const connectorGroups =
     model.parentGroups;
 
-  // ========【Family Branch Ordering】 設定 - 先排家族，再排人物 ========
-  // 主家族的遞迴 branch path 是排序權威：
-  // A -> B branch / C branch 各自保持完整；
-  // 外部 relationship attachment 只能留在 Primary Family block 外側。
+  // Family Branch Ordering 決定同世代語意順序；
+  // Family Branch Block Layout 再替每個完整 descendant subtree 保留空間。
   applyFamilyBranchOrdering(
     layers,
     model,
@@ -4895,16 +5265,10 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     layers
   );
 
-  assignInitialGenealogyHorizontalPositions(
-    layers
-  );
-
-  // 幾何 solver 只能在既定 branch order 下調整座標；
-  // 不再有 generation-global crossing minimization 可以把別家插回來。
-  solvePedigreeHorizontalLayout(
+  assignFamilyBranchBlockPositions(
     layers,
     model,
-    connectorGroups
+    ownership
   );
 
   const horizontalPairOrientationChanged =
@@ -4915,31 +5279,23 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     );
 
   if (horizontalPairOrientationChanged) {
-    // 只改 layout unit 內的人物左右方向，
-    // branch ownership / generation order 保持不變。
     applyFamilyBranchOrdering(
       layers,
       model,
       ownership
     );
 
-    assignInitialGenealogyHorizontalPositions(
-      layers
-    );
-
-    solvePedigreeHorizontalLayout(
+    assignFamilyBranchBlockPositions(
       layers,
       model,
-      connectorGroups
+      ownership
     );
   }
 
-  // 前面已確認的 canonical relationship geometry 保持最終權威。
-  // Branch Ordering 只決定「誰在哪一側」，不改親子／配偶拓撲。
-  solveAutoRelationshipGeometry(
-    layers,
-    model,
-    connectorGroups
+  // Branch blocks 已經保證同代不重疊，這裡只做最後安全檢查。
+  // 不再用全域 relationship projection 把不同家系反覆拉近 / 推遠。
+  resolvePedigreeLayerCollisions(
+    layers
   );
 
   return placeGenealogyUnitMembers(
