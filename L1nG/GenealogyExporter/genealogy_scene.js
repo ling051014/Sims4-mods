@@ -214,7 +214,7 @@
       };
     }
 
-    function getDims() {
+    function resolveDefaultCardDimensions() {
       if (viewMode === 'edit') {
         const settings =
           getCardEditSettings();
@@ -276,7 +276,7 @@
         };
       }
 
-      return getDims();
+      return resolveDefaultCardDimensions();
     }
 
     function getNodeDimensionsById(
@@ -290,7 +290,7 @@
       );
     }
 
-    function getGaps() {
+    function resolveLayoutGaps() {
       return (
         GAPS[viewMode] ||
         GAPS.view
@@ -312,7 +312,7 @@
       );
     }
 
-    function getCurrentFreeLayout(
+    function isFreeLayoutActive(
       fam
     ) {
       if (
@@ -407,7 +407,7 @@ function relationshipPairRenderGeometry(
       pairJoinPoint(a, b);
 
     return {
-      d:pairPath(a, b),
+      d:createPartnerConnectionPath(a, b),
       labelX:join.x,
       labelY:join.y
     };
@@ -580,7 +580,7 @@ function getAdaptiveSpouseGap(members, baseGap) {
 function buildGenealogyLayoutModel(visibleIds) {
   const {
     SPOUSE:SPOUSE_GAP
-  } = getGaps();
+  } = resolveLayoutGaps();
 
   const sims = [...visibleIds]
     .map(id => genealogyData.sims[id])
@@ -1614,7 +1614,7 @@ function orientSpouseUnitsByLineage(
 function setGenerationVerticalPositions(layers) {
   const {
     LEVEL:LEVEL_GAP
-  } = getGaps();
+  } = resolveLayoutGaps();
 
   const generations = [...layers.keys()]
     .sort((a, b) => a - b);
@@ -1682,7 +1682,7 @@ function packGenealogyLayer(layer, desiredLefts, gap) {
 function assignInitialGenealogyHorizontalPositions(layers) {
   const {
     SIBLING:SIBLING_GAP
-  } = getGaps();
+  } = resolveLayoutGaps();
 
   layers.forEach(layer => {
     let cursorX = 0;
@@ -2059,7 +2059,7 @@ function averagePedigreeLeftTargets(targets) {
 function alignPedigreeChildrenToParents(layers, model, connectorGroups) {
   const {
     SIBLING:SIBLING_GAP
-  } = getGaps();
+  } = resolveLayoutGaps();
 
   const generations =
     [...layers.keys()].sort((a, b) => a - b);
@@ -2100,7 +2100,7 @@ function alignPedigreeChildrenToParents(layers, model, connectorGroups) {
 function alignPedigreeParentsToChildren(layers, model, connectorGroups) {
   const {
     SIBLING:SIBLING_GAP
-  } = getGaps();
+  } = resolveLayoutGaps();
 
   const generations =
     [...layers.keys()].sort((a, b) => a - b);
@@ -2209,7 +2209,7 @@ function alignPedigreeParentsToChildren(layers, model, connectorGroups) {
 function resolvePedigreeLayerCollisions(layers) {
   const {
     SIBLING:SIBLING_GAP
-  } = getGaps();
+  } = resolveLayoutGaps();
 
   layers.forEach(layer => {
     if (!layer.length) return;
@@ -2518,7 +2518,7 @@ function projectAutoRelationshipLayerCollisions(
 ) {
   const {
     SIBLING:SIBLING_GAP
-  } = getGaps();
+  } = resolveLayoutGaps();
 
   let maxOverlap = 0;
 
@@ -2766,7 +2766,7 @@ function placeGenealogyUnitMembers(units) {
   return pos;
 }
 
-function computeAutoPositions(visibleIds) {
+function solveAutomaticGenealogyPositions(visibleIds) {
   const primarySimIds =
     getActiveLayoutPrimaryIds(
       visibleIds
@@ -2860,16 +2860,16 @@ function computeAutoPositions(visibleIds) {
   );
 }
 
-function computeLayout() {
-  const { W: NODE_W, H: NODE_H } = getDims();
+function composeScenePlan() {
+  const { W: NODE_W, H: NODE_H } = resolveDefaultCardDimensions();
   const fam = currentFamily();
   const visibleIds = getVisibleIds(fam.id);
   const sims = [...visibleIds].map(id => genealogyData.sims[id]).filter(Boolean);
   const byId = new Map(sims.map(c => [c.id, c]));
   const manualPositions = getCurrentManualPositions(fam);
-  const isFree = getCurrentFreeLayout(fam);
+  const isFree = isFreeLayoutActive(fam);
   if (isFree) {
-    const autoPos = computeAutoPositions(visibleIds);
+    const autoPos = solveAutomaticGenealogyPositions(visibleIds);
     const pos = new Map();
 
     sims.forEach(s => {
@@ -2966,7 +2966,7 @@ function computeLayout() {
       visibleIds
     };
   }
-  const pos = computeAutoPositions(visibleIds);
+  const pos = solveAutomaticGenealogyPositions(visibleIds);
   let maxX=0, maxY=0;
   pos.forEach((p, id) => {
     const dims = getNodeDimensionsById(id);
@@ -3011,25 +3011,25 @@ function flushRenderInvalidation() {
   renderDirtyMask = 0;
   if (!mask) return;
   if (mask & RENDER_DIRTY.layout) {
-    layoutCache = computeLayout();
+    layoutCache = composeScenePlan();
     syncStageGeometryFromLayout();
     mask |= RENDER_DIRTY.nodes | RENDER_DIRTY.edges;
   }
-  if (mask & RENDER_DIRTY.edges) drawEdges();
-  if (mask & RENDER_DIRTY.nodes) drawNodes();
+  if (mask & RENDER_DIRTY.edges) paintRelationshipLayer();
+  if (mask & RENDER_DIRTY.nodes) paintPersonLayer();
 }
-function invalidateScene(layers, { immediate = false } = {}) {
+function requestSceneUpdate(layers, { immediate = false } = {}) {
   renderDirtyMask |= renderMaskFromLayers(layers);
   if (!renderDirtyMask) return;
   if (immediate) { flushRenderInvalidation(); return; }
   if (renderInvalidationRaf) return;
   renderInvalidationRaf = requestAnimationFrame(() => { renderInvalidationRaf = 0; flushRenderInvalidation(); });
 }
-function scheduleEdgeRedraw() { invalidateScene({ edges:true }); }
-function renderAll() { invalidateScene({ layout:true, nodes:true, edges:true }, { immediate:true }); }
-function getLayoutSnapshot() { return layoutCache; }
-function getNodePosition(id) { const pos = layoutCache?.pos?.get(String(id)); return pos ? { ...pos } : null; }
-function updateLiveNodePosition(id, position) {
+function requestRelationshipLayerUpdate() { requestSceneUpdate({ edges:true }); }
+function renderSceneImmediately() { requestSceneUpdate({ layout:true, nodes:true, edges:true }, { immediate:true }); }
+function readScenePlan() { return layoutCache; }
+function readPersonPosition(id) { const pos = layoutCache?.pos?.get(String(id)); return pos ? { ...pos } : null; }
+function updateTransientPersonPosition(id, position) {
   if (!layoutCache?.pos || !position) return false;
   const key = String(id);
   if (!layoutCache.pos.has(key)) return false;
@@ -3435,7 +3435,7 @@ function drawParentConnectorGroup(group, pos, byId, paths, labels) {
   }
 }
 
-function drawEdges() {
+function paintRelationshipLayer() {
   if (!layoutCache) return;
 
   const {
@@ -3549,7 +3549,7 @@ function drawEdges() {
 
         paths.push(
           '<path class="edge edge-spouse" d="' +
-          pairPath(a, b) +
+          createPartnerConnectionPath(a, b) +
           '"/>'
         );
 
@@ -3761,7 +3761,7 @@ function drawEdges() {
 
 // ========【族譜連線】 設定 - 橫向關係接頭像側邊；直向親子線保留完整資訊空間 ========
 function getCardAvatarGeometry() {
-  const { W:NODE_W } = getDims();
+  const { W:NODE_W } = resolveDefaultCardDimensions();
 
   if (viewMode === 'edit') {
     const settings = getCardEditSettings();
@@ -3804,7 +3804,7 @@ function cardOuterRect(card) {
   const dims =
     card && card.id
       ? getNodeDimensionsById(card.id)
-      : getDims();
+      : resolveDefaultCardDimensions();
 
   const left = card.x + PAD;
   const top = card.y + PAD;
@@ -3970,7 +3970,7 @@ function pairJoinPoint(a, b) {
   };
 }
 
-function pairPath(a, b) {
+function createPartnerConnectionPath(a, b) {
   const {
     aX,
     aY,
@@ -3991,7 +3991,7 @@ function pairPath(a, b) {
 
 
 
-function commonNodeClasses(c, opts) {
+function buildPersonCardClassList(c, opts) {
   opts = opts || {};
   return [
     'person-card',
@@ -4060,7 +4060,7 @@ function nodeRenderSignature(
   });
 }
 
-function drawNodes() {
+function paintPersonLayer() {
   const fam = currentTreeFamily();
   const memberSet = new Set(fam.memberIds);
   const {pos, byId, visibleIds} = layoutCache;
@@ -4086,7 +4086,7 @@ function drawNodes() {
     const dAspiration = displayDataText(c.aspiration, c);
     const dCause = displayDataText(c.causeOfDeath, c);
     const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
-    const cls = commonNodeClasses(c, {viewMode:isView, isInlaw});
+    const cls = buildPersonCardClassList(c, {viewMode:isView, isInlaw});
     const dStage = uiText(c.lifeStage);
     const displayName = cardSettings.name ? `${dName}${cardSettings.gender ? formatCardGender(c.gender) : ''}` : '';
     const genderBarHiddenClass = cardSettings.genderBar ? '' : ' card-gender-bar-hidden';
@@ -4567,9 +4567,9 @@ function buildSingleDragRelationshipTargets(
   return targets;
 }
 
-function expandStageToFit() {
+function resizeStageToContent() {
   const fam = currentFamily();
-  if (!getCurrentFreeLayout(fam)) return;
+  if (!isFreeLayoutActive(fam)) return;
   let maxX=0, maxY=0;
 
   layoutCache.pos.forEach((p, id) => {
@@ -4589,7 +4589,7 @@ function expandStageToFit() {
   labelsSvg.setAttribute('viewBox', `0 0 ${sW} ${sH}`);
 
   // 尺寸更新後再補一次連線重繪，避免快速拖曳後 SVG 還停留在舊幀。
-  scheduleEdgeRedraw();
+  requestRelationshipLayerUpdate();
 }
     function getGenerationLevels(simIds) {
       syncState();
@@ -4629,17 +4629,22 @@ function expandStageToFit() {
 
     function withState(fn) { return function () { syncState(); return fn.apply(null, arguments); }; }
     return Object.freeze({
-      invalidate:invalidateScene, renderAll, scheduleEdgeRedraw, getLayoutSnapshot, getNodePosition, updateLiveNodePosition,
-      getContentBounds:withState(getVisibleTreeContentBounds),
-      getRelationshipPositionSnap:withState(getRelationshipPositionSnap),
-      buildDragPerformanceGeometry:withState(buildDragPerformanceGeometry),
-      buildSingleDragRelationshipTargets:withState(buildSingleDragRelationshipTargets),
-      expandStageToFit:withState(expandStageToFit),
-      getNodeDimensions:withState(getNodeDimensions),
-      getNodeDimensionsById:withState(getNodeDimensionsById),
-      getCurrentFreeLayout:withState(getCurrentFreeLayout),
-      getGenerationLevels,
-      syncStageGeometry:withState(syncStageGeometryFromLayout)
+      requestUpdate:requestSceneUpdate,
+      renderImmediately:renderSceneImmediately,
+      requestRelationshipUpdate:requestRelationshipLayerUpdate,
+      readScenePlan,
+      readPersonPosition,
+      updateTransientPersonPosition,
+      readContentBounds:withState(getVisibleTreeContentBounds),
+      findRelationshipSnapTargets:withState(getRelationshipPositionSnap),
+      createDragGeometrySnapshot:withState(buildDragPerformanceGeometry),
+      createSingleDragRelationshipTargets:withState(buildSingleDragRelationshipTargets),
+      resizeStageToContent:withState(resizeStageToContent),
+      measurePersonCard:withState(getNodeDimensions),
+      measurePersonCardById:withState(getNodeDimensionsById),
+      isFreeLayoutActive:withState(isFreeLayoutActive),
+      mapGenerationLevels:getGenerationLevels,
+      syncStageBounds:withState(syncStageGeometryFromLayout)
     });
   }
   global.L1nGGenealogyScene = Object.freeze({ create });

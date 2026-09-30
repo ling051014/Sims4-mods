@@ -19,6 +19,11 @@
     return data;
   }
 
+  function refreshEditorSelect(selectId) {
+    global.L1nGGenealogyUIController
+      ?.refreshSelect?.(selectId);
+  }
+
   const DEFAULT_AVATAR_FRAME =
     Object.freeze({
       x:0.5,
@@ -265,7 +270,7 @@ function buildPersonEditorDraft(){
           option.dataset.relationshipSource=
             'inferred';
 
-          option.dataset.ssNote=
+          option.dataset.uiSelectNote=
             uiText(
               '由父母關係自動推導'
             );
@@ -274,11 +279,11 @@ function buildPersonEditorDraft(){
             .relationshipSource;
 
           delete option.dataset
-            .ssNote;
+            .uiSelectNote;
         }
       });
 
-    refreshSS('fSiblings');
+    refreshEditorSelect('fSiblings');
   }
 
   function captureEditorExplicitSiblingSelection(){
@@ -955,7 +960,7 @@ function buildPersonEditorDraft(){
       'fSiblings',
       'relationshipType',
       'relationshipTarget'
-    ].forEach(refreshSS);
+    ].forEach(refreshEditorSelect);
 
     resetEditorFamilyPanels();
     renderPersonEditorFamilyPreviews();

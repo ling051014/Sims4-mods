@@ -3209,7 +3209,7 @@ function populateRelationshipTypePicker(
       ? selected
       : '';
 
-  refreshSS('relationshipType');
+  genealogyUI.refreshSelect('relationshipType');
 }
 
 function relationshipCreateOptionText(value) {
@@ -5623,7 +5623,7 @@ function saveRelationshipLineSettings() {
   applyRelationshipLineSettings();
 
   if (getSceneLayout()) {
-    genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
+    genealogyScene?.requestUpdate?.({ edges:true }, { immediate:true });
   }
 }
 
@@ -6507,7 +6507,7 @@ $('resetRelationshipStyleBtn')
       applyRelationshipLineSettings();
 
       if (getSceneLayout()) {
-        genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
+        genealogyScene?.requestUpdate?.({ edges:true }, { immediate:true });
       }
     }
   );
@@ -7815,7 +7815,7 @@ genealogyViewport =
       zoomValue:$('zoomValue')
     },
     getContentBounds:() =>
-      genealogyScene?.getContentBounds?.() ||
+      genealogyScene?.readContentBounds?.() ||
       null,
     hasSceneLayout:() =>
       !!getSceneLayout()
@@ -7854,14 +7854,14 @@ genealogyScene =
     }
   }) || null;
 if (!genealogyScene) throw new Error('Genealogy Scene failed to initialize.');
-function getSceneLayout() { return genealogyScene?.getLayoutSnapshot?.() || null; }
+function getSceneLayout() { return genealogyScene?.readScenePlan?.() || null; }
 // Viewport transform / zoom / fit / resize lifecycle 已移至 genealogy_viewport.js。
 function focusSimOnCanvas(simId) {
   if (!simId || !currentGenealogyData()?.sims?.[simId]) return;
   if (!getSceneLayout() || !getSceneLayout().pos?.has(simId)) render();
   const pos = getSceneLayout()?.pos?.get(simId);
   if (!pos) return;
-  const { W, H } = genealogyScene.getNodeDimensions(currentGenealogyData().sims[simId]);
+  const { W, H } = genealogyScene.measurePersonCard(currentGenealogyData().sims[simId]);
   const centerX =
     pos.x + PAD + W / 2;
 
@@ -7898,7 +7898,7 @@ function flushAppRenderInvalidation() {
   }
 }
 function invalidateRender(layers, { immediate = false } = {}) {
-  genealogyScene?.invalidate?.({ layout:!!layers?.layout, nodes:!!layers?.nodes, edges:!!layers?.edges }, { immediate });
+  genealogyScene?.requestUpdate?.({ layout:!!layers?.layout, nodes:!!layers?.nodes, edges:!!layers?.edges }, { immediate });
   if (layers?.chrome) appRenderDirtyMask |= APP_RENDER_DIRTY.chrome;
   if (layers?.lists) appRenderDirtyMask |= APP_RENDER_DIRTY.lists;
   if (!appRenderDirtyMask) return;
@@ -9394,7 +9394,7 @@ function clearNodeSelection() {
 }
 
 function selectVisibleNodes() {
-  if (!getSceneLayout() || !genealogyScene.getCurrentFreeLayout(currentFamily()) || arrangeTool !== 'select') return;
+  if (!getSceneLayout() || !genealogyScene.isFreeLayoutActive(currentFamily()) || arrangeTool !== 'select') return;
   selectedNodeIds.clear();
   getSceneLayout().visibleIds.forEach(id => selectedNodeIds.add(id));
   syncNodeSelectionClasses();
@@ -9433,7 +9433,7 @@ function getLayoutNodeBox(id, position = null) {
 
   if (!pos) return null;
 
-  const dims = genealogyScene.getNodeDimensionsById(id);
+  const dims = genealogyScene.measurePersonCardById(id);
 
   return {
     id,
@@ -9621,7 +9621,7 @@ function applySelectedLayoutOperation(action) {
 
   applyGenealogyMutation(mutation);
   syncNodeSelectionClasses();
-  genealogyScene?.expandStageToFit?.();
+  genealogyScene?.resizeStageToContent?.();
 
   dragHistory.push({
     type:'card-layout',
@@ -9797,7 +9797,7 @@ async function handlePersonCardMenuAction(action, simId) {
 
     applyGenealogyMutation(mutation);
     syncNodeSelectionClasses();
-    genealogyScene?.expandStageToFit?.();
+    genealogyScene?.resizeStageToContent?.();
 
     dragHistory.push({
       type:'card-layout',
@@ -9907,7 +9907,7 @@ nodes.addEventListener('contextmenu', e => {
   e.preventDefault();
   e.stopPropagation();
   const id = el.dataset.id;
-  if (genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select' && !selectedNodeIds.has(id)) {
+  if (genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select' && !selectedNodeIds.has(id)) {
     selectedNodeIds.clear();
     selectedNodeIds.add(id);
     syncNodeSelectionClasses();
@@ -9923,7 +9923,7 @@ window.addEventListener('blur', closePersonCardMenu);
 
 function updateArrangeToolUI() {
   const fam = currentGenealogyData() ? currentFamily() : null;
-  const isFree = !!fam && genealogyScene.getCurrentFreeLayout(fam);
+  const isFree = !!fam && genealogyScene.isFreeLayoutActive(fam);
   const display = isFree ? '' : 'none';
   if (selectToolBtn) selectToolBtn.style.display = display;
   if (panToolBtn) panToolBtn.style.display = display;
@@ -9980,7 +9980,7 @@ function isTextInteractionTarget(target) {
 
 function isPanGestureActive() {
   const fam = currentGenealogyData() ? currentFamily() : null;
-  return !!fam && genealogyScene.getCurrentFreeLayout(fam) && (arrangeTool === 'pan' || spacePanHeld);
+  return !!fam && genealogyScene.isFreeLayoutActive(fam) && (arrangeTool === 'pan' || spacePanHeld);
 }
 
 function updateMarquee(clientX, clientY) {
@@ -10023,7 +10023,7 @@ viewport.addEventListener('mousedown', e => {
   const onNode = !!e.target.closest('.person-card');
   const onLabel = !!e.target.closest('.edge-label');
   const fam = currentFamily();
-  const isFree = genealogyScene.getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.isFreeLayoutActive(fam);
 
   // 自由排列的框選會 preventDefault()，可能吃掉瀏覽器原生 dblclick。
   // 第二次按下空白畫布時直接執行置中，確保所有排列模式都一致。
@@ -10422,13 +10422,13 @@ function createSingleDragPerformanceSession(
     .createSingleDragSession({
       id,
       geometry:
-        genealogyScene?.buildDragPerformanceGeometry?.() || [],
+        genealogyScene?.createDragGeometrySnapshot?.() || [],
       guideSnapPx:
         GUIDE_SNAP_PX,
       relationshipSnapPx:
         RELATIONSHIP_VERTICAL_SNAP_PX,
       relationshipTargets:
-        genealogyScene?.buildSingleDragRelationshipTargets?.(
+        genealogyScene?.createSingleDragRelationshipTargets?.(
           id
         ) || { x:[], y:[] }
     });
@@ -10450,7 +10450,7 @@ function createGroupDragPerformanceSession(
       dragIds,
       startPositions,
       geometry:
-        genealogyScene?.buildDragPerformanceGeometry?.() || [],
+        genealogyScene?.createDragGeometrySnapshot?.() || [],
       guideSnapPx:
         GUIDE_SNAP_PX
     });
@@ -10465,7 +10465,7 @@ nodes.addEventListener('pointerdown', e => {
   const id = el.dataset.id;
   const fam = currentFamily();
   ensureFamilyLayoutShape(fam);
-  const isFree = genealogyScene.getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.isFreeLayoutActive(fam);
 
   // Space 是選取工具中的暫時平移：不攔截，交給 viewport 的平移手勢。
   if (isFree && spacePanHeld) return;
@@ -10538,7 +10538,7 @@ nodes.addEventListener('pointerdown', e => {
           )
         );
 
-      genealogyScene.updateLiveNodePosition(id, { x:nx, y:ny });
+      genealogyScene.updateTransientPersonPosition(id, { x:nx, y:ny });
 
       el.style.left = `${nx + PAD}px`;
       el.style.top = `${ny + PAD}px`;
@@ -10548,7 +10548,7 @@ nodes.addEventListener('pointerdown', e => {
       if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
       if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
       if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
-      genealogyScene?.scheduleEdgeRedraw?.();
+      genealogyScene?.requestRelationshipUpdate?.();
     };
 
     const moveFrame =
@@ -10595,7 +10595,7 @@ nodes.addEventListener('pointerdown', e => {
           dragMutation,
           { render:false }
         );
-        genealogyScene?.expandStageToFit?.();
+        genealogyScene?.resizeStageToContent?.();
       } else {
         if (viewMode === 'view') openPersonProfile(id);
         else personEditor.open(id);
@@ -10727,7 +10727,7 @@ nodes.addEventListener('pointerdown', e => {
           y:ny
         };
 
-        genealogyScene.updateLiveNodePosition(sid, { x:nx, y:ny });
+        genealogyScene.updateTransientPersonPosition(sid, { x:nx, y:ny });
 
         const nodeEl =
           nodes.querySelector(
@@ -10781,7 +10781,7 @@ nodes.addEventListener('pointerdown', e => {
         );
       }
 
-      genealogyScene?.scheduleEdgeRedraw?.();
+      genealogyScene?.requestRelationshipUpdate?.();
     };
 
     const moveFrame =
@@ -10851,7 +10851,7 @@ nodes.addEventListener('pointerdown', e => {
           dragMutation,
           { render:false }
         );
-        genealogyScene?.expandStageToFit?.();
+        genealogyScene?.resizeStageToContent?.();
       } else if (shift && wasSelected) {
         selectedNodeIds.delete(id);
         syncNodeSelectionClasses();
@@ -11058,7 +11058,7 @@ nodes.addEventListener('pointerdown', e => {
         )
       );
 
-    genealogyScene.updateLiveNodePosition(id, { x:nx, y:ny });
+    genealogyScene.updateTransientPersonPosition(id, { x:nx, y:ny });
 
     el.style.left =
       (nx + PAD) + 'px';
@@ -11094,7 +11094,7 @@ nodes.addEventListener('pointerdown', e => {
       );
     }
 
-    genealogyScene?.scheduleEdgeRedraw?.();
+    genealogyScene?.requestRelationshipUpdate?.();
   };
 
   const moveFrame =
@@ -11164,7 +11164,7 @@ nodes.addEventListener('pointerdown', e => {
         { render:false }
       );
 
-      genealogyScene?.expandStageToFit?.();
+      genealogyScene?.resizeStageToContent?.();
     } else {
       if (viewMode === 'view') {
         openPersonProfile(id);
@@ -11192,7 +11192,7 @@ nodes.addEventListener('pointerdown', e => {
 
 function updateLayoutToggle() {
   const fam = currentFamily();
-  const isFree = genealogyScene.getCurrentFreeLayout(fam);
+  const isFree = genealogyScene.isFreeLayoutActive(fam);
   const btn = $('layoutToggle'), lockBtn = $('lockToggle');
   if (isFree) {
     setIconText(btn, 'arrows-move', '自由排列');
@@ -11261,7 +11261,7 @@ $('layoutToggle').onclick = () => {
 
 $('lockToggle').onclick = () => {
   const fam = currentFamily();
-  if (!genealogyScene.getCurrentFreeLayout(fam)) return;
+  if (!genealogyScene.isFreeLayoutActive(fam)) return;
 
   const mutation =
     genealogyStore.setFamilyLocked(
@@ -11340,12 +11340,12 @@ $('labelToggle').onclick = () => {
   else { btn.classList.remove('active'); setIconText(btn, 'tags', '顯示關係'); }
   syncRelationshipToolbarVisibility();
   try { localStorage.setItem(LABELS_KEY, showRelLabels ? '1' : '0'); } catch(e){}
-  if (getSceneLayout()) genealogyScene?.invalidate?.({ edges:true }, { immediate:true });
+  if (getSceneLayout()) genealogyScene?.requestUpdate?.({ edges:true }, { immediate:true });
 };
 
 function getFamilyGenerationLevels(fam) {
   return (
-    genealogyScene?.getGenerationLevels?.(
+    genealogyScene?.mapGenerationLevels?.(
       fam?.memberIds || []
     ) ||
     new Map()
@@ -11950,841 +11950,25 @@ $('delFamilyBtn').onclick = async () => {
   requestAnimationFrame(() => genealogyViewport.fit());
 };
 
-function refreshSS(selectId) {
-  const wrap = document.querySelector(`.ui-select-wrap[data-ui-select-for="${selectId}"]`);
-  if (wrap && wrap._refresh) wrap._refresh();
+// ========【共用 UI Controller】 設定 - 搜尋型選擇器 / 原生下拉箭頭由獨立 UI 模組負責 ========
+const genealogyUI =
+  window.L1nGGenealogyUI?.create?.({
+    helpers:{
+      uiText,
+      esc,
+      iconSvg,
+      debounce,
+      normalizeCreatableValue:normalizeRelationshipTypeText,
+      createOptionText:relationshipCreateOptionText
+    }
+  }) || null;
+
+if (!genealogyUI) {
+  throw new Error('Genealogy UI failed to initialize.');
 }
 
+window.L1nGGenealogyUIController = genealogyUI;
 
-// ========【共用單選箭頭】 設定 - 編輯頁與導覽共用同一顆 Chevron SVG ========
-function installSharedNativeSelectChevrons(root = document) {
-  const selector = '.ui-dialog-panel select:not([multiple])';
-  const candidates = [];
-
-  if (root instanceof Element && root.matches(selector)) candidates.push(root);
-  if (root && root.querySelectorAll) candidates.push(...root.querySelectorAll(selector));
-
-  candidates.forEach(select => {
-    // 導覽列使用自己的自訂下拉；hidden select 是搜尋型下拉的資料來源，都不應包裝。
-    if (!select || select.hidden || select.hasAttribute('hidden') || select.classList.contains('nav-native-select')) return;
-    if (select.closest('.select-chevron-shell')) return;
-
-    const parent = select.parentNode;
-    if (!parent) return;
-
-    const shell = document.createElement('span');
-    shell.className = 'select-chevron-shell';
-    parent.insertBefore(shell, select);
-    shell.appendChild(select);
-
-    const icon = document.createElement('span');
-    icon.className = 'l1ng-icon icon-chevron-down select-chevron-icon';
-    icon.setAttribute('aria-hidden', 'true');
-    shell.appendChild(icon);
-  });
-}
-
-function observeSharedNativeSelectChevrons() {
-  installSharedNativeSelectChevrons(document);
-  const observer = new MutationObserver(records => {
-    records.forEach(record => {
-      record.addedNodes.forEach(node => {
-        if (node instanceof Element) installSharedNativeSelectChevrons(node);
-      });
-    });
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-}
-function setupSearchSelects() {
-  document.querySelectorAll(
-    '.ui-select-wrap'
-  ).forEach(wrap => {
-    const selectId =
-      wrap.dataset.ssFor;
-
-    const select =
-      document.getElementById(
-        selectId
-      );
-
-    if (!select) return;
-
-    const input =
-      wrap.querySelector(
-        '.ui-select-input'
-      );
-
-    const dropdown =
-      wrap.querySelector(
-        '.ui-select-dropdown'
-      );
-
-    const searchEl =
-      wrap.querySelector(
-        '.ui-select-search'
-      );
-
-    const optionsEl =
-      wrap.querySelector(
-        '.ui-select-options'
-      );
-
-    const isMultiple =
-      select.multiple;
-
-    const isCreatable =
-      wrap.dataset.ssCreatable ===
-      'true';
-
-    const rawPlaceholder =
-      wrap.dataset.placeholder ||
-      '點選選擇…';
-
-    const usePortalDropdown =
-      wrap.dataset.ssPortal ===
-      'true';
-
-    const dropdownHome = {
-      parent:dropdown.parentNode,
-      next:dropdown.nextSibling
-    };
-
-    function restoreDropdownHome() {
-      if (
-        !usePortalDropdown ||
-        dropdown.parentNode ===
-          dropdownHome.parent
-      ) {
-        return;
-      }
-
-      dropdown.classList.remove(
-        'ui-select-dropdown-portal'
-      );
-
-      dropdown.style.removeProperty(
-        'left'
-      );
-
-      dropdown.style.removeProperty(
-        'top'
-      );
-
-      dropdown.style.removeProperty(
-        'width'
-      );
-
-      dropdown.style.removeProperty(
-        'max-height'
-      );
-
-      if (
-        dropdownHome.next &&
-        dropdownHome.next.parentNode ===
-          dropdownHome.parent
-      ) {
-        dropdownHome.parent.insertBefore(
-          dropdown,
-          dropdownHome.next
-        );
-      } else {
-        dropdownHome.parent.appendChild(
-          dropdown
-        );
-      }
-    }
-
-    function positionPortalDropdown() {
-      if (
-        !usePortalDropdown ||
-        !wrap.classList.contains(
-          'ui-select-open'
-        )
-      ) {
-        return;
-      }
-
-      if (
-        dropdown.parentNode !==
-        document.body
-      ) {
-        document.body.appendChild(
-          dropdown
-        );
-      }
-
-      dropdown.classList.add(
-        'ui-select-dropdown-portal'
-      );
-
-      const rect =
-        input.getBoundingClientRect();
-
-      const margin = 10;
-      const gap = 5;
-
-      const minWidth =
-        Math.max(
-          280,
-          rect.width
-        );
-
-      const width =
-        Math.min(
-          Math.max(
-            minWidth,
-            rect.width
-          ),
-          Math.max(
-            280,
-            window.innerWidth -
-              margin * 2
-          )
-        );
-
-      const left =
-        Math.min(
-          Math.max(
-            margin,
-            rect.left
-          ),
-          Math.max(
-            margin,
-            window.innerWidth -
-              width -
-              margin
-          )
-        );
-
-      const below =
-        window.innerHeight -
-        rect.bottom -
-        gap -
-        margin;
-
-      const above =
-        rect.top -
-        gap -
-        margin;
-
-      const openAbove =
-        below < 220 &&
-        above > below;
-
-      const maxHeight =
-        Math.max(
-          180,
-          Math.min(
-            360,
-            openAbove
-              ? above
-              : below
-          )
-        );
-
-      dropdown.style.width =
-        Math.round(width) + 'px';
-
-      dropdown.style.left =
-        Math.round(left) + 'px';
-
-      dropdown.style.maxHeight =
-        Math.round(maxHeight) +
-        'px';
-
-      dropdown.style.top =
-        openAbove
-          ? Math.round(
-              Math.max(
-                margin,
-                rect.top -
-                  Math.min(
-                    maxHeight,
-                    dropdown.scrollHeight ||
-                      maxHeight
-                  ) -
-                  gap
-              )
-            ) + 'px'
-          : Math.round(
-              rect.bottom + gap
-            ) + 'px';
-    }
-
-    function renderInput() {
-      const placeholder =
-        uiText(
-          rawPlaceholder
-        );
-
-      if (isMultiple) {
-        const selected =
-          [...select.options]
-            .filter(option =>
-              option.selected
-            );
-
-        if (!selected.length) {
-          input.innerHTML =
-            '<span class="ui-select-placeholder">' +
-            esc(placeholder) +
-            '</span>';
-        } else {
-          input.innerHTML =
-            selected
-              .map(option => {
-                const locked =
-                  option.disabled;
-
-                const note =
-                  option.dataset.ssNote ||
-                  '';
-
-                return (
-                  '<span class="ui-select-tag' +
-                  (
-                    locked
-                      ? ' locked'
-                      : ''
-                  ) +
-                  '"' +
-                  (
-                    note
-                      ? ' title="' +
-                        esc(note) +
-                        '"'
-                      : ''
-                  ) +
-                  '>' +
-                  esc(
-                    option.textContent
-                  ) +
-                  (
-                    locked
-                      ? '<span class="ui-select-tag-note">' +
-                        esc(
-                          uiText('自動')
-                        ) +
-                        '</span>'
-                      : '<span class="ui-select-tag-x" data-remove="' +
-                        esc(option.value) +
-                        '" title="移除">×</span>'
-                  ) +
-                  '</span>'
-                );
-              })
-              .join('');
-        }
-
-        input.querySelectorAll(
-          '.ui-select-tag-x'
-        ).forEach(remove => {
-          remove.onclick =
-            event => {
-              event.stopPropagation();
-
-              const option =
-                [...select.options]
-                  .find(candidate =>
-                    candidate.value ===
-                    remove.dataset.remove
-                  );
-
-              if (option) {
-                option.selected =
-                  false;
-              }
-
-              renderInput();
-              renderOptions(
-                searchEl.value
-              );
-
-              select.dispatchEvent(
-                new Event(
-                  'change',
-                  { bubbles:true }
-                )
-              );
-            };
-        });
-      } else {
-        const selected =
-          select.options[
-            select.selectedIndex
-          ];
-
-        if (
-          !selected ||
-          selected.value === ''
-        ) {
-          input.innerHTML =
-            '<span class="ui-select-placeholder">' +
-            esc(placeholder) +
-            '</span>';
-        } else {
-          input.textContent =
-            selected.textContent;
-        }
-      }
-
-      input.insertAdjacentHTML(
-        'beforeend',
-        iconSvg(
-          'chevron-down',
-          'ui-select-chevron-icon'
-        )
-      );
-    }
-
-    function selectSingleOption(
-      option
-    ) {
-      [...select.options]
-        .forEach(candidate => {
-          candidate.selected =
-            false;
-        });
-
-      option.selected = true;
-
-      closeDropdown();
-      renderInput();
-
-      select.dispatchEvent(
-        new Event(
-          'change',
-          { bubbles:true }
-        )
-      );
-    }
-
-    function commitCreatableValue(
-      rawValue
-    ) {
-      if (!isCreatable) {
-        return '';
-      }
-
-      const value =
-        normalizeRelationshipTypeText(
-          rawValue
-        );
-
-      if (!value) return '';
-
-      let option =
-        [...select.options]
-          .find(candidate =>
-            candidate.value === value ||
-            candidate.textContent
-              .trim()
-              .toLowerCase() ===
-              value.toLowerCase()
-          );
-
-      if (!option) {
-        option =
-          document.createElement(
-            'option'
-          );
-
-        option.value = value;
-        option.textContent = value;
-
-        select.appendChild(option);
-      }
-
-      selectSingleOption(option);
-      return option.value;
-    }
-
-    function renderOptions(
-      filter = ''
-    ) {
-      const raw =
-        String(filter || '').trim();
-
-      const q =
-        raw.toLowerCase();
-
-      const options =
-        [...select.options];
-
-      const filtered =
-        q
-          ? options.filter(
-              option =>
-                option.textContent
-                  .toLowerCase()
-                  .includes(q)
-            )
-          : options;
-
-      const hasExact =
-        !!raw &&
-        options.some(option =>
-          option.value === raw ||
-          option.textContent
-            .trim()
-            .toLowerCase() ===
-            q
-        );
-
-      const optionHTML =
-        filtered
-          .map(option => {
-            const isEmpty =
-              option.value === '';
-
-            const selected =
-              option.selected;
-
-            const disabled =
-              option.disabled;
-
-            const note =
-              option.dataset.ssNote ||
-              '';
-
-            const classes = [
-              'ui-select-option',
-              selected
-                ? 'selected'
-                : '',
-              disabled
-                ? 'disabled'
-                : '',
-              isEmpty
-                ? 'none'
-                : ''
-            ]
-              .filter(Boolean)
-              .join(' ');
-
-            const check =
-              isMultiple &&
-              !isEmpty
-                ? '<span class="check">' +
-                  (
-                    selected
-                      ? iconSvg(
-                          'check-lg'
-                        )
-                      : ''
-                  ) +
-                  '</span>'
-                : '';
-
-            return (
-              '<div class="' +
-              classes +
-              '" data-value="' +
-              esc(option.value) +
-              '"' +
-              (
-                disabled
-                  ? ' aria-disabled="true"'
-                  : ''
-              ) +
-              '>' +
-              check +
-              '<span>' +
-              esc(
-                option.textContent
-              ) +
-              '</span>' +
-              (
-                note
-                  ? '<span class="ui-select-option-note">' +
-                    esc(note) +
-                    '</span>'
-                  : ''
-              ) +
-              '</div>'
-            );
-          })
-          .join('');
-
-      const createHTML =
-        isCreatable &&
-        raw &&
-        !hasExact
-          ? (
-              '<div class="ui-select-option" data-create-value="' +
-              esc(raw) +
-              '"><span>' +
-              esc(
-                relationshipCreateOptionText(
-                  raw
-                )
-              ) +
-              '</span></div>'
-            )
-          : '';
-
-      if (
-        !optionHTML &&
-        !createHTML
-      ) {
-        optionsEl.innerHTML =
-          '<div class="ui-select-empty">' +
-          esc(
-            uiText(
-              '沒有符合的項目'
-            )
-          ) +
-          '</div>';
-
-        return;
-      }
-
-      optionsEl.innerHTML =
-        optionHTML +
-        createHTML;
-
-      optionsEl.querySelectorAll(
-        '.ui-select-option[data-value]'
-      ).forEach(element => {
-        element.onclick =
-          event => {
-            event.stopPropagation();
-
-            const value =
-              element.dataset.value;
-
-            const option =
-              [...select.options]
-                .find(candidate =>
-                  candidate.value ===
-                  value
-                );
-
-            if (
-              !option ||
-              option.disabled
-            ) {
-              return;
-            }
-
-            if (isMultiple) {
-              option.selected =
-                !option.selected;
-
-              renderInput();
-              renderOptions(
-                searchEl.value
-              );
-
-              select.dispatchEvent(
-                new Event(
-                  'change',
-                  { bubbles:true }
-                )
-              );
-            } else {
-              selectSingleOption(
-                option
-              );
-            }
-          };
-      });
-
-      optionsEl.querySelectorAll(
-        '[data-create-value]'
-      ).forEach(element => {
-        element.onclick =
-          event => {
-            event.stopPropagation();
-
-            commitCreatableValue(
-              element.dataset
-                .createValue
-            );
-          };
-      });
-    }
-
-    function openDropdown() {
-      document.querySelectorAll(
-        '.ui-select-wrap.ui-select-open'
-      ).forEach(other => {
-        if (
-          other !== wrap &&
-          other._closeDropdown
-        ) {
-          other._closeDropdown();
-        }
-      });
-
-      dropdown.style.display = '';
-      wrap.classList.add(
-        'ui-select-open'
-      );
-
-      searchEl.value = '';
-      renderOptions();
-
-      if (usePortalDropdown) {
-        requestAnimationFrame(
-          () => {
-            positionPortalDropdown();
-
-            requestAnimationFrame(
-              positionPortalDropdown
-            );
-          }
-        );
-      }
-
-      setTimeout(
-        () => searchEl.focus(),
-        30
-      );
-    }
-
-    function closeDropdown() {
-      dropdown.style.display =
-        'none';
-
-      wrap.classList.remove(
-        'ui-select-open'
-      );
-
-      restoreDropdownHome();
-    }
-
-    input.onclick = event => {
-      if (
-        event.target.closest(
-          '.ui-select-tag-x'
-        )
-      ) {
-        return;
-      }
-
-      if (
-        wrap.classList.contains(
-          'ui-select-open'
-        )
-      ) {
-        closeDropdown();
-      } else {
-        openDropdown();
-      }
-    };
-
-    searchEl.oninput =
-      () => {
-        renderOptions(
-          searchEl.value
-        );
-      };
-
-    searchEl.onkeydown =
-      event => {
-        if (
-          event.key === 'Escape'
-        ) {
-          closeDropdown();
-          input.focus();
-          return;
-        }
-
-        if (
-          event.key === 'Enter'
-        ) {
-          event.preventDefault();
-
-          if (
-            isCreatable &&
-            searchEl.value.trim()
-          ) {
-            commitCreatableValue(
-              searchEl.value
-            );
-          }
-        }
-      };
-
-    document.addEventListener(
-      'click',
-      event => {
-        if (
-          !wrap.contains(
-            event.target
-          ) &&
-          !dropdown.contains(
-            event.target
-          )
-        ) {
-          closeDropdown();
-        }
-      }
-    );
-
-    if (usePortalDropdown) {
-      window.addEventListener(
-        'resize',
-        debounce(
-          positionPortalDropdown,
-          50
-        )
-      );
-
-      document.addEventListener(
-        'scroll',
-        () => {
-          if (
-            wrap.classList.contains(
-              'ui-select-open'
-            )
-          ) {
-            positionPortalDropdown();
-          }
-        },
-        true
-      );
-    }
-
-    wrap._closeDropdown =
-      closeDropdown;
-
-    wrap._refresh =
-      () => {
-        renderInput();
-
-        if (
-          wrap.classList.contains(
-            'ui-select-open'
-          )
-        ) {
-          renderOptions(
-            searchEl.value
-          );
-
-          if (
-            usePortalDropdown
-          ) {
-            requestAnimationFrame(
-              positionPortalDropdown
-            );
-          }
-        }
-      };
-
-    wrap._pendingValue =
-      () =>
-        normalizeRelationshipTypeText(
-          searchEl.value
-        );
-
-    wrap._commitCreatableValue =
-      commitCreatableValue;
-
-    renderInput();
-  });
-}
 
 function getEditingAvatarCropSource(target){
   return target==='pet'
@@ -15592,13 +14776,13 @@ document.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   const modifier = e.ctrlKey || e.metaKey;
 
-  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
+  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
     spacePanHeld = true;
     updateArrangeToolUI();
     e.preventDefault();
   }
 
-  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && genealogyScene.getCurrentFreeLayout(currentFamily()) && arrangeTool === 'select') {
+  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
     selectVisibleNodes();
     e.preventDefault();
     return;
@@ -15655,23 +14839,17 @@ $('relationshipAddBtn').onclick = () => {
   const typeSelect =
     $('relationshipType');
 
-  const typeWrap =
-    document.querySelector(
-      '.ui-select-wrap[data-ui-select-for="relationshipType"]'
-    );
-
   let type =
     normalizeRelationshipTypeText(
       typeSelect?.value
     );
 
-  if (
-    !type &&
-    typeWrap?._pendingValue
-  ) {
+  if (!type) {
     type =
       normalizeRelationshipTypeText(
-        typeWrap._pendingValue()
+        genealogyUI.readPendingValue(
+          'relationshipType'
+        )
       );
   }
 
@@ -15714,7 +14892,7 @@ $('relationshipAddBtn').onclick = () => {
     typeSelect.value = '';
   }
 
-  refreshSS('relationshipType');
+  genealogyUI.refreshSelect('relationshipType');
 
   personEditor.renderRelationshipList(c);
   renderRelAnno(c.id);
@@ -16070,7 +15248,7 @@ function initializeGenealogyWorkspace() {
   setupHelpTooltipPortal();
   restoreFamilyPanelCollapsed();
   genealogyViewport.observeResize();
-  setupSearchSelects();
+  genealogyUI.mountSearchableSelects();
 
   void preloadCurrentViewAssets();
 
@@ -16133,7 +15311,7 @@ async function bootstrapGenealogyApp() {
   await LING_I18N.init();
 
   setupTopbarNavSelects();
-  observeSharedNativeSelectChevrons();
+  genealogyUI.observeNativeSelectChevrons();
 
   initializeGenealogyWorkspace();
 }
