@@ -321,7 +321,7 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     style:'short-dash',
     width:1.7,
     color:null,
-    curved:true,
+    curved:false,
     curveAmount:50
   }),
   adopt: Object.freeze({

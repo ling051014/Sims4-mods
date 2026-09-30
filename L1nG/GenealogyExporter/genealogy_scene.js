@@ -2886,69 +2886,9 @@ function composeScenePlan() {
       });
     });
 
-    // 自由排列仍遵守族譜語意：
-    // 配偶 / 前任只允許同世代的水平直線，不因手動拖曳產生 H-V-H。
-    const partnerAdjacency = new Map();
-
-    visibleIds.forEach(id => {
-      partnerAdjacency.set(id, new Set());
-    });
-
-    visibleIds.forEach(id => {
-      const sim = byId.get(id);
-      if (!sim) return;
-
-      [
-        ...(sim.spouseIds || []),
-        ...(sim.exSpouseIds || [])
-      ].forEach(partnerId => {
-        if (!visibleIds.has(partnerId)) return;
-        partnerAdjacency.get(id)?.add(partnerId);
-        partnerAdjacency.get(partnerId)?.add(id);
-      });
-    });
-
-    const visitedPartners = new Set();
-
-    visibleIds.forEach(startId => {
-      if (visitedPartners.has(startId)) return;
-
-      const queue = [startId];
-      const component = [];
-
-      while (queue.length) {
-        const id = queue.shift();
-        if (visitedPartners.has(id)) continue;
-
-        visitedPartners.add(id);
-        component.push(id);
-
-        (partnerAdjacency.get(id) || [])
-          .forEach(nextId => {
-            if (!visitedPartners.has(nextId)) {
-              queue.push(nextId);
-            }
-          });
-      }
-
-      if (component.length < 2) return;
-
-      const yValues = component
-        .map(id => pos.get(id)?.y)
-        .filter(Number.isFinite);
-
-      if (!yValues.length) return;
-
-      const sharedY =
-        yValues.reduce((sum, value) => sum + value, 0) /
-        yValues.length;
-
-      component.forEach(id => {
-        const p = pos.get(id);
-        if (p) p.y = sharedY;
-      });
-    });
-
+    // 自由排列尊重玩家手動位置。
+    // 配偶 / 前任同高時維持水平直線；高度被玩家拖開後，
+    // 由 renderer 以兩端真實卡片 anchor 改畫 H-V-H。
     let maxX = 0;
     let maxY = 0;
 
@@ -3978,15 +3918,27 @@ function createPartnerConnectionPath(a, b) {
     bY
   } = getPairConnectionGeometry(a, b);
 
-  // ========【族譜伴侶線】 設定 - 配偶 / 前任永遠只畫水平直線 ========
-  // 世代排版與自由排列約束會先把兩端放在同一 row，
-  // 畫線器不再用 H-V-H 折線修補高度差。
-  const y =
-    Math.abs(aY - bY) < 2
-      ? (aY + bY) / 2
-      : aY;
+  // ========【族譜伴侶線】 設定 - 預設直線，手動錯位後使用 H-V-H ========
+  // 兩端永遠直接取自卡片左右 anchor，因此不論直線或折線都黏在卡片上。
+  const aligned =
+    Math.abs(aY - bY) <= 0.75;
 
-  return `M${aX} ${y} H${bX}`;
+  if (aligned) {
+    const y =
+      (aY + bY) / 2;
+
+    return `M${aX} ${y} H${bX}`;
+  }
+
+  const midX =
+    (aX + bX) / 2;
+
+  return (
+    `M${aX} ${aY}` +
+    ` H${midX}` +
+    ` V${bY}` +
+    ` H${bX}`
+  );
 }
 
 

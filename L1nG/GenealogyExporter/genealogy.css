@@ -5933,7 +5933,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .topbar-filter-label { display:none; }
   .topbar-filter-count { display:none !important; }
   .topbar-filter-popover { left:50%; right:auto; width:min(520px,calc(100vw - 24px)); transform:translateX(-50%); }
-  .family-panel { position:fixed; top:52px; bottom:0; left:0; width:min(310px,88vw); flex-basis:auto; transform:translateX(-102%); box-shadow:8px 0 28px rgba(0,0,0,.18); z-index:300; transition:transform .22s ease; }
+  .family-panel { position:fixed; top:52px; bottom:0; left:0; width:min(310px,88vw); flex-basis:auto; transform:translateX(-102%); z-index:300; transition:transform .22s ease; }
   .family-panel.open { transform:translateX(0); }
   body.family-panel-collapsed .family-panel { width:min(310px,88vw); }
   .family-panel-resizer { display:none !important; }
