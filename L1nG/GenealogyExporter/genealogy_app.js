@@ -7229,10 +7229,10 @@ if (restoreSampleBtn) {
         sampleDb
       );
 
-      genealogyStore.replaceDatabase(sampleDb);
+      replaceCanonicalGenealogyDatabase(
+        sampleDb
+      );
       dragHistory.clear();
-      invalidateChildrenIndex();
-      invalidateRelationshipGraph();
       save({ immediate:true });
       refreshFamilyUI();
       render();
@@ -7515,6 +7515,23 @@ if (!genealogyStore) {
 }
 
 personEditor.bindStore(genealogyStore);
+
+// ========【Canonical Database Replace】 設定 - 整庫替換後統一失效所有結構快取 ========
+function replaceCanonicalGenealogyDatabase(
+  nextData
+) {
+  const replaced =
+    genealogyStore.replaceDatabase(
+      nextData
+    );
+
+  invalidateFamilySelectorCache();
+  genealogyScene?.invalidateTopologyCache?.();
+  invalidateChildrenIndex();
+  invalidateRelationshipGraph();
+
+  return replaced;
+}
 
 function applyGenealogyMutation(
   mutation,
@@ -14935,7 +14952,9 @@ async function importJSON(file) {
 
     await assetStore.importSerializedAssets(serializedAssets);
 
-    genealogyStore.replaceDatabase(nextDb);
+    replaceCanonicalGenealogyDatabase(
+      nextDb
+    );
     dragHistory.clear();
     bgSettings = { ...bgSettings, ...incomingBg };
 
@@ -15119,7 +15138,9 @@ async function importGameGenealogy(file) {
     showGameImportStatus('正在建立族譜畫面…');
     await waitForImportPaint();
 
-    genealogyStore.replaceDatabase(preparedResult.prepared);
+    replaceCanonicalGenealogyDatabase(
+      preparedResult.prepared
+    );
 
     // 匯入新資料時，同時清除上一份族譜留下的操作狀態。
     dragHistory.clear();
@@ -15130,9 +15151,6 @@ async function importGameGenealogy(file) {
     genealogyViewport.cancelPan();
 
     arrangeTool = 'pan';
-
-    invalidateChildrenIndex();
-    invalidateRelationshipGraph();
 
     save({ immediate: true });
     refreshFamilyUI();
@@ -15842,14 +15860,9 @@ function initializeGenealogyWorkspace() {
       bgSettings
     );
 
-  genealogyStore.replaceDatabase(
+  replaceCanonicalGenealogyDatabase(
     initialDatabase
   );
-
-  invalidateFamilySelectorCache();
-  genealogyScene?.invalidateTopologyCache?.();
-  invalidateChildrenIndex();
-  invalidateRelationshipGraph();
 
   if (clearedImageRefs > 0) {
     console.warn(
