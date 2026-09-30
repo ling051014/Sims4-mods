@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20261001-appearance-open-cursor-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261001-help-layout-family-corner-r1">
     </head>
     <body data-theme="ling">
 
@@ -829,12 +829,24 @@
             </div>
         </div>
 
-        <!-- ========【使用說明】 設定 - 操作說明、圖片儲存與快捷鍵 ======== -->
+        <!-- ========【使用說明】 設定 - 簡約雙欄操作指南 ======== -->
         <div class="ui-dialog-backdrop" id="helpDialog">
             <div class="ui-dialog-panel help-panel">
-                <h2><span class="l1ng-icon icon-lightbulb" aria-hidden="true"></span><span>使用說明</span></h2>
+                <div class="help-header">
+                    <div class="help-heading">
+                        <span class="l1ng-icon icon-question-circle help-heading-icon" aria-hidden="true"></span>
+                        <div class="help-heading-copy">
+                            <h2>使用說明</h2>
+                            <p>快速查看族譜畫布、關係、備份與常用快捷鍵。</p>
+                        </div>
+                    </div>
+                    <button class="help-close-btn" id="helpCloseBtn" type="button" title="關閉" aria-label="關閉使用說明">
+                        <span class="l1ng-icon icon-x-lg" aria-hidden="true"></span>
+                    </button>
+                </div>
+
                 <div class="help-body">
-                    <div class="help-section">
+                    <section class="help-section help-section-wide">
                         <h3><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>畫布與佈局</span></h3>
                         <ul>
                             <li>自動排列時，<span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳空白處</b>平移整個族譜畫布；<span class="mouse-hint mouse-wheel" role="img" aria-label="滾輪"><span class="mouse-hint-wheel"></span></span><b>滾輪</b>以滑鼠位置為中心縮放</li>
@@ -849,8 +861,9 @@
                             <li>自由排列時可使用<b>鎖定排列</b>避免誤拖；<b>重設位置</b>會清除目前模式的手動位置並恢復自動樹狀佈局</li>
                             <li><b>電腦版：</b><b>側邊欄分隔線</b>可拖曳調整寬度；雙擊分隔線恢復預設寬度</li>
                         </ul>
-                    </div>
-                    <div class="help-section">
+                    </section>
+
+                    <section class="help-section">
                         <h3><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>關係與關係位置</span></h3>
                         <ul>
                             <li><b>顯示 / 隱藏關係</b>控制畫布上的關係名稱是否顯示</li>
@@ -858,8 +871,9 @@
                             <li><b>鎖定關係</b>可避免誤拖關係名稱</li>
                             <li>已移動的關係名稱可在模擬市民編輯視窗的關係清單中按<b>重設</b>回到自動位置</li>
                         </ul>
-                    </div>
-                    <div class="help-section">
+                    </section>
+
+                    <section class="help-section">
                         <h3><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出與備份</span></h3>
                         <ul>
                             <li>點選頂端<b>匯出</b>可選擇<b>族譜圖片</b>或<b>JSON 備份</b></li>
@@ -868,24 +882,27 @@
                             <li>族譜圖片可選擇<b>標準（1×） / 高畫質（2×） / 超高畫質（3×）</b></li>
                             <li><b>JSON 備份</b>會包含完整族譜資料與圖片，可於之後重新匯入並繼續編輯</li>
                         </ul>
-                    </div>
-                    <div class="help-section">
+                    </section>
+
+                    <section class="help-section">
                         <h3><span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span><span>人生照片</span></h3>
                         <ul>
                             <li>編輯人物 →<b>人生照片</b>：替人物保存值得記錄的照片</li>
                             <li>每張圖片可設定：<b>標題 / 關聯階段 / 備註</b></li>
                             <li>支援<b>拖曳圖片檔案</b>到人生照片區，或按<kbd>Ctrl</kbd>+<kbd>V</kbd>貼上截圖</li>
                         </ul>
-                    </div>
-                    <div class="help-section">
+                    </section>
+
+                    <section class="help-section">
                         <h3><span class="l1ng-icon icon-database" aria-hidden="true"></span><span>圖片儲存</span></h3>
                         <ul>
                             <li>頭像、人生照片、寵物圖片與背景圖片會儲存在目前使用的瀏覽器中，不會自動上傳到網站或伺服器</li>
                             <li>匯出 <b>JSON 備份</b>時，圖片會自動一起放進備份；之後重新匯入時也會一併還原</li>
                             <li><b>清理未使用的圖片</b>只會移除目前沒有被人物、寵物、人生照片或背景使用的圖片，不會刪除仍在使用中的圖片</li>
                         </ul>
-                    </div>
-                    <div class="help-section">
+                    </section>
+
+                    <section class="help-section help-section-shortcuts">
                         <h3><span class="l1ng-icon icon-keyboard" aria-hidden="true"></span><span>快捷鍵</span></h3>
                         <ul>
                             <li><kbd>Ctrl</kbd>+<kbd>Z</kbd>復原上一個卡片或關係名稱拖曳；輸入欄位內仍使用瀏覽器原生文字復原</li>
@@ -895,11 +912,7 @@
                             <li><kbd>Ctrl</kbd>+<kbd>V</kbd>圖片編輯視窗內貼上剪貼簿圖片</li>
                             <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd>在編輯彈出視窗中快速儲存</li>
                         </ul>
-                    </div>
-                </div>
-                <div class="ui-dialog-actions">
-                    <span class="spacer"></span>
-                    <button class="primary" id="helpCloseBtn">知道了</button>
+                    </section>
                 </div>
             </div>
         </div>
