@@ -88,6 +88,291 @@
       pendingRelationshipPreviewIds.clear();
     }
 
+    // ========【Canonical Generation】 設定 - 世代只由親子 / 領養關係決定 ========
+    // 使用帶位移的 Union-Find 解 parent -> child = +1 的有限等式系統。
+    // 共同父母會自然得到相同世代，不再靠「父母抬高 → 子女抬高」反覆迭代。
+    // 若來源資料真的形成祖先循環，只忽略造成矛盾的那一條約束，
+    // 不允許世代數在 render 中持續膨脹。
+    function solveCanonicalGenerationLevels(
+      sims,
+      byId
+    ) {
+      const parent =
+        new Map();
+
+      const rank =
+        new Map();
+
+      const offsetToParent =
+        new Map();
+
+      sims.forEach(sim => {
+        const id =
+          String(sim.id);
+
+        parent.set(id, id);
+        rank.set(id, 0);
+        offsetToParent.set(id, 0);
+      });
+
+      const find = id => {
+        const currentParent =
+          parent.get(id);
+
+        if (
+          currentParent == null ||
+          currentParent === id
+        ) {
+          return id;
+        }
+
+        const root =
+          find(currentParent);
+
+        offsetToParent.set(
+          id,
+          (
+            offsetToParent.get(id) ||
+            0
+          ) +
+          (
+            offsetToParent.get(
+              currentParent
+            ) || 0
+          )
+        );
+
+        parent.set(
+          id,
+          root
+        );
+
+        return root;
+      };
+
+      const relativeToRoot = id => {
+        find(id);
+
+        return (
+          offsetToParent.get(id) ||
+          0
+        );
+      };
+
+      const conflicts = [];
+
+      const constrain = (
+        parentId,
+        childId
+      ) => {
+        const a =
+          String(parentId);
+
+        const b =
+          String(childId);
+
+        if (
+          !parent.has(a) ||
+          !parent.has(b) ||
+          a === b
+        ) {
+          return false;
+        }
+
+        const aRoot =
+          find(a);
+
+        const bRoot =
+          find(b);
+
+        const aOffset =
+          relativeToRoot(a);
+
+        const bOffset =
+          relativeToRoot(b);
+
+        // canonical equation:
+        // generation(child) - generation(parent) = 1
+        const delta = 1;
+
+        if (aRoot === bRoot) {
+          const actual =
+            bOffset -
+            aOffset;
+
+          if (
+            Math.abs(
+              actual -
+              delta
+            ) > 0.0001
+          ) {
+            conflicts.push({
+              parentId:a,
+              childId:b,
+              actual
+            });
+
+            return false;
+          }
+
+          return true;
+        }
+
+        const aRank =
+          rank.get(aRoot) || 0;
+
+        const bRank =
+          rank.get(bRoot) || 0;
+
+        if (aRank < bRank) {
+          parent.set(
+            aRoot,
+            bRoot
+          );
+
+          // value(aRoot) - value(bRoot)
+          offsetToParent.set(
+            aRoot,
+            bOffset -
+              aOffset -
+              delta
+          );
+        } else {
+          parent.set(
+            bRoot,
+            aRoot
+          );
+
+          // value(bRoot) - value(aRoot)
+          offsetToParent.set(
+            bRoot,
+            delta +
+              aOffset -
+              bOffset
+          );
+
+          if (aRank === bRank) {
+            rank.set(
+              aRoot,
+              aRank + 1
+            );
+          }
+        }
+
+        return true;
+      };
+
+      const edges = [];
+
+      sims.forEach(child => {
+        genealogyParentIds(
+          child,
+          byId
+        ).forEach(parentId => {
+          if (!byId.has(parentId)) {
+            return;
+          }
+
+          edges.push({
+            parentId:String(parentId),
+            childId:String(child.id)
+          });
+        });
+      });
+
+      edges
+        .sort((left, right) =>
+          left.childId.localeCompare(
+            right.childId
+          ) ||
+          left.parentId.localeCompare(
+            right.parentId
+          )
+        )
+        .forEach(edge => {
+          constrain(
+            edge.parentId,
+            edge.childId
+          );
+        });
+
+      const minByRoot =
+        new Map();
+
+      const rawBySim =
+        new Map();
+
+      const componentBySim =
+        new Map();
+
+      sims.forEach(sim => {
+        const id =
+          String(sim.id);
+
+        const root =
+          find(id);
+
+        const raw =
+          relativeToRoot(id);
+
+        rawBySim.set(
+          id,
+          raw
+        );
+
+        componentBySim.set(
+          id,
+          root
+        );
+
+        const currentMin =
+          minByRoot.get(root);
+
+        if (
+          currentMin == null ||
+          raw < currentMin
+        ) {
+          minByRoot.set(
+            root,
+            raw
+          );
+        }
+      });
+
+      const generationBySim =
+        new Map();
+
+      sims.forEach(sim => {
+        const id =
+          String(sim.id);
+
+        const root =
+          componentBySim.get(id);
+
+        const normalized =
+          (
+            rawBySim.get(id) || 0
+          ) -
+          (
+            minByRoot.get(root) || 0
+          );
+
+        generationBySim.set(
+          id,
+          Math.max(
+            0,
+            Math.round(normalized)
+          )
+        );
+      });
+
+      return {
+        generationBySim,
+        componentBySim,
+        conflicts
+      };
+    }
+
     function buildCachedGenealogyTopology(
       visibleIds
     ) {
@@ -101,7 +386,7 @@
       const byId =
         new Map(
           sims.map(sim => [
-            sim.id,
+            String(sim.id),
             sim
           ])
         );
@@ -130,169 +415,47 @@
 
       parentGroups.forEach(group => {
         group.parentIds.forEach(parentId => {
-          if (!parentToChildren.has(parentId)) {
+          const normalizedParentId =
+            String(parentId);
+
+          if (!parentToChildren.has(
+            normalizedParentId
+          )) {
             parentToChildren.set(
-              parentId,
+              normalizedParentId,
               new Set()
             );
           }
 
           group.children.forEach(childId => {
-            parentToChildren
-              .get(parentId)
-              .add(childId);
+            const normalizedChildId =
+              String(childId);
 
-            if (!childToParents.has(childId)) {
+            parentToChildren
+              .get(normalizedParentId)
+              .add(normalizedChildId);
+
+            if (!childToParents.has(
+              normalizedChildId
+            )) {
               childToParents.set(
-                childId,
+                normalizedChildId,
                 new Set()
               );
             }
 
             childToParents
-              .get(childId)
-              .add(parentId);
+              .get(normalizedChildId)
+              .add(normalizedParentId);
           });
         });
       });
 
-      const generationBySim =
-        new Map();
-
-      const visiting =
-        new Set();
-
-      const resolveGeneration = simId => {
-        if (
-          generationBySim.has(simId)
-        ) {
-          return generationBySim.get(
-            simId
-          );
-        }
-
-        if (visiting.has(simId)) {
-          return 0;
-        }
-
-        visiting.add(simId);
-
-        const sim =
-          byId.get(simId);
-
-        const parents =
-          sim
-            ? genealogyParentIds(
-                sim,
-                byId
-              )
-            : [];
-
-        const generation =
-          parents.length
-            ? 1 + Math.max(
-                ...parents.map(
-                  resolveGeneration
-                )
-              )
-            : 0;
-
-        visiting.delete(simId);
-
-        generationBySim.set(
-          simId,
-          generation
+      const canonical =
+        solveCanonicalGenerationLevels(
+          sims,
+          byId
         );
-
-        return generation;
-      };
-
-      sims.forEach(sim => {
-        resolveGeneration(sim.id);
-      });
-
-      const maxGenerationPasses =
-        Math.max(
-          4,
-          sims.length * 4
-        );
-
-      for (
-        let pass = 0;
-        pass < maxGenerationPasses;
-        pass += 1
-      ) {
-        let changed = false;
-
-        parentGroups.forEach(group => {
-          const parents =
-            group.parentIds
-              .filter(id =>
-                generationBySim.has(id)
-              );
-
-          if (parents.length >= 2) {
-            const targetGeneration =
-              Math.max(
-                ...parents.map(id =>
-                  generationBySim.get(id)
-                )
-              );
-
-            parents.forEach(id => {
-              if (
-                generationBySim.get(id) ===
-                targetGeneration
-              ) {
-                return;
-              }
-
-              generationBySim.set(
-                id,
-                targetGeneration
-              );
-
-              changed = true;
-            });
-          }
-
-          const parentGenerations =
-            parents.map(id =>
-              generationBySim.get(id)
-            );
-
-          if (!parentGenerations.length) {
-            return;
-          }
-
-          const childMinimum =
-            Math.max(
-              ...parentGenerations
-            ) + 1;
-
-          group.children.forEach(childId => {
-            if (
-              !generationBySim.has(
-                childId
-              ) ||
-              generationBySim.get(
-                childId
-              ) >= childMinimum
-            ) {
-              return;
-            }
-
-            generationBySim.set(
-              childId,
-              childMinimum
-            );
-
-            changed = true;
-          });
-        });
-
-        if (!changed) break;
-      }
 
       return {
         sims,
@@ -300,7 +463,16 @@
         parentGroups,
         parentToChildren,
         childToParents,
-        generationBySim
+
+        // 真正世代：側邊欄排序 / 「X 代」統計只能讀這一份。
+        canonicalGenerationBySim:
+          canonical.generationBySim,
+
+        canonicalComponentBySim:
+          canonical.componentBySim,
+
+        generationConflicts:
+          canonical.conflicts
       };
     }
 
@@ -741,12 +913,12 @@
           )
           .sort((left, right) =>
             (
-              topology.generationBySim.get(
+              topology.canonicalGenerationBySim.get(
                 left
               ) || 0
             ) -
               (
-                topology.generationBySim.get(
+                topology.canonicalGenerationBySim.get(
                   right
                 ) || 0
               ) ||
@@ -778,7 +950,7 @@
       const generations =
         [...new Set(
           missing.map(id =>
-            topology.generationBySim.get(
+            topology.canonicalGenerationBySim.get(
               id
             ) || 0
           )
@@ -820,7 +992,7 @@
         missing
           .filter(id =>
             (
-              topology.generationBySim.get(
+              topology.canonicalGenerationBySim.get(
                 id
               ) || 0
             ) === generation
@@ -1602,9 +1774,16 @@ function buildGenealogyLayoutModel(visibleIds) {
     parentGroups
   } = topology;
 
-  const generationBySim =
+  // canonical generation 永遠不受配偶 / 伴侶 / 畫面排列影響。
+  const canonicalGenerationBySim =
     new Map(
-      topology.generationBySim
+      topology.canonicalGenerationBySim
+    );
+
+  // Layout Row 是獨立副本，只供畫布幾何使用。
+  const layoutGenerationBySim =
+    new Map(
+      canonicalGenerationBySim
     );
 
   const pairCandidates =
@@ -1614,19 +1793,19 @@ function buildGenealogyLayoutModel(visibleIds) {
       parentGroups
     );
 
-  // 不同血緣 component 可以整塊上下平移，讓沒有共同祖先的配偶 / 伴侶 / 情人保持同列。
-  // component 內部的親子世代差完全不改。
+  // 只有彼此獨立的血緣 component 可以整塊上下平移，
+  // 這不會回寫 canonical generation。
   alignIndependentLineageGenerations(
     sims,
     byId,
-    generationBySim,
+    layoutGenerationBySim,
     pairCandidates
   );
 
   const pairSelection =
     selectPrimaryHorizontalPairs(
       pairCandidates,
-      generationBySim
+      layoutGenerationBySim
     );
 
   const pairedIds =
@@ -1695,7 +1874,7 @@ function buildGenealogyLayoutModel(visibleIds) {
     const generation =
       Math.max(
         ...ordered.map(member =>
-          generationBySim.get(
+          layoutGenerationBySim.get(
             member.id
           ) || 0
         )
@@ -1842,7 +2021,8 @@ function buildGenealogyLayoutModel(visibleIds) {
     parentGroups,
     pairCandidates,
     pairSelection,
-    generationBySim
+    canonicalGenerationBySim,
+    layoutGenerationBySim
   };
 }
 
@@ -1997,6 +2177,40 @@ function collectGenealogyHorizontalPairCandidates(
   const candidates =
     new Map();
 
+  const adjacencyTier = meta => {
+    if (meta.kind === 'spouse') {
+      return 500;
+    }
+
+    if (
+      meta.kind === 'social' &&
+      (
+        meta.type === '訂婚' ||
+        meta.type === '伴侶'
+      )
+    ) {
+      return 450;
+    }
+
+    if (meta.kind === 'parent-group') {
+      return 400;
+    }
+
+    if (meta.kind === 'social') {
+      return 300;
+    }
+
+    if (meta.kind === 'exspouse') {
+      return 200;
+    }
+
+    if (meta.kind === 'deceased-spouse') {
+      return 150;
+    }
+
+    return 0;
+  };
+
   const add = (
     firstId,
     secondId,
@@ -2025,31 +2239,95 @@ function collectGenealogyHorizontalPairCandidates(
         b
       );
 
-    const candidate = {
-      key,
-      a,
-      b,
-      score:
-        Number(score) || 0,
-      ...meta
-    };
+    const tier =
+      adjacencyTier(meta);
 
     const existing =
       candidates.get(key);
 
-    if (
-      !existing ||
-      candidate.score >
-        existing.score
-    ) {
-      candidates.set(
-        key,
-        candidate
-      );
+    const reasons =
+      [
+        ...(existing?.reasons || []),
+        {
+          ...meta,
+          score:
+            Number(score) || 0,
+          tier
+        }
+      ];
+
+    const candidate = {
+      key,
+      a,
+      b,
+
+      // score 仍用於跨血緣 component 的同列判斷；
+      // adjacencyTier 才決定誰有資格佔據唯一水平相鄰位置。
+      score:Math.max(
+        Number(score) || 0,
+        existing?.score || 0
+      ),
+      adjacencyTier:Math.max(
+        tier,
+        existing?.adjacencyTier || 0
+      ),
+      reasons
+    };
+
+    const existingPrimary =
+      existing?.primaryReason ||
+      null;
+
+    const nextReason = {
+      ...meta,
+      score:
+        Number(score) || 0,
+      tier
+    };
+
+    candidate.primaryReason =
+      (
+        !existingPrimary ||
+        nextReason.tier >
+          existingPrimary.tier ||
+        (
+          nextReason.tier ===
+            existingPrimary.tier &&
+          nextReason.score >
+            existingPrimary.score
+        )
+      )
+        ? nextReason
+        : existingPrimary;
+
+    candidate.kind =
+      candidate.primaryReason.kind;
+
+    if (candidate.primaryReason.type) {
+      candidate.type =
+        candidate.primaryReason.type;
     }
+
+    if (
+      candidate.primaryReason
+        .parentGroupKey
+    ) {
+      candidate.parentGroupKey =
+        candidate.primaryReason
+          .parentGroupKey;
+    }
+
+    if (candidate.primaryReason.linkId) {
+      candidate.linkId =
+        candidate.primaryReason.linkId;
+    }
+
+    candidates.set(
+      key,
+      candidate
+    );
   };
 
-  // 有共同子女時優先保住 Parent Group。
   parentGroups.forEach(group => {
     const parents =
       group.parentIds
@@ -2184,6 +2462,8 @@ function collectGenealogyHorizontalPairCandidates(
 
   return [...candidates.values()]
     .sort((left, right) =>
+      right.adjacencyTier -
+        left.adjacencyTier ||
       right.score -
         left.score ||
       String(left.key)
@@ -2283,7 +2563,7 @@ function buildPersonLineageComponents(
 function alignIndependentLineageGenerations(
   sims,
   byId,
-  generationBySim,
+  layoutGenerationBySim,
   pairCandidates
 ) {
   const componentBySim =
@@ -2336,12 +2616,12 @@ function alignIndependentLineageGenerations(
 
       const delta =
         (
-          generationBySim.get(
+          layoutGenerationBySim.get(
             candidate.a
           ) || 0
         ) -
         (
-          generationBySim.get(
+          layoutGenerationBySim.get(
             candidate.b
           ) || 0
         );
@@ -2431,10 +2711,10 @@ function alignIndependentLineageGenerations(
         sim.id
       );
 
-    generationBySim.set(
+    layoutGenerationBySim.set(
       sim.id,
       (
-        generationBySim.get(
+        layoutGenerationBySim.get(
           sim.id
         ) || 0
       ) +
@@ -2450,7 +2730,7 @@ function alignIndependentLineageGenerations(
     Math.min(
       0,
       ...sims.map(sim =>
-        generationBySim.get(
+        layoutGenerationBySim.get(
           sim.id
         ) || 0
       )
@@ -2458,10 +2738,10 @@ function alignIndependentLineageGenerations(
 
   if (minGeneration < 0) {
     sims.forEach(sim => {
-      generationBySim.set(
+      layoutGenerationBySim.set(
         sim.id,
         (
-          generationBySim.get(
+          layoutGenerationBySim.get(
             sim.id
           ) || 0
         ) -
@@ -2485,12 +2765,12 @@ function selectPrimaryHorizontalPairs(
       used.has(candidate.a) ||
       used.has(candidate.b) ||
       (
-        generationBySim.get(
+        layoutGenerationBySim.get(
           candidate.a
         ) || 0
       ) !==
         (
-          generationBySim.get(
+          layoutGenerationBySim.get(
             candidate.b
           ) || 0
         )
@@ -7445,24 +7725,14 @@ function resizeStageToContent() {
         return new Map();
       }
 
-      const model =
-        buildGenealogyLayoutModel(
+      const topology =
+        getCachedGenealogyTopology(
           visibleIds
         );
 
-      const levels =
-        new Map();
-
-      model.units.forEach(unit => {
-        unit.members.forEach(member => {
-          levels.set(
-            String(member.id),
-            unit.generation
-          );
-        });
-      });
-
-      return levels;
+      return new Map(
+        topology.canonicalGenerationBySim
+      );
     }
 
     function withState(fn) { return function () { syncState(); return fn.apply(null, arguments); }; }
