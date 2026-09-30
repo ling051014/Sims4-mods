@@ -734,26 +734,6 @@ function relationshipBubbleWidth(info) {
   return Math.max(Math.ceil(measureText(displayText, fs) + iconSpace + 24), 42);
 }
 
-function getAdaptiveSpouseGap(members, baseGap) {
-  if (!members || members.length < 2) return baseGap;
-
-  // 配偶標籤必須完整放在兩張卡片之間，左右各保留約 10px 呼吸空間。
-  // 英文、自訂長關係名稱都會依實際顯示文字重新量測；隱藏關係按鈕不會改變這個幾何間距。
-  let widestLabel = 0;
-  const head = members[0];
-  for (let i = 1; i < members.length; i += 1) {
-    const spouse = members[i];
-    const pairK = pairKey(head.id, spouse.id);
-    const info = getRelInfoByKey('spouse:' + pairK, 'spouse');
-    widestLabel = Math.max(widestLabel, relationshipBubbleWidth(info));
-  }
-
-  const visualMinimum = viewMode === 'view' ? 52 : 60;
-  const labelDrivenGap = widestLabel ? widestLabel + 20 : 0;
-  // 上限避免極長自訂關係把整棵族譜撐得過度鬆散。
-    return Math.min(Math.max(baseGap, visualMinimum, labelDrivenGap), 168);
-}
-
 // ========【族譜自動排版核心】 設定 - Parent Group / 主要水平配對 / 血緣世代 ========
 function buildGenealogyLayoutModel(visibleIds) {
   const {
@@ -966,10 +946,10 @@ function buildGenealogyLayoutModel(visibleIds) {
 
     let width = 0;
     let height = 0;
-    let spouseGap = 0;
+    let pairGap = 0;
 
     if (ordered.length === 2) {
-      spouseGap =
+      pairGap =
         getAdaptiveHorizontalPairGap(
           ordered,
           SPOUSE_GAP
@@ -995,7 +975,7 @@ function buildGenealogyLayoutModel(visibleIds) {
           index <
           ordered.length - 1
         ) {
-          width += spouseGap;
+          width += pairGap;
         }
       }
     );
@@ -1025,7 +1005,7 @@ function buildGenealogyLayoutModel(visibleIds) {
         ),
       width,
       height,
-      spouseGap,
+      pairGap,
       pairInfo,
       sequence:units.length,
       parentUnitIds:new Set(),
@@ -1080,7 +1060,7 @@ function buildGenealogyLayoutModel(visibleIds) {
     );
 
   // Parent Group 是族譜真正的骨架。同一個人可以同時參與多個 Parent Group，
-  // 但人物卡只存在一次，不再因多配偶 / 多共同生育對象被 union 成三人以上 Family Unit。
+  // 但人物卡只存在一次，不再因多配偶 / 多共同生育對象被 union 成三人以上 layout unit。
   parentGroups.forEach(group => {
     group.parentUnitIds =
       [...new Set(
@@ -1419,6 +1399,18 @@ function collectGenealogyHorizontalPairCandidates(
               )
                 ? 'deceased-spouse'
                 : 'spouse'
+          }
+        );
+      });
+
+    (sim.gameData?.deceasedSpouseIds || [])
+      .forEach(spouseId => {
+        add(
+          sim.id,
+          spouseId,
+          180,
+          {
+            kind:'deceased-spouse'
           }
         );
       });
@@ -2519,7 +2511,7 @@ function buildGenerationLayers(units) {
 function genealogyFamilySideScore(member, unit, model, connectorGroups) {
   const weighted = [];
 
-  // 兄弟姊妹所在位置最能代表「原生家系應該從夫妻哪一側延伸」。
+  // 兄弟姊妹所在位置最能代表「原生家系應該從主要水平配對的哪一側延伸」。
   connectorGroups.forEach(group => {
     if (!group.children.includes(member.id)) return;
 
@@ -2543,7 +2535,7 @@ function genealogyFamilySideScore(member, unit, model, connectorGroups) {
     });
   });
 
-  // 沒有兄弟姊妹時，父母家系的位置仍可決定夫妻左右方向。
+  // 沒有兄弟姊妹時，父母家系的位置仍可決定主要水平配對左右方向。
   genealogyParentIds(
     member,
     model.byId
@@ -2792,7 +2784,7 @@ function genealogyUnitMemberLocalGeometry(unit, simId) {
     cursorX = right;
 
     if (index < unit.members.length - 1) {
-      cursorX += unit.spouseGap;
+      cursorX += unit.pairGap;
     }
   }
 
@@ -3465,7 +3457,7 @@ function buildAutoVerticalRelationshipConstraints(
     } else {
       // 多子女的 canonical 幾何：
       // parent trunk 對準 sibling bus 的外側 child branches 中點。
-      // 中間子女可依實際 Family Unit 寬度自然展開，不被固定死。
+      // 中間子女可依實際 layout unit 寬度自然展開，不被固定死。
       const leftChild =
         children[0];
 
@@ -3696,7 +3688,7 @@ function solveAutoRelationshipGeometry(
   // - 多子女：parent source = sibling bus 外側 child branches 的中點
   //
   // Inequality：
-  // - 同世代 Family Unit 保持最小安全距離
+  // - 同世代 layout unit 保持最小安全距離
   //
   // 兩類約束交替投影；不再把整個家系鎖成剛體，也不再用 V-H-V 代替排列。
   const maxPasses =
@@ -3803,7 +3795,7 @@ function placeGenealogyUnitMembers(units) {
       cursorX += getNodeDimensions(member).W;
 
       if (index < unit.members.length - 1) {
-        cursorX += unit.spouseGap;
+        cursorX += unit.pairGap;
       }
     });
   });
@@ -3898,7 +3890,7 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     );
 
   if (horizontalPairOrientationChanged) {
-    // 只改 Family Unit 內的人物左右方向，
+    // 只改 layout unit 內的人物左右方向，
     // branch ownership / generation order 保持不變。
     applyFamilyBranchOrdering(
       layers,
