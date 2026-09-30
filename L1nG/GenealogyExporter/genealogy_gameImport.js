@@ -327,6 +327,124 @@
     };
   }
 
+  function importedRelationshipLinks(
+    sourceSims,
+    humanIds
+  ) {
+    const pairMap =
+      new Map();
+
+    const add = (
+      firstId,
+      secondId,
+      type,
+      priority
+    ) => {
+      const a =
+        String(firstId || '');
+
+      const b =
+        String(secondId || '');
+
+      if (
+        !a ||
+        !b ||
+        a === b ||
+        !humanIds.has(a) ||
+        !humanIds.has(b)
+      ) {
+        return;
+      }
+
+      const ids =
+        [a, b].sort();
+
+      const key =
+        ids.join('|');
+
+      const current =
+        pairMap.get(key);
+
+      if (
+        current &&
+        current.priority >= priority
+      ) {
+        return;
+      }
+
+      pairMap.set(key, {
+        id:
+          'game_rel_' +
+          ids.join('_'),
+        from:ids[0],
+        to:ids[1],
+        type,
+        label:type,
+        priority
+      });
+    };
+
+    humanIds.forEach(id => {
+      const sim =
+        sourceSims[id];
+
+      if (!sim) return;
+
+      const rel =
+        relationshipArrays(sim);
+
+      const spouseSet =
+        new Set(
+          [
+            ...rel.spouseIds,
+            ...rel.deceasedSpouseIds
+          ].map(String)
+        );
+
+      rel.fianceIds
+        .forEach(targetId => {
+          if (
+            spouseSet.has(
+              String(targetId)
+            )
+          ) {
+            return;
+          }
+
+          add(
+            id,
+            targetId,
+            '訂婚',
+            2
+          );
+        });
+
+      rel.steadyPartnerIds
+        .forEach(targetId => {
+          if (
+            spouseSet.has(
+              String(targetId)
+            )
+          ) {
+            return;
+          }
+
+          add(
+            id,
+            targetId,
+            '伴侶',
+            1
+          );
+        });
+    });
+
+    return [...pairMap.values()]
+      .map(({
+        priority,
+        ...link
+      }) => link);
+  }
+
   // ========【遊戲人物分類】 設定 - 分類只影響 UI 歸屬，不刪除任何匯入人物 ========
   function classifyGamePerson(sim, household) {
     const recordState = String((sim && sim.recordState) || '').toLowerCase();
@@ -742,7 +860,11 @@
       },
       sims,
       families,
-      links:[],
+      links:
+        importedRelationshipLinks(
+          sourceSims,
+          humanIds
+        ),
       relationshipMap:{},
       labelPositions:{},
       currentFamilyId:families.length ? families[0].id : null

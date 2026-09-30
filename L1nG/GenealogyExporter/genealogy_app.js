@@ -7504,6 +7504,17 @@ function normalizeCurrentDatabase(targetDb) {
           id !== String(sim.id)
         );
 
+    const deceasedSpouseIds =
+      new Set(
+        sim.gameData.deceasedSpouseIds
+      );
+
+    // 已故配偶是獨立關係，不再同時留在現任 spouseIds。
+    sim.spouseIds =
+      sim.spouseIds.filter(id =>
+        !deceasedSpouseIds.has(id)
+      );
+
     sim.gameData.adoptedParentIds = sim.gameData.adoptedParentIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
     sim.gameData.adoptedChildIds = sim.gameData.adoptedChildIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
     delete sim.adoptive;
