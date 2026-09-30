@@ -11423,6 +11423,12 @@ $('resetLayoutBtn').onclick = async () => {
     }
   )) return;
 
+  const before =
+    captureLayoutHistoryState(
+      fam,
+      viewMode
+    );
+
   const mutation =
     genealogyStore.setFamilyLayoutState(
       fam.id,
@@ -11436,6 +11442,18 @@ $('resetLayoutBtn').onclick = async () => {
   clearNodeSelection();
   applyGenealogyMutation(mutation);
   updateLayoutToggle();
+
+  dragHistory.push({
+    type:'card-layout',
+    familyId:fam.id,
+    mode:viewMode,
+    before,
+    after:captureLayoutHistoryState(
+      fam,
+      viewMode
+    )
+  });
+
   requestAnimationFrame(fitScreen);
 };
 
