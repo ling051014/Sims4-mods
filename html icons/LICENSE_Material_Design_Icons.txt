@@ -1,0 +1,14 @@
+Material Design Icons SVG assets used by L1nG Genealogy
+
+Source:
+https://github.com/Templarian/MaterialDesign-SVG
+
+Package:
+@mdi/svg
+
+License:
+Apache License 2.0
+
+The upstream package declares its SVG icon distribution under Apache-2.0.
+See:
+https://github.com/Templarian/MaterialDesign-SVG/blob/master/LICENSE
