@@ -384,7 +384,7 @@ function buildPersonEditorDraft({
     });
   }
 
-  // ========【家庭關係自訂顯示文字】 設定 - 直接整合於父母 / 配偶 / 子女等人物列 ========
+  // ========【家庭關係自訂標籤文字】 設定 - 直接整合於父母 / 配偶 / 子女等人物列 ========
   function editorFamilyLabelIdentity(role,targetId){
     if(role==='parent')return'parent-group';
     return String(role||'')+':'+String(targetId||'');
