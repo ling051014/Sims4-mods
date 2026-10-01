@@ -439,18 +439,21 @@
                                             <span class="relationship-type-value" id="relationshipTypeValue">選擇或輸入關係…</span>
                                             <span class="l1ng-icon icon-chevron-down relationship-type-chevron" aria-hidden="true"></span>
                                         </button>
-                                        <div class="relationship-type-popover" id="relationshipTypePopover" hidden>
-                                            <div class="relationship-type-index" role="tablist" aria-label="關係分類">
-                                                <button class="relationship-type-index-tab active" type="button" data-relationship-category="romance" role="tab" aria-selected="true"><span>戀愛</span><span>親密</span></button>
-                                                <button class="relationship-type-index-tab" type="button" data-relationship-category="friendship" role="tab" aria-selected="false"><span>友</span><span>誼</span></button>
-                                                <button class="relationship-type-index-tab" type="button" data-relationship-category="negative" role="tab" aria-selected="false"><span>負</span><span>面</span></button>
-                                                <button class="relationship-type-index-tab" type="button" data-relationship-category="social" role="tab" aria-selected="false"><span>社</span><span>會</span></button>
-                                                <button class="relationship-type-index-tab" type="button" data-relationship-category="custom" role="tab" aria-selected="false"><span>自</span><span>訂</span></button>
-                                            </div>
+
+                                        <div class="relationship-type-popover nav-select-menu" id="relationshipTypePopover" role="listbox" aria-label="關係類型" hidden>
                                             <div class="relationship-type-menu">
                                                 <input class="relationship-type-search" id="relationshipTypeSearch" type="text" placeholder="搜尋或輸入關係…" autocomplete="off">
-                                                <div class="relationship-type-options" id="relationshipTypeOptions" role="listbox"></div>
+                                                <div class="relationship-type-options" id="relationshipTypeOptions"></div>
                                             </div>
+                                        </div>
+
+                                        <div class="family-nav-tabs-portal relationship-type-index-portal" id="relationshipTypeIndex" role="tablist" aria-label="關係分類">
+                                            <button class="family-nav-index-tab relationship-type-index-tab active" type="button" data-relationship-category="romance" role="tab" aria-selected="true"><span class="family-nav-tab-lines"><span>戀愛</span><span>親密</span></span></button>
+                                            <button class="family-nav-index-tab relationship-type-index-tab" type="button" data-relationship-category="friendship" role="tab" aria-selected="false"><span class="family-nav-tab-lines"><span>友</span><span>誼</span></span></button>
+                                            <button class="family-nav-index-tab relationship-type-index-tab" type="button" data-relationship-category="negative" role="tab" aria-selected="false"><span class="family-nav-tab-lines"><span>負</span><span>面</span></span></button>
+                                            <button class="family-nav-index-tab relationship-type-index-tab" type="button" data-relationship-category="social" role="tab" aria-selected="false"><span class="family-nav-tab-lines"><span>社</span><span>會</span></span></button>
+                                            <button class="family-nav-index-tab relationship-type-index-tab" type="button" data-relationship-category="chosen-kin" role="tab" aria-selected="false"><span class="family-nav-tab-lines"><span>非血緣</span><span>親屬</span></span></button>
+                                            <button class="family-nav-index-tab relationship-type-index-tab" type="button" data-relationship-category="custom" role="tab" aria-selected="false"><span class="family-nav-tab-lines"><span>自</span><span>訂</span></span></button>
                                         </div>
                                     </div>
                                     <select hidden id="relationshipType"></select>
