@@ -2595,12 +2595,6 @@ function renderPersonEditorRelationshipList(c) {
             rawRelation
           );
 
-        const arrow=
-          String(link.from)===
-            String(c.id)
-            ? '→'
-            : '←';
-
         const draft=
           otherRelationshipAnnotationDraft(
             link
@@ -2641,7 +2635,7 @@ function renderPersonEditorRelationshipList(c) {
             )+
             relationPersonMarkup(
               other,
-              relationLabel+' '+arrow,
+              relationLabel,
               customDisplayText
             )+
             hiddenStatus+
