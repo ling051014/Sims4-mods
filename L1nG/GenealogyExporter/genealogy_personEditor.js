@@ -430,22 +430,19 @@ function buildPersonEditorDraft(){
     );
   }
 
-  function editorFamilyLabelToggleMarkup(role,targetId){
-    if(!role||!editorFamilyLabelControlAvailable(role,targetId))return'';
-
-    return '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>';
-  }
-
-  function editorFamilyLabelEditorMarkup(role,targetId){
+  function editorFamilyLabelControlMarkup(role,targetId){
     if(!role||!editorFamilyLabelControlAvailable(role,targetId))return'';
 
     const identity=editorFamilyLabelIdentity(role,targetId);
     const value=editorFamilyDraftText(role,targetId);
 
-    return '<div class="family-rel-label-editor" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'" hidden>'+
-      '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
-      '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
-    '</div>';
+    return '<span class="family-rel-label-control" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'">'+
+      '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>'+
+      '<span class="family-rel-label-inline-editor" hidden>'+
+        '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
+        '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
+      '</span>'+
+    '</span>';
   }
 
   function syncFamilyLabelDraftInputs(identity,value){
@@ -478,17 +475,15 @@ function buildPersonEditorDraft(){
   function bindEditorFamilyLabelControls(target){
     target.querySelectorAll('.family-rel-label-toggle').forEach(button=>{
       button.addEventListener('click',()=>{
-        const row=button.closest('.family-rel-preview-row');
-        const editor=row?.querySelector('.family-rel-label-editor');
+        const control=button.closest('[data-family-label-identity]');
+        const editor=control?.querySelector('.family-rel-label-inline-editor');
         if(!editor)return;
 
-        const open=editor.hidden;
-        editor.hidden=!open;
-        button.setAttribute('aria-expanded',open?'true':'false');
+        editor.hidden=false;
+        button.hidden=true;
+        button.setAttribute('aria-expanded','true');
 
-        if(open){
-          editor.querySelector('.family-rel-label-input')?.focus({preventScroll:true});
-        }
+        editor.querySelector('.family-rel-label-input')?.focus({preventScroll:true});
       });
     });
 
@@ -509,6 +504,22 @@ function buildPersonEditorDraft(){
 
         syncFamilyLabelDraftInputs(identity,input.value);
       });
+
+      input.addEventListener('keydown',event=>{
+        if(event.key!=='Escape')return;
+
+        const control=input.closest('[data-family-label-identity]');
+        const editor=control?.querySelector('.family-rel-label-inline-editor');
+        const button=control?.querySelector('.family-rel-label-toggle');
+
+        if(editor)editor.hidden=true;
+
+        if(button){
+          button.hidden=false;
+          button.setAttribute('aria-expanded','false');
+          button.focus({preventScroll:true});
+        }
+      });
     });
 
     target.querySelectorAll('.family-rel-label-reset').forEach(button=>{
@@ -519,6 +530,7 @@ function buildPersonEditorDraft(){
         const identity=control.dataset.familyLabelIdentity||'';
         const role=control.dataset.familyLabelRole||'';
         const targetId=control.dataset.familyLabelTarget||'';
+        const input=control.querySelector('.family-rel-label-input');
 
         simEditorState.familyLabelDrafts.set(identity,{
           role,
@@ -526,7 +538,9 @@ function buildPersonEditorDraft(){
           text:''
         });
 
+        if(input)input.value='';
         syncFamilyLabelDraftInputs(identity,'');
+        input?.focus({preventScroll:true});
       });
     });
   }
@@ -675,6 +689,16 @@ function buildPersonEditorDraft(){
     renderPersonEditorInfoPreviewIfActive();
   }
 
+  function editorFamilyRemoveButtonMarkup(role,targetId){
+    const target=String(targetId||'');
+
+    if(!familyRelationCanRemove(role,target))return'<span class="family-rel-remove-spacer" aria-hidden="true"></span>';
+
+    return '<button class="family-rel-remove" type="button" data-family-rel-remove-role="'+esc(role)+'" data-family-rel-remove-id="'+esc(target)+'" aria-label="'+esc(uiText('移除'))+'" title="'+esc(uiText('移除'))+'">'+
+      iconSvg('x-lg')+
+    '</button>';
+  }
+
   function editorFamilyRelationActionsMarkup(role,targetId){
     if(!familyRelationEditMode(role))return'';
 
@@ -689,42 +713,25 @@ function buildPersonEditorDraft(){
       const kind=kindMap.get(target)||'parent-child';
 
       pieces.push(
-        '<select class="family-rel-kind-select" data-editor-relation-kind="'+esc(role)+'" data-editor-relation-id="'+esc(target)+'" aria-label="'+esc(uiText('關係種類'))+'">'+
+        '<select class="family-rel-kind-select" data-ui-compact="true" data-ui-popover-match-width="true" data-editor-relation-kind="'+esc(role)+'" data-editor-relation-id="'+esc(target)+'" aria-label="'+esc(uiText('關係種類'))+'">'+
           '<option value="parent-child"'+(kind==='parent-child'?' selected':'')+'>'+esc(uiText('親生'))+'</option>'+
           '<option value="adoptive"'+(kind==='adoptive'?' selected':'')+'>'+esc(uiText('收養'))+'</option>'+
         '</select>'
       );
     }
 
-    const hasCustomLabel=
-      editorFamilyLabelControlAvailable(
-        role,
-        target
-      );
-
-    if(hasCustomLabel){
+    if(editorFamilyLabelControlAvailable(role,target)){
       pieces.push(
-        editorFamilyLabelToggleMarkup(
+        editorFamilyLabelControlMarkup(
           role,
           target
         )
       );
     }
 
-    if(familyRelationCanRemove(role,target)){
-      pieces.push(
-        '<button class="family-rel-remove" type="button" data-family-rel-remove-role="'+esc(role)+'" data-family-rel-remove-id="'+esc(target)+'" aria-label="'+esc(uiText('移除'))+'" title="'+esc(uiText('移除'))+'">'+
-          iconSvg('x-lg')+
-        '</button>'
-      );
-    }
-
-    return '<div class="family-rel-row-actions">'+pieces.join('')+'</div>'+
-      (
-        hasCustomLabel
-          ? editorFamilyLabelEditorMarkup(role,target)
-          : ''
-      );
+    return pieces.length
+      ? '<div class="family-rel-row-actions">'+pieces.join('')+'</div>'
+      : '';
   }
 
   function bindEditorFamilyRelationControls(target){
@@ -793,6 +800,9 @@ function buildPersonEditorDraft(){
           : '';
 
       return '<div class="family-rel-preview-row'+(editing?' is-editing':'')+'">'+
+        (editing
+          ? editorFamilyRemoveButtonMarkup(role,id)
+          : '')+
         relationPersonMarkup(
           sim,
           label,
