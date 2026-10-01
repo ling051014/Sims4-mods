@@ -55,7 +55,15 @@
   const editingGallery = [];
 
   // ========【人物編輯器延遲建立】 設定 - 基本資料先顯示，隱藏分頁真正需要時再建立 ========
+  let personEditorRelationshipDataReady=false;
   let personEditorRelationshipUiReady=false;
+  let personEditorRelationshipAuthority=null;
+  let personEditorRelationCandidates=[];
+  let personEditorRelationCandidateById=new Map();
+  let personEditorParentCandidateIds=new Set();
+  let personEditorWarmupHandle=null;
+  let personEditorWarmupMode='';
+  let personEditorSessionVersion=0;
   let personEditorMediaDraftReady=false;
   let personEditorMediaUiReady=false;
 
@@ -116,7 +124,31 @@
       []
     );
 
+    personEditorSessionVersion+=1;
+
+    if(personEditorWarmupHandle!=null){
+      if(
+        personEditorWarmupMode==='idle'&&
+        typeof global.cancelIdleCallback==='function'
+      ){
+        global.cancelIdleCallback(
+          personEditorWarmupHandle
+        );
+      }else{
+        global.clearTimeout(
+          personEditorWarmupHandle
+        );
+      }
+    }
+
+    personEditorWarmupHandle=null;
+    personEditorWarmupMode='';
+    personEditorRelationshipDataReady=false;
     personEditorRelationshipUiReady=false;
+    personEditorRelationshipAuthority=null;
+    personEditorRelationCandidates=[];
+    personEditorRelationCandidateById=new Map();
+    personEditorParentCandidateIds=new Set();
     personEditorMediaDraftReady=false;
     personEditorMediaUiReady=false;
   }
@@ -277,9 +309,115 @@ function buildPersonEditorDraft({
       );
   }
 
+  function editorRelationCandidate(
+    simId
+  ){
+    return personEditorRelationCandidateById
+      .get(
+        String(simId||'')
+      )||
+      null;
+  }
+
+  function ensureEditorRelationNativeOption(
+    selectId,
+    simId
+  ){
+    const select=$(selectId);
+    const id=String(simId||'');
+
+    if(!select||!id)return null;
+
+    let option=
+      [...select.options]
+        .find(item=>
+          String(item.value)===id
+        );
+
+    if(option)return option;
+
+    const candidate=
+      editorRelationCandidate(id);
+
+    if(!candidate)return null;
+
+    option=
+      document.createElement(
+        'option'
+      );
+
+    option.value=id;
+    option.textContent=
+      candidate.label;
+
+    select.appendChild(
+      option
+    );
+
+    return option;
+  }
+
+  function replaceEditorRelationSelection(
+    selectId,
+    ids
+  ){
+    const select=$(selectId);
+    if(!select)return;
+
+    const selectedIds=[
+      ...new Set(
+        (ids||[])
+          .map(String)
+          .filter(Boolean)
+      )
+    ];
+
+    const fragment=
+      document.createDocumentFragment();
+
+    selectedIds.forEach(id=>{
+      const candidate=
+        editorRelationCandidate(id);
+
+      if(!candidate)return;
+
+      const option=
+        document.createElement(
+          'option'
+        );
+
+      option.value=id;
+      option.textContent=
+        candidate.label;
+      option.selected=true;
+
+      fragment.appendChild(
+        option
+      );
+    });
+
+    select.replaceChildren(
+      fragment
+    );
+  }
+
   function applyEditorSiblingStateToSelect(){
     const select=$('fSiblings');
     if(!select)return;
+
+    const activeIds=[
+      ...new Set([
+        ...simEditorState.explicitSiblingIds,
+        ...simEditorState.derivedSiblingIds
+      ])
+    ];
+
+    activeIds.forEach(id=>{
+      ensureEditorRelationNativeOption(
+        'fSiblings',
+        id
+      );
+    });
 
     [...select.options]
       .forEach(option=>{
@@ -1368,8 +1506,136 @@ function buildPersonEditorDraft({
     return descendants;
   }
 
+  function preparePersonEditorRelationshipData(){
+    if(personEditorRelationshipDataReady){
+      return;
+    }
+
+    const sim=
+      currentSimEditorPerson();
+
+    const db=
+      currentGenealogyData();
+
+    const allSims=
+      Object.values(
+        db.sims
+      );
+
+    personEditorRelationshipAuthority=
+      sim
+        ? resolveDirectFamilyRelationships(
+            sim.id
+          )
+        : null;
+
+    personEditorRelationCandidates=
+      allSims
+        .filter(candidate=>
+          !sim||
+          String(candidate.id)!==
+          String(sim.id)
+        )
+        .map(candidate=>({
+          value:String(candidate.id),
+          label:displayDataText(
+            candidate.name,
+            candidate
+          )
+        }));
+
+    personEditorRelationCandidateById=
+      new Map(
+        personEditorRelationCandidates
+          .map(candidate=>[
+            candidate.value,
+            candidate
+          ])
+      );
+
+    const descendantIds=
+      sim
+        ? collectPersonEditorDescendantIds(
+            allSims,
+            sim.id
+          )
+        : new Set();
+
+    personEditorParentCandidateIds=
+      new Set(
+        personEditorRelationCandidates
+          .map(candidate=>
+            candidate.value
+          )
+          .filter(id=>
+            !descendantIds.has(id)
+          )
+      );
+
+    personEditorRelationshipDataReady=true;
+  }
+
+  function personEditorRelationshipOptionProvider({
+    selectId
+  }={}){
+    preparePersonEditorRelationshipData();
+
+    if(selectId==='fParents'){
+      return personEditorRelationCandidates
+        .filter(candidate=>
+          personEditorParentCandidateIds
+            .has(candidate.value)
+        );
+    }
+
+    return personEditorRelationCandidates;
+  }
+
+  function schedulePersonEditorRelationshipWarmup(){
+    const sessionVersion=
+      personEditorSessionVersion;
+
+    const run=()=>{
+      personEditorWarmupHandle=null;
+      personEditorWarmupMode='';
+
+      if(
+        sessionVersion!==
+        personEditorSessionVersion||
+        !mask.classList.contains('show')
+      ){
+        return;
+      }
+
+      preparePersonEditorRelationshipData();
+    };
+
+    if(
+      typeof global.requestIdleCallback===
+      'function'
+    ){
+      personEditorWarmupMode='idle';
+      personEditorWarmupHandle=
+        global.requestIdleCallback(
+          run,
+          {
+            timeout:250
+          }
+        );
+    }else{
+      personEditorWarmupMode='timeout';
+      personEditorWarmupHandle=
+        global.setTimeout(
+          run,
+          80
+        );
+    }
+  }
+
   function initializePersonEditorRelationshipUi(){
     if(personEditorRelationshipUiReady)return;
+
+    preparePersonEditorRelationshipData();
 
     const sim=
       currentSimEditorPerson();
@@ -1378,11 +1644,7 @@ function buildPersonEditorDraft({
       currentGenealogyData();
 
     const familyAuthority=
-      sim
-        ? resolveDirectFamilyRelationships(
-            sim.id
-          )
-        : null;
+      personEditorRelationshipAuthority;
 
     $('fFamilyIds').innerHTML=
       db.families
@@ -1420,38 +1682,6 @@ function buildPersonEditorDraft({
           );
       });
 
-    const allSims=
-      Object.values(
-        db.sims
-      );
-
-    const descendantIds=
-      sim
-        ? collectPersonEditorDescendantIds(
-            allSims,
-            sim.id
-          )
-        : new Set();
-
-    const parentOptions=
-      allSims
-        .filter(candidate=>
-          !sim||
-          (
-            candidate.id!==sim.id&&
-            !descendantIds.has(
-              String(candidate.id)
-            )
-          )
-        )
-        .map(candidate=>
-          `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-        )
-        .join('');
-
-    $('fParents').innerHTML=
-      parentOptions;
-
     simEditorState.parentKinds=
       new Map();
 
@@ -1465,68 +1695,30 @@ function buildPersonEditorDraft({
         });
     }
 
-    [...$('fParents').options]
-      .forEach(option=>{
-        option.selected=
-          simEditorState
-            .parentKinds
-            .has(
-              String(option.value)
-            );
-      });
+    replaceEditorRelationSelection(
+      'fParents',
+      [...simEditorState.parentKinds.keys()]
+    );
 
-    const relationOptions=
-      allSims
-        .filter(candidate=>
-          !sim||
-          candidate.id!==sim.id
-        )
-        .map(candidate=>
-          `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-        )
-        .join('');
+    replaceEditorRelationSelection(
+      'fSpouse',
+      familyAuthority
+        ? familyAuthority.spouses
+            .map(relation=>
+              relation.targetId
+            )
+        : []
+    );
 
-    $('fSpouse').innerHTML=
-      relationOptions;
-
-    const currentSpouses=
-      new Set(
-        familyAuthority
-          ? familyAuthority.spouses
-              .map(relation=>
-                relation.targetId
-              )
-          : []
-      );
-
-    [...$('fSpouse').options]
-      .forEach(option=>{
-        option.selected=
-          currentSpouses.has(
-            String(option.value)
-          );
-      });
-
-    $('fExSpouse').innerHTML=
-      relationOptions;
-
-    const currentExSpouses=
-      new Set(
-        familyAuthority
-          ? familyAuthority.exSpouses
-              .map(relation=>
-                relation.targetId
-              )
-          : []
-      );
-
-    [...$('fExSpouse').options]
-      .forEach(option=>{
-        option.selected=
-          currentExSpouses.has(
-            String(option.value)
-          );
-      });
+    replaceEditorRelationSelection(
+      'fExSpouse',
+      familyAuthority
+        ? familyAuthority.exSpouses
+            .map(relation=>
+              relation.targetId
+            )
+        : []
+    );
 
     const childRelations=
       familyAuthority
@@ -1548,18 +1740,10 @@ function buildPersonEditorDraft({
           ])
       );
 
-    $('fChildren').innerHTML=
-      relationOptions;
-
-    [...$('fChildren').options]
-      .forEach(option=>{
-        option.selected=
-          simEditorState
-            .childKinds
-            .has(
-              String(option.value)
-            );
-      });
+    replaceEditorRelationSelection(
+      'fChildren',
+      [...simEditorState.childKinds.keys()]
+    );
 
     simEditorState.explicitSiblingIds=
       new Set(
@@ -1587,13 +1771,18 @@ function buildPersonEditorDraft({
           : []
       );
 
-    $('fSiblings').innerHTML=
-      relationOptions;
+    replaceEditorRelationSelection(
+      'fSiblings',
+      [
+        ...simEditorState.explicitSiblingIds,
+        ...simEditorState.derivedSiblingIds
+      ]
+    );
 
     applyEditorSiblingStateToSelect();
 
-    $('relationshipTarget').innerHTML=
-      relationOptions;
+    // 其他關係目標不需要預先建立整份人物 option。
+    $('relationshipTarget').replaceChildren();
 
     resetOtherRelationshipEditor();
     populateRelationshipTypePicker();
@@ -1857,6 +2046,7 @@ function buildPersonEditorDraft({
 
     requestAnimationFrame(()=>{
       syncEditorPreviewSheetGeometry();
+      schedulePersonEditorRelationshipWarmup();
     });
 
     setTimeout(
@@ -2988,6 +3178,12 @@ function commitPersonEditorDraft() {
 
     if (mounted) return;
     mounted = true;
+
+    global.L1nGGenealogyUIController
+      ?.registerOptionProvider?.(
+        'person-editor-relations',
+        personEditorRelationshipOptionProvider
+      );
 
     $('avatarInput').onchange=async event=>{
       const file=event.target.files[0];
