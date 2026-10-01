@@ -19,6 +19,10 @@
     const controllers = new Set();
     const controllerById = new Map();
     const controllerBySource = new WeakMap();
+
+    // ========【虛擬選項資料源】 設定 - 大型下拉不必把全部候選人複製進多個原生 select ========
+    const optionProviders = new Map();
+
     let formObserver = null;
     let activeController = null;
     let activeKeyboardIndex = -1;
@@ -192,6 +196,61 @@
       });
     }
 
+    function registerOptionProvider(name, provider) {
+      const key = String(name || '').trim();
+
+      if (
+        !key ||
+        typeof provider !== 'function'
+      ) {
+        return false;
+      }
+
+      optionProviders.set(
+        key,
+        provider
+      );
+
+      return true;
+    }
+
+    function unregisterOptionProvider(name) {
+      return optionProviders.delete(
+        String(name || '').trim()
+      );
+    }
+
+    function normalizeProvidedOption(item) {
+      if (
+        !item ||
+        item.value == null
+      ) {
+        return null;
+      }
+
+      const value =
+        String(item.value);
+
+      return {
+        value,
+        label:
+          String(
+            item.label ??
+            item.text ??
+            value
+          ),
+        selected:
+          item.selected === true,
+        disabled:
+          item.disabled === true,
+        note:
+          String(
+            item.note ||
+            ''
+          )
+      };
+    }
+
     function createSearchableSelect(wrap) {
       const selectId = String(wrap.dataset.uiSelectFor || '');
       if (!selectId) return null;
@@ -215,8 +274,170 @@
       const addOnly =
         multiple &&
         wrap.dataset.uiSelectMode === 'add-only';
+
+      const providerName =
+        String(
+          wrap.dataset.uiSelectProvider ||
+          ''
+        ).trim();
+
       const placeholderSource = wrap.dataset.placeholder || '點選選擇…';
       const home = { parent:dropdown.parentNode, next:dropdown.nextSibling };
+
+      function nativeOptionModel(option) {
+        return {
+          value:String(option.value),
+          label:String(option.textContent || ''),
+          selected:!!option.selected,
+          disabled:!!option.disabled,
+          note:String(option.dataset.uiSelectNote || '')
+        };
+      }
+
+      function optionModels() {
+        const provider =
+          providerName
+            ? optionProviders.get(
+                providerName
+              )
+            : null;
+
+        if (!provider) {
+          return [...select.options]
+            .map(nativeOptionModel);
+        }
+
+        let provided = [];
+
+        try {
+          const result =
+            provider({
+              selectId,
+              select,
+              wrap
+            });
+
+          if (Array.isArray(result)) {
+            provided = result;
+          }
+        } catch (_) {
+          provided = [];
+        }
+
+        const nativeByValue =
+          new Map(
+            [...select.options]
+              .map(option=>[
+                String(option.value),
+                option
+              ])
+          );
+
+        const models = [];
+        const seen = new Set();
+
+        provided
+          .map(normalizeProvidedOption)
+          .filter(Boolean)
+          .forEach(model=>{
+            const native =
+              nativeByValue.get(
+                model.value
+              );
+
+            if (native) {
+              model.selected =
+                !!native.selected;
+
+              model.disabled =
+                !!native.disabled ||
+                model.disabled;
+
+              model.note =
+                String(
+                  native.dataset
+                    .uiSelectNote ||
+                  model.note ||
+                  ''
+                );
+            }
+
+            models.push(model);
+            seen.add(model.value);
+          });
+
+        // 已選或曾操作過的項目即使暫時不在 provider 候選中，也必須保留。
+        nativeByValue.forEach((option,value)=>{
+          if(seen.has(value))return;
+          models.push(
+            nativeOptionModel(
+              option
+            )
+          );
+        });
+
+        return models;
+      }
+
+      function ensureNativeOption(model) {
+        const value =
+          String(
+            model?.value ??
+            ''
+          );
+
+        let option =
+          [...select.options]
+            .find(item=>
+              String(item.value)===
+              value
+            );
+
+        if (!option) {
+          option =
+            document.createElement(
+              'option'
+            );
+
+          option.value=value;
+          option.textContent=
+            String(
+              model?.label ??
+              value
+            );
+
+          select.appendChild(
+            option
+          );
+        }
+
+        if (
+          model &&
+          model.label != null
+        ) {
+          option.textContent=
+            String(model.label);
+        }
+
+        option.disabled=
+          model?.disabled === true;
+
+        const note=
+          String(
+            model?.note ||
+            ''
+          );
+
+        if(note){
+          option.dataset
+            .uiSelectNote=note;
+        }else{
+          delete option.dataset
+            .uiSelectNote;
+        }
+
+        return option;
+      }
 
       function restoreHome() {
         if (!portal || dropdown.parentNode === home.parent) return;
@@ -350,91 +571,207 @@
       function paintOptions(filter = '') {
         const raw = String(filter || '').trim();
         const query = raw.toLowerCase();
-        const options = [...select.options];
+        const options = optionModels();
+
         const availableOptions =
           addOnly
-            ? options.filter(option => !option.selected && !option.disabled)
+            ? options.filter(option =>
+                !option.selected &&
+                !option.disabled
+              )
             : options;
+
         const filtered = query
-          ? availableOptions.filter(option => option.textContent.toLowerCase().includes(query))
+          ? availableOptions.filter(option =>
+              option.label
+                .toLowerCase()
+                .includes(query)
+            )
           : availableOptions;
-        const hasExact = !!raw && options.some(option =>
-          option.value === raw ||
-          option.textContent.trim().toLowerCase() === query
-        );
 
-        const optionHTML = filtered.map(option => {
-          const empty = option.value === '';
-          const classes = [
-            'ui-select-option',
-            option.selected ? 'selected' : '',
-            option.disabled ? 'disabled' : '',
-            empty ? 'none' : ''
-          ].filter(Boolean).join(' ');
-          const check = multiple && !empty
-            ? '<span class="check">' + (option.selected ? iconSvg('check-lg') : '') + '</span>'
-            : '';
-          const selectedIcon = !multiple && option.selected
-            ? '<span class="ui-select-option-selected-icon">' + iconSvg('check-lg') + '</span>'
-            : '';
-          const note = option.dataset.uiSelectNote || '';
-
-          return (
-            '<div class="' + classes + '" data-value="' + esc(option.value) + '"' +
-            (option.disabled ? ' aria-disabled="true"' : '') +
-            ' role="option" aria-selected="' + (option.selected ? 'true' : 'false') + '">' +
-            check +
-            '<span>' + esc(option.textContent) + '</span>' +
-            (note ? '<span class="ui-select-option-note">' + esc(note) + '</span>' : '') +
-            selectedIcon +
-            '</div>'
+        const hasExact =
+          !!raw &&
+          options.some(option =>
+            option.value === raw ||
+            option.label
+              .trim()
+              .toLowerCase() === query
           );
-        }).join('');
+
+        const optionHTML =
+          filtered
+            .map(option => {
+              const empty =
+                option.value === '';
+
+              const classes = [
+                'ui-select-option',
+                option.selected
+                  ? 'selected'
+                  : '',
+                option.disabled
+                  ? 'disabled'
+                  : '',
+                empty
+                  ? 'none'
+                  : ''
+              ]
+                .filter(Boolean)
+                .join(' ');
+
+              const check =
+                multiple &&
+                !empty
+                  ? '<span class="check">' +
+                    (
+                      option.selected
+                        ? iconSvg('check-lg')
+                        : ''
+                    ) +
+                    '</span>'
+                  : '';
+
+              const selectedIcon =
+                !multiple &&
+                option.selected
+                  ? '<span class="ui-select-option-selected-icon">' +
+                    iconSvg('check-lg') +
+                    '</span>'
+                  : '';
+
+              return (
+                '<div class="' +
+                classes +
+                '" data-value="' +
+                esc(option.value) +
+                '"' +
+                (
+                  option.disabled
+                    ? ' aria-disabled="true"'
+                    : ''
+                ) +
+                ' role="option" aria-selected="' +
+                (
+                  option.selected
+                    ? 'true'
+                    : 'false'
+                ) +
+                '">' +
+                  check +
+                  '<span>' +
+                    esc(option.label) +
+                  '</span>' +
+                  (
+                    option.note
+                      ? '<span class="ui-select-option-note">' +
+                        esc(option.note) +
+                        '</span>'
+                      : ''
+                  ) +
+                  selectedIcon +
+                '</div>'
+              );
+            })
+            .join('');
 
         const createHTML =
-          creatable && raw && !hasExact
-            ? '<div class="ui-select-option" data-create-value="' + esc(raw) + '" role="option"><span>' +
-              esc(createOptionText(raw)) + '</span></div>'
+          creatable &&
+          raw &&
+          !hasExact
+            ? '<div class="ui-select-option" data-create-value="' +
+              esc(raw) +
+              '" role="option"><span>' +
+              esc(
+                createOptionText(raw)
+              ) +
+              '</span></div>'
             : '';
 
         optionsHost.innerHTML =
-          optionHTML || createHTML
-            ? optionHTML + createHTML
-            : '<div class="ui-select-empty">' + esc(uiText('沒有符合的項目')) + '</div>';
+          optionHTML ||
+          createHTML
+            ? optionHTML +
+              createHTML
+            : '<div class="ui-select-empty">' +
+              esc(
+                uiText(
+                  '沒有符合的項目'
+                )
+              ) +
+              '</div>';
 
-        resetKeyboardIndex(optionsHost);
+        resetKeyboardIndex(
+          optionsHost
+        );
 
-        optionsHost.querySelectorAll('.ui-select-option[data-value]').forEach(element => {
-          element.onclick = event => {
-            event.stopPropagation();
+        optionsHost
+          .querySelectorAll(
+            '.ui-select-option[data-value]'
+          )
+          .forEach(element => {
+            element.onclick = event => {
+              event.stopPropagation();
 
-            const option = [...select.options].find(item => item.value === element.dataset.value);
-            if (!option || option.disabled) return;
+              const model =
+                optionModels()
+                  .find(item =>
+                    item.value ===
+                    element.dataset.value
+                  );
 
-            if (multiple) {
-              option.selected =
-                addOnly
-                  ? true
-                  : !option.selected;
-              paintSelection();
-              paintOptions(search.value);
-              emitChange(select);
-
-              if (portal) {
-                global.requestAnimationFrame(position);
+              if (
+                !model ||
+                model.disabled
+              ) {
+                return;
               }
-            } else {
-              selectSingle(option);
-            }
-          };
-        });
 
-        optionsHost.querySelectorAll('[data-create-value]').forEach(element => {
-          element.onclick = event => {
-            event.stopPropagation();
-            commit(element.dataset.createValue);
-          };
-        });
+              const option =
+                ensureNativeOption(
+                  model
+                );
+
+              if (multiple) {
+                option.selected =
+                  addOnly
+                    ? true
+                    : !option.selected;
+
+                paintSelection();
+                paintOptions(
+                  search.value
+                );
+                emitChange(
+                  select
+                );
+
+                if (portal) {
+                  global
+                    .requestAnimationFrame(
+                      position
+                    );
+                }
+              } else {
+                selectSingle(
+                  option
+                );
+              }
+            };
+          });
+
+        optionsHost
+          .querySelectorAll(
+            '[data-create-value]'
+          )
+          .forEach(element => {
+            element.onclick = event => {
+              event.stopPropagation();
+              commit(
+                element.dataset
+                  .createValue
+              );
+            };
+          });
       }
 
       function open() {
@@ -1159,6 +1496,8 @@
       refreshControl,
       refreshAllControls,
       readPendingValue,
+      registerOptionProvider,
+      unregisterOptionProvider,
       observeFormControls,
       dispose
     });
