@@ -959,6 +959,27 @@ function buildPersonEditorDraft(){
     sheet.setAttribute('inert','');
   }
 
+  function syncEditorPreviewSheetGeometry(){
+    const modal=document.querySelector('.sim-editor-modal');
+    if(!modal||!mask.classList.contains('show'))return;
+
+    const rect=modal.getBoundingClientRect();
+
+    if(rect.width>0){
+      mask.style.setProperty(
+        '--sim-editor-sheet-width',
+        rect.width.toFixed(2)+'px'
+      );
+    }
+
+    if(rect.height>0){
+      mask.style.setProperty(
+        '--sim-editor-sheet-height',
+        rect.height.toFixed(2)+'px'
+      );
+    }
+  }
+
   function familyEditorToggleDefaultLabel(button){
     return button?.dataset.familyEditorToggle==='family-membership'
       ? '管理'
@@ -1348,6 +1369,11 @@ function buildPersonEditorDraft(){
     if(newRelHint)newRelHint.hidden=!!sim;
 
     mask.classList.add('show');
+
+    requestAnimationFrame(()=>{
+      syncEditorPreviewSheetGeometry();
+    });
+
     setTimeout(()=>$('fName').focus(),60);
   }
 
@@ -1971,6 +1997,23 @@ function commitPersonEditorDraft() {
     );
 
     setupPersonEditorInteractions();
+
+    const editorModal=document.querySelector('.sim-editor-modal');
+
+    if(editorModal&&global.ResizeObserver){
+      const previewSheetObserver=new ResizeObserver(()=>{
+        if(mask.classList.contains('show')){
+          syncEditorPreviewSheetGeometry();
+        }
+      });
+
+      previewSheetObserver.observe(editorModal);
+    }
+
+    global.addEventListener(
+      'resize',
+      syncEditorPreviewSheetGeometry
+    );
   }
 
   const state =
