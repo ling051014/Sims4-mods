@@ -209,6 +209,11 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     font-weight:760;
 }
 
+/* ========【Genealogy Exporter 中文主標題】 設定 - 「族譜提取器」維持單行 ======== */
+.hero h1 [data-lang="zh-Hant"] {
+    white-space:nowrap;
+}
+
 .hero-lead {
     max-width:720px;
     margin:0 0 14px;
