@@ -2364,6 +2364,15 @@ function bindOtherRelationshipControls(
             return;
           }
 
+          if(
+            button.getAttribute(
+              'aria-expanded'
+            )==='true'
+          ){
+            picker.close?.();
+            return;
+          }
+
           picker.open({
             trigger:button,
             value:currentType,
