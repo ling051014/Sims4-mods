@@ -1863,39 +1863,56 @@ button.avatar-editor-action { cursor:pointer; }
 .family-rel-manage:hover { color:var(--action-primary-hover); text-decoration:underline; }
 .family-rel-preview { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:4px 10px; min-height:29px; align-items:center; }
 
-/* ========【家庭關係自訂顯示文字】 設定 - 直接整合於每位關係人物列 ======== */
+/* ========【家庭關係編輯列】 設定 - 檢視 / 編輯共用同一人物列，避免重複三層 ======== */
 .family-rel-preview.family-rel-preview-editable {
-    /* 每位關係人物獨立一列 */ grid-template-columns: 1fr;
-    /* 列與列之間保留空隙 */ gap: 5px;
+    /* 編輯時每位人物獨立一列 */ grid-template-columns: 1fr;
+    /* 列間距 */ gap: 5px;
 }
 
 .family-rel-preview-row {
-    /* 人物與自訂顯示文字入口並排 */ display: grid;
-    /* 左側人物自適應，右側按鈕依內容寬度 */ grid-template-columns: minmax(0,1fr) auto;
+    /* 平常狀態沿用純人物摘要 */ display: grid;
+    /* 只有一個人物欄 */ grid-template-columns: minmax(0,1fr);
     /* 垂直對齊 */ align-items: center;
-    /* 欄位間距 */ column-gap: 10px;
-    /* 行間距 */ row-gap: 5px;
-    /* 內縮空間 */ padding: 3px 5px;
+    /* 項目間距 */ gap: 6px;
+    /* 內縮空間 */ padding: 3px 2px;
     /* 圓角 */ border-radius: 6px;
-    /* 背景 */ background: transparent;
 }
 
-.family-rel-preview-row:hover {
-    /* 懸停時只做輕量辨識 */ background: var(--surface-item-hover);
+.family-rel-preview-row.is-editing {
+    /* 編輯狀態：人物 + 操作同一列 */ grid-template-columns: minmax(0,1fr) auto;
+    /* 欄位間距 */ column-gap: 8px;
+    /* 行間距 */ row-gap: 6px;
+    /* 編輯狀態增加少量內距 */ padding: 4px 5px;
+    /* 使用輕量底色區分編輯 */ background: var(--surface-panel);
+    /* 邊框 */ border: 1px solid var(--border-default);
 }
 
 .family-rel-preview-row > .family-rel-person {
-    /* 人物內容不額外增加外距 */ padding: 0;
+    /* 人物摘要本身不再額外包第二層卡片 */ padding: 0;
 }
 
-.family-rel-label-control {
-    /* 讓按鈕與展開欄位共用右側控制區 */ display: contents;
+.family-rel-row-actions {
+    /* 所有編輯控制集中於同一列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 控制間距 */ gap: 5px;
+    /* 不讓控制區壓縮人物名稱 */ flex: 0 0 auto;
+}
+
+.family-rel-kind-select {
+    /* 親生 / 收養只保留一個小型選擇器 */ width: 86px;
+    /* 最小高度 */ min-height: 29px;
+    /* 內縮空間 */ padding: 4px 25px 4px 7px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 6px;
+    /* 背景 */ background: var(--surface-input);
+    /* 文字顏色 */ color: var(--text-primary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 10.5px;
 }
 
 .family-rel-label-toggle {
-    /* 右側小型文字按鈕 */ justify-self: end;
-    /* 不換行 */ white-space: nowrap;
-    /* 內縮空間 */ padding: 3px 7px;
+    /* 自訂文字只在編輯狀態顯示 */ white-space: nowrap;
+    /* 內縮空間 */ padding: 4px 7px;
     /* 邊框 */ border: 1px solid var(--border-default);
     /* 圓角 */ border-radius: 5px;
     /* 背景 */ background: var(--surface-input);
@@ -1907,26 +1924,44 @@ button.avatar-editor-action { cursor:pointer; }
 
 .family-rel-label-toggle:hover,
 .family-rel-label-toggle[aria-expanded="true"] {
-    /* 懸停與展開狀態使用主色 */ border-color: var(--action-primary);
+    /* 懸停 / 展開狀態 */ border-color: var(--action-primary);
     /* 文字顏色 */ color: var(--action-primary);
-    /* 背景 */ background: var(--surface-item);
+}
+
+.family-rel-remove {
+    /* 移除關係使用小型圖示按鈕 */ width: 28px;
+    /* 高度 */ height: 28px;
+    /* 取消多餘內距 */ padding: 0;
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 5px;
+    /* 背景 */ background: var(--surface-input);
+    /* 危險操作顏色 */ color: #b03a2e;
+    /* 滑鼠指標 */ cursor: pointer;
+}
+
+.family-rel-remove:hover {
+    /* 懸停邊框 */ border-color: #d7a69e;
+    /* 懸停背景 */ background: color-mix(in srgb,#b03a2e 7%,var(--surface-input));
 }
 
 .family-rel-label-editor {
-    /* 展開欄位跨越整列 */ grid-column: 1 / -1;
+    /* 自訂文字輸入框展開於人物列下方 */ grid-column: 1 / -1;
     /* 輸入框與恢復按鈕並排 */ display: grid;
-    /* 輸入框自適應，按鈕依內容寬度 */ grid-template-columns: minmax(0,1fr) auto;
-    /* 垂直對齊 */ align-items: center;
+    /* 欄寬 */ grid-template-columns: minmax(0,1fr) auto;
+    /* 垂直置中 */ align-items: center;
     /* 項目間距 */ gap: 6px;
-    /* 與頭像左緣對齊後再內縮 */ padding-left: 31px;
+    /* 與人物文字起點對齊 */ padding-left: 31px;
 }
 
 .family-rel-label-editor[hidden] {
-    /* 收合時完全移除版面 */ display: none;
+    /* 收合時不佔版面 */ display: none;
 }
 
 .family-rel-label-input {
-    /* 元素寬度 */ width: 100%;
+    /* 寬度 */ width: 100%;
     /* 最小高度 */ min-height: 30px;
     /* 內縮空間 */ padding: 5px 8px;
     /* 邊框 */ border: 1px solid var(--border-default);
@@ -1960,6 +1995,26 @@ button.avatar-editor-action { cursor:pointer; }
     /* 懸停文字 */ color: var(--action-primary);
 }
 
+.ui-select-wrap[data-ui-select-mode="add-only"] .ui-select-input {
+    /* 新增關係入口改成輕量按鈕感，不再顯示已選人物標籤 */ min-height: 31px;
+    /* 邊框樣式 */ border-style: dashed;
+    /* 文字顏色 */ color: var(--action-primary);
+    /* 背景 */ background: transparent;
+}
+
+.ui-select-add-label {
+    /* 新增入口圖示與文字並排 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 間距 */ gap: 5px;
+    /* 字體大小 */ font-size: 11px;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+.ui-select-add-label .l1ng-icon {
+    /* 圖示尺寸 */ width: 12px;
+    /* 圖示高度 */ height: 12px;
+}
+
 .family-rel-empty { color:var(--text-secondary); font-size:11.5px; }
 .family-rel-person { display:flex; align-items:center; gap:7px; min-width:0; max-width:100%; padding:3px 2px; border:0; border-radius:5px; background:transparent; color:var(--text-primary); font-size:11.5px; }
 .family-rel-person-avatar { width:24px; height:24px; flex:0 0 24px; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:999px; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); color:var(--avatar-text); font-size:10px; font-weight:700; }
@@ -1976,12 +2031,6 @@ button.avatar-editor-action { cursor:pointer; }
 .family-rel-edit-grid[hidden] { display:none; }
 .family-rel-edit label { display:grid; gap:4px; color:var(--text-secondary); font-size:10.5px; font-weight:600; }
 .family-rel-edit .ui-select-input { min-height:34px; }
-.family-rel-kind-list { display:grid; gap:5px; margin-top:7px; }
-.family-rel-kind-list:empty { display:none; }
-.family-rel-kind-row { display:grid; grid-template-columns:minmax(0,1fr) 132px; align-items:center; gap:8px; min-height:34px; padding:5px 7px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-panel); }
-.family-rel-kind-person { display:flex; align-items:center; gap:7px; min-width:0; color:var(--text-primary); font-size:11.5px; }
-.family-rel-kind-person .family-rel-person-avatar { width:24px; height:24px; flex-basis:24px; }
-.family-rel-kind-row select { width:100%; min-width:0; min-height:30px; padding:4px 28px 4px 7px; border:1px solid var(--border-default); border-radius:6px; background-color:var(--surface-input); color:var(--text-primary); font:inherit; font-size:11px; }
 .family-rel-person-copy { display:grid; min-width:0; gap:1px; }
 .family-rel-person-kinship { color:var(--text-secondary); font-size:10px; line-height:1.25; }
 .sim-editor-panel .relationship-section.first { margin-top:0; padding-top:0; border-top:0; }
@@ -6543,7 +6592,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .family-rel-editor { grid-template-columns:1fr; }
   .family-rel-block { border-bottom:1px solid var(--border-default) !important; }
   .family-rel-block:last-child { border-bottom:0 !important; }
-  .family-rel-kind-row { grid-template-columns:minmax(0,1fr) 120px; }
   .pet-editor-layout { grid-template-columns:150px minmax(0,1fr); gap:14px; }
   .person-profile-panel { width:min(540px,100%); }
 }
@@ -6557,8 +6605,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .pet-avatar-editor-block { width:100%; }
   .pet-editor-fields { grid-template-columns:1fr; }
   .pet-field-full { grid-column:auto; }
-  .family-rel-kind-row { grid-template-columns:1fr; }
-  .family-rel-preview-row { grid-template-columns:minmax(0,1fr) auto; column-gap:7px; }
+  .family-rel-preview-row.is-editing { grid-template-columns:1fr; }
+  .family-rel-row-actions { flex-wrap:wrap; justify-content:flex-start; padding-left:31px; }
   .family-rel-label-editor { padding-left:0; }
   .profile-fact-edit-row { grid-template-columns:1fr; }
   .profile-residence-field { grid-column:auto; }
