@@ -561,8 +561,9 @@ function buildPersonEditorDraft(){
   }
 
   function renderEditorInfoPreview(){
-    const target=$('editorInfoPreview');
-    if(!target)return;
+    const stage=$('editorInfoPreview');
+    const target=$('editorInfoPreviewCard');
+    if(!stage||!target)return;
 
     const draft=buildPersonEditorDraft();
 
@@ -586,25 +587,17 @@ function buildPersonEditorDraft(){
   }
 
   function renderPersonEditorInfoPreviewIfActive(){
-    const stack=$('simEditorStack');
-    if(stack?.dataset.activePage==='preview'){
-      renderEditorInfoPreview();
-    }
+    const panel=document.querySelector('.sim-editor-panel[data-editor-panel="preview"]');
+    if(panel&&!panel.hidden)renderEditorInfoPreview();
   }
 
   function switchEditorTab(tabName='basic'){
     const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
     const panels=[...document.querySelectorAll('.sim-editor-panel[data-editor-panel]')];
-    const stack=$('simEditorStack');
-    const editPage=document.querySelector('.sim-editor-edit-page');
-    const previewPage=$('simEditorPreviewPage');
 
     if(!tabs.some(tab=>tab.dataset.editorTab===tabName)){
       tabName='basic';
     }
-
-    const previewActive=
-      tabName==='preview';
 
     tabs.forEach(tab=>{
       const active=tab.dataset.editorTab===tabName;
@@ -613,54 +606,17 @@ function buildPersonEditorDraft(){
       tab.tabIndex=active?0:-1;
     });
 
-    if(stack){
-      stack.dataset.activePage=
-        previewActive
-          ? 'preview'
-          : 'editor';
-    }
-
-    if(editPage){
-      editPage.setAttribute(
-        'aria-hidden',
-        previewActive?'true':'false'
-      );
-      editPage.inert=previewActive;
-    }
-
-    if(previewPage){
-      previewPage.setAttribute(
-        'aria-hidden',
-        previewActive?'false':'true'
-      );
-      previewPage.inert=!previewActive;
-    }
-
     panels.forEach(panel=>{
-      const active=
-        !previewActive &&
-        panel.dataset.editorPanel===tabName;
-
-      panel.classList.toggle(
-        'active',
-        active
-      );
+      const active=panel.dataset.editorPanel===tabName;
+      panel.classList.toggle('active',active);
       panel.hidden=!active;
     });
 
     const content=document.querySelector('.sim-editor-content');
-    if(content&&!previewActive){
-      content.scrollTop=0;
-    }
+    if(content)content.scrollTop=0;
 
-    if(previewActive){
+    if(tabName==='preview'){
       renderEditorInfoPreview();
-
-      requestAnimationFrame(()=>{
-        if(previewPage){
-          previewPage.scrollTop=0;
-        }
-      });
     }
   }
 
