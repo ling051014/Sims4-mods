@@ -3314,6 +3314,9 @@ function relationshipTypeOptions() {
 }
 
 let relationshipTypePickerCategory='romance';
+let relationshipTypePickerTrigger=null;
+let relationshipTypePickerValue='';
+let relationshipTypePickerOnSelect=null;
 
 function relationshipTypePickerCategoryOf(option){
   if(option?.custom)return'custom';
@@ -3513,6 +3516,49 @@ function relationshipTypePickerFilteredOptions(){
   );
 }
 
+function activeRelationshipTypePickerTrigger(){
+  return (
+    relationshipTypePickerTrigger||
+    $('relationshipTypeTrigger')
+  );
+}
+
+function activeRelationshipTypePickerValue(){
+  if(relationshipTypePickerOnSelect){
+    return normalizeRelationshipTypeText(
+      relationshipTypePickerValue
+    );
+  }
+
+  return normalizeRelationshipTypeText(
+    $('relationshipType')?.value
+  );
+}
+
+function commitRelationshipTypePickerValue(value){
+  const normalized=
+    normalizeRelationshipTypeText(
+      value
+    );
+
+  if(!normalized)return;
+
+  if(relationshipTypePickerOnSelect){
+    relationshipTypePickerValue=
+      normalized;
+
+    relationshipTypePickerOnSelect(
+      normalized
+    );
+
+    return;
+  }
+
+  setRelationshipTypePickerValue(
+    normalized
+  );
+}
+
 function renderRelationshipTypePickerOptions(){
   const host=$('relationshipTypeOptions');
   const search=$('relationshipTypeSearch');
@@ -3527,9 +3573,7 @@ function renderRelationshipTypePickerOptions(){
     relationshipTypePickerFilteredOptions();
 
   const selected=
-    normalizeRelationshipTypeText(
-      $('relationshipType')?.value
-    );
+    activeRelationshipTypePickerValue();
 
   const optionMarkup=
     options
@@ -3624,7 +3668,7 @@ function renderRelationshipTypePickerOptions(){
           event.preventDefault();
           event.stopPropagation();
 
-          setRelationshipTypePickerValue(
+          commitRelationshipTypePickerValue(
             button.dataset
               .relationshipTypeValue||
             ''
@@ -3646,7 +3690,7 @@ function renderRelationshipTypePickerOptions(){
           event.preventDefault();
           event.stopPropagation();
 
-          setRelationshipTypePickerValue(
+          commitRelationshipTypePickerValue(
             button.dataset
               .createRelationshipType||
             ''
@@ -3701,7 +3745,8 @@ function setRelationshipTypePickerValue(value){
 }
 
 function positionRelationshipTypePicker(){
-  const trigger=$('relationshipTypeTrigger');
+  const trigger=
+    activeRelationshipTypePickerTrigger();
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
 
@@ -3847,19 +3892,53 @@ function positionRelationshipTypePicker(){
   });
 }
 
-function openRelationshipTypePicker(){
+function openRelationshipTypePicker({
+  trigger=$('relationshipTypeTrigger'),
+  value=null,
+  onSelect=null
+}={}){
   const picker=$('relationshipTypePicker');
-  const trigger=$('relationshipTypeTrigger');
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
   const search=$('relationshipTypeSearch');
 
   if(
-    !picker||
     !trigger||
     !popover||
     !index
   )return;
+
+  relationshipTypePickerTrigger=
+    trigger;
+
+  relationshipTypePickerOnSelect=
+    typeof onSelect==='function'
+      ? onSelect
+      : null;
+
+  relationshipTypePickerValue=
+    value==null
+      ? String(
+          $('relationshipType')?.value||
+          ''
+        )
+      : String(value||'');
+
+  const normalizedCurrent=
+    normalizeRelationshipTypeText(
+      relationshipTypePickerValue
+    );
+
+  if(normalizedCurrent){
+    relationshipTypePickerCategory=
+      relationshipTypePickerCategoryOf({
+        value:normalizedCurrent,
+        custom:
+          !SOCIAL_RELATIONSHIP_DEFINITIONS[
+            normalizedCurrent
+          ]
+      });
+  }
 
   if(
     popover.parentElement!==
@@ -3881,7 +3960,11 @@ function openRelationshipTypePicker(){
 
   popover.hidden=false;
 
-  picker.classList.add(
+  picker?.classList.add(
+    'open'
+  );
+
+  trigger.classList.add(
     'open'
   );
 
@@ -3906,11 +3989,12 @@ function openRelationshipTypePicker(){
 
 function closeRelationshipTypePicker(){
   const picker=$('relationshipTypePicker');
-  const trigger=$('relationshipTypeTrigger');
+  const trigger=
+    activeRelationshipTypePickerTrigger();
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
 
-  if(!trigger||!popover)return;
+  if(!popover)return;
 
   popover.hidden=true;
 
@@ -3933,10 +4017,20 @@ function closeRelationshipTypePicker(){
     'open'
   );
 
-  trigger.setAttribute(
-    'aria-expanded',
-    'false'
-  );
+  if(trigger){
+    trigger.classList.remove(
+      'open'
+    );
+
+    trigger.setAttribute(
+      'aria-expanded',
+      'false'
+    );
+  }
+
+  relationshipTypePickerTrigger=null;
+  relationshipTypePickerValue='';
+  relationshipTypePickerOnSelect=null;
 }
 
 
@@ -3962,7 +4056,12 @@ function setupRelationshipTypePicker(){
       event.stopPropagation();
 
       if(popover.hidden){
-        openRelationshipTypePicker();
+        openRelationshipTypePicker({
+          trigger,
+          value:
+            $('relationshipType')?.value||
+            ''
+        });
       }else{
         closeRelationshipTypePicker();
       }
@@ -4005,8 +4104,11 @@ function setupRelationshipTypePicker(){
     event=>{
       if(event.key==='Escape'){
         event.preventDefault();
+        const activeTrigger=
+          activeRelationshipTypePickerTrigger();
+
         closeRelationshipTypePicker();
-        trigger.focus();
+        activeTrigger?.focus();
       }
     }
   );
@@ -4023,8 +4125,14 @@ function setupRelationshipTypePicker(){
       const indexNow=
         $('relationshipTypeIndex');
 
+      const activeTrigger=
+        activeRelationshipTypePickerTrigger();
+
       if(
         pickerNow?.contains(
+          event.target
+        )||
+        activeTrigger?.contains(
           event.target
         )||
         popoverNow?.contains(
@@ -4062,6 +4170,24 @@ function setupRelationshipTypePicker(){
   syncRelationshipTypePickerTabs();
   syncRelationshipTypePickerValue();
 }
+window.L1nGRelationshipTypePicker=
+  Object.freeze({
+    open({
+      trigger,
+      value='',
+      onSelect=null
+    }={}){
+      openRelationshipTypePicker({
+        trigger,
+        value,
+        onSelect
+      });
+    },
+    close(){
+      closeRelationshipTypePicker();
+    }
+  });
+
 
 function populateRelationshipTypePicker(
   selectedValue = ''
