@@ -3704,35 +3704,35 @@ function positionRelationshipTypePicker(){
   const trigger=$('relationshipTypeTrigger');
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
-  const modal=
-    trigger?.closest(
-      '.sim-editor-modal'
-    );
 
   if(
     !trigger||
     !popover||
     !index||
-    !modal||
     popover.hidden
   )return;
 
-  const triggerRect=
+  const rect=
     trigger.getBoundingClientRect();
 
-  const modalRect=
-    modal.getBoundingClientRect();
-
   const margin=10;
-  const gap=5;
+  const gap=6;
   const tabWidth=52;
 
-  const maxAvailableWidth=
+  const viewportWidth=
     Math.max(
-      180,
-      modalRect.width-
-      margin*2-
-      tabWidth
+      1,
+      window.innerWidth||
+      document.documentElement.clientWidth||
+      1
+    );
+
+  const viewportHeight=
+    Math.max(
+      1,
+      window.innerHeight||
+      document.documentElement.clientHeight||
+      1
     );
 
   const width=
@@ -3741,9 +3741,10 @@ function positionRelationshipTypePicker(){
       Math.max(
         220,
         Math.min(
-          triggerRect.width+
-          28,
-          maxAvailableWidth
+          rect.width+28,
+          viewportWidth-
+          margin*2-
+          tabWidth
         )
       )
     );
@@ -3751,82 +3752,69 @@ function positionRelationshipTypePicker(){
   const left=
     Math.min(
       Math.max(
-        margin+
-        tabWidth,
-        triggerRect.left-
-        modalRect.left
+        margin+tabWidth,
+        rect.left
       ),
       Math.max(
-        margin+
-        tabWidth,
-        modalRect.width-
+        margin+tabWidth,
+        viewportWidth-
         width-
         margin
       )
     );
 
-  const triggerTop=
-    triggerRect.top-
-    modalRect.top;
-
-  const triggerBottom=
-    triggerRect.bottom-
-    modalRect.top;
-
   const below=
-    modalRect.height-
-    triggerBottom-
+    viewportHeight-
+    rect.bottom-
     gap-
     margin;
 
   const above=
-    triggerTop-
+    rect.top-
     gap-
     margin;
 
   const openAbove=
-    below<230&&
+    below<260&&
     above>below;
 
   const availableHeight=
     Math.max(
-      180,
+      220,
       openAbove
         ? above
         : below
     );
 
-  const maxHeight=
+  const height=
     Math.min(
       390,
       availableHeight
     );
 
-  popover.style.position='absolute';
+  popover.style.position='fixed';
   popover.style.left=
     Math.round(left)+'px';
   popover.style.width=
     Math.round(width)+'px';
-  popover.style.maxHeight=
-    Math.round(maxHeight)+'px';
-
-  // 先給清單可用高度，讓搜尋列與選項清單都留在編輯器視窗內。
   popover.style.height=
-    Math.round(maxHeight)+'px';
+    Math.round(height)+'px';
+  popover.style.maxHeight=
+    Math.round(height)+'px';
 
   if(openAbove){
     popover.style.top='auto';
     popover.style.bottom=
       Math.round(
-        modalRect.height-
-        triggerTop+
+        viewportHeight-
+        rect.top+
         gap
       )+'px';
   }else{
     popover.style.bottom='auto';
     popover.style.top=
       Math.round(
-        triggerBottom+
+        rect.bottom+
         gap
       )+'px';
   }
@@ -3834,38 +3822,20 @@ function positionRelationshipTypePicker(){
   requestAnimationFrame(()=>{
     if(popover.hidden)return;
 
-    const top=
-      parseFloat(
-        popover.style.top
-      );
+    const menuRect=
+      popover.getBoundingClientRect();
 
-    let indexTop;
-
-    if(
-      Number.isFinite(top)
-    ){
-      indexTop=top;
-    }else{
-      const bottom=
-        parseFloat(
-          popover.style.bottom
-        )||0;
-
-      indexTop=
-        modalRect.height-
-        bottom-
-        popover.offsetHeight;
-    }
-
-    index.style.position='absolute';
+    index.style.position='fixed';
     index.style.display='flex';
     index.style.top=
-      Math.round(indexTop)+'px';
+      Math.round(
+        menuRect.top
+      )+'px';
     index.style.left=
       Math.max(
         2,
         Math.round(
-          left-
+          menuRect.left-
           tabWidth+
           1
         )
@@ -3879,38 +3849,34 @@ function openRelationshipTypePicker(){
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
   const search=$('relationshipTypeSearch');
-  const modal=
-    trigger?.closest(
-      '.sim-editor-modal'
-    );
 
   if(
     !picker||
     !trigger||
     !popover||
-    !index||
-    !modal
+    !index
   )return;
 
   if(
     popover.parentElement!==
-    modal
+    document.body
   ){
-    modal.appendChild(
+    document.body.appendChild(
       popover
     );
   }
 
   if(
     index.parentElement!==
-    modal
+    document.body
   ){
-    modal.appendChild(
+    document.body.appendChild(
       index
     );
   }
 
   popover.hidden=false;
+
   picker.classList.add(
     'open'
   );
@@ -3946,6 +3912,10 @@ function closeRelationshipTypePicker(){
 
   popover.style.removeProperty(
     'height'
+  );
+
+  popover.style.removeProperty(
+    'max-height'
   );
 
   if(index){
@@ -4043,11 +4013,17 @@ function setupRelationshipTypePicker(){
       const popoverNow=
         $('relationshipTypePopover');
 
+      const indexNow=
+        $('relationshipTypeIndex');
+
       if(
         pickerNow?.contains(
           event.target
         )||
         popoverNow?.contains(
+          event.target
+        )||
+        indexNow?.contains(
           event.target
         )
       ){
