@@ -2182,30 +2182,30 @@ button.avatar-editor-action { cursor:pointer; }
     /* 編輯狀態下新增入口不再額外拉開大段距離 */ margin-top: 0;
 }
 
-/* ========【其他關係分類選擇器】 設定 - 沿用家族選擇器的左側索引 + 右側清單結構 ======== */
+/* ========【其他關係分類選擇器】 設定 - 直接沿用家族選擇器的紙張、便利貼與清單語言 ======== */
 .relationship-type-picker {
-    /* 作為觸發欄位容器 */ position: relative;
-    /* 不讓 flex 欄位超出 */ min-width: 0;
+    /* 觸發欄位容器 */ position: relative;
+    /* 允許 Flex 正確縮小 */ min-width: 0;
 }
 
 .relationship-type-trigger {
     /* 欄位寬度 */ width: 100%;
-    /* 最小高度 */ min-height: 34px;
+    /* 與網站表單欄位相同高度 */ min-height: 34px;
     /* 內縮空間 */ padding: 5px 30px 5px 9px;
     /* 邊框 */ border: 1px solid var(--border-default);
     /* 圓角 */ border-radius: 7px;
     /* 背景 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
+    /* 文字 */ color: var(--text-primary);
     /* 字體 */ font: inherit;
     /* 字體大小 */ font-size: 12px;
     /* 文字靠左 */ text-align: left;
-    /* 定位箭頭 */ position: relative;
+    /* 箭頭定位 */ position: relative;
     /* 滑鼠指標 */ cursor: pointer;
 }
 
 .relationship-type-trigger:hover,
 .relationship-type-picker.open .relationship-type-trigger {
-    /* 與其他輸入欄位相同聚焦色 */ border-color: var(--action-primary);
+    /* 展開 / 懸停與一般欄位一致 */ border-color: var(--action-primary);
 }
 
 .relationship-type-value {
@@ -2216,14 +2216,14 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-chevron {
-    /* 箭頭固定右側 */ position: absolute;
+    /* 固定右側 */ position: absolute;
     /* 右側間距 */ right: 10px;
-    /* 垂直位置 */ top: 50%;
+    /* 垂直置中 */ top: 50%;
     /* 垂直置中 */ transform: translateY(-50%);
     /* 圖示尺寸 */ width: 12px;
     /* 圖示高度 */ height: 12px;
     /* 顏色 */ color: var(--text-secondary);
-    /* 動畫 */ transition: transform .15s ease;
+    /* 轉場 */ transition: transform .15s ease;
 }
 
 .relationship-type-picker.open .relationship-type-chevron {
@@ -2231,83 +2231,57 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-popover {
-    /* 固定定位由 JS 依欄位位置計算 */ position: fixed;
-    /* 高於人物編輯器內容 */ z-index: 1600;
-    /* 左側分類 + 右側內容 */ display: grid;
-    /* 左側便利貼寬度 */ grid-template-columns: 52px minmax(0,1fr);
-    /* 不超出螢幕 */ overflow: hidden;
-    /* 邊框 */ border: 1px solid var(--nav-dropdown-border);
-    /* 圓角 */ border-radius: 8px;
+    /* 右側結果紙張與家族選擇器一致 */ position: fixed;
+    /* 高於人物編輯器 */ z-index: 1600;
+    /* 固定顯示方式 */ display: block;
     /* 背景 */ background: var(--nav-dropdown-bg);
-    /* 陰影 */ box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    /* 文字 */ color: var(--nav-dropdown-text);
+    /* 細框 */ border: 1px solid var(--nav-dropdown-border);
+    /* 圓角 */ border-radius: 8px;
+    /* 家族選擇器同級陰影 */ box-shadow: 0 5px 15px rgba(0,0,0,.10);
+    /* 不讓右側內容破出圓角 */ overflow: hidden;
 }
 
 .relationship-type-popover[hidden] {
     /* 隱藏時完全移除 */ display: none;
 }
 
-.relationship-type-index {
-    /* 左側便利貼直排 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 背景 */ background: color-mix(in srgb,var(--surface-panel) 88%,var(--nav-dropdown-bg));
-    /* 右邊界 */ border-right: 1px solid var(--nav-dropdown-border);
+.relationship-type-index-portal {
+    /* 沿用家族左側便利貼 portal */ z-index: 1601;
+    /* 預設由 JS 控制顯示 */ display: none;
 }
 
 .relationship-type-index-tab {
-    /* 固定便利貼寬度 */ width: 52px;
-    /* 各分類至少保持可點擊高度 */ min-height: 52px;
-    /* 內縮 */ padding: 5px 3px;
-    /* 直向文字 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 置中 */ align-items: center;
-    /* 置中 */ justify-content: center;
-    /* 字元間距 */ gap: 3px;
-    /* 邊框 */ border: 0;
-    /* 下方分隔 */ border-bottom: 1px solid var(--nav-dropdown-border);
-    /* 背景 */ background: transparent;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 10.5px;
-    /* 字體粗細 */ font-weight: 650;
-    /* 滑鼠指標 */ cursor: pointer;
+    /* 六個分類較多，縮短高度但保留家族便利貼輪廓 */ height: 58px;
+    /* 同步最小高度 */ min-height: 58px;
 }
 
-.relationship-type-index-tab:last-child {
-    /* 最後一個不重複分隔 */ border-bottom: 0;
-}
-
-.relationship-type-index-tab:hover {
-    /* 懸停背景 */ background: var(--nav-dropdown-hover-bg);
-    /* 懸停文字 */ color: var(--nav-dropdown-hover-text);
-}
-
-.relationship-type-index-tab.active {
-    /* 啟用分類與右側內容連成同一張紙 */ background: var(--nav-dropdown-bg);
-    /* 主題強調色 */ color: var(--action-primary);
-    /* 字體加粗 */ font-weight: 750;
-    /* 往右蓋住分隔線 */ margin-right: -1px;
-    /* 啟用項目層級 */ z-index: 1;
+.relationship-type-index-tab .family-nav-tab-lines {
+    /* 關係分類行距略緊湊 */ gap: 3px;
+    /* 字級 */ font-size: 10px;
+    /* 文字置中 */ text-align: center;
 }
 
 .relationship-type-menu {
     /* 右側內容直排 */ display: flex;
     /* 排列方向 */ flex-direction: column;
-    /* 內縮 */ padding: 6px;
-    /* 允許收縮 */ min-width: 0;
-    /* 不超出整個 popover */ min-height: 0;
+    /* 不額外包第二層卡片 */ padding: 0;
+    /* 可正確收縮 */ min-width: 0;
+    /* 可正確收縮 */ min-height: 0;
+    /* 背景沿用家族結果紙張 */ background: var(--nav-dropdown-bg);
 }
 
 .relationship-type-search {
-    /* 搜尋欄寬度 */ width: 100%;
-    /* 內縮 */ padding: 6px 9px;
+    /* 搜尋列寬度 */ width: calc(100% - 12px);
+    /* 上下左右留白 */ margin: 6px;
+    /* 搜尋框內距 */ padding: 7px 9px;
     /* 邊框 */ border: 1px solid var(--nav-dropdown-border);
-    /* 圓角 */ border-radius: 5px;
+    /* 圓角 */ border-radius: 6px;
     /* 背景 */ background: var(--nav-dropdown-bg);
     /* 文字 */ color: var(--nav-dropdown-text);
     /* 字體 */ font: inherit;
     /* 字體大小 */ font-size: 12px;
     /* 外框 */ outline: none;
-    /* 下方間距 */ margin-bottom: 5px;
 }
 
 .relationship-type-search:focus {
@@ -2316,59 +2290,67 @@ button.avatar-editor-action { cursor:pointer; }
 
 .relationship-type-options {
     /* 清單可滾動 */ overflow-y: auto;
-    /* 直排 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 項目間距 */ gap: 1px;
-    /* 允許收縮 */ min-height: 0;
+    /* 不另外製作卡片間距 */ display: block;
+    /* 可正確收縮 */ min-height: 0;
 }
 
 .relationship-type-option {
-    /* 清單項目寬度 */ width: 100%;
-    /* 圖示 + 文字 */ display: flex;
+    /* 與家族下拉結果同樣鋪滿整列 */ width: 100%;
+    /* 圖示與文字並排 */ display: flex;
     /* 垂直置中 */ align-items: center;
     /* 項目間距 */ gap: 7px;
-    /* 內縮 */ padding: 7px 9px;
-    /* 邊框 */ border: 0;
-    /* 圓角 */ border-radius: 5px;
-    /* 背景 */ background: transparent;
+    /* 與家族結果相近的留白 */ padding: 10px 13px;
+    /* 不額外顯示按鈕外框 */ border: 0;
+    /* 以分隔線形成清單 */ border-bottom: 1px solid var(--nav-dropdown-divider);
+    /* 不在每列再做小圓角 */ border-radius: 0;
+    /* 背景 */ background: var(--nav-dropdown-bg);
     /* 文字 */ color: var(--nav-dropdown-text);
     /* 字體 */ font: inherit;
     /* 字體大小 */ font-size: 12px;
     /* 文字靠左 */ text-align: left;
     /* 滑鼠指標 */ cursor: pointer;
+    /* 不使用浮誇轉場 */ transition: background-color .16s ease,color .16s ease;
+}
+
+.relationship-type-option:last-child {
+    /* 最後一列不顯示分隔線 */ border-bottom: 0;
 }
 
 .relationship-type-option:hover,
 .relationship-type-option:focus-visible {
-    /* 懸停背景 */ background: var(--nav-dropdown-hover-bg);
-    /* 懸停文字 */ color: var(--nav-dropdown-hover-text);
-    /* 外框 */ outline: none;
+    /* 與家族下拉相同 Hover */ background: var(--nav-dropdown-hover-bg);
+    /* Hover 文字 */ color: var(--nav-dropdown-hover-text);
+    /* 不額外畫焦點外框 */ outline: none;
 }
 
 .relationship-type-option.selected {
-    /* 已選背景 */ background: var(--nav-dropdown-selected-bg);
+    /* 與家族已選項相同中性灰階 */ background: var(--nav-dropdown-selected-bg);
     /* 已選文字 */ color: var(--nav-dropdown-selected-text);
-    /* 字體粗細 */ font-weight: 600;
+    /* 字體粗細 */ font-weight: 500;
 }
 
 .relationship-type-option-icon {
-    /* 關係圖示尺寸 */ width: 13px;
-    /* 關係圖示高度 */ height: 13px;
-    /* 不被壓縮 */ flex: 0 0 13px;
-    /* 系統標籤使用主題色 */ color: var(--action-primary);
+    /* 圖示尺寸 */ width: 13px;
+    /* 圖示高度 */ height: 13px;
+    /* 不壓縮 */ flex: 0 0 13px;
+    /* 使用次要文字色，避免每列都過度搶眼 */ color: var(--text-secondary);
+}
+
+.relationship-type-option.selected .relationship-type-option-icon,
+.relationship-type-option:hover .relationship-type-option-icon {
+    /* 選取 / Hover 才帶入主題色 */ color: var(--action-primary);
 }
 
 .relationship-type-create {
-    /* 自訂關係入口與一般項目區分 */ color: var(--action-primary);
+    /* 自訂新增入口使用主題色 */ color: var(--action-primary);
 }
 
 .relationship-type-empty {
-    /* 無結果提示 */ padding: 10px 8px;
+    /* 無結果提示 */ padding: 12px 10px;
     /* 文字置中 */ text-align: center;
     /* 次要文字 */ color: var(--text-secondary);
     /* 字體大小 */ font-size: 11.5px;
 }
-
 
 .sim-editor-panel .relationship-section.first { margin-top:0; padding-top:0; border-top:0; }
 .sim-editor-actions { flex:0 0 auto; margin-top:0; padding:9px 18px 10px; border-top:1px solid var(--border-default); background:var(--surface-card); box-shadow:none; position:relative; z-index:6; }
