@@ -1862,6 +1862,104 @@ button.avatar-editor-action { cursor:pointer; }
 .family-rel-manage { border:0; background:transparent; color:var(--action-primary); font:inherit; font-size:11px; padding:2px 0; }
 .family-rel-manage:hover { color:var(--action-primary-hover); text-decoration:underline; }
 .family-rel-preview { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:4px 10px; min-height:29px; align-items:center; }
+
+/* ========【家庭關係自訂顯示文字】 設定 - 直接整合於每位關係人物列 ======== */
+.family-rel-preview.family-rel-preview-editable {
+    /* 每位關係人物獨立一列 */ grid-template-columns: 1fr;
+    /* 列與列之間保留空隙 */ gap: 5px;
+}
+
+.family-rel-preview-row {
+    /* 人物與自訂顯示文字入口並排 */ display: grid;
+    /* 左側人物自適應，右側按鈕依內容寬度 */ grid-template-columns: minmax(0,1fr) auto;
+    /* 垂直對齊 */ align-items: center;
+    /* 欄位間距 */ column-gap: 10px;
+    /* 行間距 */ row-gap: 5px;
+    /* 內縮空間 */ padding: 3px 5px;
+    /* 圓角 */ border-radius: 6px;
+    /* 背景 */ background: transparent;
+}
+
+.family-rel-preview-row:hover {
+    /* 懸停時只做輕量辨識 */ background: var(--surface-item-hover);
+}
+
+.family-rel-preview-row > .family-rel-person {
+    /* 人物內容不額外增加外距 */ padding: 0;
+}
+
+.family-rel-label-control {
+    /* 讓按鈕與展開欄位共用右側控制區 */ display: contents;
+}
+
+.family-rel-label-toggle {
+    /* 右側小型文字按鈕 */ justify-self: end;
+    /* 不換行 */ white-space: nowrap;
+    /* 內縮空間 */ padding: 3px 7px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 5px;
+    /* 背景 */ background: var(--surface-input);
+    /* 文字顏色 */ color: var(--text-secondary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 10.5px;
+    /* 滑鼠指標 */ cursor: pointer;
+}
+
+.family-rel-label-toggle:hover,
+.family-rel-label-toggle[aria-expanded="true"] {
+    /* 懸停與展開狀態使用主色 */ border-color: var(--action-primary);
+    /* 文字顏色 */ color: var(--action-primary);
+    /* 背景 */ background: var(--surface-item);
+}
+
+.family-rel-label-editor {
+    /* 展開欄位跨越整列 */ grid-column: 1 / -1;
+    /* 輸入框與恢復按鈕並排 */ display: grid;
+    /* 輸入框自適應，按鈕依內容寬度 */ grid-template-columns: minmax(0,1fr) auto;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 與頭像左緣對齊後再內縮 */ padding-left: 31px;
+}
+
+.family-rel-label-editor[hidden] {
+    /* 收合時完全移除版面 */ display: none;
+}
+
+.family-rel-label-input {
+    /* 元素寬度 */ width: 100%;
+    /* 最小高度 */ min-height: 30px;
+    /* 內縮空間 */ padding: 5px 8px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 6px;
+    /* 背景 */ background: var(--surface-input);
+    /* 文字顏色 */ color: var(--text-primary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 11.5px;
+    /* 外框 */ outline: none;
+}
+
+.family-rel-label-input:focus {
+    /* 聚焦邊框 */ border-color: var(--action-primary);
+}
+
+.family-rel-label-reset {
+    /* 恢復預設按鈕 */ min-height: 30px;
+    /* 內縮空間 */ padding: 5px 8px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 6px;
+    /* 背景 */ background: var(--surface-item);
+    /* 文字顏色 */ color: var(--text-secondary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 10.5px;
+    /* 不換行 */ white-space: nowrap;
+    /* 滑鼠指標 */ cursor: pointer;
+}
+
+.family-rel-label-reset:hover {
+    /* 懸停邊框 */ border-color: var(--action-primary);
+    /* 懸停文字 */ color: var(--action-primary);
+}
+
 .family-rel-empty { color:var(--text-secondary); font-size:11.5px; }
 .family-rel-person { display:flex; align-items:center; gap:7px; min-width:0; max-width:100%; padding:3px 2px; border:0; border-radius:5px; background:transparent; color:var(--text-primary); font-size:11.5px; }
 .family-rel-person-avatar { width:24px; height:24px; flex:0 0 24px; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:999px; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); color:var(--avatar-text); font-size:10px; font-weight:700; }
@@ -1887,7 +1985,6 @@ button.avatar-editor-action { cursor:pointer; }
 .family-rel-person-copy { display:grid; min-width:0; gap:1px; }
 .family-rel-person-kinship { color:var(--text-secondary); font-size:10px; line-height:1.25; }
 .sim-editor-panel .relationship-section.first { margin-top:0; padding-top:0; border-top:0; }
-.family-rel-annotations { margin-top:9px; padding-top:9px; }
 .sim-editor-actions { flex:0 0 auto; margin-top:0; padding:9px 18px 10px; border-top:1px solid var(--border-default); background:var(--surface-card); box-shadow:none; position:relative; z-index:6; }
 
 .grid {
@@ -6462,6 +6559,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .pet-editor-fields { grid-template-columns:1fr; }
   .pet-field-full { grid-column:auto; }
   .family-rel-kind-row { grid-template-columns:1fr; }
+  .family-rel-preview-row { grid-template-columns:minmax(0,1fr) auto; column-gap:7px; }
+  .family-rel-label-editor { padding-left:0; }
   .profile-fact-edit-row { grid-template-columns:1fr; }
   .profile-residence-field { grid-column:auto; }
   .family-rel-edit-grid { grid-template-columns:1fr; }
