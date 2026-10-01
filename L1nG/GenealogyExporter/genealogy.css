@@ -3968,6 +3968,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 .sim-editor-paper-back,
 .sim-editor-preview-sheet {
+    /* 尺寸同步完成前不顯示，避免短暫露出圓角小塊 */ visibility: hidden;
     /* 與主編輯頁共用畫面中心 */ position: absolute;
     /* 水平置中 */ left: 50%;
     /* 垂直置中 */ top: 50%;
@@ -3975,6 +3976,11 @@ button.avatar-editor-action { cursor:pointer; }
     /* 高度直接跟隨目前編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,88vh));
     /* 尺寸已由編輯頁 authority 提供，不再另設不同 max-height */ max-height: none;
     /* 圓角弧度 */ border-radius: 10px;
+}
+
+#simEditorDialog.sheet-ready .sim-editor-paper-back,
+#simEditorDialog.sheet-ready .sim-editor-preview-sheet {
+    /* 幾何尺寸與編輯頁一致後才呈現完整紙張堆疊 */ visibility: visible;
 }
 
 .sim-editor-paper-back {
