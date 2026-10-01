@@ -3796,7 +3796,215 @@ button.avatar-editor-action { cursor:pointer; }
 
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
-.editor-info-preview { width:min(560px,100%); margin:0 auto; overflow:hidden; border:1px solid var(--border-default); border-radius:9px; background:var(--surface-card); }
+/* ========【人物預覽舞台】 設定 - 卡片堆疊展示、進場動畫與滑開層次 ======== */
+.editor-info-preview {
+    /* 元素寬度 */ width: 100%;
+    /* 水平置中 */ margin: 0 auto;
+    /* 舞台本身不再充當人物卡片 */ overflow: visible;
+}
+
+.editor-preview-window {
+    /* 元素寬度 */ width: min(700px,100%);
+    /* 水平置中 */ margin: 0 auto;
+    /* 邊框設定 */ border: 1px solid var(--border-default);
+    /* 圓角弧度 */ border-radius: 12px;
+    /* 背景設定 */ background: var(--surface-panel);
+    /* 溢出處理 */ overflow: hidden;
+    /* 陰影設定 */ box-shadow: 0 14px 34px rgba(31,35,40,.10);
+}
+
+.editor-preview-window-bar {
+    /* 元素高度 */ height: 34px;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 內縮空間 */ padding: 0 12px;
+    /* 下方邊框 */ border-bottom: 1px solid var(--border-default);
+    /* 背景設定 */ background: var(--surface-card);
+}
+
+.editor-preview-window-bar span {
+    /* 元素寬度 */ width: 8px;
+    /* 元素高度 */ height: 8px;
+    /* 圓形 */ border-radius: 50%;
+    /* 背景設定 */ background: var(--border-default);
+}
+
+.editor-preview-stage {
+    /* 定位方式 */ position: relative;
+    /* 最小高度 */ min-height: 410px;
+    /* 顯示方式 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 水平對齊 */ justify-content: center;
+    /* 內縮空間 */ padding: 38px 54px 44px;
+    /* 背景設定 */ background:
+        radial-gradient(circle at 18% 18%,color-mix(in srgb,var(--action-primary) 12%,transparent) 0 2px,transparent 3px),
+        linear-gradient(145deg,color-mix(in srgb,var(--surface-panel) 86%,var(--brand-tint-start)),var(--surface-card));
+}
+
+.editor-preview-stack {
+    /* 定位方式 */ position: relative;
+    /* 元素寬度 */ width: min(560px,100%);
+    /* 讓前景卡片決定整體高度 */ min-width: 0;
+    /* 建立局部層疊環境 */ isolation: isolate;
+}
+
+.editor-preview-card-back {
+    /* 定位方式 */ position: absolute;
+    /* 填滿主卡範圍 */ inset: 0;
+    /* 圓角弧度 */ border-radius: 11px;
+    /* 邊框設定 */ border: 1px solid color-mix(in srgb,var(--action-primary) 20%,var(--border-default));
+    /* 背景設定 */ background: color-mix(in srgb,var(--surface-card) 90%,var(--brand-tint-start));
+    /* 陰影設定 */ box-shadow: 0 10px 24px rgba(31,35,40,.08);
+    /* 滑鼠事件 */ pointer-events: none;
+    /* 動畫過渡 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .28s ease;
+    /* 溢出處理 */ overflow: hidden;
+}
+
+.editor-preview-card-back::after {
+    /* 生成內容 */ content: "";
+    /* 定位方式 */ position: absolute;
+    /* 定位範圍 */ inset: 0;
+    /* 柔和高光 */ background: linear-gradient(135deg,color-mix(in srgb,var(--brand-tint-start) 50%,transparent),transparent 58%);
+    /* 滑鼠事件 */ pointer-events: none;
+}
+
+.editor-preview-card-back-deep {
+    /* 最後一層位置 */ transform: translate(18px,-14px) rotate(2.1deg) scale(.985);
+    /* 顯示層級 */ z-index: 0;
+    /* 透明度 */ opacity: .72;
+}
+
+.editor-preview-card-back-mid {
+    /* 中間一層位置 */ transform: translate(-18px,15px) rotate(-2.4deg) scale(.992);
+    /* 顯示層級 */ z-index: 1;
+    /* 透明度 */ opacity: .88;
+}
+
+.editor-preview-back-avatar {
+    /* 定位方式 */ position: absolute;
+    /* 左側位置 */ left: 18px;
+    /* 頂部位置 */ top: 20px;
+    /* 元素寬度 */ width: 74px;
+    /* 元素高度 */ height: 74px;
+    /* 圓角弧度 */ border-radius: 10px;
+    /* 背景設定 */ background: color-mix(in srgb,var(--action-primary) 12%,var(--surface-item));
+}
+
+.editor-preview-back-line {
+    /* 定位方式 */ position: absolute;
+    /* 左側位置 */ left: 108px;
+    /* 元素寬度 */ width: 34%;
+    /* 元素高度 */ height: 9px;
+    /* 圓角弧度 */ border-radius: 999px;
+    /* 背景設定 */ background: color-mix(in srgb,var(--text-secondary) 12%,transparent);
+    /* 頂部位置 */ top: 58px;
+}
+
+.editor-preview-back-line-wide {
+    /* 元素寬度 */ width: 46%;
+    /* 頂部位置 */ top: 31px;
+}
+
+.editor-preview-back-line-short {
+    /* 元素寬度 */ width: 24%;
+    /* 頂部位置 */ top: 84px;
+}
+
+.editor-preview-card-shell {
+    /* 定位方式 */ position: relative;
+    /* 顯示層級 */ z-index: 2;
+    /* 元素寬度 */ width: 100%;
+    /* 溢出處理 */ overflow: hidden;
+    /* 邊框設定 */ border: 1px solid var(--border-default);
+    /* 圓角弧度 */ border-radius: 11px;
+    /* 背景設定 */ background: var(--surface-card);
+    /* 陰影設定 */ box-shadow: 0 16px 34px rgba(31,35,40,.14);
+    /* 動畫過渡 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),box-shadow .28s ease;
+    /* 合成層提示 */ will-change: transform;
+}
+
+.sim-editor-panel[data-editor-panel="preview"].active .editor-preview-card-shell {
+    /* 進場動畫 */ animation: editor-preview-front-in .46s cubic-bezier(.2,.75,.25,1) both;
+}
+
+.sim-editor-panel[data-editor-panel="preview"].active .editor-preview-card-back-mid {
+    /* 中層進場動畫 */ animation: editor-preview-mid-in .52s cubic-bezier(.2,.75,.25,1) both;
+}
+
+.sim-editor-panel[data-editor-panel="preview"].active .editor-preview-card-back-deep {
+    /* 後層進場動畫 */ animation: editor-preview-deep-in .58s cubic-bezier(.2,.75,.25,1) both;
+}
+
+@keyframes editor-preview-front-in {
+    /* 初始狀態 */ from { opacity:0; transform:translateX(28px) translateY(8px) rotate(1.2deg) scale(.985); }
+    /* 完成狀態 */ to { opacity:1; transform:translate(0,0) rotate(0) scale(1); }
+}
+
+@keyframes editor-preview-mid-in {
+    /* 初始狀態 */ from { opacity:0; transform:translate(-4px,5px) rotate(-.5deg) scale(.975); }
+    /* 完成狀態 */ to { opacity:.88; transform:translate(-18px,15px) rotate(-2.4deg) scale(.992); }
+}
+
+@keyframes editor-preview-deep-in {
+    /* 初始狀態 */ from { opacity:0; transform:translate(4px,-3px) rotate(.5deg) scale(.97); }
+    /* 完成狀態 */ to { opacity:.72; transform:translate(18px,-14px) rotate(2.1deg) scale(.985); }
+}
+
+@media (hover:hover) and (pointer:fine) {
+    .editor-preview-stack:hover .editor-preview-card-shell {
+        /* 主卡滑開露出後層 */ transform: translateX(24px) translateY(-3px) rotate(.7deg);
+        /* 懸停陰影 */ box-shadow: 0 20px 42px rgba(31,35,40,.18);
+    }
+
+    .editor-preview-stack:hover .editor-preview-card-back-mid {
+        /* 中層往左展開 */ transform: translate(-28px,17px) rotate(-3.2deg) scale(.992);
+    }
+
+    .editor-preview-stack:hover .editor-preview-card-back-deep {
+        /* 後層往上展開 */ transform: translate(20px,-20px) rotate(2.8deg) scale(.985);
+    }
+}
+
+.editor-preview-card-shell .person-profile-body {
+    /* 預覽頁由編輯器本身捲動，不在卡片內建立第二條捲軸 */ max-height: none;
+    /* 關閉內層捲軸 */ overflow-y: visible;
+}
+
+@media (max-width:760px) {
+    .editor-preview-stage {
+        /* 縮小舞台內距 */ padding: 32px 36px 38px;
+    }
+}
+
+@media (max-width:520px) {
+    .editor-preview-window {
+        /* 手機版使用完整寬度 */ width: 100%;
+    }
+
+    .editor-preview-stage {
+        /* 手機版縮小左右留白 */ padding: 28px 24px 34px;
+        /* 手機版降低最小高度 */ min-height: 360px;
+    }
+
+    .editor-preview-card-back-deep {
+        /* 手機版避免超出容器 */ transform: translate(10px,-10px) rotate(1.4deg) scale(.99);
+    }
+
+    .editor-preview-card-back-mid {
+        /* 手機版避免超出容器 */ transform: translate(-10px,11px) rotate(-1.6deg) scale(.995);
+    }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .editor-preview-card-shell,
+    .editor-preview-card-back {
+        /* 關閉位移動畫 */ animation: none !important;
+        /* 關閉過渡動畫 */ transition: none !important;
+    }
+}
+
+
 .person-profile-header { display:flex; gap:14px; align-items:flex-start; padding:16px 18px 14px; border-bottom:1px solid var(--border-default); margin:0; }
 .person-profile-avatar { width:104px; height:104px; border-radius:10px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:var(--avatar-text); border:1px solid var(--border-default); position:relative; }
 .person-profile-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
