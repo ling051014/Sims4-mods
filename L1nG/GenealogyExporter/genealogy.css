@@ -2109,8 +2109,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 不超出可用空間 */ min-width: 0;
 }
 
-.other-rel-type-trigger,
-.other-rel-visibility-toggle {
+.other-rel-type-trigger {
     /* 既有關係編輯控制維持列內小型尺寸 */ min-height: 24px;
     /* 固定列內高度 */ height: 24px;
     /* 邊框 */ border: 1px solid var(--border-default);
@@ -2132,8 +2131,7 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .other-rel-type-trigger:hover,
-.other-rel-type-trigger.open,
-.other-rel-visibility-toggle:hover {
+.other-rel-type-trigger.open {
     /* Hover / 展開時使用主題色 */ border-color: var(--action-primary);
     /* 文字同步 */ color: var(--action-primary);
 }
@@ -2155,11 +2153,6 @@ button.avatar-editor-action { cursor:pointer; }
 
 .other-rel-type-trigger.open .other-rel-type-chevron {
     /* 展開時旋轉 */ transform: rotate(180deg);
-}
-
-.other-rel-visibility-toggle {
-    /* 顯示 / 隱藏標籤保持文字單行 */ white-space: nowrap;
-    /* 內縮 */ padding: 2px 7px;
 }
 
 .other-rel-label-inline-editor {
