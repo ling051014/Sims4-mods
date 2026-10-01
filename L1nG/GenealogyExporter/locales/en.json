@@ -914,6 +914,8 @@
     "自訂標籤文字": "Custom label text",
     "輸入標籤文字": "Enter label text",
     "標籤文字：": "Label text:",
-    "標籤文字：不顯示": "Label text: hidden"
+    "標籤文字：不顯示": "Label text: hidden",
+    "顯示標籤": "Show label",
+    "隱藏標籤": "Hide label"
   }
 }
