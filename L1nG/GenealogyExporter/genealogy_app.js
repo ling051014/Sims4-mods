@@ -597,7 +597,7 @@ function applyDragHistoryEntry(entry, stateKey) {
       currentGenealogyData().currentFamilyId === entry.familyId &&
       viewMode === entry.mode
     ) {
-      updateLayoutToggle();
+      syncLayoutModeControls();
     }
 
     return;
@@ -726,7 +726,7 @@ function scheduleResolvedAssetRefresh(
             id === bgSettings?.image
         )
       ){
-        renderCanvasBackground();
+        syncCanvasBackgroundSurface();
         paintCanvasBackgroundPreview();
       }
     }catch(_){}
@@ -1569,7 +1569,7 @@ function syncFamilyNameInputWidth() {
     '';
 
   const measured = Math.ceil(
-    _familyNameMeasureContext.measureText(source).width + 18
+    _familyNameMeasureContext.measureRelationshipLabelText(source).width + 18
   );
 
   const elementWidth = element => {
@@ -2874,7 +2874,7 @@ function setupTopbarNavSelects() {
     closeAllNavSelects(inside || null);
   });
 
-  window.addEventListener('resize', debounce(() => {
+  window.addEventListener('resize', createDebouncedCallback(() => {
     const control = navSelectControls.get('familySelect');
     if (!control || !control.host.classList.contains('open')) return;
 
@@ -3037,11 +3037,27 @@ document.addEventListener('keydown', event => {
 });
 
 
-function debounce(fn, ms = 150) {
-  let t;
-  return function (...args) {
-    clearTimeout(t);
-    t = setTimeout(() => fn.apply(this, args), ms);
+function createDebouncedCallback(callback, wait = 150) {
+  let timerId = null;
+
+  return function debouncedCallback(...args) {
+    const context = this;
+
+    if (timerId !== null) {
+      window.clearTimeout(timerId);
+    }
+
+    timerId =
+      window.setTimeout(
+        () => {
+          timerId = null;
+          callback.apply(
+            context,
+            args
+          );
+        },
+        wait
+      );
   };
 }
 
@@ -4186,7 +4202,7 @@ function setupRelationshipTypePicker(){
 
   window.addEventListener(
     'resize',
-    debounce(
+    createDebouncedCallback(
       positionRelationshipTypePicker,
       60
     )
@@ -6209,7 +6225,7 @@ if (sidebarResizer) {
   });
 }
 
-window.addEventListener('resize', debounce(() => {
+window.addEventListener('resize', createDebouncedCallback(() => {
   if (window.innerWidth > 720) {
     const current = sidebar.getBoundingClientRect().width;
     const clamped = clampSidebarWidth(current);
@@ -6304,39 +6320,143 @@ document.addEventListener(
   }
 );
 
-function hexToRgb(hex) {
-  const h = String(hex).replace('#','');
-  const full = h.length === 3 ? h.split('').map(c => c+c).join('') : h;
+function normalizeHexColor(value) {
+  const source =
+    String(value || '')
+      .trim()
+      .replace(/^#/, '');
+
+  if (/^[0-9a-f]{3}$/i.test(source)) {
+    return source
+      .split('')
+      .map(channel => channel + channel)
+      .join('')
+      .toLowerCase();
+  }
+
+  if (/^[0-9a-f]{6}$/i.test(source)) {
+    return source.toLowerCase();
+  }
+
+  return '000000';
+}
+
+function clampRgbChannel(value) {
+  return Math.max(
+    0,
+    Math.min(
+      255,
+      Math.round(
+        Number(value) || 0
+      )
+    )
+  );
+}
+
+function parseHexColor(value) {
+  const hex =
+    normalizeHexColor(value);
+
   return {
-    r: parseInt(full.slice(0,2),16) || 0,
-    g: parseInt(full.slice(2,4),16) || 0,
-    b: parseInt(full.slice(4,6),16) || 0
+    r:parseInt(hex.slice(0, 2), 16),
+    g:parseInt(hex.slice(2, 4), 16),
+    b:parseInt(hex.slice(4, 6), 16)
   };
 }
-function rgbToHex(r, g, b) {
-  const c = v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,'0');
-  return '#' + c(r) + c(g) + c(b);
+
+function formatRgbHex(r, g, b) {
+  const channelHex =
+    value =>
+      clampRgbChannel(value)
+        .toString(16)
+        .padStart(2, '0');
+
+  return (
+    '#' +
+    channelHex(r) +
+    channelHex(g) +
+    channelHex(b)
+  );
 }
-function hexToRgba(hex, a) {
-  const {r,g,b} = hexToRgb(hex);
-  return `rgba(${r},${g},${b},${a})`;
+
+function formatHexRgba(hex, alpha) {
+  const color =
+    parseHexColor(hex);
+
+  return `rgba(${color.r},${color.g},${color.b},${alpha})`;
 }
-function relLum(hex) {
-  const {r,g,b} = hexToRgb(hex);
-  const lin = c => {
-    const v = c / 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  };
-  return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+
+function relativeHexLuminance(hex) {
+  const { r, g, b } =
+    parseHexColor(hex);
+
+  const linearChannel =
+    channel => {
+      const normalized =
+        channel / 255;
+
+      return normalized <= 0.03928
+        ? normalized / 12.92
+        : Math.pow(
+            (normalized + 0.055) / 1.055,
+            2.4
+          );
+    };
+
+  return (
+    0.2126 * linearChannel(r) +
+    0.7152 * linearChannel(g) +
+    0.0722 * linearChannel(b)
+  );
 }
-function mixHex(c1, c2, t) {
-  const a = hexToRgb(c1), b = hexToRgb(c2);
-  return rgbToHex(a.r * (1-t) + b.r * t, a.g * (1-t) + b.g * t, a.b * (1-t) + b.b * t);
+
+function blendHexColors(first, second, ratio) {
+  const start =
+    parseHexColor(first);
+
+  const end =
+    parseHexColor(second);
+
+  const amount =
+    Math.max(
+      0,
+      Math.min(
+        1,
+        Number(ratio) || 0
+      )
+    );
+
+  return formatRgbHex(
+    start.r + (end.r - start.r) * amount,
+    start.g + (end.g - start.g) * amount,
+    start.b + (end.b - start.b) * amount
+  );
 }
-function adjustLightness(hex, delta) {
-  const {r,g,b} = hexToRgb(hex);
-  const adj = v => delta < 0 ? v * (1 + delta) : v + (255 - v) * delta;
-  return rgbToHex(adj(r), adj(g), adj(b));
+
+function shiftHexLightness(hex, amount) {
+  const color =
+    parseHexColor(hex);
+
+  const delta =
+    Math.max(
+      -1,
+      Math.min(
+        1,
+        Number(amount) || 0
+      )
+    );
+
+  const shifted =
+    channel =>
+      delta < 0
+        ? channel * (1 + delta)
+        : channel + (255 - channel) * delta;
+
+  return formatRgbHex(
+    shifted(color.r),
+    shifted(color.g),
+    shifted(color.b)
+  );
 }
 
 function resetThemeSurface() {
@@ -6454,10 +6574,10 @@ function chooseThemePreset(themeId, { persist = true } = {}) {
 function chooseCustomTheme(primary, secondary, { persist = true } = {}) {
   const c1 = String(primary || '#f0c050');
   const c2 = String(secondary || '#a878c8');
-  const mix = mixHex(c1, c2, 0.5);
-  const accent = adjustLightness(mix, -0.28);
+  const mix = blendHexColors(c1, c2, 0.5);
+  const accent = shiftHexLightness(mix, -0.28);
   const averageLuminance =
-    (relLum(c1) + relLum(c2)) / 2;
+    (relativeHexLuminance(c1) + relativeHexLuminance(c2)) / 2;
 
   resetThemeSurface();
   document.body.dataset.theme = 'custom';
@@ -6465,12 +6585,12 @@ function chooseCustomTheme(primary, secondary, { persist = true } = {}) {
   [
     ['--brand-gradient-start', c1],
     ['--brand-gradient-end', c2],
-    ['--brand-tint-start', hexToRgba(c1, 0.2)],
-    ['--brand-tint-end', hexToRgba(c2, 0.2)],
+    ['--brand-tint-start', formatHexRgba(c1, 0.2)],
+    ['--brand-tint-end', formatHexRgba(c2, 0.2)],
     ['--action-primary', accent],
-    ['--action-primary-hover', adjustLightness(accent, -0.12)],
-    ['--action-primary-strong', adjustLightness(mix, -0.4)],
-    ['--selection-highlight', hexToRgba(accent, 0.5)]
+    ['--action-primary-hover', shiftHexLightness(accent, -0.12)],
+    ['--action-primary-strong', shiftHexLightness(mix, -0.4)],
+    ['--selection-highlight', formatHexRgba(accent, 0.5)]
   ].forEach(([property, value]) => {
     document.body.style.setProperty(property, value);
   });
@@ -6804,19 +6924,51 @@ function mapFreeLayoutSnapshotToMode(
   return merged;
 }
 
-function applyViewMode(mode) {
-  if (!VALID_MODES.includes(mode)) mode = 'edit';
-  viewMode = mode;
+function normalizeGenealogyViewMode(mode) {
+  return VALID_MODES.includes(mode)
+    ? mode
+    : 'edit';
+}
+
+function syncViewModeControl() {
+  if (!modeToggle) return;
+
+  const viewing =
+    viewMode === 'view';
+
+  setIconText(
+    modeToggle,
+    viewing
+      ? 'eye'
+      : 'pencil-square',
+    viewing
+      ? '檢視模式'
+      : '編輯模式'
+  );
+
+  modeToggle.classList.toggle(
+    'active',
+    viewing
+  );
+}
+
+function setGenealogyViewMode(mode) {
+  viewMode =
+    normalizeGenealogyViewMode(
+      mode
+    );
+
   _dimsCache.mode = null;
   _gapsCache.mode = null;
-  if (viewMode === 'view') {
-    setIconText(modeToggle, 'eye', '檢視模式');
-    modeToggle.classList.add('active');
-  } else {
-    setIconText(modeToggle, 'pencil-square', '編輯模式');
-    modeToggle.classList.remove('active');
-  }
-  try { localStorage.setItem(MODE_KEY, mode); } catch(e){}
+
+  syncViewModeControl();
+
+  try {
+    localStorage.setItem(
+      MODE_KEY,
+      viewMode
+    );
+  } catch (_) {}
 }
 function toggleViewMode() {
   const fam =
@@ -6851,7 +7003,7 @@ function toggleViewMode() {
   clearNodeSelection();
   arrangeTool = 'pan';
 
-  applyViewMode(
+  setGenealogyViewMode(
     targetMode
   );
 
@@ -6977,7 +7129,7 @@ function normalizeColorForInput(
     );
 
   return m
-    ? rgbToHex(
+    ? formatRgbHex(
         +m[1],
         +m[2],
         +m[3]
@@ -8176,26 +8328,65 @@ $('resetRelationshipStyleBtn')
     }
   );
 
-function applyLabelLock(locked) {
-  labelLocked = !!locked;
+function syncRelationshipLabelLockControl() {
+  if (!labelLockToggle) return;
+
+  setIconText(
+    labelLockToggle,
+    labelLocked
+      ? 'unlock'
+      : 'lock',
+    labelLocked
+      ? '解鎖關係'
+      : '鎖定關係'
+  );
+
+  labelLockToggle.classList.toggle(
+    'active',
+    labelLocked
+  );
+}
+
+function cancelRelationshipLabelDrag() {
+  if (!labelDrag) return;
+
+  labelDrag.el?.classList.remove(
+    'dragging'
+  );
+
+  labelDrag = null;
+}
+
+function setRelationshipLabelLock(locked) {
+  labelLocked =
+    Boolean(locked);
+
+  labelsSvg?.classList.toggle(
+    'labels-locked',
+    labelLocked
+  );
+
   if (labelLocked) {
-    setIconText(labelLockToggle, 'unlock', '解鎖關係');
-    labelLockToggle.classList.add('active');
-    labelsSvg.classList.add('labels-locked');
-    if (labelDrag) { labelDrag.el.classList.remove('dragging'); labelDrag = null; }
-  } else {
-    setIconText(labelLockToggle, 'lock', '鎖定關係');
-    labelLockToggle.classList.remove('active');
-    labelsSvg.classList.remove('labels-locked');
+    cancelRelationshipLabelDrag();
   }
-  try { localStorage.setItem(LABEL_LOCK_KEY, labelLocked ? '1' : '0'); } catch(e){}
+
+  syncRelationshipLabelLockControl();
+
+  try {
+    localStorage.setItem(
+      LABEL_LOCK_KEY,
+      labelLocked
+        ? '1'
+        : '0'
+    );
+  } catch (_) {}
 }
 function syncRelationshipToolbarVisibility() {
   if (!labelLockToggle) return;
   labelLockToggle.hidden = !showRelLabels;
   labelLockToggle.style.display = showRelLabels ? '' : 'none';
 }
-labelLockToggle.onclick = () => applyLabelLock(!labelLocked);
+labelLockToggle.onclick = () => setRelationshipLabelLock(!labelLocked);
 
 function restoreCanvasBackground() {
   let restored = null;
@@ -8225,44 +8416,86 @@ function restoreCanvasBackground() {
     };
   }
 
-  renderCanvasBackground();
+  syncCanvasBackgroundSurface();
 }
 
-function renderCanvasBackground() {
-  const root = document.documentElement;
-  const url = resolveImageUrl(bgSettings.image);
+function deriveCanvasBackgroundPresentation() {
+  const imageUrl =
+    resolveImageUrl(
+      bgSettings.image
+    );
 
-  if (!url) {
-    [
-      '--custom-bg',
-      '--custom-bg-opacity',
-      '--custom-bg-size',
-      '--custom-bg-repeat'
-    ].forEach(property => {
-      root.style.removeProperty(property);
-    });
-
-    viewport.classList.remove('has-bg');
-    return;
+  if (!imageUrl) {
+    return {
+      visible:false,
+      properties:{}
+    };
   }
 
-  const repeated = bgSettings.fit === 'repeat';
+  const repeated =
+    bgSettings.fit === 'repeat';
 
-  root.style.setProperty('--custom-bg', `url("${url}")`);
-  root.style.setProperty(
+  return {
+    visible:true,
+    properties:{
+      '--custom-bg':
+        `url("${imageUrl}")`,
+      '--custom-bg-opacity':
+        String(bgSettings.opacity),
+      '--custom-bg-size':
+        repeated
+          ? 'auto'
+          : bgSettings.fit,
+      '--custom-bg-repeat':
+        repeated
+          ? 'repeat'
+          : 'no-repeat'
+    }
+  };
+}
+
+function applyCanvasBackgroundPresentation(
+  presentation
+) {
+  const root =
+    document.documentElement;
+
+  const propertyNames = [
+    '--custom-bg',
     '--custom-bg-opacity',
-    String(bgSettings.opacity)
-  );
-  root.style.setProperty(
     '--custom-bg-size',
-    repeated ? 'auto' : bgSettings.fit
-  );
-  root.style.setProperty(
-    '--custom-bg-repeat',
-    repeated ? 'repeat' : 'no-repeat'
+    '--custom-bg-repeat'
+  ];
+
+  propertyNames.forEach(
+    property => {
+      const value =
+        presentation
+          .properties?.[property];
+
+      if (value == null) {
+        root.style.removeProperty(
+          property
+        );
+      } else {
+        root.style.setProperty(
+          property,
+          value
+        );
+      }
+    }
   );
 
-  viewport.classList.add('has-bg');
+  viewport.classList.toggle(
+    'has-bg',
+    presentation.visible === true
+  );
+}
+
+function syncCanvasBackgroundSurface() {
+  applyCanvasBackgroundPresentation(
+    deriveCanvasBackgroundPresentation()
+  );
 }
 
 function persistCanvasBackground() {
@@ -8338,7 +8571,7 @@ async function replaceCanvasBackground(file) {
     }
   );
 
-  renderCanvasBackground();
+  syncCanvasBackgroundSurface();
   persistCanvasBackground();
   paintCanvasBackgroundPreview();
 }
@@ -8357,7 +8590,7 @@ function setCanvasBackgroundOpacity(percent) {
   $('appearanceBackgroundOpacityValue').textContent =
     Math.round(value) + '%';
 
-  renderCanvasBackground();
+  syncCanvasBackgroundSurface();
   persistCanvasBackground();
 }
 
@@ -8367,7 +8600,7 @@ function setCanvasBackgroundFit(fit) {
       ? fit
       : 'cover';
 
-  renderCanvasBackground();
+  syncCanvasBackgroundSurface();
   persistCanvasBackground();
 }
 
@@ -8388,7 +8621,7 @@ async function removeCanvasBackground() {
   bgSettings.image = null;
   scheduleGC();
 
-  renderCanvasBackground();
+  syncCanvasBackgroundSurface();
   persistCanvasBackground();
   paintCanvasBackgroundPreview();
   await updateStorageInfo();
@@ -8485,11 +8718,11 @@ if (resetUiSettingsBtn) {
     applySidebarWidth(SIDEBAR_DEFAULT_WIDTH, { persist:false });
     setFamilyPanelCollapsed(false, { persist:false });
     chooseThemePreset('ling');
-    applyViewMode('view');
-    applyLabelLock(false);
-    renderCanvasBackground();
+    setGenealogyViewMode('view');
+    setRelationshipLabelLock(false);
+    syncCanvasBackgroundSurface();
     paintCanvasBackgroundPreview();
-    updateLayoutToggle();
+    syncLayoutModeControls();
     const labelBtn = $('labelToggle');
     if (labelBtn) {
       labelBtn.classList.add('active');
@@ -9343,25 +9576,89 @@ function getLabelOffset(key) {
   return { dx: o.dx || 0, dy: o.dy || 0 };
 }
 
-const _mc = document.createElement('canvas');
-const _mctx = _mc.getContext('2d');
-const _textMeasureCache = new Map();
-function getMeasureFontStack() {
-  const lang = document.documentElement.lang || 'zh-Hant';
-  if (lang === 'zh-Hans') return '"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif';
-  if (lang === 'en') return '"Segoe UI",Inter,Arial,system-ui,sans-serif';
+const RELATIONSHIP_LABEL_TEXT_CACHE_LIMIT = 3000;
+
+function relationshipLabelFontStack() {
+  const language =
+    document.documentElement.lang ||
+    'zh-Hant';
+
+  if (language === 'zh-Hans') {
+    return '"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif';
+  }
+
+  if (language === 'en') {
+    return '"Segoe UI",Inter,Arial,system-ui,sans-serif';
+  }
+
   return '"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif';
 }
-function measureText(t, fs) {
-  const fontStack = getMeasureFontStack();
-  const key = fontStack + '\u0001' + fs + '\u0001' + t;
-  let v = _textMeasureCache.get(key);
-  if (v !== undefined) return v;
-  _mctx.font = `${fs}px ${fontStack}`;
-  v = _mctx.measureText(t).width;
-  if (_textMeasureCache.size > 3000) _textMeasureCache.clear();
-  _textMeasureCache.set(key, v);
-  return v;
+
+const relationshipLabelTextMetrics = (() => {
+  const canvas =
+    document.createElement(
+      'canvas'
+    );
+
+  const context =
+    canvas.getContext('2d');
+
+  const widths =
+    new Map();
+
+  return {
+    width(text, fontSize) {
+      const font =
+        relationshipLabelFontStack();
+
+      const source =
+        String(text ?? '');
+
+      const size =
+        Number(fontSize) || 12;
+
+      const cacheKey =
+        [font, size, source]
+          .join('\u0001');
+
+      if (widths.has(cacheKey)) {
+        return widths.get(cacheKey);
+      }
+
+      context.font =
+        `${size}px ${font}`;
+
+      const width =
+        context.measureText(
+          source
+        ).width;
+
+      if (
+        widths.size >=
+        RELATIONSHIP_LABEL_TEXT_CACHE_LIMIT
+      ) {
+        widths.clear();
+      }
+
+      widths.set(
+        cacheKey,
+        width
+      );
+
+      return width;
+    }
+  };
+})();
+
+function measureRelationshipLabelText(
+  text,
+  fontSize
+) {
+  return relationshipLabelTextMetrics
+    .width(
+      text,
+      fontSize
+    );
 }
 
 const RELATIONSHIP_LABEL_ICON_SPRITE =
@@ -9386,7 +9683,7 @@ function makeLabelSVG(x, y, iconName, text, key) {
   const iconGap = 4;
 
   const textWidth =
-    measureText(
+    measureRelationshipLabelText(
       displayText,
       fs
     );
@@ -9730,9 +10027,9 @@ genealogyScene =
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, relationshipResolvedColor, relationshipInlineSvgStyle,
-      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureText,
+      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureRelationshipLabelText,
       makeLabelSVG, getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, buildTagsHTML, buildPetsChipsHTML, genderClass, statusClass
+      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass
     }
   }) || null;
 if (!genealogyScene) throw new Error('Genealogy Scene failed to initialize.');
@@ -9773,7 +10070,7 @@ function flushAppRenderInvalidation() {
   const mask = appRenderDirtyMask;
   appRenderDirtyMask = 0;
   if (!mask) return;
-  if (mask & APP_RENDER_DIRTY.chrome) { syncRelationshipPerspectiveUI(); updateLayoutToggle(); }
+  if (mask & APP_RENDER_DIRTY.chrome) { syncRelationshipPerspectiveUI(); syncLayoutModeControls(); }
   if (mask & APP_RENDER_DIRTY.lists) {
     if (personLibraryDialog.classList.contains('show')) renderPersonLibrary();
     if (familyMemberPickerDialog.classList.contains('show')) renderFamilyMemberPickerList();
@@ -9840,39 +10137,69 @@ function raceIconHTML(sim) {
   return `<span class="person-meta-icon race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</span>`;
 }
 
-function buildTagsHTML(traits, owner = null) {
-  const list =
-    (traits || [])
-      .filter(Boolean)
-      .map(value =>
-        personDisplayText(
-          value,
-          owner
-        )
+function personTraitDisplayLabels(
+  traits,
+  owner = null
+) {
+  const labels = [];
+
+  for (const value of traits || []) {
+    if (!value) continue;
+
+    const label =
+      personDisplayText(
+        value,
+        owner
       );
 
-  if (!list.length) return '';
-
-  const shown =
-    list.slice(0, MAX_TAGS);
-
-  const rest =
-    list.length -
-    shown.length;
-
-  let html =
-    shown
-      .map(text =>
-        `<span class="tag" title="${esc(text)}">${esc(text)}</span>`
-      )
-      .join('');
-
-  if (rest > 0) {
-    html +=
-      `<span class="tag tag-more" title="${esc(list.slice(MAX_TAGS).join('、'))}">+${rest}</span>`;
+    if (label) {
+      labels.push(label);
+    }
   }
 
-  return html;
+  return labels;
+}
+
+function renderTraitTagSummary(
+  traits,
+  owner = null
+) {
+  const labels =
+    personTraitDisplayLabels(
+      traits,
+      owner
+    );
+
+  if (!labels.length) {
+    return '';
+  }
+
+  const visible =
+    labels.slice(
+      0,
+      MAX_TAGS
+    );
+
+  const hidden =
+    labels.slice(
+      MAX_TAGS
+    );
+
+  const parts = [];
+
+  for (const label of visible) {
+    parts.push(
+      `<span class="tag" title="${esc(label)}">${esc(label)}</span>`
+    );
+  }
+
+  if (hidden.length) {
+    parts.push(
+      `<span class="tag tag-more" title="${esc(hidden.join('、'))}">+${hidden.length}</span>`
+    );
+  }
+
+  return parts.join('');
 }
 
 function petIconFor(pet) {
@@ -10028,43 +10355,106 @@ function renderPetLifeStatusIcon(pet) {
   return '';
 }
 
-function buildPetsChipsHTML(pets, owner = null) {
-  if (!pets?.length) return '';
+function petChipPresentation(
+  pet,
+  owner
+) {
+  const name =
+    personDisplayText(
+      pet?.name,
+      owner
+    );
 
-  const chips =
-    pets
-      .slice(0, 3)
-      .map(pet => {
-        const icon =
-          petIconFor(pet);
+  const breed =
+    personDisplayText(
+      pet?.breed,
+      owner
+    );
 
-        const status =
-          renderPetLifeStatusIcon(
-            pet
-          );
+  return {
+    name,
+    breed,
+    species:
+      formatPetSpecies(
+        pet
+      ),
+    icon:
+      petIconFor(
+        pet
+      ),
+    statusIcon:
+      renderPetLifeStatusIcon(
+        pet
+      )
+  };
+}
 
-        const petName =
-          personDisplayText(
-            pet.name,
-            owner
-          );
+function renderPetChipSummary(
+  pets,
+  owner = null
+) {
+  const source =
+    Array.isArray(pets)
+      ? pets
+      : [];
 
-        const breed =
-          personDisplayText(
-            pet.breed,
-            owner
-          );
+  if (!source.length) {
+    return '';
+  }
 
-        return `<span class="person-card-pet-chip" title="${esc(petName)} · ${esc(formatPetSpecies(pet))}${breed ? ' · ' + esc(breed) : ''}"><span class="pet-icon">${icon}</span>${status || ''}${esc(petName)}</span>`;
-      })
-      .join('');
+  const parts = [];
+  const visiblePets =
+    source.slice(0, 3);
 
-  const rest =
-    pets.length > 3
-      ? `<span class="person-card-pet-chip" title="${esc(uiText(`${pets.length} 只寵物`))}">+${pets.length - 3}</span>`
-      : '';
+  for (const pet of visiblePets) {
+    const item =
+      petChipPresentation(
+        pet,
+        owner
+      );
 
-  return chips + rest;
+    const title =
+      item.name +
+      ' · ' +
+      item.species +
+      (
+        item.breed
+          ? ' · ' + item.breed
+          : ''
+      );
+
+    parts.push(
+      '<span class="person-card-pet-chip" title="' +
+      esc(title) +
+      '">' +
+        '<span class="pet-icon">' +
+          item.icon +
+        '</span>' +
+        (item.statusIcon || '') +
+        esc(item.name) +
+      '</span>'
+    );
+  }
+
+  const remaining =
+    source.length -
+    visiblePets.length;
+
+  if (remaining > 0) {
+    parts.push(
+      '<span class="person-card-pet-chip" title="' +
+      esc(
+        uiText(
+          `${source.length} 只寵物`
+        )
+      ) +
+      '">+' +
+      remaining +
+      '</span>'
+    );
+  }
+
+  return parts.join('');
 }
 
 function genderClass(sim) {
@@ -11574,7 +11964,7 @@ function applySelectedLayoutOperation(action) {
     );
 
   applyGenealogyMutation(mutation);
-  updateLayoutToggle();
+  syncLayoutModeControls();
   syncNodeSelectionClasses();
   genealogyScene?.resizeStageToContent?.();
 
@@ -13060,7 +13450,7 @@ nodes.addEventListener('pointerdown', e => {
           );
 
         arrangeTool = 'select';
-        updateLayoutToggle();
+        syncLayoutModeControls();
       }
 
       dragInitialized = true;
@@ -13243,28 +13633,99 @@ nodes.addEventListener('pointerdown', e => {
   );
 });
 
-function updateLayoutToggle() {
-  const fam = currentFamily();
-  const isFree = genealogyScene.isFreeLayoutActive(fam);
-  const btn = $('layoutToggle'), lockBtn = $('lockToggle');
-  if (isFree) {
-    setIconText(btn, 'arrows-move', '自由排列');
-    btn.classList.add('active');
-    $('resetLayoutBtn').style.display = '';
-    lockBtn.style.display = '';
-    if (fam.locked) {
-      setIconText(lockBtn, 'lock', '已鎖定');
-      lockBtn.classList.add('active');
-    } else {
-      setIconText(lockBtn, 'unlock', '未鎖定');
-      lockBtn.classList.remove('active');
-    }
-  } else {
-    setIconText(btn, 'diagram-3', '自動排列');
-    btn.classList.remove('active');
-    $('resetLayoutBtn').style.display = 'none';
-    lockBtn.style.display = 'none';
+function deriveLayoutModeControlState(
+  family
+) {
+  const free =
+    genealogyScene
+      .isFreeLayoutActive(
+        family
+      );
+
+  return {
+    free,
+    layoutIcon:
+      free
+        ? 'arrows-move'
+        : 'diagram-3',
+    layoutText:
+      free
+        ? '自由排列'
+        : '自動排列',
+    lockVisible:free,
+    resetVisible:free,
+    lockActive:
+      free &&
+      family?.locked === true,
+    lockIcon:
+      family?.locked
+        ? 'lock'
+        : 'unlock',
+    lockText:
+      family?.locked
+        ? '已鎖定'
+        : '未鎖定'
+  };
+}
+
+function syncLayoutModeControls() {
+  const family =
+    currentFamily();
+
+  if (!family) {
+    return;
   }
+
+  const state =
+    deriveLayoutModeControlState(
+      family
+    );
+
+  const layoutButton =
+    $('layoutToggle');
+
+  const lockButton =
+    $('lockToggle');
+
+  const resetButton =
+    $('resetLayoutBtn');
+
+  setIconText(
+    layoutButton,
+    state.layoutIcon,
+    state.layoutText
+  );
+
+  layoutButton?.classList.toggle(
+    'active',
+    state.free
+  );
+
+  if (resetButton) {
+    resetButton.style.display =
+      state.resetVisible
+        ? ''
+        : 'none';
+  }
+
+  if (lockButton) {
+    lockButton.style.display =
+      state.lockVisible
+        ? ''
+        : 'none';
+
+    setIconText(
+      lockButton,
+      state.lockIcon,
+      state.lockText
+    );
+
+    lockButton.classList.toggle(
+      'active',
+      state.lockActive
+    );
+  }
+
   updateArrangeToolUI();
 }
 $('layoutToggle').onclick = () => {
@@ -13349,7 +13810,7 @@ $('layoutToggle').onclick = () => {
     mutation
   );
 
-  updateLayoutToggle();
+  syncLayoutModeControls();
 
   dragHistory.push({
     type:'card-layout',
@@ -13377,7 +13838,7 @@ $('lockToggle').onclick = () => {
     mutation,
     { render:false }
   );
-  updateLayoutToggle();
+  syncLayoutModeControls();
 };
 
 $('resetLayoutBtn').onclick = async () => {
@@ -13414,7 +13875,7 @@ $('resetLayoutBtn').onclick = async () => {
 
   clearNodeSelection();
   applyGenealogyMutation(mutation);
-  updateLayoutToggle();
+  syncLayoutModeControls();
 
   dragHistory.push({
     type:'card-layout',
@@ -13885,7 +14346,7 @@ function refreshFamilyUI() {
   }
 
   document.title = familyName + ' · ' + uiText('模擬市民族譜工具');
-  updateLayoutToggle();
+  syncLayoutModeControls();
   syncNavSelectControl('familySelect');
   refreshFamilyProfilePanel();
 }
@@ -13926,7 +14387,7 @@ $('familyNameEditBtn')?.addEventListener('click', () => {
   familyNameInput.select();
 });
 if (document.fonts?.ready) document.fonts.ready.then(syncFamilyNameInputWidth).catch(() => {});
-window.addEventListener('resize', debounce(syncFamilyNameInputWidth, 80));
+window.addEventListener('resize', createDebouncedCallback(syncFamilyNameInputWidth, 80));
 familyNameInput.onchange = () => {
   const fam = currentFamily();
   const shownBefore = displayDataText(fam.name, fam);
@@ -14061,7 +14522,7 @@ const genealogyUI =
       uiText,
       esc,
       iconSvg,
-      debounce,
+      debounce:createDebouncedCallback,
       normalizeCreatableValue:normalizeRelationshipTypeText,
       createOptionText:relationshipCreateOptionText
     }
@@ -14480,7 +14941,7 @@ avatarCropDialog?.addEventListener(
 
 window.addEventListener(
   'resize',
-  debounce(()=>{
+  createDebouncedCallback(()=>{
     if(
       avatarCropDialog?.classList.contains('show')
     ){
@@ -15817,7 +16278,7 @@ personLibraryDialog.onclick = event => {
   }
 };
 
-personLibrarySearch.oninput = debounce(renderPersonLibrary, 150);
+personLibrarySearch.oninput = createDebouncedCallback(renderPersonLibrary, 150);
 
 $('personLibraryAddBtn').onclick = () => personEditor.open(null);
 $('personLibraryCompactBtn').onclick = () => personLibraryController.setViewMode('compact');
@@ -15947,7 +16408,7 @@ $('addMemberBtn').onclick = () => {
   addMemberController.open();
 };
 
-$('familyMemberPickerSearch').oninput = debounce(renderFamilyMemberPickerList, 150);
+$('familyMemberPickerSearch').oninput = createDebouncedCallback(renderFamilyMemberPickerList, 150);
 
 $('familyMemberPickerCancelBtn').onclick = () => {
   addMemberController.close();
@@ -16503,7 +16964,7 @@ async function importJSON(file) {
     save({ immediate:true });
     persistCanvasBackground();
     refreshFamilyUI();
-    renderCanvasBackground();
+    syncCanvasBackgroundSurface();
     render();
     scheduleGC();
     requestAnimationFrame(() => genealogyViewport.fit());
@@ -17296,7 +17757,7 @@ function restoreWorkspacePreferences() {
     }
   } catch (_) {}
 
-  applyViewMode(savedMode);
+  setGenealogyViewMode(savedMode);
 
   let savedLabelLock = false;
 
@@ -17307,7 +17768,7 @@ function restoreWorkspacePreferences() {
       ) === '1';
   } catch (_) {}
 
-  applyLabelLock(
+  setRelationshipLabelLock(
     savedLabelLock
   );
 
