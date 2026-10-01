@@ -212,6 +212,9 @@
       const multiple = !!select.multiple;
       const creatable = wrap.dataset.uiSelectCreatable === 'true';
       const portal = wrap.dataset.uiSelectPortal === 'true';
+      const addOnly =
+        multiple &&
+        wrap.dataset.uiSelectMode === 'add-only';
       const placeholderSource = wrap.dataset.placeholder || '點選選擇…';
       const home = { parent:dropdown.parentNode, next:dropdown.nextSibling };
 
@@ -246,37 +249,47 @@
         const placeholder = uiText(placeholderSource);
 
         if (multiple) {
-          const selected = [...select.options].filter(option => option.selected);
+          if (addOnly) {
+            input.innerHTML =
+              '<span class="ui-select-add-label">' +
+                iconSvg('plus-lg') +
+                '<span>' +
+                  esc(placeholder) +
+                '</span>' +
+              '</span>';
+          } else {
+            const selected = [...select.options].filter(option => option.selected);
 
-          input.innerHTML = selected.length
-            ? selected.map(option => {
-                const locked = option.disabled;
-                const note = option.dataset.uiSelectNote || '';
+            input.innerHTML = selected.length
+              ? selected.map(option => {
+                  const locked = option.disabled;
+                  const note = option.dataset.uiSelectNote || '';
 
-                return (
-                  '<span class="ui-select-tag' + (locked ? ' locked' : '') + '"' +
-                  (note ? ' title="' + esc(note) + '"' : '') + '>' +
-                  esc(option.textContent) +
-                  (locked
-                    ? '<span class="ui-select-tag-note">' + esc(uiText('自動')) + '</span>'
-                    : '<span class="ui-select-tag-x" data-remove="' + esc(option.value) + '" title="' + esc(uiText('移除')) + '">×</span>') +
-                  '</span>'
-                );
-              }).join('')
-            : '<span class="ui-select-placeholder">' + esc(placeholder) + '</span>';
+                  return (
+                    '<span class="ui-select-tag' + (locked ? ' locked' : '') + '"' +
+                    (note ? ' title="' + esc(note) + '"' : '') + '>' +
+                    esc(option.textContent) +
+                    (locked
+                      ? '<span class="ui-select-tag-note">' + esc(uiText('自動')) + '</span>'
+                      : '<span class="ui-select-tag-x" data-remove="' + esc(option.value) + '" title="' + esc(uiText('移除')) + '">×</span>') +
+                    '</span>'
+                  );
+                }).join('')
+              : '<span class="ui-select-placeholder">' + esc(placeholder) + '</span>';
 
-          input.querySelectorAll('.ui-select-tag-x').forEach(remove => {
-            remove.onclick = event => {
-              event.stopPropagation();
+            input.querySelectorAll('.ui-select-tag-x').forEach(remove => {
+              remove.onclick = event => {
+                event.stopPropagation();
 
-              const option = [...select.options].find(item => item.value === remove.dataset.remove);
-              if (option) option.selected = false;
+                const option = [...select.options].find(item => item.value === remove.dataset.remove);
+                if (option) option.selected = false;
 
-              paintSelection();
-              paintOptions(search.value);
-              emitChange(select);
-            };
-          });
+                paintSelection();
+                paintOptions(search.value);
+                emitChange(select);
+              };
+            });
+          }
         } else {
           const selected = select.options[select.selectedIndex];
 
@@ -338,9 +351,13 @@
         const raw = String(filter || '').trim();
         const query = raw.toLowerCase();
         const options = [...select.options];
+        const availableOptions =
+          addOnly
+            ? options.filter(option => !option.selected && !option.disabled)
+            : options;
         const filtered = query
-          ? options.filter(option => option.textContent.toLowerCase().includes(query))
-          : options;
+          ? availableOptions.filter(option => option.textContent.toLowerCase().includes(query))
+          : availableOptions;
         const hasExact = !!raw && options.some(option =>
           option.value === raw ||
           option.textContent.trim().toLowerCase() === query
@@ -395,10 +412,17 @@
             if (!option || option.disabled) return;
 
             if (multiple) {
-              option.selected = !option.selected;
+              option.selected =
+                addOnly
+                  ? true
+                  : !option.selected;
               paintSelection();
               paintOptions(search.value);
               emitChange(select);
+
+              if (addOnly) {
+                close();
+              }
             } else {
               selectSingle(option);
             }
