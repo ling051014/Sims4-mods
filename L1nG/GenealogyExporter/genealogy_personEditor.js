@@ -1316,7 +1316,7 @@ function collectRelAnnotationDraft() {
   const entries = [];
   const items =
     document.querySelectorAll(
-      '#familyRelationshipAnnotationList .relationship-annotation-item, #relationshipAnnotationList .relationship-annotation-item'
+      '#relationshipAnnotationList .relationship-annotation-item'
     );
 
   items.forEach(item => {
