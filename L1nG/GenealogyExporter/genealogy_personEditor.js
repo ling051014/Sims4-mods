@@ -434,13 +434,11 @@ function buildPersonEditorDraft(){
     const identity=editorFamilyLabelIdentity(role,targetId);
     const value=editorFamilyDraftText(role,targetId);
 
-    return '<div class="family-rel-label-control" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'">'+
-      '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>'+
-      '<div class="family-rel-label-editor" hidden>'+
+    return '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>'+
+      '<div class="family-rel-label-editor" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'" hidden>'+
         '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
         '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
-      '</div>'+
-    '</div>';
+      '</div>';
   }
 
   function syncFamilyLabelDraftInputs(identity,value){
@@ -454,8 +452,8 @@ function buildPersonEditorDraft(){
   function bindEditorFamilyLabelControls(target){
     target.querySelectorAll('.family-rel-label-toggle').forEach(button=>{
       button.addEventListener('click',()=>{
-        const control=button.closest('[data-family-label-identity]');
-        const editor=control?.querySelector('.family-rel-label-editor');
+        const row=button.closest('.family-rel-preview-row');
+        const editor=row?.querySelector('.family-rel-label-editor');
         if(!editor)return;
 
         const open=editor.hidden;
@@ -581,12 +579,148 @@ function buildPersonEditorDraft(){
     '</span>';
   }
 
+  function familyEditorKeyForRole(role){
+    if(role==='parent')return'parents';
+    if(role==='child')return'children';
+    if(role==='spouse')return'spouse';
+    if(role==='exspouse')return'exspouse';
+    if(role==='sibling')return'siblings';
+    return'';
+  }
+
+  function familyRelationEditMode(role){
+    const key=familyEditorKeyForRole(role);
+    if(!key)return false;
+
+    const panel=document.querySelector('[data-family-editor-edit="'+key+'"]');
+    return !!panel&&!panel.hidden;
+  }
+
+  function familyRelationCanRemove(role,targetId){
+    if(role!=='sibling')return true;
+
+    const target=String(targetId||'');
+    return (
+      simEditorState.explicitSiblingIds.has(target)&&
+      !simEditorState.derivedSiblingIds.has(target)
+    );
+  }
+
+  function removeEditorFamilyRelation(role,targetId){
+    const target=String(targetId||'');
+    if(!target)return;
+
+    const selectId={
+      parent:'fParents',
+      child:'fChildren',
+      spouse:'fSpouse',
+      exspouse:'fExSpouse',
+      sibling:'fSiblings'
+    }[role];
+
+    const select=$(selectId);
+    if(!select)return;
+
+    const option=[...select.options].find(item=>String(item.value)===target);
+    if(option&&!option.disabled){
+      option.selected=false;
+    }
+
+    if(role==='parent'){
+      simEditorState.parentKinds.delete(target);
+      syncEditorSiblingAuthority();
+    }
+
+    if(role==='child'){
+      simEditorState.childKinds.delete(target);
+    }
+
+    if(role==='sibling'){
+      simEditorState.explicitSiblingIds.delete(target);
+      syncEditorSiblingAuthority();
+    }
+
+    refreshEditorSelect(selectId);
+    renderPersonEditorFamilyPreviews();
+    renderPersonEditorInfoPreviewIfActive();
+  }
+
+  function editorFamilyRelationActionsMarkup(role,targetId){
+    if(!familyRelationEditMode(role))return'';
+
+    const target=String(targetId||'');
+    const pieces=[];
+
+    if(role==='parent'||role==='child'){
+      const kindMap=
+        role==='parent'
+          ? simEditorState.parentKinds
+          : simEditorState.childKinds;
+      const kind=kindMap.get(target)||'parent-child';
+
+      pieces.push(
+        '<select class="family-rel-kind-select" data-editor-relation-kind="'+esc(role)+'" data-editor-relation-id="'+esc(target)+'" aria-label="'+esc(uiText('關係種類'))+'">'+
+          '<option value="parent-child"'+(kind==='parent-child'?' selected':'')+'>'+esc(uiText('親生'))+'</option>'+
+          '<option value="adoptive"'+(kind==='adoptive'?' selected':'')+'>'+esc(uiText('收養'))+'</option>'+
+        '</select>'
+      );
+    }
+
+    if(editorFamilyLabelControlAvailable(role,target)){
+      pieces.push(editorFamilyLabelControlMarkup(role,target));
+    }
+
+    if(familyRelationCanRemove(role,target)){
+      pieces.push(
+        '<button class="family-rel-remove" type="button" data-family-rel-remove-role="'+esc(role)+'" data-family-rel-remove-id="'+esc(target)+'" aria-label="'+esc(uiText('移除'))+'" title="'+esc(uiText('移除'))+'">'+
+          iconSvg('x-lg')+
+        '</button>'
+      );
+    }
+
+    return '<div class="family-rel-row-actions">'+pieces.join('')+'</div>';
+  }
+
+  function bindEditorFamilyRelationControls(target){
+    bindEditorFamilyLabelControls(target);
+
+    target.querySelectorAll('[data-editor-relation-kind]').forEach(select=>{
+      select.addEventListener('change',()=>{
+        const id=select.dataset.editorRelationId;
+        const targetMap=select.dataset.editorRelationKind==='parent'
+          ? simEditorState.parentKinds
+          : simEditorState.childKinds;
+
+        targetMap.set(
+          id,
+          select.value==='adoptive'
+            ? 'adoptive'
+            : 'parent-child'
+        );
+
+        renderPersonEditorFamilyPreviews();
+        renderPersonEditorInfoPreviewIfActive();
+      });
+    });
+
+    target.querySelectorAll('[data-family-rel-remove-role]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        removeEditorFamilyRelation(
+          button.dataset.familyRelRemoveRole,
+          button.dataset.familyRelRemoveId
+        );
+      });
+    });
+  }
+
   function renderEditorRelationPeople(targetId,ids,labelResolver=null,emptyText='—',role=''){
     const target=$(targetId);
     if(!target)return;
 
     const unique=[...new Set((ids||[]).map(String).filter(Boolean))];
-    target.classList.toggle('family-rel-preview-editable',!!role);
+    const editing=!!role&&familyRelationEditMode(role);
+
+    target.classList.toggle('family-rel-preview-editable',editing);
 
     if(!unique.length){
       target.innerHTML=`<span class="family-rel-empty">${esc(uiText(emptyText))}</span>`;
@@ -607,52 +741,17 @@ function buildPersonEditorDraft(){
         return relationPersonMarkup(sim,label);
       }
 
-      return '<div class="family-rel-preview-row">'+
+      return '<div class="family-rel-preview-row'+(editing?' is-editing':'')+'">'+
         relationPersonMarkup(sim,label)+
-        editorFamilyLabelControlMarkup(role,id)+
+        (editing
+          ? editorFamilyRelationActionsMarkup(role,id)
+          : '')+
       '</div>';
     }).join('')||`<span class="family-rel-empty">${esc(uiText(emptyText))}</span>`;
 
-    if(role){
-      bindEditorFamilyLabelControls(target);
+    if(editing){
+      bindEditorFamilyRelationControls(target);
     }
-  }
-
-  function renderEditorRelationKindList(listId,selectId,kindMap,role){
-    const list=$(listId);
-    if(!list)return;
-
-    syncEditorRelationKindMap(selectId,kindMap);
-    const draft=buildPersonEditorDraft();
-
-    list.innerHTML=selectedEditorIds(selectId).map(id=>{
-      const sim=currentGenealogyData().sims[id];
-      if(!sim)return'';
-
-      const kind=kindMap.get(id)||'parent-child';
-      const label=directFamilyKinshipLabel(role,sim,draft,kind);
-
-      return '<div class="family-rel-kind-row">'+
-        '<div class="family-rel-kind-person">'+relationPersonMarkup(sim,label)+'</div>'+
-        '<select data-editor-relation-kind="'+esc(role)+'" data-editor-relation-id="'+esc(id)+'">'+
-          '<option value="parent-child"'+(kind==='parent-child'?' selected':'')+'>'+esc(uiText('親生'))+'</option>'+
-          '<option value="adoptive"'+(kind==='adoptive'?' selected':'')+'>'+esc(uiText('收養'))+'</option>'+
-        '</select>'+
-      '</div>';
-    }).join('');
-
-    list.querySelectorAll('[data-editor-relation-kind]').forEach(select=>{
-      select.onchange=()=>{
-        const id=select.dataset.editorRelationId;
-        const targetMap=select.dataset.editorRelationKind==='parent'
-          ? simEditorState.parentKinds
-          : simEditorState.childKinds;
-
-        targetMap.set(id,select.value==='adoptive'?'adoptive':'parent-child');
-        renderPersonEditorFamilyPreviews();
-        renderPersonEditorInfoPreviewIfActive();
-      };
-    });
   }
 
   function renderPersonEditorFamilyPreviews(){
@@ -725,20 +824,6 @@ function buildPersonEditorDraft(){
       sim=>directFamilyKinshipLabel('sibling',sim,buildPersonEditorDraft()),
       '—',
       'sibling'
-    );
-
-    renderEditorRelationKindList(
-      'editorParentKindList',
-      'fParents',
-      simEditorState.parentKinds,
-      'parent'
-    );
-
-    renderEditorRelationKindList(
-      'editorChildKindList',
-      'fChildren',
-      simEditorState.childKinds,
-      'child'
     );
   }
 
@@ -981,6 +1066,7 @@ function buildPersonEditorDraft(){
 
         panel.hidden=!willOpen;
         syncFamilyEditorToggleButton(button,willOpen);
+        renderPersonEditorFamilyPreviews();
 
         if(willOpen){
           panel.querySelector('.ui-select-input')?.focus({preventScroll:true});
