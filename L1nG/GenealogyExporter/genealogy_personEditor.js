@@ -435,10 +435,11 @@ function buildPersonEditorDraft(){
 
     const identity=editorFamilyLabelIdentity(role,targetId);
     const value=editorFamilyDraftText(role,targetId);
+    const hasValue=!!String(value||'').trim();
 
     return '<span class="family-rel-label-control" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'">'+
-      '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>'+
-      '<span class="family-rel-label-inline-editor" hidden>'+
+      '<button class="family-rel-label-toggle" type="button" aria-expanded="'+(hasValue?'true':'false')+'"'+(hasValue?' hidden':'')+'>'+esc(uiText('自訂顯示文字…'))+'</button>'+
+      '<span class="family-rel-label-inline-editor"'+(hasValue?'':' hidden')+'>'+
         '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
         '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
       '</span>'+
@@ -1692,6 +1693,9 @@ function otherRelationshipAnnotationControlMarkup(
       )
     );
 
+  const hasCustomText=
+    !!String(draft.text||'').trim();
+
   return (
     '<span class="other-rel-label-control" '+
     'data-other-rel-annotation-key="'+
@@ -1715,10 +1719,16 @@ function otherRelationshipAnnotationControlMarkup(
           esc(uiText('（不顯示）'))+
         '</option>'+
       '</select>'+
-      '<button class="family-rel-label-toggle other-rel-label-toggle" type="button" aria-expanded="false">'+
+      '<button class="family-rel-label-toggle other-rel-label-toggle" type="button" aria-expanded="'+
+      (hasCustomText?'true':'false')+
+      '"'+
+      (hasCustomText?' hidden':'')+
+      '>'+
         esc(uiText('自訂顯示文字…'))+
       '</button>'+
-      '<span class="other-rel-label-inline-editor" hidden>'+
+      '<span class="other-rel-label-inline-editor"'+
+      (hasCustomText?'':' hidden')+
+      '>'+
         '<input class="other-rel-label-input" type="text" maxlength="40" placeholder="'+
         esc(uiText('自訂文字（可選）'))+
         '" value="'+
