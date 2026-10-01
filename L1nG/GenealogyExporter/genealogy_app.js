@@ -1569,7 +1569,7 @@ function syncFamilyNameInputWidth() {
     '';
 
   const measured = Math.ceil(
-    _familyNameMeasureContext.measureRelationshipLabelText(source).width + 18
+    _familyNameMeasureContext.measureText(source).width + 18
   );
 
   const elementWidth = element => {
