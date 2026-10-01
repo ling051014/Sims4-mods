@@ -3840,6 +3840,10 @@ function positionRelationshipTypePicker(){
           1
         )
       )+'px';
+    index.style.height=
+      Math.round(
+        menuRect.height
+      )+'px';
   });
 }
 
@@ -3920,6 +3924,9 @@ function closeRelationshipTypePicker(){
 
   if(index){
     index.style.display='none';
+    index.style.removeProperty(
+      'height'
+    );
   }
 
   picker?.classList.remove(
