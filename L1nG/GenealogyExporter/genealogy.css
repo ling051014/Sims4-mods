@@ -3995,6 +3995,7 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .sim-editor-preview-sheet {
+    /* 預覽紙不是獨立彈窗，不套用共用 dialog 進場動畫，避免 transform 被覆蓋後閃到右下角 */ animation: none;
     /* 預覽頁清除共用面板內距 */ padding: 0;
     /* 預覽頁自行捲動 */ overflow: auto;
     /* 預覽頁背景 */ background: var(--surface-card);
