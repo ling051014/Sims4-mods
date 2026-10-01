@@ -2257,15 +2257,27 @@ button.avatar-editor-action { cursor:pointer; }
     /* 展開時旋轉 */ transform: translateY(-50%) rotate(180deg);
 }
 
+.relationship-type-portal {
+    /* 分類便利貼與右側選單共用同一個浮層容器 */ position: fixed;
+    /* 高於人物編輯器與一般下拉 */ z-index: 5600;
+    /* 便利貼與選單水平接合 */ display: block;
+    /* 不在共同容器本身畫背景，讓子元件保留原輪廓 */ background: transparent;
+    /* 整組只投射一次陰影，避免便利貼與選單中間出現陰影縫 */ box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    /* 不裁切便利貼圓角 */ overflow: visible;
+}
+
+.relationship-type-portal[hidden] {
+    /* 關閉時完全移除 */ display: none;
+}
+
 .relationship-type-popover {
-    /* 關係選單脫離人物編輯器裁切，固定於最上層 viewport */ position: fixed;
-    /* 高於 Dialog 與其他一般選單 */ z-index: 5600;
+    /* 右側選單放在共同 portal 內 */ position: absolute;
     /* 固定顯示方式 */ display: block;
     /* 背景 */ background: var(--nav-dropdown-bg);
     /* 文字 */ color: var(--nav-dropdown-text);
     /* 細框 */ border: 1px solid var(--nav-dropdown-border);
     /* 左上角與左側分類便利貼接合，沿用家庭選擇器輪廓 */ border-radius: 0 6px 6px 6px;
-    /* 與切換家庭下拉完全相同的浮層陰影 */ box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    /* 陰影由共同 portal 統一提供，選單本體不再向便利貼投影 */ box-shadow: none;
     /* 不讓右側內容破出圓角 */ overflow: hidden;
 }
 
@@ -2280,8 +2292,8 @@ button.avatar-editor-action { cursor:pointer; }
 
 
 .relationship-type-index-portal {
-    /* 與右側選單一起固定在最上層 viewport */ position: fixed;
-    /* 高於右側清單 */ z-index: 5601;
+    /* 與右側選單一起放在共同 portal 內 */ position: absolute;
+    /* 高於右側清單，僅用於接縫覆蓋 */ z-index: 2;
     /* 預設由 JS 控制顯示 */ display: none;
     /* 六個分類永遠等分右側選單實際高度 */ align-items: stretch;
 }
@@ -2294,6 +2306,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 .relationship-type-index-tab.active {
     /* 當前便利貼右側不顯示分隔線，與右側選單接成同一頁 */ border-right-color: transparent;
+    /* 當前便利貼使用與內容區相同背景 */ background: var(--nav-dropdown-bg);
 }
 
 .relationship-type-index-tab.active::after {
