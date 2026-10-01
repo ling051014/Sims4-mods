@@ -3305,6 +3305,634 @@ function relationshipTypeOptions() {
   ];
 }
 
+let relationshipTypePickerCategory='romance';
+
+function relationshipTypePickerCategoryOf(option){
+  if(option?.custom)return'custom';
+
+  const rawCategory=
+    SOCIAL_RELATIONSHIP_DEFINITIONS[
+      option?.value
+    ]?.category||
+    '';
+
+  if(
+    rawCategory==='romance'||
+    rawCategory==='intimacy'
+  ){
+    return'romance';
+  }
+
+  if(rawCategory==='friendship')return'friendship';
+  if(rawCategory==='negative')return'negative';
+  if(rawCategory==='social')return'social';
+  return'custom';
+}
+
+function relationshipTypePickerCategoryText(category){
+  const labels={
+    romance:'戀愛 / 親密',
+    friendship:'友誼',
+    negative:'負面',
+    social:'生活 / 社會',
+    custom:'自訂'
+  };
+
+  return uiText(
+    labels[category]||
+    labels.romance
+  );
+}
+
+function relationshipTypePickerTabMarkup(category){
+  const text=
+    relationshipTypePickerCategoryText(
+      category
+    );
+
+  if(category==='romance'){
+    return '<span>'+esc(uiText('戀愛'))+'</span><span>'+esc(uiText('親密'))+'</span>';
+  }
+
+  const compact=
+    text
+      .replace(/\s*\/\s*/g,'')
+      .replace(/\s+/g,'');
+
+  return [...compact]
+    .map(char=>'<span>'+esc(char)+'</span>')
+    .join('');
+}
+
+function syncRelationshipTypePickerTabs(){
+  document
+    .querySelectorAll(
+      '[data-relationship-category]'
+    )
+    .forEach(button=>{
+      const category=
+        button.dataset
+          .relationshipCategory||
+        'romance';
+
+      const active=
+        category===
+        relationshipTypePickerCategory;
+
+      button.classList.toggle(
+        'active',
+        active
+      );
+
+      button.setAttribute(
+        'aria-selected',
+        active?'true':'false'
+      );
+
+      button.setAttribute(
+        'aria-label',
+        relationshipTypePickerCategoryText(
+          category
+        )
+      );
+
+      button.title=
+        relationshipTypePickerCategoryText(
+          category
+        );
+
+      button.innerHTML=
+        relationshipTypePickerTabMarkup(
+          category
+        );
+    });
+}
+
+function syncRelationshipTypePickerValue(){
+  const select=$('relationshipType');
+  const value=$('relationshipTypeValue');
+  const trigger=$('relationshipTypeTrigger');
+
+  if(!select||!value||!trigger)return;
+
+  const selected=
+    [...select.options]
+      .find(option=>
+        option.value===
+        select.value
+      );
+
+  const text=
+    selected&&selected.value
+      ? selected.textContent
+      : uiText('選擇或輸入關係…');
+
+  value.textContent=text;
+  value.title=text;
+}
+
+function relationshipTypePickerFilteredOptions(){
+  const query=
+    String(
+      $('relationshipTypeSearch')
+        ?.value||
+      ''
+    )
+      .trim()
+      .toLocaleLowerCase();
+
+  const options=
+    relationshipTypeOptions();
+
+  if(query){
+    return options.filter(option=>
+      String(option.label||'')
+        .toLocaleLowerCase()
+        .includes(query)
+    );
+  }
+
+  return options.filter(option=>
+    relationshipTypePickerCategoryOf(
+      option
+    )===
+    relationshipTypePickerCategory
+  );
+}
+
+function renderRelationshipTypePickerOptions(){
+  const host=$('relationshipTypeOptions');
+  const search=$('relationshipTypeSearch');
+
+  if(!host)return;
+
+  const raw=
+    String(search?.value||'')
+      .trim();
+
+  const options=
+    relationshipTypePickerFilteredOptions();
+
+  const selected=
+    normalizeRelationshipTypeText(
+      $('relationshipType')?.value
+    );
+
+  const optionMarkup=
+    options
+      .map(option=>{
+        const active=
+          option.value===selected;
+
+        const descriptor=
+          SOCIAL_RELATIONSHIP_DEFINITIONS[
+            option.value
+          ];
+
+        return (
+          '<button class="relationship-type-option'+
+          (active?' selected':'')+
+          '" type="button" role="option" aria-selected="'+
+          (active?'true':'false')+
+          '" data-relationship-type-value="'+
+          esc(option.value)+
+          '">'+
+            (
+              descriptor?.icon
+                ? iconSvg(
+                    descriptor.icon,
+                    'relationship-type-option-icon'
+                  )
+                : iconSvg(
+                    'tag',
+                    'relationship-type-option-icon'
+                  )
+            )+
+            '<span>'+
+              esc(option.label)+
+            '</span>'+
+          '</button>'
+        );
+      })
+      .join('');
+
+  const normalizedRaw=
+    normalizeRelationshipTypeText(
+      raw
+    );
+
+  const hasExact=
+    normalizedRaw&&
+    relationshipTypeOptions()
+      .some(option=>
+        option.value===
+          normalizedRaw||
+        String(option.label||'')
+          .toLocaleLowerCase()===
+        normalizedRaw
+          .toLocaleLowerCase()
+      );
+
+  const createMarkup=
+    normalizedRaw&&!hasExact
+      ? '<button class="relationship-type-option relationship-type-create" type="button" data-create-relationship-type="'+
+        esc(normalizedRaw)+
+        '">'+
+          iconSvg(
+            'plus-lg',
+            'relationship-type-option-icon'
+          )+
+          '<span>'+
+            esc(
+              relationshipCreateOptionText(
+                normalizedRaw
+              )
+            )+
+          '</span>'+
+        '</button>'
+      : '';
+
+  host.innerHTML=
+    optionMarkup||
+    createMarkup
+      ? optionMarkup+createMarkup
+      : '<div class="relationship-type-empty">'+
+        esc(uiText('沒有符合的項目'))+
+        '</div>';
+
+  host
+    .querySelectorAll(
+      '[data-relationship-type-value]'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+
+          setRelationshipTypePickerValue(
+            button.dataset
+              .relationshipTypeValue||
+            ''
+          );
+
+          closeRelationshipTypePicker();
+        }
+      );
+    });
+
+  host
+    .querySelectorAll(
+      '[data-create-relationship-type]'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+
+          setRelationshipTypePickerValue(
+            button.dataset
+              .createRelationshipType||
+            ''
+          );
+
+          relationshipTypePickerCategory=
+            'custom';
+
+          syncRelationshipTypePickerTabs();
+          closeRelationshipTypePicker();
+        }
+      );
+    });
+}
+
+function setRelationshipTypePickerValue(value){
+  const select=$('relationshipType');
+  if(!select)return;
+
+  const normalized=
+    normalizeRelationshipTypeText(
+      value
+    );
+
+  if(
+    normalized&&
+    ![...select.options]
+      .some(option=>
+        option.value===
+        normalized
+      )
+  ){
+    const option=
+      document.createElement(
+        'option'
+      );
+
+    option.value=normalized;
+    option.textContent=normalized;
+    select.appendChild(option);
+  }
+
+  select.value=normalized;
+  select.dispatchEvent(
+    new Event(
+      'change',
+      {bubbles:true}
+    )
+  );
+
+  syncRelationshipTypePickerValue();
+}
+
+function positionRelationshipTypePicker(){
+  const trigger=$('relationshipTypeTrigger');
+  const popover=$('relationshipTypePopover');
+
+  if(
+    !trigger||
+    !popover||
+    popover.hidden
+  )return;
+
+  const rect=
+    trigger.getBoundingClientRect();
+
+  const margin=10;
+  const gap=5;
+  const viewportWidth=
+    Math.max(
+      1,
+      window.innerWidth||
+      document.documentElement.clientWidth||
+      1
+    );
+
+  const viewportHeight=
+    Math.max(
+      1,
+      window.innerHeight||
+      document.documentElement.clientHeight||
+      1
+    );
+
+  const width=
+    Math.min(
+      390,
+      Math.max(
+        300,
+        Math.min(
+          viewportWidth-margin*2,
+          rect.width+84
+        )
+      )
+    );
+
+  const left=
+    Math.min(
+      Math.max(
+        margin,
+        rect.left
+      ),
+      Math.max(
+        margin,
+        viewportWidth-width-margin
+      )
+    );
+
+  const below=
+    viewportHeight-
+    rect.bottom-
+    gap-
+    margin;
+
+  const above=
+    rect.top-
+    gap-
+    margin;
+
+  const openAbove=
+    below<250&&
+    above>below;
+
+  const maxHeight=
+    Math.min(
+      390,
+      Math.max(
+        220,
+        openAbove
+          ? above
+          : below
+      )
+    );
+
+  popover.style.position='fixed';
+  popover.style.width=
+    Math.round(width)+'px';
+  popover.style.left=
+    Math.round(left)+'px';
+  popover.style.maxHeight=
+    Math.round(maxHeight)+'px';
+
+  if(openAbove){
+    popover.style.top='auto';
+    popover.style.bottom=
+      Math.round(
+        viewportHeight-
+        rect.top+
+        gap
+      )+'px';
+  }else{
+    popover.style.bottom='auto';
+    popover.style.top=
+      Math.round(
+        rect.bottom+
+        gap
+      )+'px';
+  }
+}
+
+function openRelationshipTypePicker(){
+  const picker=$('relationshipTypePicker');
+  const trigger=$('relationshipTypeTrigger');
+  const popover=$('relationshipTypePopover');
+  const search=$('relationshipTypeSearch');
+
+  if(
+    !picker||
+    !trigger||
+    !popover
+  )return;
+
+  if(
+    popover.parentElement!==
+    document.body
+  ){
+    document.body.appendChild(
+      popover
+    );
+  }
+
+  popover.hidden=false;
+  picker.classList.add(
+    'open'
+  );
+
+  trigger.setAttribute(
+    'aria-expanded',
+    'true'
+  );
+
+  if(search)search.value='';
+
+  syncRelationshipTypePickerTabs();
+  renderRelationshipTypePickerOptions();
+
+  requestAnimationFrame(()=>{
+    positionRelationshipTypePicker();
+    search?.focus({
+      preventScroll:true
+    });
+  });
+}
+
+function closeRelationshipTypePicker(){
+  const picker=$('relationshipTypePicker');
+  const trigger=$('relationshipTypeTrigger');
+  const popover=$('relationshipTypePopover');
+
+  if(!trigger||!popover)return;
+
+  popover.hidden=true;
+  picker?.classList.remove(
+    'open'
+  );
+
+  trigger.setAttribute(
+    'aria-expanded',
+    'false'
+  );
+}
+
+function setupRelationshipTypePicker(){
+  const trigger=$('relationshipTypeTrigger');
+  const popover=$('relationshipTypePopover');
+  const search=$('relationshipTypeSearch');
+
+  if(
+    !trigger||
+    !popover||
+    trigger.dataset
+      .relationshipPickerBound==='1'
+  )return;
+
+  trigger.dataset
+    .relationshipPickerBound='1';
+
+  trigger.addEventListener(
+    'click',
+    event=>{
+      event.preventDefault();
+      event.stopPropagation();
+
+      if(popover.hidden){
+        openRelationshipTypePicker();
+      }else{
+        closeRelationshipTypePicker();
+      }
+    }
+  );
+
+  document
+    .querySelectorAll(
+      '[data-relationship-category]'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+
+          relationshipTypePickerCategory=
+            button.dataset
+              .relationshipCategory||
+            'romance';
+
+          if(search)search.value='';
+
+          syncRelationshipTypePickerTabs();
+          renderRelationshipTypePickerOptions();
+        }
+      );
+    });
+
+  search?.addEventListener(
+    'input',
+    ()=>{
+      renderRelationshipTypePickerOptions();
+    }
+  );
+
+  search?.addEventListener(
+    'keydown',
+    event=>{
+      if(event.key==='Escape'){
+        event.preventDefault();
+        closeRelationshipTypePicker();
+        trigger.focus();
+      }
+    }
+  );
+
+  document.addEventListener(
+    'click',
+    event=>{
+      const pickerNow=
+        $('relationshipTypePicker');
+
+      const popoverNow=
+        $('relationshipTypePopover');
+
+      if(
+        pickerNow?.contains(
+          event.target
+        )||
+        popoverNow?.contains(
+          event.target
+        )
+      ){
+        return;
+      }
+
+      closeRelationshipTypePicker();
+    }
+  );
+
+  window.addEventListener(
+    'resize',
+    debounce(
+      positionRelationshipTypePicker,
+      60
+    )
+  );
+
+  document.addEventListener(
+    'scroll',
+    ()=>{
+      if(!popover.hidden){
+        positionRelationshipTypePicker();
+      }
+    },
+    true
+  );
+
+  syncRelationshipTypePickerTabs();
+  syncRelationshipTypePickerValue();
+}
+
 function populateRelationshipTypePicker(
   selectedValue = ''
 ) {
@@ -3356,7 +3984,14 @@ function populateRelationshipTypePicker(
       ? selected
       : '';
 
-  genealogyUI.refreshSelect('relationshipType');
+  syncRelationshipTypePickerValue();
+
+  if(
+    !$('relationshipTypePopover')
+      ?.hidden
+  ){
+    renderRelationshipTypePickerOptions();
+  }
 }
 
 function relationshipCreateOptionText(value) {
@@ -16094,19 +16729,10 @@ $('relationshipAddBtn').onclick = () => {
   const typeSelect =
     $('relationshipType');
 
-  let type =
+  const type =
     normalizeRelationshipTypeText(
       typeSelect?.value
     );
-
-  if (!type) {
-    type =
-      normalizeRelationshipTypeText(
-        genealogyUI.readPendingValue(
-          'relationshipType'
-        )
-      );
-  }
 
   if (!type) {
     uiAlert(
@@ -16119,10 +16745,24 @@ $('relationshipAddBtn').onclick = () => {
     return;
   }
 
-  const targetId =
-    $('relationshipTarget').value;
+  const targetSelect=
+    $('relationshipTarget');
 
-  if (!targetId) {
+  const targetIds=
+    [...(
+      targetSelect
+        ?.selectedOptions||
+      []
+    )]
+      .map(option=>
+        String(
+          option.value||
+          ''
+        )
+      )
+      .filter(Boolean);
+
+  if (!targetIds.length) {
     uiAlert(
       '請選擇關係對象。',
       {
@@ -16133,13 +16773,20 @@ $('relationshipAddBtn').onclick = () => {
     return;
   }
 
-  const mutation =
-    genealogyStore.addRelationship({
-      from:c.id,
-      to:targetId,
-      type,
-      label:type
-    });
+  let mutation=null;
+
+  targetIds.forEach(targetId=>{
+    mutation=
+      genealogyStore.mergeResults(
+        mutation,
+        genealogyStore.addRelationship({
+          from:c.id,
+          to:targetId,
+          type,
+          label:type
+        })
+      );
+  });
 
   populateRelationshipTypePicker();
 
@@ -16147,7 +16794,18 @@ $('relationshipAddBtn').onclick = () => {
     typeSelect.value = '';
   }
 
-  genealogyUI.refreshSelect('relationshipType');
+  syncRelationshipTypePickerValue();
+
+  if(targetSelect){
+    [...targetSelect.options]
+      .forEach(option=>{
+        option.selected=false;
+      });
+  }
+
+  genealogyUI.refreshSelect(
+    'relationshipTarget'
+  );
 
   personEditor.renderRelationshipList(c);
   renderRelAnno(c.id);
@@ -16544,6 +17202,8 @@ function handleGenealogyLanguageChanged() {
 
   genealogyUI.refreshAllControls();
   syncAllNavSelectControls();
+  syncRelationshipTypePickerTabs();
+  syncRelationshipTypePickerValue();
 }
 
 document.addEventListener('keydown', e => {
@@ -16565,6 +17225,7 @@ async function bootstrapGenealogyApp() {
   await LING_I18N.init();
 
   setupTopbarNavSelects();
+  setupRelationshipTypePicker();
   genealogyUI.observeFormControls();
 
   initializeGenealogyWorkspace();
