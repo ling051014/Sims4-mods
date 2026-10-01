@@ -2231,7 +2231,7 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-popover {
-    /* 右側結果紙張與家族選擇器一致 */ position: fixed;
+    /* 右側結果紙張定位於人物編輯器本身，避免 portal 座標漂移 */ position: absolute;
     /* 高於人物編輯器 */ z-index: 1600;
     /* 固定顯示方式 */ display: block;
     /* 背景 */ background: var(--nav-dropdown-bg);
@@ -2247,7 +2247,8 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-index-portal {
-    /* 沿用家族左側便利貼 portal */ z-index: 1601;
+    /* 便利貼與清單共用人物編輯器座標系 */ position: absolute;
+    /* 高於右側清單 */ z-index: 1601;
     /* 預設由 JS 控制顯示 */ display: none;
 }
 
@@ -2268,6 +2269,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 不額外包第二層卡片 */ padding: 0;
     /* 可正確收縮 */ min-width: 0;
     /* 可正確收縮 */ min-height: 0;
+    /* 填滿可用高度，讓選項清單取得實際滾動空間 */ height: 100%;
     /* 背景沿用家族結果紙張 */ background: var(--nav-dropdown-bg);
 }
 
@@ -2289,6 +2291,7 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-options {
+    /* 佔滿搜尋列以外的剩餘高度 */ flex: 1 1 auto;
     /* 清單可滾動 */ overflow-y: auto;
     /* 不另外製作卡片間距 */ display: block;
     /* 可正確收縮 */ min-height: 0;
