@@ -12382,7 +12382,7 @@ nodes.addEventListener('pointerdown', e => {
       if (snapped.guideY !== null) showSmartGuide('y', snapped.guideY);
       if (snapped.spacingX) showEqualSpacingGuide(snapped.spacingX);
       if (snapped.spacingY) showEqualSpacingGuide(snapped.spacingY);
-      genealogyScene?.requestRelationshipPreviewUpdate?.([id]);
+      genealogyScene?.updateRelationshipPreviewImmediately?.([id]);
     };
 
     const moveFrame =
@@ -12634,7 +12634,7 @@ nodes.addEventListener('pointerdown', e => {
         );
       }
 
-      genealogyScene?.requestRelationshipPreviewUpdate?.(dragIds);
+      genealogyScene?.updateRelationshipPreviewImmediately?.(dragIds);
     };
 
     const moveFrame =
@@ -12943,7 +12943,7 @@ nodes.addEventListener('pointerdown', e => {
       );
     }
 
-    genealogyScene?.requestRelationshipPreviewUpdate?.([id]);
+    genealogyScene?.updateRelationshipPreviewImmediately?.([id]);
   };
 
   const moveFrame =
