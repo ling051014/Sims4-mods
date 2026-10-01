@@ -1800,7 +1800,7 @@ body[data-theme="midnight"] .life-photo-stage {
 
 /* ========【模擬市民個人檔案編輯器】 設定 - 緊湊人物檔案、分頁內容與固定操作列 ======== */
 .sim-editor-modal { width:min(790px,100%); max-height:92vh; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease; }
-.sim-editor-top { flex:0 0 auto; padding:13px 18px 0; border-bottom:1px solid var(--border-default); background:var(--surface-card); position:relative; z-index:5; }
+.sim-editor-top { flex:0 0 auto; padding:13px 18px 0; background:var(--surface-card); position:relative; z-index:5; }
 .sim-editor-title { margin-bottom:8px !important; padding-right:64px; }
 .sim-profile-header { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:start; gap:18px; padding:0 0 11px; }
 .sim-profile-avatar-block { width:156px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto; align-items:center; gap:5px 6px; }
@@ -1824,7 +1824,7 @@ button.avatar-editor-action { cursor:pointer; }
 .profile-birthday-field .birthday-inputs { grid-template-columns:1.3fr .85fr .85fr; gap:5px; }
 .profile-age-field .age-input-wrap { min-height:32px; border-radius:6px; }
 .profile-age-field .age-input-wrap input { min-height:30px; border:0; border-radius:0; box-shadow:none; background:transparent; padding-right:2px; }
-.sim-editor-tabs { display:flex; gap:0; overflow-x:auto; scrollbar-width:none; margin:0; padding:0; }
+.sim-editor-tabs { flex:0 0 auto; display:flex; gap:0; overflow-x:auto; scrollbar-width:none; margin:0; padding:0 18px; border-bottom:1px solid var(--border-default); background:var(--surface-card); position:relative; z-index:5; }
 .sim-editor-tabs::-webkit-scrollbar { display:none; }
 .sim-editor-tab { position:relative; flex:1 1 0; min-width:max-content; min-height:34px; padding:7px 11px 8px; border:0; border-radius:0; background:transparent; color:var(--text-secondary); font-size:12.5px; font-weight:600; line-height:1.2; transition:color .15s ease,background .15s ease; }
 .sim-editor-tab:hover { background:var(--surface-item-hover); color:var(--text-primary); }
@@ -2033,6 +2033,7 @@ button.avatar-editor-action { cursor:pointer; }
 .family-rel-edit .ui-select-input { min-height:34px; }
 .family-rel-person-copy { display:grid; min-width:0; gap:1px; }
 .family-rel-person-kinship { color:var(--text-secondary); font-size:10px; line-height:1.25; }
+.family-rel-person-custom { color:var(--action-primary); font-size:10.5px; line-height:1.3; overflow-wrap:anywhere; }
 .sim-editor-panel .relationship-section.first { margin-top:0; padding-top:0; border-top:0; }
 .sim-editor-actions { flex:0 0 auto; margin-top:0; padding:9px 18px 10px; border-top:1px solid var(--border-default); background:var(--surface-card); box-shadow:none; position:relative; z-index:6; }
 
@@ -6587,15 +6588,45 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 /* ========【人物檔案響應式】 設定 - 小螢幕維持緊湊但不擠壓頭像 ======== */
 @media (max-width:760px) {
-  .sim-editor-modal { max-height:96vh; }
+  #simEditorDialog { padding:8px; }
+  .sim-editor-modal {
+    width:100%;
+    height:calc(100vh - 16px);
+    height:calc(100dvh - 16px);
+    max-height:none;
+    display:block;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
   .sim-editor-top { padding:12px 14px 0; }
+  .sim-editor-tabs {
+    position:sticky;
+    top:0;
+    z-index:8;
+    padding:0 14px;
+    background:color-mix(in srgb,var(--surface-card) 96%,transparent);
+    backdrop-filter:blur(8px);
+  }
+  .sim-editor-content {
+    min-height:auto;
+    overflow:visible;
+    padding:11px 14px 18px;
+  }
+  .sim-editor-actions {
+    position:sticky;
+    bottom:0;
+    z-index:9;
+    padding:9px 14px calc(10px + env(safe-area-inset-bottom));
+    background:color-mix(in srgb,var(--surface-card) 97%,transparent);
+    backdrop-filter:blur(8px);
+  }
   .sim-profile-header { grid-template-columns:124px minmax(0,1fr); gap:12px; }
   .sim-profile-avatar-block { width:124px; }
   .avatar-preview.sim-profile-avatar { width:94px; height:94px; }
   .profile-identity-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .profile-fact-edit-row { grid-template-columns:1fr 1fr; }
   .profile-residence-field { grid-column:1/-1; }
-  .sim-editor-content { padding:11px 14px 13px; }
   .family-rel-editor { grid-template-columns:1fr; }
   .family-rel-block { border-bottom:1px solid var(--border-default) !important; }
   .family-rel-block:last-child { border-bottom:0 !important; }
@@ -6603,11 +6634,22 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .person-profile-panel { width:min(540px,100%); }
 }
 @media (max-width:520px) {
-  .sim-profile-header { grid-template-columns:1fr; }
+  .sim-editor-top { padding:10px 14px 0; }
+  .sim-editor-tabs { padding:0 8px; }
+  .sim-editor-tab {
+    min-height:38px;
+    padding:8px 9px 9px;
+    font-size:12px;
+  }
+  .sim-profile-header { grid-template-columns:1fr; gap:10px; }
   .sim-profile-avatar-block { width:100%; grid-template-columns:104px 1fr; grid-template-rows:auto auto; column-gap:10px; }
   .avatar-preview.sim-profile-avatar { grid-column:1; grid-row:1 / span 2; margin:0; }
   .sim-profile-avatar-actions { grid-column:2; justify-content:flex-start; flex-wrap:wrap; }
   .sim-profile-avatar-block .avatar-tip { grid-column:2; text-align:left; }
+  .profile-fact-edit-row { grid-template-columns:minmax(82px,.62fr) minmax(0,1.38fr); }
+  .profile-birthday-field { grid-column:1/-1; }
+  .profile-age-field { grid-column:1; }
+  .profile-residence-field { grid-column:2; }
   .pet-editor-layout { grid-template-columns:1fr; }
   .pet-avatar-editor-block { width:100%; }
   .pet-editor-fields { grid-template-columns:1fr; }
@@ -6615,8 +6657,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .family-rel-preview-row.is-editing { grid-template-columns:1fr; }
   .family-rel-row-actions { flex-wrap:wrap; justify-content:flex-start; padding-left:31px; }
   .family-rel-label-editor { padding-left:0; }
-  .profile-fact-edit-row { grid-template-columns:1fr; }
-  .profile-residence-field { grid-column:auto; }
   .family-rel-edit-grid { grid-template-columns:1fr; }
   .person-profile-header { align-items:center; }
   .person-profile-avatar { width:88px; height:88px; }
