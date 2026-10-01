@@ -420,8 +420,8 @@
               paintOptions(search.value);
               emitChange(select);
 
-              if (addOnly) {
-                close();
+              if (portal) {
+                global.requestAnimationFrame(position);
               }
             } else {
               selectSingle(option);
@@ -589,6 +589,16 @@
       const host = document.createElement('span');
       host.className = 'ui-single-select';
 
+      const compact =
+        select.dataset.uiCompact === 'true';
+
+      const matchPopoverWidth =
+        select.dataset.uiPopoverMatchWidth === 'true';
+
+      if (compact) {
+        host.classList.add('ui-single-select-compact');
+      }
+
       const trigger = document.createElement('button');
       trigger.type = 'button';
       trigger.className = 'ui-select-input ui-single-select-trigger';
@@ -679,9 +689,22 @@
 
       function position() {
         if (!host.classList.contains('ui-select-open')) return;
+
+        const triggerWidth =
+          Math.max(
+            1,
+            trigger.getBoundingClientRect().width
+          );
+
         positionPortal(trigger, menu, {
-          minWidth:Math.max(120, trigger.getBoundingClientRect().width),
-          maxWidth:420,
+          minWidth:
+            matchPopoverWidth
+              ? triggerWidth
+              : Math.max(120,triggerWidth),
+          maxWidth:
+            matchPopoverWidth
+              ? triggerWidth
+              : 420,
           maxHeight:320
         });
       }
