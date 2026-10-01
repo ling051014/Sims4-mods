@@ -54,6 +54,10 @@
 
   const editingGallery = [];
 
+  // ========【人物編輯器延遲建立】 設定 - 基本資料先顯示，隱藏分頁真正需要時再建立 ========
+  let personEditorRelationshipUiReady=false;
+  let personEditorMediaUiReady=false;
+
   const lifePhotoState = {
     editor:{
       index:-1,
@@ -110,6 +114,9 @@
       editingGallery,
       []
     );
+
+    personEditorRelationshipUiReady=false;
+    personEditorMediaUiReady=false;
   }
 
 function renderPersonEditorAvatarPreview(){
@@ -194,14 +201,25 @@ function addTraitFromEditor() {
   input.focus();
 }
 
-function buildPersonEditorDraft(){
+function buildPersonEditorDraft({
+    copyMedia=true
+  }={}){
     const existing=
       currentSimEditorPerson();
     const status=$('fStatus').value;
 
     return {
       ...(existing
-        ? {gameData:existing.gameData?JSON.parse(JSON.stringify(existing.gameData)):undefined}
+        ? {
+            gameData:
+              existing.gameData
+                ? JSON.parse(
+                    JSON.stringify(
+                      existing.gameData
+                    )
+                  )
+                : undefined
+          }
         : {}),
       id:simEditorState.simId||'__editor_preview__',
       name:$('fName').value.trim(),
@@ -221,8 +239,22 @@ function buildPersonEditorDraft(){
       bio:$('fBio').value.trim(),
       avatar:simEditorState.avatar||null,
       avatarFrame:normalizeAvatarFrame(simEditorState.avatarFrame),
-      pets:JSON.parse(JSON.stringify(editingPets)),
-      gallery:JSON.parse(JSON.stringify(editingGallery))
+      pets:
+        copyMedia
+          ? JSON.parse(
+              JSON.stringify(
+                editingPets
+              )
+            )
+          : editingPets,
+      gallery:
+        copyMedia
+          ? JSON.parse(
+              JSON.stringify(
+                editingGallery
+              )
+            )
+          : editingGallery
     };
   }
 
@@ -438,9 +470,9 @@ function buildPersonEditorDraft(){
     const hasValue=!!String(value||'').trim();
 
     return '<span class="family-rel-label-control" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'">'+
-      '<button class="family-rel-label-toggle" type="button" aria-expanded="'+(hasValue?'true':'false')+'"'+(hasValue?' hidden':'')+'>'+esc(uiText('自訂顯示文字…'))+'</button>'+
+      '<button class="family-rel-label-toggle" type="button" aria-expanded="'+(hasValue?'true':'false')+'"'+(hasValue?' hidden':'')+'>'+esc(uiText('自訂標籤文字'))+'</button>'+
       '<span class="family-rel-label-inline-editor"'+(hasValue?'':' hidden')+'>'+
-        '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
+        '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入標籤文字'))+'" value="'+esc(value)+'">'+
         '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
       '</span>'+
     '</span>';
@@ -767,7 +799,14 @@ function buildPersonEditorDraft(){
     });
   }
 
-  function renderEditorRelationPeople(targetId,ids,labelResolver=null,emptyText='—',role=''){
+  function renderEditorRelationPeople(
+    targetId,
+    ids,
+    labelResolver=null,
+    emptyText='—',
+    role='',
+    draft=null
+  ){
     const target=$(targetId);
     if(!target)return;
 
@@ -781,14 +820,21 @@ function buildPersonEditorDraft(){
       return;
     }
 
-    const draft=buildPersonEditorDraft();
+    const relationDraft=
+      draft||
+      buildPersonEditorDraft({
+        copyMedia:false
+      });
 
     target.innerHTML=unique.map(id=>{
       const sim=currentGenealogyData().sims[id];
       if(!sim)return'';
 
       const label=typeof labelResolver==='function'
-        ? labelResolver(sim,draft)
+        ? labelResolver(
+            sim,
+            relationDraft
+          )
         : '';
 
       if(!role){
@@ -844,54 +890,76 @@ function buildPersonEditorDraft(){
     syncEditorRelationKindMap('fParents',simEditorState.parentKinds);
     syncEditorRelationKindMap('fChildren',simEditorState.childKinds);
 
+    const relationshipDraft=
+      buildPersonEditorDraft({
+        copyMedia:false
+      });
+
     renderEditorRelationPeople(
       'editorParentsPreview',
       selectedEditorIds('fParents'),
-      sim=>directFamilyKinshipLabel(
+      (sim,draft)=>directFamilyKinshipLabel(
         'parent',
         sim,
-        buildPersonEditorDraft(),
+        draft,
         simEditorState.parentKinds.get(String(sim.id))||'parent-child'
       ),
       '—',
-      'parent'
+      'parent',
+      relationshipDraft
     );
 
     renderEditorRelationPeople(
       'editorSpousePreview',
       selectedEditorIds('fSpouse'),
-      sim=>directFamilyKinshipLabel('spouse',sim,buildPersonEditorDraft()),
+      (sim,draft)=>directFamilyKinshipLabel(
+        'spouse',
+        sim,
+        draft
+      ),
       '—',
-      'spouse'
+      'spouse',
+      relationshipDraft
     );
 
     renderEditorRelationPeople(
       'editorExSpousePreview',
       selectedEditorIds('fExSpouse'),
-      sim=>directFamilyKinshipLabel('exspouse',sim,buildPersonEditorDraft()),
+      (sim,draft)=>directFamilyKinshipLabel(
+        'exspouse',
+        sim,
+        draft
+      ),
       '—',
-      'exspouse'
+      'exspouse',
+      relationshipDraft
     );
 
     renderEditorRelationPeople(
       'editorChildrenPreview',
       selectedEditorIds('fChildren'),
-      sim=>directFamilyKinshipLabel(
+      (sim,draft)=>directFamilyKinshipLabel(
         'child',
         sim,
-        buildPersonEditorDraft(),
+        draft,
         simEditorState.childKinds.get(String(sim.id))||'parent-child'
       ),
       '—',
-      'child'
+      'child',
+      relationshipDraft
     );
 
     renderEditorRelationPeople(
       'editorSiblingsPreview',
       editorSiblingIds(),
-      sim=>directFamilyKinshipLabel('sibling',sim,buildPersonEditorDraft()),
+      (sim,draft)=>directFamilyKinshipLabel(
+        'sibling',
+        sim,
+        draft
+      ),
       '—',
-      'sibling'
+      'sibling',
+      relationshipDraft
     );
   }
 
@@ -983,6 +1051,10 @@ function buildPersonEditorDraft(){
   }
 
   function switchEditorTab(tabName='basic'){
+    ensurePersonEditorTabUi(
+      tabName
+    );
+
     const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
     const panels=[...document.querySelectorAll('.sim-editor-panel[data-editor-panel]')];
 
@@ -1011,6 +1083,7 @@ function buildPersonEditorDraft(){
     const sheet=$('simEditorPreviewSheet');
     if(!sheet)return;
 
+    initializePersonEditorRelationshipUi();
     renderEditorInfoPreview();
     mask.classList.add('preview-open');
     sheet.removeAttribute('inert');
@@ -1210,16 +1283,96 @@ function buildPersonEditorDraft(){
   }
 
 
-  function openPersonEditor(id){
-    resetPersonEditorDraftState();
+  function collectPersonEditorDescendantIds(
+    allSims,
+    ancestorId
+  ){
+    const ancestor=String(ancestorId||'');
+    const descendants=new Set();
 
-    simEditorState.simId=
-      id || null;
+    if(!ancestor)return descendants;
+
+    const childrenByParent=new Map();
+
+    (allSims||[]).forEach(child=>{
+      genealogyParentRelations(child)
+        .forEach(relation=>{
+          const parentId=
+            String(
+              relation.parentId||
+              ''
+            );
+
+          const childId=
+            String(
+              child?.id||
+              ''
+            );
+
+          if(!parentId||!childId)return;
+
+          if(
+            !childrenByParent.has(
+              parentId
+            )
+          ){
+            childrenByParent.set(
+              parentId,
+              []
+            );
+          }
+
+          childrenByParent
+            .get(parentId)
+            .push(childId);
+        });
+    });
+
+    const queue=[
+      ...(childrenByParent.get(ancestor)||[])
+    ];
+
+    for(
+      let index=0;
+      index<queue.length;
+      index+=1
+    ){
+      const id=
+        String(
+          queue[index]||
+          ''
+        );
+
+      if(
+        !id||
+        descendants.has(id)
+      ){
+        continue;
+      }
+
+      descendants.add(id);
+
+      (
+        childrenByParent.get(id)||
+        []
+      ).forEach(childId=>{
+        if(!descendants.has(childId)){
+          queue.push(childId);
+        }
+      });
+    }
+
+    return descendants;
+  }
+
+  function initializePersonEditorRelationshipUi(){
+    if(personEditorRelationshipUiReady)return;
 
     const sim=
-      id
-        ? currentGenealogyData().sims[id]
-        : null;
+      currentSimEditorPerson();
+
+    const db=
+      currentGenealogyData();
 
     const familyAuthority=
       sim
@@ -1228,105 +1381,76 @@ function buildPersonEditorDraft(){
           )
         : null;
 
-    $('modalTitle').textContent=sim?uiText('編輯模擬市民'):uiText('新增模擬市民');
+    $('fFamilyIds').innerHTML=
+      db.families
+        .map(family=>
+          `<option value="${family.id}">${esc(displayDataText(family.name,family))}</option>`
+        )
+        .join('');
 
-    $('fName').value=sim?displayDataText(sim.name,sim):'';
-    $('fStage').value=sim?sim.lifeStage:'成年';
-    $('fGender').value=sim?(sim.gender||'男'):'男';
-    $('fStatus').value=sim?(sim.status||'在世'):'在世';
-    $('fRace').value=sim?(sim.race||''):'';
-
-    $('fBirthdayYear').value=sim&&sim.birthdayYear!=null
-      ? String(sim.birthdayYear)
-      : '';
-
-    $('fBirthdayMonth').value=sim&&sim.birthdayMonth
-      ? String(sim.birthdayMonth)
-      : '';
-
-    populatePersonEditorBirthdayDays(sim&&sim.birthdayDay?sim.birthdayDay:'');
-
-    $('fAge').value=sim&&sim.age!=null
-      ? String(sim.age)
-      : '';
-
-    $('fResidence').value=sim?displayDataText(sim.residence,sim):'';
-    $('fAspiration').value=sim?displayDataText(sim.aspiration,sim):'';
-    $('fCauseOfDeath').value=sim?displayDataText(sim.causeOfDeath,sim):'';
-
-    simEditorState.traits=sim
-      ? (sim.traits||[]).map(value=>displayDataText(value,sim))
-      : [];
-
-    renderTraitEditor();
-
-    if($('traitInput'))$('traitInput').value='';
-
-    $('fCareer').value=sim?displayDataText(sim.career,sim):'';
-    $('fBio').value=sim?displayDataText(sim.bio,sim):'';
-
-    simEditorState.avatar=sim?(sim.avatar||null):null;
-    simEditorState.avatarFrame=normalizeAvatarFrame(sim?.avatarFrame);
-    renderPersonEditorAvatarPreview();
-
-    replaceDraftCollection(
-      editingPets,
-      sim
-        ? JSON.parse(JSON.stringify(sim.pets||[]))
-        : []
-    );
-    renderPetDraftList();
-
-    replaceDraftCollection(
-      editingGallery,
-      sim
-        ? JSON.parse(JSON.stringify(sim.gallery||[]))
-        : []
-    );
-    lifePhotoWorkspace.renderList();
-
-    syncPersonEditorCauseOfDeathVisibility();
-    closeEditorPreviewSheet();
-    switchEditorTab('basic');
-
-    $('fFamilyIds').innerHTML=currentGenealogyData().families
-      .map(family=>`<option value="${family.id}">${esc(displayDataText(family.name,family))}</option>`)
-      .join('');
-
-    const currentFamilies=new Set();
+    const currentFamilies=
+      new Set();
 
     if(sim){
-      currentGenealogyData().families.forEach(family=>{
-        if(family.memberIds.includes(sim.id)){
-          currentFamilies.add(String(family.id));
+      db.families.forEach(family=>{
+        if(
+          family.memberIds.includes(
+            sim.id
+          )
+        ){
+          currentFamilies.add(
+            String(family.id)
+          );
         }
       });
-    }else if(currentGenealogyData().currentFamilyId){
-      currentFamilies.add(String(currentGenealogyData().currentFamilyId));
+    }else if(db.currentFamilyId){
+      currentFamilies.add(
+        String(db.currentFamilyId)
+      );
     }
 
-    [...$('fFamilyIds').options].forEach(option=>{
-      option.selected=currentFamilies.has(String(option.value));
-    });
+    [...$('fFamilyIds').options]
+      .forEach(option=>{
+        option.selected=
+          currentFamilies.has(
+            String(option.value)
+          );
+      });
 
-    const allSims=Object.values(currentGenealogyData().sims);
+    const allSims=
+      Object.values(
+        db.sims
+      );
 
-    const parentOptions=allSims
-      .filter(candidate=>
-        !sim||
-        (
-          candidate.id!==sim.id&&
-          !isDescendant(sim.id,candidate.id)
+    const descendantIds=
+      sim
+        ? collectPersonEditorDescendantIds(
+            allSims,
+            sim.id
+          )
+        : new Set();
+
+    const parentOptions=
+      allSims
+        .filter(candidate=>
+          !sim||
+          (
+            candidate.id!==sim.id&&
+            !descendantIds.has(
+              String(candidate.id)
+            )
+          )
         )
-      )
-      .map(candidate=>
-        `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-      )
-      .join('');
+        .map(candidate=>
+          `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
+        )
+        .join('');
 
-    $('fParents').innerHTML=parentOptions;
+    $('fParents').innerHTML=
+      parentOptions;
 
-    simEditorState.parentKinds=new Map();
+    simEditorState.parentKinds=
+      new Map();
 
     if(familyAuthority){
       familyAuthority.parents
@@ -1338,18 +1462,29 @@ function buildPersonEditorDraft(){
         });
     }
 
-    [...$('fParents').options].forEach(option=>{
-      option.selected=simEditorState.parentKinds.has(String(option.value));
-    });
+    [...$('fParents').options]
+      .forEach(option=>{
+        option.selected=
+          simEditorState
+            .parentKinds
+            .has(
+              String(option.value)
+            );
+      });
 
-    const relationOptions=allSims
-      .filter(candidate=>!sim||candidate.id!==sim.id)
-      .map(candidate=>
-        `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-      )
-      .join('');
+    const relationOptions=
+      allSims
+        .filter(candidate=>
+          !sim||
+          candidate.id!==sim.id
+        )
+        .map(candidate=>
+          `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
+        )
+        .join('');
 
-    $('fSpouse').innerHTML=relationOptions;
+    $('fSpouse').innerHTML=
+      relationOptions;
 
     const currentSpouses=
       new Set(
@@ -1360,11 +1495,17 @@ function buildPersonEditorDraft(){
               )
           : []
       );
-    [...$('fSpouse').options].forEach(option=>{
-      option.selected=currentSpouses.has(String(option.value));
-    });
 
-    $('fExSpouse').innerHTML=relationOptions;
+    [...$('fSpouse').options]
+      .forEach(option=>{
+        option.selected=
+          currentSpouses.has(
+            String(option.value)
+          );
+      });
+
+    $('fExSpouse').innerHTML=
+      relationOptions;
 
     const currentExSpouses=
       new Set(
@@ -1375,9 +1516,14 @@ function buildPersonEditorDraft(){
               )
           : []
       );
-    [...$('fExSpouse').options].forEach(option=>{
-      option.selected=currentExSpouses.has(String(option.value));
-    });
+
+    [...$('fExSpouse').options]
+      .forEach(option=>{
+        option.selected=
+          currentExSpouses.has(
+            String(option.value)
+          );
+      });
 
     const childRelations=
       familyAuthority
@@ -1390,17 +1536,27 @@ function buildPersonEditorDraft(){
             }))
         : [];
 
-    simEditorState.childKinds=new Map(
-      childRelations.map(relation=>[
-        relation.childId,
-        relation.kind
-      ])
-    );
+    simEditorState.childKinds=
+      new Map(
+        childRelations
+          .map(relation=>[
+            relation.childId,
+            relation.kind
+          ])
+      );
 
-    $('fChildren').innerHTML=relationOptions;
-    [...$('fChildren').options].forEach(option=>{
-      option.selected=simEditorState.childKinds.has(String(option.value));
-    });
+    $('fChildren').innerHTML=
+      relationOptions;
+
+    [...$('fChildren').options]
+      .forEach(option=>{
+        option.selected=
+          simEditorState
+            .childKinds
+            .has(
+              String(option.value)
+            );
+      });
 
     simEditorState.explicitSiblingIds=
       new Set(
@@ -1428,22 +1584,223 @@ function buildPersonEditorDraft(){
           : []
       );
 
-    $('fSiblings').innerHTML=relationOptions;
+    $('fSiblings').innerHTML=
+      relationOptions;
 
     applyEditorSiblingStateToSelect();
 
-    $('relationshipTarget').innerHTML=allSims
-      .filter(candidate=>!sim||candidate.id!==sim.id)
-      .map(candidate=>
-        `<option value="${candidate.id}">${esc(displayDataText(candidate.name,candidate))}</option>`
-      )
-      .join('');
+    $('relationshipTarget').innerHTML=
+      relationOptions;
 
     resetOtherRelationshipEditor();
     populateRelationshipTypePicker();
-    renderPersonEditorRelationshipList(sim);
-    renderRelAnno(sim?sim.id:null);
+    renderPersonEditorRelationshipList(
+      sim
+    );
 
+    [
+      'fFamilyIds',
+      'fParents',
+      'fSpouse',
+      'fExSpouse',
+      'fChildren',
+      'relationshipTarget'
+    ].forEach(
+      refreshEditorSelect
+    );
+
+    resetEditorFamilyPanels();
+
+    personEditorRelationshipUiReady=true;
+
+    renderPersonEditorFamilyPreviews();
+  }
+
+  function initializePersonEditorMediaUi(){
+    if(personEditorMediaUiReady)return;
+
+    personEditorMediaUiReady=true;
+
+    renderPetDraftList();
+    lifePhotoWorkspace.renderList();
+  }
+
+  function ensurePersonEditorTabUi(
+    tabName
+  ){
+    if(
+      tabName==='family'||
+      tabName==='relations'
+    ){
+      initializePersonEditorRelationshipUi();
+    }
+
+    if(tabName==='media'){
+      initializePersonEditorMediaUi();
+    }
+  }
+
+  function openPersonEditor(id){
+    resetPersonEditorDraftState();
+
+    simEditorState.simId=
+      id || null;
+
+    const sim=
+      id
+        ? currentGenealogyData().sims[id]
+        : null;
+
+    $('modalTitle').textContent=
+      sim
+        ? uiText('編輯模擬市民')
+        : uiText('新增模擬市民');
+
+    $('fName').value=
+      sim
+        ? displayDataText(
+            sim.name,
+            sim
+          )
+        : '';
+
+    $('fStage').value=
+      sim
+        ? sim.lifeStage
+        : '成年';
+
+    $('fGender').value=
+      sim
+        ? (sim.gender||'男')
+        : '男';
+
+    $('fStatus').value=
+      sim
+        ? (sim.status||'在世')
+        : '在世';
+
+    $('fRace').value=
+      sim
+        ? (sim.race||'')
+        : '';
+
+    $('fBirthdayYear').value=
+      sim&&sim.birthdayYear!=null
+        ? String(sim.birthdayYear)
+        : '';
+
+    $('fBirthdayMonth').value=
+      sim&&sim.birthdayMonth
+        ? String(sim.birthdayMonth)
+        : '';
+
+    populatePersonEditorBirthdayDays(
+      sim&&sim.birthdayDay
+        ? sim.birthdayDay
+        : ''
+    );
+
+    $('fAge').value=
+      sim&&sim.age!=null
+        ? String(sim.age)
+        : '';
+
+    $('fResidence').value=
+      sim
+        ? displayDataText(
+            sim.residence,
+            sim
+          )
+        : '';
+
+    $('fAspiration').value=
+      sim
+        ? displayDataText(
+            sim.aspiration,
+            sim
+          )
+        : '';
+
+    $('fCauseOfDeath').value=
+      sim
+        ? displayDataText(
+            sim.causeOfDeath,
+            sim
+          )
+        : '';
+
+    simEditorState.traits=
+      sim
+        ? (sim.traits||[])
+            .map(value=>
+              displayDataText(
+                value,
+                sim
+              )
+            )
+        : [];
+
+    renderTraitEditor();
+
+    if($('traitInput')){
+      $('traitInput').value='';
+    }
+
+    $('fCareer').value=
+      sim
+        ? displayDataText(
+            sim.career,
+            sim
+          )
+        : '';
+
+    $('fBio').value=
+      sim
+        ? displayDataText(
+            sim.bio,
+            sim
+          )
+        : '';
+
+    simEditorState.avatar=
+      sim
+        ? (sim.avatar||null)
+        : null;
+
+    simEditorState.avatarFrame=
+      normalizeAvatarFrame(
+        sim?.avatarFrame
+      );
+
+    renderPersonEditorAvatarPreview();
+
+    // Draft 資料先準備好；隱藏分頁的 DOM 不在開啟瞬間建立。
+    replaceDraftCollection(
+      editingPets,
+      sim
+        ? JSON.parse(
+            JSON.stringify(
+              sim.pets||[]
+            )
+          )
+        : []
+    );
+
+    replaceDraftCollection(
+      editingGallery,
+      sim
+        ? JSON.parse(
+            JSON.stringify(
+              sim.gallery||[]
+            )
+          )
+        : []
+    );
+
+    syncPersonEditorCauseOfDeathVisibility();
+    closeEditorPreviewSheet();
+
+    // 只有目前可見的基本資料控制需要立即同步。
     [
       'fStage',
       'fGender',
@@ -1452,34 +1809,46 @@ function buildPersonEditorDraft(){
       'fBirthdayMonth',
       'fBirthdayDay',
       'fAspiration',
-      'fCauseOfDeath',
-      'fFamilyIds',
-      'fParents',
-      'fSpouse',
-      'fExSpouse',
-      'fChildren',
-      'fSiblings',
-      'relationshipType',
-      'relationshipTarget'
-    ].forEach(refreshEditorSelect);
+      'fCauseOfDeath'
+    ].forEach(
+      refreshEditorSelect
+    );
 
-    resetEditorFamilyPanels();
-    renderPersonEditorFamilyPreviews();
+    switchEditorTab('basic');
 
-    $('btnDelete').style.display=sim?'':'none';
-    $('relationshipSection').style.display=sim?'':'none';
+    $('btnDelete').style.display=
+      sim
+        ? ''
+        : 'none';
 
-    const newRelHint=$('newSimRelationshipsHint');
-    if(newRelHint)newRelHint.hidden=!!sim;
+    $('relationshipSection').style.display=
+      sim
+        ? ''
+        : 'none';
 
-    mask.classList.remove('sheet-ready');
-    mask.classList.add('show');
+    const newRelHint=
+      $('newSimRelationshipsHint');
+
+    if(newRelHint){
+      newRelHint.hidden=!!sim;
+    }
+
+    mask.classList.remove(
+      'sheet-ready'
+    );
+
+    mask.classList.add(
+      'show'
+    );
 
     requestAnimationFrame(()=>{
       syncEditorPreviewSheetGeometry();
     });
 
-    setTimeout(()=>$('fName').focus(),60);
+    setTimeout(
+      ()=>$('fName').focus(),
+      60
+    );
   }
 
   function closePersonEditor() {
@@ -1724,13 +2093,13 @@ function otherRelationshipAnnotationControlMarkup(
       '"'+
       (hasCustomText?' hidden':'')+
       '>'+
-        esc(uiText('自訂顯示文字…'))+
+        esc(uiText('自訂標籤文字'))+
       '</button>'+
       '<span class="other-rel-label-inline-editor"'+
       (hasCustomText?'':' hidden')+
       '>'+
         '<input class="other-rel-label-input" type="text" maxlength="40" placeholder="'+
-        esc(uiText('自訂文字（可選）'))+
+        esc(uiText('輸入標籤文字'))+
         '" value="'+
         esc(draft.text)+
         '">'+
@@ -2509,6 +2878,8 @@ function ensureSavedSimManualPosition(
 }
 
 function commitPersonEditorDraft() {
+  initializePersonEditorRelationshipUi();
+
   const request =
     collectPersonEditorSaveRequest();
 
