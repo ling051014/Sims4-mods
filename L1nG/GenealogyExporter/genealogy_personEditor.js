@@ -2222,18 +2222,23 @@ function captureOtherRelationshipAnnotationDrafts(
           '.other-rel-label-input'
         );
 
-      const visibility=
-        editor.querySelector(
-          '[data-other-rel-visibility]'
-        );
+      const existingDraft=
+        simEditorState
+          .otherRelationshipAnnotationDrafts
+          .has(key)
+            ? simEditorState
+                .otherRelationshipAnnotationDrafts
+                .get(key)
+            : relationshipDisplayOverride(
+                key
+              );
 
       setOtherRelationshipAnnotationDraft(
         key,
         {
           text:input?.value||'',
           hidden:
-            visibility?.dataset
-              .otherRelVisibility==='hidden'
+            existingDraft?.hidden===true
         }
       );
     });
@@ -2289,18 +2294,6 @@ function otherRelationshipAnnotationControlMarkup(
         iconSvg(
           'chevron-down',
           'other-rel-type-chevron'
-        )+
-      '</button>'+
-      '<button class="other-rel-visibility-toggle" type="button" '+
-      'data-other-rel-visibility="'+
-      (draft.hidden?'hidden':'visible')+
-      '">'+
-        esc(
-          uiText(
-            draft.hidden
-              ? '顯示標籤'
-              : '隱藏標籤'
-          )
         )+
       '</button>'+
       '<button class="family-rel-label-toggle other-rel-label-toggle" type="button" aria-expanded="'+
@@ -2413,58 +2406,6 @@ function bindOtherRelationshipControls(
 
   target
     .querySelectorAll(
-      '[data-other-rel-visibility]'
-    )
-    .forEach(button=>{
-      button.addEventListener(
-        'click',
-        ()=>{
-          const control=
-            button.closest(
-              '[data-other-rel-annotation-key]'
-            );
-
-          const key=
-            control?.dataset
-              .otherRelAnnotationKey||
-            '';
-
-          if(!key)return;
-
-          const input=
-            control.querySelector(
-              '.other-rel-label-input'
-            );
-
-          const hidden=
-            button.dataset
-              .otherRelVisibility!=='hidden';
-
-          button.dataset
-            .otherRelVisibility=
-              hidden
-                ? 'hidden'
-                : 'visible';
-
-          button.textContent=
-            uiText(
-              hidden
-                ? '顯示標籤'
-                : '隱藏標籤'
-            );
-
-          setOtherRelationshipAnnotationDraft(
-            key,
-            {
-              text:input?.value||'',
-              hidden
-            }
-          );
-        }
-      );
-    });
-  target
-    .querySelectorAll(
       '.other-rel-label-toggle'
     )
     .forEach(button=>{
@@ -2516,19 +2457,24 @@ function bindOtherRelationshipControls(
           '.other-rel-label-input'
         );
 
-      const visibility=
-        editor.querySelector(
-          '[data-other-rel-visibility]'
-        );
-
       const syncDraft=()=>{
+        const existingDraft=
+          simEditorState
+            .otherRelationshipAnnotationDrafts
+            .has(key)
+              ? simEditorState
+                  .otherRelationshipAnnotationDrafts
+                  .get(key)
+              : relationshipDisplayOverride(
+                  key
+                );
+
         setOtherRelationshipAnnotationDraft(
           key,
           {
             text:input?.value||'',
             hidden:
-              visibility?.dataset
-                .otherRelVisibility==='hidden'
+              existingDraft?.hidden===true
           }
         );
       };
