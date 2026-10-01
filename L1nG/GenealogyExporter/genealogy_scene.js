@@ -6700,6 +6700,8 @@ function paintRelationshipLayer({
           group.key,
         kind:'parent',
         group,
+        obstacleSensitive:
+          group.parentIds.length > 1,
         simIds:[
           ...group.parentIds,
           ...group.children
@@ -6783,6 +6785,8 @@ function paintRelationshipLayer({
             toId:String(spouseId),
             setting:spouseSetting,
             labelKind:'spouse',
+            obstacleSensitive:
+              spouseSetting.routing !== 'manual',
             edgeClass:'edge edge-spouse',
             simIds:[
               String(id),
@@ -6904,6 +6908,8 @@ function paintRelationshipLayer({
           fromId:String(id),
           toId:String(spouseId),
           setting:deceasedSetting,
+          labelKind:'deceased-spouse',
+          obstacleSensitive:true,
           edgeClass:'edge edge-exspouse',
           simIds:[
             String(id),
@@ -7021,6 +7027,8 @@ function paintRelationshipLayer({
             toId:String(spouseId),
             setting:exSetting,
             labelKind:'exspouse',
+            obstacleSensitive:
+              exSetting.routing !== 'manual',
             edgeClass:'edge edge-exspouse',
             simIds:[
               String(id),
@@ -7126,6 +7134,8 @@ function paintRelationshipLayer({
           kind:'other',
           link,
           setting,
+          obstacleSensitive:
+            setting.routing !== 'manual',
           simIds:[
             String(link.from),
             String(link.to)
@@ -7370,6 +7380,16 @@ function paintRelationshipPreview(
       ).forEach(key => {
         affectedKeys.add(key);
       });
+    });
+
+  // 自動避讓的關係線會受任何卡片位置影響。
+  // 拖曳中的卡片即使不是該關係的端點，也必須同步重算，
+  // 否則放開後完整重繪時仍可能突然改道。
+  relationshipEdgeRecords
+    .forEach((record, key) => {
+      if (record.obstacleSensitive) {
+        affectedKeys.add(key);
+      }
     });
 
   if (!affectedKeys.size) {
