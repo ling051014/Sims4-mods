@@ -6497,7 +6497,6 @@ body[data-theme="ling"] .topbar-creator-link:focus-visible { color:var(--action-
 body[data-theme="ling"] .topbar-brand-divider { color:#ccc; }
 body[data-theme="ling"] .topbar-section-brand { color:#555; }
 body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
-.family-rel-annotations { margin-top:14px; }
 
 @media (max-width:980px) {
   .topbar-brand { min-width:76px; width:76px; padding:0 8px; gap:4px; }
