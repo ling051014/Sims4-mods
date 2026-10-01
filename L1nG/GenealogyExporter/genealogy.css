@@ -2231,8 +2231,8 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-popover {
-    /* 右側結果紙張定位於人物編輯器本身，避免 portal 座標漂移 */ position: absolute;
-    /* 高於人物編輯器 */ z-index: 1600;
+    /* 關係選單脫離人物編輯器裁切，固定於最上層 viewport */ position: fixed;
+    /* 高於 Dialog 與其他一般選單 */ z-index: 5600;
     /* 固定顯示方式 */ display: block;
     /* 背景 */ background: var(--nav-dropdown-bg);
     /* 文字 */ color: var(--nav-dropdown-text);
@@ -2246,9 +2246,15 @@ button.avatar-editor-action { cursor:pointer; }
     /* 隱藏時完全移除 */ display: none;
 }
 
+.relationship-type-popover:not([hidden]) {
+    /* Portal 展開時明確顯示，不依賴任何 nav-select 父層狀態 */ display: block;
+}
+
+
+
 .relationship-type-index-portal {
-    /* 便利貼與清單共用人物編輯器座標系 */ position: absolute;
-    /* 高於右側清單 */ z-index: 1601;
+    /* 與右側選單一起固定在最上層 viewport */ position: fixed;
+    /* 高於右側清單 */ z-index: 5601;
     /* 預設由 JS 控制顯示 */ display: none;
 }
 
