@@ -8069,6 +8069,65 @@ function normalizeCurrentDatabase(targetDb) {
       }));
   });
 
+  if (
+    targetDb.meta &&
+    Array.isArray(targetDb.meta.unassignedPets)
+  ) {
+    targetDb.meta.unassignedPets =
+      targetDb.meta.unassignedPets
+        .filter(pet =>
+          pet &&
+          typeof pet === 'object'
+        )
+        .map(pet => ({
+          ...pet,
+          id:
+            pet.id ||
+            uid('pet'),
+          name:
+            pet.name ||
+            '',
+          species:
+            PET_SPECIES[
+              String(
+                pet.species ||
+                ''
+              )
+            ]
+              ? String(
+                  pet.species
+                )
+              : 'other',
+          breed:
+            pet.breed ||
+            '',
+          gender:
+            isEaCasPetSpecies(
+              pet.species
+            )
+              ? (
+                  normalizePetGender(
+                    pet.gender
+                  ) ||
+                  'male'
+                )
+              : '',
+          ageStage:
+            pet.ageStage ||
+            '成年',
+          status:
+            pet.status ||
+            '在世',
+          avatar:
+            pet.avatar ||
+            null,
+          avatarFrame:
+            normalizeAvatarFrame(
+              pet.avatarFrame
+            )
+        }));
+  }
+
   if (!Array.isArray(targetDb.links)) {
     targetDb.links = [];
   }
