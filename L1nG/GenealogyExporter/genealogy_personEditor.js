@@ -1167,6 +1167,12 @@ function buildPersonEditorDraft(){
       }
     });
 
+    const petList=$('petList');
+    if(petList)petList.innerHTML='';
+
+    const galleryList=$('lifePhotoGrid');
+    if(galleryList)galleryList.innerHTML='';
+
     [
       'fFamilyIds',
       'fParents',
@@ -1182,7 +1188,10 @@ function buildPersonEditorDraft(){
     });
   }
 
-  function finishPersonEditorOpen(sim,familyAuthority){
+  function finishPersonEditorOpen(sim){
+    renderPetDraftList();
+    lifePhotoWorkspace.renderList();
+
     $('fFamilyIds').innerHTML=currentGenealogyData().families
       .map(family=>`<option value="${family.id}">${esc(displayDataText(family.name,family))}</option>`)
       .join('');
@@ -1440,7 +1449,6 @@ function buildPersonEditorDraft(){
         ? JSON.parse(JSON.stringify(sim.pets||[]))
         : []
     );
-    renderPetDraftList();
 
     replaceDraftCollection(
       editingGallery,
@@ -1448,7 +1456,6 @@ function buildPersonEditorDraft(){
         ? JSON.parse(JSON.stringify(sim.gallery||[]))
         : []
     );
-    lifePhotoWorkspace.renderList();
 
     syncPersonEditorCauseOfDeathVisibility();
     closeEditorPreviewSheet();
@@ -1488,8 +1495,7 @@ function buildPersonEditorDraft(){
         }
 
         finishPersonEditorOpen(
-          sim,
-          familyAuthority
+          sim
         );
       },0);
     });
