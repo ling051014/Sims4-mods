@@ -39,9 +39,9 @@
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, relationshipResolvedColor, relationshipInlineSvgStyle,
-      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureText,
+      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureRelationshipLabelText,
       makeLabelSVG, getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, buildTagsHTML, buildPetsChipsHTML, genderClass, statusClass
+      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass
     } = helpers;
     let genealogyData = null;
     let viewMode = 'view';
@@ -1035,7 +1035,7 @@
       return Math.max(
         1,
         Math.ceil(
-          measureText(
+          measureRelationshipLabelText(
             value,
             fontSize
           ) /
@@ -1767,7 +1767,7 @@ function relationshipBubbleWidth(info) {
   const fs = 12;
   const displayText = displayRelationshipText(info.text || '');
   const iconSpace = info.icon ? 18 : 0;
-  return Math.max(Math.ceil(measureText(displayText, fs) + iconSpace + 24), 42);
+  return Math.max(Math.ceil(measureRelationshipLabelText(displayText, fs) + iconSpace + 24), 42);
 }
 
 // ========【族譜自動排版核心】 設定 - Parent Group / 主要水平配對 / 血緣世代 ========
@@ -7787,15 +7787,55 @@ function createPartnerConnectionPath(a, b) {
 
 
 
-function buildPersonCardClassList(c, opts) {
-  opts = opts || {};
+function derivePersonCardClassName(
+  person,
+  {
+    viewMode:isViewMode = false,
+    isInlaw = false
+  } = {}
+) {
+  const classes =
+    new Set([
+      'person-card'
+    ]);
+
+  if (isViewMode) {
+    classes.add(
+      'view'
+    );
+  }
+
+  const gender =
+    genderClass(
+      person
+    );
+
+  if (gender) {
+    classes.add(
+      gender
+    );
+  }
+
+  const status =
+    statusClass(
+      person
+    );
+
+  if (status) {
+    classes.add(
+      status
+    );
+  }
+
+  if (isInlaw) {
+    classes.add(
+      'inlaw'
+    );
+  }
+
   return [
-    'person-card',
-    opts.viewMode ? 'view' : '',
-    genderClass(c),
-    statusClass(c),
-    opts.isInlaw ? 'inlaw' : ''
-  ].filter(Boolean).join(' ');
+    ...classes
+  ].join(' ');
 }
 
 function nodeRenderSignature(
@@ -7882,7 +7922,7 @@ function paintPersonLayer() {
     const dAspiration = displayDataText(c.aspiration, c);
     const dCause = displayDataText(c.causeOfDeath, c);
     const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
-    const cls = buildPersonCardClassList(c, {viewMode:isView, isInlaw});
+    const cls = derivePersonCardClassName(c, {viewMode:isView, isInlaw});
     const dStage = uiText(c.lifeStage);
     const displayName = cardSettings.name ? `${dName}${cardSettings.gender ? formatCardGender(c.gender) : ''}` : '';
     const genderBarHiddenClass = cardSettings.genderBar ? '' : ' card-gender-bar-hidden';
@@ -7942,8 +7982,8 @@ function paintPersonLayer() {
     if (cardSettings.career && c.career) editRows.push(`<div class="person-card-edit-meta person-card-edit-text" title="${esc(dCareer)}">${esc(dCareer)}</div>`);
     if (cardSettings.residence && c.residence) editRows.push(`<div class="person-card-residence" title="${esc(dResidence)}">${iconSvg('house')}${esc(dResidence)}</div>`);
     if (cardSettings.aspiration && c.aspiration) editRows.push(`<div class="person-card-aspiration" title="${esc(uiText('人生抱負'))}：${esc(dAspiration)}">${iconSvg('bullseye')}${esc(dAspiration)}</div>`);
-    if (cardSettings.traits && dTraits.length) editRows.push(`<div class="person-card-tags">${buildTagsHTML(c.traits, c)}</div>`);
-    if (cardSettings.pets && (c.pets||[]).length) editRows.push(`<div class="person-card-pets">${buildPetsChipsHTML(c.pets, c)}</div>`);
+    if (cardSettings.traits && dTraits.length) editRows.push(`<div class="person-card-tags">${renderTraitTagSummary(c.traits, c)}</div>`);
+    if (cardSettings.pets && (c.pets||[]).length) editRows.push(`<div class="person-card-pets">${renderPetChipSummary(c.pets, c)}</div>`);
     if (cardSettings.gallery && (c.gallery||[]).length) editRows.push(`<div class="person-card-life-photo-badge" title="${esc(uiText('人生照片'))} ${(c.gallery||[]).length}">${iconSvg('images')} ${(c.gallery||[]).length}</div>`);
 
     const configuredEditBody = cardSettingsHasBody(cardSettings);
