@@ -898,6 +898,18 @@
     "新增前任配偶": "Add Ex-Spouse",
     "新增子女": "Add Child",
     "新增兄弟姊妹": "Add Sibling",
-    "關係種類": "Relationship Type"
+    "關係種類": "Relationship Type",
+    "戀愛 / 親密": "Romance / Intimacy",
+    "戀愛": "Romance",
+    "親密": "Intimacy",
+    "友誼": "Friendship",
+    "負面": "Negative",
+    "生活 / 社會": "Life / Social",
+    "非血緣親屬": "Chosen Kin",
+    "乾爸": "Godfather",
+    "乾媽": "Godmother",
+    "乾兒子": "Godson",
+    "乾女兒": "Goddaughter",
+    "結拜兄弟姊妹": "Sworn Siblings"
   }
 }
