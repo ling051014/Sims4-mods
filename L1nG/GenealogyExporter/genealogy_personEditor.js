@@ -1107,85 +1107,61 @@ function buildPersonEditorDraft(){
   }
 
 
-  function openPersonEditor(id){
-    resetPersonEditorDraftState();
+  // ========【人物編輯延遲初始化】 設定 - 先顯示基本資料，再建立大型關係選單 ========
+  function editorDescendantIds(simId){
+    const root=String(simId||'');
+    const found=new Set();
+    const queue=[root];
 
-    simEditorState.simId=
-      id || null;
+    while(queue.length){
+      const current=queue.shift();
 
-    const sim=
-      id
-        ? currentGenealogyData().sims[id]
-        : null;
+      getChildrenOf(current)
+        .forEach(child=>{
+          const childId=String(child?.id||'');
+          if(!childId||found.has(childId))return;
 
-    const familyAuthority=
-      sim
-        ? resolveDirectFamilyRelationships(
-            sim.id
-          )
-        : null;
+          found.add(childId);
+          queue.push(childId);
+        });
+    }
 
-    $('modalTitle').textContent=sim?uiText('編輯模擬市民'):uiText('新增模擬市民');
+    found.delete(root);
+    return found;
+  }
 
-    $('fName').value=sim?displayDataText(sim.name,sim):'';
-    $('fStage').value=sim?sim.lifeStage:'成年';
-    $('fGender').value=sim?(sim.gender||'男'):'男';
-    $('fStatus').value=sim?(sim.status||'在世'):'在世';
-    $('fRace').value=sim?(sim.race||''):'';
+  function clearDeferredEditorRelationUi(){
+    [
+      'editorFamilyMembershipPreview',
+      'editorParentsPreview',
+      'editorSpousePreview',
+      'editorExSpousePreview',
+      'editorChildrenPreview',
+      'editorSiblingsPreview'
+    ].forEach(id=>{
+      const target=$(id);
+      if(target){
+        target.innerHTML=
+          '<span class="family-rel-empty">—</span>';
+      }
+    });
 
-    $('fBirthdayYear').value=sim&&sim.birthdayYear!=null
-      ? String(sim.birthdayYear)
-      : '';
+    [
+      'fFamilyIds',
+      'fParents',
+      'fSpouse',
+      'fExSpouse',
+      'fChildren',
+      'fSiblings',
+      'relationshipTarget'
+    ].forEach(id=>{
+      const select=$(id);
+      if(select)select.innerHTML='';
+      refreshEditorSelect(id);
+    });
+  }
 
-    $('fBirthdayMonth').value=sim&&sim.birthdayMonth
-      ? String(sim.birthdayMonth)
-      : '';
-
-    populatePersonEditorBirthdayDays(sim&&sim.birthdayDay?sim.birthdayDay:'');
-
-    $('fAge').value=sim&&sim.age!=null
-      ? String(sim.age)
-      : '';
-
-    $('fResidence').value=sim?displayDataText(sim.residence,sim):'';
-    $('fAspiration').value=sim?displayDataText(sim.aspiration,sim):'';
-    $('fCauseOfDeath').value=sim?displayDataText(sim.causeOfDeath,sim):'';
-
-    simEditorState.traits=sim
-      ? (sim.traits||[]).map(value=>displayDataText(value,sim))
-      : [];
-
-    renderTraitEditor();
-
-    if($('traitInput'))$('traitInput').value='';
-
-    $('fCareer').value=sim?displayDataText(sim.career,sim):'';
-    $('fBio').value=sim?displayDataText(sim.bio,sim):'';
-
-    simEditorState.avatar=sim?(sim.avatar||null):null;
-    simEditorState.avatarFrame=normalizeAvatarFrame(sim?.avatarFrame);
-    renderPersonEditorAvatarPreview();
-
-    replaceDraftCollection(
-      editingPets,
-      sim
-        ? JSON.parse(JSON.stringify(sim.pets||[]))
-        : []
-    );
-    renderPetDraftList();
-
-    replaceDraftCollection(
-      editingGallery,
-      sim
-        ? JSON.parse(JSON.stringify(sim.gallery||[]))
-        : []
-    );
-    lifePhotoWorkspace.renderList();
-
-    syncPersonEditorCauseOfDeathVisibility();
-    closeEditorPreviewSheet();
-    switchEditorTab('basic');
-
+  function finishPersonEditorOpen(sim,familyAuthority){
     $('fFamilyIds').innerHTML=currentGenealogyData().families
       .map(family=>`<option value="${family.id}">${esc(displayDataText(family.name,family))}</option>`)
       .join('');
@@ -1208,12 +1184,17 @@ function buildPersonEditorDraft(){
 
     const allSims=Object.values(currentGenealogyData().sims);
 
+    const descendantIds=
+      sim
+        ? editorDescendantIds(sim.id)
+        : new Set();
+
     const parentOptions=allSims
       .filter(candidate=>
         !sim||
         (
           candidate.id!==sim.id&&
-          !isDescendant(sim.id,candidate.id)
+          !descendantIds.has(String(candidate.id))
         )
       )
       .map(candidate=>
@@ -1368,14 +1349,133 @@ function buildPersonEditorDraft(){
     const newRelHint=$('newSimRelationshipsHint');
     if(newRelHint)newRelHint.hidden=!!sim;
 
+    $('btnSave').disabled=false;
+    syncEditorPreviewSheetGeometry();
+
+  }
+
+  function openPersonEditor(id){
+    resetPersonEditorDraftState();
+
+    simEditorState.simId=
+      id || null;
+
+    const sim=
+      id
+        ? currentGenealogyData().sims[id]
+        : null;
+
+    const familyAuthority=
+      sim
+        ? resolveDirectFamilyRelationships(
+            sim.id
+          )
+        : null;
+
+    $('modalTitle').textContent=sim?uiText('編輯模擬市民'):uiText('新增模擬市民');
+
+    $('fName').value=sim?displayDataText(sim.name,sim):'';
+    $('fStage').value=sim?sim.lifeStage:'成年';
+    $('fGender').value=sim?(sim.gender||'男'):'男';
+    $('fStatus').value=sim?(sim.status||'在世'):'在世';
+    $('fRace').value=sim?(sim.race||''):'';
+
+    $('fBirthdayYear').value=sim&&sim.birthdayYear!=null
+      ? String(sim.birthdayYear)
+      : '';
+
+    $('fBirthdayMonth').value=sim&&sim.birthdayMonth
+      ? String(sim.birthdayMonth)
+      : '';
+
+    populatePersonEditorBirthdayDays(sim&&sim.birthdayDay?sim.birthdayDay:'');
+
+    $('fAge').value=sim&&sim.age!=null
+      ? String(sim.age)
+      : '';
+
+    $('fResidence').value=sim?displayDataText(sim.residence,sim):'';
+    $('fAspiration').value=sim?displayDataText(sim.aspiration,sim):'';
+    $('fCauseOfDeath').value=sim?displayDataText(sim.causeOfDeath,sim):'';
+
+    simEditorState.traits=sim
+      ? (sim.traits||[]).map(value=>displayDataText(value,sim))
+      : [];
+
+    renderTraitEditor();
+
+    if($('traitInput'))$('traitInput').value='';
+
+    $('fCareer').value=sim?displayDataText(sim.career,sim):'';
+    $('fBio').value=sim?displayDataText(sim.bio,sim):'';
+
+    simEditorState.avatar=sim?(sim.avatar||null):null;
+    simEditorState.avatarFrame=normalizeAvatarFrame(sim?.avatarFrame);
+    renderPersonEditorAvatarPreview();
+
+    replaceDraftCollection(
+      editingPets,
+      sim
+        ? JSON.parse(JSON.stringify(sim.pets||[]))
+        : []
+    );
+    renderPetDraftList();
+
+    replaceDraftCollection(
+      editingGallery,
+      sim
+        ? JSON.parse(JSON.stringify(sim.gallery||[]))
+        : []
+    );
+    lifePhotoWorkspace.renderList();
+
+    syncPersonEditorCauseOfDeathVisibility();
+    closeEditorPreviewSheet();
+    switchEditorTab('basic');
+
+    resetEditorFamilyPanels();
+    clearDeferredEditorRelationUi();
+
+    $('btnSave').disabled=true;
+    $('btnDelete').style.display=sim?'':'none';
+    $('relationshipSection').style.display=sim?'':'none';
+
+    const newRelHint=$('newSimRelationshipsHint');
+    if(newRelHint)newRelHint.hidden=!!sim;
+
     mask.classList.add('show');
 
     requestAnimationFrame(()=>{
       syncEditorPreviewSheetGeometry();
+
+      setTimeout(()=>{
+        const activeId=
+          simEditorState.simId
+            ? String(simEditorState.simId)
+            : '';
+
+        const expectedId=
+          sim?.id
+            ? String(sim.id)
+            : '';
+
+        if(
+          !mask.classList.contains('show')||
+          activeId!==expectedId
+        ){
+          return;
+        }
+
+        finishPersonEditorOpen(
+          sim,
+          familyAuthority
+        );
+      },0);
     });
 
     setTimeout(()=>$('fName').focus(),60);
   }
+
 
   function closePersonEditor() {
   closeEditorPreviewSheet();
