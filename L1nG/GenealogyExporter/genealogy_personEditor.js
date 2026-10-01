@@ -2222,9 +2222,9 @@ function captureOtherRelationshipAnnotationDrafts(
           '.other-rel-label-input'
         );
 
-      const select=
+      const visibility=
         editor.querySelector(
-          '[data-other-rel-display-mode]'
+          '[data-other-rel-visibility]'
         );
 
       setOtherRelationshipAnnotationDraft(
@@ -2232,7 +2232,8 @@ function captureOtherRelationshipAnnotationDrafts(
         {
           text:input?.value||'',
           hidden:
-            select?.value==='none'
+            visibility?.dataset
+              .otherRelVisibility==='hidden'
         }
       );
     });
@@ -2240,7 +2241,8 @@ function captureOtherRelationshipAnnotationDrafts(
 
 function otherRelationshipAnnotationControlMarkup(
   link,
-  relationLabel
+  relationLabel,
+  rawRelation
 ){
   const key=
     otherRelationshipAnnotationKey(
@@ -2274,24 +2276,33 @@ function otherRelationshipAnnotationControlMarkup(
     'data-other-rel-annotation-key="'+
     esc(key)+
     '">'+
-      '<select class="other-rel-display-mode" data-other-rel-display-mode aria-label="'+
-      esc(uiText('顯示關係'))+
+      '<button class="other-rel-type-trigger" type="button" '+
+      'data-other-rel-type-trigger '+
+      'data-relationship-id="'+
+      esc(String(link.id||''))+
+      '" data-relationship-type="'+
+      esc(rawRelation)+
+      '" aria-haspopup="listbox" aria-expanded="false">'+
+        '<span class="other-rel-type-value">'+
+          esc(relationLabel)+
+        '</span>'+
+        iconSvg(
+          'chevron-down',
+          'other-rel-type-chevron'
+        )+
+      '</button>'+
+      '<button class="other-rel-visibility-toggle" type="button" '+
+      'data-other-rel-visibility="'+
+      (draft.hidden?'hidden':'visible')+
       '">'+
-        '<option value="default"'+
-        (draft.hidden?'':' selected')+
-        '>'+
-          esc(
-            uiText('預設')+
-            ' · '+
-            relationLabel
-          )+
-        '</option>'+
-        '<option value="none"'+
-        (draft.hidden?' selected':'')+
-        '>'+
-          esc(uiText('（不顯示）'))+
-        '</option>'+
-      '</select>'+
+        esc(
+          uiText(
+            draft.hidden
+              ? '顯示標籤'
+              : '隱藏標籤'
+          )
+        )+
+      '</button>'+
       '<button class="family-rel-label-toggle other-rel-label-toggle" type="button" aria-expanded="'+
       (hasCustomText?'true':'false')+
       '"'+
@@ -2328,6 +2339,130 @@ function bindOtherRelationshipControls(
   person,
   target
 ){
+  target
+    .querySelectorAll(
+      '[data-other-rel-type-trigger]'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        event=>{
+          event.preventDefault();
+          event.stopPropagation();
+
+          const relationshipId=
+            button.dataset
+              .relationshipId||
+            '';
+
+          const currentType=
+            button.dataset
+              .relationshipType||
+            '';
+
+          const picker=
+            global
+              .L1nGRelationshipTypePicker;
+
+          if(
+            !relationshipId||
+            !picker?.open
+          ){
+            return;
+          }
+
+          picker.open({
+            trigger:button,
+            value:currentType,
+            onSelect:newType=>{
+              const normalized=
+                String(
+                  newType||
+                  ''
+                ).trim();
+
+              if(
+                !normalized||
+                normalized===currentType
+              ){
+                return;
+              }
+
+              const mutation=
+                genealogyStoreAuthority
+                  .updateRelationship(
+                    relationshipId,
+                    {
+                      type:normalized,
+                      label:normalized
+                    }
+                  );
+
+              applyGenealogyMutation(
+                mutation
+              );
+
+              renderPersonEditorRelationshipList(
+                person
+              );
+            }
+          });
+        }
+      );
+    });
+
+  target
+    .querySelectorAll(
+      '[data-other-rel-visibility]'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        ()=>{
+          const control=
+            button.closest(
+              '[data-other-rel-annotation-key]'
+            );
+
+          const key=
+            control?.dataset
+              .otherRelAnnotationKey||
+            '';
+
+          if(!key)return;
+
+          const input=
+            control.querySelector(
+              '.other-rel-label-input'
+            );
+
+          const hidden=
+            button.dataset
+              .otherRelVisibility!=='hidden';
+
+          button.dataset
+            .otherRelVisibility=
+              hidden
+                ? 'hidden'
+                : 'visible';
+
+          button.textContent=
+            uiText(
+              hidden
+                ? '顯示標籤'
+                : '隱藏標籤'
+            );
+
+          setOtherRelationshipAnnotationDraft(
+            key,
+            {
+              text:input?.value||'',
+              hidden
+            }
+          );
+        }
+      );
+    });
   target
     .querySelectorAll(
       '.other-rel-label-toggle'
@@ -2381,9 +2516,9 @@ function bindOtherRelationshipControls(
           '.other-rel-label-input'
         );
 
-      const select=
+      const visibility=
         editor.querySelector(
-          '[data-other-rel-display-mode]'
+          '[data-other-rel-visibility]'
         );
 
       const syncDraft=()=>{
@@ -2392,7 +2527,8 @@ function bindOtherRelationshipControls(
           {
             text:input?.value||'',
             hidden:
-              select?.value==='none'
+              visibility?.dataset
+                .otherRelVisibility==='hidden'
           }
         );
       };
@@ -2430,11 +2566,6 @@ function bindOtherRelationshipControls(
             });
           }
         }
-      );
-
-      select?.addEventListener(
-        'change',
-        syncDraft
       );
 
       editor
@@ -2644,7 +2775,8 @@ function renderPersonEditorRelationshipList(c) {
                 ? '<div class="family-rel-row-actions">'+
                     otherRelationshipAnnotationControlMarkup(
                       link,
-                      relationLabel
+                      relationLabel,
+                      rawRelation
                     )+
                   '</div>'
                 : ''
