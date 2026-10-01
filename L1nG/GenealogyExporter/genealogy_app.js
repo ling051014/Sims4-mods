@@ -13908,10 +13908,28 @@ function renderRelAnnoList(
   });
 }
 function renderRelAnno(simId) {
-  if(!simId){renderRelAnnoList(null,'familyRelationshipAnnotationSection','familyRelationshipAnnotationList',[]);renderRelAnnoList(null,'relationshipAnnotationSection','relationshipAnnotationList',[]);return;}
-  const entries=buildRelationEntries(simId);
-  renderRelAnnoList(simId,'familyRelationshipAnnotationSection','familyRelationshipAnnotationList',entries.filter(e=>e.group==='family'));
-  renderRelAnnoList(simId,'relationshipAnnotationSection','relationshipAnnotationList',entries.filter(e=>e.group==='other'));
+  if(!simId){
+    renderRelAnnoList(
+      null,
+      'relationshipAnnotationSection',
+      'relationshipAnnotationList',
+      []
+    );
+    return;
+  }
+
+  const entries=
+    buildRelationEntries(simId)
+      .filter(entry=>
+        entry.group==='other'
+      );
+
+  renderRelAnnoList(
+    simId,
+    'relationshipAnnotationSection',
+    'relationshipAnnotationList',
+    entries
+  );
 }
 
 const petEditorController = {
