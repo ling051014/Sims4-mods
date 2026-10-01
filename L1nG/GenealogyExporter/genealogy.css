@@ -1799,9 +1799,9 @@ body[data-theme="midnight"] .life-photo-stage {
 .form-field-title { color:var(--text-secondary); font:inherit; font-weight:600; }
 
 /* ========【模擬市民個人檔案編輯器】 設定 - 緊湊人物檔案、分頁內容與固定操作列 ======== */
-.sim-editor-modal { width:min(790px,100%); max-height:92vh; padding:0; overflow:hidden; display:flex; flex-direction:column; }
+.sim-editor-modal { width:min(790px,100%); max-height:92vh; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease; }
 .sim-editor-top { flex:0 0 auto; padding:13px 18px 0; border-bottom:1px solid var(--border-default); background:var(--surface-card); position:relative; z-index:5; }
-.sim-editor-title { margin-bottom:8px !important; }
+.sim-editor-title { margin-bottom:8px !important; padding-right:64px; }
 .sim-profile-header { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:start; gap:18px; padding:0 0 11px; }
 .sim-profile-avatar-block { width:156px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto; align-items:center; gap:5px 6px; }
 .avatar-preview.sim-profile-avatar { grid-column:1/-1; width:104px; height:104px; margin:0 auto 1px; border-radius:11px; font-size:36px; }
@@ -3797,12 +3797,6 @@ button.avatar-editor-action { cursor:pointer; }
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
 /* ========【模擬市民獨立預覽頁】 設定 - 從編輯分類抽離，作為同尺寸下一張紙 ======== */
-.sim-editor-modal {
-    /* 主編輯頁維持既有版型，只增加堆疊定位層級 */ position: relative;
-    /* 主編輯頁位於最上層 */ z-index: 3;
-    /* 翻頁動畫 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
-}
-
 .sim-editor-preview-open {
     /* 獨立預覽入口固定在編輯頁標題區右上 */ position: absolute;
     /* 上方位置 */ top: 13px;
