@@ -6138,10 +6138,7 @@ function parentConnectorSource(
   group,
   pos,
   byId,
-  paths,
-  {
-    collisionRouting = true
-  } = {}
+  paths
 ) {
   const parentPositions = group.parentIds
     .map(parentId => ({
@@ -6208,15 +6205,6 @@ function parentConnectorSource(
         first.pos,
         second.pos
       );
-
-    // 拖曳 preview 沿用 main 的穩定關係幾何：
-    // 不在每一幀因為 blocker 進出而切換 parent source。
-    if (!collisionRouting) {
-      return pairJoinPoint(
-        first.pos,
-        second.pos
-      );
-    }
 
     const blocker =
       relationshipBlockingCard(
@@ -6315,16 +6303,14 @@ function drawParentConnectorGroup(
   pos,
   byId,
   paths,
-  labels,
-  options = {}
+  labels
 ) {
   const source =
     parentConnectorSource(
       group,
       pos,
       byId,
-      paths,
-      options
+      paths
     );
 
   if (!source) return;
