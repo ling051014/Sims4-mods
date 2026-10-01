@@ -219,11 +219,19 @@
 
   function isPetSim(sim) {
     const key = speciesKey(sim && sim.species);
-    return (
-      key.includes('dog') ||
-      key.includes('cat') ||
-      key.includes('horse') ||
-      key.includes('fox')
+
+    return [
+      'dog',
+      'fox',
+      'cat',
+      'raccoon',
+      'horse',
+      'cow',
+      'crow',
+      'parrot',
+      'leopard'
+    ].some(species =>
+      key.includes(species)
     );
   }
 
