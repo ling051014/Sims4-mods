@@ -454,6 +454,25 @@ function buildPersonEditorDraft(){
     });
   }
 
+  function captureEditorFamilyLabelDrafts(target=document){
+    target.querySelectorAll('[data-family-label-identity]').forEach(control=>{
+      const input=control.querySelector('.family-rel-label-input');
+      if(!input)return;
+
+      const identity=control.dataset.familyLabelIdentity||'';
+      const role=control.dataset.familyLabelRole||'';
+      const targetId=control.dataset.familyLabelTarget||'';
+
+      if(!identity)return;
+
+      simEditorState.familyLabelDrafts.set(identity,{
+        role,
+        targetId,
+        text:input.value
+      });
+    });
+  }
+
   function bindEditorFamilyLabelControls(target){
     target.querySelectorAll('.family-rel-label-toggle').forEach(button=>{
       button.addEventListener('click',()=>{
@@ -567,11 +586,12 @@ function buildPersonEditorDraft(){
     return result;
   }
 
-  function relationPersonMarkup(sim,relationLabel=''){
+  function relationPersonMarkup(sim,relationLabel='',customDisplayText=''){
     if(!sim)return'';
 
     const name=displayDataText(sim.name,sim);
     const avatar=framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((name||'?').charAt(0));
+    const customText=String(customDisplayText||'').trim();
 
     return '<span class="family-rel-person">'+
       '<span class="family-rel-person-avatar">'+avatar+'</span>'+
@@ -579,6 +599,9 @@ function buildPersonEditorDraft(){
         '<span class="family-rel-person-name">'+esc(name)+'</span>'+
         (relationLabel
           ? '<span class="family-rel-person-kinship">'+esc(displayRelationshipText(relationLabel))+'</span>'
+          : '')+
+        (customText
+          ? '<span class="family-rel-person-custom">'+esc(uiText('顯示文字'))+'：'+esc(customText)+'</span>'
           : '')+
       '</span>'+
     '</span>';
@@ -762,8 +785,19 @@ function buildPersonEditorDraft(){
         return relationPersonMarkup(sim,label);
       }
 
+      const customDisplayText=
+        role
+          ? editorFamilyDraftText(role,id)
+          : '';
+
       return '<div class="family-rel-preview-row'+(editing?' is-editing':'')+'">'+
-        relationPersonMarkup(sim,label)+
+        relationPersonMarkup(
+          sim,
+          label,
+          editing
+            ? ''
+            : customDisplayText
+        )+
         (editing
           ? editorFamilyRelationActionsMarkup(role,id)
           : '')+
@@ -1101,6 +1135,8 @@ function buildPersonEditorDraft(){
         if(!panel)return;
 
         const willOpen=panel.hidden;
+
+        captureEditorFamilyLabelDrafts();
 
         document.querySelectorAll('[data-family-editor-edit]').forEach(other=>{
           if(other!==panel)other.hidden=true;
