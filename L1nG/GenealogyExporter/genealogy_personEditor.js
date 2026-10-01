@@ -874,13 +874,34 @@ function buildPersonEditorDraft(){
     sheet.setAttribute('inert','');
   }
 
+  function familyEditorToggleDefaultLabel(button){
+    return button?.dataset.familyEditorToggle==='family-membership'
+      ? '管理'
+      : '編輯';
+  }
+
+  function syncFamilyEditorToggleButton(button,expanded){
+    if(!button)return;
+
+    button.setAttribute(
+      'aria-expanded',
+      expanded?'true':'false'
+    );
+
+    button.textContent=uiText(
+      expanded
+        ? '完成'
+        : familyEditorToggleDefaultLabel(button)
+    );
+  }
+
   function resetEditorFamilyPanels(){
     document.querySelectorAll('[data-family-editor-edit]').forEach(panel=>{
       panel.hidden=true;
     });
 
     document.querySelectorAll('[data-family-editor-toggle]').forEach(button=>{
-      button.setAttribute('aria-expanded','false');
+      syncFamilyEditorToggleButton(button,false);
     });
   }
 
@@ -955,11 +976,11 @@ function buildPersonEditorDraft(){
         });
 
         document.querySelectorAll('[data-family-editor-toggle]').forEach(other=>{
-          other.setAttribute('aria-expanded','false');
+          syncFamilyEditorToggleButton(other,false);
         });
 
         panel.hidden=!willOpen;
-        button.setAttribute('aria-expanded',willOpen?'true':'false');
+        syncFamilyEditorToggleButton(button,willOpen);
 
         if(willOpen){
           panel.querySelector('.ui-select-input')?.focus({preventScroll:true});
