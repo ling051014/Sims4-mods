@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20261001-help-layout-family-corner-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261001-person-library-density-r1">
     </head>
     <body data-theme="ling">
 
@@ -622,16 +622,16 @@
                 <div class="person-library-header">
                     <h2><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span><span class="person-library-count" id="personLibraryCount"></span></h2>
                     <div class="person-library-header-actions">
-                        <div class="person-library-view-toggle" role="group" aria-label="人物顯示方式">
-                            <button id="personLibraryCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">☷</button>
-                            <button id="personLibraryDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">☰</button>
-                        </div>
                         <button class="person-library-batch-start" id="personLibraryBatchBtn" type="button"><span class="l1ng-icon icon-person-check" aria-hidden="true"></span><span>批量管理</span></button>
                         <button class="primary" id="personLibraryAddBtn" type="button"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增人物</span></button>
                     </div>
                 </div>
                 <div class="person-library-toolbar">
                     <input id="personLibrarySearch" placeholder="搜尋人物…" type="search" autocomplete="off">
+                    <div class="person-library-view-toggle" role="group" aria-label="人物顯示方式">
+                        <button id="personLibraryCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">精簡</button>
+                        <button id="personLibraryDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">詳細</button>
+                    </div>
                 </div>
                 <div class="person-library-batch-toolbar" id="personLibraryBatchToolbar" hidden>
                     <span class="person-library-batch-count" id="personLibraryBatchCount">已選 0 位</span>
