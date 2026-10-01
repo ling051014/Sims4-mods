@@ -56,6 +56,7 @@
 
   // ========【人物編輯器延遲建立】 設定 - 基本資料先顯示，隱藏分頁真正需要時再建立 ========
   let personEditorRelationshipUiReady=false;
+  let personEditorMediaDraftReady=false;
   let personEditorMediaUiReady=false;
 
   const lifePhotoState = {
@@ -116,6 +117,7 @@
     );
 
     personEditorRelationshipUiReady=false;
+    personEditorMediaDraftReady=false;
     personEditorMediaUiReady=false;
   }
 
@@ -1084,6 +1086,7 @@ function buildPersonEditorDraft({
     if(!sheet)return;
 
     initializePersonEditorRelationshipUi();
+    initializePersonEditorMediaDraft();
     renderEditorInfoPreview();
     mask.classList.add('preview-open');
     sheet.removeAttribute('inert');
@@ -1616,8 +1619,41 @@ function buildPersonEditorDraft({
     renderPersonEditorFamilyPreviews();
   }
 
+  function initializePersonEditorMediaDraft(){
+    if(personEditorMediaDraftReady)return;
+
+    const sim=
+      currentSimEditorPerson();
+
+    replaceDraftCollection(
+      editingPets,
+      sim
+        ? JSON.parse(
+            JSON.stringify(
+              sim.pets||[]
+            )
+          )
+        : []
+    );
+
+    replaceDraftCollection(
+      editingGallery,
+      sim
+        ? JSON.parse(
+            JSON.stringify(
+              sim.gallery||[]
+            )
+          )
+        : []
+    );
+
+    personEditorMediaDraftReady=true;
+  }
+
   function initializePersonEditorMediaUi(){
     if(personEditorMediaUiReady)return;
+
+    initializePersonEditorMediaDraft();
 
     personEditorMediaUiReady=true;
 
@@ -1774,29 +1810,7 @@ function buildPersonEditorDraft({
 
     renderPersonEditorAvatarPreview();
 
-    // Draft 資料先準備好；隱藏分頁的 DOM 不在開啟瞬間建立。
-    replaceDraftCollection(
-      editingPets,
-      sim
-        ? JSON.parse(
-            JSON.stringify(
-              sim.pets||[]
-            )
-          )
-        : []
-    );
-
-    replaceDraftCollection(
-      editingGallery,
-      sim
-        ? JSON.parse(
-            JSON.stringify(
-              sim.gallery||[]
-            )
-          )
-        : []
-    );
-
+    // 人生照片與寵物的草稿資料也延遲到真正需要時才建立。
     syncPersonEditorCauseOfDeathVisibility();
     closeEditorPreviewSheet();
 
@@ -2879,6 +2893,7 @@ function ensureSavedSimManualPosition(
 
 function commitPersonEditorDraft() {
   initializePersonEditorRelationshipUi();
+  initializePersonEditorMediaDraft();
 
   const request =
     collectPersonEditorSaveRequest();
