@@ -1879,12 +1879,12 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .family-rel-preview-row.is-editing {
-    /* 編輯狀態：人物 + 操作同一列 */ grid-template-columns: minmax(0,1fr) auto;
-    /* 欄位間距 */ column-gap: 8px;
-    /* 行間距 */ row-gap: 6px;
-    /* 編輯狀態增加少量內距 */ padding: 4px 5px;
+    /* 編輯狀態：移除 / 人物 / 控制同一列 */ grid-template-columns: 20px minmax(0,1fr) auto;
+    /* 欄位間距 */ column-gap: 7px;
+    /* 行間距 */ row-gap: 5px;
+    /* 編輯狀態增加少量內距 */ padding: 5px 6px;
     /* 使用輕量底色區分編輯 */ background: var(--surface-panel);
-    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 保留人物列外框 */ border: 1px solid var(--border-default);
 }
 
 .family-rel-preview-row > .family-rel-person {
@@ -1892,27 +1892,79 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .family-rel-row-actions {
-    /* 所有編輯控制集中於同一列 */ display: flex;
+    /* 列內控制保持單排 */ display: flex;
     /* 垂直置中 */ align-items: center;
     /* 控制間距 */ gap: 5px;
-    /* 不讓控制區壓縮人物名稱 */ flex: 0 0 auto;
+    /* 不讓控制區壓縮人物姓名 */ flex: 0 0 auto;
+    /* 最小寬度 */ min-width: 0;
+}
+
+.family-rel-remove,
+.family-rel-remove-spacer {
+    /* 與左側移除位置對齊 */ width: 20px;
+    /* 固定寬度 */ flex: 0 0 20px;
+}
+
+.family-rel-remove {
+    /* 小型純圖示按鈕 */ height: 20px;
+    /* 取消多餘內距 */ padding: 0;
+    /* 顯示方式 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 移除按鈕不使用外框 */ border: 0;
+    /* 圓角只用於懸停背景 */ border-radius: 999px;
+    /* 平常保持透明 */ background: transparent;
+    /* 危險操作顏色 */ color: #b03a2e;
+    /* 滑鼠指標 */ cursor: pointer;
+    /* 不額外撐高人物列 */ align-self: center;
+}
+
+.family-rel-remove .l1ng-icon {
+    /* 圖示尺寸 */ width: 12px;
+    /* 圖示高度 */ height: 12px;
+}
+
+.family-rel-remove:hover,
+.family-rel-remove:focus-visible {
+    /* 懸停只顯示淡紅底，不增加外框 */ background: color-mix(in srgb,#b03a2e 9%,transparent);
+    /* 聚焦外框交由瀏覽器 */ color: #a32f24;
 }
 
 .family-rel-kind-select {
-    /* 親生 / 收養只保留一個小型選擇器 */ width: 86px;
-    /* 最小高度 */ min-height: 29px;
-    /* 內縮空間 */ padding: 4px 25px 4px 7px;
-    /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 6px;
-    /* 背景 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 字體 */ font: inherit;
+    /* 原生來源欄位只保留語意尺寸，視覺由 ui-single-select 接手 */ width: 78px;
+}
+
+/* ========【關係種類小型下拉】 設定 - 親生 / 收養維持列內尺寸，選單寬度與欄位一致 ======== */
+.ui-single-select-compact {
+    /* 固定小型欄寬 */ width: 78px;
+    /* 不被其他控制擠壓 */ flex: 0 0 78px;
+}
+
+.ui-single-select-compact .ui-single-select-trigger {
+    /* 真正列內高度，不再接近整張人物列 */ min-height: 24px;
+    /* 固定高度 */ height: 24px;
+    /* 左右內距 */ padding: 2px 23px 2px 7px;
+    /* 圓角 */ border-radius: 5px;
     /* 字體大小 */ font-size: 10.5px;
+    /* 行距 */ line-height: 1;
+}
+
+.ui-single-select-compact .ui-select-chevron-icon {
+    /* 小型欄位右側箭頭位置 */ right: 7px;
+    /* 箭頭尺寸 */ width: 10px;
+    /* 箭頭高度 */ height: 10px;
+}
+
+.family-rel-label-control {
+    /* 自訂顯示文字在原位置切換 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 不額外換行 */ min-width: 0;
 }
 
 .family-rel-label-toggle {
-    /* 自訂文字只在編輯狀態顯示 */ white-space: nowrap;
-    /* 內縮空間 */ padding: 4px 7px;
+    /* 自訂文字按鈕維持列內尺寸 */ min-height: 24px;
+    /* 不換行 */ white-space: nowrap;
+    /* 內縮空間 */ padding: 2px 7px;
     /* 邊框 */ border: 1px solid var(--border-default);
     /* 圓角 */ border-radius: 5px;
     /* 背景 */ background: var(--surface-input);
@@ -1924,52 +1976,32 @@ button.avatar-editor-action { cursor:pointer; }
 
 .family-rel-label-toggle:hover,
 .family-rel-label-toggle[aria-expanded="true"] {
-    /* 懸停 / 展開狀態 */ border-color: var(--action-primary);
+    /* 懸停 / 編輯狀態 */ border-color: var(--action-primary);
     /* 文字顏色 */ color: var(--action-primary);
 }
 
-.family-rel-remove {
-    /* 移除關係使用小型圖示按鈕 */ width: 28px;
-    /* 高度 */ height: 28px;
-    /* 取消多餘內距 */ padding: 0;
-    /* 顯示方式 */ display: inline-flex;
+.family-rel-label-inline-editor {
+    /* 原地取代按鈕，不另外長出整行 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
-    /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 5px;
-    /* 背景 */ background: var(--surface-input);
-    /* 危險操作顏色 */ color: #b03a2e;
-    /* 滑鼠指標 */ cursor: pointer;
+    /* 控制間距 */ gap: 4px;
+    /* 不超出可用空間 */ min-width: 0;
 }
 
-.family-rel-remove:hover {
-    /* 懸停邊框 */ border-color: #d7a69e;
-    /* 懸停背景 */ background: color-mix(in srgb,#b03a2e 7%,var(--surface-input));
-}
-
-.family-rel-label-editor {
-    /* 自訂文字輸入框展開於人物列下方 */ grid-column: 1 / -1;
-    /* 輸入框與恢復按鈕並排 */ display: grid;
-    /* 欄寬 */ grid-template-columns: minmax(0,1fr) auto;
-    /* 垂直置中 */ align-items: center;
-    /* 項目間距 */ gap: 6px;
-    /* 與人物文字起點對齊 */ padding-left: 31px;
-}
-
-.family-rel-label-editor[hidden] {
+.family-rel-label-inline-editor[hidden] {
     /* 收合時不佔版面 */ display: none;
 }
 
 .family-rel-label-input {
-    /* 寬度 */ width: 100%;
-    /* 最小高度 */ min-height: 30px;
-    /* 內縮空間 */ padding: 5px 8px;
+    /* 原地輸入框採固定可讀寬度 */ width: clamp(128px,18vw,190px);
+    /* 不撐高人物列 */ min-height: 24px;
+    /* 固定列內高度 */ height: 24px;
+    /* 內縮空間 */ padding: 2px 7px;
     /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 6px;
+    /* 圓角 */ border-radius: 5px;
     /* 背景 */ background: var(--surface-input);
     /* 文字顏色 */ color: var(--text-primary);
     /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 11.5px;
+    /* 字體大小 */ font-size: 10.5px;
     /* 外框 */ outline: none;
 }
 
@@ -1978,14 +2010,15 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .family-rel-label-reset {
-    /* 恢復預設按鈕 */ min-height: 30px;
-    /* 內縮空間 */ padding: 5px 8px;
+    /* 恢復預設維持同一列 */ min-height: 24px;
+    /* 高度 */ height: 24px;
+    /* 內縮空間 */ padding: 2px 7px;
     /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 6px;
+    /* 圓角 */ border-radius: 5px;
     /* 背景 */ background: var(--surface-item);
     /* 文字顏色 */ color: var(--text-secondary);
     /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 10.5px;
+    /* 字體大小 */ font-size: 10px;
     /* 不換行 */ white-space: nowrap;
     /* 滑鼠指標 */ cursor: pointer;
 }
@@ -6746,9 +6779,22 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .pet-avatar-editor-block { width:100%; }
   .pet-editor-fields { grid-template-columns:1fr; }
   .pet-field-full { grid-column:auto; }
-  .family-rel-preview-row.is-editing { grid-template-columns:1fr; }
-  .family-rel-row-actions { flex-wrap:wrap; justify-content:flex-start; padding-left:31px; }
-  .family-rel-label-editor { padding-left:0; }
+  .family-rel-preview-row.is-editing {
+    grid-template-columns:20px minmax(0,1fr);
+    align-items:center;
+  }
+  .family-rel-row-actions {
+    grid-column:2;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+    padding-left:0;
+  }
+  .family-rel-label-inline-editor {
+    flex-wrap:wrap;
+  }
+  .family-rel-label-input {
+    width:min(190px,52vw);
+  }
   .other-rel-hidden-label { padding-left:31px; }
   .other-rel-annotation-editor {
     grid-template-columns:1fr;
