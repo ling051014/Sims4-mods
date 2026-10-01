@@ -3971,16 +3971,16 @@ button.avatar-editor-action { cursor:pointer; }
     /* 與主編輯頁共用畫面中心 */ position: absolute;
     /* 水平置中 */ left: 50%;
     /* 垂直置中 */ top: 50%;
-    /* 與主編輯頁相同寬度 */ width: min(790px,calc(100vw - 40px));
-    /* 與主編輯頁相同最大高度 */ max-height: 92vh;
+    /* 尺寸直接跟隨目前編輯頁，避免後方紙張只露出一小塊 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
+    /* 高度直接跟隨目前編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,88vh));
+    /* 尺寸已由編輯頁 authority 提供，不再另設不同 max-height */ max-height: none;
     /* 圓角弧度 */ border-radius: 10px;
 }
 
 .sim-editor-paper-back {
-    /* 後方裝飾紙張尺寸 */ height: min(680px,88vh);
     /* 後方紙張邊框 */ border: 1px solid var(--border-default);
     /* 後方紙張背景 */ background: var(--surface-card);
-    /* 初始錯位 */ transform: translate(-50%,-50%) translate(-10px,8px) rotate(-.75deg);
+    /* 初始錯位 */ transform: translate(-50%,-50%) translate(-14px,11px) rotate(-.65deg);
     /* 顯示層級 */ z-index: 1;
     /* 透明度 */ opacity: .72;
     /* 不接收操作 */ pointer-events: none;
@@ -3994,7 +3994,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 預覽頁背景 */ background: var(--surface-card);
     /* 預覽頁邊框 */ border: 1px solid var(--border-default);
     /* 預設位於主編輯頁後方 */ z-index: 2;
-    /* 預設只露出紙張邊緣 */ transform: translate(-50%,-50%) translate(12px,-8px) rotate(.8deg) scale(.995);
+    /* 預設只露出紙張邊緣 */ transform: translate(-50%,-50%) translate(14px,-10px) rotate(.65deg) scale(.998);
     /* 預設透明度 */ opacity: .92;
     /* 預設不可操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 14px 36px rgba(31,35,40,.11);
