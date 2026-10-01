@@ -222,18 +222,19 @@ const RACE_PRESETS = {
   other:        { icon:'asterisk', label:'其他' }
 };
 
-const PET_SPECIES = {
-  // 哺乳類寵物統一以爪印表示「寵物」，避免愛心 / 圓形等圖示無法一眼辨識。
-  dog:    { icon:'paw', label:'狗' },
-  cat:    { icon:'paw', label:'貓' },
-  horse:  { icon:'paw', label:'馬' },
-  rabbit: { icon:'paw', label:'兔子' },
-  bird:   { icon:'feather', label:'鳥' },
-  hamster:{ icon:'paw', label:'倉鼠' },
-  fish:   { icon:'water', label:'魚' },
-  lizard: { icon:'bug', label:'蜥蜴' },
-  other:  { icon:'paw', label:'其他' }
-};
+const PET_SPECIES = Object.freeze({
+  // ========【寵物種類】 設定 - 顯示文字、canonical value 與專用 SVG 圖示統一 ========
+  dog:     Object.freeze({ icon:'dog', label:'狗' }),
+  fox:     Object.freeze({ icon:'wolf-head', label:'狐狸' }),
+  cat:     Object.freeze({ icon:'cat', label:'貓' }),
+  raccoon: Object.freeze({ icon:'paw', label:'浣熊' }),
+  horse:   Object.freeze({ icon:'horse', label:'馬' }),
+  cow:     Object.freeze({ icon:'cow', label:'牛' }),
+  crow:    Object.freeze({ icon:'bird', label:'烏鴉' }),
+  parrot:  Object.freeze({ icon:'feather', label:'鸚鵡' }),
+  leopard: Object.freeze({ icon:'cat', label:'豹' }),
+  other:   Object.freeze({ icon:'paw', label:'其他' })
+});
 
 const VALID_THEMES = ['ling','sage','rose','amber','midnight'];
 const VALID_MODES = ['view','edit'];
@@ -8042,7 +8043,10 @@ function normalizeCurrentDatabase(targetDb) {
         ...pet,
         id:pet.id || uid('pet'),
         name:pet.name || '',
-        species:pet.species || 'other',
+        species:
+          PET_SPECIES[String(pet.species || '')]
+            ? String(pet.species)
+            : 'other',
         breed:pet.breed || '',
         gender:isEaCasPetSpecies(pet.species) ? (normalizePetGender(pet.gender) || 'male') : '',
         ageStage:pet.ageStage || '成年',
