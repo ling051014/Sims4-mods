@@ -650,7 +650,7 @@ function buildPersonEditorDraft({
           ? '<span class="family-rel-person-kinship">'+esc(displayRelationshipText(relationLabel))+'</span>'
           : '')+
         (customText
-          ? '<span class="family-rel-person-custom">'+esc(uiText('顯示文字'))+'：'+esc(customText)+'</span>'
+          ? '<span class="family-rel-person-custom">'+esc(uiText('標籤文字：'))+esc(customText)+'</span>'
           : '')+
       '</span>'+
     '</span>';
@@ -2412,7 +2412,7 @@ function renderPersonEditorRelationshipList(c) {
           !editing&&
           draft.hidden
             ? '<span class="other-rel-hidden-label">'+
-              esc(uiText('關係標籤：不顯示'))+
+              esc(uiText('標籤文字：不顯示'))+
               '</span>'
             : '';
 
