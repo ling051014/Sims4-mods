@@ -428,17 +428,22 @@ function buildPersonEditorDraft(){
     );
   }
 
-  function editorFamilyLabelControlMarkup(role,targetId){
+  function editorFamilyLabelToggleMarkup(role,targetId){
+    if(!role||!editorFamilyLabelControlAvailable(role,targetId))return'';
+
+    return '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>';
+  }
+
+  function editorFamilyLabelEditorMarkup(role,targetId){
     if(!role||!editorFamilyLabelControlAvailable(role,targetId))return'';
 
     const identity=editorFamilyLabelIdentity(role,targetId);
     const value=editorFamilyDraftText(role,targetId);
 
-    return '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>'+
-      '<div class="family-rel-label-editor" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'" hidden>'+
-        '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
-        '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
-      '</div>';
+    return '<div class="family-rel-label-editor" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'" hidden>'+
+      '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
+      '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
+    '</div>';
   }
 
   function syncFamilyLabelDraftInputs(identity,value){
@@ -666,8 +671,19 @@ function buildPersonEditorDraft(){
       );
     }
 
-    if(editorFamilyLabelControlAvailable(role,target)){
-      pieces.push(editorFamilyLabelControlMarkup(role,target));
+    const hasCustomLabel=
+      editorFamilyLabelControlAvailable(
+        role,
+        target
+      );
+
+    if(hasCustomLabel){
+      pieces.push(
+        editorFamilyLabelToggleMarkup(
+          role,
+          target
+        )
+      );
     }
 
     if(familyRelationCanRemove(role,target)){
@@ -678,7 +694,12 @@ function buildPersonEditorDraft(){
       );
     }
 
-    return '<div class="family-rel-row-actions">'+pieces.join('')+'</div>';
+    return '<div class="family-rel-row-actions">'+pieces.join('')+'</div>'+
+      (
+        hasCustomLabel
+          ? editorFamilyLabelEditorMarkup(role,target)
+          : ''
+      );
   }
 
   function bindEditorFamilyRelationControls(target){
