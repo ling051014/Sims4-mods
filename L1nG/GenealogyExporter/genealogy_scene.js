@@ -6011,6 +6011,34 @@ function requestRelationshipPreviewUpdate(
   });
 }
 
+function updateRelationshipPreviewImmediately(
+  simIds = []
+) {
+  syncState();
+
+  const ids =
+    [...(simIds || [])]
+      .map(String)
+      .filter(Boolean);
+
+  if (!ids.length || !layoutCache) {
+    return false;
+  }
+
+  const updated =
+    paintRelationshipPreview(
+      ids
+    );
+
+  if (!updated) {
+    paintRelationshipLayer({
+      includeLabels:true
+    });
+  }
+
+  return true;
+}
+
 function renderSceneImmediately() {
   relationshipPreviewPending = false;
   requestSceneUpdate(
@@ -7229,112 +7257,6 @@ function paintRelationshipLayer({
   }
 }
 
-function relationshipPairPreviewGeometry(
-  a,
-  b,
-  setting
-) {
-  // main 的拖曳感：拖動途中不做 blocker 判斷，
-  // 只有玩家明確指定曲線時才維持曲線。
-  if (
-    setting.routing === 'manual' &&
-    setting.curved
-  ) {
-    const {
-      aX,
-      aY,
-      bX,
-      bY
-    } =
-      getPairConnectionGeometry(
-        a,
-        b
-      );
-
-    return relationshipQuadraticGeometry(
-      aX,
-      aY,
-      bX,
-      bY,
-      setting.curveAmount
-    );
-  }
-
-  const {
-    aX,
-    aY,
-    bX,
-    bY
-  } =
-    getPairConnectionGeometry(
-      a,
-      b
-    );
-
-  const y =
-    Math.abs(aY - bY) < 2
-      ? (aY + bY) / 2
-      : aY;
-
-  const join = {
-    x:(aX + bX) / 2,
-    y:(aY + bY) / 2
-  };
-
-  return {
-    d:
-      'M' + aX + ' ' + y +
-      ' H' + bX,
-    labelX:join.x,
-    labelY:join.y
-  };
-}
-
-function relationshipOtherPreviewGeometry(
-  a,
-  b,
-  setting
-) {
-  const fromAnchor =
-    avatarBoundaryAnchor(a, b);
-
-  const toAnchor =
-    avatarBoundaryAnchor(b, a);
-
-  const x1 =
-    fromAnchor.x;
-
-  const y1 =
-    fromAnchor.y;
-
-  const x2 =
-    toAnchor.x;
-
-  const y2 =
-    toAnchor.y;
-
-  if (
-    setting.routing === 'manual' &&
-    setting.curved
-  ) {
-    return relationshipQuadraticGeometry(
-      x1,
-      y1,
-      x2,
-      y2,
-      setting.curveAmount
-    );
-  }
-
-  return {
-    d:
-      'M' + x1 + ' ' + y1 +
-      ' L' + x2 + ' ' + y2,
-    labelX:(x1 + x2) / 2,
-    labelY:(y1 + y2) / 2
-  };
-}
-
 function replaceRelationshipPreviewLabelMarkup(
   markup
 ) {
@@ -7500,10 +7422,7 @@ function paintRelationshipPreview(
         pos,
         byId,
         groupPaths,
-        groupLabels,
-        {
-          collisionRouting:false
-        }
+        groupLabels
       );
 
       element.innerHTML =
@@ -7548,10 +7467,17 @@ function paintRelationshipPreview(
       'pair'
     ) {
       const result =
-        relationshipPairPreviewGeometry(
+        relationshipPairRenderGeometry(
           a,
           b,
-          record.setting
+          record.setting,
+          {
+            fromId,
+            toId,
+            pos,
+            byId,
+            geometry:layoutCache.geometry
+          }
         );
 
       path.setAttribute(
@@ -7573,10 +7499,17 @@ function paintRelationshipPreview(
       'other'
     ) {
       const result =
-        relationshipOtherPreviewGeometry(
+        relationshipOtherRenderGeometry(
           a,
           b,
-          record.setting
+          record.setting,
+          {
+            fromId,
+            toId,
+            pos,
+            byId,
+            geometry:layoutCache.geometry
+          }
         );
 
       path.setAttribute(
@@ -8534,6 +8467,7 @@ function resizeStageToContent() {
       renderImmediately:renderSceneImmediately,
       requestRelationshipUpdate:requestRelationshipLayerUpdate,
       requestRelationshipPreviewUpdate,
+      updateRelationshipPreviewImmediately,
       invalidateTopologyCache,
       readScenePlan,
       readPersonPosition,
