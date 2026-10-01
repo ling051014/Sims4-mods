@@ -1664,7 +1664,7 @@ function captureOtherRelationshipAnnotationDrafts(
     });
 }
 
-function otherRelationshipAnnotationEditorMarkup(
+function otherRelationshipAnnotationControlMarkup(
   link,
   relationLabel
 ){
@@ -1693,10 +1693,10 @@ function otherRelationshipAnnotationEditorMarkup(
     );
 
   return (
-    '<div class="other-rel-annotation-editor" '+
+    '<span class="other-rel-label-control" '+
     'data-other-rel-annotation-key="'+
     esc(key)+
-    '" hidden>'+
+    '">'+
       '<select class="other-rel-display-mode" data-other-rel-display-mode aria-label="'+
       esc(uiText('顯示關係'))+
       '">'+
@@ -1715,14 +1715,19 @@ function otherRelationshipAnnotationEditorMarkup(
           esc(uiText('（不顯示）'))+
         '</option>'+
       '</select>'+
-      '<input class="other-rel-label-input" type="text" maxlength="40" placeholder="'+
-      esc(uiText('自訂文字（可選）'))+
-      '" value="'+
-      esc(draft.text)+
-      '">'+
-      '<button class="other-rel-label-reset" type="button">'+
-        esc(uiText('恢復預設'))+
+      '<button class="family-rel-label-toggle other-rel-label-toggle" type="button" aria-expanded="false">'+
+        esc(uiText('自訂顯示文字…'))+
       '</button>'+
+      '<span class="other-rel-label-inline-editor" hidden>'+
+        '<input class="other-rel-label-input" type="text" maxlength="40" placeholder="'+
+        esc(uiText('自訂文字（可選）'))+
+        '" value="'+
+        esc(draft.text)+
+        '">'+
+        '<button class="other-rel-label-reset" type="button">'+
+          esc(uiText('恢復預設'))+
+        '</button>'+
+      '</span>'+
       (
         hasOffset
           ? '<button class="other-rel-position-reset" type="button" data-reset-other-rel-position="'+
@@ -1732,7 +1737,7 @@ function otherRelationshipAnnotationEditorMarkup(
             '</button>'
           : ''
       )+
-    '</div>'
+    '</span>'
   );
 }
 
@@ -1748,35 +1753,32 @@ function bindOtherRelationshipControls(
       button.addEventListener(
         'click',
         ()=>{
-          const row=
+          const control=
             button.closest(
-              '.family-rel-preview-row'
+              '[data-other-rel-annotation-key]'
             );
 
           const editor=
-            row?.querySelector(
-              '.other-rel-annotation-editor'
+            control?.querySelector(
+              '.other-rel-label-inline-editor'
             );
 
           if(!editor)return;
 
-          const open=editor.hidden;
-          editor.hidden=!open;
-
+          editor.hidden=false;
+          button.hidden=true;
           button.setAttribute(
             'aria-expanded',
-            open?'true':'false'
+            'true'
           );
 
-          if(open){
-            editor
-              .querySelector(
-                '.other-rel-label-input'
-              )
-              ?.focus({
-                preventScroll:true
-              });
-          }
+          editor
+            .querySelector(
+              '.other-rel-label-input'
+            )
+            ?.focus({
+              preventScroll:true
+            });
         }
       );
     });
@@ -1815,6 +1817,36 @@ function bindOtherRelationshipControls(
       input?.addEventListener(
         'input',
         syncDraft
+      );
+
+      input?.addEventListener(
+        'keydown',
+        event=>{
+          if(event.key!=='Escape')return;
+
+          const inline=
+            editor.querySelector(
+              '.other-rel-label-inline-editor'
+            );
+
+          const toggle=
+            editor.querySelector(
+              '.other-rel-label-toggle'
+            );
+
+          if(inline)inline.hidden=true;
+
+          if(toggle){
+            toggle.hidden=false;
+            toggle.setAttribute(
+              'aria-expanded',
+              'false'
+            );
+            toggle.focus({
+              preventScroll:true
+            });
+          }
+        }
       );
 
       select?.addEventListener(
@@ -2011,6 +2043,19 @@ function renderPersonEditorRelationshipList(c) {
           '" data-other-rel-id="'+
           esc(String(link.id||''))+
           '">'+
+            (
+              editing
+                ? '<button class="family-rel-remove" type="button" data-other-rel-delete="'+
+                  esc(String(link.id||''))+
+                  '" aria-label="'+
+                  esc(uiText('移除'))+
+                  '" title="'+
+                  esc(uiText('移除'))+
+                  '">'+
+                    iconSvg('x-lg')+
+                  '</button>'
+                : ''
+            )+
             relationPersonMarkup(
               other,
               relationLabel+' '+arrow,
@@ -2020,23 +2065,11 @@ function renderPersonEditorRelationshipList(c) {
             (
               editing
                 ? '<div class="family-rel-row-actions">'+
-                    '<button class="family-rel-label-toggle other-rel-label-toggle" type="button" aria-expanded="false">'+
-                      esc(uiText('自訂顯示文字…'))+
-                    '</button>'+
-                    '<button class="family-rel-remove" type="button" data-other-rel-delete="'+
-                      esc(String(link.id||''))+
-                      '" aria-label="'+
-                      esc(uiText('移除'))+
-                      '" title="'+
-                      esc(uiText('移除'))+
-                      '">'+
-                        iconSvg('x-lg')+
-                    '</button>'+
-                  '</div>'+
-                  otherRelationshipAnnotationEditorMarkup(
-                    link,
-                    relationLabel
-                  )
+                    otherRelationshipAnnotationControlMarkup(
+                      link,
+                      relationLabel
+                    )+
+                  '</div>'
                 : ''
             )+
           '</div>'
