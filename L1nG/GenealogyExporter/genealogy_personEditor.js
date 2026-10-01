@@ -561,8 +561,9 @@ function buildPersonEditorDraft(){
   }
 
   function renderEditorInfoPreview(){
-    const target=$('editorInfoPreview');
-    if(!target)return;
+    const stage=$('editorInfoPreview');
+    const target=$('editorInfoPreviewCard');
+    if(!stage||!target)return;
 
     const draft=buildPersonEditorDraft();
 
