@@ -3796,211 +3796,182 @@ button.avatar-editor-action { cursor:pointer; }
 
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
-/* ========【人物預覽舞台】 設定 - 卡片堆疊展示、進場動畫與滑開層次 ======== */
-.editor-info-preview {
-    /* 元素寬度 */ width: 100%;
-    /* 水平置中 */ margin: 0 auto;
-    /* 舞台本身不再充當人物卡片 */ overflow: visible;
+/* ========【模擬市民獨立預覽頁】 設定 - 從編輯分類抽離，作為同尺寸下一張紙 ======== */
+.sim-editor-modal {
+    /* 主編輯頁維持既有版型，只增加堆疊定位層級 */ position: relative;
+    /* 主編輯頁位於最上層 */ z-index: 3;
+    /* 翻頁動畫 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
 }
 
-.editor-preview-window {
-    /* 元素寬度 */ width: min(700px,100%);
-    /* 水平置中 */ margin: 0 auto;
+.sim-editor-preview-open {
+    /* 獨立預覽入口固定在編輯頁標題區右上 */ position: absolute;
+    /* 上方位置 */ top: 13px;
+    /* 右側位置 */ right: 18px;
+    /* 顯示層級 */ z-index: 7;
+    /* 最小高度 */ min-height: 30px;
+    /* 內縮空間 */ padding: 5px 10px;
     /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 12px;
-    /* 背景設定 */ background: var(--surface-panel);
-    /* 溢出處理 */ overflow: hidden;
-    /* 陰影設定 */ box-shadow: 0 14px 34px rgba(31,35,40,.10);
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 背景設定 */ background: var(--surface-input);
+    /* 文字顏色 */ color: var(--text-primary);
+    /* 字體設定 */ font: inherit;
+    /* 字體大小 */ font-size: 11.5px;
+    /* 字體粗細 */ font-weight: 650;
+    /* 滑鼠指標 */ cursor: pointer;
 }
 
-.editor-preview-window-bar {
-    /* 元素高度 */ height: 34px;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 6px;
-    /* 內縮空間 */ padding: 0 12px;
-    /* 下方邊框 */ border-bottom: 1px solid var(--border-default);
-    /* 背景設定 */ background: var(--surface-card);
+.sim-editor-preview-open:hover {
+    /* 懸停邊框 */ border-color: var(--action-primary);
+    /* 懸停文字 */ color: var(--action-primary);
+    /* 懸停背景 */ background: var(--surface-item-hover);
 }
 
-.editor-preview-window-bar span {
-    /* 元素寬度 */ width: 8px;
-    /* 元素高度 */ height: 8px;
-    /* 圓形 */ border-radius: 50%;
-    /* 背景設定 */ background: var(--border-default);
-}
-
-.editor-preview-stage {
-    /* 定位方式 */ position: relative;
-    /* 最小高度 */ min-height: 410px;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 內縮空間 */ padding: 38px 54px 44px;
-    /* 背景設定 */ background:
-        radial-gradient(circle at 18% 18%,color-mix(in srgb,var(--action-primary) 12%,transparent) 0 2px,transparent 3px),
-        linear-gradient(145deg,color-mix(in srgb,var(--surface-panel) 86%,var(--brand-tint-start)),var(--surface-card));
-}
-
-.editor-preview-stack {
-    /* 定位方式 */ position: relative;
-    /* 元素寬度 */ width: min(560px,100%);
-    /* 讓前景卡片決定整體高度 */ min-width: 0;
-    /* 建立局部層疊環境 */ isolation: isolate;
-}
-
-.editor-preview-card-back {
-    /* 定位方式 */ position: absolute;
-    /* 填滿主卡範圍 */ inset: 0;
-    /* 圓角弧度 */ border-radius: 11px;
-    /* 邊框設定 */ border: 1px solid color-mix(in srgb,var(--action-primary) 20%,var(--border-default));
-    /* 背景設定 */ background: color-mix(in srgb,var(--surface-card) 90%,var(--brand-tint-start));
-    /* 陰影設定 */ box-shadow: 0 10px 24px rgba(31,35,40,.08);
-    /* 滑鼠事件 */ pointer-events: none;
-    /* 動畫過渡 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .28s ease;
-    /* 溢出處理 */ overflow: hidden;
-}
-
-.editor-preview-card-back::after {
-    /* 生成內容 */ content: "";
-    /* 定位方式 */ position: absolute;
-    /* 定位範圍 */ inset: 0;
-    /* 柔和高光 */ background: linear-gradient(135deg,color-mix(in srgb,var(--brand-tint-start) 50%,transparent),transparent 58%);
-    /* 滑鼠事件 */ pointer-events: none;
-}
-
-.editor-preview-card-back-deep {
-    /* 最後一層位置 */ transform: translate(18px,-14px) rotate(2.1deg) scale(.985);
-    /* 顯示層級 */ z-index: 0;
-    /* 透明度 */ opacity: .72;
-}
-
-.editor-preview-card-back-mid {
-    /* 中間一層位置 */ transform: translate(-18px,15px) rotate(-2.4deg) scale(.992);
-    /* 顯示層級 */ z-index: 1;
-    /* 透明度 */ opacity: .88;
-}
-
-.editor-preview-back-avatar {
-    /* 定位方式 */ position: absolute;
-    /* 左側位置 */ left: 18px;
-    /* 頂部位置 */ top: 20px;
-    /* 元素寬度 */ width: 74px;
-    /* 元素高度 */ height: 74px;
+.sim-editor-paper-back,
+.sim-editor-preview-sheet {
+    /* 與主編輯頁共用畫面中心 */ position: absolute;
+    /* 水平置中 */ left: 50%;
+    /* 垂直置中 */ top: 50%;
+    /* 與主編輯頁相同寬度 */ width: min(790px,calc(100vw - 40px));
+    /* 與主編輯頁相同最大高度 */ max-height: 92vh;
     /* 圓角弧度 */ border-radius: 10px;
-    /* 背景設定 */ background: color-mix(in srgb,var(--action-primary) 12%,var(--surface-item));
 }
 
-.editor-preview-back-line {
-    /* 定位方式 */ position: absolute;
-    /* 左側位置 */ left: 108px;
-    /* 元素寬度 */ width: 34%;
-    /* 元素高度 */ height: 9px;
-    /* 圓角弧度 */ border-radius: 999px;
-    /* 背景設定 */ background: color-mix(in srgb,var(--text-secondary) 12%,transparent);
-    /* 頂部位置 */ top: 58px;
+.sim-editor-paper-back {
+    /* 後方裝飾紙張尺寸 */ height: min(680px,88vh);
+    /* 後方紙張邊框 */ border: 1px solid var(--border-default);
+    /* 後方紙張背景 */ background: var(--surface-card);
+    /* 初始錯位 */ transform: translate(-50%,-50%) translate(-10px,8px) rotate(-.75deg);
+    /* 顯示層級 */ z-index: 1;
+    /* 透明度 */ opacity: .72;
+    /* 不接收操作 */ pointer-events: none;
+    /* 陰影設定 */ box-shadow: 0 12px 30px rgba(31,35,40,.08);
+    /* 動畫過渡 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease;
 }
 
-.editor-preview-back-line-wide {
-    /* 元素寬度 */ width: 46%;
-    /* 頂部位置 */ top: 31px;
+.sim-editor-preview-sheet {
+    /* 預覽頁清除共用面板內距 */ padding: 0;
+    /* 預覽頁自行捲動 */ overflow: auto;
+    /* 預覽頁背景 */ background: var(--surface-card);
+    /* 預覽頁邊框 */ border: 1px solid var(--border-default);
+    /* 預設位於主編輯頁後方 */ z-index: 2;
+    /* 預設只露出紙張邊緣 */ transform: translate(-50%,-50%) translate(12px,-8px) rotate(.8deg) scale(.995);
+    /* 預設透明度 */ opacity: .92;
+    /* 預設不可操作 */ pointer-events: none;
+    /* 陰影設定 */ box-shadow: 0 14px 36px rgba(31,35,40,.11);
+    /* 翻頁動畫 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
 }
 
-.editor-preview-back-line-short {
-    /* 元素寬度 */ width: 24%;
-    /* 頂部位置 */ top: 84px;
+.sim-editor-preview-sheet-toolbar {
+    /* 返回按鈕固定於預覽頁上方 */ position: sticky;
+    /* 貼齊頂部 */ top: 0;
+    /* 顯示層級 */ z-index: 4;
+    /* 顯示方式 */ display: flex;
+    /* 水平靠右 */ justify-content: flex-end;
+    /* 內縮空間 */ padding: 10px 14px;
+    /* 下方邊框 */ border-bottom: 1px solid var(--border-default);
+    /* 背景設定 */ background: color-mix(in srgb,var(--surface-card) 94%,transparent);
+    /* 毛玻璃 */ backdrop-filter: blur(7px);
 }
 
-.editor-preview-card-shell {
-    /* 定位方式 */ position: relative;
-    /* 顯示層級 */ z-index: 2;
-    /* 元素寬度 */ width: 100%;
-    /* 溢出處理 */ overflow: hidden;
+.sim-editor-preview-sheet-toolbar button {
+    /* 最小高度 */ min-height: 30px;
+    /* 內縮空間 */ padding: 5px 10px;
     /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 11px;
+    /* 圓角弧度 */ border-radius: 6px;
+    /* 背景設定 */ background: var(--surface-input);
+    /* 文字顏色 */ color: var(--text-primary);
+    /* 字體設定 */ font: inherit;
+    /* 字體大小 */ font-size: 11.5px;
+}
+
+.sim-editor-preview-sheet-toolbar button:hover {
+    /* 懸停邊框 */ border-color: var(--action-primary);
+    /* 懸停文字 */ color: var(--action-primary);
+}
+
+.editor-info-preview {
+    /* 預覽內容直接使用整張紙 */ width: 100%;
+    /* 水平置中 */ margin: 0;
+    /* 不再額外包卡片 */ overflow: visible;
     /* 背景設定 */ background: var(--surface-card);
-    /* 陰影設定 */ box-shadow: 0 16px 34px rgba(31,35,40,.14);
-    /* 動畫過渡 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),box-shadow .28s ease;
-    /* 合成層提示 */ will-change: transform;
 }
 
-.sim-editor-panel[data-editor-panel="preview"].active .editor-preview-card-shell {
-    /* 進場動畫 */ animation: editor-preview-front-in .46s cubic-bezier(.2,.75,.25,1) both;
+.sim-editor-preview-sheet .person-profile-header {
+    /* 完整預覽頁標頭留白 */ padding: 18px 20px 16px;
 }
 
-.sim-editor-panel[data-editor-panel="preview"].active .editor-preview-card-back-mid {
-    /* 中層進場動畫 */ animation: editor-preview-mid-in .52s cubic-bezier(.2,.75,.25,1) both;
-}
-
-.sim-editor-panel[data-editor-panel="preview"].active .editor-preview-card-back-deep {
-    /* 後層進場動畫 */ animation: editor-preview-deep-in .58s cubic-bezier(.2,.75,.25,1) both;
-}
-
-@keyframes editor-preview-front-in {
-    /* 初始狀態 */ from { opacity:0; transform:translateX(28px) translateY(8px) rotate(1.2deg) scale(.985); }
-    /* 完成狀態 */ to { opacity:1; transform:translate(0,0) rotate(0) scale(1); }
-}
-
-@keyframes editor-preview-mid-in {
-    /* 初始狀態 */ from { opacity:0; transform:translate(-4px,5px) rotate(-.5deg) scale(.975); }
-    /* 完成狀態 */ to { opacity:.88; transform:translate(-18px,15px) rotate(-2.4deg) scale(.992); }
-}
-
-@keyframes editor-preview-deep-in {
-    /* 初始狀態 */ from { opacity:0; transform:translate(4px,-3px) rotate(.5deg) scale(.97); }
-    /* 完成狀態 */ to { opacity:.72; transform:translate(18px,-14px) rotate(2.1deg) scale(.985); }
-}
-
-@media (hover:hover) and (pointer:fine) {
-    .editor-preview-stack:hover .editor-preview-card-shell {
-        /* 主卡滑開露出後層 */ transform: translateX(24px) translateY(-3px) rotate(.7deg);
-        /* 懸停陰影 */ box-shadow: 0 20px 42px rgba(31,35,40,.18);
-    }
-
-    .editor-preview-stack:hover .editor-preview-card-back-mid {
-        /* 中層往左展開 */ transform: translate(-28px,17px) rotate(-3.2deg) scale(.992);
-    }
-
-    .editor-preview-stack:hover .editor-preview-card-back-deep {
-        /* 後層往上展開 */ transform: translate(20px,-20px) rotate(2.8deg) scale(.985);
-    }
-}
-
-.editor-preview-card-shell .person-profile-body {
-    /* 預覽頁由編輯器本身捲動，不在卡片內建立第二條捲軸 */ max-height: none;
+.sim-editor-preview-sheet .person-profile-body {
+    /* 預覽整頁自己捲動，不建立第二條捲軸 */ max-height: none;
     /* 關閉內層捲軸 */ overflow-y: visible;
+    /* 內容左右留白 */ padding: 0 20px 18px;
+}
+
+/* ========【模擬市民預覽翻頁】 設定 - 只翻編輯頁與獨立預覽頁，不改四個編輯分類 ======== */
+#simEditorDialog.preview-open .sim-editor-modal {
+    /* 主編輯頁翻離前景 */ transform: translateX(-54px) translateY(4px) rotate(-1.5deg) scale(.99);
+    /* 主編輯頁淡出 */ opacity: 0;
+    /* 主編輯頁暫停操作 */ pointer-events: none;
+}
+
+#simEditorDialog.preview-open .sim-editor-preview-sheet {
+    /* 預覽頁翻至最上層 */ z-index: 4;
+    /* 預覽頁回到正面位置 */ transform: translate(-50%,-50%) translate(0,0) rotate(0) scale(1);
+    /* 完整顯示 */ opacity: 1;
+    /* 開放操作 */ pointer-events: auto;
+    /* 前景陰影 */ box-shadow: 0 18px 46px rgba(31,35,40,.18);
+}
+
+#simEditorDialog.preview-open .sim-editor-paper-back {
+    /* 翻頁後保留第三張紙的層次 */ transform: translate(-50%,-50%) translate(9px,9px) rotate(.65deg);
+    /* 翻頁後提高辨識度 */ opacity: .62;
 }
 
 @media (max-width:760px) {
-    .editor-preview-stage {
-        /* 縮小舞台內距 */ padding: 32px 36px 38px;
+    .sim-editor-preview-open {
+        /* 小螢幕配合既有標頭內距 */ top: 12px;
+        /* 小螢幕右側位置 */ right: 14px;
+    }
+
+    .sim-editor-paper-back,
+    .sim-editor-preview-sheet {
+        /* 小螢幕保留安全邊距 */ width: min(790px,calc(100vw - 28px));
+        /* 小螢幕提高可用高度 */ max-height: 96vh;
+    }
+
+    .sim-editor-paper-back {
+        /* 小螢幕後方紙張高度 */ height: min(680px,92vh);
     }
 }
 
 @media (max-width:520px) {
-    .editor-preview-window {
-        /* 手機版使用完整寬度 */ width: 100%;
+    .sim-editor-preview-open {
+        /* 手機版縮小按鈕 */ min-height: 28px;
+        /* 手機版縮小內距 */ padding: 4px 8px;
     }
 
-    .editor-preview-stage {
-        /* 手機版縮小左右留白 */ padding: 28px 24px 34px;
-        /* 手機版降低最小高度 */ min-height: 360px;
+    .sim-editor-paper-back,
+    .sim-editor-preview-sheet {
+        /* 手機版最小安全邊距 */ width: calc(100vw - 20px);
     }
 
-    .editor-preview-card-back-deep {
-        /* 手機版避免超出容器 */ transform: translate(10px,-10px) rotate(1.4deg) scale(.99);
+    .sim-editor-preview-sheet .person-profile-header {
+        /* 手機版標頭留白 */ padding: 15px 14px 13px;
     }
 
-    .editor-preview-card-back-mid {
-        /* 手機版避免超出容器 */ transform: translate(-10px,11px) rotate(-1.6deg) scale(.995);
+    .sim-editor-preview-sheet .person-profile-body {
+        /* 手機版內容留白 */ padding: 0 14px 14px;
+    }
+
+    #simEditorDialog.preview-open .sim-editor-modal {
+        /* 手機版縮短翻頁距離 */ transform: translateX(-26px) translateY(3px) rotate(-1deg) scale(.992);
     }
 }
 
 @media (prefers-reduced-motion:reduce) {
-    .editor-preview-card-shell,
-    .editor-preview-card-back {
-        /* 關閉位移動畫 */ animation: none !important;
-        /* 關閉過渡動畫 */ transition: none !important;
+    .sim-editor-modal,
+    .sim-editor-paper-back,
+    .sim-editor-preview-sheet {
+        /* 尊重減少動態效果設定 */ transition: none;
     }
 }
 
