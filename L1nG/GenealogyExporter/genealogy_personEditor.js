@@ -561,9 +561,8 @@ function buildPersonEditorDraft(){
   }
 
   function renderEditorInfoPreview(){
-    const stage=$('editorInfoPreview');
-    const target=$('editorInfoPreviewCard');
-    if(!stage||!target)return;
+    const target=$('editorInfoPreview');
+    if(!target)return;
 
     const draft=buildPersonEditorDraft();
 
@@ -587,8 +586,9 @@ function buildPersonEditorDraft(){
   }
 
   function renderPersonEditorInfoPreviewIfActive(){
-    const panel=document.querySelector('.sim-editor-panel[data-editor-panel="preview"]');
-    if(panel&&!panel.hidden)renderEditorInfoPreview();
+    if(mask.classList.contains('preview-open')){
+      renderEditorInfoPreview();
+    }
   }
 
   function switchEditorTab(tabName='basic'){
@@ -614,10 +614,26 @@ function buildPersonEditorDraft(){
 
     const content=document.querySelector('.sim-editor-content');
     if(content)content.scrollTop=0;
+  }
 
-    if(tabName==='preview'){
-      renderEditorInfoPreview();
-    }
+  function openEditorPreviewSheet(){
+    const sheet=$('simEditorPreviewSheet');
+    if(!sheet)return;
+
+    renderEditorInfoPreview();
+    mask.classList.add('preview-open');
+    sheet.removeAttribute('inert');
+    sheet.setAttribute('aria-hidden','false');
+    sheet.scrollTop=0;
+  }
+
+  function closeEditorPreviewSheet(){
+    const sheet=$('simEditorPreviewSheet');
+    if(!sheet)return;
+
+    mask.classList.remove('preview-open');
+    sheet.setAttribute('aria-hidden','true');
+    sheet.setAttribute('inert','');
   }
 
   function resetEditorFamilyPanels(){
@@ -631,6 +647,9 @@ function buildPersonEditorDraft(){
   }
 
   function setupPersonEditorInteractions(){
+    $('simEditorPreviewBtn')?.addEventListener('click',openEditorPreviewSheet);
+    $('simEditorPreviewBackBtn')?.addEventListener('click',closeEditorPreviewSheet);
+
     document.querySelectorAll('.sim-editor-tab[data-editor-tab]').forEach(tab=>{
       tab.addEventListener('click',()=>switchEditorTab(tab.dataset.editorTab));
 
@@ -798,6 +817,7 @@ function buildPersonEditorDraft(){
     lifePhotoWorkspace.renderList();
 
     syncPersonEditorCauseOfDeathVisibility();
+    closeEditorPreviewSheet();
     switchEditorTab('basic');
 
     $('fFamilyIds').innerHTML=currentGenealogyData().families
@@ -987,6 +1007,8 @@ function buildPersonEditorDraft(){
   }
 
   function closePersonEditor() {
+  closeEditorPreviewSheet();
+
   mask.classList.remove(
     'show'
   );
