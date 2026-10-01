@@ -3202,348 +3202,429 @@ button.avatar-editor-action { cursor:pointer; }
     font-variant-numeric:tabular-nums;
 }
 
-/* ========【人物庫】 設定 - 圓形頭像、精簡 / 詳細檢視與批量管理 ======== */
+/* ========【人物庫】 設定 - 精簡雙欄快速瀏覽 / 詳細單欄資訊檢視 ======== */
 .person-library-panel {
-    width:min(860px,100%);
-    max-height:90vh;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
+    /* 視窗寬度 */ width: min(900px,100%);
+    /* 最大高度 */ max-height: 90vh;
+    /* 版面配置 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 避免整個視窗出現雙重捲軸 */ overflow: hidden;
+    /* 視窗內距 */ padding: 18px 20px 14px;
 }
 
 .person-library-header {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-    margin-bottom:12px;
+    /* 版面配置 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 左右撐開 */ justify-content: space-between;
+    /* 項目間距 */ gap: 14px;
+    /* 下方間距 */ margin-bottom: 10px;
 }
 
-.person-library-header h2 { margin:0; }
+.person-library-header h2 {
+    /* 清除共用標題外距 */ margin: 0;
+}
 
 .person-library-header-actions {
-    display:flex;
-    align-items:center;
-    gap:6px;
-}
-
-.person-library-view-toggle {
-    display:inline-flex;
-    align-items:center;
-    padding:2px;
-    border:1px solid var(--border-default);
-    border-radius:6px;
-    background:var(--surface-panel);
-}
-
-.person-library-view-toggle button {
-    width:30px;
-    height:28px;
-    padding:0;
-    border:0;
-    border-radius:4px;
-    background:transparent;
-    color:var(--text-secondary);
-    font-size:17px;
-    line-height:1;
-}
-
-.person-library-view-toggle button:hover {
-    color:var(--text-primary);
-    background:var(--surface-card);
-}
-
-.person-library-view-toggle button.active {
-    color:var(--action-primary);
-    background:var(--surface-card);
-    box-shadow:0 1px 3px rgba(31,35,40,.08);
+    /* 版面配置 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 7px;
+    /* 避免按鈕被壓縮 */ flex: 0 0 auto;
 }
 
 .person-library-header-actions > button {
-    min-height:33px;
-    padding:6px 10px;
-    border:1px solid var(--border-default);
-    border-radius:6px;
-    background:var(--surface-input);
-    color:var(--text-primary);
-    font:inherit;
-    font-size:11.5px;
+    /* 最小高度 */ min-height: 34px;
+    /* 內距 */ padding: 6px 11px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 6px;
+    /* 背景 */ background: var(--surface-input);
+    /* 文字顏色 */ color: var(--text-primary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 12.5px;
 }
 
 .person-library-header-actions > button.primary {
-    background:var(--action-primary);
-    color:#fff;
-    border-color:var(--action-primary);
+    /* 主要背景 */ background: var(--action-primary);
+    /* 主要文字 */ color: #fff;
+    /* 主要邊框 */ border-color: var(--action-primary);
 }
 
 .person-library-toolbar {
-    display:flex;
-    align-items:center;
-    margin-bottom:10px;
+    /* 搜尋與檢視切換同列 */ display: grid;
+    /* 搜尋欄優先延展 */ grid-template-columns: minmax(0,1fr) auto;
+    /* 項目間距 */ gap: 10px;
+    /* 垂直對齊 */ align-items: center;
+    /* 下方間距 */ margin-bottom: 10px;
 }
 
 .person-library-toolbar input {
-    width:100%;
-    min-height:35px;
-    padding:7px 10px;
-    border:1px solid var(--border-default);
-    border-radius:6px;
-    background:var(--surface-input);
-    color:var(--text-primary);
-    font:inherit;
-    font-size:12.5px;
-    outline:none;
+    /* 搜尋欄寬度 */ width: 100%;
+    /* 最小高度 */ min-height: 36px;
+    /* 內距 */ padding: 7px 11px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 6px;
+    /* 背景 */ background: var(--surface-input);
+    /* 文字顏色 */ color: var(--text-primary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 13px;
+    /* 清除原生外框 */ outline: none;
 }
 
 .person-library-toolbar input:focus {
-    border-color:var(--action-primary);
-    box-shadow:0 0 0 2px var(--brand-tint-start);
+    /* 聚焦邊框 */ border-color: var(--action-primary);
+    /* 聚焦提示 */ box-shadow: 0 0 0 2px var(--brand-tint-start);
+}
+
+.person-library-view-toggle {
+    /* 版面配置 */ display: inline-flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 外框內距 */ padding: 2px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 7px;
+    /* 背景 */ background: var(--surface-panel);
+    /* 避免切換器被壓縮 */ flex: 0 0 auto;
+}
+
+.person-library-view-toggle button {
+    /* 最小寬度 */ min-width: 54px;
+    /* 按鈕高度 */ height: 30px;
+    /* 水平內距 */ padding: 0 10px;
+    /* 清除額外邊框 */ border: 0;
+    /* 圓角 */ border-radius: 5px;
+    /* 背景 */ background: transparent;
+    /* 次要文字色 */ color: var(--text-secondary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 650;
+}
+
+.person-library-view-toggle button:hover {
+    /* 懸停文字 */ color: var(--text-primary);
+    /* 懸停背景 */ background: var(--surface-card);
+}
+
+.person-library-view-toggle button.active {
+    /* 啟用文字 */ color: var(--action-primary);
+    /* 啟用背景 */ background: var(--surface-card);
+    /* 啟用陰影 */ box-shadow: 0 1px 3px rgba(31,35,40,.08);
 }
 
 .person-library-count {
-    margin-left:5px;
-    color:var(--text-secondary);
-    font-size:11px;
-    font-weight:500;
-    white-space:nowrap;
+    /* 左側間距 */ margin-left: 5px;
+    /* 次要文字 */ color: var(--text-secondary);
+    /* 字體大小 */ font-size: 11.5px;
+    /* 字體粗細 */ font-weight: 500;
+    /* 不換行 */ white-space: nowrap;
 }
 
 .person-library-batch-toolbar {
-    min-height:40px;
-    margin:0 0 8px;
-    padding:6px 8px;
-    border:1px solid rgba(176,58,46,.22);
-    border-radius:7px;
-    background:rgba(176,58,46,.05);
-    display:flex;
-    align-items:center;
-    gap:6px;
-    flex-wrap:wrap;
+    /* 最小高度 */ min-height: 40px;
+    /* 外距 */ margin: 0 0 8px;
+    /* 內距 */ padding: 6px 8px;
+    /* 邊框 */ border: 1px solid rgba(176,58,46,.22);
+    /* 圓角 */ border-radius: 7px;
+    /* 背景 */ background: rgba(176,58,46,.05);
+    /* 版面配置 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 6px;
+    /* 允許換行 */ flex-wrap: wrap;
 }
 
-.person-library-batch-toolbar[hidden] { display:none; }
+.person-library-batch-toolbar[hidden] {
+    /* 隱藏批量工具列 */ display: none;
+}
 
 .person-library-batch-count {
-    color:var(--text-secondary);
-    font-size:11px;
+    /* 次要文字 */ color: var(--text-secondary);
+    /* 字體大小 */ font-size: 11.5px;
 }
 
 .person-library-batch-toolbar button {
-    min-height:28px;
-    padding:4px 8px;
-    border:1px solid var(--border-default);
-    border-radius:5px;
-    background:var(--surface-card);
-    color:var(--text-primary);
-    font:inherit;
-    font-size:10.5px;
+    /* 最小高度 */ min-height: 29px;
+    /* 內距 */ padding: 4px 9px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 5px;
+    /* 背景 */ background: var(--surface-card);
+    /* 文字顏色 */ color: var(--text-primary);
+    /* 字體 */ font: inherit;
+    /* 字體大小 */ font-size: 11px;
 }
 
 .person-library-batch-toolbar button.danger {
-    color:#b03a2e;
-    border-color:rgba(176,58,46,.28);
+    /* 危險操作文字 */ color: #b03a2e;
+    /* 危險操作邊框 */ border-color: rgba(176,58,46,.28);
 }
 
 .person-library-batch-toolbar button:disabled {
-    opacity:.4;
-    cursor:default;
+    /* 停用透明度 */ opacity: .4;
+    /* 停用游標 */ cursor: default;
 }
 
 .person-library-list {
-    flex:1 1 auto;
-    min-height:180px;
-    max-height:58vh;
-    overflow:auto;
-    padding-right:3px;
+    /* 佔滿剩餘高度 */ flex: 1 1 auto;
+    /* 最小高度 */ min-height: 180px;
+    /* 列表最大高度 */ max-height: 62vh;
+    /* 列表自行捲動 */ overflow: auto;
+    /* 留出捲軸與陰影空間 */ padding: 2px 4px 2px 2px;
+}
+
+.person-library-list.detailed {
+    /* 詳細檢視維持單欄 */ display: flex;
+    /* 垂直排列 */ flex-direction: column;
+    /* 卡片間距 */ gap: 6px;
+}
+
+.person-library-list.compact {
+    /* 精簡檢視使用雙欄 */ display: grid;
+    /* 兩欄平均分配 */ grid-template-columns: repeat(2,minmax(0,1fr));
+    /* 卡片間距 */ gap: 7px 8px;
+    /* 從頂端開始排列 */ align-content: start;
 }
 
 .person-library-item {
-    min-height:58px;
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 30px;
-    align-items:center;
-    gap:8px;
-    padding:6px 7px;
-    border-bottom:1px solid var(--border-default);
-    background:transparent;
-    transition:background-color .15s ease;
+    /* 版面配置 */ display: grid;
+    /* 內容與選單 */ grid-template-columns: minmax(0,1fr) 30px;
+    /* 垂直對齊 */ align-items: center;
+    /* 欄位間距 */ gap: 8px;
+    /* 邊框 */ border: 1px solid var(--border-default);
+    /* 圓角 */ border-radius: 8px;
+    /* 背景 */ background: var(--surface-card);
+    /* 背景動畫 */ transition: background-color .15s ease,border-color .15s ease;
 }
 
-.person-library-item:last-child { border-bottom:0; }
-.person-library-item:hover { background:var(--genealogy-roster-item-hover); }
-.person-library-item.batch-selected { background:rgba(176,58,46,.10); }
+.person-library-list.detailed .person-library-item {
+    /* 詳細列高度 */ min-height: 72px;
+    /* 詳細列內距 */ padding: 8px 9px;
+}
+
+.person-library-list.compact .person-library-item {
+    /* 精簡列高度 */ min-height: 52px;
+    /* 精簡列內距 */ padding: 6px 7px;
+}
+
+.person-library-item:hover {
+    /* 懸停背景 */ background: var(--genealogy-roster-item-hover,var(--surface-item-hover));
+    /* 懸停邊框 */ border-color: var(--border-strong,var(--border-default));
+}
+
+.person-library-item.batch-selected {
+    /* 批量選取背景 */ background: rgba(176,58,46,.10);
+    /* 批量選取邊框 */ border-color: rgba(176,58,46,.35);
+}
 
 .person-library-main {
-    min-width:0;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    cursor:pointer;
+    /* 避免內容撐破欄位 */ min-width: 0;
+    /* 版面配置 */ display: flex;
+    /* 垂直對齊 */ align-items: center;
+    /* 項目間距 */ gap: 10px;
+    /* 整列可點擊 */ cursor: pointer;
 }
 
 .person-library-avatar-wrap {
-    position:relative;
-    width:42px;
-    height:42px;
-    flex:0 0 42px;
+    /* 供批量選取層定位 */ position: relative;
+    /* 詳細頭像寬度 */ width: 48px;
+    /* 詳細頭像高度 */ height: 48px;
+    /* 固定尺寸 */ flex: 0 0 48px;
 }
 
 .person-library-avatar,
 .family-member-picker-avatar {
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
-    color:var(--avatar-text);
-    font-size:15px;
-    font-weight:700;
-    border:1px solid var(--border-default);
+    /* 頭像寬度 */ width: 48px;
+    /* 頭像高度 */ height: 48px;
+    /* 圓形頭像 */ border-radius: 50%;
+    /* 裁切內容 */ overflow: hidden;
+    /* 置中內容 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 頭像背景 */ background: linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
+    /* 頭像文字 */ color: var(--avatar-text);
+    /* 字體大小 */ font-size: 15px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 頭像邊框 */ border: 1px solid var(--border-default);
 }
 
 .person-library-avatar img,
 .family-member-picker-avatar img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
+    /* 圖片寬度 */ width: 100%;
+    /* 圖片高度 */ height: 100%;
+    /* 圖片裁切 */ object-fit: cover;
+    /* 清除行內空隙 */ display: block;
 }
 
 .person-library-batch-select {
-    position:absolute;
-    inset:0;
-    width:42px;
-    height:42px;
-    padding:0;
-    border:0;
-    border-radius:50%;
-    background:rgba(176,58,46,.36);
-    color:#fff;
-    opacity:0;
-    pointer-events:none;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    /* 疊在頭像上 */ position: absolute;
+    /* 填滿頭像 */ inset: 0;
+    /* 寬度 */ width: 48px;
+    /* 高度 */ height: 48px;
+    /* 清除內距 */ padding: 0;
+    /* 清除外框 */ border: 0;
+    /* 圓形遮罩 */ border-radius: 50%;
+    /* 選取提示背景 */ background: rgba(176,58,46,.36);
+    /* 圖示顏色 */ color: #fff;
+    /* 預設隱藏 */ opacity: 0;
+    /* 預設不接收事件 */ pointer-events: none;
+    /* 置中圖示 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
 }
 
 .person-library-item.batch-mode .person-library-batch-select {
-    opacity:.42;
-    pointer-events:auto;
+    /* 批量模式顯示 */ opacity: .42;
+    /* 批量模式可點擊 */ pointer-events: auto;
 }
 
 .person-library-item.batch-mode .person-library-batch-select.selected {
-    opacity:.64;
-    background:rgba(176,58,46,.56);
+    /* 選取後提高辨識度 */ opacity: .64;
+    /* 選取背景 */ background: rgba(176,58,46,.56);
 }
 
 .person-library-text,
 .family-member-picker-text {
-    min-width:0;
-    display:flex;
-    flex-direction:column;
-    gap:3px;
+    /* 避免文字撐破容器 */ min-width: 0;
+    /* 垂直排列 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 行間距 */ gap: 4px;
 }
 
 .person-library-name,
 .family-member-picker-name {
-    min-width:0;
-    display:flex;
-    align-items:center;
-    gap:5px;
-    color:var(--text-primary);
-    font-size:12.5px;
-    font-weight:650;
+    /* 避免長名稱撐破 */ min-width: 0;
+    /* 名稱列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 圖示間距 */ gap: 5px;
+    /* 主文字 */ color: var(--text-primary);
+    /* 字體大小 */ font-size: 13px;
+    /* 字體粗細 */ font-weight: 650;
 }
 
 .person-library-name > span:last-child,
 .family-member-picker-name > span:last-child {
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    /* 過長名稱隱藏 */ overflow: hidden;
+    /* 省略號 */ text-overflow: ellipsis;
+    /* 單行顯示 */ white-space: nowrap;
 }
 
-.person-library-compact-meta,
+.person-library-compact-meta {
+    /* 避免內容撐破 */ min-width: 0;
+    /* 次要文字 */ color: var(--text-secondary);
+    /* 字體大小 */ font-size: 11px;
+    /* 行距 */ line-height: 1.35;
+    /* 過長內容隱藏 */ overflow: hidden;
+    /* 省略號 */ text-overflow: ellipsis;
+    /* 單行顯示 */ white-space: nowrap;
+}
+
 .person-library-detailed-meta {
-    min-width:0;
-    color:var(--text-secondary);
-    font-size:10.5px;
-    line-height:1.4;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    /* 避免內容撐破 */ min-width: 0;
+    /* 次要文字 */ color: var(--text-secondary);
+    /* 字體大小 */ font-size: 11.5px;
+    /* 行距 */ line-height: 1.5;
+    /* 詳細資訊可自然換行 */ white-space: normal;
+    /* 長文字可換行 */ overflow-wrap: anywhere;
 }
 
-.person-library-detailed-meta {
-    display:flex;
-    align-items:center;
-    gap:4px;
+.person-library-list.detailed .person-library-compact-meta {
+    /* 詳細模式隱藏精簡資訊 */ display: none;
 }
 
-.person-library-list.detailed .person-library-compact-meta { display:none; }
-.person-library-list.compact .person-library-detailed-meta { display:none; }
-
-.person-library-list.compact .person-library-item {
-    min-height:48px;
-    padding-top:3px;
-    padding-bottom:3px;
+.person-library-list.compact .person-library-detailed-meta {
+    /* 精簡模式隱藏詳細資訊 */ display: none;
 }
 
 .person-library-list.compact .person-library-avatar-wrap,
 .person-library-list.compact .person-library-avatar,
 .person-library-list.compact .person-library-batch-select {
-    width:34px;
-    height:34px;
-    flex-basis:34px;
+    /* 精簡頭像寬度 */ width: 36px;
+    /* 精簡頭像高度 */ height: 36px;
+    /* 精簡頭像固定尺寸 */ flex-basis: 36px;
+}
+
+.person-library-list.compact .person-library-text {
+    /* 精簡資訊收緊 */ gap: 2px;
+}
+
+.person-library-list.compact .person-library-name {
+    /* 精簡名稱大小 */ font-size: 12.5px;
 }
 
 .person-library-item-menu {
-    justify-self:end;
-    position:relative;
+    /* 選單靠右 */ justify-self: end;
+    /* 供彈出選單定位 */ position: relative;
 }
 
 .person-library-more {
-    width:28px;
-    height:28px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:0;
-    border:0;
-    border-radius:5px;
-    background:transparent;
-    color:var(--text-secondary);
-    opacity:.55;
+    /* 按鈕寬度 */ width: 28px;
+    /* 按鈕高度 */ height: 28px;
+    /* 置中圖示 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 清除內距 */ padding: 0;
+    /* 清除邊框 */ border: 0;
+    /* 圓角 */ border-radius: 5px;
+    /* 透明背景 */ background: transparent;
+    /* 次要文字 */ color: var(--text-secondary);
+    /* 預設透明度 */ opacity: .58;
 }
 
 .person-library-item:hover .person-library-more,
 .person-library-more:focus-visible,
 .person-library-item-menu.open .person-library-more {
-    opacity:1;
-    background:var(--surface-item-hover);
-    color:var(--text-primary);
+    /* 顯示完整透明度 */ opacity: 1;
+    /* 懸停背景 */ background: var(--surface-item-hover);
+    /* 主文字色 */ color: var(--text-primary);
 }
 
 .person-library-item.batch-mode .person-library-item-menu {
-    visibility:hidden;
-    pointer-events:none;
+    /* 批量模式隱藏單人選單 */ visibility: hidden;
+    /* 不接收事件 */ pointer-events: none;
 }
 
 .person-library-item-popover {
-    top:calc(100% + 4px);
-    right:0;
-    left:auto;
-    min-width:190px;
+    /* 選單往下展開 */ top: calc(100% + 4px);
+    /* 靠右定位 */ right: 0;
+    /* 清除左側定位 */ left: auto;
+    /* 最小寬度 */ min-width: 190px;
+}
+
+.person-library-meta-separator {
+    /* 分隔點左右留白 */ margin: 0 2px;
+    /* 次要透明度 */ opacity: .55;
 }
 
 .person-library-empty,
 .family-member-picker-empty {
-    padding:42px 20px;
-    text-align:center;
-    color:var(--text-secondary);
-    font-size:12px;
+    /* 空狀態內距 */ padding: 34px 20px;
+    /* 文字置中 */ text-align: center;
+    /* 次要文字 */ color: var(--text-secondary);
+    /* 字體大小 */ font-size: 12.5px;
+}
+
+/* ========【人物庫響應式】 設定 - 窄視窗回到單欄並保留可讀性 ======== */
+@media (max-width: 720px) {
+    .person-library-panel {
+        /* 窄視窗內距 */ padding: 16px;
+    }
+
+    .person-library-header {
+        /* 標題與操作上下排列 */ align-items: flex-start;
+        /* 允許換行 */ flex-wrap: wrap;
+    }
+
+    .person-library-header-actions {
+        /* 窄視窗允許按鈕換行 */ flex-wrap: wrap;
+    }
+
+    .person-library-toolbar {
+        /* 搜尋與切換上下排列 */ grid-template-columns: minmax(0,1fr);
+        /* 縮小行距 */ gap: 8px;
+    }
+
+    .person-library-view-toggle {
+        /* 切換器貼齊左側 */ justify-self: start;
+    }
+
+    .person-library-list.compact {
+        /* 手機精簡模式回到單欄 */ grid-template-columns: minmax(0,1fr);
+    }
 }
 
 .family-member-picker-panel {
@@ -5207,42 +5288,6 @@ html[lang="en"] body {
 
 .icon-fairy-wings {
     /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/fairy-wings.svg");
-}
-
-/* ========【全部模擬市民】 設定 - 保留 Genealogy 內部清單層次，不套成頂部導覽的純白結果列 ======== */
-
-.person-library-item:hover {
-    /* 清單懸停保持同主題柔和層次 */ background: var(--genealogy-roster-item-hover, var(--surface-item-hover));
-}
-
-/* ========【人物資訊列】 設定 - SVG 保持真正 HTML，不再被 escape 成 <span> 純文字 ======== */
-
-.person-library-meta-part {
-    /* SVG 與文字並排 */ display: inline-flex;
-    /* 垂直置中 */ align-items: center;
-    /* ICON 與文字距離 */ gap: 3px;
-    /* 允許欄位縮小 */ min-width: 0;
-    /* 一般欄位不強制撐滿 */ flex: 0 1 auto;
-}
-
-.person-library-meta-part > span:last-child:not(.l1ng-icon) {
-    /* 過長人物資訊隱藏 */ overflow: hidden;
-    /* 過長人物資訊使用省略號 */ text-overflow: ellipsis;
-    /* 維持單行 */ white-space: nowrap;
-}
-
-.person-library-meta-part .l1ng-icon {
-    /* 資訊 SVG 不被文字壓縮 */ flex-shrink: 0;
-    /* 資訊 SVG 稍微提高辨識度 */ font-size: 1.05em;
-}
-
-.person-library-meta-separator {
-    /* 分隔點不被壓縮 */ flex-shrink: 0;
-    /* 分隔點透明度 */ opacity: .58;
-}
-
-.person-library-meta-gender {
-    /* 性別圖示固定保留 */ flex-shrink: 0;
 }
 
 /* ========【人物狀態圖示】 設定 - 在世、已故、幽靈使用不同語意色 ======== */
