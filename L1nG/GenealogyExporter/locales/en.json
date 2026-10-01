@@ -892,6 +892,12 @@
     "烏鴉": "Crow",
     "鸚鵡": "Parrot",
     "豹": "Leopard",
-    "哈士奇 / 暹羅貓……": "Husky / Siamese Cat…"
+    "哈士奇 / 暹羅貓……": "Husky / Siamese Cat…",
+    "新增父母": "Add Parent",
+    "新增配偶": "Add Spouse",
+    "新增前任配偶": "Add Ex-Spouse",
+    "新增子女": "Add Child",
+    "新增兄弟姊妹": "Add Sibling",
+    "關係種類": "Relationship Type"
   }
 }
