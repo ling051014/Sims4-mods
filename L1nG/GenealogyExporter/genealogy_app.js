@@ -175,7 +175,15 @@ const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   '師承':Object.freeze({ icon:'mortarboard', category:'social' }),
   '同事':Object.freeze({ icon:'people', category:'social' }),
   '室友':Object.freeze({ icon:'house-heart', category:'social' }),
-  '鄰居':Object.freeze({ icon:'house-heart', category:'social' })
+  '鄰居':Object.freeze({ icon:'house-heart', category:'social' }),
+
+  // 非血緣親屬
+  // 這些仍屬於其他關係 links，不參與父母 / 子女世代計算。
+  '乾爸':Object.freeze({ icon:'person-heart', category:'chosen-kin' }),
+  '乾媽':Object.freeze({ icon:'person-heart', category:'chosen-kin' }),
+  '乾兒子':Object.freeze({ icon:'person-check', category:'chosen-kin' }),
+  '乾女兒':Object.freeze({ icon:'person-check', category:'chosen-kin' }),
+  '結拜兄弟姊妹':Object.freeze({ icon:'people', category:'chosen-kin' })
 });
 
 function relationshipLayoutPriority(value) {
@@ -3326,6 +3334,7 @@ function relationshipTypePickerCategoryOf(option){
   if(rawCategory==='friendship')return'friendship';
   if(rawCategory==='negative')return'negative';
   if(rawCategory==='social')return'social';
+  if(rawCategory==='chosen-kin')return'chosen-kin';
   return'custom';
 }
 
@@ -3335,6 +3344,7 @@ function relationshipTypePickerCategoryText(category){
     friendship:'友誼',
     negative:'負面',
     social:'生活 / 社會',
+    'chosen-kin':'非血緣親屬',
     custom:'自訂'
   };
 
@@ -3350,8 +3360,49 @@ function relationshipTypePickerTabMarkup(category){
       category
     );
 
+  const lang=
+    document.documentElement.lang||
+    'zh-Hant';
+
+  if(lang==='en'){
+    const shortLabels={
+      romance:'Romance',
+      friendship:'Friends',
+      negative:'Negative',
+      social:'Social',
+      'chosen-kin':'Chosen Kin',
+      custom:'Custom'
+    };
+
+    return '<span class="family-nav-tab-label-en">'+
+      esc(
+        shortLabels[category]||
+        text
+      )+
+    '</span>';
+  }
+
   if(category==='romance'){
-    return '<span>'+esc(uiText('戀愛'))+'</span><span>'+esc(uiText('親密'))+'</span>';
+    const parts=
+      text
+        .split('/')
+        .map(item=>item.trim())
+        .filter(Boolean);
+
+    return '<span class="family-nav-tab-lines">'+
+      parts
+        .map(item=>'<span>'+esc(item)+'</span>')
+        .join('')+
+    '</span>';
+  }
+
+  if(category==='chosen-kin'){
+    const chars=[...text.replace(/\s+/g,'')];
+
+    return '<span class="family-nav-tab-lines">'+
+      '<span>'+esc(chars.slice(0,3).join(''))+'</span>'+
+      '<span>'+esc(chars.slice(3).join(''))+'</span>'+
+    '</span>';
   }
 
   const compact=
@@ -3359,9 +3410,11 @@ function relationshipTypePickerTabMarkup(category){
       .replace(/\s*\/\s*/g,'')
       .replace(/\s+/g,'');
 
-  return [...compact]
-    .map(char=>'<span>'+esc(char)+'</span>')
-    .join('');
+  return '<span class="family-nav-tab-lines">'+
+    [...compact]
+      .map(char=>'<span>'+esc(char)+'</span>')
+      .join('')+
+  '</span>';
 }
 
 function syncRelationshipTypePickerTabs(){
@@ -3650,10 +3703,12 @@ function setRelationshipTypePickerValue(value){
 function positionRelationshipTypePicker(){
   const trigger=$('relationshipTypeTrigger');
   const popover=$('relationshipTypePopover');
+  const index=$('relationshipTypeIndex');
 
   if(
     !trigger||
     !popover||
+    !index||
     popover.hidden
   )return;
 
@@ -3662,6 +3717,8 @@ function positionRelationshipTypePicker(){
 
   const margin=10;
   const gap=5;
+  const tabWidth=52;
+
   const viewportWidth=
     Math.max(
       1,
@@ -3680,12 +3737,14 @@ function positionRelationshipTypePicker(){
 
   const width=
     Math.min(
-      390,
+      280,
       Math.max(
-        300,
+        220,
         Math.min(
-          viewportWidth-margin*2,
-          rect.width+84
+          viewportWidth-
+          margin*2-
+          tabWidth,
+          rect.width
         )
       )
     );
@@ -3693,12 +3752,14 @@ function positionRelationshipTypePicker(){
   const left=
     Math.min(
       Math.max(
-        margin,
+        margin+tabWidth,
         rect.left
       ),
       Math.max(
-        margin,
-        viewportWidth-width-margin
+        margin+tabWidth,
+        viewportWidth-
+        width-
+        margin
       )
     );
 
@@ -3752,18 +3813,40 @@ function positionRelationshipTypePicker(){
         gap
       )+'px';
   }
+
+  requestAnimationFrame(()=>{
+    if(popover.hidden)return;
+
+    const menuRect=
+      popover.getBoundingClientRect();
+
+    index.style.display='flex';
+    index.style.top=
+      Math.round(menuRect.top)+'px';
+    index.style.left=
+      Math.max(
+        2,
+        Math.round(
+          menuRect.left-
+          tabWidth+
+          1
+        )
+      )+'px';
+  });
 }
 
 function openRelationshipTypePicker(){
   const picker=$('relationshipTypePicker');
   const trigger=$('relationshipTypeTrigger');
   const popover=$('relationshipTypePopover');
+  const index=$('relationshipTypeIndex');
   const search=$('relationshipTypeSearch');
 
   if(
     !picker||
     !trigger||
-    !popover
+    !popover||
+    !index
   )return;
 
   if(
@@ -3772,6 +3855,15 @@ function openRelationshipTypePicker(){
   ){
     document.body.appendChild(
       popover
+    );
+  }
+
+  if(
+    index.parentElement!==
+    document.body
+  ){
+    document.body.appendChild(
+      index
     );
   }
 
@@ -3802,10 +3894,16 @@ function closeRelationshipTypePicker(){
   const picker=$('relationshipTypePicker');
   const trigger=$('relationshipTypeTrigger');
   const popover=$('relationshipTypePopover');
+  const index=$('relationshipTypeIndex');
 
   if(!trigger||!popover)return;
 
   popover.hidden=true;
+
+  if(index){
+    index.style.display='none';
+  }
+
   picker?.classList.remove(
     'open'
   );
