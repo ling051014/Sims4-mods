@@ -2097,54 +2097,77 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .other-rel-hidden-label {
-    /* 隱藏畫布標籤的狀態直接顯示於摘要 */ color: var(--text-secondary);
+    /* 隱藏畫布標籤狀態跟著人物摘要顯示 */ color: var(--text-secondary);
     /* 字體大小 */ font-size: 10.5px;
     /* 行距 */ line-height: 1.3;
-    /* 與人物資訊起點對齊 */ padding-left: 31px;
 }
 
-.other-rel-annotation-editor {
-    /* 展開控制佔滿整個人物列 */ grid-column: 1 / -1;
-    /* 顯示方式 */ display: grid;
-    /* 顯示模式 / 自訂文字 / 恢復預設 / 重設位置 */ grid-template-columns: minmax(135px,.8fr) minmax(180px,1.5fr) auto auto;
+.other-rel-label-control {
+    /* 顯示方式 / 自訂文字 / 重設位置都留在同一列 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
-    /* 項目間距 */ gap: 6px;
-    /* 與人物名稱起點對齊 */ padding-left: 31px;
+    /* 控制間距 */ gap: 5px;
+    /* 不超出可用空間 */ min-width: 0;
 }
 
-.other-rel-annotation-editor[hidden] {
-    /* 收合時不佔空間 */ display: none;
+.other-rel-label-control .ui-single-select {
+    /* 顯示方式選擇器寬度 */ width: 112px;
+    /* 不被壓縮 */ flex: 0 0 112px;
 }
 
-.other-rel-display-mode,
+.other-rel-label-control .ui-single-select-trigger {
+    /* 與親生 / 收養同樣採列內高度 */ min-height: 24px;
+    /* 固定高度 */ height: 24px;
+    /* 內縮空間 */ padding: 2px 23px 2px 7px;
+    /* 字體大小 */ font-size: 10.5px;
+    /* 圓角 */ border-radius: 5px;
+}
+
+.other-rel-label-control .ui-select-chevron-icon {
+    /* 箭頭靠右 */ right: 7px;
+    /* 箭頭尺寸 */ width: 10px;
+    /* 箭頭高度 */ height: 10px;
+}
+
+.other-rel-label-inline-editor {
+    /* 原地展開輸入，不新增整行 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 控制間距 */ gap: 4px;
+    /* 不超出可用空間 */ min-width: 0;
+}
+
+.other-rel-label-inline-editor[hidden] {
+    /* 收合時不佔版面 */ display: none;
+}
+
 .other-rel-label-input {
-    /* 元素寬度 */ width: 100%;
-    /* 最小高度 */ min-height: 30px;
-    /* 內縮空間 */ padding: 5px 8px;
+    /* 與家庭關係自訂文字採一致尺寸 */ width: clamp(128px,18vw,190px);
+    /* 固定列內高度 */ min-height: 24px;
+    /* 固定高度 */ height: 24px;
+    /* 內縮空間 */ padding: 2px 7px;
     /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 6px;
+    /* 圓角 */ border-radius: 5px;
     /* 背景 */ background: var(--surface-input);
     /* 文字顏色 */ color: var(--text-primary);
     /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 11.5px;
+    /* 字體大小 */ font-size: 10.5px;
     /* 外框 */ outline: none;
 }
 
-.other-rel-display-mode:focus,
 .other-rel-label-input:focus {
     /* 聚焦邊框 */ border-color: var(--action-primary);
 }
 
 .other-rel-label-reset,
 .other-rel-position-reset {
-    /* 最小高度 */ min-height: 30px;
-    /* 內縮空間 */ padding: 5px 8px;
+    /* 與列內其他控制等高 */ min-height: 24px;
+    /* 固定高度 */ height: 24px;
+    /* 內縮空間 */ padding: 2px 7px;
     /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 6px;
+    /* 圓角 */ border-radius: 5px;
     /* 背景 */ background: var(--surface-item);
     /* 文字顏色 */ color: var(--text-secondary);
     /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 10.5px;
+    /* 字體大小 */ font-size: 10px;
     /* 不換行 */ white-space: nowrap;
     /* 滑鼠指標 */ cursor: pointer;
 }
@@ -6795,10 +6818,15 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .family-rel-label-input {
     width:min(190px,52vw);
   }
-  .other-rel-hidden-label { padding-left:31px; }
-  .other-rel-annotation-editor {
-    grid-template-columns:1fr;
+  .other-rel-hidden-label {
+    grid-column:2;
     padding-left:0;
+  }
+  .other-rel-label-control {
+    flex-wrap:wrap;
+  }
+  .other-rel-label-input {
+    width:min(190px,52vw);
   }
   .other-rel-edit .relationship-add-row {
     display:grid;
