@@ -1575,6 +1575,31 @@ function relationshipPairRenderGeometry(
       b
     );
 
+  // 配偶 / 前任 / 已故配偶的預設幾何固定為正交線：
+  // 同高時 H；手動拖離同一列後 H-V-H。
+  // 只有玩家明確把該關係切成手動曲線時，才允許曲線。
+  const useCurve =
+    setting.routing === 'manual' &&
+    !!setting.curved;
+
+  if (!useCurve) {
+    const join =
+      pairJoinPoint(
+        a,
+        b
+      );
+
+    return {
+      d:
+        createPartnerConnectionPath(
+          a,
+          b
+        ),
+      labelX:join.x,
+      labelY:join.y
+    };
+  }
+
   const blocker =
     relationshipBlockingCard(
       routeContext,
@@ -1583,22 +1608,6 @@ function relationshipPairRenderGeometry(
       bX,
       bY
     );
-
-  const useCurve =
-    setting.routing === 'manual'
-      ? !!setting.curved
-      : !!blocker;
-
-  if (!useCurve) {
-    const join =
-      pairJoinPoint(a, b);
-
-    return {
-      d:createPartnerConnectionPath(a, b),
-      labelX:join.x,
-      labelY:join.y
-    };
-  }
 
   return relationshipQuadraticGeometry(
     aX,
@@ -6200,38 +6209,14 @@ function parentConnectorSource(
     !!pairLink;
 
   if (hasVisibleHorizontalRelation) {
-    const geometry =
-      getPairConnectionGeometry(
-        first.pos,
-        second.pos
-      );
-
-    const blocker =
-      relationshipBlockingCard(
-        {
-          fromId:first.id,
-          toId:second.id,
-          pos,
-          byId
-        },
-        geometry.aX,
-        geometry.aY,
-        geometry.bX,
-        geometry.bY
-      );
-
-    if (
-      Math.abs(
-        geometry.aY -
-        geometry.bY
-      ) <= 0.75 &&
-      !blocker
-    ) {
-      return pairJoinPoint(
-        first.pos,
-        second.pos
-      );
-    }
+    // 只要兩位共同父母之間存在配偶型橫向關係，
+    // 子女幹線就固定從該 H / H-V-H 關係線的中點延伸。
+    // 玩家拖動其中一方時，配偶線與親子線共用同一個 union anchor，
+    // 不再因高度差或碰到其他卡片而退回另一套底部橋接幾何。
+    return pairJoinPoint(
+      first.pos,
+      second.pos
+    );
   }
 
   // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
@@ -6785,8 +6770,7 @@ function paintRelationshipLayer({
             toId:String(spouseId),
             setting:spouseSetting,
             labelKind:'spouse',
-            obstacleSensitive:
-              spouseSetting.routing !== 'manual',
+            obstacleSensitive:false,
             edgeClass:'edge edge-spouse',
             simIds:[
               String(id),
@@ -6909,7 +6893,7 @@ function paintRelationshipLayer({
           toId:String(spouseId),
           setting:deceasedSetting,
           labelKind:'deceased-spouse',
-          obstacleSensitive:true,
+          obstacleSensitive:false,
           edgeClass:'edge edge-exspouse',
           simIds:[
             String(id),
@@ -7027,8 +7011,7 @@ function paintRelationshipLayer({
             toId:String(spouseId),
             setting:exSetting,
             labelKind:'exspouse',
-            obstacleSensitive:
-              exSetting.routing !== 'manual',
+            obstacleSensitive:false,
             edgeClass:'edge edge-exspouse',
             simIds:[
               String(id),
