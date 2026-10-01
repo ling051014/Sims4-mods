@@ -3744,14 +3744,31 @@ function setRelationshipTypePickerValue(value){
   syncRelationshipTypePickerValue();
 }
 
+function ensureRelationshipTypePortal(){
+  let portal=$('relationshipTypePortal');
+
+  if(portal)return portal;
+
+  portal=document.createElement('div');
+  portal.id='relationshipTypePortal';
+  portal.className='relationship-type-portal';
+  portal.hidden=true;
+
+  document.body.appendChild(portal);
+  return portal;
+}
+
 function positionRelationshipTypePicker(){
   const trigger=
     activeRelationshipTypePickerTrigger();
+
+  const portal=$('relationshipTypePortal');
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
 
   if(
     !trigger||
+    !portal||
     !popover||
     !index||
     popover.hidden
@@ -3763,6 +3780,7 @@ function positionRelationshipTypePicker(){
   const margin=10;
   const gap=6;
   const tabWidth=52;
+  const tabOverlap=1;
 
   const viewportWidth=
     Math.max(
@@ -3780,7 +3798,7 @@ function positionRelationshipTypePicker(){
       1
     );
 
-  const width=
+  const menuWidth=
     Math.min(
       300,
       Math.max(
@@ -3794,7 +3812,7 @@ function positionRelationshipTypePicker(){
       )
     );
 
-  const left=
+  const menuLeft=
     Math.min(
       Math.max(
         margin+tabWidth,
@@ -3803,9 +3821,17 @@ function positionRelationshipTypePicker(){
       Math.max(
         margin+tabWidth,
         viewportWidth-
-        width-
+        menuWidth-
         margin
       )
+    );
+
+  const portalLeft=
+    Math.max(
+      margin,
+      menuLeft-
+      tabWidth+
+      tabOverlap
     );
 
   const below=
@@ -3837,59 +3863,56 @@ function positionRelationshipTypePicker(){
       availableHeight
     );
 
-  popover.style.position='fixed';
-  popover.style.left=
-    Math.round(left)+'px';
-  popover.style.width=
-    Math.round(width)+'px';
-  popover.style.height=
-    Math.round(height)+'px';
-  popover.style.maxHeight=
-    Math.round(height)+'px';
-
-  if(openAbove){
-    popover.style.top='auto';
-    popover.style.bottom=
-      Math.round(
-        viewportHeight-
-        rect.top+
-        gap
-      )+'px';
-  }else{
-    popover.style.bottom='auto';
-    popover.style.top=
-      Math.round(
-        rect.bottom+
-        gap
-      )+'px';
-  }
-
-  requestAnimationFrame(()=>{
-    if(popover.hidden)return;
-
-    const menuRect=
-      popover.getBoundingClientRect();
-
-    index.style.position='fixed';
-    index.style.display='flex';
-    index.style.top=
-      Math.round(
-        menuRect.top
-      )+'px';
-    index.style.left=
-      Math.max(
-        2,
-        Math.round(
-          menuRect.left-
-          tabWidth+
-          1
+  const portalTop=
+    openAbove
+      ? Math.max(
+          margin,
+          rect.top-
+          gap-
+          height
         )
-      )+'px';
-    index.style.height=
-      Math.round(
-        menuRect.height
-      )+'px';
-  });
+      : Math.min(
+          viewportHeight-
+          margin-
+          height,
+          rect.bottom+
+          gap
+        );
+
+  portal.style.position='fixed';
+  portal.style.left=
+    Math.round(portalLeft)+'px';
+  portal.style.top=
+    Math.round(portalTop)+'px';
+  portal.style.width=
+    Math.round(
+      tabWidth-
+      tabOverlap+
+      menuWidth
+    )+'px';
+  portal.style.height=
+    Math.round(height)+'px';
+
+  index.style.position='absolute';
+  index.style.display='flex';
+  index.style.left='0';
+  index.style.top='0';
+  index.style.width=
+    tabWidth+'px';
+  index.style.height='100%';
+
+  popover.style.position='absolute';
+  popover.style.left=
+    Math.round(
+      tabWidth-
+      tabOverlap
+    )+'px';
+  popover.style.top='0';
+  popover.style.bottom='auto';
+  popover.style.width=
+    Math.round(menuWidth)+'px';
+  popover.style.height='100%';
+  popover.style.maxHeight='100%';
 }
 
 function openRelationshipTypePicker({
@@ -3901,11 +3924,14 @@ function openRelationshipTypePicker({
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
   const search=$('relationshipTypeSearch');
+  const portal=
+    ensureRelationshipTypePortal();
 
   if(
     !trigger||
     !popover||
-    !index
+    !index||
+    !portal
   )return;
 
   relationshipTypePickerTrigger=
@@ -3941,23 +3967,24 @@ function openRelationshipTypePicker({
   }
 
   if(
-    popover.parentElement!==
-    document.body
-  ){
-    document.body.appendChild(
-      popover
-    );
-  }
-
-  if(
     index.parentElement!==
-    document.body
+    portal
   ){
-    document.body.appendChild(
+    portal.appendChild(
       index
     );
   }
 
+  if(
+    popover.parentElement!==
+    portal
+  ){
+    portal.appendChild(
+      popover
+    );
+  }
+
+  portal.hidden=false;
   popover.hidden=false;
 
   picker?.classList.add(
@@ -3991,6 +4018,7 @@ function closeRelationshipTypePicker(){
   const picker=$('relationshipTypePicker');
   const trigger=
     activeRelationshipTypePickerTrigger();
+  const portal=$('relationshipTypePortal');
   const popover=$('relationshipTypePopover');
   const index=$('relationshipTypeIndex');
 
@@ -3998,19 +4026,20 @@ function closeRelationshipTypePicker(){
 
   popover.hidden=true;
 
-  popover.style.removeProperty(
-    'height'
-  );
+  if(portal){
+    portal.hidden=true;
+    portal.style.removeProperty('width');
+    portal.style.removeProperty('height');
+  }
 
-  popover.style.removeProperty(
-    'max-height'
-  );
+  popover.style.removeProperty('height');
+  popover.style.removeProperty('max-height');
+  popover.style.removeProperty('width');
 
   if(index){
     index.style.display='none';
-    index.style.removeProperty(
-      'height'
-    );
+    index.style.removeProperty('height');
+    index.style.removeProperty('width');
   }
 
   picker?.classList.remove(
@@ -4125,6 +4154,9 @@ function setupRelationshipTypePicker(){
       const indexNow=
         $('relationshipTypeIndex');
 
+      const portalNow=
+        $('relationshipTypePortal');
+
       const activeTrigger=
         activeRelationshipTypePickerTrigger();
 
@@ -4133,6 +4165,9 @@ function setupRelationshipTypePicker(){
           event.target
         )||
         activeTrigger?.contains(
+          event.target
+        )||
+        portalNow?.contains(
           event.target
         )||
         popoverNow?.contains(
