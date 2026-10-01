@@ -3426,8 +3426,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 固定尺寸 */ flex: 0 0 48px;
 }
 
-.person-library-avatar,
-.family-member-picker-avatar {
+.person-library-avatar {
     /* 頭像寬度 */ width: 48px;
     /* 頭像高度 */ height: 48px;
     /* 圓形頭像 */ border-radius: 50%;
@@ -3442,8 +3441,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 頭像邊框 */ border: 1px solid var(--border-default);
 }
 
-.person-library-avatar img,
-.family-member-picker-avatar img {
+.person-library-avatar img {
     /* 圖片寬度 */ width: 100%;
     /* 圖片高度 */ height: 100%;
     /* 圖片裁切 */ object-fit: cover;
@@ -3477,16 +3475,14 @@ button.avatar-editor-action { cursor:pointer; }
     /* 選取背景 */ background: rgba(176,58,46,.56);
 }
 
-.person-library-text,
-.family-member-picker-text {
+.person-library-text {
     /* 避免文字撐破容器 */ min-width: 0;
     /* 垂直排列 */ display: flex;
     /* 排列方向 */ flex-direction: column;
     /* 行間距 */ gap: 4px;
 }
 
-.person-library-name,
-.family-member-picker-name {
+.person-library-name {
     /* 避免長名稱撐破 */ min-width: 0;
     /* 名稱列 */ display: flex;
     /* 垂直置中 */ align-items: center;
@@ -3496,8 +3492,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 字體粗細 */ font-weight: 650;
 }
 
-.person-library-name > span:last-child,
-.family-member-picker-name > span:last-child {
+.person-library-name > span:last-child {
     /* 過長名稱隱藏 */ overflow: hidden;
     /* 省略號 */ text-overflow: ellipsis;
     /* 單行顯示 */ white-space: nowrap;
@@ -3625,6 +3620,53 @@ button.avatar-editor-action { cursor:pointer; }
     .person-library-list.compact {
         /* 手機精簡模式回到單欄 */ grid-template-columns: minmax(0,1fr);
     }
+}
+
+/* ========【加入家族人物列】 設定 - 維持原有尺寸，不受人物庫檢視模式影響 ======== */
+.family-member-picker-avatar {
+    /* 頭像寬度 */ width: 42px;
+    /* 頭像高度 */ height: 42px;
+    /* 圓形頭像 */ border-radius: 50%;
+    /* 裁切內容 */ overflow: hidden;
+    /* 置中內容 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 水平置中 */ justify-content: center;
+    /* 頭像背景 */ background: linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
+    /* 頭像文字 */ color: var(--avatar-text);
+    /* 字體大小 */ font-size: 15px;
+    /* 字體粗細 */ font-weight: 700;
+    /* 頭像邊框 */ border: 1px solid var(--border-default);
+    /* 固定尺寸 */ flex: 0 0 42px;
+}
+
+.family-member-picker-avatar img {
+    /* 圖片寬度 */ width: 100%;
+    /* 圖片高度 */ height: 100%;
+    /* 圖片裁切 */ object-fit: cover;
+    /* 清除行內空隙 */ display: block;
+}
+
+.family-member-picker-text {
+    /* 避免文字撐破容器 */ min-width: 0;
+    /* 垂直排列 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
+    /* 行間距 */ gap: 3px;
+}
+
+.family-member-picker-name {
+    /* 避免長名稱撐破 */ min-width: 0;
+    /* 名稱列 */ display: flex;
+    /* 垂直置中 */ align-items: center;
+    /* 圖示間距 */ gap: 5px;
+    /* 主文字 */ color: var(--text-primary);
+    /* 字體大小 */ font-size: 12.5px;
+    /* 字體粗細 */ font-weight: 650;
+}
+
+.family-member-picker-name > span:last-child {
+    /* 過長名稱隱藏 */ overflow: hidden;
+    /* 省略號 */ text-overflow: ellipsis;
+    /* 單行顯示 */ white-space: nowrap;
 }
 
 .family-member-picker-panel {
