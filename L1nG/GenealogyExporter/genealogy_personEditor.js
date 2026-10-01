@@ -999,6 +999,10 @@ function buildPersonEditorDraft(){
         rect.height.toFixed(2)+'px'
       );
     }
+
+    if(rect.width>0&&rect.height>0){
+      mask.classList.add('sheet-ready');
+    }
   }
 
   function familyEditorToggleDefaultLabel(button){
@@ -1471,6 +1475,7 @@ function buildPersonEditorDraft(){
     const newRelHint=$('newSimRelationshipsHint');
     if(newRelHint)newRelHint.hidden=!!sim;
 
+    mask.classList.remove('sheet-ready');
     mask.classList.add('show');
 
     requestAnimationFrame(()=>{
@@ -1510,6 +1515,7 @@ function buildPersonEditorDraft(){
   mask.classList.remove(
     'show'
   );
+  mask.classList.remove('sheet-ready');
 
   if (
     avatarCropDialog
