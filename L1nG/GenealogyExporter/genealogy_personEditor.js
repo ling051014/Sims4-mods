@@ -39,7 +39,8 @@
     parentKinds:new Map(),
     childKinds:new Map(),
     explicitSiblingIds:new Set(),
-    derivedSiblingIds:new Set()
+    derivedSiblingIds:new Set(),
+    familyLabelDrafts:new Map()
   };
 
   const editingPets = [];
@@ -96,6 +97,7 @@
     simEditorState.childKinds.clear();
     simEditorState.explicitSiblingIds.clear();
     simEditorState.derivedSiblingIds.clear();
+    simEditorState.familyLabelDrafts.clear();
 
     replaceDraftCollection(
       editingPets,
@@ -348,6 +350,220 @@ function buildPersonEditorDraft(){
     });
   }
 
+  // ========【家庭關係自訂顯示文字】 設定 - 直接整合於父母 / 配偶 / 子女等人物列 ========
+  function editorFamilyLabelIdentity(role,targetId){
+    if(role==='parent')return'parent-group';
+    return String(role||'')+':'+String(targetId||'');
+  }
+
+  function editorFamilyAnnotationKey(role,targetId,subjectId=simEditorState.simId){
+    const subject=String(subjectId||'');
+    const target=String(targetId||'');
+
+    if(!subject)return'';
+
+    if(role==='parent'){
+      return'parent:'+subject;
+    }
+
+    if(role==='child'&&target){
+      return'parent:'+target;
+    }
+
+    if(role==='spouse'&&target){
+      return'spouse:'+pairKey(subject,target);
+    }
+
+    if(role==='exspouse'&&target){
+      return'exspouse:'+pairKey(subject,target);
+    }
+
+    if(role==='sibling'&&target){
+      const link=(currentGenealogyData().links||[]).find(item=>
+        item&&
+        isSiblingLink(item)&&
+        (
+          (String(item.from)===subject&&String(item.to)===target)||
+          (String(item.from)===target&&String(item.to)===subject)
+        )
+      );
+
+      return link?.id
+        ? 'link:'+String(link.id)
+        : '';
+    }
+
+    return'';
+  }
+
+  function editorFamilySavedCustomText(role,targetId){
+    const key=editorFamilyAnnotationKey(role,targetId);
+    if(!key)return'';
+
+    const saved=relationshipDisplayOverride(key);
+
+    return typeof saved.text==='string'
+      ? saved.text
+      : '';
+  }
+
+  function editorFamilyDraftText(role,targetId){
+    const identity=editorFamilyLabelIdentity(role,targetId);
+
+    if(simEditorState.familyLabelDrafts.has(identity)){
+      return simEditorState.familyLabelDrafts.get(identity)?.text||'';
+    }
+
+    return editorFamilySavedCustomText(role,targetId);
+  }
+
+  function editorFamilyLabelControlAvailable(role,targetId){
+    if(role!=='sibling')return true;
+
+    const target=String(targetId||'');
+
+    return (
+      simEditorState.explicitSiblingIds.has(target)||
+      !!editorFamilyAnnotationKey('sibling',target)
+    );
+  }
+
+  function editorFamilyLabelControlMarkup(role,targetId){
+    if(!role||!editorFamilyLabelControlAvailable(role,targetId))return'';
+
+    const identity=editorFamilyLabelIdentity(role,targetId);
+    const value=editorFamilyDraftText(role,targetId);
+
+    return '<div class="family-rel-label-control" data-family-label-identity="'+esc(identity)+'" data-family-label-role="'+esc(role)+'" data-family-label-target="'+esc(String(targetId||''))+'">'+
+      '<button class="family-rel-label-toggle" type="button" aria-expanded="false">'+esc(uiText('自訂顯示文字…'))+'</button>'+
+      '<div class="family-rel-label-editor" hidden>'+
+        '<input class="family-rel-label-input" type="text" maxlength="40" placeholder="'+esc(uiText('輸入自訂顯示文字'))+'" value="'+esc(value)+'">'+
+        '<button class="family-rel-label-reset" type="button">'+esc(uiText('恢復預設'))+'</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function syncFamilyLabelDraftInputs(identity,value){
+    document.querySelectorAll('[data-family-label-identity]').forEach(control=>{
+      if(control.dataset.familyLabelIdentity!==identity)return;
+      const input=control.querySelector('.family-rel-label-input');
+      if(input&&input.value!==value)input.value=value;
+    });
+  }
+
+  function bindEditorFamilyLabelControls(target){
+    target.querySelectorAll('.family-rel-label-toggle').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const control=button.closest('[data-family-label-identity]');
+        const editor=control?.querySelector('.family-rel-label-editor');
+        if(!editor)return;
+
+        const open=editor.hidden;
+        editor.hidden=!open;
+        button.setAttribute('aria-expanded',open?'true':'false');
+
+        if(open){
+          editor.querySelector('.family-rel-label-input')?.focus({preventScroll:true});
+        }
+      });
+    });
+
+    target.querySelectorAll('.family-rel-label-input').forEach(input=>{
+      input.addEventListener('input',()=>{
+        const control=input.closest('[data-family-label-identity]');
+        if(!control)return;
+
+        const identity=control.dataset.familyLabelIdentity||'';
+        const role=control.dataset.familyLabelRole||'';
+        const targetId=control.dataset.familyLabelTarget||'';
+
+        simEditorState.familyLabelDrafts.set(identity,{
+          role,
+          targetId,
+          text:input.value
+        });
+
+        syncFamilyLabelDraftInputs(identity,input.value);
+      });
+    });
+
+    target.querySelectorAll('.family-rel-label-reset').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const control=button.closest('[data-family-label-identity]');
+        if(!control)return;
+
+        const identity=control.dataset.familyLabelIdentity||'';
+        const role=control.dataset.familyLabelRole||'';
+        const targetId=control.dataset.familyLabelTarget||'';
+
+        simEditorState.familyLabelDrafts.set(identity,{
+          role,
+          targetId,
+          text:''
+        });
+
+        syncFamilyLabelDraftInputs(identity,'');
+      });
+    });
+  }
+
+  function editorFamilyRelationExists(role,targetId,subjectId){
+    const subject=String(subjectId||'');
+    const target=String(targetId||'');
+    const sim=currentGenealogyData().sims[subject];
+
+    if(!sim)return false;
+
+    if(role==='parent'){
+      return genealogyParentRelations(sim).length>0;
+    }
+
+    if(role==='child'){
+      const child=currentGenealogyData().sims[target];
+      return !!child&&genealogyParentRelations(child).some(relation=>String(relation.parentId)===subject);
+    }
+
+    if(role==='spouse'){
+      return (sim.spouseIds||[]).map(String).includes(target);
+    }
+
+    if(role==='exspouse'){
+      return (sim.exSpouseIds||[]).map(String).includes(target);
+    }
+
+    if(role==='sibling'){
+      return resolveSiblingRelationships(subject).some(relation=>String(relation.targetId)===target);
+    }
+
+    return false;
+  }
+
+  function applyEditorFamilyLabelDrafts(savedSimId,mutation){
+    let result=mutation;
+
+    simEditorState.familyLabelDrafts.forEach(draft=>{
+      if(!draft||!editorFamilyRelationExists(draft.role,draft.targetId,savedSimId))return;
+
+      const key=editorFamilyAnnotationKey(draft.role,draft.targetId,savedSimId);
+      if(!key)return;
+
+      const saved=relationshipDisplayOverride(key);
+
+      result=genealogyStoreAuthority.mergeResults(
+        result,
+        genealogyStoreAuthority.setRelationshipAnnotation(
+          key,
+          {
+            text:String(draft.text||'').trim(),
+            hidden:saved.hidden===true
+          }
+        )
+      );
+    });
+
+    return result;
+  }
+
   function relationPersonMarkup(sim,relationLabel=''){
     if(!sim)return'';
 
@@ -365,11 +581,12 @@ function buildPersonEditorDraft(){
     '</span>';
   }
 
-  function renderEditorRelationPeople(targetId,ids,labelResolver=null,emptyText='—'){
+  function renderEditorRelationPeople(targetId,ids,labelResolver=null,emptyText='—',role=''){
     const target=$(targetId);
     if(!target)return;
 
     const unique=[...new Set((ids||[]).map(String).filter(Boolean))];
+    target.classList.toggle('family-rel-preview-editable',!!role);
 
     if(!unique.length){
       target.innerHTML=`<span class="family-rel-empty">${esc(uiText(emptyText))}</span>`;
@@ -386,8 +603,19 @@ function buildPersonEditorDraft(){
         ? labelResolver(sim,draft)
         : '';
 
-      return relationPersonMarkup(sim,label);
+      if(!role){
+        return relationPersonMarkup(sim,label);
+      }
+
+      return '<div class="family-rel-preview-row">'+
+        relationPersonMarkup(sim,label)+
+        editorFamilyLabelControlMarkup(role,id)+
+      '</div>';
     }).join('')||`<span class="family-rel-empty">${esc(uiText(emptyText))}</span>`;
+
+    if(role){
+      bindEditorFamilyLabelControls(target);
+    }
   }
 
   function renderEditorRelationKindList(listId,selectId,kindMap,role){
@@ -457,19 +685,25 @@ function buildPersonEditorDraft(){
         sim,
         buildPersonEditorDraft(),
         simEditorState.parentKinds.get(String(sim.id))||'parent-child'
-      )
+      ),
+      '—',
+      'parent'
     );
 
     renderEditorRelationPeople(
       'editorSpousePreview',
       selectedEditorIds('fSpouse'),
-      sim=>directFamilyKinshipLabel('spouse',sim,buildPersonEditorDraft())
+      sim=>directFamilyKinshipLabel('spouse',sim,buildPersonEditorDraft()),
+      '—',
+      'spouse'
     );
 
     renderEditorRelationPeople(
       'editorExSpousePreview',
       selectedEditorIds('fExSpouse'),
-      sim=>directFamilyKinshipLabel('exspouse',sim,buildPersonEditorDraft())
+      sim=>directFamilyKinshipLabel('exspouse',sim,buildPersonEditorDraft()),
+      '—',
+      'exspouse'
     );
 
     renderEditorRelationPeople(
@@ -480,13 +714,17 @@ function buildPersonEditorDraft(){
         sim,
         buildPersonEditorDraft(),
         simEditorState.childKinds.get(String(sim.id))||'parent-child'
-      )
+      ),
+      '—',
+      'child'
     );
 
     renderEditorRelationPeople(
       'editorSiblingsPreview',
       editorSiblingIds(),
-      sim=>directFamilyKinshipLabel('sibling',sim,buildPersonEditorDraft())
+      sim=>directFamilyKinshipLabel('sibling',sim,buildPersonEditorDraft()),
+      '—',
+      'sibling'
     );
 
     renderEditorRelationKindList(
@@ -1535,6 +1773,12 @@ function commitPersonEditorDraft() {
             )
         );
   }
+
+  mutation =
+    applyEditorFamilyLabelDrafts(
+      sim.id,
+      mutation
+    );
 
   mutation =
     ensureSavedSimManualPosition(
