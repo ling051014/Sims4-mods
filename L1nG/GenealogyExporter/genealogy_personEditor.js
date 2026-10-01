@@ -40,7 +40,8 @@
     childKinds:new Map(),
     explicitSiblingIds:new Set(),
     derivedSiblingIds:new Set(),
-    familyLabelDrafts:new Map()
+    familyLabelDrafts:new Map(),
+    otherRelationshipAnnotationDrafts:new Map()
   };
 
   const editingPets = [];
@@ -98,6 +99,7 @@
     simEditorState.explicitSiblingIds.clear();
     simEditorState.derivedSiblingIds.clear();
     simEditorState.familyLabelDrafts.clear();
+    simEditorState.otherRelationshipAnnotationDrafts.clear();
 
     replaceDraftCollection(
       editingPets,
@@ -1156,6 +1158,35 @@ function buildPersonEditorDraft(){
       });
     });
 
+    $('otherRelationshipEditToggle')?.addEventListener('click',()=>{
+      const panel=$('otherRelationshipEditPanel');
+      if(!panel)return;
+
+      captureOtherRelationshipAnnotationDrafts();
+
+      const willOpen=panel.hidden;
+
+      panel.hidden=!willOpen;
+      syncOtherRelationshipEditorToggle(willOpen);
+
+      const person=
+        currentSimEditorPerson();
+
+      renderPersonEditorRelationshipList(
+        person
+      );
+
+      if(willOpen){
+        panel
+          .querySelector(
+            '.ui-select-input'
+          )
+          ?.focus({
+            preventScroll:true
+          });
+      }
+    });
+
     const editorModal=document.querySelector('.sim-editor-modal');
 
     editorModal?.addEventListener('input',()=>{
@@ -1397,6 +1428,7 @@ function buildPersonEditorDraft(){
       )
       .join('');
 
+    resetOtherRelationshipEditor();
     populateRelationshipTypePicker();
     renderPersonEditorRelationshipList(sim);
     renderRelAnno(sim?sim.id:null);
@@ -1477,66 +1509,571 @@ function buildPersonEditorDraft(){
   lifePhotoState.editor.isOriginal = false;
 }
 
-function renderPersonEditorRelationshipList(c) {
-  if (!c) { $('relationshipList').innerHTML = ''; return; }
-  const rels = (currentGenealogyData().links||[]).filter(l => (l.from === c.id || l.to === c.id) && !isSiblingLink(l));
-  $('relationshipList').innerHTML = rels.length
-    ? rels.map((l, i) => {
-        const otherId = l.from === c.id ? l.to : l.from;
-        const other = currentGenealogyData().sims[otherId];
-        const arrow = l.from === c.id ? '→' : '←';
-        return `<div class="relationship-item">
-          <span>${esc(displayRelationshipText(l.label || l.type || '關聯'))} ${arrow} ${esc(other ? displayDataText(other.name, other) : uiText('（已刪除）'))}</span>
-          <button type="button" data-del="${i}" title="刪除">×</button>
-        </div>`;
-      }).join('')
-    : `<div class="relationship-empty">${esc(uiText('暫無其他關係'))}</div>`;
-  $('relationshipList').querySelectorAll('[data-del]').forEach(btn => {
-    btn.onclick = () => {
-      const target = rels[+btn.dataset.del];
-      if (!target?.id) return;
+// ========【其他關係編輯列】 設定 - 與家庭關係共用單層人物列，不再拆成獨立標籤區 ========
+function personEditorOtherRelationships(simId){
+  const id=String(simId||'');
+  if(!id)return[];
 
-      const mutation =
-        genealogyStoreAuthority.removeRelationship(
-          target.id
+  return (currentGenealogyData().links||[])
+    .filter(link=>
+      link&&
+      !isSiblingLink(link)&&
+      (
+        String(link.from)===id||
+        String(link.to)===id
+      )
+    );
+}
+
+function otherRelationshipEditMode(){
+  const panel=$('otherRelationshipEditPanel');
+  return !!panel&&!panel.hidden;
+}
+
+function syncOtherRelationshipEditorToggle(expanded){
+  const button=$('otherRelationshipEditToggle');
+  if(!button)return;
+
+  button.setAttribute(
+    'aria-expanded',
+    expanded?'true':'false'
+  );
+
+  button.textContent=uiText(
+    expanded
+      ? '完成'
+      : '編輯'
+  );
+}
+
+function resetOtherRelationshipEditor(){
+  const panel=$('otherRelationshipEditPanel');
+  if(panel)panel.hidden=true;
+  syncOtherRelationshipEditorToggle(false);
+}
+
+function otherRelationshipAnnotationKey(link){
+  const id=String(link?.id||'');
+  return id
+    ? 'link:'+id
+    : '';
+}
+
+function otherRelationshipAnnotationDraft(link){
+  const key=otherRelationshipAnnotationKey(link);
+  if(!key){
+    return{
+      text:'',
+      hidden:false
+    };
+  }
+
+  if(
+    simEditorState
+      .otherRelationshipAnnotationDrafts
+      .has(key)
+  ){
+    const draft=
+      simEditorState
+        .otherRelationshipAnnotationDrafts
+        .get(key);
+
+    return{
+      text:String(draft?.text||''),
+      hidden:draft?.hidden===true
+    };
+  }
+
+  const saved=
+    relationshipDisplayOverride(key);
+
+  return{
+    text:
+      typeof saved.text==='string'
+        ? saved.text
+        : '',
+    hidden:
+      saved.hidden===true
+  };
+}
+
+function setOtherRelationshipAnnotationDraft(
+  key,
+  {
+    text='',
+    hidden=false
+  }={}
+){
+  const annotationKey=String(key||'');
+  if(!annotationKey)return;
+
+  simEditorState
+    .otherRelationshipAnnotationDrafts
+    .set(
+      annotationKey,
+      {
+        text:String(text||''),
+        hidden:hidden===true
+      }
+    );
+}
+
+function captureOtherRelationshipAnnotationDrafts(
+  target=document
+){
+  target
+    .querySelectorAll(
+      '[data-other-rel-annotation-key]'
+    )
+    .forEach(editor=>{
+      const key=
+        editor.dataset
+          .otherRelAnnotationKey||
+        '';
+
+      if(!key)return;
+
+      const input=
+        editor.querySelector(
+          '.other-rel-label-input'
         );
 
-      renderPersonEditorRelationshipList(c);
-      renderRelAnno(c.id);
-      applyGenealogyMutation(mutation);
-    };
-  });
+      const select=
+        editor.querySelector(
+          '[data-other-rel-display-mode]'
+        );
+
+      setOtherRelationshipAnnotationDraft(
+        key,
+        {
+          text:input?.value||'',
+          hidden:
+            select?.value==='none'
+        }
+      );
+    });
+}
+
+function otherRelationshipAnnotationEditorMarkup(
+  link,
+  relationLabel
+){
+  const key=
+    otherRelationshipAnnotationKey(
+      link
+    );
+
+  if(!key)return'';
+
+  const draft=
+    otherRelationshipAnnotationDraft(
+      link
+    );
+
+  const hasOffset=
+    !!(
+      currentGenealogyData()
+        .labelPositions?.[key]&&
+      (
+        currentGenealogyData()
+          .labelPositions[key].dx||
+        currentGenealogyData()
+          .labelPositions[key].dy
+      )
+    );
+
+  return (
+    '<div class="other-rel-annotation-editor" '+
+    'data-other-rel-annotation-key="'+
+    esc(key)+
+    '" hidden>'+
+      '<select class="other-rel-display-mode" data-other-rel-display-mode aria-label="'+
+      esc(uiText('顯示關係'))+
+      '">'+
+        '<option value="default"'+
+        (draft.hidden?'':' selected')+
+        '>'+
+          esc(
+            uiText('預設')+
+            ' · '+
+            relationLabel
+          )+
+        '</option>'+
+        '<option value="none"'+
+        (draft.hidden?' selected':'')+
+        '>'+
+          esc(uiText('（不顯示）'))+
+        '</option>'+
+      '</select>'+
+      '<input class="other-rel-label-input" type="text" maxlength="40" placeholder="'+
+      esc(uiText('自訂文字（可選）'))+
+      '" value="'+
+      esc(draft.text)+
+      '">'+
+      '<button class="other-rel-label-reset" type="button">'+
+        esc(uiText('恢復預設'))+
+      '</button>'+
+      (
+        hasOffset
+          ? '<button class="other-rel-position-reset" type="button" data-reset-other-rel-position="'+
+            esc(key)+
+            '">'+
+              esc(uiText('重設位置'))+
+            '</button>'
+          : ''
+      )+
+    '</div>'
+  );
+}
+
+function bindOtherRelationshipControls(
+  person,
+  target
+){
+  target
+    .querySelectorAll(
+      '.other-rel-label-toggle'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        ()=>{
+          const row=
+            button.closest(
+              '.family-rel-preview-row'
+            );
+
+          const editor=
+            row?.querySelector(
+              '.other-rel-annotation-editor'
+            );
+
+          if(!editor)return;
+
+          const open=editor.hidden;
+          editor.hidden=!open;
+
+          button.setAttribute(
+            'aria-expanded',
+            open?'true':'false'
+          );
+
+          if(open){
+            editor
+              .querySelector(
+                '.other-rel-label-input'
+              )
+              ?.focus({
+                preventScroll:true
+              });
+          }
+        }
+      );
+    });
+
+  target
+    .querySelectorAll(
+      '[data-other-rel-annotation-key]'
+    )
+    .forEach(editor=>{
+      const key=
+        editor.dataset
+          .otherRelAnnotationKey||
+        '';
+
+      const input=
+        editor.querySelector(
+          '.other-rel-label-input'
+        );
+
+      const select=
+        editor.querySelector(
+          '[data-other-rel-display-mode]'
+        );
+
+      const syncDraft=()=>{
+        setOtherRelationshipAnnotationDraft(
+          key,
+          {
+            text:input?.value||'',
+            hidden:
+              select?.value==='none'
+          }
+        );
+      };
+
+      input?.addEventListener(
+        'input',
+        syncDraft
+      );
+
+      select?.addEventListener(
+        'change',
+        syncDraft
+      );
+
+      editor
+        .querySelector(
+          '.other-rel-label-reset'
+        )
+        ?.addEventListener(
+          'click',
+          ()=>{
+            if(input){
+              input.value='';
+            }
+
+            syncDraft();
+          }
+        );
+    });
+
+  target
+    .querySelectorAll(
+      '[data-reset-other-rel-position]'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        ()=>{
+          const key=
+            button.dataset
+              .resetOtherRelPosition;
+
+          if(!key)return;
+
+          const mutation=
+            genealogyStoreAuthority
+              .setRelationshipLabelPosition(
+                key,
+                null
+              );
+
+          if(
+            !mutation?.dataChanged
+          ){
+            return;
+          }
+
+          applyGenealogyMutation(
+            mutation
+          );
+
+          renderPersonEditorRelationshipList(
+            person
+          );
+        }
+      );
+    });
+
+  target
+    .querySelectorAll(
+      '[data-other-rel-delete]'
+    )
+    .forEach(button=>{
+      button.addEventListener(
+        'click',
+        ()=>{
+          const relationshipId=
+            button.dataset
+              .otherRelDelete;
+
+          if(!relationshipId)return;
+
+          const key=
+            'link:'+
+            String(
+              relationshipId
+            );
+
+          simEditorState
+            .otherRelationshipAnnotationDrafts
+            .delete(key);
+
+          const mutation=
+            genealogyStoreAuthority
+              .removeRelationship(
+                relationshipId
+              );
+
+          renderPersonEditorRelationshipList(
+            person
+          );
+
+          applyGenealogyMutation(
+            mutation
+          );
+        }
+      );
+    });
+}
+
+function renderPersonEditorRelationshipList(c) {
+  const target=$('relationshipList');
+  if(!target)return;
+
+  if(!c){
+    target.innerHTML='';
+    target.classList.remove(
+      'family-rel-preview-editable'
+    );
+    return;
+  }
+
+  const rels=
+    personEditorOtherRelationships(
+      c.id
+    );
+
+  const editing=
+    otherRelationshipEditMode();
+
+  target.classList.toggle(
+    'family-rel-preview-editable',
+    editing
+  );
+
+  if(!rels.length){
+    target.innerHTML=
+      '<span class="family-rel-empty">'+
+      esc(uiText('暫無其他關係'))+
+      '</span>';
+
+    return;
+  }
+
+  target.innerHTML=
+    rels
+      .map(link=>{
+        const otherId=
+          String(link.from)===
+            String(c.id)
+            ? String(link.to)
+            : String(link.from);
+
+        const other=
+          currentGenealogyData()
+            .sims[otherId];
+
+        if(!other)return'';
+
+        const rawRelation=
+          String(
+            link.label||
+            link.type||
+            '關聯'
+          ).trim()||
+          '關聯';
+
+        const relationLabel=
+          displayRelationshipText(
+            rawRelation
+          );
+
+        const arrow=
+          String(link.from)===
+            String(c.id)
+            ? '→'
+            : '←';
+
+        const draft=
+          otherRelationshipAnnotationDraft(
+            link
+          );
+
+        const customDisplayText=
+          !editing&&
+          !draft.hidden
+            ? draft.text
+            : '';
+
+        const hiddenStatus=
+          !editing&&
+          draft.hidden
+            ? '<span class="other-rel-hidden-label">'+
+              esc(uiText('關係標籤：不顯示'))+
+              '</span>'
+            : '';
+
+        return (
+          '<div class="family-rel-preview-row'+
+          (editing?' is-editing':'')+
+          '" data-other-rel-id="'+
+          esc(String(link.id||''))+
+          '">'+
+            relationPersonMarkup(
+              other,
+              relationLabel+' '+arrow,
+              customDisplayText
+            )+
+            hiddenStatus+
+            (
+              editing
+                ? '<div class="family-rel-row-actions">'+
+                    '<button class="family-rel-label-toggle other-rel-label-toggle" type="button" aria-expanded="false">'+
+                      esc(uiText('自訂顯示文字…'))+
+                    '</button>'+
+                    '<button class="family-rel-remove" type="button" data-other-rel-delete="'+
+                      esc(String(link.id||''))+
+                      '" aria-label="'+
+                      esc(uiText('移除'))+
+                      '" title="'+
+                      esc(uiText('移除'))+
+                      '">'+
+                        iconSvg('x-lg')+
+                    '</button>'+
+                  '</div>'+
+                  otherRelationshipAnnotationEditorMarkup(
+                    link,
+                    relationLabel
+                  )
+                : ''
+            )+
+          '</div>'
+        );
+      })
+      .join('')||
+    '<span class="family-rel-empty">'+
+    esc(uiText('暫無其他關係'))+
+    '</span>';
+
+  if(editing){
+    bindOtherRelationshipControls(
+      c,
+      target
+    );
+  }
 }
 
 function collectRelAnnotationDraft() {
-  const entries = [];
-  const items =
-    document.querySelectorAll(
-      '#relationshipAnnotationList .relationship-annotation-item'
-    );
+  captureOtherRelationshipAnnotationDrafts();
 
-  items.forEach(item => {
-    const key = item.dataset.annoKey;
-    if (!key) return;
+  const person=
+    currentSimEditorPerson();
 
-    const select =
-      item.querySelector(
-        '[data-rel-display-mode]'
-      );
+  if(!person)return[];
 
-    const input =
-      item.querySelector(
-        'input[type="text"]'
-      );
+  return personEditorOtherRelationships(
+    person.id
+  )
+    .map(link=>{
+      const key=
+        otherRelationshipAnnotationKey(
+          link
+        );
 
-    entries.push({
-      key,
-      hidden:select?.value === 'none',
-      text:input?.value.trim() || ''
-    });
-  });
+      const draft=
+        otherRelationshipAnnotationDraft(
+          link
+        );
 
-  return entries;
+      return{
+        key,
+        hidden:draft.hidden===true,
+        text:String(draft.text||'').trim()
+      };
+    })
+    .filter(entry=>entry.key);
 }
 
 function preserveEditorSampleText(
