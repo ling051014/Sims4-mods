@@ -203,9 +203,17 @@
 
   function mapPetSpecies(value) {
     const key = speciesKey(value);
+
+    if (key.includes('fox')) return 'fox';
+    if (key.includes('raccoon')) return 'raccoon';
     if (key.includes('dog')) return 'dog';
     if (key.includes('cat')) return 'cat';
     if (key.includes('horse')) return 'horse';
+    if (key.includes('cow')) return 'cow';
+    if (key.includes('crow')) return 'crow';
+    if (key.includes('parrot')) return 'parrot';
+    if (key.includes('leopard')) return 'leopard';
+
     return 'other';
   }
 
