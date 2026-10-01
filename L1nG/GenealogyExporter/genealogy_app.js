@@ -14813,8 +14813,8 @@ personLibraryDialog.onclick = event => {
 personLibrarySearch.oninput = debounce(renderPersonLibrary, 150);
 
 $('personLibraryAddBtn').onclick = () => personEditor.open(null);
-$('personLibraryCompactBtn').onclick = () => setPersonLibraryViewMode('compact');
-$('personLibraryDetailedBtn').onclick = () => setPersonLibraryViewMode('detailed');
+$('personLibraryCompactBtn').onclick = () => personLibraryController.setViewMode('compact');
+$('personLibraryDetailedBtn').onclick = () => personLibraryController.setViewMode('detailed');
 $('personLibraryBatchBtn').onclick = () => personLibraryController.setBatchMode(true);
 $('personLibraryBatchCancelBtn').onclick = () => personLibraryController.setBatchMode(false);
 
