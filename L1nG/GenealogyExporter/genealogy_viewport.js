@@ -251,6 +251,77 @@
       return true;
     }
 
+    // ========【觸控視角】 設定 - 雙指縮放同時保留兩指中心的平移 ========
+    function transformGesture(
+      previousClientX,
+      previousClientY,
+      currentClientX,
+      currentClientY,
+      factor = 1
+    ) {
+      const rect =
+        viewport.getBoundingClientRect();
+
+      const previousX =
+        Number(previousClientX || 0) -
+        rect.left;
+
+      const previousY =
+        Number(previousClientY || 0) -
+        rect.top;
+
+      const currentX =
+        Number(currentClientX || 0) -
+        rect.left;
+
+      const currentY =
+        Number(currentClientY || 0) -
+        rect.top;
+
+      const previousScale =
+        safeScale();
+
+      const worldX =
+        (previousX - panX) /
+        previousScale;
+
+      const worldY =
+        (previousY - panY) /
+        previousScale;
+
+      const nextScale =
+        snapScale(
+          scale *
+          (Number(factor) || 1)
+        );
+
+      const changed =
+        nextScale !== scale ||
+        currentX !== previousX ||
+        currentY !== previousY;
+
+      if (!changed) {
+        return false;
+      }
+
+      viewState = 'manual';
+      scale = nextScale;
+
+      panX =
+        currentX -
+        worldX * scale;
+
+      panY =
+        currentY -
+        worldY * scale;
+
+      paintTransform({
+        interacting:true
+      });
+
+      return true;
+    }
+
     function fit({
       rememberState = true
     } = {}) {
@@ -640,6 +711,7 @@
       screenDeltaToWorld,
       screenPointToWorld,
       zoomAt,
+      transformGesture,
       fit,
       observeResize,
       focusWorldPoint,

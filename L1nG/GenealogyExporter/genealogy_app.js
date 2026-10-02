@@ -12510,6 +12510,534 @@ function finishMarquee() {
   }
 }
 
+
+const TOUCH_DRAG_THRESHOLD_PX = 8;
+const TOUCH_LONG_PRESS_MS = 520;
+const activeTouchPointers = new Map();
+const touchCardActivationSuppressed = new Set();
+
+let touchPinchGeometry = null;
+let touchLongPressTimer = 0;
+let touchLongPressPointerId = null;
+
+function isTouchCardActivationSuppressed(
+  event
+) {
+  return (
+    event?.pointerType === 'touch' &&
+    touchCardActivationSuppressed.has(
+      event.pointerId
+    )
+  );
+}
+
+function cancelTouchLongPress() {
+  if (touchLongPressTimer) {
+    window.clearTimeout(
+      touchLongPressTimer
+    );
+  }
+
+  touchLongPressTimer = 0;
+  touchLongPressPointerId = null;
+}
+
+function getTouchPointerKind(
+  target
+) {
+  const card =
+    target?.closest?.(
+      '.person-card[data-id]'
+    );
+
+  if (card) {
+    return {
+      kind:'card',
+      simId:card.dataset.id
+    };
+  }
+
+  if (
+    target?.closest?.(
+      '.edge-label'
+    )
+  ) {
+    return {
+      kind:'label',
+      simId:null
+    };
+  }
+
+  if (
+    target?.closest?.(
+      'button, a, input, textarea, select, [contenteditable="true"]'
+    )
+  ) {
+    return {
+      kind:'control',
+      simId:null
+    };
+  }
+
+  const fam =
+    currentGenealogyData()
+      ? currentFamily()
+      : null;
+
+  const isFree =
+    !!fam &&
+    genealogyScene.isFreeLayoutActive(
+      fam
+    );
+
+  return {
+    kind:
+      isFree &&
+      arrangeTool === 'select'
+        ? 'canvas-select'
+        : 'canvas-pan',
+    simId:null
+  };
+}
+
+function readTouchPairGeometry() {
+  const points =
+    [...activeTouchPointers.values()]
+      .slice(0, 2);
+
+  if (points.length < 2) {
+    return null;
+  }
+
+  const [first, second] =
+    points;
+
+  const dx =
+    second.clientX -
+    first.clientX;
+
+  const dy =
+    second.clientY -
+    first.clientY;
+
+  return {
+    centerX:
+      (
+        first.clientX +
+        second.clientX
+      ) / 2,
+    centerY:
+      (
+        first.clientY +
+        second.clientY
+      ) / 2,
+    distance:
+      Math.max(
+        Math.hypot(dx, dy),
+        1
+      )
+  };
+}
+
+function suppressActiveTouchCardActivation() {
+  activeTouchPointers.forEach(
+    point => {
+      point.blocked = true;
+
+      if (
+        point.kind === 'card'
+      ) {
+        touchCardActivationSuppressed.add(
+          point.pointerId
+        );
+      }
+    }
+  );
+}
+
+function scheduleTouchCardLongPress(
+  point
+) {
+  cancelTouchLongPress();
+
+  touchLongPressPointerId =
+    point.pointerId;
+
+  touchLongPressTimer =
+    window.setTimeout(
+      () => {
+        const current =
+          activeTouchPointers.get(
+            point.pointerId
+          );
+
+        touchLongPressTimer = 0;
+        touchLongPressPointerId = null;
+
+        if (
+          !current ||
+          current.moved ||
+          current.blocked ||
+          activeTouchPointers.size !== 1 ||
+          !current.simId
+        ) {
+          return;
+        }
+
+        current.blocked = true;
+
+        touchCardActivationSuppressed.add(
+          current.pointerId
+        );
+
+        const fam =
+          currentGenealogyData()
+            ? currentFamily()
+            : null;
+
+        if (
+          fam &&
+          genealogyScene.isFreeLayoutActive(
+            fam
+          ) &&
+          arrangeTool === 'select' &&
+          !selectedNodeIds.has(
+            current.simId
+          )
+        ) {
+          selectedNodeIds.clear();
+          selectedNodeIds.add(
+            current.simId
+          );
+          syncNodeSelectionClasses();
+        }
+
+        renderPersonCardMenu(
+          current.simId,
+          current.clientX,
+          current.clientY
+        );
+      },
+      TOUCH_LONG_PRESS_MS
+    );
+}
+
+function handleTouchPointerDown(
+  event
+) {
+  if (
+    event.pointerType !== 'touch'
+  ) {
+    return;
+  }
+
+  const descriptor =
+    getTouchPointerKind(
+      event.target
+    );
+
+  const point = {
+    pointerId:event.pointerId,
+    startX:event.clientX,
+    startY:event.clientY,
+    clientX:event.clientX,
+    clientY:event.clientY,
+    moved:false,
+    blocked:false,
+    kind:descriptor.kind,
+    simId:descriptor.simId
+  };
+
+  activeTouchPointers.set(
+    event.pointerId,
+    point
+  );
+
+  if (
+    activeTouchPointers.size === 1
+  ) {
+    if (
+      point.kind === 'card'
+    ) {
+      scheduleTouchCardLongPress(
+        point
+      );
+    } else if (
+      point.kind === 'canvas-pan'
+    ) {
+      event.preventDefault();
+
+      genealogyViewport.beginPan(
+        event.clientX,
+        event.clientY
+      );
+    } else if (
+      point.kind === 'canvas-select'
+    ) {
+      event.preventDefault();
+    }
+
+    return;
+  }
+
+  const hasControl =
+    [...activeTouchPointers.values()]
+      .some(
+        item =>
+          item.kind === 'control'
+      );
+
+  if (hasControl) {
+    return;
+  }
+
+  cancelTouchLongPress();
+  suppressActiveTouchCardActivation();
+  finishMarquee();
+  genealogyViewport.cancelPan();
+  hideSmartGuides();
+
+  touchPinchGeometry =
+    readTouchPairGeometry();
+
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function handleTouchPointerMove(
+  event
+) {
+  if (
+    event.pointerType !== 'touch'
+  ) {
+    return;
+  }
+
+  const point =
+    activeTouchPointers.get(
+      event.pointerId
+    );
+
+  if (!point) return;
+
+  point.clientX =
+    event.clientX;
+
+  point.clientY =
+    event.clientY;
+
+  if (
+    !point.moved &&
+    Math.hypot(
+      point.clientX - point.startX,
+      point.clientY - point.startY
+    ) >
+      TOUCH_DRAG_THRESHOLD_PX
+  ) {
+    point.moved = true;
+
+    if (
+      point.pointerId ===
+      touchLongPressPointerId
+    ) {
+      cancelTouchLongPress();
+    }
+  }
+
+  if (
+    touchPinchGeometry &&
+    activeTouchPointers.size >= 2
+  ) {
+    const nextGeometry =
+      readTouchPairGeometry();
+
+    if (nextGeometry) {
+      const factor =
+        nextGeometry.distance /
+        touchPinchGeometry.distance;
+
+      genealogyViewport
+        .transformGesture?.(
+          touchPinchGeometry.centerX,
+          touchPinchGeometry.centerY,
+          nextGeometry.centerX,
+          nextGeometry.centerY,
+          factor
+        );
+
+      touchPinchGeometry =
+        nextGeometry;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+
+  if (point.blocked) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+
+  if (
+    point.kind === 'canvas-pan'
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    genealogyViewport.movePan(
+      event.clientX,
+      event.clientY
+    );
+
+    return;
+  }
+
+  if (
+    point.kind === 'canvas-select'
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (
+      point.moved &&
+      !marqueeState
+    ) {
+      clearNodeSelection();
+
+      marqueeState = {
+        startX:point.startX,
+        startY:point.startY,
+        baseSelection:new Set()
+      };
+    }
+
+    if (
+      point.moved
+    ) {
+      updateMarquee(
+        event.clientX,
+        event.clientY
+      );
+    }
+  }
+}
+
+function finishTouchPointer(
+  event
+) {
+  if (
+    event.pointerType !== 'touch'
+  ) {
+    return;
+  }
+
+  const point =
+    activeTouchPointers.get(
+      event.pointerId
+    );
+
+  if (!point) return;
+
+  const wasPinching =
+    !!touchPinchGeometry &&
+    activeTouchPointers.size >= 2;
+
+  if (
+    event.type === 'pointercancel' &&
+    point.kind === 'card'
+  ) {
+    touchCardActivationSuppressed.add(
+      point.pointerId
+    );
+  }
+
+  if (
+    point.pointerId ===
+    touchLongPressPointerId
+  ) {
+    cancelTouchLongPress();
+  }
+
+  if (
+    point.kind === 'canvas-pan' &&
+    !wasPinching
+  ) {
+    genealogyViewport.endPan();
+  }
+
+  if (
+    point.kind === 'canvas-select' &&
+    !wasPinching
+  ) {
+    if (point.moved) {
+      finishMarquee();
+    } else if (!point.blocked) {
+      clearNodeSelection();
+    }
+  }
+
+  activeTouchPointers.delete(
+    event.pointerId
+  );
+
+  if (wasPinching) {
+    finishMarquee();
+    genealogyViewport.cancelPan();
+
+    if (
+      activeTouchPointers.size >= 2
+    ) {
+      touchPinchGeometry =
+        readTouchPairGeometry();
+    } else {
+      touchPinchGeometry = null;
+      suppressActiveTouchCardActivation();
+    }
+  }
+
+  if (
+    activeTouchPointers.size === 0
+  ) {
+    touchPinchGeometry = null;
+    cancelTouchLongPress();
+    genealogyViewport.endPan();
+
+    window.setTimeout(
+      () =>
+        touchCardActivationSuppressed
+          .clear(),
+      0
+    );
+  }
+}
+
+viewport.addEventListener(
+  'pointerdown',
+  handleTouchPointerDown,
+  true
+);
+
+viewport.addEventListener(
+  'pointermove',
+  handleTouchPointerMove,
+  true
+);
+
+viewport.addEventListener(
+  'pointerup',
+  finishTouchPointer,
+  true
+);
+
+viewport.addEventListener(
+  'pointercancel',
+  finishTouchPointer,
+  true
+);
+
+
 viewport.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   const onNode = !!e.target.closest('.person-card');
@@ -12958,6 +13486,14 @@ nodes.addEventListener('pointerdown', e => {
   const fam = currentFamily();
   ensureFamilyLayoutShape(fam);
   const isFree = genealogyScene.isFreeLayoutActive(fam);
+  const cardDragThreshold =
+    e.pointerType === 'touch'
+      ? TOUCH_DRAG_THRESHOLD_PX
+      : 3;
+  const cardTapThreshold =
+    e.pointerType === 'touch'
+      ? TOUCH_DRAG_THRESHOLD_PX
+      : 5;
 
   // Space 是選取工具中的暫時平移：不攔截，交給 viewport 的平移手勢。
   if (isFree && spacePanHeld) return;
@@ -12989,7 +13525,7 @@ nodes.addEventListener('pointerdown', e => {
       const dx = ev.clientX - sx;
       const dy = ev.clientY - sy;
 
-      if (!moved && Math.hypot(dx, dy) > 3) {
+      if (!moved && Math.hypot(dx, dy) > cardDragThreshold) {
         moved = true;
         el.classList.add('dragging');
       }
@@ -13063,7 +13599,7 @@ nodes.addEventListener('pointerdown', e => {
       }
     };
 
-    const onUp = () => {
+    const onUp = ev => {
       moveFrame?.flush?.();
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
@@ -13101,7 +13637,7 @@ nodes.addEventListener('pointerdown', e => {
         );
 
         genealogyScene?.resizeStageToContent?.();
-      } else {
+      } else if (!isTouchCardActivationSuppressed(ev)) {
         if (viewMode === 'view') openPersonProfile(id);
         else personEditor.open(id);
       }
@@ -13118,7 +13654,10 @@ nodes.addEventListener('pointerdown', e => {
     e.preventDefault();
     e.stopPropagation();
 
-    const shift = e.shiftKey;
+    const shift =
+      e.pointerType === 'touch'
+        ? true
+        : e.shiftKey;
     const wasSelected = selectedNodeIds.has(id);
 
     if (!shift && !wasSelected) {
@@ -13191,7 +13730,7 @@ nodes.addEventListener('pointerdown', e => {
 
       if (
         !moved &&
-        Math.hypot(dx, dy) > 3
+        Math.hypot(dx, dy) > cardDragThreshold
       ) {
         moved = true;
 
@@ -13315,7 +13854,7 @@ nodes.addEventListener('pointerdown', e => {
       }
     };
 
-    const onUp = () => {
+    const onUp = ev => {
       moveFrame?.flush?.();
 
       document.removeEventListener(
@@ -13372,7 +13911,11 @@ nodes.addEventListener('pointerdown', e => {
         );
 
         genealogyScene?.resizeStageToContent?.();
-      } else if (shift && wasSelected) {
+      } else if (
+        !isTouchCardActivationSuppressed(ev) &&
+        shift &&
+        wasSelected
+      ) {
         selectedNodeIds.delete(id);
         syncNodeSelectionClasses();
       }
@@ -13416,10 +13959,11 @@ nodes.addEventListener('pointerdown', e => {
       );
 
       if (
+        !isTouchCardActivationSuppressed(ev) &&
         Math.hypot(
           ev.clientX - sx,
           ev.clientY - sy
-        ) < 5
+        ) < cardTapThreshold
       ) {
         if (viewMode === 'view') {
           openPersonProfile(id);
@@ -13488,7 +14032,7 @@ nodes.addEventListener('pointerdown', e => {
 
     if (
       !moved &&
-      Math.hypot(dx, dy) > 3
+      Math.hypot(dx, dy) > cardDragThreshold
     ) {
       moved = true;
       el.classList.add('dragging');
@@ -13624,7 +14168,7 @@ nodes.addEventListener('pointerdown', e => {
     }
   };
 
-  const onUp = () => {
+  const onUp = ev => {
     moveFrame?.flush?.();
 
     document.removeEventListener(
@@ -13681,7 +14225,7 @@ nodes.addEventListener('pointerdown', e => {
       );
 
       genealogyScene?.resizeStageToContent?.();
-    } else {
+    } else if (!isTouchCardActivationSuppressed(ev)) {
       if (viewMode === 'view') {
         openPersonProfile(id);
       } else {
