@@ -917,6 +917,15 @@
     "標籤文字：": "Label text:",
     "標籤文字：不顯示": "Label text: hidden",
     "顯示標籤": "Show label",
-    "隱藏標籤": "Hide label"
+    "隱藏標籤": "Hide label",
+    "喜好與厭惡": "Likes & Dislikes",
+    "吸引力偏好": "Attraction Preferences",
+    "喜歡": "Likes",
+    "討厭": "Dislikes",
+    "心動": "Turn-Ons",
+    "反感": "Turn-Offs",
+    "這位模擬市民尚未設定喜好與厭惡。": "This Sim has no likes or dislikes set.",
+    "這位模擬市民尚未設定吸引力偏好。": "This Sim has no attraction preferences set.",
+    "偏好資料由遊戲匯入，目前僅供檢視。": "Preference data is imported from the game and is currently read-only."
   }
 }
