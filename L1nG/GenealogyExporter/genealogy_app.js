@@ -144,8 +144,8 @@ const RELATIONSHIP_SEMANTICS = Object.freeze({
 const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   // 戀愛 / 親密
   '曖昧':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'short-dash', layoutPriority:260 }),
-  '訂婚':Object.freeze({ icon:'gem', category:'romance', lineStyle:'solid', layoutPriority:780 }),
-  '伴侶':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'solid', layoutPriority:740 }),
+  '訂婚':Object.freeze({ icon:'gem', category:'romance', lineStyle:'solid', layoutPriority:780, symmetric:true }),
+  '伴侶':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'solid', layoutPriority:740, symmetric:true }),
   '情人':Object.freeze({ icon:'heart-fill', category:'romance', lineStyle:'short-dash', layoutPriority:600 }),
   '秘密情人':Object.freeze({ icon:'lock', category:'romance', lineStyle:'short-dash', layoutPriority:580 }),
   '外遇':Object.freeze({ icon:'heartbreak', category:'romance', lineStyle:'short-dash', layoutPriority:500 }),
@@ -154,15 +154,15 @@ const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   '前任伴侶':Object.freeze({ icon:'heartbreak', category:'romance', lineStyle:'short-dash', layoutPriority:260 }),
   '前任情人':Object.freeze({ icon:'heartbreak', category:'romance', lineStyle:'short-dash', layoutPriority:240 }),
   '單戀':Object.freeze({ icon:'heart', category:'romance', lineStyle:'dot', layoutPriority:120 }),
-  '互相暗戀':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'short-dash', layoutPriority:300 }),
+  '互相暗戀':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'short-dash', layoutPriority:300, symmetric:true }),
   '喪偶':Object.freeze({ icon:'flower1', category:'romance', lineStyle:'short-dash', layoutPriority:180 }),
 
   // 友誼
-  '朋友':Object.freeze({ icon:'person-heart', category:'friendship' }),
-  '好友':Object.freeze({ icon:'person-heart', category:'friendship' }),
-  '摯友':Object.freeze({ icon:'person-check', category:'friendship' }),
-  '青梅竹馬':Object.freeze({ icon:'person-heart', category:'friendship' }),
-  '網友':Object.freeze({ icon:'person-heart', category:'friendship' }),
+  '朋友':Object.freeze({ icon:'person-heart', category:'friendship', symmetric:true }),
+  '好友':Object.freeze({ icon:'person-heart', category:'friendship', symmetric:true }),
+  '摯友':Object.freeze({ icon:'person-check', category:'friendship', symmetric:true }),
+  '青梅竹馬':Object.freeze({ icon:'person-heart', category:'friendship', symmetric:true }),
+  '網友':Object.freeze({ icon:'person-heart', category:'friendship', symmetric:true }),
 
   // 負面
   '仇敵':Object.freeze({ icon:'lightning', category:'negative' }),
@@ -173,9 +173,9 @@ const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   // 生活 / 社會
   '師生':Object.freeze({ icon:'mortarboard', category:'social' }),
   '師承':Object.freeze({ icon:'mortarboard', category:'social' }),
-  '同事':Object.freeze({ icon:'people', category:'social' }),
-  '室友':Object.freeze({ icon:'house-heart', category:'social' }),
-  '鄰居':Object.freeze({ icon:'house-heart', category:'social' }),
+  '同事':Object.freeze({ icon:'people', category:'social', symmetric:true }),
+  '室友':Object.freeze({ icon:'house-heart', category:'social', symmetric:true }),
+  '鄰居':Object.freeze({ icon:'house-heart', category:'social', symmetric:true }),
 
   // 非血緣親屬
   // 這些仍屬於其他關係 links，不參與父母 / 子女世代計算。
@@ -183,8 +183,16 @@ const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   '乾媽':Object.freeze({ icon:'person-heart', category:'chosen-kin' }),
   '乾兒子':Object.freeze({ icon:'person-check', category:'chosen-kin' }),
   '乾女兒':Object.freeze({ icon:'person-check', category:'chosen-kin' }),
-  '結拜兄弟姊妹':Object.freeze({ icon:'people', category:'chosen-kin' })
+  '結拜兄弟姊妹':Object.freeze({ icon:'people', category:'chosen-kin', symmetric:true })
 });
+
+function isSymmetricSocialRelationshipType(value) {
+  return (
+    SOCIAL_RELATIONSHIP_DEFINITIONS[
+      String(value || '').trim()
+    ]?.symmetric === true
+  );
+}
 
 function relationshipLayoutPriority(value) {
   return Number(
@@ -7446,7 +7454,11 @@ function relationshipOtherDefaultSetting(
     ...RELATIONSHIP_LINE_DEFAULTS.other,
     style:
       definition?.lineStyle ||
-      RELATIONSHIP_LINE_DEFAULTS.other.style
+      RELATIONSHIP_LINE_DEFAULTS.other.style,
+    bidirectional:
+      definition?.symmetric === true
+        ? true
+        : RELATIONSHIP_LINE_DEFAULTS.other.bidirectional
   };
 }
 
@@ -7458,12 +7470,23 @@ function getOtherRelationshipLineSetting(
       type
     );
 
-  return normalizeRelationshipLineSetting(
-    'other',
-    relationshipLineSettings
-      .otherTypes?.[type],
-    fallback
-  );
+  const normalized =
+    normalizeRelationshipLineSetting(
+      'other',
+      relationshipLineSettings
+        .otherTypes?.[type],
+      fallback
+    );
+
+  if (
+    isSymmetricSocialRelationshipType(
+      type
+    )
+  ) {
+    normalized.bidirectional = true;
+  }
+
+  return normalized;
 }
 
 function ensureOtherRelationshipLineSetting(
@@ -7486,8 +7509,19 @@ function ensureOtherRelationshipLineSetting(
     };
   }
 
-  return relationshipLineSettings
-    .otherTypes[type];
+  const setting =
+    relationshipLineSettings
+      .otherTypes[type];
+
+  if (
+    isSymmetricSocialRelationshipType(
+      type
+    )
+  ) {
+    setting.bidirectional = true;
+  }
+
+  return setting;
 }
 
 function relationshipResolvedColor(
@@ -7962,8 +7996,24 @@ function syncOtherRelationshipLineControls() {
     }
 
     if (bidirectionalEl) {
+      const symmetric =
+        isSymmetricSocialRelationshipType(
+          type
+        );
+
       bidirectionalEl.checked =
+        symmetric ||
         !!setting.bidirectional;
+
+      bidirectionalEl.disabled =
+        symmetric;
+
+      bidirectionalEl.setAttribute(
+        'aria-disabled',
+        symmetric
+          ? 'true'
+          : 'false'
+      );
     }
 
     updateRelationshipLinePreview(
@@ -8428,6 +8478,15 @@ function bindOtherRelationshipLineControls(
           otherRelationshipTypeFromDomKey(
             el.dataset.otherRelBidirectional
           );
+
+        if (
+          isSymmetricSocialRelationshipType(
+            type
+          )
+        ) {
+          el.checked = true;
+          return;
+        }
 
         const setting =
           ensureOtherRelationshipLineSetting(
@@ -9325,6 +9384,7 @@ genealogyStore =
     siblingRelationLabel:SIBLING_RELATION_LABEL,
     normalizeRelationshipType:normalizeRelationshipTypeText,
     isBuiltInRelationshipType:isBuiltInSocialRelationshipType,
+    isSymmetricRelationshipType:isSymmetricSocialRelationshipType,
     normalizeTraitText:cleanTraitDisplayText,
     normalizeAvatarFrame,
     petSpeciesValues:Object.keys(PET_SPECIES),
