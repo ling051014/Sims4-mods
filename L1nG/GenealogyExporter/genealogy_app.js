@@ -9134,6 +9134,50 @@ function applyGenealogyMutation(
 }
 
 
+// ========【寵物特徵顯示文字】 設定 - 舊資料載入時清除富文字標記 ========
+function cleanPetTraitDisplayText(value) {
+  const source =
+    String(value ?? '');
+
+  if (!source) {
+    return '';
+  }
+
+  let decoded =
+    source;
+
+  if (
+    source.includes('&') &&
+    typeof document !== 'undefined'
+  ) {
+    const decoder =
+      document.createElement(
+        'textarea'
+      );
+
+    decoder.innerHTML =
+      source;
+
+    decoded =
+      decoder.value;
+  }
+
+  return decoded
+    .replace(
+      /<\s*br\s*\/?>/gi,
+      ' '
+    )
+    .replace(
+      /<\/?[a-z][^>]*>/gi,
+      ''
+    )
+    .replace(
+      /\s+/g,
+      ' '
+    )
+    .trim();
+}
+
 // ========【L1nG v1 資料正規化】 設定 - 只維護目前網站 canonical shape ========
 function normalizeCurrentDatabase(targetDb) {
   Object.values(targetDb.sims || {}).forEach(sim => {
@@ -9212,7 +9256,7 @@ function normalizeCurrentDatabase(targetDb) {
         status:pet.status || '在世',
         traits:Array.isArray(pet.traits)
           ? pet.traits
-              .map(value => String(value || '').trim())
+              .map(cleanPetTraitDisplayText)
               .filter(Boolean)
           : [],
         avatar:pet.avatar || null,
