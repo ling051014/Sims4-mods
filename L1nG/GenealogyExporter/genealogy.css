@@ -2780,6 +2780,19 @@ button.avatar-editor-action { cursor:pointer; }
 .pet-editor-fields input,.pet-editor-fields select { width:100%; min-width:0; min-height:34px; padding:6px 9px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:13px; outline:none; }
 .pet-editor-fields input:focus,.pet-editor-fields select:focus { border-color:var(--action-primary); }
 .pet-field-full { grid-column:1/-1; }
+.pet-trait-field {
+    /* 寵物特徵沿用人物特徵編輯器，但維持寵物表單本身的資訊層級 */ display:grid;
+    /* 標題與標籤編輯器間距 */ gap:4px;
+    /* 避免窄視窗被內容撐開 */ min-width:0;
+}
+.pet-field-label {
+    /* 與其他寵物欄位標籤一致 */ color:var(--text-secondary);
+    /* 字級一致 */ font-size:11.5px;
+    /* 字重一致 */ font-weight:600;
+}
+.pet-trait-field .trait-editor {
+    /* 內部特徵操作不繼承欄位標題粗體 */ font-weight:400;
+}
 
 .avatar-crop-modal { width:min(560px,100%); }
 .avatar-crop-workspace {
@@ -3330,6 +3343,16 @@ button.avatar-editor-action { cursor:pointer; }
     /* 換行方式 */ white-space: nowrap;
     /* 溢出處理 */ overflow: hidden;
     /* 文字溢出 */ text-overflow: ellipsis;
+}
+
+.pet-trait-summary {
+    /* 寵物清單直接顯示已記錄特徵 */ display:flex;
+    /* 多個特徵自動換行 */ flex-wrap:wrap;
+    /* 標籤間距 */ gap:3px;
+    /* 與基本資料留出呼吸空間 */ margin-top:4px;
+}
+.pet-trait-summary .tag {
+    /* 清單中的寵物特徵稍微放寬，避免文字過早省略 */ max-width:120px;
 }
 
 .pet-item-actions {
@@ -4553,6 +4576,17 @@ button.avatar-editor-action { cursor:pointer; }
     white-space:normal;
     overflow-wrap:anywhere;
     word-break:break-word;
+}
+
+.person-profile-pet-traits {
+    /* 人物檔案中的寵物特徵採與人物特徵一致的標籤語言 */ display:flex;
+    /* 空間不足時換行 */ flex-wrap:wrap;
+    /* 標籤間距 */ gap:4px;
+    /* 與寵物基本資料分層 */ margin-top:4px;
+}
+.person-profile-pet-traits .tag {
+    /* 個人檔案不限制為人物卡片的小標籤寬度 */ max-width:none;
+    /* 提升檔案檢視可讀性 */ font-size:10px;
 }
 
 /* ========【寵物血統】 設定 - 匯入的父母／子女資料以次要資訊顯示 ======== */
