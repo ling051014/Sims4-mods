@@ -326,84 +326,244 @@ body[data-theme="amber"] {
     /* 琥珀紙頁人物列懸停 */ --genealogy-roster-item-hover: #f8eedc;
 }
 
-body[data-theme="midnight"] {
-    /* 漸層起始色 */ --brand-gradient-start: #182535;
-    /* 漸層結束色 */ --brand-gradient-end: #243c5c;
-    /* 淡色漸層起始 */ --brand-tint-start: rgba(112,169,232,.12);
-    /* 淡色漸層結束 */ --brand-tint-end: rgba(112,169,232,.08);
-    /* 互動強調色 */ --action-primary: #70a9e8;
-    /* 懸停強調色 */ --action-primary-hover: #8bbaf0;
-    /* 深色主色 */ --action-primary-strong: #4f7fb8;
-    /* 頂欄文字顏色 */ --navigation-text: #edf3f8;
-    /* 頂欄次要文字 */ --navigation-text-muted: #a9b7c5;
-    /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.08);
-    /* 頂欄欄位邊框 */ --navigation-control-border: rgba(255,255,255,.15);
-    /* 頂欄欄位文字 */ --navigation-control-text: #edf3f8;
-    /* 頂欄提示文字 */ --navigation-control-placeholder: #9eacba;
-    /* 頂欄欄位懸停 */ --navigation-control-hover: rgba(255,255,255,.13);
-    /* 頁面背景 */ --surface-canvas: #10151c;
-    /* 背景紋理色 */ --surface-canvas-pattern: rgba(112,169,232,.075);
-    /* 主要文字 */ --text-primary: #f0f3f6;
-    /* 次要文字 */ --text-secondary: #9da7b3;
-    /* 主要線條 */ --relationship-parent: #303a46;
-    /* 卡片背景 */ --surface-card: #1a212a;
-    /* 一般邊框 */ --border-default: #303a46;
-    /* 輸入欄背景 */ --surface-input: #151c24;
-    /* 遮罩背景 */ --overlay-backdrop: rgba(0,0,0,.70);
-    /* 面板背景 */ --surface-panel: #151c24;
-    /* 面板項目背景 */ --surface-item: #1c2530;
-    /* 面板項目懸停 */ --surface-item-hover: #25313e;
-    /* 標籤背景 */ --tag-surface: #243241;
-    /* 標籤文字 */ --tag-text: #b2c3d5;
-    /* 配偶關係線 */ --relationship-spouse: #b67b9e;
-    /* 前任配偶線 */ --relationship-former-spouse: #626d79;
-    /* 領養關係線 */ --relationship-adoptive: #5b918b;
-    /* 其他關係線 */ --relationship-other: #6e8298;
-    /* 男性識別色 */ --person-accent-male: #678bb9;
-    /* 女性識別色 */ --person-accent-female: #b67b9e;
-    /* 其他性別識別色 */ --person-accent-other: #818b98;
-    /* 幽靈卡片背景 */ --person-ghost-surface: #162331;
-    /* 幽靈卡片邊框 */ --person-ghost-border: #38506d;
-    /* 幽靈文字 */ --person-ghost-text: #b2cee8;
-    /* 幽靈標記背景 */ --person-ghost-badge-surface: #1c2d3f;
-    /* 幽靈標記邊框 */ --person-ghost-badge-border: #3d5b7e;
-    /* 幽靈標籤背景 */ --person-ghost-tag-surface: #23384e;
-    /* 幽靈標籤文字 */ --person-ghost-tag-text: #abc5df;
-    /* 幽靈男性識別色 */ --person-ghost-accent-male: #6686a8;
-    /* 幽靈女性識別色 */ --person-ghost-accent-female: #9b7690;
-    /* 幽靈其他性別識別色 */ --person-ghost-accent-other: #76899d;
-    /* 已故卡片背景 */ --person-deceased-surface: #1e252e;
-    /* 已故卡片邊框 */ --person-deceased-border: #3a434d;
-    /* 已故文字 */ --person-deceased-text: #b7bec7;
-    /* 已故標記背景 */ --person-deceased-badge-surface: #252d37;
-    /* 已故標記邊框 */ --person-deceased-badge-border: #48525e;
-    /* 已故標籤背景 */ --person-deceased-tag-surface: #303944;
-    /* 已故標籤文字 */ --person-deceased-tag-text: #b1bac5;
-    /* 已故男性識別色 */ --person-deceased-accent-male: #6f747f;
-    /* 已故女性識別色 */ --person-deceased-accent-female: #876e7b;
-    /* 已故其他性別識別色 */ --person-deceased-accent-other: #7b8089;
-    /* 在世標記背景 */ --person-living-badge-surface: #1b2d22;
-    /* 在世標記邊框 */ --person-living-badge-border: #396246;
-    /* 關係標註背景 */ --relationship-label-surface: rgba(26,33,42,.97);
-    /* 關係標註邊框 */ --relationship-label-border: #3a4551;
-    /* 頭像漸層起始 */ --avatar-surface-start: #273442;
-    /* 頭像漸層結束 */ --avatar-surface-end: #1b232d;
-    /* 頭像文字 */ --avatar-text: #99a7b5;
-    /* 高亮顏色 */ --selection-highlight: rgba(112,169,232,.40);
-    /* 下拉選單背景 */ --nav-dropdown-bg: #1a212a;
-    /* 下拉選單文字 */ --nav-dropdown-text: #edf3f8;
-    /* 下拉選單邊框 */ --nav-dropdown-border: #35404d;
-    /* 下拉選單分隔線 */ --nav-dropdown-divider: #28323d;
-    /* 下拉選單懸停背景 */ --nav-dropdown-hover-bg: #232c36;
-    /* 下拉選單懸停文字 */ --nav-dropdown-hover-text: #f6f8fa;
-    /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #2c3642;
-    /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #ffffff;
-    /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #222b35;
-    /* 導覽選取背景 */ --nav-active-bg: #29323d;
-    /* 導覽選取邊框 */ --nav-active-border: #3a4653;
-    /* 導覽選取文字 */ --nav-active-text: #edf3f8;
-    /* 午夜靛藍人物列背景 */ --genealogy-roster-item-bg: #1c2530;
-    /* 午夜靛藍人物列懸停 */ --genealogy-roster-item-hover: #25313e;
+body[data-theme="ink"] {
+    --navigation-control-surface: rgba(255,255,255,.07);
+    --navigation-control-border: rgba(255,255,255,.14);
+    --navigation-control-hover: rgba(255,255,255,.12);
+    --overlay-backdrop: rgba(0,0,0,.72);
+    --person-ghost-surface: #1b2229;
+    --person-ghost-border: #465767;
+    --person-ghost-text: #c0d0df;
+    --person-ghost-badge-surface: #202b35;
+    --person-ghost-badge-border: #4a6072;
+    --person-ghost-tag-surface: #273541;
+    --person-ghost-tag-text: #c1d1df;
+    --person-ghost-accent-male: #7f9bb5;
+    --person-ghost-accent-female: #a8899a;
+    --person-ghost-accent-other: #8997a3;
+    --person-deceased-surface: #232529;
+    --person-deceased-border: #4d4d51;
+    --person-deceased-text: #c4c1c4;
+    --person-deceased-badge-surface: #2b2c30;
+    --person-deceased-badge-border: #56565b;
+    --person-deceased-tag-surface: #34353a;
+    --person-deceased-tag-text: #c7c3c6;
+    --person-deceased-accent-male: #7e8188;
+    --person-deceased-accent-female: #8f7b84;
+    --person-deceased-accent-other: #85868c;
+    --person-living-badge-surface: #1d3024;
+    --person-living-badge-border: #3f674d;
+    --avatar-surface-start: #2b3036;
+    --avatar-surface-end: #20252b;
+    --avatar-text: #a6afb8;
+    --nav-dropdown-selected-text: #ffffff;
+    --brand-gradient-start: #19171d;
+    --brand-gradient-end: #302936;
+    --brand-tint-start: rgba(183,154,203,.15);
+    --brand-tint-end: rgba(183,154,203,.08);
+    --action-primary: #b79acb;
+    --action-primary-hover: #c9add9;
+    --action-primary-strong: #9274a7;
+    --navigation-text: #f4f0f5;
+    --navigation-text-muted: #c0b8c3;
+    --navigation-control-text: #f4f0f5;
+    --navigation-control-placeholder: #aaa0ae;
+    --surface-canvas: #111014;
+    --surface-canvas-pattern: rgba(183,154,203,.07);
+    --text-primary: #f4f0f5;
+    --text-secondary: #c0b8c3;
+    --relationship-parent: #4b4350;
+    --surface-card: #211e24;
+    --border-default: #4b4350;
+    --surface-input: #18161b;
+    --surface-panel: #18161b;
+    --surface-item: #211e24;
+    --surface-item-hover: #2c2730;
+    --tag-surface: #302936;
+    --tag-text: #d6c4df;
+    --relationship-spouse: #c59ab7;
+    --relationship-former-spouse: #776c7c;
+    --relationship-adoptive: #81aaa0;
+    --relationship-other: #9a8ba5;
+    --person-accent-male: #83a0c2;
+    --person-accent-female: #c59ab7;
+    --person-accent-other: #a58db3;
+    --relationship-label-surface: rgba(33,30,36,.97);
+    --relationship-label-border: #554b5b;
+    --selection-highlight: rgba(183,154,203,.38);
+    --nav-dropdown-bg: #211e24;
+    --nav-dropdown-text: #f4f0f5;
+    --nav-dropdown-border: #4b4350;
+    --nav-dropdown-divider: #302b34;
+    --nav-dropdown-hover-bg: #2b2630;
+    --nav-dropdown-hover-text: #ffffff;
+    --nav-dropdown-selected-bg: #382f3f;
+    --nav-button-hover-bg: #29242e;
+    --nav-active-bg: #332c38;
+    --nav-active-border: #554b5b;
+    --nav-active-text: #f4f0f5;
+    --genealogy-roster-item-bg: #211e24;
+    --genealogy-roster-item-hover: #2b2630;
+}
+
+body[data-theme="berrynight"] {
+    --navigation-control-surface: rgba(255,255,255,.07);
+    --navigation-control-border: rgba(255,255,255,.14);
+    --navigation-control-hover: rgba(255,255,255,.12);
+    --overlay-backdrop: rgba(0,0,0,.72);
+    --person-ghost-surface: #1b2229;
+    --person-ghost-border: #465767;
+    --person-ghost-text: #c0d0df;
+    --person-ghost-badge-surface: #202b35;
+    --person-ghost-badge-border: #4a6072;
+    --person-ghost-tag-surface: #273541;
+    --person-ghost-tag-text: #c1d1df;
+    --person-ghost-accent-male: #7f9bb5;
+    --person-ghost-accent-female: #a8899a;
+    --person-ghost-accent-other: #8997a3;
+    --person-deceased-surface: #232529;
+    --person-deceased-border: #4d4d51;
+    --person-deceased-text: #c4c1c4;
+    --person-deceased-badge-surface: #2b2c30;
+    --person-deceased-badge-border: #56565b;
+    --person-deceased-tag-surface: #34353a;
+    --person-deceased-tag-text: #c7c3c6;
+    --person-deceased-accent-male: #7e8188;
+    --person-deceased-accent-female: #8f7b84;
+    --person-deceased-accent-other: #85868c;
+    --person-living-badge-surface: #1d3024;
+    --person-living-badge-border: #3f674d;
+    --avatar-surface-start: #2b3036;
+    --avatar-surface-end: #20252b;
+    --avatar-text: #a6afb8;
+    --nav-dropdown-selected-text: #ffffff;
+    --brand-gradient-start: #1b1216;
+    --brand-gradient-end: #35242b;
+    --brand-tint-start: rgba(210,138,166,.15);
+    --brand-tint-end: rgba(210,138,166,.08);
+    --action-primary: #d28aa6;
+    --action-primary-hover: #e1a2b9;
+    --action-primary-strong: #aa6881;
+    --navigation-text: #f7f1f4;
+    --navigation-text-muted: #c7b7bf;
+    --navigation-control-text: #f7f1f4;
+    --navigation-control-placeholder: #b5a1aa;
+    --surface-canvas: #151013;
+    --surface-canvas-pattern: rgba(210,138,166,.07);
+    --text-primary: #f7f1f4;
+    --text-secondary: #c7b7bf;
+    --relationship-parent: #58404b;
+    --surface-card: #281d22;
+    --border-default: #58404b;
+    --surface-input: #1e161a;
+    --surface-panel: #1e161a;
+    --surface-item: #281d22;
+    --surface-item-hover: #35262d;
+    --tag-surface: #3a2730;
+    --tag-text: #e1bdca;
+    --relationship-spouse: #d28aa6;
+    --relationship-former-spouse: #806973;
+    --relationship-adoptive: #7ea79c;
+    --relationship-other: #a58a97;
+    --person-accent-male: #879fb8;
+    --person-accent-female: #d28aa6;
+    --person-accent-other: #aa8b9b;
+    --relationship-label-surface: rgba(40,29,34,.97);
+    --relationship-label-border: #644653;
+    --selection-highlight: rgba(210,138,166,.38);
+    --nav-dropdown-bg: #281d22;
+    --nav-dropdown-text: #f7f1f4;
+    --nav-dropdown-border: #58404b;
+    --nav-dropdown-divider: #37272e;
+    --nav-dropdown-hover-bg: #35262d;
+    --nav-dropdown-hover-text: #ffffff;
+    --nav-dropdown-selected-bg: #442e38;
+    --nav-button-hover-bg: #32232a;
+    --nav-active-bg: #3a2830;
+    --nav-active-border: #644653;
+    --nav-active-text: #f7f1f4;
+    --genealogy-roster-item-bg: #281d22;
+    --genealogy-roster-item-hover: #35262d;
+}
+
+body[data-theme="graphite"] {
+    --navigation-control-surface: rgba(255,255,255,.07);
+    --navigation-control-border: rgba(255,255,255,.14);
+    --navigation-control-hover: rgba(255,255,255,.12);
+    --overlay-backdrop: rgba(0,0,0,.72);
+    --person-ghost-surface: #1b2229;
+    --person-ghost-border: #465767;
+    --person-ghost-text: #c0d0df;
+    --person-ghost-badge-surface: #202b35;
+    --person-ghost-badge-border: #4a6072;
+    --person-ghost-tag-surface: #273541;
+    --person-ghost-tag-text: #c1d1df;
+    --person-ghost-accent-male: #7f9bb5;
+    --person-ghost-accent-female: #a8899a;
+    --person-ghost-accent-other: #8997a3;
+    --person-deceased-surface: #232529;
+    --person-deceased-border: #4d4d51;
+    --person-deceased-text: #c4c1c4;
+    --person-deceased-badge-surface: #2b2c30;
+    --person-deceased-badge-border: #56565b;
+    --person-deceased-tag-surface: #34353a;
+    --person-deceased-tag-text: #c7c3c6;
+    --person-deceased-accent-male: #7e8188;
+    --person-deceased-accent-female: #8f7b84;
+    --person-deceased-accent-other: #85868c;
+    --person-living-badge-surface: #1d3024;
+    --person-living-badge-border: #3f674d;
+    --avatar-surface-start: #2b3036;
+    --avatar-surface-end: #20252b;
+    --avatar-text: #a6afb8;
+    --nav-dropdown-selected-text: #ffffff;
+    --brand-gradient-start: #15181b;
+    --brand-gradient-end: #2a3036;
+    --brand-tint-start: rgba(135,167,196,.14);
+    --brand-tint-end: rgba(135,167,196,.08);
+    --action-primary: #87a7c4;
+    --action-primary-hover: #a3bdd3;
+    --action-primary-strong: #6689a8;
+    --navigation-text: #f3f5f7;
+    --navigation-text-muted: #b9c0c7;
+    --navigation-control-text: #f3f5f7;
+    --navigation-control-placeholder: #a4abb2;
+    --surface-canvas: #111315;
+    --surface-canvas-pattern: rgba(135,167,196,.07);
+    --text-primary: #f3f5f7;
+    --text-secondary: #b9c0c7;
+    --relationship-parent: #47515a;
+    --surface-card: #202428;
+    --border-default: #47515a;
+    --surface-input: #181b1e;
+    --surface-panel: #181b1e;
+    --surface-item: #202428;
+    --surface-item-hover: #2a3035;
+    --tag-surface: #29323a;
+    --tag-text: #c0d0dc;
+    --relationship-spouse: #9ab6ce;
+    --relationship-former-spouse: #6d777f;
+    --relationship-adoptive: #7fa49a;
+    --relationship-other: #8e9ca8;
+    --person-accent-male: #87a7c4;
+    --person-accent-female: #b58fa2;
+    --person-accent-other: #929da8;
+    --relationship-label-surface: rgba(32,36,40,.97);
+    --relationship-label-border: #52606b;
+    --selection-highlight: rgba(135,167,196,.38);
+    --nav-dropdown-bg: #202428;
+    --nav-dropdown-text: #f3f5f7;
+    --nav-dropdown-border: #47515a;
+    --nav-dropdown-divider: #2c3237;
+    --nav-dropdown-hover-bg: #2a3035;
+    --nav-dropdown-hover-text: #ffffff;
+    --nav-dropdown-selected-bg: #343d44;
+    --nav-button-hover-bg: #282e33;
+    --nav-active-bg: #30373d;
+    --nav-active-border: #52606b;
+    --nav-active-text: #f3f5f7;
+    --genealogy-roster-item-bg: #202428;
+    --genealogy-roster-item-hover: #2a3035;
 }
 
 body[data-theme="custom"] {
@@ -1350,7 +1510,9 @@ body.sidebar-resizing * {
     /* 文字顏色 */ color: #a05a4a;
 }
 
-body[data-theme="midnight"] .person-card-death .l1ng-icon {
+body[data-theme="ink"] .person-card-death .l1ng-icon,
+body[data-theme="berrynight"] .person-card-death .l1ng-icon,
+body[data-theme="graphite"] .person-card-death .l1ng-icon {
     /* 文字顏色 */ color: #c08e78;
 }
 
@@ -1371,7 +1533,9 @@ body[data-theme="midnight"] .person-card-death .l1ng-icon {
     /* 文字顏色 */ color: #a05a4a;
 }
 
-body[data-theme="midnight"] .person-card-death {
+body[data-theme="ink"] .person-card-death,
+body[data-theme="berrynight"] .person-card-death,
+body[data-theme="graphite"] .person-card-death {
     /* 文字顏色 */ color: #c08e78;
 }
 
@@ -1525,8 +1689,12 @@ body[data-theme="midnight"] .person-card-death {
 .stage-成年   { --stage-accent:#8585b2; --stage-bg:rgba(133,133,178,.10); }
 .stage-老年   { --stage-accent:#9d8f84; --stage-bg:rgba(157,143,132,.10); }
 
-body[data-theme="midnight"] .stage-tag,
-body[data-theme="midnight"] .life-photo-stage {
+body[data-theme="ink"] .stage-tag,
+body[data-theme="berrynight"] .stage-tag,
+body[data-theme="graphite"] .stage-tag,
+body[data-theme="ink"] .life-photo-stage,
+body[data-theme="berrynight"] .life-photo-stage,
+body[data-theme="graphite"] .life-photo-stage {
     --stage-ink:#edf3f8;
     border-color:color-mix(in srgb,var(--stage-accent) 52%,#2f3945);
     background:color-mix(in srgb,var(--stage-accent) 16%,#151c24);
@@ -3025,214 +3193,43 @@ button.avatar-editor-action { cursor:pointer; }
     /* 行距設定 */ line-height: 1.5;
 }
 
-.appearance-panel {
-    /* 元素寬度 */ width: min(640px,100%);
-}
-
-.setting-group-title {
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: var(--action-primary);
-    /* 字體粗細 */ font-weight: 600;
-    /* 外距設定 */ margin: 14px 0 8px;
-    /* 下方內縮 */ padding-bottom: 6px;
-    /* 下方邊框 */ border-bottom: 1px dashed var(--border-default);
-    /* 字距設定 */ letter-spacing: .5px;
-}
-
-.setting-group-title:first-of-type {
-    /* 上方外距 */ margin-top: 0;
-}
-
-.appearance-theme-grid {
-    /* 顯示方式 */ display: grid;
-    /* 網格欄位 */ grid-template-columns: repeat(2,1fr);
-    /* 項目間距 */ gap: 10px;
-    /* 下方外距 */ margin-bottom: 8px;
-}
-
-.appearance-theme-card {
-    /* 邊框設定 */ border: 2px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 12px;
-    /* 內縮空間 */ padding: 12px 14px;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 動畫過渡 */ transition: .15s;
-    /* 背景設定 */ background: var(--surface-card);
-    /* 顯示方式 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 項目間距 */ gap: 8px;
-}
-
-.appearance-theme-card:hover {
-    /* 邊框顏色 */ border-color: var(--action-primary);
-}
-
-.appearance-theme-card.selected {
-    /* 邊框顏色 */ border-color: var(--action-primary);
-    /* 元素陰影 */ box-shadow: 0 0 0 3px var(--brand-tint-start), 0 0 0 6px var(--brand-tint-end);
-}
-
-.appearance-theme-preview {
-    /* 元素高度 */ height: 28px;
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 元素陰影 */ box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
-}
-
-.appearance-theme-card-name {
-    /* 文字對齊 */ text-align: center;
-    /* 字體大小 */ font-size: 13px;
-    /* 字體粗細 */ font-weight: 600;
-    /* 字距設定 */ letter-spacing: .5px;
-    /* 文字顏色 */ color: var(--text-primary);
-}
-
-.appearance-theme-card.selected .appearance-theme-card-name {
-    /* 文字顏色 */ color: var(--action-primary);
-    /* 字體粗細 */ font-weight: 700;
-}
-
-.appearance-custom-theme {
-    /* 外距設定 */ margin: 12px 0 4px;
-    /* 內縮空間 */ padding: 12px 14px;
-    /* 邊框設定 */ border: 1px dashed var(--border-default);
-    /* 圓角弧度 */ border-radius: 10px;
-    /* 背景設定 */ background: var(--surface-panel);
-}
-
-.appearance-custom-theme-row {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 10px;
-    /* 自動換行 */ flex-wrap: wrap;
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: var(--text-secondary);
-}
-
-.appearance-custom-theme-row label {
-    /* 字體粗細 */ font-weight: 600;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 顯示方式 */ display: inline-flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 5px;
-}
-
-.custom-color-input {
-    /* 元素寬度 */ width: 42px;
-    /* 元素高度 */ height: 34px;
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 內縮空間 */ padding: 2px;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 背景設定 */ background: transparent;
-}
-
-.appearance-custom-theme-preview {
-    /* 彈性配比 */ flex: 1;
-    /* 最小寬度 */ min-width: 120px;
-    /* 元素高度 */ height: 28px;
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 元素陰影 */ box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
-    /* 背景設定 */ background: linear-gradient(120deg,#f0c050,#a878c8);
-}
-
-.apply-btn {
-    /* 內縮空間 */ padding: 7px 14px;
-    /* 字體大小 */ font-size: 12.5px;
-    /* 邊框設定 */ border: 1px solid var(--action-primary);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 背景設定 */ background: linear-gradient(135deg, var(--brand-tint-start), var(--brand-tint-end));
-    /* 文字顏色 */ color: var(--action-primary);
-    /* 字體粗細 */ font-weight: 600;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 動畫過渡 */ transition: .15s;
-}
-
-.apply-btn:hover {
-    /* 視覺濾鏡 */ filter: brightness(1.05);
-}
-
-.appearance-background-preview {
-    /* 元素寬度 */ width: 100%;
-    /* 元素高度 */ height: 140px;
-    /* 圓角弧度 */ border-radius: 10px;
-    /* 邊框設定 */ border: 1px dashed var(--border-default);
-    /* 背景設定 */ background: var(--surface-item);
-    /* 背景尺寸 */ background-size: cover;
-    /* 背景位置 */ background-position: center;
-    /* 背景重複 */ background-repeat: no-repeat;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 字體大小 */ font-size: 13px;
-    /* 下方外距 */ margin-bottom: 12px;
-    /* 拖曳提示定位 */ position: relative;
-    /* 拖曳提示不超出預覽區 */ overflow: hidden;
-    /* 拖曳狀態過渡 */ transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
-}
-
-.appearance-background-preview.dragover {
-    border-color: var(--action-primary);
-    box-shadow: inset 0 0 0 1px var(--action-primary);
-    background-color: var(--brand-tint-start);
-}
-
-.appearance-background-preview.dragover::after {
-    content: attr(data-drop-label);
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px;
-    background: color-mix(in srgb,var(--surface-card) 86%,transparent);
-    color: var(--action-primary);
-    font-size: 13px;
-    font-weight: 600;
-    text-align: center;
-    pointer-events: none;
-}
-
-.appearance-background-row {
-    /* 顯示方式 */ display: flex;
-    /* 項目間距 */ gap: 8px;
-    /* 自動換行 */ flex-wrap: wrap;
-    /* 下方外距 */ margin-bottom: 12px;
-}
-
-.appearance-background-setting {
-    /* 顯示方式 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 項目間距 */ gap: 6px;
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 下方外距 */ margin-bottom: 12px;
-}
-
-.appearance-background-setting input[type=range] {
-    /* 元素寬度 */ width: 100%;
-    /* 內縮空間 */ padding: 0;
-    /* 邊框設定 */ border: none;
-    /* 背景設定 */ background: transparent;
-    /* 控制項強調色 */ accent-color: var(--action-primary);
-    /* 滑鼠指標 */ cursor: pointer;
-}
-
-.appearance-background-setting select {
-    /* 內縮空間 */ padding: 6px 10px;
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 字體大小 */ font-size: 13px;
-    /* 外框設定 */ outline: none;
-    /* 字體設定 */ font-family: inherit;
-    /* 元素寬度 */ width: 100%;
-}
-
-.appearance-background-value {
-    /* 文字顏色 */ color: var(--action-primary);
-    /* 字體粗細 */ font-weight: 600;
-}
+.appearance-panel{width:min(860px,100%)}
+.setting-group-title{font-size:12px;color:var(--action-primary);font-weight:600;margin:16px 0 9px;padding-bottom:6px;border-bottom:1px dashed var(--border-default);letter-spacing:.5px}
+.setting-group-title:first-of-type{margin-top:0}
+.appearance-theme-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:10px}
+.appearance-theme-card{position:relative;min-width:0;border:1px solid var(--border-default);border-radius:10px;padding:10px;cursor:pointer;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease,background-color .16s ease;background:var(--surface-card);color:var(--text-primary);display:flex;flex-direction:column;gap:7px}
+.appearance-theme-card:hover{border-color:color-mix(in srgb,var(--action-primary) 55%,var(--border-default));transform:translateY(-1px)}
+.appearance-theme-card.selected{border-color:var(--action-primary);box-shadow:0 0 0 2px var(--brand-tint-start)}
+.appearance-theme-radio{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;border:1px solid var(--border-default);background:var(--surface-card)}
+.appearance-theme-card.selected .appearance-theme-radio{border-color:var(--action-primary);background:var(--action-primary)}
+.appearance-theme-preview{height:34px;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),inset 0 1px 2px rgba(0,0,0,.10)}
+.appearance-theme-card-name{padding-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:600;text-align:left;color:var(--text-primary)}
+.appearance-theme-card.selected .appearance-theme-card-name{color:var(--action-primary)}
+.appearance-custom-theme{margin:8px 0 4px;padding:12px 14px;border:1px solid var(--border-default);border-radius:10px;background:var(--surface-panel)}
+.appearance-custom-theme-title{margin-bottom:10px;color:var(--text-primary);font-size:12px;font-weight:700}
+.appearance-custom-theme-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.appearance-custom-theme-row label{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text-secondary);font-size:11px;font-weight:600}
+.custom-color-input{width:44px;height:32px;flex:0 0 44px;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
+.appearance-custom-theme-preview{height:28px;margin-top:10px;border-radius:7px;border:1px solid var(--border-default)}
+.appearance-custom-theme-actions{margin-top:10px;display:flex;justify-content:flex-end}
+.apply-btn{padding:7px 14px;font-size:12px;border:1px solid var(--action-primary);border-radius:7px;background:var(--brand-tint-start);color:var(--action-primary);font-weight:600;cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
+.apply-btn:hover{background:var(--brand-tint-end)}
+.appearance-background-preview{appearance:none;width:100%;min-height:142px;padding:18px;border:1px dashed var(--border-default);border-radius:10px;background-color:var(--surface-item);background-size:cover;background-position:center;background-repeat:no-repeat;color:var(--text-secondary);cursor:pointer;position:relative;overflow:hidden;transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}
+.appearance-background-preview:hover,.appearance-background-preview:focus-visible,.appearance-background-preview.dragover{border-color:var(--action-primary);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--action-primary) 45%,transparent);outline:none}
+.appearance-background-preview.dragover::after{content:attr(data-drop-label);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;background:color-mix(in srgb,var(--surface-card) 88%,transparent);color:var(--action-primary);font-size:13px;font-weight:600;text-align:center;pointer-events:none}
+.appearance-background-empty{display:grid;justify-items:center;gap:7px;pointer-events:none}
+.appearance-background-empty .l1ng-icon{width:26px;height:26px;color:var(--action-primary)}
+.appearance-background-empty strong{color:var(--text-primary);font-size:13px}
+.appearance-background-empty small{color:var(--text-secondary);font-size:11px;font-weight:400}
+.appearance-background-preview.has-image{min-height:170px;border-style:solid}
+.appearance-background-preview.has-image .appearance-background-empty{visibility:hidden}
+.appearance-background-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;margin-bottom:12px}
+.appearance-background-row button{display:inline-flex;align-items:center;gap:6px}
+.appearance-control-row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:10px;color:var(--text-secondary);font-size:11px}
+.appearance-control-row select{grid-column:2/4}
+.appearance-control-row input[type=range]{width:100%;min-width:0;accent-color:var(--action-primary)}
+.appearance-background-value{min-width:38px;color:var(--text-primary);font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+@media(max-width:760px){.appearance-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.appearance-custom-theme-row{grid-template-columns:1fr}}
 
 .storage-bar {
     /* 元素寬度 */ width: 100%;
@@ -6201,7 +6198,9 @@ html[lang="en"] body {
     /* 種族圖示使用主題強調色提高辨識度 */ color: var(--action-primary);
 }
 
-body[data-theme="midnight"] .person-meta-icon.status-alive {
+body[data-theme="ink"] .person-meta-icon.status-alive,
+body[data-theme="berrynight"] .person-meta-icon.status-alive,
+body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 深色主題提高在世圖示亮度 */ color: #8fc59b;
 }
 
@@ -7961,357 +7960,67 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     max-height:min(300px,calc(100vh - 150px));
 }
 
-/* ========【關係線設定】 設定 - 每條關係線直接展開自己的設定 ======== */
-.relationship-line-list {
-    display:grid;
-    gap:4px;
-}
-
-.relationship-line-item {
-    border:1px solid var(--border-default);
-    border-radius:7px;
-    background:var(--surface-card);
-    overflow:hidden;
-}
-
-.relationship-line-item > summary {
-    position:relative;
-    min-height:38px;
-    padding:7px 9px;
-    display:grid;
-    grid-template-columns:120px minmax(120px,1fr);
-    align-items:center;
-    gap:12px;
-    cursor:pointer;
-    list-style:none;
-    color:var(--text-primary);
-    font-size:11px;
-    font-weight:600;
-    transition:background-color .15s ease;
-}
-
-.relationship-line-item > summary::-webkit-details-marker {
-    display:none;
-}
-
-.relationship-line-item > summary:hover {
-    background:var(--surface-item-hover);
-}
-
-.relationship-line-item[open] > summary {
-    background:var(--brand-tint-start);
-    border-bottom:1px solid var(--border-default);
-}
-
-.relationship-line-item > summary::after {
-    content:"";
-    position:absolute;
-    right:11px;
-    top:50%;
-    width:7px;
-    height:7px;
-    border-right:1.5px solid var(--text-secondary);
-    border-bottom:1.5px solid var(--text-secondary);
-    transform:translateY(-65%) rotate(45deg);
-    transition:transform .15s ease;
-}
-
-.relationship-line-item[open] > summary::after {
-    transform:translateY(-35%) rotate(225deg);
-}
-
-.relationship-line-item > summary > i {
-    grid-column:2;
-    grid-row:1;
-    margin-right:22px;
-    height:8px;
-    position:relative;
-    display:block;
-}
-
-.relationship-line-item > summary > i::before {
-    content:"";
-    position:absolute;
-    left:0;
-    right:0;
-    top:50%;
-    height:var(--preview-width,2px);
-    background:var(--preview-color,var(--relationship-parent));
-    transform:translateY(-50%);
-}
-
-.relationship-line-item > summary > i[data-line-style="short-dash"]::before {
-    background:repeating-linear-gradient(90deg,var(--preview-color) 0 4px,transparent 4px 7px);
-}
-
-.relationship-line-item > summary > i[data-line-style="long-dash"]::before {
-    background:repeating-linear-gradient(90deg,var(--preview-color) 0 10px,transparent 10px 16px);
-}
-
-.relationship-line-item > summary > i[data-line-style="dot"]::before {
-    background:repeating-linear-gradient(90deg,var(--preview-color) 0 2px,transparent 2px 7px);
-}
-
-.relationship-line-controls {
-    padding:9px 10px 10px;
-    display:grid;
-    grid-template-columns:150px minmax(150px,1fr) 80px;
-    gap:10px;
-    align-items:end;
-    background:var(--surface-panel);
-}
-
-.relationship-line-controls label {
-    min-width:0;
-    display:grid;
-    gap:5px;
-    color:var(--text-secondary);
-    font-size:10px;
-}
-
-.relationship-line-controls select {
-    width:100%;
-    min-height:30px;
-    padding:5px 32px 5px 8px;
-    border:1px solid var(--border-default);
-    border-radius:5px;
-    background:var(--surface-input);
-    color:var(--text-primary);
-    font:inherit;
-    font-size:10.5px;
-    outline:none;
-}
-
-.relationship-line-controls select:hover {
-    border-color:color-mix(in srgb,var(--action-primary) 38%,var(--border-default));
-}
-
-.relationship-line-controls select:focus {
-    border-color:var(--action-primary);
-    box-shadow:0 0 0 2px var(--brand-tint-start);
-}
-
-.relationship-line-controls input[type="color"] {
-    width:42px;
-    height:30px;
-    padding:2px;
-    border:1px solid var(--border-default);
-    border-radius:5px;
-    background:var(--surface-input);
-}
-
-.relationship-style-actions {
-    margin-top:8px;
-}
-
-/* ========【外觀設定下拉欄位】 設定 - 與網站其他輸入欄位統一 ======== */
-.appearance-modal .ui-single-select {
-    width:100%;
-}
-
-.appearance-modal select,
-.appearance-modal .ui-single-select-trigger {
-    width:100%;
-    min-height:32px;
-    border:1px solid var(--border-default);
-    border-radius:6px;
-    background:var(--surface-input);
-    color:var(--text-primary);
-    font:inherit;
-    font-size:11px;
-    outline:none;
-    transition:border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
-}
-
-.appearance-modal .ui-single-select-trigger:hover {
-    border-color:color-mix(in srgb,var(--action-primary) 40%,var(--border-default));
-}
-
-.appearance-modal .ui-single-select-trigger:focus-visible {
-    border-color:var(--action-primary);
-    box-shadow:0 0 0 2px var(--brand-tint-start);
-}
-
-.appearance-modal .ui-select-chevron-icon {
-    color:var(--text-secondary);
-}
-
-.appearance-modal .ui-single-select:focus-within .ui-select-chevron-icon {
-    color:var(--action-primary);
-}
-
-@media (max-width:680px) {
-    .relationship-line-controls {
-        grid-template-columns:1fr;
-    }
-
-    .relationship-line-item > summary {
-        grid-template-columns:100px minmax(90px,1fr);
-    }
-}
-
-
-/* ========【曲線關係線】 設定 - 線型、曲線路徑與端點各自獨立控制 ======== */
-.relationship-line-item > summary > i[data-curved="true"] {
-    height:18px;
-}
-
-.relationship-line-item > summary > i[data-curved="true"]::before {
-    display:none;
-}
-
-.relationship-curve-mini-preview {
-    width:100%;
-    height:18px;
-    display:block;
-    overflow:visible;
-}
-
-.relationship-curve-mini-preview path {
-    fill:none;
-    vector-effect:non-scaling-stroke;
-    stroke-linecap:round;
-}
-
-.relationship-line-extra-controls {
-    padding:0 10px 10px;
-    display:grid;
-    grid-template-columns:130px minmax(180px,1fr) 130px;
-    gap:10px;
-    align-items:end;
-    background:var(--surface-panel);
-}
-
-.relationship-line-extra-controls:empty {
-    display:none;
-}
-
-.relationship-toggle-control,
-.relationship-arrow-control {
-    min-height:30px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    color:var(--text-secondary);
-    font-size:10px;
-}
-
-.relationship-toggle-control input[type="checkbox"],
-.relationship-arrow-control input[type="checkbox"] {
-    flex:0 0 auto;
-}
-
-.relationship-curve-control {
-    min-width:0;
-    display:grid;
-    gap:5px;
-    color:var(--text-secondary);
-    font-size:10px;
-    opacity:1;
-    transition:opacity .15s ease;
-}
-
-.relationship-curve-control.is-disabled {
-    opacity:.42;
-}
-
-.relationship-curve-control.is-disabled input[type="range"] {
-    cursor:not-allowed;
-}
-
-.relationship-curve-slider {
-    min-width:0;
-    display:grid;
-    grid-template-columns:minmax(120px,1fr) 44px;
-    align-items:center;
-    gap:8px;
-}
-
-.relationship-curve-slider output {
-    color:var(--text-primary);
-    font-size:10.5px;
-    font-variant-numeric:tabular-nums;
-    text-align:right;
-}
-
-.other-relationship-line-list {
-    padding:6px;
-    display:grid;
-    gap:4px;
-    background:var(--surface-panel);
-}
-
-.other-relationship-line-item {
-    background:var(--surface-card);
-}
-
-.other-relationship-empty {
-    padding:12px 10px;
-    color:var(--text-secondary);
-    font-size:11px;
-    text-align:center;
-}
-
-.relationship-curve-live-preview {
-    position:fixed;
-    z-index:5300;
-    width:260px;
-    padding:10px 12px 9px;
-    border:1px solid var(--border-default);
-    border-radius:8px;
-    background:var(--surface-card);
-    box-shadow:0 10px 26px rgba(0,0,0,.18);
-    pointer-events:none;
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(3px);
-    transition:opacity .12s ease,transform .12s ease,visibility .12s;
-}
-
-.relationship-curve-live-preview.show {
-    opacity:1;
-    visibility:visible;
-    transform:translateY(0);
-}
-
-.relationship-curve-live-preview-head {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    margin-bottom:4px;
-    color:var(--text-secondary);
-    font-size:10.5px;
-}
-
-.relationship-curve-live-preview-head strong {
-    color:var(--text-primary);
-    font-variant-numeric:tabular-nums;
-}
-
-.relationship-curve-live-preview svg {
-    width:100%;
-    height:42px;
-    display:block;
-    overflow:visible;
-}
-
-.relationship-curve-live-preview path {
-    fill:none;
-    stroke-linecap:round;
-    vector-effect:non-scaling-stroke;
-}
-
-@media (max-width:680px) {
-    .relationship-line-extra-controls {
-        grid-template-columns:1fr;
-    }
-
-    .relationship-curve-live-preview {
-        width:min(260px,calc(100vw - 24px));
-    }
-}
+/* ========【關係線設定】 設定 - 左側類型清單與右側共用編輯器 ======== */
+.relationship-style-workspace{display:grid;grid-template-columns:168px minmax(0,1fr);gap:12px;align-items:start}
+.relationship-style-nav{min-width:0;display:grid;gap:5px}
+.relationship-style-choice{min-width:0;min-height:42px;padding:7px 9px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-card);color:var(--text-primary);display:grid;grid-template-columns:74px minmax(0,1fr);align-items:center;gap:8px;text-align:left;font:inherit;font-size:10.5px;font-weight:600;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,color .15s ease}
+.relationship-style-choice:hover{background:var(--surface-item-hover)}
+.relationship-style-choice.selected{border-color:var(--action-primary);background:var(--brand-tint-start);color:var(--action-primary)}
+.relationship-style-choice>i{height:18px;position:relative;display:block;min-width:0}
+.relationship-style-choice>i::before{content:"";position:absolute;left:0;right:0;top:50%;height:var(--preview-width,2px);background:var(--preview-color,var(--relationship-parent));transform:translateY(-50%)}
+.relationship-style-choice>i[data-line-style="short-dash"]::before{background:repeating-linear-gradient(90deg,var(--preview-color) 0 4px,transparent 4px 7px)}
+.relationship-style-choice>i[data-line-style="long-dash"]::before{background:repeating-linear-gradient(90deg,var(--preview-color) 0 10px,transparent 10px 16px)}
+.relationship-style-choice>i[data-line-style="dot"]::before{background:repeating-linear-gradient(90deg,var(--preview-color) 0 2px,transparent 2px 7px)}
+.relationship-curve-mini-preview{width:100%;height:18px;display:block;overflow:visible}
+.relationship-curve-mini-preview path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.relationship-style-editor{min-width:0;padding:12px;border:1px solid var(--border-default);border-radius:10px;background:var(--surface-panel)}
+.relationship-editor-head{min-height:34px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.relationship-editor-head>strong{color:var(--text-primary);font-size:12px}
+.relationship-other-type-field{width:min(220px,55%);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;color:var(--text-secondary);font-size:10.5px}
+.relationship-full-preview{position:relative;width:100%;height:190px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border-default);border-radius:9px;background:var(--surface-card)}
+.relationship-full-preview svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.relationship-full-preview path{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.relationship-preview-card{position:absolute;z-index:1;width:88px;min-height:70px;padding:7px 7px 8px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-card);box-shadow:0 2px 7px rgba(0,0,0,.08);display:grid;justify-items:center;gap:4px}
+.relationship-preview-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,var(--avatar-surface-start),var(--avatar-surface-end));border:1px solid var(--border-default)}
+.relationship-preview-name,.relationship-preview-meta{display:block;height:5px;border-radius:999px;background:var(--border-default)}
+.relationship-preview-name{width:48px}.relationship-preview-meta{width:34px;opacity:.72}
+.relationship-full-preview[data-orientation="vertical"] .card-a{left:50%;top:7px;transform:translateX(-50%)}
+.relationship-full-preview[data-orientation="vertical"] .card-b{left:50%;bottom:7px;transform:translateX(-50%)}
+.relationship-full-preview[data-orientation="horizontal"] .card-a{left:20px;top:50%;transform:translateY(-50%)}
+.relationship-full-preview[data-orientation="horizontal"] .card-b{right:20px;top:50%;transform:translateY(-50%)}
+.relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 74px;gap:10px;align-items:end}
+.relationship-editor-fields>label{min-width:0;display:grid;gap:5px;color:var(--text-secondary);font-size:10px}
+.relationship-editor-range{min-width:0;display:grid;grid-template-columns:minmax(90px,1fr) 38px;align-items:center;gap:7px}
+.relationship-editor-range output{color:var(--text-primary);font-size:10.5px;text-align:right;font-variant-numeric:tabular-nums}
+.relationship-editor-fields input[type=range],.relationship-curve-slider input[type=range]{width:100%;min-width:0;accent-color:var(--action-primary)}
+.relationship-editor-color input[type=color]{width:44px;height:32px;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
+.relationship-feature-row{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:center}
+.relationship-feature-row.single .curve-cell{grid-column:1/-1}
+.relationship-feature-cell{min-width:0;display:flex;align-items:center;justify-content:center}
+.relationship-feature-toggle{width:142px;min-height:38px;display:grid;grid-template-columns:96px 38px;align-items:center;column-gap:8px}
+.relationship-feature-label{width:96px;min-width:96px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--text-primary);font-size:11px;white-space:nowrap}
+.help-tooltip-slot{display:inline-block;width:18px;height:18px;flex:0 0 18px;visibility:hidden}
+.relationship-switch{position:relative;width:38px;height:22px;padding:0;border:0;border-radius:999px;background:color-mix(in srgb,var(--border-default) 72%,var(--surface-panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--border-default) 78%,transparent);cursor:pointer;overflow:hidden;transition:background .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s cubic-bezier(.2,.8,.2,1)}
+.relationship-switch::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:color-mix(in srgb,var(--surface-card) 82%,var(--surface-panel) 18%);box-shadow:0 1px 3px rgba(0,0,0,.16);transform:translateX(0);transition:transform .30s cubic-bezier(.2,.9,.25,1),background .28s ease,box-shadow .28s ease}
+.relationship-switch[aria-pressed="true"]{background:color-mix(in srgb,var(--action-primary) 78%,var(--surface-panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--action-primary) 58%,transparent)}
+.relationship-switch[aria-pressed="true"]::after{transform:translateX(16px);background:color-mix(in srgb,var(--surface-card) 80%,var(--action-primary) 20%)}
+.relationship-switch:active::after{transform:translateX(1px) scaleX(1.08)}
+.relationship-switch[aria-pressed="true"]:active::after{transform:translateX(15px) scaleX(1.08)}
+.relationship-switch:focus-visible{outline:2px solid color-mix(in srgb,var(--action-primary) 55%,transparent);outline-offset:2px}
+.relationship-curve-control{min-width:0;display:grid;gap:5px;color:var(--text-secondary);font-size:10px;opacity:1;transition:opacity .15s ease}
+.relationship-shared-curve-row{margin-top:8px}
+.relationship-curve-control.is-disabled{opacity:.42}
+.relationship-curve-control.is-disabled input[type=range]{cursor:not-allowed}
+.relationship-curve-slider{min-width:0;display:grid;grid-template-columns:minmax(120px,1fr) 44px;align-items:center;gap:8px}
+.relationship-curve-slider output{color:var(--text-primary);font-size:10.5px;font-variant-numeric:tabular-nums;text-align:right}
+.relationship-style-actions{margin-top:8px}
+.appearance-modal .ui-single-select{width:100%}
+.appearance-modal select,.appearance-modal .ui-single-select-trigger{width:100%;min-height:32px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);color:var(--text-primary);font:inherit;font-size:11px;outline:none;transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}
+.appearance-modal .ui-single-select-trigger:hover{border-color:color-mix(in srgb,var(--action-primary) 40%,var(--border-default))}
+.appearance-modal .ui-single-select-trigger:focus-visible{border-color:var(--action-primary);box-shadow:0 0 0 2px var(--brand-tint-start)}
+.appearance-modal .ui-select-chevron-icon{color:var(--text-secondary)}
+.appearance-modal .ui-single-select:focus-within .ui-select-chevron-icon{color:var(--action-primary)}
+@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:1fr 1fr 70px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}.relationship-full-preview[data-orientation="horizontal"] .card-a{left:10px}.relationship-full-preview[data-orientation="horizontal"] .card-b{right:10px}}
 
 
 /* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */

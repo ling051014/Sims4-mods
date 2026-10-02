@@ -38,7 +38,7 @@
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
-      getOtherRelationshipLineSetting, relationshipResolvedColor, relationshipInlineSvgStyle,
+      getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureRelationshipLabelText,
       makeLabelSVG, getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass
@@ -6612,9 +6612,9 @@ function paintRelationshipLayer({
     );
   };
 
-  const bidirectionalMarkerAttributes =
-    setting => {
-      if (!setting.bidirectional) {
+  const relationshipArrowMarkerAttributes =
+    (setting, type) => {
+      if (!setting.showArrow) {
         return '';
       }
 
@@ -6653,12 +6653,20 @@ function paintRelationshipLayer({
         );
       }
 
+      const end =
+        ' marker-end="url(#' +
+        markerId +
+        ')"';
+
       return (
-        ' marker-start="url(#' +
-        markerId +
-        ')" marker-end="url(#' +
-        markerId +
-        ')"'
+        isSymmetricSocialRelationshipType(type)
+          ? (
+              ' marker-start="url(#' +
+              markerId +
+              ')"' +
+              end
+            )
+          : end
       );
     };
 
@@ -7105,8 +7113,9 @@ function paintRelationshipLayer({
         );
 
       const markerAttributes =
-        bidirectionalMarkerAttributes(
-          setting
+        relationshipArrowMarkerAttributes(
+          setting,
+          type
         );
 
       registerEdge(

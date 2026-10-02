@@ -706,7 +706,7 @@
     "圖片顯示": "Image Fit",
     "關係線": "Relationship Lines",
     "父母 / 子女": "Parent / Child",
-    "前任": "Ex",
+    "前任": "Former",
     "自訂關係線外觀": "Customize Relationship Lines",
     "樣式": "Style",
     "粗細": "Width",
@@ -1048,6 +1048,22 @@
     "拖曳圖片到這裡，或點「更換圖片」": "Drag an image here, or click “Change Image”",
     "放開以上傳背景圖片": "Drop to upload the background image",
     "請一次只拖曳一張背景圖片。": "Drop one background image at a time.",
-    "背景處理失敗：": "Background processing failed: "
+    "背景處理失敗：": "Background processing failed: ",
+    "視覺設定": "Visual Settings",
+    "墨曜紫灰": "Obsidian Mauve",
+    "夜莓酒紅": "Berry Wine",
+    "中性石墨": "Neutral Graphite",
+    "強調色": "Accent",
+    "上傳族譜背景": "Upload Genealogy Background",
+    "拖曳圖片到這裡，或點擊此區域選擇檔案": "Drag an image here, or click this area to choose a file",
+    "更換背景圖片": "Change Background Image",
+    "關係線類型": "Relationship Line Type",
+    "關係類型": "Relationship Type",
+    "關係線預覽": "Relationship Line Preview",
+    "改用曲線": "Use Curve",
+    "顯示箭頭": "Show Arrows",
+    "箭頭說明": "Arrow Help",
+    "單向關係顯示單一箭頭；雙向關係顯示兩端箭頭。": "Directional relationships show one arrow; symmetric relationships show arrows at both ends.",
+    "重設視覺設定": "Reset Visual Settings"
   }
 }

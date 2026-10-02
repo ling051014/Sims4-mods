@@ -102,11 +102,13 @@ const editingGallery = personEditor.state.gallery;
 const lifePhotoState = personEditor.state.lifePhoto;
 
 const THEME_PRESETS = [
-  { id:'ling',     name:'L1nG 晴空',     grad:'linear-gradient(120deg, #ffffff 0%, #dfeffc 100%)' },
-  { id:'sage',     name:'森霧鼠尾草',    grad:'linear-gradient(120deg, #dfe9e0 0%, #eef3ea 100%)' },
-  { id:'rose',     name:'莓果薄暮',      grad:'linear-gradient(120deg, #e8c4d0 0%, #f4dfe6 100%)' },
-  { id:'amber',    name:'琥珀紙頁',      grad:'linear-gradient(120deg, #e5c896 0%, #f2dfb9 100%)' },
-  { id:'midnight', name:'午夜靛藍',      grad:'linear-gradient(120deg, #182535 0%, #243c5c 100%)' }
+  { id:'ling',       name:'L1nG 晴空',  grad:'linear-gradient(120deg, #ffffff 0%, #dfeffc 100%)' },
+  { id:'sage',       name:'森霧鼠尾草', grad:'linear-gradient(120deg, #dfe9e0 0%, #eef3ea 100%)' },
+  { id:'rose',       name:'莓果薄暮',   grad:'linear-gradient(120deg, #e8c4d0 0%, #f4dfe6 100%)' },
+  { id:'amber',      name:'琥珀紙頁',   grad:'linear-gradient(120deg, #e5c896 0%, #f2dfb9 100%)' },
+  { id:'ink',        name:'墨曜紫灰',   grad:'linear-gradient(120deg, #19171d 0%, #302936 100%)' },
+  { id:'berrynight', name:'夜莓酒紅',   grad:'linear-gradient(120deg, #1b1216 0%, #35242b 100%)' },
+  { id:'graphite',   name:'中性石墨',   grad:'linear-gradient(120deg, #15181b 0%, #2a3036 100%)' }
 ];
 
 const BG_MAX = 1920;
@@ -252,7 +254,7 @@ const PET_SPECIES = Object.freeze({
   other:   Object.freeze({ icon:'paw', label:'其他' })
 });
 
-const VALID_THEMES = ['ling','sage','rose','amber','midnight'];
+const VALID_THEMES = ['ling','sage','rose','amber','ink','berrynight','graphite'];
 const VALID_MODES = ['view','edit'];
 let showRelLabels = true;
 let relationshipPerspectiveSimId = null;
@@ -271,7 +273,8 @@ let labelDrag = null;
 let viewMode = 'view';
 let personProfilePersonId = null;
 let currentThemeId = 'ling';
-let customColors = { c1: '#f0c050', c2: '#a878c8' };
+let customColors = { c1:'#ffffff', c2:'#dfeffc', c3:'#55acee' };
+let hasSavedCustomTheme = false;
 
 let personLibraryViewMode = 'detailed';
 try {
@@ -372,7 +375,7 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     curved:false,
     curveAmount:50,
     routing:'auto',
-    bidirectional:false
+    showArrow:false
   }),
   otherTypes:Object.freeze({})
 });
@@ -448,8 +451,19 @@ function normalizeRelationshipLineSetting(
     );
 
   if (key === 'other') {
-    normalized.bidirectional =
-      !!normalized.bidirectional;
+    const storedShowArrow =
+      saved &&
+      Object.prototype.hasOwnProperty.call(
+        saved,
+        'showArrow'
+      )
+        ? saved.showArrow
+        : saved?.bidirectional;
+
+    normalized.showArrow =
+      !!storedShowArrow;
+
+    delete normalized.bidirectional;
   }
 
   return normalized;
@@ -1691,6 +1705,8 @@ const smartSpacingVertical = $('smartSpacingVertical');
 const appearanceThemeGrid = $('appearanceThemeGrid');
 const customColor1 = $('customColor1');
 const customColor2 = $('customColor2');
+const customColor3 = $('customColor3');
+const appearanceCustomThemeEditor = $('appearanceCustomThemeEditor');
 const appearanceCustomThemePreview = $('appearanceCustomThemePreview');
 const lifePhotoGrid = $('lifePhotoGrid');
 
@@ -6715,12 +6731,38 @@ function resetThemeSurface() {
     '--brand-gradient-start','--brand-gradient-end',
     '--brand-tint-start','--brand-tint-end',
     '--action-primary','--action-primary-hover',
-    '--action-primary-strong','--selection-highlight'
-  ].forEach(property => {
-    document.body.style.removeProperty(property);
-  });
+    '--action-primary-strong','--selection-highlight',
+    '--navigation-text','--navigation-text-muted',
+    '--navigation-control-surface','--navigation-control-border',
+    '--navigation-control-text','--navigation-control-placeholder',
+    '--navigation-control-hover','--surface-canvas',
+    '--surface-canvas-pattern','--text-primary','--text-secondary',
+    '--surface-card','--border-default','--surface-input',
+    '--overlay-backdrop','--surface-panel','--surface-item',
+    '--surface-item-hover','--tag-surface','--tag-text',
+    '--relationship-parent','--relationship-spouse',
+    '--relationship-former-spouse','--relationship-adoptive',
+    '--relationship-other','--relationship-label-surface',
+    '--relationship-label-border','--nav-dropdown-bg',
+    '--nav-dropdown-text','--nav-dropdown-border',
+    '--nav-dropdown-divider','--nav-dropdown-hover-bg',
+    '--nav-dropdown-hover-text','--nav-dropdown-selected-bg',
+    '--nav-dropdown-selected-text','--nav-button-hover-bg',
+    '--nav-active-bg','--nav-active-border','--nav-active-text',
+    '--genealogy-roster-item-bg','--genealogy-roster-item-hover'
+  ].forEach(property => document.body.style.removeProperty(property));
 
   document.body.removeAttribute('data-topbar-contrast');
+}
+
+function currentThemeSeedColors() {
+  const style = getComputedStyle(document.body);
+
+  return {
+    c1:normalizeColorForInput(style.getPropertyValue('--brand-gradient-start'),'#ffffff'),
+    c2:normalizeColorForInput(style.getPropertyValue('--brand-gradient-end'),'#dfeffc'),
+    c3:normalizeColorForInput(style.getPropertyValue('--action-primary'),'#55acee')
+  };
 }
 
 function paintThemeChoices() {
@@ -6728,139 +6770,164 @@ function paintThemeChoices() {
 
   const choices = THEME_PRESETS.map(theme => ({
     id:theme.id,
-    name:theme.name,
+    name:uiText(theme.name),
     gradient:theme.grad
   }));
 
   choices.push({
     id:'custom',
-    name:'自訂配色',
-    gradient:
-      `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`
+    name:uiText('自訂配色'),
+    gradient:'linear-gradient(120deg, ' + customColors.c1 + ' 0%, ' + customColors.c2 + ' 100%)'
   });
 
   appearanceThemeGrid.innerHTML = choices.map(choice => {
     const selected = choice.id === currentThemeId;
-    const previewId =
-      choice.id === 'custom'
-        ? ' id="customCardPreview"'
-        : '';
+    const previewId = choice.id === 'custom' ? ' id="customCardPreview"' : '';
 
-    return `
-      <button
-        class="appearance-theme-card${selected ? ' selected' : ''}"
-        type="button"
-        data-theme-id="${esc(choice.id)}"
-        aria-pressed="${selected ? 'true' : 'false'}"
-      >
-        <span class="appearance-theme-radio" aria-hidden="true"></span>
-        <span class="appearance-theme-card-name">${esc(choice.name)}</span>
-        <span class="appearance-theme-preview"${previewId} style="background:${choice.gradient}"></span>
-      </button>
-    `;
+    return (
+      '<button class="appearance-theme-card' + (selected ? ' selected' : '') +
+      '" type="button" data-theme-id="' + esc(choice.id) +
+      '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
+        '<span class="appearance-theme-radio" aria-hidden="true"></span>' +
+        '<span class="appearance-theme-card-name">' + esc(choice.name) + '</span>' +
+        '<span class="appearance-theme-preview"' + previewId +
+          ' style="background:' + choice.gradient + '"></span>' +
+      '</button>'
+    );
   }).join('');
 
-  appearanceThemeGrid
-    .querySelectorAll('[data-theme-id]')
-    .forEach(button => {
-      button.addEventListener('click', () => {
-        const themeId = button.dataset.themeId || '';
+  appearanceThemeGrid.querySelectorAll('[data-theme-id]').forEach(button => {
+    button.addEventListener('click', () => {
+      const themeId = button.dataset.themeId || '';
 
-        if (themeId === 'custom') {
-          chooseCustomTheme(
-            customColors.c1,
-            customColors.c2
-          );
-          return;
+      if (themeId === 'custom') {
+        if (!hasSavedCustomTheme && currentThemeId !== 'custom') {
+          customColors = currentThemeSeedColors();
         }
 
-        chooseThemePreset(themeId);
-      });
+        customColor1.value = customColors.c1;
+        customColor2.value = customColors.c2;
+        customColor3.value = customColors.c3;
+        appearanceCustomThemeEditor.hidden = !appearanceCustomThemeEditor.hidden;
+        paintCustomThemePreview();
+        return;
+      }
+
+      appearanceCustomThemeEditor.hidden = true;
+      chooseThemePreset(themeId);
     });
+  });
 }
 
 function syncThemeChoiceDisplay() {
-  appearanceThemeGrid
-    ?.querySelectorAll('[data-theme-id]')
-    .forEach(button => {
-      const selected =
-        button.dataset.themeId === currentThemeId;
+  appearanceThemeGrid?.querySelectorAll('[data-theme-id]').forEach(button => {
+    const selected = button.dataset.themeId === currentThemeId;
+    button.classList.toggle('selected', selected);
+    button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
 
-      button.classList.toggle('selected', selected);
-      button.setAttribute(
-        'aria-pressed',
-        selected ? 'true' : 'false'
-      );
-    });
-
-  const customPreview =
-    document.getElementById('customCardPreview');
+  const customPreview = document.getElementById('customCardPreview');
 
   if (customPreview) {
     customPreview.style.background =
-      `linear-gradient(120deg, ${customColors.c1} 0%, ${customColors.c2} 100%)`;
+      'linear-gradient(120deg, ' + customColors.c1 + ' 0%, ' + customColors.c2 + ' 100%)';
+    customPreview.style.boxShadow =
+      'inset 0 0 0 2px ' + formatHexRgba(customColors.c3,0.55);
   }
 }
 
 function chooseThemePreset(themeId, { persist = true } = {}) {
-  const nextTheme =
-    VALID_THEMES.includes(themeId)
-      ? themeId
-      : 'ling';
+  const nextTheme = VALID_THEMES.includes(themeId) ? themeId : 'ling';
 
   resetThemeSurface();
   document.body.dataset.theme = nextTheme;
   currentThemeId = nextTheme;
 
   if (persist) {
-    try {
-      localStorage.setItem(THEME_KEY, nextTheme);
-    } catch (_) {}
+    try { localStorage.setItem(THEME_KEY,nextTheme); } catch (_) {}
   }
 
   syncThemeChoiceDisplay();
   applyRelationshipLineSettings();
 }
 
-function chooseCustomTheme(primary, secondary, { persist = true } = {}) {
-  const c1 = String(primary || '#f0c050');
-  const c2 = String(secondary || '#a878c8');
-  const mix = blendHexColors(c1, c2, 0.5);
-  const accent = shiftHexLightness(mix, -0.28);
-  const averageLuminance =
-    (relativeHexLuminance(c1) + relativeHexLuminance(c2)) / 2;
+function chooseCustomTheme(primary, secondary, accentColor, { persist = true } = {}) {
+  const c1 = normalizeColorForInput(primary,'#ffffff');
+  const c2 = normalizeColorForInput(secondary,'#dfeffc');
+  const c3 = normalizeColorForInput(accentColor,'#55acee');
+  const averageLuminance = (relativeHexLuminance(c1) + relativeHexLuminance(c2)) / 2;
+  const dark = averageLuminance < 0.34;
+  const mixed = blendHexColors(c1,c2,0.45);
+
+  const surfaceCanvas = dark
+    ? shiftHexLightness(mixed,-0.44)
+    : shiftHexLightness(mixed,0.84);
+  const surfacePanel = dark
+    ? shiftHexLightness(surfaceCanvas,0.09)
+    : shiftHexLightness(surfaceCanvas,-0.03);
+  const surfaceCard = dark
+    ? shiftHexLightness(surfaceCanvas,0.15)
+    : '#ffffff';
+  const border = dark
+    ? shiftHexLightness(surfaceCanvas,0.28)
+    : shiftHexLightness(mixed,0.55);
+  const textPrimary = dark ? '#f5f3f6' : '#2f3135';
+  const textSecondary = dark ? '#bbb6bf' : '#737780';
 
   resetThemeSurface();
   document.body.dataset.theme = 'custom';
 
   [
-    ['--brand-gradient-start', c1],
-    ['--brand-gradient-end', c2],
-    ['--brand-tint-start', formatHexRgba(c1, 0.2)],
-    ['--brand-tint-end', formatHexRgba(c2, 0.2)],
-    ['--action-primary', accent],
-    ['--action-primary-hover', shiftHexLightness(accent, -0.12)],
-    ['--action-primary-strong', shiftHexLightness(mix, -0.4)],
-    ['--selection-highlight', formatHexRgba(accent, 0.5)]
-  ].forEach(([property, value]) => {
-    document.body.style.setProperty(property, value);
-  });
+    ['--brand-gradient-start',c1],['--brand-gradient-end',c2],
+    ['--brand-tint-start',formatHexRgba(c3,dark ? 0.16 : 0.13)],
+    ['--brand-tint-end',formatHexRgba(c3,dark ? 0.09 : 0.07)],
+    ['--action-primary',c3],
+    ['--action-primary-hover',shiftHexLightness(c3,dark ? 0.12 : -0.12)],
+    ['--action-primary-strong',shiftHexLightness(c3,dark ? -0.16 : -0.30)],
+    ['--selection-highlight',formatHexRgba(c3,dark ? 0.42 : 0.30)],
+    ['--navigation-text',textPrimary],['--navigation-text-muted',textSecondary],
+    ['--navigation-control-surface',dark ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.72)'],
+    ['--navigation-control-border',dark ? 'rgba(255,255,255,.14)' : formatHexRgba(border,0.92)],
+    ['--navigation-control-text',textPrimary],['--navigation-control-placeholder',textSecondary],
+    ['--navigation-control-hover',dark ? 'rgba(255,255,255,.12)' : '#ffffff'],
+    ['--surface-canvas',surfaceCanvas],['--surface-canvas-pattern',formatHexRgba(c3,dark ? 0.07 : 0.08)],
+    ['--text-primary',textPrimary],['--text-secondary',textSecondary],
+    ['--surface-card',surfaceCard],['--border-default',border],
+    ['--surface-input',dark ? surfacePanel : '#ffffff'],
+    ['--overlay-backdrop',dark ? 'rgba(0,0,0,.72)' : 'rgba(31,35,40,.36)'],
+    ['--surface-panel',surfacePanel],['--surface-item',surfaceCard],
+    ['--surface-item-hover',dark ? shiftHexLightness(surfaceCard,0.08) : shiftHexLightness(surfacePanel,-0.03)],
+    ['--tag-surface',dark ? shiftHexLightness(surfacePanel,0.10) : formatHexRgba(c3,0.10)],
+    ['--tag-text',dark ? shiftHexLightness(c3,0.28) : shiftHexLightness(c3,-0.20)],
+    ['--relationship-parent',border],
+    ['--relationship-spouse',shiftHexLightness(c3,dark ? 0.12 : -0.02)],
+    ['--relationship-former-spouse',dark ? shiftHexLightness(border,0.18) : shiftHexLightness(border,-0.12)],
+    ['--relationship-adoptive',dark ? '#7fa49a' : '#77998f'],
+    ['--relationship-other',dark ? shiftHexLightness(border,0.22) : shiftHexLightness(border,-0.08)],
+    ['--relationship-label-surface',dark ? formatHexRgba(surfaceCard,0.97) : 'rgba(255,255,255,.97)'],
+    ['--relationship-label-border',border],
+    ['--nav-dropdown-bg',surfaceCard],['--nav-dropdown-text',textPrimary],['--nav-dropdown-border',border],
+    ['--nav-dropdown-divider',dark ? shiftHexLightness(surfacePanel,0.10) : surfacePanel],
+    ['--nav-dropdown-hover-bg',dark ? shiftHexLightness(surfaceCard,0.08) : surfacePanel],
+    ['--nav-dropdown-hover-text',textPrimary],
+    ['--nav-dropdown-selected-bg',dark ? shiftHexLightness(surfaceCard,0.13) : shiftHexLightness(surfacePanel,-0.03)],
+    ['--nav-dropdown-selected-text',textPrimary],
+    ['--nav-button-hover-bg',dark ? shiftHexLightness(surfaceCard,0.07) : surfacePanel],
+    ['--nav-active-bg',dark ? shiftHexLightness(surfaceCard,0.11) : surfacePanel],
+    ['--nav-active-border',border],['--nav-active-text',textPrimary],
+    ['--genealogy-roster-item-bg',surfaceCard],
+    ['--genealogy-roster-item-hover',dark ? shiftHexLightness(surfaceCard,0.08) : surfacePanel]
+  ].forEach(([property,value]) => document.body.style.setProperty(property,value));
 
-  document.body.setAttribute(
-    'data-topbar-contrast',
-    averageLuminance > 0.62 ? 'light' : 'dark'
-  );
-
+  document.body.setAttribute('data-topbar-contrast',dark ? 'dark' : 'light');
   currentThemeId = 'custom';
-  customColors = { c1, c2 };
+  customColors = { c1,c2,c3 };
+  hasSavedCustomTheme = true;
 
   if (persist) {
     try {
-      localStorage.setItem(THEME_KEY, 'custom');
-      localStorage.setItem(
-        CUSTOM_COLORS_KEY,
-        JSON.stringify(customColors)
-      );
+      localStorage.setItem(THEME_KEY,'custom');
+      localStorage.setItem(CUSTOM_COLORS_KEY,JSON.stringify(customColors));
     } catch (_) {}
   }
 
@@ -6872,23 +6939,17 @@ function paintCustomThemePreview() {
   if (!appearanceCustomThemePreview) return;
 
   appearanceCustomThemePreview.style.background =
-    `linear-gradient(120deg, ${customColor1.value} 0%, ${customColor2.value} 100%)`;
+    'linear-gradient(120deg, ' + customColor1.value + ' 0%, ' + customColor2.value + ' 100%)';
+  appearanceCustomThemePreview.style.boxShadow =
+    'inset 0 0 0 2px ' + formatHexRgba(customColor3.value,0.58);
 }
 
-customColor1.addEventListener(
-  'input',
-  paintCustomThemePreview
-);
-customColor2.addEventListener(
-  'input',
-  paintCustomThemePreview
-);
+[customColor1,customColor2,customColor3].forEach(input => {
+  input?.addEventListener('input',paintCustomThemePreview);
+});
 
 $('applyCustomBtn').onclick = () => {
-  chooseCustomTheme(
-    customColor1.value,
-    customColor2.value
-  );
+  chooseCustomTheme(customColor1.value,customColor2.value,customColor3.value);
 };
 
 // ========【自由排列跨模式映射】 設定 - 檢視 / 編輯共用同一份視覺構圖 ========
@@ -7412,34 +7473,18 @@ function relationshipOtherType(link) {
 }
 
 function getOtherRelationshipTypes() {
-  const seen =
-    new Map();
+  const seen = new Map();
 
-  (currentGenealogyData()?.links || [])
-    .forEach(link => {
-      const type =
-        relationshipOtherType(link);
+  Object.keys(SOCIAL_RELATIONSHIP_DEFINITIONS).forEach(type => {
+    seen.set(type,displayRelationshipText(type));
+  });
 
-      if (!seen.has(type)) {
-        seen.set(
-          type,
-          displayRelationshipText(type)
-        );
-      }
-    });
+  (currentGenealogyData()?.links || []).forEach(link => {
+    const type = relationshipOtherType(link);
+    if (!seen.has(type)) seen.set(type,displayRelationshipText(type));
+  });
 
-  return [...seen.entries()]
-    .map(([type, label]) => ({
-      type,
-      label
-    }))
-    .sort((left, right) =>
-      String(left.label)
-        .localeCompare(
-          String(right.label),
-          'zh'
-        )
-    );
+  return [...seen.entries()].map(([type,label]) => ({ type,label }));
 }
 
 function relationshipOtherDefaultSetting(
@@ -7454,11 +7499,7 @@ function relationshipOtherDefaultSetting(
     ...RELATIONSHIP_LINE_DEFAULTS.other,
     style:
       definition?.lineStyle ||
-      RELATIONSHIP_LINE_DEFAULTS.other.style,
-    bidirectional:
-      definition?.symmetric === true
-        ? true
-        : RELATIONSHIP_LINE_DEFAULTS.other.bidirectional
+      RELATIONSHIP_LINE_DEFAULTS.other.style
   };
 }
 
@@ -7477,14 +7518,6 @@ function getOtherRelationshipLineSetting(
         .otherTypes?.[type],
       fallback
     );
-
-  if (
-    isSymmetricSocialRelationshipType(
-      type
-    )
-  ) {
-    normalized.bidirectional = true;
-  }
 
   return normalized;
 }
@@ -7512,14 +7545,6 @@ function ensureOtherRelationshipLineSetting(
   const setting =
     relationshipLineSettings
       .otherTypes[type];
-
-  if (
-    isSymmetricSocialRelationshipType(
-      type
-    )
-  ) {
-    setting.bidirectional = true;
-  }
 
   return setting;
 }
@@ -7699,931 +7724,243 @@ function saveRelationshipLineSettings() {
 
 function relationshipStyleOptionsHTML() {
   return [
-    ['solid','實線'],
-    ['short-dash','短虛線'],
-    ['long-dash','長虛線'],
-    ['dot','點線']
-  ]
-    .map(([value, label]) =>
-      '<option value="' +
-      value +
-      '">' +
-      esc(uiText(label)) +
-      '</option>'
-    )
-    .join('');
+    ['solid','實線'],['short-dash','短虛線'],['long-dash','長虛線'],['dot','點線']
+  ].map(([value,label]) =>
+    '<option value="' + value + '">' + esc(uiText(label)) + '</option>'
+  ).join('');
 }
 
-function otherRelationshipDomKey(
-  type
-) {
-  return encodeURIComponent(
-    String(type)
-  );
+function otherRelationshipDomKey(type) {
+  return encodeURIComponent(String(type));
 }
 
-function otherRelationshipTypeFromDomKey(
-  key
-) {
-  try {
-    return decodeURIComponent(
-      String(key || '')
-    );
-  } catch (_) {
-    return String(key || '');
+function otherRelationshipTypeFromDomKey(key) {
+  try { return decodeURIComponent(String(key || '')); }
+  catch (_) { return String(key || ''); }
+}
+
+const RELATIONSHIP_EDITOR_LABELS = Object.freeze({
+  parent:'父母 / 子女',spouse:'配偶',exspouse:'前任',adopt:'領養',other:'其他關係'
+});
+
+let activeRelationshipStyleKey = 'parent';
+let activeOtherRelationshipType = '';
+
+function relationshipEditorSetting() {
+  if (activeRelationshipStyleKey !== 'other') {
+    return relationshipLineSettings[activeRelationshipStyleKey];
+  }
+
+  const types = getOtherRelationshipTypes();
+  if (!activeOtherRelationshipType || !types.some(entry => entry.type === activeOtherRelationshipType)) {
+    activeOtherRelationshipType = types[0]?.type || '關聯';
+  }
+  return ensureOtherRelationshipLineSetting(activeOtherRelationshipType);
+}
+
+function syncOtherRelationshipTypeSelect() {
+  const select = $('relationshipOtherTypeSelect');
+  if (!select) return;
+
+  const types = getOtherRelationshipTypes();
+  if (!activeOtherRelationshipType || !types.some(entry => entry.type === activeOtherRelationshipType)) {
+    activeOtherRelationshipType = types[0]?.type || '關聯';
+  }
+
+  const options = types.length ? types : [{ type:'關聯',label:uiText('關聯') }];
+  const nextHtml = options.map(entry =>
+    '<option value="' + esc(entry.type) + '">' + esc(entry.label) + '</option>'
+  ).join('');
+
+  if (select.dataset.optionsHtml !== nextHtml) {
+    select.innerHTML = nextHtml;
+    select.dataset.optionsHtml = nextHtml;
+  }
+
+  select.value = activeOtherRelationshipType;
+}
+
+function setRelationshipSwitchState(button,enabled) {
+  button?.setAttribute('aria-pressed',enabled ? 'true' : 'false');
+}
+
+function relationshipFullPreviewPath(key,setting) {
+  if (key === 'parent' || key === 'adopt') return 'M160 76 L160 114';
+
+  if ((key === 'exspouse' || key === 'other') && setting.curved) {
+    const amount = clampRelationshipCurveAmount(setting.curveAmount);
+    const amplitude = 8 + (amount / 100) * 34;
+    return 'M108 95 Q160 ' + (95 - amplitude) + ' 212 95';
+  }
+
+  return 'M108 95 L212 95';
+}
+
+function updateRelationshipFullPreview() {
+  const preview = $('relationshipFullPreview');
+  const path = $('relationshipFullPreviewPath');
+  const arrowShape = $('relationshipPreviewArrowShape');
+  if (!preview || !path) return;
+
+  const key = activeRelationshipStyleKey;
+  const setting = relationshipEditorSetting();
+  const color = relationshipResolvedColor(setting,key === 'other' ? 'other' : key);
+  const vertical = key === 'parent' || key === 'adopt';
+
+  preview.dataset.orientation = vertical ? 'vertical' : 'horizontal';
+  path.setAttribute('d',relationshipFullPreviewPath(key,setting));
+  path.setAttribute('stroke',color);
+  path.setAttribute('stroke-width',String(Math.max(1,Number(setting.width) || 1.5)));
+  path.setAttribute('stroke-dasharray',relationshipDashValue(setting));
+  path.removeAttribute('marker-start');
+  path.removeAttribute('marker-end');
+  arrowShape?.setAttribute('fill',color);
+
+  if (key === 'other' && setting.showArrow) {
+    path.setAttribute('marker-end','url(#relationshipPreviewArrow)');
+    if (isSymmetricSocialRelationshipType(activeOtherRelationshipType)) {
+      path.setAttribute('marker-start','url(#relationshipPreviewArrow)');
+    }
   }
 }
 
-function renderOtherRelationshipLineControls() {
-  const list =
-    $('otherRelationshipLineList');
-
-  if (!list) return;
-
-  const openKeys =
-    new Set(
-      [...list.querySelectorAll(
-        '.other-relationship-line-item[open]'
-      )]
-        .map(item =>
-          item.dataset.otherRelKey
-        )
-        .filter(Boolean)
-    );
-
-  const types =
-    getOtherRelationshipTypes();
-
-  if (!types.length) {
-    list.innerHTML =
-      '<div class="other-relationship-empty">' +
-      esc(uiText('尚無其他關係')) +
-      '</div>';
-
-    return;
-  }
-
-  list.innerHTML =
-    types.map(entry => {
-      const key =
-        otherRelationshipDomKey(
-          entry.type
-        );
-
-      const open =
-        openKeys.has(key)
-          ? ' open'
-          : '';
-
-      return (
-        '<details class="relationship-line-item other-relationship-line-item" ' +
-        'data-other-rel-key="' +
-        esc(key) +
-        '"' +
-        open +
-        '>' +
-          '<summary>' +
-            '<span>' +
-              esc(entry.label) +
-            '</span>' +
-            '<i data-other-rel-preview="' +
-              esc(key) +
-            '"></i>' +
-          '</summary>' +
-          '<div class="relationship-line-controls">' +
-            '<label>' +
-              '<span>' +
-                esc(uiText('樣式')) +
-              '</span>' +
-              '<select data-other-rel-style="' +
-                esc(key) +
-              '">' +
-                relationshipStyleOptionsHTML() +
-              '</select>' +
-            '</label>' +
-            '<label>' +
-              '<span>' +
-                esc(uiText('粗細')) +
-              '</span>' +
-              '<input data-other-rel-width="' +
-                esc(key) +
-              '" type="range" min="1" max="4" step="0.1">' +
-            '</label>' +
-            '<label>' +
-              '<span>' +
-                esc(uiText('顏色')) +
-              '</span>' +
-              '<input data-other-rel-color="' +
-                esc(key) +
-              '" type="color">' +
-            '</label>' +
-          '</div>' +
-          '<div class="relationship-line-extra-controls">' +
-            '<label class="relationship-toggle-control">' +
-              '<span>' +
-                esc(uiText('曲線')) +
-              '</span>' +
-              '<input data-other-rel-curved="' +
-                esc(key) +
-              '" type="checkbox">' +
-            '</label>' +
-            '<label class="relationship-curve-control" data-other-rel-curve-row="' +
-              esc(key) +
-            '">' +
-              '<span>' +
-                esc(uiText('曲線弧度')) +
-              '</span>' +
-              '<div class="relationship-curve-slider">' +
-                '<input data-other-rel-curve="' +
-                  esc(key) +
-                '" type="range" min="10" max="100" step="1">' +
-                '<output data-other-rel-curve-value="' +
-                  esc(key) +
-                '"></output>' +
-              '</div>' +
-            '</label>' +
-            '<label class="relationship-arrow-control">' +
-              '<span>' +
-                esc(uiText('雙向箭頭')) +
-              '</span>' +
-              '<input data-other-rel-bidirectional="' +
-                esc(key) +
-              '" type="checkbox">' +
-            '</label>' +
-          '</div>' +
-        '</details>'
-      );
-    }).join('');
-
-  genealogyUI.mountFormControls(
-    list
-  );
-
-  bindOtherRelationshipLineControls(
-    list
-  );
-
-  syncOtherRelationshipLineControls();
-}
-
-function syncOtherRelationshipLineControls() {
-  const list =
-    $('otherRelationshipLineList');
-
-  if (!list) return;
-
-  list.querySelectorAll(
-    '.other-relationship-line-item'
-  ).forEach(item => {
-    const key =
-      item.dataset.otherRelKey || '';
-
-    const type =
-      otherRelationshipTypeFromDomKey(
-        key
-      );
-
+function syncRelationshipNavPreviews() {
+  REL_LINE_KEYS.forEach(key => {
+    const preview = document.querySelector('[data-rel-preview="' + key + '"]');
     const setting =
-      getOtherRelationshipLineSetting(
-        type
-      );
+      key === 'other'
+        ? (activeOtherRelationshipType
+            ? getOtherRelationshipLineSetting(activeOtherRelationshipType)
+            : relationshipLineSetting('other'))
+        : relationshipLineSetting(key);
 
-    const styleEl =
-      item.querySelector(
-        '[data-other-rel-style]'
-      );
-
-    const widthEl =
-      item.querySelector(
-        '[data-other-rel-width]'
-      );
-
-    const colorEl =
-      item.querySelector(
-        '[data-other-rel-color]'
-      );
-
-    const curvedEl =
-      item.querySelector(
-        '[data-other-rel-curved]'
-      );
-
-    const curveEl =
-      item.querySelector(
-        '[data-other-rel-curve]'
-      );
-
-    const curveValueEl =
-      item.querySelector(
-        '[data-other-rel-curve-value]'
-      );
-
-    const curveRow =
-      item.querySelector(
-        '[data-other-rel-curve-row]'
-      );
-
-    const bidirectionalEl =
-      item.querySelector(
-        '[data-other-rel-bidirectional]'
-      );
-
-    const preview =
-      item.querySelector(
-        '[data-other-rel-preview]'
-      );
-
-    if (styleEl) {
-      styleEl.value =
-        setting.style;
-
-      window
-        .L1nGGenealogyUIController
-        ?.refreshControl?.(
-          styleEl
-        );
-    }
-
-    if (widthEl) {
-      widthEl.value =
-        String(setting.width);
-    }
-
-    if (colorEl) {
-      colorEl.value =
-        relationshipResolvedColor(
-          setting,
-          'other'
-        );
-    }
-
-    if (curvedEl) {
-      curvedEl.checked =
-        !!setting.curved;
-    }
-
-    if (curveEl) {
-      curveEl.value =
-        String(
-          setting.curveAmount
-        );
-
-      curveEl.disabled =
-        !setting.curved;
-    }
-
-    if (curveValueEl) {
-      curveValueEl.textContent =
-        String(
-          Math.round(
-            setting.curveAmount
-          )
-        ) + '%';
-    }
-
-    if (curveRow) {
-      curveRow.classList.toggle(
-        'is-disabled',
-        !setting.curved
-      );
-
-      curveRow.setAttribute(
-        'aria-disabled',
-        setting.curved
-          ? 'false'
-          : 'true'
-      );
-    }
-
-    if (bidirectionalEl) {
-      const symmetric =
-        isSymmetricSocialRelationshipType(
-          type
-        );
-
-      bidirectionalEl.checked =
-        symmetric ||
-        !!setting.bidirectional;
-
-      bidirectionalEl.disabled =
-        symmetric;
-
-      bidirectionalEl.setAttribute(
-        'aria-disabled',
-        symmetric
-          ? 'true'
-          : 'false'
-      );
-    }
-
-    updateRelationshipLinePreview(
-      preview,
-      setting,
-      'other'
-    );
+    updateRelationshipLinePreview(preview,setting,key === 'other' ? 'other' : key);
   });
 }
 
 function syncRelationshipLineControls() {
-  REL_LINE_KEYS.forEach(key => {
-    const setting =
-      relationshipLineSetting(key);
+  const key = activeRelationshipStyleKey;
+  const other = key === 'other';
 
-    const styleEl =
-      document.querySelector(
-        '[data-rel-style="' +
-        key +
-        '"]'
-      );
+  if (other) syncOtherRelationshipTypeSelect();
+  const setting = relationshipEditorSetting();
 
-    const widthEl =
-      document.querySelector(
-        '[data-rel-width="' +
-        key +
-        '"]'
-      );
-
-    const colorEl =
-      document.querySelector(
-        '[data-rel-color="' +
-        key +
-        '"]'
-      );
-
-    const curvedEl =
-      document.querySelector(
-        '[data-rel-curved="' +
-        key +
-        '"]'
-      );
-
-    const curveEl =
-      document.querySelector(
-        '[data-rel-curve="' +
-        key +
-        '"]'
-      );
-
-    const curveValueEl =
-      document.querySelector(
-        '[data-rel-curve-value="' +
-        key +
-        '"]'
-      );
-
-    const curveRow =
-      document.querySelector(
-        '[data-rel-curve-row="' +
-        key +
-        '"]'
-      );
-
-    const preview =
-      document.querySelector(
-        '[data-rel-preview="' +
-        key +
-        '"]'
-      );
-
-    if (styleEl) {
-      styleEl.value =
-        setting.style;
-
-      window
-        .L1nGGenealogyUIController
-        ?.refreshControl?.(
-          styleEl
-        );
-    }
-
-    if (widthEl) {
-      widthEl.value =
-        String(setting.width);
-    }
-
-    if (colorEl) {
-      colorEl.value =
-        setting.color ||
-        relationshipDefaultColor(key);
-    }
-
-    if (curvedEl) {
-      curvedEl.checked =
-        !!setting.curved;
-    }
-
-    if (curveEl) {
-      curveEl.value =
-        String(setting.curveAmount);
-
-      curveEl.disabled =
-        !setting.curved;
-    }
-
-    if (curveValueEl) {
-      curveValueEl.textContent =
-        String(
-          Math.round(
-            setting.curveAmount
-          )
-        ) + '%';
-    }
-
-    if (curveRow) {
-      curveRow.classList.toggle(
-        'is-disabled',
-        !setting.curved
-      );
-
-      curveRow.setAttribute(
-        'aria-disabled',
-        setting.curved
-          ? 'false'
-          : 'true'
-      );
-    }
-
-    updateRelationshipLinePreview(
-      preview,
-      setting,
-      key
-    );
+  document.querySelectorAll('[data-rel-editor-key]').forEach(button => {
+    const selected = button.dataset.relEditorKey === key;
+    button.classList.toggle('selected',selected);
+    button.setAttribute('aria-pressed',selected ? 'true' : 'false');
   });
 
-  syncOtherRelationshipLineControls();
-}
+  const title = $('relationshipEditorTitle');
+  if (title) title.textContent = uiText(RELATIONSHIP_EDITOR_LABELS[key] || '關係線');
 
-let relationshipCurvePreviewHideTimer =
-  null;
+  const otherField = $('relationshipOtherTypeField');
+  if (otherField) otherField.hidden = !other;
 
-function showRelationshipCurveLivePreview(
-  input,
-  setting,
-  colorKey='other'
-) {
-  const preview =
-    $('relationshipCurveLivePreview');
+  const styleEl = $('relationshipEditorStyle');
+  const widthEl = $('relationshipEditorWidth');
+  const widthValue = $('relationshipEditorWidthValue');
+  const colorEl = $('relationshipEditorColor');
 
-  const path =
-    $('relationshipCurveLivePreviewPath');
-
-  const value =
-    $('relationshipCurveLivePreviewValue');
-
-  if (
-    !preview ||
-    !path ||
-    !input ||
-    input.disabled
-  ) {
-    return;
+  if (styleEl) {
+    styleEl.value = setting.style;
+    window.L1nGGenealogyUIController?.refreshControl?.(styleEl);
   }
+  if (widthEl) widthEl.value = String(setting.width);
+  if (widthValue) widthValue.textContent = Number(setting.width).toFixed(1).replace(/\.0$/,'') + ' px';
+  if (colorEl) colorEl.value = relationshipResolvedColor(setting,other ? 'other' : key);
 
-  clearTimeout(
-    relationshipCurvePreviewHideTimer
-  );
+  const curveSupported = key === 'exspouse' || key === 'other';
+  const arrowSupported = key === 'other';
+  const featureRow = $('relationshipFeatureRow');
+  const curveCell = $('relationshipCurveToggleCell');
+  const arrowCell = $('relationshipArrowToggleCell');
 
-  const color =
-    relationshipResolvedColor(
-      setting,
-      colorKey
-    );
-
-  path.setAttribute(
-    'd',
-    relationshipCurvePreviewPath(
-      setting.curveAmount
-    )
-  );
-
-  path.setAttribute(
-    'stroke',
-    color
-  );
-
-  path.setAttribute(
-    'stroke-width',
-    String(
-      Math.max(
-        1.5,
-        Number(setting.width) || 1.5
-      )
-    )
-  );
-
-  path.setAttribute(
-    'stroke-dasharray',
-    relationshipDashValue(
-      setting
-    )
-  );
-
-  if (value) {
-    value.textContent =
-      String(
-        Math.round(
-          setting.curveAmount
-        )
-      ) + '%';
+  if (featureRow) {
+    featureRow.hidden = !curveSupported && !arrowSupported;
+    featureRow.classList.toggle('single',curveSupported && !arrowSupported);
   }
+  if (curveCell) curveCell.hidden = !curveSupported;
+  if (arrowCell) arrowCell.hidden = !arrowSupported;
 
-  const rect =
-    input.getBoundingClientRect();
+  setRelationshipSwitchState($('relationshipEditorCurveToggle'),curveSupported && !!setting.curved);
+  setRelationshipSwitchState($('relationshipEditorArrowToggle'),arrowSupported && !!setting.showArrow);
 
-  const width = 260;
-  const estimatedHeight = 92;
-  const gap = 10;
-  const margin = 12;
+  const curveRow = $('relationshipEditorCurveAmountRow');
+  const curveInput = $('relationshipEditorCurveAmount');
+  const curveValue = $('relationshipEditorCurveAmountValue');
 
-  const left =
-    Math.min(
-      Math.max(
-        margin,
-        rect.left +
-        rect.width / 2 -
-        width / 2
-      ),
-      Math.max(
-        margin,
-        window.innerWidth -
-        width -
-        margin
-      )
-    );
+  if (curveRow) {
+    curveRow.hidden = !curveSupported;
+    curveRow.classList.toggle('is-disabled',!setting.curved);
+    curveRow.setAttribute('aria-disabled',setting.curved ? 'false' : 'true');
+  }
+  if (curveInput) {
+    curveInput.value = String(setting.curveAmount);
+    curveInput.disabled = !setting.curved;
+  }
+  if (curveValue) curveValue.textContent = Math.round(setting.curveAmount) + '%';
 
-  const canOpenAbove =
-    rect.top -
-    estimatedHeight -
-    gap >
-    margin;
-
-  const top =
-    canOpenAbove
-      ? rect.top -
-        estimatedHeight -
-        gap
-      : rect.bottom + gap;
-
-  preview.style.left =
-    Math.round(left) + 'px';
-
-  preview.style.top =
-    Math.round(top) + 'px';
-
-  preview.classList.add(
-    'show'
-  );
-
-  preview.setAttribute(
-    'aria-hidden',
-    'false'
-  );
+  if (other) window.L1nGGenealogyUIController?.refreshControl?.($('relationshipOtherTypeSelect'));
+  syncRelationshipNavPreviews();
+  updateRelationshipFullPreview();
 }
 
-function hideRelationshipCurveLivePreview(
-  delay=180
-) {
-  const preview =
-    $('relationshipCurveLivePreview');
+document.querySelectorAll('[data-rel-editor-key]').forEach(button => {
+  button.addEventListener('click',() => {
+    activeRelationshipStyleKey = button.dataset.relEditorKey || 'parent';
+    syncRelationshipLineControls();
+  });
+});
 
-  if (!preview) return;
+$('relationshipOtherTypeSelect')?.addEventListener('change',event => {
+  activeOtherRelationshipType = event.currentTarget.value || '';
+  syncRelationshipLineControls();
+});
 
-  clearTimeout(
-    relationshipCurvePreviewHideTimer
-  );
-
-  relationshipCurvePreviewHideTimer =
-    setTimeout(() => {
-      preview.classList.remove(
-        'show'
-      );
-
-      preview.setAttribute(
-        'aria-hidden',
-        'true'
-      );
-    }, delay);
-}
-
-function updateRelationshipCurveInput(
-  input,
-  setting,
-  colorKey='other'
-) {
-  setting.curveAmount =
-    clampRelationshipCurveAmount(
-      input.value
-    );
-
+$('relationshipEditorStyle')?.addEventListener('change',event => {
+  const setting = relationshipEditorSetting();
+  setting.style = REL_STROKE_STYLES.has(event.currentTarget.value) ? event.currentTarget.value : 'solid';
   saveRelationshipLineSettings();
-
-  showRelationshipCurveLivePreview(
-    input,
-    setting,
-    colorKey
-  );
-}
-
-function bindOtherRelationshipLineControls(
-  root
-) {
-  root.querySelectorAll(
-    '[data-other-rel-style]'
-  ).forEach(el => {
-    el.addEventListener(
-      'change',
-      () => {
-        const type =
-          otherRelationshipTypeFromDomKey(
-            el.dataset.otherRelStyle
-          );
-
-        const setting =
-          ensureOtherRelationshipLineSetting(
-            type
-          );
-
-        setting.style =
-          REL_STROKE_STYLES.has(
-            el.value
-          )
-            ? el.value
-            : 'dot';
-
-        saveRelationshipLineSettings();
-      }
-    );
-  });
-
-  root.querySelectorAll(
-    '[data-other-rel-width]'
-  ).forEach(el => {
-    el.addEventListener(
-      'input',
-      () => {
-        const type =
-          otherRelationshipTypeFromDomKey(
-            el.dataset.otherRelWidth
-          );
-
-        const setting =
-          ensureOtherRelationshipLineSetting(
-            type
-          );
-
-        setting.width =
-          Number(el.value) ||
-          RELATIONSHIP_LINE_DEFAULTS.other.width;
-
-        saveRelationshipLineSettings();
-      }
-    );
-  });
-
-  root.querySelectorAll(
-    '[data-other-rel-color]'
-  ).forEach(el => {
-    el.addEventListener(
-      'input',
-      () => {
-        const type =
-          otherRelationshipTypeFromDomKey(
-            el.dataset.otherRelColor
-          );
-
-        const setting =
-          ensureOtherRelationshipLineSetting(
-            type
-          );
-
-        setting.color =
-          el.value;
-
-        saveRelationshipLineSettings();
-      }
-    );
-  });
-
-  root.querySelectorAll(
-    '[data-other-rel-curved]'
-  ).forEach(el => {
-    el.addEventListener(
-      'change',
-      () => {
-        const type =
-          otherRelationshipTypeFromDomKey(
-            el.dataset.otherRelCurved
-          );
-
-        const setting =
-          ensureOtherRelationshipLineSetting(
-            type
-          );
-
-        setting.curved =
-          el.checked;
-
-        setting.routing =
-          'manual';
-
-        saveRelationshipLineSettings();
-      }
-    );
-  });
-
-  root.querySelectorAll(
-    '[data-other-rel-curve]'
-  ).forEach(el => {
-    el.addEventListener(
-      'input',
-      () => {
-        const type =
-          otherRelationshipTypeFromDomKey(
-            el.dataset.otherRelCurve
-          );
-
-        const setting =
-          ensureOtherRelationshipLineSetting(
-            type
-          );
-
-        updateRelationshipCurveInput(
-          el,
-          setting,
-          'other'
-        );
-      }
-    );
-
-    el.addEventListener(
-      'pointerup',
-      () =>
-        hideRelationshipCurveLivePreview()
-    );
-
-    el.addEventListener(
-      'blur',
-      () =>
-        hideRelationshipCurveLivePreview()
-    );
-  });
-
-  root.querySelectorAll(
-    '[data-other-rel-bidirectional]'
-  ).forEach(el => {
-    el.addEventListener(
-      'change',
-      () => {
-        const type =
-          otherRelationshipTypeFromDomKey(
-            el.dataset.otherRelBidirectional
-          );
-
-        if (
-          isSymmetricSocialRelationshipType(
-            type
-          )
-        ) {
-          el.checked = true;
-          return;
-        }
-
-        const setting =
-          ensureOtherRelationshipLineSetting(
-            type
-          );
-
-        setting.bidirectional =
-          el.checked;
-
-        saveRelationshipLineSettings();
-      }
-    );
-  });
-}
-
-document.querySelectorAll(
-  '[data-rel-style]'
-).forEach(el => {
-  el.addEventListener(
-    'change',
-    () => {
-      const key =
-        el.dataset.relStyle;
-
-      relationshipLineSettings[key].style =
-        el.value;
-
-      saveRelationshipLineSettings();
-    }
-  );
 });
 
-document.querySelectorAll(
-  '[data-rel-width]'
-).forEach(el => {
-  el.addEventListener(
-    'input',
-    () => {
-      const key =
-        el.dataset.relWidth;
-
-      relationshipLineSettings[key].width =
-        Number(el.value);
-
-      saveRelationshipLineSettings();
-    }
-  );
+$('relationshipEditorWidth')?.addEventListener('input',event => {
+  const setting = relationshipEditorSetting();
+  setting.width = Math.max(1,Math.min(4,Number(event.currentTarget.value) || 1.5));
+  saveRelationshipLineSettings();
 });
 
-document.querySelectorAll(
-  '[data-rel-color]'
-).forEach(el => {
-  el.addEventListener(
-    'input',
-    () => {
-      const key =
-        el.dataset.relColor;
-
-      relationshipLineSettings[key].color =
-        el.value;
-
-      saveRelationshipLineSettings();
-    }
-  );
+$('relationshipEditorColor')?.addEventListener('input',event => {
+  relationshipEditorSetting().color = event.currentTarget.value;
+  saveRelationshipLineSettings();
 });
 
-document.querySelectorAll(
-  '[data-rel-curved]'
-).forEach(el => {
-  el.addEventListener(
-    'change',
-    () => {
-      const key =
-        el.dataset.relCurved;
-
-      relationshipLineSettings[key].curved =
-        el.checked;
-
-      relationshipLineSettings[key].routing =
-        'manual';
-
-      saveRelationshipLineSettings();
-    }
-  );
+$('relationshipEditorCurveToggle')?.addEventListener('click',() => {
+  const setting = relationshipEditorSetting();
+  setting.curved = !setting.curved;
+  setting.routing = 'manual';
+  saveRelationshipLineSettings();
 });
 
-document.querySelectorAll(
-  '[data-rel-curve]'
-).forEach(el => {
-  el.addEventListener(
-    'input',
-    () => {
-      const key =
-        el.dataset.relCurve;
-
-      updateRelationshipCurveInput(
-        el,
-        relationshipLineSettings[key],
-        key
-      );
-    }
-  );
-
-  el.addEventListener(
-    'pointerup',
-    () =>
-      hideRelationshipCurveLivePreview()
-  );
-
-  el.addEventListener(
-    'blur',
-    () =>
-      hideRelationshipCurveLivePreview()
-  );
+$('relationshipEditorArrowToggle')?.addEventListener('click',() => {
+  if (activeRelationshipStyleKey !== 'other') return;
+  const setting = relationshipEditorSetting();
+  setting.showArrow = !setting.showArrow;
+  saveRelationshipLineSettings();
 });
 
-$('resetRelationshipStyleBtn')
-  ?.addEventListener(
-    'click',
-    () => {
-      relationshipLineSettings =
-        createRelationshipLineSettings();
+$('relationshipEditorCurveAmount')?.addEventListener('input',event => {
+  const setting = relationshipEditorSetting();
+  setting.curveAmount = clampRelationshipCurveAmount(event.currentTarget.value);
+  saveRelationshipLineSettings();
+});
 
-      try {
-        localStorage.removeItem(
-          REL_LINE_STYLE_KEY
-        );
-      } catch (_) {}
-
-      renderOtherRelationshipLineControls();
-      applyRelationshipLineSettings();
-
-      if (getSceneLayout()) {
-        genealogyScene?.requestUpdate?.({ edges:true }, { immediate:true });
-      }
-    }
-  );
+$('resetRelationshipStyleBtn')?.addEventListener('click',() => {
+  relationshipLineSettings = createRelationshipLineSettings();
+  try { localStorage.removeItem(REL_LINE_STYLE_KEY); } catch (_) {}
+  applyRelationshipLineSettings();
+  if (getSceneLayout()) genealogyScene?.requestUpdate?.({ edges:true },{ immediate:true });
+});
 
 function syncRelationshipLabelLockControl() {
   if (!labelLockToggle) return;
@@ -8821,23 +8158,17 @@ function paintCanvasBackgroundPreview() {
   preview.style.backgroundImage =
     url ? `url("${url}")` : '';
 
-  preview.textContent =
-    url
-      ? ''
-      : uiText(
-          '拖曳圖片到這裡，或點「更換圖片」'
-        );
+  preview.classList.toggle('has-image',!!url);
 
-  preview.dataset.dropLabel =
-    uiText(
-      '放開以上傳背景圖片'
-    );
+  const actions = $('appearanceBackgroundActions');
+  if (actions) actions.hidden = !url;
 
+  preview.dataset.dropLabel = uiText('放開以上傳背景圖片');
   preview.setAttribute(
     'aria-label',
-    uiText(
-      '拖曳圖片到這裡，或點「更換圖片」'
-    )
+    url
+      ? uiText('更換背景圖片')
+      : uiText('拖曳圖片到這裡，或點擊此區域選擇檔案')
   );
 }
 
@@ -8850,23 +8181,22 @@ function openAppearancePanel() {
 
   customColor1.value = customColors.c1;
   customColor2.value = customColors.c2;
+  customColor3.value = customColors.c3;
+
+  appearanceCustomThemeEditor.hidden = true;
 
   paintCustomThemePreview();
   paintThemeChoices();
   paintCanvasBackgroundPreview();
-  renderOtherRelationshipLineControls();
 
   appearanceDialog.classList.add('show');
 
-  genealogyUI.mountFormControls(
-    appearanceDialog
-  );
-
-  genealogyUI.refreshControl(
-    $('appearanceBackgroundFit')
-  );
-
   syncRelationshipLineControls();
+
+  genealogyUI.mountFormControls(appearanceDialog);
+  genealogyUI.refreshControl($('appearanceBackgroundFit'));
+  genealogyUI.refreshControl($('relationshipEditorStyle'));
+  genealogyUI.refreshControl($('relationshipOtherTypeSelect'));
 }
 
 function closeAppearancePanel() {
@@ -9022,7 +8352,8 @@ if (resetUiSettingsBtn) {
       try { localStorage.removeItem(key); } catch (_) {}
     });
 
-    customColors = { c1:'#f0c050', c2:'#a878c8' };
+    customColors = { c1:'#ffffff', c2:'#dfeffc', c3:'#55acee' };
+    hasSavedCustomTheme = false;
     bgSettings = { image:null, opacity:0.5, fit:'cover' };
     showRelLabels = true;
     personLibraryViewMode = 'detailed';
@@ -9118,6 +8449,16 @@ const appearanceBackgroundInput =
 
 const appearanceBackgroundPreview =
   $('appearanceBackgroundPreview');
+
+appearanceBackgroundPreview?.addEventListener(
+  'click',
+  () => appearanceBackgroundInput?.click()
+);
+
+$('appearanceBackgroundChangeBtn')?.addEventListener(
+  'click',
+  () => appearanceBackgroundInput?.click()
+);
 
 appearanceBackgroundInput.onchange =
   async event => {
@@ -10261,7 +9602,7 @@ genealogyScene =
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
-      getOtherRelationshipLineSetting, relationshipResolvedColor, relationshipInlineSvgStyle,
+      getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureRelationshipLabelText,
       makeLabelSVG, getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass
@@ -19110,6 +18451,18 @@ function restoreWorkspacePreferences() {
         customColors.c2 =
           parsed.c2;
       }
+
+      if (parsed.c3) {
+        customColors.c3 =
+          parsed.c3;
+      }
+
+      hasSavedCustomTheme =
+        !!(
+          parsed.c1 &&
+          parsed.c2 &&
+          parsed.c3
+        );
     }
   } catch (_) {}
 
@@ -19134,7 +18487,8 @@ function restoreWorkspacePreferences() {
   if (savedTheme === 'custom') {
     chooseCustomTheme(
       customColors.c1,
-      customColors.c2
+      customColors.c2,
+      customColors.c3
     );
   } else {
     chooseThemePreset(
