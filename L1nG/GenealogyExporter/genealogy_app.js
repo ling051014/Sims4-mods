@@ -3190,12 +3190,12 @@ function openUiDialog({
       if (mode === 'prompt') {
         inputEl.focus();
         inputEl.select();
-      } else if (mode === 'confirm' && kind === 'danger') {
-        // 危險操作預設聚焦「取消」，避免鍵盤 Enter / Space 誤觸確認。
-        cancelBtn.focus();
-      } else {
-        confirmBtn.focus();
+        return;
       }
+
+      dialog.focus({
+        preventScroll:true
+      });
     });
   });
 }
@@ -11237,7 +11237,14 @@ const lifePhotoWorkspace = {
 
     this.refreshPreview();
     lifePhotoEditorDialog.classList.add('show');
-    setTimeout(() => $('phTitle').focus(), 60);
+
+    requestAnimationFrame(() => {
+      lifePhotoEditorDialog
+        .querySelector('.photo-modal')
+        ?.focus({
+          preventScroll:true
+        });
+    });
   },
 
   closeEditor() {
@@ -16198,10 +16205,13 @@ const petEditorController = {
     this.populateForm(pet);
     petEditorDialog.classList.add('show');
 
-    setTimeout(
-      () => $('pName').focus(),
-      60
-    );
+    requestAnimationFrame(() => {
+      petEditorDialog
+        .querySelector('.pet-editor-modal')
+        ?.focus({
+          preventScroll:true
+        });
+    });
   },
 
   close() {
