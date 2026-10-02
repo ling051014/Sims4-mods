@@ -292,6 +292,59 @@
     return item.localizedName || item.displayName || item.internalName || item.tuningId || '';
   }
 
+  // ========【寵物特徵顯示文字】 設定 - 清除 EA / 第三方模組附帶的富文字標記 ========
+  // 只套用在寵物 traits；不改人物特徵、職業、抱負或其他遊戲文字。
+  function decodeImportedTextEntities(value) {
+    const source =
+      String(value ?? '');
+
+    if (
+      !source.includes('&') ||
+      typeof document === 'undefined'
+    ) {
+      return source;
+    }
+
+    const decoder =
+      document.createElement(
+        'textarea'
+      );
+
+    decoder.innerHTML =
+      source;
+
+    return decoder.value;
+  }
+
+  function cleanImportedPetTraitLabel(item) {
+    const raw =
+      internalLabel(item);
+
+    if (!raw) {
+      return '';
+    }
+
+    const withoutRichText =
+      String(raw)
+        .replace(
+          /<\s*br\s*\/?>/gi,
+          ' '
+        )
+        .replace(
+          /<\/?[a-z][^>]*>/gi,
+          ''
+        );
+
+    return decodeImportedTextEntities(
+      withoutRichText
+    )
+      .replace(
+        /\s+/g,
+        ' '
+      )
+      .trim();
+  }
+
   function stringIds(value) {
     return Array.isArray(value) ? value.map(String).filter(Boolean) : [];
   }
@@ -731,7 +784,7 @@
 
       const traits = Array.isArray(pet.traits)
         ? pet.traits
-            .map(internalLabel)
+            .map(cleanImportedPetTraitLabel)
             .filter(Boolean)
         : [];
 
