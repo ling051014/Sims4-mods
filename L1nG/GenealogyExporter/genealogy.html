@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20261002-game-import-dialog-r2">
+        <link rel="stylesheet" href="genealogy.css?v=20261002-save-source-r1">
     </head>
     <body data-theme="ling">
 
@@ -997,9 +997,16 @@
                     <input class="ui-dialog-input" id="uiDialogInput" type="text" autocomplete="off">
                 </div>
                 <div class="ui-dialog-actions">
+                    <div class="ui-dialog-action-tooltip" id="uiDialogActionTooltip" role="tooltip"></div>
                     <button id="uiDialogCancel" type="button">取消</button>
-                    <button id="uiDialogSecondary" type="button" hidden></button>
-                    <button class="primary" id="uiDialogConfirm" type="button">確定</button>
+                    <span class="ui-dialog-action-wrap" id="uiDialogSecondaryWrap" hidden>
+                        <button id="uiDialogSecondary" type="button"></button>
+                        <button class="ui-dialog-action-info" id="uiDialogSecondaryInfo" type="button" aria-label="選項說明" hidden><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></button>
+                    </span>
+                    <span class="ui-dialog-action-wrap" id="uiDialogConfirmWrap">
+                        <button class="primary" id="uiDialogConfirm" type="button">確定</button>
+                        <button class="ui-dialog-action-info" id="uiDialogConfirmInfo" type="button" aria-label="選項說明" hidden><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></button>
+                    </span>
                 </div>
             </div>
         </div>
@@ -1077,7 +1084,7 @@
         </div>
 
         <script src="genealogy_assets.js?v=20260930-asset-db-clean-break"></script>
-        <script src="genealogy_gameImport.js?v=20261002-game-update-r2"></script>
+        <script src="genealogy_gameImport.js?v=20261002-save-source-r1"></script>
         <script src="genealogy_runtime.js?v=20261001-transient-node-state-v6"></script>
 <script src="genealogy_store.js?v=20261002-game-update-r2"></script>
 <script src="genealogy_interaction.js?v=20260929-performance-p345"></script>
@@ -1085,7 +1092,7 @@
 <script src="genealogy_ui.js?v=20261001-virtual-rel-options-r1"></script>
 <script src="genealogy_scene.js?v=20261002-independent-ui-rewrite-r1"></script>
 <script src="genealogy_personEditor.js?v=20261002-default-preferences-r1"></script>
-  <script src="genealogy_i18n.js?v=20261002-game-import-dialog-r2"></script>
-  <script src="genealogy_app.js?v=20261002-game-import-dialog-r2"></script>
+  <script src="genealogy_i18n.js?v=20261002-save-source-r1"></script>
+  <script src="genealogy_app.js?v=20261002-save-source-r1"></script>
     </body>
 </html>
