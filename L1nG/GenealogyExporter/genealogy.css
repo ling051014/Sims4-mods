@@ -1787,7 +1787,7 @@ body[data-theme="midnight"] .life-photo-stage {
 .help-tooltip.compact { width:18px; height:18px; flex-basis:18px; font-size:11px; }
 .help-tooltip:hover,.help-tooltip:focus-visible { background:var(--brand-tint-start); color:var(--action-primary-hover); }
 .help-tooltip::before,.help-tooltip::after { content:none !important; display:none !important; }
-#globalHelpTooltip { position:fixed; z-index:23000; max-width:min(330px,calc(100vw - 24px)); padding:9px 11px; border-radius:7px; background:rgba(32,37,43,.97); color:#fff; font-size:12px; font-weight:400; line-height:1.55; letter-spacing:0; text-align:left; box-shadow:0 8px 24px rgba(0,0,0,.18); pointer-events:none; opacity:0; visibility:hidden; transform:translateY(-3px); transition:opacity .12s ease,transform .12s ease,visibility .12s ease; }
+#globalHelpTooltip { position:fixed; z-index:23000; max-width:min(330px,calc(100vw - 24px)); padding:9px 11px; border-radius:7px; background:rgba(32,37,43,.97); color:#fff; font-size:12px; font-weight:400; line-height:1.55; letter-spacing:0; text-align:left; white-space:pre-line; box-shadow:0 8px 24px rgba(0,0,0,.18); pointer-events:none; opacity:0; visibility:hidden; transform:translateY(-3px); transition:opacity .12s ease,transform .12s ease,visibility .12s ease; }
 #globalHelpTooltip.show { opacity:1; visibility:visible; transform:translateY(0); }
 #globalHelpTooltip::after { content:""; position:absolute; left:var(--tooltip-arrow-x,50%); width:9px; height:9px; background:inherit; transform:translateX(-50%) rotate(45deg); }
 #globalHelpTooltip[data-side="top"]::after { bottom:-4px; }
