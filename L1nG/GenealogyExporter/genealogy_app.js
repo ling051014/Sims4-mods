@@ -8822,7 +8822,23 @@ function paintCanvasBackgroundPreview() {
     url ? `url("${url}")` : '';
 
   preview.textContent =
-    url ? '' : '尚未設定背景圖片';
+    url
+      ? ''
+      : uiText(
+          '拖曳圖片到這裡，或點「更換圖片」'
+        );
+
+  preview.dataset.dropLabel =
+    uiText(
+      '放開以上傳背景圖片'
+    );
+
+  preview.setAttribute(
+    'aria-label',
+    uiText(
+      '拖曳圖片到這裡，或點「更換圖片」'
+    )
+  );
 }
 
 function openAppearancePanel() {
@@ -9078,24 +9094,185 @@ if (restoreSampleBtn) {
   };
 }
 
-$('appearanceBackgroundInput').onchange = async event => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
+async function importCanvasBackgroundFile(
+  file
+) {
   try {
-    await replaceCanvasBackground(file);
+    await replaceCanvasBackground(
+      file
+    );
   } catch (error) {
     uiAlert(
-      '背景處理失敗：' + error.message,
+      uiText('背景處理失敗：') +
+        error.message,
       {
         title:'圖片處理失敗',
         kind:'danger'
       }
     );
-  } finally {
-    event.target.value = '';
   }
-};
+}
+
+const appearanceBackgroundInput =
+  $('appearanceBackgroundInput');
+
+const appearanceBackgroundPreview =
+  $('appearanceBackgroundPreview');
+
+appearanceBackgroundInput.onchange =
+  async event => {
+    const file =
+      event.target.files?.[0];
+
+    if (!file) return;
+
+    try {
+      await importCanvasBackgroundFile(
+        file
+      );
+    } finally {
+      event.target.value = '';
+    }
+  };
+
+let appearanceBackgroundDragDepth = 0;
+
+function isFileDrag(event) {
+  const types =
+    Array.from(
+      event.dataTransfer?.types || []
+    );
+
+  return (
+    types.includes('Files') ||
+    !!event.dataTransfer?.files?.length
+  );
+}
+
+function clearAppearanceBackgroundDragState() {
+  appearanceBackgroundDragDepth = 0;
+  appearanceBackgroundPreview
+    ?.classList
+    .remove('dragover');
+}
+
+appearanceBackgroundPreview
+  ?.addEventListener(
+    'dragenter',
+    event => {
+      if (!isFileDrag(event)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      appearanceBackgroundDragDepth++;
+
+      appearanceBackgroundPreview
+        .classList
+        .add('dragover');
+    }
+  );
+
+appearanceBackgroundPreview
+  ?.addEventListener(
+    'dragover',
+    event => {
+      if (!isFileDrag(event)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect =
+          'copy';
+      }
+
+      appearanceBackgroundPreview
+        .classList
+        .add('dragover');
+    }
+  );
+
+appearanceBackgroundPreview
+  ?.addEventListener(
+    'dragleave',
+    event => {
+      if (!isFileDrag(event)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      appearanceBackgroundDragDepth =
+        Math.max(
+          0,
+          appearanceBackgroundDragDepth - 1
+        );
+
+      if (
+        appearanceBackgroundDragDepth ===
+        0
+      ) {
+        appearanceBackgroundPreview
+          .classList
+          .remove('dragover');
+      }
+    }
+  );
+
+appearanceBackgroundPreview
+  ?.addEventListener(
+    'drop',
+    async event => {
+      if (!isFileDrag(event)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const files =
+        [...(
+          event.dataTransfer?.files ||
+          []
+        )];
+
+      clearAppearanceBackgroundDragState();
+
+      if (!files.length) return;
+
+      if (files.length > 1) {
+        uiAlert(
+          '請一次只拖曳一張背景圖片。',
+          {
+            title:'圖片處理失敗',
+            kind:'danger'
+          }
+        );
+        return;
+      }
+
+      await importCanvasBackgroundFile(
+        files[0]
+      );
+    }
+  );
+
+appearanceDialog
+  ?.addEventListener(
+    'dragend',
+    clearAppearanceBackgroundDragState
+  );
+
+appearanceDialog
+  ?.addEventListener(
+    'drop',
+    event => {
+      if (
+        !appearanceBackgroundPreview
+          ?.contains(event.target)
+      ) {
+        clearAppearanceBackgroundDragState();
+      }
+    }
+  );
 
 $('appearanceBackgroundOpacity').oninput = event => {
   setCanvasBackgroundOpacity(
