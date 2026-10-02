@@ -221,6 +221,243 @@ function renderTraitEditor() {
   });
 }
 
+// ========【遊戲偏好顯示】 設定 - 喜好與厭惡唯讀呈現；吸引力偏好僅在有實際資料時顯示 ========
+function personEditorPreferenceData(sim=currentSimEditorPerson()){
+  const source=
+    sim &&
+    sim.gameData &&
+    sim.gameData.preferences &&
+    typeof sim.gameData.preferences === 'object'
+      ? sim.gameData.preferences
+      : null;
+
+  return {
+    availability:
+      source && source.availability
+        ? String(source.availability)
+        : 'unavailable',
+    likesDislikes:
+      source && Array.isArray(source.likesDislikes)
+        ? source.likesDislikes
+        : [],
+    attraction:
+      source && Array.isArray(source.attraction)
+        ? source.attraction
+        : []
+  };
+}
+
+function personEditorPreferenceCategory(item){
+  const category=item && item.category;
+  if(!category || typeof category !== 'object'){
+    return {
+      key:'other',
+      label:'其他'
+    };
+  }
+
+  return {
+    key:String(
+      category.tuningId ||
+      category.internalName ||
+      category.localizedName ||
+      'other'
+    ),
+    label:String(
+      category.localizedName ||
+      category.internalName ||
+      '其他'
+    ).trim() || '其他'
+  };
+}
+
+function personEditorPreferenceName(item){
+  if(!item || typeof item !== 'object')return '';
+
+  return String(
+    item.displayName ||
+    item.localizedName ||
+    item.internalName ||
+    item.tuningId ||
+    ''
+  ).trim();
+}
+
+function groupPersonEditorPreferences(items){
+  const groups=new Map();
+
+  (items || []).forEach(item=>{
+    if(!item || typeof item !== 'object')return;
+
+    const category=
+      personEditorPreferenceCategory(item);
+
+    if(!groups.has(category.key)){
+      groups.set(category.key,{
+        label:category.label,
+        likes:[],
+        dislikes:[]
+      });
+    }
+
+    const name=
+      personEditorPreferenceName(item);
+
+    if(!name)return;
+
+    const group=
+      groups.get(category.key);
+
+    const target=
+      item.preference === 'dislike'
+        ? group.dislikes
+        : group.likes;
+
+    if(!target.includes(name)){
+      target.push(name);
+    }
+  });
+
+  return [...groups.values()];
+}
+
+function personEditorPreferenceRowMarkup(label,items){
+  if(!items.length)return '';
+
+  return '<div class="game-preference-row">'+
+    '<span class="game-preference-row-label">'+
+      esc(label)+
+    '</span>'+
+    '<div class="game-preference-items">'+
+      items
+        .map(item=>
+          '<span class="game-preference-chip">'+
+            esc(item)+
+          '</span>'
+        )
+        .join('')+
+    '</div>'+
+  '</div>';
+}
+
+function renderPersonEditorPreferences(tabName){
+  const isAttraction=
+    tabName === 'attraction';
+
+  const data=
+    personEditorPreferenceData();
+
+  const items=
+    isAttraction
+      ? data.attraction
+      : data.likesDislikes;
+
+  const list=$(
+    isAttraction
+      ? 'attractionPreferenceList'
+      : 'gamePreferenceList'
+  );
+
+  const empty=$(
+    isAttraction
+      ? 'attractionPreferenceEmpty'
+      : 'gamePreferenceEmpty'
+  );
+
+  if(!list || !empty)return;
+
+  const groups=
+    groupPersonEditorPreferences(items);
+
+  list.innerHTML=
+    groups
+      .map(group=>{
+        const likeLabel=
+          isAttraction
+            ? '心動'
+            : '喜歡';
+
+        const dislikeLabel=
+          isAttraction
+            ? '反感'
+            : '討厭';
+
+        return '<section class="game-preference-category">'+
+          '<div class="game-preference-category-title">'+
+            esc(group.label)+
+          '</div>'+
+          personEditorPreferenceRowMarkup(
+            likeLabel,
+            group.likes
+          )+
+          personEditorPreferenceRowMarkup(
+            dislikeLabel,
+            group.dislikes
+          )+
+        '</section>';
+      })
+      .join('');
+
+  empty.hidden=
+    groups.length > 0;
+}
+
+function syncPersonEditorPreferenceTabs(sim){
+  const data=
+    personEditorPreferenceData(sim);
+
+  const regularTab=
+    document.querySelector(
+      '.sim-editor-tab[data-editor-tab="preferences"]'
+    );
+
+  const attractionTab=
+    document.querySelector(
+      '.sim-editor-tab[data-editor-tab="attraction"]'
+    );
+
+  const regularPanel=
+    document.querySelector(
+      '.sim-editor-panel[data-editor-panel="preferences"]'
+    );
+
+  const attractionPanel=
+    document.querySelector(
+      '.sim-editor-panel[data-editor-panel="attraction"]'
+    );
+
+  const hasRegularData=
+    !!sim &&
+    (
+      data.likesDislikes.length > 0 ||
+      data.availability === 'available'
+    );
+
+  const hasAttractionData=
+    !!sim &&
+    data.attraction.length > 0;
+
+  if(regularTab){
+    regularTab.hidden=
+      !hasRegularData;
+  }
+
+  if(attractionTab){
+    attractionTab.hidden=
+      !hasAttractionData;
+  }
+
+  if(!hasRegularData && regularPanel){
+    regularPanel.hidden=true;
+    regularPanel.classList.remove('active');
+  }
+
+  if(!hasAttractionData && attractionPanel){
+    attractionPanel.hidden=true;
+    attractionPanel.classList.remove('active');
+  }
+}
+
 function addTraitFromEditor() {
   const input = $('traitInput');
   if (!input) return;
@@ -1196,7 +1433,8 @@ function buildPersonEditorDraft({
       tabName
     );
 
-    const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
+    const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')]
+      .filter(tab=>!tab.hidden);
     const panels=[...document.querySelectorAll('.sim-editor-panel[data-editor-panel]')];
 
     if(!tabs.some(tab=>tab.dataset.editorTab===tabName)){
@@ -1308,7 +1546,8 @@ function buildPersonEditorDraft({
       tab.addEventListener('keydown',event=>{
         if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
 
-        const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')];
+        const tabs=[...document.querySelectorAll('.sim-editor-tab[data-editor-tab]')]
+      .filter(tab=>!tab.hidden);
         const index=tabs.indexOf(tab);
         if(index<0)return;
 
@@ -1861,6 +2100,15 @@ function buildPersonEditorDraft({
       initializePersonEditorRelationshipUi();
     }
 
+    if(
+      tabName==='preferences'||
+      tabName==='attraction'
+    ){
+      renderPersonEditorPreferences(
+        tabName
+      );
+    }
+
     if(tabName==='media'){
       initializePersonEditorMediaUi();
     }
@@ -2016,6 +2264,10 @@ function buildPersonEditorDraft({
       'fCauseOfDeath'
     ].forEach(
       refreshEditorSelect
+    );
+
+    syncPersonEditorPreferenceTabs(
+      sim
     );
 
     switchEditorTab('basic');
