@@ -3047,7 +3047,12 @@ function openUiDialog({
   kind = 'default',
   defaultValue = '',
   confirmText = '確定',
-  cancelText = '取消'
+  cancelText = '取消',
+  secondaryText = '',
+  secondaryValue = null,
+  secondaryKind = 'default',
+  confirmValue = true,
+  cancelValue = mode === 'confirm' ? false : null
 } = {}) {
   const overlay = $('confirmationDialog');
   const dialog = $('uiDialog');
@@ -3055,11 +3060,20 @@ function openUiDialog({
   const messageEl = $('uiDialogMessage');
   const inputEl = $('uiDialogInput');
   const cancelBtn = $('uiDialogCancel');
+  const secondaryBtn = $('uiDialogSecondary');
   const confirmBtn = $('uiDialogConfirm');
   const closeBtn = $('uiDialogClose');
 
-  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !confirmBtn || !closeBtn) {
-    return Promise.resolve(mode === 'confirm' ? false : mode === 'prompt' ? null : true);
+  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !closeBtn) {
+    return Promise.resolve(
+      mode === 'confirm'
+        ? false
+        : mode === 'choice'
+          ? null
+          : mode === 'prompt'
+            ? null
+            : true
+    );
   }
 
   if (_uiDialogResolve) closeUiDialog(null);
@@ -3073,11 +3087,34 @@ function openUiDialog({
     ? wholeMessage
     : rawMessage.split('\n').map(line => uiText(line)).join('\n');
   dialog.dataset.kind = kind;
-  // 讓 CSS 能只針對「兩顆按鈕」的確認 / 輸入彈窗置中，不影響單按鈕提示。
-  dialog.dataset.actionCount = mode === 'alert' ? '1' : '2';
+  const hasSecondaryAction =
+    !!String(secondaryText || '').trim();
+
+  dialog.dataset.actionCount =
+    mode === 'alert'
+      ? '1'
+      : hasSecondaryAction
+        ? '3'
+        : '2';
+
   confirmBtn.textContent = uiText(confirmText);
   cancelBtn.textContent = uiText(cancelText);
   cancelBtn.style.display = mode === 'alert' ? 'none' : '';
+
+  secondaryBtn.textContent =
+    hasSecondaryAction
+      ? uiText(secondaryText)
+      : '';
+
+  secondaryBtn.hidden =
+    !hasSecondaryAction;
+
+  secondaryBtn.classList.toggle(
+    'danger',
+    hasSecondaryAction &&
+    secondaryKind === 'danger'
+  );
+
   inputEl.classList.toggle('show', mode === 'prompt');
   inputEl.value = mode === 'prompt' ? uiText(defaultValue) : '';
 
@@ -3088,12 +3125,25 @@ function openUiDialog({
     _uiDialogResolve = resolve;
 
     const finishConfirm = () => {
-      if (mode === 'prompt') closeUiDialog(inputEl.value);
-      else closeUiDialog(true);
+      if (mode === 'prompt') {
+        closeUiDialog(inputEl.value);
+        return;
+      }
+
+      closeUiDialog(confirmValue);
     };
-    const finishCancel = () => closeUiDialog(mode === 'confirm' ? false : null);
+
+    const finishSecondary = () =>
+      closeUiDialog(secondaryValue);
+
+    const finishCancel = () =>
+      closeUiDialog(cancelValue);
 
     confirmBtn.onclick = finishConfirm;
+    secondaryBtn.onclick =
+      hasSecondaryAction
+        ? finishSecondary
+        : null;
     cancelBtn.onclick = finishCancel;
     closeBtn.onclick = finishCancel;
     overlay.onclick = event => {
@@ -17799,6 +17849,16 @@ function currentGameImportUpdateAnalysis(
 async function chooseGameImportMode(
   analysis
 ) {
+  const currentDatabase =
+    currentGenealogyData();
+
+  // 內建預設族譜只是示範資料，第一次匯入真正遊戲 ZIP 時直接建立新族譜。
+  if (
+    currentDatabase?.meta?.sample === true
+  ) {
+    return 'replace';
+  }
+
   if (
     !analysis ||
     analysis.currentGameSimCount <= 0
@@ -17809,8 +17869,9 @@ async function chooseGameImportMode(
   hideGameImportStatus();
 
   if (analysis.matchedSimCount > 0) {
-    const update = await uiConfirm(
-      [
+    return await openUiDialog({
+      title:'更新遊戲族譜',
+      message:[
         uiText('網站目前已經有遊戲族譜。'),
         '',
         `${uiText('找到相同遊戲人物')}：${analysis.matchedSimCount}`,
@@ -17820,37 +17881,29 @@ async function chooseGameImportMode(
         uiText('更新會同步最新遊戲資料，並保留手動排列、人生照片、自訂關係、關係標籤與其他網站資料。'),
         uiText('目前尚未加入存檔編號識別；請自行確認這份 ZIP 是要延續目前族譜的遊戲資料。')
       ].join('\n'),
-      {
-        title:'更新遊戲族譜',
-        confirmText:'更新目前族譜',
-        cancelText:'其他選項'
-      }
-    );
-
-    if (update) {
-      return 'update';
-    }
+      mode:'choice',
+      confirmText:'更新目前族譜',
+      confirmValue:'update',
+      secondaryText:'覆蓋現有族譜',
+      secondaryValue:'replace',
+      secondaryKind:'danger',
+      cancelText:'取消',
+      cancelValue:'cancel'
+    });
   }
 
   const replace = await uiConfirm(
-    analysis.matchedSimCount > 0
-      ? [
-          uiText('是否改為使用這份 ZIP 整份取代目前族譜？'),
-          '',
-          uiText('整份取代會重新建立遊戲族譜，原本網站上的人物資料、手動排列、人生照片、自訂關係與家庭資料都會被目前 ZIP 取代。'),
-          uiText('如果只是想更新原本族譜，請取消並重新匯入後選擇「更新目前族譜」。')
-        ].join('\n')
-      : [
-          uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。'),
-          '',
-          uiText('在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。'),
-          uiText('是否仍要使用這份 ZIP 整份取代目前族譜？')
-        ].join('\n'),
+    [
+      uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。'),
+      '',
+      uiText('在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。'),
+      uiText('是否仍要使用這份 ZIP 整份取代目前族譜？')
+    ].join('\n'),
     {
-      title:'整份取代遊戲族譜',
+      title:'覆蓋現有族譜',
       kind:'danger',
-      confirmText:'整份取代',
-      cancelText:'取消匯入'
+      confirmText:'覆蓋現有族譜',
+      cancelText:'取消'
     }
   );
 

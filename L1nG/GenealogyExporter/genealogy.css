@@ -5639,6 +5639,10 @@ html[lang="en"] body {
     /* 確認 / 取消兩顆按鈕置中 */ justify-content: center;
 }
 
+.ui-dialog[data-action-count="3"] .ui-dialog-actions {
+    /* 取消 / 覆蓋 / 更新三顆按鈕置中 */ justify-content: center;
+}
+
 /* 一般功能彈窗若操作列只有兩顆按鈕與 spacer，也一起置中；有計數器等其他資訊者維持原排版。 */
 
 .ui-dialog-actions:has(> button:nth-of-type(2)):not(:has(> button:nth-of-type(3))):not(:has(> :not(button):not(.spacer))) {
