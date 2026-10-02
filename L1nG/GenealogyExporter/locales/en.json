@@ -952,6 +952,23 @@
     "藍色": "Blue",
     "電子音樂": "Electronica",
     "電動遊戲": "Video Gaming",
-    "兒童電台音樂": "Kids Radio"
+    "兒童電台音樂": "Kids Radio",
+    "寫作": "Writing",
+    "程式設計": "Programming",
+    "浪漫音樂": "Romance Music",
+    "紅色": "Red",
+    "另類音樂": "Alternative Music",
+    "黑色": "Black",
+    "攀岩": "Rock Climbing",
+    "非洲節奏音樂": "Afro Beats",
+    "劍術": "Swordsmanship",
+    "創作歌手音樂": "Singer-Songwriter Music",
+    "夏日音樂": "Summer Strut",
+    "華爾滋音樂": "Ballroom Music",
+    "刺青": "Tattooing",
+    "調酒": "Mixology",
+    "模擬流行樂": "S-Pop",
+    "復古音樂": "Retro Music",
+    "鋼琴": "Piano"
   }
 }
