@@ -9210,6 +9210,11 @@ function normalizeCurrentDatabase(targetDb) {
         gender:isEaCasPetSpecies(pet.species) ? (normalizePetGender(pet.gender) || 'male') : '',
         ageStage:pet.ageStage || '成年',
         status:pet.status || '在世',
+        traits:Array.isArray(pet.traits)
+          ? pet.traits
+              .map(value => String(value || '').trim())
+              .filter(Boolean)
+          : [],
         avatar:pet.avatar || null,
         avatarFrame:normalizeAvatarFrame(pet.avatarFrame)
       }));
@@ -10779,6 +10784,25 @@ function renderPersonProfilePet(
       <div class="person-profile-pet-text">
         <div class="person-profile-pet-name">${esc(name)}</div>
         <div class="person-profile-pet-meta">${esc(meta)}</div>
+        ${(pet.traits || []).length
+          ? '<div class="person-profile-pet-traits">' +
+            (pet.traits || [])
+              .map(value =>
+                personDisplayText(
+                  value,
+                  model.person,
+                  model.draft
+                )
+              )
+              .filter(Boolean)
+              .map(value =>
+                '<span class="tag">' +
+                  esc(value) +
+                '</span>'
+              )
+              .join('') +
+            '</div>'
+          : ''}
         ${petLineageHTML(pet)}
       </div>
     </div>
@@ -15407,9 +15431,113 @@ const petEditorController = {
       gender:'male',
       ageStage:'成年',
       status:'在世',
+      traits:[],
       avatar:null,
       avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
     };
+  },
+
+  renderTraits() {
+    const list =
+      $('petTraitChipList');
+
+    if (!list) return;
+
+    list.innerHTML =
+      petEditorState.traits
+        .map(
+          (trait, index) =>
+            '<span class="trait-chip">' +
+              '<span>' +
+                esc(trait) +
+              '</span>' +
+              '<button type="button" class="trait-chip-remove" data-pet-trait-index="' +
+                index +
+                '" aria-label="' +
+                esc(uiText('移除')) +
+                '" title="' +
+                esc(uiText('移除')) +
+              '">×</button>' +
+            '</span>'
+        )
+        .join('');
+
+    list
+      .querySelectorAll(
+        '[data-pet-trait-index]'
+      )
+      .forEach(button => {
+        button.addEventListener(
+          'click',
+          () => {
+            const index =
+              Number(
+                button.dataset
+                  .petTraitIndex
+              );
+
+            if (
+              !Number.isInteger(index) ||
+              index < 0 ||
+              index >=
+                petEditorState
+                  .traits
+                  .length
+            ) {
+              return;
+            }
+
+            petEditorState.traits.splice(
+              index,
+              1
+            );
+
+            this.renderTraits();
+          }
+        );
+      });
+  },
+
+  addTraitsFromInput() {
+    const input =
+      $('petTraitInput');
+
+    if (!input) return;
+
+    const values =
+      input.value
+        .split(/[,，\n]+/)
+        .map(value =>
+          value.trim()
+        )
+        .filter(Boolean);
+
+    if (!values.length) {
+      return;
+    }
+
+    for (const value of values) {
+      const normalized =
+        value.toLocaleLowerCase();
+
+      const duplicate =
+        petEditorState.traits
+          .some(existing =>
+            existing
+              .toLocaleLowerCase() ===
+            normalized
+          );
+
+      if (!duplicate) {
+        petEditorState.traits.push(
+          value
+        );
+      }
+    }
+
+    input.value = '';
+    this.renderTraits();
+    input.focus();
   },
 
   refreshAvatarPreview() {
@@ -15486,6 +15614,32 @@ const petEditorController = {
     $('pStatus').value =
       pet.status || '在世';
 
+    petEditorState.traits =
+      Array.isArray(pet.traits)
+        ? pet.traits
+            .map(value =>
+              owner
+                ? displayDataText(
+                    value,
+                    owner
+                  )
+                : String(value || '')
+            )
+            .map(value =>
+              String(value || '').trim()
+            )
+            .filter(Boolean)
+        : [];
+
+    this.renderTraits();
+
+    const traitInput =
+      $('petTraitInput');
+
+    if (traitInput) {
+      traitInput.value = '';
+    }
+
     petEditorState.avatar =
       pet.avatar || null;
 
@@ -15552,6 +15706,7 @@ const petEditorController = {
     petEditorState.avatarFrame = {
       ...DEFAULT_AVATAR_FRAME
     };
+    petEditorState.traits = [];
   },
 
   collectForm() {
@@ -15626,6 +15781,9 @@ const petEditorController = {
         $('pAgeStage').value,
       status:
         $('pStatus').value,
+      traits:[
+        ...petEditorState.traits
+      ],
       avatar:
         petEditorState.avatar ||
         null,
@@ -15780,6 +15938,26 @@ function renderPetDraftList() {
           <div class="pet-item-info">
             <div class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</div>
             <div class="pet-item-meta">${esc(meta.join(' · '))}</div>
+            ${(pet.traits || []).length
+              ? '<div class="pet-trait-summary">' +
+                (pet.traits || [])
+                  .map(value =>
+                    owner
+                      ? displayDataText(
+                          value,
+                          owner
+                        )
+                      : String(value || '')
+                  )
+                  .filter(Boolean)
+                  .map(value =>
+                    '<span class="tag">' +
+                      esc(value) +
+                    '</span>'
+                  )
+                  .join('') +
+                '</div>'
+              : ''}
             ${petLineageHTML(pet)}
           </div>
           <div class="pet-item-actions">
@@ -15879,6 +16057,28 @@ $('pSpecies').addEventListener('change', () => {
   petEditorController.syncGenderVisibility();
   petEditorController.refreshAvatarPreview();
 });
+
+$('petTraitAddBtn')?.addEventListener(
+  'click',
+  () => {
+    petEditorController
+      .addTraitsFromInput();
+  }
+);
+
+$('petTraitInput')?.addEventListener(
+  'keydown',
+  event => {
+    if (event.key !== 'Enter') {
+      return;
+    }
+
+    event.preventDefault();
+
+    petEditorController
+      .addTraitsFromInput();
+  }
+);
 
 $('pSave').onclick = () => {
   petEditorController.commit();
