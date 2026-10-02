@@ -5507,6 +5507,7 @@ html[lang="en"] body {
 }
 
 .ui-dialog:focus,
+.ui-dialog-panel:focus,
 .ui-dialog-backdrop:focus {
     outline: none;
 }
