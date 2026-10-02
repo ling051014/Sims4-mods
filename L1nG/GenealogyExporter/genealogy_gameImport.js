@@ -1095,9 +1095,274 @@
     };
   }
 
+  // ========【EA Household 室友推導】 設定 - 同住但沒有親屬／伴侶關係時建立「室友」遊戲關係 ========
+  function familyComponentMap(
+    sourceSims
+  ) {
+    const adjacency =
+      new Map();
+
+    const ensureNode =
+      rawId => {
+        const id =
+          String(rawId || '');
+
+        if (!id) return '';
+
+        if (!adjacency.has(id)) {
+          adjacency.set(
+            id,
+            new Set()
+          );
+        }
+
+        return id;
+      };
+
+    const connect =
+      (firstId, secondId) => {
+        const a =
+          ensureNode(firstId);
+
+        const b =
+          ensureNode(secondId);
+
+        if (
+          !a ||
+          !b ||
+          a === b
+        ) {
+          return;
+        }
+
+        adjacency.get(a).add(b);
+        adjacency.get(b).add(a);
+      };
+
+    Object.entries(
+      sourceSims || {}
+    ).forEach(([idRaw, sim]) => {
+      const id =
+        ensureNode(idRaw);
+
+      if (!id) return;
+
+      const rel =
+        relationshipArrays(sim);
+
+      [
+        ...rel.parentIds,
+        ...rel.childIds,
+        ...rel.adoptedParentIds,
+        ...rel.adoptedChildIds
+      ].forEach(relatedId =>
+        connect(
+          id,
+          relatedId
+        )
+      );
+    });
+
+    const componentById =
+      new Map();
+
+    let componentIndex = 0;
+
+    adjacency.forEach(
+      (_, startId) => {
+        if (
+          componentById.has(startId)
+        ) {
+          return;
+        }
+
+        componentIndex++;
+
+        const stack =
+          [startId];
+
+        componentById.set(
+          startId,
+          componentIndex
+        );
+
+        while (stack.length) {
+          const id =
+            stack.pop();
+
+          adjacency.get(id)
+            ?.forEach(nextId => {
+              if (
+                componentById.has(nextId)
+              ) {
+                return;
+              }
+
+              componentById.set(
+                nextId,
+                componentIndex
+              );
+
+              stack.push(nextId);
+            });
+        }
+      }
+    );
+
+    return componentById;
+  }
+
+  function sameFamilyComponent(
+    firstId,
+    secondId,
+    componentById
+  ) {
+    const a =
+      componentById.get(
+        String(firstId || '')
+      );
+
+    const b =
+      componentById.get(
+        String(secondId || '')
+      );
+
+    return (
+      a != null &&
+      b != null &&
+      a === b
+    );
+  }
+
+  function hasDirectPartnerRelationship(
+    firstId,
+    secondId,
+    sourceSims
+  ) {
+    const a =
+      String(firstId || '');
+
+    const b =
+      String(secondId || '');
+
+    if (
+      !a ||
+      !b ||
+      a === b
+    ) {
+      return false;
+    }
+
+    const pointsTo =
+      (sim, targetId) => {
+        const rel =
+          relationshipArrays(sim);
+
+        return [
+          ...rel.spouseIds,
+          ...rel.deceasedSpouseIds,
+          ...rel.exSpouseIds,
+          ...rel.fianceIds,
+          ...rel.steadyPartnerIds
+        ]
+          .map(String)
+          .includes(targetId);
+      };
+
+    return (
+      pointsTo(
+        sourceSims?.[a],
+        b
+      ) ||
+      pointsTo(
+        sourceSims?.[b],
+        a
+      )
+    );
+  }
+
+  function roommatePairs(
+    sourceSims,
+    humanIds,
+    households
+  ) {
+    const components =
+      familyComponentMap(
+        sourceSims
+      );
+
+    const pairs = [];
+
+    Object.values(
+      households || {}
+    ).forEach(household => {
+      if (
+        !householdShouldCreateFamily(
+          household
+        )
+      ) {
+        return;
+      }
+
+      const memberIds =
+        uniqueStrings(
+          household?.memberIds
+        )
+          .filter(id =>
+            humanIds.has(id)
+          );
+
+      for (
+        let firstIndex = 0;
+        firstIndex < memberIds.length;
+        firstIndex++
+      ) {
+        for (
+          let secondIndex = firstIndex + 1;
+          secondIndex < memberIds.length;
+          secondIndex++
+        ) {
+          const firstId =
+            memberIds[firstIndex];
+
+          const secondId =
+            memberIds[secondIndex];
+
+          if (
+            sameFamilyComponent(
+              firstId,
+              secondId,
+              components
+            )
+          ) {
+            continue;
+          }
+
+          if (
+            hasDirectPartnerRelationship(
+              firstId,
+              secondId,
+              sourceSims
+            )
+          ) {
+            continue;
+          }
+
+          pairs.push([
+            firstId,
+            secondId
+          ]);
+        }
+      }
+    });
+
+    return pairs;
+  }
+
   function importedRelationshipLinks(
     sourceSims,
-    humanIds
+    humanIds,
+    households
   ) {
     const pairMap =
       new Map();
@@ -1206,6 +1471,25 @@
           );
         });
     });
+
+    roommatePairs(
+      sourceSims,
+      humanIds,
+      households
+    )
+      .forEach(([
+        firstId,
+        secondId
+      ]) => {
+        // 室友是 Household 推導關係，優先級最低；
+        // 若同一人物組已有訂婚／伴侶等明確遊戲關係，會保留明確關係。
+        add(
+          firstId,
+          secondId,
+          '室友',
+          0
+        );
+      });
 
     return [...pairMap.values()]
       .map(({
@@ -1695,7 +1979,8 @@
       links:
         importedRelationshipLinks(
           sourceSims,
-          humanIds
+          humanIds,
+          households
         ),
       relationshipMap:{},
       labelPositions:{},
