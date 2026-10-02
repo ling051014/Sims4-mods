@@ -3165,6 +3165,31 @@ button.avatar-editor-action { cursor:pointer; }
     /* 文字顏色 */ color: var(--text-secondary);
     /* 字體大小 */ font-size: 13px;
     /* 下方外距 */ margin-bottom: 12px;
+    /* 拖曳提示定位 */ position: relative;
+    /* 拖曳提示不超出預覽區 */ overflow: hidden;
+    /* 拖曳狀態過渡 */ transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.appearance-background-preview.dragover {
+    border-color: var(--action-primary);
+    box-shadow: inset 0 0 0 1px var(--action-primary);
+    background-color: var(--brand-tint-start);
+}
+
+.appearance-background-preview.dragover::after {
+    content: attr(data-drop-label);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    background: color-mix(in srgb,var(--surface-card) 86%,transparent);
+    color: var(--action-primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
 }
 
 .appearance-background-row {
