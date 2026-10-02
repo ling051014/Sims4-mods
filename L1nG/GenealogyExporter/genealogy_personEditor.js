@@ -49,7 +49,8 @@
   const petEditorState = {
     index:-1,
     avatar:null,
-    avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
+    avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    traits:[]
   };
 
   const editingGallery = [];
@@ -2082,6 +2083,7 @@ function buildPersonEditorDraft({
   petEditorState.avatarFrame = {
     ...DEFAULT_AVATAR_FRAME
   };
+  petEditorState.traits = [];
 
   lifePhotoEditorDialog.classList.remove(
     'show'
