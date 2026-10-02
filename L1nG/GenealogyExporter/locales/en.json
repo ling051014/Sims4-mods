@@ -1001,8 +1001,6 @@
     "更新遊戲族譜": "Update Game Genealogy",
     "更新目前族譜": "Update Current Genealogy",
     "其他選項": "Other Options",
-    "整份取代遊戲族譜": "Replace Game Genealogy",
-    "整份取代": "Replace Everything",
     "取消匯入": "Cancel Import",
     "正在更新遊戲族譜…": "Updating game genealogy…",
     "正在合併最新遊戲資料…": "Merging the latest game data…",
@@ -1023,13 +1021,11 @@
     "新匯入頭像": "Newly imported portraits",
     "更新會同步最新遊戲資料，並保留手動排列、人生照片、自訂關係、關係標籤與其他網站資料。": "Updating syncs the latest game data while preserving manual layout, life photos, custom relationships, relationship labels, and other website data.",
     "目前尚未加入存檔編號識別；請自行確認這份 ZIP 是要延續目前族譜的遊戲資料。": "Save identification is not available yet. Please confirm that this ZIP should continue the current genealogy.",
-    "是否改為使用這份 ZIP 整份取代目前族譜？": "Replace the current genealogy with this ZIP instead?",
-    "整份取代會重新建立遊戲族譜，原本網站上的人物資料、手動排列、人生照片、自訂關係與家庭資料都會被目前 ZIP 取代。": "Replacing rebuilds the game genealogy. Existing website Sim data, manual layout, life photos, custom relationships, and family data will be replaced by this ZIP.",
-    "如果只是想更新原本族譜，請取消並重新匯入後選擇「更新目前族譜」。": "If you only want to update the existing genealogy, cancel and import again, then choose “Update Current Genealogy”.",
     "目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。": "The current genealogy already contains game data, but this ZIP has no matching game Sims.",
     "在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。": "Until save identification is added, the site will not automatically treat this ZIP as an update to the same genealogy.",
-    "是否仍要使用這份 ZIP 整份取代目前族譜？": "Replace the current genealogy with this ZIP anyway?",
     "已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。": "Preserved: manual layout, life photos, custom relationships, custom labels, family covers, and website-only data.",
-    "覆蓋現有族譜": "Replace Existing Genealogy"
+    "覆蓋現有族譜": "Replace Existing Genealogy",
+    "匯入遊戲族譜": "Import Game Genealogy",
+    "是否仍要使用這份 ZIP 覆蓋現有族譜？": "Use this ZIP to replace the existing genealogy anyway?"
   }
 }

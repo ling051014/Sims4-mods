@@ -17870,7 +17870,7 @@ async function chooseGameImportMode(
 
   if (analysis.matchedSimCount > 0) {
     return await openUiDialog({
-      title:'更新遊戲族譜',
+      title:'匯入遊戲族譜',
       message:[
         uiText('網站目前已經有遊戲族譜。'),
         '',
@@ -17897,10 +17897,10 @@ async function chooseGameImportMode(
       uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。'),
       '',
       uiText('在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。'),
-      uiText('是否仍要使用這份 ZIP 整份取代目前族譜？')
+      uiText('是否仍要使用這份 ZIP 覆蓋現有族譜？')
     ].join('\n'),
     {
-      title:'覆蓋現有族譜',
+      title:'匯入遊戲族譜',
       kind:'danger',
       confirmText:'覆蓋現有族譜',
       cancelText:'取消'

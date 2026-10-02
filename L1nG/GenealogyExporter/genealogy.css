@@ -5633,14 +5633,10 @@ html[lang="en"] body {
     /* 邊框顏色 */ border-color: #963838;
 }
 
-/* ========【雙按鈕彈窗】 設定 - 只有兩顆操作按鈕時置中 ======== */
+/* ========【共用確認彈窗】 設定 - alert / confirm / choice / prompt 操作按鈕統一置中 ======== */
 
-.ui-dialog[data-action-count="2"] .ui-dialog-actions {
-    /* 確認 / 取消兩顆按鈕置中 */ justify-content: center;
-}
-
-.ui-dialog[data-action-count="3"] .ui-dialog-actions {
-    /* 取消 / 覆蓋 / 更新三顆按鈕置中 */ justify-content: center;
+#uiDialog .ui-dialog-actions {
+    /* 共用確認彈窗不依賴按鈕數量判斷位置，避免新增第三操作後又回到靠右 */ justify-content: center;
 }
 
 /* 一般功能彈窗若操作列只有兩顆按鈕與 spacer，也一起置中；有計數器等其他資訊者維持原排版。 */
