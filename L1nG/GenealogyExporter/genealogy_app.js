@@ -9134,8 +9134,8 @@ function applyGenealogyMutation(
 }
 
 
-// ========【寵物特徵顯示文字】 設定 - 舊資料載入時清除富文字標記 ========
-function cleanPetTraitDisplayText(value) {
+// ========【Trait 顯示文字】 設定 - 人物與寵物共用舊資料富文字清理 ========
+function cleanTraitDisplayText(value) {
   const source =
     String(value ?? '');
 
@@ -9162,7 +9162,7 @@ function cleanPetTraitDisplayText(value) {
       decoder.value;
   }
 
-  return decoded
+  return String(decoded)
     .replace(
       /<\s*br\s*\/?>/gi,
       ' '
@@ -9195,6 +9195,11 @@ function normalizeCurrentDatabase(targetDb) {
     if (!Array.isArray(sim.spouseIds)) sim.spouseIds = [];
     if (!Array.isArray(sim.exSpouseIds)) sim.exSpouseIds = [];
     if (!Array.isArray(sim.traits)) sim.traits = [];
+
+    sim.traits =
+      sim.traits
+        .map(cleanTraitDisplayText)
+        .filter(Boolean);
 
     sim.spouseIds = sim.spouseIds
       .map(String)
@@ -9256,7 +9261,7 @@ function normalizeCurrentDatabase(targetDb) {
         status:pet.status || '在世',
         traits:Array.isArray(pet.traits)
           ? pet.traits
-              .map(cleanPetTraitDisplayText)
+              .map(cleanTraitDisplayText)
               .filter(Boolean)
           : [],
         avatar:pet.avatar || null,
