@@ -79,6 +79,501 @@
       : String(value);
   }
 
+
+  // ========【遊戲存檔來源識別】 設定 - 保存 Slot 資訊，GUID 目前只記錄、不單獨作為自動合併依據 ========
+  function finiteInteger(value) {
+    if (value == null || value === '') return null;
+    const number = Number(value);
+    return Number.isFinite(number)
+      ? Math.trunc(number)
+      : null;
+  }
+
+  function slotFileFromId(slotId) {
+    const value = finiteInteger(slotId);
+    if (value == null || value < 0) return '';
+    return 'Slot_' + value
+      .toString(16)
+      .toUpperCase()
+      .padStart(8, '0');
+  }
+
+  function normalizeSaveSlot(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return null;
+    }
+
+    const slotId = finiteInteger(value.slotId);
+    const preferredManualSlotId =
+      finiteInteger(value.preferredManualSlotId);
+
+    const slotFile =
+      String(value.slotFile || '').trim() ||
+      slotFileFromId(slotId);
+
+    const guid =
+      value.guid == null
+        ? ''
+        : String(value.guid).trim();
+
+    const name =
+      value.name == null
+        ? ''
+        : String(value.name).trim();
+
+    if (
+      slotId == null &&
+      !slotFile &&
+      !guid &&
+      !name
+    ) {
+      return null;
+    }
+
+    return {
+      slotId,
+      preferredManualSlotId,
+      slotFile,
+      guid,
+      name
+    };
+  }
+
+  function saveSlotIdentityKey(value) {
+    const slot = normalizeSaveSlot(value);
+    if (!slot) return '';
+
+    if (slot.slotId != null) {
+      return 'slot:' + slot.slotId;
+    }
+
+    if (slot.slotFile) {
+      return 'file:' + slot.slotFile.toLowerCase();
+    }
+
+    return '';
+  }
+
+  function sameSaveSlot(left, right) {
+    const a = normalizeSaveSlot(left);
+    const b = normalizeSaveSlot(right);
+
+    if (!a || !b) return false;
+
+    if (
+      a.slotId != null &&
+      b.slotId != null
+    ) {
+      return a.slotId === b.slotId;
+    }
+
+    if (a.slotFile && b.slotFile) {
+      return (
+        a.slotFile.toLowerCase() ===
+        b.slotFile.toLowerCase()
+      );
+    }
+
+    return false;
+  }
+
+  function saveSlotPayloadConflict(left, right) {
+    const a = normalizeSaveSlot(left);
+    const b = normalizeSaveSlot(right);
+
+    if (!a || !b) return false;
+
+    const comparable = [
+      'slotId',
+      'preferredManualSlotId',
+      'slotFile',
+      'guid'
+    ];
+
+    return comparable.some(key => {
+      const av = a[key];
+      const bv = b[key];
+
+      if (
+        av == null || av === '' ||
+        bv == null || bv === ''
+      ) {
+        return false;
+      }
+
+      return String(av) !== String(bv);
+    });
+  }
+
+  function resolveBundleSaveSource(bundle) {
+    const manifestSave =
+      normalizeSaveSlot(
+        bundle?.manifest?.saveSlot
+      );
+
+    const genealogySave =
+      normalizeSaveSlot(
+        bundle?.genealogy?.saveSlot
+      );
+
+    const conflict =
+      !!(
+        manifestSave &&
+        genealogySave &&
+        saveSlotPayloadConflict(
+          manifestSave,
+          genealogySave
+        )
+      );
+
+    return {
+      currentSave:
+        manifestSave ||
+        genealogySave ||
+        null,
+      saveSlotConsistency:
+        conflict
+          ? 'conflict'
+          : (
+              manifestSave || genealogySave
+                ? 'consistent'
+                : 'missing'
+            )
+    };
+  }
+
+  function normalizeKnownSaveEntry(value) {
+    const slot = normalizeSaveSlot(value);
+    if (!slot) return null;
+
+    return {
+      ...slot,
+      firstImportedAt:
+        value?.firstImportedAt || null,
+      lastImportedAt:
+        value?.lastImportedAt || null,
+      acceptedAsContinuation:
+        value?.acceptedAsContinuation === true
+    };
+  }
+
+  function mergeKnownSaves(
+    currentValues,
+    incomingSlot,
+    importedAt,
+    {
+      acceptedAsContinuation = false
+    } = {}
+  ) {
+    const result = [];
+    const indexByKey = new Map();
+
+    const add = (value, options = {}) => {
+      const normalized =
+        normalizeKnownSaveEntry(value);
+
+      if (!normalized) return;
+
+      const key =
+        saveSlotIdentityKey(normalized);
+
+      if (!key) return;
+
+      const existingIndex =
+        indexByKey.get(key);
+
+      const next = {
+        ...normalized,
+        firstImportedAt:
+          normalized.firstImportedAt ||
+          options.importedAt ||
+          null,
+        lastImportedAt:
+          options.importedAt ||
+          normalized.lastImportedAt ||
+          null,
+        acceptedAsContinuation:
+          normalized.acceptedAsContinuation === true ||
+          options.acceptedAsContinuation === true
+      };
+
+      if (existingIndex == null) {
+        indexByKey.set(key, result.length);
+        result.push(next);
+        return;
+      }
+
+      const existing =
+        result[existingIndex];
+
+      result[existingIndex] = {
+        ...existing,
+        ...next,
+        firstImportedAt:
+          existing.firstImportedAt ||
+          next.firstImportedAt ||
+          null,
+        lastImportedAt:
+          next.lastImportedAt ||
+          existing.lastImportedAt ||
+          null,
+        acceptedAsContinuation:
+          existing.acceptedAsContinuation === true ||
+          next.acceptedAsContinuation === true
+      };
+    };
+
+    (Array.isArray(currentValues)
+      ? currentValues
+      : []
+    ).forEach(value => add(value));
+
+    add(
+      incomingSlot,
+      {
+        importedAt,
+        acceptedAsContinuation
+      }
+    );
+
+    return result;
+  }
+
+  function gameImportSource(database) {
+    const source =
+      database?.meta?.gameImportSource;
+
+    if (
+      source &&
+      typeof source === 'object' &&
+      !Array.isArray(source)
+    ) {
+      return source;
+    }
+
+    return {};
+  }
+
+  function sourceCurrentSave(database) {
+    const source =
+      gameImportSource(database);
+
+    return (
+      normalizeSaveSlot(
+        source.currentSave
+      ) ||
+      normalizeSaveSlot(
+        (
+          Array.isArray(source.knownSaves)
+            ? source.knownSaves
+            : []
+        ).slice(-1)[0]
+      ) ||
+      null
+    );
+  }
+
+  function sourceLastImportedAt(database) {
+    return (
+      gameImportSource(database)
+        .lastImportedAt ||
+      database?.meta?.gameImportUpdate
+        ?.lastImportedAt ||
+      database?.meta?.exportedAt ||
+      null
+    );
+  }
+
+  function isOlderImport(
+    currentDatabase,
+    incomingDatabase
+  ) {
+    const currentValue =
+      sourceLastImportedAt(
+        currentDatabase
+      );
+
+    const incomingValue =
+      sourceLastImportedAt(
+        incomingDatabase
+      );
+
+    const currentTime =
+      Date.parse(currentValue || '');
+
+    const incomingTime =
+      Date.parse(incomingValue || '');
+
+    return (
+      Number.isFinite(currentTime) &&
+      Number.isFinite(incomingTime) &&
+      incomingTime < currentTime
+    );
+  }
+
+  function compareSaveSource(
+    currentDatabase,
+    incomingDatabase
+  ) {
+    const currentSource =
+      gameImportSource(
+        currentDatabase
+      );
+
+    const incomingSource =
+      gameImportSource(
+        incomingDatabase
+      );
+
+    const currentSave =
+      sourceCurrentSave(
+        currentDatabase
+      );
+
+    const incomingSave =
+      sourceCurrentSave(
+        incomingDatabase
+      );
+
+    const knownSaves =
+      (Array.isArray(currentSource.knownSaves)
+        ? currentSource.knownSaves
+        : []
+      )
+        .map(normalizeKnownSaveEntry)
+        .filter(Boolean);
+
+    let verification =
+      'unverified';
+
+    if (
+      incomingSource.saveSlotConsistency ===
+      'conflict'
+    ) {
+      verification =
+        'conflict';
+    } else if (
+      currentSave &&
+      incomingSave &&
+      sameSaveSlot(
+        currentSave,
+        incomingSave
+      )
+    ) {
+      verification =
+        'same_slot';
+    } else if (
+      incomingSave &&
+      knownSaves.some(save =>
+        sameSaveSlot(
+          save,
+          incomingSave
+        )
+      )
+    ) {
+      verification =
+        'known_save';
+    } else if (
+      currentSave &&
+      incomingSave &&
+      saveSlotIdentityKey(currentSave) &&
+      saveSlotIdentityKey(incomingSave)
+    ) {
+      verification =
+        'different_slot';
+    }
+
+    return {
+      verification,
+      currentSave,
+      incomingSave,
+      guidMatch:
+        !!(
+          currentSave?.guid &&
+          incomingSave?.guid &&
+          currentSave.guid ===
+            incomingSave.guid
+        ),
+      olderImport:
+        isOlderImport(
+          currentDatabase,
+          incomingDatabase
+        ),
+      currentLastImportedAt:
+        sourceLastImportedAt(
+          currentDatabase
+        ),
+      incomingImportedAt:
+        sourceLastImportedAt(
+          incomingDatabase
+        )
+    };
+  }
+
+  function mergeGameImportSource(
+    currentDatabase,
+    incomingDatabase,
+    sourceVerification,
+    importedAt
+  ) {
+    const currentSource =
+      gameImportSource(
+        currentDatabase
+      );
+
+    const incomingSource =
+      gameImportSource(
+        incomingDatabase
+      );
+
+    const incomingSave =
+      sourceCurrentSave(
+        incomingDatabase
+      );
+
+    let knownSaves =
+      mergeKnownSaves(
+        currentSource.knownSaves,
+        sourceCurrentSave(
+          currentDatabase
+        ),
+        sourceLastImportedAt(
+          currentDatabase
+        )
+      );
+
+    knownSaves =
+      mergeKnownSaves(
+        knownSaves,
+        incomingSave,
+        importedAt,
+        {
+          acceptedAsContinuation:
+            sourceVerification ===
+            'confirmed_continuation'
+        }
+      );
+
+    return {
+      currentSave:
+        incomingSave ||
+        sourceCurrentSave(
+          currentDatabase
+        ),
+      knownSaves,
+      saveSlotConsistency:
+        incomingSource.saveSlotConsistency ||
+        'missing',
+      lastImportedAt:
+        importedAt ||
+        sourceLastImportedAt(
+          currentDatabase
+        ) ||
+        null
+    };
+  }
+
+
   function manualOverrideSet(record) {
     return new Set(
       Array.isArray(record?.gameData?.manualOverrides)
@@ -884,6 +1379,11 @@
       bundle.manifest?.exportedAt ||
       null;
 
+    const saveSource =
+      resolveBundleSaveSource(
+        bundle
+      );
+
     const humanIds = new Set();
     const petIds = new Set();
 
@@ -1151,8 +1651,27 @@
         gameLocale:bundle.manifest.gameLocale,
         exportedAt:bundle.manifest.exportedAt,
         realDateCurrentDate,
+        gameImportSource:{
+          currentSave:
+            saveSource.currentSave,
+          knownSaves:
+            saveSource.currentSave
+              ? mergeKnownSaves(
+                  [],
+                  saveSource.currentSave,
+                  importedAt
+                )
+              : [],
+          saveSlotConsistency:
+            saveSource.saveSlotConsistency,
+          lastImportedAt:
+            importedAt
+        },
         gameImportUpdate:{
-          sourceVerification:'unverified',
+          sourceVerification:
+            saveSource.currentSave
+              ? 'initial_import'
+              : 'unverified',
           lastMode:'replace',
           lastImportedAt:importedAt
         },
@@ -1241,8 +1760,16 @@
     const incomingHouseholds =
       householdIdSet(incomingDatabase);
 
+    const source =
+      compareSaveSource(
+        currentDatabase,
+        incomingDatabase
+      );
+
     return {
-      sourceVerification:'unverified',
+      sourceVerification:
+        source.verification,
+      source,
       currentGameSimCount:currentIds.size,
       incomingGameSimCount:incomingIds.size,
       matchedSimCount:matchedSimIds.length,
@@ -2100,7 +2627,8 @@
 
   function mergeConvertedDatabase(
     currentDatabase,
-    incomingDatabase
+    incomingDatabase,
+    options = {}
   ) {
     if (
       !currentDatabase ||
@@ -2122,6 +2650,13 @@
     const importedAt =
       incomingDatabase?.meta?.exportedAt ||
       null;
+
+    const sourceVerification =
+      String(
+        options.sourceVerification ||
+        analysis.sourceVerification ||
+        'unverified'
+      );
 
     const stats = {
       people:{
@@ -2195,8 +2730,15 @@
         ? { cardEdit:currentCardEdit }
         : {}),
       gameImport:true,
+      gameImportSource:
+        mergeGameImportSource(
+          currentDatabase,
+          incomingDatabase,
+          sourceVerification,
+          importedAt
+        ),
       gameImportUpdate:{
-        sourceVerification:'unverified',
+        sourceVerification,
         lastMode:'update',
         lastImportedAt:importedAt
       }
@@ -2465,6 +3007,8 @@
     parseFile,
     convertBundle,
     analyzeUpdateCandidate,
+    compareSaveSource,
+    normalizeSaveSlot,
     mergeConvertedDatabase,
     GAME_MANAGED_SIM_FIELDS,
     GAME_MANAGED_PET_FIELDS,
