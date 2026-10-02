@@ -729,6 +729,12 @@
       const ownerIds = resolvePetOwnerIds(pet, household, humanIds);
       const petRelations = relationshipArrays(pet);
 
+      const traits = Array.isArray(pet.traits)
+        ? pet.traits
+            .map(internalLabel)
+            .filter(Boolean)
+        : [];
+
       const lineageNames = ids =>
         ids
           .map(parentId => sourceSims[String(parentId)])
@@ -744,6 +750,7 @@
         gender:mapGender(pet.gender),
         ageStage:mapLifeStage(pet.age),
         status:mapStatus(pet),
+        traits,
         avatar:null,
         gameData:{
           simId:id,
