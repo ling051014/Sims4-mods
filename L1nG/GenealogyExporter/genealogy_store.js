@@ -629,13 +629,25 @@
               )
             );
 
+          const importedHouseholdMemberIds =
+            family.gameImport &&
+            family.gameData?.householdId != null &&
+            Array.isArray(
+              family.gameData?.householdMemberIds
+            )
+              ? family.gameData.householdMemberIds
+              : null;
+
           family.memberIds =
             uniqueIds(
-              Array.isArray(
-                family.memberIds
-              )
-                ? family.memberIds
-                : [],
+              importedHouseholdMemberIds ||
+              (
+                Array.isArray(
+                  family.memberIds
+                )
+                  ? family.memberIds
+                  : []
+              ),
               current,
               null
             );

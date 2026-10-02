@@ -9373,40 +9373,6 @@ function cleanTraitDisplayText(value) {
 }
 
 // ========【L1nG v1 資料載入整理】 設定 - canonical shape 由 Genealogy Store 唯一負責 ========
-function repairImportedHouseholdMembership(targetDb) {
-  if (!targetDb || !targetDb.sims || !Array.isArray(targetDb.families)) return false;
-
-  let changed = false;
-
-  targetDb.families.forEach(fam => {
-    if (!fam || !fam.gameImport) return;
-    if (fam.gameData?.householdId == null) return;
-    if (!Array.isArray(fam.gameData?.householdMemberIds)) return;
-
-    const actualMemberIds = [...new Set(
-      fam.gameData.householdMemberIds
-        .map(String)
-        .filter(id => targetDb.sims[id])
-    )];
-
-    const currentMemberIds = Array.isArray(fam.memberIds)
-      ? fam.memberIds.map(String)
-      : [];
-
-    const same =
-      currentMemberIds.length === actualMemberIds.length &&
-      currentMemberIds.every((id, index) => id === actualMemberIds[index]);
-
-    if (same) return;
-
-    fam.memberIds = actualMemberIds;
-    changed = true;
-  });
-
-  return changed;
-}
-
-
 function collectReferencedAssetIds(targetDb = currentGenealogyData(), targetBg = bgSettings, { strict = false } = {}) {
   const used = new Set();
 
@@ -17565,19 +17531,11 @@ function prepareDatabase(raw) {
       raw
     );
 
-  const prepared =
-    normalizedResult.data;
-
-  const householdMembershipRepaired =
-    repairImportedHouseholdMembership(
-      prepared
-    );
-
   return {
-    prepared,
+    prepared:
+      normalizedResult.data,
     changed:
-      normalizedResult.changed ||
-      householdMembershipRepaired
+      normalizedResult.changed
   };
 }
 
