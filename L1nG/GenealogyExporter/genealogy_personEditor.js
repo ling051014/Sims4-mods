@@ -263,24 +263,30 @@ function personEditorPreferenceCategory(item){
       category.localizedName ||
       'other'
     ),
-    label:String(
-      category.localizedName ||
-      category.internalName ||
-      '其他'
-    ).trim() || '其他'
+    label:displayDataText(
+      String(
+        category.localizedName ||
+        category.internalName ||
+        '其他'
+      ).trim() || '其他',
+      currentSimEditorPerson()
+    )
   };
 }
 
 function personEditorPreferenceName(item){
   if(!item || typeof item !== 'object')return '';
 
-  return String(
-    item.displayName ||
-    item.localizedName ||
-    item.internalName ||
-    item.tuningId ||
-    ''
-  ).trim();
+  return displayDataText(
+    String(
+      item.displayName ||
+      item.localizedName ||
+      item.internalName ||
+      item.tuningId ||
+      ''
+    ).trim(),
+    currentSimEditorPerson()
+  );
 }
 
 function groupPersonEditorPreferences(items){
