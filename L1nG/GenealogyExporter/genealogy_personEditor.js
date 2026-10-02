@@ -2308,10 +2308,13 @@ function buildPersonEditorDraft({
       schedulePersonEditorRelationshipWarmup();
     });
 
-    setTimeout(
-      ()=>$('fName').focus(),
-      60
-    );
+    requestAnimationFrame(()=>{
+      mask
+        .querySelector('.sim-editor-modal')
+        ?.focus({
+          preventScroll:true
+        });
+    });
   }
 
   function closePersonEditor() {
