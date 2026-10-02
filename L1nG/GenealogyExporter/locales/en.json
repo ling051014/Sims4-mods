@@ -937,6 +937,21 @@
     "選取工具下，拖曳空白處可框選人物；點一下空白處可取消目前選取。": "With the Select tool, drag empty canvas to marquee-select Sims; tap empty canvas to clear the current selection.",
     "拖曳人物卡接近其他卡片時，仍會使用智慧對齊與等距吸附。": "When a dragged Sim card approaches other cards, smart alignment and equal-spacing snapping still apply.",
     "自由排列時可使用鎖定排列避免誤拖；重設位置會清除目前模式的手動位置並恢復自動樹狀佈局。": "In Free Layout, use Lock Layout to prevent accidental dragging; Reset Positions clears manual positions for the current mode and restores the automatic tree layout.",
-    "手機或觸控裝置可按「新增圖片」後使用「選擇圖片」，從裝置中挑選照片。": "On phones or touch devices, choose Add Image, then Select Image to pick a photo from the device."
+    "手機或觸控裝置可按「新增圖片」後使用「選擇圖片」，從裝置中挑選照片。": "On phones or touch devices, choose Add Image, then Select Image to pick a photo from the device.",
+    "活動": "Activities",
+    "音樂": "Music",
+    "健身": "Fitness",
+    "流行音樂": "Pop Music",
+    "園藝": "Gardening",
+    "烹飪": "Cooking",
+    "古典音樂": "Classical Music",
+    "惡作劇": "Mischief",
+    "繪畫": "Painting",
+    "爵士樂": "Jazz",
+    "火箭科學": "Rocket Science",
+    "藍色": "Blue",
+    "電子音樂": "Electronica",
+    "電動遊戲": "Video Gaming",
+    "兒童電台音樂": "Kids Radio"
   }
 }
