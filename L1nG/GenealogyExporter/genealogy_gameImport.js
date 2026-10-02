@@ -1,5 +1,5 @@
 /*
- * L1nG Genealogy Game Bundle Importer v0.2
+ * L1nG Genealogy Game Bundle Importer v0.3
  * 對應 L1nG Genealogy Exporter schemaVersion 1。
  *
  * 第一版 exporter 使用 ZIP_STORED，因此這裡不需要第三方 ZIP 函式庫。
@@ -13,6 +13,87 @@
 
   // ========【網站資料版本】 設定 - 遊戲 ZIP schema 與網站 L1nG v1 資料版本分開管理 ========
   const WEBSITE_DATA_VERSION = 1;
+
+  // ========【遊戲資料同步欄位】 設定 - 新增遊戲來源欄位時統一登記於此 ========
+  const GAME_MANAGED_SIM_FIELDS = Object.freeze([
+    'name',
+    'gender',
+    'lifeStage',
+    'status',
+    'race',
+    'birthdayYear',
+    'birthdayMonth',
+    'birthdayDay',
+    'age',
+    'residence',
+    'aspiration',
+    'causeOfDeath',
+    'traits',
+    'career',
+    'avatar',
+    'avatarFrame'
+  ]);
+
+  const GAME_MANAGED_PET_FIELDS = Object.freeze([
+    'name',
+    'species',
+    'breed',
+    'gender',
+    'ageStage',
+    'status',
+    'traits',
+    'avatar',
+    'avatarFrame'
+  ]);
+
+  function cloneData(value) {
+    if (value == null || typeof value !== 'object') return value;
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function sameData(left, right) {
+    if (left === right) return true;
+    try {
+      return JSON.stringify(left) === JSON.stringify(right);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function uniqueStrings(values) {
+    return [...new Set(
+      (values || [])
+        .map(value => String(value || ''))
+        .filter(Boolean)
+    )];
+  }
+
+  function recordGameId(record) {
+    const value =
+      record &&
+      record.gameData &&
+      record.gameData.simId;
+
+    return value == null || value === ''
+      ? ''
+      : String(value);
+  }
+
+  function manualOverrideSet(record) {
+    return new Set(
+      Array.isArray(record?.gameData?.manualOverrides)
+        ? record.gameData.manualOverrides.map(String).filter(Boolean)
+        : []
+    );
+  }
+
+  function isGameRelationshipLink(link) {
+    if (!link || typeof link !== 'object') return false;
+    return (
+      link.source === 'game' ||
+      /^game_rel_/.test(String(link.id || ''))
+    );
+  }
 
   function u16(view, offset) { return view.getUint16(offset, true); }
   function u32(view, offset) { return view.getUint32(offset, true); }
@@ -572,6 +653,7 @@
         to:ids[1],
         type,
         label:type,
+        source:'game',
         priority
       });
     };
@@ -798,6 +880,9 @@
     const source = bundle.genealogy || {};
     const sourceSims = source.sims || {};
     const households = source.households || {};
+    const importedAt =
+      bundle.manifest?.exportedAt ||
+      null;
 
     const humanIds = new Set();
     const petIds = new Set();
@@ -873,6 +958,10 @@
         avatar:null,
         gameData:{
           simId:id,
+          source:'game',
+          presentInLatestImport:true,
+          lastSeenAt:importedAt,
+          manualOverrides:[],
           avatarPath:findSimAvatarPath(bundle.files, id, sim),
           householdId:sim.householdId || null,
           householdName:optionalDisplayValue(household && household.name),
@@ -935,6 +1024,10 @@
         avatar:null,
         gameData:{
           simId:id,
+          source:'game',
+          presentInLatestImport:true,
+          lastSeenAt:importedAt,
+          manualOverrides:[],
           avatarPath:findSimAvatarPath(bundle.files, id, pet),
           householdId:pet.householdId || null,
           ownerIds,
@@ -999,6 +1092,10 @@
             gameImport:true,
             gameData:{
               householdId,
+              source:'game',
+              presentInLatestImport:true,
+              lastSeenAt:importedAt,
+              manualOverrides:[],
               homeZoneId:household.homeZoneId || household.zoneId || null,
               worldId:household.worldId || null,
               neighborhoodId:household.neighborhoodId || null,
@@ -1027,7 +1124,14 @@
         manualPositions:{ view:{}, edit:{} },
         locked:false,
         gameImport:true,
-        gameData:{ householdId:null, householdMemberIds:[] }
+        gameData:{
+          householdId:null,
+          source:'game',
+          presentInLatestImport:true,
+          lastSeenAt:importedAt,
+          manualOverrides:[],
+          householdMemberIds:[]
+        }
       }));
     }
 
@@ -1047,6 +1151,11 @@
         gameLocale:bundle.manifest.gameLocale,
         exportedAt:bundle.manifest.exportedAt,
         realDateCurrentDate,
+        gameImportUpdate:{
+          sourceVerification:'unverified',
+          lastMode:'replace',
+          lastImportedAt:importedAt
+        },
         gameImportStats:{
           sourceSimCount:Object.keys(sourceSims).length,
           peopleCount:humanIds.size,
@@ -1075,6 +1184,1277 @@
     };
   }
 
+
+
+  // ========【遊戲族譜增量更新】 設定 - 依穩定遊戲 ID 更新遊戲資料，保留網站資料 ========
+  function gameSimIdSet(database) {
+    const ids = new Set();
+
+    Object.values(database?.sims || {})
+      .forEach(sim => {
+        const id = recordGameId(sim);
+        if (id) ids.add(id);
+      });
+
+    return ids;
+  }
+
+  function householdIdSet(database) {
+    const ids = new Set();
+
+    (database?.families || [])
+      .forEach(family => {
+        const id =
+          family?.gameImport &&
+          family?.gameData?.householdId != null
+            ? String(family.gameData.householdId)
+            : '';
+
+        if (id) ids.add(id);
+      });
+
+    return ids;
+  }
+
+  function analyzeUpdateCandidate(currentDatabase, incomingDatabase) {
+    const currentIds =
+      gameSimIdSet(currentDatabase);
+
+    const incomingIds =
+      gameSimIdSet(incomingDatabase);
+
+    const matchedSimIds =
+      [...incomingIds]
+        .filter(id => currentIds.has(id));
+
+    const newSimIds =
+      [...incomingIds]
+        .filter(id => !currentIds.has(id));
+
+    const missingSimIds =
+      [...currentIds]
+        .filter(id => !incomingIds.has(id));
+
+    const currentHouseholds =
+      householdIdSet(currentDatabase);
+
+    const incomingHouseholds =
+      householdIdSet(incomingDatabase);
+
+    return {
+      sourceVerification:'unverified',
+      currentGameSimCount:currentIds.size,
+      incomingGameSimCount:incomingIds.size,
+      matchedSimCount:matchedSimIds.length,
+      newSimCount:newSimIds.length,
+      missingSimCount:missingSimIds.length,
+      matchedSimIds,
+      newSimIds,
+      missingSimIds,
+      currentHouseholdCount:currentHouseholds.size,
+      incomingHouseholdCount:incomingHouseholds.size,
+      matchedHouseholdCount:
+        [...incomingHouseholds]
+          .filter(id => currentHouseholds.has(id))
+          .length
+    };
+  }
+
+  function latestImportTracking(
+    gameData,
+    importedAt,
+    present = true
+  ) {
+    return {
+      ...(gameData &&
+      typeof gameData === 'object' &&
+      !Array.isArray(gameData)
+        ? gameData
+        : {}),
+      source:'game',
+      presentInLatestImport:!!present,
+      ...(present
+        ? { lastSeenAt:importedAt || null }
+        : {})
+    };
+  }
+
+  function incomingPetIdSet(database) {
+    const ids = new Set();
+
+    Object.values(database?.sims || {})
+      .forEach(sim => {
+        (sim?.pets || [])
+          .forEach(pet => {
+            const id = recordGameId(pet);
+            if (id) ids.add(id);
+          });
+      });
+
+    (database?.meta?.unassignedPets || [])
+      .forEach(pet => {
+        const id = recordGameId(pet);
+        if (id) ids.add(id);
+      });
+
+    return ids;
+  }
+
+  function incomingAssignedPetIdSet(database) {
+    const ids = new Set();
+
+    Object.values(database?.sims || {})
+      .forEach(sim => {
+        (sim?.pets || [])
+          .forEach(pet => {
+            const id = recordGameId(pet);
+            if (id) ids.add(id);
+          });
+      });
+
+    return ids;
+  }
+
+  function trackPet(stats, kind, petId) {
+    if (!petId) return;
+    stats._petSets[kind].add(String(petId));
+  }
+
+  function mergeGamePet(
+    existingPet,
+    incomingPet,
+    context
+  ) {
+    const importedAt =
+      context.importedAt;
+
+    const petId =
+      recordGameId(incomingPet) ||
+      recordGameId(existingPet);
+
+    if (!existingPet) {
+      const created =
+        cloneData(incomingPet);
+
+      created.gameData =
+        latestImportTracking(
+          created.gameData,
+          importedAt,
+          true
+        );
+
+      created.gameData.manualOverrides =
+        uniqueStrings(
+          created.gameData.manualOverrides
+        );
+
+      trackPet(
+        context.stats,
+        'added',
+        petId
+      );
+
+      return created;
+    }
+
+    const result =
+      cloneData(existingPet);
+
+    const overrides =
+      manualOverrideSet(existingPet);
+
+    GAME_MANAGED_PET_FIELDS
+      .filter(field =>
+        field !== 'avatar' &&
+        field !== 'avatarFrame'
+      )
+      .forEach(field => {
+        if (overrides.has(field)) return;
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            incomingPet,
+            field
+          )
+        ) {
+          result[field] =
+            cloneData(
+              incomingPet[field]
+            );
+        }
+      });
+
+    if (!overrides.has('avatar')) {
+      if (incomingPet.avatar) {
+        result.avatar =
+          incomingPet.avatar;
+
+        result.avatarFrame =
+          cloneData(
+            incomingPet.avatarFrame
+          );
+      }
+    }
+
+    const existingGameData =
+      existingPet.gameData || {};
+
+    const incomingGameData =
+      incomingPet.gameData || {};
+
+    result.gameData =
+      latestImportTracking(
+        {
+          ...cloneData(existingGameData),
+          ...cloneData(incomingGameData),
+          manualOverrides:[
+            ...overrides
+          ]
+        },
+        importedAt,
+        true
+      );
+
+    trackPet(
+      context.stats,
+      'matched',
+      petId
+    );
+
+    return result;
+  }
+
+  function markPetNotSeen(
+    pet,
+    context
+  ) {
+    const copy =
+      cloneData(pet);
+
+    const petId =
+      recordGameId(copy);
+
+    copy.gameData =
+      latestImportTracking(
+        copy.gameData,
+        context.importedAt,
+        false
+      );
+
+    trackPet(
+      context.stats,
+      'notSeen',
+      petId
+    );
+
+    return copy;
+  }
+
+  function mergeOwnerPets(
+    currentPets,
+    incomingPets,
+    context
+  ) {
+    const currentList =
+      Array.isArray(currentPets)
+        ? currentPets
+        : [];
+
+    const incomingList =
+      Array.isArray(incomingPets)
+        ? incomingPets
+        : [];
+
+    const currentGamePets =
+      new Map();
+
+    const manualPets = [];
+
+    currentList.forEach(pet => {
+      const id = recordGameId(pet);
+
+      if (id) {
+        currentGamePets.set(
+          id,
+          pet
+        );
+      } else {
+        manualPets.push(
+          cloneData(pet)
+        );
+      }
+    });
+
+    const mergedGamePets = [];
+    const incomingOwnerIds =
+      new Set();
+
+    incomingList.forEach(pet => {
+      const id =
+        recordGameId(pet);
+
+      if (!id) return;
+
+      incomingOwnerIds.add(id);
+
+      mergedGamePets.push(
+        mergeGamePet(
+          currentGamePets.get(id) || null,
+          pet,
+          context
+        )
+      );
+    });
+
+    currentGamePets.forEach(
+      (pet, id) => {
+        if (
+          incomingOwnerIds.has(id)
+        ) {
+          return;
+        }
+
+        // 寵物仍存在於這次 ZIP、但已不屬於這位主人：視為搬家，不在舊主人底下保留複本。
+        if (
+          context.incomingPetIds.has(id)
+        ) {
+          return;
+        }
+
+        mergedGamePets.push(
+          markPetNotSeen(
+            pet,
+            context
+          )
+        );
+      }
+    );
+
+    return [
+      ...manualPets,
+      ...mergedGamePets
+    ];
+  }
+
+  function mergeGameSim(
+    existingSim,
+    incomingSim,
+    context
+  ) {
+    const importedAt =
+      context.importedAt;
+
+    const incomingId =
+      recordGameId(incomingSim) ||
+      String(incomingSim?.id || '');
+
+    if (!existingSim) {
+      const created =
+        cloneData(incomingSim);
+
+      created.gameData =
+        latestImportTracking(
+          created.gameData,
+          importedAt,
+          true
+        );
+
+      created.gameData.manualOverrides =
+        uniqueStrings(
+          created.gameData.manualOverrides
+        );
+
+      created.pets =
+        mergeOwnerPets(
+          [],
+          created.pets,
+          context
+        );
+
+      return created;
+    }
+
+    const result =
+      cloneData(existingSim);
+
+    const overrides =
+      manualOverrideSet(existingSim);
+
+    GAME_MANAGED_SIM_FIELDS
+      .filter(field =>
+        field !== 'avatar' &&
+        field !== 'avatarFrame'
+      )
+      .forEach(field => {
+        if (overrides.has(field)) return;
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            incomingSim,
+            field
+          )
+        ) {
+          result[field] =
+            cloneData(
+              incomingSim[field]
+            );
+        }
+      });
+
+    if (!overrides.has('parents')) {
+      result.parentIds =
+        cloneData(
+          incomingSim.parentIds || []
+        );
+    }
+
+    if (!overrides.has('partners')) {
+      result.spouseIds =
+        cloneData(
+          incomingSim.spouseIds || []
+        );
+
+      result.exSpouseIds =
+        cloneData(
+          incomingSim.exSpouseIds || []
+        );
+    }
+
+    if (!overrides.has('avatar')) {
+      if (incomingSim.avatar) {
+        result.avatar =
+          incomingSim.avatar;
+
+        result.avatarFrame =
+          cloneData(
+            incomingSim.avatarFrame
+          );
+      }
+    }
+
+    // 人生照片、簡介與網站手動內容由 existingSim 保留。
+    result.pets =
+      mergeOwnerPets(
+        existingSim.pets,
+        incomingSim.pets,
+        context
+      );
+
+    const existingGameData =
+      existingSim.gameData || {};
+
+    const incomingGameData =
+      incomingSim.gameData || {};
+
+    result.gameData =
+      latestImportTracking(
+        {
+          ...cloneData(existingGameData),
+          ...cloneData(incomingGameData),
+          manualOverrides:[
+            ...overrides
+          ]
+        },
+        importedAt,
+        true
+      );
+
+    if (overrides.has('parents')) {
+      result.gameData.adoptedParentIds =
+        cloneData(
+          existingGameData.adoptedParentIds || []
+        );
+    }
+
+    if (overrides.has('partners')) {
+      result.gameData.deceasedSpouseIds =
+        cloneData(
+          existingGameData.deceasedSpouseIds || []
+        );
+    }
+
+    if (!result.id) {
+      result.id =
+        incomingId;
+    }
+
+    return result;
+  }
+
+  function markSimNotSeen(
+    sim,
+    context
+  ) {
+    const copy =
+      cloneData(sim);
+
+    copy.gameData =
+      latestImportTracking(
+        copy.gameData,
+        context.importedAt,
+        false
+      );
+
+    (copy.pets || [])
+      .forEach(pet => {
+        if (!recordGameId(pet)) return;
+        pet.gameData =
+          latestImportTracking(
+            pet.gameData,
+            context.importedAt,
+            false
+          );
+      });
+
+    return copy;
+  }
+
+  function familyLookupKey(family) {
+    const householdId =
+      family?.gameData?.householdId;
+
+    if (
+      householdId != null &&
+      String(householdId)
+    ) {
+      return (
+        'household:' +
+        String(householdId)
+      );
+    }
+
+    return (
+      'family:' +
+      String(family?.id || '')
+    );
+  }
+
+  function mergeImportedFamily(
+    existingFamily,
+    incomingFamily,
+    context
+  ) {
+    if (!existingFamily) {
+      const created =
+        cloneData(incomingFamily);
+
+      created.gameData =
+        latestImportTracking(
+          created.gameData,
+          context.importedAt,
+          true
+        );
+
+      created.gameData.manualOverrides =
+        uniqueStrings(
+          created.gameData.manualOverrides
+        );
+
+      return created;
+    }
+
+    const result =
+      cloneData(existingFamily);
+
+    const overrides =
+      manualOverrideSet(existingFamily);
+
+    if (!overrides.has('name')) {
+      result.name =
+        incomingFamily.name;
+    }
+
+    if (!overrides.has('bio')) {
+      result.bio =
+        incomingFamily.bio;
+    }
+
+    result.memberIds =
+      cloneData(
+        incomingFamily.memberIds || []
+      );
+
+    // coverImage / freeLayout / manualPositions / locked 都屬網站工作區資料，保留 existing。
+    result.gameImport = true;
+
+    result.gameData =
+      latestImportTracking(
+        {
+          ...cloneData(existingFamily.gameData || {}),
+          ...cloneData(incomingFamily.gameData || {}),
+          manualOverrides:[
+            ...overrides
+          ]
+        },
+        context.importedAt,
+        true
+      );
+
+    return result;
+  }
+
+  function markFamilyNotSeen(
+    family,
+    context
+  ) {
+    const copy =
+      cloneData(family);
+
+    copy.gameData =
+      latestImportTracking(
+        copy.gameData,
+        context.importedAt,
+        false
+      );
+
+    return copy;
+  }
+
+  function mergeUnassignedPets(
+    currentDatabase,
+    incomingDatabase,
+    context
+  ) {
+    const currentList =
+      Array.isArray(
+        currentDatabase?.meta?.unassignedPets
+      )
+        ? currentDatabase.meta.unassignedPets
+        : [];
+
+    const incomingList =
+      Array.isArray(
+        incomingDatabase?.meta?.unassignedPets
+      )
+        ? incomingDatabase.meta.unassignedPets
+        : [];
+
+    const manualPets = [];
+    const currentGamePets =
+      new Map();
+
+    currentList.forEach(pet => {
+      const id = recordGameId(pet);
+
+      if (id) {
+        currentGamePets.set(id, pet);
+      } else {
+        manualPets.push(cloneData(pet));
+      }
+    });
+
+    const merged = [];
+    const incomingUnassignedIds =
+      new Set();
+
+    incomingList.forEach(pet => {
+      const id = recordGameId(pet);
+      if (!id) return;
+
+      incomingUnassignedIds.add(id);
+
+      merged.push(
+        mergeGamePet(
+          currentGamePets.get(id) || null,
+          pet,
+          context
+        )
+      );
+    });
+
+    currentGamePets.forEach(
+      (pet, id) => {
+        if (
+          incomingUnassignedIds.has(id)
+        ) {
+          return;
+        }
+
+        // 本次已被分配給人物，不再保留在「未分配寵物」。
+        if (
+          context.incomingAssignedPetIds.has(id)
+        ) {
+          return;
+        }
+
+        if (
+          !context.incomingPetIds.has(id)
+        ) {
+          merged.push(
+            markPetNotSeen(
+              pet,
+              context
+            )
+          );
+        }
+      }
+    );
+
+    return [
+      ...manualPets,
+      ...merged
+    ];
+  }
+
+  function rebuildAdoptedChildIds(database) {
+    const sims =
+      database?.sims || {};
+
+    Object.values(sims)
+      .forEach(sim => {
+        if (
+          !sim ||
+          typeof sim !== 'object'
+        ) {
+          return;
+        }
+
+        if (
+          !sim.gameData ||
+          typeof sim.gameData !== 'object' ||
+          Array.isArray(sim.gameData)
+        ) {
+          sim.gameData = {};
+        }
+
+        sim.gameData.adoptedChildIds = [];
+      });
+
+    Object.values(sims)
+      .forEach(child => {
+        if (!child) return;
+
+        uniqueStrings(
+          child.gameData?.adoptedParentIds
+        )
+          .forEach(parentId => {
+            const parent =
+              sims[parentId];
+
+            if (!parent) return;
+
+            parent.gameData.adoptedChildIds =
+              uniqueStrings([
+                ...(parent.gameData.adoptedChildIds || []),
+                String(child.id)
+              ]);
+          });
+      });
+  }
+
+  function mergeGameRelationships(
+    currentDatabase,
+    incomingDatabase,
+    mergedDatabase,
+    stats
+  ) {
+    const currentLinks =
+      Array.isArray(currentDatabase?.links)
+        ? currentDatabase.links
+        : [];
+
+    const incomingLinks =
+      Array.isArray(incomingDatabase?.links)
+        ? incomingDatabase.links
+        : [];
+
+    const suppressed =
+      new Set(
+        uniqueStrings(
+          currentDatabase?.meta
+            ?.suppressedGameRelationshipIds
+        )
+      );
+
+    const manualLinks =
+      currentLinks
+        .filter(link =>
+          !isGameRelationshipLink(link)
+        )
+        .map(cloneData);
+
+    const currentGameLinks =
+      new Map(
+        currentLinks
+          .filter(isGameRelationshipLink)
+          .map(link => [
+            String(link.id || ''),
+            link
+          ])
+          .filter(([id]) => id)
+      );
+
+    const nextGameLinks = [];
+    const incomingIds =
+      new Set();
+
+    incomingLinks
+      .filter(isGameRelationshipLink)
+      .forEach(link => {
+        const id =
+          String(link.id || '');
+
+        if (
+          !id ||
+          suppressed.has(id)
+        ) {
+          return;
+        }
+
+        incomingIds.add(id);
+
+        const existing =
+          currentGameLinks.get(id);
+
+        if (!existing) {
+          nextGameLinks.push({
+            ...cloneData(link),
+            source:'game'
+          });
+
+          stats.relationships.added++;
+          return;
+        }
+
+        const overrides =
+          new Set(
+            Array.isArray(existing.manualOverrides)
+              ? existing.manualOverrides.map(String)
+              : []
+          );
+
+        const next =
+          cloneData(existing);
+
+        ['from','to','type','label']
+          .forEach(field => {
+            if (overrides.has(field)) return;
+            next[field] =
+              cloneData(link[field]);
+          });
+
+        next.source = 'game';
+        next.manualOverrides =
+          [...overrides];
+
+        nextGameLinks.push(next);
+        stats.relationships.matched++;
+      });
+
+    currentGameLinks.forEach(
+      (link, id) => {
+        if (
+          !incomingIds.has(id) &&
+          !suppressed.has(id)
+        ) {
+          stats.relationships.removed++;
+        }
+      }
+    );
+
+    const nextIds =
+      new Set(
+        nextGameLinks
+          .map(link =>
+            String(link.id || '')
+          )
+          .filter(Boolean)
+      );
+
+    const removedIds =
+      new Set(
+        [...currentGameLinks.keys()]
+          .filter(id =>
+            !nextIds.has(id)
+          )
+      );
+
+    mergedDatabase.links = [
+      ...manualLinks,
+      ...nextGameLinks
+    ];
+
+    const pruneAnnotations =
+      source => {
+        const next = {
+          ...(source || {})
+        };
+
+        removedIds.forEach(id => {
+          delete next['link:' + id];
+        });
+
+        return next;
+      };
+
+    mergedDatabase.relationshipMap =
+      pruneAnnotations(
+        currentDatabase.relationshipMap
+      );
+
+    mergedDatabase.labelPositions =
+      pruneAnnotations(
+        currentDatabase.labelPositions
+      );
+  }
+
+  function mergeConvertedDatabase(
+    currentDatabase,
+    incomingDatabase
+  ) {
+    if (
+      !currentDatabase ||
+      typeof currentDatabase !== 'object' ||
+      !incomingDatabase ||
+      typeof incomingDatabase !== 'object'
+    ) {
+      throw new Error(
+        '遊戲族譜更新需要目前資料與新的遊戲匯入資料。'
+      );
+    }
+
+    const analysis =
+      analyzeUpdateCandidate(
+        currentDatabase,
+        incomingDatabase
+      );
+
+    const importedAt =
+      incomingDatabase?.meta?.exportedAt ||
+      null;
+
+    const stats = {
+      people:{
+        matched:analysis.matchedSimCount,
+        added:analysis.newSimCount,
+        notSeen:analysis.missingSimCount
+      },
+      pets:{
+        matched:0,
+        added:0,
+        notSeen:0
+      },
+      families:{
+        matched:0,
+        added:0,
+        notSeen:0
+      },
+      relationships:{
+        matched:0,
+        added:0,
+        removed:0
+      },
+      _petSets:{
+        matched:new Set(),
+        added:new Set(),
+        notSeen:new Set()
+      }
+    };
+
+    const context = {
+      importedAt,
+      stats,
+      incomingPetIds:
+        incomingPetIdSet(
+          incomingDatabase
+        ),
+      incomingAssignedPetIds:
+        incomingAssignedPetIdSet(
+          incomingDatabase
+        )
+    };
+
+    const merged =
+      cloneData(currentDatabase);
+
+    if (
+      !merged.meta ||
+      typeof merged.meta !== 'object' ||
+      Array.isArray(merged.meta)
+    ) {
+      merged.meta = {};
+    }
+
+    const currentCardView =
+      cloneData(
+        currentDatabase?.meta?.cardView
+      );
+
+    const currentCardEdit =
+      cloneData(
+        currentDatabase?.meta?.cardEdit
+      );
+
+    merged.meta = {
+      ...cloneData(currentDatabase.meta || {}),
+      ...cloneData(incomingDatabase.meta || {}),
+      ...(currentCardView
+        ? { cardView:currentCardView }
+        : {}),
+      ...(currentCardEdit
+        ? { cardEdit:currentCardEdit }
+        : {}),
+      gameImport:true,
+      gameImportUpdate:{
+        sourceVerification:'unverified',
+        lastMode:'update',
+        lastImportedAt:importedAt
+      }
+    };
+
+    const currentSims =
+      currentDatabase.sims || {};
+
+    const incomingSims =
+      incomingDatabase.sims || {};
+
+    const mergedSims = {};
+    let nextOrder =
+      Math.max(
+        -1,
+        ...Object.values(currentSims)
+          .map(sim =>
+            Number.isFinite(
+              Number(sim?.order)
+            )
+              ? Number(sim.order)
+              : -1
+          )
+      ) + 1;
+
+    Object.entries(currentSims)
+      .forEach(([id, sim]) => {
+        if (!recordGameId(sim)) {
+          mergedSims[id] =
+            cloneData(sim);
+        }
+      });
+
+    const matchedCurrentKeys =
+      new Set();
+
+    const currentGameBySimId =
+      new Map();
+
+    Object.entries(currentSims)
+      .forEach(([key, sim]) => {
+        const gameId =
+          recordGameId(sim);
+
+        if (gameId) {
+          currentGameBySimId.set(
+            gameId,
+            { key, sim }
+          );
+        }
+      });
+
+    Object.entries(incomingSims)
+      .forEach(([incomingKey, incomingSim]) => {
+        const gameId =
+          recordGameId(incomingSim) ||
+          String(incomingKey);
+
+        const currentEntry =
+          currentGameBySimId.get(gameId);
+
+        if (
+          !currentEntry &&
+          mergedSims[incomingKey]
+        ) {
+          throw new Error(
+            '遊戲人物 ID 與網站手動人物發生衝突：' +
+            incomingKey
+          );
+        }
+
+        const mergedSim =
+          mergeGameSim(
+            currentEntry?.sim || null,
+            incomingSim,
+            context
+          );
+
+        const targetKey =
+          currentEntry?.key ||
+          String(incomingKey);
+
+        if (!currentEntry) {
+          mergedSim.order =
+            nextOrder++;
+        }
+
+        mergedSims[targetKey] =
+          mergedSim;
+
+        if (currentEntry) {
+          matchedCurrentKeys.add(
+            currentEntry.key
+          );
+        }
+      });
+
+    currentGameBySimId.forEach(
+      ({ key, sim }) => {
+        if (
+          matchedCurrentKeys.has(key)
+        ) {
+          return;
+        }
+
+        mergedSims[key] =
+          markSimNotSeen(
+            sim,
+            context
+          );
+      }
+    );
+
+    merged.sims =
+      mergedSims;
+
+    const currentFamilies =
+      Array.isArray(currentDatabase.families)
+        ? currentDatabase.families
+        : [];
+
+    const incomingFamilies =
+      Array.isArray(incomingDatabase.families)
+        ? incomingDatabase.families
+        : [];
+
+    const manualFamilies =
+      currentFamilies
+        .filter(family =>
+          !family?.gameImport
+        )
+        .map(cloneData);
+
+    const currentImportedByKey =
+      new Map(
+        currentFamilies
+          .filter(family =>
+            !!family?.gameImport
+          )
+          .map(family => [
+            familyLookupKey(family),
+            family
+          ])
+      );
+
+    const seenFamilyKeys =
+      new Set();
+
+    const nextImportedFamilies = [];
+
+    incomingFamilies
+      .filter(family =>
+        !!family?.gameImport
+      )
+      .forEach(family => {
+        const key =
+          familyLookupKey(family);
+
+        const existing =
+          currentImportedByKey.get(key);
+
+        nextImportedFamilies.push(
+          mergeImportedFamily(
+            existing || null,
+            family,
+            context
+          )
+        );
+
+        seenFamilyKeys.add(key);
+
+        if (existing) {
+          stats.families.matched++;
+        } else {
+          stats.families.added++;
+        }
+      });
+
+    currentImportedByKey.forEach(
+      (family, key) => {
+        if (seenFamilyKeys.has(key)) {
+          return;
+        }
+
+        nextImportedFamilies.push(
+          markFamilyNotSeen(
+            family,
+            context
+          )
+        );
+
+        stats.families.notSeen++;
+      }
+    );
+
+    merged.families = [
+      ...manualFamilies,
+      ...nextImportedFamilies
+    ];
+
+    merged.meta.unassignedPets =
+      mergeUnassignedPets(
+        currentDatabase,
+        incomingDatabase,
+        context
+      );
+
+    mergeGameRelationships(
+      currentDatabase,
+      incomingDatabase,
+      merged,
+      stats
+    );
+
+    merged.relationshipTypeLibrary =
+      uniqueStrings([
+        ...(currentDatabase.relationshipTypeLibrary || []),
+        ...(incomingDatabase.relationshipTypeLibrary || [])
+      ]);
+
+    const currentFamilyId =
+      currentDatabase.currentFamilyId;
+
+    merged.currentFamilyId =
+      merged.families.some(
+        family =>
+          String(family?.id || '') ===
+          String(currentFamilyId || '')
+      )
+        ? currentFamilyId
+        : (
+            incomingDatabase.currentFamilyId ||
+            merged.families[0]?.id ||
+            null
+          );
+
+    rebuildAdoptedChildIds(
+      merged
+    );
+
+    stats.pets = {
+      matched:
+        stats._petSets.matched.size,
+      added:
+        stats._petSets.added.size,
+      notSeen:
+        stats._petSets.notSeen.size
+    };
+
+    delete stats._petSets;
+
+    return {
+      database:merged,
+      stats,
+      analysis
+    };
+  }
+
   async function parseFile(file) {
     const buffer = await file.arrayBuffer();
     return parseBundle(buffer);
@@ -1084,6 +2464,10 @@
     parseBundle,
     parseFile,
     convertBundle,
+    analyzeUpdateCandidate,
+    mergeConvertedDatabase,
+    GAME_MANAGED_SIM_FIELDS,
+    GAME_MANAGED_PET_FIELDS,
     readStoredZip,
     isPetSim,
     mapOccultRace,

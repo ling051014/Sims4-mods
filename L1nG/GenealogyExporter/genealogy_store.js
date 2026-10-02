@@ -132,6 +132,7 @@
     ),
     petSpeciesValues = [],
     sexedPetSpeciesValues = ['dog','cat','horse'],
+    gameManagedSimFields = [],
     cardSettingFieldKeys = [],
     defaultCardViewSettings = {},
     defaultCardEditSettings = {},
@@ -162,6 +163,67 @@
         .map(String)
         .filter(Boolean)
     );
+
+    const gameManagedSimFieldSet = new Set(
+      (gameManagedSimFields || [])
+        .map(String)
+        .filter(Boolean)
+    );
+
+    function isGameImportedRecord(record) {
+      return !!(
+        record &&
+        record.gameData &&
+        record.gameData.simId != null &&
+        String(record.gameData.simId)
+      );
+    }
+
+    function manualOverrideValues(record) {
+      return [...new Set(
+        (
+          Array.isArray(record?.gameData?.manualOverrides)
+            ? record.gameData.manualOverrides
+            : []
+        )
+          .map(String)
+          .filter(Boolean)
+      )];
+    }
+
+    function markManualOverrides(record, fields) {
+      if (!isGameImportedRecord(record)) {
+        return false;
+      }
+
+      if (
+        !record.gameData ||
+        typeof record.gameData !== 'object' ||
+        Array.isArray(record.gameData)
+      ) {
+        record.gameData = {};
+      }
+
+      const before =
+        manualOverrideValues(record);
+
+      const next =
+        [...new Set([
+          ...before,
+          ...(fields || [])
+            .map(String)
+            .filter(Boolean)
+        ])];
+
+      if (sameValue(before, next)) {
+        return false;
+      }
+
+      record.gameData.manualOverrides =
+        next;
+
+      return true;
+    }
 
     function normalizePetGenderValue(value) {
       const text =
@@ -197,7 +259,7 @@
                 : rawSpecies
             );
 
-      return {
+      const normalized = {
         ...pet,
         id:String(
           pet.id ||
@@ -233,6 +295,19 @@
             pet.avatarFrame
           )
       };
+
+      if (
+        normalized.gameData &&
+        typeof normalized.gameData === 'object' &&
+        !Array.isArray(normalized.gameData)
+      ) {
+        normalized.gameData.manualOverrides =
+          manualOverrideValues(
+            normalized
+          );
+      }
+
+      return normalized;
     }
 
     function normalizeGalleryItem(item) {
@@ -399,6 +474,11 @@
           sim
         );
 
+      gameData.manualOverrides =
+        manualOverrideValues(
+          sim
+        );
+
       gameData.adoptedParentIds =
         uniqueIds(
           gameData.adoptedParentIds,
@@ -557,17 +637,41 @@
             typeof link === 'object' &&
             !Array.isArray(link)
           )
-          .map(link => ({
-            ...link,
-            id:String(
-              link.id ||
-              (
-                typeof uid === 'function'
-                  ? uid('lnk')
-                  : 'lnk_' + Date.now()
-              )
-            )
-          }));
+          .map(link => {
+            const id =
+              String(
+                link.id ||
+                (
+                  typeof uid === 'function'
+                    ? uid('lnk')
+                    : 'lnk_' + Date.now()
+                )
+              );
+
+            const source =
+              link.source === 'game' ||
+              /^game_rel_/.test(id)
+                ? 'game'
+                : 'manual';
+
+            return {
+              ...link,
+              id,
+              source,
+              manualOverrides:
+                source === 'game'
+                  ? [...new Set(
+                      (
+                        Array.isArray(link.manualOverrides)
+                          ? link.manualOverrides
+                          : []
+                      )
+                        .map(String)
+                        .filter(Boolean)
+                    )]
+                  : []
+            };
+          });
 
       normalizeRelationshipMap(
         current
@@ -655,6 +759,23 @@
           ensureFamilyLayout(
             family
           );
+
+          if (
+            family.gameData &&
+            typeof family.gameData === 'object' &&
+            !Array.isArray(family.gameData)
+          ) {
+            family.gameData.manualOverrides =
+              [...new Set(
+                (
+                  Array.isArray(family.gameData.manualOverrides)
+                    ? family.gameData.manualOverrides
+                    : []
+                )
+                  .map(String)
+                  .filter(Boolean)
+              )];
+          }
 
           if (
             typeof family.bio !==
@@ -1211,7 +1332,8 @@
             from:key,
             to:other,
             type:siblingRelationType,
-            label:siblingRelationLabel
+            label:siblingRelationLabel,
+            source:'manual'
           });
         }
       });
@@ -1275,6 +1397,7 @@
       let changed = false;
       let layoutChanged = false;
       let assetsChanged = false;
+      const manualGameFields = [];
 
       Object.entries(patch || {}).forEach(([field, value]) => {
         if (BLOCKED_SIM_PATCH_KEYS.has(field)) return;
@@ -1282,11 +1405,23 @@
 
         sim[field] = cloneValue(value);
         changed = true;
+
+        if (
+          gameManagedSimFieldSet.has(field)
+        ) {
+          manualGameFields.push(field);
+        }
+
         if (SIM_LAYOUT_FIELDS.has(field)) layoutChanged = true;
         if (SIM_ASSET_FIELDS.has(field)) assetsChanged = true;
       });
 
       if (!changed) return finalized(result);
+
+      markManualOverrides(
+        sim,
+        manualGameFields
+      );
 
       normalizeSimRecord(
         sim,
@@ -1469,6 +1604,7 @@
 
       let changed = false;
       let assetsChanged = false;
+      const manualGameFields = [];
 
       ['name','bio','coverImage'].forEach(field => {
         if (!Object.prototype.hasOwnProperty.call(patch || {}, field)) return;
@@ -1476,10 +1612,41 @@
 
         family[field] = cloneValue(patch[field]);
         changed = true;
+
+        if (
+          family.gameImport &&
+          (field === 'name' || field === 'bio')
+        ) {
+          manualGameFields.push(field);
+        }
+
         if (field === 'coverImage') assetsChanged = true;
       });
 
       if (!changed) return finalized(result);
+
+      if (
+        family.gameImport &&
+        manualGameFields.length
+      ) {
+        if (
+          !family.gameData ||
+          typeof family.gameData !== 'object' ||
+          Array.isArray(family.gameData)
+        ) {
+          family.gameData = {};
+        }
+
+        family.gameData.manualOverrides =
+          [...new Set([
+            ...(Array.isArray(
+              family.gameData.manualOverrides
+            )
+              ? family.gameData.manualOverrides
+              : []),
+            ...manualGameFields
+          ])];
+      }
 
       mark(result, {
         dataChanged:true,
@@ -1774,7 +1941,8 @@
         from:fromId,
         to:toId,
         type:normalizedType,
-        label:normalizeRelationshipType(label || normalizedType) || normalizedType
+        label:normalizeRelationshipType(label || normalizedType) || normalizedType,
+        source:'manual'
       };
 
       db.links.push(relationship);
@@ -1809,6 +1977,7 @@
 
       const wasSibling = !!isSiblingLink?.(link);
       let changed = false;
+      const changedFields = [];
 
       ['from','to','type','label'].forEach(field => {
         if (!Object.prototype.hasOwnProperty.call(patch || {}, field)) return;
@@ -1820,9 +1989,26 @@
         if (link[field] === value) return;
         link[field] = value;
         changed = true;
+        changedFields.push(field);
       });
 
       if (!changed) return finalized(result);
+
+      if (
+        link.source === 'game' ||
+        /^game_rel_/.test(
+          String(link.id || '')
+        )
+      ) {
+        link.source = 'game';
+        link.manualOverrides =
+          [...new Set([
+            ...(Array.isArray(link.manualOverrides)
+              ? link.manualOverrides
+              : []),
+            ...changedFields
+          ])];
+      }
 
       const nowSibling = !!isSiblingLink?.(link);
 
@@ -1849,6 +2035,31 @@
 
       const link = db.links[index];
       const sibling = !!isSiblingLink?.(link);
+
+      if (
+        link.source === 'game' ||
+        /^game_rel_/.test(
+          String(link.id || '')
+        )
+      ) {
+        if (
+          !db.meta ||
+          typeof db.meta !== 'object' ||
+          Array.isArray(db.meta)
+        ) {
+          db.meta = {};
+        }
+
+        db.meta.suppressedGameRelationshipIds =
+          [...new Set([
+            ...(Array.isArray(
+              db.meta.suppressedGameRelationshipIds
+            )
+              ? db.meta.suppressedGameRelationshipIds
+              : []),
+            String(link.id)
+          ])];
+      }
 
       db.links.splice(index, 1);
       delete db.relationshipMap['link:' + key];
@@ -2016,6 +2227,67 @@
       const db = data();
       const cleanPatch = cloneValue(simPatch || {});
 
+      const originalSim =
+        simId
+          ? db.sims[String(simId)] || null
+          : null;
+
+      const originalParentSignature =
+        originalSim
+          ? parentRelationSignature(originalSim)
+          : '';
+
+      const originalPartners =
+        originalSim
+          ? [
+              ...(originalSim.spouseIds || [])
+                .map(String)
+                .sort(),
+              '|',
+              ...(originalSim.exSpouseIds || [])
+                .map(String)
+                .sort()
+            ].join(',')
+          : '';
+
+      const originalPartnerIds =
+        originalSim
+          ? new Set([
+              ...(originalSim.spouseIds || []).map(String),
+              ...(originalSim.exSpouseIds || []).map(String)
+            ])
+          : new Set();
+
+      const originalChildRelations =
+        new Map();
+
+      if (originalSim) {
+        Object.values(db.sims)
+          .forEach(child => {
+            if (
+              !child ||
+              String(child.id) === String(originalSim.id) ||
+              typeof getParentRelations !== 'function'
+            ) {
+              return;
+            }
+
+            const relation =
+              getParentRelations(child)
+                .find(item =>
+                  String(item.parentId) ===
+                  String(originalSim.id)
+                );
+
+            if (relation) {
+              originalChildRelations.set(
+                String(child.id),
+                relation.kind
+              );
+            }
+          });
+      }
+
       delete cleanPatch.id;
       delete cleanPatch.order;
       delete cleanPatch.parentIds;
@@ -2053,6 +2325,122 @@
         setSiblings(id, siblingIds),
         setFamilyMembership(id, familyIds)
       );
+
+      const savedSim =
+        db.sims[id];
+
+      if (
+        originalSim &&
+        savedSim
+      ) {
+        const nextParentSignature =
+          parentRelationSignature(
+            savedSim
+          );
+
+        if (
+          nextParentSignature !==
+          originalParentSignature
+        ) {
+          markManualOverrides(
+            savedSim,
+            ['parents']
+          );
+        }
+
+        const nextPartners = [
+          ...(savedSim.spouseIds || [])
+            .map(String)
+            .sort(),
+          '|',
+          ...(savedSim.exSpouseIds || [])
+            .map(String)
+            .sort()
+        ].join(',');
+
+        if (
+          nextPartners !==
+          originalPartners
+        ) {
+          const touchedPartnerIds =
+            new Set([
+              ...originalPartnerIds,
+              ...(savedSim.spouseIds || []).map(String),
+              ...(savedSim.exSpouseIds || []).map(String)
+            ]);
+
+          markManualOverrides(
+            savedSim,
+            ['partners']
+          );
+
+          touchedPartnerIds
+            .forEach(partnerId => {
+              const partner =
+                db.sims[partnerId];
+
+              if (partner) {
+                markManualOverrides(
+                  partner,
+                  ['partners']
+                );
+              }
+            });
+        }
+
+        const nextChildRelations =
+          new Map();
+
+        Object.values(db.sims)
+          .forEach(child => {
+            if (
+              !child ||
+              String(child.id) === id ||
+              typeof getParentRelations !== 'function'
+            ) {
+              return;
+            }
+
+            const relation =
+              getParentRelations(child)
+                .find(item =>
+                  String(item.parentId) === id
+                );
+
+            if (relation) {
+              nextChildRelations.set(
+                String(child.id),
+                relation.kind
+              );
+            }
+          });
+
+        const touchedChildIds =
+          new Set([
+            ...originalChildRelations.keys(),
+            ...nextChildRelations.keys()
+          ]);
+
+        touchedChildIds
+          .forEach(childId => {
+            if (
+              originalChildRelations.get(childId) ===
+              nextChildRelations.get(childId)
+            ) {
+              return;
+            }
+
+            const child =
+              db.sims[childId];
+
+            if (child) {
+              markManualOverrides(
+                child,
+                ['parents']
+              );
+            }
+          });
+      }
 
       combined.simId = id;
       return combined;
