@@ -3064,16 +3064,10 @@ function openUiDialog({
   const cancelBtn = $('uiDialogCancel');
   const secondaryBtn = $('uiDialogSecondary');
   const confirmBtn = $('uiDialogConfirm');
-  const optionHints = $('uiDialogOptionHints');
-  const confirmHintRow = $('uiDialogConfirmHintRow');
-  const secondaryHintRow = $('uiDialogSecondaryHintRow');
-  const confirmHintLabel = $('uiDialogConfirmHintLabel');
-  const secondaryHintLabel = $('uiDialogSecondaryHintLabel');
-  const confirmHintInfo = $('uiDialogConfirmHintInfo');
-  const secondaryHintInfo = $('uiDialogSecondaryHintInfo');
+  const titleHint = $('uiDialogTitleHint');
   const closeBtn = $('uiDialogClose');
 
-  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !optionHints || !confirmHintRow || !secondaryHintRow || !confirmHintLabel || !secondaryHintLabel || !confirmHintInfo || !secondaryHintInfo || !closeBtn) {
+  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !titleHint || !closeBtn) {
     return Promise.resolve(
       mode === 'confirm'
         ? false
@@ -3124,56 +3118,30 @@ function openUiDialog({
     secondaryKind === 'danger'
   );
 
-  const confirmHintText =
-    String(confirmHint || '').trim();
+  const titleHintText =
+    String(
+      [confirmHint, secondaryHint]
+        .map(value => String(value || '').trim())
+        .filter(Boolean)
+        .join('\n\n')
+    ).trim();
 
-  const secondaryHintText =
-    String(secondaryHint || '').trim();
+  titleHint.hidden =
+    !titleHintText;
 
-  confirmHintRow.hidden =
-    !confirmHintText;
+  if (titleHintText) {
+    titleHint.dataset.tooltip =
+      titleHintText
+        .split('\n')
+        .map(line => uiText(line))
+        .join('\n');
 
-  secondaryHintRow.hidden =
-    !(
-      hasSecondaryAction &&
-      secondaryHintText
-    );
-
-  optionHints.hidden =
-    confirmHintRow.hidden &&
-    secondaryHintRow.hidden;
-
-  confirmHintLabel.textContent =
-    uiText(confirmText);
-
-  secondaryHintLabel.textContent =
-    hasSecondaryAction
-      ? uiText(secondaryText)
-      : '';
-
-  if (confirmHintText) {
-    confirmHintInfo.dataset.tooltip =
-      uiText(confirmHintText);
-    confirmHintInfo.setAttribute(
+    titleHint.setAttribute(
       'aria-label',
-      uiText('選項說明')
+      uiText('匯入方式說明')
     );
   } else {
-    delete confirmHintInfo.dataset.tooltip;
-  }
-
-  if (
-    hasSecondaryAction &&
-    secondaryHintText
-  ) {
-    secondaryHintInfo.dataset.tooltip =
-      uiText(secondaryHintText);
-    secondaryHintInfo.setAttribute(
-      'aria-label',
-      uiText('選項說明')
-    );
-  } else {
-    delete secondaryHintInfo.dataset.tooltip;
+    delete titleHint.dataset.tooltip;
   }
 
   inputEl.classList.toggle('show', mode === 'prompt');
