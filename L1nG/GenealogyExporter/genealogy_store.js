@@ -1409,7 +1409,11 @@
         if (
           gameManagedSimFieldSet.has(field)
         ) {
-          manualGameFields.push(field);
+          manualGameFields.push(
+            field === 'avatarFrame'
+              ? 'avatar'
+              : field
+          );
         }
 
         if (SIM_LAYOUT_FIELDS.has(field)) layoutChanged = true;

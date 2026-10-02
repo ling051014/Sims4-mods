@@ -17811,14 +17811,14 @@ async function chooseGameImportMode(
   if (analysis.matchedSimCount > 0) {
     const update = await uiConfirm(
       [
-        '網站目前已經有遊戲族譜。',
+        uiText('網站目前已經有遊戲族譜。'),
         '',
-        `找到相同遊戲人物：${analysis.matchedSimCount}`,
-        `這次新增人物：${analysis.newSimCount}`,
-        `這次未出現人物：${analysis.missingSimCount}`,
+        `${uiText('找到相同遊戲人物')}：${analysis.matchedSimCount}`,
+        `${uiText('這次新增人物')}：${analysis.newSimCount}`,
+        `${uiText('這次未出現人物')}：${analysis.missingSimCount}`,
         '',
-        '更新會同步最新遊戲資料，並保留手動排列、人生照片、自訂關係、關係標籤與其他網站資料。',
-        '目前尚未加入存檔編號識別；請自行確認這份 ZIP 是要延續目前族譜的遊戲資料。'
+        uiText('更新會同步最新遊戲資料，並保留手動排列、人生照片、自訂關係、關係標籤與其他網站資料。'),
+        uiText('目前尚未加入存檔編號識別；請自行確認這份 ZIP 是要延續目前族譜的遊戲資料。')
       ].join('\n'),
       {
         title:'更新遊戲族譜',
@@ -17835,16 +17835,16 @@ async function chooseGameImportMode(
   const replace = await uiConfirm(
     analysis.matchedSimCount > 0
       ? [
-          '是否改為使用這份 ZIP 整份取代目前族譜？',
+          uiText('是否改為使用這份 ZIP 整份取代目前族譜？'),
           '',
-          '整份取代會重新建立遊戲族譜，原本網站上的人物資料、手動排列、人生照片、自訂關係與家庭資料都會被目前 ZIP 取代。',
-          '如果只是想更新原本族譜，請取消並重新匯入後選擇「更新目前族譜」。'
+          uiText('整份取代會重新建立遊戲族譜，原本網站上的人物資料、手動排列、人生照片、自訂關係與家庭資料都會被目前 ZIP 取代。'),
+          uiText('如果只是想更新原本族譜，請取消並重新匯入後選擇「更新目前族譜」。')
         ].join('\n')
       : [
-          '目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。',
+          uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。'),
           '',
-          '在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。',
-          '是否仍要使用這份 ZIP 整份取代目前族譜？'
+          uiText('在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。'),
+          uiText('是否仍要使用這份 ZIP 整份取代目前族譜？')
         ].join('\n'),
     {
       title:'整份取代遊戲族譜',
@@ -17867,21 +17867,21 @@ function gameImportUpdateSummary(
     result?.stats || {};
 
   return [
-    '遊戲族譜已更新。',
+    uiText('遊戲族譜已更新。'),
     '',
-    `相同人物：${stats.people?.matched || 0}`,
-    `新增人物：${stats.people?.added || 0}`,
-    `本次未出現人物：${stats.people?.notSeen || 0}`,
-    `同步寵物：${stats.pets?.matched || 0}`,
-    `新增寵物：${stats.pets?.added || 0}`,
-    `更新家庭：${stats.families?.matched || 0}`,
-    `新增家庭：${stats.families?.added || 0}`,
-    `同步遊戲關係：${stats.relationships?.matched || 0}`,
-    `新增遊戲關係：${stats.relationships?.added || 0}`,
-    `移除已不存在的遊戲關係：${stats.relationships?.removed || 0}`,
-    `新匯入頭像：${avatarStats?.saved || 0}`,
+    `${uiText('相同人物')}：${stats.people?.matched || 0}`,
+    `${uiText('新增人物')}：${stats.people?.added || 0}`,
+    `${uiText('本次未出現人物')}：${stats.people?.notSeen || 0}`,
+    `${uiText('同步寵物')}：${stats.pets?.matched || 0}`,
+    `${uiText('新增寵物')}：${stats.pets?.added || 0}`,
+    `${uiText('更新家庭')}：${stats.families?.matched || 0}`,
+    `${uiText('新增家庭')}：${stats.families?.added || 0}`,
+    `${uiText('同步遊戲關係')}：${stats.relationships?.matched || 0}`,
+    `${uiText('新增遊戲關係')}：${stats.relationships?.added || 0}`,
+    `${uiText('移除已不存在的遊戲關係')}：${stats.relationships?.removed || 0}`,
+    `${uiText('新匯入頭像')}：${avatarStats?.saved || 0}`,
     '',
-    '已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。'
+    uiText('已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。')
   ].join('\n');
 }
 
