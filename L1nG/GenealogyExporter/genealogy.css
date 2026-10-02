@@ -5530,6 +5530,15 @@ html[lang="en"] body {
     /* 文字置中 */ text-align: center;
 }
 
+.ui-dialog-title-row {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    min-width:0;
+}
+
+
 .ui-dialog-close {
     /* 絕對定位 */ position: absolute;
     /* 右側位置 */ right: 16px;
@@ -5559,34 +5568,6 @@ html[lang="en"] body {
     /* 行距設定 */ line-height: 1.75;
     /* 保留換行 */ white-space: pre-wrap;
     /* 字體大小 */ font-size: 13px;
-}
-
-.ui-dialog-option-hints {
-    display:grid;
-    gap:7px;
-    margin-top:14px;
-    padding-top:12px;
-    border-top:1px solid var(--border-default);
-}
-
-.ui-dialog-option-hints[hidden],
-.ui-dialog-option-hint[hidden] {
-    display:none;
-}
-
-.ui-dialog-option-hint {
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:4px;
-    min-height:22px;
-    color:var(--text-secondary);
-    font-size:12px;
-}
-
-.ui-dialog-option-hint-title {
-    font-weight:600;
-    color:var(--text-primary);
 }
 
 .ui-dialog-input {
