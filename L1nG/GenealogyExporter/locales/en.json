@@ -996,6 +996,18 @@
     "與": " and ",
     "。": ".",
     "自由排列時可使用": "In Free Layout, use ",
-    "會清除目前模式的手動位置並恢復自動樹狀佈局。": " clears manual positions for the current mode and restores the automatic tree layout."
+    "會清除目前模式的手動位置並恢復自動樹狀佈局。": " clears manual positions for the current mode and restores the automatic tree layout.",
+    "網站目前已經有遊戲族譜。": "This genealogy already contains imported game data.",
+    "更新遊戲族譜": "Update Game Genealogy",
+    "更新目前族譜": "Update Current Genealogy",
+    "其他選項": "Other Options",
+    "整份取代遊戲族譜": "Replace Game Genealogy",
+    "整份取代": "Replace Everything",
+    "取消匯入": "Cancel Import",
+    "正在更新遊戲族譜…": "Updating game genealogy…",
+    "正在合併最新遊戲資料…": "Merging the latest game data…",
+    "正在更新族譜畫面…": "Updating genealogy view…",
+    "遊戲族譜更新完成": "Game Genealogy Updated",
+    "遊戲族譜已更新。": "Game genealogy updated."
   }
 }

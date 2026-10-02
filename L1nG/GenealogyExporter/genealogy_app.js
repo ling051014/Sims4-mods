@@ -16188,7 +16188,7 @@ const petEditorController = {
     const species =
       $('pSpecies').value;
 
-    return {
+    const nextPet = {
       ...(previous
         ? JSON.parse(JSON.stringify(previous))
         : {}),
@@ -16222,6 +16222,63 @@ const petEditorController = {
           petEditorState.avatarFrame
         )
     };
+
+    if (
+      previous?.gameData?.simId != null
+    ) {
+      const overrides =
+        new Set(
+          Array.isArray(
+            previous.gameData.manualOverrides
+          )
+            ? previous.gameData.manualOverrides
+                .map(String)
+                .filter(Boolean)
+            : []
+        );
+
+      const managedFields =
+        window.L1nGGameImport
+          ?.GAME_MANAGED_PET_FIELDS ||
+        [];
+
+      managedFields
+        .forEach(field => {
+          const previousValue =
+            field === 'avatarFrame'
+              ? normalizeAvatarFrame(
+                  previous.avatarFrame
+                )
+              : previous[field];
+
+          const nextValue =
+            field === 'avatarFrame'
+              ? normalizeAvatarFrame(
+                  nextPet.avatarFrame
+                )
+              : nextPet[field];
+
+          if (
+            JSON.stringify(previousValue) !==
+            JSON.stringify(nextValue)
+          ) {
+            overrides.add(
+              field === 'avatarFrame'
+                ? 'avatar'
+                : field
+            );
+          }
+        });
+
+      nextPet.gameData = {
+        ...(nextPet.gameData || {}),
+        manualOverrides:[
+          ...overrides
+        ]
+      };
+    }
+
+    return nextPet;
   },
 
   commit() {
@@ -17729,6 +17786,105 @@ async function persistGameImportAvatars(bundle, converted) {
   };
 }
 
+function currentGameImportUpdateAnalysis(
+  incomingDatabase
+) {
+  return window.L1nGGameImport
+    .analyzeUpdateCandidate(
+      currentGenealogyData(),
+      incomingDatabase
+    );
+}
+
+async function chooseGameImportMode(
+  analysis
+) {
+  if (
+    !analysis ||
+    analysis.currentGameSimCount <= 0
+  ) {
+    return 'replace';
+  }
+
+  hideGameImportStatus();
+
+  if (analysis.matchedSimCount > 0) {
+    const update = await uiConfirm(
+      [
+        '網站目前已經有遊戲族譜。',
+        '',
+        `找到相同遊戲人物：${analysis.matchedSimCount}`,
+        `這次新增人物：${analysis.newSimCount}`,
+        `這次未出現人物：${analysis.missingSimCount}`,
+        '',
+        '更新會同步最新遊戲資料，並保留手動排列、人生照片、自訂關係、關係標籤與其他網站資料。',
+        '目前尚未加入存檔編號識別；請自行確認這份 ZIP 是要延續目前族譜的遊戲資料。'
+      ].join('\n'),
+      {
+        title:'更新遊戲族譜',
+        confirmText:'更新目前族譜',
+        cancelText:'其他選項'
+      }
+    );
+
+    if (update) {
+      return 'update';
+    }
+  }
+
+  const replace = await uiConfirm(
+    analysis.matchedSimCount > 0
+      ? [
+          '是否改為使用這份 ZIP 整份取代目前族譜？',
+          '',
+          '整份取代會重新建立遊戲族譜，原本網站上的人物資料、手動排列、人生照片、自訂關係與家庭資料都會被目前 ZIP 取代。',
+          '如果只是想更新原本族譜，請取消並重新匯入後選擇「更新目前族譜」。'
+        ].join('\n')
+      : [
+          '目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。',
+          '',
+          '在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。',
+          '是否仍要使用這份 ZIP 整份取代目前族譜？'
+        ].join('\n'),
+    {
+      title:'整份取代遊戲族譜',
+      kind:'danger',
+      confirmText:'整份取代',
+      cancelText:'取消匯入'
+    }
+  );
+
+  return replace
+    ? 'replace'
+    : 'cancel';
+}
+
+function gameImportUpdateSummary(
+  result,
+  avatarStats
+) {
+  const stats =
+    result?.stats || {};
+
+  return [
+    '遊戲族譜已更新。',
+    '',
+    `相同人物：${stats.people?.matched || 0}`,
+    `新增人物：${stats.people?.added || 0}`,
+    `本次未出現人物：${stats.people?.notSeen || 0}`,
+    `同步寵物：${stats.pets?.matched || 0}`,
+    `新增寵物：${stats.pets?.added || 0}`,
+    `更新家庭：${stats.families?.matched || 0}`,
+    `新增家庭：${stats.families?.added || 0}`,
+    `同步遊戲關係：${stats.relationships?.matched || 0}`,
+    `新增遊戲關係：${stats.relationships?.added || 0}`,
+    `移除已不存在的遊戲關係：${stats.relationships?.removed || 0}`,
+    `新匯入頭像：${avatarStats?.saved || 0}`,
+    '',
+    '已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。'
+  ].join('\n');
+}
+
 async function importGameGenealogy(file) {
   try {
     if (!window.L1nGGameImport) {
@@ -17743,9 +17899,30 @@ async function importGameGenealogy(file) {
     showGameImportStatus('正在整理人物與家族…');
     await waitForImportPaint();
 
-    const converted = window.L1nGGameImport.convertBundle(bundle);
+    const converted =
+      window.L1nGGameImport
+        .convertBundle(bundle);
 
-    showGameImportStatus('正在匯入人物頭像…');
+    const analysis =
+      currentGameImportUpdateAnalysis(
+        converted
+      );
+
+    const importMode =
+      await chooseGameImportMode(
+        analysis
+      );
+
+    if (importMode === 'cancel') {
+      hideGameImportStatus();
+      return;
+    }
+
+    showGameImportStatus(
+      importMode === 'update'
+        ? '正在更新遊戲族譜…'
+        : '正在匯入人物頭像…'
+    );
     await waitForImportPaint();
 
     const avatarStats =
@@ -17754,16 +17931,46 @@ async function importGameGenealogy(file) {
         converted
       );
 
-    const preparedResult = prepareDatabase(converted);
+    const incomingPrepared =
+      prepareDatabase(
+        converted
+      ).prepared;
 
-    showGameImportStatus('正在建立族譜畫面…');
+    let updateResult = null;
+    let nextDatabase =
+      incomingPrepared;
+
+    if (importMode === 'update') {
+      showGameImportStatus(
+        '正在合併最新遊戲資料…'
+      );
+      await waitForImportPaint();
+
+      updateResult =
+        window.L1nGGameImport
+          .mergeConvertedDatabase(
+            currentGenealogyData(),
+            incomingPrepared
+          );
+
+      nextDatabase =
+        prepareDatabase(
+          updateResult.database
+        ).prepared;
+    }
+
+    showGameImportStatus(
+      importMode === 'update'
+        ? '正在更新族譜畫面…'
+        : '正在建立族譜畫面…'
+    );
     await waitForImportPaint();
 
     replaceCanonicalGenealogyDatabase(
-      preparedResult.prepared
+      nextDatabase
     );
 
-    // 匯入新資料時，同時清除上一份族譜留下的操作狀態。
+    // 整庫替換後清掉舊操作中的暫態狀態，但「更新」本身已保留資料庫內的手動排列。
     dragHistory.clear();
     clearNodeSelection();
     finishMarquee();
@@ -17773,20 +17980,19 @@ async function importGameGenealogy(file) {
 
     arrangeTool = 'pan';
 
-    save({ immediate: true });
+    save({ immediate:true });
     refreshFamilyUI();
     render();
+    scheduleGC();
 
-    await new Promise(resolve => {
-      requestAnimationFrame(() => {
-        genealogyViewport.fit();
-        resolve();
+    if (importMode === 'replace') {
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          genealogyViewport.fit();
+          resolve();
+        });
       });
-    });
-
-    const stats = bundle.manifest && bundle.manifest.stats
-      ? bundle.manifest.stats
-      : {};
+    }
 
     const normalizedStats =
       converted.meta &&
@@ -17796,43 +18002,73 @@ async function importGameGenealogy(file) {
 
     const simCount =
       normalizedStats.peopleCount ||
-      Object.keys(currentGenealogyData().sims || {}).length;
+      Object.keys(
+        currentGenealogyData().sims ||
+        {}
+      ).length;
 
     const petCount =
       normalizedStats.petCount ||
       0;
 
     const familyCount =
-      Array.isArray(currentGenealogyData().families)
-        ? currentGenealogyData().families.length
+      Array.isArray(
+        currentGenealogyData().families
+      )
+        ? currentGenealogyData()
+            .families.length
         : 0;
 
-    const activeFamily = currentFamily();
-    const activeFamilyName = activeFamily
-      ? displayDataText(activeFamily.name, activeFamily)
-      : '—';
-    const importedGameDate = formatGameDate(
-      converted && converted.meta && converted.meta.realDateCurrentDate
-    );
+    const activeFamily =
+      currentFamily();
+
+    const activeFamilyName =
+      activeFamily
+        ? displayDataText(
+            activeFamily.name,
+            activeFamily
+          )
+        : '—';
+
+    const importedGameDate =
+      formatGameDate(
+        converted?.meta
+          ?.realDateCurrentDate
+      );
 
     hideGameImportStatus();
 
-    await uiAlert(
-      [
-        '遊戲族譜已成功匯入。',
-        '',
-        `人物：${simCount}`,
-        `寵物：${petCount}`,
-        `家族：${familyCount}`,
-        `頭像：${avatarStats.saved}`,
-        importedGameDate ? `${uiText('遊戲日期')}：${importedGameDate}` : null,
-        `目前顯示：${activeFamilyName}`
-      ].filter(Boolean).join('\n'),
-      {
-        title: '遊戲族譜匯入完成',
-        confirmText: '查看族譜'
-      }
-    );
+    if (importMode === 'update') {
+      await uiAlert(
+        gameImportUpdateSummary(
+          updateResult,
+          avatarStats
+        ),
+        {
+          title:'遊戲族譜更新完成',
+          confirmText:'查看族譜'
+        }
+      );
+    } else {
+      await uiAlert(
+        [
+          '遊戲族譜已成功匯入。',
+          '',
+          `人物：${simCount}`,
+          `寵物：${petCount}`,
+          `家族：${familyCount}`,
+          `頭像：${avatarStats.saved}`,
+          importedGameDate
+            ? `${uiText('遊戲日期')}：${importedGameDate}`
+            : null,
+          `目前顯示：${activeFamilyName}`
+        ].filter(Boolean).join('\n'),
+        {
+          title:'遊戲族譜匯入完成',
+          confirmText:'查看族譜'
+        }
+      );
+    }
 
     // 完成後主動讓玩家看見家族清單。
     if (window.innerWidth <= 720) {
