@@ -292,8 +292,8 @@
     return item.localizedName || item.displayName || item.internalName || item.tuningId || '';
   }
 
-  // ========【寵物特徵顯示文字】 設定 - 清除 EA / 第三方模組附帶的富文字標記 ========
-  // 只套用在寵物 traits；不改人物特徵、職業、抱負或其他遊戲文字。
+  // ========【Trait 顯示文字】 設定 - 人物與寵物共用 EA / 第三方模組富文字清理 ========
+  // 僅處理 traits；職業、抱負、品種與其他遊戲文字仍維持各自原有流程。
   function decodeImportedTextEntities(value) {
     const source =
       String(value ?? '');
@@ -316,33 +316,32 @@
     return decoder.value;
   }
 
-  function cleanImportedPetTraitLabel(item) {
-    const raw =
-      internalLabel(item);
+  function cleanImportedTraitText(value) {
+    const decoded =
+      decodeImportedTextEntities(
+        value
+      );
 
-    if (!raw) {
-      return '';
-    }
-
-    const withoutRichText =
-      String(raw)
-        .replace(
-          /<\s*br\s*\/?>/gi,
-          ' '
-        )
-        .replace(
-          /<\/?[a-z][^>]*>/gi,
-          ''
-        );
-
-    return decodeImportedTextEntities(
-      withoutRichText
-    )
+    return String(decoded)
+      .replace(
+        /<\s*br\s*\/?>/gi,
+        ' '
+      )
+      .replace(
+        /<\/?[a-z][^>]*>/gi,
+        ''
+      )
       .replace(
         /\s+/g,
         ' '
       )
       .trim();
+  }
+
+  function cleanImportedTraitLabel(item) {
+    return cleanImportedTraitText(
+      internalLabel(item)
+    );
   }
 
   function stringIds(value) {
@@ -696,7 +695,9 @@
           : null;
 
       const traits = Array.isArray(sim.traits)
-        ? sim.traits.map(internalLabel).filter(Boolean)
+        ? sim.traits
+            .map(cleanImportedTraitLabel)
+            .filter(Boolean)
         : [];
 
       const careers = Array.isArray(sim.careers)
@@ -784,7 +785,7 @@
 
       const traits = Array.isArray(pet.traits)
         ? pet.traits
-            .map(cleanImportedPetTraitLabel)
+            .map(cleanImportedTraitLabel)
             .filter(Boolean)
         : [];
 
