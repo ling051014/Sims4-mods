@@ -1026,6 +1026,24 @@
     "已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。": "Preserved: manual layout, life photos, custom relationships, custom labels, family covers, and website-only data.",
     "覆蓋現有族譜": "Replace Existing Genealogy",
     "匯入遊戲族譜": "Import Game Genealogy",
-    "是否仍要使用這份 ZIP 覆蓋現有族譜？": "Use this ZIP to replace the existing genealogy anyway?"
+    "是否仍要使用這份 ZIP 覆蓋現有族譜？": "Use this ZIP to replace the existing genealogy anyway?",
+    "選項說明": "Option details",
+    "無存檔識別資料": "No save identification data",
+    "已確認來自相同遊戲存檔。": "Confirmed as the same game save.",
+    "已確認為目前族譜曾接受的存檔來源。": "Confirmed as a previously accepted save source for this genealogy.",
+    "偵測到不同的遊戲存檔。": "A different game save was detected.",
+    "目前族譜": "Current genealogy",
+    "這次匯入": "This import",
+    "ZIP 內的存檔識別資料不一致，網站無法自動確認來源。": "The save identification data inside the ZIP is inconsistent, so the source cannot be confirmed automatically.",
+    "目前無法確認存檔來源，將以相同遊戲人物作為更新參考。": "The save source cannot be confirmed yet; matching game Sims will be used as the update reference.",
+    "這份遊戲資料早於目前族譜最後一次匯入，更新可能會同步回較早的遊戲狀態。": "This game export is older than the genealogy's latest import. Updating may sync game data back to an earlier state.",
+    "目前最後匯入": "Latest current import",
+    "這次匯出": "This export",
+    "如果這是「另存新檔」後繼續遊玩的存檔，可以將它視為同一族譜並繼續更新。": "If this is a Save As copy that continues the same playthrough, you can treat it as the same genealogy and keep updating it.",
+    "這是同一族譜，繼續更新": "Same Genealogy, Continue Updating",
+    "同步最新遊戲資料，保留手動排列、人生照片、自訂關係、家庭封面與你在網站上的修改。": "Sync the latest game data while keeping manual layout, life photos, custom relationships, family covers, and your website edits.",
+    "使用這份 ZIP 重新建立遊戲族譜；目前族譜內容會被取代。": "Rebuild the game genealogy from this ZIP; the current genealogy content will be replaced.",
+    "將這個不同存檔記錄為目前族譜的延續來源，並同步最新遊戲資料。": "Record this different save as a continuation source for the current genealogy and sync its latest game data.",
+    "目前族譜已有遊戲資料，但這份 ZIP 沒有找到可安全更新的相同來源。": "The current genealogy already contains game data, but this ZIP has no source that can be safely matched for an update."
   }
 }
