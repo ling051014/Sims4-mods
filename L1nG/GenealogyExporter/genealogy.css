@@ -1854,6 +1854,77 @@ button.avatar-editor-action { cursor:pointer; }
 .trait-add-row input { flex:1; min-width:0; }
 .trait-add-row button { display:inline-flex; align-items:center; justify-content:center; gap:4px; min-width:70px; padding:5px 10px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-item); color:var(--text-primary); font-size:11.5px; }
 .trait-add-row button:hover { border-color:var(--action-primary); color:var(--action-primary); }
+
+/* ========【遊戲偏好唯讀顯示】 設定 - 簡約分類列，不使用表格框線 ======== */
+.game-preference-list {
+    /* 每個 EA 分類依序排列 */ display: grid;
+}
+
+.game-preference-category {
+    /* 分類之間用留白與淡線區分 */ padding: 12px 0 13px;
+    /* 僅保留水平分隔 */ border-bottom: 1px solid var(--border-default);
+}
+
+.game-preference-category:last-child {
+    /* 最後一個分類不需要尾線 */ border-bottom: 0;
+}
+
+.game-preference-category-title {
+    /* 活動 / 音樂 / 顏色等分類只顯示一次 */ margin-bottom: 8px;
+    /* 分類文字大小 */ font-size: 12px;
+    /* 分類層級 */ font-weight: 700;
+    /* 使用主要文字色 */ color: var(--text-primary);
+}
+
+.game-preference-row {
+    /* 喜歡 / 討厭與項目維持同一列 */ display: grid;
+    /* 左側固定狀態文字，右側自動換行 */ grid-template-columns: 52px minmax(0,1fr);
+    /* 欄位距離 */ gap: 8px;
+    /* 從頂端對齊 */ align-items: start;
+    /* 最小列高 */ min-height: 27px;
+}
+
+.game-preference-row + .game-preference-row {
+    /* 喜歡與討厭之間保留輕量距離 */ margin-top: 6px;
+}
+
+.game-preference-row-label {
+    /* 狀態文字與標籤第一列對齊 */ padding-top: 5px;
+    /* 次要文字色 */ color: var(--text-secondary);
+    /* 狀態字級 */ font-size: 10.5px;
+    /* 狀態文字稍微加重 */ font-weight: 600;
+}
+
+.game-preference-items {
+    /* 同分類多項偏好自動換行 */ display: flex;
+    /* 允許換行 */ flex-wrap: wrap;
+    /* 標籤間距 */ gap: 6px;
+    /* 避免長字撐破欄位 */ min-width: 0;
+}
+
+.game-preference-chip {
+    /* 偏好項目沿用網站既有標籤語言 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 舒適列高 */ min-height: 25px;
+    /* 長文字可收進目前欄位 */ max-width: 100%;
+    /* 標籤內距 */ padding: 5px 9px;
+    /* 膠囊圓角 */ border-radius: 999px;
+    /* 沿用既有標籤底色 */ background: var(--tag-surface);
+    /* 沿用既有標籤文字色 */ color: var(--tag-text);
+    /* 可讀字級 */ font-size: 10.8px;
+    /* 輕量字重 */ font-weight: 500;
+    /* 緊湊行高 */ line-height: 1.2;
+    /* 長偏好名稱可以換行 */ white-space: normal;
+    /* 避免長單字溢出 */ overflow-wrap: anywhere;
+}
+
+.game-preference-footnote {
+    /* 唯讀來源提示不搶主內容視覺 */ margin: 8px 0 0;
+    /* 使用次要文字色 */ color: var(--text-secondary);
+    /* 提示字級 */ font-size: 10.5px;
+    /* 舒適行高 */ line-height: 1.45;
+}
+
 .family-rel-editor { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:18px; row-gap:0; }
 .family-rel-block { min-width:0; padding:10px 0 11px; border-bottom:1px solid var(--border-default); }
 .family-rel-block:nth-last-child(-n+2) { border-bottom:0; }
