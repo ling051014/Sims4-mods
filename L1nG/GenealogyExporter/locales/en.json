@@ -926,6 +926,17 @@
     "反感": "Turn-Offs",
     "這位模擬市民尚未設定喜好與厭惡。": "This Sim has no likes or dislikes set.",
     "這位模擬市民尚未設定吸引力偏好。": "This Sim has no attraction preferences set.",
-    "偏好資料由遊戲匯入，目前僅供檢視。": "Preference data is imported from the game and is currently read-only."
+    "偏好資料由遊戲匯入，目前僅供檢視。": "Preference data is imported from the game and is currently read-only.",
+    "快速查看族譜畫布、手勢操作、關係與備份方式。": "Quickly review canvas gestures, relationships, and backup options.",
+    "畫布與觸控操作": "Canvas & Touch Controls",
+    "一般操作或拖曳工具下，單指拖曳空白處可平移整個族譜畫布。": "During normal use or with the Pan tool, drag empty canvas with one finger to pan the genealogy view.",
+    "雙指在畫布上靠近或拉開可縮放；兩指一起移動時也會同步平移視角。": "Pinch or spread two fingers on the canvas to zoom; moving both fingers together also pans the view.",
+    "點一下人物卡可查看人物資料或進入編輯；長按人物卡可開啟卡片設定與人物快捷操作。": "Tap a Sim card to view details or edit it; press and hold a card to open card settings and Sim actions.",
+    "拖曳人物卡可移動人物；自動排列時，拖曳超過門檻後會切換為自由排列並儲存位置。": "Drag a Sim card to move it; in Auto Layout, dragging past the threshold switches to Free Layout and saves the position.",
+    "選取工具下，點人物可加入或取消選取；拖曳任一已選人物可整組移動。": "With the Select tool, tap Sims to add or remove them from the selection; drag any selected Sim to move the group.",
+    "選取工具下，拖曳空白處可框選人物；點一下空白處可取消目前選取。": "With the Select tool, drag empty canvas to marquee-select Sims; tap empty canvas to clear the current selection.",
+    "拖曳人物卡接近其他卡片時，仍會使用智慧對齊與等距吸附。": "When a dragged Sim card approaches other cards, smart alignment and equal-spacing snapping still apply.",
+    "自由排列時可使用鎖定排列避免誤拖；重設位置會清除目前模式的手動位置並恢復自動樹狀佈局。": "In Free Layout, use Lock Layout to prevent accidental dragging; Reset Positions clears manual positions for the current mode and restores the automatic tree layout.",
+    "手機或觸控裝置可按「新增圖片」後使用「選擇圖片」，從裝置中挑選照片。": "On phones or touch devices, choose Add Image, then Select Image to pick a photo from the device."
   }
 }

@@ -8829,11 +8829,69 @@ $('cleanupBtn').onclick = async () => {
   }
 };
 
+// ========【使用說明輸入方式】 設定 - 依實際操作切換電腦／觸控說明，不綁定裝置類型 ========
+let helpInputMode =
+  window.matchMedia?.(
+    '(hover: none) and (pointer: coarse)'
+  )?.matches
+    ? 'touch'
+    : 'desktop';
+
+document.addEventListener(
+  'pointerdown',
+  event => {
+    if (
+      event.pointerType === 'touch' ||
+      event.pointerType === 'pen'
+    ) {
+      helpInputMode = 'touch';
+      return;
+    }
+
+    if (
+      event.pointerType === 'mouse'
+    ) {
+      helpInputMode = 'desktop';
+    }
+  },
+  true
+);
+
+document.addEventListener(
+  'keydown',
+  () => {
+    helpInputMode = 'desktop';
+  },
+  true
+);
+
+function syncHelpInputContent() {
+  helpDialog
+    ?.querySelectorAll(
+      '[data-help-mode]'
+    )
+    .forEach(element => {
+      element.hidden =
+        element.dataset.helpMode !==
+        helpInputMode;
+    });
+
+  if (helpDialog) {
+    helpDialog.dataset.helpInputMode =
+      helpInputMode;
+  }
+}
+
+function openHelpPanel() {
+  syncHelpInputContent();
+  helpDialog.classList.add('show');
+}
+
 function closeHelpPanel() {
   helpDialog.classList.remove('show');
 }
 
-$('helpBtn').onclick = () => helpDialog.classList.add('show');
+$('helpBtn').onclick = openHelpPanel;
 $('helpCloseBtn').onclick = closeHelpPanel;
 helpDialog.onclick = event => {
   if (event.target === helpDialog) {

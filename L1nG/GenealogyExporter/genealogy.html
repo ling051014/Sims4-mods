@@ -888,7 +888,8 @@
                         <span class="l1ng-icon icon-question-circle help-heading-icon" aria-hidden="true"></span>
                         <div class="help-heading-copy">
                             <h2>使用說明</h2>
-                            <p>快速查看族譜畫布、關係、備份與常用快捷鍵。</p>
+                            <p data-help-mode="desktop">快速查看族譜畫布、關係、備份與常用快捷鍵。</p>
+                            <p data-help-mode="touch" hidden>快速查看族譜畫布、手勢操作、關係與備份方式。</p>
                         </div>
                     </div>
                     <button class="help-close-btn" id="helpCloseBtn" type="button" title="關閉" aria-label="關閉使用說明">
@@ -897,7 +898,7 @@
                 </div>
 
                 <div class="help-body">
-                    <section class="help-section help-section-wide">
+                    <section class="help-section help-section-wide" data-help-mode="desktop">
                         <h3><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>畫布與佈局</span></h3>
                         <ul>
                             <li>自動排列時，<span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳空白處</b>平移整個族譜畫布；<span class="mouse-hint mouse-wheel" role="img" aria-label="滾輪"><span class="mouse-hint-wheel"></span></span><b>滾輪</b>以滑鼠位置為中心縮放</li>
@@ -911,6 +912,20 @@
                             <li><b>等距吸附</b>支援水平與垂直排列；接近相同間距時會顯示兩段間距與數值，只移動目前拖曳的卡片</li>
                             <li>自由排列時可使用<b>鎖定排列</b>避免誤拖；<b>重設位置</b>會清除目前模式的手動位置並恢復自動樹狀佈局</li>
                             <li><b>電腦版：</b><b>側邊欄分隔線</b>可拖曳調整寬度；雙擊分隔線恢復預設寬度</li>
+                        </ul>
+                    </section>
+
+                    <section class="help-section help-section-wide" data-help-mode="touch" hidden>
+                        <h3><span class="l1ng-icon icon-arrows-move" aria-hidden="true"></span><span>畫布與觸控操作</span></h3>
+                        <ul>
+                            <li>一般操作或拖曳工具下，單指拖曳空白處可平移整個族譜畫布。</li>
+                            <li>雙指在畫布上靠近或拉開可縮放；兩指一起移動時也會同步平移視角。</li>
+                            <li>點一下人物卡可查看人物資料或進入編輯；長按人物卡可開啟卡片設定與人物快捷操作。</li>
+                            <li>拖曳人物卡可移動人物；自動排列時，拖曳超過門檻後會切換為自由排列並儲存位置。</li>
+                            <li>選取工具下，點人物可加入或取消選取；拖曳任一已選人物可整組移動。</li>
+                            <li>選取工具下，拖曳空白處可框選人物；點一下空白處可取消目前選取。</li>
+                            <li>拖曳人物卡接近其他卡片時，仍會使用智慧對齊與等距吸附。</li>
+                            <li>自由排列時可使用鎖定排列避免誤拖；重設位置會清除目前模式的手動位置並恢復自動樹狀佈局。</li>
                         </ul>
                     </section>
 
@@ -940,7 +955,8 @@
                         <ul>
                             <li>編輯人物 →<b>人生照片</b>：替人物保存值得記錄的照片</li>
                             <li>每張圖片可設定：<b>標題 / 關聯階段 / 備註</b></li>
-                            <li>支援<b>拖曳圖片檔案</b>到人生照片區，或按<kbd>Ctrl</kbd>+<kbd>V</kbd>貼上截圖</li>
+                            <li data-help-mode="desktop">支援<b>拖曳圖片檔案</b>到人生照片區，或按<kbd>Ctrl</kbd>+<kbd>V</kbd>貼上截圖</li>
+                            <li data-help-mode="touch" hidden>手機或觸控裝置可按「新增圖片」後使用「選擇圖片」，從裝置中挑選照片。</li>
                         </ul>
                     </section>
 
@@ -953,7 +969,7 @@
                         </ul>
                     </section>
 
-                    <section class="help-section help-section-shortcuts">
+                    <section class="help-section help-section-shortcuts" data-help-mode="desktop">
                         <h3><span class="l1ng-icon icon-keyboard" aria-hidden="true"></span><span>快捷鍵</span></h3>
                         <ul>
                             <li><kbd>Ctrl</kbd>+<kbd>Z</kbd>復原上一個卡片或關係名稱拖曳；輸入欄位內仍使用瀏覽器原生文字復原</li>
