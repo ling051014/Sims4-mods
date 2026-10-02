@@ -543,8 +543,7 @@ function cloneManualPositionMap(source) {
 }
 
 function captureLayoutHistoryState(fam, mode) {
-  ensureFamilyLayoutShape(fam);
-  return {
+return {
     freeLayout: !!fam.freeLayout[mode],
     manualPositions: cloneManualPositionMap(fam.manualPositions[mode])
   };
@@ -1217,35 +1216,6 @@ function renderViewCardLine(line) {
     : esc(line.text);
 
   return `<div class="${className}"${title}>${body}</div>`;
-}
-
-function ensureFamilyLayoutShape(fam) {
-  return !!(
-    fam &&
-    fam.manualPositions &&
-    typeof fam.manualPositions === 'object' &&
-    fam.manualPositions.view &&
-    typeof fam.manualPositions.view === 'object' &&
-    fam.manualPositions.edit &&
-    typeof fam.manualPositions.edit === 'object' &&
-    fam.freeLayout &&
-    typeof fam.freeLayout === 'object' &&
-    typeof fam.freeLayout.view === 'boolean' &&
-    typeof fam.freeLayout.edit === 'boolean' &&
-    typeof fam.locked === 'boolean'
-  );
-}
-
-function ensureFamilyProfileShape(fam) {
-  return !!(
-    fam &&
-    typeof fam === 'object' &&
-    typeof fam.bio === 'string' &&
-    Object.prototype.hasOwnProperty.call(
-      fam,
-      'coverImage'
-    )
-  );
 }
 
 function formatCardGender(gender) {
@@ -7151,12 +7121,7 @@ function setGenealogyViewMode(mode) {
 function toggleViewMode() {
   const fam =
     currentFamily();
-
-  ensureFamilyLayoutShape(
-    fam
-  );
-
-  const sourceMode =
+const sourceMode =
     viewMode;
 
   const targetMode =
@@ -8938,11 +8903,9 @@ if (restoreSampleBtn) {
       personEditor.close();
 
       const sampleDb =
-        buildSample();
-
-      normalizeCurrentDatabase(
-        sampleDb
-      );
+        prepareDatabase(
+          buildSample()
+        ).prepared;
 
       replaceCanonicalGenealogyDatabase(
         sampleDb
@@ -9204,15 +9167,6 @@ function genealogyParentKindFor(child, parentId, byId = null) {
   return relation ? relation.kind : 'parent-child';
 }
 
-function normalizeAdoptionMetadataShape(sim){
-    if(!sim)return null;
-    if(!sim.gameData||typeof sim.gameData!=='object'||Array.isArray(sim.gameData))sim.gameData={};
-    if(!Array.isArray(sim.gameData.adoptedParentIds))sim.gameData.adoptedParentIds=[];
-    if(!Array.isArray(sim.gameData.adoptedChildIds))sim.gameData.adoptedChildIds=[];
-    sim.gameData.adoptedParentIds=[...new Set(sim.gameData.adoptedParentIds.map(String).filter(Boolean))];
-    sim.gameData.adoptedChildIds=[...new Set(sim.gameData.adoptedChildIds.map(String).filter(Boolean))];
-    return sim.gameData;
-  }
 function isDescendant(ancestorId, nodeId) {
   const queue = [nodeId];
   const seen = new Set();
@@ -9276,6 +9230,10 @@ genealogyStore =
     siblingRelationLabel:SIBLING_RELATION_LABEL,
     normalizeRelationshipType:normalizeRelationshipTypeText,
     isBuiltInRelationshipType:isBuiltInSocialRelationshipType,
+    normalizeTraitText:cleanTraitDisplayText,
+    normalizeAvatarFrame,
+    petSpeciesValues:Object.keys(PET_SPECIES),
+    sexedPetSpeciesValues:['dog','cat','horse'],
     cardSettingFieldKeys:CARD_SETTING_FIELD_KEYS,
     defaultCardViewSettings:DEFAULT_CARD_VIEW_SETTINGS,
     defaultCardEditSettings:DEFAULT_CARD_EDIT_SETTINGS,
@@ -9414,298 +9372,7 @@ function cleanTraitDisplayText(value) {
     .trim();
 }
 
-// ========【L1nG v1 資料正規化】 設定 - 只維護目前網站 canonical shape ========
-function normalizeCurrentDatabase(targetDb) {
-  Object.values(targetDb.sims || {}).forEach(sim => {
-    if (!sim || typeof sim !== 'object') return;
-
-    sim.gender = sim.gender || '男';
-    sim.lifeStage = sim.lifeStage || '成年';
-    sim.status = sim.status || '在世';
-
-    if (!Array.isArray(sim.parentIds)) sim.parentIds = [];
-    sim.parentIds = sim.parentIds
-      .map(String)
-      .filter(id => targetDb.sims[id]);
-
-    if (!Array.isArray(sim.spouseIds)) sim.spouseIds = [];
-    if (!Array.isArray(sim.exSpouseIds)) sim.exSpouseIds = [];
-    if (!Array.isArray(sim.traits)) sim.traits = [];
-
-    sim.traits =
-      sim.traits
-        .map(cleanTraitDisplayText)
-        .filter(Boolean);
-
-    sim.spouseIds = sim.spouseIds
-      .map(String)
-      .filter(id => targetDb.sims[id]);
-
-    sim.exSpouseIds = sim.exSpouseIds
-      .map(String)
-      .filter(id => targetDb.sims[id]);
-
-    if (sim.avatar === undefined) sim.avatar = null;
-    sim.avatarFrame = normalizeAvatarFrame(sim.avatarFrame);
-    if (sim.race === undefined) sim.race = '';
-    if (sim.residence === undefined) sim.residence = '';
-    if (sim.aspiration === undefined) sim.aspiration = '';
-    if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
-    normalizeAdoptionMetadataShape(sim);
-
-    if (!Array.isArray(sim.gameData.deceasedSpouseIds)) {
-      sim.gameData.deceasedSpouseIds = [];
-    }
-
-    sim.gameData.deceasedSpouseIds =
-      sim.gameData.deceasedSpouseIds
-        .map(String)
-        .filter(id =>
-          targetDb.sims[id] &&
-          id !== String(sim.id)
-        );
-
-    const deceasedSpouseIds =
-      new Set(
-        sim.gameData.deceasedSpouseIds
-      );
-
-    // 已故配偶是獨立關係，不再同時留在現任 spouseIds。
-    sim.spouseIds =
-      sim.spouseIds.filter(id =>
-        !deceasedSpouseIds.has(id)
-      );
-
-    sim.gameData.adoptedParentIds = sim.gameData.adoptedParentIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
-    sim.gameData.adoptedChildIds = sim.gameData.adoptedChildIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
-
-    if (!Array.isArray(sim.pets)) sim.pets = [];
-    sim.pets = sim.pets
-      .filter(pet => pet && typeof pet === 'object')
-      .map(pet => ({
-        ...pet,
-        id:pet.id || uid('pet'),
-        name:pet.name || '',
-        species:
-          PET_SPECIES[String(pet.species || '')]
-            ? String(pet.species)
-            : 'other',
-        breed:pet.breed || '',
-        gender:isEaCasPetSpecies(pet.species) ? (normalizePetGender(pet.gender) || 'male') : '',
-        ageStage:pet.ageStage || '成年',
-        status:pet.status || '在世',
-        traits:Array.isArray(pet.traits)
-          ? pet.traits
-              .map(cleanTraitDisplayText)
-              .filter(Boolean)
-          : [],
-        avatar:pet.avatar || null,
-        avatarFrame:normalizeAvatarFrame(pet.avatarFrame)
-      }));
-
-    if (!Array.isArray(sim.gallery)) sim.gallery = [];
-    sim.gallery = sim.gallery
-      .filter(item => item && typeof item === 'object')
-      .map(item => ({
-        ...item,
-        id:item.id || uid('gal'),
-        title:item.title || '',
-        note:item.note || '',
-        lifeStage:item.lifeStage || '',
-        image:item.image || '',
-        addedAt:item.addedAt || Date.now()
-      }));
-  });
-
-  if (
-    targetDb.meta &&
-    Array.isArray(targetDb.meta.unassignedPets)
-  ) {
-    targetDb.meta.unassignedPets =
-      targetDb.meta.unassignedPets
-        .filter(pet =>
-          pet &&
-          typeof pet === 'object'
-        )
-        .map(pet => ({
-          ...pet,
-          id:
-            pet.id ||
-            uid('pet'),
-          name:
-            pet.name ||
-            '',
-          species:
-            PET_SPECIES[
-              String(
-                pet.species ||
-                ''
-              )
-            ]
-              ? String(
-                  pet.species
-                )
-              : 'other',
-          breed:
-            pet.breed ||
-            '',
-          gender:
-            isEaCasPetSpecies(
-              pet.species
-            )
-              ? (
-                  normalizePetGender(
-                    pet.gender
-                  ) ||
-                  'male'
-                )
-              : '',
-          ageStage:
-            pet.ageStage ||
-            '成年',
-          status:
-            pet.status ||
-            '在世',
-          avatar:
-            pet.avatar ||
-            null,
-          avatarFrame:
-            normalizeAvatarFrame(
-              pet.avatarFrame
-            )
-        }));
-  }
-
-  if (!Array.isArray(targetDb.links)) {
-    targetDb.links = [];
-  }
-
-  targetDb.links = targetDb.links
-    .filter(link =>
-      link &&
-      typeof link === 'object'
-    );
-
-  const importedRelationshipTypeLibrary =
-    Array.isArray(
-      targetDb.relationshipTypeLibrary
-    )
-      ? targetDb.relationshipTypeLibrary
-      : [];
-
-  const relationshipTypesFromLinks =
-    targetDb.links
-      .filter(link =>
-        !isSiblingLink(link)
-      )
-      .map(link =>
-        normalizeRelationshipTypeText(
-          link.label ||
-          link.type ||
-          ''
-        )
-      )
-      .filter(Boolean);
-
-  targetDb.relationshipTypeLibrary =
-    [...new Set([
-      ...importedRelationshipTypeLibrary
-        .map(
-          normalizeRelationshipTypeText
-        )
-        .filter(Boolean),
-      ...relationshipTypesFromLinks
-    ])]
-      .filter(type =>
-        type !== '關聯' &&
-        !isBuiltInSocialRelationshipType(
-          type
-        )
-      );
-
-  if (
-    !targetDb.relationshipMap ||
-    typeof targetDb.relationshipMap !== 'object' ||
-    Array.isArray(targetDb.relationshipMap)
-  ) {
-    targetDb.relationshipMap = {};
-  } else {
-    const normalizedRelationshipMap = {};
-
-    Object.entries(
-      targetDb.relationshipMap
-    ).forEach(([key, saved]) => {
-      if (
-        !saved ||
-        typeof saved !== 'object' ||
-        Array.isArray(saved)
-      ) {
-        return;
-      }
-
-      const text =
-        typeof saved.text === 'string'
-          ? saved.text.trim()
-          : '';
-
-      const hidden =
-        saved.hidden === true ||
-        saved.kind === 'none';
-
-      if (!text && !hidden) {
-        return;
-      }
-
-      normalizedRelationshipMap[key] = {
-        ...(text ? { text } : {}),
-        ...(hidden ? { hidden:true } : {})
-      };
-    });
-
-    targetDb.relationshipMap =
-      normalizedRelationshipMap;
-  }
-
-  if (
-    !targetDb.labelPositions ||
-    typeof targetDb.labelPositions !== 'object' ||
-    Array.isArray(targetDb.labelPositions)
-  ) {
-    targetDb.labelPositions = {};
-  }
-
-  targetDb.families.forEach(family => {
-    if (!family || typeof family !== 'object') return;
-
-    if (!Array.isArray(family.memberIds)) {
-      family.memberIds = [];
-    }
-
-    family.memberIds = [...new Set(
-      family.memberIds
-        .map(String)
-        .filter(id => targetDb.sims[id])
-    )];
-
-    ensureFamilyLayoutShape(family);
-    ensureFamilyProfileShape(family);
-  });
-
-  const hasCurrentFamily =
-    targetDb.currentFamilyId != null &&
-    targetDb.families.some(
-      family =>
-        family &&
-        family.id === targetDb.currentFamilyId
-    );
-
-  if (!hasCurrentFamily) {
-    targetDb.currentFamilyId =
-      targetDb.families[0]?.id ||
-      null;
-  }
-}
-
+// ========【L1nG v1 資料載入整理】 設定 - canonical shape 由 Genealogy Store 唯一負責 ========
 function repairImportedHouseholdMembership(targetDb) {
   if (!targetDb || !targetDb.sims || !Array.isArray(targetDb.families)) return false;
 
@@ -12065,10 +11732,7 @@ function seedVisibleScenePositionsForFreeLayout(
 function applySelectedLayoutOperation(action) {
   const fam = currentFamily();
   if (!fam || !getSceneLayout()) return false;
-
-  ensureFamilyLayoutShape(fam);
-
-  const ids = getSelectedLayoutNodeIds();
+const ids = getSelectedLayoutNodeIds();
   if (ids.length < 2) return false;
 
   const boxes =
@@ -12400,9 +12064,7 @@ async function handlePersonCardMenuAction(action, simId) {
 
   if (action === 'reset-selected') {
     const fam = currentFamily();
-    ensureFamilyLayoutShape(fam);
-
-    const ids =
+const ids =
       [...selectedNodeIds]
         .filter(id =>
           Object.prototype.hasOwnProperty.call(
@@ -13700,8 +13362,7 @@ nodes.addEventListener('pointerdown', e => {
   if (!el) return;
   const id = el.dataset.id;
   const fam = currentFamily();
-  ensureFamilyLayoutShape(fam);
-  const isFree = genealogyScene.isFreeLayoutActive(fam);
+const isFree = genealogyScene.isFreeLayoutActive(fam);
   const cardDragThreshold =
     e.pointerType === 'touch'
       ? TOUCH_DRAG_THRESHOLD_PX
@@ -14564,12 +14225,7 @@ function syncLayoutModeControls() {
 $('layoutToggle').onclick = () => {
   const fam =
     currentFamily();
-
-  ensureFamilyLayoutShape(
-    fam
-  );
-
-  const before =
+const before =
     captureLayoutHistoryState(
       fam,
       viewMode
@@ -15123,8 +14779,7 @@ function renderFamilyMemberList(fam) {
 function refreshFamilyProfilePanel() {
   const fam = currentFamily(); if (!fam) return;
   const viewFamily = currentTreeFamily() || fam;
-  ensureFamilyProfileShape(fam);
-  const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value = fam.bio || '';
+const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value = fam.bio || '';
   const members = (viewFamily.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean);
   if ($('familyMemberCount')) $('familyMemberCount').textContent = String(members.length);
   if ($('familyGenerationCount')) $('familyGenerationCount').textContent = String(calculateFamilyGenerationCount(viewFamily));
@@ -17905,28 +17560,24 @@ function prepareDatabase(raw) {
     );
   }
 
-  const prepared = raw;
+  const normalizedResult =
+    genealogyStore.normalizeDatabase(
+      raw
+    );
 
-  normalizeCurrentDatabase(prepared);
+  const prepared =
+    normalizedResult.data;
 
   const householdMembershipRepaired =
     repairImportedHouseholdMembership(
       prepared
     );
 
-  let missingLinkIdRepaired = false;
-
-  prepared.links.forEach(link => {
-    if (!link || link.id) return;
-    link.id = uid('lnk');
-    missingLinkIdRepaired = true;
-  });
-
   return {
     prepared,
     changed:
-      householdMembershipRepaired ||
-      missingLinkIdRepaired
+      normalizedResult.changed ||
+      householdMembershipRepaired
   };
 }
 

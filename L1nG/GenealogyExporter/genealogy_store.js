@@ -124,6 +124,14 @@
     siblingRelationLabel = '兄弟姊妹',
     normalizeRelationshipType = value => String(value || '').trim(),
     isBuiltInRelationshipType = () => false,
+    normalizeTraitText = value => String(value ?? '').trim(),
+    normalizeAvatarFrame = frame => (
+      frame && typeof frame === 'object' && !Array.isArray(frame)
+        ? cloneValue(frame)
+        : null
+    ),
+    petSpeciesValues = [],
+    sexedPetSpeciesValues = ['dog','cat','horse'],
     cardSettingFieldKeys = [],
     defaultCardViewSettings = {},
     defaultCardEditSettings = {},
@@ -142,6 +150,113 @@
         .map(String)
         .filter(Boolean)
     );
+
+    const petSpeciesSet = new Set(
+      (petSpeciesValues || [])
+        .map(String)
+        .filter(Boolean)
+    );
+
+    const sexedPetSpeciesSet = new Set(
+      (sexedPetSpeciesValues || [])
+        .map(String)
+        .filter(Boolean)
+    );
+
+    function normalizePetGenderValue(value) {
+      const text =
+        String(value || '')
+          .trim()
+          .toLowerCase();
+
+      if (['male','男','公'].includes(text)) {
+        return 'male';
+      }
+
+      if (['female','女','母'].includes(text)) {
+        return 'female';
+      }
+
+      return '';
+    }
+
+    function normalizePetRecord(pet) {
+      if (!pet || typeof pet !== 'object' || Array.isArray(pet)) {
+        return null;
+      }
+
+      const rawSpecies =
+        String(pet.species || '');
+
+      const species =
+        petSpeciesSet.has(rawSpecies)
+          ? rawSpecies
+          : (
+              petSpeciesSet.has('other')
+                ? 'other'
+                : rawSpecies
+            );
+
+      return {
+        ...pet,
+        id:String(
+          pet.id ||
+          (
+            typeof uid === 'function'
+              ? uid('pet')
+              : 'pet_' + Date.now()
+          )
+        ),
+        name:pet.name || '',
+        species,
+        breed:pet.breed || '',
+        gender:
+          sexedPetSpeciesSet.has(species)
+            ? (
+                normalizePetGenderValue(
+                  pet.gender
+                ) ||
+                'male'
+              )
+            : '',
+        ageStage:pet.ageStage || '成年',
+        status:pet.status || '在世',
+        traits:
+          Array.isArray(pet.traits)
+            ? pet.traits
+                .map(normalizeTraitText)
+                .filter(Boolean)
+            : [],
+        avatar:pet.avatar || null,
+        avatarFrame:
+          normalizeAvatarFrame(
+            pet.avatarFrame
+          )
+      };
+    }
+
+    function normalizeGalleryItem(item) {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        return null;
+      }
+
+      return {
+        ...item,
+        id:String(
+          item.id ||
+          (
+            typeof uid === 'function'
+              ? uid('gal')
+              : 'gal_' + Date.now()
+          )
+        ),
+        title:item.title || '',
+        note:item.note || '',
+        lifeStage:item.lifeStage || '',
+        image:item.image || '',
+        addedAt:item.addedAt || Date.now()
+      };
+    }
 
     function normalizeCardSettings(mode, current) {
       const normalizedMode =
@@ -214,29 +329,411 @@
       return current.meta;
     }
 
+    function normalizeSimRecord(sim, simId, current) {
+      if (!sim || typeof sim !== 'object' || Array.isArray(sim)) {
+        return null;
+      }
+
+      const id =
+        String(
+          simId ||
+          sim.id ||
+          ''
+        );
+
+      sim.id = id;
+      sim.gender = sim.gender || '男';
+      sim.lifeStage = sim.lifeStage || '成年';
+      sim.status = sim.status || '在世';
+
+      sim.parentIds =
+        uniqueIds(
+          Array.isArray(sim.parentIds)
+            ? sim.parentIds
+            : [],
+          current,
+          id
+        );
+
+      sim.spouseIds =
+        uniqueIds(
+          Array.isArray(sim.spouseIds)
+            ? sim.spouseIds
+            : [],
+          current,
+          id
+        );
+
+      sim.exSpouseIds =
+        uniqueIds(
+          Array.isArray(sim.exSpouseIds)
+            ? sim.exSpouseIds
+            : [],
+          current,
+          id
+        );
+
+      sim.traits =
+        Array.isArray(sim.traits)
+          ? sim.traits
+              .map(normalizeTraitText)
+              .filter(Boolean)
+          : [];
+
+      if (sim.avatar === undefined) {
+        sim.avatar = null;
+      }
+
+      sim.avatarFrame =
+        normalizeAvatarFrame(
+          sim.avatarFrame
+        );
+
+      if (sim.race === undefined) sim.race = '';
+      if (sim.residence === undefined) sim.residence = '';
+      if (sim.aspiration === undefined) sim.aspiration = '';
+      if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
+
+      const gameData =
+        ensureAdoptionMetadata(
+          sim
+        );
+
+      gameData.adoptedParentIds =
+        uniqueIds(
+          gameData.adoptedParentIds,
+          current,
+          id
+        );
+
+      gameData.adoptedChildIds =
+        uniqueIds(
+          gameData.adoptedChildIds,
+          current,
+          id
+        );
+
+      gameData.deceasedSpouseIds =
+        uniqueIds(
+          Array.isArray(
+            gameData.deceasedSpouseIds
+          )
+            ? gameData.deceasedSpouseIds
+            : [],
+          current,
+          id
+        );
+
+      const deceasedSpouseIds =
+        new Set(
+          gameData.deceasedSpouseIds
+        );
+
+      sim.spouseIds =
+        sim.spouseIds.filter(id =>
+          !deceasedSpouseIds.has(id)
+        );
+
+      sim.pets =
+        (Array.isArray(sim.pets)
+          ? sim.pets
+          : []
+        )
+          .map(normalizePetRecord)
+          .filter(Boolean);
+
+      sim.gallery =
+        (Array.isArray(sim.gallery)
+          ? sim.gallery
+          : []
+        )
+          .map(normalizeGalleryItem)
+          .filter(Boolean);
+
+      return sim;
+    }
+
+    function normalizeRelationshipMap(current) {
+      const source =
+        current.relationshipMap &&
+        typeof current.relationshipMap === 'object' &&
+        !Array.isArray(current.relationshipMap)
+          ? current.relationshipMap
+          : {};
+
+      const normalized = {};
+
+      Object.entries(source)
+        .forEach(([key, saved]) => {
+          if (
+            !saved ||
+            typeof saved !== 'object' ||
+            Array.isArray(saved)
+          ) {
+            return;
+          }
+
+          const text =
+            typeof saved.text === 'string'
+              ? saved.text.trim()
+              : '';
+
+          const hidden =
+            saved.hidden === true ||
+            saved.kind === 'none';
+
+          if (!text && !hidden) {
+            return;
+          }
+
+          normalized[key] = {
+            ...(text ? { text } : {}),
+            ...(hidden ? { hidden:true } : {})
+          };
+        });
+
+      current.relationshipMap =
+        normalized;
+    }
+
     function normalizeDatabaseShape(current) {
       if (!current || typeof current !== 'object' || Array.isArray(current)) {
         throw new Error('Genealogy Store requires a canonical database object.');
       }
+
       current.sims =
-        current.sims && typeof current.sims === 'object' && !Array.isArray(current.sims)
+        current.sims &&
+        typeof current.sims === 'object' &&
+        !Array.isArray(current.sims)
           ? current.sims
           : {};
-      current.families = Array.isArray(current.families) ? current.families : [];
-      current.links = Array.isArray(current.links) ? current.links : [];
-      current.relationshipMap =
-        current.relationshipMap && typeof current.relationshipMap === 'object' && !Array.isArray(current.relationshipMap)
-          ? current.relationshipMap
-          : {};
+
+      const normalizedSims = {};
+
+      Object.entries(current.sims)
+        .forEach(([id, sim]) => {
+          const normalized =
+            normalizeSimRecord(
+              sim,
+              id,
+              current
+            );
+
+          if (normalized) {
+            normalizedSims[String(id)] =
+              normalized;
+          }
+        });
+
+      current.sims =
+        normalizedSims;
+
+      Object.entries(current.sims)
+        .forEach(([id, sim]) => {
+          normalizeSimRecord(
+            sim,
+            id,
+            current
+          );
+        });
+
+      current.families =
+        Array.isArray(current.families)
+          ? current.families
+              .filter(family =>
+                family &&
+                typeof family === 'object' &&
+                !Array.isArray(family)
+              )
+          : [];
+
+      current.links =
+        (Array.isArray(current.links)
+          ? current.links
+          : []
+        )
+          .filter(link =>
+            link &&
+            typeof link === 'object' &&
+            !Array.isArray(link)
+          )
+          .map(link => ({
+            ...link,
+            id:String(
+              link.id ||
+              (
+                typeof uid === 'function'
+                  ? uid('lnk')
+                  : 'lnk_' + Date.now()
+              )
+            )
+          }));
+
+      normalizeRelationshipMap(
+        current
+      );
+
       current.labelPositions =
-        current.labelPositions && typeof current.labelPositions === 'object' && !Array.isArray(current.labelPositions)
+        current.labelPositions &&
+        typeof current.labelPositions === 'object' &&
+        !Array.isArray(current.labelPositions)
           ? current.labelPositions
           : {};
-      current.relationshipTypeLibrary = Array.isArray(current.relationshipTypeLibrary)
-        ? current.relationshipTypeLibrary
-        : [];
-      ensureCardSettings(current);
+
+      const importedRelationshipTypeLibrary =
+        Array.isArray(
+          current.relationshipTypeLibrary
+        )
+          ? current.relationshipTypeLibrary
+          : [];
+
+      const relationshipTypesFromLinks =
+        current.links
+          .filter(link =>
+            !isSiblingLink?.(link)
+          )
+          .map(link =>
+            normalizeRelationshipType(
+              link.label ||
+              link.type ||
+              ''
+            )
+          )
+          .filter(Boolean);
+
+      current.relationshipTypeLibrary =
+        [...new Set([
+          ...importedRelationshipTypeLibrary
+            .map(
+              normalizeRelationshipType
+            )
+            .filter(Boolean),
+          ...relationshipTypesFromLinks
+        ])]
+          .filter(type =>
+            type !== '關聯' &&
+            !isBuiltInRelationshipType(
+              type
+            )
+          );
+
+      current.families
+        .forEach(family => {
+          family.id =
+            String(
+              family.id ||
+              (
+                typeof uid === 'function'
+                  ? uid('fam')
+                  : 'fam_' + Date.now()
+              )
+            );
+
+          family.memberIds =
+            uniqueIds(
+              Array.isArray(
+                family.memberIds
+              )
+                ? family.memberIds
+                : [],
+              current,
+              null
+            );
+
+          ensureFamilyLayout(
+            family
+          );
+
+          if (
+            typeof family.bio !==
+            'string'
+          ) {
+            family.bio = '';
+          }
+
+          if (
+            family.coverImage ===
+            undefined
+          ) {
+            family.coverImage = null;
+          }
+        });
+
+      if (
+        current.meta &&
+        Array.isArray(
+          current.meta.unassignedPets
+        )
+      ) {
+        current.meta.unassignedPets =
+          current.meta.unassignedPets
+            .map(normalizePetRecord)
+            .filter(Boolean);
+      }
+
+      const currentFamilyKey =
+        current.currentFamilyId == null
+          ? ''
+          : String(
+              current.currentFamilyId
+            );
+
+      const currentFamily =
+        current.families.find(
+          family =>
+            String(
+              family.id || ''
+            ) === currentFamilyKey
+        );
+
+      current.currentFamilyId =
+        currentFamily
+          ? String(currentFamily.id)
+          : (
+              current.families[0]
+                ? String(
+                    current.families[0].id
+                  )
+                : null
+            );
+
+      ensureCardSettings(
+        current
+      );
+
       return current;
+    }
+
+    function normalizeDatabase(current) {
+      let before = null;
+
+      try {
+        before =
+          JSON.stringify(
+            current
+          );
+      } catch (_) {}
+
+      const normalized =
+        normalizeDatabaseShape(
+          current
+        );
+
+      let changed = true;
+
+      if (before !== null) {
+        try {
+          changed =
+            JSON.stringify(
+              normalized
+            ) !== before;
+        } catch (_) {}
+      }
+
+      return {
+        data:normalized,
+        changed
+      };
     }
 
     function getData() {
@@ -244,7 +741,11 @@
     }
 
     function replaceDatabase(nextData) {
-      activeData = normalizeDatabaseShape(nextData);
+      activeData =
+        normalizeDatabase(
+          nextData
+        ).data;
+
       return activeData;
     }
 
@@ -252,7 +753,8 @@
       if (!activeData) {
         throw new Error('Genealogy Store has no active canonical database.');
       }
-      return normalizeDatabaseShape(activeData);
+
+      return activeData;
     }
 
     function simById(simId) {
@@ -729,11 +1231,12 @@
       }
 
       input.id = id;
-      if (!Array.isArray(input.parentIds)) input.parentIds = [];
-      if (!Array.isArray(input.spouseIds)) input.spouseIds = [];
-      if (!Array.isArray(input.exSpouseIds)) input.exSpouseIds = [];
-      ensureAdoptionMetadata(input);
-      db.sims[id] = input;
+      db.sims[id] =
+        normalizeSimRecord(
+          input,
+          id,
+          db
+        );
 
       mark(result, {
         dataChanged:true,
@@ -772,6 +1275,12 @@
       });
 
       if (!changed) return finalized(result);
+
+      normalizeSimRecord(
+        sim,
+        key,
+        db
+      );
 
       mark(result, {
         dataChanged:true,
@@ -1539,6 +2048,7 @@
 
     return Object.freeze({
       getData,
+      normalizeDatabase,
       replaceDatabase,
       getSim:simById,
       getFamily:familyById,
