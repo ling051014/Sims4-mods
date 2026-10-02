@@ -1308,6 +1308,131 @@ function buildSample() {
     "944092612642774246":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2017,"month":7,"day":14},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":9,"months":2,"days":21,"displayValue":9,"displayUnit":"years"}}
   };
 
+  // ========【預設偏好示範】 設定 - 不改預設家庭，只讓初次使用者能先看到偏好分頁 ========
+  // 這些值是依 2026-10-02 實機匯出確認過的 EA preference schema / tuning metadata 建立的 UI 範例，
+  // 不宣稱是史賓瑟．金．路易斯家庭目前存檔中的實際偏好；真正匯入遊戲 ZIP 時會由匯入資料取代。
+  const samplePreferenceCategories = Object.freeze({
+    activity:Object.freeze({
+      tuningId:'264576',
+      internalName:'PreferenceCategory_Activity',
+      localizedName:'活動',
+      localizedNameRef:null
+    }),
+    music:Object.freeze({
+      tuningId:'264581',
+      internalName:'PreferenceCategory_MusicGenre',
+      localizedName:'音樂',
+      localizedNameRef:null
+    }),
+    color:Object.freeze({
+      tuningId:'259880',
+      internalName:'PreferenceCategory_Color',
+      localizedName:'顏色',
+      localizedNameRef:null
+    })
+  });
+
+  const samplePreferenceGroup = Object.freeze({
+    tuningId:'361531',
+    internalName:'casPreferenceGroup_likesdislikes',
+    localizedName:'喜歡與不喜歡的事物',
+    localizedNameRef:null
+  });
+
+  const samplePreferencePresets = Object.freeze({
+    fitnessLike:['like','258765','trait_SimPreference_Likes_Activities_Fitness','健身','264612','preferenceItem_Activities_Fitness','activity'],
+    popLike:['like','258276','trait_SimPreference_Likes_Music_Pop','流行音樂','264652','preferenceItem_MusicGenre_Pop','music'],
+    gardeningDislike:['dislike','264146','trait_SimPreference_Dislikes_Activities_Gardening','園藝','264613','preferenceItem_Activities_Gardening','activity'],
+    cookingLike:['like','258764','trait_SimPreference_Likes_Activities_Cooking','烹飪','264609','preferenceItem_Activities_Cooking','activity'],
+    classicalLike:['like','258271','trait_SimPreference_Likes_Music_Classical','古典音樂','264647','preferenceItem_MusicGenre_Classical','music'],
+    mischiefDislike:['dislike','264149','trait_SimPreference_Dislikes_Activities_Mischief','惡作劇','264616','preferenceItem_Activities_Mischief','activity'],
+    paintingLike:['like','258766','trait_SimPreference_Likes_Activities_Painting','繪畫','264618','preferenceItem_Activities_Painting','activity'],
+    jazzLike:['like','259024','Trait_SimPreference_Likes_Music_Jazz','爵士樂','264665','PreferenceItem_MusicGenre_Jazz','music'],
+    rocketDislike:['dislike','264164','trait_SimPreference_Dislikes_Activities_RocketScience','火箭科學','264625','preferenceItem_Activities_RocketScience','activity'],
+    gardeningLike:['like','264181','trait_SimPreference_Likes_Activities_Gardening','園藝','264613','preferenceItem_Activities_Gardening','activity'],
+    blueLike:['like','258214','trait_SimPreference_Likes_Color_Blue','藍色','260212','preferenceItem_Color_Blue','color'],
+    electronicaDislike:['dislike','258258','trait_SimPreference_Dislikes_Music_Electronica','電子音樂','264648','preferenceItem_MusicGenre_Electronica','music'],
+    videoGamingLike:['like','258767','trait_SimPreference_Likes_Activities_VideoGaming','電動遊戲','264627','preferenceItem_Activities_Videogaming','activity'],
+    kidsMusicLike:['like','258274','trait_SimPreference_Likes_Music_Kids','兒童電台音樂','264650','preferenceItem_MusicGenre_Kids','music'],
+    fitnessDislike:['dislike','258759','trait_SimPreference_Dislikes_Activities_Fitness','健身','264612','preferenceItem_Activities_Fitness','activity']
+  });
+
+  const samplePreferenceKeysBySim = Object.freeze({
+    '944092612642014825':['fitnessLike','popLike','gardeningDislike'],
+    '944092612642014826':['cookingLike','classicalLike','mischiefDislike'],
+    '944092612642014827':['paintingLike','jazzLike','rocketDislike'],
+    '944092612642014828':['gardeningLike','blueLike','electronicaDislike'],
+    '944092612642014829':['videoGamingLike','kidsMusicLike','fitnessDislike']
+  });
+
+  function makeSamplePreference(key) {
+    const preset=
+      samplePreferencePresets[key];
+
+    if(!preset)return null;
+
+    const [
+      preference,
+      tuningId,
+      internalName,
+      displayName,
+      itemTuningId,
+      itemInternalName,
+      categoryKey
+    ]=preset;
+
+    const category=
+      samplePreferenceCategories[categoryKey];
+
+    return {
+      preference,
+      tuningId,
+      internalName,
+      localizedName:
+        (preference==='dislike'
+          ? '不喜歡'
+          : '喜歡')+
+        displayName,
+      displayName,
+      localizedNameRef:null,
+      traitType:{
+        key:preference,
+        value:
+          preference==='dislike'
+            ? 23
+            : 22
+      },
+      subject:{
+        key:'object',
+        value:0
+      },
+      isAttractionPreference:false,
+      item:{
+        tuningId:itemTuningId,
+        internalName:itemInternalName,
+        localizedName:'',
+        localizedNameRef:null
+      },
+      category:{
+        ...category
+      },
+      group:{
+        ...samplePreferenceGroup
+      }
+    };
+  }
+
+  function samplePreferencesForSim(id) {
+    const keys=
+      samplePreferenceKeysBySim[
+        String(id)
+      ] || [];
+
+    return keys
+      .map(makeSamplePreference)
+      .filter(Boolean);
+  }
+
   const rows = [
 ["944092612642014825","路易斯埃里克","男","青年","在世","human","柳溪 / 扁柏街道","豪宅大王",["物質主義","貪吃鬼","自信"],"",["944092612642014826"],["944092612642014827"],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],2008,3,1,18],
 ["944092612642014826","路易斯薇薇安","女","老年","在世","human","柳溪 / 扁柏街道","快樂大家庭",["歡樂","以家庭為重","美食家"],"",[],[],[],"944092612642014824","史賓瑟．金．路易斯","full",[],[],1959,9,10,67],
@@ -1358,6 +1483,9 @@ function buildSample() {
       ? JSON.parse(JSON.stringify(sampleRealDateBySim[id]))
       : null;
 
+    const samplePreferences=
+      samplePreferencesForSim(id);
+
     sims[id] = {
       id,name,gender,lifeStage,status,race,residence,aspiration,
       causeOfDeath:'',
@@ -1385,6 +1513,20 @@ function buildSample() {
         fianceIds:[],
         steadyPartnerIds:[],
         deceasedSpouseIds:[],
+        dataAvailability:{
+          preferences:
+            samplePreferences.length
+              ? 'available'
+              : 'unavailable'
+        },
+        preferences:{
+          availability:
+            samplePreferences.length
+              ? 'available'
+              : 'unavailable',
+          likesDislikes:samplePreferences,
+          attraction:[]
+        },
         realDate,
         entityClass:
           recordState === 'family_tree_only'
@@ -1463,8 +1605,9 @@ function buildSample() {
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
-      sampleVersion:5,
+      sampleVersion:6,
       sampleSource:'ea-npc-20260927',
+      samplePreferenceDemo:true,
       gameImport:true,
       sourceFormat:'l1ng-genealogy',
       sourceSchemaVersion:1,
@@ -3149,7 +3292,12 @@ const BUILTIN_SAMPLE_TEXT_VALUES = new Set([
     sim.residence,
     sim.aspiration,
     sim.career,
-    ...(sim.traits || [])
+    ...(sim.traits || []),
+    ...(sim.gameData?.preferences?.likesDislikes || [])
+      .flatMap(item => [
+        item?.displayName,
+        item?.category?.localizedName
+      ])
   ])
 ].filter(Boolean));
 
