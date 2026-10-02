@@ -9491,7 +9491,6 @@ function normalizeCurrentDatabase(targetDb) {
 
     sim.gameData.adoptedParentIds = sim.gameData.adoptedParentIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
     sim.gameData.adoptedChildIds = sim.gameData.adoptedChildIds.filter(id => targetDb.sims[id] && id !== String(sim.id));
-    delete sim.adoptive;
 
     if (!Array.isArray(sim.pets)) sim.pets = [];
     sim.pets = sim.pets

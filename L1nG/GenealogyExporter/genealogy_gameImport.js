@@ -866,7 +866,6 @@
         parentIds:rel.parentIds,
         spouseIds:rel.spouseIds,
         exSpouseIds:rel.exSpouseIds,
-        adoptive:rel.adoptedParentIds.length > 0,
         traits,
         career:careers.join(' / '),
         bio:'',
