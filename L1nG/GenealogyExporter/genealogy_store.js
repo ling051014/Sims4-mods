@@ -124,6 +124,7 @@
     siblingRelationLabel = '兄弟姊妹',
     normalizeRelationshipType = value => String(value || '').trim(),
     isBuiltInRelationshipType = () => false,
+    isSymmetricRelationshipType = () => false,
     normalizeTraitText = value => String(value ?? '').trim(),
     normalizeAvatarFrame = frame => (
       frame && typeof frame === 'object' && !Array.isArray(frame)
@@ -627,7 +628,7 @@
               )
           : [];
 
-      current.links =
+      const normalizedLinks =
         (Array.isArray(current.links)
           ? current.links
           : []
@@ -654,9 +655,46 @@
                 ? 'game'
                 : 'manual';
 
+            const normalizedType =
+              normalizeRelationshipType(
+                link.type ||
+                link.label ||
+                '關聯'
+              ) ||
+              '關聯';
+
+            const normalizedLabel =
+              normalizeRelationshipType(
+                link.label ||
+                normalizedType
+              ) ||
+              normalizedType;
+
+            let from =
+              String(link.from || '');
+
+            let to =
+              String(link.to || '');
+
+            if (
+              isSymmetricRelationshipType(
+                normalizedType
+              ) &&
+              from &&
+              to &&
+              from > to
+            ) {
+              [from, to] =
+                [to, from];
+            }
+
             return {
               ...link,
               id,
+              from,
+              to,
+              type:normalizedType,
+              label:normalizedLabel,
               source,
               manualOverrides:
                 source === 'game'
@@ -671,6 +709,36 @@
                     )]
                   : []
             };
+          });
+
+      const symmetricKeys =
+        new Set();
+
+      current.links =
+        normalizedLinks
+          .filter(link => {
+            if (
+              !isSymmetricRelationshipType(
+                link.type
+              )
+            ) {
+              return true;
+            }
+
+            const key = [
+              String(link.from || ''),
+              String(link.to || ''),
+              String(link.type || '')
+            ].join('|');
+
+            if (
+              symmetricKeys.has(key)
+            ) {
+              return false;
+            }
+
+            symmetricKeys.add(key);
+            return true;
           });
 
       normalizeRelationshipMap(
@@ -1939,13 +2007,90 @@
         return finalized(result);
       }
 
-      const normalizedType = normalizeRelationshipType(type || label || '關聯') || '關聯';
+      const normalizedType =
+        normalizeRelationshipType(
+          type ||
+          label ||
+          '關聯'
+        ) ||
+        '關聯';
+
+      const normalizedLabel =
+        normalizeRelationshipType(
+          label ||
+          normalizedType
+        ) ||
+        normalizedType;
+
+      let normalizedFrom =
+        fromId;
+
+      let normalizedTo =
+        toId;
+
+      const symmetric =
+        isSymmetricRelationshipType(
+          normalizedType
+        );
+
+      if (
+        symmetric &&
+        normalizedFrom >
+        normalizedTo
+      ) {
+        [normalizedFrom, normalizedTo] =
+          [normalizedTo, normalizedFrom];
+      }
+
+      if (symmetric) {
+        const existing =
+          db.links.find(link =>
+            link &&
+            isSymmetricRelationshipType(
+              normalizeRelationshipType(
+                link.type ||
+                link.label ||
+                ''
+              )
+            ) &&
+            normalizeRelationshipType(
+              link.type ||
+              link.label ||
+              ''
+            ) === normalizedType &&
+            (
+              (
+                String(link.from) ===
+                  normalizedFrom &&
+                String(link.to) ===
+                  normalizedTo
+              ) ||
+              (
+                String(link.from) ===
+                  normalizedTo &&
+                String(link.to) ===
+                  normalizedFrom
+              )
+            )
+          );
+
+        if (existing) {
+          result.relationshipId =
+            String(existing.id || '');
+
+          return finalized(result);
+        }
+      }
+
       const relationship = {
-        id:typeof uid === 'function' ? uid('lnk') : 'lnk_' + Date.now(),
-        from:fromId,
-        to:toId,
+        id:
+          typeof uid === 'function'
+            ? uid('lnk')
+            : 'lnk_' + Date.now(),
+        from:normalizedFrom,
+        to:normalizedTo,
         type:normalizedType,
-        label:normalizeRelationshipType(label || normalizedType) || normalizedType,
+        label:normalizedLabel,
         source:'manual'
       };
 
@@ -1997,6 +2142,30 @@
       });
 
       if (!changed) return finalized(result);
+
+      const normalizedUpdatedType =
+        normalizeRelationshipType(
+          link.type ||
+          link.label ||
+          ''
+        );
+
+      if (
+        isSymmetricRelationshipType(
+          normalizedUpdatedType
+        ) &&
+        String(link.from || '') >
+          String(link.to || '')
+      ) {
+        const nextFrom =
+          String(link.to || '');
+
+        const nextTo =
+          String(link.from || '');
+
+        link.from = nextFrom;
+        link.to = nextTo;
+      }
 
       if (
         link.source === 'game' ||
