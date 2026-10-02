@@ -11,15 +11,15 @@ const STORE_KEY = 'l1ng_genealogy_v1';
 const THEME_KEY = 'l1ng_genealogy_theme_v1';
 const CUSTOM_COLORS_KEY = 'l1ng_genealogy_custom_theme_v1';
 const BG_KEY = 'l1ng_genealogy_background_v1';
-const MODE_KEY = 'sims4_genealogy_mode';
-const LABELS_KEY = 'sims4_genealogy_labels';
-const LABEL_LOCK_KEY = 'sims4_genealogy_label_lock';
-const SIDEBAR_WIDTH_KEY = 'sims4_genealogy_sidebar_width';
-const FAMILY_PANEL_COLLAPSED_KEY = 'sims4_genealogy_family_panel_collapsed';
-const PERSON_LIBRARY_VIEW_KEY = 'sims4_genealogy_person_library_view';
-const FAMILY_MEMBER_GENERATION_SORT_KEY = 'sims4_genealogy_family_member_generation_sort';
-const REL_LINE_STYLE_KEY = 'sims4_genealogy_relationship_line_style';
-const FAMILY_TREE_VIEW_MODE_KEY = 'sims4_genealogy_family_tree_view_mode';
+const MODE_KEY = 'l1ng_genealogy_view_mode_v1';
+const LABELS_KEY = 'l1ng_genealogy_relationship_labels_v1';
+const LABEL_LOCK_KEY = 'l1ng_genealogy_relationship_label_lock_v1';
+const SIDEBAR_WIDTH_KEY = 'l1ng_genealogy_sidebar_width_v1';
+const FAMILY_PANEL_COLLAPSED_KEY = 'l1ng_genealogy_family_panel_collapsed_v1';
+const PERSON_LIBRARY_VIEW_KEY = 'l1ng_genealogy_person_library_view_v1';
+const FAMILY_MEMBER_GENERATION_SORT_KEY = 'l1ng_genealogy_family_member_generation_sort_v1';
+const REL_LINE_STYLE_KEY = 'l1ng_genealogy_relationship_line_style_v1';
+const FAMILY_TREE_VIEW_MODE_KEY = 'l1ng_genealogy_family_tree_view_mode_v1';
 const SIDEBAR_DEFAULT_WIDTH = 300;
 const SIDEBAR_MIN_WIDTH = 260;
 const SIDEBAR_MAX_WIDTH = 430;
@@ -380,7 +380,7 @@ function createRelationshipLineSettings() {
   };
 }
 
-function migrateRelationshipLineSetting(
+function normalizeRelationshipLineSetting(
   key,
   saved,
   fallbackOverride = null
@@ -398,42 +398,29 @@ function migrateRelationshipLineSetting(
     return { ...fallback };
   }
 
-  const migrated = {
+  const normalized = {
     ...fallback,
     ...saved
   };
 
-  // 2026-09-28 過渡版曾把 curve 當成第五種 stroke style。
-  // 現在 cleanly 拆成「線型 + curved + curveAmount」三個維度。
-  if (migrated.style === 'curve') {
-    migrated.style =
-      key === 'exspouse'
-        ? 'short-dash'
-        : key === 'other'
-          ? 'dot'
-          : fallback.style;
-
-    migrated.curved = true;
-  }
-
   if (
     !['solid','short-dash','long-dash','dot']
-      .includes(migrated.style)
+      .includes(normalized.style)
   ) {
-    migrated.style =
+    normalized.style =
       fallback.style;
   }
 
-  migrated.curved =
-    typeof migrated.curved === 'boolean'
-      ? migrated.curved
+  normalized.curved =
+    typeof normalized.curved === 'boolean'
+      ? normalized.curved
       : !!fallback.curved;
 
-  migrated.routing =
+  normalized.routing =
     ['auto','manual'].includes(
-      migrated.routing
+      normalized.routing
     )
-      ? migrated.routing
+      ? normalized.routing
       : (
           ['spouse','exspouse','other']
             .includes(key)
@@ -441,23 +428,23 @@ function migrateRelationshipLineSetting(
             : 'manual'
         );
 
-  migrated.curveAmount =
+  normalized.curveAmount =
     Math.max(
       10,
       Math.min(
         100,
-        Number(migrated.curveAmount) ||
+        Number(normalized.curveAmount) ||
         fallback.curveAmount ||
         50
       )
     );
 
   if (key === 'other') {
-    migrated.bidirectional =
-      !!migrated.bidirectional;
+    normalized.bidirectional =
+      !!normalized.bidirectional;
   }
 
-  return migrated;
+  return normalized;
 }
 
 let relationshipLineSettings =
@@ -478,7 +465,7 @@ try {
     ['parent','spouse','exspouse','adopt','other']
       .forEach(key => {
         relationshipLineSettings[key] =
-          migrateRelationshipLineSetting(
+          normalizeRelationshipLineSetting(
             key,
             parsed?.[key]
           );
@@ -502,7 +489,7 @@ try {
           }
 
           relationshipLineSettings.otherTypes[type] =
-            migrateRelationshipLineSetting(
+            normalizeRelationshipLineSetting(
               'other',
               setting
             );
@@ -7339,7 +7326,7 @@ function relationshipDefaultColor(key) {
 }
 
 function relationshipLineSetting(key) {
-  return migrateRelationshipLineSetting(
+  return normalizeRelationshipLineSetting(
     key,
     relationshipLineSettings[key]
   );
@@ -7411,7 +7398,7 @@ function getOtherRelationshipLineSetting(
       type
     );
 
-  return migrateRelationshipLineSetting(
+  return normalizeRelationshipLineSetting(
     'other',
     relationshipLineSettings
       .otherTypes?.[type],
@@ -9597,26 +9584,7 @@ function normalizeCurrentDatabase(targetDb) {
     .filter(link =>
       link &&
       typeof link === 'object'
-    )
-    .map(link => {
-      const next = { ...link };
-
-      const legacySibling =
-        next.type === '兄弟姐妹' ||
-        next.type === '兄弟姊妹' ||
-        next.label === '兄弟姐妹' ||
-        next.label === '兄弟姊妹';
-
-      if (legacySibling) {
-        next.type =
-          SIBLING_RELATION_TYPE;
-
-        next.label =
-          SIBLING_RELATION_LABEL;
-      }
-
-      return next;
-    });
+    );
 
   const importedRelationshipTypeLibrary =
     Array.isArray(
