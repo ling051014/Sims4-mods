@@ -344,6 +344,130 @@
     );
   }
 
+  // ========【遊戲偏好正規化】 設定 - 保留 EA metadata，網站僅建立唯讀顯示資料 ========
+  function importedPreferenceKind(item) {
+    const raw = String(
+      (item && item.preference) ||
+      enumKey(item && item.traitType) ||
+      ''
+    ).trim().toLowerCase();
+
+    if (raw.includes('dislike')) return 'dislike';
+    if (raw.includes('like')) return 'like';
+    return '';
+  }
+
+  function cleanImportedPreferenceDisplayName(item, kind) {
+    let label = cleanImportedTraitText(
+      internalLabel(item)
+    );
+
+    if (!label) return '';
+
+    const patterns =
+      kind === 'dislike'
+        ? [
+            /^(?:不喜歡|不喜欢|討厭|讨厌)\s*[:：]?\s*/u,
+            /^dislikes?\s*[:：-]?\s*/i,
+            /^turn[- ]?offs?\s*[:：-]?\s*/i
+          ]
+        : [
+            /^(?:喜歡|喜欢)\s*[:：]?\s*/u,
+            /^likes?\s*[:：-]?\s*/i,
+            /^turn[- ]?ons?\s*[:：-]?\s*/i
+          ];
+
+    patterns.some(pattern => {
+      const next = label.replace(pattern, '').trim();
+      if (next !== label) {
+        label = next;
+        return true;
+      }
+      return false;
+    });
+
+    return label;
+  }
+
+  function normalizePreferenceReference(value) {
+    if (!value || typeof value !== 'object') return null;
+
+    return {
+      tuningId:
+        value.tuningId != null
+          ? String(value.tuningId)
+          : '',
+      internalName:String(value.internalName || ''),
+      localizedName:cleanImportedTraitText(
+        value.localizedName ||
+        value.displayName ||
+        ''
+      ),
+      localizedNameRef:
+        value.localizedNameRef || null
+    };
+  }
+
+  function normalizeImportedPreference(item) {
+    if (!item || typeof item !== 'object') return null;
+
+    const preference = importedPreferenceKind(item);
+    if (!preference) return null;
+
+    return {
+      preference,
+      tuningId:
+        item.tuningId != null
+          ? String(item.tuningId)
+          : '',
+      internalName:String(item.internalName || ''),
+      localizedName:cleanImportedTraitText(
+        item.localizedName ||
+        item.displayName ||
+        ''
+      ),
+      displayName:cleanImportedPreferenceDisplayName(
+        item,
+        preference
+      ),
+      localizedNameRef:item.localizedNameRef || null,
+      traitType:item.traitType || null,
+      subject:item.subject || null,
+      isAttractionPreference:
+        item.isAttractionPreference === true,
+      item:normalizePreferenceReference(item.item),
+      category:normalizePreferenceReference(item.category),
+      group:normalizePreferenceReference(item.group)
+    };
+  }
+
+  function normalizeImportedPreferences(sim) {
+    const all = Array.isArray(sim && sim.preferences)
+      ? sim.preferences
+          .map(normalizeImportedPreference)
+          .filter(Boolean)
+      : [];
+
+    const availability =
+      sim &&
+      sim.dataAvailability &&
+      sim.dataAvailability.preferences
+        ? String(sim.dataAvailability.preferences)
+        : (all.length ? 'available' : 'unavailable');
+
+    return {
+      availability,
+      likesDislikes:
+        all.filter(item =>
+          !item.isAttractionPreference
+        ),
+      attraction:
+        all.filter(item =>
+          item.isAttractionPreference
+        )
+    };
+  }
+
   function stringIds(value) {
     return Array.isArray(value) ? value.map(String).filter(Boolean) : [];
   }
@@ -700,6 +824,9 @@
             .filter(Boolean)
         : [];
 
+      const preferences =
+        normalizeImportedPreferences(sim);
+
       const careers = Array.isArray(sim.careers)
         ? sim.careers.map(internalLabel).filter(Boolean)
         : [];
@@ -760,6 +887,7 @@
           isCulled:!!sim.isCulled,
           isSelectable:!!sim.isSelectable,
           dataAvailability:sim.dataAvailability || null,
+          preferences,
           entityClass:classifyGamePerson(sim, household),
           localizedNameRef:
             sim.name && sim.name.localizedRef
