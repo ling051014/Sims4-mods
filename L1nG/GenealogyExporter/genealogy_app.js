@@ -18784,7 +18784,6 @@ function initializeGenealogyWorkspace() {
 /* ========【多語系介面回呼】 設定 - 語言切換後刷新 App 專屬畫面狀態 ======== */
 function handleGenealogyLanguageChanged() {
   // 關係標籤寬度與 selector 顯示文字都依目前語言重新計算。
-  _textMeasureCache.clear();
   invalidateFamilySelectorCache();
 
   if (
