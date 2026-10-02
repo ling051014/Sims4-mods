@@ -17888,6 +17888,89 @@ function isCurrentGenealogyData(raw) {
   );
 }
 
+function upgradeStoredBuiltinSamplePreferences(prepared) {
+  if (
+    !prepared ||
+    prepared.meta?.sample !== true ||
+    prepared.meta?.sampleSource !== 'ea-npc-20260927' ||
+    prepared.meta?.samplePreferenceDemo === true
+  ) {
+    return false;
+  }
+
+  const latestSample =
+    buildSample();
+
+  let changed = false;
+
+  Object.entries(
+    latestSample.sims || {}
+  ).forEach(([id, latestSim]) => {
+    const currentSim =
+      prepared.sims?.[id];
+
+    const latestPreferences =
+      latestSim?.gameData?.preferences;
+
+    if (
+      !currentSim ||
+      !latestPreferences ||
+      !Array.isArray(
+        latestPreferences.likesDislikes
+      ) ||
+      !latestPreferences.likesDislikes.length
+    ) {
+      return;
+    }
+
+    if (
+      !currentSim.gameData ||
+      typeof currentSim.gameData !== 'object' ||
+      Array.isArray(currentSim.gameData)
+    ) {
+      currentSim.gameData = {};
+    }
+
+    const currentPreferences =
+      currentSim.gameData.preferences;
+
+    const alreadyHasPreferences =
+      currentPreferences &&
+      Array.isArray(
+        currentPreferences.likesDislikes
+      ) &&
+      currentPreferences.likesDislikes.length > 0;
+
+    if (alreadyHasPreferences) {
+      return;
+    }
+
+    currentSim.gameData.preferences =
+      JSON.parse(
+        JSON.stringify(
+          latestPreferences
+        )
+      );
+
+    currentSim.gameData.dataAvailability = {
+      ...(currentSim.gameData.dataAvailability || {}),
+      preferences:'available'
+    };
+
+    changed = true;
+  });
+
+  if (changed) {
+    prepared.meta = {
+      ...(prepared.meta || {}),
+      sampleVersion:6,
+      samplePreferenceDemo:true
+    };
+  }
+
+  return changed;
+}
+
 function prepareDatabase(raw) {
   if (!isCurrentGenealogyData(raw)) {
     throw new Error(
@@ -17898,6 +17981,11 @@ function prepareDatabase(raw) {
   const prepared = raw;
 
   normalizeCurrentDatabase(prepared);
+
+  const samplePreferencesUpgraded =
+    upgradeStoredBuiltinSamplePreferences(
+      prepared
+    );
 
   const householdMembershipRepaired =
     repairImportedHouseholdMembership(
@@ -17915,6 +18003,7 @@ function prepareDatabase(raw) {
   return {
     prepared,
     changed:
+      samplePreferencesUpgraded ||
       householdMembershipRepaired ||
       missingLinkIdRepaired
   };
