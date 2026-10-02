@@ -3051,6 +3051,8 @@ function openUiDialog({
   secondaryText = '',
   secondaryValue = null,
   secondaryKind = 'default',
+  secondaryHint = '',
+  confirmHint = '',
   confirmValue = true,
   cancelValue = mode === 'confirm' ? false : null
 } = {}) {
@@ -3062,9 +3064,14 @@ function openUiDialog({
   const cancelBtn = $('uiDialogCancel');
   const secondaryBtn = $('uiDialogSecondary');
   const confirmBtn = $('uiDialogConfirm');
+  const secondaryWrap = $('uiDialogSecondaryWrap');
+  const confirmWrap = $('uiDialogConfirmWrap');
+  const secondaryInfo = $('uiDialogSecondaryInfo');
+  const confirmInfo = $('uiDialogConfirmInfo');
+  const actionTooltip = $('uiDialogActionTooltip');
   const closeBtn = $('uiDialogClose');
 
-  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !closeBtn) {
+  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !secondaryWrap || !confirmWrap || !secondaryInfo || !confirmInfo || !actionTooltip || !closeBtn) {
     return Promise.resolve(
       mode === 'confirm'
         ? false
@@ -3109,10 +3116,122 @@ function openUiDialog({
   secondaryBtn.hidden =
     !hasSecondaryAction;
 
+  secondaryWrap.hidden =
+    !hasSecondaryAction;
+
   secondaryBtn.classList.toggle(
     'danger',
     hasSecondaryAction &&
     secondaryKind === 'danger'
+  );
+
+  const closeActionTooltip = () => {
+    secondaryInfo.classList.remove('is-open');
+    confirmInfo.classList.remove('is-open');
+    actionTooltip.classList.remove('show');
+    actionTooltip.textContent = '';
+  };
+
+  const setupActionHint = (
+    button,
+    hint
+  ) => {
+    const rawHint =
+      String(hint || '').trim();
+
+    const translatedHint =
+      rawHint
+        ? uiText(rawHint)
+        : '';
+
+    button.hidden =
+      !translatedHint;
+
+    button.classList.remove(
+      'is-open'
+    );
+
+    button.setAttribute(
+      'aria-label',
+      translatedHint ||
+      uiText('選項說明')
+    );
+
+    const showHint = () => {
+      actionTooltip.textContent =
+        translatedHint;
+      actionTooltip.classList.add(
+        'show'
+      );
+    };
+
+    const hideHint = () => {
+      if (
+        !button.classList.contains(
+          'is-open'
+        )
+      ) {
+        actionTooltip.classList.remove(
+          'show'
+        );
+      }
+    };
+
+    button.onmouseenter =
+      translatedHint
+        ? showHint
+        : null;
+
+    button.onmouseleave =
+      translatedHint
+        ? hideHint
+        : null;
+
+    button.onfocus =
+      translatedHint
+        ? showHint
+        : null;
+
+    button.onblur =
+      translatedHint
+        ? hideHint
+        : null;
+
+    button.onclick =
+      translatedHint
+        ? event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const opening =
+              !button.classList.contains(
+                'is-open'
+              );
+
+            closeActionTooltip();
+
+            if (opening) {
+              button.classList.add(
+                'is-open'
+              );
+              showHint();
+            }
+          }
+        : null;
+  };
+
+  closeActionTooltip();
+
+  setupActionHint(
+    secondaryInfo,
+    hasSecondaryAction
+      ? secondaryHint
+      : ''
+  );
+
+  setupActionHint(
+    confirmInfo,
+    confirmHint
   );
 
   inputEl.classList.toggle('show', mode === 'prompt');
@@ -3147,8 +3266,30 @@ function openUiDialog({
     cancelBtn.onclick = finishCancel;
     closeBtn.onclick = finishCancel;
     overlay.onclick = event => {
-      if (event.target === overlay) finishCancel();
+      if (event.target === overlay) {
+        finishCancel();
+        return;
+      }
+
+      if (
+        !event.target.closest(
+          '.ui-dialog-action-info'
+        )
+      ) {
+        closeActionTooltip();
+      }
     };
+
+    dialog.onclick = event => {
+      if (
+        !event.target.closest(
+          '.ui-dialog-action-info'
+        )
+      ) {
+        closeActionTooltip();
+      }
+    };
+
     inputEl.onkeydown = event => {
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -17836,6 +17977,137 @@ async function persistGameImportAvatars(bundle, converted) {
   };
 }
 
+
+function formatGameImportTime(
+  value
+) {
+  if (!value) return '';
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return String(value);
+  }
+
+  const language =
+    window.LING_I18N?.language ||
+    'zh-Hant';
+
+  const locale =
+    language === 'en'
+      ? 'en-US'
+      : language === 'zh-Hans'
+        ? 'zh-CN'
+        : 'zh-TW';
+
+  return new Intl.DateTimeFormat(
+    locale,
+    {
+      year:'numeric',
+      month:'2-digit',
+      day:'2-digit',
+      hour:'2-digit',
+      minute:'2-digit',
+      hour12:false
+    }
+  ).format(date);
+}
+
+function gameSaveSlotLabel(
+  save
+) {
+  if (!save) {
+    return uiText('無存檔識別資料');
+  }
+
+  const slot =
+    String(
+      save.slotFile || ''
+    ).trim();
+
+  const name =
+    String(
+      save.name || ''
+    ).trim();
+
+  if (name && slot) {
+    return name + ' / ' + slot;
+  }
+
+  return (
+    name ||
+    slot ||
+    uiText('無存檔識別資料')
+  );
+}
+
+function gameImportSourceMessageLines(
+  analysis
+) {
+  const source =
+    analysis?.source || {};
+
+  const lines = [];
+
+  if (
+    source.verification ===
+    'same_slot'
+  ) {
+    lines.push(
+      uiText('已確認來自相同遊戲存檔。'),
+      gameSaveSlotLabel(
+        source.incomingSave
+      )
+    );
+  } else if (
+    source.verification ===
+    'known_save'
+  ) {
+    lines.push(
+      uiText('已確認為目前族譜曾接受的存檔來源。'),
+      gameSaveSlotLabel(
+        source.incomingSave
+      )
+    );
+  } else if (
+    source.verification ===
+    'different_slot'
+  ) {
+    lines.push(
+      uiText('偵測到不同的遊戲存檔。'),
+      `${uiText('目前族譜')}：${gameSaveSlotLabel(source.currentSave)}`,
+      `${uiText('這次匯入')}：${gameSaveSlotLabel(source.incomingSave)}`
+    );
+  } else if (
+    source.verification ===
+    'conflict'
+  ) {
+    lines.push(
+      uiText('ZIP 內的存檔識別資料不一致，網站無法自動確認來源。')
+    );
+  } else {
+    lines.push(
+      uiText('目前無法確認存檔來源，將以相同遊戲人物作為更新參考。')
+    );
+  }
+
+  if (source.olderImport) {
+    lines.push(
+      '',
+      uiText('這份遊戲資料早於目前族譜最後一次匯入，更新可能會同步回較早的遊戲狀態。'),
+      `${uiText('目前最後匯入')}：${formatGameImportTime(source.currentLastImportedAt)}`,
+      `${uiText('這次匯出')}：${formatGameImportTime(source.incomingImportedAt)}`
+    );
+  }
+
+  return lines;
+}
+
 function currentGameImportUpdateAnalysis(
   incomingDatabase
 ) {
@@ -17868,25 +18140,89 @@ async function chooseGameImportMode(
 
   hideGameImportStatus();
 
-  if (analysis.matchedSimCount > 0) {
+  const source =
+    analysis.source || {};
+
+  const sourceLines =
+    gameImportSourceMessageLines(
+      analysis
+    );
+
+  const statsLines = [
+    `${uiText('找到相同遊戲人物')}：${analysis.matchedSimCount}`,
+    `${uiText('這次新增人物')}：${analysis.newSimCount}`,
+    `${uiText('這次未出現人物')}：${analysis.missingSimCount}`
+  ];
+
+  const updateHint =
+    '同步最新遊戲資料，保留手動排列、人生照片、自訂關係、家庭封面與你在網站上的修改。';
+
+  const replaceHint =
+    '使用這份 ZIP 重新建立遊戲族譜；目前族譜內容會被取代。';
+
+  if (
+    source.verification ===
+      'different_slot' &&
+    analysis.matchedSimCount > 0
+  ) {
+    return await openUiDialog({
+      title:'匯入遊戲族譜',
+      message:[
+        ...sourceLines,
+        '',
+        ...statsLines,
+        '',
+        uiText('如果這是「另存新檔」後繼續遊玩的存檔，可以將它視為同一族譜並繼續更新。')
+      ].join('\n'),
+      mode:'choice',
+      confirmText:'這是同一族譜，繼續更新',
+      confirmValue:'continue_update',
+      confirmHint:'將這個不同存檔記錄為目前族譜的延續來源，並同步最新遊戲資料。',
+      secondaryText:'覆蓋現有族譜',
+      secondaryValue:'replace',
+      secondaryKind:'danger',
+      secondaryHint:replaceHint,
+      cancelText:'取消',
+      cancelValue:'cancel'
+    });
+  }
+
+  const sourceAllowsUpdate =
+    source.verification ===
+      'same_slot' ||
+    source.verification ===
+      'known_save';
+
+  const fallbackAllowsUpdate =
+    (
+      source.verification ===
+        'unverified' ||
+      source.verification ===
+        'conflict'
+    ) &&
+    analysis.matchedSimCount > 0;
+
+  if (
+    sourceAllowsUpdate ||
+    fallbackAllowsUpdate
+  ) {
     return await openUiDialog({
       title:'匯入遊戲族譜',
       message:[
         uiText('網站目前已經有遊戲族譜。'),
         '',
-        `${uiText('找到相同遊戲人物')}：${analysis.matchedSimCount}`,
-        `${uiText('這次新增人物')}：${analysis.newSimCount}`,
-        `${uiText('這次未出現人物')}：${analysis.missingSimCount}`,
+        ...sourceLines,
         '',
-        uiText('更新會同步最新遊戲資料，並保留手動排列、人生照片、自訂關係、關係標籤與其他網站資料。'),
-        uiText('目前尚未加入存檔編號識別；請自行確認這份 ZIP 是要延續目前族譜的遊戲資料。')
+        ...statsLines
       ].join('\n'),
       mode:'choice',
       confirmText:'更新目前族譜',
       confirmValue:'update',
+      confirmHint:updateHint,
       secondaryText:'覆蓋現有族譜',
       secondaryValue:'replace',
       secondaryKind:'danger',
+      secondaryHint:replaceHint,
       cancelText:'取消',
       cancelValue:'cancel'
     });
@@ -17894,9 +18230,9 @@ async function chooseGameImportMode(
 
   const replace = await uiConfirm(
     [
-      uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。'),
+      ...sourceLines,
       '',
-      uiText('在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。'),
+      uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到可安全更新的相同來源。'),
       uiText('是否仍要使用這份 ZIP 覆蓋現有族譜？')
     ].join('\n'),
     {
@@ -17972,7 +18308,7 @@ async function importGameGenealogy(file) {
     }
 
     showGameImportStatus(
-      importMode === 'update'
+      (importMode === 'update' || importMode === 'continue_update')
         ? '正在更新遊戲族譜…'
         : '正在匯入人物頭像…'
     );
@@ -17993,7 +18329,7 @@ async function importGameGenealogy(file) {
     let nextDatabase =
       incomingPrepared;
 
-    if (importMode === 'update') {
+    if ((importMode === 'update' || importMode === 'continue_update')) {
       showGameImportStatus(
         '正在合併最新遊戲資料…'
       );
@@ -18003,7 +18339,14 @@ async function importGameGenealogy(file) {
         window.L1nGGameImport
           .mergeConvertedDatabase(
             currentGenealogyData(),
-            incomingPrepared
+            incomingPrepared,
+            {
+              sourceVerification:
+                importMode ===
+                'continue_update'
+                  ? 'confirmed_continuation'
+                  : analysis.sourceVerification
+            }
           );
 
       nextDatabase =
@@ -18013,7 +18356,7 @@ async function importGameGenealogy(file) {
     }
 
     showGameImportStatus(
-      importMode === 'update'
+      (importMode === 'update' || importMode === 'continue_update')
         ? '正在更新族譜畫面…'
         : '正在建立族譜畫面…'
     );
@@ -18091,7 +18434,7 @@ async function importGameGenealogy(file) {
 
     hideGameImportStatus();
 
-    if (importMode === 'update') {
+    if ((importMode === 'update' || importMode === 'continue_update')) {
       await uiAlert(
         gameImportUpdateSummary(
           updateResult,
