@@ -3118,23 +3118,38 @@ function openUiDialog({
     secondaryKind === 'danger'
   );
 
+  const confirmHintText =
+    String(confirmHint || '').trim();
+
+  const secondaryHintText =
+    String(secondaryHint || '').trim();
+
+  const titleHintSections = [];
+
+  if (confirmHintText) {
+    titleHintSections.push(
+      `${uiText(confirmText)}：${uiText(confirmHintText)}`
+    );
+  }
+
+  if (
+    hasSecondaryAction &&
+    secondaryHintText
+  ) {
+    titleHintSections.push(
+      `${uiText(secondaryText)}：${uiText(secondaryHintText)}`
+    );
+  }
+
   const titleHintText =
-    String(
-      [confirmHint, secondaryHint]
-        .map(value => String(value || '').trim())
-        .filter(Boolean)
-        .join('\n\n')
-    ).trim();
+    titleHintSections.join('\n\n');
 
   titleHint.hidden =
     !titleHintText;
 
   if (titleHintText) {
     titleHint.dataset.tooltip =
-      titleHintText
-        .split('\n')
-        .map(line => uiText(line))
-        .join('\n');
+      titleHintText;
 
     titleHint.setAttribute(
       'aria-label',
