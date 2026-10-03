@@ -106,9 +106,9 @@ const THEME_PRESETS = [
   { id:'sage',       name:'森霧鼠尾草', grad:'linear-gradient(120deg, #dfe9e0 0%, #eef3ea 100%)' },
   { id:'rose',       name:'莓果薄暮',   grad:'linear-gradient(120deg, #e8c4d0 0%, #f4dfe6 100%)' },
   { id:'amber',      name:'琥珀紙頁',   grad:'linear-gradient(120deg, #e5c896 0%, #f2dfb9 100%)' },
-  { id:'ink',        name:'墨曜紫灰',   grad:'linear-gradient(120deg, #19171d 0%, #302936 100%)' },
-  { id:'berrynight', name:'夜莓酒紅',   grad:'linear-gradient(120deg, #1b1216 0%, #35242b 100%)' },
-  { id:'graphite',   name:'中性石墨',   grad:'linear-gradient(120deg, #15181b 0%, #2a3036 100%)' }
+  { id:'ink',        name:'墨曜紫灰',   grad:'linear-gradient(120deg, #111014 0%, #211e24 100%)' },
+  { id:'berrynight', name:'夜莓酒紅',   grad:'linear-gradient(120deg, #151013 0%, #281d22 100%)' },
+  { id:'graphite',   name:'中性石墨',   grad:'linear-gradient(120deg, #111315 0%, #202428 100%)' }
 ];
 
 const BG_MAX = 1920;
@@ -6784,14 +6784,34 @@ function paintThemeChoices() {
     const selected = choice.id === currentThemeId;
     const previewId = choice.id === 'custom' ? ' id="customCardPreview"' : '';
 
+    const customClass =
+      choice.id === 'custom'
+        ? ' custom-trigger'
+        : '';
+
+    const previewStyle =
+      (
+        choice.id === 'custom' &&
+        !hasSavedCustomTheme &&
+        currentThemeId !== 'custom'
+      )
+        ? ''
+        : ' style="background:' +
+          choice.gradient +
+          '"';
+
     return (
-      '<button class="appearance-theme-card' + (selected ? ' selected' : '') +
+      '<button class="appearance-theme-card' +
+      customClass +
+      (selected ? ' selected' : '') +
       '" type="button" data-theme-id="' + esc(choice.id) +
       '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
-        '<span class="appearance-theme-radio" aria-hidden="true"></span>' +
-        '<span class="appearance-theme-card-name">' + esc(choice.name) + '</span>' +
         '<span class="appearance-theme-preview"' + previewId +
-          ' style="background:' + choice.gradient + '"></span>' +
+          previewStyle + '></span>' +
+        '<span class="appearance-theme-meta">' +
+          '<span class="appearance-theme-radio" aria-hidden="true"></span>' +
+          '<span class="appearance-theme-card-name">' + esc(choice.name) + '</span>' +
+        '</span>' +
       '</button>'
     );
   }).join('');
@@ -8162,6 +8182,40 @@ function paintCanvasBackgroundPreview() {
 
   const actions = $('appearanceBackgroundActions');
   if (actions) actions.hidden = !url;
+
+  const opacityInput =
+    $('appearanceBackgroundOpacity');
+  const fitSelect =
+    $('appearanceBackgroundFit');
+  const hasBackground =
+    !!url;
+
+  if (opacityInput) {
+    opacityInput.disabled =
+      !hasBackground;
+  }
+
+  if (fitSelect) {
+    fitSelect.disabled =
+      !hasBackground;
+
+    window
+      .L1nGGenealogyUIController
+      ?.refreshControl?.(
+        fitSelect
+      );
+  }
+
+  document
+    .querySelectorAll(
+      '[data-background-control]'
+    )
+    .forEach(control => {
+      control.classList.toggle(
+        'is-disabled',
+        !hasBackground
+      );
+    });
 
   preview.dataset.dropLabel = uiText('放開以上傳背景圖片');
   preview.setAttribute(
