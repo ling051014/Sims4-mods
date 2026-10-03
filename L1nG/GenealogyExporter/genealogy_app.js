@@ -1243,10 +1243,10 @@ function cardGenderIconHTML(gender) {
 
   const icon =
     value === '男'
-      ? 'gender-male'
+      ? 'gender-card-male'
       : value === '女'
-        ? 'gender-female'
-        : 'gender-ambiguous';
+        ? 'gender-card-female'
+        : 'gender-card-other';
 
   const label =
     uiText(value || '其他');
@@ -7851,8 +7851,7 @@ function relationshipHorizontalPreviewAnchors(
     cardB.getBoundingClientRect();
 
   if (
-    previewRect.width <= 0 ||
-    previewRect.height <= 0
+    previewRect.width <= 0
   ) {
     return {
       aX:136,
@@ -7864,39 +7863,23 @@ function relationshipHorizontalPreviewAnchors(
 
   const scaleX =
     320 / previewRect.width;
-  const scaleY =
-    190 / previewRect.height;
 
   return {
-    // 左卡右側邊緣的垂直正中央。
+    // X 只取左右卡片真正可見的相對邊緣。
     aX:
       (
         cardARect.right -
         previewRect.left
       ) * scaleX,
-    aY:
-      (
-        (
-          cardARect.top +
-          cardARect.bottom
-        ) / 2 -
-        previewRect.top
-      ) * scaleY,
+    // 橫向預覽永遠位於 190 高度的正中央。
+    aY:95,
 
-    // 右卡左側邊緣的垂直正中央。
     bX:
       (
         cardBRect.left -
         previewRect.left
       ) * scaleX,
-    bY:
-      (
-        (
-          cardBRect.top +
-          cardBRect.bottom
-        ) / 2 -
-        previewRect.top
-      ) * scaleY
+    bY:95
   };
 }
 
