@@ -7971,7 +7971,7 @@ function paintPersonLayer() {
       return `<div class="${cls} mode-view ${appearanceClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
         <div class="person-card-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
-        ${model.name ? `<div class="person-card-view-name" title="${esc(model.name)}"><span class="person-card-name-text">${esc(model.name)}</span>${genderIcon}</div>` : ''}
+        ${model.name ? `<div class="person-card-view-name" title="${esc(model.name)}">${esc(model.name)}${genderIcon}</div>` : ''}
         ${model.primary.map(renderViewCardLine).join('')}
         ${model.details.map(renderViewCardLine).join('')}
       </div>`;
@@ -8003,7 +8003,7 @@ function paintPersonLayer() {
 
     const configuredEditBody = cardSettingsHasBody(cardSettings);
     const editBody = configuredEditBody ? `<div class="person-card-body">
-      ${cardSettings.name ? `<div class="person-card-name" title="${esc(displayName)}"><span class="person-card-name-text">${esc(displayName)}</span>${genderIcon}</div>` : ''}
+      ${cardSettings.name ? `<div class="person-card-name" title="${esc(displayName)}">${esc(displayName)}${genderIcon}</div>` : ''}
       ${editRows.join('') || (cardSettings.name ? '' : `<div class="person-card-edit-meta">—</div>`)}
     </div>` : '';
     const avatarOnlyClass = configuredEditBody ? '' : ' card-avatar-only';

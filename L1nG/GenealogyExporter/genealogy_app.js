@@ -7822,9 +7822,8 @@ function setRelationshipSwitchState(button,enabled) {
   button?.setAttribute('aria-pressed',enabled ? 'true' : 'false');
 }
 
-function relationshipPreviewAnchors(
-  preview,
-  vertical
+function relationshipHorizontalPreviewAnchors(
+  preview
 ) {
   const cardA =
     preview?.querySelector('.card-a');
@@ -7842,48 +7841,18 @@ function relationshipPreviewAnchors(
     width <= 0 ||
     height <= 0
   ) {
-    return vertical
-      ? {
-          aX:160,
-          aY:76,
-          bX:160,
-          bY:114
-        }
-      : {
-          aX:138,
-          aY:95,
-          bX:182,
-          bY:95
-        };
+    return {
+      aX:154,
+      aY:95,
+      bX:166,
+      bY:95
+    };
   }
 
   const scaleX =
     320 / width;
   const scaleY =
     190 / height;
-
-  if (vertical) {
-    return {
-      aX:
-        (
-          cardA.offsetLeft +
-          cardA.offsetWidth / 2
-        ) * scaleX,
-      aY:
-        (
-          cardA.offsetTop +
-          cardA.offsetHeight
-        ) * scaleY,
-      bX:
-        (
-          cardB.offsetLeft +
-          cardB.offsetWidth / 2
-        ) * scaleX,
-      bY:
-        cardB.offsetTop *
-        scaleY
-    };
-  }
 
   return {
     aX:
@@ -7912,9 +7881,13 @@ function relationshipFullPreviewPath(
   setting,
   preview
 ) {
-  const vertical =
+  // 父母 / 子女與領養沿用原本已確認的固定垂直置中預覽。
+  if (
     key === 'parent' ||
-    key === 'adopt';
+    key === 'adopt'
+  ) {
+    return 'M160 76 L160 114';
+  }
 
   const {
     aX,
@@ -7922,13 +7895,11 @@ function relationshipFullPreviewPath(
     bX,
     bY
   } =
-    relationshipPreviewAnchors(
-      preview,
-      vertical
+    relationshipHorizontalPreviewAnchors(
+      preview
     );
 
   if (
-    !vertical &&
     (
       key === 'exspouse' ||
       key === 'other'
@@ -7977,7 +7948,6 @@ function relationshipFullPreviewPath(
     bY.toFixed(2)
   );
 }
-
 function updateRelationshipFullPreview() {
   const preview = $('relationshipFullPreview');
   const path = $('relationshipFullPreviewPath');
