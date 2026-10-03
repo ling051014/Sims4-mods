@@ -140,6 +140,39 @@ section[id] {
 }
 
 
+/* ========【語言切換】 設定 - 繁中與英文首頁切換 ======== */
+.language-switch {
+    /* 橫向排列 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 選項間距 */ gap: 7px;
+    /* 淡化文字 */ color: var(--muted);
+    /* 字體大小 */ font-size: 12px;
+    /* 禁止換行 */ white-space: nowrap;
+}
+
+
+/* ========【語言切換】 設定 - 語言選項 ======== */
+.main-nav .language-switch a {
+    /* 移除額外內距 */ padding: 0;
+    /* 淡化文字 */ color: var(--muted);
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 600;
+}
+
+
+/* ========【語言切換】 設定 - 目前語言 ======== */
+.main-nav .language-switch a[aria-current="page"] {
+    /* 主要文字 */ color: var(--ink);
+}
+
+
+/* ========【語言切換】 設定 - 語言選項懸停 ======== */
+.main-nav .language-switch a:hover {
+    /* 品牌藍 */ color: var(--accent);
+    /* 不套用導覽背景 */ background: transparent;
+}
+
+
 /* ========【頂部導覽列】 設定 - 手機導覽按鈕 ======== */
 .nav-toggle {
     /* 桌面預設隱藏 */ display: none;
@@ -993,6 +1026,14 @@ section[id] {
     .main-nav .nav-external {
         /* 移除額外邊框 */ border: none;
         /* 移除額外背景 */ background: transparent;
+    }
+
+    .main-nav .language-switch {
+        /* 與其他手機導覽項目對齊 */ padding: 9px 10px;
+    }
+
+    .main-nav .language-switch a {
+        /* 語言切換維持緊湊 */ padding: 0;
     }
 
 

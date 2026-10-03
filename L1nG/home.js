@@ -20,6 +20,9 @@ window.addEventListener("scroll", updateHeaderState, { passive: true });
 // ========【手機導覽列】 設定 - 開啟與關閉導覽選單 ========
 const navToggle = document.getElementById("navToggle");
 const mainNav = document.getElementById("mainNav");
+const isEnglishHome = document.documentElement.lang.toLowerCase().startsWith("en");
+const navLabelOpen = isEnglishHome ? "Open navigation" : "開啟導覽選單";
+const navLabelClose = isEnglishHome ? "Close navigation" : "關閉導覽選單";
 
 function closeMobileNav() {
     if (!navToggle || !mainNav) {
@@ -29,7 +32,7 @@ function closeMobileNav() {
     navToggle.classList.remove("active");
     mainNav.classList.remove("open");
     navToggle.setAttribute("aria-expanded", "false");
-    navToggle.setAttribute("aria-label", "開啟導覽選單");
+    navToggle.setAttribute("aria-label", navLabelOpen);
 }
 
 if (navToggle && mainNav) {
@@ -40,7 +43,7 @@ if (navToggle && mainNav) {
         navToggle.setAttribute("aria-expanded", String(isOpen));
         navToggle.setAttribute(
             "aria-label",
-            isOpen ? "關閉導覽選單" : "開啟導覽選單"
+            isOpen ? navLabelClose : navLabelOpen
         );
     });
 
