@@ -34,7 +34,7 @@
     const { getData, getViewMode, getFamilyTreeViewMode, getShowRelLabels, getRelationshipPerspectiveId, getScale } = state;
     const {
       getCardViewSettings, getCardEditSettings, cardViewAppearanceClass, cardSettingsHasBody,
-      buildViewCardContentModel, renderViewCardLine, formatCardGender, formatCardAge,
+      buildViewCardContentModel, renderViewCardLine, cardGenderIconHTML, formatCardAge,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
@@ -7933,8 +7933,17 @@ function paintPersonLayer() {
     const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
     const cls = derivePersonCardClassName(c, {viewMode:isView, isInlaw});
     const dStage = uiText(c.lifeStage);
-    const displayName = cardSettings.name ? `${dName}${cardSettings.gender ? formatCardGender(c.gender) : ''}` : '';
-    const genderBarHiddenClass = cardSettings.genderBar ? '' : ' card-gender-bar-hidden';
+    const displayName =
+      cardSettings.name
+        ? dName
+        : '';
+    const genderIcon =
+      cardSettings.name &&
+      cardSettings.gender
+        ? cardGenderIconHTML(
+            c.gender
+          )
+        : '';
 
     const renderKey =
       nodeRenderSignature(
@@ -7959,10 +7968,10 @@ function paintPersonLayer() {
           ? ''
           : ' card-avatar-only';
 
-      return `<div class="${cls} mode-view ${appearanceClass}${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
+      return `<div class="${cls} mode-view ${appearanceClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
         <div class="person-card-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
-        ${model.name ? `<div class="person-card-view-name" title="${esc(model.name)}">${esc(model.name)}</div>` : ''}
+        ${model.name ? `<div class="person-card-view-name" title="${esc(model.name)}"><span class="person-card-name-text">${esc(model.name)}</span>${genderIcon}</div>` : ''}
         ${model.primary.map(renderViewCardLine).join('')}
         ${model.details.map(renderViewCardLine).join('')}
       </div>`;
@@ -7970,9 +7979,6 @@ function paintPersonLayer() {
 
     // 編輯模式有自己的顯示內容設定，不再跟檢視模式同步。
     const editRows = [];
-    if (!cardSettings.name && cardSettings.gender) {
-      editRows.push(`<div class="person-card-edit-meta">${esc(uiText(c.gender || '其他'))}</div>`);
-    }
 
     const stageAge = [];
     if (cardSettings.lifeStage) stageAge.push(dStage);
@@ -7997,12 +8003,12 @@ function paintPersonLayer() {
 
     const configuredEditBody = cardSettingsHasBody(cardSettings);
     const editBody = configuredEditBody ? `<div class="person-card-body">
-      ${cardSettings.name ? `<div class="person-card-name" title="${esc(displayName)}">${esc(displayName)}</div>` : ''}
+      ${cardSettings.name ? `<div class="person-card-name" title="${esc(displayName)}"><span class="person-card-name-text">${esc(displayName)}</span>${genderIcon}</div>` : ''}
       ${editRows.join('') || (cardSettings.name ? '' : `<div class="person-card-edit-meta">—</div>`)}
     </div>` : '';
     const avatarOnlyClass = configuredEditBody ? '' : ' card-avatar-only';
 
-    return `<div class="${cls} mode-edit${genderBarHiddenClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
+    return `<div class="${cls} mode-edit${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
       style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
       <div class="person-card-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
       ${editBody}

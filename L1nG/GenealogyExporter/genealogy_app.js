@@ -42,13 +42,12 @@ let genealogyScene = null;
 
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
-const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS, 'genderBar'];
+const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
 
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
   avatar: true,
   name: true,
   gender: false,
-  genderBar: false,
   lifeStage: false,
   age: false,
   birthday: false,
@@ -66,8 +65,7 @@ const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
 const DEFAULT_CARD_EDIT_SETTINGS = Object.freeze({
   avatar: true,
   name: true,
-  gender: false,
-  genderBar: true,
+  gender: true,
   lifeStage: true,
   age: true,
   birthday: true,
@@ -887,7 +885,15 @@ function cardViewAppearanceClass() {
 }
 
 function cardSettingsHasBody(settings) {
-  return CARD_CONTENT_FIELD_KEYS.some(key => !!settings[key]);
+  return (
+    !!settings.name ||
+    CARD_CONTENT_FIELD_KEYS.some(
+      key =>
+        key !== 'name' &&
+        key !== 'gender' &&
+        !!settings[key]
+    )
+  );
 }
 
 // ========【人物呈現模型】 設定 - 畫布卡片、個人檔案與人物清單共用同一份顯示資料 ========
@@ -1071,19 +1077,10 @@ function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
 
   const name =
     settings.name
-      ? `${presentation.name}${settings.gender ? formatCardGender(presentation.gender.value) : ''}`
+      ? presentation.name
       : '';
 
   const primary = [];
-
-  if (
-    !settings.name &&
-    settings.gender
-  ) {
-    primary.push({
-      text:presentation.gender.text
-    });
-  }
 
   const stageAge = [];
 
@@ -1240,9 +1237,30 @@ function renderViewCardLine(line) {
   return `<div class="${className}"${title}>${body}</div>`;
 }
 
-function formatCardGender(gender) {
-  const text = uiText(gender || '其他');
-  return (document.documentElement.lang || 'zh-Hant') === 'en' ? `(${text})` : `（${text}）`;
+function cardGenderIconHTML(gender) {
+  const value =
+    String(gender || '其他');
+
+  const icon =
+    value === '男'
+      ? 'gender-male'
+      : value === '女'
+        ? 'gender-female'
+        : 'gender-ambiguous';
+
+  const label =
+    uiText(value || '其他');
+
+  return (
+    '<span class="person-card-gender-icon" ' +
+    'role="img" aria-label="' +
+    esc(label) +
+    '" title="' +
+    esc(label) +
+    '">' +
+      iconSvg(icon) +
+    '</span>'
+  );
 }
 
 function formatCardAge(age) {
@@ -7804,16 +7822,160 @@ function setRelationshipSwitchState(button,enabled) {
   button?.setAttribute('aria-pressed',enabled ? 'true' : 'false');
 }
 
-function relationshipFullPreviewPath(key,setting) {
-  if (key === 'parent' || key === 'adopt') return 'M160 76 L160 114';
+function relationshipPreviewAnchors(
+  preview,
+  vertical
+) {
+  const cardA =
+    preview?.querySelector('.card-a');
+  const cardB =
+    preview?.querySelector('.card-b');
 
-  if ((key === 'exspouse' || key === 'other') && setting.curved) {
-    const amount = clampRelationshipCurveAmount(setting.curveAmount);
-    const amplitude = 8 + (amount / 100) * 34;
-    return 'M108 95 Q160 ' + (95 - amplitude) + ' 212 95';
+  const width =
+    preview?.clientWidth || 320;
+  const height =
+    preview?.clientHeight || 190;
+
+  if (
+    !cardA ||
+    !cardB ||
+    width <= 0 ||
+    height <= 0
+  ) {
+    return vertical
+      ? {
+          aX:160,
+          aY:76,
+          bX:160,
+          bY:114
+        }
+      : {
+          aX:138,
+          aY:95,
+          bX:182,
+          bY:95
+        };
   }
 
-  return 'M108 95 L212 95';
+  const scaleX =
+    320 / width;
+  const scaleY =
+    190 / height;
+
+  if (vertical) {
+    return {
+      aX:
+        (
+          cardA.offsetLeft +
+          cardA.offsetWidth / 2
+        ) * scaleX,
+      aY:
+        (
+          cardA.offsetTop +
+          cardA.offsetHeight
+        ) * scaleY,
+      bX:
+        (
+          cardB.offsetLeft +
+          cardB.offsetWidth / 2
+        ) * scaleX,
+      bY:
+        cardB.offsetTop *
+        scaleY
+    };
+  }
+
+  return {
+    aX:
+      (
+        cardA.offsetLeft +
+        cardA.offsetWidth
+      ) * scaleX,
+    aY:
+      (
+        cardA.offsetTop +
+        cardA.offsetHeight / 2
+      ) * scaleY,
+    bX:
+      cardB.offsetLeft *
+      scaleX,
+    bY:
+      (
+        cardB.offsetTop +
+        cardB.offsetHeight / 2
+      ) * scaleY
+  };
+}
+
+function relationshipFullPreviewPath(
+  key,
+  setting,
+  preview
+) {
+  const vertical =
+    key === 'parent' ||
+    key === 'adopt';
+
+  const {
+    aX,
+    aY,
+    bX,
+    bY
+  } =
+    relationshipPreviewAnchors(
+      preview,
+      vertical
+    );
+
+  if (
+    !vertical &&
+    (
+      key === 'exspouse' ||
+      key === 'other'
+    ) &&
+    setting.curved
+  ) {
+    const amount =
+      clampRelationshipCurveAmount(
+        setting.curveAmount
+      );
+
+    const amplitude =
+      8 +
+      (amount / 100) * 34;
+
+    const midX =
+      (aX + bX) / 2;
+
+    const midY =
+      (aY + bY) / 2;
+
+    return (
+      'M' +
+      aX.toFixed(2) +
+      ' ' +
+      aY.toFixed(2) +
+      ' Q' +
+      midX.toFixed(2) +
+      ' ' +
+      (midY - amplitude).toFixed(2) +
+      ' ' +
+      bX.toFixed(2) +
+      ' ' +
+      bY.toFixed(2)
+    );
+  }
+
+  return (
+    'M' +
+    aX.toFixed(2) +
+    ' ' +
+    aY.toFixed(2) +
+    ' L' +
+    bX.toFixed(2) +
+    ' ' +
+    bY.toFixed(2)
+  );
 }
 
 function updateRelationshipFullPreview() {
@@ -7828,7 +7990,14 @@ function updateRelationshipFullPreview() {
   const vertical = key === 'parent' || key === 'adopt';
 
   preview.dataset.orientation = vertical ? 'vertical' : 'horizontal';
-  path.setAttribute('d',relationshipFullPreviewPath(key,setting));
+  path.setAttribute(
+    'd',
+    relationshipFullPreviewPath(
+      key,
+      setting,
+      preview
+    )
+  );
   path.setAttribute('stroke',color);
   path.setAttribute('stroke-width',String(Math.max(1,Number(setting.width) || 1.5)));
   path.setAttribute('stroke-dasharray',relationshipDashValue(setting));
@@ -7843,6 +8012,19 @@ function updateRelationshipFullPreview() {
     }
   }
 }
+
+window.addEventListener(
+  'resize',
+  () => {
+    if (
+      $('appearanceDialog')
+        ?.classList
+        .contains('show')
+    ) {
+      updateRelationshipFullPreview();
+    }
+  }
+);
 
 function syncRelationshipNavPreviews() {
   REL_LINE_KEYS.forEach(key => {
@@ -9652,7 +9834,7 @@ genealogyScene =
     },
     helpers:{
       getCardViewSettings, getCardEditSettings, cardViewAppearanceClass, cardSettingsHasBody,
-      buildViewCardContentModel, renderViewCardLine, formatCardGender, formatCardAge,
+      buildViewCardContentModel, renderViewCardLine, cardGenderIconHTML, formatCardAge,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
@@ -11683,7 +11865,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
   }
 
   const fieldRows = [
-    ['name','姓名'], ['gender','性別文字'], ['genderBar','性別色條'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
+    ['name','姓名'], ['gender','性別'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
     ['status','狀態'], ['race','種族'], ['career','職業'], ['residence','居住地'], ['aspiration','人生抱負'],
     ['traits','特徵'], ['pets','寵物'], ['gallery','人生照片']
   ].map(([key,label]) => `<label class="person-card-menu-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');

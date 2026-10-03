@@ -1272,18 +1272,6 @@ body.sidebar-resizing * {
     /* 顯示層級 */ z-index: 9;
 }
 
-.person-card.male {
-    /* 左側邊框 */ border-left: 4px solid var(--person-accent-male);
-}
-
-.person-card.female {
-    /* 左側邊框 */ border-left: 4px solid var(--person-accent-female);
-}
-
-.person-card.other {
-    /* 左側邊框 */ border-left: 4px solid var(--person-accent-other);
-}
-
 .person-card.ghost {
     /* 背景設定 */ background: var(--person-ghost-surface);
     /* 邊框顏色 */ border-color: var(--person-ghost-border);
@@ -1291,35 +1279,11 @@ body.sidebar-resizing * {
     /* 透明度 */ opacity: .9;
 }
 
-.person-card.ghost.male {
-    /* 左側邊框 */ border-left: 4px solid var(--person-ghost-accent-male);
-}
-
-.person-card.ghost.female {
-    /* 左側邊框 */ border-left: 4px solid var(--person-ghost-accent-female);
-}
-
-.person-card.ghost.other {
-    /* 左側邊框 */ border-left: 4px solid var(--person-ghost-accent-other);
-}
-
 .person-card.dead {
     /* 背景設定 */ background: var(--person-deceased-surface);
     /* 邊框顏色 */ border-color: var(--person-deceased-border);
     /* 邊框樣式 */ border-style: dashed;
     /* 透明度 */ opacity: .88;
-}
-
-.person-card.dead.male {
-    /* 左側邊框 */ border-left: 4px solid var(--person-deceased-accent-male);
-}
-
-.person-card.dead.female {
-    /* 左側邊框 */ border-left: 4px solid var(--person-deceased-accent-female);
-}
-
-.person-card.dead.other {
-    /* 左側邊框 */ border-left: 4px solid var(--person-deceased-accent-other);
 }
 
 .person-card.inlaw {
@@ -1403,13 +1367,83 @@ body.sidebar-resizing * {
     /* 字體粗細 */ font-weight: 700;
     /* 字距設定 */ letter-spacing: .2px;
     /* 行距設定 */ line-height: 1.28;
-    /* 顯示方式 */ display: -webkit-box;
-    /* WebKit 行數限制 */ -webkit-line-clamp: 2;
-    /* WebKit 排列方向 */ -webkit-box-orient: vertical;
-    /* 溢出處理 */ overflow: hidden;
-    /* 斷字方式 */ word-break: break-word;
-    /* 換行規則 */ overflow-wrap: anywhere;
-    /* 右側內縮 */ padding-right: 24px;
+    /* 顯示方式 */ display:flex;
+    /* 垂直對齊 */ align-items:flex-start;
+    /* 項目間距 */ gap:4px;
+    /* 右側內縮 */ padding-right:24px;
+    /* 最小寬度 */ min-width:0;
+}
+
+.person-card-name .person-card-name-text {
+    min-width:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+}
+
+.person-card-gender-icon {
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:15px;
+    height:15px;
+    margin-top:.05em;
+    color:var(--person-accent-other);
+}
+
+.person-card-gender-icon .l1ng-icon {
+    width:13px;
+    height:13px;
+}
+
+.person-card.view .person-card-gender-icon {
+    width:13px;
+    height:13px;
+}
+
+.person-card.view .person-card-gender-icon .l1ng-icon {
+    width:11px;
+    height:11px;
+}
+
+.person-card.male .person-card-gender-icon {
+    color:var(--person-accent-male);
+}
+
+.person-card.female .person-card-gender-icon {
+    color:var(--person-accent-female);
+}
+
+.person-card.other .person-card-gender-icon {
+    color:var(--person-accent-other);
+}
+
+.person-card.ghost.male .person-card-gender-icon {
+    color:var(--person-ghost-accent-male);
+}
+
+.person-card.ghost.female .person-card-gender-icon {
+    color:var(--person-ghost-accent-female);
+}
+
+.person-card.ghost.other .person-card-gender-icon {
+    color:var(--person-ghost-accent-other);
+}
+
+.person-card.dead.male .person-card-gender-icon {
+    color:var(--person-deceased-accent-male);
+}
+
+.person-card.dead.female .person-card-gender-icon {
+    color:var(--person-deceased-accent-female);
+}
+
+.person-card.dead.other .person-card-gender-icon {
+    color:var(--person-deceased-accent-other);
 }
 
 .person-card.dead .person-card-name {
@@ -1835,11 +1869,19 @@ body[data-theme="graphite"] .life-photo-stage {
     /* 字距設定 */ letter-spacing:.2px;
     /* 行距設定 */ line-height:1.2;
     /* 文字對齊 */ text-align:center;
-    /* 顯示方式 */ display:block;
-    /* 斷字方式 */ word-break:break-word;
-    /* 換行規則 */ overflow-wrap:anywhere;
-    /* 換行方式 */ white-space:normal;
+    /* 顯示方式 */ display:flex;
+    /* 垂直對齊 */ align-items:flex-start;
+    /* 水平對齊 */ justify-content:center;
+    /* 項目間距 */ gap:3px;
     /* 內縮空間 */ padding:0 2px;
+    /* 最小寬度 */ min-width:0;
+}
+
+.person-card-view-name .person-card-name-text {
+    min-width:0;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+    white-space:normal;
 }
 
 .person-card.view.dead .person-card-view-name {
@@ -7814,19 +7856,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     margin: 0;
 }
 
-/* ========【卡片性別顯示】 設定 - 性別色條與性別文字各自獨立控制 ======== */
-.person-card.card-gender-bar-hidden {
-    border-left-width:1.5px;
-    border-left-color:var(--border-default);
-}
-.person-card.card-gender-bar-hidden.ghost {
-    border-left-color:var(--person-ghost-border);
-}
-.person-card.card-gender-bar-hidden.dead {
-    border-left-color:var(--person-deceased-border);
-}
-
-
 /* ========【全站載入骨架】 設定 - 初始化期間維持與正式介面相同的主要區塊比例 ======== */
 .app-skeleton {
     position:fixed;
@@ -8127,8 +8156,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-preview-name{width:48px}.relationship-preview-meta{width:34px;opacity:.72}
 .relationship-full-preview[data-orientation="vertical"] .card-a{left:50%;top:7px;transform:translateX(-50%)}
 .relationship-full-preview[data-orientation="vertical"] .card-b{left:50%;bottom:7px;transform:translateX(-50%)}
-.relationship-full-preview[data-orientation="horizontal"] .card-a{left:20px;top:50%;transform:translateY(-50%)}
-.relationship-full-preview[data-orientation="horizontal"] .card-b{right:20px;top:50%;transform:translateY(-50%)}
+.relationship-full-preview[data-orientation="horizontal"] .card-a{left:calc(50% - 110px);top:50%;transform:translateY(-50%)}
+.relationship-full-preview[data-orientation="horizontal"] .card-b{right:calc(50% - 110px);top:50%;transform:translateY(-50%)}
 .relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 74px;gap:10px;align-items:end}
 .relationship-editor-fields>label{min-width:0;display:grid;gap:5px;color:var(--text-secondary);font-size:10px}
 .relationship-editor-range{min-width:0;display:grid;grid-template-columns:minmax(90px,1fr) 38px;align-items:center;gap:7px}
@@ -8177,7 +8206,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .appearance-modal .ui-single-select-trigger:focus-visible{border-color:var(--action-primary);box-shadow:0 0 0 2px var(--brand-tint-start)}
 .appearance-modal .ui-select-chevron-icon{color:var(--text-secondary)}
 .appearance-modal .ui-single-select:focus-within .ui-select-chevron-icon{color:var(--action-primary)}
-@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:1fr 1fr 70px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}.relationship-full-preview[data-orientation="horizontal"] .card-a{left:10px}.relationship-full-preview[data-orientation="horizontal"] .card-b{right:10px}}
+@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:1fr 1fr 70px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 
 /* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */

@@ -354,6 +354,17 @@
 
       settings.avatar = true;
 
+      if (
+        typeof settings.genderBar ===
+        'boolean'
+      ) {
+        settings.gender =
+          !!settings.gender ||
+          settings.genderBar;
+
+        delete settings.genderBar;
+      }
+
       cardSettingFields.forEach(field => {
         if (typeof settings[field] !== 'boolean') {
           settings[field] = !!defaults[field];
