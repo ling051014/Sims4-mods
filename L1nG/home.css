@@ -244,69 +244,51 @@ section[id] {
 }
 
 
-/* ========【首頁主視覺】 設定 - 主要操作按鈕排列 ======== */
-.hero-actions {
-    /* 上方間距 */ margin-top: 34px;
+/* ========【首頁主視覺】 設定 - 創作者外部連結排列 ======== */
+.creator-links {
+    /* 上方間距 */ margin-top: 32px;
     /* 橫向排列 */ display: flex;
     /* 自動換行 */ flex-wrap: wrap;
-    /* 按鈕間距 */ gap: 12px;
+    /* 連結間距 */ gap: 22px;
 }
 
 
-/* ========【首頁主視覺】 設定 - 共用按鈕 ======== */
-.btn {
-    /* 最小高度 */ min-height: 46px;
-    /* 左右內距 */ padding: 0 18px;
-    /* 圓角弧度 */ border-radius: 9px;
+/* ========【首頁主視覺】 設定 - 創作者外部連結 ======== */
+.creator-link {
     /* 橫向排列 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
+    /* 圖示與文字間距 */ gap: 8px;
+    /* 次要文字 */ color: var(--sub);
     /* 移除底線 */ text-decoration: none;
     /* 字體大小 */ font-size: 14px;
     /* 字體粗細 */ font-weight: 600;
     /* 動畫效果 */ transition:
-        transform 0.2s ease,
-        border-color 0.2s ease,
         color 0.2s ease,
-        background 0.2s ease,
-        box-shadow 0.2s ease;
+        transform 0.2s ease;
 }
 
 
-/* ========【首頁主視覺】 設定 - 按鈕懸停 ======== */
-.btn:hover {
-    /* 微幅上移 */ transform: translateY(-2px);
+/* ========【首頁主視覺】 設定 - 創作者外部連結 Logo ======== */
+.creator-link img {
+    /* 圖示寬度 */ width: 19px;
+    /* 圖示高度 */ height: 19px;
+    /* 不壓縮圖示 */ flex: 0 0 auto;
+    /* 預設稍微淡化 */ opacity: 0.72;
+    /* 動畫效果 */ transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
 
 
-/* ========【首頁主視覺】 設定 - 主要按鈕 ======== */
-.btn-primary {
-    /* 品牌色邊框 */ border: 1px solid var(--accent);
-    /* 品牌色背景 */ background: var(--accent);
-    /* 白色文字 */ color: #ffffff;
-    /* 淡藍陰影 */ box-shadow: 0 10px 28px rgba(85, 172, 238, 0.18);
-}
-
-
-/* ========【首頁主視覺】 設定 - 主要按鈕懸停 ======== */
-.btn-primary:hover {
-    /* 懸停背景 */ background: var(--accent-hover);
-    /* 懸停邊框 */ border-color: var(--accent-hover);
-}
-
-
-/* ========【首頁主視覺】 設定 - 次要按鈕 ======== */
-.btn-secondary {
-    /* 一般邊框 */ border: 1px solid var(--border);
-    /* 白色背景 */ background: #ffffff;
+/* ========【首頁主視覺】 設定 - 創作者外部連結懸停 ======== */
+.creator-link:hover {
     /* 主要文字 */ color: var(--ink);
+    /* 微幅上移 */ transform: translateY(-1px);
 }
 
-
-/* ========【首頁主視覺】 設定 - 次要按鈕懸停 ======== */
-.btn-secondary:hover {
-    /* 淡藍邊框 */ border-color: #c4d9e8;
-    /* 品牌藍文字 */ color: var(--accent);
+.creator-link:hover img {
+    /* Logo 完整顯示 */ opacity: 1;
+    /* 微幅放大 */ transform: scale(1.04);
 }
 
 
