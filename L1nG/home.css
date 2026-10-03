@@ -244,69 +244,51 @@ section[id] {
 }
 
 
-/* ========【首頁主視覺】 設定 - 主要操作按鈕排列 ======== */
-.hero-actions {
-    /* 上方間距 */ margin-top: 34px;
+/* ========【首頁主視覺】 設定 - 創作者外部連結排列 ======== */
+.creator-links {
+    /* 上方間距 */ margin-top: 32px;
     /* 橫向排列 */ display: flex;
     /* 自動換行 */ flex-wrap: wrap;
-    /* 按鈕間距 */ gap: 12px;
+    /* 連結間距 */ gap: 22px;
 }
 
 
-/* ========【首頁主視覺】 設定 - 共用按鈕 ======== */
-.btn {
-    /* 最小高度 */ min-height: 46px;
-    /* 左右內距 */ padding: 0 18px;
-    /* 圓角弧度 */ border-radius: 9px;
+/* ========【首頁主視覺】 設定 - 創作者外部連結 ======== */
+.creator-link {
     /* 橫向排列 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
+    /* 圖示與文字間距 */ gap: 8px;
+    /* 次要文字 */ color: var(--sub);
     /* 移除底線 */ text-decoration: none;
     /* 字體大小 */ font-size: 14px;
     /* 字體粗細 */ font-weight: 600;
     /* 動畫效果 */ transition:
-        transform 0.2s ease,
-        border-color 0.2s ease,
         color 0.2s ease,
-        background 0.2s ease,
-        box-shadow 0.2s ease;
+        transform 0.2s ease;
 }
 
 
-/* ========【首頁主視覺】 設定 - 按鈕懸停 ======== */
-.btn:hover {
-    /* 微幅上移 */ transform: translateY(-2px);
+/* ========【首頁主視覺】 設定 - 創作者外部連結 Logo ======== */
+.creator-link img {
+    /* 圖示寬度 */ width: 19px;
+    /* 圖示高度 */ height: 19px;
+    /* 不壓縮圖示 */ flex: 0 0 auto;
+    /* 預設稍微淡化 */ opacity: 0.72;
+    /* 動畫效果 */ transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
 
 
-/* ========【首頁主視覺】 設定 - 主要按鈕 ======== */
-.btn-primary {
-    /* 品牌色邊框 */ border: 1px solid var(--accent);
-    /* 品牌色背景 */ background: var(--accent);
-    /* 白色文字 */ color: #ffffff;
-    /* 淡藍陰影 */ box-shadow: 0 10px 28px rgba(85, 172, 238, 0.18);
-}
-
-
-/* ========【首頁主視覺】 設定 - 主要按鈕懸停 ======== */
-.btn-primary:hover {
-    /* 懸停背景 */ background: var(--accent-hover);
-    /* 懸停邊框 */ border-color: var(--accent-hover);
-}
-
-
-/* ========【首頁主視覺】 設定 - 次要按鈕 ======== */
-.btn-secondary {
-    /* 一般邊框 */ border: 1px solid var(--border);
-    /* 白色背景 */ background: #ffffff;
+/* ========【首頁主視覺】 設定 - 創作者外部連結懸停 ======== */
+.creator-link:hover {
     /* 主要文字 */ color: var(--ink);
+    /* 微幅上移 */ transform: translateY(-1px);
 }
 
-
-/* ========【首頁主視覺】 設定 - 次要按鈕懸停 ======== */
-.btn-secondary:hover {
-    /* 淡藍邊框 */ border-color: #c4d9e8;
-    /* 品牌藍文字 */ color: var(--accent);
+.creator-link:hover img {
+    /* Logo 完整顯示 */ opacity: 1;
+    /* 微幅放大 */ transform: scale(1.04);
 }
 
 
@@ -802,160 +784,20 @@ section[id] {
 }
 
 
-/* ========【漢化專區入口】 設定 - 跨欄大型入口 ======== */
-.translation-card {
-    /* 上方間距 */ margin-top: 22px;
-    /* 最小高度 */ min-height: 190px;
-    /* 內縮空間 */ padding: 30px 32px;
-    /* 漢化淡色邊框 */ border: 1px solid #ddd8ed;
-    /* 圓角弧度 */ border-radius: 16px;
-    /* 淡紫漸層 */ background:
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #faf8ff 100%
-        );
-    /* 橫向排列 */ display: grid;
-    /* 欄位配置 */ grid-template-columns: auto 1fr auto;
-    /* 垂直置中 */ align-items: center;
-    /* 欄位間距 */ gap: 26px;
-    /* 移除底線 */ text-decoration: none;
-    /* 主要文字 */ color: var(--ink);
-    /* 動畫效果 */ transition:
-        transform 0.24s ease,
-        border-color 0.24s ease,
-        box-shadow 0.24s ease;
-}
-
-
-/* ========【漢化專區入口】 設定 - 懸停效果 ======== */
-.translation-card:hover {
-    /* 微幅上移 */ transform: translateY(-3px);
-    /* 漢化邊框加深 */ border-color: #d1cae9;
-    /* 淡色陰影 */ box-shadow: 0 18px 45px rgba(86, 72, 126, 0.07);
-}
-
-
-/* ========【漢化專區入口】 設定 - 左側中文字圖形 ======== */
-.translation-card-mark {
-    /* 固定寬度 */ width: 78px;
-    /* 固定高度 */ height: 78px;
+/* ========【漢化專區】 設定 - 與其他專案一致的繁中字樣圖形 ======== */
+.translation-graphic {
+    /* 上下外距 */ margin: 36px 0 28px;
+    /* 固定寬度 */ width: 82px;
+    /* 固定高度 */ height: 82px;
     /* 圓角弧度 */ border-radius: 18px;
-    /* 垂直置中 */ display: flex;
-    /* 水平置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
     /* 淡紫背景 */ background: var(--translation-soft);
     /* 漢化強調色 */ color: var(--translation);
-    /* 字體大小 */ font-size: 36px;
-    /* 字體粗細 */ font-weight: 600;
-}
-
-
-/* ========【漢化專區入口】 設定 - 文字內容 ======== */
-.translation-card-content h3 {
-    /* 上下外距 */ margin: 7px 0 0;
-    /* 字體大小 */ font-size: 29px;
-    /* 字距 */ letter-spacing: -0.03em;
-}
-
-
-/* ========【漢化專區入口】 設定 - 內容說明 ======== */
-.translation-card-content p {
-    /* 最大寬度 */ max-width: 650px;
-    /* 上方間距 */ margin: 8px 0 0;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 14px;
-}
-
-
-/* ========【漢化專區入口】 設定 - 右側操作文字 ======== */
-.translation-card-action {
-    /* 漢化強調色 */ color: var(--translation);
-    /* 字體大小 */ font-size: 13px;
-    /* 禁止換行 */ white-space: nowrap;
-}
-
-
-/* ========【漢化專區】 設定 - 區塊上方距離 ======== */
-.translation-section {
-    /* 縮小上方內距 */ padding-top: 40px;
-}
-
-
-/* ========【漢化專區】 設定 - 專區預告面板 ======== */
-.translation-panel {
-    /* 最小高度 */ min-height: 330px;
-    /* 隱藏溢出 */ overflow: hidden;
-    /* 漢化淡色邊框 */ border: 1px solid #ddd8ed;
-    /* 圓角弧度 */ border-radius: 19px;
-    /* 淡紫漸層 */ background:
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #faf8ff 100%
-        );
-    /* 網格系統 */ display: grid;
-    /* 左右欄比例 */ grid-template-columns: 0.85fr 1.15fr;
-}
-
-
-/* ========【漢化專區】 設定 - 左側大字裝飾 ======== */
-.translation-panel-mark {
-    /* 水平置中 */ display: flex;
+    /* 置中排列 */ display: flex;
     /* 垂直置中 */ align-items: center;
     /* 水平置中 */ justify-content: center;
-    /* 淡紫背景 */ background:
-        radial-gradient(
-            circle,
-            #f4f1fb 0%,
-            #faf9fd 72%
-        );
-    /* 裝飾文字 */ color: rgba(127, 115, 180, 0.24);
-    /* 響應式字體 */ font-size: clamp(110px, 16vw, 190px);
-    /* 字體粗細 */ font-weight: 700;
+    /* 字體大小 */ font-size: 38px;
+    /* 字體粗細 */ font-weight: 650;
     /* 禁止選取 */ user-select: none;
-}
-
-
-/* ========【漢化專區】 設定 - 右側內容 ======== */
-.translation-panel-content {
-    /* 內縮空間 */ padding: 55px 55px 55px 20px;
-    /* 垂直置中 */ align-self: center;
-}
-
-
-/* ========【漢化專區】 設定 - 漢化英文小標 ======== */
-.translation-kicker {
-    /* 漢化強調色 */ color: var(--translation);
-}
-
-
-/* ========【漢化專區】 設定 - 專區說明 ======== */
-.translation-panel-content > p {
-    /* 最大寬度 */ max-width: 560px;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 14px;
-}
-
-
-/* ========【漢化專區】 設定 - 專區建置狀態 ======== */
-.translation-status {
-    /* 上方間距 */ margin-top: 24px;
-    /* 最大寬度 */ max-width: 370px;
-    /* 上方分隔線 */ border-top: 1px solid #ebe7f3;
-    /* 上方內距 */ padding-top: 16px;
-    /* 橫向排列 */ display: flex;
-    /* 兩端排列 */ justify-content: space-between;
-    /* 項目間距 */ gap: 20px;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 12px;
-}
-
-
-/* ========【漢化專區】 設定 - 專區狀態強調 ======== */
-.translation-status strong {
-    /* 漢化強調色 */ color: var(--translation);
-    /* 字體粗細 */ font-weight: 600;
 }
 
 
@@ -1186,31 +1028,6 @@ section[id] {
     }
 
 
-    /* ========【漢化專區入口】 設定 - 平板三欄改為兩欄 ======== */
-    .translation-card {
-        /* 欄位配置 */ grid-template-columns: auto 1fr;
-    }
-
-    .translation-card-action {
-        /* 佔滿整列 */ grid-column: 1 / -1;
-        /* 靠右排列 */ justify-self: end;
-    }
-
-
-    /* ========【漢化專區】 設定 - 平板改為上下排列 ======== */
-    .translation-panel {
-        /* 單欄排列 */ grid-template-columns: 1fr;
-    }
-
-    .translation-panel-mark {
-        /* 最小高度 */ min-height: 190px;
-        /* 字體大小 */ font-size: 120px;
-    }
-
-    .translation-panel-content {
-        /* 平板內距 */ padding: 38px;
-    }
-
 
     /* ========【關於 L1nG】 設定 - 平板改為單欄 ======== */
     .about-grid {
@@ -1292,24 +1109,6 @@ section[id] {
         /* 手機金額字體 */ font-size: 37px;
     }
 
-
-    /* ========【漢化專區入口】 設定 - 手機改為單欄 ======== */
-    .translation-card {
-        /* 單欄排列 */ grid-template-columns: 1fr;
-        /* 靠左排列 */ justify-items: start;
-        /* 手機內距 */ padding: 24px;
-    }
-
-    .translation-card-action {
-        /* 重設欄位 */ grid-column: auto;
-        /* 靠左排列 */ justify-self: start;
-    }
-
-
-    /* ========【漢化專區】 設定 - 手機內容 ======== */
-    .translation-panel-content {
-        /* 手機內距 */ padding: 30px 24px;
-    }
 
 
     /* ========【創作理念】 設定 - 手機間距 ======== */
