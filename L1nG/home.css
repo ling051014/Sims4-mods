@@ -350,7 +350,6 @@ section[id] {
 
 /* ========【共用區塊】 設定 - 標題字體 ======== */
 .section-heading h2,
-.translation-panel h2,
 .about-section h2 {
     /* 上下外距 */ margin: 5px 0 0;
     /* 響應式字體 */ font-size: clamp(30px, 4vw, 45px);
