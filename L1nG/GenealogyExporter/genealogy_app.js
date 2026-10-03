@@ -7830,48 +7830,72 @@ function relationshipHorizontalPreviewAnchors(
   const cardB =
     preview?.querySelector('.card-b');
 
-  const width =
-    preview?.clientWidth || 320;
-  const height =
-    preview?.clientHeight || 190;
-
   if (
+    !preview ||
     !cardA ||
-    !cardB ||
-    width <= 0 ||
-    height <= 0
+    !cardB
   ) {
     return {
-      aX:154,
+      aX:136,
       aY:95,
-      bX:166,
+      bX:184,
+      bY:95
+    };
+  }
+
+  const previewRect =
+    preview.getBoundingClientRect();
+  const cardARect =
+    cardA.getBoundingClientRect();
+  const cardBRect =
+    cardB.getBoundingClientRect();
+
+  if (
+    previewRect.width <= 0 ||
+    previewRect.height <= 0
+  ) {
+    return {
+      aX:136,
+      aY:95,
+      bX:184,
       bY:95
     };
   }
 
   const scaleX =
-    320 / width;
+    320 / previewRect.width;
   const scaleY =
-    190 / height;
+    190 / previewRect.height;
 
   return {
+    // 左卡右側邊緣的垂直正中央。
     aX:
       (
-        cardA.offsetLeft +
-        cardA.offsetWidth
+        cardARect.right -
+        previewRect.left
       ) * scaleX,
     aY:
       (
-        cardA.offsetTop +
-        cardA.offsetHeight / 2
+        (
+          cardARect.top +
+          cardARect.bottom
+        ) / 2 -
+        previewRect.top
       ) * scaleY,
+
+    // 右卡左側邊緣的垂直正中央。
     bX:
-      cardB.offsetLeft *
-      scaleX,
+      (
+        cardBRect.left -
+        previewRect.left
+      ) * scaleX,
     bY:
       (
-        cardB.offsetTop +
-        cardB.offsetHeight / 2
+        (
+          cardBRect.top +
+          cardBRect.bottom
+        ) / 2 -
+        previewRect.top
       ) * scaleY
   };
 }
