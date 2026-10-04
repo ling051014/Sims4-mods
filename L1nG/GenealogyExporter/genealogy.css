@@ -6875,10 +6875,10 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 .topbar-brand { width:auto; min-width:210px; padding:0 14px; justify-content:flex-start; gap:8px; font-size:10.5px; letter-spacing:1.15px; text-align:left; }
 .topbar-brand-group { display:flex; align-items:center; gap:9px; min-width:0; white-space:nowrap; }
 .topbar-creator-link,.topbar-section-brand { text-decoration:none; }
-.topbar-creator-link { color:color-mix(in srgb,var(--navigation-text) 64%,transparent); font-size:11px; letter-spacing:1.5px; transition:color .15s ease; }
+.topbar-creator-link { color:color-mix(in srgb,var(--navigation-text) 64%,transparent); font-size:12px; letter-spacing:1.4px; transition:color .15s ease; }
 .topbar-creator-link:hover,.topbar-creator-link:focus-visible { color:var(--action-primary); outline:none; }
 .topbar-brand-divider { color:color-mix(in srgb,var(--navigation-text) 35%,transparent); }
-.topbar-section-brand { color:var(--navigation-text); font-size:12px; font-weight:650; letter-spacing:1.8px; }
+.topbar-section-brand { color:var(--navigation-text); font-size:13px; font-weight:650; letter-spacing:1.4px; }
 .topbar-help-btn { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; padding:0; border:0; border-radius:50%; background:transparent; color:var(--navigation-text-muted); font:inherit; cursor:pointer; }
 .topbar-help-btn:hover,.topbar-help-btn:focus-visible { background:var(--nav-button-hover-bg); color:var(--action-primary); outline:none; }
 .topbar-help-btn .l1ng-icon { width:15px; height:15px; }
