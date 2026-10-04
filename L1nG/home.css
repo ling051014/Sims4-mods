@@ -92,9 +92,9 @@ section[id] {
 .brand {
     /* 文字顏色 */ color: var(--ink);
     /* 移除底線 */ text-decoration: none;
-    /* 字體大小 */ font-size: 19px;
+    /* 字體大小 */ font-size: 12px;
     /* 字體粗細 */ font-weight: 700;
-    /* 字距 */ letter-spacing: 0.08em;
+    /* 字距 */ letter-spacing: 1.4px;
 }
 
 
@@ -123,7 +123,7 @@ section[id] {
 .main-nav a {
     /* 文字顏色 */ color: var(--sub);
     /* 移除底線 */ text-decoration: none;
-    /* 字體大小 */ font-size: 14px;
+    /* 字體大小 */ font-size: 13px;
     /* 動畫效果 */ transition:
         color 0.2s ease,
         border-color 0.2s ease,
@@ -137,29 +137,13 @@ section[id] {
 }
 
 
-/* ========【頂部導覽列】 設定 - 模組整理站內入口 ======== */
-.main-nav .nav-external {
-    /* 內縮空間 */ padding: 7px 12px;
-    /* 一般邊框 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 淡色背景 */ background: rgba(255, 255, 255, 0.72);
-}
-
-
-/* ========【頂部導覽列】 設定 - 模組整理入口懸停 ======== */
-.main-nav .nav-external:hover {
-    /* 邊框改為淡藍 */ border-color: rgba(85, 172, 238, 0.45);
-    /* 背景變白 */ background: #ffffff;
-}
-
-
 /* ========【語言切換】 設定 - 繁中與英文首頁切換 ======== */
 .language-switch {
     /* 橫向排列 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
     /* 選項間距 */ gap: 7px;
     /* 淡化文字 */ color: var(--muted);
-    /* 字體大小 */ font-size: 12px;
+    /* 字體大小 */ font-size: 11px;
     /* 禁止換行 */ white-space: nowrap;
 }
 
@@ -168,7 +152,9 @@ section[id] {
 .language-switch a {
     /* 移除額外內距 */ padding: 0;
     /* 淡化文字 */ color: var(--muted);
-    /* 字體大小 */ font-size: 12px;
+    /* 移除底線 */ text-decoration: none;
+    /* 移除底線邊框 */ border-bottom: 0;
+    /* 字體大小 */ font-size: 11px;
     /* 字體粗細 */ font-weight: 600;
 }
 
@@ -192,8 +178,8 @@ section[id] {
     /* 固定尺寸 */ width: 40px;
     /* 固定高度 */ height: 40px;
     /* 移除背景 */ background: transparent;
-    /* 一般邊框 */ border: 1px solid var(--border);
-    /* 圓角弧度 */ border-radius: 9px;
+    /* 不顯示外框 */ border: 0;
+    /* 圓角弧度 */ border-radius: 8px;
     /* 指標手勢 */ cursor: pointer;
     /* 內縮空間 */ padding: 0;
 }
@@ -202,7 +188,7 @@ section[id] {
 /* ========【頂部導覽列】 設定 - 手機導覽線條 ======== */
 .nav-toggle span {
     /* 區塊顯示 */ display: block;
-    /* 線條寬度 */ width: 16px;
+    /* 線條寬度 */ width: 18px;
     /* 線條高度 */ height: 1px;
     /* 水平置中 */ margin: 5px auto;
     /* 線條顏色 */ background: var(--ink);

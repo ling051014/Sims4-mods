@@ -106,7 +106,7 @@ section[id] {
     color:var(--ink);
     font-size:13px;
     font-weight:700;
-    letter-spacing:1.7px;
+    letter-spacing:1.4px;
 }
 
 .main-nav {
@@ -131,15 +131,15 @@ section[id] {
     width:40px;
     height:40px;
     padding:0;
-    border:1px solid var(--line);
-    border-radius:9px;
+    border:0;
+    border-radius:8px;
     background:transparent;
     cursor:pointer;
 }
 
 .nav-toggle span {
     display:block;
-    width:16px;
+    width:18px;
     height:1px;
     margin:5px auto;
     background:var(--ink);
@@ -815,16 +815,17 @@ section[id] {
     }
 
     .site-brand-group {
-        gap:6px;
+        gap:9px;
     }
 
     .creator-link {
-        font-size:10px;
+        font-size:12px;
+        letter-spacing:1.4px;
     }
 
     .translations-brand {
-        font-size:11px;
-        letter-spacing:1.2px;
+        font-size:13px;
+        letter-spacing:1.4px;
     }
 
     .hero-title-row {

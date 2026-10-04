@@ -124,7 +124,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 定位方式 */ position: relative;
     /* 文字顏色 */ color: var(--text-muted);
     /* 字體大小 */ font-size: 12px;
-    /* 字距 */ letter-spacing: 1.5px;
+    /* 字距 */ letter-spacing: 1.4px;
     /* 指標手勢 */ cursor: pointer;
     /* 動畫效果 */ transition: color .2s ease;
 }
@@ -140,9 +140,9 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 .realdate-brand {
     /* 文字顏色 */ color: var(--text-strong);
-    /* 字體大小 */ font-size: 14px;
+    /* 字體大小 */ font-size: 13px;
     /* 字體粗細 */ font-weight: 650;
-    /* 字距 */ letter-spacing: 2.2px;
+    /* 字距 */ letter-spacing: 1.4px;
 }
 
 .main-nav {
@@ -158,7 +158,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 定位方式 */ position: relative;
     /* 文字顏色 */ color: var(--text-muted);
     /* 文字裝飾 */ text-decoration: none;
-    /* 字體大小 */ font-size: 12px;
+    /* 字體大小 */ font-size: 13px;
     /* 換行規則 */ white-space: nowrap;
     /* 指標手勢 */ cursor: pointer;
     /* 清單樣式 */ list-style: none;
@@ -247,7 +247,8 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 邊框 */ border: 0;
     /* 背景 */ background: transparent;
     /* 文字顏色 */ color: var(--text-soft);
-    /* 字體大小 */ font-size: 12px;
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 11px;
     /* 指標手勢 */ cursor: pointer;
 }
 
@@ -265,15 +266,15 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 顯示方式 */ display: none;
     /* 寬度 */ width: 40px;
     /* 高度 */ height: 40px;
-    /* 邊框 */ border: 1px solid var(--line);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 背景 */ background: var(--surface);
+    /* 不顯示外框 */ border: 0;
+    /* 圓角弧度 */ border-radius: 8px;
+    /* 背景 */ background: transparent;
     /* 指標手勢 */ cursor: pointer;
 }
 
 .nav-toggle span {
     /* 顯示方式 */ display: block;
-    /* 寬度 */ width: 16px;
+    /* 寬度 */ width: 18px;
     /* 高度 */ height: 1px;
     /* 外距 */ margin: 5px auto;
     /* 背景 */ background: var(--text-strong);
@@ -1584,13 +1585,13 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     }
 
     .site-brand-group {
-        /* 項目間距 */ gap: 6px;
+        /* 項目間距 */ gap: 9px;
     }
 
     .creator-link {
         /* 最小高度 */ min-height: 40px;
-        /* 字體大小 */ font-size: 10px;
-        /* 字距 */ letter-spacing: 1px;
+        /* 字體大小 */ font-size: 12px;
+        /* 字距 */ letter-spacing: 1.4px;
     }
 
     .brand-divider {
@@ -1598,7 +1599,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     }
 
     .realdate-brand {
-        /* 字體大小 */ font-size: 12px;
+        /* 字體大小 */ font-size: 13px;
         /* 字距 */ letter-spacing: 1.4px;
     }
 
