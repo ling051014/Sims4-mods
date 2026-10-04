@@ -164,37 +164,6 @@ section[id] {
     letter-spacing:2px;
 }
 
-.button {
-    min-height:44px;
-    padding:0 17px;
-    border:1px solid transparent;
-    border-radius:9px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    color:inherit;
-    text-decoration:none;
-    font-size:13px;
-    font-weight:650;
-    transition:transform .18s ease,background .18s ease,border-color .18s ease;
-}
-
-.button:hover {
-    transform:translateY(-1px);
-}
-
-.button-primary {
-    color:#fff;
-    background:var(--translation);
-    border-color:var(--translation);
-}
-
-.button-primary:hover {
-    background:var(--translation-dark);
-    border-color:var(--translation-dark);
-}
-
-
 /* ========【主視覺】 設定 - 漢化專區定位 ======== */
 .hero {
     position:relative;
@@ -258,13 +227,6 @@ section[id] {
     max-width:700px;
     margin:16px 0 0;
     color:var(--sub);
-}
-
-.hero-actions {
-    margin-top:30px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
 }
 
 .hero-summary {
@@ -548,6 +510,17 @@ section[id] {
     margin:9px 0 0;
     color:var(--sub);
     font-size:12px;
+}
+
+.card-author a {
+    color:inherit;
+    text-decoration:none;
+    border-bottom:1px solid rgba(127,115,180,.28);
+}
+
+.card-author a:hover {
+    color:var(--translation-dark);
+    border-bottom-color:var(--translation);
 }
 
 .card-facts {
@@ -873,15 +846,6 @@ section[id] {
 
     .hero-lead {
         font-size:20px;
-    }
-
-    .hero-actions {
-        display:grid;
-        grid-template-columns:1fr;
-    }
-
-    .button {
-        width:100%;
     }
 
     .hero-summary {
