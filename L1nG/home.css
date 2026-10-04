@@ -66,20 +66,17 @@ section[id] {
     /* 半透明背景 */ background: rgba(246, 248, 251, 0.88);
     /* 背景模糊 */ backdrop-filter: blur(18px);
     /* Safari 背景模糊 */ -webkit-backdrop-filter: blur(18px);
-    /* 主視覺期間完全隱藏 */ transform: translateY(-110%);
-    opacity: 0;
+    /* 主視覺期間完全隱藏；離開後由捲動進度連續控制 */
+    transform: translateY(var(--header-offset, -110%));
+    opacity: var(--header-opacity, 0);
     pointer-events: none;
-    /* 顯示與滾動狀態動畫 */ transition:
-        transform 0.24s ease,
-        opacity 0.20s ease,
+    /* 背景與陰影仍保留輕微過渡 */ transition:
         background 0.2s ease,
         box-shadow 0.2s ease;
 }
 
-/* ========【頂部導覽列】 設定 - 主視覺離開後顯示 ======== */
-.site-header.visible {
-    transform: translateY(0);
-    opacity: 1;
+/* ========【頂部導覽列】 設定 - 淡入完成後才可操作 ======== */
+.site-header.interactive {
     pointer-events: auto;
 }
 
@@ -226,7 +223,8 @@ section[id] {
 /* ========【首頁主視覺】 設定 - 首屏高度與定位 ======== */
 .hero {
     /* 相對定位 */ position: relative;
-    /* V3 使用完整首屏高度 */ min-height: 100svh;
+    /* 舊瀏覽器 fallback */ min-height: 100vh;
+    /* 依目前實際可見視窗填滿整個首屏 */ min-height: 100dvh;
     /* 隱藏裝飾溢出 */ overflow: hidden;
     /* 啟用彈性佈局 */ display: flex;
     /* 垂直置中 */ align-items: center;
@@ -395,29 +393,6 @@ section[id] {
 }
 
 
-
-/* ========【首頁主視覺】 設定 - V3 底部滑動提示 ======== */
-.hero-scroll-hint {
-    position: absolute;
-    left: 50%;
-    bottom: calc(26px + env(safe-area-inset-bottom));
-    z-index: 3;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transform: translateX(-50%);
-    color: var(--muted);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-}
-
-.hero-scroll-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-}
 
 
 /* ========【共用區塊】 設定 - 主要內容寬度與上下間距 ======== */
@@ -1112,7 +1087,8 @@ section[id] {
 
     /* ========【首頁主視覺】 設定 - 平板維持完整首屏 ======== */
     .hero {
-        /* V3 維持完整首屏 */ min-height: 100svh;
+        /* 舊瀏覽器 fallback */ min-height: 100vh;
+        /* 依目前實際可見視窗填滿整個首屏 */ min-height: 100dvh;
     }
 
 
@@ -1169,7 +1145,8 @@ section[id] {
 
     /* ========【首頁主視覺】 設定 - 手機 V3 完整首屏 ======== */
     .hero {
-        /* 手機維持完整首屏 */ min-height: 100svh;
+        /* 舊瀏覽器 fallback */ min-height: 100vh;
+        /* iPhone Safari 依目前實際可見視窗填滿首屏 */ min-height: 100dvh;
     }
 
     .hero-inner {
@@ -1194,10 +1171,6 @@ section[id] {
 
     .creator-links {
         /* 手機縮短與說明之間距 */ margin-top: 24px;
-    }
-
-    .hero-scroll-hint {
-        /* 手機底部留安全區 */ bottom: calc(20px + env(safe-area-inset-bottom));
     }
 
 

@@ -12,12 +12,17 @@ function updateHeaderState() {
     }
 
     const heroBottom = homeHero.getBoundingClientRect().bottom;
-    const shouldShowHeader = heroBottom <= 0;
+    const fadeDistance = 88;
+    const distancePastHero = Math.max(0, -heroBottom);
+    const progress = Math.min(1, distancePastHero / fadeDistance);
+    const offset = -110 * (1 - progress);
 
-    siteHeader.classList.toggle("visible", shouldShowHeader);
-    siteHeader.classList.toggle("scrolled", shouldShowHeader && window.scrollY > 10);
+    siteHeader.style.setProperty("--header-opacity", progress.toFixed(3));
+    siteHeader.style.setProperty("--header-offset", offset.toFixed(2) + "%");
+    siteHeader.classList.toggle("interactive", progress >= 0.98);
+    siteHeader.classList.toggle("scrolled", progress > 0);
 
-    if (!shouldShowHeader) {
+    if (progress < 0.98) {
         closeMobileNav();
     }
 }
