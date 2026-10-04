@@ -1038,10 +1038,6 @@ section[id] {
         /* 移除額外背景 */ background: transparent;
     }
 
-    .main-nav .language-switch {
-        /* 與其他手機導覽項目對齊 */ padding: 9px 10px;
-    }
-
     .language-switch a {
         /* 語言切換維持緊湊 */ padding: 0;
     }
