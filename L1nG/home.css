@@ -100,10 +100,13 @@ section[id] {
 
 /* ========【頂部導覽列】 設定 - 右側固定控制區 ======== */
 .header-controls {
+    /* 固定靠右 */ justify-self: end;
     /* 橫向排列 */ display: inline-flex;
     /* 垂直置中 */ align-items: center;
     /* 語言與選單間距 */ gap: 12px;
     /* 不縮小控制區 */ flex: 0 0 auto;
+    /* 禁止換行 */ flex-wrap: nowrap;
+    /* 保持單行 */ white-space: nowrap;
 }
 
 
@@ -998,6 +1001,13 @@ section[id] {
     /* ========【頂部導覽列】 設定 - 平板導覽 ======== */
     .site-header-inner {
         /* 相對定位 */ position: relative;
+        /* 手機導覽只保留品牌與右側控制 */ grid-template-columns: minmax(0, 1fr) auto;
+        /* 縮小頂條間距 */ gap: 12px;
+    }
+
+    .header-controls {
+        /* 固定在最右側 */ grid-column: 2;
+        /* 禁止被壓縮 */ min-width: max-content;
     }
 
     .nav-toggle {
