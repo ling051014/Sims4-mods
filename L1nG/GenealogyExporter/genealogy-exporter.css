@@ -882,6 +882,7 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
         position:relative;
         width:min(100% - 28px,var(--max-width));
         grid-template-columns:minmax(0,1fr) auto auto;
+        gap:10px;
     }
 
     .exporter-brand {
@@ -891,12 +892,19 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
         white-space:nowrap;
     }
 
-    .nav-toggle {
-        display:block;
-        order:2;
+    .language-switch {
+        grid-column:2;
+        justify-self:end;
+        flex-wrap:nowrap;
+        white-space:nowrap;
+        min-width:max-content;
     }
 
-    .language-switch { order:3; }
+    .nav-toggle {
+        grid-column:3;
+        justify-self:end;
+        display:block;
+    }
 
     .main-nav {
         position:absolute;
