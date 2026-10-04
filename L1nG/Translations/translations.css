@@ -26,6 +26,7 @@ html {
 }
 
 body {
+    /* 靜態文字與一般介面使用標準箭頭 */ cursor: default;
     margin:0;
     color:var(--ink);
     background:
@@ -39,6 +40,39 @@ body {
     font-size:15px;
     line-height:1.75;
 }
+
+/* ========【全站游標】 設定 - 只有文字輸入區使用 I 形游標 ======== */
+a[href],
+button,
+summary,
+select,
+label[for],
+[role="button"],
+[role="link"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+input[type="color"],
+input[type="file"] {
+    /* 可操作項目使用手指游標 */ cursor: pointer;
+}
+
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+textarea,
+[contenteditable="true"] {
+    /* 只有真正可輸入文字的區域使用 I 形游標 */ cursor: text;
+}
+
+button:disabled,
+select:disabled,
+input:disabled,
+[aria-disabled="true"] {
+    /* 停用控制項使用禁止操作游標 */ cursor: not-allowed;
+}
+
 
 a {
     color:inherit;

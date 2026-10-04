@@ -690,9 +690,22 @@ button {
     /* 字體設定 */ font-family: inherit;
 }
 
-button {
-    /* 字體設定 */ font-family: inherit;
-    /* 滑鼠指標 */ cursor: pointer;
+a[href],
+button,
+summary,
+select,
+label[for],
+[role="button"],
+[role="link"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+input[type="color"],
+input[type="file"] {
+    /* 可操作項目使用手指游標 */ cursor: pointer;
 }
 
 input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
@@ -701,13 +714,11 @@ textarea,
     /* 只有真正可輸入文字的區域使用 I 形游標 */ cursor: text;
 }
 
-select,
-input[type="checkbox"],
-input[type="radio"],
-input[type="range"],
-input[type="color"],
-input[type="file"] {
-    /* 非文字輸入控制項維持操作游標 */ cursor: pointer;
+button:disabled,
+select:disabled,
+input:disabled,
+[aria-disabled="true"] {
+    /* 停用控制項使用禁止操作游標 */ cursor: not-allowed;
 }
 
 /* ========【側邊欄尺寸】 設定 - 左上品牌區與側邊欄共用同一寬度 ======== */
