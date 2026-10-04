@@ -223,6 +223,8 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 .language-switch {
+    /* 網格欄位 */ grid-column: 3;
+    /* 自身水平對齊 */ justify-self: end;
     /* 顯示方式 */ display: flex;
     /* 垂直對齊 */ align-items: center;
     /* 項目間距 */ gap: 6px;
@@ -248,6 +250,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 .nav-toggle {
+    /* 網格欄位 */ grid-column: 3;
     /* 顯示方式 */ display: none;
     /* 寬度 */ width: 40px;
     /* 高度 */ height: 40px;
@@ -1477,7 +1480,12 @@ html[data-language="en"] [data-lang="zh-Hant"] {
         /* 網格欄位 */ grid-template-columns: auto 1fr auto;
     }
 
+    .language-switch {
+        /* 語言固定在三條線左側 */ grid-column: 2;
+    }
+
     .nav-toggle {
+        /* 網格欄位 */ grid-column: 3;
         /* 顯示方式 */ display: block;
         /* 自身水平對齊 */ justify-self: end;
     }
