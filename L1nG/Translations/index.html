@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>漢化專區 · L1nG</title>
+    <meta
+        name="description"
+        content="L1nG 製作與維護的《模擬市民 4》繁體中文漢化整理。"
+    >
+    <meta name="theme-color" content="#f7f6fb">
+
+    <link rel="stylesheet" href="translations.css">
+    <script src="translations.js" defer></script>
+</head>
+
+<body id="top">
+
+    <!-- ========【漢化專區頂部導覽】 設定 - 品牌、頁面導覽與模組整理入口 ======== -->
+    <header class="site-header" id="siteHeader">
+        <div class="site-header-inner">
+
+            <div class="site-brand-group">
+                <a class="creator-link" href="../home.html">L1nG</a>
+                <span class="brand-divider">/</span>
+                <a class="translations-brand" href="#top">TRANSLATIONS</a>
+            </div>
+
+            <nav class="main-nav" id="mainNav" aria-label="漢化專區導覽">
+                <a href="#translations">漢化列表</a>
+                <a href="#install">安裝方式</a>
+                <a href="#notes">注意事項</a>
+                <a class="nav-external" href="../../index.html">模組整理</a>
+            </nav>
+
+            <button
+                class="nav-toggle"
+                id="navToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="mainNav"
+                aria-label="開啟導覽選單"
+            >
+                <span></span>
+                <span></span>
+            </button>
+
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- ========【漢化專區主視覺】 設定 - 專區定位與目前收錄數量 ======== -->
+        <section class="hero">
+
+            <div class="hero-decoration hero-decoration-left" aria-hidden="true"></div>
+            <div class="hero-decoration hero-decoration-right" aria-hidden="true"></div>
+
+            <div class="hero-inner reveal">
+
+                <div class="hero-copy">
+                    <span class="eyebrow">TRADITIONAL CHINESE TRANSLATIONS</span>
+
+                    <div class="hero-title-row">
+                        <div class="translation-mark" aria-hidden="true">繁</div>
+                        <h1>漢化專區</h1>
+                    </div>
+
+                    <p class="hero-lead">
+                        整理我自己製作與維護的《模擬市民 4》繁體中文漢化。
+                    </p>
+
+                    <p class="hero-description">
+                        原模組仍需從原作者頁面另外下載；這裡只提供翻譯檔，
+                        不會重新打包或搬運原作者的模組本體。
+                    </p>
+
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="#translations">查看漢化</a>
+                        <a class="button button-secondary" href="../../index.html">回模組整理</a>
+                    </div>
+                </div>
+
+                <div class="hero-summary" aria-label="漢化專區目前收錄狀態">
+                    <div class="summary-item">
+                        <strong data-translation-count>5</strong>
+                        <span>目前收錄</span>
+                    </div>
+                    <div class="summary-item">
+                        <strong data-category-count>3</strong>
+                        <span>分類</span>
+                    </div>
+                    <div class="summary-item summary-item-wide">
+                        <strong>CHT</strong>
+                        <span>繁體中文</span>
+                    </div>
+                    <p>
+                        內容以目前「模組整理」網站標記為 L1nG 自漢化的項目為準。
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========【漢化列表】 設定 - 搜尋、分類與 L1nG 自漢化卡片 ======== -->
+        <section class="section" id="translations">
+
+            <div class="section-heading reveal">
+                <div>
+                    <span class="section-kicker">L1nG TRANSLATIONS</span>
+                    <h2>L1nG 自漢化</h2>
+                </div>
+
+                <p>
+                    可以依分類篩選，也可以直接搜尋模組名稱或作者。
+                </p>
+            </div>
+
+
+            <div class="translation-toolbar reveal">
+
+                <label class="search-field">
+                    <span class="search-label">搜尋</span>
+                    <input
+                        id="translationSearch"
+                        type="search"
+                        placeholder="搜尋模組或作者"
+                        autocomplete="off"
+                    >
+                </label>
+
+                <div class="filter-group" id="translationFilters" aria-label="漢化分類">
+                    <button class="filter-button active" type="button" data-filter="all">全部</button>
+                    <button class="filter-button" type="button" data-filter="cas">CAS</button>
+                    <button class="filter-button" type="button" data-filter="gameplay">生活 / 社交</button>
+                    <button class="filter-button" type="button" data-filter="adult">成人向</button>
+                </div>
+
+            </div>
+
+
+            <div class="translation-grid" id="translationGrid">
+
+                <!-- ========【L1nG 自漢化】 貓狗特徵包 ======== -->
+                <article
+                    class="translation-card reveal"
+                    data-translation-card
+                    data-category="cas"
+                    data-search="Cat And Dog Custom Traits Pack 貓狗特徵包 Vicky Sims chingyu1023"
+                >
+                    <div class="card-top">
+                        <span class="category-chip">CAS</span>
+                        <span class="translation-state">L1nG 自漢化</span>
+                    </div>
+
+                    <div class="card-visual" aria-hidden="true">
+                        <span class="card-index">01</span>
+                        <span class="card-mark">繁</span>
+                    </div>
+
+                    <div class="card-content">
+                        <h3>Cat And Dog Custom Traits Pack</h3>
+                        <p class="card-title-zh">貓狗特徵包</p>
+                        <p class="card-author">原作者 · Vicky Sims (chingyu1023)</p>
+
+                        <div class="card-facts">
+                            <span><strong>所需 DLC</strong> 貓狗總動員</span>
+                            <span><strong>最後整理</strong> 2026.07.23</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <a
+                            class="card-action primary"
+                            href="https://www.dropbox.com/scl/fi/7jrxenrsr3tx86u30s0fv/_chingyu_CatAndDogTraits_CHT_BY_L1nG.package?rlkey=04170f5z2kstv6owkpe7xrjf3&st=73q9l82d&dl=0"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            下載漢化
+                        </a>
+                        <a
+                            class="card-action"
+                            href="https://www.patreon.com/chingyu1023/posts/cat-and-dog-pack-120892985?collection=838462"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            原模組
+                        </a>
+                        <a class="card-action text" href="../../cas.html">模組整理</a>
+                    </div>
+                </article>
+
+
+                <!-- ========【L1nG 自漢化】 Wicked Memories Enhanced ======== -->
+                <article
+                    class="translation-card reveal"
+                    data-translation-card
+                    data-category="adult"
+                    data-search="Wicked Memories Enhanced 嘿嘿記憶增強版 XtremSyn"
+                >
+                    <div class="card-top">
+                        <span class="category-chip category-chip-adult">成人向</span>
+                        <span class="translation-state">L1nG 自漢化</span>
+                    </div>
+
+                    <div class="card-visual" aria-hidden="true">
+                        <span class="card-index">02</span>
+                        <span class="card-mark">繁</span>
+                    </div>
+
+                    <div class="card-content">
+                        <h3>Wicked Memories Enhanced</h3>
+                        <p class="card-title-zh">嘿嘿記憶增強版</p>
+                        <p class="card-author">原作者 · XtremSyn</p>
+
+                        <div class="card-facts">
+                            <span><strong>原模組版本</strong> 1.0.2</span>
+                            <span><strong>最後整理</strong> 2026.09.10</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <a
+                            class="card-action primary"
+                            href="https://www.dropbox.com/scl/fi/4jdif9ydavudq9l1jfe49/_XtremSyn_WickedMemoriesEnhanced_CHT_BY_L1nG.package?rlkey=3wdhtn5tjb2wsiad62g1k52m5&st=6jm2ikya&dl=0"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            下載漢化
+                        </a>
+                        <a
+                            class="card-action"
+                            href="https://www.patreon.com/xtremsyn/posts/wicked-memories-165936707?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            原模組
+                        </a>
+                        <a class="card-action text" href="../../nsfw-mods.html">模組整理</a>
+                    </div>
+                </article>
+
+
+                <!-- ========【L1nG 自漢化】 A Morning Routine Mod ======== -->
+                <article
+                    class="translation-card reveal"
+                    data-translation-card
+                    data-category="gameplay"
+                    data-search="A Morning Routine Mod 起床例事 TriplisSims Triplis HABIT"
+                >
+                    <div class="card-top">
+                        <span class="category-chip">生活 / 社交</span>
+                        <span class="translation-state">L1nG 自漢化</span>
+                    </div>
+
+                    <div class="card-visual" aria-hidden="true">
+                        <span class="card-index">03</span>
+                        <span class="card-mark">繁</span>
+                    </div>
+
+                    <div class="card-content">
+                        <h3>A Morning Routine Mod</h3>
+                        <p class="card-title-zh">起床例事</p>
+                        <p class="card-author">原作者 · TriplisSims</p>
+
+                        <div class="card-facts">
+                            <span><strong>原模組版本</strong> V1-1</span>
+                            <span><strong>最後整理</strong> 2026.06.06</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <a
+                            class="card-action primary"
+                            href="https://www.dropbox.com/scl/fi/pb9rbmrz4tuft9nj8i4ld/_Triplis-HABIT_CHT_BY_L1nG.package?rlkey=d8zcmm365y605c6swbx3yhja3&st=8aje0mgu&dl=0"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            下載漢化
+                        </a>
+                        <a
+                            class="card-action"
+                            href="https://www.patreon.com/posts/introducing-mod-25436971"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            原模組
+                        </a>
+                        <a class="card-action text" href="../../social-mods.html">模組整理</a>
+                    </div>
+                </article>
+
+
+                <!-- ========【L1nG 自漢化】 SimSoul ======== -->
+                <article
+                    class="translation-card reveal translation-card-attention"
+                    data-translation-card
+                    data-category="gameplay"
+                    data-search="SimSoul AI 模組 威廉 Merkel 日不落汉化组"
+                >
+                    <div class="card-top">
+                        <span class="category-chip">生活 / 社交</span>
+                        <span class="translation-state translation-state-attention">版本請先確認</span>
+                    </div>
+
+                    <div class="card-visual" aria-hidden="true">
+                        <span class="card-index">04</span>
+                        <span class="card-mark">繁</span>
+                    </div>
+
+                    <div class="card-content">
+                        <h3>SimSoul</h3>
+                        <p class="card-title-zh">AI 模組</p>
+                        <p class="card-author">原作者 · 威廉Merkel × 日不落汉化组</p>
+
+                        <div class="card-facts">
+                            <span><strong>原模組</strong> v8.9</span>
+                            <span><strong>漢化檔</strong> v8.2</span>
+                        </div>
+
+                        <p class="card-note">
+                            模組整理頁目前記錄為原模組 v8.9、漢化檔 v8.2；
+                            安裝前請先確認目前版本是否仍相容。
+                        </p>
+                    </div>
+
+                    <div class="card-actions">
+                        <a
+                            class="card-action primary"
+                            href="https://www.dropbox.com/scl/fo/5rca4x2iyn2kmcrcmxrd9/AJ_QJkv7rc1rt9ZKa54Hqcs?rlkey=22i6b331gfapa5epldnd9v5ax&st=a07549qh&dl=0"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            查看漢化
+                        </a>
+                        <a
+                            class="card-action"
+                            href="https://www.sglynp.com/forum.php?mod=viewthread&tid=181353"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            原模組
+                        </a>
+                        <a class="card-action text" href="../../social-mods.html">模組整理</a>
+                    </div>
+                </article>
+
+
+                <!-- ========【L1nG 自漢化】 Front Desk Staff Mod ======== -->
+                <article
+                    class="translation-card reveal"
+                    data-translation-card
+                    data-category="gameplay"
+                    data-search="Front Desk Staff Mod 前台工作人員模式 SHUSHU"
+                >
+                    <div class="card-top">
+                        <span class="category-chip">生活 / 社交</span>
+                        <span class="translation-state">L1nG 自漢化</span>
+                    </div>
+
+                    <div class="card-visual" aria-hidden="true">
+                        <span class="card-index">05</span>
+                        <span class="card-mark">繁</span>
+                    </div>
+
+                    <div class="card-content">
+                        <h3>Front Desk Staff Mod</h3>
+                        <p class="card-title-zh">前台工作人員模式</p>
+                        <p class="card-author">原作者 · SHUSHU</p>
+
+                        <div class="card-facts">
+                            <span><strong>所需 DLC</strong> 來去上班</span>
+                            <span><strong>原模組版本</strong> 29th Oct 2020</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <a
+                            class="card-action primary"
+                            href="https://www.dropbox.com/scl/fi/xr3pqlzz4412r9bpn5hfr/_SHUSHU__FrontDeskStaff_CHT_BY_L1nG.package?rlkey=uqmlj1gza7hks943i41k4znnu&st=ebi9us9j&dl=0"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            下載漢化
+                        </a>
+                        <a
+                            class="card-action"
+                            href="https://modthesims.info/d/648433/front-desk-staff-mod.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            原模組
+                        </a>
+                        <a class="card-action text" href="../../social-mods.html">模組整理</a>
+                    </div>
+                </article>
+
+            </div>
+
+            <div class="empty-state" id="translationEmpty" hidden>
+                沒有符合目前搜尋或分類的漢化。
+            </div>
+
+        </section>
+
+
+        <!-- ========【安裝方式】 設定 - 漢化檔基本安裝流程 ======== -->
+        <section class="guide-section" id="install">
+
+            <div class="guide-inner">
+
+                <div class="section-heading reveal">
+                    <div>
+                        <span class="section-kicker">INSTALL</span>
+                        <h2>安裝方式</h2>
+                    </div>
+
+                    <p>
+                        漢化檔不包含原模組，請先完成原模組安裝。
+                    </p>
+                </div>
+
+
+                <div class="step-grid">
+
+                    <article class="step-card reveal">
+                        <span class="step-number">01</span>
+                        <h3>下載原模組</h3>
+                        <p>
+                            從卡片中的「原模組」前往作者頁面，
+                            依原作者說明下載並安裝模組本體。
+                        </p>
+                    </article>
+
+                    <article class="step-card reveal">
+                        <span class="step-number">02</span>
+                        <h3>下載漢化檔</h3>
+                        <p>
+                            再下載對應的 L1nG 繁體中文漢化。
+                            漢化檔通常是獨立的 <code>.package</code>。
+                        </p>
+                    </article>
+
+                    <article class="step-card reveal">
+                        <span class="step-number">03</span>
+                        <h3>放在同一個資料夾</h3>
+                        <p>
+                            建議將模組主體與漢化檔放在同一個 Mods 子資料夾，
+                            之後啟動遊戲確認文字是否正常顯示。
+                        </p>
+                    </article>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========【注意事項】 設定 - 版本與授權說明 ======== -->
+        <section class="section notes-section" id="notes">
+
+            <div class="section-heading reveal">
+                <div>
+                    <span class="section-kicker">NOTES</span>
+                    <h2>下載前先確認</h2>
+                </div>
+            </div>
+
+            <div class="notes-grid">
+
+                <article class="note-card reveal">
+                    <span class="note-label">01</span>
+                    <h3>漢化不是模組本體</h3>
+                    <p>
+                        這裡只提供翻譯內容。原模組的下載、授權與使用方式仍以原作者頁面為準。
+                    </p>
+                </article>
+
+                <article class="note-card reveal">
+                    <span class="note-label">02</span>
+                    <h3>更新後要重新確認版本</h3>
+                    <p>
+                        原模組如果新增或修改文字，舊漢化可能仍能載入，但不代表所有新內容都已翻譯。
+                    </p>
+                </article>
+
+                <article class="note-card reveal">
+                    <span class="note-label">03</span>
+                    <h3>這裡只整理 L1nG 自漢化</h3>
+                    <p>
+                        其他漢化作者的作品仍保留在「模組整理」網站，不會搬到這個專區冒充自己的內容。
+                    </p>
+                </article>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ========【漢化專區頁腳】 設定 - 站內入口與 Patreon ======== -->
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <div class="footer-brand">
+                <strong>L1nG / TRANSLATIONS</strong>
+                <span>《模擬市民 4》繁體中文漢化</span>
+            </div>
+
+            <div class="footer-links">
+                <a href="../home.html">L1nG 首頁</a>
+                <a href="../../index.html">模組整理</a>
+                <a href="https://www.patreon.com/ling051014" target="_blank" rel="noopener noreferrer">Patreon</a>
+                <a href="#top">↑ 返回頂部</a>
+            </div>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>

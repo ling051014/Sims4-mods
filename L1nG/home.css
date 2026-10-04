@@ -829,6 +829,19 @@ section[id] {
 }
 
 
+/* ========【漢化專區】 設定 - 前往漢化專區入口 ======== */
+.translation-project-link {
+    /* 漢化識別色 */ color: var(--translation);
+    /* 移除底線 */ text-decoration: none;
+    /* 字體大小 */ font-size: 12px;
+    /* 字體粗細 */ font-weight: 650;
+}
+
+.translation-project-link:hover {
+    /* 懸停加深 */ color: #62578f;
+}
+
+
 /* ========【漢化專區】 設定 - 與其他專案一致的繁中字樣圖形 ======== */
 .translation-graphic {
     /* 上下外距 */ margin: 36px 0 28px;
