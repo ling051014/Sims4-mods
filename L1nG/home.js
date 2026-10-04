@@ -2,19 +2,28 @@
 document.documentElement.classList.add("js");
 
 
-// ========【頂部導覽列】 設定 - 滾動後切換導覽列陰影 ========
+// ========【頂部導覽列】 設定 - 主視覺完全離開後才顯示 ========
 const siteHeader = document.getElementById("siteHeader");
+const homeHero = document.querySelector(".hero");
 
 function updateHeaderState() {
-    if (!siteHeader) {
+    if (!siteHeader || !homeHero) {
         return;
     }
 
-    siteHeader.classList.toggle("scrolled", window.scrollY > 10);
+    const heroBottom = homeHero.getBoundingClientRect().bottom;
+    const shouldShowHeader = heroBottom <= 0;
+
+    siteHeader.classList.toggle("visible", shouldShowHeader);
+    siteHeader.classList.toggle("scrolled", shouldShowHeader && window.scrollY > 10);
+
+    if (!shouldShowHeader) {
+        closeMobileNav();
+    }
 }
 
-updateHeaderState();
 window.addEventListener("scroll", updateHeaderState, { passive: true });
+window.addEventListener("resize", updateHeaderState);
 
 
 // ========【手機導覽列】 設定 - 開啟與關閉導覽選單 ========
@@ -34,6 +43,8 @@ function closeMobileNav() {
     navToggle.setAttribute("aria-expanded", "false");
     navToggle.setAttribute("aria-label", navLabelOpen);
 }
+
+updateHeaderState();
 
 if (navToggle && mainNav) {
     navToggle.addEventListener("click", () => {
