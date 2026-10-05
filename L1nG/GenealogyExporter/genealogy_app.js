@@ -520,15 +520,75 @@ try {
 
 // ========【拖曳歷史】 設定 - 卡片與關係標籤共用 Ctrl+Z / Ctrl+Y ========
 const DRAG_HISTORY_LIMIT = 60;
+
+function sameLayoutHistoryState(left, right) {
+  if (!left || !right) return left === right;
+  if (!!left.freeLayout !== !!right.freeLayout) return false;
+
+  const leftPositions = left.manualPositions || {};
+  const rightPositions = right.manualPositions || {};
+  const leftIds = Object.keys(leftPositions).sort();
+  const rightIds = Object.keys(rightPositions).sort();
+
+  if (leftIds.length !== rightIds.length) return false;
+
+  for (let index = 0; index < leftIds.length; index += 1) {
+    if (leftIds[index] !== rightIds[index]) return false;
+
+    const id = leftIds[index];
+    const leftPos = leftPositions[id] || {};
+    const rightPos = rightPositions[id] || {};
+
+    if (
+      Number(leftPos.x) !== Number(rightPos.x) ||
+      Number(leftPos.y) !== Number(rightPos.y)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function sameLabelHistoryState(left, right) {
+  const leftOffset = left?.offset || null;
+  const rightOffset = right?.offset || null;
+
+  if (!leftOffset || !rightOffset) {
+    return leftOffset === rightOffset;
+  }
+
+  return (
+    Number(leftOffset.dx) === Number(rightOffset.dx) &&
+    Number(leftOffset.dy) === Number(rightOffset.dy)
+  );
+}
+
+function dragHistoryEntryHasChange(entry) {
+  if (!entry) return false;
+
+  if (entry.type === 'card-layout') {
+    return !sameLayoutHistoryState(entry.before, entry.after);
+  }
+
+  if (entry.type === 'relationship-label') {
+    return !sameLabelHistoryState(entry.before, entry.after);
+  }
+
+  return true;
+}
+
 const dragHistory = {
   undoStack: [],
   redoStack: [],
 
   push(entry) {
-    if (!entry) return;
+    if (!dragHistoryEntryHasChange(entry)) return false;
+
     this.undoStack.push(entry);
     if (this.undoStack.length > DRAG_HISTORY_LIMIT) this.undoStack.shift();
     this.redoStack.length = 0;
+    return true;
   },
 
   clear() {
@@ -537,19 +597,31 @@ const dragHistory = {
   },
 
   undo() {
-    const entry = this.undoStack.pop();
-    if (!entry) return false;
-    applyDragHistoryEntry(entry, 'before');
-    this.redoStack.push(entry);
-    return true;
+    let entry;
+
+    while ((entry = this.undoStack.pop())) {
+      if (!dragHistoryEntryHasChange(entry)) continue;
+
+      applyDragHistoryEntry(entry, 'before');
+      this.redoStack.push(entry);
+      return true;
+    }
+
+    return false;
   },
 
   redo() {
-    const entry = this.redoStack.pop();
-    if (!entry) return false;
-    applyDragHistoryEntry(entry, 'after');
-    this.undoStack.push(entry);
-    return true;
+    let entry;
+
+    while ((entry = this.redoStack.pop())) {
+      if (!dragHistoryEntryHasChange(entry)) continue;
+
+      applyDragHistoryEntry(entry, 'after');
+      this.undoStack.push(entry);
+      return true;
+    }
+
+    return false;
   }
 };
 
@@ -18387,11 +18459,26 @@ document.addEventListener('keydown', e => {
 
   // 拖曳復原只在非文字編輯欄位攔截，輸入框仍保留瀏覽器原生 Ctrl+Z。
   if (modifier && !isNativeTextUndoTarget(e.target)) {
-    if (key === 'z' && !e.shiftKey) {
+    const isUndoShortcut =
+      key === 'z' &&
+      !e.shiftKey;
+
+    const isRedoShortcut =
+      (key === 'z' && e.shiftKey) ||
+      key === 'y';
+
+    if ((isUndoShortcut || isRedoShortcut) && e.repeat) {
+      // 鍵盤長按會連續送出 keydown；一次實際按鍵只允許退回／重做一筆歷史。
+      e.preventDefault();
+      return;
+    }
+
+    if (isUndoShortcut) {
       if (dragHistory.undo()) e.preventDefault();
       return;
     }
-    if ((key === 'z' && e.shiftKey) || key === 'y') {
+
+    if (isRedoShortcut) {
       if (dragHistory.redo()) e.preventDefault();
       return;
     }
