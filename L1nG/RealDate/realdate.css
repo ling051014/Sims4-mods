@@ -85,6 +85,29 @@ code {
     /* 長文字換行 */ overflow-wrap: anywhere;
 }
 
+/* ========【箭頭轉跳連結】 設定 - 統一轉跳動畫 ======== */
+.arrow-link-motion {
+    /* 允許整體位移動畫 */ transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.arrow-link-motion .link-arrow {
+    /* 箭頭可獨立位移 */ display: inline-block;
+    /* 箭頭動畫 */ transition: transform 0.2s ease;
+}
+
+.arrow-link-motion:hover,
+.arrow-link-motion:focus-visible {
+    /* 整個轉跳連結微幅右移 */ transform: translateX(3px);
+}
+
+.arrow-link-motion:hover .link-arrow,
+.arrow-link-motion:focus-visible .link-arrow {
+    /* 箭頭再額外往右滑動 */ transform: translateX(4px);
+}
+
+
 /* ========【RealDate 語言顯示】 設定 - 繁中 / 英文切換 ======== */
 html[data-language="zh-Hant"] [data-lang="en"] {
     /* 顯示方式 */ display: none !important;
