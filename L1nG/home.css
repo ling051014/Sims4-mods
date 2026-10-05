@@ -32,13 +32,7 @@ html {
 body {
     /* 靜態文字與一般介面使用標準箭頭 */ cursor: default;
     /* 移除預設邊距 */ margin: 0;
-    /* 頁面背景 */ background:
-        radial-gradient(
-            circle at 20% 0%,
-            rgba(85, 172, 238, 0.07),
-            transparent 28rem
-        ),
-        var(--bg);
+    /* 頁面背景與內容區使用同一底色，避免主視覺交界出現分隔 */ background: var(--bg);
     /* 主要文字 */ color: var(--ink);
     /* 全站字體 */ font-family:
         "PingFang TC",
@@ -264,17 +258,13 @@ section[id] {
     /* 垂直置中 */ align-items: center;
     /* 水平置中 */ justify-content: center;
     /* 主視覺文字置中 */ text-align: center;
-    /* V3 滿版封面背景 */ background:
+    /* V3 滿版封面只保留中央淡藍光暈，底色與下方內容完全一致 */ background:
         radial-gradient(
             circle at 50% 42%,
             rgba(85, 172, 238, 0.10),
             transparent 28rem
         ),
-        linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.82),
-            rgba(246, 248, 251, 0.96)
-        );
+        var(--bg);
 }
 
 
@@ -888,10 +878,15 @@ section[id] {
     /* 移除底線 */ text-decoration: none;
     /* 字體大小 */ font-size: 12px;
     /* 字體粗細 */ font-weight: 650;
+    /* 與其他專案入口一致的移動動畫 */ transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.translation-project-link:hover {
+.translation-project-link:hover,
+.translation-project-link:focus-visible {
     /* 懸停加深 */ color: #62578f;
+    /* 與其他專案入口一致微幅右移 */ transform: translateX(3px);
 }
 
 
