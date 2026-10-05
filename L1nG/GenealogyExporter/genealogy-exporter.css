@@ -78,28 +78,17 @@ input:disabled,
 
 a { color:inherit; }
 
-/* ========【箭頭轉跳連結】 設定 - 統一轉跳動畫 ======== */
+/* ========【箭頭轉跳連結】 設定 - 與 L1nG 首頁一致的整體位移 ======== */
 .arrow-link-motion {
-    /* 確保文字連結可以位移 */ display: inline-flex;
-    /* 垂直置中 */ align-items: center;
-    /* 允許整體位移動畫 */ transition:
+    transition:
         color 0.2s ease,
         transform 0.2s ease;
 }
 
-.arrow-link-motion .link-arrow {
-    /* 箭頭可獨立位移 */ display: inline-block;
-    /* 箭頭動畫 */ transition: transform 0.2s ease;
-}
-
 .arrow-link-motion:hover,
 .arrow-link-motion:focus-visible {
-    /* 整個轉跳連結微幅右移 */ transform: translateX(3px);
-}
-
-.arrow-link-motion:hover .link-arrow,
-.arrow-link-motion:focus-visible .link-arrow {
-    /* 箭頭再額外往右滑動 */ transform: translateX(4px);
+    color: var(--accent-hover);
+    transform: translateX(3px);
 }
 
 
