@@ -32,7 +32,23 @@ html {
 body {
     /* 靜態文字與一般介面使用標準箭頭 */ cursor: default;
     /* 移除預設邊距 */ margin: 0;
-    /* 頁面背景與內容區使用同一底色，避免主視覺交界出現分隔 */ background: var(--bg);
+    /* 首頁使用連續背景，光暈可自然跨過主視覺與內容區交界 */
+    background:
+        radial-gradient(
+            circle at 50% 390px,
+            rgba(85, 172, 238, 0.10),
+            rgba(85, 172, 238, 0.055) 320px,
+            rgba(85, 172, 238, 0.018) 560px,
+            transparent 820px
+        ),
+        radial-gradient(
+            circle at calc(100% + 120px) 760px,
+            rgba(49, 95, 131, 0.055),
+            transparent 520px
+        ),
+        var(--bg);
+    /* 背景只繪製一次，不隨內容重複 */
+    background-repeat: no-repeat;
     /* 主要文字 */ color: var(--ink);
     /* 全站字體 */ font-family:
         "PingFang TC",
@@ -258,13 +274,7 @@ section[id] {
     /* 垂直置中 */ align-items: center;
     /* 水平置中 */ justify-content: center;
     /* 主視覺文字置中 */ text-align: center;
-    /* V3 滿版封面只保留中央淡藍光暈，底色與下方內容完全一致 */ background:
-        radial-gradient(
-            circle at 50% 42%,
-            rgba(85, 172, 238, 0.10),
-            transparent 28rem
-        ),
-        var(--bg);
+    /* Hero 不建立獨立背景，直接透出整頁連續背景 */ background: transparent;
 }
 
 
@@ -380,45 +390,8 @@ section[id] {
 
 
 /* ========【首頁主視覺】 設定 - 背景裝飾光暈 ======== */
-.hero-decoration {
-    /* 絕對定位 */ position: absolute;
-    /* 圓形 */ border-radius: 50%;
-    /* 裝飾不接收操作 */ pointer-events: none;
-}
-
-
 /* ========【首頁主視覺】 設定 - 左側光暈 ======== */
-.hero-decoration-left {
-    /* 裝飾寬度 */ width: 460px;
-    /* 裝飾高度 */ height: 460px;
-    /* 左側偏移 */ left: -190px;
-    /* 頂部位置 */ top: 30px;
-    /* 徑向漸層 */ background:
-        radial-gradient(
-            circle,
-            rgba(85, 172, 238, 0.12),
-            transparent 68%
-        );
-}
-
-
 /* ========【首頁主視覺】 設定 - 右側光暈 ======== */
-.hero-decoration-right {
-    /* 裝飾寬度 */ width: 560px;
-    /* 裝飾高度 */ height: 560px;
-    /* 右側偏移 */ right: -180px;
-    /* 底部偏移 */ bottom: -150px;
-    /* 徑向漸層 */ background:
-        radial-gradient(
-            circle,
-            rgba(49, 95, 131, 0.07),
-            transparent 70%
-        );
-}
-
-
-
-
 /* ========【共用區塊】 設定 - 主要內容寬度與上下間距 ======== */
 .section {
     /* 安全寬度 */ width: min(calc(100% - 40px), var(--max-width));
