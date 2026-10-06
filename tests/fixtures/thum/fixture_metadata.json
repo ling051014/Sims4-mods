@@ -1,0 +1,15 @@
+{
+  "description": "Synthetic 4x4 JPEG+ALFA thumbnail, no player cache or player portrait",
+  "playerData": false,
+  "sourceCommit": "b5db166dd4b935abc9f47c4c998fce98c61bd4de",
+  "referenceSourceSha256": "899041DD5B46E803E2E76CBBF0C603E22269DD210CB1E7922160DB956726D0AF",
+  "generator": "ThumReferenceHarness --synthetic: independent format assembly with GDI+ RGB JPEG and grayscale PNG",
+  "reference": "Unmodified ThumbnailResource.TransformToPNG -> UpdateAlpha -> ToImageStream",
+  "rgbDependency": "Offline GDI+ only, not evidence of a TS4 pixel decoder",
+  "sha256": {
+    "synthetic_alfa.thum": "9c30e2864df0a1db8904e9b47cd9fe42633cbbf944c88046389fd3fd8cd03c70",
+    "s4pe_reference.png": "52bcfbaf7bcbd44e331ab86eb6746a312db5db021b878dea3eaeff4577d84418",
+    "decoded_rgb.bin": "861498d0c7e31b82f2c11fa86c2eed04dca1fa09f987906625953f1df91cec4e"
+  },
+  "deterministicWriterSha256": "bee90af84c3c7653384cc79727e8bc5a936eca865e841cbba1a6307e79e1b521"
+}

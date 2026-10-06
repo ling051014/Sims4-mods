@@ -17683,6 +17683,8 @@ async function persistGameImportAvatars(bundle, converted) {
   let saved = 0;
   let unsupported = 0;
   let missing = 0;
+  let thumDecoded = 0;
+  let decodeFailed = 0;
 
   const persistAsset = async (target, simId, kind = 'sim') => {
     const sourceSim = sourceSims[String(simId)];
@@ -17704,15 +17706,20 @@ async function persistGameImportAvatars(bundle, converted) {
       return;
     }
 
-    // 遊戲端 Genealogy Exporter ZIP 已提供 EA 原始頭像 bytes。
-    // 這裡直接保存原始 Blob，避免再次經過一般手動上傳使用的
-    // 384px 縮圖與 JPEG / WEBP 重新編碼，保留遊戲匯出的原始畫質。
-    const sourceBlob = new Blob(
-      [asset.bytes],
-      { type:asset.mimeType }
-    );
+    let prepared;
+    try {
+      prepared = await window.L1nGGameImport.prepareGameAvatarAsset(asset, kind);
+    } catch (error) {
+      if (error?.code !== 'EA_THUM_DECODE_FAILED') throw error;
+      // 已知 THUM conversion failure 只略過這張頭像，不能中止或損失整份族譜。
+      decodeFailed++;
+      console.warn('[遊戲 ZIP 頭像] EA THUM fail closed：', { simId:String(simId), path:asset.path, stage:error.stage, reason:error.message }, error);
+      return;
+    }
 
-    target.avatar = await saveImageAsset(sourceBlob);
+    // 普通圖片仍保存原 bytes；THUM 保存 lossless straight-RGBA PNG，不經手動上傳 384px pipeline。
+    target.avatar = await saveImageAsset(prepared.blob, prepared.metadata);
+    if (prepared.converted) thumDecoded++;
 
     saved++;
   };
@@ -17750,7 +17757,9 @@ async function persistGameImportAvatars(bundle, converted) {
   return {
     saved,
     unsupported,
-    missing
+    missing,
+    thumDecoded,
+    decodeFailed
   };
 }
 
@@ -18046,9 +18055,10 @@ function gameImportUpdateSummary(
     `${uiText('新增遊戲關係')}：${stats.relationships?.added || 0}`,
     `${uiText('移除已不存在的遊戲關係')}：${stats.relationships?.removed || 0}`,
     `${uiText('新匯入頭像')}：${avatarStats?.saved || 0}`,
+    avatarStats?.decodeFailed ? `EA THUM decode failed / skipped: ${avatarStats.decodeFailed} (console: Sim / path / stage)` : null,
     '',
     uiText('已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。')
-  ].join('\n');
+  ].filter(line => line !== null).join('\n');
 }
 
 async function importGameGenealogy(file) {
@@ -18096,6 +18106,8 @@ async function importGameGenealogy(file) {
         bundle,
         converted
       );
+
+    console.info('[遊戲 ZIP 頭像] 匯入摘要：', avatarStats);
 
     const incomingPrepared =
       prepareDatabase(
@@ -18231,6 +18243,7 @@ async function importGameGenealogy(file) {
           `寵物：${petCount}`,
           `家族：${familyCount}`,
           `頭像：${avatarStats.saved}`,
+          avatarStats.decodeFailed ? `EA THUM decode failed / skipped: ${avatarStats.decodeFailed} (console: Sim / path / stage)` : null,
           importedGameDate
             ? `${uiText('遊戲日期')}：${importedGameDate}`
             : null,

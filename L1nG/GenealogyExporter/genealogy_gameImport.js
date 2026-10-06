@@ -748,6 +748,16 @@
     };
   }
 
+  async function prepareGameAvatarAsset(asset, kind = 'sim') {
+    const original = new Blob([asset.bytes], { type:asset.mimeType });
+    // EA codec 僅在遊戲 ZIP 人物頭像這個 owner 使用；寵物及所有其他圖片保持原流程。
+    if (kind !== 'sim' || asset.mimeType !== 'image/jpeg') return { blob:original, converted:false, metadata:{} };
+    const result = await global.L1nGThumDecoder.decode(asset.bytes);
+    return result
+      ? { ...result, converted:true, metadata:{ width:result.width, height:result.height } }
+      : { blob:original, converted:false, metadata:{} };
+  }
+
   function enumKey(value) {
     if (!value) return '';
     if (typeof value === 'string' || typeof value === 'number') return String(value);
@@ -3304,6 +3314,7 @@
     householdShouldCreateFamily,
     expandHouseholdGenealogy,
     findSimAvatarPath,
+    prepareGameAvatarAsset,
     getSimAvatarAsset
   };
 })(window);
