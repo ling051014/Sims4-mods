@@ -630,6 +630,8 @@
       if (sim.residence === undefined) sim.residence = '';
       if (sim.aspiration === undefined) sim.aspiration = '';
       if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
+      if (typeof sim.notes !== 'string') sim.notes = '';
+      delete sim.bio;
 
       const gameData =
         ensureAdoptionMetadata(
