@@ -8294,7 +8294,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-editor-head>strong{color:var(--text-primary);font-size:12px}
 .relationship-other-type-field{width:min(220px,55%);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;color:var(--text-secondary);font-size:var(--appearance-control-label-size)}
 .relationship-other-type-field[hidden]{display:none}
-.relationship-full-preview{--relationship-preview-card-width:88px;--relationship-preview-side-gap:18px;position:relative;width:100%;height:190px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border-default);border-radius:9px;background:var(--surface-card)}
+.relationship-full-preview{--relationship-preview-card-width:88px;--relationship-preview-side-gap:clamp(30px,6%,48px);position:relative;width:100%;height:190px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border-default);border-radius:9px;background:var(--surface-card)}
 .relationship-full-preview svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .relationship-full-preview #relationshipFullPreviewPath{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .relationship-full-preview .relationship-preview-arrow{stroke:none;vector-effect:non-scaling-stroke;pointer-events:none}
