@@ -1612,6 +1612,13 @@ function buildPersonEditorDraft({
 
     const rect=modal.getBoundingClientRect();
 
+    if(rect.width>0){
+      mask.style.setProperty(
+        '--sim-editor-sheet-width',
+        rect.width.toFixed(2)+'px'
+      );
+    }
+
     if(rect.height>0){
       mask.style.setProperty(
         '--sim-editor-sheet-height',
@@ -1619,7 +1626,7 @@ function buildPersonEditorDraft({
       );
     }
 
-    if(rect.height>0){
+    if(rect.width>0&&rect.height>0){
       mask.classList.add('sheet-ready');
     }
   }
