@@ -8153,10 +8153,143 @@ function relationshipFullPreviewPath(
     bY.toFixed(2)
   );
 }
+function relationshipPreviewArrowPath(
+  tipX,
+  tipY,
+  directionX,
+  directionY,
+  size = 9
+) {
+  const length =
+    Math.hypot(
+      directionX,
+      directionY
+    ) || 1;
+
+  const dx =
+    directionX / length;
+  const dy =
+    directionY / length;
+
+  const baseX =
+    tipX - dx * size;
+  const baseY =
+    tipY - dy * size;
+
+  const halfWidth =
+    size * 0.62;
+
+  const px =
+    -dy * halfWidth;
+  const py =
+    dx * halfWidth;
+
+  return (
+    'M' +
+    tipX.toFixed(2) +
+    ' ' +
+    tipY.toFixed(2) +
+    ' L' +
+    (baseX + px).toFixed(2) +
+    ' ' +
+    (baseY + py).toFixed(2) +
+    ' L' +
+    (baseX - px).toFixed(2) +
+    ' ' +
+    (baseY - py).toFixed(2) +
+    ' Z'
+  );
+}
+
+function relationshipPreviewArrowGeometry(
+  setting,
+  preview
+) {
+  const {
+    aX,
+    aY,
+    bX,
+    bY
+  } =
+    relationshipHorizontalPreviewAnchors(
+      preview
+    );
+
+  let startDx =
+    bX - aX;
+  let startDy =
+    bY - aY;
+  let endDx =
+    startDx;
+  let endDy =
+    startDy;
+
+  if (setting.curved) {
+    const amount =
+      clampRelationshipCurveAmount(
+        setting.curveAmount
+      );
+
+    const amplitude =
+      8 +
+      (amount / 100) * 34;
+
+    const controlX =
+      (aX + bX) / 2;
+
+    const controlY =
+      ((aY + bY) / 2) -
+      amplitude;
+
+    startDx =
+      controlX - aX;
+    startDy =
+      controlY - aY;
+
+    endDx =
+      bX - controlX;
+    endDy =
+      bY - controlY;
+  }
+
+  const startLength =
+    Math.hypot(startDx,startDy) || 1;
+  const endLength =
+    Math.hypot(endDx,endDy) || 1;
+
+  const inset = 7;
+
+  return {
+    start:
+      relationshipPreviewArrowPath(
+        aX +
+          (startDx / startLength) *
+          inset,
+        aY +
+          (startDy / startLength) *
+          inset,
+        -startDx,
+        -startDy
+      ),
+    end:
+      relationshipPreviewArrowPath(
+        bX -
+          (endDx / endLength) *
+          inset,
+        bY -
+          (endDy / endLength) *
+          inset,
+        endDx,
+        endDy
+      )
+  };
+}
+
 function updateRelationshipFullPreview() {
   const preview = $('relationshipFullPreview');
   const path = $('relationshipFullPreviewPath');
-  const arrowShape = $('relationshipPreviewArrowShape');
+  const arrowStart = $('relationshipFullPreviewArrowStart');
+  const arrowEnd = $('relationshipFullPreviewArrowEnd');
   if (!preview || !path) return;
 
   const key = activeRelationshipStyleKey;
@@ -8176,14 +8309,54 @@ function updateRelationshipFullPreview() {
   path.setAttribute('stroke',color);
   path.setAttribute('stroke-width',String(Math.max(1,Number(setting.width) || 1.5)));
   path.setAttribute('stroke-dasharray',relationshipDashValue(setting));
-  path.removeAttribute('marker-start');
-  path.removeAttribute('marker-end');
-  arrowShape?.setAttribute('fill',color);
 
-  if (key === 'other' && setting.showArrow) {
-    path.setAttribute('marker-end','url(#relationshipPreviewArrow)');
-    if (isSymmetricSocialRelationshipType(activeOtherRelationshipType)) {
-      path.setAttribute('marker-start','url(#relationshipPreviewArrow)');
+  if (arrowStart) {
+    arrowStart.hidden = true;
+    arrowStart.removeAttribute('d');
+  }
+
+  if (arrowEnd) {
+    arrowEnd.hidden = true;
+    arrowEnd.removeAttribute('d');
+  }
+
+  if (
+    key === 'other' &&
+    setting.showArrow
+  ) {
+    const arrows =
+      relationshipPreviewArrowGeometry(
+        setting,
+        preview
+      );
+
+    if (arrowEnd) {
+      arrowEnd.setAttribute(
+        'd',
+        arrows.end
+      );
+      arrowEnd.setAttribute(
+        'fill',
+        color
+      );
+      arrowEnd.hidden = false;
+    }
+
+    if (
+      arrowStart &&
+      isSymmetricSocialRelationshipType(
+        activeOtherRelationshipType
+      )
+    ) {
+      arrowStart.setAttribute(
+        'd',
+        arrows.start
+      );
+      arrowStart.setAttribute(
+        'fill',
+        color
+      );
+      arrowStart.hidden = false;
     }
   }
 }
