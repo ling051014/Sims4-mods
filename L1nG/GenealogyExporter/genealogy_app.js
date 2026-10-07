@@ -8252,9 +8252,7 @@ function relationshipPreviewArrowPath(
 
 function relationshipPreviewLineGeometry(
   setting,
-  preview,
-  showStartArrow,
-  showEndArrow
+  preview
 ) {
   const {
     aX,
@@ -8265,11 +8263,6 @@ function relationshipPreviewLineGeometry(
     relationshipHorizontalPreviewAnchors(
       preview
     );
-
-  let startX = aX;
-  let startY = aY;
-  let endX = bX;
-  let endY = bY;
 
   let controlX = null;
   let controlY = null;
@@ -8292,127 +8285,11 @@ function relationshipPreviewLineGeometry(
       amplitude;
   }
 
-  const startDx =
-    controlX == null
-      ? bX - aX
-      : controlX - aX;
-  const startDy =
-    controlY == null
-      ? bY - aY
-      : controlY - aY;
-
-  const endDx =
-    controlX == null
-      ? bX - aX
-      : bX - controlX;
-  const endDy =
-    controlY == null
-      ? bY - aY
-      : bY - controlY;
-
-  const previewRect =
-    preview?.getBoundingClientRect();
-
-  const previewWidth =
-    Math.max(
-      1,
-      previewRect?.width || 320
-    );
-
-  const previewHeight =
-    Math.max(
-      1,
-      previewRect?.height || 190
-    );
-
-  const scaleX =
-    320 / previewWidth;
-
-  const scaleY =
-    190 / previewHeight;
-
-  const arrowScreenLength =
-    6.5 * 0.8;
-
-  const startScreenDx =
-    startDx / scaleX;
-
-  const startScreenDy =
-    startDy / scaleY;
-
-  const endScreenDx =
-    endDx / scaleX;
-
-  const endScreenDy =
-    endDy / scaleY;
-
-  const startScreenLength =
-    Math.hypot(
-      startScreenDx,
-      startScreenDy
-    ) || 1;
-
-  const endScreenLength =
-    Math.hypot(
-      endScreenDx,
-      endScreenDy
-    ) || 1;
-
-  const startInsetX =
-    (
-      startScreenDx /
-      startScreenLength
-    ) *
-    arrowScreenLength *
-    scaleX;
-
-  const startInsetY =
-    (
-      startScreenDy /
-      startScreenLength
-    ) *
-    arrowScreenLength *
-    scaleY;
-
-  const endInsetX =
-    (
-      endScreenDx /
-      endScreenLength
-    ) *
-    arrowScreenLength *
-    scaleX;
-
-  const endInsetY =
-    (
-      endScreenDy /
-      endScreenLength
-    ) *
-    arrowScreenLength *
-    scaleY;
-
-  if (showStartArrow) {
-    startX =
-      aX +
-      startInsetX;
-    startY =
-      aY +
-      startInsetY;
-  }
-
-  if (showEndArrow) {
-    endX =
-      bX -
-      endInsetX;
-    endY =
-      bY -
-      endInsetY;
-  }
-
   return {
-    startX,
-    startY,
-    endX,
-    endY,
+    startX:aX,
+    startY:aY,
+    endX:bX,
+    endY:bY,
     controlX,
     controlY
   };
@@ -8469,35 +8346,20 @@ function relationshipPreviewArrowGeometry(
       bY - controlY;
   }
 
-  const startLength =
-    Math.hypot(startDx,startDy) || 1;
-  const endLength =
-    Math.hypot(endDx,endDy) || 1;
-
-  const inset = 7;
-
   return {
     start:
       relationshipPreviewArrowPath(
         preview,
-        aX +
-          (startDx / startLength) *
-          inset,
-        aY +
-          (startDy / startLength) *
-          inset,
+        aX,
+        aY,
         -startDx,
         -startDy
       ),
     end:
       relationshipPreviewArrowPath(
         preview,
-        bX -
-          (endDx / endLength) *
-          inset,
-        bY -
-          (endDy / endLength) *
-          inset,
+        bX,
+        bY,
         endDx,
         endDy
       )
@@ -8534,9 +8396,7 @@ function updateRelationshipFullPreview() {
     const geometry =
       relationshipPreviewLineGeometry(
         setting,
-        preview,
-        hasStartArrow,
-        hasEndArrow
+        preview
       );
 
     if (
