@@ -29,9 +29,7 @@
     'aspiration',
     'causeOfDeath',
     'traits',
-    'career',
-    'avatar',
-    'avatarFrame'
+    'career'
   ]);
 
   const GAME_MANAGED_PET_FIELDS = Object.freeze([
@@ -1750,6 +1748,12 @@
         bio:'',
         order:0,
         avatar:null,
+        avatarFrame:null,
+        gameAvatar:null,
+        gameAvatarFrame:null,
+        customAvatar:null,
+        customAvatarFrame:null,
+        avatarSource:'game',
         gameData:{
           simId:id,
           source:'game',
@@ -2403,10 +2407,6 @@
       manualOverrideSet(existingSim);
 
     GAME_MANAGED_SIM_FIELDS
-      .filter(field =>
-        field !== 'avatar' &&
-        field !== 'avatarFrame'
-      )
       .forEach(field => {
         if (overrides.has(field)) return;
 
@@ -2442,14 +2442,18 @@
         );
     }
 
-    if (!overrides.has('avatar')) {
-      if (incomingSim.avatar) {
-        result.avatar =
-          incomingSim.avatar;
+    // 遊戲頭像只更新 gameAvatar；玩家自訂頭像與目前顯示來源由網站保留。
+    if (incomingSim.gameAvatar) {
+      const hadGameAvatar =
+        !!existingSim.gameAvatar;
 
-        result.avatarFrame =
+      result.gameAvatar =
+        incomingSim.gameAvatar;
+
+      if (!hadGameAvatar) {
+        result.gameAvatarFrame =
           cloneData(
-            incomingSim.avatarFrame
+            incomingSim.gameAvatarFrame
           );
       }
     }

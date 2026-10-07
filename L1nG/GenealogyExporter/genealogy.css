@@ -2013,6 +2013,8 @@ body[data-theme="graphite"] .life-photo-stage {
 .avatar-preview.sim-profile-avatar { grid-column:1/-1; width:104px; height:104px; margin:0 auto 1px; border-radius:11px; font-size:36px; }
 .sim-profile-avatar-actions { grid-column:1/-1; }
 .avatar-editor-actions { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; }
+.sim-profile-avatar-actions.avatar-editor-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.sim-profile-avatar-actions > .avatar-editor-action,.sim-profile-avatar-actions > .filebtn.compact { width:100%; display:inline-flex; align-items:center; justify-content:center; }
 .avatar-editor-action,.filebtn.compact,.avatar-clear-compact { min-height:28px; padding:4px 8px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:11px; line-height:1; white-space:nowrap; }
 button.avatar-editor-action { cursor:pointer; }
 .avatar-editor-action:hover,.avatar-clear-compact:hover,.filebtn.compact:hover { border-color:var(--action-primary); color:var(--action-primary); }
@@ -7547,7 +7549,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .sim-profile-header { grid-template-columns:1fr; gap:10px; }
   .sim-profile-avatar-block { width:100%; grid-template-columns:104px 1fr; grid-template-rows:auto auto; column-gap:10px; }
   .avatar-preview.sim-profile-avatar { grid-column:1; grid-row:1 / span 2; margin:0; }
-  .sim-profile-avatar-actions { grid-column:2; justify-content:flex-start; flex-wrap:wrap; }
+  .sim-profile-avatar-actions { grid-column:2; width:100%; justify-content:stretch; }
   .sim-profile-avatar-block .avatar-tip { grid-column:2; text-align:left; }
   .profile-fact-edit-row { grid-template-columns:minmax(82px,.62fr) minmax(0,1.38fr); }
   .profile-birthday-field { grid-column:1/-1; }

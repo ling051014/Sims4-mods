@@ -3,6 +3,8 @@
   'use strict';
 
   let genealogyStoreAuthority = null;
+  let avatarImageCompressor = null;
+  let avatarImageAssetSaver = null;
 
   function bindStore(store) {
     if (!store || typeof store.getData !== 'function') {
@@ -35,6 +37,11 @@
     simId:null,
     avatar:null,
     avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    gameAvatar:null,
+    gameAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    customAvatar:null,
+    customAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    avatarSource:'custom',
     traits:[],
     parentKinds:new Map(),
     childKinds:new Map(),
@@ -101,12 +108,107 @@
       : null;
   }
 
+  function syncPersonEditorActiveAvatar() {
+    let source =
+      simEditorState.avatarSource ===
+      'game'
+        ? 'game'
+        : 'custom';
+
+    if (
+      source === 'game' &&
+      !simEditorState.gameAvatar &&
+      simEditorState.customAvatar
+    ) {
+      source = 'custom';
+    } else if (
+      source === 'custom' &&
+      !simEditorState.customAvatar &&
+      simEditorState.gameAvatar
+    ) {
+      source = 'game';
+    }
+
+    simEditorState.avatarSource =
+      source;
+
+    simEditorState.avatar =
+      source === 'game'
+        ? simEditorState.gameAvatar
+        : simEditorState.customAvatar;
+
+    simEditorState.avatarFrame =
+      normalizeAvatarFrame(
+        source === 'game'
+          ? simEditorState.gameAvatarFrame
+          : simEditorState.customAvatarFrame
+      );
+
+    return source;
+  }
+
+  function syncPersonEditorAvatarControls() {
+    const source =
+      syncPersonEditorActiveAvatar();
+
+    const toggle =
+      $('avatarSourceToggleBtn');
+
+    if (toggle) {
+      const target =
+        source === 'game'
+          ? 'custom'
+          : 'game';
+
+      toggle.textContent =
+        uiText(
+          target === 'game'
+            ? '使用遊戲頭像'
+            : '使用自訂頭像'
+        );
+
+      toggle.disabled =
+        target === 'game'
+          ? !simEditorState.gameAvatar
+          : !simEditorState.customAvatar;
+
+      toggle.dataset.avatarTarget =
+        target;
+    }
+
+    const adjust =
+      $('avatarAdjustBtn');
+
+    if (adjust) {
+      adjust.disabled =
+        !simEditorState.avatar;
+    }
+
+    const clear =
+      $('avatarClearBtn');
+
+    if (clear) {
+      clear.disabled =
+        source !== 'custom' ||
+        !simEditorState.customAvatar;
+    }
+  }
+
   function resetPersonEditorDraftState() {
     simEditorState.simId = null;
     simEditorState.avatar = null;
     simEditorState.avatarFrame = {
       ...DEFAULT_AVATAR_FRAME
     };
+    simEditorState.gameAvatar = null;
+    simEditorState.gameAvatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+    simEditorState.customAvatar = null;
+    simEditorState.customAvatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+    simEditorState.avatarSource = 'custom';
     simEditorState.traits = [];
     simEditorState.parentKinds.clear();
     simEditorState.childKinds.clear();
@@ -155,6 +257,8 @@
   }
 
 function renderPersonEditorAvatarPreview(){
+    syncPersonEditorAvatarControls();
+
     const element=$('avatarPreview');
     const avatar=framedAvatarImageHTML(simEditorState.avatar,simEditorState.avatarFrame);
 
@@ -164,9 +268,6 @@ function renderPersonEditorAvatarPreview(){
       const name=$('fName').value.trim();
       element.textContent=name?name.charAt(0):'?';
     }
-
-    const adjust=$('avatarAdjustBtn');
-    if(adjust)adjust.disabled=!simEditorState.avatar;
   }
 
   function syncPersonEditorCauseOfDeathVisibility() {
@@ -517,6 +618,21 @@ function buildPersonEditorDraft({
       bio:$('fBio').value.trim(),
       avatar:simEditorState.avatar||null,
       avatarFrame:normalizeAvatarFrame(simEditorState.avatarFrame),
+      gameAvatar:simEditorState.gameAvatar||null,
+      gameAvatarFrame:
+        simEditorState.gameAvatar
+          ? normalizeAvatarFrame(
+              simEditorState.gameAvatarFrame
+            )
+          : null,
+      customAvatar:simEditorState.customAvatar||null,
+      customAvatarFrame:
+        simEditorState.customAvatar
+          ? normalizeAvatarFrame(
+              simEditorState.customAvatarFrame
+            )
+          : null,
+      avatarSource:simEditorState.avatarSource,
       pets:
         copyMedia
           ? JSON.parse(
@@ -2242,16 +2358,32 @@ function buildPersonEditorDraft({
           )
         : '';
 
-    simEditorState.avatar=
+    simEditorState.gameAvatar=
       sim
-        ? (sim.avatar||null)
+        ? (sim.gameAvatar||null)
         : null;
 
-    simEditorState.avatarFrame=
+    simEditorState.gameAvatarFrame=
       normalizeAvatarFrame(
-        sim?.avatarFrame
+        sim?.gameAvatarFrame
       );
 
+    simEditorState.customAvatar=
+      sim
+        ? (sim.customAvatar||null)
+        : null;
+
+    simEditorState.customAvatarFrame=
+      normalizeAvatarFrame(
+        sim?.customAvatarFrame
+      );
+
+    simEditorState.avatarSource=
+      sim?.avatarSource === 'game'
+        ? 'game'
+        : 'custom';
+
+    syncPersonEditorActiveAvatar();
     renderPersonEditorAvatarPreview();
 
     // 人生照片與寵物的草稿資料也延遲到真正需要時才建立。
@@ -3271,13 +3403,26 @@ function collectPersonEditorSaveRequest() {
         'bio',
         $('fBio').value
       ),
-    avatar:
-      simEditorState.avatar ||
+    gameAvatar:
+      simEditorState.gameAvatar ||
       null,
-    avatarFrame:
-      normalizeAvatarFrame(
-        simEditorState.avatarFrame
-      ),
+    gameAvatarFrame:
+      simEditorState.gameAvatar
+        ? normalizeAvatarFrame(
+            simEditorState.gameAvatarFrame
+          )
+        : null,
+    customAvatar:
+      simEditorState.customAvatar ||
+      null,
+    customAvatarFrame:
+      simEditorState.customAvatar
+        ? normalizeAvatarFrame(
+            simEditorState.customAvatarFrame
+          )
+        : null,
+    avatarSource:
+      simEditorState.avatarSource,
     pets:
       JSON.parse(
         JSON.stringify(
@@ -3506,7 +3651,9 @@ function commitPersonEditorDraft() {
   let avatarCropOpener = null;
 
   function mountPersonEditor({
-    openAvatarCropEditor
+    openAvatarCropEditor,
+    compressImage,
+    saveImageAsset
   } = {}) {
     if (
       typeof openAvatarCropEditor !==
@@ -3517,8 +3664,32 @@ function commitPersonEditorDraft() {
       );
     }
 
+    if (
+      typeof compressImage !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires image compressor.'
+      );
+    }
+
+    if (
+      typeof saveImageAsset !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires image asset saver.'
+      );
+    }
+
     avatarCropOpener =
       openAvatarCropEditor;
+
+    avatarImageCompressor =
+      compressImage;
+
+    avatarImageAssetSaver =
+      saveImageAsset;
 
     if (mounted) return;
     mounted = true;
@@ -3534,12 +3705,29 @@ function commitPersonEditorDraft() {
       if(!file)return;
 
       try{
-        const result=await compressImage(file,'sim');
-        simEditorState.avatar=await saveImageAsset(result.blob,{
-          width:result.width,
-          height:result.height
-        });
-        simEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
+        const result=
+          await avatarImageCompressor(
+            file,
+            'sim'
+          );
+
+        simEditorState.customAvatar=
+          await avatarImageAssetSaver(
+            result.blob,
+            {
+              width:result.width,
+              height:result.height
+            }
+          );
+
+        simEditorState.customAvatarFrame={
+          ...DEFAULT_AVATAR_FRAME
+        };
+
+        simEditorState.avatarSource=
+          'custom';
+
+        syncPersonEditorActiveAvatar();
         renderPersonEditorAvatarPreview();
         renderPersonEditorInfoPreviewIfActive();
 
@@ -3558,9 +3746,45 @@ function commitPersonEditorDraft() {
       void avatarCropOpener('sim');
     };
 
+    $('avatarSourceToggleBtn').onclick=()=>{
+      const target=
+        simEditorState.avatarSource==='game'
+          ? 'custom'
+          : 'game';
+
+      const available=
+        target==='game'
+          ? simEditorState.gameAvatar
+          : simEditorState.customAvatar;
+
+      if(!available)return;
+
+      simEditorState.avatarSource=
+        target;
+
+      syncPersonEditorActiveAvatar();
+      renderPersonEditorAvatarPreview();
+      renderPersonEditorInfoPreviewIfActive();
+    };
+
     $('avatarClearBtn').onclick=()=>{
-      simEditorState.avatar=null;
-      simEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
+      if(
+        simEditorState.avatarSource!=='custom' ||
+        !simEditorState.customAvatar
+      ){
+        return;
+      }
+
+      simEditorState.customAvatar=null;
+      simEditorState.customAvatarFrame={
+        ...DEFAULT_AVATAR_FRAME
+      };
+
+      if(simEditorState.gameAvatar){
+        simEditorState.avatarSource='game';
+      }
+
+      syncPersonEditorActiveAvatar();
       renderPersonEditorAvatarPreview();
       renderPersonEditorInfoPreviewIfActive();
     };

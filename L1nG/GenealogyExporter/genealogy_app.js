@@ -9192,6 +9192,10 @@ genealogyStore =
     normalizeAvatarFrame,
     petSpeciesValues:Object.keys(PET_SPECIES),
     sexedPetSpeciesValues:['dog','cat','horse'],
+    gameManagedSimFields:
+      window.L1nGGameImport
+        ?.GAME_MANAGED_SIM_FIELDS ||
+      [],
     cardSettingFieldKeys:CARD_SETTING_FIELD_KEYS,
     defaultCardViewSettings:DEFAULT_CARD_VIEW_SETTINGS,
     defaultCardEditSettings:DEFAULT_CARD_EDIT_SETTINGS,
@@ -9346,7 +9350,9 @@ function collectReferencedAssetIds(targetDb = currentGenealogyData(), targetBg =
   };
 
   Object.values(targetDb?.sims || {}).forEach(sim => {
-    add(sim.avatar, '人物頭像');
+    add(sim.avatar, '人物目前頭像');
+    add(sim.gameAvatar, '人物遊戲頭像');
+    add(sim.customAvatar, '人物自訂頭像');
     (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
     (sim.pets || []).forEach(pet => add(pet.avatar, '寵物頭像'));
   });
@@ -9369,6 +9375,8 @@ function clearUnsupportedImageRefs(targetDb = currentGenealogyData(), targetBg =
 
   Object.values(targetDb?.sims || {}).forEach(sim => {
     clean(sim, 'avatar', null);
+    clean(sim, 'gameAvatar', null);
+    clean(sim, 'customAvatar', null);
     (sim.gallery || []).forEach(item => clean(item, 'image', ''));
     (sim.pets || []).forEach(pet => clean(pet, 'avatar', null));
   });
@@ -14967,6 +14975,12 @@ function setEditingAvatarCropFrame(target,frame){
     petEditorState.avatarFrame=normalized;
     petEditorController.refreshAvatarPreview();
   }else{
+    if(simEditorState.avatarSource==='game'){
+      simEditorState.gameAvatarFrame=normalized;
+    }else{
+      simEditorState.customAvatarFrame=normalized;
+    }
+
     simEditorState.avatarFrame=normalized;
     personEditor.renderAvatarPreview();
     personEditor.renderInfoPreviewIfActive();
@@ -16559,7 +16573,9 @@ $('btnAddPet').onclick = () => {
 
 // ========【人物編輯器 Authority】 設定 - Draft / lifecycle / 關係編輯由獨立模組負責 ========
 personEditor.mount({
-  openAvatarCropEditor
+  openAvatarCropEditor,
+  compressImage,
+  saveImageAsset
 });
 
 function purgeSimData(id) {
@@ -17718,7 +17734,31 @@ async function persistGameImportAvatars(bundle, converted) {
     }
 
     // 普通圖片仍保存原 bytes；THUM 保存 lossless straight-RGBA PNG，不經手動上傳 384px pipeline。
-    target.avatar = await saveImageAsset(prepared.blob, prepared.metadata);
+    const savedAvatar =
+      await saveImageAsset(
+        prepared.blob,
+        prepared.metadata
+      );
+
+    if (kind === 'sim') {
+      target.gameAvatar =
+        savedAvatar;
+
+      if (!target.gameAvatarFrame) {
+        target.gameAvatarFrame = {
+          ...DEFAULT_AVATAR_FRAME
+        };
+      }
+
+      if (!target.customAvatar) {
+        target.avatarSource =
+          'game';
+      }
+    } else {
+      target.avatar =
+        savedAvatar;
+    }
+
     if (prepared.converted) thumDecoded++;
 
     saved++;
