@@ -1018,9 +1018,9 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
       draft
     );
 
-  const bio =
+  const notes =
     personDisplayText(
-      sim.bio,
+      sim.notes,
       sim,
       draft
     );
@@ -1095,7 +1095,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
     residence,
     aspiration,
     causeOfDeath,
-    bio,
+    notes,
     traits,
     lifeStage:{
       value:sim.lifeStage || '成年',
@@ -1616,7 +1616,7 @@ function buildSample() {
       exSpouseIds,
       traits,
       career,
-      bio:'',
+      notes:'',
       order:0,
       avatar:null,
       gameData:{
@@ -11019,7 +11019,7 @@ function renderPersonProfileContent(
   sections.push(
     renderPersonProfileSection(
       '備註',
-      `<div class="person-profile-bio">${person.bio ? esc(presentation.bio) : '—'}</div>`
+      `<div class="person-profile-notes">${person.notes ? esc(presentation.notes) : '—'}</div>`
     )
   );
 
