@@ -8201,6 +8201,112 @@ function relationshipPreviewArrowPath(
   );
 }
 
+function relationshipPreviewLineGeometry(
+  setting,
+  preview,
+  showStartArrow,
+  showEndArrow
+) {
+  const {
+    aX,
+    aY,
+    bX,
+    bY
+  } =
+    relationshipHorizontalPreviewAnchors(
+      preview
+    );
+
+  let startX = aX;
+  let startY = aY;
+  let endX = bX;
+  let endY = bY;
+
+  let controlX = null;
+  let controlY = null;
+
+  if (setting.curved) {
+    const amount =
+      clampRelationshipCurveAmount(
+        setting.curveAmount
+      );
+
+    const amplitude =
+      8 +
+      (amount / 100) * 34;
+
+    controlX =
+      (aX + bX) / 2;
+
+    controlY =
+      ((aY + bY) / 2) -
+      amplitude;
+  }
+
+  const startDx =
+    controlX == null
+      ? bX - aX
+      : controlX - aX;
+  const startDy =
+    controlY == null
+      ? bY - aY
+      : controlY - aY;
+
+  const endDx =
+    controlX == null
+      ? bX - aX
+      : bX - controlX;
+  const endDy =
+    controlY == null
+      ? bY - aY
+      : bY - controlY;
+
+  const startLength =
+    Math.hypot(
+      startDx,
+      startDy
+    ) || 1;
+
+  const endLength =
+    Math.hypot(
+      endDx,
+      endDy
+    ) || 1;
+
+  const arrowInset = 7;
+
+  if (showStartArrow) {
+    startX =
+      aX +
+      (startDx / startLength) *
+      arrowInset;
+    startY =
+      aY +
+      (startDy / startLength) *
+      arrowInset;
+  }
+
+  if (showEndArrow) {
+    endX =
+      bX -
+      (endDx / endLength) *
+      arrowInset;
+    endY =
+      bY -
+      (endDy / endLength) *
+      arrowInset;
+  }
+
+  return {
+    startX,
+    startY,
+    endX,
+    endY,
+    controlX,
+    controlY
+  };
+}
+
 function relationshipPreviewArrowGeometry(
   setting,
   preview
@@ -8298,14 +8404,71 @@ function updateRelationshipFullPreview() {
   const vertical = key === 'parent' || key === 'adopt';
 
   preview.dataset.orientation = vertical ? 'vertical' : 'horizontal';
-  path.setAttribute(
-    'd',
-    relationshipFullPreviewPath(
-      key,
-      setting,
-      preview
-    )
-  );
+
+  const hasEndArrow =
+    key === 'other' &&
+    !!setting.showArrow;
+
+  const hasStartArrow =
+    hasEndArrow &&
+    isSymmetricSocialRelationshipType(
+      activeOtherRelationshipType
+    );
+
+  if (
+    key === 'other'
+  ) {
+    const geometry =
+      relationshipPreviewLineGeometry(
+        setting,
+        preview,
+        hasStartArrow,
+        hasEndArrow
+      );
+
+    if (
+      setting.curved &&
+      geometry.controlX != null &&
+      geometry.controlY != null
+    ) {
+      path.setAttribute(
+        'd',
+        'M' +
+          geometry.startX.toFixed(2) +
+          ' ' +
+          geometry.startY.toFixed(2) +
+          ' Q' +
+          geometry.controlX.toFixed(2) +
+          ' ' +
+          geometry.controlY.toFixed(2) +
+          ' ' +
+          geometry.endX.toFixed(2) +
+          ' ' +
+          geometry.endY.toFixed(2)
+      );
+    } else {
+      path.setAttribute(
+        'd',
+        'M' +
+          geometry.startX.toFixed(2) +
+          ' ' +
+          geometry.startY.toFixed(2) +
+          ' L' +
+          geometry.endX.toFixed(2) +
+          ' ' +
+          geometry.endY.toFixed(2)
+      );
+    }
+  } else {
+    path.setAttribute(
+      'd',
+      relationshipFullPreviewPath(
+        key,
+        setting,
+        preview
+      )
+    );
+  }
   path.setAttribute('stroke',color);
   path.setAttribute('stroke-width',String(Math.max(1,Number(setting.width) || 1.5)));
   path.setAttribute('stroke-dasharray',relationshipDashValue(setting));
