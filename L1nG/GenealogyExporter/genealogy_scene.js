@@ -6633,7 +6633,7 @@ function paintRelationshipLayer({
           Number(scale) || 1
         );
       const markerSize =
-        5.5 / safeScale;
+        6.5 / safeScale;
 
       let markerId =
         arrowMarkerByColor.get(
