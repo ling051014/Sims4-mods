@@ -11018,7 +11018,7 @@ function renderPersonProfileContent(
 
   sections.push(
     renderPersonProfileSection(
-      '簡介',
+      '備註',
       `<div class="person-profile-bio">${person.bio ? esc(presentation.bio) : '—'}</div>`
     )
   );
