@@ -6748,28 +6748,6 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 行高 */ line-height: 1.7;
 }
 
-.export-close {
-    /* 寬度 */ width: 42px;
-    /* 高度 */ height: 42px;
-    /* 縮排 */ flex: 0 0 42px;
-    /* 外觀 */ appearance: none;
-    /* 邊框 */ border: 1px solid var(--relationship-parent);
-    /* 圓角 */ border-radius: 14px;
-    /* 背景設定 */ background: var(--surface-item);
-    /* 顏色 */ color: var(--text-primary);
-    /* 字級 */ font-size: 22px;
-    /* 字重 */ font-weight: 700;
-    /* 游標 */ cursor: pointer;
-    /* 動畫過渡 */ transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
-}
-
-.export-close:hover,
-.export-close:focus-visible {
-    /* 背景設定 */ background: var(--surface-item-hover);
-    /* 邊框 */ border-color: var(--border-default);
-    /* 位移 */ transform: translateY(-1px);
-}
-
 .export-grid {
     /* 版面配置 */ display: grid;
     /* 欄位 */ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

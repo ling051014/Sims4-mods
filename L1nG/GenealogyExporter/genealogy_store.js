@@ -226,7 +226,7 @@
       return true;
     }
 
-    // ========【人物頭像雙來源】 設定 - 遊戲提取與玩家自訂各自保存，avatar 僅作目前顯示來源 ========
+    // ========【人物頭像雙來源】 設定 - 只接受目前 schema；avatar / avatarFrame 僅作目前顯示衍生值 ========
     function syncSimAvatarSources(record) {
       if (
         !record ||
@@ -236,104 +236,37 @@
         return;
       }
 
-      const legacyOverrides =
-        new Set(
-          manualOverrideValues(record)
-        );
-
-      const hasGameAvatarField =
-        Object.prototype.hasOwnProperty.call(
-          record,
-          'gameAvatar'
-        );
-
-      const hasCustomAvatarField =
-        Object.prototype.hasOwnProperty.call(
-          record,
-          'customAvatar'
-        );
-
-      if (
-        !hasGameAvatarField &&
-        !hasCustomAvatarField
-      ) {
-        const legacyAvatar =
-          record.avatar == null
-            ? null
-            : record.avatar;
-
-        const legacyFrame =
-          normalizeAvatarFrame(
-            record.avatarFrame
-          );
-
-        const legacyIsCustom =
-          !!legacyAvatar &&
-          (
-            !isGameImportedRecord(record) ||
-            legacyOverrides.has('avatar') ||
-            legacyOverrides.has('avatarFrame')
-          );
-
-        record.gameAvatar =
-          legacyAvatar &&
-          !legacyIsCustom
-            ? legacyAvatar
-            : null;
-
-        record.gameAvatarFrame =
-          record.gameAvatar
-            ? legacyFrame
-            : null;
-
-        record.customAvatar =
-          legacyAvatar &&
-          legacyIsCustom
-            ? legacyAvatar
-            : null;
-
-        record.customAvatarFrame =
-          record.customAvatar
-            ? legacyFrame
-            : null;
-
-        if (
-          record.avatarSource !== 'game' &&
-          record.avatarSource !== 'custom'
-        ) {
-          record.avatarSource =
-            record.customAvatar
-              ? 'custom'
-              : 'game';
-        }
-      } else {
-        if (record.gameAvatar === undefined) {
-          record.gameAvatar = null;
-        }
-
-        if (record.customAvatar === undefined) {
-          record.customAvatar = null;
-        }
-
-        record.gameAvatarFrame =
-          record.gameAvatar
-            ? normalizeAvatarFrame(
-                record.gameAvatarFrame
-              )
-            : null;
-
-        record.customAvatarFrame =
-          record.customAvatar
-            ? normalizeAvatarFrame(
-                record.customAvatarFrame
-              )
-            : null;
+      if (record.gameAvatar === undefined) {
+        record.gameAvatar = null;
       }
 
+      if (record.customAvatar === undefined) {
+        record.customAvatar = null;
+      }
+
+      record.gameAvatarFrame =
+        record.gameAvatar
+          ? normalizeAvatarFrame(
+              record.gameAvatarFrame
+            )
+          : null;
+
+      record.customAvatarFrame =
+        record.customAvatar
+          ? normalizeAvatarFrame(
+              record.customAvatarFrame
+            )
+          : null;
+
       let source =
-        record.avatarSource === 'game'
-          ? 'game'
-          : 'custom';
+        record.avatarSource === 'game' ||
+        record.avatarSource === 'custom'
+          ? record.avatarSource
+          : record.customAvatar
+            ? 'custom'
+            : record.gameAvatar
+              ? 'game'
+              : 'custom';
 
       if (
         source === 'game' &&
@@ -347,14 +280,6 @@
         record.gameAvatar
       ) {
         source = 'game';
-      } else if (
-        !record.gameAvatar &&
-        !record.customAvatar
-      ) {
-        source =
-          isGameImportedRecord(record)
-            ? 'game'
-            : 'custom';
       }
 
       record.avatarSource = source;
@@ -370,19 +295,6 @@
             ? record.gameAvatarFrame
             : record.customAvatarFrame
         );
-
-      if (
-        record.gameData &&
-        typeof record.gameData === 'object' &&
-        !Array.isArray(record.gameData)
-      ) {
-        record.gameData.manualOverrides =
-          manualOverrideValues(record)
-            .filter(field =>
-              field !== 'avatar' &&
-              field !== 'avatarFrame'
-            );
-      }
     }
 
     function normalizePetGenderValue(value) {
