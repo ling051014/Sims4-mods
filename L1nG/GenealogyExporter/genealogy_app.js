@@ -16575,7 +16575,8 @@ $('btnAddPet').onclick = () => {
 personEditor.mount({
   openAvatarCropEditor,
   compressImage,
-  saveImageAsset
+  saveImageAsset,
+  showToast:uiToast
 });
 
 function purgeSimData(id) {

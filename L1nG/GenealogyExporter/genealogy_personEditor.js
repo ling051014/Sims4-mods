@@ -5,6 +5,7 @@
   let genealogyStoreAuthority = null;
   let avatarImageCompressor = null;
   let avatarImageAssetSaver = null;
+  let personEditorToast = null;
 
   function bindStore(store) {
     if (!store || typeof store.getData !== 'function') {
@@ -3644,6 +3645,9 @@ function commitPersonEditorDraft() {
 
   closePersonEditor();
   scheduleGC();
+  personEditorToast?.(
+    '已儲存模擬市民資料。'
+  );
 }
 
 
@@ -3653,7 +3657,8 @@ function commitPersonEditorDraft() {
   function mountPersonEditor({
     openAvatarCropEditor,
     compressImage,
-    saveImageAsset
+    saveImageAsset,
+    showToast
   } = {}) {
     if (
       typeof openAvatarCropEditor !==
@@ -3682,6 +3687,15 @@ function commitPersonEditorDraft() {
       );
     }
 
+    if (
+      typeof showToast !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires toast feedback.'
+      );
+    }
+
     avatarCropOpener =
       openAvatarCropEditor;
 
@@ -3690,6 +3704,9 @@ function commitPersonEditorDraft() {
 
     avatarImageAssetSaver =
       saveImageAsset;
+
+    personEditorToast =
+      showToast;
 
     if (mounted) return;
     mounted = true;
