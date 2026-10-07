@@ -7528,8 +7528,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .canvas-tool { width:30px; padding:5px; }
 }
 @media (max-width:720px) {
-  /* 手機層級：頂部工具列／工具列選單永遠最高；一般彈窗其次，再來才是常駐家庭資訊。 */
-  .topbar { z-index:600; }
+  /* 手機層級：完整視窗高於頂部工具列；工具列與其選單只需高於常駐家庭資訊。 */
+  .topbar { z-index:350; }
   .ui-dialog-backdrop { z-index:400; }
   .ui-dialog-backdrop.person-library-backdrop { z-index:390; }
   .ui-dialog-backdrop.nested { z-index:450; }
