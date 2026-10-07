@@ -8196,14 +8196,15 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-full-preview[data-orientation="vertical"] .card-b{left:50%;bottom:7px;transform:translateX(-50%)}
 .relationship-full-preview[data-orientation="horizontal"] .card-a{left:calc(50% - var(--relationship-preview-card-width) - var(--relationship-preview-half-pair-gap));top:50%;transform:translateY(-50%)}
 .relationship-full-preview[data-orientation="horizontal"] .card-b{left:calc(50% + var(--relationship-preview-half-pair-gap));top:50%;transform:translateY(-50%)}
-.relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 74px;gap:10px;align-items:start}
+.relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 44px;gap:10px;align-items:start}
 .relationship-editor-fields>label{min-width:0;display:grid;grid-template-rows:auto 32px;gap:5px;align-items:start;color:var(--text-secondary);font-size:10px}
 .relationship-editor-fields>label>span:first-child{min-height:12px;display:flex;align-items:center;line-height:1.2}
 .relationship-editor-fields>label>.ui-single-select,
 .relationship-editor-fields>label>select{height:32px;align-self:start}
-.relationship-editor-range{min-width:0;height:32px;display:grid;grid-template-columns:minmax(90px,1fr) 38px;align-items:center;gap:7px}
-.relationship-editor-range output{color:var(--text-primary);font-size:10.5px;text-align:right;font-variant-numeric:tabular-nums}
+.relationship-editor-range{min-width:0;height:32px;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:4px}
+.relationship-editor-range output{min-width:30px;color:var(--text-primary);font-size:10.5px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
 .relationship-editor-fields input[type=range],.relationship-curve-slider input[type=range]{width:100%;min-width:0;accent-color:var(--action-primary)}
+.relationship-editor-color{width:44px;justify-self:end}
 .relationship-editor-color input[type=color]{width:44px;height:32px;align-self:start;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
 .relationship-feature-row{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:center}
 .relationship-feature-row[hidden]{display:none}
@@ -8225,8 +8226,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-shared-curve-row{margin-top:8px}
 .relationship-curve-control.is-disabled{opacity:.42}
 .relationship-curve-control.is-disabled input[type=range]{cursor:not-allowed}
-.relationship-curve-slider{min-width:0;display:grid;grid-template-columns:minmax(120px,1fr) 44px;align-items:center;gap:8px}
-.relationship-curve-slider output{color:var(--text-primary);font-size:10.5px;font-variant-numeric:tabular-nums;text-align:right}
+.relationship-curve-slider{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:4px}
+.relationship-curve-slider output{min-width:34px;color:var(--text-primary);font-size:10.5px;font-variant-numeric:tabular-nums;text-align:left;white-space:nowrap}
 .relationship-style-actions{
     margin-top:8px;
     display:flex;
@@ -8250,7 +8251,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .appearance-modal .ui-single-select-trigger:focus-visible{border-color:var(--action-primary);box-shadow:0 0 0 2px var(--brand-tint-start)}
 .appearance-modal .ui-select-chevron-icon{color:var(--text-secondary)}
 .appearance-modal .ui-single-select:focus-within .ui-select-chevron-icon{color:var(--action-primary)}
-@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:1fr 1fr 70px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:minmax(82px,.9fr) minmax(0,1.45fr) 44px;gap:8px}.relationship-editor-range{grid-template-columns:minmax(0,1fr) max-content;gap:3px}.relationship-editor-range output{min-width:28px;font-size:10px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 
 /* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */
