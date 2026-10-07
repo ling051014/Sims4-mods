@@ -3258,13 +3258,16 @@ button.avatar-editor-action { cursor:pointer; }
 
 /* 主題卡：沿用視覺設定 prototype。 */
 .appearance-theme-grid{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
     gap:10px;
     margin-bottom:10px;
 }
 
 .appearance-theme-card{
+    width:calc((100% - 20px) / 3);
+    flex:0 0 calc((100% - 20px) / 3);
     min-width:0;
     min-height:88px;
     padding:10px;
@@ -3589,8 +3592,9 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 @media(max-width:760px){
-    .appearance-theme-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr));
+    .appearance-theme-card{
+        width:calc((100% - 10px) / 2);
+        flex-basis:calc((100% - 10px) / 2);
     }
 
     .appearance-custom-theme-row{
@@ -8169,12 +8173,15 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-full-preview[data-orientation="vertical"] .card-b{left:50%;bottom:7px;transform:translateX(-50%)}
 .relationship-full-preview[data-orientation="horizontal"] .card-a{left:calc(50% - var(--relationship-preview-card-width) - var(--relationship-preview-half-pair-gap));top:50%;transform:translateY(-50%)}
 .relationship-full-preview[data-orientation="horizontal"] .card-b{left:calc(50% + var(--relationship-preview-half-pair-gap));top:50%;transform:translateY(-50%)}
-.relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 74px;gap:10px;align-items:end}
-.relationship-editor-fields>label{min-width:0;display:grid;gap:5px;color:var(--text-secondary);font-size:10px}
-.relationship-editor-range{min-width:0;display:grid;grid-template-columns:minmax(90px,1fr) 38px;align-items:center;gap:7px}
+.relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 74px;gap:10px;align-items:start}
+.relationship-editor-fields>label{min-width:0;display:grid;grid-template-rows:auto 32px;gap:5px;align-items:start;color:var(--text-secondary);font-size:10px}
+.relationship-editor-fields>label>span:first-child{min-height:12px;display:flex;align-items:center;line-height:1.2}
+.relationship-editor-fields>label>.ui-single-select,
+.relationship-editor-fields>label>select{height:32px;align-self:start}
+.relationship-editor-range{min-width:0;height:32px;display:grid;grid-template-columns:minmax(90px,1fr) 38px;align-items:center;gap:7px}
 .relationship-editor-range output{color:var(--text-primary);font-size:10.5px;text-align:right;font-variant-numeric:tabular-nums}
 .relationship-editor-fields input[type=range],.relationship-curve-slider input[type=range]{width:100%;min-width:0;accent-color:var(--action-primary)}
-.relationship-editor-color input[type=color]{width:44px;height:32px;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
+.relationship-editor-color input[type=color]{width:44px;height:32px;align-self:start;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
 .relationship-feature-row{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:center}
 .relationship-feature-row[hidden]{display:none}
 .relationship-feature-row.single .curve-cell{grid-column:1/-1}
