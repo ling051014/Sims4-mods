@@ -6,6 +6,9 @@
   let avatarImageCompressor = null;
   let avatarImageAssetSaver = null;
   let personEditorToast = null;
+  let personEditorScene = null;
+  let personEditorGetCurrentFamily = null;
+  let personEditorGetViewMode = null;
 
   function bindStore(store) {
     if (!store || typeof store.getData !== 'function') {
@@ -3475,24 +3478,28 @@ function ensureSavedSimManualPosition(
   mutation
 ) {
   const family =
-    currentFamily();
+    personEditorGetCurrentFamily?.();
 
-  ensureFamilyLayoutShape(
-    family
-  );
+  const mode =
+    personEditorGetViewMode?.() ===
+    'edit'
+      ? 'edit'
+      : 'view';
 
   if (
-    !family.freeLayout[
-      viewMode
-    ]
+    !family ||
+    !personEditorScene
+      ?.isFreeLayoutActive?.(
+        family
+      )
   ) {
     return mutation;
   }
 
   const manualPositions =
-    family.manualPositions[
-      viewMode
-    ];
+    family.manualPositions?.[
+      mode
+    ] || {};
 
   if (
     manualPositions[sim.id]
@@ -3500,13 +3507,11 @@ function ensureSavedSimManualPosition(
     return mutation;
   }
 
-  const {
-    H:NODE_H
-  } = getDims();
-
-  const {
-    LEVEL:LEVEL_GAP
-  } = getGaps();
+  const readPosition = id =>
+    manualPositions[id] ||
+    personEditorScene
+      ?.readPersonPosition?.(id) ||
+    null;
 
   const anchorParentId =
     parentRelations
@@ -3514,40 +3519,69 @@ function ensureSavedSimManualPosition(
         relation.parentId
       )
       .find(parentId =>
-        manualPositions[
-          parentId
-        ]
+        !!readPosition(parentId)
       );
 
   let nextPosition;
 
   if (anchorParentId) {
     const parentPosition =
-      manualPositions[
+      readPosition(
         anchorParentId
-      ];
+      );
+
+    const parentDimensions =
+      personEditorScene
+        ?.measurePersonCardById?.(
+          anchorParentId
+        ) || {
+          H:100
+        };
 
     nextPosition = {
       x:parentPosition.x,
       y:
         parentPosition.y +
-        NODE_H +
-        LEVEL_GAP
+        (Number(parentDimensions.H) || 100) +
+        80
     };
   } else {
     let maxY = 0;
 
-    Object.values(
-      manualPositions
-    )
-      .forEach(position => {
+    const scenePlan =
+      personEditorScene
+        ?.readScenePlan?.();
+
+    if (scenePlan?.pos) {
+      scenePlan.pos.forEach(
+        (position, id) => {
+          const dimensions =
+            personEditorScene
+              ?.measurePersonCardById?.(
+                id
+              ) || {
+                H:100
+              };
+
+          maxY =
+            Math.max(
+              maxY,
+              position.y +
+              (Number(dimensions.H) || 100)
+            );
+        }
+      );
+    } else {
+      Object.values(
+        manualPositions
+      ).forEach(position => {
         maxY =
           Math.max(
             maxY,
-            position.y +
-            NODE_H
+            Number(position?.y) || 0
           );
       });
+    }
 
     nextPosition = {
       x:0,
@@ -3564,7 +3598,7 @@ function ensureSavedSimManualPosition(
       genealogyStoreAuthority
         .setNodePosition(
           family.id,
-          viewMode,
+          mode,
           sim.id,
           nextPosition
         )
@@ -3666,7 +3700,10 @@ function commitPersonEditorDraft() {
     openAvatarCropEditor,
     compressImage,
     saveImageAsset,
-    showToast
+    showToast,
+    scene,
+    getCurrentFamily,
+    getViewMode
   } = {}) {
     if (
       typeof openAvatarCropEditor !==
@@ -3704,6 +3741,27 @@ function commitPersonEditorDraft() {
       );
     }
 
+    if (
+      !scene ||
+      typeof scene.isFreeLayoutActive !==
+        'function'
+    ) {
+      throw new Error(
+        'Person Editor requires Genealogy Scene.'
+      );
+    }
+
+    if (
+      typeof getCurrentFamily !==
+      'function' ||
+      typeof getViewMode !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires layout state access.'
+      );
+    }
+
     avatarCropOpener =
       openAvatarCropEditor;
 
@@ -3715,6 +3773,15 @@ function commitPersonEditorDraft() {
 
     personEditorToast =
       showToast;
+
+    personEditorScene =
+      scene;
+
+    personEditorGetCurrentFamily =
+      getCurrentFamily;
+
+    personEditorGetViewMode =
+      getViewMode;
 
     if (mounted) return;
     mounted = true;

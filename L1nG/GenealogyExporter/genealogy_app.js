@@ -16708,7 +16708,10 @@ personEditor.mount({
   openAvatarCropEditor,
   compressImage,
   saveImageAsset,
-  showToast:uiToast
+  showToast:uiToast,
+  scene:genealogyScene,
+  getCurrentFamily:currentFamily,
+  getViewMode:() => viewMode
 });
 
 function purgeSimData(id) {
@@ -18622,11 +18625,32 @@ window.addEventListener('resize', () => {
 });
 
 async function savePersonEditorFromUi() {
-  return withActionButtonLoading(
-    $('btnSave'),
-    '儲存中',
-    () => personEditor.commit()
-  );
+  try {
+    return await withActionButtonLoading(
+      $('btnSave'),
+      '儲存中',
+      () => personEditor.commit()
+    );
+  } catch (error) {
+    console.error(
+      '[Genealogy] Person editor save failed.',
+      error
+    );
+
+    await uiAlert(
+      '模擬市民資料儲存失敗：' +
+        (
+          error?.message ||
+          'Unknown error'
+        ),
+      {
+        title:'儲存失敗',
+        kind:'danger'
+      }
+    );
+
+    return null;
+  }
 }
 
 $('addBtn').onclick = () => personEditor.open(null);
