@@ -6,7 +6,6 @@
   let avatarImageCompressor = null;
   let avatarImageAssetSaver = null;
   let personEditorToast = null;
-  let personEditorFlushSave = null;
 
   function bindStore(store) {
     if (!store || typeof store.getData !== 'function') {
@@ -3572,7 +3571,7 @@ function ensureSavedSimManualPosition(
     );
 }
 
-async function commitPersonEditorDraft() {
+function commitPersonEditorDraft() {
   initializePersonEditorRelationshipUi();
   initializePersonEditorMediaDraft();
 
@@ -3640,17 +3639,23 @@ async function commitPersonEditorDraft() {
       mutation
     );
 
+  // 資料先交給 Store 與既有 Save Coordinator；
+  // 不在按鈕點擊流程強制整庫 JSON.stringify / localStorage 寫入。
+  // Scene 改走下一幀更新，避免大型族譜在關閉編輯器前同步重繪。
   applyGenealogyMutation(
-    mutation
+    mutation,
+    {
+      immediateRender:false
+    }
   );
-
-  await personEditorFlushSave();
 
   closePersonEditor();
   scheduleGC();
   personEditorToast?.(
     '已儲存模擬市民資料。'
   );
+
+  return mutation;
 }
 
 
@@ -3661,8 +3666,7 @@ async function commitPersonEditorDraft() {
     openAvatarCropEditor,
     compressImage,
     saveImageAsset,
-    showToast,
-    flushSave
+    showToast
   } = {}) {
     if (
       typeof openAvatarCropEditor !==
@@ -3700,15 +3704,6 @@ async function commitPersonEditorDraft() {
       );
     }
 
-    if (
-      typeof flushSave !==
-      'function'
-    ) {
-      throw new Error(
-        'Person Editor requires save flush.'
-      );
-    }
-
     avatarCropOpener =
       openAvatarCropEditor;
 
@@ -3720,9 +3715,6 @@ async function commitPersonEditorDraft() {
 
     personEditorToast =
       showToast;
-
-    personEditorFlushSave =
-      flushSave;
 
     if (mounted) return;
     mounted = true;

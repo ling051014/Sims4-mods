@@ -16708,8 +16708,7 @@ personEditor.mount({
   openAvatarCropEditor,
   compressImage,
   saveImageAsset,
-  showToast:uiToast,
-  flushSave:_flushSave
+  showToast:uiToast
 });
 
 function purgeSimData(id) {
