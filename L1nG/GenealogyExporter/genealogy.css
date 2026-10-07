@@ -8002,7 +8002,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     margin: 0;
 }
 
-/* ========【全站載入骨架】 設定 - 初始化期間維持與正式介面相同的主要區塊比例 ======== */
+/* ========【全站載入骨架】 設定 - 初始化期間對齊目前正式介面分佈 ======== */
 .app-skeleton {
     position:fixed;
     inset:0;
@@ -8018,15 +8018,31 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     pointer-events:none;
 }
 .app-skeleton-topbar {
-    height:52px;
-    flex:0 0 52px;
+    height:58px;
+    flex:0 0 58px;
     display:flex;
-    align-items:center;
-    gap:12px;
-    padding:0 16px;
+    align-items:stretch;
     border-bottom:1px solid var(--border-default);
     background:var(--surface-card);
 }
+.app-skeleton-brand-area {
+    width:var(--sidebar-width);
+    flex:0 0 var(--sidebar-width);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:0 10px;
+}
+.app-skeleton-main-actions {
+    flex:1;
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 16px;
+}
+.skeleton-topbar-spacer { flex:1; }
 .app-skeleton-body {
     flex:1;
     min-height:0;
@@ -8035,7 +8051,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .app-skeleton-sidebar {
     width:var(--sidebar-width);
     flex:0 0 var(--sidebar-width);
-    padding:14px;
+    min-width:0;
+    padding:12px 8px 16px;
+    overflow:hidden;
     border-right:1px solid var(--border-default);
     background:var(--surface-card);
 }
@@ -8044,7 +8062,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     flex:1;
     min-width:0;
     overflow:hidden;
-    background:var(--canvas-bg, var(--surface-canvas));
+    background-color:#fafafa;
+    background-image:radial-gradient(circle,rgba(0,0,0,.055) 1px,transparent 1px);
+    background-size:24px 24px;
 }
 .skeleton-block,
 .skeleton-person,
@@ -8060,32 +8080,154 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background-size:220% 100%;
     animation:genealogy-skeleton-shimmer 1.25s linear infinite;
 }
-.skeleton-brand { width:150px; height:18px; border-radius:5px; }
-.skeleton-search { width:min(360px,34vw); height:30px; border-radius:5px; }
-.skeleton-action { width:64px; height:28px; border-radius:5px; }
-.skeleton-cover { width:100%; aspect-ratio:16/9; border-radius:7px; }
-.skeleton-line { width:72%; height:12px; margin-top:14px; border-radius:4px; }
+.skeleton-brand { width:126px; height:14px; border-radius:4px; }
+.skeleton-help,
+.skeleton-more,
+.skeleton-mobile-menu {
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
+    border-radius:7px;
+}
+.skeleton-mobile-menu { display:none; }
+.skeleton-filter { width:76px; height:32px; border-radius:7px; }
+.skeleton-action { width:64px; height:32px; border-radius:7px; }
+.skeleton-action-wide { width:112px; }
+.skeleton-cover { width:100%; aspect-ratio:16/9; border-radius:8px; }
+.skeleton-line { width:72%; height:11px; margin-top:0; border-radius:4px; }
 .skeleton-line.wide { width:86%; }
 .skeleton-line.short { width:48%; }
-.skeleton-people { margin-top:18px; display:flex; flex-direction:column; gap:9px; }
-.skeleton-person { height:46px; border-radius:6px; }
+.skeleton-family-heading,
+.skeleton-member-heading,
+.skeleton-stats {
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.skeleton-family-heading {
+    justify-content:space-between;
+    margin-top:14px;
+}
+.skeleton-family-heading .skeleton-line { flex:1; max-width:128px; }
+.app-skeleton-sidebar > .skeleton-line { margin-top:10px; }
+.skeleton-stats {
+    justify-content:space-between;
+    margin-top:12px;
+    padding:9px 0 12px;
+    border-bottom:1px solid var(--border-default);
+}
+.skeleton-stats .skeleton-line {
+    width:27%;
+    height:9px;
+}
+.skeleton-member-heading {
+    justify-content:space-between;
+    margin-top:12px;
+}
+.skeleton-member-heading .skeleton-line { width:54px; }
+.skeleton-people {
+    margin-top:10px;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+.skeleton-person {
+    height:48px;
+    padding:6px 8px;
+    border-radius:7px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.skeleton-avatar {
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    border-radius:50%;
+}
+.skeleton-person-copy {
+    min-width:0;
+    flex:1;
+    display:grid;
+    gap:7px;
+}
+.skeleton-person-copy .skeleton-line:first-child { width:70%; }
+.skeleton-person-copy .skeleton-line.short { width:44%; }
+.skeleton-canvas-toolbar {
+    position:absolute;
+    top:12px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1;
+    display:flex;
+    gap:7px;
+    padding:6px;
+    border:1px solid var(--border-default);
+    border-radius:9px;
+    background:color-mix(in srgb,var(--surface-card) 94%,transparent);
+}
+.skeleton-tool { width:74px; height:30px; border-radius:6px; }
 .skeleton-node {
     position:absolute;
     width:176px;
     height:142px;
     border-radius:10px;
 }
-.skeleton-node-a { left:20%; top:22%; }
-.skeleton-node-b { left:54%; top:40%; }
-.skeleton-node-c { left:31%; top:63%; }
+.skeleton-node-a { left:18%; top:22%; }
+.skeleton-node-b { left:54%; top:38%; }
+.skeleton-node-c { left:31%; top:62%; }
+.skeleton-zoom {
+    position:absolute;
+    right:16px;
+    bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:6px;
+    border:1px solid var(--border-default);
+    border-radius:9px;
+    background:var(--surface-card);
+}
+.skeleton-zoom-button { width:28px; height:28px; border-radius:6px; }
+.skeleton-zoom-value { width:42px; height:10px; border-radius:4px; }
+
 @keyframes genealogy-skeleton-shimmer {
     from { background-position:200% 0; }
     to { background-position:-20% 0; }
 }
 @media (max-width:720px) {
-    .app-skeleton-sidebar { width:min(280px,72vw); flex-basis:min(280px,72vw); }
-    .skeleton-search { flex:1; width:auto; }
-    .skeleton-action { display:none; }
+    .app-skeleton-brand-area { display:none; }
+    .app-skeleton-main-actions {
+        padding:0 8px;
+        gap:6px;
+    }
+    .skeleton-mobile-menu { display:block; }
+    .skeleton-filter { width:54px; }
+    .skeleton-action { width:34px; }
+    .skeleton-action-wide { display:none; }
+    .app-skeleton-sidebar { display:none; }
+    .skeleton-canvas-toolbar {
+        top:10px;
+        max-width:calc(100% - 20px);
+        overflow:hidden;
+    }
+    .skeleton-tool { width:56px; }
+    .skeleton-node {
+        width:132px;
+        height:112px;
+    }
+    .skeleton-node-a { left:8%; top:24%; }
+    .skeleton-node-b { left:52%; top:42%; }
+    .skeleton-node-c { left:22%; top:64%; }
+}
+@media (prefers-reduced-motion:reduce) {
+    .app-skeleton { transition:none; }
+    .skeleton-block,
+    .skeleton-person,
+    .skeleton-node {
+        animation:none;
+        background:color-mix(in srgb,var(--border-default) 68%,transparent);
+    }
 }
 
 

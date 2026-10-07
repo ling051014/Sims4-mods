@@ -5,35 +5,104 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20261008-relationship-preview-match-canvas-r4">
+        <link rel="stylesheet" href="genealogy.css?v=20261008-skeleton-layout-r1">
     </head>
     <body data-theme="ling">
 
-        <!-- ========【全站載入骨架】 設定 - 資料庫與圖片初始化完成前保留穩定版面 ======== -->
+        <!-- ========【全站載入骨架】 設定 - 對齊目前頂欄、家族檔案欄與畫布工具分佈 ======== -->
         <div class="app-skeleton" id="appSkeleton" aria-hidden="true">
             <div class="app-skeleton-topbar">
-                <span class="skeleton-block skeleton-brand"></span>
-                <span class="skeleton-block skeleton-search"></span>
-                <span class="skeleton-block skeleton-action"></span>
-                <span class="skeleton-block skeleton-action"></span>
+                <div class="app-skeleton-brand-area">
+                    <span class="skeleton-block skeleton-brand"></span>
+                    <span class="skeleton-block skeleton-help"></span>
+                </div>
+                <div class="app-skeleton-main-actions">
+                    <span class="skeleton-block skeleton-mobile-menu"></span>
+                    <span class="skeleton-block skeleton-filter"></span>
+                    <span class="skeleton-topbar-spacer"></span>
+                    <span class="skeleton-block skeleton-action"></span>
+                    <span class="skeleton-block skeleton-action"></span>
+                    <span class="skeleton-block skeleton-action skeleton-action-wide"></span>
+                    <span class="skeleton-block skeleton-more"></span>
+                </div>
             </div>
             <div class="app-skeleton-body">
                 <aside class="app-skeleton-sidebar">
                     <span class="skeleton-block skeleton-cover"></span>
-                    <span class="skeleton-block skeleton-line wide"></span>
+                    <div class="skeleton-family-heading">
+                        <span class="skeleton-block skeleton-line wide"></span>
+                        <span class="skeleton-block skeleton-more"></span>
+                    </div>
                     <span class="skeleton-block skeleton-line"></span>
-                    <span class="skeleton-block skeleton-line short"></span>
+                    <span class="skeleton-block skeleton-line wide"></span>
+                    <div class="skeleton-stats">
+                        <span class="skeleton-block skeleton-line short"></span>
+                        <span class="skeleton-block skeleton-line short"></span>
+                        <span class="skeleton-block skeleton-line short"></span>
+                    </div>
+                    <div class="skeleton-member-heading">
+                        <span class="skeleton-block skeleton-line short"></span>
+                        <span class="skeleton-block skeleton-more"></span>
+                    </div>
                     <div class="skeleton-people">
-                        <span class="skeleton-person"></span>
-                        <span class="skeleton-person"></span>
-                        <span class="skeleton-person"></span>
-                        <span class="skeleton-person"></span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
                     </div>
                 </aside>
                 <main class="app-skeleton-canvas">
+                    <div class="skeleton-canvas-toolbar">
+                        <span class="skeleton-block skeleton-tool"></span>
+                        <span class="skeleton-block skeleton-tool"></span>
+                        <span class="skeleton-block skeleton-tool"></span>
+                        <span class="skeleton-block skeleton-tool"></span>
+                    </div>
                     <span class="skeleton-node skeleton-node-a"></span>
                     <span class="skeleton-node skeleton-node-b"></span>
                     <span class="skeleton-node skeleton-node-c"></span>
+                    <div class="skeleton-zoom">
+                        <span class="skeleton-block skeleton-zoom-button"></span>
+                        <span class="skeleton-block skeleton-zoom-value"></span>
+                        <span class="skeleton-block skeleton-zoom-button"></span>
+                        <span class="skeleton-block skeleton-zoom-button"></span>
+                    </div>
                 </main>
             </div>
         </div>
