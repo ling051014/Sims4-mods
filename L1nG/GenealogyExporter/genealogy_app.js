@@ -8158,8 +8158,7 @@ function relationshipPreviewArrowPath(
   tipX,
   tipY,
   directionX,
-  directionY,
-  lineWidth
+  directionY
 ) {
   const previewRect =
     preview?.getBoundingClientRect();
@@ -8186,11 +8185,7 @@ function relationshipPreviewArrowPath(
   // marker path 實際三角形佔 viewBox 約 80%。
   // 因此預覽也用同一視覺比例，並跟隨目前線條粗細。
   const markerScreenSize =
-    5.5 *
-    Math.max(
-      1,
-      Number(lineWidth) || 1.5
-    );
+    6.5;
 
   const arrowScreenLength =
     markerScreenSize * 0.8;
@@ -8336,16 +8331,8 @@ function relationshipPreviewLineGeometry(
   const scaleY =
     190 / previewHeight;
 
-  const lineWidth =
-    Math.max(
-      1,
-      Number(setting.width) || 1.5
-    );
-
   const arrowScreenLength =
-    5.5 *
-    lineWidth *
-    0.8;
+    6.5 * 0.8;
 
   const startScreenDx =
     startDx / scaleX;
@@ -8500,8 +8487,7 @@ function relationshipPreviewArrowGeometry(
           (startDy / startLength) *
           inset,
         -startDx,
-        -startDy,
-        setting.width
+        -startDy
       ),
     end:
       relationshipPreviewArrowPath(
@@ -8513,8 +8499,7 @@ function relationshipPreviewArrowGeometry(
           (endDy / endLength) *
           inset,
         endDx,
-        endDy,
-        setting.width
+        endDy
       )
   };
 }
