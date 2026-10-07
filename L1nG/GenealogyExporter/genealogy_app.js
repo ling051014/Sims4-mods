@@ -8154,35 +8154,89 @@ function relationshipFullPreviewPath(
   );
 }
 function relationshipPreviewArrowPath(
+  preview,
   tipX,
   tipY,
   directionX,
   directionY,
-  size = 9
+  lineWidth
 ) {
-  const length =
+  const previewRect =
+    preview?.getBoundingClientRect();
+
+  const width =
+    Math.max(
+      1,
+      previewRect?.width || 320
+    );
+
+  const height =
+    Math.max(
+      1,
+      previewRect?.height || 190
+    );
+
+  const viewBoxScaleX =
+    320 / width;
+
+  const viewBoxScaleY =
+    190 / height;
+
+  // 畫布 markerWidth / markerHeight 的基準是 5.5，
+  // marker path 實際三角形佔 viewBox 約 80%。
+  // 因此預覽也用同一視覺比例，並跟隨目前線條粗細。
+  const markerScreenSize =
+    5.5 *
+    Math.max(
+      1,
+      Number(lineWidth) || 1.5
+    );
+
+  const arrowScreenLength =
+    markerScreenSize * 0.8;
+
+  const arrowScreenHalfWidth =
+    markerScreenSize * 0.4;
+
+  // 先把方向轉成螢幕座標再正規化，
+  // 避免 preserveAspectRatio="none" 導致桌面版橫向箭頭被拉大。
+  const screenDx =
+    directionX / viewBoxScaleX;
+
+  const screenDy =
+    directionY / viewBoxScaleY;
+
+  const screenLength =
     Math.hypot(
-      directionX,
-      directionY
+      screenDx,
+      screenDy
     ) || 1;
 
   const dx =
-    directionX / length;
+    screenDx / screenLength;
+
   const dy =
-    directionY / length;
+    screenDy / screenLength;
 
-  const baseX =
-    tipX - dx * size;
-  const baseY =
-    tipY - dy * size;
+  const baseScreenX =
+    (tipX / viewBoxScaleX) -
+    dx * arrowScreenLength;
 
-  const halfWidth =
-    size * 0.62;
+  const baseScreenY =
+    (tipY / viewBoxScaleY) -
+    dy * arrowScreenLength;
 
   const px =
-    -dy * halfWidth;
+    -dy * arrowScreenHalfWidth;
+
   const py =
-    dx * halfWidth;
+    dx * arrowScreenHalfWidth;
+
+  const tipScreenX =
+    tipX / viewBoxScaleX;
+
+  const tipScreenY =
+    tipY / viewBoxScaleY;
 
   return (
     'M' +
@@ -8190,13 +8244,13 @@ function relationshipPreviewArrowPath(
     ' ' +
     tipY.toFixed(2) +
     ' L' +
-    (baseX + px).toFixed(2) +
+    ((baseScreenX + px) * viewBoxScaleX).toFixed(2) +
     ' ' +
-    (baseY + py).toFixed(2) +
+    ((baseScreenY + py) * viewBoxScaleY).toFixed(2) +
     ' L' +
-    (baseX - px).toFixed(2) +
+    ((baseScreenX - px) * viewBoxScaleX).toFixed(2) +
     ' ' +
-    (baseY - py).toFixed(2) +
+    ((baseScreenY - py) * viewBoxScaleY).toFixed(2) +
     ' Z'
   );
 }
@@ -8261,40 +8315,110 @@ function relationshipPreviewLineGeometry(
       ? bY - aY
       : bY - controlY;
 
-  const startLength =
+  const previewRect =
+    preview?.getBoundingClientRect();
+
+  const previewWidth =
+    Math.max(
+      1,
+      previewRect?.width || 320
+    );
+
+  const previewHeight =
+    Math.max(
+      1,
+      previewRect?.height || 190
+    );
+
+  const scaleX =
+    320 / previewWidth;
+
+  const scaleY =
+    190 / previewHeight;
+
+  const lineWidth =
+    Math.max(
+      1,
+      Number(setting.width) || 1.5
+    );
+
+  const arrowScreenLength =
+    5.5 *
+    lineWidth *
+    0.8;
+
+  const startScreenDx =
+    startDx / scaleX;
+
+  const startScreenDy =
+    startDy / scaleY;
+
+  const endScreenDx =
+    endDx / scaleX;
+
+  const endScreenDy =
+    endDy / scaleY;
+
+  const startScreenLength =
     Math.hypot(
-      startDx,
-      startDy
+      startScreenDx,
+      startScreenDy
     ) || 1;
 
-  const endLength =
+  const endScreenLength =
     Math.hypot(
-      endDx,
-      endDy
+      endScreenDx,
+      endScreenDy
     ) || 1;
 
-  const arrowInset = 7;
+  const startInsetX =
+    (
+      startScreenDx /
+      startScreenLength
+    ) *
+    arrowScreenLength *
+    scaleX;
+
+  const startInsetY =
+    (
+      startScreenDy /
+      startScreenLength
+    ) *
+    arrowScreenLength *
+    scaleY;
+
+  const endInsetX =
+    (
+      endScreenDx /
+      endScreenLength
+    ) *
+    arrowScreenLength *
+    scaleX;
+
+  const endInsetY =
+    (
+      endScreenDy /
+      endScreenLength
+    ) *
+    arrowScreenLength *
+    scaleY;
 
   if (showStartArrow) {
     startX =
       aX +
-      (startDx / startLength) *
-      arrowInset;
+      startInsetX;
     startY =
       aY +
-      (startDy / startLength) *
-      arrowInset;
+      startInsetY;
   }
 
   if (showEndArrow) {
     endX =
       bX -
-      (endDx / endLength) *
-      arrowInset;
+      endInsetX;
     endY =
       bY -
-      (endDy / endLength) *
-      arrowInset;
+      endInsetY;
   }
 
   return {
@@ -8368,6 +8492,7 @@ function relationshipPreviewArrowGeometry(
   return {
     start:
       relationshipPreviewArrowPath(
+        preview,
         aX +
           (startDx / startLength) *
           inset,
@@ -8375,10 +8500,12 @@ function relationshipPreviewArrowGeometry(
           (startDy / startLength) *
           inset,
         -startDx,
-        -startDy
+        -startDy,
+        setting.width
       ),
     end:
       relationshipPreviewArrowPath(
+        preview,
         bX -
           (endDx / endLength) *
           inset,
@@ -8386,7 +8513,8 @@ function relationshipPreviewArrowGeometry(
           (endDy / endLength) *
           inset,
         endDx,
-        endDy
+        endDy,
+        setting.width
       )
   };
 }
