@@ -8727,6 +8727,7 @@ async function updateStorageInfo() {
 
 $('appearanceBtn').onclick = openAppearancePanel;
 $('appearanceCloseBtn').onclick = closeAppearancePanel;
+$('appearanceHeaderCloseBtn')?.addEventListener('click', closeAppearancePanel);
 appearanceDialog.onclick = event => {
   if (event.target === appearanceDialog) {
     closeAppearancePanel();
