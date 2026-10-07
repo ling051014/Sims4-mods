@@ -4838,7 +4838,11 @@ button.avatar-editor-action { cursor:pointer; }
 
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
-/* ========【模擬市民獨立預覽頁】 設定 - 編輯頁背紙維持同尺寸，預覽頁維持人物檢視尺寸 ======== */
+/* ========【模擬市民獨立預覽頁】 設定 - 編輯頁背紙維持同尺寸，預覽頁與預覽背紙共用同一尺寸 authority ======== */
+#simEditorDialog {
+    /* 桌面正式人物預覽寬度；預覽前景與預覽背紙必須共用這一個值 */ --sim-editor-preview-width: min(560px,calc(100vw - 40px));
+}
+
 .sim-editor-preview-open {
     /* 獨立預覽入口固定在編輯頁標題區右上 */ position: absolute;
     /* 上方位置 */ top: 13px;
@@ -4896,7 +4900,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 透明度 */ opacity: .72;
     /* 不接收操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 12px 30px rgba(31,35,40,.08);
-    /* 動畫過渡 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease;
+    /* 動畫過渡；翻到預覽時寬度與前景一起收斂 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease;
 }
 
 .sim-editor-preview-sheet {
@@ -4970,8 +4974,12 @@ button.avatar-editor-action { cursor:pointer; }
     /* 主編輯頁暫停操作 */ pointer-events: none;
 }
 
+#simEditorDialog.preview-open .sim-editor-preview-sheet,
+#simEditorDialog.preview-open .sim-editor-paper-back {
+    /* 預覽前景與背紙強制共用完全相同的寬度，避免再出現 560px / 790px 混搭 */ width: var(--sim-editor-preview-width);
+}
+
 #simEditorDialog.preview-open .sim-editor-preview-sheet {
-    /* 翻到前景後才使用正式人物檢視的 560px 寬度 */ width: min(560px,calc(100vw - 40px));
     /* 預覽頁翻至最上層 */ z-index: 4;
     /* 預覽頁回到正面位置 */ transform: translate(-50%,-50%) translate(0,0) rotate(0) scale(1);
     /* 完整顯示 */ opacity: 1;
@@ -4980,14 +4988,13 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 #simEditorDialog.preview-open .sim-editor-paper-back {
-    /* 翻到預覽後，第三張背紙也切換成正式預覽尺寸，避免仍維持 790px 編輯頁大小 */ width: min(560px,calc(100vw - 40px));
     /* 翻頁後保留第三張紙的層次 */ transform: translate(-50%,-50%) translate(9px,9px) rotate(.65deg);
     /* 翻頁後提高辨識度 */ opacity: .62;
 }
 
 @media (max-width:760px) {
-    #simEditorDialog.preview-open .sim-editor-paper-back {
-        /* 小螢幕預覽後方背紙同步正式人物檢視寬度 */ width: min(540px,calc(100vw - 40px));
+    #simEditorDialog {
+        /* 小螢幕正式人物預覽寬度 */ --sim-editor-preview-width: min(540px,calc(100vw - 40px));
     }
 
     .sim-editor-preview-open {
@@ -4996,23 +5003,18 @@ button.avatar-editor-action { cursor:pointer; }
     }
 
     #simEditorDialog.preview-open .sim-editor-preview-sheet {
-        /* 翻到前景後才套用小螢幕正式人物檢視寬度 */ width: min(540px,calc(100vw - 40px));
         /* 小螢幕提高可用高度 */ max-height: 96vh;
     }
 }
 
 @media (max-width:520px) {
-    #simEditorDialog.preview-open .sim-editor-paper-back {
-        /* 手機預覽後方背紙與正式人物檢視保持相同寬度 */ width: calc(100vw - 40px);
+    #simEditorDialog {
+        /* 手機正式人物預覽寬度：遮罩左右各保留 20px */ --sim-editor-preview-width: calc(100vw - 40px);
     }
 
     .sim-editor-preview-open {
         /* 手機版縮小按鈕 */ min-height: 28px;
         /* 手機版縮小內距 */ padding: 4px 8px;
-    }
-
-    #simEditorDialog.preview-open .sim-editor-preview-sheet {
-        /* 翻到前景後才與正式人物檢視相同：遮罩左右各保留 20px */ width: calc(100vw - 40px);
     }
 
     .sim-editor-preview-sheet .person-profile-header {
