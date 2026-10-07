@@ -4878,9 +4878,9 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .sim-editor-preview-sheet {
-    /* 預覽寬度跟正式人物檢視視窗一致 */ width: min(560px,calc(100vw - 40px));
-    /* 預覽仍沿用既有固定編輯框架高度，不改預覽視窗大小 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
-    /* 預覽尺寸獨立於背紙 */ max-height: none;
+    /* 尚未翻頁時，這張紙也要與編輯頁完全同寬，才會形成真正的同尺寸紙張堆疊 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
+    /* 高度同樣跟隨編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
+    /* 尺寸由編輯頁量測值決定 */ max-height: none;
 }
 
 #simEditorDialog.sheet-ready .sim-editor-paper-back,
@@ -4910,7 +4910,12 @@ button.avatar-editor-action { cursor:pointer; }
     /* 預設透明度 */ opacity: .92;
     /* 預設不可操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 14px 36px rgba(31,35,40,.11);
-    /* 翻頁動畫 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
+    /* 翻頁動畫；寬度在翻到前景時才由編輯頁尺寸收斂到正式預覽尺寸 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
+}
+
+/* 尚未打開預覽時只把它當成第二張紙，不讓 560px 預覽內容從編輯頁邊緣露出。 */
+#simEditorDialog:not(.preview-open) .sim-editor-preview-sheet > * {
+    visibility: hidden;
 }
 
 .sim-editor-preview-sheet-toolbar {
@@ -4966,6 +4971,7 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 #simEditorDialog.preview-open .sim-editor-preview-sheet {
+    /* 翻到前景後才使用正式人物檢視的 560px 寬度 */ width: min(560px,calc(100vw - 40px));
     /* 預覽頁翻至最上層 */ z-index: 4;
     /* 預覽頁回到正面位置 */ transform: translate(-50%,-50%) translate(0,0) rotate(0) scale(1);
     /* 完整顯示 */ opacity: 1;
@@ -4984,8 +4990,8 @@ button.avatar-editor-action { cursor:pointer; }
         /* 小螢幕右側位置 */ right: 14px;
     }
 
-    .sim-editor-preview-sheet {
-        /* 小螢幕跟正式人物檢視視窗一致：遮罩左右各保留 20px */ width: min(540px,calc(100vw - 40px));
+    #simEditorDialog.preview-open .sim-editor-preview-sheet {
+        /* 翻到前景後才套用小螢幕正式人物檢視寬度 */ width: min(540px,calc(100vw - 40px));
         /* 小螢幕提高可用高度 */ max-height: 96vh;
     }
 }
@@ -4996,8 +5002,8 @@ button.avatar-editor-action { cursor:pointer; }
         /* 手機版縮小內距 */ padding: 4px 8px;
     }
 
-    .sim-editor-preview-sheet {
-        /* 與正式人物檢視相同：遮罩左右各保留 20px */ width: calc(100vw - 40px);
+    #simEditorDialog.preview-open .sim-editor-preview-sheet {
+        /* 翻到前景後才與正式人物檢視相同：遮罩左右各保留 20px */ width: calc(100vw - 40px);
     }
 
     .sim-editor-preview-sheet .person-profile-header {
