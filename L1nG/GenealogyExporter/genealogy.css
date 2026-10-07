@@ -7528,6 +7528,13 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .canvas-tool { width:30px; padding:5px; }
 }
 @media (max-width:720px) {
+  /* 手機層級：一般彈窗 > 頂部工具列／工具列選單 > 常駐家庭資訊 > 家庭資訊遮罩 > 畫布。 */
+  .topbar { z-index:350; }
+  .ui-dialog-backdrop { z-index:400; }
+  .ui-dialog-backdrop.person-library-backdrop { z-index:390; }
+  .ui-dialog-backdrop.nested { z-index:450; }
+  .ui-dialog-backdrop.photo-viewer-backdrop { z-index:470; }
+
   .topbar-brand { display:flex; width:76px; min-width:76px; padding:0 8px; gap:4px; }
   .topbar-main { padding:0 7px; gap:5px; }
   .topbar-filter-btn { width:32px; padding:0; }
