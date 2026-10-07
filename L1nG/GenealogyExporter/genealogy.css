@@ -4980,11 +4980,16 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 #simEditorDialog.preview-open .sim-editor-paper-back {
+    /* 翻到預覽後，第三張背紙也切換成正式預覽尺寸，避免仍維持 790px 編輯頁大小 */ width: min(560px,calc(100vw - 40px));
     /* 翻頁後保留第三張紙的層次 */ transform: translate(-50%,-50%) translate(9px,9px) rotate(.65deg);
     /* 翻頁後提高辨識度 */ opacity: .62;
 }
 
 @media (max-width:760px) {
+    #simEditorDialog.preview-open .sim-editor-paper-back {
+        /* 小螢幕預覽後方背紙同步正式人物檢視寬度 */ width: min(540px,calc(100vw - 40px));
+    }
+
     .sim-editor-preview-open {
         /* 小螢幕配合既有標頭內距 */ top: 12px;
         /* 小螢幕右側位置 */ right: 14px;
@@ -4997,6 +5002,10 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 @media (max-width:520px) {
+    #simEditorDialog.preview-open .sim-editor-paper-back {
+        /* 手機預覽後方背紙與正式人物檢視保持相同寬度 */ width: calc(100vw - 40px);
+    }
+
     .sim-editor-preview-open {
         /* 手機版縮小按鈕 */ min-height: 28px;
         /* 手機版縮小內距 */ padding: 4px 8px;
