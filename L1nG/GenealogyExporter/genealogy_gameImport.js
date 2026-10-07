@@ -1745,7 +1745,7 @@
         exSpouseIds:rel.exSpouseIds,
         traits,
         career:careers.join(' / '),
-        bio:'',
+        notes:'',
         order:0,
         avatar:null,
         avatarFrame:null,
