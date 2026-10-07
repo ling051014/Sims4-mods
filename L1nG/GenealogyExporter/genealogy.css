@@ -4838,7 +4838,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
-/* ========【模擬市民獨立預覽頁】 設定 - 從編輯分類抽離，作為同尺寸下一張紙 ======== */
+/* ========【模擬市民獨立預覽頁】 設定 - 編輯頁背紙維持同尺寸，預覽頁維持人物檢視尺寸 ======== */
 .sim-editor-preview-open {
     /* 獨立預覽入口固定在編輯頁標題區右上 */ position: absolute;
     /* 上方位置 */ top: 13px;
@@ -4868,15 +4868,24 @@ button.avatar-editor-action { cursor:pointer; }
     /* 與主編輯頁共用畫面中心 */ position: absolute;
     /* 水平置中 */ left: 50%;
     /* 垂直置中 */ top: 50%;
-    /* 預覽寬度跟正式人物檢視視窗一致 */ width: min(560px,calc(100vw - 40px));
-    /* 高度維持固定編輯框架高度 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
-    /* 尺寸已由編輯頁 authority 提供，不再另設不同 max-height */ max-height: none;
     /* 圓角弧度 */ border-radius: 10px;
+}
+
+.sim-editor-paper-back {
+    /* 背紙寬度直接跟隨實際編輯頁，不受 560px 預覽寬度影響 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
+    /* 背紙高度直接跟隨實際編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
+    /* 幾何尺寸由編輯頁量測值決定 */ max-height: none;
+}
+
+.sim-editor-preview-sheet {
+    /* 預覽寬度跟正式人物檢視視窗一致 */ width: min(560px,calc(100vw - 40px));
+    /* 預覽仍沿用既有固定編輯框架高度，不改預覽視窗大小 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
+    /* 預覽尺寸獨立於背紙 */ max-height: none;
 }
 
 #simEditorDialog.sheet-ready .sim-editor-paper-back,
 #simEditorDialog.sheet-ready .sim-editor-preview-sheet {
-    /* 幾何尺寸與編輯頁一致後才呈現完整紙張堆疊 */ visibility: visible;
+    /* 編輯頁幾何量測完成後才呈現紙張堆疊，避免初始化時尺寸跳動 */ visibility: visible;
 }
 
 .sim-editor-paper-back {
@@ -4975,14 +4984,9 @@ button.avatar-editor-action { cursor:pointer; }
         /* 小螢幕右側位置 */ right: 14px;
     }
 
-    .sim-editor-paper-back,
     .sim-editor-preview-sheet {
-        /* 小螢幕跟正式人物檢視視窗一致 */ width: min(540px,calc(100vw - 28px));
+        /* 小螢幕跟正式人物檢視視窗一致：遮罩左右各保留 20px */ width: min(540px,calc(100vw - 40px));
         /* 小螢幕提高可用高度 */ max-height: 96vh;
-    }
-
-    .sim-editor-paper-back {
-        /* 小螢幕後方紙張高度 */ height: min(680px,92vh);
     }
 }
 
@@ -4992,17 +4996,16 @@ button.avatar-editor-action { cursor:pointer; }
         /* 手機版縮小內距 */ padding: 4px 8px;
     }
 
-    .sim-editor-paper-back,
     .sim-editor-preview-sheet {
-        /* 手機版最小安全邊距 */ width: calc(100vw - 20px);
+        /* 與正式人物檢視相同：遮罩左右各保留 20px */ width: calc(100vw - 40px);
     }
 
     .sim-editor-preview-sheet .person-profile-header {
-        /* 手機版標頭留白 */ padding: 15px 14px 13px;
+        /* 與正式人物檢視標頭內距一致 */ padding: 16px 18px 14px;
     }
 
     .sim-editor-preview-sheet .person-profile-body {
-        /* 手機版內容留白 */ padding: 0 14px 14px;
+        /* 與正式人物檢視內容內距一致 */ padding: 0 18px 18px;
     }
 
     #simEditorDialog.preview-open .sim-editor-modal {
