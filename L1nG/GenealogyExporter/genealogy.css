@@ -2026,9 +2026,13 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-profile-edit-fields input:focus,.sim-profile-edit-fields select:focus,.sim-profile-edit-fields .ui-single-select-trigger:focus-visible { border-color:var(--action-primary); }
 .profile-name-field input { min-height:36px; font-size:17px; font-weight:700; padding:5px 9px; }
 .profile-identity-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
-.profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:end; }
-.profile-field-label { display:inline-flex; align-items:center; gap:4px; }
+.profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:start; }
+.profile-fact-edit-row > .form-field { grid-template-rows:auto 32px; align-items:start; }
+.profile-field-label { min-height:14px; display:inline-flex; align-items:center; gap:4px; line-height:1.2; }
 .profile-field-label .l1ng-icon { color:var(--action-primary); }
+.profile-birthday-field .birthday-inputs,
+.profile-age-field .age-input-wrap,
+.profile-residence-field > input { align-self:start; min-height:32px; }
 .profile-birthday-field .birthday-inputs { grid-template-columns:1.3fr .85fr .85fr; gap:5px; }
 .profile-age-field .age-input-wrap { min-height:32px; border-radius:6px; }
 .profile-age-field .age-input-wrap input { min-height:30px; border:0; border-radius:0; box-shadow:none; background:transparent; padding-right:2px; }
@@ -3543,8 +3547,9 @@ button.avatar-editor-action { cursor:pointer; }
 
 .appearance-background-control{
     min-width:0;
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-rows:auto 32px;
+    align-items:start;
     gap:7px;
     color:var(--text-secondary);
     font-size:11.5px;
@@ -3557,6 +3562,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 .appearance-background-range{
     min-width:0;
+    height:32px;
     display:grid;
     grid-template-columns:minmax(0,1fr) auto;
     align-items:center;
@@ -3577,6 +3583,13 @@ button.avatar-editor-action { cursor:pointer; }
 .appearance-background-control .ui-single-select{
     width:100%;
     max-width:200px;
+    height:32px;
+    align-self:start;
+}
+
+.appearance-background-control .ui-single-select-trigger{
+    height:32px;
+    min-height:32px;
 }
 
 .appearance-background-value{
@@ -5628,6 +5641,14 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/hearts.svg");
 }
 
+.icon-cake2 {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/cake2.svg");
+}
+
+.icon-hourglass-split {
+    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/hourglass-split.svg");
+}
+
 .icon-house {
     /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/house.svg");
 }
@@ -6676,7 +6697,8 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 }
 
 .export-section {
-    /* 版面配置 */ display: grid;
+    /* 版面配置 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
     /* 間距 */ gap: 16px;
     /* 內距 */ padding: 18px;
     /* 背景設定 */ background: var(--surface-panel);
@@ -6776,6 +6798,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 版面配置 */ display: flex;
     /* 水平對齊 */ justify-content: flex-end;
     /* 垂直對齊 */ align-items: flex-end;
+    /* 將左右卡片的匯出按鈕固定在相同底部基準 */ margin-top: auto;
     /* 上方內距 */ padding-top: 4px;
 }
 
