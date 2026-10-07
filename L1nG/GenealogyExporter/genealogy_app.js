@@ -355,8 +355,6 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     style:'short-dash',
     width:1.7,
     color:null,
-    curved:false,
-    curveAmount:50,
     routing:'auto'
   }),
   adopt: Object.freeze({
@@ -447,6 +445,12 @@ function normalizeRelationshipLineSetting(
         50
       )
     );
+
+  if (key === 'exspouse') {
+    normalized.routing = 'auto';
+    delete normalized.curved;
+    delete normalized.curveAmount;
+  }
 
   if (key === 'other') {
     const storedShowArrow =
@@ -3375,6 +3379,127 @@ function uiToast(message, duration = 2600) {
     toast.style.transition = 'opacity .18s ease, transform .18s ease';
     setTimeout(() => toast.remove(), 200);
   }, duration);
+}
+
+const actionButtonLoadingState =
+  new WeakMap();
+
+function setActionButtonLoading(
+  button,
+  loading,
+  label = ''
+) {
+  if (!button) return;
+
+  if (loading) {
+    if (
+      actionButtonLoadingState
+        .has(button)
+    ) {
+      return;
+    }
+
+    const measuredWidth =
+      Math.ceil(
+        button
+          .getBoundingClientRect()
+          .width
+      );
+
+    actionButtonLoadingState.set(
+      button,
+      {
+        html:button.innerHTML,
+        disabled:button.disabled,
+        minWidth:button.style.minWidth
+      }
+    );
+
+    if (measuredWidth > 0) {
+      button.style.minWidth =
+        measuredWidth + 'px';
+    }
+
+    button.disabled = true;
+    button.classList.add(
+      'is-loading'
+    );
+    button.setAttribute(
+      'aria-busy',
+      'true'
+    );
+
+    const loadingLabel =
+      uiText(label || '處理中')
+        .replace(/[.…]+$/u,'');
+
+    button.innerHTML =
+      '<span class="button-loading-label">' +
+        esc(loadingLabel) +
+      '</span>' +
+      '<span class="button-loading-dots" aria-hidden="true">' +
+        '<span></span><span></span><span></span>' +
+      '</span>';
+
+    return;
+  }
+
+  const state =
+    actionButtonLoadingState
+      .get(button);
+
+  if (!state) return;
+
+  button.innerHTML =
+    state.html;
+
+  button.disabled =
+    state.disabled;
+
+  button.style.minWidth =
+    state.minWidth;
+
+  button.classList.remove(
+    'is-loading'
+  );
+  button.removeAttribute(
+    'aria-busy'
+  );
+
+  actionButtonLoadingState
+    .delete(button);
+}
+
+async function withActionButtonLoading(
+  button,
+  label,
+  action
+) {
+  if (
+    !button ||
+    actionButtonLoadingState.has(button)
+  ) {
+    return;
+  }
+
+  setActionButtonLoading(
+    button,
+    true,
+    label
+  );
+
+  await new Promise(resolve =>
+    requestAnimationFrame(resolve)
+  );
+
+  try {
+    return await action();
+  } finally {
+    setActionButtonLoading(
+      button,
+      false
+    );
+  }
 }
 
 
@@ -7469,7 +7594,7 @@ const sourceMode =
 }
 modeToggle.onclick = toggleViewMode;
 
-// ========【關係線外觀】 設定 - 沿用現有外觀 UI，次要關係增加曲線與個別類型設定 ========
+// ========【關係線外觀】 設定 - 沿用現有外觀 UI，只有其他關係提供曲線與個別類型設定 ========
 const REL_LINE_KEYS =
   ['parent','spouse','exspouse','adopt','other'];
 
@@ -7979,10 +8104,7 @@ function relationshipFullPreviewPath(
     );
 
   if (
-    (
-      key === 'exspouse' ||
-      key === 'other'
-    ) &&
+    key === 'other' &&
     setting.curved
   ) {
     const amount =
@@ -8121,7 +8243,7 @@ function syncRelationshipLineControls() {
   if (widthValue) widthValue.textContent = Number(setting.width).toFixed(1).replace(/\.0$/,'') + ' px';
   if (colorEl) colorEl.value = relationshipResolvedColor(setting,other ? 'other' : key);
 
-  const curveSupported = key === 'exspouse' || key === 'other';
+  const curveSupported = key === 'other';
   const arrowSupported = key === 'other';
   const featureRow = $('relationshipFeatureRow');
   const curveCell = $('relationshipCurveToggleCell');
@@ -8187,6 +8309,7 @@ $('relationshipEditorColor')?.addEventListener('input',event => {
 });
 
 $('relationshipEditorCurveToggle')?.addEventListener('click',() => {
+  if (activeRelationshipStyleKey !== 'other') return;
   const setting = relationshipEditorSetting();
   setting.curved = !setting.curved;
   setting.routing = 'manual';
@@ -8917,14 +9040,23 @@ $('appearanceBackgroundClearBtn').onclick = removeCanvasBackground;
 $('cleanupBtn').onclick = async () => {
   if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
   const button = $('cleanupBtn');
-  if (button) button.disabled = true;
-  try {
-    const n = await cleanupUnusedImages();
-    uiToast(n > 0 ? `清理完成：刪除了 ${n} 張未使用圖片。` : '目前沒有可清理的圖片。');
-    await updateStorageInfo();
-  } finally {
-    if (button) button.disabled = false;
-  }
+
+  await withActionButtonLoading(
+    button,
+    '清理中',
+    async () => {
+      const n =
+        await cleanupUnusedImages();
+
+      uiToast(
+        n > 0
+          ? `清理完成：刪除了 ${n} 張未使用圖片。`
+          : '目前沒有可清理的圖片。'
+      );
+
+      await updateStorageInfo();
+    }
+  );
 };
 
 // ========【使用說明輸入方式】 設定 - 依實際操作切換電腦／觸控說明，不綁定裝置類型 ========
@@ -16576,7 +16708,8 @@ personEditor.mount({
   openAvatarCropEditor,
   compressImage,
   saveImageAsset,
-  showToast:uiToast
+  showToast:uiToast,
+  flushSave:_flushSave
 });
 
 function purgeSimData(id) {
@@ -18489,9 +18622,19 @@ window.addEventListener('resize', () => {
   }
 });
 
+async function savePersonEditorFromUi() {
+  return withActionButtonLoading(
+    $('btnSave'),
+    '儲存中',
+    () => personEditor.commit()
+  );
+}
+
 $('addBtn').onclick = () => personEditor.open(null);
 $('btnCancel').onclick = personEditor.close;
-$('btnSave').onclick = personEditor.commit;
+$('btnSave').onclick = () => {
+  void savePersonEditorFromUi();
+};
 $('btnDelete').onclick = () => simEditorState.simId && deleteChar(simEditorState.simId);
 mask.onclick = e => { if (e.target === mask) personEditor.close(); };
 
@@ -18549,7 +18692,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.ctrlKey) {
     if (lifePhotoEditorDialog.classList.contains('show')) lifePhotoWorkspace.commitEditor();
     else if (petEditorDialog.classList.contains('show')) petEditorController.commit();
-    else if (mask.classList.contains('show')) personEditor.commit();
+    else if (mask.classList.contains('show')) void savePersonEditorFromUi();
   }
 });
 
@@ -18701,55 +18844,45 @@ $('fitScreenBtn')?.addEventListener('click', () => genealogyViewport.fit());
 $('exportBtn').onclick = openExportPanel;
 if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
 if (exportDialog) exportDialog.onclick = e => { if (e.target === exportDialog) closeExportPanel(); };
-if (exportJsonBtn) exportJsonBtn.onclick = async () => { closeExportPanel(); await exportJSON(); };
-if (exportImageBtn) exportImageBtn.onclick = async () => {
-  const originalHtml =
-    exportImageBtn.innerHTML;
-
-  exportImageBtn.disabled = true;
-  exportImageBtn.classList.add('is-loading');
-  exportImageBtn.setAttribute('aria-busy', 'true');
-  exportJsonBtn && (exportJsonBtn.disabled = true);
-
-  const loadingText =
-    uiText('正在匯出族譜圖片…')
-      .replace(/[.…]+$/u, '');
-
-  exportImageBtn.innerHTML =
-    `<span>${esc(loadingText)}</span>` +
-    '<span class="export-loading-dots" aria-hidden="true">' +
-      '<span></span><span></span><span></span>' +
-    '</span>';
+if (exportJsonBtn) exportJsonBtn.onclick = async () => {
+  exportImageBtn && (exportImageBtn.disabled = true);
 
   try {
-    // 先讓 loading 狀態真正畫到畫面上，再開始較重的族譜 capture。
-    await new Promise(resolve =>
-      requestAnimationFrame(resolve)
+    await withActionButtonLoading(
+      exportJsonBtn,
+      '正在匯出 JSON 備份',
+      async () => {
+        await exportJSON();
+        closeExportPanel();
+        uiToast('JSON 備份匯出完成');
+      }
     );
+  } finally {
+    exportImageBtn && (exportImageBtn.disabled = false);
+  }
+};
 
-    await exportGenealogyImage(
-      getSelectedExportImageSize(),
-      getSelectedExportBackgroundMode()
+if (exportImageBtn) exportImageBtn.onclick = async () => {
+  exportJsonBtn && (exportJsonBtn.disabled = true);
+
+  try {
+    await withActionButtonLoading(
+      exportImageBtn,
+      '正在匯出族譜圖片',
+      async () => {
+        await exportGenealogyImage(
+          getSelectedExportImageSize(),
+          getSelectedExportBackgroundMode()
+        );
+
+        closeExportPanel();
+        uiToast('族譜圖片匯出完成');
+      }
     );
-
-    closeExportPanel();
-    uiToast('族譜圖片匯出完成');
   } catch (err) {
     console.error(err);
     await uiAlert(`族譜圖片匯出失敗：${err && err.message ? err.message : 'Unknown error'}`, { title: '族譜圖片匯出失敗', kind: 'danger' });
   } finally {
-    exportImageBtn.innerHTML =
-      originalHtml;
-
-    exportImageBtn.classList.remove(
-      'is-loading'
-    );
-
-    exportImageBtn.removeAttribute(
-      'aria-busy'
-    );
-
-    exportImageBtn.disabled = false;
     exportJsonBtn && (exportJsonBtn.disabled = false);
   }
 };

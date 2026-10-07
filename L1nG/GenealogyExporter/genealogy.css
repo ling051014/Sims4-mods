@@ -3276,7 +3276,7 @@ button.avatar-editor-action { cursor:pointer; }
     flex-direction:column;
     gap:9px;
     font:inherit;
-    text-align:left;
+    text-align:center;
     cursor:pointer;
     transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;
 }
@@ -3302,6 +3302,7 @@ button.avatar-editor-action { cursor:pointer; }
     min-width:0;
     display:flex;
     align-items:center;
+    justify-content:center;
     gap:7px;
 }
 
@@ -3373,8 +3374,8 @@ button.avatar-editor-action { cursor:pointer; }
     min-width:0;
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:8px;
+    justify-content:flex-start;
+    gap:6px;
     color:var(--text-secondary);
     font-size:11.5px;
     font-weight:600;
@@ -6802,39 +6803,50 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 滑鼠指標 */ cursor: wait;
 }
 
-/* ========【圖片匯出狀態】 設定 - 匯出期間顯示跳動圓點，避免長時間處理看起來像卡住 ======== */
-.export-actions button.is-loading {
+/* ========【共用按鈕處理狀態】 設定 - 儲存、匯出、清理等等待操作統一使用跳動圓點 ======== */
+button.is-loading {
     display:inline-flex;
     align-items:center;
     justify-content:center;
+    flex-wrap:nowrap;
     gap:6px;
+    white-space:nowrap;
+    cursor:wait;
 }
 
-.export-loading-dots {
+button.is-loading .button-loading-label {
+    flex:0 0 auto;
+    white-space:nowrap;
+}
+
+.button-loading-dots {
     display:inline-flex;
+    flex:0 0 auto;
     align-items:flex-end;
     gap:2px;
     height:9px;
+    white-space:nowrap;
 }
 
-.export-loading-dots > span {
+.button-loading-dots > span {
     width:3px;
     height:3px;
+    flex:0 0 3px;
     border-radius:50%;
     background:currentColor;
     opacity:.45;
-    animation:genealogy-export-dot .9s ease-in-out infinite;
+    animation:genealogy-loading-dot .9s ease-in-out infinite;
 }
 
-.export-loading-dots > span:nth-child(2) {
+.button-loading-dots > span:nth-child(2) {
     animation-delay:.12s;
 }
 
-.export-loading-dots > span:nth-child(3) {
+.button-loading-dots > span:nth-child(3) {
     animation-delay:.24s;
 }
 
-@keyframes genealogy-export-dot {
+@keyframes genealogy-loading-dot {
     0%,60%,100% {
         transform:translateY(0);
         opacity:.45;
@@ -6846,7 +6858,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .export-loading-dots > span {
+    .button-loading-dots > span {
         animation:none;
         opacity:.8;
     }
@@ -8166,10 +8178,10 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-feature-row{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:center}
 .relationship-feature-row[hidden]{display:none}
 .relationship-feature-row.single .curve-cell{grid-column:1/-1}
-.relationship-feature-cell{min-width:0;display:flex;align-items:center;justify-content:center}
+.relationship-feature-cell{min-width:0;display:flex;align-items:center;justify-content:flex-start}
 .relationship-feature-cell[hidden]{display:none}
-.relationship-feature-toggle{width:142px;min-height:38px;display:grid;grid-template-columns:96px 38px;align-items:center;column-gap:8px}
-.relationship-feature-label{width:96px;min-width:96px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--text-primary);font-size:11px;white-space:nowrap}
+.relationship-feature-toggle{width:auto;min-height:38px;display:grid;grid-template-columns:max-content 38px;align-items:center;column-gap:8px}
+.relationship-feature-label{width:auto;min-width:0;display:flex;align-items:center;justify-content:flex-start;gap:5px;color:var(--text-primary);font-size:11px;white-space:nowrap}
 .help-tooltip-slot{display:inline-block;width:18px;height:18px;flex:0 0 18px;visibility:hidden}
 .relationship-switch{position:relative;width:38px;height:22px;padding:0;border:0;border-radius:999px;background:color-mix(in srgb,var(--border-default) 72%,var(--surface-panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--border-default) 78%,transparent);cursor:pointer;overflow:hidden;transition:background .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s cubic-bezier(.2,.8,.2,1)}
 .relationship-switch::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:color-mix(in srgb,var(--surface-card) 82%,var(--surface-panel) 18%);box-shadow:0 1px 3px rgba(0,0,0,.16);transform:translateX(0);transition:transform .30s cubic-bezier(.2,.9,.25,1),background .28s ease,box-shadow .28s ease}

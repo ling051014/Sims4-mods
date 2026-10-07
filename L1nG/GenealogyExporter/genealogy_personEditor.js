@@ -6,6 +6,7 @@
   let avatarImageCompressor = null;
   let avatarImageAssetSaver = null;
   let personEditorToast = null;
+  let personEditorFlushSave = null;
 
   function bindStore(store) {
     if (!store || typeof store.getData !== 'function') {
@@ -3571,7 +3572,7 @@ function ensureSavedSimManualPosition(
     );
 }
 
-function commitPersonEditorDraft() {
+async function commitPersonEditorDraft() {
   initializePersonEditorRelationshipUi();
   initializePersonEditorMediaDraft();
 
@@ -3643,6 +3644,8 @@ function commitPersonEditorDraft() {
     mutation
   );
 
+  await personEditorFlushSave();
+
   closePersonEditor();
   scheduleGC();
   personEditorToast?.(
@@ -3658,7 +3661,8 @@ function commitPersonEditorDraft() {
     openAvatarCropEditor,
     compressImage,
     saveImageAsset,
-    showToast
+    showToast,
+    flushSave
   } = {}) {
     if (
       typeof openAvatarCropEditor !==
@@ -3696,6 +3700,15 @@ function commitPersonEditorDraft() {
       );
     }
 
+    if (
+      typeof flushSave !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires save flush.'
+      );
+    }
+
     avatarCropOpener =
       openAvatarCropEditor;
 
@@ -3707,6 +3720,9 @@ function commitPersonEditorDraft() {
 
     personEditorToast =
       showToast;
+
+    personEditorFlushSave =
+      flushSave;
 
     if (mounted) return;
     mounted = true;
