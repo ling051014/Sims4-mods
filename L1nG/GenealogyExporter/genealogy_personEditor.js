@@ -619,7 +619,7 @@ function buildPersonEditorDraft({
       causeOfDeath:status==='已故'||status==='幽靈'?$('fCauseOfDeath').value.trim():'',
       traits:[...simEditorState.traits],
       career:$('fCareer').value.trim(),
-      bio:$('fBio').value.trim(),
+      notes:$('fNotes').value.trim(),
       avatar:simEditorState.avatar||null,
       avatarFrame:normalizeAvatarFrame(simEditorState.avatarFrame),
       gameAvatar:simEditorState.gameAvatar||null,
@@ -1612,13 +1612,6 @@ function buildPersonEditorDraft({
 
     const rect=modal.getBoundingClientRect();
 
-    if(rect.width>0){
-      mask.style.setProperty(
-        '--sim-editor-sheet-width',
-        rect.width.toFixed(2)+'px'
-      );
-    }
-
     if(rect.height>0){
       mask.style.setProperty(
         '--sim-editor-sheet-height',
@@ -1626,7 +1619,7 @@ function buildPersonEditorDraft({
       );
     }
 
-    if(rect.width>0&&rect.height>0){
+    if(rect.height>0){
       mask.classList.add('sheet-ready');
     }
   }
@@ -2354,10 +2347,10 @@ function buildPersonEditorDraft({
           )
         : '';
 
-    $('fBio').value=
+    $('fNotes').value=
       sim
         ? displayDataText(
-            sim.bio,
+            sim.notes,
             sim
           )
         : '';
@@ -3401,11 +3394,11 @@ function collectPersonEditorSaveRequest() {
         'career',
         $('fCareer').value
       ),
-    bio:
+    notes:
       preserveEditorSampleText(
         existing,
-        'bio',
-        $('fBio').value
+        'notes',
+        $('fNotes').value
       ),
     gameAvatar:
       simEditorState.gameAvatar ||
