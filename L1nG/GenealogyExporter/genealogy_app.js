@@ -1906,9 +1906,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g,
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const pairKey = (a,b) => [a,b].sort().join('::');
 
-// ========【UI 圖示】 專案 SVG 自動解析 ========
-const ICON_ASSET_BASE = '../../html%20icons/';
-
+// ========【UI 圖示】 設定 - 圖示遮罩由 genealogy_icon_masks.css 內嵌提供，不再逐顆請求 SVG ========
 const iconSvg = (name, extra = '') => {
   const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
   if (!safe) return '';
@@ -1917,7 +1915,6 @@ const iconSvg = (name, extra = '') => {
 
   return `<span
     class="l1ng-icon icon-${safe}${extraClass}"
-    style="--l1ng-icon:url('${ICON_ASSET_BASE}${safe}.svg')"
     aria-hidden="true"
   ></span>`;
 };
@@ -17773,30 +17770,78 @@ function downloadBlob(blob, filename) {
 
 const _exportIconSvgCache = new Map();
 
+function decodeBundledIconSvg(iconName) {
+  const safe =
+    String(iconName || '')
+      .replace(/[^a-z0-9-]/gi, '');
+
+  if (!safe) {
+    throw new Error('Invalid icon name');
+  }
+
+  const token =
+    getComputedStyle(
+      document.documentElement
+    )
+      .getPropertyValue(
+        `--l1ng-icon-${safe}`
+      )
+      .trim();
+
+  const match =
+    token.match(
+      /base64,([^"'\)]+)/
+    );
+
+  if (!match) {
+    throw new Error(
+      `Bundled SVG not found: ${safe}`
+    );
+  }
+
+  const binary =
+    atob(match[1]);
+
+  if (
+    typeof TextDecoder ===
+    'function'
+  ) {
+    const bytes =
+      Uint8Array.from(
+        binary,
+        char =>
+          char.charCodeAt(0)
+      );
+
+    return new TextDecoder(
+      'utf-8'
+    ).decode(bytes);
+  }
+
+  return binary;
+}
+
 async function loadExportIconSvg(iconName) {
   if (_exportIconSvgCache.has(iconName)) {
     return _exportIconSvgCache.get(iconName);
   }
 
-  const url =
-    new URL(
-      `../../html%20icons/${iconName}.svg`,
-      document.baseURI
-    ).href;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${iconName}.svg`);
-  }
-
-  const svg = await response.text();
+  const svg =
+    decodeBundledIconSvg(
+      iconName
+    );
 
   if (!svg.includes('<svg')) {
-    throw new Error(`Invalid SVG: ${iconName}`);
+    throw new Error(
+      `Invalid bundled SVG: ${iconName}`
+    );
   }
 
-  _exportIconSvgCache.set(iconName, svg);
+  _exportIconSvgCache.set(
+    iconName,
+    svg
+  );
+
   return svg;
 }
 
