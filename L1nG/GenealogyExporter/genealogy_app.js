@@ -3488,8 +3488,12 @@ async function withActionButtonLoading(
     label
   );
 
+  // 等兩個 animation frame：第一幀提交 loading 狀態，第二幀再開始工作，
+  // 避免同步儲存與關窗搶在瀏覽器真正繪製「儲存中」之前完成。
   await new Promise(resolve =>
-    requestAnimationFrame(resolve)
+    requestAnimationFrame(() =>
+      requestAnimationFrame(resolve)
+    )
   );
 
   try {
