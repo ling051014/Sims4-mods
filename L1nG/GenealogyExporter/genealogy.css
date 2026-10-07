@@ -3241,6 +3241,14 @@ button.avatar-editor-action { cursor:pointer; }
     width:min(860px,100%);
 }
 
+.appearance-mobile-header{
+    display:none;
+}
+
+.appearance-scroll-body{
+    min-width:0;
+}
+
 .appearance-section{
     padding:4px 0 16px;
     border-bottom:1px solid var(--border-default);
@@ -7556,6 +7564,98 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .canvas-toolbar { max-width:calc(100% - 16px); overflow-x:auto; }
 }
 
+/* ========【手機視窗捲動】 設定 - 固定標題與副標題，只讓內容區捲動 ======== */
+@media (max-width:720px) {
+  #appearanceDialog {
+    padding:14px;
+  }
+
+  .appearance-modal {
+    width:100%;
+    max-height:calc(100vh - 28px);
+    max-height:calc(100dvh - 28px);
+    padding:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .appearance-desktop-title {
+    display:none !important;
+  }
+
+  .appearance-mobile-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex:0 0 auto;
+    padding:15px 16px 12px;
+    border-bottom:1px solid var(--border-default);
+    background:var(--surface-card);
+  }
+
+  .appearance-mobile-heading {
+    min-width:0;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .appearance-mobile-heading-icon {
+    width:18px;
+    height:18px;
+    margin-top:2px;
+    flex:0 0 auto;
+    color:var(--action-primary);
+  }
+
+  .appearance-mobile-heading h2 {
+    margin:0;
+    color:var(--action-primary);
+    font-size:16px;
+    font-weight:700;
+    line-height:1.3;
+  }
+
+  .appearance-mobile-heading p {
+    margin:4px 0 0;
+    color:var(--text-secondary);
+    font-size:11.5px;
+    line-height:1.45;
+  }
+
+  .appearance-scroll-body {
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding:0 16px 16px;
+  }
+
+  .export-modal {
+    max-height:calc(100vh - 28px);
+    max-height:calc(100dvh - 28px);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .export-header {
+    flex:0 0 auto;
+    background:var(--surface-card);
+  }
+
+  .export-grid {
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+}
+
 
 /* ========【人物檔案響應式】 設定 - 小螢幕維持緊湊但不擠壓頭像 ======== */
 @media (max-width:760px) {
@@ -8214,7 +8314,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-other-type-field[hidden]{display:none}
 .relationship-full-preview{--relationship-preview-card-width:88px;--relationship-preview-pair-gap:48px;--relationship-preview-half-pair-gap:24px;position:relative;width:100%;height:190px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border-default);border-radius:9px;background:var(--surface-card)}
 .relationship-full-preview svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.relationship-full-preview path{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.relationship-full-preview #relationshipFullPreviewPath{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+#relationshipPreviewArrowShape{stroke:none}
 .relationship-preview-card{position:absolute;z-index:1;width:var(--relationship-preview-card-width);min-height:70px;padding:7px 7px 8px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-card);box-shadow:0 2px 7px rgba(0,0,0,.08);display:grid;justify-items:center;gap:4px}
 .relationship-preview-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,var(--avatar-surface-start),var(--avatar-surface-end));border:1px solid var(--border-default)}
 .relationship-preview-name,.relationship-preview-meta{display:block;height:5px;border-radius:999px;background:var(--border-default)}
