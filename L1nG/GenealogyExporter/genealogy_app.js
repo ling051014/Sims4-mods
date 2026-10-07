@@ -12466,12 +12466,15 @@ function finishMarquee() {
 
 const TOUCH_DRAG_THRESHOLD_PX = 8;
 const TOUCH_LONG_PRESS_MS = 520;
+const TOUCH_DOUBLE_TAP_MS = 320;
+const TOUCH_DOUBLE_TAP_DISTANCE_PX = 28;
 const activeTouchPointers = new Map();
 const touchCardActivationSuppressed = new Set();
 
 let touchPinchGeometry = null;
 let touchLongPressTimer = 0;
 let touchLongPressPointerId = null;
+let lastTouchCanvasTap = null;
 
 function isTouchCardActivationSuppressed(
   event
@@ -12493,6 +12496,54 @@ function cancelTouchLongPress() {
 
   touchLongPressTimer = 0;
   touchLongPressPointerId = null;
+}
+
+function registerTouchCanvasTap(
+  point
+) {
+  if (
+    !point ||
+    point.moved ||
+    point.blocked ||
+    (
+      point.kind !== 'canvas-pan' &&
+      point.kind !== 'canvas-select'
+    )
+  ) {
+    lastTouchCanvasTap = null;
+    return false;
+  }
+
+  const now =
+    performance.now();
+
+  const previous =
+    lastTouchCanvasTap;
+
+  const isDoubleTap =
+    !!previous &&
+    now - previous.time <=
+      TOUCH_DOUBLE_TAP_MS &&
+    Math.hypot(
+      point.clientX - previous.clientX,
+      point.clientY - previous.clientY
+    ) <=
+      TOUCH_DOUBLE_TAP_DISTANCE_PX;
+
+  if (!isDoubleTap) {
+    lastTouchCanvasTap = {
+      time:now,
+      clientX:point.clientX,
+      clientY:point.clientY
+    };
+    return false;
+  }
+
+  lastTouchCanvasTap = null;
+  finishMarquee();
+  genealogyViewport.cancelPan();
+  genealogyViewport.fit();
+  return true;
 }
 
 function getTouchPointerKind(
@@ -12700,6 +12751,13 @@ function handleTouchPointerDown(
     kind:descriptor.kind,
     simId:descriptor.simId
   };
+
+  if (
+    point.kind !== 'canvas-pan' &&
+    point.kind !== 'canvas-select'
+  ) {
+    lastTouchCanvasTap = null;
+  }
 
   activeTouchPointers.set(
     event.pointerId,
@@ -12920,9 +12978,22 @@ function finishTouchPointer(
     genealogyViewport.endPan();
   }
 
+  let handledCanvasDoubleTap =
+    false;
+
+  if (!wasPinching) {
+    handledCanvasDoubleTap =
+      registerTouchCanvasTap(
+        point
+      );
+  } else {
+    lastTouchCanvasTap = null;
+  }
+
   if (
     point.kind === 'canvas-select' &&
-    !wasPinching
+    !wasPinching &&
+    !handledCanvasDoubleTap
   ) {
     if (point.moved) {
       finishMarquee();
