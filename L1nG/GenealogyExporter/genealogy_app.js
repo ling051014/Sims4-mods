@@ -12498,13 +12498,11 @@ function cancelTouchLongPress() {
   touchLongPressPointerId = null;
 }
 
-function registerTouchCanvasTap(
+function handleTouchCanvasTapStart(
   point
 ) {
   if (
     !point ||
-    point.moved ||
-    point.blocked ||
     (
       point.kind !== 'canvas-pan' &&
       point.kind !== 'canvas-select'
@@ -12540,9 +12538,12 @@ function registerTouchCanvasTap(
   }
 
   lastTouchCanvasTap = null;
+  point.blocked = true;
+
   finishMarquee();
   genealogyViewport.cancelPan();
   genealogyViewport.fit();
+
   return true;
 }
 
@@ -12768,6 +12769,16 @@ function handleTouchPointerDown(
     activeTouchPointers.size === 1
   ) {
     if (
+      handleTouchCanvasTapStart(
+        point
+      )
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (
       point.kind === 'card'
     ) {
       scheduleTouchCardLongPress(
@@ -12846,6 +12857,13 @@ function handleTouchPointerMove(
       TOUCH_DRAG_THRESHOLD_PX
   ) {
     point.moved = true;
+
+    if (
+      point.kind === 'canvas-pan' ||
+      point.kind === 'canvas-select'
+    ) {
+      lastTouchCanvasTap = null;
+    }
 
     if (
       point.pointerId ===
@@ -12978,22 +12996,13 @@ function finishTouchPointer(
     genealogyViewport.endPan();
   }
 
-  let handledCanvasDoubleTap =
-    false;
-
-  if (!wasPinching) {
-    handledCanvasDoubleTap =
-      registerTouchCanvasTap(
-        point
-      );
-  } else {
+  if (wasPinching) {
     lastTouchCanvasTap = null;
   }
 
   if (
     point.kind === 'canvas-select' &&
-    !wasPinching &&
-    !handledCanvasDoubleTap
+    !wasPinching
   ) {
     if (point.moved) {
       finishMarquee();
