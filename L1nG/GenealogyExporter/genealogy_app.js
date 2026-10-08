@@ -5402,129 +5402,12 @@ function resolveDirectFamilyRelationships(
   };
 }
 
-function findAncestorPath(
-  sourceId,
-  targetId,
-  maxDepth = 8
-) {
-  const source = String(sourceId || '');
-  const target = String(targetId || '');
-
-  if (!source || !target || source === target) {
-    return null;
-  }
-
-  const queue = [{ id:source, path:[] }];
-  const bestDepth = new Map([[source, 0]]);
-
-  while (queue.length) {
-    const current = queue.shift();
-
-    if (current.path.length >= maxDepth) {
-      continue;
-    }
-
-    const sim = currentGenealogyData()?.sims?.[current.id];
-    if (!sim) continue;
-
-    const relations = genealogyParentRelations(sim);
-
-    for (const relation of relations) {
-      const nextId = String(relation.parentId);
-      if (!nextId) continue;
-
-      const nextPath = [
-        ...current.path,
-        nextId
-      ];
-
-      if (nextId === target) {
-        return nextPath;
-      }
-
-      const known = bestDepth.get(nextId);
-
-      if (
-        known != null &&
-        known <= nextPath.length
-      ) {
-        continue;
-      }
-
-      bestDepth.set(
-        nextId,
-        nextPath.length
-      );
-
-      queue.push({
-        id:nextId,
-        path:nextPath
-      });
-    }
-  }
-
-  return null;
+// 親屬稱謂保留在 App，僅將祖先／後代路徑交給 Store。
+function findAncestorPath(sourceId, targetId, maxDepth = 8) {
+  return genealogyStore.findAncestorPath(sourceId, targetId, maxDepth);
 }
-
-function findDescendantPath(
-  sourceId,
-  targetId,
-  maxDepth = 8
-) {
-  const source = String(sourceId || '');
-  const target = String(targetId || '');
-
-  if (!source || !target || source === target) {
-    return null;
-  }
-
-  const queue = [{ id:source, path:[] }];
-  const bestDepth = new Map([[source, 0]]);
-
-  while (queue.length) {
-    const current = queue.shift();
-
-    if (current.path.length >= maxDepth) {
-      continue;
-    }
-
-    const children = getChildrenOf(current.id);
-
-    for (const child of children) {
-      const nextId = String(child.id);
-      if (!nextId) continue;
-
-      const nextPath = [
-        ...current.path,
-        nextId
-      ];
-
-      if (nextId === target) {
-        return nextPath;
-      }
-
-      const known = bestDepth.get(nextId);
-
-      if (
-        known != null &&
-        known <= nextPath.length
-      ) {
-        continue;
-      }
-
-      bestDepth.set(
-        nextId,
-        nextPath.length
-      );
-
-      queue.push({
-        id:nextId,
-        path:nextPath
-      });
-    }
-  }
-
-  return null;
+function findDescendantPath(sourceId, targetId, maxDepth = 8) {
+  return genealogyStore.findDescendantPath(sourceId, targetId, maxDepth);
 }
 
 function ancestorKinshipLabel(
@@ -9470,150 +9353,26 @@ function closeTopModal() {
   return false;
 }
 
+// 親子／收養查詢由 Store 統一管理；保留既有畫布及編輯器呼叫介面。
 function genealogyParentRelations(child, byId = null) {
-  if (!child) return [];
-
-  const childId = String(child.id || '');
-  const relationByParent = new Map();
-
-  const hasParent = parentId => {
-    const id = String(parentId || '');
-    if (!id || id === childId) return false;
-    return byId instanceof Map
-      ? byId.has(id)
-      : !!currentGenealogyData()?.sims?.[id];
-  };
-
-  const addRelation = (parentId, kind) => {
-    const id = String(parentId || '');
-    if (!hasParent(id)) return;
-
-    const current = relationByParent.get(id);
-    if (current === 'adoptive') return;
-
-    if (kind === 'adoptive' || !current) {
-      relationByParent.set(id, kind);
-    }
-  };
-
-  (child.parentIds || []).forEach(parentId => {
-    addRelation(parentId, 'parent-child');
-  });
-
-  const explicitAdoptedParentIds =
-    (child.gameData?.adoptedParentIds || [])
-      .map(String)
-      .filter(Boolean);
-
-  explicitAdoptedParentIds.forEach(parentId => {
-    addRelation(parentId, 'adoptive');
-  });
-
-  const parentPool =
-    byId instanceof Map
-      ? [...byId.values()]
-      : Object.values(currentGenealogyData()?.sims || {});
-
-  parentPool.forEach(parent => {
-    if (!parent || parent.id == null) return;
-
-    const adoptedChildIds =
-      (parent.gameData?.adoptedChildIds || [])
-        .map(String);
-
-    if (adoptedChildIds.includes(childId)) {
-      addRelation(parent.id, 'adoptive');
-    }
-  });
-
-  return [...relationByParent.entries()]
-    .map(([parentId, kind]) => ({ parentId, kind }))
-    .sort((left, right) =>
-      String(left.parentId).localeCompare(String(right.parentId))
-    );
+  return genealogyStore.getParentRelations(child, byId);
 }
-
 function genealogyParentIds(child, byId = null) {
-  return genealogyParentRelations(child, byId)
-    .map(relation => relation.parentId);
+  return genealogyStore.getParentIds(child, byId);
 }
-
 function genealogyParentRelationGroups(child, byId = null) {
-  const groups = new Map();
-
-  genealogyParentRelations(child, byId)
-    .forEach(relation => {
-      if (!groups.has(relation.kind)) {
-        groups.set(relation.kind, []);
-      }
-      groups.get(relation.kind).push(relation.parentId);
-    });
-
-  return [...groups.entries()]
-    .map(([kind, parentIds]) => ({
-      kind,
-      parentIds:[...new Set(parentIds)].sort()
-    }))
-    .filter(group => group.parentIds.length);
+  return genealogyStore.getParentRelationGroups(child, byId);
 }
-
 function genealogyParentKindFor(child, parentId, byId = null) {
-  const id = String(parentId || '');
-  const relation =
-    genealogyParentRelations(child, byId)
-      .find(item => item.parentId === id);
-
-  return relation ? relation.kind : 'parent-child';
+  return genealogyStore.getParentKindFor(child, parentId, byId);
 }
 
-function isDescendant(ancestorId, nodeId) {
-  const queue = [nodeId];
-  const seen = new Set();
-
-  while (queue.length) {
-    const id = queue.shift();
-    if (seen.has(id)) continue;
-    seen.add(id);
-
-    const sim = currentGenealogyData().sims[id];
-    if (!sim) continue;
-
-    for (const parentId of genealogyParentIds(sim)) {
-      if (parentId === ancestorId) return true;
-      queue.push(parentId);
-    }
-  }
-
-  return false;
-}
-
-let _childrenIndex = null;
+// 子女索引由 Store 統一建立／失效。
 function getChildrenOf(id) {
-  const parentId = String(id || '');
-
-  if (!_childrenIndex) {
-    _childrenIndex = new Map();
-
-    Object.values(currentGenealogyData().sims)
-      .forEach(child => {
-        genealogyParentIds(child)
-          .forEach(pid => {
-            if (!_childrenIndex.has(pid)) {
-              _childrenIndex.set(pid, []);
-            }
-
-            const list = _childrenIndex.get(pid);
-            if (!list.some(item => String(item.id) === String(child.id))) {
-              list.push(child);
-            }
-          });
-      });
-  }
-
-  return _childrenIndex.get(parentId) || [];
+  return genealogyStore.getChildrenOf(id);
 }
 function invalidateChildrenIndex() {
-  _childrenIndex = null;
+  genealogyStore.invalidateChildrenIndex();
 }
 
 function invalidateRelationshipGraph() {
@@ -9623,7 +9382,6 @@ function invalidateRelationshipGraph() {
 genealogyStore =
   window.L1nGGenealogyStore?.create?.({
     uid,
-    getParentRelations:(sim) => genealogyParentRelations(sim),
     isSiblingLink,
     siblingRelationType:SIBLING_RELATION_TYPE,
     siblingRelationLabel:SIBLING_RELATION_LABEL,
@@ -10135,85 +9893,16 @@ async function compressGalleryImage(file) {
 }
 
 function getVisibleIds(familyId) {
-  const fam =
-    familyId ===
-      currentGenealogyData().currentFamilyId
-      ? currentTreeFamily()
-      : currentGenealogyData().families.find(
-          f => f.id === familyId
-        );
-
-  if (!fam) {
-    return new Set();
-  }
-
-  const memberIds =
-    (fam.memberIds || [])
-      .map(String)
-      .filter(id =>
-        currentGenealogyData().sims[id]
-      );
-
-  const result =
-    new Set(memberIds);
-
-  // ========【外部關係人物顯示範圍】 設定 - attachment 不再二次擴張 ========
-  // EA 家庭 / EA 族譜：
-  //   只從 primary 成員附加其直接配偶／前任。
-  //   已經附著進來的 X 不會再把 X 的其他伴侶／家系帶進來。
-  //
-  // 大家族：
-  //   保留原本「完整連通族譜」語意，memberIds 本身就是完整 component；
-  //   仍允許補上 component 邊界上的直接配偶／前任。
-  const relationshipSources =
-    familyId ===
-      currentGenealogyData().currentFamilyId &&
-    familyTreeViewMode !== 'extended' &&
-    Array.isArray(
-      fam.primaryMemberIds
-    ) &&
-    fam.primaryMemberIds.length
-      ? fam.primaryMemberIds
-      : memberIds;
-
-  [...new Set(
-    relationshipSources.map(String)
-  )].forEach(id => {
-    const sim =
-      currentGenealogyData().sims[id];
-
-    if (!sim) return;
-
-    [
-      ...(sim.spouseIds || []),
-      ...(sim.exSpouseIds || [])
-    ]
-      .map(String)
-      .forEach(relatedId => {
-        if (
-          currentGenealogyData().sims[
-            relatedId
-          ]
-        ) {
-          result.add(
-            relatedId
-          );
-        }
-      });
+  const db = currentGenealogyData();
+  const isCurrent = familyId === db.currentFamilyId;
+  const family = isCurrent ? currentTreeFamily() : genealogyStore.getFamily(familyId);
+  const attachmentSources = isCurrent && familyTreeViewMode !== 'extended' &&
+    Array.isArray(family?.primaryMemberIds) && family.primaryMemberIds.length
+      ? family.primaryMemberIds : null;
+  return genealogyStore.getVisibleFamilyIds(family, {
+    relationshipSourceIds:attachmentSources,
+    matchesSim:simMatchesTopbarFilters
   });
-
-  // 篩選是真正的顯示篩選。
-  [...result].forEach(id => {
-    if (
-      !simMatchesTopbarFilters(
-        currentGenealogyData().sims[id]
-      )
-    ) {
-      result.delete(id);
-    }
-  });
-
-  return result;
 }
 
 // ========【圖片預熱】 設定 - 只預先載入目前畫面會立即看到的圖片，避免 F5 後頭像逐張跳出 ========
