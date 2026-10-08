@@ -1542,6 +1542,7 @@ function currentGenealogyData() {
 // 自由排列工具：選取 / 框選與畫布拖曳分離。
 let arrangeTool = 'pan';
 const selectedNodeIds = new Set();
+const selectedPetIds = new Set();
 let spacePanHeld = false;
 let marqueeState = null;
 
@@ -8834,7 +8835,8 @@ genealogyScene =
       avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
       showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
       petCardAvatarHTML:pet => framedAvatarImageHTML(pet?.avatar, pet?.avatarFrame) || petIconFor(pet),
-      petCardSpeciesLabel:formatPetSpecies
+      petCardSpeciesLabel:formatPetSpecies,
+      syncPetSelectionClasses
     }
   }) || null;
 if (!genealogyScene) throw new Error('Genealogy Scene failed to initialize.');
@@ -10491,6 +10493,21 @@ lifePhotoViewerDialog.onclick = event => {
 /* =========================================================
  *  自由排列選取 / 框選 + 平移 / 縮放
  * ========================================================= */
+function syncPetSelectionClasses() {
+  if (!petCardsLayer) return;
+  const visible = new Set();
+  petCardsLayer.querySelectorAll('.genealogy-pet-card[data-pet-id]').forEach(element => {
+    const id = element.dataset.petId;
+    visible.add(id);
+    const selected = selectedPetIds.has(id);
+    element.classList.toggle('pet-card-selected', selected);
+    element.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
+  [...selectedPetIds].forEach(id => {
+    if (!visible.has(id)) selectedPetIds.delete(id);
+  });
+}
+
 function syncNodeSelectionClasses() {
   const visible = new Set();
   nodes.querySelectorAll('.person-card[data-id]').forEach(el => {
@@ -10498,11 +10515,13 @@ function syncNodeSelectionClasses() {
     el.classList.toggle('person-card-selected', selectedNodeIds.has(el.dataset.id));
   });
   [...selectedNodeIds].forEach(id => { if (!visible.has(id)) selectedNodeIds.delete(id); });
+  syncPetSelectionClasses();
 }
 
 function clearNodeSelection() {
-  if (!selectedNodeIds.size) return;
+  if (!selectedNodeIds.size && !selectedPetIds.size) return;
   selectedNodeIds.clear();
+  selectedPetIds.clear();
   syncNodeSelectionClasses();
 }
 
@@ -10515,12 +10534,16 @@ function selectVisibleNodes() {
   }
 
   selectedNodeIds.clear();
+  selectedPetIds.clear();
 
   getSceneLayout()
     .visibleIds
     .forEach(id =>
       selectedNodeIds.add(id)
     );
+  getSceneLayout()
+    .petLayout?.cards
+    ?.forEach(card => selectedPetIds.add(card.key));
 
   syncNodeSelectionClasses();
 }
@@ -11255,8 +11278,16 @@ function updateMarquee(clientX, clientY) {
     const intersects = r.right >= leftClient && r.left <= rightClient && r.bottom >= topClient && r.top <= bottomClient;
     if (intersects) next.add(el.dataset.id);
   });
+  const nextPets = new Set(marqueeState.basePetSelection || []);
+  petCardsLayer?.querySelectorAll('.genealogy-pet-card[data-pet-id]').forEach(el => {
+    const r = el.getBoundingClientRect();
+    const intersects = r.right >= leftClient && r.left <= rightClient && r.bottom >= topClient && r.top <= bottomClient;
+    if (intersects) nextPets.add(el.dataset.petId);
+  });
   selectedNodeIds.clear();
   next.forEach(id => selectedNodeIds.add(id));
+  selectedPetIds.clear();
+  nextPets.forEach(id => selectedPetIds.add(id));
   syncNodeSelectionClasses();
 }
 
@@ -11745,7 +11776,8 @@ function handleTouchPointerMove(
       marqueeState = {
         startX:point.startX,
         startY:point.startY,
-        baseSelection:new Set()
+        baseSelection:new Set(),
+        basePetSelection:new Set()
       };
     }
 
@@ -11906,7 +11938,8 @@ viewport.addEventListener('mousedown', e => {
     marqueeState = {
       startX: e.clientX,
       startY: e.clientY,
-      baseSelection: e.shiftKey ? new Set(selectedNodeIds) : new Set()
+      baseSelection: e.shiftKey ? new Set(selectedNodeIds) : new Set(),
+      basePetSelection: e.shiftKey ? new Set(selectedPetIds) : new Set()
     };
     if (!e.shiftKey) clearNodeSelection();
     updateMarquee(e.clientX, e.clientY);
@@ -17839,20 +17872,67 @@ function openPetProfileFromCanvas(entry) {
   personProfileDialog.classList.add('show');
 }
 
+// ========【寵物卡操作】 設定 - PointerUp 啟用觸控／滑鼠卡片；Click 保留鍵盤啟用 ========
+function activatePetCanvasCard(id, additive = false) {
+  const card = getSceneLayout()?.petLayout?.cards?.find(entry => entry.key === id);
+  if (!card) return false;
+
+  if (arrangeTool === 'select' && !spacePanHeld) {
+    if (!additive) {
+      selectedNodeIds.clear();
+      selectedPetIds.clear();
+      selectedPetIds.add(id);
+    } else if (selectedPetIds.has(id)) {
+      selectedPetIds.delete(id);
+    } else {
+      selectedPetIds.add(id);
+    }
+    syncNodeSelectionClasses();
+    return true;
+  }
+
+  if (viewMode === 'edit' && openPetEditorFromCanvas(card)) return true;
+  openPetProfileFromCanvas(card);
+  return true;
+}
+
+let petPointerStart = null;
+let lastPetPointerActivation = null;
 petCardsLayer?.addEventListener('pointerdown', event => {
-  if (event.target.closest('.genealogy-pet-card')) event.stopPropagation();
+  const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
+  if (!element || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  petPointerStart = {
+    id:element.dataset.petId,
+    pointerId:event.pointerId,
+    x:event.clientX,
+    y:event.clientY
+  };
+  event.stopPropagation();
+});
+petCardsLayer?.addEventListener('pointercancel', () => { petPointerStart = null; });
+petCardsLayer?.addEventListener('pointerup', event => {
+  const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
+  const start = petPointerStart;
+  petPointerStart = null;
+  if (!start || !element || event.pointerId !== start.pointerId ||
+      element.dataset.petId !== start.id ||
+      Math.hypot(event.clientX - start.x,event.clientY - start.y) > 8) return;
+  event.stopPropagation();
+  // 原生 Click 在 PointerUp 後仍可能觸發，記錄 ID 防止重複開啟視窗。
+  lastPetPointerActivation = {id:start.id,time:performance.now()};
+  activatePetCanvasCard(start.id,event.shiftKey);
 });
 petCardsLayer?.addEventListener('click', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
   if (!element) return;
-  event.preventDefault();
   event.stopPropagation();
-  const card = getSceneLayout()?.petLayout?.cards?.find(
-    entry => entry.key === element.dataset.petId
-  );
-  if (!card) return;
-  if (viewMode === 'edit' && openPetEditorFromCanvas(card)) return;
-  openPetProfileFromCanvas(card);
+  const id = element.dataset.petId;
+  if (lastPetPointerActivation?.id === id &&
+      performance.now() - lastPetPointerActivation.time < 900) {
+    lastPetPointerActivation = null;
+    return;
+  }
+  activatePetCanvasCard(id,event.shiftKey);
 });
 
 // ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========

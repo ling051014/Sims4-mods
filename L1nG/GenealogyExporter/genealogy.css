@@ -8639,7 +8639,8 @@ button.danger-action:focus-visible {
 
 // ========【畫布寵物卡】 設定 - 沿用人物卡片配色，家庭旁獨立顯示，不覆蓋血緣線 ========
 /* 寵物卡置於畫布標籤上方；容器不擋人物卡，只有卡片接收點擊。 */
-#genealogyPetLayer { position:absolute; inset:0; z-index:4; pointer-events:none; }
+#genealogyPetLayer { position:absolute; inset:0; z-index:4; pointer-events:none; overflow:visible; }
+#genealogyPetLayer .genealogy-pet-card { pointer-events:auto; touch-action:manipulation; }
 .genealogy-pet-card {
   position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
   gap:5px; padding:9px 7px 7px; border:1.5px solid var(--border-default); border-radius:10px;
@@ -8649,6 +8650,18 @@ button.danger-action:focus-visible {
 }
 .genealogy-pet-card:hover,.genealogy-pet-card:focus-visible {
   border-color:var(--action-primary); box-shadow:0 5px 14px rgba(0,0,0,.10);
+}
+.genealogy-pet-card.pet-card-selected {
+  z-index:5;
+}
+.genealogy-pet-card.pet-card-selected::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  border:2px solid var(--action-primary);
+  border-radius:inherit;
+  box-sizing:border-box;
+  pointer-events:none;
 }
 /* 與人物卡一致：檢視直向、編輯橫向，寵物資訊各自適配。 */
 .genealogy-pet-card-info { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; min-width:0; width:100%; }

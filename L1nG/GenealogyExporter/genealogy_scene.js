@@ -49,7 +49,8 @@
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
-      showPetCards, petCardAvatarHTML, petCardSpeciesLabel
+      showPetCards, petCardAvatarHTML, petCardSpeciesLabel,
+      syncPetSelectionClasses
     } = helpers;
     // Scene owns canvas-only presentation and relationship-label SVG markup.
     // ========【檢視卡片內容模型】 設定 - 文字列與卡片 HTML 都由 Scene 統一組裝 ========
@@ -6273,6 +6274,7 @@ function paintPetLayer() {
   lastPaintedPetLayout = layoutCache?.petLayout;
   if (!layoutCache?.petLayout?.cards?.length) {
     petLayer.replaceChildren();
+    syncPetSelectionClasses();
     return;
   }
   const {cards,groups} = layoutCache.petLayout;
@@ -6297,6 +6299,7 @@ function paintPetLayer() {
     }).join('');
     return items;
   }).join('');
+  syncPetSelectionClasses();
 }
 
 function composeScenePlan() {
