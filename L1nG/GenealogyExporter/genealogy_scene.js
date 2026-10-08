@@ -20,7 +20,7 @@
     const PET_CARD_GAP = 12;
     const PET_ROW_GAP = 13;
     const PET_GROUP_GAP = 30;
-    const PET_SIDE_GAP = 96;
+    const PET_SIDE_GAP = 26;
     const GAPS = Object.freeze({
       edit:Object.freeze({ SPOUSE:30, SIBLING:56, LEVEL:118 }),
       view:Object.freeze({ SPOUSE:22, SIBLING:40, LEVEL:90 })
@@ -6237,34 +6237,67 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
   const groups = [...byGroup.values()];
   if (!groups.length) return empty;
 
+  // 以實際可見的 EA 家庭成員為錨點，不再把寵物一律塞到整張族譜最右邊。
+  const humanRects = [...(humanGeometry.rects?.values() || [])].map(rect => ({
+    left:rect.left-PAD,
+    top:rect.top-PAD,
+    right:rect.right-PAD,
+    bottom:rect.bottom-PAD
+  }));
   groups.forEach(group => {
     const anchors = [...visibleIds].filter(id => {
       const sim = genealogyData?.sims?.[id];
       return group.ownerIds.has(String(id)) ||
         (!!group.householdId && String(sim?.gameData?.householdId ?? '') === group.householdId);
-    }).map(id => positions.get(String(id))?.y).filter(Number.isFinite).sort((a,b) => a-b);
-    group.anchorY = anchors.length ? anchors[Math.floor((anchors.length-1)/2)] : 0;
+    }).map(id => {
+      const p = positions.get(String(id));
+      const dims = humanGeometry.dimensions?.get(String(id)) || getNodeDimensionsById(id);
+      return p ? { x:p.x, y:p.y, right:p.x+dims.W } : null;
+    }).filter(Boolean).sort((a,b) => a.y-b.y);
+    group.anchorY = anchors.length ? anchors[Math.floor((anchors.length-1)/2)].y : 0;
+    group.anchorX = anchors.length
+      ? Math.max(...anchors.map(anchor => anchor.right))
+      : (humanGeometry.width || 0);
   });
-  groups.sort((a,b) => a.anchorY-b.anchorY || a.key.localeCompare(b.key));
+  groups.sort((a,b) => a.anchorY-b.anchorY || a.anchorX-b.anchorX || a.key.localeCompare(b.key));
 
-  const originX = (humanGeometry.width || 0) + (positions.size ? PET_SIDE_GAP : 0);
   const cards = [];
-  let bottom = -PET_GROUP_GAP;
-  let maxRight = 0;
+  const occupied = humanRects.slice();
+  let maxRight = humanGeometry.width || 0;
+  let maxBottom = humanGeometry.height || 0;
+  const {W,H} = getPetCardDims();
+  const clearance = 10;
+
   groups.forEach(group => {
-    group.x = originX;
-    group.y = Math.max(0,group.anchorY,bottom + PET_GROUP_GAP);
-    const {W,H} = getPetCardDims();
-    group.entries.forEach((entry,index) => {
-      const x = originX + (index % 3) * (W + PET_CARD_GAP);
-      const y = group.y + Math.floor(index / 3) * (H + PET_ROW_GAP);
-      cards.push({...entry,x,y});
-      maxRight = Math.max(maxRight,x+W);
-    });
+    const cols = Math.min(3,group.entries.length);
     const rows = Math.ceil(group.entries.length/3);
-    bottom = group.y + rows*H + Math.max(0,rows-1)*PET_ROW_GAP;
+    const groupW = cols*W + Math.max(0,cols-1)*PET_CARD_GAP;
+    const groupH = rows*H + Math.max(0,rows-1)*PET_ROW_GAP;
+    const y = Math.max(0,group.anchorY);
+    let x = Math.max(0,group.anchorX+PET_SIDE_GAP);
+
+    // 只移動寵物群組避讓既有卡片，不調整人物族譜或關係線的幾何。
+    for (let attempt=0; attempt<occupied.length+1; attempt++) {
+      const blocking = occupied.find(rect =>
+        x < rect.right+clearance && x+groupW+clearance > rect.left &&
+        y < rect.bottom+clearance && y+groupH+clearance > rect.top
+      );
+      if (!blocking) break;
+      x = Math.max(x+PET_CARD_GAP,blocking.right+PET_SIDE_GAP);
+    }
+
+    group.x = x;
+    group.y = y;
+    occupied.push({left:x,top:y,right:x+groupW,bottom:y+groupH});
+    group.entries.forEach((entry,index) => {
+      const cardX = x + (index%3)*(W+PET_CARD_GAP);
+      const cardY = y + Math.floor(index/3)*(H+PET_ROW_GAP);
+      cards.push({...entry,x:cardX,y:cardY});
+    });
+    maxRight = Math.max(maxRight,x+groupW);
+    maxBottom = Math.max(maxBottom,y+groupH);
   });
-  return {cards,groups,width:maxRight,height:bottom};
+  return {cards,groups,width:maxRight,height:maxBottom};
 }
 
 // ========【寵物畫布圖層】 設定 - 不混入人物節點、選取及關係線路由 ========
@@ -8571,7 +8604,6 @@ function paintPersonLayer() {
     if (cardSettings.residence && c.residence) editRows.push(`<div class="person-card-residence" title="${esc(dResidence)}">${iconSvg('house')}${esc(dResidence)}</div>`);
     if (cardSettings.aspiration && c.aspiration) editRows.push(`<div class="person-card-aspiration" title="${esc(uiText('人生抱負'))}：${esc(dAspiration)}">${iconSvg('bullseye')}${esc(dAspiration)}</div>`);
     if (cardSettings.traits && dTraits.length) editRows.push(`<div class="person-card-tags">${renderTraitTagSummary(c.traits, c)}</div>`);
-    if (cardSettings.pets && showPetCards() && (c.pets||[]).length) editRows.push(`<div class="person-card-pets">${renderPetChipSummary(c.pets, c)}</div>`);
     if (cardSettings.gallery && (c.gallery||[]).length) editRows.push(`<div class="person-card-life-photo-badge" title="${esc(uiText('人生照片'))} ${(c.gallery||[]).length}">${iconSvg('images')} ${(c.gallery||[]).length}</div>`);
 
     const configuredEditBody = cardSettingsHasBody(cardSettings);
