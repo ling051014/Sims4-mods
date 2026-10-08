@@ -43,15 +43,19 @@
         Array.from({ length: count }, (_, index) => factory(index)).join("");
 
 
-    const bar = (type) =>
-        '<div class="sk-sitebar sk-sitebar-' + type + '"><div class="sk-sitebar-inner">' +
+    const bar = (type) => {
+        // 品牌名稱、站內導覽、右側工具必須各佔一格；漢化頁沒有語言切換。
+        const links = type === "realdate" ? 5 : (type === "home" || type === "translations" ? 3 : 4);
+        const language = type === "realdate" || type === "product";
+        return '<div class="sk-sitebar sk-sitebar-' + type + '"><div class="sk-sitebar-inner">' +
             '<div class="sk-site-brand">' +
                 block("sk-brand") + (type === "home" ? "" : block("sk-brand-section")) +
             '</div>' +
-            '<div class="sk-site-links">' +
-                repeat(type === "realdate" ? 5 : type === "home" ? 3 : 4, () => block("sk-nav-link")) +
-            '</div><div class="sk-site-controls">' + (type === "home" ? "" : block("sk-language")) + block("sk-mobile-menu") +
+            '<div class="sk-site-links">' + repeat(links, () => block("sk-nav-link")) + '</div>' +
+            '<div class="sk-site-controls">' +
+                (language ? block("sk-language") : "") + block("sk-mobile-menu") +
             '</div></div></div>';
+    };
     const eyebrow = () => block("sk-eyebrow");
     const rowLines = () => panelLines();
     const feature = () => '<div class="sk-feature-card">' + rowLines() + '</div>';
@@ -114,7 +118,7 @@
             '<div class="sk-exporter-features">' + repeat(3, feature) + '</div>',
 
         "translations": () =>
-            bar("home") +
+            bar("translations") +
             '<div class="sk-translations-hero"><div class="sk-translations-copy">' + eyebrow() +
                 '<div class="sk-translations-title-row">' + block("sk-translation-mark") + block("sk-translation-title") + '</div>' +
                 block("sk-wide-copy") + block("sk-medium-copy") + block("sk-wide-copy") +

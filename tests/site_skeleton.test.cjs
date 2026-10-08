@@ -109,3 +109,10 @@ test("首屏圖片有最長等待上限、完成或錯誤都能解除骨架",()=
   assert.match(script,/setTimeout\(finish, 750\)/);
   assert.match(script,/clearTimeout\(limit\)/);
 });
+
+test("頂欄品牌與導覽保持三區，漢化頁有專區名稱而不新增語言欄",()=>{
+  assert.match(script,/class="sk-site-brand"/);
+  assert.match(style,/\.sk-site-brand\s*\{\s*display:flex;/);
+  assert.match(script,/"translations": \(\) =>\s*bar\("translations"\)/);
+  assert.match(script,/const language = type === "realdate" \|\| type === "product"/);
+});
