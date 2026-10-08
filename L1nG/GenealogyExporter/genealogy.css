@@ -8018,8 +8018,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     pointer-events:none;
 }
 .app-skeleton-topbar {
-    height:58px;
-    flex:0 0 58px;
+    position:relative;
+    height:52px;
+    flex:0 0 52px;
     display:flex;
     align-items:stretch;
     border-bottom:1px solid var(--border-default);
@@ -8090,7 +8091,17 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     border-radius:7px;
 }
 .skeleton-mobile-menu { display:none; }
-.skeleton-filter { width:76px; height:32px; border-radius:7px; }
+/* 與正式 .topbar-filter-menu 相同，以整條頂欄而非按鈕列為置中基準。 */
+.skeleton-filter {
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:76px;
+    height:32px;
+    border-radius:7px;
+    transform:translate(-50%, -50%);
+    z-index:1;
+}
 .skeleton-action { width:64px; height:32px; border-radius:7px; }
 .skeleton-action-wide { width:112px; }
 .skeleton-cover { width:100%; aspect-ratio:16/9; border-radius:8px; }
@@ -8202,7 +8213,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         gap:6px;
     }
     .skeleton-mobile-menu { display:block; }
-    .skeleton-filter { width:54px; }
+    .skeleton-filter { width:32px; }
     .skeleton-action { width:34px; }
     .skeleton-action-wide { display:none; }
     .app-skeleton-sidebar { display:none; }
