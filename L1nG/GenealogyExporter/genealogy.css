@@ -5658,6 +5658,8 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-cloud-haze2);
 }
 
+.icon-crosshair { --l1ng-icon: var(--l1ng-icon-crosshair); }
+
 .icon-database {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-database);
 }
