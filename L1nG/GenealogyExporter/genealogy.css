@@ -2005,7 +2005,7 @@ body[data-theme="graphite"] .life-photo-stage {
 .form-field-title { color:var(--text-secondary); font:inherit; font-weight:600; }
 
 /* ========【模擬市民個人檔案編輯器】 設定 - 緊湊人物檔案、分頁內容與固定操作列 ======== */
-.sim-editor-modal { width:min(790px,100%); max-height:92vh; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease; }
+.sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease; }
 .sim-editor-top { flex:0 0 auto; padding:13px 18px 0; background:var(--surface-card); position:relative; z-index:5; }
 .sim-editor-title { margin-bottom:8px !important; padding-right:64px; }
 .sim-profile-header { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:start; gap:18px; padding:0 0 11px; }
@@ -2013,6 +2013,8 @@ body[data-theme="graphite"] .life-photo-stage {
 .avatar-preview.sim-profile-avatar { grid-column:1/-1; width:104px; height:104px; margin:0 auto 1px; border-radius:11px; font-size:36px; }
 .sim-profile-avatar-actions { grid-column:1/-1; }
 .avatar-editor-actions { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; }
+.sim-profile-avatar-actions.avatar-editor-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.sim-profile-avatar-actions > .avatar-editor-action,.sim-profile-avatar-actions > .filebtn.compact { width:100%; display:inline-flex; align-items:center; justify-content:center; }
 .avatar-editor-action,.filebtn.compact,.avatar-clear-compact { min-height:28px; padding:4px 8px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:11px; line-height:1; white-space:nowrap; }
 button.avatar-editor-action { cursor:pointer; }
 .avatar-editor-action:hover,.avatar-clear-compact:hover,.filebtn.compact:hover { border-color:var(--action-primary); color:var(--action-primary); }
@@ -2024,9 +2026,13 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-profile-edit-fields input:focus,.sim-profile-edit-fields select:focus,.sim-profile-edit-fields .ui-single-select-trigger:focus-visible { border-color:var(--action-primary); }
 .profile-name-field input { min-height:36px; font-size:17px; font-weight:700; padding:5px 9px; }
 .profile-identity-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
-.profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:end; }
-.profile-field-label { display:inline-flex; align-items:center; gap:4px; }
+.profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:start; }
+.profile-fact-edit-row > .form-field { grid-template-rows:auto 32px; align-items:start; }
+.profile-field-label { min-height:14px; display:inline-flex; align-items:center; gap:4px; line-height:1.2; }
 .profile-field-label .l1ng-icon { color:var(--action-primary); }
+.profile-birthday-field .birthday-inputs,
+.profile-age-field .age-input-wrap,
+.profile-residence-field > input { align-self:start; min-height:32px; }
 .profile-birthday-field .birthday-inputs { grid-template-columns:1.3fr .85fr .85fr; gap:5px; }
 .profile-age-field .age-input-wrap { min-height:32px; border-radius:6px; }
 .profile-age-field .age-input-wrap input { min-height:30px; border:0; border-radius:0; box-shadow:none; background:transparent; padding-right:2px; }
@@ -3233,6 +3239,67 @@ button.avatar-editor-action { cursor:pointer; }
 
 .appearance-panel{
     width:min(860px,100%);
+    max-height:min(760px,calc(100vh - 40px));
+    max-height:min(760px,calc(100dvh - 40px));
+    padding:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+}
+
+.appearance-modal{
+    --appearance-control-label-size:11.5px;
+}
+
+.appearance-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex:0 0 auto;
+    padding:17px 20px 14px;
+    border-bottom:1px solid var(--border-default);
+    background:var(--surface-card);
+}
+
+.appearance-heading{
+    min-width:0;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+}
+
+.appearance-heading-icon{
+    width:18px;
+    height:18px;
+    margin-top:2px;
+    flex:0 0 auto;
+    color:var(--action-primary);
+}
+
+.appearance-heading h2{
+    margin:0;
+    color:var(--action-primary);
+    font-size:16px;
+    font-weight:700;
+    line-height:1.3;
+}
+
+.appearance-heading p{
+    margin:4px 0 0;
+    color:var(--text-secondary);
+    font-size:11.5px;
+    line-height:1.45;
+}
+
+.appearance-scroll-body{
+    flex:1 1 auto;
+    min-width:0;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding:0 20px 18px;
 }
 
 .appearance-section{
@@ -3256,13 +3323,16 @@ button.avatar-editor-action { cursor:pointer; }
 
 /* 主題卡：沿用視覺設定 prototype。 */
 .appearance-theme-grid{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
     gap:10px;
     margin-bottom:10px;
 }
 
 .appearance-theme-card{
+    width:calc((100% - 20px) / 3);
+    flex:0 0 calc((100% - 20px) / 3);
     min-width:0;
     min-height:88px;
     padding:10px;
@@ -3274,7 +3344,7 @@ button.avatar-editor-action { cursor:pointer; }
     flex-direction:column;
     gap:9px;
     font:inherit;
-    text-align:left;
+    text-align:center;
     cursor:pointer;
     transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;
 }
@@ -3300,6 +3370,7 @@ button.avatar-editor-action { cursor:pointer; }
     min-width:0;
     display:flex;
     align-items:center;
+    justify-content:center;
     gap:7px;
 }
 
@@ -3371,10 +3442,10 @@ button.avatar-editor-action { cursor:pointer; }
     min-width:0;
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:8px;
+    justify-content:flex-start;
+    gap:6px;
     color:var(--text-secondary);
-    font-size:11.5px;
+    font-size:var(--appearance-control-label-size);
     font-weight:600;
 }
 
@@ -3537,11 +3608,12 @@ button.avatar-editor-action { cursor:pointer; }
 
 .appearance-background-control{
     min-width:0;
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-rows:auto 32px;
+    align-items:start;
     gap:7px;
     color:var(--text-secondary);
-    font-size:11.5px;
+    font-size:var(--appearance-control-label-size);
     transition:opacity .15s ease;
 }
 
@@ -3551,6 +3623,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 .appearance-background-range{
     min-width:0;
+    height:32px;
     display:grid;
     grid-template-columns:minmax(0,1fr) auto;
     align-items:center;
@@ -3571,6 +3644,13 @@ button.avatar-editor-action { cursor:pointer; }
 .appearance-background-control .ui-single-select{
     width:100%;
     max-width:200px;
+    height:32px;
+    align-self:start;
+}
+
+.appearance-background-control .ui-single-select-trigger{
+    height:32px;
+    min-height:32px;
 }
 
 .appearance-background-value{
@@ -3586,8 +3666,9 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 @media(max-width:760px){
-    .appearance-theme-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr));
+    .appearance-theme-card{
+        width:calc((100% - 10px) / 2);
+        flex-basis:calc((100% - 10px) / 2);
     }
 
     .appearance-custom-theme-row{
@@ -4818,7 +4899,11 @@ button.avatar-editor-action { cursor:pointer; }
 
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
-/* ========【模擬市民獨立預覽頁】 設定 - 從編輯分類抽離，作為同尺寸下一張紙 ======== */
+/* ========【模擬市民獨立預覽頁】 設定 - 編輯頁背紙維持同尺寸，預覽頁與預覽背紙共用同一尺寸 authority ======== */
+#simEditorDialog {
+    /* 桌面正式人物預覽寬度；預覽前景與預覽背紙必須共用這一個值 */ --sim-editor-preview-width: min(560px,calc(100vw - 40px));
+}
+
 .sim-editor-preview-open {
     /* 獨立預覽入口固定在編輯頁標題區右上 */ position: absolute;
     /* 上方位置 */ top: 13px;
@@ -4848,15 +4933,24 @@ button.avatar-editor-action { cursor:pointer; }
     /* 與主編輯頁共用畫面中心 */ position: absolute;
     /* 水平置中 */ left: 50%;
     /* 垂直置中 */ top: 50%;
-    /* 尺寸直接跟隨目前編輯頁，避免後方紙張只露出一小塊 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
-    /* 高度直接跟隨目前編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,88vh));
-    /* 尺寸已由編輯頁 authority 提供，不再另設不同 max-height */ max-height: none;
     /* 圓角弧度 */ border-radius: 10px;
+}
+
+.sim-editor-paper-back {
+    /* 背紙寬度直接跟隨實際編輯頁，不受 560px 預覽寬度影響 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
+    /* 背紙高度直接跟隨實際編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
+    /* 幾何尺寸由編輯頁量測值決定 */ max-height: none;
+}
+
+.sim-editor-preview-sheet {
+    /* 尚未翻頁時，這張紙也要與編輯頁完全同寬，才會形成真正的同尺寸紙張堆疊 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
+    /* 高度同樣跟隨編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
+    /* 尺寸由編輯頁量測值決定 */ max-height: none;
 }
 
 #simEditorDialog.sheet-ready .sim-editor-paper-back,
 #simEditorDialog.sheet-ready .sim-editor-preview-sheet {
-    /* 幾何尺寸與編輯頁一致後才呈現完整紙張堆疊 */ visibility: visible;
+    /* 編輯頁幾何量測完成後才呈現紙張堆疊，避免初始化時尺寸跳動 */ visibility: visible;
 }
 
 .sim-editor-paper-back {
@@ -4867,7 +4961,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 透明度 */ opacity: .72;
     /* 不接收操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 12px 30px rgba(31,35,40,.08);
-    /* 動畫過渡 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease;
+    /* 動畫過渡；翻到預覽時寬度與前景一起收斂 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease;
 }
 
 .sim-editor-preview-sheet {
@@ -4881,7 +4975,12 @@ button.avatar-editor-action { cursor:pointer; }
     /* 預設透明度 */ opacity: .92;
     /* 預設不可操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 14px 36px rgba(31,35,40,.11);
-    /* 翻頁動畫 */ transition: transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
+    /* 翻頁動畫；寬度在翻到前景時才由編輯頁尺寸收斂到正式預覽尺寸 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
+}
+
+/* 尚未打開預覽時只把它當成第二張紙，不讓 560px 預覽內容從編輯頁邊緣露出。 */
+#simEditorDialog:not(.preview-open) .sim-editor-preview-sheet > * {
+    visibility: hidden;
 }
 
 .sim-editor-preview-sheet-toolbar {
@@ -4920,13 +5019,13 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .sim-editor-preview-sheet .person-profile-header {
-    /* 完整預覽頁標頭留白 */ padding: 18px 20px 16px;
+    /* 與正式人物檢視標頭一致 */ padding: 16px 18px 14px;
 }
 
 .sim-editor-preview-sheet .person-profile-body {
     /* 預覽整頁自己捲動，不建立第二條捲軸 */ max-height: none;
     /* 關閉內層捲軸 */ overflow-y: visible;
-    /* 內容左右留白 */ padding: 0 20px 18px;
+    /* 與正式人物檢視內容寬度一致 */ padding: 0 18px 18px;
 }
 
 /* ========【模擬市民預覽翻頁】 設定 - 只翻編輯頁與獨立預覽頁，不改四個編輯分類 ======== */
@@ -4934,6 +5033,11 @@ button.avatar-editor-action { cursor:pointer; }
     /* 主編輯頁翻離前景 */ transform: translateX(-54px) translateY(4px) rotate(-1.5deg) scale(.99);
     /* 主編輯頁淡出 */ opacity: 0;
     /* 主編輯頁暫停操作 */ pointer-events: none;
+}
+
+#simEditorDialog.preview-open .sim-editor-preview-sheet,
+#simEditorDialog.preview-open .sim-editor-paper-back {
+    /* 預覽前景與背紙強制共用完全相同的寬度，避免再出現 560px / 790px 混搭 */ width: var(--sim-editor-preview-width);
 }
 
 #simEditorDialog.preview-open .sim-editor-preview-sheet {
@@ -4950,39 +5054,36 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 @media (max-width:760px) {
+    #simEditorDialog {
+        /* 小螢幕正式人物預覽寬度 */ --sim-editor-preview-width: min(540px,calc(100vw - 40px));
+    }
+
     .sim-editor-preview-open {
         /* 小螢幕配合既有標頭內距 */ top: 12px;
         /* 小螢幕右側位置 */ right: 14px;
     }
 
-    .sim-editor-paper-back,
-    .sim-editor-preview-sheet {
-        /* 小螢幕保留安全邊距 */ width: min(790px,calc(100vw - 28px));
+    #simEditorDialog.preview-open .sim-editor-preview-sheet {
         /* 小螢幕提高可用高度 */ max-height: 96vh;
-    }
-
-    .sim-editor-paper-back {
-        /* 小螢幕後方紙張高度 */ height: min(680px,92vh);
     }
 }
 
 @media (max-width:520px) {
+    #simEditorDialog {
+        /* 手機正式人物預覽寬度：遮罩左右各保留 20px */ --sim-editor-preview-width: calc(100vw - 40px);
+    }
+
     .sim-editor-preview-open {
         /* 手機版縮小按鈕 */ min-height: 28px;
         /* 手機版縮小內距 */ padding: 4px 8px;
     }
 
-    .sim-editor-paper-back,
-    .sim-editor-preview-sheet {
-        /* 手機版最小安全邊距 */ width: calc(100vw - 20px);
-    }
-
     .sim-editor-preview-sheet .person-profile-header {
-        /* 手機版標頭留白 */ padding: 15px 14px 13px;
+        /* 與正式人物檢視標頭內距一致 */ padding: 16px 18px 14px;
     }
 
     .sim-editor-preview-sheet .person-profile-body {
-        /* 手機版內容留白 */ padding: 0 14px 14px;
+        /* 與正式人物檢視內容內距一致 */ padding: 0 18px 18px;
     }
 
     #simEditorDialog.preview-open .sim-editor-modal {
@@ -5031,7 +5132,7 @@ button.avatar-editor-action { cursor:pointer; }
 .person-profile-value.muted { color:var(--text-secondary); font-style:italic; }
 .person-profile-traits { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
 .person-profile-traits .tag { font-size:10.5px; padding:3px 7px; max-width:none; }
-.person-profile-bio { font-size:12.5px; line-height:1.55; color:var(--text-primary); word-break:break-word; white-space:pre-wrap; }
+.person-profile-notes { font-size:12.5px; line-height:1.55; color:var(--text-primary); word-break:break-word; white-space:pre-wrap; }
 .person-profile-media { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:16px; }
 .person-profile-media-column { min-width:0; }
 .person-profile-media-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:7px; color:var(--text-primary); font-size:12px; font-weight:700; }
@@ -5506,263 +5607,271 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 /* ========【SVG 圖示資源】 設定 - 對應獨立 Bootstrap Icons SVG 檔案 ======== */
 
 .icon-activity {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/activity.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-activity);
 }
 
 .icon-arrow-counterclockwise {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/arrow-counterclockwise.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-arrow-counterclockwise);
 }
 
 .icon-arrows-move {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/arrows-move.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-arrows-move);
 }
 
 .icon-asterisk {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/asterisk.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-asterisk);
 }
 
 .icon-box-arrow-in-down {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/box-arrow-in-down.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-box-arrow-in-down);
 }
 
 .icon-box-arrow-up {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/box-arrow-up.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-box-arrow-up);
 }
 
 .icon-broadcast {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/broadcast.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-broadcast);
 }
 
 .icon-bug {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/bug.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-bug);
 }
 
 .icon-bullseye {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/bullseye.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-bullseye);
 }
 
 .icon-check-circle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/check-circle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-check-circle);
 }
 
 .icon-check-lg {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/check-lg.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-check-lg);
 }
 
 .icon-circle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/circle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-circle);
 }
 
 .icon-cloud-haze2 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/cloud-haze2.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-cloud-haze2);
 }
 
 .icon-database {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/database.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-database);
 }
 
 .icon-diagram-3 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/diagram-3.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-diagram-3);
 }
 
 .icon-exclamation-triangle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/exclamation-triangle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-exclamation-triangle);
 }
 
 .icon-eye {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/eye.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-eye);
 }
 
 .icon-feather {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/feather.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-feather);
 }
 
 .icon-file-earmark-text {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/file-earmark-text.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-file-earmark-text);
 }
 
 .icon-flower1 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/flower1.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-flower1);
 }
 
 .icon-flower2 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/flower2.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-flower2);
 }
 
 .icon-gem {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/gem.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-gem);
 }
 
 .icon-gender-ambiguous {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/gender-ambiguous.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-gender-ambiguous);
 }
 
 .icon-gender-female {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/gender-female.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-gender-female);
 }
 
 .icon-gender-male {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/gender-male.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-gender-male);
 }
 
 .icon-heart {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/heart.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-heart);
 }
 
 .icon-heart-fill {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/heart-fill.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-heart-fill);
 }
 
 .icon-heartbreak {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/heartbreak.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-heartbreak);
 }
 
 .icon-hearts {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/hearts.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-hearts);
+}
+
+.icon-cake2 {
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-cake2);
+}
+
+.icon-hourglass-split {
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-hourglass-split);
 }
 
 .icon-house {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/house.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-house);
 }
 
 .icon-house-heart {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/house-heart.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-house-heart);
 }
 
 .icon-image {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/image.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-image);
 }
 
 .icon-images {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/images.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-images);
 }
 
 .icon-info-circle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/info-circle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-info-circle);
 }
 
 .icon-question-circle {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/question-circle.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-question-circle);
 }
 
 .icon-keyboard {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/keyboard.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-keyboard);
 }
 
 .icon-lightbulb {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/lightbulb.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-lightbulb);
 }
 
 .icon-lightning {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/lightning.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-lightning);
 }
 
 .icon-list {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/list.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-list);
 }
 
 .icon-lock {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/lock.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-lock);
 }
 
 .icon-magic {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/magic.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-magic);
 }
 
 .icon-moon {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/moon.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-moon);
 }
 
 .icon-moon-stars {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/moon-stars.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-moon-stars);
 }
 
 .icon-mortarboard {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/mortarboard.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-mortarboard);
 }
 
 .icon-mouse {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/mouse.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-mouse);
 }
 
 .icon-palette {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/palette.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-palette);
 }
 
 .icon-pencil-square {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/pencil-square.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-pencil-square);
 }
 
 .icon-people {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/people.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-people);
 }
 
 .icon-person {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person);
 }
 
 .icon-person-add {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person-add.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person-add);
 }
 
 .icon-person-check {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person-check.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person-check);
 }
 
 .icon-person-dash {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person-dash.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person-dash);
 }
 
 .icon-person-heart {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person-heart.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person-heart);
 }
 
 .icon-person-hearts {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person-hearts.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person-hearts);
 }
 
 .icon-person-plus {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person-plus.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person-plus);
 }
 
 .icon-person-vcard {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/person-vcard.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-person-vcard);
 }
 
 .icon-plus-lg {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/plus-lg.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-plus-lg);
 }
 
 .icon-robot {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/robot.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-robot);
 }
 
 .icon-stars {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/stars.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-stars);
 }
 
 .icon-tag {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/tag.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-tag);
 }
 
 .icon-tags {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/tags.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-tags);
 }
 
 .icon-trash3 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/trash3.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-trash3);
 }
 
 .icon-unlock {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/unlock.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-unlock);
 }
 
 .icon-water {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/water.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-water);
 }
 
 .icon-x-lg {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/x-lg.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-x-lg);
 }
 
 /* ========【族譜縮放】 設定 - 提升文字、線條與圖片清晰度 ======== */
@@ -5821,7 +5930,7 @@ html[lang="en"] body {
 /* ========【SVG 圖示資源】 設定 - 語言切換地球圖示 ======== */
 
 .icon-globe2 {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/globe2.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-globe2);
 }
 
 /* ========【響應式設定】 設定 - 小螢幕維持固定欄位邏輯 ======== */
@@ -6356,15 +6465,15 @@ html[lang="en"] body {
 /* ========【新增 SVG 圖示】 設定 - 下拉箭頭與家族名稱編輯筆 ======== */
 
 .icon-chevron-down {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/chevron-down.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-chevron-down);
 }
 
 .icon-pencil {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/pencil.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-pencil);
 }
 
 .icon-funnel {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/funnel.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-funnel);
 }
 
 /* ========【響應式導覽】 設定 - 小螢幕維持固定欄位但避免擠壓 ======== */
@@ -6529,35 +6638,35 @@ html[lang="en"] body {
 /* ========【人物資訊語意圖示】 設定 - 種族、存歿、寵物使用可直接辨識的 SVG ======== */
 
 .icon-paw {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/paw.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-paw);
 }
 
 .icon-tombstone {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/tombstone.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-tombstone);
 }
 
 .icon-ghost-symbol {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/ghost-symbol.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-ghost-symbol);
 }
 
 .icon-alien-head {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/alien-head.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-alien-head);
 }
 
 .icon-vampire-fangs {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/vampire-fangs.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-vampire-fangs);
 }
 
 .icon-wolf-head {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/wolf-head.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-wolf-head);
 }
 
 .icon-mermaid-tail {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/mermaid-tail.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-mermaid-tail);
 }
 
 .icon-fairy-wings {
-    /* SVG 圖示路徑 */ --l1ng-icon: url("../../html%20icons/fairy-wings.svg");
+    /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-fairy-wings);
 }
 
 /* ========【人物狀態圖示】 設定 - 在世、已故、幽靈使用不同語意色 ======== */
@@ -6639,28 +6748,6 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 行高 */ line-height: 1.7;
 }
 
-.export-close {
-    /* 寬度 */ width: 42px;
-    /* 高度 */ height: 42px;
-    /* 縮排 */ flex: 0 0 42px;
-    /* 外觀 */ appearance: none;
-    /* 邊框 */ border: 1px solid var(--relationship-parent);
-    /* 圓角 */ border-radius: 14px;
-    /* 背景設定 */ background: var(--surface-item);
-    /* 顏色 */ color: var(--text-primary);
-    /* 字級 */ font-size: 22px;
-    /* 字重 */ font-weight: 700;
-    /* 游標 */ cursor: pointer;
-    /* 動畫過渡 */ transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
-}
-
-.export-close:hover,
-.export-close:focus-visible {
-    /* 背景設定 */ background: var(--surface-item-hover);
-    /* 邊框 */ border-color: var(--border-default);
-    /* 位移 */ transform: translateY(-1px);
-}
-
 .export-grid {
     /* 版面配置 */ display: grid;
     /* 欄位 */ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -6669,7 +6756,8 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 }
 
 .export-section {
-    /* 版面配置 */ display: grid;
+    /* 版面配置 */ display: flex;
+    /* 排列方向 */ flex-direction: column;
     /* 間距 */ gap: 16px;
     /* 內距 */ padding: 18px;
     /* 背景設定 */ background: var(--surface-panel);
@@ -6769,6 +6857,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 版面配置 */ display: flex;
     /* 水平對齊 */ justify-content: flex-end;
     /* 垂直對齊 */ align-items: flex-end;
+    /* 將左右卡片的匯出按鈕固定在相同底部基準 */ margin-top: auto;
     /* 上方內距 */ padding-top: 4px;
 }
 
@@ -6800,39 +6889,50 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 滑鼠指標 */ cursor: wait;
 }
 
-/* ========【圖片匯出狀態】 設定 - 匯出期間顯示跳動圓點，避免長時間處理看起來像卡住 ======== */
-.export-actions button.is-loading {
+/* ========【共用按鈕處理狀態】 設定 - 儲存、匯出、清理等等待操作統一使用跳動圓點 ======== */
+button.is-loading {
     display:inline-flex;
     align-items:center;
     justify-content:center;
+    flex-wrap:nowrap;
     gap:6px;
+    white-space:nowrap;
+    cursor:wait;
 }
 
-.export-loading-dots {
+button.is-loading .button-loading-label {
+    flex:0 0 auto;
+    white-space:nowrap;
+}
+
+.button-loading-dots {
     display:inline-flex;
+    flex:0 0 auto;
     align-items:flex-end;
     gap:2px;
     height:9px;
+    white-space:nowrap;
 }
 
-.export-loading-dots > span {
+.button-loading-dots > span {
     width:3px;
     height:3px;
+    flex:0 0 3px;
     border-radius:50%;
     background:currentColor;
     opacity:.45;
-    animation:genealogy-export-dot .9s ease-in-out infinite;
+    animation:genealogy-loading-dot .9s ease-in-out infinite;
 }
 
-.export-loading-dots > span:nth-child(2) {
+.button-loading-dots > span:nth-child(2) {
     animation-delay:.12s;
 }
 
-.export-loading-dots > span:nth-child(3) {
+.button-loading-dots > span:nth-child(3) {
     animation-delay:.24s;
 }
 
-@keyframes genealogy-export-dot {
+@keyframes genealogy-loading-dot {
     0%,60%,100% {
         transform:translateY(0);
         opacity:.45;
@@ -6844,7 +6944,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .export-loading-dots > span {
+    .button-loading-dots > span {
         animation:none;
         opacity:.8;
     }
@@ -6878,9 +6978,9 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 
 /* ========【正式新版外殼】 家族檔案欄、精簡頂欄、畫布情境工具 ======== */
 :root { --sidebar-width:300px; --sidebar-default-width:300px; }
-.icon-three-dots { --l1ng-icon:url("../../html%20icons/three-dots.svg"); }
-.icon-dash-lg { --l1ng-icon:url("../../html%20icons/dash-lg.svg"); }
-.icon-arrows-fullscreen { --l1ng-icon:url("../../html%20icons/arrows-fullscreen.svg"); }
+.icon-three-dots { --l1ng-icon:var(--l1ng-icon-three-dots); }
+.icon-dash-lg { --l1ng-icon:var(--l1ng-icon-dash-lg); }
+.icon-arrows-fullscreen { --l1ng-icon:var(--l1ng-icon-arrows-fullscreen); }
 
 .topbar { position:relative; height:52px; min-height:52px; align-items:stretch; border-bottom:1px solid var(--border-default); box-shadow:none; background:linear-gradient(120deg,var(--brand-gradient-start) 0%,var(--brand-gradient-end) 100%); }
 .topbar-brand { width:auto; min-width:210px; padding:0 14px; justify-content:flex-start; gap:8px; font-size:10.5px; letter-spacing:1.15px; text-align:left; }
@@ -7170,10 +7270,10 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     transition:color .15s ease,opacity .15s ease;
 }
 .icon-sort-generation-up {
-    --l1ng-icon:url("../../html%20icons/sort-generation-up.svg");
+    --l1ng-icon:var(--l1ng-icon-sort-generation-up);
 }
 .icon-sort-generation-down {
-    --l1ng-icon:url("../../html%20icons/sort-generation-down.svg");
+    --l1ng-icon:var(--l1ng-icon-sort-generation-down);
 }
 .family-generation-sort[data-sort-order="asc"] .generation-sort-arrow-up,
 .family-generation-sort[data-sort-order="desc"] .generation-sort-arrow-down {
@@ -7467,6 +7567,13 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .canvas-tool { width:30px; padding:5px; }
 }
 @media (max-width:720px) {
+  /* 手機層級：完整視窗高於頂部工具列；工具列與其選單只需高於常駐家庭資訊。 */
+  .topbar { z-index:350; }
+  .ui-dialog-backdrop { z-index:400; }
+  .ui-dialog-backdrop.person-library-backdrop { z-index:390; }
+  .ui-dialog-backdrop.nested { z-index:450; }
+  .ui-dialog-backdrop.photo-viewer-backdrop { z-index:470; }
+
   .topbar-brand { display:flex; width:76px; min-width:76px; padding:0 8px; gap:4px; }
   .topbar-main { padding:0 7px; gap:5px; }
   .topbar-filter-btn { width:32px; padding:0; }
@@ -7486,6 +7593,49 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 @media (max-width:520px) {
   .canvas-toolbar { max-width:calc(100% - 16px); overflow-x:auto; }
+}
+
+/* ========【手機視窗捲動】 設定 - 匯出固定標題；視覺設定沿用全尺寸固定標題結構 ======== */
+@media (max-width:720px) {
+  #appearanceDialog {
+    padding:14px;
+  }
+
+  .appearance-modal {
+    width:100%;
+    max-height:calc(100vh - 28px);
+    max-height:calc(100dvh - 28px);
+  }
+
+  .appearance-header {
+    gap:14px;
+    padding:15px 16px 12px;
+  }
+
+  .appearance-scroll-body {
+    padding:0 16px 16px;
+  }
+
+  .export-modal {
+    max-height:calc(100vh - 28px);
+    max-height:calc(100dvh - 28px);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .export-header {
+    flex:0 0 auto;
+    background:var(--surface-card);
+  }
+
+  .export-grid {
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
 }
 
 
@@ -7547,7 +7697,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .sim-profile-header { grid-template-columns:1fr; gap:10px; }
   .sim-profile-avatar-block { width:100%; grid-template-columns:104px 1fr; grid-template-rows:auto auto; column-gap:10px; }
   .avatar-preview.sim-profile-avatar { grid-column:1; grid-row:1 / span 2; margin:0; }
-  .sim-profile-avatar-actions { grid-column:2; justify-content:flex-start; flex-wrap:wrap; }
+  .sim-profile-avatar-actions { grid-column:2; width:100%; justify-content:stretch; }
   .sim-profile-avatar-block .avatar-tip { grid-column:2; text-align:left; }
   .profile-fact-edit-row { grid-template-columns:minmax(82px,.62fr) minmax(0,1.38fr); }
   .profile-birthday-field { grid-column:1/-1; }
@@ -7852,7 +8002,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     margin: 0;
 }
 
-/* ========【全站載入骨架】 設定 - 初始化期間維持與正式介面相同的主要區塊比例 ======== */
+/* ========【全站載入骨架】 設定 - 初始化期間對齊目前正式介面分佈 ======== */
 .app-skeleton {
     position:fixed;
     inset:0;
@@ -7868,15 +8018,32 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     pointer-events:none;
 }
 .app-skeleton-topbar {
+    position:relative;
     height:52px;
     flex:0 0 52px;
     display:flex;
-    align-items:center;
-    gap:12px;
-    padding:0 16px;
+    align-items:stretch;
     border-bottom:1px solid var(--border-default);
     background:var(--surface-card);
 }
+.app-skeleton-brand-area {
+    width:var(--sidebar-width);
+    flex:0 0 var(--sidebar-width);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:0 10px;
+}
+.app-skeleton-main-actions {
+    flex:1;
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 16px;
+}
+.skeleton-topbar-spacer { flex:1; }
 .app-skeleton-body {
     flex:1;
     min-height:0;
@@ -7885,7 +8052,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .app-skeleton-sidebar {
     width:var(--sidebar-width);
     flex:0 0 var(--sidebar-width);
-    padding:14px;
+    min-width:0;
+    padding:12px 8px 16px;
+    overflow:hidden;
     border-right:1px solid var(--border-default);
     background:var(--surface-card);
 }
@@ -7894,11 +8063,12 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     flex:1;
     min-width:0;
     overflow:hidden;
-    background:var(--canvas-bg, var(--surface-canvas));
+    background-color:#fafafa;
+    background-image:radial-gradient(circle,rgba(0,0,0,.055) 1px,transparent 1px);
+    background-size:24px 24px;
 }
 .skeleton-block,
-.skeleton-person,
-.skeleton-node {
+.skeleton-person {
     display:block;
     background:
       linear-gradient(
@@ -7910,32 +8080,236 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background-size:220% 100%;
     animation:genealogy-skeleton-shimmer 1.25s linear infinite;
 }
-.skeleton-brand { width:150px; height:18px; border-radius:5px; }
-.skeleton-search { width:min(360px,34vw); height:30px; border-radius:5px; }
-.skeleton-action { width:64px; height:28px; border-radius:5px; }
-.skeleton-cover { width:100%; aspect-ratio:16/9; border-radius:7px; }
-.skeleton-line { width:72%; height:12px; margin-top:14px; border-radius:4px; }
+.skeleton-brand { width:126px; height:14px; border-radius:4px; }
+.skeleton-help,
+.skeleton-more,
+.skeleton-mobile-menu {
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
+    border-radius:7px;
+}
+.skeleton-mobile-menu { display:none; }
+/* 與正式 .topbar-filter-menu 相同，以整條頂欄而非按鈕列為置中基準。 */
+.skeleton-filter {
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:76px;
+    height:32px;
+    border-radius:7px;
+    transform:translate(-50%, -50%);
+    z-index:1;
+}
+.skeleton-action { width:64px; height:32px; border-radius:7px; }
+.skeleton-action-wide { width:112px; }
+.skeleton-cover { width:100%; aspect-ratio:16/9; border-radius:8px; }
+.skeleton-line { width:72%; height:11px; margin-top:0; border-radius:4px; }
 .skeleton-line.wide { width:86%; }
 .skeleton-line.short { width:48%; }
-.skeleton-people { margin-top:18px; display:flex; flex-direction:column; gap:9px; }
-.skeleton-person { height:46px; border-radius:6px; }
-.skeleton-node {
-    position:absolute;
-    width:176px;
-    height:142px;
-    border-radius:10px;
+.skeleton-family-heading,
+.skeleton-member-heading,
+.skeleton-stats {
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
-.skeleton-node-a { left:20%; top:22%; }
-.skeleton-node-b { left:54%; top:40%; }
-.skeleton-node-c { left:31%; top:63%; }
+.skeleton-family-heading {
+    justify-content:space-between;
+    margin-top:14px;
+}
+.skeleton-family-heading .skeleton-line { flex:1; max-width:128px; }
+.app-skeleton-sidebar > .skeleton-line { margin-top:10px; }
+.skeleton-stats {
+    justify-content:space-between;
+    margin-top:12px;
+    padding:9px 0 12px;
+    border-bottom:1px solid var(--border-default);
+}
+.skeleton-stats .skeleton-line {
+    width:27%;
+    height:9px;
+}
+.skeleton-member-heading {
+    justify-content:space-between;
+    margin-top:12px;
+}
+.skeleton-member-heading .skeleton-line { width:54px; }
+.skeleton-people {
+    margin-top:10px;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+.skeleton-person {
+    height:48px;
+    padding:6px 8px;
+    border-radius:7px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.skeleton-avatar {
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    border-radius:50%;
+}
+.skeleton-person-copy {
+    min-width:0;
+    flex:1;
+    display:grid;
+    gap:7px;
+}
+.skeleton-person-copy .skeleton-line:first-child { width:70%; }
+.skeleton-person-copy .skeleton-line.short { width:44%; }
+/* 骨架工具列與正式 .canvas-toolbar 同樣固定於畫布右上方。 */
+.skeleton-canvas-toolbar {
+    position:absolute;
+    top:12px;
+    right:12px;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:1px;
+    max-width:calc(100% - 24px);
+    padding:4px;
+    border:1px solid var(--border-default);
+    border-radius:6px;
+    background:color-mix(in srgb,var(--surface-card) 94%,transparent);
+}
+.skeleton-tool {
+    flex:0 1 auto;
+    min-width:0;
+    height:30px;
+    border-radius:4px;
+}
+.skeleton-tool-mode { width:89px; }
+.skeleton-tool-layout { width:88px; }
+.skeleton-tool-label { width:91px; }
+.skeleton-tool-lock { width:88px; }
+.skeleton-canvas-tool-divider {
+    flex:0 0 1px;
+    height:18px;
+    margin:0 3px;
+    background:var(--border-default);
+}
+/* 父母兩張、子女三張；每排都以畫布中心線對稱。 */
+.skeleton-family-tree {
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:min(620px,calc(100% - 48px));
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:54px;
+    transform:translate(-50%,-50%);
+}
+.skeleton-tree-row {
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:26px;
+}
+.skeleton-node {
+    flex:0 1 152px;
+    min-width:0;
+    height:138px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:14px 10px;
+    border:1px solid var(--border-default);
+    border-radius:10px;
+    background:var(--surface-card);
+}
+.skeleton-node-avatar {
+    width:48px;
+    height:48px;
+    flex:0 0 48px;
+    border-radius:50%;
+}
+.skeleton-node-line {
+    width:72%;
+    height:10px;
+    border-radius:4px;
+}
+.skeleton-node-line.short {
+    width:46%;
+    height:8px;
+}
+/* 正式 .canvas-zoom 位於畫布底部中央，骨架亦採用同一定位。 */
+.skeleton-zoom {
+    position:absolute;
+    left:50%;
+    bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:2px;
+    height:34px;
+    padding:3px 5px;
+    border:1px solid var(--border-default);
+    border-radius:6px;
+    background:var(--surface-card);
+    transform:translateX(-50%);
+}
+.skeleton-zoom-button { width:27px; height:27px; border-radius:4px; }
+.skeleton-zoom-value { width:42px; height:10px; border-radius:4px; }
+
 @keyframes genealogy-skeleton-shimmer {
     from { background-position:200% 0; }
     to { background-position:-20% 0; }
 }
+@media (max-width:980px) {
+    .skeleton-tool-mode,
+    .skeleton-tool-layout,
+    .skeleton-tool-label,
+    .skeleton-tool-lock { width:30px; flex:0 0 30px; }
+}
 @media (max-width:720px) {
-    .app-skeleton-sidebar { width:min(280px,72vw); flex-basis:min(280px,72vw); }
-    .skeleton-search { flex:1; width:auto; }
-    .skeleton-action { display:none; }
+    .app-skeleton-brand-area { display:none; }
+    .app-skeleton-main-actions {
+        padding:0 8px;
+        gap:6px;
+    }
+    .skeleton-mobile-menu { display:block; }
+    .skeleton-filter { width:32px; }
+    .skeleton-action { width:34px; }
+    .skeleton-action-wide { display:none; }
+    .app-skeleton-sidebar { display:none; }
+    .skeleton-canvas-toolbar {
+        top:8px;
+        right:8px;
+        max-width:calc(100% - 16px);
+    }
+    .skeleton-family-tree {
+        width:calc(100% - 28px);
+        gap:38px;
+    }
+    .skeleton-tree-row { gap:12px; }
+    .skeleton-node {
+        height:112px;
+        padding:10px 5px;
+        gap:8px;
+    }
+    .skeleton-node-avatar {
+        width:36px;
+        height:36px;
+        flex-basis:36px;
+    }
+    .skeleton-zoom { bottom:8px; }
+}
+@media (prefers-reduced-motion:reduce) {
+    .app-skeleton { transition:none; }
+    .skeleton-block,
+    .skeleton-person {
+        animation:none;
+        background:color-mix(in srgb,var(--border-default) 68%,transparent);
+    }
 }
 
 
@@ -8142,32 +8516,37 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-style-editor{min-width:0;padding:12px;border:1px solid var(--border-default);border-radius:10px;background:var(--surface-panel)}
 .relationship-editor-head{min-height:34px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
 .relationship-editor-head>strong{color:var(--text-primary);font-size:12px}
-.relationship-other-type-field{width:min(220px,55%);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;color:var(--text-secondary);font-size:10.5px}
+.relationship-other-type-field{width:min(220px,55%);display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;color:var(--text-secondary);font-size:var(--appearance-control-label-size)}
 .relationship-other-type-field[hidden]{display:none}
-.relationship-full-preview{--relationship-preview-card-width:88px;--relationship-preview-pair-gap:48px;--relationship-preview-half-pair-gap:24px;position:relative;width:100%;height:190px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border-default);border-radius:9px;background:var(--surface-card)}
+.relationship-full-preview{--relationship-preview-card-width:88px;--relationship-preview-side-gap:clamp(30px,6%,48px);position:relative;width:100%;height:190px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border-default);border-radius:9px;background:var(--surface-card)}
 .relationship-full-preview svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.relationship-full-preview path{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.relationship-full-preview #relationshipFullPreviewPath{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.relationship-full-preview .relationship-preview-arrow{stroke:none;vector-effect:non-scaling-stroke;pointer-events:none}
 .relationship-preview-card{position:absolute;z-index:1;width:var(--relationship-preview-card-width);min-height:70px;padding:7px 7px 8px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-card);box-shadow:0 2px 7px rgba(0,0,0,.08);display:grid;justify-items:center;gap:4px}
 .relationship-preview-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,var(--avatar-surface-start),var(--avatar-surface-end));border:1px solid var(--border-default)}
 .relationship-preview-name,.relationship-preview-meta{display:block;height:5px;border-radius:999px;background:var(--border-default)}
 .relationship-preview-name{width:48px}.relationship-preview-meta{width:34px;opacity:.72}
 .relationship-full-preview[data-orientation="vertical"] .card-a{left:50%;top:7px;transform:translateX(-50%)}
 .relationship-full-preview[data-orientation="vertical"] .card-b{left:50%;bottom:7px;transform:translateX(-50%)}
-.relationship-full-preview[data-orientation="horizontal"] .card-a{left:calc(50% - var(--relationship-preview-card-width) - var(--relationship-preview-half-pair-gap));top:50%;transform:translateY(-50%)}
-.relationship-full-preview[data-orientation="horizontal"] .card-b{left:calc(50% + var(--relationship-preview-half-pair-gap));top:50%;transform:translateY(-50%)}
-.relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 74px;gap:10px;align-items:end}
-.relationship-editor-fields>label{min-width:0;display:grid;gap:5px;color:var(--text-secondary);font-size:10px}
-.relationship-editor-range{min-width:0;display:grid;grid-template-columns:minmax(90px,1fr) 38px;align-items:center;gap:7px}
-.relationship-editor-range output{color:var(--text-primary);font-size:10.5px;text-align:right;font-variant-numeric:tabular-nums}
+.relationship-full-preview[data-orientation="horizontal"] .card-a{left:var(--relationship-preview-side-gap);top:50%;transform:translateY(-50%)}
+.relationship-full-preview[data-orientation="horizontal"] .card-b{right:var(--relationship-preview-side-gap);left:auto;top:50%;transform:translateY(-50%)}
+.relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 44px;gap:10px;align-items:start}
+.relationship-editor-fields>label{min-width:0;display:grid;grid-template-rows:auto 32px;gap:5px;align-items:start;color:var(--text-secondary);font-size:var(--appearance-control-label-size)}
+.relationship-editor-fields>label>span:first-child{min-height:12px;display:flex;align-items:center;line-height:1.2}
+.relationship-editor-fields>label>.ui-single-select,
+.relationship-editor-fields>label>select{height:32px;align-self:start}
+.relationship-editor-range{min-width:0;height:32px;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:6px}
+.relationship-editor-range output{min-width:30px;color:var(--text-primary);font-size:10.5px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
 .relationship-editor-fields input[type=range],.relationship-curve-slider input[type=range]{width:100%;min-width:0;accent-color:var(--action-primary)}
-.relationship-editor-color input[type=color]{width:44px;height:32px;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
+.relationship-editor-color{width:44px;justify-self:end}
+.relationship-editor-color input[type=color]{width:44px;height:32px;align-self:start;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
 .relationship-feature-row{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:center}
 .relationship-feature-row[hidden]{display:none}
 .relationship-feature-row.single .curve-cell{grid-column:1/-1}
-.relationship-feature-cell{min-width:0;display:flex;align-items:center;justify-content:center}
+.relationship-feature-cell{min-width:0;display:flex;align-items:center;justify-content:flex-start}
 .relationship-feature-cell[hidden]{display:none}
-.relationship-feature-toggle{width:142px;min-height:38px;display:grid;grid-template-columns:96px 38px;align-items:center;column-gap:8px}
-.relationship-feature-label{width:96px;min-width:96px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--text-primary);font-size:11px;white-space:nowrap}
+.relationship-feature-toggle{width:auto;min-height:38px;display:grid;grid-template-columns:max-content 38px;align-items:center;column-gap:8px}
+.relationship-feature-label{width:auto;min-width:0;display:flex;align-items:center;justify-content:flex-start;gap:5px;color:var(--text-primary);font-size:var(--appearance-control-label-size);white-space:nowrap}
 .help-tooltip-slot{display:inline-block;width:18px;height:18px;flex:0 0 18px;visibility:hidden}
 .relationship-switch{position:relative;width:38px;height:22px;padding:0;border:0;border-radius:999px;background:color-mix(in srgb,var(--border-default) 72%,var(--surface-panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--border-default) 78%,transparent);cursor:pointer;overflow:hidden;transition:background .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s cubic-bezier(.2,.8,.2,1)}
 .relationship-switch::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:color-mix(in srgb,var(--surface-card) 82%,var(--surface-panel) 18%);box-shadow:0 1px 3px rgba(0,0,0,.16);transform:translateX(0);transition:transform .30s cubic-bezier(.2,.9,.25,1),background .28s ease,box-shadow .28s ease}
@@ -8176,13 +8555,13 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-switch:active::after{transform:translateX(1px) scaleX(1.08)}
 .relationship-switch[aria-pressed="true"]:active::after{transform:translateX(15px) scaleX(1.08)}
 .relationship-switch:focus-visible{outline:2px solid color-mix(in srgb,var(--action-primary) 55%,transparent);outline-offset:2px}
-.relationship-curve-control{min-width:0;display:grid;gap:5px;color:var(--text-secondary);font-size:10px;opacity:1;transition:opacity .15s ease}
+.relationship-curve-control{min-width:0;display:grid;gap:5px;color:var(--text-secondary);font-size:var(--appearance-control-label-size);opacity:1;transition:opacity .15s ease}
 .relationship-curve-control[hidden]{display:none}
 .relationship-shared-curve-row{margin-top:8px}
 .relationship-curve-control.is-disabled{opacity:.42}
 .relationship-curve-control.is-disabled input[type=range]{cursor:not-allowed}
-.relationship-curve-slider{min-width:0;display:grid;grid-template-columns:minmax(120px,1fr) 44px;align-items:center;gap:8px}
-.relationship-curve-slider output{color:var(--text-primary);font-size:10.5px;font-variant-numeric:tabular-nums;text-align:right}
+.relationship-curve-slider{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:6px}
+.relationship-curve-slider output{min-width:34px;color:var(--text-primary);font-size:10.5px;font-variant-numeric:tabular-nums;text-align:left;white-space:nowrap}
 .relationship-style-actions{
     margin-top:8px;
     display:flex;
@@ -8206,7 +8585,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .appearance-modal .ui-single-select-trigger:focus-visible{border-color:var(--action-primary);box-shadow:0 0 0 2px var(--brand-tint-start)}
 .appearance-modal .ui-select-chevron-icon{color:var(--text-secondary)}
 .appearance-modal .ui-single-select:focus-within .ui-select-chevron-icon{color:var(--action-primary)}
-@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:1fr 1fr 70px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:minmax(82px,.9fr) minmax(0,1.45fr) 44px;gap:8px}.relationship-editor-range{grid-template-columns:minmax(0,1fr) max-content;gap:4px}.relationship-editor-range output{min-width:28px;font-size:10px}.relationship-curve-slider{gap:4px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 
 /* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */

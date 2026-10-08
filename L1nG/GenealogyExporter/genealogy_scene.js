@@ -6624,6 +6624,17 @@ function paintRelationshipLayer({
           'other'
         );
 
+      // 關係 SVG 會跟著整個族譜畫布縮放。桌面版通常接近 100%，
+      // 但手機自動適應後可能只剩很小倍率；固定 markerWidth 會一起縮到幾乎看不見。
+      // 只反向補償 marker 尺寸，不改線條本身粗細，讓箭頭維持接近固定的螢幕可見大小。
+      const safeScale =
+        Math.max(
+          0.2,
+          Number(scale) || 1
+        );
+      const markerSize =
+        6.5 / safeScale;
+
       let markerId =
         arrowMarkerByColor.get(
           color
@@ -6644,7 +6655,11 @@ function paintRelationshipLayer({
           markerId +
           '" viewBox="0 0 10 10" ' +
           'refX="8.4" refY="5" ' +
-          'markerWidth="5.5" markerHeight="5.5" ' +
+          'markerWidth="' +
+          markerSize.toFixed(3) +
+          '" markerHeight="' +
+          markerSize.toFixed(3) +
+          '" ' +
           'orient="auto-start-reverse">' +
             '<path d="M1 1 L9 5 L1 9 Z" fill="' +
             color +

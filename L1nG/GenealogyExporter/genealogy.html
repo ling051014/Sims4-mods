@@ -5,35 +5,134 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
-        <link rel="stylesheet" href="genealogy.css?v=20261004-topbar-r1">
+        <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261008-icon-bundle-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261008-skeleton-canvas-align-r1">
     </head>
     <body data-theme="ling">
 
-        <!-- ========【全站載入骨架】 設定 - 資料庫與圖片初始化完成前保留穩定版面 ======== -->
+        <!-- ========【全站載入骨架】 設定 - 對齊目前頂欄、家族檔案欄與畫布工具分佈 ======== -->
         <div class="app-skeleton" id="appSkeleton" aria-hidden="true">
             <div class="app-skeleton-topbar">
-                <span class="skeleton-block skeleton-brand"></span>
-                <span class="skeleton-block skeleton-search"></span>
-                <span class="skeleton-block skeleton-action"></span>
-                <span class="skeleton-block skeleton-action"></span>
+                <div class="app-skeleton-brand-area">
+                    <span class="skeleton-block skeleton-brand"></span>
+                    <span class="skeleton-block skeleton-help"></span>
+                </div>
+                <span class="skeleton-block skeleton-filter"></span>
+                <div class="app-skeleton-main-actions">
+                    <span class="skeleton-block skeleton-mobile-menu"></span>
+                    <span class="skeleton-topbar-spacer"></span>
+                    <span class="skeleton-block skeleton-action"></span>
+                    <span class="skeleton-block skeleton-action"></span>
+                    <span class="skeleton-block skeleton-action skeleton-action-wide"></span>
+                    <span class="skeleton-block skeleton-more"></span>
+                </div>
             </div>
             <div class="app-skeleton-body">
                 <aside class="app-skeleton-sidebar">
                     <span class="skeleton-block skeleton-cover"></span>
-                    <span class="skeleton-block skeleton-line wide"></span>
+                    <div class="skeleton-family-heading">
+                        <span class="skeleton-block skeleton-line wide"></span>
+                        <span class="skeleton-block skeleton-more"></span>
+                    </div>
                     <span class="skeleton-block skeleton-line"></span>
-                    <span class="skeleton-block skeleton-line short"></span>
+                    <span class="skeleton-block skeleton-line wide"></span>
+                    <div class="skeleton-stats">
+                        <span class="skeleton-block skeleton-line short"></span>
+                        <span class="skeleton-block skeleton-line short"></span>
+                        <span class="skeleton-block skeleton-line short"></span>
+                    </div>
+                    <div class="skeleton-member-heading">
+                        <span class="skeleton-block skeleton-line short"></span>
+                        <span class="skeleton-block skeleton-more"></span>
+                    </div>
                     <div class="skeleton-people">
-                        <span class="skeleton-person"></span>
-                        <span class="skeleton-person"></span>
-                        <span class="skeleton-person"></span>
-                        <span class="skeleton-person"></span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
+
+                        <span class="skeleton-person">
+                            <span class="skeleton-block skeleton-avatar"></span>
+                            <span class="skeleton-person-copy">
+                                <span class="skeleton-block skeleton-line"></span>
+                                <span class="skeleton-block skeleton-line short"></span>
+                            </span>
+                        </span>
                     </div>
                 </aside>
                 <main class="app-skeleton-canvas">
-                    <span class="skeleton-node skeleton-node-a"></span>
-                    <span class="skeleton-node skeleton-node-b"></span>
-                    <span class="skeleton-node skeleton-node-c"></span>
+                    <div class="skeleton-canvas-toolbar">
+                        <span class="skeleton-block skeleton-tool skeleton-tool-mode"></span>
+                        <span class="skeleton-block skeleton-tool skeleton-tool-layout"></span>
+                        <span class="skeleton-canvas-tool-divider"></span>
+                        <span class="skeleton-block skeleton-tool skeleton-tool-label"></span>
+                        <span class="skeleton-block skeleton-tool skeleton-tool-lock"></span>
+                    </div>
+                    <div class="skeleton-family-tree">
+                        <div class="skeleton-tree-row skeleton-tree-parents">
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                        </div>
+                        <div class="skeleton-tree-row skeleton-tree-children">
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="skeleton-zoom">
+                        <span class="skeleton-block skeleton-zoom-button"></span>
+                        <span class="skeleton-block skeleton-zoom-value"></span>
+                        <span class="skeleton-block skeleton-zoom-button"></span>
+                        <span class="skeleton-block skeleton-zoom-button"></span>
+                    </div>
                 </main>
             </div>
         </div>
@@ -330,6 +429,7 @@
                             <div class="sim-profile-avatar-actions avatar-editor-actions">
                                 <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="avatarInput" type="file"></label>
                                 <button class="avatar-editor-action" id="avatarAdjustBtn" type="button">調整範圍</button>
+                                <button class="avatar-editor-action" id="avatarSourceToggleBtn" type="button" disabled>使用遊戲頭像</button>
                                 <button class="avatar-clear-compact avatar-editor-action danger-action" id="avatarClearBtn" type="button">移除頭像</button>
                             </div>
                             <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / WEBP</div>
@@ -372,7 +472,7 @@
                             <div class="form-field full" id="causeOfDeathLabel" style="display:none"><span class="form-field-title" id="fCauseOfDeathLabelText">死因</span><input id="fCauseOfDeath" data-ui-suggestion-list="causeOfDeathPresets" maxlength="40" placeholder="衰老 / 溺水 / 火災……" aria-labelledby="fCauseOfDeathLabelText"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></div>
                             <div class="form-field full"><span class="form-field-title" id="fAspirationLabel">抱負</span><input id="fAspiration" data-ui-suggestion-list="aspirationPresets" maxlength="40" placeholder="暢銷作家 / 靈魂伴侶……" aria-labelledby="fAspirationLabel"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></div>
                             <div class="form-field full trait-field"><span class="field-label-row form-field-title" id="traitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="traitFieldLabel"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></div>
-                            <div class="form-field full"><span class="form-field-title" id="fBioLabel">簡介</span><textarea id="fBio" placeholder="人物小傳、結局、備註…" rows="3" aria-labelledby="fBioLabel"></textarea></div>
+                            <div class="form-field full"><span class="form-field-title" id="fNotesLabel">備註</span><textarea id="fNotes" placeholder="補充想記錄的資訊或故事…" rows="3" aria-labelledby="fNotesLabel"></textarea></div>
                         </div>
                     </section>
 
@@ -503,7 +603,7 @@
                 </div>
             </div>
 
-            <!-- ========【模擬市民獨立預覽頁】 設定 - 與編輯分類分離的下一張紙 ======== -->
+            <!-- ========【模擬市民獨立預覽頁】 設定 - 編輯頁背紙同尺寸，預覽本體維持人物檢視尺寸 ======== -->
             <div class="sim-editor-paper-back" aria-hidden="true"></div>
             <div class="ui-dialog-panel sim-editor-preview-sheet" id="simEditorPreviewSheet" aria-hidden="true" inert>
                 <div class="sim-editor-preview-sheet-toolbar">
@@ -719,8 +819,20 @@
         <!-- ========【視覺設定】 設定 - 主題、背景與關係線共用同一個視覺設定面板 ======== -->
         <div class="ui-dialog-backdrop" id="appearanceDialog">
             <div class="ui-dialog-panel appearance-panel appearance-modal">
-                <h2><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>視覺設定</span></h2>
+                <div class="appearance-header">
+                    <div class="appearance-heading">
+                        <span class="l1ng-icon icon-palette appearance-heading-icon" aria-hidden="true"></span>
+                        <div>
+                            <h2>視覺設定</h2>
+                            <p>調整主題、族譜背景與關係線顯示。</p>
+                        </div>
+                    </div>
+                    <button class="help-close-btn" id="appearanceHeaderCloseBtn" type="button" title="關閉" aria-label="關閉視覺設定">
+                        <span class="l1ng-icon icon-x-lg" aria-hidden="true"></span>
+                    </button>
+                </div>
 
+                <div class="appearance-scroll-body">
                 <section class="appearance-section">
                     <div class="setting-group-title">主題</div>
                     <div class="appearance-theme-grid" id="appearanceThemeGrid"></div>
@@ -789,8 +901,9 @@
                             <div class="relationship-full-preview" id="relationshipFullPreview" data-orientation="vertical" aria-label="關係線預覽">
                                 <div class="relationship-preview-card card-a" aria-hidden="true"><span class="relationship-preview-avatar"></span><span class="relationship-preview-name"></span><span class="relationship-preview-meta"></span></div>
                                 <svg viewBox="0 0 320 190" preserveAspectRatio="none" aria-hidden="true">
-                                    <defs><marker id="relationshipPreviewArrow" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path id="relationshipPreviewArrowShape" d="M1 1 L9 5 L1 9 Z"></path></marker></defs>
                                     <path id="relationshipFullPreviewPath" d="M160 76 L160 114"></path>
+                                    <path class="relationship-preview-arrow" id="relationshipFullPreviewArrowStart" hidden></path>
+                                    <path class="relationship-preview-arrow" id="relationshipFullPreviewArrowEnd" hidden></path>
                                 </svg>
                                 <div class="relationship-preview-card card-b" aria-hidden="true"><span class="relationship-preview-avatar"></span><span class="relationship-preview-name"></span><span class="relationship-preview-meta"></span></div>
                             </div>
@@ -830,7 +943,7 @@
                     <button id="resetUiSettingsBtn" type="button">恢復介面預設</button>
                 </section>
 
-                <div class="ui-dialog-actions"><span class="spacer"></span><button id="appearanceCloseBtn">關閉</button></div>
+                </div>
             </div>
         </div>
 
@@ -928,6 +1041,7 @@
                         <h3><span class="l1ng-icon icon-arrows-move" aria-hidden="true"></span><span>畫布與觸控操作</span></h3>
                         <ul>
                             <li>一般操作或拖曳工具下，<b>單指拖曳空白處</b>可平移整個族譜畫布。</li>
+                            <li><b>快速點兩下空白畫布</b>可自動適應畫面並置中族譜。</li>
                             <li><b>雙指靠近／拉開</b>可縮放畫布；<b>雙指一起移動</b>時也會同步平移視角。</li>
                             <li><b>點一下人物卡</b>可查看人物資料或進入編輯；<b>長按人物卡</b>可開啟卡片設定與人物快捷操作。</li>
                             <li><b>拖曳人物卡</b>可移動人物；自動排列時，拖曳超過門檻後會切換為自由排列並儲存位置。</li>
@@ -1026,7 +1140,7 @@
                         <h2 id="exportTitle"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></h2>
                         <p id="exportDesc">可選擇匯出目前完整族譜圖片，或匯出 JSON 備份。</p>
                     </div>
-                    <button class="export-close" id="exportCloseBtn" type="button" aria-label="關閉">×</button>
+                    <button class="help-close-btn" id="exportCloseBtn" type="button" title="關閉" aria-label="關閉匯出"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
                 </div>
 
                 <div class="export-grid">
@@ -1089,15 +1203,16 @@
         </div>
 
         <script src="genealogy_assets.js?v=20260930-asset-db-clean-break"></script>
-        <script src="genealogy_gameImport.js?v=20261002-save-source-r1"></script>
+        <script src="genealogy_thumDecoder.js?v=20261006-ea-alfa-r1"></script>
+        <script src="genealogy_gameImport.js?v=20261008-notes-preview-r1"></script>
         <script src="genealogy_runtime.js?v=20261001-transient-node-state-v6"></script>
-<script src="genealogy_store.js?v=20261003-gender-icon-preview-r1"></script>
+<script src="genealogy_store.js?v=20261008-legacy-avatar-close-cleanup-r1"></script>
 <script src="genealogy_interaction.js?v=20260929-performance-p345"></script>
 <script src="genealogy_viewport.js?v=20260930-viewport-authority-round1"></script>
 <script src="genealogy_ui.js?v=20261001-virtual-rel-options-r1"></script>
-<script src="genealogy_scene.js?v=20261003-preview-ratio-gender-wrap-r2"></script>
-<script src="genealogy_personEditor.js?v=20261003-dialog-focus-r1"></script>
-  <script src="genealogy_i18n.js?v=20261003-visual-settings-r1"></script>
-  <script src="genealogy_app.js?v=20261003-rel-hidden-gender-svg-r1"></script>
+<script src="genealogy_scene.js?v=20261008-canvas-arrow-size-r5"></script>
+<script src="genealogy_personEditor.js?v=20261008-person-editor-fixes-r1"></script>
+  <script src="genealogy_i18n.js?v=20261008-mobile-fixed-dialogs-arrow-r1"></script>
+  <script src="genealogy_app.js?v=20261008-icon-bundle-r1"></script>
     </body>
 </html>

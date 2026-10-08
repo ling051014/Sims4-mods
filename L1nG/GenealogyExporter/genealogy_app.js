@@ -355,8 +355,6 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     style:'short-dash',
     width:1.7,
     color:null,
-    curved:false,
-    curveAmount:50,
     routing:'auto'
   }),
   adopt: Object.freeze({
@@ -447,6 +445,12 @@ function normalizeRelationshipLineSetting(
         50
       )
     );
+
+  if (key === 'exspouse') {
+    normalized.routing = 'auto';
+    delete normalized.curved;
+    delete normalized.curveAmount;
+  }
 
   if (key === 'other') {
     const storedShowArrow =
@@ -1014,9 +1018,9 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
       draft
     );
 
-  const bio =
+  const notes =
     personDisplayText(
-      sim.bio,
+      sim.notes,
       sim,
       draft
     );
@@ -1091,7 +1095,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
     residence,
     aspiration,
     causeOfDeath,
-    bio,
+    notes,
     traits,
     lifeStage:{
       value:sim.lifeStage || '成年',
@@ -1612,7 +1616,7 @@ function buildSample() {
       exSpouseIds,
       traits,
       career,
-      bio:'',
+      notes:'',
       order:0,
       avatar:null,
       gameData:{
@@ -1902,9 +1906,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g,
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const pairKey = (a,b) => [a,b].sort().join('::');
 
-// ========【UI 圖示】 專案 SVG 自動解析 ========
-const ICON_ASSET_BASE = '../../html%20icons/';
-
+// ========【UI 圖示】 設定 - 圖示遮罩由 genealogy_icon_masks.css 內嵌提供，不再逐顆請求 SVG ========
 const iconSvg = (name, extra = '') => {
   const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
   if (!safe) return '';
@@ -1913,7 +1915,6 @@ const iconSvg = (name, extra = '') => {
 
   return `<span
     class="l1ng-icon icon-${safe}${extraClass}"
-    style="--l1ng-icon:url('${ICON_ASSET_BASE}${safe}.svg')"
     aria-hidden="true"
   ></span>`;
 };
@@ -3375,6 +3376,131 @@ function uiToast(message, duration = 2600) {
     toast.style.transition = 'opacity .18s ease, transform .18s ease';
     setTimeout(() => toast.remove(), 200);
   }, duration);
+}
+
+const actionButtonLoadingState =
+  new WeakMap();
+
+function setActionButtonLoading(
+  button,
+  loading,
+  label = ''
+) {
+  if (!button) return;
+
+  if (loading) {
+    if (
+      actionButtonLoadingState
+        .has(button)
+    ) {
+      return;
+    }
+
+    const measuredWidth =
+      Math.ceil(
+        button
+          .getBoundingClientRect()
+          .width
+      );
+
+    actionButtonLoadingState.set(
+      button,
+      {
+        html:button.innerHTML,
+        disabled:button.disabled,
+        minWidth:button.style.minWidth
+      }
+    );
+
+    if (measuredWidth > 0) {
+      button.style.minWidth =
+        measuredWidth + 'px';
+    }
+
+    button.disabled = true;
+    button.classList.add(
+      'is-loading'
+    );
+    button.setAttribute(
+      'aria-busy',
+      'true'
+    );
+
+    const loadingLabel =
+      uiText(label || '處理中')
+        .replace(/[.…]+$/u,'');
+
+    button.innerHTML =
+      '<span class="button-loading-label">' +
+        esc(loadingLabel) +
+      '</span>' +
+      '<span class="button-loading-dots" aria-hidden="true">' +
+        '<span></span><span></span><span></span>' +
+      '</span>';
+
+    return;
+  }
+
+  const state =
+    actionButtonLoadingState
+      .get(button);
+
+  if (!state) return;
+
+  button.innerHTML =
+    state.html;
+
+  button.disabled =
+    state.disabled;
+
+  button.style.minWidth =
+    state.minWidth;
+
+  button.classList.remove(
+    'is-loading'
+  );
+  button.removeAttribute(
+    'aria-busy'
+  );
+
+  actionButtonLoadingState
+    .delete(button);
+}
+
+async function withActionButtonLoading(
+  button,
+  label,
+  action
+) {
+  if (
+    !button ||
+    actionButtonLoadingState.has(button)
+  ) {
+    return;
+  }
+
+  setActionButtonLoading(
+    button,
+    true,
+    label
+  );
+
+  // 等兩個 animation frame：第一幀提交 loading 狀態，第二幀再開始工作，
+  // 避免同步儲存與關窗搶在瀏覽器真正繪製「儲存中」之前完成。
+  await new Promise(resolve =>
+    requestAnimationFrame(() =>
+      requestAnimationFrame(resolve)
+    )
+  );
+
+  try {
+    return await action();
+  } finally {
+    setActionButtonLoading(
+      button,
+      false
+    );
+  }
 }
 
 
@@ -7469,7 +7595,7 @@ const sourceMode =
 }
 modeToggle.onclick = toggleViewMode;
 
-// ========【關係線外觀】 設定 - 沿用現有外觀 UI，次要關係增加曲線與個別類型設定 ========
+// ========【關係線外觀】 設定 - 沿用現有外觀 UI，只有其他關係提供曲線與個別類型設定 ========
 const REL_LINE_KEYS =
   ['parent','spouse','exspouse','adopt','other'];
 
@@ -7979,10 +8105,7 @@ function relationshipFullPreviewPath(
     );
 
   if (
-    (
-      key === 'exspouse' ||
-      key === 'other'
-    ) &&
+    key === 'other' &&
     setting.curved
   ) {
     const amount =
@@ -8027,10 +8150,224 @@ function relationshipFullPreviewPath(
     bY.toFixed(2)
   );
 }
+function relationshipPreviewArrowPath(
+  preview,
+  tipX,
+  tipY,
+  directionX,
+  directionY
+) {
+  const previewRect =
+    preview?.getBoundingClientRect();
+
+  const width =
+    Math.max(
+      1,
+      previewRect?.width || 320
+    );
+
+  const height =
+    Math.max(
+      1,
+      previewRect?.height || 190
+    );
+
+  const viewBoxScaleX =
+    320 / width;
+
+  const viewBoxScaleY =
+    190 / height;
+
+  // 畫布 markerWidth / markerHeight 的基準是 5.5，
+  // marker path 實際三角形佔 viewBox 約 80%。
+  // 因此預覽也用同一視覺比例，並跟隨目前線條粗細。
+  const markerScreenSize =
+    6.5;
+
+  const arrowScreenLength =
+    markerScreenSize * 0.8;
+
+  const arrowScreenHalfWidth =
+    markerScreenSize * 0.4;
+
+  // 先把方向轉成螢幕座標再正規化，
+  // 避免 preserveAspectRatio="none" 導致桌面版橫向箭頭被拉大。
+  const screenDx =
+    directionX / viewBoxScaleX;
+
+  const screenDy =
+    directionY / viewBoxScaleY;
+
+  const screenLength =
+    Math.hypot(
+      screenDx,
+      screenDy
+    ) || 1;
+
+  const dx =
+    screenDx / screenLength;
+
+  const dy =
+    screenDy / screenLength;
+
+  const baseScreenX =
+    (tipX / viewBoxScaleX) -
+    dx * arrowScreenLength;
+
+  const baseScreenY =
+    (tipY / viewBoxScaleY) -
+    dy * arrowScreenLength;
+
+  const px =
+    -dy * arrowScreenHalfWidth;
+
+  const py =
+    dx * arrowScreenHalfWidth;
+
+  const tipScreenX =
+    tipX / viewBoxScaleX;
+
+  const tipScreenY =
+    tipY / viewBoxScaleY;
+
+  return (
+    'M' +
+    tipX.toFixed(2) +
+    ' ' +
+    tipY.toFixed(2) +
+    ' L' +
+    ((baseScreenX + px) * viewBoxScaleX).toFixed(2) +
+    ' ' +
+    ((baseScreenY + py) * viewBoxScaleY).toFixed(2) +
+    ' L' +
+    ((baseScreenX - px) * viewBoxScaleX).toFixed(2) +
+    ' ' +
+    ((baseScreenY - py) * viewBoxScaleY).toFixed(2) +
+    ' Z'
+  );
+}
+
+function relationshipPreviewLineGeometry(
+  setting,
+  preview
+) {
+  const {
+    aX,
+    aY,
+    bX,
+    bY
+  } =
+    relationshipHorizontalPreviewAnchors(
+      preview
+    );
+
+  let controlX = null;
+  let controlY = null;
+
+  if (setting.curved) {
+    const amount =
+      clampRelationshipCurveAmount(
+        setting.curveAmount
+      );
+
+    const amplitude =
+      8 +
+      (amount / 100) * 34;
+
+    controlX =
+      (aX + bX) / 2;
+
+    controlY =
+      ((aY + bY) / 2) -
+      amplitude;
+  }
+
+  return {
+    startX:aX,
+    startY:aY,
+    endX:bX,
+    endY:bY,
+    controlX,
+    controlY
+  };
+}
+
+function relationshipPreviewArrowGeometry(
+  setting,
+  preview
+) {
+  const {
+    aX,
+    aY,
+    bX,
+    bY
+  } =
+    relationshipHorizontalPreviewAnchors(
+      preview
+    );
+
+  let startDx =
+    bX - aX;
+  let startDy =
+    bY - aY;
+  let endDx =
+    startDx;
+  let endDy =
+    startDy;
+
+  if (setting.curved) {
+    const amount =
+      clampRelationshipCurveAmount(
+        setting.curveAmount
+      );
+
+    const amplitude =
+      8 +
+      (amount / 100) * 34;
+
+    const controlX =
+      (aX + bX) / 2;
+
+    const controlY =
+      ((aY + bY) / 2) -
+      amplitude;
+
+    startDx =
+      controlX - aX;
+    startDy =
+      controlY - aY;
+
+    endDx =
+      bX - controlX;
+    endDy =
+      bY - controlY;
+  }
+
+  return {
+    start:
+      relationshipPreviewArrowPath(
+        preview,
+        aX,
+        aY,
+        -startDx,
+        -startDy
+      ),
+    end:
+      relationshipPreviewArrowPath(
+        preview,
+        bX,
+        bY,
+        endDx,
+        endDy
+      )
+  };
+}
+
 function updateRelationshipFullPreview() {
   const preview = $('relationshipFullPreview');
   const path = $('relationshipFullPreviewPath');
-  const arrowShape = $('relationshipPreviewArrowShape');
+  const arrowStart = $('relationshipFullPreviewArrowStart');
+  const arrowEnd = $('relationshipFullPreviewArrowEnd');
   if (!preview || !path) return;
 
   const key = activeRelationshipStyleKey;
@@ -8039,25 +8376,120 @@ function updateRelationshipFullPreview() {
   const vertical = key === 'parent' || key === 'adopt';
 
   preview.dataset.orientation = vertical ? 'vertical' : 'horizontal';
-  path.setAttribute(
-    'd',
-    relationshipFullPreviewPath(
-      key,
-      setting,
-      preview
-    )
-  );
+
+  const hasEndArrow =
+    key === 'other' &&
+    !!setting.showArrow;
+
+  const hasStartArrow =
+    hasEndArrow &&
+    isSymmetricSocialRelationshipType(
+      activeOtherRelationshipType
+    );
+
+  if (
+    key === 'other'
+  ) {
+    const geometry =
+      relationshipPreviewLineGeometry(
+        setting,
+        preview
+      );
+
+    if (
+      setting.curved &&
+      geometry.controlX != null &&
+      geometry.controlY != null
+    ) {
+      path.setAttribute(
+        'd',
+        'M' +
+          geometry.startX.toFixed(2) +
+          ' ' +
+          geometry.startY.toFixed(2) +
+          ' Q' +
+          geometry.controlX.toFixed(2) +
+          ' ' +
+          geometry.controlY.toFixed(2) +
+          ' ' +
+          geometry.endX.toFixed(2) +
+          ' ' +
+          geometry.endY.toFixed(2)
+      );
+    } else {
+      path.setAttribute(
+        'd',
+        'M' +
+          geometry.startX.toFixed(2) +
+          ' ' +
+          geometry.startY.toFixed(2) +
+          ' L' +
+          geometry.endX.toFixed(2) +
+          ' ' +
+          geometry.endY.toFixed(2)
+      );
+    }
+  } else {
+    path.setAttribute(
+      'd',
+      relationshipFullPreviewPath(
+        key,
+        setting,
+        preview
+      )
+    );
+  }
   path.setAttribute('stroke',color);
   path.setAttribute('stroke-width',String(Math.max(1,Number(setting.width) || 1.5)));
   path.setAttribute('stroke-dasharray',relationshipDashValue(setting));
-  path.removeAttribute('marker-start');
-  path.removeAttribute('marker-end');
-  arrowShape?.setAttribute('fill',color);
 
-  if (key === 'other' && setting.showArrow) {
-    path.setAttribute('marker-end','url(#relationshipPreviewArrow)');
-    if (isSymmetricSocialRelationshipType(activeOtherRelationshipType)) {
-      path.setAttribute('marker-start','url(#relationshipPreviewArrow)');
+  if (arrowStart) {
+    arrowStart.hidden = true;
+    arrowStart.removeAttribute('d');
+  }
+
+  if (arrowEnd) {
+    arrowEnd.hidden = true;
+    arrowEnd.removeAttribute('d');
+  }
+
+  if (
+    key === 'other' &&
+    setting.showArrow
+  ) {
+    const arrows =
+      relationshipPreviewArrowGeometry(
+        setting,
+        preview
+      );
+
+    if (arrowEnd) {
+      arrowEnd.setAttribute(
+        'd',
+        arrows.end
+      );
+      arrowEnd.setAttribute(
+        'fill',
+        color
+      );
+      arrowEnd.hidden = false;
+    }
+
+    if (
+      arrowStart &&
+      isSymmetricSocialRelationshipType(
+        activeOtherRelationshipType
+      )
+    ) {
+      arrowStart.setAttribute(
+        'd',
+        arrows.start
+      );
+      arrowStart.setAttribute(
+        'fill',
+        color
+      );
+      arrowStart.hidden = false;
     }
   }
 }
@@ -8121,7 +8553,7 @@ function syncRelationshipLineControls() {
   if (widthValue) widthValue.textContent = Number(setting.width).toFixed(1).replace(/\.0$/,'') + ' px';
   if (colorEl) colorEl.value = relationshipResolvedColor(setting,other ? 'other' : key);
 
-  const curveSupported = key === 'exspouse' || key === 'other';
+  const curveSupported = key === 'other';
   const arrowSupported = key === 'other';
   const featureRow = $('relationshipFeatureRow');
   const curveCell = $('relationshipCurveToggleCell');
@@ -8187,6 +8619,7 @@ $('relationshipEditorColor')?.addEventListener('input',event => {
 });
 
 $('relationshipEditorCurveToggle')?.addEventListener('click',() => {
+  if (activeRelationshipStyleKey !== 'other') return;
   const setting = relationshipEditorSetting();
   setting.curved = !setting.curved;
   setting.routing = 'manual';
@@ -8599,7 +9032,7 @@ async function updateStorageInfo() {
 }
 
 $('appearanceBtn').onclick = openAppearancePanel;
-$('appearanceCloseBtn').onclick = closeAppearancePanel;
+$('appearanceHeaderCloseBtn')?.addEventListener('click', closeAppearancePanel);
 appearanceDialog.onclick = event => {
   if (event.target === appearanceDialog) {
     closeAppearancePanel();
@@ -8917,14 +9350,23 @@ $('appearanceBackgroundClearBtn').onclick = removeCanvasBackground;
 $('cleanupBtn').onclick = async () => {
   if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
   const button = $('cleanupBtn');
-  if (button) button.disabled = true;
-  try {
-    const n = await cleanupUnusedImages();
-    uiToast(n > 0 ? `清理完成：刪除了 ${n} 張未使用圖片。` : '目前沒有可清理的圖片。');
-    await updateStorageInfo();
-  } finally {
-    if (button) button.disabled = false;
-  }
+
+  await withActionButtonLoading(
+    button,
+    '清理中',
+    async () => {
+      const n =
+        await cleanupUnusedImages();
+
+      uiToast(
+        n > 0
+          ? `清理完成：刪除了 ${n} 張未使用圖片。`
+          : '目前沒有可清理的圖片。'
+      );
+
+      await updateStorageInfo();
+    }
+  );
 };
 
 // ========【使用說明輸入方式】 設定 - 依實際操作切換電腦／觸控說明，不綁定裝置類型 ========
@@ -9192,6 +9634,10 @@ genealogyStore =
     normalizeAvatarFrame,
     petSpeciesValues:Object.keys(PET_SPECIES),
     sexedPetSpeciesValues:['dog','cat','horse'],
+    gameManagedSimFields:
+      window.L1nGGameImport
+        ?.GAME_MANAGED_SIM_FIELDS ||
+      [],
     cardSettingFieldKeys:CARD_SETTING_FIELD_KEYS,
     defaultCardViewSettings:DEFAULT_CARD_VIEW_SETTINGS,
     defaultCardEditSettings:DEFAULT_CARD_EDIT_SETTINGS,
@@ -9346,7 +9792,9 @@ function collectReferencedAssetIds(targetDb = currentGenealogyData(), targetBg =
   };
 
   Object.values(targetDb?.sims || {}).forEach(sim => {
-    add(sim.avatar, '人物頭像');
+    add(sim.avatar, '人物目前頭像');
+    add(sim.gameAvatar, '人物遊戲頭像');
+    add(sim.customAvatar, '人物自訂頭像');
     (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
     (sim.pets || []).forEach(pet => add(pet.avatar, '寵物頭像'));
   });
@@ -9369,6 +9817,8 @@ function clearUnsupportedImageRefs(targetDb = currentGenealogyData(), targetBg =
 
   Object.values(targetDb?.sims || {}).forEach(sim => {
     clean(sim, 'avatar', null);
+    clean(sim, 'gameAvatar', null);
+    clean(sim, 'customAvatar', null);
     (sim.gallery || []).forEach(item => clean(item, 'image', ''));
     (sim.pets || []).forEach(pet => clean(pet, 'avatar', null));
   });
@@ -10878,8 +11328,8 @@ function renderPersonProfileContent(
 
   sections.push(
     renderPersonProfileSection(
-      '簡介',
-      `<div class="person-profile-bio">${person.bio ? esc(presentation.bio) : '—'}</div>`
+      '備註',
+      `<div class="person-profile-notes">${person.notes ? esc(presentation.notes) : '—'}</div>`
     )
   );
 
@@ -12322,12 +12772,15 @@ function finishMarquee() {
 
 const TOUCH_DRAG_THRESHOLD_PX = 8;
 const TOUCH_LONG_PRESS_MS = 520;
+const TOUCH_DOUBLE_TAP_MS = 320;
+const TOUCH_DOUBLE_TAP_DISTANCE_PX = 28;
 const activeTouchPointers = new Map();
 const touchCardActivationSuppressed = new Set();
 
 let touchPinchGeometry = null;
 let touchLongPressTimer = 0;
 let touchLongPressPointerId = null;
+let lastTouchCanvasTap = null;
 
 function isTouchCardActivationSuppressed(
   event
@@ -12349,6 +12802,55 @@ function cancelTouchLongPress() {
 
   touchLongPressTimer = 0;
   touchLongPressPointerId = null;
+}
+
+function handleTouchCanvasTapStart(
+  point
+) {
+  if (
+    !point ||
+    (
+      point.kind !== 'canvas-pan' &&
+      point.kind !== 'canvas-select'
+    )
+  ) {
+    lastTouchCanvasTap = null;
+    return false;
+  }
+
+  const now =
+    performance.now();
+
+  const previous =
+    lastTouchCanvasTap;
+
+  const isDoubleTap =
+    !!previous &&
+    now - previous.time <=
+      TOUCH_DOUBLE_TAP_MS &&
+    Math.hypot(
+      point.clientX - previous.clientX,
+      point.clientY - previous.clientY
+    ) <=
+      TOUCH_DOUBLE_TAP_DISTANCE_PX;
+
+  if (!isDoubleTap) {
+    lastTouchCanvasTap = {
+      time:now,
+      clientX:point.clientX,
+      clientY:point.clientY
+    };
+    return false;
+  }
+
+  lastTouchCanvasTap = null;
+  point.blocked = true;
+
+  finishMarquee();
+  genealogyViewport.cancelPan();
+  genealogyViewport.fit();
+
+  return true;
 }
 
 function getTouchPointerKind(
@@ -12557,6 +13059,13 @@ function handleTouchPointerDown(
     simId:descriptor.simId
   };
 
+  if (
+    point.kind !== 'canvas-pan' &&
+    point.kind !== 'canvas-select'
+  ) {
+    lastTouchCanvasTap = null;
+  }
+
   activeTouchPointers.set(
     event.pointerId,
     point
@@ -12565,6 +13074,16 @@ function handleTouchPointerDown(
   if (
     activeTouchPointers.size === 1
   ) {
+    if (
+      handleTouchCanvasTapStart(
+        point
+      )
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     if (
       point.kind === 'card'
     ) {
@@ -12644,6 +13163,13 @@ function handleTouchPointerMove(
       TOUCH_DRAG_THRESHOLD_PX
   ) {
     point.moved = true;
+
+    if (
+      point.kind === 'canvas-pan' ||
+      point.kind === 'canvas-select'
+    ) {
+      lastTouchCanvasTap = null;
+    }
 
     if (
       point.pointerId ===
@@ -12774,6 +13300,10 @@ function finishTouchPointer(
     !wasPinching
   ) {
     genealogyViewport.endPan();
+  }
+
+  if (wasPinching) {
+    lastTouchCanvasTap = null;
   }
 
   if (
@@ -14967,6 +15497,12 @@ function setEditingAvatarCropFrame(target,frame){
     petEditorState.avatarFrame=normalized;
     petEditorController.refreshAvatarPreview();
   }else{
+    if(simEditorState.avatarSource==='game'){
+      simEditorState.gameAvatarFrame=normalized;
+    }else{
+      simEditorState.customAvatarFrame=normalized;
+    }
+
     simEditorState.avatarFrame=normalized;
     personEditor.renderAvatarPreview();
     personEditor.renderInfoPreviewIfActive();
@@ -16559,7 +17095,13 @@ $('btnAddPet').onclick = () => {
 
 // ========【人物編輯器 Authority】 設定 - Draft / lifecycle / 關係編輯由獨立模組負責 ========
 personEditor.mount({
-  openAvatarCropEditor
+  openAvatarCropEditor,
+  compressImage,
+  saveImageAsset,
+  showToast:uiToast,
+  scene:genealogyScene,
+  getCurrentFamily:currentFamily,
+  getViewMode:() => viewMode
 });
 
 function purgeSimData(id) {
@@ -17228,30 +17770,78 @@ function downloadBlob(blob, filename) {
 
 const _exportIconSvgCache = new Map();
 
+function decodeBundledIconSvg(iconName) {
+  const safe =
+    String(iconName || '')
+      .replace(/[^a-z0-9-]/gi, '');
+
+  if (!safe) {
+    throw new Error('Invalid icon name');
+  }
+
+  const token =
+    getComputedStyle(
+      document.documentElement
+    )
+      .getPropertyValue(
+        `--l1ng-icon-${safe}`
+      )
+      .trim();
+
+  const match =
+    token.match(
+      /base64,([^"'\)]+)/
+    );
+
+  if (!match) {
+    throw new Error(
+      `Bundled SVG not found: ${safe}`
+    );
+  }
+
+  const binary =
+    atob(match[1]);
+
+  if (
+    typeof TextDecoder ===
+    'function'
+  ) {
+    const bytes =
+      Uint8Array.from(
+        binary,
+        char =>
+          char.charCodeAt(0)
+      );
+
+    return new TextDecoder(
+      'utf-8'
+    ).decode(bytes);
+  }
+
+  return binary;
+}
+
 async function loadExportIconSvg(iconName) {
   if (_exportIconSvgCache.has(iconName)) {
     return _exportIconSvgCache.get(iconName);
   }
 
-  const url =
-    new URL(
-      `../../html%20icons/${iconName}.svg`,
-      document.baseURI
-    ).href;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${iconName}.svg`);
-  }
-
-  const svg = await response.text();
+  const svg =
+    decodeBundledIconSvg(
+      iconName
+    );
 
   if (!svg.includes('<svg')) {
-    throw new Error(`Invalid SVG: ${iconName}`);
+    throw new Error(
+      `Invalid bundled SVG: ${iconName}`
+    );
   }
 
-  _exportIconSvgCache.set(iconName, svg);
+  _exportIconSvgCache.set(
+    iconName,
+    svg
+  );
+
   return svg;
 }
 
@@ -17683,6 +18273,8 @@ async function persistGameImportAvatars(bundle, converted) {
   let saved = 0;
   let unsupported = 0;
   let missing = 0;
+  let thumDecoded = 0;
+  let decodeFailed = 0;
 
   const persistAsset = async (target, simId, kind = 'sim') => {
     const sourceSim = sourceSims[String(simId)];
@@ -17704,15 +18296,44 @@ async function persistGameImportAvatars(bundle, converted) {
       return;
     }
 
-    // 遊戲端 Genealogy Exporter ZIP 已提供 EA 原始頭像 bytes。
-    // 這裡直接保存原始 Blob，避免再次經過一般手動上傳使用的
-    // 384px 縮圖與 JPEG / WEBP 重新編碼，保留遊戲匯出的原始畫質。
-    const sourceBlob = new Blob(
-      [asset.bytes],
-      { type:asset.mimeType }
-    );
+    let prepared;
+    try {
+      prepared = await window.L1nGGameImport.prepareGameAvatarAsset(asset, kind);
+    } catch (error) {
+      if (error?.code !== 'EA_THUM_DECODE_FAILED') throw error;
+      // 已知 THUM conversion failure 只略過這張頭像，不能中止或損失整份族譜。
+      decodeFailed++;
+      console.warn('[遊戲 ZIP 頭像] EA THUM fail closed：', { simId:String(simId), path:asset.path, stage:error.stage, reason:error.message }, error);
+      return;
+    }
 
-    target.avatar = await saveImageAsset(sourceBlob);
+    // 普通圖片仍保存原 bytes；THUM 保存 lossless straight-RGBA PNG，不經手動上傳 384px pipeline。
+    const savedAvatar =
+      await saveImageAsset(
+        prepared.blob,
+        prepared.metadata
+      );
+
+    if (kind === 'sim') {
+      target.gameAvatar =
+        savedAvatar;
+
+      if (!target.gameAvatarFrame) {
+        target.gameAvatarFrame = {
+          ...DEFAULT_AVATAR_FRAME
+        };
+      }
+
+      if (!target.customAvatar) {
+        target.avatarSource =
+          'game';
+      }
+    } else {
+      target.avatar =
+        savedAvatar;
+    }
+
+    if (prepared.converted) thumDecoded++;
 
     saved++;
   };
@@ -17750,7 +18371,9 @@ async function persistGameImportAvatars(bundle, converted) {
   return {
     saved,
     unsupported,
-    missing
+    missing,
+    thumDecoded,
+    decodeFailed
   };
 }
 
@@ -18046,9 +18669,10 @@ function gameImportUpdateSummary(
     `${uiText('新增遊戲關係')}：${stats.relationships?.added || 0}`,
     `${uiText('移除已不存在的遊戲關係')}：${stats.relationships?.removed || 0}`,
     `${uiText('新匯入頭像')}：${avatarStats?.saved || 0}`,
+    avatarStats?.decodeFailed ? `EA THUM decode failed / skipped: ${avatarStats.decodeFailed} (console: Sim / path / stage)` : null,
     '',
     uiText('已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。')
-  ].join('\n');
+  ].filter(line => line !== null).join('\n');
 }
 
 async function importGameGenealogy(file) {
@@ -18096,6 +18720,8 @@ async function importGameGenealogy(file) {
         bundle,
         converted
       );
+
+    console.info('[遊戲 ZIP 頭像] 匯入摘要：', avatarStats);
 
     const incomingPrepared =
       prepareDatabase(
@@ -18231,6 +18857,7 @@ async function importGameGenealogy(file) {
           `寵物：${petCount}`,
           `家族：${familyCount}`,
           `頭像：${avatarStats.saved}`,
+          avatarStats.decodeFailed ? `EA THUM decode failed / skipped: ${avatarStats.decodeFailed} (console: Sim / path / stage)` : null,
           importedGameDate
             ? `${uiText('遊戲日期')}：${importedGameDate}`
             : null,
@@ -18435,9 +19062,40 @@ window.addEventListener('resize', () => {
   }
 });
 
+async function savePersonEditorFromUi() {
+  try {
+    return await withActionButtonLoading(
+      $('btnSave'),
+      '儲存中',
+      () => personEditor.commit()
+    );
+  } catch (error) {
+    console.error(
+      '[Genealogy] Person editor save failed.',
+      error
+    );
+
+    await uiAlert(
+      '模擬市民資料儲存失敗：' +
+        (
+          error?.message ||
+          'Unknown error'
+        ),
+      {
+        title:'儲存失敗',
+        kind:'danger'
+      }
+    );
+
+    return null;
+  }
+}
+
 $('addBtn').onclick = () => personEditor.open(null);
 $('btnCancel').onclick = personEditor.close;
-$('btnSave').onclick = personEditor.commit;
+$('btnSave').onclick = () => {
+  void savePersonEditorFromUi();
+};
 $('btnDelete').onclick = () => simEditorState.simId && deleteChar(simEditorState.simId);
 mask.onclick = e => { if (e.target === mask) personEditor.close(); };
 
@@ -18495,7 +19153,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.ctrlKey) {
     if (lifePhotoEditorDialog.classList.contains('show')) lifePhotoWorkspace.commitEditor();
     else if (petEditorDialog.classList.contains('show')) petEditorController.commit();
-    else if (mask.classList.contains('show')) personEditor.commit();
+    else if (mask.classList.contains('show')) void savePersonEditorFromUi();
   }
 });
 
@@ -18647,55 +19305,45 @@ $('fitScreenBtn')?.addEventListener('click', () => genealogyViewport.fit());
 $('exportBtn').onclick = openExportPanel;
 if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
 if (exportDialog) exportDialog.onclick = e => { if (e.target === exportDialog) closeExportPanel(); };
-if (exportJsonBtn) exportJsonBtn.onclick = async () => { closeExportPanel(); await exportJSON(); };
-if (exportImageBtn) exportImageBtn.onclick = async () => {
-  const originalHtml =
-    exportImageBtn.innerHTML;
-
-  exportImageBtn.disabled = true;
-  exportImageBtn.classList.add('is-loading');
-  exportImageBtn.setAttribute('aria-busy', 'true');
-  exportJsonBtn && (exportJsonBtn.disabled = true);
-
-  const loadingText =
-    uiText('正在匯出族譜圖片…')
-      .replace(/[.…]+$/u, '');
-
-  exportImageBtn.innerHTML =
-    `<span>${esc(loadingText)}</span>` +
-    '<span class="export-loading-dots" aria-hidden="true">' +
-      '<span></span><span></span><span></span>' +
-    '</span>';
+if (exportJsonBtn) exportJsonBtn.onclick = async () => {
+  exportImageBtn && (exportImageBtn.disabled = true);
 
   try {
-    // 先讓 loading 狀態真正畫到畫面上，再開始較重的族譜 capture。
-    await new Promise(resolve =>
-      requestAnimationFrame(resolve)
+    await withActionButtonLoading(
+      exportJsonBtn,
+      '正在匯出 JSON 備份',
+      async () => {
+        await exportJSON();
+        closeExportPanel();
+        uiToast('JSON 備份匯出完成');
+      }
     );
+  } finally {
+    exportImageBtn && (exportImageBtn.disabled = false);
+  }
+};
 
-    await exportGenealogyImage(
-      getSelectedExportImageSize(),
-      getSelectedExportBackgroundMode()
+if (exportImageBtn) exportImageBtn.onclick = async () => {
+  exportJsonBtn && (exportJsonBtn.disabled = true);
+
+  try {
+    await withActionButtonLoading(
+      exportImageBtn,
+      '正在匯出族譜圖片',
+      async () => {
+        await exportGenealogyImage(
+          getSelectedExportImageSize(),
+          getSelectedExportBackgroundMode()
+        );
+
+        closeExportPanel();
+        uiToast('族譜圖片匯出完成');
+      }
     );
-
-    closeExportPanel();
-    uiToast('族譜圖片匯出完成');
   } catch (err) {
     console.error(err);
     await uiAlert(`族譜圖片匯出失敗：${err && err.message ? err.message : 'Unknown error'}`, { title: '族譜圖片匯出失敗', kind: 'danger' });
   } finally {
-    exportImageBtn.innerHTML =
-      originalHtml;
-
-    exportImageBtn.classList.remove(
-      'is-loading'
-    );
-
-    exportImageBtn.removeAttribute(
-      'aria-busy'
-    );
-
-    exportImageBtn.disabled = false;
     exportJsonBtn && (exportJsonBtn.disabled = false);
   }
 };

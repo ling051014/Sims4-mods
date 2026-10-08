@@ -30,7 +30,7 @@
     'traits','pets','gallery'
   ]);
 
-  const SIM_ASSET_FIELDS = new Set(['avatar','pets','gallery']);
+  const SIM_ASSET_FIELDS = new Set(['avatar','gameAvatar','customAvatar','pets','gallery']);
 
   function cloneValue(value) {
     if (value == null || typeof value !== 'object') return value;
@@ -224,6 +224,77 @@
         next;
 
       return true;
+    }
+
+    // ========【人物頭像雙來源】 設定 - 只接受目前 schema；avatar / avatarFrame 僅作目前顯示衍生值 ========
+    function syncSimAvatarSources(record) {
+      if (
+        !record ||
+        typeof record !== 'object' ||
+        Array.isArray(record)
+      ) {
+        return;
+      }
+
+      if (record.gameAvatar === undefined) {
+        record.gameAvatar = null;
+      }
+
+      if (record.customAvatar === undefined) {
+        record.customAvatar = null;
+      }
+
+      record.gameAvatarFrame =
+        record.gameAvatar
+          ? normalizeAvatarFrame(
+              record.gameAvatarFrame
+            )
+          : null;
+
+      record.customAvatarFrame =
+        record.customAvatar
+          ? normalizeAvatarFrame(
+              record.customAvatarFrame
+            )
+          : null;
+
+      let source =
+        record.avatarSource === 'game' ||
+        record.avatarSource === 'custom'
+          ? record.avatarSource
+          : record.customAvatar
+            ? 'custom'
+            : record.gameAvatar
+              ? 'game'
+              : 'custom';
+
+      if (
+        source === 'game' &&
+        !record.gameAvatar &&
+        record.customAvatar
+      ) {
+        source = 'custom';
+      } else if (
+        source === 'custom' &&
+        !record.customAvatar &&
+        record.gameAvatar
+      ) {
+        source = 'game';
+      }
+
+      record.avatarSource = source;
+
+      record.avatar =
+        source === 'game'
+          ? record.gameAvatar
+          : record.customAvatar;
+
+      record.avatarFrame =
+        normalizeAvatarFrame(
+          source === 'game'
+            ? record.gameAvatarFrame
+            : record.customAvatarFrame
+        );
     }
 
     function normalizePetGenderValue(value) {
@@ -467,19 +538,11 @@
               .filter(Boolean)
           : [];
 
-      if (sim.avatar === undefined) {
-        sim.avatar = null;
-      }
-
-      sim.avatarFrame =
-        normalizeAvatarFrame(
-          sim.avatarFrame
-        );
-
       if (sim.race === undefined) sim.race = '';
       if (sim.residence === undefined) sim.residence = '';
       if (sim.aspiration === undefined) sim.aspiration = '';
       if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
+      if (typeof sim.notes !== 'string') sim.notes = '';
 
       const gameData =
         ensureAdoptionMetadata(
@@ -490,6 +553,10 @@
         manualOverrideValues(
           sim
         );
+
+      syncSimAvatarSources(
+        sim
+      );
 
       gameData.adoptedParentIds =
         uniqueIds(
@@ -1489,9 +1556,7 @@
           gameManagedSimFieldSet.has(field)
         ) {
           manualGameFields.push(
-            field === 'avatarFrame'
-              ? 'avatar'
-              : field
+            field
           );
         }
 

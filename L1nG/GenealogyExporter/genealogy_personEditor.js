@@ -3,6 +3,12 @@
   'use strict';
 
   let genealogyStoreAuthority = null;
+  let avatarImageCompressor = null;
+  let avatarImageAssetSaver = null;
+  let personEditorToast = null;
+  let personEditorScene = null;
+  let personEditorGetCurrentFamily = null;
+  let personEditorGetViewMode = null;
 
   function bindStore(store) {
     if (!store || typeof store.getData !== 'function') {
@@ -35,6 +41,11 @@
     simId:null,
     avatar:null,
     avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    gameAvatar:null,
+    gameAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    customAvatar:null,
+    customAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    avatarSource:'custom',
     traits:[],
     parentKinds:new Map(),
     childKinds:new Map(),
@@ -101,12 +112,107 @@
       : null;
   }
 
+  function syncPersonEditorActiveAvatar() {
+    let source =
+      simEditorState.avatarSource ===
+      'game'
+        ? 'game'
+        : 'custom';
+
+    if (
+      source === 'game' &&
+      !simEditorState.gameAvatar &&
+      simEditorState.customAvatar
+    ) {
+      source = 'custom';
+    } else if (
+      source === 'custom' &&
+      !simEditorState.customAvatar &&
+      simEditorState.gameAvatar
+    ) {
+      source = 'game';
+    }
+
+    simEditorState.avatarSource =
+      source;
+
+    simEditorState.avatar =
+      source === 'game'
+        ? simEditorState.gameAvatar
+        : simEditorState.customAvatar;
+
+    simEditorState.avatarFrame =
+      normalizeAvatarFrame(
+        source === 'game'
+          ? simEditorState.gameAvatarFrame
+          : simEditorState.customAvatarFrame
+      );
+
+    return source;
+  }
+
+  function syncPersonEditorAvatarControls() {
+    const source =
+      syncPersonEditorActiveAvatar();
+
+    const toggle =
+      $('avatarSourceToggleBtn');
+
+    if (toggle) {
+      const target =
+        source === 'game'
+          ? 'custom'
+          : 'game';
+
+      toggle.textContent =
+        uiText(
+          target === 'game'
+            ? '使用遊戲頭像'
+            : '使用自訂頭像'
+        );
+
+      toggle.disabled =
+        target === 'game'
+          ? !simEditorState.gameAvatar
+          : !simEditorState.customAvatar;
+
+      toggle.dataset.avatarTarget =
+        target;
+    }
+
+    const adjust =
+      $('avatarAdjustBtn');
+
+    if (adjust) {
+      adjust.disabled =
+        !simEditorState.avatar;
+    }
+
+    const clear =
+      $('avatarClearBtn');
+
+    if (clear) {
+      clear.disabled =
+        source !== 'custom' ||
+        !simEditorState.customAvatar;
+    }
+  }
+
   function resetPersonEditorDraftState() {
     simEditorState.simId = null;
     simEditorState.avatar = null;
     simEditorState.avatarFrame = {
       ...DEFAULT_AVATAR_FRAME
     };
+    simEditorState.gameAvatar = null;
+    simEditorState.gameAvatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+    simEditorState.customAvatar = null;
+    simEditorState.customAvatarFrame = {
+      ...DEFAULT_AVATAR_FRAME
+    };
+    simEditorState.avatarSource = 'custom';
     simEditorState.traits = [];
     simEditorState.parentKinds.clear();
     simEditorState.childKinds.clear();
@@ -155,6 +261,8 @@
   }
 
 function renderPersonEditorAvatarPreview(){
+    syncPersonEditorAvatarControls();
+
     const element=$('avatarPreview');
     const avatar=framedAvatarImageHTML(simEditorState.avatar,simEditorState.avatarFrame);
 
@@ -164,9 +272,6 @@ function renderPersonEditorAvatarPreview(){
       const name=$('fName').value.trim();
       element.textContent=name?name.charAt(0):'?';
     }
-
-    const adjust=$('avatarAdjustBtn');
-    if(adjust)adjust.disabled=!simEditorState.avatar;
   }
 
   function syncPersonEditorCauseOfDeathVisibility() {
@@ -514,9 +619,24 @@ function buildPersonEditorDraft({
       causeOfDeath:status==='已故'||status==='幽靈'?$('fCauseOfDeath').value.trim():'',
       traits:[...simEditorState.traits],
       career:$('fCareer').value.trim(),
-      bio:$('fBio').value.trim(),
+      notes:$('fNotes').value.trim(),
       avatar:simEditorState.avatar||null,
       avatarFrame:normalizeAvatarFrame(simEditorState.avatarFrame),
+      gameAvatar:simEditorState.gameAvatar||null,
+      gameAvatarFrame:
+        simEditorState.gameAvatar
+          ? normalizeAvatarFrame(
+              simEditorState.gameAvatarFrame
+            )
+          : null,
+      customAvatar:simEditorState.customAvatar||null,
+      customAvatarFrame:
+        simEditorState.customAvatar
+          ? normalizeAvatarFrame(
+              simEditorState.customAvatarFrame
+            )
+          : null,
+      avatarSource:simEditorState.avatarSource,
       pets:
         copyMedia
           ? JSON.parse(
@@ -2234,24 +2354,40 @@ function buildPersonEditorDraft({
           )
         : '';
 
-    $('fBio').value=
+    $('fNotes').value=
       sim
         ? displayDataText(
-            sim.bio,
+            sim.notes,
             sim
           )
         : '';
 
-    simEditorState.avatar=
+    simEditorState.gameAvatar=
       sim
-        ? (sim.avatar||null)
+        ? (sim.gameAvatar||null)
         : null;
 
-    simEditorState.avatarFrame=
+    simEditorState.gameAvatarFrame=
       normalizeAvatarFrame(
-        sim?.avatarFrame
+        sim?.gameAvatarFrame
       );
 
+    simEditorState.customAvatar=
+      sim
+        ? (sim.customAvatar||null)
+        : null;
+
+    simEditorState.customAvatarFrame=
+      normalizeAvatarFrame(
+        sim?.customAvatarFrame
+      );
+
+    simEditorState.avatarSource=
+      sim?.avatarSource === 'game'
+        ? 'game'
+        : 'custom';
+
+    syncPersonEditorActiveAvatar();
     renderPersonEditorAvatarPreview();
 
     // 人生照片與寵物的草稿資料也延遲到真正需要時才建立。
@@ -3265,19 +3401,32 @@ function collectPersonEditorSaveRequest() {
         'career',
         $('fCareer').value
       ),
-    bio:
+    notes:
       preserveEditorSampleText(
         existing,
-        'bio',
-        $('fBio').value
+        'notes',
+        $('fNotes').value
       ),
-    avatar:
-      simEditorState.avatar ||
+    gameAvatar:
+      simEditorState.gameAvatar ||
       null,
-    avatarFrame:
-      normalizeAvatarFrame(
-        simEditorState.avatarFrame
-      ),
+    gameAvatarFrame:
+      simEditorState.gameAvatar
+        ? normalizeAvatarFrame(
+            simEditorState.gameAvatarFrame
+          )
+        : null,
+    customAvatar:
+      simEditorState.customAvatar ||
+      null,
+    customAvatarFrame:
+      simEditorState.customAvatar
+        ? normalizeAvatarFrame(
+            simEditorState.customAvatarFrame
+          )
+        : null,
+    avatarSource:
+      simEditorState.avatarSource,
     pets:
       JSON.parse(
         JSON.stringify(
@@ -3329,24 +3478,28 @@ function ensureSavedSimManualPosition(
   mutation
 ) {
   const family =
-    currentFamily();
+    personEditorGetCurrentFamily?.();
 
-  ensureFamilyLayoutShape(
-    family
-  );
+  const mode =
+    personEditorGetViewMode?.() ===
+    'edit'
+      ? 'edit'
+      : 'view';
 
   if (
-    !family.freeLayout[
-      viewMode
-    ]
+    !family ||
+    !personEditorScene
+      ?.isFreeLayoutActive?.(
+        family
+      )
   ) {
     return mutation;
   }
 
   const manualPositions =
-    family.manualPositions[
-      viewMode
-    ];
+    family.manualPositions?.[
+      mode
+    ] || {};
 
   if (
     manualPositions[sim.id]
@@ -3354,13 +3507,11 @@ function ensureSavedSimManualPosition(
     return mutation;
   }
 
-  const {
-    H:NODE_H
-  } = getDims();
-
-  const {
-    LEVEL:LEVEL_GAP
-  } = getGaps();
+  const readPosition = id =>
+    manualPositions[id] ||
+    personEditorScene
+      ?.readPersonPosition?.(id) ||
+    null;
 
   const anchorParentId =
     parentRelations
@@ -3368,40 +3519,69 @@ function ensureSavedSimManualPosition(
         relation.parentId
       )
       .find(parentId =>
-        manualPositions[
-          parentId
-        ]
+        !!readPosition(parentId)
       );
 
   let nextPosition;
 
   if (anchorParentId) {
     const parentPosition =
-      manualPositions[
+      readPosition(
         anchorParentId
-      ];
+      );
+
+    const parentDimensions =
+      personEditorScene
+        ?.measurePersonCardById?.(
+          anchorParentId
+        ) || {
+          H:100
+        };
 
     nextPosition = {
       x:parentPosition.x,
       y:
         parentPosition.y +
-        NODE_H +
-        LEVEL_GAP
+        (Number(parentDimensions.H) || 100) +
+        80
     };
   } else {
     let maxY = 0;
 
-    Object.values(
-      manualPositions
-    )
-      .forEach(position => {
+    const scenePlan =
+      personEditorScene
+        ?.readScenePlan?.();
+
+    if (scenePlan?.pos) {
+      scenePlan.pos.forEach(
+        (position, id) => {
+          const dimensions =
+            personEditorScene
+              ?.measurePersonCardById?.(
+                id
+              ) || {
+                H:100
+              };
+
+          maxY =
+            Math.max(
+              maxY,
+              position.y +
+              (Number(dimensions.H) || 100)
+            );
+        }
+      );
+    } else {
+      Object.values(
+        manualPositions
+      ).forEach(position => {
         maxY =
           Math.max(
             maxY,
-            position.y +
-            NODE_H
+            Number(position?.y) || 0
           );
       });
+    }
 
     nextPosition = {
       x:0,
@@ -3418,7 +3598,7 @@ function ensureSavedSimManualPosition(
       genealogyStoreAuthority
         .setNodePosition(
           family.id,
-          viewMode,
+          mode,
           sim.id,
           nextPosition
         )
@@ -3493,12 +3673,23 @@ function commitPersonEditorDraft() {
       mutation
     );
 
+  // 資料先交給 Store 與既有 Save Coordinator；
+  // 不在按鈕點擊流程強制整庫 JSON.stringify / localStorage 寫入。
+  // Scene 改走下一幀更新，避免大型族譜在關閉編輯器前同步重繪。
   applyGenealogyMutation(
-    mutation
+    mutation,
+    {
+      immediateRender:false
+    }
   );
 
   closePersonEditor();
   scheduleGC();
+  personEditorToast?.(
+    '已儲存模擬市民資料。'
+  );
+
+  return mutation;
 }
 
 
@@ -3506,7 +3697,13 @@ function commitPersonEditorDraft() {
   let avatarCropOpener = null;
 
   function mountPersonEditor({
-    openAvatarCropEditor
+    openAvatarCropEditor,
+    compressImage,
+    saveImageAsset,
+    showToast,
+    scene,
+    getCurrentFamily,
+    getViewMode
   } = {}) {
     if (
       typeof openAvatarCropEditor !==
@@ -3517,8 +3714,74 @@ function commitPersonEditorDraft() {
       );
     }
 
+    if (
+      typeof compressImage !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires image compressor.'
+      );
+    }
+
+    if (
+      typeof saveImageAsset !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires image asset saver.'
+      );
+    }
+
+    if (
+      typeof showToast !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires toast feedback.'
+      );
+    }
+
+    if (
+      !scene ||
+      typeof scene.isFreeLayoutActive !==
+        'function'
+    ) {
+      throw new Error(
+        'Person Editor requires Genealogy Scene.'
+      );
+    }
+
+    if (
+      typeof getCurrentFamily !==
+      'function' ||
+      typeof getViewMode !==
+      'function'
+    ) {
+      throw new Error(
+        'Person Editor requires layout state access.'
+      );
+    }
+
     avatarCropOpener =
       openAvatarCropEditor;
+
+    avatarImageCompressor =
+      compressImage;
+
+    avatarImageAssetSaver =
+      saveImageAsset;
+
+    personEditorToast =
+      showToast;
+
+    personEditorScene =
+      scene;
+
+    personEditorGetCurrentFamily =
+      getCurrentFamily;
+
+    personEditorGetViewMode =
+      getViewMode;
 
     if (mounted) return;
     mounted = true;
@@ -3534,12 +3797,29 @@ function commitPersonEditorDraft() {
       if(!file)return;
 
       try{
-        const result=await compressImage(file,'sim');
-        simEditorState.avatar=await saveImageAsset(result.blob,{
-          width:result.width,
-          height:result.height
-        });
-        simEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
+        const result=
+          await avatarImageCompressor(
+            file,
+            'sim'
+          );
+
+        simEditorState.customAvatar=
+          await avatarImageAssetSaver(
+            result.blob,
+            {
+              width:result.width,
+              height:result.height
+            }
+          );
+
+        simEditorState.customAvatarFrame={
+          ...DEFAULT_AVATAR_FRAME
+        };
+
+        simEditorState.avatarSource=
+          'custom';
+
+        syncPersonEditorActiveAvatar();
         renderPersonEditorAvatarPreview();
         renderPersonEditorInfoPreviewIfActive();
 
@@ -3558,9 +3838,45 @@ function commitPersonEditorDraft() {
       void avatarCropOpener('sim');
     };
 
+    $('avatarSourceToggleBtn').onclick=()=>{
+      const target=
+        simEditorState.avatarSource==='game'
+          ? 'custom'
+          : 'game';
+
+      const available=
+        target==='game'
+          ? simEditorState.gameAvatar
+          : simEditorState.customAvatar;
+
+      if(!available)return;
+
+      simEditorState.avatarSource=
+        target;
+
+      syncPersonEditorActiveAvatar();
+      renderPersonEditorAvatarPreview();
+      renderPersonEditorInfoPreviewIfActive();
+    };
+
     $('avatarClearBtn').onclick=()=>{
-      simEditorState.avatar=null;
-      simEditorState.avatarFrame={...DEFAULT_AVATAR_FRAME};
+      if(
+        simEditorState.avatarSource!=='custom' ||
+        !simEditorState.customAvatar
+      ){
+        return;
+      }
+
+      simEditorState.customAvatar=null;
+      simEditorState.customAvatarFrame={
+        ...DEFAULT_AVATAR_FRAME
+      };
+
+      if(simEditorState.gameAvatar){
+        simEditorState.avatarSource='game';
+      }
+
+      syncPersonEditorActiveAvatar();
       renderPersonEditorAvatarPreview();
       renderPersonEditorInfoPreviewIfActive();
     };

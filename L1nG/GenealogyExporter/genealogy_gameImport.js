@@ -29,9 +29,7 @@
     'aspiration',
     'causeOfDeath',
     'traits',
-    'career',
-    'avatar',
-    'avatarFrame'
+    'career'
   ]);
 
   const GAME_MANAGED_PET_FIELDS = Object.freeze([
@@ -746,6 +744,16 @@
       byteLength:bytes.length,
       supported:true
     };
+  }
+
+  async function prepareGameAvatarAsset(asset, kind = 'sim') {
+    const original = new Blob([asset.bytes], { type:asset.mimeType });
+    // EA codec 僅在遊戲 ZIP 人物頭像這個 owner 使用；寵物及所有其他圖片保持原流程。
+    if (kind !== 'sim' || asset.mimeType !== 'image/jpeg') return { blob:original, converted:false, metadata:{} };
+    const result = await global.L1nGThumDecoder.decode(asset.bytes);
+    return result
+      ? { ...result, converted:true, metadata:{ width:result.width, height:result.height } }
+      : { blob:original, converted:false, metadata:{} };
   }
 
   function enumKey(value) {
@@ -1737,9 +1745,15 @@
         exSpouseIds:rel.exSpouseIds,
         traits,
         career:careers.join(' / '),
-        bio:'',
+        notes:'',
         order:0,
         avatar:null,
+        avatarFrame:null,
+        gameAvatar:null,
+        gameAvatarFrame:null,
+        customAvatar:null,
+        customAvatarFrame:null,
+        avatarSource:'game',
         gameData:{
           simId:id,
           source:'game',
@@ -2393,10 +2407,6 @@
       manualOverrideSet(existingSim);
 
     GAME_MANAGED_SIM_FIELDS
-      .filter(field =>
-        field !== 'avatar' &&
-        field !== 'avatarFrame'
-      )
       .forEach(field => {
         if (overrides.has(field)) return;
 
@@ -2432,14 +2442,18 @@
         );
     }
 
-    if (!overrides.has('avatar')) {
-      if (incomingSim.avatar) {
-        result.avatar =
-          incomingSim.avatar;
+    // 遊戲頭像只更新 gameAvatar；玩家自訂頭像與目前顯示來源由網站保留。
+    if (incomingSim.gameAvatar) {
+      const hadGameAvatar =
+        !!existingSim.gameAvatar;
 
-        result.avatarFrame =
+      result.gameAvatar =
+        incomingSim.gameAvatar;
+
+      if (!hadGameAvatar) {
+        result.gameAvatarFrame =
           cloneData(
-            incomingSim.avatarFrame
+            incomingSim.gameAvatarFrame
           );
       }
     }
@@ -3304,6 +3318,7 @@
     householdShouldCreateFamily,
     expandHouseholdGenealogy,
     findSimAvatarPath,
+    prepareGameAvatarAsset,
     getSimAvatarAsset
   };
 })(window);
