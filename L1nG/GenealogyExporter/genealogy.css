@@ -7036,7 +7036,30 @@ button.is-loading .button-loading-label {
 .topbar-filter-column .topbar-filter-group + .topbar-filter-group { margin-top:24px; padding-top:0; border-top:0; }
 .topbar-filter-group legend { width:100%; margin:0 0 4px; padding:0; color:var(--text-secondary); font-size:10.5px; font-weight:650; letter-spacing:.35px; }
 .topbar-filter-option { display:flex; align-items:center; gap:8px; min-height:29px; padding:3px 2px; color:var(--nav-dropdown-text); font-size:12px; cursor:pointer; }
-.topbar-filter-option input { width:14px; height:14px; margin:0; accent-color:var(--action-primary); flex:0 0 auto; }
+/* 篩選核取方塊共用 SVG 白色勾號，避免不同瀏覽器將原生勾號繪製成黑色。 */
+.topbar-filter-option input[type="checkbox"] {
+  -webkit-appearance:none;
+  appearance:none;
+  width:14px;
+  height:14px;
+  margin:0;
+  flex:0 0 14px;
+  border:1px solid var(--border-default);
+  border-radius:3px;
+  background-color:var(--surface-input);
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:11px 11px;
+}
+.topbar-filter-option input[type="checkbox"]:checked {
+  border-color:var(--action-primary);
+  background-color:var(--action-primary);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.topbar-filter-option input[type="checkbox"]:focus-visible {
+  outline:2px solid var(--action-primary);
+  outline-offset:2px;
+}
 .topbar-filter-option:hover span { color:var(--action-primary); }
 .topbar-filter-footer { display:flex; justify-content:flex-end; padding-top:6px; border-top:1px solid var(--nav-dropdown-divider); }
 .topbar-filter-footer button { padding:4px 2px; border:0; background:transparent; color:var(--text-secondary); font:inherit; font-size:11px; }
@@ -7580,6 +7603,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .topbar-filter-label { display:none; }
   .topbar-filter-count { display:none !important; }
   .topbar-filter-popover { left:50%; right:auto; width:min(520px,calc(100vw - 24px)); transform:translateX(-50%); }
+  /* 手機第一直欄：狀態、性別與寵物保持同樣距離，但比桌面版的 24px 緊湊。 */
+  .topbar-filter-column .topbar-filter-group + .topbar-filter-group { margin-top:16px; }
   .family-panel { position:fixed; top:52px; bottom:0; left:0; width:min(310px,88vw); flex-basis:auto; transform:translateX(-102%); z-index:300; transition:transform .22s ease; }
   .family-panel.open { transform:translateX(0); }
   body.family-panel-collapsed .family-panel { width:min(310px,88vw); }
