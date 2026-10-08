@@ -6267,6 +6267,9 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
 
 // ========【寵物畫布圖層】 設定 - 不混入人物節點、選取及關係線路由 ========
 function paintPetLayer() {
+  // 只有 Layout 更新才重建寵物 DOM；拖曳人物卡的每一幀不重建寵物頭像。
+  if (lastPaintedPetLayout === layoutCache?.petLayout) return;
+  lastPaintedPetLayout = layoutCache?.petLayout;
   if (!layoutCache?.petLayout?.cards?.length) {
     petLayer.replaceChildren();
     return;
@@ -6395,6 +6398,7 @@ function composeScenePlan() {
 // ========【Scene Incremental Pipeline】 設定 - Layout / Nodes / Edges 由 Scene 單獨失效 ========
 const RENDER_DIRTY = Object.freeze({ layout:1, nodes:2, edges:4 });
 let layoutCache = null;
+let lastPaintedPetLayout = null;
 let renderDirtyMask = 0;
 let renderInvalidationRaf = 0;
 let relationshipPreviewPending = false;
