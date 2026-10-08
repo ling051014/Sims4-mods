@@ -1014,6 +1014,15 @@
       };
     }
 
+    // ========【資料序列化】固定使用目前的 canonical database；Blob 留給 Assets 備份 ========
+    function serializeDatabase() {
+      return JSON.stringify(activeData);
+    }
+
+    function snapshotDatabase() {
+      return JSON.parse(serializeDatabase());
+    }
+
     function getData() {
       return activeData;
     }
@@ -2966,6 +2975,8 @@
 
     return Object.freeze({
       getData,
+      serializeDatabase,
+      snapshotDatabase,
       normalizeDatabase,
       replaceDatabase,
       getSim:simById,
