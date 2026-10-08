@@ -8068,8 +8068,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background-size:24px 24px;
 }
 .skeleton-block,
-.skeleton-person,
-.skeleton-node {
+.skeleton-person {
     display:block;
     background:
       linear-gradient(
@@ -8164,47 +8163,112 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 .skeleton-person-copy .skeleton-line:first-child { width:70%; }
 .skeleton-person-copy .skeleton-line.short { width:44%; }
+/* 骨架工具列與正式 .canvas-toolbar 同樣固定於畫布右上方。 */
 .skeleton-canvas-toolbar {
     position:absolute;
     top:12px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:1;
-    display:flex;
-    gap:7px;
-    padding:6px;
-    border:1px solid var(--border-default);
-    border-radius:9px;
-    background:color-mix(in srgb,var(--surface-card) 94%,transparent);
-}
-.skeleton-tool { width:74px; height:30px; border-radius:6px; }
-.skeleton-node {
-    position:absolute;
-    width:176px;
-    height:142px;
-    border-radius:10px;
-}
-.skeleton-node-a { left:18%; top:22%; }
-.skeleton-node-b { left:54%; top:38%; }
-.skeleton-node-c { left:31%; top:62%; }
-.skeleton-zoom {
-    position:absolute;
-    right:16px;
-    bottom:16px;
+    right:12px;
+    z-index:2;
     display:flex;
     align-items:center;
-    gap:6px;
-    padding:6px;
+    gap:1px;
+    max-width:calc(100% - 24px);
+    padding:4px;
     border:1px solid var(--border-default);
-    border-radius:9px;
+    border-radius:6px;
+    background:color-mix(in srgb,var(--surface-card) 94%,transparent);
+}
+.skeleton-tool {
+    flex:0 1 auto;
+    min-width:0;
+    height:30px;
+    border-radius:4px;
+}
+.skeleton-tool-mode { width:89px; }
+.skeleton-tool-layout { width:88px; }
+.skeleton-tool-label { width:91px; }
+.skeleton-tool-lock { width:88px; }
+.skeleton-canvas-tool-divider {
+    flex:0 0 1px;
+    height:18px;
+    margin:0 3px;
+    background:var(--border-default);
+}
+/* 父母兩張、子女三張；每排都以畫布中心線對稱。 */
+.skeleton-family-tree {
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:min(620px,calc(100% - 48px));
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:54px;
+    transform:translate(-50%,-50%);
+}
+.skeleton-tree-row {
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:26px;
+}
+.skeleton-node {
+    flex:0 1 152px;
+    min-width:0;
+    height:138px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:14px 10px;
+    border:1px solid var(--border-default);
+    border-radius:10px;
     background:var(--surface-card);
 }
-.skeleton-zoom-button { width:28px; height:28px; border-radius:6px; }
+.skeleton-node-avatar {
+    width:48px;
+    height:48px;
+    flex:0 0 48px;
+    border-radius:50%;
+}
+.skeleton-node-line {
+    width:72%;
+    height:10px;
+    border-radius:4px;
+}
+.skeleton-node-line.short {
+    width:46%;
+    height:8px;
+}
+/* 正式 .canvas-zoom 位於畫布底部中央，骨架亦採用同一定位。 */
+.skeleton-zoom {
+    position:absolute;
+    left:50%;
+    bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:2px;
+    height:34px;
+    padding:3px 5px;
+    border:1px solid var(--border-default);
+    border-radius:6px;
+    background:var(--surface-card);
+    transform:translateX(-50%);
+}
+.skeleton-zoom-button { width:27px; height:27px; border-radius:4px; }
 .skeleton-zoom-value { width:42px; height:10px; border-radius:4px; }
 
 @keyframes genealogy-skeleton-shimmer {
     from { background-position:200% 0; }
     to { background-position:-20% 0; }
+}
+@media (max-width:980px) {
+    .skeleton-tool-mode,
+    .skeleton-tool-layout,
+    .skeleton-tool-label,
+    .skeleton-tool-lock { width:30px; flex:0 0 30px; }
 }
 @media (max-width:720px) {
     .app-skeleton-brand-area { display:none; }
@@ -8218,24 +8282,31 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     .skeleton-action-wide { display:none; }
     .app-skeleton-sidebar { display:none; }
     .skeleton-canvas-toolbar {
-        top:10px;
-        max-width:calc(100% - 20px);
-        overflow:hidden;
+        top:8px;
+        right:8px;
+        max-width:calc(100% - 16px);
     }
-    .skeleton-tool { width:56px; }
+    .skeleton-family-tree {
+        width:calc(100% - 28px);
+        gap:38px;
+    }
+    .skeleton-tree-row { gap:12px; }
     .skeleton-node {
-        width:132px;
         height:112px;
+        padding:10px 5px;
+        gap:8px;
     }
-    .skeleton-node-a { left:8%; top:24%; }
-    .skeleton-node-b { left:52%; top:42%; }
-    .skeleton-node-c { left:22%; top:64%; }
+    .skeleton-node-avatar {
+        width:36px;
+        height:36px;
+        flex-basis:36px;
+    }
+    .skeleton-zoom { bottom:8px; }
 }
 @media (prefers-reduced-motion:reduce) {
     .app-skeleton { transition:none; }
     .skeleton-block,
-    .skeleton-person,
-    .skeleton-node {
+    .skeleton-person {
         animation:none;
         background:color-mix(in srgb,var(--border-default) 68%,transparent);
     }

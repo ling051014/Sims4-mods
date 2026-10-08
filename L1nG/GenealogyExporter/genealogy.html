@@ -6,7 +6,7 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261008-icon-bundle-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261008-skeleton-filter-center-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261008-skeleton-canvas-align-r1">
     </head>
     <body data-theme="ling">
 
@@ -90,14 +90,43 @@
                 </aside>
                 <main class="app-skeleton-canvas">
                     <div class="skeleton-canvas-toolbar">
-                        <span class="skeleton-block skeleton-tool"></span>
-                        <span class="skeleton-block skeleton-tool"></span>
-                        <span class="skeleton-block skeleton-tool"></span>
-                        <span class="skeleton-block skeleton-tool"></span>
+                        <span class="skeleton-block skeleton-tool skeleton-tool-mode"></span>
+                        <span class="skeleton-block skeleton-tool skeleton-tool-layout"></span>
+                        <span class="skeleton-canvas-tool-divider"></span>
+                        <span class="skeleton-block skeleton-tool skeleton-tool-label"></span>
+                        <span class="skeleton-block skeleton-tool skeleton-tool-lock"></span>
                     </div>
-                    <span class="skeleton-node skeleton-node-a"></span>
-                    <span class="skeleton-node skeleton-node-b"></span>
-                    <span class="skeleton-node skeleton-node-c"></span>
+                    <div class="skeleton-family-tree">
+                        <div class="skeleton-tree-row skeleton-tree-parents">
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                        </div>
+                        <div class="skeleton-tree-row skeleton-tree-children">
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                            <span class="skeleton-node">
+                                <span class="skeleton-block skeleton-node-avatar"></span>
+                                <span class="skeleton-block skeleton-node-line"></span>
+                                <span class="skeleton-block skeleton-node-line short"></span>
+                            </span>
+                        </div>
+                    </div>
                     <div class="skeleton-zoom">
                         <span class="skeleton-block skeleton-zoom-button"></span>
                         <span class="skeleton-block skeleton-zoom-value"></span>
