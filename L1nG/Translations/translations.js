@@ -10,9 +10,14 @@ const emptyState = document.getElementById("translationEmpty");
 
 let activeFilter = "all";
 let linkedTargetCard = null;
+let linkedTargetTimeout = null;
 
 // ========【跨頁漢化定位】 設定 - 僅回應有效卡片錨點，不更動一般分類／搜尋行為 ========
 function clearLinkedTarget() {
+    if (linkedTargetTimeout !== null) {
+        window.clearTimeout(linkedTargetTimeout);
+        linkedTargetTimeout = null;
+    }
     if (!linkedTargetCard) return;
 
     linkedTargetCard.classList.remove("is-linked-target");
@@ -61,6 +66,10 @@ function revealLinkedTranslation() {
         window.requestAnimationFrame(() => {
             if (linkedTargetCard === target && !target.hidden) {
                 target.scrollIntoView({ behavior:"instant", block:"start" });
+                // 只短暫提示；計時到後完整還原原本卡片外觀。
+                linkedTargetTimeout = window.setTimeout(() => {
+                    if (linkedTargetCard === target) clearLinkedTarget();
+                }, 1600);
             }
         });
     });

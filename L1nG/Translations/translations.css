@@ -462,11 +462,8 @@ section[id] {
 /* ========【模組整理深層連結提示】 設定 - 對應卡片使用專區紫色，避免與警告狀態混淆 ======== */
 .translation-card.is-linked-target {
     position:relative;
-    border-color:var(--translation);
-    background:linear-gradient(180deg, rgba(127,115,180,.085), rgba(255,255,255,.98) 27%);
-    box-shadow:0 0 0 3px rgba(127,115,180,.15), 0 15px 36px rgba(98,87,143,.12);
     scroll-margin-top:94px;
-    animation:translation-target-arrival 1.15s ease-out 1;
+    animation:translation-target-flash 1.6s ease-in-out 1;
 }
 
 .translation-target-hint {
@@ -485,15 +482,30 @@ section[id] {
     letter-spacing:.02em;
     line-height:1.25;
     pointer-events:none;
+    animation:translation-target-hint-flash 1.6s ease-in-out 1 both;
 }
 
-@keyframes translation-target-arrival {
-    from { box-shadow:0 0 0 7px rgba(127,115,180,.25), 0 15px 36px rgba(98,87,143,.12); }
-    to { box-shadow:0 0 0 3px rgba(127,115,180,.15), 0 15px 36px rgba(98,87,143,.12); }
+@keyframes translation-target-flash {
+    0%,100% { box-shadow:0 0 0 0 rgba(127,115,180,0); }
+    20%,48% {
+        border-color:var(--translation);
+        background-color:rgba(244,240,252,.98);
+        box-shadow:0 0 0 5px rgba(127,115,180,.22), 0 12px 30px rgba(98,87,143,.13);
+    }
+}
+
+@keyframes translation-target-hint-flash {
+    0%,100% { opacity:0; transform:translateY(-5px); }
+    18%,52% { opacity:1; transform:translateY(0); }
 }
 
 @media (prefers-reduced-motion:reduce) {
-    .translation-card.is-linked-target { animation:none; }
+    .translation-card.is-linked-target {
+        animation:none;
+        border-color:var(--translation);
+        box-shadow:0 0 0 3px rgba(127,115,180,.17);
+    }
+    .translation-target-hint { animation:none; }
 }
 
 .card-top,
