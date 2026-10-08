@@ -2,6 +2,432 @@
 (function (global) {
   'use strict';
 
+  // ========【頂欄／側欄介面】UI 模組管理側欄寬度、選單與提示浮層 ========
+  function createChromeController({ dom = {}, constants = {}, helpers = {} } = {}) {
+    const { sidebar, sidebarBackdrop, menuToggle, sidebarResizer } = dom;
+    const { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_DEFAULT_WIDTH,
+      SIDEBAR_WIDTH_KEY, FAMILY_PANEL_COLLAPSED_KEY } = constants;
+    const { uiText, iconSvg, scheduleFamilyNameInputWidthSync,
+      createDebouncedCallback } = helpers;
+    const $ = id => document.getElementById(id);
+
+    function openSidebar() {
+      if (!sidebar) return;
+      sidebar.classList.add('open');
+      sidebarBackdrop?.classList.add('show');
+    }
+    function closeSidebar() {
+      if (!sidebar) return;
+      sidebar.classList.remove('open');
+      sidebarBackdrop?.classList.remove('show');
+    }
+    function setFamilyPanelCollapsed(collapsed, { persist = true } = {}) {
+      const next = !!collapsed;
+      document.body.classList.toggle('family-panel-collapsed', next);
+      const btn = $('familyPanelCollapseBtn');
+      if (btn) {
+        btn.innerHTML = iconSvg(next ? 'chevron-right' : 'chevron-left');
+        btn.title = uiText(next ? '展開家族欄' : '收合家族欄');
+        btn.setAttribute('aria-label', btn.title);
+      }
+      if (persist) { try { localStorage.setItem(FAMILY_PANEL_COLLAPSED_KEY, next ? '1' : '0'); } catch (_) {} }
+    }
+    function restoreFamilyPanelCollapsed() {
+      let collapsed = false;
+      try { collapsed = localStorage.getItem(FAMILY_PANEL_COLLAPSED_KEY) === '1'; } catch (_) {}
+      setFamilyPanelCollapsed(collapsed, { persist:false });
+    }
+    menuToggle.onclick = () => {
+      if (window.innerWidth <= 720) {
+        if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+      } else {
+        setFamilyPanelCollapsed(!document.body.classList.contains('family-panel-collapsed'));
+      }
+    };
+    sidebarBackdrop.onclick = closeSidebar;
+    $('familyPanelCollapseBtn')?.addEventListener('click', () => setFamilyPanelCollapsed(true));
+
+    // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
+    function restoreAppMenuPortal(menu) {
+      const popover =
+        menu?._bodyPortalPopover;
+
+      if (!popover) return;
+
+      popover.classList.remove(
+        'ui-menu-body-portal'
+      );
+
+      popover.style.removeProperty('top');
+      popover.style.removeProperty('left');
+      popover.style.removeProperty('right');
+      popover.style.removeProperty('bottom');
+
+      menu.appendChild(popover);
+      menu._bodyPortalPopover = null;
+    }
+
+    function positionAppMenuPortal(
+      menu,
+      trigger,
+      popover
+    ) {
+      const margin = 8;
+      const gap = 4;
+      const triggerRect =
+        trigger.getBoundingClientRect();
+
+      document.body.appendChild(popover);
+
+      popover.classList.add(
+        'ui-menu-body-portal'
+      );
+
+      const popoverRect =
+        popover.getBoundingClientRect();
+
+      const left =
+        Math.max(
+          margin,
+          Math.min(
+            triggerRect.right -
+              popoverRect.width,
+            window.innerWidth -
+              popoverRect.width -
+              margin
+          )
+        );
+
+      const belowTop =
+        triggerRect.bottom + gap;
+
+      const aboveTop =
+        triggerRect.top -
+        popoverRect.height -
+        gap;
+
+      const top =
+        belowTop +
+          popoverRect.height <=
+            window.innerHeight -
+              margin
+          ? belowTop
+          : Math.max(
+              margin,
+              aboveTop
+            );
+
+      popover.style.left =
+        Math.round(left) + 'px';
+
+      popover.style.top =
+        Math.round(top) + 'px';
+
+      popover.style.right = 'auto';
+      popover.style.bottom = 'auto';
+
+      menu._bodyPortalPopover =
+        popover;
+    }
+
+    function closeAppMenu(menu) {
+      if (!menu) return;
+
+      menu.classList.remove('open');
+
+      menu
+        .querySelector(
+          ':scope > .ui-menu-trigger'
+        )
+        ?.setAttribute(
+          'aria-expanded',
+          'false'
+        );
+
+      restoreAppMenuPortal(menu);
+    }
+
+    function closeAppMenus(except = null) {
+      document
+        .querySelectorAll(
+          '.ui-menu.open'
+        )
+        .forEach(menu => {
+          if (menu === except) return;
+          closeAppMenu(menu);
+        });
+    }
+
+    let _appMenuGlobalBound = false;
+
+    function setupAppMenus() {
+      document
+        .querySelectorAll('.ui-menu')
+        .forEach(menu => {
+          const trigger =
+            menu.querySelector(
+              ':scope > .ui-menu-trigger'
+            );
+
+          if (
+            !trigger ||
+            trigger.dataset.menuBound === '1'
+          ) {
+            return;
+          }
+
+          trigger.dataset.menuBound = '1';
+
+          trigger.addEventListener(
+            'click',
+            e => {
+              e.preventDefault();
+              e.stopPropagation();
+
+              const willOpen =
+                !menu.classList.contains(
+                  'open'
+                );
+
+              closeAppMenus(menu);
+
+              if (!willOpen) {
+                closeAppMenu(menu);
+                return;
+              }
+
+              menu.classList.add('open');
+
+              trigger.setAttribute(
+                'aria-expanded',
+                'true'
+              );
+
+              if (
+                menu.dataset.menuPortal ===
+                'body'
+              ) {
+                const popover =
+                  menu.querySelector(
+                    ':scope > .ui-menu-popover'
+                  );
+
+                if (popover) {
+                  positionAppMenuPortal(
+                    menu,
+                    trigger,
+                    popover
+                  );
+                }
+              }
+            }
+          );
+
+          menu
+            .querySelectorAll(
+              '.ui-menu-item'
+            )
+            .forEach(item =>
+              item.addEventListener(
+                'click',
+                () => {
+                  setTimeout(
+                    () => closeAppMenus(),
+                    0
+                  );
+                }
+              )
+            );
+        });
+
+      if (!_appMenuGlobalBound) {
+        _appMenuGlobalBound = true;
+
+        document.addEventListener(
+          'click',
+          e => {
+            if (
+              !e.target.closest?.(
+                '.ui-menu, .ui-menu-body-portal'
+              )
+            ) {
+              closeAppMenus();
+            }
+          }
+        );
+
+        document.addEventListener(
+          'keydown',
+          e => {
+            if (e.key === 'Escape') {
+              closeAppMenus();
+            }
+          }
+        );
+
+        window.addEventListener(
+          'resize',
+          () => closeAppMenus()
+        );
+      }
+    }
+
+    // ========【共用說明 Tooltip】 設定 - 掛到 body，避免被 modal overflow 裁切 ========
+    function setupHelpTooltipPortal() {
+      if ($('globalHelpTooltip')) return;
+      const tip = document.createElement('div');
+      tip.id = 'globalHelpTooltip';
+      tip.setAttribute('role','tooltip');
+      document.body.appendChild(tip);
+      let active = null;
+      const place = () => {
+        if (!active || !tip.classList.contains('show')) return;
+        const r = active.getBoundingClientRect();
+        const tr = tip.getBoundingClientRect();
+        const margin = 10, gap = 8;
+        const canTop = r.top >= tr.height + gap + margin;
+        const side = canTop ? 'top' : 'bottom';
+        let left = r.left + r.width / 2 - tr.width / 2;
+        left = Math.max(margin, Math.min(left, window.innerWidth - tr.width - margin));
+        const top = side === 'top' ? r.top - tr.height - gap : r.bottom + gap;
+        const arrowX = Math.max(9, Math.min(tr.width - 9, r.left + r.width / 2 - left));
+        tip.dataset.side = side;
+        tip.style.left = `${Math.round(left)}px`; tip.style.top = `${Math.round(top)}px`;
+        tip.style.setProperty('--tooltip-arrow-x', `${Math.round(arrowX)}px`);
+      };
+      const show = target => {
+        const text = target?.dataset?.tooltip; if (!text) return;
+        active = target; tip.textContent = text; tip.classList.add('show');
+        requestAnimationFrame(place);
+      };
+      const hide = target => { if (!target || target === active) { tip.classList.remove('show'); active = null; } };
+      document.addEventListener('mouseover', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) show(t); });
+      document.addEventListener('mouseout', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t && !t.contains(e.relatedTarget)) hide(t); });
+      document.addEventListener('focusin', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) show(t); });
+      document.addEventListener('focusout', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) hide(t); });
+      document.addEventListener('click', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) { e.stopPropagation(); active===t && tip.classList.contains('show') ? hide(t) : show(t); } else hide(); });
+      window.addEventListener('resize', place);
+      document.addEventListener('scroll', place, true);
+    }
+
+    // ========【側邊欄寬度】 設定 - 桌面版拖曳調整並保存寬度 ========
+    function getSidebarMaxWidth() {
+      // 避免側邊欄在較窄桌面畫面佔掉過多族譜工作區
+      return Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, Math.floor(window.innerWidth * 0.42)));
+    }
+
+    function clampSidebarWidth(value) {
+      const width = Number(value);
+      if (!Number.isFinite(width)) return SIDEBAR_DEFAULT_WIDTH;
+      return Math.max(SIDEBAR_MIN_WIDTH, Math.min(getSidebarMaxWidth(), Math.round(width)));
+    }
+
+    function applySidebarWidth(value, { persist = true } = {}) {
+      const width = clampSidebarWidth(value);
+      document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+      scheduleFamilyNameInputWidthSync();
+      if (sidebarResizer) sidebarResizer.setAttribute('aria-valuenow', String(width));
+      if (persist) {
+        try { localStorage.setItem(SIDEBAR_WIDTH_KEY, String(width)); } catch (_) {}
+      }
+      return width;
+    }
+
+    function restoreSidebarWidth() {
+      let saved = SIDEBAR_DEFAULT_WIDTH;
+      try { saved = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY)) || SIDEBAR_DEFAULT_WIDTH; } catch (_) {}
+      applySidebarWidth(saved, { persist: false });
+    }
+
+    restoreSidebarWidth();
+
+    if (sidebarResizer) {
+      sidebarResizer.setAttribute('aria-valuemin', String(SIDEBAR_MIN_WIDTH));
+      sidebarResizer.setAttribute('aria-valuemax', String(SIDEBAR_MAX_WIDTH));
+
+      sidebarResizer.addEventListener('pointerdown', e => {
+        if (window.innerWidth <= 720 || document.body.classList.contains('family-panel-collapsed')) return;
+        e.preventDefault();
+        const startX = e.clientX;
+        const startWidth = sidebar.getBoundingClientRect().width;
+        document.body.classList.add('sidebar-resizing');
+        try { sidebarResizer.setPointerCapture(e.pointerId); } catch (_) {}
+
+        const onMove = ev => {
+          applySidebarWidth(startWidth + (ev.clientX - startX));
+        };
+
+        const onUp = () => {
+          sidebarResizer.removeEventListener('pointermove', onMove);
+          sidebarResizer.removeEventListener('pointerup', onUp);
+          sidebarResizer.removeEventListener('pointercancel', onUp);
+          document.body.classList.remove('sidebar-resizing');
+        };
+
+        sidebarResizer.addEventListener('pointermove', onMove);
+        sidebarResizer.addEventListener('pointerup', onUp);
+        sidebarResizer.addEventListener('pointercancel', onUp);
+      });
+
+      sidebarResizer.addEventListener('dblclick', () => {
+        applySidebarWidth(SIDEBAR_DEFAULT_WIDTH);
+      });
+
+      sidebarResizer.addEventListener('keydown', e => {
+        if (window.innerWidth <= 720) return;
+        const current = sidebar.getBoundingClientRect().width;
+        const step = e.shiftKey ? 20 : 8;
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          applySidebarWidth(current - step);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          applySidebarWidth(current + step);
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          applySidebarWidth(SIDEBAR_MIN_WIDTH);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          applySidebarWidth(getSidebarMaxWidth());
+        }
+      });
+    }
+
+    window.addEventListener('resize', createDebouncedCallback(() => {
+      if (window.innerWidth > 720) {
+        const current = sidebar.getBoundingClientRect().width;
+        const clamped = clampSidebarWidth(current);
+        if (Math.abs(clamped - current) > 0.5) applySidebarWidth(clamped);
+      }
+    }, 80));
+
+
+
+    return Object.freeze({
+      openSidebar,
+      closeSidebar,
+      setFamilyPanelCollapsed,
+      restoreFamilyPanelCollapsed,
+      setupAppMenus,
+      closeAppMenus,
+      setupHelpTooltipPortal,
+      getSidebarMaxWidth,
+      clampSidebarWidth,
+      applySidebarWidth,
+      restoreSidebarWidth
+    });
+  }
+
+  // 各視窗自行關閉，UI 只選擇當前最上層可見的視窗。
+  function closeTopmostDialog(lifecycles) {
+    for (const lifecycle of lifecycles || []) {
+      if (!lifecycle.dialog || !lifecycle.dialog.classList.contains('show')) continue;
+      lifecycle.close();
+      return true;
+    }
+    return false;
+  }
+
   function create({ helpers = {} } = {}) {
     const uiText = typeof helpers.uiText === 'function' ? helpers.uiText : value => String(value ?? '');
     const esc = typeof helpers.esc === 'function' ? helpers.esc : value => String(value ?? '');
@@ -1503,5 +1929,5 @@
     });
   }
 
-  global.L1nGGenealogyUI = Object.freeze({ create });
+  global.L1nGGenealogyUI = Object.freeze({ create, createChromeController, closeTopmostDialog });
 })(window);
