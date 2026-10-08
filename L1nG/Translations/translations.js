@@ -53,25 +53,46 @@ function revealLinkedTranslation() {
 
     clearLinkedTarget();
     linkedTargetCard = target;
-    target.classList.add("visible", "is-linked-target");
 
-    const hint = document.createElement("span");
-    hint.className = "translation-target-hint";
-    hint.setAttribute("role", "status");
-    hint.textContent = "已定位此漢化";
-    target.appendChild(hint);
-
-    // 待分類、卡片可見狀態和版面完成後，再避開固定頂條定位。
-    window.requestAnimationFrame(() => {
+    // 必須等全站骨架屏離場才播放，避免高亮在遮罩後方結束。
+    const startHighlight = () => {
+        if (linkedTargetCard !== target || target.hidden) return;
+        target.scrollIntoView({ behavior:"instant", block:"start" });
         window.requestAnimationFrame(() => {
-            if (linkedTargetCard === target && !target.hidden) {
-                target.scrollIntoView({ behavior:"instant", block:"start" });
-                // 只短暫提示；計時到後完整還原原本卡片外觀。
-                linkedTargetTimeout = window.setTimeout(() => {
-                    if (linkedTargetCard === target) clearLinkedTarget();
-                }, 1600);
-            }
+            if (linkedTargetCard !== target) return;
+            target.classList.add("visible", "is-linked-target");
+            const hint = document.createElement("span");
+            hint.className = "translation-target-hint";
+            hint.setAttribute("role", "status");
+            hint.textContent = "已定位此漢化";
+            target.appendChild(hint);
+            linkedTargetTimeout = window.setTimeout(() => {
+                if (linkedTargetCard === target) clearLinkedTarget();
+            }, 1600);
         });
+    };
+
+    window.requestAnimationFrame(() => {
+        const skeleton = document.querySelector(".l1ng-site-skeleton");
+        if (!skeleton || skeleton.classList.contains("is-hidden")) {
+            startHighlight();
+            return;
+        }
+        let started = false;
+        let fallback = null;
+        const revealOnce = () => {
+            if (started) return;
+            started = true;
+            observer.disconnect();
+            window.clearTimeout(fallback);
+            window.requestAnimationFrame(startHighlight);
+        };
+        const observer = new MutationObserver(() => {
+            if (skeleton.classList.contains("is-hidden")) revealOnce();
+        });
+        observer.observe(skeleton, { attributes:true, attributeFilter:["class"] });
+        // 骨架異常未結束時的保底處理，不讓定位提示永遠無法出現。
+        fallback = window.setTimeout(revealOnce, 1800);
     });
 }
 
