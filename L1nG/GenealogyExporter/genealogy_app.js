@@ -80,12 +80,7 @@ const DEFAULT_CARD_EDIT_SETTINGS = Object.freeze({
 });
 
 
-// ========【圖片處理規則】 設定 - 依用途自動最佳化，不提供玩家畫質檔位 ========
-const IMAGE_PROCESSING_POLICY = Object.freeze({
-  avatar:Object.freeze({ max:384, webp:0.87, jpeg:0.84 }),
-  petAvatar:Object.freeze({ max:384, webp:0.87, jpeg:0.84 }),
-  gallery:Object.freeze({ max:720, webp:0.85, jpeg:0.82 })
-});
+// 圖片處理政策集中由 Assets 管理。
 const SUPPORTED_IMAGE_MIME_TYPES = Object.freeze(['image/jpeg','image/png','image/webp']);
 const SUPPORTED_IMAGE_EXTENSIONS = Object.freeze(['jpg','jpeg','png','webp']);
 const personEditor = window.L1nGGenealogyPersonEditor;
@@ -109,8 +104,6 @@ const THEME_PRESETS = [
   { id:'graphite',   name:'中性石墨',   grad:'linear-gradient(120deg, #111315 0%, #202428 100%)' }
 ];
 
-const BG_MAX = 1920;
-const BG_QUALITY = 0.72;
 const MAX_TAGS = 5;
 const ORIGINAL_WARN_KB = 2048;
 
@@ -6401,9 +6394,7 @@ const genealogySaveCoordinator =
     idleTimeout:700,
 
     serialize:() =>
-      JSON.stringify(
-        currentGenealogyData()
-      ),
+      genealogyStore.serializeDatabase(),
 
     write:serialized =>
       localStorage.setItem(
@@ -8599,7 +8590,7 @@ function closeAppearancePanel() {
 }
 
 async function replaceCanvasBackground(file) {
-  const result = await compressBgImage(file);
+  const result = await assetStore.optimizeForUsage(validateSupportedImageFile(file), 'background');
 
   bgSettings.image = await saveImageAsset(
     result.blob,
@@ -8665,22 +8656,6 @@ async function removeCanvasBackground() {
   await updateStorageInfo();
 }
 
-async function compressBgImage(file) {
-  validateSupportedImageFile(file);
-  const optimized = await assetStore.optimizeImage(file, {
-    maxDimension:BG_MAX,
-    webpQuality:BG_QUALITY,
-    jpegQuality:BG_QUALITY,
-    preserveAlpha:'auto'
-  });
-
-  return {
-    blob:optimized.blob,
-    width:optimized.width,
-    height:optimized.height,
-    sizeKB:Math.round(optimized.byteSize / 1024)
-  };
-}
 function formatStorageSize(byteSize) {
   const bytes = Math.max(0, Number(byteSize) || 0);
   if (bytes < 1024) return bytes + ' B';
@@ -9033,7 +9008,7 @@ $('cleanupBtn').onclick = async () => {
     '清理中',
     async () => {
       const n =
-        await cleanupUnusedImages();
+        await assetStore.cleanupUnusedAssets(currentGenealogyData(), bgSettings);
 
       uiToast(
         n > 0
@@ -9329,73 +9304,12 @@ function cleanTraitDisplayText(value) {
 }
 
 // ========【L1nG v1 資料載入整理】 設定 - canonical shape 由 Genealogy Store 唯一負責 ========
-function collectReferencedAssetIds(targetDb = currentGenealogyData(), targetBg = bgSettings, { strict = false } = {}) {
-  const used = new Set();
-
-  const add = (ref, label) => {
-    if (!ref) return;
-    if (isAssetId(ref)) {
-      used.add(ref);
-      return;
-    }
-    if (strict) {
-      throw new Error(`${label || '圖片'}使用了目前不支援的舊圖片格式。`);
-    }
-  };
-
-  Object.values(targetDb?.sims || {}).forEach(sim => {
-    add(sim.avatar, '人物目前頭像');
-    add(sim.gameAvatar, '人物遊戲頭像');
-    add(sim.customAvatar, '人物自訂頭像');
-    (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
-    (sim.pets || []).forEach(pet => add(pet.avatar, '寵物頭像'));
-  });
-
-  (targetDb?.families || []).forEach(fam => add(fam.coverImage, '家族封面'));
-  (targetDb?.meta?.unassignedPets || []).forEach(pet => add(pet.avatar, '未分配寵物頭像'));
-  add(targetBg?.image, '背景圖片');
-
-  return used;
-}
-
-function clearUnsupportedImageRefs(targetDb = currentGenealogyData(), targetBg = bgSettings) {
-  let cleared = 0;
-
-  const clean = (obj, key, emptyValue = null) => {
-    if (!obj || !obj[key] || isAssetId(obj[key])) return;
-    obj[key] = emptyValue;
-    cleared++;
-  };
-
-  Object.values(targetDb?.sims || {}).forEach(sim => {
-    clean(sim, 'avatar', null);
-    clean(sim, 'gameAvatar', null);
-    clean(sim, 'customAvatar', null);
-    (sim.gallery || []).forEach(item => clean(item, 'image', ''));
-    (sim.pets || []).forEach(pet => clean(pet, 'avatar', null));
-  });
-
-  (targetDb?.families || []).forEach(fam => clean(fam, 'coverImage', null));
-  (targetDb?.meta?.unassignedPets || []).forEach(pet => clean(pet, 'avatar', null));
-  clean(targetBg, 'image', null);
-
-  return cleared;
-}
-
-async function cleanupUnusedImages() {
-  const used = collectReferencedAssetIds();
-  const removed = await assetStore.garbageCollect(used);
-  if (removed) console.log(`[GC] 清理了 ${removed} 張未使用的圖片資產`);
-  return removed;
-}
-
-let _gcTimer = null;
+// 圖片清理排程交由 Assets；每次真正執行時讀取最新資料。
 function scheduleGC() {
-  if (_gcTimer) return;
-  _gcTimer = setTimeout(async () => {
-    _gcTimer = null;
-    await cleanupUnusedImages();
-  }, 5000);
+  assetStore.scheduleGarbageCollect(() => ({
+    database:currentGenealogyData(),
+    background:bgSettings
+  }));
 }
 
 function getRelInfoByKey(
@@ -9435,48 +9349,10 @@ function getRelInfoByKey(
 
 // 畫布關係標籤的量測與 SVG 排版，改由 genealogy_scene.js 負責。
 
+// 人物編輯器保留目前的回呼介面，但壓縮政策與執行由 Assets 負責。
 async function compressImage(file, kind = 'sim') {
   validateSupportedImageFile(file);
-  const policy =
-    kind === 'pet'
-      ? IMAGE_PROCESSING_POLICY.petAvatar
-      : IMAGE_PROCESSING_POLICY.avatar;
-
-  const optimized = await assetStore.optimizeImage(file, {
-    maxDimension:policy.max,
-    webpQuality:policy.webp,
-    jpegQuality:policy.jpeg,
-    preserveAlpha:'auto'
-  });
-
-  return {
-    blob:optimized.blob,
-    width:optimized.width,
-    height:optimized.height,
-    sizeKB:Math.round(optimized.byteSize / 1024),
-    isOriginal:optimized.usedOriginal
-  };
-}
-
-async function compressGalleryImage(file) {
-  validateSupportedImageFile(file);
-  const policy = IMAGE_PROCESSING_POLICY.gallery;
-
-  const optimized = await assetStore.optimizeImage(file, {
-    maxDimension:policy.max,
-    webpQuality:policy.webp,
-    jpegQuality:policy.jpeg,
-    preserveAlpha:'auto',
-    keepOriginal:false
-  });
-
-  return {
-    blob:optimized.blob,
-    width:optimized.width,
-    height:optimized.height,
-    sizeKB:Math.round(optimized.byteSize / 1024),
-    isOriginal:optimized.usedOriginal
-  };
+  return assetStore.optimizeForUsage(file, kind === 'pet' ? 'petAvatar' : 'avatar');
 }
 
 function getVisibleIds(familyId) {
@@ -10908,7 +10784,7 @@ const lifePhotoWorkspace = {
   },
 
   async prepareFile(file, { openEditor = false } = {}) {
-    const result = await compressGalleryImage(file);
+    const result = await assetStore.optimizeForUsage(validateSupportedImageFile(file), 'gallery');
 
     if (
       result.isOriginal &&
@@ -14654,7 +14530,7 @@ const familyCoverInput = $('familyCoverInput');
 if (familyCoverInput) familyCoverInput.onchange = async e => {
   const file = e.target.files?.[0]; e.target.value=''; if (!file) return;
   try {
-    const result = await compressBgImage(file);
+    const result = await assetStore.optimizeForUsage(validateSupportedImageFile(file), 'background');
     const fam = currentFamily();
     const coverImage = await saveImageAsset(result.blob, {
       width:result.width,
@@ -16923,9 +16799,9 @@ $('familyMemberRemoveConfirmBtn').onclick = event => {
 
 async function exportJSON() {
   try {
-    const exportDb = JSON.parse(JSON.stringify(currentGenealogyData()));
+    const exportDb = genealogyStore.snapshotDatabase();
     const exportBg = { ...bgSettings };
-    const assetIds = collectReferencedAssetIds(exportDb, exportBg, { strict:true });
+    const assetIds = assetStore.collectReferencedAssetIds(exportDb, exportBg, { strict:true });
     const assets = await assetStore.serializeAssets(assetIds);
 
     const payload = {
@@ -17453,7 +17329,7 @@ async function importJSON(file) {
 
     const preparedResult = prepareDatabase(rawDb);
     const nextDb = preparedResult.prepared;
-    const requiredAssets = collectReferencedAssetIds(nextDb, incomingBg, { strict:true });
+    const requiredAssets = assetStore.collectReferencedAssetIds(nextDb, incomingBg, { strict:true });
     const serializedAssets = raw.assets || {};
 
     for (const id of requiredAssets) {
@@ -18860,7 +18736,7 @@ function initializeGenealogyWorkspace() {
   restoreCanvasBackground();
 
   const clearedImageRefs =
-    clearUnsupportedImageRefs(
+    assetStore.clearUnsupportedImageRefs(
       initialDatabase,
       bgSettings
     );
