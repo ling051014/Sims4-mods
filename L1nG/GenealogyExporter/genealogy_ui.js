@@ -418,6 +418,394 @@
     });
   }
 
+  // ========【共用對話視窗】UI 管理確認、提示、輸入及載入按鈕 ========
+  function createDialogController({ uiText = value => String(value ?? ''), esc = value => String(value ?? '') } = {}) {
+    const $ = id => document.getElementById(id);
+    let _uiDialogResolve = null;
+    let _uiDialogMode = 'alert';
+
+    function closeUiDialog(result = null) {
+      const overlay = $('confirmationDialog');
+      if (!overlay || !overlay.classList.contains('show')) return;
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden', 'true');
+      const resolve = _uiDialogResolve;
+      _uiDialogResolve = null;
+      if (resolve) resolve(result);
+    }
+
+    function openUiDialog({
+      title = '提示',
+      message = '',
+      mode = 'alert',
+      kind = 'default',
+      defaultValue = '',
+      confirmText = '確定',
+      cancelText = '取消',
+      secondaryText = '',
+      secondaryValue = null,
+      secondaryKind = 'default',
+      secondaryHint = '',
+      confirmHint = '',
+      confirmValue = true,
+      cancelValue = mode === 'confirm' ? false : null
+    } = {}) {
+      const overlay = $('confirmationDialog');
+      const dialog = $('uiDialog');
+      const titleEl = $('uiDialogTitle');
+      const messageEl = $('uiDialogMessage');
+      const inputEl = $('uiDialogInput');
+      const cancelBtn = $('uiDialogCancel');
+      const secondaryBtn = $('uiDialogSecondary');
+      const confirmBtn = $('uiDialogConfirm');
+      const titleHint = $('uiDialogTitleHint');
+      const closeBtn = $('uiDialogClose');
+
+      if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !titleHint || !closeBtn) {
+        return Promise.resolve(
+          mode === 'confirm'
+            ? false
+            : mode === 'choice'
+              ? null
+              : mode === 'prompt'
+                ? null
+                : true
+        );
+      }
+
+      if (_uiDialogResolve) closeUiDialog(null);
+      _uiDialogMode = mode;
+      titleEl.textContent = uiText(title);
+      // 先嘗試翻譯完整訊息，讓跨行確認文案與動態樣式能一次正確處理；
+      // 若沒有完整對應，再逐行翻譯，避免英文介面殘留繁中文字。
+      const rawMessage = String(message ?? '');
+      const wholeMessage = uiText(rawMessage);
+      messageEl.textContent = wholeMessage !== rawMessage
+        ? wholeMessage
+        : rawMessage.split('\n').map(line => uiText(line)).join('\n');
+      dialog.dataset.kind = kind;
+      const hasSecondaryAction =
+        !!String(secondaryText || '').trim();
+
+      dialog.dataset.actionCount =
+        mode === 'alert'
+          ? '1'
+          : hasSecondaryAction
+            ? '3'
+            : '2';
+
+      confirmBtn.textContent = uiText(confirmText);
+      cancelBtn.textContent = uiText(cancelText);
+      cancelBtn.style.display = mode === 'alert' ? 'none' : '';
+
+      secondaryBtn.textContent =
+        hasSecondaryAction
+          ? uiText(secondaryText)
+          : '';
+
+      secondaryBtn.hidden =
+        !hasSecondaryAction;
+
+      secondaryBtn.classList.toggle(
+        'danger',
+        hasSecondaryAction &&
+        secondaryKind === 'danger'
+      );
+
+      const confirmHintText =
+        String(confirmHint || '').trim();
+
+      const secondaryHintText =
+        String(secondaryHint || '').trim();
+
+      const titleHintSections = [];
+
+      if (confirmHintText) {
+        titleHintSections.push(
+          `${uiText(confirmText)}：${uiText(confirmHintText)}`
+        );
+      }
+
+      if (
+        hasSecondaryAction &&
+        secondaryHintText
+      ) {
+        titleHintSections.push(
+          `${uiText(secondaryText)}：${uiText(secondaryHintText)}`
+        );
+      }
+
+      const titleHintText =
+        titleHintSections.join('\n\n');
+
+      titleHint.hidden =
+        !titleHintText;
+
+      if (titleHintText) {
+        titleHint.dataset.tooltip =
+          titleHintText;
+
+        titleHint.setAttribute(
+          'aria-label',
+          uiText('匯入方式說明')
+        );
+      } else {
+        delete titleHint.dataset.tooltip;
+      }
+
+      inputEl.classList.toggle('show', mode === 'prompt');
+      inputEl.value = mode === 'prompt' ? uiText(defaultValue) : '';
+
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden', 'false');
+
+      return new Promise(resolve => {
+        _uiDialogResolve = resolve;
+
+        const finishConfirm = () => {
+          if (mode === 'prompt') {
+            closeUiDialog(inputEl.value);
+            return;
+          }
+
+          closeUiDialog(confirmValue);
+        };
+
+        const finishSecondary = () =>
+          closeUiDialog(secondaryValue);
+
+        const finishCancel = () =>
+          closeUiDialog(cancelValue);
+
+        confirmBtn.onclick = finishConfirm;
+        secondaryBtn.onclick =
+          hasSecondaryAction
+            ? finishSecondary
+            : null;
+        cancelBtn.onclick = finishCancel;
+        closeBtn.onclick = finishCancel;
+        overlay.onclick = event => {
+          if (event.target === overlay) finishCancel();
+        };
+
+        inputEl.onkeydown = event => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            finishConfirm();
+          }
+        };
+
+        requestAnimationFrame(() => {
+          if (mode === 'prompt') {
+            inputEl.focus();
+            inputEl.select();
+            return;
+          }
+
+          dialog.focus({
+            preventScroll:true
+          });
+        });
+      });
+    }
+
+    function uiAlert(message, options = {}) {
+      return openUiDialog({
+        title: options.title || '提示',
+        message,
+        mode: 'alert',
+        kind: options.kind || 'default',
+        confirmText: options.confirmText || '確定'
+      });
+    }
+
+    function uiConfirm(message, options = {}) {
+      return openUiDialog({
+        title: options.title || '請確認',
+        message,
+        mode: 'confirm',
+        kind: options.kind || 'default',
+        confirmText: options.confirmText || '確定',
+        cancelText: options.cancelText || '取消'
+      });
+    }
+
+    function uiPrompt(message, defaultValue = '', options = {}) {
+      return openUiDialog({
+        title: options.title || '輸入資料',
+        message,
+        mode: 'prompt',
+        kind: options.kind || 'default',
+        defaultValue,
+        confirmText: options.confirmText || '確定',
+        cancelText: options.cancelText || '取消'
+      });
+    }
+
+    function uiToast(message, duration = 2600) {
+      const region = $('toastRegion');
+      if (!region) return;
+      const toast = document.createElement('div');
+      toast.className = 'ui-toast';
+      toast.textContent = uiText(message);
+      region.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(6px)';
+        toast.style.transition = 'opacity .18s ease, transform .18s ease';
+        setTimeout(() => toast.remove(), 200);
+      }, duration);
+    }
+
+    const actionButtonLoadingState =
+      new WeakMap();
+
+    function setActionButtonLoading(
+      button,
+      loading,
+      label = ''
+    ) {
+      if (!button) return;
+
+      if (loading) {
+        if (
+          actionButtonLoadingState
+            .has(button)
+        ) {
+          return;
+        }
+
+        const measuredWidth =
+          Math.ceil(
+            button
+              .getBoundingClientRect()
+              .width
+          );
+
+        actionButtonLoadingState.set(
+          button,
+          {
+            html:button.innerHTML,
+            disabled:button.disabled,
+            minWidth:button.style.minWidth
+          }
+        );
+
+        if (measuredWidth > 0) {
+          button.style.minWidth =
+            measuredWidth + 'px';
+        }
+
+        button.disabled = true;
+        button.classList.add(
+          'is-loading'
+        );
+        button.setAttribute(
+          'aria-busy',
+          'true'
+        );
+
+        const loadingLabel =
+          uiText(label || '處理中')
+            .replace(/[.…]+$/u,'');
+
+        button.innerHTML =
+          '<span class="button-loading-label">' +
+            esc(loadingLabel) +
+          '</span>' +
+          '<span class="button-loading-dots" aria-hidden="true">' +
+            '<span></span><span></span><span></span>' +
+          '</span>';
+
+        return;
+      }
+
+      const state =
+        actionButtonLoadingState
+          .get(button);
+
+      if (!state) return;
+
+      button.innerHTML =
+        state.html;
+
+      button.disabled =
+        state.disabled;
+
+      button.style.minWidth =
+        state.minWidth;
+
+      button.classList.remove(
+        'is-loading'
+      );
+      button.removeAttribute(
+        'aria-busy'
+      );
+
+      actionButtonLoadingState
+        .delete(button);
+    }
+
+    async function withActionButtonLoading(
+      button,
+      label,
+      action
+    ) {
+      if (
+        !button ||
+        actionButtonLoadingState.has(button)
+      ) {
+        return;
+      }
+
+      setActionButtonLoading(
+        button,
+        true,
+        label
+      );
+
+      // 等兩個 animation frame：第一幀提交 loading 狀態，第二幀再開始工作，
+      // 避免同步儲存與關窗搶在瀏覽器真正繪製「儲存中」之前完成。
+      await new Promise(resolve =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(resolve)
+        )
+      );
+
+      try {
+        return await action();
+      } finally {
+        setActionButtonLoading(
+          button,
+          false
+        );
+      }
+    }
+
+
+    document.addEventListener('keydown', event => {
+      const overlay = $('confirmationDialog');
+      if (!overlay || !overlay.classList.contains('show')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        closeUiDialog(_uiDialogMode === 'confirm' ? false : null);
+      }
+    });
+
+
+
+    return Object.freeze({
+      open:openUiDialog,
+      close:closeUiDialog,
+      alert:uiAlert,
+      confirm:uiConfirm,
+      prompt:uiPrompt,
+      toast:uiToast,
+      withActionButtonLoading
+    });
+  }
+
   // 各視窗自行關閉，UI 只選擇當前最上層可見的視窗。
   function closeTopmostDialog(lifecycles) {
     for (const lifecycle of lifecycles || []) {
@@ -1929,5 +2317,5 @@
     });
   }
 
-  global.L1nGGenealogyUI = Object.freeze({ create, createChromeController, closeTopmostDialog });
+  global.L1nGGenealogyUI = Object.freeze({ create, createChromeController, createDialogController, closeTopmostDialog });
 })(window);
