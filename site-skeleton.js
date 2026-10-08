@@ -45,7 +45,9 @@
 
     const bar = (type) =>
         '<div class="sk-sitebar sk-sitebar-' + type + '"><div class="sk-sitebar-inner">' +
-            block("sk-brand") + (type === "home" ? "" : block("sk-brand-section")) +
+            '<div class="sk-site-brand">' +
+                block("sk-brand") + (type === "home" ? "" : block("sk-brand-section")) +
+            '</div>' +
             '<div class="sk-site-links">' +
                 repeat(type === "realdate" ? 5 : type === "home" ? 3 : 4, () => block("sk-nav-link")) +
             '</div><div class="sk-site-controls">' + (type === "home" ? "" : block("sk-language")) + block("sk-mobile-menu") +

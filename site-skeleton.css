@@ -150,7 +150,9 @@
 /* ========【全站專頁骨架】 真實頁面形狀，不以通用四宮格代替 ======== */
 .sk-sitebar { min-height:68px; background:var(--sk-surface); border-bottom:1px solid var(--sk-line); }
 .sk-sitebar-inner { width:min(1180px,calc(100% - 40px)); height:68px; margin:auto; display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:24px; align-items:center; }
+.sk-site-brand { display:flex; align-items:center; gap:12px; min-width:0; }
 .sk-sitebar .sk-brand { width:52px; height:15px; }
+.sk-sitebar .sk-brand-section { margin-left:0; }
 .sk-sitebar .sk-brand-section { width:116px; height:15px; margin-left:12px; }
 .sk-site-links { display:flex; justify-content:flex-end; gap:20px; align-items:center; }
 .sk-site-links .sk-nav-link { width:66px; height:12px; }
@@ -222,7 +224,7 @@
 .sk-translation-toolbar { min-height:82px; display:flex; align-items:center; gap:12px; padding:16px; margin-bottom:26px; border:1px solid var(--sk-line); border-radius:14px; background:var(--sk-surface); }
 .sk-search { width:45%; height:38px; border-radius:8px; }
 .sk-filter { width:96px; height:36px; border-radius:8px; }
-.sk-filter:first-of-type { margin-left:auto; }
+.sk-search + .sk-filter { margin-left:auto; }
 .sk-translation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .sk-translation-card { min-height:220px; padding:22px; display:grid; align-content:start; gap:17px; border:1px solid var(--sk-line); border-radius:12px; background:var(--sk-surface); }
 .sk-translation-card .sk-button { height:35px; width:122px; }
@@ -301,7 +303,7 @@
     .sk-translations-body { width:calc(100% - 28px); }
     .sk-translation-toolbar { flex-wrap:wrap; }
     .sk-search { width:100%; }
-    .sk-filter { flex:1; }
+    .sk-filter { flex:1; margin-left:0; }
     .sk-translation-grid { grid-template-columns:1fr; }
 
     .sk-realdate-home-hero { width:calc(100% - 28px); margin-top:40px; }

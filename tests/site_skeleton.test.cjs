@@ -28,6 +28,7 @@ test("正式頁面皆使用對應骨架及最新版資源",()=>{
 });
 test("特殊版面不使用通用四宮格",()=>{
   assert.match(script,/sk-exporter-hero/);
+  assert.match(script,/<div class="sk-site-brand">/);
   assert.match(script,/sk-translation-toolbar/);
   assert.match(script,/sk-faq-row/);
   assert.match(script,/sk-timeline-row/);
