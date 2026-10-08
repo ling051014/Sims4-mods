@@ -332,6 +332,45 @@
     };
   }
 
+  // ========【畫面更新協調】Runtime 管理髒區合併與排程，不依賴畫面 DOM ========
+  function createRenderCoordinator({ requestSceneUpdate, refreshChrome, refreshLists } = {}) {
+    const DIRTY = Object.freeze({ chrome:1, lists:2 });
+    let dirty = 0;
+    let frame = 0;
+
+    function flush() {
+      if (frame) { global.cancelAnimationFrame(frame); frame = 0; }
+      const mask = dirty;
+      dirty = 0;
+      if (!mask) return;
+      if (mask & DIRTY.chrome) refreshChrome?.();
+      if (mask & DIRTY.lists) refreshLists?.();
+    }
+
+    function invalidate(layers, { immediate = false } = {}) {
+      requestSceneUpdate?.({
+        layout:!!layers?.layout,
+        nodes:!!layers?.nodes,
+        edges:!!layers?.edges
+      }, { immediate });
+      if (layers?.chrome) dirty |= DIRTY.chrome;
+      if (layers?.lists) dirty |= DIRTY.lists;
+      if (!dirty) return;
+      if (immediate) { flush(); return; }
+      if (frame) return;
+      frame = global.requestAnimationFrame(() => { frame = 0; flush(); });
+    }
+
+    return Object.freeze({
+      invalidate,
+      flush,
+      dispose() {
+        if (frame) { global.cancelAnimationFrame(frame); frame = 0; }
+        dirty = 0;
+      }
+    });
+  }
+
   function create() {
     let relationshipRevision = 0;
 
@@ -421,6 +460,7 @@
       signature,
       patchKeyedNodes,
       createSaveCoordinator,
+      createRenderCoordinator,
       invalidateRelationships,
       getKinshipLabels,
       getRelationshipRevision() {
