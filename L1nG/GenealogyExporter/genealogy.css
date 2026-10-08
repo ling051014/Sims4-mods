@@ -7036,7 +7036,9 @@ button.is-loading .button-loading-label {
 .topbar-filter-column .topbar-filter-group + .topbar-filter-group { margin-top:24px; padding-top:0; border-top:0; }
 .topbar-filter-group legend { width:100%; margin:0 0 4px; padding:0; color:var(--text-secondary); font-size:10.5px; font-weight:650; letter-spacing:.35px; }
 .topbar-filter-option { display:flex; align-items:center; gap:8px; min-height:29px; padding:3px 2px; color:var(--nav-dropdown-text); font-size:12px; cursor:pointer; }
-/* 篩選核取方塊共用 SVG 白色勾號，避免不同瀏覽器將原生勾號繪製成黑色。 */
+/* 篩選勾選框：背景沿用各主題強調色，勾號依顏色對比選深色或白色。 */
+:root { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23172636' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+body[data-theme="rose"] { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 .topbar-filter-option input[type="checkbox"] {
   -webkit-appearance:none;
   appearance:none;
@@ -7054,7 +7056,7 @@ button.is-loading .button-loading-label {
 .topbar-filter-option input[type="checkbox"]:checked {
   border-color:var(--action-primary);
   background-color:var(--action-primary);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image:var(--filter-checkmark-image);
 }
 .topbar-filter-option input[type="checkbox"]:focus-visible {
   outline:2px solid var(--action-primary);
@@ -8635,10 +8637,6 @@ button.danger-action:focus-visible {
 
 // ========【畫布寵物卡】 設定 - 沿用人物卡片配色，家庭旁獨立顯示，不覆蓋血緣線 ========
 #genealogyPetLayer { position:absolute; inset:0; z-index:2; pointer-events:none; }
-.genealogy-pet-family-label {
-  position:absolute; min-height:18px; max-width:360px; overflow:hidden; text-overflow:ellipsis;
-  white-space:nowrap; color:var(--text-secondary); font-size:10.5px; font-weight:600; letter-spacing:.2px;
-}
 .genealogy-pet-card {
   position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
   gap:5px; padding:9px 7px 7px; border:1.5px solid var(--border-default); border-radius:10px;
@@ -8649,6 +8647,15 @@ button.danger-action:focus-visible {
 .genealogy-pet-card:hover,.genealogy-pet-card:focus-visible {
   border-color:var(--action-primary); box-shadow:0 5px 14px rgba(0,0,0,.10);
 }
+/* 與人物卡一致：檢視直向、編輯橫向，寵物資訊各自適配。 */
+.genealogy-pet-card-info { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; min-width:0; width:100%; }
+.genealogy-pet-card.mode-edit { flex-direction:row; align-items:center; justify-content:flex-start; gap:10px; padding:10px; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-info { align-items:flex-start; text-align:left; gap:5px; flex:1; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-avatar { width:51px; height:51px; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-name,
+.genealogy-pet-card.mode-edit .genealogy-pet-card-meta { text-align:left; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-name { font-size:12px; }
+
 .genealogy-pet-card-avatar {
   display:flex; align-items:center; justify-content:center; flex:none; width:51px; height:51px;
   border:1px solid var(--border-default); border-radius:9px; overflow:hidden;
@@ -8668,25 +8675,7 @@ button.danger-action:focus-visible {
 }
 .genealogy-pet-card.ghost { background:var(--person-ghost-surface); border-color:var(--person-ghost-border); border-style:dotted; }
 .genealogy-pet-card.dead { background:var(--person-deceased-surface); border-color:var(--person-deceased-border); border-style:dashed; }
-.genealogy-pet-detail-backdrop {
-  display:none; position:fixed; inset:0; z-index:650; align-items:center; justify-content:center;
-  padding:20px; background:var(--overlay-backdrop);
-}
-.genealogy-pet-detail-backdrop.show { display:flex; }
-.genealogy-pet-detail {
-  position:relative; display:flex; flex-direction:column; align-items:center; gap:10px;
-  width:min(360px,100%); max-height:min(620px,calc(100dvh - 40px)); overflow-y:auto;
-  padding:25px 22px 22px; border:1px solid var(--border-default); border-radius:13px;
-  background:var(--surface-card); box-shadow:0 18px 52px rgba(0,0,0,.19);
-  color:var(--text-primary); outline:none;
-}
-.genealogy-pet-detail-close { position:absolute; right:10px; top:7px; width:29px; height:29px; border:0; background:transparent; color:var(--text-secondary); font:inherit; font-size:22px; cursor:pointer; }
-.genealogy-pet-detail-content { display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; }
-.genealogy-pet-detail-avatar { width:82px; height:82px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid var(--border-default); border-radius:11px; background:var(--surface-panel); }
-.genealogy-pet-detail-avatar img { width:100%; height:100%; object-fit:cover; }
-.genealogy-pet-detail-avatar .l1ng-icon { width:40px; height:40px; }
-.genealogy-pet-detail-content h2 { margin:0; font-size:16px; text-align:center; }
-.genealogy-pet-detail-fields { width:100%; border-top:1px solid var(--border-default); padding-top:7px; }
-.genealogy-pet-detail-row { display:grid; grid-template-columns:75px minmax(0,1fr); gap:10px; padding:8px 1px; font-size:12px; line-height:1.55; }
-.genealogy-pet-detail-row span { color:var(--text-secondary); }
-.genealogy-pet-detail-row strong { font-weight:500; overflow-wrap:anywhere; }
+
+// ========【寵物資料視窗】 設定 - 完整沿用人物資料視窗版型 ========
+.person-profile-pet-main-avatar .l1ng-icon { width:48px; height:48px; }
+.person-profile-pet-lineage { display:flex; flex-direction:column; gap:6px; font-size:12px; line-height:1.5; color:var(--text-secondary); }

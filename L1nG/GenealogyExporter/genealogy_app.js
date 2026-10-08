@@ -136,7 +136,7 @@ const RELATIONSHIP_SEMANTICS = Object.freeze({
 
 const SOCIAL_RELATIONSHIP_DEFINITIONS = Object.freeze({
   // 戀愛 / 親密
-  '曖昧':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'short-dash', layoutPriority:260 }),
+  '曖昧':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'short-dash', layoutPriority:260, symmetric:true }),
   '訂婚':Object.freeze({ icon:'gem', category:'romance', lineStyle:'solid', layoutPriority:780, symmetric:true }),
   '伴侶':Object.freeze({ icon:'hearts', category:'romance', lineStyle:'solid', layoutPriority:740, symmetric:true }),
   '情人':Object.freeze({ icon:'heart-fill', category:'romance', lineStyle:'short-dash', layoutPriority:600 }),
@@ -263,6 +263,7 @@ const familyMemberOperationState = {
 let labelDrag = null;
 let viewMode = 'view';
 let personProfilePersonId = null;
+let personProfilePetTarget = null;
 let currentThemeId = 'ling';
 let customColors = { c1:'#ffffff', c2:'#dfeffc', c3:'#55acee' };
 let hasSavedCustomTheme = false;
@@ -5955,7 +5956,8 @@ function resetThemeSurface() {
     '--nav-dropdown-hover-text','--nav-dropdown-selected-bg',
     '--nav-dropdown-selected-text','--nav-button-hover-bg',
     '--nav-active-bg','--nav-active-border','--nav-active-text',
-    '--genealogy-roster-item-bg','--genealogy-roster-item-hover'
+    '--genealogy-roster-item-bg','--genealogy-roster-item-hover',
+    '--filter-checkmark-image'
   ].forEach(property => document.body.style.removeProperty(property));
 
   document.body.removeAttribute('data-topbar-contrast');
@@ -6108,6 +6110,9 @@ function chooseCustomTheme(primary, secondary, accentColor, { persist = true } =
     ['--brand-tint-start',formatHexRgba(c3,dark ? 0.16 : 0.13)],
     ['--brand-tint-end',formatHexRgba(c3,dark ? 0.09 : 0.07)],
     ['--action-primary',c3],
+    ['--filter-checkmark-image',relativeHexLuminance(c3) > 0.179
+      ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23172636' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`
+      : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`],
     ['--action-primary-hover',shiftHexLightness(c3,dark ? 0.12 : -0.12)],
     ['--action-primary-strong',shiftHexLightness(c3,dark ? -0.16 : -0.30)],
     ['--selection-highlight',formatHexRgba(c3,dark ? 0.42 : 0.30)],
@@ -9919,6 +9924,8 @@ function openPersonProfile(id) {
   if (!person) return;
 
   personProfilePersonId = id;
+  personProfilePetTarget = null;
+  $('personProfileEditBtn').style.display = '';
 
   renderPersonProfileContent(
     $('personProfileContent'),
@@ -9935,6 +9942,7 @@ function closePersonProfile() {
     'show'
   );
   personProfilePersonId = null;
+  personProfilePetTarget = null;
 }
 
 $('personProfileCloseBtn').onclick =
@@ -9948,9 +9956,12 @@ personProfileDialog.onclick = event => {
 
 $('personProfileEditBtn').onclick = () => {
   const id = personProfilePersonId;
+  const petTarget = personProfilePetTarget;
   closePersonProfile();
 
-  if (id) {
+  if (petTarget) {
+    openPetEditorFromCanvas(petTarget);
+  } else if (id) {
     personEditor.open(id);
   }
 };
@@ -17756,47 +17767,75 @@ $('relationshipAddBtn').onclick = () => {
   applyGenealogyMutation(mutation);
 };
 
-// ========【寵物卡資訊】 設定 - 獨立唯讀檢視，不變更人物編輯視窗 ========
-function showGenealogyPetDetails(pet, owner) {
-  let backdrop = $('genealogyPetDetailBackdrop');
-  if (!backdrop) {
-    backdrop = document.createElement('div');
-    backdrop.id = 'genealogyPetDetailBackdrop';
-    backdrop.className = 'genealogy-pet-detail-backdrop';
-    backdrop.innerHTML = `<section class="genealogy-pet-detail" role="dialog" aria-modal="true" aria-label="寵物資料" tabindex="-1">
-      <button class="genealogy-pet-detail-close" type="button" aria-label="關閉">×</button>
-      <div class="genealogy-pet-detail-content"></div>
-    </section>`;
-    document.body.appendChild(backdrop);
-    backdrop.addEventListener('click', event => {
-      if (event.target === backdrop || event.target.closest('.genealogy-pet-detail-close')) {
-        backdrop.classList.remove('show');
-      }
-    });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && backdrop.classList.contains('show')) {
-        backdrop.classList.remove('show');
-      }
-    });
-  }
-  const name = displayDataText(pet.name, owner) || uiText('（未命名）');
-  const avatar = framedAvatarImageHTML(pet.avatar, pet.avatarFrame) || petIconFor(pet);
-  const fields = [
-    [uiText('物種'), formatPetSpecies(pet)],
-    [uiText('品種'), displayDataText(pet.breed, owner)],
-    [uiText('性別'), petGenderLabel(pet)],
-    [uiText('人生階段'), uiText(pet.ageStage || '')],
-    [uiText('狀態'), uiText(pet.status || '')],
-    [uiText('特徵'), (pet.traits || []).map(trait => displayDataText(trait, owner)).filter(Boolean).join(' · ')]
-  ].filter(([,value]) => value);
-  const rows = fields.map(([label,value]) =>
-    `<div class="genealogy-pet-detail-row"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`
-  ).join('');
-  backdrop.querySelector('.genealogy-pet-detail-content').innerHTML =
-    `<div class="genealogy-pet-detail-avatar">${avatar}</div><h2>${esc(name)}</h2><div class="genealogy-pet-detail-fields">${rows}</div>`;
-  backdrop.classList.add('show');
-  backdrop.querySelector('.genealogy-pet-detail')?.focus({preventScroll:true});
+// ========【寵物卡互動】 設定 - 檢視沿用人物個人資料視窗；編輯沿用既有寵物編輯器 ========
+function petCanvasOwnerIndex(entry) {
+  const owner = currentGenealogyData()?.sims?.[entry?.ownerId];
+  if (!owner || !Array.isArray(owner.pets)) return -1;
+  const petId = String(entry.pet?.gameData?.simId || entry.pet?.id || '');
+  return owner.pets.findIndex(pet =>
+    String(pet.gameData?.simId || pet.id || '') === petId
+  );
 }
+
+function openPetEditorFromCanvas(entry) {
+  const index = petCanvasOwnerIndex(entry);
+  if (index < 0) return false;
+
+  personEditor.open(entry.ownerId);
+  const mediaTab = document.querySelector('.sim-editor-tab[data-editor-tab="media"]');
+  mediaTab?.click();
+  const draftIndex = editingPets.findIndex(pet =>
+    String(pet.gameData?.simId || pet.id || '') ===
+      String(entry.pet?.gameData?.simId || entry.pet?.id || '')
+  );
+  if (draftIndex < 0) return false;
+  petEditorController.open(draftIndex);
+  return true;
+}
+
+function openPetProfileFromCanvas(entry) {
+  const pet = entry.pet;
+  const owner = currentGenealogyData()?.sims?.[entry.ownerId] || null;
+  const name = displayDataText(pet.name,owner) || uiText('（未命名）');
+  const avatar = framedAvatarImageHTML(pet.avatar,pet.avatarFrame) || petIconFor(pet);
+  const facts = [
+    [uiText('品種'),displayDataText(pet.breed,owner)],
+    [uiText('性別'),petGenderLabel(pet)],
+    [uiText('人生階段'),uiText(pet.ageStage || '')],
+    [uiText('狀態'),uiText(pet.status || '')]
+  ].filter(([,value]) => !!value);
+  const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('');
+  const traitMarkup = (pet.traits || []).map(trait => displayDataText(trait,owner))
+    .filter(Boolean).map(trait => `<span class="tag">${esc(trait)}</span>`).join('');
+  const lineageMarkup = petLineageHTML(pet);
+  $('personProfileContent').innerHTML = `
+    <div class="person-profile-header">
+      <div class="person-profile-avatar person-profile-pet-main-avatar">${avatar}</div>
+      <div class="person-profile-header-text">
+        <div class="person-profile-name-row"><span class="person-profile-name">${esc(name)}</span></div>
+        <div class="person-profile-meta"><span class="meta-pill">${esc(formatPetSpecies(pet))}</span></div>
+      </div>
+    </div>
+    <div class="person-profile-body">
+      <section class="person-profile-section">
+        <h3 class="person-profile-section-title">${esc(uiText('基本資料'))}</h3>
+        <div class="person-profile-list">${factsMarkup || '—'}</div>
+      </section>
+      <section class="person-profile-section">
+        <h3 class="person-profile-section-title">${esc(uiText('特徵'))}</h3>
+        <div class="person-profile-traits">${traitMarkup || '—'}</div>
+      </section>
+      ${lineageMarkup ? `<section class="person-profile-section">
+        <h3 class="person-profile-section-title">${esc(uiText('血統'))}</h3>
+        <div class="person-profile-pet-lineage">${lineageMarkup}</div>
+      </section>` : ''}
+    </div>`;
+  personProfilePersonId = null;
+  personProfilePetTarget = petCanvasOwnerIndex(entry) >= 0 ? entry : null;
+  $('personProfileEditBtn').style.display = personProfilePetTarget ? '' : 'none';
+  personProfileDialog.classList.add('show');
+}
+
 petCardsLayer?.addEventListener('pointerdown', event => {
   if (event.target.closest('.genealogy-pet-card')) event.stopPropagation();
 });
@@ -17809,7 +17848,8 @@ petCardsLayer?.addEventListener('click', event => {
     entry => entry.key === element.dataset.petId
   );
   if (!card) return;
-  showGenealogyPetDetails(card.pet, currentGenealogyData().sims[card.ownerId] || null);
+  if (viewMode === 'edit' && openPetEditorFromCanvas(card)) return;
+  openPetProfileFromCanvas(card);
 });
 
 // ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
