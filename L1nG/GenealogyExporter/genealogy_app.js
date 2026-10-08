@@ -913,12 +913,12 @@ function clampAvatarValue(value,min,max,fallback){
     element.style.setProperty('--avatar-y',`${(f.y*100).toFixed(2)}%`);
     element.style.setProperty('--avatar-zoom',f.zoom.toFixed(3));
   }
-  function framedAvatarImageHTML(ref,frame){
+  function framedAvatarImageHTML(ref,frame,extraClass=''){
     if(!isAssetId(ref))return'';
 
     const url=resolveImageUrl(ref);
 
-    return `<img class="avatar-framed-image${url?'':' asset-pending'}" data-asset-id="${esc(ref)}"${url?` src="${esc(url)}"`:''} alt="" draggable="false" decoding="async" style="${avatarFrameInlineStyle(frame)}">`;
+    return `<img class="avatar-framed-image${extraClass ? ' ' + esc(extraClass) : ''}${url?'':' asset-pending'}" data-asset-id="${esc(ref)}"${url?` src="${esc(url)}"`:''} alt="" draggable="false" decoding="async" style="${avatarFrameInlineStyle(frame)}">`;
   }
   function validateSupportedImageFile(file){
     if(!file)throw new Error(uiText('尚未選擇圖片'));
@@ -8834,7 +8834,7 @@ genealogyScene =
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
       showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
-      petCardAvatarHTML:pet => framedAvatarImageHTML(pet?.avatar, pet?.avatarFrame) || petIconFor(pet),
+      petCardAvatarHTML:pet => petAvatarWithFallbackHTML(pet),
       petCardSpeciesLabel:formatPetSpecies,
       syncPetSelectionClasses
     }
@@ -9019,6 +9019,19 @@ function petIconFor(pet) {
     species.icon,
     'pet-icon'
   );
+}
+
+// ========【寵物頭像】 設定 - 物種 SVG 在圖片完成載入前保持可見 ========
+function petAvatarWithFallbackHTML(pet) {
+  const icon = petIconFor(pet);
+  const image = framedAvatarImageHTML(pet?.avatar,pet?.avatarFrame,'pet-avatar-image');
+  return `<span class="pet-avatar-species-fallback" aria-hidden="true">${icon}</span>${image}`;
+}
+
+function markPetAvatarLoaded(event) {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement) || !image.classList.contains('pet-avatar-image')) return;
+  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar')?.classList.add('has-image');
 }
 
 function formatPetSpecies(pet) {
@@ -10553,6 +10566,7 @@ function closePersonCardMenu() {
   personCardMenu.classList.remove('show');
   personCardMenu.setAttribute('aria-hidden', 'true');
   personCardMenu.innerHTML = '';
+  delete personCardMenu.dataset.petId;
 }
 
 function positionPersonCardMenu(clientX, clientY) {
@@ -11035,6 +11049,13 @@ const ids =
 }
 
 personCardMenu?.addEventListener('click', e => {
+  const petAction = e.target.closest('[data-pet-card-menu-action]');
+  if (petAction) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!petAction.disabled) handlePetCardMenuAction(petAction.dataset.petCardMenuAction,personCardMenu.dataset.petId);
+    return;
+  }
   const actionBtn = e.target.closest('[data-person-card-menu-action]');
   if (actionBtn) {
     e.preventDefault(); e.stopPropagation();
@@ -17833,7 +17854,7 @@ function openPetProfileFromCanvas(entry) {
   const pet = entry.pet;
   const owner = currentGenealogyData()?.sims?.[entry.ownerId] || null;
   const name = displayDataText(pet.name,owner) || uiText('（未命名）');
-  const avatar = framedAvatarImageHTML(pet.avatar,pet.avatarFrame) || petIconFor(pet);
+  const avatar = petAvatarWithFallbackHTML(pet);
   const facts = [
     [uiText('品種'),displayDataText(pet.breed,owner)],
     [uiText('性別'),petGenderLabel(pet)],
@@ -17872,6 +17893,67 @@ function openPetProfileFromCanvas(entry) {
   personProfileDialog.classList.add('show');
 }
 
+
+// ========【寵物右鍵選單】 設定 - 沿用人物選單外觀，操作僅指向寵物 ========
+function findCanvasPetEntry(key) {
+  return getSceneLayout()?.petLayout?.cards?.find(entry => entry.key === String(key)) || null;
+}
+
+function focusPetOnCanvas(entry) {
+  if (!entry) return;
+  const dims = viewMode === 'edit' ? {W:176,H:84} : {W:110,H:126};
+  genealogyViewport.focusWorldPoint(entry.x + PAD + dims.W/2,entry.y + PAD + dims.H/2,{minFocusScale:0.72});
+  const element = [...petCardsLayer.querySelectorAll('.genealogy-pet-card[data-pet-id]')]
+    .find(el => el.dataset.petId === entry.key);
+  if (element) {
+    element.classList.remove('focus-pulse');
+    void element.offsetWidth;
+    element.classList.add('focus-pulse');
+    window.setTimeout(() => element.classList.remove('focus-pulse'),1100);
+  }
+}
+
+function renderPetCardMenu(entry,clientX,clientY) {
+  if (!personCardMenu || !entry) return;
+  const owner = currentGenealogyData()?.sims?.[entry.ownerId] || null;
+  const title = displayDataText(entry.pet?.name,owner) || uiText('（未命名）');
+  const editable = petCanvasOwnerIndex(entry) >= 0;
+  const selected = selectedPetIds.has(entry.key);
+  personCardMenu.innerHTML = `
+    <div class="person-card-menu-title">${esc(title)}</div>
+    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看寵物資料'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="edit" ${editable ? '' : 'disabled'}>${iconSvg('pencil-square')}<span>${esc(uiText('編輯寵物'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
+    <div class="person-card-menu-divider"></div>
+    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="select">${iconSvg(selected ? 'x-lg' : 'check-circle')}<span>${esc(uiText(selected ? '取消選取' : '選取寵物'))}</span></button>
+    ${editable ? '' : `<div class="person-card-menu-note">${esc(uiText('此寵物沒有可編輯的所屬人物，目前僅能檢視。'))}</div>`}
+  `;
+  delete personCardMenu.dataset.simId;
+  personCardMenu.dataset.petId = entry.key;
+  personCardMenu.classList.add('show');
+  personCardMenu.setAttribute('aria-hidden','false');
+  positionPersonCardMenu(clientX,clientY);
+}
+
+function handlePetCardMenuAction(action,key) {
+  const entry = findCanvasPetEntry(key);
+  if (!entry) {closePersonCardMenu();return;}
+  closePersonCardMenu();
+  if (action === 'view') { openPetProfileFromCanvas(entry); return; }
+  if (action === 'edit') { if (petCanvasOwnerIndex(entry) >= 0) openPetEditorFromCanvas(entry); return; }
+  if (action === 'locate') { focusPetOnCanvas(entry); return; }
+  if (action === 'select') {
+    if (selectedPetIds.has(entry.key)) {
+      selectedPetIds.delete(entry.key);
+    } else {
+      selectedNodeIds.clear();
+      selectedPetIds.clear();
+      selectedPetIds.add(entry.key);
+    }
+    syncNodeSelectionClasses();
+  }
+}
+
 // ========【寵物卡操作】 設定 - PointerUp 啟用觸控／滑鼠卡片；Click 保留鍵盤啟用 ========
 function activatePetCanvasCard(id, additive = false) {
   const card = getSceneLayout()?.petLayout?.cards?.find(entry => entry.key === id);
@@ -17898,6 +17980,25 @@ function activatePetCanvasCard(id, additive = false) {
 
 let petPointerStart = null;
 let lastPetPointerActivation = null;
+petCardsLayer?.addEventListener('load',markPetAvatarLoaded,true);
+personProfileDialog?.addEventListener('load',markPetAvatarLoaded,true);
+petCardsLayer?.addEventListener('contextmenu',event => {
+  const cardElement = event.target.closest('.genealogy-pet-card[data-pet-id]');
+  if (!cardElement) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const entry = findCanvasPetEntry(cardElement.dataset.petId);
+  if (entry) renderPetCardMenu(entry,event.clientX,event.clientY);
+});
+petCardsLayer?.addEventListener('keydown',event => {
+  const cardElement = event.target.closest('.genealogy-pet-card[data-pet-id]');
+  if (!cardElement || !(event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10'))) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const entry = findCanvasPetEntry(cardElement.dataset.petId);
+  const box = cardElement.getBoundingClientRect();
+  if (entry) renderPetCardMenu(entry,box.left+Math.min(box.width,40),box.top+Math.min(box.height,40));
+});
 petCardsLayer?.addEventListener('pointerdown', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
   if (!element || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;

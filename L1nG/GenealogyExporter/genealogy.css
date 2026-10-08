@@ -6640,6 +6640,11 @@ html[lang="en"] body {
 .icon-paw {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-paw);
 }
+.icon-dog { --l1ng-icon: var(--l1ng-icon-dog); }
+.icon-cat { --l1ng-icon: var(--l1ng-icon-cat); }
+.icon-horse { --l1ng-icon: var(--l1ng-icon-horse); }
+.icon-cow { --l1ng-icon: var(--l1ng-icon-cow); }
+.icon-bird { --l1ng-icon: var(--l1ng-icon-bird); }
 
 .icon-tombstone {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-tombstone);
@@ -8673,12 +8678,19 @@ button.danger-action:focus-visible {
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name { font-size:12px; }
 
 .genealogy-pet-card-avatar {
+  position:relative;
   display:flex; align-items:center; justify-content:center; flex:none; width:51px; height:51px;
   border:1px solid var(--border-default); border-radius:9px; overflow:hidden;
   background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
   color:var(--avatar-text);
 }
 .genealogy-pet-card-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.genealogy-pet-card-avatar .pet-avatar-image,
+.person-profile-pet-main-avatar .pet-avatar-image { position:relative; z-index:1; opacity:0; }
+.genealogy-pet-card-avatar.has-image .pet-avatar-image,
+.person-profile-pet-main-avatar.has-image .pet-avatar-image { opacity:1; }
+.pet-avatar-species-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--avatar-text); pointer-events:none; }
+.genealogy-pet-card-avatar .pet-avatar-species-fallback .l1ng-icon { width:30px; height:30px; }
 .genealogy-pet-card-avatar .l1ng-icon { width:26px; height:26px; }
 .genealogy-pet-card-name {
   display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -8693,5 +8705,7 @@ button.danger-action:focus-visible {
 .genealogy-pet-card.dead { background:var(--person-deceased-surface); border-color:var(--person-deceased-border); border-style:dashed; }
 
 /* ========【寵物資料視窗】 設定 - 完整沿用人物資料視窗版型 ======== */
-.person-profile-pet-main-avatar .l1ng-icon { width:48px; height:48px; }
+.person-profile-pet-main-avatar { position:relative; }
+.person-profile-pet-main-avatar .pet-avatar-species-fallback .l1ng-icon { width:48px; height:48px; }
+.genealogy-pet-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
 .person-profile-pet-lineage { display:flex; flex-direction:column; gap:6px; font-size:12px; line-height:1.5; color:var(--text-secondary); }
