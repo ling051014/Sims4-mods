@@ -45,3 +45,59 @@ test("骨架退出由單一公開 ready 接口控制",()=>{
   assert.match(script,/prefers-reduced-motion/);
   assert.match(script,/transitionend/);
 });
+
+test("18 種骨架皆可建立畫面並確實退出",()=>{
+  const vm=require("node:vm");
+  const all=[
+    "mods-home","mods-list","mods-table","l1ng-home","l1ng-changelog",
+    "genealogy-exporter","translations","realdate-home","realdate-download",
+    "realdate-installation","realdate-faq","realdate-roadmap","realdate-gameplay",
+    "realdate-compatibility","realdate-changelog","realdate-content",
+    "l1ng-content","product"
+  ];
+  const required={
+    "genealogy-exporter":"sk-exporter-hero",
+    "translations":"sk-translations-hero",
+    "realdate-home":"sk-calendar-scene",
+    "realdate-download":"sk-download-card",
+    "realdate-faq":"sk-faq-row",
+    "realdate-roadmap":"sk-timeline-row",
+    "realdate-gameplay":"sk-doc-index",
+    "realdate-changelog":"sk-release-row",
+    "l1ng-home":"l1ng-home-hero",
+    "mods-list":"mods-card-grid"
+  };
+  for(const layout of all){
+    let skeleton=null;
+    let removed=false;
+    let hidden=false;
+    const window={};
+    const document={
+      currentScript:{
+        dataset:{skeletonLayout:layout,skeletonAuto:"manual"},
+        insertAdjacentElement(_where,node){skeleton=node;}
+      },
+      createElement(){
+        return {
+          setAttribute(){},
+          classList:{add(name){if(name==="is-hidden")hidden=true;}},
+          addEventListener(){},
+          remove(){removed=true;},
+          innerHTML:""
+        };
+      }
+    };
+    vm.runInNewContext(script,{
+      document,
+      window,
+      matchMedia:()=>({matches:true}),
+      requestAnimationFrame:fn=>fn(),
+    },{filename:"site-skeleton.js"});
+    assert.ok(skeleton,layout+" creates element");
+    assert.ok(skeleton.innerHTML.includes("l1ng-sk-shell"),layout+" shell");
+    if(required[layout])assert.ok(skeleton.innerHTML.includes(required[layout]),layout+" shape");
+    assert.equal(typeof window.L1nGSkeleton.ready,"function",layout+" ready API");
+    window.L1nGSkeleton.ready();
+    assert.ok(hidden&&removed,layout+" cleanup");
+  }
+});
