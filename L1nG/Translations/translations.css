@@ -459,6 +459,43 @@ section[id] {
     border-color:#eadbc7;
 }
 
+/* ========【模組整理深層連結提示】 設定 - 對應卡片使用專區紫色，避免與警告狀態混淆 ======== */
+.translation-card.is-linked-target {
+    position:relative;
+    border-color:var(--translation);
+    background:linear-gradient(180deg, rgba(127,115,180,.085), rgba(255,255,255,.98) 27%);
+    box-shadow:0 0 0 3px rgba(127,115,180,.15), 0 15px 36px rgba(98,87,143,.12);
+    scroll-margin-top:94px;
+    animation:translation-target-arrival 1.15s ease-out 1;
+}
+
+.translation-target-hint {
+    position:absolute;
+    top:-13px;
+    right:19px;
+    display:inline-flex;
+    align-items:center;
+    min-height:25px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:var(--translation-dark);
+    color:#fff;
+    font-size:11px;
+    font-weight:650;
+    letter-spacing:.02em;
+    line-height:1.25;
+    pointer-events:none;
+}
+
+@keyframes translation-target-arrival {
+    from { box-shadow:0 0 0 7px rgba(127,115,180,.25), 0 15px 36px rgba(98,87,143,.12); }
+    to { box-shadow:0 0 0 3px rgba(127,115,180,.15), 0 15px 36px rgba(98,87,143,.12); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .translation-card.is-linked-target { animation:none; }
+}
+
 .card-top,
 .card-actions {
     display:flex;

@@ -9,6 +9,64 @@ const cards = Array.from(document.querySelectorAll("[data-translation-card]"));
 const emptyState = document.getElementById("translationEmpty");
 
 let activeFilter = "all";
+let linkedTargetCard = null;
+
+// ========【跨頁漢化定位】 設定 - 僅回應有效卡片錨點，不更動一般分類／搜尋行為 ========
+function clearLinkedTarget() {
+    if (!linkedTargetCard) return;
+
+    linkedTargetCard.classList.remove("is-linked-target");
+    linkedTargetCard.querySelector(".translation-target-hint")?.remove();
+    linkedTargetCard = null;
+}
+
+function revealLinkedTranslation() {
+    let targetId = "";
+
+    try {
+        targetId = decodeURIComponent(window.location.hash.slice(1));
+    } catch (_) {
+        clearLinkedTarget();
+        return;
+    }
+
+    const target = cards.find((card) => card.id === targetId);
+    if (!target) {
+        clearLinkedTarget();
+        return;
+    }
+
+    // 使用既有全部分類，避免先前的搜尋或篩選令目標卡被隱藏。
+    if (activeFilter !== "all" || (searchInput && searchInput.value)) {
+        activeFilter = "all";
+        if (searchInput) searchInput.value = "";
+        filterGroup?.querySelectorAll("[data-filter]").forEach((button) => {
+            button.classList.toggle("active", button.dataset.filter === "all");
+        });
+        updateTranslations();
+    }
+
+    clearLinkedTarget();
+    linkedTargetCard = target;
+    target.classList.add("visible", "is-linked-target");
+
+    const hint = document.createElement("span");
+    hint.className = "translation-target-hint";
+    hint.setAttribute("role", "status");
+    hint.textContent = "已定位此漢化";
+    target.appendChild(hint);
+
+    // 待分類、卡片可見狀態和版面完成後，再避開固定頂條定位。
+    window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+            if (linkedTargetCard === target && !target.hidden) {
+                target.scrollIntoView({ behavior:"instant", block:"start" });
+            }
+        });
+    });
+}
+
+window.addEventListener("hashchange", revealLinkedTranslation);
 
 function closeNavigation() {
     if (!mainNav || !navToggle) return;
@@ -74,6 +132,7 @@ if (filterGroup) {
         const button = event.target.closest("[data-filter]");
         if (!button) return;
 
+        clearLinkedTarget();
         activeFilter = button.dataset.filter || "all";
 
         filterGroup.querySelectorAll("[data-filter]").forEach((item) => {
@@ -85,7 +144,10 @@ if (filterGroup) {
 }
 
 if (searchInput) {
-    searchInput.addEventListener("input", updateTranslations);
+    searchInput.addEventListener("input", () => {
+        clearLinkedTarget();
+        updateTranslations();
+    });
 }
 
 const countTarget = document.querySelector("[data-translation-count]");
@@ -137,3 +199,4 @@ window.addEventListener("resize", () => {
 });
 
 updateTranslations();
+revealLinkedTranslation();
