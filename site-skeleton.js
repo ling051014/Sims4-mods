@@ -209,10 +209,42 @@
                 requestAnimationFrame(ready)
             );
 
+        // 等待第一屏的重要圖片，減少骨架先消失而圖片仍留白的跳動。
+        // 最多等待 750ms；圖片失敗或網路過慢時仍會解除骨架。
+        const waitForFirstScreen = () => {
+            const images = [...document.querySelectorAll(
+                ".hero img, .page-hero img, .preview-img img, .mod-card img, .translation-card img"
+            )].slice(0, 4).filter(image => !image.complete);
+
+            if (!images.length) {
+                scheduleReady();
+                return;
+            }
+
+            let completed = false;
+            let limit;
+            const finish = () => {
+                if (completed) return;
+                completed = true;
+                clearTimeout(limit);
+                scheduleReady();
+            };
+
+            limit = setTimeout(finish, 750);
+            Promise.all(images.map(image => new Promise(resolve => {
+                if (image.complete) {
+                    resolve();
+                    return;
+                }
+                image.addEventListener("load", resolve, { once:true });
+                image.addEventListener("error", resolve, { once:true });
+            }))).then(finish, finish);
+        };
+
         if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", scheduleReady, { once:true });
+            document.addEventListener("DOMContentLoaded", waitForFirstScreen, { once:true });
         } else {
-            scheduleReady();
+            waitForFirstScreen();
         }
     }
 })();

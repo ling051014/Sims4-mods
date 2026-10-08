@@ -101,3 +101,11 @@ test("18 種骨架皆可建立畫面並確實退出",()=>{
     assert.ok(hidden&&removed,layout+" cleanup");
   }
 });
+
+test("首屏圖片有最長等待上限、完成或錯誤都能解除骨架",()=>{
+  assert.match(script,/waitForFirstScreen/);
+  assert.match(script,/image\.addEventListener\("load"/);
+  assert.match(script,/image\.addEventListener\("error"/);
+  assert.match(script,/setTimeout\(finish, 750\)/);
+  assert.match(script,/clearTimeout\(limit\)/);
+});
