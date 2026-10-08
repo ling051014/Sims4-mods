@@ -136,7 +136,10 @@
     cardSettingFieldKeys = [],
     defaultCardViewSettings = {},
     defaultCardEditSettings = {},
-    cardViewAppearances = ['minimal','translucent','full']
+    cardViewAppearances = ['minimal','translucent','full'],
+    petCardFieldKeys = [],
+    defaultPetCardViewSettings = {},
+    defaultPetCardEditSettings = {}
   } = {}) {
     let activeData = null;
 
@@ -145,6 +148,8 @@
         .map(String)
         .filter(Boolean)
     );
+
+    const petCardFields = new Set((petCardFieldKeys || []).map(String).filter(Boolean));
 
     const cardAppearanceValues = new Set(
       (cardViewAppearances || [])
@@ -462,6 +467,20 @@
       return settings;
     }
 
+    function normalizePetCardSettings(mode, current) {
+      const defaults = mode === 'edit'
+        ? defaultPetCardEditSettings
+        : defaultPetCardViewSettings;
+      const settings =
+        current && typeof current === 'object' && !Array.isArray(current)
+          ? current : {};
+      settings.avatar = true;
+      petCardFields.forEach(field => {
+        if (typeof settings[field] !== 'boolean') settings[field] = !!defaults[field];
+      });
+      return settings;
+    }
+
     function ensureCardSettings(current) {
       if (
         !current.meta ||
@@ -482,6 +501,9 @@
           'edit',
           current.meta.cardEdit
         );
+
+      current.meta.petCardView = normalizePetCardSettings('view',current.meta.petCardView);
+      current.meta.petCardEdit = normalizePetCardSettings('edit',current.meta.petCardEdit);
 
       return current.meta;
     }
@@ -1399,6 +1421,34 @@
         saveDirty:true
       });
 
+      return finalized(result);
+    }
+
+    function getPetCardSettings(mode) {
+      const db = data();
+      ensureCardSettings(db);
+      return Object.freeze({
+        ...(mode === 'edit' ? db.meta.petCardEdit : db.meta.petCardView)
+      });
+    }
+
+    function setPetCardField(mode, field, enabled) {
+      const db = data();
+      const result = rawResult();
+      const key = String(field || '');
+      if (!petCardFields.has(key)) return finalized(result);
+      ensureCardSettings(db);
+      const settings = mode === 'edit' ? db.meta.petCardEdit : db.meta.petCardView;
+      const next = !!enabled;
+      if (settings[key] === next) return finalized(result);
+      settings[key] = next;
+      mark(result, {
+        dataChanged:true,
+        layoutChanged:true,
+        nodesChanged:true,
+        edgesChanged:true,
+        saveDirty:true
+      });
       return finalized(result);
     }
 
@@ -3000,6 +3050,8 @@
       setCurrentFamilyId,
       getCardSettings,
       setCardField,
+      getPetCardSettings,
+      setPetCardField,
       setCardAppearance,
       mergeResults,
       createSim,

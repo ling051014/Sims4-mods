@@ -16,7 +16,6 @@
 
     const PET_VIEW_DIMS = Object.freeze({ W:110,H:126 });
     const PET_EDIT_DIMS = Object.freeze({ W:176,H:84 });
-    const getPetCardDims = () => viewMode === 'edit' ? PET_EDIT_DIMS : PET_VIEW_DIMS;
     const PET_CARD_GAP = 12;
     const PET_ROW_GAP = 13;
     const PET_GROUP_GAP = 30;
@@ -49,7 +48,7 @@
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
-      showPetCards, petCardAvatarHTML, petCardSpeciesLabel,
+      showPetCards, petCardAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
       syncPetSelectionClasses
     } = helpers;
     // Scene owns canvas-only presentation and relationship-label SVG markup.
@@ -6179,6 +6178,38 @@ function solveAutomaticGenealogyPositions(visibleIds) {
 }
 
 // ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
+// ========【寵物卡顯示資訊】 設定 - 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
+function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
+  const rows = [
+    ['species',petCardSpeciesLabel(pet)],
+    ['breed',displayDataText(pet.breed,owner)],
+    ['gender',petCardGenderLabel(pet)],
+    ['ageStage',uiText(pet.ageStage || '')],
+    ['status',uiText(pet.status || '')],
+    ['traits',(pet.traits || []).map(trait => displayDataText(trait,owner)).filter(Boolean).join(' · ')]
+  ];
+  return rows.filter(([key,value]) => settings[key] && value)
+    .map(([key,value]) => ({
+      key, text:['gender','traits'].includes(key)
+        ? uiText(key === 'gender' ? '性別' : '特徵') + '：' + value : value
+    }));
+}
+
+function petCardDimensions(pet,owner) {
+  const config = getPetCardSettings();
+  const rows = petCardFieldRows(pet,owner,config);
+  const name = config.name ? displayDataText(pet.name,owner) : '';
+  // 以卡片可用寬度估算換行，讓內容全部顯示，不以裁切解決過多欄位。
+  const lines = value => Math.max(1,Math.ceil([...String(value || '')].length / 8));
+  const nameH = name ? lines(name)*17 : 0;
+  const bodyH = rows.reduce((sum,row) => sum+lines(row.text)*14,0) +
+    Math.max(0,rows.length-1)*3;
+  if (viewMode === 'edit') {
+    return {W:PET_EDIT_DIMS.W,H:Math.max(84,20+Math.max(51,nameH+(nameH && rows.length ? 4 : 0)+bodyH))};
+  }
+  return {W:PET_VIEW_DIMS.W,H:Math.max(76,9+51+(nameH ? 5+nameH : 0)+(rows.length ? 5+bodyH : 0)+9)};
+}
+
 function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
   const empty = {cards:[],groups:[],width:0,height:0};
   if (!showPetCards()) return empty;
@@ -6265,18 +6296,28 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
   const occupied = humanRects.slice();
   let maxRight = humanGeometry.width || 0;
   let maxBottom = humanGeometry.height || 0;
-  const {W,H} = getPetCardDims();
   const clearance = 10;
 
   groups.forEach(group => {
     const cols = Math.min(3,group.entries.length);
     const rows = Math.ceil(group.entries.length/3);
-    const groupW = cols*W + Math.max(0,cols-1)*PET_CARD_GAP;
-    const groupH = rows*H + Math.max(0,rows-1)*PET_ROW_GAP;
+    const itemDims = group.entries.map(entry =>
+      petCardDimensions(entry.pet,genealogyData?.sims?.[entry.ownerId] || null)
+    );
+    const W = viewMode === 'edit' ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
+    const rowHeights = Array.from({length:rows},(_,i) =>
+      Math.max(...itemDims.slice(i*3,i*3+3).map(dim => dim.H))
+    );
+    const rowTops = rowHeights.map((_,i) =>
+      rowHeights.slice(0,i).reduce((sum,height)=>sum+height+PET_ROW_GAP,0)
+    );
+    const groupW = cols*W+Math.max(0,cols-1)*PET_CARD_GAP;
+    const groupH = rowHeights.reduce((sum,height)=>sum+height,0)+
+      Math.max(0,rows-1)*PET_ROW_GAP;
     const y = Math.max(0,group.anchorY);
     let x = Math.max(0,group.anchorX+PET_SIDE_GAP);
 
-    // 只移動寵物群組避讓既有卡片，不調整人物族譜或關係線的幾何。
+    // 僅移動寵物群組避開人物卡；不同高度的寵物卡以同列最高卡為間距基準。
     for (let attempt=0; attempt<occupied.length+1; attempt++) {
       const blocking = occupied.find(rect =>
         x < rect.right+clearance && x+groupW+clearance > rect.left &&
@@ -6290,9 +6331,9 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     group.y = y;
     occupied.push({left:x,top:y,right:x+groupW,bottom:y+groupH});
     group.entries.forEach((entry,index) => {
-      const cardX = x + (index%3)*(W+PET_CARD_GAP);
-      const cardY = y + Math.floor(index/3)*(H+PET_ROW_GAP);
-      cards.push({...entry,x:cardX,y:cardY});
+      const cardX = x+(index%3)*(W+PET_CARD_GAP);
+      const cardY = y+rowTops[Math.floor(index/3)];
+      cards.push({...entry,x:cardX,y:cardY,width:itemDims[index].W,height:itemDims[index].H});
     });
     maxRight = Math.max(maxRight,x+groupW);
     maxBottom = Math.max(maxBottom,y+groupH);
@@ -6316,18 +6357,21 @@ function paintPetLayer() {
       const pet = card.pet;
       const owner = genealogyData?.sims?.[card.ownerId] || null;
       const name = displayDataText(pet.name,owner) || uiText('（未命名）');
-      const breed = displayDataText(pet.breed,owner);
-      const species = petCardSpeciesLabel(pet);
       const state = pet.status === '幽靈' ? 'ghost' : pet.status === '已故' ? 'dead' : '';
-      const {W,H} = getPetCardDims();
+      const settings = getPetCardSettings();
+      const fields = petCardFieldRows(pet,owner,settings);
+      const fieldHTML = fields.map(row =>
+        `<span class="genealogy-pet-card-field" title="${esc(row.text)}">${esc(row.text)}</span>`
+      ).join('');
       const cardMode = viewMode === 'edit' ? 'mode-edit' : 'mode-view';
-      return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
-        style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${W}px;height:${H}px">
+      const hasContent = settings.name || fields.length;
+      return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}${hasContent ? '' : ' pet-avatar-only'}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
+        style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${card.width}px;height:${card.height}px">
         <span class="genealogy-pet-card-avatar">${petCardAvatarHTML(pet)}</span>
-        <span class="genealogy-pet-card-info">
-          <span class="genealogy-pet-card-name">${esc(name)}</span>
-          <span class="genealogy-pet-card-meta">${esc(species)}${breed ? ' · ' + esc(breed) : ''}</span>
-        </span>
+        ${hasContent ? `<span class="genealogy-pet-card-info">
+          ${settings.name ? `<span class="genealogy-pet-card-name">${esc(name)}</span>` : ''}
+          ${fieldHTML}
+        </span>` : ''}
       </button>`;
     }).join('');
     return items;
@@ -8677,9 +8721,8 @@ function getVisibleTreeContentBounds() {
   layoutCache.petLayout?.cards?.forEach(card => {
     left = Math.min(left,card.x+PAD);
     top = Math.min(top,card.y+PAD);
-    const dims = getPetCardDims();
-    right = Math.max(right,card.x+PAD+dims.W);
-    bottom = Math.max(bottom,card.y+PAD+dims.H);
+    right = Math.max(right,card.x+PAD+card.width);
+    bottom = Math.max(bottom,card.y+PAD+card.height);
   });
 
   if (

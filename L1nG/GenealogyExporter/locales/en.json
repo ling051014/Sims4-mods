@@ -1073,6 +1073,10 @@
     "重設視覺設定": "Reset Visual Settings",
     "調整主題、族譜背景與關係線顯示。": "Adjust the theme, genealogy background, and relationship lines.",
     "顯示寵物": "Show pets",
-    "家庭寵物": "Household pets"
+    "家庭寵物": "Household pets",
+    "物種": "Species",
+    "頭像": "Portrait",
+    "只套用於編輯模式寵物卡": "Applies only to pet cards in edit mode",
+    "只套用於檢視模式寵物卡": "Applies only to pet cards in view mode"
   }
 }

@@ -8669,13 +8669,14 @@ button.danger-action:focus-visible {
   pointer-events:none;
 }
 /* 與人物卡一致：檢視直向、編輯橫向，寵物資訊各自適配。 */
-.genealogy-pet-card-info { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; min-width:0; width:100%; }
+.genealogy-pet-card-info { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; min-width:0; width:100%; }
 .genealogy-pet-card.mode-edit { flex-direction:row; align-items:center; justify-content:flex-start; gap:10px; padding:10px; }
-.genealogy-pet-card.mode-edit .genealogy-pet-card-info { align-items:flex-start; text-align:left; gap:5px; flex:1; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-info { align-items:flex-start; text-align:left; gap:3px; flex:1; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-avatar { width:51px; height:51px; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name,
-.genealogy-pet-card.mode-edit .genealogy-pet-card-meta { text-align:left; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-field { text-align:left; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name { font-size:12px; }
+.genealogy-pet-card.pet-avatar-only { justify-content:center; }
 
 .genealogy-pet-card-avatar {
   position:relative;
@@ -8692,14 +8693,14 @@ button.danger-action:focus-visible {
 .pet-avatar-species-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--avatar-text); pointer-events:none; }
 .genealogy-pet-card-avatar .pet-avatar-species-fallback .l1ng-icon { width:30px; height:30px; }
 .genealogy-pet-card-avatar .l1ng-icon { width:26px; height:26px; }
+/* 寵物可選顯示欄位全部保留換行，不使用固定兩行裁切。 */
 .genealogy-pet-card-name {
-  display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  font-size:11px; font-weight:700; line-height:1.25;
+  display:block; width:100%; font-size:11px; font-weight:700; line-height:1.45;
+  white-space:normal; overflow-wrap:anywhere;
 }
-.genealogy-pet-card-meta {
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-  overflow:hidden; width:100%; font-size:9.5px; line-height:1.35; color:var(--text-secondary);
-  overflow-wrap:anywhere;
+.genealogy-pet-card-field {
+  display:block; width:100%; font-size:9.5px; line-height:1.4;
+  color:var(--text-secondary); white-space:normal; overflow-wrap:anywhere;
 }
 .genealogy-pet-card.ghost { background:var(--person-ghost-surface); border-color:var(--person-ghost-border); border-style:dotted; }
 .genealogy-pet-card.dead { background:var(--person-deceased-surface); border-color:var(--person-deceased-border); border-style:dashed; }

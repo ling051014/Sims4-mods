@@ -43,6 +43,15 @@ let genealogyScene = null;
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
 const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
+const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits'];
+const DEFAULT_PET_CARD_VIEW_SETTINGS = Object.freeze({
+  avatar:true, name:true, species:true, breed:true,
+  gender:false, ageStage:false, status:false, traits:false
+});
+const DEFAULT_PET_CARD_EDIT_SETTINGS = Object.freeze({
+  avatar:true, name:true, species:true, breed:true,
+  gender:false, ageStage:true, status:true, traits:false
+});
 
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
   avatar: true,
@@ -950,6 +959,11 @@ function getCardEditSettings() {
   );
 }
 
+function getPetCardSettings(mode = viewMode) {
+  return genealogyStore?.getPetCardSettings?.(mode) ||
+    { ...(mode === 'edit' ? DEFAULT_PET_CARD_EDIT_SETTINGS : DEFAULT_PET_CARD_VIEW_SETTINGS) };
+}
+
 function cardViewAppearanceClass() {
   return `card-appearance-${getCardViewSettings().appearance}`;
 }
@@ -1521,7 +1535,9 @@ function buildSample() {
       exportedAt:'2026-09-27T05:26:55.970318+08:00',
       realDateCurrentDate:{ year:2026, month:10, day:5 },
       cardView:{ ...DEFAULT_CARD_VIEW_SETTINGS },
-      cardEdit:{ ...DEFAULT_CARD_EDIT_SETTINGS }
+      cardEdit:{ ...DEFAULT_CARD_EDIT_SETTINGS },
+      petCardView:{ ...DEFAULT_PET_CARD_VIEW_SETTINGS },
+      petCardEdit:{ ...DEFAULT_PET_CARD_EDIT_SETTINGS }
     },
     sims,
     families,
@@ -8484,7 +8500,10 @@ genealogyStore =
     cardSettingFieldKeys:CARD_SETTING_FIELD_KEYS,
     defaultCardViewSettings:DEFAULT_CARD_VIEW_SETTINGS,
     defaultCardEditSettings:DEFAULT_CARD_EDIT_SETTINGS,
-    cardViewAppearances:['minimal','translucent','full']
+    cardViewAppearances:['minimal','translucent','full'],
+    petCardFieldKeys:PET_CARD_FIELD_KEYS,
+    defaultPetCardViewSettings:DEFAULT_PET_CARD_VIEW_SETTINGS,
+    defaultPetCardEditSettings:DEFAULT_PET_CARD_EDIT_SETTINGS
   }) ||
   null;
 
@@ -8836,6 +8855,8 @@ genealogyScene =
       showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
       petCardAvatarHTML:pet => petAvatarWithFallbackHTML(pet),
       petCardSpeciesLabel:formatPetSpecies,
+      petCardGenderLabel:petGenderLabel,
+      getPetCardSettings,
       syncPetSelectionClasses
     }
   }) || null;
@@ -11063,6 +11084,18 @@ personCardMenu?.addEventListener('click', e => {
   }
 });
 personCardMenu?.addEventListener('change', e => {
+  const petField = e.target?.dataset?.petCardField;
+  if (petField && PET_CARD_FIELD_KEYS.includes(petField)) {
+    const mode = personCardMenu.dataset.cardMode === 'edit' ? 'edit' : 'view';
+    const mutation = genealogyStore.setPetCardField(mode,petField,!!e.target.checked);
+    applyGenealogyMutation(mutation,{refreshFamily:false});
+    positionPersonCardMenu(
+      parseFloat(personCardMenu.style.left) || 0,
+      parseFloat(personCardMenu.style.top) || 0
+    );
+    return;
+  }
+
   const field = e.target?.dataset?.cardField;
 
   if (
@@ -17901,8 +17934,7 @@ function findCanvasPetEntry(key) {
 
 function focusPetOnCanvas(entry) {
   if (!entry) return;
-  const dims = viewMode === 'edit' ? {W:176,H:84} : {W:110,H:126};
-  genealogyViewport.focusWorldPoint(entry.x + PAD + dims.W/2,entry.y + PAD + dims.H/2,{minFocusScale:0.72});
+  genealogyViewport.focusWorldPoint(entry.x + PAD + entry.width/2,entry.y + PAD + entry.height/2,{minFocusScale:0.72});
   const element = [...petCardsLayer.querySelectorAll('.genealogy-pet-card[data-pet-id]')]
     .find(el => el.dataset.petId === entry.key);
   if (element) {
@@ -17918,18 +17950,28 @@ function renderPetCardMenu(entry,clientX,clientY) {
   const owner = currentGenealogyData()?.sims?.[entry.ownerId] || null;
   const title = displayDataText(entry.pet?.name,owner) || uiText('（未命名）');
   const editable = petCanvasOwnerIndex(entry) >= 0;
-  const selected = selectedPetIds.has(entry.key);
+  const settings = getPetCardSettings();
+  const fieldRows = [
+    ['name','姓名'],['species','物種'],['breed','品種'],['gender','性別'],
+    ['ageStage','人生階段'],['status','狀態'],['traits','特徵']
+  ].map(([key,label]) =>
+    `<label class="person-card-menu-check"><input type="checkbox" data-pet-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`
+  ).join('');
   personCardMenu.innerHTML = `
     <div class="person-card-menu-title">${esc(title)}</div>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看寵物資料'))}</span></button>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="edit" ${editable ? '' : 'disabled'}>${iconSvg('pencil-square')}<span>${esc(uiText('編輯寵物'))}</span></button>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
     <div class="person-card-menu-divider"></div>
-    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="select">${iconSvg(selected ? 'x-lg' : 'check-circle')}<span>${esc(uiText(selected ? '取消選取' : '選取寵物'))}</span></button>
+    <div class="person-card-menu-section-title">${esc(uiText(viewMode === 'edit' ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
+    <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
+    <div class="person-card-menu-grid">${fieldRows}</div>
+    <div class="person-card-menu-note">${esc(uiText(viewMode === 'edit' ? '只套用於編輯模式寵物卡' : '只套用於檢視模式寵物卡'))}</div>
     ${editable ? '' : `<div class="person-card-menu-note">${esc(uiText('此寵物沒有可編輯的所屬人物，目前僅能檢視。'))}</div>`}
   `;
   delete personCardMenu.dataset.simId;
   personCardMenu.dataset.petId = entry.key;
+  personCardMenu.dataset.cardMode = viewMode;
   personCardMenu.classList.add('show');
   personCardMenu.setAttribute('aria-hidden','false');
   positionPersonCardMenu(clientX,clientY);
@@ -17942,16 +17984,6 @@ function handlePetCardMenuAction(action,key) {
   if (action === 'view') { openPetProfileFromCanvas(entry); return; }
   if (action === 'edit') { if (petCanvasOwnerIndex(entry) >= 0) openPetEditorFromCanvas(entry); return; }
   if (action === 'locate') { focusPetOnCanvas(entry); return; }
-  if (action === 'select') {
-    if (selectedPetIds.has(entry.key)) {
-      selectedPetIds.delete(entry.key);
-    } else {
-      selectedNodeIds.clear();
-      selectedPetIds.clear();
-      selectedPetIds.add(entry.key);
-    }
-    syncNodeSelectionClasses();
-  }
 }
 
 // ========【寵物卡操作】 設定 - PointerUp 啟用觸控／滑鼠卡片；Click 保留鍵盤啟用 ========
