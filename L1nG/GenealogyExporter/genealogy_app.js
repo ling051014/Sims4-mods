@@ -8727,6 +8727,30 @@ function preloadCurrentViewAssets() {
     }
   });
 
+  if (!petVisibilityFilter || petVisibilityFilter.checked) {
+    const current = currentFamily();
+    const owners = new Set([
+      ...(current?.memberIds || []),
+      ...visibleIds
+    ].map(String));
+    const householdIds = new Set();
+    owners.forEach(id => {
+      const owner = currentGenealogyData().sims[id];
+      const householdId = owner?.gameData?.householdId;
+      if (householdId != null) householdIds.add(String(householdId));
+      (owner?.pets || []).forEach(pet => addPriority(pet?.avatar));
+    });
+    if (current?.gameData?.householdId != null) {
+      householdIds.add(String(current.gameData.householdId));
+    }
+    (currentGenealogyData()?.meta?.unassignedPets || []).forEach(pet => {
+      const householdId = pet?.gameData?.householdId;
+      if (householdId != null && householdIds.has(String(householdId))) {
+        addPriority(pet.avatar);
+      }
+    });
+  }
+
   // 側邊欄中目前不在主畫布的成員降為第二優先，
   // 不阻塞主畫布首次顯示。
   (currentFamily()?.memberIds || [])
@@ -16468,6 +16492,7 @@ function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
   const viewportRect = captureViewport.getBoundingClientRect();
   const content = [
     ...captureStage.querySelectorAll('.person-card'),
+    ...captureStage.querySelectorAll('.genealogy-pet-card, .genealogy-pet-family-label'),
     ...captureStage.querySelectorAll('#genealogyRelationshipLayer path'),
     ...captureStage.querySelectorAll('#genealogyRelationshipLabelLayer .edge-label')
   ];
