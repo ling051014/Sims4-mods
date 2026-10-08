@@ -2928,379 +2928,39 @@ function setupTopbarNavSelects() {
 }
 
 
-// ========【共用 HTML 彈窗】 設定 - 取代瀏覽器原生 alert / confirm / prompt ========
-let _uiDialogResolve = null;
-let _uiDialogMode = 'alert';
+// ========【共用 HTML 彈窗】 設定 - UI Controller 是唯一彈窗與按鈕 Loading Authority ========
+const genealogyDialogs =
+  window.L1nGGenealogyUI?.createDialogController?.({
+    uiText,
+    esc
+  });
 
+if (!genealogyDialogs) {
+  throw new Error('Genealogy dialog controller failed to initialize.');
+}
+
+// 只保留 App 業務操作所需的穩定呼叫介面，不在 App 複製彈窗生命週期。
 function closeUiDialog(result = null) {
-  const overlay = $('confirmationDialog');
-  if (!overlay || !overlay.classList.contains('show')) return;
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  const resolve = _uiDialogResolve;
-  _uiDialogResolve = null;
-  if (resolve) resolve(result);
+  return genealogyDialogs.close(result);
 }
-
-function openUiDialog({
-  title = '提示',
-  message = '',
-  mode = 'alert',
-  kind = 'default',
-  defaultValue = '',
-  confirmText = '確定',
-  cancelText = '取消',
-  secondaryText = '',
-  secondaryValue = null,
-  secondaryKind = 'default',
-  secondaryHint = '',
-  confirmHint = '',
-  confirmValue = true,
-  cancelValue = mode === 'confirm' ? false : null
-} = {}) {
-  const overlay = $('confirmationDialog');
-  const dialog = $('uiDialog');
-  const titleEl = $('uiDialogTitle');
-  const messageEl = $('uiDialogMessage');
-  const inputEl = $('uiDialogInput');
-  const cancelBtn = $('uiDialogCancel');
-  const secondaryBtn = $('uiDialogSecondary');
-  const confirmBtn = $('uiDialogConfirm');
-  const titleHint = $('uiDialogTitleHint');
-  const closeBtn = $('uiDialogClose');
-
-  if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !titleHint || !closeBtn) {
-    return Promise.resolve(
-      mode === 'confirm'
-        ? false
-        : mode === 'choice'
-          ? null
-          : mode === 'prompt'
-            ? null
-            : true
-    );
-  }
-
-  if (_uiDialogResolve) closeUiDialog(null);
-  _uiDialogMode = mode;
-  titleEl.textContent = uiText(title);
-  // 先嘗試翻譯完整訊息，讓跨行確認文案與動態樣式能一次正確處理；
-  // 若沒有完整對應，再逐行翻譯，避免英文介面殘留繁中文字。
-  const rawMessage = String(message ?? '');
-  const wholeMessage = uiText(rawMessage);
-  messageEl.textContent = wholeMessage !== rawMessage
-    ? wholeMessage
-    : rawMessage.split('\n').map(line => uiText(line)).join('\n');
-  dialog.dataset.kind = kind;
-  const hasSecondaryAction =
-    !!String(secondaryText || '').trim();
-
-  dialog.dataset.actionCount =
-    mode === 'alert'
-      ? '1'
-      : hasSecondaryAction
-        ? '3'
-        : '2';
-
-  confirmBtn.textContent = uiText(confirmText);
-  cancelBtn.textContent = uiText(cancelText);
-  cancelBtn.style.display = mode === 'alert' ? 'none' : '';
-
-  secondaryBtn.textContent =
-    hasSecondaryAction
-      ? uiText(secondaryText)
-      : '';
-
-  secondaryBtn.hidden =
-    !hasSecondaryAction;
-
-  secondaryBtn.classList.toggle(
-    'danger',
-    hasSecondaryAction &&
-    secondaryKind === 'danger'
-  );
-
-  const confirmHintText =
-    String(confirmHint || '').trim();
-
-  const secondaryHintText =
-    String(secondaryHint || '').trim();
-
-  const titleHintSections = [];
-
-  if (confirmHintText) {
-    titleHintSections.push(
-      `${uiText(confirmText)}：${uiText(confirmHintText)}`
-    );
-  }
-
-  if (
-    hasSecondaryAction &&
-    secondaryHintText
-  ) {
-    titleHintSections.push(
-      `${uiText(secondaryText)}：${uiText(secondaryHintText)}`
-    );
-  }
-
-  const titleHintText =
-    titleHintSections.join('\n\n');
-
-  titleHint.hidden =
-    !titleHintText;
-
-  if (titleHintText) {
-    titleHint.dataset.tooltip =
-      titleHintText;
-
-    titleHint.setAttribute(
-      'aria-label',
-      uiText('匯入方式說明')
-    );
-  } else {
-    delete titleHint.dataset.tooltip;
-  }
-
-  inputEl.classList.toggle('show', mode === 'prompt');
-  inputEl.value = mode === 'prompt' ? uiText(defaultValue) : '';
-
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-
-  return new Promise(resolve => {
-    _uiDialogResolve = resolve;
-
-    const finishConfirm = () => {
-      if (mode === 'prompt') {
-        closeUiDialog(inputEl.value);
-        return;
-      }
-
-      closeUiDialog(confirmValue);
-    };
-
-    const finishSecondary = () =>
-      closeUiDialog(secondaryValue);
-
-    const finishCancel = () =>
-      closeUiDialog(cancelValue);
-
-    confirmBtn.onclick = finishConfirm;
-    secondaryBtn.onclick =
-      hasSecondaryAction
-        ? finishSecondary
-        : null;
-    cancelBtn.onclick = finishCancel;
-    closeBtn.onclick = finishCancel;
-    overlay.onclick = event => {
-      if (event.target === overlay) finishCancel();
-    };
-
-    inputEl.onkeydown = event => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        finishConfirm();
-      }
-    };
-
-    requestAnimationFrame(() => {
-      if (mode === 'prompt') {
-        inputEl.focus();
-        inputEl.select();
-        return;
-      }
-
-      dialog.focus({
-        preventScroll:true
-      });
-    });
-  });
+function openUiDialog(options = {}) {
+  return genealogyDialogs.open(options);
 }
-
 function uiAlert(message, options = {}) {
-  return openUiDialog({
-    title: options.title || '提示',
-    message,
-    mode: 'alert',
-    kind: options.kind || 'default',
-    confirmText: options.confirmText || '確定'
-  });
+  return genealogyDialogs.alert(message, options);
 }
-
 function uiConfirm(message, options = {}) {
-  return openUiDialog({
-    title: options.title || '請確認',
-    message,
-    mode: 'confirm',
-    kind: options.kind || 'default',
-    confirmText: options.confirmText || '確定',
-    cancelText: options.cancelText || '取消'
-  });
+  return genealogyDialogs.confirm(message, options);
 }
-
 function uiPrompt(message, defaultValue = '', options = {}) {
-  return openUiDialog({
-    title: options.title || '輸入資料',
-    message,
-    mode: 'prompt',
-    kind: options.kind || 'default',
-    defaultValue,
-    confirmText: options.confirmText || '確定',
-    cancelText: options.cancelText || '取消'
-  });
+  return genealogyDialogs.prompt(message, defaultValue, options);
 }
-
 function uiToast(message, duration = 2600) {
-  const region = $('toastRegion');
-  if (!region) return;
-  const toast = document.createElement('div');
-  toast.className = 'ui-toast';
-  toast.textContent = uiText(message);
-  region.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(6px)';
-    toast.style.transition = 'opacity .18s ease, transform .18s ease';
-    setTimeout(() => toast.remove(), 200);
-  }, duration);
+  return genealogyDialogs.toast(message, duration);
 }
-
-const actionButtonLoadingState =
-  new WeakMap();
-
-function setActionButtonLoading(
-  button,
-  loading,
-  label = ''
-) {
-  if (!button) return;
-
-  if (loading) {
-    if (
-      actionButtonLoadingState
-        .has(button)
-    ) {
-      return;
-    }
-
-    const measuredWidth =
-      Math.ceil(
-        button
-          .getBoundingClientRect()
-          .width
-      );
-
-    actionButtonLoadingState.set(
-      button,
-      {
-        html:button.innerHTML,
-        disabled:button.disabled,
-        minWidth:button.style.minWidth
-      }
-    );
-
-    if (measuredWidth > 0) {
-      button.style.minWidth =
-        measuredWidth + 'px';
-    }
-
-    button.disabled = true;
-    button.classList.add(
-      'is-loading'
-    );
-    button.setAttribute(
-      'aria-busy',
-      'true'
-    );
-
-    const loadingLabel =
-      uiText(label || '處理中')
-        .replace(/[.…]+$/u,'');
-
-    button.innerHTML =
-      '<span class="button-loading-label">' +
-        esc(loadingLabel) +
-      '</span>' +
-      '<span class="button-loading-dots" aria-hidden="true">' +
-        '<span></span><span></span><span></span>' +
-      '</span>';
-
-    return;
-  }
-
-  const state =
-    actionButtonLoadingState
-      .get(button);
-
-  if (!state) return;
-
-  button.innerHTML =
-    state.html;
-
-  button.disabled =
-    state.disabled;
-
-  button.style.minWidth =
-    state.minWidth;
-
-  button.classList.remove(
-    'is-loading'
-  );
-  button.removeAttribute(
-    'aria-busy'
-  );
-
-  actionButtonLoadingState
-    .delete(button);
+function withActionButtonLoading(button, label, action) {
+  return genealogyDialogs.withActionButtonLoading(button, label, action);
 }
-
-async function withActionButtonLoading(
-  button,
-  label,
-  action
-) {
-  if (
-    !button ||
-    actionButtonLoadingState.has(button)
-  ) {
-    return;
-  }
-
-  setActionButtonLoading(
-    button,
-    true,
-    label
-  );
-
-  // 等兩個 animation frame：第一幀提交 loading 狀態，第二幀再開始工作，
-  // 避免同步儲存與關窗搶在瀏覽器真正繪製「儲存中」之前完成。
-  await new Promise(resolve =>
-    requestAnimationFrame(() =>
-      requestAnimationFrame(resolve)
-    )
-  );
-
-  try {
-    return await action();
-  } finally {
-    setActionButtonLoading(
-      button,
-      false
-    );
-  }
-}
-
-
-document.addEventListener('keydown', event => {
-  const overlay = $('confirmationDialog');
-  if (!overlay || !overlay.classList.contains('show')) return;
-  if (event.key === 'Escape') {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    closeUiDialog(_uiDialogMode === 'confirm' ? false : null);
-  }
-});
-
 
 function createDebouncedCallback(callback, wait = 150) {
   let timerId = null;
@@ -5996,396 +5656,56 @@ function setRelationshipPerspective(
 
 
 
-function openSidebar() {
-  if (!sidebar) return;
-  sidebar.classList.add('open');
-  sidebarBackdrop?.classList.add('show');
-}
-function closeSidebar() {
-  if (!sidebar) return;
-  sidebar.classList.remove('open');
-  sidebarBackdrop?.classList.remove('show');
-}
-function setFamilyPanelCollapsed(collapsed, { persist = true } = {}) {
-  const next = !!collapsed;
-  document.body.classList.toggle('family-panel-collapsed', next);
-  const btn = $('familyPanelCollapseBtn');
-  if (btn) {
-    btn.innerHTML = iconSvg(next ? 'chevron-right' : 'chevron-left');
-    btn.title = uiText(next ? '展開家族欄' : '收合家族欄');
-    btn.setAttribute('aria-label', btn.title);
-  }
-  if (persist) { try { localStorage.setItem(FAMILY_PANEL_COLLAPSED_KEY, next ? '1' : '0'); } catch (_) {} }
-}
-function restoreFamilyPanelCollapsed() {
-  let collapsed = false;
-  try { collapsed = localStorage.getItem(FAMILY_PANEL_COLLAPSED_KEY) === '1'; } catch (_) {}
-  setFamilyPanelCollapsed(collapsed, { persist:false });
-}
-menuToggle.onclick = () => {
-  if (window.innerWidth <= 720) {
-    if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
-  } else {
-    setFamilyPanelCollapsed(!document.body.classList.contains('family-panel-collapsed'));
-  }
-};
-sidebarBackdrop.onclick = closeSidebar;
-$('familyPanelCollapseBtn')?.addEventListener('click', () => setFamilyPanelCollapsed(true));
-
-// ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
-function restoreAppMenuPortal(menu) {
-  const popover =
-    menu?._bodyPortalPopover;
-
-  if (!popover) return;
-
-  popover.classList.remove(
-    'ui-menu-body-portal'
-  );
-
-  popover.style.removeProperty('top');
-  popover.style.removeProperty('left');
-  popover.style.removeProperty('right');
-  popover.style.removeProperty('bottom');
-
-  menu.appendChild(popover);
-  menu._bodyPortalPopover = null;
-}
-
-function positionAppMenuPortal(
-  menu,
-  trigger,
-  popover
-) {
-  const margin = 8;
-  const gap = 4;
-  const triggerRect =
-    trigger.getBoundingClientRect();
-
-  document.body.appendChild(popover);
-
-  popover.classList.add(
-    'ui-menu-body-portal'
-  );
-
-  const popoverRect =
-    popover.getBoundingClientRect();
-
-  const left =
-    Math.max(
-      margin,
-      Math.min(
-        triggerRect.right -
-          popoverRect.width,
-        window.innerWidth -
-          popoverRect.width -
-          margin
-      )
-    );
-
-  const belowTop =
-    triggerRect.bottom + gap;
-
-  const aboveTop =
-    triggerRect.top -
-    popoverRect.height -
-    gap;
-
-  const top =
-    belowTop +
-      popoverRect.height <=
-        window.innerHeight -
-          margin
-      ? belowTop
-      : Math.max(
-          margin,
-          aboveTop
-        );
-
-  popover.style.left =
-    Math.round(left) + 'px';
-
-  popover.style.top =
-    Math.round(top) + 'px';
-
-  popover.style.right = 'auto';
-  popover.style.bottom = 'auto';
-
-  menu._bodyPortalPopover =
-    popover;
-}
-
-function closeAppMenu(menu) {
-  if (!menu) return;
-
-  menu.classList.remove('open');
-
-  menu
-    .querySelector(
-      ':scope > .ui-menu-trigger'
-    )
-    ?.setAttribute(
-      'aria-expanded',
-      'false'
-    );
-
-  restoreAppMenuPortal(menu);
-}
-
-function closeAppMenus(except = null) {
-  document
-    .querySelectorAll(
-      '.ui-menu.open'
-    )
-    .forEach(menu => {
-      if (menu === except) return;
-      closeAppMenu(menu);
-    });
-}
-
-let _appMenuGlobalBound = false;
-
-function setupAppMenus() {
-  document
-    .querySelectorAll('.ui-menu')
-    .forEach(menu => {
-      const trigger =
-        menu.querySelector(
-          ':scope > .ui-menu-trigger'
-        );
-
-      if (
-        !trigger ||
-        trigger.dataset.menuBound === '1'
-      ) {
-        return;
-      }
-
-      trigger.dataset.menuBound = '1';
-
-      trigger.addEventListener(
-        'click',
-        e => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const willOpen =
-            !menu.classList.contains(
-              'open'
-            );
-
-          closeAppMenus(menu);
-
-          if (!willOpen) {
-            closeAppMenu(menu);
-            return;
-          }
-
-          menu.classList.add('open');
-
-          trigger.setAttribute(
-            'aria-expanded',
-            'true'
-          );
-
-          if (
-            menu.dataset.menuPortal ===
-            'body'
-          ) {
-            const popover =
-              menu.querySelector(
-                ':scope > .ui-menu-popover'
-              );
-
-            if (popover) {
-              positionAppMenuPortal(
-                menu,
-                trigger,
-                popover
-              );
-            }
-          }
-        }
-      );
-
-      menu
-        .querySelectorAll(
-          '.ui-menu-item'
-        )
-        .forEach(item =>
-          item.addEventListener(
-            'click',
-            () => {
-              setTimeout(
-                () => closeAppMenus(),
-                0
-              );
-            }
-          )
-        );
-    });
-
-  if (!_appMenuGlobalBound) {
-    _appMenuGlobalBound = true;
-
-    document.addEventListener(
-      'click',
-      e => {
-        if (
-          !e.target.closest?.(
-            '.ui-menu, .ui-menu-body-portal'
-          )
-        ) {
-          closeAppMenus();
-        }
-      }
-    );
-
-    document.addEventListener(
-      'keydown',
-      e => {
-        if (e.key === 'Escape') {
-          closeAppMenus();
-        }
-      }
-    );
-
-    window.addEventListener(
-      'resize',
-      () => closeAppMenus()
-    );
-  }
-}
-
-// ========【共用說明 Tooltip】 設定 - 掛到 body，避免被 modal overflow 裁切 ========
-function setupHelpTooltipPortal() {
-  if ($('globalHelpTooltip')) return;
-  const tip = document.createElement('div');
-  tip.id = 'globalHelpTooltip';
-  tip.setAttribute('role','tooltip');
-  document.body.appendChild(tip);
-  let active = null;
-  const place = () => {
-    if (!active || !tip.classList.contains('show')) return;
-    const r = active.getBoundingClientRect();
-    const tr = tip.getBoundingClientRect();
-    const margin = 10, gap = 8;
-    const canTop = r.top >= tr.height + gap + margin;
-    const side = canTop ? 'top' : 'bottom';
-    let left = r.left + r.width / 2 - tr.width / 2;
-    left = Math.max(margin, Math.min(left, window.innerWidth - tr.width - margin));
-    const top = side === 'top' ? r.top - tr.height - gap : r.bottom + gap;
-    const arrowX = Math.max(9, Math.min(tr.width - 9, r.left + r.width / 2 - left));
-    tip.dataset.side = side;
-    tip.style.left = `${Math.round(left)}px`; tip.style.top = `${Math.round(top)}px`;
-    tip.style.setProperty('--tooltip-arrow-x', `${Math.round(arrowX)}px`);
-  };
-  const show = target => {
-    const text = target?.dataset?.tooltip; if (!text) return;
-    active = target; tip.textContent = text; tip.classList.add('show');
-    requestAnimationFrame(place);
-  };
-  const hide = target => { if (!target || target === active) { tip.classList.remove('show'); active = null; } };
-  document.addEventListener('mouseover', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) show(t); });
-  document.addEventListener('mouseout', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t && !t.contains(e.relatedTarget)) hide(t); });
-  document.addEventListener('focusin', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) show(t); });
-  document.addEventListener('focusout', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) hide(t); });
-  document.addEventListener('click', e => { const t=e.target.closest?.('.help-tooltip[data-tooltip]'); if (t) { e.stopPropagation(); active===t && tip.classList.contains('show') ? hide(t) : show(t); } else hide(); });
-  window.addEventListener('resize', place);
-  document.addEventListener('scroll', place, true);
-}
-
-// ========【側邊欄寬度】 設定 - 桌面版拖曳調整並保存寬度 ========
-function getSidebarMaxWidth() {
-  // 避免側邊欄在較窄桌面畫面佔掉過多族譜工作區
-  return Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, Math.floor(window.innerWidth * 0.42)));
-}
-
-function clampSidebarWidth(value) {
-  const width = Number(value);
-  if (!Number.isFinite(width)) return SIDEBAR_DEFAULT_WIDTH;
-  return Math.max(SIDEBAR_MIN_WIDTH, Math.min(getSidebarMaxWidth(), Math.round(width)));
-}
-
-function applySidebarWidth(value, { persist = true } = {}) {
-  const width = clampSidebarWidth(value);
-  document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
-  scheduleFamilyNameInputWidthSync();
-  if (sidebarResizer) sidebarResizer.setAttribute('aria-valuenow', String(width));
-  if (persist) {
-    try { localStorage.setItem(SIDEBAR_WIDTH_KEY, String(width)); } catch (_) {}
-  }
-  return width;
-}
-
-function restoreSidebarWidth() {
-  let saved = SIDEBAR_DEFAULT_WIDTH;
-  try { saved = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY)) || SIDEBAR_DEFAULT_WIDTH; } catch (_) {}
-  applySidebarWidth(saved, { persist: false });
-}
-
-restoreSidebarWidth();
-
-if (sidebarResizer) {
-  sidebarResizer.setAttribute('aria-valuemin', String(SIDEBAR_MIN_WIDTH));
-  sidebarResizer.setAttribute('aria-valuemax', String(SIDEBAR_MAX_WIDTH));
-
-  sidebarResizer.addEventListener('pointerdown', e => {
-    if (window.innerWidth <= 720 || document.body.classList.contains('family-panel-collapsed')) return;
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = sidebar.getBoundingClientRect().width;
-    document.body.classList.add('sidebar-resizing');
-    try { sidebarResizer.setPointerCapture(e.pointerId); } catch (_) {}
-
-    const onMove = ev => {
-      applySidebarWidth(startWidth + (ev.clientX - startX));
-    };
-
-    const onUp = () => {
-      sidebarResizer.removeEventListener('pointermove', onMove);
-      sidebarResizer.removeEventListener('pointerup', onUp);
-      sidebarResizer.removeEventListener('pointercancel', onUp);
-      document.body.classList.remove('sidebar-resizing');
-    };
-
-    sidebarResizer.addEventListener('pointermove', onMove);
-    sidebarResizer.addEventListener('pointerup', onUp);
-    sidebarResizer.addEventListener('pointercancel', onUp);
-  });
-
-  sidebarResizer.addEventListener('dblclick', () => {
-    applySidebarWidth(SIDEBAR_DEFAULT_WIDTH);
-  });
-
-  sidebarResizer.addEventListener('keydown', e => {
-    if (window.innerWidth <= 720) return;
-    const current = sidebar.getBoundingClientRect().width;
-    const step = e.shiftKey ? 20 : 8;
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      applySidebarWidth(current - step);
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      applySidebarWidth(current + step);
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      applySidebarWidth(SIDEBAR_MIN_WIDTH);
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      applySidebarWidth(getSidebarMaxWidth());
+// ========【頂欄與側邊欄】 設定 - UI 模組唯一持有選單、Tooltip、Resize 事件 ========
+const genealogyChrome =
+  window.L1nGGenealogyUI?.createChromeController?.({
+    dom:{
+      sidebar,
+      sidebarBackdrop,
+      menuToggle,
+      sidebarResizer
+    },
+    constants:{
+      SIDEBAR_MIN_WIDTH,
+      SIDEBAR_MAX_WIDTH,
+      SIDEBAR_DEFAULT_WIDTH,
+      SIDEBAR_WIDTH_KEY,
+      FAMILY_PANEL_COLLAPSED_KEY
+    },
+    helpers:{
+      uiText,
+      iconSvg,
+      scheduleFamilyNameInputWidthSync,
+      createDebouncedCallback
     }
   });
+
+if (!genealogyChrome) {
+  throw new Error('Genealogy chrome controller failed to initialize.');
 }
 
-window.addEventListener('resize', createDebouncedCallback(() => {
-  if (window.innerWidth > 720) {
-    const current = sidebar.getBoundingClientRect().width;
-    const clamped = clampSidebarWidth(current);
-    if (Math.abs(clamped - current) > 0.5) applySidebarWidth(clamped);
-  }
-}, 80));
+// App 只協調互動流程；事件註冊與位置計算已由 UI Controller 接管。
+function openSidebar() { return genealogyChrome.openSidebar(); }
+function closeSidebar() { return genealogyChrome.closeSidebar(); }
+function setFamilyPanelCollapsed(collapsed, options) {
+  return genealogyChrome.setFamilyPanelCollapsed(collapsed, options);
+}
+function restoreFamilyPanelCollapsed() {
+  return genealogyChrome.restoreFamilyPanelCollapsed();
+}
+function setupAppMenus() { return genealogyChrome.setupAppMenus(); }
+function closeAppMenus(except = null) {
+  return genealogyChrome.closeAppMenus(except);
+}
+function setupHelpTooltipPortal() {
+  return genealogyChrome.setupHelpTooltipPortal();
+}
+function applySidebarWidth(value, options) {
+  return genealogyChrome.applySidebarWidth(value, options);
+}
 
+// 初始寬度仍在原本階段恢復；不依賴後續 bootstrap。
+genealogyChrome.restoreSidebarWidth();
 
 // ========【資料儲存佇列】 設定 - Runtime Save Coordinator 為唯一儲存 Authority ========
 const genealogySaveCoordinator =
@@ -9107,19 +8427,7 @@ const MODAL_LIFECYCLE_STACK = [
 ];
 
 function closeTopModal() {
-  for (const lifecycle of MODAL_LIFECYCLE_STACK) {
-    if (
-      !lifecycle.dialog ||
-      !lifecycle.dialog.classList.contains('show')
-    ) {
-      continue;
-    }
-
-    lifecycle.close();
-    return true;
-  }
-
-  return false;
+  return window.L1nGGenealogyUI.closeTopmostDialog(MODAL_LIFECYCLE_STACK);
 }
 
 // 親子／收養查詢由 Store 統一管理；保留既有畫布及編輯器呼叫介面。
@@ -9524,32 +8832,33 @@ function focusSimOnCanvas(simId) {
   }
 }
 
-// ========【App Render Orchestration】 設定 - Canvas dirty 交給 Scene；Chrome / Lists 留在 App ========
-const APP_RENDER_DIRTY = Object.freeze({ chrome:1, lists:2 });
-let appRenderDirtyMask = 0;
-let appRenderInvalidationRaf = 0;
-function flushAppRenderInvalidation() {
-  if (appRenderInvalidationRaf) { cancelAnimationFrame(appRenderInvalidationRaf); appRenderInvalidationRaf = 0; }
-  const mask = appRenderDirtyMask;
-  appRenderDirtyMask = 0;
-  if (!mask) return;
-  if (mask & APP_RENDER_DIRTY.chrome) { syncRelationshipPerspectiveUI(); syncLayoutModeControls(); }
-  if (mask & APP_RENDER_DIRTY.lists) {
-    if (personLibraryDialog.classList.contains('show')) renderPersonLibrary();
-    if (familyMemberPickerDialog.classList.contains('show')) renderFamilyMemberPickerList();
-  }
+// ========【App Render Orchestration】 設定 - Runtime 唯一管理 Scene / Chrome / Lists dirty 排程 ========
+const genealogyRenderCoordinator =
+  genealogyRuntime?.createRenderCoordinator?.({
+    requestSceneUpdate:(layers,options) => genealogyScene?.requestUpdate?.(layers,options),
+    refreshChrome:() => {
+      syncRelationshipPerspectiveUI();
+      syncLayoutModeControls();
+    },
+    refreshLists:() => {
+      if (personLibraryDialog.classList.contains('show')) renderPersonLibrary();
+      if (familyMemberPickerDialog.classList.contains('show')) renderFamilyMemberPickerList();
+    }
+  });
+
+if (!genealogyRenderCoordinator) {
+  throw new Error('Genealogy render coordinator failed to initialize.');
 }
-function invalidateRender(layers, { immediate = false } = {}) {
-  genealogyScene?.requestUpdate?.({ layout:!!layers?.layout, nodes:!!layers?.nodes, edges:!!layers?.edges }, { immediate });
-  if (layers?.chrome) appRenderDirtyMask |= APP_RENDER_DIRTY.chrome;
-  if (layers?.lists) appRenderDirtyMask |= APP_RENDER_DIRTY.lists;
-  if (!appRenderDirtyMask) return;
-  if (immediate) { flushAppRenderInvalidation(); return; }
-  if (appRenderInvalidationRaf) return;
-  appRenderInvalidationRaf = requestAnimationFrame(() => { appRenderInvalidationRaf = 0; flushAppRenderInvalidation(); });
+
+function invalidateRender(layers, options = {}) {
+  return genealogyRenderCoordinator.invalidate(layers, options);
 }
+
 function render() {
-  invalidateRender({ layout:true, nodes:true, edges:true, chrome:true, lists:true }, { immediate:true });
+  invalidateRender(
+    { layout:true, nodes:true, edges:true, chrome:true, lists:true },
+    { immediate:true }
+  );
 }
 
 function avatarHTML(sim) {
