@@ -1071,6 +1071,8 @@
     "箭頭說明": "Arrow Help",
     "單向關係顯示單一箭頭；雙向關係顯示兩端箭頭。": "Directional relationships show one arrow; symmetric relationships show arrows at both ends.",
     "重設視覺設定": "Reset Visual Settings",
-    "調整主題、族譜背景與關係線顯示。": "Adjust the theme, genealogy background, and relationship lines."
+    "調整主題、族譜背景與關係線顯示。": "Adjust the theme, genealogy background, and relationship lines.",
+    "顯示寵物": "Show pets",
+    "家庭寵物": "Household pets"
   }
 }

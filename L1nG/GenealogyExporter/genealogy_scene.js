@@ -4,8 +4,8 @@
   function create({ runtime, dom, constants, state, helpers } = {}) {
     if (!dom || !state || !helpers) throw new Error('Genealogy Scene requires dom, state, and helpers.');
     const genealogyRuntime = runtime || null;
-    const { stage, svg, labelsSvg, nodes } = dom;
-    if (!stage || !svg || !labelsSvg || !nodes) throw new Error('Genealogy Scene requires Canvas DOM references.');
+    const { stage, svg, labelsSvg, nodes, pets:petLayer } = dom;
+    if (!stage || !svg || !labelsSvg || !nodes || !petLayer) throw new Error('Genealogy Scene requires Canvas DOM references.');
     const { PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX } = constants;
 
     // ========【Scene 卡片幾何】 設定 - 卡片尺寸 / 間距 / 檢視版型由 Scene 唯一持有 ========
@@ -14,6 +14,13 @@
       view:Object.freeze({ W:136, H:118 })
     });
 
+    const PET_CARD_W = 110;
+    const PET_CARD_H = 126;
+    const PET_CARD_GAP = 12;
+    const PET_ROW_GAP = 13;
+    const PET_GROUP_GAP = 30;
+    const PET_HEADER_H = 25;
+    const PET_SIDE_GAP = 96;
     const GAPS = Object.freeze({
       edit:Object.freeze({ SPOUSE:30, SIBLING:56, LEVEL:118 }),
       view:Object.freeze({ SPOUSE:22, SIBLING:40, LEVEL:90 })
@@ -41,7 +48,8 @@
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass
+      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
+      showPetCards, petCardAvatarHTML, petCardSpeciesLabel
     } = helpers;
     // Scene owns canvas-only presentation and relationship-label SVG markup.
     // ========【檢視卡片內容模型】 設定 - 文字列與卡片 HTML 都由 Scene 統一組裝 ========
@@ -6169,6 +6177,121 @@ function solveAutomaticGenealogyPositions(visibleIds) {
   );
 }
 
+// ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
+function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
+  const empty = {cards:[],groups:[],width:0,height:0};
+  if (!showPetCards()) return empty;
+  const sourceIds = new Set([
+    ...(family?.memberIds || []),
+    ...(family?.primaryMemberIds || []),
+    ...visibleIds
+  ].map(String));
+  const householdIds = new Set();
+  const byGroup = new Map();
+  const seen = new Set();
+
+  sourceIds.forEach(id => {
+    const hh = genealogyData?.sims?.[id]?.gameData?.householdId;
+    if (hh != null) householdIds.add(String(hh));
+  });
+  if (family?.gameData?.householdId != null) householdIds.add(String(family.gameData.householdId));
+
+  function addPet(pet, ownerId) {
+    if (!pet || typeof pet !== 'object') return;
+    const id = String(pet.gameData?.simId || pet.id || (ownerId + ':' + seen.size));
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    const ownerHousehold = ownerId ? genealogyData?.sims?.[ownerId]?.gameData?.householdId : null;
+    const householdId = pet.gameData?.householdId != null
+      ? String(pet.gameData.householdId)
+      : (ownerHousehold != null ? String(ownerHousehold) : '');
+    const groupKey = householdId ? 'household:' + householdId : 'owner:' + (ownerId || id);
+
+    if (!byGroup.has(groupKey)) {
+      const matchingFamily = (genealogyData?.families || []).find(entry =>
+        householdId && String(entry?.gameData?.householdId ?? '') === householdId
+      );
+      byGroup.set(groupKey, {
+        key:groupKey, householdId,
+        title:matchingFamily?.name || uiText('家庭寵物'),
+        ownerIds:new Set(), entries:[], anchorY:0
+      });
+    }
+    const group = byGroup.get(groupKey);
+    if (ownerId) group.ownerIds.add(ownerId);
+    group.entries.push({key:id,pet,ownerId,householdId,groupKey});
+  }
+  sourceIds.forEach(id => {
+    const owner = genealogyData?.sims?.[id];
+    if (Array.isArray(owner?.pets)) owner.pets.forEach(pet => addPet(pet,id));
+  });
+
+  // EA 多人家庭通常無法指定單一主人：未指派主人但有家庭 ID 的寵物仍須顯示。
+  (genealogyData?.meta?.unassignedPets || []).forEach(pet => {
+    const household = pet?.gameData?.householdId;
+    if (household == null || !householdIds.has(String(household))) return;
+    addPet(pet,'');
+  });
+  const groups = [...byGroup.values()];
+  if (!groups.length) return empty;
+
+  groups.forEach(group => {
+    const anchors = [...visibleIds].filter(id => {
+      const sim = genealogyData?.sims?.[id];
+      return group.ownerIds.has(String(id)) ||
+        (!!group.householdId && String(sim?.gameData?.householdId ?? '') === group.householdId);
+    }).map(id => positions.get(String(id))?.y).filter(Number.isFinite).sort((a,b) => a-b);
+    group.anchorY = anchors.length ? anchors[Math.floor((anchors.length-1)/2)] : 0;
+  });
+  groups.sort((a,b) => a.anchorY-b.anchorY || a.key.localeCompare(b.key));
+
+  const originX = (humanGeometry.width || 0) + (positions.size ? PET_SIDE_GAP : 0);
+  const cards = [];
+  let bottom = -PET_GROUP_GAP;
+  let maxRight = 0;
+  groups.forEach(group => {
+    group.x = originX;
+    group.y = Math.max(0,group.anchorY,bottom + PET_GROUP_GAP);
+    group.entries.forEach((entry,index) => {
+      const x = originX + (index % 3) * (PET_CARD_W + PET_CARD_GAP);
+      const y = group.y + PET_HEADER_H + Math.floor(index / 3) * (PET_CARD_H + PET_ROW_GAP);
+      cards.push({...entry,x,y});
+      maxRight = Math.max(maxRight,x+PET_CARD_W);
+    });
+    const rows = Math.ceil(group.entries.length/3);
+    bottom = group.y + PET_HEADER_H + rows*PET_CARD_H + Math.max(0,rows-1)*PET_ROW_GAP;
+  });
+  return {cards,groups,width:maxRight,height:bottom};
+}
+
+// ========【寵物畫布圖層】 設定 - 不混入人物節點、選取及關係線路由 ========
+function paintPetLayer() {
+  if (!layoutCache?.petLayout?.cards?.length) {
+    petLayer.replaceChildren();
+    return;
+  }
+  const {cards,groups} = layoutCache.petLayout;
+  petLayer.innerHTML = groups.map(group => {
+    const header = `<div class="genealogy-pet-family-label" style="left:${group.x+PAD}px;top:${group.y+PAD}px">${esc(group.title)}</div>`;
+    const items = cards.filter(card => card.groupKey === group.key).map(card => {
+      const pet = card.pet;
+      const owner = genealogyData?.sims?.[card.ownerId] || null;
+      const name = displayDataText(pet.name,owner) || uiText('（未命名）');
+      const breed = displayDataText(pet.breed,owner);
+      const species = petCardSpeciesLabel(pet);
+      const state = pet.status === '幽靈' ? 'ghost' : pet.status === '已故' ? 'dead' : '';
+      return `<button type="button" class="genealogy-pet-card ${state}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
+        style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${PET_CARD_W}px;height:${PET_CARD_H}px">
+        <span class="genealogy-pet-card-avatar">${petCardAvatarHTML(pet)}</span>
+        <span class="genealogy-pet-card-name">${esc(name)}</span>
+        <span class="genealogy-pet-card-meta">${esc(species)}${breed ? ' · ' + esc(breed) : ''}</span>
+      </button>`;
+    }).join('');
+    return header+items;
+  }).join('');
+}
+
 function composeScenePlan() {
   const fam =
     currentFamily();
@@ -6252,9 +6375,13 @@ function composeScenePlan() {
       pos,
       visibleIds
     );
+  const petLayout = buildPetCardLayout(fam,visibleIds,pos,geometry);
+  geometry.width = Math.max(geometry.width,petLayout.width);
+  geometry.height = Math.max(geometry.height,petLayout.height);
 
   return {
     pos,
+    petLayout,
     width:geometry.width,
     height:geometry.height,
     geometry,
@@ -8469,6 +8596,7 @@ function paintPersonLayer() {
   }
 
   syncNodeSelectionClasses();
+  paintPetLayer();
 }
 
 
@@ -8477,7 +8605,8 @@ function getVisibleTreeContentBounds() {
   if (
     !layoutCache ||
     !layoutCache.pos ||
-    !layoutCache.pos.size
+    !layoutCache.pos.size &&
+    !layoutCache.petLayout?.cards?.length
   ) {
     return null;
   }
@@ -8501,6 +8630,12 @@ function getVisibleTreeContentBounds() {
     top = Math.min(top, y);
     right = Math.max(right, x + dims.W);
     bottom = Math.max(bottom, y + dims.H);
+  });
+  layoutCache.petLayout?.cards?.forEach(card => {
+    left = Math.min(left,card.x+PAD);
+    top = Math.min(top,card.y+PAD);
+    right = Math.max(right,card.x+PAD+PET_CARD_W);
+    bottom = Math.max(bottom,card.y+PAD+PET_CARD_H);
   });
 
   if (
@@ -8895,6 +9030,9 @@ function resizeStageToContent() {
       );
   });
 
+  layoutCache.petLayout = buildPetCardLayout(fam,layoutCache.visibleIds,layoutCache.pos,{width:maxX,height:maxY});
+  maxX = Math.max(maxX,layoutCache.petLayout.width);
+  maxY = Math.max(maxY,layoutCache.petLayout.height);
   layoutCache.width =
     maxX;
 
@@ -8910,6 +9048,7 @@ function resizeStageToContent() {
   }
 
   syncStageGeometryFromLayout();
+  paintPetLayer();
 
   // 拖曳結束後做一次 authoritative full redraw；拖曳幀內只更新受影響線條。
   requestRelationshipLayerUpdate();

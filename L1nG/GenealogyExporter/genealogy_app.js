@@ -1565,6 +1565,8 @@ const statusFilterInputs = [...document.querySelectorAll('input[name="statusFilt
 const genderFilterInputs = [...document.querySelectorAll('input[name="genderFilter"]')];
 const raceFilterInputs = [...document.querySelectorAll('input[name="raceFilter"]')];
 const lifeStageFilterInputs = [...document.querySelectorAll('input[name="lifeStageFilter"]')];
+const petVisibilityFilter = $('petVisibilityFilter');
+const petCardsLayer = $('genealogyPetLayer');
 const personLibrarySearch = $('personLibrarySearch');
 const modeToggle = $('modeToggle');
 const selectToolBtn = $('selectToolBtn');
@@ -3040,7 +3042,7 @@ function updateTopbarFilterUI() {
   const excludedCount = groups.reduce(
     (total, [inputs, selectedValues]) =>
       total + Math.max(0, inputs.length - selectedValues.size),
-    0
+    petVisibilityFilter && !petVisibilityFilter.checked ? 1 : 0
   );
 
   const button = $('topbarFilterBtn');
@@ -8781,7 +8783,7 @@ if (!genealogyViewport) {
 genealogyScene =
   window.L1nGGenealogyScene?.create?.({
     runtime:genealogyRuntime,
-    dom:{ stage, svg, labelsSvg, nodes },
+    dom:{ stage, svg, labelsSvg, nodes, pets:petCardsLayer },
     constants:{ PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX },
     state:{
       getData:() => genealogyStore.getData(),
@@ -8800,7 +8802,10 @@ genealogyScene =
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass
+      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
+      showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
+      petCardAvatarHTML:pet => framedAvatarImageHTML(pet?.avatar, pet?.avatarFrame) || petIconFor(pet),
+      petCardSpeciesLabel:formatPetSpecies
     }
   }) || null;
 if (!genealogyScene) throw new Error('Genealogy Scene failed to initialize.');
@@ -17726,6 +17731,62 @@ $('relationshipAddBtn').onclick = () => {
   applyGenealogyMutation(mutation);
 };
 
+// ========【寵物卡資訊】 設定 - 獨立唯讀檢視，不變更人物編輯視窗 ========
+function showGenealogyPetDetails(pet, owner) {
+  let backdrop = $('genealogyPetDetailBackdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'genealogyPetDetailBackdrop';
+    backdrop.className = 'genealogy-pet-detail-backdrop';
+    backdrop.innerHTML = `<section class="genealogy-pet-detail" role="dialog" aria-modal="true" aria-label="寵物資料" tabindex="-1">
+      <button class="genealogy-pet-detail-close" type="button" aria-label="關閉">×</button>
+      <div class="genealogy-pet-detail-content"></div>
+    </section>`;
+    document.body.appendChild(backdrop);
+    backdrop.addEventListener('click', event => {
+      if (event.target === backdrop || event.target.closest('.genealogy-pet-detail-close')) {
+        backdrop.classList.remove('show');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && backdrop.classList.contains('show')) {
+        backdrop.classList.remove('show');
+      }
+    });
+  }
+  const name = displayDataText(pet.name, owner) || uiText('（未命名）');
+  const avatar = framedAvatarImageHTML(pet.avatar, pet.avatarFrame) || petIconFor(pet);
+  const fields = [
+    [uiText('物種'), formatPetSpecies(pet)],
+    [uiText('品種'), displayDataText(pet.breed, owner)],
+    [uiText('性別'), petGenderLabel(pet)],
+    [uiText('人生階段'), uiText(pet.ageStage || '')],
+    [uiText('狀態'), uiText(pet.status || '')],
+    [uiText('特徵'), (pet.traits || []).map(trait => displayDataText(trait, owner)).filter(Boolean).join(' · ')]
+  ].filter(([,value]) => value);
+  const rows = fields.map(([label,value]) =>
+    `<div class="genealogy-pet-detail-row"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`
+  ).join('');
+  backdrop.querySelector('.genealogy-pet-detail-content').innerHTML =
+    `<div class="genealogy-pet-detail-avatar">${avatar}</div><h2>${esc(name)}</h2><div class="genealogy-pet-detail-fields">${rows}</div>`;
+  backdrop.classList.add('show');
+  backdrop.querySelector('.genealogy-pet-detail')?.focus({preventScroll:true});
+}
+petCardsLayer?.addEventListener('pointerdown', event => {
+  if (event.target.closest('.genealogy-pet-card')) event.stopPropagation();
+});
+petCardsLayer?.addEventListener('click', event => {
+  const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
+  if (!element) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const card = getSceneLayout()?.petLayout?.cards?.find(
+    entry => entry.key === element.dataset.petId
+  );
+  if (!card) return;
+  showGenealogyPetDetails(card.pet, currentGenealogyData().sims[card.ownerId] || null);
+});
+
 // ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
 function applyTopbarFilters() {
   updateTopbarFilterUI();
@@ -17736,8 +17797,9 @@ function applyTopbarFilters() {
   ...statusFilterInputs,
   ...genderFilterInputs,
   ...raceFilterInputs,
-  ...lifeStageFilterInputs
-].forEach(input => {
+  ...lifeStageFilterInputs,
+  petVisibilityFilter
+].filter(Boolean).forEach(input => {
   input.addEventListener('change', applyTopbarFilters);
 });
 
@@ -17748,8 +17810,9 @@ $('filterResetBtn')?.addEventListener('click', event => {
     ...statusFilterInputs,
     ...genderFilterInputs,
     ...raceFilterInputs,
-    ...lifeStageFilterInputs
-  ].forEach(input => {
+    ...lifeStageFilterInputs,
+    petVisibilityFilter
+  ].filter(Boolean).forEach(input => {
     input.checked = true;
   });
 
