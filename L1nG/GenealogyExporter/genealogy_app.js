@@ -11881,6 +11881,7 @@ viewport.addEventListener(
 viewport.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   const onNode = !!e.target.closest('.person-card');
+  const onPetCard = !!e.target.closest('.genealogy-pet-card');
   const onLabel = !!e.target.closest('.edge-label');
   const fam = currentFamily();
   const isFree = genealogyScene.isFreeLayoutActive(fam);
@@ -11890,7 +11891,8 @@ viewport.addEventListener('mousedown', e => {
   if (
     e.detail >= 2 &&
     !onNode &&
-    !onLabel
+    !onLabel &&
+    !onPetCard
   ) {
     e.preventDefault();
     finishMarquee();
@@ -11899,7 +11901,7 @@ viewport.addEventListener('mousedown', e => {
     return;
   }
 
-  if (arrangeTool === 'select' && !spacePanHeld && !onNode && !onLabel) {
+  if (arrangeTool === 'select' && !spacePanHeld && !onNode && !onLabel && !onPetCard) {
     e.preventDefault();
     marqueeState = {
       startX: e.clientX,
@@ -11912,7 +11914,7 @@ viewport.addEventListener('mousedown', e => {
   }
 
   if (onNode && !isPanGestureActive()) return;
-  if (onLabel) return;
+  if (onPetCard || onLabel) return;
   e.preventDefault();
 
   genealogyViewport.beginPan(
@@ -11941,6 +11943,7 @@ window.addEventListener('mouseup', () => {
 });
 viewport.addEventListener('dblclick', e => {
   if (e.target.closest('.person-card')) return;
+  if (e.target.closest('.genealogy-pet-card')) return;
   if (e.target.closest('.edge-label')) return;
 
   e.preventDefault();
