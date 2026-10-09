@@ -59,7 +59,7 @@ const DEFAULT_PET_CARD_EDIT_SETTINGS = Object.freeze({
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
   avatar: true,
   name: true,
-  gender: false,
+  gender: true,
   lifeStage: false,
   age: false,
   birthday: false,
