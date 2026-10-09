@@ -48,11 +48,12 @@ const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
 const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits'];
 const DEFAULT_PET_CARD_VIEW_SETTINGS = Object.freeze({
   avatar:true, name:true, species:true, breed:true,
-  gender:false, ageStage:false, status:false, traits:false
+  gender:false, ageStage:false, status:false, traits:false,
+  appearance:'minimal'
 });
 const DEFAULT_PET_CARD_EDIT_SETTINGS = Object.freeze({
   avatar:true, name:true, species:true, breed:true,
-  gender:false, ageStage:true, status:true, traits:false
+  gender:false, ageStage:true, status:true, traits:true
 });
 
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
@@ -10034,6 +10035,7 @@ function openPersonProfile(id) {
 
   personProfilePersonId = id;
   personProfilePetTarget = null;
+  personProfileDialog.classList.remove('pet-profile-open');
   $('personProfileEditBtn').style.display = '';
 
   renderPersonProfileContent(
@@ -10050,6 +10052,7 @@ function closePersonProfile() {
   personProfileDialog.classList.remove(
     'show'
   );
+  personProfileDialog.classList.remove('pet-profile-open');
   personProfilePersonId = null;
   personProfilePetTarget = null;
 }
@@ -11157,6 +11160,15 @@ personCardMenu?.addEventListener('click', e => {
   }
 });
 personCardMenu?.addEventListener('change', e => {
+  if (e.target?.name === 'petCardAppearance') {
+    const mutation = genealogyStore.setPetCardAppearance(e.target.value);
+    applyGenealogyMutation(mutation,{refreshFamily:false});
+    positionPersonCardMenu(
+      parseFloat(personCardMenu.style.left) || 0,
+      parseFloat(personCardMenu.style.top) || 0
+    );
+    return;
+  }
   const petField = e.target?.dataset?.petCardField;
   if (petField && PET_CARD_FIELD_KEYS.includes(petField)) {
     const mode = personCardMenu.dataset.cardMode === 'edit' ? 'edit' : 'view';
@@ -18357,6 +18369,29 @@ function openPetEditorFromCanvas(entry) {
   return true;
 }
 
+function resolvePetHouseholdName(entry) {
+  const data = currentGenealogyData();
+  const pet = entry?.pet;
+  const owner = data?.sims?.[entry?.ownerId] || null;
+  const importedName = String(pet?.gameData?.householdName || '').trim();
+  if (importedName) return displayDataText(importedName, owner);
+  const householdId = pet?.gameData?.householdId == null ? '' : String(pet.gameData.householdId);
+  if (householdId) {
+    const family = (data?.families || []).find(candidate =>
+      candidate?.gameData?.householdId != null &&
+      String(candidate.gameData.householdId) === householdId
+    );
+    if (family) return displayDataText(family.name, family);
+  }
+  if (owner && !householdId) {
+    const family = (data?.families || []).find(item =>
+      (item.memberIds || []).some(id => String(id) === String(owner.id))
+    );
+    if (family) return displayDataText(family.name, family);
+  }
+  return uiText('家庭未知');
+}
+
 function openPetProfileFromCanvas(entry) {
   const pet = entry.pet;
   const owner = currentGenealogyData()?.sims?.[entry.ownerId] || null;
@@ -18366,7 +18401,8 @@ function openPetProfileFromCanvas(entry) {
     [uiText('品種'),displayDataText(pet.breed,owner)],
     [uiText('性別'),petGenderLabel(pet)],
     [uiText('人生階段'),uiText(pet.ageStage || '')],
-    [uiText('狀態'),uiText(pet.status || '')]
+    [uiText('狀態'),uiText(pet.status || '')],
+    [uiText('所屬家庭'),resolvePetHouseholdName(entry)]
   ].filter(([,value]) => !!value);
   const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('');
   const traitMarkup = (pet.traits || []).map(trait => displayDataText(trait,owner))
@@ -18397,6 +18433,7 @@ function openPetProfileFromCanvas(entry) {
   personProfilePersonId = null;
   personProfilePetTarget = petCanvasOwnerIndex(entry) >= 0 ? entry : null;
   $('personProfileEditBtn').style.display = personProfilePetTarget ? '' : 'none';
+  personProfileDialog.classList.add('pet-profile-open');
   personProfileDialog.classList.add('show');
 }
 
@@ -18431,6 +18468,12 @@ function renderPetCardMenu(entry,clientX,clientY) {
   ].map(([key,label]) =>
     `<label class="person-card-menu-check"><input type="checkbox" data-pet-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`
   ).join('');
+  const appearanceSection = viewMode === 'edit' ? '' : `
+    <div class="person-card-menu-divider"></div>
+    <div class="person-card-menu-section-title">${esc(uiText('檢視卡片外觀'))}</div>
+    <label class="person-card-menu-radio"><input type="radio" name="petCardAppearance" value="minimal" ${settings.appearance === 'minimal' ? 'checked' : ''}><span>${esc(uiText('極簡'))}</span></label>
+    <label class="person-card-menu-radio"><input type="radio" name="petCardAppearance" value="translucent" ${settings.appearance === 'translucent' ? 'checked' : ''}><span>${esc(uiText('半透明'))}</span></label>
+    <label class="person-card-menu-radio"><input type="radio" name="petCardAppearance" value="full" ${settings.appearance === 'full' ? 'checked' : ''}><span>${esc(uiText('完整卡片'))}</span></label>`;
   personCardMenu.innerHTML = `
     <div class="person-card-menu-title">${esc(title)}</div>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看寵物資料'))}</span></button>
@@ -18440,6 +18483,7 @@ function renderPetCardMenu(entry,clientX,clientY) {
     <div class="person-card-menu-section-title">${esc(uiText(viewMode === 'edit' ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
     <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
     <div class="person-card-menu-grid">${fieldRows}</div>
+    ${appearanceSection}
     <div class="person-card-menu-note">${esc(uiText(viewMode === 'edit' ? '只套用於編輯模式寵物卡' : '只套用於檢視模式寵物卡'))}</div>
     ${editable ? '' : `<div class="person-card-menu-note">${esc(uiText('此寵物沒有可編輯的所屬人物，目前僅能檢視。'))}</div>`}
   `;
