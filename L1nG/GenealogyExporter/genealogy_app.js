@@ -18914,52 +18914,84 @@ function connectAssetStoreInBackground() {
 async function ensureSamplePortraitAssets(database) {
   if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 10) return;
   const images = window.L1nGGenealogySamplePortraits;
-  if (!images) throw new Error('預設族譜肖像資料尚未載入。');
+  const pack = window.L1nGGenealogySamplePack;
+  if (!images || !pack) throw new Error('預設族譜肖像索引尚未載入。');
 
-  const sharedPath = 'assets/sample-portraits/shared_unknown.png';
-  const needed = new Map();
-  const allSimIds = Object.keys(database.sims || {});
-  for (const id of allSimIds) {
-    const sim = database.sims[id];
-    const individual = 'assets/sample-portraits/' + id + '.png';
-    const path = images[individual] ? individual :
-      sim.gameData?.recordState === 'family_tree_only' ? sharedPath : null;
-    if (path) needed.set(id, path);
+  const prefix = 'assets/sample-portraits/';
+  const sharedPath = prefix + 'shared_unknown.png';
+  const items = new Map();
+  for (const [id,sim] of Object.entries(database.sims || {})) {
+    const specific = prefix + id + '.png';
+    const path = sim.gameData?.recordState === 'family_tree_only'
+      ? sharedPath : specific;
+    items.set(String(id), {person:sim,path,original:pack.portraits?.[id]?.path || null});
   }
-  const allPets = [
+  for (const pet of [
     ...Object.values(database.sims || {}).flatMap(sim => sim.pets || []),
     ...(database.meta.unassignedPets || [])
-  ];
-  for (const pet of allPets) {
+  ]) {
     const id = String(pet.gameData?.simId || pet.id);
-    const path = 'assets/sample-portraits/' + id + '.png';
-    if (images[path]) needed.set(id, path);
+    items.set(id, {person:pet,path:prefix + id + '.png',original:pack.portraits?.[id]?.path || null});
   }
 
-  const processed = new Map();
-  const missing = [];
-  for (const path of new Set(needed.values())) {
-    const base64 = images[path];
-    if (!base64) { missing.push(path); continue; }
-    const binary = atob(base64);
-    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
-    processed.set(path, await assetStore.importBlob(
-      new Blob([bytes], {type:'image/png'}),
-      {width:path === sharedPath ? 128 : 512,height:path === sharedPath ? 128 : 512}
-    ));
-  }
-  if (missing.length) throw new Error('缺少預設肖像：' + missing.join(', '));
-  for (const [id,path] of needed) {
-    const assetId = processed.get(path);
-    const sim = database.sims[id];
-    if (sim) {
-      sim.avatar = assetId;
-      sim.gameAvatar = assetId;
-      sim.gameData = sim.gameData || {};
-      sim.gameData.avatarSource = 'game';
-    } else for (const pet of allPets) {
-      if (String(pet.gameData?.simId || pet.id) === id) pet.avatar = assetId;
+  // PNG 解碼後的獨立檔案優先；尚未發布完整 PNG 時回退到既有內嵌圖，不讓預設頭像消失。
+  // manifest 是發布完成的單一訊號，避免對大量未上傳圖片反覆產生 404。
+  let published = null;
+  try {
+    const response = await fetch(prefix + 'manifest.json', {cache:'no-store'});
+    if (response.ok) {
+      const manifest = await response.json();
+      if (manifest?.version === 1 && manifest.files && typeof manifest.files === 'object') {
+        published = manifest.files;
+      }
     }
+  } catch (error) {
+    console.warn('[預設肖像] 獨立 PNG 尚未啟用，使用內嵌圖。', error);
+  }
+
+  const imported = new Map();
+  const tasks = [...items.entries()];
+  for (let offset = 0; offset < tasks.length; offset += 4) {
+    await Promise.all(tasks.slice(offset,offset+4).map(async ([id,item]) => {
+      const name = item.path.slice(prefix.length);
+      let path = item.path;
+      let blob = null;
+      const reference = published?.[name];
+      if (reference && typeof reference.sha256 === 'string') {
+        try {
+          const response = await fetch(path, {cache:'force-cache'});
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          blob = await response.blob();
+          if (blob.type !== 'image/png') {
+            blob = new Blob([await blob.arrayBuffer()], {type:'image/png'});
+          }
+        } catch (error) {
+          console.warn('[預設肖像] 獨立 PNG 讀取失敗，回退內嵌圖：' + path, error);
+        }
+      }
+      if (!blob && !images[path]) {
+        path = item.original || (item.path === sharedPath ? sharedPath : null);
+      }
+      if (!blob && path && images[path]) {
+        const type = path.endsWith('.webp') ? 'image/webp' : 'image/png';
+        const raw = atob(images[path]);
+        const bytes = Uint8Array.from(raw, char => char.charCodeAt(0));
+        blob = new Blob([bytes], {type});
+      }
+      if (!blob) return;
+      let assetId = imported.get(path);
+      if (!assetId) {
+        const size = path.endsWith('.webp') ? 192 : path === sharedPath ? 128 : 512;
+        assetId = await assetStore.importBlob(blob, {width:size,height:size});
+        imported.set(path,assetId);
+      }
+      item.person.avatar = assetId;
+      if (database.sims?.[id]) {
+        item.person.gameAvatar = assetId;
+        item.person.gameData = item.person.gameData || {};
+        item.person.gameData.avatarSource = 'game';
+      }
+    }));
   }
 }
 
