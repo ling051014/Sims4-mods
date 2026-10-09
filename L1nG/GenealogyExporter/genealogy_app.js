@@ -1567,17 +1567,6 @@ function buildSample() {
         families.push(JSON.parse(JSON.stringify(family)));
       }
     });
-    Object.entries(samplePack.portraits || {}).forEach(([id,portrait]) => {
-      const sim = sims[id];
-      if (sim) {
-        sim.avatar = portrait.assetId;
-        sim.gameAvatar = portrait.assetId;
-        sim.gameData.avatarSource = 'game';
-      }
-      Object.values(sims).forEach(owner => (owner.pets || []).forEach(pet => {
-        if (String(pet.gameData?.simId || pet.id) === id) pet.avatar = portrait.assetId;
-      }));
-    });
   }
 
   return {
@@ -1585,13 +1574,11 @@ function buildSample() {
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
-      sampleVersion:10,
+      sampleVersion:11,
       sampleSource:'Slot_00001128_20261010',
       samplePreferenceDemo:true,
       unassignedPets:(samplePack?.unassignedPets || []).map(pet => {
         const value = JSON.parse(JSON.stringify(pet));
-        const portrait = samplePack.portraits?.[String(value.gameData?.simId || value.id)];
-        if (portrait) value.avatar = portrait.assetId;
         return value;
       }),
       gameImport:true,
@@ -18913,87 +18900,92 @@ function connectAssetStoreInBackground() {
 
 // 內建範例的圖片在檔案中提供，首次載入與恢復預設時匯入既有 Blob 資產庫。
 async function ensureSamplePortraitAssets(database) {
-  if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 10) return;
+  if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 11) return false;
   const images = window.L1nGGenealogySamplePortraits;
-  const pack = window.L1nGGenealogySamplePack;
-  if (!images || !pack) throw new Error('預設族譜肖像索引尚未載入。');
+  if (!images) throw new Error('預設族譜 PNG 索引尚未載入。');
 
+  // 只處理內建 82 位人物與 6 隻寵物，不覆蓋玩家後來自行新增的角色。
+  const baseline = buildSample();
   const prefix = 'assets/sample-portraits/';
   const sharedPath = prefix + 'shared_unknown.png';
   const items = new Map();
-  for (const [id,sim] of Object.entries(database.sims || {})) {
-    const specific = prefix + id + '.png';
-    const path = sim.gameData?.recordState === 'family_tree_only'
-      ? sharedPath : specific;
-    items.set(String(id), {person:sim,path,original:pack.portraits?.[id]?.path || null});
+  for (const [id,original] of Object.entries(baseline.sims)) {
+    const sim = database.sims?.[id];
+    if (!sim) continue;
+    const path = original.gameData?.recordState === 'family_tree_only'
+      ? sharedPath : prefix + id + '.png';
+    items.set('sim:' + id, { person:sim, path, isSim:true });
   }
+  const samplePetIds = new Set([
+    ...Object.values(baseline.sims).flatMap(sim => sim.pets || []),
+    ...(baseline.meta.unassignedPets || [])
+  ].map(pet => String(pet.gameData?.simId || pet.id)));
   for (const pet of [
     ...Object.values(database.sims || {}).flatMap(sim => sim.pets || []),
     ...(database.meta.unassignedPets || [])
   ]) {
     const id = String(pet.gameData?.simId || pet.id);
-    items.set(id, {person:pet,path:prefix + id + '.png',original:pack.portraits?.[id]?.path || null});
-  }
-
-  // PNG 解碼後的獨立檔案優先；尚未發布完整 PNG 時回退到既有內嵌圖，不讓預設頭像消失。
-  // manifest 是發布完成的單一訊號，避免對大量未上傳圖片反覆產生 404。
-  let published = null;
-  try {
-    const response = await fetch(prefix + 'manifest.json', {cache:'no-store'});
-    if (response.ok) {
-      const manifest = await response.json();
-      if (manifest?.version === 1 && manifest.files && typeof manifest.files === 'object') {
-        published = manifest.files;
-      }
+    if (samplePetIds.has(id)) {
+      items.set('pet:' + id, { person:pet, path:prefix + id + '.png', isSim:false });
     }
-  } catch (error) {
-    console.warn('[預設肖像] 獨立 PNG 尚未啟用，使用內嵌圖。', error);
   }
 
-  const imported = new Map();
-  const tasks = [...items.entries()];
-  for (let offset = 0; offset < tasks.length; offset += 4) {
-    await Promise.all(tasks.slice(offset,offset+4).map(async ([id,item]) => {
-      const name = item.path.slice(prefix.length);
-      let path = item.path;
-      let blob = null;
-      const reference = published?.[name];
-      if (reference && typeof reference.sha256 === 'string') {
-        try {
-          const response = await fetch(path, {cache:'force-cache'});
-          if (!response.ok) throw new Error('HTTP ' + response.status);
-          blob = await response.blob();
-          if (blob.type !== 'image/png') {
-            blob = new Blob([await blob.arrayBuffer()], {type:'image/png'});
-          }
-        } catch (error) {
-          console.warn('[預設肖像] 獨立 PNG 讀取失敗，回退內嵌圖：' + path, error);
-        }
+  // 同一張 EA 未知肖像只需保存一次，不重新取樣、修圖或轉成 WebP。
+  const importPromises = new Map();
+  async function importOriginalPng(path) {
+    let promise = importPromises.get(path);
+    if (promise) return promise;
+    promise = (async () => {
+      let bytes;
+      if (typeof images[path] === 'string') {
+        bytes = Uint8Array.from(atob(images[path]), char => char.charCodeAt(0));
+      } else {
+        const response = await fetch(path, { cache:'no-store' });
+        if (!response.ok) throw new Error(path + '：HTTP ' + response.status);
+        bytes = new Uint8Array(await response.arrayBuffer());
       }
-      if (!blob && !images[path]) {
-        path = item.original || (item.path === sharedPath ? sharedPath : null);
+      const signature = [137,80,78,71,13,10,26,10];
+      if (bytes.length < 33 || !signature.every((value,index) => bytes[index] === value)) {
+        throw new Error('預設肖像不是有效 PNG：' + path);
       }
-      if (!blob && path && images[path]) {
-        const type = path.endsWith('.webp') ? 'image/webp' : 'image/png';
-        const raw = atob(images[path]);
-        const bytes = Uint8Array.from(raw, char => char.charCodeAt(0));
-        blob = new Blob([bytes], {type});
+      const dimensions = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      const width = dimensions.getUint32(16, false);
+      const height = dimensions.getUint32(20, false);
+      const expected = path === sharedPath ? 128 : 512;
+      if (width !== expected || height !== expected || bytes[25] !== 6) {
+        throw new Error('預設肖像尺寸或透明通道不正確：' + path);
       }
-      if (!blob) return;
-      let assetId = imported.get(path);
-      if (!assetId) {
-        const size = path.endsWith('.webp') ? 192 : path === sharedPath ? 128 : 512;
-        assetId = await assetStore.importBlob(blob, {width:size,height:size});
-        imported.set(path,assetId);
-      }
-      item.person.avatar = assetId;
-      if (database.sims?.[id]) {
-        item.person.gameAvatar = assetId;
+      return assetStore.importBlob(new Blob([bytes], { type:'image/png' }), {
+        width, height
+      });
+    })();
+    importPromises.set(path, promise);
+    return promise;
+  }
+
+  const entries = [...items.values()];
+  let changed = false;
+  for (let start = 0; start < entries.length; start += 4) {
+    await Promise.all(entries.slice(start, start+4).map(async item => {
+      // 重新整理已完成的預設肖像不重新下載；但若 IndexedDB 已遺失圖片，會自動補回。
+      if (Number(database.meta.samplePortraitVersion) === 11 &&
+          assetStore.isAssetId(item.person.avatar) &&
+          await assetStore.hasAsset(item.person.avatar)) return;
+      const id = await importOriginalPng(item.path);
+      if (item.person.avatar !== id) changed = true;
+      item.person.avatar = id;
+      if (item.isSim) {
+        item.person.gameAvatar = id;
         item.person.gameData = item.person.gameData || {};
         item.person.gameData.avatarSource = 'game';
       }
     }));
   }
+  if (Number(database.meta.samplePortraitVersion) !== 11) {
+    database.meta.samplePortraitVersion = 11;
+    changed = true;
+  }
+  return changed;
 }
 
 async function prepareInitialWorkspaceDatabase() {
