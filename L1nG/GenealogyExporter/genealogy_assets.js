@@ -3,8 +3,9 @@
 
   // ========【圖片資產儲存】 設定 - Blob 為唯一圖片本體；SHA-256 作為資產識別 ========
   const DB_NAME = 'l1ng_genealogy_assets_v1';
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const STORE_NAME = 'assets';
+  const WORKSPACE_STORE_NAME = 'workspace';
   const ASSET_PREFIX = 'asset_';
   const URL_CACHE_LIMIT = 256;
   // ========【圖片處理規則】 設定 - 依用途自動最佳化，不提供玩家畫質檔位 ========
@@ -223,6 +224,9 @@
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id' });
         }
+        if (!db.objectStoreNames.contains(WORKSPACE_STORE_NAME)) {
+          db.createObjectStore(WORKSPACE_STORE_NAME);
+        }
       };
 
       request.onsuccess = event => {
@@ -257,6 +261,28 @@
     });
 
     return dbPromise;
+  }
+
+  // ========【大型族譜資料】設定 - localStorage 容量不足時，與圖片共用持久化資料庫 ========
+  async function saveWorkspaceData(serialized) {
+    const db = await openDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(WORKSPACE_STORE_NAME, 'readwrite');
+      tx.objectStore(WORKSPACE_STORE_NAME).put(String(serialized), 'current');
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('族譜資料儲存失敗。'));
+      tx.onabort = () => reject(tx.error || new Error('族譜資料儲存已取消。'));
+    });
+  }
+
+  async function loadWorkspaceData() {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(WORKSPACE_STORE_NAME, 'readonly');
+      const request = tx.objectStore(WORKSPACE_STORE_NAME).get('current');
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('族譜資料讀取失敗。'));
+    });
   }
 
   async function getRecord(id) {
@@ -903,6 +929,8 @@
 
   global.L1nGGenealogyAssets = {
     openDb,
+    saveWorkspaceData,
+    loadWorkspaceData,
     isAssetId,
     optimizeImage,
     optimizeForUsage,
