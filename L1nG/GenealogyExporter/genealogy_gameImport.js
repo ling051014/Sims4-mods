@@ -748,8 +748,8 @@
 
   async function prepareGameAvatarAsset(asset, kind = 'sim') {
     const original = new Blob([asset.bytes], { type:asset.mimeType });
-    // EA codec 僅在遊戲 ZIP 人物頭像這個 owner 使用；寵物及所有其他圖片保持原流程。
-    if (kind !== 'sim' || asset.mimeType !== 'image/jpeg') return { blob:original, converted:false, metadata:{} };
+    // EA codec 用於遊戲 ZIP 人物及寵物頭像；普通 JPEG／PNG 與其他圖片保持原流程。
+    if (!['sim', 'pet'].includes(kind) || asset.mimeType !== 'image/jpeg') return { blob:original, converted:false, metadata:{} };
     const result = await global.L1nGThumDecoder.decode(asset.bytes);
     return result
       ? { ...result, converted:true, metadata:{ width:result.width, height:result.height } }
