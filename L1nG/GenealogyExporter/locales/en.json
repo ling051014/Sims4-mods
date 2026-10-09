@@ -1080,6 +1080,17 @@
     "物種": "Species",
     "頭像": "Portrait",
     "只套用於編輯模式寵物卡": "Applies only to pet cards in edit mode",
-    "只套用於檢視模式寵物卡": "Applies only to pet cards in view mode"
+    "只套用於檢視模式寵物卡": "Applies only to pet cards in view mode",
+    "遊戲族譜匯入完成": "Game Genealogy Imported",
+    "處理模擬市民頭像": "Processing Sim portraits",
+    "處理寵物頭像": "Processing pet portraits",
+    "讀取並檢查 ZIP 檔案……": "Reading and validating ZIP file…",
+    "整理模擬市民、寵物、家族與人物關係……": "Organizing Sims, pets, households, and relationships…",
+    "比對遊戲存檔與現有族譜資料……": "Comparing game save and existing genealogy…",
+    "準備處理匯入頭像……": "Preparing imported portraits…",
+    "整理匯入資料並準備儲存……": "Preparing imported data for saving…",
+    "合併最新遊戲資料，保留網站上的手動修改……": "Merging latest game data while preserving manual edits…",
+    "儲存資料並更新家族清單與族譜畫布……": "Saving data and refreshing families and genealogy canvas…",
+    "所有資料已處理完成！": "All data processed successfully!"
   }
 }
