@@ -14,8 +14,8 @@
       view:Object.freeze({ W:136, H:118 })
     });
 
-    const PET_VIEW_DIMS = Object.freeze({ W:110,H:126 });
-    const PET_EDIT_DIMS = Object.freeze({ W:176,H:84 });
+    const PET_VIEW_DIMS = Object.freeze({ W:148,H:126 });
+    const PET_EDIT_DIMS = Object.freeze({ W:190,H:84 });
     const PET_CARD_GAP = 12;
     const PET_ROW_GAP = 13;
     const PET_GROUP_GAP = 30;
@@ -6199,15 +6199,25 @@ function petCardDimensions(pet,owner) {
   const config = getPetCardSettings();
   const rows = petCardFieldRows(pet,owner,config);
   const name = config.name ? displayDataText(pet.name,owner) : '';
-  // 以卡片可用寬度估算換行，讓內容全部顯示，不以裁切解決過多欄位。
-  const lines = value => Math.max(1,Math.ceil([...String(value || '')].length / 8));
-  const nameH = name ? lines(name)*17 : 0;
-  const bodyH = rows.reduce((sum,row) => sum+lines(row.text)*14,0) +
-    Math.max(0,rows.length-1)*3;
-  if (viewMode === 'edit') {
-    return {W:PET_EDIT_DIMS.W,H:Math.max(84,20+Math.max(51,nameH+(nameH && rows.length ? 4 : 0)+bodyH))};
-  }
-  return {W:PET_VIEW_DIMS.W,H:Math.max(76,9+51+(nameH ? 5+nameH : 0)+(rows.length ? 5+bodyH : 0)+9)};
+  const edit = viewMode === 'edit';
+  const availableChars = edit ? 11 : 14;
+  const lines = value => Math.max(1,Math.ceil([...String(value || '')].length / availableChars));
+  const nameH = name ? lines(name)*16 : 0;
+  const bodyH = rows.reduce((sum,row) => {
+    if (edit && row.key === 'traits') {
+      const traits = (pet.traits || []).map(t => displayDataText(t,owner)).filter(Boolean);
+      let count = 1, used = 0;
+      traits.forEach(trait => {
+        const width = Math.min(108,[...trait].length*10+13);
+        if (used && used+width+4 > 108) { count++; used=0; }
+        used += width+4;
+      });
+      return sum + Math.max(1,count)*22;
+    }
+    return sum + lines(row.text)*14;
+  },0) + Math.max(0,rows.length-1)*3;
+  if (edit) return {W:PET_EDIT_DIMS.W,H:Math.max(84,20+Math.max(51,nameH+(nameH && rows.length ? 4 : 0)+bodyH))};
+  return {W:PET_VIEW_DIMS.W,H:Math.max(88,10+61+(nameH ? 5+nameH : 0)+(rows.length ? 5+bodyH : 0)+10)};
 }
 
 function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
@@ -6360,12 +6370,21 @@ function paintPetLayer() {
       const state = pet.status === '幽靈' ? 'ghost' : pet.status === '已故' ? 'dead' : '';
       const settings = getPetCardSettings();
       const fields = petCardFieldRows(pet,owner,settings);
-      const fieldHTML = fields.map(row =>
-        `<span class="genealogy-pet-card-field" title="${esc(row.text)}">${esc(row.text)}</span>`
-      ).join('');
+      const fieldHTML = fields.map(row => {
+        if (viewMode === 'edit' && row.key === 'traits') {
+          const chips = (pet.traits || []).map(trait => displayDataText(trait,owner))
+            .filter(Boolean).map(trait =>
+              `<span class="genealogy-pet-card-trait">${esc(trait)}</span>`
+            ).join('');
+          return `<span class="genealogy-pet-card-traits">${chips}</span>`;
+        }
+        return `<span class="genealogy-pet-card-field" title="${esc(row.text)}">${esc(row.text)}</span>`;
+      }).join('');
       const cardMode = viewMode === 'edit' ? 'mode-edit' : 'mode-view';
+      const appearanceClass = viewMode === 'edit' ? '' :
+        ' card-appearance-' + (settings.appearance || 'minimal');
       const hasContent = settings.name || fields.length;
-      return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}${hasContent ? '' : ' pet-avatar-only'}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
+      return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}${appearanceClass}${hasContent ? '' : ' pet-avatar-only'}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
         style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${card.width}px;height:${card.height}px">
         <span class="genealogy-pet-card-avatar">${petCardAvatarHTML(pet)}</span>
         ${hasContent ? `<span class="genealogy-pet-card-info">
