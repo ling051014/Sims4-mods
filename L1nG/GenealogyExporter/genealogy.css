@@ -4725,6 +4725,60 @@ button.avatar-editor-action { cursor:pointer; }
     }
 }
 
+/* ========【人物／寵物總覽】 設定 - 共用人物庫列與頭像樣式 ======== */
+.person-library-category-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-default);
+    margin: 0 0 12px;
+}
+.person-library-category-tabs button {
+    position: relative;
+    padding: 9px 4px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+.person-library-category-tabs button:hover { color: var(--text-primary); }
+.person-library-category-tabs button.active {
+    color: var(--action-primary);
+    font-weight: 650;
+}
+.person-library-category-tabs button.active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--action-primary);
+}
+.person-library-avatar { position: relative; }
+.person-library-avatar-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.person-library-avatar .pet-avatar-species-fallback .l1ng-icon {
+    width: 25px;
+    height: 25px;
+}
+.person-library-avatar img.person-library-deferred-image {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+}
+.person-library-avatar img.person-library-deferred-image.asset-ready {
+    opacity: 1;
+}
+
 /* ========【加入家族人物列】 設定 - 維持原有尺寸，不受人物庫檢視模式影響 ======== */
 .family-member-picker-avatar {
     /* 頭像寬度 */ width: 42px;
