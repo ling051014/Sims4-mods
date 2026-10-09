@@ -8778,8 +8778,20 @@ button.danger-action:focus-visible {
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name,
 .genealogy-pet-card.mode-edit .genealogy-pet-card-field { text-align:left; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name { font-size:12px; }
-.genealogy-pet-card-traits { display:flex; flex-wrap:wrap; align-items:flex-start; gap:4px; width:100%; }
-.genealogy-pet-card-trait { display:inline-flex; max-width:100%; min-width:0; padding:3px 6px; border-radius:5px; background:var(--surface-item); color:var(--text-primary); border:1px solid var(--border-default); font-size:9px; line-height:1.3; white-space:normal; overflow-wrap:anywhere; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-traits.person-card-tags {
+  width:100%; max-height:none; overflow:visible; margin-top:1px;
+  display:flex; flex-wrap:wrap; gap:3px; align-items:flex-start;
+}
+.genealogy-pet-card.mode-edit .genealogy-pet-card-traits .tag {
+  max-width:100%; white-space:normal; overflow-wrap:anywhere;
+  text-overflow:clip; min-height:16px;
+}
+.genealogy-pet-card .person-card-gender-icon { flex:0 0 auto; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-name { display:flex; align-items:center; gap:2px; }
+.genealogy-pet-card.mode-view .genealogy-pet-card-name { text-align:center; }
+.genealogy-pet-card.mode-view .genealogy-pet-card-field.person-card-view-meta { justify-content:center; text-align:center; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-field.person-card-edit-meta { justify-content:flex-start; text-align:left; min-height:0; }
+
 .genealogy-pet-card.pet-avatar-only { justify-content:center; }
 
 .genealogy-pet-card-avatar {
