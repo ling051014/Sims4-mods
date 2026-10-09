@@ -17138,8 +17138,12 @@ function ensureGameImportStatus() {
       <span class="game-import-spinner" aria-hidden="true"></span>
 
       <div class="game-import-status-content">
-        <strong class="game-import-status-title">正在匯入遊戲族譜</strong>
-        <span class="game-import-status-text">準備中…</span>
+        <strong class="game-import-status-title">匯入遊戲族譜</strong>
+        <span class="game-import-status-text">準備中……</span>
+      </div>
+      <span class="game-import-status-percent" aria-hidden="true">0%</span>
+      <div class="game-import-status-track" role="progressbar" aria-label="遊戲族譜匯入進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="game-import-status-fill"></span>
       </div>
     </div>
   `;
@@ -17150,11 +17154,22 @@ function ensureGameImportStatus() {
   return overlay;
 }
 
-function showGameImportStatus(message) {
+function showGameImportStatus(message, percent = null, title = '匯入遊戲族譜') {
   const overlay = ensureGameImportStatus();
   const text = overlay.querySelector('.game-import-status-text');
+  const titleElement = overlay.querySelector('.game-import-status-title');
+  const percentageElement = overlay.querySelector('.game-import-status-percent');
+  const progressBar = overlay.querySelector('.game-import-status-track');
+  const fill = overlay.querySelector('.game-import-status-fill');
 
   if (text) text.textContent = uiText(message);
+  if (titleElement) titleElement.textContent = uiText(title);
+  if (Number.isFinite(percent)) {
+    const value = Math.min(100, Math.max(0, Math.floor(percent)));
+    if (percentageElement) percentageElement.textContent = value + '%';
+    if (progressBar) progressBar.setAttribute('aria-valuenow', String(value));
+    if (fill) fill.style.width = value + '%';
+  }
 
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
@@ -17177,7 +17192,7 @@ function waitForImportPaint() {
 
 // ========【遊戲族譜匯入】 設定 - 讀取 L1nG Genealogy Exporter ZIP ========
 // ========【遊戲族譜頭像】 設定 - ZIP 圖片直接進 Blob Asset Store，再回填人物 / 寵物 assetId ========
-async function persistGameImportAvatars(bundle, converted) {
+async function persistGameImportAvatars(bundle, converted, importMode = 'replace') {
   if (!window.L1nGGameImport || !bundle || !converted) {
     return { saved:0, unsupported:0, missing:0 };
   }
@@ -17254,34 +17269,66 @@ async function persistGameImportAvatars(bundle, converted) {
     saved++;
   };
 
-  for (const [simId, sim] of Object.entries(converted.sims || {})) {
-    await persistAsset(sim, simId);
+  const isUpdate = importMode === 'update' || importMode === 'continue_update';
+  const progressTitle = isUpdate ? '更新遊戲族譜' : '匯入遊戲族譜';
+  const english = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+  const personEntries = Object.entries(converted.sims || {});
+  const petEntries = [];
 
+  // 原有的每一筆寵物引用仍個別匯入；只調整處理順序以便顯示連續的寵物進度。
+  for (const [, sim] of personEntries) {
     for (const pet of sim.pets || []) {
-      const petSimId =
-        pet &&
-        pet.gameData &&
-        pet.gameData.simId;
+      const petId = pet?.gameData?.simId;
+      if (petId && !pet.avatar) petEntries.push([pet, petId]);
+    }
+  }
+  const unassignedPets = Array.isArray(converted.meta?.unassignedPets)
+    ? converted.meta.unassignedPets : [];
+  for (const pet of unassignedPets) {
+    const petId = pet?.gameData?.simId;
+    if (petId && !pet.avatar) petEntries.push([pet, petId]);
+  }
 
-      if (!petSimId || pet.avatar) continue;
-      await persistAsset(pet, petSimId, 'pet');
+  const totalPeople = personEntries.length;
+  const totalPets = petEntries.length;
+  showGameImportStatus(
+    uiText('處理模擬市民頭像') + (english ? ' (' : '（') +
+      '0 / ' + totalPeople + (english ? ')' : '）'),
+    25, progressTitle
+  );
+  const personStep = Math.max(1, Math.floor(totalPeople / 100));
+  for (let index = 0; index < totalPeople; index++) {
+    const [simId, sim] = personEntries[index];
+    await persistAsset(sim, simId);
+    const done = index + 1;
+    if (done % personStep === 0 || done === totalPeople) {
+      showGameImportStatus(
+        uiText('處理模擬市民頭像') + (english ? ' (' : '（') +
+          done + ' / ' + totalPeople + (english ? ')' : '）'),
+        25 + Math.floor(50 * done / totalPeople), progressTitle
+      );
     }
   }
 
-  const unassignedPets =
-    converted.meta &&
-    Array.isArray(converted.meta.unassignedPets)
-      ? converted.meta.unassignedPets
-      : [];
-
-  for (const pet of unassignedPets) {
-    const petSimId =
-      pet &&
-      pet.gameData &&
-      pet.gameData.simId;
-
-    if (!petSimId || pet.avatar) continue;
-    await persistAsset(pet, petSimId, 'pet');
+  if (totalPets) {
+    showGameImportStatus(
+      uiText('處理寵物頭像') + (english ? ' (' : '（') +
+        '0 / ' + totalPets + (english ? ')' : '）'),
+      75, progressTitle
+    );
+    const petStep = Math.max(1, Math.floor(totalPets / 100));
+    for (let index = 0; index < totalPets; index++) {
+      const [pet, petId] = petEntries[index];
+      await persistAsset(pet, petId, 'pet');
+      const done = index + 1;
+      if (done % petStep === 0 || done === totalPets) {
+        showGameImportStatus(
+          uiText('處理寵物頭像') + (english ? ' (' : '（') +
+            done + ' / ' + totalPets + (english ? ')' : '）'),
+          75 + Math.floor(13 * done / totalPets), progressTitle
+        );
+      }
+    }
   }
 
   return {
@@ -17597,17 +17644,20 @@ async function importGameGenealogy(file) {
       throw new Error('找不到遊戲族譜匯入模組。');
     }
 
-    showGameImportStatus('正在讀取 ZIP…');
+    showGameImportStatus('讀取並檢查 ZIP 檔案……', 0);
     await waitForImportPaint();
 
     const bundle = await window.L1nGGameImport.parseFile(file);
 
-    showGameImportStatus('正在整理人物與家族…');
+    showGameImportStatus('整理模擬市民、寵物、家族與人物關係……', 12);
     await waitForImportPaint();
 
     const converted =
       window.L1nGGameImport
         .convertBundle(bundle);
+
+    showGameImportStatus('比對遊戲存檔與現有族譜資料……', 22);
+    await waitForImportPaint();
 
     const analysis =
       currentGameImportUpdateAnalysis(
@@ -17624,20 +17674,22 @@ async function importGameGenealogy(file) {
       return;
     }
 
-    showGameImportStatus(
-      (importMode === 'update' || importMode === 'continue_update')
-        ? '正在更新遊戲族譜…'
-        : '正在匯入人物頭像…'
-    );
+    const isUpdate = importMode === 'update' || importMode === 'continue_update';
+    const progressTitle = isUpdate ? '更新遊戲族譜' : '匯入遊戲族譜';
+    showGameImportStatus('準備處理匯入頭像……', 24, progressTitle);
     await waitForImportPaint();
 
     const avatarStats =
       await persistGameImportAvatars(
         bundle,
-        converted
+        converted,
+        importMode
       );
 
     console.info('[遊戲 ZIP 頭像] 匯入摘要：', avatarStats);
+
+    showGameImportStatus('整理匯入資料並準備儲存……', 88, progressTitle);
+    await waitForImportPaint();
 
     const incomingPrepared =
       prepareDatabase(
@@ -17648,9 +17700,10 @@ async function importGameGenealogy(file) {
     let nextDatabase =
       incomingPrepared;
 
-    if ((importMode === 'update' || importMode === 'continue_update')) {
+    if (isUpdate) {
       showGameImportStatus(
-        '正在合併最新遊戲資料…'
+        '合併最新遊戲資料，保留網站上的手動修改……',
+        91, progressTitle
       );
       await waitForImportPaint();
 
@@ -17675,9 +17728,8 @@ async function importGameGenealogy(file) {
     }
 
     showGameImportStatus(
-      (importMode === 'update' || importMode === 'continue_update')
-        ? '正在更新族譜畫面…'
-        : '正在建立族譜畫面…'
+      '儲存資料並更新家族清單與族譜畫布……',
+      95, progressTitle
     );
     await waitForImportPaint();
 
@@ -17751,9 +17803,15 @@ async function importGameGenealogy(file) {
           ?.realDateCurrentDate
       );
 
+    showGameImportStatus(
+      '所有資料已處理完成！',
+      100,
+      isUpdate ? '遊戲族譜更新完成' : '遊戲族譜匯入完成'
+    );
+    await waitForImportPaint();
     hideGameImportStatus();
 
-    if ((importMode === 'update' || importMode === 'continue_update')) {
+    if (isUpdate) {
       await uiAlert(
         gameImportUpdateSummary(
           updateResult,
