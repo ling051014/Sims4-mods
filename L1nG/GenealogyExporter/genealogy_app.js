@@ -16496,6 +16496,87 @@ async function prepareCaptureIcons(captureRoot) {
   );
 }
 
+
+/* ========【族譜 PNG 匯出】設定 - 只在匯出副本內嵌頭像與關係圖示，不改動原畫布 ======== */
+async function prepareCaptureAssetImages(captureRoot, backgroundMode) {
+  const images = [...captureRoot.querySelectorAll('img[data-asset-id]')];
+  const ids = new Set(images.map(image => image.dataset.assetId).filter(isAssetId));
+  const backgroundId = backgroundMode === 'current' &&
+    captureRoot.classList.contains('has-bg') &&
+    isAssetId(bgSettings?.image) ? bgSettings.image : null;
+  if (backgroundId) ids.add(backgroundId);
+  if (!ids.size) return;
+
+  // 直接讀取 IndexedDB 中的原始 Blob，而非重用可能被撤銷的 blob: 暫存網址。
+  const assets = await assetStore.serializeAssets(ids);
+  const assetDataUrl = id => {
+    const asset = assets[id];
+    if (!asset || !asset.data) throw new Error('缺少匯出圖片資產：' + id);
+    return 'data:' + (asset.mime || 'image/png') + ';base64,' + asset.data;
+  };
+
+  images.forEach(image => {
+    image.src = assetDataUrl(image.dataset.assetId);
+    image.classList.remove('asset-pending');
+  });
+
+  if (backgroundId) {
+    captureRoot.style.setProperty('--custom-bg', 'url("' + assetDataUrl(backgroundId) + '")');
+  }
+
+  // 所有頭像必須真正完成解碼，不能只確認 src 已設定就開始製作 PNG。
+  await Promise.all(images.map(async image => {
+    try {
+      if (typeof image.decode === 'function') {
+        await image.decode();
+      } else if (!image.complete) {
+        await new Promise((resolve, reject) => {
+          image.addEventListener('load', resolve, { once:true });
+          image.addEventListener('error', reject, { once:true });
+        });
+      }
+      if (!image.naturalWidth) throw new Error('圖片解碼失敗');
+    } catch (_) {
+      throw new Error('族譜頭像無法載入：' + image.dataset.assetId);
+    }
+  }));
+}
+
+async function prepareCaptureRelationshipIcons(captureRoot) {
+  const icons = [...captureRoot.querySelectorAll('#genealogyRelationshipLabelLayer use.edge-label-icon')];
+  if (!icons.length) return;
+
+  const firstHref = icons[0].getAttribute('href') || '';
+  const splitAt = firstHref.lastIndexOf('#');
+  if (splitAt <= 0) throw new Error('無法定位關係標籤 SVG 圖示來源');
+  const response = await fetch(firstHref.slice(0, splitAt));
+  if (!response.ok) throw new Error('無法讀取關係標籤 SVG 圖示');
+  const sprite = new DOMParser().parseFromString(await response.text(), 'image/svg+xml');
+  if (sprite.querySelector('parsererror')) throw new Error('關係標籤 SVG 格式不正確');
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  icons.forEach(icon => {
+    const href = icon.getAttribute('href') || '';
+    const symbol = sprite.getElementById(href.slice(href.lastIndexOf('#') + 1));
+    if (!symbol) throw new Error('找不到關係標籤 SVG：' + href);
+
+    // <use href="外部 SVG#symbol"> 在 foreignObject 匯出時可能遺失；
+    // 換成內嵌路徑，保留原本圖示尺寸、位置、顏色與特殊 viewBox。
+    const inline = document.createElementNS(svgNS, 'svg');
+    for (const attr of ['x', 'y', 'width', 'height']) {
+      if (icon.hasAttribute(attr)) inline.setAttribute(attr, icon.getAttribute(attr));
+    }
+    inline.setAttribute('viewBox', symbol.getAttribute('viewBox') || '0 0 16 16');
+    inline.setAttribute('class', 'edge-label-icon');
+    inline.setAttribute('aria-hidden', 'true');
+    const style = getComputedStyle(icon);
+    inline.style.color = style.color;
+    inline.style.fill = style.fill;
+    symbol.childNodes.forEach(child => inline.appendChild(document.importNode(child, true)));
+    icon.replaceWith(inline);
+  });
+}
+
 const EXPORT_TREE_PADDING_PX = 40;
 
 // ========【族譜圖片主題背景】 設定 - 匯出時沿用目前主題的實際畫布底色與紋理 ========
@@ -16664,7 +16745,11 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   try {
     // 先讓 clone 套用完整 CSS，再把 mask icon 換成 html2canvas 能正確輸出的 SVG。
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    await prepareCaptureIcons(captureViewport);
+    await Promise.all([
+      prepareCaptureIcons(captureViewport),
+      prepareCaptureRelationshipIcons(captureViewport),
+      prepareCaptureAssetImages(captureViewport, backgroundMode)
+    ]);
     const captureSize = fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight);
     const pixelWidth = Math.max(1, Math.round(captureSize.width * factor));
     const pixelHeight = Math.max(1, Math.round(captureSize.height * factor));
