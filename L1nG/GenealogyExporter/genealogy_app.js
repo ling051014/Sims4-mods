@@ -2622,10 +2622,10 @@ function setFamilyTreeViewMode(mode, control = null) {
   render();
 
   requestAnimationFrame(() => {
-    // 切換分類保持下拉面板位置，只讓目前選取的家庭回到可見範圍。
+    // 切換分類後選項數量可能不同；重新依實際列高安排欄數，
+    // 再讓目前選取的家庭回到可見範圍。
     if (control && control.host.classList.contains('open')) {
-      positionFamilyNavTabsPortal(control);
-      scrollSelectedFamilyNavOption(control);
+      positionFamilyNavSelectMenu(control);
     }
     genealogyViewport.fit();
   });
