@@ -537,12 +537,8 @@ function syncPersonEditorPreferenceTabs(sim){
       '.sim-editor-panel[data-editor-panel="attraction"]'
     );
 
-  const hasRegularData=
-    !!sim &&
-    (
-      data.likesDislikes.length > 0 ||
-      data.availability === 'available'
-    );
+  // 喜好與厭惡是固定資訊分頁；沒有資料時顯示既有空狀態，而非藏掉整頁。
+  const hasRegularData = !!sim;
 
   const hasAttractionData=
     !!sim &&
