@@ -6274,9 +6274,11 @@ html[lang="en"] body {
 }
 
 .game-import-status-card {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 14px;
+    /* 原有卡片加上第二列進度條 */ display: grid;
+    grid-template-columns: 22px minmax(0,1fr) auto;
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 12px;
     /* 最小寬度 */ min-width: min(340px, calc(100vw - 40px));
     /* 最大寬度 */ max-width: 460px;
     /* 內縮空間 */ padding: 18px 20px;
@@ -6288,6 +6290,7 @@ html[lang="en"] body {
 }
 
 .game-import-status-content {
+    min-width: 0;
     /* 顯示方式 */ display: flex;
     /* 排列方向 */ flex-direction: column;
     /* 項目間距 */ gap: 4px;
@@ -6305,6 +6308,28 @@ html[lang="en"] body {
     /* 文字顏色 */ color: var(--text-secondary);
 }
 
+.game-import-status-percent {
+    font-size: 16px;
+    font-weight: 650;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.game-import-status-track {
+    grid-column: 1 / -1;
+    height: 6px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--border-default);
+}
+.game-import-status-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: var(--action-primary);
+    transition: width .12s ease;
+}
 .game-import-spinner {
     /* 元素寬度 */ width: 22px;
     /* 元素高度 */ height: 22px;
