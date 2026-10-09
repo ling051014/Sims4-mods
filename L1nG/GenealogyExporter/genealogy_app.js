@@ -1507,7 +1507,7 @@ function buildSample() {
       'sample_hh_944092612642563313',
       '伊藤',
       ['944092612642563314','944092612642563315','944092612642563316','944092612642563317'],
-      '伊藤惠從小在千葉町長大。身為金牌滑雪運動員，她希望讓自己的兒女也有相同的成長環境，但過往戀情的記憶卻可能令她分神。伊藤直樹也是拿過獎牌的運動員。身為充滿算計的商人，他打造木漏隙光山的願景極具爭議，包括更多觀光人潮、更多錢，以及更多現代化舉措。七海和清皆有著父母的運動天賦，但他們的心卻另繫他方…七海只想當個孩子，而清則迷戀起坡道外的其他事物…',
+      '伊藤惠從小在千葉町長大。身為金牌滑雪運動員，她希望讓自己的兒女也有相同的成長環境，但過往戀情的記憶卻可能令她分神。伊藤直樹也是拿過獎牌的運動員。身為充滿算計的商人，他打造木漏隙光山的願景極具爭議，包括更多觀光人潮、更多錢，以及更多現代化舉措。七海和清皆有著父母的運動天賦，但他們的心卻另繫他方……七海只想當個孩子，而清則迷戀起坡道外的其他事物……',
       { householdId:'944092612642563313', homeZoneId:'944092612642562894', worldId:'1491052508', neighborhoodId:'944092612642496440', regionId:'246370', lotName:'2-5-1 若葉森', worldName:'', neighborhoodName:'木漏隙光山', hidden:false, isActiveHousehold:false, isPlayedHousehold:false, isPlayerHousehold:false }
     ),
     makeHousehold(
@@ -3455,7 +3455,7 @@ function syncRelationshipTypePickerValue(){
   const text=
     selected&&selected.value
       ? selected.textContent
-      : uiText('選擇或輸入關係…');
+      : uiText('選擇或輸入關係……');
 
   value.textContent=text;
   value.title=text;
@@ -15847,7 +15847,7 @@ const personLibraryController = {
       button.tabIndex = active ? 0 : -1;
     }
     if (personLibrarySearch) {
-      personLibrarySearch.placeholder = uiText(petTab ? '搜尋寵物…' : '搜尋人物…');
+      personLibrarySearch.placeholder = uiText(petTab ? '搜尋寵物……' : '搜尋人物……');
     }
   },
   setCategory(category) {
@@ -17971,7 +17971,7 @@ async function importCanvasDroppedFile(file) {
   }
 
   if (kind === 'json-backup') {
-    uiToast('正在匯入 JSON 備份…');
+    uiToast('正在匯入 JSON 備份……');
     await importJSON(file);
     return;
   }
