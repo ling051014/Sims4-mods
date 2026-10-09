@@ -18990,13 +18990,39 @@ async function ensureSamplePortraitAssets(database) {
 
 async function prepareInitialWorkspaceDatabase() {
   let preparedResult;
+  let upgradedSample = false;
 
   try {
-    preparedResult =
-      prepareDatabase(
-        (await readStoredGenealogyData()) ||
-        buildSample()
-      );
+    let saved = await readStoredGenealogyData();
+    // 只升級網站內建範例。保留玩家已經修改的人物內容與排版位置，
+    // 不會動到玩家從遊戲 ZIP 匯入的族譜。
+    if (saved?.meta?.sample && Number(saved.meta.sampleVersion || 0) < 11) {
+      const latest = buildSample();
+      saved.sims = saved.sims || {};
+      for (const [id,sim] of Object.entries(latest.sims)) {
+        if (!saved.sims[id]) saved.sims[id] = sim;
+      }
+      saved.families = saved.families || [];
+      const knownFamilies = new Set(saved.families.map(family => String(family.id)));
+      for (const family of latest.families) {
+        if (!knownFamilies.has(String(family.id))) saved.families.push(family);
+      }
+      saved.links = saved.links || [];
+      const knownLinks = new Set(saved.links.map(link => String(link.id)));
+      for (const link of latest.links || []) {
+        if (!knownLinks.has(String(link.id))) saved.links.push(link);
+      }
+      saved.meta.unassignedPets = saved.meta.unassignedPets || [];
+      const knownPets = new Set(saved.meta.unassignedPets.map(pet => String(pet.gameData?.simId || pet.id)));
+      for (const pet of latest.meta.unassignedPets || []) {
+        if (!knownPets.has(String(pet.gameData?.simId || pet.id))) saved.meta.unassignedPets.push(pet);
+      }
+      saved.meta.sampleVersion = 11;
+      saved.meta.sampleSource = latest.meta.sampleSource;
+      delete saved.meta.samplePortraitVersion;
+      upgradedSample = true;
+    }
+    preparedResult = prepareDatabase(saved || buildSample());
   } catch (error) {
     if (localStorage.getItem(STORE_KEY) === WORKSPACE_IDB_MARKER) throw error;
     console.warn(
@@ -19028,7 +19054,8 @@ async function prepareInitialWorkspaceDatabase() {
 
   return {
     preparedResult,
-    initialDatabase
+    initialDatabase,
+    upgradedSample
   };
 }
 
@@ -19038,13 +19065,14 @@ async function initializeGenealogyWorkspace() {
 
   const {
     preparedResult,
-    initialDatabase
+    initialDatabase,
+    upgradedSample
   } =
     await prepareInitialWorkspaceDatabase();
 
   applyRelationshipLineSettings();
   restoreCanvasBackground();
-  await ensureSamplePortraitAssets(initialDatabase);
+  const repairedSamplePortraits = await ensureSamplePortraitAssets(initialDatabase);
 
   const clearedImageRefs =
     assetStore.clearUnsupportedImageRefs(
@@ -19067,9 +19095,11 @@ async function initializeGenealogyWorkspace() {
 
     persistCanvasBackground();
   } else if (
-    preparedResult.changed
+    preparedResult.changed ||
+    upgradedSample ||
+    repairedSamplePortraits
   ) {
-    save();
+    save({ immediate:true });
   }
 
   setupAppMenus();
