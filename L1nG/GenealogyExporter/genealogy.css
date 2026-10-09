@@ -5766,6 +5766,11 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 .icon-gender-male {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-gender-male);
 }
+/* 卡片姓名後方的專用性別 SVG，沿用既有 icon mask 系統。 */
+.icon-gender-card-male { --l1ng-icon: var(--l1ng-icon-gender-card-male); }
+.icon-gender-card-female { --l1ng-icon: var(--l1ng-icon-gender-card-female); }
+.icon-gender-card-other { --l1ng-icon: var(--l1ng-icon-gender-card-other); }
+
 
 .icon-heart {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-heart);
