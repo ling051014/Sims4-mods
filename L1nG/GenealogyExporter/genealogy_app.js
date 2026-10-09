@@ -8,6 +8,8 @@
 
 const PAD = 80;
 const STORE_KEY = 'l1ng_genealogy_v1';
+// 大型遊戲族譜超出 localStorage 容量時，保存於現有 IndexedDB 資料庫。
+const WORKSPACE_IDB_MARKER = 'L1NG_GENEALOGY_INDEXEDDB_V1';
 const THEME_KEY = 'l1ng_genealogy_theme_v1';
 const CUSTOM_COLORS_KEY = 'l1ng_genealogy_custom_theme_v1';
 const BG_KEY = 'l1ng_genealogy_background_v1';
@@ -5736,6 +5738,8 @@ function applySidebarWidth(value, options) {
 genealogyChrome.restoreSidebarWidth();
 
 // ========【資料儲存佇列】 設定 - Runtime Save Coordinator 為唯一儲存 Authority ========
+let workspaceWriteSequence = 0;
+let workspaceWritePending = Promise.resolve();
 const genealogySaveCoordinator =
   genealogyRuntime?.createSaveCoordinator?.({
     delay:260,
@@ -5744,11 +5748,32 @@ const genealogySaveCoordinator =
     serialize:() =>
       genealogyStore.serializeDatabase(),
 
-    write:serialized =>
-      localStorage.setItem(
-        STORE_KEY,
-        serialized
-      ),
+    write:serialized => {
+      const writeNumber = ++workspaceWriteSequence;
+      try {
+        localStorage.setItem(STORE_KEY, serialized);
+        // 之前可能仍有圖片資料庫的寫入排隊；只允許最新版本更新儲存位置。
+        workspaceWritePending = Promise.resolve();
+      } catch (error) {
+        if (
+          error?.name !== 'QuotaExceededError' &&
+          !/quota/i.test(error?.message || '')
+        ) throw error;
+
+        // 資料庫依寫入順序排隊。必須等原始字串完整保存後才切換輕量定位標記。
+        workspaceWritePending = workspaceWritePending
+          .catch(() => {})
+          .then(async () => {
+            await assetStore.saveWorkspaceData(serialized);
+            if (writeNumber === workspaceWriteSequence) {
+              localStorage.setItem(STORE_KEY, WORKSPACE_IDB_MARKER);
+            }
+          });
+        void workspaceWritePending.catch(saveError => {
+          console.error('[大型族譜資料儲存失敗]', saveError);
+        });
+      }
+    },
 
     getExisting:() =>
       localStorage.getItem(
@@ -17029,13 +17054,16 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
 }
 
 // ========【L1nG v1 資料載入】 設定 - 只讀取目前 schema，不承接舊版網站資料 ========
-function readStoredGenealogyData() {
-  const currentRaw =
-    localStorage.getItem(STORE_KEY);
-
-  return currentRaw
-    ? JSON.parse(currentRaw)
-    : null;
+async function readStoredGenealogyData() {
+  const currentRaw = localStorage.getItem(STORE_KEY);
+  if (currentRaw === WORKSPACE_IDB_MARKER) {
+    const saved = await assetStore.loadWorkspaceData();
+    if (!saved) {
+      throw new Error('族譜圖片資料庫中的大型族譜存檔遺失，已停止載入以避免覆蓋資料。');
+    }
+    return JSON.parse(saved);
+  }
+  return currentRaw ? JSON.parse(currentRaw) : null;
 }
 
 function isCurrentGenealogyData(raw) {
@@ -17766,6 +17794,17 @@ async function importGameGenealogy(file) {
     arrangeTool = 'pan';
 
     save({ immediate:true });
+    // 原本的成功提示只代表內存已更新；必須確認重新整理時能讀回完整資料。
+    await workspaceWritePending;
+    const expectedSave = genealogyStore.serializeDatabase();
+    const savedLocation = localStorage.getItem(STORE_KEY);
+    const restoredSave = savedLocation === WORKSPACE_IDB_MARKER
+      ? await assetStore.loadWorkspaceData()
+      : savedLocation;
+    if (restoredSave !== expectedSave) {
+      throw new Error('遊戲族譜尚未成功保存至瀏覽器，請先匯出 JSON 備份，不要重新整理網頁。');
+    }
+
     refreshFamilyUI();
     render();
     scheduleGC();
@@ -18734,16 +18773,17 @@ function connectAssetStoreInBackground() {
     });
 }
 
-function prepareInitialWorkspaceDatabase() {
+async function prepareInitialWorkspaceDatabase() {
   let preparedResult;
 
   try {
     preparedResult =
       prepareDatabase(
-        readStoredGenealogyData() ||
+        (await readStoredGenealogyData()) ||
         buildSample()
       );
   } catch (error) {
+    if (localStorage.getItem(STORE_KEY) === WORKSPACE_IDB_MARKER) throw error;
     console.warn(
       '族譜資料載入失敗，改用目前預設資料。',
       error
@@ -18777,7 +18817,7 @@ function prepareInitialWorkspaceDatabase() {
   };
 }
 
-function initializeGenealogyWorkspace() {
+async function initializeGenealogyWorkspace() {
   restoreWorkspacePreferences();
   connectAssetStoreInBackground();
 
@@ -18785,7 +18825,7 @@ function initializeGenealogyWorkspace() {
     preparedResult,
     initialDatabase
   } =
-    prepareInitialWorkspaceDatabase();
+    await prepareInitialWorkspaceDatabase();
 
   applyRelationshipLineSettings();
   restoreCanvasBackground();
@@ -18889,7 +18929,7 @@ async function bootstrapGenealogyApp() {
   setupRelationshipTypePicker();
   genealogyUI.observeFormControls();
 
-  initializeGenealogyWorkspace();
+  await initializeGenealogyWorkspace();
 }
 
 bootstrapGenealogyApp().catch(error => {
