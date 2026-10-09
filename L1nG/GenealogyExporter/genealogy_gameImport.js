@@ -1828,6 +1828,7 @@
           manualOverrides:[],
           avatarPath:findSimAvatarPath(bundle.files, id, pet),
           householdId:pet.householdId || null,
+          householdName:optionalDisplayValue(household?.name) || '',
           ownerIds,
           recordState:pet.recordState || 'full',
           portrait:pet.portrait || null,
