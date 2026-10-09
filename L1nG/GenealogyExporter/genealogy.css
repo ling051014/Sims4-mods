@@ -7130,7 +7130,8 @@ button.is-loading .button-loading-label {
 :root { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"] { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23172636' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 /* 自訂主題勾號由 chooseCustomTheme() 按使用者選的強調色計算。 */
-.topbar-filter-option input[type="checkbox"] {
+.topbar-filter-option input[type="checkbox"],
+.person-card-menu-check input[type="checkbox"] {
   -webkit-appearance:none;
   appearance:none;
   width:14px;
@@ -7144,12 +7145,14 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
   background-position:center;
   background-size:11px 11px;
 }
-.topbar-filter-option input[type="checkbox"]:checked {
+.topbar-filter-option input[type="checkbox"]:checked,
+.person-card-menu-check input[type="checkbox"]:checked {
   border-color:var(--action-primary);
   background-color:var(--action-primary);
   background-image:var(--filter-checkmark-image);
 }
-.topbar-filter-option input[type="checkbox"]:focus-visible {
+.topbar-filter-option input[type="checkbox"]:focus-visible,
+.person-card-menu-check input[type="checkbox"]:focus-visible {
   outline:2px solid var(--action-primary);
   outline-offset:2px;
 }
@@ -7926,7 +7929,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .person-card-menu-check:hover,.person-card-menu-radio:hover { background:var(--surface-item-hover); }
 .person-card-menu-check.fixed { color:var(--text-secondary); cursor:default; }
 .person-card-menu-check.fixed:hover { background:transparent; }
-.person-card-menu-check input,.person-card-menu-radio input { margin:0; accent-color:var(--action-primary); }
+.person-card-menu-radio input { margin:0; accent-color:var(--action-primary); }
+.person-card-menu-check.fixed input[type="checkbox"]:disabled { opacity:.65; }
 .person-card-menu-note { padding:5px 9px 7px; color:var(--text-secondary); font-size:10px; line-height:1.4; }
 
 /* ========【人物卡片外觀】 設定 - 檢視模式外觀；檢視 / 編輯顯示內容各自獨立 ======== */
