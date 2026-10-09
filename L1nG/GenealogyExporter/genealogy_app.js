@@ -278,6 +278,8 @@ let customColors = { c1:'#ffffff', c2:'#dfeffc', c3:'#55acee' };
 let hasSavedCustomTheme = false;
 
 let personLibraryViewMode = 'detailed';
+let personLibraryCategory = 'sims';
+let personLibraryAvatarObserver = null;
 try {
   const savedPersonLibraryView = localStorage.getItem(PERSON_LIBRARY_VIEW_KEY);
   if (savedPersonLibraryView === 'compact' || savedPersonLibraryView === 'detailed') personLibraryViewMode = savedPersonLibraryView;
@@ -741,6 +743,8 @@ function refreshResolvedAssetDom(
         element instanceof
         HTMLImageElement
       ) {
+        // 人物／寵物總覽的頭像由可見範圍觀察器管理，避免一次載入數百張導致暫存網址遭回收。
+        if (element.classList.contains('person-library-deferred-image')) return;
         if (element.src !== url) {
           element.src = url;
         }
@@ -922,10 +926,10 @@ function clampAvatarValue(value,min,max,fallback){
     element.style.setProperty('--avatar-y',`${(f.y*100).toFixed(2)}%`);
     element.style.setProperty('--avatar-zoom',f.zoom.toFixed(3));
   }
-  function framedAvatarImageHTML(ref,frame,extraClass=''){
+  function framedAvatarImageHTML(ref,frame,extraClass='',deferSrc=false){
     if(!isAssetId(ref))return'';
 
-    const url=resolveImageUrl(ref);
+    const url=deferSrc?'':resolveImageUrl(ref);
 
     return `<img class="avatar-framed-image${extraClass ? ' ' + esc(extraClass) : ''}${url?'':' asset-pending'}" data-asset-id="${esc(ref)}"${url?` src="${esc(url)}"`:''} alt="" draggable="false" decoding="async" style="${avatarFrameInlineStyle(frame)}">`;
   }
@@ -15776,9 +15780,9 @@ const personLibraryController = {
     const addBtn = $('personLibraryAddBtn');
     const countEl = $('personLibraryBatchCount');
 
-    if (toolbar) toolbar.hidden = !personLibraryState.batchMode;
-    if (batchBtn) batchBtn.hidden = personLibraryState.batchMode;
-    if (addBtn) addBtn.hidden = personLibraryState.batchMode;
+    if (toolbar) toolbar.hidden = !personLibraryState.batchMode || personLibraryCategory === 'pets';
+    if (batchBtn) batchBtn.hidden = personLibraryState.batchMode || personLibraryCategory === 'pets';
+    if (addBtn) addBtn.hidden = personLibraryState.batchMode || personLibraryCategory === 'pets';
     if (countEl) countEl.textContent = '已選 ' + count + ' 位';
 
     ['personLibraryBatchAddFamilyBtn','personLibraryBatchRemoveFamilyBtn','personLibraryBatchDeleteBtn']
@@ -15811,6 +15815,7 @@ const personLibraryController = {
   open() {
     personLibrarySearch.value = '';
     resetPersonLibraryOperations({ batch:true, add:false });
+    this.syncCategoryControls();
     this.syncViewControls();
     renderPersonLibrary();
     personLibraryDialog.classList.add('show');
@@ -15818,7 +15823,31 @@ const personLibraryController = {
 
   close() {
     personLibraryDialog.classList.remove('show');
+    personLibraryAvatarObserver?.disconnect();
+    personLibraryAvatarObserver = null;
     resetPersonLibraryOperations({ batch:true, add:false });
+  },
+  syncCategoryControls() {
+    const petTab = personLibraryCategory === 'pets';
+    const sims = $('personLibrarySimsTab');
+    const pets = $('personLibraryPetsTab');
+    for (const [button, active] of [[sims, !petTab], [pets, petTab]]) {
+      if (!button) continue;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
+      button.tabIndex = active ? 0 : -1;
+    }
+    if (personLibrarySearch) {
+      personLibrarySearch.placeholder = uiText(petTab ? '搜尋寵物…' : '搜尋人物…');
+    }
+  },
+  setCategory(category) {
+    personLibraryCategory = category === 'pets' ? 'pets' : 'sims';
+    personLibrarySearch.value = '';
+    resetPersonLibraryOperations({ batch:true, add:false });
+    $('personLibraryList').scrollTop = 0;
+    this.syncCategoryControls();
+    renderPersonLibrary();
   },
 
   addSelectionToCurrentFamily() {
@@ -15877,8 +15906,201 @@ function personLibraryCompactMeta(sim) {
   return parts.filter(Boolean).join(' · ');
 }
 
+
+/* ========【人物與寵物總覽】設定 - 清單只載入可見頭像，避免 256 個暫存網址被大量清單耗盡 ======== */
+function personLibraryAvatarHTML(sim) {
+  const name = displayDataText(sim?.name, sim) || '?';
+  const initial = esc(name.trim().charAt(0) || '?');
+  const image = framedAvatarImageHTML(sim?.avatar, sim?.avatarFrame, 'person-library-deferred-image', true);
+  return image
+    ? '<span class="person-library-avatar-fallback">' + initial + '</span>' + image
+    : initial;
+}
+
+function petLibraryAvatarHTML(pet) {
+  return '<span class="pet-avatar-species-fallback" aria-hidden="true">' +
+    petIconFor(pet) + '</span>' +
+    framedAvatarImageHTML(pet?.avatar, pet?.avatarFrame, 'person-library-deferred-image', true);
+}
+
+function observePersonLibraryAvatars(list) {
+  personLibraryAvatarObserver?.disconnect();
+  personLibraryAvatarObserver = null;
+  const images = [...list.querySelectorAll('img.person-library-deferred-image[data-asset-id]')];
+  if (!images.length) return;
+
+  async function loadVisibleAvatar(image) {
+    const id = image.dataset.assetId;
+    try {
+      const url = await assetStore.getUrl(id);
+      if (image.dataset.libraryVisible !== '1' || !image.isConnected) return;
+      if (!url) return;
+      image.onload = () => {
+        if (image.dataset.libraryVisible === '1') image.classList.add('asset-ready');
+      };
+      image.onerror = () => image.classList.remove('asset-ready');
+      image.src = url;
+      if (image.complete && image.naturalWidth) image.classList.add('asset-ready');
+    } catch (error) {
+      console.warn('人物庫頭像載入失敗：', id, error);
+    }
+  }
+
+  if (typeof IntersectionObserver !== 'function') {
+    // 舊瀏覽器也採分批載入，不會在同一幀建立幾百個圖片網址。
+    images.slice(0, 60).forEach(image => {
+      image.dataset.libraryVisible = '1';
+      void loadVisibleAvatar(image);
+    });
+    return;
+  }
+
+  personLibraryAvatarObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const image = entry.target;
+      if (entry.isIntersecting) {
+        if (image.dataset.libraryVisible === '1') return;
+        image.dataset.libraryVisible = '1';
+        void loadVisibleAvatar(image);
+      } else {
+        image.dataset.libraryVisible = '0';
+        image.onload = null;
+        image.onerror = null;
+        image.removeAttribute('src');
+        image.classList.remove('asset-ready');
+      }
+    });
+  }, { root:list, rootMargin:'140px 0px' });
+  images.forEach(image => personLibraryAvatarObserver.observe(image));
+}
+
+function collectPetLibraryEntries() {
+  const db = currentGenealogyData();
+  const byId = new Map();
+  const add = (pet, ownerId, index) => {
+    if (!pet || typeof pet !== 'object') return;
+    const stable = pet.gameData?.simId || pet.id;
+    const key = stable != null && String(stable)
+      ? String(stable)
+      : (ownerId || 'unassigned') + ':pet:' + index;
+    let entry = byId.get(key);
+    if (!entry) {
+      entry = { key, pet, ownerId:ownerId || '', ownerIds:new Set() };
+      byId.set(key, entry);
+    }
+    if (ownerId) {
+      entry.ownerIds.add(String(ownerId));
+      if (!entry.ownerId) entry.ownerId = String(ownerId);
+    }
+    if (!entry.pet.avatar && pet.avatar) entry.pet = pet;
+  };
+  Object.values(db?.sims || {}).forEach(sim => {
+    (sim.pets || []).forEach((pet, index) => add(pet, String(sim.id), index));
+  });
+  (db?.meta?.unassignedPets || []).forEach((pet,index) => add(pet,'',index));
+  return [...byId.values()].sort((a,b) =>
+    String(a.pet.name || '').localeCompare(String(b.pet.name || ''), 'zh')
+  );
+}
+
+function petLibraryDisplayInfo(entry) {
+  const db = currentGenealogyData();
+  const pet = entry.pet;
+  const owner = db?.sims?.[entry.ownerId] || null;
+  const owners = [...entry.ownerIds]
+    .map(id => db.sims[id])
+    .filter(Boolean)
+    .map(sim => displayDataText(sim.name,sim));
+  const householdId = pet?.gameData?.householdId;
+  const household = householdId == null ? null :
+    (db?.families || []).find(f => String(f.gameData?.householdId ?? '') === String(householdId));
+  const ownerLabel = owners.length ? owners.join(' · ') :
+    (household ? displayDataText(household.name,household) : uiText('（未歸屬）'));
+  const name = displayDataText(pet.name,owner) || uiText('（未命名）');
+  const breed = displayDataText(pet.breed,owner);
+  const traits = (pet.traits || []).map(t => displayDataText(t,owner));
+  return {name,breed,traits,ownerLabel,owner,species:formatPetSpecies(pet)};
+}
+
+function renderPetLibrary() {
+  const list = $('personLibraryList');
+  const all = collectPetLibraryEntries();
+  const query = personLibrarySearch.value.trim().toLowerCase();
+  const filtered = all.filter(entry => {
+    if (!query) return true;
+    const info = petLibraryDisplayInfo(entry);
+    return [info.name,info.breed,info.species,info.ownerLabel,...info.traits]
+      .some(value => String(value || '').toLowerCase().includes(query));
+  });
+  $('personLibraryCount').textContent = '（' + filtered.length + '/' + all.length + '）';
+  personLibraryController.syncViewControls();
+  personLibraryController.syncBatchToolbar();
+  if (!filtered.length) {
+    list.innerHTML = '<div class="person-library-empty">' +
+      esc(uiText(all.length ? '沒有符合的寵物' : '尚無寵物資料')) + '</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(entry => {
+    const info = petLibraryDisplayInfo(entry);
+    const pet = entry.pet;
+    const details = [info.species,info.breed,petGenderLabel(pet),
+      uiText(pet.ageStage || ''),uiText(pet.status || ''),info.ownerLabel].filter(Boolean);
+    const short = [info.species,info.breed].filter(Boolean).join(' · ');
+    return '<div class="person-library-item person-library-pet-item" data-pet-library-key="' + esc(entry.key) + '">' +
+      '<div class="person-library-main">' +
+        '<div class="person-library-avatar-wrap"><div class="person-library-avatar">' +
+          petLibraryAvatarHTML(pet) + '</div></div>' +
+        '<div class="person-library-text">' +
+          '<div class="person-library-name"><span>' + esc(info.name) + '</span></div>' +
+          '<div class="person-library-compact-meta">' + esc(short) + '</div>' +
+          '<div class="person-library-detailed-meta">' +
+            details.map(value => '<span>' + esc(value) + '</span>')
+              .join('<span class="person-library-meta-separator" aria-hidden="true">·</span>') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ui-menu person-library-item-menu" data-menu-portal="body">' +
+        '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
+          iconSvg('three-dots') + '</button>' +
+        '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view">' +
+            iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span></button>' +
+          (entry.ownerId ? '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit">' +
+            iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' : '') +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+
+  const indexed = new Map(filtered.map(entry => [entry.key,entry]));
+  list.querySelectorAll('[data-pet-library-key]').forEach(row => {
+    const entry = indexed.get(row.dataset.petLibraryKey);
+    if (!entry) return;
+    row.addEventListener('click', event => {
+      if (event.target.closest('.person-library-item-menu')) return;
+      openPetProfileFromCanvas(entry);
+    });
+    row.querySelectorAll('[data-pet-library-action]').forEach(button => {
+      button.addEventListener('click', event => {
+        event.stopPropagation();
+        if (button.dataset.petLibraryAction === 'edit') openPetEditorFromCanvas(entry);
+        else openPetProfileFromCanvas(entry);
+      });
+    });
+  });
+  observePersonLibraryAvatars(list);
+  setupAppMenus();
+}
+
 function renderPersonLibrary() {
   closeAppMenus();
+  personLibraryAvatarObserver?.disconnect();
+  personLibraryAvatarObserver = null;
+  personLibraryController.syncCategoryControls();
+  if (personLibraryCategory === 'pets') {
+    renderPetLibrary();
+    return;
+  }
 
   const fam = currentFamily();
   const q = personLibrarySearch.value.trim().toLowerCase();
@@ -15961,7 +16183,7 @@ function renderPersonLibrary() {
         '" data-person-library-id="' + esc(s.id) + '">' +
       '<div class="person-library-main">' +
         '<div class="person-library-avatar-wrap">' +
-          '<div class="person-library-avatar">' + avatarHTML(s) + '</div>' +
+          '<div class="person-library-avatar">' + personLibraryAvatarHTML(s) + '</div>' +
           '<button class="person-library-batch-select' + (selected ? ' selected' : '') +
             '" type="button" data-person-library-select="' + esc(s.id) +
             '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
@@ -16049,6 +16271,7 @@ function renderPersonLibrary() {
     });
   });
 
+  observePersonLibraryAvatars(list);
   if (!personLibraryState.batchMode) setupAppMenus();
 }
 
@@ -16068,6 +16291,8 @@ personLibraryDialog.onclick = event => {
 
 personLibrarySearch.oninput = createDebouncedCallback(renderPersonLibrary, 150);
 
+$('personLibrarySimsTab').onclick = () => personLibraryController.setCategory('sims');
+$('personLibraryPetsTab').onclick = () => personLibraryController.setCategory('pets');
 $('personLibraryAddBtn').onclick = () => personEditor.open(null);
 $('personLibraryCompactBtn').onclick = () => personLibraryController.setViewMode('compact');
 $('personLibraryDetailedBtn').onclick = () => personLibraryController.setViewMode('detailed');
