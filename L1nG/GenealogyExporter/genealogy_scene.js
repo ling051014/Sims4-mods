@@ -6180,44 +6180,46 @@ function solveAutomaticGenealogyPositions(visibleIds) {
 // ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
 // ========【寵物卡顯示資訊】 設定 - 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
 function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
-  const rows = [
-    ['species',petCardSpeciesLabel(pet)],
-    ['breed',displayDataText(pet.breed,owner)],
-    ['gender',petCardGenderLabel(pet)],
-    ['ageStage',uiText(pet.ageStage || '')],
-    ['status',uiText(pet.status || '')],
-    ['traits',(pet.traits || []).map(trait => displayDataText(trait,owner)).filter(Boolean).join(' · ')]
-  ];
-  return rows.filter(([key,value]) => settings[key] && value)
-    .map(([key,value]) => ({
-      key, text:['gender','traits'].includes(key)
-        ? uiText(key === 'gender' ? '性別' : '特徵') + '：' + value : value
-    }));
+  const species = settings.species ? petCardSpeciesLabel(pet) : '';
+  const breed = settings.breed ? displayDataText(pet.breed,owner) : '';
+  const stage = settings.ageStage ? uiText(pet.ageStage || '') : '';
+  const status = settings.status ? uiText(pet.status || '') : '';
+  const traits = settings.traits
+    ? (pet.traits || []).map(trait => displayDataText(trait,owner)).filter(Boolean)
+    : [];
+  const rows = [];
+  if (species || breed) rows.push({key:'speciesBreed',text:[species,breed].filter(Boolean).join(' · ')});
+  if (stage || status) rows.push({key:'stageStatus',text:[stage,status].filter(Boolean).join(' · ')});
+  if (traits.length) rows.push({key:'traits',text:traits.join(' / '),traits});
+  return rows;
 }
 
 function petCardDimensions(pet,owner) {
-  const config = getPetCardSettings();
-  const rows = petCardFieldRows(pet,owner,config);
-  const name = config.name ? displayDataText(pet.name,owner) : '';
+  const settings = getPetCardSettings();
+  const rows = petCardFieldRows(pet,owner,settings);
   const edit = viewMode === 'edit';
-  const availableChars = edit ? 11 : 14;
-  const lines = value => Math.max(1,Math.ceil([...String(value || '')].length / availableChars));
-  const nameH = name ? lines(name)*16 : 0;
-  const bodyH = rows.reduce((sum,row) => {
+  const W = edit ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
+  const textWidth = edit ? W - 82 : W - 18;
+  const lines = (value,fontSize = 10) => {
+    const charWidth = /[^\x00-\x7f]/.test(String(value || '')) ? fontSize : fontSize * 0.58;
+    return Math.max(1,Math.ceil([...String(value || '')].length * charWidth / textWidth));
+  };
+  const name = settings.name ? displayDataText(pet.name,owner) : '';
+  const nameHeight = name ? lines(name,edit?12:11)*17 : 0;
+  const rowHeight = rows.reduce((sum,row) => {
     if (edit && row.key === 'traits') {
-      const traits = (pet.traits || []).map(t => displayDataText(t,owner)).filter(Boolean);
-      let count = 1, used = 0;
-      traits.forEach(trait => {
-        const width = Math.min(108,[...trait].length*10+13);
-        if (used && used+width+4 > 108) { count++; used=0; }
-        used += width+4;
-      });
-      return sum + Math.max(1,count)*22;
+      let used = 0, count = 1;
+      for (const trait of row.traits) {
+        const width = Math.min(textWidth,[...trait].length*9+12);
+        if (used && used+width+3>textWidth) {count++;used=0;}
+        used += width+3;
+      }
+      return sum+count*19;
     }
-    return sum + lines(row.text)*14;
-  },0) + Math.max(0,rows.length-1)*3;
-  if (edit) return {W:PET_EDIT_DIMS.W,H:Math.max(84,20+Math.max(51,nameH+(nameH && rows.length ? 4 : 0)+bodyH))};
-  return {W:PET_VIEW_DIMS.W,H:Math.max(88,10+61+(nameH ? 5+nameH : 0)+(rows.length ? 5+bodyH : 0)+10)};
+    return sum+lines(row.text)*14+3;
+  },0);
+  if (edit) return {W,H:Math.max(84,20+Math.max(51,nameHeight+rowHeight+4))};
+  return {W,H:Math.max(90,12+61+(nameHeight?nameHeight+5:0)+rowHeight+10)};
 }
 
 function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
@@ -6370,25 +6372,33 @@ function paintPetLayer() {
       const state = pet.status === '幽靈' ? 'ghost' : pet.status === '已故' ? 'dead' : '';
       const settings = getPetCardSettings();
       const fields = petCardFieldRows(pet,owner,settings);
+      const edit = viewMode === 'edit';
+      const gender = settings.gender ? String(pet.gender || '').toLowerCase() : '';
+      const male = ['男','公','male'].includes(gender);
+      const female = ['女','母','female'].includes(gender);
+      const genderIcon = settings.gender ? (
+        '<span class="person-card-gender-icon" role="img" aria-label="' +
+        esc(uiText(male ? '公' : female ? '母' : '其他')) + '">' +
+        iconSvg(male ? 'gender-card-male' : female ? 'gender-card-female' : 'gender-card-other') +
+        '</span>'
+      ) : '';
       const fieldHTML = fields.map(row => {
-        if (viewMode === 'edit' && row.key === 'traits') {
-          const chips = (pet.traits || []).map(trait => displayDataText(trait,owner))
-            .filter(Boolean).map(trait =>
-              `<span class="genealogy-pet-card-trait">${esc(trait)}</span>`
-            ).join('');
-          return `<span class="genealogy-pet-card-traits">${chips}</span>`;
+        if (edit && row.key === 'traits') {
+          const chips = row.traits.map(trait =>
+            `<span class="tag" title="${esc(trait)}">${esc(trait)}</span>`
+          ).join('');
+          return `<span class="genealogy-pet-card-traits person-card-tags">${chips}</span>`;
         }
-        return `<span class="genealogy-pet-card-field" title="${esc(row.text)}">${esc(row.text)}</span>`;
+        return `<span class="genealogy-pet-card-field${edit ? ' person-card-edit-meta' : ' person-card-view-meta'}" title="${esc(row.text)}">${esc(row.text)}</span>`;
       }).join('');
-      const cardMode = viewMode === 'edit' ? 'mode-edit' : 'mode-view';
-      const appearanceClass = viewMode === 'edit' ? '' :
-        ' card-appearance-' + (settings.appearance || 'minimal');
+      const cardMode = edit ? 'mode-edit' : 'mode-view';
+      const appearanceClass = edit ? '' : ' card-appearance-' + (settings.appearance || 'minimal');
       const hasContent = settings.name || fields.length;
       return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}${appearanceClass}${hasContent ? '' : ' pet-avatar-only'}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
         style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${card.width}px;height:${card.height}px">
         <span class="genealogy-pet-card-avatar">${petCardAvatarHTML(pet)}</span>
         ${hasContent ? `<span class="genealogy-pet-card-info">
-          ${settings.name ? `<span class="genealogy-pet-card-name">${esc(name)}</span>` : ''}
+          ${settings.name ? `<span class="genealogy-pet-card-name">${esc(name)}${genderIcon}</span>` : ''}
           ${fieldHTML}
         </span>` : ''}
       </button>`;
