@@ -21,6 +21,7 @@
   let dbConnection = null;
   const objectUrlCache = new Map();
   const pendingUrlLoads = new Map();
+  let urlCachePruneQueued = false;
 
   // ========【圖片處理佇列】 設定 - 同時間只處理一張大圖，避免 CPU / RAM 峰值 ========
   const IMAGE_WORKER_URL =
@@ -325,11 +326,25 @@
     const url = URL.createObjectURL(blob);
     objectUrlCache.set(id, url);
 
-    while (objectUrlCache.size > URL_CACHE_LIMIT) {
-      const oldest = objectUrlCache.entries().next().value;
-      if (!oldest) break;
-      URL.revokeObjectURL(oldest[1]);
-      objectUrlCache.delete(oldest[0]);
+    // 批次收斂快取；不能回收目前仍由人物卡、寵物卡、相簿或背景使用的網址。
+    if (objectUrlCache.size > URL_CACHE_LIMIT && !urlCachePruneQueued) {
+      urlCachePruneQueued = true;
+      requestAnimationFrame(() => {
+        urlCachePruneQueued = false;
+        if (objectUrlCache.size <= URL_CACHE_LIMIT) return;
+
+        const pinnedIds = new Set();
+        document.querySelectorAll('[data-asset-id], [data-asset-bg-id]').forEach(element => {
+          if (isAssetId(element.dataset.assetId)) pinnedIds.add(element.dataset.assetId);
+          if (isAssetId(element.dataset.assetBgId)) pinnedIds.add(element.dataset.assetBgId);
+        });
+        for (const [assetId, assetUrl] of objectUrlCache) {
+          if (objectUrlCache.size <= URL_CACHE_LIMIT) break;
+          if (pinnedIds.has(assetId)) continue;
+          URL.revokeObjectURL(assetUrl);
+          objectUrlCache.delete(assetId);
+        }
+      });
     }
 
     return url;
