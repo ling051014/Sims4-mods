@@ -2622,9 +2622,10 @@ function setFamilyTreeViewMode(mode, control = null) {
   render();
 
   requestAnimationFrame(() => {
-    // 只更新左側索引位置；切換分類不重新計算右側 dropdown 幾何。
+    // 切換分類保持下拉面板位置，只讓目前選取的家庭回到可見範圍。
     if (control && control.host.classList.contains('open')) {
       positionFamilyNavTabsPortal(control);
+      scrollSelectedFamilyNavOption(control);
     }
     genealogyViewport.fit();
   });
@@ -2750,6 +2751,25 @@ function restoreFamilyNavSelectMenu(control) {
   hideFamilyNavTabsPortal(control);
 }
 
+// 家庭超量時選單會向右新增欄位：展開或切換分類後，讓目前家庭落在可見範圍中央。
+function scrollSelectedFamilyNavOption(control) {
+  if (!control || control.select.id !== 'familySelect') return;
+  const menu = control.menu;
+  if (!control.host.classList.contains('open') || menu.parentElement !== document.body) return;
+
+  const selected = menu.querySelector('.nav-select-option.selected');
+  const maxScroll = Math.max(0, menu.scrollWidth - menu.clientWidth);
+  if (!selected || maxScroll <= 1) return;
+
+  // 使用實際排版位置，不依賴固定列高或家族排序；只改選單本身的水平捲軸。
+  const menuRect = menu.getBoundingClientRect();
+  const itemRect = selected.getBoundingClientRect();
+  const target = menu.scrollLeft +
+    (itemRect.left + itemRect.width / 2) -
+    (menuRect.left + menu.clientWidth / 2);
+  menu.scrollLeft = Math.max(0, Math.min(maxScroll, target));
+}
+
 function positionFamilyNavSelectMenu(control) {
   if (!control || control.select.id !== 'familySelect') return;
 
@@ -2787,6 +2807,7 @@ function positionFamilyNavSelectMenu(control) {
   menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
   menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
   positionFamilyNavTabsPortal(control);
+  scrollSelectedFamilyNavOption(control);
 }
 
 function closeNavSelect(host) {
