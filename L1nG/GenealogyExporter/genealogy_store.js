@@ -478,6 +478,10 @@
       petCardFields.forEach(field => {
         if (typeof settings[field] !== 'boolean') settings[field] = !!defaults[field];
       });
+      if (mode === 'view' && !cardAppearanceValues.has(String(settings.appearance || ''))) {
+        settings.appearance = cardAppearanceValues.has(String(defaults.appearance || ''))
+          ? String(defaults.appearance) : 'minimal';
+      }
       return settings;
     }
 
@@ -1447,6 +1451,22 @@
         layoutChanged:true,
         nodesChanged:true,
         edgesChanged:true,
+        saveDirty:true
+      });
+      return finalized(result);
+    }
+
+    function setPetCardAppearance(appearance) {
+      const db = data();
+      const result = rawResult();
+      const next = String(appearance || '');
+      if (!cardAppearanceValues.has(next)) return finalized(result);
+      ensureCardSettings(db);
+      if (db.meta.petCardView.appearance === next) return finalized(result);
+      db.meta.petCardView.appearance = next;
+      mark(result, {
+        dataChanged:true,
+        nodesChanged:true,
         saveDirty:true
       });
       return finalized(result);
@@ -3052,6 +3072,7 @@
       setCardField,
       getPetCardSettings,
       setPetCardField,
+      setPetCardAppearance,
       setCardAppearance,
       mergeResults,
       createSim,
