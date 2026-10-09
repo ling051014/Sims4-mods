@@ -322,7 +322,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <textarea class="family-bio" id="familyBio" rows="3" maxlength="360" placeholder="加入這個家族的簡介、背景或備註…" aria-label="家族簡介"></textarea>
+                            <textarea class="family-bio" id="familyBio" rows="3" maxlength="360" placeholder="加入這個家族的簡介、背景或備註……" aria-label="家族簡介"></textarea>
                             <div class="family-stats" aria-label="家族摘要">
                                 <span><strong id="familyMemberCount">0</strong><span> 位成員</span></span>
                                 <span class="family-stat-sep">·</span>
@@ -477,7 +477,7 @@
                             <div class="form-field full" id="causeOfDeathLabel" style="display:none"><span class="form-field-title" id="fCauseOfDeathLabelText">死因</span><input id="fCauseOfDeath" data-ui-suggestion-list="causeOfDeathPresets" maxlength="40" placeholder="衰老 / 溺水 / 火災……" aria-labelledby="fCauseOfDeathLabelText"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></div>
                             <div class="form-field full"><span class="form-field-title" id="fAspirationLabel">抱負</span><input id="fAspiration" data-ui-suggestion-list="aspirationPresets" maxlength="40" placeholder="暢銷作家 / 靈魂伴侶……" aria-labelledby="fAspirationLabel"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></div>
                             <div class="form-field full trait-field"><span class="field-label-row form-field-title" id="traitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="fTraits" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="traitFieldLabel"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></div>
-                            <div class="form-field full"><span class="form-field-title" id="fNotesLabel">備註</span><textarea id="fNotes" placeholder="補充想記錄的資訊或故事…" rows="3" aria-labelledby="fNotesLabel"></textarea></div>
+                            <div class="form-field full"><span class="form-field-title" id="fNotesLabel">備註</span><textarea id="fNotes" placeholder="補充想記錄的資訊或故事……" rows="3" aria-labelledby="fNotesLabel"></textarea></div>
                         </div>
                     </section>
 
@@ -487,37 +487,37 @@
                             <section class="family-rel-block family-rel-block-wide">
                                 <div class="family-rel-block-head"><span>所屬家族</span><button class="family-rel-manage" type="button" data-family-editor-toggle="family-membership">管理</button></div>
                                 <div class="family-rel-preview" id="editorFamilyMembershipPreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="family-membership" hidden><div class="ui-select-wrap" data-placeholder="點選選擇家族（可多選）" data-ui-select-for="fFamilyIds" data-ui-select-portal="true"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋家族…" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fFamilyIds" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="family-membership" hidden><div class="ui-select-wrap" data-placeholder="點選選擇家族（可多選）" data-ui-select-for="fFamilyIds" data-ui-select-portal="true"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋家族……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fFamilyIds" multiple></select></div>
                             </section>
                             <section class="family-rel-block family-rel-block-wide">
                                 <div class="family-rel-block-head"><span>父母</span><button class="family-rel-manage" type="button" data-family-editor-toggle="parents">編輯</button></div>
                                 <div class="family-rel-preview" id="editorParentsPreview"></div>
                                 <div class="family-rel-edit" data-family-editor-edit="parents" hidden>
-                                    <div class="ui-select-wrap" data-placeholder="新增父母" data-ui-select-for="fParents" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名…" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fParents" multiple></select>
+                                    <div class="ui-select-wrap" data-placeholder="新增父母" data-ui-select-for="fParents" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fParents" multiple></select>
                                 </div>
                             </section>
                             <section class="family-rel-block">
                                 <div class="family-rel-block-head"><span>配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="spouse">編輯</button></div>
                                 <div class="family-rel-preview" id="editorSpousePreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="spouse" hidden><div class="ui-select-wrap" data-placeholder="新增配偶" data-ui-select-for="fSpouse" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名…" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fSpouse" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="spouse" hidden><div class="ui-select-wrap" data-placeholder="新增配偶" data-ui-select-for="fSpouse" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fSpouse" multiple></select></div>
                             </section>
                             <section class="family-rel-block">
                                 <div class="family-rel-block-head"><span>前任配偶</span><button class="family-rel-manage" type="button" data-family-editor-toggle="exspouse">編輯</button></div>
                                 <div class="family-rel-preview" id="editorExSpousePreview"></div>
-                                <div class="family-rel-edit" data-family-editor-edit="exspouse" hidden><div class="ui-select-wrap" data-placeholder="新增前任配偶" data-ui-select-for="fExSpouse" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名…" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fExSpouse" multiple></select></div>
+                                <div class="family-rel-edit" data-family-editor-edit="exspouse" hidden><div class="ui-select-wrap" data-placeholder="新增前任配偶" data-ui-select-for="fExSpouse" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fExSpouse" multiple></select></div>
                             </section>
                             <section class="family-rel-block family-rel-block-wide">
                                 <div class="family-rel-block-head"><span>子女</span><button class="family-rel-manage" type="button" data-family-editor-toggle="children">編輯</button></div>
                                 <div class="family-rel-preview" id="editorChildrenPreview"></div>
                                 <div class="family-rel-edit" data-family-editor-edit="children" hidden>
-                                    <div class="ui-select-wrap" data-placeholder="新增子女" data-ui-select-for="fChildren" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名…" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fChildren" multiple></select>
+                                    <div class="ui-select-wrap" data-placeholder="新增子女" data-ui-select-for="fChildren" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fChildren" multiple></select>
                                 </div>
                             </section>
                             <section class="family-rel-block family-rel-block-wide">
                                 <div class="family-rel-block-head"><span>兄弟姊妹</span><button class="family-rel-manage" type="button" data-family-editor-toggle="siblings">編輯</button></div>
                                 <div class="family-rel-preview" id="editorSiblingsPreview"></div>
                                 <div class="family-rel-edit" data-family-editor-edit="siblings" hidden>
-                                    <div class="ui-select-wrap" data-placeholder="新增兄弟姊妹" data-ui-select-for="fSiblings" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名…" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fSiblings" multiple></select>
+                                    <div class="ui-select-wrap" data-placeholder="新增兄弟姊妹" data-ui-select-for="fSiblings" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" data-ui-select-mode="add-only"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="fSiblings" multiple></select>
                                     <div class="family-rel-derived-hint">由父母關係推導的兄弟姊妹會自動同步；如需變更，請調整父母關係。</div>
                                 </div>
                             </section>
@@ -543,13 +543,13 @@
                                 <div class="relationship-add-row">
                                     <div class="relationship-type-picker" id="relationshipTypePicker" style="flex:1">
                                         <button class="relationship-type-trigger" id="relationshipTypeTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                                            <span class="relationship-type-value" id="relationshipTypeValue">選擇或輸入關係…</span>
+                                            <span class="relationship-type-value" id="relationshipTypeValue">選擇或輸入關係……</span>
                                             <span class="l1ng-icon icon-chevron-down relationship-type-chevron" aria-hidden="true"></span>
                                         </button>
 
                                         <div class="relationship-type-popover" id="relationshipTypePopover" role="listbox" aria-label="關係類型" hidden>
                                             <div class="relationship-type-menu">
-                                                <input class="relationship-type-search" id="relationshipTypeSearch" type="text" placeholder="搜尋或輸入關係…" autocomplete="off">
+                                                <input class="relationship-type-search" id="relationshipTypeSearch" type="text" placeholder="搜尋或輸入關係……" autocomplete="off">
                                                 <div class="relationship-type-options" id="relationshipTypeOptions"></div>
                                             </div>
                                         </div>
@@ -565,7 +565,7 @@
                                     </div>
                                     <select hidden id="relationshipType"></select>
                                     <div class="ui-select-wrap" data-placeholder="選擇目標（可多選）" data-ui-select-for="relationshipTarget" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" style="flex:1.4">
-                                        <div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名…" type="text"><div class="ui-select-options"></div></div>
+                                        <div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div>
                                     </div>
                                     <select hidden id="relationshipTarget" multiple></select>
                                     <button id="relationshipAddBtn" type="button">新增</button>
@@ -723,7 +723,7 @@
                             <option value="老年">老年</option>
                         </select>
                     </label>
-                    <label class="full">備註<textarea id="phNote" placeholder="可選：拍攝場景、備註、想記錄的故事…" rows="2"></textarea></label>
+                    <label class="full">備註<textarea id="phNote" placeholder="可選：拍攝場景、備註、想記錄的故事……" rows="2"></textarea></label>
                 </div>
                 <div class="ui-dialog-actions">
                     <button class="danger" id="phDelete" style="display:none">刪除圖片</button>
@@ -787,7 +787,7 @@
                     <button type="button" id="personLibraryPetsTab" role="tab" aria-selected="false" aria-controls="personLibraryList" tabindex="-1">寵物</button>
                 </div>
                 <div class="person-library-toolbar">
-                    <input id="personLibrarySearch" placeholder="搜尋人物…" type="search" autocomplete="off">
+                    <input id="personLibrarySearch" placeholder="搜尋人物……" type="search" autocomplete="off">
                     <div class="person-library-view-toggle" role="group" aria-label="人物顯示方式">
                         <button id="personLibraryCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">☷</button>
                         <button id="personLibraryDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">☰</button>
@@ -811,7 +811,7 @@
             <div class="ui-dialog-panel family-member-picker-panel">
                 <h2>新增模擬市民到<span class="family-name-chip" id="familyMemberPickerFamilyName">—</span><span class="help-tooltip" tabindex="0" role="button" aria-label="加入家族說明" data-tooltip="勾選後點選「加入家族」即可讓它們出現在目前家族的族譜中。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h2>
                 <div class="family-member-picker-toolbar">
-                    <input id="familyMemberPickerSearch" placeholder="搜尋…" type="search">
+                    <input id="familyMemberPickerSearch" placeholder="搜尋……" type="search">
                     <button id="familyMemberPickerAllBtn" type="button">全選</button>
                     <button id="familyMemberPickerNoneBtn" type="button">清空</button>
                 </div>
