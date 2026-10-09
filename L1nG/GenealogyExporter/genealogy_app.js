@@ -1584,7 +1584,7 @@ function buildSample() {
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
-      sampleVersion:8,
+      sampleVersion:10,
       sampleSource:'Slot_00001128_20261010',
       samplePreferenceDemo:true,
       unassignedPets:(samplePack?.unassignedPets || []).map(pet => {
@@ -18912,19 +18912,54 @@ function connectAssetStoreInBackground() {
 
 // 內建範例的圖片在檔案中提供，首次載入與恢復預設時匯入既有 Blob 資產庫。
 async function ensureSamplePortraitAssets(database) {
-  if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 8) return;
-  const pack = window.L1nGGenealogySamplePack;
+  if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 10) return;
   const images = window.L1nGGenealogySamplePortraits;
-  if (!pack || !images) throw new Error('預設族譜頭像資料未完整載入。');
-  const portraits = Object.values(pack.portraits || {});
-  for (let offset=0; offset<portraits.length; offset+=4) {
-    await Promise.all(portraits.slice(offset,offset+4).map(async portrait => {
-      const base64 = images[portrait.path];
-      if (!base64) throw new Error('缺少預設頭像：' + portrait.path);
-      const bytes = Uint8Array.from(atob(base64), char => char.charCodeAt(0));
-      const id = await assetStore.importBlob(new Blob([bytes], {type:'image/webp'}), {width:192,height:192});
-      if (id !== portrait.assetId) throw new Error('預設頭像校驗失敗：' + portrait.path);
-    }));
+  if (!images) throw new Error('預設族譜肖像資料尚未載入。');
+
+  const sharedPath = 'assets/sample-portraits/shared_unknown.png';
+  const needed = new Map();
+  const allSimIds = Object.keys(database.sims || {});
+  for (const id of allSimIds) {
+    const sim = database.sims[id];
+    const individual = 'assets/sample-portraits/' + id + '.png';
+    const path = images[individual] ? individual :
+      sim.gameData?.recordState === 'family_tree_only' ? sharedPath : null;
+    if (path) needed.set(id, path);
+  }
+  const allPets = [
+    ...Object.values(database.sims || {}).flatMap(sim => sim.pets || []),
+    ...(database.meta.unassignedPets || [])
+  ];
+  for (const pet of allPets) {
+    const id = String(pet.gameData?.simId || pet.id);
+    const path = 'assets/sample-portraits/' + id + '.png';
+    if (images[path]) needed.set(id, path);
+  }
+
+  const processed = new Map();
+  const missing = [];
+  for (const path of new Set(needed.values())) {
+    const base64 = images[path];
+    if (!base64) { missing.push(path); continue; }
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    processed.set(path, await assetStore.importBlob(
+      new Blob([bytes], {type:'image/png'}),
+      {width:path === sharedPath ? 128 : 512,height:path === sharedPath ? 128 : 512}
+    ));
+  }
+  if (missing.length) throw new Error('缺少預設肖像：' + missing.join(', '));
+  for (const [id,path] of needed) {
+    const assetId = processed.get(path);
+    const sim = database.sims[id];
+    if (sim) {
+      sim.avatar = assetId;
+      sim.gameAvatar = assetId;
+      sim.gameData = sim.gameData || {};
+      sim.gameData.avatarSource = 'game';
+    } else for (const pet of allPets) {
+      if (String(pet.gameData?.simId || pet.id) === id) pet.avatar = assetId;
+    }
   }
 }
 
