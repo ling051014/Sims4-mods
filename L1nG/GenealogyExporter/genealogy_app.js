@@ -1529,14 +1529,46 @@ function buildSample() {
     )
   ];
 
+  // 保留原本六個家庭及已人工整理的 RealDate、偏好與關係；
+  // 另加入玩家指定的七個 EA Household，不匯入整份存檔。
+  const samplePack = window.L1nGGenealogySamplePack;
+  if (samplePack) {
+    Object.entries(samplePack.sims || {}).forEach(([id,sim]) => {
+      if (!sims[id]) sims[id] = JSON.parse(JSON.stringify(sim));
+    });
+    const knownFamilies = new Set(families.map(family => String(family.gameData?.householdId || family.id)));
+    (samplePack.families || []).forEach(family => {
+      if (!knownFamilies.has(String(family.gameData?.householdId || family.id))) {
+        families.push(JSON.parse(JSON.stringify(family)));
+      }
+    });
+    Object.entries(samplePack.portraits || {}).forEach(([id,portrait]) => {
+      const sim = sims[id];
+      if (sim) {
+        sim.avatar = portrait.assetId;
+        sim.gameAvatar = portrait.assetId;
+        sim.gameData.avatarSource = 'game';
+      }
+      Object.values(sims).forEach(owner => (owner.pets || []).forEach(pet => {
+        if (String(pet.gameData?.simId || pet.id) === id) pet.avatar = portrait.assetId;
+      }));
+    });
+  }
+
   return {
     version:1,
     meta:{
       sample:true,
       sampleLanguage:'zh-Hant',
-      sampleVersion:7,
-      sampleSource:'ea-npc-20260927',
+      sampleVersion:8,
+      sampleSource:'Slot_00001128_20261010',
       samplePreferenceDemo:true,
+      unassignedPets:(samplePack?.unassignedPets || []).map(pet => {
+        const value = JSON.parse(JSON.stringify(pet));
+        const portrait = samplePack.portraits?.[String(value.gameData?.simId || value.id)];
+        if (portrait) value.avatar = portrait.assetId;
+        return value;
+      }),
       gameImport:true,
       sourceFormat:'l1ng-genealogy',
       sourceSchemaVersion:1,
@@ -8190,6 +8222,7 @@ if (restoreSampleBtn) {
         prepareDatabase(
           buildSample()
         ).prepared;
+      await ensureSamplePortraitAssets(sampleDb);
 
       replaceCanonicalGenealogyDatabase(
         sampleDb
@@ -18853,6 +18886,24 @@ function connectAssetStoreInBackground() {
     });
 }
 
+// 內建範例的圖片在檔案中提供，首次載入與恢復預設時匯入既有 Blob 資產庫。
+async function ensureSamplePortraitAssets(database) {
+  if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 8) return;
+  const pack = window.L1nGGenealogySamplePack;
+  const images = window.L1nGGenealogySamplePortraits;
+  if (!pack || !images) throw new Error('預設族譜頭像資料未完整載入。');
+  const portraits = Object.values(pack.portraits || {});
+  for (let offset=0; offset<portraits.length; offset+=4) {
+    await Promise.all(portraits.slice(offset,offset+4).map(async portrait => {
+      const base64 = images[portrait.path];
+      if (!base64) throw new Error('缺少預設頭像：' + portrait.path);
+      const bytes = Uint8Array.from(atob(base64), char => char.charCodeAt(0));
+      const id = await assetStore.importBlob(new Blob([bytes], {type:'image/webp'}), {width:192,height:192});
+      if (id !== portrait.assetId) throw new Error('預設頭像校驗失敗：' + portrait.path);
+    }));
+  }
+}
+
 async function prepareInitialWorkspaceDatabase() {
   let preparedResult;
 
@@ -18909,6 +18960,7 @@ async function initializeGenealogyWorkspace() {
 
   applyRelationshipLineSettings();
   restoreCanvasBackground();
+  await ensureSamplePortraitAssets(initialDatabase);
 
   const clearedImageRefs =
     assetStore.clearUnsupportedImageRefs(
