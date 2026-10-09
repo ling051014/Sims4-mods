@@ -2746,6 +2746,7 @@ function restoreFamilyNavSelectMenu(control) {
   menu.style.removeProperty('width');
   menu.style.removeProperty('max-width');
   menu.style.removeProperty('max-height');
+  menu.style.removeProperty('overflow-y');
   menu.style.removeProperty('--family-menu-rows');
 
   hideFamilyNavTabsPortal(control);
@@ -2787,25 +2788,38 @@ function positionFamilyNavSelectMenu(control) {
   const rect = trigger.getBoundingClientRect();
   const margin = 10;
   const gap = 6;
-  const itemHeight = 32;
-  const availableHeight = Math.max(
-    itemHeight,
-    window.innerHeight - rect.bottom - gap - margin
+  // 選項上下內距已超過舊版假設的 32px；使用實際列高，避免最後幾列被裁切。
+  const menuStyle = getComputedStyle(menu);
+  const verticalInset = [
+    menuStyle.paddingTop,
+    menuStyle.paddingBottom,
+    menuStyle.borderTopWidth,
+    menuStyle.borderBottomWidth
+  ].reduce((total, value) => total + (parseFloat(value) || 0), 0);
+  const itemHeight = Math.max(
+    30,
+    ...items.slice(0, 3).map(item => item.getBoundingClientRect().height)
   );
-
+  const belowHeight = Math.max(0, window.innerHeight - rect.bottom - gap - margin);
+  const aboveHeight = Math.max(0, rect.top - gap - margin);
+  const openAbove = belowHeight < itemHeight + verticalInset && aboveHeight > belowHeight;
+  const availableHeight = openAbove ? aboveHeight : belowHeight;
   const rows = Math.max(
     1,
-    Math.min(
-      items.length,
-      Math.floor(availableHeight / itemHeight)
-    )
+    Math.min(items.length, Math.floor((availableHeight - verticalInset) / itemHeight))
   );
+  const contentHeight = rows * itemHeight + verticalInset;
+  const menuTop = openAbove
+    ? rect.top - gap - contentHeight
+    : rect.bottom + gap;
 
   menu.style.setProperty('--family-menu-rows', String(rows));
-  menu.style.top = `${Math.round(rect.bottom + gap)}px`;
+  menu.style.top = `${Math.round(Math.max(margin, menuTop))}px`;
   menu.style.left = `${Math.max(margin, Math.round(rect.left))}px`;
   menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
   menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
+  // 極矮視窗連一列都容不下時，仍保留捲動入口，不留下看不見的可點擊項目。
+  menu.style.overflowY = availableHeight < itemHeight + verticalInset ? 'auto' : 'hidden';
   positionFamilyNavTabsPortal(control);
   scrollSelectedFamilyNavOption(control);
 }
