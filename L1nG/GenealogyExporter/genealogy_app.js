@@ -17289,18 +17289,34 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
     if (petId && !pet.avatar) petEntries.push([pet, petId]);
   }
 
-  const totalPeople = personEntries.length;
-  const totalPets = petEntries.length;
+  // 頭像總數只計算 ZIP 中實際存在、且格式可處理的圖片；
+  // 沒有頭像的模擬市民仍經過原有匯入流程，但不計入圖片進度。
+  const personHasPortrait = personEntries.map(([simId]) => {
+    const asset = window.L1nGGameImport.getSimAvatarAsset(
+      bundle, String(simId), sourceSims[String(simId)]
+    );
+    return !!(asset?.supported && asset.bytes);
+  });
+  const totalPeople = personHasPortrait.filter(Boolean).length;
+  const petHasPortrait = petEntries.map(([, petId]) => {
+    const asset = window.L1nGGameImport.getSimAvatarAsset(
+      bundle, String(petId), sourceSims[String(petId)]
+    );
+    return !!(asset?.supported && asset.bytes);
+  });
+  const totalPets = petHasPortrait.filter(Boolean).length;
   showGameImportStatus(
     uiText('處理模擬市民頭像') + (english ? ' (' : '（') +
       '0 / ' + totalPeople + (english ? ')' : '）'),
     25, progressTitle
   );
   const personStep = Math.max(1, Math.floor(totalPeople / 100));
-  for (let index = 0; index < totalPeople; index++) {
+  let personDone = 0;
+  for (let index = 0; index < personEntries.length; index++) {
     const [simId, sim] = personEntries[index];
     await persistAsset(sim, simId);
-    const done = index + 1;
+    if (!personHasPortrait[index]) continue;
+    const done = ++personDone;
     if (done % personStep === 0 || done === totalPeople) {
       showGameImportStatus(
         uiText('處理模擬市民頭像') + (english ? ' (' : '（') +
@@ -17317,10 +17333,12 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
       75, progressTitle
     );
     const petStep = Math.max(1, Math.floor(totalPets / 100));
-    for (let index = 0; index < totalPets; index++) {
+    let petDone = 0;
+    for (let index = 0; index < petEntries.length; index++) {
       const [pet, petId] = petEntries[index];
       await persistAsset(pet, petId, 'pet');
-      const done = index + 1;
+      if (!petHasPortrait[index]) continue;
+      const done = ++petDone;
       if (done % petStep === 0 || done === totalPets) {
         showGameImportStatus(
           uiText('處理寵物頭像') + (english ? ' (' : '（') +
