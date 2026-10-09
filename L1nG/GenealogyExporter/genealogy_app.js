@@ -1536,6 +1536,30 @@ function buildSample() {
     Object.entries(samplePack.sims || {}).forEach(([id,sim]) => {
       if (!sims[id]) sims[id] = JSON.parse(JSON.stringify(sim));
     });
+    // 遊戲沒有實際偏好項目的家庭成員，才使用現有的「示範偏好」資料。
+    // 真實 EA 偏好完整保留，不得被示範資料覆蓋。
+    const sampleDemoSets = [
+      ['fitnessLike','classicalLike','cookingDislike'],
+      ['paintingLike','popLike','gardeningDislike'],
+      ['videoGamingLike','blueLike','mischiefDislike'],
+      ['gardeningLike','jazzLike','programmingDislike']
+    ];
+    const sampleHouseholdMembers = new Set(
+      (samplePack.families || []).flatMap(family => (family.memberIds || []).map(String))
+    );
+    for (const id of sampleHouseholdMembers) {
+      const sim = sims[id];
+      const preferences = sim?.gameData?.preferences;
+      if (!preferences ||
+          (preferences.likesDislikes || []).length ||
+          (preferences.attraction || []).length) continue;
+      const variation = Number(BigInt(id) % BigInt(sampleDemoSets.length));
+      preferences.likesDislikes = sampleDemoSets[variation]
+        .map(makeSamplePreference)
+        .filter(Boolean);
+      preferences.availability = 'sample';
+      preferences.sampleDemo = true;
+    }
     const knownFamilies = new Set(families.map(family => String(family.gameData?.householdId || family.id)));
     (samplePack.families || []).forEach(family => {
       if (!knownFamilies.has(String(family.gameData?.householdId || family.id))) {
@@ -1584,7 +1608,7 @@ function buildSample() {
     },
     sims,
     families,
-    links:[],
+    links:(samplePack?.links || []).map(link => ({ ...link })),
     relationshipTypeLibrary:[],
     relationshipMap:{},
     labelPositions:{},
