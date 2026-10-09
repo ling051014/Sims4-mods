@@ -48,12 +48,12 @@ const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
 const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits'];
 const DEFAULT_PET_CARD_VIEW_SETTINGS = Object.freeze({
   avatar:true, name:true, species:true, breed:true,
-  gender:false, ageStage:false, status:false, traits:false,
+  gender:true, ageStage:false, status:false, traits:false,
   appearance:'minimal'
 });
 const DEFAULT_PET_CARD_EDIT_SETTINGS = Object.freeze({
   avatar:true, name:true, species:true, breed:true,
-  gender:false, ageStage:true, status:true, traits:true
+  gender:true, ageStage:true, status:true, traits:true
 });
 
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
@@ -8146,7 +8146,7 @@ if (resetUiSettingsBtn) {
     setFamilyPanelCollapsed(false, { persist:false });
     chooseThemePreset('ling');
     setGenealogyViewMode('view');
-    setRelationshipLabelLock(false);
+    setRelationshipLabelLock(true);
     syncCanvasBackgroundSurface();
     paintCanvasBackgroundPreview();
     syncLayoutModeControls();
@@ -18787,13 +18787,14 @@ function restoreWorkspacePreferences() {
 
   setGenealogyViewMode(savedMode);
 
-  let savedLabelLock = false;
+  // 新使用者預設鎖定關係標籤；已自行解鎖的使用者仍保留選擇。
+  let savedLabelLock = true;
 
   try {
     savedLabelLock =
       localStorage.getItem(
         LABEL_LOCK_KEY
-      ) === '1';
+      ) !== '0';
   } catch (_) {}
 
   setRelationshipLabelLock(
