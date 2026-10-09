@@ -1095,7 +1095,7 @@
           ''
         ).trim();
 
-      const placeholderSource = wrap.dataset.placeholder || '點選選擇…';
+      const placeholderSource = wrap.dataset.placeholder || '點選選擇……';
       const home = { parent:dropdown.parentNode, next:dropdown.nextSibling };
 
       function nativeOptionModel(option) {
