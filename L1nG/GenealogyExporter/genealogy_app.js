@@ -16,6 +16,7 @@ const BG_KEY = 'l1ng_genealogy_background_v1';
 const MODE_KEY = 'l1ng_genealogy_view_mode_v1';
 const LABELS_KEY = 'l1ng_genealogy_relationship_labels_v1';
 const LABEL_LOCK_KEY = 'l1ng_genealogy_relationship_label_lock_v1';
+const LABEL_LOCK_DEFAULT_APPLIED_KEY = 'l1ng_genealogy_relationship_label_lock_default_applied';
 const SIDEBAR_WIDTH_KEY = 'l1ng_genealogy_sidebar_width_v1';
 const FAMILY_PANEL_COLLAPSED_KEY = 'l1ng_genealogy_family_panel_collapsed_v1';
 const PERSON_LIBRARY_VIEW_KEY = 'l1ng_genealogy_person_library_view_v1';
@@ -8251,6 +8252,8 @@ if (restoreSampleBtn) {
       replaceCanonicalGenealogyDatabase(
         sampleDb
       );
+      // 「恢復預設族譜」也恢復預設的關係標籤鎖定狀態。
+      setRelationshipLabelLock(true);
       dragHistory.clear();
       save({ immediate:true });
       refreshFamilyUI();
@@ -18844,19 +18847,17 @@ function restoreWorkspacePreferences() {
 
   setGenealogyViewMode(savedMode);
 
-  // 新使用者預設鎖定關係標籤；已自行解鎖的使用者仍保留選擇。
+  // 首次套用新版「預設鎖定關係」時，修正舊版留存的解鎖狀態；
+  // 後續仍保留玩家透過「解鎖關係」手動切換的選擇。
   let savedLabelLock = true;
-
   try {
-    savedLabelLock =
-      localStorage.getItem(
-        LABEL_LOCK_KEY
-      ) !== '0';
+    if (localStorage.getItem(LABEL_LOCK_DEFAULT_APPLIED_KEY) === '1') {
+      savedLabelLock = localStorage.getItem(LABEL_LOCK_KEY) !== '0';
+    } else {
+      localStorage.setItem(LABEL_LOCK_DEFAULT_APPLIED_KEY, '1');
+    }
   } catch (_) {}
-
-  setRelationshipLabelLock(
-    savedLabelLock
-  );
+  setRelationshipLabelLock(savedLabelLock);
 
   try {
     showRelLabels =
