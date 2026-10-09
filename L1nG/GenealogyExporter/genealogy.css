@@ -5188,6 +5188,8 @@ button.avatar-editor-action { cursor:pointer; }
 .person-profile-value { min-width:0; color:var(--text-primary); word-break:break-word; }
 .person-profile-value.muted { color:var(--text-secondary); font-style:italic; }
 .person-profile-traits { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+/* 資訊卡的「特徵」與其他基本資料共用同一列；對齊首排標籤，不套用獨立區塊的上方間距。 */
+.person-profile-row .person-profile-traits { margin-top:0; }
 .person-profile-traits .tag { font-size:10.5px; padding:3px 7px; max-width:none; }
 .person-profile-notes { font-size:12.5px; line-height:1.55; color:var(--text-primary); word-break:break-word; white-space:pre-wrap; }
 .person-profile-media { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:16px; }
