@@ -6554,6 +6554,16 @@ html[lang="en"] body {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-chevron-down);
 }
 
+/* 收合／展開家族欄沿用同一個現有 SVG，僅轉向，不另外新增圖示檔。 */
+.icon-chevron-left {
+    --l1ng-icon: var(--l1ng-icon-chevron-down);
+    transform: rotate(90deg);
+}
+.icon-chevron-right {
+    --l1ng-icon: var(--l1ng-icon-chevron-down);
+    transform: rotate(-90deg);
+}
+
 .icon-pencil {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-pencil);
 }
