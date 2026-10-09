@@ -746,6 +746,10 @@ function refreshResolvedAssetDom(
         // 人物／寵物總覽的頭像由可見範圍觀察器管理，避免一次載入數百張導致暫存網址遭回收。
         if (element.classList.contains('person-library-deferred-image')) return;
         if (element.src !== url) {
+          if (element.classList.contains('pet-avatar-image')) {
+            element.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+              ?.classList.remove('has-image');
+          }
           element.src = url;
         }
 
@@ -9056,7 +9060,16 @@ function petAvatarWithFallbackHTML(pet) {
 function markPetAvatarLoaded(event) {
   const image = event.target;
   if (!(image instanceof HTMLImageElement) || !image.classList.contains('pet-avatar-image')) return;
-  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar')?.classList.add('has-image');
+  // 等圖片解碼成功才隱藏 SVG，避免透明的遊戲頭像露出預設物種圖示。
+  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+    ?.classList.toggle('has-image', image.naturalWidth > 0);
+}
+
+function markPetAvatarError(event) {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement) || !image.classList.contains('pet-avatar-image')) return;
+  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+    ?.classList.remove('has-image');
 }
 
 function formatPetSpecies(pet) {
@@ -9591,11 +9604,7 @@ function renderPersonProfilePet(
   model
 ) {
   const avatar =
-    framedAvatarImageHTML(
-      pet.avatar,
-      pet.avatarFrame
-    ) ||
-    petIconFor(pet);
+    petAvatarWithFallbackHTML(pet);
 
   const meta = [
     formatPetSpecies(pet),
@@ -15935,12 +15944,16 @@ function observePersonLibraryAvatars(list) {
       const url = await assetStore.getUrl(id);
       if (image.dataset.libraryVisible !== '1' || !image.isConnected) return;
       if (!url) return;
-      image.onload = () => {
-        if (image.dataset.libraryVisible === '1') image.classList.add('asset-ready');
+      const setReady = ready => {
+        if (!image.isConnected || image.dataset.libraryVisible !== '1') return;
+        const loaded = ready && image.naturalWidth > 0;
+        image.classList.toggle('asset-ready', loaded);
+        image.closest('.person-library-avatar')?.classList.toggle('has-image', loaded);
       };
-      image.onerror = () => image.classList.remove('asset-ready');
+      image.onload = () => setReady(true);
+      image.onerror = () => setReady(false);
       image.src = url;
-      if (image.complete && image.naturalWidth) image.classList.add('asset-ready');
+      if (image.complete) setReady(image.naturalWidth > 0);
     } catch (error) {
       console.warn('人物庫頭像載入失敗：', id, error);
     }
@@ -15968,6 +15981,7 @@ function observePersonLibraryAvatars(list) {
         image.onerror = null;
         image.removeAttribute('src');
         image.classList.remove('asset-ready');
+        image.closest('.person-library-avatar')?.classList.remove('has-image');
       }
     });
   }, { root:list, rootMargin:'140px 0px' });
@@ -18323,7 +18337,9 @@ function activatePetCanvasCard(id, additive = false) {
 let petPointerStart = null;
 let lastPetPointerActivation = null;
 petCardsLayer?.addEventListener('load',markPetAvatarLoaded,true);
+petCardsLayer?.addEventListener('error',markPetAvatarError,true);
 personProfileDialog?.addEventListener('load',markPetAvatarLoaded,true);
+personProfileDialog?.addEventListener('error',markPetAvatarError,true);
 petCardsLayer?.addEventListener('contextmenu',event => {
   const cardElement = event.target.closest('.genealogy-pet-card[data-pet-id]');
   if (!cardElement) return;
