@@ -4348,6 +4348,42 @@ function assignFamilyBranchBlockPositions(
           parentGroupGap;
       }
     );
+
+    // 單一共同父母群組：整個子孫區塊依真實錨點平移，維持世代與兄弟排序。
+    if (groups.length === 1 &&
+        singleGroupAnchorByOwner.get(unitId) === groups[0].groupKey) {
+      const relation = (model.parentGroups || []).find(
+        entry => entry.key === groups[0].groupKey
+      );
+      if (relation) {
+        const anchors = relation.children
+          .map(id => genealogyChildAnchorX(id,model))
+          .filter(Number.isFinite);
+        const source = genealogyGroupSourceX(relation,model);
+        if (anchors.length && Number.isFinite(source)) {
+          const delta = source - (Math.min(...anchors)+Math.max(...anchors))/2;
+          if (Math.abs(delta) > 0.01) {
+            const movable = new Set();
+            const queue = [...groups[0].childIds];
+            while (queue.length) {
+              const next = queue.shift();
+              if (movable.has(next)) continue;
+              movable.add(next);
+              (ownership.primaryChildren.get(next) || []).forEach(child => {
+                if (ownership.ownerParentByUnit.get(child) === next) queue.push(child);
+              });
+            }
+            const units = [...movable].map(id => model.unitById.get(id)).filter(Boolean);
+            const bounds = blockBoundsByUnit.get(unitId);
+            if (units.length && bounds &&
+                Math.min(...units.map(child => child.x+delta)) >= bounds.left-0.01 &&
+                Math.max(...units.map(child => child.x+child.width+delta)) <= bounds.right+0.01) {
+              units.forEach(child => { child.x += delta; });
+            }
+          }
+        }
+      }
+    }
   };
 
   let cursorX = 0;
