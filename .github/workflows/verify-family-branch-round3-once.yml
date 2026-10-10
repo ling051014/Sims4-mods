@@ -1,0 +1,25 @@
+name: Verify genealogy branch layout round three
+on:
+  push:
+    branches: [genealogy-structural-optimization-20260926]
+    paths: [.github/workflows/verify-family-branch-round3-once.yml]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run selected genealogy regression suite
+        run: |
+          node --check L1nG/GenealogyExporter/genealogy_scene.js
+          node --test tests/genealogy_branch_anchors_round3.test.cjs tests/genealogy_relationship_routing_round2.test.cjs tests/genealogy_coparent_layout.test.cjs tests/genealogy_parent_axis_alignment.test.cjs tests/genealogy_family_kinship.test.cjs tests/default_portrait_integrity.test.cjs
+          git diff --check
+      - name: Remove one-time workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm .github/workflows/verify-family-branch-round3-once.yml
+          git add .github/workflows/verify-family-branch-round3-once.yml
+          git commit -m "Remove temporary genealogy branch layout verifier"
+          git push origin HEAD:genealogy-structural-optimization-20260926
