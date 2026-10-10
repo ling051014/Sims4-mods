@@ -6581,6 +6581,43 @@ function alignFamilyBranchParentAxes(layers, model, connectorGroups, ownership =
     });
 }
 
+// ========【情人共同子女自動排列】 在真正的關係線連接點下放置完整後代區塊 ========
+function alignNonSpousalCoParentBranches(layers,model,ownership,connectorGroups) {
+  const {SIBLING:gap}=resolveLayoutGaps();
+  // 親子關係座標由同一個 junction 函式取得，避免畫布與排列各算一套中心。
+  // 一個人有多位共同生育對象時，每組子女分別尋找自己的線路連接點。
+  let adjusted=0;
+  [...connectorGroups]
+    .sort((a,b)=>{
+      const depth=group=>Math.max(...group.parentIds.map(id=>
+        model.unitBySim.get(id)?.generation ?? 0));
+      return depth(b)-depth(a);
+    })
+    .forEach(group=>{
+      if(group.parentIds.length!==2||!group.children.length)return;
+      const link=genealogyNonSpousalCoParentLink(group,model.byId);
+      if(!link)return;
+      const parentGeneration=Math.max(...group.parentIds.map(id=>
+        model.unitBySim.get(id)?.generation??0));
+      const descendants=group.children.filter(id=>
+        (model.unitBySim.get(id)?.generation??0)>parentGeneration);
+      if(!descendants.length)return;
+      const pos=placeGenealogyUnitMembers(model.units);
+      const point=genealogyCoParentRelationshipJunction(group,pos,model.byId,link);
+      if(!point)return;
+      const actual=descendants.map(id=>pos.get(id)).filter(Boolean)
+        .map(p=>cardVerticalAnchor(p,'top').x);
+      if(!actual.length)return;
+      const center=(Math.min(...actual)+Math.max(...actual))/2;
+      const delta=point.x-center;
+      if(Math.abs(delta)<0.75)return;
+      if(translateFamilyDescendants(
+        layers,model,ownership,group,delta,parentGeneration,gap
+      ))adjusted++;
+    });
+  return adjusted;
+}
+
 function solveAutomaticGenealogyPositions(visibleIds) {
   const primarySimIds =
     getActiveLayoutPrimaryIds(
@@ -6658,6 +6695,14 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     model,
     connectorGroups,
     ownership
+  );
+
+  // 真正改動人物位置：以情人關係線的接點為基準，整組平移私生子女與其後代。
+  alignNonSpousalCoParentBranches(
+    layers,
+    model,
+    ownership,
+    connectorGroups
   );
 
   // Family Branch Block 本身就是最終水平幾何權威。
@@ -7360,8 +7405,7 @@ function genealogyNonSpousalCoParentLink(group,byId) {
   const known=(genealogyData.links||[]).find(link=>
     link&&!isSiblingLink(link) &&
     ((String(link.from)===a&&String(link.to)===b)||
-     (String(link.from)===b&&String(link.to)===a)) &&
-    relationshipLayoutPriority(relationshipOtherType(link))>0
+     (String(link.from)===b&&String(link.to)===a))
   );
   if(known)return known;
   return inferCoParentRelationshipLinks([group],byId)[0]||null;
@@ -7377,7 +7421,9 @@ function genealogyCoParentRelationshipJunction(group,pos,byId,link) {
   const positions=group.children.map(id=>pos.get(id)).filter(Boolean);
   if(!positions.length)return null;
   const childAnchors=positions.map(card=>cardVerticalAnchor(card,'top'));
-  const centerX=(Math.min(...childAnchors.map(p=>p.x))+
+  const start=avatarBoundaryAnchor(a,b),end=avatarBoundaryAnchor(b,a);
+  const centerX=(start.x+end.x)/2;
+  const childCenter=(Math.min(...childAnchors.map(p=>p.x))+
     Math.max(...childAnchors.map(p=>p.x)))/2;
   const childTop=Math.min(...childAnchors.map(p=>p.y));
   const samples=[];
@@ -7412,6 +7458,7 @@ function genealogyCoParentRelationshipJunction(group,pos,byId,link) {
   const choices=feasible.length?feasible:samples;
   choices.sort((left,right)=>
     Math.abs(left.x-centerX)-Math.abs(right.x-centerX) ||
+    Math.abs(left.x-childCenter)-Math.abs(right.x-childCenter) ||
     right.y-left.y
   );
   const point=choices[0];
