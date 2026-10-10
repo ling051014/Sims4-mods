@@ -141,6 +141,26 @@ test('對齊時碰到別家子女，推開整個家系但不改左右次序',()=
   assert.equal(geometry.alignUnifiedSingleChildBranches(f.layers,f.model,f.owner,[f.group]),1);
   assert.equal(f.c.x,300);assert.equal(f.o.x,414);assert.equal(f.z.x,434);
 });
+test('跨祖先家系的卡片不能因單一子女強制垂直而被整棵推向另一側',()=>{
+  const f=layout();
+  f.owner.rootByUnit=new Map([
+    ['p','root-main'],['c','root-main'],['g','root-main'],
+    ['o','root-other'],['z','root-other']
+  ]);
+  assert.equal(geometry.alignUnifiedSingleChildBranches(f.layers,f.model,f.owner,[f.group]),0);
+  assert.equal(f.c.x,100);
+  assert.equal(f.g.x,120);
+  assert.equal(f.o.x,250);
+  assert.equal(f.z.x,270);
+});
+test('同一血緣根內調整子女仍可推開相鄰分支',()=>{
+  const f=layout();
+  f.owner.rootByUnit=new Map(['p','c','g','o','z'].map(id=>[id,'root-main']));
+  assert.equal(geometry.alignUnifiedSingleChildBranches(f.layers,f.model,f.owner,[f.group]),1);
+  assert.equal(f.c.x,300);
+  assert.equal(f.o.x,414);
+  assert.equal(f.z.x,434);
+});
 test('同住的同代成員和後代整組平移',()=>{
   const f=layout(100,450,true,245);
   assert.equal(geometry.alignUnifiedSingleChildBranches(f.layers,f.model,f.owner,[f.group]),1);
