@@ -2065,7 +2065,7 @@ function relationshipSegmentsClear(points,rects) {
     relationshipSegmentIntersectsRect(points[i-1].x,points[i-1].y,point.x,point.y,rect,9)));
 }
 
-function relationshipOrthogonalRoute(start,end,rects) {
+function relationshipOrthogonalRoute(start,end,rects,upperOnly=false) {
   if(relationshipSegmentsClear([start,end],rects))return [start,end];
   const xValues=new Set([start.x,end.x]),yValues=new Set([start.y,end.y]);
   rects.forEach(rect=>{
@@ -2093,6 +2093,7 @@ function relationshipOrthogonalRoute(start,end,rects) {
     for(const [xx,yy,axis] of [[x-1,y,0],[x+1,y,0],[x,y-1,1],[x,y+1,1]]){
       if(xx<0||xx>=nx||yy<0||yy>=ny)continue;
       const adjacent=index(xx,yy);
+      if(upperOnly && Y[yy]>Math.max(start.y,end.y)+1)continue;
       if(!valid[adjacent])continue;
       const p={x:X[x],y:Y[y]},q={x:X[xx],y:Y[yy]};
       if(!relationshipSegmentsClear([p,q],rects))continue;
@@ -2223,55 +2224,56 @@ function relationshipArcCandidate(start,end,amplitude,sign) {
 }
 
 // ========【弧度滑桿與實際曲線】 設定 - 在安全避障空間內連續調整弧度 ========
-function relationshipSafeArcBand(start,end,rects,maxBend) {
-  // 先找出上下兩側可安全使用的弧度區間，不以「第一條可通過的線」代替滑桿數值。
-  // 同一條關係使用固定的一側，避免拖動滑桿時線條突然上下翻轉。
-  const lower=8,step=7;
-  const bands=[];
-  const clear=(amplitude,direction)=>
-    relationshipCubicClear(relationshipArcCandidate(start,end,amplitude,direction),rects);
-  for(const direction of [-1,1]){
-    let runStart=null,runEnd=null;
-    for(let bend=lower;bend<=maxBend+step;bend+=step){
-      const value=Math.min(maxBend,bend);
-      const safe=clear(value,direction);
-      if(safe){
-        if(runStart===null)runStart=value;
-        runEnd=value;
-      }
-      if((!safe||value===maxBend)&&runStart!==null){
-        // 補足低弧度避障臨界點，令 10% 不會突然跳到超大的弧度。
-        let min=runStart,max=runEnd;
-        if(min>lower){
-          let lo=Math.max(lower,min-step),hi=min;
-          for(let i=0;i<7;i++){
-            const mid=(lo+hi)/2;
-            if(clear(mid,direction))hi=mid;else lo=mid;
-          }
-          min=hi+1;
-        }
-        if(max<maxBend){
-          let lo=max,hi=Math.min(maxBend,max+step);
-          for(let i=0;i<7;i++){
-            const mid=(lo+hi)/2;
-            if(clear(mid,direction))lo=mid;else hi=mid;
-          }
-          max=lo-1;
-        }
-        if(max>=min)bands.push({min,max,direction,width:max-min});
-        runStart=null;
-        runEnd=null;
-      }
-      if(value===maxBend)break;
-    }
+// ========【弧度優先權】 設定 - 預設找最小安全弧度，玩家手動值不再被避障演算法覆蓋 ========
+function relationshipCurveAmplitude(start,end,amount) {
+  const span=Math.hypot(end.x-start.x,end.y-start.y);
+  const max=Math.max(90,Math.min(230,span*0.65));
+  return 8+(max-8)*(clampRelationshipCurveAmount(amount)-10)/90;
+}
+
+function relationshipUpperCurveSign(start,end) {
+  // SVG 的 Y 軸向下；無論人物排列左右如何，預設曲線只往上拱。
+  return end.x>=start.x ? -1 : 1;
+}
+
+function relationshipRecommendedCurveAmount(start,end,rects) {
+  const sign=relationshipUpperCurveSign(start,end);
+  for(let amount=10;amount<=100;amount++){
+    const segments=relationshipArcCandidate(
+      start,end,relationshipCurveAmplitude(start,end,amount),sign
+    );
+    if(relationshipCubicClear(segments,rects))return amount;
   }
-  // 寧可選擇有足夠調整空間的安全通道，也不要把不同百分比全部壓成同一條線。
-  bands.sort((left,right)=>
-    right.width-left.width ||
-    left.min-right.min ||
-    left.direction-right.direction
-  );
-  return bands[0]||null;
+  return null;
+}
+
+const defaultOtherCurveCache=new Map();
+function recommendOtherRelationshipCurveAmount(type) {
+  if(defaultOtherCurveCache.has(type))return defaultOtherCurveCache.get(type);
+  if(!layoutCache?.pos||!layoutCache?.byId)return null;
+  const {pos,byId,visibleIds,geometry}=layoutCache;
+  const relations=[
+    ...(genealogyData.links||[]),
+    ...inferCoParentRelationshipLinks(
+      buildParentChildConnectorGroups(byId,visibleIds),byId
+    )
+  ];
+  let required=10,found=false;
+  relations.forEach(link=>{
+    if(relationshipOtherType(link)!==type)return;
+    const from=pos.get(String(link.from)),to=pos.get(String(link.to));
+    if(!from||!to)return;
+    found=true;
+    const start=avatarBoundaryAnchor(from,to);
+    const end=avatarBoundaryAnchor(to,from);
+    const rects=relationshipRouteRects({pos,byId,geometry,fromId:link.from,toId:link.to},start,end);
+    const value=relationshipRecommendedCurveAmount(start,end,rects);
+    // 少數家族沒有上方安全單弧通道，保留最大值給後續避障分支。
+    required=Math.max(required,value??100);
+  });
+  const result=found?required:null;
+  defaultOtherCurveCache.set(type,result);
+  return result;
 }
 
 function relationshipSmoothRoute(points,rects,amount) {
@@ -2309,44 +2311,30 @@ function relationshipOtherRenderGeometry(a,b,setting,context=null) {
   const from=avatarBoundaryAnchor(a,b),to=avatarBoundaryAnchor(b,a);
   const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
   const rects=relationshipRouteRects(context,start,end);
-  const points=relationshipOrthogonalRoute(start,end,rects);
 
   if(!setting.curved){
-    // 關閉曲線時仍維持直線／避障折線。
-    return relationshipStraightRoute(points||[start,end]);
+    return relationshipStraightRoute(relationshipOrthogonalRoute(start,end,rects)||[start,end]);
   }
 
-  const length=Math.hypot(end.x-start.x,end.y-start.y);
   const amount=clampRelationshipCurveAmount(setting.curveAmount);
-  const maximum=Math.max(50,Math.min(150,length*0.38));
-  const band=relationshipSafeArcBand(start,end,rects,maximum);
+  const sign=relationshipUpperCurveSign(start,end);
+  const segments=relationshipArcCandidate(start,end,
+    relationshipCurveAmplitude(start,end,amount),sign
+  );
 
-  if(band){
-    const ratio=(amount-10)/90;
-    let amplitude=band.min+(band.max-band.min)*ratio;
-    let candidate=relationshipArcCandidate(start,end,amplitude,band.direction);
-    // 幾何取樣有誤差時，從最近的安全弧度尋找，不直接畫穿卡片。
-    if(!relationshipCubicClear(candidate,rects)){
-      for(let n=1;n<=12;n++){
-        const offset=n*0.75;
-        const lower=amplitude-offset,upper=amplitude+offset;
-        const target=lower>=band.min?lower:upper;
-        if(target>band.max)break;
-        candidate=relationshipArcCandidate(start,end,target,band.direction);
-        if(relationshipCubicClear(candidate,rects))break;
-      }
-    }
-    if(relationshipCubicClear(candidate,rects))
-      return relationshipCubicGeometry(candidate);
-  }
+  // 玩家調整滑桿後，完全依照所選百分比繪製，不偷偷替換弧度或翻轉方向。
+  if(setting.curveAmountManual===true||relationshipCubicClear(segments,rects))
+    return relationshipCubicGeometry(segments);
 
+  // 未經玩家調整的預設值才可以採用安全的上方避障路徑。
+  const points=relationshipOrthogonalRoute(start,end,rects,true);
   if(points){
     const smooth=relationshipSmoothRoute(points,rects,amount);
     if(smooth)return smooth;
-    // 無可行曲線時，以安全折線取代穿越卡片的曲線。
     return relationshipStraightRoute(points);
   }
-  return relationshipStraightRoute([start,end]);
+  // 不存在安全通道時仍維持原來的向上曲線，不會自行翻到下側。
+  return relationshipCubicGeometry(segments);
 }
 
 function drawPerspectiveKinshipLabels(
@@ -7797,6 +7785,7 @@ function paintRelationshipLayer({
   includeLabels = true
 } = {}) {
   if (!layoutCache) return;
+  defaultOtherCurveCache.clear();
 
   const {
     pos,
@@ -9786,6 +9775,7 @@ function resizeStageToContent() {
     function withState(fn) { return function () { syncState(); return fn.apply(null, arguments); }; }
     return Object.freeze({
       requestUpdate:requestSceneUpdate,
+      recommendedOtherCurveAmount:withState(recommendOtherRelationshipCurveAmount),
       renderImmediately:renderSceneImmediately,
       requestRelationshipUpdate:requestRelationshipLayerUpdate,
       requestRelationshipPreviewUpdate,
