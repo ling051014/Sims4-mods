@@ -1093,6 +1093,15 @@
     "整理匯入資料並準備儲存……": "Preparing imported data for saving…",
     "合併最新遊戲資料，保留網站上的手動修改……": "Merging latest game data while preserving manual edits…",
     "儲存資料並更新家族清單與族譜畫布……": "Saving data and refreshing families and genealogy canvas…",
-    "所有資料已處理完成！": "All data processed successfully!"
+    "所有資料已處理完成！": "All data processed successfully!",
+    "繼父": "Stepfather",
+    "繼母": "Stepmother",
+    "繼親": "Stepparent",
+    "繼子": "Stepson",
+    "繼女": "Stepdaughter",
+    "繼子女": "Stepchild",
+    "私生子": "Son born outside marriage",
+    "私生女": "Daughter born outside marriage",
+    "私生子女": "Child born outside marriage"
   }
 }
