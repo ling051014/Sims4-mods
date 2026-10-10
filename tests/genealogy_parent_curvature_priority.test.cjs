@@ -104,5 +104,5 @@ test('視覺設定顯示安全預設、手動後標記來源並優先使用玩�
  assert.match(scene,/if\(setting\.curveAmountManual===true\)return relationshipCubicGeometry\(segments\)/);
  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
  assert.match(html,/genealogy_scene\.js\?v=20261011-family-root-cohesion-r11/);
- assert.match(html,/genealogy_app\.js\?v=20261011-sidebar-canvas-sync-r7/);
+ assert.match(html,/genealogy_app\.js\?v=20261011-person-library-locate-r8/);
 });
