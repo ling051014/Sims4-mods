@@ -48,8 +48,48 @@ test('主要家庭有一位成員與外部配偶成對，配偶朝所在家系�
   assert.deepEqual(couple.members.map(s=>s.id),['anchor','outside']);
 });
 test('同住的不同血緣根區塊依然相鄰',()=>{
-  assert.deepEqual(roots([U('a',0,'H1'),U('b',1,'H2'),U('c',2,'H1')],[],['a','b','c']),
-    ['unit:a','unit:c','unit:b']);
+  const ordered=roots([U('a',0,'H1'),U('b',1,'H2'),U('c',2,'H1')],[],['a','b','c']);
+  assert.equal(Math.abs(ordered.indexOf('unit:a')-ordered.indexOf('unit:c')),1,
+    '同住家庭應相鄰，不規定整個家族必須在左或右');
+});
+test('跨血緣根的親子關係必須讓祖先家系靠近其後代',()=>{
+  const a=U('A',0),x=U('X',1),b=U('B',2),c=U('C',3);
+  const units=[a,x,b,c],ids=units.map(u=>u.id);
+  const model={
+    units,unitById:new Map(units.map(u=>[u.id,u])),
+    unitBySim:new Map(units.map(u=>[u.members[0].id,u])),
+    pairCandidates:[],
+    parentGroups:[{parentUnitIds:['unit:A'],childUnitIds:['unit:C'],children:['C']}]
+  };
+  const ownership={
+    anchorSimIds:new Set(['C']),primarySimIds:new Set(['C']),
+    rootByUnit:new Map(ids.map(id=>[id,id])),
+    pathByUnit:new Map(ids.map((id,index)=>[id,[index]])),
+    primarySideByUnit:new Map()
+  };
+  const ordered=[...rank(ids,model,ownership)];
+  assert.equal(Math.abs(ordered.indexOf('unit:A')-ordered.indexOf('unit:C')),1,
+    '有實際親子關係的兩個家系根不得隔著其他不相關家系');
+});
+test('根人物沒有 householdId，但其後代同住也能將兩棵家系靠攏',()=>{
+  const a=U('A',0),b=U('B',1),c=U('C',2),d=U('D',3);
+  const ca=U('ca',4),cb=U('cb',5);
+  ca.members[0].gameData.householdId='H';
+  cb.members[0].gameData.householdId='H';
+  const units=[a,b,c,d,ca,cb];
+  const rootsList=['unit:A','unit:B','unit:C','unit:D'];
+  const idMap=new Map(units.map(u=>[u.id,u]));
+  const owner={
+    anchorSimIds:new Set(['A']),primarySimIds:new Set(['A']),
+    rootByUnit:new Map([...rootsList.map(x=>[x,x]),['unit:ca','unit:A'],['unit:cb','unit:C']]),
+    pathByUnit:new Map(rootsList.map((id,i)=>[id,[i]])),
+    primarySideByUnit:new Map()
+  };
+  const ranked=[...rank(rootsList,{units,unitById:idMap,
+    unitBySim:new Map(units.map(u=>[u.members[0].id,u])),
+    pairCandidates:[],parentGroups:[]},owner)];
+  assert.equal(Math.abs(ranked.indexOf('unit:A')-ranked.indexOf('unit:C')),1,
+    '根節點的已故祖先沒有戶籍 ID，也要追溯子代的共同家庭');
 });
 const geometry=vm.runInNewContext(between('function genealogyUnitHouseholds(','function solveAutomaticGenealogyPositions(')+
   '\n({genealogyTranslateChildBlockWithClearance,alignUnifiedSingleChildBranches});',{
