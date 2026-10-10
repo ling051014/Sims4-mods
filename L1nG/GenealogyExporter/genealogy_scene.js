@@ -2121,35 +2121,133 @@ function relationshipOrthogonalRoute(start,end,rects) {
   return simplified;
 }
 
-function relationshipRoundedRoute(points,curved,amount) {
-  let path='M'+points[0].x+' '+points[0].y;
-  const cornerRadius=4+clampRelationshipCurveAmount(amount)*0.12;
-  for(let i=1;i<points.length-1;i++){
-    const prev=points[i-1],point=points[i],next=points[i+1];
-    const before=Math.hypot(prev.x-point.x,prev.y-point.y);
-    const after=Math.hypot(next.x-point.x,next.y-point.y);
-    if(!curved||before<3||after<3){
-      path+=' L'+point.x+' '+point.y;continue;
+// ========【真正的曲線】 設定 - cubic Bézier 連續曲率，非折線加圓角 ========
+function relationshipRouteLabelPoint(points) {
+  const lengths=points.slice(1).map((p,i)=>Math.hypot(p.x-points[i].x,p.y-points[i].y));
+  const midpoint=lengths.reduce((sum,length)=>sum+length,0)/2;
+  let distance=0;
+  for(let index=0;index<lengths.length;index++){
+    if(distance+lengths[index]>=midpoint){
+      const t=lengths[index]?(midpoint-distance)/lengths[index]:0;
+      return {
+        x:points[index].x+(points[index+1].x-points[index].x)*t,
+        y:points[index].y+(points[index+1].y-points[index].y)*t
+      };
     }
-    const radius=Math.min(cornerRadius,before/3,after/3);
-    const entry={x:point.x+(prev.x-point.x)*radius/before,y:point.y+(prev.y-point.y)*radius/before};
-    const exit={x:point.x+(next.x-point.x)*radius/after,y:point.y+(next.y-point.y)*radius/after};
-    path+=' L'+entry.x+' '+entry.y+' Q'+point.x+' '+point.y+' '+exit.x+' '+exit.y;
+    distance+=lengths[index];
   }
-  const last=points[points.length-1];path+=' L'+last.x+' '+last.y;
-  const lengths=points.slice(1).map((point,i)=>Math.hypot(point.x-points[i].x,point.y-points[i].y));
-  const halfway=lengths.reduce((sum,n)=>sum+n,0)/2;
-  let sum=0,labelX=last.x,labelY=last.y;
-  for(let i=0;i<lengths.length;i++){
-    if(sum+lengths[i]>=halfway){
-      const t=lengths[i]?(halfway-sum)/lengths[i]:0;
-      labelX=points[i].x+(points[i+1].x-points[i].x)*t;
-      labelY=points[i].y+(points[i+1].y-points[i].y)*t;
+  return points[Math.floor(points.length/2)];
+}
+
+function relationshipStraightRoute(points) {
+  const label=relationshipRouteLabelPoint(points);
+  return {
+    d:points.map((p,i)=>(i?' L':'M')+p.x+' '+p.y).join(''),
+    labelX:label.x,labelY:label.y
+  };
+}
+
+function relationshipCubicAt(segment,t) {
+  const u=1-t;
+  const from=segment.from,to=segment.to,c1=segment.c1,c2=segment.c2;
+  return {
+    x:u*u*u*from.x+3*u*u*t*c1.x+3*u*t*t*c2.x+t*t*t*to.x,
+    y:u*u*u*from.y+3*u*u*t*c1.y+3*u*t*t*c2.y+t*t*t*to.y
+  };
+}
+
+function relationshipCubicClear(segments,rects) {
+  // 驗證實際曲線而不是只驗證控制點或折線。
+  // 小段曲線提高取樣密度，避免窄卡片被略過。
+  return segments.every(segment=>{
+    const length=Math.hypot(segment.to.x-segment.from.x,segment.to.y-segment.from.y);
+    const steps=Math.max(32,Math.min(160,Math.ceil(length/3)));
+    for(let step=1;step<steps;step++){
+      const p=relationshipCubicAt(segment,step/steps);
+      if(rects.some(rect=>
+        p.x>=rect.left-9&&p.x<=rect.right+9&&
+        p.y>=rect.top-9&&p.y<=rect.bottom+9
+      ))return false;
+    }
+    return true;
+  });
+}
+
+function relationshipCubicGeometry(segments) {
+  if(!segments.length)return null;
+  const d=['M'+segments[0].from.x+' '+segments[0].from.y];
+  segments.forEach(segment=>{
+    d.push('C'+segment.c1.x+' '+segment.c1.y+' '+
+      segment.c2.x+' '+segment.c2.y+' '+
+      segment.to.x+' '+segment.to.y);
+  });
+  // 標籤落在實際平滑曲線中央，而非折線原本的拐角。
+  const lengths=segments.map(segment=>{
+    let length=0,previous=segment.from;
+    for(let i=1;i<=24;i++){
+      const current=relationshipCubicAt(segment,i/24);
+      length+=Math.hypot(current.x-previous.x,current.y-previous.y);
+      previous=current;
+    }
+    return length;
+  });
+  const half=lengths.reduce((sum,value)=>sum+value,0)/2;
+  let walked=0,label=segments[0].from;
+  for(let i=0;i<segments.length;i++){
+    if(walked+lengths[i]>=half){
+      let consumed=0,previous=segments[i].from;
+      for(let step=1;step<=48;step++){
+        const point=relationshipCubicAt(segments[i],step/48);
+        consumed+=Math.hypot(point.x-previous.x,point.y-previous.y);
+        if(walked+consumed>=half){label=point;break;}
+        previous=point;
+      }
       break;
     }
-    sum+=lengths[i];
+    walked+=lengths[i];
   }
-  return {d:path,labelX,labelY};
+  return {d:d.join(' '),labelX:label.x,labelY:label.y};
+}
+
+function relationshipArcCandidate(start,end,amplitude,sign) {
+  const dx=end.x-start.x,dy=end.y-start.y;
+  const length=Math.max(1,Math.hypot(dx,dy));
+  const nx=-dy/length,ny=dx/length;
+  const normal=amplitude*sign;
+  return [{
+    from:start,
+    c1:{x:start.x+dx*0.28+nx*normal,y:start.y+dy*0.28+ny*normal},
+    c2:{x:end.x-dx*0.28+nx*normal,y:end.y-dy*0.28+ny*normal},
+    to:end
+  }];
+}
+
+function relationshipSmoothRoute(points,rects,amount) {
+  // 避障點只用來尋找安全通道；實際渲染全程以 C 連續相接。
+  // 所有相鄰曲線共用同一切線，避免任何硬折角。
+  const lengths=points.slice(1).map((p,i)=>
+    Math.hypot(p.x-points[i].x,p.y-points[i].y)
+  );
+  for(const strength of [0.46,0.36,0.28,0.18,0.09,0.025]){
+    const factor=strength*(0.7+clampRelationshipCurveAmount(amount)*0.003);
+    const tangents=points.map((p,i)=>{
+      const before=points[Math.max(i-1,0)],after=points[Math.min(i+1,points.length-1)];
+      const dx=after.x-before.x,dy=after.y-before.y;
+      const distance=Math.hypot(dx,dy)||1;
+      const reach=i===0?lengths[0]:i===points.length-1?lengths[i-1]:
+        Math.min(lengths[i-1],lengths[i]);
+      return {x:dx/distance*reach*factor,y:dy/distance*reach*factor};
+    });
+    const segments=points.slice(1).map((point,index)=>({
+      from:points[index],
+      c1:{x:points[index].x+tangents[index].x,y:points[index].y+tangents[index].y},
+      c2:{x:point.x-tangents[index+1].x,y:point.y-tangents[index+1].y},
+      to:point
+    }));
+    if(relationshipCubicClear(segments,rects))
+      return relationshipCubicGeometry(segments);
+  }
+  return null;
 }
 
 function relationshipOtherRenderGeometry(a,b,setting,context=null) {
@@ -2157,24 +2255,35 @@ function relationshipOtherRenderGeometry(a,b,setting,context=null) {
   const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
   const rects=relationshipRouteRects(context,start,end);
   const points=relationshipOrthogonalRoute(start,end,rects);
-  if(points){
-    if(points.length>2)return relationshipRoundedRoute(points,!!setting.curved,setting.curveAmount);
-    if(!setting.curved)return relationshipRoundedRoute(points,false,setting.curveAmount);
-    const curve=relationshipQuadraticGeometry(start.x,start.y,end.x,end.y,setting.curveAmount,1);
-    const touches=rects.some(rect=>{
-      for(let step=1;step<40;step++){
-        const t=step/40,u=1-t;
-        const x=u*u*start.x+2*u*t*curve.cx+t*t*end.x;
-        const y=u*u*start.y+2*u*t*curve.cy+t*t*end.y;
-        if(x>=rect.left-6&&x<=rect.right+6&&y>=rect.top-6&&y<=rect.bottom+6)return true;
-      }
-      return false;
-    });
-    return touches?relationshipRoundedRoute(points,false,setting.curveAmount):curve;
+
+  if(!setting.curved){
+    // 關閉曲線就是直線或避障折線；不會擅自畫弧。
+    return relationshipStraightRoute(points||[start,end]);
   }
-  // 無安全避障路徑時仍維持基本連線，不產生倍增曲率的大拱橋。
-  return {d:'M'+start.x+' '+start.y+' L'+end.x+' '+end.y,
-    labelX:(start.x+end.x)/2,labelY:(start.y+end.y)/2};
+
+  const length=Math.hypot(end.x-start.x,end.y-start.y);
+  const amount=clampRelationshipCurveAmount(setting.curveAmount);
+  const base=10+amount*0.3;
+  const cap=Math.max(45,Math.min(190,length*0.55));
+  for(const addition of [0,14,28,44,64,88,116,160]){
+    const amplitude=base+addition;
+    if(amplitude>cap)continue;
+    // 優先最短安全弧線；上下兩側都檢查，不會直接拱向上一代。
+    for(const direction of [-1,1]){
+      const segments=relationshipArcCandidate(start,end,amplitude,direction);
+      if(relationshipCubicClear(segments,rects))
+        return relationshipCubicGeometry(segments);
+    }
+  }
+
+  if(points){
+    const smooth=relationshipSmoothRoute(points,rects,amount);
+    if(smooth)return smooth;
+    // 極端緊密的家族沒有安全曲線通道，優先不穿過卡片。
+    return relationshipStraightRoute(points);
+  }
+  // 找不到避障通道時不生成極大的拱橋。
+  return relationshipStraightRoute([start,end]);
 }
 
 function drawPerspectiveKinshipLabels(
