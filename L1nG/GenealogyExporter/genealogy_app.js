@@ -4772,7 +4772,7 @@ function directFamilyKinshipLabel(
 
   if (role === 'child') {
     if (kind !== 'adoptive' && perspective && target &&
-        !isBuiltinSampleFamily(perspective) && !Array.isArray(perspective)) {
+        !Array.isArray(perspective)) {
       const inferred = familyDerivedChildTitle(target);
       if (inferred) return inferred;
     }
@@ -8812,10 +8812,16 @@ function getRelInfoByKey(
     return null;
   }
 
+  const inferredChildText = semanticType === 'parent-child' &&
+    String(key).startsWith('parent:')
+      ? familyDerivedChildTitle(
+          currentGenealogyData()?.sims?.[String(key).slice(7)]
+        )
+      : '';
   const descriptor =
     relationshipSemanticDescriptor(
       semanticType,
-      defaultText
+      inferredChildText || defaultText
     );
 
   const customText =
