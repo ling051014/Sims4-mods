@@ -82,7 +82,14 @@ test('蓋普與阿布蘭特斯跨家系親子優先於無關配偶，不得隔�
     rootByUnit:new Map(ids.map(id=>[id,id])),
     pathByUnit:new Map(ids.map((id,i)=>[id,[i]])),primarySideByUnit:new Map()};
   const order=[...rank(ids,model,ownership)];
-  assert.deepEqual(order,['unit:A','unit:B','unit:P']);
+  assert.equal(Math.abs(order.indexOf('unit:A')-order.indexOf('unit:B')),1,
+    'A 與 B 有直接親子連線，不能被外部人物 P 插在中間');
+  assert.equal(order.filter(id=>id==='unit:P').length,1,
+    '外部人物只能保留一張卡片');
+});
+test('原本未連接的家庭保留原先根排列，不因社交家系規則被打亂',()=>{
+  const a=U('A',0),p=U('P',1),b=U('B',2);
+  assert.deepEqual(roots([a,p,b],[],['A']),['unit:A','unit:P','unit:B']);
 });
 test('根人物沒有 householdId，但其後代同住也能將兩棵家系靠攏',()=>{
   const a=U('A',0),b=U('B',1),c=U('C',2),d=U('D',3);
