@@ -4679,21 +4679,102 @@ function genealogyAttachmentPriority(unit,ownerId,model) {
 }
 
 // 主家系根區塊排序：保持原血緣先後，只把同一實際家庭的獨立根分支合攏。
+// 家系根區塊同時受血緣、共同父母與社交優先級約束；同一人物仍只有一個 unit。
 function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
-  const ordered=[...ids].sort((a,b)=>
-    compareFamilyBranchPath(ownership.pathByUnit.get(a),ownership.pathByUnit.get(b))||
-    stableGenealogyUnitCompare(model.unitById.get(a),model.unitById.get(b)));
-  const firstIndex=new Map();
-  ordered.forEach((id,index)=>{
-    const household=[...genealogyUnitHouseholds(model.unitById.get(id))].sort()[0];
-    const key=household?'household:'+household:'root:'+id;
-    if(!firstIndex.has(key))firstIndex.set(key,index);
+  const requested=new Set(ids);
+  const allRoots=new Set([
+    ...ids,
+    ...(ownership.rootByUnit?.values()||[])
+  ]);
+  const base=[...allRoots].filter(id=>model.unitById.has(id))
+    .sort((a,b)=>compareFamilyBranchPath(ownership.pathByUnit.get(a),ownership.pathByUnit.get(b))||
+      stableGenealogyUnitCompare(model.unitById.get(a),model.unitById.get(b)));
+  const index=new Map(base.map((id,i)=>[id,i]));
+  const rootForUnit=id=>ownership.rootByUnit?.get(id)||id;
+  const rootForSim=id=>{
+    const unit=model.unitBySim.get(String(id));
+    return unit?rootForUnit(unit.id):null;
+  };
+  const activeRoots=new Set([...ownership.primarySimIds||[]]
+    .map(rootForSim).filter(id=>allRoots.has(id)));
+  const attached=new Map();
+  const candidates=[...(model.pairCandidates||[])].sort((a,b)=>
+    (b.adjacencyTier||0)-(a.adjacencyTier||0)||
+    (b.score||0)-(a.score||0));
+  // 從目前正在檢視的主要家系向外找相關家系；
+  // 前任與共同生育對象必須整棵靠近主家系，而不是散落到遠處。
+  for(let pass=0;pass<allRoots.size;pass++){
+    let changed=false;
+    candidates.forEach(pair=>{
+      const a=rootForSim(pair.a),b=rootForSim(pair.b);
+      if(!a||!b||a===b||!allRoots.has(a)||!allRoots.has(b))return;
+      const ownerA=activeRoots.has(a)||attached.has(a);
+      const ownerB=activeRoots.has(b)||attached.has(b);
+      if(ownerA===ownerB)return;
+      const ownerId=ownerA?a:b,otherId=ownerA?b:a;
+      if(activeRoots.has(otherId)||attached.has(otherId))return;
+      const anchor=attached.get(ownerId)?.anchor||ownerId;
+      attached.set(otherId,{anchor,tier:pair.adjacencyTier||0,
+        ownerUnit:model.unitBySim.get(String(ownerA?pair.a:pair.b))});
+      changed=true;
+    });
+    if(!changed)break;
+  }
+  // 無親子但同住的獨立根也靠在一起；不修改雙方血緣關係。
+  base.forEach(id=>{
+    if(activeRoots.has(id)||attached.has(id))return;
+    const household=genealogyUnitHouseholds(model.unitById.get(id));
+    if(!household.size)return;
+    const owner=base.find(other=>other!==id&&(activeRoots.has(other)||attached.has(other))&&
+      [...genealogyUnitHouseholds(model.unitById.get(other))].some(h=>household.has(h)));
+    if(owner)attached.set(id,{anchor:attached.get(owner)?.anchor||owner,tier:0,ownerUnit:null});
   });
-  return ordered.map((id,index)=>{
+  const sideForAttachment=item=>{
+    const unit=item.ownerUnit;
+    if(unit?.members?.length===2){
+      const i=unit.members.findIndex(member=>ownership.primarySimIds.has(member.id));
+      // 主家系已有水平配偶時，前任優先往相反側展開。
+      if(i===0)return -1;
+      if(i===1)return 1;
+    }
+    const side=unit?ownership.primarySideByUnit?.get(unit.id)||0:0;
+    if(side)return side;
+    return item.tier>=430?-1:1;
+  };
+  const groups=new Map(base.map(id=>[id,{id,left:[],right:[]}])); 
+  attached.forEach((item,id)=>{
+    const group=groups.get(item.anchor);
+    if(!group||item.anchor===id)return;
+    groups.delete(id);
+    group[sideForAttachment(item)<0?'left':'right'].push({id,tier:item.tier});
+  });
+  const originalRoots=[...groups.keys()];
+  const householdBuckets=new Map();
+  originalRoots.forEach(id=>{
     const household=[...genealogyUnitHouseholds(model.unitById.get(id))].sort()[0];
     const key=household?'household:'+household:'root:'+id;
-    return {id,index,first:firstIndex.get(key)};
-  }).sort((a,b)=>a.first-b.first||a.index-b.index).map(item=>item.id);
+    if(!householdBuckets.has(key))householdBuckets.set(key,index.get(id));
+  });
+  originalRoots.sort((a,b)=>{
+    const key=id=>{
+      const household=[...genealogyUnitHouseholds(model.unitById.get(id))].sort()[0];
+      return household?'household:'+household:'root:'+id;
+    };
+    return householdBuckets.get(key(a))-householdBuckets.get(key(b))||
+      index.get(a)-index.get(b);
+  });
+  const result=[];
+  originalRoots.forEach(id=>{
+    const group=groups.get(id);
+    const compare=(left,right,side)=>
+      (side<0?left.tier-right.tier:right.tier-left.tier)||
+      index.get(left.id)-index.get(right.id);
+    group.left.sort((a,b)=>compare(a,b,-1));
+    group.right.sort((a,b)=>compare(a,b,1));
+    result.push(...group.left.map(x=>x.id),id,...group.right.map(x=>x.id));
+  });
+  // 每個 generation 可能只顯示一部分 root，順序仍依同一份全域結果。
+  return result.filter(id=>requested.has(id));
 }
 
 function applyFamilyBranchOrdering(layers,model,ownership) {
