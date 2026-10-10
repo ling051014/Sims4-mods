@@ -1,4 +1,4 @@
-name: Verify smooth genealogy curves
+name: Verify true cubic genealogy curves
 on:
   push:
     branches: [genealogy-structural-optimization-20260926]
