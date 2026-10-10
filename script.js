@@ -239,68 +239,54 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ========【複製按鈕】 設定 - 全域 HTML ========
-document.addEventListener('click', async (e) => {
+// ========【複製按鈕】 設定 - 關鍵字清單使用統一 SVG 筆劃動畫 ========
+const copyAnimationTimers = new WeakMap();
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.copy-btn[data-copy]');
+    if (!button) return;
+    const value = button.dataset.copy;
+    if (!value) return;
 
-    // ========【取得目標按鈕】========
-    const btn = e.target.closest('.copy-btn');
-
-    // 若不是複製按鈕則跳出
-    if (!btn) return;
-
-    // ========【取得要複製的文字】========
-    const text = btn.dataset.copy;
-
-    // 若沒有內容則停止
-    if (!text) return;
-
+    let copied = false;
     try {
-
-        // ========【1. 複製文字到剪貼簿】========
-        await navigator.clipboard.writeText(text);
-
-        // ========【2. 手機震動回饋】========
-        if (navigator.vibrate) {
-            navigator.vibrate(80);
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            await navigator.clipboard.writeText(value);
+            copied = true;
         }
-
-        // ========【3. 建立 ✔ 動畫元素】========
-        const check = document.createElement('span');
-        check.textContent = '✔';
-        check.className = 'copy-check';
-
-        // 清空按鈕內容並加入 ✔
-        btn.innerHTML = '';
-        btn.appendChild(check);
-
-        // ========【4. 建立 tooltip 提示】========
-        const tooltip = document.createElement('div');
-        tooltip.className = 'copy-tooltip show';
-        tooltip.textContent = '已複製';
-
-        // 確保定位基準
-        btn.style.position = 'relative';
-        btn.appendChild(tooltip);
-
-        // ========【5. 1 秒後還原原始 icon】========
-        setTimeout(() => {
-
-            // 清空內容
-            btn.innerHTML = '';
-
-            // 重建 copy icon
-            const img = document.createElement('img');
-            img.className = 'copy-icon';
-            img.src = 'icons/copy.svg';
-            img.alt = 'copy';
-
-            btn.appendChild(img);
-
-        }, 1000);
-
-    } catch (err) {
-        console.error('複製失敗', err);
+    } catch (_) {
+        // 剪貼簿權限不足時改試舊式複製方法。
     }
+    if (!copied) {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try { copied = document.execCommand('copy'); } catch (_) {}
+        textarea.remove();
+    }
+    if (!copied) {
+        button.title = '複製失敗，請手動複製';
+        return;
+    }
+
+    if (navigator.vibrate) navigator.vibrate(80);
+    const glyph = button.querySelector('.l1ng-copy-glyph');
+    const previous = copyAnimationTimers.get(button);
+    if (previous) clearTimeout(previous);
+    if (glyph) {
+        glyph.classList.remove('l1ng-copy-running');
+        void glyph.getBoundingClientRect();
+        glyph.classList.add('l1ng-copy-running');
+    }
+    button.title = '已複製！';
+    button.setAttribute('aria-label', '已複製 ' + value);
+    copyAnimationTimers.set(button, setTimeout(() => {
+        if (glyph) glyph.classList.remove('l1ng-copy-running');
+        button.title = '點擊複製';
+        button.setAttribute('aria-label', '複製 ' + value);
+    }, 3900));
 });
 
 // ========【DLC對照表】 設定 - 載入外部 HTML ========
