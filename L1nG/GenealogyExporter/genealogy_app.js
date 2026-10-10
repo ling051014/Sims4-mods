@@ -8777,6 +8777,18 @@ function getVisibleIds(familyId) {
   });
 }
 
+// 側邊欄與畫布共同使用同一份可見範圍；不修改真正的家庭成員清單。
+// 配偶／前任屬於可顯示的關聯人物，不代表已加入原始 Household。
+function currentDisplayedFamily() {
+  const family = currentFamily();
+  if (!family) return null;
+  const treeFamily = currentTreeFamily() || family;
+  return {
+    ...treeFamily,
+    memberIds:[...getVisibleIds(family.id)]
+  };
+}
+
 // ========【圖片預熱】 設定 - 只預先載入目前畫面會立即看到的圖片，避免 F5 後頭像逐張跳出 ========
 function preloadCurrentViewAssets() {
   if (!assetStoreReady || !currentGenealogyData()) {
@@ -13656,10 +13668,7 @@ function setFamilyMemberGenerationSort(order) {
   } catch (_) {}
 
   updateFamilyGenerationSortControl();
-  renderFamilyMemberList(
-    currentTreeFamily() ||
-    currentFamily()
-  );
+  renderFamilyMemberList(currentDisplayedFamily());
 }
 
 $('familyGenerationSortBtn')?.addEventListener(
@@ -13699,19 +13708,21 @@ const familyMemberController = {
     familyMemberOperationState.selection.clear();
 
     if (familyMemberOperationState.removeMode) {
+      const editableIds = new Set((currentFamily()?.memberIds || []).map(String));
       selectedIds.forEach(id => {
-        if (id && currentGenealogyData().sims[id]) {
-          familyMemberOperationState.selection.add(id);
+        if (id && editableIds.has(String(id)) && currentGenealogyData().sims[id]) {
+          familyMemberOperationState.selection.add(String(id));
         }
       });
     }
 
     if (typeof closeAppMenus === 'function') closeAppMenus();
-    renderFamilyMemberList(currentFamily());
+    renderFamilyMemberList(currentDisplayedFamily());
   },
 
   toggleSelection(simId) {
-    if (!familyMemberOperationState.removeMode || !simId) return;
+    if (!familyMemberOperationState.removeMode || !simId ||
+        !(currentFamily()?.memberIds || []).map(String).includes(String(simId))) return;
 
     if (familyMemberOperationState.selection.has(simId)) {
       familyMemberOperationState.selection.delete(simId);
@@ -13719,7 +13730,7 @@ const familyMemberController = {
       familyMemberOperationState.selection.add(simId);
     }
 
-    renderFamilyMemberList(currentFamily());
+    renderFamilyMemberList(currentDisplayedFamily());
   },
 
   async confirmRemoveSelected(event) {
@@ -13781,9 +13792,11 @@ function renderFamilyMemberList(fam) {
 
   const currentIds =
     new Set(members.map(sim => sim.id));
+  const editableIds =
+    new Set((currentFamily()?.memberIds || []).map(String));
 
   [...familyMemberOperationState.selection].forEach(id => {
-    if (!currentIds.has(id)) {
+    if (!currentIds.has(id) || !editableIds.has(id)) {
       familyMemberOperationState.selection.delete(id);
     }
   });
@@ -13850,13 +13863,14 @@ function renderFamilyMemberList(fam) {
     ].filter(Boolean).join(' · ');
 
     const selected = familyMemberOperationState.selection.has(sim.id);
+    const editable = editableIds.has(String(sim.id));
 
-    return `<div class="family-member-row${familyMemberOperationState.removeMode ? ' remove-mode' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" tabindex="0">
+    return `<div class="family-member-row${familyMemberOperationState.removeMode && editable ? ' remove-mode' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" tabindex="0">
       <div class="family-member-avatar-wrap">
         <div class="family-member-avatar">${framedAvatarImageHTML(sim.avatar, sim.avatarFrame) || esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>
-        <button class="family-member-remove-select${selected ? ' selected' : ''}" type="button" data-family-member-remove-select="${esc(sim.id)}" aria-pressed="${selected ? 'true' : 'false'}" title="${esc(uiText(selected ? '取消選取' : '批量移除'))}">
+        ${editable ? `<button class="family-member-remove-select${selected ? ' selected' : ''}" type="button" data-family-member-remove-select="${esc(sim.id)}" aria-pressed="${selected ? 'true' : 'false'}" title="${esc(uiText(selected ? '取消選取' : '批量移除'))}">
           ${iconSvg(selected ? 'check-lg' : 'trash3')}
-        </button>
+        </button>` : ''}
       </div>
       <div class="family-member-copy"><div class="family-member-name">${esc(displayDataText(sim.name,sim))}</div><div class="family-member-meta">${esc(meta)}</div></div>
       <div class="ui-menu family-member-menu">
@@ -13865,8 +13879,8 @@ function renderFamilyMemberList(fam) {
           <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="view" data-family-member-id="${esc(sim.id)}">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
           <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="edit" data-family-member-id="${esc(sim.id)}">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
           <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="locate" data-family-member-id="${esc(sim.id)}">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-          <div class="ui-menu-divider"></div>
-          <button class="ui-menu-item danger" type="button" role="menuitem" data-family-member-action="remove" data-family-member-id="${esc(sim.id)}">${iconSvg('person-dash')}<span>${esc(uiText('移出目前家族'))}</span></button>
+          ${editable ? `<div class="ui-menu-divider"></div>
+          <button class="ui-menu-item danger" type="button" role="menuitem" data-family-member-action="remove" data-family-member-id="${esc(sim.id)}">${iconSvg('person-dash')}<span>${esc(uiText('移出目前家族'))}</span></button>` : ''}
         </div>
       </div>
     </div>`;
@@ -13920,7 +13934,7 @@ function renderFamilyMemberList(fam) {
 
 function refreshFamilyProfilePanel() {
   const fam = currentFamily(); if (!fam) return;
-  const viewFamily = currentTreeFamily() || fam;
+  const viewFamily = currentDisplayedFamily() || fam;
 const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value = fam.bio || '';
   const members = (viewFamily.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean);
   if ($('familyMemberCount')) $('familyMemberCount').textContent = String(members.length);
@@ -18596,6 +18610,8 @@ petCardsLayer?.addEventListener('click', event => {
 // ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
 function applyTopbarFilters() {
   updateTopbarFilterUI();
+  // 畫布與側欄都由 getVisibleIds() 決定顯示人物；篩選後一併刷新。
+  refreshFamilyProfilePanel();
   render();
 }
 
