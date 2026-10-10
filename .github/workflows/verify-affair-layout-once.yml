@@ -1,4 +1,4 @@
-name: Verify shared co-parent curve and family block layout
+name: Verify real shared co-parent junction and descendant placement
 on:
   push:
     branches: [genealogy-structural-optimization-20260926]
