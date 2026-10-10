@@ -4755,14 +4755,14 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
       const childUnit=(group.childUnitIds||[])
         .map(id=>model.unitById.get(id)).find(unit=>unit&&rootForUnit(unit.id)===childRoot);
       // 真正的父母與子女跨 root，比一般「其他關係」更需要相鄰。
-      addBond(parentRoot,childRoot,475,1000+(group.children?.length||0)*20,
+      addBond(parentRoot,childRoot,700,1000+(group.children?.length||0)*20,
         parentUnit,childUnit);
     }));
   });
   households.forEach(roots=>{
     const list=[...roots].sort((a,b)=>(index.get(a)??0)-(index.get(b)??0));
     for(let i=1;i<list.length;i++){
-      addBond(list[0],list[i],650,1400);
+      addBond(list[0],list[i],750,1400);
     }
   });
   const candidates=[...bonds.values()].sort((a,b)=>
