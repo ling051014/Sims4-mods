@@ -7412,43 +7412,57 @@ function parentConnectorSource(
         ) > 0
       );
 
-  const hasVisibleHorizontalRelation =
-    (firstSim.spouseIds || [])
-      .map(String)
-      .includes(String(secondId)) ||
-    (firstSim.exSpouseIds || [])
-      .map(String)
-      .includes(String(secondId)) ||
-    (firstSim.gameData?.deceasedSpouseIds || [])
-      .map(String)
-      .includes(String(secondId)) ||
-    !!pairLink;
+  const recordedPartner = (firstSim.spouseIds || [])
+    .map(String).includes(String(secondId)) ||
+    (firstSim.exSpouseIds || []).map(String).includes(String(secondId)) ||
+    (firstSim.gameData?.deceasedSpouseIds || []).map(String).includes(String(secondId));
+
+  const pairType = pairLink ? relationshipOtherType(pairLink) : '';
+  const hasVisibleHorizontalRelation = recordedPartner ||
+    (pairLink && (pairType === '訂婚' || pairType === '伴侶'));
 
   if (hasVisibleHorizontalRelation) {
-    // 只要兩位共同父母之間存在配偶型橫向關係，
-    // 子女幹線就固定從該 H / H-V-H 關係線的中點延伸。
-    // 玩家拖動其中一方時，配偶線與親子線共用同一個 union anchor，
-    // 不再因高度差或碰到其他卡片而退回另一套底部橋接幾何。
-    return pairJoinPoint(
-      first.pos,
-      second.pos
-    );
+    // 真正共享水平伴侶連線的父母，可以從該連線中點接出親子主幹。
+    return pairJoinPoint(first.pos, second.pos);
   }
 
-  // 已推定為「情人」時，關係線本身已連接兩位共同父母。
-  // 親子分支僅從最接近子女群中軸的一方垂直延伸；
-  // 不再於兩張卡片下方額外畫一條橫跨全家系的假配偶橋。
-  const inferred = inferCoParentRelationshipLinks([group],byId);
-  if (inferred.length) {
-    const anchors=group.children
-      .map(childId=>pos.get(childId))
+  const inferred = inferCoParentRelationshipLinks([group], byId);
+  const independentCoParents = inferred.length || !!pairLink;
+  if (independentCoParents) {
+    // 情人等非配偶的兩名親生父母都必須保留血緣線。
+    // 由兩位父母各自向下匯入子女的共同主幹，不重新畫第二條伴侶橫線。
+    const parentAnchors = [first, second].map(item =>
+      cardVerticalAnchor(item.pos, 'bottom')
+    );
+    const childAnchors = group.children
+      .map(id => pos.get(id))
       .filter(Boolean)
-      .map(position=>cardVerticalAnchor(position,'top').x);
-    const center=anchors.length
-      ? (Math.min(...anchors)+Math.max(...anchors))/2
-      : (cardVerticalAnchor(first.pos,'bottom').x+cardVerticalAnchor(second.pos,'bottom').x)/2;
-    const options=[first,second].map(parent=>cardVerticalAnchor(parent.pos,'bottom'));
-    return options.sort((a,b)=>Math.abs(a.x-center)-Math.abs(b.x-center))[0];
+      .map(item => cardVerticalAnchor(item, 'top'));
+    const childX = childAnchors.length
+      ? (Math.min(...childAnchors.map(p=>p.x)) +
+         Math.max(...childAnchors.map(p=>p.x))) / 2
+      : (parentAnchors[0].x + parentAnchors[1].x) / 2;
+    const parentBottom = Math.max(...parentAnchors.map(p=>p.y));
+    const firstChildTop = childAnchors.length
+      ? Math.min(...childAnchors.map(p=>p.y))
+      : parentBottom + 100;
+    const available = Math.max(0, firstChildTop-parentBottom);
+    const mergeY = available > 32
+      ? parentBottom + available*0.6
+      : parentBottom + 14;
+    const turns = available > 32
+      ? [parentBottom+available*0.24,parentBottom+available*0.39]
+      : [parentBottom+5,parentBottom+10];
+
+    parentAnchors.forEach((anchor,index) => {
+      const bendY = Math.max(anchor.y+2,turns[index]);
+      const d = 'M'+anchor.x+' '+anchor.y+
+        ' V'+bendY+
+        ' H'+childX+
+        ' V'+mergeY;
+      paths.push('<path class="edge edge-parent" d="'+d+'"/>');
+    });
+    return {x:childX,y:mergeY};
   }
 
   // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
