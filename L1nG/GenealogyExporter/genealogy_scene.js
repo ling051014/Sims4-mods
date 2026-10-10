@@ -6886,6 +6886,86 @@ function alignUnifiedSingleChildBranches(layers,model,ownership,connectorGroups)
   return corrected;
 }
 
+// ========【跨家系兄弟姊妹區塊】 不讓另一個家系插在同一組父母的兩名子女中 ========
+// 僅修正有共同父母、但因不同血緣 root 所有權而被拆開的兩名子女。
+// 改動只限此層相鄰區塊及其真正後代，不重新排列全部祖先。
+function compactCrossRootSiblingGroups(layers,model,ownership) {
+  const gap=resolveLayoutGaps().SIBLING;
+  let corrected=0;
+  (model.parentGroups||[]).forEach(group=>{
+    const childIds=[...new Set(group.childUnitIds||[])];
+    if(childIds.length!==2)return;
+    const pair=childIds.map(id=>model.unitById.get(id)).filter(Boolean)
+      .sort((a,b)=>a.x-b.x);
+    if(pair.length!==2)return;
+    const [first,second]=pair;
+    if(first.generation!==second.generation)return;
+    const roots=ownership.rootByUnit||new Map();
+    if((roots.get(first.id)||first.id)===(roots.get(second.id)||second.id))return;
+
+    const target=first.x+first.width+gap;
+    if(second.x<=target+0.75)return;
+    const layer=layers.get(first.generation)||[];
+    const blockers=layer.filter(unit=>unit.id!==first.id&&unit.id!==second.id &&
+      unit.x>=target-0.001&&unit.x<second.x);
+    const originals=new Map(model.units.map(unit=>[unit.id,unit.x]));
+    const deltas=new Map();
+    const request=(id,delta)=>{
+      if(deltas.has(id)&&Math.abs(deltas.get(id)-delta)>0.01)return false;
+      deltas.set(id,delta);
+      return true;
+    };
+
+    let possible=true;
+    const siblingBranch=genealogyOwnedBranchUnits(model,ownership,[second.id],false);
+    siblingBranch.forEach(id=>{
+      if(!request(id,target-second.x))possible=false;
+    });
+    blockers.forEach(blocker=>{
+      const branch=genealogyOwnedBranchUnits(model,ownership,[blocker.id],false);
+      branch.forEach(id=>{
+        if(!request(id,second.width+gap))possible=false;
+      });
+    });
+    if(!possible)return;
+    deltas.forEach((delta,id)=>{model.unitById.get(id).x+=delta;});
+
+    // 任何世代出現新重疊就完整還原這次校正，絕不為一組兄弟破壞另一家。
+    const collision=[...deltas.keys()].some(id=>{
+      const unit=model.unitById.get(id);
+      return (layers.get(unit.generation)||[]).some(other=>
+        other.id!==id&&
+        unit.x<other.x+other.width+gap-0.001 &&
+        unit.x+unit.width+gap>other.x+0.001
+      );
+    });
+    if(collision){
+      originals.forEach((x,id)=>{model.unitById.get(id).x=x;});
+      return;
+    }
+
+    corrected++;
+    // 沒有上一代的共同父／母，可對準目前兩名子女的真實錨點。
+    // 有更上層祖先時不單獨拉動父母，以免破壞上游血緣線。
+    if(group.parentIds.length===1){
+      const parentUnit=model.unitBySim.get(group.parentIds[0]);
+      if(parentUnit&&!(parentUnit.parentUnitIds?.size)){
+        const anchors=group.children.map(id=>genealogyChildAnchorX(id,model))
+          .filter(Number.isFinite);
+        const source=genealogyGroupSourceX(group,model);
+        if(anchors.length===2&&Number.isFinite(source)){
+          const targetX=parentUnit.x+
+            (Math.min(...anchors)+Math.max(...anchors))/2-source;
+          if(canPlaceGenealogyUnitAtX(
+            parentUnit,targetX,layers.get(parentUnit.generation),gap
+          ))parentUnit.x=targetX;
+        }
+      }
+    }
+  });
+  return corrected;
+}
+
 function solveAutomaticGenealogyPositions(visibleIds) {
   const primarySimIds =
     getActiveLayoutPrimaryIds(
@@ -6978,6 +7058,9 @@ function solveAutomaticGenealogyPositions(visibleIds) {
   alignUnifiedSingleChildBranches(
     layers,model,ownership,connectorGroups
   );
+
+  // 最後確認同父母的跨家系兄弟姊妹連續，不能讓另一個家族插在中間。
+  compactCrossRootSiblingGroups(layers,model,ownership);
 
   // Family Branch Block 本身就是最終水平幾何權威。
   // 不再執行 generation-global packing，避免把已保留的 Parent Group block 再推壞。
