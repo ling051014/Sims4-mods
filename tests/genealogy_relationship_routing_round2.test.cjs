@@ -67,5 +67,19 @@ test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
  assert.match(scoped,/setting\.curveAmount/);
  assert.doesNotMatch(scoped,/setting\.routing\s*===\s*'manual'/);
  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
- assert.match(html,/genealogy_scene\.js\?v=20261011-smooth-bezier-r4/);
+ assert.match(html,/genealogy_scene\.js\?v=20261011-curvature-slider-r5/);
+});
+
+test('曲線弧度 10% 與 100% 無障礙時有不同的真正曲線',()=>{
+ const low=render(A,B,{curved:true,curveAmount:10},obstacle({left:500,right:550,top:-20,bottom:20}));
+ const high=render(A,B,{curved:true,curveAmount:100},obstacle({left:500,right:550,top:-20,bottom:20}));
+ assert.match(low.d,/C/);assert.match(high.d,/C/);
+ assert.notEqual(low.d,high.d,'滑桿必須實際改變曲線幾何');
+});
+test('有原配阻擋時，滑桿弧度不能全部被固定避障值覆蓋',()=>{
+ const context=obstacle({left:150,right:240,top:-40,bottom:40});
+ const low=render(A,B,{curved:true,curveAmount:10},context);
+ const high=render(A,B,{curved:true,curveAmount:100},context);
+ assert.match(low.d,/C/);assert.match(high.d,/C/);
+ assert.notEqual(low.d,high.d,'原配阻擋時仍須保有弧度調整空間');
 });
