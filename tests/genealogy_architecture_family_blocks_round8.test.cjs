@@ -71,6 +71,19 @@ test('跨血緣根的親子關係必須讓祖先家系靠近其後代',()=>{
   assert.equal(Math.abs(ordered.indexOf('unit:A')-ordered.indexOf('unit:C')),1,
     '有實際親子關係的兩個家系根不得隔著其他不相關家系');
 });
+test('蓋普與阿布蘭特斯跨家系親子優先於無關配偶，不得隔著另一家系',()=>{
+  const a=U('A',0),p=U('P',1),b=U('B',2);
+  const units=[a,p,b],ids=units.map(u=>u.id);
+  const model={units,unitById:new Map(units.map(u=>[u.id,u])),
+    unitBySim:new Map(units.map(u=>[u.members[0].id,u])),
+    pairCandidates:[{a:'B',b:'P',adjacencyTier:500,score:900}],
+    parentGroups:[{parentUnitIds:['unit:B'],childUnitIds:['unit:A'],children:['A']}]};
+  const ownership={anchorSimIds:new Set(['B']),primarySimIds:new Set(['B']),
+    rootByUnit:new Map(ids.map(id=>[id,id])),
+    pathByUnit:new Map(ids.map((id,i)=>[id,[i]])),primarySideByUnit:new Map()};
+  const order=[...rank(ids,model,ownership)];
+  assert.deepEqual(order,['unit:A','unit:B','unit:P']);
+});
 test('根人物沒有 householdId，但其後代同住也能將兩棵家系靠攏',()=>{
   const a=U('A',0),b=U('B',1),c=U('C',2),d=U('D',3);
   const ca=U('ca',4),cb=U('cb',5);
