@@ -8949,6 +8949,136 @@ genealogyScene =
 if (!genealogyScene) throw new Error('Genealogy Scene failed to initialize.');
 function getSceneLayout() { return genealogyScene?.readScenePlan?.() || null; }
 // Viewport transform / zoom / fit / resize lifecycle 已移至 genealogy_viewport.js。
+// ========【人物庫定位】 依實際族譜範圍找家庭，而不是只在當前畫布搜尋卡片 ========
+function findPersonFamilyLocation(simId) {
+  const db = currentGenealogyData();
+  const id = String(simId || '');
+  if (!db?.sims?.[id]) return null;
+
+  const modeOrder = [...new Set([
+    familyTreeViewMode, 'extended', 'ea', 'household'
+  ])];
+  const ownedFamilyIds = new Set(
+    (db.families || []).filter(family =>
+      (family.memberIds || []).map(String).includes(id) ||
+      familySourceSeedIds(family).includes(id)
+    ).map(family => String(family.id))
+  );
+  const inScope = (entry, mode) => {
+    if (!entry) return false;
+    const members = (entry.memberIds || []).map(String);
+    if (members.includes(id)) return true;
+    // Household／EA 族譜仍會顯示直接配偶或前任；找家庭時同樣使用 Store 規則。
+    const sources = mode !== 'extended' && (entry.primaryMemberIds || []).length
+      ? entry.primaryMemberIds : null;
+    return genealogyStore.getVisibleFamilyIds(
+      { memberIds:members },
+      { relationshipSourceIds:sources }
+    ).has(id);
+  };
+
+  const active = getActiveFamilySelectorEntry(familyTreeViewMode);
+  if (inScope(active, familyTreeViewMode)) {
+    return { mode:familyTreeViewMode, entry:active };
+  }
+
+  const candidates = [];
+  modeOrder.forEach((mode, modeIndex) => {
+    getFamilySelectorEntries(mode).forEach((entry, index) => {
+      if (!inScope(entry, mode)) return;
+      const directlyListed = (entry.memberIds || []).map(String).includes(id);
+      const owned = ownedFamilyIds.has(String(entry.familyId)) ||
+        (entry.sourceFamilyIds || []).some(familyId =>
+          ownedFamilyIds.has(String(familyId))
+        );
+      candidates.push({ mode, entry, modeIndex, index, directlyListed, owned });
+    });
+  });
+  candidates.sort((a,b) =>
+    Number(b.owned)-Number(a.owned) ||
+    Number(b.directlyListed)-Number(a.directlyListed) ||
+    a.modeIndex-b.modeIndex ||
+    (a.entry.memberIds?.length || 0)-(b.entry.memberIds?.length || 0) ||
+    a.index-b.index
+  );
+  const selected = candidates[0];
+  return selected ? { mode:selected.mode, entry:selected.entry } : null;
+}
+
+// 定位是玩家明確要求顯示人物；若被篩選隱藏，只補勾必要的分類選項。
+function revealPersonInTopbarFilters(sim) {
+  let changed = false;
+  [
+    [statusFilterInputs, sim.status],
+    [genderFilterInputs, sim.gender],
+    [raceFilterInputs, sim.race],
+    [lifeStageFilterInputs, sim.lifeStage]
+  ].forEach(([inputs, value]) => {
+    if (topbarFilterGroupMatches(checkedTopbarFilterValues(inputs), inputs, value)) return;
+    const matching = inputs.find(input => input.value === (value || ''));
+    if (matching) matching.checked = true;
+    else inputs.forEach(input => { input.checked = true; });
+    changed = true;
+  });
+  if (changed) updateTopbarFilterUI();
+  return changed;
+}
+
+// 先確立家庭與分頁，再更新畫布，最後依新座標將人物置中。
+function locatePersonFromLibrary(simId) {
+  const id = String(simId || '');
+  const sim = currentGenealogyData()?.sims?.[id];
+  if (!sim) return false;
+  const target = findPersonFamilyLocation(id);
+  if (!target?.entry) {
+    uiAlert(uiText('找不到包含這位模擬市民的族譜，請先將其加入家族。'), {
+      title:uiText('在族譜中定位')
+    });
+    return false;
+  }
+
+  const { mode, entry } = target;
+  const changedFamily = familyTreeViewMode !== mode ||
+    String(currentFamily()?.id || '') !== String(entry.familyId || '') ||
+    getFamilyTreeSelectionValue(mode) !== entry.value;
+
+  const changedFilters = revealPersonInTopbarFilters(sim);
+  if (changedFamily) {
+    familyTreeViewMode = mode;
+    try { localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, mode); } catch (_) {}
+    setFamilyTreeSelectionValue(mode, entry.value);
+    genealogyStore.setCurrentFamilyId(entry.familyId);
+    familyTreeLastSourceFamilyId = entry.familyId;
+    dragHistory.clear();
+    clearNodeSelection();
+    resetFamilyMemberOperations();
+  }
+
+  personLibraryController.close();
+  if (changedFamily) {
+    save();
+    refreshFamilyUI();
+  } else if (changedFilters) {
+    refreshFamilyProfilePanel();
+  }
+  if (changedFamily || changedFilters) render();
+
+  // 重建畫布後才可讀取新卡片的位置；不能沿用前一家庭的 Scene 快取。
+  requestAnimationFrame(() => {
+    if (!getSceneLayout()?.pos?.has(id)) render();
+    requestAnimationFrame(() => {
+      if (getSceneLayout()?.pos?.has(id)) {
+        focusSimOnCanvas(id);
+      } else {
+        uiAlert(uiText('這位模擬市民目前沒有可顯示的族譜卡片。'), {
+          title:uiText('在族譜中定位')
+        });
+      }
+    });
+  });
+  return true;
+}
+
 function focusSimOnCanvas(simId) {
   if (!simId || !currentGenealogyData()?.sims?.[simId]) return;
   if (!getSceneLayout() || !getSceneLayout().pos?.has(simId)) render();
@@ -16012,9 +16142,8 @@ function personLibraryAvatarHTML(sim) {
   const name = displayDataText(sim?.name, sim) || '?';
   const initial = esc(name.trim().charAt(0) || '?');
   const image = framedAvatarImageHTML(sim?.avatar, sim?.avatarFrame, 'person-library-deferred-image', true);
-  return image
-    ? '<span class="person-library-avatar-fallback">' + initial + '</span>' + image
-    : initial;
+  // 已設定頭像時只輸出圖片；透明 PNG 不得透出舊的姓名首字。
+  return image || initial;
 }
 
 function petLibraryAvatarHTML(pet) {
@@ -16360,8 +16489,7 @@ function renderPersonLibrary() {
       } else if (action === 'edit') {
         personEditor.open(id);
       } else if (action === 'locate') {
-        personLibraryDialog.classList.remove('show');
-        focusSimOnCanvas(id);
+        locatePersonFromLibrary(id);
       } else if (action === 'toggle-family') {
         const mutation =
           fam.memberIds.includes(id)
