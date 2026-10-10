@@ -2337,6 +2337,20 @@ function relationshipRoundedObstacleRoute(points,rects) {
   return relationshipCubicClear(segments,rects)?relationshipCubicGeometry(segments):null;
 }
 
+
+function relationshipUpperDetourGeometry(start,end,rects) {
+  // 單弧無法避障時，從人物上方尋找平滑通道；不能因直線可走就畫成平線。
+  // 每個候選都以真正的曲線碰撞檢查通過後才採用。
+  const baseline=Math.min(start.y,end.y);
+  for(const rise of [55,85,120,165,210,270,340,430]){
+    const y=baseline-rise;
+    const points=[start,{x:start.x,y},{x:end.x,y},end];
+    const curved=relationshipRoundedObstacleRoute(points,rects);
+    if(curved)return curved;
+  }
+  return null;
+}
+
 function relationshipOtherRenderGeometry(a,b,setting,context=null) {
   const from=avatarBoundaryAnchor(a,b),to=avatarBoundaryAnchor(b,a);
   const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
@@ -2364,12 +2378,15 @@ function relationshipOtherRenderGeometry(a,b,setting,context=null) {
 
   // 單弧不安全時，尋找上方通道，並且保持真正的曲線。
   const points=relationshipOrthogonalRoute(start,end,rects,true,35);
-  if(points){
+  if(points?.length>=3){
     const smooth=relationshipSmoothRoute(points,rects,Math.max(50,amount));
     if(smooth)return smooth;
     const rounded=relationshipRoundedObstacleRoute(points,rects);
     if(rounded)return rounded;
   }
+  // 原路徑搜尋可能回傳只有兩點的直線；在曲線模式下不接受這個結果。
+  const detour=relationshipUpperDetourGeometry(start,end,rects);
+  if(detour)return detour;
   // 沒有安全通道時仍可能重疊；至少不違反「改用曲線」的設定。
   return relationshipCubicGeometry(segments);
 }
