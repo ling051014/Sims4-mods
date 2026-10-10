@@ -114,6 +114,27 @@ test('蓋普提伯特與三名子女仍同代排齊且沒有彼此交疊',()=>{
   assert.ok(xs[1]-xs[0]>=95);
   assert.ok(xs[2]-xs[1]>=95);
 });
+test('阿布蘭特斯修正只位移實際擋路的蓋普／蒙提分支，不擾動其他預設家族',()=>{
+  const oldSolver=vm.runInNewContext(
+    implementations.replace(
+      'compactCrossRootSiblingGroups(layers,model,ownership);',
+      '// 關閉跨家系兄弟姊妹校正以比較影響範圍'
+    )+'\nsolveAutomaticGenealogyPositions;',ctx
+  );
+  const before=oldSolver(ids);
+  const moved=sims.filter(sim=>{
+    const old=before.get(sim.id),now=positions.get(sim.id);
+    return old.x!==now.x||old.y!==now.y;
+  }).map(sim=>sim.name);
+  const allowed=new Set([
+    '阿布蘭特斯艾梅琳達','阿布蘭特斯蘇菲亞',
+    '蓋普提伯特','蓋普碧翠絲','蓋普瑟勒絲特','蓋普維吉里歐',
+    '蒙提茱麗葉','蒙提但丁'
+  ]);
+  assert.ok(moved.length>0,'測試應確實觸發排列校正');
+  assert.ok(moved.every(name=>allowed.has(name)),
+    '修阿布蘭特斯不得動到無關的家族：'+moved.join('、'));
+});
 test('完成排列後同世代所有人物卡不得碰撞',()=>{
   const rows=new Map();
   for(const [id,pos] of positions){
