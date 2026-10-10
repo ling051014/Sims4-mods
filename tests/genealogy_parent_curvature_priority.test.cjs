@@ -59,27 +59,26 @@ test('自動預設計算最低安全百分比，且與玩家值分離',()=>{
   functions.relationshipCurveAmplitude(A.anchor,B.anchor,blocked),-1);
  assert.equal(functions.relationshipCubicClear(curve,[{left:150,right:250,top:-40,bottom:40}]),true);
 });
-test('兩名共同親生父母必須都有獨立通往子女主幹的血緣線',()=>{
+test('情人的子女只從現有情人關係線接出，不重畫父母橫橋',()=>{
  const body=extract('function parentConnectorSource(','function parentConnectorChildAnchor(');
  const env={
-   genealogyData:{links:[{from:'A',to:'B',type:'情人'}]},
-   relationshipOtherType:link=>link.type,
-   relationshipLayoutPriority:()=>180,
-   isSiblingLink:()=>false,
-   inferCoParentRelationshipLinks:()=>[],
-   cardVerticalAnchor:(pos,side)=>({x:pos.x+10,y:side==='bottom'?pos.y+30:pos.y}),
-   pairJoinPoint:()=>({x:999,y:999})
+  genealogyData:{links:[]},
+  genealogyNonSpousalCoParentLink:()=>({from:'A',to:'B',type:'情人'}),
+  genealogyCoParentRelationshipJunction:()=>({x:210,y:55}),
+  cardVerticalAnchor:(pos,side)=>({x:pos.x+10,y:side==='bottom'?pos.y+30:pos.y}),
+  pairJoinPoint:()=>({x:999,y:999})
  };
  const source=vm.runInNewContext(body+'\nparentConnectorSource;',env);
- const byId=new Map([['A',{id:'A',spouseIds:[],exSpouseIds:[],gameData:{}}],['B',{id:'B',spouseIds:[],exSpouseIds:[],gameData:{}}]]);
+ const byId=new Map([
+  ['A',{id:'A',spouseIds:[],exSpouseIds:[],gameData:{}}],
+  ['B',{id:'B',spouseIds:[],exSpouseIds:[],gameData:{}}]
+ ]);
  const positions=new Map([['A',{x:0,y:0}],['B',{x:400,y:0}],['child',{x:200,y:140}]]);
  const paths=[];
- const result=source({parentIds:['A','B'],children:['child']},positions,byId,paths);
- assert.equal(paths.length,2,'兩位父母都要接到共同主幹');
- assert.ok(paths.some(p=>p.includes('M10 30')));
- assert.ok(paths.some(p=>p.includes('M410 30')));
- assert.equal(result.x,210);
- assert.notEqual(result.x,999,'情人不能冒用配偶連線中點');
+ const point=source({parentIds:['A','B'],children:['child']},positions,byId,paths);
+ assert.equal(paths.length,0,'不得重新畫父母下方的橫線或折線');
+ assert.equal(point.x,210);
+ assert.equal(point.y,55);
 });
 test('親子線仍然保留真實配偶共用的連接點',()=>{
  const body=extract('function parentConnectorSource(','function parentConnectorChildAnchor(');
