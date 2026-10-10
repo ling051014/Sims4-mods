@@ -105,7 +105,7 @@ test('自動排列會實際移動整個私生子女後代區塊，而非只改�
   cardVerticalAnchor:(pos)=>({x:pos.x+45,y:pos.y})
  };
  const src=between('function translateFamilyDescendants(','function alignFamilyBranchParentAxes(')+
-  '\n'+between('function alignNonSpousalCoParentBranches(','function solveAutomaticGenealogyPositions(');
+  '\n'+between('function genealogySafeDescendantShift(','function solveAutomaticGenealogyPositions(');
  const run=vm.runInNewContext(src+'\nalignNonSpousalCoParentBranches;',env);
  const oldC=child.x,oldD=grandchild.x;
  assert.equal(run(layers,model,ownership,[pair]),1);
@@ -119,4 +119,18 @@ test('真正的自動排列流程必須使用新的分支定位步驟',()=>{
  assert.match(body,/alignNonSpousalCoParentBranches\(/);
  assert.ok(body.indexOf('alignNonSpousalCoParentBranches')>
   body.indexOf('alignFamilyBranchParentAxes'));
+});
+
+test('旁邊有其他家族時，沿安全空間移動子代區塊而不是完全放棄排列',()=>{
+ const c={id:'C',generation:1,x:100,y:200,width:90};
+ const other={id:'E',generation:1,x:235,y:200,width:90};
+ const children=new Map([['C',c]]);
+ const layers=new Map([[1,[c,other]]]);
+ const model={unitBySim:new Map([['child',c]]),unitById:children};
+ const ownership={primaryChildren:new Map(),ownerParentByUnit:new Map()};
+ const src=between('function genealogySafeDescendantShift(','function alignNonSpousalCoParentBranches(');
+ const safe=vm.runInNewContext(src+'\ngenealogySafeDescendantShift;',{});
+ const delta=safe(layers,model,ownership,{children:['child']},120,0,24);
+ assert.equal(delta,21,'安全位置應保留卡片寬度和間距');
+ assert.equal(c.x,100,'函式只計算空間，不應立即移動');
 });
