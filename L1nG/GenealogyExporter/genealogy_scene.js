@@ -4427,13 +4427,13 @@ function assignFamilyBranchBlockPositions(
     parentGroupGap
   } = metrics;
 
-  const primaryRoots =
-    genealogyOrderRootFamilyBlocks(
-      [...ownership.primaryUnitIds].filter(unitId=>
-        !ownership.ownerParentByUnit.has(unitId)
-      ),
-      model,ownership
-    );
+  // 根區塊維持原本穩定順序，不因觀看哪一個家族就把其他家庭整體搬位。
+  // 只有跨家系的兄弟姊妹由局部排列步驟作必要位移。
+  const primaryRoots=model.units
+    .filter(unit=>ownership.primaryUnitIds.has(unit.id)&&
+      !ownership.ownerParentByUnit.has(unit.id))
+    .sort(stableGenealogyUnitCompare)
+    .map(unit=>unit.id);
 
   const placed =
     new Set();
