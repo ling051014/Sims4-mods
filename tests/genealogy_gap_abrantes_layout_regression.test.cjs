@@ -114,6 +114,17 @@ test('蓋普提伯特與三名子女仍同代排齊且沒有彼此交疊',()=>{
   assert.ok(xs[1]-xs[0]>=95);
   assert.ok(xs[2]-xs[1]>=95);
 });
+test('原本正常的室友、永遠的麻吉、林克斯區塊維持修正前位置',()=>{
+  // 固定測試環境的 95px 卡片尺寸；這些位置取自排序退步前的穩定版。
+  const unchanged=[
+    ['史考特崔維斯',1979],
+    ['帕托柔伊',2486],
+    ['林克斯卡特琳娜',3162]
+  ];
+  unchanged.forEach(([name,x])=>{
+    assert.equal(person(name).x,x,'無關家族不應因修阿布蘭特斯被整組搬走：'+name);
+  });
+});
 test('阿布蘭特斯修正只位移實際擋路的蓋普／蒙提分支，不擾動其他預設家族',()=>{
   const oldSolver=vm.runInNewContext(
     implementations.replace(
