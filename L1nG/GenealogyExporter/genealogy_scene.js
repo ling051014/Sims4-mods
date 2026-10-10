@@ -7633,10 +7633,16 @@ function parentConnectorSource(
   const firstSim = first.sim;
   const secondId = second.id;
 
+  // 雙向辨識配偶／前任／已故配偶。EA 資料偶爾只保留單側關係，
+  // 不能因為 parentIds 字串排序不同，就把另一側的連線誤判為情人。
+  const recordedPartnerBy = (sim,otherId) =>
+    (sim.spouseIds || []).map(String).includes(String(otherId)) ||
+    (sim.exSpouseIds || []).map(String).includes(String(otherId)) ||
+    (sim.gameData?.deceasedSpouseIds || []).map(String).includes(String(otherId));
+
   // ========【共同父母共享連接點】 情人與配偶一樣從現有關係線接出子女 ========
-  const recordedPartner = (firstSim.spouseIds || []).map(String).includes(String(secondId)) ||
-    (firstSim.exSpouseIds || []).map(String).includes(String(secondId)) ||
-    (firstSim.gameData?.deceasedSpouseIds || []).map(String).includes(String(secondId));
+  const recordedPartner = recordedPartnerBy(firstSim,secondId) ||
+    recordedPartnerBy(second.sim,first.id);
 
   if(recordedPartner){
     return pairJoinPoint(first.pos,second.pos);
