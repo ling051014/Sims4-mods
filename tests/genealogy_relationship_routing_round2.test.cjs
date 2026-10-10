@@ -58,8 +58,8 @@ test('上下兩側都有其他人物卡片時尋找避障路徑',()=>{
 });
 test('親子橋接只在推定情人狀態取消，其他親子線不受影響',()=>{
  const line=source.slice(source.indexOf('function parentConnectorSource('),source.indexOf('function parentConnectorChildAnchor('));
- assert.match(line,/const inferred = inferCoParentRelationshipLinks\(\[group\],byId\)/);
- assert.match(line,/if \(inferred\.length\)/);
+ assert.match(line,/const independentCoParents = inferred\.length \|\| !!pairLink/);
+ assert.match(line,/parentAnchors\.forEach\(\(anchor,index\) => \{/);
  assert.match(line,/paths\.push\(/);
 });
 test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
@@ -67,7 +67,7 @@ test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
  assert.match(scoped,/setting\.curveAmount/);
  assert.doesNotMatch(scoped,/setting\.routing\s*===\s*'manual'/);
  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
- assert.match(html,/genealogy_scene\.js\?v=20261011-curvature-slider-r5/);
+ assert.match(html,/genealogy_scene\.js\?v=20261011-player-curve-priority-r6/);
 });
 
 test('曲線弧度 10% 與 100% 無障礙時有不同的真正曲線',()=>{
