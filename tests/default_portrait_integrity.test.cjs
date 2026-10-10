@@ -56,24 +56,15 @@ test('13 家庭的 82 人與 6 隻寵物全部有原始解析度 PNG', () => {
   assert.equal(pets.length, 6);
   const targets = new Set([...full, ...pets]);
   assert.equal(targets.size, 59);
-  const embedded = [], published = [];
-  for (const id of targets) {
-    const name = id + '.png', key = 'assets/sample-portraits/' + name;
-    let buffer;
-    if (images[key]) {
-      embedded.push(id);
-      buffer = Buffer.from(images[key], 'base64');
-    } else {
-      published.push(id);
-      buffer = fs.readFileSync(path.join(ROOT, key));
-    }
-    inspectPng(buffer, name, 512);
-  }
-  const unknownPng = Buffer.from(images['assets/sample-portraits/shared_unknown.png'], 'base64');
-  inspectPng(unknownPng, 'shared_unknown.png', 128);
-  assert.equal(embedded.length, 29);
-  assert.equal(published.length, 30);
-  assert.ok(!Object.keys(images).some(name => name.endsWith('.webp')), '禁止舊版 192px WebP 回退');
+  assert.equal(Object.keys(images).length, 0, '內嵌 PNG 必須清空');
+const portraitDir = path.join(ROOT, 'assets/sample-portraits');
+assert.equal(fs.readdirSync(portraitDir).filter(name => name.endsWith('.png')).length, 60);
+for (const id of targets) {
+  const name = id + '.png';
+  inspectPng(fs.readFileSync(path.join(portraitDir, name)), name, 512);
+}
+inspectPng(fs.readFileSync(path.join(portraitDir, 'shared_unknown.png')), 'shared_unknown.png', 128);
+assert.ok(!Object.keys(images).some(name => name.endsWith('.webp')), '禁止舊版 192px WebP 回退');
 });
 
 test('預設資料升級後重新保存新 PNG，正式匯入不受影響', () => {
