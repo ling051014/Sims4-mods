@@ -2053,6 +2053,58 @@ function relationshipPairRenderGeometry(
   );
 }
 
+    // ========【情人／其他關係避障】 設定 - 曲線必須真正繞過卡片，而非僅略微彎曲 ========
+function relationshipAvoidingCardGeometry(x1, y1, x2, y2, amount, preferredDirection, blocker) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const distance = Math.max(1, Math.hypot(dx, dy));
+  const normalX = -dy / distance;
+  const normalY = dx / distance;
+  const rect = blocker.rect;
+  const clearance = 9;
+  const bounds = {
+    left:rect.left - clearance,
+    right:rect.right + clearance,
+    top:rect.top - clearance,
+    bottom:rect.bottom + clearance
+  };
+  const baseBend = Math.max(
+    distance * relationshipCurveFactor(amount),
+    Math.min(distance * 2.5, Math.max(bounds.right - bounds.left, bounds.bottom - bounds.top) * 1.35)
+  );
+  const create = (bend, direction) => {
+    const cx = (x1 + x2) / 2 + normalX * bend * direction;
+    const cy = (y1 + y2) / 2 + normalY * bend * direction;
+    return {
+      d:'M' + x1 + ' ' + y1 + ' Q' + cx + ' ' + cy + ' ' + x2 + ' ' + y2,
+      labelX:0.25 * x1 + 0.5 * cx + 0.25 * x2,
+      labelY:0.25 * y1 + 0.5 * cy + 0.25 * y2,
+      cx, cy
+    };
+  };
+  const intersects = path => {
+    // 取樣的是實際二次曲線，不只檢查兩個端點的直線。
+    for (let step = 1; step < 40; step++) {
+      const t = step / 40;
+      const u = 1 - t;
+      const x = u*u*x1 + 2*u*t*path.cx + t*t*x2;
+      const y = u*u*y1 + 2*u*t*path.cy + t*t*y2;
+      if (x >= bounds.left && x <= bounds.right &&
+          y >= bounds.top && y <= bounds.bottom) return true;
+    }
+    return false;
+  };
+  let fallback = null;
+  for (const direction of [preferredDirection, -preferredDirection]) {
+    for (const factor of [1, 1.5, 2, 3, 4, 6]) {
+      const candidate = create(baseBend * factor, direction);
+      if (!fallback) fallback = candidate;
+      if (!intersects(candidate)) return candidate;
+    }
+  }
+  return fallback;
+}
+
 function relationshipOtherRenderGeometry(
   a,
   b,
@@ -2092,20 +2144,16 @@ function relationshipOtherRenderGeometry(
       : !!blocker;
 
   if (useCurve) {
-    return relationshipQuadraticGeometry(
-      x1,
-      y1,
-      x2,
-      y2,
-      setting.curveAmount,
-      relationshipCurveDirection(
-        blocker,
-        x1,
-        y1,
-        x2,
-        y2
-      )
+    const direction = relationshipCurveDirection(
+      blocker, x1, y1, x2, y2
     );
+    return blocker && setting.routing !== 'manual'
+      ? relationshipAvoidingCardGeometry(
+          x1, y1, x2, y2, setting.curveAmount, direction, blocker
+        )
+      : relationshipQuadraticGeometry(
+          x1, y1, x2, y2, setting.curveAmount, direction
+        );
   }
 
   return {
@@ -4582,6 +4630,28 @@ function orientHorizontalPairUnitsByLineage(
       }
     }
 
+    // ========【配偶外向排列】 設定 - 雙方皆被列為主家族時仍要辨識原生血緣 ========
+    // 只在一方有明確的可見祖先、另一方沒有時才強制方向；
+    // 雙方都有祖先的交叉家系維持原有 lineage 判斷，不猜測誰是外人。
+    const lineageParentCount = member =>
+      genealogyParentIds(member, model.byId)
+        .filter(parentId => {
+          const parentUnit = model.unitBySim.get(String(parentId));
+          return parentUnit && parentUnit.id !== unit.id;
+        }).length;
+    const leftParentCount = lineageParentCount(leftMember);
+    const rightParentCount = lineageParentCount(rightMember);
+    const familySide = ownership?.primarySideByUnit?.get(unit.id) || 0;
+    if (familySide && !!leftParentCount !== !!rightParentCount) {
+      const bloodMemberIsLeft = leftParentCount > rightParentCount;
+      const bloodMemberShouldBeLeft = familySide > 0;
+      if (bloodMemberIsLeft !== bloodMemberShouldBeLeft) {
+        unit.members.reverse();
+        changed = true;
+      }
+      return;
+    }
+
     // 主家族中央或兩人都屬於 primary 時，
     // 沿用既有 lineage orientation。
     const leftScore =
@@ -6100,7 +6170,46 @@ function alignDirectParentChildGroups(
 }
 
 // ========【父母／子女中心】 設定 - 分支寬度用於保留空間，親子錨點才是置中依據 ========
-function alignFamilyBranchParentAxes(layers, model, connectorGroups) {
+    // ========【整組子孫置中】 設定 - 父母受鄰卡限制時，平移完整子孫區塊 ========
+function translateFamilyDescendants(layers, model, ownership, group, delta, parentGeneration, gap) {
+  if (!Number.isFinite(delta) || Math.abs(delta) < 0.75) return false;
+  const movedIds = new Set();
+  const queue = group.children
+    .map(id => model.unitBySim.get(id))
+    .filter(unit => unit && unit.generation > parentGeneration);
+  if (!queue.length) return false;
+
+  while (queue.length) {
+    const unit = queue.shift();
+    if (movedIds.has(unit.id)) continue;
+    movedIds.add(unit.id);
+    // 只延伸經由這個子孫分支擁有的後代，不擅自移動其他配偶家族。
+    (ownership?.primaryChildren?.get(unit.id) || []).forEach(childId => {
+      if (ownership.ownerParentByUnit?.get(childId) !== unit.id) return;
+      const child = model.unitById?.get(childId);
+      if (child && child.generation > unit.generation) queue.push(child);
+    });
+  }
+
+  const movable = [...layers.values()]
+    .flat()
+    .filter(unit => movedIds.has(unit.id));
+  // 必須所有世代都留得下整個區塊，不能犧牲卡片不重疊的規則。
+  if (movable.some(unit => {
+    const targetLeft = unit.x + delta;
+    const targetRight = targetLeft + unit.width;
+    return (layers.get(unit.generation) || []).some(other =>
+      !movedIds.has(other.id) &&
+      targetRight + gap > other.x &&
+      targetLeft < other.x + other.width + gap
+    );
+  })) return false;
+
+  movable.forEach(unit => { unit.x += delta; });
+  return true;
+}
+
+function alignFamilyBranchParentAxes(layers, model, connectorGroups, ownership = null) {
   const { SIBLING:gap } = resolveLayoutGaps();
 
   // 由後代往祖先調整：較年長的一代必須看見子女已校正的最終錨點。
@@ -6187,6 +6296,25 @@ function alignFamilyBranchParentAxes(layers, model, connectorGroups) {
         .filter(item => item.delta < 0)
         .sort((a, b) => a.unit.x - b.unit.x)
         .forEach(moveWithinLayer);
+
+      // 不再因為父母旁邊有其他卡片就放棄置中：
+      // 安全條件允許時，將這組子女及其整個後代平移到父母連接點下方。
+      connectorGroups.forEach(group => {
+        const parents = genealogyGroupParentEntries(group, model);
+        if (!parents.length ||
+            parents.some(parent => parent.unit.generation !== generation)) return;
+        const childAnchors = group.children
+          .filter(id => (model.unitBySim.get(id)?.generation ?? -1) > generation)
+          .map(id => genealogyChildAnchorX(id, model))
+          .filter(Number.isFinite);
+        if (!childAnchors.length) return;
+        const sourceX = genealogyGroupSourceX(group, model);
+        if (!Number.isFinite(sourceX)) return;
+        const childCenter = (Math.min(...childAnchors) + Math.max(...childAnchors)) / 2;
+        translateFamilyDescendants(
+          layers, model, ownership, group, sourceX - childCenter, generation, gap
+        );
+      });
     });
 }
 
@@ -6265,7 +6393,8 @@ function solveAutomaticGenealogyPositions(visibleIds) {
   alignFamilyBranchParentAxes(
     layers,
     model,
-    connectorGroups
+    connectorGroups,
+    ownership
   );
 
   // Family Branch Block 本身就是最終水平幾何權威。
@@ -6903,6 +7032,56 @@ function buildParentChildConnectorGroups(byId, visibleIds) {
   });
 
   return [...groups.values()];
+}
+
+    // ========【共同親生父母】 設定 - 僅推定畫布用「情人」，不修改 EA／玩家關係資料 ========
+function inferCoParentRelationshipLinks(parentGroups, byId, existingLinks = genealogyData.links || []) {
+  const knownPairs = new Set();
+  const addKnown = (first, second) => {
+    const a = String(first || '');
+    const b = String(second || '');
+    if (a && b && a !== b) knownPairs.add(pairKey(a, b));
+  };
+
+  byId.forEach(sim => {
+    [
+      ...(sim.spouseIds || []),
+      ...(sim.exSpouseIds || []),
+      ...(sim.gameData?.deceasedSpouseIds || [])
+    ].forEach(otherId => addKnown(sim.id, otherId));
+  });
+  existingLinks.forEach(link => {
+    if (link?.from != null && link?.to != null) {
+      addKnown(link.from, link.to);
+    }
+  });
+
+  const inferred = [];
+  parentGroups.forEach(group => {
+    if (group.parentIds.length !== 2) return;
+    // 養父母只能建立領養線；不得因此推定戀愛或生育關係。
+    const hasBiologicalChild = group.children.some(id =>
+      group.childKinds?.get(id) === 'parent-child'
+    );
+    if (!hasBiologicalChild) return;
+
+    const [a, b] = group.parentIds.map(String);
+    if (!byId.has(a) || !byId.has(b) || a === b) return;
+    const key = pairKey(a, b);
+    if (knownPairs.has(key)) return;
+    knownPairs.add(key);
+
+    // 不寫入 genealogyData.links；若玩家新增真實關係，此推定自然消失。
+    inferred.push({
+      id:'inferred-co-parent-' + key,
+      from:a,
+      to:b,
+      type:'情人',
+      label:'情人',
+      inferred:true
+    });
+  });
+  return inferred;
 }
 
 function parentConnectorSource(
@@ -7840,7 +8019,13 @@ function paintRelationshipLayer({
       });
   });
 
-  (genealogyData.links || [])
+  // 衍生關係只參與畫布繪製與即時拖曳，不持久化，也不改寫已知標籤。
+  const drawnOtherLinks = [
+    ...(genealogyData.links || []),
+    ...inferCoParentRelationshipLinks(topology.parentGroups, byId)
+  ];
+
+  drawnOtherLinks
     .forEach(link => {
       if (
         !visibleIds.has(
