@@ -1,0 +1,16 @@
+name: Verify two parent bloodlines and curve control
+on:
+  push:
+    branches: [genealogy-structural-optimization-20260926]
+    paths: [.github/workflows/verify-parent-curve-control-once.yml]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify JavaScript syntax and genealogy regressions
+        run: |
+          node --check L1nG/GenealogyExporter/genealogy_scene.js
+          node --check L1nG/GenealogyExporter/genealogy_app.js
+          node --test tests/genealogy_parent_curvature_priority.test.cjs tests/genealogy_relationship_routing_round2.test.cjs tests/genealogy_branch_anchors_round3.test.cjs tests/genealogy_parent_axis_alignment.test.cjs tests/genealogy_coparent_layout.test.cjs tests/genealogy_family_kinship.test.cjs tests/default_portrait_integrity.test.cjs
+          git diff --check
