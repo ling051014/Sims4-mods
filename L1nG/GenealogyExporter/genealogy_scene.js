@@ -6834,6 +6834,16 @@ function genealogyTranslateChildBlockWithClearance(layers,model,ownership,group,
     if(!branch.size||[...branch].some(id=>moving.has(id)||protectedParents.has(id))){
       revert();return false;
     }
+    // 親子垂直校正不能把另一棵完整祖先家族一路推過畫布。
+    // 碰到跨根障礙時保留原本血緣區塊，交由後續整體排列處理。
+    const branchRoots=ownership?.rootByUnit;
+    if(branchRoots?.size){
+      const movingRoots=new Set([...moving].map(id=>branchRoots.get(id)||id));
+      const pushedRoots=new Set([...branch].map(id=>branchRoots.get(id)||id));
+      if([...pushedRoots].some(id=>!movingRoots.has(id))){
+        revert();return false;
+      }
+    }
     // 若推開的單位是已被移動的區塊，需要保留原有分支相對位置。
     if(branch.has(active.id)){
       revert();return false;
