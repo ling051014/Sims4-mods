@@ -67,5 +67,5 @@ test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
  assert.match(scoped,/setting\.curveAmount/);
  assert.doesNotMatch(scoped,/setting\.routing\s*===\s*'manual'/);
  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
- assert.match(html,/genealogy_scene\.js\?v=20261011-relationship-routing-r2/);
+ assert.match(html,/genealogy_scene\.js\?v=20261011-smooth-bezier-r4/);
 });
