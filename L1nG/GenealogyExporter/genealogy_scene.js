@@ -3515,6 +3515,16 @@ function stableGenealogyUnitCompare(a, b) {
 
 
 // ========【族譜排列身分】 設定 - 主家族與外部關係人物分離 ========
+// 選中的實際家庭是排列中心；EA 族譜擴張出的雙方祖先則只是血緣主幹，不能全部變中心。
+function getActiveLayoutAnchorIds(visibleIds) {
+  const visible=visibleIds instanceof Set?visibleIds:new Set(visibleIds||[]);
+  const entry=getActiveFamilySelectorEntry(familyTreeViewMode);
+  const seeds=Array.isArray(entry?.seedIds)&&entry.seedIds.length
+    ?entry.seedIds:Array.isArray(entry?.labelFamily?.memberIds)&&entry.labelFamily.memberIds.length
+      ?entry.labelFamily.memberIds:(currentFamily()?.memberIds||[]);
+  return new Set(seeds.map(String).filter(id=>visible.has(id)&&genealogyData.sims[id]));
+}
+
 function getActiveLayoutPrimaryIds(
   visibleIds
 ) {
@@ -3604,6 +3614,7 @@ function buildFamilyBranchOwnership(
   model,
   primarySimIds
 ) {
+  const anchorSimIds=getActiveLayoutAnchorIds(new Set(model.sims.map(sim=>String(sim.id))));
   const primaryUnitIds =
     new Set();
 
@@ -4121,6 +4132,7 @@ function buildFamilyBranchOwnership(
 
   return {
     primarySimIds,
+    anchorSimIds,
     primaryUnitIds,
     primaryParents,
     primaryChildren,
@@ -4695,7 +4707,9 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
     const unit=model.unitBySim.get(String(id));
     return unit?rootForUnit(unit.id):null;
   };
-  const activeRoots=new Set([...ownership.primarySimIds||[]]
+  const anchorIds=ownership.anchorSimIds?.size
+    ?ownership.anchorSimIds:ownership.primarySimIds;
+  const activeRoots=new Set([...anchorIds||[]]
     .map(rootForSim).filter(id=>allRoots.has(id)));
   const attached=new Map();
   const candidates=[...(model.pairCandidates||[])].sort((a,b)=>
@@ -4733,9 +4747,9 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
   // 水平配對已佔一側；前任靠另一側，其他關係再往兩邊依序擴展。
   groups.forEach(group=>{
     const owner=model.units.find(unit=>unit.members?.length===2 &&
-      unit.members.some(member=>ownership.primarySimIds.has(member.id)) &&
+      unit.members.some(member=>anchorIds.has(member.id)) &&
       rootForUnit(unit.id)===group.id);
-    const index=owner?.members?.findIndex(member=>ownership.primarySimIds.has(member.id))??-1;
+    const index=owner?.members?.findIndex(member=>anchorIds.has(member.id))??-1;
     if(index===0)group.rightLoad=1;
     if(index===1)group.leftLoad=1;
   });
@@ -4934,6 +4948,21 @@ function orientHorizontalPairUnitsByLineage(
 
     const [leftMember, rightMember] =
       unit.members;
+
+    // 預設向外排列應以玩家選中的家庭為準，
+    // 不能讓整個 EA 血緣 core 的每個人都變成另一個「中心」。
+    const anchorMembers=unit.members.filter(member=>
+      ownership?.anchorSimIds?.has(member.id));
+    if(anchorMembers.length===1){
+      const branchSide=ownership.primarySideByUnit?.get(unit.id)||1;
+      const anchorShouldBeLeft=branchSide>=0;
+      const anchorIsLeft=leftMember.id===anchorMembers[0].id;
+      if(anchorIsLeft!==anchorShouldBeLeft){
+        unit.members.reverse();
+        changed=true;
+      }
+      return;
+    }
 
     // ========【主家族配偶方向】 設定 - 外部配偶永遠朝主家族外側 ========
     if (
