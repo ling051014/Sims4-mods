@@ -4729,25 +4729,39 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
       [...genealogyUnitHouseholds(model.unitById.get(other))].some(h=>household.has(h)));
     if(owner)attached.set(id,{anchor:attached.get(owner)?.anchor||owner,tier:0,ownerUnit:null});
   });
-  const sideForAttachment=item=>{
-    const unit=item.ownerUnit;
-    if(unit?.members?.length===2){
-      const i=unit.members.findIndex(member=>ownership.primarySimIds.has(member.id));
-      // 主家系已有水平配偶時，前任優先往相反側展開。
-      if(i===0)return -1;
-      if(i===1)return 1;
-    }
-    const side=unit?ownership.primarySideByUnit?.get(unit.id)||0:0;
-    if(side)return side;
-    return item.tier>=430?-1:1;
-  };
-  const groups=new Map(base.map(id=>[id,{id,left:[],right:[]}])); 
-  attached.forEach((item,id)=>{
-    const group=groups.get(item.anchor);
-    if(!group||item.anchor===id)return;
-    groups.delete(id);
-    group[sideForAttachment(item)<0?'left':'right'].push({id,tier:item.tier});
+  const groups=new Map(base.map(id=>[id,{id,left:[],right:[],leftLoad:0,rightLoad:0}]));
+  // 水平配對已佔一側；前任靠另一側，其他關係再往兩邊依序擴展。
+  groups.forEach(group=>{
+    const owner=model.units.find(unit=>unit.members?.length===2 &&
+      unit.members.some(member=>ownership.primarySimIds.has(member.id)) &&
+      rootForUnit(unit.id)===group.id);
+    const index=owner?.members?.findIndex(member=>ownership.primarySimIds.has(member.id))??-1;
+    if(index===0)group.rightLoad=1;
+    if(index===1)group.leftLoad=1;
   });
+  [...attached.entries()]
+    .sort((a,b)=>(b[1].tier||0)-(a[1].tier||0)||
+      (index.get(a[0])||0)-(index.get(b[0])||0))
+    .forEach(([id,item])=>{
+      const group=groups.get(item.anchor);
+      if(!group||item.anchor===id)return;
+      groups.delete(id);
+      const ownerSide=item.ownerUnit?
+        ownership.primarySideByUnit?.get(item.ownerUnit.id)||0:0;
+      let side;
+      if(item.tier>=430){
+        // 若已有現任配偶，前任先使用另一側；否則兩邊輪流配置。
+        side=group.rightLoad>group.leftLoad?-1:
+          group.leftLoad>group.rightLoad?1:-1;
+      }else if(ownerSide && group.leftLoad===group.rightLoad){
+        side=ownerSide;
+      }else{
+        side=group.leftLoad<=group.rightLoad?-1:1;
+      }
+      group[side<0?'left':'right'].push({id,tier:item.tier});
+      if(side<0)group.leftLoad++;
+      else group.rightLoad++;
+    });
   const originalRoots=[...groups.keys()];
   const householdBuckets=new Map();
   originalRoots.forEach(id=>{
