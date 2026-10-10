@@ -212,8 +212,10 @@ const KINSHIP_SYSTEM_LABELS = Object.freeze([
   '本人',
   '父親','母親','父母',
   '養父','養母','養親',
+  '繼父','繼母','繼親',
   '兒子','女兒','子女',
   '養子','養女','養子女',
+  '私生子','私生女','私生子女','繼子','繼女','繼子女',
   '丈夫','妻子','配偶',
   '前夫','前妻','前任配偶',
   '哥哥','姐姐','弟弟','妹妹','兄弟','姊妹','兄弟姊妹',
@@ -4733,6 +4735,17 @@ function siblingKinshipLabel(
   return '兄弟姊妹';
 }
 
+
+function familyDerivedChildTitle(child, db = currentGenealogyData()) {
+  return window.L1nGGenealogyKinship?.childKinshipLabel(child,db?.sims,db?.links) || '';
+}
+function familyStepParentTitle(sim) {
+  return genderedKinship(sim,'繼父','繼母','繼親');
+}
+function familyStepChildTitle(sim) {
+  return genderedKinship(sim,'繼子','繼女','繼子女');
+}
+
 function directFamilyKinshipLabel(
   role,
   target,
@@ -4758,6 +4771,11 @@ function directFamilyKinshipLabel(
   }
 
   if (role === 'child') {
+    if (kind !== 'adoptive' && perspective && target &&
+        !isBuiltinSampleFamily(perspective) && !Array.isArray(perspective)) {
+      const inferred = familyDerivedChildTitle(target);
+      if (inferred) return inferred;
+    }
     return kind === 'adoptive'
       ? genderedKinship(
           target,
@@ -4772,6 +4790,9 @@ function directFamilyKinshipLabel(
           '子女'
         );
   }
+
+  if (role === 'step-parent') return familyStepParentTitle(target);
+  if (role === 'step-child') return familyStepChildTitle(target);
 
   if (role === 'spouse') {
     return genderedKinship(
@@ -4818,6 +4839,8 @@ function resolveDirectFamilyRelationships(
     exSpouses:[],
     children:[],
     siblings:[],
+    stepParents:[],
+    stepChildren:[],
     all:[]
   };
 
@@ -4921,6 +4944,14 @@ function resolveDirectFamilyRelationships(
       )
       .filter(Boolean);
 
+  const kinship = window.L1nGGenealogyKinship;
+  const stepParents = (kinship?.stepParentIds(subject,currentGenealogyData().sims) || [])
+    .map(targetId => makeEntry('step-parent',targetId,{source:'derived',editable:false}))
+    .filter(Boolean);
+  const stepChildren = (kinship?.stepChildIds(subject,currentGenealogyData().sims) || [])
+    .map(targetId => makeEntry('step-child',targetId,{source:'derived',editable:false}))
+    .filter(Boolean);
+
   const siblings =
     resolveSiblingRelationships(id)
       .map(relation =>
@@ -4949,7 +4980,11 @@ function resolveDirectFamilyRelationships(
     exSpouses,
     children,
     siblings,
+    stepParents,
+    stepChildren,
     all:[
+      ...stepParents,
+      ...stepChildren,
       ...parents,
       ...spouses,
       ...exSpouses,
