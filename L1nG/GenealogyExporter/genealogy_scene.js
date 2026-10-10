@@ -6172,7 +6172,7 @@ function alignDirectParentChildGroups(
 // ========【父母／子女中心】 設定 - 分支寬度用於保留空間，親子錨點才是置中依據 ========
     // ========【整組子孫置中】 設定 - 父母受鄰卡限制時，平移完整子孫區塊 ========
 function translateFamilyDescendants(layers, model, ownership, group, delta, parentGeneration, gap) {
-  if (!Number.isFinite(delta) || Math.abs(delta) < 0.75) return false;
+  if (!ownership || !Number.isFinite(delta) || Math.abs(delta) < 0.75) return false;
   const movedIds = new Set();
   const queue = group.children
     .map(id => model.unitBySim.get(id))
