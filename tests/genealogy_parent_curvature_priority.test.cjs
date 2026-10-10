@@ -51,13 +51,13 @@ test('人物順序顛倒仍往上彎，不會因路徑方向而變成向下凹',
 test('自動預設計算最低安全百分比，且與玩家值分離',()=>{
  const clear=functions.relationshipRecommendedCurveAmount(A.anchor,B.anchor,[]);
  const blocked=functions.relationshipRecommendedCurveAmount(
-  A.anchor,B.anchor,[{left:150,right:250,top:-40,bottom:40}]
+  A.anchor,B.anchor,[{left:150,right:250,top:-90,bottom:40}]
  );
- assert.equal(clear,10);
+ assert.equal(clear,50);
  assert.ok(blocked>clear,'阻擋卡片的預設弧度必須比無阻擋時更大');
  const curve=functions.relationshipArcCandidate(A.anchor,B.anchor,
   functions.relationshipCurveAmplitude(A.anchor,B.anchor,blocked),-1);
- assert.equal(functions.relationshipCubicClear(curve,[{left:150,right:250,top:-40,bottom:40}]),true);
+ assert.equal(functions.relationshipCubicClear(curve,[{left:150,right:250,top:-90,bottom:40}]),true);
 });
 test('情人的子女只從現有情人關係線接出，不重畫父母橫橋',()=>{
  const body=extract('function parentConnectorSource(','function parentConnectorChildAnchor(');
@@ -101,8 +101,8 @@ test('視覺設定顯示安全預設、手動後標記來源並優先使用玩�
  assert.match(app,/genealogyScene\?\.recommendedOtherCurveAmount\?\.\(activeOtherRelationshipType\)/);
  assert.match(app,/setting\.curveAmountManual = true/);
  assert.match(app,/if \(!normalized\.curveAmountManual\)/);
- assert.match(scene,/if\(setting\.curveAmountManual===true\|\|relationshipCubicClear/);
+ assert.match(scene,/if\(setting\.curveAmountManual===true\)return relationshipCubicGeometry\(segments\)/);
  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
- assert.match(html,/genealogy_scene\.js\?v=20261011-shared-co-parent-layout-r7/);
+ assert.match(html,/genealogy_scene\.js\?v=20261011-family-block-architecture-r8/);
  assert.match(html,/genealogy_app\.js\?v=20261011-player-curve-priority-r6/);
 });
