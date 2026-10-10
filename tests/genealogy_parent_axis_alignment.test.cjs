@@ -9,7 +9,7 @@ const scene = fs.readFileSync(
   path.join(__dirname, '../L1nG/GenealogyExporter/genealogy_scene.js'),
   'utf8'
 );
-const start = scene.indexOf('function alignFamilyBranchParentAxes(');
+const start = scene.indexOf('function translateFamilyDescendants(');
 const end = scene.indexOf('function solveAutomaticGenealogyPositions(', start);
 assert.ok(start >= 0 && end > start, '自動排列必須保留父母／子女錨點校正');
 assert.match(
