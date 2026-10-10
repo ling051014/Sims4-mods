@@ -548,12 +548,15 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
 .feature-grid {
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(6,minmax(0,1fr));
     gap:14px;
 }
 
-@media (max-width:1120px) and (min-width:981px) {
-    .feature-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+/* 電腦版每排三張同寬卡片，最後兩張研究中卡片置中排列。 */
+@media (min-width:981px) {
+    .feature-card { grid-column:span 2; }
+    .feature-card:nth-child(7) { grid-column:2 / span 2; }
+    .feature-card:nth-child(8) { grid-column:4 / span 2; }
 }
 
 .feature-card {
