@@ -1949,16 +1949,8 @@ function relationshipQuadraticGeometry(
   const normalY =
     dx / distance;
 
-  const bend =
-    distance *
-    relationshipCurveFactor(
-      curveAmount
-    ) *
-    (
-      direction < 0
-        ? -1
-        : 1
-    );
+  const bend = Math.min(36,distance * relationshipCurveFactor(curveAmount)) *
+    (direction < 0 ? -1 : 1);
 
   const cx =
     (x1 + x2) / 2 +
@@ -2053,116 +2045,136 @@ function relationshipPairRenderGeometry(
   );
 }
 
-    // ========【情人／其他關係避障】 設定 - 曲線必須真正繞過卡片，而非僅略微彎曲 ========
-function relationshipAvoidingCardGeometry(x1, y1, x2, y2, amount, preferredDirection, blocker) {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const distance = Math.max(1, Math.hypot(dx, dy));
-  const normalX = -dy / distance;
-  const normalY = dx / distance;
-  const rect = blocker.rect;
-  const clearance = 9;
-  const bounds = {
-    left:rect.left - clearance,
-    right:rect.right + clearance,
-    top:rect.top - clearance,
-    bottom:rect.bottom + clearance
-  };
-  const baseBend = Math.max(
-    distance * relationshipCurveFactor(amount),
-    Math.min(distance * 2.5, Math.max(bounds.right - bounds.left, bounds.bottom - bounds.top) * 1.35)
-  );
-  const create = (bend, direction) => {
-    const cx = (x1 + x2) / 2 + normalX * bend * direction;
-    const cy = (y1 + y2) / 2 + normalY * bend * direction;
-    return {
-      d:'M' + x1 + ' ' + y1 + ' Q' + cx + ' ' + cy + ' ' + x2 + ' ' + y2,
-      labelX:0.25 * x1 + 0.5 * cx + 0.25 * x2,
-      labelY:0.25 * y1 + 0.5 * cy + 0.25 * y2,
-      cx, cy
-    };
-  };
-  const intersects = path => {
-    // 取樣的是實際二次曲線，不只檢查兩個端點的直線。
-    for (let step = 1; step < 40; step++) {
-      const t = step / 40;
-      const u = 1 - t;
-      const x = u*u*x1 + 2*u*t*path.cx + t*t*x2;
-      const y = u*u*y1 + 2*u*t*path.cy + t*t*y2;
-      if (x >= bounds.left && x <= bounds.right &&
-          y >= bounds.top && y <= bounds.bottom) return true;
-    }
-    return false;
-  };
-  let fallback = null;
-  for (const direction of [preferredDirection, -preferredDirection]) {
-    for (const factor of [1, 1.5, 2, 3, 4, 6]) {
-      const candidate = create(baseBend * factor, direction);
-      if (!fallback) fallback = candidate;
-      if (!intersects(candidate)) return candidate;
-    }
-  }
-  return fallback;
+// ========【其他關係線避障】 設定 - 統一遵守視覺設定，尋找最短且不穿越卡片的路徑 ========
+function relationshipRouteRects(context,start,end) {
+  if(!context?.pos)return [];
+  const excluded=new Set([String(context.fromId||''),String(context.toId||'')]);
+  const result=[];
+  context.pos.forEach((position,id)=>{
+    if(!position||excluded.has(String(id)))return;
+    const rect=context.geometry?.rects?.get(String(id))||cardOuterRect(position);
+    if(rect.right<Math.min(start.x,end.x)-230||rect.left>Math.max(start.x,end.x)+230||
+       rect.bottom<Math.min(start.y,end.y)-260||rect.top>Math.max(start.y,end.y)+260)return;
+    result.push(rect);
+  });
+  return result;
 }
 
-function relationshipOtherRenderGeometry(
-  a,
-  b,
-  setting,
-  routeContext = null
-) {
-  const fromAnchor =
-    avatarBoundaryAnchor(a, b);
+function relationshipSegmentsClear(points,rects) {
+  return points.every((point,i)=>i===0||!rects.some(rect=>
+    relationshipSegmentIntersectsRect(points[i-1].x,points[i-1].y,point.x,point.y,rect,9)));
+}
 
-  const toAnchor =
-    avatarBoundaryAnchor(b, a);
-
-  const x1 =
-    fromAnchor.x;
-
-  const y1 =
-    fromAnchor.y;
-
-  const x2 =
-    toAnchor.x;
-
-  const y2 =
-    toAnchor.y;
-
-  const blocker =
-    relationshipBlockingCard(
-      routeContext,
-      x1,
-      y1,
-      x2,
-      y2
-    );
-
-  const useCurve =
-    setting.routing === 'manual'
-      ? !!setting.curved
-      : !!blocker;
-
-  if (useCurve) {
-    const direction = relationshipCurveDirection(
-      blocker, x1, y1, x2, y2
-    );
-    return blocker && setting.routing !== 'manual'
-      ? relationshipAvoidingCardGeometry(
-          x1, y1, x2, y2, setting.curveAmount, direction, blocker
-        )
-      : relationshipQuadraticGeometry(
-          x1, y1, x2, y2, setting.curveAmount, direction
-        );
+function relationshipOrthogonalRoute(start,end,rects) {
+  if(relationshipSegmentsClear([start,end],rects))return [start,end];
+  const xValues=new Set([start.x,end.x]),yValues=new Set([start.y,end.y]);
+  rects.forEach(rect=>{
+    xValues.add(rect.left-15);xValues.add(rect.right+15);
+    yValues.add(rect.top-15);yValues.add(rect.bottom+15);
+  });
+  const X=[...xValues].sort((a,b)=>a-b),Y=[...yValues].sort((a,b)=>a-b);
+  const nx=X.length,ny=Y.length,index=(x,y)=>y*nx+x;
+  const source=index(X.indexOf(start.x),Y.indexOf(start.y));
+  const target=index(X.indexOf(end.x),Y.indexOf(end.y));
+  const valid=new Uint8Array(nx*ny);
+  for(let y=0;y<ny;y++)for(let x=0;x<nx;x++)valid[index(x,y)]=rects.some(r=>
+    X[x]>r.left-9&&X[x]<r.right+9&&Y[y]>r.top-9&&Y[y]<r.bottom+9)?0:1;
+  valid[source]=1;valid[target]=1;
+  const distances=new Map([[source*3+2,0]]),prev=new Map(),open=[{key:source*3+2,dist:0}];
+  let last=null;
+  while(open.length){
+    // 一般畫布只需要繞過少數卡片；不掃描整個族譜做多輪全域排列。
+    open.sort((a,b)=>b.dist-a.dist);
+    const next=open.pop();
+    if(next.dist!==distances.get(next.key))continue;
+    const current=Math.floor(next.key/3),direction=next.key%3;
+    if(current===target){last=next.key;break;}
+    const x=current%nx,y=Math.floor(current/nx);
+    for(const [xx,yy,axis] of [[x-1,y,0],[x+1,y,0],[x,y-1,1],[x,y+1,1]]){
+      if(xx<0||xx>=nx||yy<0||yy>=ny)continue;
+      const adjacent=index(xx,yy);
+      if(!valid[adjacent])continue;
+      const p={x:X[x],y:Y[y]},q={x:X[xx],y:Y[yy]};
+      if(!relationshipSegmentsClear([p,q],rects))continue;
+      const cost=next.dist+Math.hypot(p.x-q.x,p.y-q.y)+(direction!==2&&direction!==axis?16:0);
+      const key=adjacent*3+axis;
+      if(cost>=(distances.get(key)??Infinity))continue;
+      distances.set(key,cost);prev.set(key,next.key);open.push({key,dist:cost});
+    }
   }
+  if(last===null)return null;
+  const route=[];
+  for(let key=last;key!==undefined;key=prev.get(key)){
+    const n=Math.floor(key/3);
+    route.push({x:X[n%nx],y:Y[Math.floor(n/nx)]});
+  }
+  route.reverse();
+  const simplified=[];
+  route.forEach(point=>{
+    while(simplified.length>=2){
+      const p=simplified[simplified.length-2],q=simplified[simplified.length-1];
+      if((p.x===q.x&&q.x===point.x)||(p.y===q.y&&q.y===point.y))simplified.pop();
+      else break;
+    }
+    simplified.push(point);
+  });
+  return simplified;
+}
 
-  return {
-    d:
-      'M' + x1 + ' ' + y1 +
-      ' L' + x2 + ' ' + y2,
-    labelX:(x1 + x2) / 2,
-    labelY:(y1 + y2) / 2
-  };
+function relationshipRoundedRoute(points,curved,amount) {
+  let path='M'+points[0].x+' '+points[0].y;
+  const cornerRadius=4+clampRelationshipCurveAmount(amount)*0.12;
+  for(let i=1;i<points.length-1;i++){
+    const prev=points[i-1],point=points[i],next=points[i+1];
+    const before=Math.hypot(prev.x-point.x,prev.y-point.y);
+    const after=Math.hypot(next.x-point.x,next.y-point.y);
+    if(!curved||before<3||after<3){
+      path+=' L'+point.x+' '+point.y;continue;
+    }
+    const radius=Math.min(cornerRadius,before/3,after/3);
+    const entry={x:point.x+(prev.x-point.x)*radius/before,y:point.y+(prev.y-point.y)*radius/before};
+    const exit={x:point.x+(next.x-point.x)*radius/after,y:point.y+(next.y-point.y)*radius/after};
+    path+=' L'+entry.x+' '+entry.y+' Q'+point.x+' '+point.y+' '+exit.x+' '+exit.y;
+  }
+  const last=points[points.length-1];path+=' L'+last.x+' '+last.y;
+  const lengths=points.slice(1).map((point,i)=>Math.hypot(point.x-points[i].x,point.y-points[i].y));
+  const halfway=lengths.reduce((sum,n)=>sum+n,0)/2;
+  let sum=0,labelX=last.x,labelY=last.y;
+  for(let i=0;i<lengths.length;i++){
+    if(sum+lengths[i]>=halfway){
+      const t=lengths[i]?(halfway-sum)/lengths[i]:0;
+      labelX=points[i].x+(points[i+1].x-points[i].x)*t;
+      labelY=points[i].y+(points[i+1].y-points[i].y)*t;
+      break;
+    }
+    sum+=lengths[i];
+  }
+  return {d:path,labelX,labelY};
+}
+
+function relationshipOtherRenderGeometry(a,b,setting,context=null) {
+  const from=avatarBoundaryAnchor(a,b),to=avatarBoundaryAnchor(b,a);
+  const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
+  const rects=relationshipRouteRects(context,start,end);
+  const points=relationshipOrthogonalRoute(start,end,rects);
+  if(points){
+    if(points.length>2)return relationshipRoundedRoute(points,!!setting.curved,setting.curveAmount);
+    if(!setting.curved)return relationshipRoundedRoute(points,false,setting.curveAmount);
+    const curve=relationshipQuadraticGeometry(start.x,start.y,end.x,end.y,setting.curveAmount,1);
+    const touches=rects.some(rect=>{
+      for(let step=1;step<40;step++){
+        const t=step/40,u=1-t;
+        const x=u*u*start.x+2*u*t*curve.cx+t*t*end.x;
+        const y=u*u*start.y+2*u*t*curve.cy+t*t*end.y;
+        if(x>=rect.left-6&&x<=rect.right+6&&y>=rect.top-6&&y<=rect.bottom+6)return true;
+      }
+      return false;
+    });
+    return touches?relationshipRoundedRoute(points,false,setting.curveAmount):curve;
+  }
+  // 無安全避障路徑時仍維持基本連線，不產生倍增曲率的大拱橋。
+  return {d:'M'+start.x+' '+start.y+' L'+end.x+' '+end.y,
+    labelX:(start.x+end.x)/2,labelY:(start.y+end.y)/2};
 }
 
 function drawPerspectiveKinshipLabels(
