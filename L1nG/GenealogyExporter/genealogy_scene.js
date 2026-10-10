@@ -4674,6 +4674,7 @@ function genealogyAttachmentPriority(unit,ownerId,model) {
 // 家系根區塊同時受血緣、共同父母與社交優先級約束；同一人物仍只有一個 unit。
 // 血緣根排序只處理實際跨根的親子與同家庭連接；
 // 不以情人／一般社交關係強制重排整張原本正常的族譜。
+// 血緣與家庭群組不拆分；配偶、前任及情人只能在完整根區塊外側排序。
 function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
   const requested=new Set(ids);
   const roots=[...new Set([
@@ -4683,13 +4684,18 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
     .sort((a,b)=>compareFamilyBranchPath(
       ownership.pathByUnit.get(a),ownership.pathByUnit.get(b)
     )||stableGenealogyUnitCompare(model.unitById.get(a),model.unitById.get(b)));
+  const index=new Map(roots.map((id,i)=>[id,i]));
   const parent=new Map(roots.map(id=>[id,id]));
   const rootOf=id=>ownership.rootByUnit?.get(id)||id;
+  const rootForSim=id=>{
+    const unit=model.unitBySim.get(String(id));
+    return unit?rootOf(unit.id):null;
+  };
   const find=id=>{
-    const p=parent.get(id);
-    if(!p)return null;
-    if(p===id)return id;
-    const root=find(p);
+    const value=parent.get(id);
+    if(!value)return null;
+    if(value===id)return id;
+    const root=find(value);
     parent.set(id,root);
     return root;
   };
@@ -4698,7 +4704,9 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
     if(!left||!right||left===right)return;
     parent.set(right,left);
   };
-  // 只有真正連到同一組子女的兩個血緣根才合併相鄰區塊。
+
+  // 這裡只合併真正有親子連接、或後代同一個居住家庭的根。
+  // 一般社交關係只影響相鄰次序，不能把整個祖先家系合併或拉走。
   (model.parentGroups||[]).forEach(group=>{
     const linked=[...new Set([
       ...(group.parentUnitIds||[]),
@@ -4706,27 +4714,83 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
     ].map(rootOf))].filter(id=>parent.has(id));
     linked.slice(1).forEach(id=>merge(linked[0],id));
   });
-  // 已故祖先可能沒有 householdId：從整個分支的後代收集相同家庭。
   const firstByHousehold=new Map();
   model.units.forEach(unit=>{
     const root=rootOf(unit.id);
     if(!parent.has(root))return;
     genealogyUnitHouseholds(unit).forEach(householdId=>{
-      if(firstByHousehold.has(householdId))
-        merge(firstByHousehold.get(householdId),root);
+      if(firstByHousehold.has(householdId))merge(firstByHousehold.get(householdId),root);
       else firstByHousehold.set(householdId,root);
     });
   });
-  const groups=new Map();
+  const components=new Map();
   roots.forEach(root=>{
-    const component=find(root);
-    if(!groups.has(component))groups.set(component,[]);
-    groups.get(component).push(root);
+    const id=find(root);
+    if(!components.has(id))components.set(id,{id,roots:[],left:[],right:[],
+      leftLoad:0,rightLoad:0,anchor:false});
+    components.get(id).roots.push(root);
   });
-  // 群組內保留原本的父母／子女相對順序；僅消除外人插在兩條血緣根之間。
-  const sorted=[...groups.values()].sort((a,b)=>
-    roots.indexOf(a[0])-roots.indexOf(b[0]));
-  return sorted.flat().filter(id=>requested.has(id));
+  const anchors=ownership.anchorSimIds?.size
+    ?ownership.anchorSimIds:ownership.primarySimIds||new Set();
+  anchors.forEach(simId=>{
+    const id=find(rootForSim(simId));
+    if(id&&components.has(id))components.get(id).anchor=true;
+  });
+  const attached=new Map();
+  const pairLinks=(model.pairCandidates||[]).map(pair=>({
+    a:find(rootForSim(pair.a)),b:find(rootForSim(pair.b)),
+    tier:pair.adjacencyTier||0,score:pair.score||0
+  })).filter(pair=>pair.a&&pair.b&&pair.a!==pair.b)
+    .sort((a,b)=>b.tier-a.tier||b.score-a.score||
+      (index.get(components.get(a.a)?.roots[0])??0)-
+      (index.get(components.get(b.a)?.roots[0])??0));
+
+  // 已佔據的現任配偶方向先計入；前任貼近人物，其餘關係往外排。
+  components.forEach(component=>{
+    const pair=model.units.find(unit=>unit.members?.length===2 &&
+      unit.members.some(member=>anchors.has(member.id)) &&
+      find(rootOf(unit.id))===component.id);
+    const primaryIndex=pair?.members.findIndex(member=>anchors.has(member.id))??-1;
+    if(primaryIndex===0)component.rightLoad=1;
+    else if(primaryIndex===1)component.leftLoad=1;
+  });
+  for(let pass=0;pass<components.size;pass++){
+    let change=false;
+    pairLinks.forEach(pair=>{
+      const left=components.get(pair.a),right=components.get(pair.b);
+      if(!left||!right||left===right)return;
+      const activeA=left.anchor||attached.has(left.id);
+      const activeB=right.anchor||attached.has(right.id);
+      if(activeA===activeB)return;
+      const owner=activeA?left:right;
+      const child=activeA?right:left;
+      if(child.anchor||attached.has(child.id))return;
+      const homeId=attached.get(owner.id)?.home||owner.id;
+      const home=components.get(homeId);
+      if(!home)return;
+      const side=home.rightLoad>home.leftLoad?-1:
+        home.leftLoad>home.rightLoad?1:-1;
+      home[side<0?'left':'right'].push({id:child.id,tier:pair.tier});
+      if(side<0)home.leftLoad+=child.roots.length;
+      else home.rightLoad+=child.roots.length;
+      attached.set(child.id,{home:homeId});
+      change=true;
+    });
+    if(!change)break;
+  }
+
+  const rendered=[];
+  const sorted=[...components.values()].sort((a,b)=>
+    (index.get(a.roots[0])??0)-(index.get(b.roots[0])??0));
+  sorted.forEach(group=>{
+    if(attached.has(group.id))return;
+    group.left.sort((a,b)=>a.tier-b.tier);
+    group.right.sort((a,b)=>b.tier-a.tier);
+    group.left.forEach(item=>rendered.push(...components.get(item.id).roots));
+    rendered.push(...group.roots);
+    group.right.forEach(item=>rendered.push(...components.get(item.id).roots));
+  });
+  return rendered.filter(id=>requested.has(id));
 }
 
 function applyFamilyBranchOrdering(layers,model,ownership) {
