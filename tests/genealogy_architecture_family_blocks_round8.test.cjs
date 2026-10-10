@@ -13,11 +13,11 @@ const rank=vm.runInNewContext(between('function genealogyOrderRootFamilyBlocks('
   stableGenealogyUnitCompare:(a,b)=>(a?.sequence??99)-(b?.sequence??99)
 });
 const U=(id,i,h)=>({id:'unit:'+id,sequence:i,members:[{id,gameData:h?{householdId:h}:{}}],width:90,x:i*160,generation:0,y:0});
-function roots(units,pairs=[],active=['A']){
+function roots(units,pairs=[],active=['A'],anchors=null){
   const keys=units.map(u=>u.id);
   return [...rank(keys,{units,unitById:new Map(units.map(u=>[u.id,u])),
     unitBySim:new Map(units.flatMap(u=>u.members.map(m=>[m.id,u]))),pairCandidates:pairs},
-    {primarySimIds:new Set(active),rootByUnit:new Map(keys.map(id=>[id,id])),
+    {primarySimIds:new Set(active),anchorSimIds:anchors?new Set(anchors):null,rootByUnit:new Map(keys.map(id=>[id,id])),
     pathByUnit:new Map(keys.map((id,i)=>[id,[i]])),primarySideByUnit:new Map()})];
 }
 test('前任在主家系旁、情人向兩側外擴、其他家系不穿插',()=>{
@@ -28,6 +28,24 @@ test('前任在主家系旁、情人向兩側外擴、其他家系不穿插',()=
     {a:'A',b:'D',adjacencyTier:250,score:100},
     {a:'A',b:'E',adjacencyTier:250,score:90}
   ]),['unit:D','unit:B','unit:A','unit:E','unit:F']);
+});
+test('擴張 EA 族譜把前任算進血緣 core，仍只以選中家庭為排列中心',()=>{
+  const a=U('A',0),b=U('B',1),d=U('D',2);
+  a.members.push({id:'C',gameData:{}});a.width=220;
+  assert.deepEqual(roots([a,b,d],[
+    {a:'A',b:'B',adjacencyTier:440,score:220},
+    {a:'A',b:'D',adjacencyTier:250,score:100}
+  ],['A','B','D'],['A']),['unit:D','unit:B','unit:A']);
+});
+test('主要家庭有一位成員與外部配偶成對，配偶朝所在家系外側',()=>{
+  const source=between('function orientHorizontalPairUnitsByLineage(','function setGenerationVerticalPositions(');
+  const fn=vm.runInNewContext(source+'\norientHorizontalPairUnitsByLineage;',{});
+  const couple={id:'pair',members:[{id:'outside'},{id:'anchor'}]};
+  const changed=fn({units:[couple]},[],{
+    anchorSimIds:new Set(['anchor']),primarySideByUnit:new Map([['pair',1]])
+  });
+  assert.equal(changed,true);
+  assert.deepEqual(couple.members.map(s=>s.id),['anchor','outside']);
 });
 test('同住的不同血緣根區塊依然相鄰',()=>{
   assert.deepEqual(roots([U('a',0,'H1'),U('b',1,'H2'),U('c',2,'H1')],[],['a','b','c']),
