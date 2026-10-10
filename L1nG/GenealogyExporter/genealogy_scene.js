@@ -2144,7 +2144,7 @@ function relationshipStraightRoute(points) {
   const label=relationshipRouteLabelPoint(points);
   return {
     d:points.map((p,i)=>(i?' L':'M')+p.x+' '+p.y).join(''),
-    labelX:label.x,labelY:label.y
+    labelX:label.x,labelY:label.y,points
   };
 }
 
@@ -2207,7 +2207,7 @@ function relationshipCubicGeometry(segments) {
     }
     walked+=lengths[i];
   }
-  return {d:d.join(' '),labelX:label.x,labelY:label.y};
+  return {d:d.join(' '),labelX:label.x,labelY:label.y,segments};
 }
 
 function relationshipArcCandidate(start,end,amplitude,sign) {
@@ -7347,6 +7347,78 @@ function inferCoParentRelationshipLinks(parentGroups, byId, existingLinks = gene
   return inferred;
 }
 
+// ========【共同父母連線】 單一關係線同時服務「情人」與親子主幹 ========
+function genealogyNonSpousalCoParentLink(group,byId) {
+  if (!group || group.parentIds?.length !== 2) return null;
+  const [a,b]=group.parentIds.map(String);
+  const first=byId.get(a),second=byId.get(b);
+  if(!first||!second)return null;
+  const hasPartner=(sim,id)=>(sim.spouseIds||[]).map(String).includes(id) ||
+    (sim.exSpouseIds||[]).map(String).includes(id) ||
+    (sim.gameData?.deceasedSpouseIds||[]).map(String).includes(id);
+  if(hasPartner(first,b)||hasPartner(second,a))return null;
+  const known=(genealogyData.links||[]).find(link=>
+    link&&!isSiblingLink(link) &&
+    ((String(link.from)===a&&String(link.to)===b)||
+     (String(link.from)===b&&String(link.to)===a)) &&
+    relationshipLayoutPriority(relationshipOtherType(link))>0
+  );
+  if(known)return known;
+  return inferCoParentRelationshipLinks([group],byId)[0]||null;
+}
+
+// 使用關係線「真正畫出的 SVG 幾何」挑選接合點，不畫第二條伴侶線。
+function genealogyCoParentRelationshipJunction(group,pos,byId,link) {
+  const a=pos.get(String(link.from)),b=pos.get(String(link.to));
+  if(!a||!b)return null;
+  const setting=getOtherRelationshipLineSetting(relationshipOtherType(link));
+  const context={pos,byId,fromId:link.from,toId:link.to};
+  const geometry=relationshipOtherRenderGeometry(a,b,setting,context);
+  const positions=group.children.map(id=>pos.get(id)).filter(Boolean);
+  if(!positions.length)return null;
+  const childAnchors=positions.map(card=>cardVerticalAnchor(card,'top'));
+  const centerX=(Math.min(...childAnchors.map(p=>p.x))+
+    Math.max(...childAnchors.map(p=>p.x)))/2;
+  const childTop=Math.min(...childAnchors.map(p=>p.y));
+  const samples=[];
+  if(geometry.segments?.length){
+    geometry.segments.forEach((segment,index)=>{
+      for(let step=1;step<30;step++){
+        const point=relationshipCubicAt(segment,step/30);
+        samples.push({...point});
+      }
+    });
+  }else if(geometry.points?.length>1){
+    for(let i=1;i<geometry.points.length;i++){
+      const first=geometry.points[i-1],second=geometry.points[i];
+      for(let step=1;step<30;step++){
+        const t=step/30;
+        samples.push({x:first.x+(second.x-first.x)*t,
+          y:first.y+(second.y-first.y)*t});
+      }
+    }
+  }
+  if(!samples.length)return null;
+  const obstacles=[];
+  pos.forEach((card,id)=>{
+    if(group.children.includes(String(id)))return;
+    obstacles.push(cardOuterRect(card));
+  });
+  // 優先不穿卡片，並盡量靠近目前子女群的中心。
+  const feasible=samples.filter(p=>p.y<childTop-12&&
+    !obstacles.some(rect=>relationshipSegmentIntersectsRect(
+      p.x,p.y,p.x,childTop,rect,5
+    )));
+  const choices=feasible.length?feasible:samples;
+  choices.sort((left,right)=>
+    Math.abs(left.x-centerX)-Math.abs(right.x-centerX) ||
+    right.y-left.y
+  );
+  const point=choices[0];
+  return {x:point.x,y:point.y};
+}
+
+
 function parentConnectorSource(
   group,
   pos,
@@ -7374,83 +7446,23 @@ function parentConnectorSource(
   const firstSim = first.sim;
   const secondId = second.id;
 
-  const pairLink =
-    (genealogyData.links || [])
-      .find(link =>
-        link &&
-        !isSiblingLink(link) &&
-        (
-          (
-            String(link.from) ===
-              String(first.id) &&
-            String(link.to) ===
-              String(second.id)
-          ) ||
-          (
-            String(link.from) ===
-              String(second.id) &&
-            String(link.to) ===
-              String(first.id)
-          )
-        ) &&
-        relationshipLayoutPriority(
-          relationshipOtherType(
-            link
-          )
-        ) > 0
-      );
-
-  const recordedPartner = (firstSim.spouseIds || [])
-    .map(String).includes(String(secondId)) ||
+  // ========【共同父母共享連接點】 情人與配偶一樣從現有關係線接出子女 ========
+  const recordedPartner = (firstSim.spouseIds || []).map(String).includes(String(secondId)) ||
     (firstSim.exSpouseIds || []).map(String).includes(String(secondId)) ||
     (firstSim.gameData?.deceasedSpouseIds || []).map(String).includes(String(secondId));
 
-  const pairType = pairLink ? relationshipOtherType(pairLink) : '';
-  const hasVisibleHorizontalRelation = recordedPartner ||
-    (pairLink && (pairType === '訂婚' || pairType === '伴侶'));
-
-  if (hasVisibleHorizontalRelation) {
-    // 真正共享水平伴侶連線的父母，可以從該連線中點接出親子主幹。
-    return pairJoinPoint(first.pos, second.pos);
+  if(recordedPartner){
+    return pairJoinPoint(first.pos,second.pos);
   }
 
-  const inferred = inferCoParentRelationshipLinks([group], byId);
-  const independentCoParents = inferred.length || !!pairLink;
-  if (independentCoParents) {
-    // 情人等非配偶的兩名親生父母都必須保留血緣線。
-    // 由兩位父母各自向下匯入子女的共同主幹，不重新畫第二條伴侶橫線。
-    const parentAnchors = [first, second].map(item =>
-      cardVerticalAnchor(item.pos, 'bottom')
+  // 這個共同父母群的關係線已經存在於畫布；從線上取點，
+  // 絕不可另外補上「父母下方的兩段橫線」。
+  const relation=genealogyNonSpousalCoParentLink(group,byId);
+  if(relation){
+    const junction=genealogyCoParentRelationshipJunction(
+      group,pos,byId,relation
     );
-    const childAnchors = group.children
-      .map(id => pos.get(id))
-      .filter(Boolean)
-      .map(item => cardVerticalAnchor(item, 'top'));
-    const childX = childAnchors.length
-      ? (Math.min(...childAnchors.map(p=>p.x)) +
-         Math.max(...childAnchors.map(p=>p.x))) / 2
-      : (parentAnchors[0].x + parentAnchors[1].x) / 2;
-    const parentBottom = Math.max(...parentAnchors.map(p=>p.y));
-    const firstChildTop = childAnchors.length
-      ? Math.min(...childAnchors.map(p=>p.y))
-      : parentBottom + 100;
-    const available = Math.max(0, firstChildTop-parentBottom);
-    const mergeY = available > 32
-      ? parentBottom + available*0.6
-      : parentBottom + 14;
-    const turns = available > 32
-      ? [parentBottom+available*0.24,parentBottom+available*0.39]
-      : [parentBottom+5,parentBottom+10];
-
-    parentAnchors.forEach((anchor,index) => {
-      const bendY = Math.max(anchor.y+2,turns[index]);
-      const d = 'M'+anchor.x+' '+anchor.y+
-        ' V'+bendY+
-        ' H'+childX+
-        ' V'+mergeY;
-      paths.push('<path class="edge edge-parent" d="'+d+'"/>');
-    });
-    return {x:childX,y:mergeY};
+    if(junction)return junction;
   }
 
   // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
