@@ -1,4 +1,4 @@
-name: Verify shared co-parent curve layout after cache refresh
+name: Verify updated co-parent branch layout geometry
 on:
   push:
     branches: [genealogy-structural-optimization-20260926]
