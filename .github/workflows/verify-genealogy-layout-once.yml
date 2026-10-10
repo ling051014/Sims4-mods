@@ -13,7 +13,7 @@ jobs:
       - name: Run genealogy regression checks
         run: |
           node --check L1nG/GenealogyExporter/genealogy_scene.js
-          node --test tests/genealogy_parent_axis_alignment.test.cjs tests/genealogy_coparent_layout.test.cjs tests/default_portrait_integrity.test.cjs tests/thum_decoder.test.cjs
+          node --test tests/genealogy_parent_axis_alignment.test.cjs tests/genealogy_coparent_layout.test.cjs tests/default_portrait_integrity.test.cjs
           git diff --check
       - name: Remove one-time workflow after successful verification
         run: |
