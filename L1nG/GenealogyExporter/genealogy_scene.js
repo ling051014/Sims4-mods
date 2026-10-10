@@ -6582,6 +6582,40 @@ function alignFamilyBranchParentAxes(layers, model, connectorGroups, ownership =
 }
 
 // ========【情人共同子女自動排列】 在真正的關係線連接點下放置完整後代區塊 ========
+// ========【家系分支安全位移】 空間不足時移到可行極限，不是整組原地不動 ========
+function genealogySafeDescendantShift(layers,model,ownership,group,delta,parentGeneration,gap) {
+  if(!Number.isFinite(delta)||Math.abs(delta)<0.75)return 0;
+  const descendants=new Set();
+  const queue=group.children.map(id=>model.unitBySim.get(id))
+    .filter(unit=>unit&&unit.generation>parentGeneration);
+  while(queue.length){
+    const unit=queue.shift();
+    if(descendants.has(unit.id))continue;
+    descendants.add(unit.id);
+    (ownership?.primaryChildren?.get(unit.id)||[]).forEach(id=>{
+      if(ownership.ownerParentByUnit?.get(id)!==unit.id)return;
+      const child=model.unitById?.get(id);
+      if(child&&child.generation>unit.generation)queue.push(child);
+    });
+  }
+  let allowed=delta;
+  for(const id of descendants){
+    const unit=model.unitById?.get(id);
+    if(!unit)continue;
+    for(const other of (layers.get(unit.generation)||[])){
+      if(descendants.has(other.id))continue;
+      if(delta>0){
+        if(other.x>=unit.x+unit.width-0.001){
+          allowed=Math.min(allowed,other.x-unit.x-unit.width-gap);
+        }
+      }else if(other.x+other.width<=unit.x+0.001){
+        allowed=Math.max(allowed,other.x+other.width+gap-unit.x);
+      }
+    }
+  }
+  return delta>0?Math.max(0,allowed):Math.min(0,allowed);
+}
+
 function alignNonSpousalCoParentBranches(layers,model,ownership,connectorGroups) {
   const {SIBLING:gap}=resolveLayoutGaps();
   // 親子關係座標由同一個 junction 函式取得，避免畫布與排列各算一套中心。
@@ -6610,9 +6644,12 @@ function alignNonSpousalCoParentBranches(layers,model,ownership,connectorGroups)
       if(!actual.length)return;
       const center=(Math.min(...actual)+Math.max(...actual))/2;
       const delta=point.x-center;
-      if(Math.abs(delta)<0.75)return;
-      if(translateFamilyDescendants(
+      const safeDelta=genealogySafeDescendantShift(
         layers,model,ownership,group,delta,parentGeneration,gap
+      );
+      if(Math.abs(safeDelta)<0.75)return;
+      if(translateFamilyDescendants(
+        layers,model,ownership,group,safeDelta,parentGeneration,gap
       ))adjusted++;
     });
   return adjusted;
