@@ -37,12 +37,12 @@ test('沒有障礙且沒有勾曲線時維持直線',()=>{
 test('有原配阻擋、曲線關閉時一定沒有曲線命令',()=>{
  const result=render(A,B,{curved:false,curveAmount:90},obstacle({left:150,right:240,top:-40,bottom:40}));
  assert.doesNotMatch(result.d,/[QC]/);
- assert.ok((result.d.match(/L/g)||[]).length>=2,'應為多段折線避開卡片');
+ assert.ok((result.d.match(/L/g)||[]).length>=2,'關閉曲線應為多段折線避開卡片');
 });
 test('有原配阻擋、曲線開啟時使用有限弧度圓角，不是巨大拱橋',()=>{
  const rect={left:150,right:240,top:-40,bottom:40};
  const result=render(A,B,{curved:true,curveAmount:100},obstacle(rect));
- assert.match(result.d,/Q/);
+ assert.match(result.d,/C/);
  const nums=[...result.d.matchAll(/[-+]?(?:\d+\.?\d*|\.\d+)/g)].map(x=>Number(x[0]));
  assert.ok(nums.every(Number.isFinite));
  assert.ok(Math.max(...nums.map(Math.abs))<600,'控制點不得無限制遠離人物');
