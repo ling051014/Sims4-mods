@@ -17182,6 +17182,15 @@ function fitCaptureToCompleteTree(captureViewport, stageWidth, stageHeight) {
   return { width, height };
 }
 
+// iPhone／iPad 的 WebKit 以 foreignObject 截圖時可能只保留卡片與 SVG，
+// 卻漏畫已成功解碼的透明 PNG 肖像；在 iOS 改用 html2canvas 逐元素繪製。
+function useSafeIosGenealogyCapture(navigatorInfo = navigator) {
+  const agent = String(navigatorInfo?.userAgent || '');
+  const platform = String(navigatorInfo?.platform || '');
+  return /iPad|iPhone|iPod/i.test(agent) ||
+    (platform === 'MacIntel' && Number(navigatorInfo?.maxTouchPoints) > 1);
+}
+
 async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'current') {
   if (!currentGenealogyData() || !stage || !viewport) throw new Error('Genealogy canvas is not ready');
 
@@ -17226,7 +17235,9 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
       scrollX: 0,
       scrollY: 0,
       useCORS: true,
-      foreignObjectRendering: true,
+      // iOS Safari 的 foreignObject 匯出常會讓頭像整批消失；
+      // 保留桌面版既有流程，只有 WebKit iOS 改走安全圖片繪製。
+      foreignObjectRendering: !useSafeIosGenealogyCapture(),
       allowTaint: false,
       imageTimeout: 15000,
       logging: false,
