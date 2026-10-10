@@ -520,6 +520,9 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     padding:100px 0 0;
 }
 
+/* 最後一個內容區與頁腳保持完整留白，不需要額外插入空白區塊。 */
+#status { padding-bottom:clamp(78px, 8vw, 112px); }
+
 .section-heading {
     max-width:790px;
     margin-bottom:38px;
@@ -545,8 +548,12 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
 .feature-grid {
     display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(4,minmax(0,1fr));
     gap:14px;
+}
+
+@media (max-width:1120px) and (min-width:981px) {
+    .feature-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
 }
 
 .feature-card {
@@ -628,7 +635,7 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     padding:27px 0;
     border-bottom:1px solid var(--line);
     display:grid;
-    grid-template-columns:72px minmax(0,1fr) minmax(170px,auto);
+    grid-template-columns:72px minmax(0,1fr) 218px;
     gap:24px;
     align-items:center;
 }
@@ -663,7 +670,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 /* 沿用原本指令框的底色和邊框，文字與 SVG 直接並排，沒有左側空白佔位。 */
 .workflow-step > .command-copy {
     display:inline-flex; align-items:center; justify-content:center; gap:12px;
-    min-width:0; max-width:100%; padding:10px 12px;
+    width:218px; min-width:0; max-width:100%; padding:10px 12px;
+    justify-self:center;
     border:1px solid #d6e6f1; border-radius:8px;
     background:#f3f9fd; color:var(--accent-dark);
     font:inherit; text-align:center; cursor:pointer;
@@ -698,7 +706,6 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
   .l1ng-copy-running .l1ng-check-stroke { stroke-dashoffset:0; }
 }
 
-
 .inline-link,
 .text-link {
     color:var(--accent-dark);
@@ -709,6 +716,17 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
 .inline-link:hover,
 .text-link:hover { color:var(--accent-hover); }
+
+/* 第四步的網站入口與安裝檔、指令框共用相同的右欄中心線。 */
+.workflow-step > .inline-link {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    justify-self:center;
+    width:218px;
+    max-width:100%;
+    text-align:center;
+}
 
 .path-card {
     margin-top:28px;
@@ -798,12 +816,13 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
 .status-grid {
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(3,minmax(0,1fr));
     gap:14px;
+    align-items:stretch;
 }
 
 .status-column {
-    min-height:310px;
+    min-height:0;
     padding:25px 26px;
     border:1px solid var(--line);
     border-radius:var(--radius-md);
@@ -1049,6 +1068,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
         grid-template-columns:1fr;
     }
 
+    .status-grid { align-items:start; }
+
     .workflow-step {
         grid-template-columns:44px 1fr;
         gap:16px;
@@ -1096,7 +1117,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
     .hero-meta {
         display:grid;
-        grid-template-columns:1fr 1fr;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        column-gap:12px;
     }
 
     .bridge-visual {
@@ -1133,3 +1155,61 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     .release-card h2[data-lang="zh-Hant"],
     .hero-lead[data-lang="zh-Hant"] { white-space:normal; overflow-wrap:normal; }
 }
+
+
+/* 安裝步驟右側直接提供下載：沿用四步驟既有的三欄網格。 */
+.workflow-step > .workflow-install-download {
+    grid-column:3;
+    justify-self:center;
+    width:218px;
+    max-width:100%;
+    display:grid;
+    gap:9px;
+}
+.workflow-install-download-meta {
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    color:var(--ink);
+}
+.workflow-install-download-meta strong { font-size:13px; font-weight:750; white-space:nowrap; }
+.workflow-install-download-meta small { font-size:10.5px; color:var(--sub); white-space:nowrap; }
+.workflow-install-download-action {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    min-height:39px;
+    padding:9px 13px;
+    border:1px solid var(--accent-dark);
+    border-radius:8px;
+    background:var(--accent-dark);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    line-height:1.3;
+    text-decoration:none;
+    transition:box-shadow .18s ease, background-color .12s ease;
+}
+/* 滑鼠停在按鈕上時不持續改色，避免下載後誤以為按鈕停留在按下狀態。 */
+.workflow-install-download-action:hover { box-shadow:0 3px 12px rgba(49,95,131,.18); }
+.workflow-install-download-action:active { background:var(--accent-hover); }
+.workflow-install-download-action:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.workflow-install-download-action svg { flex:0 0 17px; }
+@media (max-width:760px) {
+    .workflow-step > .workflow-install-download {
+        grid-column:2;
+        justify-self:start;
+        width:218px;
+        max-width:100%;
+    }
+}
+@media (prefers-reduced-motion:reduce) {
+    .workflow-install-download-action { transition:none; }
+}
+
+/* 安裝檔尚未發布：保留版面，不提供失效或測試版下載。 */
+.workflow-install-download-action:disabled { font-family:inherit; cursor:not-allowed; opacity:.58; box-shadow:none; }
+.workflow-install-download-action:disabled:hover,
+.workflow-install-download-action:disabled:active { background:var(--accent-dark); box-shadow:none; }
