@@ -4759,13 +4759,6 @@ button.avatar-editor-action { cursor:pointer; }
     background: var(--action-primary);
 }
 .person-library-avatar { position: relative; }
-.person-library-avatar-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 .person-library-avatar .pet-avatar-species-fallback .l1ng-icon {
     width: 25px;
     height: 25px;
