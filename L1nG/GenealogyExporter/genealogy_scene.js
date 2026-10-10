@@ -3773,10 +3773,12 @@ function buildFamilyBranchOwnership(
                 rightId
             ) || '';
 
+          // 同一個實際家庭的同代成員應連續，不再被其他家庭群組穿插。
+          const leftHousehold=[...genealogyUnitHouseholds(model.unitById.get(leftId))].sort()[0]||'~';
+          const rightHousehold=[...genealogyUnitHouseholds(model.unitById.get(rightId))].sort()[0]||'~';
           return (
-            leftGroup.localeCompare(
-              rightGroup
-            ) ||
+            leftHousehold.localeCompare(rightHousehold) ||
+            leftGroup.localeCompare(rightGroup) ||
             stableGenealogyUnitCompare(
               model.unitById.get(leftId),
               model.unitById.get(rightId)
@@ -4265,12 +4267,19 @@ function buildFamilyBranchBlockMetrics(
                 )
               )
         }))
-        .sort((left, right) =>
-          String(left.groupKey)
-            .localeCompare(
-              String(right.groupKey)
-            )
-        );
+        .sort((left,right)=>{
+          // 父母群組仍是不可拆分區塊；其順序再盡量讓同住家庭相鄰。
+          const household=group=>{
+            const counts=new Map();
+            group.childIds.forEach(childId=>{
+              genealogyUnitHouseholds(model.unitById.get(childId)).forEach(id=>
+                counts.set(id,(counts.get(id)||0)+1));
+            });
+            return [...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0]?.[0]||'~';
+          };
+          return household(left).localeCompare(household(right))||
+            String(left.groupKey).localeCompare(String(right.groupKey));
+        });
 
     childGroupsByOwner.set(
       unitId,
@@ -4407,25 +4416,12 @@ function assignFamilyBranchBlockPositions(
   } = metrics;
 
   const primaryRoots =
-    [...ownership.primaryUnitIds]
-      .filter(unitId =>
-        !ownership.ownerParentByUnit
-          .has(unitId)
-      )
-      .sort((leftId, rightId) =>
-        compareFamilyBranchPath(
-          ownership.pathByUnit.get(
-            leftId
-          ),
-          ownership.pathByUnit.get(
-            rightId
-          )
-        ) ||
-        stableGenealogyUnitCompare(
-          model.unitById.get(leftId),
-          model.unitById.get(rightId)
-        )
-      );
+    genealogyOrderRootFamilyBlocks(
+      [...ownership.primaryUnitIds].filter(unitId=>
+        !ownership.ownerParentByUnit.has(unitId)
+      ),
+      model,ownership
+    );
 
   const placed =
     new Set();
@@ -4682,6 +4678,24 @@ function genealogyAttachmentPriority(unit,ownerId,model) {
     .map(pair=>pair.adjacencyTier||0));
 }
 
+// 主家系根區塊排序：保持原血緣先後，只把同一實際家庭的獨立根分支合攏。
+function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
+  const ordered=[...ids].sort((a,b)=>
+    compareFamilyBranchPath(ownership.pathByUnit.get(a),ownership.pathByUnit.get(b))||
+    stableGenealogyUnitCompare(model.unitById.get(a),model.unitById.get(b)));
+  const firstIndex=new Map();
+  ordered.forEach((id,index)=>{
+    const household=[...genealogyUnitHouseholds(model.unitById.get(id))].sort()[0];
+    const key=household?'household:'+household:'root:'+id;
+    if(!firstIndex.has(key))firstIndex.set(key,index);
+  });
+  return ordered.map((id,index)=>{
+    const household=[...genealogyUnitHouseholds(model.unitById.get(id))].sort()[0];
+    const key=household?'household:'+household:'root:'+id;
+    return {id,index,first:firstIndex.get(key)};
+  }).sort((a,b)=>a.first-b.first||a.index-b.index).map(item=>item.id);
+}
+
 function applyFamilyBranchOrdering(layers,model,ownership) {
   layers.forEach(layer=>{
     if(!layer||layer.length<2)return;
@@ -4703,10 +4717,8 @@ function applyFamilyBranchOrdering(layers,model,ownership) {
       const side=ownership.attachmentSideByUnit.get(unit.id)||1;
       groupFor(rootId)[side<0?'left':'right'].push(unit);
     });
-    const orderedRoots=[...roots.values()].sort((a,b)=>
-      compareFamilyBranchPath(ownership.pathByUnit.get(a.id),ownership.pathByUnit.get(b.id))||
-      stableGenealogyUnitCompare(model.unitById.get(a.id)||a.primary[0]||a.left[0]||a.right[0],
-        model.unitById.get(b.id)||b.primary[0]||b.left[0]||b.right[0]));
+    const orderedRoots=genealogyOrderRootFamilyBlocks([...roots.keys()],model,ownership)
+      .map(id=>roots.get(id));
     const result=[];
     orderedRoots.forEach(root=>{
       root.primary.sort((a,b)=>
