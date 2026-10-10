@@ -2065,12 +2065,12 @@ function relationshipSegmentsClear(points,rects) {
     relationshipSegmentIntersectsRect(points[i-1].x,points[i-1].y,point.x,point.y,rect,9)));
 }
 
-function relationshipOrthogonalRoute(start,end,rects,upperOnly=false) {
+function relationshipOrthogonalRoute(start,end,rects,upperOnly=false,clearance=15) {
   if(relationshipSegmentsClear([start,end],rects))return [start,end];
   const xValues=new Set([start.x,end.x]),yValues=new Set([start.y,end.y]);
   rects.forEach(rect=>{
-    xValues.add(rect.left-15);xValues.add(rect.right+15);
-    yValues.add(rect.top-15);yValues.add(rect.bottom+15);
+    xValues.add(rect.left-clearance);xValues.add(rect.right+clearance);
+    yValues.add(rect.top-clearance);yValues.add(rect.bottom+clearance);
   });
   const X=[...xValues].sort((a,b)=>a-b),Y=[...yValues].sort((a,b)=>a-b);
   const nx=X.length,ny=Y.length,index=(x,y)=>y*nx+x;
@@ -2236,9 +2236,10 @@ function relationshipUpperCurveSign(start,end) {
   return end.x>=start.x ? -1 : 1;
 }
 
-function relationshipRecommendedCurveAmount(start,end,rects) {
+function relationshipRecommendedCurveAmount(start,end,rects,minAmount=50) {
   const sign=relationshipUpperCurveSign(start,end);
-  for(let amount=10;amount<=100;amount++){
+  // 自動弧度不能從視覺上幾乎水平的 10% 起算。
+  for(let amount=clampRelationshipCurveAmount(minAmount);amount<=100;amount++){
     const segments=relationshipArcCandidate(
       start,end,relationshipCurveAmplitude(start,end,amount),sign
     );
@@ -2307,6 +2308,35 @@ function relationshipSmoothRoute(points,rects,amount) {
   return null;
 }
 
+// 避障路徑轉角改用連續三次曲線，不能在「曲線」設定下退回直角折線。
+function relationshipRoundedObstacleRoute(points,rects) {
+  if(!points||points.length<3)return null;
+  const segments=[];
+  let current=points[0];
+  const append=target=>{
+    if(Math.hypot(target.x-current.x,target.y-current.y)<0.001)return;
+    segments.push({from:current,
+      c1:{x:current.x+(target.x-current.x)/3,y:current.y+(target.y-current.y)/3},
+      c2:{x:current.x+(target.x-current.x)*2/3,y:current.y+(target.y-current.y)*2/3},
+      to:target});
+    current=target;
+  };
+  for(let i=1;i<points.length-1;i++){
+    const prev=points[i-1],corner=points[i],next=points[i+1];
+    const a=Math.hypot(corner.x-prev.x,corner.y-prev.y);
+    const b=Math.hypot(next.x-corner.x,next.y-corner.y);
+    if(!a||!b)continue;
+    const radius=Math.min(20,a*0.45,b*0.45);
+    const entry={x:corner.x+(prev.x-corner.x)*radius/a,y:corner.y+(prev.y-corner.y)*radius/a};
+    const exit={x:corner.x+(next.x-corner.x)*radius/b,y:corner.y+(next.y-corner.y)*radius/b};
+    append(entry);
+    segments.push({from:entry,c1:corner,c2:corner,to:exit});
+    current=exit;
+  }
+  append(points[points.length-1]);
+  return relationshipCubicClear(segments,rects)?relationshipCubicGeometry(segments):null;
+}
+
 function relationshipOtherRenderGeometry(a,b,setting,context=null) {
   const from=avatarBoundaryAnchor(a,b),to=avatarBoundaryAnchor(b,a);
   const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
@@ -2322,18 +2352,25 @@ function relationshipOtherRenderGeometry(a,b,setting,context=null) {
     relationshipCurveAmplitude(start,end,amount),sign
   );
 
-  // 玩家調整滑桿後，完全依照所選百分比繪製，不偷偷替換弧度或翻轉方向。
-  if(setting.curveAmountManual===true||relationshipCubicClear(segments,rects))
-    return relationshipCubicGeometry(segments);
+  // 玩家指定弧度維持原樣，不強制替換其數值。
+  if(setting.curveAmountManual===true)return relationshipCubicGeometry(segments);
 
-  // 未經玩家調整的預設值才可以採用安全的上方避障路徑。
-  const points=relationshipOrthogonalRoute(start,end,rects,true);
-  if(points){
-    const smooth=relationshipSmoothRoute(points,rects,amount);
-    if(smooth)return smooth;
-    return relationshipStraightRoute(points);
+  // 每一條曲線依目前的卡片重新驗證，不沿用同類型其他線的避障結果。
+  const safeAmount=relationshipRecommendedCurveAmount(start,end,rects,Math.max(50,amount));
+  if(safeAmount!==null){
+    return relationshipCubicGeometry(relationshipArcCandidate(start,end,
+      relationshipCurveAmplitude(start,end,safeAmount),sign));
   }
-  // 不存在安全通道時仍維持原來的向上曲線，不會自行翻到下側。
+
+  // 單弧不安全時，尋找上方通道，並且保持真正的曲線。
+  const points=relationshipOrthogonalRoute(start,end,rects,true,35);
+  if(points){
+    const smooth=relationshipSmoothRoute(points,rects,Math.max(50,amount));
+    if(smooth)return smooth;
+    const rounded=relationshipRoundedObstacleRoute(points,rects);
+    if(rounded)return rounded;
+  }
+  // 沒有安全通道時仍可能重疊；至少不違反「改用曲線」的設定。
   return relationshipCubicGeometry(segments);
 }
 
