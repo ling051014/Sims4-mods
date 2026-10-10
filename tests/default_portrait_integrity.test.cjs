@@ -14,11 +14,8 @@ function unpackSource() {
   const env = { window:{} };
   vm.runInNewContext(getText('genealogy_sample_preset.js'), env);
   vm.runInNewContext(getText('genealogy_sample_portraits.js'), env);
-  for (let n = 0; n < 6; n++) {
-    const name = 'genealogy_sample_portraits_v10_0' + n + '.js';
-    assert.ok(html.includes(name), 'HTML 未載入 ' + name);
-    vm.runInNewContext(getText(name), env);
-  }
+  assert.match(html, /<script src="genealogy_sample_portraits\.js\?v=[^"]+"><\/script>/);
+  assert.doesNotMatch(html, /genealogy_sample_portraits_v10_\d\d\.js/);
   return env.window;
 }
 
