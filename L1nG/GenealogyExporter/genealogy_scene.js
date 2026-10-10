@@ -7172,6 +7172,22 @@ function parentConnectorSource(
     );
   }
 
+  // 已推定為「情人」時，關係線本身已連接兩位共同父母。
+  // 親子分支僅從最接近子女群中軸的一方垂直延伸；
+  // 不再於兩張卡片下方額外畫一條橫跨全家系的假配偶橋。
+  const inferred = inferCoParentRelationshipLinks([group],byId);
+  if (inferred.length) {
+    const anchors=group.children
+      .map(childId=>pos.get(childId))
+      .filter(Boolean)
+      .map(position=>cardVerticalAnchor(position,'top').x);
+    const center=anchors.length
+      ? (Math.min(...anchors)+Math.max(...anchors))/2
+      : (cardVerticalAnchor(first.pos,'bottom').x+cardVerticalAnchor(second.pos,'bottom').x)/2;
+    const options=[first,second].map(parent=>cardVerticalAnchor(parent.pos,'bottom'));
+    return options.sort((a,b)=>Math.abs(a.x-center)-Math.abs(b.x-center))[0];
+  }
+
   // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
   // 直接從兩張父母卡片向下匯流，再由匯流點接往子女。
   const firstAnchor =
