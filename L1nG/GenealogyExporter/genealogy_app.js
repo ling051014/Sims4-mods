@@ -464,6 +464,9 @@ function normalizeRelationshipLineSetting(
   }
 
   if (key === 'other') {
+    normalized.curveAmountManual = saved?.curveAmountManual === true ||
+      (saved?.curveAmountManual == null && saved?.curveAmount != null &&
+       Number(saved.curveAmount) !== Number(fallback.curveAmount ?? 50));
     const storedShowArrow =
       saved &&
       Object.prototype.hasOwnProperty.call(
@@ -6893,6 +6896,8 @@ function relationshipOtherDefaultSetting(
 
   return {
     ...RELATIONSHIP_LINE_DEFAULTS.other,
+    curved:String(type || '').trim() === '情人' ? true : RELATIONSHIP_LINE_DEFAULTS.other.curved,
+    curveAmountManual:false,
     style:
       definition?.lineStyle ||
       RELATIONSHIP_LINE_DEFAULTS.other.style
@@ -6915,6 +6920,10 @@ function getOtherRelationshipLineSetting(
       fallback
     );
 
+  if (!normalized.curveAmountManual) {
+    const computed=genealogyScene?.recommendedOtherCurveAmount?.(type);
+    if (Number.isFinite(computed)) normalized.curveAmount=computed;
+  }
   return normalized;
 }
 
@@ -7738,11 +7747,14 @@ function syncRelationshipLineControls() {
     curveRow.classList.toggle('is-disabled',!setting.curved);
     curveRow.setAttribute('aria-disabled',setting.curved ? 'false' : 'true');
   }
+  const shownCurveAmount=other && !setting.curveAmountManual
+    ? (genealogyScene?.recommendedOtherCurveAmount?.(activeOtherRelationshipType) ?? setting.curveAmount)
+    : setting.curveAmount;
   if (curveInput) {
-    curveInput.value = String(setting.curveAmount);
+    curveInput.value = String(shownCurveAmount);
     curveInput.disabled = !setting.curved;
   }
-  if (curveValue) curveValue.textContent = Math.round(setting.curveAmount) + '%';
+  if (curveValue) curveValue.textContent = Math.round(shownCurveAmount) + '%';
 
   if (other) window.L1nGGenealogyUIController?.refreshControl?.($('relationshipOtherTypeSelect'));
   syncRelationshipNavPreviews();
@@ -7796,6 +7808,7 @@ $('relationshipEditorArrowToggle')?.addEventListener('click',() => {
 $('relationshipEditorCurveAmount')?.addEventListener('input',event => {
   const setting = relationshipEditorSetting();
   setting.curveAmount = clampRelationshipCurveAmount(event.currentTarget.value);
+  setting.curveAmountManual = true;
   saveRelationshipLineSettings();
 });
 
