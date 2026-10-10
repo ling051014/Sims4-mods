@@ -3948,8 +3948,50 @@ function buildFamilyBranchBlockMetrics(
   const childGroupsByOwner =
     new Map();
 
+
   const groupWidthByOwnerKey =
     new Map();
+
+  // ========【第三輪父母錨點空間】 依真實親子錨點預留完整家系移動空間 ========
+  const singleGroupAnchorByOwner = new Map();
+  const parentGroupByKey = new Map(
+    (model.parentGroups || []).map(group => [group.key,group])
+  );
+
+  const singleGroupAnchorOffset = (unit, group, childIds, widths, siblingGap) => {
+    const relation = parentGroupByKey.get(group.groupKey);
+    if (!relation ||
+        relation.parentIds.some(id => model.unitBySim.get(id)?.id !== unit.id) ||
+        relation.children.some(id => ownership.ownerParentByUnit.get(
+          model.unitBySim.get(id)?.id
+        ) !== unit.id)) return null;
+
+    const sourceX = genealogyGroupSourceX(relation,model);
+    if (!Number.isFinite(sourceX)) return null;
+    const sourceLocalX = sourceX-unit.x;
+
+    let cursor=0,minX=Infinity,maxX=-Infinity;
+    childIds.forEach((childUnitId,index) => {
+      const childUnit=model.unitById.get(childUnitId);
+      const span=widths[index];
+      if (!childUnit) return;
+      const localCardX=(span-childUnit.width)/2;
+      relation.children.forEach(childId => {
+        if (model.unitBySim.get(childId)?.id !== childUnitId) return;
+        const geometry=genealogyUnitMemberRelationshipGeometry(childUnit,childId);
+        if (!geometry) return;
+        const anchorX=cursor+localCardX+geometry.anchorLocalX;
+        minX=Math.min(minX,anchorX);
+        maxX=Math.max(maxX,anchorX);
+      });
+      cursor+=span+siblingGap;
+    });
+    if (!Number.isFinite(minX)||!Number.isFinite(maxX)) return null;
+    return {
+      sourceLocalX,
+      childrenBias:(minX+maxX)/2-(cursor-siblingGap)/2
+    };
+  };
 
   const visiting =
     new Set();
@@ -4099,11 +4141,22 @@ function buildFamilyBranchBlockMetrics(
             )
         : 0;
 
-    const width =
-      Math.max(
-        unit.width,
-        childrenWidth
+    let reservedWidth=childrenWidth;
+    if (groups.length===1 && groupWidths.length===1) {
+      const one=groups[0];
+      const childWidths=one.childIds.map(childId => widthByUnit.get(childId) ||
+        model.unitById.get(childId)?.width || 0);
+      const offset=singleGroupAnchorOffset(
+        unit,one,one.childIds,childWidths,SIBLING_GAP
       );
+      if (offset) {
+        reservedWidth+=2*Math.abs(
+          offset.sourceLocalX-unit.width/2-offset.childrenBias
+        );
+        singleGroupAnchorByOwner.set(unitId,one.groupKey);
+      }
+    }
+    const width=Math.max(unit.width,reservedWidth);
 
     visiting.delete(unitId);
 
@@ -4122,6 +4175,7 @@ function buildFamilyBranchBlockMetrics(
     widthByUnit,
     childGroupsByOwner,
     groupWidthByOwnerKey,
+    singleGroupAnchorByOwner,
     siblingGap:SIBLING_GAP,
     parentGroupGap:PARENT_GROUP_GAP
   };
@@ -4142,6 +4196,7 @@ function assignFamilyBranchBlockPositions(
     widthByUnit,
     childGroupsByOwner,
     groupWidthByOwnerKey,
+    singleGroupAnchorByOwner,
     siblingGap,
     parentGroupGap
   } = metrics;
