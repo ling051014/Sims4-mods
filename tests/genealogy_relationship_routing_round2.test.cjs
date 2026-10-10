@@ -69,7 +69,7 @@ test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
  assert.match(scoped,/setting\.curveAmount/);
  assert.doesNotMatch(scoped,/setting\.routing\s*===\s*'manual'/);
  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
- assert.match(html,/genealogy_scene\.js\?v=20261011-shared-co-parent-layout-r7/);
+ assert.match(html,/genealogy_scene\.js\?v=20261011-family-block-architecture-r8/);
 });
 
 test('曲線弧度 10% 與 100% 無障礙時有不同的真正曲線',()=>{
