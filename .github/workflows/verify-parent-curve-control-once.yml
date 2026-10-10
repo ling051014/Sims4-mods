@@ -1,4 +1,4 @@
-name: Verify two parent bloodlines and curve control
+name: Verify dual bloodlines and player-owned curves
 on:
   push:
     branches: [genealogy-structural-optimization-20260926]
