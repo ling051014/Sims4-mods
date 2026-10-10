@@ -14,7 +14,7 @@ const end = scene.indexOf('function solveAutomaticGenealogyPositions(', start);
 assert.ok(start >= 0 && end > start, '自動排列必須保留父母／子女錨點校正');
 assert.match(
   scene.slice(end, scene.indexOf('function petCardFieldRows(', end)),
-  /alignFamilyBranchParentAxes\(\s*layers,\s*model,\s*connectorGroups\s*\)/,
+  /alignFamilyBranchParentAxes\(\s*layers,\s*model,\s*connectorGroups,\s*ownership\s*\)/,
   '真正的自動排列流程必須呼叫置中校正'
 );
 
