@@ -7416,119 +7416,34 @@ function relationshipPreviewArrowPath(
   );
 }
 
-function relationshipPreviewLineGeometry(
-  setting,
-  preview
-) {
-  const {
-    aX,
-    aY,
-    bX,
-    bY
-  } =
-    relationshipHorizontalPreviewAnchors(
-      preview
-    );
-
-  let controlX = null;
-  let controlY = null;
-
-  if (setting.curved) {
-    const amount =
-      clampRelationshipCurveAmount(
-        setting.curveAmount
-      );
-
-    const amplitude =
-      8 +
-      (amount / 100) * 34;
-
-    controlX =
-      (aX + bX) / 2;
-
-    controlY =
-      ((aY + bY) / 2) -
-      amplitude;
+function relationshipPreviewLineGeometry(setting, preview) {
+  const {aX,aY,bX,bY}=relationshipHorizontalPreviewAnchors(preview);
+  let controlX1=null,controlY1=null,controlX2=null,controlY2=null;
+  if(setting.curved){
+    const dx=bX-aX,dy=bY-aY,span=Math.max(1,Math.hypot(dx,dy));
+    const max=Math.max(90,Math.min(230,span*0.65));
+    const amount=clampRelationshipCurveAmount(setting.curveAmount);
+    const amplitude=8+(max-8)*(amount-10)/90;
+    const sign=dx>=0?-1:1;
+    const nx=-dy/span,ny=dx/span;
+    controlX1=aX+dx*0.28+nx*amplitude*sign;
+    controlY1=aY+dy*0.28+ny*amplitude*sign;
+    controlX2=bX-dx*0.28+nx*amplitude*sign;
+    controlY2=bY-dy*0.28+ny*amplitude*sign;
   }
-
-  return {
-    startX:aX,
-    startY:aY,
-    endX:bX,
-    endY:bY,
-    controlX,
-    controlY
-  };
+  return {startX:aX,startY:aY,endX:bX,endY:bY,
+    controlX1,controlY1,controlX2,controlY2};
 }
 
-function relationshipPreviewArrowGeometry(
-  setting,
-  preview
-) {
-  const {
-    aX,
-    aY,
-    bX,
-    bY
-  } =
-    relationshipHorizontalPreviewAnchors(
-      preview
-    );
-
-  let startDx =
-    bX - aX;
-  let startDy =
-    bY - aY;
-  let endDx =
-    startDx;
-  let endDy =
-    startDy;
-
-  if (setting.curved) {
-    const amount =
-      clampRelationshipCurveAmount(
-        setting.curveAmount
-      );
-
-    const amplitude =
-      8 +
-      (amount / 100) * 34;
-
-    const controlX =
-      (aX + bX) / 2;
-
-    const controlY =
-      ((aY + bY) / 2) -
-      amplitude;
-
-    startDx =
-      controlX - aX;
-    startDy =
-      controlY - aY;
-
-    endDx =
-      bX - controlX;
-    endDy =
-      bY - controlY;
-  }
-
+function relationshipPreviewArrowGeometry(setting, preview) {
+  const g=relationshipPreviewLineGeometry(setting,preview);
+  const startDx=setting.curved?g.controlX1-g.startX:g.endX-g.startX;
+  const startDy=setting.curved?g.controlY1-g.startY:g.endY-g.startY;
+  const endDx=setting.curved?g.endX-g.controlX2:g.endX-g.startX;
+  const endDy=setting.curved?g.endY-g.controlY2:g.endY-g.startY;
   return {
-    start:
-      relationshipPreviewArrowPath(
-        preview,
-        aX,
-        aY,
-        -startDx,
-        -startDy
-      ),
-    end:
-      relationshipPreviewArrowPath(
-        preview,
-        bX,
-        bY,
-        endDx,
-        endDy
-      )
+    start:relationshipPreviewArrowPath(preview,g.startX,g.startY,-startDx,-startDy),
+    end:relationshipPreviewArrowPath(preview,g.endX,g.endY,endDx,endDy)
   };
 }
 
@@ -7540,7 +7455,9 @@ function updateRelationshipFullPreview() {
   if (!preview || !path) return;
 
   const key = activeRelationshipStyleKey;
-  const setting = relationshipEditorSetting();
+  const setting = key === 'other'
+    ? getOtherRelationshipLineSetting(activeOtherRelationshipType || '關聯')
+    : relationshipEditorSetting();
   const color = relationshipResolvedColor(setting,key === 'other' ? 'other' : key);
   const vertical = key === 'parent' || key === 'adopt';
 
@@ -7565,25 +7482,12 @@ function updateRelationshipFullPreview() {
         preview
       );
 
-    if (
-      setting.curved &&
-      geometry.controlX != null &&
-      geometry.controlY != null
-    ) {
-      path.setAttribute(
-        'd',
-        'M' +
-          geometry.startX.toFixed(2) +
-          ' ' +
-          geometry.startY.toFixed(2) +
-          ' Q' +
-          geometry.controlX.toFixed(2) +
-          ' ' +
-          geometry.controlY.toFixed(2) +
-          ' ' +
-          geometry.endX.toFixed(2) +
-          ' ' +
-          geometry.endY.toFixed(2)
+    if(setting.curved && geometry.controlX1 != null) {
+      path.setAttribute('d',
+        'M'+geometry.startX.toFixed(2)+' '+geometry.startY.toFixed(2)+
+        ' C'+geometry.controlX1.toFixed(2)+' '+geometry.controlY1.toFixed(2)+
+        ' '+geometry.controlX2.toFixed(2)+' '+geometry.controlY2.toFixed(2)+
+        ' '+geometry.endX.toFixed(2)+' '+geometry.endY.toFixed(2)
       );
     } else {
       path.setAttribute(
