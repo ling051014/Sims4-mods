@@ -6099,6 +6099,97 @@ function alignDirectParentChildGroups(
   });
 }
 
+// ========【父母／子女中心】 設定 - 分支寬度用於保留空間，親子錨點才是置中依據 ========
+function alignFamilyBranchParentAxes(layers, model, connectorGroups) {
+  const { SIBLING:gap } = resolveLayoutGaps();
+
+  // 由後代往祖先調整：較年長的一代必須看見子女已校正的最終錨點。
+  [...layers.keys()]
+    .sort((left, right) => right - left)
+    .forEach(generation => {
+      const layer = layers.get(generation);
+      const requestedDeltas = new Map();
+
+      connectorGroups.forEach(group => {
+        const parents = genealogyGroupParentEntries(group, model);
+        if (
+          !parents.length ||
+          parents.some(parent => parent.unit.generation !== generation)
+        ) {
+          return;
+        }
+
+        const childAnchors = group.children
+          .filter(childId => {
+            const unit = model.unitBySim.get(childId);
+            return unit && unit.generation > generation;
+          })
+          .map(childId => genealogyChildAnchorX(childId, model))
+          .filter(Number.isFinite);
+
+        if (!childAnchors.length) return;
+
+        // 關係來源與 SVG 繪製共用同一個錨點，不能用配偶區塊的外框中心。
+        const sourceX = genealogyGroupSourceX(group, model);
+        if (!Number.isFinite(sourceX)) return;
+
+        const childCenterX =
+          (Math.min(...childAnchors) + Math.max(...childAnchors)) / 2;
+        const delta = childCenterX - sourceX;
+        if (Math.abs(delta) < 0.01) return;
+
+        // 同一人可能有多組子女；平均要求，避免最後一組覆蓋之前的結果。
+        const weight = childAnchors.length;
+        new Set(parents.map(parent => parent.unit.id)).forEach(unitId => {
+          const entry = requestedDeltas.get(unitId) || { sum:0, weight:0 };
+          entry.sum += delta * weight;
+          entry.weight += weight;
+          requestedDeltas.set(unitId, entry);
+        });
+      });
+
+      const shifts = layer
+        .filter(unit => requestedDeltas.has(unit.id))
+        .map(unit => {
+          const entry = requestedDeltas.get(unit.id);
+          return { unit, delta:entry.sum / entry.weight };
+        });
+
+      const moveWithinLayer = ({ unit, delta }) => {
+        if (!Number.isFinite(delta) || Math.abs(delta) < 0.01) return;
+
+        let minimum = -Infinity;
+        let maximum = Infinity;
+
+        // 只移動父母所在的 unit（含水平配偶），不改變子女分支的相對位置。
+        // 左右界線依既有卡片位置決定，避免跨家族或同代卡片重疊。
+        for (const other of layer) {
+          if (other.id === unit.id) continue;
+          if (other.x + other.width <= unit.x + 0.001) {
+            minimum = Math.max(minimum, other.x + other.width + gap);
+          } else if (other.x >= unit.x + unit.width - 0.001) {
+            maximum = Math.min(maximum, other.x - unit.width - gap);
+          } else {
+            return;
+          }
+        }
+
+        if (minimum > maximum) return;
+        unit.x = Math.min(maximum, Math.max(minimum, unit.x + delta));
+      };
+
+      // 向右移動先處理最右側；向左移動先處理最左側，保留同代順序。
+      shifts
+        .filter(item => item.delta > 0)
+        .sort((a, b) => b.unit.x - a.unit.x)
+        .forEach(moveWithinLayer);
+      shifts
+        .filter(item => item.delta < 0)
+        .sort((a, b) => a.unit.x - b.unit.x)
+        .forEach(moveWithinLayer);
+    });
+}
+
 function solveAutomaticGenealogyPositions(visibleIds) {
   const primarySimIds =
     getActiveLayoutPrimaryIds(
@@ -6165,6 +6256,13 @@ function solveAutomaticGenealogyPositions(visibleIds) {
 
   // 先滿足最簡單、最可讀的親子直線；只有碰撞時才交給 renderer 畫折線。
   alignDirectParentChildGroups(
+    layers,
+    model,
+    connectorGroups
+  );
+
+  // 最後依真正子女錨點置中上一代；不重新打散已保留的家族區塊。
+  alignFamilyBranchParentAxes(
     layers,
     model,
     connectorGroups
