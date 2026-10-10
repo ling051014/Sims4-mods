@@ -138,6 +138,18 @@ test('遊戲載入與玩家自訂的半透明肖像有圖片就不渲染姓名�
   }
   assert.equal(fn({name:'艾梅琳達',avatar:null}),'艾');
 });
+test('iOS Safari 和 iPadOS 使用不漏畫頭像的匯出路徑，桌面保留原繪製方式',()=>{
+  const detect=vm.runInNewContext(
+    between('function useSafeIosGenealogyCapture(','async function exportGenealogyImage(')+
+    '\nuseSafeIosGenealogyCapture;',{}
+  );
+  assert.equal(detect({userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'}),true);
+  assert.equal(detect({userAgent:'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)'}),true);
+  assert.equal(detect({userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X)',platform:'MacIntel',maxTouchPoints:5}),true);
+  assert.equal(detect({userAgent:'Mozilla/5.0 (Windows NT 10.0)',platform:'Win32',maxTouchPoints:0}),false);
+  assert.match(app,/foreignObjectRendering:\s*!useSafeIosGenealogyCapture\(\)/);
+  assert.match(app,/await\s+Promise\.all\(\[\s*prepareCaptureIcons\(captureViewport\),\s*prepareCaptureRelationshipIcons\(captureViewport\),\s*prepareCaptureAssetImages\(captureViewport, backgroundMode\)/);
+});
 test('人物庫更多操作確實呼叫跨家庭定位，而非只在當前畫布尋找',()=>{
   const menu=between("list.querySelectorAll('[data-person-library-action]')","observePersonLibraryAvatars(list);");
   assert.match(menu,/locatePersonFromLibrary\(id\)/);
