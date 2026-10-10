@@ -4712,15 +4712,86 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
   const activeRoots=new Set([...anchorIds||[]]
     .map(rootForSim).filter(id=>allRoots.has(id)));
   const attached=new Map();
-  const candidates=[...(model.pairCandidates||[])].sort((a,b)=>
-    (b.adjacencyTier||0)-(a.adjacencyTier||0)||
-    (b.score||0)-(a.score||0));
+
+  // 同一個居住家庭的不同血緣根，不得被另一棵家系插在中間。
+  // 不能只查根人物的 householdId，因為多數已故祖先根本沒有這個欄位。
+  const households=new Map();
+  model.units.forEach(unit=>{
+    const root=rootForUnit(unit.id);
+    if(!allRoots.has(root))return;
+    genealogyUnitHouseholds(unit).forEach(householdId=>{
+      if(!households.has(householdId))households.set(householdId,new Set());
+      households.get(householdId).add(root);
+    });
+  });
+
+  // 橫向配偶與跨家系親子都會連起兩棵家系。先用真正的 unit
+  // 換算出 root，再以同一份關係建立區塊靠攏順序。
+  const bonds=new Map();
+  const addBond=(leftRoot,rightRoot,tier,score,fromUnit=null,toUnit=null)=>{
+    if(!leftRoot||!rightRoot||leftRoot===rightRoot||
+        !allRoots.has(leftRoot)||!allRoots.has(rightRoot))return;
+    const pair=leftRoot<rightRoot?[leftRoot,rightRoot]:[rightRoot,leftRoot];
+    const key=pair.join('\u0001');
+    const old=bonds.get(key);
+    if(old&&(old.adjacencyTier>tier||
+      (old.adjacencyTier===tier&&old.score>=score)))return;
+    bonds.set(key,{a:leftRoot,b:rightRoot,adjacencyTier:tier,score,
+      fromUnit:pair[0]===leftRoot?fromUnit:toUnit,
+      toUnit:pair[1]===rightRoot?toUnit:fromUnit});
+  };
+  (model.pairCandidates||[]).forEach(pair=>
+    addBond(rootForSim(pair.a),rootForSim(pair.b),
+      pair.adjacencyTier||0,pair.score||0,
+      model.unitBySim.get(String(pair.a)),model.unitBySim.get(String(pair.b))));
+  (model.parentGroups||[]).forEach(group=>{
+    const parents=[...new Set((group.parentUnitIds||[])
+      .map(rootForUnit))].filter(Boolean);
+    const children=[...new Set((group.childUnitIds||[])
+      .map(rootForUnit))].filter(Boolean);
+    parents.forEach(parentRoot=>children.forEach(childRoot=>{
+      const parentUnit=(group.parentUnitIds||[])
+        .map(id=>model.unitById.get(id)).find(unit=>unit&&rootForUnit(unit.id)===parentRoot);
+      const childUnit=(group.childUnitIds||[])
+        .map(id=>model.unitById.get(id)).find(unit=>unit&&rootForUnit(unit.id)===childRoot);
+      // 真正的父母與子女跨 root，比一般「其他關係」更需要相鄰。
+      addBond(parentRoot,childRoot,475,1000+(group.children?.length||0)*20,
+        parentUnit,childUnit);
+    }));
+  });
+  households.forEach(roots=>{
+    const list=[...roots].sort((a,b)=>(index.get(a)??0)-(index.get(b)??0));
+    for(let i=1;i<list.length;i++){
+      addBond(list[0],list[i],650,1400);
+    }
+  });
+  const candidates=[...bonds.values()].sort((a,b)=>
+    b.adjacencyTier-a.adjacencyTier||
+    b.score-a.score||
+    (index.get(a.a)??0)-(index.get(b.a)??0));
+
+  // 玩家選中的同一家庭可能屬於兩棵祖先根。兩根先合成
+  // 緊密的核心，再沿血緣與配偶關係向外擴張，不准被其他根穿插。
+  const activeList=[...activeRoots].sort((a,b)=>
+    (index.get(a)??0)-(index.get(b)??0));
+  if(activeList.length>1){
+    const counts=new Map(activeList.map(id=>[id,0]));
+    anchorIds.forEach(id=>{
+      const root=rootForSim(id);
+      if(counts.has(root))counts.set(root,counts.get(root)+1);
+    });
+    activeList.sort((a,b)=>(counts.get(b)||0)-(counts.get(a)||0)||
+      (index.get(a)??0)-(index.get(b)??0));
+    activeList.slice(1).forEach(id=>{
+      attached.set(id,{anchor:activeList[0],tier:900,ownerUnit:null});
+    });
+  }
   // 從目前正在檢視的主要家系向外找相關家系；
   // 前任與共同生育對象必須整棵靠近主家系，而不是散落到遠處。
   for(let pass=0;pass<allRoots.size;pass++){
     let changed=false;
     candidates.forEach(pair=>{
-      const a=rootForSim(pair.a),b=rootForSim(pair.b);
+      const a=pair.a,b=pair.b;
       if(!a||!b||a===b||!allRoots.has(a)||!allRoots.has(b))return;
       const ownerA=activeRoots.has(a)||attached.has(a);
       const ownerB=activeRoots.has(b)||attached.has(b);
@@ -4729,7 +4800,7 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
       if(activeRoots.has(otherId)||attached.has(otherId))return;
       const anchor=attached.get(ownerId)?.anchor||ownerId;
       attached.set(otherId,{anchor,tier:pair.adjacencyTier||0,
-        ownerUnit:model.unitBySim.get(String(ownerA?pair.a:pair.b))});
+        ownerUnit:ownerA?pair.fromUnit:pair.toUnit});
       changed=true;
     });
     if(!changed)break;
