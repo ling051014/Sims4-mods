@@ -6626,6 +6626,132 @@ function alignNonSpousalCoParentBranches(layers,model,ownership,connectorGroups)
   return adjusted;
 }
 
+// ========【家庭區塊剛性移動】 同代碰撞向外推移完整子孫分支，而不是讓單一卡片卡住 ========
+function genealogyUnitHouseholds(unit) {
+  const ids=new Set();
+  (unit?.members||[]).forEach(member=>{
+    const id=member?.gameData?.householdId;
+    if(id!==null&&id!==undefined&&String(id).trim())ids.add(String(id));
+  });
+  return ids;
+}
+
+function genealogyOwnedBranchUnits(model,ownership,seedIds,includeHousehold=true) {
+  const result=new Set(),queue=[...seedIds];
+  const children=ownership?.primaryChildren||new Map();
+  const parents=ownership?.ownerParentByUnit||new Map();
+  while(queue.length){
+    const id=queue.shift();
+    if(result.has(id))continue;
+    const unit=model.unitById?.get(id);
+    if(!unit)continue;
+    result.add(id);
+    (children.get(id)||[]).forEach(childId=>{
+      if(parents.get(childId)===id)queue.push(childId);
+    });
+    if(!includeHousehold)continue;
+    const householdIds=genealogyUnitHouseholds(unit);
+    if(!householdIds.size)continue;
+    // 同一世代、同一實際居住家庭一起移動，不允許只把某位家庭成員拉走。
+    model.units.forEach(other=>{
+      if(other.id===id||other.generation!==unit.generation||result.has(other.id))return;
+      if([...genealogyUnitHouseholds(other)].some(value=>householdIds.has(value)))
+        queue.push(other.id);
+    });
+  }
+  return result;
+}
+
+function genealogyTranslateChildBlockWithClearance(layers,model,ownership,group,delta,parentGeneration,gap) {
+  if(!Number.isFinite(delta)||Math.abs(delta)<0.75)return false;
+  const seeds=group.children.map(childId=>model.unitBySim.get(childId))
+    .filter(unit=>unit&&unit.generation>parentGeneration).map(unit=>unit.id);
+  if(!seeds.length)return false;
+  const moving=genealogyOwnedBranchUnits(model,ownership,seeds);
+  if(!moving.size)return false;
+  const original=new Map(model.units.map(unit=>[unit.id,unit.x]));
+  const moved=new Set(moving);
+  const protectedParents=new Set(group.parentIds.map(id=>model.unitBySim.get(id)?.id).filter(Boolean));
+  if([...moving].some(id=>protectedParents.has(id)))return false;
+
+  const shift=(ids,amount)=>{
+    ids.forEach(id=>{
+      const unit=model.unitById.get(id);
+      if(unit)unit.x+=amount;
+      moved.add(id);
+    });
+  };
+  const revert=()=>model.units.forEach(unit=>{
+    if(original.has(unit.id))unit.x=original.get(unit.id);
+  });
+  shift(moving,delta);
+  const direction=Math.sign(delta);
+  const maxPasses=Math.min(256,model.units.length*3+8);
+  for(let pass=0;pass<maxPasses;pass++){
+    let collision=null;
+    // 固定 layer 排列權威：左右順序不允許靠重新排序卡片解決。
+    for(const layer of layers.values()){
+      for(let index=1;index<layer.length;index++){
+        const left=layer[index-1],right=layer[index];
+        const overlap=left.x+left.width+gap-right.x;
+        if(overlap>0.01){collision={left,right,overlap};break;}
+      }
+      if(collision)break;
+    }
+    if(!collision)return true;
+    const {left,right,overlap}=collision;
+    const block=direction>0?right:left;
+    const active=direction>0?left:right;
+    // 只能從被位移的區塊向外推；絕對不反向移動另一個家族。
+    if(!moved.has(active.id)||protectedParents.has(block.id)){
+      revert();return false;
+    }
+    const branch=genealogyOwnedBranchUnits(model,ownership,[block.id]);
+    if(!branch.size||[...branch].some(id=>moving.has(id)||protectedParents.has(id))){
+      revert();return false;
+    }
+    // 若推開的單位是已被移動的區塊，需要保留原有分支相對位置。
+    if(branch.has(active.id)){
+      revert();return false;
+    }
+    shift(branch,direction*overlap);
+  }
+  revert();
+  return false;
+}
+
+// ========【共通親子排列】 配偶、前任、情人與單親只從實際畫線接點計算子女位置 ========
+function alignUnifiedSingleChildBranches(layers,model,ownership,connectorGroups) {
+  const {SIBLING:gap}=resolveLayoutGaps();
+  const groups=connectorGroups.filter(group=>group.children.length===1)
+    .sort((a,b)=>{
+      const generation=g=>Math.max(-1,...g.parentIds.map(id=>
+        model.unitBySim.get(id)?.generation??-1));
+      return generation(b)-generation(a)||String(a.key||'').localeCompare(String(b.key||''));
+    });
+  let corrected=0;
+  // 由下而上，整棵子孫先排好再靠近其父母連接點。
+  groups.forEach(group=>{
+    const childId=group.children[0];
+    const childUnit=model.unitBySim.get(childId);
+    if(!childUnit)return;
+    const parentGeneration=Math.max(-1,...group.parentIds.map(id=>
+      model.unitBySim.get(id)?.generation??-1));
+    if(childUnit.generation<=parentGeneration)return;
+    const pos=placeGenealogyUnitMembers(model.units);
+    const source=parentConnectorSource(group,pos,model.byId,[]);
+    const child=pos.get(childId);
+    if(!source||!child)return;
+    const childX=cardVerticalAnchor(child,'top').x;
+    const delta=source.x-childX;
+    if(Math.abs(delta)<=0.75)return;
+    if(genealogyTranslateChildBlockWithClearance(
+      layers,model,ownership,group,delta,parentGeneration,gap
+    ))corrected++;
+  });
+  return corrected;
+}
+
 function solveAutomaticGenealogyPositions(visibleIds) {
   const primarySimIds =
     getActiveLayoutPrimaryIds(
@@ -6711,6 +6837,12 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     model,
     ownership,
     connectorGroups
+  );
+
+  // 讓所有「僅有一名子女」的群組共用真正的 renderer 接點，不再只處理情人。
+  // 不重排既有家系；若卡片擋住對齊位置，僅向外推開整個相鄰子孫區塊。
+  alignUnifiedSingleChildBranches(
+    layers,model,ownership,connectorGroups
   );
 
   // Family Branch Block 本身就是最終水平幾何權威。
