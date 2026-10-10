@@ -13,7 +13,7 @@ const layouts = new Map([
   ["L1nG/home-en.html","l1ng-home"],
   ["L1nG/changelog.html","l1ng-changelog"],
   ["L1nG/Translations/index.html","translations"],
-  ["L1nG/GenealogyExporter/index.html","genealogy-exporter"],
+  ["L1nG/GenealogyExporter/genealogy-exporter.html","genealogy-exporter"],
   ["L1nG/RealDate/index.html","realdate-home"],
   ...["download","installation","faq","roadmap","gameplay","compatibility","changelog"].map(k=>["L1nG/RealDate/"+k+".html","realdate-"+k])
 ]);

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html data-language="zh-Hant" lang="zh-Hant">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>族譜提取器 · L1nG</title>
+    <meta content="使用 L1nG 族譜提取器，將《模擬市民 4》存檔中的人物、家庭、族譜關係、寵物與可取得的頭像整理成 ZIP，匯入網頁端族譜工具。" name="description"/>
+    <meta content="#f6f8fb" name="theme-color"/>
+    <link rel="stylesheet" href="genealogy-exporter.css?v=20261011-beta-preview-r1"/>
+    <script src="genealogy-exporter.js?v=20261010-player-stroke-r1" defer></script>
+    <link rel="stylesheet" href="../../site-skeleton.css?v=20261008-site-skeleton-r2"/>
+    <noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
+</head>
+<body id="top">
+    <script src="../../site-skeleton.js?v=20261008-site-skeleton-r2" data-skeleton-layout="genealogy-exporter"></script>
+    <!-- ========【Genealogy Exporter 頂部導覽】 設定 - L1nG 品牌、頁面導覽與語言切換 ======== -->
+    <header class="site-header" id="siteHeader">
+        <div class="site-header-inner">
+            <div class="site-brand-group">
+                <a class="creator-link" href="../home.html">L1nG</a>
+                <span class="brand-divider">/</span>
+                <span aria-current="page" class="exporter-brand"><span data-lang="zh-Hant">族譜提取器</span><span data-lang="en">GENEALOGY EXPORTER</span></span>
+            </div>
+            <nav aria-label="族譜提取器" class="main-nav" id="mainNav">
+                <a href="#features"><span data-lang="zh-Hant">功能</span><span data-lang="en">Features</span></a>
+                <a href="#workflow"><span data-lang="zh-Hant">使用方式</span><span data-lang="en">How It Works</span></a>
+                <a href="#status"><span data-lang="zh-Hant">支援範圍</span><span data-lang="en">Support &amp; Limits</span></a>
+                <a class="nav-tool-link" href="genealogy.html"><span data-lang="zh-Hant">開啟族譜工具</span><span data-lang="en">Open Genealogy</span></a>
+            </nav>
+            <div class="header-controls">
+                <div aria-label="Language" class="language-switch" role="group">
+                    <button aria-pressed="true" class="language-button active" data-language-button="zh-Hant" type="button">繁中</button>
+                    <span class="language-divider">/</span>
+                    <button aria-pressed="false" class="language-button" data-language-button="en" type="button">EN</button>
+                </div>
+                <button aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單" class="nav-toggle" id="navToggle" type="button">
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <!-- ========【首頁主視覺】 設定 - 模組定位、目前狀態與主要入口 ======== -->
+        <section class="hero">
+            <div class="hero-grid">
+                <div class="hero-copy reveal">
+                    <div class="eyebrow"><span data-lang="zh-Hant">模擬市民 4 · 族譜資料提取</span><span data-lang="en">THE SIMS 4 · GENEALOGY EXPORTER</span></div>
+                    <h1><span data-lang="zh-Hant">族譜提取器</span><span data-lang="en">GENEALOGY<br/>EXPORTER</span></h1>
+                    <p class="hero-lead" data-lang="zh-Hant">把遊戲中的家族關係整理成網頁族譜</p>
+                    <p class="hero-lead" data-lang="en">Turn your Sims 4 family relationships into a web family tree</p>
+                    <p class="hero-description" data-lang="zh-Hant">將模擬市民、家庭、親子關係、寵物與可取得的頭像整理成 ZIP，再匯入 L1nG 族譜工具，不必從頭建立每一位家族成員</p>
+                    <p class="hero-description" data-lang="en">Gather Sims, households, family relationships, pets, and available portraits into a ZIP, then import it into L1nG Genealogy without adding each family member by hand</p>
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="genealogy.html">
+                            <span data-lang="zh-Hant">開啟族譜工具</span>
+                            <span data-lang="en">Open Genealogy Tool</span>
+                        </a>
+                        <a class="button button-secondary" href="#workflow">
+                            <span data-lang="zh-Hant">查看使用方式</span>
+                            <span data-lang="en">How to Export</span>
+                        </a>
+                    </div>
+                    <div class="hero-meta">
+                        <span>
+                            <small data-lang="zh-Hant">目前版本</small>
+                            <small data-lang="en">Current Version</small>
+                            <strong data-lang="zh-Hant">v0.1 Beta</strong>
+                            <strong data-lang="en">v0.1 Beta</strong>
+                        </span>
+                        <span>
+                            <small data-lang="zh-Hant">遊戲版本</small>
+                            <small data-lang="en">Game Version</small>
+                            <strong>1.128.90.1030</strong>
+                        </span>
+                        <span>
+                            <small data-lang="zh-Hant">支援系統</small>
+                            <small data-lang="en">Supported System</small>
+                            <strong>Windows x64</strong>
+                        </span>
+                    </div>
+                </div>
+                <!-- ========【資料流視覺】 設定 - 遊戲存檔到網頁族譜的四段資料流 ======== -->
+                <div aria-label="The Sims 4 save to Genealogy workflow" class="bridge-visual reveal">
+                    <div class="bridge-card bridge-source">
+                        <span class="bridge-kicker">01</span>
+                        <strong>THE SIMS 4</strong>
+                        <small data-lang="zh-Hant">目前存檔</small>
+                        <small data-lang="en">Current Save</small>
+                    </div>
+                    <span aria-hidden="true" class="bridge-line"></span>
+                    <div class="bridge-card bridge-module">
+                        <span class="bridge-kicker">02</span>
+                        <strong><span data-lang="zh-Hant">族譜提取器</span><span data-lang="en">EXPORTER</span></strong>
+                        <small data-lang="zh-Hant">人物、關係與頭像</small>
+                        <small data-lang="en">Family Data &amp; Portraits</small>
+                    </div>
+                    <span aria-hidden="true" class="bridge-line"></span>
+                    <div aria-hidden="true" class="bridge-file">
+                        <span class="file-fold"></span>
+                        <strong>ZIP</strong>
+                        <small data-lang="zh-Hant">族譜資料與頭像</small><small data-lang="en">Genealogy + Portraits</small>
+                    </div>
+                    <span aria-hidden="true" class="bridge-line"></span>
+                    <div class="bridge-card bridge-target">
+                        <span class="bridge-kicker">04</span>
+                        <strong><span data-lang="zh-Hant">族譜工具</span><span data-lang="en">GENEALOGY</span></strong>
+                        <small data-lang="zh-Hant">網頁端族譜工具</small>
+                        <small data-lang="en">Web Genealogy</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ========【安全設計】 設定 - 說明提取器不修改存檔與資料留在本機 ======== -->
+        <section class="trust-strip">
+            <div class="trust-inner">
+                <div class="trust-item reveal">
+                    <span class="trust-mark">01</span>
+                    <div>
+                        <strong data-lang="zh-Hant">不修改存檔</strong>
+                        <strong data-lang="en">Does not modify saves</strong>
+                        <p data-lang="zh-Hant">讀取需要的人物與家庭資料，不更改存檔中的人物或親子關係</p>
+                        <p data-lang="en">Reads the required Sim and household data without editing the save or its family relationships</p>
+                    </div>
+                </div>
+                <div class="trust-item reveal">
+                    <span class="trust-mark">02</span>
+                    <div>
+                        <strong data-lang="zh-Hant">資料留在本機</strong>
+                        <strong data-lang="en">Local-only output</strong>
+                        <p data-lang="zh-Hant">ZIP 儲存在 The Sims 4 文件資料夾，不會自動上傳</p>
+                        <p data-lang="en">Your ZIP stays in your The Sims 4 documents folder and is never uploaded automatically</p>
+                    </div>
+                </div>
+                <div class="trust-item reveal">
+                    <span class="trust-mark">03</span>
+                    <div>
+                        <strong data-lang="zh-Hant">匯入後繼續編輯</strong>
+                        <strong data-lang="en">Edit after importing</strong>
+                        <p data-lang="zh-Hant">匯入族譜工具後，仍可調整模擬市民資料與家族關係</p>
+                        <p data-lang="en">After importing, you can continue editing Sim details and family relationships in Genealogy</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ========【提取內容】 設定 - 目前已驗證的資料範圍 ======== -->
+        <section class="section" id="features">
+            <div class="section-heading reveal">
+                <span class="section-kicker"><span data-lang="zh-Hant">提取內容</span><span data-lang="en">WHAT YOU CAN EXPORT</span></span>
+                <h2 data-lang="zh-Hant">從人物資料到家族關係，一次整理</h2>
+                <h2 data-lang="en">From Sims and households to family relationships</h2>
+                <p data-lang="zh-Hant">提取器會整理存檔中可取得的資料，實際內容依模擬市民、存檔及已安裝模組而有所不同</p>
+                <p data-lang="en">The exporter gathers available information from your save. Results may vary by Sim, save, and installed mods</p>
+            </div>
+            <div class="feature-grid">
+                <article class="feature-card reveal">
+                    <span class="feature-number">01</span>
+                    <h3 data-lang="zh-Hant">模擬市民與家庭</h3>
+                    <h3 data-lang="en">Sims &amp; Households</h3>
+                    <p data-lang="zh-Hant">提取模擬市民、家庭成員、家庭名稱與可取得的居住資訊，也包含存檔中的貓狗資料</p>
+                    <p data-lang="en">Exports Sims, household members and names, available residence details, and cats and dogs in the save</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">家庭成員</span>
+                        <span data-lang="zh-Hant">居住資訊</span>
+                        <span data-lang="zh-Hant">寵物</span>
+                        <span data-lang="en">Households</span>
+                        <span data-lang="en">Residence</span>
+                        <span data-lang="en">Pets</span>
+                    </div>
+                </article>
+                <article class="feature-card reveal">
+                    <span class="feature-number">02</span>
+                    <h3 data-lang="zh-Hant">親子與家族關係</h3>
+                    <h3 data-lang="en">Family Relationships</h3>
+                    <p data-lang="zh-Hant">保留父母、子女與歷代族譜關係，包括只留下族譜紀錄的家族成員</p>
+                    <p data-lang="en">Preserves parents, children, and past generations, including relatives recorded only in the game family tree</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">父母與子女</span>
+                        <span data-lang="zh-Hant">歷代家族</span>
+                        <span data-lang="en">Parents &amp; Children</span>
+                        <span data-lang="en">Family History</span>
+                    </div>
+                </article>
+                <article class="feature-card reveal">
+                    <span class="feature-number">03</span>
+                    <h3 data-lang="zh-Hant">人物詳細資料</h3>
+                    <h3 data-lang="en">Sim Details</h3>
+                    <p data-lang="zh-Hant">整理可取得的特徵、職業與職級、抱負、特殊種族及死亡相關資訊</p>
+                    <p data-lang="en">Includes available traits, career levels, aspirations, occult types, and death-related information</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">特徵</span>
+                        <span data-lang="zh-Hant">職業</span>
+                        <span data-lang="zh-Hant">抱負</span>
+                        <span data-lang="en">Traits</span>
+                        <span data-lang="en">Careers</span>
+                        <span data-lang="en">Aspirations</span>
+                    </div>
+                </article>
+                <article class="feature-card reveal">
+                    <span class="feature-number">04</span>
+                    <h3 data-lang="zh-Hant">遊戲中顯示的文本</h3>
+                    <h3 data-lang="en">In-Game Text</h3>
+                    <p data-lang="zh-Hant">盡可能沿用目前遊戲語言的文本，讓特徵與職業等資訊更容易閱讀</p>
+                    <p data-lang="en">Uses text from your current game language where available to make traits and careers easier to read</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">目前遊戲語言</span>
+                        <span data-lang="en">Game Language</span>
+                    </div>
+                </article>
+                <article class="feature-card reveal">
+                    <span class="feature-number">05</span>
+                    <h3 data-lang="zh-Hant">模擬市民與寵物頭像</h3>
+                    <h3 data-lang="en">Sim &amp; Pet Portraits</h3>
+                    <p data-lang="zh-Hant">可將遊戲原生的模擬市民與寵物 512×512 頭像一併匯出</p>
+                    <p data-lang="en">Exports available native 512×512 portraits of Sims and pets alongside their genealogy data</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">原生頭像</span>
+                        <span data-lang="zh-Hant">貓狗</span>
+                        <span data-lang="zh-Hant">自動顯示</span>
+                        <span data-lang="en">Native Portraits</span>
+                        <span data-lang="en">Cats &amp; Dogs</span>
+                        <span data-lang="en">Auto Display</span>
+                    </div>
+                </article>
+                <article class="feature-card feature-card-accent reveal">
+                    <span class="feature-number">06</span>
+                    <h3 data-lang="zh-Hant">RealDate 日期資訊</h3>
+                    <h3 data-lang="en">RealDate Dates</h3>
+                    <p data-lang="zh-Hant">搭配支援的 RealDate 版本，可帶入可取得的生日、遊戲日期與年齡資料</p>
+                    <p data-lang="en">When used with a supported RealDate version, includes available birthdays, game dates, and age details</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">生日</span>
+                        <span data-lang="zh-Hant">年齡</span>
+                        <span data-lang="en">Birth Dates</span>
+                        <span data-lang="en">Ages</span>
+                    </div>
+                </article>
+                <article class="feature-card feature-card-pending reveal">
+                    <span class="feature-number">07</span>
+                    <div class="feature-state" data-lang="zh-Hant">尚在研究</div>
+                    <div class="feature-state" data-lang="en">In Research</div>
+                    <h3 data-lang="zh-Hant">人物 CAS 服裝照片</h3>
+                    <h3 data-lang="en">CAS Outfit Photos</h3>
+                    <p data-lang="zh-Hant">正在研究提取模擬市民在 CAS 中的服裝造型照片，目前尚未提供匯出</p>
+                    <p data-lang="en">Research into exporting Sims' CAS outfit photos is ongoing; this feature is not yet available</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">服裝照片</span>
+                        <span data-lang="zh-Hant">研究中</span>
+                        <span data-lang="en">Outfit Photos</span>
+                        <span data-lang="en">In Research</span>
+                    </div>
+                </article>
+                <article class="feature-card feature-card-pending reveal">
+                    <span class="feature-number">08</span>
+                    <div class="feature-state" data-lang="zh-Hant">尚在研究</div>
+                    <div class="feature-state" data-lang="en">In Research</div>
+                    <h3 data-lang="zh-Hant">家庭合照</h3>
+                    <h3 data-lang="en">Household Group Photos</h3>
+                    <p data-lang="zh-Hant">正在研究提取家庭成員合照的方式，目前尚未提供匯出</p>
+                    <p data-lang="en">Research into exporting household group photos is ongoing; this feature is not yet available</p>
+                    <div class="feature-tags">
+                        <span data-lang="zh-Hant">家庭合照</span>
+                        <span data-lang="zh-Hant">研究中</span>
+                        <span data-lang="en">Household Photos</span>
+                        <span data-lang="en">In Research</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+        <!-- ========【使用流程】 設定 - 從安裝模組到網頁匯入的完整操作 ======== -->
+        <section class="section workflow-section" id="workflow">
+            <div class="section-heading reveal">
+                <span class="section-kicker"><span data-lang="zh-Hant">使用方式</span><span data-lang="en">HOW TO USE</span></span>
+                <h2 data-lang="zh-Hant">四個步驟，完成族譜匯出</h2>
+                <h2 data-lang="en">Export your genealogy in four steps</h2>
+            </div>
+            <div class="workflow-list">
+                <article class="workflow-step reveal">
+                    <span class="step-index">01</span>
+                    <div class="step-copy">
+                        <h3 data-lang="zh-Hant">安裝族譜提取器</h3>
+                        <h3 data-lang="en">Install Genealogy Exporter</h3>
+                        <p data-lang="zh-Hant">解壓縮後，將 <code>.ts4script</code> 與 <code>.pyd</code> 放進 Mods 內同一個資料夾，並在遊戲設定中開啟「自訂內容與模組」及「允許腳本模組」</p>
+                        <p data-lang="en">After extracting the download, place the <code>.ts4script</code> and <code>.pyd</code> files in the same Mods subfolder, then enable Custom Content &amp; Mods and Script Mods in game settings</p>
+                    </div>
+                    <div class="workflow-install-download" aria-label="族譜提取器下載資訊">
+                        <div class="workflow-install-download-meta">
+                            <strong>v0.1 Beta</strong>
+                            <small>Windows x64</small>
+                        </div>
+                        <button class="workflow-install-download-action" type="button" disabled title="安裝檔整理中，尚未開放下載">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg>
+                            <span data-lang="zh-Hant">安裝檔準備中</span><span data-lang="en">Download pending</span>
+                        </button>
+                    </div>
+                </article>
+                <article class="workflow-step reveal">
+                    <span class="step-index">02</span>
+                    <div class="step-copy">
+                        <h3 data-lang="zh-Hant">載入要匯出的存檔</h3>
+                        <h3 data-lang="en">Load your save</h3>
+                        <p data-lang="zh-Hant">進入生活模式並等待存檔載入完成，如需確認提取器是否啟動，可按 <code>Ctrl + Shift + C</code> 開啟遊戲指令輸入框，再點擊右側指令複製、貼上並執行</p>
+                        <p data-lang="en">Enter Live Mode and wait for your save to finish loading. To check that the exporter is running, press <code>Ctrl + Shift + C</code> to open the cheat console, then click the command on the right to copy, paste, and run it</p>
+                    </div>
+                    <button aria-label="複製指令：l1ng.genealogy.status" class="command-copy" data-copy-command="l1ng.genealogy.status" title="點擊複製指令" type="button">
+                        <code>l1ng.genealogy.status</code>
+                        <svg aria-hidden="true" class="l1ng-copy-glyph" focusable="false" viewbox="0 0 24 24">
+                            <rect class="l1ng-copy-stroke" height="12" rx="2" stroke-dasharray="43.314 90" style="--stroke-hide:45.314" width="12" x="8" y="8"></rect>
+                            <path class="l1ng-copy-stroke" d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke-dasharray="29.427 80" style="--stroke-hide:31.427"></path>
+                            <path class="l1ng-check-stroke" d="M5 12.5l4.2 4.2L19 7" stroke-dasharray="19.728 70" style="--stroke-hide:21.728"></path>
+                        </svg>
+                        <span aria-atomic="true" aria-live="polite" class="command-copy-feedback"></span>
+                    </button>
+                </article>
+                <article class="workflow-step reveal">
+                    <span class="step-index">03</span>
+                    <div class="step-copy">
+                        <h3 data-lang="zh-Hant">執行族譜匯出</h3>
+                        <h3 data-lang="en">Export your genealogy</h3>
+                        <p data-lang="zh-Hant">按 <code>Ctrl + Shift + C</code> 開啟遊戲指令輸入框，點擊右側指令複製並貼上執行，等待匯出完成後即可取得 ZIP 檔案</p>
+                        <p data-lang="en">Press <code>Ctrl + Shift + C</code> to open the cheat console, then click to copy the command on the right, paste it into the game, and wait for the ZIP export to finish</p>
+                    </div>
+                    <button aria-label="複製指令：l1ng.genealogy.export" class="command-copy" data-copy-command="l1ng.genealogy.export" title="點擊複製指令" type="button">
+                        <code>l1ng.genealogy.export</code>
+                        <svg aria-hidden="true" class="l1ng-copy-glyph" focusable="false" viewbox="0 0 24 24">
+                            <rect class="l1ng-copy-stroke" height="12" rx="2" stroke-dasharray="43.314 90" style="--stroke-hide:45.314" width="12" x="8" y="8"></rect>
+                            <path class="l1ng-copy-stroke" d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke-dasharray="29.427 80" style="--stroke-hide:31.427"></path>
+                            <path class="l1ng-check-stroke" d="M5 12.5l4.2 4.2L19 7" stroke-dasharray="19.728 70" style="--stroke-hide:21.728"></path>
+                        </svg>
+                        <span aria-atomic="true" aria-live="polite" class="command-copy-feedback"></span>
+                    </button>
+                </article>
+                <article class="workflow-step reveal">
+                    <span class="step-index">04</span>
+                    <div class="step-copy">
+                        <h3 data-lang="zh-Hant">匯入網頁族譜</h3>
+                        <h3 data-lang="en">Import into Genealogy</h3>
+                        <p data-lang="zh-Hant">將 ZIP 拖曳到族譜工具的畫布，或透過「更多 → 匯入遊戲族譜」選取檔案；匯入後的操作可參考族譜工具內的「使用說明」</p>
+                        <p data-lang="en">Drag the ZIP onto the Genealogy canvas, or select it from More → Import Game Genealogy. For editing and other features, see Help in the Genealogy tool</p>
+                    </div>
+                    <a class="inline-link arrow-link-motion" href="genealogy.html">
+                        <span data-lang="zh-Hant">開啟族譜工具 →</span>
+                        <span data-lang="en">Open Genealogy →</span>
+                    </a>
+                </article>
+            </div>
+            <div class="path-card reveal">
+                <span class="path-label" data-lang="zh-Hant">預設輸出位置</span>
+                <span class="path-label" data-lang="en">Default export folder</span>
+                <code>Documents\Electronic Arts\The Sims 4\L1nG_Genealogy_Exports</code>
+                <p data-lang="zh-Hant">每次匯出都會建立附有日期與時間的 <strong>L1nG_Genealogy_*.zip</strong>，匯入網站時選取這份檔案即可</p>
+                <p data-lang="en">Each export creates a dated <strong>L1nG_Genealogy_*.zip</strong>. Choose this file when importing into the website</p>
+            </div>
+        </section>
+        <!-- ========【ZIP 結構】 設定 - 說明輸出檔案內容與本機資料流 ======== -->
+        <section class="section data-section">
+            <div class="data-panel reveal">
+                <div class="data-copy">
+                    <span class="section-kicker"><span data-lang="zh-Hant">匯出檔案</span><span data-lang="en">YOUR EXPORT FILE</span></span>
+                    <h2 data-lang="zh-Hant">將族譜資料整理成 ZIP</h2>
+                    <h2 data-lang="en">Your genealogy data in one ZIP</h2>
+                    <p data-lang="zh-Hant">這份 ZIP 包含提取的人物、家庭、族譜資料與頭像，檔案會留在你的電腦中，直到你自行選取匯入；<strong>它不是遊戲存檔備份</strong></p>
+                    <p data-lang="en">The ZIP contains exported Sims, households, family relationships, and available portraits. It stays on your computer until you choose to import it; <strong>it is not a backup of your game save</strong></p>
+                </div>
+                <div aria-label="Export ZIP structure" class="file-tree">
+                    <div class="file-tree-root">L1nG_Genealogy_*.zip</div>
+                    <div class="file-tree-item"><span></span><strong>manifest.json</strong><small data-lang="zh-Hant">檔案版本與匯出資訊</small><small data-lang="en">Export file details</small></div>
+                    <div class="file-tree-item"><span></span><strong>genealogy.json</strong><small data-lang="zh-Hant">人物、寵物、家庭與族譜資料</small><small data-lang="en">Sims, pets, households, relationships</small></div>
+                    <div class="file-tree-item"><span></span><strong>avatars/</strong><small data-lang="zh-Hant">可取得的頭像圖片</small><small data-lang="en">Available portrait images</small></div>
+                </div>
+            </div>
+        </section>
+        <!-- ========【開發狀態】 設定 - 已驗證、測試中與尚未完成項目 ======== -->
+        <section class="section" id="status">
+            <div class="section-heading reveal">
+                <span class="section-kicker"><span data-lang="zh-Hant">支援範圍</span><span data-lang="en">SUPPORT &amp; PROGRESS</span></span>
+                <h2 data-lang="zh-Hant">目前支援與開發進度</h2>
+                <h2 data-lang="en">Available features and upcoming work</h2>
+            </div>
+            <div class="status-grid">
+                <div class="status-column status-ready reveal">
+                    <div class="status-heading">
+                        <span class="status-dot"></span>
+                        <strong data-lang="zh-Hant">目前已支援</strong>
+                        <strong data-lang="en">Supported</strong>
+                    </div>
+                    <ul>
+                        <li data-lang="zh-Hant">模擬市民、家庭與寵物資料</li>
+                        <li data-lang="en">Sims, households, and pets</li>
+                        <li data-lang="zh-Hant">親子關係與歷代族譜成員</li>
+                        <li data-lang="en">Parent-child relationships and earlier generations</li>
+                        <li data-lang="zh-Hant">特徵、職業、抱負與可取得的原生頭像</li>
+                        <li data-lang="en">Traits, careers, aspirations, and available native portraits</li>
+                        <li data-lang="zh-Hant">ZIP 匯出與網站匯入</li>
+                        <li data-lang="en">ZIP export and website import</li>
+                    </ul>
+                </div>
+                <div class="status-column status-testing reveal">
+                    <div class="status-heading">
+                        <span class="status-dot"></span>
+                        <strong data-lang="zh-Hant">部分資料可能缺少</strong>
+                        <strong data-lang="en">Some data may be unavailable</strong>
+                    </div>
+                    <ul>
+                        <li data-lang="zh-Hant">尚未涵蓋所有 DLC 的實機測試，部分特殊種族及相關資訊可能無法完整提取</li>
+                        <li data-lang="en">Not all DLC have been tested in-game; some occult types and related details may not be fully exported</li>
+                    </ul>
+                </div>
+                <div class="status-column status-pending reveal">
+                    <div class="status-heading">
+                        <span class="status-dot"></span>
+                        <strong data-lang="zh-Hant">開發測試中</strong>
+                        <strong data-lang="en">In Development &amp; Testing</strong>
+                    </div>
+                    <ul>
+                        <li data-lang="zh-Hant">人物 CAS 服裝照片提取</li>
+                        <li data-lang="en">CAS outfit photo extraction</li>
+                        <li data-lang="zh-Hant">家庭合照提取</li>
+                        <li data-lang="en">Household group photo extraction</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- ========【網站頁腳】 設定 - 專案互通入口與返回頂部 ======== -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <strong><span data-lang="zh-Hant">族譜提取器</span><span data-lang="en">GENEALOGY EXPORTER</span></strong>
+                <span data-lang="zh-Hant">L1nG ·《模擬市民 4》族譜提取器</span>
+                <span data-lang="en">L1nG · The Sims 4 genealogy data exporter</span>
+            </div>
+            <div class="footer-links">
+                <a href="../home.html">L1nG</a>
+                <a href="genealogy.html"><span data-lang="zh-Hant">族譜工具</span><span data-lang="en">Genealogy</span></a>
+                <a href="../RealDate/index.html">RealDate</a>
+                <a href="#top"><span data-lang="zh-Hant">↑ 返回頂部</span><span data-lang="en">↑ Back to top</span></a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
