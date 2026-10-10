@@ -56,11 +56,13 @@ test('上下兩側都有其他人物卡片時尋找避障路徑',()=>{
  assert.doesNotMatch(result.d,/[QC]/);
  assert.ok(result.d.length>15,'應繞開上一代，不應只有直線');
 });
-test('親子橋接只在推定情人狀態取消，其他親子線不受影響',()=>{
+test('推定情人直接沿用關係曲線作為共同子女來源，不產生第二條伴侶線',()=>{
  const line=source.slice(source.indexOf('function parentConnectorSource('),source.indexOf('function parentConnectorChildAnchor('));
- assert.match(line,/const independentCoParents = inferred\.length \|\| !!pairLink/);
- assert.match(line,/parentAnchors\.forEach\(\(anchor,index\) => \{/);
- assert.match(line,/paths\.push\(/);
+ assert.match(line,/genealogyNonSpousalCoParentLink\(group,byId\)/);
+ assert.match(line,/genealogyCoParentRelationshipJunction\(/);
+ assert.match(line,/if\(junction\)return junction/);
+ const branch=line.slice(line.indexOf('if(relation){'),line.indexOf('// 兩位共同父母不是配偶'));
+ assert.doesNotMatch(branch,/paths\.push\(/);
 });
 test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
  assert.match(scoped,/if\(!setting\.curved\)/);
