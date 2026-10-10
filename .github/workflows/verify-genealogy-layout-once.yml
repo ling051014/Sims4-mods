@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run genealogy regression checks
+      - name: Verify focused genealogy regression checks
         run: |
           node --check L1nG/GenealogyExporter/genealogy_scene.js
           node --test tests/genealogy_parent_axis_alignment.test.cjs tests/genealogy_coparent_layout.test.cjs tests/default_portrait_integrity.test.cjs
