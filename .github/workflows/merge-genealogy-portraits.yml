@@ -1,0 +1,92 @@
+name: Merge genealogy sample portraits
+on:
+  push:
+    branches:
+      - genealogy-structural-optimization-20260926
+    paths:
+      - .github/workflows/merge-genealogy-portraits.yml
+permissions:
+  contents: write
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Merge source files and verify
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64
+          import json
+          import re
+          from pathlib import Path
+          root = Path("L1nG/GenealogyExporter")
+          files = [root / ("genealogy_sample_portraits_v10_%02d.js" % i) for i in range(6)]
+          prefix = "(function(g){'use strict';Object.assign(g.L1nGGenealogySamplePortraits, "
+          suffix = ");})(window);"
+          chunks = []
+          keys = set()
+          for file in files:
+              source = file.read_text(encoding="utf-8").strip()
+              assert source.startswith(prefix) and source.endswith(suffix), str(file)
+              raw = source[len(prefix):-len(suffix)]
+              group = json.loads(raw)
+              assert isinstance(group, dict)
+              for name, payload in group.items():
+                  assert name not in keys, name
+                  assert name.startswith("assets/sample-portraits/") and name.endswith(".png"), name
+                  data = base64.b64decode(payload, validate=True)
+                  expected = 128 if name.endswith("/shared_unknown.png") else 512
+                  assert data[:8] == b"\x89PNG\r\n\x1a\n" and data[12:16] == b"IHDR", name
+                  assert (int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big"), data[24], data[25]) == (expected,expected,8,6), name
+                  keys.add(name)
+              chunks.append(raw)
+          assert len(keys) == 30, len(keys)
+          assert len(list((root/"assets"/"sample-portraits").glob("*.png"))) == 30
+          merged = ("/* 網站預設肖像：保留原始 PNG 資料，不重新編碼 */\n"
+                    "(function(global) {\n  'use strict';\n"
+                    "  global.L1nGGenealogySamplePortraits = Object.assign({},\n"
+                    + ",\n".join("    "+chunk for chunk in chunks) + "\n"
+                    "  );\n})(window);\n")
+          (root/"genealogy_sample_portraits.js").write_text(merged, encoding="utf-8")
+          html_file = root/"genealogy.html"
+          html = html_file.read_text(encoding="utf-8")
+          for file in files:
+              pattern = r'^\s*<script src="' + re.escape(file.name) + r'\?v=[^"]+"></script>\s*\n?'
+              html, count = re.subn(pattern, "\n", html, count=1, flags=re.MULTILINE)
+              assert count == 1, file.name
+          html, count = re.subn(r'<script src="genealogy_sample_portraits\.js\?v=[^"]+"></script>',
+              '<script src="genealogy_sample_portraits.js?v=20261011-portrait-single-r1"></script>',html,count=1)
+          assert count == 1
+          html_file.write_text(html,encoding="utf-8")
+          test_file = Path("tests/default_portrait_integrity.test.cjs")
+          test = test_file.read_text(encoding="utf-8")
+          old = """  for (let n = 0; n < 6; n++) {
+              const name = 'genealogy_sample_portraits_v10_0' + n + '.js';
+              assert.ok(html.includes(name), 'HTML 未載入 ' + name);
+              vm.runInNewContext(getText(name), env);
+            }
+          """
+          # Avoid indentation-dependent matching.
+          pattern = r"  for \(let n = 0; n < 6; n\+\+\) \{\n\s*const name = 'genealogy_sample_portraits_v10_0' \+ n \+ '\.js';\n\s*assert\.ok\(html\.includes\(name\), 'HTML 未載入 ' \+ name\);\n\s*vm\.runInNewContext\(getText\(name\), env\);\n\s*\}\n"
+          replacement = '  assert.match(html, /<script src="genealogy_sample_portraits\\.js\\?v=[^"]+"><\\/script>/);\n  assert.doesNotMatch(html, /genealogy_sample_portraits_v10_\\d\\d\\.js/);\n'
+          test, count = re.subn(pattern, lambda _: replacement, test, count=1)
+          assert count == 1, "test loader does not match expected form"
+          test_file.write_text(test,encoding="utf-8")
+          for file in files:
+              file.unlink()
+          Path(".github/workflows/merge-genealogy-portraits.yml").unlink()
+          print("Merged",len(keys),"PNG entries without changing image bytes")
+          PY
+          node --check L1nG/GenealogyExporter/genealogy_sample_portraits.js
+          node --test tests/default_portrait_integrity.test.cjs
+      - name: Commit verified changes to working branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A L1nG/GenealogyExporter/genealogy.html L1nG/GenealogyExporter/genealogy_sample_portraits.js L1nG/GenealogyExporter/genealogy_sample_portraits_v10_*.js tests/default_portrait_integrity.test.cjs .github/workflows/merge-genealogy-portraits.yml
+          git commit -m "Merge lossless default portrait chunks and update loader"
+          git push origin HEAD:genealogy-structural-optimization-20260926
