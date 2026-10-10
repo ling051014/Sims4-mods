@@ -1,0 +1,14 @@
+name: Verify curvature slider behavior
+on:
+  push:
+    branches: [genealogy-structural-optimization-20260926]
+    paths: [.github/workflows/verify-curvature-slider-once.yml]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test curve geometry and regressions
+        run: |
+          node --check L1nG/GenealogyExporter/genealogy_scene.js
+          node --test tests/genealogy_relationship_routing_round2.test.cjs tests/genealogy_branch_anchors_round3.test.cjs tests/genealogy_coparent_layout.test.cjs tests/genealogy_family_kinship.test.cjs
