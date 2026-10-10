@@ -1,37 +1,89 @@
 <!doctype html>
 <html lang="zh-Hant">
-<meta charset="utf-8">
-<title>EA THUM 開發驗證（非玩家 UI）</title>
-<style>
-body{font:16px system-ui;margin:24px;background:#f5f5f5;color:#222}label{display:block;margin:12px 0}.comparison{display:flex;gap:20px;flex-wrap:wrap}.tile{padding:16px;background-color:white;background-image:conic-gradient(#ddd 25%,transparent 0 50%,#ddd 0 75%,transparent 0);background-size:24px 24px}.tile img{max-width:100%;image-rendering:auto}.white .tile{background:white}.dark .tile{background:#20242b}pre{white-space:pre-wrap}button,select{padding:8px}
-</style>
-<h1>EA THUM 開發驗證</h1>
-<p>只在本機處理；不上傳、不寫 IndexedDB、不縮放 / 修圖。可選本地 raw THUM/JPG 與 s4pe reference PNG。</p>
-<label>原始 THUM：<input id="rawInput" type="file"></label>
-<label>Reference PNG（選填）：<input id="referenceInput" type="file" accept="image/png"></label>
-<label>背景：<select id="background"><option value="checker">棋盤透明背景</option><option value="white">白底</option><option value="dark">深色底</option></select></label>
-<button id="synthetic">載入 tiny synthetic fixture</button>
-<div class="comparison" id="comparison"><section><h2>Raw JPEG</h2><div class="tile"><img id="rawImage"></div></section><section><h2>Decoded PNG</h2><div class="tile"><img id="decodedImage"></div><a id="download">下載 PNG</a></section><section><h2>Reference PNG</h2><div class="tile"><img id="referenceImage"></div></section></div>
-<pre id="result">等待 sample。</pre>
-<script src="../L1nG/GenealogyExporter/genealogy_thumDecoder.js"></script>
-<script>
-const urls=new Map();
-function useBlob(id,blob){if(urls.has(id))URL.revokeObjectURL(urls.get(id));const url=URL.createObjectURL(blob);urls.set(id,url);document.getElementById(id).src=url;return url;}
-function clearUrls(){for(const url of urls.values())URL.revokeObjectURL(url);urls.clear();}
-async function showRaw(blob){
-  clearUrls();
-  try{
-    const bytes=new Uint8Array(await blob.arrayBuffer()), decoded=await L1nGThumDecoder.decode(bytes);
-    if(!decoded)throw new Error('不是已確認的 ALFA THUM');
-    useBlob('rawImage',new Blob([bytes],{type:'image/jpeg'}));
-    const url=useBlob('decodedImage',decoded.blob),link=document.getElementById('download');link.href=url;link.download='thum-decoded.png';
-    const {blob:png,...metadata}=decoded;document.getElementById('result').textContent=JSON.stringify({...metadata,pngBytes:png.size,mime:png.type},null,2);
-  }catch(error){document.getElementById('result').textContent=String(error.stack||error);}
-}
-document.getElementById('rawInput').onchange=e=>e.target.files[0]&&showRaw(e.target.files[0]);
-document.getElementById('referenceInput').onchange=e=>e.target.files[0]&&useBlob('referenceImage',e.target.files[0]);
-document.getElementById('background').onchange=e=>document.getElementById('comparison').className='comparison '+e.target.value;
-document.getElementById('synthetic').onclick=async()=>showRaw(await (await fetch('fixtures/thum/synthetic_alfa.thum')).blob());
-window.addEventListener('beforeunload',clearUrls);
-</script>
+    <meta charset="utf-8">
+    <title>EA THUM 開發驗證（非玩家 UI）</title>
+    <style>
+        body {
+            font:16px system-ui;
+            margin:24px;
+            background:#f5f5f5;
+            color:#222;
+        }
+        label {
+            display:block;
+            margin:12px 0;
+        }
+        .comparison {
+            display:flex;
+            gap:20px;
+            flex-wrap:wrap;
+        }
+        .tile {
+            padding:16px;
+            background-color:white;
+            background-image:conic-gradient(#ddd 25%,transparent 0 50%,#ddd 0 75%,transparent 0);
+            background-size:24px 24px;
+        }
+        .tile img {
+            max-width:100%;
+            image-rendering:auto;
+        }
+        .white .tile {
+            background:white;
+        }
+        .dark .tile {
+            background:#20242b;
+        }
+        pre {
+            white-space:pre-wrap;
+        }
+        button,select {
+            padding:8px;
+        }
+    </style>
+    <h1>EA THUM 開發驗證</h1>
+    <p>只在本機處理；不上傳、不寫 IndexedDB、不縮放 / 修圖。可選本地 raw THUM/JPG 與 s4pe reference PNG。</p>
+    <label>原始 THUM：<input id="rawInput" type="file"></label>
+    <label>Reference PNG（選填）：<input id="referenceInput" type="file" accept="image/png"></label>
+    <label>背景：<select id="background"><option value="checker">棋盤透明背景</option><option value="white">白底</option><option value="dark">深色底</option></select></label>
+    <button id="synthetic">載入 tiny synthetic fixture</button>
+    <div class="comparison" id="comparison">
+        <section>
+            <h2>Raw JPEG</h2>
+            <div class="tile"><img id="rawImage">
+            </div>
+        </section>
+        <section>
+            <h2>Decoded PNG</h2>
+            <div class="tile"><img id="decodedImage">
+            </div><a id="download">下載 PNG</a>
+        </section>
+        <section>
+            <h2>Reference PNG</h2>
+            <div class="tile"><img id="referenceImage">
+            </div>
+        </section>
+    </div>
+    <pre id="result">等待 sample。</pre>
+    <script src="../L1nG/GenealogyExporter/genealogy_thumDecoder.js"></script>
+    <script>
+        const urls=new Map();
+        function useBlob(id,blob){if(urls.has(id))URL.revokeObjectURL(urls.get(id));const url=URL.createObjectURL(blob);urls.set(id,url);document.getElementById(id).src=url;return url;}
+        function clearUrls(){for(const url of urls.values())URL.revokeObjectURL(url);urls.clear();}
+        async function showRaw(blob){
+          clearUrls();
+          try{
+            const bytes=new Uint8Array(await blob.arrayBuffer()), decoded=await L1nGThumDecoder.decode(bytes);
+            if(!decoded)throw new Error('不是已確認的 ALFA THUM');
+            useBlob('rawImage',new Blob([bytes],{type:'image/jpeg'}));
+            const url=useBlob('decodedImage',decoded.blob),link=document.getElementById('download');link.href=url;link.download='thum-decoded.png';
+            const {blob:png,...metadata}=decoded;document.getElementById('result').textContent=JSON.stringify({...metadata,pngBytes:png.size,mime:png.type},null,2);
+          }catch(error){document.getElementById('result').textContent=String(error.stack||error);}
+        }
+        document.getElementById('rawInput').onchange=e=>e.target.files[0]&&showRaw(e.target.files[0]);
+        document.getElementById('referenceInput').onchange=e=>e.target.files[0]&&useBlob('referenceImage',e.target.files[0]);
+        document.getElementById('background').onchange=e=>document.getElementById('comparison').className='comparison '+e.target.value;
+        document.getElementById('synthetic').onclick=async()=>showRaw(await (await fetch('fixtures/thum/synthetic_alfa.thum')).blob());
+        window.addEventListener('beforeunload',clearUrls);
+    </script>
 </html>
