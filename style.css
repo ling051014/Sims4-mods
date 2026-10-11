@@ -1444,3 +1444,9 @@ th.desc .sort-arrows::after {
 .search-box .l1ng-search-clear[hidden]{display:none}
 .search-box .l1ng-search-clear:hover,.search-box .l1ng-search-clear:focus-visible{background:#edf4fa;color:#315f83}
 @media(pointer:coarse){.search-box .l1ng-search-clear{height:40px;width:40px;right:0}}
+
+/* ========【共用捲軸】 A 款細線 - 所有可捲動容器 ======== */
+html,body,body *{scrollbar-width:thin;scrollbar-color:#cad7e2 transparent}
+html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{width:6px;height:6px}
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,body *::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scrollbar-thumb{background:#cad7e2;border-radius:999px}
