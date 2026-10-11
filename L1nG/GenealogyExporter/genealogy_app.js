@@ -6,6 +6,24 @@
  */
 
 
+// ========【滑桿填色】 設定 - 將目前數值映射至自訂細軌道，不依賴瀏覽器原生進度 ========
+function syncGenealogyRangeFill(input) {
+  if (!input || input.type !== 'range') return;
+  const min = Number(input.min);
+  const max = Number(input.max);
+  const value = Number(input.value);
+  const progress = Number.isFinite(value) && Number.isFinite(min) && Number.isFinite(max) && max > min
+    ? Math.min(100,Math.max(0,(value - min) / (max - min) * 100))
+    : 0;
+  input.style.setProperty('--range-fill',progress + '%');
+}
+
+// 原生 input 事件即時更新填色；程式主動更改 value 時則在對應設定流程同步更新。
+document.querySelectorAll('input[type="range"]').forEach(input => {
+  syncGenealogyRangeFill(input);
+  input.addEventListener('input',() => syncGenealogyRangeFill(input));
+});
+
 const PAD = 80;
 const STORE_KEY = 'l1ng_genealogy_v1';
 // 大型遊戲族譜超出 localStorage 容量時，保存於現有 IndexedDB 資料庫。
@@ -7622,7 +7640,10 @@ function syncRelationshipLineControls() {
     styleEl.value = setting.style;
     window.L1nGGenealogyUIController?.refreshControl?.(styleEl);
   }
-  if (widthEl) widthEl.value = String(setting.width);
+  if (widthEl) {
+    widthEl.value = String(setting.width);
+    syncGenealogyRangeFill(widthEl);
+  }
   if (widthValue) widthValue.textContent = Number(setting.width).toFixed(1).replace(/\.0$/,'') + ' px';
   if (colorEl) colorEl.value = relationshipResolvedColor(setting,other ? 'other' : key);
 
@@ -7657,6 +7678,7 @@ function syncRelationshipLineControls() {
   if (curveInput) {
     curveInput.value = String(shownCurveAmount);
     curveInput.disabled = !setting.curved;
+    syncGenealogyRangeFill(curveInput);
   }
   if (curveValue) curveValue.textContent = Math.round(shownCurveAmount) + '%';
 
@@ -7970,6 +7992,7 @@ function paintCanvasBackgroundPreview() {
 function openAppearancePanel() {
   $('appearanceBackgroundOpacity').value =
     Math.round(bgSettings.opacity * 100);
+  syncGenealogyRangeFill($('appearanceBackgroundOpacity'));
   $('appearanceBackgroundOpacityValue').textContent =
     Math.round(bgSettings.opacity * 100) + '%';
   $('appearanceBackgroundFit').value = bgSettings.fit;
@@ -14450,7 +14473,10 @@ function renderAvatarCropPreview(){
     avatarCropDraft.y*bounds.imageHeight
   }px`;
 
-  if(zoom)zoom.value=String(avatarCropDraft.zoom);
+  if(zoom){
+    zoom.value=String(avatarCropDraft.zoom);
+    syncGenealogyRangeFill(zoom);
+  }
   if(output){
     output.textContent=
       `${Math.round(avatarCropDraft.zoom*100)}%`;
