@@ -6,7 +6,7 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261010-gender-card-svg-fix-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261012-person-overview-v7-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261012-unified-storage-header-r1">
     </head>
     <body data-theme="ling">
 
@@ -975,9 +975,21 @@
 
         <!-- ========【圖片與儲存】 設定 - 一般玩家只顯示必要的圖片使用量、備份與清理資訊 ======== -->
         <div class="ui-dialog-backdrop" id="storageDialog">
-            <div class="ui-dialog-panel storage-modal">
-                <h2><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>圖片與儲存</span></h2>
-                <p class="storage-intro">你加入的頭像、寵物圖片、人生照片、家庭合照與背景圖片會保存在這台裝置的瀏覽器中，不會自動上傳。</p>
+            <div class="ui-dialog-panel storage-modal" role="dialog" aria-modal="true" aria-labelledby="storageTitle">
+                <div class="help-header storage-header">
+                    <div class="help-heading">
+                        <span class="l1ng-icon icon-image help-heading-icon" aria-hidden="true"></span>
+                        <div class="help-heading-copy">
+                            <h2 id="storageTitle">圖片與儲存</h2>
+                            <p>查看圖片使用量、備份說明與清理空間。</p>
+                        </div>
+                    </div>
+                    <button class="help-close-btn" id="storageCloseBtn" type="button" title="關閉" aria-label="關閉圖片與儲存">
+                        <span class="l1ng-icon icon-x-lg" aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div class="storage-scroll-body">
+                    <p class="storage-intro">你加入的頭像、寵物圖片、人生照片、家庭合照與背景圖片會保存在這台裝置的瀏覽器中，不會自動上傳。</p>
 
                 <section class="storage-section storage-overview-section">
                     <div class="setting-group-title">目前使用量</div>
@@ -1024,7 +1036,7 @@
                     </div>
                 </section>
 
-                <div class="ui-dialog-actions"><span class="spacer"></span><button id="storageCloseBtn">關閉</button></div>
+                </div>
             </div>
         </div>
 
