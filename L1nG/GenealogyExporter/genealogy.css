@@ -5718,10 +5718,11 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 
 /* 族譜提取器專用：檔案與族譜分支（小尺寸 SVG） */
 .icon-genealogy-extractor {
-    /* 保留原方案 A 構圖，僅放大視覺尺寸；不改變選單排版 */
-    --l1ng-icon: url("../icons/genealogy-extractor.svg?v=20261011-size-r3");
-    transform: scale(1.45);
-    transform-origin: center;
+    /* 文件＋右下角族譜分支：維持原選單文字位置，以獨立圖示尺寸提高辨識度 */
+    --l1ng-icon: url("../icons/genealogy-extractor.svg?v=20261011-shape-r4");
+    width: 18px;
+    height: 18px;
+    margin-inline: -3px;
 }
 
 .icon-diagram-3 {
