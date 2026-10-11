@@ -2277,76 +2277,43 @@ function recommendOtherRelationshipCurveAmount(type) {
   return result;
 }
 
-function relationshipSmoothRoute(points,rects,amount) {
-  const lengths=points.slice(1).map((p,i)=>
-    Math.hypot(p.x-points[i].x,p.y-points[i].y)
-  );
-  const normalized=(clampRelationshipCurveAmount(amount)-10)/90;
-  const desired=0.04+0.42*normalized;
-  // 只有真正發生碰撞才縮小切線；以滑桿要求值作為第一優先。
-  const strengths=[desired,...[0.04,0.10,0.17,0.25,0.33,0.40,0.46]
-    .filter(x=>Math.abs(x-desired)>0.001)
-    .sort((a,b)=>Math.abs(a-desired)-Math.abs(b-desired))];
-  for(const factor of strengths){
-    const tangents=points.map((p,i)=>{
-      const before=points[Math.max(i-1,0)],after=points[Math.min(i+1,points.length-1)];
-      const dx=after.x-before.x,dy=after.y-before.y;
-      const distance=Math.hypot(dx,dy)||1;
-      const reach=i===0?lengths[0]:i===points.length-1?lengths[i-1]:
-        Math.min(lengths[i-1],lengths[i]);
-      return {x:dx/distance*reach*factor,y:dy/distance*reach*factor};
-    });
-    const segments=points.slice(1).map((point,index)=>({
-      from:points[index],
-      c1:{x:points[index].x+tangents[index].x,y:points[index].y+tangents[index].y},
-      c2:{x:point.x-tangents[index+1].x,y:point.y-tangents[index+1].y},
-      to:point
-    }));
-    if(relationshipCubicClear(segments,rects))
-      return relationshipCubicGeometry(segments);
-  }
-  return null;
+// ========【自然曲線避障】 使用連續切線的兩段 Bézier 拱線，不再把直角折線磨圓 ========
+function relationshipNaturalArchSegments(start,end,rise,peakRatio=0.5) {
+  const dx=end.x-start.x;
+  const apex={x:start.x+dx*peakRatio,y:Math.min(start.y,end.y)-rise};
+  const shoulder=dx*0.16;
+  const lift=Math.max(20,rise*0.78);
+  return [
+    {
+      from:start,
+      c1:{x:start.x+dx*0.04,y:start.y-lift},
+      c2:{x:apex.x-shoulder,y:apex.y},
+      to:apex
+    },
+    {
+      from:apex,
+      c1:{x:apex.x+shoulder,y:apex.y},
+      c2:{x:end.x-dx*0.04,y:end.y-lift},
+      to:end
+    }
+  ];
 }
 
-// 避障路徑轉角改用連續三次曲線，不能在「曲線」設定下退回直角折線。
-function relationshipRoundedObstacleRoute(points,rects) {
-  if(!points||points.length<3)return null;
-  const segments=[];
-  let current=points[0];
-  const append=target=>{
-    if(Math.hypot(target.x-current.x,target.y-current.y)<0.001)return;
-    segments.push({from:current,
-      c1:{x:current.x+(target.x-current.x)/3,y:current.y+(target.y-current.y)/3},
-      c2:{x:current.x+(target.x-current.x)*2/3,y:current.y+(target.y-current.y)*2/3},
-      to:target});
-    current=target;
-  };
-  for(let i=1;i<points.length-1;i++){
-    const prev=points[i-1],corner=points[i],next=points[i+1];
-    const a=Math.hypot(corner.x-prev.x,corner.y-prev.y);
-    const b=Math.hypot(next.x-corner.x,next.y-corner.y);
-    if(!a||!b)continue;
-    const radius=Math.min(20,a*0.45,b*0.45);
-    const entry={x:corner.x+(prev.x-corner.x)*radius/a,y:corner.y+(prev.y-corner.y)*radius/a};
-    const exit={x:corner.x+(next.x-corner.x)*radius/b,y:corner.y+(next.y-corner.y)*radius/b};
-    append(entry);
-    segments.push({from:entry,c1:corner,c2:corner,to:exit});
-    current=exit;
-  }
-  append(points[points.length-1]);
-  return relationshipCubicClear(segments,rects)?relationshipCubicGeometry(segments):null;
-}
-
-
-function relationshipUpperDetourGeometry(start,end,rects) {
-  // 單弧無法避障時，從人物上方尋找平滑通道；不能因直線可走就畫成平線。
-  // 每個候選都以真正的曲線碰撞檢查通過後才採用。
-  const baseline=Math.min(start.y,end.y);
-  for(const rise of [55,85,120,165,210,270,340,430]){
-    const y=baseline-rise;
-    const points=[start,{x:start.x,y},{x:end.x,y},end];
-    const curved=relationshipRoundedObstacleRoute(points,rects);
-    if(curved)return curved;
+function relationshipUpperDetourGeometry(start,end,rects,amount=50) {
+  const dx=end.x-start.x,dy=end.y-start.y;
+  // 近乎垂直的關係交由原本的單弧處理，不建立不必要的側向回折。
+  if(Math.abs(dx)<Math.max(80,Math.abs(dy)*0.5))return null;
+  const initialRise=Math.max(52,relationshipCurveAmplitude(start,end,amount)*0.75);
+  // 先試較低的自然拱線；確定撞到其他人物卡片才逐步提高。
+  // 只測有限組弧度與頂點，避免大族譜反覆進行高成本避障搜尋。
+  const rises=[0,30,65,105,155,220,300,390,490];
+  for(const extra of rises){
+    const rise=initialRise+extra;
+    for(const ratio of [0.5,0.42,0.58]){
+      const segments=relationshipNaturalArchSegments(start,end,rise,ratio);
+      if(relationshipCubicClear(segments,rects))
+        return relationshipCubicGeometry(segments);
+    }
   }
   return null;
 }
@@ -2376,18 +2343,11 @@ function relationshipOtherRenderGeometry(a,b,setting,context=null) {
       relationshipCurveAmplitude(start,end,safeAmount),sign));
   }
 
-  // 單弧不安全時，尋找上方通道，並且保持真正的曲線。
-  const points=relationshipOrthogonalRoute(start,end,rects,true,35);
-  if(points?.length>=3){
-    const smooth=relationshipSmoothRoute(points,rects,Math.max(50,amount));
-    if(smooth)return smooth;
-    const rounded=relationshipRoundedObstacleRoute(points,rects);
-    if(rounded)return rounded;
-  }
-  // 原路徑搜尋可能回傳只有兩點的直線；在曲線模式下不接受這個結果。
-  const detour=relationshipUpperDetourGeometry(start,end,rects);
+  // 單弧無法避開其他卡片時改用連續拱形曲線，不採用「水平折線加圓角」。
+  const detour=relationshipUpperDetourGeometry(start,end,rects,Math.max(50,amount));
   if(detour)return detour;
-  // 沒有安全通道時仍可能重疊；至少不違反「改用曲線」的設定。
+  // 極度擁擠且找不到安全上方通道時，仍保留真正的 Bézier 弧線，
+  // 不因避障失敗而退回水平直線。玩家手動指定弧度仍有最高優先權。
   return relationshipCubicGeometry(segments);
 }
 
