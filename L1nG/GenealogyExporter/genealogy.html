@@ -6,7 +6,7 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261010-gender-card-svg-fix-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261012-liquid-hue-r3">
+        <link rel="stylesheet" href="genealogy.css?v=20261012-person-overview-v7-r1">
     </head>
     <body data-theme="ling">
 
@@ -213,7 +213,7 @@
                     </div>
                     <span class="topbar-spacer"></span>
                     <nav class="topbar-primary-actions" aria-label="主要功能">
-                        <button class="topbar-text-btn" id="personLibraryBtn" type="button"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span></button>
+                        <button class="topbar-text-btn" id="personLibraryBtn" type="button" title="市民與寵物總覽" aria-label="開啟市民與寵物總覽"><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>總覽</span></button>
                         <button class="topbar-text-btn topbar-export-btn" id="exportBtn" type="button" title="匯出資料"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></button>
                         <button class="topbar-text-btn danger-action" id="restoreSampleBtn" type="button" title="恢復預設族譜"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>恢復預設族譜</span></button>
                         <div class="ui-menu" id="topbarMoreMenu">
@@ -772,37 +772,54 @@
             </div>
         </div>
 
-        <!-- ========【人物庫】 設定 - 搜尋、精簡 / 詳細檢視與批量管理 ======== -->
+        <!-- ========【市民與寵物總覽】 設定 - 固定標題、側邊分類與批量管理 ======== -->
         <div class="ui-dialog-backdrop person-library-backdrop" id="personLibraryDialog">
-            <div class="ui-dialog-panel person-library-panel">
+            <div class="ui-dialog-panel person-library-panel" role="dialog" aria-modal="true" aria-labelledby="personLibraryTitle">
                 <div class="person-library-header">
-                    <h2><span class="l1ng-icon icon-people" aria-hidden="true"></span><span>人物</span><span class="person-library-count" id="personLibraryCount"></span></h2>
-                    <div class="person-library-header-actions">
-                        <button class="person-library-batch-start" id="personLibraryBatchBtn" type="button"><span class="l1ng-icon icon-person-check" aria-hidden="true"></span><span>批量管理</span></button>
-                        <button class="primary" id="personLibraryAddBtn" type="button"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增人物</span></button>
+                    <span class="l1ng-icon icon-people person-library-heading-icon" aria-hidden="true"></span>
+                    <div class="person-library-heading">
+                        <h2 id="personLibraryTitle">市民與寵物總覽</h2>
+                        <p>瀏覽、搜尋及管理所有模擬市民與寵物。</p>
                     </div>
+                    <button class="help-close-btn" id="personLibraryCloseBtn" type="button" title="關閉" aria-label="關閉市民與寵物總覽"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
                 </div>
-                <div class="person-library-category-tabs" role="tablist" aria-label="圖庫分類">
-                    <button type="button" id="personLibrarySimsTab" class="active" role="tab" aria-selected="true" aria-controls="personLibraryList">模擬市民</button>
-                    <button type="button" id="personLibraryPetsTab" role="tab" aria-selected="false" aria-controls="personLibraryList" tabindex="-1">寵物</button>
-                </div>
-                <div class="person-library-toolbar">
-                    <input id="personLibrarySearch" placeholder="搜尋人物……" type="search" autocomplete="off">
-                    <div class="person-library-view-toggle" role="group" aria-label="人物顯示方式">
-                        <button id="personLibraryCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">☷</button>
-                        <button id="personLibraryDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">☰</button>
+                <div class="person-library-layout">
+                    <aside class="person-library-side">
+                        <div class="person-library-category-tabs" role="tablist" aria-label="總覽分類">
+                            <button type="button" id="personLibrarySimsTab" class="active" role="tab" aria-selected="true" aria-controls="personLibraryList">
+                                <span class="l1ng-icon icon-people" aria-hidden="true"></span><span>模擬市民</span><span class="person-library-category-total" id="personLibrarySimsCount">0</span>
+                            </button>
+                            <button type="button" id="personLibraryPetsTab" role="tab" aria-selected="false" aria-controls="personLibraryList" tabindex="-1">
+                                <span class="l1ng-icon icon-paw" aria-hidden="true"></span><span>寵物</span><span class="person-library-category-total" id="personLibraryPetsCount">0</span>
+                            </button>
+                        </div>
+                        <div class="person-library-header-actions">
+                            <button class="person-library-batch-start" id="personLibraryBatchBtn" type="button"><span class="l1ng-icon icon-person-check" aria-hidden="true"></span><span>批量管理</span></button>
+                            <button class="primary" id="personLibraryAddBtn" type="button"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增人物</span></button>
+                        </div>
+                    </aside>
+                    <div class="person-library-main-pane">
+                        <div class="person-library-toolbar">
+                            <input id="personLibrarySearch" placeholder="搜尋人物……" type="search" autocomplete="off">
+                            <div class="person-library-view-toggle" role="group" aria-label="人物顯示方式">
+                                <button id="personLibraryCompactBtn" type="button" title="精簡檢視" aria-label="精簡檢視" aria-pressed="false">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                                </button>
+                                <button id="personLibraryDetailedBtn" type="button" title="詳細檢視" aria-label="詳細檢視" aria-pressed="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="person-library-list detailed" id="personLibraryList"></div>
                     </div>
                 </div>
                 <div class="person-library-batch-toolbar" id="personLibraryBatchToolbar" hidden>
-                    <span class="person-library-batch-count" id="personLibraryBatchCount">已選 0 位</span>
-                    <span class="spacer"></span>
+                    <span class="person-library-batch-count" id="personLibraryBatchCount" hidden></span>
                     <button id="personLibraryBatchAddFamilyBtn" type="button">加入目前家族</button>
                     <button class="danger-action" id="personLibraryBatchRemoveFamilyBtn" type="button">移出目前家族</button>
                     <button class="danger" id="personLibraryBatchDeleteBtn" type="button">刪除人物</button>
                     <button id="personLibraryBatchCancelBtn" type="button">取消</button>
                 </div>
-                <div class="person-library-list detailed" id="personLibraryList"></div>
-                <div class="ui-dialog-actions"><span class="spacer"></span><button id="personLibraryCloseBtn">關閉</button></div>
             </div>
         </div>
 

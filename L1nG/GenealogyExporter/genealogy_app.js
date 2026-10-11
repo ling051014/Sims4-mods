@@ -16120,6 +16120,12 @@ const personLibraryController = {
     personLibraryAvatarObserver = null;
     resetPersonLibraryOperations({ batch:true, add:false });
   },
+  syncCategoryCounts() {
+    const sims = Object.keys(currentGenealogyData().sims || {}).length;
+    const pets = collectPetLibraryEntries().length;
+    if ($('personLibrarySimsCount')) $('personLibrarySimsCount').textContent = String(sims);
+    if ($('personLibraryPetsCount')) $('personLibraryPetsCount').textContent = String(pets);
+  },
   syncCategoryControls() {
     const petTab = personLibraryCategory === 'pets';
     const sims = $('personLibrarySimsTab');
@@ -16329,7 +16335,7 @@ function renderPetLibrary() {
     return [info.name,info.breed,info.species,info.ownerLabel,...info.traits]
       .some(value => String(value || '').toLowerCase().includes(query));
   });
-  $('personLibraryCount').textContent = '（' + filtered.length + '/' + all.length + '）';
+  personLibraryController.syncCategoryCounts();
   personLibraryController.syncViewControls();
   personLibraryController.syncBatchToolbar();
   if (!filtered.length) {
@@ -16341,20 +16347,29 @@ function renderPetLibrary() {
   list.innerHTML = filtered.map(entry => {
     const info = petLibraryDisplayInfo(entry);
     const pet = entry.pet;
-    const details = [info.species,info.breed,petGenderLabel(pet),
-      uiText(pet.ageStage || ''),uiText(pet.status || ''),info.ownerLabel].filter(Boolean);
+    const details = [
+      [uiText('物種'),info.species],
+      [uiText('品種'),info.breed],
+      [uiText('性別'),petGenderLabel(pet)],
+      [uiText('人生階段'),uiText(pet.ageStage || '')],
+      [uiText('狀態'),uiText(pet.status || '')],
+      [uiText('所屬家庭'),info.ownerLabel]
+    ].filter(([,value]) => !!value);
     const short = [info.species,info.breed].filter(Boolean).join(' · ');
+    const detailHtml = details.map(([label,value]) =>
+      '<div class="person-library-detail-field"><span class="person-library-detail-label">' +
+      esc(label) + '</span><span class="person-library-detail-value">' +
+      esc(value) + '</span></div>'
+    ).join('');
     return '<div class="person-library-item person-library-pet-item" data-pet-library-key="' + esc(entry.key) + '">' +
       '<div class="person-library-main">' +
         '<div class="person-library-avatar-wrap"><div class="person-library-avatar">' +
           petLibraryAvatarHTML(pet) + '</div></div>' +
         '<div class="person-library-text">' +
-          '<div class="person-library-name"><span>' + esc(info.name) + '</span></div>' +
+          '<div class="person-library-name"><span class="person-library-name-label">' + esc(info.name) + '</span>' +
+          '<span class="person-library-life">' + esc(uiText(pet.ageStage || '')) + '</span></div>' +
           '<div class="person-library-compact-meta">' + esc(short) + '</div>' +
-          '<div class="person-library-detailed-meta">' +
-            details.map(value => '<span>' + esc(value) + '</span>')
-              .join('<span class="person-library-meta-separator" aria-hidden="true">·</span>') +
-          '</div>' +
+          '<div class="person-library-detailed-meta">' + detailHtml + '</div>' +
         '</div>' +
       '</div>' +
       '<div class="ui-menu person-library-item-menu" data-menu-portal="body">' +
@@ -16419,7 +16434,7 @@ function renderPersonLibrary() {
     || (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q))
   ) : all;
 
-  $('personLibraryCount').textContent = '（' + filtered.length + '/' + all.length + '）';
+  personLibraryController.syncCategoryCounts();
   personLibraryController.syncViewControls();
   personLibraryController.syncBatchToolbar();
 
@@ -16453,23 +16468,20 @@ function renderPersonLibrary() {
 
     const selected = personLibraryState.selection.has(s.id);
     const compactMeta = personLibraryCompactMeta(s);
-    const detail = [
-      displayDataText(s.lifeStage, s),
-      s.race ? displayDataText(RACE_PRESETS[s.race]?.label || s.race, s) : '',
-      displayDataText(s.career, s),
-      displayDataText(s.residence, s),
-      familyNames.join(' · ') || uiText('（未歸屬）')
-    ].filter(Boolean);
-
     const photoCount = (s.gallery || []).length;
-    const detailHtml = detail
-      .map(value => '<span>' + esc(value) + '</span>')
-      .join('<span class="person-library-meta-separator" aria-hidden="true">·</span>');
-
-    const photoHtml = photoCount
-      ? '<span class="person-library-meta-separator" aria-hidden="true">·</span>' +
-        '<span>' + iconSvg('images') + ' ' + photoCount + ' ' + esc(uiText('人生照片')) + '</span>'
-      : '';
+    const familyLabel = familyNames.join(' · ') || uiText('（未歸屬）');
+    const familyDetails = familyLabel + (photoCount ? ' · ' + photoCount + ' ' + uiText('張人生照片') : '');
+    const detail = [
+      [uiText('種族'), s.race ? displayDataText(RACE_PRESETS[s.race]?.label || s.race, s) : '—'],
+      [uiText('職業'), displayDataText(s.career, s) || '—'],
+      [uiText('居住地'), displayDataText(s.residence, s) || uiText('居住地未知')],
+      [uiText('所屬家族'), familyDetails]
+    ];
+    const detailHtml = detail.map(([label,value]) =>
+      '<div class="person-library-detail-field"><span class="person-library-detail-label">' +
+      esc(label) + '</span><span class="person-library-detail-value">' +
+      esc(value) + '</span></div>'
+    ).join('');
 
     const familyAction = fam.memberIds.includes(s.id) ? '移出目前家族' : '加入目前家族';
     const familyIcon = fam.memberIds.includes(s.id) ? 'person-dash' : 'person-add';
@@ -16481,21 +16493,23 @@ function renderPersonLibrary() {
       '<div class="person-library-main">' +
         '<div class="person-library-avatar-wrap">' +
           '<div class="person-library-avatar">' + personLibraryAvatarHTML(s) + '</div>' +
-          '<button class="person-library-batch-select' + (selected ? ' selected' : '') +
-            '" type="button" data-person-library-select="' + esc(s.id) +
-            '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
-            (selected ? iconSvg('check-lg') : '') +
-          '</button>' +
         '</div>' +
         '<div class="person-library-text">' +
           '<div class="person-library-name">' +
             raceIconHTML(s) + statusIconHTML(s) +
-            '<span>' + esc(displayDataText(s.name, s)) + '</span>' +
+            '<span class="person-library-name-label">' + esc(displayDataText(s.name, s)) + '</span>' +
+            '<span class="person-library-life">' + esc(displayDataText(s.lifeStage, s)) + '</span>' +
           '</div>' +
           '<div class="person-library-compact-meta">' + esc(compactMeta) + '</div>' +
-          '<div class="person-library-detailed-meta">' + detailHtml + photoHtml + '</div>' +
+          '<div class="person-library-detailed-meta">' + detailHtml + '</div>' +
         '</div>' +
       '</div>' +
+      '<button class="person-library-batch-select' + (selected ? ' selected' : '') +
+        '" type="button" data-person-library-select="' + esc(s.id) +
+        '" aria-pressed="' + (selected ? 'true' : 'false') + '" aria-label="' +
+        esc(uiText('選取') + ' ' + displayDataText(s.name,s)) + '">' +
+        (selected ? iconSvg('check-lg') : '') +
+      '</button>' +
       '<div class="ui-menu person-library-item-menu" data-menu-portal="body">' +
         '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') +
