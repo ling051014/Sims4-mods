@@ -214,10 +214,9 @@
     inputFile.addEventListener('change',()=>{
       const file=inputFile.files?.[0];if(!file)return;
       const url=URL.createObjectURL(file);
-      const img=new Image();
-      img.onload=()=>{paintImage(url);URL.revokeObjectURL(url);};
-      img.onerror=()=>URL.revokeObjectURL(url);
-      img.src=url;inputFile.value='';
+      paintImage(url);
+      inputFile.value='';
+      window.setTimeout(()=>URL.revokeObjectURL(url),30000);
     });
     const canvas=sampler.querySelector('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
     canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;canvas.setPointerCapture(e.pointerId);sampleAt(e,ctx,canvas);});
