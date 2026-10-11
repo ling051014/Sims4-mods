@@ -976,3 +976,16 @@ section[id] {
         transform:none;
     }
 }
+
+
+/* ========【搜尋欄】 設定 - 共用 SVG 與自訂清除鈕 ======== */
+.search-input-wrap {position:relative;min-width:0;flex:1 1 auto;color:var(--muted)}
+.search-input-wrap input {width:100%;padding-left:36px;padding-right:40px}
+.search-input-wrap::before {content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;background:currentColor;opacity:.7;pointer-events:none;-webkit-mask:url("../icons/ui-search.svg") center/contain no-repeat;mask:url("../icons/ui-search.svg") center/contain no-repeat}
+.search-input-wrap input::-webkit-search-cancel-button {-webkit-appearance:none;display:none}
+.search-input-wrap .l1ng-search-clear {position:absolute;right:4px;top:50%;transform:translateY(-50%);height:32px;width:32px;border:0;border-radius:7px;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.search-input-wrap .l1ng-search-clear::before {content:"";height:14px;width:14px;background:currentColor;-webkit-mask:url("../icons/ui-clear.svg") center/contain no-repeat;mask:url("../icons/ui-clear.svg") center/contain no-repeat}
+.search-input-wrap .l1ng-search-clear[hidden]{display:none}
+.search-input-wrap .l1ng-search-clear:hover,.search-input-wrap .l1ng-search-clear:focus-visible {background:var(--line);color:var(--ink)}
+@media(pointer:coarse){.search-input-wrap .l1ng-search-clear{width:40px;height:40px;right:0}}
+@media(hover:hover) and (pointer:fine){.translation-grid,.translation-list{scrollbar-width:thin;scrollbar-color:var(--line) transparent}}
