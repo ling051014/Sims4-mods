@@ -721,6 +721,118 @@ input:disabled,
     /* 停用控制項使用禁止操作游標 */ cursor: not-allowed;
 }
 
+/* ========【滑桿】 設定 - 全部使用 A 款極簡細線，不依賴瀏覽器原生外觀 ======== */
+input[type="range"] {
+    --range-fill: 0%;
+    --range-track-height: 4px;
+    --range-thumb-size: 16px;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    /* 保留 iOS 對水平拖曳與垂直捲動的原生觸控判斷。 */
+    touch-action: auto;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: var(--range-track-height);
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+        var(--action-primary) 0%,
+        var(--action-primary) var(--range-fill),
+        var(--border-default) var(--range-fill),
+        var(--border-default) 100%);
+}
+
+input[type="range"]::-moz-range-track {
+    height: var(--range-track-height);
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+        var(--action-primary) 0%,
+        var(--action-primary) var(--range-fill),
+        var(--border-default) var(--range-fill),
+        var(--border-default) 100%);
+}
+
+input[type="range"]::-moz-range-progress {
+    border: 0;
+    background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    margin-top: calc((var(--range-track-height) - var(--range-thumb-size)) / 2);
+    border: 2px solid var(--surface-card);
+    border-radius: 50%;
+    background: var(--action-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    transition: transform .16s ease,box-shadow .16s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    border: 2px solid var(--surface-card);
+    border-radius: 50%;
+    background: var(--action-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    transition: transform .16s ease,box-shadow .16s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    input[type="range"]:not(:disabled):hover::-webkit-slider-thumb {
+        transform: scale(1.12);
+    }
+    input[type="range"]:not(:disabled):hover::-moz-range-thumb {
+        transform: scale(1.12);
+    }
+}
+
+input[type="range"]:not(:disabled):active::-webkit-slider-thumb {
+    transform: scale(1.16);
+    box-shadow: 0 0 0 5px color-mix(in srgb,var(--action-primary) 15%,transparent);
+}
+input[type="range"]:not(:disabled):active::-moz-range-thumb {
+    transform: scale(1.16);
+    box-shadow: 0 0 0 5px color-mix(in srgb,var(--action-primary) 15%,transparent);
+}
+input[type="range"]:focus-visible {
+    outline: 2px solid var(--action-primary);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+input[type="range"]:disabled {
+    cursor: not-allowed;
+    filter: grayscale(.35);
+}
+
+/* 細線外觀不變，手指操作時將透明觸控區增加到 44px。 */
+@media (pointer: coarse) {
+    input[type="range"] {
+        height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    input[type="range"]::-webkit-slider-thumb,
+    input[type="range"]::-moz-range-thumb {
+        transition: none;
+    }
+}
+
+
 /* ========【側邊欄尺寸】 設定 - 左上品牌區與側邊欄共用同一寬度 ======== */
 
 :root {
@@ -3623,17 +3735,12 @@ button.avatar-editor-action { cursor:pointer; }
 
 .appearance-background-range{
     min-width:0;
-    height:32px;
+    min-height:32px;
+    height:auto;
     display:grid;
     grid-template-columns:minmax(0,1fr) auto;
     align-items:center;
     gap:8px;
-}
-
-.appearance-background-control input[type="range"]{
-    width:100%;
-    min-width:0;
-    accent-color:var(--action-primary);
 }
 
 .appearance-background-control input[type="range"]:disabled{
@@ -8672,13 +8779,12 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-full-preview[data-orientation="horizontal"] .card-a{left:var(--relationship-preview-side-gap);top:50%;transform:translateY(-50%)}
 .relationship-full-preview[data-orientation="horizontal"] .card-b{right:var(--relationship-preview-side-gap);left:auto;top:50%;transform:translateY(-50%)}
 .relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 44px;gap:10px;align-items:start}
-.relationship-editor-fields>label{min-width:0;display:grid;grid-template-rows:auto 32px;gap:5px;align-items:start;color:var(--text-secondary);font-size:var(--appearance-control-label-size)}
+.relationship-editor-fields>label{min-width:0;display:grid;grid-template-rows:auto minmax(32px,auto);gap:5px;align-items:start;color:var(--text-secondary);font-size:var(--appearance-control-label-size)}
 .relationship-editor-fields>label>span:first-child{min-height:12px;display:flex;align-items:center;line-height:1.2}
 .relationship-editor-fields>label>.ui-single-select,
 .relationship-editor-fields>label>select{height:32px;align-self:start}
-.relationship-editor-range{min-width:0;height:32px;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:6px}
+.relationship-editor-range{min-width:0;min-height:32px;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:6px}
 .relationship-editor-range output{min-width:30px;color:var(--text-primary);font-size:10.5px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
-.relationship-editor-fields input[type=range],.relationship-curve-slider input[type=range]{width:100%;min-width:0;accent-color:var(--action-primary)}
 .relationship-editor-color{width:44px;justify-self:end}
 .relationship-editor-color input[type=color]{width:44px;height:32px;align-self:start;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
 .relationship-feature-row{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:center}
