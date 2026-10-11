@@ -495,12 +495,34 @@ function normalizeRelationshipLineSetting(
         : saved?.bidirectional;
 
     normalized.showArrow =
-      !!storedShowArrow;
+      storedShowArrow === undefined
+        ? !!fallback.showArrow
+        : !!storedShowArrow;
 
     delete normalized.bidirectional;
   }
 
   return normalized;
+}
+
+// 舊版「室友」類型曾沿用其他關係的關閉預設，某些瀏覽器已將它存入 localStorage。
+// 沒有任何線型、粗細、顏色、弧度等自訂變更時，才採用新版的室友預設。
+function isUnmodifiedLegacyRoommateLineSetting(saved) {
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return false;
+  const defaults = RELATIONSHIP_LINE_DEFAULTS.other;
+  const expectedKeys = new Set([
+    'style','width','color','curved','curveAmount','curveAmountManual',
+    'routing','showArrow'
+  ]);
+  return Object.keys(saved).every(key => expectedKeys.has(key)) &&
+    saved.style === defaults.style &&
+    Number(saved.width) === defaults.width &&
+    saved.color == null &&
+    saved.curved === false &&
+    (saved.curveAmount == null || Number(saved.curveAmount) === defaults.curveAmount) &&
+    (saved.curveAmountManual == null || saved.curveAmountManual === false) &&
+    (saved.routing == null || saved.routing === defaults.routing) &&
+    (saved.showArrow == null || saved.showArrow === false);
 }
 
 let relationshipLineSettings =
@@ -544,10 +566,18 @@ try {
             return;
           }
 
+          // 舊版進入視覺設定時可能自動儲存「室友」的全關閉預設；
+          // 只更新完全未修改的舊預設，避免覆寫玩家調整過的樣式。
+          const storedSetting =
+            type === '室友' && isUnmodifiedLegacyRoommateLineSetting(setting)
+              ? relationshipOtherDefaultSetting(type)
+              : setting;
+
           relationshipLineSettings.otherTypes[type] =
             normalizeRelationshipLineSetting(
               'other',
-              setting
+              storedSetting,
+              type === '室友' ? relationshipOtherDefaultSetting(type) : null
             );
         });
     }
@@ -6913,9 +6943,13 @@ function relationshipOtherDefaultSetting(
       String(type || '').trim()
     ];
 
+  const normalizedType = String(type || '').trim();
+  const isRoommate = normalizedType === '室友';
+
   return {
     ...RELATIONSHIP_LINE_DEFAULTS.other,
-    curved:String(type || '').trim() === '情人' ? true : RELATIONSHIP_LINE_DEFAULTS.other.curved,
+    curved:normalizedType === '情人' || isRoommate,
+    showArrow:isRoommate ? true : RELATIONSHIP_LINE_DEFAULTS.other.showArrow,
     curveAmountManual:false,
     style:
       definition?.lineStyle ||
