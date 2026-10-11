@@ -2170,10 +2170,45 @@
       collect(root, 'input[data-ui-suggestion-list]').forEach(createSuggestionInput);
     }
 
+    // ========【搜尋欄】 設定 - 保留現有輸入與事件，補上共用搜尋及清除圖示 ========
+    function mountSearchDecorations(root = document) {
+      const fields = [
+        'input[type="search"]',
+        '.relationship-type-search',
+        '.ui-select-search'
+      ].join(',');
+      collect(root, fields).forEach(input => {
+        if (input.closest('.l1ng-search-control')) return;
+        const parent = input.parentNode;
+        if (!parent) return;
+        const wrap = document.createElement('span');
+        wrap.className = 'l1ng-search-control';
+        parent.insertBefore(wrap,input);
+        wrap.appendChild(input);
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'l1ng-search-clear';
+        clear.setAttribute('aria-label','清除搜尋');
+        clear.title = '清除搜尋';
+        const sync = () => { clear.hidden = !input.value; };
+        clear.addEventListener('click',() => {
+          if (!input.value) return;
+          input.value = '';
+          input.dispatchEvent(new Event('input',{bubbles:true}));
+          input.focus({preventScroll:true});
+          sync();
+        });
+        input.addEventListener('input',sync);
+        wrap.appendChild(clear);
+        sync();
+      });
+    }
+
     function mountFormControls(root = document) {
       mountSearchableSelects(root);
       mountSingleSelects(root);
       mountSuggestionInputs(root);
+      mountSearchDecorations(root);
     }
 
     function refreshSelect(sourceId) {
