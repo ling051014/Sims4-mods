@@ -718,90 +718,14 @@ section[id] {
 }
 
 
-/* ========【Genealogy】 設定 - 族譜裝飾圖容器 ======== */
+/* ========【Genealogy】 設定 - 族譜首頁裝飾圖：人物節點與直角關係線 ======== */
 .genealogy-graphic {
-    /* 相對定位 */ position: relative;
-    /* 圖形寬度 */ width: 170px;
-    /* 圖形高度 */ height: 85px;
-    /* 上下外距 */ margin: 34px 0 28px;
-}
-
-
-/* ========【Genealogy】 設定 - 族譜人物節點 ======== */
-.tree-node {
-    /* 絕對定位 */ position: absolute;
-    /* 節點寬度 */ width: 21px;
-    /* 節點高度 */ height: 21px;
-    /* 白色外框 */ border: 3px solid #ffffff;
-    /* 圓形 */ border-radius: 50%;
-    /* 淡藍背景 */ background: #b9d9ed;
-    /* 淡藍外圈 */ box-shadow: 0 0 0 1px #bad3e3;
-}
-
-
-/* ========【Genealogy】 設定 - 第一層人物位置 ======== */
-.node-a {
-    /* 左側位置 */ left: 72px;
-    /* 頂部位置 */ top: 0;
-}
-
-
-/* ========【Genealogy】 設定 - 第二層左側人物位置 ======== */
-.node-b {
-    /* 左側位置 */ left: 23px;
-    /* 底部位置 */ bottom: 0;
-}
-
-
-/* ========【Genealogy】 設定 - 第二層中央人物位置 ======== */
-.node-c {
-    /* 左側位置 */ left: 72px;
-    /* 底部位置 */ bottom: 0;
-}
-
-
-/* ========【Genealogy】 設定 - 第二層右側人物位置 ======== */
-.node-d {
-    /* 右側位置 */ right: 23px;
-    /* 底部位置 */ bottom: 0;
-}
-
-
-/* ========【Genealogy】 設定 - 族譜連線共用 ======== */
-.tree-line {
-    /* 絕對定位 */ position: absolute;
-    /* 區塊顯示 */ display: block;
-    /* 連線顏色 */ background: #c8dce8;
-}
-
-
-/* ========【Genealogy】 設定 - 中央垂直連線 ======== */
-.tree-line-1 {
-    /* 左側位置 */ left: 82px;
-    /* 頂部位置 */ top: 20px;
-    /* 線條寬度 */ width: 1px;
-    /* 線條高度 */ height: 35px;
-}
-
-
-/* ========【Genealogy】 設定 - 水平連線 ======== */
-.tree-line-2 {
-    /* 左側位置 */ left: 33px;
-    /* 頂部位置 */ top: 47px;
-    /* 線條寬度 */ width: 100px;
-    /* 線條高度 */ height: 1px;
-}
-
-
-/* ========【Genealogy】 設定 - 三個子節點垂直連線 ======== */
-.tree-line-3 {
-    /* 左側位置 */ left: 33px;
-    /* 頂部位置 */ top: 47px;
-    /* 線條寬度 */ width: 1px;
-    /* 線條高度 */ height: 17px;
-    /* 複製另外兩條連線 */ box-shadow:
-        49px 0 0 #c8dce8,
-        98px 0 0 #c8dce8;
+    /* 固定顯示尺寸，同時保持原本卡片內的總垂直間距。 */
+    display: block;
+    width: 170px;
+    height: 100px;
+    margin: 34px 0 13px;
+    object-fit: contain;
 }
 
 
