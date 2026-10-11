@@ -69,7 +69,7 @@ test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
  assert.match(scoped,/setting\.curveAmount/);
  assert.doesNotMatch(scoped,/setting\.routing\s*===\s*'manual'/);
  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
- assert.match(html,/genealogy_scene\.js\?v=20261011-cross-root-siblings-r12/);
+ assert.match(html,/genealogy_scene\.js\?v=20261012-natural-curve-r1/);
 });
 
 test('曲線弧度 10% 與 100% 無障礙時有不同的真正曲線',()=>{
@@ -84,4 +84,29 @@ test('有原配阻擋時，滑桿弧度不能全部被固定避障值覆蓋',()=
  const high=render(A,B,{curved:true,curveAmount:100},context);
  assert.match(low.d,/C/);assert.match(high.d,/C/);
  assert.notEqual(low.d,high.d,'原配阻擋時仍須保有弧度調整空間');
+});
+
+test('長距離情人曲線避開其他人物時維持連續拱線，不再有水平折線與圓角',()=>{
+ const a={anchor:{x:0,y:0}},b={anchor:{x:400,y:0}};
+ const rect={left:130,right:270,top:-190,bottom:35};
+ const pos=new Map([['blocking-sim',{rect}]]);
+ const result=render(a,b,{curved:true,curveAmount:65},{pos,fromId:'A',toId:'B'});
+ assert.equal(result.segments.length,2,'高障礙應改用自然拱線，而不是折線轉角');
+ assert.doesNotMatch(result.d,/\\sL/,'曲線模式不得退回水平折線');
+ const [first,second]=result.segments;
+ assert.equal(first.to.x,second.from.x);
+ assert.equal(first.to.y,second.from.y);
+ assert.equal(first.c2.y,first.to.y,'拱頂不能保留折線的轉角');
+ assert.equal(second.c1.y,second.from.y,'拱頂前後應保持連續水平切線');
+ assert.ok(first.to.y<rect.top-9,'曲線必須確實避開卡片');
+ assert.ok(first.c1.y>first.to.y,'曲線上升過程不能是長條水平線');
+});
+test('手動曲線弧度優先與關閉曲線時的直角避障不受自然拱線修正影響',()=>{
+ const a={anchor:{x:0,y:0}},b={anchor:{x:400,y:0}};
+ const obstacle={pos:new Map([['block',{rect:{left:130,right:270,top:-190,bottom:35}}]]),fromId:'A',toId:'B'};
+ const manual=render(a,b,{curved:true,curveAmount:80,curveAmountManual:true},obstacle);
+ const orthogonal=render(a,b,{curved:false,curveAmount:80},obstacle);
+ assert.equal(manual.segments.length,1);
+ assert.match(manual.d,/C/);
+ assert.doesNotMatch(orthogonal.d,/C/);
 });
