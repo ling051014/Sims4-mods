@@ -173,6 +173,18 @@ if (filterGroup) {
     });
 }
 
+const searchClear = document.getElementById("translationSearchClear");
+if (searchInput && searchClear) {
+    const syncClear = () => { searchClear.hidden = !searchInput.value; };
+    searchInput.addEventListener("input",syncClear);
+    searchClear.addEventListener("click",() => {
+        searchInput.value = "";
+        searchInput.dispatchEvent(new Event("input",{bubbles:true}));
+        searchInput.focus({preventScroll:true});
+    });
+    syncClear();
+}
+
 if (searchInput) {
     searchInput.addEventListener("input", () => {
         clearLinkedTarget();
