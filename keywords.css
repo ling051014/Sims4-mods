@@ -120,6 +120,42 @@
     /* 背景變化 */ background: #f7f7f7;
 }
 
+/* 關鍵字複製欄：保留輕量圖示，統一使用 SVG 路徑筆劃動畫。 */
+.keyword-copy .copy-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:32px; height:32px; padding:6px; border:0; border-radius:7px;
+    background:transparent; color:#657786; cursor:pointer;
+}
+.keyword-copy .copy-btn:hover { background:#eef7fd; color:#315f83; }
+.keyword-copy .copy-btn:focus-visible { outline:2px solid #55acee; outline-offset:2px; }
+/* SVG 筆劃動畫：複製輪廓收回、勾號寫出、停留後依路徑復原。 */
+.l1ng-copy-glyph { display:block; width:20px; height:20px; flex:0 0 20px; overflow:visible; }
+.l1ng-copy-stroke, .l1ng-check-stroke { fill:none; stroke-width:1.85; stroke-linecap:round; stroke-linejoin:round; }
+.l1ng-copy-stroke { stroke:currentColor; stroke-dashoffset:0; }
+.l1ng-check-stroke { stroke:#5d9876; stroke-dashoffset:var(--stroke-hide); stroke-width:2.2; }
+.l1ng-copy-running .l1ng-copy-stroke { animation:l1ngTraceCopy 3.8s linear both; }
+.l1ng-copy-running .l1ng-check-stroke { animation:l1ngTraceCheck 3.8s linear both; }
+@keyframes l1ngTraceCopy {
+  0%,8% { stroke-dashoffset:0; }
+  8.01% { stroke-dashoffset:0; animation-timing-function:cubic-bezier(.4,0,.8,.7); }
+  23%,76% { stroke-dashoffset:var(--stroke-hide); }
+  76.01% { stroke-dashoffset:var(--stroke-hide); animation-timing-function:cubic-bezier(.2,.3,.2,1); }
+  91%,100% { stroke-dashoffset:0; }
+}
+@keyframes l1ngTraceCheck {
+  0%,22% { stroke-dashoffset:var(--stroke-hide); }
+  22.01% { stroke-dashoffset:var(--stroke-hide); animation-timing-function:cubic-bezier(.25,.35,.3,1); }
+  37%,67% { stroke-dashoffset:0; }
+  67.01% { stroke-dashoffset:0; animation-timing-function:cubic-bezier(.5,.05,.8,.7); }
+  82%,100% { stroke-dashoffset:var(--stroke-hide); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .l1ng-copy-running .l1ng-copy-stroke, .l1ng-copy-running .l1ng-check-stroke { animation:none; }
+  .l1ng-copy-running .l1ng-copy-stroke { stroke-dashoffset:var(--stroke-hide); }
+  .l1ng-copy-running .l1ng-check-stroke { stroke-dashoffset:0; }
+}
+
+
 /* ========【響應式】 設定 - 手機直向優化 ======== */
 @media (max-width: 600px) and (orientation: portrait) {
     .keyword-side-tab {

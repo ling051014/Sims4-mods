@@ -1,3 +1,13 @@
+// ========【關鍵字複製圖示】 SVG 筆劃與提取器頁面一致 ========
+const keywordCopyIcon = () => `<svg class="l1ng-copy-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect class="l1ng-copy-stroke" x="8" y="8" width="12" height="12" rx="2" stroke-dasharray="43.314 90" style="--stroke-hide:45.314"/>
+    <path class="l1ng-copy-stroke" d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke-dasharray="29.427 80" style="--stroke-hide:31.427"/>
+    <path class="l1ng-check-stroke" d="M5 12.5l4.2 4.2L19 7" stroke-dasharray="19.728 70" style="--stroke-hide:21.728"/>
+</svg>`;
+const keywordAttr = (value) => String(value ?? '').replace(/[&<>"']/g, char =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char])
+);
+
 // ===================================================
 // ========【關鍵字對照表】 載入外部資料模組 ========
 // ===================================================
@@ -38,7 +48,7 @@ async function loadKeywords(placeholderId, categoryList) {
                                     <td class="keyword-zh">${i.zh}</td>
                                     <td class="keyword-en">${i.en}</td>
                                     <td class="keyword-copy">
-                                        <img src="html icons/copy.svg" class="copy-btn" onclick="copyText(this, '${i.en}')">
+                                        <button type="button" class="copy-btn" data-copy="${keywordAttr(i.en)}" title="點擊複製" aria-label="複製 ${keywordAttr(i.en)}">${keywordCopyIcon()}</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -83,22 +93,3 @@ async function loadKeywords(placeholderId, categoryList) {
         });
 }
 
-// ==================================================
-// 【複製控制】執行剪貼與圖示切換
-// ==================================================
-function copyText(element, text) {
-    // 【寫入剪貼】系統執行複製動作
-    navigator.clipboard.writeText(text);
-    
-    // 【路徑設定】定義前後兩個圖示
-    const originalIcon = 'html icons/copy.svg';
-    const checkIcon = 'html icons/check.svg';
-    
-    // 【圖示變更】切換為打勾圖示
-    element.src = checkIcon;
-    
-    // 【恢復圖示】一秒後變回原始
-    setTimeout(() => { 
-        element.src = originalIcon; 
-    }, 1000);
-}

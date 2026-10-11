@@ -6,6 +6,72 @@
     const mainNav = document.getElementById('mainNav');
     const languageButtons = [...document.querySelectorAll('[data-language-button]')];
     const LANGUAGE_KEY = 'l1ng-genealogy-exporter-language';
+    const commandButtons = [...document.querySelectorAll('[data-copy-command]')];
+    const commandFeedbackTimers = new WeakMap();
+
+    // 點擊原本的指令框即可複製；本機開啟單檔時也提供備援方式。
+    async function copyCommandText(text) {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (_) {
+                // 部分瀏覽器或本機預覽可能沒有剪貼簿權限。
+            }
+        }
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0;';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (_) {}
+        textarea.remove();
+        return copied;
+    }
+
+    function setCommandFeedback(button, result = '') {
+        const english = root.dataset.language === 'en';
+        const feedback = button.querySelector('.command-copy-feedback');
+        if (feedback) feedback.textContent = result === 'success'
+            ? (english ? 'Copied!' : '已複製！')
+            : result === 'error'
+                ? (english ? 'Copy failed; please copy manually.' : '複製失敗，請手動複製。')
+                : '';
+        button.setAttribute('aria-label',
+            (english ? 'Copy command: ' : '複製指令：') + button.dataset.copyCommand);
+        button.title = result === 'success'
+            ? (english ? 'Copied!' : '已複製！')
+            : result === 'error'
+                ? (english ? 'Copy failed' : '複製失敗')
+                : (english ? 'Click to copy' : '點擊複製指令');
+    }
+
+    commandButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const value = button.dataset.copyCommand || '';
+            if (!value) return;
+            const copied = await copyCommandText(value);
+            const previous = commandFeedbackTimers.get(button);
+            if (previous) clearTimeout(previous);
+            const glyph = button.querySelector('.l1ng-copy-glyph');
+            if (glyph) glyph.classList.remove('l1ng-copy-running');
+            setCommandFeedback(button, copied ? 'success' : 'error');
+            if (copied && glyph) {
+                // 沿著 SVG 筆劃重播；快速連點時從第一筆重新開始。
+                void glyph.getBoundingClientRect();
+                glyph.classList.add('l1ng-copy-running');
+            }
+            commandFeedbackTimers.set(button, setTimeout(() => {
+                if (glyph) glyph.classList.remove('l1ng-copy-running');
+                setCommandFeedback(button);
+            }, copied ? 3900 : 1900));
+        });
+    });
+
 
     function setLanguage(language) {
         const next = language === 'en' ? 'en' : 'zh-Hant';
@@ -19,6 +85,11 @@
             const active = button.dataset.languageButton === next;
             button.classList.toggle('active', active);
             button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+        commandButtons.forEach(button => {
+            const previous = commandFeedbackTimers.get(button);
+            if (previous) clearTimeout(previous);
+            setCommandFeedback(button);
         });
 
         try {

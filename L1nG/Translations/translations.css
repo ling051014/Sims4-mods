@@ -459,6 +459,55 @@ section[id] {
     border-color:#eadbc7;
 }
 
+/* ========【模組整理深層連結提示】 設定 - 對應卡片使用專區紫色，避免與警告狀態混淆 ======== */
+.translation-card.is-linked-target {
+    position:relative;
+    scroll-margin-top:94px;
+    animation:translation-target-flash 1.6s ease-in-out 1;
+}
+
+.translation-target-hint {
+    position:absolute;
+    top:-13px;
+    right:19px;
+    display:inline-flex;
+    align-items:center;
+    min-height:25px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:var(--translation-dark);
+    color:#fff;
+    font-size:11px;
+    font-weight:650;
+    letter-spacing:.02em;
+    line-height:1.25;
+    pointer-events:none;
+    animation:translation-target-hint-flash 1.6s ease-in-out 1 both;
+}
+
+@keyframes translation-target-flash {
+    0%,100% { box-shadow:0 0 0 0 rgba(127,115,180,0); }
+    20%,48% {
+        border-color:var(--translation);
+        background-color:rgba(244,240,252,.98);
+        box-shadow:0 0 0 5px rgba(127,115,180,.22), 0 12px 30px rgba(98,87,143,.13);
+    }
+}
+
+@keyframes translation-target-hint-flash {
+    0%,100% { opacity:0; transform:translateY(-5px); }
+    18%,52% { opacity:1; transform:translateY(0); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .translation-card.is-linked-target {
+        animation:none;
+        border-color:var(--translation);
+        box-shadow:0 0 0 3px rgba(127,115,180,.17);
+    }
+    .translation-target-hint { animation:none; }
+}
+
 .card-top,
 .card-actions {
     display:flex;
@@ -927,3 +976,22 @@ section[id] {
         transform:none;
     }
 }
+
+
+/* ========【搜尋欄】 設定 - 共用 SVG 與自訂清除鈕 ======== */
+.search-input-wrap {position:relative;min-width:0;flex:1 1 auto;color:var(--muted)}
+.search-input-wrap input {width:100%;padding-left:36px;padding-right:40px}
+.search-input-wrap::before {content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;background:currentColor;opacity:.7;pointer-events:none;-webkit-mask:url("../icons/ui-search.svg") center/contain no-repeat;mask:url("../icons/ui-search.svg") center/contain no-repeat}
+.search-input-wrap input::-webkit-search-cancel-button {-webkit-appearance:none;display:none}
+.search-input-wrap .l1ng-search-clear {position:absolute;right:4px;top:50%;transform:translateY(-50%);height:32px;width:32px;border:0;border-radius:7px;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.search-input-wrap .l1ng-search-clear::before {content:"";height:14px;width:14px;background:currentColor;-webkit-mask:url("../icons/ui-clear.svg") center/contain no-repeat;mask:url("../icons/ui-clear.svg") center/contain no-repeat}
+.search-input-wrap .l1ng-search-clear[hidden]{display:none}
+.search-input-wrap .l1ng-search-clear:hover,.search-input-wrap .l1ng-search-clear:focus-visible {background:var(--line);color:var(--ink)}
+@media(pointer:coarse){.search-input-wrap .l1ng-search-clear{width:40px;height:40px;right:0}}
+@media(hover:hover) and (pointer:fine){.translation-grid,.translation-list{scrollbar-width:thin;scrollbar-color:var(--line) transparent}}
+
+/* ========【共用捲軸】 A 款細線 - 所有可捲動容器 ======== */
+html,body,body *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{width:6px;height:6px}
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,body *::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}

@@ -721,6 +721,118 @@ input:disabled,
     /* 停用控制項使用禁止操作游標 */ cursor: not-allowed;
 }
 
+/* ========【滑桿】 設定 - 全部使用 A 款極簡細線，不依賴瀏覽器原生外觀 ======== */
+input[type="range"] {
+    --range-fill: 0%;
+    --range-track-height: 4px;
+    --range-thumb-size: 16px;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    /* 保留 iOS 對水平拖曳與垂直捲動的原生觸控判斷。 */
+    touch-action: auto;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: var(--range-track-height);
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+        var(--action-primary) 0%,
+        var(--action-primary) var(--range-fill),
+        var(--border-default) var(--range-fill),
+        var(--border-default) 100%);
+}
+
+input[type="range"]::-moz-range-track {
+    height: var(--range-track-height);
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+        var(--action-primary) 0%,
+        var(--action-primary) var(--range-fill),
+        var(--border-default) var(--range-fill),
+        var(--border-default) 100%);
+}
+
+input[type="range"]::-moz-range-progress {
+    border: 0;
+    background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    margin-top: calc((var(--range-track-height) - var(--range-thumb-size)) / 2);
+    border: 2px solid var(--surface-card);
+    border-radius: 50%;
+    background: var(--action-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    transition: transform .16s ease,box-shadow .16s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: var(--range-thumb-size);
+    height: var(--range-thumb-size);
+    border: 2px solid var(--surface-card);
+    border-radius: 50%;
+    background: var(--action-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    transition: transform .16s ease,box-shadow .16s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    input[type="range"]:not(:disabled):hover::-webkit-slider-thumb {
+        transform: scale(1.12);
+    }
+    input[type="range"]:not(:disabled):hover::-moz-range-thumb {
+        transform: scale(1.12);
+    }
+}
+
+input[type="range"]:not(:disabled):active::-webkit-slider-thumb {
+    transform: scale(1.16);
+    box-shadow: 0 0 0 5px color-mix(in srgb,var(--action-primary) 15%,transparent);
+}
+input[type="range"]:not(:disabled):active::-moz-range-thumb {
+    transform: scale(1.16);
+    box-shadow: 0 0 0 5px color-mix(in srgb,var(--action-primary) 15%,transparent);
+}
+input[type="range"]:focus-visible {
+    outline: 2px solid var(--action-primary);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+input[type="range"]:disabled {
+    cursor: not-allowed;
+    filter: grayscale(.35);
+}
+
+/* 細線外觀不變，手指操作時將透明觸控區增加到 44px。 */
+@media (pointer: coarse) {
+    input[type="range"] {
+        height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    input[type="range"]::-webkit-slider-thumb,
+    input[type="range"]::-moz-range-thumb {
+        transition: none;
+    }
+}
+
+
 /* ========【側邊欄尺寸】 設定 - 左上品牌區與側邊欄共用同一寬度 ======== */
 
 :root {
@@ -3623,17 +3735,12 @@ button.avatar-editor-action { cursor:pointer; }
 
 .appearance-background-range{
     min-width:0;
-    height:32px;
+    min-height:32px;
+    height:auto;
     display:grid;
     grid-template-columns:minmax(0,1fr) auto;
     align-items:center;
     gap:8px;
-}
-
-.appearance-background-control input[type="range"]{
-    width:100%;
-    min-width:0;
-    accent-color:var(--action-primary);
 }
 
 .appearance-background-control input[type="range"]:disabled{
@@ -4305,426 +4412,217 @@ button.avatar-editor-action { cursor:pointer; }
     font-variant-numeric:tabular-nums;
 }
 
-/* ========【人物庫】 設定 - 精簡雙欄快速瀏覽 / 詳細單欄資訊檢視 ======== */
+/* ========【市民與寵物總覽】 設定 - v7 固定視窗、分類與管理共用結構 ======== */
 .person-library-panel {
-    /* 視窗寬度 */ width: min(900px,100%);
-    /* 最大高度 */ max-height: 90vh;
-    /* 版面配置 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 避免整個視窗出現雙重捲軸 */ overflow: hidden;
-    /* 視窗內距 */ padding: 18px 20px 14px;
+    width:min(870px,100%);
+    height:min(650px,calc(100dvh - 40px));
+    max-height:none;
+    min-height:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
 }
-
 .person-library-header {
-    /* 版面配置 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 左右撐開 */ justify-content: space-between;
-    /* 項目間距 */ gap: 14px;
-    /* 下方間距 */ margin-bottom: 10px;
+    flex:0 0 auto;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:17px 20px 14px;
+    border-bottom:1px solid var(--border-default);
+    background:var(--surface-card);
 }
-
-.person-library-header h2 {
-    /* 清除共用標題外距 */ margin: 0;
+.person-library-heading-icon { flex:0 0 18px; width:18px; height:18px; margin-top:2px; color:var(--action-primary); }
+.person-library-heading { flex:1 1 auto; min-width:0; }
+.person-library-heading h2 { margin:0; color:var(--action-primary); font-size:16px; font-weight:700; line-height:1.3; letter-spacing:0; }
+.person-library-heading p { margin:4px 0 0; color:var(--text-secondary); font-size:11.5px; line-height:1.45; }
+.person-library-header .help-close-btn { flex:0 0 30px; align-self:center; }
+.person-library-layout { display:flex; flex:1 1 auto; min-height:0; overflow:hidden; }
+.person-library-side {
+    display:flex;
+    flex-direction:column;
+    flex:0 0 165px;
+    min-width:0;
+    padding:17px 9px 12px;
+    border-right:1px solid var(--border-default);
+    background:var(--surface-panel);
 }
-
-.person-library-header-actions {
-    /* 版面配置 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 7px;
-    /* 避免按鈕被壓縮 */ flex: 0 0 auto;
+.person-library-category-tabs { display:flex; flex-direction:column; gap:3px; flex:0 0 auto; margin:0; padding:0; border:0; }
+.person-library-category-tabs button {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    min-width:0;
+    min-height:38px;
+    padding:9px 10px;
+    border:0;
+    border-radius:7px;
+    background:transparent;
+    color:var(--text-secondary);
+    font:inherit;
+    font-size:12px;
+    text-align:left;
+    white-space:nowrap;
+    cursor:pointer;
 }
-
-.person-library-header-actions > button {
-    /* 最小高度 */ min-height: 34px;
-    /* 內距 */ padding: 6px 11px;
-    /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 6px;
-    /* 背景 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 12.5px;
+.person-library-category-tabs button .l1ng-icon { width:16px; height:16px; flex:0 0 16px; }
+.person-library-category-tabs button:hover { background:var(--surface-item-hover); color:var(--text-primary); }
+.person-library-category-tabs button.active { color:var(--action-primary); background:var(--brand-tint-start); font-weight:700; }
+.person-library-category-total { margin-left:auto; color:var(--text-secondary); font-size:10.5px; font-weight:500; font-variant-numeric:tabular-nums; line-height:1.2; }
+.person-library-category-tabs button.active .person-library-category-total { color:var(--action-primary); opacity:.76; }
+.person-library-header-actions { display:flex; flex-direction:column; align-items:stretch; gap:7px; margin-top:auto; padding-top:18px; }
+.person-library-header-actions button {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    min-height:35px;
+    min-width:0;
+    padding:6px 8px;
+    border:1px solid var(--border-default);
+    border-radius:7px;
+    background:var(--surface-card);
+    color:var(--text-primary);
+    font:inherit;
+    font-size:11.5px;
+    white-space:nowrap;
+    cursor:pointer;
 }
-
-.person-library-header-actions > button.primary {
-    /* 主要背景 */ background: var(--action-primary);
-    /* 主要文字 */ color: #fff;
-    /* 主要邊框 */ border-color: var(--action-primary);
+.person-library-header-actions button.primary { background:var(--action-primary); border-color:var(--action-primary); color:#fff; }
+.person-library-header-actions button .l1ng-icon { width:15px; height:15px; flex:0 0 15px; }
+.person-library-header-actions button[hidden] { display:none; }
+.person-library-main-pane { display:flex; flex:1 1 auto; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
+.person-library-toolbar { flex:0 0 auto; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; padding:14px 18px 12px; margin:0; }
+.person-library-toolbar input { width:100%; min-width:0; min-height:36px; padding:7px 11px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12.5px; outline:none; }
+.person-library-toolbar input:focus { border-color:var(--action-primary); box-shadow:0 0 0 2px var(--brand-tint-start); }
+.person-library-view-toggle { display:inline-flex; flex:0 0 auto; align-items:center; gap:2px; padding:2px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-panel); }
+.person-library-view-toggle button { display:grid; place-items:center; width:35px; height:32px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--text-secondary); cursor:pointer; }
+.person-library-view-toggle button svg { width:16px; height:16px; }
+.person-library-view-toggle button:hover { color:var(--text-primary); }
+.person-library-view-toggle button.active { background:var(--surface-card); color:var(--action-primary); box-shadow:0 1px 3px rgba(31,35,40,.08); }
+.person-library-list,.person-library-list.compact,.person-library-list.detailed {
+    display:flex;
+    flex:1 1 auto;
+    flex-direction:column;
+    gap:0;
+    min-height:0;
+    max-height:none;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding:0 18px 7px;
+    scrollbar-width:thin;
 }
-
-.person-library-toolbar {
-    /* 搜尋與檢視切換同列 */ display: grid;
-    /* 搜尋欄優先延展 */ grid-template-columns: minmax(0,1fr) auto;
-    /* 項目間距 */ gap: 10px;
-    /* 垂直對齊 */ align-items: center;
-    /* 下方間距 */ margin-bottom: 10px;
-}
-
-.person-library-toolbar input {
-    /* 搜尋欄寬度 */ width: 100%;
-    /* 最小高度 */ min-height: 36px;
-    /* 內距 */ padding: 7px 11px;
-    /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 6px;
-    /* 背景 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 13px;
-    /* 清除原生外框 */ outline: none;
-}
-
-.person-library-toolbar input:focus {
-    /* 聚焦邊框 */ border-color: var(--action-primary);
-    /* 聚焦提示 */ box-shadow: 0 0 0 2px var(--brand-tint-start);
-}
-
-.person-library-view-toggle {
-    /* 版面配置 */ display: inline-flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 外框內距 */ padding: 2px;
-    /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 7px;
-    /* 背景 */ background: var(--surface-panel);
-    /* 避免切換器被壓縮 */ flex: 0 0 auto;
-}
-
-.person-library-view-toggle button {
-    /* 最小寬度 */ min-width: 54px;
-    /* 按鈕高度 */ height: 30px;
-    /* 水平內距 */ padding: 0 10px;
-    /* 清除額外邊框 */ border: 0;
-    /* 圓角 */ border-radius: 5px;
-    /* 背景 */ background: transparent;
-    /* 次要文字色 */ color: var(--text-secondary);
-    /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 12px;
-    /* 字體粗細 */ font-weight: 650;
-}
-
-.person-library-view-toggle button:hover {
-    /* 懸停文字 */ color: var(--text-primary);
-    /* 懸停背景 */ background: var(--surface-card);
-}
-
-.person-library-view-toggle button.active {
-    /* 啟用文字 */ color: var(--action-primary);
-    /* 啟用背景 */ background: var(--surface-card);
-    /* 啟用陰影 */ box-shadow: 0 1px 3px rgba(31,35,40,.08);
-}
-
-.person-library-count {
-    /* 左側間距 */ margin-left: 5px;
-    /* 次要文字 */ color: var(--text-secondary);
-    /* 字體大小 */ font-size: 11.5px;
-    /* 字體粗細 */ font-weight: 500;
-    /* 不換行 */ white-space: nowrap;
-}
-
-.person-library-batch-toolbar {
-    /* 最小高度 */ min-height: 40px;
-    /* 外距 */ margin: 0 0 8px;
-    /* 內距 */ padding: 6px 8px;
-    /* 邊框 */ border: 1px solid rgba(176,58,46,.22);
-    /* 圓角 */ border-radius: 7px;
-    /* 背景 */ background: rgba(176,58,46,.05);
-    /* 版面配置 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 6px;
-    /* 允許換行 */ flex-wrap: wrap;
-}
-
-.person-library-batch-toolbar[hidden] {
-    /* 隱藏批量工具列 */ display: none;
-}
-
-.person-library-batch-count {
-    /* 次要文字 */ color: var(--text-secondary);
-    /* 字體大小 */ font-size: 11.5px;
-}
-
-.person-library-batch-toolbar button {
-    /* 最小高度 */ min-height: 29px;
-    /* 內距 */ padding: 4px 9px;
-    /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 5px;
-    /* 背景 */ background: var(--surface-card);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 字體 */ font: inherit;
-    /* 字體大小 */ font-size: 11px;
-}
-
-.person-library-batch-toolbar button.danger {
-    /* 危險操作文字 */ color: #b03a2e;
-    /* 危險操作邊框 */ border-color: rgba(176,58,46,.28);
-}
-
-.person-library-batch-toolbar button:disabled {
-    /* 停用透明度 */ opacity: .4;
-    /* 停用游標 */ cursor: default;
-}
-
-.person-library-list {
-    /* 佔滿剩餘高度 */ flex: 1 1 auto;
-    /* 最小高度 */ min-height: 180px;
-    /* 列表最大高度 */ max-height: 62vh;
-    /* 列表自行捲動 */ overflow: auto;
-    /* 留出捲軸與陰影空間 */ padding: 2px 4px 2px 2px;
-}
-
-.person-library-list.detailed {
-    /* 詳細檢視維持單欄 */ display: flex;
-    /* 垂直排列 */ flex-direction: column;
-    /* 卡片間距 */ gap: 6px;
-}
-
-.person-library-list.compact {
-    /* 精簡檢視使用雙欄 */ display: grid;
-    /* 兩欄平均分配 */ grid-template-columns: repeat(2,minmax(0,1fr));
-    /* 卡片間距 */ gap: 7px 8px;
-    /* 從頂端開始排列 */ align-content: start;
-}
-
 .person-library-item {
-    /* 版面配置 */ display: grid;
-    /* 內容與選單 */ grid-template-columns: minmax(0,1fr) 30px;
-    /* 垂直對齊 */ align-items: center;
-    /* 欄位間距 */ gap: 8px;
-    /* 邊框 */ border: 1px solid var(--border-default);
-    /* 圓角 */ border-radius: 8px;
-    /* 背景 */ background: var(--surface-card);
-    /* 背景動畫 */ transition: background-color .15s ease,border-color .15s ease;
+    display:grid;
+    position:relative;
+    flex:0 0 auto;
+    grid-template-columns:minmax(0,1fr) 28px;
+    align-items:start;
+    gap:10px;
+    min-width:0;
+    padding:14px 3px;
+    border:0;
+    border-bottom:1px solid var(--border-default);
+    border-radius:0;
+    background:transparent;
+    transition:background-color .12s ease;
 }
-
-.person-library-list.detailed .person-library-item {
-    /* 詳細列高度 */ min-height: 72px;
-    /* 詳細列內距 */ padding: 8px 9px;
+.person-library-item:last-child { border-bottom:0; }
+.person-library-item:hover { background:var(--surface-item-hover); }
+.person-library-item.batch-selected { background:color-mix(in srgb,var(--action-primary) 10%,transparent); border-radius:7px; }
+.person-library-main { display:flex; align-items:flex-start; gap:12px; min-width:0; cursor:pointer; }
+.person-library-avatar-wrap { width:48px; height:48px; flex:0 0 48px; position:relative; margin-top:1px; }
+.person-library-avatar { display:flex; position:relative; width:48px; height:48px; align-items:center; justify-content:center; overflow:hidden; border:1px solid var(--border-default); border-radius:50%; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); color:var(--avatar-text); font-size:15px; font-weight:700; }
+.person-library-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.person-library-avatar .pet-avatar-species-fallback .l1ng-icon { width:25px; height:25px; }
+.person-library-avatar img.person-library-deferred-image { position:relative; z-index:1; opacity:0; }
+.person-library-avatar img.person-library-deferred-image.asset-ready { opacity:1; }
+.person-library-avatar.has-image .pet-avatar-species-fallback { display:none; }
+.person-library-text { display:flex; flex:1 1 auto; flex-direction:column; gap:7px; min-width:0; }
+.person-library-name { display:flex; align-items:center; flex-wrap:wrap; gap:5px; min-height:20px; color:var(--text-primary); font-size:13px; font-weight:650; min-width:0; }
+.person-library-name-label { min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.person-library-life { color:var(--text-secondary); font-size:10.5px; font-weight:400; white-space:nowrap; margin-left:4px; }
+.person-library-detailed-meta { display:flex; flex-direction:column; align-items:flex-start; gap:4px; font-size:11.5px; line-height:1.48; white-space:normal; min-width:0; }
+.person-library-detail-field { display:grid; width:100%; grid-template-columns:68px minmax(0,1fr); gap:8px; align-items:baseline; overflow-wrap:anywhere; }
+.person-library-detail-label { color:var(--text-secondary); font-weight:500; }
+.person-library-detail-value { min-width:0; color:var(--text-primary); overflow-wrap:anywhere; }
+.person-library-compact-meta { color:var(--text-secondary); font-size:10.5px; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.person-library-list.detailed .person-library-compact-meta { display:none; }
+.person-library-list.compact .person-library-detailed-meta,.person-library-list.compact .person-library-life { display:none; }
+.person-library-list.compact .person-library-item { padding:9px 3px; min-height:55px; align-items:center; }
+.person-library-list.compact .person-library-main { align-items:center; }
+.person-library-list.compact .person-library-avatar-wrap,.person-library-list.compact .person-library-avatar { width:36px; height:36px; flex-basis:36px; }
+.person-library-list.compact .person-library-avatar-wrap { margin:0; }
+.person-library-list.compact .person-library-text { gap:2px; }
+.person-library-list.compact .person-library-name { font-size:12.5px; }
+.person-library-list.compact .person-library-item-menu,.person-library-list.compact .person-library-batch-select { align-self:center; }
+.person-library-item-menu { grid-column:2; grid-row:1; justify-self:end; position:relative; align-self:start; }
+.person-library-more { display:flex; width:28px; height:28px; align-items:center; justify-content:center; border:0; border-radius:6px; background:transparent; color:var(--text-secondary); cursor:pointer; opacity:.65; }
+.person-library-item:hover .person-library-more,.person-library-more:focus-visible,.person-library-item-menu.open .person-library-more { opacity:1; color:var(--text-primary); background:var(--surface-item-hover); }
+.person-library-item-popover { top:calc(100% + 4px); right:0; left:auto; min-width:190px; }
+.person-library-batch-select { grid-column:2; grid-row:1; justify-self:center; align-self:start; display:none; width:21px; height:21px; margin:3px 0 0; padding:0; align-items:center; justify-content:center; border:1px solid var(--border-default); border-radius:50%; background:var(--surface-input); color:transparent; cursor:pointer; }
+.person-library-item.batch-mode .person-library-batch-select { display:flex; opacity:1; pointer-events:auto; }
+.person-library-item.batch-mode .person-library-batch-select.selected { border-color:var(--action-primary); background:var(--action-primary); color:#fff; }
+.person-library-batch-select .l1ng-icon { width:12px; height:12px; }
+.person-library-item.batch-mode .person-library-item-menu { display:none; }
+.person-library-empty,.family-member-picker-empty { padding:40px 20px; color:var(--text-secondary); font-size:12.5px; text-align:center; }
+.person-library-batch-toolbar {
+    flex:0 0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:flex-start;
+    gap:7px;
+    min-height:58px;
+    margin:0;
+    padding:10px 18px max(10px,env(safe-area-inset-bottom));
+    border:0;
+    border-top:1px solid var(--border-default);
+    border-radius:0;
+    background:var(--surface-card);
 }
-
-.person-library-list.compact .person-library-item {
-    /* 精簡列高度 */ min-height: 52px;
-    /* 精簡列內距 */ padding: 6px 7px;
+.person-library-batch-toolbar[hidden],.person-library-batch-count[hidden] { display:none; }
+.person-library-batch-toolbar button { min-height:34px; padding:6px 11px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-card); color:var(--text-primary); font:inherit; font-size:11.5px; cursor:pointer; }
+.person-library-batch-toolbar button.danger { color:#b03a2e; border-color:rgba(176,58,46,.35); }
+.person-library-batch-toolbar button:disabled { opacity:.4; cursor:default; }
+@media (max-width:720px) {
+    #personLibraryDialog { padding:10px; }
+    .person-library-panel { width:100%; height:min(668px,calc(100dvh - 20px)); max-height:none; }
+    .person-library-header { padding:14px 15px 12px; }
+    .person-library-heading h2 { font-size:15px; }
+    .person-library-heading p { font-size:11px; }
+    .person-library-layout { flex-direction:column; }
+    .person-library-side { flex:0 0 auto; width:100%; min-height:53px; padding:5px 12px; flex-direction:row; align-items:center; gap:6px; border-right:0; border-bottom:1px solid var(--border-default); background:var(--surface-card); }
+    .person-library-category-tabs { flex:1 1 auto; min-width:0; flex-direction:row; align-items:center; gap:2px; }
+    .person-library-category-tabs button { position:relative; flex:0 0 auto; width:auto; min-height:40px; padding:6px 3px 8px; gap:5px; border:0; border-radius:0; background:transparent; font-size:11px; }
+    .person-library-category-tabs button.active { background:transparent; color:var(--action-primary); }
+    .person-library-category-tabs button.active::after { content:""; position:absolute; left:1px; right:1px; bottom:-5px; height:2px; border-radius:2px; background:var(--action-primary); }
+    .person-library-category-tabs button .l1ng-icon { width:13px; height:13px; flex-basis:13px; }
+    .person-library-category-total { font-size:9.5px; margin-left:0; }
+    .person-library-header-actions { flex:0 0 auto; margin:0 0 0 auto; padding:0; align-items:center; flex-direction:row; justify-content:flex-end; gap:4px; }
+    .person-library-header-actions button { min-height:31px; padding:5px 6px; gap:4px; font-size:10.5px; line-height:1.1; }
+    .person-library-header-actions button .l1ng-icon { width:12px; height:12px; flex-basis:12px; }
+    .person-library-toolbar { padding:10px 13px; gap:8px; }
+    .person-library-view-toggle button { width:33px; height:31px; }
+    .person-library-list { padding:0 13px 6px; }
+    .person-library-item { padding:13px 2px; gap:9px; }
+    .person-library-main { gap:9px; }
+    .person-library-avatar-wrap,.person-library-avatar { width:43px; height:43px; flex-basis:43px; }
+    .person-library-detail-field { grid-template-columns:62px minmax(0,1fr); gap:7px; }
+    .person-library-batch-toolbar { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:10px 13px max(10px,env(safe-area-inset-bottom)); gap:6px; }
+    .person-library-batch-toolbar[hidden] { display:none; }
+    .person-library-batch-toolbar button { min-width:0; font-size:10.5px; padding:6px 3px; }
 }
-
-.person-library-item:hover {
-    /* 懸停背景 */ background: var(--genealogy-roster-item-hover,var(--surface-item-hover));
-    /* 懸停邊框 */ border-color: var(--border-strong,var(--border-default));
+@media (max-width:360px) {
+    .person-library-side { padding:5px 7px; gap:4px; }
+    .person-library-category-tabs button { font-size:10px; gap:3px; padding-left:1px; padding-right:1px; }
+    .person-library-category-tabs button .l1ng-icon { width:12px; height:12px; flex-basis:12px; }
+    .person-library-header-actions { gap:3px; }
+    .person-library-header-actions button { font-size:10px; padding:5px 4px; gap:3px; }
+    .person-library-header-actions button .l1ng-icon { width:11px; height:11px; flex-basis:11px; }
 }
-
-.person-library-item.batch-selected {
-    /* 批量選取背景 */ background: rgba(176,58,46,.10);
-    /* 批量選取邊框 */ border-color: rgba(176,58,46,.35);
-}
-
-.person-library-main {
-    /* 避免內容撐破欄位 */ min-width: 0;
-    /* 版面配置 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 10px;
-    /* 整列可點擊 */ cursor: pointer;
-}
-
-.person-library-avatar-wrap {
-    /* 供批量選取層定位 */ position: relative;
-    /* 詳細頭像寬度 */ width: 48px;
-    /* 詳細頭像高度 */ height: 48px;
-    /* 固定尺寸 */ flex: 0 0 48px;
-}
-
-.person-library-avatar {
-    /* 頭像寬度 */ width: 48px;
-    /* 頭像高度 */ height: 48px;
-    /* 圓形頭像 */ border-radius: 50%;
-    /* 裁切內容 */ overflow: hidden;
-    /* 置中內容 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
-    /* 頭像背景 */ background: linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
-    /* 頭像文字 */ color: var(--avatar-text);
-    /* 字體大小 */ font-size: 15px;
-    /* 字體粗細 */ font-weight: 700;
-    /* 頭像邊框 */ border: 1px solid var(--border-default);
-}
-
-.person-library-avatar img {
-    /* 圖片寬度 */ width: 100%;
-    /* 圖片高度 */ height: 100%;
-    /* 圖片裁切 */ object-fit: cover;
-    /* 清除行內空隙 */ display: block;
-}
-
-.person-library-batch-select {
-    /* 疊在頭像上 */ position: absolute;
-    /* 填滿頭像 */ inset: 0;
-    /* 寬度 */ width: 48px;
-    /* 高度 */ height: 48px;
-    /* 清除內距 */ padding: 0;
-    /* 清除外框 */ border: 0;
-    /* 圓形遮罩 */ border-radius: 50%;
-    /* 選取提示背景 */ background: rgba(176,58,46,.36);
-    /* 圖示顏色 */ color: #fff;
-    /* 預設隱藏 */ opacity: 0;
-    /* 預設不接收事件 */ pointer-events: none;
-    /* 置中圖示 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
-}
-
-.person-library-item.batch-mode .person-library-batch-select {
-    /* 批量模式顯示 */ opacity: .42;
-    /* 批量模式可點擊 */ pointer-events: auto;
-}
-
-.person-library-item.batch-mode .person-library-batch-select.selected {
-    /* 選取後提高辨識度 */ opacity: .64;
-    /* 選取背景 */ background: rgba(176,58,46,.56);
-}
-
-.person-library-text {
-    /* 避免文字撐破容器 */ min-width: 0;
-    /* 垂直排列 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 行間距 */ gap: 4px;
-}
-
-.person-library-name {
-    /* 避免長名稱撐破 */ min-width: 0;
-    /* 名稱列 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 圖示間距 */ gap: 5px;
-    /* 主文字 */ color: var(--text-primary);
-    /* 字體大小 */ font-size: 13px;
-    /* 字體粗細 */ font-weight: 650;
-}
-
-.person-library-name > span:last-child {
-    /* 過長名稱隱藏 */ overflow: hidden;
-    /* 省略號 */ text-overflow: ellipsis;
-    /* 單行顯示 */ white-space: nowrap;
-}
-
-.person-library-compact-meta {
-    /* 避免內容撐破 */ min-width: 0;
-    /* 次要文字 */ color: var(--text-secondary);
-    /* 字體大小 */ font-size: 11px;
-    /* 行距 */ line-height: 1.35;
-    /* 過長內容隱藏 */ overflow: hidden;
-    /* 省略號 */ text-overflow: ellipsis;
-    /* 單行顯示 */ white-space: nowrap;
-}
-
-.person-library-detailed-meta {
-    /* 避免內容撐破 */ min-width: 0;
-    /* 次要文字 */ color: var(--text-secondary);
-    /* 字體大小 */ font-size: 11.5px;
-    /* 行距 */ line-height: 1.5;
-    /* 詳細資訊可自然換行 */ white-space: normal;
-    /* 長文字可換行 */ overflow-wrap: anywhere;
-}
-
-.person-library-list.detailed .person-library-compact-meta {
-    /* 詳細模式隱藏精簡資訊 */ display: none;
-}
-
-.person-library-list.compact .person-library-detailed-meta {
-    /* 精簡模式隱藏詳細資訊 */ display: none;
-}
-
-.person-library-list.compact .person-library-avatar-wrap,
-.person-library-list.compact .person-library-avatar,
-.person-library-list.compact .person-library-batch-select {
-    /* 精簡頭像寬度 */ width: 36px;
-    /* 精簡頭像高度 */ height: 36px;
-    /* 精簡頭像固定尺寸 */ flex-basis: 36px;
-}
-
-.person-library-list.compact .person-library-text {
-    /* 精簡資訊收緊 */ gap: 2px;
-}
-
-.person-library-list.compact .person-library-name {
-    /* 精簡名稱大小 */ font-size: 12.5px;
-}
-
-.person-library-item-menu {
-    /* 選單靠右 */ justify-self: end;
-    /* 供彈出選單定位 */ position: relative;
-}
-
-.person-library-more {
-    /* 按鈕寬度 */ width: 28px;
-    /* 按鈕高度 */ height: 28px;
-    /* 置中圖示 */ display: inline-flex;
-    /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
-    /* 清除內距 */ padding: 0;
-    /* 清除邊框 */ border: 0;
-    /* 圓角 */ border-radius: 5px;
-    /* 透明背景 */ background: transparent;
-    /* 次要文字 */ color: var(--text-secondary);
-    /* 預設透明度 */ opacity: .58;
-}
-
-.person-library-item:hover .person-library-more,
-.person-library-more:focus-visible,
-.person-library-item-menu.open .person-library-more {
-    /* 顯示完整透明度 */ opacity: 1;
-    /* 懸停背景 */ background: var(--surface-item-hover);
-    /* 主文字色 */ color: var(--text-primary);
-}
-
-.person-library-item.batch-mode .person-library-item-menu {
-    /* 批量模式隱藏單人選單 */ visibility: hidden;
-    /* 不接收事件 */ pointer-events: none;
-}
-
-.person-library-item-popover {
-    /* 選單往下展開 */ top: calc(100% + 4px);
-    /* 靠右定位 */ right: 0;
-    /* 清除左側定位 */ left: auto;
-    /* 最小寬度 */ min-width: 190px;
-}
-
-.person-library-meta-separator {
-    /* 分隔點左右留白 */ margin: 0 2px;
-    /* 次要透明度 */ opacity: .55;
-}
-
-.person-library-empty,
-.family-member-picker-empty {
-    /* 空狀態內距 */ padding: 34px 20px;
-    /* 文字置中 */ text-align: center;
-    /* 次要文字 */ color: var(--text-secondary);
-    /* 字體大小 */ font-size: 12.5px;
-}
-
-/* ========【人物庫響應式】 設定 - 窄視窗回到單欄並保留可讀性 ======== */
-@media (max-width: 720px) {
-    .person-library-panel {
-        /* 窄視窗內距 */ padding: 16px;
-    }
-
-    .person-library-header {
-        /* 標題與操作上下排列 */ align-items: flex-start;
-        /* 允許換行 */ flex-wrap: wrap;
-    }
-
-    .person-library-header-actions {
-        /* 窄視窗允許按鈕換行 */ flex-wrap: wrap;
-    }
-
-    .person-library-toolbar {
-        /* 搜尋與切換上下排列 */ grid-template-columns: minmax(0,1fr);
-        /* 縮小行距 */ gap: 8px;
-    }
-
-    .person-library-view-toggle {
-        /* 切換器貼齊左側 */ justify-self: start;
-    }
-
-    .person-library-list.compact {
-        /* 手機精簡模式回到單欄 */ grid-template-columns: minmax(0,1fr);
-    }
-}
-
 /* ========【加入家族人物列】 設定 - 維持原有尺寸，不受人物庫檢視模式影響 ======== */
 .family-member-picker-avatar {
     /* 頭像寬度 */ width: 42px;
@@ -5131,6 +5029,8 @@ button.avatar-editor-action { cursor:pointer; }
 .person-profile-value { min-width:0; color:var(--text-primary); word-break:break-word; }
 .person-profile-value.muted { color:var(--text-secondary); font-style:italic; }
 .person-profile-traits { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+/* 資訊卡的「特徵」與其他基本資料共用同一列；對齊首排標籤，不套用獨立區塊的上方間距。 */
+.person-profile-row .person-profile-traits { margin-top:0; }
 .person-profile-traits .tag { font-size:10.5px; padding:3px 7px; max-width:none; }
 .person-profile-notes { font-size:12.5px; line-height:1.55; color:var(--text-primary); word-break:break-word; white-space:pre-wrap; }
 .person-profile-media { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:16px; }
@@ -5658,8 +5558,19 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-cloud-haze2);
 }
 
+.icon-crosshair { --l1ng-icon: var(--l1ng-icon-crosshair); }
+
 .icon-database {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-database);
+}
+
+/* 族譜提取器專用：檔案與族譜分支（小尺寸 SVG） */
+.icon-genealogy-extractor {
+    /* 對齊方案 A：保留文件與族譜分支的間距及既有選單欄位配置 */
+    --l1ng-icon: url("../icons/genealogy-extractor.svg?v=20261011-thin-r6");
+    width: 18px;
+    height: 18px;
+    margin-inline: -3px;
 }
 
 .icon-diagram-3 {
@@ -5705,6 +5616,11 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 .icon-gender-male {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-gender-male);
 }
+/* 卡片姓名後方的專用性別 SVG，沿用既有 icon mask 系統。 */
+.icon-gender-card-male { --l1ng-icon: var(--l1ng-icon-gender-card-male); }
+.icon-gender-card-female { --l1ng-icon: var(--l1ng-icon-gender-card-female); }
+.icon-gender-card-other { --l1ng-icon: var(--l1ng-icon-gender-card-other); }
+
 
 .icon-heart {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-heart);
@@ -6215,9 +6131,11 @@ html[lang="en"] body {
 }
 
 .game-import-status-card {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 14px;
+    /* 原有卡片加上第二列進度條 */ display: grid;
+    grid-template-columns: 22px minmax(0,1fr) auto;
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 12px;
     /* 最小寬度 */ min-width: min(340px, calc(100vw - 40px));
     /* 最大寬度 */ max-width: 460px;
     /* 內縮空間 */ padding: 18px 20px;
@@ -6229,6 +6147,7 @@ html[lang="en"] body {
 }
 
 .game-import-status-content {
+    min-width: 0;
     /* 顯示方式 */ display: flex;
     /* 排列方向 */ flex-direction: column;
     /* 項目間距 */ gap: 4px;
@@ -6246,6 +6165,28 @@ html[lang="en"] body {
     /* 文字顏色 */ color: var(--text-secondary);
 }
 
+.game-import-status-percent {
+    font-size: 16px;
+    font-weight: 650;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.game-import-status-track {
+    grid-column: 1 / -1;
+    height: 6px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--border-default);
+}
+.game-import-status-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: var(--action-primary);
+    transition: width .12s ease;
+}
 .game-import-spinner {
     /* 元素寬度 */ width: 22px;
     /* 元素高度 */ height: 22px;
@@ -6468,6 +6409,16 @@ html[lang="en"] body {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-chevron-down);
 }
 
+/* 收合／展開家族欄沿用同一個現有 SVG，僅轉向，不另外新增圖示檔。 */
+.icon-chevron-left {
+    --l1ng-icon: var(--l1ng-icon-chevron-down);
+    transform: rotate(90deg);
+}
+.icon-chevron-right {
+    --l1ng-icon: var(--l1ng-icon-chevron-down);
+    transform: rotate(-90deg);
+}
+
 .icon-pencil {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-pencil);
 }
@@ -6640,6 +6591,11 @@ html[lang="en"] body {
 .icon-paw {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-paw);
 }
+.icon-dog { --l1ng-icon: var(--l1ng-icon-dog); }
+.icon-cat { --l1ng-icon: var(--l1ng-icon-cat); }
+.icon-horse { --l1ng-icon: var(--l1ng-icon-horse); }
+.icon-cow { --l1ng-icon: var(--l1ng-icon-cow); }
+.icon-bird { --l1ng-icon: var(--l1ng-icon-bird); }
 
 .icon-tombstone {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-tombstone);
@@ -7036,7 +6992,37 @@ button.is-loading .button-loading-label {
 .topbar-filter-column .topbar-filter-group + .topbar-filter-group { margin-top:24px; padding-top:0; border-top:0; }
 .topbar-filter-group legend { width:100%; margin:0 0 4px; padding:0; color:var(--text-secondary); font-size:10.5px; font-weight:650; letter-spacing:.35px; }
 .topbar-filter-option { display:flex; align-items:center; gap:8px; min-height:29px; padding:3px 2px; color:var(--nav-dropdown-text); font-size:12px; cursor:pointer; }
-.topbar-filter-option input { width:14px; height:14px; margin:0; accent-color:var(--action-primary); flex:0 0 auto; }
+/* 篩選勾選框：背景沿用各主題強調色，勾號依顏色對比選深色或白色。 */
+/* 各主題沿用 --action-primary 作為勾選底色；勾號則依主題色亮度配對。 */
+:root { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"] { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23172636' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+/* 自訂主題勾號由 chooseCustomTheme() 按使用者選的強調色計算。 */
+.topbar-filter-option input[type="checkbox"],
+.person-card-menu-check input[type="checkbox"] {
+  -webkit-appearance:none;
+  appearance:none;
+  width:14px;
+  height:14px;
+  margin:0;
+  flex:0 0 14px;
+  border:1px solid var(--border-default);
+  border-radius:3px;
+  background-color:var(--surface-input);
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:11px 11px;
+}
+.topbar-filter-option input[type="checkbox"]:checked,
+.person-card-menu-check input[type="checkbox"]:checked {
+  border-color:var(--action-primary);
+  background-color:var(--action-primary);
+  background-image:var(--filter-checkmark-image);
+}
+.topbar-filter-option input[type="checkbox"]:focus-visible,
+.person-card-menu-check input[type="checkbox"]:focus-visible {
+  outline:2px solid var(--action-primary);
+  outline-offset:2px;
+}
 .topbar-filter-option:hover span { color:var(--action-primary); }
 .topbar-filter-footer { display:flex; justify-content:flex-end; padding-top:6px; border-top:1px solid var(--nav-dropdown-divider); }
 .topbar-filter-footer button { padding:4px 2px; border:0; background:transparent; color:var(--text-secondary); font:inherit; font-size:11px; }
@@ -7580,6 +7566,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .topbar-filter-label { display:none; }
   .topbar-filter-count { display:none !important; }
   .topbar-filter-popover { left:50%; right:auto; width:min(520px,calc(100vw - 24px)); transform:translateX(-50%); }
+  /* 手機第一直欄：狀態、性別與寵物保持同樣距離，但比桌面版的 24px 緊湊。 */
+  .topbar-filter-column .topbar-filter-group + .topbar-filter-group { margin-top:8px; }
   .family-panel { position:fixed; top:52px; bottom:0; left:0; width:min(310px,88vw); flex-basis:auto; transform:translateX(-102%); z-index:300; transition:transform .22s ease; }
   .family-panel.open { transform:translateX(0); }
   body.family-panel-collapsed .family-panel { width:min(310px,88vw); }
@@ -7808,7 +7796,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .person-card-menu-check:hover,.person-card-menu-radio:hover { background:var(--surface-item-hover); }
 .person-card-menu-check.fixed { color:var(--text-secondary); cursor:default; }
 .person-card-menu-check.fixed:hover { background:transparent; }
-.person-card-menu-check input,.person-card-menu-radio input { margin:0; accent-color:var(--action-primary); }
+.person-card-menu-radio input { margin:0; accent-color:var(--action-primary); }
+.person-card-menu-check.fixed input[type="checkbox"]:disabled { opacity:.65; }
 .person-card-menu-note { padding:5px 9px 7px; color:var(--text-secondary); font-size:10px; line-height:1.4; }
 
 /* ========【人物卡片外觀】 設定 - 檢視模式外觀；檢視 / 編輯顯示內容各自獨立 ======== */
@@ -8313,17 +8302,27 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 
-/* ========【圖片與儲存】 設定 - 玩家導向的圖片使用量、備份說明與清理操作 ======== */
+/* ========【圖片與儲存】 設定 - 共用固定標題、關閉按鈕與獨立捲動內容 ======== */
 .storage-modal {
     width:min(680px,100%);
+    max-height:min(680px,calc(100dvh - 40px));
+    display:flex;
+    flex-direction:column;
+    padding:0;
+    overflow:hidden;
 }
-
-.storage-modal > h2 {
-    margin-bottom:7px;
+.storage-header { flex:0 0 auto; background:var(--surface-card); }
+.storage-header .help-heading { flex:1 1 auto; }
+.storage-scroll-body {
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 20px 20px;
 }
-
 .storage-intro {
-    margin:0 0 18px;
+    margin:0 0 8px;
     color:var(--text-secondary);
     font-size:13px;
     line-height:1.65;
@@ -8466,6 +8465,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 @media (max-width:720px) {
+    .storage-modal { max-height:calc(100dvh - 28px); }
+    .storage-scroll-body { padding:14px 16px 16px; }
     .storage-summary {
         grid-template-columns:1fr;
     }
@@ -8531,13 +8532,12 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .relationship-full-preview[data-orientation="horizontal"] .card-a{left:var(--relationship-preview-side-gap);top:50%;transform:translateY(-50%)}
 .relationship-full-preview[data-orientation="horizontal"] .card-b{right:var(--relationship-preview-side-gap);left:auto;top:50%;transform:translateY(-50%)}
 .relationship-editor-fields{display:grid;grid-template-columns:150px minmax(160px,1fr) 44px;gap:10px;align-items:start}
-.relationship-editor-fields>label{min-width:0;display:grid;grid-template-rows:auto 32px;gap:5px;align-items:start;color:var(--text-secondary);font-size:var(--appearance-control-label-size)}
+.relationship-editor-fields>label{min-width:0;display:grid;grid-template-rows:auto minmax(32px,auto);gap:5px;align-items:start;color:var(--text-secondary);font-size:var(--appearance-control-label-size)}
 .relationship-editor-fields>label>span:first-child{min-height:12px;display:flex;align-items:center;line-height:1.2}
 .relationship-editor-fields>label>.ui-single-select,
 .relationship-editor-fields>label>select{height:32px;align-self:start}
-.relationship-editor-range{min-width:0;height:32px;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:6px}
+.relationship-editor-range{min-width:0;min-height:32px;display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:6px}
 .relationship-editor-range output{min-width:30px;color:var(--text-primary);font-size:10.5px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
-.relationship-editor-fields input[type=range],.relationship-curve-slider input[type=range]{width:100%;min-width:0;accent-color:var(--action-primary)}
 .relationship-editor-color{width:44px;justify-self:end}
 .relationship-editor-color input[type=color]{width:44px;height:32px;align-self:start;padding:2px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);cursor:pointer}
 .relationship-feature-row{margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:center}
@@ -8607,3 +8607,293 @@ button.danger-action:focus-visible {
 
 
 
+
+/* ========【畫布寵物卡】 設定 - 沿用人物卡片配色，家庭旁獨立顯示，不覆蓋血緣線 ======== */
+/* 寵物卡置於畫布標籤上方；容器不擋人物卡，只有卡片接收點擊。 */
+#genealogyPetLayer { position:absolute; inset:0; z-index:4; pointer-events:none; overflow:visible; }
+#genealogyPetLayer .genealogy-pet-card { pointer-events:auto; touch-action:manipulation; }
+.genealogy-pet-card {
+  position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  gap:5px; padding:9px 7px 7px; border:1.5px solid var(--border-default); border-radius:10px;
+  background:var(--surface-card); box-shadow:0 1px 3px rgba(0,0,0,.06);
+  color:var(--text-primary); font:inherit; text-align:center; cursor:pointer; pointer-events:auto;
+  user-select:none; -webkit-user-select:none; touch-action:manipulation;
+}
+.genealogy-pet-card:hover,.genealogy-pet-card:focus-visible {
+  border-color:var(--action-primary); box-shadow:0 5px 14px rgba(0,0,0,.10);
+}
+.genealogy-pet-card.pet-card-selected {
+  z-index:5;
+}
+.genealogy-pet-card.pet-card-selected::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  border:2px solid var(--action-primary);
+  border-radius:inherit;
+  box-sizing:border-box;
+  pointer-events:none;
+}
+/* 與人物卡一致：檢視直向、編輯橫向，寵物資訊各自適配。 */
+.genealogy-pet-card-info { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; min-width:0; width:100%; text-align:center; }
+.genealogy-pet-card.mode-view .genealogy-pet-card-avatar { width:61px; height:61px; align-self:center; }
+.genealogy-pet-card.mode-view .genealogy-pet-card-info { align-items:center; text-align:center; }
+.genealogy-pet-card.mode-edit { flex-direction:row; align-items:center; justify-content:flex-start; gap:10px; padding:10px; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-info { align-items:flex-start; text-align:left; gap:3px; flex:1; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-avatar { width:51px; height:51px; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-name,
+.genealogy-pet-card.mode-edit .genealogy-pet-card-field { text-align:left; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-name { font-size:12px; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-traits.person-card-tags {
+  width:100%; max-height:none; overflow:visible; margin-top:1px;
+  display:flex; flex-wrap:wrap; gap:3px; align-items:flex-start;
+}
+.genealogy-pet-card.mode-edit .genealogy-pet-card-traits .tag {
+  max-width:100%; white-space:normal; overflow-wrap:anywhere;
+  text-overflow:clip; min-height:16px;
+}
+.genealogy-pet-card .person-card-gender-icon { flex:0 0 auto; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-name { display:flex; align-items:center; gap:2px; }
+.genealogy-pet-card.mode-view .genealogy-pet-card-name { text-align:center; }
+.genealogy-pet-card.mode-view .genealogy-pet-card-field.person-card-view-meta { justify-content:center; text-align:center; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-field.person-card-edit-meta { justify-content:flex-start; text-align:left; min-height:0; }
+
+.genealogy-pet-card.pet-avatar-only { justify-content:center; }
+
+.genealogy-pet-card-avatar {
+  position:relative;
+  display:flex; align-items:center; justify-content:center; flex:none; width:51px; height:51px;
+  border:1px solid var(--border-default); border-radius:9px; overflow:hidden;
+  background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
+  color:var(--avatar-text);
+}
+.genealogy-pet-card-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.genealogy-pet-card-avatar .pet-avatar-image,
+.person-profile-pet-main-avatar .pet-avatar-image,
+.person-profile-pet-avatar .pet-avatar-image { position:relative; z-index:1; opacity:0; }
+.genealogy-pet-card-avatar.has-image .pet-avatar-image,
+.person-profile-pet-main-avatar.has-image .pet-avatar-image,
+.person-profile-pet-avatar.has-image .pet-avatar-image { opacity:1; }
+.genealogy-pet-card-avatar.has-image .pet-avatar-species-fallback,
+.person-profile-pet-main-avatar.has-image .pet-avatar-species-fallback,
+.person-profile-pet-avatar.has-image .pet-avatar-species-fallback { display:none; }
+.pet-avatar-species-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--avatar-text); pointer-events:none; }
+.genealogy-pet-card-avatar .pet-avatar-species-fallback .l1ng-icon { width:30px; height:30px; }
+.genealogy-pet-card-avatar .l1ng-icon { width:26px; height:26px; }
+/* 寵物可選顯示欄位全部保留換行，不使用固定兩行裁切。 */
+.genealogy-pet-card-name {
+  display:block; width:100%; font-size:11px; font-weight:700; line-height:1.45;
+  white-space:normal; overflow-wrap:anywhere;
+}
+.genealogy-pet-card-field {
+  display:block; width:100%; font-size:9.5px; line-height:1.4;
+  color:var(--text-secondary); white-space:normal; overflow-wrap:anywhere;
+}
+.genealogy-pet-card.mode-view.card-appearance-minimal { background:transparent; border-color:transparent; box-shadow:none; }
+.genealogy-pet-card.mode-view.card-appearance-minimal:hover,
+.genealogy-pet-card.mode-view.card-appearance-minimal:focus-visible { background:color-mix(in srgb,var(--surface-card) 48%,transparent); border-color:color-mix(in srgb,var(--action-primary) 58%,transparent); }
+.genealogy-pet-card.mode-view.card-appearance-translucent { background:color-mix(in srgb,var(--surface-card) 76%,transparent); border-color:color-mix(in srgb,var(--border-default) 74%,transparent); box-shadow:0 2px 10px rgba(0,0,0,.05); backdrop-filter:blur(5px); }
+.genealogy-pet-card.mode-view.card-appearance-full { background:var(--surface-card); }
+.genealogy-pet-card.ghost { background:var(--person-ghost-surface); border-color:var(--person-ghost-border); border-style:dotted; }
+.genealogy-pet-card.mode-view.card-appearance-minimal.ghost,
+.genealogy-pet-card.mode-view.card-appearance-minimal.dead { background:transparent; border-color:transparent; border-style:solid; }
+.genealogy-pet-card.dead { background:var(--person-deceased-surface); border-color:var(--person-deceased-border); border-style:dashed; }
+
+/* ========【寵物資料視窗】 設定 - 延續人物樣式，減少寵物資料的空白 ======== */
+#personProfileDialog.pet-profile-open .person-profile-panel { width:min(430px,100%); }
+#personProfileDialog.pet-profile-open .person-profile-header { padding:14px 16px 12px; gap:12px; }
+#personProfileDialog.pet-profile-open .person-profile-avatar { width:80px; height:80px; font-size:26px; }
+#personProfileDialog.pet-profile-open .person-profile-body { padding:0 16px; max-height:min(64vh,520px); }
+#personProfileDialog.pet-profile-open .person-profile-section { padding:10px 0 11px; }
+#personProfileDialog.pet-profile-open .person-profile-row { grid-template-columns:82px minmax(0,1fr); gap:8px; }
+#personProfileDialog.pet-profile-open .person-profile-traits { margin-top:5px; }
+#personProfileDialog.pet-profile-open .person-profile-panel > .ui-dialog-actions { padding:9px 16px 11px; }
+.person-profile-pet-main-avatar { position:relative; }
+.person-profile-pet-main-avatar .pet-avatar-species-fallback .l1ng-icon { width:48px; height:48px; }
+.genealogy-pet-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
+.person-profile-pet-lineage { display:flex; flex-direction:column; gap:6px; font-size:12px; line-height:1.5; color:var(--text-secondary); }
+
+
+/* ========【統一表單】 設定 - A 款勾選與單選，保留原生語意與鍵盤操作 ======== */
+.export-background-option input[type="radio"],
+.person-card-menu-radio input[type="radio"] {
+    appearance:none;
+    -webkit-appearance:none;
+    flex:0 0 14px;
+    width:14px;
+    height:14px;
+    margin:0;
+    border:1px solid var(--border-default);
+    border-radius:50%;
+    background:var(--surface-input);
+    box-shadow:none;
+}
+.export-background-option input[type="radio"]:checked,
+.person-card-menu-radio input[type="radio"]:checked {
+    border-color:var(--action-primary);
+    background:radial-gradient(circle,var(--action-primary) 0 3.2px,transparent 3.3px);
+}
+.export-background-option input[type="radio"]:focus-visible,
+.person-card-menu-radio input[type="radio"]:focus-visible {
+    outline:2px solid var(--action-primary);
+    outline-offset:2px;
+}
+
+/* ========【搜尋欄】 設定 - 共用搜尋 SVG 與清除鈕，不更動下拉選單邏輯 ======== */
+.l1ng-search-control {position:relative;min-width:0;flex:1 1 auto}
+.l1ng-search-control > input {width:100%;padding-left:33px;padding-right:34px;box-sizing:border-box}
+.l1ng-search-control::before {content:"";position:absolute;left:11px;top:50%;width:15px;height:15px;transform:translateY(-50%);background:currentColor;opacity:.58;pointer-events:none;-webkit-mask:url("../icons/ui-search.svg") center/contain no-repeat;mask:url("../icons/ui-search.svg") center/contain no-repeat}
+.l1ng-search-control > input::-webkit-search-cancel-button {-webkit-appearance:none;appearance:none;display:none}
+.l1ng-search-clear {position:absolute;right:3px;top:50%;transform:translateY(-50%);width:28px;height:28px;min-height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.l1ng-search-clear::before {content:"";display:block;width:13px;height:13px;background:currentColor;-webkit-mask:url("../icons/ui-clear.svg") center/contain no-repeat;mask:url("../icons/ui-clear.svg") center/contain no-repeat}
+.l1ng-search-clear:hover,.l1ng-search-clear:focus-visible {background:var(--surface-item-hover);color:var(--text-primary)}
+.l1ng-search-clear:focus-visible {outline:2px solid var(--action-primary);outline-offset:1px}
+.l1ng-search-control > .ui-select-search {margin-bottom:0}
+.ui-select-dropdown > .l1ng-search-control {display:block;width:100%;margin-bottom:4px}
+.relationship-type-search + .l1ng-search-clear {z-index:1}
+.l1ng-search-clear[hidden] {display:none}
+@media(pointer:coarse){.l1ng-search-clear{width:40px;height:40px;right:0}.l1ng-search-control > input{padding-right:43px}}
+
+/* ========【捲軸】 設定 - A 款細線，涵蓋畫布側欄與所有彈窗捲動區 ======== */
+/* 直接指定全體捲動容器，避免先前僅限 .app／滑鼠裝置而漏掉手機與浮動面板。 */
+html, body, body * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-default) transparent;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, body *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track, body *::-webkit-scrollbar-track {
+    background: transparent;
+}
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, body *::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 999px;
+}
+/* 刻意隱藏的編輯分頁橫向捲軸仍維持隱藏。 */
+.sim-editor-tabs { scrollbar-width: none; }
+.sim-editor-tabs::-webkit-scrollbar { display: none; }
+
+/* ========【其他關係搜尋】 設定 - 修正插入搜尋 SVG 後搜尋列被 flex 撐高的問題 ======== */
+.relationship-type-menu > .l1ng-search-control {
+    flex: 0 0 auto;
+    display: block;
+    align-self: stretch;
+    width: calc(100% - 12px);
+    min-width: 0;
+    margin: 6px;
+    color: var(--nav-dropdown-text);
+}
+.relationship-type-menu > .l1ng-search-control > .relationship-type-search {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 7px 43px 7px 33px;
+    box-sizing: border-box;
+}
+.relationship-type-menu > .l1ng-search-control::before {
+    left: 11px;
+    top: 50%;
+}
+.ui-select-dropdown > .l1ng-search-control {
+    flex: 0 0 auto;
+    min-height: 0;
+    color: var(--nav-dropdown-text);
+}
+.l1ng-search-control > .ui-select-search {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (pointer:coarse) {
+    .relationship-type-menu > .l1ng-search-control > .relationship-type-search {
+        padding-right: 45px;
+    }
+}
+
+/* ========【顏色選擇器色塊】 設定 - 僅統一色塊外觀，保留原生選色功能 ======== */
+.custom-color-input,
+.relationship-editor-color input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 44px;
+    height: 32px;
+    padding: 3px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-input);
+    cursor: pointer;
+    overflow: hidden;
+}
+.custom-color-input::-webkit-color-swatch-wrapper,
+.relationship-editor-color input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.custom-color-input::-webkit-color-swatch,
+.relationship-editor-color input[type="color"]::-webkit-color-swatch {
+    border: 0;
+    border-radius: 5px;
+}
+.custom-color-input::-moz-color-swatch,
+.relationship-editor-color input[type="color"]::-moz-color-swatch {
+    border: 0;
+    border-radius: 5px;
+}
+.custom-color-input:focus-visible,
+.relationship-editor-color input[type="color"]:focus-visible {
+    outline: 2px solid var(--action-primary);
+    outline-offset: 2px;
+}
+
+
+/* ========【浮動調色板】 設定 - 緊湊色碼欄位與手機觸控 ======== */
+.l1ng-color-picker-trigger{position:relative;display:inline-flex;vertical-align:middle;width:44px;height:32px;flex:0 0 44px}
+.l1ng-color-picker-trigger>input[type="color"]{position:absolute;inset:0;opacity:0;pointer-events:none;width:100%;height:100%;padding:0}
+.l1ng-color-swatch-button{display:block;width:44px;height:32px;padding:3px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-input);cursor:pointer}
+.l1ng-color-swatch-button::before{content:"";display:block;width:100%;height:100%;border-radius:5px;background:var(--color-value,#55acee)}
+.l1ng-color-swatch-button:focus-visible{outline:2px solid var(--action-primary);outline-offset:2px}
+.l1ng-color-swatch-button[aria-expanded="true"]{border-color:var(--action-primary)}
+.l1ng-color-picker-popover{position:fixed;z-index:23050;box-sizing:border-box;padding:12px;border:1px solid var(--nav-dropdown-border);border-radius:11px;background:var(--nav-dropdown-bg);color:var(--nav-dropdown-text);box-shadow:0 12px 32px rgba(0,0,0,.20);overflow-y:auto;overscroll-behavior:contain;font-family:inherit}
+.l1ng-color-picker-popover[hidden],.l1ng-color-picker-sampler[hidden],.l1ng-color-picker-tools [hidden]{display:none}
+.l1ng-color-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.l1ng-color-picker-title{font-size:12px;font-weight:700}
+.l1ng-color-picker-close{cursor:pointer}
+.l1ng-color-picker-sv{position:relative;height:124px;border-radius:6px;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,transparent),var(--picker-hue,#55acee);touch-action:none;cursor:crosshair}
+.l1ng-color-picker-dot{position:absolute;width:14px;height:14px;border:2px solid white;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #404953;pointer-events:none}
+/* ========【色相玻璃】 B 款材質配 A 款 29px 尺寸，彩虹軌道保留 ======== */
+.l1ng-color-picker-hue-wrap{position:relative;width:100%;height:52px;margin:4px 0 2px;isolation:isolate}
+.l1ng-color-picker-hue-track{position:absolute;left:14.5px;right:14.5px;top:50%;height:10px;transform:translateY(-50%);border-radius:99px;pointer-events:none;background:linear-gradient(90deg,#f00 0%,#ff0 16.67%,#0f0 33.33%,#0ff 50%,#00f 66.67%,#f0f 83.33%,#f00 100%)}
+.l1ng-color-picker-hue-rest{position:absolute;top:50%;left:50%;width:17px;height:17px;border:2px solid #fff;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #8293a0,0 1px 3px rgba(18,44,70,.14);transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:none;transition:opacity .31s ease,transform .36s cubic-bezier(.22,1.15,.36,1)}
+.l1ng-color-picker-hue-lens{position:absolute;top:50%;left:50%;width:29px;height:29px;opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.68);transition:opacity .33s ease,transform .45s cubic-bezier(.2,1.13,.3,1)}
+.l1ng-color-picker-hue-glass{position:absolute;inset:0;border-radius:50%;transform:translateX(var(--glass-shift,0px)) scaleX(var(--glass-stretch,1));background:radial-gradient(ellipse 80% 60% at 34% 15%,rgba(255,255,255,.16),transparent 88%),radial-gradient(ellipse 75% 60% at 74% 95%,rgba(22,45,66,.065),transparent 90%),rgba(255,255,255,.055);-webkit-backdrop-filter:blur(.95px) saturate(1.65) brightness(1.07);backdrop-filter:blur(.95px) saturate(1.65) brightness(1.07);box-shadow:0 3px 5px rgba(24,43,68,.18),0 8px 11px -8px rgba(20,43,63,.22),inset 0 1px 1px rgba(255,255,255,.42),inset 0 -1.2px 1.5px rgba(17,42,67,.21),inset 1.2px 0 1px rgba(255,255,255,.18),inset -1.1px 0 1px rgba(31,56,74,.13);overflow:hidden}
+.l1ng-color-picker-hue-glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse 85% 54% at 24% -8%,rgba(255,255,255,.55),transparent 89%),radial-gradient(ellipse 65% 62% at 101% 111%,rgba(215,233,255,.25),transparent 91%),radial-gradient(ellipse 85% 70% at 92% 10%,rgba(255,255,255,.05),transparent 82%);opacity:.78;mix-blend-mode:screen;pointer-events:none}
+.l1ng-color-picker-hue-glass::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,255,255,.64);border-radius:inherit;box-shadow:inset 1px 1px 1.5px rgba(255,255,255,.24),inset -1px -1px 1.5px rgba(37,60,84,.16),0 0 0 .5px rgba(35,70,100,.12);pointer-events:none}
+.l1ng-color-picker-hue-wrap:is(.is-dragging,.is-settling) .l1ng-color-picker-hue-rest{opacity:0;transform:translate(-50%,-50%) scale(1.58)}
+.l1ng-color-picker-hue-wrap:is(.is-dragging,.is-settling) .l1ng-color-picker-hue-lens{opacity:1;transform:translate(-50%,-50%) scale(1.07)}
+input[type="range"].l1ng-color-picker-hue{position:absolute;inset:0;z-index:2;width:100%;height:52px;margin:0;padding:0;appearance:none;-webkit-appearance:none;background:transparent;cursor:pointer;touch-action:auto}
+
+input[type="range"].l1ng-color-picker-hue::-webkit-slider-runnable-track{height:10px;border:0;background:transparent}
+input[type="range"].l1ng-color-picker-hue::-moz-range-track{height:10px;border:0;background:transparent}
+input[type="range"].l1ng-color-picker-hue::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;height:29px;width:29px;margin-top:-9.5px;border:0;border-radius:50%;background:transparent;box-shadow:none}
+input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29px;border:0;border-radius:50%;background:transparent;box-shadow:none}
+.l1ng-color-picker-fields{display:grid;gap:6px}
+.l1ng-color-picker-field-row{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;align-items:center}
+.l1ng-color-picker-field-row>span{font-size:10px;font-weight:700;color:var(--nav-dropdown-text);opacity:.76}
+.l1ng-color-picker-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.l1ng-color-picker-inputs.single{grid-template-columns:minmax(0,1fr)}
+.l1ng-color-picker-inputs label{display:flex;align-items:center;gap:3px;min-width:0;font-size:10px;opacity:.9}
+.l1ng-color-picker-inputs input{width:100%;min-width:0;height:28px;min-height:28px;padding:3px 5px;box-sizing:border-box;border:1px solid var(--nav-dropdown-border);border-radius:5px;background:var(--surface-input);color:var(--text-primary);font:inherit;font-size:12px;line-height:1.2;font-variant-numeric:tabular-nums}
+.l1ng-color-picker-inputs input[type="number"]{-moz-appearance:textfield;appearance:textfield}
+.l1ng-color-picker-inputs input[type="number"]::-webkit-inner-spin-button,.l1ng-color-picker-inputs input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.l1ng-color-picker-inputs input[aria-invalid="true"]{border-color:#d55f69}
+.l1ng-color-picker-tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.l1ng-color-picker-tools button,.l1ng-color-picker-sampler button{min-height:30px;display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid var(--nav-dropdown-border);border-radius:6px;background:var(--surface-input);color:var(--text-primary);font-size:11px;cursor:pointer}
+.l1ng-color-picker-tools svg{width:15px;height:15px}
+.l1ng-color-picker-sampler{margin-top:8px}
+.l1ng-color-picker-sampler canvas{display:block;width:100%;height:120px;border-radius:6px;background:var(--surface-panel);touch-action:none;cursor:crosshair}
+.l1ng-color-picker-sampler-note{margin:5px 0;font-size:10.5px;line-height:1.5;color:var(--text-secondary)}
+@media (pointer:coarse){.l1ng-color-picker-tools button{min-height:40px}.l1ng-color-picker-inputs input{font-size:16px;height:32px;min-height:32px}}
+
+@media (prefers-reduced-motion:reduce){.l1ng-color-picker-hue-rest,.l1ng-color-picker-hue-lens{transition:none}}

@@ -118,7 +118,6 @@
 
   function create({
     uid,
-    getParentRelations,
     isSiblingLink,
     siblingRelationType = 'sibling',
     siblingRelationLabel = '兄弟姊妹',
@@ -137,7 +136,10 @@
     cardSettingFieldKeys = [],
     defaultCardViewSettings = {},
     defaultCardEditSettings = {},
-    cardViewAppearances = ['minimal','translucent','full']
+    cardViewAppearances = ['minimal','translucent','full'],
+    petCardFieldKeys = [],
+    defaultPetCardViewSettings = {},
+    defaultPetCardEditSettings = {}
   } = {}) {
     let activeData = null;
 
@@ -146,6 +148,8 @@
         .map(String)
         .filter(Boolean)
     );
+
+    const petCardFields = new Set((petCardFieldKeys || []).map(String).filter(Boolean));
 
     const cardAppearanceValues = new Set(
       (cardViewAppearances || [])
@@ -463,6 +467,24 @@
       return settings;
     }
 
+    function normalizePetCardSettings(mode, current) {
+      const defaults = mode === 'edit'
+        ? defaultPetCardEditSettings
+        : defaultPetCardViewSettings;
+      const settings =
+        current && typeof current === 'object' && !Array.isArray(current)
+          ? current : {};
+      settings.avatar = true;
+      petCardFields.forEach(field => {
+        if (typeof settings[field] !== 'boolean') settings[field] = !!defaults[field];
+      });
+      if (mode === 'view' && !cardAppearanceValues.has(String(settings.appearance || ''))) {
+        settings.appearance = cardAppearanceValues.has(String(defaults.appearance || ''))
+          ? String(defaults.appearance) : 'minimal';
+      }
+      return settings;
+    }
+
     function ensureCardSettings(current) {
       if (
         !current.meta ||
@@ -483,6 +505,9 @@
           'edit',
           current.meta.cardEdit
         );
+
+      current.meta.petCardView = normalizePetCardSettings('view',current.meta.petCardView);
+      current.meta.petCardEdit = normalizePetCardSettings('edit',current.meta.petCardEdit);
 
       return current.meta;
     }
@@ -543,6 +568,12 @@
       if (sim.aspiration === undefined) sim.aspiration = '';
       if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
       if (typeof sim.notes !== 'string') sim.notes = '';
+
+      // 人物簡介已由 notes 取代；原版世家欄位也不屬於現行 schema。
+      // 只清人物記錄，不影響家庭 family.bio。
+      delete sim.bio;
+      delete sim.dynasties;
+      delete sim.dynastyRole;
 
       const gameData =
         ensureAdoptionMetadata(
@@ -1015,6 +1046,15 @@
       };
     }
 
+    // ========【資料序列化】固定使用目前的 canonical database；Blob 留給 Assets 備份 ========
+    function serializeDatabase() {
+      return JSON.stringify(activeData);
+    }
+
+    function snapshotDatabase() {
+      return JSON.parse(serializeDatabase());
+    }
+
     function getData() {
       return activeData;
     }
@@ -1024,6 +1064,7 @@
         normalizeDatabase(
           nextData
         ).data;
+      invalidateChildrenIndex();
 
       return activeData;
     }
@@ -1034,6 +1075,272 @@
       }
 
       return activeData;
+    }
+
+    // ========【族譜查詢】Store 為 canonical 資料與關係判斷的唯一查詢來源 ========
+    function canonicalParentRelations(child, byId = null) {
+      if (!child) return [];
+
+      const childId = String(child.id || '');
+      const relationByParent = new Map();
+
+      const hasParent = parentId => {
+        const id = String(parentId || '');
+        if (!id || id === childId) return false;
+        return byId instanceof Map
+          ? byId.has(id)
+          : !!data().sims[id];
+      };
+
+      const addRelation = (parentId, kind) => {
+        const id = String(parentId || '');
+        if (!hasParent(id)) return;
+
+        const current = relationByParent.get(id);
+        if (current === 'adoptive') return;
+
+        if (kind === 'adoptive' || !current) {
+          relationByParent.set(id, kind);
+        }
+      };
+
+      (child.parentIds || []).forEach(parentId => {
+        addRelation(parentId, 'parent-child');
+      });
+
+      const explicitAdoptedParentIds =
+        (child.gameData?.adoptedParentIds || [])
+          .map(String)
+          .filter(Boolean);
+
+      explicitAdoptedParentIds.forEach(parentId => {
+        addRelation(parentId, 'adoptive');
+      });
+
+      const parentPool =
+        byId instanceof Map
+          ? [...byId.values()]
+          : Object.values(data().sims);
+
+      parentPool.forEach(parent => {
+        if (!parent || parent.id == null) return;
+
+        const adoptedChildIds =
+          (parent.gameData?.adoptedChildIds || [])
+            .map(String);
+
+        if (adoptedChildIds.includes(childId)) {
+          addRelation(parent.id, 'adoptive');
+        }
+      });
+
+      return [...relationByParent.entries()]
+        .map(([parentId, kind]) => ({ parentId, kind }))
+        .sort((left, right) =>
+          String(left.parentId).localeCompare(String(right.parentId))
+        );
+    }
+
+    function canonicalParentIds(child, byId = null) {
+      return canonicalParentRelations(child, byId)
+        .map(relation => relation.parentId);
+    }
+
+    function canonicalParentRelationGroups(child, byId = null) {
+      const groups = new Map();
+
+      canonicalParentRelations(child, byId)
+        .forEach(relation => {
+          if (!groups.has(relation.kind)) {
+            groups.set(relation.kind, []);
+          }
+          groups.get(relation.kind).push(relation.parentId);
+        });
+
+      return [...groups.entries()]
+        .map(([kind, parentIds]) => ({
+          kind,
+          parentIds:[...new Set(parentIds)].sort()
+        }))
+        .filter(group => group.parentIds.length);
+    }
+
+    function canonicalParentKindFor(child, parentId, byId = null) {
+      const id = String(parentId || '');
+      const relation =
+        canonicalParentRelations(child, byId)
+          .find(item => item.parentId === id);
+
+      return relation ? relation.kind : 'parent-child';
+    }
+
+
+    // ========【子女索引】Store 維持單一快取，避免重複遍歷所有人物 ========
+    let childrenIndex = null;
+
+    function getChildrenOf(id) {
+      const parentId = String(id || '');
+      if (!childrenIndex) {
+        childrenIndex = new Map();
+        Object.values(data().sims).forEach(child => {
+          canonicalParentIds(child).forEach(pid => {
+            if (!childrenIndex.has(pid)) childrenIndex.set(pid, []);
+            const list = childrenIndex.get(pid);
+            if (!list.some(item => String(item.id) === String(child.id))) list.push(child);
+          });
+        });
+      }
+      return childrenIndex.get(parentId) || [];
+    }
+
+    function invalidateChildrenIndex() {
+      childrenIndex = null;
+    }
+
+    function findAncestorPath(
+      sourceId,
+      targetId,
+      maxDepth = 8
+    ) {
+      const source = String(sourceId || '');
+      const target = String(targetId || '');
+
+      if (!source || !target || source === target) {
+        return null;
+      }
+
+      const queue = [{ id:source, path:[] }];
+      const bestDepth = new Map([[source, 0]]);
+
+      while (queue.length) {
+        const current = queue.shift();
+
+        if (current.path.length >= maxDepth) {
+          continue;
+        }
+
+        const sim = data().sims[current.id];
+        if (!sim) continue;
+
+        const relations = canonicalParentRelations(sim);
+
+        for (const relation of relations) {
+          const nextId = String(relation.parentId);
+          if (!nextId) continue;
+
+          const nextPath = [
+            ...current.path,
+            nextId
+          ];
+
+          if (nextId === target) {
+            return nextPath;
+          }
+
+          const known = bestDepth.get(nextId);
+
+          if (
+            known != null &&
+            known <= nextPath.length
+          ) {
+            continue;
+          }
+
+          bestDepth.set(
+            nextId,
+            nextPath.length
+          );
+
+          queue.push({
+            id:nextId,
+            path:nextPath
+          });
+        }
+      }
+
+      return null;
+    }
+
+    function findDescendantPath(
+      sourceId,
+      targetId,
+      maxDepth = 8
+    ) {
+      const source = String(sourceId || '');
+      const target = String(targetId || '');
+
+      if (!source || !target || source === target) {
+        return null;
+      }
+
+      const queue = [{ id:source, path:[] }];
+      const bestDepth = new Map([[source, 0]]);
+
+      while (queue.length) {
+        const current = queue.shift();
+
+        if (current.path.length >= maxDepth) {
+          continue;
+        }
+
+        const children = getChildrenOf(current.id);
+
+        for (const child of children) {
+          const nextId = String(child.id);
+          if (!nextId) continue;
+
+          const nextPath = [
+            ...current.path,
+            nextId
+          ];
+
+          if (nextId === target) {
+            return nextPath;
+          }
+
+          const known = bestDepth.get(nextId);
+
+          if (
+            known != null &&
+            known <= nextPath.length
+          ) {
+            continue;
+          }
+
+          bestDepth.set(
+            nextId,
+            nextPath.length
+          );
+
+          queue.push({
+            id:nextId,
+            path:nextPath
+          });
+        }
+      }
+
+      return null;
+    }
+
+
+    // 家庭視圖：由 UI 指定首要成員與篩選，但關係擴張只執行一次。
+    function getVisibleFamilyIds(family, { relationshipSourceIds = null, matchesSim = null } = {}) {
+      const sims = data().sims;
+      if (!family) return new Set();
+      const memberIds = (family.memberIds || []).map(String).filter(id => sims[id]);
+      const visible = new Set(memberIds);
+      const sources = Array.isArray(relationshipSourceIds) && relationshipSourceIds.length
+        ? relationshipSourceIds : memberIds;
+      [...new Set(sources.map(String))].forEach(id => {
+        const sim = sims[id];
+        if (!sim) return;
+        [...(sim.spouseIds || []), ...(sim.exSpouseIds || [])].map(String)
+          .forEach(relatedId => { if (sims[relatedId]) visible.add(relatedId); });
+      });
+      if (typeof matchesSim === 'function') {
+        [...visible].forEach(id => { if (!matchesSim(sims[id])) visible.delete(id); });
+      }
+      return visible;
     }
 
     function simById(simId) {
@@ -1121,6 +1428,50 @@
       return finalized(result);
     }
 
+    function getPetCardSettings(mode) {
+      const db = data();
+      ensureCardSettings(db);
+      return Object.freeze({
+        ...(mode === 'edit' ? db.meta.petCardEdit : db.meta.petCardView)
+      });
+    }
+
+    function setPetCardField(mode, field, enabled) {
+      const db = data();
+      const result = rawResult();
+      const key = String(field || '');
+      if (!petCardFields.has(key)) return finalized(result);
+      ensureCardSettings(db);
+      const settings = mode === 'edit' ? db.meta.petCardEdit : db.meta.petCardView;
+      const next = !!enabled;
+      if (settings[key] === next) return finalized(result);
+      settings[key] = next;
+      mark(result, {
+        dataChanged:true,
+        layoutChanged:true,
+        nodesChanged:true,
+        edgesChanged:true,
+        saveDirty:true
+      });
+      return finalized(result);
+    }
+
+    function setPetCardAppearance(appearance) {
+      const db = data();
+      const result = rawResult();
+      const next = String(appearance || '');
+      if (!cardAppearanceValues.has(next)) return finalized(result);
+      ensureCardSettings(db);
+      if (db.meta.petCardView.appearance === next) return finalized(result);
+      db.meta.petCardView.appearance = next;
+      mark(result, {
+        dataChanged:true,
+        nodesChanged:true,
+        saveDirty:true
+      });
+      return finalized(result);
+    }
+
     function setCardAppearance(appearance) {
       const db = data();
       const result = rawResult();
@@ -1186,8 +1537,8 @@
     }
 
     function parentRelationSignature(sim) {
-      if (!sim || typeof getParentRelations !== 'function') return '';
-      return getParentRelations(sim)
+      if (!sim || typeof canonicalParentRelations !== 'function') return '';
+      return canonicalParentRelations(sim)
         .map(item => String(item.parentId) + ':' + (item.kind === 'adoptive' ? 'adoptive' : 'parent-child'))
         .sort()
         .join('|');
@@ -1269,8 +1620,8 @@
           .filter(([parentId]) => parentId && parentId !== String(child.id) && db.sims[parentId])
       );
 
-      const existing = typeof getParentRelations === 'function'
-        ? getParentRelations(child).map(item => String(item.parentId))
+      const existing = typeof canonicalParentRelations === 'function'
+        ? canonicalParentRelations(child).map(item => String(item.parentId))
         : [];
 
       let rawChanged = false;
@@ -1292,6 +1643,7 @@
       addAffected(result, 'sim', [child.id, ...existing, ...desired.keys()]);
 
       if (before !== after) {
+        invalidateChildrenIndex();
         mark(result, {
           relationshipGraphChanged:true,
           childrenIndexChanged:true,
@@ -1322,8 +1674,8 @@
 
       const existing = new Set();
       Object.values(db.sims).forEach(child => {
-        if (!child || String(child.id) === parentKey || typeof getParentRelations !== 'function') return;
-        if (getParentRelations(child).some(item => String(item.parentId) === parentKey)) {
+        if (!child || String(child.id) === parentKey || typeof canonicalParentRelations !== 'function') return;
+        if (canonicalParentRelations(child).some(item => String(item.parentId) === parentKey)) {
           existing.add(String(child.id));
         }
       });
@@ -1333,8 +1685,8 @@
         const child = db.sims[childId];
         if (!child) return;
 
-        const relations = typeof getParentRelations === 'function'
-          ? getParentRelations(child)
+        const relations = typeof canonicalParentRelations === 'function'
+          ? canonicalParentRelations(child)
               .filter(item => String(item.parentId) !== parentKey)
               .map(item => ({ parentId:String(item.parentId), kind:item.kind }))
           : [];
@@ -1517,6 +1869,7 @@
           id,
           db
         );
+      invalidateChildrenIndex();
 
       mark(result, {
         dataChanged:true,
@@ -2363,6 +2716,7 @@
       });
 
       delete db.sims[key];
+      invalidateChildrenIndex();
 
       Object.values(db.sims).forEach(other => {
         if (!other) return;
@@ -2516,13 +2870,13 @@
             if (
               !child ||
               String(child.id) === String(originalSim.id) ||
-              typeof getParentRelations !== 'function'
+              typeof canonicalParentRelations !== 'function'
             ) {
               return;
             }
 
             const relation =
-              getParentRelations(child)
+              canonicalParentRelations(child)
                 .find(item =>
                   String(item.parentId) ===
                   String(originalSim.id)
@@ -2645,13 +2999,13 @@
             if (
               !child ||
               String(child.id) === id ||
-              typeof getParentRelations !== 'function'
+              typeof canonicalParentRelations !== 'function'
             ) {
               return;
             }
 
             const relation =
-              getParentRelations(child)
+              canonicalParentRelations(child)
                 .find(item =>
                   String(item.parentId) === id
                 );
@@ -2697,14 +3051,28 @@
 
     return Object.freeze({
       getData,
+      serializeDatabase,
+      snapshotDatabase,
       normalizeDatabase,
       replaceDatabase,
       getSim:simById,
       getFamily:familyById,
       getCurrentFamily,
+      getParentRelations:canonicalParentRelations,
+      getParentIds:canonicalParentIds,
+      getParentRelationGroups:canonicalParentRelationGroups,
+      getParentKindFor:canonicalParentKindFor,
+      getChildrenOf,
+      invalidateChildrenIndex,
+      findAncestorPath,
+      findDescendantPath,
+      getVisibleFamilyIds,
       setCurrentFamilyId,
       getCardSettings,
       setCardField,
+      getPetCardSettings,
+      setPetCardField,
+      setPetCardAppearance,
       setCardAppearance,
       mergeResults,
       createSim,

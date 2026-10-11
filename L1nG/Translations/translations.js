@@ -9,6 +9,94 @@ const cards = Array.from(document.querySelectorAll("[data-translation-card]"));
 const emptyState = document.getElementById("translationEmpty");
 
 let activeFilter = "all";
+let linkedTargetCard = null;
+let linkedTargetTimeout = null;
+
+// ========【跨頁漢化定位】 設定 - 僅回應有效卡片錨點，不更動一般分類／搜尋行為 ========
+function clearLinkedTarget() {
+    if (linkedTargetTimeout !== null) {
+        window.clearTimeout(linkedTargetTimeout);
+        linkedTargetTimeout = null;
+    }
+    if (!linkedTargetCard) return;
+
+    linkedTargetCard.classList.remove("is-linked-target");
+    linkedTargetCard.querySelector(".translation-target-hint")?.remove();
+    linkedTargetCard = null;
+}
+
+function revealLinkedTranslation() {
+    let targetId = "";
+
+    try {
+        targetId = decodeURIComponent(window.location.hash.slice(1));
+    } catch (_) {
+        clearLinkedTarget();
+        return;
+    }
+
+    const target = cards.find((card) => card.id === targetId);
+    if (!target) {
+        clearLinkedTarget();
+        return;
+    }
+
+    // 使用既有全部分類，避免先前的搜尋或篩選令目標卡被隱藏。
+    if (activeFilter !== "all" || (searchInput && searchInput.value)) {
+        activeFilter = "all";
+        if (searchInput) searchInput.value = "";
+        filterGroup?.querySelectorAll("[data-filter]").forEach((button) => {
+            button.classList.toggle("active", button.dataset.filter === "all");
+        });
+        updateTranslations();
+    }
+
+    clearLinkedTarget();
+    linkedTargetCard = target;
+
+    // 必須等全站骨架屏離場才播放，避免高亮在遮罩後方結束。
+    const startHighlight = () => {
+        if (linkedTargetCard !== target || target.hidden) return;
+        target.scrollIntoView({ behavior:"instant", block:"start" });
+        window.requestAnimationFrame(() => {
+            if (linkedTargetCard !== target) return;
+            target.classList.add("visible", "is-linked-target");
+            const hint = document.createElement("span");
+            hint.className = "translation-target-hint";
+            hint.setAttribute("role", "status");
+            hint.textContent = "已定位此漢化";
+            target.appendChild(hint);
+            linkedTargetTimeout = window.setTimeout(() => {
+                if (linkedTargetCard === target) clearLinkedTarget();
+            }, 1600);
+        });
+    };
+
+    window.requestAnimationFrame(() => {
+        const skeleton = document.querySelector(".l1ng-site-skeleton");
+        if (!skeleton || skeleton.classList.contains("is-hidden")) {
+            startHighlight();
+            return;
+        }
+        let started = false;
+        let fallback = null;
+        const revealOnce = () => {
+            if (started) return;
+            started = true;
+            observer.disconnect();
+            window.clearTimeout(fallback);
+            window.requestAnimationFrame(startHighlight);
+        };
+        const observer = new MutationObserver(() => {
+            if (skeleton.classList.contains("is-hidden")) revealOnce();
+        });
+        observer.observe(skeleton, { attributes:true, attributeFilter:["class"] });
+        // 骨架異常未結束時的保底處理，不讓定位提示永遠無法出現。
+        fallback = window.setTimeout(revealOnce, 1800);
+    });
+}
+
+window.addEventListener("hashchange", revealLinkedTranslation);
 
 function closeNavigation() {
     if (!mainNav || !navToggle) return;
@@ -74,6 +162,7 @@ if (filterGroup) {
         const button = event.target.closest("[data-filter]");
         if (!button) return;
 
+        clearLinkedTarget();
         activeFilter = button.dataset.filter || "all";
 
         filterGroup.querySelectorAll("[data-filter]").forEach((item) => {
@@ -84,8 +173,23 @@ if (filterGroup) {
     });
 }
 
+const searchClear = document.getElementById("translationSearchClear");
+if (searchInput && searchClear) {
+    const syncClear = () => { searchClear.hidden = !searchInput.value; };
+    searchInput.addEventListener("input",syncClear);
+    searchClear.addEventListener("click",() => {
+        searchInput.value = "";
+        searchInput.dispatchEvent(new Event("input",{bubbles:true}));
+        searchInput.focus({preventScroll:true});
+    });
+    syncClear();
+}
+
 if (searchInput) {
-    searchInput.addEventListener("input", updateTranslations);
+    searchInput.addEventListener("input", () => {
+        clearLinkedTarget();
+        updateTranslations();
+    });
 }
 
 const countTarget = document.querySelector("[data-translation-count]");
@@ -137,3 +241,4 @@ window.addEventListener("resize", () => {
 });
 
 updateTranslations();
+revealLinkedTranslation();

@@ -4,8 +4,8 @@
   function create({ runtime, dom, constants, state, helpers } = {}) {
     if (!dom || !state || !helpers) throw new Error('Genealogy Scene requires dom, state, and helpers.');
     const genealogyRuntime = runtime || null;
-    const { stage, svg, labelsSvg, nodes } = dom;
-    if (!stage || !svg || !labelsSvg || !nodes) throw new Error('Genealogy Scene requires Canvas DOM references.');
+    const { stage, svg, labelsSvg, nodes, pets:petLayer } = dom;
+    if (!stage || !svg || !labelsSvg || !nodes || !petLayer) throw new Error('Genealogy Scene requires Canvas DOM references.');
     const { PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX } = constants;
 
     // ========【Scene 卡片幾何】 設定 - 卡片尺寸 / 間距 / 檢視版型由 Scene 唯一持有 ========
@@ -14,6 +14,12 @@
       view:Object.freeze({ W:136, H:118 })
     });
 
+    const PET_VIEW_DIMS = Object.freeze({ W:148,H:126 });
+    const PET_EDIT_DIMS = Object.freeze({ W:190,H:84 });
+    const PET_CARD_GAP = 12;
+    const PET_ROW_GAP = 13;
+    const PET_GROUP_GAP = 30;
+    const PET_SIDE_GAP = 26;
     const GAPS = Object.freeze({
       edit:Object.freeze({ SPOUSE:30, SIBLING:56, LEVEL:118 }),
       view:Object.freeze({ SPOUSE:22, SIBLING:40, LEVEL:90 })
@@ -34,15 +40,437 @@
     const { getData, getViewMode, getFamilyTreeViewMode, getShowRelLabels, getRelationshipPerspectiveId, getScale } = state;
     const {
       getCardViewSettings, getCardEditSettings, cardViewAppearanceClass, cardSettingsHasBody,
-      buildViewCardContentModel, renderViewCardLine, cardGenderIconHTML, formatCardAge,
+      buildPersonPresentation,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
-      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey, measureRelationshipLabelText,
-      makeLabelSVG, getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass
+      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
+      getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
+      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
+      showPetCards, petCardAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
+      syncPetSelectionClasses
     } = helpers;
+    // Scene owns canvas-only presentation and relationship-label SVG markup.
+    // ========【檢視卡片內容模型】 設定 - 文字列與卡片 HTML 都由 Scene 統一組裝 ========
+    function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
+      const presentation =
+        buildPersonPresentation(sim);
+
+      if (!presentation) {
+        return {
+          name:'',
+          primary:[],
+          details:[],
+          hasText:false
+        };
+      }
+
+      const name =
+        settings.name
+          ? presentation.name
+          : '';
+
+      const primary = [];
+
+      const stageAge = [];
+
+      if (settings.lifeStage) {
+        stageAge.push(
+          presentation.lifeStage.text
+        );
+      }
+
+      if (
+        settings.age &&
+        sim.age != null &&
+        sim.age !== ''
+      ) {
+        stageAge.push(
+          formatCardAge(sim.age)
+        );
+      }
+
+      if (stageAge.length) {
+        primary.push({
+          text:stageAge.join(' · ')
+        });
+      }
+
+      if (
+        settings.birthday &&
+        sim.birthdayMonth &&
+        sim.birthdayDay
+      ) {
+        primary.push({
+          text:presentation.birthdayText,
+          icon:'cake2'
+        });
+      }
+
+      const statusRace = [];
+
+      if (settings.status) {
+        statusRace.push(
+          presentation.status.text
+        );
+      }
+
+      if (
+        settings.race &&
+        presentation.race
+      ) {
+        statusRace.push(
+          presentation.race.text
+        );
+      }
+
+      if (statusRace.length) {
+        primary.push({
+          text:statusRace.join(' · ')
+        });
+      }
+
+      const details = [];
+
+      if (
+        settings.career &&
+        presentation.career
+      ) {
+        details.push({
+          text:presentation.career,
+          detail:true
+        });
+      }
+
+      if (
+        settings.residence &&
+        presentation.residence
+      ) {
+        details.push({
+          text:presentation.residence,
+          icon:'house',
+          detail:true
+        });
+      }
+
+      if (
+        settings.aspiration &&
+        presentation.aspiration
+      ) {
+        details.push({
+          text:presentation.aspiration,
+          icon:'bullseye',
+          detail:true
+        });
+      }
+
+      if (
+        settings.traits &&
+        presentation.traits.length
+      ) {
+        details.push({
+          text:presentation.traits.join(' / '),
+          detail:true
+        });
+      }
+
+      if (
+        settings.pets ||
+        settings.gallery
+      ) {
+        const mediaBits = [];
+
+        if (
+          settings.pets &&
+          (sim.pets || []).length
+        ) {
+          mediaBits.push(
+            `${uiText('寵物')} ${(sim.pets || []).length}`
+          );
+        }
+
+        if (
+          settings.gallery &&
+          (sim.gallery || []).length
+        ) {
+          mediaBits.push(
+            `${uiText('人生照片')} ${(sim.gallery || []).length}`
+          );
+        }
+
+        if (mediaBits.length) {
+          details.push({
+            text:mediaBits.join(' · ')
+          });
+        }
+      }
+
+      return {
+        name,
+        primary,
+        details,
+        hasText:!!(
+          name ||
+          primary.length ||
+          details.length
+        )
+      };
+    }
+
+    function renderViewCardLine(line) {
+      const className = `person-card-view-meta${line.detail ? ' person-card-view-text' : ''}`;
+      const title = line.text ? ` title="${esc(line.text)}"` : '';
+      const body = line.icon
+        ? `${iconSvg(line.icon)}<span>${esc(line.text)}</span>`
+        : esc(line.text);
+
+      return `<div class="${className}"${title}>${body}</div>`;
+    }
+
+    function cardGenderIconHTML(gender) {
+      const value =
+        String(gender || '其他');
+
+      const icon =
+        value === '男'
+          ? 'gender-card-male'
+          : value === '女'
+            ? 'gender-card-female'
+            : 'gender-card-other';
+
+      const label =
+        uiText(value || '其他');
+
+      return (
+        '<span class="person-card-gender-icon" ' +
+        'role="img" aria-label="' +
+        esc(label) +
+        '" title="' +
+        esc(label) +
+        '">' +
+          iconSvg(icon) +
+        '</span>'
+      );
+    }
+
+    function formatCardAge(age) {
+      if (age == null || age === '') return '';
+      return (document.documentElement.lang || 'zh-Hant') === 'en' ? `${age} ${uiText('歲')}` : `${age} ${uiText('歲')}`;
+    }
+
+
+
+    function getLabelOffset(key) {
+      if (!key) return { dx:0, dy:0 };
+      const o = (getData()?.labelPositions || {})[key] || {};
+      return { dx: o.dx || 0, dy: o.dy || 0 };
+    }
+
+    const RELATIONSHIP_LABEL_TEXT_CACHE_LIMIT = 3000;
+
+    function relationshipLabelFontStack() {
+      const language =
+        document.documentElement.lang ||
+        'zh-Hant';
+
+      if (language === 'zh-Hans') {
+        return '"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif';
+      }
+
+      if (language === 'en') {
+        return '"Segoe UI",Inter,Arial,system-ui,sans-serif';
+      }
+
+      return '"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif';
+    }
+
+    const relationshipLabelTextMetrics = (() => {
+      const canvas =
+        document.createElement(
+          'canvas'
+        );
+
+      const context =
+        canvas.getContext('2d');
+
+      const widths =
+        new Map();
+
+      return {
+        width(text, fontSize) {
+          const font =
+            relationshipLabelFontStack();
+
+          const source =
+            String(text ?? '');
+
+          const size =
+            Number(fontSize) || 12;
+
+          const cacheKey =
+            [font, size, source]
+              .join('\u0001');
+
+          if (widths.has(cacheKey)) {
+            return widths.get(cacheKey);
+          }
+
+          context.font =
+            `${size}px ${font}`;
+
+          const width =
+            context.measureText(
+              source
+            ).width;
+
+          if (
+            widths.size >=
+            RELATIONSHIP_LABEL_TEXT_CACHE_LIMIT
+          ) {
+            widths.clear();
+          }
+
+          widths.set(
+            cacheKey,
+            width
+          );
+
+          return width;
+        }
+      };
+    })();
+
+    function measureRelationshipLabelText(
+      text,
+      fontSize
+    ) {
+      return relationshipLabelTextMetrics
+        .width(
+          text,
+          fontSize
+        );
+    }
+
+    const RELATIONSHIP_LABEL_ICON_SPRITE =
+      '../../html%20icons/relationship-label-icons.svg?v=20260930-relationship-catalog';
+
+    function makeLabelSVG(x, y, iconName, text, key) {
+      const fs = 12;
+      const displayText =
+        displayRelationshipText(text);
+
+      const safeIcon =
+        String(iconName || '')
+          .replace(
+            /[^a-z0-9-]/gi,
+            ''
+          );
+
+      const hasIcon =
+        !!safeIcon;
+
+      const iconSize = 11;
+      const iconGap = 4;
+
+      const textWidth =
+        measureRelationshipLabelText(
+          displayText,
+          fs
+        );
+
+      const contentWidth =
+        textWidth +
+        (
+          hasIcon
+            ? iconSize + iconGap
+            : 0
+        );
+
+      // 依實際顯示語言量測；英文較長時標籤會自動擴寬，不再被裁切。
+      const w =
+        Math.max(
+          Math.ceil(
+            contentWidth + 24
+          ),
+          42
+        );
+
+      const h = 22;
+      const contentStart =
+        -contentWidth / 2;
+
+      const iconX =
+        contentStart;
+
+      const iconY =
+        -iconSize / 2;
+
+      const textX =
+        hasIcon
+          ? contentStart +
+            iconSize +
+            iconGap
+          : 0;
+
+      const off =
+        getLabelOffset(key);
+
+      const tx =
+        (x + off.dx)
+          .toFixed(1);
+
+      const ty =
+        (y + off.dy)
+          .toFixed(1);
+
+      const keyAttr =
+        key
+          ? ` data-key="${esc(key)}"`
+          : '';
+
+      const iconMarkup =
+        hasIcon
+          ? `<use
+              class="edge-label-icon"
+              href="${RELATIONSHIP_LABEL_ICON_SPRITE}#rel-${safeIcon}"
+              x="${iconX.toFixed(1)}"
+              y="${iconY.toFixed(1)}"
+              width="${iconSize}"
+              height="${iconSize}"
+              aria-hidden="true"
+            />`
+          : '';
+
+      return `<g
+        class="edge-label"
+        ${keyAttr}
+        data-x="${x.toFixed(1)}"
+        data-y="${y.toFixed(1)}"
+        transform="translate(${tx},${ty})"
+      >
+        <rect
+          x="${(-w / 2).toFixed(1)}"
+          y="${-h / 2}"
+          width="${w.toFixed(1)}"
+          height="${h}"
+          rx="${h / 2}"
+          fill="var(--relationship-label-surface)"
+          stroke="var(--relationship-label-border)"
+          stroke-width="1.5"
+        />
+        ${iconMarkup}
+        <text
+          class="edge-label-text"
+          x="${textX.toFixed(1)}"
+          y="0"
+          text-anchor="${hasIcon ? 'start' : 'middle'}"
+          dominant-baseline="middle"
+        >${esc(displayText)}</text>
+      </g>`;
+    }
+
+
     let genealogyData = null;
     let viewMode = 'view';
     let familyTreeViewMode = 'family';
@@ -1521,16 +1949,8 @@ function relationshipQuadraticGeometry(
   const normalY =
     dx / distance;
 
-  const bend =
-    distance *
-    relationshipCurveFactor(
-      curveAmount
-    ) *
-    (
-      direction < 0
-        ? -1
-        : 1
-    );
+  const bend = Math.min(36,distance * relationshipCurveFactor(curveAmount)) *
+    (direction < 0 ? -1 : 1);
 
   const cx =
     (x1 + x2) / 2 +
@@ -1625,68 +2045,310 @@ function relationshipPairRenderGeometry(
   );
 }
 
-function relationshipOtherRenderGeometry(
-  a,
-  b,
-  setting,
-  routeContext = null
-) {
-  const fromAnchor =
-    avatarBoundaryAnchor(a, b);
+// ========【其他關係線避障】 設定 - 統一遵守視覺設定，尋找最短且不穿越卡片的路徑 ========
+function relationshipRouteRects(context,start,end) {
+  if(!context?.pos)return [];
+  const excluded=new Set([String(context.fromId||''),String(context.toId||'')]);
+  const result=[];
+  context.pos.forEach((position,id)=>{
+    if(!position||excluded.has(String(id)))return;
+    const rect=context.geometry?.rects?.get(String(id))||cardOuterRect(position);
+    if(rect.right<Math.min(start.x,end.x)-230||rect.left>Math.max(start.x,end.x)+230||
+       rect.bottom<Math.min(start.y,end.y)-260||rect.top>Math.max(start.y,end.y)+260)return;
+    result.push(rect);
+  });
+  return result;
+}
 
-  const toAnchor =
-    avatarBoundaryAnchor(b, a);
+function relationshipSegmentsClear(points,rects) {
+  return points.every((point,i)=>i===0||!rects.some(rect=>
+    relationshipSegmentIntersectsRect(points[i-1].x,points[i-1].y,point.x,point.y,rect,9)));
+}
 
-  const x1 =
-    fromAnchor.x;
+function relationshipOrthogonalRoute(start,end,rects,upperOnly=false,clearance=15) {
+  if(relationshipSegmentsClear([start,end],rects))return [start,end];
+  const xValues=new Set([start.x,end.x]),yValues=new Set([start.y,end.y]);
+  rects.forEach(rect=>{
+    xValues.add(rect.left-clearance);xValues.add(rect.right+clearance);
+    yValues.add(rect.top-clearance);yValues.add(rect.bottom+clearance);
+  });
+  const X=[...xValues].sort((a,b)=>a-b),Y=[...yValues].sort((a,b)=>a-b);
+  const nx=X.length,ny=Y.length,index=(x,y)=>y*nx+x;
+  const source=index(X.indexOf(start.x),Y.indexOf(start.y));
+  const target=index(X.indexOf(end.x),Y.indexOf(end.y));
+  const valid=new Uint8Array(nx*ny);
+  for(let y=0;y<ny;y++)for(let x=0;x<nx;x++)valid[index(x,y)]=rects.some(r=>
+    X[x]>r.left-9&&X[x]<r.right+9&&Y[y]>r.top-9&&Y[y]<r.bottom+9)?0:1;
+  valid[source]=1;valid[target]=1;
+  const distances=new Map([[source*3+2,0]]),prev=new Map(),open=[{key:source*3+2,dist:0}];
+  let last=null;
+  while(open.length){
+    // 一般畫布只需要繞過少數卡片；不掃描整個族譜做多輪全域排列。
+    open.sort((a,b)=>b.dist-a.dist);
+    const next=open.pop();
+    if(next.dist!==distances.get(next.key))continue;
+    const current=Math.floor(next.key/3),direction=next.key%3;
+    if(current===target){last=next.key;break;}
+    const x=current%nx,y=Math.floor(current/nx);
+    for(const [xx,yy,axis] of [[x-1,y,0],[x+1,y,0],[x,y-1,1],[x,y+1,1]]){
+      if(xx<0||xx>=nx||yy<0||yy>=ny)continue;
+      const adjacent=index(xx,yy);
+      if(upperOnly && Y[yy]>Math.max(start.y,end.y)+1)continue;
+      if(!valid[adjacent])continue;
+      const p={x:X[x],y:Y[y]},q={x:X[xx],y:Y[yy]};
+      if(!relationshipSegmentsClear([p,q],rects))continue;
+      const cost=next.dist+Math.hypot(p.x-q.x,p.y-q.y)+(direction!==2&&direction!==axis?16:0);
+      const key=adjacent*3+axis;
+      if(cost>=(distances.get(key)??Infinity))continue;
+      distances.set(key,cost);prev.set(key,next.key);open.push({key,dist:cost});
+    }
+  }
+  if(last===null)return null;
+  const route=[];
+  for(let key=last;key!==undefined;key=prev.get(key)){
+    const n=Math.floor(key/3);
+    route.push({x:X[n%nx],y:Y[Math.floor(n/nx)]});
+  }
+  route.reverse();
+  const simplified=[];
+  route.forEach(point=>{
+    while(simplified.length>=2){
+      const p=simplified[simplified.length-2],q=simplified[simplified.length-1];
+      if((p.x===q.x&&q.x===point.x)||(p.y===q.y&&q.y===point.y))simplified.pop();
+      else break;
+    }
+    simplified.push(point);
+  });
+  return simplified;
+}
 
-  const y1 =
-    fromAnchor.y;
+// ========【真正的曲線】 設定 - cubic Bézier 連續曲率，非折線加圓角 ========
+function relationshipRouteLabelPoint(points) {
+  const lengths=points.slice(1).map((p,i)=>Math.hypot(p.x-points[i].x,p.y-points[i].y));
+  const midpoint=lengths.reduce((sum,length)=>sum+length,0)/2;
+  let distance=0;
+  for(let index=0;index<lengths.length;index++){
+    if(distance+lengths[index]>=midpoint){
+      const t=lengths[index]?(midpoint-distance)/lengths[index]:0;
+      return {
+        x:points[index].x+(points[index+1].x-points[index].x)*t,
+        y:points[index].y+(points[index+1].y-points[index].y)*t
+      };
+    }
+    distance+=lengths[index];
+  }
+  return points[Math.floor(points.length/2)];
+}
 
-  const x2 =
-    toAnchor.x;
+function relationshipStraightRoute(points) {
+  const label=relationshipRouteLabelPoint(points);
+  return {
+    d:points.map((p,i)=>(i?' L':'M')+p.x+' '+p.y).join(''),
+    labelX:label.x,labelY:label.y,points
+  };
+}
 
-  const y2 =
-    toAnchor.y;
+function relationshipCubicAt(segment,t) {
+  const u=1-t;
+  const from=segment.from,to=segment.to,c1=segment.c1,c2=segment.c2;
+  return {
+    x:u*u*u*from.x+3*u*u*t*c1.x+3*u*t*t*c2.x+t*t*t*to.x,
+    y:u*u*u*from.y+3*u*u*t*c1.y+3*u*t*t*c2.y+t*t*t*to.y
+  };
+}
 
-  const blocker =
-    relationshipBlockingCard(
-      routeContext,
-      x1,
-      y1,
-      x2,
-      y2
+function relationshipCubicClear(segments,rects) {
+  // 驗證實際曲線而不是只驗證控制點或折線。
+  // 小段曲線提高取樣密度，避免窄卡片被略過。
+  return segments.every(segment=>{
+    const length=Math.hypot(segment.to.x-segment.from.x,segment.to.y-segment.from.y);
+    const steps=Math.max(32,Math.min(160,Math.ceil(length/3)));
+    for(let step=1;step<steps;step++){
+      const p=relationshipCubicAt(segment,step/steps);
+      if(rects.some(rect=>
+        p.x>=rect.left-9&&p.x<=rect.right+9&&
+        p.y>=rect.top-9&&p.y<=rect.bottom+9
+      ))return false;
+    }
+    return true;
+  });
+}
+
+function relationshipCubicGeometry(segments) {
+  if(!segments.length)return null;
+  const d=['M'+segments[0].from.x+' '+segments[0].from.y];
+  segments.forEach(segment=>{
+    d.push('C'+segment.c1.x+' '+segment.c1.y+' '+
+      segment.c2.x+' '+segment.c2.y+' '+
+      segment.to.x+' '+segment.to.y);
+  });
+  // 標籤落在實際平滑曲線中央，而非折線原本的拐角。
+  const lengths=segments.map(segment=>{
+    let length=0,previous=segment.from;
+    for(let i=1;i<=24;i++){
+      const current=relationshipCubicAt(segment,i/24);
+      length+=Math.hypot(current.x-previous.x,current.y-previous.y);
+      previous=current;
+    }
+    return length;
+  });
+  const half=lengths.reduce((sum,value)=>sum+value,0)/2;
+  let walked=0,label=segments[0].from;
+  for(let i=0;i<segments.length;i++){
+    if(walked+lengths[i]>=half){
+      let consumed=0,previous=segments[i].from;
+      for(let step=1;step<=48;step++){
+        const point=relationshipCubicAt(segments[i],step/48);
+        consumed+=Math.hypot(point.x-previous.x,point.y-previous.y);
+        if(walked+consumed>=half){label=point;break;}
+        previous=point;
+      }
+      break;
+    }
+    walked+=lengths[i];
+  }
+  return {d:d.join(' '),labelX:label.x,labelY:label.y,segments};
+}
+
+function relationshipArcCandidate(start,end,amplitude,sign) {
+  const dx=end.x-start.x,dy=end.y-start.y;
+  const length=Math.max(1,Math.hypot(dx,dy));
+  const nx=-dy/length,ny=dx/length;
+  const normal=amplitude*sign;
+  return [{
+    from:start,
+    c1:{x:start.x+dx*0.28+nx*normal,y:start.y+dy*0.28+ny*normal},
+    c2:{x:end.x-dx*0.28+nx*normal,y:end.y-dy*0.28+ny*normal},
+    to:end
+  }];
+}
+
+// ========【弧度滑桿與實際曲線】 設定 - 在安全避障空間內連續調整弧度 ========
+// ========【弧度優先權】 設定 - 預設找最小安全弧度，玩家手動值不再被避障演算法覆蓋 ========
+function relationshipCurveAmplitude(start,end,amount) {
+  const span=Math.hypot(end.x-start.x,end.y-start.y);
+  const max=Math.max(90,Math.min(230,span*0.65));
+  return 8+(max-8)*(clampRelationshipCurveAmount(amount)-10)/90;
+}
+
+function relationshipUpperCurveSign(start,end) {
+  // SVG 的 Y 軸向下；無論人物排列左右如何，預設曲線只往上拱。
+  return end.x>=start.x ? -1 : 1;
+}
+
+function relationshipRecommendedCurveAmount(start,end,rects,minAmount=50) {
+  const sign=relationshipUpperCurveSign(start,end);
+  // 自動弧度不能從視覺上幾乎水平的 10% 起算。
+  for(let amount=clampRelationshipCurveAmount(minAmount);amount<=100;amount++){
+    const segments=relationshipArcCandidate(
+      start,end,relationshipCurveAmplitude(start,end,amount),sign
     );
+    if(relationshipCubicClear(segments,rects))return amount;
+  }
+  return null;
+}
 
-  const useCurve =
-    setting.routing === 'manual'
-      ? !!setting.curved
-      : !!blocker;
+const defaultOtherCurveCache=new Map();
+function recommendOtherRelationshipCurveAmount(type) {
+  if(defaultOtherCurveCache.has(type))return defaultOtherCurveCache.get(type);
+  if(!layoutCache?.pos||!layoutCache?.byId)return null;
+  const {pos,byId,visibleIds,geometry}=layoutCache;
+  const relations=[
+    ...(genealogyData.links||[]),
+    ...inferCoParentRelationshipLinks(
+      buildParentChildConnectorGroups(byId,visibleIds),byId
+    )
+  ];
+  let required=10,found=false;
+  relations.forEach(link=>{
+    if(relationshipOtherType(link)!==type)return;
+    const from=pos.get(String(link.from)),to=pos.get(String(link.to));
+    if(!from||!to)return;
+    found=true;
+    const start=avatarBoundaryAnchor(from,to);
+    const end=avatarBoundaryAnchor(to,from);
+    const rects=relationshipRouteRects({pos,byId,geometry,fromId:link.from,toId:link.to},start,end);
+    const value=relationshipRecommendedCurveAmount(start,end,rects);
+    // 少數家族沒有上方安全單弧通道，保留最大值給後續避障分支。
+    required=Math.max(required,value??100);
+  });
+  const result=found?required:null;
+  defaultOtherCurveCache.set(type,result);
+  return result;
+}
 
-  if (useCurve) {
-    return relationshipQuadraticGeometry(
-      x1,
-      y1,
-      x2,
-      y2,
-      setting.curveAmount,
-      relationshipCurveDirection(
-        blocker,
-        x1,
-        y1,
-        x2,
-        y2
-      )
-    );
+// ========【自然曲線避障】 使用連續切線的兩段 Bézier 拱線，不再把直角折線磨圓 ========
+function relationshipNaturalArchSegments(start,end,rise,peakRatio=0.5) {
+  const dx=end.x-start.x;
+  const apex={x:start.x+dx*peakRatio,y:Math.min(start.y,end.y)-rise};
+  const shoulder=dx*0.16;
+  const lift=Math.max(20,rise*0.78);
+  return [
+    {
+      from:start,
+      c1:{x:start.x+dx*0.04,y:start.y-lift},
+      c2:{x:apex.x-shoulder,y:apex.y},
+      to:apex
+    },
+    {
+      from:apex,
+      c1:{x:apex.x+shoulder,y:apex.y},
+      c2:{x:end.x-dx*0.04,y:end.y-lift},
+      to:end
+    }
+  ];
+}
+
+function relationshipUpperDetourGeometry(start,end,rects,amount=50) {
+  const dx=end.x-start.x,dy=end.y-start.y;
+  // 近乎垂直的關係交由原本的單弧處理，不建立不必要的側向回折。
+  if(Math.abs(dx)<Math.max(80,Math.abs(dy)*0.5))return null;
+  const initialRise=Math.max(52,relationshipCurveAmplitude(start,end,amount)*0.75);
+  // 先試較低的自然拱線；確定撞到其他人物卡片才逐步提高。
+  // 只測有限組弧度與頂點，避免大族譜反覆進行高成本避障搜尋。
+  const rises=[0,30,65,105,155,220,300,390,490];
+  for(const extra of rises){
+    const rise=initialRise+extra;
+    for(const ratio of [0.5,0.42,0.58]){
+      const segments=relationshipNaturalArchSegments(start,end,rise,ratio);
+      if(relationshipCubicClear(segments,rects))
+        return relationshipCubicGeometry(segments);
+    }
+  }
+  return null;
+}
+
+function relationshipOtherRenderGeometry(a,b,setting,context=null) {
+  const from=avatarBoundaryAnchor(a,b),to=avatarBoundaryAnchor(b,a);
+  const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
+  const rects=relationshipRouteRects(context,start,end);
+
+  if(!setting.curved){
+    return relationshipStraightRoute(relationshipOrthogonalRoute(start,end,rects)||[start,end]);
   }
 
-  return {
-    d:
-      'M' + x1 + ' ' + y1 +
-      ' L' + x2 + ' ' + y2,
-    labelX:(x1 + x2) / 2,
-    labelY:(y1 + y2) / 2
-  };
+  const amount=clampRelationshipCurveAmount(setting.curveAmount);
+  const sign=relationshipUpperCurveSign(start,end);
+  const segments=relationshipArcCandidate(start,end,
+    relationshipCurveAmplitude(start,end,amount),sign
+  );
+
+  // 玩家指定弧度維持原樣，不強制替換其數值。
+  if(setting.curveAmountManual===true)return relationshipCubicGeometry(segments);
+
+  // 每一條曲線依目前的卡片重新驗證，不沿用同類型其他線的避障結果。
+  const safeAmount=relationshipRecommendedCurveAmount(start,end,rects,Math.max(50,amount));
+  if(safeAmount!==null){
+    return relationshipCubicGeometry(relationshipArcCandidate(start,end,
+      relationshipCurveAmplitude(start,end,safeAmount),sign));
+  }
+
+  // 單弧無法避開其他卡片時改用連續拱形曲線，不採用「水平折線加圓角」。
+  const detour=relationshipUpperDetourGeometry(start,end,rects,Math.max(50,amount));
+  if(detour)return detour;
+  // 極度擁擠且找不到安全上方通道時，仍保留真正的 Bézier 弧線，
+  // 不因避障失敗而退回水平直線。玩家手動指定弧度仍有最高優先權。
+  return relationshipCubicGeometry(segments);
 }
 
 function drawPerspectiveKinshipLabels(
@@ -2205,21 +2867,12 @@ function collectGenealogyHorizontalPairCandidates(
       return 450;
     }
 
-    if (meta.kind === 'parent-group') {
-      return 400;
-    }
-
-    if (meta.kind === 'social') {
-      return 300;
-    }
-
-    if (meta.kind === 'exspouse') {
-      return 200;
-    }
-
-    if (meta.kind === 'deceased-spouse') {
-      return 150;
-    }
+    // 前任與已故配偶應優先於情人／一般社交關係；
+    // 共同子女是血緣證據，但不得搶走現任或前任唯一的相鄰位置。
+    if (meta.kind === 'exspouse') return 440;
+    if (meta.kind === 'deceased-spouse') return 430;
+    if (meta.kind === 'parent-group') return 400;
+    if (meta.kind === 'social') return 250;
 
     return 0;
   };
@@ -2822,6 +3475,16 @@ function stableGenealogyUnitCompare(a, b) {
 
 
 // ========【族譜排列身分】 設定 - 主家族與外部關係人物分離 ========
+// 選中的實際家庭是排列中心；EA 族譜擴張出的雙方祖先則只是血緣主幹，不能全部變中心。
+function getActiveLayoutAnchorIds(visibleIds) {
+  const visible=visibleIds instanceof Set?visibleIds:new Set(visibleIds||[]);
+  const entry=getActiveFamilySelectorEntry(familyTreeViewMode);
+  const seeds=Array.isArray(entry?.seedIds)&&entry.seedIds.length
+    ?entry.seedIds:Array.isArray(entry?.labelFamily?.memberIds)&&entry.labelFamily.memberIds.length
+      ?entry.labelFamily.memberIds:(currentFamily()?.memberIds||[]);
+  return new Set(seeds.map(String).filter(id=>visible.has(id)&&genealogyData.sims[id]));
+}
+
 function getActiveLayoutPrimaryIds(
   visibleIds
 ) {
@@ -2911,6 +3574,7 @@ function buildFamilyBranchOwnership(
   model,
   primarySimIds
 ) {
+  const anchorSimIds=getActiveLayoutAnchorIds(new Set(model.sims.map(sim=>String(sim.id))));
   const primaryUnitIds =
     new Set();
 
@@ -3080,10 +3744,12 @@ function buildFamilyBranchOwnership(
                 rightId
             ) || '';
 
+          // 同一個實際家庭的同代成員應連續，不再被其他家庭群組穿插。
+          const leftHousehold=[...genealogyUnitHouseholds(model.unitById.get(leftId))].sort()[0]||'~';
+          const rightHousehold=[...genealogyUnitHouseholds(model.unitById.get(rightId))].sort()[0]||'~';
           return (
-            leftGroup.localeCompare(
-              rightGroup
-            ) ||
+            leftHousehold.localeCompare(rightHousehold) ||
+            leftGroup.localeCompare(rightGroup) ||
             stableGenealogyUnitCompare(
               model.unitById.get(leftId),
               model.unitById.get(rightId)
@@ -3426,6 +4092,7 @@ function buildFamilyBranchOwnership(
 
   return {
     primarySimIds,
+    anchorSimIds,
     primaryUnitIds,
     primaryParents,
     primaryChildren,
@@ -3460,8 +4127,50 @@ function buildFamilyBranchBlockMetrics(
   const childGroupsByOwner =
     new Map();
 
+
   const groupWidthByOwnerKey =
     new Map();
+
+  // ========【第三輪父母錨點空間】 依真實親子錨點預留完整家系移動空間 ========
+  const singleGroupAnchorByOwner = new Map();
+  const parentGroupByKey = new Map(
+    (model.parentGroups || []).map(group => [group.key,group])
+  );
+
+  const singleGroupAnchorOffset = (unit, group, childIds, widths, siblingGap) => {
+    const relation = parentGroupByKey.get(group.groupKey);
+    if (!relation ||
+        relation.parentIds.some(id => model.unitBySim.get(id)?.id !== unit.id) ||
+        relation.children.some(id => ownership.ownerParentByUnit.get(
+          model.unitBySim.get(id)?.id
+        ) !== unit.id)) return null;
+
+    const sourceX = genealogyGroupSourceX(relation,model);
+    if (!Number.isFinite(sourceX)) return null;
+    const sourceLocalX = sourceX-unit.x;
+
+    let cursor=0,minX=Infinity,maxX=-Infinity;
+    childIds.forEach((childUnitId,index) => {
+      const childUnit=model.unitById.get(childUnitId);
+      const span=widths[index];
+      if (!childUnit) return;
+      const localCardX=(span-childUnit.width)/2;
+      relation.children.forEach(childId => {
+        if (model.unitBySim.get(childId)?.id !== childUnitId) return;
+        const geometry=genealogyUnitMemberRelationshipGeometry(childUnit,childId);
+        if (!geometry) return;
+        const anchorX=cursor+localCardX+geometry.anchorLocalX;
+        minX=Math.min(minX,anchorX);
+        maxX=Math.max(maxX,anchorX);
+      });
+      cursor+=span+siblingGap;
+    });
+    if (!Number.isFinite(minX)||!Number.isFinite(maxX)) return null;
+    return {
+      sourceLocalX,
+      childrenBias:(minX+maxX)/2-(cursor-siblingGap)/2
+    };
+  };
 
   const visiting =
     new Set();
@@ -3530,12 +4239,19 @@ function buildFamilyBranchBlockMetrics(
                 )
               )
         }))
-        .sort((left, right) =>
-          String(left.groupKey)
-            .localeCompare(
-              String(right.groupKey)
-            )
-        );
+        .sort((left,right)=>{
+          // 父母群組仍是不可拆分區塊；其順序再盡量讓同住家庭相鄰。
+          const household=group=>{
+            const counts=new Map();
+            group.childIds.forEach(childId=>{
+              genealogyUnitHouseholds(model.unitById.get(childId)).forEach(id=>
+                counts.set(id,(counts.get(id)||0)+1));
+            });
+            return [...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0]?.[0]||'~';
+          };
+          return household(left).localeCompare(household(right))||
+            String(left.groupKey).localeCompare(String(right.groupKey));
+        });
 
     childGroupsByOwner.set(
       unitId,
@@ -3611,11 +4327,22 @@ function buildFamilyBranchBlockMetrics(
             )
         : 0;
 
-    const width =
-      Math.max(
-        unit.width,
-        childrenWidth
+    let reservedWidth=childrenWidth;
+    if (groups.length===1 && groupWidths.length===1) {
+      const one=groups[0];
+      const childWidths=one.childIds.map(childId => widthByUnit.get(childId) ||
+        model.unitById.get(childId)?.width || 0);
+      const offset=singleGroupAnchorOffset(
+        unit,one,one.childIds,childWidths,SIBLING_GAP
       );
+      if (offset) {
+        reservedWidth+=2*Math.abs(
+          offset.sourceLocalX-unit.width/2-offset.childrenBias
+        );
+        singleGroupAnchorByOwner.set(unitId,one.groupKey);
+      }
+    }
+    const width=Math.max(unit.width,reservedWidth);
 
     visiting.delete(unitId);
 
@@ -3634,6 +4361,7 @@ function buildFamilyBranchBlockMetrics(
     widthByUnit,
     childGroupsByOwner,
     groupWidthByOwnerKey,
+    singleGroupAnchorByOwner,
     siblingGap:SIBLING_GAP,
     parentGroupGap:PARENT_GROUP_GAP
   };
@@ -3654,30 +4382,18 @@ function assignFamilyBranchBlockPositions(
     widthByUnit,
     childGroupsByOwner,
     groupWidthByOwnerKey,
+    singleGroupAnchorByOwner,
     siblingGap,
     parentGroupGap
   } = metrics;
 
-  const primaryRoots =
-    [...ownership.primaryUnitIds]
-      .filter(unitId =>
-        !ownership.ownerParentByUnit
-          .has(unitId)
-      )
-      .sort((leftId, rightId) =>
-        compareFamilyBranchPath(
-          ownership.pathByUnit.get(
-            leftId
-          ),
-          ownership.pathByUnit.get(
-            rightId
-          )
-        ) ||
-        stableGenealogyUnitCompare(
-          model.unitById.get(leftId),
-          model.unitById.get(rightId)
-        )
-      );
+  // 根區塊維持原本穩定順序，不因觀看哪一個家族就把其他家庭整體搬位。
+  // 只有跨家系的兄弟姊妹由局部排列步驟作必要位移。
+  const primaryRoots=model.units
+    .filter(unit=>ownership.primaryUnitIds.has(unit.id)&&
+      !ownership.ownerParentByUnit.has(unit.id))
+    .sort(stableGenealogyUnitCompare)
+    .map(unit=>unit.id);
 
   const placed =
     new Set();
@@ -3805,113 +4521,94 @@ function assignFamilyBranchBlockPositions(
           parentGroupGap;
       }
     );
+
+    // 單一共同父母群組：整個子孫區塊依真實錨點平移，維持世代與兄弟排序。
+    if (groups.length === 1 &&
+        singleGroupAnchorByOwner.get(unitId) === groups[0].groupKey) {
+      const relation = (model.parentGroups || []).find(
+        entry => entry.key === groups[0].groupKey
+      );
+      if (relation) {
+        const anchors = relation.children
+          .map(id => genealogyChildAnchorX(id,model))
+          .filter(Number.isFinite);
+        const source = genealogyGroupSourceX(relation,model);
+        if (anchors.length && Number.isFinite(source)) {
+          const delta = source - (Math.min(...anchors)+Math.max(...anchors))/2;
+          if (Math.abs(delta) > 0.01) {
+            const movable = new Set();
+            const queue = [...groups[0].childIds];
+            while (queue.length) {
+              const next = queue.shift();
+              if (movable.has(next)) continue;
+              movable.add(next);
+              (ownership.primaryChildren.get(next) || []).forEach(child => {
+                if (ownership.ownerParentByUnit.get(child) === next) queue.push(child);
+              });
+            }
+            const units = [...movable].map(id => model.unitById.get(id)).filter(Boolean);
+            const bounds = blockBoundsByUnit.get(unitId);
+            if (units.length && bounds &&
+                Math.min(...units.map(child => child.x+delta)) >= bounds.left-0.01 &&
+                Math.max(...units.map(child => child.x+child.width+delta)) <= bounds.right+0.01) {
+              units.forEach(child => { child.x += delta; });
+            }
+          }
+        }
+      }
+    }
   };
 
-  let cursorX = 0;
+  // 恢復原有的子孫分支定位：不可將配偶放在整棵祖先樹的最外邊，
+  // 更不可替全族譜每一代的外部人物都額外疊加根區塊留白。
+  let cursorX=0;
+  const placeRoot=rootId=>{
+    const unit=model.unitById.get(rootId);
+    if(!unit)return;
+    const width=widthByUnit.get(rootId)||unit.width;
+    placeBranch(rootId,cursorX);
+    cursorX+=width+parentGroupGap;
+  };
+  primaryRoots.forEach(placeRoot);
 
-  primaryRoots.forEach(rootId => {
-    const width =
-      widthByUnit.get(rootId) ||
-      model.unitById.get(rootId)?.width ||
-      0;
-
-    placeBranch(
-      rootId,
-      cursorX
-    );
-
-    cursorX +=
-      width +
-      parentGroupGap;
-  });
-
-  // DAG / 異常來源資料若還有未被 owner tree 走到的 branch，
-  // 只能追加成另一個完整 block，不准塞回已建立的 Parent Group 內。
+  // 異常或多父母的資料中，剩餘區塊依原本穩定次序加入，不插入別人的分支。
   [...ownership.primaryUnitIds]
-    .filter(unitId =>
-      !placed.has(unitId)
-    )
-    .sort((leftId, rightId) =>
-      compareFamilyBranchPath(
-        ownership.pathByUnit.get(
-          leftId
-        ),
-        ownership.pathByUnit.get(
-          rightId
-        )
-      ) ||
-      stableGenealogyUnitCompare(
-        model.unitById.get(leftId),
-        model.unitById.get(rightId)
-      )
-    )
-    .forEach(unitId => {
-      const width =
-        widthByUnit.get(unitId) ||
-        model.unitById.get(unitId)?.width ||
-        0;
+    .filter(id=>!placed.has(id))
+    .sort((a,b)=>compareFamilyBranchPath(
+      ownership.pathByUnit.get(a),ownership.pathByUnit.get(b))||
+      stableGenealogyUnitCompare(model.unitById.get(a),model.unitById.get(b)))
+    .forEach(placeRoot);
 
-      placeBranch(
-        unitId,
-        cursorX
-      );
-
-      cursorX +=
-        width +
-        parentGroupGap;
-    });
-
-  // 純社交 / 無 Parent Group 骨架的人才是 attachment。
-  // 它們掛在 owner branch 外側，而不是把整個 B / C 血緣家系趕到全圖最左 / 最右。
-  layers.forEach(layer => {
-    const attachments =
-      layer.filter(unit =>
-        !ownership.primaryUnitIds
-          .has(unit.id)
-      );
-
-    attachments.forEach(unit => {
-      const ownerId =
-        ownership.attachmentOwnerByUnit
-          .get(unit.id);
-
-      const owner =
-        ownerId
-          ? model.unitById.get(
-              ownerId
-            )
-          : null;
-
-      const ownerBounds =
-        ownerId
-          ? blockBoundsByUnit.get(
-              ownerId
-            )
-          : null;
-
-      const side =
-        ownership.attachmentSideByUnit
-          .get(unit.id) ||
-        1;
-
-      if (owner && ownerBounds) {
-        unit.x =
-          side < 0
-            ? ownerBounds.left -
-              siblingGap -
-              unit.width
-            : ownerBounds.right +
-              siblingGap;
-
-        return;
+  // 配偶與前任必須圍繞其真正關聯人物的分支，而不是整個 root 的極端邊界。
+  const placedAttachments=new Set();
+  layers.forEach(layer=>{
+    const occupied=layer.filter(unit=>ownership.primaryUnitIds.has(unit.id));
+    const attachments=layer.filter(unit=>!ownership.primaryUnitIds.has(unit.id));
+    attachments.forEach(unit=>{
+      const ownerId=ownership.attachmentOwnerByUnit.get(unit.id);
+      const bounds=ownerId?blockBoundsByUnit.get(ownerId):null;
+      const side=ownership.attachmentSideByUnit.get(unit.id)||1;
+      if(!bounds){
+        unit.x=cursorX;
+        cursorX+=unit.width+siblingGap;
+      }else{
+        let candidate=side<0
+          ?bounds.left-siblingGap-unit.width
+          :bounds.right+siblingGap;
+        // 只推動附件本身，不移動已排好的血緣卡片與祖先分支。
+        for(let attempt=0;attempt<occupied.length+1;attempt++){
+          const obstacle=occupied.find(other=>
+            candidate<other.x+other.width+siblingGap &&
+            candidate+unit.width+siblingGap>other.x);
+          if(!obstacle)break;
+          candidate=side<0
+            ?obstacle.x-unit.width-siblingGap
+            :obstacle.x+obstacle.width+siblingGap;
+        }
+        unit.x=candidate;
       }
-
-      unit.x =
-        cursorX;
-
-      cursorX +=
-        unit.width +
-        siblingGap;
+      occupied.push(unit);
+      placedAttachments.add(unit.id);
     });
   });
 
@@ -3921,104 +4618,187 @@ function assignFamilyBranchBlockPositions(
   };
 }
 
-function applyFamilyBranchOrdering(
-  layers,
-  model,
-  ownership
-) {
-  layers.forEach(layer => {
-    if (!layer || layer.length < 2) {
-      return;
-    }
-
-    const primary = [];
-    const leftAttachments = [];
-    const rightAttachments = [];
-
-    layer.forEach(unit => {
-      if (
-        ownership.primaryUnitIds
-          .has(unit.id)
-      ) {
-        primary.push(unit);
-        return;
-      }
-
-      const side =
-        ownership.attachmentSideByUnit
-          .get(unit.id) || 1;
-
-      (
-        side < 0
-          ? leftAttachments
-          : rightAttachments
-      ).push(unit);
-    });
-
-    primary.sort((left, right) =>
-      compareFamilyBranchPath(
-        ownership.pathByUnit.get(
-          left.id
-        ),
-        ownership.pathByUnit.get(
-          right.id
-        )
-      ) ||
-      stableGenealogyUnitCompare(
-        left,
-        right
-      )
-    );
-
-    const attachmentCompare =
-      (left, right) => {
-        const leftOwner =
-          ownership.attachmentOwnerByUnit
-            .get(left.id);
-
-        const rightOwner =
-          ownership.attachmentOwnerByUnit
-            .get(right.id);
-
-        const ownerOrder =
-          compareFamilyBranchPath(
-            ownership.pathByUnit.get(
-              leftOwner
-            ),
-            ownership.pathByUnit.get(
-              rightOwner
-            )
-          );
-
-        return (
-          ownerOrder ||
-          stableGenealogyUnitCompare(
-            left,
-            right
-          )
-        );
-      };
-
-    leftAttachments.sort(
-      attachmentCompare
-    );
-
-    rightAttachments.sort(
-      attachmentCompare
-    );
-
-    // 外部人物只能待在整個 Primary Family block 的外側。
-    // 不允許 [B branch][外人][C branch]。
-    layer.splice(
-      0,
-      layer.length,
-      ...leftAttachments,
-      ...primary,
-      ...rightAttachments
-    );
-  });
+// ========【完整家系同代排序】 家系區塊為最小排序單位，外部關係貼在對應家系兩側 ========
+function genealogyAttachmentPriority(unit,ownerId,model) {
+  const owner=model.unitById.get(ownerId);
+  if(!owner)return 0;
+  const related=new Set(unit.members.map(member=>String(member.id)));
+  const owners=new Set(owner.members.map(member=>String(member.id)));
+  return Math.max(0,...(model.pairCandidates||[])
+    .filter(pair=>(related.has(String(pair.a))&&owners.has(String(pair.b)))||
+      (related.has(String(pair.b))&&owners.has(String(pair.a))))
+    .map(pair=>pair.adjacencyTier||0));
 }
 
+// 主家系根區塊排序：保持原血緣先後，只把同一實際家庭的獨立根分支合攏。
+// 家系根區塊同時受血緣、共同父母與社交優先級約束；同一人物仍只有一個 unit。
+// 血緣根排序只處理實際跨根的親子與同家庭連接；
+// 不以情人／一般社交關係強制重排整張原本正常的族譜。
+// 血緣與家庭群組不拆分；配偶、前任及情人只能在完整根區塊外側排序。
+function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
+  const requested=new Set(ids);
+  const roots=[...new Set([
+    ...ids,
+    ...(ownership.rootByUnit?.values()||[])
+  ])].filter(id=>model.unitById.has(id))
+    .sort((a,b)=>compareFamilyBranchPath(
+      ownership.pathByUnit.get(a),ownership.pathByUnit.get(b)
+    )||stableGenealogyUnitCompare(model.unitById.get(a),model.unitById.get(b)));
+  const index=new Map(roots.map((id,i)=>[id,i]));
+  const parent=new Map(roots.map(id=>[id,id]));
+  const rootOf=id=>ownership.rootByUnit?.get(id)||id;
+  const rootForSim=id=>{
+    const unit=model.unitBySim.get(String(id));
+    return unit?rootOf(unit.id):null;
+  };
+  const find=id=>{
+    const value=parent.get(id);
+    if(!value)return null;
+    if(value===id)return id;
+    const root=find(value);
+    parent.set(id,root);
+    return root;
+  };
+  const merge=(a,b)=>{
+    const left=find(a),right=find(b);
+    if(!left||!right||left===right)return;
+    parent.set(right,left);
+  };
+
+  // 這裡只合併真正有親子連接、或後代同一個居住家庭的根。
+  // 一般社交關係只影響相鄰次序，不能把整個祖先家系合併或拉走。
+  (model.parentGroups||[]).forEach(group=>{
+    const linked=[...new Set([
+      ...(group.parentUnitIds||[]),
+      ...(group.childUnitIds||[])
+    ].map(rootOf))].filter(id=>parent.has(id));
+    linked.slice(1).forEach(id=>merge(linked[0],id));
+  });
+  const firstByHousehold=new Map();
+  model.units.forEach(unit=>{
+    const root=rootOf(unit.id);
+    if(!parent.has(root))return;
+    genealogyUnitHouseholds(unit).forEach(householdId=>{
+      if(firstByHousehold.has(householdId))merge(firstByHousehold.get(householdId),root);
+      else firstByHousehold.set(householdId,root);
+    });
+  });
+  const components=new Map();
+  roots.forEach(root=>{
+    const id=find(root);
+    if(!components.has(id))components.set(id,{id,roots:[],left:[],right:[],
+      leftLoad:0,rightLoad:0,anchor:false});
+    components.get(id).roots.push(root);
+  });
+  const anchors=ownership.anchorSimIds?.size
+    ?ownership.anchorSimIds:ownership.primarySimIds||new Set();
+  anchors.forEach(simId=>{
+    const id=find(rootForSim(simId));
+    if(id&&components.has(id))components.get(id).anchor=true;
+  });
+  const attached=new Map();
+  const pairLinks=(model.pairCandidates||[]).map(pair=>({
+    a:find(rootForSim(pair.a)),b:find(rootForSim(pair.b)),
+    tier:pair.adjacencyTier||0,score:pair.score||0
+  })).filter(pair=>pair.a&&pair.b&&pair.a!==pair.b)
+    .sort((a,b)=>b.tier-a.tier||b.score-a.score||
+      (index.get(components.get(a.a)?.roots[0])??0)-
+      (index.get(components.get(b.a)?.roots[0])??0));
+
+  // 已佔據的現任配偶方向先計入；前任貼近人物，其餘關係往外排。
+  components.forEach(component=>{
+    const pair=model.units.find(unit=>unit.members?.length===2 &&
+      unit.members.some(member=>anchors.has(member.id)) &&
+      find(rootOf(unit.id))===component.id);
+    const primaryIndex=pair?.members.findIndex(member=>anchors.has(member.id))??-1;
+    if(primaryIndex===0)component.rightLoad=1;
+    else if(primaryIndex===1)component.leftLoad=1;
+  });
+  for(let pass=0;pass<components.size;pass++){
+    let change=false;
+    pairLinks.forEach(pair=>{
+      const left=components.get(pair.a),right=components.get(pair.b);
+      if(!left||!right||left===right)return;
+      const activeA=left.anchor||attached.has(left.id);
+      const activeB=right.anchor||attached.has(right.id);
+      if(activeA===activeB)return;
+      const owner=activeA?left:right;
+      const child=activeA?right:left;
+      if(child.anchor||attached.has(child.id))return;
+      const homeId=attached.get(owner.id)?.home||owner.id;
+      const home=components.get(homeId);
+      if(!home)return;
+      const side=home.rightLoad>home.leftLoad?-1:
+        home.leftLoad>home.rightLoad?1:-1;
+      home[side<0?'left':'right'].push({id:child.id,tier:pair.tier});
+      if(side<0)home.leftLoad+=child.roots.length;
+      else home.rightLoad+=child.roots.length;
+      attached.set(child.id,{home:homeId});
+      change=true;
+    });
+    if(!change)break;
+  }
+
+  const rendered=[];
+  const sorted=[...components.values()].sort((a,b)=>
+    (index.get(a.roots[0])??0)-(index.get(b.roots[0])??0));
+  sorted.forEach(group=>{
+    if(attached.has(group.id))return;
+    group.left.sort((a,b)=>a.tier-b.tier);
+    group.right.sort((a,b)=>b.tier-a.tier);
+    group.left.forEach(item=>rendered.push(...components.get(item.id).roots));
+    rendered.push(...group.roots);
+    group.right.forEach(item=>rendered.push(...components.get(item.id).roots));
+  });
+  return rendered.filter(id=>requested.has(id));
+}
+
+function applyFamilyBranchOrdering(layers,model,ownership) {
+  layers.forEach(layer=>{
+    if(!layer||layer.length<2)return;
+    const roots=new Map();
+    const groupFor=rootId=>{
+      if(!roots.has(rootId))roots.set(rootId,{
+        id:rootId,primary:[],left:[],right:[]
+      });
+      return roots.get(rootId);
+    };
+    layer.forEach(unit=>{
+      if(ownership.primaryUnitIds.has(unit.id)){
+        const rootId=ownership.rootByUnit.get(unit.id)||unit.id;
+        groupFor(rootId).primary.push(unit);
+        return;
+      }
+      const ownerId=ownership.attachmentOwnerByUnit.get(unit.id);
+      const rootId=ownership.rootByUnit.get(ownerId)||ownerId||unit.id;
+      const side=ownership.attachmentSideByUnit.get(unit.id)||1;
+      groupFor(rootId)[side<0?'left':'right'].push(unit);
+    });
+    const orderedRoots=genealogyOrderRootFamilyBlocks([...roots.keys()],model,ownership)
+      .map(id=>roots.get(id));
+    const result=[];
+    orderedRoots.forEach(root=>{
+      root.primary.sort((a,b)=>
+        compareFamilyBranchPath(ownership.pathByUnit.get(a.id),ownership.pathByUnit.get(b.id))||
+        stableGenealogyUnitCompare(a,b));
+      const compareAttachment=(a,b,side)=>{
+        const ownerA=ownership.attachmentOwnerByUnit.get(a.id);
+        const ownerB=ownership.attachmentOwnerByUnit.get(b.id);
+        const priorityA=genealogyAttachmentPriority(a,ownerA,model);
+        const priorityB=genealogyAttachmentPriority(b,ownerB,model);
+        return (side<0?priorityA-priorityB:priorityB-priorityA)||
+          compareFamilyBranchPath(ownership.pathByUnit.get(ownerA),ownership.pathByUnit.get(ownerB))||
+          stableGenealogyUnitCompare(a,b);
+      };
+      root.left.sort((a,b)=>compareAttachment(a,b,-1));
+      root.right.sort((a,b)=>compareAttachment(a,b,1));
+      result.push(...root.left,...root.primary,...root.right);
+    });
+    // 在每個完整原生家系的外側加入配偶／前任／社交人物，
+    // 而不是把某一家系的人物塞到另一個家系的親子中間。
+    layer.splice(0,layer.length,...result);
+  });
+}
 function buildGenerationLayers(units) {
   const layers = new Map();
 
@@ -4117,6 +4897,21 @@ function orientHorizontalPairUnitsByLineage(
     const [leftMember, rightMember] =
       unit.members;
 
+    // 預設向外排列應以玩家選中的家庭為準，
+    // 不能讓整個 EA 血緣 core 的每個人都變成另一個「中心」。
+    const anchorMembers=unit.members.filter(member=>
+      ownership?.anchorSimIds?.has(member.id));
+    if(anchorMembers.length===1){
+      const branchSide=ownership.primarySideByUnit?.get(unit.id)||1;
+      const anchorShouldBeLeft=branchSide>=0;
+      const anchorIsLeft=leftMember.id===anchorMembers[0].id;
+      if(anchorIsLeft!==anchorShouldBeLeft){
+        unit.members.reverse();
+        changed=true;
+      }
+      return;
+    }
+
     // ========【主家族配偶方向】 設定 - 外部配偶永遠朝主家族外側 ========
     if (
       ownership &&
@@ -4131,9 +4926,8 @@ function orientHorizontalPairUnitsByLineage(
       const primaryIsLeft =
         leftMember.id === primaryId;
 
-      const side =
-        ownership.primarySideByUnit
-          .get(unit.id) || 0;
+      // 唯一的中央家系也要決定外向方向，而不是回退到隨機姓名順序。
+      const side = ownership.primarySideByUnit.get(unit.id) || 1;
 
       // 左 branch：X ─ B
       // 右 branch：C ─ Y
@@ -4152,6 +4946,28 @@ function orientHorizontalPairUnitsByLineage(
       if (side !== 0) {
         return;
       }
+    }
+
+    // ========【配偶外向排列】 設定 - 雙方皆被列為主家族時仍要辨識原生血緣 ========
+    // 只在一方有明確的可見祖先、另一方沒有時才強制方向；
+    // 雙方都有祖先的交叉家系維持原有 lineage 判斷，不猜測誰是外人。
+    const lineageParentCount = member =>
+      genealogyParentIds(member, model.byId)
+        .filter(parentId => {
+          const parentUnit = model.unitBySim.get(String(parentId));
+          return parentUnit && parentUnit.id !== unit.id;
+        }).length;
+    const leftParentCount = lineageParentCount(leftMember);
+    const rightParentCount = lineageParentCount(rightMember);
+    const familySide = ownership?.primarySideByUnit?.get(unit.id) || 0;
+    if (familySide && !!leftParentCount !== !!rightParentCount) {
+      const bloodMemberIsLeft = leftParentCount > rightParentCount;
+      const bloodMemberShouldBeLeft = familySide > 0;
+      if (bloodMemberIsLeft !== bloodMemberShouldBeLeft) {
+        unit.members.reverse();
+        changed = true;
+      }
+      return;
     }
 
     // 主家族中央或兩人都屬於 primary 時，
@@ -5671,6 +6487,445 @@ function alignDirectParentChildGroups(
   });
 }
 
+// ========【父母／子女中心】 設定 - 分支寬度用於保留空間，親子錨點才是置中依據 ========
+    // ========【整組子孫置中】 設定 - 父母受鄰卡限制時，平移完整子孫區塊 ========
+function translateFamilyDescendants(layers, model, ownership, group, delta, parentGeneration, gap) {
+  if (!ownership || !Number.isFinite(delta) || Math.abs(delta) < 0.75) return false;
+  const movedIds = new Set();
+  const queue = group.children
+    .map(id => model.unitBySim.get(id))
+    .filter(unit => unit && unit.generation > parentGeneration);
+  if (!queue.length) return false;
+
+  while (queue.length) {
+    const unit = queue.shift();
+    if (movedIds.has(unit.id)) continue;
+    movedIds.add(unit.id);
+    // 只延伸經由這個子孫分支擁有的後代，不擅自移動其他配偶家族。
+    (ownership?.primaryChildren?.get(unit.id) || []).forEach(childId => {
+      if (ownership.ownerParentByUnit?.get(childId) !== unit.id) return;
+      const child = model.unitById?.get(childId);
+      if (child && child.generation > unit.generation) queue.push(child);
+    });
+  }
+
+  const movable = [...layers.values()]
+    .flat()
+    .filter(unit => movedIds.has(unit.id));
+  // 必須所有世代都留得下整個區塊，不能犧牲卡片不重疊的規則。
+  if (movable.some(unit => {
+    const targetLeft = unit.x + delta;
+    const targetRight = targetLeft + unit.width;
+    return (layers.get(unit.generation) || []).some(other =>
+      !movedIds.has(other.id) &&
+      targetRight + gap > other.x &&
+      targetLeft < other.x + other.width + gap
+    );
+  })) return false;
+
+  movable.forEach(unit => { unit.x += delta; });
+  return true;
+}
+
+function alignFamilyBranchParentAxes(layers, model, connectorGroups, ownership = null) {
+  const { SIBLING:gap } = resolveLayoutGaps();
+
+  // 由後代往祖先調整：較年長的一代必須看見子女已校正的最終錨點。
+  [...layers.keys()]
+    .sort((left, right) => right - left)
+    .forEach(generation => {
+      const layer = layers.get(generation);
+      const requestedDeltas = new Map();
+
+      connectorGroups.forEach(group => {
+        const parents = genealogyGroupParentEntries(group, model);
+        if (
+          !parents.length ||
+          parents.some(parent => parent.unit.generation !== generation)
+        ) {
+          return;
+        }
+
+        const childAnchors = group.children
+          .filter(childId => {
+            const unit = model.unitBySim.get(childId);
+            return unit && unit.generation > generation;
+          })
+          .map(childId => genealogyChildAnchorX(childId, model))
+          .filter(Number.isFinite);
+
+        if (!childAnchors.length) return;
+
+        // 關係來源與 SVG 繪製共用同一個錨點，不能用配偶區塊的外框中心。
+        const sourceX = genealogyGroupSourceX(group, model);
+        if (!Number.isFinite(sourceX)) return;
+
+        const childCenterX =
+          (Math.min(...childAnchors) + Math.max(...childAnchors)) / 2;
+        const delta = childCenterX - sourceX;
+        if (Math.abs(delta) < 0.01) return;
+
+        // 同一人可能有多組子女；平均要求，避免最後一組覆蓋之前的結果。
+        const weight = childAnchors.length;
+        new Set(parents.map(parent => parent.unit.id)).forEach(unitId => {
+          const entry = requestedDeltas.get(unitId) || { sum:0, weight:0 };
+          entry.sum += delta * weight;
+          entry.weight += weight;
+          requestedDeltas.set(unitId, entry);
+        });
+      });
+
+      const shifts = layer
+        .filter(unit => requestedDeltas.has(unit.id))
+        .map(unit => {
+          const entry = requestedDeltas.get(unit.id);
+          return { unit, delta:entry.sum / entry.weight };
+        });
+
+      const moveWithinLayer = ({ unit, delta }) => {
+        if (!Number.isFinite(delta) || Math.abs(delta) < 0.01) return;
+
+        let minimum = -Infinity;
+        let maximum = Infinity;
+
+        // 只移動父母所在的 unit（含水平配偶），不改變子女分支的相對位置。
+        // 左右界線依既有卡片位置決定，避免跨家族或同代卡片重疊。
+        for (const other of layer) {
+          if (other.id === unit.id) continue;
+          if (other.x + other.width <= unit.x + 0.001) {
+            minimum = Math.max(minimum, other.x + other.width + gap);
+          } else if (other.x >= unit.x + unit.width - 0.001) {
+            maximum = Math.min(maximum, other.x - unit.width - gap);
+          } else {
+            return;
+          }
+        }
+
+        if (minimum > maximum) return;
+        unit.x = Math.min(maximum, Math.max(minimum, unit.x + delta));
+      };
+
+      // 向右移動先處理最右側；向左移動先處理最左側，保留同代順序。
+      shifts
+        .filter(item => item.delta > 0)
+        .sort((a, b) => b.unit.x - a.unit.x)
+        .forEach(moveWithinLayer);
+      shifts
+        .filter(item => item.delta < 0)
+        .sort((a, b) => a.unit.x - b.unit.x)
+        .forEach(moveWithinLayer);
+
+      // 不再因為父母旁邊有其他卡片就放棄置中：
+      // 安全條件允許時，將這組子女及其整個後代平移到父母連接點下方。
+      connectorGroups.forEach(group => {
+        const parents = genealogyGroupParentEntries(group, model);
+        if (!parents.length ||
+            parents.some(parent => parent.unit.generation !== generation)) return;
+        const childAnchors = group.children
+          .filter(id => (model.unitBySim.get(id)?.generation ?? -1) > generation)
+          .map(id => genealogyChildAnchorX(id, model))
+          .filter(Number.isFinite);
+        if (!childAnchors.length) return;
+        const sourceX = genealogyGroupSourceX(group, model);
+        if (!Number.isFinite(sourceX)) return;
+        const childCenter = (Math.min(...childAnchors) + Math.max(...childAnchors)) / 2;
+        translateFamilyDescendants(
+          layers, model, ownership, group, sourceX - childCenter, generation, gap
+        );
+      });
+    });
+}
+
+// ========【情人共同子女自動排列】 在真正的關係線連接點下放置完整後代區塊 ========
+// ========【家系分支安全位移】 空間不足時移到可行極限，不是整組原地不動 ========
+function genealogySafeDescendantShift(layers,model,ownership,group,delta,parentGeneration,gap) {
+  if(!Number.isFinite(delta)||Math.abs(delta)<0.75)return 0;
+  const descendants=new Set();
+  const queue=group.children.map(id=>model.unitBySim.get(id))
+    .filter(unit=>unit&&unit.generation>parentGeneration);
+  while(queue.length){
+    const unit=queue.shift();
+    if(descendants.has(unit.id))continue;
+    descendants.add(unit.id);
+    (ownership?.primaryChildren?.get(unit.id)||[]).forEach(id=>{
+      if(ownership.ownerParentByUnit?.get(id)!==unit.id)return;
+      const child=model.unitById?.get(id);
+      if(child&&child.generation>unit.generation)queue.push(child);
+    });
+  }
+  let allowed=delta;
+  for(const id of descendants){
+    const unit=model.unitById?.get(id);
+    if(!unit)continue;
+    for(const other of (layers.get(unit.generation)||[])){
+      if(descendants.has(other.id))continue;
+      if(delta>0){
+        if(other.x>=unit.x+unit.width-0.001){
+          allowed=Math.min(allowed,other.x-unit.x-unit.width-gap);
+        }
+      }else if(other.x+other.width<=unit.x+0.001){
+        allowed=Math.max(allowed,other.x+other.width+gap-unit.x);
+      }
+    }
+  }
+  return delta>0?Math.max(0,allowed):Math.min(0,allowed);
+}
+
+function alignNonSpousalCoParentBranches(layers,model,ownership,connectorGroups) {
+  const {SIBLING:gap}=resolveLayoutGaps();
+  // 親子關係座標由同一個 junction 函式取得，避免畫布與排列各算一套中心。
+  // 一個人有多位共同生育對象時，每組子女分別尋找自己的線路連接點。
+  let adjusted=0;
+  [...connectorGroups]
+    .sort((a,b)=>{
+      const depth=group=>Math.max(...group.parentIds.map(id=>
+        model.unitBySim.get(id)?.generation ?? 0));
+      return depth(b)-depth(a);
+    })
+    .forEach(group=>{
+      if(group.parentIds.length!==2||!group.children.length)return;
+      const link=genealogyNonSpousalCoParentLink(group,model.byId);
+      if(!link)return;
+      const parentGeneration=Math.max(...group.parentIds.map(id=>
+        model.unitBySim.get(id)?.generation??0));
+      const descendants=group.children.filter(id=>
+        (model.unitBySim.get(id)?.generation??0)>parentGeneration);
+      if(!descendants.length)return;
+      const pos=placeGenealogyUnitMembers(model.units);
+      const point=genealogyCoParentRelationshipJunction(group,pos,model.byId,link);
+      if(!point)return;
+      const actual=descendants.map(id=>pos.get(id)).filter(Boolean)
+        .map(p=>cardVerticalAnchor(p,'top').x);
+      if(!actual.length)return;
+      const center=(Math.min(...actual)+Math.max(...actual))/2;
+      const delta=point.x-center;
+      const safeDelta=genealogySafeDescendantShift(
+        layers,model,ownership,group,delta,parentGeneration,gap
+      );
+      if(Math.abs(safeDelta)<0.75)return;
+      if(translateFamilyDescendants(
+        layers,model,ownership,group,safeDelta,parentGeneration,gap
+      ))adjusted++;
+    });
+  return adjusted;
+}
+
+// ========【家庭區塊剛性移動】 同代碰撞向外推移完整子孫分支，而不是讓單一卡片卡住 ========
+function genealogyUnitHouseholds(unit) {
+  const ids=new Set();
+  (unit?.members||[]).forEach(member=>{
+    const id=member?.gameData?.householdId;
+    if(id!==null&&id!==undefined&&String(id).trim())ids.add(String(id));
+  });
+  return ids;
+}
+
+function genealogyOwnedBranchUnits(model,ownership,seedIds,includeHousehold=true) {
+  const result=new Set(),queue=[...seedIds];
+  const children=ownership?.primaryChildren||new Map();
+  const parents=ownership?.ownerParentByUnit||new Map();
+  while(queue.length){
+    const id=queue.shift();
+    if(result.has(id))continue;
+    const unit=model.unitById?.get(id);
+    if(!unit)continue;
+    result.add(id);
+    (children.get(id)||[]).forEach(childId=>{
+      if(parents.get(childId)===id)queue.push(childId);
+    });
+    if(!includeHousehold)continue;
+    const householdIds=genealogyUnitHouseholds(unit);
+    if(!householdIds.size)continue;
+    // 同一世代、同一實際居住家庭一起移動，不允許只把某位家庭成員拉走。
+    model.units.forEach(other=>{
+      if(other.id===id||other.generation!==unit.generation||result.has(other.id))return;
+      if([...genealogyUnitHouseholds(other)].some(value=>householdIds.has(value)))
+        queue.push(other.id);
+    });
+  }
+  return result;
+}
+
+function genealogyTranslateChildBlockWithClearance(layers,model,ownership,group,delta,parentGeneration,gap) {
+  if(!Number.isFinite(delta)||Math.abs(delta)<0.75)return false;
+  const seeds=group.children.map(childId=>model.unitBySim.get(childId))
+    .filter(unit=>unit&&unit.generation>parentGeneration).map(unit=>unit.id);
+  if(!seeds.length)return false;
+  const moving=genealogyOwnedBranchUnits(model,ownership,seeds);
+  if(!moving.size)return false;
+  const original=new Map(model.units.map(unit=>[unit.id,unit.x]));
+  const moved=new Set(moving);
+  const protectedParents=new Set(group.parentIds.map(id=>model.unitBySim.get(id)?.id).filter(Boolean));
+  if([...moving].some(id=>protectedParents.has(id)))return false;
+
+  const shift=(ids,amount)=>{
+    ids.forEach(id=>{
+      const unit=model.unitById.get(id);
+      if(unit)unit.x+=amount;
+      moved.add(id);
+    });
+  };
+  const revert=()=>model.units.forEach(unit=>{
+    if(original.has(unit.id))unit.x=original.get(unit.id);
+  });
+  shift(moving,delta);
+  const direction=Math.sign(delta);
+  const maxPasses=Math.min(256,model.units.length*3+8);
+  for(let pass=0;pass<maxPasses;pass++){
+    let collision=null;
+    // 固定 layer 排列權威：左右順序不允許靠重新排序卡片解決。
+    for(const layer of layers.values()){
+      for(let index=1;index<layer.length;index++){
+        const left=layer[index-1],right=layer[index];
+        const overlap=left.x+left.width+gap-right.x;
+        if(overlap>0.01){collision={left,right,overlap};break;}
+      }
+      if(collision)break;
+    }
+    if(!collision)return true;
+    const {left,right,overlap}=collision;
+    const block=direction>0?right:left;
+    const active=direction>0?left:right;
+    // 只能從被位移的區塊向外推；絕對不反向移動另一個家族。
+    if(!moved.has(active.id)||protectedParents.has(block.id)){
+      revert();return false;
+    }
+    const branch=genealogyOwnedBranchUnits(model,ownership,[block.id]);
+    if(!branch.size||[...branch].some(id=>moving.has(id)||protectedParents.has(id))){
+      revert();return false;
+    }
+    // 親子垂直校正不能把另一棵完整祖先家族一路推過畫布。
+    // 碰到跨根障礙時保留原本血緣區塊，交由後續整體排列處理。
+    const branchRoots=ownership?.rootByUnit;
+    if(branchRoots?.size){
+      const movingRoots=new Set([...moving].map(id=>branchRoots.get(id)||id));
+      const pushedRoots=new Set([...branch].map(id=>branchRoots.get(id)||id));
+      if([...pushedRoots].some(id=>!movingRoots.has(id))){
+        revert();return false;
+      }
+    }
+    // 若推開的單位是已被移動的區塊，需要保留原有分支相對位置。
+    if(branch.has(active.id)){
+      revert();return false;
+    }
+    shift(branch,direction*overlap);
+  }
+  revert();
+  return false;
+}
+
+// ========【共通親子排列】 配偶、前任、情人與單親只從實際畫線接點計算子女位置 ========
+function alignUnifiedSingleChildBranches(layers,model,ownership,connectorGroups) {
+  const {SIBLING:gap}=resolveLayoutGaps();
+  const groups=connectorGroups.filter(group=>group.children.length===1)
+    .sort((a,b)=>{
+      const generation=g=>Math.max(-1,...g.parentIds.map(id=>
+        model.unitBySim.get(id)?.generation??-1));
+      return generation(b)-generation(a)||String(a.key||'').localeCompare(String(b.key||''));
+    });
+  let corrected=0;
+  // 由下而上，整棵子孫先排好再靠近其父母連接點。
+  groups.forEach(group=>{
+    const childId=group.children[0];
+    const childUnit=model.unitBySim.get(childId);
+    if(!childUnit)return;
+    const parentGeneration=Math.max(-1,...group.parentIds.map(id=>
+      model.unitBySim.get(id)?.generation??-1));
+    if(childUnit.generation<=parentGeneration)return;
+    const pos=placeGenealogyUnitMembers(model.units);
+    const source=parentConnectorSource(group,pos,model.byId,[]);
+    const child=pos.get(childId);
+    if(!source||!child)return;
+    const childX=cardVerticalAnchor(child,'top').x;
+    const delta=source.x-childX;
+    if(Math.abs(delta)<=0.75)return;
+    if(genealogyTranslateChildBlockWithClearance(
+      layers,model,ownership,group,delta,parentGeneration,gap
+    ))corrected++;
+  });
+  return corrected;
+}
+
+// ========【跨家系兄弟姊妹區塊】 不讓另一個家系插在同一組父母的兩名子女中 ========
+// 僅修正有共同父母、但因不同血緣 root 所有權而被拆開的兩名子女。
+// 改動只限此層相鄰區塊及其真正後代，不重新排列全部祖先。
+function compactCrossRootSiblingGroups(layers,model,ownership) {
+  const gap=resolveLayoutGaps().SIBLING;
+  let corrected=0;
+  (model.parentGroups||[]).forEach(group=>{
+    const childIds=[...new Set(group.childUnitIds||[])];
+    if(childIds.length!==2)return;
+    const pair=childIds.map(id=>model.unitById.get(id)).filter(Boolean)
+      .sort((a,b)=>a.x-b.x);
+    if(pair.length!==2)return;
+    const [first,second]=pair;
+    if(first.generation!==second.generation)return;
+    const roots=ownership.rootByUnit||new Map();
+    if((roots.get(first.id)||first.id)===(roots.get(second.id)||second.id))return;
+
+    const target=first.x+first.width+gap;
+    if(second.x<=target+0.75)return;
+    const layer=layers.get(first.generation)||[];
+    const blockers=layer.filter(unit=>unit.id!==first.id&&unit.id!==second.id &&
+      unit.x>=target-0.001&&unit.x<second.x);
+    const originals=new Map(model.units.map(unit=>[unit.id,unit.x]));
+    const deltas=new Map();
+    const request=(id,delta)=>{
+      if(deltas.has(id)&&Math.abs(deltas.get(id)-delta)>0.01)return false;
+      deltas.set(id,delta);
+      return true;
+    };
+
+    let possible=true;
+    const siblingBranch=genealogyOwnedBranchUnits(model,ownership,[second.id],false);
+    siblingBranch.forEach(id=>{
+      if(!request(id,target-second.x))possible=false;
+    });
+    blockers.forEach(blocker=>{
+      const branch=genealogyOwnedBranchUnits(model,ownership,[blocker.id],false);
+      branch.forEach(id=>{
+        if(!request(id,second.width+gap))possible=false;
+      });
+    });
+    if(!possible)return;
+    deltas.forEach((delta,id)=>{model.unitById.get(id).x+=delta;});
+
+    // 任何世代出現新重疊就完整還原這次校正，絕不為一組兄弟破壞另一家。
+    const collision=[...deltas.keys()].some(id=>{
+      const unit=model.unitById.get(id);
+      return (layers.get(unit.generation)||[]).some(other=>
+        other.id!==id&&
+        unit.x<other.x+other.width+gap-0.001 &&
+        unit.x+unit.width+gap>other.x+0.001
+      );
+    });
+    if(collision){
+      originals.forEach((x,id)=>{model.unitById.get(id).x=x;});
+      return;
+    }
+
+    corrected++;
+    // 沒有上一代的共同父／母，可對準目前兩名子女的真實錨點。
+    // 有更上層祖先時不單獨拉動父母，以免破壞上游血緣線。
+    if(group.parentIds.length===1){
+      const parentUnit=model.unitBySim.get(group.parentIds[0]);
+      if(parentUnit&&!(parentUnit.parentUnitIds?.size)){
+        const anchors=group.children.map(id=>genealogyChildAnchorX(id,model))
+          .filter(Number.isFinite);
+        const source=genealogyGroupSourceX(group,model);
+        if(anchors.length===2&&Number.isFinite(source)){
+          const targetX=parentUnit.x+
+            (Math.min(...anchors)+Math.max(...anchors))/2-source;
+          if(canPlaceGenealogyUnitAtX(
+            parentUnit,targetX,layers.get(parentUnit.generation),gap
+          ))parentUnit.x=targetX;
+        }
+      }
+    }
+  });
+  return corrected;
+}
+
 function solveAutomaticGenealogyPositions(visibleIds) {
   const primarySimIds =
     getActiveLayoutPrimaryIds(
@@ -5742,11 +6997,267 @@ function solveAutomaticGenealogyPositions(visibleIds) {
     connectorGroups
   );
 
+  // 最後依真正子女錨點置中上一代；不重新打散已保留的家族區塊。
+  alignFamilyBranchParentAxes(
+    layers,
+    model,
+    connectorGroups,
+    ownership
+  );
+
+  // 真正改動人物位置：以情人關係線的接點為基準，整組平移私生子女與其後代。
+  alignNonSpousalCoParentBranches(
+    layers,
+    model,
+    ownership,
+    connectorGroups
+  );
+
+  // 讓所有「僅有一名子女」的群組共用真正的 renderer 接點，不再只處理情人。
+  // 不重排既有家系；若卡片擋住對齊位置，僅向外推開整個相鄰子孫區塊。
+  alignUnifiedSingleChildBranches(
+    layers,model,ownership,connectorGroups
+  );
+
+  // 最後確認同父母的跨家系兄弟姊妹連續，不能讓另一個家族插在中間。
+  compactCrossRootSiblingGroups(layers,model,ownership);
+
   // Family Branch Block 本身就是最終水平幾何權威。
   // 不再執行 generation-global packing，避免把已保留的 Parent Group block 再推壞。
   return placeGenealogyUnitMembers(
     model.units
   );
+}
+
+// ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
+// ========【寵物卡顯示資訊】 設定 - 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
+function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
+  const species = settings.species ? petCardSpeciesLabel(pet) : '';
+  const breed = settings.breed ? displayDataText(pet.breed,owner) : '';
+  const stage = settings.ageStage ? uiText(pet.ageStage || '') : '';
+  const status = settings.status ? uiText(pet.status || '') : '';
+  const traits = settings.traits
+    ? (pet.traits || []).map(trait => displayDataText(trait,owner)).filter(Boolean)
+    : [];
+  const rows = [];
+  if (species || breed) rows.push({key:'speciesBreed',text:[species,breed].filter(Boolean).join(' · ')});
+  if (stage || status) rows.push({key:'stageStatus',text:[stage,status].filter(Boolean).join(' · ')});
+  if (traits.length) rows.push({key:'traits',text:traits.join(' / '),traits});
+  return rows;
+}
+
+function petCardDimensions(pet,owner) {
+  const settings = getPetCardSettings();
+  const rows = petCardFieldRows(pet,owner,settings);
+  const edit = viewMode === 'edit';
+  const W = edit ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
+  const textWidth = edit ? W - 82 : W - 18;
+  const lines = (value,fontSize = 10) => {
+    const charWidth = /[^\x00-\x7f]/.test(String(value || '')) ? fontSize : fontSize * 0.58;
+    return Math.max(1,Math.ceil([...String(value || '')].length * charWidth / textWidth));
+  };
+  const name = settings.name ? displayDataText(pet.name,owner) : '';
+  const nameHeight = name ? lines(name,edit?12:11)*17 : 0;
+  const rowHeight = rows.reduce((sum,row) => {
+    if (edit && row.key === 'traits') {
+      let used = 0, count = 1;
+      for (const trait of row.traits) {
+        const width = Math.min(textWidth,[...trait].length*9+12);
+        if (used && used+width+3>textWidth) {count++;used=0;}
+        used += width+3;
+      }
+      return sum+count*19;
+    }
+    return sum+lines(row.text)*14+3;
+  },0);
+  if (edit) return {W,H:Math.max(84,20+Math.max(51,nameHeight+rowHeight+4))};
+  return {W,H:Math.max(90,12+61+(nameHeight?nameHeight+5:0)+rowHeight+10)};
+}
+
+function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
+  const empty = {cards:[],groups:[],width:0,height:0};
+  if (!showPetCards()) return empty;
+  const sourceIds = new Set([
+    ...(family?.memberIds || []),
+    ...(family?.primaryMemberIds || []),
+    ...visibleIds
+  ].map(String));
+  const householdIds = new Set();
+  const byGroup = new Map();
+  const seen = new Set();
+
+  sourceIds.forEach(id => {
+    const hh = genealogyData?.sims?.[id]?.gameData?.householdId;
+    if (hh != null) householdIds.add(String(hh));
+  });
+  if (family?.gameData?.householdId != null) householdIds.add(String(family.gameData.householdId));
+
+  function addPet(pet, ownerId) {
+    if (!pet || typeof pet !== 'object') return;
+    const id = String(pet.gameData?.simId || pet.id || (ownerId + ':' + seen.size));
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    const ownerHousehold = ownerId ? genealogyData?.sims?.[ownerId]?.gameData?.householdId : null;
+    const householdId = pet.gameData?.householdId != null
+      ? String(pet.gameData.householdId)
+      : (ownerHousehold != null ? String(ownerHousehold) : '');
+    const groupKey = householdId ? 'household:' + householdId : 'owner:' + (ownerId || id);
+
+    if (!byGroup.has(groupKey)) {
+      const matchingFamily = (genealogyData?.families || []).find(entry =>
+        householdId && String(entry?.gameData?.householdId ?? '') === householdId
+      );
+      byGroup.set(groupKey, {
+        key:groupKey, householdId,
+        title:matchingFamily?.name || uiText('家庭寵物'),
+        ownerIds:new Set(), entries:[], anchorY:0
+      });
+    }
+    const group = byGroup.get(groupKey);
+    if (ownerId) group.ownerIds.add(ownerId);
+    group.entries.push({key:id,pet,ownerId,householdId,groupKey});
+  }
+  sourceIds.forEach(id => {
+    const owner = genealogyData?.sims?.[id];
+    if (Array.isArray(owner?.pets)) owner.pets.forEach(pet => addPet(pet,id));
+  });
+
+  // EA 多人家庭通常無法指定單一主人：未指派主人但有家庭 ID 的寵物仍須顯示。
+  (genealogyData?.meta?.unassignedPets || []).forEach(pet => {
+    const household = pet?.gameData?.householdId;
+    if (household == null || !householdIds.has(String(household))) return;
+    addPet(pet,'');
+  });
+  const groups = [...byGroup.values()];
+  if (!groups.length) return empty;
+
+  // 以實際可見的 EA 家庭成員為錨點，不再把寵物一律塞到整張族譜最右邊。
+  const humanRects = [...(humanGeometry.rects?.values() || [])].map(rect => ({
+    left:rect.left-PAD,
+    top:rect.top-PAD,
+    right:rect.right-PAD,
+    bottom:rect.bottom-PAD
+  }));
+  groups.forEach(group => {
+    const anchors = [...visibleIds].filter(id => {
+      const sim = genealogyData?.sims?.[id];
+      return group.ownerIds.has(String(id)) ||
+        (!!group.householdId && String(sim?.gameData?.householdId ?? '') === group.householdId);
+    }).map(id => {
+      const p = positions.get(String(id));
+      const dims = humanGeometry.dimensions?.get(String(id)) || getNodeDimensionsById(id);
+      return p ? { x:p.x, y:p.y, right:p.x+dims.W } : null;
+    }).filter(Boolean).sort((a,b) => a.y-b.y);
+    group.anchorY = anchors.length ? anchors[Math.floor((anchors.length-1)/2)].y : 0;
+    group.anchorX = anchors.length
+      ? Math.max(...anchors.map(anchor => anchor.right))
+      : (humanGeometry.width || 0);
+  });
+  groups.sort((a,b) => a.anchorY-b.anchorY || a.anchorX-b.anchorX || a.key.localeCompare(b.key));
+
+  const cards = [];
+  const occupied = humanRects.slice();
+  let maxRight = humanGeometry.width || 0;
+  let maxBottom = humanGeometry.height || 0;
+  const clearance = 10;
+
+  groups.forEach(group => {
+    const cols = Math.min(3,group.entries.length);
+    const rows = Math.ceil(group.entries.length/3);
+    const itemDims = group.entries.map(entry =>
+      petCardDimensions(entry.pet,genealogyData?.sims?.[entry.ownerId] || null)
+    );
+    const W = viewMode === 'edit' ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
+    const rowHeights = Array.from({length:rows},(_,i) =>
+      Math.max(...itemDims.slice(i*3,i*3+3).map(dim => dim.H))
+    );
+    const rowTops = rowHeights.map((_,i) =>
+      rowHeights.slice(0,i).reduce((sum,height)=>sum+height+PET_ROW_GAP,0)
+    );
+    const groupW = cols*W+Math.max(0,cols-1)*PET_CARD_GAP;
+    const groupH = rowHeights.reduce((sum,height)=>sum+height,0)+
+      Math.max(0,rows-1)*PET_ROW_GAP;
+    const y = Math.max(0,group.anchorY);
+    let x = Math.max(0,group.anchorX+PET_SIDE_GAP);
+
+    // 僅移動寵物群組避開人物卡；不同高度的寵物卡以同列最高卡為間距基準。
+    for (let attempt=0; attempt<occupied.length+1; attempt++) {
+      const blocking = occupied.find(rect =>
+        x < rect.right+clearance && x+groupW+clearance > rect.left &&
+        y < rect.bottom+clearance && y+groupH+clearance > rect.top
+      );
+      if (!blocking) break;
+      x = Math.max(x+PET_CARD_GAP,blocking.right+PET_SIDE_GAP);
+    }
+
+    group.x = x;
+    group.y = y;
+    occupied.push({left:x,top:y,right:x+groupW,bottom:y+groupH});
+    group.entries.forEach((entry,index) => {
+      const cardX = x+(index%3)*(W+PET_CARD_GAP);
+      const cardY = y+rowTops[Math.floor(index/3)];
+      cards.push({...entry,x:cardX,y:cardY,width:itemDims[index].W,height:itemDims[index].H});
+    });
+    maxRight = Math.max(maxRight,x+groupW);
+    maxBottom = Math.max(maxBottom,y+groupH);
+  });
+  return {cards,groups,width:maxRight,height:maxBottom};
+}
+
+// ========【寵物畫布圖層】 設定 - 不混入人物節點、選取及關係線路由 ========
+function paintPetLayer() {
+  // 只有 Layout 更新才重建寵物 DOM；拖曳人物卡的每一幀不重建寵物頭像。
+  if (lastPaintedPetLayout === layoutCache?.petLayout) return;
+  lastPaintedPetLayout = layoutCache?.petLayout;
+  if (!layoutCache?.petLayout?.cards?.length) {
+    petLayer.replaceChildren();
+    syncPetSelectionClasses();
+    return;
+  }
+  const {cards,groups} = layoutCache.petLayout;
+  petLayer.innerHTML = groups.map(group => {
+    const items = cards.filter(card => card.groupKey === group.key).map(card => {
+      const pet = card.pet;
+      const owner = genealogyData?.sims?.[card.ownerId] || null;
+      const name = displayDataText(pet.name,owner) || uiText('（未命名）');
+      const state = pet.status === '幽靈' ? 'ghost' : pet.status === '已故' ? 'dead' : '';
+      const settings = getPetCardSettings();
+      const fields = petCardFieldRows(pet,owner,settings);
+      const edit = viewMode === 'edit';
+      const gender = settings.gender ? String(pet.gender || '').toLowerCase() : '';
+      const male = ['男','公','male'].includes(gender);
+      const female = ['女','母','female'].includes(gender);
+      const genderIcon = settings.gender ? (
+        '<span class="person-card-gender-icon" role="img" aria-label="' +
+        esc(uiText(male ? '公' : female ? '母' : '其他')) + '">' +
+        iconSvg(male ? 'gender-card-male' : female ? 'gender-card-female' : 'gender-card-other') +
+        '</span>'
+      ) : '';
+      const fieldHTML = fields.map(row => {
+        if (edit && row.key === 'traits') {
+          const chips = row.traits.map(trait =>
+            `<span class="tag" title="${esc(trait)}">${esc(trait)}</span>`
+          ).join('');
+          return `<span class="genealogy-pet-card-traits person-card-tags">${chips}</span>`;
+        }
+        return `<span class="genealogy-pet-card-field${edit ? ' person-card-edit-meta' : ' person-card-view-meta'}" title="${esc(row.text)}">${esc(row.text)}</span>`;
+      }).join('');
+      const cardMode = edit ? 'mode-edit' : 'mode-view';
+      const appearanceClass = edit ? '' : ' card-appearance-' + (settings.appearance || 'minimal');
+      const hasContent = settings.name || fields.length;
+      return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}${appearanceClass}${hasContent ? '' : ' pet-avatar-only'}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
+        style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${card.width}px;height:${card.height}px">
+        <span class="genealogy-pet-card-avatar">${petCardAvatarHTML(pet)}</span>
+        ${hasContent ? `<span class="genealogy-pet-card-info">
+          ${settings.name ? `<span class="genealogy-pet-card-name">${esc(name)}${genderIcon}</span>` : ''}
+          ${fieldHTML}
+        </span>` : ''}
+      </button>`;
+    }).join('');
+    return items;
+  }).join('');
+  syncPetSelectionClasses();
 }
 
 function composeScenePlan() {
@@ -5832,9 +7343,13 @@ function composeScenePlan() {
       pos,
       visibleIds
     );
+  const petLayout = buildPetCardLayout(fam,visibleIds,pos,geometry);
+  geometry.width = Math.max(geometry.width,petLayout.width);
+  geometry.height = Math.max(geometry.height,petLayout.height);
 
   return {
     pos,
+    petLayout,
     width:geometry.width,
     height:geometry.height,
     geometry,
@@ -5848,6 +7363,7 @@ function composeScenePlan() {
 // ========【Scene Incremental Pipeline】 設定 - Layout / Nodes / Edges 由 Scene 單獨失效 ========
 const RENDER_DIRTY = Object.freeze({ layout:1, nodes:2, edges:4 });
 let layoutCache = null;
+let lastPaintedPetLayout = null;
 let renderDirtyMask = 0;
 let renderInvalidationRaf = 0;
 let relationshipPreviewPending = false;
@@ -6143,6 +7659,130 @@ function buildParentChildConnectorGroups(byId, visibleIds) {
   return [...groups.values()];
 }
 
+    // ========【共同親生父母】 設定 - 僅推定畫布用「情人」，不修改 EA／玩家關係資料 ========
+function inferCoParentRelationshipLinks(parentGroups, byId, existingLinks = genealogyData.links || []) {
+  const knownPairs = new Set();
+  const addKnown = (first, second) => {
+    const a = String(first || '');
+    const b = String(second || '');
+    if (a && b && a !== b) knownPairs.add(pairKey(a, b));
+  };
+
+  byId.forEach(sim => {
+    [
+      ...(sim.spouseIds || []),
+      ...(sim.exSpouseIds || []),
+      ...(sim.gameData?.deceasedSpouseIds || [])
+    ].forEach(otherId => addKnown(sim.id, otherId));
+  });
+  existingLinks.forEach(link => {
+    if (link?.from != null && link?.to != null) {
+      addKnown(link.from, link.to);
+    }
+  });
+
+  const inferred = [];
+  parentGroups.forEach(group => {
+    if (group.parentIds.length !== 2) return;
+    // 養父母只能建立領養線；不得因此推定戀愛或生育關係。
+    const hasBiologicalChild = group.children.some(id =>
+      group.childKinds?.get(id) === 'parent-child'
+    );
+    if (!hasBiologicalChild) return;
+
+    const [a, b] = group.parentIds.map(String);
+    if (!byId.has(a) || !byId.has(b) || a === b) return;
+    const key = pairKey(a, b);
+    if (knownPairs.has(key)) return;
+    knownPairs.add(key);
+
+    // 不寫入 genealogyData.links；若玩家新增真實關係，此推定自然消失。
+    inferred.push({
+      id:'inferred-co-parent-' + key,
+      from:a,
+      to:b,
+      type:'情人',
+      label:'情人',
+      inferred:true
+    });
+  });
+  return inferred;
+}
+
+// ========【共同父母連線】 單一關係線同時服務「情人」與親子主幹 ========
+function genealogyNonSpousalCoParentLink(group,byId) {
+  if (!group || group.parentIds?.length !== 2) return null;
+  const [a,b]=group.parentIds.map(String);
+  const first=byId.get(a),second=byId.get(b);
+  if(!first||!second)return null;
+  const hasPartner=(sim,id)=>(sim.spouseIds||[]).map(String).includes(id) ||
+    (sim.exSpouseIds||[]).map(String).includes(id) ||
+    (sim.gameData?.deceasedSpouseIds||[]).map(String).includes(id);
+  if(hasPartner(first,b)||hasPartner(second,a))return null;
+  const known=(genealogyData.links||[]).find(link=>
+    link&&!isSiblingLink(link) &&
+    ((String(link.from)===a&&String(link.to)===b)||
+     (String(link.from)===b&&String(link.to)===a))
+  );
+  if(known)return known;
+  return inferCoParentRelationshipLinks([group],byId)[0]||null;
+}
+
+// 使用關係線「真正畫出的 SVG 幾何」挑選接合點，不畫第二條伴侶線。
+function genealogyCoParentRelationshipJunction(group,pos,byId,link) {
+  const a=pos.get(String(link.from)),b=pos.get(String(link.to));
+  if(!a||!b)return null;
+  const setting=getOtherRelationshipLineSetting(relationshipOtherType(link));
+  const context={pos,byId,fromId:link.from,toId:link.to};
+  const geometry=relationshipOtherRenderGeometry(a,b,setting,context);
+  const positions=group.children.map(id=>pos.get(id)).filter(Boolean);
+  if(!positions.length)return null;
+  const childAnchors=positions.map(card=>cardVerticalAnchor(card,'top'));
+  const start=avatarBoundaryAnchor(a,b),end=avatarBoundaryAnchor(b,a);
+  const centerX=(start.x+end.x)/2;
+  const childCenter=(Math.min(...childAnchors.map(p=>p.x))+
+    Math.max(...childAnchors.map(p=>p.x)))/2;
+  const childTop=Math.min(...childAnchors.map(p=>p.y));
+  const samples=[];
+  if(geometry.segments?.length){
+    geometry.segments.forEach((segment,index)=>{
+      for(let step=1;step<30;step++){
+        const point=relationshipCubicAt(segment,step/30);
+        samples.push({...point});
+      }
+    });
+  }else if(geometry.points?.length>1){
+    for(let i=1;i<geometry.points.length;i++){
+      const first=geometry.points[i-1],second=geometry.points[i];
+      for(let step=1;step<30;step++){
+        const t=step/30;
+        samples.push({x:first.x+(second.x-first.x)*t,
+          y:first.y+(second.y-first.y)*t});
+      }
+    }
+  }
+  if(!samples.length)return null;
+  const obstacles=[];
+  pos.forEach((card,id)=>{
+    if(group.children.includes(String(id)))return;
+    obstacles.push(cardOuterRect(card));
+  });
+  // 優先不穿卡片，並盡量靠近目前子女群的中心。
+  const feasible=samples.filter(p=>p.y<childTop-12&&
+    !obstacles.some(rect=>relationshipSegmentIntersectsRect(
+      p.x,p.y,p.x,childTop,rect,5
+    )));
+  const choices=feasible.length?feasible:samples;
+  choices.sort((left,right)=>
+    Math.abs(left.x-centerX)-Math.abs(right.x-centerX) ||
+    Math.abs(left.x-childCenter)-Math.abs(right.x-childCenter) ||
+    right.y-left.y
+  );
+  const point=choices[0];
+  return {x:point.x,y:point.y};
+}
+
+
 function parentConnectorSource(
   group,
   pos,
@@ -6170,53 +7810,29 @@ function parentConnectorSource(
   const firstSim = first.sim;
   const secondId = second.id;
 
-  const pairLink =
-    (genealogyData.links || [])
-      .find(link =>
-        link &&
-        !isSiblingLink(link) &&
-        (
-          (
-            String(link.from) ===
-              String(first.id) &&
-            String(link.to) ===
-              String(second.id)
-          ) ||
-          (
-            String(link.from) ===
-              String(second.id) &&
-            String(link.to) ===
-              String(first.id)
-          )
-        ) &&
-        relationshipLayoutPriority(
-          relationshipOtherType(
-            link
-          )
-        ) > 0
-      );
+  // 雙向辨識配偶／前任／已故配偶。EA 資料偶爾只保留單側關係，
+  // 不能因為 parentIds 字串排序不同，就把另一側的連線誤判為情人。
+  const recordedPartnerBy = (sim,otherId) =>
+    (sim.spouseIds || []).map(String).includes(String(otherId)) ||
+    (sim.exSpouseIds || []).map(String).includes(String(otherId)) ||
+    (sim.gameData?.deceasedSpouseIds || []).map(String).includes(String(otherId));
 
-  const hasVisibleHorizontalRelation =
-    (firstSim.spouseIds || [])
-      .map(String)
-      .includes(String(secondId)) ||
-    (firstSim.exSpouseIds || [])
-      .map(String)
-      .includes(String(secondId)) ||
-    (firstSim.gameData?.deceasedSpouseIds || [])
-      .map(String)
-      .includes(String(secondId)) ||
-    !!pairLink;
+  // ========【共同父母共享連接點】 情人與配偶一樣從現有關係線接出子女 ========
+  const recordedPartner = recordedPartnerBy(firstSim,secondId) ||
+    recordedPartnerBy(second.sim,first.id);
 
-  if (hasVisibleHorizontalRelation) {
-    // 只要兩位共同父母之間存在配偶型橫向關係，
-    // 子女幹線就固定從該 H / H-V-H 關係線的中點延伸。
-    // 玩家拖動其中一方時，配偶線與親子線共用同一個 union anchor，
-    // 不再因高度差或碰到其他卡片而退回另一套底部橋接幾何。
-    return pairJoinPoint(
-      first.pos,
-      second.pos
+  if(recordedPartner){
+    return pairJoinPoint(first.pos,second.pos);
+  }
+
+  // 這個共同父母群的關係線已經存在於畫布；從線上取點，
+  // 絕不可另外補上「父母下方的兩段橫線」。
+  const relation=genealogyNonSpousalCoParentLink(group,byId);
+  if(relation){
+    const junction=genealogyCoParentRelationshipJunction(
+      group,pos,byId,relation
     );
+    if(junction)return junction;
   }
 
   // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
@@ -6551,6 +8167,7 @@ function paintRelationshipLayer({
   includeLabels = true
 } = {}) {
   if (!layoutCache) return;
+  defaultOtherCurveCache.clear();
 
   const {
     pos,
@@ -7078,7 +8695,13 @@ function paintRelationshipLayer({
       });
   });
 
-  (genealogyData.links || [])
+  // 衍生關係只參與畫布繪製與即時拖曳，不持久化，也不改寫已知標籤。
+  const drawnOtherLinks = [
+    ...(genealogyData.links || []),
+    ...inferCoParentRelationshipLinks(topology.parentGroups, byId)
+  ];
+
+  drawnOtherLinks
     .forEach(link => {
       if (
         !visibleIds.has(
@@ -8013,7 +9636,6 @@ function paintPersonLayer() {
     if (cardSettings.residence && c.residence) editRows.push(`<div class="person-card-residence" title="${esc(dResidence)}">${iconSvg('house')}${esc(dResidence)}</div>`);
     if (cardSettings.aspiration && c.aspiration) editRows.push(`<div class="person-card-aspiration" title="${esc(uiText('人生抱負'))}：${esc(dAspiration)}">${iconSvg('bullseye')}${esc(dAspiration)}</div>`);
     if (cardSettings.traits && dTraits.length) editRows.push(`<div class="person-card-tags">${renderTraitTagSummary(c.traits, c)}</div>`);
-    if (cardSettings.pets && (c.pets||[]).length) editRows.push(`<div class="person-card-pets">${renderPetChipSummary(c.pets, c)}</div>`);
     if (cardSettings.gallery && (c.gallery||[]).length) editRows.push(`<div class="person-card-life-photo-badge" title="${esc(uiText('人生照片'))} ${(c.gallery||[]).length}">${iconSvg('images')} ${(c.gallery||[]).length}</div>`);
 
     const configuredEditBody = cardSettingsHasBody(cardSettings);
@@ -8049,6 +9671,7 @@ function paintPersonLayer() {
   }
 
   syncNodeSelectionClasses();
+  paintPetLayer();
 }
 
 
@@ -8057,7 +9680,8 @@ function getVisibleTreeContentBounds() {
   if (
     !layoutCache ||
     !layoutCache.pos ||
-    !layoutCache.pos.size
+    !layoutCache.pos.size &&
+    !layoutCache.petLayout?.cards?.length
   ) {
     return null;
   }
@@ -8081,6 +9705,12 @@ function getVisibleTreeContentBounds() {
     top = Math.min(top, y);
     right = Math.max(right, x + dims.W);
     bottom = Math.max(bottom, y + dims.H);
+  });
+  layoutCache.petLayout?.cards?.forEach(card => {
+    left = Math.min(left,card.x+PAD);
+    top = Math.min(top,card.y+PAD);
+    right = Math.max(right,card.x+PAD+card.width);
+    bottom = Math.max(bottom,card.y+PAD+card.height);
   });
 
   if (
@@ -8475,6 +10105,9 @@ function resizeStageToContent() {
       );
   });
 
+  layoutCache.petLayout = buildPetCardLayout(fam,layoutCache.visibleIds,layoutCache.pos,{width:maxX,height:maxY});
+  maxX = Math.max(maxX,layoutCache.petLayout.width);
+  maxY = Math.max(maxY,layoutCache.petLayout.height);
   layoutCache.width =
     maxX;
 
@@ -8490,6 +10123,7 @@ function resizeStageToContent() {
   }
 
   syncStageGeometryFromLayout();
+  paintPetLayer();
 
   // 拖曳結束後做一次 authoritative full redraw；拖曳幀內只更新受影響線條。
   requestRelationshipLayerUpdate();
@@ -8523,6 +10157,7 @@ function resizeStageToContent() {
     function withState(fn) { return function () { syncState(); return fn.apply(null, arguments); }; }
     return Object.freeze({
       requestUpdate:requestSceneUpdate,
+      recommendedOtherCurveAmount:withState(recommendOtherRelationshipCurveAmount),
       renderImmediately:renderSceneImmediately,
       requestRelationshipUpdate:requestRelationshipLayerUpdate,
       requestRelationshipPreviewUpdate,

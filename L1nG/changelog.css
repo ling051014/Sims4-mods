@@ -743,3 +743,9 @@ html[data-language="en"] [data-lang="zh-Hant"] {
         padding-right: 18px;
     }
 }
+
+/* ========【共用捲軸】 A 款細線 - 所有可捲動容器 ======== */
+html,body,body *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{width:6px;height:6px}
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,body *::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}

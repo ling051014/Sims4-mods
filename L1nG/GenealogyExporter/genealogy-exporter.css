@@ -432,9 +432,9 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     width:116px;
     height:77px;
     padding:19px 12px 10px;
-    border:1px solid #b7d9f1;
-    border-radius:8px;
-    background:#f1f9fe;
+    border:1px solid transparent;
+    border-radius:0;
+    background:url("../icons/genealogy-zip-folder.svg?v=20261011-zip-folder-approved-v4-r1") center / 116px 77px no-repeat;
     color:var(--accent-dark);
     display:grid;
     place-items:center;
@@ -457,19 +457,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     font-weight:800;
 }
 
-.bridge-file strong { font-size:18px; letter-spacing:2px; }
-.bridge-file small { color:#718798; font-size:8.5px; }
-.file-fold {
-    position:absolute;
-    top:-1px;
-    right:-1px;
-    width:22px;
-    height:17px;
-    border-left:1px solid #b7d9f1;
-    border-bottom:1px solid #b7d9f1;
-    background:#fff;
-    clip-path:polygon(0 0,100% 100%,0 100%);
-}
+.bridge-file strong { font-size:18px; letter-spacing:2px; transform:translateY(5px); }
+.bridge-file small { color:#718798; font-size:8.5px; transform:translateY(3px); }
 
 .trust-strip {
     border-top:1px solid var(--line-soft);
@@ -520,6 +509,9 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     padding:100px 0 0;
 }
 
+/* 最後一個內容區與頁腳保持完整留白，不需要額外插入空白區塊。 */
+#status { padding-bottom:clamp(78px, 8vw, 112px); }
+
 .section-heading {
     max-width:790px;
     margin-bottom:38px;
@@ -545,8 +537,15 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
 .feature-grid {
     display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(6,minmax(0,1fr));
     gap:14px;
+}
+
+/* 電腦版每排三張同寬卡片，最後兩張研究中卡片置中排列。 */
+@media (min-width:981px) {
+    .feature-card { grid-column:span 2; }
+    .feature-card:nth-child(7) { grid-column:2 / span 2; }
+    .feature-card:nth-child(8) { grid-column:4 / span 2; }
 }
 
 .feature-card {
@@ -615,6 +614,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     font-weight:700;
 }
 
+.feature-card-accent .feature-state { background:#edf6f0; color:#4f8063; }
+
 .workflow-section { padding-top:118px; }
 
 .workflow-list {
@@ -626,7 +627,7 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     padding:27px 0;
     border-bottom:1px solid var(--line);
     display:grid;
-    grid-template-columns:72px minmax(0,1fr) minmax(170px,auto);
+    grid-template-columns:72px minmax(0,1fr) 218px;
     gap:24px;
     align-items:center;
 }
@@ -658,12 +659,43 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     font-size:11.5px;
 }
 
-.workflow-step > code {
-    padding:10px 12px;
-    border:1px solid #d6e6f1;
-    border-radius:8px;
-    background:#f3f9fd;
-    text-align:center;
+/* 沿用原本指令框的底色和邊框，文字與 SVG 直接並排，沒有左側空白佔位。 */
+.workflow-step > .command-copy {
+    display:inline-flex; align-items:center; justify-content:center; gap:12px;
+    width:218px; min-width:0; max-width:100%; padding:10px 12px;
+    justify-self:center;
+    border:1px solid #d6e6f1; border-radius:8px;
+    background:#f3f9fd; color:var(--accent-dark);
+    font:inherit; text-align:center; cursor:pointer;
+}
+.workflow-step > .command-copy:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.command-copy code { color:inherit; font-size:11.5px; }
+.command-copy-feedback { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+/* SVG 筆劃動畫：複製輪廓收回、勾號寫出、停留後依路徑復原。 */
+.l1ng-copy-glyph { display:block; width:20px; height:20px; flex:0 0 20px; overflow:visible; }
+.l1ng-copy-stroke, .l1ng-check-stroke { fill:none; stroke-width:1.85; stroke-linecap:round; stroke-linejoin:round; }
+.l1ng-copy-stroke { stroke:currentColor; stroke-dashoffset:0; }
+.l1ng-check-stroke { stroke:#5d9876; stroke-dashoffset:var(--stroke-hide); stroke-width:2.2; }
+.l1ng-copy-running .l1ng-copy-stroke { animation:l1ngTraceCopy 3.8s linear both; }
+.l1ng-copy-running .l1ng-check-stroke { animation:l1ngTraceCheck 3.8s linear both; }
+@keyframes l1ngTraceCopy {
+  0%,8% { stroke-dashoffset:0; }
+  8.01% { stroke-dashoffset:0; animation-timing-function:cubic-bezier(.4,0,.8,.7); }
+  23%,76% { stroke-dashoffset:var(--stroke-hide); }
+  76.01% { stroke-dashoffset:var(--stroke-hide); animation-timing-function:cubic-bezier(.2,.3,.2,1); }
+  91%,100% { stroke-dashoffset:0; }
+}
+@keyframes l1ngTraceCheck {
+  0%,22% { stroke-dashoffset:var(--stroke-hide); }
+  22.01% { stroke-dashoffset:var(--stroke-hide); animation-timing-function:cubic-bezier(.25,.35,.3,1); }
+  37%,67% { stroke-dashoffset:0; }
+  67.01% { stroke-dashoffset:0; animation-timing-function:cubic-bezier(.5,.05,.8,.7); }
+  82%,100% { stroke-dashoffset:var(--stroke-hide); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .l1ng-copy-running .l1ng-copy-stroke, .l1ng-copy-running .l1ng-check-stroke { animation:none; }
+  .l1ng-copy-running .l1ng-copy-stroke { stroke-dashoffset:var(--stroke-hide); }
+  .l1ng-copy-running .l1ng-check-stroke { stroke-dashoffset:0; }
 }
 
 .inline-link,
@@ -676,6 +708,17 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
 .inline-link:hover,
 .text-link:hover { color:var(--accent-hover); }
+
+/* 第四步的網站入口與安裝檔、指令框共用相同的右欄中心線。 */
+.workflow-step > .inline-link {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    justify-self:center;
+    width:218px;
+    max-width:100%;
+    text-align:center;
+}
 
 .path-card {
     margin-top:28px;
@@ -765,12 +808,13 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
 .status-grid {
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(3,minmax(0,1fr));
     gap:14px;
+    align-items:stretch;
 }
 
 .status-column {
-    min-height:310px;
+    min-height:0;
     padding:25px 26px;
     border:1px solid var(--line);
     border-radius:var(--radius-md);
@@ -1016,12 +1060,14 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
         grid-template-columns:1fr;
     }
 
+    .status-grid { align-items:start; }
+
     .workflow-step {
         grid-template-columns:44px 1fr;
         gap:16px;
     }
 
-    .workflow-step > code,
+    .workflow-step > .command-copy,
     .workflow-step > .inline-link {
         grid-column:2;
         justify-self:start;
@@ -1063,7 +1109,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
     .hero-meta {
         display:grid;
-        grid-template-columns:1fr 1fr;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        column-gap:12px;
     }
 
     .bridge-visual {
@@ -1083,3 +1130,84 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
     .release-section { padding:86px 0 72px; }
 }
+
+/* ========【中文標題單行優化】 不修改卡片結構；桌面保留單行，窄畫面自然換行 ======== */
+.section-heading { max-width:none; }
+.section-heading > p { max-width:790px; }
+@media (min-width:981px) {
+    .section-heading h2[data-lang="zh-Hant"],
+    .data-copy h2[data-lang="zh-Hant"],
+    .release-card h2[data-lang="zh-Hant"],
+    .hero-lead[data-lang="zh-Hant"] { white-space:nowrap; }
+    .data-copy h2[data-lang="zh-Hant"] { font-size:clamp(29px,2.65vw,38px); letter-spacing:-.04em; }
+}
+@media (max-width:980px) {
+    .section-heading h2[data-lang="zh-Hant"],
+    .data-copy h2[data-lang="zh-Hant"],
+    .release-card h2[data-lang="zh-Hant"],
+    .hero-lead[data-lang="zh-Hant"] { white-space:normal; overflow-wrap:normal; }
+}
+
+
+/* 安裝步驟右側直接提供下載：沿用四步驟既有的三欄網格。 */
+.workflow-step > .workflow-install-download {
+    grid-column:3;
+    justify-self:center;
+    width:218px;
+    max-width:100%;
+    display:grid;
+    gap:9px;
+}
+.workflow-install-download-meta {
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    color:var(--ink);
+}
+.workflow-install-download-meta strong { font-size:13px; font-weight:750; white-space:nowrap; }
+.workflow-install-download-meta small { font-size:10.5px; color:var(--sub); white-space:nowrap; }
+.workflow-install-download-action {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    min-height:39px;
+    padding:9px 13px;
+    border:1px solid var(--accent-dark);
+    border-radius:8px;
+    background:var(--accent-dark);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    line-height:1.3;
+    text-decoration:none;
+    transition:box-shadow .18s ease, background-color .12s ease;
+}
+/* 滑鼠停在按鈕上時不持續改色，避免下載後誤以為按鈕停留在按下狀態。 */
+.workflow-install-download-action:hover { box-shadow:0 3px 12px rgba(49,95,131,.18); }
+.workflow-install-download-action:active { background:var(--accent-hover); }
+.workflow-install-download-action:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.workflow-install-download-action svg { flex:0 0 17px; }
+@media (max-width:760px) {
+    .workflow-step > .workflow-install-download {
+        grid-column:2;
+        justify-self:start;
+        width:218px;
+        max-width:100%;
+    }
+}
+@media (prefers-reduced-motion:reduce) {
+    .workflow-install-download-action { transition:none; }
+}
+
+/* 安裝檔尚未發布：保留版面，不提供失效或測試版下載。 */
+.workflow-install-download-action:disabled { font-family:inherit; cursor:not-allowed; opacity:.58; box-shadow:none; }
+.workflow-install-download-action:disabled:hover,
+.workflow-install-download-action:disabled:active { background:var(--accent-dark); box-shadow:none; }
+
+/* ========【共用捲軸】 A 款細線 - 所有可捲動容器 ======== */
+html,body,body *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{width:6px;height:6px}
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,body *::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}

@@ -3,15 +3,25 @@
 
   // ========【圖片資產儲存】 設定 - Blob 為唯一圖片本體；SHA-256 作為資產識別 ========
   const DB_NAME = 'l1ng_genealogy_assets_v1';
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const STORE_NAME = 'assets';
+  const WORKSPACE_STORE_NAME = 'workspace';
   const ASSET_PREFIX = 'asset_';
   const URL_CACHE_LIMIT = 256;
+  // ========【圖片處理規則】 設定 - 依用途自動最佳化，不提供玩家畫質檔位 ========
+  const IMAGE_PROCESSING_POLICY = Object.freeze({
+    avatar:Object.freeze({ max:384, webp:0.87, jpeg:0.84 }),
+    petAvatar:Object.freeze({ max:384, webp:0.87, jpeg:0.84 }),
+    gallery:Object.freeze({ max:720, webp:0.85, jpeg:0.82 })
+  });
+  const BG_MAX = 1920;
+  const BG_QUALITY = 0.72;
 
   let dbPromise = null;
   let dbConnection = null;
   const objectUrlCache = new Map();
   const pendingUrlLoads = new Map();
+  let urlCachePruneQueued = false;
 
   // ========【圖片處理佇列】 設定 - 同時間只處理一張大圖，避免 CPU / RAM 峰值 ========
   const IMAGE_WORKER_URL =
@@ -215,6 +225,9 @@
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id' });
         }
+        if (!db.objectStoreNames.contains(WORKSPACE_STORE_NAME)) {
+          db.createObjectStore(WORKSPACE_STORE_NAME);
+        }
       };
 
       request.onsuccess = event => {
@@ -249,6 +262,28 @@
     });
 
     return dbPromise;
+  }
+
+  // ========【大型族譜資料】設定 - localStorage 容量不足時，與圖片共用持久化資料庫 ========
+  async function saveWorkspaceData(serialized) {
+    const db = await openDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(WORKSPACE_STORE_NAME, 'readwrite');
+      tx.objectStore(WORKSPACE_STORE_NAME).put(String(serialized), 'current');
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('族譜資料儲存失敗。'));
+      tx.onabort = () => reject(tx.error || new Error('族譜資料儲存已取消。'));
+    });
+  }
+
+  async function loadWorkspaceData() {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(WORKSPACE_STORE_NAME, 'readonly');
+      const request = tx.objectStore(WORKSPACE_STORE_NAME).get('current');
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('族譜資料讀取失敗。'));
+    });
   }
 
   async function getRecord(id) {
@@ -291,11 +326,25 @@
     const url = URL.createObjectURL(blob);
     objectUrlCache.set(id, url);
 
-    while (objectUrlCache.size > URL_CACHE_LIMIT) {
-      const oldest = objectUrlCache.entries().next().value;
-      if (!oldest) break;
-      URL.revokeObjectURL(oldest[1]);
-      objectUrlCache.delete(oldest[0]);
+    // 批次收斂快取；不能回收目前仍由人物卡、寵物卡、相簿或背景使用的網址。
+    if (objectUrlCache.size > URL_CACHE_LIMIT && !urlCachePruneQueued) {
+      urlCachePruneQueued = true;
+      requestAnimationFrame(() => {
+        urlCachePruneQueued = false;
+        if (objectUrlCache.size <= URL_CACHE_LIMIT) return;
+
+        const pinnedIds = new Set();
+        document.querySelectorAll('[data-asset-id], [data-asset-bg-id]').forEach(element => {
+          if (isAssetId(element.dataset.assetId)) pinnedIds.add(element.dataset.assetId);
+          if (isAssetId(element.dataset.assetBgId)) pinnedIds.add(element.dataset.assetBgId);
+        });
+        for (const [assetId, assetUrl] of objectUrlCache) {
+          if (objectUrlCache.size <= URL_CACHE_LIMIT) break;
+          if (pinnedIds.has(assetId)) continue;
+          URL.revokeObjectURL(assetUrl);
+          objectUrlCache.delete(assetId);
+        }
+      });
     }
 
     return url;
@@ -572,6 +621,27 @@
     );
   }
 
+  // ========【依圖片用途最佳化】共用 Worker／主執行緒備援與原本品質參數 ========
+  async function optimizeForUsage(blob, usage = 'avatar') {
+    const policy = usage === 'background'
+      ? { max:BG_MAX, webp:BG_QUALITY, jpeg:BG_QUALITY }
+      : IMAGE_PROCESSING_POLICY[usage] || IMAGE_PROCESSING_POLICY.avatar;
+    const result = await optimizeImage(blob, {
+      maxDimension:policy.max,
+      webpQuality:policy.webp,
+      jpegQuality:policy.jpeg,
+      preserveAlpha:'auto',
+      ...(usage === 'gallery' ? { keepOriginal:false } : {})
+    });
+    return {
+      blob:result.blob,
+      width:result.width,
+      height:result.height,
+      sizeKB:Math.round(result.byteSize / 1024),
+      isOriginal:result.usedOriginal
+    };
+  }
+
   async function importBlob(blob, metadata = {}) {
     if (!(blob instanceof Blob)) throw new TypeError('圖片資產必須以 Blob 儲存。');
 
@@ -637,6 +707,60 @@
     });
   }
 
+  function collectReferencedAssetIds(targetDb, targetBg, { strict = false } = {}) {
+    const used = new Set();
+
+    const add = (ref, label) => {
+      if (!ref) return;
+      if (isAssetId(ref)) {
+        used.add(ref);
+        return;
+      }
+      if (strict) {
+        throw new Error(`${label || '圖片'}使用了目前不支援的舊圖片格式。`);
+      }
+    };
+
+    Object.values(targetDb?.sims || {}).forEach(sim => {
+      add(sim.avatar, '人物目前頭像');
+      add(sim.gameAvatar, '人物遊戲頭像');
+      add(sim.customAvatar, '人物自訂頭像');
+      (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
+      (sim.pets || []).forEach(pet => add(pet.avatar, '寵物頭像'));
+    });
+
+    (targetDb?.families || []).forEach(fam => add(fam.coverImage, '家族封面'));
+    (targetDb?.meta?.unassignedPets || []).forEach(pet => add(pet.avatar, '未分配寵物頭像'));
+    add(targetBg?.image, '背景圖片');
+
+    return used;
+  }
+
+  function clearUnsupportedImageRefs(targetDb, targetBg) {
+    let cleared = 0;
+
+    const clean = (obj, key, emptyValue = null) => {
+      if (!obj || !obj[key] || isAssetId(obj[key])) return;
+      obj[key] = emptyValue;
+      cleared++;
+    };
+
+    Object.values(targetDb?.sims || {}).forEach(sim => {
+      clean(sim, 'avatar', null);
+      clean(sim, 'gameAvatar', null);
+      clean(sim, 'customAvatar', null);
+      (sim.gallery || []).forEach(item => clean(item, 'image', ''));
+      (sim.pets || []).forEach(pet => clean(pet, 'avatar', null));
+    });
+
+    (targetDb?.families || []).forEach(fam => clean(fam, 'coverImage', null));
+    (targetDb?.meta?.unassignedPets || []).forEach(pet => clean(pet, 'avatar', null));
+    clean(targetBg, 'image', null);
+
+    return cleared;
+  }
+
+
   async function garbageCollect(usedIds) {
     const used = usedIds instanceof Set ? usedIds : new Set(usedIds || []);
     const db = await openDb();
@@ -664,6 +788,28 @@
     }
 
     return orphanIds.length;
+  }
+
+  // ========【圖片清理】延遲清理只在執行當下讀取最新引用，避免誤刪 ========
+  async function cleanupUnusedAssets(database, background) {
+    const used = collectReferencedAssetIds(database, background);
+    const removed = await garbageCollect(used);
+    if (removed) console.log(`[GC] 清理了 ${removed} 張未使用的圖片資產`);
+    return removed;
+  }
+
+  let gcTimer = null;
+  function scheduleGarbageCollect(getCurrentReferences, { delay = 5000 } = {}) {
+    if (gcTimer) return;
+    gcTimer = setTimeout(async () => {
+      gcTimer = null;
+      try {
+        const refs = typeof getCurrentReferences === 'function' ? getCurrentReferences() : null;
+        if (refs?.database) await cleanupUnusedAssets(refs.database, refs.background);
+      } catch (error) {
+        console.warn('[GC] 清理未使用圖片失敗：', error);
+      }
+    }, delay);
   }
 
   async function blobToBase64(blob) {
@@ -760,6 +906,7 @@
   }
 
   function dispose() {
+    if (gcTimer) { clearTimeout(gcTimer); gcTimer = null; }
     for (const id of [...objectUrlCache.keys()]) {
       revokeCachedUrl(id);
     }
@@ -797,8 +944,15 @@
 
   global.L1nGGenealogyAssets = {
     openDb,
+    saveWorkspaceData,
+    loadWorkspaceData,
     isAssetId,
     optimizeImage,
+    optimizeForUsage,
+    collectReferencedAssetIds,
+    clearUnsupportedImageRefs,
+    cleanupUnusedAssets,
+    scheduleGarbageCollect,
     importBlob,
     getUrl,
     preloadUrls,

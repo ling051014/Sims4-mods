@@ -537,12 +537,8 @@ function syncPersonEditorPreferenceTabs(sim){
       '.sim-editor-panel[data-editor-panel="attraction"]'
     );
 
-  const hasRegularData=
-    !!sim &&
-    (
-      data.likesDislikes.length > 0 ||
-      data.availability === 'available'
-    );
+  // 喜好與厭惡是固定資訊分頁；沒有資料時顯示既有空狀態，而非藏掉整頁。
+  const hasRegularData = !!sim;
 
   const hasAttractionData=
     !!sim &&
@@ -1372,6 +1368,26 @@ function buildPersonEditorDraft({
     }
   }
 
+  function appendDerivedStepFamilyRows() {
+    const subjectId = String(simEditorState.simId || '');
+    if (!subjectId) return;
+    const relatives = resolveDirectFamilyRelationships(subjectId);
+    const parentTarget = $('editorParentsPreview');
+    const childTarget = $('editorChildrenPreview');
+    const append = (target,relations) => {
+      if (!target || !relations?.length) return;
+      const markup = relations.map(relation => {
+        return '<div class="family-rel-preview-row">' +
+          relationPersonMarkup(relation.target,relation.label) +
+          '</div>';
+      }).join('');
+      if (target.querySelector('.family-rel-empty')) target.innerHTML = '';
+      target.insertAdjacentHTML('beforeend',markup);
+    };
+    append(parentTarget,relatives.stepParents);
+    append(childTarget,relatives.stepChildren);
+  }
+
   function renderPersonEditorFamilyPreviews(){
     const familyTarget=$('editorFamilyMembershipPreview');
 
@@ -1453,6 +1469,8 @@ function buildPersonEditorDraft({
       relationshipDraft
     );
 
+    appendDerivedStepFamilyRows();
+
     renderEditorRelationPeople(
       'editorSiblingsPreview',
       editorSiblingIds(),
@@ -1511,6 +1529,12 @@ function buildPersonEditorDraft({
         sim
       );
     });
+
+    const derived = resolveDirectFamilyRelationships(
+      simEditorState.simId || draft.id
+    );
+    [...(derived.stepParents || []),...(derived.stepChildren || [])]
+      .forEach(relation => add(relation.label,relation.target));
 
     editorSiblingIds().forEach(id=>{
       const sim=currentGenealogyData().sims[id];
