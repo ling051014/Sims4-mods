@@ -6,7 +6,7 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261010-gender-card-svg-fix-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261011-controls-verified-r2">
+        <link rel="stylesheet" href="genealogy.css?v=20261012-floating-picker-r1">
     </head>
     <body data-theme="ling">
 
@@ -848,9 +848,9 @@
                     <div class="appearance-custom-theme" id="appearanceCustomThemeEditor" hidden>
                         <div class="appearance-custom-theme-title">自訂配色</div>
                         <div class="appearance-custom-theme-row">
-                            <label><span>主色</span><input class="custom-color-input" id="customColor1" type="color"></label>
-                            <label><span>輔色</span><input class="custom-color-input" id="customColor2" type="color"></label>
-                            <label><span>強調色</span><input class="custom-color-input" id="customColor3" type="color"></label>
+                            <label><span>主色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customColor1" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customColor1" aria-label="主色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
+                            <label><span>輔色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customColor2" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customColor2" aria-label="輔色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
+                            <label><span>強調色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customColor3" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customColor3" aria-label="強調色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
                         </div>
                         <div class="appearance-custom-theme-preview" id="appearanceCustomThemePreview"></div>
                         <div class="appearance-custom-theme-actions"><button class="apply-btn" id="applyCustomBtn" type="button">套用自訂配色</button></div>
@@ -920,7 +920,7 @@
                             <div class="relationship-editor-fields">
                                 <label><span>樣式</span><select id="relationshipEditorStyle"><option value="solid">實線</option><option value="short-dash">短虛線</option><option value="long-dash">長虛線</option><option value="dot">點線</option></select></label>
                                 <label><span>粗細</span><div class="relationship-editor-range"><input id="relationshipEditorWidth" type="range" min="1" max="4" step="0.1"><output id="relationshipEditorWidthValue"></output></div></label>
-                                <label class="relationship-editor-color"><span>顏色</span><input id="relationshipEditorColor" type="color"></label>
+                                <label class="relationship-editor-color"><span>顏色</span><span class="l1ng-color-picker-trigger"><input id="relationshipEditorColor" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="relationshipEditorColor" aria-label="關係線顏色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
                             </div>
 
                             <div class="relationship-feature-row" id="relationshipFeatureRow" hidden>
@@ -1227,5 +1227,6 @@
   <script src="genealogy_sample_portraits.js?v=20261011-portrait-files-r1"></script>
 
 <script src="genealogy_app.js?v=20261011-unified-sliders-r1"></script>
+    <script src="genealogy_colorPicker.js?v=20261012-floating-picker-r1"></script>
     </body>
 </html>
