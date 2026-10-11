@@ -9001,11 +9001,95 @@ button.danger-action:focus-visible {
 .l1ng-search-clear[hidden] {display:none}
 @media(pointer:coarse){.l1ng-search-clear{width:40px;height:40px;right:0}.l1ng-search-control > input{padding-right:43px}}
 
-/* ========【捲軸】 設定 - A 款細線，iOS 繼續使用系統慣性捲動 ======== */
-@media(hover:hover) and (pointer:fine) {
-    .app {scrollbar-width:thin;scrollbar-color:var(--border-default) transparent}
-    .app * {scrollbar-width:thin;scrollbar-color:var(--border-default) transparent}
-    .app *::-webkit-scrollbar {width:6px;height:6px}
-    .app *::-webkit-scrollbar-track {background:transparent}
-    .app *::-webkit-scrollbar-thumb {background:var(--border-default);border-radius:999px}
+/* ========【捲軸】 設定 - A 款細線，涵蓋畫布側欄與所有彈窗捲動區 ======== */
+/* 直接指定全體捲動容器，避免先前僅限 .app／滑鼠裝置而漏掉手機與浮動面板。 */
+html, body, body * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-default) transparent;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, body *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track, body *::-webkit-scrollbar-track {
+    background: transparent;
+}
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, body *::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 999px;
+}
+/* 刻意隱藏的編輯分頁橫向捲軸仍維持隱藏。 */
+.sim-editor-tabs { scrollbar-width: none; }
+.sim-editor-tabs::-webkit-scrollbar { display: none; }
+
+/* ========【其他關係搜尋】 設定 - 修正插入搜尋 SVG 後搜尋列被 flex 撐高的問題 ======== */
+.relationship-type-menu > .l1ng-search-control {
+    flex: 0 0 auto;
+    display: block;
+    align-self: stretch;
+    width: calc(100% - 12px);
+    min-width: 0;
+    margin: 6px;
+    color: var(--nav-dropdown-text);
+}
+.relationship-type-menu > .l1ng-search-control > .relationship-type-search {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 7px 43px 7px 33px;
+    box-sizing: border-box;
+}
+.relationship-type-menu > .l1ng-search-control::before {
+    left: 11px;
+    top: 50%;
+}
+.ui-select-dropdown > .l1ng-search-control {
+    flex: 0 0 auto;
+    min-height: 0;
+    color: var(--nav-dropdown-text);
+}
+.l1ng-search-control > .ui-select-search {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (pointer:coarse) {
+    .relationship-type-menu > .l1ng-search-control > .relationship-type-search {
+        padding-right: 45px;
+    }
+}
+
+/* ========【顏色選擇器色塊】 設定 - 僅統一色塊外觀，保留原生選色功能 ======== */
+.custom-color-input,
+.relationship-editor-color input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 44px;
+    height: 32px;
+    padding: 3px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-input);
+    cursor: pointer;
+    overflow: hidden;
+}
+.custom-color-input::-webkit-color-swatch-wrapper,
+.relationship-editor-color input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.custom-color-input::-webkit-color-swatch,
+.relationship-editor-color input[type="color"]::-webkit-color-swatch {
+    border: 0;
+    border-radius: 5px;
+}
+.custom-color-input::-moz-color-swatch,
+.relationship-editor-color input[type="color"]::-moz-color-swatch {
+    border: 0;
+    border-radius: 5px;
+}
+.custom-color-input:focus-visible,
+.relationship-editor-color input[type="color"]:focus-visible {
+    outline: 2px solid var(--action-primary);
+    outline-offset: 2px;
 }
