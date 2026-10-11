@@ -432,9 +432,9 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     width:116px;
     height:77px;
     padding:19px 12px 10px;
-    border:1px solid #b7d9f1;
-    border-radius:8px;
-    background:#f1f9fe;
+    border:1px solid transparent;
+    border-radius:0;
+    background:url("../icons/genealogy-zip-folder.svg?v=20261011-zip-folder-approved-v4-r1") center / 116px 77px no-repeat;
     color:var(--accent-dark);
     display:grid;
     place-items:center;
@@ -457,19 +457,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     font-weight:800;
 }
 
-.bridge-file strong { font-size:18px; letter-spacing:2px; }
-.bridge-file small { color:#718798; font-size:8.5px; }
-.file-fold {
-    position:absolute;
-    top:-1px;
-    right:-1px;
-    width:22px;
-    height:17px;
-    border-left:1px solid #b7d9f1;
-    border-bottom:1px solid #b7d9f1;
-    background:#fff;
-    clip-path:polygon(0 0,100% 100%,0 100%);
-}
+.bridge-file strong { font-size:18px; letter-spacing:2px; transform:translateY(5px); }
+.bridge-file small { color:#718798; font-size:8.5px; transform:translateY(3px); }
 
 .trust-strip {
     border-top:1px solid var(--line-soft);
