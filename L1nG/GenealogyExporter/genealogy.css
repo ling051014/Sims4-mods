@@ -8959,3 +8959,50 @@ button.danger-action:focus-visible {
 .person-profile-pet-main-avatar .pet-avatar-species-fallback .l1ng-icon { width:48px; height:48px; }
 .genealogy-pet-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
 .person-profile-pet-lineage { display:flex; flex-direction:column; gap:6px; font-size:12px; line-height:1.5; color:var(--text-secondary); }
+
+
+/* ========【統一表單】 設定 - A 款勾選與單選，保留原生語意與鍵盤操作 ======== */
+.export-background-option input[type="radio"],
+.person-card-menu-radio input[type="radio"] {
+    appearance:none;
+    -webkit-appearance:none;
+    flex:0 0 14px;
+    width:14px;
+    height:14px;
+    margin:0;
+    border:1px solid var(--border-default);
+    border-radius:50%;
+    background:var(--surface-input);
+    box-shadow:none;
+}
+.export-background-option input[type="radio"]:checked,
+.person-card-menu-radio input[type="radio"]:checked {
+    border-color:var(--action-primary);
+    background:radial-gradient(circle,var(--action-primary) 0 3.2px,transparent 3.3px);
+}
+.export-background-option input[type="radio"]:focus-visible,
+.person-card-menu-radio input[type="radio"]:focus-visible {
+    outline:2px solid var(--action-primary);
+    outline-offset:2px;
+}
+
+/* ========【搜尋欄】 設定 - 共用搜尋 SVG 與清除鈕，不更動下拉選單邏輯 ======== */
+.l1ng-search-control {position:relative;min-width:0;flex:1 1 auto}
+.l1ng-search-control > input {width:100%;padding-left:33px;padding-right:34px;box-sizing:border-box}
+.l1ng-search-control::before {content:"";position:absolute;left:11px;top:50%;width:15px;height:15px;transform:translateY(-50%);background:currentColor;opacity:.58;pointer-events:none;-webkit-mask:url("../icons/ui-search.svg") center/contain no-repeat;mask:url("../icons/ui-search.svg") center/contain no-repeat}
+.l1ng-search-control > input::-webkit-search-cancel-button {-webkit-appearance:none;appearance:none;display:none}
+.l1ng-search-clear {position:absolute;right:3px;top:50%;transform:translateY(-50%);width:28px;height:28px;min-height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.l1ng-search-clear::before {content:"";display:block;width:13px;height:13px;background:currentColor;-webkit-mask:url("../icons/ui-clear.svg") center/contain no-repeat;mask:url("../icons/ui-clear.svg") center/contain no-repeat}
+.l1ng-search-clear:hover,.l1ng-search-clear:focus-visible {background:var(--surface-item-hover);color:var(--text-primary)}
+.l1ng-search-clear:focus-visible {outline:2px solid var(--action-primary);outline-offset:1px}
+.l1ng-search-clear[hidden] {display:none}
+@media(pointer:coarse){.l1ng-search-clear{width:40px;height:40px;right:0}.l1ng-search-control > input{padding-right:43px}}
+
+/* ========【捲軸】 設定 - A 款細線，iOS 繼續使用系統慣性捲動 ======== */
+@media(hover:hover) and (pointer:fine) {
+    .app {scrollbar-width:thin;scrollbar-color:var(--border-default) transparent}
+    .app * {scrollbar-width:thin;scrollbar-color:var(--border-default) transparent}
+    .app *::-webkit-scrollbar {width:6px;height:6px}
+    .app *::-webkit-scrollbar-track {background:transparent}
+    .app *::-webkit-scrollbar-thumb {background:var(--border-default);border-radius:999px}
+}
