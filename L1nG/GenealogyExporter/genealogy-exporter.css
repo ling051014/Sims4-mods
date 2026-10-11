@@ -1205,3 +1205,9 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 .workflow-install-download-action:disabled { font-family:inherit; cursor:not-allowed; opacity:.58; box-shadow:none; }
 .workflow-install-download-action:disabled:hover,
 .workflow-install-download-action:disabled:active { background:var(--accent-dark); box-shadow:none; }
+
+/* ========【共用捲軸】 A 款細線 - 所有可捲動容器 ======== */
+html,body,body *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{width:6px;height:6px}
+html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,body *::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
