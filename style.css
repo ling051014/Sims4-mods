@@ -1428,3 +1428,19 @@ th.desc .sort-arrows::after {
         /* 背景顏色 */ background: transparent;
     }
 }
+
+
+/* ========【統一控制項】 設定 - A 款勾選框及桌面細線捲軸 ======== */
+.filter-group input[type="checkbox"] {appearance:none;-webkit-appearance:none;top:0;width:15px;height:15px;flex:0 0 15px;border:1px solid #cbd7e2;border-radius:3px;background:#fff;position:relative;}
+.filter-group input[type="checkbox"]:checked {background:#55acee;border-color:#55acee;}
+.filter-group input[type="checkbox"]:checked::after {content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);}
+.filter-group input[type="checkbox"]:focus-visible {outline:2px solid #55acee;outline-offset:2px;}
+@media(hover:hover) and (pointer:fine){.page-scroll,.search-dropdown,.table-container {scrollbar-width:thin;scrollbar-color:#cad7e2 transparent}.page-scroll::-webkit-scrollbar,.search-dropdown::-webkit-scrollbar,.table-container::-webkit-scrollbar {width:6px;height:6px}.page-scroll::-webkit-scrollbar-thumb,.search-dropdown::-webkit-scrollbar-thumb,.table-container::-webkit-scrollbar-thumb {background:#cad7e2;border-radius:999px}}
+.search-box {color:#6b7986}
+.search-box:before {content:"";position:absolute;left:13px;top:50%;transform:translateY(-50%);height:15px;width:15px;background:currentColor;opacity:.7;pointer-events:none;-webkit-mask:url("L1nG/icons/ui-search.svg") center/contain no-repeat;mask:url("L1nG/icons/ui-search.svg") center/contain no-repeat}
+.search-box #mod-search {padding-left:35px;padding-right:37px}
+.search-box .l1ng-search-clear{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:#768491;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.search-box .l1ng-search-clear:before {content:"";width:13px;height:13px;background:currentColor;-webkit-mask:url("L1nG/icons/ui-clear.svg") center/contain no-repeat;mask:url("L1nG/icons/ui-clear.svg") center/contain no-repeat}
+.search-box .l1ng-search-clear[hidden]{display:none}
+.search-box .l1ng-search-clear:hover,.search-box .l1ng-search-clear:focus-visible{background:#edf4fa;color:#315f83}
+@media(pointer:coarse){.search-box .l1ng-search-clear{height:40px;width:40px;right:0}}
