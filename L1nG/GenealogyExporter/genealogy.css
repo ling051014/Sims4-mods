@@ -5718,7 +5718,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 
 /* 族譜提取器專用：檔案與族譜分支（小尺寸 SVG） */
 .icon-genealogy-extractor {
-    --l1ng-icon: url("../icons/genealogy-extractor.svg");
+    --l1ng-icon: url("../icons/genealogy-extractor.svg?v=20261011-size-r2");
 }
 
 .icon-diagram-3 {
