@@ -8995,6 +8995,9 @@ button.danger-action:focus-visible {
 .l1ng-search-clear::before {content:"";display:block;width:13px;height:13px;background:currentColor;-webkit-mask:url("../icons/ui-clear.svg") center/contain no-repeat;mask:url("../icons/ui-clear.svg") center/contain no-repeat}
 .l1ng-search-clear:hover,.l1ng-search-clear:focus-visible {background:var(--surface-item-hover);color:var(--text-primary)}
 .l1ng-search-clear:focus-visible {outline:2px solid var(--action-primary);outline-offset:1px}
+.l1ng-search-control > .ui-select-search {margin-bottom:0}
+.ui-select-dropdown > .l1ng-search-control {display:block;width:100%;margin-bottom:4px}
+.relationship-type-search + .l1ng-search-clear {z-index:1}
 .l1ng-search-clear[hidden] {display:none}
 @media(pointer:coarse){.l1ng-search-clear{width:40px;height:40px;right:0}.l1ng-search-control > input{padding-right:43px}}
 
