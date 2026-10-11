@@ -11,8 +11,8 @@
     >
     <meta name="theme-color" content="#f7f6fb">
 
-    <link rel="stylesheet" href="translations.css?v=20261009-deep-link-flash-r2">
-    <script src="translations.js?v=20261009-deep-link-after-skeleton-r3" defer></script>
+    <link rel="stylesheet" href="translations.css?v=20261011-unified-controls-r1">
+    <script src="translations.js?v=20261011-unified-controls-r1" defer></script>
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261008-site-skeleton-r2">
 </head>
 
@@ -121,12 +121,15 @@
 
                 <label class="search-field">
                     <span class="search-label">搜尋</span>
-                    <input
-                        id="translationSearch"
-                        type="search"
-                        placeholder="搜尋模組或作者"
-                        autocomplete="off"
-                    >
+                    <span class="search-input-wrap">
+                        <input
+                            id="translationSearch"
+                            type="search"
+                            placeholder="搜尋模組或作者"
+                            autocomplete="off"
+                        >
+                        <button class="l1ng-search-clear" id="translationSearchClear" type="button" aria-label="清除搜尋" title="清除搜尋" hidden></button>
+                    </span>
                 </label>
 
                 <div class="filter-group" id="translationFilters" aria-label="漢化分類">
