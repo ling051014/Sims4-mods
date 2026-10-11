@@ -38,11 +38,11 @@
   }
   const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 19 8.5-8.5"/><path d="M3 21h4l8-8"/><path d="M13.5 6.5 17.5 10.5"/><path d="M15 5l2-2a3 3 0 0 1 4 4l-2 2"/><path d="m13 9 2-2 4 4-2 2"/></svg>';
   const refs = new Map();
-  let active=null, panel=null, selectedHex='#55ACEE', hsv=rgbToHsv([85,172,238]), syncFields=null, animationFrame=0;
+  let active=null, panel=null, selectedHex='#55ACEE', hsv=rgbToHsv([85,172,238]), animationFrame=0, hueDragging=false;
   const html = `
     <div class="l1ng-color-picker-head">
       <strong class="l1ng-color-picker-title">調整顏色</strong>
-      <button type="button" class="l1ng-color-picker-close" aria-label="關閉調色板">×</button>
+      <button type="button" class="help-close-btn l1ng-color-picker-close" aria-label="關閉調色板" title="關閉"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
     </div>
     <div class="l1ng-color-picker-sv" role="slider" tabindex="0" aria-label="飽和度與明暗" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
       <span class="l1ng-color-picker-dot" aria-hidden="true"></span>
@@ -97,7 +97,7 @@
     const dot=panel.querySelector('.l1ng-color-picker-dot');
     dot.style.left=(hsv.s*100)+'%';dot.style.top=((1-hsv.v)*100)+'%';
     sv.setAttribute('aria-valuenow',String(Math.round(hsv.s*100)));
-    panel.querySelector('.l1ng-color-picker-hue').value=String(Math.round(hsv.h));
+    if (!hueDragging) panel.querySelector('.l1ng-color-picker-hue').value=String(Math.round(hsv.h));
     const values={hex:selectedHex,rgb:rgbFromHex(selectedHex),hsl:rgbToHsl(rgbFromHex(selectedHex))};
     if(skipGroup!=='HEX')panel.querySelector('[data-hex]').value=values.hex;
     if(skipGroup!=='RGB') ['r','g','b'].forEach((k,i)=>panel.querySelector('[data-'+k+']').value=values.rgb[i]);
@@ -190,7 +190,20 @@
       else return;
       e.preventDefault();setHex(hexFromRgb(hsvToRgb(hsv)));
     });
-    hue.addEventListener('input',()=>{hsv.h=Number(hue.value);setHex(hexFromRgb(hsvToRgb(hsv)));});
+    // 360° 和 0° 是同一個紅色；拖曳時保留滑塊的實際位置，不被 RGB 回算成 0°。
+    hue.addEventListener('pointerdown',()=>{hueDragging=true;});
+    const endHueDrag=()=>{hueDragging=false;};
+    hue.addEventListener('pointerup',endHueDrag);
+    hue.addEventListener('pointercancel',endHueDrag);
+    hue.addEventListener('blur',endHueDrag);
+    hue.addEventListener('input',()=>{
+      const requestedHue=Number(hue.value);
+      hsv.h=requestedHue;
+      setHex(hexFromRgb(hsvToRgb(hsv)));
+      // 對灰色／接近紅色的顏色，保留目前選取色相而不讓滑塊跳到 0°。
+      hsv.h=requestedHue;
+      hue.value=String(requestedHue);
+    });
     const parseGroup=group=>{
       if(group==='HEX'){const field=panel.querySelector('[data-hex]');const text=field.value.trim();const hex=text.startsWith('#')?text:'#'+text;field.setAttribute('aria-invalid',String(!validHex(hex)));return validHex(hex)?hex:null;}
       const keys=group==='RGB'?['r','g','b']:['h','s','l'];
