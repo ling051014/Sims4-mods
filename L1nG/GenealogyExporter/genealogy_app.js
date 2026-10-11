@@ -6222,6 +6222,7 @@ function paintThemeChoices() {
         customColor1.value = customColors.c1;
         customColor2.value = customColors.c2;
         customColor3.value = customColors.c3;
+        window.L1nGColorPicker?.sync?.();
         appearanceCustomThemeEditor.hidden = !appearanceCustomThemeEditor.hidden;
         paintCustomThemePreview();
         return;
@@ -7646,6 +7647,7 @@ function syncRelationshipLineControls() {
   }
   if (widthValue) widthValue.textContent = Number(setting.width).toFixed(1).replace(/\.0$/,'') + ' px';
   if (colorEl) colorEl.value = relationshipResolvedColor(setting,other ? 'other' : key);
+  window.L1nGColorPicker?.sync?.();
 
   const curveSupported = key === 'other';
   const arrowSupported = key === 'other';
@@ -8000,6 +8002,7 @@ function openAppearancePanel() {
   customColor1.value = customColors.c1;
   customColor2.value = customColors.c2;
   customColor3.value = customColors.c3;
+  window.L1nGColorPicker?.sync?.();
 
   appearanceCustomThemeEditor.hidden = true;
 
