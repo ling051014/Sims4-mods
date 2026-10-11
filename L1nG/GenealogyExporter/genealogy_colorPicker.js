@@ -39,6 +39,11 @@
   const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 19 8.5-8.5"/><path d="M3 21h4l8-8"/><path d="M13.5 6.5 17.5 10.5"/><path d="M15 5l2-2a3 3 0 0 1 4 4l-2 2"/><path d="m13 9 2-2 4 4-2 2"/></svg>';
   const refs = new Map();
   let active=null, panel=null, selectedHex='#55ACEE', hsv=rgbToHsv([85,172,238]), animationFrame=0, hueDragging=false;
+  // ========【色相玻璃】 設定 - B 材質、A 尺寸，原生滑桿持續負責觸控 ========
+  const hueReduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const hueMotion={active:false,frame:0,display:0,velocity:0,target:0,lastValue:0,lastTime:0,lastMove:0,releaseStart:0};
+  const HUE_GLASS_DIAMETER=29;
+  const HUE_MAX_STRETCH=13;
   const html = `
     <div class="l1ng-color-picker-head">
       <strong class="l1ng-color-picker-title">調整顏色</strong>
@@ -47,7 +52,12 @@
     <div class="l1ng-color-picker-sv" role="slider" tabindex="0" aria-label="飽和度與明暗" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
       <span class="l1ng-color-picker-dot" aria-hidden="true"></span>
     </div>
-    <input class="l1ng-color-picker-hue" type="range" min="0" max="360" step="1" value="200" aria-label="色相">
+    <div class="l1ng-color-picker-hue-wrap">
+      <span class="l1ng-color-picker-hue-track" aria-hidden="true"></span>
+      <span class="l1ng-color-picker-hue-rest" aria-hidden="true"></span>
+      <span class="l1ng-color-picker-hue-lens" aria-hidden="true"><span class="l1ng-color-picker-hue-glass"></span></span>
+      <input class="l1ng-color-picker-hue" type="range" min="0" max="360" step="1" value="200" aria-label="色相">
+    </div>
     <div class="l1ng-color-picker-fields">
       <div class="l1ng-color-picker-field-row" data-group="HEX"><span>HEX</span><div class="l1ng-color-picker-inputs single"><input data-hex type="text" maxlength="7" spellcheck="false" autocapitalize="characters" aria-label="HEX 色碼"></div></div>
       <div class="l1ng-color-picker-field-row" data-group="RGB"><span>RGB</span><div class="l1ng-color-picker-inputs">
@@ -85,10 +95,112 @@
     if(top+height>topLimit+viewportHeight-12 && rect.top-height-8>=topLimit+12) top=rect.top-height-8;
     top=clamp(top,topLimit+12,Math.max(topLimit+12,topLimit+viewportHeight-height-12));
     panel.style.left=left+'px';panel.style.top=top+'px';
+    syncHuePosition();
   }
   function schedulePosition() {
     if(animationFrame)cancelAnimationFrame(animationFrame);
     animationFrame=requestAnimationFrame(() => {animationFrame=0;position();});
+  }
+
+  function syncHuePosition() {
+    if (!panel) return;
+    const wrap=panel.querySelector('.l1ng-color-picker-hue-wrap');
+    const input=panel.querySelector('.l1ng-color-picker-hue');
+    if (!wrap || !input) return;
+    // 與 29px 透明原生 thumb 的行程完全相同；包含 0° 和 360° 兩端。
+    const x=HUE_GLASS_DIAMETER/2+
+      Math.max(0,wrap.clientWidth-HUE_GLASS_DIAMETER)*clamp(Number(input.value)/360,0,1);
+    for(const cls of ['.l1ng-color-picker-hue-rest','.l1ng-color-picker-hue-lens']){
+      wrap.querySelector(cls).style.left=x+'px';
+    }
+  }
+  function shapeHueGlass(value) {
+    if (!panel) return;
+    const glass=panel.querySelector('.l1ng-color-picker-hue-glass');
+    const magnitude=Math.min(Math.abs(value),HUE_MAX_STRETCH);
+    // B 款延展幅度，但兩端維持對稱圓潤的橢圓；僅受方向影響微量平移。
+    glass.style.setProperty('--glass-stretch',String(1+0.04*magnitude));
+    glass.style.setProperty('--glass-shift',(Math.sign(value)*magnitude*0.07)+'px');
+  }
+  function animateHueGlass() {
+    if(hueMotion.frame || !panel)return;
+    let previous=performance.now();
+    const frame=now=>{
+      hueMotion.frame=0;
+      const dt=clamp(now-previous,1,35);
+      previous=now;
+      if(hueMotion.active && now-hueMotion.lastMove>90){
+        hueMotion.target*=Math.pow(.70,dt/16.7);
+      }
+      const target=hueReduceMotion.matches?0:hueMotion.target;
+      hueMotion.velocity=(hueMotion.velocity+
+        (target-hueMotion.display)*(hueMotion.active?.34:.22)*(dt/16.7))*
+        Math.pow(hueMotion.active?.55:.68,dt/16.7);
+      hueMotion.display+=hueMotion.velocity*(dt/16.7);
+      if(Math.abs(hueMotion.display)<.055 && Math.abs(hueMotion.velocity)<.055 &&
+        Math.abs(target)<.055){
+        hueMotion.display=0;
+        hueMotion.velocity=0;
+      }
+      shapeHueGlass(hueMotion.display);
+      const wrap=panel.querySelector('.l1ng-color-picker-hue-wrap');
+      if(wrap.classList.contains('is-settling') && !hueMotion.active &&
+         hueMotion.display===0 && now-hueMotion.releaseStart>=350){
+        wrap.classList.remove('is-settling');
+      }
+      if(hueMotion.display!==0 || hueMotion.velocity!==0 || Math.abs(target)>.055 ||
+         wrap.classList.contains('is-settling')){
+        hueMotion.frame=requestAnimationFrame(frame);
+      }
+    };
+    hueMotion.frame=requestAnimationFrame(frame);
+  }
+  function beginHueGlass() {
+    const wrap=panel.querySelector('.l1ng-color-picker-hue-wrap');
+    const now=performance.now();
+    hueMotion.active=true;
+    hueMotion.target=0;
+    hueMotion.lastTime=now;
+    hueMotion.lastMove=now;
+    hueMotion.lastValue=Number(panel.querySelector('.l1ng-color-picker-hue').value);
+    wrap.classList.remove('is-settling');
+    wrap.classList.add('is-dragging');
+  }
+  function moveHueGlass(value) {
+    const now=performance.now();
+    const dt=clamp(now-hueMotion.lastTime,12,85);
+    const delta=value-hueMotion.lastValue;
+    hueMotion.lastTime=now;
+    hueMotion.lastValue=value;
+    if(Math.abs(delta)>.2)hueMotion.lastMove=now;
+    if(hueMotion.active && !hueReduceMotion.matches && Math.abs(delta)>.2){
+      const intensity=clamp((Math.abs(delta)/dt-.018)/.21,0,1);
+      hueMotion.target=Math.sign(delta)*HUE_MAX_STRETCH*intensity;
+      animateHueGlass();
+    }
+    syncHuePosition();
+  }
+  function endHueGlass() {
+    if(!hueMotion.active)return;
+    hueMotion.active=false;
+    hueMotion.target=0;
+    hueMotion.releaseStart=performance.now();
+    const wrap=panel.querySelector('.l1ng-color-picker-hue-wrap');
+    wrap.classList.remove('is-dragging');
+    wrap.classList.add('is-settling');
+    animateHueGlass();
+  }
+  function resetHueGlass() {
+    hueMotion.active=false;
+    hueMotion.target=0;
+    hueMotion.display=0;
+    hueMotion.velocity=0;
+    hueDragging=false;
+    if(hueMotion.frame)cancelAnimationFrame(hueMotion.frame);
+    hueMotion.frame=0;
+    const wrap=panel?.querySelector('.l1ng-color-picker-hue-wrap');
+    if(wrap)wrap.classList.remove('is-dragging','is-settling');
+    shapeHueGlass(0);
   }
   function draw(skipGroup=null) {
     if(!panel || !active) return;
@@ -98,6 +210,7 @@
     dot.style.left=(hsv.s*100)+'%';dot.style.top=((1-hsv.v)*100)+'%';
     sv.setAttribute('aria-valuenow',String(Math.round(hsv.s*100)));
     if (!hueDragging) panel.querySelector('.l1ng-color-picker-hue').value=String(Math.round(hsv.h));
+    syncHuePosition();
     const values={hex:selectedHex,rgb:rgbFromHex(selectedHex),hsl:rgbToHsl(rgbFromHex(selectedHex))};
     if(skipGroup!=='HEX')panel.querySelector('[data-hex]').value=values.hex;
     if(skipGroup!=='RGB') ['r','g','b'].forEach((k,i)=>panel.querySelector('[data-'+k+']').value=values.rgb[i]);
@@ -122,6 +235,7 @@
   function sync() {ids.forEach(id=>{const input=document.getElementById(id);if(input)refreshButton(input);});if(active && active.input.value.toUpperCase()!==selectedHex){selectedHex=active.input.value.toUpperCase();hsv=rgbToHsv(rgbFromHex(selectedHex));draw();}}
   function close() {
     if(!active)return;
+    resetHueGlass();
     active.button.setAttribute('aria-expanded','false');
     active=null;
     panel.hidden=true;
@@ -191,11 +305,14 @@
       e.preventDefault();setHex(hexFromRgb(hsvToRgb(hsv)));
     });
     // 360° 和 0° 是同一個紅色；拖曳時保留滑塊的實際位置，不被 RGB 回算成 0°。
-    hue.addEventListener('pointerdown',()=>{hueDragging=true;});
-    const endHueDrag=()=>{hueDragging=false;};
+    hue.addEventListener('pointerdown',()=>{hueDragging=true;beginHueGlass();});
+    const endHueDrag=()=>{hueDragging=false;endHueGlass();};
     hue.addEventListener('pointerup',endHueDrag);
     hue.addEventListener('pointercancel',endHueDrag);
+    hue.addEventListener('touchend',endHueDrag,{passive:true});
+    hue.addEventListener('touchcancel',endHueDrag,{passive:true});
     hue.addEventListener('blur',endHueDrag);
+    window.addEventListener('pointerup',endHueDrag,{passive:true});
     hue.addEventListener('input',()=>{
       const requestedHue=Number(hue.value);
       hsv.h=requestedHue;
@@ -203,6 +320,7 @@
       // 對灰色／接近紅色的顏色，保留目前選取色相而不讓滑塊跳到 0°。
       hsv.h=requestedHue;
       hue.value=String(requestedHue);
+      moveHueGlass(requestedHue);
     });
     const parseGroup=group=>{
       if(group==='HEX'){const field=panel.querySelector('[data-hex]');const text=field.value.trim();const hex=text.startsWith('#')?text:'#'+text;field.setAttribute('aria-invalid',String(!validHex(hex)));return validHex(hex)?hex:null;}
