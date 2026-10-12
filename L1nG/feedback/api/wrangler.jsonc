@@ -12,7 +12,13 @@
     {
       "binding": "DB",
       "database_name": "l1ng-feedback-db",
-      "database_id": "REPLACE_WITH_ACTUAL_D1_DATABASE_ID"
+      "database_id": "41982056-0458-490b-b9a7-a09f929960e3"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "ATTACHMENTS",
+      "bucket_name": "l1ng-feedback-attachments"
     }
   ]
 }

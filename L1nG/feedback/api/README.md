@@ -1,57 +1,41 @@
-# L1nG 匿名回饋後端（未上線）
+# L1nG 問題回饋 Worker — 部署手冊
 
-本資料夾只實作原有 RealDate／Genealogy 問題回饋所需的後端，不更動公開網站的其他功能。
+> **安全狀態：尚未正式部署與端到端驗收。** GitHub 修改不代表 Cloudflare Worker 已更新。請保持目前公開服務停用，直到完成 Access、Worker Route 與 D1/R2 實機測試。
 
-## 現有 Cloudflare 資源
+## 已建立的 Cloudflare 資源
 
-- Worker: l1ng-feedback-api（目前線上仍可能是 Hello World）
-- D1: l1ng-feedback-db，以 binding 名稱 DB 存取
-- Secret: TURNSTILE_SECRET_KEY（已由站長設於 Worker Production；不得提交到 GitHub）
-- Turnstile Site Key: 只在公開前端使用
+- Worker：`l1ng-feedback-api`；公開呼叫路徑 `https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback`。
+- D1：`l1ng-feedback-db`，ID `41982056-0458-490b-b9a7-a09f929960e3`，綁定名稱 `DB`。
+- R2 私有儲存空間：`l1ng-feedback-attachments`，綁定名稱 `ATTACHMENTS`。**不要啟用 R2 Public Access。**
+- Turnstile Secret：`TURNSTILE_SECRET_KEY`，存在 Cloudflare Worker Secrets。**不要提交或貼出 Secret。**
+- 玩家來源：`https://realdate.by-l1ng.com`、`https://genealogy.by-l1ng.com`。
+- Cloudflare Access：已登入的 `home.by-l1ng.com/feedback/admin.html`，應用程式 `L1nG Dashboard`；**目前還需要涵蓋管理 API 路徑。**
 
-## 上線前必要步驟
+## 上線順序（不可跳過）
 
-1. 唯讀核對 Cloudflare Worker、D1 與網域設定；不要直接覆寫現有 Worker。
-2. 在 D1 Console 執行 schema.sql（或使用 Wrangler 執行 migration），確認有 3 個資料表。
-3. Cloudflare R2 建立私有 bucket，將它綁定到 Worker，變數名稱 ATTACHMENTS。**沒有 R2 時，帶附件送出會明確失敗，絕不假稱成功。**
-4. 確認部署的程式使用 worker.js，並同步設定 wrangler.jsonc 中的 D1 binding。Secret Key 仍需保留於 Worker Secrets，不寫入版本控制。
-5. Cloudflare Access 建立只有站長電子郵件可登入的受保護管理應用；Worker 設定 ACCESS_TEAM_DOMAIN、ACCESS_AUD、ADMIN_EMAIL。所有 /v1/admin/* 路由會在缺少有效 JWT 時拒絕存取。Access 保護管理前台（admin.html）與 API 都是必要工作，不能只藏網址。
-6. 測試正常／無效／過期／重複 Turnstile token、附件大小、私人憑證查詢、陌生人讀取、管理員存取、失敗後不回報成功、實機匿名對話。
-7. 正式域名以 Cloudflare 控制台為準，這份範例使用 realdate.by-l1ng.com、genealogy.by-l1ng.com。若更換，需同時更新 Turnstile Hostnames、Worker allowlist 及網站端設定。
+1. **先在 Zero Trust 的同一個 `L1nG Dashboard` Access 應用程式中增加第二個受保護的路徑：`home.by-l1ng.com/feedback/admin-api/*`。** 保留原 `/feedback/admin.html`，仍只允許指定電子郵件。建議同一應用程式兩個目的地，使用相同 AUD。請先確認 Cloudflare UI 支援該配置且實際規則生效，再加 Worker Route。不要保護 `/v1/feedback` 玩家公開 API。
+2. 找到該 Access 應用程式的 **Application Audience (AUD) Tag**，以及 Zero Trust Team domain。它們不是 Access policy ID。Cloudflare Worker → Settings → Variables and Secrets 加：
+   - `ACCESS_TEAM_DOMAIN`：`https://<你的團隊名稱>.cloudflareaccess.com`（依 Zero Trust 實際顯示確認，不能猜）。
+   - `ACCESS_AUD`：前述同一個 Access 應用程式的 JWT Audience Tag。
+   - `ADMIN_EMAIL`：獲授權的管理員電子郵件；多個以逗號分隔。Worker 會再次驗證電子郵件，因此 Access 允許規則和此設定必須一致。
+   - `TURNSTILE_SECRET_KEY` 是既有 Secret，保留原值；不需要重新建立。
+3. 確認 D1 的四張表（`feedback`、`replies`、`attachments`、`request_limits`）及索引已建立；若資料庫是空的，可在 D1 Console 執行本資料夾 `schema.sql`。已建立則不須重跑。
+4. 將本目錄的 `worker.js` 作為 Cloudflare Worker 實際程式部署。若使用 Wrangler：由專案根目錄執行 `npx wrangler deploy --config L1nG/feedback/api/wrangler.jsonc`，必須先核對帳號、網域、資源綁定。部署前確認 Secret 與變數不會因設定覆蓋而遺失。**目前不會自動部署，也沒有 GitHub→Worker 的 CI 部署。**
+5. 最後才到 Worker → Settings → Domains & Routes，為 `by-l1ng.com` 新增只匹配 `home.by-l1ng.com/feedback/admin-api/*` 的 Worker Route 指向 `l1ng-feedback-api`。不要將這個路由設定到整個首頁，也不要把它指到 Pages 靜態資源。先核對 Cloudflare Pages 自訂網域和 Worker Route 是否能共存。
+6. 以無痕視窗測試：未登入管理 API 不可取得任何回饋；管理員登入後 API 可存取；直接請求 `workers.dev/v1/admin/*` 永遠被拒；公開玩家回饋只允許正式 RealDate 與 Genealogy 來源。
+7. 執行測試：有效、失敗、過期及重複 Turnstile；提交、匿名憑證查詢、玩家回覆、後台回覆／標記／刪除；3 附件、單檔 10 MB、總計 20 MB；資料庫失敗不得假報成功。實機驗收通過後才宣告上線。
 
-## API 契約
+## API 與路由
 
-- POST /v1/feedback：multipart/form-data，source、category、target、message、followUp、version、gameVersion、contactMethod、contactValue、turnstileToken、files（0~3）。
-- POST /v1/feedback/lookup：JSON {receipt}，回傳只有該對話的狀態與訊息。
-- POST /v1/feedback/reply：multipart/form-data，receipt、message、turnstileToken、files；每次都需重新完成人機驗證。
-- GET /v1/admin/feedback：管理員清單。
-- GET/PATCH/DELETE /v1/admin/feedback/:id：詳情、狀態與刪除。
-- POST /v1/admin/feedback/:id/replies：管理員回覆。
-- GET /v1/admin/feedback/:id/attachments/:fileId：需管理員驗證的附件讀取。
+- 玩家公開 API（有 Origin / Turnstile / D1 Rate Limit）：`POST /v1/feedback`、`POST /v1/feedback/lookup`、`POST /v1/feedback/reply`。只由正式兩個網站使用，不開放預覽來源。
+- 後台同網域（有 Access JWT 簽章、AUD、有效期、電子郵件核對）：`/feedback/admin-api/feedback`；`/feedback/admin-api/feedback/:id`；`/feedback/admin-api/feedback/:id/replies`；`/feedback/admin-api/feedback/:id/attachments/:fileId`。
+- workers.dev 的舊管理路由 `/v1/admin/*` 一律拒絕。
+- D1 僅保存匿名憑證雜湊與資料，不保存明文憑證；R2 附件永不公開，管理員下載需通過 Access。瀏覽器後台不能直接存取 R2 bucket。
 
-## 安全設計
+## 測試與原始碼管理
 
-- Turnstile 必須由 Worker 伺服器端呼叫 Siteverify，並檢查成功、核發網域及來源；憑證僅單次、有效期約 5 分鐘。
-- 公開 API 只允許明列的 Origin，安全性不能單靠 CORS，還有 Turnstile 和伺服器端檢查。
-- 私人憑證只在建立時回傳，D1 僅保存 SHA-256，憑證遺失不可重取。
-- 管理 API 驗證 Cloudflare Access JWT 的簽章、受眾、有效期及電子郵件；未設定則拒絕。
-- R2 僅使用私有 bucket，不回傳公開檔案 URL。附件僅經授權管理 API 存取。
-- 不能將 D1、R2、私密金鑰或 Access 管理 API 放進 GitHub Pages 前端程式。
-- **目前只是版本庫中的程式碼，不代表已部署、實機驗收或可開始正式收件。**
-
-## 目前檢查狀態（2026-10-13）
-
-- 已補齊 RealDate 正式回饋入口、版本欄位、拖放附件及匿名回覆驗證的程式接線，**未變動原介面 CSS**。
-- 已為 Worker 新增 `worker.test.mjs`，可使用 Node.js 22+ 執行：`node --test worker.test.mjs`。此輪只完成檔案提交，**測試案例尚未實際執行，不應宣稱 passed**。
-- 前端檢視頁在未完成 R2、D1 表格、Access 和正式部署之前，不應啟用玩家提交；如果未完成 Cloudflare Access，管理員 API 預設拒絕。
-- 特別注意：前端與 Worker 跨網域時，必須確保 Cloudflare Access 實際保護**管理 API 的主機名稱／路由**，讓有效的 `Cf-Access-Jwt-Assertion` 能傳到 Worker；僅保護 `admin.html` 並不足夠。正式上線前仍需確認登入方式、瀏覽器跨站 Cookie 規則及 CORS 的實機相容性。
-- 在 Cloudflare R2 建立、掛載私有 bucket 前，帶附件的提交會明確失敗而非假成功。限制為每筆最多三個檔案、單檔 10 MB、總計 20 MB。
-- GA4 不是這次回饋系統接線的內容，尚未安裝到網站或接至管理中心。
-
-## 2026-10-13 發布前阻擋檢查
-
-- `wrangler.jsonc` 的 D1 `database_id` 現為 `REPLACE_WITH_ACTUAL_D1_DATABASE_ID`。之前填入的 UUID 沒有從 Cloudflare 實際確認，不能當作資料庫真實 ID 使用；請由 Cloudflare D1 詳情頁複製正確 ID 後再部署。
-- Worker 公開來源白名單現在僅包含兩個正式網域；分支與 `pages.dev` 預覽**不允許**向正式回饋服務送出。Turnstile 的 hostname 限制也已同步收窄。
-- 已提交 GitHub Actions 工作流程，當回饋檔案修改時嘗試執行 Node 語法檢查與離線 Worker 測試。**本輪尚未拿到 GitHub Actions 執行通過的證據**；不得視為通過。
-- 管理員附件連結與跨主機 Cloudflare Access 的實際憑證轉送仍需端到端測試。僅 HTML 頁面的登入保護不足以保護 API。
-- 發布前需加入濫用頻率限制並完整測試連續提交；Turnstile 不是通用的頻率限制機制。
+- `node --test L1nG/feedback/api/worker.test.mjs` 可執行離線 API 測試。
+- `.github/workflows/feedback-api-branch-check.yml` 只做語法／離線測試、設定檢查；不部署 Worker。
+- `L1nG/build-pages.mjs` 刻意不把 `feedback/api` 放進公開靜態網站。
+- 本次設定已將經過核對的 D1 ID、R2 綁定寫入 `wrangler.jsonc`；Cloudflare 帳號 ID、Turnstile Secret、Access AUD、管理員 Email 不硬寫在 GitHub。
+- GA4 網站分析不屬於此輪回饋後端，仍未接通 Dashboard。
