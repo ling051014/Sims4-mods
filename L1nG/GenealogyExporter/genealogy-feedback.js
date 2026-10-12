@@ -30,27 +30,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const attached = [];
   let lastFocus = null;
 
+  // 導覽保留 RealDate 的單一文字連結，不再使用編輯模擬市民的分頁。
   function setTab(index, focus = false) {
     tabs.forEach(({ tab, panel: view }, i) => {
       const active = index === i;
-      tab.classList.toggle('active', active);
-      tab.setAttribute('aria-selected', String(active));
-      tab.tabIndex = active ? 0 : -1;
       view.hidden = !active;
+      tab.hidden = active;
+      tab.tabIndex = active ? -1 : 0;
     });
-    if (focus) tabs[index].tab.focus({ preventScroll: true });
+    if (focus) tabs[index === 0 ? 1 : 0].tab.focus({ preventScroll: true });
   }
 
   tabs.forEach(({ tab }, index) => {
-    tab.addEventListener('click', () => setTab(index));
-    tab.addEventListener('keydown', event => {
-      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-      event.preventDefault();
-      const next = event.key === 'Home' ? 0
-        : event.key === 'End' ? tabs.length - 1
-        : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-      setTab(next, true);
-    });
+    tab.addEventListener('click', () => setTab(index, true));
   });
 
   function openFeedback() {
@@ -116,7 +108,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (result.errors.length) showError(result.errors.join('；'));
   }
 
-  $('genealogyFeedbackAddFile').addEventListener('click', () => fileInput.click());
+  const uploadZone = $('genealogyFeedbackAddFile');
+  uploadZone.addEventListener('click', () => fileInput.click());
+  // 上傳卡片支援電腦拖放；觸控裝置仍使用原生檔案選取器。
+  uploadZone.addEventListener('dragenter', event => {
+    event.preventDefault();
+    uploadZone.classList.add('is-dragover');
+  });
+  uploadZone.addEventListener('dragover', event => {
+    event.preventDefault();
+    uploadZone.classList.add('is-dragover');
+  });
+  uploadZone.addEventListener('dragleave', event => {
+    if (!uploadZone.contains(event.relatedTarget)) uploadZone.classList.remove('is-dragover');
+  });
+  uploadZone.addEventListener('drop', event => {
+    event.preventDefault();
+    uploadZone.classList.remove('is-dragover');
+    if (event.dataTransfer?.files?.length) addFiles(event.dataTransfer.files);
+  });
   fileInput.addEventListener('change', () => {
     addFiles(fileInput.files);
     fileInput.value = '';
