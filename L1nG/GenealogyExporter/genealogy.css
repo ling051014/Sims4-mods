@@ -5567,7 +5567,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 /* 族譜提取器專用：檔案與族譜分支（小尺寸 SVG） */
 .icon-genealogy-extractor {
     /* 對齊方案 A：保留文件與族譜分支的間距及既有選單欄位配置 */
-    --l1ng-icon: url("../icons/genealogy-extractor.svg?v=20261011-thin-r6");
+    --l1ng-icon: var(--l1ng-icon-genealogy-extractor);
     width: 18px;
     height: 18px;
     margin-inline: -3px;
