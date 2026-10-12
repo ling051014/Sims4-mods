@@ -4,13 +4,13 @@
   const $=id=>document.getElementById(id);
   const core=window.L1nGFeedbackCore;
   if(!core || !$('feedback-form'))return;
-  let category='bug', site='RealDate', files=[], replyFiles=[], verifier=null, activeReceipt='', current=null, lastReceipt='';
+  let category='bug', files=[], replyFiles=[], verifier=null, replyVerifier=null, activeReceipt='', current=null, lastReceipt='';
   const siteKeyHost=$('verify-card');
   const setError=msg=>{
     $('submit-error-detail').textContent=msg;
     $('submit-error-summary').hidden=!msg;
   };
-  const show=(id)=>{for(const name of ['form-main','success-pane','thread-pane'])$(name).classList.toggle('hide',id!==name);$(id).style.display=id==='form-main'?'flex':'';};
+  const show=(id)=>{for(const name of ['form-main','success-pane','thread-pane']){const el=$(name);el.classList.toggle('hide',id!==name);if(name==='form-main')el.style.display=id===name?'flex':'none';}};
   const describeFile=f=>f.name+' · '+Math.max(1,Math.round(f.size/1024))+' KB';
   const displayFiles=(list,node)=>{
     node.replaceChildren();
@@ -30,6 +30,13 @@
   }
   if($('upload-zone'))$('upload-zone').addEventListener('click',event=>{if(event.target!==$('file-input'))$('file-input').click();});
   if($('file-input'))$('file-input').addEventListener('change',event=>{addFiles(files,event.target.files,$('file-list'));event.target.value='';});
+  const upload=$('upload-zone');
+  if(upload){
+    upload.addEventListener('keydown',e=>{if(e.target===upload&&(e.key==='Enter'||e.key===' ')){e.preventDefault();$('file-input')?.click();}});
+    upload.addEventListener('dragover',e=>{e.preventDefault();upload.classList.add('drag-over');});
+    upload.addEventListener('dragleave',e=>{if(!upload.contains(e.relatedTarget))upload.classList.remove('drag-over');});
+    upload.addEventListener('drop',e=>{e.preventDefault();upload.classList.remove('drag-over');addFiles(files,e.dataTransfer?.files||[],$('file-list'));});
+  }
   for(const button of document.querySelectorAll('[data-type]'))button.addEventListener('click',()=>{
     category=button.dataset.type;
     document.querySelectorAll('[data-type]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});
@@ -38,16 +45,31 @@
   function updateVersion(){
     const isBug=category==='bug';
     if($('bug-context'))$('bug-context').hidden=!isBug;
-    if($('module-version-section'))$('module-version-section').hidden=!isBug;
+    if($('module-version-section'))$('module-version-section').hidden=!(isBug && targetSelect?.value==='mod');
     if($('game-version-section'))$('game-version-section').hidden=!isBug;
   }
+  // 沿用原預覽的公開版本選單，不再讓 RealDate 顯示族譜提取器的選項。
   const version=$('module-version');
-  if(version && !version.options.length)version.add(new Option('不確定','unknown'));
-  if(version && version.options.length<=1){
-    version.add(new Option('不確定','unknown'));
-    version.add(new Option('其他版本','other'));
+  if(version){
+    version.replaceChildren();
+    for(const [value,label] of [
+      ['','請選擇版本'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
+      ['v0.2.1 Beta','v0.2.1 Beta'],['v0.2 Beta','v0.2 Beta'],
+      ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta'],
+      ['other','其他版本（手動填寫）'],['unknown','不確定']
+    ])version.add(new Option(label,value));
   }
+  $('form-title').textContent='問題反饋';
+  $('form-subtitle').textContent='你的想法，讓 RealDate 變得更好。';
+  const targetSelect=$('issue-target');
+  if(targetSelect){
+    targetSelect.replaceChildren(new Option('RealDate 模組','mod'),new Option('RealDate 網站','web'));
+    targetSelect.value='mod';
+  }
+  $('bug-context')?.querySelector('label')?.replaceChildren(document.createTextNode('回饋對象'));
+  if($('version-changelog-link'))$('version-changelog-link').href='changelog.html';
   version?.addEventListener('change',()=>{$('manual-version-wrap').hidden=version.value!=='other';});
+  targetSelect?.addEventListener('change',updateVersion);
   $('message-field')?.addEventListener('input',()=>{$('char-count').textContent=$('message-field').value.length+' / 2000';setError('');});
   $('contact-method')?.addEventListener('change',()=>{$('contact-value').type=$('contact-method').value==='email'?'email':'text';});
   // 保留原本驗證卡片的設計，將停用按鈕換成真正的 Turnstile。
@@ -73,12 +95,15 @@
     const token=verifier?.getToken();
     if(!token){setError('請先完成 Cloudflare 人機驗證。');return;}
     const chosen=$('reply-thread').checked?'conversation':'once';
+    if(category==='bug'&&targetSelect?.value==='mod'&&(!version?.value||(version.value==='other'&&!$('manual-version').value.trim()))){
+      setError('請選擇模組版本，或選擇「不確定」。');return;
+    }
     const selected=version?.value==='other'?$('manual-version').value:version?.value||'';
     const button=form.querySelector('button[type="submit"]');button.disabled=true;button.classList.add('is-loading');
     setError('');
     try{
       const result=await core.submit(core.normalizeFeedback({
-        source:'RealDate',category,target:'mod',message,files,followUp:chosen,
+        source:'RealDate',category,target:targetSelect?.value||'mod',message,files,followUp:chosen,
         contactMethod:method,contactValue:contact,version:selected
       }),token);
       lastReceipt=result.receipt||'';
@@ -88,12 +113,12 @@
       $('success-open-thread').hidden=!lastReceipt;
       $('success-description').textContent=lastReceipt?'已建立匿名對話，請保存私人憑證。':'已收到單次回饋，不會建立匿名對話。';
       show('success-pane');verifier?.reset();
-      if(lastReceipt){activeReceipt=lastReceipt;sessionStorage.setItem('l1ng-last-feedback-receipt',lastReceipt);}
+      if(lastReceipt)activeReceipt=lastReceipt;
     }catch(err){setError(err.message||'送出失敗。');verifier?.reset();}
     finally{button.disabled=false;button.classList.remove('is-loading');}
   });
   $('copy-receipt')?.addEventListener('click',()=>{if(lastReceipt)navigator.clipboard?.writeText(lastReceipt);});
-  function newFeedback(){form.reset();files=[];displayFiles(files,$('file-list'));category='bug';updateVersion();$('char-count').textContent='0 / 2000';show('form-main');setError('');}
+  function newFeedback(){form.reset();files=[];displayFiles(files,$('file-list'));category='bug';updateVersion();$('char-count').textContent='0 / 2000';verifier?.reset();show('form-main');setError('');}
   $('success-new')?.addEventListener('click',newFeedback);
   function messagesFor(item){
     const stack=$('visitor-messages');stack.replaceChildren();
@@ -115,6 +140,15 @@
       $('thread-state').textContent=({pending:'尚未處理',progress:'處理中',done:'已完成',spam:'已結案'})[current.status]||current.status;
       $('visitor-reply-form').hidden=['done','spam'].includes(current.status);
       messagesFor(current);show('thread-pane');
+      if(!['done','spam'].includes(current.status) && !replyVerifier && core.isLive()){
+        const container=document.createElement('div');
+        container.id='realdate-reply-turnstile';
+        const actions=$('visitor-reply-form')?.querySelector('.thread-compose-actions');
+        if(actions)actions.before(container);
+        core.createVerification(container).then(v=>{replyVerifier=v;}).catch(err=>{
+          $('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;
+        });
+      }
     }catch(err){$('restore-error').textContent=err.message||'憑證查詢失敗。';$('restore-error').hidden=false;show('thread-pane');}
   }
   function threadHome(){show('thread-pane');$('thread-home').classList.remove('hide');$('thread-chat').classList.add('hide');}
@@ -132,10 +166,10 @@
     e.preventDefault();
     const message=$('visitor-reply').value.trim();
     if(!message||!activeReceipt){$('visitor-reply-error').textContent='請先輸入回覆內容。';$('visitor-reply-error').hidden=false;return;}
-    const token=verifier?.getToken();
-    if(!token){$('visitor-reply-error').textContent='請返回回饋表單完成人機驗證後再送出。';$('visitor-reply-error').hidden=false;return;}
-    try{await core.reply(activeReceipt,message,replyFiles,token);replyFiles=[];$('visitor-reply').value='';verifier?.reset();await openThread(activeReceipt);}
-    catch(err){$('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;verifier?.reset();}
+    const token=replyVerifier?.getToken();
+    if(!token){$('visitor-reply-error').textContent='請先完成下方的人機驗證。';$('visitor-reply-error').hidden=false;return;}
+    try{await core.reply(activeReceipt,message,replyFiles,token);replyFiles=[];$('visitor-reply').value='';replyVerifier?.reset();await openThread(activeReceipt);}
+    catch(err){$('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;replyVerifier?.reset();}
   });
   // 示範管理入口與假資料不得在正式網站對外開啟。
   $('admin-screen')?.remove();
@@ -144,5 +178,8 @@
   document.querySelector('.preview-bar')?.remove();
   $('reset-demo')?.remove();
   if($('source-field'))$('source-field').value='RealDate';
+  $('close-form')?.addEventListener('click',()=>{$('form-layer').classList.add('closed');});
+  document.querySelectorAll('[data-open-form]').forEach(button=>button.addEventListener('click',()=>{$('form-layer').classList.remove('closed');newFeedback();}));
+  $('thread-back-form')?.addEventListener('click',()=>{$('form-layer').classList.remove('closed');});
   updateVersion();show('form-main');
 })();
