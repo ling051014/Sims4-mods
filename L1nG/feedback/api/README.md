@@ -38,3 +38,12 @@
 - R2 僅使用私有 bucket，不回傳公開檔案 URL。附件僅經授權管理 API 存取。
 - 不能將 D1、R2、私密金鑰或 Access 管理 API 放進 GitHub Pages 前端程式。
 - **目前只是版本庫中的程式碼，不代表已部署、實機驗收或可開始正式收件。**
+
+## 目前檢查狀態（2026-10-13）
+
+- 已補齊 RealDate 正式回饋入口、版本欄位、拖放附件及匿名回覆驗證的程式接線，**未變動原介面 CSS**。
+- 已為 Worker 新增 `worker.test.mjs`，可使用 Node.js 22+ 執行：`node --test worker.test.mjs`。此輪只完成檔案提交，**測試案例尚未實際執行，不應宣稱 passed**。
+- 前端檢視頁在未完成 R2、D1 表格、Access 和正式部署之前，不應啟用玩家提交；如果未完成 Cloudflare Access，管理員 API 預設拒絕。
+- 特別注意：前端與 Worker 跨網域時，必須確保 Cloudflare Access 實際保護**管理 API 的主機名稱／路由**，讓有效的 `Cf-Access-Jwt-Assertion` 能傳到 Worker；僅保護 `admin.html` 並不足夠。正式上線前仍需確認登入方式、瀏覽器跨站 Cookie 規則及 CORS 的實機相容性。
+- 在 Cloudflare R2 建立、掛載私有 bucket 前，帶附件的提交會明確失敗而非假成功。限制為每筆最多三個檔案、單檔 10 MB、總計 20 MB。
+- GA4 不是這次回饋系統接線的內容，尚未安裝到網站或接至管理中心。
