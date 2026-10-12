@@ -145,8 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return element;
     };
     const shadow = el('path', 'genealogy-feedback-peel-shadow');
-    const back = el('polygon', 'genealogy-feedback-peel-paper');
-    const grain = el('polygon', 'genealogy-feedback-peel-grain');
+    const back = el('path', 'genealogy-feedback-peel-paper');
+    const grain = el('path', 'genealogy-feedback-peel-grain');
     const crease = el('path', 'genealogy-feedback-peel-crease');
     const glint = el('path', 'genealogy-feedback-peel-glint');
     return { svg, shadow, back, grain, crease, glint };
@@ -177,19 +177,37 @@ document.addEventListener('DOMContentLoaded', () => {
     outgoing.style.clipPath = near.length >= 3
       ? 'polygon(' + near.map(point => point.x.toFixed(2) + 'px ' + point.y.toFixed(2) + 'px').join(',') + ')'
       : 'polygon(0 0,0 0,0 0)';
-    const shape = flipped.map(paperPoint).join(' ');
-    visual.back.setAttribute('points', shape);
-    visual.grain.setAttribute('points', shape);
     const ends = foldEnds(threshold, width, height);
+    // 紙張折痕不是尺畫出的硬直線：摺背邊緣與陰影共用同一條微彎曲線。
+    const bend = Math.min(15, Math.min(width, height) * .025)
+      * Math.sin(Math.PI * Math.min(1, progress * 1.06));
+    const foldedPath = flipped.length ? flipped.reduce((path, point, index) => {
+      const next = flipped[(index + 1) % flipped.length];
+      const onFold = Math.abs(point.x + point.y - threshold) < .08
+        && Math.abs(next.x + next.y - threshold) < .08;
+      if (!index) path = 'M' + paperPoint(point);
+      return path + (onFold && flipped.length >= 3
+        ? ' Q' + paperPoint({
+          x: (point.x + next.x) / 2 - bend,
+          y: (point.y + next.y) / 2 - bend
+        }) + ' ' + paperPoint(next)
+        : ' L' + paperPoint(next));
+    }, '') + ' Z' : '';
+    visual.back.setAttribute('d', foldedPath);
+    visual.grain.setAttribute('d', foldedPath);
     if (ends.length === 2) {
-      const path = 'M' + paperPoint(ends[0]) + ' L' + paperPoint(ends[1]);
+      const start = ends[0], end = ends[1];
+      const middle = {
+        x: (start.x + end.x) / 2 - bend,
+        y: (start.y + end.y) / 2 - bend
+      };
+      const path = 'M' + paperPoint(start) + ' Q' + paperPoint(middle) + ' ' + paperPoint(end);
       visual.shadow.setAttribute('d', path);
       visual.crease.setAttribute('d', path);
-      visual.glint.setAttribute('d', 'M' + paperPoint({
-        x: ends[0].x - 1.5, y: ends[0].y - 1.5
-      }) + ' L' + paperPoint({
-        x: ends[1].x - 1.5, y: ends[1].y - 1.5
-      }));
+      visual.glint.setAttribute('d',
+        'M' + paperPoint({ x: start.x - 1.5, y: start.y - 1.5 })
+        + ' Q' + paperPoint({ x: middle.x - 1.5, y: middle.y - 1.5 })
+        + ' ' + paperPoint({ x: end.x - 1.5, y: end.y - 1.5 }));
     } else {
       for (const path of [visual.shadow, visual.crease, visual.glint]) path.setAttribute('d', '');
     }
