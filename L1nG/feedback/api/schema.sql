@@ -36,3 +36,11 @@ CREATE TABLE IF NOT EXISTS attachments (
 CREATE INDEX IF NOT EXISTS feedback_created_idx ON feedback(created_at DESC);
 CREATE INDEX IF NOT EXISTS replies_feedback_idx ON replies(feedback_id,created_at);
 CREATE INDEX IF NOT EXISTS attachments_feedback_idx ON attachments(feedback_id);
+
+-- 頻率限制：雜湊後的來源識別與每小時用量，不保存原始 IP。
+CREATE TABLE IF NOT EXISTS request_limits (
+  bucket TEXT PRIMARY KEY,
+  used INTEGER NOT NULL CHECK(used >= 0),
+  expires_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS request_limits_expiry_idx ON request_limits(expires_at);

@@ -39,6 +39,25 @@ async function validateTurnstile(token,origin,env){
     return {error:"人機驗證未通過或已過期，請重新驗證。",status:403};
   return {ok:true};
 }
+// 以 Cloudflare 轉送的 IP 衍生雜湊，D1 只保存每小時用量，不儲存原始 IP。
+// D1 的條件式 UPSERT 是原子操作；不使用容易競態的 SELECT 後 UPDATE。
+async function enforceRateLimit(request,env,kind,max){
+  const ip=request.headers.get("cf-connecting-ip");
+  if(!ip || !env.TURNSTILE_SECRET_KEY)return {error:"無法確認提交來源，請稍後再試。",status:503};
+  const hour=now().slice(0,13);
+  const bucket=kind+":"+hour+":"+await sha256(env.TURNSTILE_SECRET_KEY+":"+ip);
+  const expiresAt=new Date(Date.now()+2*3600000).toISOString();
+  try{
+    const row=await env.DB.prepare(
+      "INSERT INTO request_limits (bucket,used,expires_at) VALUES (?,1,?) "+
+      "ON CONFLICT(bucket) DO UPDATE SET used=used+1 WHERE used < ? RETURNING used"
+    ).bind(bucket,expiresAt,max).first();
+    return row?{ok:true}:{error:"操作過於頻繁，請稍後再試。",status:429};
+  }catch(_){
+    // 設定或 D1 失敗時拒絕收件，不可繞過頻率限制。
+    return {error:"回饋服務暫時無法使用，請稍後再試。",status:503};
+  }
+}
 function validatePayload(form){
   const source=f(form,"source"), category=f(form,"category"),target=f(form,"target");
   const message=f(form,"message"), followUp=f(form,"followUp"),version=f(form,"version"),gameVersion=f(form,"gameVersion");
@@ -120,6 +139,8 @@ async function createFeedback(req,env,origin){
   const inspected=await validatedFiles(form,env);if(inspected.error)return fail(inspected.error,inspected.status||400);
   const verified=await validateTurnstile(f(form,"turnstileToken"),origin,env);
   if(!verified.ok)return fail(verified.error,verified.status);
+  const limited=await enforceRateLimit(req,env,"submit",6);
+  if(!limited.ok)return fail(limited.error,limited.status);
   const data=checked.data,id="LNG-"+crypto.randomUUID().replace(/-/g,"").slice(0,12).toUpperCase();
   const secret=data.followUp==="conversation"?randomToken():null,hash=secret?await sha256(secret):null;
   const created=now();let saved=[];
@@ -139,6 +160,8 @@ async function createFeedback(req,env,origin){
 }
 async function lookup(req,env){
   let body;try{body=await req.json();}catch(_){return fail("查詢格式不正確。");}
+  const limited=await enforceRateLimit(req,env,"lookup",120);
+  if(!limited.ok)return fail(limited.error,limited.status);
   const row=await verifiedReceipt(env,body.receipt);if(!row)return fail("私人憑證無效或查無資料。",404);
   const record=await readRecord(env,row.id);
   return json({ok:true,feedback:formatFeedback(record.row,record.messages,record.attachments)});
@@ -153,6 +176,8 @@ async function reply(req,env,origin){
   const inspected=await validatedFiles(form,env);if(inspected.error)return fail(inspected.error,inspected.status||400);
   const verified=await validateTurnstile(f(form,"turnstileToken"),origin,env);
   if(!verified.ok)return fail(verified.error,verified.status);
+  const requestLimit=await enforceRateLimit(req,env,"reply",20);
+  if(!requestLimit.ok)return fail(requestLimit.error,requestLimit.status);
   // 每個私人對話每小時最多五則玩家回覆，限制被竊憑證濫用。
   const limited=await env.DB.prepare("SELECT count(*) AS n FROM replies WHERE feedback_id=? AND author='player' AND created_at >= ?")
     .bind(row.id,new Date(Date.now()-3600000).toISOString()).first();
