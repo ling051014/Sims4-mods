@@ -4817,12 +4817,50 @@ button.avatar-editor-action { cursor:pointer; }
         gap:7px;
     }
 
-    .genealogy-feedback-type-choice > strong {
-        font-size:12px;
-    }
-
+    /* 手機版與視覺設定／圖片與儲存共用相同的文字層級；輸入欄維持 16px 防止 iOS 自動放大。 */
     .genealogy-feedback-panel .genealogy-feedback-field {
         font-size:16px;
+    }
+
+    .genealogy-feedback-panel .genealogy-feedback-field-label,
+    .genealogy-feedback-panel .genealogy-feedback-type-choice > strong,
+    .genealogy-feedback-panel .genealogy-feedback-reply-text strong,
+    .genealogy-feedback-panel .genealogy-feedback-contact-copy strong,
+    .genealogy-feedback-panel .genealogy-feedback-verify-text strong,
+    .genealogy-feedback-panel .genealogy-feedback-error-copy strong {
+        font-size:13px;
+        line-height:1.45;
+    }
+
+    .genealogy-feedback-panel .genealogy-feedback-optional,
+    .genealogy-feedback-panel .genealogy-feedback-help,
+    .genealogy-feedback-panel .genealogy-feedback-field-note,
+    .genealogy-feedback-panel .genealogy-feedback-reply-text small,
+    .genealogy-feedback-panel .genealogy-feedback-contact-copy small,
+    .genealogy-feedback-panel .genealogy-feedback-verify-text small,
+    .genealogy-feedback-panel .genealogy-feedback-error-copy p,
+    .genealogy-feedback-panel .genealogy-feedback-policy,
+    .genealogy-feedback-panel .genealogy-feedback-files li,
+    .genealogy-feedback-panel .genealogy-feedback-upload-zone .appearance-background-empty small {
+        font-size:12px;
+        line-height:1.55;
+    }
+
+    .genealogy-feedback-panel .genealogy-feedback-contact-copy em {
+        font-size:11.5px;
+    }
+
+    .genealogy-feedback-panel .genealogy-feedback-submit,
+    .genealogy-feedback-panel .genealogy-feedback-secondary,
+    .genealogy-feedback-panel .genealogy-feedback-back-link,
+    .genealogy-feedback-panel .genealogy-feedback-verify-card button,
+    .genealogy-feedback-panel .genealogy-feedback-files button {
+        font-size:13px;
+    }
+
+    .genealogy-feedback-panel .genealogy-feedback-error,
+    .genealogy-feedback-panel .genealogy-feedback-history-status {
+        font-size:12.5px;
     }
 
     .genealogy-feedback-reply-options {
@@ -4866,9 +4904,6 @@ button.avatar-editor-action { cursor:pointer; }
         padding:9px 7px;
     }
 
-    .genealogy-feedback-type-choice > strong {
-        font-size:11.5px;
-    }
 }
 
 @media (prefers-reduced-motion:reduce) {
