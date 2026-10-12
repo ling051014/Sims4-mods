@@ -120,13 +120,98 @@ body.realdate-only{--bg:#fafafa;--surface:#fff;--subtle:#f7fafc;--ink:#262626;--
 @media(max-width:780px){.realdate-only .rd-v1-hero{padding:53px 20px 42px}}
 @media(max-width:600px){.realdate-only .rd-v1-hero{min-height:0;padding:40px 20px 35px}.realdate-only .rd-v1-hero h1{font-size:42px}}
 
-/* 族譜工具內嵌回饋：只顯示表單，不顯示設計預覽導覽與後台 */
-body.genealogy-only{background:transparent}
-.genealogy-only .preview-bar,.genealogy-only .context-switch,.genealogy-only .site-shell,.genealogy-only .realdate-preview,.genealogy-only #admin-screen{display:none}
-.genealogy-only .modal-layer{position:relative;inset:auto;display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:12px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+/* Genealogy 回饋內容：外層視窗、標題、關閉、頂部工具列均交給 genealogy.html 原生 ui-dialog。
+   子頁只負責表單。畫面無第二層卡片／遮罩／標題，捲動僅發生在表單主體。 */
+body.genealogy-only{
+  background:var(--surface);
+  color:var(--ink);
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  height:100dvh;
+  overflow:hidden;
+}
+.genealogy-only .preview-bar,
+.genealogy-only .context-switch,
+.genealogy-only .site-shell,
+.genealogy-only .realdate-preview,
+.genealogy-only #admin-screen{display:none}
+.genealogy-only .modal-layer{
+  position:relative;
+  inset:auto;
+  display:flex;
+  align-items:stretch;
+  justify-content:stretch;
+  width:100%;
+  height:100dvh;
+  min-height:0;
+  padding:0;
+  background:transparent;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
 .genealogy-only .modal-layer.closed{display:none}
-.genealogy-only .feedback-modal{width:min(100%,650px);height:auto;max-height:calc(100dvh - 24px);border-radius:17px;box-shadow:0 20px 75px rgba(0,0,0,.12)}
-@media(max-width:600px){.genealogy-only .modal-layer{padding:0;height:100dvh;align-items:stretch}.genealogy-only .feedback-modal{width:100%;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}}
+.genealogy-only .feedback-modal{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  height:100%;
+  min-height:0;
+  max-height:none;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  overflow:hidden;
+  background:var(--surface);
+  color:var(--ink);
+}
+.genealogy-only .modal-top{display:none}
+.genealogy-only #form-main{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+}
+.genealogy-only #feedback-form{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+}
+.genealogy-only .modal-content{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:6px 20px 22px;
+}
+.genealogy-only .modal-bottom{
+  flex:0 0 auto;
+  border-top:1px solid var(--stroke);
+  background:var(--surface);
+  padding:12px 20px 13px;
+}
+.genealogy-only .success-pane{flex:1 1 auto;min-height:0;overflow-y:auto}
+.genealogy-only .thread-pane{flex:1 1 auto;min-height:0;max-height:none}
+.genealogy-only .thread-body{flex:1 1 auto;min-height:0}
+.genealogy-only .field,
+.genealogy-only .l1ng-select-trigger,
+.genealogy-only .type-choice,
+.genealogy-only .reply-option{
+  border-radius:7px;
+  background:var(--surface);
+  color:var(--ink);
+  border-color:var(--stroke);
+}
+.genealogy-only .type-choice.active,
+.genealogy-only .reply-option:has(input:checked){
+  background:var(--primary-pale);
+  border-color:var(--primary);
+  color:var(--primary);
+}
+.genealogy-only .primary{background:var(--primary);border-color:var(--primary)}
+.genealogy-only .verify-card{background:var(--subtle);border-color:var(--stroke)}
+@media(max-width:650px){
+  .genealogy-only .modal-content{padding:6px 16px 18px}
+  .genealogy-only .modal-bottom{padding:11px 16px 12px}
+}
 
 /* RealDate 使用本站原生頂條；回饋表單仍沿用原型內容區的獨立尺寸 */
 .realdate-only .feedback-modal .section{width:auto;max-width:none;padding:0}
@@ -215,23 +300,3 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
 @media(max-width:600px){body.realdate-only .rd-v1-main{width:calc(100% - 30px);margin:22px auto 34px}body.realdate-only .rd-v1-main .modal-layer.standalone .modal-content{padding:22px 17px}body.realdate-only .rd-v1-main .modal-layer.standalone .modal-bottom{padding:16px 17px}}
 
 
-/* Genealogy：共用族譜視窗的配色、標題結構和相同的分區線 */
-body.genealogy-only{--shadow:0 12px 44px rgba(0,0,0,.15);--small-shadow:0 8px 22px rgba(0,0,0,.11);color:var(--ink);font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
-.genealogy-only .feedback-modal{background:var(--surface);color:var(--ink);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--shadow)}
-.genealogy-only .modal-top{position:relative;background:var(--subtle);border-bottom:1px solid var(--stroke);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px 72px 17px;gap:0;min-height:110px}
-.genealogy-only .modal-top .eyebrow{color:var(--primary);font-size:10px;letter-spacing:1.4px}
-.genealogy-only .modal-top h2{font-size:19px;font-weight:650;letter-spacing:0;margin:4px 0}
-.genealogy-only .modal-top p{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
-.genealogy-only .modal-head-actions{position:absolute;inset:14px 12px auto 12px;display:flex;align-items:center;justify-content:space-between;gap:5px;pointer-events:none}
-.genealogy-only .modal-head-actions button{pointer-events:auto}
-.genealogy-only .modal-head-actions .icon-btn{height:32px;width:32px;border-radius:8px;color:var(--muted)}
-.genealogy-only .modal-head-actions .icon-btn:hover{background:var(--subtle-2);color:var(--ink)}
-.genealogy-only .modal-head-actions .text-action{font-size:11px;padding:5px 8px;border-radius:6px}
-.genealogy-only .modal-content{padding:20px 25px 25px}
-.genealogy-only .modal-bottom{border-top:1px solid var(--stroke);background:var(--surface);padding:14px 25px}
-.genealogy-only .field,.genealogy-only .l1ng-select-trigger,.genealogy-only .type-choice,.genealogy-only .reply-option{border-radius:8px;background:var(--surface);color:var(--ink);border-color:var(--stroke)}
-.genealogy-only .type-choice.active,.genealogy-only .reply-option:has(input:checked){background:var(--primary-pale);border-color:var(--primary);color:var(--primary)}
-.genealogy-only .primary{background:var(--primary);border-color:var(--primary)}
-.genealogy-only .l1ng-select-item.selected{background:var(--primary-pale)}
-.genealogy-only .verify-card{background:var(--subtle);border-color:var(--stroke)}
-@media(max-width:600px){.genealogy-only .modal-top{min-height:102px;padding:16px 62px}.genealogy-only .modal-content{padding:17px}.genealogy-only .modal-bottom{padding:13px 17px}}
