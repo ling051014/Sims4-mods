@@ -106,6 +106,7 @@
         source:'RealDate',category,target:targetSelect?.value||'mod',message,files,followUp:chosen,
         contactMethod:method,contactValue:contact,version:selected
       }),token);
+      resetReceiptCopyState();
       lastReceipt=result.receipt||'';
       $('success-code').textContent='回饋編號 '+result.id;
       $('success-token').textContent=lastReceipt;
@@ -117,8 +118,53 @@
     }catch(err){setError(err.message||'送出失敗。');verifier?.reset();}
     finally{button.disabled=false;button.classList.remove('is-loading');}
   });
-  $('copy-receipt')?.addEventListener('click',()=>{if(lastReceipt)navigator.clipboard?.writeText(lastReceipt);});
-  function newFeedback(){form.reset();files=[];displayFiles(files,$('file-list'));category='bug';updateVersion();$('char-count').textContent='0 / 2000';verifier?.reset();show('form-main');setError('');}
+  // 正式回饋沿用成功頁現有 SVG：複製圖示淡出、勾勾描繪，再返回複製圖示。
+  // 只有真正寫入剪貼簿後才觸發動畫；連續點擊要重設前一次的計時器。
+  const receiptCopyButton=$('copy-receipt');
+  let receiptCopyResetTimer=null;
+  function resetReceiptCopyState(){
+    if(receiptCopyResetTimer!==null){
+      clearTimeout(receiptCopyResetTimer);
+      receiptCopyResetTimer=null;
+    }
+    receiptCopyButton?.classList.remove('is-copied');
+    receiptCopyButton?.setAttribute('aria-label','複製回饋憑證');
+  }
+  async function copyReceiptToClipboard(value){
+    if(navigator.clipboard?.writeText){
+      try{await navigator.clipboard.writeText(value);return true;}catch(_){}
+    }
+    // iOS 網頁內瀏覽器若拒絕 Clipboard API，嘗試原生選取複製作為備援。
+    const field=document.createElement('textarea');
+    field.value=value;
+    field.readOnly=true;
+    field.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;';
+    document.body.appendChild(field);
+    try{
+      field.focus({preventScroll:true});
+      field.select();
+      field.setSelectionRange(0,value.length);
+      return !!document.execCommand('copy');
+    }catch(_){
+      return false;
+    }finally{
+      field.remove();
+    }
+  }
+  receiptCopyButton?.addEventListener('click',async()=>{
+    if(!lastReceipt)return;
+    const value=lastReceipt;
+    if(!(await copyReceiptToClipboard(value))){
+      resetReceiptCopyState();
+      receiptCopyButton.setAttribute('aria-label','複製失敗，請長按憑證手動複製');
+      return;
+    }
+    resetReceiptCopyState();
+    receiptCopyButton.classList.add('is-copied');
+    receiptCopyButton.setAttribute('aria-label','已複製回饋憑證');
+    receiptCopyResetTimer=window.setTimeout(resetReceiptCopyState,1450);
+  });
+  function newFeedback(){resetReceiptCopyState();form.reset();files=[];displayFiles(files,$('file-list'));category='bug';updateVersion();$('char-count').textContent='0 / 2000';verifier?.reset();show('form-main');setError('');}
   $('success-new')?.addEventListener('click',newFeedback);
   function messagesFor(item){
     const stack=$('visitor-messages');stack.replaceChildren();
