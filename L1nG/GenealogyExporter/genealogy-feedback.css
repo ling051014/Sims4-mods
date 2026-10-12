@@ -16,19 +16,16 @@
 .genealogy-feedback-panel .appearance-header{
   flex:0 0 auto;
 }
-.genealogy-feedback-tools{
+.genealogy-feedback-header-actions{
   display:flex;
   align-items:center;
   justify-content:flex-end;
   flex:0 0 auto;
-  padding:7px 20px;
-  border-bottom:1px solid var(--border-default);
-  background:var(--surface-card);
+  gap:11px;
 }
 .genealogy-feedback-thread{
   display:inline-flex;
   align-items:center;
-  gap:7px;
   min-height:30px;
   border:0;
   padding:5px 8px;
@@ -41,10 +38,6 @@
 }
 .genealogy-feedback-thread:hover{
   background:var(--surface-item-hover);
-}
-.genealogy-feedback-thread .l1ng-icon{
-  width:15px;
-  height:15px;
 }
 .genealogy-feedback-body{
   flex:1 1 auto;
@@ -69,5 +62,6 @@
     border-radius:0;
     border:0;
   }
-  .genealogy-feedback-tools{padding:5px 14px}
+  .genealogy-feedback-header-actions{gap:5px}
+  .genealogy-feedback-thread{font-size:11px}
 }
