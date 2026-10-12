@@ -201,6 +201,15 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     min-width: 0;
 }
 
+.main-nav > .nav-placeholder {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: default;
+}
+
 .main-nav > a {
     position: relative;
     color: var(--text-muted);
@@ -354,10 +363,9 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 /* ========【RealDate 首頁主視覺】 設定 - 首屏內容 ======== */
 .hero {
-    /* 背景 */ background:
+    /* 背景漸變至頁面底色，與下方內容自然銜接 */ background:
         radial-gradient(circle at 78% 22%, rgba(85, 172, 238, .09), transparent 25rem),
-        linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-    /* 下方邊框 */ border-bottom: 1px solid var(--line);
+        linear-gradient(180deg, #ffffff 0%, var(--page-bg) 100%);
 }
 
 .hero-inner {
@@ -1706,6 +1714,10 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
     .main-nav > a {
         /* 內縮空間 */ padding: 9px 10px;
+    }
+
+    .main-nav > .nav-placeholder {
+        padding: 9px 10px;
     }
 
     .main-nav > a.active::after {
