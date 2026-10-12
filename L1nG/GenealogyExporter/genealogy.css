@@ -4052,16 +4052,14 @@ button.avatar-editor-action { cursor:pointer; }
 .genealogy-feedback-panel .genealogy-feedback-peel-shadow {
     fill:none;
     stroke:var(--gf-text);
-    stroke-opacity:.24;
-    stroke-width:17;
-    filter:blur(4px);
+    stroke-opacity:.11;
+    stroke-width:8;
 }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-paper {
     fill:url(#genealogyFeedbackPaperGradient);
-    stroke:color-mix(in srgb,var(--gf-text) 13%,var(--gf-surface));
-    stroke-width:1;
-    filter:drop-shadow(4px 6px 5px color-mix(in srgb,var(--gf-text) 22%,transparent));
+    stroke:color-mix(in srgb,var(--gf-text) 10%,var(--gf-surface));
+    stroke-width:.8;
 }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-grain {
@@ -4074,13 +4072,6 @@ button.avatar-editor-action { cursor:pointer; }
     stroke:color-mix(in srgb,var(--gf-text) 29%,var(--gf-surface));
     stroke-width:1.5;
     opacity:.7;
-}
-
-.genealogy-feedback-panel .genealogy-feedback-peel-glint {
-    fill:none;
-    stroke:var(--gf-surface);
-    stroke-width:2;
-    opacity:.85;
 }
 
 @media (prefers-reduced-motion:reduce) {
