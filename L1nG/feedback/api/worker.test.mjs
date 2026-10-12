@@ -124,3 +124,12 @@ test('不得從 RealDate 網域冒充 Genealogy 來源',async()=>{
   const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data});
   assert.equal(response.status,403);
 });
+
+test('直連 workers.dev 管理路徑即使有認證標頭仍拒絕',async()=>{
+ const response=await call('/v1/admin/feedback',{headers:{'Cf-Access-Jwt-Assertion':'untrusted'}});
+ assert.equal(response.status,403);
+});
+test('同網域管理路由在缺少 Access 驗證時拒絕',async()=>{
+ const response=await worker.fetch(new Request('https://home.by-l1ng.com/feedback/admin-api/feedback'),{DB:dummyDB});
+ assert.equal(response.status,403);
+});
