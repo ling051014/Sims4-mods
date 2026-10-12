@@ -65,3 +65,7 @@
   .genealogy-feedback-header-actions{gap:5px}
   .genealogy-feedback-thread{font-size:11px}
 }
+
+.genealogy-feedback-thread-row{display:flex;justify-content:flex-end;padding:9px 20px 0;background:var(--surface-card)}
+.genealogy-feedback-body{display:flex;flex-direction:column}
+.genealogy-feedback-body iframe{flex:1;min-height:0}
