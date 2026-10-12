@@ -47,3 +47,11 @@
 - 特別注意：前端與 Worker 跨網域時，必須確保 Cloudflare Access 實際保護**管理 API 的主機名稱／路由**，讓有效的 `Cf-Access-Jwt-Assertion` 能傳到 Worker；僅保護 `admin.html` 並不足夠。正式上線前仍需確認登入方式、瀏覽器跨站 Cookie 規則及 CORS 的實機相容性。
 - 在 Cloudflare R2 建立、掛載私有 bucket 前，帶附件的提交會明確失敗而非假成功。限制為每筆最多三個檔案、單檔 10 MB、總計 20 MB。
 - GA4 不是這次回饋系統接線的內容，尚未安裝到網站或接至管理中心。
+
+## 2026-10-13 發布前阻擋檢查
+
+- `wrangler.jsonc` 的 D1 `database_id` 現為 `REPLACE_WITH_ACTUAL_D1_DATABASE_ID`。之前填入的 UUID 沒有從 Cloudflare 實際確認，不能當作資料庫真實 ID 使用；請由 Cloudflare D1 詳情頁複製正確 ID 後再部署。
+- Worker 公開來源白名單現在僅包含兩個正式網域；分支與 `pages.dev` 預覽**不允許**向正式回饋服務送出。Turnstile 的 hostname 限制也已同步收窄。
+- 已提交 GitHub Actions 工作流程，當回饋檔案修改時嘗試執行 Node 語法檢查與離線 Worker 測試。**本輪尚未拿到 GitHub Actions 執行通過的證據**；不得視為通過。
+- 管理員附件連結與跨主機 Cloudflare Access 的實際憑證轉送仍需端到端測試。僅 HTML 頁面的登入保護不足以保護 API。
+- 發布前需加入濫用頻率限制並完整測試連續提交；Turnstile 不是通用的頻率限制機制。
