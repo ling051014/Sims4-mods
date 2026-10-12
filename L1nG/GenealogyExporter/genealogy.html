@@ -1346,16 +1346,19 @@
 
         <!-- ========【匯出面板】 設定 - 圖片匯出與 JSON 備份入口 ======== -->
         <div class="export-mask" id="exportDialog" aria-hidden="true">
-            <div class="export-modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
-                <div class="export-header">
-                    <div class="export-title-group">
-                        <h2 id="exportTitle"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span><span>匯出</span></h2>
-                        <p id="exportDesc">可選擇匯出目前完整族譜圖片，或匯出 JSON 備份。</p>
+            <div class="ui-dialog-panel appearance-panel appearance-modal export-modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle" aria-describedby="exportDesc">
+                <div class="appearance-header">
+                    <div class="appearance-heading">
+                        <span class="l1ng-icon icon-box-arrow-up appearance-heading-icon" aria-hidden="true"></span>
+                        <div>
+                            <h2 id="exportTitle">匯出</h2>
+                            <p id="exportDesc">可選擇匯出目前完整族譜圖片，或匯出 JSON 備份。</p>
+                        </div>
                     </div>
                     <button class="help-close-btn" id="exportCloseBtn" type="button" title="關閉" aria-label="關閉匯出"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
                 </div>
 
-                <div class="export-grid">
+                <div class="appearance-scroll-body export-grid">
                     <section class="export-section">
                         <div class="export-section-head">
                             <h3><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>族譜圖片</span></h3>
