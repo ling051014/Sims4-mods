@@ -175,12 +175,18 @@
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
         url.searchParams.set("parent", location.origin);
-        url.searchParams.set("v", "20261012-info-native-size-r1");
+        url.searchParams.set("v", "20261012-genealogy-fixed-scroll-r2");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         activeUrl = url;
+        // 族譜「關於」的外框尺寸固定；只有其他政策視窗維持依內容調整高度。
+        const content = modal.querySelector(".l1ng-site-info-content");
+        if (nativeGenealogy && section === "genealogy") {
+            content.style.removeProperty("height");
+        }
         if (frame.src !== url.href) {
-            setContentHeight(modal, section === "genealogy" ? 265 : section === "terms" ? 450 : 520);
-            const content = modal.querySelector(".l1ng-site-info-content");
+            if (!(nativeGenealogy && section === "genealogy")) {
+                setContentHeight(modal, section === "terms" ? 450 : 520);
+            }
             content.classList.add("is-loading");
             content.setAttribute("aria-busy", "true");
             modal.querySelector(".l1ng-site-info-loading").hidden = false;
@@ -224,7 +230,8 @@
         if (!dialog || !dialog.isConnected || event.source !== dialog.querySelector("iframe").contentWindow) return;
         if (!activeUrl || event.origin !== activeUrl.origin) return;
         if (event.data && event.data.type === "l1ng-site-info-close") close();
-        if (event.data && event.data.type === "l1ng-site-info-size") {
+        if (event.data && event.data.type === "l1ng-site-info-size"
+            && !(nativeGenealogy && dialog.dataset.siteInfoSection === "genealogy")) {
             setContentHeight(dialog, event.data.height);
         }
     });
