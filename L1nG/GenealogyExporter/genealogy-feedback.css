@@ -1,9 +1,8 @@
-/* 回饋視窗直接使用族譜原生 ui-dialog-backdrop／appearance-panel 骨架。
-   標題與關閉鍵固定在父頁；只有下方 iframe 表單內容捲動。 */
-.genealogy-feedback-backdrop{
+/* 回饋視窗沿用族譜的視覺設定視窗骨架與主題變數。 */
+.genealogy-feedback-backdrop {
   z-index:100;
 }
-.genealogy-feedback-panel{
+.genealogy-feedback-panel {
   width:min(760px,100%);
   height:min(760px,calc(100dvh - 40px));
   max-height:calc(100dvh - 40px);
@@ -13,19 +12,37 @@
   display:flex;
   flex-direction:column;
 }
-.genealogy-feedback-panel .appearance-header{
+.genealogy-feedback-panel .appearance-header {
   flex:0 0 auto;
 }
-.genealogy-feedback-header-actions{
+.genealogy-feedback-header-actions {
   display:flex;
   align-items:center;
   justify-content:flex-end;
   flex:0 0 auto;
   gap:11px;
 }
-.genealogy-feedback-thread{
+.genealogy-feedback-body {
+  flex:1 1 auto;
+  min-height:0;
+  min-width:0;
+  padding:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  background:var(--surface-card);
+}
+.genealogy-feedback-thread-row {
+  display:flex;
+  flex:0 0 auto;
+  justify-content:flex-end;
+  padding:9px 20px 0;
+  background:var(--surface-card);
+}
+.genealogy-feedback-thread {
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   min-height:30px;
   border:0;
   padding:5px 8px;
@@ -36,36 +53,84 @@
   font-size:11.5px;
   cursor:pointer;
 }
-.genealogy-feedback-thread:hover{
+.genealogy-feedback-thread:hover {
   background:var(--surface-item-hover);
 }
-.genealogy-feedback-body{
-  flex:1 1 auto;
-  min-height:0;
-  padding:0;
-  overflow:hidden;
-  background:var(--surface-card);
-}
-#genealogyFeedbackFrame{
+#genealogyFeedbackFrame {
   display:block;
+  flex:1 1 auto;
   width:100%;
   height:100%;
+  min-height:0;
   border:0;
   background:var(--surface-card);
 }
-@media(max-width:650px){
-  .genealogy-feedback-backdrop{padding:0}
-  .genealogy-feedback-panel{
-    width:100%;
-    height:100dvh;
-    max-height:none;
-    border-radius:0;
-    border:0;
-  }
-  .genealogy-feedback-header-actions{gap:5px}
-  .genealogy-feedback-thread{font-size:11px}
-}
 
-.genealogy-feedback-thread-row{display:flex;justify-content:flex-end;padding:9px 20px 0;background:var(--surface-card)}
-.genealogy-feedback-body{display:flex;flex-direction:column}
-.genealogy-feedback-body iframe{flex:1;min-height:0}
+/* 與使用說明、總覽和視覺設定一致：手機保留外框、圓角及固定標題。 */
+@media (max-width:720px) {
+  .genealogy-feedback-backdrop {
+    z-index:400;
+    padding:14px;
+  }
+  .genealogy-feedback-panel {
+    width:100%;
+    height:min(760px,calc(100dvh - 28px));
+    max-height:calc(100dvh - 28px);
+    border:1px solid var(--border-default);
+    border-radius:10px;
+  }
+  .genealogy-feedback-panel .appearance-header {
+    gap:12px;
+    padding:15px 16px 12px;
+  }
+  .genealogy-feedback-panel .appearance-heading {
+    min-width:0;
+    gap:9px;
+  }
+  .genealogy-feedback-panel .appearance-heading h2 {
+    font-size:15px;
+    line-height:1.3;
+  }
+  .genealogy-feedback-panel .appearance-heading p {
+    font-size:11px;
+    line-height:1.45;
+  }
+  .genealogy-feedback-header-actions {
+    gap:6px;
+  }
+  .genealogy-feedback-header-actions .help-close-btn {
+    flex:0 0 30px;
+  }
+  .genealogy-feedback-thread-row {
+    padding:7px 16px 0;
+  }
+  .genealogy-feedback-thread {
+    min-height:34px;
+    padding:6px 8px;
+    font-size:12px;
+  }
+}
+@media (max-width:375px) {
+  .genealogy-feedback-backdrop {
+    padding:10px;
+  }
+  .genealogy-feedback-panel {
+    height:calc(100dvh - 20px);
+    max-height:calc(100dvh - 20px);
+  }
+  .genealogy-feedback-panel .appearance-header {
+    padding:13px 13px 11px;
+  }
+  .genealogy-feedback-thread-row {
+    padding:6px 13px 0;
+  }
+}
+@media (max-width:720px) and (max-height:480px) {
+  .genealogy-feedback-backdrop {
+    padding:8px;
+  }
+  .genealogy-feedback-panel {
+    height:calc(100dvh - 16px);
+    max-height:calc(100dvh - 16px);
+  }
+}
