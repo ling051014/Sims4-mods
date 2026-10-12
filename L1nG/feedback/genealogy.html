@@ -106,10 +106,10 @@
 </div><p class="compact-help">選擇匿名對話不代表管理員目前在線，回覆可能不是即時的。</p>
 </section>
 <section class="section"><details class="contact-card" id="contact-option"><summary><span class="contact-icon"><svg class="i sm"><use href="#ico-msg"></use></svg></span><span class="contact-copy"><strong>其他聯絡方式 <em>完全選填</em></strong><small>不留 Email 也能用私人憑證在網站接收回覆。</small></span><span class="contact-chevron"><svg class="i sm"><use href="#ico-arrow"></use></svg></span></summary><div class="contact-fields"><label class="field-label" for="contact-method">聯絡方式</label><select class="field" id="contact-method"><option value="email">電子郵件</option><option value="discord">Discord</option></select><label class="field-label" for="contact-value" style="margin-top:10px;display:block">聯絡資料</label><input autocomplete="email" class="field" id="contact-value" maxlength="120" placeholder="example@email.com" type="email"/><p class="hint">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</p><div class="field-error" id="contact-error">請確認聯絡方式格式，或收合此區塊保持匿名。</div></div></details></section>
-<div class="policy-inline"><svg class="i sm noshrink"><use href="#ico-shield"></use></svg><span>請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</span></div>
+
 <section class="section"><div class="section-heading"><span class="field-label">安全驗證 <span class="required">*</span></span><span class="optional">Cloudflare Turnstile</span></div><div class="verify-card" id="verify-card"><div class="verify-left"><div class="verify-icon"><svg class="i lg"><use href="#ico-shield"></use></svg></div><div class="verify-text"><strong id="verify-title">人機驗證</strong><span id="verify-subtitle">Cloudflare 驗證服務</span></div></div><button id="verify-button" type="button" disabled aria-disabled="true">驗證</button></div><div class="verify-legal">驗證服務尚未啟用。</div><div class="field-error" id="verify-error">請先完成人機驗證。</div></section>
 </div>
-<div class="modal-bottom"><div class="privacy-tip"><svg class="i sm"><use href="#ico-lock"></use></svg><span>自行選擇一次性提交或匿名對話</span></div><button class="primary submit" type="submit">送出回饋 <svg class="i sm"><use href="#ico-arrow"></use></svg></button></div>
+<div class="modal-bottom"><div class="privacy-tip"><svg class="i sm"><use href="#ico-shield"></use></svg><span>請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</span></div><button class="primary submit" type="submit">送出回饋 <svg class="i sm"><use href="#ico-arrow"></use></svg></button></div>
 </form>
 </div>
 <div class="success-pane hide" id="success-pane">
@@ -117,7 +117,7 @@
 <span class="preview-pill">回饋已建立</span><h2>已收到你的回饋！</h2>
 <p class="success-code" id="success-code">回饋編號 LNG-1029</p>
 <p id="success-description">你可以直接在網站接收回覆，完全不必留下聯絡方式。</p>
-<div class="credential-card" id="success-credential"><div class="credential-heading"><svg class="i sm"><use href="#ico-lock"></use></svg><strong>你的私人回饋憑證</strong></div><code id="success-token" class="credential-token"></code><button class="secondary credential-copy" id="copy-receipt" type="button">複製回饋憑證</button><small>請妥善保存。回饋編號本身無法開啟對話；私人憑證則相當於密碼，請勿公開。</small></div>
+<div class="credential-card" id="success-credential"><div class="credential-heading"><svg class="i sm"><use href="#ico-lock"></use></svg><strong>你的私人回饋憑證</strong></div><code id="success-token" class="credential-token"></code><button class="secondary credential-copy" id="copy-receipt" type="button"><svg class="copy-state-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="copy-shape" d="M8 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm-3 4H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path class="check-shape" d="m5 12 4.5 4.5L19 7"/></svg><span>複製回饋憑證</span></button><small>請妥善保存。回饋編號本身無法開啟對話；私人憑證則相當於密碼，請勿公開。</small></div>
 <div class="success-actions"><button class="secondary" id="success-new" type="button">再寫一則</button><button class="primary" id="success-open-thread" type="button">查看匿名對話 <svg class="i sm"><use href="#ico-arrow"></use></svg></button></div>
 <p class="demo-disclaimer">訊息服務尚未連接，暫時無法存取對話紀錄。</p>
 </div>
