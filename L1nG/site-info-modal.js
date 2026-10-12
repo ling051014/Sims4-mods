@@ -29,10 +29,10 @@
     let dialog = null;
     let opener = null;
     let previousOverflow = "";
-    let requestNumber = 0;
     const language = () => {
         const selected = document.documentElement.dataset.language || document.documentElement.lang || "zh-Hant";
-        return ["zh-Hant", "zh-Hans", "en"].includes(selected) ? selected : "zh-Hant";
+        if (["zh-Hant", "zh-Hans", "en"].includes(selected)) return selected;
+        return selected.toLowerCase().startsWith("en") ? "en" : "zh-Hant";
     };
     function createDialog() {
         if (dialog) return dialog;
@@ -89,12 +89,12 @@
         const url = new URL(baseUrl.href);
         url.searchParams.set("embed", "1");
         url.searchParams.set("section", section);
+        url.searchParams.set("lang", language());
         const frame = modal.querySelector(".l1ng-site-info-frame");
         if (frame.src !== url.href) {
             modal.querySelector(".l1ng-site-info-loading").hidden = false;
             frame.src = url.href;
         }
-        requestNumber++;
         modal.querySelector(".l1ng-site-info-panel").focus({ preventScroll: true });
     }
     function close() {

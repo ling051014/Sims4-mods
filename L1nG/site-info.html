@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" id="top">
+<html lang="zh-Hant" data-language="zh-Hant" id="top">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,78 +7,154 @@
     <title>使用、隱私與 Cookie 說明 · L1nG</title>
     <meta name="description" content="L1nG 網站的隱私權與 Cookie 說明、使用及免責聲明。">
     <script>
-        // ========【內嵌閱讀模式】依公開的 section 參數只顯示指定內容 ========
+        // ========【嵌入初始狀態】在載入樣式前決定內容與語言 ========
         (() => {
             const params = new URLSearchParams(location.search);
             const section = params.get("section");
-            if (params.get("embed") !== "1" || !["privacy", "terms", "genealogy"].includes(section)) return;
-            document.documentElement.dataset.siteInfoSection = section;
+            if (params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(section)) {
+                document.documentElement.dataset.siteInfoSection = section;
+            }
+            const lang = params.get("lang");
+            if (["zh-Hant", "zh-Hans", "en"].includes(lang)) {
+                document.documentElement.dataset.language = lang;
+                document.documentElement.lang = lang;
+            }
             document.addEventListener("keydown", event => {
-                if (event.key === "Escape" && window.parent !== window) {
+                if (event.key === "Escape" && window.parent !== window && document.documentElement.dataset.siteInfoSection) {
                     event.preventDefault();
-                    window.parent.postMessage({ type: "l1ng-site-info-close" }, "*");
+                    window.parent.postMessage({ type: "l1ng-site-info-close" }, location.origin);
                 }
             });
         })();
     </script>
-    <link rel="stylesheet" href="site-info.css?v=20261012-embed-r1">
+    <link rel="stylesheet" href="site-info.css?v=20261012-site-info-i18n-r1">
     <link rel="stylesheet" href="site-footer.css?v=20261012-footer-index-r1">
+    <script src="site-info.js?v=20261012-site-info-i18n-r1" defer></script>
 </head>
 <body>
 <header class="policy-header">
     <div class="policy-header-inner">
         <a class="policy-brand" href="home.html">L1nG</a>
-        <a class="policy-back" href="home.html">← 返回首頁</a>
+        <div class="policy-header-actions">
+            <div class="policy-language-switch" role="group" aria-label="Language">
+                <button type="button" data-site-language-button="zh-Hant" aria-pressed="true">繁中</button>
+                <span aria-hidden="true">/</span>
+                <button type="button" data-site-language-button="zh-Hans" aria-pressed="false">简中</button>
+                <span aria-hidden="true">/</span>
+                <button type="button" data-site-language-button="en" aria-pressed="false">EN</button>
+            </div>
+            <a class="policy-back" href="home.html"><span data-lang="zh-Hant">← 返回首頁</span><span data-lang="zh-Hans">← 返回首页</span><span data-lang="en">← Back to home</span></a>
+        </div>
     </div>
 </header>
 <main class="policy-content">
     <span class="policy-eyebrow">SITE INFORMATION</span>
-    <h1>使用、隱私與 Cookie 說明</h1>
-    <p class="policy-intro">以下說明適用於 L1nG 的公開網站及其專案頁面。本頁提供一般資訊，不代表對個別法律適用情況的判斷。<br><span lang="en">Information for visitors to L1nG's public project websites.</span></p>
+    <h1><span data-lang="zh-Hant">使用、隱私與 Cookie 說明</span><span data-lang="zh-Hans">使用、隐私与 Cookie 说明</span><span data-lang="en">Site Policies & Information</span></h1>
+    <p class="policy-intro"><span data-lang="zh-Hant">以下說明適用於 L1nG 的公開網站及其專案頁面。本頁提供一般資訊，不代表對個別法律適用情況的判斷。</span><span data-lang="zh-Hans">以下说明适用于 L1nG 的公开网站及其项目页面。本页仅提供一般信息，不代表对个别法律适用情况的判断。</span><span data-lang="en">The following information applies to L1nG's public websites and project pages. It provides general information, not a determination of specific legal obligations.</span></p>
     <section class="policy-section" id="privacy" aria-labelledby="privacy-title">
-        <h2 id="privacy-title">隱私權與 Cookie</h2>
-        <h3>網站流量分析</h3>
-        <p>本站使用 Google Analytics 4（GA4）了解頁面瀏覽、流量來源及功能使用情況。視網站所使用的標記與訪客的瀏覽器設定，GA4 可能透過 Cookie 或類似技術記錄訪問和互動資料。相關資料可能由 Google 依其服務條款與隱私權政策處理。</p>
-        <p lang="en">This site uses Google Analytics 4 for aggregate usage and traffic analysis. Depending on the deployed configuration and browser settings, Google Analytics may use cookies or similar technologies.</p>
-        <h3>資料儲存與使用者提交</h3>
-        <p>網站上的偏好設定及部分族譜資料可能保存在目前裝置的瀏覽器中；若你使用問題反饋功能，主動送出的文字、附件或聯絡內容則可能交由回饋服務處理。請勿在回饋中提交不必要的敏感個人資料。</p>
-        <p lang="en">Some settings and genealogy data may be stored in your browser. Information or attachments you deliberately submit through feedback features may be processed to respond to your report.</p>
-        <h3>第三方網站</h3>
-        <p>前往原作者、Patreon、愛發電或其他第三方網站後，適用該網站各自的隱私與 Cookie 規則。</p>
-        <h3>如何管理 Cookie</h3>
-        <p>你可以透過瀏覽器的隱私設定限制、清除 Cookie，亦可使用 <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics 停用工具</a>（如瀏覽器支援）。</p>
-        <p class="policy-info">目前本網站尚未提供可直接管理 GA4 同意狀態的站內 Cookie 設定介面；此頁提供資料使用說明，不應被視為已實作同意管理。各地區適用的同意機制仍須依實際部署情況另外確認與實作。</p>
+        <h2 id="privacy-title"><span data-lang="zh-Hant">隱私權與 Cookie</span><span data-lang="zh-Hans">隐私权与 Cookie</span><span data-lang="en">Privacy & Cookies</span></h2>
+        <div class="policy-language-content" data-site-language="zh-Hant">
+<h3>網站流量分析</h3>
+<p>本站使用 Google Analytics 4（GA4）了解頁面瀏覽、流量來源及功能使用情況。視網站所使用的標記與訪客的瀏覽器設定，GA4 可能透過 Cookie 或類似技術記錄訪問和互動資料。相關資料可能由 Google 依其服務條款與隱私權政策處理。</p>
+<h3>資料儲存與使用者提交</h3>
+<p>網站上的偏好設定及部分族譜資料可能保存在目前裝置的瀏覽器中；若你使用問題反饋功能，主動送出的文字、附件或聯絡內容則可能交由回饋服務處理。請勿在回饋中提交不必要的敏感個人資料。</p>
+<h3>第三方網站</h3>
+<p>前往原作者、Patreon、愛發電或其他第三方網站後，適用該網站各自的隱私與 Cookie 規則。</p>
+<h3>如何管理 Cookie</h3>
+<p>你可以透過瀏覽器的隱私設定限制、清除 Cookie，亦可使用 <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics 停用工具</a>（如瀏覽器支援）。</p>
+<p class="policy-info">目前本網站尚未提供可直接管理 GA4 同意狀態的站內 Cookie 設定介面；此頁提供資料使用說明，不應被視為已實作同意管理。各地區適用的同意機制仍須依實際部署情況另外確認與實作。</p>
+        </div>
+        <div class="policy-language-content" data-site-language="zh-Hans">
+<h3>网站流量分析</h3>
+<p>本站使用 Google Analytics 4（GA4）了解页面浏览量、流量来源及功能使用情况。根据网站使用的跟踪代码及访客的浏览器设置，GA4 可能通过 Cookie 或类似技术记录访问和互动数据。相关数据可能由 Google 根据其服务条款及隐私政策处理。</p>
+<h3>数据存储与用户提交</h3>
+<p>网站偏好设置及部分族谱数据可能保存在当前设备的浏览器中；如果使用问题反馈功能，主动提交的文字、附件或联系方式可能由反馈服务处理。请勿提交不必要的敏感个人信息。</p>
+<h3>第三方网站</h3>
+<p>访问原作者、Patreon、爱发电或其他第三方网站后，将适用相应网站的隐私与 Cookie 规则。</p>
+<h3>如何管理 Cookie</h3>
+<p>你可以通过浏览器的隐私设置限制或清除 Cookie，也可以使用 <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics 停用工具</a>（如浏览器支持）。</p>
+<p class="policy-info">本站目前尚未提供可直接管理 GA4 同意状态的站内 Cookie 设置界面；本页仅说明数据使用情况，不代表已经实现同意管理。各地区适用的同意机制仍需根据实际部署情况另行确认和实现。</p>
+        </div>
+        <div class="policy-language-content" data-site-language="en">
+<h3>Website analytics</h3>
+<p>This site uses Google Analytics 4 (GA4) to understand page views, traffic sources and use of site features. Depending on the analytics configuration and your browser settings, GA4 may use cookies or similar technologies to record visits and interactions. Google may process related data according to its terms and privacy policy.</p>
+<h3>Browser storage and feedback submissions</h3>
+<p>Site preferences and some genealogy data may be stored in your browser on this device. If you submit feedback, text, attachments or contact details that you choose to provide may be processed by the feedback service. Please do not submit unnecessary sensitive personal information.</p>
+<h3>Third-party websites</h3>
+<p>When you visit a mod author's website, Patreon, AFDIAN or another third-party service, that service's own privacy and cookie policies apply.</p>
+<h3>Managing cookies</h3>
+<p>You can restrict or clear cookies in your browser's privacy settings. You may also use the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a>, if supported by your browser.</p>
+<p class="policy-info">This site does not currently provide an in-site control for managing GA4 consent. This page explains how information may be used; it does not mean a consent management system has been implemented. Applicable consent requirements must be reviewed and implemented for the actual site deployment.</p>
+        </div>
     </section>
     <section class="policy-section" id="terms" aria-labelledby="terms-title">
-        <h2 id="terms-title">使用與免責聲明</h2>
-        <h3>非官方專案</h3>
-        <p>《The Sims 4》及相關商標屬各自權利人所有。L1nG 是獨立玩家創作網站，與 Electronic Arts（EA）、Maxis 或相關權利人沒有官方隸屬或背書關係。</p>
-        <p lang="en">The Sims 4 and related trademarks belong to their respective owners. L1nG is an independent fan project and is not affiliated with or endorsed by Electronic Arts or Maxis.</p>
-        <h3>模組與工具的相容性</h3>
-        <p>模組及相關工具可能受遊戲更新、不同安裝環境或其他模組影響。使用前請確認支援版本並自行備份重要遊戲存檔；本站不保證所有功能在任何環境下均可持續相容。</p>
-        <h3>第三方模組與漢化</h3>
-        <p>第三方模組、素材及相關權利歸各原作者所有。漢化專區提供的是 L1nG 製作或維護的翻譯內容；原模組請依原作者的方式與授權取得。</p>
-        <h3>外部連結</h3>
-        <p>本站提供第三方連結以方便查閱原作者說明與下載來源；外部網站的內容、下載服務及隱私措施由各網站自行管理。</p>
+        <h2 id="terms-title"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="zh-Hans">使用与免责声明</span><span data-lang="en">Terms & Disclaimer</span></h2>
+        <div class="policy-language-content" data-site-language="zh-Hant">
+<h3>非官方專案</h3>
+<p>《The Sims 4》及相關商標屬各自權利人所有。L1nG 是獨立玩家創作網站，與 Electronic Arts（EA）、Maxis 或相關權利人沒有官方隸屬或背書關係。</p>
+<h3>模組與工具的相容性</h3>
+<p>模組及相關工具可能受遊戲更新、不同安裝環境或其他模組影響。使用前請確認支援版本並自行備份重要遊戲存檔；本站不保證所有功能在任何環境下均可持續相容。</p>
+<h3>第三方模組與漢化</h3>
+<p>第三方模組、素材及相關權利歸各原作者所有。漢化專區提供的是 L1nG 製作或維護的翻譯內容；原模組請依原作者的方式與授權取得。</p>
+<h3>外部連結</h3>
+<p>本站提供第三方連結以方便查閱原作者說明與下載來源；外部網站的內容、下載服務及隱私措施由各網站自行管理。</p>
+        </div>
+        <div class="policy-language-content" data-site-language="zh-Hans">
+<h3>非官方项目</h3>
+<p>《The Sims 4》及相关商标归各自权利人所有。L1nG 是独立玩家创作网站，与 Electronic Arts（EA）、Maxis 或相关权利人没有官方隶属或背书关系。</p>
+<h3>模组与工具的兼容性</h3>
+<p>模组及相关工具可能受到游戏更新、不同安装环境或其他模组的影响。使用前请确认支持的版本，并自行备份重要的游戏存档；本站不保证所有功能在任何环境下都能持续兼容。</p>
+<h3>第三方模组与汉化</h3>
+<p>第三方模组、素材及相关权利归各原作者所有。汉化专区提供的是 L1nG 制作或维护的翻译内容；原模组请按照原作者的方式及授权获取。</p>
+<h3>外部链接</h3>
+<p>本站提供第三方链接，方便查看原作者说明与下载来源；外部网站的内容、下载服务及隐私措施由相应网站自行管理。</p>
+        </div>
+        <div class="policy-language-content" data-site-language="en">
+<h3>Independent fan project</h3>
+<p>The Sims 4 and related trademarks belong to their respective rights holders. L1nG is an independent fan-made site and is not affiliated with, sponsored by or endorsed by Electronic Arts (EA), Maxis or their rights holders.</p>
+<h3>Mod and tool compatibility</h3>
+<p>Mods and related tools may be affected by game updates, installation environments or conflicts with other mods. Check the supported versions and back up important game saves before use. Continued compatibility in every environment is not guaranteed.</p>
+<h3>Third-party mods and translations</h3>
+<p>Rights to third-party mods and assets remain with their respective creators. The translations section provides translations made or maintained by L1nG. Obtain the original mods through their creators under their applicable terms.</p>
+<h3>External links</h3>
+<p>Links to other sites are provided for access to original creators' documentation and downloads. Each external site is responsible for its own content, downloads and privacy practices.</p>
+        </div>
     </section>
     <section class="policy-section" id="genealogy" aria-labelledby="genealogy-title">
-        <h2 id="genealogy-title">關於族譜工具</h2>
-        <p>族譜工具用於整理《模擬市民 4》的家族與關係資料。玩家匯入遊戲提取資料或使用瀏覽器儲存功能時，請自行保存重要備份；工具的展示結果不代表 EA 官方族譜資料或保證所有關係均可完整提取。</p>
-        <p lang="en">The genealogy tool is an independent fan-made editor. Back up important files and verify imported relationships before relying on exports.</p>
-        <p><a href="GenealogyExporter/genealogy.html">開啟族譜工具</a> · <a href="GenealogyExporter/genealogy-exporter.html">族譜提取器</a></p>
+        <h2 id="genealogy-title"><span data-lang="zh-Hant">關於族譜工具</span><span data-lang="zh-Hans">关于族谱工具</span><span data-lang="en">About the Genealogy Tool</span></h2>
+        <div class="policy-language-content" data-site-language="zh-Hant">
+<p>族譜工具用於整理《模擬市民 4》的家族與關係資料。玩家匯入遊戲提取資料或使用瀏覽器儲存功能時，請自行保存重要備份；工具的展示結果不代表 EA 官方族譜資料或保證所有關係均可完整提取。</p>
+<p><a href="GenealogyExporter/genealogy.html">開啟族譜工具</a> · <a href="GenealogyExporter/genealogy-exporter.html">族譜提取器</a></p>
+        </div>
+        <div class="policy-language-content" data-site-language="zh-Hans">
+<p>族谱工具用于整理《模擬市民 4》的家族和关系数据。导入游戏提取的数据或使用浏览器存储功能时，请自行保留重要备份。工具中的展示结果不代表 EA 官方族谱数据，也不保证所有关系都能被完整提取。</p>
+<p><a href="GenealogyExporter/genealogy.html">打开族谱工具</a> · <a href="GenealogyExporter/genealogy-exporter.html">族谱提取器</a></p>
+        </div>
+        <div class="policy-language-content" data-site-language="en">
+<p>The genealogy tool helps organize family and relationship data from The Sims 4. Keep your own backups when importing extracted game data or storing information in the browser. Displayed relationships are not official EA family tree records, and the tool may not be able to extract every relationship.</p>
+<p><a href="GenealogyExporter/genealogy.html">Open Genealogy Tool</a> · <a href="GenealogyExporter/genealogy-exporter.html">Genealogy Exporter</a></p>
+        </div>
     </section>
 </main>
 <footer class="l1ng-document-footer" data-footer-project="l1ng">
   <div class="l1ng-footer-inner">
     <div class="l1ng-footer-main">
-      <div class="l1ng-footer-identity"><strong>L1nG</strong><p>《模擬市民 4》模組、工具與繁體中文內容</p></div>
-      <nav class="l1ng-footer-nav" aria-label="網站導覽"><a href="home.html">L1nG 首頁</a><a href="RealDate/index.html">RealDate</a><a href="GenealogyExporter/genealogy.html">族譜工具</a><a href="Translations/index.html">漢化專區</a></nav>
-      <a class="l1ng-footer-top" href="#top">↑ 返回頂部</a>
+      <div class="l1ng-footer-identity"><strong>L1nG</strong><p><span data-lang="zh-Hant">《模擬市民 4》模組、工具與繁體中文內容</span><span data-lang="zh-Hans">《模拟人生 4》模组、工具与繁体中文内容</span><span data-lang="en">The Sims 4 mods, tools and Traditional Chinese content</span></p></div>
+      <nav class="l1ng-footer-nav" aria-label="Site navigation">
+        <a href="home.html"><span data-lang="zh-Hant">L1nG 首頁</span><span data-lang="zh-Hans">L1nG 首页</span><span data-lang="en">L1nG Home</span></a>
+        <a href="RealDate/index.html">RealDate</a>
+        <a href="GenealogyExporter/genealogy.html"><span data-lang="zh-Hant">族譜工具</span><span data-lang="zh-Hans">族谱工具</span><span data-lang="en">Genealogy Tool</span></a>
+        <a href="Translations/index.html"><span data-lang="zh-Hant">漢化專區</span><span data-lang="zh-Hans">汉化专区</span><span data-lang="en">Translations</span></a>
+      </nav>
+      <a class="l1ng-footer-top" href="#top"><span data-lang="zh-Hant">↑ 返回頂部</span><span data-lang="zh-Hans">↑ 返回顶部</span><span data-lang="en">↑ Back to top</span></a>
     </div>
     <div class="l1ng-footer-legal">
       <p class="l1ng-footer-copyright">© 2026 L1nG.</p>
-      <nav class="l1ng-footer-policy-links" aria-label="政策資訊"><a href="#privacy">隱私權與 Cookie</a><a href="#terms">使用與免責聲明</a></nav>
-      <p class="l1ng-footer-disclaimer">《The Sims 4》及相關商標屬各自權利人所有。本站為獨立玩家創作網站，非 EA／Maxis 官方網站。</p>
+      <nav class="l1ng-footer-policy-links" aria-label="Policies">
+        <a href="#privacy"><span data-lang="zh-Hant">隱私權與 Cookie</span><span data-lang="zh-Hans">隐私权与 Cookie</span><span data-lang="en">Privacy & Cookies</span></a>
+        <a href="#terms"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="zh-Hans">使用与免责声明</span><span data-lang="en">Terms & Disclaimer</span></a>
+      </nav>
+      <p class="l1ng-footer-disclaimer"><span data-lang="zh-Hant">《The Sims 4》及相關商標屬各自權利人所有。本站為獨立玩家創作網站，非 EA／Maxis 官方網站。</span><span data-lang="zh-Hans">《The Sims 4》及相关商标归各自权利人所有。本站为独立玩家创作网站，并非 EA／Maxis 官方网站。</span><span data-lang="en">The Sims 4 and related trademarks belong to their respective rights holders. L1nG is an independent fan site, not affiliated with EA or Maxis.</span></p>
     </div>
   </div>
 </footer>
