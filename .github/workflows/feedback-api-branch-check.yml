@@ -32,5 +32,8 @@ jobs:
           node --check L1nG/feedback/realdate-feedback-live.js
           node --check L1nG/feedback/admin.js
           node --check L1nG/GenealogyExporter/genealogy-feedback.js
+      - name: Validate deployment is not accidentally configured with guessed D1 ID
+        run: |
+          node -e "const fs=require('fs'); const s=fs.readFileSync('L1nG/feedback/api/wrangler.jsonc','utf8'); if(!s.includes('REPLACE_WITH_ACTUAL_D1_DATABASE_ID'))process.exitCode=1"
       - name: Run feedback API tests (offline)
         run: node --test L1nG/feedback/api/worker.test.mjs
