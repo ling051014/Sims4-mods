@@ -29,6 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const contactValue = $('genealogyFeedbackContact');
   const attached = [];
   let lastFocus = null;
+  let verification = null;
+  const verificationCard = backdrop.querySelector('.genealogy-feedback-verify-card');
+  const originalVerifyHelp = verificationCard?.nextElementSibling;
+  if (verificationCard) {
+    const oldButton = verificationCard.querySelector('button[disabled]');
+    oldButton?.remove();
+    const host = document.createElement('div');
+    host.id = 'genealogy-feedback-turnstile';
+    verificationCard.appendChild(host);
+    if (core.isLive()) {
+      core.createVerification(host).then(v => {
+        verification = v;
+        if (originalVerifyHelp) originalVerifyHelp.textContent = '送出前請完成人機驗證。';
+      }).catch(e => {
+        if (originalVerifyHelp) originalVerifyHelp.textContent = e.message;
+      });
+    } else if (originalVerifyHelp) {
+      originalVerifyHelp.textContent = '此分支預覽不會送出正式回饋。';
+    }
+  }
+
 
   // 右下角先掀起，紙面往上剝離至標題下緣的黏貼線；標題與分隔線保持固定。
   const pages = $('genealogyFeedbackPages');
@@ -209,7 +230,20 @@ document.addEventListener('DOMContentLoaded', () => {
     submitButton.disabled = true;
     submitButton.classList.add('is-loading');
     try {
-      await core.submit(payload);
+      const result = await core.submit(payload, verification?.getToken());
+      const status = $('genealogyFeedbackHistoryStatus');
+      const receipt = $('genealogyFeedbackReceipt');
+      const messageText = result.receipt
+        ? '已收到回饋，編號：' + result.id + '。請立即保存私人憑證：' + result.receipt
+        : '已收到回饋，編號：' + result.id + '。';
+      if (status) { status.textContent = messageText; status.hidden = false; }
+      if (receipt && result.receipt) receipt.value = result.receipt;
+      setTab(1);
+      verification?.reset();
+      form.reset();
+      attached.splice(0, attached.length);
+      updateFileList();
+      updateFields();
     } catch (err) {
       showError(err?.message || '目前無法送出回饋，請稍後再試。');
     } finally {
@@ -220,13 +254,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const historyForm = $('genealogyFeedbackHistoryForm');
   const receiptInput = $('genealogyFeedbackReceipt');
-  historyForm.addEventListener('submit', event => {
+  historyForm.addEventListener('submit', async event => {
     event.preventDefault();
     const status = $('genealogyFeedbackHistoryStatus');
-    status.textContent = receiptInput.value.trim()
-      ? '目前尚未開放回饋紀錄查詢，請稍後再試。'
-      : '請先貼上私人回饋憑證。';
-    status.hidden = false;
+    const receipt = receiptInput.value.trim();
+    if (!receipt) { status.textContent = '請先貼上私人回饋憑證。'; status.hidden = false; return; }
+    status.textContent = '正在查詢回饋…'; status.hidden = false;
+    try {
+      const response = await core.lookup(receipt);
+      const item = response.feedback;
+      const labels = {pending:'尚未處理',progress:'處理中',done:'已完成',spam:'垃圾訊息'};
+      const lines = ['回饋編號：' + item.id, '處理狀態：' + (labels[item.status]||item.status)];
+      for (const reply of item.messages||[]) lines.push((reply.author==='admin'?'管理員':'玩家')+'：'+reply.body);
+      status.textContent = lines.join('\n');
+    } catch (err) { status.textContent = err?.message || '查詢失敗，請稍後再試。'; }
   });
   // 憑證欄按 Enter 等同點擊「查詢」；Shift+Enter 保留換行，輸入法選字不觸發。
   receiptInput.addEventListener('keydown', event => {
