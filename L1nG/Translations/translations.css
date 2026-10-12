@@ -201,10 +201,9 @@ section[id] {
 /* ========【主視覺】 設定 - 漢化專區定位 ======== */
 .hero {
     position:relative;
-    overflow:hidden;
-    border-bottom:1px solid var(--line);
-    background:
-        linear-gradient(180deg,rgba(255,255,255,.7),rgba(247,248,251,.4));
+    overflow:clip;
+    border:0;
+    background:transparent;
 }
 
 .hero-inner {
@@ -324,7 +323,7 @@ section[id] {
     width:380px;
     height:380px;
     right:-230px;
-    bottom:-100px;
+    top:110px;
     background:rgba(127,115,180,.05);
 }
 
@@ -610,12 +609,17 @@ section[id] {
     margin-top:18px;
     padding-top:14px;
     border-top:1px solid var(--line-soft);
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px 18px;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
 }
 
 .card-facts span {
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    overflow-wrap:anywhere;
     color:var(--sub);
     font-size:11px;
 }
@@ -637,7 +641,9 @@ section[id] {
 
 .card-actions {
     margin-top:24px;
-    flex-wrap:wrap;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    align-items:stretch;
     gap:8px;
 }
 
@@ -995,3 +1001,17 @@ html,body,body *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{width:6px;height:6px}
 html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,body *::-webkit-scrollbar-track{background:transparent}
 html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
+
+/* ========【漢化下載】 同尺寸動作與語言切換清單 ======== */
+.card-actions > .card-action,.card-actions > .download-language-menu {width:100%;min-width:0}
+.download-language-menu {position:relative}
+.download-language-menu > summary {width:100%;height:100%;gap:8px;list-style:none;cursor:pointer}
+.download-language-menu > summary::-webkit-details-marker {display:none}
+.download-chevron {display:block;width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+.download-language-menu[open] .download-chevron {transform:translateY(2px) rotate(225deg)}
+.download-language-options {position:absolute;left:0;right:0;bottom:calc(100% + 7px);z-index:8;padding:5px;border:1px solid var(--translation-border);border-radius:10px;background:var(--surface);box-shadow:0 14px 30px rgba(48,37,81,.12)}
+.download-language-options a {display:block;padding:9px 10px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:12px}
+.download-language-options a:hover,.download-language-options a:focus-visible {background:var(--translation-soft);color:var(--translation-dark)}
+.card-note {background:var(--translation-soft);color:var(--sub)}
+@media(max-width:640px) {.card-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.card-action{padding:0 6px;font-size:10px}.card-facts{gap:8px}}
+@media(prefers-reduced-motion:reduce){.download-chevron{transition:none}}

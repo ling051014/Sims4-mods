@@ -242,3 +242,18 @@ window.addEventListener("resize", () => {
 
 updateTranslations();
 revealLinkedTranslation();
+
+// ========【漢化語言選單】 切換、點擊外側與 Escape 關閉 ========
+const downloadMenus = Array.from(document.querySelectorAll(".download-language-menu"));
+downloadMenus.forEach((menu) => {
+    menu.addEventListener("toggle", () => {
+        if (menu.open) downloadMenus.forEach((other) => { if (other !== menu) other.open = false; });
+    });
+    menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => { menu.open = false; }));
+});
+document.addEventListener("click", (event) => {
+    downloadMenus.forEach((menu) => { if (menu.open && !menu.contains(event.target)) menu.open = false; });
+});
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") downloadMenus.forEach((menu) => { menu.open = false; });
+});
