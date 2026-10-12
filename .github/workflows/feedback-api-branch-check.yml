@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - genealogy-structural-optimization-20260926
+      - main
     paths:
       - 'L1nG/feedback/api/**'
       - 'L1nG/feedback/feedback-core.js'
@@ -32,8 +33,8 @@ jobs:
           node --check L1nG/feedback/realdate-feedback-live.js
           node --check L1nG/feedback/admin.js
           node --check L1nG/GenealogyExporter/genealogy-feedback.js
-      - name: Validate deployment is not accidentally configured with guessed D1 ID
+      - name: Verify production bindings and forbidden published routes
         run: |
-          node -e "const fs=require('fs'); const s=fs.readFileSync('L1nG/feedback/api/wrangler.jsonc','utf8'); if(!s.includes('REPLACE_WITH_ACTUAL_D1_DATABASE_ID'))process.exitCode=1"
+          node -e "const fs=require('fs'); const c=JSON.parse(fs.readFileSync('L1nG/feedback/api/wrangler.jsonc'));if(c.d1_databases?.[0]?.binding!=='DB'||c.d1_databases?.[0]?.database_id!=='41982056-0458-490b-b9a7-a09f929960e3'||c.r2_buckets?.[0]?.binding!=='ATTACHMENTS'||c.r2_buckets?.[0]?.bucket_name!=='l1ng-feedback-attachments')process.exitCode=1;if(c.routes||c.route)process.exitCode=1"
       - name: Run feedback API tests (offline)
         run: node --test L1nG/feedback/api/worker.test.mjs
