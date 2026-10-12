@@ -2,6 +2,25 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 let page='overview';let entries=[];let current=null;let status='all';
+const API='https://l1ng-feedback-api.zpl74520.workers.dev';
+function adminError(err){notify(err.message||'無法讀取回饋資料。');}
+async function api(path,method='GET',payload){
+  const response=await fetch(API+path,{
+    method,cache:'no-store',credentials:'include',
+    headers:payload?{'content-type':'application/json'}:undefined,
+    body:payload?JSON.stringify(payload):undefined
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok||!data.ok)throw new Error(data.error||'管理服務無法存取，請確認 Cloudflare Access 已完成設定。');
+  return data;
+}
+async function refresh(){
+  try {
+    const data=await api('/v1/admin/feedback');
+    entries=data.items.map(v=>({...v,title:v.title||v.message.slice(0,32),site:v.source,replyState:v.followUp==='conversation'?'admin':'no-reply'}));
+    render();
+  }catch(err){entries=[];render();adminError(err);}
+}
 const idList=['all','pending','progress','done','spam'];
 function label(s){return({pending:'尚未處理',progress:'處理中',done:'已完成',spam:'垃圾訊息'})[s]||s}
 function notify(message){const t=$('toast');if(!t)return;t.textContent=message;t.classList.add('show');}
@@ -34,7 +53,13 @@ function render(){
   const row=document.createElement('button');row.type='button';row.className='feedback-row';row.textContent=e.title+'　'+e.site+'　'+label(e.status);row.addEventListener('click',()=>openDetail(e));root.appendChild(row);
  }
 }
-function openDetail(e){current=e;$('detail-layer')?.classList.add('open');$('detail-layer')?.setAttribute('aria-hidden','false');if($('detail-title'))$('detail-title').textContent=e.title;if($('detail-body'))$('detail-body').textContent=e.message;if($('detail-status'))$('detail-status').value=e.status}
+async function openDetail(e){current=e;try{const info=await api('/v1/admin/feedback/'+encodeURIComponent(e.id));current={...e,...info.feedback};}catch(err){adminError(err);return;}$('detail-layer')?.classList.add('open');$('detail-layer')?.setAttribute('aria-hidden','false');if($('detail-title'))$('detail-title').textContent=e.title;if($('detail-body'))$('detail-body').textContent=e.message;if($('detail-status'))$('detail-status').value=current.status;
+ const content=$('detail-body');
+ if(content){content.replaceChildren();const header=document.createElement('p');header.textContent=current.message;content.append(header);
+ for(const m of current.messages||[]){const p=document.createElement('p');p.textContent=(m.author==='admin'?'管理員：':'玩家：')+m.body;content.append(p);}
+ for(const a of current.attachments||[]){const link=document.createElement('a');link.textContent='附件：'+a.name;link.href=API+'/v1/admin/feedback/'+encodeURIComponent(current.id)+'/attachments/'+encodeURIComponent(a.id);link.target='_blank';link.rel='noopener noreferrer';content.append(link);}
+ }
+}
 function closeDetail(){$('detail-layer')?.classList.remove('open');$('detail-layer')?.setAttribute('aria-hidden','true')}
 function activateTheme(){const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next}
 document.querySelectorAll('[data-adminpage]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.adminpage)));
@@ -56,15 +81,15 @@ $('apply-date')?.addEventListener('click',()=>{
 $('settings-theme')?.addEventListener('click',activateTheme);
 $('detail-close')?.addEventListener('click',closeDetail);
 $('detail-layer')?.addEventListener('click',e=>{if(e.target===$('detail-layer'))closeDetail()});
-$('detail-update')?.addEventListener('click',()=>notify('目前尚未連接管理服務，無法儲存變更。'));
-$('detail-delete')?.addEventListener('click',()=>notify('目前尚未連接管理服務，無法刪除回饋。'));
-$('admin-send')?.addEventListener('click',()=>notify('目前尚未連接回覆服務。'));
+$('detail-update')?.addEventListener('click',async()=>{if(!current)return;try{await api('/v1/admin/feedback/'+encodeURIComponent(current.id),'PATCH',{status:$('detail-status').value});await refresh();closeDetail();notify('已更新處理狀態。');}catch(err){adminError(err);}});
+$('detail-delete')?.addEventListener('click',()=>{$('confirm-layer')?.setAttribute('aria-hidden','false');});
+$('admin-send')?.addEventListener('click',async()=>{if(!current)return;const message=$('admin-reply').value.trim();if(!message)return notify('請輸入回覆內容。');try{await api('/v1/admin/feedback/'+encodeURIComponent(current.id)+'/replies','POST',{message});$('admin-reply').value='';await refresh();await openDetail(current);notify('已送出回覆。');}catch(err){adminError(err);}});
 $('cancel-delete')?.addEventListener('click',()=>{$('confirm-layer')?.setAttribute('aria-hidden','true')});
-$('confirm-delete')?.addEventListener('click',()=>notify('目前尚未連接管理服務。'));
+$('confirm-delete')?.addEventListener('click',async()=>{if(!current)return;try{await api('/v1/admin/feedback/'+encodeURIComponent(current.id),'DELETE');$('confirm-layer')?.setAttribute('aria-hidden','true');closeDetail();await refresh();notify('已刪除回饋。');}catch(err){adminError(err);}});
 for(const id of ['ga-users','ga-views','ga-downloads','ga-new','ov-users','ov-views','ov-downloads'])if($(id))$(id).textContent='—';
 if($('overview-chart'))$('overview-chart').innerHTML='<span class="empty-data">尚未連接網站分析資料。</span>';
 if($('overview-recent'))$('overview-recent').textContent='目前沒有回饋紀錄。';
 for(const id of ['ga-countries','ga-pages','ga-devices','ga-referrals','ga-trend-chart','analytics-traffic-chart'])if($(id))$(id).textContent='尚未連接資料來源。';
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail()});
-showPage('overview');render();
+showPage('overview');render();refresh();
 })();
