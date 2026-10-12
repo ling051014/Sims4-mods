@@ -51,6 +51,33 @@
             element.hidden = true;
             element.style.display = "none";
         }
+        if (chosen === "genealogy") {
+            // 族譜工具沒有網站頁腳：把同一份版權聲明及完整政策搬進「關於」視窗。
+            // 不複製免責內容，修改共用說明頁即可同步更新。
+            const genealogy = document.getElementById("genealogy");
+            const legal = document.querySelector(".l1ng-footer-legal");
+            if (genealogy && legal) {
+                legal.classList.add("policy-embedded-legal");
+                legal.querySelector(".l1ng-footer-policy-links")?.remove();
+                genealogy.appendChild(legal);
+                for (const id of ["terms", "privacy"]) {
+                    const section = document.getElementById(id);
+                    const heading = section?.querySelector("h2");
+                    if (!section || !heading) continue;
+                    const details = document.createElement("details");
+                    details.className = "policy-embedded-details";
+                    const summary = document.createElement("summary");
+                    for (const node of heading.childNodes) {
+                        summary.appendChild(node.cloneNode(true));
+                    }
+                    details.append(summary, section);
+                    genealogy.appendChild(details);
+                    // 內容仍由同一份條款及翻譯供應，開合僅影響閱讀方式。
+                    section.hidden = false;
+                    section.style.display = "block";
+                }
+            }
+        }
     }
     document.addEventListener("click", event => {
         const button = event.target.closest?.("[data-site-language-button]");

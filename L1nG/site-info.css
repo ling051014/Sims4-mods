@@ -51,3 +51,74 @@ html[data-site-info-section] #genealogy > p:last-child { display: none; }
 .policy-language-switch button { background: transparent; border: 0; padding: 6px 2px; color: #929ca6; font: inherit; font-weight: 600; cursor: pointer; }
 .policy-language-switch button.active, .policy-language-switch button:hover { color: #438cbe; }
 @media (max-width: 600px) { .policy-header-actions { gap: 12px; } .policy-language-switch { gap: 4px; } .policy-back { font-size: 11px; } }
+
+/* ========【族譜工具「關於」】共用網站的版權聲明與政策內容 ======== */
+html[data-site-info-section="genealogy"] #genealogy .policy-language-content > p:last-child { display: none; }
+html[data-site-info-section="genealogy"] .policy-embedded-legal {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 17px 0 19px;
+    margin-top: 22px;
+    border-top: 1px solid #e3e8ed;
+    color: #71818e;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-copyright {
+    margin: 0;
+    color: #4d6070;
+    font-size: 12px;
+    font-weight: 650;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-disclaimer {
+    margin: 0;
+    color: #71818e;
+    font-size: 12px;
+    line-height: 1.8;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details {
+    border-top: 1px solid #e3e8ed;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details:last-child {
+    border-bottom: 1px solid #e3e8ed;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 49px;
+    padding: 13px 1px;
+    color: #455867;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    cursor: pointer;
+    list-style: none;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary::-webkit-details-marker { display: none; }
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary::after {
+    content: "";
+    flex: 0 0 7px;
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform .18s ease;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary::after {
+    transform: rotate(225deg);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:hover,
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:focus-visible {
+    color: #438cbe;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > .policy-section {
+    padding: 0 1px 23px;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section h3:first-of-type {
+    margin-top: 9px;
+}
+@media (prefers-reduced-motion: reduce) {
+    html[data-site-info-section="genealogy"] .policy-embedded-details > summary::after { transition: none; }
+}

@@ -110,7 +110,7 @@
         url.searchParams.set("embed", "1");
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
-        url.searchParams.set("v", "20261012-site-info-visibility-r2");
+        url.searchParams.set("v", section === "genealogy" ? "20261012-genealogy-legal-r1" : "20261012-site-info-visibility-r2");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         if (frame.src !== url.href) {
             const content = modal.querySelector(".l1ng-site-info-content");
