@@ -79,6 +79,66 @@
             }
         }
     }
+    // 族譜嵌入頁自有捲動容器與細滑塊，不使用 iOS／瀏覽器原生卷軸。
+    if (isEmbedded && params.get("section") === "genealogy") {
+        const scroller = document.body;
+        const track = document.createElement("div");
+        track.className = "policy-scroll-track";
+        track.setAttribute("aria-hidden", "true");
+        const thumb = document.createElement("div");
+        thumb.className = "policy-scroll-thumb";
+        track.appendChild(thumb);
+        scroller.appendChild(track);
+        let maxTop = 0;
+        let maxMove = 0;
+        const refreshScroll = () => {
+            const height = scroller.clientHeight;
+            const total = scroller.scrollHeight;
+            const overflow = Math.max(0, total - height);
+            track.hidden = overflow <= 1;
+            if (track.hidden) return;
+            const trackHeight = track.clientHeight;
+            const thumbHeight = Math.min(trackHeight, Math.max(28, trackHeight * height / total));
+            maxTop = overflow;
+            maxMove = trackHeight - thumbHeight;
+            thumb.style.height = thumbHeight + "px";
+            thumb.style.transform = "translateY(" + (overflow ? scroller.scrollTop / overflow * maxMove : 0) + "px)";
+        };
+        scroller.addEventListener("scroll", refreshScroll, { passive: true });
+        window.addEventListener("resize", refreshScroll);
+        if ("ResizeObserver" in window) {
+            new ResizeObserver(refreshScroll).observe(document.querySelector(".policy-content"));
+        }
+        document.querySelectorAll(".policy-embedded-details").forEach(details => {
+            details.addEventListener("toggle", refreshScroll);
+        });
+        let dragging = false;
+        let pointerStartY = 0;
+        let startTop = 0;
+        track.addEventListener("pointerdown", event => {
+            if (track.hidden || event.button !== 0) return;
+            dragging = true;
+            pointerStartY = event.clientY;
+            startTop = scroller.scrollTop;
+            if (event.target === track) {
+                const rect = track.getBoundingClientRect();
+                const target = Math.max(0, Math.min(maxMove, event.clientY - rect.top - thumb.offsetHeight / 2));
+                scroller.scrollTop = maxMove ? target / maxMove * maxTop : 0;
+                startTop = scroller.scrollTop;
+            }
+            track.setPointerCapture(event.pointerId);
+            event.preventDefault();
+        });
+        track.addEventListener("pointermove", event => {
+            if (!dragging) return;
+            scroller.scrollTop = startTop + (maxMove ? (event.clientY - pointerStartY) / maxMove * maxTop : 0);
+        });
+        const finishDrag = () => { dragging = false; };
+        track.addEventListener("pointerup", finishDrag);
+        track.addEventListener("pointercancel", finishDrag);
+        requestAnimationFrame(refreshScroll);
+        document.fonts?.ready?.then(refreshScroll);
+    }
     if (isEmbedded && window.parent !== window) {
         const parentOrigin = params.get("parent") || "*";
         const content = document.querySelector(".policy-content");
