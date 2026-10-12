@@ -134,10 +134,7 @@ html[data-site-info-section="genealogy"] body {
     overflow-y:auto;
     overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-}
-html[data-site-info-section="genealogy"] body::-webkit-scrollbar {
-    display:none;
+    scrollbar-width:thin;
 }
 html[data-site-info-section="genealogy"] .policy-content {
     padding-right:30px;
@@ -180,41 +177,20 @@ html[data-site-info-section="genealogy"] .policy-embedded-details .policy-sectio
     line-height:1.8;
     font-weight:400;
 }
-html[data-site-info-section="genealogy"] .policy-scroll-track {
-    position:fixed;
-    top:12px;
-    bottom:12px;
-    right:7px;
-    z-index:5;
-    width:5px;
+/* 沿用族譜工具既有的 6px 捲軸尺寸及主題色，不額外建立可拖曳假滑塊。 */
+html[data-site-info-section="genealogy"] body {
+    scrollbar-width:thin;
+    scrollbar-color:var(--site-info-border,#e3e8ed) transparent;
+}
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar {display:block;width:6px;height:6px}
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar-track {background:transparent}
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar-thumb {
+    background:var(--site-info-border,#e3e8ed);
     border-radius:999px;
-    background:color-mix(in srgb,var(--site-info-border,#e3e8ed) 40%,transparent);
-    touch-action:none;
-}
-html[data-site-info-section="genealogy"] .policy-scroll-thumb {
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    min-height:28px;
-    border-radius:999px;
-    background:var(--site-info-accent,#438cbe);
-    opacity:.55;
-    transition:opacity .16s ease;
-}
-html[data-site-info-section="genealogy"] .policy-scroll-track:hover .policy-scroll-thumb,
-html[data-site-info-section="genealogy"] .policy-scroll-track:active .policy-scroll-thumb {
-    opacity:.9;
-}
-html[data-site-info-section="genealogy"] .policy-scroll-track[hidden] {
-    display:none;
 }
 @media(max-width:640px){
     html[data-site-info-section="genealogy"] .policy-content {
         padding-right:25px;
-    }
-    html[data-site-info-section="genealogy"] .policy-scroll-track {
-        right:6px;
     }
 }
 
