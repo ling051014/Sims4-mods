@@ -241,7 +241,28 @@ export default {
     const url=new URL(request.url),path=url.pathname.replace(/\/+$/,"")||"/";
     if(path==="/health"&&request.method==="GET")return json({ok:true,service:"l1ng-feedback-api"});
     if(!env.DB)return fail("回饋資料庫尚未連接。",503);
-    if(path.startsWith("/v1/admin/"))return admin(request,env,path);
+    if(path.startsWith("/v1/admin/")){
+      // 管理介面使用獨立白名單；實際資料端點仍須驗證 Access JWT。
+      const origin=request.headers.get("origin");
+      const adminOrigin=env.ADMIN_ORIGIN||"https://home.by-l1ng.com";
+      if(request.method==="OPTIONS"){
+        if(origin!==adminOrigin)return fail("不允許的管理來源。",403);
+        return new Response(null,{status:204,headers:{
+          "access-control-allow-origin":adminOrigin,
+          "access-control-allow-credentials":"true",
+          "access-control-allow-methods":"GET,POST,PATCH,DELETE,OPTIONS",
+          "access-control-allow-headers":"Content-Type",
+          "access-control-max-age":"600","vary":"Origin"
+        }});
+      }
+      const response=await admin(request,env,path);
+      if(origin!==adminOrigin)return response;
+      const headers=new Headers(response.headers);
+      headers.set("access-control-allow-origin",adminOrigin);
+      headers.set("access-control-allow-credentials","true");
+      headers.set("vary","Origin");
+      return new Response(response.body,{status:response.status,headers});
+    }
     const origin=request.headers.get("origin");
     if(!validOrigin(origin,env))return fail("不允許的網站來源。",403);
     if(request.method==="OPTIONS")return new Response(null,{status:204,headers:cors(origin)});
