@@ -43,13 +43,9 @@ html[data-site-info-section] #genealogy > p:last-child { display: none; }
 @media (max-width: 640px) { html[data-site-info-section] .policy-content { padding: 3px 17px 28px; } }
 
 /* ========【說明頁多語系】依語言顯示完整翻譯，嵌入時繼承來源頁 ======== */
-[data-lang], [data-site-language] { display: none; }
-html[data-language="zh-Hant"] [data-lang="zh-Hant"],
-html[data-language="zh-Hant"] [data-site-language="zh-Hant"],
-html[data-language="zh-Hans"] [data-lang="zh-Hans"],
-html[data-language="zh-Hans"] [data-site-language="zh-Hans"],
-html[data-language="en"] [data-lang="en"],
-html[data-language="en"] [data-site-language="en"] { display: revert; }
+/* 隱藏語言由元素 hidden 屬性及切換程式直接管理，不依賴選擇器顯示狀態。 */
+[data-lang][hidden],
+[data-site-language][hidden] { display: none; }
 .policy-header-actions { display: flex; align-items: center; gap: 27px; }
 .policy-language-switch { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; color: #a0a9b3; font-size: 11px; }
 .policy-language-switch button { background: transparent; border: 0; padding: 6px 2px; color: #929ca6; font: inherit; font-weight: 600; cursor: pointer; }

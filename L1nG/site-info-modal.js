@@ -30,7 +30,12 @@
     let opener = null;
     let previousOverflow = "";
     const language = () => {
-        const selected = document.documentElement.dataset.language || document.documentElement.lang || "zh-Hant";
+        // 族譜工具採用獨立的多語系控制器，html.lang 不一定會跟著更新。
+        const selected = window.LING_I18N?.language
+            || document.getElementById("languageSelect")?.value
+            || document.documentElement.dataset.language
+            || document.documentElement.lang
+            || "zh-Hant";
         if (["zh-Hant", "zh-Hans", "en"].includes(selected)) return selected;
         return selected.toLowerCase().startsWith("en") ? "en" : "zh-Hant";
     };
@@ -90,6 +95,7 @@
         url.searchParams.set("embed", "1");
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
+        url.searchParams.set("v", "20261012-site-info-visibility-r2");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         if (frame.src !== url.href) {
             modal.querySelector(".l1ng-site-info-loading").hidden = false;
