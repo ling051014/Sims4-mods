@@ -3935,7 +3935,7 @@ button.avatar-editor-action { cursor:pointer; }
     display:none;
 }
 
-/* 撕頁轉場只作用在標題分隔線下方；標題列固定不參與動畫。 */
+/* 便利貼從右下角掀起：上緣是黏貼處，最後才脫離；標題與分隔線固定不動。 */
 .genealogy-feedback-panel .genealogy-feedback-pages {
     position:relative;
     display:grid;
@@ -3947,7 +3947,6 @@ button.avatar-editor-action { cursor:pointer; }
     min-height:0;
     overflow:hidden;
     isolation:isolate;
-    perspective:1050px;
     background:var(--gf-surface);
 }
 
@@ -3963,51 +3962,106 @@ button.avatar-editor-action { cursor:pointer; }
     z-index:1;
 }
 
+/* 先掀右下角，再沿對角線向左上撕；80% 前不移動黏在上方的紙緣。 */
 .genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .genealogy-feedback-view.is-tearing-page {
     position:absolute;
     inset:0;
     z-index:2;
-    box-shadow:0 11px 25px color-mix(in srgb,var(--gf-text) 19%,transparent);
-    transform-origin:50% 0;
-    backface-visibility:hidden;
+    transform-origin:0 0;
     pointer-events:none;
-    will-change:transform,opacity;
-    animation:genealogy-feedback-sheet-tear .62s cubic-bezier(.26,.66,.3,1) both;
+    will-change:clip-path,transform;
+    animation:genealogy-feedback-sheet-peel .82s cubic-bezier(.24,.66,.22,1) both;
 }
 
-/* 捲起的紙面薄光澤和撕開後的細微鋸齒，不額外建立整頁假卡片。 */
-.genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .is-tearing-page::after {
+/* 紙張背面沿斜向摺痕滑動，讓底下的新頁逐步露出，而不是整張往下翻。 */
+.genealogy-feedback-panel .genealogy-feedback-pages.is-tearing::after {
     content:"";
     position:absolute;
-    inset:0 0 auto;
+    inset:0;
     z-index:3;
-    height:14px;
     pointer-events:none;
-    background:linear-gradient(180deg,
-        color-mix(in srgb,var(--gf-text) 11%,transparent),
-        color-mix(in srgb,var(--gf-surface) 75%,transparent) 55%,
-        transparent);
-    clip-path:polygon(0 0,6% 0,8% 35%,11% 0,18% 0,20% 30%,24% 0,33% 0,35% 32%,40% 0,49% 0,51% 35%,56% 0,65% 0,67% 31%,73% 0,81% 0,83% 34%,89% 0,96% 0,98% 30%,100% 0,100% 100%,0 100%);
-    animation:genealogy-feedback-sheet-edge .62s ease-out both;
+    background:linear-gradient(135deg,
+        color-mix(in srgb,var(--gf-surface) 94%,var(--gf-text)),
+        var(--gf-surface) 35%,
+        color-mix(in srgb,var(--gf-subtle) 82%,var(--gf-text)) 70%,
+        color-mix(in srgb,var(--gf-text) 18%,var(--gf-surface)));
+    filter:drop-shadow(-3px -3px 4px color-mix(in srgb,var(--gf-text) 18%,transparent));
+    will-change:clip-path;
+    animation:genealogy-feedback-sheet-fold .82s cubic-bezier(.24,.66,.22,1) both;
 }
 
-@keyframes genealogy-feedback-sheet-tear {
-    0% {transform:translate3d(0,0,0) rotateX(0deg) rotateZ(0deg);opacity:1}
-    18% {transform:translate3d(0,5px,0) rotateX(-7deg) rotateZ(-.5deg);opacity:1}
-    43% {transform:translate3d(8px,26px,0) rotateX(-22deg) rotateZ(1.7deg);opacity:1}
-    73% {transform:translate3d(25px,45%,0) rotateX(-32deg) rotateZ(4deg);opacity:.92}
-    100% {transform:translate3d(55px,115%,0) rotateX(-43deg) rotateZ(7deg);opacity:0}
+@keyframes genealogy-feedback-sheet-peel {
+    0%,8% {
+        clip-path:polygon(0 0,100% 0,100% 100%,100% 100%,0 100%);
+        transform:translate3d(0,0,0) rotate(0deg);
+        opacity:1;
+    }
+    20% {
+        clip-path:polygon(0 0,100% 0,100% 82%,82% 100%,0 100%);
+        transform:translate3d(0,0,0) rotate(0deg);
+        opacity:1;
+    }
+    50% {
+        clip-path:polygon(0 0,100% 0,100% 52%,52% 100%,0 100%);
+        transform:translate3d(0,0,0) rotate(0deg);
+        opacity:1;
+    }
+    74% {
+        clip-path:polygon(0 0,100% 0,100% 8%,8% 100%,0 100%);
+        transform:translate3d(0,0,0) rotate(0deg);
+        opacity:1;
+    }
+    84% {
+        clip-path:polygon(0 0,70% 0,0 70%,0 70%,0 70%);
+        transform:translate3d(0,0,0) rotate(0deg);
+        opacity:1;
+    }
+    94% {
+        clip-path:polygon(0 0,22% 0,0 22%,0 22%,0 22%);
+        transform:translate3d(-1%,-2%,0) rotate(-2deg);
+        opacity:1;
+    }
+    100% {
+        clip-path:polygon(0 0,0 0,0 0,0 0,0 0);
+        transform:translate3d(-10%,-20%,0) rotate(-7deg);
+        opacity:0;
+    }
 }
 
-@keyframes genealogy-feedback-sheet-edge {
-    0%,8% {opacity:0}
-    30% {opacity:.9}
-    100% {opacity:.25}
+@keyframes genealogy-feedback-sheet-fold {
+    0%,8% {
+        clip-path:polygon(100% 100%,100% 100%,100% 100%,100% 100%);
+        opacity:0;
+    }
+    20% {
+        clip-path:polygon(100% 82%,100% 89%,89% 100%,82% 100%);
+        opacity:1;
+    }
+    50% {
+        clip-path:polygon(100% 52%,100% 61%,61% 100%,52% 100%);
+        opacity:1;
+    }
+    74% {
+        clip-path:polygon(100% 8%,100% 18%,18% 100%,8% 100%);
+        opacity:1;
+    }
+    84% {
+        clip-path:polygon(70% 0,80% 0,0 80%,0 70%);
+        opacity:.95;
+    }
+    94% {
+        clip-path:polygon(22% 0,32% 0,0 32%,0 22%);
+        opacity:.7;
+    }
+    100% {
+        clip-path:polygon(0 0,0 0,0 0,0 0);
+        opacity:0;
+    }
 }
 
 @media (prefers-reduced-motion:reduce) {
     .genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .genealogy-feedback-view.is-tearing-page,
-    .genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .is-tearing-page::after {
+    .genealogy-feedback-panel .genealogy-feedback-pages.is-tearing::after {
         animation:none;
     }
 }
