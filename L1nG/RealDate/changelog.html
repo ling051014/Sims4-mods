@@ -8,8 +8,7 @@
     <meta name="theme-color" content="#fafafa">
     <link rel="stylesheet" href="realdate.css?v=20261012-nav-center-floating-r1">
     <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
-    <link rel="stylesheet" href="changelog.css?v=20261011-scrollbar-r2">
-    <script src="changelog.js" defer></script>
+    <link rel="stylesheet" href="changelog.css?v=20261012-editorial-timeline-r1">
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261008-site-skeleton-r2">
 </head>
 
@@ -44,7 +43,7 @@
         </div>
     </header>
 
-    <main>
+    <main class="changelog-page">
         <section class="page-hero">
             <div class="page-hero-inner reveal">
                 <span class="eyebrow">CHANGELOG</span>
@@ -77,18 +76,7 @@
             </div>
         </section>
 
-        <nav class="changelog-version-index" aria-label="版本快速導覽">
-            <a class="version-link active" href="#v040" data-version-target="v040">
-                v0.4
-            </a>
-            <a class="version-link" href="#v030" data-version-target="v030">v0.3</a>
-            <a class="version-link" href="#v021" data-version-target="v021">v0.2.1</a>
-            <a class="version-link" href="#v020" data-version-target="v020">v0.2</a>
-            <a class="version-link" href="#v011" data-version-target="v011">v0.1.1</a>
-            <a class="version-link" href="#v010" data-version-target="v010">v0.1</a>
-        </nav>
-
-        <section class="changelog-content">
+<section class="changelog-content">
             <div class="release-list">
                 <article class="release" id="v040">
                     <div class="release-marker" aria-hidden="true"></div>
@@ -933,6 +921,36 @@
             </div>
         </section>
     </main>
+
+    <!-- ========【版本導覽】 內容長頁使用固定浮動入口，不建立第二頂條 ======== -->
+    <details class="doc-quick-nav" data-doc-quick-nav>
+        <summary>
+            <span class="doc-quick-symbol" aria-hidden="true"></span>
+            <span data-lang="zh-Hant">版本導覽</span>
+            <span data-lang="en">Versions</span>
+            <span class="doc-quick-position" data-doc-position aria-hidden="true">01 / 06</span>
+        </summary>
+        <div class="doc-quick-panel">
+            <div class="doc-quick-panel-heading">
+                <strong data-lang="zh-Hant">切換版本</strong>
+                <strong data-lang="en">Jump to a release</strong>
+                <small data-lang="zh-Hant">自動標示目前正在閱讀的版本。</small>
+                <small data-lang="en">The current release is highlighted as you scroll.</small>
+            </div>
+            <nav class="doc-quick-links" aria-label="Release versions">
+                <a href="#v040" data-index="01"><span>v0.4 Beta</span></a>
+                <a href="#v030" data-index="02"><span>v0.3</span></a>
+                <a href="#v021" data-index="03"><span>v0.2.1</span></a>
+                <a href="#v020" data-index="04"><span>v0.2</span></a>
+                <a href="#v011" data-index="05"><span>v0.1.1</span></a>
+                <a href="#v010" data-index="06"><span>v0.1</span></a>
+            </nav>
+            <button class="doc-quick-top" type="button" data-doc-to-top>
+                <span data-lang="zh-Hant">↑　回到頁首</span>
+                <span data-lang="en">↑　Back to top</span>
+            </button>
+        </div>
+    </details>
 
     <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
     <footer class="site-footer">
