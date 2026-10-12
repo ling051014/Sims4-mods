@@ -7,8 +7,11 @@
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
         <link rel="stylesheet" href="genealogy.css?v=20261012-extractor-inline-r1">
+        <link rel="stylesheet" href="genealogy-feedback.css">
+        <script src="genealogy-feedback.js" defer></script>
     </head>
     <body data-theme="ling">
+        <dialog id="genealogyFeedbackDialog" aria-label="問題反饋"><iframe id="genealogyFeedbackFrame" title="匿名問題反饋" loading="lazy" src="../feedback/genealogy.html"></iframe></dialog>
 
         <!-- ========【全站載入骨架】 設定 - 對齊目前頂欄、家族檔案欄與畫布工具分佈 ======== -->
         <div class="app-skeleton" id="appSkeleton" aria-hidden="true">
@@ -237,6 +240,7 @@
                                     <span>族譜提取器</span>
                                 </a>
                                 
+                                <button class="ui-menu-item" id="feedbackBtn" type="button" role="menuitem"><span class="l1ng-icon icon-question-circle" aria-hidden="true"></span><span>問題反饋</span></button>
                                 <button class="ui-menu-item" id="appearanceBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>視覺設定</span></button>
                                 <button class="ui-menu-item" id="storageBtn" type="button" role="menuitem"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>圖片與儲存</span></button>
                                 <div class="ui-menu-divider"></div>
