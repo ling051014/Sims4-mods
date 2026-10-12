@@ -23,3 +23,21 @@ body { margin: 0; background: #fbfcfd; color: #344455; font: 14px/1.85 system-ui
 .policy-info { padding: 16px 19px; border-radius: 9px; background: #f0f5f8; color: #617487; font-size: 12px; }
 @media (max-width: 700px) { .policy-header-inner, .policy-content { width: calc(100% - 30px); } .policy-content { margin: 46px auto 70px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* ========【頁內視窗嵌入模式】只顯示所選段落 ======== */
+html[data-site-info-section] { scroll-behavior: auto; }
+html[data-site-info-section] body { margin: 0; background: #fff; }
+html[data-site-info-section] .policy-header,
+html[data-site-info-section] .l1ng-document-footer,
+html[data-site-info-section] .policy-eyebrow,
+html[data-site-info-section] .policy-content > h1,
+html[data-site-info-section] .policy-intro,
+html[data-site-info-section] .policy-section { display: none; }
+html[data-site-info-section] .policy-content { width: 100%; max-width: none; margin: 0; padding: 3px 22px 30px; }
+html[data-site-info-section] .policy-section { border: 0; padding: 17px 0; }
+html[data-site-info-section] .policy-section h2 { display: none; }
+html[data-site-info-section="privacy"] #privacy,
+html[data-site-info-section="terms"] #terms,
+html[data-site-info-section="genealogy"] #genealogy { display: block; }
+html[data-site-info-section] #genealogy > p:last-child { display: none; }
+@media (max-width: 640px) { html[data-site-info-section] .policy-content { padding: 3px 17px 28px; } }

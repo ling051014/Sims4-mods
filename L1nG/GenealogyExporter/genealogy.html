@@ -9,7 +9,9 @@
         <link rel="stylesheet" href="genealogy.css?v=20261012-extractor-inline-r1">
         <link rel="stylesheet" href="genealogy-feedback.css">
         <script src="genealogy-feedback.js" defer></script>
-    </head>
+        <link rel="stylesheet" href="../site-info-modal.css?v=20261012-embedded-info-r1">
+    <script src="../site-info-modal.js?v=20261012-embedded-info-r1" defer></script>
+</head>
     <body data-theme="ling">
         <div class="ui-dialog-backdrop genealogy-feedback-backdrop" id="genealogyFeedbackDialog" aria-hidden="true">
             <div class="ui-dialog-panel appearance-panel genealogy-feedback-panel" role="dialog" aria-modal="true" aria-labelledby="genealogyFeedbackTitle" aria-describedby="genealogyFeedbackSubtitle" tabindex="-1">
@@ -262,11 +264,10 @@
                                     <span>族譜提取器</span>
                                 </a>
                                 
-                                <button class="ui-menu-item" id="feedbackBtn" type="button" role="menuitem"><span class="l1ng-icon icon-question-circle" aria-hidden="true"></span><span>問題反饋</span></button>
                                 <button class="ui-menu-item" id="appearanceBtn" type="button" role="menuitem"><span class="l1ng-icon icon-palette" aria-hidden="true"></span><span>視覺設定</span></button>
                                 <button class="ui-menu-item" id="storageBtn" type="button" role="menuitem"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>圖片與儲存</span></button>
-                                <div class="ui-menu-divider"></div>
-                                <a class="ui-menu-item" href="../site-info.html#genealogy" role="menuitem">
+                                <button class="ui-menu-item" id="feedbackBtn" type="button" role="menuitem"><span class="l1ng-icon icon-question-circle" aria-hidden="true"></span><span>問題反饋</span></button>
+                                <a class="ui-menu-item" href="../site-info.html#genealogy" data-site-info-section="genealogy" role="menuitem">
                                     <span class="l1ng-icon icon-info-circle" aria-hidden="true"></span>
                                     <span>關於族譜工具</span>
                                 </a>
