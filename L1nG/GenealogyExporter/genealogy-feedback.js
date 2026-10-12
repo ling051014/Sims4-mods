@@ -181,13 +181,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  $('genealogyFeedbackHistoryForm').addEventListener('submit', event => {
+  const historyForm = $('genealogyFeedbackHistoryForm');
+  const receiptInput = $('genealogyFeedbackReceipt');
+  historyForm.addEventListener('submit', event => {
     event.preventDefault();
     const status = $('genealogyFeedbackHistoryStatus');
-    status.textContent = $('genealogyFeedbackReceipt').value.trim()
+    status.textContent = receiptInput.value.trim()
       ? '目前尚未開放回饋紀錄查詢，請稍後再試。'
       : '請先貼上私人回饋憑證。';
     status.hidden = false;
+  });
+  // 憑證欄按 Enter 等同點擊「查詢」；Shift+Enter 保留換行，輸入法選字不觸發。
+  receiptInput.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' || event.isComposing || event.keyCode === 229
+        || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
+    event.preventDefault();
+    historyForm.requestSubmit();
   });
 
   openButton.addEventListener('click', openFeedback);
