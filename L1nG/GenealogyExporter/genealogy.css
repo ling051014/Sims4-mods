@@ -4018,7 +4018,8 @@ button.avatar-editor-action { cursor:pointer; }
     display:flex;
     width:100%;
     height:100%;
-    background:var(--gf-surface);
+    background-color:var(--gf-paper-surface,var(--gf-surface));
+    opacity:1;
     pointer-events:none;
 }
 
@@ -4058,6 +4059,8 @@ button.avatar-editor-action { cursor:pointer; }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-paper {
     fill:var(--gf-paper-surface,var(--gf-surface));
+    fill-opacity:1;
+    opacity:1;
     stroke:color-mix(in srgb,var(--gf-text) 10%,var(--gf-surface));
     stroke-width:.8;
 }
