@@ -118,7 +118,7 @@
     }catch(err){setError(err.message||'送出失敗。');verifier?.reset();}
     finally{button.disabled=false;button.classList.remove('is-loading');}
   });
-  // 正式回饋沿用成功頁現有 SVG：複製圖示淡出、勾勾描繪，再返回複製圖示。
+  // 正式回饋沿用族譜提取器已選定的 SVG 筆劃動畫：複製輪廓收回、勾勾寫出後復原。
   // 只有真正寫入剪貼簿後才觸發動畫；連續點擊要重設前一次的計時器。
   const receiptCopyButton=$('copy-receipt');
   let receiptCopyResetTimer=null;
@@ -127,7 +127,7 @@
       clearTimeout(receiptCopyResetTimer);
       receiptCopyResetTimer=null;
     }
-    receiptCopyButton?.classList.remove('is-copied');
+    receiptCopyButton?.querySelector('.l1ng-copy-glyph')?.classList.remove('l1ng-copy-running');
     receiptCopyButton?.setAttribute('aria-label','複製回饋憑證');
   }
   async function copyReceiptToClipboard(value){
@@ -160,9 +160,14 @@
       return;
     }
     resetReceiptCopyState();
-    receiptCopyButton.classList.add('is-copied');
+    const glyph=receiptCopyButton.querySelector('.l1ng-copy-glyph');
+    if(glyph){
+      // 與族譜提取器相同：重複點擊時讓 SVG 從第一筆重新描繪。
+      void glyph.getBoundingClientRect();
+      glyph.classList.add('l1ng-copy-running');
+    }
     receiptCopyButton.setAttribute('aria-label','已複製回饋憑證');
-    receiptCopyResetTimer=window.setTimeout(resetReceiptCopyState,1450);
+    receiptCopyResetTimer=window.setTimeout(resetReceiptCopyState,3900);
   });
   function newFeedback(){resetReceiptCopyState();form.reset();files=[];displayFiles(files,$('file-list'));category='bug';updateVersion();$('char-count').textContent='0 / 2000';verifier?.reset();show('form-main');setError('');}
   $('success-new')?.addEventListener('click',newFeedback);
