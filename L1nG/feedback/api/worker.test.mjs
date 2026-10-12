@@ -108,7 +108,7 @@ test('沒有可信來源位址時拒絕建立回饋',async()=>{
 });
 test('驗證核發網域和提交網站不一致時拒絕',async()=>{
   const original=globalThis.fetch;
-  globalThis.fetch=async()=>Response.json({success:true,hostname:'genealogy.by-l1ng.com'});
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'genealogy-tool.by-l1ng.com'});
   try{
     const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('message','有效回饋至少十個字以上');data.set('followUp','once');data.set('turnstileToken','token');
     const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data,env:{DB:dummyDB,TURNSTILE_SECRET_KEY:'secret'}});
@@ -123,6 +123,28 @@ test('不得從 RealDate 網域冒充 Genealogy 來源',async()=>{
   data.set('message','這是一則有效的測試用回饋訊息');
   const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data});
   assert.equal(response.status,403);
+});
+
+test('正式族譜工具可通過 Origin 預檢，舊錯誤網域必須拒絕',async()=>{
+ const correct=await call('/v1/feedback',{method:'OPTIONS',headers:{Origin:'https://genealogy-tool.by-l1ng.com'}});
+ assert.equal(correct.status,204);
+ assert.equal(correct.headers.get('access-control-allow-origin'),'https://genealogy-tool.by-l1ng.com');
+ const outdated=await call('/v1/feedback',{method:'OPTIONS',headers:{Origin:'https://genealogy.by-l1ng.com'}});
+ assert.equal(outdated.status,403);
+});
+test('族譜回饋前端只在真正的正式網域啟用',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {runInNewContext}=await import('node:vm');
+ const code=readFileSync(new URL('../feedback-core.js',import.meta.url),'utf8');
+ const frontend=host=>{
+   const window={location:{hostname:host}};
+   runInNewContext(code,{window});
+   return window.L1nGFeedbackCore.isLive();
+ };
+ assert.equal(frontend('genealogy-tool.by-l1ng.com'),true);
+ assert.equal(frontend('genealogy.by-l1ng.com'),false);
+ assert.equal(frontend('realdate.by-l1ng.com'),true);
+ assert.equal(frontend('genealogy-tool.pages.dev'),false);
 });
 
 test('直連 workers.dev 管理路徑即使有認證標頭仍拒絕',async()=>{
