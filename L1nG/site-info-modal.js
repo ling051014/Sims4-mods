@@ -51,8 +51,9 @@
         if (!nativeGenealogy || !activeUrl) return;
         const panel = layer.querySelector(".l1ng-site-info-native-panel");
         const css = getComputedStyle(panel);
-        const root = getComputedStyle(document.documentElement);
-        const token = key => root.getPropertyValue(key).trim();
+        // 主題 Token 定義在 body[data-theme]，不能讀 :root 的預設晴空藍。
+        const currentTheme = getComputedStyle(document.body);
+        const token = key => currentTheme.getPropertyValue(key).trim();
         layer.querySelector("iframe")?.contentWindow?.postMessage({
             type: "l1ng-site-info-theme",
             colors: {
