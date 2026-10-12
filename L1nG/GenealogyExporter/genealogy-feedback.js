@@ -105,39 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     svg.setAttribute('class', 'genealogy-feedback-peel-visual');
     svg.setAttribute('aria-hidden', 'true');
 
-    const defs = document.createElementNS(svgNS, 'defs');
-    const gradient = document.createElementNS(svgNS, 'linearGradient');
-    gradient.id = 'genealogyFeedbackPaperGradient';
-    gradient.setAttribute('x1', '100%');
-    gradient.setAttribute('y1', '100%');
-    gradient.setAttribute('x2', '0%');
-    gradient.setAttribute('y2', '0%');
-    [
-      // 霧面紙背僅有微弱深淺變化，不使用玻璃式亮帶。
-      ['0%', 'color-mix(in srgb,var(--gf-text) 7%,var(--gf-surface))'],
-      ['48%', 'color-mix(in srgb,var(--gf-text) 2%,var(--gf-surface))'],
-      ['100%', 'color-mix(in srgb,var(--gf-text) 9%,var(--gf-surface))']
-    ].forEach(([offset, color]) => {
-      const stop = document.createElementNS(svgNS, 'stop');
-      stop.setAttribute('offset', offset);
-      stop.style.stopColor = color;
-      gradient.appendChild(stop);
-    });
-    const paperPattern = document.createElementNS(svgNS, 'pattern');
-    paperPattern.id = 'genealogyFeedbackPaperGrain';
-    paperPattern.setAttribute('width', '16');
-    paperPattern.setAttribute('height', '16');
-    paperPattern.setAttribute('patternUnits', 'userSpaceOnUse');
-    const fiber = document.createElementNS(svgNS, 'path');
-    fiber.setAttribute('d', 'M2 4l3 -1 M10 12l3 -1 M13 3l1 2 M4 14l2 -1');
-    fiber.setAttribute('fill', 'none');
-    fiber.setAttribute('stroke', 'var(--gf-text)');
-    fiber.setAttribute('stroke-width', '.35');
-    fiber.setAttribute('opacity', '.45');
-    paperPattern.appendChild(fiber);
-    defs.append(gradient, paperPattern);
-    svg.appendChild(defs);
-
     const el = (name, className) => {
       const element = document.createElementNS(svgNS, name);
       element.setAttribute('class', className);
@@ -146,9 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const shadow = el('path', 'genealogy-feedback-peel-shadow');
     const back = el('path', 'genealogy-feedback-peel-paper');
-    const grain = el('path', 'genealogy-feedback-peel-grain');
     const crease = el('path', 'genealogy-feedback-peel-crease');
-    return { svg, shadow, back, grain, crease };
+    return { svg, shadow, back, crease };
   }
 
   function smoothstep(value) {
@@ -193,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
         : ' L' + paperPoint(next));
     }, '') + ' Z' : '';
     visual.back.setAttribute('d', foldedPath);
-    visual.grain.setAttribute('d', foldedPath);
     if (ends.length === 2) {
       const start = ends[0], end = ends[1];
       const middle = {
@@ -227,6 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.className = 'genealogy-feedback-panel genealogy-feedback-tear-overlay';
     overlay.setAttribute('aria-hidden', 'true');
     overlay.inert = true;
+    // 取真正的問題反饋視窗背景，不使用畫布色或額外產生的紙張漸層。
+    // 這也能完整跟隨淺色、深色與自訂主題。
+    const windowSurface = getComputedStyle(panel).backgroundColor;
+    if (windowSurface && windowSurface !== 'transparent' && windowSurface !== 'rgba(0, 0, 0, 0)') {
+      overlay.style.setProperty('--gf-surface', windowSurface);
+      overlay.style.setProperty('--gf-paper-surface', windowSurface);
+    }
 
     const stage = document.createElement('div');
     stage.className = 'genealogy-feedback-pages genealogy-feedback-tear-stage is-tearing';
