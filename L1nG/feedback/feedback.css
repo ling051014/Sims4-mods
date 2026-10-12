@@ -169,3 +169,26 @@ body.realdate-only #form-layer .section-heading{margin-bottom:9px}
 @media(max-width:650px){
   body.realdate-only #siteHeader .site-header-inner{width:min(calc(100% - 28px),var(--page-width));gap:8px}
 }
+
+/* 自訂下拉：避免瀏覽器原生箭頭與預設選擇器外觀 */
+.l1ng-select-native{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;padding:0;min-height:0}
+.l1ng-select{display:block;position:relative;width:100%}
+.l1ng-select-trigger{appearance:none;-webkit-appearance:none;width:100%;min-height:43px;text-align:left;padding:10px 39px 10px 13px;border:1px solid var(--stroke);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;line-height:1.5;position:relative;cursor:pointer}
+.l1ng-select-trigger::after{content:"";position:absolute;right:15px;top:calc(50% - 5px);width:8px;height:8px;border-right:1.8px solid var(--muted);border-bottom:1.8px solid var(--muted);transform:rotate(45deg)}
+.l1ng-select-trigger:hover{border-color:var(--primary-line)}
+.l1ng-select-trigger[aria-expanded="true"],.l1ng-select-trigger:focus-visible{border-color:var(--primary);outline:2px solid var(--primary-pale);outline-offset:1px}
+.l1ng-select-trigger:disabled{opacity:.45;cursor:not-allowed}
+.l1ng-select-panel{position:fixed;z-index:120;overflow:auto;overscroll-behavior:contain;padding:5px;border:1px solid var(--stroke);background:var(--surface);color:var(--ink);border-radius:11px;box-shadow:var(--small-shadow,0 12px 36px #0002);scrollbar-width:thin}
+.l1ng-select-panel[hidden]{display:none}
+.l1ng-select-item{appearance:none;-webkit-appearance:none;display:block;width:100%;text-align:left;background:transparent;color:var(--ink);border:0;border-radius:7px;min-height:38px;padding:9px 10px;font:inherit;font-size:12px;cursor:pointer}
+.l1ng-select-item:hover,.l1ng-select-item:focus-visible{background:var(--subtle);outline:none}
+.l1ng-select-item.selected{background:var(--primary-pale);color:var(--primary);font-weight:650}
+.realdate-only .l1ng-select-panel{z-index:60}
+/* 自訂選取控制，不使用平台原生圓點或勾選外觀 */
+.reply-option input[type="radio"],.unknown-version input[type="checkbox"],.contact-card input[type="checkbox"]{-webkit-appearance:none;appearance:none;box-sizing:border-box;width:17px;height:17px;min-width:17px;border:1.5px solid var(--stroke);background:var(--surface);display:inline-grid;place-content:center;position:relative;cursor:pointer}
+.reply-option input[type="radio"]{border-radius:50%;margin:3px 0 0}
+.reply-option input[type="radio"]:checked{border-color:var(--primary)}
+.reply-option input[type="radio"]:checked::after{content:"";display:block;width:9px;height:9px;border-radius:50%;background:var(--primary)}
+.unknown-version input[type="checkbox"],.contact-card input[type="checkbox"]{border-radius:5px}
+.unknown-version input[type="checkbox"]:checked,.contact-card input[type="checkbox"]:checked{background:var(--primary);border-color:var(--primary)}
+.unknown-version input[type="checkbox"]:checked::after,.contact-card input[type="checkbox"]:checked::after{content:"";width:8px;height:5px;border-left:2px solid var(--surface);border-bottom:2px solid var(--surface);transform:rotate(-45deg) translateY(-1px)}
