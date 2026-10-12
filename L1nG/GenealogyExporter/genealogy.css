@@ -4026,6 +4026,14 @@ button.avatar-editor-action { cursor:pointer; }
     display:none;
 }
 
+.genealogy-feedback-tear-overlay .genealogy-feedback-peel-placeholder {
+    display:block;
+    width:100%;
+    min-height:24px;
+    border-radius:7px;
+    background:var(--gf-subtle);
+}
+
 /* SVG 只繪製撕起的紙張背面；表單與資料欄位仍是原本 DOM。 */
 .genealogy-feedback-panel .genealogy-feedback-peel-visual {
     position:absolute;
