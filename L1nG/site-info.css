@@ -124,6 +124,100 @@ html[data-site-info-section="genealogy"] .policy-embedded-details .policy-sectio
     html[data-site-info-section="genealogy"] .policy-embedded-details > summary::after { transition: none; }
 }
 
+/* ========【族譜關於視窗】固定內容捲動與清楚區分展開標題／內文 ======== */
+html[data-site-info-section="genealogy"] {
+    height:100%;
+    overflow:hidden;
+}
+html[data-site-info-section="genealogy"] body {
+    height:100%;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+}
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar {
+    display:none;
+}
+html[data-site-info-section="genealogy"] .policy-content {
+    padding-right:30px;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details {
+    margin-top:9px;
+    border:1px solid var(--site-info-border,#e3e8ed);
+    border-radius:9px;
+    overflow:hidden;
+    background:var(--site-info-bg,#fff);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details:last-child {
+    border-bottom:1px solid var(--site-info-border,#e3e8ed);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary {
+    min-height:50px;
+    padding:13px 15px;
+    background:var(--site-info-input,#f0f5f8);
+    font-weight:700;
+    transition:background .16s ease,color .16s ease;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary {
+    border-bottom:1px solid var(--site-info-border,#e3e8ed);
+    color:var(--site-info-accent,#438cbe);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > .policy-section {
+    padding:14px 16px 18px;
+    background:var(--site-info-bg,#fff);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section h3:first-of-type {
+    margin-top:0;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section h3 {
+    font-size:13px;
+    font-weight:700;
+    margin:18px 0 6px;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section p,
+html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section li {
+    line-height:1.8;
+    font-weight:400;
+}
+html[data-site-info-section="genealogy"] .policy-scroll-track {
+    position:fixed;
+    top:12px;
+    bottom:12px;
+    right:7px;
+    z-index:5;
+    width:5px;
+    border-radius:999px;
+    background:color-mix(in srgb,var(--site-info-border,#e3e8ed) 40%,transparent);
+    touch-action:none;
+}
+html[data-site-info-section="genealogy"] .policy-scroll-thumb {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    min-height:28px;
+    border-radius:999px;
+    background:var(--site-info-accent,#438cbe);
+    opacity:.55;
+    transition:opacity .16s ease;
+}
+html[data-site-info-section="genealogy"] .policy-scroll-track:hover .policy-scroll-thumb,
+html[data-site-info-section="genealogy"] .policy-scroll-track:active .policy-scroll-thumb {
+    opacity:.9;
+}
+html[data-site-info-section="genealogy"] .policy-scroll-track[hidden] {
+    display:none;
+}
+@media(max-width:640px){
+    html[data-site-info-section="genealogy"] .policy-content {
+        padding-right:25px;
+    }
+    html[data-site-info-section="genealogy"] .policy-scroll-track {
+        right:6px;
+    }
+}
+
 /* ========【族譜工具主題】沿用目前族譜主題，而非固定白底說明視窗 ======== */
 html[data-site-info-section="genealogy"] body {
     background:var(--site-info-bg,#fff);
