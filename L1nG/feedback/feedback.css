@@ -164,6 +164,18 @@ body.genealogy-only{
   font-weight:400;
   letter-spacing:0;
 }
+/* 與族譜原生編輯視窗相同：空白輸入提示使用小字級。
+   文字輸入本身仍維持 iOS 聚焦所需字級，不讓佔位文字撐大。 */
+.genealogy-only input.field::placeholder,
+.genealogy-only textarea.field::placeholder{
+  color:var(--faint);
+  opacity:1;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.55;
+  letter-spacing:0;
+}
 .genealogy-only .type-choice,
 .genealogy-only .reply-option strong,
 .genealogy-only .contact-copy strong{
