@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showError(text) {
-    error.textContent = text;
+    $('genealogyFeedbackErrorDetail').textContent = text;
     error.hidden = !text;
     if (text) {
       setTab(0);
@@ -170,12 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
       version: $('genealogyFeedbackVersionRow').hidden ? '' : $('genealogyFeedbackVersion').value
     });
     submitButton.disabled = true;
+    submitButton.classList.add('is-loading');
     try {
       await core.submit(payload);
     } catch (err) {
       showError(err?.message || '目前無法送出回饋，請稍後再試。');
     } finally {
       submitButton.disabled = false;
+      submitButton.classList.remove('is-loading');
     }
   });
 
