@@ -113,11 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
     gradient.setAttribute('x2', '0%');
     gradient.setAttribute('y2', '0%');
     [
-      ['0%', 'color-mix(in srgb,var(--gf-text) 13%,var(--gf-surface))'],
-      ['17%', 'var(--gf-surface)'],
-      ['39%', 'color-mix(in srgb,var(--gf-subtle) 88%,var(--gf-surface))'],
-      ['72%', 'var(--gf-surface)'],
-      ['100%', 'color-mix(in srgb,var(--gf-text) 20%,var(--gf-surface))']
+      // 霧面紙背僅有微弱深淺變化，不使用玻璃式亮帶。
+      ['0%', 'color-mix(in srgb,var(--gf-text) 7%,var(--gf-surface))'],
+      ['48%', 'color-mix(in srgb,var(--gf-text) 2%,var(--gf-surface))'],
+      ['100%', 'color-mix(in srgb,var(--gf-text) 9%,var(--gf-surface))']
     ].forEach(([offset, color]) => {
       const stop = document.createElementNS(svgNS, 'stop');
       stop.setAttribute('offset', offset);
@@ -149,8 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const back = el('path', 'genealogy-feedback-peel-paper');
     const grain = el('path', 'genealogy-feedback-peel-grain');
     const crease = el('path', 'genealogy-feedback-peel-crease');
-    const glint = el('path', 'genealogy-feedback-peel-glint');
-    return { svg, shadow, back, grain, crease, glint };
+    return { svg, shadow, back, grain, crease };
   }
 
   function smoothstep(value) {
@@ -205,12 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const path = 'M' + paperPoint(start) + ' Q' + paperPoint(middle) + ' ' + paperPoint(end);
       visual.shadow.setAttribute('d', path);
       visual.crease.setAttribute('d', path);
-      visual.glint.setAttribute('d',
-        'M' + paperPoint({ x: start.x - 1.5, y: start.y - 1.5 })
-        + ' Q' + paperPoint({ x: middle.x - 1.5, y: middle.y - 1.5 })
-        + ' ' + paperPoint({ x: end.x - 1.5, y: end.y - 1.5 }));
+
     } else {
-      for (const path of [visual.shadow, visual.crease, visual.glint]) path.setAttribute('d', '');
+      for (const path of [visual.shadow, visual.crease]) path.setAttribute('d', '');
     }
     // 膠帶拉開後，讓最後一小塊紙帶著慣性離開，而非突然消失。
     // 紙背在上緣撕開後飛出整個對話框；不再被原本的圓角和視窗邊界裁掉。
