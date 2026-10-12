@@ -2117,7 +2117,7 @@ body[data-theme="graphite"] .life-photo-stage {
 .form-field-title { color:var(--text-secondary); font:inherit; font-weight:600; }
 
 /* ========【模擬市民個人檔案編輯器】 設定 - 緊湊人物檔案、分頁內容與固定操作列 ======== */
-.sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease; }
+.sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease; }
 .sim-editor-top { flex:0 0 auto; padding:13px 18px 0; background:var(--surface-card); position:relative; z-index:5; }
 .sim-editor-title { margin-bottom:8px !important; padding-right:64px; }
 .sim-profile-header { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:start; gap:18px; padding:0 0 11px; }
@@ -5985,7 +5985,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 透明度 */ opacity: .72;
     /* 不接收操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 12px 30px rgba(31,35,40,.08);
-    /* 動畫過渡；翻到預覽時寬度與前景一起收斂 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease;
+    /* 動畫過渡；翻到預覽時寬度與前景一起收斂 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease;
 }
 
 .sim-editor-preview-sheet {
@@ -5996,15 +5996,24 @@ button.avatar-editor-action { cursor:pointer; }
     /* 預覽頁邊框 */ border: 1px solid var(--border-default);
     /* 預設位於主編輯頁後方 */ z-index: 2;
     /* 預設只露出紙張邊緣 */ transform: translate(-50%,-50%) translate(14px,-10px) rotate(.65deg) scale(.998);
+    /* 關閉預覽時立即回到編輯紙張後方；打開時等翻頁完成才換層 */ --sim-editor-layer-delay: 0s;
     /* 預設透明度 */ opacity: .92;
     /* 預設不可操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 14px 36px rgba(31,35,40,.11);
-    /* 翻頁動畫；寬度在翻到前景時才由編輯頁尺寸收斂到正式預覽尺寸 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .26s ease,box-shadow .26s ease;
+    /* 寬度、位移與透明度同步收尾；層級只在翻頁結束時切換 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease,z-index 0s linear var(--sim-editor-layer-delay);
 }
 
-/* 尚未打開預覽時只把它當成第二張紙，不讓 560px 預覽內容從編輯頁邊緣露出。 */
-#simEditorDialog:not(.preview-open) .sim-editor-preview-sheet > * {
+/* 預覽內容也要跟著紙張過渡；返回編輯時不會在動畫未完成前突然消失。 */
+.sim-editor-preview-sheet > * {
+    opacity: 0;
     visibility: hidden;
+    transition: opacity .38s ease,visibility 0s linear .38s;
+}
+
+#simEditorDialog.preview-open .sim-editor-preview-sheet > * {
+    opacity: 1;
+    visibility: visible;
+    /* 紙張開始向前移動後才漸入，避免內容在背紙邊緣突然露出。 */ transition: opacity .2s ease .18s,visibility 0s linear;
 }
 
 .sim-editor-preview-sheet-toolbar {
@@ -6065,7 +6074,8 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 #simEditorDialog.preview-open .sim-editor-preview-sheet {
-    /* 預覽頁翻至最上層 */ z-index: 4;
+    /* 直到紙張移動和淡出都結束後才交換前後層級，避免前景瞬間跳換 */ --sim-editor-layer-delay: .38s;
+    z-index: 4;
     /* 預覽頁回到正面位置 */ transform: translate(-50%,-50%) translate(0,0) rotate(0) scale(1);
     /* 完整顯示 */ opacity: 1;
     /* 開放操作 */ pointer-events: auto;
@@ -6118,7 +6128,8 @@ button.avatar-editor-action { cursor:pointer; }
 @media (prefers-reduced-motion:reduce) {
     .sim-editor-modal,
     .sim-editor-paper-back,
-    .sim-editor-preview-sheet {
+    .sim-editor-preview-sheet,
+    .sim-editor-preview-sheet > * {
         /* 尊重減少動態效果設定 */ transition: none;
     }
 }
