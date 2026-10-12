@@ -1,0 +1,259 @@
+/* L1nG 匿名回饋 API：僅處理回饋，不修改網站其他服務。
+ * 部署前需建立 D1 資料表；Turnstile Secret 只能保存在 Cloudflare Secret。
+ * 管理 API 必須完成 Cloudflare Access JWT 驗證，預設拒絕存取。
+ */
+const MAX_FILES = 3, FILE_BYTES = 10 * 1048576, TOTAL_BYTES = 20 * 1048576;
+const TYPES = {png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",txt:"text/plain",log:"text/plain"};
+const PUBLIC_ORIGINS = ["https://realdate.by-l1ng.com","https://genealogy.by-l1ng.com","https://l1ng-realdate.pages.dev","https://l1ng-genealogy-tool.pages.dev"];
+const enc = new TextEncoder();
+const now = () => new Date().toISOString();
+const json = (data,status=200,headers={}) => new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff",...headers}});
+const fail = (message,status=400) => json({ok:false,error:message},status);
+const text = v => String(v==null?"":v).trim();
+const clean = (v,max) => text(v).slice(0,max);
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const randomToken = () => b64(crypto.getRandomValues(new Uint8Array(32)));
+const sha256 = async s => b64(await crypto.subtle.digest("SHA-256",enc.encode(s)));
+const allowedOrigins = env => (env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(",").map(x=>x.trim()) : PUBLIC_ORIGINS);
+const validOrigin = (origin,env) => !!origin && allowedOrigins(env).includes(origin);
+const cors = origin => ({"access-control-allow-origin":origin,"vary":"Origin","access-control-allow-methods":"POST,GET,OPTIONS","access-control-allow-headers":"Content-Type","access-control-max-age":"600"});
+const f = (form,key) => clean(form.get(key),2000);
+const receiptParts = token => {
+  const match=/^(LNG-[A-Z0-9]{12}):([A-Za-z0-9_-]{40,60})$/.exec(text(token));
+  return match?{id:match[1],secret:match[2]}:null;
+};
+async function validateTurnstile(token,origin,env){
+  if(!env.TURNSTILE_SECRET_KEY) return {error:"驗證服務尚未設定完成。",status:503};
+  if(!token || token.length>2048) return {error:"請先完成人機驗證。",status:400};
+  let result;
+  try {
+    const response=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{
+      method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({secret:env.TURNSTILE_SECRET_KEY,response:token})
+    });
+    result=await response.json();
+  }catch(_){return {error:"驗證服務暫時無法連線，請稍後重試。",status:503};}
+  const allowedHostnames=(env.TURNSTILE_HOSTNAMES||"realdate.by-l1ng.com,genealogy.by-l1ng.com,l1ng-realdate.pages.dev,l1ng-genealogy-tool.pages.dev").split(",").map(x=>x.trim());
+  const expected=new URL(origin).hostname;
+  if(!result.success || result.hostname!==expected || !allowedHostnames.includes(result.hostname))
+    return {error:"人機驗證未通過或已過期，請重新驗證。",status:403};
+  return {ok:true};
+}
+function validatePayload(form){
+  const source=f(form,"source"), category=f(form,"category"),target=f(form,"target");
+  const message=f(form,"message"), followUp=f(form,"followUp"),version=f(form,"version"),gameVersion=f(form,"gameVersion");
+  const method=f(form,"contactMethod"),contact=f(form,"contactValue");
+  if(!["RealDate","Genealogy"].includes(source)) return {error:"來源網站不正確。"};
+  if(!["bug","feature","other"].includes(category)) return {error:"回饋類型不正確。"};
+  if(message.length<10||message.length>2000) return {error:"回饋內容需為 10 至 2000 字。"};
+  if(!["once","conversation"].includes(followUp)) return {error:"回饋方式不正確。"};
+  if(contact.length>120 || (contact && !(method==="email"?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact):method==="discord" && contact.length>=2)))
+    return {error:"聯絡方式格式不正確。"};
+  if(version.length>60||gameVersion.length>70||target.length>80) return {error:"版本或問題分類超過長度限制。"};
+  return {data:{source,category,target,message,followUp,version,gameVersion,contactMethod:contact?method:null,contactValue:contact||null}};
+}
+async function validatedFiles(form,env){
+  const files=form.getAll("files").filter(x=>x instanceof File && x.size>0);
+  if(files.length>MAX_FILES || files.reduce((sum,file)=>sum+file.size,0)>TOTAL_BYTES)
+    return {error:"最多 3 個附件，合計不可超過 20 MB。"};
+  if(files.length && !env.ATTACHMENTS) return {error:"附件儲存尚未啟用，請先移除附件再送出。",status:503};
+  const accepted=[];
+  for(const file of files){
+    const name=clean(file.name,160);
+    const ext=name.includes(".")?name.split(".").pop().toLowerCase():"";
+    if(!TYPES[ext] || file.size>FILE_BYTES || !file.size) return {error:"附件格式或大小不符合限制。"};
+    const header=new Uint8Array(await file.slice(0,12).arrayBuffer());
+    const isPng=ext==="png" && header.slice(0,4).join(",")==="137,80,78,71";
+    const isJpg=["jpg","jpeg"].includes(ext) && header[0]===255&&header[1]===216&&header[2]===255;
+    const isWebp=ext==="webp" && String.fromCharCode(...header.slice(0,4))==="RIFF" && String.fromCharCode(...header.slice(8,12))==="WEBP";
+    const isText=["txt","log"].includes(ext);
+    if(!(isPng||isJpg||isWebp||isText)) return {error:"附件內容與副檔名不符。"};
+    accepted.push({file,name,type:TYPES[ext],size:file.size});
+  }
+  return {files:accepted};
+}
+async function saveFiles(files,id,env){
+  const stored=[];
+  try{
+    for(const x of files){
+      const fileId=crypto.randomUUID();
+      const key="feedback/"+id+"/"+fileId;
+      await env.ATTACHMENTS.put(key,x.file.stream(),{httpMetadata:{contentType:x.type}});
+      stored.push({id:fileId,key,name:x.name,type:x.type,size:x.size});
+    }
+    return stored;
+  }catch(e){
+    await Promise.allSettled(stored.map(s=>env.ATTACHMENTS.delete(s.key)));
+    throw e;
+  }
+}
+const formatFeedback = (row,messages=[],attachments=[],admin=false) => ({
+  id:row.id,source:row.source,site:row.source,category:row.category,target:row.target,
+  title:row.message.slice(0,32),message:row.message,followUp:row.follow_up,
+  status:row.status,createdAt:row.created_at,updatedAt:row.updated_at,
+  version:row.version,gameVersion:row.game_version,
+  ...(admin?{contact:row.contact_value?{method:row.contact_method,value:row.contact_value}:null}:{}),
+  messages,attachments:attachments.map(a=>({id:a.id,name:a.name,type:a.content_type,size:a.size}))
+});
+async function readRecord(env,id){
+  const row=await env.DB.prepare("SELECT * FROM feedback WHERE id=?").bind(id).first();
+  if(!row) return null;
+  const messages=(await env.DB.prepare("SELECT id,author,body,created_at FROM replies WHERE feedback_id=? ORDER BY created_at ASC,id ASC").bind(id).all()).results;
+  const attachments=(await env.DB.prepare("SELECT id,name,content_type,size FROM attachments WHERE feedback_id=? ORDER BY created_at ASC").bind(id).all()).results;
+  return {row,messages,attachments};
+}
+async function verifiedReceipt(env,value){
+  const pair=receiptParts(value);if(!pair)return null;
+  const row=await env.DB.prepare("SELECT * FROM feedback WHERE id=? AND follow_up='conversation'").bind(pair.id).first();
+  if(!row || !row.receipt_hash || row.receipt_hash!==await sha256(pair.secret)) return null;
+  return row;
+}
+async function createFeedback(req,env,origin){
+  const len=Number(req.headers.get("content-length")||0);
+  if(len>23*1048576) return fail("回饋資料超過允許大小。",413);
+  let form;
+  try{form=await req.formData();}catch(_){return fail("回饋格式不正確。");}
+  const checked=validatePayload(form);if(checked.error)return fail(checked.error);
+  const inspected=await validatedFiles(form,env);if(inspected.error)return fail(inspected.error,inspected.status||400);
+  const verified=await validateTurnstile(f(form,"turnstileToken"),origin,env);
+  if(!verified.ok)return fail(verified.error,verified.status);
+  const data=checked.data,id="LNG-"+crypto.randomUUID().replace(/-/g,"").slice(0,12).toUpperCase();
+  const secret=data.followUp==="conversation"?randomToken():null,hash=secret?await sha256(secret):null;
+  const created=now();let saved=[];
+  try{
+    saved=await saveFiles(inspected.files,id,env);
+    const statements=[
+      env.DB.prepare("INSERT INTO feedback (id,source,category,target,message,follow_up,receipt_hash,contact_method,contact_value,version,game_version,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(id,data.source,data.category,data.target,data.message,data.followUp,hash,data.contactMethod,data.contactValue,data.version,data.gameVersion,"pending",created,created)
+    ];
+    for(const a of saved)statements.push(env.DB.prepare("INSERT INTO attachments (id,feedback_id,reply_id,r2_key,name,content_type,size,created_at) VALUES (?,?,?,?,?,?,?,?)").bind(a.id,id,null,a.key,a.name,a.type,a.size,created));
+    await env.DB.batch(statements);
+  }catch(_){
+    if(env.ATTACHMENTS)await Promise.allSettled(saved.map(a=>env.ATTACHMENTS.delete(a.key)));
+    return fail("儲存回饋失敗，請稍後再試。",503);
+  }
+  return json({ok:true,id,receipt:secret?id+":"+secret:null,status:"pending"},201);
+}
+async function lookup(req,env){
+  let body;try{body=await req.json();}catch(_){return fail("查詢格式不正確。");}
+  const row=await verifiedReceipt(env,body.receipt);if(!row)return fail("私人憑證無效或查無資料。",404);
+  const record=await readRecord(env,row.id);
+  return json({ok:true,feedback:formatFeedback(record.row,record.messages,record.attachments)});
+}
+async function reply(req,env,origin){
+  let form;try{form=await req.formData();}catch(_){return fail("回覆格式不正確。");}
+  const row=await verifiedReceipt(env,f(form,"receipt"));
+  if(!row)return fail("私人憑證無效或查無資料。",404);
+  if(["done","spam"].includes(row.status))return fail("此對話已結束，暫時無法新增回覆。",409);
+  const body=f(form,"message");
+  if(body.length<1||body.length>2000)return fail("回覆內容需為 1 至 2000 字。");
+  const inspected=await validatedFiles(form,env);if(inspected.error)return fail(inspected.error,inspected.status||400);
+  const verified=await validateTurnstile(f(form,"turnstileToken"),origin,env);
+  if(!verified.ok)return fail(verified.error,verified.status);
+  // 每個私人對話每小時最多五則玩家回覆，限制被竊憑證濫用。
+  const limited=await env.DB.prepare("SELECT count(*) AS n FROM replies WHERE feedback_id=? AND author='player' AND created_at >= ?")
+    .bind(row.id,new Date(Date.now()-3600000).toISOString()).first();
+  if(limited.n>=5)return fail("一小時內回覆過於頻繁，請稍後再試。",429);
+  const id=crypto.randomUUID(),created=now();let saved=[];
+  try{
+    saved=await saveFiles(inspected.files,row.id,env);
+    const statements=[
+      env.DB.prepare("INSERT INTO replies (id,feedback_id,author,body,created_at) VALUES (?,?,?,?,?)").bind(id,row.id,"player",body,created),
+      env.DB.prepare("UPDATE feedback SET status='progress',updated_at=? WHERE id=?").bind(created,row.id)
+    ];
+    for(const a of saved)statements.push(env.DB.prepare("INSERT INTO attachments (id,feedback_id,reply_id,r2_key,name,content_type,size,created_at) VALUES (?,?,?,?,?,?,?,?)").bind(a.id,row.id,id,a.key,a.name,a.type,a.size,created));
+    await env.DB.batch(statements);
+  }catch(_){
+    if(env.ATTACHMENTS)await Promise.allSettled(saved.map(a=>env.ATTACHMENTS.delete(a.key)));
+    return fail("儲存回覆失敗，請稍後再試。",503);
+  }
+  return json({ok:true});
+}
+async function checkAdmin(request,env){
+  if(!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD || !env.ADMIN_EMAIL)return false;
+  let issuer;
+  try{issuer=new URL(env.ACCESS_TEAM_DOMAIN).origin;}catch(_){return false;}
+  if(!issuer.endsWith(".cloudflareaccess.com"))return false;
+  const token=request.headers.get("Cf-Access-Jwt-Assertion");
+  if(!token)return false;
+  const pieces=token.split(".");if(pieces.length!==3)return false;
+  try{
+    const decode=s=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0))));
+    const header=decode(pieces[0]),payload=decode(pieces[1]);
+    if(header.alg!=="RS256" || !header.kid || payload.iss!==issuer || !String(payload.email||"").toLowerCase().split(",").includes(env.ADMIN_EMAIL.toLowerCase()))return false;
+    if(!(Array.isArray(payload.aud)?payload.aud.includes(env.ACCESS_AUD):payload.aud===env.ACCESS_AUD))return false;
+    if(!Number.isFinite(payload.exp) || payload.exp<=Date.now()/1000 || (payload.nbf && payload.nbf>Date.now()/1000))return false;
+    const response=await fetch(issuer+"/cdn-cgi/access/certs");
+    if(!response.ok)return false;
+    const keys=await response.json();
+    const jwk=(keys.keys||[]).find(x=>x.kid===header.kid && x.kty==="RSA");
+    if(!jwk)return false;
+    const key=await crypto.subtle.importKey("jwk",jwk,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
+    const signature=Uint8Array.from(atob(pieces[2].replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+    return await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,signature,enc.encode(pieces[0]+"."+pieces[1]));
+  }catch(_){return false;}
+}
+async function admin(req,env,path){
+  if(!await checkAdmin(req,env))return fail("未授權的管理操作。",403);
+  const bits=path.split("/").filter(Boolean),id=bits[3];
+  if(req.method==="GET" && bits.length===3){
+    const result=await env.DB.prepare("SELECT id,source,category,target,message,follow_up,status,created_at,updated_at,contact_method,contact_value,version,game_version FROM feedback ORDER BY created_at DESC LIMIT 200").all();
+    return json({ok:true,items:result.results.map(r=>formatFeedback(r,[],[],true))});
+  }
+  if(!/^LNG-[A-Z0-9]{12}$/.test(id||""))return fail("回饋編號不正確。",404);
+  const record=await readRecord(env,id);if(!record)return fail("找不到回饋。",404);
+  if(req.method==="GET"&&bits.length===4)return json({ok:true,feedback:formatFeedback(record.row,record.messages,record.attachments,true)});
+  if(req.method==="PATCH"&&bits.length===4){
+    let body;try{body=await req.json();}catch(_){return fail("內容格式不正確。");}
+    if(!["pending","progress","done","spam"].includes(body.status))return fail("狀態不正確。");
+    await env.DB.prepare("UPDATE feedback SET status=?,updated_at=? WHERE id=?").bind(body.status,now(),id).run();
+    return json({ok:true});
+  }
+  if(req.method==="POST"&&bits[4]==="replies"){
+    let body;try{body=await req.json();}catch(_){return fail("內容格式不正確。");}
+    const msg=clean(body.message,2001);
+    if(record.row.follow_up!=="conversation")return fail("此回饋沒有啟用匿名對話。",409);
+    if(msg.length<1||msg.length>2000)return fail("回覆內容需為 1 至 2000 字。");
+    const created=now();
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO replies (id,feedback_id,author,body,created_at) VALUES (?,?,?,?,?)").bind(crypto.randomUUID(),id,"admin",msg,created),
+      env.DB.prepare("UPDATE feedback SET status='progress',updated_at=? WHERE id=?").bind(created,id)
+    ]);
+    return json({ok:true});
+  }
+  if(req.method==="DELETE"&&bits.length===4){
+    const attachments=await env.DB.prepare("SELECT r2_key FROM attachments WHERE feedback_id=?").bind(id).all();
+    await env.DB.prepare("DELETE FROM feedback WHERE id=?").bind(id).run();
+    if(env.ATTACHMENTS)await Promise.allSettled(attachments.results.map(a=>env.ATTACHMENTS.delete(a.r2_key)));
+    return json({ok:true});
+  }
+  if(req.method==="GET"&&bits[4]==="attachments"&&bits[5]&&env.ATTACHMENTS){
+    const file=await env.DB.prepare("SELECT * FROM attachments WHERE id=? AND feedback_id=?").bind(bits[5],id).first();
+    if(!file)return fail("找不到附件。",404);
+    const object=await env.ATTACHMENTS.get(file.r2_key);
+    if(!object)return fail("附件暫時無法讀取。",404);
+    return new Response(object.body,{headers:{"content-type":file.content_type,"content-disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(file.name),"cache-control":"no-store","x-content-type-options":"nosniff"}});
+  }
+  return fail("找不到端點。",404);
+}
+export default {
+  async fetch(request,env){
+    const url=new URL(request.url),path=url.pathname.replace(/\/+$/,"")||"/";
+    if(path==="/health"&&request.method==="GET")return json({ok:true,service:"l1ng-feedback-api"});
+    if(!env.DB)return fail("回饋資料庫尚未連接。",503);
+    if(path.startsWith("/v1/admin/"))return admin(request,env,path);
+    const origin=request.headers.get("origin");
+    if(!validOrigin(origin,env))return fail("不允許的網站來源。",403);
+    if(request.method==="OPTIONS")return new Response(null,{status:204,headers:cors(origin)});
+    let result;
+    try{
+      if(path==="/v1/feedback"&&request.method==="POST")result=await createFeedback(request,env,origin);
+      else if(path==="/v1/feedback/lookup"&&request.method==="POST")result=await lookup(request,env);
+      else if(path==="/v1/feedback/reply"&&request.method==="POST")result=await reply(request,env,origin);
+      else result=fail("找不到端點。",404);
+    }catch(_){result=fail("服務暫時無法處理請求。",503);}
+    const headers=new Headers(result.headers);
+    for(const [k,v] of Object.entries(cors(origin)))headers.set(k,v);
+    return new Response(result.body,{status:result.status,headers});
+  }
+};
