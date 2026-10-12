@@ -169,28 +169,158 @@
     receiptCopyButton.setAttribute('aria-label','已複製回饋憑證');
     receiptCopyResetTimer=window.setTimeout(resetReceiptCopyState,3900);
   });
-  function newFeedback(){resetReceiptCopyState();form.reset();files=[];displayFiles(files,$('file-list'));category='bug';updateVersion();$('char-count').textContent='0 / 2000';verifier?.reset();show('form-main');setError('');}
-  $('success-new')?.addEventListener('click',newFeedback);
+  // 私人憑證僅保存在目前瀏覽器分頁，用於重新整理後恢復對話；不放在網址或長期儲存。
+  const activeThreadKey='l1ng-realdate-feedback-active-thread-v1';
+  const refreshInterval=60000;
+  let refreshTimer=null,refreshBusy=false,threadFingerprint='',lastCheckAt=0;
+  function rememberThread(receipt){
+    try{sessionStorage.setItem(activeThreadKey,receipt);}catch(_){}
+  }
+  function clearRememberedThread(){
+    try{sessionStorage.removeItem(activeThreadKey);}catch(_){}
+  }
+  function rememberedThread(){
+    try{return sessionStorage.getItem(activeThreadKey)||'';}catch(_){return '';}
+  }
+  function stopThreadRefresh(){
+    if(refreshTimer!==null){clearInterval(refreshTimer);refreshTimer=null;}
+  }
+  function threadIsVisible(){
+    return document.visibilityState==='visible' &&
+      !$('thread-pane').classList.contains('hide') &&
+      !$('thread-chat').classList.contains('hide') &&
+      !$('form-layer').classList.contains('closed');
+  }
+  function formatMessageTime(value){
+    const parsed=new Date(value||'');
+    if(!Number.isFinite(parsed.getTime()))return '';
+    return new Intl.DateTimeFormat('zh-TW',{
+      year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false
+    }).format(parsed);
+  }
+  function appendMessage(stack,author,body,time){
+    const player=author!=='admin';
+    const wrapper=document.createElement('div');
+    wrapper.className='conversation-message '+(player?'by-player':'by-admin');
+    const label=document.createElement('span');
+    label.className='conversation-label';
+    label.textContent=player?'你':'管理員';
+    const bubble=document.createElement('div');
+    bubble.className='conversation-bubble';
+    bubble.textContent=body||'';
+    wrapper.append(label,bubble);
+    const formatted=formatMessageTime(time);
+    if(formatted){
+      const stamp=document.createElement('time');
+      stamp.className='conversation-time';
+      stamp.dateTime=time;
+      stamp.textContent=formatted;
+      wrapper.append(stamp);
+    }
+    stack.append(wrapper);
+  }
   function messagesFor(item){
-    const stack=$('visitor-messages');stack.replaceChildren();
-    const initial=document.createElement('div');initial.className='conversation-message by-player';
-    initial.textContent=item.message;stack.append(initial);
-    for(const msg of item.messages||[]){
-      const p=document.createElement('div');p.className='conversation-message '+(msg.author==='admin'?'by-admin':'by-player');
-      p.textContent=msg.body;stack.append(p);
+    const stack=$('visitor-messages');
+    const body=$('thread-pane').querySelector('.thread-body');
+    const nearEnd=body.scrollHeight-body.scrollTop-body.clientHeight<90;
+    const oldPosition=body.scrollTop;
+    stack.replaceChildren();
+    appendMessage(stack,'player',item.message,item.createdAt);
+    for(const msg of item.messages||[])appendMessage(stack,msg.author,msg.body,msg.created_at||msg.createdAt);
+    // API 目前回傳附件清單，但沒有將附件 ID 配對到每則回覆；因此單獨列示，不虛構歸屬。
+    const files=$('thread-attachment-list');
+    if(files){
+      files.replaceChildren();
+      const attachments=item.attachments||[];
+      files.hidden=!attachments.length;
+      for(const a of attachments){
+        const row=document.createElement('div');
+        row.className='conversation-attachment';
+        row.textContent=a.name||'附件';
+        files.append(row);
+      }
+    }
+    body.scrollTop=nearEnd?body.scrollHeight:oldPosition;
+  }
+  function threadVersion(item){
+    return JSON.stringify([item.id,item.status,item.updatedAt,item.message,
+      (item.messages||[]).map(x=>[x.id,x.author,x.body,x.created_at]),
+      (item.attachments||[]).map(x=>[x.id,x.name])]);
+  }
+  function updateThread(item){
+    const fingerprint=threadVersion(item);
+    current=item;
+    $('thread-ref').textContent=item.id;
+    $('thread-meta').textContent=item.source+' · '+formatMessageTime(item.createdAt);
+    const latest=(item.messages||[]).at(-1);
+    const statusText=item.status==='done'?'已完成':item.status==='spam'?'已結案'
+      :latest?.author==='admin'?'管理員已回覆':latest?.author==='player'?'等待管理員回覆'
+      :item.status==='progress'?'處理中':'尚未處理';
+    $('thread-state').textContent=statusText;
+    $('visitor-reply-form').hidden=['done','spam'].includes(item.status);
+    if(fingerprint!==threadFingerprint){
+      threadFingerprint=fingerprint;
+      messagesFor(item);
     }
   }
-  async function openThread(receipt){
-    $('restore-error').hidden=true;
+  function syncNotice(text){
+    const node=$('thread-refresh-status');
+    if(node)node.textContent=text;
+  }
+  async function refreshThread(manual=false){
+    if(!activeReceipt||refreshBusy||!threadIsVisible())return;
+    if(manual && Date.now()-lastCheckAt<15000){
+      syncNotice('剛剛已更新，請稍後再試。');
+      return;
+    }
+    const receipt=activeReceipt;
+    refreshBusy=true;
+    lastCheckAt=Date.now();
+    const button=$('thread-refresh');
+    if(button)button.disabled=true;
+    syncNotice('正在檢查新回覆…');
     try{
       const data=await core.lookup(receipt);
-      current=data.feedback;activeReceipt=receipt;
-      $('thread-home').classList.add('hide');$('thread-chat').classList.remove('hide');
-      $('thread-ref').textContent=current.id;
-      $('thread-meta').textContent=current.source+' · '+current.createdAt;
-      $('thread-state').textContent=({pending:'尚未處理',progress:'處理中',done:'已完成',spam:'已結案'})[current.status]||current.status;
-      $('visitor-reply-form').hidden=['done','spam'].includes(current.status);
-      messagesFor(current);show('thread-pane');
+      if(activeReceipt!==receipt || !threadIsVisible())return;
+      updateThread(data.feedback);
+      syncNotice('上次更新：'+new Intl.DateTimeFormat('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date()));
+    }catch(err){
+      if(activeReceipt!==receipt)return;
+      const message=err?.message||'更新失敗';
+      syncNotice(message.includes('過於頻繁')?'查詢已達限制，請稍後再試。':'暫時無法更新，稍後會自動重試。');
+      if(message.includes('過於頻繁'))stopThreadRefresh();
+    }finally{
+      refreshBusy=false;
+      if(button)button.disabled=false;
+    }
+  }
+  function startThreadRefresh(){
+    stopThreadRefresh();
+    refreshTimer=window.setInterval(()=>{if(threadIsVisible())refreshThread();},refreshInterval);
+  }
+  function newFeedback(){
+    stopThreadRefresh();clearRememberedThread();activeReceipt='';current=null;threadFingerprint='';
+    resetReceiptCopyState();form.reset();files=[];displayFiles(files,$('file-list'));
+    category='bug';updateVersion();$('char-count').textContent='0 / 2000';
+    verifier?.reset();show('form-main');setError('');
+  }
+  $('success-new')?.addEventListener('click',newFeedback);
+  async function openThread(receipt,{recover=false}={}){
+    const value=String(receipt||'').trim();
+    if(!value)return;
+    stopThreadRefresh();
+    $('restore-error').hidden=true;
+    syncNotice('正在載入對話…');
+    try{
+      const data=await core.lookup(value);
+      activeReceipt=value;threadFingerprint='';lastCheckAt=Date.now();
+      updateThread(data.feedback);
+      rememberThread(value);
+      $('thread-home').classList.add('hide');
+      $('thread-chat').classList.remove('hide');
+      show('thread-pane');
+      syncNotice('每 60 秒自動更新，切回頁面會立即檢查。');
+      startThreadRefresh();
       if(!['done','spam'].includes(current.status) && !replyVerifier && core.isLive()){
         const container=document.createElement('div');
         container.id='realdate-reply-turnstile';
@@ -200,14 +330,33 @@
           $('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;
         });
       }
-    }catch(err){$('restore-error').textContent=err.message||'憑證查詢失敗。';$('restore-error').hidden=false;show('thread-pane');}
+    }catch(err){
+      // 失效的憑證不再自動恢復；網路暫時失敗則保留分頁憑證供使用者重試。
+      if(recover && /無效|查無資料/.test(err?.message||''))clearRememberedThread();
+      $('thread-home').classList.remove('hide');
+      $('thread-chat').classList.add('hide');
+      $('restore-token').value=value;
+      $('restore-error').textContent=err?.message||'憑證查詢失敗。';
+      $('restore-error').hidden=false;
+      show('thread-pane');
+    }
   }
-  function threadHome(){show('thread-pane');$('thread-home').classList.remove('hide');$('thread-chat').classList.add('hide');}
+  function threadHome(){
+    stopThreadRefresh();activeReceipt='';current=null;threadFingerprint='';clearRememberedThread();
+    show('thread-pane');$('thread-home').classList.remove('hide');$('thread-chat').classList.add('hide');
+  }
   document.querySelectorAll('[data-open-thread]').forEach(b=>b.addEventListener('click',threadHome));
   $('form-open-thread')?.addEventListener('click',threadHome);
   $('success-open-thread')?.addEventListener('click',()=>openThread(lastReceipt));
   $('restore-thread')?.addEventListener('click',()=>openThread($('restore-token').value.trim()));
   $('thread-back-list')?.addEventListener('click',threadHome);
+  $('thread-refresh')?.addEventListener('click',()=>refreshThread(true));
+  function checkVisibleThread(){
+    if(threadIsVisible() && Date.now()-lastCheckAt>15000)refreshThread();
+  }
+  document.addEventListener('visibilitychange',checkVisibleThread);
+  window.addEventListener('focus',checkVisibleThread);
+  window.addEventListener('online',checkVisibleThread);
   $('thread-back-form')?.addEventListener('click',newFeedback);
   $('visitor-reply-files')?.addEventListener('change',e=>{
     addFiles(replyFiles,e.target.files,null);e.target.value='';
@@ -233,4 +382,9 @@
   document.querySelectorAll('[data-open-form]').forEach(button=>button.addEventListener('click',()=>{$('form-layer').classList.remove('closed');newFeedback();}));
   $('thread-back-form')?.addEventListener('click',()=>{$('form-layer').classList.remove('closed');});
   updateVersion();show('form-main');
+  // F5 保留本分頁的私人對話，不要求再次貼上憑證。
+  if(core.isLive()){
+    const previous=rememberedThread();
+    if(previous)openThread(previous,{recover:true});
+  }
 })();
