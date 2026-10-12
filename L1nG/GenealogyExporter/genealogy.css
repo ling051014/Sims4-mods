@@ -7940,7 +7940,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 .topbar-filter-footer button { padding:4px 2px; border:0; background:transparent; color:var(--text-secondary); font:inherit; font-size:11px; }
 .topbar-filter-footer button:hover { color:var(--action-primary); }
 .topbar-more-popover .language-switch { min-width:82px; height:30px; padding:0; border:0; background:transparent; }
-.topbar-more-popover .language-trigger { min-height:30px; height:30px; }
+.topbar-more-popover .language-trigger { min-height:30px; height:30px; border-color:var(--nav-dropdown-border); }
 .topbar-more-popover .nav-select-language .nav-select-menu { right:0; left:auto; top:calc(100% + 4px); }
 
 .app-body { flex:1; display:flex; min-height:0; overflow:hidden; }
