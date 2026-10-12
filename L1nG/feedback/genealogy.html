@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <meta content="#f7f7f5" name="theme-color"/>
-<title>Genealogy · 問題反饋（預覽）</title>
+<title>問題反饋 · Genealogy · L1nG</title>
 <link rel="stylesheet" href="feedback.css"/>
 </head>
 <body class="genealogy-only">
@@ -107,14 +107,14 @@
 </section>
 <section class="section"><details class="contact-card" id="contact-option"><summary><span class="contact-icon"><svg class="i sm"><use href="#ico-msg"></use></svg></span><span class="contact-copy"><strong>其他聯絡方式 <em>完全選填</em></strong><small>不留 Email 也能用私人憑證在網站接收回覆。</small></span><span class="contact-chevron"><svg class="i sm"><use href="#ico-arrow"></use></svg></span></summary><div class="contact-fields"><label class="field-label" for="contact-method">聯絡方式</label><select class="field" id="contact-method"><option value="email">電子郵件</option><option value="discord">Discord</option></select><label class="field-label" for="contact-value" style="margin-top:10px;display:block">聯絡資料</label><input autocomplete="email" class="field" id="contact-value" maxlength="120" placeholder="example@email.com" type="email"/><p class="hint">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</p><div class="field-error" id="contact-error">請確認聯絡方式格式，或收合此區塊保持匿名。</div></div></details></section>
 <div class="policy-inline"><svg class="i sm noshrink"><use href="#ico-shield"></use></svg><span>請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</span></div>
-<section class="section"><div class="section-heading"><span class="field-label">安全驗證 <span class="required">*</span></span><span class="optional">Cloudflare Turnstile</span></div><div class="verify-card" id="verify-card"><div class="verify-left"><div class="verify-icon"><svg class="i lg"><use href="#ico-shield"></use></svg></div><div class="verify-text"><strong id="verify-title">人機驗證預覽</strong><span id="verify-subtitle">正式版將由 Cloudflare 自動驗證</span></div></div><button id="verify-button" type="button">模擬驗證</button></div><div class="verify-legal">目前僅為示意；尚未接入 Cloudflare，按鈕不具真實防機器人效果。</div><div class="field-error" id="verify-error">請先完成示範驗證。</div></section>
+<section class="section"><div class="section-heading"><span class="field-label">安全驗證 <span class="required">*</span></span><span class="optional">Cloudflare Turnstile</span></div><div class="verify-card" id="verify-card"><div class="verify-left"><div class="verify-icon"><svg class="i lg"><use href="#ico-shield"></use></svg></div><div class="verify-text"><strong id="verify-title">人機驗證</strong><span id="verify-subtitle">Cloudflare 驗證服務</span></div></div><button id="verify-button" type="button" disabled aria-disabled="true">驗證</button></div><div class="verify-legal">驗證服務尚未啟用。</div><div class="field-error" id="verify-error">請先完成人機驗證。</div></section>
 </div>
-<div class="modal-bottom"><div class="privacy-tip"><svg class="i sm"><use href="#ico-lock"></use></svg><span>自行選擇一次性提交或匿名對話</span></div><button class="primary submit" type="submit">模擬送出 <svg class="i sm"><use href="#ico-arrow"></use></svg></button></div>
+<div class="modal-bottom"><div class="privacy-tip"><svg class="i sm"><use href="#ico-lock"></use></svg><span>自行選擇一次性提交或匿名對話</span></div><button class="primary submit" type="submit">送出回饋 <svg class="i sm"><use href="#ico-arrow"></use></svg></button></div>
 </form>
 </div>
 <div class="success-pane hide" id="success-pane">
 <div class="success-bubble"><svg class="i xl"><use href="#ico-check"></use></svg></div>
-<span class="preview-pill">示範回饋已建立</span><h2>已收到你的回饋！</h2>
+<span class="preview-pill">回饋已建立</span><h2>已收到你的回饋！</h2>
 <p class="success-code" id="success-code">回饋編號 LNG-1029</p>
 <p id="success-description">你可以直接在網站接收回覆，完全不必留下聯絡方式。</p>
 <div class="credential-card" id="success-credential"><div class="credential-heading"><svg class="i sm"><use href="#ico-lock"></use></svg><strong>你的私人回饋憑證</strong></div><code id="success-token" class="credential-token"></code><button class="secondary credential-copy" id="copy-receipt" type="button">複製回饋憑證</button><small>請妥善保存。回饋編號本身無法開啟對話；私人憑證則相當於密碼，請勿公開。</small></div>
@@ -190,6 +190,7 @@
 <div aria-hidden="true" class="detail-layer" id="detail-layer"><aside aria-labelledby="detail-title" aria-modal="true" class="detail-panel" role="dialog"><div class="detail-head"><div><span class="eyebrow">FEEDBACK DETAIL</span><h2 id="detail-title">回饋詳情</h2></div><button aria-label="關閉詳情" class="icon-btn" id="detail-close" type="button"><svg class="i"><use href="#ico-close"></use></svg></button></div><div class="detail-body" id="detail-body"></div><div class="admin-reply-compose"><label for="admin-reply" class="field-label">回覆匿名玩家 <span class="optional">（網站內對話）</span></label><textarea id="admin-reply" class="field" rows="2" maxlength="2000" placeholder="輸入給玩家的回覆…"></textarea><div class="admin-reply-actions"><span class="hint">回覆不會寄出 Email</span><button class="primary" id="admin-send" type="button">傳送回覆 <svg class="i sm"><use href="#ico-send"></use></svg></button></div><p class="restore-error" id="admin-reply-error" hidden>請先輸入回覆內容。</p></div><div class="detail-foot"><select aria-label="處理狀態" class="field" id="detail-status"><option value="pending">尚未處理</option><option value="progress">處理中</option><option value="done">已完成</option><option value="spam">垃圾訊息</option></select><button class="secondary" id="detail-update" type="button">儲存狀態</button><button aria-label="刪除這則回饋" class="danger" id="detail-delete" title="刪除這則回饋" type="button"><svg class="i sm"><use href="#ico-trash"></use></svg></button></div></aside></div>
 <div aria-hidden="true" class="confirm-layer" id="confirm-layer"><div aria-labelledby="confirm-heading" aria-modal="true" class="confirm-card" role="alertdialog"><h3 id="confirm-heading">刪除這則回饋？</h3><p>這會從目前的示範列表移除訊息。真實版本將同時處理相關附件。</p><div class="confirm-actions"><button class="secondary" id="cancel-delete" type="button">取消</button><button class="danger" id="confirm-delete" type="button">確認刪除</button></div></div></div>
 <div aria-live="polite" class="toast" id="toast" role="status"></div>
+<script src="select-ui.js" defer></script>
 <script src="feedback.js" defer></script>
 </body>
 </html>
