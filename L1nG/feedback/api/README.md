@@ -8,7 +8,7 @@
 - D1：`l1ng-feedback-db`，ID `41982056-0458-490b-b9a7-a09f929960e3`，綁定名稱 `DB`。
 - R2 私有儲存空間：`l1ng-feedback-attachments`，綁定名稱 `ATTACHMENTS`。**不要啟用 R2 Public Access。**
 - Turnstile Secret：`TURNSTILE_SECRET_KEY`，存在 Cloudflare Worker Secrets。**不要提交或貼出 Secret。**
-- 玩家來源：`https://realdate.by-l1ng.com`、`https://genealogy.by-l1ng.com`。
+- 玩家來源：`https://realdate.by-l1ng.com`、`https://genealogy-tool.by-l1ng.com`。
 - Cloudflare Access：已登入的 `home.by-l1ng.com/feedback/admin.html`，應用程式 `L1nG Dashboard`；**目前還需要涵蓋管理 API 路徑。**
 
 ## 上線順序（不可跳過）
