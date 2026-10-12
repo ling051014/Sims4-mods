@@ -176,7 +176,7 @@
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
         url.searchParams.set("parent", location.origin);
-        url.searchParams.set("v", "20261012-genealogy-fixed-scroll-r2");
+        url.searchParams.set("v", "20261013-genealogy-about-theme-r3");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         activeUrl = url;
         // 族譜「關於」的外框尺寸固定；只有其他政策視窗維持依內容調整高度。
@@ -192,6 +192,9 @@
             content.setAttribute("aria-busy", "true");
             modal.querySelector(".l1ng-site-info-loading").hidden = false;
             frame.src = url.href;
+        } else if (nativeGenealogy && section === "genealogy") {
+            // 已載入的 iframe 再次開啟時，也同步當下主題。
+            sendNativeTheme(modal);
         }
         modal.querySelector(".l1ng-site-info-panel").focus({ preventScroll: true });
     }
