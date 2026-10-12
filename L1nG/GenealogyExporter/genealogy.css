@@ -8060,6 +8060,8 @@ button.is-loading .button-loading-label {
     }
 
     .export-section:last-child {
+        /* 手機版第二區也要與分隔線保留和第一區相同的上方距離。 */
+        padding-top:20px;
         padding-bottom:4px;
     }
 }
