@@ -4,7 +4,7 @@
  */
 const MAX_FILES = 3, FILE_BYTES = 10 * 1048576, TOTAL_BYTES = 20 * 1048576;
 const TYPES = {png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",txt:"text/plain",log:"text/plain"};
-const PUBLIC_ORIGINS = ["https://realdate.by-l1ng.com","https://genealogy.by-l1ng.com","https://l1ng-realdate.pages.dev","https://l1ng-genealogy-tool.pages.dev"];
+const PUBLIC_ORIGINS = ["https://realdate.by-l1ng.com","https://genealogy.by-l1ng.com"];
 const enc = new TextEncoder();
 const now = () => new Date().toISOString();
 const json = (data,status=200,headers={}) => new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff",...headers}});
@@ -33,7 +33,7 @@ async function validateTurnstile(token,origin,env){
     });
     result=await response.json();
   }catch(_){return {error:"驗證服務暫時無法連線，請稍後重試。",status:503};}
-  const allowedHostnames=(env.TURNSTILE_HOSTNAMES||"realdate.by-l1ng.com,genealogy.by-l1ng.com,l1ng-realdate.pages.dev,l1ng-genealogy-tool.pages.dev").split(",").map(x=>x.trim());
+  const allowedHostnames=(env.TURNSTILE_HOSTNAMES||"realdate.by-l1ng.com,genealogy.by-l1ng.com").split(",").map(x=>x.trim());
   const expected=new URL(origin).hostname;
   if(!result.success || result.hostname!==expected || !allowedHostnames.includes(result.hostname))
     return {error:"人機驗證未通過或已過期，請重新驗證。",status:403};
