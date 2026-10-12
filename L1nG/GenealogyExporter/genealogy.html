@@ -6,9 +6,9 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261012-feedback-native-ui-r2">
+        <link rel="stylesheet" href="genealogy.css?v=20261012-feedback-realdate-style-r3">
         <script src="../feedback/feedback-core.js" defer></script>
-        <script src="genealogy-feedback.js?v=20261012-native-form-r1" defer></script>
+        <script src="genealogy-feedback.js?v=20261012-realdate-ui-r2" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
         <script src="../site-info-modal.js?v=20261012-native-layout-r1" defer></script>
     </head>
@@ -18,104 +18,85 @@
                 <div class="appearance-header">
                     <div class="appearance-heading">
                         <span class="l1ng-icon icon-question-circle appearance-heading-icon" aria-hidden="true"></span>
-                        <div>
-                            <h2 id="genealogyFeedbackTitle">問題反饋</h2>
-                            <p id="genealogyFeedbackSubtitle">回報問題、提出建議或留下其他意見。</p>
-                        </div>
+                        <div><h2 id="genealogyFeedbackTitle">問題反饋</h2><p id="genealogyFeedbackSubtitle">回報問題、提出建議或留下其他意見。</p></div>
                     </div>
-                    <button class="help-close-btn" id="genealogyFeedbackCloseBtn" type="button" title="關閉" aria-label="關閉問題反饋">
-                        <span class="l1ng-icon icon-x-lg" aria-hidden="true"></span>
-                    </button>
+                    <button class="help-close-btn" id="genealogyFeedbackCloseBtn" type="button" title="關閉" aria-label="關閉問題反饋"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
                 </div>
-                <div class="sim-editor-tabs genealogy-feedback-tabs" role="tablist" aria-label="問題反饋">
-                    <button class="sim-editor-tab active" id="genealogyFeedbackWriteTab" type="button" role="tab" aria-selected="true" aria-controls="genealogyFeedbackWritePanel">填寫回饋</button>
-                    <button class="sim-editor-tab" id="genealogyFeedbackHistoryTab" type="button" role="tab" aria-selected="false" aria-controls="genealogyFeedbackHistoryPanel">回饋紀錄</button>
+                <div class="genealogy-feedback-nav" aria-label="回饋頁面">
+                    <button class="genealogy-feedback-nav-link" id="genealogyFeedbackWriteTab" type="button" hidden><span class="l1ng-icon icon-chevron-down genealogy-feedback-back-icon" aria-hidden="true"></span>返回填寫回饋</button>
+                    <button class="genealogy-feedback-nav-link" id="genealogyFeedbackHistoryTab" type="button">查看我的回饋 <span class="genealogy-feedback-arrow" aria-hidden="true">→</span></button>
                 </div>
-                <section class="genealogy-feedback-view" id="genealogyFeedbackWritePanel" role="tabpanel" aria-labelledby="genealogyFeedbackWriteTab">
+                <section class="genealogy-feedback-view" id="genealogyFeedbackWritePanel" aria-labelledby="genealogyFeedbackTitle">
                     <form class="genealogy-feedback-form" id="genealogyFeedbackForm" novalidate>
-                        <div class="appearance-scroll-body genealogy-feedback-scroll">
+                        <div class="genealogy-feedback-scroll">
                             <div class="genealogy-feedback-error" id="genealogyFeedbackError" role="alert" hidden></div>
-                            <section class="appearance-section">
-                                <h3 class="setting-group-title">回饋類型</h3>
-                                <div class="export-background-options genealogy-feedback-category-row" role="radiogroup" aria-label="回饋類型">
-                                    <label class="export-background-option"><input type="radio" name="genealogyFeedbackCategory" value="bug" checked><span>錯誤回報</span></label>
-                                    <label class="export-background-option"><input type="radio" name="genealogyFeedbackCategory" value="feature"><span>功能建議</span></label>
-                                    <label class="export-background-option"><input type="radio" name="genealogyFeedbackCategory" value="other"><span>其他意見</span></label>
+                            <section class="genealogy-feedback-section">
+                                <div class="genealogy-feedback-section-heading"><span class="genealogy-feedback-field-label" id="genealogyFeedbackCategoryLabel">回饋類型 <span class="genealogy-feedback-required" aria-hidden="true">*</span></span></div>
+                                <div class="genealogy-feedback-type-grid" role="radiogroup" aria-labelledby="genealogyFeedbackCategoryLabel">
+                                    <label class="genealogy-feedback-type-choice"><input type="radio" name="genealogyFeedbackCategory" value="bug" checked><span class="l1ng-icon icon-bug" aria-hidden="true"></span><strong>錯誤回報</strong></label>
+                                    <label class="genealogy-feedback-type-choice"><input type="radio" name="genealogyFeedbackCategory" value="feature"><span class="l1ng-icon icon-stars" aria-hidden="true"></span><strong>功能建議</strong></label>
+                                    <label class="genealogy-feedback-type-choice"><input type="radio" name="genealogyFeedbackCategory" value="other"><span class="l1ng-icon icon-heart" aria-hidden="true"></span><strong>其他意見</strong></label>
                                 </div>
                             </section>
-                            <section class="appearance-section">
-                                <div class="grid profile-grid">
-                                    <label class="full">回饋對象
-                                        <select id="genealogyFeedbackTarget">
-                                            <option value="web">網站端（族譜工具）</option>
-                                            <option value="exporter">遊戲端（族譜提取器）</option>
-                                        </select>
-                                    </label>
-                                    <label class="full" id="genealogyFeedbackVersionRow" hidden>族譜提取器版本（選填）
-                                        <input id="genealogyFeedbackVersion" type="text" maxlength="60" placeholder="例如：v0.5.0" autocomplete="off">
-                                    </label>
-                                </div>
+                            <section class="genealogy-feedback-section">
+                                <div class="genealogy-feedback-section-heading"><label class="genealogy-feedback-field-label" for="genealogyFeedbackTarget">問題發生在哪裡？</label></div>
+                                <div class="genealogy-feedback-select-wrap"><select class="genealogy-feedback-field" id="genealogyFeedbackTarget"><option value="web">族譜工具網站</option><option value="exporter">族譜提取器</option></select><span class="l1ng-icon icon-chevron-down" aria-hidden="true"></span></div>
+                                <p class="genealogy-feedback-help">網站端不需要手動填寫版本號。</p>
+                                <div class="genealogy-feedback-conditional" id="genealogyFeedbackVersionRow" hidden><label class="genealogy-feedback-field-label" for="genealogyFeedbackVersion">族譜提取器版本 <span class="genealogy-feedback-optional">（選填）</span></label><input class="genealogy-feedback-field" id="genealogyFeedbackVersion" type="text" maxlength="60" placeholder="例如：v0.5.0" autocomplete="off"></div>
                             </section>
-                            <section class="appearance-section">
-                                <div class="grid profile-grid">
-                                    <label class="full">回饋內容 <span aria-hidden="true">*</span>
-                                        <textarea id="genealogyFeedbackMessage" rows="5" maxlength="2000" required placeholder="描述遇到的問題、操作步驟，或想提出的建議…"></textarea>
-                                    </label>
-                                </div>
+                            <section class="genealogy-feedback-section">
+                                <div class="genealogy-feedback-section-heading"><label class="genealogy-feedback-field-label" for="genealogyFeedbackMessage">回饋內容 <span class="genealogy-feedback-required" aria-hidden="true">*</span></label><span class="genealogy-feedback-optional">至少 10 字</span></div>
+                                <textarea class="genealogy-feedback-field genealogy-feedback-message" id="genealogyFeedbackMessage" rows="5" maxlength="2000" required placeholder="請描述遇到的情況、操作步驟，或想提出的建議…"></textarea>
                                 <div class="genealogy-feedback-field-note"><span>請勿填寫帳號、密碼或其他敏感資訊。</span><span id="genealogyFeedbackCount">0 / 2000</span></div>
                             </section>
-                            <section class="appearance-section">
-                                <h3 class="setting-group-title">附件（選填）</h3>
-                                <div class="genealogy-feedback-upload">
-                                    <button class="secondary" id="genealogyFeedbackAddFile" type="button">選擇檔案</button>
-                                    <span>最多 3 個，合計 20 MB。支援 PNG、JPG、WebP、TXT、LOG。</span>
-                                </div>
+                            <section class="genealogy-feedback-section">
+                                <div class="genealogy-feedback-section-heading"><span class="genealogy-feedback-field-label">附加檔案 <span class="genealogy-feedback-optional">（選填）</span></span><span class="genealogy-feedback-optional">最多 3 個 · 合計 20 MB</span></div>
+                                <button class="genealogy-feedback-upload-zone" id="genealogyFeedbackAddFile" type="button" aria-label="選擇圖片或文字錯誤紀錄"><span class="genealogy-feedback-upload-icon"><span class="l1ng-icon icon-box-arrow-up" aria-hidden="true"></span></span><strong>新增截圖或錯誤紀錄</strong><small>點擊選擇檔案 · 電腦亦可拖曳</small><small>PNG、JPG、WebP、TXT、LOG</small></button>
                                 <input id="genealogyFeedbackFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log,image/png,image/jpeg,image/webp,text/plain" multiple hidden>
                                 <ul id="genealogyFeedbackFileList" class="genealogy-feedback-files"></ul>
                             </section>
-                            <section class="appearance-section">
-                                <h3 class="setting-group-title">是否需要後續對話？</h3>
-                                <div class="export-background-options genealogy-feedback-followup-row" role="radiogroup" aria-label="後續聯絡方式">
-                                    <label class="export-background-option"><input name="genealogyFeedbackFollowUp" type="radio" value="once" checked><span>只送出這次回饋</span></label>
-                                    <label class="export-background-option"><input name="genealogyFeedbackFollowUp" type="radio" value="conversation"><span>建立匿名對話</span></label>
+                            <section class="genealogy-feedback-section">
+                                <div class="genealogy-feedback-section-heading"><span class="genealogy-feedback-field-label" id="genealogyFeedbackFollowUpLabel">是否需要後續對話？ <span class="genealogy-feedback-required" aria-hidden="true">*</span></span><span class="genealogy-feedback-optional">由你決定</span></div>
+                                <div class="genealogy-feedback-reply-options" role="radiogroup" aria-labelledby="genealogyFeedbackFollowUpLabel">
+                                    <label class="genealogy-feedback-reply-option"><input type="radio" name="genealogyFeedbackFollowUp" value="once" checked><span class="genealogy-feedback-reply-text"><strong>只送出這次回饋</strong><small>不建立聊天室，也不需要保存私人憑證。</small></span></label>
+                                    <label class="genealogy-feedback-reply-option"><input type="radio" name="genealogyFeedbackFollowUp" value="conversation"><span class="genealogy-feedback-reply-text"><strong>建立匿名對話</strong><small>想收到回覆、補充資訊時再選擇；不用 Email。</small></span></label>
                                 </div>
-                                <p class="genealogy-feedback-description">匿名對話可在收到回覆後補充資訊；回覆不一定是即時的。</p>
+                                <p class="genealogy-feedback-help">選擇匿名對話不代表管理員目前在線，回覆可能不是即時的。</p>
                             </section>
-                            <section class="appearance-section">
-                                <details class="genealogy-feedback-contact">
-                                    <summary>其他聯絡方式（選填）</summary>
-                                    <div class="grid profile-grid">
-                                        <label class="full">聯絡方式
-                                            <select id="genealogyFeedbackContactMethod">
-                                                <option value="email">電子郵件</option>
-                                                <option value="discord">Discord</option>
-                                            </select>
-                                        </label>
-                                        <label class="full">聯絡資料
-                                            <input id="genealogyFeedbackContact" type="text" maxlength="120" placeholder="example@email.com" autocomplete="off">
-                                        </label>
-                                    </div>
-                                </details>
+                            <section class="genealogy-feedback-section">
+                                <details class="genealogy-feedback-contact"><summary>
+                                    <span class="genealogy-feedback-contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 0 1-8 8 9 9 0 0 1-3.4-.66L4 20l1.2-4.25A8 8 0 1 1 20 11.5Z"/></svg></span>
+                                    <span class="genealogy-feedback-contact-copy"><strong>其他聯絡方式 <em>完全選填</em></strong><small>不留 Email 也能用私人憑證在網站接收回覆。</small></span>
+                                    <span class="l1ng-icon icon-chevron-down genealogy-feedback-contact-chevron" aria-hidden="true"></span>
+                                </summary>
+                                <div class="genealogy-feedback-contact-fields">
+                                    <label class="genealogy-feedback-field-label" for="genealogyFeedbackContactMethod">聯絡方式</label>
+                                    <div class="genealogy-feedback-select-wrap"><select class="genealogy-feedback-field" id="genealogyFeedbackContactMethod"><option value="email">電子郵件</option><option value="discord">Discord</option></select><span class="l1ng-icon icon-chevron-down" aria-hidden="true"></span></div>
+                                    <label class="genealogy-feedback-field-label" for="genealogyFeedbackContact">聯絡資料</label>
+                                    <input class="genealogy-feedback-field" id="genealogyFeedbackContact" type="text" maxlength="120" placeholder="example@email.com" autocomplete="off">
+                                    <p class="genealogy-feedback-help">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</p>
+                                </div></details>
+                            </section>
+                            <section class="genealogy-feedback-section">
+                                <div class="genealogy-feedback-section-heading"><span class="genealogy-feedback-field-label">安全驗證</span><span class="genealogy-feedback-optional">Cloudflare Turnstile</span></div>
+                                <div class="genealogy-feedback-verify-card"><span class="genealogy-feedback-verify-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 20 6v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="genealogy-feedback-verify-text"><strong>人機驗證</strong><small>Cloudflare 驗證服務</small></span><button type="button" disabled>驗證</button></div>
+                                <p class="genealogy-feedback-help">驗證服務尚未啟用。</p>
                             </section>
                         </div>
-                        <div class="ui-dialog-actions genealogy-feedback-actions">
-                            <p class="genealogy-feedback-policy">請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</p>
-                            <button class="primary" id="genealogyFeedbackSubmit" type="submit">送出</button>
+                        <div class="genealogy-feedback-actions">
+                            <div class="genealogy-feedback-policy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 20 6v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4Z"/><path d="m9 12 2 2 4-4"/></svg><span>請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</span></div>
+                            <button class="genealogy-feedback-submit" id="genealogyFeedbackSubmit" type="submit">送出回饋 <span class="genealogy-feedback-arrow" aria-hidden="true">→</span></button>
                         </div>
                     </form>
                 </section>
-                <section class="genealogy-feedback-view" id="genealogyFeedbackHistoryPanel" role="tabpanel" aria-labelledby="genealogyFeedbackHistoryTab" hidden>
-                    <div class="appearance-scroll-body genealogy-feedback-scroll">
-                        <section class="appearance-section">
-                            <h3 class="setting-group-title">回饋紀錄</h3>
-                            <p class="genealogy-feedback-description">如果提交時選擇了匿名對話，可以使用當時保存的私人憑證查詢回覆。只送出一次性回饋不會建立對話。</p>
-                            <form class="grid profile-grid" id="genealogyFeedbackHistoryForm" novalidate>
-                                <label class="full">私人回饋憑證
-                                    <textarea id="genealogyFeedbackReceipt" rows="2" placeholder="貼上完整的私人憑證" autocomplete="off"></textarea>
-                                </label>
-                                <div class="genealogy-feedback-history-actions">
-                                    <button class="primary" type="submit">查詢</button>
-                                </div>
+                <section class="genealogy-feedback-view" id="genealogyFeedbackHistoryPanel" aria-labelledby="genealogyFeedbackTitle" hidden>
+                    <div class="genealogy-feedback-scroll">
+                        <section class="genealogy-feedback-section"><div class="genealogy-feedback-section-heading"><h3 class="genealogy-feedback-field-label">我的回饋</h3></div>
+                            <p class="genealogy-feedback-help">選擇建立匿名對話後，可以使用當時保存的私人憑證查詢回覆。只送出一次性回饋不會建立對話。</p>
+                            <form class="genealogy-feedback-history-form" id="genealogyFeedbackHistoryForm" novalidate>
+                                <label class="genealogy-feedback-field-label" for="genealogyFeedbackReceipt">私人回饋憑證</label>
+                                <textarea class="genealogy-feedback-field" id="genealogyFeedbackReceipt" rows="3" placeholder="貼上完整的私人憑證" autocomplete="off"></textarea>
+                                <button class="genealogy-feedback-submit" type="submit">查詢</button>
                             </form>
                             <p class="genealogy-feedback-history-status" id="genealogyFeedbackHistoryStatus" role="status" hidden></p>
                         </section>
