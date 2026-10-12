@@ -4817,9 +4817,15 @@ button.avatar-editor-action { cursor:pointer; }
         gap:7px;
     }
 
-    /* 手機版與視覺設定／圖片與儲存共用相同的文字層級；輸入欄維持 16px 防止 iOS 自動放大。 */
+    /* 輸入的文字維持 16px 防止 iOS 聚焦放大；佔位說明使用與其他視窗一致的 13px。 */
     .genealogy-feedback-panel .genealogy-feedback-field {
         font-size:16px;
+    }
+
+    .genealogy-feedback-panel .genealogy-feedback-field::placeholder {
+        font-size:13px;
+        font-weight:400;
+        line-height:1.5;
     }
 
     .genealogy-feedback-panel .genealogy-feedback-field-label,
