@@ -30,19 +30,55 @@ document.addEventListener('DOMContentLoaded', () => {
   const attached = [];
   let lastFocus = null;
 
-  // 導覽保留 RealDate 的單一文字連結，不再使用編輯模擬市民的分頁。
+  // 標題與分隔線保持固定，僅讓其下方的便利貼頁面撕離並露出下一頁。
+  const pages = $('genealogyFeedbackPages');
+  let activePage = 0;
+  let pendingPage = null;
+  let pageTimer = null;
+
   function setTab(index, focus = false) {
+    if (pageTimer !== null) {
+      clearTimeout(pageTimer);
+      pageTimer = null;
+    }
+    pages?.classList.remove('is-tearing');
     tabs.forEach(({ tab, panel: view }, i) => {
       const active = index === i;
+      view.classList.remove('is-tearing-page', 'is-under-page');
+      view.inert = false;
+      view.removeAttribute('aria-hidden');
       view.hidden = !active;
       tab.hidden = active;
       tab.tabIndex = active ? -1 : 0;
     });
+    pendingPage = null;
+    activePage = index;
     if (focus) tabs[index === 0 ? 1 : 0].tab.focus({ preventScroll: true });
   }
 
+  function turnPage(index) {
+    if (pendingPage !== null || index === activePage) return;
+    if (!pages || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setTab(index, true);
+      return;
+    }
+    const outgoing = tabs[activePage].panel;
+    const incoming = tabs[index].panel;
+    pendingPage = index;
+    // 頁面仍然可見以供動畫使用，但切換期間不可觸發第二次操作。
+    panel.focus({ preventScroll: true });
+    incoming.hidden = false;
+    outgoing.inert = true;
+    incoming.inert = true;
+    outgoing.classList.add('is-tearing-page');
+    incoming.classList.add('is-under-page');
+    pages.classList.add('is-tearing');
+    // 動畫收尾時才隱藏舊頁，表單值與捲動位置均不清空。
+    pageTimer = window.setTimeout(() => setTab(index, true), 660);
+  }
+
   tabs.forEach(({ tab }, index) => {
-    tab.addEventListener('click', () => setTab(index, true));
+    tab.addEventListener('click', () => turnPage(index));
   });
 
   function openFeedback() {
@@ -60,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!backdrop.classList.contains('show')) return;
     backdrop.classList.remove('show');
     backdrop.setAttribute('aria-hidden', 'true');
+    setTab(0);
     error.hidden = true;
     if (lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
     lastFocus = null;
