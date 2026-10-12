@@ -14,3 +14,14 @@ body.admin-only{min-height:100dvh}
 .admin-only select,.admin-only input[type="date"]{-webkit-appearance:none;appearance:none}
 .admin-only select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='%238f8f99' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:38px}
 @media(max-width:980px){.admin-only .admin-app,.admin-only .admin-main{height:auto;min-height:100dvh}.admin-only .sidebar{display:none}}
+
+/* 正式 Dashboard 沒有原型的 66px 頂欄，側邊詳情與確認視窗應完整覆蓋畫面。 */
+.admin-only .detail-layer,.admin-only .confirm-layer{top:0;inset-block-start:0}
+.admin-only .detail-title-text{font-size:18px;letter-spacing:-.025em;margin:7px 0 14px}
+.admin-only .detail-description{font-size:13px;line-height:1.95;color:var(--muted);overflow-wrap:anywhere}
+.admin-only .detail-body .divider{border-top:1px solid var(--stroke);margin:27px 0 23px}
+.admin-only .detail-file-info{flex:1;min-width:0}
+.admin-only .detail-body .conversation-stack{margin:20px 0 25px}
+.admin-only .admin-reply-compose[hidden]{display:none}
+.admin-only .detail-panel{min-height:0}
+@media(max-width:600px){.admin-only .detail-layer,.admin-only .confirm-layer{top:0;inset-block-start:0}}
