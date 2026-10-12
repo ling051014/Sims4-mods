@@ -88,7 +88,7 @@
     }
     $('mock-more-menu').classList.add('hide');$('mock-more').setAttribute('aria-expanded','false');
     if(realdate){
-      $('realdate-form-slot').appendChild($('form-layer'));
+      if($('form-layer').parentElement!==$('realdate-form-slot'))$('realdate-form-slot').appendChild($('form-layer'));
       $('form-layer').classList.add('standalone');
       $('form-layer').classList.remove('closed');
       $('form-main').style.overflow='visible';
