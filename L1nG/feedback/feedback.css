@@ -119,3 +119,11 @@ body.realdate-only{--bg:#fafafa;--surface:#fff;--subtle:#f7fafc;--ink:#262626;--
 .realdate-only .rd-aside-thread{margin:3px 0 24px;padding:10px 13px;font-size:12px}
 @media(max-width:780px){.realdate-only .rd-v1-hero{padding:53px 20px 42px}}
 @media(max-width:600px){.realdate-only .rd-v1-hero{min-height:0;padding:40px 20px 35px}.realdate-only .rd-v1-hero h1{font-size:42px}}
+
+/* 族譜工具內嵌回饋：只顯示表單，不顯示設計預覽導覽與後台 */
+body.genealogy-only{background:transparent}
+.genealogy-only .preview-bar,.genealogy-only .context-switch,.genealogy-only .site-shell,.genealogy-only .realdate-preview,.genealogy-only #admin-screen{display:none}
+.genealogy-only .modal-layer{position:relative;inset:auto;display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:12px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.genealogy-only .modal-layer.closed{display:none}
+.genealogy-only .feedback-modal{width:min(100%,650px);height:auto;max-height:calc(100dvh - 24px);border-radius:17px;box-shadow:0 20px 75px rgba(0,0,0,.12)}
+@media(max-width:600px){.genealogy-only .modal-layer{padding:0;height:100dvh;align-items:stretch}.genealogy-only .feedback-modal{width:100%;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}}
