@@ -124,74 +124,29 @@ html[data-site-info-section="genealogy"] .policy-embedded-details .policy-sectio
     html[data-site-info-section="genealogy"] .policy-embedded-details > summary::after { transition: none; }
 }
 
-/* ========【族譜關於視窗】固定內容捲動與清楚區分展開標題／內文 ======== */
+/* ========【族譜工具關於視窗】僅保留固定外框下的內部捲動與既有細捲軸 ======== */
 html[data-site-info-section="genealogy"] {
-    height:100%;
-    overflow:hidden;
+    height: 100%;
+    overflow: hidden;
 }
 html[data-site-info-section="genealogy"] body {
-    height:100%;
-    overflow-y:auto;
-    overscroll-behavior:contain;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:thin;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--site-info-border, #e3e8ed) transparent;
 }
-html[data-site-info-section="genealogy"] .policy-content {
-    padding-right:30px;
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
-html[data-site-info-section="genealogy"] .policy-embedded-details {
-    margin-top:9px;
-    border:1px solid var(--site-info-border,#e3e8ed);
-    border-radius:9px;
-    overflow:hidden;
-    background:var(--site-info-bg,#fff);
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar-track {
+    background: transparent;
 }
-html[data-site-info-section="genealogy"] .policy-embedded-details:last-child {
-    border-bottom:1px solid var(--site-info-border,#e3e8ed);
-}
-html[data-site-info-section="genealogy"] .policy-embedded-details > summary {
-    min-height:50px;
-    padding:13px 15px;
-    background:var(--site-info-input,#f0f5f8);
-    font-weight:700;
-    transition:background .16s ease,color .16s ease;
-}
-html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary {
-    border-bottom:1px solid var(--site-info-border,#e3e8ed);
-    color:var(--site-info-accent,#438cbe);
-}
-html[data-site-info-section="genealogy"] .policy-embedded-details > .policy-section {
-    padding:14px 16px 18px;
-    background:var(--site-info-bg,#fff);
-}
-html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section h3:first-of-type {
-    margin-top:0;
-}
-html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section h3 {
-    font-size:13px;
-    font-weight:700;
-    margin:18px 0 6px;
-}
-html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section p,
-html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section li {
-    line-height:1.8;
-    font-weight:400;
-}
-/* 沿用族譜工具既有的 6px 捲軸尺寸及主題色，不額外建立可拖曳假滑塊。 */
-html[data-site-info-section="genealogy"] body {
-    scrollbar-width:thin;
-    scrollbar-color:var(--site-info-border,#e3e8ed) transparent;
-}
-html[data-site-info-section="genealogy"] body::-webkit-scrollbar {display:block;width:6px;height:6px}
-html[data-site-info-section="genealogy"] body::-webkit-scrollbar-track {background:transparent}
 html[data-site-info-section="genealogy"] body::-webkit-scrollbar-thumb {
-    background:var(--site-info-border,#e3e8ed);
-    border-radius:999px;
-}
-@media(max-width:640px){
-    html[data-site-info-section="genealogy"] .policy-content {
-        padding-right:25px;
-    }
+    background: var(--site-info-border, #e3e8ed);
+    border-radius: 999px;
 }
 
 /* ========【族譜工具主題】沿用目前族譜主題，而非固定白底說明視窗 ======== */
@@ -219,4 +174,8 @@ html[data-site-info-section="genealogy"] .policy-section a {
 html[data-site-info-section="genealogy"] .policy-info {
     background:var(--site-info-input,#f0f5f8);
     color:var(--site-info-secondary,#617487);
+}
+/* 僅已展開的條款標題使用目前主題強調色；沿用原始分隔線，不額外套外框或底色。 */
+html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary {
+    color: var(--site-info-accent, #438cbe);
 }
