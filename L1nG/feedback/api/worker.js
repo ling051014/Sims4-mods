@@ -17,7 +17,7 @@ const sha256 = async s => b64(await crypto.subtle.digest("SHA-256",enc.encode(s)
 const allowedOrigins = env => (env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(",").map(x=>x.trim()) : PUBLIC_ORIGINS);
 const validOrigin = (origin,env) => !!origin && allowedOrigins(env).includes(origin);
 const cors = origin => ({"access-control-allow-origin":origin,"vary":"Origin","access-control-allow-methods":"POST,GET,OPTIONS","access-control-allow-headers":"Content-Type","access-control-max-age":"600"});
-const f = (form,key) => clean(form.get(key),2000);
+const f = (form,key) => text(form.get(key));
 const receiptParts = token => {
   const match=/^(LNG-[A-Z0-9]{12}):([A-Za-z0-9_-]{40,60})$/.exec(text(token));
   return match?{id:match[1],secret:match[2]}:null;
@@ -53,7 +53,9 @@ function validatePayload(form){
   return {data:{source,category,target,message,followUp,version,gameVersion,contactMethod:contact?method:null,contactValue:contact||null}};
 }
 async function validatedFiles(form,env){
-  const files=form.getAll("files").filter(x=>x instanceof File && x.size>0);
+  const rawFiles=form.getAll("files");
+  if(rawFiles.some(x=>!(x instanceof File) || x.size===0))return {error:"附件資料無效，請重新選擇。"};
+  const files=rawFiles;
   if(files.length>MAX_FILES || files.reduce((sum,file)=>sum+file.size,0)>TOTAL_BYTES)
     return {error:"最多 3 個附件，合計不可超過 20 MB。"};
   if(files.length && !env.ATTACHMENTS) return {error:"附件儲存尚未啟用，請先移除附件再送出。",status:503};
@@ -113,6 +115,7 @@ async function createFeedback(req,env,origin){
   if(len>23*1048576) return fail("回饋資料超過允許大小。",413);
   let form;
   try{form=await req.formData();}catch(_){return fail("回饋格式不正確。");}
+  if(form.getAll("files").reduce((size,file)=>size+(file instanceof File?file.size:0),0)>TOTAL_BYTES)return fail("附件合計不得超過 20 MB。",413);
   const checked=validatePayload(form);if(checked.error)return fail(checked.error);
   const inspected=await validatedFiles(form,env);if(inspected.error)return fail(inspected.error,inspected.status||400);
   const verified=await validateTurnstile(f(form,"turnstileToken"),origin,env);
@@ -180,7 +183,7 @@ async function checkAdmin(request,env){
   try{
     const decode=s=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0))));
     const header=decode(pieces[0]),payload=decode(pieces[1]);
-    if(header.alg!=="RS256" || !header.kid || payload.iss!==issuer || !String(payload.email||"").toLowerCase().split(",").includes(env.ADMIN_EMAIL.toLowerCase()))return false;
+    if(header.alg!=="RS256" || !header.kid || payload.iss!==issuer || String(payload.email||"").toLowerCase()!==env.ADMIN_EMAIL.toLowerCase())return false;
     if(!(Array.isArray(payload.aud)?payload.aud.includes(env.ACCESS_AUD):payload.aud===env.ACCESS_AUD))return false;
     if(!Number.isFinite(payload.exp) || payload.exp<=Date.now()/1000 || (payload.nbf && payload.nbf>Date.now()/1000))return false;
     const response=await fetch(issuer+"/cdn-cgi/access/certs");
@@ -211,7 +214,7 @@ async function admin(req,env,path){
   }
   if(req.method==="POST"&&bits[4]==="replies"){
     let body;try{body=await req.json();}catch(_){return fail("內容格式不正確。");}
-    const msg=clean(body.message,2001);
+    const msg=text(body.message);
     if(record.row.follow_up!=="conversation")return fail("此回饋沒有啟用匿名對話。",409);
     if(msg.length<1||msg.length>2000)return fail("回覆內容需為 1 至 2000 字。");
     const created=now();
@@ -227,7 +230,7 @@ async function admin(req,env,path){
     if(env.ATTACHMENTS)await Promise.allSettled(attachments.results.map(a=>env.ATTACHMENTS.delete(a.r2_key)));
     return json({ok:true});
   }
-  if(req.method==="GET"&&bits[4]==="attachments"&&bits[5]&&env.ATTACHMENTS){
+  if(req.method==="GET"&&bits.length===6&&bits[4]==="attachments"&&bits[5]&&env.ATTACHMENTS){
     const file=await env.DB.prepare("SELECT * FROM attachments WHERE id=? AND feedback_id=?").bind(bits[5],id).first();
     if(!file)return fail("找不到附件。",404);
     const object=await env.ATTACHMENTS.get(file.r2_key);
