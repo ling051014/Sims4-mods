@@ -216,11 +216,32 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
 
 
 .credential-copy{display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.copy-state-icon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.copy-shape,.check-shape{transition:opacity .18s ease,stroke-dashoffset .32s ease,transform .25s ease}
-.check-shape{stroke-dasharray:28;stroke-dashoffset:28;opacity:0}
-.credential-copy.is-copied .copy-shape{opacity:0;transform:scale(.7);transform-origin:center}
-.credential-copy.is-copied .check-shape{stroke-dashoffset:0;opacity:1}
+/* 憑證複製直接沿用族譜提取器的 SVG 筆劃動畫與原路徑，不再以淡入淡出取代。 */
+.credential-copy .l1ng-copy-glyph{display:block;width:20px;height:20px;flex:0 0 20px;overflow:visible}
+.credential-copy .l1ng-copy-stroke,.credential-copy .l1ng-check-stroke{fill:none;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+.credential-copy .l1ng-copy-stroke{stroke:currentColor;stroke-dashoffset:0}
+.credential-copy .l1ng-check-stroke{stroke:#5d9876;stroke-dashoffset:var(--stroke-hide);stroke-width:2.2}
+.credential-copy .l1ng-copy-running .l1ng-copy-stroke{animation:l1ngTraceCopy 3.8s linear both}
+.credential-copy .l1ng-copy-running .l1ng-check-stroke{animation:l1ngTraceCheck 3.8s linear both}
+@keyframes l1ngTraceCopy{
+  0%,8%{stroke-dashoffset:0}
+  8.01%{stroke-dashoffset:0;animation-timing-function:cubic-bezier(.4,0,.8,.7)}
+  23%,76%{stroke-dashoffset:var(--stroke-hide)}
+  76.01%{stroke-dashoffset:var(--stroke-hide);animation-timing-function:cubic-bezier(.2,.3,.2,1)}
+  91%,100%{stroke-dashoffset:0}
+}
+@keyframes l1ngTraceCheck{
+  0%,22%{stroke-dashoffset:var(--stroke-hide)}
+  22.01%{stroke-dashoffset:var(--stroke-hide);animation-timing-function:cubic-bezier(.25,.35,.3,1)}
+  37%,67%{stroke-dashoffset:0}
+  67.01%{stroke-dashoffset:0;animation-timing-function:cubic-bezier(.5,.05,.8,.7)}
+  82%,100%{stroke-dashoffset:var(--stroke-hide)}
+}
+@media(prefers-reduced-motion:reduce){
+  .credential-copy .l1ng-copy-running .l1ng-copy-stroke,.credential-copy .l1ng-copy-running .l1ng-check-stroke{animation:none}
+  .credential-copy .l1ng-copy-running .l1ng-copy-stroke{stroke-dashoffset:var(--stroke-hide)}
+  .credential-copy .l1ng-copy-running .l1ng-check-stroke{stroke-dashoffset:0}
+}
 .privacy-tip{line-height:1.55}
 @media(max-width:600px){.privacy-tip{font-size:10px;max-width:64%}}
 .primary.submit.is-loading,.thread-compose .primary.is-loading{cursor:progress;pointer-events:none}
