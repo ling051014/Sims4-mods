@@ -125,9 +125,72 @@ body.realdate-only{--bg:#fafafa;--surface:#fff;--subtle:#f7fafc;--ink:#262626;--
 body.genealogy-only{
   background:var(--surface);
   color:var(--ink);
-  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  font-size:14px;
+  font-weight:400;
+  line-height:1.5;
+  letter-spacing:0;
+  -webkit-font-smoothing:auto;
   height:100dvh;
   overflow:hidden;
+}
+.genealogy-only button,
+.genealogy-only input,
+.genealogy-only select,
+.genealogy-only textarea,
+.genealogy-only summary,
+.genealogy-only .l1ng-select-trigger,
+.genealogy-only .l1ng-select-item{
+  font-family:inherit;
+}
+/* 欄位文字層級直接參照視覺設定的 setting-group-title 與使用說明。 */
+.genealogy-only .modal-content>.section>.section-heading>.field-label{
+  color:var(--ink);
+  font-size:13px;
+  font-weight:700;
+  line-height:1.4;
+  letter-spacing:.1px;
+}
+.genealogy-only .modal-content .section-heading .optional{
+  font-size:11px;
+  font-weight:400;
+  line-height:1.5;
+  letter-spacing:0;
+}
+.genealogy-only .field,
+.genealogy-only .l1ng-select-trigger,
+.genealogy-only .l1ng-select-item{
+  font-size:12px;
+  font-weight:400;
+  letter-spacing:0;
+}
+.genealogy-only .type-choice,
+.genealogy-only .reply-option strong,
+.genealogy-only .contact-copy strong{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0;
+}
+.genealogy-only .reply-option small,
+.genealogy-only .compact-help,
+.genealogy-only .hint,
+.genealogy-only .field-info,
+.genealogy-only .version-guide,
+.genealogy-only .contact-copy small,
+.genealogy-only .verify-legal,
+.genealogy-only .privacy-tip{
+  font-size:11.5px;
+  font-weight:400;
+  line-height:1.6;
+  letter-spacing:0;
+}
+.genealogy-only .submit,
+.genealogy-only .secondary,
+.genealogy-only .text-action{
+  font-family:inherit;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:0;
 }
 .genealogy-only .preview-bar,
 .genealogy-only .context-switch,
@@ -196,7 +259,7 @@ body.genealogy-only{
 }
 .genealogy-only .modal-content>.section:last-child{border-bottom:0}
 .genealogy-only .section-heading{margin-bottom:10px}
-.genealogy-only .field-label{font-size:12px;color:var(--ink);font-weight:650}
+.genealogy-only .field-label{font-size:11.5px;color:var(--ink);font-weight:600;letter-spacing:0}
 .genealogy-only .success-pane{flex:1 1 auto;min-height:0;overflow-y:auto}
 .genealogy-only .thread-pane{flex:1 1 auto;min-height:0;max-height:none}
 .genealogy-only .thread-body{flex:1 1 auto;min-height:0}
@@ -372,11 +435,17 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
     margin-bottom:9px;
   }
   .genealogy-only .section-heading .optional {
-    font-size:10.5px;
+    font-size:11px;
+    font-weight:400;
     line-height:1.5;
   }
   .genealogy-only .field-label {
-    font-size:12px;
+    font-size:11.5px;
+    font-weight:600;
+  }
+  .genealogy-only .modal-content>.section>.section-heading>.field-label{
+    font-size:12.5px;
+    font-weight:700;
   }
   .genealogy-only .type-grid {
     grid-template-columns:repeat(3,minmax(0,1fr));
@@ -387,7 +456,8 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
     min-height:67px;
     padding:10px 8px;
     gap:6px;
-    font-size:11px;
+    font-size:11.5px;
+    font-weight:700;
     line-height:1.4;
     border-radius:8px;
   }
@@ -402,8 +472,17 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
   .genealogy-only .l1ng-select-trigger {
     max-width:100%;
     min-width:0;
-    font-size:16px;
+    font-weight:400;
     line-height:1.5;
+  }
+  /* iPhone 可編輯欄位用 16px 防止聚焦縮放；下拉按鈕不需要放大。 */
+  .genealogy-only input.field,
+  .genealogy-only textarea.field{
+    font-size:16px;
+  }
+  .genealogy-only .l1ng-select-trigger,
+  .genealogy-only .l1ng-select-item{
+    font-size:12px;
   }
   .genealogy-only .field,
   .genealogy-only .l1ng-select-trigger {
@@ -426,9 +505,11 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
   }
   .genealogy-only .reply-option strong {
     font-size:12px;
+    font-weight:700;
   }
   .genealogy-only .reply-option small {
-    font-size:11px;
+    font-size:11.5px;
+    font-weight:400;
     line-height:1.6;
   }
   .genealogy-only .upload-zone {
@@ -555,7 +636,7 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
   }
   .genealogy-only .type-choice {
     padding-inline:6px;
-    font-size:10.5px;
+    font-size:11px;
   }
   .genealogy-only .verify-text span {
     font-size:10px;
