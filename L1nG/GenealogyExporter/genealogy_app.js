@@ -16875,6 +16875,46 @@ async function ensureHtml2Canvas() {
   }
 }
 
+// iOS Safari 可能把主題顏色計算成 color(display-p3 ...)；舊版 html2canvas 不支援這種格式。
+// 只替 iOS PNG 匯出載入支援 CSS Color 4 的相容版本，不更換電腦版的既有繪製流程。
+let _iosHtml2CanvasPromise = null;
+
+async function ensureIosHtml2Canvas() {
+  if (_iosHtml2CanvasPromise) return _iosHtml2CanvasPromise;
+
+  const sources = [
+    'https://cdn.jsdelivr.net/npm/html2canvas-pro@1.6.7/dist/html2canvas-pro.min.js',
+    'https://unpkg.com/html2canvas-pro@1.6.7/dist/html2canvas-pro.min.js'
+  ];
+
+  _iosHtml2CanvasPromise = (async () => {
+    let lastError = null;
+
+    for (const src of sources) {
+      const previousRenderer = window.html2canvas;
+      try {
+        await loadScriptOnce(src);
+        // 即使頁面先前曾載入舊版，仍須確認相容版已真正取代它。
+        if (typeof window.html2canvas === 'function' &&
+            window.html2canvas !== previousRenderer) {
+          return window.html2canvas;
+        }
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    throw lastError || new Error('無法載入支援 iOS 顏色格式的圖片轉換元件。');
+  })();
+
+  try {
+    return await _iosHtml2CanvasPromise;
+  } catch (err) {
+    _iosHtml2CanvasPromise = null;
+    throw err;
+  }
+}
+
 function sanitizeDownloadName(name) {
   return String(name || 'genealogy')
     .replace(/[\\/:*?"<>|]/g, '_')
@@ -17282,7 +17322,9 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   const stageWidth = Math.max(1, Math.ceil(parseFloat(stage.style.width) || stage.offsetWidth || 1));
   const stageHeight = Math.max(1, Math.ceil(parseFloat(stage.style.height) || stage.offsetHeight || 1));
 
-  const html2canvas = await ensureHtml2Canvas();
+  const html2canvas = useSafeIosGenealogyCapture()
+    ? await ensureIosHtml2Canvas()
+    : await ensureHtml2Canvas();
   const captureViewport = buildGenealogyCaptureNode(stageWidth, stageHeight, backgroundMode);
   document.body.appendChild(captureViewport);
 
