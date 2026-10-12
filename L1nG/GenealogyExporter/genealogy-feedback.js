@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let activePage = 0;
   let pendingPage = null;
   let peelFrame = null;
+  let floatingPaper = null;
   const peelDuration = 1080;
   const svgNS = 'http://www.w3.org/2000/svg';
   const pageCorners = (width, height) => [
@@ -212,13 +213,62 @@ document.addEventListener('DOMContentLoaded', () => {
       for (const path of [visual.shadow, visual.crease, visual.glint]) path.setAttribute('d', '');
     }
     // 膠帶拉開後，讓最後一小塊紙帶著慣性離開，而非突然消失。
-    const release = Math.max(0, (progress - .91) / .09);
-    visual.svg.style.transform = release
-      ? 'translate3d(' + (-width * .035 * release).toFixed(2) + 'px,'
-        + (-height * .04 * release).toFixed(2) + 'px,0) rotate('
-        + (-4 * release).toFixed(2) + 'deg)'
+    // 紙背在上緣撕開後飛出整個對話框；不再被原本的圓角和視窗邊界裁掉。
+    const flight = smoothstep(Math.max(0, (progress - .79) / .21));
+    const fade = smoothstep(Math.max(0, (progress - .93) / .07));
+    visual.svg.style.transformOrigin = '0 0';
+    visual.svg.style.transform = flight
+      ? 'translate3d(' + (-width * .29 * flight).toFixed(2) + 'px,'
+        + (-height * .38 * flight).toFixed(2) + 'px,0) rotate('
+        + (-13 * flight).toFixed(2) + 'deg)'
       : '';
-    visual.svg.style.opacity = String(1 - smoothstep(release) * .95);
+    visual.svg.style.opacity = String(1 - fade);
+  }
+
+  // 將「紙張本體」暫時複製到視窗外的最上層：翻折與飛離不受原彈窗 overflow 裁切。
+  // 原始輸入欄位及事件永遠留在原處；動畫副本不帶 ID、沒有事件，也不能被操作。
+  function createFloatingPaper(outgoing, rect) {
+    const overlay = document.createElement('div');
+    overlay.className = 'genealogy-feedback-panel genealogy-feedback-tear-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.inert = true;
+
+    const stage = document.createElement('div');
+    stage.className = 'genealogy-feedback-pages genealogy-feedback-tear-stage is-tearing';
+    stage.style.left = rect.left + 'px';
+    stage.style.top = rect.top + 'px';
+    stage.style.width = rect.width + 'px';
+    stage.style.height = rect.height + 'px';
+
+    const sheet = outgoing.cloneNode(true);
+    sheet.classList.add('is-tearing-page');
+    sheet.inert = true;
+    const originals = [outgoing, ...outgoing.querySelectorAll('*')];
+    const copies = [sheet, ...sheet.querySelectorAll('*')];
+    const scrollPositions = [];
+    originals.forEach((original, index) => {
+      const copy = copies[index];
+      if (copy.hasAttribute('id')) copy.removeAttribute('id');
+      if (copy.hasAttribute('for')) copy.removeAttribute('for');
+      if (copy.hasAttribute('hidden')) copy.style.display = 'none';
+      if ('value' in original && 'value' in copy) copy.value = original.value;
+      if ('checked' in original && 'checked' in copy) copy.checked = original.checked;
+      if (original.scrollTop || original.scrollLeft) {
+        scrollPositions.push([copy, original.scrollTop, original.scrollLeft]);
+      }
+    });
+    stage.appendChild(sheet);
+    overlay.appendChild(stage);
+    document.body.appendChild(overlay);
+    scrollPositions.forEach(([copy, top, left]) => {
+      copy.scrollTop = top;
+      copy.scrollLeft = left;
+    });
+
+    const visual = makePeelVisual();
+    visual.svg.setAttribute('viewBox', '0 0 ' + rect.width + ' ' + rect.height);
+    stage.appendChild(visual.svg);
+    return { overlay, sheet, visual };
   }
 
   function stopPeel() {
@@ -226,11 +276,13 @@ document.addEventListener('DOMContentLoaded', () => {
       cancelAnimationFrame(peelFrame);
       peelFrame = null;
     }
-    pages?.querySelector('.genealogy-feedback-peel-visual')?.remove();
+    floatingPaper?.remove();
+    floatingPaper = null;
     pages?.classList.remove('is-tearing');
     tabs.forEach(({ panel: view }) => {
       view.classList.remove('is-tearing-page', 'is-under-page');
       view.style.removeProperty('clip-path');
+      view.style.removeProperty('visibility');
       view.inert = false;
     });
   }
@@ -270,16 +322,17 @@ document.addEventListener('DOMContentLoaded', () => {
     outgoing.classList.add('is-tearing-page');
     incoming.classList.add('is-under-page');
     pages.classList.add('is-tearing');
-    const visual = makePeelVisual();
-    visual.svg.setAttribute('viewBox', '0 0 ' + rect.width + ' ' + rect.height);
-    pages.appendChild(visual.svg);
+    const paper = createFloatingPaper(outgoing, rect);
+    floatingPaper = paper.overlay;
+    // 原頁保持原來的 DOM、表單數值與捲動狀態，只把可見紙面交給浮層。
+    outgoing.style.visibility = 'hidden';
 
     let start = null;
     const animate = timestamp => {
       if (pendingPage !== index) return;
       if (start === null) start = timestamp;
       const progress = Math.min(1, (timestamp - start) / peelDuration);
-      drawPeel(progress, outgoing, visual, rect.width, rect.height);
+      drawPeel(progress, paper.sheet, paper.visual, rect.width, rect.height);
       if (progress >= 1) {
         setTab(index, true);
       } else {
