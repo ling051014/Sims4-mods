@@ -105,17 +105,6 @@ if (navToggle && mainNav) {
     });
 }
 
-// ========【RealDate 更多選單】 設定 - 點擊外部自動收合 ========
-const moreMenus = document.querySelectorAll(".nav-more");
-
-document.addEventListener("click", (event) => {
-    moreMenus.forEach((menu) => {
-        if (menu.open && !menu.contains(event.target)) {
-            menu.open = false;
-        }
-    });
-});
-
 // ========【RealDate 進場動畫】 設定 - 進入畫面後顯示 ========
 const revealItems = document.querySelectorAll(".reveal");
 
@@ -136,3 +125,73 @@ if ("IntersectionObserver" in window) {
 } else {
     revealItems.forEach((item) => item.classList.add("visible"));
 }
+
+// ========【章節快速導覽】 追蹤所在章節、切換與返回頁首 ========
+(() => {
+    "use strict";
+    const quickNav = document.querySelector("[data-doc-quick-nav]");
+    if (!quickNav) return;
+    const summary = quickNav.querySelector("summary");
+    const links = Array.from(quickNav.querySelectorAll(".doc-quick-links a"));
+    const sections = links.map((link) => document.getElementById(link.hash.slice(1)));
+    const position = quickNav.querySelector("[data-doc-position]");
+    const topButton = quickNav.querySelector("[data-doc-to-top]");
+    let frameScheduled = false;
+
+    function updateCurrentSection() {
+        frameScheduled = false;
+        const headerHeight = siteHeader ? siteHeader.getBoundingClientRect().height : 0;
+        const threshold = headerHeight + 72;
+        let current = 0;
+        sections.forEach((section, index) => {
+            if (section && section.getBoundingClientRect().top <= threshold) current = index;
+        });
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+            current = sections.length - 1;
+        }
+        links.forEach((link, index) => {
+            if (index === current) link.setAttribute("aria-current", "location");
+            else link.removeAttribute("aria-current");
+        });
+        if (position) {
+            position.textContent = String(current + 1).padStart(2, "0") + " / " +
+                String(links.length).padStart(2, "0");
+        }
+    }
+
+    function scheduleUpdate() {
+        if (frameScheduled) return;
+        frameScheduled = true;
+        window.requestAnimationFrame(updateCurrentSection);
+    }
+
+    links.forEach((link) => {
+        link.addEventListener("click", () => {
+            quickNav.open = false;
+            scheduleUpdate();
+        });
+    });
+
+    if (topButton) {
+        topButton.addEventListener("click", () => {
+            quickNav.open = false;
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+        });
+    }
+
+    document.addEventListener("click", (event) => {
+        if (quickNav.open && !quickNav.contains(event.target)) quickNav.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && quickNav.open) {
+            quickNav.open = false;
+            summary.focus();
+        }
+    });
+
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.addEventListener("hashchange", scheduleUpdate);
+    updateCurrentSection();
+})();

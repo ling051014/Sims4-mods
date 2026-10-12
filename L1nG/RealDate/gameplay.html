@@ -6,8 +6,8 @@
     <title>RealDate 完整玩法 · L1nG</title>
     <meta name="description" content="RealDate v0.4 Beta 目前公開版本的完整累積玩法。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261011-scrollbar-r2">
-    <script src="realdate.js" defer></script>
+    <link rel="stylesheet" href="realdate.css?v=20261012-nav-center-floating-r1">
+    <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261008-site-skeleton-r2">
 </head>
 
@@ -64,28 +64,7 @@
             </div>
         </section>
 
-        <section class="doc-toc" id="page-directory" aria-label="頁內章節目錄">
-            <div class="doc-toc-heading">
-                <div>
-                    <span class="eyebrow">ON THIS PAGE</span>
-                    <h2 data-lang="zh-Hant">章節目錄</h2>
-                    <h2 data-lang="en">Contents</h2>
-                </div>
-                <p data-lang="zh-Hant">選擇章節，直接前往對應內容。</p>
-                <p data-lang="en">Jump directly to a section.</p>
-            </div>
-            <nav class="doc-toc-links" aria-label="Gameplay sections">
-                <a href="#setup"><span data-lang="zh-Hant">初始設定</span><span data-lang="en">Getting Started</span></a>
-                <a href="#calendar"><span data-lang="zh-Hant">月曆與季節</span><span data-lang="en">Calendar & Seasons</span></a>
-                <a href="#aging"><span data-lang="zh-Hant">年齡與生命階段</span><span data-lang="en">Ages & Life Stages</span></a>
-                <a href="#birthdays"><span data-lang="zh-Hant">生日與社交</span><span data-lang="en">Birthdays & Socials</span></a>
-                <a href="#reproductive"><span data-lang="zh-Hant">生理時間軸</span><span data-lang="en">Reproductive Timeline</span></a>
-                <a href="#pregnancy"><span data-lang="zh-Hant">懷孕與產後</span><span data-lang="en">Pregnancy & Postpartum</span></a>
-                <a href="#eras"><span data-lang="zh-Hant">年號與星期</span><span data-lang="en">Eras & Weekdays</span></a>
-                <a href="#zodiac"><span data-lang="zh-Hant">星座聯動</span><span data-lang="en">Zodiac Integration</span></a>
-                <a href="#tools"><span data-lang="zh-Hant">介面與診斷</span><span data-lang="en">Interface & Diagnostics</span></a>
-            </nav>
-        </section>
+        
 
         <section class="doc-section" id="setup">
             <div class="doc-label">
@@ -621,6 +600,39 @@
             </div>
         </section>
     </main>
+
+    <!-- ========【章節快速導覽】 隨時可開啟，並標示目前章節 ======== -->
+    <details class="doc-quick-nav" data-doc-quick-nav>
+        <summary>
+            <span class="doc-quick-symbol" aria-hidden="true"></span>
+            <span data-lang="zh-Hant">章節導覽</span>
+            <span data-lang="en">Sections</span>
+            <span class="doc-quick-position" data-doc-position aria-hidden="true">01 / 09</span>
+        </summary>
+        <div class="doc-quick-panel">
+            <div class="doc-quick-panel-heading">
+                <strong data-lang="zh-Hant">前往章節</strong>
+                <strong data-lang="en">Jump to section</strong>
+                <small data-lang="zh-Hant">目前章節會自動標示，隨時可切換。</small>
+                <small data-lang="en">Your current section is highlighted automatically.</small>
+            </div>
+            <nav class="doc-quick-links" aria-label="Page sections">
+                <a href="#setup" data-index="01"><span data-lang="zh-Hant">初始設定</span><span data-lang="en">Getting Started</span></a>
+                <a href="#calendar" data-index="02"><span data-lang="zh-Hant">月曆與季節</span><span data-lang="en">Calendar &amp; Seasons</span></a>
+                <a href="#aging" data-index="03"><span data-lang="zh-Hant">年齡與生命階段</span><span data-lang="en">Ages &amp; Life Stages</span></a>
+                <a href="#birthdays" data-index="04"><span data-lang="zh-Hant">生日與社交</span><span data-lang="en">Birthdays &amp; Socials</span></a>
+                <a href="#reproductive" data-index="05"><span data-lang="zh-Hant">生理時間軸</span><span data-lang="en">Reproductive Timeline</span></a>
+                <a href="#pregnancy" data-index="06"><span data-lang="zh-Hant">懷孕與產後</span><span data-lang="en">Pregnancy &amp; Postpartum</span></a>
+                <a href="#eras" data-index="07"><span data-lang="zh-Hant">年號與星期</span><span data-lang="en">Eras &amp; Weekdays</span></a>
+                <a href="#zodiac" data-index="08"><span data-lang="zh-Hant">星座聯動</span><span data-lang="en">Zodiac Integration</span></a>
+                <a href="#tools" data-index="09"><span data-lang="zh-Hant">介面與診斷</span><span data-lang="en">Interface &amp; Diagnostics</span></a>
+            </nav>
+            <button class="doc-quick-top" type="button" data-doc-to-top>
+                <span data-lang="zh-Hant">↑　回到頁首</span>
+                <span data-lang="en">↑　Back to top</span>
+            </button>
+        </div>
+    </details>
 
     <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
     <footer class="site-footer">
