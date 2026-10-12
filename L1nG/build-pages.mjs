@@ -81,6 +81,8 @@ const rewrite = (value,attribute) => {
   if (value.startsWith('../home.html') || value==='home.html' && mode!=='home')
     return 'https://home.by-l1ng.com/' + value.slice(main.length);
   if (domains[main]) return domains[main]+value.slice(main.length);
+  if (main.startsWith('RealDate/')) return 'https://realdate.by-l1ng.com/'+main.slice('RealDate/'.length)+value.slice(main.length);
+  if (main.startsWith('GenealogyExporter/')) return 'https://genealogy.by-l1ng.com/'+main.slice('GenealogyExporter/'.length)+value.slice(main.length);
   if (mode==='genealogy' && main==='genealogy-exporter.html')
     return 'https://genealogy-exporter.by-l1ng.com/'+value.slice(main.length);
   if (mode==='extractor' && main==='genealogy.html')
