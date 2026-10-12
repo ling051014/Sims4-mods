@@ -71,7 +71,7 @@ if (mode === 'home') {
 // website under a URL served by the wrong Cloudflare Pages project.
 const domains = {
   'RealDate/index.html':'https://realdate.by-l1ng.com/',
-  'GenealogyExporter/genealogy.html':'https://genealogy.by-l1ng.com/',
+  'GenealogyExporter/genealogy.html':'https://genealogy-tool.by-l1ng.com/',
   'GenealogyExporter/genealogy-exporter.html':'https://genealogy-exporter.by-l1ng.com/',
   'Translations/index.html':'https://translations.by-l1ng.com/'
 };
@@ -82,11 +82,11 @@ const rewrite = (value,attribute) => {
     return 'https://home.by-l1ng.com/' + value.slice(main.length);
   if (domains[main]) return domains[main]+value.slice(main.length);
   if (main.startsWith('RealDate/')) return 'https://realdate.by-l1ng.com/'+main.slice('RealDate/'.length)+value.slice(main.length);
-  if (main.startsWith('GenealogyExporter/')) return 'https://genealogy.by-l1ng.com/'+main.slice('GenealogyExporter/'.length)+value.slice(main.length);
+  if (main.startsWith('GenealogyExporter/')) return 'https://genealogy-tool.by-l1ng.com/'+main.slice('GenealogyExporter/'.length)+value.slice(main.length);
   if (mode==='genealogy' && main==='genealogy-exporter.html')
     return 'https://genealogy-exporter.by-l1ng.com/'+value.slice(main.length);
   if (mode==='extractor' && main==='genealogy.html')
-    return 'https://genealogy.by-l1ng.com/'+value.slice(main.length);
+    return 'https://genealogy-tool.by-l1ng.com/'+value.slice(main.length);
   return value;
 };
 function htmlFiles(directory) {
