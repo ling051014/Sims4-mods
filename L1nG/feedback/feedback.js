@@ -294,6 +294,10 @@
   if(document.body.classList.contains('genealogy-only')){
     window.addEventListener('message',event=>{
       if(event.origin!==window.location.origin||event.source!==window.parent)return;
+      if(event.data?.type==='l1ng-feedback-open-thread'){
+        openThreadHub();
+        return;
+      }
       if(event.data?.type!=='l1ng-feedback-theme'||!event.data.variables)return;
       for(const [name,value] of Object.entries(event.data.variables)){
         if(/^--[a-z0-9-]+$/.test(name)&&typeof value==='string'&&value.length<100)document.documentElement.style.setProperty(name,value);
@@ -303,6 +307,10 @@
   if(document.body.classList.contains('genealogy-only')){
     openForm();
     $('close-form').addEventListener('click',()=>{if(window.parent!==window)window.parent.postMessage({type:'l1ng-feedback-close'},window.location.origin)});
+    window.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&window.parent!==window)window.parent.postMessage({type:'l1ng-feedback-close'},window.location.origin);
+    });
+    if(window.parent!==window)window.parent.postMessage({type:'l1ng-feedback-child-ready'},window.location.origin);
   }
   render();setAdminPage('overview');
 })();
