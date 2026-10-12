@@ -4097,6 +4097,14 @@ button.avatar-editor-action { cursor:pointer; }
     padding:0 20px 28px;
 }
 
+/* 僅縮減填寫頁最後的安全驗證下方留白，不影響其他區塊間距或查詢頁。 */
+.genealogy-feedback-panel #genealogyFeedbackWritePanel .genealogy-feedback-scroll {
+    padding-bottom:12px;
+}
+.genealogy-feedback-panel #genealogyFeedbackWritePanel .genealogy-feedback-section:last-child {
+    padding-bottom:0;
+}
+
 /* 表單中段只保留原本的上下留白，不在各區塊間繪製分隔線。 */
 .genealogy-feedback-section {
     padding:20px 0;
@@ -4113,6 +4121,22 @@ button.avatar-editor-action { cursor:pointer; }
     flex-wrap:wrap;
     gap:5px 12px;
     margin:0 0 12px;
+}
+
+/* 電腦版提示移到標題右方；觸控版仍維持「由你決定」及原下方提示。 */
+.genealogy-feedback-panel .genealogy-feedback-followup-mobile-note {
+    display:none;
+}
+@media (max-width:720px) {
+    .genealogy-feedback-panel .genealogy-feedback-followup-desktop-note {
+        display:none;
+    }
+    .genealogy-feedback-panel .genealogy-feedback-section-heading > .genealogy-feedback-followup-mobile-note {
+        display:inline;
+    }
+    .genealogy-feedback-panel p.genealogy-feedback-followup-mobile-note {
+        display:block;
+    }
 }
 
 .genealogy-feedback-panel .genealogy-feedback-field-label {
