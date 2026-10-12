@@ -141,7 +141,7 @@
 
 <section class="section"><div class="section-heading"><span class="field-label">安全驗證 <span class="required">*</span></span><span class="optional">Cloudflare Turnstile</span></div><div class="verify-card" id="verify-card"><div class="verify-left"><div class="verify-icon"><svg class="i lg"><use href="#ico-shield"></use></svg></div><div class="verify-text"><strong id="verify-title">人機驗證</strong><span id="verify-subtitle">Cloudflare 驗證服務</span></div></div><button id="verify-button" type="button" disabled aria-disabled="true">驗證</button></div><div class="verify-legal">驗證服務尚未啟用。</div><div class="field-error" id="verify-error">請先完成人機驗證。</div></section>
 </div>
-<div class="modal-bottom"><div class="privacy-tip"><svg class="i sm"><use href="#ico-shield"></use></svg><span>請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</span></div><button class="primary submit" type="submit">送出回饋 <svg class="i sm"><use href="#ico-arrow"></use></svg></button></div>
+<div class="modal-bottom"><div class="privacy-tip"><svg class="i sm"><use href="#ico-shield"></use></svg><span>請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</span></div><button class="primary submit" type="submit">送出</button></div>
 </form>
 </div>
 <div class="success-pane hide" id="success-pane">
@@ -254,6 +254,7 @@
 <div aria-hidden="true" class="confirm-layer" id="confirm-layer"><div aria-labelledby="confirm-heading" aria-modal="true" class="confirm-card" role="alertdialog"><h3 id="confirm-heading">刪除這則回饋？</h3><p>這會從目前的列表移除訊息。真實版本將同時處理相關附件。</p><div class="confirm-actions"><button class="secondary" id="cancel-delete" type="button">取消</button><button class="danger" id="confirm-delete" type="button">確認刪除</button></div></div></div>
 <div aria-live="polite" class="toast" id="toast" role="status"></div>
 <script src="../feedback/select-ui.js" defer></script>
+<script src="../feedback/feedback-core.js" defer></script>
 <script src="../feedback/feedback.js" defer></script>
 <script src="../feedback/feedback-i18n.js" defer></script>
 </body>
