@@ -1366,34 +1366,18 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 字體大小 */ font-size: 9px;
 }
 
-/* ========【常見問題】 設定 - FAQ ======== */
-.faq-list {
-    /* 最大寬度 */ max-width: var(--reading-width);
-}
-
-.faq-item {
-    /* 背景 */ background: var(--surface);
-    /* 邊框 */ border: 1px solid var(--line);
-    /* 底部邊框寬度 */ border-bottom-width: 0;
-}
-
-.faq-item:last-child {
-    /* 底部邊框寬度 */ border-bottom-width: 1px;
-}
-
-.faq-item summary {
-    /* 內縮空間 */ padding: 18px 20px;
-    /* 文字顏色 */ color: var(--text-strong);
-    /* 字體大小 */ font-size: 14px;
-    /* 指標手勢 */ cursor: pointer;
-}
-
-.faq-item p {
-    /* 外距 */ margin: 0;
-    /* 內縮空間 */ padding: 0 20px 20px;
-    /* 文字顏色 */ color: var(--text-muted);
-    /* 字體大小 */ font-size: 13px;
-}
+/* ========【常見問題】 正式文件式展開項目 ======== */
+.faq-list {max-width:var(--reading-width);display:grid;gap:12px}
+.faq-item {background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:border-color .2s ease,box-shadow .2s ease}
+.faq-item[open] {border-color:var(--accent-border);box-shadow:0 9px 26px rgba(0,0,0,.035)}
+.faq-item > summary {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:19px 22px;color:var(--text-strong);font-size:14px;font-weight:600;line-height:1.6;cursor:pointer;list-style:none}
+.faq-item > summary::-webkit-details-marker {display:none}
+.faq-item > summary::after {content:"";width:8px;height:8px;flex:0 0 auto;border-right:1.5px solid var(--text-muted);border-bottom:1.5px solid var(--text-muted);transform:rotate(45deg);transition:transform .2s ease}
+.faq-item[open] > summary::after {transform:rotate(225deg)}
+.faq-item > p {margin:0 22px 22px;padding:16px 0 0;border-top:1px solid var(--line-soft);color:var(--text-muted);font-size:13px;line-height:1.9}
+.faq-item > p a {color:var(--accent);text-underline-offset:3px}
+@media(max-width:640px){.faq-item > summary{padding:17px;font-size:13px}.faq-item > p{margin:0 17px 17px}}
+@media(prefers-reduced-motion:reduce){.faq-item,.faq-item>summary::after{transition:none}}
 
 /* ========【RealDate 網站底部】 設定 - 專案資訊 ======== */
 .site-footer {
@@ -1707,13 +1691,12 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 
-/* ========【展開箭頭】 設定 - 沿用模組整理的 CSS 三角箭頭（向右、展開向下） ======== */
-.faq-item > summary,.compat-detail > summary {list-style:none;display:flex;align-items:center;gap:12px}
-.faq-item > summary::-webkit-details-marker,.compat-detail > summary::-webkit-details-marker {display:none}
-.faq-item > summary::before,.compat-detail > summary::before {content:"";display:block;flex:0 0 auto;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid var(--text-strong);transition:transform .2s ease}
-.faq-item[open] > summary::before,.compat-detail[open] > summary::before {transform:rotate(90deg)}
-@media(prefers-reduced-motion:reduce){.faq-item > summary::before,.compat-detail > summary::before {transition:none}}
-@media(hover:hover) and (pointer:fine){.compat-details,.faq-list{scrollbar-width:thin;scrollbar-color:var(--line) transparent}}
+/* ========【相容性展開箭頭】 ======== */
+.compat-detail > summary {list-style:none}
+.compat-detail > summary::-webkit-details-marker {display:none}
+.compat-detail > summary::before {content:"";display:block;flex:0 0 auto;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid var(--text-strong);transition:transform .2s ease}
+.compat-detail[open] > summary::before {transform:rotate(90deg)}
+@media(prefers-reduced-motion:reduce){.compat-detail > summary::before{transition:none}}
 
 /* ========【共用捲軸】 A 款細線 - 所有可捲動容器 ======== */
 html,body,body *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
@@ -1724,3 +1707,13 @@ html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scro
 /* ========【頁內章節索引】 和內容一起捲動，不形成第二頂條 ======== */
 .doc-index-title{flex:0 0 auto;align-self:center;margin-right:10px;color:var(--text-strong);font-size:11px;font-weight:650;white-space:nowrap}
 @media(max-width:640px){.doc-index{width:min(calc(100% - 30px),var(--reading-width));margin-top:16px}.doc-index-title{margin-right:6px}}
+
+/* ========【相容性詳細說明】 名稱、版本和狀態各自佔據明確區域 ======== */
+.compat-detail > summary {display:grid;grid-template-columns:8px minmax(0,1fr) minmax(125px,auto);gap:14px;align-items:center;padding:20px 22px}
+.compat-detail > summary::before {grid-column:1;grid-row:1}
+.compat-detail > summary > span:first-child {grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.compat-detail > summary > span:first-child strong {font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+.compat-detail > summary > span:first-child small {font-size:11px;line-height:1.5}
+.compat-detail > summary > .compat-status {grid-column:3;grid-row:1;text-align:right;white-space:normal;font-size:11px;line-height:1.5}
+.compat-detail-body {padding:17px 22px 22px}
+@media(max-width:640px){.compat-detail > summary{grid-template-columns:8px minmax(0,1fr);align-items:start;gap:7px 12px;padding:17px}.compat-detail > summary > .compat-status{grid-column:2;grid-row:2;text-align:left}.compat-detail-body{padding:16px}}
