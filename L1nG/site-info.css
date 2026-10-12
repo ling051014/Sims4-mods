@@ -53,7 +53,7 @@ html[data-site-info-section] #genealogy > p:last-child { display: none; }
 @media (max-width: 600px) { .policy-header-actions { gap: 12px; } .policy-language-switch { gap: 4px; } .policy-back { font-size: 11px; } }
 
 /* ========【族譜工具「關於」】共用網站的版權聲明與政策內容 ======== */
-html[data-site-info-section="genealogy"] #genealogy .policy-language-content > p:last-child { display: none; }
+html[data-site-info-section="genealogy"] #genealogy > .policy-language-content > p:last-child { display: none; }
 html[data-site-info-section="genealogy"] .policy-embedded-legal {
     display: flex;
     flex-direction: column;
