@@ -257,6 +257,12 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollPositions.push([copy, original.scrollTop, original.scrollLeft]);
       }
     });
+    // 不複製仍在執行的 Turnstile／媒體 iframe，以免轉場副本重啟外部服務。
+    sheet.querySelectorAll('iframe, video, audio, object, embed').forEach(element => {
+      const standIn = document.createElement('span');
+      standIn.className = 'genealogy-feedback-peel-placeholder';
+      element.replaceWith(standIn);
+    });
     stage.appendChild(sheet);
     overlay.appendChild(stage);
     document.body.appendChild(overlay);
