@@ -1,0 +1,5 @@
+/* RealDate 回饋頁：載入時表單固定在最終欄位，進場動畫沿用原站。 */
+body.realdate-only .realdate-preview{display:block}
+body.realdate-only #realdate-form-slot .modal-layer{position:relative}
+body.realdate-only .rd-v1-hero-copy.reveal,body.realdate-only .rd-v1-aside.reveal{transition:opacity .55s ease,transform .55s ease}
+@media(prefers-reduced-motion:reduce){body.realdate-only .rd-v1-hero-copy.reveal,body.realdate-only .rd-v1-aside.reveal{transition:none;transform:none}}

@@ -1,0 +1,181 @@
+/* ========【站點說明頁】與全站頁腳使用同一套簡潔文字系統 ======== */
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 30px; }
+body { margin: 0; background: #fbfcfd; color: #344455; font: 14px/1.85 system-ui, -apple-system, "Noto Sans TC", sans-serif; }
+.policy-header { border-bottom: 1px solid #e1e7eb; background: #fff; }
+.policy-header-inner { width: min(1180px, calc(100% - 40px)); margin: auto; min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.policy-header a { color: #596b7c; text-decoration: none; }
+.policy-header a:hover { color: #55acee; }
+.policy-brand { color: #293d4f; font-size: 17px; font-weight: 750; }
+.policy-back { font-size: 12px; }
+.policy-content { width: min(850px, calc(100% - 40px)); margin: 70px auto 96px; }
+.policy-eyebrow { display: block; color: #779fba; letter-spacing: .15em; font-size: 11px; font-weight: 700; }
+.policy-content h1 { margin: 13px 0 13px; font-size: clamp(32px, 5vw, 47px); letter-spacing: -.04em; line-height: 1.25; }
+.policy-intro { color: #758492; font-size: 14px; margin-bottom: 42px; }
+.policy-section { padding: 34px 0; border-top: 1px solid #e3e8ed; }
+.policy-section h2 { margin: 0 0 17px; font-size: 21px; color: #30475b; }
+.policy-section h3 { margin: 24px 0 7px; font-size: 14px; }
+.policy-section p, .policy-section li { color: #617487; font-size: 13px; }
+.policy-section a { color: #438cbe; text-underline-offset: 3px; }
+.policy-section ul { padding-left: 20px; }
+.policy-section li + li { margin-top: 9px; }
+.policy-info { padding: 16px 19px; border-radius: 9px; background: #f0f5f8; color: #617487; font-size: 12px; }
+@media (max-width: 700px) { .policy-header-inner, .policy-content { width: calc(100% - 30px); } .policy-content { margin: 46px auto 70px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* ========【頁內視窗嵌入模式】只顯示所選段落 ======== */
+html[data-site-info-section] { scroll-behavior: auto; }
+html[data-site-info-section] body { margin: 0; background: #fff; }
+html[data-site-info-section] .policy-header,
+html[data-site-info-section] .l1ng-document-footer,
+html[data-site-info-section] .policy-eyebrow,
+html[data-site-info-section] .policy-content > h1,
+html[data-site-info-section] .policy-intro,
+html[data-site-info-section] .policy-section { display: none; }
+html[data-site-info-section] .policy-content { width: 100%; max-width: none; margin: 0; padding: 16px 20px 20px; }
+html[data-site-info-section] .policy-section { border: 0; padding: 0; }
+html[data-site-info-section] .policy-language-content > :first-child { margin-top: 0; }
+html[data-site-info-section] .policy-section h2 { display: none; }
+html[data-site-info-section="privacy"] #privacy,
+html[data-site-info-section="terms"] #terms,
+html[data-site-info-section="genealogy"] #genealogy { display: block; }
+html[data-site-info-section] #genealogy > p:last-child { display: none; }
+@media (max-width: 640px) { html[data-site-info-section] .policy-content { padding: 14px 16px 16px; } }
+
+/* ========【說明頁多語系】依語言顯示完整翻譯，嵌入時繼承來源頁 ======== */
+/* 隱藏語言由元素 hidden 屬性及切換程式直接管理，不依賴選擇器顯示狀態。 */
+[data-lang][hidden],
+[data-site-language][hidden] { display: none; }
+.policy-header-actions { display: flex; align-items: center; gap: 27px; }
+.policy-language-switch { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; color: #a0a9b3; font-size: 11px; }
+.policy-language-switch button { background: transparent; border: 0; padding: 6px 2px; color: #929ca6; font: inherit; font-weight: 600; cursor: pointer; }
+.policy-language-switch button.active, .policy-language-switch button:hover { color: #438cbe; }
+@media (max-width: 600px) { .policy-header-actions { gap: 12px; } .policy-language-switch { gap: 4px; } .policy-back { font-size: 11px; } }
+
+/* ========【族譜工具「關於」】共用網站的版權聲明與政策內容 ======== */
+html[data-site-info-section="genealogy"] #genealogy > .policy-language-content > p:last-child { display: none; }
+html[data-site-info-section="genealogy"] .policy-embedded-legal {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 17px 0 19px;
+    margin-top: 22px;
+    border-top: 1px solid #e3e8ed;
+    color: #71818e;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-copyright {
+    margin: 0;
+    color: #4d6070;
+    font-size: 12px;
+    font-weight: 650;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-disclaimer {
+    margin: 0;
+    color: #71818e;
+    font-size: 12px;
+    line-height: 1.8;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details {
+    border-top: 1px solid #e3e8ed;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details:last-child {
+    border-bottom: 1px solid var(--site-info-border, #e3e8ed);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 49px;
+    padding: 13px 1px;
+    color: #455867;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    cursor: pointer;
+    list-style: none;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary::-webkit-details-marker { display: none; }
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary::after {
+    content: "";
+    flex: 0 0 7px;
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform .18s ease;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary::after {
+    transform: rotate(225deg);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:hover,
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:focus-visible {
+    color: #438cbe;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > .policy-section {
+    padding: 0 1px 23px;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details .policy-section h3:first-of-type {
+    margin-top: 9px;
+}
+@media (prefers-reduced-motion: reduce) {
+    html[data-site-info-section="genealogy"] .policy-embedded-details > summary::after { transition: none; }
+}
+
+/* ========【族譜工具關於視窗】僅保留固定外框下的內部捲動與既有細捲軸 ======== */
+html[data-site-info-section="genealogy"] {
+    height: 100%;
+    overflow: hidden;
+}
+html[data-site-info-section="genealogy"] body {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--site-info-border, #e3e8ed) transparent;
+}
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar-track {
+    background: transparent;
+}
+html[data-site-info-section="genealogy"] body::-webkit-scrollbar-thumb {
+    background: var(--site-info-border, #e3e8ed);
+    border-radius: 999px;
+}
+
+/* ========【族譜工具主題】沿用目前族譜主題，而非固定白底說明視窗 ======== */
+html[data-site-info-section="genealogy"] body {
+    background:var(--site-info-bg,#fff);
+    color:var(--site-info-text,#344455);
+}
+html[data-site-info-section="genealogy"] .policy-section p,
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-disclaimer {
+    color:var(--site-info-secondary,#617487);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal,
+html[data-site-info-section="genealogy"] .policy-embedded-details {
+    border-color:var(--site-info-border,#e3e8ed);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-copyright,
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary {
+    color:var(--site-info-text,#344455);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:hover,
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:focus-visible,
+html[data-site-info-section="genealogy"] .policy-section a {
+    color:var(--site-info-accent,#438cbe);
+}
+html[data-site-info-section="genealogy"] .policy-info {
+    background:var(--site-info-input,#f0f5f8);
+    color:var(--site-info-secondary,#617487);
+}
+/* 僅已展開的條款標題使用目前主題強調色；沿用原始分隔線，不額外套外框或底色。 */
+html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary {
+    color: var(--site-info-accent, #438cbe);
+}

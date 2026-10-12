@@ -6,16 +6,19 @@
     <title>RealDate 完整玩法 · L1nG</title>
     <meta name="description" content="RealDate v0.4 Beta 目前公開版本的完整累積玩法。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261011-scrollbar-r2">
-    <script src="realdate.js" defer></script>
-    <link rel="stylesheet" href="../../site-skeleton.css?v=20261008-site-skeleton-r2">
+    <link rel="stylesheet" href="realdate.css?v=20261012-feedback-seam-r1">
+    <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
+    <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
+    <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
+    <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
+    <script src="../site-info-modal.js?v=20261012-native-layout-r1" defer></script>
 </head>
 
 <body>
-    <script src="../../site-skeleton.js?v=20261008-site-skeleton-r2" data-skeleton-layout="realdate-gameplay"></script>
+    <script src="../../site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3" data-skeleton-layout="realdate-gameplay"></script>
 
     <!-- ========【RealDate 頂部導覽】 設定 - 品牌、頁面導覽與語言切換 ======== -->
-    <header class="site-header" id="siteHeader">
+        <header class="site-header" id="siteHeader">
         <div class="site-header-inner">
             <div class="site-brand-group">
                 <a class="creator-link" href="../home.html">L1nG</a>
@@ -27,21 +30,18 @@
                 <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
                 <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
                 <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
-                <details class="nav-more">
-                    <summary><span data-lang="zh-Hant">更多</span><span data-lang="en">More</span><span class="nav-more-chevron" aria-hidden="true">⌄</span></summary>
-                    <div class="nav-more-menu">
-                        <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
-                        <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
-                    </div>
-                </details>
+                <!-- 全部導覽項目直接顯示，避免桌面版額外的「更多」選單 -->
+                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                <a href="feedback.html"><span data-lang="zh-Hant">問題反饋</span><span data-lang="en">Feedback</span></a>
             </nav>
             <div class="header-controls">
-            <div class="language-switch" role="group" aria-label="Language">
-                <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
-                <span class="language-divider">/</span>
-                <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
-            </div>
-            <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
+                <div class="language-switch" role="group" aria-label="Language">
+                    <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
+                    <span class="language-divider">/</span>
+                    <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
+                </div>
+                <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
             </div>
 
         </div>
@@ -53,32 +53,13 @@
                 <span class="eyebrow">GAMEPLAY GUIDE</span>
                 <h1 data-lang="zh-Hant">完整玩法</h1>
                 <h1 data-lang="en">Complete Gameplay</h1>
-                <p data-lang="zh-Hant">
-                    這裡整理的是目前公開版本 v0.4 Beta 累積至今的玩法，
-                    依系統分類，而不是按 v0.1、v0.2、v0.3、v0.4 分開。
-                </p>
-                <p data-lang="en">
-                    This page documents the complete cumulative gameplay of public v0.4 Beta,
-                    organized by system rather than release version.
-                </p>
-                <div class="doc-note">
-                    <span data-lang="zh-Hant">v0.5 開發中的功能不列入目前公開玩法。</span>
-                    <span data-lang="en">In-development v0.5 features are not presented as released gameplay.</span>
-                </div>
+                <p data-lang="zh-Hant">這裡整理目前公開版本累積至今的玩法，依系統分類，不按版本分開整理。</p>
+                <p data-lang="en">Explore the features available in the current public release, organized by system rather than by version.</p>
+                
             </div>
         </section>
 
-        <nav class="doc-index" aria-label="Gameplay">
-            <a href="#setup">初始設定</a>
-            <a href="#calendar">月曆與季節</a>
-            <a href="#aging">年齡與生命階段</a>
-            <a href="#birthdays">生日與社交</a>
-            <a href="#reproductive">生理時間軸</a>
-            <a href="#pregnancy">懷孕與產後</a>
-            <a href="#eras">年號與星期</a>
-            <a href="#zodiac">星座聯動</a>
-            <a href="#tools">介面與診斷</a>
-        </nav>
+        
 
         <section class="doc-section" id="setup">
             <div class="doc-label">
@@ -615,27 +596,65 @@
         </section>
     </main>
 
+    <!-- ========【章節快速導覽】 隨時可開啟，並標示目前章節 ======== -->
+    <details class="doc-quick-nav" data-doc-quick-nav>
+        <summary>
+            <span class="doc-quick-symbol" aria-hidden="true"></span>
+            <span data-lang="zh-Hant">章節導覽</span>
+            <span data-lang="en">Sections</span>
+            <span class="doc-quick-position" data-doc-position aria-hidden="true">01 / 09</span>
+        </summary>
+        <div class="doc-quick-panel">
+            <div class="doc-quick-panel-heading">
+                <strong data-lang="zh-Hant">前往章節</strong>
+                <strong data-lang="en">Jump to section</strong>
+                <small data-lang="zh-Hant">目前章節會自動標示，隨時可切換。</small>
+                <small data-lang="en">Your current section is highlighted automatically.</small>
+            </div>
+            <nav class="doc-quick-links" aria-label="Page sections">
+                <a href="#setup" data-index="01"><span data-lang="zh-Hant">初始設定</span><span data-lang="en">Getting Started</span></a>
+                <a href="#calendar" data-index="02"><span data-lang="zh-Hant">月曆與季節</span><span data-lang="en">Calendar &amp; Seasons</span></a>
+                <a href="#aging" data-index="03"><span data-lang="zh-Hant">年齡與生命階段</span><span data-lang="en">Ages &amp; Life Stages</span></a>
+                <a href="#birthdays" data-index="04"><span data-lang="zh-Hant">生日與社交</span><span data-lang="en">Birthdays &amp; Socials</span></a>
+                <a href="#reproductive" data-index="05"><span data-lang="zh-Hant">生理時間軸</span><span data-lang="en">Reproductive Timeline</span></a>
+                <a href="#pregnancy" data-index="06"><span data-lang="zh-Hant">懷孕與產後</span><span data-lang="en">Pregnancy &amp; Postpartum</span></a>
+                <a href="#eras" data-index="07"><span data-lang="zh-Hant">年號與星期</span><span data-lang="en">Eras &amp; Weekdays</span></a>
+                <a href="#zodiac" data-index="08"><span data-lang="zh-Hant">星座聯動</span><span data-lang="en">Zodiac Integration</span></a>
+                <a href="#tools" data-index="09"><span data-lang="zh-Hant">介面與診斷</span><span data-lang="en">Interface &amp; Diagnostics</span></a>
+            </nav>
+            <button class="doc-quick-top" type="button" data-doc-to-top>
+                <span data-lang="zh-Hant">↑　回到頁首</span>
+                <span data-lang="en">↑　Back to top</span>
+            </button>
+        </div>
+    </details>
+
     <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
-    <footer class="site-footer">
-        <div class="site-footer-inner">
-            <div class="footer-identity">
-                <strong>REALDATE</strong>
-                <span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span>
-                <span data-lang="en">A time and life-system mod for The Sims 4</span>
+        <footer class="l1ng-document-footer" data-footer-project="realdate">
+        <div class="l1ng-footer-inner">
+            <div class="l1ng-footer-main">
+                <div class="l1ng-footer-identity">
+                    <strong>REALDATE</strong>
+                    <p><span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span><span data-lang="en">The Sims 4 Time &amp; Life System</span></p>
+                </div>
+                <nav class="l1ng-footer-nav" aria-label="RealDate site navigation">
+                    <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                    <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                    <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                    <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                    <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                    <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                    <a href="../home.html"><span data-lang="zh-Hant">L1nG 首頁</span><span data-lang="en">L1nG Home</span></a>
+                </nav>
+                <a class="l1ng-footer-top" href="#top"><span data-lang="zh-Hant">↑ 返回頂部</span><span data-lang="en">↑ Back to top</span></a>
             </div>
-            <div class="footer-links">
-                <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
-                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
-                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
-                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
-                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
-                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
-            </div>
-            <div class="footer-meta">
-                <span data-lang="zh-Hant">L1nG ·《模擬市民 4》模組作者</span>
-                <span data-lang="en">L1nG · THE SIMS 4 MOD CREATOR</span>
-                <span data-lang="zh-Hant">非 Electronic Arts 或 Maxis 官方網站。</span>
-                <span data-lang="en">Not affiliated with Electronic Arts or Maxis.</span>
+            <div class="l1ng-footer-legal">
+                <p class="l1ng-footer-copyright">© 2026 L1nG.</p>
+                <nav class="l1ng-footer-policy-links" aria-label="Policies">
+                    <a href="https://home.by-l1ng.com/site-info.html#privacy" data-site-info-section="privacy"><span data-lang="zh-Hant">隱私權與 Cookie</span><span data-lang="en">Privacy &amp; Cookies</span></a>
+                    <a href="https://home.by-l1ng.com/site-info.html#terms" data-site-info-section="terms"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="en">Terms &amp; Disclaimer</span></a>
+                </nav>
+                <p class="l1ng-footer-disclaimer"><span data-lang="zh-Hant">《The Sims 4》及相關商標屬其權利人所有。本站為獨立玩家創作網站，非 EA／Maxis 官方網站。</span><span data-lang="en">The Sims 4 and related trademarks belong to their respective owners. This independent fan site is not affiliated with or endorsed by EA or Maxis.</span></p>
             </div>
         </div>
     </footer>

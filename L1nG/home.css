@@ -168,10 +168,10 @@ section[id] {
 
 /* ========【頂部導覽列】 設定 - 導覽項目排列 ======== */
 .main-nav {
-    /* 靠右排列 */ justify-self: end;
+    /* 與 RealDate、族譜提取器一致置中 */ justify-self: center;
     /* 橫向排列 */ display: flex;
     /* 垂直置中 */ align-items: center;
-    /* 項目間距 */ gap: 28px;
+    /* 項目間距 */ gap: 21px;
 }
 
 
@@ -411,8 +411,7 @@ section[id] {
 
 
 /* ========【共用區塊】 設定 - 標題字體 ======== */
-.section-heading h2,
-.about-section h2 {
+.section-heading h2 {
     /* 上下外距 */ margin: 5px 0 0;
     /* 響應式字體 */ font-size: clamp(30px, 4vw, 45px);
     /* 行距 */ line-height: 1.2;
@@ -804,78 +803,6 @@ section[id] {
 }
 
 
-/* ========【創作理念】 設定 - 全寬淡藍理念區塊 ======== */
-.philosophy-section {
-    /* 上方外距 */ margin-top: 80px;
-    /* 上下內距 */ padding: 120px 20px;
-    /* 淡藍漸層 */ background:
-        linear-gradient(
-            135deg,
-            #eef7fd,
-            #f8fbfd
-        );
-    /* 上方邊框 */ border-top: 1px solid #ddebf4;
-    /* 下方邊框 */ border-bottom: 1px solid #ddebf4;
-}
-
-
-/* ========【創作理念】 設定 - 內容置中 ======== */
-.philosophy-inner {
-    /* 最大寬度 */ width: min(100%, 800px);
-    /* 水平置中 */ margin: 0 auto;
-    /* 文字置中 */ text-align: center;
-}
-
-
-/* ========【創作理念】 設定 - 英文主句 ======== */
-.philosophy-inner h2 {
-    /* 上方間距 */ margin: 18px 0 0;
-    /* 響應式字體 */ font-size: clamp(42px, 7vw, 70px);
-    /* 行距 */ line-height: 1.16;
-    /* 中文標題不做過度負字距 */ letter-spacing: -0.035em;
-}
-
-
-/* ========【創作理念】 設定 - 中文理念說明 ======== */
-.philosophy-inner p {
-    /* 最大寬度 */ max-width: 640px;
-    /* 水平置中 */ margin: 32px auto 0;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 15px;
-    /* 行距 */ line-height: 2;
-}
-
-
-/* ========【關於 L1nG】 設定 - 區塊上下距離 ======== */
-.about-section {
-    /* 上方內距 */ padding-top: 110px;
-    /* 下方內距 */ padding-bottom: 110px;
-}
-
-
-/* ========【關於 L1nG】 設定 - 兩欄內容 ======== */
-.about-grid {
-    /* 網格系統 */ display: grid;
-    /* 左右欄比例 */ grid-template-columns: 0.9fr 1.1fr;
-    /* 欄位間距 */ gap: 80px;
-}
-
-
-/* ========【關於 L1nG】 設定 - 右側文字底部對齊 ======== */
-.about-copy {
-    /* 底部對齊 */ align-self: end;
-}
-
-
-/* ========【關於 L1nG】 設定 - 介紹文字 ======== */
-.about-copy p {
-    /* 最大寬度 */ max-width: 610px;
-    /* 段落間距 */ margin: 0 0 14px;
-    /* 次要文字 */ color: var(--sub);
-    /* 字體大小 */ font-size: 15px;
-}
-
-
 /* ========【網站頁腳】 設定 - 頂部分隔線 ======== */
 .site-footer {
     /* 上方邊框 */ border-top: 1px solid var(--border);
@@ -1044,11 +971,6 @@ section[id] {
 
 
 
-    /* ========【關於 L1nG】 設定 - 平板改為單欄 ======== */
-    .about-grid {
-        /* 單欄排列 */ grid-template-columns: 1fr;
-        /* 縮小間距 */ gap: 25px;
-    }
 }
 
 
@@ -1133,24 +1055,6 @@ section[id] {
         /* 手機金額字體 */ font-size: 37px;
     }
 
-
-
-    /* ========【創作理念】 設定 - 手機間距 ======== */
-    .philosophy-section {
-        /* 手機上方間距 */ margin-top: 30px;
-        /* 手機內距 */ padding: 85px 20px;
-    }
-
-    .philosophy-inner h2 {
-        /* 手機理念標題 */ font-size: 42px;
-    }
-
-
-    /* ========【關於 L1nG】 設定 - 手機上下間距 ======== */
-    .about-section {
-        /* 手機上方內距 */ padding-top: 75px;
-        /* 手機下方內距 */ padding-bottom: 75px;
-    }
 
 
     /* ========【網站頁腳】 設定 - 手機改為上下排列 ======== */

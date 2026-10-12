@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-language="zh-Hant">
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+        <meta content="#fafafa" name="theme-color"/>
+        <title>問題反饋 · RealDate · L1nG</title>
+        <link rel="stylesheet" href="realdate.css?v=20261012-feedback-seam-r1"/>
+        <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"/>
+        <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
+        <link rel="stylesheet" href="../feedback/feedback.css?v=20261013-security-gap-r4"/>
+        <link rel="stylesheet" href="../feedback/feedback-loading.css"/>
+        <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
+        <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
+        <script src="../site-info-modal.js?v=20261012-native-layout-r1" defer></script>
+    </head>
+    <body class="realdate-only">
+        <script src="../../site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3" data-skeleton-layout="realdate-content"></script>
+        <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
+            <symbol id="ico-msg" viewbox="0 0 24 24"><path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.8-3.7A8.5 8.5 0 1 1 20 11.5Z"></path></symbol>
+            <symbol id="ico-grid" viewbox="0 0 24 24"><rect height="7" rx="1.5" width="7" x="3" y="3"></rect><rect height="7" rx="1.5" width="7" x="14" y="3"></rect><rect height="7" rx="1.5" width="7" x="3" y="14"></rect><rect height="7" rx="1.5" width="7" x="14" y="14"></rect></symbol>
+            <symbol id="ico-close" viewbox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></symbol>
+            <symbol id="ico-arrow" viewbox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"></path></symbol>
+            <symbol id="ico-bug" viewbox="0 0 24 24"><path d="M8 7h8m-4-4v4m-7 5H2m20 0h-3M4 7l3 2m13-2-3 2M5 18l3-2m11 2-3-2M7 12a5 5 0 0 1 10 0v4a5 5 0 0 1-10 0z"></path></symbol>
+            <symbol id="ico-spark" viewbox="0 0 24 24"><path d="m12 2 1.9 7.1L21 11l-7.1 1.9L12 20l-1.9-7.1L3 11l7.1-1.9L12 2Zm7 15 .8 2.2L22 20l-2.2.8L19 23l-.8-2.2L16 20l2.2-.8L19 17Z"></path></symbol>
+            <symbol id="ico-heart" viewbox="0 0 24 24"><path d="M20.8 7.8c0 5-8.8 11.3-8.8 11.3S3.2 12.8 3.2 7.8a4.5 4.5 0 0 1 8.8-1.1 4.5 4.5 0 0 1 8.8 1.1Z"></path></symbol>
+            <symbol id="ico-upload" viewbox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></symbol>
+            <symbol id="ico-shield" viewbox="0 0 24 24"><path d="m12 2 8 4v6c0 5.3-3.5 8-8 10-4.5-2-8-4.7-8-10V6l8-4Z"></path><path d="m9 12 2 2 4-4"></path></symbol>
+            <symbol id="ico-lock" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="11"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></symbol>
+            <symbol id="ico-check" viewbox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"></path></symbol>
+            <symbol id="ico-search" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16.5 16.5 4 4"></path></symbol>
+            <symbol id="ico-clock" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></symbol>
+            <symbol id="ico-inbox" viewbox="0 0 24 24"><path d="M4 4h16l2 10v6H2v-6L4 4Z"></path><path d="M2 14h6l2 3h4l2-3h6"></path></symbol>
+            <symbol id="ico-chart" viewbox="0 0 24 24"><path d="M4 20V11m6 9V4m6 16v-7m5 7H2"></path></symbol>
+            <symbol id="ico-paperclip" viewbox="0 0 24 24"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3"></path></symbol>
+            <symbol id="ico-file" viewbox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-7-7Z"></path><path d="M13 2v7h7"></path></symbol>
+            <symbol id="ico-trash" viewbox="0 0 24 24"><path d="M4 7h16m-10 0V4h4v3m-8 0 1 14h10l1-14M10 11v6m4-6v6"></path></symbol>
+            <symbol id="ico-moon" viewbox="0 0 24 24"><path d="M20.4 15.8A9 9 0 0 1 8.2 3.6 9 9 0 1 0 20.4 15.8Z"></path></symbol>
+            <symbol id="ico-sun" viewbox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></symbol>
+            <symbol id="ico-refresh" viewbox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6m2-10v4h-4"></path></symbol>
+            <symbol id="ico-external" viewbox="0 0 24 24"><path d="M13 4h7v7m0-7L10 14"></path><path d="M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"></path></symbol>
+            <symbol id="ico-info" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10h.01"></path></symbol>
+            <symbol id="ico-send" viewbox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4L22 2Zm0 0L11 13"></path></symbol>
+            <symbol id="ico-arrow-left" viewbox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6"></path></symbol>
+        </svg>
+        <header class="site-header" id="siteHeader">
+            <div class="site-header-inner">
+                <div class="site-brand-group">
+                    <a class="creator-link" href="../home.html">L1nG</a>
+                    <span class="brand-divider">/</span>
+                    <a class="realdate-brand" href="index.html">REALDATE</a>
+                </div>
+                <nav class="main-nav" id="mainNav" aria-label="RealDate">
+                    <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                    <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                    <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                    <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                    <!-- 全部導覽項目直接顯示，避免桌面版額外的「更多」選單 -->
+                    <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                    <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                    <a class="active" aria-current="page" href="feedback.html"><span data-lang="zh-Hant">問題反饋</span><span data-lang="en">Feedback</span></a>
+                </nav>
+                <div class="header-controls">
+                    <div class="language-switch" role="group" aria-label="Language">
+                        <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
+                        <span class="language-divider">/</span>
+                        <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
+                    </div>
+                    <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單">
+                        <span></span><span></span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <header class="preview-bar">
+            <div class="preview-brand">
+                <div aria-hidden="true" class="brand-mark">
+                    <span>l</span>1</div>
+                <div>
+                    <strong>L1nG</strong><span class="caption">L1nG</span>
+                </div>
+            </div>
+            <nav aria-label="介面選擇" class="preview-tabs">
+                <button aria-pressed="true" class="active" id="tab-visitor" type="button">
+                    <svg class="i sm"><use href="#ico-msg"></use></svg>訪客視窗</button>
+                <button aria-pressed="false" id="tab-admin" type="button">
+                    <svg class="i sm"><use href="#ico-grid"></use></svg>共用後台</button>
+            </nav>
+            <div class="preview-tools">
+                <span class="demo-chip"></span>
+                <button aria-label="切換深色／淺色" class="icon-btn" id="theme-toggle" title="切換深色／淺色" type="button">
+                    <svg class="i"><use href="#ico-moon"></use></svg>
+                </button>
+            </div>
+        </header>
+        <div aria-label="回饋入口情境" class="context-switch" id="context-switch">
+            <span class="context-title">網站入口</span>
+            <div aria-label="切換訪客來源" class="context-buttons" role="group">
+                <button aria-pressed="true" class="context-btn active" id="view-genealogy" type="button">Genealogy · 更多選單</button>
+                <button aria-pressed="false" class="context-btn" id="view-realdate" type="button">RealDate · 獨立頁面</button>
+            </div>
+            <span class="context-help">僅用來切換展示情境，不會寫入正式網站</span>
+        </div>
+        <main class="site-shell" id="visitor-screen">
+            <div class="site-content">
+                <div class="site-header">
+                    <div class="site-logo">L1nG<span style="color:var(--primary)">.</span>
+                    </div>
+                    <div class="site-links">
+                        <span>L1nG</span><span>REALDATE</span><span class="current">GENEALOGY</span>
+                    </div>
+                    <div class="site-actions">
+                        <div class="mock-more-wrap">
+                            <button aria-controls="mock-more-menu" aria-expanded="false" class="feedback-entry" id="mock-more" type="button">更多 <svg class="i sm"><use href="#ico-grid"></use></svg>
+                            </button>
+                            <div class="mock-more-menu hide" id="mock-more-menu" role="menu">
+                                <span class="more-head">更多功能</span>
+                                <button data-open-form="" role="menuitem" type="button">
+                                    <svg class="i sm"><use href="#ico-msg"></use></svg>意見回饋 <svg class="i sm more-arrow"><use href="#ico-arrow"></use></svg>
+                                </button>
+                                <button data-open-thread="" role="menuitem" type="button">
+                                    <svg class="i sm"><use href="#ico-lock"></use></svg>查看我的回饋 <svg class="i sm more-arrow"><use href="#ico-arrow"></use></svg>
+                                </button>
+                                <div class="divider">
+                                </div>
+                                <span class="more-hint">僅為導覽入口示意</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <section class="hero">
+                    <div class="hero-copy">
+                        <span class="eyebrow">L1nG / GENEALOGY</span><h1>你的族譜，<br/><span class="light">你的故事。</span></h1><p>建立模擬市民的家族連結，保留每段關係與回憶。這是族譜工具的頁面。意見回饋會放在頂條「更多」選單中，不會新增干擾畫布的浮動按鈕。</p>
+                        <div class="hero-actions">
+                            <button class="primary" data-open-form="" type="button">
+                                <svg class="i sm"><use href="#ico-msg"></use></svg>查看意見回饋視窗 <svg class="i sm"><use href="#ico-arrow"></use></svg>
+                            </button>
+                            <button class="secondary" id="visitor-go-admin" type="button">查看管理中心</button>
+                        </div>
+                        <div class="hero-foot">
+                            <span>01　無需登入</span><span>02　自選附件</span><span>03　人機驗證</span>
+                        </div>
+                    </div>
+                    <div aria-hidden="true" class="hero-art">
+                        <div class="genealogy-canvas">
+                            <div class="canvas-toolbar">
+                                <span>Family / Preview</span>
+                                <div class="canvas-dots">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </div>
+                            <div class="canvas-inside">
+                                <div class="connector h" style="left:35%;top:92px;width:31%">
+                                </div>
+                                <div class="connector v" style="left:50%;top:92px;height:119px">
+                                </div>
+                                <div class="connector h" style="left:35%;top:211px;width:32%">
+                                </div>
+                                <div class="connector v" style="left:35%;top:211px;height:50px">
+                                </div>
+                                <div class="connector v" style="left:67%;top:211px;height:50px">
+                                </div>
+                                <div class="sim-node n1">
+                                    <div class="avatar-dot">
+                                    </div>
+                                    <div>亞歷克斯<small>青年</small>
+                                    </div>
+                                </div>
+                                <div class="sim-node n2">
+                                    <div class="avatar-dot" style="background:linear-gradient(135deg,#f3dfdb,#d7a69d)">
+                                    </div>
+                                    <div>艾莉<small>青年</small>
+                                    </div>
+                                </div>
+                                <div class="sim-node n3">
+                                    <div class="avatar-dot" style="background:linear-gradient(135deg,#e3eedf,#9cb49e)">
+                                    </div>
+                                    <div>米亞<small>兒童</small>
+                                    </div>
+                                </div>
+                                <div class="sim-node n4">
+                                    <div class="avatar-dot" style="background:linear-gradient(135deg,#dce8f0,#9dafd0)">
+                                    </div>
+                                    <div>諾亞<small>幼兒</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="floating-note">
+                            <svg class="i"><use href="#ico-spark"></use></svg>每一段關係，都值得記錄。</div>
+                    </div>
+                </section>
+                <div class="site-bottom">
+                    <span>© L1nG · Interactive concept preview</span><span>此頁為介面展示，非正式網站</span>
+                </div>
+            </div>
+        </main>
+        <section aria-label="RealDate 意見回饋獨立頁面" class="realdate-preview" id="realdate-preview">
+            <div class="rd-v1-hero">
+                <div class="rd-v1-hero-copy reveal">
+                    <span class="eyebrow">FEEDBACK</span><h1>問題反饋</h1><p>你的想法，讓RealDate變得更好。</p>
+                </div>
+            </div>
+            <div class="rd-v1-main">
+                <aside class="rd-v1-aside reveal">
+                    <h2>遇到問題了嗎？<br/>告訴我就好。</h2><p>從日期顯示、模組相容，到遊戲內的操作異常，都歡迎回報。寫下遇到的狀況，必要時可以附上截圖或錯誤紀錄。</p>
+                    <div class="rd-tags">
+                        <span>無需登入</span><span>對話由玩家選擇</span><span>附件可選填</span>
+                    </div>
+                    <button class="rd-my-feedback rd-aside-thread" data-open-thread type="button">查看我的回饋 →</button>
+                    <ol class="rd-steps">
+                        <li>
+                            <b>01</b><span><strong>選擇回饋類型</strong><small>錯誤回報或功能建議都可以。</small></span>
+                        </li>
+                        <li>
+                            <b>02</b><span><strong>描述發生的狀況</strong><small>如有需要，選擇模組版本並附上相關紀錄。</small></span>
+                        </li>
+                        <li>
+                            <b>03</b><span><strong>選擇後續方式</strong><small>需要雙向對話時，再建立私人憑證。</small></span>
+                        </li>
+                    </ol>
+                </aside>
+                <div id="realdate-form-slot">
+                    <div class="modal-layer standalone" id="form-layer" role="presentation">
+                        <div aria-labelledby="form-title" aria-modal="true" class="feedback-modal" role="dialog">
+                            <div id="form-main" style="display:flex;flex-direction:column;min-height:0;overflow:hidden">
+                                <div class="modal-top">
+                                    <div>
+                                        <span class="eyebrow">FEEDBACK</span><h2 id="form-title">意見回饋</h2><p id="form-subtitle">匿名提交，不需要登入。</p>
+                                    </div>
+                                    <div class="modal-head-actions">
+                                        <button class="text-action" id="form-open-thread" type="button">我的回饋</button>
+                                        <button aria-label="關閉回饋視窗" class="icon-btn" id="close-form" type="button">
+                                            <svg class="i"><use href="#ico-close"></use></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form id="feedback-form" novalidate="" style="display:flex;flex-direction:column;min-height:0;overflow:hidden">
+                                    <div class="modal-content">
+                                        <div aria-live="assertive" class="submit-error-summary" hidden="" id="submit-error-summary" role="alert" tabindex="-1">
+                                            <span aria-hidden="true" class="submit-error-symbol">!</span>
+                                            <div>
+                                                <strong>無法送出，請先確認以下內容</strong><p id="submit-error-detail">請檢查必填欄位。</p>
+                                            </div>
+                                        </div>
+                                        <section class="section" style="margin-top:0">
+                                            <div class="section-heading">
+                                                <label class="field-label">回饋類型 <span class="required">*</span></label>
+                                            </div>
+                                            <div aria-label="回饋類型" class="type-grid" role="group">
+                                                <button aria-pressed="true" class="type-choice active" data-type="bug" type="button">
+                                                    <svg class="i"><use href="#ico-bug"></use></svg>錯誤回報</button>
+                                                <button aria-pressed="false" class="type-choice" data-type="feature" type="button">
+                                                    <svg class="i"><use href="#ico-spark"></use></svg>功能建議</button>
+                                                <button aria-pressed="false" class="type-choice" data-type="other" type="button">
+                                                    <svg class="i"><use href="#ico-heart"></use></svg>其他意見</button>
+                                            </div>
+                                        </section>
+                                        <input id="source-field" type="hidden" value="Genealogy"/>
+                                        <section class="section conditional-section" id="bug-context">
+                                            <div class="section-heading">
+                                                <label class="field-label" for="issue-target">問題發生在哪裡？</label>
+                                            </div>
+                                            <select class="field" id="issue-target"><option value="web">族譜工具網站</option><option value="exporter">族譜提取器</option></select>
+                                            <p class="compact-help" id="site-version-note">網站版本將由正式網站自動記錄，不需要手動填寫。</p>
+                                        </section>
+                                        <section class="section conditional-section" hidden="" id="module-version-section">
+                                            <div class="section-heading">
+                                                <label class="field-label" for="module-version">使用的模組版本 <span class="required">*</span></label><span class="optional">依目前網站版本紀錄列出</span>
+                                            </div>
+                                            <select aria-describedby="version-guide" class="field" id="module-version"><option value="">請選擇版本</option></select>
+                                            <div hidden="" id="manual-version-wrap">
+                                                <label class="field-label" for="manual-version">其他版本號</label><input autocomplete="off" class="field" id="manual-version" maxlength="60" placeholder="輸入安裝的版本，例如 v0.5 Beta" type="text"/>
+                                            </div>
+                                            <details class="version-guide" id="version-guide">
+                                                <summary>
+                                                    <span aria-hidden="true" class="guide-info">?</span>不知道安裝哪一版？查看確認方式 <span aria-hidden="true" class="guide-chevron">⌄</span>
+                                                </summary>
+                                                <div class="version-guide-body">
+                                                    <p><b>① 找到當初下載的壓縮檔。</b>例如 <code>L1nG_RealDate_v0.4_Beta.zip</code>，其中 <b>v0.4 Beta</b> 就是下載時的版本。</p><p><b>② 對照網站的版本更新日誌。</b>更新日誌可確認版本名稱與發佈日期；但只看更新日誌，無法確認電腦實際安裝哪一版。</p><p><b>③ 找不到原下載檔？</b>可以選「不確定」，並附上你知道的資訊。<code>.package</code> 或 <code>.ts4script</code> 主檔名不一定包含版本號。</p><a href="https://raw.githack.com/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/L1nG/RealDate/changelog.html" id="version-changelog-link" rel="noopener noreferrer" target="_blank">查看 RealDate 更新日誌 ↗</a>
+                                                </div>
+                                            </details>
+                                            <div class="field-error" id="version-error">請選擇模組版本，或選擇「不確定」。</div>
+                                        </section>
+                                        <section class="section conditional-section" hidden="" id="game-version-section">
+                                            <div class="section-heading">
+                                                <label class="field-label" for="game-version">遊戲版本 <span class="optional">（選填）</span></label>
+                                            </div>
+                                            <input autocomplete="off" class="field" id="game-version" maxlength="70" placeholder="例如：1.128.XXX"/>
+                                        </section>
+                                        <section class="section">
+                                            <div class="section-heading">
+                                                <label class="field-label" for="message-field">回饋內容 <span class="required">*</span></label><span class="optional">至少 10 字</span>
+                                            </div>
+                                            <textarea class="field" id="message-field" maxlength="2000" placeholder="請描述遇到的情況、操作步驟，或想提出的建議⋯⋯"></textarea>
+                                            <div class="field-info">
+                                                <span>請勿填寫帳號、密碼或其他敏感資訊。</span><span id="char-count">0 / 2000</span>
+                                            </div>
+                                            <div class="field-error" id="message-error">請填寫至少 10 個字的回饋內容。</div>
+                                        </section>
+                                        <section class="section">
+                                            <div class="section-heading">
+                                                <label class="field-label">附加檔案 <span class="optional">（選填）</span></label><span class="optional">最多 3 個 · 合計 20 MB</span>
+                                            </div>
+                                            <div aria-label="選擇圖片或文字錯誤紀錄" class="upload-zone upload-zone-v1 appearance-background-upload" id="upload-zone" role="button" tabindex="0">
+                                                <div class="upload-pict">
+                                                    <svg class="i lg"><use href="#ico-upload"></use></svg>
+                                                </div>
+                                                <strong>新增截圖或錯誤紀錄</strong><small>點擊選擇檔案 · 電腦亦可拖曳<br/>PNG、JPG、WebP、TXT、LOG</small><input accept=".png,.jpg,.jpeg,.webp,.txt,.log,image/png,image/jpeg,image/webp,text/plain" id="file-input" multiple="" type="file"/>
+                                            </div>
+                                            <div class="file-list" id="file-list">
+                                            </div>
+                                            <div class="field-error" id="file-error">
+                                            </div>
+                                        </section>
+                                        <section class="section reply-preference" id="reply-preference">
+                                            <div class="section-heading">
+                                                <span class="field-label">是否需要後續對話？ <span class="required">*</span></span><span class="optional reply-desktop-note">選擇匿名對話不代表管理員目前在線，回覆可能不是即時的。</span><span class="optional reply-mobile-note">由你決定</span>
+                                            </div>
+                                            <div class="reply-options" role="radiogroup" aria-label="回饋後續方式">
+                                                <label class="reply-option"><input id="reply-once" type="radio" name="reply-mode" value="once" checked/><span><strong>只送出這次回饋</strong><small>不建立聊天室，也不需要保存私人憑證。</small></span></label>
+                                                <label class="reply-option"><input id="reply-thread" type="radio" name="reply-mode" value="thread"/><span><strong>建立匿名對話</strong><small>想收到回覆、補充資訊時再選擇；不用 Email。</small></span></label>
+                                            </div>
+                                            <p class="compact-help reply-mobile-note">選擇匿名對話不代表管理員目前在線，回覆可能不是即時的。</p>
+                                        </section>
+                                        <section class="section">
+                                            <details class="contact-card" id="contact-option">
+                                                <summary>
+                                                    <span class="contact-icon"><svg class="i sm"><use href="#ico-msg"></use></svg></span><span class="contact-copy"><strong>其他聯絡方式 <em>（選填）</em></strong><small>不留 Email 也能用私人憑證在網站接收回覆。</small></span><span class="contact-chevron"><svg class="i sm"><use href="#ico-arrow"></use></svg></span>
+                                                </summary>
+                                                <div class="contact-fields">
+                                                    <label class="field-label" for="contact-method">聯絡方式</label><select class="field" id="contact-method"><option value="email">電子郵件</option><option value="discord">Discord</option></select><label class="field-label" for="contact-value" style="margin-top:10px;display:block">聯絡資料</label><input autocomplete="email" class="field" id="contact-value" maxlength="120" placeholder="example@email.com" type="email"/><p class="hint">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</p>
+                                                    <div class="field-error" id="contact-error">請確認聯絡方式格式，或收合此區塊保持匿名。</div>
+                                                </div>
+                                            </details>
+                                        </section>
+                                        <section class="section">
+                                            <div class="section-heading">
+                                                <span class="field-label">安全驗證 <span class="required">*</span></span><span class="optional">Cloudflare Turnstile</span>
+                                            </div>
+                                            <div class="verify-card" id="verify-card">
+                                                <div class="verify-left">
+                                                    <div class="verify-icon">
+                                                        <svg class="i lg"><use href="#ico-shield"></use></svg>
+                                                    </div>
+                                                    <div class="verify-text">
+                                                        <strong id="verify-title">人機驗證</strong><span id="verify-subtitle">Cloudflare 驗證服務</span>
+                                                    </div>
+                                                </div>
+                                                <button id="verify-button" type="button" disabled aria-disabled="true">驗證</button>
+                                            </div>
+                                            <div class="verify-legal">驗證服務尚未啟用。</div>
+                                            <div class="field-error" id="verify-error">請先完成人機驗證。</div>
+                                        </section>
+                                    </div>
+                                    <div class="modal-bottom">
+                                        <div class="privacy-tip">
+                                            <svg class="i sm"><use href="#ico-shield"></use></svg><span>請勿提交廣告、垃圾訊息、騷擾或威脅內容；違規回饋可能遭移除或限制提交。</span>
+                                        </div>
+                                        <button class="primary submit" type="submit">送出</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="success-pane hide" id="success-pane">
+                                <div class="success-bubble">
+                                    <svg class="i xl"><use href="#ico-check"></use></svg>
+                                </div>
+                                <span class="preview-pill">回饋已建立</span><h2>已收到你的回饋！</h2>
+                                <p class="success-code" id="success-code">回饋編號 LNG-1029</p>
+                                <p id="success-description">你可以直接在網站接收回覆，完全不必留下聯絡方式。</p>
+                                <div class="credential-card" id="success-credential">
+                                    <div class="credential-heading">
+                                        <svg class="i sm"><use href="#ico-lock"></use></svg><strong>你的私人回饋憑證</strong>
+                                    </div>
+                                    <code id="success-token" class="credential-token"></code>
+                                    <button class="secondary credential-copy" id="copy-receipt" type="button">
+                                        <svg class="copy-state-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="copy-shape" d="M8 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm-3 4H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/><path class="check-shape" d="m5 12 4.5 4.5L19 7"/></svg><span>複製回饋憑證</span>
+                                    </button>
+                                    <small>請妥善保存。回饋編號本身無法開啟對話；私人憑證則相當於密碼，請勿公開。</small>
+                                </div>
+                                <div class="success-actions">
+                                    <button class="secondary" id="success-new" type="button">再寫一則</button>
+                                    <button class="primary" id="success-open-thread" type="button">查看匿名對話 <svg class="i sm"><use href="#ico-arrow"></use></svg>
+                                    </button>
+                                </div>
+                                <p class="demo-disclaimer">訊息服務尚未連接，暫時無法存取對話紀錄。</p>
+                            </div>
+                            <div class="thread-pane hide" id="thread-pane">
+                                <div class="thread-heading">
+                                    <div>
+                                        <span class="eyebrow">PRIVATE CONVERSATION</span><h2 id="thread-title">我的匿名回饋</h2><p id="thread-description">開啟匿名對話的玩家，才能在此查看回覆。</p>
+                                    </div>
+                                    <button class="secondary mini-back" id="thread-back-form" type="button">返回填寫</button>
+                                </div>
+                                <div class="thread-body">
+                                    <div id="thread-home">
+                                        <p class="thread-help">你的匿名對話會顯示在這裡，也可以輸入先前保存的私人憑證。</p>
+                                        <div id="my-thread-list" class="my-thread-list">
+                                        </div>
+                                        <div class="thread-restore">
+                                            <label for="restore-token" class="field-label">使用私人憑證開啟對話</label><textarea id="restore-token" class="field" rows="2" placeholder="貼上完整回饋憑證"></textarea>
+                                            <button class="secondary" id="restore-thread" type="button">開啟對話</button>
+                                            <p id="restore-error" class="restore-error" role="alert" hidden>找不到符合條件的回饋，請檢查私人憑證。</p>
+                                        </div>
+                                        <p class="demo-disclaimer">僅為前端互動演示；正式版會由伺服器驗證私人憑證。未連接網路資料庫。</p>
+                                    </div>
+                                    <div class="hide" id="thread-chat">
+                                        <div class="thread-summary">
+                                            <div>
+                                                <strong id="thread-ref"></strong><span id="thread-meta"></span>
+                                            </div>
+                                            <span id="thread-state" class="reply-indicator"></span>
+                                        </div>
+                                        <div class="conversation-stack" id="visitor-messages" aria-live="polite">
+                                        </div>
+                                        <form id="visitor-reply-form" class="thread-compose">
+                                            <label class="field-label" for="visitor-reply">補充資訊或回覆管理員</label><textarea id="visitor-reply" class="field" rows="3" maxlength="2000" placeholder="在這裡補充問題、回覆或說明結果⋯⋯"></textarea>
+                                            <div class="thread-compose-actions">
+                                                <label class="attach-action" for="visitor-reply-files"><svg class="i sm"><use href="#ico-paperclip"></use></svg>選擇附件<input id="visitor-reply-files" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log" multiple hidden></label><span id="visitor-reply-file-info" class="hint">最多 3 個檔案・合計 20 MB</span>
+                                                <button class="primary" type="submit">送出回覆 <svg class="i sm"><use href="#ico-send"></use></svg>
+                                                </button>
+                                            </div>
+                                            <p id="visitor-reply-error" class="restore-error" role="alert" hidden></p>
+                                        </form>
+                                        <button class="text-action thread-switch-back" id="thread-back-list" type="button">← 返回我的回饋</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="l1ng-document-footer" data-footer-project="realdate">
+                <div class="l1ng-footer-inner">
+                    <div class="l1ng-footer-main">
+                        <div class="l1ng-footer-identity">
+                            <strong>REALDATE</strong>
+                            <p><span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span><span data-lang="en">The Sims 4 Time &amp; Life System</span></p>
+                        </div>
+                        <nav class="l1ng-footer-nav" aria-label="RealDate site navigation">
+                            <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                            <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                            <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                            <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                            <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                            <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                            <a href="../home.html"><span data-lang="zh-Hant">L1nG 首頁</span><span data-lang="en">L1nG Home</span></a>
+                        </nav>
+                        <a class="l1ng-footer-top" href="#top"><span data-lang="zh-Hant">↑ 返回頂部</span><span data-lang="en">↑ Back to top</span></a>
+                    </div>
+                    <div class="l1ng-footer-legal">
+                        <p class="l1ng-footer-copyright">© 2026 L1nG.</p>
+                        <nav class="l1ng-footer-policy-links" aria-label="Policies">
+                            <a href="https://home.by-l1ng.com/site-info.html#privacy" data-site-info-section="privacy"><span data-lang="zh-Hant">隱私權與 Cookie</span><span data-lang="en">Privacy &amp; Cookies</span></a>
+                            <a href="https://home.by-l1ng.com/site-info.html#terms" data-site-info-section="terms"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="en">Terms &amp; Disclaimer</span></a>
+                        </nav>
+                        <p class="l1ng-footer-disclaimer"><span data-lang="zh-Hant">《The Sims 4》及相關商標屬其權利人所有。本站為獨立玩家創作網站，非 EA／Maxis 官方網站。</span><span data-lang="en">The Sims 4 and related trademarks belong to their respective owners. This independent fan site is not affiliated with or endorsed by EA or Maxis.</span></p>
+                    </div>
+                </div>
+            </footer>
+        </section>
+        <!-- Visitor modal: actual build should load genuine Turnstile and submit to a secure backend -->
+        <!-- The following administration UI is a demo only, without any authentication or real records. -->
+        <div class="admin-app off" id="admin-screen">
+            <aside class="sidebar">
+                <div class="admin-brand">
+                    <div class="brand-mark">
+                        <span>l</span>1</div>
+                    <div class="admin-brand-name">L1nG<span>DASHBOARD</span>
+                    </div>
+                </div>
+                <div class="sidebar-group">WORKSPACE</div>
+                <nav aria-label="管理功能" class="side-nav">
+                    <button class="side-item dash-side active" data-adminpage="overview" type="button">
+                        <svg class="i"><use href="#ico-grid"></use></svg>總覽</button>
+                    <button class="side-item dash-side" data-adminpage="analytics" type="button">
+                        <svg class="i"><use href="#ico-chart"></use></svg>網站分析 <span class="count">GA4</span>
+                    </button>
+                    <button class="side-item dash-side" data-adminpage="feedback" type="button">
+                        <svg class="i"><use href="#ico-inbox"></use></svg>意見回饋 <span class="count" id="nav-count-all">9</span>
+                    </button>
+                    <button class="side-item dash-side" data-adminpage="settings" type="button">
+                        <svg class="i"><use href="#ico-shield"></use></svg>設定</button>
+                </nav>
+                <div class="sidebar-note">
+                    <svg class="i sm"><use href="#ico-lock"></use></svg><span>管理端與訪客端分開。正式版需登入與伺服器端驗證。</span>
+                </div>
+                <div class="side-foot">
+                    <div class="admin-id">
+                        <div class="admin-avatar">L</div>
+                        <div>
+                            <strong>L1nG 管理員</strong><small>設計・未登入</small>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <div class="admin-main">
+                <nav aria-label="管理功能切換" class="admin-mobile-nav">
+                    <button class="active" data-adminpage="overview" type="button">總覽</button>
+                    <button data-adminpage="analytics" type="button">網站分析</button>
+                    <button data-adminpage="feedback" type="button">意見回饋</button>
+                    <button data-adminpage="settings" type="button">設定</button>
+                </nav>
+                <div class="panel-view" hidden="" id="panel-feedback">
+                    <div class="admin-head">
+                        <div>
+                            <span class="eyebrow">FEEDBACK / INBOX</span><h1>意見回饋</h1><p>查看問題、追蹤匿名對話，直接在此回覆玩家。</p>
+                        </div>
+                        <div class="admin-head-actions">
+                            <button class="secondary" id="reset-demo" type="button">
+                                <svg class="i sm"><use href="#ico-refresh"></use></svg><span class="button-caption">重設範例</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="admin-notice">
+                        <svg class="i sm noshrink" style="margin-top:2px"><use href="#ico-info"></use></svg><span><strong>介面</strong>：所有留言與附件均為；管理端需要伺服器權限驗證。</span>
+                    </div>
+                    <section aria-label="回饋統計" class="stat-grid" id="stats">
+                        <button class="stat-card chosen" data-stat="all" data-status="all" type="button">
+                            <div class="topline">全部回饋 <span class="stat-icon"><svg class="i sm"><use href="#ico-inbox"></use></svg></span>
+                            </div>
+                            <div class="num" id="count-all">8</div>
+                            <div class="stat-footer">來自所有網站</div>
+                        </button>
+                        <button class="stat-card" data-stat="pending" data-status="pending" type="button">
+                            <div class="topline">尚未處理 <span class="stat-icon"><svg class="i sm"><use href="#ico-clock"></use></svg></span>
+                            </div>
+                            <div class="num" id="count-pending">3</div>
+                            <div class="stat-footer">等待確認的問題</div>
+                        </button>
+                        <button class="stat-card" data-stat="progress" data-status="progress" type="button">
+                            <div class="topline">處理中 <span class="stat-icon"><svg class="i sm"><use href="#ico-refresh"></use></svg></span>
+                            </div>
+                            <div class="num" id="count-progress">2</div>
+                            <div class="stat-footer">正在調查或改善</div>
+                        </button>
+                        <button class="stat-card" data-stat="done" data-status="done" type="button">
+                            <div class="topline">已完成 <span class="stat-icon"><svg class="i sm"><use href="#ico-check"></use></svg></span>
+                            </div>
+                            <div class="num" id="count-done">3</div>
+                            <div class="stat-footer">已處理的回饋</div>
+                        </button>
+                    </section>
+                    <div aria-label="處理狀態篩選" class="mobile-sidefilters feedback-filters">
+                        <button class="mobile-filter active" data-mobilefilter="all">全部回饋</button>
+                        <button class="mobile-filter" data-mobilefilter="pending">尚未處理</button>
+                        <button class="mobile-filter" data-mobilefilter="progress">處理中</button>
+                        <button class="mobile-filter" data-mobilefilter="done">已完成</button>
+                        <button class="mobile-filter" data-mobilefilter="spam">垃圾訊息</button>
+                    </div>
+                    <section aria-label="回饋列表">
+                        <div class="section-toolbar">
+                            <h2>回饋列表 <span class="list-count" id="list-count">8 則</span></h2>
+                            <div class="toolbar-tools">
+                                <label class="search-field"><svg class="i sm"><use href="#ico-search"></use></svg><input aria-label="搜尋回饋" id="search-input" placeholder="搜尋回饋內容⋯⋯" type="search"/></label><select aria-label="來源網站" class="toolbar-select" id="site-filter"><option value="all">所有網站</option><option value="Genealogy">Genealogy</option><option value="RealDate">RealDate</option><option value="L1nG">L1nG</option></select><select aria-label="是否有聯絡方式" class="toolbar-select" id="contact-filter"><option value="all">所有聯絡狀態</option><option value="contact">已留聯絡方式</option><option value="anonymous">未留聯絡方式</option></select><select aria-label="對話回覆狀態" class="toolbar-select" id="reply-filter"><option value="all">全部對話狀態</option><option value="admin">等待我回覆</option><option value="player">等待玩家回覆</option><option value="no-reply">尚未有管理員回覆</option></select>
+                            </div>
+                        </div>
+                        <div class="feedback-table">
+                            <div class="table-header">
+                                <span>回饋內容</span><span>相關網站</span><span>回饋類型</span><span>處理狀態</span><span>提交日期</span>
+                            </div>
+                            <div id="feedback-rows">
+                            </div>
+                        </div>
+                        <p class="list-bottom" id="list-bottom"></p>
+                    </section>
+                </div>
+                <section aria-label="管理總覽" class="panel-view" id="panel-overview">
+                    <div class="admin-head">
+                        <div>
+                            <span class="eyebrow">WORKSPACE / OVERVIEW</span><h1>管理總覽</h1><p>網站營運與玩家回饋，都在同一個地方查看。</p>
+                        </div>
+                        <span class="demo-label">—</span>
+                    </div>
+                    <div class="admin-notice">
+                        <svg class="i sm noshrink"><use href="#ico-info"></use></svg><span><strong>這是純介面原型</strong>：回饋與 GA4 數據皆為未連接的資料，沒有連接 Google 或 Cloudflare，也不會上傳任何資訊。</span>
+                    </div>
+                    <div class="overview-intro">
+                        <div>
+                            <span class="eyebrow">AT A GLANCE</span><h2>早安，歡迎回來。</h2><p>一眼掌握網站狀態，細節則到各個專屬頁面查看。</p>
+                        </div>
+                        <div class="overview-bubble">
+                            <svg class="i xl"><use href="#ico-chart"></use></svg>
+                        </div>
+                    </div>
+                    <div class="stat-grid overview-grid">
+                        <button class="stat-card" data-jump="analytics" type="button">
+                            <span class="topline">活躍使用者 <svg class="i sm"><use href="#ico-chart"></use></svg></span><strong class="num" id="ov-users">—</strong><span class="stat-footer">GA4 · 近 30 天</span>
+                        </button>
+                        <button class="stat-card" data-jump="analytics" type="button">
+                            <span class="topline">頁面瀏覽量 <svg class="i sm"><use href="#ico-grid"></use></svg></span><strong class="num" id="ov-views">—</strong><span class="stat-footer">GA4 · 近 30 天</span>
+                        </button>
+                        <button class="stat-card" data-jump="feedback" type="button">
+                            <span class="topline">尚未處理 <svg class="i sm"><use href="#ico-clock"></use></svg></span><strong class="num" id="ov-pending">—</strong><span class="stat-footer">問題回饋 · 全部網站</span>
+                        </button>
+                        <button class="stat-card" data-jump="analytics" type="button">
+                            <span class="topline">下載點擊 <svg class="i sm"><use href="#ico-arrow"></use></svg></span><strong class="num" id="ov-downloads">—</strong><span class="stat-footer">GA4 事件 · 近 30 天</span>
+                        </button>
+                    </div>
+                    <div class="dash-overview-bottom">
+                        <section class="dash-card">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">VISITORS</span><h3>訪客趨勢</h3>
+                                </div>
+                                <button class="link" data-jump="analytics" type="button">完整分析 →</button>
+                            </div>
+                            <div class="overview-chart" id="overview-chart">
+                            </div>
+                            <p class="hint">尚未連接網站流量資料。</p>
+                        </section>
+                        <section class="dash-card">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">INBOX</span><h3>近期回饋</h3>
+                                </div>
+                                <button class="link" data-jump="feedback" type="button">查看全部 →</button>
+                            </div>
+                            <div class="overview-recent" id="overview-recent">
+                            </div>
+                        </section>
+                    </div>
+                </section>
+                <section aria-label="GA4 網站分析" class="panel-view" hidden="" id="panel-analytics">
+                    <div class="admin-head analytics-heading">
+                        <div>
+                            <span class="eyebrow">INSIGHTS / GOOGLE ANALYTICS 4</span><h1>網站分析</h1><p>查看來自 GA4 的流量、裝置與下載事件（目前為）。</p>
+                        </div>
+                        <span class="demo-label">GA4</span>
+                    </div>
+                    <div class="admin-notice">
+                        <svg class="i sm noshrink"><use href="#ico-info"></use></svg><span><strong>未連接 Google Analytics</strong>：所有數字與圖表均為本地產生的資料。正式版將由伺服器讀取 GA4 Data API，且不會傳送回饋聯絡資料。</span>
+                    </div>
+                    <div class="analytics-filters">
+                        <div aria-label="統計日期範圍" class="analytics-range" role="group">
+                            <button class="range-btn" data-range="7">7 天</button>
+                            <button class="range-btn active" data-range="30">30 天</button>
+                            <button class="range-btn" data-range="90">90 天</button>
+                            <button class="range-btn" data-range="custom">自訂</button>
+                        </div>
+                        <select aria-label="選擇分析網站" class="toolbar-select" id="analytics-site"><option value="all">全部網站</option><option value="Genealogy">Genealogy</option><option value="RealDate">RealDate</option><option value="L1nG">L1nG</option></select>
+                    </div>
+                    <div class="custom-date-row" hidden="" id="custom-date-row">
+                        <label>開始日期 <input id="date-from" max="2026-10-12" type="date" value="2026-09-15"/></label><label>結束日期 <input id="date-to" max="2026-10-12" type="date" value="2026-10-12"/></label>
+                        <button class="secondary" id="apply-date" type="button">套用日期</button>
+                        <span class="date-error" id="date-error"></span>
+                    </div>
+                    <div class="stat-grid analytics-stat-grid">
+                        <div class="stat-card">
+                            <div class="topline">活躍使用者 <svg class="i sm"><use href="#ico-chart"></use></svg>
+                            </div>
+                            <div class="num" id="ga-users">—</div>
+                            <div class="stat-footer">去重後的活躍使用者</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="topline">頁面瀏覽量 <svg class="i sm"><use href="#ico-grid"></use></svg>
+                            </div>
+                            <div class="num" id="ga-views">—</div>
+                            <div class="stat-footer">page_view 事件</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="topline">下載點擊 <svg class="i sm"><use href="#ico-arrow"></use></svg>
+                            </div>
+                            <div class="num" id="ga-downloads">—</div>
+                            <div class="stat-footer">需在正式網站設定事件</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="topline">新訪客 <svg class="i sm"><use href="#ico-spark"></use></svg>
+                            </div>
+                            <div class="num" id="ga-new">—</div>
+                            <div class="stat-footer">newUsers 指標</div>
+                        </div>
+                    </div>
+                    <section class="dash-card analytics-traffic">
+                        <div class="dash-card-header">
+                            <div>
+                                <span class="eyebrow">TRAFFIC TREND</span><h3>網站流量趨勢</h3><p class="hint" id="chart-description">最近 30 天 · 活躍使用者</p>
+                            </div>
+                            <div class="chart-key">
+                                <span class="chart-dot"></span>活躍使用者</div>
+                        </div>
+                        <div aria-label="網站流量趨勢圖" class="chart-area" id="ga-trend-chart" role="img">
+                        </div>
+                    </section>
+                    <div class="analytics-lower">
+                        <section class="dash-card">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">TOP PAGES</span><h3>熱門頁面</h3>
+                                </div>
+                                <span class="hint">瀏覽量</span>
+                            </div>
+                            <div class="rank-list" id="ga-pages">
+                            </div>
+                        </section>
+                        <section class="dash-card">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">AUDIENCE</span><h3>訪客所在國家</h3>
+                                </div>
+                                <span class="hint">分布</span>
+                            </div>
+                            <div class="rank-list" id="ga-countries">
+                            </div>
+                        </section>
+                    </div>
+                    <div class="analytics-lower">
+                        <section class="dash-card">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">EVENTS</span><h3>下載點擊排行</h3>
+                                </div>
+                                <span class="hint">自訂追蹤事件</span>
+                            </div>
+                            <div class="rank-list" id="ga-files">
+                            </div>
+                        </section>
+                        <section class="dash-card">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">DEVICES</span><h3>裝置分布</h3>
+                                </div>
+                                <span class="hint">desktop / mobile / tablet</span>
+                            </div>
+                            <div class="device-layout" id="ga-device">
+                            </div>
+                            <div class="divider" style="margin:20px 0 15px">
+                            </div>
+                            <div>
+                                <span class="eyebrow">ACQUISITION</span><h3 style="font-size:16px;margin:6px 0 12px">流量來源</h3>
+                                <div class="rank-list compact" id="ga-referrals">
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <p class="hint" style="margin-top:22px">注意：下載統計需要在正式網站設定事件；GA4 不是檔案儲存服務，亦不會用於辨識匿名回饋提交者。</p>
+                </section>
+                <section aria-label="管理設定" class="panel-view" hidden="" id="panel-settings">
+                    <div class="admin-head">
+                        <div>
+                            <span class="eyebrow">WORKSPACE / SETTINGS</span><h1>設定</h1><p>匿名雙向回覆、管理權限與資料來源的設定。</p>
+                        </div>
+                        <span class="demo-label">PREVIEW ONLY</span>
+                    </div>
+                    <div class="admin-notice">
+                        <svg class="i sm noshrink"><use href="#ico-info"></use></svg><span><strong>尚未連接服務</strong>：這裡只展示未來可設定的項目，不會修改 Cloudflare、Google Analytics 或安全規則。</span>
+                    </div>
+                    <div class="setting-layout">
+                        <section class="dash-card">
+                            <span class="eyebrow">APPEARANCE</span><h3>介面外觀</h3><p class="hint">沿用 L1nG 的明亮／深色主題，後台與訪客介面共用視覺語言。</p>
+                            <button class="secondary" id="settings-theme" type="button">切換深色／淺色主題</button>
+                        </section>
+                        <section class="dash-card">
+                            <span class="eyebrow">FEEDBACK</span><h3>匿名回饋設定</h3>
+                            <div class="setting-list">
+                                <div>
+                                    <strong>附件限制</strong><small>最多 3 個，總計 20 MB</small>
+                                </div>
+                                <div>
+                                    <strong>匿名回覆</strong><small>私人憑證取回對話；聯絡資訊保持選填</small>
+                                </div>
+                                <div>
+                                    <strong>安全防護</strong><small>Turnstile + 限流（正式版才接線）</small>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="dash-card">
+                            <span class="eyebrow">INTEGRATIONS</span><h3>資料與權限</h3>
+                            <div class="setting-list">
+                                <div>
+                                    <strong>GA4</strong><small>預計由伺服器讀取分析資料，不處理回饋聯絡資訊</small>
+                                </div>
+                                <div>
+                                    <strong>Cloudflare D1／R2</strong><small>回饋內容與附件分開儲存</small>
+                                </div>
+                                <div>
+                                    <strong>管理員登入</strong><small>正式版需實施身分驗證與授權</small>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div aria-hidden="true" class="detail-layer" id="detail-layer">
+            <aside aria-labelledby="detail-title" aria-modal="true" class="detail-panel" role="dialog">
+                <div class="detail-head">
+                    <div>
+                        <span class="eyebrow">FEEDBACK DETAIL</span><h2 id="detail-title">回饋詳情</h2>
+                    </div>
+                    <button aria-label="關閉詳情" class="icon-btn" id="detail-close" type="button">
+                        <svg class="i"><use href="#ico-close"></use></svg>
+                    </button>
+                </div>
+                <div class="detail-body" id="detail-body">
+                </div>
+                <div class="admin-reply-compose">
+                    <label for="admin-reply" class="field-label">回覆匿名玩家 <span class="optional">（網站內對話）</span></label><textarea id="admin-reply" class="field" rows="2" maxlength="2000" placeholder="輸入給玩家的回覆⋯⋯"></textarea>
+                    <div class="admin-reply-actions">
+                        <span class="hint">回覆不會寄出 Email</span>
+                        <button class="primary" id="admin-send" type="button">傳送回覆 <svg class="i sm"><use href="#ico-send"></use></svg>
+                        </button>
+                    </div>
+                    <p class="restore-error" id="admin-reply-error" hidden>請先輸入回覆內容。</p>
+                </div>
+                <div class="detail-foot">
+                    <select aria-label="處理狀態" class="field" id="detail-status"><option value="pending">尚未處理</option><option value="progress">處理中</option><option value="done">已完成</option><option value="spam">垃圾訊息</option></select>
+                    <button class="secondary" id="detail-update" type="button">儲存狀態</button>
+                    <button aria-label="刪除這則回饋" class="danger" id="detail-delete" title="刪除這則回饋" type="button">
+                        <svg class="i sm"><use href="#ico-trash"></use></svg>
+                    </button>
+                </div>
+            </aside>
+        </div>
+        <div aria-hidden="true" class="confirm-layer" id="confirm-layer">
+            <div aria-labelledby="confirm-heading" aria-modal="true" class="confirm-card" role="alertdialog">
+                <h3 id="confirm-heading">刪除這則回饋？</h3><p>這會從目前的列表移除訊息。真實版本將同時處理相關附件。</p>
+                <div class="confirm-actions">
+                    <button class="secondary" id="cancel-delete" type="button">取消</button>
+                    <button class="danger" id="confirm-delete" type="button">確認刪除</button>
+                </div>
+            </div>
+        </div>
+        <div aria-live="polite" class="toast" id="toast" role="status">
+        </div>
+        <script src="../feedback/select-ui.js" defer></script>
+        <script src="../feedback/feedback-core.js" defer></script>
+        <script src="../feedback/realdate-feedback-live.js" defer></script>
+        <script src="../feedback/feedback-i18n.js?v=20261013-contact-copy-r1" defer></script>
+    </body>
+</html>

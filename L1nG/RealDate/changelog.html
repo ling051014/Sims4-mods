@@ -6,18 +6,20 @@
     <title>RealDate 更新日誌 · L1nG</title>
     <meta name="description" content="RealDate 公開版本更新紀錄、修正與相容性變更。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261011-scrollbar-r2">
-    <script src="realdate.js" defer></script>
-    <link rel="stylesheet" href="changelog.css?v=20261011-scrollbar-r2">
-    <script src="changelog.js" defer></script>
-    <link rel="stylesheet" href="../../site-skeleton.css?v=20261008-site-skeleton-r2">
+    <link rel="stylesheet" href="realdate.css?v=20261012-feedback-seam-r1">
+    <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
+    <link rel="stylesheet" href="changelog.css?v=20261012-original-hero-r1">
+    <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
+    <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
+    <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
+    <script src="../site-info-modal.js?v=20261012-native-layout-r1" defer></script>
 </head>
 
 <body>
-    <script src="../../site-skeleton.js?v=20261008-site-skeleton-r2" data-skeleton-layout="realdate-changelog"></script>
+    <script src="../../site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3" data-skeleton-layout="realdate-changelog"></script>
 
     <!-- ========【RealDate 頂部導覽】 設定 - 品牌、頁面導覽與語言切換 ======== -->
-    <header class="site-header" id="siteHeader">
+        <header class="site-header" id="siteHeader">
         <div class="site-header-inner">
             <div class="site-brand-group">
                 <a class="creator-link" href="../home.html">L1nG</a>
@@ -29,21 +31,17 @@
                 <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
                 <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
                 <a class="active" href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
-                <details class="nav-more">
-                    <summary><span data-lang="zh-Hant">更多</span><span data-lang="en">More</span><span class="nav-more-chevron" aria-hidden="true">⌄</span></summary>
-                    <div class="nav-more-menu">
-                        <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
-                        <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
-                    </div>
-                </details>
+                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                <a href="feedback.html"><span data-lang="zh-Hant">問題反饋</span><span data-lang="en">Feedback</span></a>
             </nav>
             <div class="header-controls">
-            <div class="language-switch" role="group" aria-label="Language">
-                <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
-                <span class="language-divider">/</span>
-                <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
-            </div>
-            <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
+                <div class="language-switch" role="group" aria-label="Language">
+                    <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">繁中</button>
+                    <span class="language-divider">/</span>
+                    <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
+                </div>
+                <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
             </div>
 
         </div>
@@ -72,7 +70,7 @@
                     <div>
                         <span data-lang="zh-Hant">最後更新</span>
                         <span data-lang="en">Last updated</span>
-                        <strong>2026.09.23 (UTC+8)</strong>
+                        <strong>2026.09.22 (UTC+8)</strong>
                     </div>
                 </div>
                 <div class="hero-actions">
@@ -82,29 +80,18 @@
             </div>
         </section>
 
-        <nav class="changelog-version-index" aria-label="版本快速導覽">
-            <a class="version-link active" href="#v040" data-version-target="v040">
-                v0.4
-            </a>
-            <a class="version-link" href="#v030" data-version-target="v030">v0.3</a>
-            <a class="version-link" href="#v021" data-version-target="v021">v0.2.1</a>
-            <a class="version-link" href="#v020" data-version-target="v020">v0.2</a>
-            <a class="version-link" href="#v011" data-version-target="v011">v0.1.1</a>
-            <a class="version-link" href="#v010" data-version-target="v010">v0.1</a>
-        </nav>
-
-        <section class="changelog-content">
+<section class="changelog-content">
             <div class="release-list">
                 <article class="release" id="v040">
                     <div class="release-marker" aria-hidden="true"></div>
                     <div class="release-content">
                         <header class="release-header">
                             <div>
-                                <div class="release-version">v0.4</div>
+                                <div class="release-version">v0.4 Beta</div>
                                 <h2 data-lang="zh-Hant">架構重構、生活玩法與相容性擴充</h2>
                                 <h2 data-lang="en">Architecture, Life Gameplay &amp; Compatibility</h2>
                             </div>
-                            <time datetime="2026-09-23">2026.09.23 (UTC+8)</time>
+                            <time datetime="2026-09-22">2026.09.22 (UTC+8)</time>
                         </header>
                         <p class="release-summary" data-lang="zh-Hant">目前規模最大的一次架構重構與系統整合更新。新增生日社交、年號、星期校正與每日換日通知，並進一步整合生理時間軸、MCCC、RPO 與 Child Birth Mod。</p>
                         <p class="release-summary" data-lang="en">
@@ -317,11 +304,11 @@
                     <div class="release-content">
                         <header class="release-header">
                             <div>
-                                <div class="release-version">v0.3</div>
+                                <div class="release-version">v0.3 Beta</div>
                                 <h2 data-lang="zh-Hant">RealDate 月曆、月齡與生理時間軸</h2>
                                 <h2 data-lang="en">Calendar, Age in Months &amp; Reproductive Timeline</h2>
                             </div>
-                            <time datetime="2026-09-07">2026.09.07 (UTC+8)</time>
+                            <time datetime="2026-09-08">2026.09.08 (UTC+8)</time>
                         </header>
                         <p class="release-summary" data-lang="zh-Hant">把 RealDate 日期正式帶進 EA 月曆，加入未滿一歲的月齡系統，並重整月經、懷孕、初潮、停經與產後恢復的時間架構，同時新增診斷與除錯工具。</p>
                         <p class="release-summary" data-lang="en">
@@ -534,7 +521,7 @@
                     <div class="release-content">
                         <header class="release-header">
                             <div>
-                                <div class="release-version">v0.2.1</div>
+                                <div class="release-version">v0.2.1 Beta</div>
                                 <h2 data-lang="zh-Hant">午夜換日熱修復</h2>
                                 <h2 data-lang="en">Midnight Rollover Hotfix</h2>
                             </div>
@@ -586,11 +573,11 @@
                     <div class="release-content">
                         <header class="release-header">
                             <div>
-                                <div class="release-version">v0.2</div>
+                                <div class="release-version">v0.2 Beta</div>
                                 <h2 data-lang="zh-Hant">十二個月年份、季節與年齡介面整合</h2>
                                 <h2 data-lang="en">Twelve-Month Year, Seasons &amp; Aging UI</h2>
                             </div>
-                            <time datetime="2026-08-28">2026.08.28 (UTC+8)</time>
+                            <time datetime="2026-08-29">2026.08.29 (UTC+8)</time>
                         </header>
                         <p class="release-summary" data-lang="zh-Hant">從 v0.1 的日期／生日基礎進一步延伸到季節、年齡進度與遊戲 UI，建立「3 個月 × 4 季＝12 個月」的第一版時間整合，並開始測試月經與長孕期同步。</p>
                         <p class="release-summary" data-lang="en">
@@ -767,7 +754,7 @@
                     <div class="release-content">
                         <header class="release-header">
                             <div>
-                                <div class="release-version">v0.1.1</div>
+                                <div class="release-version">v0.1.1 Beta</div>
                                 <h2 data-lang="zh-Hant">ModGuard 相容性熱修復</h2>
                                 <h2 data-lang="en">ModGuard Compatibility Hotfix</h2>
                             </div>
@@ -807,7 +794,7 @@
                     <div class="release-content">
                         <header class="release-header">
                             <div>
-                                <div class="release-version">v0.1</div>
+                                <div class="release-version">v0.1 Beta</div>
                                 <h2 data-lang="zh-Hant">日期、生日與實際年齡基礎</h2>
                                 <h2 data-lang="en">Date, Birthday &amp; Real-Age Foundation</h2>
                             </div>
@@ -939,27 +926,62 @@
         </section>
     </main>
 
+    <!-- ========【版本導覽】 內容長頁使用固定浮動入口，不建立第二頂條 ======== -->
+    <details class="doc-quick-nav" data-doc-quick-nav>
+        <summary>
+            <span class="doc-quick-symbol" aria-hidden="true"></span>
+            <span data-lang="zh-Hant">版本導覽</span>
+            <span data-lang="en">Versions</span>
+            <span class="doc-quick-position" data-doc-position aria-hidden="true">01 / 06</span>
+        </summary>
+        <div class="doc-quick-panel">
+            <div class="doc-quick-panel-heading">
+                <strong data-lang="zh-Hant">切換版本</strong>
+                <strong data-lang="en">Jump to a release</strong>
+                <small data-lang="zh-Hant">自動標示目前正在閱讀的版本。</small>
+                <small data-lang="en">The current release is highlighted as you scroll.</small>
+            </div>
+            <nav class="doc-quick-links" aria-label="Release versions">
+                <a href="#v040" data-index="01"><span>v0.4 Beta</span></a>
+                <a href="#v030" data-index="02"><span>v0.3 Beta</span></a>
+                <a href="#v021" data-index="03"><span>v0.2.1 Beta</span></a>
+                <a href="#v020" data-index="04"><span>v0.2 Beta</span></a>
+                <a href="#v011" data-index="05"><span>v0.1.1 Beta</span></a>
+                <a href="#v010" data-index="06"><span>v0.1 Beta</span></a>
+            </nav>
+            <button class="doc-quick-top" type="button" data-doc-to-top>
+                <span data-lang="zh-Hant">↑　回到頁首</span>
+                <span data-lang="en">↑　Back to top</span>
+            </button>
+        </div>
+    </details>
+
     <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
-    <footer class="site-footer">
-        <div class="site-footer-inner">
-            <div class="footer-identity">
-                <strong>REALDATE</strong>
-                <span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span>
-                <span data-lang="en">A time and life-system mod for The Sims 4</span>
+        <footer class="l1ng-document-footer" data-footer-project="realdate">
+        <div class="l1ng-footer-inner">
+            <div class="l1ng-footer-main">
+                <div class="l1ng-footer-identity">
+                    <strong>REALDATE</strong>
+                    <p><span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span><span data-lang="en">The Sims 4 Time &amp; Life System</span></p>
+                </div>
+                <nav class="l1ng-footer-nav" aria-label="RealDate site navigation">
+                    <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
+                    <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
+                    <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
+                    <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
+                    <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                    <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
+                    <a href="../home.html"><span data-lang="zh-Hant">L1nG 首頁</span><span data-lang="en">L1nG Home</span></a>
+                </nav>
+                <a class="l1ng-footer-top" href="#top"><span data-lang="zh-Hant">↑ 返回頂部</span><span data-lang="en">↑ Back to top</span></a>
             </div>
-            <div class="footer-links">
-                <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
-                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
-                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
-                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
-                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
-                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
-            </div>
-            <div class="footer-meta">
-                <span data-lang="zh-Hant">L1nG ·《模擬市民 4》模組作者</span>
-                <span data-lang="en">L1nG · THE SIMS 4 MOD CREATOR</span>
-                <span data-lang="zh-Hant">非 Electronic Arts 或 Maxis 官方網站。</span>
-                <span data-lang="en">Not affiliated with Electronic Arts or Maxis.</span>
+            <div class="l1ng-footer-legal">
+                <p class="l1ng-footer-copyright">© 2026 L1nG.</p>
+                <nav class="l1ng-footer-policy-links" aria-label="Policies">
+                    <a href="https://home.by-l1ng.com/site-info.html#privacy" data-site-info-section="privacy"><span data-lang="zh-Hant">隱私權與 Cookie</span><span data-lang="en">Privacy &amp; Cookies</span></a>
+                    <a href="https://home.by-l1ng.com/site-info.html#terms" data-site-info-section="terms"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="en">Terms &amp; Disclaimer</span></a>
+                </nav>
+                <p class="l1ng-footer-disclaimer"><span data-lang="zh-Hant">《The Sims 4》及相關商標屬其權利人所有。本站為獨立玩家創作網站，非 EA／Maxis 官方網站。</span><span data-lang="en">The Sims 4 and related trademarks belong to their respective owners. This independent fan site is not affiliated with or endorsed by EA or Maxis.</span></p>
             </div>
         </div>
     </footer>
