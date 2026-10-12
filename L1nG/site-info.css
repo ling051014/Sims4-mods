@@ -1,0 +1,25 @@
+/* ========【站點說明頁】與全站頁腳使用同一套簡潔文字系統 ======== */
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 30px; }
+body { margin: 0; background: #fbfcfd; color: #344455; font: 14px/1.85 system-ui, -apple-system, "Noto Sans TC", sans-serif; }
+.policy-header { border-bottom: 1px solid #e1e7eb; background: #fff; }
+.policy-header-inner { width: min(1180px, calc(100% - 40px)); margin: auto; min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.policy-header a { color: #596b7c; text-decoration: none; }
+.policy-header a:hover { color: #55acee; }
+.policy-brand { color: #293d4f; font-size: 17px; font-weight: 750; }
+.policy-back { font-size: 12px; }
+.policy-content { width: min(850px, calc(100% - 40px)); margin: 70px auto 96px; }
+.policy-eyebrow { display: block; color: #779fba; letter-spacing: .15em; font-size: 11px; font-weight: 700; }
+.policy-content h1 { margin: 13px 0 13px; font-size: clamp(32px, 5vw, 47px); letter-spacing: -.04em; line-height: 1.25; }
+.policy-intro { color: #758492; font-size: 14px; margin-bottom: 42px; }
+.policy-section { padding: 34px 0; border-top: 1px solid #e3e8ed; }
+.policy-section h2 { margin: 0 0 17px; font-size: 21px; color: #30475b; }
+.policy-section h3 { margin: 24px 0 7px; font-size: 14px; }
+.policy-section p, .policy-section li { color: #617487; font-size: 13px; }
+.policy-section a { color: #438cbe; text-underline-offset: 3px; }
+.policy-section ul { padding-left: 20px; }
+.policy-section li + li { margin-top: 9px; }
+.policy-info { padding: 16px 19px; border-radius: 9px; background: #f0f5f8; color: #617487; font-size: 12px; }
+@media (max-width: 700px) { .policy-header-inner, .policy-content { width: calc(100% - 30px); } .policy-content { margin: 46px auto 70px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
