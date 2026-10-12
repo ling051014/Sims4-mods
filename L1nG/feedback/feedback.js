@@ -288,5 +288,9 @@
   });
 
   setVisitorSite(document.body.classList.contains('realdate-only')?'RealDate':'Genealogy');
+  if(document.body.classList.contains('genealogy-only')){
+    openForm();
+    $('close-form').addEventListener('click',()=>{if(window.parent!==window)window.parent.postMessage({type:'l1ng-feedback-close'},window.location.origin)});
+  }
   render();setAdminPage('overview');
 })();
