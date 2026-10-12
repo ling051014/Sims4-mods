@@ -11,7 +11,31 @@
         <script src="genealogy-feedback.js" defer></script>
     </head>
     <body data-theme="ling">
-        <dialog id="genealogyFeedbackDialog" aria-label="問題反饋"><iframe id="genealogyFeedbackFrame" title="匿名問題反饋" loading="lazy" src="../feedback/genealogy.html"></iframe></dialog>
+        <div class="ui-dialog-backdrop genealogy-feedback-backdrop" id="genealogyFeedbackDialog" aria-hidden="true">
+            <div class="ui-dialog-panel appearance-panel genealogy-feedback-panel" role="dialog" aria-modal="true" aria-labelledby="genealogyFeedbackTitle" aria-describedby="genealogyFeedbackSubtitle" tabindex="-1">
+                <div class="appearance-header">
+                    <div class="appearance-heading">
+                        <span class="l1ng-icon icon-question-circle appearance-heading-icon" aria-hidden="true"></span>
+                        <div>
+                            <h2 id="genealogyFeedbackTitle">問題反饋</h2>
+                            <p id="genealogyFeedbackSubtitle">回報問題、提出建議或留下其他意見。</p>
+                        </div>
+                    </div>
+                    <button class="help-close-btn" id="genealogyFeedbackCloseBtn" type="button" title="關閉" aria-label="關閉問題反饋">
+                        <span class="l1ng-icon icon-x-lg" aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div class="genealogy-feedback-tools">
+                    <button class="genealogy-feedback-thread" id="genealogyFeedbackThreadBtn" type="button">
+                        <span class="l1ng-icon icon-question-circle" aria-hidden="true"></span>
+                        <span>查看我的回饋</span>
+                    </button>
+                </div>
+                <div class="appearance-scroll-body genealogy-feedback-body">
+                    <iframe id="genealogyFeedbackFrame" title="問題反饋表單" loading="lazy" src="../feedback/genealogy.html"></iframe>
+                </div>
+            </div>
+        </div>
 
         <!-- ========【全站載入骨架】 設定 - 對齊目前頂欄、家族檔案欄與畫布工具分佈 ======== -->
         <div class="app-skeleton" id="appSkeleton" aria-hidden="true">
