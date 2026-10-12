@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const attached = [];
   let lastFocus = null;
 
-  // 標題與分隔線保持固定，僅讓其下方的便利貼頁面撕離並露出下一頁。
+  // 右下角先掀起，紙面往上剝離至標題下緣的黏貼線；標題與分隔線保持固定。
   const pages = $('genealogyFeedbackPages');
   let activePage = 0;
   let pendingPage = null;
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     incoming.classList.add('is-under-page');
     pages.classList.add('is-tearing');
     // 動畫收尾時才隱藏舊頁，表單值與捲動位置均不清空。
-    pageTimer = window.setTimeout(() => setTab(index, true), 660);
+    pageTimer = window.setTimeout(() => setTab(index, true), 860);
   }
 
   tabs.forEach(({ tab }, index) => {
