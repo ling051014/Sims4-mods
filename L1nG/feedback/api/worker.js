@@ -136,6 +136,9 @@ async function createFeedback(req,env,origin){
   try{form=await req.formData();}catch(_){return fail("回饋格式不正確。");}
   if(form.getAll("files").reduce((size,file)=>size+(file instanceof File?file.size:0),0)>TOTAL_BYTES)return fail("附件合計不得超過 20 MB。",413);
   const checked=validatePayload(form);if(checked.error)return fail(checked.error);
+  // 來源網站必須和提交網域一致，避免冒充其他網站的回饋。
+  const expectedSource=new URL(origin).hostname.startsWith("realdate.")?"RealDate":"Genealogy";
+  if(checked.data.source!==expectedSource)return fail("回饋來源與提交網站不一致。",403);
   const inspected=await validatedFiles(form,env);if(inspected.error)return fail(inspected.error,inspected.status||400);
   const verified=await validateTurnstile(f(form,"turnstileToken"),origin,env);
   if(!verified.ok)return fail(verified.error,verified.status);
