@@ -1,0 +1,23 @@
+name: L1nG Pages build checks
+on:
+  push:
+    branches:
+      - genealogy-structural-optimization-20260926
+    paths:
+      - 'L1nG/**'
+      - '.github/workflows/l1ng-pages-build-check.yml'
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        site: [home, realdate, genealogy, extractor, translations]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build ${{ matrix.site }} Pages site
+        run: node L1nG/build-pages.mjs ${{ matrix.site }}
