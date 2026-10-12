@@ -45,7 +45,7 @@
 
     const bar = (type) => {
         // 品牌名稱、站內導覽、右側工具必須各佔一格；漢化頁沒有語言切換。
-        const links = type === "realdate" ? 5 : (type === "home" || type === "translations" ? 3 : 4);
+        const links = type === "realdate" ? 7 : (type === "home" || type === "translations" ? 3 : 4);
         const language = type === "realdate" || type === "product";
         return '<div class="sk-sitebar sk-sitebar-' + type + '"><div class="sk-sitebar-inner">' +
             '<div class="sk-site-brand">' +
@@ -70,7 +70,12 @@
     const roadRow = () => '<div class="sk-timeline-row"><span class="sk-timeline-dot"></span><div class="sk-timeline-card">' +
         block("sk-status-pill") + rowLines() + '</div></div>';
     const releaseRow = () => '<div class="sk-release-row"><span class="sk-timeline-dot"></span><div class="sk-release-card">' +
-        rowLines() + '<div class="sk-release-grid">' + feature() + feature() + '</div></div></div>';
+        '<div class="sk-release-heading">' + block("sk-status-pill") + block("sk-medium-copy") + '</div>' +
+        block("sk-wide-copy") + block("sk-medium-copy") +
+        '<div class="sk-release-sections">' + repeat(2, () =>
+            '<div class="sk-release-section">' + block("sk-release-section-label") +
+                '<div class="sk-release-section-items">' + repeat(3, () => block("sk-wide-copy")) +
+            '</div></div>') + '</div></div></div>';
 
     const templates = {
         "mods-home": () =>
@@ -94,8 +99,10 @@
         "l1ng-home": () =>
             '<div class="l1ng-home-hero"><div class="l1ng-home-hero-inner">' +
                 block("l1ng-sk-line hero-kicker") + block("hero-title") +
-                block("l1ng-sk-line hero-sub") + block("l1ng-sk-line hero-sub") +
-                block("l1ng-sk-pill hero-cta") +
+                block("l1ng-sk-line hero-subtitle") + block("l1ng-sk-line hero-description") +
+                '<div class="sk-home-creator-links">' + repeat(2, () =>
+                    '<div class="sk-home-creator-link">' + block("sk-home-creator-icon") +
+                    block("sk-home-creator-label") + '</div>') + '</div>' +
             '</div>' + block("sk-scroll-hint") + '</div>',
 
         "l1ng-changelog": () =>
@@ -124,7 +131,9 @@
                 block("sk-wide-copy") + block("sk-medium-copy") + block("sk-wide-copy") +
             '</div><div class="sk-translation-stats">' + repeat(2, () =>
                 '<div class="sk-translation-stat">' + block("sk-stat-value") + block("sk-medium-copy") + '</div>'
-            ) + '</div></div>' +
+            ) + '<div class="sk-translation-stat sk-translation-stat-wide">' +
+                block("sk-stat-value") + block("sk-medium-copy") + '</div>' +
+                block("sk-translation-summary-note") + '</div></div>' +
             '<div class="sk-translations-body">' + title() +
                 '<div class="sk-translation-toolbar">' + block("sk-search") +
                     repeat(3, () => block("sk-filter")) + '</div>' +
@@ -137,6 +146,9 @@
             '<div class="sk-realdate-home-hero"><div class="sk-realdate-copy">' +
                 eyebrow() + block("sk-realdate-title") + block("sk-wide-copy") +
                 block("sk-medium-copy") + block("sk-wide-copy") + twoButtons() +
+                '<div class="sk-realdate-release">' + repeat(3, () =>
+                    '<div class="sk-realdate-release-item">' + block("sk-release-label") +
+                    block("sk-release-value") + '</div>') + '</div>' +
             '</div><div class="sk-calendar-scene"><div class="sk-calendar-sheet">' +
                 block("sk-medium-copy") + block("sk-section-title") +
                 '<div class="sk-calendar-days">' + repeat(28, () => block("sk-calendar-day")) + '</div>' +
@@ -144,7 +156,7 @@
             '<div class="sk-realdate-home-features">' + repeat(3, feature) + '</div>',
 
         "realdate-download": () =>
-            rd() + docIndex(4) + '<div class="sk-realdate-body">' + title() +
+            rd() + '<div class="sk-realdate-body">' + title() +
                 '<div class="sk-download-card"><div class="sk-download-copy">' +
                     rowLines() + twoButtons() + '</div><div class="sk-download-files">' + rowLines() + '</div></div>' +
                 title() + '<div class="sk-step-grid">' + repeat(3, feature) + '</div></div>',
@@ -154,7 +166,7 @@
 
         "realdate-faq": () =>
             rd("", true) + '<div class="sk-realdate-body sk-faq-list">' +
-                repeat(7, () => '<div class="sk-faq-row">' + block("sk-faq-line") +
+                repeat(9, () => '<div class="sk-faq-row">' + block("sk-faq-line") +
                     block("sk-faq-icon") + '</div>') + '</div>',
 
         "realdate-roadmap": () =>
@@ -162,7 +174,7 @@
 
         "realdate-gameplay": () =>
             rd('<div class="sk-doc-note">' + block("sk-medium-copy") + '</div>') +
-                docIndex(8) + '<div class="sk-realdate-body">' + title() +
+                '<div class="sk-realdate-body">' + title() +
                     '<div class="sk-doc-copy">' + rowLines() +
                         '<div class="sk-feature-grid">' + repeat(2, feature) + '</div></div></div>',
 

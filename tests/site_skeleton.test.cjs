@@ -21,8 +21,8 @@ test("正式頁面皆使用對應骨架及最新版資源",()=>{
   for (const [path,layout] of layouts) {
     const html=readFileSync(join(root,path),"utf8");
     assert.ok(html.includes('data-skeleton-layout="'+layout+'"'), path+" layout");
-    assert.ok(html.includes("site-skeleton.js?v=20261008-site-skeleton-r2"),path+" JS cache");
-    assert.ok(html.includes("site-skeleton.css?v=20261008-site-skeleton-r2"),path+" CSS cache");
+    assert.ok(html.includes("site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3"),path+" JS cache");
+    assert.ok(html.includes("site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"),path+" CSS cache");
     assert.ok(script.includes('"'+layout+'": () =>'),layout+" template");
   }
 });
@@ -34,7 +34,9 @@ test("特殊版面不使用通用四宮格",()=>{
   assert.match(script,/sk-timeline-row/);
   assert.match(script,/sk-calendar-scene/);
   assert.match(script,/sk-download-card/);
-  assert.match(script,/sk-doc-index/);
+  assert.match(script,/sk-home-creator-link/);
+  assert.match(script,/sk-realdate-release/);
+  assert.match(script,/sk-translation-stat-wide/);
   assert.match(style,/\.sk-translation-grid\s*\{\s*display:grid;\s*grid-template-columns:repeat\(2/);
   assert.match(style,/\.sk-realdate-home-hero\s*\{[^}]*grid-template-columns:/);
   assert.match(style,/@media \(max-width:720px\)/);
@@ -62,7 +64,7 @@ test("18 種骨架皆可建立畫面並確實退出",()=>{
     "realdate-download":"sk-download-card",
     "realdate-faq":"sk-faq-row",
     "realdate-roadmap":"sk-timeline-row",
-    "realdate-gameplay":"sk-doc-index",
+    "realdate-gameplay":"sk-doc-copy",
     "realdate-changelog":"sk-release-row",
     "l1ng-home":"l1ng-home-hero",
     "mods-list":"mods-card-grid"
@@ -115,4 +117,15 @@ test("頂欄品牌與導覽保持三區，漢化頁有專區名稱而不新增�
   assert.match(style,/\.sk-site-brand\s*\{\s*display:flex;/);
   assert.match(script,/"translations": \(\) =>\s*bar\("translations"\)/);
   assert.match(script,/const language = type === "realdate" \|\| type === "product"/);
+});
+
+test("主視覺骨架保持與實際內容一致",()=>{
+  assert.match(script,/repeat\(2, \(\) =>\s*'<div class="sk-home-creator-link">/);
+  assert.match(script,/const links = type === "realdate" \? 7/);
+  assert.match(script,/sk-translation-stat-wide/);
+  assert.match(script,/sk-realdate-release-item/);
+  assert.doesNotMatch(script,/docIndex\(4\)|docIndex\(8\)/);
+  assert.match(style,/\.sk-site-links\s*\{[^}]*justify-content:center;/);
+  assert.match(style,/\.sk-release-sections\s*\{[^}]*display:grid;/);
+  assert.match(style,/\.sk-translations-hero\s*\{[^}]*min-height:620px;/);
 });
