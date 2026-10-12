@@ -4752,6 +4752,12 @@ button.avatar-editor-action { cursor:pointer; }
     margin-top:20px;
 }
 
+.genealogy-feedback-panel #genealogyFeedbackReceipt {
+    resize:vertical;
+    max-width:100%;
+    min-width:0;
+}
+
 .genealogy-feedback-history-form .genealogy-feedback-submit {
     justify-self:end;
 }
