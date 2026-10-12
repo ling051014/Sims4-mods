@@ -4097,9 +4097,9 @@ button.avatar-editor-action { cursor:pointer; }
     padding:0 20px 28px;
 }
 
+/* 表單中段只保留原本的上下留白，不在各區塊間繪製分隔線。 */
 .genealogy-feedback-section {
     padding:20px 0;
-    border-top:1px solid var(--gf-stroke);
 }
 
 .genealogy-feedback-section:first-of-type {
