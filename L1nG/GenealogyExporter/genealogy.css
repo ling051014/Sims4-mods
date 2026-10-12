@@ -3989,8 +3989,9 @@ button.avatar-editor-action { cursor:pointer; }
 .genealogy-feedback-panel .genealogy-feedback-peel-shadow {
     fill:none;
     stroke:var(--gf-text);
-    stroke-opacity:.29;
-    stroke-width:15;
+    stroke-opacity:.24;
+    stroke-width:17;
+    filter:blur(4px);
 }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-paper {
@@ -4002,7 +4003,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-grain {
     fill:url(#genealogyFeedbackPaperGrain);
-    opacity:.24;
+    opacity:.38;
 }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-crease {
