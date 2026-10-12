@@ -3888,15 +3888,11 @@ button.avatar-editor-action { cursor:pointer; }
     border-radius:7px;
     background:transparent;
     color:var(--gf-primary);
-    font:600 12px/1.4 inherit;
     font-family:inherit;
-    cursor:pointer;
-}
-
-.genealogy-feedback-panel .genealogy-feedback-nav-link {
     font-size:12px;
     font-weight:600;
     line-height:1.4;
+    cursor:pointer;
 }
 
 .genealogy-feedback-nav-link:hover {
