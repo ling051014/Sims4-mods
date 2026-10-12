@@ -8749,7 +8749,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     padding:15px 16px 12px;
   }
 
-  .appearance-scroll-body {
+  #appearanceDialog .appearance-scroll-body {
     padding:0 16px 16px;
   }
 
