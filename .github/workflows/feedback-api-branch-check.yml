@@ -1,0 +1,36 @@
+name: Feedback API branch checks
+
+on:
+  push:
+    branches:
+      - genealogy-structural-optimization-20260926
+    paths:
+      - 'L1nG/feedback/api/**'
+      - 'L1nG/feedback/feedback-core.js'
+      - 'L1nG/feedback/realdate-feedback-live.js'
+      - 'L1nG/feedback/admin.js'
+      - 'L1nG/GenealogyExporter/genealogy-feedback.js'
+      - '.github/workflows/feedback-api-branch-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  feedback-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check feedback JS syntax
+        run: |
+          node --check L1nG/feedback/api/worker.js
+          node --check L1nG/feedback/feedback-core.js
+          node --check L1nG/feedback/realdate-feedback-live.js
+          node --check L1nG/feedback/admin.js
+          node --check L1nG/GenealogyExporter/genealogy-feedback.js
+      - name: Run feedback API tests (offline)
+        run: node --test L1nG/feedback/api/worker.test.mjs
