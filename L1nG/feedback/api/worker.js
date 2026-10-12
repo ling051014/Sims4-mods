@@ -211,7 +211,7 @@ async function checkAdmin(request,env){
   try{
     const decode=s=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0))));
     const header=decode(pieces[0]),payload=decode(pieces[1]);
-    if(header.alg!=="RS256" || !header.kid || payload.iss!==issuer || String(payload.email||"").toLowerCase()!==env.ADMIN_EMAIL.toLowerCase())return false;
+    if(header.alg!=="RS256" || !header.kid || payload.iss!==issuer || !env.ADMIN_EMAIL.split(",").map(e=>e.trim().toLowerCase()).includes(String(payload.email||"").toLowerCase()))return false;
     if(!(Array.isArray(payload.aud)?payload.aud.includes(env.ACCESS_AUD):payload.aud===env.ACCESS_AUD))return false;
     if(!Number.isFinite(payload.exp) || payload.exp<=Date.now()/1000 || (payload.nbf && payload.nbf>Date.now()/1000))return false;
     const response=await fetch(issuer+"/cdn-cgi/access/certs");
@@ -272,27 +272,15 @@ export default {
     const url=new URL(request.url),path=url.pathname.replace(/\/+$/,"")||"/";
     if(path==="/health"&&request.method==="GET")return json({ok:true,service:"l1ng-feedback-api"});
     if(!env.DB)return fail("回饋資料庫尚未連接。",503);
+    const adminPrefix="/feedback/admin-api";
+    // 管理請求僅從首頁同網域的專用 Worker Route 進入，不接受 workers.dev 直連。
+    // Cloudflare Access 必須保護 home.by-l1ng.com/feedback/admin-api/*。
+    if(url.hostname==="home.by-l1ng.com" && path.startsWith(adminPrefix+"/")){
+      const adminPath=path.slice(adminPrefix.length);
+      return admin(request,env,adminPath);
+    }
     if(path.startsWith("/v1/admin/")){
-      // 管理介面使用獨立白名單；實際資料端點仍須驗證 Access JWT。
-      const origin=request.headers.get("origin");
-      const adminOrigin=env.ADMIN_ORIGIN||"https://home.by-l1ng.com";
-      if(request.method==="OPTIONS"){
-        if(origin!==adminOrigin)return fail("不允許的管理來源。",403);
-        return new Response(null,{status:204,headers:{
-          "access-control-allow-origin":adminOrigin,
-          "access-control-allow-credentials":"true",
-          "access-control-allow-methods":"GET,POST,PATCH,DELETE,OPTIONS",
-          "access-control-allow-headers":"Content-Type",
-          "access-control-max-age":"600","vary":"Origin"
-        }});
-      }
-      const response=await admin(request,env,path);
-      if(origin!==adminOrigin)return response;
-      const headers=new Headers(response.headers);
-      headers.set("access-control-allow-origin",adminOrigin);
-      headers.set("access-control-allow-credentials","true");
-      headers.set("vary","Origin");
-      return new Response(response.body,{status:response.status,headers});
+      return fail("管理端點只能透過受保護的網站路徑存取。",403);
     }
     const origin=request.headers.get("origin");
     if(!validOrigin(origin,env))return fail("不允許的網站來源。",403);
