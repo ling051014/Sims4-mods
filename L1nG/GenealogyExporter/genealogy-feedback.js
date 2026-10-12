@@ -51,22 +51,176 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // 右下角先掀起，紙面往上剝離至標題下緣的黏貼線；標題與分隔線保持固定。
+  // 標題下方是便利貼黏貼處：右下角先翻出紙背，再逐漸拉開，最後從上緣脫離。
   const pages = $('genealogyFeedbackPages');
   let activePage = 0;
   let pendingPage = null;
-  let pageTimer = null;
+  let peelFrame = null;
+  const peelDuration = 1080;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const pageCorners = (width, height) => [
+    { x: 0, y: 0 }, { x: width, y: 0 },
+    { x: width, y: height }, { x: 0, y: height }
+  ];
+
+  function paperClip(points, threshold, keepTop) {
+    const within = point => keepTop
+      ? point.x + point.y <= threshold + .001
+      : point.x + point.y >= threshold - .001;
+    const output = [];
+    for (let i = 0; i < points.length; i++) {
+      const from = points[i], to = points[(i + 1) % points.length];
+      const a = within(from), b = within(to);
+      if (a) output.push(from);
+      if (a !== b) {
+        const sumA = from.x + from.y, sumB = to.x + to.y;
+        const fraction = (threshold - sumA) / (sumB - sumA);
+        output.push({
+          x: from.x + (to.x - from.x) * fraction,
+          y: from.y + (to.y - from.y) * fraction
+        });
+      }
+    }
+    return output;
+  }
+
+  const paperPoint = point => point.x.toFixed(2) + ',' + point.y.toFixed(2);
+  function foldEnds(threshold, width, height) {
+    const points = [
+      { x: threshold, y: 0 }, { x: 0, y: threshold },
+      { x: threshold - height, y: height }, { x: width, y: threshold - width }
+    ].filter(point =>
+      point.x >= -.01 && point.y >= -.01
+      && point.x <= width + .01 && point.y <= height + .01
+    );
+    return points.filter((point, index) => points.findIndex(other =>
+      Math.abs(point.x - other.x) < .01 && Math.abs(point.y - other.y) < .01
+    ) === index).slice(0, 2);
+  }
+
+  // 真正的紙背是摺線外側紙面沿 x+y=threshold 鏡射的多邊形，不是透明三角遮罩。
+  function makePeelVisual() {
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'genealogy-feedback-peel-visual');
+    svg.setAttribute('aria-hidden', 'true');
+
+    const defs = document.createElementNS(svgNS, 'defs');
+    const gradient = document.createElementNS(svgNS, 'linearGradient');
+    gradient.id = 'genealogyFeedbackPaperGradient';
+    gradient.setAttribute('x1', '100%');
+    gradient.setAttribute('y1', '100%');
+    gradient.setAttribute('x2', '0%');
+    gradient.setAttribute('y2', '0%');
+    [
+      ['0%', 'color-mix(in srgb,var(--gf-text) 13%,var(--gf-surface))'],
+      ['17%', 'var(--gf-surface)'],
+      ['39%', 'color-mix(in srgb,var(--gf-subtle) 88%,var(--gf-surface))'],
+      ['72%', 'var(--gf-surface)'],
+      ['100%', 'color-mix(in srgb,var(--gf-text) 20%,var(--gf-surface))']
+    ].forEach(([offset, color]) => {
+      const stop = document.createElementNS(svgNS, 'stop');
+      stop.setAttribute('offset', offset);
+      stop.style.stopColor = color;
+      gradient.appendChild(stop);
+    });
+    const paperPattern = document.createElementNS(svgNS, 'pattern');
+    paperPattern.id = 'genealogyFeedbackPaperGrain';
+    paperPattern.setAttribute('width', '16');
+    paperPattern.setAttribute('height', '16');
+    paperPattern.setAttribute('patternUnits', 'userSpaceOnUse');
+    const fiber = document.createElementNS(svgNS, 'path');
+    fiber.setAttribute('d', 'M2 4l3 -1 M10 12l3 -1 M13 3l1 2 M4 14l2 -1');
+    fiber.setAttribute('fill', 'none');
+    fiber.setAttribute('stroke', 'var(--gf-text)');
+    fiber.setAttribute('stroke-width', '.35');
+    fiber.setAttribute('opacity', '.45');
+    paperPattern.appendChild(fiber);
+    defs.append(gradient, paperPattern);
+    svg.appendChild(defs);
+
+    const el = (name, className) => {
+      const element = document.createElementNS(svgNS, name);
+      element.setAttribute('class', className);
+      svg.appendChild(element);
+      return element;
+    };
+    const shadow = el('path', 'genealogy-feedback-peel-shadow');
+    const back = el('polygon', 'genealogy-feedback-peel-paper');
+    const grain = el('polygon', 'genealogy-feedback-peel-grain');
+    const crease = el('path', 'genealogy-feedback-peel-crease');
+    const glint = el('path', 'genealogy-feedback-peel-glint');
+    return { svg, shadow, back, grain, crease, glint };
+  }
+
+  function smoothstep(value) {
+    const x = Math.max(0, Math.min(1, value));
+    return x * x * (3 - 2 * x);
+  }
+
+  function peelAmount(time) {
+    // 首段慢慢挑起角落；中段拉起整張紙；上方膠帶處略有阻力，最後快速釋放。
+    if (time < .15) return .10 * smoothstep(time / .15);
+    if (time < .79) return .10 + .78 * smoothstep((time - .15) / .64);
+    if (time < .91) return .88 + .055 * smoothstep((time - .79) / .12);
+    return .935 + .065 * smoothstep((time - .91) / .09);
+  }
+
+  function drawPeel(progress, outgoing, visual, width, height) {
+    const threshold = Math.max(0, (width + height) * (1 - peelAmount(progress)));
+    const corners = pageCorners(width, height);
+    const near = paperClip(corners, threshold, true);
+    const lifted = paperClip(corners, threshold, false);
+    const flipped = lifted.map(point => ({
+      x: threshold - point.y,
+      y: threshold - point.x
+    }));
+    outgoing.style.clipPath = near.length >= 3
+      ? 'polygon(' + near.map(point => point.x.toFixed(2) + 'px ' + point.y.toFixed(2) + 'px').join(',') + ')'
+      : 'polygon(0 0,0 0,0 0)';
+    const shape = flipped.map(paperPoint).join(' ');
+    visual.back.setAttribute('points', shape);
+    visual.grain.setAttribute('points', shape);
+    const ends = foldEnds(threshold, width, height);
+    if (ends.length === 2) {
+      const path = 'M' + paperPoint(ends[0]) + ' L' + paperPoint(ends[1]);
+      visual.shadow.setAttribute('d', path);
+      visual.crease.setAttribute('d', path);
+      visual.glint.setAttribute('d', 'M' + paperPoint({
+        x: ends[0].x - 1.5, y: ends[0].y - 1.5
+      }) + ' L' + paperPoint({
+        x: ends[1].x - 1.5, y: ends[1].y - 1.5
+      }));
+    } else {
+      for (const path of [visual.shadow, visual.crease, visual.glint]) path.setAttribute('d', '');
+    }
+    // 膠帶拉開後，讓最後一小塊紙帶著慣性離開，而非突然消失。
+    const release = Math.max(0, (progress - .91) / .09);
+    visual.svg.style.transform = release
+      ? 'translate3d(' + (-width * .035 * release).toFixed(2) + 'px,'
+        + (-height * .04 * release).toFixed(2) + 'px,0) rotate('
+        + (-4 * release).toFixed(2) + 'deg)'
+      : '';
+    visual.svg.style.opacity = String(1 - smoothstep(release) * .95);
+  }
+
+  function stopPeel() {
+    if (peelFrame !== null) {
+      cancelAnimationFrame(peelFrame);
+      peelFrame = null;
+    }
+    pages?.querySelector('.genealogy-feedback-peel-visual')?.remove();
+    pages?.classList.remove('is-tearing');
+    tabs.forEach(({ panel: view }) => {
+      view.classList.remove('is-tearing-page', 'is-under-page');
+      view.style.removeProperty('clip-path');
+      view.inert = false;
+    });
+  }
 
   function setTab(index, focus = false) {
-    if (pageTimer !== null) {
-      clearTimeout(pageTimer);
-      pageTimer = null;
-    }
-    pages?.classList.remove('is-tearing');
+    stopPeel();
     tabs.forEach(({ tab, panel: view }, i) => {
       const active = index === i;
-      view.classList.remove('is-tearing-page', 'is-under-page');
-      view.inert = false;
       view.removeAttribute('aria-hidden');
       view.hidden = !active;
       tab.hidden = active;
@@ -85,8 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const outgoing = tabs[activePage].panel;
     const incoming = tabs[index].panel;
+    const rect = pages.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) {
+      setTab(index, true);
+      return;
+    }
     pendingPage = index;
-    // 頁面仍然可見以供動畫使用，但切換期間不可觸發第二次操作。
     panel.focus({ preventScroll: true });
     incoming.hidden = false;
     outgoing.inert = true;
@@ -94,8 +252,23 @@ document.addEventListener('DOMContentLoaded', () => {
     outgoing.classList.add('is-tearing-page');
     incoming.classList.add('is-under-page');
     pages.classList.add('is-tearing');
-    // 動畫收尾時才隱藏舊頁，表單值與捲動位置均不清空。
-    pageTimer = window.setTimeout(() => setTab(index, true), 860);
+    const visual = makePeelVisual();
+    visual.svg.setAttribute('viewBox', '0 0 ' + rect.width + ' ' + rect.height);
+    pages.appendChild(visual.svg);
+
+    let start = null;
+    const animate = timestamp => {
+      if (pendingPage !== index) return;
+      if (start === null) start = timestamp;
+      const progress = Math.min(1, (timestamp - start) / peelDuration);
+      drawPeel(progress, outgoing, visual, rect.width, rect.height);
+      if (progress >= 1) {
+        setTab(index, true);
+      } else {
+        peelFrame = requestAnimationFrame(animate);
+      }
+    };
+    peelFrame = requestAnimationFrame(animate);
   }
 
   tabs.forEach(({ tab }, index) => {
