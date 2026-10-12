@@ -94,7 +94,7 @@
       $('form-main').style.overflow='visible';
       $('feedback-form').style.overflow='visible';
       $('form-title').textContent='問題反饋';
-      $('form-subtitle').textContent='你的想法，讓 RealDate 變得更好。';
+      $('form-subtitle').textContent='你的想法，讓RealDate變得更好。';
       $('issue-target').innerHTML='<option value="mod">RealDate 模組</option><option value="web">RealDate 網站</option>';
       $('bug-context').querySelector('label').textContent='回饋對象';
       $('issue-target').value='mod';
