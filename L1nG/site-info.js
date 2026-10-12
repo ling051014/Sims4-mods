@@ -79,6 +79,42 @@
             }
         }
     }
+    if (isEmbedded && window.parent !== window) {
+        const parentOrigin = params.get("parent") || "*";
+        const content = document.querySelector(".policy-content");
+        let reportedHeight = 0;
+        const reportHeight = () => {
+            if (!content) return;
+            const height = Math.ceil(content.getBoundingClientRect().height);
+            if (height === reportedHeight) return;
+            reportedHeight = height;
+            window.parent.postMessage({ type: "l1ng-site-info-size", height }, parentOrigin);
+        };
+        requestAnimationFrame(reportHeight);
+        if ("ResizeObserver" in window && content) new ResizeObserver(reportHeight).observe(content);
+        document.fonts?.ready?.then(reportHeight);
+        window.addEventListener("resize", reportHeight);
+        window.addEventListener("message", event => {
+            if (params.get("section") !== "genealogy"
+                || event.source !== window.parent || event.origin !== parentOrigin
+                || event.data?.type !== "l1ng-site-info-theme") return;
+            const colors = event.data.colors || {};
+            const vars = {
+                background: "--site-info-bg",
+                text: "--site-info-text",
+                secondary: "--site-info-secondary",
+                border: "--site-info-border",
+                accent: "--site-info-accent",
+                input: "--site-info-input"
+            };
+            for (const [key, cssVar] of Object.entries(vars)) {
+                const value = colors[key];
+                if (typeof value === "string" && CSS.supports("color", value)) {
+                    root.style.setProperty(cssVar, value);
+                }
+            }
+        });
+    }
     document.addEventListener("click", event => {
         const button = event.target.closest?.("[data-site-language-button]");
         if (button) applyLanguage(button.dataset.siteLanguageButton, true);

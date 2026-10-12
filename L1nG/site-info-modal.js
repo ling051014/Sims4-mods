@@ -29,6 +29,8 @@
     let dialog = null;
     let opener = null;
     let previousOverflow = "";
+    const nativeGenealogy = !!document.querySelector("#topbarMoreMenu") && !!document.querySelector("#helpDialog .help-header");
+    let activeUrl = null;
     const language = () => {
         // 族譜工具採用獨立的多語系控制器，html.lang 不一定會跟著更新。
         const selected = window.LING_I18N?.language
@@ -39,6 +41,30 @@
         if (["zh-Hant", "zh-Hans", "en"].includes(selected)) return selected;
         return selected.toLowerCase().startsWith("en") ? "en" : "zh-Hant";
     };
+    function setContentHeight(layer, value) {
+        const viewportLimit = Math.max(110, Math.min(570, window.innerHeight - (nativeGenealogy ? 140 : 155)));
+        const height = Math.max(110, Math.min(Math.ceil(Number(value) || 220), viewportLimit));
+        const content = layer.querySelector(".l1ng-site-info-content");
+        if (content) content.style.height = height + "px";
+    }
+    function sendNativeTheme(layer) {
+        if (!nativeGenealogy || !activeUrl) return;
+        const panel = layer.querySelector(".l1ng-site-info-native-panel");
+        const css = getComputedStyle(panel);
+        const root = getComputedStyle(document.documentElement);
+        const token = key => root.getPropertyValue(key).trim();
+        layer.querySelector("iframe")?.contentWindow?.postMessage({
+            type: "l1ng-site-info-theme",
+            colors: {
+                background: css.backgroundColor,
+                text: token("--text-primary") || css.color,
+                secondary: token("--text-secondary") || css.color,
+                border: token("--border-default") || "#e3e8ed",
+                accent: token("--action-primary") || "#438cbe",
+                input: token("--surface-input") || css.backgroundColor
+            }
+        }, activeUrl.origin);
+    }
     function createDialog() {
         if (dialog) return dialog;
         const layer = document.createElement("div");
@@ -78,12 +104,32 @@
                     <iframe class="l1ng-site-info-frame" title="網站說明內容"></iframe>
                 </div>
             </section>`;
+        if (nativeGenealogy) {
+            // 直接採用族譜工具原有的外框、標題列與關閉控制。
+            layer.className = "ui-dialog-backdrop show l1ng-site-info-native";
+            const panel = layer.querySelector(".l1ng-site-info-panel");
+            panel.className = "ui-dialog-panel storage-modal l1ng-site-info-native-panel";
+            layer.querySelector(".l1ng-site-info-header").className = "help-header storage-header";
+            const icon = layer.querySelector(".l1ng-site-info-heading-icon");
+            icon.outerHTML = '<span class="l1ng-icon icon-info-circle help-heading-icon" aria-hidden="true"></span>';
+            const heading = layer.querySelector(".l1ng-site-info-heading");
+            heading.className = "help-heading-copy";
+            const wrapper = document.createElement("div");
+            wrapper.className = "help-heading";
+            heading.before(wrapper);
+            wrapper.append(layer.querySelector(".help-heading-icon"), heading);
+            const button = layer.querySelector(".l1ng-site-info-close");
+            button.className = "help-close-btn l1ng-site-info-close";
+            button.innerHTML = '<span class="l1ng-icon icon-x-lg" aria-hidden="true"></span>';
+            layer.querySelector(".l1ng-site-info-content").classList.add("storage-scroll-body");
+        }
         layer.querySelector(".l1ng-site-info-close").addEventListener("click", close);
         layer.addEventListener("click", event => {
             if (event.target === layer) close();
         });
         layer.querySelector(".l1ng-site-info-frame").addEventListener("load", () => {
-            if (dialog !== layer) return;
+            if (dialog !== layer || !layer.isConnected) return;
+            if (nativeGenealogy) sendNativeTheme(layer);
             layer.querySelector(".l1ng-site-info-loading").hidden = true;
             const content = layer.querySelector(".l1ng-site-info-content");
             content.classList.remove("is-loading");
@@ -95,6 +141,24 @@
     function open(section, trigger) {
         if (!sections.has(section)) return;
         const modal = createDialog();
+        modal.dataset.siteInfoSection = section;
+        const skeleton = modal.querySelector(".l1ng-site-info-skeleton");
+        if (skeleton && skeleton.dataset.section !== section) {
+            skeleton.dataset.section = section;
+            // 族譜「關於」是簡介、版權／聲明、兩項可展開條款；骨架順序與正文一致。
+            const rows = section === "genealogy"
+                ? ["skeleton-text", "skeleton-text-medium", "skeleton-text-short",
+                    "skeleton-heading", "skeleton-text", "skeleton-text-medium",
+                    "skeleton-heading", "skeleton-heading"]
+                : ["skeleton-heading", "skeleton-text", "skeleton-text",
+                    "skeleton-text-short", "skeleton-heading", "skeleton-text",
+                    "skeleton-text-medium", "skeleton-text", "skeleton-text-short"];
+            skeleton.replaceChildren(...rows.map(name => {
+                const line = document.createElement("span");
+                line.className = "l1ng-site-info-skeleton-line " + name;
+                return line;
+            }));
+        }
         if (!modal.isConnected) {
             opener = trigger || document.activeElement;
             previousOverflow = document.body.style.overflow;
@@ -110,9 +174,12 @@
         url.searchParams.set("embed", "1");
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
-        url.searchParams.set("v", section === "genealogy" ? "20261012-genealogy-legal-r2" : "20261012-site-info-visibility-r2");
+        url.searchParams.set("parent", location.origin);
+        url.searchParams.set("v", "20261012-info-native-size-r1");
         const frame = modal.querySelector(".l1ng-site-info-frame");
+        activeUrl = url;
         if (frame.src !== url.href) {
+            setContentHeight(modal, section === "genealogy" ? 265 : section === "terms" ? 450 : 520);
             const content = modal.querySelector(".l1ng-site-info-content");
             content.classList.add("is-loading");
             content.setAttribute("aria-busy", "true");
@@ -124,6 +191,7 @@
     function close() {
         if (!dialog || !dialog.isConnected) return;
         dialog.remove();
+        activeUrl = null;
         document.body.style.overflow = previousOverflow;
         const target = opener;
         opener = null;
@@ -154,6 +222,10 @@
     }, true);
     window.addEventListener("message", event => {
         if (!dialog || !dialog.isConnected || event.source !== dialog.querySelector("iframe").contentWindow) return;
+        if (!activeUrl || event.origin !== activeUrl.origin) return;
         if (event.data && event.data.type === "l1ng-site-info-close") close();
+        if (event.data && event.data.type === "l1ng-site-info-size") {
+            setContentHeight(dialog, event.data.height);
+        }
     });
 })();

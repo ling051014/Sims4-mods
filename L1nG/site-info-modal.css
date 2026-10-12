@@ -15,13 +15,13 @@
 .l1ng-site-info-backdrop *,
 .l1ng-site-info-backdrop *::before,
 .l1ng-site-info-backdrop *::after { box-sizing: border-box; }
-.l1ng-site-info-panel {
+.l1ng-site-info-backdrop .l1ng-site-info-panel {
     display: flex;
     flex-direction: column;
     width: min(790px, 100%);
-    height: min(650px, calc(100vh - 40px));
-    height: min(650px, calc(100dvh - 40px));
-    min-height: 250px;
+    height: auto;
+    max-height: min(650px, calc(100dvh - 40px));
+    min-height: 0;
     overflow: hidden;
     background: #fff;
     border: 1px solid #e2e7eb;
@@ -31,7 +31,7 @@
     font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
     outline: none;
 }
-.l1ng-site-info-header {
+.l1ng-site-info-backdrop .l1ng-site-info-header {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
@@ -41,12 +41,12 @@
     border-bottom: 1px solid #e6eaee;
     background: #fff;
 }
-.l1ng-site-info-heading-icon { flex: 0 0 19px; width: 19px; height: 19px; align-self: flex-start; margin-top: 3px; color: #55acee; }
-.l1ng-site-info-heading-icon svg { display: block; width: 19px; height: 19px; }
-.l1ng-site-info-heading { min-width: 0; flex: 1 1 auto; }
-.l1ng-site-info-heading h2 { margin: 0; font-size: 17px; font-weight: 650; color: #283946; line-height: 1.5; }
-.l1ng-site-info-heading p { margin: 3px 0 0; color: #81909c; font-size: 11px; font-weight: 400; line-height: 1.6; }
-.l1ng-site-info-close {
+.l1ng-site-info-backdrop .l1ng-site-info-heading-icon { flex: 0 0 19px; width: 19px; height: 19px; align-self: flex-start; margin-top: 3px; color: #55acee; }
+.l1ng-site-info-backdrop .l1ng-site-info-heading-icon svg { display: block; width: 19px; height: 19px; }
+.l1ng-site-info-backdrop .l1ng-site-info-heading { min-width: 0; flex: 1 1 auto; }
+.l1ng-site-info-backdrop .l1ng-site-info-heading h2 { margin: 0; font-size: 17px; font-weight: 650; color: #283946; line-height: 1.5; }
+.l1ng-site-info-backdrop .l1ng-site-info-heading p { margin: 3px 0 0; color: #81909c; font-size: 11px; font-weight: 400; line-height: 1.6; }
+.l1ng-site-info-backdrop .l1ng-site-info-close {
     flex: 0 0 30px;
     display: inline-flex;
     align-items: center;
@@ -60,9 +60,9 @@
     color: #687984;
     cursor: pointer;
 }
-.l1ng-site-info-close:hover, .l1ng-site-info-close:focus-visible { background: #eff4f7; color: #344657; }
-.l1ng-site-info-close svg { width: 17px; height: 17px; }
-.l1ng-site-info-content { position: relative; flex: 1 1 auto; min-height: 0; }
+.l1ng-site-info-backdrop .l1ng-site-info-close:hover, .l1ng-site-info-backdrop .l1ng-site-info-close:focus-visible { background: #eff4f7; color: #344657; }
+.l1ng-site-info-backdrop .l1ng-site-info-close svg { width: 17px; height: 17px; }
+.l1ng-site-info-content { position: relative; flex: 0 1 auto; min-height: 0; height: 220px; overflow: hidden; }
 .l1ng-site-info-frame { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
 .l1ng-site-info-content.is-loading .l1ng-site-info-frame { visibility: hidden; }
 .l1ng-site-info-loading {
@@ -70,7 +70,7 @@
     inset: 0;
     z-index: 1;
     overflow: hidden;
-    padding: 27px 23px;
+    padding: 16px 20px;
     background: #fff;
     pointer-events: none;
 }
@@ -112,15 +112,39 @@
 }
 @media (max-width: 640px) {
     .l1ng-site-info-backdrop { padding: 10px; }
-    .l1ng-site-info-panel {
+    .l1ng-site-info-backdrop .l1ng-site-info-panel {
         width: 100%;
-        height: min(670px, calc(100dvh - 20px));
+        max-height: calc(100dvh - 20px);
     }
-    .l1ng-site-info-header { padding: 15px 16px; gap: 9px; }
-    .l1ng-site-info-heading h2 { font-size: 16px; }
-    .l1ng-site-info-loading { padding: 22px 17px; }
+    .l1ng-site-info-backdrop .l1ng-site-info-header { padding: 15px 16px; gap: 9px; }
+    .l1ng-site-info-backdrop .l1ng-site-info-heading h2 { font-size: 16px; }
+    .l1ng-site-info-loading { padding: 14px 16px; }
 }
+/* ========【族譜工具原生視窗】共用族譜既有 header / panel / close 樣式 ======== */
+.ui-dialog-backdrop.l1ng-site-info-native {
+    z-index: 6000;
+}
+.l1ng-site-info-native .l1ng-site-info-native-panel {
+    height: auto;
+    max-height: min(680px, calc(100dvh - 28px));
+}
+.l1ng-site-info-native .l1ng-site-info-content {
+    flex: 0 1 auto;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    background: var(--surface-card);
+}
+.l1ng-site-info-native .l1ng-site-info-frame { background: var(--surface-card); }
+.l1ng-site-info-native .l1ng-site-info-loading { background: var(--surface-card); }
+.l1ng-site-info-native .l1ng-site-info-skeleton-line {
+    background: color-mix(in srgb, var(--border-default) 65%, var(--surface-card));
+}
+.l1ng-site-info-native .l1ng-site-info-skeleton .skeleton-heading {
+    background: color-mix(in srgb, var(--border-default) 82%, var(--surface-card));
+}
+.l1ng-site-info-native[data-site-info-section="genealogy"] .l1ng-site-info-skeleton .skeleton-heading:first-child { display: none; }
 @media (prefers-reduced-motion: reduce) {
-    .l1ng-site-info-panel { animation: none; }
+    .l1ng-site-info-backdrop .l1ng-site-info-panel { animation: none; }
     .l1ng-site-info-skeleton-line::after { animation: none; }
 }

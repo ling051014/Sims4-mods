@@ -33,14 +33,15 @@ html[data-site-info-section] .policy-eyebrow,
 html[data-site-info-section] .policy-content > h1,
 html[data-site-info-section] .policy-intro,
 html[data-site-info-section] .policy-section { display: none; }
-html[data-site-info-section] .policy-content { width: 100%; max-width: none; margin: 0; padding: 3px 22px 30px; }
-html[data-site-info-section] .policy-section { border: 0; padding: 17px 0; }
+html[data-site-info-section] .policy-content { width: 100%; max-width: none; margin: 0; padding: 16px 20px 20px; }
+html[data-site-info-section] .policy-section { border: 0; padding: 0; }
+html[data-site-info-section] .policy-language-content > :first-child { margin-top: 0; }
 html[data-site-info-section] .policy-section h2 { display: none; }
 html[data-site-info-section="privacy"] #privacy,
 html[data-site-info-section="terms"] #terms,
 html[data-site-info-section="genealogy"] #genealogy { display: block; }
 html[data-site-info-section] #genealogy > p:last-child { display: none; }
-@media (max-width: 640px) { html[data-site-info-section] .policy-content { padding: 3px 17px 28px; } }
+@media (max-width: 640px) { html[data-site-info-section] .policy-content { padding: 14px 16px 16px; } }
 
 /* ========【說明頁多語系】依語言顯示完整翻譯，嵌入時繼承來源頁 ======== */
 /* 隱藏語言由元素 hidden 屬性及切換程式直接管理，不依賴選擇器顯示狀態。 */
@@ -121,4 +122,31 @@ html[data-site-info-section="genealogy"] .policy-embedded-details .policy-sectio
 }
 @media (prefers-reduced-motion: reduce) {
     html[data-site-info-section="genealogy"] .policy-embedded-details > summary::after { transition: none; }
+}
+
+/* ========【族譜工具主題】沿用目前族譜主題，而非固定白底說明視窗 ======== */
+html[data-site-info-section="genealogy"] body {
+    background:var(--site-info-bg,#fff);
+    color:var(--site-info-text,#344455);
+}
+html[data-site-info-section="genealogy"] .policy-section p,
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-disclaimer {
+    color:var(--site-info-secondary,#617487);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal,
+html[data-site-info-section="genealogy"] .policy-embedded-details {
+    border-color:var(--site-info-border,#e3e8ed);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-copyright,
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary {
+    color:var(--site-info-text,#344455);
+}
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:hover,
+html[data-site-info-section="genealogy"] .policy-embedded-details > summary:focus-visible,
+html[data-site-info-section="genealogy"] .policy-section a {
+    color:var(--site-info-accent,#438cbe);
+}
+html[data-site-info-section="genealogy"] .policy-info {
+    background:var(--site-info-input,#f0f5f8);
+    color:var(--site-info-secondary,#617487);
 }
