@@ -135,6 +135,20 @@
     overflow: hidden;
     background: var(--surface-card);
 }
+/* 僅「關於族譜工具」採固定外框；展開條款時不再重新計算視窗高度。 */
+.l1ng-site-info-native[data-site-info-section="genealogy"] .l1ng-site-info-native-panel {
+    height: min(680px, calc(100dvh - 28px));
+    max-height: min(680px, calc(100dvh - 28px));
+}
+.l1ng-site-info-native[data-site-info-section="genealogy"] .l1ng-site-info-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+}
+.l1ng-site-info-native[data-site-info-section="genealogy"] .l1ng-site-info-frame {
+    height: 100%;
+}
 .l1ng-site-info-native .l1ng-site-info-frame { background: var(--surface-card); }
 .l1ng-site-info-native .l1ng-site-info-loading { background: var(--surface-card); }
 .l1ng-site-info-native .l1ng-site-info-skeleton-line {
