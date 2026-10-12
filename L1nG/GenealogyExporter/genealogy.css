@@ -3935,6 +3935,83 @@ button.avatar-editor-action { cursor:pointer; }
     display:none;
 }
 
+/* 撕頁轉場只作用在標題分隔線下方；標題列固定不參與動畫。 */
+.genealogy-feedback-panel .genealogy-feedback-pages {
+    position:relative;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr);
+    flex:1 1 auto;
+    width:100%;
+    min-width:0;
+    min-height:0;
+    overflow:hidden;
+    isolation:isolate;
+    perspective:1050px;
+    background:var(--gf-surface);
+}
+
+.genealogy-feedback-panel .genealogy-feedback-pages > .genealogy-feedback-view {
+    grid-area:1 / 1;
+    width:100%;
+    height:100%;
+    background:var(--gf-surface);
+}
+
+.genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .genealogy-feedback-view.is-under-page {
+    position:relative;
+    z-index:1;
+}
+
+.genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .genealogy-feedback-view.is-tearing-page {
+    position:absolute;
+    inset:0;
+    z-index:2;
+    box-shadow:0 11px 25px color-mix(in srgb,var(--gf-text) 19%,transparent);
+    transform-origin:50% 0;
+    backface-visibility:hidden;
+    pointer-events:none;
+    will-change:transform,opacity;
+    animation:genealogy-feedback-sheet-tear .62s cubic-bezier(.26,.66,.3,1) both;
+}
+
+/* 捲起的紙面薄光澤和撕開後的細微鋸齒，不額外建立整頁假卡片。 */
+.genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .is-tearing-page::after {
+    content:"";
+    position:absolute;
+    inset:0 0 auto;
+    z-index:3;
+    height:14px;
+    pointer-events:none;
+    background:linear-gradient(180deg,
+        color-mix(in srgb,var(--gf-text) 11%,transparent),
+        color-mix(in srgb,var(--gf-surface) 75%,transparent) 55%,
+        transparent);
+    clip-path:polygon(0 0,6% 0,8% 35%,11% 0,18% 0,20% 30%,24% 0,33% 0,35% 32%,40% 0,49% 0,51% 35%,56% 0,65% 0,67% 31%,73% 0,81% 0,83% 34%,89% 0,96% 0,98% 30%,100% 0,100% 100%,0 100%);
+    animation:genealogy-feedback-sheet-edge .62s ease-out both;
+}
+
+@keyframes genealogy-feedback-sheet-tear {
+    0% {transform:translate3d(0,0,0) rotateX(0deg) rotateZ(0deg);opacity:1}
+    18% {transform:translate3d(0,5px,0) rotateX(-7deg) rotateZ(-.5deg);opacity:1}
+    43% {transform:translate3d(8px,26px,0) rotateX(-22deg) rotateZ(1.7deg);opacity:1}
+    73% {transform:translate3d(25px,45%,0) rotateX(-32deg) rotateZ(4deg);opacity:.92}
+    100% {transform:translate3d(55px,115%,0) rotateX(-43deg) rotateZ(7deg);opacity:0}
+}
+
+@keyframes genealogy-feedback-sheet-edge {
+    0%,8% {opacity:0}
+    30% {opacity:.9}
+    100% {opacity:.25}
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .genealogy-feedback-view.is-tearing-page,
+    .genealogy-feedback-panel .genealogy-feedback-pages.is-tearing > .is-tearing-page::after {
+        animation:none;
+    }
+}
+
 .genealogy-feedback-panel .genealogy-feedback-form {
     display:flex;
     flex:1 1 auto;
