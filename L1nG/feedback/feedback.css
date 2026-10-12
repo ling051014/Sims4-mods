@@ -220,15 +220,3 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
 .primary.submit.is-loading::before,.thread-compose .primary.is-loading::before{content:"";display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:l1ng-feedback-spin .7s linear infinite;margin-right:8px}
 @keyframes l1ng-feedback-spin{to{transform:rotate(360deg)}}
 
-
-/* 族譜回饋：輸入提示文字沿用人物編輯視窗的緊湊字級，不改實際輸入文字。 */
-body.genealogy-only input.field::placeholder,
-body.genealogy-only textarea.field::placeholder {
-  font-family:inherit;
-  font-size:13px;
-  font-weight:400;
-  line-height:1.5;
-  letter-spacing:0;
-  color:var(--faint);
-  opacity:1;
-}
