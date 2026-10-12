@@ -1,11 +1,73 @@
-/* 對齊族譜原生 ui-dialog；直接使用族譜主題 Token */
-#genealogyFeedbackDialog{
- width:min(730px,calc(100vw - 28px));height:min(850px,calc(100dvh - 28px));
- max-height:calc(100dvh - 28px);max-width:none;margin:auto;padding:0;
- border:1px solid var(--border-default);border-radius:12px;overflow:hidden;
- background:var(--surface-card);color:var(--text-primary);
- box-shadow:0 10px 40px rgba(0,0,0,.22)
+/* 回饋視窗直接使用族譜原生 ui-dialog-backdrop／appearance-panel 骨架。
+   標題與關閉鍵固定在父頁；只有下方 iframe 表單內容捲動。 */
+.genealogy-feedback-backdrop{
+  z-index:100;
 }
-#genealogyFeedbackDialog::backdrop{background:var(--overlay-backdrop);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-#genealogyFeedbackDialog iframe{width:100%;height:100%;display:block;border:0;background:var(--surface-card)}
-@media(max-width:600px){#genealogyFeedbackDialog{width:100vw;height:100dvh;max-height:none;border:0;border-radius:0}}
+.genealogy-feedback-panel{
+  width:min(760px,100%);
+  height:min(760px,calc(100dvh - 40px));
+  max-height:calc(100dvh - 40px);
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.genealogy-feedback-panel .appearance-header{
+  flex:0 0 auto;
+}
+.genealogy-feedback-tools{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex:0 0 auto;
+  padding:7px 20px;
+  border-bottom:1px solid var(--border-default);
+  background:var(--surface-card);
+}
+.genealogy-feedback-thread{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:30px;
+  border:0;
+  padding:5px 8px;
+  border-radius:7px;
+  background:transparent;
+  color:var(--action-primary);
+  font:inherit;
+  font-size:11.5px;
+  cursor:pointer;
+}
+.genealogy-feedback-thread:hover{
+  background:var(--surface-item-hover);
+}
+.genealogy-feedback-thread .l1ng-icon{
+  width:15px;
+  height:15px;
+}
+.genealogy-feedback-body{
+  flex:1 1 auto;
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+  background:var(--surface-card);
+}
+#genealogyFeedbackFrame{
+  display:block;
+  width:100%;
+  height:100%;
+  border:0;
+  background:var(--surface-card);
+}
+@media(max-width:650px){
+  .genealogy-feedback-backdrop{padding:0}
+  .genealogy-feedback-panel{
+    width:100%;
+    height:100dvh;
+    max-height:none;
+    border-radius:0;
+    border:0;
+  }
+  .genealogy-feedback-tools{padding:5px 14px}
+}
