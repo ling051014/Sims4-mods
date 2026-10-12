@@ -80,7 +80,7 @@ html[data-site-info-section="genealogy"] .policy-embedded-details {
     border-top: 1px solid #e3e8ed;
 }
 html[data-site-info-section="genealogy"] .policy-embedded-details:last-child {
-    border-bottom: 1px solid #e3e8ed;
+    border-bottom: 1px solid var(--site-info-border, #e3e8ed);
 }
 html[data-site-info-section="genealogy"] .policy-embedded-details > summary {
     display: flex;
