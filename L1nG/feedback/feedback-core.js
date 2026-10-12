@@ -69,7 +69,7 @@
   const API_URL = 'https://l1ng-feedback-api.zpl74520.workers.dev';
   const SITE_KEY = '0x4AAAAAAFUwHYgvdSfW7wI_';
   const LIVE_HOSTS = Object.freeze([
-    'realdate.by-l1ng.com', 'genealogy.by-l1ng.com'
+    'realdate.by-l1ng.com', 'genealogy-tool.by-l1ng.com'
   ]);
   let turnstileLoading = null;
   function isLive() { return LIVE_HOSTS.includes(global.location.hostname); }
