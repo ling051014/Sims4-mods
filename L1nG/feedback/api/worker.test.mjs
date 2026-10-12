@@ -61,3 +61,57 @@ test('無 Turnstile Secret 時不能讓回饋通過',async()=>{
   const res=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:form});
   assert.equal(res.status,503);
 });
+
+test('有效的 Turnstile 仍須通過 D1 頻率限制才可寫入',async()=>{
+  const original=globalThis.fetch;
+  let stored=0,limitUsed=0;
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'realdate.by-l1ng.com'});
+  const db={
+    prepare(sql){
+      return {
+        bind(...values){
+          return {
+            async first(){
+              if(sql.includes('INSERT INTO request_limits')){
+                limitUsed++;
+                return limitUsed<=6?{used:limitUsed}:null;
+              }
+              throw new Error('Unexpected SQL in first: '+sql);
+            }
+          };
+        }
+      };
+    },
+    async batch(){stored++;}
+  };
+  try{
+    const form=()=>{const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('followUp','once');data.set('message','測試有效回饋至少十字');data.set('turnstileToken','valid-token');return data;};
+    const env={DB:db,TURNSTILE_SECRET_KEY:'unit-test-secret'};
+    for(let i=0;i<6;i++){
+      const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin,'CF-Connecting-IP':'203.0.113.5'},body:form(),env});
+      assert.equal(response.status,201);
+      assert.equal((await response.json()).ok,true);
+    }
+    const blocked=await call('/v1/feedback',{method:'POST',headers:{Origin:origin,'CF-Connecting-IP':'203.0.113.5'},body:form(),env});
+    assert.equal(blocked.status,429);
+    assert.equal(stored,6);
+  }finally{globalThis.fetch=original;}
+});
+test('沒有可信來源位址時拒絕建立回饋',async()=>{
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'realdate.by-l1ng.com'});
+  try{
+    const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('message','有效回饋至少十個字以上');data.set('followUp','once');data.set('turnstileToken','token');
+    const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data,env:{DB:dummyDB,TURNSTILE_SECRET_KEY:'secret'}});
+    assert.equal(response.status,503);
+  }finally{globalThis.fetch=original;}
+});
+test('驗證核發網域和提交網站不一致時拒絕',async()=>{
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'genealogy.by-l1ng.com'});
+  try{
+    const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('message','有效回饋至少十個字以上');data.set('followUp','once');data.set('turnstileToken','token');
+    const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data,env:{DB:dummyDB,TURNSTILE_SECRET_KEY:'secret'}});
+    assert.equal(response.status,403);
+  }finally{globalThis.fetch=original;}
+});
