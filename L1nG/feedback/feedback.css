@@ -213,3 +213,25 @@ body.realdate-only .rd-v1-hero p{font-size:15px;line-height:1.82}
 body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
 @media(max-width:900px){body.realdate-only .rd-v1-main{width:min(calc(100% - 38px),750px);grid-template-columns:1fr;gap:22px;margin-top:25px}body.realdate-only .rd-v1-aside{position:static;max-height:none;overflow:visible}}
 @media(max-width:600px){body.realdate-only .rd-v1-main{width:calc(100% - 30px);margin:22px auto 34px}body.realdate-only .rd-v1-main .modal-layer.standalone .modal-content{padding:22px 17px}body.realdate-only .rd-v1-main .modal-layer.standalone .modal-bottom{padding:16px 17px}}
+
+
+/* Genealogy：共用族譜視窗的配色、標題結構和相同的分區線 */
+body.genealogy-only{--shadow:0 12px 44px rgba(0,0,0,.15);--small-shadow:0 8px 22px rgba(0,0,0,.11);color:var(--ink);font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+.genealogy-only .feedback-modal{background:var(--surface);color:var(--ink);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--shadow)}
+.genealogy-only .modal-top{position:relative;background:var(--subtle);border-bottom:1px solid var(--stroke);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px 72px 17px;gap:0;min-height:110px}
+.genealogy-only .modal-top .eyebrow{color:var(--primary);font-size:10px;letter-spacing:1.4px}
+.genealogy-only .modal-top h2{font-size:19px;font-weight:650;letter-spacing:0;margin:4px 0}
+.genealogy-only .modal-top p{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.genealogy-only .modal-head-actions{position:absolute;inset:14px 12px auto 12px;display:flex;align-items:center;justify-content:space-between;gap:5px;pointer-events:none}
+.genealogy-only .modal-head-actions button{pointer-events:auto}
+.genealogy-only .modal-head-actions .icon-btn{height:32px;width:32px;border-radius:8px;color:var(--muted)}
+.genealogy-only .modal-head-actions .icon-btn:hover{background:var(--subtle-2);color:var(--ink)}
+.genealogy-only .modal-head-actions .text-action{font-size:11px;padding:5px 8px;border-radius:6px}
+.genealogy-only .modal-content{padding:20px 25px 25px}
+.genealogy-only .modal-bottom{border-top:1px solid var(--stroke);background:var(--surface);padding:14px 25px}
+.genealogy-only .field,.genealogy-only .l1ng-select-trigger,.genealogy-only .type-choice,.genealogy-only .reply-option{border-radius:8px;background:var(--surface);color:var(--ink);border-color:var(--stroke)}
+.genealogy-only .type-choice.active,.genealogy-only .reply-option:has(input:checked){background:var(--primary-pale);border-color:var(--primary);color:var(--primary)}
+.genealogy-only .primary{background:var(--primary);border-color:var(--primary)}
+.genealogy-only .l1ng-select-item.selected{background:var(--primary-pale)}
+.genealogy-only .verify-card{background:var(--subtle);border-color:var(--stroke)}
+@media(max-width:600px){.genealogy-only .modal-top{min-height:102px;padding:16px 62px}.genealogy-only .modal-content{padding:17px}.genealogy-only .modal-bottom{padding:13px 17px}}
