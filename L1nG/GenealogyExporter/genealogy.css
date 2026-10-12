@@ -4057,14 +4057,9 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-paper {
-    fill:url(#genealogyFeedbackPaperGradient);
+    fill:var(--gf-paper-surface,var(--gf-surface));
     stroke:color-mix(in srgb,var(--gf-text) 10%,var(--gf-surface));
     stroke-width:.8;
-}
-
-.genealogy-feedback-panel .genealogy-feedback-peel-grain {
-    fill:url(#genealogyFeedbackPaperGrain);
-    opacity:.38;
 }
 
 .genealogy-feedback-panel .genealogy-feedback-peel-crease {
