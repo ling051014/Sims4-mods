@@ -132,3 +132,40 @@ body.genealogy-only{background:transparent}
 .realdate-only .feedback-modal .section{width:auto;max-width:none;padding:0}
 .realdate-only .site-header{margin:0;width:100%;max-width:none}
 .realdate-only .site-header .site-header-inner{max-width:var(--page-width)}
+
+/* RealDate 問題反饋：頂條直接沿用 RealDate 的 site-header/realdate.css/realdate.js。
+   修正本頁預覽樣式與原站同名 class 的衝突，不另建立一套導覽。 */
+body.realdate-only #siteHeader{
+  display:block;height:auto;min-height:var(--header-height);
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:15px;line-height:1.82
+}
+body.realdate-only #siteHeader .site-header-inner{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  width:min(calc(100% - 40px),var(--page-width));min-height:var(--header-height);
+  margin:0 auto;gap:28px;align-items:center
+}
+body.realdate-only #siteHeader .main-nav{
+  display:flex;align-items:center;justify-content:center;gap:21px;min-width:0
+}
+body.realdate-only #siteHeader .main-nav>a{font-size:13px}
+body.realdate-only #siteHeader .main-nav>a.active::after{display:block}
+body.realdate-only #siteHeader .header-controls{display:inline-flex;grid-column:3;justify-self:end;align-items:center;gap:10px;white-space:nowrap}
+body.realdate-only #siteHeader .nav-toggle{display:none}
+body.realdate-only #form-layer .section{width:auto;max-width:none;margin:16px 0 0;padding:0}
+body.realdate-only #form-layer .section-heading{margin-bottom:9px}
+@media(max-width:980px){
+  body.realdate-only #siteHeader .site-header-inner{grid-template-columns:minmax(0,1fr) auto;gap:10px;position:relative}
+  body.realdate-only #siteHeader .header-controls{grid-column:2}
+  body.realdate-only #siteHeader .nav-toggle{display:block}
+  body.realdate-only #siteHeader .main-nav{
+    display:none;position:absolute;top:calc(100% + 8px);left:20px;right:20px;
+    flex-direction:column;align-items:stretch;gap:0;min-width:0
+  }
+  body.realdate-only #siteHeader .main-nav.open{display:flex}
+  body.realdate-only #siteHeader .main-nav>a{padding:9px 10px}
+  body.realdate-only #siteHeader .main-nav>a.active::after{display:none}
+}
+@media(max-width:650px){
+  body.realdate-only #siteHeader .site-header-inner{width:min(calc(100% - 28px),var(--page-width));gap:8px}
+}
