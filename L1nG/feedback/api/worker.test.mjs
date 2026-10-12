@@ -40,10 +40,10 @@ test('管理預檢不允許陌生網域',async()=>{
   const res=await call('/v1/admin/feedback',{method:'OPTIONS',headers:{Origin:'https://attacker.example'}});
   assert.equal(res.status,403);
 });
-test('管理端只允許明列來源通過預檢',async()=>{
+test('舊 workers.dev 管理預檢路由一律拒絕',async()=>{
   const res=await call('/v1/admin/feedback',{method:'OPTIONS',headers:{Origin:'https://home.by-l1ng.com'}});
-  assert.equal(res.status,204);
-  assert.equal(res.headers.get('access-control-allow-credentials'),'true');
+  assert.equal(res.status,403);
+  assert.equal(res.headers.get('access-control-allow-origin'),null);
 });
 test('格式錯誤或未驗證的回饋不會寫入資料庫',async()=>{
   const form=new FormData();
