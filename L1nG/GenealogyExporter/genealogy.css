@@ -4098,24 +4098,20 @@ button.avatar-editor-action { cursor:pointer; }
     position:relative;
 }
 
-.genealogy-feedback-panel .genealogy-feedback-select-wrap select {
-    -webkit-appearance:none;
-    appearance:none;
-    padding-right:39px;
-    cursor:pointer;
+.genealogy-feedback-panel .genealogy-feedback-view .ui-single-select {width:100%}
+.genealogy-feedback-panel .genealogy-feedback-view .ui-single-select-trigger {
+    width:100%;
+    min-height:43px;
+    border:1px solid var(--gf-stroke);
+    border-radius:9px;
+    background:var(--surface-input);
+    color:var(--gf-text);
+    font-size:13px;
 }
-
-.genealogy-feedback-select-wrap > .l1ng-icon {
-    position:absolute;
-    right:14px;
-    top:50%;
-    width:16px;
-    height:16px;
-    color:var(--gf-muted);
-    transform:translateY(-50%);
-    pointer-events:none;
+.genealogy-feedback-panel .genealogy-feedback-view .ui-single-select-trigger:focus-visible {
+    border-color:var(--gf-primary);
+    box-shadow:0 0 0 2px var(--gf-primary-pale);
 }
-
 .genealogy-feedback-panel .genealogy-feedback-message {
     min-height:126px;
     resize:vertical;
@@ -4153,61 +4149,25 @@ button.avatar-editor-action { cursor:pointer; }
     font-variant-numeric:tabular-nums;
 }
 
-.genealogy-feedback-panel .genealogy-feedback-upload-zone {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:5px;
-    width:100%;
-    min-height:137px;
-    padding:19px 14px;
-    border:1px dashed var(--gf-stroke);
-    border-radius:12px;
-    background:var(--gf-subtle);
-    color:var(--gf-text);
-    text-align:center;
-    font-family:inherit;
-    cursor:pointer;
-    transition:border-color .17s ease,background .17s ease;
+/* 直接沿用「視覺設定 > 上傳族譜背景」元件，不複製另一份上傳卡設計。 */
+.genealogy-feedback-panel .appearance-background-preview.genealogy-feedback-upload-zone {
+    min-height:150px;
+    background:linear-gradient(180deg,var(--surface-item),var(--surface-panel));
 }
-
-.genealogy-feedback-upload-zone:hover,
-.genealogy-feedback-upload-zone.is-dragover {
-    border-color:var(--gf-primary);
-    background:var(--gf-primary-pale);
+.genealogy-feedback-panel .genealogy-feedback-upload-zone.is-dragover {
+    border-color:var(--action-primary);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--action-primary) 45%,transparent);
 }
-
-.genealogy-feedback-upload-icon {
+.genealogy-feedback-panel .genealogy-feedback-upload-zone .appearance-background-empty {
     display:grid;
-    place-items:center;
-    width:42px;
-    height:42px;
-    margin-bottom:4px;
-    border:1px solid var(--gf-stroke);
-    border-radius:12px;
-    background:var(--gf-surface);
-    color:var(--gf-primary);
+    justify-items:center;
+    gap:7px;
 }
-
-.genealogy-feedback-upload-icon .l1ng-icon {
-    width:22px;
-    height:22px;
+.genealogy-feedback-panel .genealogy-feedback-upload-zone .appearance-background-empty .l1ng-icon {
+    width:36px;
+    height:36px;
+    color:var(--action-primary);
 }
-
-.genealogy-feedback-upload-zone > strong {
-    font-size:13px;
-    font-weight:700;
-    line-height:1.35;
-}
-
-.genealogy-feedback-upload-zone > small {
-    color:var(--gf-muted);
-    font-size:11.5px;
-    font-weight:400;
-    line-height:1.4;
-}
-
 .genealogy-feedback-panel .genealogy-feedback-files {
     display:grid;
     gap:6px;
@@ -4562,6 +4522,95 @@ button.avatar-editor-action { cursor:pointer; }
     line-height:1.6;
 }
 
+/* 回饋錯誤提示與 RealDate 同一資訊層級：提示符號、標題、詳情。 */
+.genealogy-feedback-panel .genealogy-feedback-error {
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    scroll-margin-top:18px;
+}
+.genealogy-feedback-error-symbol {
+    flex:0 0 21px;
+    display:grid;
+    place-items:center;
+    width:21px;
+    height:21px;
+    border-radius:50%;
+    background:#b6515a;
+    color:#fff;
+    font-size:13px;
+    font-weight:800;
+}
+.genealogy-feedback-error-copy strong {
+    display:block;
+    font-size:12px;
+    font-weight:760;
+}
+.genealogy-feedback-error-copy p {
+    margin:3px 0 0;
+    color:var(--gf-muted);
+    font-size:11px;
+    line-height:1.7;
+}
+.genealogy-feedback-action-buttons {
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:9px;
+    flex:0 0 auto;
+}
+.genealogy-feedback-panel .genealogy-feedback-secondary,
+.genealogy-feedback-panel .genealogy-feedback-back-link {
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    gap:7px;
+    padding:10px 14px;
+    min-height:41px;
+    border:1px solid var(--gf-stroke);
+    border-radius:9px;
+    background:var(--gf-surface);
+    color:var(--gf-text);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:650;
+    cursor:pointer;
+}
+.genealogy-feedback-panel .genealogy-feedback-secondary:hover,
+.genealogy-feedback-panel .genealogy-feedback-back-link:hover {
+    background:var(--gf-subtle);
+}
+.genealogy-feedback-panel .genealogy-feedback-back-link {
+    margin:12px 0;
+    color:var(--gf-primary);
+}
+.genealogy-feedback-panel .genealogy-feedback-submit.is-loading {
+    pointer-events:none;
+    cursor:progress;
+}
+.genealogy-feedback-panel .genealogy-feedback-submit.is-loading::before {
+    content:"";
+    width:15px;
+    height:15px;
+    display:inline-block;
+    border:2px solid currentColor;
+    border-right-color:transparent;
+    border-radius:50%;
+    animation:genealogy-feedback-spin .7s linear infinite;
+}
+@keyframes genealogy-feedback-spin {to{transform:rotate(360deg)}}
+@media(max-width:720px) {
+    .genealogy-feedback-action-buttons {width:100%}
+    .genealogy-feedback-panel .genealogy-feedback-secondary,
+    .genealogy-feedback-panel .genealogy-feedback-action-buttons .genealogy-feedback-submit {
+        flex:1 1 0;
+        width:auto;
+        min-width:0;
+    }
+}
+@media(prefers-reduced-motion:reduce) {
+    .genealogy-feedback-panel .genealogy-feedback-submit.is-loading::before {animation-duration:1.5s}
+}
 .genealogy-feedback-history-form {
     display:grid;
     gap:10px;
