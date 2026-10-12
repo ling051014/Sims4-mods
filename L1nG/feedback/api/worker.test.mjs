@@ -115,3 +115,12 @@ test('驗證核發網域和提交網站不一致時拒絕',async()=>{
     assert.equal(response.status,403);
   }finally{globalThis.fetch=original;}
 });
+
+test('不得從 RealDate 網域冒充 Genealogy 來源',async()=>{
+  const data=new FormData();
+  data.set('source','Genealogy');data.set('category','bug');
+  data.set('target','web');data.set('followUp','once');
+  data.set('message','這是一則有效的測試用回饋訊息');
+  const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data});
+  assert.equal(response.status,403);
+});
