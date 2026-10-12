@@ -1,0 +1,6 @@
+
+/* 問題反饋小視窗，與畫布狀態及既有視覺設定獨立 */
+#genealogyFeedbackDialog{width:min(690px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);height:min(840px,calc(100dvh - 24px));margin:auto;padding:0;border:0;border-radius:17px;overflow:hidden;background:transparent;box-shadow:0 22px 75px rgba(0,0,0,.18)}
+#genealogyFeedbackDialog::backdrop{background:rgba(20,24,34,.48);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#genealogyFeedbackDialog iframe{width:100%;height:100%;display:block;border:0;background:transparent}
+@media(max-width:600px){#genealogyFeedbackDialog{width:100vw;height:100dvh;max-height:none;border-radius:0}}
