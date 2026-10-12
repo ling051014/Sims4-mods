@@ -64,19 +64,52 @@
 .l1ng-site-info-close svg { width: 17px; height: 17px; }
 .l1ng-site-info-content { position: relative; flex: 1 1 auto; min-height: 0; }
 .l1ng-site-info-frame { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.l1ng-site-info-content.is-loading .l1ng-site-info-frame { visibility: hidden; }
 .l1ng-site-info-loading {
     position: absolute;
     inset: 0;
     z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
+    overflow: hidden;
+    padding: 27px 23px;
     background: #fff;
-    color: #82929e;
-    font-size: 12px;
+    pointer-events: none;
 }
 .l1ng-site-info-loading[hidden] { display: none; }
+.l1ng-site-info-skeleton {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    max-width: 670px;
+}
+.l1ng-site-info-skeleton-line {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 11px;
+    border-radius: 4px;
+    background: #ecf0f3;
+}
+.l1ng-site-info-skeleton-line::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.72) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: l1ng-site-info-skeleton-shimmer 1.7s ease-in-out infinite;
+}
+.l1ng-site-info-skeleton .skeleton-heading {
+    width: 34%;
+    height: 16px;
+    margin: 0 0 8px;
+    background: #e4eaf0;
+}
+.l1ng-site-info-skeleton .skeleton-heading:not(:first-child) { margin-top: 18px; }
+.l1ng-site-info-skeleton .skeleton-text-medium { width: 76%; }
+.l1ng-site-info-skeleton .skeleton-text-short { width: 53%; }
+@keyframes l1ng-site-info-skeleton-shimmer {
+    to { transform: translateX(100%); }
+}
 @media (max-width: 640px) {
     .l1ng-site-info-backdrop { padding: 10px; }
     .l1ng-site-info-panel {
@@ -85,7 +118,9 @@
     }
     .l1ng-site-info-header { padding: 15px 16px; gap: 9px; }
     .l1ng-site-info-heading h2 { font-size: 16px; }
+    .l1ng-site-info-loading { padding: 22px 17px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .l1ng-site-info-panel { animation: none; }
+    .l1ng-site-info-skeleton-line::after { animation: none; }
 }

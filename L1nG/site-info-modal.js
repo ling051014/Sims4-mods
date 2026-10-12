@@ -61,8 +61,20 @@
                              stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"></path></svg>
                     </button>
                 </header>
-                <div class="l1ng-site-info-content">
-                    <p class="l1ng-site-info-loading" role="status">正在載入說明…</p>
+                <div class="l1ng-site-info-content is-loading" aria-busy="true">
+                    <div class="l1ng-site-info-loading" aria-hidden="true">
+                        <div class="l1ng-site-info-skeleton">
+                            <span class="l1ng-site-info-skeleton-line skeleton-heading"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-text"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-text"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-text-short"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-heading"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-text"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-text-medium"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-text"></span>
+                            <span class="l1ng-site-info-skeleton-line skeleton-text-short"></span>
+                        </div>
+                    </div>
                     <iframe class="l1ng-site-info-frame" title="網站說明內容"></iframe>
                 </div>
             </section>`;
@@ -73,6 +85,9 @@
         layer.querySelector(".l1ng-site-info-frame").addEventListener("load", () => {
             if (dialog !== layer) return;
             layer.querySelector(".l1ng-site-info-loading").hidden = true;
+            const content = layer.querySelector(".l1ng-site-info-content");
+            content.classList.remove("is-loading");
+            content.setAttribute("aria-busy", "false");
         });
         dialog = layer;
         return layer;
@@ -98,6 +113,9 @@
         url.searchParams.set("v", "20261012-site-info-visibility-r2");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         if (frame.src !== url.href) {
+            const content = modal.querySelector(".l1ng-site-info-content");
+            content.classList.add("is-loading");
+            content.setAttribute("aria-busy", "true");
             modal.querySelector(".l1ng-site-info-loading").hidden = false;
             frame.src = url.href;
         }
