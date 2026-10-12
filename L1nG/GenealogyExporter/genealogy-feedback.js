@@ -175,14 +175,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 膠帶拉開後，讓最後一小塊紙帶著慣性離開，而非突然消失。
     // 紙背在上緣撕開後飛出整個對話框；不再被原本的圓角和視窗邊界裁掉。
     const flight = smoothstep(Math.max(0, (progress - .79) / .21));
-    const fade = smoothstep(Math.max(0, (progress - .93) / .07));
+    // 撕下的紙從開始到完全飛離都必須不透明，不再以淡出冒充紙張離場。
+    visual.svg.style.opacity = '1';
     visual.svg.style.transformOrigin = '0 0';
     visual.svg.style.transform = flight
       ? 'translate3d(' + (-width * .29 * flight).toFixed(2) + 'px,'
         + (-height * .38 * flight).toFixed(2) + 'px,0) rotate('
         + (-13 * flight).toFixed(2) + 'deg)'
       : '';
-    visual.svg.style.opacity = String(1 - fade);
   }
 
   // 將「紙張本體」暫時複製到視窗外的最上層：翻折與飛離不受原彈窗 overflow 裁切。
@@ -194,11 +194,21 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.inert = true;
     // 取真正的問題反饋視窗背景，不使用畫布色或額外產生的紙張漸層。
     // 這也能完整跟隨淺色、深色與自訂主題。
-    const windowSurface = getComputedStyle(panel).backgroundColor;
-    if (windowSurface && windowSurface !== 'transparent' && windowSurface !== 'rgba(0, 0, 0, 0)') {
-      overlay.style.setProperty('--gf-surface', windowSurface);
-      overlay.style.setProperty('--gf-paper-surface', windowSurface);
-    }
+    const isOpaque = value => {
+      if (!value || value === 'transparent') return false;
+      const rgb = value.match(/^rgba?\(([^)]+)\)$/i);
+      if (!rgb) return true;
+      const parts = rgb[1].split(/[\s,/]+/).filter(Boolean);
+      return parts.length < 4 || Number(parts[3]) >= 1;
+    };
+    // 使用已經渲染的視窗背景，且只接受不透明顏色；透明主題值則回退到卡片底色。
+    const windowSurface = [
+      getComputedStyle(panel).backgroundColor,
+      getComputedStyle(pages).backgroundColor,
+      getComputedStyle(document.body).getPropertyValue('--surface-card').trim()
+    ].find(isOpaque) || '#ffffff';
+    overlay.style.setProperty('--gf-surface', windowSurface);
+    overlay.style.setProperty('--gf-paper-surface', windowSurface);
 
     const stage = document.createElement('div');
     stage.className = 'genealogy-feedback-pages genealogy-feedback-tear-stage is-tearing';
@@ -240,6 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const visual = makePeelVisual();
     visual.svg.setAttribute('viewBox', '0 0 ' + rect.width + ' ' + rect.height);
+    // iOS Safari 對 SVG 中的 CSS 變數填色可能不穩定；直接指定有效的純色。
+    visual.back.setAttribute('fill', windowSurface);
+    visual.back.style.fill = windowSurface;
+    visual.back.style.fillOpacity = '1';
+    visual.back.style.opacity = '1';
     stage.appendChild(visual.svg);
     return { overlay, sheet, visual };
   }
