@@ -276,7 +276,7 @@ export default {
     // 管理請求僅從首頁同網域的專用 Worker Route 進入，不接受 workers.dev 直連。
     // Cloudflare Access 必須保護 home.by-l1ng.com/feedback/admin-api/*。
     if(url.hostname==="home.by-l1ng.com" && path.startsWith(adminPrefix+"/")){
-      const adminPath=path.slice(adminPrefix.length);
+      const adminPath="/v1/admin"+path.slice(adminPrefix.length);
       return admin(request,env,adminPath);
     }
     if(path.startsWith("/v1/admin/")){
