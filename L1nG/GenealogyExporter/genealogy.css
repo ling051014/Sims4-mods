@@ -4352,6 +4352,9 @@ button.avatar-editor-action { cursor:pointer; }
     gap:8px;
     margin-top:16px;
 }
+.genealogy-feedback-conditional[hidden] {
+    display:none;
+}
 
 .genealogy-feedback-field-note {
     display:flex;

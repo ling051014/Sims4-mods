@@ -126,6 +126,22 @@ if ("IntersectionObserver" in window) {
     revealItems.forEach((item) => item.classList.add("visible"));
 }
 
+// ========【星座相容性連結】 從完整玩法進入時展開並定位對應說明 ========
+(() => {
+    const zodiac = document.getElementById("zodiac-compatibility");
+    if (!zodiac) return;
+
+    function revealZodiac() {
+        if (window.location.hash !== "#zodiac-compatibility") return;
+        zodiac.open = true;
+        window.requestAnimationFrame(() => zodiac.scrollIntoView({ block: "start" }));
+    }
+
+    window.addEventListener("hashchange", revealZodiac);
+    window.addEventListener("load", revealZodiac, { once: true });
+    revealZodiac();
+})();
+
 // ========【章節快速導覽】 追蹤所在章節、切換與返回頁首 ========
 (() => {
     "use strict";

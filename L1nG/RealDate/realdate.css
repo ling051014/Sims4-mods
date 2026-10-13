@@ -851,7 +851,8 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 .doc-section[id],
-.section[id] {
+.section[id],
+.compat-detail[id] {
     scroll-margin-top: calc(var(--header-height) + 20px);
 }
 
@@ -939,6 +940,20 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 文字顏色 */ color: var(--text-muted);
     /* 字體大小 */ font-size: 13px;
 }
+
+.doc-note-link {
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin-top:11px;
+    color:var(--accent);
+    font-size:13px;
+    font-weight:650;
+    text-decoration:none;
+}
+.doc-note-link:hover { text-decoration:underline; text-underline-offset:3px; }
+.doc-note-link:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.doc-note-link svg { width:16px; height:16px; flex:0 0 16px; }
 
 .doc-note-warning {
     /* 背景 */ background: rgba(155, 109, 66, .05);
