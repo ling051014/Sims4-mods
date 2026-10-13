@@ -1852,7 +1852,9 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 .rd-direction .rd-vision-disclaimer {margin-top:32px;color:var(--text-soft);font-size:12px;}
 
 @media (max-width:980px) {
-    .rd-hero-track .hero-inner {grid-template-columns:1fr;min-height:auto;padding:74px 0;gap:44px;}
+    /* Keep horizontal swiping inside its intended paper strip, not the entire page. */
+    .rd-hero-track, .rd-direction { overflow-x:clip; }
+    .rd-hero-track .hero-inner {grid-template-columns:minmax(0,1fr);min-height:auto;padding:74px 0;gap:44px;}
     .rd-hero-track .rd-timeline-visual {min-height:400px;height:400px;max-width:500px;width:100%;margin:0 auto;}
 }
 @media (max-width:650px) {
@@ -1870,11 +1872,12 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     .rd-direction .rd-focus-section {padding:70px 0;}
     .rd-direction .rd-focus-inner {width:calc(100% - 30px);grid-template-columns:1fr;gap:22px;}
     .rd-direction .rd-vision-line {
-        margin-top:26px;padding:18px 0 16px;overflow-x:auto;overflow-y:hidden;
+        width:100%;max-width:100%;min-width:0;
+        margin-top:26px;padding:18px 0 48px;overflow-x:auto;overflow-y:hidden;
         scroll-snap-type:x proximity;overscroll-behavior-inline:contain;
         -webkit-overflow-scrolling:touch;
     }
-    .rd-direction .rd-vision-stages {grid-template-columns:repeat(4,174px);gap:22px;width:max-content;padding-inline:6px 20px;}
+    .rd-direction .rd-vision-stages {grid-template-columns:repeat(4,174px);gap:22px;width:max-content;padding-inline:28px 30px;}
     .rd-direction .rd-vision-stage {scroll-snap-align:start;}
     .rd-direction .rd-vision-sheet {width:168px;}
     .rd-direction .rd-vision-note {min-height:125px;}

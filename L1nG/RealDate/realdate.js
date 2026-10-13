@@ -313,7 +313,7 @@ if ("IntersectionObserver" in window) {
     const line = document.querySelector(".rd-direction .rd-vision-line");
     if (!sheets.length || !line) return;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let prevY = window.scrollY, swing = 0, target = 0, frame = 0;
+    let prevY = window.scrollY, prevX = line.scrollLeft, swing = 0, target = 0, frame = 0;
     function render() {
         sheets.forEach(stage => {
             const sheet = stage.querySelector(".rd-vision-sheet");
@@ -330,14 +330,30 @@ if ("IntersectionObserver" in window) {
         if (Math.abs(swing) > .02 || Math.abs(target) > .02) frame = requestAnimationFrame(step);
         else { swing=0;target=0;frame=0;render(); }
     }
-    window.addEventListener("scroll",() => {
-        const delta = window.scrollY - prevY; prevY = window.scrollY;
-        if (reduceMotion.matches) return;
-        const box = line.getBoundingClientRect();
-        if (box.bottom < 0 || box.top > window.innerHeight) return;
+    function nudge(delta) {
+        if (reduceMotion.matches || !delta) return;
         target = Math.max(-3,Math.min(3,target + delta * .026));
         if (!frame) frame = requestAnimationFrame(step);
+    }
+    window.addEventListener("scroll",() => {
+        const delta = window.scrollY - prevY; prevY = window.scrollY;
+        const box = line.getBoundingClientRect();
+        if (box.bottom < 0 || box.top > window.innerHeight) return;
+        nudge(delta);
     },{passive:true});
-    reduceMotion.addEventListener?.("change",render);
+    // The mobile swipe strip scrolls independently of window.scrollY.
+    // Reuse the same spring motion so swipes and vertical scrolling agree.
+    line.addEventListener("scroll",() => {
+        const delta = line.scrollLeft - prevX; prevX = line.scrollLeft;
+        nudge(delta);
+    },{passive:true});
+    reduceMotion.addEventListener?.("change",() => {
+        if (reduceMotion.matches) {
+            target=0; swing=0;
+            if (frame) cancelAnimationFrame(frame);
+            frame=0;
+        }
+        render();
+    });
     render();
 })();
