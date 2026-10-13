@@ -95,7 +95,11 @@
   function updateVerificationStatus(state,message){
     verificationState=state;
     // 換新文字節點，讓現有繁中／英文切換能正確翻譯動態驗證狀態。
-    verificationStatus?.replaceChildren(document.createTextNode(message));
+    if(verificationStatus){
+      verificationStatus.replaceChildren(document.createTextNode(message));
+      // Cloudflare 自帶驗證進度與成功狀態，只在異常或預覽限制時顯示說明。
+      verificationStatus.hidden=!['error','expired','preview'].includes(state);
+    }
     if(verificationRetry)verificationRetry.hidden=state!=='error';
   }
   async function ensureVerification(){

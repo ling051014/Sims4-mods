@@ -1695,17 +1695,19 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     .main-nav {
         /* 定位方式 */ position: absolute;
         /* 頂部位置 */ top: calc(100% + 8px);
-        /* 左側位置 */ left: 20px;
-        /* 右側位置 */ right: 20px;
-        /* 內縮空間 */ padding: 8px;
+        /* 右側浮動選單與 L1nG 首頁一致 */ left: auto;
+        right: 0;
+        width: min(248px, calc(100vw - 32px));
+        min-width: 0;
+        /* 內縮空間 */ padding: 10px;
         /* 顯示方式 */ display: none;
         /* 排列方向 */ flex-direction: column;
         /* 垂直對齊 */ align-items: stretch;
-        /* 項目間距 */ gap: 0;
+        /* 項目間距 */ gap: 4px;
         /* 背景 */ background: var(--surface);
         /* 邊框 */ border: 1px solid var(--line);
-        /* 圓角弧度 */ border-radius: 8px;
-        /* 陰影效果 */ box-shadow: 0 15px 40px rgba(0, 0, 0, .08);
+        /* 圓角弧度 */ border-radius: 12px;
+        /* 陰影效果 */ box-shadow: 0 14px 36px rgba(42, 56, 66, .10);
     }
 
     .main-nav.open {
@@ -1714,6 +1716,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
     .main-nav > a {
         /* 內縮空間 */ padding: 9px 10px;
+        border-radius: 8px;
     }
 
     .main-nav > .nav-placeholder {

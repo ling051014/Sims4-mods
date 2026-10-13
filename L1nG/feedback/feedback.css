@@ -45,7 +45,7 @@
 .submit-error-symbol{flex:0 0 21px;width:21px;height:21px;display:grid;place-items:center;border-radius:50%;background:var(--red);color:#fff;font-size:13px;font-weight:800}
 .submit-error-summary strong{font-size:12px;font-weight:760}.submit-error-summary p{font-size:11px;line-height:1.7;color:var(--muted);margin-top:3px}
 #manual-version-wrap{margin-top:12px}#manual-version-wrap .field-label{display:block;margin:0 0 7px}
-.version-guide{border:0;margin:11px 0 0}.version-guide summary{list-style:none;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--primary);cursor:pointer;line-height:1.5}.version-guide summary::-webkit-details-marker{display:none}.guide-info{width:18px;height:18px;border:1px solid var(--primary-line);border-radius:50%;display:grid;place-items:center;font-weight:750;font-size:11px}.guide-chevron{margin-left:auto;transition:transform .2s}.version-guide[open] .guide-chevron{transform:rotate(180deg)}.version-guide-body{border:1px solid var(--stroke);border-radius:12px;background:var(--bg);padding:13px 15px;margin-top:11px;color:var(--muted);font-size:11px;line-height:1.8}.version-guide-body p+p{margin-top:9px}.version-guide-body b{color:var(--ink)}.version-guide-body code{font-size:10px;overflow-wrap:anywhere}.version-guide-body a{display:inline-flex;color:var(--primary);font-weight:760;margin-top:11px;text-underline-offset:3px}
+.version-guide{border:0;margin:11px 0 0}.version-guide summary{list-style:none;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--primary);cursor:pointer;line-height:1.5}.version-guide summary::-webkit-details-marker{display:none}.guide-info{width:18px;height:18px;border:1px solid var(--primary-line);border-radius:50%;display:grid;place-items:center;font-weight:750;font-size:11px}.guide-chevron{margin-left:auto;width:16px;height:16px;flex:0 0 16px;transition:transform .2s;stroke:currentColor;stroke-width:1.8;fill:none}.version-guide[open] .guide-chevron{transform:rotate(180deg)}.version-guide-body{border:1px solid var(--stroke);border-radius:12px;background:var(--bg);padding:13px 15px;margin-top:11px;color:var(--muted);font-size:11px;line-height:1.8}.version-guide-body p+p{margin-top:9px}.version-guide-body b{color:var(--ink)}.version-guide-body code{font-size:10px;overflow-wrap:anywhere}.version-guide-body a{display:inline-flex;align-items:center;gap:5px;color:var(--primary);font-weight:760;margin-top:11px;text-underline-offset:3px}.version-guide-body a .i{width:14px;height:14px;flex:0 0 14px}
 /* RealDate V1: full independent page, intro + form in two columns */
 .realdate-preview{background:var(--bg);padding-bottom:20px}
 .rd-v1-hero{max-width:1090px;min-height:210px;border-radius:19px;margin:16px auto 0;padding:40px 43px;background:linear-gradient(115deg,#29262e 18%,#35303b 60%,#594558 100%);color:#fff;position:relative;overflow:hidden;display:flex;align-items:center}
@@ -169,11 +169,12 @@ body.realdate-only #realdate-turnstile-retry[hidden]{display:none}
   body.realdate-only #siteHeader .header-controls{grid-column:2}
   body.realdate-only #siteHeader .nav-toggle{display:block}
   body.realdate-only #siteHeader .main-nav{
-    display:none;position:absolute;top:calc(100% + 8px);left:20px;right:20px;
-    flex-direction:column;align-items:stretch;gap:0;min-width:0
+    display:none;position:absolute;top:calc(100% + 8px);left:auto;right:0;
+    width:min(248px,calc(100vw - 32px));min-width:0;
+    padding:10px;flex-direction:column;align-items:stretch;gap:4px;border-radius:12px
   }
   body.realdate-only #siteHeader .main-nav.open{display:flex}
-  body.realdate-only #siteHeader .main-nav>a{padding:9px 10px}
+  body.realdate-only #siteHeader .main-nav>a{padding:9px 10px;border-radius:8px}
   body.realdate-only #siteHeader .main-nav>a.active::after{display:none}
 }
 @media(max-width:650px){
@@ -254,7 +255,15 @@ body.realdate-only .rd-v1-aside h2{font-weight:350;letter-spacing:-.025em}
   .credential-copy .l1ng-copy-running .l1ng-check-stroke{stroke-dashoffset:0}
 }
 .privacy-tip{line-height:1.55}
-@media(max-width:600px){.privacy-tip{font-size:10px;max-width:64%}}
+@media(max-width:600px){
+  .privacy-tip{font-size:10px;max-width:64%}
+  /* RealDate 手機送出：違規說明與按鈕維持同一排，錯誤訊息另起一排。 */
+  body.realdate-only #form-layer .modal-bottom{display:grid;grid-template-columns:minmax(0,1fr) 92px;align-items:center;gap:8px 12px}
+  body.realdate-only #form-layer .modal-bottom .privacy-tip{grid-column:1;grid-row:1;min-width:0;max-width:none;align-items:flex-start}
+  body.realdate-only #form-layer .modal-bottom .privacy-tip .i{flex:0 0 16px;margin-top:2px}
+  body.realdate-only #form-layer .modal-bottom .submit{grid-column:2;grid-row:1;min-width:0;width:92px;min-height:42px;padding:9px 11px;white-space:nowrap}
+  body.realdate-only #form-layer .modal-bottom #submit-inline-error.visible{grid-column:1/-1;grid-row:2;margin:0}
+}
 .primary.submit.is-loading,.thread-compose .primary.is-loading{cursor:progress;pointer-events:none}
 .primary.submit.is-loading::before,.thread-compose .primary.is-loading::before{content:"";display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:l1ng-feedback-spin .7s linear infinite;margin-right:8px}
 @keyframes l1ng-feedback-spin{to{transform:rotate(360deg)}}
