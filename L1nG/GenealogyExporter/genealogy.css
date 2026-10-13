@@ -3819,6 +3819,9 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 
+.genealogy-feedback-panel .genealogy-feedback-history-form[hidden],
+.genealogy-feedback-panel .genealogy-feedback-reply-form[hidden],
+.genealogy-feedback-panel .genealogy-feedback-section-heading[hidden]{display:none}
 /* 族譜回饋：沿用既有主題色，附件及訊息不增加多餘外框。 */
 .genealogy-feedback-panel .genealogy-feedback-field-error{color:#b6515a;font-size:11px;line-height:1.6;margin:7px 0 0}
 .genealogy-feedback-panel .genealogy-feedback-field-error[hidden]{display:none}
