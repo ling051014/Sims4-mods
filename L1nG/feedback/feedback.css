@@ -312,10 +312,10 @@ body.realdate-only .upload-zone.appearance-background-upload small {
 .realdate-only .feedback-paperclip{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--muted)}
 .realdate-only .feedback-attachment-row .secondary{
  margin-left:auto;padding:3px 7px;min-height:26px;font-size:11px;
- border:0;border-radius:6px;background:transparent;color:var(--red);font-weight:650
+ border:1px solid var(--red);border-radius:6px;background:transparent;color:var(--red);font-weight:650
 }
 .realdate-only .feedback-attachment-row .secondary:hover{
- border:0;background:color-mix(in srgb,var(--red) 9%,transparent);color:var(--red)
+ border-color:var(--red);background:color-mix(in srgb,var(--red) 9%,transparent);color:var(--red)
 }
 .realdate-only .credential-inline-button{appearance:none;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:11px 12px;border:1px solid var(--stroke);border-radius:9px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;font:inherit}
 .realdate-only .credential-inline-button:hover{border-color:var(--primary)}
