@@ -62,13 +62,10 @@
     const isBug=category==='bug';
     if($('bug-context'))$('bug-context').hidden=!isBug;
     if($('module-version-section'))$('module-version-section').hidden=!(isBug && targetSelect?.value==='mod');
-    if($('game-version-section'))$('game-version-section').hidden=!isBug;
     const needsGameVersion=isBug && targetSelect?.value==='mod';
+    if($('game-version-section'))$('game-version-section').hidden=!needsGameVersion;
     const gameVersionField=$('game-version');
     if(gameVersionField)gameVersionField.required=needsGameVersion;
-    if($('game-version-required'))$('game-version-required').hidden=!needsGameVersion;
-    if($('game-version-optional'))$('game-version-optional').hidden=needsGameVersion;
-    if($('game-version-help'))$('game-version-help').hidden=!needsGameVersion;
     if(!needsGameVersion){
       gameVersionField?.classList.remove('feedback-invalid');
       if($('game-version-error'))$('game-version-error').classList.remove('visible');
@@ -168,7 +165,8 @@
     if(category==='bug'&&targetSelect?.value==='mod'&&(!version?.value||(version.value==='other'&&!$('manual-version').value.trim()))){
       setError('請選擇模組版本，或選擇「不確定」。');return;
     }
-    const gameVersion=$('game-version')?.value.trim()||'';
+    const gameVersion=category==='bug'&&targetSelect?.value==='mod'
+      ? ($('game-version')?.value.trim()||'') : '';
     if(category==='bug'&&targetSelect?.value==='mod'&&!gameVersion){
       setError('請填寫遊戲版本，可查看 RealDate 日誌確認。','gameVersion');return;
     }

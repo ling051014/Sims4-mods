@@ -150,7 +150,7 @@ if ("IntersectionObserver" in window) {
     const summary = quickNav.querySelector("summary");
     const links = Array.from(quickNav.querySelectorAll(".doc-quick-links a"));
     const sections = links.map((link) => document.getElementById(link.hash.slice(1)));
-    const position = quickNav.querySelector("[data-doc-position]");
+    const currentLabels = Array.from(quickNav.querySelectorAll("[data-doc-current-language]"));
     const topButton = quickNav.querySelector("[data-doc-to-top]");
     let frameScheduled = false;
 
@@ -169,10 +169,14 @@ if ("IntersectionObserver" in window) {
             if (index === current) link.setAttribute("aria-current", "location");
             else link.removeAttribute("aria-current");
         });
-        if (position) {
-            position.textContent = String(current + 1).padStart(2, "0") + " / " +
-                String(links.length).padStart(2, "0");
-        }
+        // 浮動入口直接顯示目前章節名稱，而非通用標題或頁碼。
+        const activeLink = links[current];
+        currentLabels.forEach((label) => {
+            const language = label.dataset.docCurrentLanguage;
+            const translated = activeLink?.querySelector('[data-lang="' + language + '"]');
+            label.textContent = translated?.textContent.trim() ||
+                activeLink?.textContent.trim() || "";
+        });
     }
 
     function scheduleUpdate() {

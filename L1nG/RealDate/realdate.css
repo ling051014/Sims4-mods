@@ -713,33 +713,24 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     outline-offset: 3px;
 }
 
-.doc-quick-symbol {
-    display: grid;
-    gap: 3px;
-    width: 14px;
+.doc-quick-icon {
+    width:18px;
+    height:18px;
+    flex:0 0 18px;
 }
-
-.doc-quick-symbol::before,
-.doc-quick-symbol::after {
-    content: "";
-    display: block;
-    height: 1px;
-    background: currentColor;
-    box-shadow: 0 4px currentColor;
+.doc-quick-current {
+    min-width:0;
+    line-height:1.35;
 }
-
-.doc-quick-symbol::after {
-    box-shadow: none;
+.doc-quick-chevron {
+    width:15px;
+    height:15px;
+    flex:0 0 15px;
+    margin-left:4px;
+    color:var(--text-muted);
+    transition:transform .2s ease;
 }
-
-.doc-quick-position {
-    padding-left: 9px;
-    border-left: 1px solid var(--line);
-    color: var(--text-muted);
-    font-size: 11px;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-}
+.doc-quick-nav[open] > summary .doc-quick-chevron { transform:rotate(180deg); }
 
 .doc-quick-panel {
     position: absolute;
@@ -848,6 +839,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 @media (prefers-reduced-motion: reduce) {
     .doc-quick-nav > summary,
+    .doc-quick-chevron,
     .doc-quick-links a,
     .doc-quick-top {
         transition: none;
@@ -1388,13 +1380,23 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 .compat-detail > summary {
     display: grid;
-    grid-template-columns: 8px minmax(0, 1fr) minmax(130px, auto);
+    grid-template-columns: 18px minmax(0, 1fr) minmax(130px, auto);
     gap: 14px;
     align-items: center;
     padding: 20px 22px;
     cursor: pointer;
     list-style: none;
 }
+.compat-detail > summary > .compat-chevron {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    width: 16px;
+    height: 16px;
+    margin-top: 4px;
+    transition: transform .2s ease;
+}
+.compat-detail[open] > summary > .compat-chevron { transform: rotate(90deg); }
 
 .compat-detail > summary::-webkit-details-marker {
     display: none;
@@ -1519,7 +1521,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 @media (max-width: 650px) {
     .compat-detail > summary {
-        grid-template-columns: 8px minmax(0, 1fr);
+        grid-template-columns: 18px minmax(0, 1fr);
         gap: 6px 12px;
         align-items: start;
         padding: 18px;
@@ -1943,12 +1945,8 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 
-/* ========【相容性展開箭頭】 ======== */
-.compat-detail > summary {list-style:none}
-.compat-detail > summary::-webkit-details-marker {display:none}
-.compat-detail > summary::before {content:"";display:block;grid-column:1;grid-row:1;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid var(--text-strong);transition:transform .2s ease}
-.compat-detail[open] > summary::before {transform:rotate(90deg)}
-@media(prefers-reduced-motion:reduce){.compat-detail > summary::before{transition:none}}
+/* ========【相容性展開箭頭】 統一內嵌 SVG 的對齊與狀態 ======== */
+@media(prefers-reduced-motion:reduce){.compat-detail > summary > .compat-chevron{transition:none}}
 
 /* ========【共用捲軸】 A 款細線 - 所有可捲動容器 ======== */
 html,body,body *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
