@@ -15,8 +15,15 @@
   const displayFiles=(list,node)=>{
     node.replaceChildren();
     list.forEach((file,i)=>{
-      const row=document.createElement('div');row.className='file-entry';
-      const span=document.createElement('span');span.textContent=describeFile(file);
+      const row=document.createElement('div');row.className='file-entry feedback-attachment-row';
+      const span=document.createElement('span');span.className='feedback-attachment-name';
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.classList.add('feedback-paperclip');
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3');svg.append(path);
+      const label=document.createElement('span');label.textContent=file.name;
+      const size=document.createElement('small');size.textContent=Math.max(1,Math.round(file.size/1024))+' KB';
+      span.append(svg,label,size);
       const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='移除';
       button.addEventListener('click',()=>{list.splice(i,1);displayFiles(list,node);});
       row.append(span,button);node.append(row);
@@ -194,9 +201,11 @@
   function formatMessageTime(value){
     const parsed=new Date(value||'');
     if(!Number.isFinite(parsed.getTime()))return '';
+    const minutes=-parsed.getTimezoneOffset();
+    const offset='UTC'+(minutes<0?'−':'+')+Math.floor(Math.abs(minutes)/60)+(Math.abs(minutes)%60?':'+String(Math.abs(minutes)%60).padStart(2,'0'):'');
     return new Intl.DateTimeFormat('zh-TW',{
       year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false
-    }).format(parsed);
+    }).format(parsed)+'（'+offset+'）';
   }
   function appendMessage(stack,author,body,time){
     const player=author!=='admin';
@@ -235,9 +244,14 @@
       files.hidden=!attachments.length;
       for(const a of attachments){
         const row=document.createElement('div');
-        row.className='conversation-attachment';
-        row.textContent=a.name||'附件';
-        files.append(row);
+        row.className='conversation-attachment feedback-attachment-row';
+        const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');
+        icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');icon.classList.add('feedback-paperclip');
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d','m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3');icon.append(path);
+        const name=document.createElement('span');name.textContent=a.name||'附件';
+        const size=document.createElement('small');size.textContent=Math.max(1,Math.round((a.size||0)/1024))+' KB';
+        row.append(icon,name,size);files.append(row);
       }
     }
     body.scrollTop=nearEnd?body.scrollHeight:oldPosition;
@@ -360,7 +374,8 @@
   $('thread-back-form')?.addEventListener('click',newFeedback);
   $('visitor-reply-files')?.addEventListener('change',e=>{
     addFiles(replyFiles,e.target.files,null);e.target.value='';
-    $('visitor-reply-file-info').textContent=replyFiles.length?replyFiles.map(f=>f.name).join('、'):'最多 3 個檔案・合計 20 MB';
+    $('visitor-reply-file-info').textContent='最多 3 個檔案・合計 20 MB';
+    displayFiles(replyFiles,$('visitor-reply-selected'));
   });
   $('visitor-reply-form')?.addEventListener('submit',async e=>{
     e.preventDefault();
@@ -368,7 +383,7 @@
     if(!message||!activeReceipt){$('visitor-reply-error').textContent='請先輸入回覆內容。';$('visitor-reply-error').hidden=false;return;}
     const token=replyVerifier?.getToken();
     if(!token){$('visitor-reply-error').textContent='請先完成下方的人機驗證。';$('visitor-reply-error').hidden=false;return;}
-    try{await core.reply(activeReceipt,message,replyFiles,token);replyFiles=[];$('visitor-reply').value='';replyVerifier?.reset();await openThread(activeReceipt);}
+    try{await core.reply(activeReceipt,message,replyFiles,token);replyFiles=[];displayFiles(replyFiles,$('visitor-reply-selected'));$('visitor-reply').value='';replyVerifier?.reset();await openThread(activeReceipt);}
     catch(err){$('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;replyVerifier?.reset();}
   });
   // 示範管理入口與假資料不得在正式網站對外開啟。
