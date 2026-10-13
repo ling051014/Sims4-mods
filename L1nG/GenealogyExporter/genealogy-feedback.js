@@ -594,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
     historyForm.hidden=false;
   }
   $('genealogyFeedbackSuccessOpen').addEventListener('click',()=>openThread(lastReceipt));
-  $('genealogyFeedbackSuccessNew').addEventListener('click',()=>{showHistory();clearReceipt();setTab(0);});
+  $('genealogyFeedbackSuccessNew').addEventListener('click',()=>{showHistory();clearReceipt();lastReceipt='';receiptInput.value='';setTab(0);});
   $('genealogyFeedbackThreadRefresh').addEventListener('click',()=>updateThread(true));
   $('genealogyFeedbackCopyCredential').addEventListener('click',async()=>{
     if(!lastReceipt)return;
@@ -672,7 +672,8 @@ document.addEventListener('DOMContentLoaded', () => {
   tabs[1].tab.addEventListener('click',showHistory);
   openButton.addEventListener('click',()=>{
     openFeedback();
-    if(saved && !lastReceipt) openThread(saved);
+    const pending=storedReceipt();
+    if(pending)openThread(pending);
   });
   closeButton.addEventListener('click', closeFeedback);
   backdrop.addEventListener('pointerdown', event => {
