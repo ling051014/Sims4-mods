@@ -1804,8 +1804,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 .rd-direction .rd-roadmap-current {border-color:var(--accent-border);background:linear-gradient(135deg,#fff,#f8fcff);}
 .rd-direction .rd-roadmap-content h3 {margin:12px 0 3px;color:var(--text-strong);font-size:28px;font-weight:300;}
 .rd-direction .rd-roadmap-content p {font-size:12px;color:var(--text-muted);line-height:1.85;}
-.rd-direction .rd-roadmap-content small {color:var(--text-soft);font-size:11px;}
-.rd-direction .rd-roadmap-content .rd-release-changelog-link {display:block;text-align:right;}
+.rd-direction .rd-roadmap-content small {display:block;text-align:right;color:var(--text-soft);font-size:11px;}
 .rd-direction .rd-roadmap-content .rd-release-changelog-link .text-link {font-size:inherit;}
 .rd-direction .rd-focus-section {width:100%;padding:92px 0;background:var(--page-bg);border-top:1px solid var(--line);}
 .rd-direction .rd-focus-inner {
