@@ -937,11 +937,26 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 字體大小 */ font-size: 13px;
 }
 
+.doc-note-zodiac {
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) auto;
+    align-items:center;
+    column-gap:14px;
+    row-gap:6px;
+}
+.doc-note-zodiac > [data-lang] {
+    grid-column:1;
+    grid-row:1;
+    min-width:0;
+}
 .doc-note-link {
     display:inline-flex;
     align-items:center;
     gap:7px;
-    margin-top:11px;
+    justify-self:end;
+    grid-column:2;
+    grid-row:1;
+    white-space:nowrap;
     color:var(--accent);
     font-size:13px;
     font-weight:650;
@@ -950,6 +965,13 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 .doc-note-link:hover { text-decoration:underline; text-underline-offset:3px; }
 .doc-note-link:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .doc-note-link svg { width:16px; height:16px; flex:0 0 16px; }
+@media (max-width:650px) {
+    .doc-note-zodiac { grid-template-columns:minmax(0, 1fr); }
+    .doc-note-zodiac > .doc-note-link {
+        grid-column:1;
+        grid-row:2;
+    }
+}
 
 .doc-note-warning {
     /* 背景 */ background: rgba(155, 109, 66, .05);
