@@ -294,6 +294,10 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 背景 */ background: var(--text-strong);
 }
 
+.nav-toggle span { transition:transform .18s ease; }
+.nav-toggle.active span:first-child { transform:translateY(3px) rotate(45deg); }
+.nav-toggle.active span:last-child { transform:translateY(-3px) rotate(-45deg); }
+
 /* ========【RealDate 共用操作】 設定 - 按鈕與文字連結 ======== */
 .button {
     /* 最小高度 */ min-height: 44px;
@@ -1730,8 +1734,12 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     }
 
     .main-nav > a {
-        /* 內縮空間 */ padding: 9px 10px;
-        border-radius: 8px;
+        display:flex;
+        align-items:center;
+        min-height:42px;
+        padding:9px 11px;
+        border-radius:8px;
+        text-align:left;
     }
 
     .main-nav > .nav-placeholder {

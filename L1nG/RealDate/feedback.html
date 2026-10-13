@@ -5,7 +5,7 @@
         <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
         <meta content="#fafafa" name="theme-color"/>
         <title>問題反饋 · RealDate · L1nG</title>
-        <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-width-r2"/>
+        <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-unified-r4"/>
         <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"/>
         <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
         <link rel="stylesheet" href="../feedback/feedback.css?v=20261013-feedback-mobile-refine-r12"/>
@@ -277,16 +277,18 @@
                                                     <span aria-hidden="true" class="guide-info">?</span>不知道安裝哪一版？查看確認方式 <svg class="i sm guide-chevron" aria-hidden="true"><use href="#ico-chevron-down"></use></svg>
                                                 </summary>
                                                 <div class="version-guide-body">
-                                                    <p><b>① 找到當初下載的壓縮檔。</b>例如 <code>L1nG_RealDate_v0.4_Beta.zip</code>，其中 <b>v0.4 Beta</b> 就是下載時的版本。</p><p><b>② 對照網站的版本更新日誌。</b>更新日誌可確認版本名稱與發佈日期；但只看更新日誌，無法確認電腦實際安裝哪一版。</p><p><b>③ 找不到原下載檔？</b>可以選「不確定」，並附上你知道的資訊。<code>.package</code> 或 <code>.ts4script</code> 主檔名不一定包含版本號。</p><a href="https://raw.githack.com/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/L1nG/RealDate/changelog.html" id="version-changelog-link" rel="noopener noreferrer" target="_blank">查看 RealDate 更新日誌 <svg class="i sm" aria-hidden="true"><use href="#ico-external"></use></svg></a>
+                                                    <p><b>① 找到當初下載的壓縮檔。</b>例如 <code>L1nG_RealDate_v0.4_Beta.zip</code>，其中 <b>v0.4 Beta</b> 就是下載時的版本。</p><p><b>② 對照網站的版本更新日誌。</b>更新日誌可確認版本名稱與發佈日期；但只看更新日誌，無法確認電腦實際安裝哪一版。</p><p><b>③ 找不到原下載檔？</b>可查看遊戲產生的 RealDate 日誌，確認模組及遊戲版本；若仍不確定模組版本，可選「不確定」，並附上你知道的資訊。<code>.package</code> 或 <code>.ts4script</code> 主檔名不一定包含版本號。</p><a href="https://raw.githack.com/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/L1nG/RealDate/changelog.html" id="version-changelog-link" rel="noopener noreferrer" target="_blank">查看 RealDate 更新日誌 <svg class="i sm" aria-hidden="true"><use href="#ico-external"></use></svg></a>
                                                 </div>
                                             </details>
                                             <div class="field-error" id="version-error">請選擇模組版本，或選擇「不確定」。</div>
                                         </section>
                                         <section class="section conditional-section" hidden="" id="game-version-section">
                                             <div class="section-heading">
-                                                <label class="field-label" for="game-version">遊戲版本 <span class="optional">（選填）</span></label>
+                                                <label class="field-label" for="game-version">遊戲版本 <span class="required" id="game-version-required" aria-hidden="true" hidden>*</span><span class="optional" id="game-version-optional">（選填）</span></label>
                                             </div>
-                                            <input autocomplete="off" class="field" id="game-version" maxlength="70" placeholder="例如：1.128.XXX"/>
+                                            <input autocomplete="off" class="field" id="game-version" maxlength="70" placeholder="例如：1.128.XXX" aria-describedby="game-version-help game-version-error"/>
+                                            <p class="compact-help" id="game-version-help" hidden>不知道模組或遊戲版本？可查看遊戲產生的 RealDate 日誌，其中會記錄版本資訊。</p>
+                                            <div class="field-error" id="game-version-error" role="alert">請填寫遊戲版本，可查看 RealDate 日誌確認。</div>
                                         </section>
                                         <section class="section">
                                             <div class="section-heading">
@@ -825,8 +827,8 @@
         <div aria-live="polite" class="toast" id="toast" role="status">
         </div>
         <script src="../feedback/select-ui.js" defer></script>
-        <script src="../feedback/feedback-core.js" defer></script>
-        <script src="../feedback/realdate-feedback-live.js?v=20261013-feedback-mobile-refine-r6" defer></script>
-        <script src="../feedback/feedback-i18n.js?v=20261013-feedback-cleanup-r4" defer></script>
+        <script src="../feedback/feedback-core.js?v=20261013-game-version-payload-r2" defer></script>
+        <script src="../feedback/realdate-feedback-live.js?v=20261013-game-version-required-r7" defer></script>
+        <script src="../feedback/feedback-i18n.js?v=20261013-game-version-required-r5" defer></script>
     </body>
 </html>

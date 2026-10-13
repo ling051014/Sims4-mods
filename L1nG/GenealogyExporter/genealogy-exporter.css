@@ -238,6 +238,8 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     background:#4d5862;
     transition:transform .18s ease;
 }
+.nav-toggle.active span:first-child { transform:translateY(3px) rotate(45deg); }
+.nav-toggle.active span:last-child { transform:translateY(-3px) rotate(-45deg); }
 
 .hero {
     padding:96px 0 76px;
@@ -1013,23 +1015,34 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 
     .main-nav {
         position:absolute;
-        top:58px;
-        left:0;
+        top:calc(100% + 8px);
+        left:auto;
         right:0;
+        width:min(248px,calc(100vw - 32px));
+        min-width:0;
         display:none;
-        padding:8px;
+        flex-direction:column;
+        align-items:stretch;
+        justify-content:flex-start;
+        gap:4px;
+        padding:10px;
         border:1px solid var(--line);
         border-radius:12px;
         background:#fff;
-        box-shadow:0 16px 30px rgba(31,35,40,.12);
+        box-shadow:0 14px 36px rgba(42,56,66,.10);
     }
 
     .main-nav.open {
-        display:grid;
+        display:flex;
     }
 
     .main-nav a {
-        padding:10px 11px;
+        display:flex;
+        align-items:center;
+        min-height:42px;
+        padding:9px 11px;
+        border-radius:8px;
+        text-align:left;
     }
 
     .hero {

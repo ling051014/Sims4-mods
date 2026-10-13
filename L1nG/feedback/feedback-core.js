@@ -50,7 +50,7 @@
       : method === 'discord' && text.length >= 2;
   }
 
-  function normalizeFeedback({ source, category, target, message, files, followUp, contactMethod, contactValue, version }) {
+  function normalizeFeedback({ source, category, target, message, files, followUp, contactMethod, contactValue, version, gameVersion }) {
     return {
       source: source === 'RealDate' ? 'RealDate' : 'Genealogy',
       category: ['bug', 'feature', 'other'].includes(category) ? category : 'other',
@@ -61,7 +61,8 @@
       contact: String(contactValue || '').trim()
         ? { method: contactMethod, value: String(contactValue).trim() }
         : null,
-      version: String(version || '').trim() || null
+      version: String(version || '').trim() || null,
+      gameVersion: String(gameVersion || '').trim() || null
     };
   }
 

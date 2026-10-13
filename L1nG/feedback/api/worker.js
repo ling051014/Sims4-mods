@@ -69,6 +69,8 @@ function validatePayload(form){
   if(contact.length>120 || (contact && !(method==="email"?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact):method==="discord" && contact.length>=2)))
     return {error:"聯絡方式格式不正確。"};
   if(version.length>60||gameVersion.length>70||target.length>80) return {error:"版本或問題分類超過長度限制。"};
+  if(source==="RealDate"&&category==="bug"&&target==="mod"&&!gameVersion.trim())
+    return {error:"請填寫遊戲版本，可查看 RealDate 日誌確認。"};
   return {data:{source,category,target,message,followUp,version,gameVersion,contactMethod:contact?method:null,contactValue:contact||null}};
 }
 async function validatedFiles(form,env){

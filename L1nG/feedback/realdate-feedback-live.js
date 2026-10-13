@@ -7,16 +7,16 @@
   let category='bug', files=[], replyFiles=[], verifier=null, replyVerifier=null, activeReceipt='', current=null, lastReceipt='';
   const verificationHost=$('realdate-turnstile');
   const setError=(msg,field)=>{
-    const nodes=['message-error','version-error','contact-error','file-error','submit-inline-error'];
+    const nodes=['message-error','version-error','game-version-error','contact-error','file-error','submit-inline-error'];
     for(const id of nodes){const node=$(id);if(node){node.classList.remove('visible');node.textContent='';}}
-    for(const id of ['message-field','module-version','manual-version','contact-value'])$(id)?.classList.remove('feedback-invalid');
+    for(const id of ['message-field','module-version','manual-version','game-version','contact-value'])$(id)?.classList.remove('feedback-invalid');
     $('submit-error-summary').hidden=true;
     if(!msg)return;
     const target=field||(msg.includes('版本')?'version':msg.includes('聯絡')?'contact':msg.includes('附件')?'file':msg.includes('回饋內容')?'message':'submit');
-    const lookup={version:'version-error',contact:'contact-error',file:'file-error',message:'message-error',submit:'submit-inline-error'};
+    const lookup={version:'version-error',gameVersion:'game-version-error',contact:'contact-error',file:'file-error',message:'message-error',submit:'submit-inline-error'};
     const node=$(lookup[target]||'submit-inline-error');
     if(node){node.textContent=msg;node.classList.add('visible');}
-    const input={version: $('manual-version-wrap')?.hidden?$('module-version'):$('manual-version'),contact:$('contact-value'),message:$('message-field')}[target];
+    const input={version: $('manual-version-wrap')?.hidden?$('module-version'):$('manual-version'),gameVersion:$('game-version'),contact:$('contact-value'),message:$('message-field')}[target];
     input?.classList.add('feedback-invalid');
   };
   const show=(id)=>{for(const name of ['form-main','success-pane','thread-pane']){const el=$(name);el.classList.toggle('hide',id!==name);if(name==='form-main')el.style.display=id===name?'flex':'none';}};
@@ -63,6 +63,16 @@
     if($('bug-context'))$('bug-context').hidden=!isBug;
     if($('module-version-section'))$('module-version-section').hidden=!(isBug && targetSelect?.value==='mod');
     if($('game-version-section'))$('game-version-section').hidden=!isBug;
+    const needsGameVersion=isBug && targetSelect?.value==='mod';
+    const gameVersionField=$('game-version');
+    if(gameVersionField)gameVersionField.required=needsGameVersion;
+    if($('game-version-required'))$('game-version-required').hidden=!needsGameVersion;
+    if($('game-version-optional'))$('game-version-optional').hidden=needsGameVersion;
+    if($('game-version-help'))$('game-version-help').hidden=!needsGameVersion;
+    if(!needsGameVersion){
+      gameVersionField?.classList.remove('feedback-invalid');
+      if($('game-version-error'))$('game-version-error').classList.remove('visible');
+    }
   }
   // 沿用原預覽的公開版本選單，不再讓 RealDate 顯示族譜提取器的選項。
   const version=$('module-version');
@@ -87,6 +97,10 @@
   version?.addEventListener('change',()=>{$('manual-version-wrap').hidden=version.value!=='other';});
   targetSelect?.addEventListener('change',updateVersion);
   $('message-field')?.addEventListener('input',()=>{$('char-count').textContent=$('message-field').value.length+' / 2000';setError('');});
+  $('game-version')?.addEventListener('input',()=>{
+    $('game-version').classList.remove('feedback-invalid');
+    $('game-version-error')?.classList.remove('visible');
+  });
   $('contact-method')?.addEventListener('change',()=>{$('contact-value').type=$('contact-method').value==='email'?'email':'text';});
   // RealDate 直接顯示 Cloudflare 原生元件，避免舊卡片與驗證框在手機上互相擠壓。
   const verificationStatus=$('realdate-turnstile-status');
@@ -154,13 +168,17 @@
     if(category==='bug'&&targetSelect?.value==='mod'&&(!version?.value||(version.value==='other'&&!$('manual-version').value.trim()))){
       setError('請選擇模組版本，或選擇「不確定」。');return;
     }
+    const gameVersion=$('game-version')?.value.trim()||'';
+    if(category==='bug'&&targetSelect?.value==='mod'&&!gameVersion){
+      setError('請填寫遊戲版本，可查看 RealDate 日誌確認。','gameVersion');return;
+    }
     const selected=version?.value==='other'?$('manual-version').value:version?.value||'';
     const button=form.querySelector('button[type="submit"]');button.disabled=true;button.classList.add('is-loading');
     setError('');
     try{
       const result=await core.submit(core.normalizeFeedback({
         source:'RealDate',category,target:targetSelect?.value||'mod',message,files,followUp:chosen,
-        contactMethod:method,contactValue:contact,version:selected
+        contactMethod:method,contactValue:contact,version:selected,gameVersion
       }),token);
       resetReceiptCopyState();
       lastReceipt=result.receipt||'';
