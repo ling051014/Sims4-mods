@@ -16,13 +16,95 @@
   const idList = ['all','pending','progress','done','spam'];
   let page = 'overview', entries = [], current = null, filterStatus = 'all';
   let detailRequest = 0, previewUrls = [];
+  const savedAdminViewKey = 'l1ng-admin-view-v1';
+  function readSavedView() {
+    try {
+      const data = JSON.parse(sessionStorage.getItem(savedAdminViewKey) || 'null');
+      return data && typeof data === 'object' ? data : {};
+    } catch (_) { return {}; }
+  }
+  const initialView = readSavedView();
+  let activeDetailId = null;
+  function saveView() {
+    try {
+      sessionStorage.setItem(savedAdminViewKey, JSON.stringify({
+        page,filterStatus,detailId:activeDetailId
+      }));
+    } catch (_) {}
+  }
+
+  // 預覽只能由管理員手動點附件開啟；不會跟回饋詳情同時自動彈出。
+  let fullPreviewUrl = null, fullPreviewRequest = 0, previewOpener = null;
+  function closeFullPreview(restoreFocus = true) {
+    fullPreviewRequest++;
+    $('admin-attachment-preview').hidden = true;
+    if (fullPreviewUrl) {
+      URL.revokeObjectURL(fullPreviewUrl);
+      fullPreviewUrl = null;
+    }
+    $('admin-preview-content').replaceChildren();
+    if (restoreFocus && previewOpener?.isConnected) previewOpener.focus({preventScroll:true});
+    previewOpener = null;
+  }
+  async function openFullPreview(file, url, trigger) {
+    const type = String(file.type || '').toLowerCase();
+    if (!/^(image\/(png|jpeg|webp)|text\/plain)$/.test(type)) return;
+    closeFullPreview(false);
+    previewOpener = trigger;
+    const requestId = ++fullPreviewRequest;
+    $('admin-preview-title').textContent = file.name;
+    $('admin-preview-size').textContent = sizeText(file.size);
+    $('admin-preview-download').href = url;
+    $('admin-preview-download').setAttribute('download',file.name);
+    $('admin-preview-zoom-out').hidden = true;
+    $('admin-preview-zoom-in').hidden = true;
+    const content = $('admin-preview-content');
+    content.replaceChildren(el('p','preview-placeholder','正在讀取附件…'));
+    $('admin-attachment-preview').hidden = false;
+    $('admin-preview-close').focus({preventScroll:true});
+    try {
+      const response = await fetch(url,{cache:'no-store',credentials:'include'});
+      if (!response.ok) throw new Error('附件無法讀取，請改用下載。');
+      const blob = await response.blob();
+      if (requestId !== fullPreviewRequest) return;
+      content.replaceChildren();
+      if (type.startsWith('image/')) {
+        fullPreviewUrl = URL.createObjectURL(blob);
+        const image = document.createElement('img');
+        image.alt = file.name;
+        image.src = fullPreviewUrl;
+        image.style.width = '100%';
+        content.append(image);
+        let zoom = 1;
+        for (const [id,change] of [['admin-preview-zoom-in',.25],['admin-preview-zoom-out',-.25]]) {
+          const button = $(id);
+          button.hidden = false;
+          button.onclick = () => {
+            zoom = Math.max(.5,Math.min(3,Math.round((zoom+change)*100)/100));
+            image.style.width = zoom*100+'%';
+            image.style.maxWidth = zoom > 1 ? 'none' : '100%';
+          };
+        }
+      } else {
+        // TXT/LOG 只能作純文字顯示，禁止把附件當作 HTML 執行。
+        const text = document.createElement('pre');
+        text.textContent = await blob.text();
+        if (requestId !== fullPreviewRequest) return;
+        content.append(text);
+      }
+    } catch (error) {
+      if (requestId === fullPreviewRequest) {
+        content.replaceChildren(el('p','preview-placeholder',error.message || '預覽失敗，請使用下載。'));
+      }
+    }
+  }
   const label = status => statuses[status] || status || '未知';
   const categoryLabel = category => categories[category] || category || '未分類';
   const dateText = value => {
     if (!value) return '未知';
     const timestamp = new Date(value);
     return Number.isNaN(timestamp.getTime()) ? '未知'
-      : new Intl.DateTimeFormat('zh-TW', {dateStyle:'medium',timeStyle:'short'}).format(timestamp);
+      : new Intl.DateTimeFormat('zh-TW', {dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Taipei'}).format(timestamp) + '（UTC+8）';
   };
   const sizeText = n => {
     const size = Number(n) || 0;
@@ -72,6 +154,7 @@
   function showPage(next) {
     if (!['overview','analytics','feedback','settings'].includes(next)) return;
     page = next;
+    saveView();
     for (const name of ['overview','analytics','feedback','settings']) {
       const panel = $('panel-' + name);
       if (panel) panel.hidden = name !== next;
@@ -195,7 +278,19 @@
     link.href = url;
     link.rel = 'noopener noreferrer';
     link.setAttribute('aria-label','下載附件：' + file.name);
-    entry.append(thumb,info,link);
+    const previewable = /^(image\/(png|jpeg|webp)|text\/plain)$/.test(file.type || '');
+    if (previewable) {
+      const preview = el('button','detail-file-preview-button','預覽');
+      preview.type = 'button';
+      preview.setAttribute('aria-label','預覽附件：' + file.name);
+      preview.addEventListener('click',()=>openFullPreview(file,url,preview));
+      entry.classList.add('is-previewable');
+      entry.addEventListener('click',event => {
+        if (event.target.closest('a,button')) return;
+        openFullPreview(file,url,preview);
+      });
+      entry.append(thumb,info,preview,link);
+    } else entry.append(thumb,info,link);
     root.appendChild(entry);
     if (/^image\/(png|jpeg|webp)$/.test(file.type || '')) {
       const image = document.createElement('img');
@@ -214,6 +309,9 @@
   }
   function populateDetail(item,requestId) {
     current = item;
+    activeDetailId = item.id;
+    saveView();
+    closeFullPreview(false);
     releasePreviews();
     const body = $('detail-body');
     if (!body) return;
@@ -279,13 +377,20 @@
       if (requestId !== detailRequest) return;
       populateDetail(info.feedback,requestId);
     } catch (error) {
-      if (requestId === detailRequest) notify(error.message);
+      if (requestId === detailRequest) {
+        activeDetailId = null;
+        saveView();
+        notify(error.message);
+      }
     }
   }
   function closeDetail() {
     detailRequest++;
+    closeFullPreview(false);
     releasePreviews();
     current = null;
+    activeDetailId = null;
+    saveView();
     $('detail-layer')?.classList.remove('open');
     $('detail-layer')?.setAttribute('aria-hidden','true');
     $('confirm-layer')?.classList.remove('open');
@@ -302,6 +407,7 @@
   document.querySelectorAll('[data-status],[data-mobilefilter]').forEach(button =>
     button.addEventListener('click',() => {
       filterStatus = button.dataset.status || button.dataset.mobilefilter || 'all';
+      saveView();
       showPage('feedback');
       document.querySelectorAll('[data-status],[data-mobilefilter]').forEach(other =>
         other.classList.toggle('active',
@@ -322,6 +428,10 @@
   });
   $('settings-theme')?.addEventListener('click',activateTheme);
   $('detail-close')?.addEventListener('click',closeDetail);
+  $('admin-preview-close')?.addEventListener('click',()=>closeFullPreview());
+  $('admin-attachment-preview')?.addEventListener('click',event=>{
+    if (event.target === $('admin-attachment-preview')) closeFullPreview();
+  });
   $('detail-layer')?.addEventListener('click',event => {
     if (event.target === $('detail-layer')) closeDetail();
   });
@@ -339,6 +449,11 @@
     $('confirm-layer')?.classList.add('open');
     $('confirm-layer')?.setAttribute('aria-hidden','false');
   });
+  $('admin-reply')?.addEventListener('keydown',event=>{
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing || event.keyCode === 229) return;
+    event.preventDefault();
+    if (!$('admin-send')?.disabled) $('admin-send')?.click();
+  });
   $('admin-send')?.addEventListener('click',async () => {
     if (!current) return;
     const id = current.id, message = $('admin-reply')?.value.trim();
@@ -346,12 +461,16 @@
       $('admin-reply-error').hidden = false;
       return;
     }
+    const button = $('admin-send');
+    if (button.disabled) return;
+    button.disabled = true;
     try {
       await api('/feedback/' + encodeURIComponent(id) + '/replies','POST',{message});
       await refresh();
       await openDetail(id);
       notify('已送出回覆。');
     } catch (error) { notify(error.message); }
+    finally { button.disabled = false; }
   });
   $('cancel-delete')?.addEventListener('click',() => {
     $('confirm-layer')?.classList.remove('open');
@@ -375,11 +494,17 @@
   }
   document.addEventListener('keydown',event => {
     if (event.key !== 'Escape') return;
-    if ($('confirm-layer')?.classList.contains('open')) {
-      $('cancel-delete')?.click();
-    } else closeDetail();
+    if ($('confirm-layer')?.classList.contains('open')) $('cancel-delete')?.click();
+    else if (!$('admin-attachment-preview')?.hidden) closeFullPreview();
+    else if ($('detail-layer')?.classList.contains('open')) closeDetail();
   });
-  showPage('overview');
+  if (idList.includes(initialView.filterStatus)) filterStatus = initialView.filterStatus;
+  document.querySelectorAll('[data-status],[data-mobilefilter]').forEach(button =>
+    button.classList.toggle('active',(button.dataset.status || button.dataset.mobilefilter) === filterStatus));
+  showPage(['overview','analytics','feedback','settings'].includes(initialView.page)
+    ? initialView.page : 'overview');
   render();
-  refresh();
+  refresh().then(()=>{
+    if (initialView.detailId && page === 'feedback') openDetail(initialView.detailId);
+  });
 })();

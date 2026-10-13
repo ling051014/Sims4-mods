@@ -30,26 +30,62 @@ document.addEventListener('DOMContentLoaded', () => {
   const attached = [];
   let lastFocus = null;
   let verification = null;
-  const verificationCard = backdrop.querySelector('.genealogy-feedback-verify-card');
-  const originalVerifyHelp = verificationCard?.nextElementSibling;
-  if (verificationCard) {
-    const oldButton = verificationCard.querySelector('button[disabled]');
-    oldButton?.remove();
-    const host = document.createElement('div');
-    host.id = 'genealogy-feedback-turnstile';
-    verificationCard.appendChild(host);
-    if (core.isLive()) {
-      core.createVerification(host).then(v => {
-        verification = v;
-        if (originalVerifyHelp) originalVerifyHelp.textContent = '送出前請完成人機驗證。';
-      }).catch(e => {
-        if (originalVerifyHelp) originalVerifyHelp.textContent = e.message;
+  let verificationLoading = false;
+  let verificationState = 'idle';
+  const verificationHost = $('genealogy-feedback-turnstile');
+  const verificationHelp = $('genealogyFeedbackVerifyHelp');
+  const verificationRetry = $('genealogyFeedbackVerifyRetry');
+  const verificationVisible = () => backdrop.classList.contains('show') && !tabs[0].panel.hidden;
+  const setVerificationState = (state, message) => {
+    verificationState = state;
+    if (verificationHelp) verificationHelp.textContent = message;
+    if (verificationRetry) verificationRetry.hidden = state !== 'error';
+  };
+  async function ensureVerification() {
+    if (!verificationHost || verification || verificationLoading) return;
+    if (!core.isLive()) {
+      setVerificationState('preview', '此網址不支援正式回饋，請從正式網站開啟。');
+      return;
+    }
+    // 等視窗顯示、尺寸確定後才建立 Cloudflare iframe。
+    if (!verificationVisible()) return;
+    verificationLoading = true;
+    setVerificationState('loading', '正在載入 Cloudflare 安全驗證…');
+    try {
+      const widget = await core.createVerification(verificationHost, {
+        size: verificationHost.clientWidth < 300 ? 'compact' : 'flexible',
+        shouldRender: verificationVisible,
+        onStatus: state => {
+          if (state === 'success') setVerificationState('success', '安全驗證已完成。');
+          else if (state === 'expired') setVerificationState('expired', '驗證已過期，請重新完成驗證。');
+          else if (state === 'error' || state === 'timeout') {
+            setVerificationState('error', '安全驗證發生問題，請重新載入驗證。');
+          }
+        }
       });
-    } else if (originalVerifyHelp) {
-      originalVerifyHelp.textContent = '此分支預覽不會送出正式回饋。';
+      verification = widget;
+      if (verificationState === 'loading') {
+        setVerificationState(widget.getToken() ? 'success' : 'ready',
+          widget.getToken() ? '安全驗證已完成。' : '請完成上方的安全驗證。');
+      }
+    } catch (error) {
+      verificationHost.replaceChildren();
+      if (!verificationVisible()) {
+        setVerificationState('idle', '開啟回饋視窗後將載入安全驗證。');
+      } else {
+        setVerificationState('error', error?.message || '安全驗證載入失敗，請重新載入。');
+      }
+    } finally {
+      verificationLoading = false;
     }
   }
-
+  verificationRetry?.addEventListener('click', () => {
+    if (verificationLoading) return;
+    verification?.remove();
+    verification = null;
+    verificationHost?.replaceChildren();
+    ensureVerification();
+  });
 
   // 標題下方是便利貼黏貼處：右下角先翻出紙背，再逐漸拉開，最後從上緣脫離。
   const pages = $('genealogyFeedbackPages');
@@ -343,10 +379,12 @@ document.addEventListener('DOMContentLoaded', () => {
     backdrop.setAttribute('aria-hidden', 'false');
     setTab(0);
     panel.focus({ preventScroll: true });
+    requestAnimationFrame(() => { if (backdrop.classList.contains('show')) ensureVerification(); });
   }
 
   function closeFeedback() {
     if (!backdrop.classList.contains('show')) return;
+    stopPolling();
     backdrop.classList.remove('show');
     backdrop.setAttribute('aria-hidden', 'true');
     setTab(0);
@@ -376,7 +414,15 @@ document.addEventListener('DOMContentLoaded', () => {
     attached.forEach((file, index) => {
       const entry = document.createElement('li');
       const name = document.createElement('span');
-      name.textContent = file.name + ' (' + Math.max(1, Math.round(file.size / 1024)) + ' KB)';
+      name.className='genealogy-feedback-file-text';
+      const pin=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      pin.setAttribute('viewBox','0 0 24 24');pin.setAttribute('aria-hidden','true');pin.classList.add('genealogy-feedback-paperclip');
+      const stroke=document.createElementNS('http://www.w3.org/2000/svg','path');
+      stroke.setAttribute('d','m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3');
+      pin.append(stroke);
+      const title=document.createElement('span');title.textContent=file.name;
+      const size=document.createElement('small');size.textContent=Math.max(1,Math.round(file.size/1024))+' KB';
+      name.append(pin,title,size);
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'secondary';
@@ -395,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const result = core.checkFiles(attached, nextFiles);
     attached.splice(0, attached.length, ...result.files);
     updateFileList();
-    if (result.errors.length) showError(result.errors.join('；'));
+    if(result.errors.length){$('genealogyFeedbackFilesError').textContent=result.errors.join('；');$('genealogyFeedbackFilesError').hidden=false;}else $('genealogyFeedbackFilesError').hidden=true;
   }
 
   const uploadZone = $('genealogyFeedbackAddFile');
@@ -427,8 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
   target.addEventListener('change', updateFields);
   message.addEventListener('input', () => {
     $('genealogyFeedbackCount').textContent = message.value.length + ' / 2000';
+    message.classList.remove('genealogy-feedback-invalid');$('genealogyFeedbackMessageError').hidden=true;
     if (!error.hidden) showError('');
   });
+  contactValue.addEventListener('input',()=>{contactValue.classList.remove('genealogy-feedback-invalid');$('genealogyFeedbackContactError').hidden=true;});
 
   contactMethod.addEventListener('change', () => {
     contactValue.placeholder = contactMethod.value === 'email' ? 'example@email.com' : 'Discord 使用者名稱';
@@ -438,13 +486,15 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     const checked = core.checkMessage(message.value);
     if (!checked.valid) {
-      showError('回饋內容至少需要 10 個字，最多 2000 字。');
+      message.classList.add('genealogy-feedback-invalid');
+      $('genealogyFeedbackMessageError').hidden=false;
       message.focus({ preventScroll: true });
       return;
     }
     const contact = contactValue.value.trim();
     if (!core.checkContact(contactMethod.value, contact)) {
-      showError('請確認聯絡方式格式，或將聯絡資料留空。');
+      contactValue.classList.add('genealogy-feedback-invalid');
+      $('genealogyFeedbackContactError').hidden=false;
       contactValue.focus({ preventScroll: true });
       return;
     }
@@ -465,13 +515,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await core.submit(payload, verification?.getToken());
       const status = $('genealogyFeedbackHistoryStatus');
       const receipt = $('genealogyFeedbackReceipt');
-      const messageText = result.receipt
-        ? '已收到回饋，編號：' + result.id + '。請立即保存私人憑證：' + result.receipt
-        : '已收到回饋，編號：' + result.id + '。';
-      if (status) { status.textContent = messageText; status.hidden = false; }
-      if (receipt && result.receipt) receipt.value = result.receipt;
+      if(status)status.hidden=true;
+      if(receipt&&result.receipt)receipt.value=result.receipt;
+      $('genealogyFeedbackSuccessCode').textContent='回饋編號 '+result.id;
+      $('genealogyFeedbackSuccessDescription').textContent=result.receipt?'已建立匿名對話，請保存私人憑證。':'已收到這次回饋，不會建立匿名對話。';
+      $('genealogyFeedbackSuccessToken').textContent=result.receipt||'';
+      $('genealogyFeedbackCredential').hidden=!result.receipt;
+      $('genealogyFeedbackSuccessOpen').hidden=!result.receipt;
+      $('genealogyFeedbackSuccess').hidden=false;
+      $('genealogyFeedbackHistoryIntro').hidden=true;
+      $('genealogyFeedbackThread').hidden=true;
+      historyForm.hidden=true;
+      lastReceipt=result.receipt||'';
+      if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
       verification?.reset();
+      if (verification) setVerificationState('ready', '請完成上方的安全驗證。');
       form.reset();
       attached.splice(0, attached.length);
       updateFileList();
@@ -486,6 +545,151 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const historyForm = $('genealogyFeedbackHistoryForm');
   const receiptInput = $('genealogyFeedbackReceipt');
+  let lastReceipt='',activeReceipt='',activeItem=null,refreshTimer=null,lastCheck=0,loadingThread=false,replyVerification=null,copyReset=null;
+  const storageKey='l1ng-genealogy-feedback-receipt-v1',replyFiles=[];
+  const rememberReceipt=value=>{try{sessionStorage.setItem(storageKey,value);}catch(_){}};
+  const storedReceipt=()=>{try{return sessionStorage.getItem(storageKey)||'';}catch(_){return ''}};
+  const clearReceipt=()=>{try{sessionStorage.removeItem(storageKey);}catch(_){}};
+  const stopPolling=()=>{if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}};
+  const threadVisible=()=>!!activeReceipt&&document.visibilityState==='visible'&&backdrop.classList.contains('show')&&!$('genealogyFeedbackHistoryPanel').hidden&&!$('genealogyFeedbackThread').hidden;
+  function dateText(value){
+    const date=new Date(value||'');if(!Number.isFinite(date.getTime()))return '';
+    const minutes=-date.getTimezoneOffset(),abs=Math.abs(minutes);
+    return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date)+'（UTC'+(minutes<0?'−':'+')+Math.floor(abs/60)+(abs%60?':'+String(abs%60).padStart(2,'0'):'')+'）';
+  }
+  function pin(){
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.classList.add('genealogy-feedback-paperclip');
+    const line=document.createElementNS('http://www.w3.org/2000/svg','path');
+    line.setAttribute('d','m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3');
+    svg.append(line);return svg;
+  }
+  function renderAttachments(parent,attachments){
+    for(const file of attachments){
+      const row=document.createElement('div');row.className='genealogy-feedback-message-attachment';
+      const title=document.createElement('span');title.textContent=file.name||'附件';
+      const size=document.createElement('small');size.textContent=Math.max(1,Math.round((file.size||0)/1024))+' KB';
+      row.append(pin(),title,size);parent.append(row);
+    }
+  }
+  function drawThread(item){
+    activeItem=item;
+    $('genealogyFeedbackThreadId').textContent=item.id;
+    $('genealogyFeedbackThreadTime').textContent=dateText(item.createdAt);
+    const list=$('genealogyFeedbackMessages');list.replaceChildren();
+    const messages=[{author:'player',body:item.message,created_at:item.createdAt},...(item.messages||[])];
+    messages.forEach((msg,index)=>{
+      const row=document.createElement('div'),player=msg.author!=='admin';
+      row.className='genealogy-feedback-conversation-message'+(player?' is-player':'');
+      const by=document.createElement('span');by.textContent=player?'你':'管理員';
+      const bubble=document.createElement('div');bubble.className='genealogy-feedback-conversation-bubble';bubble.textContent=msg.body||'';
+      const stamp=document.createElement('span');stamp.textContent=dateText(msg.created_at||msg.createdAt);
+      row.append(by,bubble,stamp);
+      if(index===0)renderAttachments(row,item.attachments||[]);
+      list.append(row);
+    });
+    const last=(item.messages||[]).at(-1);
+    $('genealogyFeedbackThreadState').textContent=item.status==='done'?'已完成':item.status==='spam'?'已結案':last?.author==='admin'?'管理員已回覆':last?.author==='player'?'等待管理員回覆':item.status==='progress'?'處理中':'尚未處理';
+    $('genealogyFeedbackReplyForm').hidden=['done','spam'].includes(item.status);
+    if(!$('genealogyFeedbackReplyForm').hidden&&!replyVerification&&core.isLive()){
+      core.createVerification($('genealogyFeedbackReplyVerify')).then(v=>{replyVerification=v;}).catch(e=>{
+        $('genealogyFeedbackReplyError').textContent=e.message;$('genealogyFeedbackReplyError').hidden=false;
+      });
+    }
+  }
+  async function openThread(value){
+    const receipt=String(value||'').trim();if(!receipt)return;
+    stopPolling();
+    const status=$('genealogyFeedbackHistoryStatus');status.hidden=true;
+    try{
+      const response=await core.lookup(receipt);
+      activeReceipt=receipt;rememberReceipt(receipt);receiptInput.value=receipt;
+      $('genealogyFeedbackSuccess').hidden=true;historyForm.hidden=true;
+      $('genealogyFeedbackHistoryIntro').hidden=true;
+      $('genealogyFeedbackThread').hidden=false;
+      lastCheck=Date.now();drawThread(response.feedback);setTab(1);
+      $('genealogyFeedbackThreadRefreshInfo').textContent='每 60 秒檢查新回覆';
+      refreshTimer=setInterval(()=>{if(threadVisible())updateThread();},60000);
+    }catch(e){
+      status.textContent=e?.message||'無法開啟對話。';status.hidden=false;
+      historyForm.hidden=false;$('genealogyFeedbackThread').hidden=true;
+    }
+  }
+  async function updateThread(force=false){
+    if(!threadVisible()||loadingThread)return;
+    if(force&&Date.now()-lastCheck<15000)return;
+    loadingThread=true;lastCheck=Date.now();
+    $('genealogyFeedbackThreadRefreshInfo').textContent='正在更新…';
+    try{
+      const receipt=activeReceipt,data=await core.lookup(receipt);
+      if(activeReceipt!==receipt)return;
+      drawThread(data.feedback);
+      $('genealogyFeedbackThreadRefreshInfo').textContent='更新時間：'+dateText(new Date().toISOString());
+    }catch(_){$('genealogyFeedbackThreadRefreshInfo').textContent='暫時無法更新，稍後重試。';}
+    finally{loadingThread=false;}
+  }
+  function showHistory(){
+    stopPolling();activeReceipt='';
+    $('genealogyFeedbackSuccess').hidden=true;$('genealogyFeedbackThread').hidden=true;
+    $('genealogyFeedbackHistoryIntro').hidden=false;
+    historyForm.hidden=false;
+  }
+  $('genealogyFeedbackSuccessOpen').addEventListener('click',()=>openThread(lastReceipt));
+  $('genealogyFeedbackSuccessNew').addEventListener('click',()=>{showHistory();clearReceipt();lastReceipt='';receiptInput.value='';setTab(0);});
+  $('genealogyFeedbackThreadRefresh').addEventListener('click',()=>updateThread(true));
+  $('genealogyFeedbackCopyCredential').addEventListener('click',async()=>{
+    if(!lastReceipt)return;
+    let copied=false;
+    try{await navigator.clipboard.writeText(lastReceipt);copied=true;}catch(_){}
+    if(!copied){
+      const field=document.createElement('textarea');field.value=lastReceipt;field.readOnly=true;
+      field.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:0';
+      document.body.append(field);field.select();
+      try{copied=document.execCommand('copy');}catch(_){}field.remove();
+    }
+    if(!copied)return;
+    const glyph=$('genealogyFeedbackCopyCredential').querySelector('.l1ng-copy-glyph');
+    clearTimeout(copyReset);glyph.classList.remove('l1ng-copy-running');
+    void glyph.getBoundingClientRect();glyph.classList.add('l1ng-copy-running');
+    copyReset=setTimeout(()=>glyph.classList.remove('l1ng-copy-running'),3900);
+  });
+  function showReplyFiles(){
+    const root=$('genealogyFeedbackReplyFileList');root.replaceChildren();
+    replyFiles.forEach((file,index)=>{
+      const row=document.createElement('li'),text=document.createElement('span');text.className='genealogy-feedback-file-text';
+      const name=document.createElement('span');name.textContent=file.name;
+      const size=document.createElement('small');size.textContent=Math.max(1,Math.round(file.size/1024))+' KB';
+      text.append(pin(),name,size);
+      const remove=document.createElement('button');remove.type='button';remove.textContent='移除';
+      remove.onclick=()=>{replyFiles.splice(index,1);showReplyFiles();};
+      row.append(text,remove);root.append(row);
+    });
+  }
+  $('genealogyFeedbackReplyFiles').addEventListener('change',e=>{
+    const checked=core.checkFiles(replyFiles,e.target.files);
+    replyFiles.splice(0,replyFiles.length,...checked.files);showReplyFiles();e.target.value='';
+    if(checked.errors.length){$('genealogyFeedbackReplyError').textContent=checked.errors.join('；');$('genealogyFeedbackReplyError').hidden=false;}
+  });
+  $('genealogyFeedbackReplyForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const content=$('genealogyFeedbackReply').value.trim(),err=$('genealogyFeedbackReplyError');
+    if(!content||!activeReceipt){err.textContent='請輸入回覆內容。';err.hidden=false;return;}
+    const token=replyVerification?.getToken();
+    if(!token){err.textContent='請先完成安全驗證。';err.hidden=false;return;}
+    const button=$('genealogyFeedbackReplySubmit');button.disabled=true;
+    try{
+      await core.reply(activeReceipt,content,replyFiles,token);
+      $('genealogyFeedbackReply').value='';replyFiles.length=0;showReplyFiles();err.hidden=true;
+      replyVerification?.reset();await openThread(activeReceipt);
+    }catch(ex){err.textContent=ex.message||'送出失敗。';err.hidden=false;replyVerification?.reset();}
+    finally{button.disabled=false;}
+  });
+  $('genealogyFeedbackReply').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();$('genealogyFeedbackReplyForm').requestSubmit();}
+  });
+  document.addEventListener('visibilitychange',()=>{if(threadVisible()&&Date.now()-lastCheck>15000)updateThread();});
+  window.addEventListener('focus',()=>{if(threadVisible()&&Date.now()-lastCheck>15000)updateThread();});
+
   historyForm.addEventListener('submit', async event => {
     event.preventDefault();
     const status = $('genealogyFeedbackHistoryStatus');
@@ -493,12 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!receipt) { status.textContent = '請先貼上私人回饋憑證。'; status.hidden = false; return; }
     status.textContent = '正在查詢回饋…'; status.hidden = false;
     try {
-      const response = await core.lookup(receipt);
-      const item = response.feedback;
-      const labels = {pending:'尚未處理',progress:'處理中',done:'已完成',spam:'垃圾訊息'};
-      const lines = ['回饋編號：' + item.id, '處理狀態：' + (labels[item.status]||item.status)];
-      for (const reply of item.messages||[]) lines.push((reply.author==='admin'?'管理員':'玩家')+'：'+reply.body);
-      status.textContent = lines.join('\n');
+      await openThread(receipt);
     } catch (err) { status.textContent = err?.message || '查詢失敗，請稍後再試。'; }
   });
   // 憑證欄按 Enter 等同點擊「查詢」；Shift+Enter 保留換行，輸入法選字不觸發。
@@ -509,7 +708,14 @@ document.addEventListener('DOMContentLoaded', () => {
     historyForm.requestSubmit();
   });
 
-  openButton.addEventListener('click', openFeedback);
+  const saved=storedReceipt();
+  if(saved)receiptInput.value=saved;
+  tabs[1].tab.addEventListener('click',showHistory);
+  openButton.addEventListener('click',()=>{
+    openFeedback();
+    const pending=storedReceipt();
+    if(pending)openThread(pending);
+  });
   closeButton.addEventListener('click', closeFeedback);
   backdrop.addEventListener('pointerdown', event => {
     if (event.target === backdrop) closeFeedback();
