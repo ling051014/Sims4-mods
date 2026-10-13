@@ -79,16 +79,30 @@
     if (turnstileLoading) return turnstileLoading;
     turnstileLoading = new Promise((resolve, reject) => {
       const script = document.createElement('script');
+      let settled = false;
+      let timeoutId;
+      const finish = (error, api) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        if (error) { script.remove(); reject(error); }
+        else resolve(api);
+      };
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
       script.async = true;
-      script.onload = () => global.turnstile ? resolve(global.turnstile) : reject(new Error('無法載入人機驗證。'));
-      script.onerror = () => reject(new Error('無法載入人機驗證，請確認網路連線。'));
+      script.onload = () => global.turnstile
+        ? finish(null, global.turnstile) : finish(new Error('無法載入人機驗證。'));
+      script.onerror = () => finish(new Error('無法載入人機驗證，請確認網路連線。'));
+      timeoutId = setTimeout(() => finish(new Error('安全驗證載入逾時，請重新載入驗證。')), 15000);
       document.head.appendChild(script);
     }).catch(error => { turnstileLoading = null; throw error; });
     return turnstileLoading;
   }
   async function createVerification(container, options = {}) {
     const ts = await loadTurnstile();
+    if (typeof options.shouldRender === 'function' && !options.shouldRender()) {
+      throw new Error('安全驗證視窗已關閉。');
+    }
     let token = '', widgetId;
     const notify = status => {
       if (typeof options.onStatus === 'function') options.onStatus(status);
