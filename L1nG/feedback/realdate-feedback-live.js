@@ -6,9 +6,18 @@
   if(!core || !$('feedback-form'))return;
   let category='bug', files=[], replyFiles=[], verifier=null, replyVerifier=null, activeReceipt='', current=null, lastReceipt='';
   const siteKeyHost=$('verify-card');
-  const setError=msg=>{
-    $('submit-error-detail').textContent=msg;
-    $('submit-error-summary').hidden=!msg;
+  const setError=(msg,field)=>{
+    const nodes=['message-error','version-error','contact-error','file-error','submit-inline-error'];
+    for(const id of nodes){const node=$(id);if(node){node.classList.remove('visible');node.textContent='';}}
+    for(const id of ['message-field','module-version','manual-version','contact-value'])$(id)?.classList.remove('feedback-invalid');
+    $('submit-error-summary').hidden=true;
+    if(!msg)return;
+    const target=field||(msg.includes('版本')?'version':msg.includes('聯絡')?'contact':msg.includes('附件')?'file':msg.includes('回饋內容')?'message':'submit');
+    const lookup={version:'version-error',contact:'contact-error',file:'file-error',message:'message-error',submit:'submit-inline-error'};
+    const node=$(lookup[target]||'submit-inline-error');
+    if(node){node.textContent=msg;node.classList.add('visible');}
+    const input={version: $('manual-version-wrap')?.hidden?$('module-version'):$('manual-version'),contact:$('contact-value'),message:$('message-field')}[target];
+    input?.classList.add('feedback-invalid');
   };
   const show=(id)=>{for(const name of ['form-main','success-pane','thread-pane']){const el=$(name);el.classList.toggle('hide',id!==name);if(name==='form-main')el.style.display=id===name?'flex':'none';}};
   const describeFile=f=>f.name+' · '+Math.max(1,Math.round(f.size/1024))+' KB';
