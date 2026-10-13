@@ -1711,8 +1711,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 /* ========【RealDate 首頁指定整合】 左側字級／大小寫、右側翻頁日曆 ======== */
 /* 僅作用於首頁 rd-hero-track；保留其他頁面與共用頁腳原樣。 */
-.rd-hero-track .hero-inner { min-height:max(1050px,148vh);align-items:start; }
-.rd-hero-track .hero-copy { padding-top:clamp(60px,11vh,150px); }
 .rd-hero-track .hero-copy h1 {
     font-family: "Helvetica Neue", "Segoe UI", "Lato", sans-serif;
     font-size: clamp(70px,10vw,126px);
@@ -1725,12 +1723,12 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 .rd-hero-track .hero-copy .hero-description { font-size:15px;line-height:1.82; }
 .rd-hero-track .rd-timeline-visual {
     height:455px;min-height:455px;min-width:0;
-    position:sticky;top:clamp(110px,calc(50vh - 228px),210px);
-    align-self:start;isolation:isolate;perspective:1000px;
+    position:relative;isolation:isolate;perspective:1000px;
 }
 .rd-hero-track .rd-paper-scene {
     position:absolute;top:8px;right:25px;width:242px;height:284px;
-    transform:rotate(3deg);transform-style:preserve-3d;
+    transform:translate3d(0,var(--calendar-follow,0px),0) rotate(3deg);
+    transform-style:preserve-3d;
     filter:drop-shadow(0 22px 34px rgba(60,111,151,.10));
 }
 .rd-hero-track .rd-paper-pad {
@@ -1784,7 +1782,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 .rd-hero-track .rd-timeline-event strong {font-size:13px;display:block;color:var(--text-strong);font-weight:550;}
 .rd-hero-track .rd-timeline-event small {display:block;font-size:11px;color:var(--text-soft);}
-.rd-hero-track .rd-timeline-event.active {transform:translateX(4px);}
 .rd-hero-track .rd-timeline-event.active strong {color:var(--accent);}
 
 /* ========【RealDate 發展方向】 源自優化預覽，僅作用於 rd-direction ======== */
@@ -1856,8 +1853,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 @media (max-width:980px) {
     .rd-hero-track .hero-inner {grid-template-columns:1fr;min-height:auto;padding:74px 0;gap:44px;}
-    .rd-hero-track .hero-copy {padding-top:0;}
-    .rd-hero-track .rd-timeline-visual {position:relative;top:auto;min-height:400px;height:400px;max-width:500px;width:100%;margin:0 auto;}
+    .rd-hero-track .rd-timeline-visual {min-height:400px;height:400px;max-width:500px;width:100%;margin:0 auto;}
 }
 @media (max-width:650px) {
     .rd-hero-track .hero-inner {padding:74px 0;gap:32px;}

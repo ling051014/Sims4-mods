@@ -223,6 +223,7 @@ if ("IntersectionObserver" in window) {
     const scene = document.getElementById("rdPaperScene");
     if (!scene) return;
     const hero = scene.closest(".rd-hero-track");
+    const visual = scene.closest(".rd-timeline-visual");
     const desktop = window.matchMedia("(min-width: 981px)");
     const front = scene.querySelector("[data-paper-front]");
     const back = scene.querySelector("[data-paper-back]");
@@ -252,17 +253,22 @@ if ("IntersectionObserver" in window) {
             if (currentIndex !== 0) { putDate(front,dates[0]);putDate(back,dates[1]);currentIndex=0; }
             scene.style.setProperty("--flip","0");
             scene.style.setProperty("--peel","0");
+            scene.style.setProperty("--calendar-follow","0px");
             return;
         }
-        // Desktop progress uses the hero's document coordinates rather than
-        // the moving viewport coordinates of the sticky calendar.
-        const heroTop = hero.getBoundingClientRect().top + window.scrollY;
-        const heroBottom = heroTop + hero.offsetHeight;
-        const top = scene.getBoundingClientRect().top + window.scrollY;
-        const start = desktop.matches ? Math.max(0,heroTop + 70) : Math.max(0,top-window.innerHeight*.76);
-        const finish = desktop.matches
-            ? Math.max(start+480,heroBottom-window.innerHeight*.60)
-            : Math.max(start+460,top+Math.min(140,window.innerHeight*.18));
+        // The paper alone follows scrolling; the four labels and the original
+        // hero geometry stay in normal flow, at their pre-sticky positions.
+        // Measure against the untransformed visual so the animation cannot
+        // feed its own transform back into its scroll progress calculation.
+        const top = visual.getBoundingClientRect().top + window.scrollY + scene.offsetTop;
+        const heroBottom = hero.getBoundingClientRect().top + window.scrollY + hero.offsetHeight;
+        const safeTravel = Math.max(0, heroBottom - top - scene.offsetHeight - 12);
+        const follow = desktop.matches ? Math.min(window.scrollY, 250, safeTravel) : 0;
+        scene.style.setProperty("--calendar-follow",follow.toFixed(1)+"px");
+        const start = Math.max(0, top - window.innerHeight * .76);
+        // Complete the desktop flips while the paper is still held in view.
+        const finish = desktop.matches ? start + 340
+            : Math.max(start + 460, top + Math.min(140, window.innerHeight * .18));
         const p = Math.max(0, Math.min(1, (window.scrollY - start) / (finish - start)));
         const phase = Math.min(2.9999, p * 3);
         const index = Math.floor(phase);
