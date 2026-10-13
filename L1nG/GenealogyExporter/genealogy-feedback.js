@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const verificationHost = $('genealogy-feedback-turnstile');
   const verificationHelp = $('genealogyFeedbackVerifyHelp');
   const verificationRetry = $('genealogyFeedbackVerifyRetry');
+  const verificationVisible = () => backdrop.classList.contains('show') && !tabs[0].panel.hidden;
   const setVerificationState = (state, message) => {
     verificationState = state;
     if (verificationHelp) verificationHelp.textContent = message;
@@ -47,12 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     // 等視窗顯示、尺寸確定後才建立 Cloudflare iframe。
-    if (!backdrop.classList.contains('show') || tabs[0].panel.hidden) return;
+    if (!verificationVisible()) return;
     verificationLoading = true;
     setVerificationState('loading', '正在載入 Cloudflare 安全驗證…');
     try {
       const widget = await core.createVerification(verificationHost, {
         size: verificationHost.clientWidth < 300 ? 'compact' : 'flexible',
+        shouldRender: verificationVisible,
         onStatus: state => {
           if (state === 'success') setVerificationState('success', '安全驗證已完成。');
           else if (state === 'expired') setVerificationState('expired', '驗證已過期，請重新完成驗證。');
@@ -68,7 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (error) {
       verificationHost.replaceChildren();
-      setVerificationState('error', error?.message || '安全驗證載入失敗，請重新載入。');
+      if (!verificationVisible()) {
+        setVerificationState('idle', '開啟回饋視窗後將載入安全驗證。');
+      } else {
+        setVerificationState('error', error?.message || '安全驗證載入失敗，請重新載入。');
+      }
     } finally {
       verificationLoading = false;
     }
