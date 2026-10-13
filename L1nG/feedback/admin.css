@@ -25,3 +25,37 @@ body.admin-only{min-height:100dvh}
 .admin-only .admin-reply-compose[hidden]{display:none}
 .admin-only .detail-panel{min-height:0}
 @media(max-width:600px){.admin-only .detail-layer,.admin-only .confirm-layer{top:0;inset-block-start:0}}
+
+
+/* 中央附件預覽：只在手動點選時出現；右側詳情維持原位。 */
+.admin-only .admin-attachment-preview{position:fixed;z-index:130;inset:0 min(510px,100%) 0 0;background:rgba(15,19,26,.42);display:flex;align-items:center;justify-content:center;padding:clamp(12px,2vw,24px)}
+.admin-only .admin-attachment-preview[hidden]{display:none}
+.admin-only .admin-preview-card{display:flex;flex-direction:column;min-height:0;max-height:calc(100dvh - 36px);width:min(960px,100%);background:var(--surface);border:1px solid var(--stroke);border-radius:14px;box-shadow:0 22px 70px #0003;overflow:hidden}
+.admin-only .admin-preview-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 17px;border-bottom:1px solid var(--stroke)}
+.admin-only .admin-preview-heading{display:flex;flex-direction:column;gap:4px;min-width:0}
+.admin-only .admin-preview-heading strong{font-size:13px;overflow-wrap:anywhere}
+.admin-only .admin-preview-heading small{font-size:11px;color:var(--muted)}
+.admin-only .admin-preview-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.admin-only .admin-preview-actions .secondary,.admin-only .admin-preview-download{display:inline-flex;align-items:center;justify-content:center;min-width:35px;min-height:35px;padding:7px 10px;font-size:12px;text-decoration:none;border:1px solid var(--stroke);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer}
+.admin-only .admin-preview-actions .secondary[hidden]{display:none}
+.admin-only .admin-preview-content{min-height:160px;max-height:calc(100dvh - 140px);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:16px;overscroll-behavior:contain}
+.admin-only .admin-preview-content img{display:block;max-width:100%;height:auto;object-fit:contain;border-radius:5px}
+.admin-only .admin-preview-content pre{width:100%;margin:0;font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:4;user-select:text;-webkit-user-select:text;color:var(--ink)}
+.admin-only .admin-preview-content .preview-placeholder{font-size:12px;color:var(--muted);padding:40px 15px;text-align:center}
+.admin-only .detail-file.is-previewable{cursor:pointer}
+.admin-only .detail-file.is-previewable:hover{border-color:var(--primary-line);background:var(--subtle)}
+.admin-only .detail-file-preview-button{border:0;background:transparent;color:var(--primary);font:inherit;font-size:11px;font-weight:750;cursor:pointer;padding:5px 3px}
+.admin-only .detail-file-preview-button:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:3px}
+/* 管理員靠右、匿名玩家靠左，僅修改管理後台。 */
+.admin-only .detail-body .conversation-message.by-player{align-self:flex-start;align-items:flex-start}
+.admin-only .detail-body .conversation-message.by-admin{align-self:flex-end;align-items:flex-end}
+.admin-only .detail-body .by-player .conversation-bubble{border-color:var(--stroke);background:var(--subtle);border-radius:14px 14px 14px 4px}
+.admin-only .detail-body .by-admin .conversation-bubble{border-color:var(--primary-line);background:var(--primary-pale);border-radius:14px 14px 4px 14px}
+@media(max-width:700px){
+ .admin-only .admin-attachment-preview{inset:0;z-index:135;padding:12px}
+ .admin-only .admin-preview-card{max-height:calc(100dvh - 24px)}
+ .admin-only .admin-preview-header{padding:12px;align-items:flex-start}
+ .admin-only .admin-preview-actions{gap:3px}
+ .admin-only .admin-preview-actions .secondary,.admin-only .admin-preview-download{padding:5px 7px;font-size:11px;min-width:30px}
+ .admin-only .admin-preview-content{padding:10px}
+}
