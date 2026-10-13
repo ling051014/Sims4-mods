@@ -300,3 +300,19 @@ body.realdate-only .upload-zone.appearance-background-upload small {
 @media(max-width:600px) {
     body.realdate-only .upload-zone.appearance-background-upload {min-height:150px}
 }
+
+/* RealDate：附件選取與匿名對話共用不帶外框的迴紋針列表；維持原站配色。 */
+.realdate-only .feedback-attachment-list,.realdate-only .file-list{display:flex;flex-direction:column;gap:7px}
+.realdate-only .feedback-attachment-row,.realdate-only .file-list .file-entry,.realdate-only .thread-attachment-list .conversation-attachment{
+ display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;margin:0;padding:3px 0;border:0;border-radius:0;background:transparent;box-shadow:none;font-size:11px
+}
+.realdate-only .feedback-attachment-name{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.realdate-only .feedback-attachment-row span{overflow-wrap:anywhere;min-width:0}
+.realdate-only .feedback-attachment-row small{color:var(--muted);font-size:10px;white-space:nowrap}
+.realdate-only .feedback-paperclip{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--muted)}
+.realdate-only .feedback-attachment-row .secondary{margin-left:auto;padding:3px 7px;min-height:26px;font-size:11px}
+.realdate-only .credential-inline-button{appearance:none;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:11px 12px;border:1px solid var(--stroke);border-radius:9px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;font:inherit}
+.realdate-only .credential-inline-button:hover{border-color:var(--primary)}
+.realdate-only .credential-inline-button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.realdate-only .credential-inline-button .credential-token{padding:0;margin:0;border:0;border-radius:0;background:transparent;flex:1;min-width:0;overflow-wrap:anywhere}
+.realdate-only .credential-inline-button .l1ng-copy-glyph{flex:0 0 20px}
