@@ -146,7 +146,7 @@
         const skeleton = modal.querySelector(".l1ng-site-info-skeleton");
         if (skeleton && skeleton.dataset.section !== section) {
             skeleton.dataset.section = section;
-            // 族譜「關於」是簡介、版權／聲明、兩項可展開條款；骨架順序與正文一致。
+            // 族譜「關於」是簡介、版權 / 聲明、兩項可展開條款；骨架順序與正文一致。
             const rows = section === "genealogy"
                 ? ["skeleton-text", "skeleton-text-medium", "skeleton-text-short",
                     "skeleton-heading", "skeleton-text", "skeleton-text-medium",
