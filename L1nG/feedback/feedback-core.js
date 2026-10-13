@@ -87,19 +87,28 @@
     }).catch(error => { turnstileLoading = null; throw error; });
     return turnstileLoading;
   }
-  async function createVerification(container) {
+  async function createVerification(container, options = {}) {
     const ts = await loadTurnstile();
     let token = '', widgetId;
+    const notify = status => {
+      if (typeof options.onStatus === 'function') options.onStatus(status);
+    };
     widgetId = ts.render(container, {
       sitekey: SITE_KEY,
       theme: 'auto',
-      callback: value => { token = value; },
-      'expired-callback': () => { token = ''; },
-      'error-callback': () => { token = ''; }
+      ...(options.size ? { size: options.size } : {}),
+      appearance: 'always',
+      callback: value => { token = value; notify('success'); },
+      'expired-callback': () => { token = ''; notify('expired'); },
+      'error-callback': () => { token = ''; notify('error'); return true; },
+      'timeout-callback': () => { token = ''; notify('timeout'); }
     });
+    if (widgetId === undefined || widgetId === null) {
+      throw new Error('無法建立安全驗證，請重新載入。');
+    }
     return {
       getToken: () => token,
-      reset: () => { token = ''; ts.reset(widgetId); },
+      reset: () => { token = ''; ts.reset(widgetId); notify('pending'); },
       remove: () => { ts.remove(widgetId); token = ''; }
     };
   }
