@@ -347,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeFeedback() {
     if (!backdrop.classList.contains('show')) return;
+    stopPolling();
     backdrop.classList.remove('show');
     backdrop.setAttribute('aria-hidden', 'true');
     setTab(0);
@@ -488,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $('genealogyFeedbackThread').hidden=true;
       historyForm.hidden=true;
       lastReceipt=result.receipt||'';
-      if(lastReceipt)rememberReceipt(lastReceipt);
+      if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
       verification?.reset();
       form.reset();
@@ -655,8 +656,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!receipt) { status.textContent = '請先貼上私人回饋憑證。'; status.hidden = false; return; }
     status.textContent = '正在查詢回饋…'; status.hidden = false;
     try {
-      const response = await core.lookup(receipt);
-      const item = response.feedback;
       await openThread(receipt);
     } catch (err) { status.textContent = err?.message || '查詢失敗，請稍後再試。'; }
   });
@@ -669,8 +668,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const saved=storedReceipt();
-  if(saved){receiptInput.value=saved;openButton.addEventListener('click',()=>{openThread(saved);});}
-  openButton.addEventListener('click', openFeedback);
+  if(saved)receiptInput.value=saved;
+  tabs[1].tab.addEventListener('click',showHistory);
+  openButton.addEventListener('click',()=>{
+    openFeedback();
+    if(saved && !lastReceipt) openThread(saved);
+  });
   closeButton.addEventListener('click', closeFeedback);
   backdrop.addEventListener('pointerdown', event => {
     if (event.target === backdrop) closeFeedback();
