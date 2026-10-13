@@ -30,26 +30,56 @@ document.addEventListener('DOMContentLoaded', () => {
   const attached = [];
   let lastFocus = null;
   let verification = null;
-  const verificationCard = backdrop.querySelector('.genealogy-feedback-verify-card');
-  const originalVerifyHelp = verificationCard?.nextElementSibling;
-  if (verificationCard) {
-    const oldButton = verificationCard.querySelector('button[disabled]');
-    oldButton?.remove();
-    const host = document.createElement('div');
-    host.id = 'genealogy-feedback-turnstile';
-    verificationCard.appendChild(host);
-    if (core.isLive()) {
-      core.createVerification(host).then(v => {
-        verification = v;
-        if (originalVerifyHelp) originalVerifyHelp.textContent = '送出前請完成人機驗證。';
-      }).catch(e => {
-        if (originalVerifyHelp) originalVerifyHelp.textContent = e.message;
+  let verificationLoading = false;
+  let verificationState = 'idle';
+  const verificationHost = $('genealogy-feedback-turnstile');
+  const verificationHelp = $('genealogyFeedbackVerifyHelp');
+  const verificationRetry = $('genealogyFeedbackVerifyRetry');
+  const setVerificationState = (state, message) => {
+    verificationState = state;
+    if (verificationHelp) verificationHelp.textContent = message;
+    if (verificationRetry) verificationRetry.hidden = state !== 'error';
+  };
+  async function ensureVerification() {
+    if (!verificationHost || verification || verificationLoading) return;
+    if (!core.isLive()) {
+      setVerificationState('preview', '此網址不支援正式回饋，請從正式網站開啟。');
+      return;
+    }
+    // 等視窗顯示、尺寸確定後才建立 Cloudflare iframe。
+    if (!backdrop.classList.contains('show') || tabs[0].panel.hidden) return;
+    verificationLoading = true;
+    setVerificationState('loading', '正在載入 Cloudflare 安全驗證…');
+    try {
+      const widget = await core.createVerification(verificationHost, {
+        size: verificationHost.clientWidth < 300 ? 'compact' : 'flexible',
+        onStatus: state => {
+          if (state === 'success') setVerificationState('success', '安全驗證已完成。');
+          else if (state === 'expired') setVerificationState('expired', '驗證已過期，請重新完成驗證。');
+          else if (state === 'error' || state === 'timeout') {
+            setVerificationState('error', '安全驗證發生問題，請重新載入驗證。');
+          }
+        }
       });
-    } else if (originalVerifyHelp) {
-      originalVerifyHelp.textContent = '請完成安全驗證後送出回饋。';
+      verification = widget;
+      if (verificationState === 'loading') {
+        setVerificationState(widget.getToken() ? 'success' : 'ready',
+          widget.getToken() ? '安全驗證已完成。' : '請完成上方的安全驗證。');
+      }
+    } catch (error) {
+      verificationHost.replaceChildren();
+      setVerificationState('error', error?.message || '安全驗證載入失敗，請重新載入。');
+    } finally {
+      verificationLoading = false;
     }
   }
-
+  verificationRetry?.addEventListener('click', () => {
+    if (verificationLoading) return;
+    verification?.remove();
+    verification = null;
+    verificationHost?.replaceChildren();
+    ensureVerification();
+  });
 
   // 標題下方是便利貼黏貼處：右下角先翻出紙背，再逐漸拉開，最後從上緣脫離。
   const pages = $('genealogyFeedbackPages');
@@ -343,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backdrop.setAttribute('aria-hidden', 'false');
     setTab(0);
     panel.focus({ preventScroll: true });
+    requestAnimationFrame(() => { if (backdrop.classList.contains('show')) ensureVerification(); });
   }
 
   function closeFeedback() {
@@ -493,6 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
       verification?.reset();
+      if (verification) setVerificationState('ready', '請完成上方的安全驗證。');
       form.reset();
       attached.splice(0, attached.length);
       updateFileList();
