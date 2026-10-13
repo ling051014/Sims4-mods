@@ -215,3 +215,102 @@ if ("IntersectionObserver" in window) {
     window.addEventListener("hashchange", scheduleUpdate);
     updateCurrentSection();
 })();
+
+
+// ========【RealDate 首頁日曆】 僅首頁啟動；捲動進度不攔截頁面 ========
+(() => {
+    "use strict";
+    const scene = document.getElementById("rdPaperScene");
+    if (!scene) return;
+    const front = scene.querySelector("[data-paper-front]");
+    const back = scene.querySelector("[data-paper-back]");
+    const timeline = document.querySelectorAll(".rd-hero-track .rd-timeline-event");
+    const dates = [
+        {day:"14",zhMonth:"10 月",enMonth:"OCTOBER",zhWeek:"星期三",enWeek:"WEDNESDAY"},
+        {day:"15",zhMonth:"10 月",enMonth:"OCTOBER",zhWeek:"星期四",enWeek:"THURSDAY"},
+        {day:"20",zhMonth:"10 月",enMonth:"OCTOBER",zhWeek:"星期二",enWeek:"TUESDAY"},
+        {day:"01",zhMonth:"11 月",enMonth:"NOVEMBER",zhWeek:"星期日",enWeek:"SUNDAY"}
+    ];
+    let frame = 0;
+    let currentIndex = -1;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function putDate(node, date) {
+        const small = node?.querySelector("small");
+        const week = node?.querySelector(".rd-paper-weekday");
+        if (!small || !week) return;
+        node.querySelector(".rd-paper-day").textContent = date.day;
+        small.querySelector('[data-lang="zh-Hant"]').textContent = date.zhMonth;
+        small.querySelector('[data-lang="en"]').textContent = date.enMonth;
+        week.querySelector('[data-lang="zh-Hant"]').textContent = date.zhWeek;
+        week.querySelector('[data-lang="en"]').textContent = date.enWeek;
+    }
+    function update() {
+        frame = 0;
+        if (reduceMotion.matches) {
+            if (currentIndex !== 0) { putDate(front,dates[0]);putDate(back,dates[1]);currentIndex=0; }
+            scene.style.setProperty("--flip","0");
+            scene.style.setProperty("--peel","0");
+            return;
+        }
+        const top = scene.getBoundingClientRect().top + window.scrollY;
+        const start = Math.max(0, top - window.innerHeight * .76);
+        // At least 460px of page scrolling, rather than changing three dates in 180px.
+        const finish = Math.max(start + 460, top + Math.min(140, window.innerHeight * .18));
+        const p = Math.max(0, Math.min(1, (window.scrollY - start) / (finish - start)));
+        const phase = Math.min(2.9999, p * 3);
+        const index = Math.floor(phase);
+        const f = phase - index;
+        if (index !== currentIndex) {
+            putDate(front,dates[index]);putDate(back,dates[index+1]);currentIndex=index;
+        }
+        const easing = f*f*(3-2*f);
+        scene.style.setProperty("--flip",String(easing));
+        scene.style.setProperty("--peel",String(Math.min(1,f*2.2)));
+        timeline.forEach((element,i) => element.classList.toggle("active",i === Math.min(3,Math.round(p*3))));
+    }
+    function schedule() {
+        if (frame) return;
+        frame = window.requestAnimationFrame(update);
+    }
+    window.addEventListener("scroll",schedule,{passive:true});
+    window.addEventListener("resize",schedule,{passive:true});
+    reduceMotion.addEventListener?.("change",schedule);
+    window.addEventListener("load",schedule,{once:true});
+    update();
+})();
+
+// ========【RealDate 發展方向】 紙張隨捲動輕擺；尊重減少動態設定 ========
+(() => {
+    "use strict";
+    const sheets = Array.from(document.querySelectorAll(".rd-direction .rd-vision-stage"));
+    const line = document.querySelector(".rd-direction .rd-vision-line");
+    if (!sheets.length || !line) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let prevY = window.scrollY, swing = 0, target = 0, frame = 0;
+    function render() {
+        sheets.forEach(stage => {
+            const sheet = stage.querySelector(".rd-vision-sheet");
+            if (!sheet) return;
+            const base = parseFloat(stage.dataset.baseRot) || 0;
+            const mult = parseFloat(stage.dataset.swing) || 1;
+            sheet.style.setProperty("--card-rot", (base + (reduceMotion.matches ? 0 : swing * mult)).toFixed(3) + "deg");
+        });
+    }
+    function step() {
+        swing += (target - swing) * .16;
+        target *= .88;
+        render();
+        if (Math.abs(swing) > .02 || Math.abs(target) > .02) frame = requestAnimationFrame(step);
+        else { swing=0;target=0;frame=0;render(); }
+    }
+    window.addEventListener("scroll",() => {
+        const delta = window.scrollY - prevY; prevY = window.scrollY;
+        if (reduceMotion.matches) return;
+        const box = line.getBoundingClientRect();
+        if (box.bottom < 0 || box.top > window.innerHeight) return;
+        target = Math.max(-3,Math.min(3,target + delta * .026));
+        if (!frame) frame = requestAnimationFrame(step);
+    },{passive:true});
+    reduceMotion.addEventListener?.("change",render);
+    render();
+})();

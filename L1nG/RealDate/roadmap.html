@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RealDate 開發藍圖 · L1nG</title>
-    <meta name="description" content="RealDate 開發藍圖與版本狀態。">
+    <title>RealDate 發展方向 · L1nG</title>
+    <meta name="description" content="RealDate 發展方向與目前版本資訊。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-unified-r4">
-    <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
+    <link rel="stylesheet" href="realdate.css?v=20261014-home-direction-visual-r1">
+    <script src="realdate.js?v=20261014-home-direction-visual-r1" defer></script>
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
     <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
     <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
@@ -46,48 +46,89 @@
         </div>
     </header>
 
-    <main>
+    <main class="rd-direction">
         <section class="page-hero">
             <div class="page-hero-inner reveal">
-                <span class="eyebrow">ROADMAP</span>
-                <h1 data-lang="zh-Hant">RealDate 開發藍圖</h1>
-                <h1 data-lang="en">RealDate Roadmap</h1>
-                <p data-lang="zh-Hant">開發藍圖表示後續開發方向；尚未發布的功能不會先混進目前公開玩法。</p>
-                <p data-lang="en">The roadmap shows development direction. Unreleased features are not presented as current gameplay.</p>
+                <span class="eyebrow">REALDATE · DIRECTION</span>
+                <h1 data-lang="zh-Hant">發展方向</h1><h1 data-lang="en">Direction</h1>
+                <p data-lang="zh-Hant">從真實日期到人生時間系統。一起看看已發布的成果、目前投入的重點，以及 RealDate 想走向的未來。</p>
+                <p data-lang="en">From real dates to a life timeline. A look at our releases, current focus and where RealDate may go next.</p>
             </div>
         </section>
-
-        <section class="section">
-            <div class="roadmap-timeline">
-                <article class="roadmap-item reveal">
-                    <div class="roadmap-marker"></div>
-                    <div class="roadmap-content">
-                        <span class="status-chip">
-                            <span data-lang="zh-Hant">已發布</span>
-                            <span data-lang="en">Released</span>
-                        </span>
-                        <h2>v0.4 Beta</h2>
-                        <p>2026.09.22 (UTC+8)</p>
-                        <p data-lang="zh-Hant">架構重構、生日社交、年號、生理時間軸與第三方相容擴充。</p>
-                        <p data-lang="en">Architecture refactor, birthday socials, Eras, reproductive timeline, and expanded compatibility.</p>
-                        <a class="text-link arrow-link-motion" href="changelog.html#v040"><span data-lang="zh-Hant">查看更新日誌</span><span data-lang="en">View Changelog</span><span aria-hidden="true">→</span></a>
+        <section class="section rd-direction-status">
+            <div class="rd-roadmap-status reveal">
+                <span class="eyebrow">01 · DEVELOPMENT STATUS</span>
+                <h2 data-lang="zh-Hant">走到哪裡了？</h2><h2 data-lang="en">Where are we now?</h2>
+                <p data-lang="zh-Hant">每個版本，都讓遊戲裡的時間更貼近模擬市民的生活。</p><p data-lang="en">Each release brings the passage of time closer to the lives of your Sims.</p>
+            </div>
+            <div class="rd-roadmap-timeline">
+                <article class="rd-roadmap-item reveal"><div class="rd-roadmap-marker"></div>
+                    <div class="rd-roadmap-content"><span class="status-chip"><span data-lang="zh-Hant">已發布</span><span data-lang="en">Released</span></span>
+                        <h3>v0.1 – v0.4 Beta</h3>
+                        <p data-lang="zh-Hant">從日期、出生與年齡，逐步建立月曆、生命週期與時間同步基礎。</p>
+                        <p data-lang="en">From dates and age to the calendar, life cycle and time synchronization.</p>
+                        <small data-lang="zh-Hant">詳細版本內容請見正式更新日誌。</small><small data-lang="en">See the changelog for released features.</small>
                     </div>
                 </article>
-                <article class="roadmap-item reveal">
-                    <div class="roadmap-marker"></div>
-                    <div class="roadmap-content roadmap-current">
-                        <span class="status-chip">
-                            <span data-lang="zh-Hant">開發中</span>
-                            <span data-lang="en">In Development</span>
-                        </span>
-                        <h2>v0.5 Beta</h2>
-                        <h3 data-lang="zh-Hant">關係與人生紀錄</h3>
-                        <h3 data-lang="en">Relationship &amp; Life Chronicle</h3>
-                        <p data-lang="zh-Hant">目前開發中的版本；尚未正式發布的細節不寫成現有玩法。</p>
-                        <p data-lang="en">The current development release; unreleased details are not documented as current gameplay.</p>
+                <article class="rd-roadmap-item reveal"><div class="rd-roadmap-marker"></div>
+                    <div class="rd-roadmap-content rd-roadmap-current"><span class="status-chip"><span data-lang="zh-Hant">開發中</span><span data-lang="en">In development</span></span>
+                        <h3>v0.5 Beta</h3>
+                        <p data-lang="zh-Hant">目前聚焦人生事件、關係歷史與值得紀念的日子。</p>
+                        <p data-lang="en">Currently focusing on life events, relationship history and meaningful anniversaries.</p>
+                        <small data-lang="zh-Hant">詳細內容將於版本發布後整理至更新日誌。</small><small data-lang="en">Details will be added to the changelog after release.</small>
                     </div>
                 </article>
             </div>
+        </section>
+        <section class="rd-focus-section">
+            <div class="rd-focus-inner">
+                <div class="reveal">
+                    <span class="eyebrow">02 · CURRENT FOCUS</span>
+                    <h2 data-lang="zh-Hant">讓重要的一天，不只留下日期。</h2><h2 data-lang="en">Let important days leave more than dates.</h2>
+                    <p data-lang="zh-Hant">接續既有時間基礎，讓人生事件有可追溯的前後文。</p><p data-lang="en">Build on the existing time system so important events have a history.</p>
+                </div>
+                <div class="rd-focus-list"><article class="rd-focus-row reveal"><span class="rd-focus-no">01</span><div><h3 data-lang="zh-Hant">重要事件</h3><h3 data-lang="en">Life events</h3><p data-lang="zh-Hant">記住有意義的經歷，而不是記下每次數值變化。</p><p data-lang="en">Remember meaningful moments, not every small stat change.</p></div></article>
+<article class="rd-focus-row reveal"><span class="rd-focus-no">02</span><div><h3 data-lang="zh-Hant">關係歷史</h3><h3 data-lang="en">Relationship history</h3><p data-lang="zh-Hant">讓一段關係的開始、變化與結束各有位置。</p><p data-lang="en">Give each beginning, change and ending a place in the timeline.</p></div></article>
+<article class="rd-focus-row reveal"><span class="rd-focus-no">03</span><div><h3 data-lang="zh-Hant">值得再想起的日子</h3><h3 data-lang="en">Dates worth remembering</h3><p data-lang="zh-Hant">探索重要日期如何成為紀念，而不必每年重複記錄同一件事。</p><p data-lang="en">Explore anniversaries without duplicating the original events.</p></div></article></div>
+            </div>
+        </section>
+        <section class="section rd-vision">
+            <span class="eyebrow">03 · LONG-TERM VISION</span>
+            <div class="section-head">
+                <h2 data-lang="zh-Hant">讓一段人生，留在同一條時間線上。</h2><h2 data-lang="en">Let a whole life live on one timeline.</h2>
+                <p data-lang="zh-Hant">RealDate 的長期方向，是逐步連結模擬市民的日期、年齡、生命經歷與重要記憶。各階段會隨技術驗證及實際開發調整。</p>
+                <p data-lang="en">Our long-term direction is to connect dates, age, experiences and memories. Each stage may change with technical feasibility.</p>
+            </div>
+            <div class="rd-vision-line"><ol class="rd-vision-stages" aria-label="RealDate 長期方向"><li class="rd-vision-stage" data-base-rot="-2.6" data-swing="1.15"><div class="rd-vision-sheet" style="--card-rot:-2.6deg"><svg class="rd-vision-peg" viewBox="0 0 40 64" aria-hidden="true" focusable="false">
+<defs><linearGradient id="rdWood1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#edd5b3"/><stop offset=".55" stop-color="#e6c69c"/><stop offset="1" stop-color="#ddb989"/></linearGradient>
+<linearGradient id="rdMetal1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9fbfd"/><stop offset=".46" stop-color="#c6d0d7"/><stop offset="1" stop-color="#8e9ca6"/></linearGradient></defs>
+<path d="M10.2 10.5 C7.4 10.5 6 13.2 6 16.8 V39 C6 42.8 7.4 45.4 10.2 45.4 M29.8 10.5 C32.6 10.5 34 13.2 34 16.8 V39 C34 42.8 32.6 45.4 29.8 45.4" fill="none" stroke="#a8b3bb" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="11" y="1" width="18" height="56" rx="2.5" fill="url(#rdWood1)" stroke="#c8a57c" stroke-width=".8"/>
+<path d="M20 3.2V54.5" stroke="#f7e8cf" stroke-width=".85" opacity=".72"/><path d="M14.5 10V47 M17.4 7V49 M23 9V48 M25.7 13.2V45.3" stroke="#d2a977" stroke-width=".55" opacity=".45"/>
+<rect x="11" y="26.3" width="18" height="5.9" rx="1.7" fill="url(#rdMetal1)" stroke="#8998a4" stroke-width=".8"/><path d="M12.6 28.6H27.4" stroke="#fff" stroke-width=".7" opacity=".7"/></svg><article class="rd-vision-note"><span class="rd-stage-number">01</span><span class="rd-stage-name" data-lang="zh-Hant">時間與年齡</span><span class="rd-stage-name" data-lang="en">Time & Age</span></article></div></li>
+<li class="rd-vision-stage" data-base-rot="1.4" data-swing="0.92"><div class="rd-vision-sheet" style="--card-rot:1.4deg"><svg class="rd-vision-peg" viewBox="0 0 40 64" aria-hidden="true" focusable="false">
+<defs><linearGradient id="rdWood2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#edd5b3"/><stop offset=".55" stop-color="#e6c69c"/><stop offset="1" stop-color="#ddb989"/></linearGradient>
+<linearGradient id="rdMetal2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9fbfd"/><stop offset=".46" stop-color="#c6d0d7"/><stop offset="1" stop-color="#8e9ca6"/></linearGradient></defs>
+<path d="M10.2 10.5 C7.4 10.5 6 13.2 6 16.8 V39 C6 42.8 7.4 45.4 10.2 45.4 M29.8 10.5 C32.6 10.5 34 13.2 34 16.8 V39 C34 42.8 32.6 45.4 29.8 45.4" fill="none" stroke="#a8b3bb" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="11" y="1" width="18" height="56" rx="2.5" fill="url(#rdWood2)" stroke="#c8a57c" stroke-width=".8"/>
+<path d="M20 3.2V54.5" stroke="#f7e8cf" stroke-width=".85" opacity=".72"/><path d="M14.5 10V47 M17.4 7V49 M23 9V48 M25.7 13.2V45.3" stroke="#d2a977" stroke-width=".55" opacity=".45"/>
+<rect x="11" y="26.3" width="18" height="5.9" rx="1.7" fill="url(#rdMetal2)" stroke="#8998a4" stroke-width=".8"/><path d="M12.6 28.6H27.4" stroke="#fff" stroke-width=".7" opacity=".7"/></svg><article class="rd-vision-note"><span class="rd-stage-number">02</span><span class="rd-stage-name" data-lang="zh-Hant">生命歷程</span><span class="rd-stage-name" data-lang="en">Life Journey</span></article></div></li>
+<li class="rd-vision-stage" data-base-rot="-1.2" data-swing="1.08"><div class="rd-vision-sheet" style="--card-rot:-1.2deg"><svg class="rd-vision-peg" viewBox="0 0 40 64" aria-hidden="true" focusable="false">
+<defs><linearGradient id="rdWood3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#edd5b3"/><stop offset=".55" stop-color="#e6c69c"/><stop offset="1" stop-color="#ddb989"/></linearGradient>
+<linearGradient id="rdMetal3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9fbfd"/><stop offset=".46" stop-color="#c6d0d7"/><stop offset="1" stop-color="#8e9ca6"/></linearGradient></defs>
+<path d="M10.2 10.5 C7.4 10.5 6 13.2 6 16.8 V39 C6 42.8 7.4 45.4 10.2 45.4 M29.8 10.5 C32.6 10.5 34 13.2 34 16.8 V39 C34 42.8 32.6 45.4 29.8 45.4" fill="none" stroke="#a8b3bb" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="11" y="1" width="18" height="56" rx="2.5" fill="url(#rdWood3)" stroke="#c8a57c" stroke-width=".8"/>
+<path d="M20 3.2V54.5" stroke="#f7e8cf" stroke-width=".85" opacity=".72"/><path d="M14.5 10V47 M17.4 7V49 M23 9V48 M25.7 13.2V45.3" stroke="#d2a977" stroke-width=".55" opacity=".45"/>
+<rect x="11" y="26.3" width="18" height="5.9" rx="1.7" fill="url(#rdMetal3)" stroke="#8998a4" stroke-width=".8"/><path d="M12.6 28.6H27.4" stroke="#fff" stroke-width=".7" opacity=".7"/></svg><article class="rd-vision-note"><span class="rd-stage-number">03</span><span class="rd-stage-name" data-lang="zh-Hant">關係與記憶</span><span class="rd-stage-name" data-lang="en">Relationships & Memories</span></article></div></li>
+<li class="rd-vision-stage" data-base-rot="2.3" data-swing="0.86"><div class="rd-vision-sheet" style="--card-rot:2.3deg"><svg class="rd-vision-peg" viewBox="0 0 40 64" aria-hidden="true" focusable="false">
+<defs><linearGradient id="rdWood4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#edd5b3"/><stop offset=".55" stop-color="#e6c69c"/><stop offset="1" stop-color="#ddb989"/></linearGradient>
+<linearGradient id="rdMetal4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9fbfd"/><stop offset=".46" stop-color="#c6d0d7"/><stop offset="1" stop-color="#8e9ca6"/></linearGradient></defs>
+<path d="M10.2 10.5 C7.4 10.5 6 13.2 6 16.8 V39 C6 42.8 7.4 45.4 10.2 45.4 M29.8 10.5 C32.6 10.5 34 13.2 34 16.8 V39 C34 42.8 32.6 45.4 29.8 45.4" fill="none" stroke="#a8b3bb" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="11" y="1" width="18" height="56" rx="2.5" fill="url(#rdWood4)" stroke="#c8a57c" stroke-width=".8"/>
+<path d="M20 3.2V54.5" stroke="#f7e8cf" stroke-width=".85" opacity=".72"/><path d="M14.5 10V47 M17.4 7V49 M23 9V48 M25.7 13.2V45.3" stroke="#d2a977" stroke-width=".55" opacity=".45"/>
+<rect x="11" y="26.3" width="18" height="5.9" rx="1.7" fill="url(#rdMetal4)" stroke="#8998a4" stroke-width=".8"/><path d="M12.6 28.6H27.4" stroke="#fff" stroke-width=".7" opacity=".7"/></svg><article class="rd-vision-note"><span class="rd-stage-number">04</span><span class="rd-stage-name" data-lang="zh-Hant">完整人生時間線</span><span class="rd-stage-name" data-lang="en">A Whole Life Timeline</span></article></div></li></ol></div>
+            <p class="rd-vision-swipe-hint"><span data-lang="zh-Hant">左右滑動，查看後續階段</span><span data-lang="en">Swipe to see the next stages</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12h16m-5-5 5 5-5 5"/></svg></p>
+            <p class="rd-vision-disclaimer" data-lang="zh-Hant">未來方向將依實際開發與技術可行性調整。</p><p class="rd-vision-disclaimer" data-lang="en">Future directions may change with development and technical feasibility.</p>
         </section>
     </main>
 
