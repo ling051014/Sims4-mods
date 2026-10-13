@@ -903,7 +903,8 @@ section[id] {
         /* 絕對定位 */ position: absolute;
         /* 靠近頂欄底部 */ top: calc(100% + 8px);
         /* 貼齊右側 */ right: 0;
-        /* 固定最小寬度 */ min-width: 190px;
+        /* 手機選單統一為右側固定寬度 */ width: min(248px, calc(100vw - 32px));
+        min-width: 0;
         /* 內縮空間 */ padding: 10px;
         /* 一般邊框 */ border: 1px solid var(--border);
         /* 圓角弧度 */ border-radius: 12px;
