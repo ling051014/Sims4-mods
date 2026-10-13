@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileList = $('genealogyFeedbackFileList');
   const message = $('genealogyFeedbackMessage');
   const target = $('genealogyFeedbackTarget');
+  const versionField = $('genealogyFeedbackVersion');
+  const versionRow = $('genealogyFeedbackVersionRow');
+  const versionError = $('genealogyFeedbackVersionError');
   const error = $('genealogyFeedbackError');
   const submitButton = $('genealogyFeedbackSubmit');
   const contactMethod = $('genealogyFeedbackContactMethod');
@@ -405,7 +408,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateFields() {
     const category = form.elements.genealogyFeedbackCategory.value;
     const versionVisible = category === 'bug' && target.value === 'exporter';
-    $('genealogyFeedbackVersionRow').hidden = !versionVisible;
+    versionRow.hidden = !versionVisible;
+    versionField.required = versionVisible;
+    versionField.classList.remove('genealogy-feedback-invalid');
+    versionError.hidden = true;
     showError('');
   }
 
@@ -471,6 +477,10 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('change', updateFields);
   });
   target.addEventListener('change', updateFields);
+  versionField.addEventListener('change', () => {
+    versionField.classList.remove('genealogy-feedback-invalid');
+    versionError.hidden = true;
+  });
   message.addEventListener('input', () => {
     $('genealogyFeedbackCount').textContent = message.value.length + ' / 2000';
     message.classList.remove('genealogy-feedback-invalid');$('genealogyFeedbackMessageError').hidden=true;
@@ -491,6 +501,14 @@ document.addEventListener('DOMContentLoaded', () => {
       message.focus({ preventScroll: true });
       return;
     }
+    // 只在「錯誤回報／族譜提取器」顯示時強制驗證版本。
+    const versionOption = versionField.selectedOptions[0];
+    if (!versionRow.hidden && (!versionOption || !versionOption.value || versionOption.disabled)) {
+      versionField.classList.add('genealogy-feedback-invalid');
+      versionError.hidden = false;
+      versionField.focus({ preventScroll: true });
+      return;
+    }
     const contact = contactValue.value.trim();
     if (!core.checkContact(contactMethod.value, contact)) {
       contactValue.classList.add('genealogy-feedback-invalid');
@@ -507,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
       followUp: form.elements.genealogyFeedbackFollowUp.value,
       contactMethod: contactMethod.value,
       contactValue: contact,
-      version: $('genealogyFeedbackVersionRow').hidden ? '' : $('genealogyFeedbackVersion').value
+      version: versionRow.hidden ? '' : versionField.value
     });
     submitButton.disabled = true;
     submitButton.classList.add('is-loading');

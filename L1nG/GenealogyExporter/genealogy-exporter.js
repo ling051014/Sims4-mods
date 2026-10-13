@@ -114,22 +114,25 @@
     });
 
     if (navToggle && mainNav) {
+        function closeNavigation() {
+            mainNav.classList.remove('open');
+            navToggle.classList.remove('active');
+            navToggle.setAttribute('aria-expanded', 'false');
+            navToggle.setAttribute('aria-label', '開啟導覽選單');
+        }
         navToggle.addEventListener('click', () => {
             const open = mainNav.classList.toggle('open');
-            navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            navToggle.classList.toggle('active', open);
+            navToggle.setAttribute('aria-expanded', String(open));
+            navToggle.setAttribute('aria-label', open ? '關閉導覽選單' : '開啟導覽選單');
         });
-
         mainNav.addEventListener('click', event => {
-            if (!event.target.closest('a')) return;
-            mainNav.classList.remove('open');
-            navToggle.setAttribute('aria-expanded', 'false');
+            if (event.target.closest('a')) closeNavigation();
         });
-
         document.addEventListener('click', event => {
             if (!mainNav.classList.contains('open')) return;
             if (mainNav.contains(event.target) || navToggle.contains(event.target)) return;
-            mainNav.classList.remove('open');
-            navToggle.setAttribute('aria-expanded', 'false');
+            closeNavigation();
         });
     }
 

@@ -6,8 +6,8 @@
     <title>RealDate · L1nG</title>
     <meta name="description" content="RealDate 是 L1nG 製作的《模擬市民 4》時間與人生系統模組。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-width-r2">
-    <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
+    <link rel="stylesheet" href="realdate.css?v=20261014-mobile-calendar-center-r6">
+    <script src="realdate.js?v=20261014-mobile-calendar-center-r6" defer></script>
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
     <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
     <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
@@ -23,7 +23,7 @@
             <div class="site-brand-group">
                 <a class="creator-link" href="../home.html">L1nG</a>
                 <span class="brand-divider">/</span>
-                <a class="realdate-brand" href="index.html">REALDATE</a>
+                <a class="realdate-brand" href="index.html">RealDate</a>
             </div>
             <nav class="main-nav" id="mainNav" aria-label="RealDate">
                 <a href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
@@ -31,7 +31,7 @@
                 <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
                 <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
                 <!-- 全部導覽項目直接顯示，避免桌面版額外的「更多」選單 -->
-                <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                <a href="roadmap.html"><span data-lang="zh-Hant">發展方向</span><span data-lang="en">Direction</span></a>
                 <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
                 <a href="feedback.html"><span data-lang="zh-Hant">問題反饋</span><span data-lang="en">Feedback</span></a>
             </nav>
@@ -49,11 +49,11 @@
 
     <main>
         <!-- ========【RealDate 首頁主視覺】 設定 - 專案定位、版本資訊與人生時間軸 ======== -->
-        <section class="hero">
+        <section class="hero rd-hero-track" aria-label="RealDate">
             <div class="hero-inner">
                 <div class="hero-copy reveal">
-                    <div class="eyebrow">THE SIMS 4 · TIME &amp; LIFE SYSTEM</div>
-                    <h1>REALDATE</h1>
+                    <div class="eyebrow">The Sims 4 · Time &amp; Life System</div>
+                    <h1>RealDate</h1>
                     <p class="hero-lead" data-lang="zh-Hant">讓《模擬市民 4》裡的時間，不只是一天一天經過。</p>
                     <p class="hero-lead" data-lang="en">Make time in The Sims 4 feel like a life that actually moves forward.</p>
                     <p class="hero-description" data-lang="zh-Hant">
@@ -87,39 +87,19 @@
                         </span>
                     </div>
                 </div>
-                <div class="timeline-visual reveal" aria-hidden="true">
-                    <div class="calendar-card">
-                        <div class="calendar-month">
-                            <span data-lang="zh-Hant">10 月</span>
-                            <span data-lang="en">OCTOBER</span>
-                        </div>
-                        <div class="calendar-day">14</div>
-                        <div class="calendar-weekday">
-                            <span data-lang="zh-Hant">星期二</span>
-                            <span data-lang="en">TUESDAY</span>
-                        </div>
-                    </div>
-                    <div class="life-line">
-                        <div class="life-event">
-                            <span class="event-dot"></span>
-                            <strong><span data-lang="zh-Hant">生日</span><span data-lang="en">Birthday</span></strong>
-                            <small><span data-lang="zh-Hant">22 歲</span><span data-lang="en">Age 22</span></small>
-                        </div>
-                        <div class="life-event">
-                            <span class="event-dot"></span>
-                            <strong><span data-lang="zh-Hant">月曆</span><span data-lang="en">Calendar</span></strong>
-                            <small><span data-lang="zh-Hant">365 天</span><span data-lang="en">365 Days</span></small>
-                        </div>
-                        <div class="life-event">
-                            <span class="event-dot"></span>
-                            <strong><span data-lang="zh-Hant">懷孕</span><span data-lang="en">Pregnancy</span></strong>
-                            <small><span data-lang="zh-Hant">時間軸</span><span data-lang="en">Timeline</span></small>
-                        </div>
-                        <div class="life-event">
-                            <span class="event-dot"></span>
-                            <strong><span data-lang="zh-Hant">年號</span><span data-lang="en">Era</span></strong>
-                            <small><span data-lang="zh-Hant">歷史</span><span data-lang="en">History</span></small>
-                        </div>
+                <div class="timeline-visual rd-timeline-visual reveal" aria-label="日曆會隨頁面捲動翻頁">
+                    <div class="rd-timeline-events"><div class="rd-timeline-event active"><strong><span data-lang="zh-Hant">日期</span><span data-lang="en">Date</span></strong><small><span data-lang="zh-Hant">今天的日期</span><span data-lang="en">Today</span></small></div>
+<div class="rd-timeline-event"><strong><span data-lang="zh-Hant">生日</span><span data-lang="en">Birthday</span></strong><small><span data-lang="zh-Hant">重要的一天</span><span data-lang="en">A special day</span></small></div>
+<div class="rd-timeline-event"><strong><span data-lang="zh-Hant">紀念</span><span data-lang="en">Memories</span></strong><small><span data-lang="zh-Hant">值得記得的事</span><span data-lang="en">Worth remembering</span></small></div>
+<div class="rd-timeline-event"><strong><span data-lang="zh-Hant">下一頁</span><span data-lang="en">Next Page</span></strong><small><span data-lang="zh-Hant">人生仍在前進</span><span data-lang="en">Life moves forward</span></small></div></div>
+                    <div class="rd-paper-scene is-tear" id="rdPaperScene">
+                        <div class="rd-paper-pad rd-pad-two"></div><div class="rd-paper-pad"></div>
+                        <div class="rd-paper rd-paper-back" data-paper-back><small><span data-lang="zh-Hant">10 月</span><span data-lang="en">OCTOBER</span></small><div class="rd-paper-day">15</div><div class="rd-paper-weekday"><span data-lang="zh-Hant">星期四</span><span data-lang="en">THURSDAY</span></div></div>
+                        <div class="rd-paper rd-paper-out" data-paper-front><small><span data-lang="zh-Hant">10 月</span><span data-lang="en">OCTOBER</span></small><div class="rd-paper-day">14</div><div class="rd-paper-weekday"><span data-lang="zh-Hant">星期三</span><span data-lang="en">WEDNESDAY</span></div></div>
+                        <div class="rd-paper rd-stack-layer" data-paper-card="0"><small><span data-lang="zh-Hant">10 月</span><span data-lang="en">OCTOBER</span></small><div class="rd-paper-day">14</div><div class="rd-paper-weekday"><span data-lang="zh-Hant">星期三</span><span data-lang="en">WEDNESDAY</span></div></div>
+<div class="rd-paper rd-stack-layer" data-paper-card="1"><small><span data-lang="zh-Hant">10 月</span><span data-lang="en">OCTOBER</span></small><div class="rd-paper-day">15</div><div class="rd-paper-weekday"><span data-lang="zh-Hant">星期四</span><span data-lang="en">THURSDAY</span></div></div>
+<div class="rd-paper rd-stack-layer" data-paper-card="2"><small><span data-lang="zh-Hant">10 月</span><span data-lang="en">OCTOBER</span></small><div class="rd-paper-day">20</div><div class="rd-paper-weekday"><span data-lang="zh-Hant">星期二</span><span data-lang="en">TUESDAY</span></div></div>
+<div class="rd-paper rd-stack-layer" data-paper-card="3"><small><span data-lang="zh-Hant">11 月</span><span data-lang="en">NOVEMBER</span></small><div class="rd-paper-day">01</div><div class="rd-paper-weekday"><span data-lang="zh-Hant">星期日</span><span data-lang="en">SUNDAY</span></div></div>
                     </div>
                 </div>
             </div>
@@ -216,7 +196,7 @@
                 <p data-lang="en">Relationship &amp; Life Chronicle</p>
                 <p data-lang="zh-Hant">開發中的內容不會先寫進目前公開玩法；完成並發布後才會整合進正式文件。</p>
                 <p data-lang="en">In-development features stay separate from released gameplay documentation until publication.</p>
-                <a class="text-link arrow-link-motion" href="roadmap.html"><span data-lang="zh-Hant">查看開發藍圖</span><span data-lang="en">View Roadmap</span><span aria-hidden="true">→</span></a>
+                <a class="text-link arrow-link-motion" href="roadmap.html"><span data-lang="zh-Hant">查看發展方向</span><span data-lang="en">View Direction</span><span aria-hidden="true">→</span></a>
             </article>
         </section>
     </main>
@@ -234,7 +214,7 @@
                     <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
                     <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
                     <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
-                    <a href="roadmap.html"><span data-lang="zh-Hant">開發藍圖</span><span data-lang="en">Roadmap</span></a>
+                    <a href="roadmap.html"><span data-lang="zh-Hant">發展方向</span><span data-lang="en">Direction</span></a>
                     <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
                     <a href="../home.html"><span data-lang="zh-Hant">L1nG 首頁</span><span data-lang="en">L1nG Home</span></a>
                 </nav>

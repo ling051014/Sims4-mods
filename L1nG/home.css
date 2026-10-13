@@ -1104,7 +1104,7 @@ section[id] {
     padding:10px 12px;
     border:1px solid var(--border);
     border-radius:10px;
-    background:var(--card);
+    background:#fff;
     color:inherit;
     text-decoration:none;
     display:flex;
@@ -1114,15 +1114,20 @@ section[id] {
     transition:border-color .18s ease, background-color .18s ease, transform .18s ease;
 }
 
-.genealogy-project-action:hover {
-    border-color:#bfdced;
-    background:#f8fbfd;
+.genealogy-project-action:hover,
+.genealogy-project-action:focus-visible {
+    border-color:#acd3ee;
+    background:#edf7ff;
     transform:translateX(2px);
 }
 
-.genealogy-project-action.primary {
-    border-color:#c8dfed;
-    background:#f7fbfe;
+.genealogy-project-action:focus-visible {
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+}
+
+.genealogy-project-action:active {
+    background:#e2f1fc;
 }
 
 .genealogy-project-action-copy {
