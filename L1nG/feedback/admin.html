@@ -6,9 +6,9 @@
         <meta name="theme-color" content="#f7f7f5">
         <title>管理中心 · L1nG</title>
         <link rel="stylesheet" href="feedback.css">
-        <link rel="stylesheet" href="admin.css?v=20261013-conversation-r1">
+        <link rel="stylesheet" href="admin.css?v=20261013-attachment-preview-r2">
         <script src="select-ui.js" defer></script>
-        <script src="admin.js?v=20261013-conversation-r1" defer></script>
+        <script src="admin.js?v=20261013-attachment-preview-r2" defer></script>
     </head>
     <body class="admin-only">
         <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
@@ -353,7 +353,7 @@
                 <div class="admin-reply-compose">
                     <label for="admin-reply" class="field-label">回覆匿名玩家 <span class="optional">（網站內對話）</span></label><textarea id="admin-reply" class="field" rows="2" maxlength="2000" placeholder="輸入給玩家的回覆…"></textarea>
                     <div class="admin-reply-actions">
-                        <span class="hint">回覆不會寄出 Email</span>
+                        <span class="hint">Enter 傳送 · Shift+Enter 換行；不會寄出 Email</span>
                         <button class="primary" id="admin-send" type="button">傳送回覆 <svg class="i sm"><use href="#ico-send"></use></svg>
                         </button>
                     </div>
@@ -367,6 +367,25 @@
                     </button>
                 </div>
             </aside>
+        </div>
+        <div class="admin-attachment-preview" id="admin-attachment-preview" role="presentation" hidden>
+            <section class="admin-preview-card" role="dialog" aria-modal="true" aria-labelledby="admin-preview-title">
+                <header class="admin-preview-header">
+                    <div class="admin-preview-heading">
+                        <strong id="admin-preview-title">附件預覽</strong>
+                        <small id="admin-preview-size"></small>
+                    </div>
+                    <div class="admin-preview-actions">
+                        <button class="secondary" id="admin-preview-zoom-out" type="button" aria-label="縮小圖片" hidden>−</button>
+                        <button class="secondary" id="admin-preview-zoom-in" type="button" aria-label="放大圖片" hidden>＋</button>
+                        <a class="secondary admin-preview-download" id="admin-preview-download" href="#" download>下載</a>
+                        <button class="icon-btn" id="admin-preview-close" type="button" aria-label="關閉附件預覽">
+                            <svg class="i"><use href="#ico-close"></use></svg>
+                        </button>
+                    </div>
+                </header>
+                <div class="admin-preview-content" id="admin-preview-content">正在讀取附件…</div>
+            </section>
         </div>
         <div aria-hidden="true" class="confirm-layer" id="confirm-layer">
             <div aria-labelledby="confirm-heading" aria-modal="true" class="confirm-card" role="alertdialog">
