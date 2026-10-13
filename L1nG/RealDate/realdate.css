@@ -1861,7 +1861,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     .rd-hero-track .hero-inner {padding:74px 0;gap:32px;}
     .rd-hero-track .hero-copy h1 {font-size:61px;letter-spacing:2px;}
     .rd-hero-track .rd-timeline-visual {min-height:390px;height:390px;width:min(100%,410px);max-width:410px;}
-    .rd-hero-track .rd-paper-scene {right:0;top:8px;width:210px;height:250px;}
+    .rd-hero-track .rd-paper-scene {right:0;top:48px;width:210px;height:250px;}
     .rd-hero-track .rd-paper-day {font-size:82px;}
     .rd-hero-track .rd-timeline-events {left:20px;top:160px;gap:5px;padding-left:24px;}
     .rd-hero-track .rd-timeline-event strong {font-size:12px;}

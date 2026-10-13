@@ -225,6 +225,8 @@ if ("IntersectionObserver" in window) {
     const hero = scene.closest(".rd-hero-track");
     const visual = scene.closest(".rd-timeline-visual");
     const desktop = window.matchMedia("(min-width: 981px)");
+    const phone = window.matchMedia("(max-width: 650px)");
+    const labels = visual.querySelector(".rd-timeline-events");
     const front = scene.querySelector("[data-paper-front]");
     const back = scene.querySelector("[data-paper-back]");
     const timeline = document.querySelectorAll(".rd-hero-track .rd-timeline-event");
@@ -270,15 +272,20 @@ if ("IntersectionObserver" in window) {
             start = Math.max(0, top - window.innerHeight * .76);
             finish = start + 340;
         } else {
-            // On stacked mobile/tablet layouts, the calendar starts below the
-            // text. Allow it to become fully visible before the paper follows.
-            // Only the paper moves; the event labels stay in normal flow.
+            // Keep the existing tablet behavior. On phones, compare the initial
+            // paper position with its final position around the label midpoint.
+            // The left-side labels themselves remain entirely stationary.
             const visibleTop = Math.max(96, Math.min(window.innerHeight * .22, 210));
             const holdStart = Math.max(0, top - visibleTop);
-            const mobileTravel = Math.min(250, safeTravel);
+            let mobileTravel = Math.min(250, safeTravel);
+            if (phone.matches && labels) {
+                const labelRect = labels.getBoundingClientRect();
+                const labelCenter = labelRect.top + window.scrollY + labelRect.height / 2;
+                const paperCenter = top + scene.offsetHeight / 2;
+                mobileTravel = Math.min(mobileTravel,
+                    Math.max(0, (labelCenter - paperCenter) * 2));
+            }
             follow = Math.min(Math.max(0, window.scrollY - holdStart), mobileTravel);
-            // Begin flipping as the calendar enters view, then finish before
-            // it leaves its bounded follow area (without extra hero height).
             start = Math.max(0, holdStart - Math.min(140, window.innerHeight * .18));
             finish = Math.max(start + 260, holdStart + mobileTravel);
         }
