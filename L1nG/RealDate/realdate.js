@@ -222,6 +222,8 @@ if ("IntersectionObserver" in window) {
     "use strict";
     const scene = document.getElementById("rdPaperScene");
     if (!scene) return;
+    const hero = scene.closest(".rd-hero-track");
+    const desktop = window.matchMedia("(min-width: 981px)");
     const front = scene.querySelector("[data-paper-front]");
     const back = scene.querySelector("[data-paper-back]");
     const timeline = document.querySelectorAll(".rd-hero-track .rd-timeline-event");
@@ -252,10 +254,15 @@ if ("IntersectionObserver" in window) {
             scene.style.setProperty("--peel","0");
             return;
         }
+        // Desktop progress uses the hero's document coordinates rather than
+        // the moving viewport coordinates of the sticky calendar.
+        const heroTop = hero.getBoundingClientRect().top + window.scrollY;
+        const heroBottom = heroTop + hero.offsetHeight;
         const top = scene.getBoundingClientRect().top + window.scrollY;
-        const start = Math.max(0, top - window.innerHeight * .76);
-        // At least 460px of page scrolling, rather than changing three dates in 180px.
-        const finish = Math.max(start + 460, top + Math.min(140, window.innerHeight * .18));
+        const start = desktop.matches ? Math.max(0,heroTop + 70) : Math.max(0,top-window.innerHeight*.76);
+        const finish = desktop.matches
+            ? Math.max(start+480,heroBottom-window.innerHeight*.60)
+            : Math.max(start+460,top+Math.min(140,window.innerHeight*.18));
         const p = Math.max(0, Math.min(1, (window.scrollY - start) / (finish - start)));
         const phase = Math.min(2.9999, p * 3);
         const index = Math.floor(phase);
