@@ -6,9 +6,9 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261013-export-section-padding-r23">
+        <link rel="stylesheet" href="genealogy.css?v=20261013-thread-unify-r24">
         <script src="../feedback/feedback-core.js" defer></script>
-        <script src="genealogy-feedback.js?v=20261013-feedback-opaque-r12" defer></script>
+        <script src="genealogy-feedback.js?v=20261013-thread-unify-r13" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261012-about-fixed-scroll-r2">
         <script src="../site-info-modal.js?v=20261013-about-theme-r3" defer></script>
     </head>
@@ -77,6 +77,7 @@
                                         <span class="genealogy-feedback-optional">至少 10 字</span>
                                     </div>
                                     <textarea class="genealogy-feedback-field genealogy-feedback-message" id="genealogyFeedbackMessage" rows="5" maxlength="2000" required placeholder="請描述遇到的情況、操作步驟，或想提出的建議⋯⋯"></textarea>
+                                    <p class="genealogy-feedback-field-error" id="genealogyFeedbackMessageError" hidden>回饋內容至少需要 10 個字。</p>
                                     <div class="genealogy-feedback-field-note">
                                         <span>請勿填寫帳號、密碼或其他敏感資訊。</span>
                                         <span id="genealogyFeedbackCount">0 / 2000</span>
@@ -97,6 +98,7 @@
                                     </button>
                                     <input id="genealogyFeedbackFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log,image/png,image/jpeg,image/webp,text/plain" multiple hidden>
                                     <ul id="genealogyFeedbackFileList" class="genealogy-feedback-files"></ul>
+                                    <p class="genealogy-feedback-field-error" id="genealogyFeedbackFilesError" hidden></p>
                                 </section>
                                 <section class="genealogy-feedback-section">
                                     <div class="genealogy-feedback-section-heading">
@@ -131,6 +133,7 @@
                                             <label class="genealogy-feedback-field-label" for="genealogyFeedbackContact">聯絡資料</label>
                                             <input class="genealogy-feedback-field" id="genealogyFeedbackContact" type="text" maxlength="120" placeholder="example@email.com" autocomplete="off">
                                             <p class="genealogy-feedback-help">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</p>
+                                            <p class="genealogy-feedback-field-error" id="genealogyFeedbackContactError" hidden>請確認聯絡方式格式。</p>
                                         </div>
                                     </details>
                                 </section>
@@ -175,6 +178,50 @@
                                     <button class="genealogy-feedback-submit" type="submit">查詢</button>
                                 </form>
                                 <p class="genealogy-feedback-history-status" id="genealogyFeedbackHistoryStatus" role="status" hidden></p>
+                                <div class="genealogy-feedback-success" id="genealogyFeedbackSuccess" hidden>
+                                    <h3>已收到你的回饋！</h3>
+                                    <p id="genealogyFeedbackSuccessCode"></p>
+                                    <p id="genealogyFeedbackSuccessDescription"></p>
+                                    <div class="genealogy-feedback-credential" id="genealogyFeedbackCredential" hidden>
+                                        <strong>你的私人回饋憑證</strong>
+                                        <button class="genealogy-feedback-copy-credential" id="genealogyFeedbackCopyCredential" type="button" aria-label="複製回饋憑證">
+                                            <code id="genealogyFeedbackSuccessToken"></code>
+                                            <svg class="l1ng-copy-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <rect class="l1ng-copy-stroke" x="8" y="8" width="12" height="12" rx="2" stroke-dasharray="44.7 90" style="--stroke-hide:46.7"></rect>
+                                                <path class="l1ng-copy-stroke" d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke-dasharray="29.427 80" style="--stroke-hide:31.427"></path>
+                                                <path class="l1ng-check-stroke" d="M5 12.5l4.2 4.2L19 7" stroke-dasharray="19.728 70" style="--stroke-hide:21.728"></path>
+                                            </svg>
+                                        </button>
+                                        <small>請妥善保存。私人憑證相當於密碼，請勿公開。</small>
+                                    </div>
+                                    <div class="genealogy-feedback-success-actions">
+                                        <button class="genealogy-feedback-secondary" id="genealogyFeedbackSuccessNew" type="button">再寫一則</button>
+                                        <button class="genealogy-feedback-submit" id="genealogyFeedbackSuccessOpen" type="button" hidden>查看匿名對話</button>
+                                    </div>
+                                </div>
+                                <div class="genealogy-feedback-thread" id="genealogyFeedbackThread" hidden>
+                                    <div class="genealogy-feedback-thread-summary">
+                                        <div><strong id="genealogyFeedbackThreadId"></strong><small id="genealogyFeedbackThreadTime"></small></div>
+                                        <span id="genealogyFeedbackThreadState"></span>
+                                    </div>
+                                    <div class="genealogy-feedback-thread-refresh">
+                                        <span id="genealogyFeedbackThreadRefreshInfo"></span>
+                                        <button class="genealogy-feedback-secondary" id="genealogyFeedbackThreadRefresh" type="button">立即更新</button>
+                                    </div>
+                                    <div class="genealogy-feedback-conversation" id="genealogyFeedbackMessages" aria-live="polite"></div>
+                                    <form id="genealogyFeedbackReplyForm" class="genealogy-feedback-reply-form" novalidate>
+                                        <label class="genealogy-feedback-field-label" for="genealogyFeedbackReply">補充資訊或回覆管理員</label>
+                                        <textarea class="genealogy-feedback-field" id="genealogyFeedbackReply" maxlength="2000" rows="3" placeholder="補充問題、回覆或說明結果⋯⋯"></textarea>
+                                        <div class="genealogy-feedback-reply-actions">
+                                            <label class="genealogy-feedback-attach-action" for="genealogyFeedbackReplyFiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3"/></svg>選擇附件</label>
+                                            <input id="genealogyFeedbackReplyFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log" multiple hidden>
+                                            <button class="genealogy-feedback-submit" id="genealogyFeedbackReplySubmit" type="submit">送出回覆</button>
+                                        </div>
+                                        <ul id="genealogyFeedbackReplyFileList" class="genealogy-feedback-files"></ul>
+                                        <p class="genealogy-feedback-field-error" id="genealogyFeedbackReplyError" role="alert" hidden></p>
+                                        <div id="genealogyFeedbackReplyVerify"></div>
+                                    </form>
+                                </div>
                             </section>
                         </div>
                     </section>
