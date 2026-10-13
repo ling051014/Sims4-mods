@@ -4617,64 +4617,34 @@ button.avatar-editor-action { cursor:pointer; }
 
 .genealogy-feedback-verify-card {
     display:flex;
-    align-items:center;
-    gap:12px;
-    min-height:66px;
-    padding:12px;
-    border:1px solid var(--gf-stroke);
-    border-radius:12px;
-    background:var(--gf-subtle);
-}
-
-.genealogy-feedback-verify-icon {
-    display:grid;
-    place-items:center;
-    flex:0 0 36px;
-    width:36px;
-    height:36px;
-    border:1px solid var(--gf-stroke);
-    border-radius:10px;
-    background:var(--gf-surface);
-    color:var(--gf-primary);
-}
-
-.genealogy-feedback-verify-icon svg {
-    width:23px;
-    height:23px;
-}
-
-.genealogy-feedback-verify-text {
-    flex:1 1 auto;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:9px;
     min-width:0;
 }
 
-.genealogy-feedback-verify-text strong {
-    display:block;
-    font-size:12.5px;
-    font-weight:700;
+.genealogy-feedback-turnstile {
+    width:100%;
+    min-width:0;
 }
 
-.genealogy-feedback-verify-text small {
-    display:block;
-    margin-top:3px;
-    color:var(--gf-muted);
-    font-size:10.5px;
-}
-
-.genealogy-feedback-panel .genealogy-feedback-verify-card button {
-    flex:0 0 auto;
-    padding:8px 11px;
+.genealogy-feedback-panel .genealogy-feedback-retry {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:32px;
+    padding:7px 11px;
     border:1px solid var(--gf-stroke);
     border-radius:8px;
     background:var(--gf-surface);
-    color:var(--gf-muted);
-    font-family:inherit;
+    color:var(--gf-text);
+    font:inherit;
     font-size:11px;
+    cursor:pointer;
 }
 
-.genealogy-feedback-panel .genealogy-feedback-verify-card button:disabled {
-    opacity:.5;
-    cursor:not-allowed;
+.genealogy-feedback-panel .genealogy-feedback-retry[hidden] {
+    display:none;
 }
 
 .genealogy-feedback-panel .genealogy-feedback-actions {
