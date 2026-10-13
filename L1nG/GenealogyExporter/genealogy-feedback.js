@@ -486,6 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $('genealogyFeedbackCredential').hidden=!result.receipt;
       $('genealogyFeedbackSuccessOpen').hidden=!result.receipt;
       $('genealogyFeedbackSuccess').hidden=false;
+      $('genealogyFeedbackHistoryIntro').hidden=true;
       $('genealogyFeedbackThread').hidden=true;
       historyForm.hidden=true;
       lastReceipt=result.receipt||'';
@@ -566,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response=await core.lookup(receipt);
       activeReceipt=receipt;rememberReceipt(receipt);receiptInput.value=receipt;
       $('genealogyFeedbackSuccess').hidden=true;historyForm.hidden=true;
+      $('genealogyFeedbackHistoryIntro').hidden=true;
       $('genealogyFeedbackThread').hidden=false;
       lastCheck=Date.now();drawThread(response.feedback);setTab(1);
       $('genealogyFeedbackThreadRefreshInfo').textContent='每 60 秒檢查新回覆';
@@ -591,6 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function showHistory(){
     stopPolling();activeReceipt='';
     $('genealogyFeedbackSuccess').hidden=true;$('genealogyFeedbackThread').hidden=true;
+    $('genealogyFeedbackHistoryIntro').hidden=false;
     historyForm.hidden=false;
   }
   $('genealogyFeedbackSuccessOpen').addEventListener('click',()=>openThread(lastReceipt));
