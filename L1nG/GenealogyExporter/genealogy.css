@@ -4424,7 +4424,7 @@ button.avatar-editor-action { cursor:pointer; }
     flex:0 0 auto;
     min-height:26px;
     padding:3px 7px;
-    border:0;
+    border:1px solid var(--red,#b6515a);
     border-radius:6px;
     background:transparent;
     color:var(--red,#b6515a);
