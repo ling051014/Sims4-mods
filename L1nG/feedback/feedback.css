@@ -160,6 +160,10 @@ body.realdate-only #siteHeader .header-controls{display:inline-flex;grid-column:
 body.realdate-only #siteHeader .nav-toggle{display:none}
 body.realdate-only #form-layer .section{width:auto;max-width:none;margin:16px 0 0;padding:0}
 body.realdate-only #form-layer .section-heading{margin-bottom:9px}
+body.realdate-only #realdate-turnstile{display:block;width:100%;min-width:0}
+body.realdate-only #realdate-turnstile iframe{max-width:100%}
+body.realdate-only #realdate-turnstile-retry{margin-top:8px;font-size:11px;padding:7px 12px}
+body.realdate-only #realdate-turnstile-retry[hidden]{display:none}
 @media(max-width:980px){
   body.realdate-only #siteHeader .site-header-inner{grid-template-columns:minmax(0,1fr) auto;gap:10px;position:relative}
   body.realdate-only #siteHeader .header-controls{grid-column:2}

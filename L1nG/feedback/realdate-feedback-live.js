@@ -5,7 +5,7 @@
   const core=window.L1nGFeedbackCore;
   if(!core || !$('feedback-form'))return;
   let category='bug', files=[], replyFiles=[], verifier=null, replyVerifier=null, activeReceipt='', current=null, lastReceipt='';
-  const siteKeyHost=$('verify-card');
+  const verificationHost=$('realdate-turnstile');
   const setError=(msg,field)=>{
     const nodes=['message-error','version-error','contact-error','file-error','submit-inline-error'];
     for(const id of nodes){const node=$(id);if(node){node.classList.remove('visible');node.textContent='';}}
@@ -88,18 +88,54 @@
   targetSelect?.addEventListener('change',updateVersion);
   $('message-field')?.addEventListener('input',()=>{$('char-count').textContent=$('message-field').value.length+' / 2000';setError('');});
   $('contact-method')?.addEventListener('change',()=>{$('contact-value').type=$('contact-method').value==='email'?'email':'text';});
-  // 保留原本驗證卡片的設計，將停用按鈕換成真正的 Turnstile。
-  if(siteKeyHost){
-    const button=$('verify-button');button?.remove();
-    const target=document.createElement('div');target.id='realdate-turnstile';siteKeyHost.append(target);
-    if(core.isLive()){
-      core.createVerification(target).then(v=>{
-        verifier=v;$('verify-title').textContent='Cloudflare 人機驗證';
-        $('verify-subtitle').textContent='驗證通過後才可送出回饋';
-        const help=document.querySelector('.verify-legal');if(help)help.textContent='由 Cloudflare 提供安全驗證。';
-      }).catch(err=>{$('verify-subtitle').textContent=err.message;});
-    }else {$('verify-subtitle').textContent='預覽不會送出正式回饋';}
+  // RealDate 直接顯示 Cloudflare 原生元件，避免舊卡片與驗證框在手機上互相擠壓。
+  const verificationStatus=$('realdate-turnstile-status');
+  const verificationRetry=$('realdate-turnstile-retry');
+  let verificationLoading=false, verificationState='idle';
+  function updateVerificationStatus(state,message){
+    verificationState=state;
+    // 換新文字節點，讓現有繁中／英文切換能正確翻譯動態驗證狀態。
+    verificationStatus?.replaceChildren(document.createTextNode(message));
+    if(verificationRetry)verificationRetry.hidden=state!=='error';
   }
+  async function ensureVerification(){
+    if(!verificationHost||verificationLoading||verifier)return;
+    if(!core.isLive()){
+      updateVerificationStatus('preview','預覽不會送出正式回饋');
+      return;
+    }
+    verificationLoading=true;
+    updateVerificationStatus('loading','正在載入 Cloudflare 安全驗證…');
+    try{
+      const widget=await core.createVerification(verificationHost,{
+        size:'flexible',
+        onStatus:state=>{
+          if(state==='success')updateVerificationStatus('success','安全驗證已完成。');
+          else if(state==='expired')updateVerificationStatus('expired','驗證已過期，請重新完成驗證。');
+          else if(state==='error'||state==='timeout')updateVerificationStatus('error','安全驗證發生問題，請重新載入驗證。');
+          else if(state==='pending')updateVerificationStatus('ready','請完成上方的安全驗證。');
+        }
+      });
+      verifier=widget;
+      if(verificationState==='loading'){
+        updateVerificationStatus(widget.getToken()?'success':'ready',
+          widget.getToken()?'安全驗證已完成。':'請完成上方的安全驗證。');
+      }
+    }catch(err){
+      verificationHost.replaceChildren();
+      updateVerificationStatus('error',err?.message||'安全驗證載入失敗，請重新載入驗證。');
+    }finally{
+      verificationLoading=false;
+    }
+  }
+  verificationRetry?.addEventListener('click',()=>{
+    if(verificationLoading)return;
+    verifier?.remove();
+    verifier=null;
+    verificationHost?.replaceChildren();
+    ensureVerification();
+  });
+  if(verificationHost)requestAnimationFrame(ensureVerification);
   const form=$('feedback-form');
   form.addEventListener('submit',async event=>{
     event.preventDefault();
