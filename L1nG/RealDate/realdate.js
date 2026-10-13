@@ -263,12 +263,26 @@ if ("IntersectionObserver" in window) {
         const top = visual.getBoundingClientRect().top + window.scrollY + scene.offsetTop;
         const heroBottom = hero.getBoundingClientRect().top + window.scrollY + hero.offsetHeight;
         const safeTravel = Math.max(0, heroBottom - top - scene.offsetHeight - 12);
-        const follow = desktop.matches ? Math.min(window.scrollY, 250, safeTravel) : 0;
+        let follow, start, finish;
+        if (desktop.matches) {
+            // Preserve the desktop behavior that is already approved.
+            follow = Math.min(window.scrollY, 250, safeTravel);
+            start = Math.max(0, top - window.innerHeight * .76);
+            finish = start + 340;
+        } else {
+            // On stacked mobile/tablet layouts, the calendar starts below the
+            // text. Allow it to become fully visible before the paper follows.
+            // Only the paper moves; the event labels stay in normal flow.
+            const visibleTop = Math.max(96, Math.min(window.innerHeight * .22, 210));
+            const holdStart = Math.max(0, top - visibleTop);
+            const mobileTravel = Math.min(250, safeTravel);
+            follow = Math.min(Math.max(0, window.scrollY - holdStart), mobileTravel);
+            // Begin flipping as the calendar enters view, then finish before
+            // it leaves its bounded follow area (without extra hero height).
+            start = Math.max(0, holdStart - Math.min(140, window.innerHeight * .18));
+            finish = Math.max(start + 260, holdStart + mobileTravel);
+        }
         scene.style.setProperty("--calendar-follow",follow.toFixed(1)+"px");
-        const start = Math.max(0, top - window.innerHeight * .76);
-        // Complete the desktop flips while the paper is still held in view.
-        const finish = desktop.matches ? start + 340
-            : Math.max(start + 460, top + Math.min(140, window.innerHeight * .18));
         const p = Math.max(0, Math.min(1, (window.scrollY - start) / (finish - start)));
         const phase = Math.min(2.9999, p * 3);
         const index = Math.floor(phase);
