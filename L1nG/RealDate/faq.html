@@ -6,8 +6,8 @@
     <title>RealDate 常見問題 · L1nG</title>
     <meta name="description" content="RealDate 常見問題。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-unified-r4">
-    <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
+    <link rel="stylesheet" href="realdate.css?v=20261014-overrides-faq-r1">
+    <script src="realdate.js?v=20261014-overrides-faq-r1" defer></script>
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
     <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
     <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
@@ -76,10 +76,80 @@
                 <p data-lang="zh-Hant">建議先備份存檔，並移除舊版 RealDate 的 <code>.package</code> 與 <code>.ts4script</code>，再安裝新版。請一併檢查相容檔是否需要更換，避免不同版本混用。各版本的變更請參閱<a href="changelog.html">更新日誌</a>。</p>
                 <p data-lang="en">Back up your saves, remove the previous RealDate <code>.package</code> and <code>.ts4script</code>, then install the new release. Update any compatibility packages as needed and avoid mixing versions. See the <a href="changelog.html">Changelog</a>.</p>
             </details>
-            <details class="faq-item reveal">
-                <summary><span data-lang="zh-Hant">相容檔應放在哪裡？</span><span data-lang="en">Where do compatibility packages go?</span></summary>
-                <p data-lang="zh-Hant">相容檔請放在 <code>Mods\Overrides</code>。只安裝與自己使用的第三方模組相符的檔案；未安裝對應第三方模組時，不需要額外加入該相容檔。</p>
-                <p data-lang="en">Place compatibility packages in <code>Mods\Overrides</code>. Install only packages matching third-party mods you actually use. Other packages are unnecessary.</p>
+            <details class="faq-item reveal" id="faq-resource">
+                <summary><span data-lang="zh-Hant">如何設定 Overrides 與 Resource.cfg？</span><span data-lang="en">How do I set up Overrides and Resource.cfg?</span></summary>
+                <div class="faq-resource-body">
+                    <p data-lang="zh-Hant">RealDate 的相容檔需要放進 <code>Mods\Overrides</code>。<code>Resource.cfg</code> 是告訴遊戲「到哪裡找模組、哪個資料夾優先」的設定檔。</p>
+                    <p data-lang="en">RealDate compatibility packages go in <code>Mods\Overrides</code>. <code>Resource.cfg</code> tells the game where to find mods and which loading rules take priority.</p>
+
+                    <section class="resource-step">
+                        <div class="resource-step-heading"><span class="resource-step-num">01</span><h4 data-lang="zh-Hant">找到 Resource.cfg</h4><h4 data-lang="en">Find Resource.cfg</h4></div>
+                        <p data-lang="zh-Hant">開啟 <code>文件 / Electronic Arts / The Sims 4 / Mods</code>，找到 <code>Resource.cfg</code>，再用 Windows「記事本」開啟。<strong>先只看內容，不要更改。</strong></p>
+                        <p data-lang="en">Open <code>Documents / Electronic Arts / The Sims 4 / Mods</code>, find <code>Resource.cfg</code>, and open it with Notepad. <strong>Just read it for now; don't make changes.</strong></p>
+                    </section>
+
+                    <section class="resource-step">
+                        <div class="resource-step-heading"><span class="resource-step-num">02</span><h4 data-lang="zh-Hant">看看 Overrides 是否已經設定好</h4><h4 data-lang="en">Check whether Overrides is already configured</h4></div>
+                        <p data-lang="zh-Hant">在記事本按 <code>Ctrl + F</code>，搜尋 <code>Overrides</code>。你可能會看到類似這樣的內容：</p>
+                        <p data-lang="en">Press <code>Ctrl + F</code> in Notepad and search for <code>Overrides</code>. Your file may contain something like this:</p>
+                        <div class="resource-code">
+                            <div class="resource-code-head"><span data-lang="zh-Hant">Resource.cfg 範例節錄（不是完整檔案）</span><span data-lang="en">Resource.cfg excerpt (not a complete file)</span></div>
+                            <pre>Priority 500
+PackedFile *.package
+PackedFile */*.package
+
+Priority 600
+PackedFile Overrides\*.package</pre>
+                        </div>
+                        <p data-lang="zh-Hant"><strong>500 是一般模組、600 是 Overrides。</strong>因為 600 比 500 大，所以 Overrides 的讀取優先級較高。<code>PackedFile Overrides\*.package</code> 則是讀取 Overrides 資料夾內的 .package 檔案。</p>
+                        <p data-lang="en"><strong>500 is for regular mods and 600 is for Overrides.</strong> Since 600 is higher, Overrides has a higher loading priority. <code>PackedFile Overrides\*.package</code> loads .package files directly inside Overrides.</p>
+                        <p class="resource-result" data-lang="zh-Hant"><strong>如果已有 Overrides 的讀取規則，而且優先級高於一般模組，就設定完成了！</strong>不必修改數字或重複新增，直接跳到第 ④ 步。</p>
+                        <p class="resource-result" data-lang="en"><strong>If you already have an Overrides rule at a higher priority than regular mods, you're done!</strong> No need to change the numbers or add duplicate rules. Skip to Step 4.</p>
+                        <p class="resource-hint" data-lang="zh-Hant">Priority 不一定要是 500 和 600，設定檔也可能有更多行。重點是 Overrides 有對應讀取規則，且優先級較高。</p>
+                        <p class="resource-hint" data-lang="en">Priority numbers need not be 500 and 600, and your file may contain more lines. What matters is an Overrides loading rule with a higher priority.</p>
+                    </section>
+
+                    <section class="resource-step">
+                        <div class="resource-step-heading"><span class="resource-step-num">03</span><h4 data-lang="zh-Hant">找不到 Overrides 設定時，才需要新增</h4><h4 data-lang="en">Only add a rule if none exists</h4></div>
+                        <p data-lang="zh-Hant">先複製一份原本的 <code>Resource.cfg</code> 作為備份。<strong>如果一般模組使用 Priority 500</strong>，可以在原有內容的最後新增以下兩行：</p>
+                        <p data-lang="en">Make a backup of your current <code>Resource.cfg</code>. <strong>If your regular mods use Priority 500</strong>, add these two lines at the end of the existing file:</p>
+                        <div class="resource-code">
+                            <div class="resource-code-head">
+                                <span data-lang="zh-Hant">只有需要新增設定時才複製</span><span data-lang="en">Copy only when adding a rule</span>
+                                <button class="resource-copy-button" type="button" data-resource-copy aria-label="複製 Resource.cfg 設定" title="複製設定">
+                                    <svg class="l1ng-copy-glyph" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                                        <rect class="l1ng-copy-stroke" x="8" y="8" width="12" height="12" rx="2" stroke-dasharray="44.7 90" style="--stroke-hide:46.7"></rect>
+                                        <path class="l1ng-copy-stroke" d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke-dasharray="29.427 80" style="--stroke-hide:31.427"></path>
+                                        <path class="l1ng-check-stroke" d="M5 12.5l4.2 4.2L19 7" stroke-dasharray="19.728 70" style="--stroke-hide:21.728"></path>
+                                    </svg>
+                                    <span data-lang="zh-Hant">複製</span><span data-lang="en">Copy</span>
+                                    <span class="resource-copy-feedback" aria-live="polite" aria-atomic="true"></span>
+                                </button>
+                            </div>
+                            <pre id="resource-cfg-rule">Priority 600
+PackedFile Overrides\*.package</pre>
+                        </div>
+                        <p data-lang="zh-Hant">按 <code>Ctrl + S</code> 儲存。<strong>保留原本的其他內容</strong>，並確認檔名仍是 <code>Resource.cfg</code>，不是 <code>Resource.cfg.txt</code>。</p>
+                        <p data-lang="en">Press <code>Ctrl + S</code> to save. <strong>Keep all other lines intact</strong> and make sure the filename is <code>Resource.cfg</code>, not <code>Resource.cfg.txt</code>.</p>
+                        <p class="resource-hint" data-lang="zh-Hant">600 只是以一般模組 Priority 500 為例。如果你原本使用其他優先級，請先確認新增的數字高於一般模組，不要直接照貼。</p>
+                        <p class="resource-hint" data-lang="en">600 is just an example for regular mods using Priority 500. If your file has other priorities, check the values before copying the example.</p>
+                    </section>
+
+                    <section class="resource-step">
+                        <div class="resource-step-heading"><span class="resource-step-num">04</span><h4 data-lang="zh-Hant">放入 RealDate 相容檔</h4><h4 data-lang="en">Place your RealDate compatibility packages</h4></div>
+                        <p data-lang="zh-Hant">在 <code>Mods</code> 裡找到或建立 <code>Overrides</code> 資料夾，把需要的 RealDate 相容檔直接放進去。</p>
+                        <p data-lang="en">Find or create the <code>Overrides</code> folder inside <code>Mods</code>, then place the RealDate compatibility packages you need directly inside it.</p>
+                        <div class="resource-code">
+                            <div class="resource-code-head"><span data-lang="zh-Hant">資料夾放置範例</span><span data-lang="en">Example folder structure</span></div>
+                            <pre>Mods
+├─ Resource.cfg
+└─ Overrides
+   └─ L1nG_RealDate_Compat_MoodPack.package</pre>
+                        </div>
+                        <p class="resource-hint" data-lang="zh-Hant">只以 Mood Pack Mod 相容檔為例。未安裝對應第三方模組時，不需要放入那個相容檔；完成後重新啟動遊戲。</p>
+                        <p class="resource-hint" data-lang="en">Mood Pack Mod is only an example. Do not install compatibility packages for third-party mods you don't use. Restart the game afterward.</p>
+                    </section>
+                </div>
             </details>
             <details class="faq-item reveal">
                 <summary><span data-lang="zh-Hant">UI Cheats 與 Quick Save 的相容檔可以同時安裝嗎？</span><span data-lang="en">Can UI Cheats and Quick Save packages be installed together?</span></summary>

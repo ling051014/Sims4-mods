@@ -1639,6 +1639,69 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 @media(max-width:640px){.faq-item > summary{padding:17px;font-size:13px}.faq-item > p{margin:0 17px 17px}}
 @media(prefers-reduced-motion:reduce){.faq-item,.faq-item>summary::after{transition:none}}
 
+
+/* ========【RealDate 安裝教學】 僅步驟 05 的內部連結 ======== */
+.step-overrides-line { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; min-width:0; }
+.step-overrides-line > code { margin-top:5px; flex:0 0 auto; }
+.step-overrides-link { display:inline-flex; align-items:center; gap:5px; flex:0 1 auto; min-width:0; color:var(--accent); text-decoration:none; white-space:nowrap; font-size:11px; line-height:1.7; }
+.step-overrides-link:hover, .step-overrides-link:focus-visible { color:var(--accent-hover); }
+.step-overrides-label-short { display:none; }
+
+/* ========【RealDate FAQ】 Resource.cfg 教學沿用現有 FAQ 展開卡片 ======== */
+#faq-resource { scroll-margin-top:calc(var(--header-height) + 18px); }
+.faq-resource-body { margin:0 22px 22px; padding-top:16px; border-top:1px solid var(--line-soft); font-size:13px; line-height:1.9; color:var(--text-muted); min-width:0; }
+.faq-resource-body p { margin:0 0 10px; }
+.faq-resource-body strong { color:var(--text-strong); font-weight:600; }
+.faq-resource-body code { overflow-wrap:anywhere; font-size:12px; }
+.faq-resource-body .resource-step { margin-top:22px; }
+.faq-resource-body .resource-step-heading { display:flex; align-items:baseline; gap:13px; margin-bottom:8px; }
+.faq-resource-body .resource-step-num { color:var(--accent); font-size:12px; font-family:"Bahnschrift SemiCondensed","Arial Narrow",sans-serif; letter-spacing:1.2px; font-weight:600; }
+.faq-resource-body h4 { margin:0; font-size:14px; line-height:1.6; font-weight:600; color:var(--text-strong); }
+.faq-resource-body .resource-hint { color:var(--text-soft); font-size:12px; }
+.faq-resource-body .resource-result { margin:12px 0; padding:12px 14px; background:var(--accent-soft); border-radius:5px; }
+.faq-resource-body .resource-code { margin:12px 0; min-width:0; overflow:hidden; background:var(--surface-soft); border:1px solid var(--line-soft); border-radius:6px; }
+.faq-resource-body .resource-code-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; color:var(--text-soft); font-size:10px; }
+.faq-resource-body .resource-code pre { margin:0; padding:2px 12px 13px; overflow-x:auto; font:12px/1.85 "Cascadia Code","SFMono-Regular",Consolas,monospace; white-space:pre; color:var(--text-main); }
+.faq-resource-body .resource-copy-button { display:inline-flex; align-items:center; justify-content:center; gap:6px; flex:0 0 auto; min-height:30px; padding:4px 7px; border:0; border-radius:5px; background:transparent; color:var(--accent); font-size:11px; }
+.faq-resource-body .resource-copy-button:hover { background:var(--accent-soft); color:var(--accent-hover); }
+.faq-resource-body .resource-copy-button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.faq-resource-body .resource-copy-button.is-copy-error { color:#aa4949; }
+.faq-resource-body .resource-copy-feedback { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.faq-resource-body .l1ng-copy-glyph { display:block; width:20px; height:20px; flex:0 0 20px; overflow:visible; }
+.faq-resource-body .l1ng-copy-stroke, .faq-resource-body .l1ng-check-stroke { fill:none; stroke-width:1.85; stroke-linecap:round; stroke-linejoin:round; }
+.faq-resource-body .l1ng-copy-stroke { stroke:currentColor; stroke-dashoffset:0; }
+.faq-resource-body .l1ng-check-stroke { stroke:#5d9876; stroke-dashoffset:var(--stroke-hide); stroke-width:2.2; }
+.faq-resource-body .l1ng-copy-running .l1ng-copy-stroke { animation:l1ngTraceCopy 3.8s linear both; }
+.faq-resource-body .l1ng-copy-running .l1ng-check-stroke { animation:l1ngTraceCheck 3.8s linear both; }
+@keyframes l1ngTraceCopy {
+  0%,8% { stroke-dashoffset:0; }
+  8.01% { stroke-dashoffset:0; animation-timing-function:cubic-bezier(.4,0,.8,.7); }
+  23%,76% { stroke-dashoffset:var(--stroke-hide); }
+  76.01% { stroke-dashoffset:var(--stroke-hide); animation-timing-function:cubic-bezier(.2,.3,.2,1); }
+  91%,100% { stroke-dashoffset:0; }
+}
+@keyframes l1ngTraceCheck {
+  0%,22% { stroke-dashoffset:var(--stroke-hide); }
+  22.01% { stroke-dashoffset:var(--stroke-hide); animation-timing-function:cubic-bezier(.25,.35,.3,1); }
+  37%,67% { stroke-dashoffset:0; }
+  67.01% { stroke-dashoffset:0; animation-timing-function:cubic-bezier(.5,.05,.8,.7); }
+  82%,100% { stroke-dashoffset:var(--stroke-hide); }
+}
+@media (max-width:650px) {
+  .step-overrides-label-full { display:none; }
+  .step-overrides-label-short { display:inline; }
+  .step-overrides-link { font-size:10px; }
+  .faq-resource-body { margin:0 17px 17px; padding-top:15px; }
+  .faq-resource-body .resource-step-heading { gap:9px; }
+  .faq-resource-body .resource-code-head { padding:8px 10px; font-size:9px; }
+  .faq-resource-body .resource-code pre { padding:2px 10px 12px; font-size:11px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .faq-resource-body .l1ng-copy-running .l1ng-copy-stroke, .faq-resource-body .l1ng-copy-running .l1ng-check-stroke { animation:none; }
+  .faq-resource-body .l1ng-copy-running .l1ng-copy-stroke { stroke-dashoffset:var(--stroke-hide); }
+  .faq-resource-body .l1ng-copy-running .l1ng-check-stroke { stroke-dashoffset:0; }
+}
+
 /* ========【RealDate 網站底部】 設定 - 專案資訊 ======== */
 .site-footer {
     /* 背景 */ background: var(--surface);

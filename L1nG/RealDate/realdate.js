@@ -364,3 +364,75 @@ if ("IntersectionObserver" in window) {
     });
     render();
 })();
+
+
+// ========【RealDate Overrides FAQ】 錨點展開與複製設定（沿用族譜提取器 SVG 動畫） ========
+(() => {
+    "use strict";
+    const guide = document.getElementById("faq-resource");
+    if (!guide) return;
+
+    function openGuideFromLink() {
+        if (window.location.hash !== "#faq-resource") return;
+        guide.open = true;
+        window.requestAnimationFrame(() => {
+            guide.scrollIntoView({ block: "start" });
+        });
+    }
+    window.addEventListener("hashchange", openGuideFromLink);
+    window.addEventListener("load", openGuideFromLink, { once:true });
+    openGuideFromLink();
+
+    const copyButton = guide.querySelector("[data-resource-copy]");
+    const rule = document.getElementById("resource-cfg-rule");
+    if (!copyButton || !rule) return;
+    const glyph = copyButton.querySelector(".l1ng-copy-glyph");
+    const feedback = copyButton.querySelector(".resource-copy-feedback");
+    let resetTimer;
+
+    async function copyText(value) {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+            try {
+                await navigator.clipboard.writeText(value);
+                return true;
+            } catch (_) {
+                // 剪貼簿權限不可用時，沿用族譜提取器的備援方式。
+            }
+        }
+        const area = document.createElement("textarea");
+        area.value = value;
+        area.setAttribute("readonly", "");
+        area.style.cssText = "position:fixed;top:0;left:-9999px;opacity:0;";
+        document.body.appendChild(area);
+        area.focus();
+        area.select();
+        area.setSelectionRange(0, area.value.length);
+        let copied = false;
+        try { copied = document.execCommand("copy"); } catch (_) {}
+        area.remove();
+        return copied;
+    }
+
+    copyButton.addEventListener("click", async () => {
+        const copied = await copyText(rule.textContent.trim());
+        if (resetTimer) window.clearTimeout(resetTimer);
+        if (glyph) glyph.classList.remove("l1ng-copy-running");
+        copyButton.classList.toggle("is-copy-error", !copied);
+        const english = document.documentElement.dataset.language === "en";
+        if (feedback) feedback.textContent = copied
+            ? (english ? "Copied!" : "已複製！")
+            : (english ? "Copy failed; please copy manually." : "複製失敗，請手動複製。");
+        copyButton.title = copied ? (english ? "Copied!" : "已複製！")
+            : (english ? "Copy failed" : "複製失敗");
+        if (copied && glyph) {
+            void glyph.getBoundingClientRect();
+            glyph.classList.add("l1ng-copy-running");
+        }
+        resetTimer = window.setTimeout(() => {
+            if (glyph) glyph.classList.remove("l1ng-copy-running");
+            copyButton.classList.remove("is-copy-error");
+            if (feedback) feedback.textContent = "";
+            copyButton.title = document.documentElement.dataset.language === "en" ? "Copy settings" : "複製設定";
+        }, copied ? 3900 : 1900);
+    });
+})();
