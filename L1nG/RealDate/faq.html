@@ -6,7 +6,7 @@
     <title>RealDate 常見問題 · L1nG</title>
     <meta name="description" content="RealDate 常見問題。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261014-overrides-faq-r1">
+    <link rel="stylesheet" href="realdate.css?v=20261014-overrides-doc-refine-r2">
     <script src="realdate.js?v=20261014-overrides-faq-r1" defer></script>
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
     <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
@@ -84,8 +84,8 @@
 
                     <section class="resource-step">
                         <div class="resource-step-heading"><span class="resource-step-num">01</span><h4 data-lang="zh-Hant">找到 Resource.cfg</h4><h4 data-lang="en">Find Resource.cfg</h4></div>
-                        <p data-lang="zh-Hant">開啟 <code>文件 / Electronic Arts / The Sims 4 / Mods</code>，找到 <code>Resource.cfg</code>，再用 Windows「記事本」開啟。<strong>先只看內容，不要更改。</strong></p>
-                        <p data-lang="en">Open <code>Documents / Electronic Arts / The Sims 4 / Mods</code>, find <code>Resource.cfg</code>, and open it with Notepad. <strong>Just read it for now; don't make changes.</strong></p>
+                        <p data-lang="zh-Hant">開啟 <code>文件 / Electronic Arts / The Sims 4 / Mods</code>，找到 <code>Resource.cfg</code>，再用 Windows「記事本」開啟。</p>
+                        <p data-lang="en">Open <code>Documents / Electronic Arts / The Sims 4 / Mods</code>, find <code>Resource.cfg</code>, and open it with Notepad.</p>
                     </section>
 
                     <section class="resource-step">
@@ -101,12 +101,10 @@ PackedFile */*.package
 Priority 600
 PackedFile Overrides\*.package</pre>
                         </div>
-                        <p data-lang="zh-Hant"><strong>500 是一般模組、600 是 Overrides。</strong>因為 600 比 500 大，所以 Overrides 的讀取優先級較高。<code>PackedFile Overrides\*.package</code> 則是讀取 Overrides 資料夾內的 .package 檔案。</p>
-                        <p data-lang="en"><strong>500 is for regular mods and 600 is for Overrides.</strong> Since 600 is higher, Overrides has a higher loading priority. <code>PackedFile Overrides\*.package</code> loads .package files directly inside Overrides.</p>
-                        <p class="resource-result" data-lang="zh-Hant"><strong>如果已有 Overrides 的讀取規則，而且優先級高於一般模組，就設定完成了！</strong>不必修改數字或重複新增，直接跳到第 ④ 步。</p>
-                        <p class="resource-result" data-lang="en"><strong>If you already have an Overrides rule at a higher priority than regular mods, you're done!</strong> No need to change the numbers or add duplicate rules. Skip to Step 4.</p>
-                        <p class="resource-hint" data-lang="zh-Hant">Priority 不一定要是 500 和 600，設定檔也可能有更多行。重點是 Overrides 有對應讀取規則，且優先級較高。</p>
-                        <p class="resource-hint" data-lang="en">Priority numbers need not be 500 and 600, and your file may contain more lines. What matters is an Overrides loading rule with a higher priority.</p>
+                        <p data-lang="zh-Hant"><strong>500 是一般模組、600 是 Overrides。</strong>因為 600 比 500 大，所以 Overrides 的讀取優先級較高。</p>
+                        <p data-lang="en"><strong>500 is for regular mods and 600 is for Overrides.</strong> Since 600 is higher, Overrides has a higher loading priority.</p>
+                        <p data-lang="zh-Hant"><code>PackedFile Overrides\*.package</code> 則是讀取 Overrides 資料夾內的 .package 檔案。</p>
+                        <p data-lang="en"><code>PackedFile Overrides\*.package</code> loads .package files directly inside Overrides.</p>
                     </section>
 
                     <section class="resource-step">
@@ -131,8 +129,8 @@ PackedFile Overrides\*.package</pre>
                         </div>
                         <p data-lang="zh-Hant">按 <code>Ctrl + S</code> 儲存。<strong>保留原本的其他內容</strong>，並確認檔名仍是 <code>Resource.cfg</code>，不是 <code>Resource.cfg.txt</code>。</p>
                         <p data-lang="en">Press <code>Ctrl + S</code> to save. <strong>Keep all other lines intact</strong> and make sure the filename is <code>Resource.cfg</code>, not <code>Resource.cfg.txt</code>.</p>
-                        <p class="resource-hint" data-lang="zh-Hant">600 只是以一般模組 Priority 500 為例。如果你原本使用其他優先級，請先確認新增的數字高於一般模組，不要直接照貼。</p>
-                        <p class="resource-hint" data-lang="en">600 is just an example for regular mods using Priority 500. If your file has other priorities, check the values before copying the example.</p>
+                        <p class="resource-hint" data-lang="zh-Hant">上述 500 / 600 只是範例，你的 Resource.cfg 可能有更多行或使用不同的 Priority。只要 Overrides 已有對應讀取規則，且優先級高於一般模組，就不必修改；如果需要新增，請依現有設定調整數字，不要直接照貼。</p>
+                        <p class="resource-hint" data-lang="en">The 500 / 600 values are examples. Your Resource.cfg may contain more rules or different priority numbers. If Overrides already has a matching rule with higher priority than regular mods, no changes are needed. Otherwise, adjust the values to your existing setup rather than copying them blindly.</p>
                     </section>
 
                     <section class="resource-step">
@@ -144,10 +142,10 @@ PackedFile Overrides\*.package</pre>
                             <pre>Mods
 ├─ Resource.cfg
 └─ Overrides
-   └─ L1nG_RealDate_Compat_MoodPack.package</pre>
+   └─ L1nG_RealDate_Compat_UI_Cheats.package</pre>
                         </div>
-                        <p class="resource-hint" data-lang="zh-Hant">只以 Mood Pack Mod 相容檔為例。未安裝對應第三方模組時，不需要放入那個相容檔；完成後重新啟動遊戲。</p>
-                        <p class="resource-hint" data-lang="en">Mood Pack Mod is only an example. Do not install compatibility packages for third-party mods you don't use. Restart the game afterward.</p>
+                        <p class="resource-hint" data-lang="zh-Hant">只以 UI Cheats 相容檔為例。未安裝對應第三方模組時，不需要放入那個相容檔；完成後重新啟動遊戲。</p>
+                        <p class="resource-hint" data-lang="en">UI Cheats is only an example. Do not install compatibility packages for third-party mods you don't use. Restart the game afterward.</p>
                     </section>
                 </div>
             </details>

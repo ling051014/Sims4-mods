@@ -1087,7 +1087,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 顯示方式 */ display: grid;
     /* 網格欄位 */ grid-template-columns: repeat(3, minmax(0, 1fr));
     /* 上方邊框 */ border-top: 1px solid var(--line);
-    /* 下方邊框 */ border-bottom: 1px solid var(--line);
 }
 
 .download-facts > div {
@@ -1658,7 +1657,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 .faq-resource-body .resource-step-num { color:var(--accent); font-size:12px; font-family:"Bahnschrift SemiCondensed","Arial Narrow",sans-serif; letter-spacing:1.2px; font-weight:600; }
 .faq-resource-body h4 { margin:0; font-size:14px; line-height:1.6; font-weight:600; color:var(--text-strong); }
 .faq-resource-body .resource-hint { color:var(--text-soft); font-size:12px; }
-.faq-resource-body .resource-result { margin:12px 0; padding:12px 14px; background:var(--accent-soft); border-radius:5px; }
 .faq-resource-body .resource-code { margin:12px 0; min-width:0; overflow:hidden; background:var(--surface-soft); border:1px solid var(--line-soft); border-radius:6px; }
 .faq-resource-body .resource-code-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; color:var(--text-soft); font-size:10px; }
 .faq-resource-body .resource-code pre { margin:0; padding:2px 12px 13px; overflow-x:auto; font:12px/1.85 "Cascadia Code","SFMono-Regular",Consolas,monospace; white-space:pre; color:var(--text-main); }
