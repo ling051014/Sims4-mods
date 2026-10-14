@@ -194,8 +194,9 @@ html[data-site-info-section="genealogy"] .policy-section a {
     color:var(--site-info-accent,#438cbe);
 }
 html[data-site-info-section="genealogy"] .policy-info {
-    background:var(--site-info-input,#f0f5f8);
-    color:var(--site-info-secondary,#617487);
+    background: color-mix(in srgb, var(--site-info-accent,#438cbe) 8%, var(--site-info-input,#f0f5f8));
+    border: 1px solid var(--site-info-border,#e3e8ed);
+    color: var(--site-info-secondary,#617487);
 }
 /* 僅已展開的條款標題使用目前主題強調色；沿用原始分隔線，不額外套外框或底色。 */
 html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary {
