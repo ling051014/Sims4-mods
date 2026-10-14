@@ -436,7 +436,7 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     padding:19px 12px 10px;
     border:1px solid transparent;
     border-radius:0;
-    background:url("../icons/genealogy-zip-folder.svg?v=20261011-zip-folder-approved-v4-r1") center / 116px 77px no-repeat;
+    background:url("../../html%20icons/genealogy-zip-folder.svg?v=20261011-zip-folder-approved-v4-r1") center / 116px 77px no-repeat;
     color:var(--accent-dark);
     display:grid;
     place-items:center;
