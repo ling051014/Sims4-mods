@@ -12,10 +12,10 @@
     if (isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
         const cookieStyle = document.createElement("link");
         cookieStyle.rel = "stylesheet";
-        cookieStyle.href = new URL("cookie-consent.css?v=20261015-branch-preview-r1", script.src).href;
+        cookieStyle.href = new URL("cookie-consent.css?v=20261015-cookie-layout-r3", script.src).href;
         document.head.appendChild(cookieStyle);
         const cookieScript = document.createElement("script");
-        cookieScript.src = new URL("cookie-consent.js?v=20261015-branch-preview-r1", script.src).href;
+        cookieScript.src = new URL("cookie-consent.js?v=20261015-cookie-layout-r3", script.src).href;
         cookieScript.async = false;
         document.head.appendChild(cookieScript);
     }
@@ -33,6 +33,8 @@
             if (!anchor?.href) return;
             let requested;
             try { requested = new URL(anchor.href); } catch (_) { return; }
+            // Keep already-rewritten preview URLs unchanged.
+            if (requested.hostname === location.hostname && requested.pathname.startsWith(previewPath)) return;
             const local = hosts[requested.hostname];
             if (!local) return;
             let relative = local;
