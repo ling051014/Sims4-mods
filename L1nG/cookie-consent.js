@@ -98,7 +98,10 @@
     document.head.appendChild(script);
   }
   let banner, overlay, opener = null, switchValue = false;
+  let bannerSkeletonObserver = null;
   function removeBanner() {
+    bannerSkeletonObserver?.disconnect();
+    bannerSkeletonObserver = null;
     banner?.remove();
     banner = null;
   }
@@ -154,11 +157,32 @@
     banner.className = 'l1ng-cookie-banner';
     banner.setAttribute('aria-label', copy[language()].heading);
     banner.innerHTML =
-      '<strong data-cookie-heading></strong><p data-cookie-message></p>' +
+      '<div class="l1ng-cookie-skeleton" aria-hidden="true">' +
+      '<span class="l1ng-cookie-skeleton-line is-title"></span>' +
+      '<span class="l1ng-cookie-skeleton-line"></span>' +
+      '<span class="l1ng-cookie-skeleton-line is-medium"></span>' +
+      '<span class="l1ng-cookie-skeleton-line is-short"></span>' +
+      '<div class="l1ng-cookie-skeleton-actions"><span></span><span></span><span></span></div></div>' +
+      '<div class="l1ng-cookie-live"><strong data-cookie-heading></strong><p data-cookie-message></p>' +
       '<div class="l1ng-cookie-actions">' +
       '<button type="button" class="l1ng-cookie-accept" data-cookie-accept></button>' +
       '<button type="button" data-cookie-reject></button>' +
-      '<button type="button" data-cookie-preferences></button></div>';
+      '<button type="button" data-cookie-preferences></button></div></div>';
+    const pageSkeleton = document.querySelector(
+      '.l1ng-site-skeleton:not(.is-hidden), #appSkeleton:not(.is-hidden)'
+    );
+    if (pageSkeleton) {
+      banner.classList.add('is-loading');
+      banner.setAttribute('aria-busy', 'true');
+      bannerSkeletonObserver = new MutationObserver(() => {
+        if (pageSkeleton.isConnected && !pageSkeleton.classList.contains('is-hidden')) return;
+        banner?.classList.remove('is-loading');
+        banner?.removeAttribute('aria-busy');
+        bannerSkeletonObserver?.disconnect();
+        bannerSkeletonObserver = null;
+      });
+      bannerSkeletonObserver.observe(pageSkeleton, {attributes:true,attributeFilter:['class']});
+    }
     document.body.appendChild(banner);
     banner.querySelector('[data-cookie-accept]').addEventListener('click', () => choose(true));
     banner.querySelector('[data-cookie-reject]').addEventListener('click', () => choose(false));
@@ -184,28 +208,41 @@
     overlay.className = genealogyStyle
       ? 'ui-dialog-backdrop show l1ng-cookie-backdrop l1ng-cookie-genealogy'
       : 'l1ng-cookie-backdrop';
-    const genealogyHeader = genealogyStyle
+    const infoIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="7.5" r="1.1" ' +
+      'fill="currentColor" stroke="none"></circle><path d="M12 11.5v5.5"></path></svg>';
+    const closeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" aria-hidden="true">' +
+      '<path d="M5 5l14 14M19 5L5 19"></path></svg>';
+    const header = genealogyStyle
       ? '<div class="help-heading"><span class="l1ng-icon icon-info-circle help-heading-icon" aria-hidden="true"></span>' +
-        '<div class="help-heading-copy"><h2 id="l1ng-cookie-title" data-cookie-title></h2></div></div>' +
+        '<div class="help-heading-copy"><h2 id="l1ng-cookie-title" data-cookie-title></h2>' +
+        '<p class="l1ng-cookie-subtitle" id="l1ng-cookie-subtitle" data-cookie-note></p></div></div>' +
         '<button type="button" class="help-close-btn l1ng-cookie-close" data-cookie-close aria-label="Close">' +
         '<span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>'
-      : '<h2 id="l1ng-cookie-title" data-cookie-title></h2>' +
-        '<button type="button" class="l1ng-cookie-close" data-cookie-close aria-label="Close">×</button>';
+      : '<span class="l1ng-site-info-heading-icon" aria-hidden="true">' + infoIcon + '</span>' +
+        '<div class="l1ng-site-info-heading"><h2 id="l1ng-cookie-title" data-cookie-title></h2>' +
+        '<p id="l1ng-cookie-subtitle" data-cookie-note></p></div>' +
+        '<button type="button" class="l1ng-site-info-close l1ng-cookie-close" data-cookie-close aria-label="Close">' +
+        closeIcon + '</button>';
+    overlay.className = genealogyStyle
+      ? 'ui-dialog-backdrop show l1ng-cookie-backdrop l1ng-cookie-genealogy'
+      : 'l1ng-cookie-backdrop l1ng-site-info-backdrop l1ng-cookie-regular';
     overlay.innerHTML =
       '<section class="' + (genealogyStyle
           ? 'ui-dialog-panel storage-modal l1ng-cookie-dialog'
-          : 'l1ng-cookie-dialog') +
-        '" role="dialog" aria-modal="true" aria-labelledby="l1ng-cookie-title">' +
-        '<header class="' + (genealogyStyle ? 'help-header storage-header' : '') +
-        '">' + genealogyHeader + '</header>' +
+          : 'l1ng-site-info-panel l1ng-cookie-dialog') +
+        '" role="dialog" aria-modal="true" aria-labelledby="l1ng-cookie-title" aria-describedby="l1ng-cookie-subtitle">' +
+        '<header class="' + (genealogyStyle ? 'help-header storage-header' : 'l1ng-site-info-header') +
+        '">' + header + '</header>' +
         '<div class="' + (genealogyStyle ? 'storage-scroll-body l1ng-cookie-body' : 'l1ng-cookie-body') + '">' +
         '<div class="l1ng-cookie-setting"><span><strong data-cookie-necessary></strong>' +
         '<small data-cookie-necessary-note></small></span>' +
         '<span class="l1ng-cookie-switch is-on" aria-hidden="true"></span></div>' +
         '<div class="l1ng-cookie-setting"><span><strong data-cookie-analytics></strong>' +
         '<small data-cookie-analytics-note></small></span>' +
-        '<button type="button" class="l1ng-cookie-switch" role="switch" aria-label="Google Analytics 4" aria-checked="false" data-cookie-switch></button></div>' +
-        '<p class="l1ng-cookie-note" data-cookie-note></p></div>' +
+        '<button type="button" class="l1ng-cookie-switch" role="switch" aria-label="Google Analytics 4" aria-checked="false" data-cookie-switch></button></div></div>' +
         '<div class="l1ng-cookie-actions"><button type="button" data-cookie-all-reject></button>' +
         '<button type="button" class="l1ng-cookie-accept" data-cookie-save></button></div>' +
       '</section>';
