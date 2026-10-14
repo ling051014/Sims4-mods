@@ -15,6 +15,7 @@
   );
   if (!production && !preview) return;
   const embedded = window.parent !== window;
+  const genealogyStyle = !!document.querySelector('body[data-theme] #topbarMoreMenu');
   let previewChoice = null;
   const key = 'l1ng_analytics_consent';
   const scriptUrl = new URL('analytics.js?v=20261015-ga4-region-r1', document.currentScript.src);
@@ -23,7 +24,7 @@
   let regionResolved = false;
   const copy = {
     'zh-Hant': {
-      heading:'我們使用 Cookie 嗎？',
+      heading:'網站統計與 Cookie',
       message:'為了解網站使用情況，我們希望使用 Google Analytics 4 了解網站流量與使用趨勢。你可以接受、拒絕，或查看詳細設定。',
       autoMessage:'本站目前使用 Google Analytics 4 統計網站流量及使用趨勢。你可以拒絕統計，或查看偏好設定。',
       accept:'接受統計',keep:'維持統計',reject:'拒絕',settings:'偏好設定',
@@ -35,7 +36,7 @@
       note:'你可以隨時回到隱私權說明更改選擇。'
     },
     'zh-Hans': {
-      heading:'我们使用 Cookie 吗？',
+      heading:'网站统计与 Cookie',
       message:'为了了解网站使用情况，我们希望使用 Google Analytics 4 了解网站流量与使用趋势。你可以接受、拒绝，或查看详细设置。',
       autoMessage:'本站目前使用 Google Analytics 4 统计网站流量和使用趋势。你可以拒绝统计，或查看偏好设置。',
       accept:'接受统计',keep:'继续统计',reject:'拒绝',settings:'偏好设置',
@@ -47,7 +48,7 @@
       note:'你可以随时返回隐私权说明更改选择。'
     },
     en: {
-      heading:'Do we use cookies?',
+      heading:'Analytics & Cookies',
       message:'We would like to use Google Analytics 4 to understand website traffic and usage trends. You can accept, reject, or review your preferences.',
       autoMessage:'This site is using Google Analytics 4 to measure traffic and usage trends. You may opt out or review preferences.',
       accept:'Accept analytics',keep:'Keep analytics',reject:'Reject',settings:'Preferences',
@@ -180,18 +181,31 @@
     opener = document.activeElement;
     switchValue = permittedToTrack();
     overlay = document.createElement('div');
-    overlay.className = 'l1ng-cookie-backdrop';
+    overlay.className = genealogyStyle
+      ? 'ui-dialog-backdrop show l1ng-cookie-backdrop l1ng-cookie-genealogy'
+      : 'l1ng-cookie-backdrop';
+    const genealogyHeader = genealogyStyle
+      ? '<div class="help-heading"><span class="l1ng-icon icon-info-circle help-heading-icon" aria-hidden="true"></span>' +
+        '<div class="help-heading-copy"><h2 id="l1ng-cookie-title" data-cookie-title></h2></div></div>' +
+        '<button type="button" class="help-close-btn l1ng-cookie-close" data-cookie-close aria-label="Close">' +
+        '<span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>'
+      : '<h2 id="l1ng-cookie-title" data-cookie-title></h2>' +
+        '<button type="button" class="l1ng-cookie-close" data-cookie-close aria-label="Close">×</button>';
     overlay.innerHTML =
-      '<section class="l1ng-cookie-dialog" role="dialog" aria-modal="true" aria-labelledby="l1ng-cookie-title">' +
-        '<header><h2 id="l1ng-cookie-title" data-cookie-title></h2>' +
-        '<button type="button" class="l1ng-cookie-close" data-cookie-close aria-label="Close">×</button></header>' +
+      '<section class="' + (genealogyStyle
+          ? 'ui-dialog-panel storage-modal l1ng-cookie-dialog'
+          : 'l1ng-cookie-dialog') +
+        '" role="dialog" aria-modal="true" aria-labelledby="l1ng-cookie-title">' +
+        '<header class="' + (genealogyStyle ? 'help-header storage-header' : '') +
+        '">' + genealogyHeader + '</header>' +
+        '<div class="' + (genealogyStyle ? 'storage-scroll-body l1ng-cookie-body' : 'l1ng-cookie-body') + '">' +
         '<div class="l1ng-cookie-setting"><span><strong data-cookie-necessary></strong>' +
         '<small data-cookie-necessary-note></small></span>' +
         '<span class="l1ng-cookie-switch is-on" aria-hidden="true"></span></div>' +
         '<div class="l1ng-cookie-setting"><span><strong data-cookie-analytics></strong>' +
         '<small data-cookie-analytics-note></small></span>' +
         '<button type="button" class="l1ng-cookie-switch" role="switch" aria-label="Google Analytics 4" aria-checked="false" data-cookie-switch></button></div>' +
-        '<p class="l1ng-cookie-note" data-cookie-note></p>' +
+        '<p class="l1ng-cookie-note" data-cookie-note></p></div>' +
         '<div class="l1ng-cookie-actions"><button type="button" data-cookie-all-reject></button>' +
         '<button type="button" class="l1ng-cookie-accept" data-cookie-save></button></div>' +
       '</section>';
