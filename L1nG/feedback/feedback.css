@@ -69,12 +69,14 @@
 .realdate-only .realdate-version-help-dialog .version-guide-path{display:block;margin:5px 0 0;color:var(--ink);font:11px/1.7 "Cascadia Code","SFMono-Regular",Consolas,monospace;overflow-wrap:anywhere}
 .realdate-only .realdate-version-help-dialog .version-guide-log{display:flex;flex-direction:column;gap:2px;min-width:0;margin:7px 0 5px;padding:8px 11px;border-left:2px solid var(--primary-line);background:var(--subtle);border-radius:3px}
 .realdate-only .realdate-version-help-dialog .version-guide-log code{color:var(--ink);font:11px/1.75 "Cascadia Code","SFMono-Regular",Consolas,monospace;overflow-wrap:anywhere}
-.realdate-only .realdate-version-help-dialog .version-guide-note{margin:6px 0 0;padding:0 0 0 34px;color:var(--muted);font-size:11px;line-height:1.7}
+.realdate-only .realdate-version-help-dialog .version-guide-log-key{color:var(--ink);font-weight:700}
+.realdate-only .realdate-version-help-dialog .version-guide-log-example{display:inline-block;color:var(--muted);opacity:.56;filter:blur(2.4px);user-select:none;-webkit-user-select:none}
+.realdate-only .realdate-version-help-dialog .version-guide-note{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;margin:12px 0 0;padding:11px 0 0;border-top:1px solid var(--stroke);color:var(--muted);font-size:11px;line-height:1.7}
+.realdate-only .realdate-version-help-dialog .version-guide-note strong{color:var(--ink);font-weight:600}
 @media(max-width:600px){
   .realdate-only .version-help-modal-header{padding:14px 16px 12px}
   .realdate-only .realdate-version-help-dialog .version-guide-body{padding:10px 16px 16px}
   .realdate-only .realdate-version-help-dialog .version-guide-step{gap:8px}
-  .realdate-only .realdate-version-help-dialog .version-guide-note{padding-left:30px}
 }
 
 /* RealDate V1: full independent page, intro + form in two columns */
