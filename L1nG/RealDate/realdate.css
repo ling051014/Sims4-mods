@@ -2233,7 +2233,18 @@ html[data-language="en"] [data-lang="zh-Hant"] {
         overflow-wrap: anywhere;
     }
 
-    .history-title,
+    /* 歷史版本：版本號留左側、發布日期固定於卡片右上角。 */
+    .history-title {
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .history-title > span {
+        flex-shrink: 0;
+        white-space: nowrap;
+        text-align: right;
+    }
+
     .compat-overview > div {
         /* 排列方向 */ flex-direction: column;
         /* 垂直對齊 */ align-items: flex-start;
