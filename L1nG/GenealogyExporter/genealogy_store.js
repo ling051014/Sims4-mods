@@ -1466,6 +1466,8 @@
       db.meta.petCardView.appearance = next;
       mark(result, {
         dataChanged:true,
+        // 寵物畫面由 Layout 擁有：單純 nodesChanged 會被寵物版面快取略過。
+        layoutChanged:true,
         nodesChanged:true,
         saveDirty:true
       });
