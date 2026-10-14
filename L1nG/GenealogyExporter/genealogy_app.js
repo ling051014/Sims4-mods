@@ -10968,6 +10968,25 @@ function getLayoutNodeBox(id, position = null) {
   };
 }
 
+function getUnpositionedPetPositions(fam, mode) {
+  const saved = fam?.manualPositions?.[mode] || {};
+  const positions = {};
+  (getSceneLayout()?.petLayout?.cards || []).forEach(card => {
+    const key = 'pet:' + card.key;
+    if (Object.prototype.hasOwnProperty.call(saved,key)) return;
+    positions[key] = {x:card.x,y:card.y};
+  });
+  return positions;
+}
+
+// 保留目前寵物的獨立位置，不讓移動人物時因家庭錨點重新計算而連帶移動。
+function freezeUnpositionedPetCards(fam, mode) {
+  const positions = getUnpositionedPetPositions(fam,mode);
+  return Object.keys(positions).length
+    ? genealogyStore.setNodePositions(fam.id,mode,positions)
+    : null;
+}
+
 function seedVisibleScenePositionsForFreeLayout(
   fam,
   mode
@@ -10995,6 +11014,8 @@ function seedVisibleScenePositionsForFreeLayout(
       y:position.y
     };
   });
+
+  Object.assign(seeded,getUnpositionedPetPositions(fam,mode));
 
   return genealogyStore.setFamilyLayoutState(
     fam.id,
@@ -12889,6 +12910,9 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
       hideSmartGuides();
 
       if (moved && previewPosition) {
+        dragMutation = genealogyStore.mergeResults(
+          dragMutation, freezeUnpositionedPetCards(fam,dragMode)
+        );
         dragMutation =
           genealogyStore.mergeResults(
             dragMutation,
@@ -13164,6 +13188,9 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
       hideSmartGuides();
 
       if (moved && previewPositions) {
+        dragMutation = genealogyStore.mergeResults(
+          dragMutation, freezeUnpositionedPetCards(fam,viewMode)
+        );
         dragMutation =
           genealogyStore.mergeResults(
             dragMutation,
@@ -13332,6 +13359,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
             };
           }
         );
+        Object.assign(seededPositions,getUnpositionedPetPositions(fam,dragMode));
 
         dragMutation =
           genealogyStore.mergeResults(
@@ -13470,6 +13498,9 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
     hideSmartGuides();
 
     if (moved && previewPosition) {
+      dragMutation = genealogyStore.mergeResults(
+        dragMutation, freezeUnpositionedPetCards(fam,dragMode)
+      );
       dragMutation =
         genealogyStore.mergeResults(
           dragMutation,
@@ -18912,6 +18943,7 @@ function activatePetCanvasCard(id, additive = false) {
 }
 
 let lastPetPointerActivation = null;
+let activePetTouchDragPointerId = null;
 petCardsLayer?.addEventListener('load',markPetAvatarLoaded,true);
 petCardsLayer?.addEventListener('error',markPetAvatarError,true);
 personProfileDialog?.addEventListener('load',markPetAvatarLoaded,true);
@@ -18921,6 +18953,8 @@ petCardsLayer?.addEventListener('contextmenu',event => {
   if (!cardElement) return;
   event.preventDefault();
   event.stopPropagation();
+  // 觸控長按專供拖曳，不能被 Safari 的 contextmenu 攔截。
+  if (event.pointerType === 'touch' || activePetTouchDragPointerId !== null) return;
   const entry = findCanvasPetEntry(cardElement.dataset.petId);
   if (entry) renderPetCardMenu(entry,event.clientX,event.clientY);
 });
@@ -18949,6 +18983,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const scale = genealogyViewport.getScale() || 1;
   const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
   const isTouch = event.pointerType === 'touch';
+  if (isTouch) activePetTouchDragPointerId = event.pointerId;
   const jitterAllowance = isTouch ? 18 : 10;
   const tapAllowance = isTouch ? 12 : 8;
   let holdReady = false, moved = false, preHoldMoved = false;
@@ -19015,6 +19050,8 @@ petCardsLayer?.addEventListener('pointerdown', event => {
       (isTouch && touchCardActivationSuppressed.has(event.pointerId));
     const tap = !cancelled && !moved && !preHoldMoved && movement(ev) <= tapAllowance;
     clear();
+    if (isTouch && activePetTouchDragPointerId === ev.pointerId)
+      activePetTouchDragPointerId = null;
     // 阻止 pointerup 之後瀏覽器合成的 click 重新開啟視窗。
     lastPetPointerActivation = {id:entry.key,time:performance.now()};
     if (moved && previewPosition && !cancelled) {
