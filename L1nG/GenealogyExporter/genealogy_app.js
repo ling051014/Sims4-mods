@@ -15875,11 +15875,20 @@ const petEditorController = {
 
     if (!confirmed) return;
 
-    editingPets.splice(
-      petEditorState.index,
-      1
-    );
+    if (this.directEntry) {
+      // 寵物資料卡的刪除是完整刪除，而非解除飼主；所有飼主引用一併移除。
+      const petId = String(pet.gameData?.simId || pet.id || '');
+      const mutation = genealogyStore.deletePet(petId);
+      if (!mutation.dataChanged) return;
+      selectedPetIds.delete(petId);
+      this.close();
+      applyGenealogyMutation(mutation);
+      return;
+    }
 
+    // 人物編輯器使用草稿，僅對目前尚未儲存的寵物清單進行刪除。
+    if (petEditorState.index < 0 || petEditorState.index >= editingPets.length) return;
+    editingPets.splice(petEditorState.index,1);
     renderPetDraftList();
     personEditor.renderInfoPreviewIfActive();
     this.close();

@@ -1504,6 +1504,55 @@
       return finalized(result);
     }
 
+    // 刪除全部飼主與未指派清單中的同一隻寵物；並清理兩種排列模式的卡片位置。
+    function deletePet(petId) {
+      const db = data();
+      const result = rawResult();
+      const key = String(petId || '');
+      if (!key) return finalized(result);
+      const isTarget = pet =>
+        String(pet?.gameData?.simId || pet?.id || '') === key;
+      let removed = false;
+
+      Object.entries(db.sims || {}).forEach(([simId, sim]) => {
+        const original = Array.isArray(sim?.pets) ? sim.pets : [];
+        const next = original.filter(pet => !isTarget(pet));
+        if (next.length === original.length) return;
+        sim.pets = next;
+        addAffected(result, 'sim', [simId]);
+        removed = true;
+      });
+
+      if (Array.isArray(db.meta?.unassignedPets)) {
+        const original = db.meta.unassignedPets;
+        const next = original.filter(pet => !isTarget(pet));
+        if (next.length !== original.length) {
+          db.meta.unassignedPets = next;
+          removed = true;
+        }
+      }
+      if (!removed) return finalized(result);
+
+      (db.families || []).forEach(family => {
+        if (!family) return;
+        ensureFamilyLayout(family);
+        let changed = false;
+        for (const mode of ['view','edit']) {
+          const positions = family.manualPositions[mode];
+          const positionKey = 'pet:' + key;
+          if (!Object.prototype.hasOwnProperty.call(positions,positionKey)) continue;
+          delete positions[positionKey];
+          changed = true;
+        }
+        if (changed) addAffected(result,'family',[family.id]);
+      });
+      mark(result, {
+        dataChanged:true,layoutChanged:true,nodesChanged:true,
+        listsChanged:true,familyUiChanged:true,assetsChanged:true,saveDirty:true
+      });
+      return finalized(result);
+    }
+
     function setPetCardField(mode, field, enabled) {
       const db = data();
       const result = rawResult();
@@ -3142,6 +3191,7 @@
       setCardField,
       getPetCardSettings,
       savePetWithOwners,
+      deletePet,
       setPetCardField,
       setPetCardAppearance,
       setCardAppearance,
