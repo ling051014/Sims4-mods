@@ -191,7 +191,10 @@
     }
   });
   window.addEventListener('message', event => {
-    if (embedded || !hosts.has(new URL(event.origin).hostname)) return;
+    if (embedded) return;
+    let senderHost='';
+    try { senderHost=new URL(event.origin).hostname; } catch (_) { return; }
+    if (!hosts.has(senderHost)) return;
     if (event.data?.type === 'l1ng-cookie-open-preferences') openPreferences();
   });
   document.addEventListener('DOMContentLoaded', () => {
