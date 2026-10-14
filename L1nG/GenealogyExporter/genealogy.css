@@ -3281,11 +3281,6 @@ button.avatar-editor-action { cursor:pointer; }
     /* 標題與標籤編輯器間距 */ gap:4px;
     /* 避免窄視窗被內容撐開 */ min-width:0;
 }
-.pet-field-label {
-    /* 與其他寵物欄位標籤一致 */ color:var(--text-secondary);
-    /* 字級一致 */ font-size:11.5px;
-    /* 字重一致 */ font-weight:600;
-}
 .pet-trait-field .trait-editor {
     /* 內部特徵操作不繼承欄位標題粗體 */ font-weight:400;
 }
@@ -9860,13 +9855,13 @@ button.danger-action:focus-visible {
 /* ========【畫布寵物卡】 設定 - 沿用人物卡片配色，家庭旁獨立顯示，不覆蓋血緣線 ======== */
 /* 寵物卡置於畫布標籤上方；容器不擋人物卡，只有卡片接收點擊。 */
 #genealogyPetLayer { position:absolute; inset:0; z-index:4; pointer-events:none; overflow:visible; }
-#genealogyPetLayer .genealogy-pet-card { pointer-events:auto; touch-action:manipulation; }
+#genealogyPetLayer .genealogy-pet-card { pointer-events:auto; touch-action:none; }
 .genealogy-pet-card {
   position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
   gap:5px; padding:9px 7px 7px; border:1.5px solid var(--border-default); border-radius:10px;
   background:var(--surface-card); box-shadow:0 1px 3px rgba(0,0,0,.06);
   color:var(--text-primary); font:inherit; text-align:center; cursor:pointer; pointer-events:auto;
-  user-select:none; -webkit-user-select:none; touch-action:manipulation;
+  user-select:none; -webkit-user-select:none; touch-action:none;
 }
 .genealogy-pet-card:hover,.genealogy-pet-card:focus-visible {
   border-color:var(--action-primary); box-shadow:0 5px 14px rgba(0,0,0,.10);
