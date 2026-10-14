@@ -149,7 +149,10 @@
     form.append('contactValue', payload.contact?.value || '');
     form.append('turnstileToken', token);
     for (const file of payload.files || []) form.append('files', file, file.name);
-    return request('/v1/feedback', form);
+    const result = await request('/v1/feedback', form);
+    // Only a successful API response counts. Do not pass user content to GA4.
+    global.L1nGAnalytics?.feedbackSubmitted?.();
+    return result;
   }
   async function lookup(receipt) { return request('/v1/feedback/lookup', {receipt}); }
   async function reply(receipt, message, files, token) {
