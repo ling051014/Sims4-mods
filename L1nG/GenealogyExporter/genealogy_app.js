@@ -3529,6 +3529,21 @@ function relationshipTypePickerTabMarkup(category){
   '</span>';
 }
 
+function syncRelationshipTypePickerSeam(){
+  const popover=$('relationshipTypePopover');
+  const index=$('relationshipTypeIndex');
+  const active=index?.querySelector('.relationship-type-index-tab.active');
+  if(!popover||popover.hidden||!active)return;
+
+  // Measure the tab and menu after layout: all six tabs share the same positioning logic.
+  const menuRect=popover.getBoundingClientRect();
+  const tabRect=active.getBoundingClientRect();
+  const start=Math.max(0,Math.min(menuRect.height,tabRect.top-menuRect.top));
+  const end=Math.max(start,Math.min(menuRect.height,tabRect.bottom-menuRect.top));
+  popover.style.setProperty('--relationship-seam-start',start+'px');
+  popover.style.setProperty('--relationship-seam-end',end+'px');
+}
+
 function syncRelationshipTypePickerTabs(){
   document
     .querySelectorAll(
@@ -3571,6 +3586,7 @@ function syncRelationshipTypePickerTabs(){
           category
         );
     });
+  syncRelationshipTypePickerSeam();
 }
 
 function syncRelationshipTypePickerValue(){
@@ -4028,6 +4044,7 @@ function positionRelationshipTypePicker(){
     Math.round(menuWidth)+'px';
   popover.style.height='100%';
   popover.style.maxHeight='100%';
+  syncRelationshipTypePickerSeam();
 }
 
 function openRelationshipTypePicker({
