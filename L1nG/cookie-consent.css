@@ -5,8 +5,8 @@
   --cookie-text: var(--text-primary,var(--text-strong,var(--ink,#24292f)));
   --cookie-secondary: var(--text-secondary,var(--text-muted,var(--sub,#6e7781)));
   --cookie-border: var(--border-default,var(--line,var(--border,#dfe5ea)));
-  --cookie-accent: var(--action-primary,var(--translation,var(--accent,#55acee)));
-  --cookie-accent-hover: var(--action-primary-hover,var(--translation-dark,var(--accent-hover,#3e95d3)));
+  --cookie-accent: var(--action-primary,var(--accent,var(--translation,#55acee)));
+  --cookie-accent-hover: var(--action-primary-hover,var(--accent-hover,var(--translation-dark,#3e95d3)));
   --cookie-hover: var(--surface-item-hover,var(--surface-soft,var(--bg-soft,#f5faff)));
   --cookie-overlay: var(--overlay-backdrop,rgba(31,35,40,.42));
   box-sizing: border-box;
@@ -166,6 +166,64 @@
 .l1ng-cookie-switch.is-on { opacity: .55; cursor: default; }
 .l1ng-cookie-note { margin: 15px 22px 0; color: var(--cookie-secondary); font-size: 11px; }
 .l1ng-cookie-dialog > .l1ng-cookie-actions { padding: 20px 22px; justify-content: flex-end; }
+
+/* Genealogy preference dialog shares the site's storage/help modal structure. */
+.l1ng-cookie-backdrop.l1ng-cookie-genealogy { z-index: 61000; }
+.l1ng-cookie-genealogy .l1ng-cookie-dialog.ui-dialog-panel.storage-modal {
+  width: min(520px, 100%);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  color: var(--text-primary);
+}
+.l1ng-cookie-genealogy .l1ng-cookie-dialog .help-header {
+  flex: 0 0 auto;
+  padding: 17px 20px 14px;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-default);
+}
+.l1ng-cookie-genealogy .l1ng-cookie-dialog .help-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.l1ng-cookie-genealogy .l1ng-cookie-dialog .help-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--action-primary);
+}
+.l1ng-cookie-genealogy .l1ng-cookie-dialog .help-close-btn.l1ng-cookie-close {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.l1ng-cookie-genealogy .l1ng-cookie-dialog .help-close-btn.l1ng-cookie-close:hover {
+  background: var(--surface-item-hover);
+  color: var(--text-primary);
+}
+.l1ng-cookie-genealogy .l1ng-cookie-close .l1ng-icon { width: 14px; height: 14px; }
+.l1ng-cookie-genealogy .l1ng-cookie-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.l1ng-cookie-genealogy .l1ng-cookie-dialog > .l1ng-cookie-actions {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border-default);
+}
 @media (max-width: 540px) {
   .l1ng-cookie-banner { right: 12px; bottom: 12px; padding: 17px; width: calc(100vw - 24px); }
   .l1ng-cookie-dialog header { padding: 15px 17px; }
