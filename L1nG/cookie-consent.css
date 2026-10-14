@@ -12,7 +12,9 @@
   box-sizing: border-box;
   background: var(--cookie-surface);
   color: var(--cookie-text);
-  font: 12px/1.7 inherit;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.7;
 }
 .l1ng-cookie-banner *,
 .l1ng-cookie-dialog * { box-sizing: border-box; }
