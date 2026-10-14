@@ -37,6 +37,9 @@ for (const name of [
   'site-info.css','site-info.js','site-info.html'
 ]) file(name);
 folder('icons');
+for (const icon of ['ui-search.svg', 'ui-clear.svg']) {
+  put(path.join(base,'html icons',icon),path.join(out,'html icons',icon));
+}
 file('analytics.js');
 const publicFeedback = [
   'feedback-core.js','feedback-i18n.js','feedback-loading.css',
@@ -57,6 +60,7 @@ if (mode === 'home') {
   for (const name of publicFeedback) file(path.join('feedback',name),path.join('feedback',name));
 } else if (mode === 'genealogy') {
   contents('GenealogyExporter');
+  put(path.join(base,'html icons','relationship-label-icons.svg'),path.join(out,'html icons','relationship-label-icons.svg'));
   file('feedback/feedback-core.js');
   put(site('GenealogyExporter','genealogy.html'),path.join(out,'index.html'));
 } else if (mode === 'extractor') {
@@ -66,6 +70,19 @@ if (mode === 'home') {
   put(site('GenealogyExporter','genealogy-exporter.html'),path.join(out,'index.html'));
 } else if (mode === 'translations') {
   contents('Translations');
+}
+
+// CSS/JS sit at the Pages domain root, whereas development source files
+// live two levels below html icons. Rewrite only deployed copies.
+if (mode === 'genealogy' || mode === 'translations') {
+  const cssFile = path.join(out,mode === 'genealogy' ? 'genealogy.css' : 'translations.css');
+  const css = fs.readFileSync(cssFile,'utf8');
+  fs.writeFileSync(cssFile,css.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
+}
+if (mode === 'genealogy') {
+  const sceneFile = path.join(out,'genealogy_scene.js');
+  const scene = fs.readFileSync(sceneFile,'utf8');
+  fs.writeFileSync(sceneFile,scene.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
 }
 
 // Keep each project's navigation on its own domain, rather than showing another
