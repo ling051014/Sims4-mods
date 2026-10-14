@@ -30,8 +30,8 @@ body { margin: 0; background: #fbfcfd; color: #344455; font: 14px/1.85 system-ui
     padding: 7px 12px;
     border: 1px solid var(--site-info-border, #cddde7);
     border-radius: 7px;
-    background: var(--site-info-input, #fff);
-    color: var(--site-info-accent, #438cbe);
+    background: var(--site-info-bg, #fff);
+    color: var(--site-info-text, #344455);
     font: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -41,6 +41,7 @@ body { margin: 0; background: #fbfcfd; color: #344455; font: 14px/1.85 system-ui
 .policy-info [data-l1ng-cookie-settings]:focus-visible {
     border-color: var(--site-info-accent, #438cbe);
     color: var(--site-info-accent, #438cbe);
+    background: var(--site-info-input, #f0f5f8);
 }
 
 @media (max-width: 700px) { .policy-header-inner, .policy-content { width: calc(100% - 30px); } .policy-content { margin: 46px auto 70px; } }
