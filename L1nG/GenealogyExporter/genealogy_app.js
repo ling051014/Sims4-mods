@@ -2804,7 +2804,16 @@ function positionFamilyNavTabsPortal(control) {
 
   portal.style.display = 'flex';
   portal.style.top = Math.round(menuRect.top) + 'px';
-  portal.style.left = Math.max(2, Math.round(menuRect.left - tabWidth + 1)) + 'px';
+  portal.style.left = Math.max(2, Math.round(menuRect.left - tabWidth)) + 'px';
+  portal.style.height = menuRect.height + 'px';
+  const active = portal.querySelector('.family-nav-index-tab.active');
+  if (active) {
+    const rect = active.getBoundingClientRect();
+    const start = Math.max(0,Math.min(menuRect.height,rect.top-menuRect.top));
+    const end = Math.max(start,Math.min(menuRect.height,rect.bottom-menuRect.top));
+    control.menu.style.setProperty('--family-seam-start',start+'px');
+    control.menu.style.setProperty('--family-seam-end',end+'px');
+  }
 }
 
 
