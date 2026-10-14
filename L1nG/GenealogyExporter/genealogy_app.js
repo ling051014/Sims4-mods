@@ -13374,7 +13374,8 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
             )
           );
 
-        arrangeTool = 'select';
+        // 單一卡片拖曳只啟用自由排列，不應強制切換成選取工具。
+        setArrangeTool('pan');
         syncLayoutModeControls();
       }
 
@@ -13526,9 +13527,8 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
         after:afterLayoutState
       });
 
-      selectedNodeIds.clear();
-      selectedNodeIds.add(id);
-      syncNodeSelectionClasses();
+      // 放開即結束單一卡片操作，不把該人物留在選取狀態。
+      clearNodeSelection();
 
       applyGenealogyMutation(
         dragMutation,
@@ -19034,6 +19034,8 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   }
   const jitterAllowance = isTouch ? 18 : 10;
   const tapAllowance = isTouch ? 12 : 8;
+  // 在手勢開始時固定人物對齊目標；移動過程不再反覆取 Scene/遍歷 Map。
+  const personSnapTargets = [...(getSceneLayout()?.pos?.values() || [])];
   let holdReady = false, moved = false, preHoldMoved = false;
   let previewPosition = null;
   let latestPoint = {pointerId:event.pointerId,clientX:event.clientX,clientY:event.clientY};
@@ -19050,56 +19052,72 @@ petCardsLayer?.addEventListener('pointerdown', event => {
       // 按住時先移動游標，不應把長按計時器直接取消；達時間後接續移動。
       if (preHoldMoved) onMove({...latestPoint,preventDefault(){}});
     }
-  },360) : null;
+  },280) : null;
   const movement = ev => Math.hypot(ev.clientX-event.clientX,ev.clientY-event.clientY);
   const clear = () => {
     window.clearTimeout(holdTimer);
+    moveFrame?.cancel?.();
     document.removeEventListener('pointermove',onMove);
     document.removeEventListener('pointerup',onFinish);
     document.removeEventListener('pointercancel',onFinish);
     element.classList.remove('dragging','pet-hold-ready');
     hideSmartGuides();
   };
+  // 與人物卡一致，將多次 PointerMove 合併到同一個動畫幀。
+  const applyMove = point => {
+    const worldDelta = genealogyViewport.screenDeltaToWorld(
+      point.clientX-event.clientX,
+      point.clientY-event.clientY
+    );
+    const rawX = Math.max(0,origin.x+worldDelta.x);
+    const rawY = Math.max(0,origin.y+worldDelta.y);
+    const threshold = genealogyViewport.screenPixelsToWorld(8);
+    let guideX = null, guideY = null;
+    let nearestX = threshold, nearestY = threshold;
+    for (const target of personSnapTargets) {
+      const diffX = Math.abs(target.x-rawX);
+      const diffY = Math.abs(target.y-rawY);
+      if (diffX < nearestX) {nearestX=diffX;guideX=target.x;}
+      if (diffY < nearestY) {nearestY=diffY;guideY=target.y;}
+    }
+    previewPosition = {x:Math.max(0,guideX ?? rawX),y:Math.max(0,guideY ?? rawY)};
+    element.style.left = (previewPosition.x+PAD)+'px';
+    element.style.top = (previewPosition.y+PAD)+'px';
+    hideSmartGuides();
+    if (guideX !== null) showSmartGuide('x',guideX);
+    if (guideY !== null) showSmartGuide('y',guideY);
+  };
+  const moveFrame = genealogyInteraction?.createFrameScheduler?.(applyMove) || null;
   const onMove = ev => {
     if (ev.pointerId !== event.pointerId) return;
     latestPoint = {pointerId:ev.pointerId,clientX:ev.clientX,clientY:ev.clientY};
-    // 畫布雙指縮放時，不應再觸發寵物拖曳。
+    // 雙指手勢只縮放畫布，絕不觸發寵物拖曳。
     if (isTouch && (activeTouchPointers.size !== 1 ||
       activeTouchPointers.get(event.pointerId)?.blocked ||
       touchCardActivationSuppressed.has(event.pointerId))) {
       preHoldMoved = true;
       window.clearTimeout(holdTimer);
+      moveFrame?.cancel?.();
       return;
     }
     const distance = movement(ev);
     if (!holdReady) {
-      // 只有鬆開或取消才結束計時；移動超過門檻仍可在按滿 360ms 後拖曳。
       if (distance > jitterAllowance) preHoldMoved = true;
       return;
     }
     if (!moved && distance < (isTouch ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
     moved = true;
     element.classList.add('dragging');
-    const rawX = Math.max(0,origin.x+(ev.clientX-event.clientX)/scale);
-    const rawY = Math.max(0,origin.y+(ev.clientY-event.clientY)/scale);
-    const threshold = genealogyViewport.screenPixelsToWorld(8);
-    const guides = {x:null,y:null};
-    for (const [,point] of getSceneLayout()?.pos?.entries() || []) {
-      if (Math.abs(point.x-rawX) < threshold) guides.x=point.x;
-      if (Math.abs(point.y-rawY) < threshold) guides.y=point.y;
-    }
-    previewPosition = {x:Math.max(0,guides.x ?? rawX),y:Math.max(0,guides.y ?? rawY)};
-    element.style.left = (previewPosition.x+PAD)+'px';
-    element.style.top = (previewPosition.y+PAD)+'px';
-    hideSmartGuides();
-    if (guides.x !== null) showSmartGuide('x',guides.x);
-    if (guides.y !== null) showSmartGuide('y',guides.y);
-    ev.preventDefault();
+    if (moveFrame) moveFrame.push(latestPoint);
+    else applyMove(latestPoint);
+    ev.preventDefault?.();
   };
   const onFinish = ev => {
     if (ev.pointerId !== event.pointerId) return;
     const cancelled = ev.type === 'pointercancel' ||
       (isTouch && touchCardActivationSuppressed.has(event.pointerId));
+    // 寫入前補齊最後一幀，避免放開時位置落後指標；取消時丟棄預覽。
+    if (!cancelled) moveFrame?.flush?.();
     const tap = !cancelled && !moved && !preHoldMoved && movement(ev) <= tapAllowance;
     clear();
     if (isTouch && activePetTouchDragPointerId === ev.pointerId)
@@ -19109,7 +19127,8 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     if (moved && previewPosition && !cancelled) {
       const seed = fam.freeLayout[mode] ? null : seedVisibleScenePositionsForFreeLayout(fam,mode);
       const change = genealogyStore.setNodePosition(fam.id,mode,'pet:'+entry.key,previewPosition);
-      applyGenealogyMutation(genealogyStore.mergeResults(seed,change));
+      // 讓排版重算排到下一幀，避免 pointerup 同步重建整張族譜。
+      applyGenealogyMutation(genealogyStore.mergeResults(seed,change),{immediateRender:false});
       syncLayoutModeControls();
       dragHistory.push({type:'card-layout',familyId:fam.id,mode,
         before,after:captureLayoutHistoryState(fam,mode)});
