@@ -3606,7 +3606,7 @@ function syncRelationshipTypePickerValue(){
   const text=
     selected&&selected.value
       ? selected.textContent
-      : uiText('選擇或輸入關係……');
+      : uiText('新增其他關係');
 
   value.textContent=text;
   value.title=text;
