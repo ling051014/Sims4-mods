@@ -8388,11 +8388,6 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     width:52px;
 }
 
-#familyNavTabs .family-nav-index-tab {
-    flex:1 1 0;
-    height:auto;
-    min-height:0;
-}
 #familyNavTabs .family-nav-index-tab.active::after {
     content:none;
 }
