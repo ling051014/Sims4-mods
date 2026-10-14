@@ -417,6 +417,18 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 項目間距 */ gap: 11px;
 }
 
+/* ========【RealDate 下載】 更新日誌靠左，下載按鈕群組靠右 ======== */
+.download-buttons > .download-file-actions,
+.history-actions > .download-file-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 11px;
+    max-width: 100%;
+    margin-left: auto;
+}
+
 .hero-actions {
     /* 上方外距 */ margin-top: 30px;
 }
