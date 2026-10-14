@@ -15392,7 +15392,7 @@ const petEditorController = {
     this.directEntry = entry;
     petEditorState.index = -1;
     $('petModalTitle').textContent = uiText('編輯寵物');
-    $('pDelete').style.display = 'none';
+    $('pDelete').style.display = '';
     this.populateForm(entry.pet);
     this.renderOwnerChoices(entry.pet);
     petEditorDialog.classList.add('show');

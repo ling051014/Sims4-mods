@@ -3266,7 +3266,17 @@ button.avatar-editor-action { cursor:pointer; }
 
 
 /* ========【共用頭像編輯器】 設定 - 模擬市民與寵物共用上傳、取景與移除操作 ======== */
-.pet-editor-modal { width:min(620px,100%); }
+.pet-editor-modal {
+  width:min(620px,100%); max-height:min(720px,calc(100dvh - 24px));
+  padding:0; overflow:hidden; display:flex; flex-direction:column;
+}
+.pet-editor-content {
+  flex:1 1 auto; min-height:0; overflow-y:auto;
+  overscroll-behavior:contain; padding:20px 24px 16px;
+}
+.pet-editor-modal > .ui-dialog-actions.sim-editor-actions {
+  position:relative; z-index:1;
+}
 .pet-editor-layout { display:grid; grid-template-columns:170px minmax(0,1fr); align-items:start; gap:18px; }
 .pet-avatar-editor-block { display:grid; align-content:start; gap:7px; min-width:0; }
 .pet-avatar-editor-preview { width:112px; height:112px; margin:0 auto; border-radius:11px; font-size:36px; }
@@ -9045,6 +9055,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .profile-age-field { grid-column:1; }
   .profile-residence-field { grid-column:2; }
   .pet-editor-layout { grid-template-columns:1fr; }
+  .pet-editor-content { padding:14px 14px 16px; }
   .pet-avatar-editor-block { width:100%; }
   .pet-editor-fields { grid-template-columns:1fr; }
   .pet-field-full { grid-column:auto; }

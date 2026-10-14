@@ -6,7 +6,7 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261015-pet-owner-search-wrapper-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261015-pet-editor-footer-r1">
         <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
         <script src="genealogy-feedback.js?v=20261013-exporter-version-select-r2" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
@@ -836,8 +836,9 @@
         <!-- ========【寵物編輯】 設定 - 與模擬市民共用頭像編輯器、EA 寵物性別與資料欄位 ======== -->
         <div class="ui-dialog-backdrop nested" id="petEditorDialog">
             <div class="ui-dialog-panel pet-editor-modal" tabindex="-1">
-                <h2 id="petModalTitle">新增寵物</h2>
-                <div class="pet-editor-layout">
+                <div class="pet-editor-content">
+                    <h2 id="petModalTitle">新增寵物</h2>
+                    <div class="pet-editor-layout">
                     <div class="avatar-editor-block pet-avatar-editor-block">
                         <div class="avatar-preview pet-avatar-editor-preview avatar-editor-preview" id="petAvatarPreview">?</div>
                         <div class="avatar-editor-actions">
@@ -873,8 +874,14 @@
                             <input type="search" id="petOwnerSearch" placeholder="搜尋模擬市民" aria-label="搜尋飼主">
                             <div class="pet-owner-choices" id="petOwnerChoices" role="group" aria-label="飼主（可多選）"></div>
                         </div>
+                    </div>
                 </div>
-                <div class="ui-dialog-actions"><button class="danger" id="pDelete" style="display:none">刪除寵物</button><span class="spacer"></span><button id="pCancel">取消</button><button class="primary" id="pSave">儲存</button></div>
+                <div class="ui-dialog-actions sim-editor-actions">
+                    <button class="danger" id="pDelete" type="button" style="display:none">刪除寵物</button>
+                    <span class="spacer"></span>
+                    <button id="pCancel" type="button">取消</button>
+                    <button class="primary" id="pSave" type="button">儲存</button>
+                </div>
             </div>
         </div>
 
@@ -1479,7 +1486,7 @@
         <script src="genealogy_sample_preset.js?v=20261010-png-complete-r3"></script>
         <script src="genealogy_sample_portraits.js?v=20261011-portrait-files-r1"></script>
 
-        <script src="genealogy_app.js?v=20261015-pet-dual-avatar-r2"></script>
+        <script src="genealogy_app.js?v=20261015-pet-editor-footer-r1"></script>
         <script src="genealogy_colorPicker.js?v=20261012-liquid-hue-r3"></script>
     </body>
 </html>
