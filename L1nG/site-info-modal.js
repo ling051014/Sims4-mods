@@ -12,10 +12,10 @@
     if (isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
         const cookieStyle = document.createElement("link");
         cookieStyle.rel = "stylesheet";
-        cookieStyle.href = new URL("cookie-consent.css?v=20261015-cookie-layout-r3", script.src).href;
+        cookieStyle.href = new URL("cookie-consent.css?v=20261015-cookie-preferences-skeleton-r4", script.src).href;
         document.head.appendChild(cookieStyle);
         const cookieScript = document.createElement("script");
-        cookieScript.src = new URL("cookie-consent.js?v=20261015-cookie-layout-r3", script.src).href;
+        cookieScript.src = new URL("cookie-consent.js?v=20261015-cookie-preferences-skeleton-r4", script.src).href;
         cookieScript.async = false;
         document.head.appendChild(cookieScript);
     }
