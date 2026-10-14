@@ -3284,6 +3284,14 @@ button.avatar-editor-action { cursor:pointer; }
 .pet-trait-field .trait-editor {
     /* 內部特徵操作不繼承欄位標題粗體 */ font-weight:400;
 }
+.pet-owners-modal { width:min(430px,calc(100vw - 24px)); max-height:min(80dvh,620px); display:flex; flex-direction:column; gap:10px; }
+.pet-owners-modal h2 { margin:0; font-size:17px; }
+.pet-owners-modal p { margin:0; color:var(--text-secondary); font-size:12px; }
+.pet-owners-options { min-height:0; overflow:auto; display:grid; gap:0; border:1px solid var(--border-default); border-radius:7px; }
+.pet-owners-options label { display:flex; align-items:center; gap:9px; padding:8px 10px; border-bottom:1px solid var(--border-default); font-size:12px; cursor:pointer; }
+.pet-owners-options label:last-child { border-bottom:0; }
+.pet-owners-options input { accent-color:var(--action-primary); }
+
 
 .avatar-crop-modal { width:min(560px,100%); }
 .avatar-crop-workspace {
