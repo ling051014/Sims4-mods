@@ -47,27 +47,34 @@
 #manual-version-wrap{margin-top:12px}#manual-version-wrap .field-label{display:block;margin:0 0 7px}
 .version-guide{border:0;margin:11px 0 0}.version-guide summary{list-style:none;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--primary);cursor:pointer;line-height:1.5}.version-guide summary::-webkit-details-marker{display:none}.guide-info{width:18px;height:18px;border:1px solid var(--primary-line);border-radius:50%;display:grid;place-items:center;font-weight:750;font-size:11px}.guide-chevron{margin-left:auto;width:16px;height:16px;flex:0 0 16px;transition:transform .2s;stroke:currentColor;stroke-width:1.8;fill:none}.version-guide[open] .guide-chevron{transform:rotate(180deg)}.version-guide-body{border:1px solid var(--stroke);border-radius:12px;background:var(--bg);padding:13px 15px;margin-top:11px;color:var(--muted);font-size:11px;line-height:1.8}.version-guide-body p+p{margin-top:9px}.version-guide-body b{color:var(--ink)}.version-guide-body code{font-size:10px;overflow-wrap:anywhere}.version-guide-body a{display:inline-flex;align-items:center;gap:5px;color:var(--primary);font-weight:760;margin-top:11px;text-underline-offset:3px}.version-guide-body a .i{width:14px;height:14px;flex:0 0 14px}
 
-/* RealDate 問題回饋：共用版本教學；保持 RealDate 藍色與簡潔文字層級，不影響族譜工具。 */
-.realdate-only #game-version-section .version-guide{margin:12px 0 0;border:0}
-.realdate-only #game-version-section .version-guide > summary{gap:8px;min-height:28px;padding:3px 0;font-size:12px;font-weight:550;line-height:1.65;color:var(--primary)}
-.realdate-only #game-version-section .version-guide .guide-info-icon{width:16px;height:16px;flex:0 0 16px;stroke-width:1.6}
-.realdate-only #game-version-section .version-guide .guide-chevron{margin-left:auto;width:15px;height:15px;flex:0 0 15px;transition:transform .2s ease}
-.realdate-only #game-version-section .version-guide-body{margin:9px 0 0;padding:7px 0 2px;border:0;border-top:1px solid var(--stroke);border-radius:0;background:transparent;color:var(--muted);font-size:12px;line-height:1.8}
-.realdate-only #game-version-section .version-guide-step{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;padding:10px 0}
-.realdate-only #game-version-section .version-guide-number{padding-top:1px;color:var(--primary);font:550 11px/1.8 "Bahnschrift SemiCondensed","Arial Narrow",sans-serif;letter-spacing:.08em}
-.realdate-only #game-version-section .version-guide-step-content{min-width:0}
-.realdate-only #game-version-section .version-guide-step-content > strong{display:block;margin:0;color:var(--ink);font-size:12px;font-weight:550;line-height:1.7}
-.realdate-only #game-version-section .version-guide-step-content > p{margin:3px 0 0;color:var(--muted);font-size:11px;line-height:1.8}
-.realdate-only #game-version-section .version-guide-path{display:block;margin:5px 0 0;color:var(--ink);font:11px/1.8 "Cascadia Code","SFMono-Regular",Consolas,monospace;overflow-wrap:anywhere;white-space:normal}
-.realdate-only #game-version-section .version-guide-log{display:flex;flex-direction:column;gap:1px;min-width:0;margin:7px 0 5px;padding:9px 12px;border-left:2px solid var(--primary-line);background:var(--subtle);border-radius:3px}
-.realdate-only #game-version-section .version-guide-log code{font:11px/1.75 "Cascadia Code","SFMono-Regular",Consolas,monospace;color:var(--ink);overflow-wrap:anywhere}
-.realdate-only #game-version-section .version-guide-note{margin:6px 0 2px;padding-left:34px;color:var(--muted);font-size:11px;line-height:1.7}
-@media (max-width:600px){
-  .realdate-only #game-version-section .version-guide-step{grid-template-columns:22px minmax(0,1fr);gap:8px}
-  .realdate-only #game-version-section .version-guide-note{padding-left:30px}
-}
-@media (prefers-reduced-motion:reduce){
-  .realdate-only #game-version-section .version-guide .guide-chevron{transition:none}
+/* RealDate 回饋：兩個欄位共用同一個原生對話窗，避免展開時把表單撐長。 */
+.realdate-only .version-field-heading{justify-content:flex-start;align-items:center;gap:7px}
+.realdate-only .version-info-trigger{width:22px;height:22px;display:inline-grid;place-items:center;flex:0 0 22px;padding:0;border:0;background:transparent;color:var(--primary);border-radius:50%;cursor:pointer}
+.realdate-only .version-info-trigger svg{width:17px;height:17px;stroke-width:1.8}
+.realdate-only .version-info-trigger:hover{background:var(--primary-pale);color:var(--primary-hover)}
+.realdate-only .version-info-trigger:focus-visible,.realdate-only .version-help-close:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.realdate-only .realdate-version-help-dialog{position:fixed;inset:0;box-sizing:border-box;width:min(460px,calc(100% - 32px));max-width:460px;max-height:min(570px,calc(100dvh - 44px));height:auto;margin:auto;padding:0;border:1px solid var(--stroke);border-radius:11px;background:var(--surface);color:var(--ink);box-shadow:0 18px 65px rgba(14,31,46,.16);overflow:hidden}
+.realdate-only .realdate-version-help-dialog::backdrop{background:rgba(22,35,48,.35);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.realdate-only .version-help-modal-header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px 14px;border-bottom:1px solid var(--stroke)}
+.realdate-only .version-help-modal-header h3{margin:0;color:var(--ink);font-size:15px;font-weight:650;line-height:1.5}
+.realdate-only .version-help-close{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer}
+.realdate-only .version-help-close:hover{background:var(--subtle);color:var(--ink)}
+.realdate-only .version-help-modal-header .i{width:17px;height:17px}
+.realdate-only .realdate-version-help-dialog .version-guide-body{max-height:calc(min(570px,100dvh - 44px) - 68px);overflow-y:auto;overscroll-behavior:contain;padding:12px 20px 18px;margin:0;background:transparent;border:0;border-radius:0;color:var(--muted);font-size:12px;line-height:1.75}
+.realdate-only .realdate-version-help-dialog .version-guide-step{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;padding:11px 0}
+.realdate-only .realdate-version-help-dialog .version-guide-number{color:var(--primary);font:600 11px/1.8 "Bahnschrift SemiCondensed","Arial Narrow",sans-serif;letter-spacing:.08em}
+.realdate-only .realdate-version-help-dialog .version-guide-step-content{min-width:0}
+.realdate-only .realdate-version-help-dialog .version-guide-step-content>strong{display:block;color:var(--ink);font-size:12px;font-weight:600;line-height:1.6}
+.realdate-only .realdate-version-help-dialog .version-guide-step-content>p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.75}
+.realdate-only .realdate-version-help-dialog .version-guide-path{display:block;margin:5px 0 0;color:var(--ink);font:11px/1.7 "Cascadia Code","SFMono-Regular",Consolas,monospace;overflow-wrap:anywhere}
+.realdate-only .realdate-version-help-dialog .version-guide-log{display:flex;flex-direction:column;gap:2px;min-width:0;margin:7px 0 5px;padding:8px 11px;border-left:2px solid var(--primary-line);background:var(--subtle);border-radius:3px}
+.realdate-only .realdate-version-help-dialog .version-guide-log code{color:var(--ink);font:11px/1.75 "Cascadia Code","SFMono-Regular",Consolas,monospace;overflow-wrap:anywhere}
+.realdate-only .realdate-version-help-dialog .version-guide-note{margin:6px 0 0;padding:0 0 0 34px;color:var(--muted);font-size:11px;line-height:1.7}
+@media(max-width:600px){
+  .realdate-only .version-help-modal-header{padding:14px 16px 12px}
+  .realdate-only .realdate-version-help-dialog .version-guide-body{padding:10px 16px 16px}
+  .realdate-only .realdate-version-help-dialog .version-guide-step{gap:8px}
+  .realdate-only .realdate-version-help-dialog .version-guide-note{padding-left:30px}
 }
 
 /* RealDate V1: full independent page, intro + form in two columns */
@@ -154,7 +161,7 @@ body.realdate-only{--bg:#fafafa;--surface:#fff;--subtle:#f7fafc;--ink:#262626;--
 .realdate-only .rd-v1-hero p{color:#767676;max-width:770px;line-height:1.82}
 .realdate-only .rd-hero-art{display:none}
 .realdate-only .rd-v1-main,.realdate-only .rd-footer{max-width:930px}
-.realdate-only .rd-aside-thread{margin:3px 0 24px}
+.realdate-only .rd-aside-thread{display:flex;margin:3px 0 24px auto}
 @media(max-width:780px){.realdate-only .rd-v1-hero{padding:53px 20px 42px}}
 @media(max-width:600px){.realdate-only .rd-v1-hero{min-height:0;padding:40px 20px 35px}.realdate-only .rd-v1-hero h1{font-size:42px}}
 

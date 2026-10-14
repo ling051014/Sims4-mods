@@ -75,8 +75,11 @@
                      aria-labelledby="l1ngInfoTitle" aria-describedby="l1ngInfoSubtitle" tabindex="-1">
                 <header class="l1ng-site-info-header">
                     <span class="l1ng-site-info-heading-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7h.01"></path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <circle cx="12" cy="7.5" r="1.1" fill="currentColor" stroke="none"></circle>
+                            <path d="M12 11.5v5.5"></path>
                         </svg>
                     </span>
                     <div class="l1ng-site-info-heading">
@@ -112,13 +115,13 @@
             panel.className = "ui-dialog-panel storage-modal l1ng-site-info-native-panel";
             layer.querySelector(".l1ng-site-info-header").className = "help-header storage-header";
             const icon = layer.querySelector(".l1ng-site-info-heading-icon");
-            icon.outerHTML = '<span class="l1ng-icon icon-info-circle help-heading-icon" aria-hidden="true"></span>';
+            icon.className = "l1ng-site-info-heading-icon help-heading-icon";
             const heading = layer.querySelector(".l1ng-site-info-heading");
             heading.className = "help-heading-copy";
             const wrapper = document.createElement("div");
             wrapper.className = "help-heading";
             heading.before(wrapper);
-            wrapper.append(layer.querySelector(".help-heading-icon"), heading);
+            wrapper.append(icon, heading);
             const button = layer.querySelector(".l1ng-site-info-close");
             button.className = "help-close-btn l1ng-site-info-close";
             button.innerHTML = '<span class="l1ng-icon icon-x-lg" aria-hidden="true"></span>';
