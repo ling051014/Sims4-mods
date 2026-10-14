@@ -9986,12 +9986,6 @@ button.danger-action:focus-visible {
 .genealogy-pet-card:hover,.genealogy-pet-card:focus-visible {
   border-color:var(--action-primary); box-shadow:0 5px 14px rgba(0,0,0,.10);
 }
-/* 原地長按達門檻提供明確的可拖曳回饋，鬆開立刻復原。 */
-.genealogy-pet-card.pet-hold-ready {
-  cursor:grab;
-  border-color:var(--action-primary);
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--action-primary) 16%,transparent);
-}
 .genealogy-pet-card.dragging { cursor:grabbing; }
 .genealogy-pet-card.pet-card-selected {
   z-index:5;
