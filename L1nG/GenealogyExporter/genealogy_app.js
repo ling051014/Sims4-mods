@@ -19013,7 +19013,7 @@ petCardsLayer?.addEventListener('keydown',event => {
   if (entry) renderPetCardMenu(entry,box.left+Math.min(box.width,40),box.top+Math.min(box.height,40));
 });
 
-// 與人物卡一致：一般點擊開啟資料；必須在卡上原地長按後才能拖曳。
+// 與人物卡一致：點擊開資料，移動超過 3px（觸控 8px）直接啟動拖曳；不等待長按。
 // 手勢只由同一組 PointerDown/Move/Up 收尾，避免 pointerup/click 重複執行。
 petCardsLayer?.addEventListener('pointerdown', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
@@ -19025,42 +19025,29 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const canDrag = !!(fam && !fam.locked && !spacePanHeld);
   const mode = viewMode;
   const origin = {x:entry.x,y:entry.y};
-  const scale = genealogyViewport.getScale() || 1;
   const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
   const isTouch = event.pointerType === 'touch';
   if (isTouch) {
     activePetTouchDragPointerId = event.pointerId;
     lastPetTouchPressAt = performance.now();
   }
-  const jitterAllowance = isTouch ? 18 : 10;
-  const tapAllowance = isTouch ? 12 : 8;
+  const dragThreshold = isTouch ? TOUCH_DRAG_THRESHOLD_PX : 3;
+  const tapAllowance = isTouch ? TOUCH_DRAG_THRESHOLD_PX : 5;
   // 在手勢開始時固定人物對齊目標；移動過程不再反覆取 Scene/遍歷 Map。
   const personSnapTargets = [...(getSceneLayout()?.pos?.values() || [])];
-  let holdReady = false, moved = false, preHoldMoved = false;
+  let moved = false, gestureBlocked = false;
   let previewPosition = null;
-  let latestPoint = {pointerId:event.pointerId,clientX:event.clientX,clientY:event.clientY};
-  // 防止瀏覽器原生按鈕與圖像手勢攔截長按；游標離開卡片仍維持追蹤。
+  // 防止瀏覽器原生圖像拖曳；游標離開卡片仍維持追蹤。
   event.preventDefault();
   event.stopPropagation();
   try { element.setPointerCapture?.(event.pointerId); } catch (_) {}
-  const holdTimer = canDrag ? window.setTimeout(() => {
-    const point = isTouch ? activeTouchPointers.get(event.pointerId) : null;
-    if (!isTouch || (activeTouchPointers.size === 1 && point && !point.blocked &&
-        !touchCardActivationSuppressed.has(event.pointerId))) {
-      holdReady = true;
-      element.classList.add('pet-hold-ready');
-      // 按住時先移動游標，不應把長按計時器直接取消；達時間後接續移動。
-      if (preHoldMoved) onMove({...latestPoint,preventDefault(){}});
-    }
-  },280) : null;
   const movement = ev => Math.hypot(ev.clientX-event.clientX,ev.clientY-event.clientY);
   const clear = () => {
-    window.clearTimeout(holdTimer);
     moveFrame?.cancel?.();
     document.removeEventListener('pointermove',onMove);
     document.removeEventListener('pointerup',onFinish);
     document.removeEventListener('pointercancel',onFinish);
-    element.classList.remove('dragging','pet-hold-ready');
+    element.classList.remove('dragging');
     hideSmartGuides();
   };
   // 與人物卡一致，將多次 PointerMove 合併到同一個動畫幀。
@@ -19090,35 +19077,30 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const moveFrame = genealogyInteraction?.createFrameScheduler?.(applyMove) || null;
   const onMove = ev => {
     if (ev.pointerId !== event.pointerId) return;
-    latestPoint = {pointerId:ev.pointerId,clientX:ev.clientX,clientY:ev.clientY};
     // 雙指手勢只縮放畫布，絕不觸發寵物拖曳。
     if (isTouch && (activeTouchPointers.size !== 1 ||
       activeTouchPointers.get(event.pointerId)?.blocked ||
       touchCardActivationSuppressed.has(event.pointerId))) {
-      preHoldMoved = true;
-      window.clearTimeout(holdTimer);
+      gestureBlocked = true;
       moveFrame?.cancel?.();
       return;
     }
-    const distance = movement(ev);
-    if (!holdReady) {
-      if (distance > jitterAllowance) preHoldMoved = true;
-      return;
-    }
-    if (!moved && distance < (isTouch ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
+    if (!canDrag || gestureBlocked) return;
+    if (!moved && movement(ev) <= dragThreshold) return;
     moved = true;
     element.classList.add('dragging');
-    if (moveFrame) moveFrame.push(latestPoint);
-    else applyMove(latestPoint);
+    const point = {clientX:ev.clientX,clientY:ev.clientY};
+    if (moveFrame) moveFrame.push(point);
+    else applyMove(point);
     ev.preventDefault?.();
   };
   const onFinish = ev => {
     if (ev.pointerId !== event.pointerId) return;
-    const cancelled = ev.type === 'pointercancel' ||
+    const cancelled = gestureBlocked || ev.type === 'pointercancel' ||
       (isTouch && touchCardActivationSuppressed.has(event.pointerId));
     // 寫入前補齊最後一幀，避免放開時位置落後指標；取消時丟棄預覽。
     if (!cancelled) moveFrame?.flush?.();
-    const tap = !cancelled && !moved && !preHoldMoved && movement(ev) <= tapAllowance;
+    const tap = !cancelled && !moved && movement(ev) <= tapAllowance;
     clear();
     if (isTouch && activePetTouchDragPointerId === ev.pointerId)
       activePetTouchDragPointerId = null;
