@@ -72,6 +72,19 @@ if (mode === 'home') {
   contents('Translations');
 }
 
+// CSS/JS sit at the Pages domain root, whereas development source files
+// live two levels below html icons. Rewrite only deployed copies.
+if (mode === 'genealogy' || mode === 'translations') {
+  const cssFile = path.join(out,mode === 'genealogy' ? 'genealogy.css' : 'translations.css');
+  const css = fs.readFileSync(cssFile,'utf8');
+  fs.writeFileSync(cssFile,css.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
+}
+if (mode === 'genealogy') {
+  const sceneFile = path.join(out,'genealogy_scene.js');
+  const scene = fs.readFileSync(sceneFile,'utf8');
+  fs.writeFileSync(sceneFile,scene.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
+}
+
 // Keep each project's navigation on its own domain, rather than showing another
 // website under a URL served by the wrong Cloudflare Pages project.
 const domains = {
