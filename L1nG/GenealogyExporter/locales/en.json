@@ -1147,6 +1147,8 @@
     "單一附件不可超過 10 MB": "Each attachment must be 10 MB or less",
     "附件總大小不可超過 20 MB": "Total attachments must be 20 MB or less",
     "網站端": "Website",
-    "遊戲端": "In-game"
+    "遊戲端": "In-game",
+    "問題反饋": "Feedback",
+    "關於族譜工具": "About Genealogy Tool"
   }
 }
