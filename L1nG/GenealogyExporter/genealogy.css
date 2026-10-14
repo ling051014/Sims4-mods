@@ -2698,12 +2698,14 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-popover {
-    /* 右側選單放在共同 portal 內 */ position: absolute;
+    /* 右側選單蓋住標籤的 1px 接合重疊，避免懸停背景突出到選單 */ position: absolute;
+    z-index: 2;
     /* 固定顯示方式 */ display: block;
     /* 背景 */ background: var(--nav-dropdown-bg);
     /* 文字 */ color: var(--nav-dropdown-text);
-    /* 細框 */ border: 1px solid var(--nav-dropdown-border);
-    /* 左上角與左側分類便利貼接合，沿用家庭選擇器輪廓 */ border-radius: 0 6px 6px 6px;
+    /* 左側貼齊分類標籤，邊框由標籤呈現，不在接縫留下直線 */ border: 1px solid var(--nav-dropdown-border);
+    border-left-color: transparent;
+    /* 左側上下角維持直角，只有選單右側保留圓角 */ border-radius: 0 6px 6px 0;
     /* 陰影由共同 portal 統一提供，選單本體不再向便利貼投影 */ box-shadow: none;
     /* 不讓右側內容破出圓角 */ overflow: hidden;
 }
@@ -2720,7 +2722,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 .relationship-type-index-portal {
     /* 與右側選單一起放在共同 portal 內 */ position: absolute;
-    /* 高於右側清單，僅用於接縫覆蓋 */ z-index: 2;
+    /* 讓右側選單位於分類標籤前方，防止標籤懸停背景覆蓋清單 */ z-index: 1;
     /* 預設由 JS 控制顯示 */ display: none;
     /* 六個分類永遠等分右側選單實際高度 */ align-items: stretch;
 }
@@ -2732,14 +2734,12 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-index-tab.active {
-    /* 當前便利貼右側不顯示分隔線，與右側選單接成同一頁 */ border-right-color: transparent;
-    /* 當前便利貼使用與內容區相同背景 */ background: var(--nav-dropdown-bg);
+    /* 當前標籤與選單使用相同紙張色，形成連續的接合面 */ border-right-color: transparent;
+    background: var(--nav-dropdown-bg);
 }
 
 .relationship-type-index-tab.active::after {
-    /* 覆蓋右側選單左邊框，避免 Active 頁籤仍看見接縫 */ right: -3px;
-    /* 稍微加寬遮罩，確保 Portal 疊合後不露出 1px 線條 */ width: 4px;
-    /* 使用選單背景色形成同一層頁籤效果 */ background: var(--nav-dropdown-bg);
+    /* 原遮罩上下超出 1px，首尾標籤會產生尖角；右側選單已負責遮住接縫 */ content: none;
 }
 
 .relationship-type-index-tab .family-nav-tab-lines {
