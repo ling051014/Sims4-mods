@@ -19,6 +19,43 @@
         cookieScript.async = false;
         document.head.appendChild(cookieScript);
     }
+    // Use the same source branch for all internal L1nG links in previews.
+    if (isBranchPreview) {
+        const previewRoot = new URL("./", script.src);
+        const hosts = {
+            "home.by-l1ng.com": "home.html",
+            "translations.by-l1ng.com": "Translations/index.html",
+            "realdate.by-l1ng.com": "RealDate/index.html",
+            "genealogy-tool.by-l1ng.com": "GenealogyExporter/genealogy.html",
+            "genealogy-exporter.by-l1ng.com": "GenealogyExporter/genealogy-exporter.html"
+        };
+        function remapPreviewLink(anchor) {
+            if (!anchor?.href) return;
+            let requested;
+            try { requested = new URL(anchor.href); } catch (_) { return; }
+            const local = hosts[requested.hostname];
+            if (!local) return;
+            let relative = local;
+            const pathPart = requested.pathname.slice(1);
+            if (requested.hostname === "home.by-l1ng.com" && pathPart === "site-info.html") {
+                relative = "site-info.html";
+            } else if (requested.hostname === "realdate.by-l1ng.com" && pathPart) {
+                relative = "RealDate/" + pathPart;
+            }
+            const previewUrl = new URL(relative, previewRoot);
+            previewUrl.hash = requested.hash;
+            previewUrl.search = requested.search;
+            anchor.href = previewUrl.href;
+        }
+        const remapAll = () => document.querySelectorAll("a[href]").forEach(remapPreviewLink);
+        document.addEventListener("click", event => {
+            const anchor = event.target.closest?.("a[href]");
+            if (anchor) remapPreviewLink(anchor);
+        }, true);
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", remapAll, {once:true});
+        } else remapAll();
+    }
     const sections = new Set(["privacy", "terms", "genealogy"]);
     const baseUrl = new URL("site-info.html", script.src);
     // 公開的獨立子網域一律引用首頁域名；分支預覽與本地路徑則沿用相對路徑。
