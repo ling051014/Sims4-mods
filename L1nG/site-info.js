@@ -2,6 +2,23 @@
 (() => {
     "use strict";
     const root = document.documentElement;
+    // RawGitHack serves source HTML directly, bypassing the Pages build-time
+    // Cookie CSS/JS injection. Load the same shared assets for branch review.
+    // Cookie consent itself blocks analytics and persistence on preview hosts.
+    const script = document.currentScript;
+    const previewPath = "/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/";
+    const isBranchPreview = location.hostname === "raw.githack.com"
+        && location.pathname.startsWith(previewPath);
+    if (script && isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
+        const cookieStyle = document.createElement("link");
+        cookieStyle.rel = "stylesheet";
+        cookieStyle.href = new URL("cookie-consent.css?v=20261015-branch-preview-r1", script.src).href;
+        document.head.appendChild(cookieStyle);
+        const cookieScript = document.createElement("script");
+        cookieScript.src = new URL("cookie-consent.js?v=20261015-branch-preview-r1", script.src).href;
+        cookieScript.async = false;
+        document.head.appendChild(cookieScript);
+    }
     const allowed = new Set(["zh-Hant", "zh-Hans", "en"]);
     const params = new URLSearchParams(location.search);
     const isEmbedded = params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(params.get("section"));
