@@ -11821,9 +11821,10 @@ function getTouchPointerKind(
     };
   }
 
-  // 寵物卡是 button，但仍屬畫布卡片，不應當作一般 UI control。
-  if (target?.closest?.('.genealogy-pet-card[data-pet-id]')) {
-    return {kind:'pet-card',simId:null};
+  // 寵物卡是 button，但仍屬畫布卡片；與人物共用觸控長按選單。
+  const petCard = target?.closest?.('.genealogy-pet-card[data-pet-id]');
+  if (petCard) {
+    return {kind:'pet-card',simId:null,petId:petCard.dataset.petId};
   }
 
   if (
@@ -11948,7 +11949,7 @@ function scheduleTouchCardLongPress(
           current.moved ||
           current.blocked ||
           activeTouchPointers.size !== 1 ||
-          !current.simId
+          !(current.simId || current.petId)
         ) {
           return;
         }
@@ -11963,6 +11964,21 @@ function scheduleTouchCardLongPress(
           currentGenealogyData()
             ? currentFamily()
             : null;
+
+        if (current.kind === 'pet-card') {
+          const entry = findCanvasPetEntry(current.petId);
+          if (!entry) return;
+          if (
+            fam && genealogyScene.isFreeLayoutActive(fam) &&
+            arrangeTool === 'select' && !selectedPetIds.has(current.petId)
+          ) {
+            selectedPetIds.clear();
+            selectedPetIds.add(current.petId);
+            syncNodeSelectionClasses();
+          }
+          renderPetCardMenu(entry,current.clientX,current.clientY);
+          return;
+        }
 
         if (
           fam &&
@@ -12014,7 +12030,8 @@ function handleTouchPointerDown(
     moved:false,
     blocked:false,
     kind:descriptor.kind,
-    simId:descriptor.simId
+    simId:descriptor.simId,
+    petId:descriptor.petId || null
   };
 
   if (
@@ -12043,7 +12060,7 @@ function handleTouchPointerDown(
     }
 
     if (
-      point.kind === 'card'
+      (point.kind === 'card' || point.kind === 'pet-card')
     ) {
       scheduleTouchCardLongPress(
         point
@@ -12240,7 +12257,7 @@ function finishTouchPointer(
 
   if (
     event.type === 'pointercancel' &&
-    point.kind === 'card'
+    (point.kind === 'card' || point.kind === 'pet-card')
   ) {
     touchCardActivationSuppressed.add(
       point.pointerId
@@ -18997,7 +19014,7 @@ petCardsLayer?.addEventListener('contextmenu',event => {
   if (!cardElement) return;
   event.preventDefault();
   event.stopPropagation();
-  // 觸控長按專供拖曳，不能被 Safari 的 contextmenu 攔截。
+  // 觸控長按由共用 520ms 選單處理，略過 Safari 額外合成的 contextmenu。
   if (event.pointerType === 'touch' || activePetTouchDragPointerId !== null ||
       performance.now() - lastPetTouchPressAt < 1100) return;
   const entry = findCanvasPetEntry(cardElement.dataset.petId);
