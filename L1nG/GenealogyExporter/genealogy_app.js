@@ -3895,7 +3895,7 @@ function positionRelationshipTypePicker(){
   const margin=10;
   const gap=6;
   const tabWidth=52;
-  const tabOverlap=1;
+  const tabOverlap=0;
 
   const viewportWidth=
     Math.max(
