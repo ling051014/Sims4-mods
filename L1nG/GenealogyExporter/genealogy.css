@@ -2625,10 +2625,12 @@ button.avatar-editor-action { cursor:pointer; }
 .other-rel-edit .relationship-add-row .relationship-type-trigger {
     display: flex;
     align-items: center;
+    box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    min-height: 31px;
-    padding: 4px 8px;
+    height: 34px;
+    min-height: 34px;
+    padding: 4px 30px 4px 8px;
     font: inherit;
     font-size: 13px;
     line-height: 1.2;
@@ -2648,6 +2650,26 @@ button.avatar-editor-action { cursor:pointer; }
 }
 .other-rel-edit .relationship-add-row .relationship-type-trigger .relationship-type-value {
     color: inherit;
+}
+/* 三個新增控制項共用 34px 基準，保留目標多選時自然增高的能力。 */
+.other-rel-edit .relationship-add-row .ui-select-wrap[data-ui-select-for="relationshipTarget"] .ui-select-input {
+    box-sizing: border-box;
+    min-height: 34px;
+    align-items: center;
+    font-size: 13px;
+    line-height: 1.2;
+}
+.other-rel-edit .relationship-add-row #relationshipAddBtn {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    min-height: 34px;
+    padding: 4px 12px;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.2;
 }
 .relationship-other-type-field > .relationship-type-trigger {
     width: 100%;
