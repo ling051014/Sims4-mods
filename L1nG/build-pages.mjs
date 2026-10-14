@@ -41,6 +41,8 @@ for (const icon of ['ui-search.svg', 'ui-clear.svg']) {
   put(path.join(base,'html icons',icon),path.join(out,'html icons',icon));
 }
 file('analytics.js');
+file('cookie-consent.js');
+file('cookie-consent.css');
 const publicFeedback = [
   'feedback-core.js','feedback-i18n.js','feedback-loading.css',
   'feedback.css','realdate-feedback-live.js','select-ui.js'
@@ -126,9 +128,10 @@ for(const p of htmls) {
   // Never count private administrator activity as public traffic.
   if (relative !== 'feedback/admin.html') {
     if (!/<\/head\s*>/i.test(modified)) throw new Error('Missing HTML head: '+relative);
-    const trackingSrc='../'.repeat(relative.split('/').length-1)+'analytics.js?v=20261014-ga4-r1';
+    const assetPrefix='../'.repeat(relative.split('/').length-1);
     modified=modified.replace(/<\/head\s*>/i,
-      '    <script src="'+trackingSrc+'" defer></script>\n</head>');
+      '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261014-consent-r1">\n' +
+      '    <script src="'+assetPrefix+'cookie-consent.js?v=20261014-consent-r1" defer></script>\n</head>');
     analyticsPages++;
   }
   if (modified!==html) fs.writeFileSync(p,modified,'utf8');
