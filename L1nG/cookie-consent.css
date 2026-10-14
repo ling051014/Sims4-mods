@@ -196,7 +196,7 @@
 .l1ng-cookie-dialog .l1ng-cookie-body { min-height:0; overflow-y:auto; }
 .l1ng-cookie-dialog .l1ng-cookie-body .l1ng-cookie-setting:first-child { padding-top:12px; }
 .l1ng-cookie-dialog .l1ng-cookie-setting:last-child { border-bottom:0; }
-.l1ng-cookie-dialog > .l1ng-cookie-actions { border-top:1px solid var(--cookie-border); padding:14px 20px; }
+.l1ng-cookie-dialog > .l1ng-cookie-actions { border-top:0; padding:14px 20px; }
 .l1ng-cookie-genealogy .l1ng-cookie-dialog .help-heading-copy .l1ng-cookie-subtitle { margin:4px 0 0; color:var(--text-secondary); font-size:11.5px; line-height:1.45; }
 .l1ng-cookie-genealogy .l1ng-cookie-dialog .storage-scroll-body.l1ng-cookie-body { padding:0 0 8px; }
 .l1ng-cookie-genealogy .l1ng-cookie-dialog .storage-scroll-body.l1ng-cookie-body .l1ng-cookie-setting:first-child { padding-top:12px; }
@@ -207,6 +207,16 @@
   .l1ng-cookie-regular .l1ng-cookie-dialog .l1ng-site-info-header { padding:15px 16px; }
 }
 @media(prefers-reduced-motion:reduce) { .l1ng-cookie-skeleton-line::after,.l1ng-cookie-skeleton-actions span::after { animation:none; } }
+
+
+/* Shared preferences loading state: match both modal shells without intercepting clicks. */
+.l1ng-cookie-dialog { position:relative; }
+.l1ng-cookie-preferences-skeleton { display:none; padding:13px 22px 18px; flex:1 1 auto; min-height:112px; background:var(--cookie-surface); }
+.l1ng-cookie-preferences-skeleton .l1ng-cookie-skeleton-line { margin:0 0 12px; }
+.l1ng-cookie-backdrop.is-loading .l1ng-cookie-preferences-skeleton { display:block; }
+.l1ng-cookie-backdrop.is-loading .l1ng-cookie-body,
+.l1ng-cookie-backdrop.is-loading .l1ng-cookie-dialog > .l1ng-cookie-actions { visibility:hidden; height:0; overflow:hidden; padding-top:0; padding-bottom:0; }
+.l1ng-cookie-genealogy .l1ng-cookie-dialog .help-heading-icon { align-self:flex-start; flex:0 0 18px; width:18px; height:18px; margin-top:2px; }
 
 /* Genealogy preference dialog shares the site's storage/help modal structure. */
 .l1ng-cookie-backdrop.l1ng-cookie-genealogy { z-index: 61000; }
@@ -229,7 +239,7 @@
 }
 .l1ng-cookie-genealogy .l1ng-cookie-dialog .help-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   min-width: 0;
 }
@@ -263,7 +273,7 @@
 }
 .l1ng-cookie-genealogy .l1ng-cookie-dialog > .l1ng-cookie-actions {
   flex: 0 0 auto;
-  border-top: 1px solid var(--border-default);
+  border-top: 0;
 }
 @media (max-width: 540px) {
   .l1ng-cookie-banner { right: 12px; bottom: 12px; padding: 17px; width: calc(100vw - 24px); }
