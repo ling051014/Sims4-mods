@@ -2689,7 +2689,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 高於人物編輯器與一般下拉 */ z-index: 5600;
     /* 便利貼與選單水平接合 */ display: block;
     /* 不在共同容器本身畫背景，讓子元件保留原輪廓 */ background: transparent;
-    /* 整組只投射一次陰影，避免便利貼與選單中間出現陰影縫 */ box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    /* 沿實際圓角標籤與選單輪廓投影，避免矩形外框在標籤圓角後露出方角 */ filter: drop-shadow(0 10px 30px rgba(0,0,0,.16));
     /* 不裁切便利貼圓角 */ overflow: visible;
 }
 
