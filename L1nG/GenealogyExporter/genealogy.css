@@ -2117,7 +2117,7 @@ body[data-theme="graphite"] .life-photo-stage {
 .form-field-title { color:var(--text-secondary); font:inherit; font-weight:600; }
 
 /* ========【模擬市民個人檔案編輯器】 設定 - 緊湊人物檔案、分頁內容與固定操作列 ======== */
-.sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease; }
+.sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; --sim-editor-placeholder-color:color-mix(in srgb,var(--text-secondary) 80%,transparent); transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease; }
 .sim-editor-top { flex:0 0 auto; padding:13px 18px 0; background:var(--surface-card); position:relative; z-index:5; }
 .sim-editor-title { margin-bottom:8px !important; padding-right:64px; }
 .sim-profile-header { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:start; gap:18px; padding:0 0 11px; }
@@ -2155,6 +2155,30 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-editor-tab.active { color:var(--action-primary); background:transparent; }
 .sim-editor-tab.active::after { content:""; position:absolute; left:14px; right:14px; bottom:0; height:2px; border-radius:999px; background:var(--action-primary); }
 .sim-editor-content { flex:1 1 auto; min-height:0; overflow-y:auto; padding:12px 18px 14px; background:var(--surface-card); }
+/* 編輯模擬市民的已撰寫提示內容：統一字型、13px 字級、粗細及各主題的次要文字色。 */
+.sim-editor-modal input::placeholder,
+.sim-editor-modal textarea::placeholder {
+    font-family:inherit;
+    font-size:13px;
+    font-weight:400;
+    color:var(--sim-editor-placeholder-color);
+    opacity:1;
+}
+.sim-editor-modal .ui-select-placeholder {
+    font-family:inherit;
+    font-size:13px;
+    font-weight:400;
+    color:var(--sim-editor-placeholder-color);
+}
+/* 其他關係的搜尋選單由 portal 移至 body，無法繼承編輯視窗變數。 */
+.relationship-type-popover .relationship-type-search::placeholder {
+    font-family:inherit;
+    font-size:13px;
+    font-weight:400;
+    color:color-mix(in srgb,var(--text-secondary) 80%,transparent);
+    opacity:1;
+}
+
 .sim-editor-panel { display:none; }
 .sim-editor-panel.active { display:block; }
 .sim-editor-panel[hidden] { display:none !important; }
@@ -2454,7 +2478,7 @@ button.avatar-editor-action { cursor:pointer; }
     word-break:break-word;
     line-height:1.3;
 }
-.family-rel-edit { margin-top:7px; padding-top:7px; border-top:1px dashed var(--border-default); }
+.family-rel-edit { margin-top:7px; padding-top:7px; }
 .family-rel-edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
 .family-rel-edit-grid[hidden] { display:none; }
 .family-rel-edit label { display:grid; gap:4px; color:var(--text-secondary); font-size:10.5px; font-weight:600; }
@@ -2863,7 +2887,8 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .sim-editor-panel .relationship-section.first { margin-top:0; padding-top:0; border-top:0; }
-.sim-editor-actions { flex:0 0 auto; margin-top:0; padding:9px 18px 10px; border-top:1px solid var(--border-default); background:var(--surface-card); box-shadow:none; position:relative; z-index:6; }
+/* 編輯器操作列原本被後方的共用規則補回 18px 上方外距，使用複合選擇器保留原設計。 */
+.ui-dialog-actions.sim-editor-actions { flex:0 0 auto; margin-top:0; padding:9px 18px 10px; border-top:1px solid var(--border-default); background:var(--surface-card); box-shadow:none; position:relative; z-index:6; }
 
 .grid {
     /* 顯示方式 */ display: grid;
@@ -8856,7 +8881,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     overflow:visible;
     padding:11px 14px 18px;
   }
-  .sim-editor-actions {
+  .ui-dialog-actions.sim-editor-actions {
     position:sticky;
     bottom:0;
     z-index:9;
