@@ -162,3 +162,7 @@
     .l1ng-site-info-backdrop .l1ng-site-info-panel { animation: none; }
     .l1ng-site-info-skeleton-line::after { animation: none; }
 }
+
+/* 族譜原生標題列同樣使用全站一致的清晰圓形 i SVG。 */
+.l1ng-site-info-native .l1ng-site-info-heading-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 19px;width:19px;height:19px;margin-top:3px;color:var(--action-primary,#55acee);background:none}
+.l1ng-site-info-native .l1ng-site-info-heading-icon svg{display:block;width:19px;height:19px}

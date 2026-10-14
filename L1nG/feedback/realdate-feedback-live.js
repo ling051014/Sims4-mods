@@ -76,7 +76,7 @@
   if(version){
     version.replaceChildren();
     for(const [value,label] of [
-      ['','請選擇版本'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
+      ['','請選擇版本'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
       ['v0.2.1 Beta','v0.2.1 Beta'],['v0.2 Beta','v0.2 Beta'],
       ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta'],
       ['other','其他版本（手動填寫）'],['unknown','不確定']
@@ -90,7 +90,27 @@
     targetSelect.value='mod';
   }
   $('bug-context')?.querySelector('label')?.replaceChildren(document.createTextNode('回饋對象'));
-  if($('version-changelog-link'))$('version-changelog-link').href='changelog.html';
+  // 共用版本說明：原生小視窗不影響表單高度，兩顆 i 按鈕都開啟同一份內容。
+  const versionHelp=$('version-guide');
+  let versionHelpOpener=null;
+  if(versionHelp && typeof versionHelp.showModal==='function'){
+    document.querySelectorAll('[data-version-help]').forEach(button=>button.addEventListener('click',()=>{
+      if(versionHelp.open)return;
+      versionHelpOpener=button;
+      versionHelp.showModal();
+    }));
+    versionHelp.querySelector('[data-close-version-help]')?.addEventListener('click',()=>versionHelp.close());
+    versionHelp.addEventListener('click',event=>{
+      if(event.target===versionHelp){
+        const rect=versionHelp.getBoundingClientRect();
+        if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)versionHelp.close();
+      }
+    });
+    versionHelp.addEventListener('close',()=>{
+      if(versionHelpOpener?.isConnected)versionHelpOpener.focus({preventScroll:true});
+      versionHelpOpener=null;
+    });
+  }
   version?.addEventListener('change',()=>{$('manual-version-wrap').hidden=version.value!=='other';});
   targetSelect?.addEventListener('change',updateVersion);
   $('message-field')?.addEventListener('input',()=>{$('char-count').textContent=$('message-field').value.length+' / 2000';setError('');});

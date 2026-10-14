@@ -8,11 +8,11 @@
         <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-unified-r4"/>
         <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"/>
         <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
-        <link rel="stylesheet" href="../feedback/feedback.css?v=20261013-feedback-action-r13"/>
+        <link rel="stylesheet" href="../feedback/feedback.css?v=20261014-log-example-hierarchy-r1"/>
         <link rel="stylesheet" href="../feedback/feedback-loading.css"/>
         <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
-        <link rel="stylesheet" href="../site-info-modal.css?v=20261012-native-layout-r1">
-        <script src="../site-info-modal.js?v=20261012-native-layout-r1" defer></script>
+        <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
+        <script src="../site-info-modal.js?v=20261014-title-info-r2" defer></script>
     </head>
     <body class="realdate-only">
         <script src="../../site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3" data-skeleton-layout="realdate-content"></script>
@@ -57,7 +57,7 @@
                     <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
                     <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
                     <!-- 全部導覽項目直接顯示，避免桌面版額外的「更多」選單 -->
-                    <a href="roadmap.html"><span data-lang="zh-Hant">發展方向</span><span data-lang="en">Direction</span></a>
+                    <a href="roadmap.html"><span data-lang="zh-Hant">開發方向</span><span data-lang="en">Direction</span></a>
                     <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
                     <a class="active" aria-current="page" href="feedback.html"><span data-lang="zh-Hant">問題反饋</span><span data-lang="en">Feedback</span></a>
                 </nav>
@@ -89,7 +89,7 @@
             </nav>
             <div class="preview-tools">
                 <span class="demo-chip"></span>
-                <button aria-label="切換深色／淺色" class="icon-btn" id="theme-toggle" title="切換深色／淺色" type="button">
+                <button aria-label="切換深色 / 淺色" class="icon-btn" id="theme-toggle" title="切換深色 / 淺色" type="button">
                     <svg class="i"><use href="#ico-moon"></use></svg>
                 </button>
             </div>
@@ -208,7 +208,7 @@
                     <div class="rd-tags">
                         <span>無需登入</span><span>對話由玩家選擇</span><span>附件可選填</span>
                     </div>
-                    <button class="rd-my-feedback rd-aside-thread" data-open-thread type="button"><span>查看我的回饋</span><svg class="rd-my-feedback-arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+                    <button class="rd-my-feedback rd-aside-thread arrow-link-motion" data-open-thread type="button"><span>查看我的回饋</span><span aria-hidden="true">→</span></button>
                     <ol class="rd-steps">
                         <li>
                             <b>01</b><span><strong>選擇回饋類型</strong><small>錯誤回報或功能建議都可以。</small></span>
@@ -265,29 +265,59 @@
                                             <select class="field" id="issue-target"><option value="web">族譜工具網站</option><option value="exporter">族譜提取器</option></select>
                                         </section>
                                         <section class="section conditional-section" hidden="" id="module-version-section">
-                                            <div class="section-heading">
+                                            <div class="section-heading version-field-heading">
                                                 <label class="field-label" for="module-version">使用的模組版本 <span class="required">*</span></label>
+                                                <button type="button" class="version-info-trigger" data-version-help aria-haspopup="dialog" aria-controls="version-guide" aria-label="如何確認 RealDate 與遊戲版本？" title="查看版本確認方式"><svg class="i sm" aria-hidden="true"><use href="#ico-info"></use></svg></button>
                                             </div>
-                                            <select aria-describedby="version-guide" class="field" id="module-version"><option value="">請選擇版本</option></select>
+                                            <select aria-describedby="version-error" class="field" id="module-version"><option value="">請選擇版本</option></select>
                                             <div hidden="" id="manual-version-wrap">
                                                 <label class="field-label" for="manual-version">其他版本號</label><input autocomplete="off" class="field" id="manual-version" maxlength="60" placeholder="輸入安裝的版本，例如 v0.5 Beta" type="text"/>
                                             </div>
-                                            <details class="version-guide" id="version-guide">
-                                                <summary>
-                                                    <span aria-hidden="true" class="guide-info">?</span>不知道安裝哪一版？查看確認方式 <svg class="i sm guide-chevron" aria-hidden="true"><use href="#ico-chevron-down"></use></svg>
-                                                </summary>
-                                                <div class="version-guide-body">
-                                                    <p><b>① 找到當初下載的壓縮檔。</b>例如 <code>L1nG_RealDate_v0.4_Beta.zip</code>，其中 <b>v0.4 Beta</b> 就是下載時的版本。</p><p><b>② 對照網站的版本更新日誌。</b>更新日誌可確認版本名稱與發佈日期；但只看更新日誌，無法確認電腦實際安裝哪一版。</p><p><b>③ 找不到原下載檔？</b>可查看遊戲產生的 RealDate 日誌，確認模組及遊戲版本；若仍不確定模組版本，可選「不確定」，並附上你知道的資訊。<code>.package</code> 或 <code>.ts4script</code> 主檔名不一定包含版本號。</p><a href="https://raw.githack.com/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/L1nG/RealDate/changelog.html" id="version-changelog-link" rel="noopener noreferrer" target="_blank">查看 RealDate 更新日誌 <svg class="i sm" aria-hidden="true"><use href="#ico-external"></use></svg></a>
-                                                </div>
-                                            </details>
+
                                             <div class="field-error" id="version-error">請選擇模組版本，或選擇「不確定」。</div>
                                         </section>
                                         <section class="section conditional-section" hidden="" id="game-version-section">
-                                            <div class="section-heading">
+                                            <div class="section-heading version-field-heading">
                                                 <label class="field-label" for="game-version">遊戲版本 <span class="required" aria-hidden="true">*</span></label>
+                                                <button type="button" class="version-info-trigger" data-version-help aria-haspopup="dialog" aria-controls="version-guide" aria-label="如何確認 RealDate 與遊戲版本？" title="查看版本確認方式"><svg class="i sm" aria-hidden="true"><use href="#ico-info"></use></svg></button>
                                             </div>
-                                            <input autocomplete="off" class="field" id="game-version" maxlength="70" placeholder="例如：1.128.×××" aria-describedby="game-version-help game-version-error"/>
-                                            <p class="compact-help" id="game-version-help">不知道模組或遊戲版本？可查看遊戲產生的 RealDate 日誌，其中會記錄版本資訊。</p>
+                                            <input autocomplete="off" class="field" id="game-version" maxlength="70" placeholder="例如：1.128.×××" aria-describedby="game-version-error"/>
+                                            <dialog class="realdate-version-help-dialog" id="version-guide" aria-labelledby="version-help-title">
+                                                <div class="version-help-modal-header">
+                                                    <h3 id="version-help-title">如何確認 RealDate 與遊戲版本？</h3>
+                                                    <button type="button" class="version-help-close" data-close-version-help aria-label="關閉版本說明" title="關閉"><svg class="i sm" aria-hidden="true"><use href="#ico-close"></use></svg></button>
+                                                </div>
+                                                <div class="version-guide-body">
+                                                    <div class="version-guide-step">
+                                                        <span class="version-guide-number" aria-hidden="true">01</span>
+                                                        <div class="version-guide-step-content">
+                                                            <strong>找到 RealDate 資料夾</strong>
+                                                            <p>在「文件」中依序開啟：</p>
+                                                            <code class="version-guide-path">Electronic Arts\The Sims 4\L1nG_RealDate</code>
+                                                        </div>
+                                                    </div>
+                                                    <div class="version-guide-step">
+                                                        <span class="version-guide-number" aria-hidden="true">02</span>
+                                                        <div class="version-guide-step-content">
+                                                            <strong>開啟最新的啟動日誌</strong>
+                                                            <p>找到以下檔案，若有多份，請開啟日期時間最新的一份：</p>
+                                                            <code class="version-guide-path">L1nG_RealDate_Boot_Log_*.txt</code>
+                                                        </div>
+                                                    </div>
+                                                    <div class="version-guide-step">
+                                                        <span class="version-guide-number" aria-hidden="true">03</span>
+                                                        <div class="version-guide-step-content">
+                                                            <strong>查看最上方的版本資訊</strong>
+                                                            <div class="version-guide-log" aria-label="啟動日誌版本資訊範例">
+                                                                <code><span class="version-guide-log-key">Runtime Version:</span> <span class="version-guide-log-example">v0.5 Beta</span></code>
+                                                                <code><span class="version-guide-log-key">Game Version:</span> <span class="version-guide-log-example">1.128.90.1030</span></code>
+                                                            </div>
+                                                            <p>Runtime Version 是 RealDate 模組版本，Game Version 是《模擬市民 4》的遊戲版本。</p>
+                                                        </div>
+                                                    </div>
+                                                    <p class="version-guide-note"><strong>找不到日誌？</strong><span>請先啟動遊戲後再確認。</span></p>
+                                                </div>
+                                            </dialog>
                                             <div class="field-error" id="game-version-error" role="alert">請填寫遊戲版本，可查看 RealDate 日誌確認。</div>
                                         </section>
                                         <section class="section">
@@ -437,7 +467,7 @@
                 <div class="l1ng-footer-inner">
                     <div class="l1ng-footer-main">
                         <div class="l1ng-footer-identity">
-                            <strong>REALDATE</strong>
+                            <strong>RealDate</strong>
                             <p><span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span><span data-lang="en">The Sims 4 Time &amp; Life System</span></p>
                         </div>
                         <nav class="l1ng-footer-nav" aria-label="RealDate site navigation">
@@ -445,7 +475,7 @@
                             <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
                             <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
                             <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
-                            <a href="roadmap.html"><span data-lang="zh-Hant">發展方向</span><span data-lang="en">Direction</span></a>
+                            <a href="roadmap.html"><span data-lang="zh-Hant">開發方向</span><span data-lang="en">Direction</span></a>
                             <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
                             <a href="../home.html"><span data-lang="zh-Hant">L1nG 首頁</span><span data-lang="en">L1nG Home</span></a>
                         </nav>
@@ -457,7 +487,7 @@
                             <a href="https://home.by-l1ng.com/site-info.html#privacy" data-site-info-section="privacy"><span data-lang="zh-Hant">隱私權與 Cookie</span><span data-lang="en">Privacy &amp; Cookies</span></a>
                             <a href="https://home.by-l1ng.com/site-info.html#terms" data-site-info-section="terms"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="en">Terms &amp; Disclaimer</span></a>
                         </nav>
-                        <p class="l1ng-footer-disclaimer"><span data-lang="zh-Hant">《The Sims 4》及相關商標屬其權利人所有。本站為獨立玩家創作網站，非 EA／Maxis 官方網站。</span><span data-lang="en">The Sims 4 and related trademarks belong to their respective owners. This independent fan site is not affiliated with or endorsed by EA or Maxis.</span></p>
+                        <p class="l1ng-footer-disclaimer"><span data-lang="zh-Hant">《The Sims 4》及相關商標屬其權利人所有。本站為獨立玩家創作網站，非 EA / Maxis 官方網站。</span><span data-lang="en">The Sims 4 and related trademarks belong to their respective owners. This independent fan site is not affiliated with or endorsed by EA or Maxis.</span></p>
                     </div>
                 </div>
             </footer>
@@ -750,8 +780,8 @@
                     </div>
                     <div class="setting-layout">
                         <section class="dash-card">
-                            <span class="eyebrow">APPEARANCE</span><h3>介面外觀</h3><p class="hint">沿用 L1nG 的明亮／深色主題，後台與訪客介面共用視覺語言。</p>
-                            <button class="secondary" id="settings-theme" type="button">切換深色／淺色主題</button>
+                            <span class="eyebrow">APPEARANCE</span><h3>介面外觀</h3><p class="hint">沿用 L1nG 的明亮 / 深色主題，後台與訪客介面共用視覺語言。</p>
+                            <button class="secondary" id="settings-theme" type="button">切換深色 / 淺色主題</button>
                         </section>
                         <section class="dash-card">
                             <span class="eyebrow">FEEDBACK</span><h3>匿名回饋設定</h3>
@@ -774,7 +804,7 @@
                                     <strong>GA4</strong><small>預計由伺服器讀取分析資料，不處理回饋聯絡資訊</small>
                                 </div>
                                 <div>
-                                    <strong>Cloudflare D1／R2</strong><small>回饋內容與附件分開儲存</small>
+                                    <strong>Cloudflare D1 / R2</strong><small>回饋內容與附件分開儲存</small>
                                 </div>
                                 <div>
                                     <strong>管理員登入</strong><small>正式版需實施身分驗證與授權</small>
@@ -828,7 +858,7 @@
         </div>
         <script src="../feedback/select-ui.js" defer></script>
         <script src="../feedback/feedback-core.js?v=20261013-game-version-payload-r2" defer></script>
-        <script src="../feedback/realdate-feedback-live.js?v=20261013-game-version-visible-r8" defer></script>
-        <script src="../feedback/feedback-i18n.js?v=20261013-feedback-action-r6" defer></script>
+        <script src="../feedback/realdate-feedback-live.js?v=20261014-version-info-modal-r2" defer></script>
+        <script src="../feedback/feedback-i18n.js?v=20261014-log-example-hierarchy-r1" defer></script>
     </body>
 </html>
