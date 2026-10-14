@@ -3291,15 +3291,13 @@ button.avatar-editor-action { cursor:pointer; }
 .pet-field-full { grid-column:1/-1; }
 .pet-editor-layout > .pet-trait-field,
 .pet-editor-layout > .pet-owner-field { grid-column:1/-1; }
-.pet-editor-layout > .pet-trait-field .trait-add-row input,
-.pet-editor-layout > .pet-owner-field > input {
+.pet-editor-layout > .pet-trait-field .trait-add-row input {
     width:100%; min-width:0; min-height:34px; padding:6px 9px;
     border:1px solid var(--border-default); border-radius:7px;
     background:var(--surface-input); color:var(--text-primary);
     font:inherit; font-size:13px; outline:none;
 }
-.pet-editor-layout > .pet-trait-field .trait-add-row input:focus,
-.pet-editor-layout > .pet-owner-field > input:focus { border-color:var(--action-primary); }
+.pet-editor-layout > .pet-trait-field .trait-add-row input:focus { border-color:var(--action-primary); }
 .pet-trait-field {
     /* 特徵標題、說明及標籤編輯器與人物編輯器共用視覺層級 */ display:grid;
     gap:4px;
@@ -3314,17 +3312,26 @@ button.avatar-editor-action { cursor:pointer; }
 }
 .pet-owner-field { display:grid; gap:6px; min-width:0; }
 .pet-owner-field[hidden] { display:none; }
-.pet-editor-layout .pet-owner-field > #petOwnerSearch {
-  display:block; -webkit-appearance:none; appearance:none; box-sizing:border-box;
-  width:100%; height:34px; padding:6px 9px; border:1px solid var(--border-default);
-  border-radius:7px; background:var(--surface-input); color:var(--text-primary);
+/* genealogy_ui.js 將 type=search 包在 .l1ng-search-control 內；
+   樣式必須指向實際產生的 DOM，而非原本不存在的直接子元素。 */
+.pet-editor-layout .pet-owner-field > .l1ng-search-control {
+  display:block; width:100%; min-width:0; color:var(--text-secondary);
+}
+.pet-editor-layout .pet-owner-field > .l1ng-search-control > #petOwnerSearch {
+  display:block; -webkit-appearance:none; appearance:none;
+  box-sizing:border-box; width:100%; min-width:0; height:34px; min-height:34px;
+  margin:0; padding:6px 34px 6px 33px;
+  border:1px solid var(--border-default); border-radius:7px;
+  background:var(--surface-input); color:var(--text-primary);
   font:inherit; font-size:13px; line-height:1.4; outline:none; cursor:text;
 }
-.pet-editor-layout .pet-owner-field > #petOwnerSearch:focus {
+.pet-editor-layout .pet-owner-field > .l1ng-search-control > #petOwnerSearch:focus {
   border-color:var(--action-primary);
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--action-primary) 12%,transparent);
+  box-shadow:0 0 0 2px var(--brand-tint-start);
 }
-@media (max-width:520px) { .pet-editor-layout .pet-owner-field > #petOwnerSearch {font-size:16px;} }
+@media (max-width:520px) {
+  .pet-editor-layout .pet-owner-field > .l1ng-search-control > #petOwnerSearch {font-size:16px;}
+}
 .pet-owner-heading { color:var(--text-secondary); font-size:11.5px; font-weight:600; }
 .pet-owner-choices {
   display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px 8px;
