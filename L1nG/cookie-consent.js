@@ -6,8 +6,16 @@
     'home.by-l1ng.com','realdate.by-l1ng.com','genealogy-tool.by-l1ng.com',
     'genealogy-exporter.by-l1ng.com','translations.by-l1ng.com'
   ]);
-  if (!hosts.has(location.hostname)) return;
+  const production = hosts.has(location.hostname);
+  // Make the interface testable on branch previews without enabling GA4 or production cookies.
+  const preview = !production && (
+    location.hostname === 'raw.githack.com' &&
+      location.pathname.startsWith('/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/') ||
+    /^(?:[a-z0-9-]+\.)?l1ng-(?:home|realdate|genealogy-tool|genealogy-exporter|translations)\.pages\.dev$/.test(location.hostname)
+  );
+  if (!production && !preview) return;
   const embedded = window.parent !== window;
+  let previewChoice = null;
   const key = 'l1ng_analytics_consent';
   const scriptUrl = new URL('analytics.js?v=20261015-ga4-region-r1', document.currentScript.src);
   const regionUrl = new URL('l1ng-analytics-region', document.currentScript.src);
@@ -15,7 +23,7 @@
   let regionResolved = false;
   const copy = {
     'zh-Hant': {
-      heading:'網站統計與 Cookie',
+      heading:'我們使用 Cookie 嗎？',
       message:'為了解網站使用情況，我們希望使用 Google Analytics 4 了解網站流量與使用趨勢。你可以接受、拒絕，或查看詳細設定。',
       autoMessage:'本站目前使用 Google Analytics 4 統計網站流量及使用趨勢。你可以拒絕統計，或查看偏好設定。',
       accept:'接受統計',keep:'維持統計',reject:'拒絕',settings:'偏好設定',
@@ -27,7 +35,7 @@
       note:'你可以隨時回到隱私權說明更改選擇。'
     },
     'zh-Hans': {
-      heading:'网站统计与 Cookie',
+      heading:'我们使用 Cookie 吗？',
       message:'为了了解网站使用情况，我们希望使用 Google Analytics 4 了解网站流量与使用趋势。你可以接受、拒绝，或查看详细设置。',
       autoMessage:'本站目前使用 Google Analytics 4 统计网站流量和使用趋势。你可以拒绝统计，或查看偏好设置。',
       accept:'接受统计',keep:'继续统计',reject:'拒绝',settings:'偏好设置',
@@ -39,7 +47,7 @@
       note:'你可以随时返回隐私权说明更改选择。'
     },
     en: {
-      heading:'Analytics & Cookies',
+      heading:'Do we use cookies?',
       message:'We would like to use Google Analytics 4 to understand website traffic and usage trends. You can accept, reject, or review your preferences.',
       autoMessage:'This site is using Google Analytics 4 to measure traffic and usage trends. You may opt out or review preferences.',
       accept:'Accept analytics',keep:'Keep analytics',reject:'Reject',settings:'Preferences',
@@ -56,11 +64,13 @@
     return /^en/i.test(lang) ? 'en' : /zh-(Hans|CN)|^zh-CN/i.test(lang) ? 'zh-Hans' : 'zh-Hant';
   }
   function savedChoice() {
+    if (preview) return previewChoice;
     const match = document.cookie.split('; ').find(part => part.startsWith(key + '='));
     const value = match && match.slice(key.length + 1);
     return value === 'accepted' || value === 'rejected' ? value : null;
   }
   function storeChoice(value) {
+    if (preview) { previewChoice = value; return; }
     document.cookie = key + '=' + value +
       '; Domain=.by-l1ng.com; Path=/; Max-Age=31536000; SameSite=Lax; Secure';
   }
@@ -79,7 +89,7 @@
     return choice === 'accepted' || (choice !== 'rejected' && regionResolved && regionMode === 'opt-out');
   }
   function loadAnalytics() {
-    if (analyticsLoaded || !permittedToTrack() || embedded) return;
+    if (!production || analyticsLoaded || !permittedToTrack() || embedded) return;
     analyticsLoaded = true;
     const script = document.createElement('script');
     script.src = scriptUrl.href;
@@ -91,8 +101,21 @@
     banner?.remove();
     banner = null;
   }
+  function installFooterEntry() {
+    const nav = document.querySelector('.l1ng-document-footer .l1ng-footer-policy-links');
+    if (!nav || nav.querySelector('[data-l1ng-cookie-footer]')) return;
+    const link = document.createElement('a');
+    link.href = '#cookie-settings';
+    link.dataset.l1ngCookieSettings = '';
+    link.dataset.l1ngCookieFooter = '';
+    nav.appendChild(link);
+    updateLabels();
+  }
   function updateLabels() {
     const t = copy[language()];
+    const footerLink = document.querySelector('[data-l1ng-cookie-footer]');
+    if (footerLink) footerLink.textContent = language() === 'en' ? 'Cookie settings'
+      : language() === 'zh-Hans' ? 'Cookie 设置' : 'Cookie 設定';
     if (banner) {
       banner.querySelector('[data-cookie-heading]').textContent = t.heading;
       const autoTracking = regionResolved && regionMode === 'opt-out' && !savedChoice();
@@ -205,10 +228,11 @@
     if (embedded) return;
     let senderHost='';
     try { senderHost=new URL(event.origin).hostname; } catch (_) { return; }
-    if (!hosts.has(senderHost)) return;
+    if (!hosts.has(senderHost) && !(preview && senderHost === location.hostname)) return;
     if (event.data?.type === 'l1ng-cookie-open-preferences') openPreferences();
   });
   async function resolveRegion() {
+    if (!production) { regionResolved = true; regionMode = 'opt-in'; updateLabels(); return; }
     const choice = savedChoice();
     // Explicit consent/opt-out overrides regional defaults.
     if (choice === 'accepted') { loadAnalytics(); return; }
@@ -229,9 +253,21 @@
     if (banner) updateLabels();
     else showBanner();
   }
-  document.addEventListener('DOMContentLoaded', () => {
-    if (savedChoice() === 'accepted') loadAnalytics();
-    else if (!savedChoice()) resolveRegion();
+  function init() {
+    if (embedded) return;
+    installFooterEntry();
+    const choice = savedChoice();
+    if (choice === 'accepted') loadAnalytics();
+    else if (!choice) {
+      // Render immediately. Do not hide the choice while the country request is pending.
+      showBanner();
+      resolveRegion();
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  else init();
+  new MutationObserver(updateLabels).observe(document.documentElement, {
+    attributes:true, attributeFilter:['lang','data-language']
   });
   window.L1nGCookiePreferences = Object.freeze({open:openPreferences});
 })();
