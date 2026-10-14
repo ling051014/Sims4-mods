@@ -8347,9 +8347,23 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     min-width:180px;
     padding:5px;
     border:1px solid var(--nav-dropdown-border);
-    /* 左上角與左側分類便利貼接合，其餘角保留原圓角 */ border-radius:0 6px 6px 6px;
+    border-left:0;
+    /* 與關係選單一致：左側平直，只有右側保留圓角 */ border-radius:0 6px 6px 0;
     background:var(--nav-dropdown-bg);
     box-shadow:0 10px 30px rgba(0,0,0,.16);
+}
+.nav-select-menu.family-nav-portal::before {
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0; width:1px;
+    z-index:3; pointer-events:none;
+    background:linear-gradient(to bottom,
+        var(--nav-dropdown-border) 0,
+        var(--nav-dropdown-border) var(--family-seam-start,0px),
+        transparent var(--family-seam-start,0px),
+        transparent var(--family-seam-end,0px),
+        var(--nav-dropdown-border) var(--family-seam-end,0px),
+        var(--nav-dropdown-border) 100%);
 }
 .nav-select-menu.family-nav-portal .nav-select-option {
     min-width:168px;
@@ -8366,6 +8380,14 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     width:52px;
 }
 
+#familyNavTabs .family-nav-index-tab {
+    flex:1 1 0;
+    height:auto;
+    min-height:0;
+}
+#familyNavTabs .family-nav-index-tab.active::after {
+    content:none;
+}
 .family-nav-index-tab {
     position:relative;
     width:52px;
