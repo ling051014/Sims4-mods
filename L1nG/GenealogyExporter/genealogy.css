@@ -2604,6 +2604,38 @@ button.avatar-editor-action { cursor:pointer; }
     /* 編輯狀態下新增入口不再額外拉開大段距離 */ margin-top: 0;
 }
 
+/* 其他關係觸發器需與欄位平齊，不受「新增」按鈕的通用樣式覆蓋。 */
+.other-rel-edit .relationship-add-row .relationship-type-trigger {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    min-height: 34px;
+    padding: 5px 30px 5px 9px;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: left;
+    background: var(--surface-input);
+    border: 1px solid var(--border-default);
+    border-radius: 7px;
+    color: var(--text-primary);
+}
+.other-rel-edit .relationship-add-row .relationship-type-trigger:hover,
+.other-rel-edit .relationship-add-row .relationship-type-trigger[aria-expanded="true"] {
+    border-color: var(--action-primary);
+}
+.relationship-other-type-field > .relationship-type-trigger {
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    min-height: 32px;
+    padding: 5px 30px 5px 9px;
+}
+.relationship-other-type-field > .relationship-type-trigger[aria-expanded="true"] {
+    border-color: var(--action-primary);
+}
+
 /* ========【其他關係分類選擇器】 設定 - 直接沿用家族選擇器的紙張、便利貼與清單語言 ======== */
 .relationship-type-picker {
     /* 觸發欄位容器 */ position: relative;
