@@ -1436,6 +1436,49 @@
       });
     }
 
+
+    // 寵物可由多位模擬市民共同飼養，唯一身分以遊戲 simId 或自訂 id 判斷。
+    // 統一經 Store 修改所有飼主與未指派寵物，避免多份寵物資料不一致。
+    function savePetWithOwners(pet, ownerIds) {
+      const db = data();
+      const result = rawResult();
+      const normalized = normalizePetRecord(cloneValue(pet));
+      const petId = String(normalized?.gameData?.simId || normalized?.id || '');
+      if (!petId) return finalized(result);
+      const samePet = item =>
+        String(item?.gameData?.simId || item?.id || '') === petId;
+      const requested = new Set((ownerIds || []).map(String).filter(id => !!db.sims[id]));
+      const updatedOwners = [];
+
+      Object.entries(db.sims || {}).forEach(([id, sim]) => {
+        const previous = Array.isArray(sim.pets) ? sim.pets : [];
+        const index = previous.findIndex(samePet);
+        const selected = requested.has(id);
+        if (!selected && index < 0) return;
+        const next = previous.filter(item => !samePet(item));
+        if (selected) next.splice(index < 0 ? next.length : Math.min(index, next.length), 0, cloneValue(normalized));
+        if (sameValue(previous, next)) return;
+        sim.pets = next;
+        updatedOwners.push(id);
+      });
+
+      db.meta = db.meta && typeof db.meta === 'object' ? db.meta : {};
+      const previousUnassigned = Array.isArray(db.meta.unassignedPets) ? db.meta.unassignedPets : [];
+      const nextUnassigned = previousUnassigned.filter(item => !samePet(item));
+      if (!requested.size) nextUnassigned.push(cloneValue(normalized));
+      const unassignedChanged = !sameValue(previousUnassigned, nextUnassigned);
+      if (unassignedChanged) db.meta.unassignedPets = nextUnassigned;
+      if (!updatedOwners.length && !unassignedChanged) return finalized(result);
+
+      mark(result, {
+        dataChanged:true, layoutChanged:true, nodesChanged:true,
+        listsChanged:true, familyUiChanged:true, saveDirty:true,
+        assetsChanged:true
+      });
+      addAffected(result, 'sim', updatedOwners);
+      return finalized(result);
+    }
+
     function setPetCardField(mode, field, enabled) {
       const db = data();
       const result = rawResult();
@@ -3073,6 +3116,7 @@
       getCardSettings,
       setCardField,
       getPetCardSettings,
+      savePetWithOwners,
       setPetCardField,
       setPetCardAppearance,
       setCardAppearance,

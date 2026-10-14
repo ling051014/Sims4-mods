@@ -15280,13 +15280,17 @@ function renderRelAnno(simId) {
 }
 
 const petEditorController = {
+  directEntry:null,
+
   owner() {
+    if (this.directEntry) return currentGenealogyData()?.sims?.[this.directEntry.ownerId] || null;
     return simEditorState.simId
       ? currentGenealogyData().sims[simEditorState.simId]
       : null;
   },
 
   currentPet() {
+    if (this.directEntry) return this.directEntry.pet;
     return (
       petEditorState.index >= 0 &&
       editingPets[petEditorState.index]
@@ -15308,6 +15312,41 @@ const petEditorController = {
       avatar:null,
       avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
     };
+  },
+
+  // 只有由寵物資料卡開啟的獨立編輯才直接更動飼主；人物編輯器的寵物草稿維持原流程。
+  renderOwnerChoices(pet) {
+    const row = $('petOwnerField');
+    if (!row) return;
+    row.hidden = !this.directEntry;
+    if (!this.directEntry) return;
+    const sims = Object.values(currentGenealogyData()?.sims || {}).filter(sim => sim?.id);
+    const id = String(pet?.gameData?.simId || pet?.id || '');
+    const selected = new Set(sims.filter(sim => (sim.pets || []).some(item =>
+      String(item?.gameData?.simId || item?.id || '') === id
+    )).map(sim => String(sim.id)));
+    $('petOwnerChoices').innerHTML = sims.map(sim =>
+      '<label class="pet-owner-choice"><input type="checkbox" value="' + esc(sim.id) + '"' +
+      (selected.has(String(sim.id)) ? ' checked' : '') + '><span>' +
+      esc(displayDataText(sim.name,sim) || uiText('（未命名）')) +
+      '</span></label>'
+    ).join('');
+    $('petOwnerSearch').value = '';
+  },
+
+  openDirect(entry) {
+    if (!entry?.pet) return false;
+    this.directEntry = entry;
+    petEditorState.index = -1;
+    $('petModalTitle').textContent = uiText('編輯寵物');
+    $('pDelete').style.display = 'none';
+    this.populateForm(entry.pet);
+    this.renderOwnerChoices(entry.pet);
+    petEditorDialog.classList.add('show');
+    requestAnimationFrame(() =>
+      petEditorDialog.querySelector('.pet-editor-modal')?.focus({preventScroll:true})
+    );
+    return true;
   },
 
   renderTraits() {
@@ -15535,6 +15574,7 @@ const petEditorController = {
   },
 
   open(index = -1) {
+    this.directEntry = null;
     const validIndex =
       Number.isInteger(index) &&
       index >= 0 &&
@@ -15559,6 +15599,7 @@ const petEditorController = {
       validIndex ? '' : 'none';
 
     this.populateForm(pet);
+    this.renderOwnerChoices(pet);
     petEditorDialog.classList.add('show');
 
     requestAnimationFrame(() => {
@@ -15572,6 +15613,7 @@ const petEditorController = {
 
   close() {
     petEditorDialog.classList.remove('show');
+    this.directEntry = null;
 
     if (avatarCropTarget === 'pet') {
       closeAvatarCropEditor();
@@ -15730,6 +15772,15 @@ const petEditorController = {
   commit() {
     const pet = this.collectForm();
     if (!pet) return;
+
+    if (this.directEntry) {
+      const owners = [...$('petOwnerChoices').querySelectorAll('input:checked')].map(input => input.value);
+      const mutation = genealogyStore.savePetWithOwners(pet,owners);
+      applyGenealogyMutation(mutation);
+      this.close();
+      uiToast(uiText('已儲存寵物資料'));
+      return;
+    }
 
     if (petEditorState.index >= 0) {
       editingPets[
@@ -15989,6 +16040,13 @@ $('pName').addEventListener('input', () => {
 $('pSpecies').addEventListener('change', () => {
   petEditorController.syncGenderVisibility();
   petEditorController.refreshAvatarPreview();
+});
+
+$('petOwnerSearch')?.addEventListener('input',event => {
+  const query = event.target.value.trim().toLocaleLowerCase();
+  $('petOwnerChoices')?.querySelectorAll('.pet-owner-choice').forEach(row => {
+    row.hidden = !!query && !row.textContent.toLocaleLowerCase().includes(query);
+  });
 });
 
 $('petTraitAddBtn')?.addEventListener(
@@ -18685,19 +18743,7 @@ function petCanvasOwnerIndex(entry) {
 }
 
 function openPetEditorFromCanvas(entry) {
-  const index = petCanvasOwnerIndex(entry);
-  if (index < 0) return false;
-
-  personEditor.open(entry.ownerId);
-  const mediaTab = document.querySelector('.sim-editor-tab[data-editor-tab="media"]');
-  mediaTab?.click();
-  const draftIndex = editingPets.findIndex(pet =>
-    String(pet.gameData?.simId || pet.id || '') ===
-      String(entry.pet?.gameData?.simId || entry.pet?.id || '')
-  );
-  if (draftIndex < 0) return false;
-  petEditorController.open(draftIndex);
-  return true;
+  return petEditorController.openDirect(entry);
 }
 
 function resolvePetHouseholdName(entry) {
@@ -18728,16 +18774,22 @@ function openPetProfileFromCanvas(entry) {
   const owner = currentGenealogyData()?.sims?.[entry.ownerId] || null;
   const name = displayDataText(pet.name,owner) || uiText('（未命名）');
   const avatar = petAvatarWithFallbackHTML(pet);
+  const petId = String(pet.gameData?.simId || pet.id || '');
+  const ownerNames = Object.values(currentGenealogyData()?.sims || {}).filter(sim =>
+    (sim.pets || []).some(item => String(item?.gameData?.simId || item?.id || '') === petId)
+  ).map(sim => displayDataText(sim.name,sim)).filter(Boolean);
   const facts = [
     [uiText('品種'),displayDataText(pet.breed,owner)],
     [uiText('性別'),petGenderLabel(pet)],
     [uiText('人生階段'),uiText(pet.ageStage || '')],
     [uiText('狀態'),uiText(pet.status || '')],
-    [uiText('所屬家庭'),resolvePetHouseholdName(entry)]
+    [uiText('所屬家庭'),resolvePetHouseholdName(entry)],
+    [uiText('飼主'),ownerNames.join('、') || '—']
   ].filter(([,value]) => !!value);
-  const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('');
   const traitMarkup = (pet.traits || []).map(trait => displayDataText(trait,owner))
     .filter(Boolean).map(trait => `<span class="tag">${esc(trait)}</span>`).join('');
+  const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('') +
+    renderPersonProfileRow(uiText('特徵'),'<div class="person-profile-traits">' + (traitMarkup || '—') + '</div>');
   const lineageMarkup = petLineageHTML(pet);
   $('personProfileContent').innerHTML = `
     <div class="person-profile-header">
@@ -18752,18 +18804,14 @@ function openPetProfileFromCanvas(entry) {
         <h3 class="person-profile-section-title">${esc(uiText('基本資料'))}</h3>
         <div class="person-profile-list">${factsMarkup || '—'}</div>
       </section>
-      <section class="person-profile-section">
-        <h3 class="person-profile-section-title">${esc(uiText('特徵'))}</h3>
-        <div class="person-profile-traits">${traitMarkup || '—'}</div>
-      </section>
       ${lineageMarkup ? `<section class="person-profile-section">
         <h3 class="person-profile-section-title">${esc(uiText('血統'))}</h3>
         <div class="person-profile-pet-lineage">${lineageMarkup}</div>
       </section>` : ''}
     </div>`;
   personProfilePersonId = null;
-  personProfilePetTarget = petCanvasOwnerIndex(entry) >= 0 ? entry : null;
-  $('personProfileEditBtn').style.display = personProfilePetTarget ? '' : 'none';
+  personProfilePetTarget = entry;
+  $('personProfileEditBtn').style.display = '';
   personProfileDialog.classList.add('pet-profile-open');
   personProfileDialog.classList.add('show');
 }
@@ -18808,16 +18856,14 @@ function renderPetCardMenu(entry,clientX,clientY) {
   personCardMenu.innerHTML = `
     <div class="person-card-menu-title">${esc(title)}</div>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看寵物資料'))}</span></button>
-    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="edit" ${editable ? '' : 'disabled'}>${iconSvg('pencil-square')}<span>${esc(uiText('編輯寵物'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯寵物'))}</span></button>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="owners">${iconSvg('pencil-square')}<span>${esc(uiText('編輯飼主'))}</span></button>
     <div class="person-card-menu-divider"></div>
     <div class="person-card-menu-section-title">${esc(uiText(viewMode === 'edit' ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
     <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
     <div class="person-card-menu-grid">${fieldRows}</div>
     ${appearanceSection}
     <div class="person-card-menu-note">${esc(uiText(viewMode === 'edit' ? '只套用於編輯模式寵物卡' : '只套用於檢視模式寵物卡'))}</div>
-    ${editable ? '' : `<div class="person-card-menu-note">${esc(uiText('此寵物沒有可編輯的所屬人物，目前僅能檢視。'))}</div>`}
   `;
   delete personCardMenu.dataset.simId;
   personCardMenu.dataset.petId = entry.key;
@@ -18827,48 +18873,12 @@ function renderPetCardMenu(entry,clientX,clientY) {
   positionPersonCardMenu(clientX,clientY);
 }
 
-function editPetOwners(entry) {
-  const db=currentGenealogyData();
-  if (!db || !entry) return;
-  const petId=String(entry.pet?.gameData?.simId || entry.pet?.id || entry.key);
-  const sims=Object.values(db.sims || {}).filter(sim=>sim && sim.id);
-  const currently=sims.filter(sim=>(sim.pets||[]).some(pet=>String(pet.gameData?.simId || pet.id || '')===petId));
-  const modal=document.createElement('div');
-  modal.className='ui-dialog-backdrop show';
-  modal.style.zIndex='7000';
-  const title=uiText('編輯飼主');
-  modal.innerHTML='<section class="ui-dialog-panel pet-owners-modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
-    '<h2>'+esc(title)+'</h2><p>'+esc(uiText('選擇飼主（可多選）'))+'</p>'+
-    '<div class="pet-owners-options">'+sims.map(sim=>'<label><input type="checkbox" value="'+esc(sim.id)+'"'+(currently.includes(sim)?' checked':'')+'><span>'+esc(displayDataText(sim.name,sim))+'</span></label>').join('')+'</div>'+
-    '<div class="ui-dialog-actions"><button type="button" data-owner-cancel>'+esc(uiText('取消'))+'</button><button type="button" class="primary" data-owner-save>'+esc(uiText('儲存'))+'</button></div></section>';
-  const close=()=>modal.remove();
-  modal.addEventListener('click',event=>{if(event.target===modal || event.target.closest('[data-owner-cancel]'))close();});
-  modal.querySelector('[data-owner-save]').addEventListener('click',()=>{
-    const selected=new Set([...modal.querySelectorAll('.pet-owners-options input:checked')].map(input=>input.value));
-    let mutation=null;
-    for(const sim of sims) {
-      const old=Array.isArray(sim.pets)?sim.pets:[];
-      const had=old.some(pet=>String(pet.gameData?.simId || pet.id || '')===petId);
-      const want=selected.has(String(sim.id));
-      if(had===want)continue;
-      const next=want?[...old,JSON.parse(JSON.stringify(entry.pet))]:old.filter(pet=>String(pet.gameData?.simId || pet.id || '')!==petId);
-      mutation=genealogyStore.mergeResults(mutation,genealogyStore.updateSim(sim.id,{pets:next}));
-    }
-    // Pet cards are a layout-owned layer; refresh after owner membership changes.
-    applyGenealogyMutation(mutation);
-    invalidateRender({layout:true,nodes:true,edges:true},{immediate:true});
-    close();
-  });
-  document.body.appendChild(modal);
-}
-
 function handlePetCardMenuAction(action,key) {
   const entry = findCanvasPetEntry(key);
   if (!entry) {closePersonCardMenu();return;}
   closePersonCardMenu();
-  if (action === 'owners') { editPetOwners(entry); return; }
   if (action === 'view') { openPetProfileFromCanvas(entry); return; }
-  if (action === 'edit') { if (petCanvasOwnerIndex(entry) >= 0) openPetEditorFromCanvas(entry); return; }
+  if (action === 'edit') { openPetEditorFromCanvas(entry); return; }
   if (action === 'locate') { focusPetOnCanvas(entry); return; }
 }
 
@@ -18896,7 +18906,6 @@ function activatePetCanvasCard(id, additive = false) {
   return true;
 }
 
-let petPointerStart = null;
 let lastPetPointerActivation = null;
 petCardsLayer?.addEventListener('load',markPetAvatarLoaded,true);
 petCardsLayer?.addEventListener('error',markPetAvatarError,true);
@@ -18919,90 +18928,84 @@ petCardsLayer?.addEventListener('keydown',event => {
   const box = cardElement.getBoundingClientRect();
   if (entry) renderPetCardMenu(entry,box.left+Math.min(box.width,40),box.top+Math.min(box.height,40));
 });
+
+// 與人物卡一致：一般點擊開啟資料；必須在卡上原地長按後才能拖曳。
+// 手勢只由同一組 PointerDown/Move/Up 收尾，避免 pointerup/click 重複執行。
 petCardsLayer?.addEventListener('pointerdown', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
   if (!element || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  const entry = findCanvasPetEntry(element.dataset.petId);
+  if (!entry) return;
   const fam = currentFamily();
-  const layout = getSceneLayout();
-  const entry = layout?.petLayout?.cards?.find(card => card.key === element.dataset.petId);
-  petPointerStart = {
-    id:element.dataset.petId,
-    pointerId:event.pointerId,
-    x:event.clientX,
-    y:event.clientY
+  const canDrag = !!(fam && !fam.locked && !spacePanHeld && arrangeTool === 'pan');
+  const mode = viewMode;
+  const origin = {x:entry.x,y:entry.y};
+  const scale = genealogyViewport.getScale() || 1;
+  const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
+  let holdReady = false, moved = false, preHoldMoved = false;
+  let previewPosition = null;
+  const holdTimer = canDrag ? window.setTimeout(() => {
+    if (!preHoldMoved) holdReady = true;
+  },360) : null;
+  const movement = ev => Math.hypot(ev.clientX-event.clientX,ev.clientY-event.clientY);
+  const clear = () => {
+    window.clearTimeout(holdTimer);
+    document.removeEventListener('pointermove',onMove);
+    document.removeEventListener('pointerup',onFinish);
+    document.removeEventListener('pointercancel',onFinish);
+    element.classList.remove('dragging');
+    hideSmartGuides();
   };
-  if (fam && entry && !fam.locked && !spacePanHeld && arrangeTool === 'pan') {
-    const dragMode = viewMode;
-    const before = captureLayoutHistoryState(fam,dragMode);
-    const origin = {x:entry.x,y:entry.y};
-    const scale = genealogyViewport.getScale() || 1;
-    let moved = false;
-    const pressedAt = performance.now();
-    let holdReady = false;
-    const holdTimer = window.setTimeout(() => { holdReady = true; },360);
-    const move = ev => {
-      if (ev.pointerId !== event.pointerId) return;
-      const dx=ev.clientX-event.clientX,dy=ev.clientY-event.clientY;
-      // 短按只開啟資料；必須先長按，再移動卡片。
-      if (!holdReady) return;
-      if (!moved && Math.hypot(dx,dy) < (event.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
-      moved=true;
-      if (petPointerStart?.pointerId === event.pointerId) petPointerStart.moved = true;
-      element.classList.add('dragging');
-      const px = Math.max(0,origin.x+dx/scale), py = Math.max(0,origin.y+dy/scale);
-      const candidates = [...(getSceneLayout()?.pos?.entries() || [])];
-      const guides = {x:null,y:null};
-      const threshold = genealogyViewport.screenPixelsToWorld(8);
-      for (const [id,point] of candidates) {
-        if (Math.abs(point.x-px) < threshold) guides.x=point.x;
-        if (Math.abs(point.y-py) < threshold) guides.y=point.y;
+  const onMove = ev => {
+    if (ev.pointerId !== event.pointerId) return;
+    const distance = movement(ev);
+    if (!holdReady) {
+      if (distance > 8) {
+        preHoldMoved = true;
+        window.clearTimeout(holdTimer);
       }
-      hideSmartGuides();
-      if (guides.x !== null) showSmartGuide('x',guides.x);
-      if (guides.y !== null) showSmartGuide('y',guides.y);
-      element.style.left = (Math.max(0,guides.x ?? px)+PAD)+'px';
-      element.style.top = (Math.max(0,guides.y ?? py)+PAD)+'px';
-      ev.preventDefault();
-    };
-    const finish = ev => {
-      if (ev.pointerId !== event.pointerId) return;
-      window.clearTimeout(holdTimer);
-      document.removeEventListener('pointermove',move);
-      document.removeEventListener('pointerup',finish);
-      document.removeEventListener('pointercancel',finish);
-      element.classList.remove('dragging');
-      hideSmartGuides();
-      if (!moved || ev.type === 'pointercancel') return;
-      petPointerStart=null;
-      lastPetPointerActivation={id:entry.key,time:performance.now()};
-      // Preserve the current automatic human arrangement before switching to free layout.
-      const seed = fam.freeLayout[dragMode] ? null : seedVisibleScenePositionsForFreeLayout(fam,dragMode);
-      const pos={x:Math.max(0,origin.x+(ev.clientX-event.clientX)/scale),
-                 y:Math.max(0,origin.y+(ev.clientY-event.clientY)/scale)};
-      const change=genealogyStore.setNodePosition(fam.id,dragMode,'pet:'+entry.key,pos);
+      return;
+    }
+    if (!moved && distance < (event.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
+    moved = true;
+    element.classList.add('dragging');
+    const rawX = Math.max(0,origin.x+(ev.clientX-event.clientX)/scale);
+    const rawY = Math.max(0,origin.y+(ev.clientY-event.clientY)/scale);
+    const threshold = genealogyViewport.screenPixelsToWorld(8);
+    const guides = {x:null,y:null};
+    for (const [,point] of getSceneLayout()?.pos?.entries() || []) {
+      if (Math.abs(point.x-rawX) < threshold) guides.x=point.x;
+      if (Math.abs(point.y-rawY) < threshold) guides.y=point.y;
+    }
+    previewPosition = {x:Math.max(0,guides.x ?? rawX),y:Math.max(0,guides.y ?? rawY)};
+    element.style.left = (previewPosition.x+PAD)+'px';
+    element.style.top = (previewPosition.y+PAD)+'px';
+    hideSmartGuides();
+    if (guides.x !== null) showSmartGuide('x',guides.x);
+    if (guides.y !== null) showSmartGuide('y',guides.y);
+    ev.preventDefault();
+  };
+  const onFinish = ev => {
+    if (ev.pointerId !== event.pointerId) return;
+    const tap = !moved && !preHoldMoved && movement(ev) <= 8 && ev.type !== 'pointercancel';
+    clear();
+    // 阻止 pointerup 之後瀏覽器合成的 click 重新開啟視窗。
+    lastPetPointerActivation = {id:entry.key,time:performance.now()};
+    if (moved && previewPosition && ev.type !== 'pointercancel') {
+      const seed = fam.freeLayout[mode] ? null : seedVisibleScenePositionsForFreeLayout(fam,mode);
+      const change = genealogyStore.setNodePosition(fam.id,mode,'pet:'+entry.key,previewPosition);
       applyGenealogyMutation(genealogyStore.mergeResults(seed,change));
       syncLayoutModeControls();
-      dragHistory.push({type:'card-layout',familyId:fam.id,mode:dragMode,
-        before,after:captureLayoutHistoryState(fam,dragMode)});
-    };
-    document.addEventListener('pointermove',move);
-    document.addEventListener('pointerup',finish);
-    document.addEventListener('pointercancel',finish);
-  }
+      dragHistory.push({type:'card-layout',familyId:fam.id,mode,
+        before,after:captureLayoutHistoryState(fam,mode)});
+    } else if (tap) {
+      activatePetCanvasCard(entry.key,ev.shiftKey);
+    }
+  };
+  document.addEventListener('pointermove',onMove);
+  document.addEventListener('pointerup',onFinish);
+  document.addEventListener('pointercancel',onFinish);
   event.stopPropagation();
-});
-petCardsLayer?.addEventListener('pointercancel', () => { petPointerStart = null; });
-petCardsLayer?.addEventListener('pointerup', event => {
-  const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
-  const start = petPointerStart;
-  petPointerStart = null;
-  if (!start || start.moved || !element || event.pointerId !== start.pointerId ||
-      element.dataset.petId !== start.id ||
-      Math.hypot(event.clientX - start.x,event.clientY - start.y) > 8) return;
-  event.stopPropagation();
-  // 原生 Click 在 PointerUp 後仍可能觸發，記錄 ID 防止重複開啟視窗。
-  lastPetPointerActivation = {id:start.id,time:performance.now()};
-  activatePetCanvasCard(start.id,event.shiftKey);
 });
 petCardsLayer?.addEventListener('click', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
@@ -19010,10 +19013,11 @@ petCardsLayer?.addEventListener('click', event => {
   event.stopPropagation();
   const id = element.dataset.petId;
   if (lastPetPointerActivation?.id === id &&
-      performance.now() - lastPetPointerActivation.time < 900) {
+      performance.now()-lastPetPointerActivation.time < 900) {
     lastPetPointerActivation = null;
     return;
   }
+  // 鍵盤啟用或無 Pointer Events 的瀏覽器保留 Click。
   activatePetCanvasCard(id,event.shiftKey);
 });
 

@@ -3284,13 +3284,20 @@ button.avatar-editor-action { cursor:pointer; }
 .pet-trait-field .trait-editor {
     /* 內部特徵操作不繼承欄位標題粗體 */ font-weight:400;
 }
-.pet-owners-modal { width:min(430px,calc(100vw - 24px)); max-height:min(80dvh,620px); display:flex; flex-direction:column; gap:10px; }
-.pet-owners-modal h2 { margin:0; font-size:17px; }
-.pet-owners-modal p { margin:0; color:var(--text-secondary); font-size:12px; }
-.pet-owners-options { min-height:0; overflow:auto; display:grid; gap:0; border:1px solid var(--border-default); border-radius:7px; }
-.pet-owners-options label { display:flex; align-items:center; gap:9px; padding:8px 10px; border-bottom:1px solid var(--border-default); font-size:12px; cursor:pointer; }
-.pet-owners-options label:last-child { border-bottom:0; }
-.pet-owners-options input { accent-color:var(--action-primary); }
+.pet-owner-field { display:grid; gap:6px; min-width:0; }
+.pet-owner-field[hidden] { display:none; }
+.pet-owner-heading { color:var(--text-secondary); font-size:11.5px; font-weight:600; }
+.pet-owner-choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px;
+  max-height:148px; overflow:auto; padding:3px 6px; border:1px solid var(--border-default);
+  border-radius:7px; background:var(--surface-input); }
+.pet-owner-choice { display:flex!important; flex-direction:row!important; align-items:center!important;
+  gap:7px!important; padding:6px 3px; font-size:12px!important; font-weight:400!important;
+  color:var(--text-primary)!important; cursor:pointer; min-width:0; }
+.pet-owner-choice[hidden] { display:none!important; }
+.pet-owner-choice input[type="checkbox"] { width:15px; height:15px; min-height:15px; flex:0 0 15px;
+  padding:0; margin:0; accent-color:var(--action-primary); }
+.pet-owner-choice span { min-width:0; overflow-wrap:anywhere; }
+@media (max-width:480px) { .pet-owner-choices { grid-template-columns:minmax(0,1fr); } }
 
 
 .avatar-crop-modal { width:min(560px,100%); }
@@ -8356,7 +8363,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     padding:5px;
     border:1px solid var(--nav-dropdown-border);
     border-left:0;
-    /* 與關係選單一致：左側平直，只有右側保留圓角 */ border-radius:0 6px 6px 0;
+    /* 左側分類索引維持原尺寸，補回選單左下圓角 */ border-radius:0 6px 6px 6px;
     background:var(--nav-dropdown-bg);
     box-shadow:0 10px 30px rgba(0,0,0,.16);
 }
