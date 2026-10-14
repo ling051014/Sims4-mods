@@ -45,6 +45,10 @@ for (const icon of ['ui-search.svg', 'ui-clear.svg', 'afdian.svg',
 file('analytics.js');
 file('cookie-consent.js');
 file('cookie-consent.css');
+// Scope the only Pages Function to its one analytics-region endpoint;
+// all regular web pages and assets remain purely static.
+fs.writeFileSync(path.join(out,'_routes.json'),
+  JSON.stringify({version:1,include:['/l1ng-analytics-region'],exclude:[]}));
 const publicFeedback = [
   'feedback-core.js','feedback-i18n.js','feedback-loading.css',
   'feedback.css','realdate-feedback-live.js','select-ui.js'
@@ -138,7 +142,7 @@ for(const p of htmls) {
     const assetPrefix='../'.repeat(relative.split('/').length-1);
     modified=modified.replace(/<\/head\s*>/i,
       '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261014-consent-r1">\n' +
-      '    <script src="'+assetPrefix+'cookie-consent.js?v=20261014-consent-r1" defer></script>\n</head>');
+      '    <script src="'+assetPrefix+'cookie-consent.js?v=20261015-consent-region-r1" defer></script>\n</head>');
     analyticsPages++;
   }
   if (modified!==html) fs.writeFileSync(p,modified,'utf8');
