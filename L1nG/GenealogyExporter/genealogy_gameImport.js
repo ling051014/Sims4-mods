@@ -39,9 +39,7 @@
     'gender',
     'ageStage',
     'status',
-    'traits',
-    'avatar',
-    'avatarFrame'
+    'traits'
   ]);
 
   function cloneData(value) {
@@ -1820,6 +1818,12 @@
         status:mapStatus(pet),
         traits,
         avatar:null,
+        avatarFrame:null,
+        gameAvatar:null,
+        gameAvatarFrame:null,
+        customAvatar:null,
+        customAvatarFrame:null,
+        avatarSource:'game',
         gameData:{
           simId:id,
           source:'game',
@@ -2191,10 +2195,6 @@
       manualOverrideSet(existingPet);
 
     GAME_MANAGED_PET_FIELDS
-      .filter(field =>
-        field !== 'avatar' &&
-        field !== 'avatarFrame'
-      )
       .forEach(field => {
         if (overrides.has(field)) return;
 
@@ -2211,17 +2211,20 @@
         }
       });
 
-    if (!overrides.has('avatar')) {
-      if (incomingPet.avatar) {
-        result.avatar =
-          incomingPet.avatar;
-
-        result.avatarFrame =
-          cloneData(
-            incomingPet.avatarFrame
-          );
-      }
+    // 遊戲更新僅更新 gameAvatar，不覆蓋玩家上傳的 customAvatar。
+    const nextGameImage = incomingPet.gameAvatar || incomingPet.avatar;
+    if (nextGameImage) {
+      const alreadyHadGame = !!result.gameAvatar;
+      result.gameAvatar = nextGameImage;
+      if (!alreadyHadGame) result.gameAvatarFrame = cloneData(
+        incomingPet.gameAvatarFrame || incomingPet.avatarFrame);
     }
+    if (!result.customAvatar && result.gameAvatar) result.avatarSource = 'game';
+    const source = result.avatarSource === 'game' ? 'game' : 'custom';
+    result.avatar = source === 'game'
+      ? (result.gameAvatar || null) : (result.customAvatar || null);
+    result.avatarFrame = cloneData(source === 'game'
+      ? result.gameAvatarFrame : result.customAvatarFrame);
 
     const existingGameData =
       existingPet.gameData || {};

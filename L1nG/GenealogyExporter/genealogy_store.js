@@ -366,11 +366,36 @@
                 .filter(Boolean)
             : [],
         avatar:pet.avatar || null,
-        avatarFrame:
-          normalizeAvatarFrame(
-            pet.avatarFrame
-          )
+        avatarFrame:normalizeAvatarFrame(pet.avatarFrame)
       };
+
+      // 將舊版單一頭像保留在正確來源；舊版手動覆寫不能被當作遊戲頭像。
+      const original = pet.avatar || null;
+      const manual = manualOverrideValues(pet).includes('avatar');
+      const imported = isGameImportedRecord(pet);
+      normalized.gameAvatar = pet.gameAvatar ||
+        (original && imported && !manual && !pet.customAvatar ? original : null);
+      normalized.customAvatar = pet.customAvatar ||
+        (original && (!imported || manual) && !pet.gameAvatar ? original : null);
+      normalized.gameAvatarFrame = normalized.gameAvatar
+        ? normalizeAvatarFrame(pet.gameAvatarFrame ||
+            (original === normalized.gameAvatar ? pet.avatarFrame : null)) : null;
+      normalized.customAvatarFrame = normalized.customAvatar
+        ? normalizeAvatarFrame(pet.customAvatarFrame ||
+            (original === normalized.customAvatar ? pet.avatarFrame : null)) : null;
+      let chosen = pet.avatarSource === 'game' ? 'game'
+        : pet.avatarSource === 'custom' ? 'custom'
+        : normalized.customAvatar ? 'custom'
+        : normalized.gameAvatar ? 'game' : 'custom';
+      if (chosen === 'game' && !normalized.gameAvatar && normalized.customAvatar)
+        chosen = 'custom';
+      else if (chosen === 'custom' && !normalized.customAvatar && normalized.gameAvatar)
+        chosen = 'game';
+      normalized.avatarSource = chosen;
+      normalized.avatar = chosen === 'game'
+        ? normalized.gameAvatar : normalized.customAvatar;
+      normalized.avatarFrame = normalizeAvatarFrame(chosen === 'game'
+        ? normalized.gameAvatarFrame : normalized.customAvatarFrame);
 
       if (
         normalized.gameData &&

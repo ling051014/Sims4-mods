@@ -726,11 +726,19 @@
       add(sim.gameAvatar, '人物遊戲頭像');
       add(sim.customAvatar, '人物自訂頭像');
       (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
-      (sim.pets || []).forEach(pet => add(pet.avatar, '寵物頭像'));
+      (sim.pets || []).forEach(pet => {
+        add(pet.avatar, '寵物目前頭像');
+        add(pet.gameAvatar, '寵物遊戲頭像');
+        add(pet.customAvatar, '寵物自訂頭像');
+      });
     });
 
     (targetDb?.families || []).forEach(fam => add(fam.coverImage, '家族封面'));
-    (targetDb?.meta?.unassignedPets || []).forEach(pet => add(pet.avatar, '未分配寵物頭像'));
+    (targetDb?.meta?.unassignedPets || []).forEach(pet => {
+      add(pet.avatar, '未分配寵物目前頭像');
+      add(pet.gameAvatar, '未分配寵物遊戲頭像');
+      add(pet.customAvatar, '未分配寵物自訂頭像');
+    });
     add(targetBg?.image, '背景圖片');
 
     return used;
@@ -750,11 +758,19 @@
       clean(sim, 'gameAvatar', null);
       clean(sim, 'customAvatar', null);
       (sim.gallery || []).forEach(item => clean(item, 'image', ''));
-      (sim.pets || []).forEach(pet => clean(pet, 'avatar', null));
+      (sim.pets || []).forEach(pet => {
+        clean(pet, 'avatar', null);
+        clean(pet, 'gameAvatar', null);
+        clean(pet, 'customAvatar', null);
+      });
     });
 
     (targetDb?.families || []).forEach(fam => clean(fam, 'coverImage', null));
-    (targetDb?.meta?.unassignedPets || []).forEach(pet => clean(pet, 'avatar', null));
+    (targetDb?.meta?.unassignedPets || []).forEach(pet => {
+      clean(pet, 'avatar', null);
+      clean(pet, 'gameAvatar', null);
+      clean(pet, 'customAvatar', null);
+    });
     clean(targetBg, 'image', null);
 
     return cleared;

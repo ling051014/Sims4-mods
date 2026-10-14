@@ -61,6 +61,11 @@
     index:-1,
     avatar:null,
     avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    gameAvatar:null,
+    gameAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    customAvatar:null,
+    customAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    avatarSource:'custom',
     traits:[]
   };
 
@@ -2501,9 +2506,12 @@ function buildPersonEditorDraft({
 
   petEditorState.index = -1;
   petEditorState.avatar = null;
-  petEditorState.avatarFrame = {
-    ...DEFAULT_AVATAR_FRAME
-  };
+  petEditorState.avatarFrame = { ...DEFAULT_AVATAR_FRAME };
+  petEditorState.gameAvatar = null;
+  petEditorState.gameAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+  petEditorState.customAvatar = null;
+  petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+  petEditorState.avatarSource = 'custom';
   petEditorState.traits = [];
 
   lifePhotoEditorDialog.classList.remove(
