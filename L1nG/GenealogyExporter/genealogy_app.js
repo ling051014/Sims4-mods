@@ -18877,12 +18877,54 @@ petCardsLayer?.addEventListener('keydown',event => {
 petCardsLayer?.addEventListener('pointerdown', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
   if (!element || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  const fam = currentFamily();
+  const layout = getSceneLayout();
+  const entry = layout?.petLayout?.cards?.find(card => card.key === element.dataset.petId);
   petPointerStart = {
     id:element.dataset.petId,
     pointerId:event.pointerId,
     x:event.clientX,
     y:event.clientY
   };
+  if (fam && entry && !fam.locked && !spacePanHeld && arrangeTool === 'pan') {
+    const dragMode = viewMode;
+    const before = captureLayoutHistoryState(fam,dragMode);
+    const origin = {x:entry.x,y:entry.y};
+    const scale = genealogyViewport.getScale() || 1;
+    let moved = false;
+    const move = ev => {
+      if (ev.pointerId !== event.pointerId) return;
+      const dx=ev.clientX-event.clientX,dy=ev.clientY-event.clientY;
+      if (!moved && Math.hypot(dx,dy) < (event.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
+      moved=true;
+      element.classList.add('dragging');
+      element.style.left = (Math.max(0,origin.x+dx/scale)+PAD)+'px';
+      element.style.top = (Math.max(0,origin.y+dy/scale)+PAD)+'px';
+      ev.preventDefault();
+    };
+    const finish = ev => {
+      if (ev.pointerId !== event.pointerId) return;
+      document.removeEventListener('pointermove',move);
+      document.removeEventListener('pointerup',finish);
+      document.removeEventListener('pointercancel',finish);
+      element.classList.remove('dragging');
+      if (!moved || ev.type === 'pointercancel') return;
+      petPointerStart=null;
+      lastPetPointerActivation={id:entry.key,time:performance.now()};
+      // Preserve the current automatic human arrangement before switching to free layout.
+      const seed = fam.freeLayout[dragMode] ? null : seedVisibleScenePositionsForFreeLayout(fam,dragMode);
+      const pos={x:Math.max(0,origin.x+(ev.clientX-event.clientX)/scale),
+                 y:Math.max(0,origin.y+(ev.clientY-event.clientY)/scale)};
+      const change=genealogyStore.setNodePosition(fam.id,dragMode,'pet:'+entry.key,pos);
+      applyGenealogyMutation(genealogyStore.mergeResults(seed,change));
+      syncLayoutModeControls();
+      dragHistory.push({type:'card-layout',familyId:fam.id,mode:dragMode,
+        before,after:captureLayoutHistoryState(fam,dragMode)});
+    };
+    document.addEventListener('pointermove',move);
+    document.addEventListener('pointerup',finish);
+    document.addEventListener('pointercancel',finish);
+  }
   event.stopPropagation();
 });
 petCardsLayer?.addEventListener('pointercancel', () => { petPointerStart = null; });
