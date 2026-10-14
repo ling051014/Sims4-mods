@@ -7197,7 +7197,14 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     group.entries.forEach((entry,index) => {
       const cardX = x+(index%3)*(W+PET_CARD_GAP);
       const cardY = y+rowTops[Math.floor(index/3)];
-      cards.push({...entry,x:cardX,y:cardY,width:itemDims[index].W,height:itemDims[index].H});
+      // 寵物使用與人物相同的每家庭、每模式手動位置快照。
+      const manual = family?.freeLayout?.[viewMode]
+        ? family?.manualPositions?.[viewMode]?.['pet:' + entry.key] : null;
+      const finalX = manual && Number.isFinite(Number(manual.x)) ? Math.max(0,Number(manual.x)) : cardX;
+      const finalY = manual && Number.isFinite(Number(manual.y)) ? Math.max(0,Number(manual.y)) : cardY;
+      cards.push({...entry,x:finalX,y:finalY,width:itemDims[index].W,height:itemDims[index].H});
+      maxRight = Math.max(maxRight,finalX+itemDims[index].W);
+      maxBottom = Math.max(maxBottom,finalY+itemDims[index].H);
     });
     maxRight = Math.max(maxRight,x+groupW);
     maxBottom = Math.max(maxBottom,y+groupH);
