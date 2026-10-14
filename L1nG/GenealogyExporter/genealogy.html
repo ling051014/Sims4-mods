@@ -758,12 +758,10 @@
                             <div class="family-rel-preview other-rel-preview" id="relationshipList"></div>
 
                             <div class="family-rel-edit other-rel-edit" id="otherRelationshipEditPanel" hidden>
-                                <div class="other-rel-add-title">新增其他關係</div>
                                 <div class="relationship-add-row">
                                     <div class="relationship-type-picker" id="relationshipTypePicker" style="flex:1">
                                         <button class="relationship-type-trigger" id="relationshipTypeTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                                            <span class="relationship-type-value" id="relationshipTypeValue">選擇或輸入關係……</span>
-                                            <span class="l1ng-icon icon-chevron-down relationship-type-chevron" aria-hidden="true"></span>
+                                            <span class="ui-select-add-label"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span class="relationship-type-value" id="relationshipTypeValue">新增其他關係</span></span>
                                         </button>
 
                                         <div class="relationship-type-popover" id="relationshipTypePopover" role="listbox" aria-label="關係類型" hidden>
@@ -783,7 +781,7 @@
                                         </div>
                                     </div>
                                     <select hidden id="relationshipType"></select>
-                                    <div class="ui-select-wrap" data-placeholder="選擇目標（可多選）" data-ui-select-for="relationshipTarget" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" style="flex:1.4">
+                                    <div class="ui-select-wrap" data-placeholder="選擇目標市民（可多選）" data-ui-select-for="relationshipTarget" data-ui-select-provider="person-editor-relations" data-ui-select-portal="true" style="flex:1.4">
                                         <div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div>
                                     </div>
                                     <select hidden id="relationshipTarget" multiple></select>
