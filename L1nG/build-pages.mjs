@@ -37,6 +37,9 @@ for (const name of [
   'site-info.css','site-info.js','site-info.html'
 ]) file(name);
 folder('icons');
+for (const icon of ['ui-search.svg', 'ui-clear.svg']) {
+  put(path.join(base,'html icons',icon),path.join(out,'html icons',icon));
+}
 file('analytics.js');
 const publicFeedback = [
   'feedback-core.js','feedback-i18n.js','feedback-loading.css',
@@ -57,6 +60,7 @@ if (mode === 'home') {
   for (const name of publicFeedback) file(path.join('feedback',name),path.join('feedback',name));
 } else if (mode === 'genealogy') {
   contents('GenealogyExporter');
+  put(path.join(base,'html icons','relationship-label-icons.svg'),path.join(out,'html icons','relationship-label-icons.svg'));
   file('feedback/feedback-core.js');
   put(site('GenealogyExporter','genealogy.html'),path.join(out,'index.html'));
 } else if (mode === 'extractor') {
