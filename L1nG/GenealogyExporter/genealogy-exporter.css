@@ -1195,10 +1195,10 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
     font-weight:700;
     line-height:1.3;
     text-decoration:none;
-    transition:box-shadow .18s ease, background-color .12s ease;
+    transition:transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .18s ease;
 }
-/* 滑鼠停在按鈕上時不持續改色，避免下載後誤以為按鈕停留在按下狀態。 */
-.workflow-install-download-action:hover { box-shadow:0 3px 12px rgba(49,95,131,.18); }
+/* 與主視覺「開啟族譜工具」相同：懸停上浮 1px 並切換強調色。 */
+.workflow-install-download-action:hover { transform:translateY(-1px); background:var(--accent-hover); border-color:var(--accent-hover); box-shadow:0 3px 12px rgba(49,95,131,.18); }
 .workflow-install-download-action:active { background:var(--accent-hover); }
 .workflow-install-download-action:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .workflow-install-download-action svg { flex:0 0 17px; }
