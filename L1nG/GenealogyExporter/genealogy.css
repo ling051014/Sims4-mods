@@ -2698,13 +2698,12 @@ button.avatar-editor-action { cursor:pointer; }
 }
 
 .relationship-type-popover {
-    /* 右側選單蓋住標籤的 1px 接合重疊，避免懸停背景突出到選單 */ position: absolute;
+    /* 右側選單與分類標籤緊貼、不重疊；保留完整的左側直線 */ position: absolute;
     z-index: 2;
     /* 固定顯示方式 */ display: block;
     /* 背景 */ background: var(--nav-dropdown-bg);
     /* 文字 */ color: var(--nav-dropdown-text);
-    /* 左側貼齊分類標籤，邊框由標籤呈現，不在接縫留下直線 */ border: 1px solid var(--nav-dropdown-border);
-    border-left-color: transparent;
+    /* 選單左側保留完整直線；分類標籤不再覆蓋或遮掉此邊框 */ border: 1px solid var(--nav-dropdown-border);
     /* 左側上下角維持直角，只有選單右側保留圓角 */ border-radius: 0 6px 6px 0;
     /* 陰影由共同 portal 統一提供，選單本體不再向便利貼投影 */ box-shadow: none;
     /* 不讓右側內容破出圓角 */ overflow: hidden;
@@ -2738,8 +2737,8 @@ button.avatar-editor-action { cursor:pointer; }
     background: var(--nav-dropdown-bg);
 }
 
-.relationship-type-index-tab.active::after {
-    /* 原遮罩上下超出 1px，首尾標籤會產生尖角；右側選單已負責遮住接縫 */ content: none;
+.family-nav-index-tab.relationship-type-index-tab.active::after {
+    /* 提高權重覆蓋檔案後段的 .family-nav-index-tab.active::after，完全停用尖角遮罩 */ content: none;
 }
 
 .relationship-type-index-tab .family-nav-tab-lines {
