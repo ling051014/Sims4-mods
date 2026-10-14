@@ -7236,6 +7236,8 @@ function syncOtherRelationshipTypeSelect() {
   }
 
   select.value = activeOtherRelationshipType;
+  const label=$('relationshipOtherTypeValue');
+  if (label) label.textContent=options.find(entry=>entry.type===activeOtherRelationshipType)?.label||uiText('關聯');
 }
 
 function setRelationshipSwitchState(button,enabled) {
@@ -7718,7 +7720,6 @@ function syncRelationshipLineControls() {
   }
   if (curveValue) curveValue.textContent = Math.round(shownCurveAmount) + '%';
 
-  if (other) window.L1nGGenealogyUIController?.refreshControl?.($('relationshipOtherTypeSelect'));
   syncRelationshipNavPreviews();
   updateRelationshipFullPreview();
 }
@@ -7727,6 +7728,28 @@ document.querySelectorAll('[data-rel-editor-key]').forEach(button => {
   button.addEventListener('click',() => {
     activeRelationshipStyleKey = button.dataset.relEditorKey || 'parent';
     syncRelationshipLineControls();
+  });
+});
+
+$('relationshipOtherTypeTrigger')?.addEventListener('click',event=>{
+  event.preventDefault();
+  event.stopPropagation();
+  const trigger=event.currentTarget;
+  if (!$('relationshipTypePopover')?.hidden && trigger.getAttribute('aria-expanded')==='true') {
+    closeRelationshipTypePicker();
+    return;
+  }
+  openRelationshipTypePicker({
+    trigger,
+    value:activeOtherRelationshipType,
+    onSelect:value=>{
+      // The visual settings edit existing line types; never create relationships here.
+      if (!getOtherRelationshipTypes().some(entry=>entry.type===value)) return;
+      const select=$('relationshipOtherTypeSelect');
+      if (!select) return;
+      select.value=value;
+      select.dispatchEvent(new Event('change',{bubbles:true}));
+    }
   });
 });
 
