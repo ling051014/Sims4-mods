@@ -11800,6 +11800,11 @@ function getTouchPointerKind(
     };
   }
 
+  // 寵物卡是 button，但仍屬畫布卡片，不應當作一般 UI control。
+  if (target?.closest?.('.genealogy-pet-card[data-pet-id]')) {
+    return {kind:'pet-card',simId:null};
+  }
+
   if (
     target?.closest?.(
       '.edge-label'
@@ -11888,7 +11893,7 @@ function suppressActiveTouchCardActivation() {
       point.blocked = true;
 
       if (
-        point.kind === 'card'
+        point.kind === 'card' || point.kind === 'pet-card'
       ) {
         touchCardActivationSuppressed.add(
           point.pointerId
@@ -18937,15 +18942,26 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const entry = findCanvasPetEntry(element.dataset.petId);
   if (!entry) return;
   const fam = currentFamily();
-  const canDrag = !!(fam && !fam.locked && !spacePanHeld && arrangeTool === 'pan');
+  // 與人物一致：已解鎖時，自動/自由排列都可開始手動拖曳。
+  const canDrag = !!(fam && !fam.locked && !spacePanHeld);
   const mode = viewMode;
   const origin = {x:entry.x,y:entry.y};
   const scale = genealogyViewport.getScale() || 1;
   const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
+  const isTouch = event.pointerType === 'touch';
+  const jitterAllowance = isTouch ? 18 : 10;
+  const tapAllowance = isTouch ? 12 : 8;
   let holdReady = false, moved = false, preHoldMoved = false;
   let previewPosition = null;
+  // 防止瀏覽器原生按鈕與圖像手勢攔截長按；游標離開卡片仍維持追蹤。
+  event.preventDefault();
+  event.stopPropagation();
+  try { element.setPointerCapture?.(event.pointerId); } catch (_) {}
   const holdTimer = canDrag ? window.setTimeout(() => {
-    if (!preHoldMoved) holdReady = true;
+    const point = isTouch ? activeTouchPointers.get(event.pointerId) : null;
+    if (!preHoldMoved && (!isTouch ||
+      (activeTouchPointers.size === 1 && point && !point.blocked &&
+        !touchCardActivationSuppressed.has(event.pointerId)))) holdReady = true;
   },360) : null;
   const movement = ev => Math.hypot(ev.clientX-event.clientX,ev.clientY-event.clientY);
   const clear = () => {
@@ -18958,15 +18974,23 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   };
   const onMove = ev => {
     if (ev.pointerId !== event.pointerId) return;
+    // 畫布雙指縮放時，不應再觸發寵物拖曳。
+    if (isTouch && (activeTouchPointers.size !== 1 ||
+      activeTouchPointers.get(event.pointerId)?.blocked ||
+      touchCardActivationSuppressed.has(event.pointerId))) {
+      preHoldMoved = true;
+      window.clearTimeout(holdTimer);
+      return;
+    }
     const distance = movement(ev);
     if (!holdReady) {
-      if (distance > 8) {
+      if (distance > jitterAllowance) {
         preHoldMoved = true;
         window.clearTimeout(holdTimer);
       }
       return;
     }
-    if (!moved && distance < (event.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
+    if (!moved && distance < (isTouch ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
     moved = true;
     element.classList.add('dragging');
     const rawX = Math.max(0,origin.x+(ev.clientX-event.clientX)/scale);
@@ -18987,25 +19011,33 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   };
   const onFinish = ev => {
     if (ev.pointerId !== event.pointerId) return;
-    const tap = !moved && !preHoldMoved && movement(ev) <= 8 && ev.type !== 'pointercancel';
+    const cancelled = ev.type === 'pointercancel' ||
+      (isTouch && touchCardActivationSuppressed.has(event.pointerId));
+    const tap = !cancelled && !moved && !preHoldMoved && movement(ev) <= tapAllowance;
     clear();
     // 阻止 pointerup 之後瀏覽器合成的 click 重新開啟視窗。
     lastPetPointerActivation = {id:entry.key,time:performance.now()};
-    if (moved && previewPosition && ev.type !== 'pointercancel') {
+    if (moved && previewPosition && !cancelled) {
       const seed = fam.freeLayout[mode] ? null : seedVisibleScenePositionsForFreeLayout(fam,mode);
       const change = genealogyStore.setNodePosition(fam.id,mode,'pet:'+entry.key,previewPosition);
       applyGenealogyMutation(genealogyStore.mergeResults(seed,change));
       syncLayoutModeControls();
       dragHistory.push({type:'card-layout',familyId:fam.id,mode,
         before,after:captureLayoutHistoryState(fam,mode)});
-    } else if (tap) {
-      activatePetCanvasCard(entry.key,ev.shiftKey);
+    } else {
+      if (moved) {
+        element.style.left = (origin.x+PAD)+'px';
+        element.style.top = (origin.y+PAD)+'px';
+      }
+      if (tap) activatePetCanvasCard(entry.key,ev.shiftKey);
     }
+    try {
+      if (element.hasPointerCapture?.(ev.pointerId)) element.releasePointerCapture(ev.pointerId);
+    } catch (_) {}
   };
   document.addEventListener('pointermove',onMove);
   document.addEventListener('pointerup',onFinish);
   document.addEventListener('pointercancel',onFinish);
-  event.stopPropagation();
 });
 petCardsLayer?.addEventListener('click', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
