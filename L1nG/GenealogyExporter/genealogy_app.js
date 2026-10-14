@@ -18944,6 +18944,7 @@ function activatePetCanvasCard(id, additive = false) {
 
 let lastPetPointerActivation = null;
 let activePetTouchDragPointerId = null;
+let lastPetTouchPressAt = -Infinity;
 petCardsLayer?.addEventListener('load',markPetAvatarLoaded,true);
 petCardsLayer?.addEventListener('error',markPetAvatarError,true);
 personProfileDialog?.addEventListener('load',markPetAvatarLoaded,true);
@@ -18954,7 +18955,8 @@ petCardsLayer?.addEventListener('contextmenu',event => {
   event.preventDefault();
   event.stopPropagation();
   // 觸控長按專供拖曳，不能被 Safari 的 contextmenu 攔截。
-  if (event.pointerType === 'touch' || activePetTouchDragPointerId !== null) return;
+  if (event.pointerType === 'touch' || activePetTouchDragPointerId !== null ||
+      performance.now() - lastPetTouchPressAt < 1100) return;
   const entry = findCanvasPetEntry(cardElement.dataset.petId);
   if (entry) renderPetCardMenu(entry,event.clientX,event.clientY);
 });
@@ -18983,20 +18985,28 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const scale = genealogyViewport.getScale() || 1;
   const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
   const isTouch = event.pointerType === 'touch';
-  if (isTouch) activePetTouchDragPointerId = event.pointerId;
+  if (isTouch) {
+    activePetTouchDragPointerId = event.pointerId;
+    lastPetTouchPressAt = performance.now();
+  }
   const jitterAllowance = isTouch ? 18 : 10;
   const tapAllowance = isTouch ? 12 : 8;
   let holdReady = false, moved = false, preHoldMoved = false;
   let previewPosition = null;
+  let latestPoint = {pointerId:event.pointerId,clientX:event.clientX,clientY:event.clientY};
   // 防止瀏覽器原生按鈕與圖像手勢攔截長按；游標離開卡片仍維持追蹤。
   event.preventDefault();
   event.stopPropagation();
   try { element.setPointerCapture?.(event.pointerId); } catch (_) {}
   const holdTimer = canDrag ? window.setTimeout(() => {
     const point = isTouch ? activeTouchPointers.get(event.pointerId) : null;
-    if (!preHoldMoved && (!isTouch ||
-      (activeTouchPointers.size === 1 && point && !point.blocked &&
-        !touchCardActivationSuppressed.has(event.pointerId)))) holdReady = true;
+    if (!isTouch || (activeTouchPointers.size === 1 && point && !point.blocked &&
+        !touchCardActivationSuppressed.has(event.pointerId))) {
+      holdReady = true;
+      element.classList.add('pet-hold-ready');
+      // 按住時先移動游標，不應把長按計時器直接取消；達時間後接續移動。
+      if (preHoldMoved) onMove({...latestPoint,preventDefault(){}});
+    }
   },360) : null;
   const movement = ev => Math.hypot(ev.clientX-event.clientX,ev.clientY-event.clientY);
   const clear = () => {
@@ -19004,11 +19014,12 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     document.removeEventListener('pointermove',onMove);
     document.removeEventListener('pointerup',onFinish);
     document.removeEventListener('pointercancel',onFinish);
-    element.classList.remove('dragging');
+    element.classList.remove('dragging','pet-hold-ready');
     hideSmartGuides();
   };
   const onMove = ev => {
     if (ev.pointerId !== event.pointerId) return;
+    latestPoint = {pointerId:ev.pointerId,clientX:ev.clientX,clientY:ev.clientY};
     // 畫布雙指縮放時，不應再觸發寵物拖曳。
     if (isTouch && (activeTouchPointers.size !== 1 ||
       activeTouchPointers.get(event.pointerId)?.blocked ||
@@ -19019,10 +19030,8 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     }
     const distance = movement(ev);
     if (!holdReady) {
-      if (distance > jitterAllowance) {
-        preHoldMoved = true;
-        window.clearTimeout(holdTimer);
-      }
+      // 只有鬆開或取消才結束計時；移動超過門檻仍可在按滿 360ms 後拖曳。
+      if (distance > jitterAllowance) preHoldMoved = true;
       return;
     }
     if (!moved && distance < (isTouch ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
