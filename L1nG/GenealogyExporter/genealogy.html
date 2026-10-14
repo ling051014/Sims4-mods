@@ -6,7 +6,7 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261015-pet-profile-owners-tap-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261015-pet-editor-three-fields-r1">
         <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
         <script src="genealogy-feedback.js?v=20261013-exporter-version-select-r2" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
@@ -854,14 +854,12 @@
                         <label class="pet-field-full">名字<input id="pName" maxlength="30" placeholder="多多 / 小黑……"></label>
                         <label>種類<select id="pSpecies"><option value="dog">狗</option><option value="fox">狐狸</option><option value="cat">貓</option><option value="raccoon">浣熊</option><option value="horse">馬</option><option value="cow">牛</option><option value="crow">烏鴉</option><option value="parrot">鸚鵡</option><option value="leopard">豹</option><option value="other">其他</option></select></label>
                         <label>品種<input id="pBreed" maxlength="40" placeholder="哈士奇 / 暹羅貓……"></label>
-                        <label id="pGenderField">性別<select id="pGender"><option value="male">公</option><option value="female">母</option></select></label>
-                        <label>年齡階段<select id="pAgeStage"><option value="幼年">幼年</option><option value="成年">成年</option><option value="老年">老年</option></select></label>
-                        <label>狀態<select id="pStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
-                        <div class="pet-field-full pet-owner-field" id="petOwnerField" hidden>
-                            <span class="pet-owner-heading">飼主（可多選）</span>
-                            <input type="search" id="petOwnerSearch" placeholder="搜尋模擬市民" aria-label="搜尋飼主">
-                            <div class="pet-owner-choices" id="petOwnerChoices" role="group" aria-label="飼主（可多選）"></div>
+                        <div class="pet-editor-status-row">
+                            <label id="pGenderField">性別<select id="pGender"><option value="male">公</option><option value="female">母</option></select></label>
+                            <label>年齡階段<select id="pAgeStage"><option value="幼年">幼年</option><option value="成年">成年</option><option value="老年">老年</option></select></label>
+                            <label>狀態<select id="pStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
                         </div>
+                    </div>
                         <div class="pet-field-full pet-trait-field form-field trait-field">
                             <div class="trait-editor">
                                 <div class="trait-chip-list" id="petTraitChipList"></div>
@@ -871,7 +869,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <div class="pet-field-full pet-owner-field" id="petOwnerField" hidden>
+                            <span class="pet-owner-heading">飼主（可多選）</span>
+                            <input type="search" id="petOwnerSearch" placeholder="搜尋模擬市民" aria-label="搜尋飼主">
+                            <div class="pet-owner-choices" id="petOwnerChoices" role="group" aria-label="飼主（可多選）"></div>
+                        </div>
                 </div>
                 <div class="ui-dialog-actions"><button class="danger" id="pDelete" style="display:none">刪除寵物</button><span class="spacer"></span><button id="pCancel">取消</button><button class="primary" id="pSave">儲存</button></div>
             </div>
