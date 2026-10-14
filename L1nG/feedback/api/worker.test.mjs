@@ -52,11 +52,22 @@ test('格式錯誤或未驗證的回饋不會寫入資料庫',async()=>{
   const res=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:form});
   assert.equal(res.status,400);
 });
+test('RealDate 模組錯誤回饋缺少遊戲版本時仍須拒絕',async()=>{
+  const form=new FormData();
+  form.set('source','RealDate');form.set('category','bug');
+  form.set('target','mod');form.set('followUp','once');
+  form.set('message','這是一則超過十字但缺少遊戲版本的測試回饋');
+  form.set('turnstileToken','fake-token');
+  const res=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:form});
+  assert.equal(res.status,400);
+  assert.match((await res.json()).error,/遊戲版本/);
+});
 test('無 Turnstile Secret 時不能讓回饋通過',async()=>{
   const form=new FormData();
   form.set('source','RealDate');form.set('category','bug');
   form.set('target','mod');form.set('followUp','once');
   form.set('message','測試回饋必須至少十個中文字元才符合規定');
+  form.set('gameVersion','1.128.90.1030');
   form.set('turnstileToken','fake-token');
   const res=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:form});
   assert.equal(res.status,503);
@@ -85,7 +96,7 @@ test('有效的 Turnstile 仍須通過 D1 頻率限制才可寫入',async()=>{
     async batch(){stored++;}
   };
   try{
-    const form=()=>{const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('followUp','once');data.set('message','測試有效回饋至少十字');data.set('turnstileToken','valid-token');return data;};
+    const form=()=>{const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('followUp','once');data.set('message','測試有效回饋至少十字');data.set('gameVersion','1.128.90.1030');data.set('turnstileToken','valid-token');return data;};
     const env={DB:db,TURNSTILE_SECRET_KEY:'unit-test-secret'};
     for(let i=0;i<6;i++){
       const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin,'CF-Connecting-IP':'203.0.113.5'},body:form(),env});
@@ -101,7 +112,7 @@ test('沒有可信來源位址時拒絕建立回饋',async()=>{
   const original=globalThis.fetch;
   globalThis.fetch=async()=>Response.json({success:true,hostname:'realdate.by-l1ng.com'});
   try{
-    const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('message','有效回饋至少十個字以上');data.set('followUp','once');data.set('turnstileToken','token');
+    const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('message','有效回饋至少十個字以上');data.set('followUp','once');data.set('gameVersion','1.128.90.1030');data.set('turnstileToken','token');
     const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data,env:{DB:dummyDB,TURNSTILE_SECRET_KEY:'secret'}});
     assert.equal(response.status,503);
   }finally{globalThis.fetch=original;}
@@ -110,7 +121,7 @@ test('驗證核發網域和提交網站不一致時拒絕',async()=>{
   const original=globalThis.fetch;
   globalThis.fetch=async()=>Response.json({success:true,hostname:'genealogy-tool.by-l1ng.com'});
   try{
-    const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('message','有效回饋至少十個字以上');data.set('followUp','once');data.set('turnstileToken','token');
+    const data=new FormData();data.set('source','RealDate');data.set('category','bug');data.set('target','mod');data.set('message','有效回饋至少十個字以上');data.set('followUp','once');data.set('gameVersion','1.128.90.1030');data.set('turnstileToken','token');
     const response=await call('/v1/feedback',{method:'POST',headers:{Origin:origin},body:data,env:{DB:dummyDB,TURNSTILE_SECRET_KEY:'secret'}});
     assert.equal(response.status,403);
   }finally{globalThis.fetch=original;}
