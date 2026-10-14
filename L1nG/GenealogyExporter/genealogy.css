@@ -9905,10 +9905,10 @@ button.danger-action:focus-visible {
 /* ========【搜尋欄】 設定 - 共用搜尋 SVG 與清除鈕，不更動下拉選單邏輯 ======== */
 .l1ng-search-control {position:relative;min-width:0;flex:1 1 auto}
 .l1ng-search-control > input {width:100%;padding-left:33px;padding-right:34px;box-sizing:border-box}
-.l1ng-search-control::before {content:"";position:absolute;left:11px;top:50%;width:15px;height:15px;transform:translateY(-50%);background:currentColor;opacity:.58;pointer-events:none;-webkit-mask:url("../icons/ui-search.svg") center/contain no-repeat;mask:url("../icons/ui-search.svg") center/contain no-repeat}
+.l1ng-search-control::before {content:"";position:absolute;left:11px;top:50%;width:15px;height:15px;transform:translateY(-50%);background:currentColor;opacity:.58;pointer-events:none;-webkit-mask:url("../../html%20icons/ui-search.svg") center/contain no-repeat;mask:url("../../html%20icons/ui-search.svg") center/contain no-repeat}
 .l1ng-search-control > input::-webkit-search-cancel-button {-webkit-appearance:none;appearance:none;display:none}
 .l1ng-search-clear {position:absolute;right:3px;top:50%;transform:translateY(-50%);width:28px;height:28px;min-height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer}
-.l1ng-search-clear::before {content:"";display:block;width:13px;height:13px;background:currentColor;-webkit-mask:url("../icons/ui-clear.svg") center/contain no-repeat;mask:url("../icons/ui-clear.svg") center/contain no-repeat}
+.l1ng-search-clear::before {content:"";display:block;width:13px;height:13px;background:currentColor;-webkit-mask:url("../../html%20icons/ui-clear.svg") center/contain no-repeat;mask:url("../../html%20icons/ui-clear.svg") center/contain no-repeat}
 .l1ng-search-clear:hover,.l1ng-search-clear:focus-visible {background:var(--surface-item-hover);color:var(--text-primary)}
 .l1ng-search-clear:focus-visible {outline:2px solid var(--action-primary);outline-offset:1px}
 .l1ng-search-control > .ui-select-search {margin-bottom:0}
