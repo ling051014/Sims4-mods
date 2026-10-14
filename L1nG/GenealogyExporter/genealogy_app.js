@@ -19333,9 +19333,24 @@ async function initializeGenealogyWorkspace() {
 
   applyRelationshipLineSettings();
   restoreCanvasBackground();
-  const repairedSamplePortraits = await ensureSamplePortraitAssets(initialDatabase);
+  // A failed IndexedDB Blob write must not block access to an otherwise valid
+  // saved family tree. Never clear picture references or rewrite the workspace
+  // while the browser's image storage is failing.
+  let repairedSamplePortraits = false;
+  let portraitStorageError = null;
+  try {
+    repairedSamplePortraits = await ensureSamplePortraitAssets(initialDatabase);
+  } catch (error) {
+    const storageFailure = /Failed to write blobs|IOError|QuotaExceededError|quota/i.test(
+      String(error?.name || '') + ' ' + String(error?.message || '')
+    );
+    if (!storageFailure) throw error;
+    portraitStorageError = error;
+    console.error('[圖片資產儲存失敗] 保留既有資料並繼續載入族譜。', error);
+  }
 
   const clearedImageRefs =
+    portraitStorageError ? 0 :
     assetStore.clearUnsupportedImageRefs(
       initialDatabase,
       bgSettings
@@ -19356,9 +19371,11 @@ async function initializeGenealogyWorkspace() {
 
     persistCanvasBackground();
   } else if (
-    preparedResult.changed ||
-    upgradedSample ||
-    repairedSamplePortraits
+    !portraitStorageError && (
+      preparedResult.changed ||
+      upgradedSample ||
+      repairedSamplePortraits
+    )
   ) {
     save({ immediate:true });
   }
@@ -19380,6 +19397,17 @@ async function initializeGenealogyWorkspace() {
     requestAnimationFrame(
       hideAppSkeleton
     );
+    if (portraitStorageError) {
+      window.setTimeout(() => {
+        void uiAlert(
+          '瀏覽器暫時無法儲存部分肖像圖片（IndexedDB Blob 寫入失敗）。' +
+          '\n\n族譜已繼續載入，原有的族譜資料及圖片引用不會因此清除。' +
+          '\n請先確認是否能匯出 JSON 備份，再檢查裝置可用儲存空間。' +
+          '\n在備份前請勿清除網站資料或重設瀏覽器儲存空間。',
+          { title:'圖片儲存異常', kind:'danger' }
+        );
+      }, 220);
+    }
   });
 }
 
