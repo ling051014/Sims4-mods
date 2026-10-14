@@ -18897,6 +18897,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
       const dx=ev.clientX-event.clientX,dy=ev.clientY-event.clientY;
       if (!moved && Math.hypot(dx,dy) < (event.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
       moved=true;
+      if (petPointerStart?.pointerId === event.pointerId) petPointerStart.moved = true;
       element.classList.add('dragging');
       element.style.left = (Math.max(0,origin.x+dx/scale)+PAD)+'px';
       element.style.top = (Math.max(0,origin.y+dy/scale)+PAD)+'px';
@@ -18932,7 +18933,7 @@ petCardsLayer?.addEventListener('pointerup', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
   const start = petPointerStart;
   petPointerStart = null;
-  if (!start || !element || event.pointerId !== start.pointerId ||
+  if (!start || start.moved || !element || event.pointerId !== start.pointerId ||
       element.dataset.petId !== start.id ||
       Math.hypot(event.clientX - start.x,event.clientY - start.y) > 8) return;
   event.stopPropagation();
