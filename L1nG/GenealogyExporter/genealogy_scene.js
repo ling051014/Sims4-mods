@@ -7029,6 +7029,15 @@ function solveAutomaticGenealogyPositions(visibleIds) {
   );
 }
 
+// 一個寵物可能由多位模擬市民共同飼養，使用穩定 ID 查找實際飼主。
+function petOwnerDisplayNames(pet) {
+  const id=String(pet?.gameData?.simId || pet?.id || '');
+  if (!id) return [];
+  return Object.values(genealogyData?.sims || {}).filter(sim =>
+    (sim.pets || []).some(item => String(item?.gameData?.simId || item?.id || '') === id)
+  ).map(sim => displayDataText(sim.name,sim)).filter(Boolean);
+}
+
 // ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
 // ========【寵物卡顯示資訊】 設定 - 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
 function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
@@ -7043,6 +7052,8 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
   if (species || breed) rows.push({key:'speciesBreed',text:[species,breed].filter(Boolean).join(' · ')});
   if (stage || status) rows.push({key:'stageStatus',text:[stage,status].filter(Boolean).join(' · ')});
   if (traits.length) rows.push({key:'traits',text:traits.join(' / '),traits});
+  const owners=petOwnerDisplayNames(pet);
+  if (owners.length) rows.push({key:'owners',text:uiText('飼主')+'：'+owners.join('、')});
   return rows;
 }
 
