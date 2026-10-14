@@ -2160,12 +2160,43 @@ html[data-language="en"] [data-lang="zh-Hant"] {
         /* 網格欄位 */ grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .compat-file-matrix > div {
-        /* 網格欄位 */ grid-template-columns: 1fr;
+    /* 手機版將每一組模組與相容檔合併閱讀，不再拆成表格的兩列。 */
+    .compat-file-matrix .matrix-head {
+        display: none;
     }
 
-    .compat-file-matrix > div > *:nth-child(2) {
-        /* 左側邊框 */ border-left: 0;
+    .compat-file-matrix > div:not(.matrix-head) {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 14px 16px;
+        min-width: 0;
+    }
+
+    .compat-file-matrix > div:not(.matrix-head):not(:last-child) {
+        border-bottom: 1px solid var(--line-soft);
+    }
+
+    .compat-file-matrix > div:not(.matrix-head) > * {
+        min-width: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .compat-file-matrix > div:not(.matrix-head) > span {
+        color: var(--text-strong);
+        font-size: 13px;
+        font-weight: 550;
+        line-height: 1.6;
+    }
+
+    .compat-file-matrix > div:not(.matrix-head) > code {
+        display: block;
+        color: var(--text-muted);
+        font-size: 11px;
+        line-height: 1.65;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .history-title,
