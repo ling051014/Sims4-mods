@@ -18901,23 +18901,41 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     const origin = {x:entry.x,y:entry.y};
     const scale = genealogyViewport.getScale() || 1;
     let moved = false;
+    const pressedAt = performance.now();
+    let holdReady = false;
+    const holdTimer = window.setTimeout(() => { holdReady = true; },360);
     const move = ev => {
       if (ev.pointerId !== event.pointerId) return;
       const dx=ev.clientX-event.clientX,dy=ev.clientY-event.clientY;
+      // 短按只開啟資料；必須先長按，再移動卡片。
+      if (!holdReady) return;
       if (!moved && Math.hypot(dx,dy) < (event.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD_PX : 3)) return;
       moved=true;
       if (petPointerStart?.pointerId === event.pointerId) petPointerStart.moved = true;
       element.classList.add('dragging');
-      element.style.left = (Math.max(0,origin.x+dx/scale)+PAD)+'px';
-      element.style.top = (Math.max(0,origin.y+dy/scale)+PAD)+'px';
+      const px = Math.max(0,origin.x+dx/scale), py = Math.max(0,origin.y+dy/scale);
+      const candidates = [...(getSceneLayout()?.pos?.entries() || [])];
+      const guides = {x:null,y:null};
+      const threshold = genealogyViewport.screenPixelsToWorld(8);
+      for (const [id,point] of candidates) {
+        if (Math.abs(point.x-px) < threshold) guides.x=point.x;
+        if (Math.abs(point.y-py) < threshold) guides.y=point.y;
+      }
+      hideSmartGuides();
+      if (guides.x !== null) showSmartGuide('x',guides.x);
+      if (guides.y !== null) showSmartGuide('y',guides.y);
+      element.style.left = (Math.max(0,guides.x ?? px)+PAD)+'px';
+      element.style.top = (Math.max(0,guides.y ?? py)+PAD)+'px';
       ev.preventDefault();
     };
     const finish = ev => {
       if (ev.pointerId !== event.pointerId) return;
+      window.clearTimeout(holdTimer);
       document.removeEventListener('pointermove',move);
       document.removeEventListener('pointerup',finish);
       document.removeEventListener('pointercancel',finish);
       element.classList.remove('dragging');
+      hideSmartGuides();
       if (!moved || ev.type === 'pointercancel') return;
       petPointerStart=null;
       lastPetPointerActivation={id:entry.key,time:performance.now()};
