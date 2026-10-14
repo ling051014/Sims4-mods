@@ -37,6 +37,7 @@ for (const name of [
   'site-info.css','site-info.js','site-info.html'
 ]) file(name);
 folder('icons');
+file('analytics.js');
 const publicFeedback = [
   'feedback-core.js','feedback-i18n.js','feedback-loading.css',
   'feedback.css','realdate-feedback-live.js','select-ui.js'
@@ -99,10 +100,20 @@ function htmlFiles(directory) {
   return all;
 }
 const htmls=htmlFiles(out);
+let analyticsPages=0;
 for(const p of htmls) {
   const html=fs.readFileSync(p,'utf8');
-  const modified=html.replace(/\b(href|src)=(["'])([^"']+)\2/g, (whole,key,quote,value)=>
+  let modified=html.replace(/\b(href|src)=(["'])([^"']+)\2/g, (whole,key,quote,value)=>
     key+'='+quote+rewrite(value,key)+quote);
+  const relative=path.relative(out,p).split(path.sep).join('/');
+  // Never count private administrator activity as public traffic.
+  if (relative !== 'feedback/admin.html') {
+    if (!/<\/head\s*>/i.test(modified)) throw new Error('Missing HTML head: '+relative);
+    const trackingSrc='../'.repeat(relative.split('/').length-1)+'analytics.js?v=20261014-ga4-r1';
+    modified=modified.replace(/<\/head\s*>/i,
+      '    <script src="'+trackingSrc+'" defer></script>\n</head>');
+    analyticsPages++;
+  }
   if (modified!==html) fs.writeFileSync(p,modified,'utf8');
 }
 
@@ -139,4 +150,4 @@ if (missing.length) {
 }
 fs.writeFileSync(path.join(out,'404.html'),
   '<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><title>找不到頁面 · L1nG</title><body><h1>找不到頁面</h1><p>這個網址不存在。</p><a href="https://home.by-l1ng.com/">返回 L1nG</a></body></html>');
-console.log('Pages build ready:',mode,'— HTML:',htmls.length,'— output: dist');
+console.log('Pages build ready:',mode,'— HTML:',htmls.length,'— GA4 pages:',analyticsPages,'— output: dist');
