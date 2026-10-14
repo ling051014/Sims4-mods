@@ -18811,6 +18811,7 @@ function renderPetCardMenu(entry,clientX,clientY) {
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看寵物資料'))}</span></button>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="edit" ${editable ? '' : 'disabled'}>${iconSvg('pencil-square')}<span>${esc(uiText('編輯寵物'))}</span></button>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="owners">${iconSvg('pencil-square')}<span>${esc(uiText('編輯飼主'))}</span></button>
     <div class="person-card-menu-divider"></div>
     <div class="person-card-menu-section-title">${esc(uiText(viewMode === 'edit' ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
     <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
@@ -18827,10 +18828,46 @@ function renderPetCardMenu(entry,clientX,clientY) {
   positionPersonCardMenu(clientX,clientY);
 }
 
+function editPetOwners(entry) {
+  const db=currentGenealogyData();
+  if (!db || !entry) return;
+  const petId=String(entry.pet?.gameData?.simId || entry.pet?.id || entry.key);
+  const sims=Object.values(db.sims || {}).filter(sim=>sim && sim.id);
+  const currently=sims.filter(sim=>(sim.pets||[]).some(pet=>String(pet.gameData?.simId || pet.id || '')===petId));
+  const modal=document.createElement('div');
+  modal.className='ui-dialog-backdrop show';
+  modal.style.zIndex='7000';
+  const title=uiText('編輯飼主');
+  modal.innerHTML='<section class="ui-dialog-panel pet-owners-modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
+    '<h2>'+esc(title)+'</h2><p>'+esc(uiText('選擇飼主（可多選）'))+'</p>'+
+    '<div class="pet-owners-options">'+sims.map(sim=>'<label><input type="checkbox" value="'+esc(sim.id)+'"'+(currently.includes(sim)?' checked':'')+'><span>'+esc(displayDataText(sim.name,sim))+'</span></label>').join('')+'</div>'+
+    '<div class="ui-dialog-actions"><button type="button" data-owner-cancel>'+esc(uiText('取消'))+'</button><button type="button" class="primary" data-owner-save>'+esc(uiText('儲存'))+'</button></div></section>';
+  const close=()=>modal.remove();
+  modal.addEventListener('click',event=>{if(event.target===modal || event.target.closest('[data-owner-cancel]'))close();});
+  modal.querySelector('[data-owner-save]').addEventListener('click',()=>{
+    const selected=new Set([...modal.querySelectorAll('.pet-owners-options input:checked')].map(input=>input.value));
+    let mutation=null;
+    for(const sim of sims) {
+      const old=Array.isArray(sim.pets)?sim.pets:[];
+      const had=old.some(pet=>String(pet.gameData?.simId || pet.id || '')===petId);
+      const want=selected.has(String(sim.id));
+      if(had===want)continue;
+      const next=want?[...old,JSON.parse(JSON.stringify(entry.pet))]:old.filter(pet=>String(pet.gameData?.simId || pet.id || '')!==petId);
+      mutation=genealogyStore.mergeResults(mutation,genealogyStore.updateSim(sim.id,{pets:next}));
+    }
+    // Pet cards are a layout-owned layer; refresh after owner membership changes.
+    applyGenealogyMutation(mutation);
+    invalidateRender({layout:true,nodes:true,edges:true},{immediate:true});
+    close();
+  });
+  document.body.appendChild(modal);
+}
+
 function handlePetCardMenuAction(action,key) {
   const entry = findCanvasPetEntry(key);
   if (!entry) {closePersonCardMenu();return;}
   closePersonCardMenu();
+  if (action === 'owners') { editPetOwners(entry); return; }
   if (action === 'view') { openPetProfileFromCanvas(entry); return; }
   if (action === 'edit') { if (petCanvasOwnerIndex(entry) >= 0) openPetEditorFromCanvas(entry); return; }
   if (action === 'locate') { focusPetOnCanvas(entry); return; }
