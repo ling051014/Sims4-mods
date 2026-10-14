@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 106" fill="none" aria-hidden="true">
+  <!-- 族譜關係線：水平和垂直直角連接，與族譜畫布的線條設定無關。 -->
+  <path d="M90 33V58M24 58H156M24 58V73M90 58V73M156 58V73"
+        stroke="#b4d2e6" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter"/>
+  <!-- 上層人物節點 -->
+  <g transform="translate(90 18)">
+    <circle r="15" fill="#fff" stroke="#93c2e5" stroke-width="1.8"/>
+    <circle cy="-4.7" r="4.4" fill="#9ecbea"/>
+    <path d="M-8.8 9V7.1C-8.8 2.2-5 .1 0 .1S8.8 2.2 8.8 7.1V9A12.8 12.8 0 0 1-8.8 9Z" fill="#9ecbea"/>
+  </g>
+  <!-- 下層三位人物節點 -->
+  <g transform="translate(24 88)">
+    <circle r="15" fill="#fff" stroke="#93c2e5" stroke-width="1.8"/>
+    <circle cy="-4.7" r="4.4" fill="#9ecbea"/>
+    <path d="M-8.8 9V7.1C-8.8 2.2-5 .1 0 .1S8.8 2.2 8.8 7.1V9A12.8 12.8 0 0 1-8.8 9Z" fill="#9ecbea"/>
+  </g>
+  <g transform="translate(90 88)">
+    <circle r="15" fill="#fff" stroke="#93c2e5" stroke-width="1.8"/>
+    <circle cy="-4.7" r="4.4" fill="#9ecbea"/>
+    <path d="M-8.8 9V7.1C-8.8 2.2-5 .1 0 .1S8.8 2.2 8.8 7.1V9A12.8 12.8 0 0 1-8.8 9Z" fill="#9ecbea"/>
+  </g>
+  <g transform="translate(156 88)">
+    <circle r="15" fill="#fff" stroke="#93c2e5" stroke-width="1.8"/>
+    <circle cy="-4.7" r="4.4" fill="#9ecbea"/>
+    <path d="M-8.8 9V7.1C-8.8 2.2-5 .1 0 .1S8.8 2.2 8.8 7.1V9A12.8 12.8 0 0 1-8.8 9Z" fill="#9ecbea"/>
+  </g>
+</svg>
