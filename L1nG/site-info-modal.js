@@ -3,6 +3,22 @@
     "use strict";
     const script = document.currentScript;
     if (!script) return;
+    // RawGitHack serves source HTML directly, bypassing the Pages build-time
+    // Cookie CSS/JS injection. Load the same shared assets for branch review.
+    // Cookie consent itself blocks analytics and persistence on preview hosts.
+    const previewPath = "/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/";
+    const isBranchPreview = location.hostname === "raw.githack.com"
+        && location.pathname.startsWith(previewPath);
+    if (isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
+        const cookieStyle = document.createElement("link");
+        cookieStyle.rel = "stylesheet";
+        cookieStyle.href = new URL("cookie-consent.css?v=20261015-branch-preview-r1", script.src).href;
+        document.head.appendChild(cookieStyle);
+        const cookieScript = document.createElement("script");
+        cookieScript.src = new URL("cookie-consent.js?v=20261015-branch-preview-r1", script.src).href;
+        cookieScript.async = false;
+        document.head.appendChild(cookieScript);
+    }
     const sections = new Set(["privacy", "terms", "genealogy"]);
     const baseUrl = new URL("site-info.html", script.src);
     // 公開的獨立子網域一律引用首頁域名；分支預覽與本地路徑則沿用相對路徑。
@@ -62,7 +78,7 @@
                 secondary: token("--text-secondary") || css.color,
                 border: token("--border-default") || "#e3e8ed",
                 accent: token("--action-primary") || "#438cbe",
-                input: token("--surface-input") || css.backgroundColor
+                input: token("--surface-panel") || token("--surface-input") || css.backgroundColor
             }
         }, activeUrl.origin);
     }
