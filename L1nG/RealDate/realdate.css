@@ -1224,10 +1224,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 下方邊框 */ border-bottom: 1px solid var(--line-soft);
 }
 
-.compat-file-matrix > div > *:nth-child(2) {
-    /* 左側邊框 */ border-left: 1px solid var(--line-soft);
-}
-
 .compat-file-matrix .matrix-head {
     /* 背景 */ background: var(--surface-soft);
     /* 文字顏色 */ color: var(--text-soft);
@@ -1307,6 +1303,44 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 邊框 */ border: 1px solid var(--line);
     /* 圓角弧度 */ border-radius: 7px;
     /* 錨點上方留白 */ scroll-margin-top: calc(var(--header-height) + 40px);
+}
+
+/* ========【RealDate 歷史版本】 沿用站內左側時間軸，僅限電腦版 ======== */
+@media (min-width: 981px) {
+    #history .history-list {
+        position: relative;
+        max-width: 780px;
+        margin: 0 auto;
+        padding-left: 36px;
+        gap: 34px;
+    }
+
+    #history .history-list::before {
+        content: "";
+        position: absolute;
+        top: 8px;
+        bottom: 10px;
+        left: 5px;
+        width: 1px;
+        background: #dfdfdf;
+    }
+
+    #history .history-card {
+        position: relative;
+    }
+
+    #history .history-card::before {
+        content: "";
+        position: absolute;
+        top: 16px;
+        left: -36px;
+        width: 11px;
+        height: 11px;
+        background: var(--surface);
+        border: 2px solid var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 0 5px var(--page-bg);
+    }
 }
 
 .history-title {
