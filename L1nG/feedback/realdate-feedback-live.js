@@ -76,7 +76,7 @@
   if(version){
     version.replaceChildren();
     for(const [value,label] of [
-      ['','請選擇版本'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
+      ['','請選擇版本'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
       ['v0.2.1 Beta','v0.2.1 Beta'],['v0.2 Beta','v0.2 Beta'],
       ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta'],
       ['other','其他版本（手動填寫）'],['unknown','不確定']
@@ -90,7 +90,6 @@
     targetSelect.value='mod';
   }
   $('bug-context')?.querySelector('label')?.replaceChildren(document.createTextNode('回饋對象'));
-  if($('version-changelog-link'))$('version-changelog-link').href='changelog.html';
   version?.addEventListener('change',()=>{$('manual-version-wrap').hidden=version.value!=='other';});
   targetSelect?.addEventListener('change',updateVersion);
   $('message-field')?.addEventListener('input',()=>{$('char-count').textContent=$('message-field').value.length+' / 2000';setError('');});
