@@ -36,8 +36,10 @@ for (const name of [
   'site-footer.css','site-info-modal.css','site-info-modal.js',
   'site-info.css','site-info.js','site-info.html'
 ]) file(name);
-folder('icons');
-for (const icon of ['ui-search.svg', 'ui-clear.svg']) {
+// Repository SVG sources are stored exclusively in html icons/.
+for (const icon of ['ui-search.svg', 'ui-clear.svg', 'afdian.svg',
+                    'genealogy-extractor.svg', 'genealogy-people.svg',
+                    'genealogy-zip-folder.svg', 'patreon.svg']) {
   put(path.join(base,'html icons',icon),path.join(out,'html icons',icon));
 }
 file('analytics.js');
@@ -78,6 +80,11 @@ if (mode === 'home') {
 // live two levels below html icons. Rewrite only deployed copies.
 if (mode === 'genealogy' || mode === 'translations') {
   const cssFile = path.join(out,mode === 'genealogy' ? 'genealogy.css' : 'translations.css');
+  const css = fs.readFileSync(cssFile,'utf8');
+  fs.writeFileSync(cssFile,css.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
+}
+if (mode === 'extractor') {
+  const cssFile = path.join(out,'genealogy-exporter.css');
   const css = fs.readFileSync(cssFile,'utf8');
   fs.writeFileSync(cssFile,css.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
 }
