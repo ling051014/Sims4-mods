@@ -75,6 +75,8 @@ if (mode === 'home') {
   for (const name of ['genealogy-exporter.html','genealogy-exporter.css','genealogy-exporter.js']) {
     file(path.join('GenealogyExporter',name),name);
   }
+  // Keep the install ZIP alongside the deployed page at /downloads/.
+  folder('GenealogyExporter/downloads','downloads');
   put(site('GenealogyExporter','genealogy-exporter.html'),path.join(out,'index.html'));
 } else if (mode === 'translations') {
   contents('Translations');
