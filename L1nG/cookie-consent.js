@@ -33,7 +33,7 @@
       analytics:'分析統計（Google Analytics 4）',
       analyticsNote:'統計網頁瀏覽、下載點擊及功能使用情況。是否需要事先同意，會依訪客所在地區判斷。',
       save:'儲存偏好',close:'關閉',details:'隱私權與 Cookie 說明',
-      note:'你可以隨時回到隱私權說明更改選擇。'
+      note:'你可以隨時回來更改選擇。'
     },
     'zh-Hans': {
       heading:'网站统计与 Cookie',
@@ -45,7 +45,7 @@
       analytics:'分析统计（Google Analytics 4）',
       analyticsNote:'统计页面浏览、下载点击及功能使用情况。是否需要事先同意，依访客所在地判断。',
       save:'保存偏好',close:'关闭',details:'隐私权与 Cookie 说明',
-      note:'你可以随时返回隐私权说明更改选择。'
+      note:'你可以随时回来更改选择。'
     },
     en: {
       heading:'Analytics & Cookies',
@@ -57,7 +57,7 @@
       analytics:'Analytics (Google Analytics 4)',
       analyticsNote:'Measure page views, download clicks and feature use. Regions requiring opt-in will not be tracked before consent.',
       save:'Save preferences',close:'Close',details:'Privacy & Cookies',
-      note:'You can change your choice later from our privacy information.'
+      note:'You can come back to change your choice at any time.'
     }
   };
   function language() {
@@ -99,6 +99,7 @@
   }
   let banner, overlay, opener = null, switchValue = false;
   let bannerSkeletonObserver = null;
+  let preferencesReadyFrame = null;
   function removeBanner() {
     bannerSkeletonObserver?.disconnect();
     bannerSkeletonObserver = null;
@@ -191,6 +192,8 @@
   }
   function closePreferences() {
     if (!overlay) return;
+    if (preferencesReadyFrame !== null) cancelAnimationFrame(preferencesReadyFrame);
+    preferencesReadyFrame = null;
     overlay.remove();
     overlay = null;
     opener?.focus?.({preventScroll:true});
@@ -236,6 +239,12 @@
         '" role="dialog" aria-modal="true" aria-labelledby="l1ng-cookie-title" aria-describedby="l1ng-cookie-subtitle">' +
         '<header class="' + (genealogyStyle ? 'help-header storage-header' : 'l1ng-site-info-header') +
         '">' + header + '</header>' +
+        '<div class="l1ng-cookie-preferences-skeleton" aria-hidden="true">' +
+        '<span class="l1ng-cookie-skeleton-line is-title"></span>' +
+        '<span class="l1ng-cookie-skeleton-line"></span>' +
+        '<span class="l1ng-cookie-skeleton-line is-medium"></span>' +
+        '<span class="l1ng-cookie-skeleton-line"></span>' +
+        '<span class="l1ng-cookie-skeleton-line is-short"></span></div>' +
         '<div class="' + (genealogyStyle ? 'storage-scroll-body l1ng-cookie-body' : 'l1ng-cookie-body') + '">' +
         '<div class="l1ng-cookie-setting"><span><strong data-cookie-necessary></strong>' +
         '<small data-cookie-necessary-note></small></span>' +
@@ -246,7 +255,19 @@
         '<div class="l1ng-cookie-actions"><button type="button" data-cookie-all-reject></button>' +
         '<button type="button" class="l1ng-cookie-accept" data-cookie-save></button></div>' +
       '</section>';
+    overlay.classList.add('is-loading');
+    overlay.setAttribute('aria-busy','true');
     document.body.appendChild(overlay);
+    // A real initial render: let the skeleton paint before revealing populated controls.
+    preferencesReadyFrame = requestAnimationFrame(() => {
+      preferencesReadyFrame = requestAnimationFrame(() => {
+        if (overlay) {
+          overlay.classList.remove('is-loading');
+          overlay.removeAttribute('aria-busy');
+        }
+        preferencesReadyFrame = null;
+      });
+    });
     overlay.querySelector('[data-cookie-switch]').addEventListener('click', () => {
       switchValue = !switchValue;
       overlay.querySelector('[data-cookie-switch]').setAttribute('aria-checked',String(switchValue));
