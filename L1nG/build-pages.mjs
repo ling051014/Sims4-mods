@@ -140,9 +140,11 @@ for(const p of htmls) {
   if (relative !== 'feedback/admin.html') {
     if (!/<\/head\s*>/i.test(modified)) throw new Error('Missing HTML head: '+relative);
     const assetPrefix='../'.repeat(relative.split('/').length-1);
-    modified=modified.replace(/<\/head\s*>/i,
-      '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261014-consent-r1">\n' +
-      '    <script src="'+assetPrefix+'cookie-consent.js?v=20261015-consent-region-r1" defer></script>\n</head>');
+    if (!/src=["'][^"']*cookie-consent\.js(?:[?"'])/.test(modified)) {
+      modified=modified.replace(/<\/head\s*>/i,
+        '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261015-theme-r2">\n' +
+        '    <script src="'+assetPrefix+'cookie-consent.js?v=20261015-theme-r2" defer></script>\n</head>');
+    }
     analyticsPages++;
   }
   if (modified!==html) fs.writeFileSync(p,modified,'utf8');
