@@ -14469,6 +14469,8 @@ function setEditingAvatarCropFrame(target,frame){
   const normalized=normalizeAvatarFrame(frame);
 
   if(target==='pet'){
+    if (petEditorState.avatarSource === 'game') petEditorState.gameAvatarFrame = normalized;
+    else petEditorState.customAvatarFrame = normalized;
     petEditorState.avatarFrame=normalized;
     petEditorController.refreshAvatarPreview();
   }else{
@@ -15315,6 +15317,18 @@ function renderRelAnno(simId) {
   );
 }
 
+function syncPetEditorActiveAvatar() {
+  let source = petEditorState.avatarSource === 'game' ? 'game' : 'custom';
+  if (source === 'game' && !petEditorState.gameAvatar && petEditorState.customAvatar) source = 'custom';
+  else if (source === 'custom' && !petEditorState.customAvatar && petEditorState.gameAvatar) source = 'game';
+  petEditorState.avatarSource = source;
+  petEditorState.avatar = source === 'game' ? petEditorState.gameAvatar : petEditorState.customAvatar;
+  petEditorState.avatarFrame = normalizeAvatarFrame(
+    source === 'game' ? petEditorState.gameAvatarFrame : petEditorState.customAvatarFrame
+  );
+  return source;
+}
+
 const petEditorController = {
   directEntry:null,
 
@@ -15346,7 +15360,10 @@ const petEditorController = {
       status:'在世',
       traits:[],
       avatar:null,
-      avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
+      avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+      gameAvatar:null, gameAvatarFrame:null,
+      customAvatar:null, customAvatarFrame:null,
+      avatarSource:'custom'
     };
   },
 
@@ -15489,6 +15506,16 @@ const petEditorController = {
   },
 
   refreshAvatarPreview() {
+    const source = syncPetEditorActiveAvatar();
+    const toggle = $('petAvatarSourceToggleBtn');
+    if (toggle) {
+      const target = source === 'game' ? 'custom' : 'game';
+      toggle.textContent = uiText(target === 'game' ? '使用遊戲頭像' : '使用自訂頭像');
+      toggle.disabled = !(target === 'game' ? petEditorState.gameAvatar : petEditorState.customAvatar);
+      toggle.dataset.avatarTarget = target;
+    }
+    const clear = $('petAvatarClearBtn');
+    if (clear) clear.disabled = source !== 'custom' || !petEditorState.customAvatar;
     const preview = $('petAvatarPreview');
     const avatar =
       framedAvatarImageHTML(
@@ -15588,13 +15615,12 @@ const petEditorController = {
       traitInput.value = '';
     }
 
-    petEditorState.avatar =
-      pet.avatar || null;
-
-    petEditorState.avatarFrame =
-      normalizeAvatarFrame(
-        pet.avatarFrame
-      );
+    petEditorState.gameAvatar = pet.gameAvatar || null;
+    petEditorState.gameAvatarFrame = normalizeAvatarFrame(pet.gameAvatarFrame);
+    petEditorState.customAvatar = pet.customAvatar || null;
+    petEditorState.customAvatarFrame = normalizeAvatarFrame(pet.customAvatarFrame);
+    petEditorState.avatarSource = pet.avatarSource === 'game' ? 'game' : 'custom';
+    syncPetEditorActiveAvatar();
 
     this.syncGenderVisibility();
     this.refreshAvatarPreview();
@@ -15657,9 +15683,12 @@ const petEditorController = {
 
     petEditorState.index = -1;
     petEditorState.avatar = null;
-    petEditorState.avatarFrame = {
-      ...DEFAULT_AVATAR_FRAME
-    };
+    petEditorState.avatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.gameAvatar = null;
+    petEditorState.gameAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.customAvatar = null;
+    petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.avatarSource = 'custom';
     petEditorState.traits = [];
   },
 
@@ -15738,13 +15767,13 @@ const petEditorController = {
       traits:[
         ...petEditorState.traits
       ],
-      avatar:
-        petEditorState.avatar ||
-        null,
-      avatarFrame:
-        normalizeAvatarFrame(
-          petEditorState.avatarFrame
-        )
+      avatar:petEditorState.avatar || null,
+      avatarFrame:normalizeAvatarFrame(petEditorState.avatarFrame),
+      gameAvatar:petEditorState.gameAvatar || null,
+      gameAvatarFrame:petEditorState.gameAvatar ? normalizeAvatarFrame(petEditorState.gameAvatarFrame) : null,
+      customAvatar:petEditorState.customAvatar || null,
+      customAvatarFrame:petEditorState.customAvatar ? normalizeAvatarFrame(petEditorState.customAvatarFrame) : null,
+      avatarSource:petEditorState.avatarSource
     };
 
     if (
@@ -15863,27 +15892,19 @@ const petEditorController = {
         'pet'
       );
 
-    petEditorState.avatar =
-      await saveImageAsset(
-        result.blob,
-        {
-          width:result.width,
-          height:result.height
-        }
-      );
-
-    petEditorState.avatarFrame = {
-      ...DEFAULT_AVATAR_FRAME
-    };
-
+    petEditorState.customAvatar = await saveImageAsset(
+      result.blob,{width:result.width,height:result.height}
+    );
+    petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.avatarSource = 'custom';
     this.refreshAvatarPreview();
   },
 
   clearAvatar() {
-    petEditorState.avatar = null;
-    petEditorState.avatarFrame = {
-      ...DEFAULT_AVATAR_FRAME
-    };
+    if (petEditorState.avatarSource !== 'custom' || !petEditorState.customAvatar) return;
+    petEditorState.customAvatar = null;
+    petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    if (petEditorState.gameAvatar) petEditorState.avatarSource = 'game';
     this.refreshAvatarPreview();
   }
 };
@@ -16063,6 +16084,14 @@ $('petAvatarInput').onchange = async event => {
 
 $('petAvatarAdjustBtn').onclick = () => {
   openAvatarCropEditor('pet');
+};
+
+$('petAvatarSourceToggleBtn').onclick = () => {
+  const target = petEditorState.avatarSource === 'game' ? 'custom' : 'game';
+  const available = target === 'game' ? petEditorState.gameAvatar : petEditorState.customAvatar;
+  if (!available) return;
+  petEditorState.avatarSource = target;
+  petEditorController.refreshAvatarPreview();
 };
 
 $('petAvatarClearBtn').onclick = () => {
@@ -17760,8 +17789,13 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
           'game';
       }
     } else {
-      target.avatar =
-        savedAvatar;
+      target.gameAvatar = savedAvatar;
+      if (!target.gameAvatarFrame) target.gameAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+      if (!target.customAvatar) target.avatarSource = 'game';
+      if (target.avatarSource === 'game') {
+        target.avatar = savedAvatar;
+        target.avatarFrame = normalizeAvatarFrame(target.gameAvatarFrame);
+      }
     }
 
     if (prepared.converted) thumDecoded++;
@@ -17779,14 +17813,14 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
   for (const [, sim] of personEntries) {
     for (const pet of sim.pets || []) {
       const petId = pet?.gameData?.simId;
-      if (petId && !pet.avatar) petEntries.push([pet, petId]);
+      if (petId && !pet.gameAvatar) petEntries.push([pet, petId]);
     }
   }
   const unassignedPets = Array.isArray(converted.meta?.unassignedPets)
     ? converted.meta.unassignedPets : [];
   for (const pet of unassignedPets) {
     const petId = pet?.gameData?.simId;
-    if (petId && !pet.avatar) petEntries.push([pet, petId]);
+    if (petId && !pet.gameAvatar) petEntries.push([pet, petId]);
   }
 
   // 頭像總數只計算 ZIP 中實際存在、且格式可處理的圖片；
@@ -19438,12 +19472,21 @@ async function ensureSamplePortraitAssets(database) {
           assetStore.isAssetId(item.person.avatar) &&
           await assetStore.hasAsset(item.person.avatar)) return;
       const id = await importOriginalPng(item.path);
-      if (item.person.avatar !== id) changed = true;
-      item.person.avatar = id;
       if (item.isSim) {
+        if (item.person.avatar !== id) changed = true;
+        item.person.avatar = id;
         item.person.gameAvatar = id;
         item.person.gameData = item.person.gameData || {};
         item.person.gameData.avatarSource = 'game';
+      } else {
+        if (item.person.gameAvatar !== id) changed = true;
+        item.person.gameAvatar = id;
+        item.person.gameAvatarFrame ||= { ...DEFAULT_AVATAR_FRAME };
+        if (!item.person.customAvatar) item.person.avatarSource = 'game';
+        if (item.person.avatarSource === 'game') {
+          item.person.avatar = id;
+          item.person.avatarFrame = normalizeAvatarFrame(item.person.gameAvatarFrame);
+        }
       }
     }));
   }
