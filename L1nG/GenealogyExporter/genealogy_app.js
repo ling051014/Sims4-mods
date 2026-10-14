@@ -3606,8 +3606,14 @@ function relationshipTypePickerFilteredOptions(){
       .trim()
       .toLocaleLowerCase();
 
-  const options=
-    relationshipTypeOptions();
+  // Visual settings reuse the picker but list only existing relationship types.
+  const options=relationshipTypePickerOnSelect
+    ? getOtherRelationshipTypes().map(entry=>({
+        value:entry.type,
+        label:entry.label,
+        custom:!SOCIAL_RELATIONSHIP_DEFINITIONS[entry.type]
+      }))
+    : relationshipTypeOptions();
 
   if(query){
     return options.filter(option=>
@@ -3740,7 +3746,7 @@ function renderRelationshipTypePickerOptions(){
       );
 
   const createMarkup=
-    normalizedRaw&&!hasExact
+    !relationshipTypePickerOnSelect&&normalizedRaw&&!hasExact
       ? '<button class="relationship-type-option relationship-type-create" type="button" data-create-relationship-type="'+
         esc(normalizedRaw)+
         '">'+
