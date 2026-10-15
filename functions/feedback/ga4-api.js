@@ -39,7 +39,7 @@ function accessTokenFrom(request) {
   const match = (request.headers.get('cookie')||'').match(/(?:^|;\s*)CF_Authorization=([^;]+)/);
   return match ? match[1] : '';
 }
-async function allowAdmin(request,env) {
+export async function allowAdmin(request,env) {
   const rawIssuer = env.ACCESS_TEAM_DOMAIN;
   const expectedAudience = env.ACCESS_AUD;
   const admins = (env.ADMIN_EMAIL||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);

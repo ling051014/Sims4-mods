@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="admin.css?v=20261013-attachment-preview-r2">
         <script src="select-ui.js" defer></script>
         <script src="admin.js?v=20261015-ga4-backend-r1" defer></script>
-        <script src="ga4-dashboard.js?v=20261016-ga4-zh-hant-display-r1" defer></script>
+        <script src="ga4-dashboard.js?v=20261016-feedback-downloads-r1" defer></script>
     </head>
     <body class="admin-only">
         <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
@@ -295,7 +295,11 @@
                             </div>
                         </section>
                     </div>
-                    <p class="hint" style="margin-top:22px">數據來自 Google Analytics 4，僅涵蓋符合 Cookie 偏好設定的追蹤資料；下載統計從事件啟用後開始累積，不會回補先前點擊。</p>
+                    <div class="analytics-lower">
+                        <section class="dash-card"><div class="dash-card-header"><div><span class="eyebrow">FEEDBACK INTERACTIONS</span><h3>問題回饋互動</h3></div><span class="hint" id="ga-feedback-totals">開啟 — · 成功提交 —</span></div><div class="rank-list" id="ga-feedback-events"></div></section>
+                        <section class="dash-card"><div class="dash-card-header"><div><span class="eyebrow">DOWNLOAD DETAILS</span><h3>各下載按鈕點擊明細</h3></div><span class="hint">按模組、版本與下載入口</span></div><div class="rank-list" id="ga-download-items"></div></section>
+                    </div>
+                    <p class="hint" style="margin-top:22px">數據來自 Google Analytics 4，僅涵蓋符合 Cookie 偏好設定的追蹤資料；下載及回饋互動事件從啟用後累積，不會回補先前紀錄。</p>
                 </section>
                 <section aria-label="管理設定" class="panel-view" hidden="" id="panel-settings">
                     <div class="admin-head">

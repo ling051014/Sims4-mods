@@ -47,7 +47,7 @@ file('cookie-consent.js');
 file('cookie-consent.css');
 // Only regional consent and the protected home GA4 reports use Pages Functions.
 const functionRoutes=['/l1ng-analytics-region'];
-if (mode==='home') functionRoutes.push('/feedback/ga4-api');
+if (mode==='home') functionRoutes.push('/feedback/ga4-api','/feedback/admin.html');
 fs.writeFileSync(path.join(out,'_routes.json'),
   JSON.stringify({version:1,include:functionRoutes,exclude:[]}));
 const publicFeedback = [

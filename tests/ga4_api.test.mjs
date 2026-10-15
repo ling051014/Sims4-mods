@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,sign} from 'node:crypto';
 import {onRequestGet} from '../functions/feedback/ga4-api.js';
+import {onRequestGet as adminPage} from '../functions/feedback/admin.html.js';
 
 const {privateKey,publicKey}=generateKeyPairSync('rsa',{modulusLength:2048});
 const jwk={...publicKey.export({format:'jwk'}),kid:'l1ng-test-kid',alg:'RS256',use:'sig'};
@@ -110,4 +111,21 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
     assert.ok(calls>=9);
     assert.equal(JSON.stringify(result.body).includes('PRIVATE KEY'),false);
   } finally {globalThis.fetch=original;}
+});
+
+test('admin HTML is not publicly readable and preserves original content for a verified admin',async()=>{
+  const original=globalThis.fetch;
+  let served=0;
+  globalThis.fetch=async()=>Response.json({keys:[jwk]});
+  const next=async()=>{served++;return new Response('<html>PRIVATE DASHBOARD</html>',{headers:{'content-type':'text/html'}});};
+  try {
+    let res=await adminPage({request:new Request('https://home.by-l1ng.com/feedback/admin.html'),env,next});
+    assert.equal(res.status,403);
+    assert.equal(served,0);
+    res=await adminPage({request:new Request('https://home.by-l1ng.com/feedback/admin.html',{headers:{'Cf-Access-Jwt-Assertion':accessJwt()}}),env,next});
+    assert.equal(res.status,200);
+    assert.match(await res.text(),/PRIVATE DASHBOARD/);
+    assert.equal(served,1);
+    assert.equal(res.headers.get('cache-control'),'no-store, private');
+  }finally{globalThis.fetch=original;}
 });

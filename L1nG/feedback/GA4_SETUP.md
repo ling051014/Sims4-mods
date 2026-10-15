@@ -38,3 +38,7 @@
 ## 其他系統
 
 此 GA4 整合不會自動部署 `l1ng-feedback-api` Worker，也不會變更 D1/R2/Turnstile 的正式接線；回饋 API 是否正常須另做正式環境驗收。
+
+## 管理頁面伺服器端保護
+
+`/feedback/admin.html` 現在由 Pages Function 預先驗證 Access JWT，匿名請求只會收到 403 JSON，不會返回管理中心 HTML。`/feedback/ga4-api` 同樣使用 Access JWT 身分驗證。請在 Zero Trust 同時保護兩條路徑（繼續沿用既有 L1nG Dashboard 應用程式），不要把整個公開 `/feedback/` 目錄設為管理員專用。

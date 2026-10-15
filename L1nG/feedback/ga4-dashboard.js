@@ -11,6 +11,41 @@
     'translations.by-l1ng.com':'漢化專區'
   };
   const labelSite = name => siteLabels[name] || name || '未知網站';
+  const downloadNames=Object.freeze({
+    "r_v05_homehero":"RealDate v0.5 Beta · 首頁上方下載",
+    "r_v05_homecard":"RealDate v0.5 Beta · 首頁版本卡下載",
+    "r_v050_main":"RealDate v0.5 Beta · 主要下載",
+    "r_v050_backup":"RealDate v0.5 Beta · 備用下載",
+    "r_v040_main":"RealDate v0.4 Beta · 主要下載",
+    "r_v040_backup":"RealDate v0.4 Beta · 備用下載",
+    "r_v030_main":"RealDate v0.3 Beta · 主要下載",
+    "r_v030_backup":"RealDate v0.3 Beta · 備用下載",
+    "r_v021_main":"RealDate v0.2.1 Beta · 主要下載",
+    "r_v021_backup":"RealDate v0.2.1 Beta · 備用下載",
+    "r_v020_main":"RealDate v0.2 Beta · 主要下載",
+    "r_v020_backup":"RealDate v0.2 Beta · 備用下載",
+    "r_v011_main":"RealDate v0.1.1 Beta · 主要下載",
+    "r_v011_backup":"RealDate v0.1.1 Beta · 備用下載",
+    "r_v010_main":"RealDate v0.1 Beta · 主要下載",
+    "r_v010_backup":"RealDate v0.1 Beta · 備用下載",
+    "t_catdog_cht":"貓狗特徵包 · 繁體中文下載",
+    "t_catdog_backup":"貓狗特徵包 · 備用下載",
+    "t_wme_cht":"Wicked Memories Enhanced · 繁體中文下載",
+    "t_wme_backup":"Wicked Memories Enhanced · 備用下載",
+    "t_habit_cht":"A Morning Routine · 繁體中文下載",
+    "t_habit_backup":"A Morning Routine · 備用下載",
+    "t_frontdesk_cht":"Front Desk Staff · 繁體中文下載",
+    "t_frontdesk_backup":"Front Desk Staff · 備用下載",
+    "t_airline_cht":"Airline Employee · 繁體中文下載",
+    "t_airline_backup":"Airline Employee · 備用下載",
+    "t_uicheats_cht":"UI Cheats Extension · 繁體中文下載",
+    "t_uicheats_backup":"UI Cheats Extension · 備用下載",
+    "t_zodiac_cht":"十二星座 · 繁體中文下載",
+    "t_zodiac_chs":"十二星座 · 簡體中文下載",
+    "t_zodiac_backup":"十二星座 · 備用下載",
+    "e_v01_main":"族譜提取器 v0.1 Beta · 主要下載"
+  });
+  const feedbackNames={l1ng_feedback_open:'開啟回饋',l1ng_feedback_submitted:'成功提交'};
   // Keep GA4's canonical dimension values untouched; translate only visible labels.
   const deviceNames = Object.freeze({
     desktop:'電腦', mobile:'手機', tablet:'平板',
@@ -163,6 +198,9 @@
     list('ga-pages',data.pages,x=>labelSite(x.host)+' · '+(x.path||'/'));
     list('ga-countries',data.countries,x=>labelCountry(x.name));
     list('ga-files',data.downloads,x=>labelSite(x.host));
+    list('ga-feedback-events',data.feedbackEvents,x=>labelSite(x.host)+' · '+(feedbackNames[x.event]||'未知互動'));
+    setText('ga-feedback-totals','開啟 '+number(s.feedbackOpened)+' · 成功提交 '+number(s.feedbackSubmitted));
+    list('ga-download-items',data.downloadItems,x=>labelSite(x.host)+' · '+(downloadNames[x.id]||'其他下載'));
     list('ga-referrals',data.referrals,x=>labelReferral(x.name));
     devices(data.devices);
   }
@@ -175,7 +213,8 @@
   }
   function resetDetails(message) {
     for(const id of ['ga-users','ga-views','ga-downloads','ga-new'])setText(id,'—');
-    for(const id of ['ga-trend-chart','ga-pages','ga-countries','ga-files','ga-referrals','ga-device'])empty(id,message);
+    for(const id of ['ga-trend-chart','ga-pages','ga-countries','ga-files','ga-referrals','ga-device','ga-feedback-events','ga-download-items'])empty(id,message);
+    setText('ga-feedback-totals','開啟 — · 成功提交 —');
   }
   function dateRange() {
     const end=today();

@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'functions/feedback/ga4-api.js'
+      - 'functions/feedback/admin.html.js'
+      - 'L1nG/feedback/ga4-dashboard.js'
       - 'L1nG/feedback/admin.js'
       - 'L1nG/feedback/admin.html'
       - 'L1nG/build-pages.mjs'
@@ -23,6 +25,8 @@ jobs:
       - name: Validate GA4 JS and Pages Function syntax
         run: |
           node --check functions/feedback/ga4-api.js
+          node --check functions/feedback/admin.html.js
+          node --check L1nG/feedback/ga4-dashboard.js
           node --check L1nG/feedback/admin.js
           node --check L1nG/analytics.js
           node --check L1nG/build-pages.mjs
@@ -34,6 +38,6 @@ jobs:
           node --input-type=module -e "
             import fs from 'node:fs';
             const r=JSON.parse(fs.readFileSync('dist/_routes.json','utf8'));
-            if(!r.include.includes('/feedback/ga4-api'))process.exit(1);
+            if(!r.include.includes('/feedback/ga4-api') || !r.include.includes('/feedback/admin.html'))process.exit(1);
             if(fs.existsSync('dist/feedback/ga4-api.js'))process.exit(1);
           "
