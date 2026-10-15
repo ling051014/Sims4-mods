@@ -204,6 +204,8 @@
   }
 
   function resetPersonEditorDraftState() {
+    // 媒體分頁的寵物操作與家庭關係一致，每次重開人物編輯器均回到檢視模式。
+    $('petSection')?.classList.remove('is-editing');
     simEditorState.simId = null;
     simEditorState.avatar = null;
     simEditorState.avatarFrame = {
