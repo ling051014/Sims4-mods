@@ -257,7 +257,11 @@
     } catch (error) {
       $('feedback-sync-status').textContent='更新失敗，請稍後重試。';
       if(manual||!listLoaded)notify(error.message);
-      if(!listLoaded){const root=$('feedback-rows');root.replaceChildren(el('p','empty-list','回饋載入失敗，請按「立即更新」重試。'));}
+      if(!listLoaded){
+        const root=$('feedback-rows');root.replaceChildren(el('p','empty-list','回饋載入失敗，請按「立即更新」重試。'));
+        const recent=$('overview-recent');
+        if(recent){recent.textContent='近期回饋暫時無法載入。';recent.removeAttribute('aria-busy');}
+      }
     }finally{listBusy=false;if(button)button.disabled=false;$('feedback-rows')?.removeAttribute('aria-busy');}
   }
   async function refreshVisibleDetail(){
@@ -330,7 +334,8 @@
     if (/^image\/(png|jpeg|webp)$/.test(file.type || '')) {
       const image = document.createElement('img');
       image.alt = '附件縮圖';
-      image.loading = 'lazy';
+      // Load detached thumbnails immediately; a lazy detached image may never fire load.
+      image.decoding = 'async';
       image.addEventListener('load',() => thumb.replaceChildren(image),{once:true});
       loadThumbnail(image,url,requestId);
     }
