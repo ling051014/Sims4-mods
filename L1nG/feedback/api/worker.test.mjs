@@ -197,9 +197,9 @@ function offlineFeedbackHarness(){
               return {results:replies.filter(x=>x.feedback_id===values[0])
                 .map(({id,author,body,created_at})=>({id,author,body,created_at}))};
             }
-            if(sql.startsWith('SELECT id,name,content_type,size FROM attachments')){
+            if(sql.startsWith('SELECT id,reply_id,name,content_type,size FROM attachments')){
               return {results:attachments.filter(x=>x.feedback_id===values[0])
-                .map(({id,name,content_type,size})=>({id,name,content_type,size}))};
+                .map(({id,reply_id,name,content_type,size})=>({id,reply_id,name,content_type,size}))};
             }
             throw new Error('Unexpected offline all SQL: '+sql);
           },
@@ -309,6 +309,7 @@ test('離線附件流程：保存日誌、查詢中列出附件，拒絕偽裝�
     const result=(await lookup.json()).feedback;
     assert.equal(result.attachments.length,1);
     assert.equal(result.attachments[0].name,'RealDate_Test_Log.txt');
+    assert.equal(result.attachments[0].replyId,null);
     const disguised=offlineFeedbackForm();
     disguised.append('files',new File(['not-a-png'],'fake.png',{type:'image/png'}));
     const blocked=await call('/v1/feedback',{method:'POST',headers:offlineHeaders,body:disguised,env:harness.env});
@@ -325,5 +326,42 @@ test('離線附件流程：保存日誌、查詢中列出附件，拒絕偽裝�
       env:{DB:harness.env.DB,TURNSTILE_SECRET_KEY:'offline-only-secret'}});
     assert.equal(missing.status,503);
     assert.equal(harness.feedback.size,1);
+  }finally{globalThis.fetch=original;}
+});
+
+test('離線回覆附件依每則 replyId 配對，原始附件保留 null',async()=>{
+  const harness=offlineFeedbackHarness();
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'realdate.by-l1ng.com'});
+  try{
+    const form=offlineFeedbackForm();
+    form.append('files',new File(['initial log'],'initial.txt',{type:'text/plain'}));
+    const created=await call('/v1/feedback',{method:'POST',headers:offlineHeaders,body:form,env:harness.env});
+    assert.equal(created.status,201);
+    const {receipt}=await created.json();
+    const reply=(body,name)=>{
+      const next=new FormData();
+      next.set('receipt',receipt);
+      next.set('message',body);
+      next.set('turnstileToken','offline-token');
+      next.append('files',new File(['follow-up log'],name,{type:'text/plain'}));
+      return next;
+    };
+    for(const [body,name] of [['玩家第一次追問','first.txt'],['玩家第二次追問','second.txt']]){
+      const response=await call('/v1/feedback/reply',{method:'POST',headers:offlineHeaders,body:reply(body,name),env:harness.env});
+      assert.equal(response.status,200);
+    }
+    const lookup=await call('/v1/feedback/lookup',{
+      method:'POST',headers:{...offlineHeaders,'Content-Type':'application/json'},
+      body:JSON.stringify({receipt}),env:harness.env
+    });
+    assert.equal(lookup.status,200);
+    const item=(await lookup.json()).feedback;
+    assert.equal(item.messages.length,2);
+    assert.equal(item.attachments.length,3);
+    assert.deepEqual(item.attachments.map(a=>[a.name,a.replyId]),[
+      ['initial.txt',null],['first.txt',item.messages[0].id],['second.txt',item.messages[1].id]
+    ]);
+    assert.notEqual(item.messages[0].id,item.messages[1].id);
   }finally{globalThis.fetch=original;}
 });
