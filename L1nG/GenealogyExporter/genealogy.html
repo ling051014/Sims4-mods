@@ -6,9 +6,9 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261016-css-structure-round2">
+        <link rel="stylesheet" href="genealogy.css?v=20261016-feedback-layout-r4">
         <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
-        <script src="genealogy-feedback.js?v=20261016-feedback-fixed-thread-r1" defer></script>
+        <script src="genealogy-feedback.js?v=20261016-feedback-layout-r4" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
         <script src="../site-info-modal.js?v=20261015-cookie-preferences-r4" defer></script>
     </head>
@@ -171,7 +171,10 @@
                                 <form class="genealogy-feedback-history-form" id="genealogyFeedbackHistoryForm" novalidate>
                                     <label class="genealogy-feedback-field-label" for="genealogyFeedbackReceipt">私人回饋憑證</label>
                                     <textarea class="genealogy-feedback-field" id="genealogyFeedbackReceipt" rows="3" placeholder="貼上完整的私人憑證" autocomplete="off"></textarea>
-                                    <button class="genealogy-feedback-submit" type="submit">查詢</button>
+                                    <div class="genealogy-feedback-history-actions">
+                                        <button class="genealogy-feedback-back-link" id="genealogyFeedbackHistoryBack" type="button"><span class="l1ng-icon icon-chevron-down genealogy-feedback-back-icon" aria-hidden="true"></span>返回填寫回饋</button>
+                                        <button class="genealogy-feedback-submit" type="submit">查詢</button>
+                                    </div>
                                 </form>
                                 <p class="genealogy-feedback-history-status" id="genealogyFeedbackHistoryStatus" role="status" hidden></p>
                                 <div class="genealogy-feedback-success" id="genealogyFeedbackSuccess" hidden>
@@ -221,7 +224,7 @@
                                     <form id="genealogyFeedbackReplyForm" class="genealogy-feedback-reply-form" novalidate>
                                         <textarea class="genealogy-feedback-field" id="genealogyFeedbackReply" aria-label="輸入匿名對話回覆" maxlength="2000" rows="3" placeholder="補充問題、回覆或說明結果⋯⋯"></textarea>
                                         <div class="genealogy-feedback-reply-attachments feedback-reply-drop-target">
-                                            <div class="genealogy-feedback-attachment-choice"><label class="genealogy-feedback-attach-action" for="genealogyFeedbackReplyFiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5 0 0 1-8-7.5L13 3"/></svg>選擇附件</label><span class="genealogy-feedback-drag-hint">或拖曳檔案至此</span><small>最多 3 個檔案・合計 20 MB</small></div>
+                                            <div class="genealogy-feedback-attachment-choice"><div class="genealogy-feedback-attachment-top"><label class="genealogy-feedback-attach-action" for="genealogyFeedbackReplyFiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5 0 0 1-8-7.5L13 3"/></svg>選擇附件</label><span class="genealogy-feedback-drag-hint">或拖曳檔案至此</span></div><small>最多 3 個檔案・合計 20 MB</small></div>
                                             <input id="genealogyFeedbackReplyFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log" multiple hidden>
                                             <ul id="genealogyFeedbackReplyFileList" class="genealogy-feedback-files"></ul>
                                         </div>

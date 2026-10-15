@@ -729,6 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('visibilitychange',()=>{if(threadVisible()&&Date.now()-lastCheck>15000)updateThread();});
   window.addEventListener('focus',()=>{if(threadVisible()&&Date.now()-lastCheck>15000)updateThread();});
 
+  $('genealogyFeedbackHistoryBack').addEventListener('click',()=>{showHistory();setTab(0);});
   historyForm.addEventListener('submit', async event => {
     event.preventDefault();
     const status = $('genealogyFeedbackHistoryStatus');
