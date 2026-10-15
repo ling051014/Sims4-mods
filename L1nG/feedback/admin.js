@@ -16,6 +16,7 @@
   const idList = ['all','pending','progress','done','spam'];
   let page = 'overview', entries = [], current = null, filterStatus = 'all';
   let detailRequest = 0, previewUrls = [];
+  let listBusy=false,listLoaded=false,lastListCheck=0,refreshTimer=null,detailBusy=false,knownRevisions=new Map();
   const savedAdminViewKey = 'l1ng-admin-view-v1';
   function readSavedView() {
     try {
@@ -225,23 +226,55 @@
     }
     root.appendChild(fragment);
   }
-  async function refresh() {
+  function showListSkeleton(){
+    const root=$('feedback-rows');if(!root)return;root.replaceChildren();
+    for(let i=0;i<4;i++){const row=el('div','feedback-skeleton-row');row.setAttribute('aria-hidden','true');row.append(el('span','feedback-skeleton-main'),el('span','feedback-skeleton-short'));root.append(row);}
+    root.setAttribute('aria-busy','true');
+  }
+  const revisionOf=item=>[item.updatedAt,item.lastReplyAuthor,item.status].join('|');
+  async function refresh({manual=false,quiet=false}={}){
+    if(listBusy)return;
+    listBusy=true;const button=$('feedback-refresh');if(button)button.disabled=true;
+    if(!listLoaded)showListSkeleton();
+    if(manual)$('feedback-sync-status').textContent='正在更新回饋…';
     try {
       const data = await api('/feedback');
-      entries = (data.items || []).map(item => ({
-        ...item, title:item.title || item.message.slice(0,32),
-        site:item.source || item.site
-      }));
-      render();
+      const next=(data.items||[]).map(item=>({...item,title:item.title||item.message.slice(0,32),site:item.source||item.site}));
+      const additions=next.filter(item=>!knownRevisions.has(item.id)||(knownRevisions.get(item.id)!==revisionOf(item)&&item.lastReplyAuthor==='player'));
+      const needsDetail=current&&next.some(item=>item.id===current.id&&knownRevisions.get(item.id)!==revisionOf(item));
+      const shouldNotify=listLoaded&&additions.length&&!quiet;
+      entries=next;knownRevisions=new Map(next.map(item=>[item.id,revisionOf(item)]));listLoaded=true;lastListCheck=Date.now();
+      const area=document.querySelector('.admin-main'),scroll=area?.scrollTop||0;render();if(area)area.scrollTop=scroll;
+      if(needsDetail)void refreshVisibleDetail();
+      if(shouldNotify)$('feedback-sync-status').textContent='收到 '+additions.length+' 則新回饋或更新';
+      else if(manual)$('feedback-sync-status').textContent='已更新 · '+new Date().toLocaleTimeString('zh-TW');
       if ($('overview-recent')) {
         $('overview-recent').textContent = entries.length
           ? '最新回饋：' + entries[0].title : '目前沒有回饋紀錄。';
       }
     } catch (error) {
-      entries = [];
-      render();
-      notify(error.message);
-    }
+      $('feedback-sync-status').textContent='更新失敗，請稍後重試。';
+      if(manual||!listLoaded)notify(error.message);
+      if(!listLoaded){const root=$('feedback-rows');root.replaceChildren(el('p','empty-list','回饋載入失敗，請按「立即更新」重試。'));}
+    }finally{listBusy=false;if(button)button.disabled=false;$('feedback-rows')?.removeAttribute('aria-busy');}
+  }
+  async function refreshVisibleDetail(){
+    if(detailBusy||!current||!$('detail-layer')?.classList.contains('open'))return;
+    detailBusy=true;const id=current.id;
+    try{
+      const response=await api('/feedback/'+encodeURIComponent(id));
+      if(!current||current.id!==id)return;
+      const item=response.feedback,root=$('detail-body'),stack=root?.querySelector('.conversation-stack');
+      if(!stack)return;
+      const scroll=root.scrollTop;
+      releasePreviews();stack.replaceChildren();
+      const attachments=item.attachments||[];
+      renderMessage(stack,'player',item.message,item.createdAt,attachments.filter(f=>f.replyId==null),detailRequest);
+      for(const msg of item.messages||[])renderMessage(stack,msg.author,msg.body,msg.created_at||msg.createdAt,attachments.filter(f=>f.replyId===msg.id),detailRequest);
+      root.scrollTop=scroll;current=item;updateDetailTags(item);
+      $('detail-status').value=item.status;window.L1nGRefreshSelect?.($('detail-status'));
+    }catch(_){/* keep prior conversation and unsent reply */}
+    finally{detailBusy=false;}
   }
   function addField(root, name, value) {
     if (value === null || value === undefined || value === '') return;
@@ -258,7 +291,7 @@
       const response = await fetch(url,{cache:'no-store',credentials:'include'});
       if (!response.ok) return;
       const blob = await response.blob();
-      if (!blob.type.startsWith('image/') || requestId !== detailRequest) return;
+      if (requestId !== detailRequest) return;
       const objectUrl = URL.createObjectURL(blob);
       previewUrls.push(objectUrl);
       image.src = objectUrl;
@@ -271,7 +304,7 @@
       + '/attachments/' + encodeURIComponent(file.id);
     const entry = el('div','detail-file');
     const thumb = el('div','thumb');
-    thumb.appendChild(icon('paperclip'));
+    thumb.appendChild(icon(/^text\//.test(file.type||'')?'file-text':'paperclip'));
     const info = el('div','detail-file-info');
     info.append(el('strong','',file.name),el('small','',sizeText(file.size)));
     const link = el('a','', '下載');
@@ -308,6 +341,10 @@
     message.append(el('span','conversation-time',dateText(date)));
     root.appendChild(message);
   }
+  function updateDetailTags(item){
+    const tags=$('detail-head-tags');if(!tags)return;tags.replaceChildren();
+    tags.append(el('span','status-badge '+item.status,label(item.status)),el('span','type-badge',categoryLabel(item.category)),el('span','contact-tag '+(item.contact?'has-contact':'anonymous'),item.contact?'已留聯絡方式':'未留聯絡方式'));
+  }
   function populateDetail(item,requestId) {
     current = item;
     activeDetailId = item.id;
@@ -318,16 +355,8 @@
     if (!body) return;
     body.replaceChildren();
     $('detail-title').textContent = item.title || item.message.slice(0,32);
-    $('detail-status').value = item.status;
-    const tags = el('div','detail-meta');
-    tags.append(el('span','status-badge ' + item.status,label(item.status)));
-    tags.append(el('span','type-badge',categoryLabel(item.category)));
-    tags.append(el('span','contact-tag ' + (item.contact ? 'has-contact' : 'anonymous'),
-      item.contact ? '已留聯絡方式' : '未留聯絡方式'));
-    body.append(tags);
-    body.append(el('span','tiny-label','回饋內容'));
-    body.append(el('h3','detail-title-text',item.title || item.message.slice(0,32)));
-    body.append(el('p','detail-description','原始內容與後續回覆顯示在下方對話區。'));
+    $('detail-status').value = item.status;window.L1nGRefreshSelect?.($('detail-status'));
+    updateDetailTags(item);
 
     const threadHeading = el('h3','detail-thread-title');
     threadHeading.append(document.createTextNode(item.followUp === 'conversation' ? '匿名對話 ' : '單次回饋 '));
@@ -367,7 +396,10 @@
     $('detail-close')?.focus();
   }
   async function openDetail(id) {
-    const requestId = ++detailRequest;
+    const requestId = ++detailRequest;detailBusy=true;
+    const root=$('detail-body');root.replaceChildren();for(let i=0;i<3;i++)root.append(el('div','feedback-detail-skeleton'));
+    root.setAttribute('aria-busy','true');
+    $('detail-layer').classList.add('open');$('detail-layer').setAttribute('aria-hidden','false');
     try {
       const info = await api('/feedback/' + encodeURIComponent(id));
       if (requestId !== detailRequest) return;
@@ -376,9 +408,9 @@
       if (requestId === detailRequest) {
         activeDetailId = null;
         saveView();
-        notify(error.message);
+        notify(error.message);closeDetail();
       }
-    }
+    }finally{detailBusy=false;root.removeAttribute('aria-busy');}
   }
   function closeDetail() {
     detailRequest++;
@@ -424,7 +456,7 @@
     if (event.target === $('detail-layer')) closeDetail();
   });
   $('detail-update')?.addEventListener('click',async () => {
-    if (!current) return;
+    if (!current) return;const button=$('detail-update');if(button.disabled)return;button.disabled=true;button.classList.add('is-loading');
     const id = current.id;
     try {
       await api('/feedback/' + encodeURIComponent(id),'PATCH',{status:$('detail-status').value});
@@ -432,6 +464,7 @@
       await refresh();
       notify('已更新處理狀態。');
     } catch (error) { notify(error.message); }
+    finally{button.disabled=false;button.classList.remove('is-loading');}
   });
   $('detail-delete')?.addEventListener('click',() => {
     $('confirm-layer')?.classList.add('open');
@@ -451,14 +484,14 @@
     }
     const button = $('admin-send');
     if (button.disabled) return;
-    button.disabled = true;
+    button.disabled = true;button.classList.add('is-loading');
     try {
       await api('/feedback/' + encodeURIComponent(id) + '/replies','POST',{message});
       await refresh();
       await openDetail(id);
       notify('已送出回覆。');
     } catch (error) { notify(error.message); }
-    finally { button.disabled = false; }
+    finally { button.disabled = false;button.classList.remove('is-loading'); }
   });
   $('cancel-delete')?.addEventListener('click',() => {
     $('confirm-layer')?.classList.remove('open');
@@ -473,6 +506,10 @@
       notify('已刪除回饋。');
     } catch (error) { notify(error.message); }
   });
+  $('feedback-refresh')?.addEventListener('click',()=>void refresh({manual:true}));
+  const poll=()=>{if(document.visibilityState==='visible'&&Date.now()-lastListCheck>15000)void refresh();};
+  refreshTimer=window.setInterval(()=>{if(document.visibilityState==='visible')void refresh();},60000);
+  document.addEventListener('visibilitychange',poll);window.addEventListener('focus',poll);window.addEventListener('online',poll);
   // GA4 statistics, charts and loading/error states are rendered by ga4-dashboard.js.
   document.addEventListener('keydown',event => {
     if (event.key !== 'Escape') return;
@@ -485,8 +522,8 @@
     button.classList.toggle('active',(button.dataset.status || button.dataset.mobilefilter) === filterStatus));
   showPage(['overview','analytics','feedback','settings'].includes(initialView.page)
     ? initialView.page : 'overview');
-  render();
-  refresh().then(()=>{
+  showListSkeleton();
+  refresh({quiet:true}).then(()=>{
     if (initialView.detailId && page === 'feedback') openDetail(initialView.detailId);
   });
 })();
