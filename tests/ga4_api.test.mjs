@@ -58,8 +58,10 @@ test('rejects invalid website and date filters after Access authentication',asyn
 test('serves only real GA4-shaped reports to a cryptographically verified admin',async()=>{
   const original=globalThis.fetch;
   let calls=0,reportCalls=0;
+  const seen=[];
   globalThis.fetch=async(input,options={})=>{
     const url=String(input);calls++;
+    seen.push(new URL(url).hostname);
     if(url.endsWith('/cdn-cgi/access/certs'))return Response.json({keys:[jwk]});
     if(url==='https://oauth2.googleapis.com/token'){
       assert.match(String(options.body),'grant_type=');
@@ -95,7 +97,7 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
   };
   try {
     const result=await response({token:accessJwt()});
-    assert.equal(result.status,200);
+    assert.equal(result.status,200,'Outbound host sequence: '+seen.join(', ')+'; reportCalls='+reportCalls);
     assert.equal(result.headers.get('cache-control'),'no-store, private');
     assert.equal(result.body.summary.activeUsers,12);
     assert.equal(result.body.summary.views,31);
