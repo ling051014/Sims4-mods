@@ -34,7 +34,8 @@
 
   function event(name, fields) {
     // Fixed event names and allowlisted values: no file names, URLs, or form contents.
-    if (!['l1ng_download_click', 'l1ng_feedback_open', 'l1ng_feedback_submitted'].includes(name)) return;
+    if (!['l1ng_download_click', 'l1ng_feedback_open', 'l1ng_feedback_submitted'].includes(name)
+        && !/^l1ng_dl_[a-z0-9_]{4,30}$/.test(name)) return;
     const params = {
       l1ng_site: site,
       page_location: pageLocation,
@@ -48,20 +49,21 @@
   }
 
   function downloadDetails(anchor) {
-    if (site !== 'realdate' && site !== 'translations') return null;
+    if (!['realdate','translations','extractor'].includes(site)) return null;
     let url;
     try { url = new URL(anchor.href, document.baseURI); } catch (_) { return null; }
     const localFile = url.origin === global.location.origin
       && /^\/downloads\//.test(url.pathname)
       && /\.(zip|package)$/i.test(url.pathname);
-    const backup = site === 'translations'
+    const backup = ['realdate','translations'].includes(site)
       && url.hostname === 'www.dropbox.com'
       && /^\/scl\/(fi|fo)\//.test(url.pathname);
     if (!localFile && !backup) return null;
     const format = url.pathname.toLowerCase().endsWith('.zip') ? 'zip'
       : url.pathname.toLowerCase().endsWith('.package') ? 'package'
       : 'bundle';
-    return { format, channel: backup ? 'backup' : 'primary' };
+    const id=anchor.dataset.l1ngDownload || '';
+    return {format,channel:backup?'backup':'primary',itemId:/^[a-z0-9_]{4,30}$/.test(id)?id:''};
   }
 
   document.addEventListener('click', function (click) {
@@ -69,13 +71,14 @@
     if (!element || typeof element.closest !== 'function') return;
     const anchor = element.closest('a[href]');
     const details = anchor && downloadDetails(anchor);
-    if (details) event('l1ng_download_click', details);
+    if (details) { event('l1ng_download_click', details); if(details.itemId)event('l1ng_dl_'+details.itemId); }
     if ((site === 'genealogy' && element.closest('#feedbackBtn'))
         || (site === 'realdate' && element.closest('[data-open-form]'))) {
       event('l1ng_feedback_open');
     }
   });
 
+  if(site==='realdate' && /^\/feedback(?:\.html)?\/?$/.test(global.location.pathname)) event('l1ng_feedback_open');
   global.L1nGAnalytics = Object.freeze({
     feedbackSubmitted: function () { event('l1ng_feedback_submitted'); }
   });

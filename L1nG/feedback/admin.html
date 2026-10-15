@@ -6,9 +6,10 @@
         <meta name="theme-color" content="#f7f7f5">
         <title>管理中心 · L1nG</title>
         <link rel="stylesheet" href="feedback.css">
-        <link rel="stylesheet" href="admin.css?v=20261013-attachment-preview-r2">
+        <link rel="stylesheet" href="admin.css?v=20261016-branch-ga4-layout-r1">
         <script src="select-ui.js" defer></script>
-        <script src="admin.js?v=20261013-attachment-preview-r2" defer></script>
+        <script src="admin.js?v=20261016-branch-ga4-layout-r1" defer></script>
+        <script src="ga4-dashboard.js?v=20261016-branch-preview-r1" defer></script>
     </head>
     <body class="admin-only">
         <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
@@ -198,10 +199,11 @@
                             <button class="range-btn" data-range="90">90 天</button>
                             <button class="range-btn" data-range="custom">自訂</button>
                         </div>
-                        <select aria-label="選擇分析網站" class="toolbar-select" id="analytics-site"><option value="all">全部網站</option><option value="Genealogy">Genealogy</option><option value="RealDate">RealDate</option><option value="L1nG">L1nG</option></select>
+                        <select aria-label="選擇分析網站" class="toolbar-select" id="analytics-site"><option value="all">全部網站</option><option value="home">L1nG 首頁</option><option value="realdate">RealDate</option><option value="genealogy">族譜工具</option><option value="extractor">族譜提取器</option><option value="translations">漢化專區</option></select>
                     </div>
+                    <p class="hint" id="ga-load-status" role="status" aria-live="polite">正在連接 GA4…</p>
                     <div class="custom-date-row" hidden="" id="custom-date-row">
-                        <label>開始日期 <input id="date-from" max="2026-10-12" type="date" value="2026-09-15"/></label><label>結束日期 <input id="date-to" max="2026-10-12" type="date" value="2026-10-12"/></label>
+                        <label>開始日期 <input id="date-from" type="date"/></label><label>結束日期 <input id="date-to" type="date"/></label>
                         <button class="secondary" id="apply-date" type="button">套用日期</button>
                         <span class="date-error" id="date-error"></span>
                     </div>
@@ -268,12 +270,11 @@
                         <section class="dash-card">
                             <div class="dash-card-header">
                                 <div>
-                                    <span class="eyebrow">EVENTS</span><h3>下載點擊排行</h3>
+                                    <span class="eyebrow">FEEDBACK INTERACTIONS</span><h3>問題回饋互動</h3>
                                 </div>
-                                <span class="hint">自訂追蹤事件</span>
+                                <span class="hint" id="ga-feedback-totals">開啟 — · 成功提交 —</span>
                             </div>
-                            <div class="rank-list" id="ga-files">
-                            </div>
+                            <div class="rank-list" id="ga-feedback-events"></div>
                         </section>
                         <section class="dash-card">
                             <div class="dash-card-header">
@@ -293,7 +294,16 @@
                             </div>
                         </section>
                     </div>
-                    <p class="hint" style="margin-top:22px">注意：下載統計需要在正式網站設定事件；GA4 不是檔案儲存服務，亦不會用於辨識匿名回饋提交者。</p>
+                    <section class="dash-card analytics-download-details">
+                        <div class="dash-card-header">
+                            <div>
+                                <span class="eyebrow">DOWNLOAD DETAILS</span><h3>各下載按鈕點擊明細</h3>
+                            </div>
+                            <span class="hint">按模組、版本與下載入口</span>
+                        </div>
+                        <div class="rank-list" id="ga-download-items"></div>
+                    </section>
+                    <p class="hint" style="margin-top:22px">數據來自 Google Analytics 4，僅涵蓋符合 Cookie 偏好設定的追蹤資料；下載及回饋互動事件從啟用後累積，不會回補先前紀錄。</p>
                 </section>
                 <section aria-label="管理設定" class="panel-view" hidden="" id="panel-settings">
                     <div class="admin-head">
