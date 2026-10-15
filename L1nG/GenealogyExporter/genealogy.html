@@ -839,51 +839,51 @@
                 <div class="pet-editor-top">
                     <h2 id="petModalTitle">新增寵物</h2>
                     <div class="pet-editor-layout">
-                    <div class="avatar-editor-block pet-avatar-editor-block">
-                        <div class="avatar-preview pet-avatar-editor-preview avatar-editor-preview" id="petAvatarPreview">?</div>
-                        <div class="avatar-editor-actions">
-                            <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="petAvatarInput" type="file"></label>
-                            <button class="avatar-editor-action" id="petAvatarAdjustBtn" type="button">調整範圍</button>
-                            <button class="avatar-editor-action" id="petAvatarSourceToggleBtn" type="button" disabled>使用遊戲頭像</button>
-                            <button class="avatar-clear-compact avatar-editor-action danger-action" id="petAvatarClearBtn" type="button">移除頭像</button>
+                        <div class="avatar-editor-block pet-avatar-editor-block">
+                            <div class="avatar-preview pet-avatar-editor-preview avatar-editor-preview" id="petAvatarPreview">?</div>
+                            <div class="avatar-editor-actions">
+                                <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="petAvatarInput" type="file"></label>
+                                <button class="avatar-editor-action" id="petAvatarAdjustBtn" type="button">調整範圍</button>
+                                <button class="avatar-editor-action" id="petAvatarSourceToggleBtn" type="button" disabled>使用遊戲頭像</button>
+                                <button class="avatar-clear-compact avatar-editor-action danger-action" id="petAvatarClearBtn" type="button">移除頭像</button>
+                            </div>
+                            <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / WEBP</div>
                         </div>
-                        <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / WEBP</div>
-                    </div>
-                    <div class="pet-editor-fields">
-                        <label class="pet-field-full">名字<input id="pName" maxlength="30" placeholder="多多 / 小黑……"></label>
-                        <label>種類<select id="pSpecies"><option value="dog">狗</option><option value="fox">狐狸</option><option value="cat">貓</option><option value="raccoon">浣熊</option><option value="horse">馬</option><option value="cow">牛</option><option value="crow">烏鴉</option><option value="parrot">鸚鵡</option><option value="leopard">豹</option><option value="other">其他</option></select></label>
-                        <label>品種<input id="pBreed" maxlength="40" placeholder="哈士奇 / 暹羅貓……"></label>
-                        <div class="pet-editor-status-row">
-                            <label id="pGenderField">性別<select id="pGender"><option value="male">公</option><option value="female">母</option></select></label>
-                            <label>年齡階段<select id="pAgeStage"><option value="幼年">幼年</option><option value="成年">成年</option><option value="老年">老年</option></select></label>
-                            <label>狀態<select id="pStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
+                        <div class="pet-editor-fields">
+                            <label class="pet-field-full">名字<input id="pName" maxlength="30" placeholder="多多 / 小黑……"></label>
+                            <label>種類<select id="pSpecies"><option value="dog">狗</option><option value="fox">狐狸</option><option value="cat">貓</option><option value="raccoon">浣熊</option><option value="horse">馬</option><option value="cow">牛</option><option value="crow">烏鴉</option><option value="parrot">鸚鵡</option><option value="leopard">豹</option><option value="other">其他</option></select></label>
+                            <label>品種<input id="pBreed" maxlength="40" placeholder="哈士奇 / 暹羅貓……"></label>
+                            <div class="pet-editor-status-row">
+                                <label id="pGenderField">性別<select id="pGender"><option value="male">公</option><option value="female">母</option></select></label>
+                                <label>年齡階段<select id="pAgeStage"><option value="幼年">幼年</option><option value="成年">成年</option><option value="老年">老年</option></select></label>
+                                <label>狀態<select id="pStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
+                            </div>
                         </div>
-                    </div>
                     </div>
                 </div>
-                    <div class="sim-editor-tabs pet-editor-tabs" role="tablist" aria-label="寵物編輯分類">
-                        <button class="sim-editor-tab pet-editor-tab active" type="button" role="tab" aria-selected="true" data-pet-editor-tab="basic">基本資料</button>
-                        <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="preferences" hidden>喜好與厭惡</button>
-                        <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="attraction" hidden>吸引力偏好</button>
-                    </div>
+                <div class="sim-editor-tabs pet-editor-tabs" role="tablist" aria-label="寵物編輯分類">
+                    <button class="sim-editor-tab pet-editor-tab active" type="button" role="tab" aria-selected="true" data-pet-editor-tab="basic">基本資料</button>
+                    <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="preferences" hidden>喜好與厭惡</button>
+                    <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="attraction" hidden>吸引力偏好</button>
+                </div>
                 <div class="pet-editor-content">
                     <section class="pet-editor-panel active" data-pet-editor-panel="basic" role="tabpanel">
                         <div class="pet-editor-layout pet-editor-detail-layout">
-                        <div class="pet-field-full pet-trait-field form-field trait-field">
-                            <span class="field-label-row form-field-title" id="petTraitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span>
-                            <div class="trait-editor">
-                                <div class="trait-chip-list" id="petTraitChipList"></div>
-                                <div class="trait-add-row">
-                                    <input id="petTraitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="petTraitFieldLabel">
-                                    <button id="petTraitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button>
+                            <div class="pet-field-full pet-trait-field form-field trait-field">
+                                <span class="field-label-row form-field-title" id="petTraitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span>
+                                <div class="trait-editor">
+                                    <div class="trait-chip-list" id="petTraitChipList"></div>
+                                    <div class="trait-add-row">
+                                        <input id="petTraitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="petTraitFieldLabel">
+                                        <button id="petTraitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="pet-field-full pet-owner-field" id="petOwnerField" hidden>
-                            <span class="pet-owner-heading">飼主（可多選）</span>
-                            <input type="search" id="petOwnerSearch" placeholder="搜尋模擬市民" aria-label="搜尋飼主">
-                            <div class="pet-owner-choices" id="petOwnerChoices" role="group" aria-label="飼主（可多選）"></div>
-                        </div>
+                            <div class="pet-field-full pet-owner-field" id="petOwnerField" hidden>
+                                <span class="pet-owner-heading">飼主（可多選）</span>
+                                <input type="search" id="petOwnerSearch" placeholder="搜尋模擬市民" aria-label="搜尋飼主">
+                                <div class="pet-owner-choices" id="petOwnerChoices" role="group" aria-label="飼主（可多選）"></div>
+                            </div>
                         </div>
                     </section>
                     <section class="pet-editor-panel" data-pet-editor-panel="preferences" role="tabpanel" hidden>
@@ -895,7 +895,8 @@
                         <div class="game-preference-list" id="petAttractionPreferenceList"></div>
                         <div class="editor-empty-note" id="petAttractionPreferenceEmpty" hidden>這隻寵物尚未設定吸引力偏好。</div>
                         <p class="game-preference-footnote">偏好資料由遊戲匯入，目前僅供檢視。</p>
-                    </section>                </div>
+                    </section>
+                </div>
                 <div class="ui-dialog-actions sim-editor-actions">
                     <button class="danger" id="pDelete" type="button" style="display:none">刪除寵物</button>
                     <span class="spacer"></span>
