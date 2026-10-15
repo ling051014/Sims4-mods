@@ -8442,7 +8442,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 /* ========【人物檔案響應式】 設定 - 小螢幕維持緊湊但不擠壓頭像 ======== */
 @media (max-width:760px) {
-  #simEditorDialog { padding:8px; }
+  #simEditorDialog, #petEditorDialog { padding:8px; }
   .sim-editor-modal {
     width:100%;
     height:calc(100vh - 16px);
