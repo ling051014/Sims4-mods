@@ -1,4 +1,4 @@
-/* ========【L1nG Genealogy Scene】 設定 - Canvas Layout / Geometry / Renderer Authority ======== */
+/* ========【族譜場景】 管理畫布排版、關係幾何與圖層繪製 ======== */
 (function (global) {
   'use strict';
   function create({ runtime, dom, constants, state, helpers } = {}) {
@@ -8,7 +8,7 @@
     if (!stage || !svg || !labelsSvg || !nodes || !petLayer) throw new Error('Genealogy Scene requires Canvas DOM references.');
     const { PAD, RACE_PRESETS, GUIDE_SNAP_PX, RELATIONSHIP_VERTICAL_SNAP_PX } = constants;
 
-    // ========【Scene 卡片幾何】 設定 - 卡片尺寸 / 間距 / 檢視版型由 Scene 唯一持有 ========
+    // ========【Scene 卡片幾何】 卡片尺寸 / 間距 / 檢視版型由 Scene 唯一持有 ========
     const NODE_DIMS = Object.freeze({
       edit:Object.freeze({ W:220, H:148 }),
       view:Object.freeze({ W:136, H:118 })
@@ -51,8 +51,8 @@
       showPetCards, petCardAvatarHTML, petOwnerAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
       syncPetSelectionClasses
     } = helpers;
-    // Scene owns canvas-only presentation and relationship-label SVG markup.
-    // ========【檢視卡片內容模型】 設定 - 文字列與卡片 HTML 都由 Scene 統一組裝 ========
+    // Scene 僅負責畫布呈現與關係標籤的 SVG 結構。
+    // ========【檢視卡片內容模型】 文字列與卡片 HTML 都由 Scene 統一組裝 ========
     function buildViewCardContentModel(sim, settings = getCardViewSettings()) {
       const presentation =
         buildPersonPresentation(sim);
@@ -477,7 +477,7 @@
       scale = getScale();
     }
 
-    // ========【Genealogy Scene Cache】 設定 - 拓撲、卡片幾何與拖曳關係索引分層快取 ========
+    // ========【Genealogy Scene Cache】 拓撲、卡片幾何與拖曳關係索引分層快取 ========
     const GEOMETRY_BUCKET_SIZE = 256;
     let nodeDimensionCache = new Map();
     let genealogyTopologyCache = new Map();
@@ -507,7 +507,7 @@
       pendingRelationshipPreviewIds.clear();
     }
 
-    // ========【Canonical Generation】 設定 - 世代只由親子 / 領養關係決定 ========
+    // ========【Canonical Generation】 世代只由親子 / 領養關係決定 ========
     // 使用帶位移的 Union-Find 解 parent -> child = +1 的有限等式系統。
     // 共同父母會自然得到相同世代，不再靠「父母抬高 → 子女抬高」反覆迭代。
     // 若來源資料真的形成祖先循環，只忽略造成矛盾的那一條約束，
@@ -610,7 +610,7 @@
         const bOffset =
           relativeToRoot(b);
 
-        // canonical equation:
+        // 世代差計算規則：
         // generation(child) - generation(parent) = 1
         const delta = 1;
 
@@ -1898,7 +1898,7 @@ function relationshipPairRenderGeometry(a,b,setting,routeContext=null) {
   return relationshipSmartUpperCurveGeometry(start,end,relationshipRouteRects(routeContext,start,end,true));
 }
 
-// ========【其他關係線避障】 設定 - 統一遵守視覺設定，尋找最短且不穿越卡片的路徑 ========
+// ========【其他關係線避障】 統一遵守視覺設定，尋找最短且不穿越卡片的路徑 ========
 function relationshipRouteRects(context,start,end,forCurve=false) {
   if(!context?.pos)return [];
   const excluded=new Set([String(context.fromId||''),String(context.toId||'')]);
@@ -1980,7 +1980,7 @@ function relationshipOrthogonalRoute(start,end,rects,upperOnly=false,clearance=1
   return simplified;
 }
 
-// ========【真正的曲線】 設定 - cubic Bézier 連續曲率，非折線加圓角 ========
+// ========【平滑曲線】 以三次 Bézier 曲線維持連續曲率，而非替折線加圓角 ========
 function relationshipRouteLabelPoint(points) {
   const lengths=points.slice(1).map((p,i)=>Math.hypot(p.x-points[i].x,p.y-points[i].y));
   const midpoint=lengths.reduce((sum,length)=>sum+length,0)/2;
@@ -2204,7 +2204,7 @@ function drawPerspectiveKinshipLabels(
   });
 }
 
-// ========【配偶間距】 設定 - 依關係標籤實際寬度自適應 ========
+// ========【配偶間距】 依關係標籤實際寬度自適應 ========
 function relationshipBubbleWidth(info) {
   if (!info) return 0;
   const fs = 12;
@@ -2213,7 +2213,7 @@ function relationshipBubbleWidth(info) {
   return Math.max(Math.ceil(measureRelationshipLabelText(displayText, fs) + iconSpace + 24), 42);
 }
 
-// ========【族譜自動排版核心】 設定 - Parent Group / 主要水平配對 / 血緣世代 ========
+// ========【族譜自動排版核心】 Parent Group / 主要水平配對 / 血緣世代 ========
 function buildGenealogyLayoutModel(visibleIds) {
   const {
     SPOUSE:SPOUSE_GAP
@@ -3255,7 +3255,7 @@ function stableGenealogyUnitCompare(a, b) {
 }
 
 
-// ========【族譜排列身分】 設定 - 主家族與外部關係人物分離 ========
+// ========【族譜排列身分】 主家族與外部關係人物分離 ========
 // 選中的實際家庭是排列中心；EA 族譜擴張出的雙方祖先則只是血緣主幹，不能全部變中心。
 function getActiveLayoutAnchorIds(visibleIds) {
   const visible=visibleIds instanceof Set?visibleIds:new Set(visibleIds||[]);
@@ -3392,7 +3392,7 @@ function buildFamilyBranchOwnership(
     }
   });
 
-  // ========【Primary Branch Expansion】 設定 - Parent Group 連上的家系都屬於真正分支 ========
+  // ========【Primary Branch Expansion】 Parent Group 連上的家系都屬於真正分支 ========
   // 大家族模式的 primaryMemberIds 只是「從哪個 EA 族譜進入」，
   // 不能把後續透過親子 / 領養延伸到的 B / C 家庭降級成 attachment。
   // 只要 unit 透過 Parent Group 骨架與主分支相連，就遞迴升格為 branch unit。
@@ -3887,7 +3887,7 @@ function buildFamilyBranchOwnership(
   };
 }
 
-// ========【Family Branch Block Layout】 設定 - 先保留整個子孫分支，再放人物 ========
+// ========【Family Branch Block Layout】 先保留整個子孫分支，再放人物 ========
 function buildFamilyBranchBlockMetrics(
   model,
   ownership
@@ -3912,7 +3912,7 @@ function buildFamilyBranchBlockMetrics(
   const groupWidthByOwnerKey =
     new Map();
 
-  // ========【第三輪父母錨點空間】 依真實親子錨點預留完整家系移動空間 ========
+  // ========【父母錨點空間】 依真實親子錨點預留完整家系移動空間 ========
   const singleGroupAnchorByOwner = new Map();
   const parentGroupByKey = new Map(
     (model.parentGroups || []).map(group => [group.key,group])
@@ -4693,7 +4693,7 @@ function orientHorizontalPairUnitsByLineage(
       return;
     }
 
-    // ========【主家族配偶方向】 設定 - 外部配偶永遠朝主家族外側 ========
+    // ========【主家族配偶方向】 外部配偶永遠朝主家族外側 ========
     if (
       ownership &&
       unit.primaryMemberIds &&
@@ -4729,7 +4729,7 @@ function orientHorizontalPairUnitsByLineage(
       }
     }
 
-    // ========【配偶外向排列】 設定 - 雙方皆被列為主家族時仍要辨識原生血緣 ========
+    // ========【配偶外向排列】 雙方皆被列為主家族時仍要辨識原生血緣 ========
     // 只在一方有明確的可見祖先、另一方沒有時才強制方向；
     // 雙方都有祖先的交叉家系維持原有 lineage 判斷，不猜測誰是外人。
     const lineageParentCount = member =>
@@ -4863,7 +4863,7 @@ function genealogyUnitMemberLocalGeometry(unit, simId) {
   return null;
 }
 
-// ========【族譜關係錨點】 設定 - 自動排列與 SVG 共用同一個頭像／卡片連接中心 ========
+// ========【族譜關係錨點】 自動排列與 SVG 共用同一個頭像／卡片連接中心 ========
 function genealogyUnitMemberRelationshipGeometry(
   unit,
   simId
@@ -4994,7 +4994,7 @@ function genealogyGroupSourceX(group, model) {
   ) / 2;
 }
 
-// ========【自動排列關係軸】 設定 - 使用與 renderer 完全相同的 parent source 幾何 ========
+// ========【自動排列關係軸】 使用與 renderer 完全相同的 parent source 幾何 ========
 
 
 function genealogyChildAnchorX(childId, model) {
@@ -5097,7 +5097,7 @@ function placeGenealogyUnitMembers(units) {
   return pos;
 }
 
-// ========【親子直線優先】 設定 - 排列器先對齊，renderer 才需要最少折線 ========
+// ========【親子直線優先】 排列器先對齊，renderer 才需要最少折線 ========
 function genealogyLayerForUnit(
   layers,
   unit
@@ -5375,8 +5375,8 @@ function alignDirectParentChildGroups(
   });
 }
 
-// ========【父母／子女中心】 設定 - 分支寬度用於保留空間，親子錨點才是置中依據 ========
-    // ========【整組子孫置中】 設定 - 父母受鄰卡限制時，平移完整子孫區塊 ========
+// ========【父母／子女中心】 分支寬度用於保留空間，親子錨點才是置中依據 ========
+    // ========【整組子孫置中】 父母受鄰卡限制時，平移完整子孫區塊 ========
 function translateFamilyDescendants(layers, model, ownership, group, delta, parentGeneration, gap) {
   if (!ownership || !Number.isFinite(delta) || Math.abs(delta) < 0.75) return false;
   const movedIds = new Set();
@@ -5926,8 +5926,8 @@ function petCardOwners(pet) {
   );
 }
 
-// ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
-// ========【寵物卡顯示資訊】 設定 - 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
+// ========【家庭寵物排列】 人物族譜先排好，寵物卡只占用畫布外側空間 ========
+// ========【寵物卡顯示資訊】 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
 function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
   const species = settings.species ? petCardSpeciesLabel(pet) : '';
   const breed = settings.breed ? displayDataText(pet.breed,owner) : '';
@@ -6155,7 +6155,7 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
   return {cards,groups,width:maxRight,height:maxBottom};
 }
 
-// ========【寵物畫布圖層】 設定 - 不混入人物節點、選取及關係線路由 ========
+// ========【寵物畫布圖層】 不混入人物節點、選取及關係線路由 ========
 function paintPetLayer() {
   // 只有 Layout 更新才重建寵物 DOM；拖曳人物卡的每一幀不重建寵物頭像。
   if (lastPaintedPetLayout === layoutCache?.petLayout) return;
@@ -6328,7 +6328,7 @@ function composeScenePlan() {
 
 
 
-// ========【Scene Incremental Pipeline】 設定 - Layout / Nodes / Edges 由 Scene 單獨失效 ========
+// ========【Scene Incremental Pipeline】 Layout / Nodes / Edges 由 Scene 單獨失效 ========
 const RENDER_DIRTY = Object.freeze({ layout:1, nodes:2, edges:4 });
 let layoutCache = null;
 let lastPaintedPetLayout = null;
@@ -6627,7 +6627,7 @@ function buildParentChildConnectorGroups(byId, visibleIds) {
   return [...groups.values()];
 }
 
-    // ========【共同親生父母】 設定 - 僅推定畫布用「情人」，不修改 EA／玩家關係資料 ========
+    // ========【共同親生父母】 僅推定畫布用「情人」，不修改 EA／玩家關係資料 ========
 function inferCoParentRelationshipLinks(parentGroups, byId, existingLinks = genealogyData.links || []) {
   const knownPairs = new Set();
   const addKnown = (first, second) => {
@@ -6928,7 +6928,7 @@ function drawParentConnectorGroup(
     const x2 = child.anchor.x;
     const y2 = child.anchor.y;
 
-    // ========【單一子女路徑】 設定 - renderer 只忠實反映真實 anchor，不自行吸附 ========
+    // ========【單一子女路徑】 renderer 只忠實反映真實 anchor，不自行吸附 ========
     const verticallyAligned =
       Math.abs(x1 - x2) <= 0.75;
 
@@ -7019,7 +7019,7 @@ function drawParentConnectorGroup(
     '"/>'
   );
 
-  // ========【Sibling Bus 分段】 設定 - 進入純領養分支後立刻使用領養線型 ========
+  // ========【Sibling Bus 分段】 進入純領養分支後立刻使用領養線型 ========
   const busPoints =
     [...new Set([
       source.x,
@@ -8137,7 +8137,7 @@ function paintRelationshipPreview(
 
 
 
-// ========【族譜連線】 設定 - 橫向關係接頭像側邊；直向親子線保留完整資訊空間 ========
+// ========【族譜連線】 橫向關係接頭像側邊；直向親子線保留完整資訊空間 ========
 function getCardAvatarGeometry() {
   const { W:NODE_W } = resolveDefaultCardDimensions();
 
@@ -8254,7 +8254,7 @@ function cardVerticalConnectionRect(card) {
   };
 }
 
-// ========【關係線錨點幾何】 設定 - 排列、拖曳、畫線共用同一個頭像／卡片中心 ========
+// ========【關係線錨點幾何】 排列、拖曳、畫線共用同一個頭像／卡片中心 ========
 function relationshipVerticalAnchorOffsetX(id) {
   return cardVerticalConnectionRect({
     id,
@@ -8317,7 +8317,7 @@ function avatarBoundaryAnchor(card, targetCard) {
   };
 }
 
-// ========【配偶關係連線】 設定 - 配偶固定為同世代橫向關係，不受卡片高度影響 ========
+// ========【配偶關係連線】 配偶固定為同世代橫向關係，不受卡片高度影響 ========
 function getPairConnectionGeometry(a, b) {
   const aOuter = cardOuterRect(a);
   const bOuter = cardOuterRect(b);
@@ -8380,7 +8380,7 @@ function createPartnerConnectionPath(a, b) {
     bY
   } = getPairConnectionGeometry(a, b);
 
-  // ========【族譜伴侶線】 設定 - 預設直線，手動錯位後使用 H-V-H ========
+  // ========【族譜伴侶線】 預設直線，手動錯位後使用 H-V-H ========
   // 兩端永遠直接取自卡片左右 anchor，因此不論直線或折線都黏在卡片上。
   const aligned =
     Math.abs(aY - bY) <= 0.75;
