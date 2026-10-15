@@ -15877,12 +15877,11 @@ const petEditorController = {
 function renderPetDraftList() {
   const list = $('petList');
   if (!list) return;
-
-  if (!editingPets.length) {
-    list.innerHTML =
-      `<div class="relationship-empty">${esc(uiText('尚未新增寵物'))}</div>`;
-    personEditor.renderInfoPreviewIfActive();
-    return;
+  const editing = $('petSection').classList.contains('is-editing');
+  const toggle = $('petSectionEditToggle');
+  if (toggle) {
+    toggle.textContent = uiText(editing ? '完成' : '編輯');
+    toggle.setAttribute('aria-expanded', String(editing));
   }
 
   const owner = petEditorController.owner();
@@ -15932,22 +15931,24 @@ function renderPetDraftList() {
                 '</div>'
               : ''}
           </div>
-          <div class="pet-item-actions">
-            <button
-              type="button"
-              data-pet-action="edit"
-              data-pet-index="${index}"
-            >編輯</button>
-            <button
-              type="button"
-              class="danger"
-              data-pet-action="delete"
-              data-pet-index="${index}"
-            >刪除</button>
-          </div>
+          ${editing ? `<div class="pet-item-actions">
+            <button type="button" data-pet-action="edit" data-pet-index="${index}">${esc(uiText('編輯'))}</button>
+            <button type="button" class="danger" data-pet-action="delete" data-pet-index="${index}">${esc(uiText('刪除'))}</button>
+          </div>` : ''}
         </div>
       `;
-    }).join('');
+    }).join('') +
+    (!editingPets.length && !editing
+      ? '<div class="relationship-empty">'+esc(uiText('尚未新增寵物'))+'</div>'
+      : '') +
+    (editing
+      ? '<button class="pet-add-btn" id="btnAddPet" type="button">'+
+          iconSvg('plus-lg')+'<span>'+esc(uiText('新增寵物'))+'</span></button>'
+      : '');
+
+  list.querySelector('#btnAddPet')?.addEventListener('click', () => {
+    petEditorController.open();
+  });
 
   list
     .querySelectorAll('[data-pet-action="edit"]')
@@ -16102,9 +16103,11 @@ petEditorDialog.onclick = event => {
   }
 };
 
-$('btnAddPet').onclick = () => {
-  petEditorController.open();
-};
+$('petSectionEditToggle')?.addEventListener('click',()=>{
+  const section=$('petSection');
+  section.classList.toggle('is-editing');
+  renderPetDraftList();
+});
 
 // ========【人物編輯器 Authority】 設定 - Draft / lifecycle / 關係編輯由獨立模組負責 ========
 personEditor.mount({
