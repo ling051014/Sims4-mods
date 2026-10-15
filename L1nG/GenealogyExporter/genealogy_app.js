@@ -9256,16 +9256,6 @@ function avatarHTML(sim) {
   );
 }
 
-function statusBadgeHTML(sim) {
-  const status =
-    buildPersonPresentation(sim)
-      ?.status;
-
-  if (!status) return '';
-
-  return `<div class="person-card-status-badge ${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</div>`;
-}
-
 function statusIconHTML(sim) {
   const status =
     buildPersonPresentation(sim)
@@ -9274,16 +9264,6 @@ function statusIconHTML(sim) {
   if (!status) return '';
 
   return `<span class="person-meta-icon status-icon status-${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</span>`;
-}
-
-function raceBadgeHTML(sim) {
-  const race =
-    buildPersonPresentation(sim)
-      ?.race;
-
-  if (!race?.icon) return '';
-
-  return `<div class="person-card-race-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</div>`;
 }
 
 function raceIconHTML(sim) {

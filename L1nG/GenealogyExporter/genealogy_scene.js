@@ -9455,8 +9455,7 @@ function createPartnerConnectionPath(a, b) {
 function derivePersonCardClassName(
   person,
   {
-    viewMode:isViewMode = false,
-    isInlaw = false
+    viewMode:isViewMode = false
   } = {}
 ) {
   const classes =
@@ -9492,12 +9491,6 @@ function derivePersonCardClassName(
     );
   }
 
-  if (isInlaw) {
-    classes.add(
-      'inlaw'
-    );
-  }
-
   return [
     ...classes
   ].join(' ');
@@ -9507,7 +9500,6 @@ function nodeRenderSignature(
   sim,
   {
     isView,
-    isInlaw,
     cardSettings,
     appearanceClass
   }
@@ -9527,9 +9519,6 @@ function nodeRenderSignature(
       isView
         ? 'view'
         : 'edit',
-
-    isInlaw:
-      !!isInlaw,
 
     appearanceClass:
       appearanceClass || '',
@@ -9562,8 +9551,6 @@ function nodeRenderSignature(
 }
 
 function paintPersonLayer() {
-  const fam = currentTreeFamily();
-  const memberSet = new Set(fam.memberIds);
   const {pos, byId, visibleIds} = layoutCache;
   const isView = viewMode === 'view';
   const cardSettings = isView ? getCardViewSettings() : getCardEditSettings();
@@ -9579,15 +9566,13 @@ function paintPersonLayer() {
       H:NODE_H
     } = getNodeDimensions(c);
 
-    const isInlaw = !memberSet.has(id);
-
     const dName = displayDataText(c.name, c);
     const dCareer = displayDataText(c.career, c);
     const dResidence = displayDataText(c.residence, c);
     const dAspiration = displayDataText(c.aspiration, c);
     const dCause = displayDataText(c.causeOfDeath, c);
     const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
-    const cls = derivePersonCardClassName(c, {viewMode:isView, isInlaw});
+    const cls = derivePersonCardClassName(c, {viewMode:isView});
     const dStage = uiText(c.lifeStage);
     const displayName =
       cardSettings.name
@@ -9606,7 +9591,6 @@ function paintPersonLayer() {
         c,
         {
           isView,
-          isInlaw,
           cardSettings,
           appearanceClass
         }

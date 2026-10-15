@@ -45,8 +45,6 @@ body[data-theme="ling"] {
     /* 幽靈卡片背景 */ --person-ghost-surface: #f1f6fb;
     /* 幽靈卡片邊框 */ --person-ghost-border: #c8d8e8;
     /* 幽靈文字 */ --person-ghost-text: #526e88;
-    /* 幽靈標記背景 */ --person-ghost-badge-surface: #eaf2f9;
-    /* 幽靈標記邊框 */ --person-ghost-badge-border: #c2d4e4;
     /* 幽靈標籤背景 */ --person-ghost-tag-surface: #e5eef6;
     /* 幽靈標籤文字 */ --person-ghost-tag-text: #5b7893;
     /* 幽靈男性識別色 */ --person-ghost-accent-male: #819fbe;
@@ -55,15 +53,11 @@ body[data-theme="ling"] {
     /* 已故卡片背景 */ --person-deceased-surface: #f4f1f1;
     /* 已故卡片邊框 */ --person-deceased-border: #d6cccc;
     /* 已故文字 */ --person-deceased-text: #6f6666;
-    /* 已故標記背景 */ --person-deceased-badge-surface: #eee8e4;
-    /* 已故標記邊框 */ --person-deceased-badge-border: #d8cbc2;
     /* 已故標籤背景 */ --person-deceased-tag-surface: #e8e1dc;
     /* 已故標籤文字 */ --person-deceased-tag-text: #74665d;
     /* 已故男性識別色 */ --person-deceased-accent-male: #989195;
     /* 已故女性識別色 */ --person-deceased-accent-female: #a98f99;
     /* 已故其他性別識別色 */ --person-deceased-accent-other: #9e9699;
-    /* 在世標記背景 */ --person-living-badge-surface: #edf6ef;
-    /* 在世標記邊框 */ --person-living-badge-border: #c4dcc8;
     /* 關係標註背景 */ --relationship-label-surface: rgba(255,255,255,.97);
     /* 關係標註邊框 */ --relationship-label-border: #d8dee4;
     /* 頭像漸層起始 */ --avatar-surface-start: #f5f7f9;
@@ -125,8 +119,6 @@ body[data-theme="sage"] {
     /* 幽靈卡片背景 */ --person-ghost-surface: #edf3f0;
     /* 幽靈卡片邊框 */ --person-ghost-border: #bfd0c7;
     /* 幽靈文字 */ --person-ghost-text: #4e6b5e;
-    /* 幽靈標記背景 */ --person-ghost-badge-surface: #e5efe9;
-    /* 幽靈標記邊框 */ --person-ghost-badge-border: #b6ccbf;
     /* 幽靈標籤背景 */ --person-ghost-tag-surface: #dbe9e0;
     /* 幽靈標籤文字 */ --person-ghost-tag-text: #526f60;
     /* 幽靈男性識別色 */ --person-ghost-accent-male: #7595a2;
@@ -135,15 +127,11 @@ body[data-theme="sage"] {
     /* 已故卡片背景 */ --person-deceased-surface: #eceae3;
     /* 已故卡片邊框 */ --person-deceased-border: #cbc7b9;
     /* 已故文字 */ --person-deceased-text: #666256;
-    /* 已故標記背景 */ --person-deceased-badge-surface: #e8e3d8;
-    /* 已故標記邊框 */ --person-deceased-badge-border: #cec5b2;
     /* 已故標籤背景 */ --person-deceased-tag-surface: #ded8ca;
     /* 已故標籤文字 */ --person-deceased-tag-text: #6b6455;
     /* 已故男性識別色 */ --person-deceased-accent-male: #8d8b83;
     /* 已故女性識別色 */ --person-deceased-accent-female: #9d8b8e;
     /* 已故其他性別識別色 */ --person-deceased-accent-other: #939087;
-    /* 在世標記背景 */ --person-living-badge-surface: #e3efe4;
-    /* 在世標記邊框 */ --person-living-badge-border: #b8d0bc;
     /* 關係標註背景 */ --relationship-label-surface: rgba(255,255,255,.96);
     /* 關係標註邊框 */ --relationship-label-border: #d2ddd3;
     /* 頭像漸層起始 */ --avatar-surface-start: #edf3ec;
@@ -205,8 +193,6 @@ body[data-theme="rose"] {
     /* 幽靈卡片背景 */ --person-ghost-surface: #eef1f7;
     /* 幽靈卡片邊框 */ --person-ghost-border: #c4cedd;
     /* 幽靈文字 */ --person-ghost-text: #526278;
-    /* 幽靈標記背景 */ --person-ghost-badge-surface: #e8edf5;
-    /* 幽靈標記邊框 */ --person-ghost-badge-border: #bec9da;
     /* 幽靈標籤背景 */ --person-ghost-tag-surface: #dde5f0;
     /* 幽靈標籤文字 */ --person-ghost-tag-text: #596d86;
     /* 幽靈男性識別色 */ --person-ghost-accent-male: #7990aa;
@@ -215,15 +201,11 @@ body[data-theme="rose"] {
     /* 已故卡片背景 */ --person-deceased-surface: #eee4e6;
     /* 已故卡片邊框 */ --person-deceased-border: #d2bcc2;
     /* 已故文字 */ --person-deceased-text: #66565a;
-    /* 已故標記背景 */ --person-deceased-badge-surface: #ece0dc;
-    /* 已故標記邊框 */ --person-deceased-badge-border: #d1beb4;
     /* 已故標籤背景 */ --person-deceased-tag-surface: #e3d3cc;
     /* 已故標籤文字 */ --person-deceased-tag-text: #715a53;
     /* 已故男性識別色 */ --person-deceased-accent-male: #91858a;
     /* 已故女性識別色 */ --person-deceased-accent-female: #a47f8d;
     /* 已故其他性別識別色 */ --person-deceased-accent-other: #95898e;
-    /* 在世標記背景 */ --person-living-badge-surface: #e9f2e8;
-    /* 在世標記邊框 */ --person-living-badge-border: #bfd2bd;
     /* 關係標註背景 */ --relationship-label-surface: rgba(255,255,255,.97);
     /* 關係標註邊框 */ --relationship-label-border: #e3d4d9;
     /* 頭像漸層起始 */ --avatar-surface-start: #f5e7ec;
@@ -285,8 +267,6 @@ body[data-theme="amber"] {
     /* 幽靈卡片背景 */ --person-ghost-surface: #eef1ee;
     /* 幽靈卡片邊框 */ --person-ghost-border: #c8cfca;
     /* 幽靈文字 */ --person-ghost-text: #55665d;
-    /* 幽靈標記背景 */ --person-ghost-badge-surface: #e9efea;
-    /* 幽靈標記邊框 */ --person-ghost-badge-border: #c2cec5;
     /* 幽靈標籤背景 */ --person-ghost-tag-surface: #dde8df;
     /* 幽靈標籤文字 */ --person-ghost-tag-text: #5d7163;
     /* 幽靈男性識別色 */ --person-ghost-accent-male: #7f909d;
@@ -295,15 +275,11 @@ body[data-theme="amber"] {
     /* 已故卡片背景 */ --person-deceased-surface: #eee7da;
     /* 已故卡片邊框 */ --person-deceased-border: #d0c3ab;
     /* 已故文字 */ --person-deceased-text: #665d4d;
-    /* 已故標記背景 */ --person-deceased-badge-surface: #e9dfcf;
-    /* 已故標記邊框 */ --person-deceased-badge-border: #cdbda3;
     /* 已故標籤背景 */ --person-deceased-tag-surface: #ded0bb;
     /* 已故標籤文字 */ --person-deceased-tag-text: #6b5d48;
     /* 已故男性識別色 */ --person-deceased-accent-male: #8e877c;
     /* 已故女性識別色 */ --person-deceased-accent-female: #9c8581;
     /* 已故其他性別識別色 */ --person-deceased-accent-other: #91897d;
-    /* 在世標記背景 */ --person-living-badge-surface: #e9f0df;
-    /* 在世標記邊框 */ --person-living-badge-border: #c3d1ae;
     /* 關係標註背景 */ --relationship-label-surface: rgba(255,253,249,.97);
     /* 關係標註邊框 */ --relationship-label-border: #e3d9ca;
     /* 頭像漸層起始 */ --avatar-surface-start: #f4ead8;
@@ -334,8 +310,6 @@ body[data-theme="ink"] {
     --person-ghost-surface: #1b2229;
     --person-ghost-border: #465767;
     --person-ghost-text: #c0d0df;
-    --person-ghost-badge-surface: #202b35;
-    --person-ghost-badge-border: #4a6072;
     --person-ghost-tag-surface: #273541;
     --person-ghost-tag-text: #c1d1df;
     --person-ghost-accent-male: #7f9bb5;
@@ -344,15 +318,11 @@ body[data-theme="ink"] {
     --person-deceased-surface: #232529;
     --person-deceased-border: #4d4d51;
     --person-deceased-text: #c4c1c4;
-    --person-deceased-badge-surface: #2b2c30;
-    --person-deceased-badge-border: #56565b;
     --person-deceased-tag-surface: #34353a;
     --person-deceased-tag-text: #c7c3c6;
     --person-deceased-accent-male: #7e8188;
     --person-deceased-accent-female: #8f7b84;
     --person-deceased-accent-other: #85868c;
-    --person-living-badge-surface: #1d3024;
-    --person-living-badge-border: #3f674d;
     --avatar-surface-start: #2b3036;
     --avatar-surface-end: #20252b;
     --avatar-text: #a6afb8;
@@ -414,8 +384,6 @@ body[data-theme="berrynight"] {
     --person-ghost-surface: #1b2229;
     --person-ghost-border: #465767;
     --person-ghost-text: #c0d0df;
-    --person-ghost-badge-surface: #202b35;
-    --person-ghost-badge-border: #4a6072;
     --person-ghost-tag-surface: #273541;
     --person-ghost-tag-text: #c1d1df;
     --person-ghost-accent-male: #7f9bb5;
@@ -424,15 +392,11 @@ body[data-theme="berrynight"] {
     --person-deceased-surface: #232529;
     --person-deceased-border: #4d4d51;
     --person-deceased-text: #c4c1c4;
-    --person-deceased-badge-surface: #2b2c30;
-    --person-deceased-badge-border: #56565b;
     --person-deceased-tag-surface: #34353a;
     --person-deceased-tag-text: #c7c3c6;
     --person-deceased-accent-male: #7e8188;
     --person-deceased-accent-female: #8f7b84;
     --person-deceased-accent-other: #85868c;
-    --person-living-badge-surface: #1d3024;
-    --person-living-badge-border: #3f674d;
     --avatar-surface-start: #2b3036;
     --avatar-surface-end: #20252b;
     --avatar-text: #a6afb8;
@@ -494,8 +458,6 @@ body[data-theme="graphite"] {
     --person-ghost-surface: #1b2229;
     --person-ghost-border: #465767;
     --person-ghost-text: #c0d0df;
-    --person-ghost-badge-surface: #202b35;
-    --person-ghost-badge-border: #4a6072;
     --person-ghost-tag-surface: #273541;
     --person-ghost-tag-text: #c1d1df;
     --person-ghost-accent-male: #7f9bb5;
@@ -504,15 +466,11 @@ body[data-theme="graphite"] {
     --person-deceased-surface: #232529;
     --person-deceased-border: #4d4d51;
     --person-deceased-text: #c4c1c4;
-    --person-deceased-badge-surface: #2b2c30;
-    --person-deceased-badge-border: #56565b;
     --person-deceased-tag-surface: #34353a;
     --person-deceased-tag-text: #c7c3c6;
     --person-deceased-accent-male: #7e8188;
     --person-deceased-accent-female: #8f7b84;
     --person-deceased-accent-other: #85868c;
-    --person-living-badge-surface: #1d3024;
-    --person-living-badge-border: #3f674d;
     --avatar-surface-start: #2b3036;
     --avatar-surface-end: #20252b;
     --avatar-text: #a6afb8;
@@ -605,8 +563,6 @@ body[data-theme="custom"] {
     /* 幽靈卡片背景 */ --person-ghost-surface: #eef1f6;
     /* 幽靈卡片邊框 */ --person-ghost-border: #c8d0dc;
     /* 幽靈文字 */ --person-ghost-text: #566578;
-    /* 幽靈標記背景 */ --person-ghost-badge-surface: #e9edf4;
-    /* 幽靈標記邊框 */ --person-ghost-badge-border: #c3ccd9;
     /* 幽靈標籤背景 */ --person-ghost-tag-surface: #e0e6ef;
     /* 幽靈標籤文字 */ --person-ghost-tag-text: #5d6d82;
     /* 幽靈男性識別色 */ --person-ghost-accent-male: #7b90a8;
@@ -615,15 +571,11 @@ body[data-theme="custom"] {
     /* 已故卡片背景 */ --person-deceased-surface: #efeaeb;
     /* 已故卡片邊框 */ --person-deceased-border: #d2c7ca;
     /* 已故文字 */ --person-deceased-text: #675d60;
-    /* 已故標記背景 */ --person-deceased-badge-surface: #ece4df;
-    /* 已故標記邊框 */ --person-deceased-badge-border: #d1c3ba;
     /* 已故標籤背景 */ --person-deceased-tag-surface: #e2d6cf;
     /* 已故標籤文字 */ --person-deceased-tag-text: #6f5e56;
     /* 已故男性識別色 */ --person-deceased-accent-male: #91898e;
     /* 已故女性識別色 */ --person-deceased-accent-female: #a1818f;
     /* 已故其他性別識別色 */ --person-deceased-accent-other: #958b90;
-    /* 在世標記背景 */ --person-living-badge-surface: #e9f1e8;
-    /* 在世標記邊框 */ --person-living-badge-border: #bfd1bd;
     /* 關係標註背景 */ --relationship-label-surface: rgba(255,255,255,.97);
     /* 關係標註邊框 */ --relationship-label-border: #e1e1e7;
     /* 頭像漸層起始 */ --avatar-surface-start: #f1eff5;
@@ -1409,16 +1361,7 @@ body.sidebar-resizing * {
     /* 透明度 */ opacity: .88;
 }
 
-.person-card.inlaw {
-    /* 上方邊框 */ border-top: 2px dotted var(--relationship-spouse);
-}
 
-.person-card.inlaw .person-card-name::before {
-    /* 生成內容 */ content: "姻 ";
-    /* 字體大小 */ font-size: 10px;
-    /* 文字顏色 */ color: var(--relationship-spouse);
-    /* 字體粗細 */ font-weight: 400;
-}
 
 .person-card.hl {
     /* 外框設定 */ outline: 3px solid var(--selection-highlight);
@@ -1570,13 +1513,6 @@ body.sidebar-resizing * {
     /* 文字顏色 */ color: var(--person-ghost-text);
 }
 
-.person-card-title {
-    /* 字體大小 */ font-size: 10px;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 換行方式 */ white-space: nowrap;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-}
 
 .person-card-residence,
 .person-card-aspiration,
@@ -1850,69 +1786,12 @@ body[data-theme="graphite"] .life-photo-stage {
     background:color-mix(in srgb,var(--stage-accent) 16%,#151c24);
 }
 
-.person-card-status-badge {
-    /* 定位方式 */ position: absolute;
-    /* 頂部位置 */ top: 5px;
-    /* 右側位置 */ right: 5px;
-    /* 元素寬度 */ width: 22px;
-    /* 元素高度 */ height: 22px;
-    /* 圓角弧度 */ border-radius: 50%;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 字體大小 */ font-size: 13px;
-    /* 行距設定 */ line-height: 1;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 元素陰影 */ box-shadow: 0 1px 4px rgba(0,0,0,.18);
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 顯示層級 */ z-index: 3;
-    /* 滑鼠事件 */ pointer-events: none;
-}
 
-.person-card-status-badge.alive {
-    /* 背景設定 */ background: var(--person-living-badge-surface);
-    /* 邊框顏色 */ border-color: var(--person-living-badge-border);
-}
 
-.person-card-status-badge.ghost {
-    /* 背景設定 */ background: var(--person-ghost-badge-surface);
-    /* 邊框顏色 */ border-color: var(--person-ghost-badge-border);
-}
 
-.person-card-status-badge.dead {
-    /* 背景設定 */ background: var(--person-deceased-badge-surface);
-    /* 邊框顏色 */ border-color: var(--person-deceased-badge-border);
-}
 
-.person-card-race-badge {
-    /* 定位方式 */ position: absolute;
-    /* 頂部位置 */ top: 5px;
-    /* 左側位置 */ left: 5px;
-    /* 最小寬度 */ min-width: 22px;
-    /* 元素高度 */ height: 22px;
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 內縮空間 */ padding: 0 4px;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 字體大小 */ font-size: 13px;
-    /* 行距設定 */ line-height: 1;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 元素陰影 */ box-shadow: 0 1px 4px rgba(0,0,0,.18);
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 顯示層級 */ z-index: 3;
-    /* 滑鼠事件 */ pointer-events: none;
-}
 
-.person-card.ghost .person-card-race-badge {
-    /* 背景設定 */ background: var(--person-ghost-badge-surface);
-    /* 邊框顏色 */ border-color: var(--person-ghost-badge-border);
-}
 
-.person-card.dead .person-card-race-badge {
-    /* 背景設定 */ background: var(--person-deceased-badge-surface);
-    /* 邊框顏色 */ border-color: var(--person-deceased-badge-border);
-}
 
 .person-card.view {
     /* 排列方向 */ flex-direction: column;
@@ -1922,23 +1801,7 @@ body[data-theme="graphite"] .life-photo-stage {
     /* 內縮空間 */ padding: 8px 6px 6px;
 }
 
-.person-card.view .person-card-race-badge {
-    /* 頂部位置 */ top: 3px;
-    /* 左側位置 */ left: 3px;
-    /* 最小寬度 */ min-width: 16px;
-    /* 元素高度 */ height: 16px;
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 內縮空間 */ padding: 0 3px;
-    /* 字體大小 */ font-size: 10px;
-}
 
-.person-card.view .person-card-status-badge {
-    /* 頂部位置 */ top: 3px;
-    /* 右側位置 */ right: 3px;
-    /* 元素寬度 */ width: 16px;
-    /* 元素高度 */ height: 16px;
-    /* 字體大小 */ font-size: 10px;
-}
 
 .person-card-view-avatar {
     /* 元素寬度 */ width: 76px;
@@ -2000,17 +1863,6 @@ body[data-theme="graphite"] .life-photo-stage {
     /* 文字顏色 */ color: var(--person-ghost-text);
 }
 
-.person-card-view-pets {
-    /* 字體大小 */ font-size: 9.5px;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 行距設定 */ line-height: 1.3;
-    /* 文字對齊 */ text-align: center;
-    /* 換行方式 */ white-space: nowrap;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-    /* 最大寬度 */ max-width: 100%;
-    /* 內縮空間 */ padding: 0 2px;
-}
 
 .empty {
     /* 定位方式 */ position: absolute;
