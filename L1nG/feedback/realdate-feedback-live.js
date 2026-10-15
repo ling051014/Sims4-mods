@@ -19,16 +19,19 @@
     const input={version: $('manual-version-wrap')?.hidden?$('module-version'):$('manual-version'),gameVersion:$('game-version'),contact:$('contact-value'),message:$('message-field')}[target];
     input?.classList.add('feedback-invalid');
   };
-  const show=(id)=>{
+  const captureFormHeight=()=>{
     const form=$('form-main');
-    if(form&&getComputedStyle(form).display!=='none'){
-      const height=Math.ceil(form.getBoundingClientRect().height);
-      if(height>0)$('thread-pane')?.style.setProperty('--realdate-form-height',Math.min(height,window.innerHeight-45)+'px');
-    }
+    if(!form||form.classList.contains('hide')||getComputedStyle(form).display==='none')return;
+    const height=Math.ceil(Math.max(form.scrollHeight,form.getBoundingClientRect().height));
+    if(height>0)$('thread-pane')?.style.setProperty('--realdate-form-height',height+'px');
+  };
+  const show=(id)=>{
+    captureFormHeight();
     for(const name of ['form-main','success-pane','thread-pane']){
       const el=$(name);el.classList.toggle('hide',id!==name);
       if(name==='form-main')el.style.display=id===name?'flex':'none';
     }
+    if(id==='form-main')requestAnimationFrame(captureFormHeight);
   };
   const describeFile=f=>f.name+' · '+Math.max(1,Math.round(f.size/1024))+' KB';
   const displayFiles=(list,node)=>{
@@ -350,15 +353,14 @@
   }
   function messagesFor(item){
     const stack=$('visitor-messages');
-    const body=$('thread-pane').querySelector('.thread-body');
-    const nearEnd=body.scrollHeight-body.scrollTop-body.clientHeight<90;
-    const oldPosition=body.scrollTop;
+    const nearEnd=stack.scrollHeight-stack.scrollTop-stack.clientHeight<90;
+    const oldPosition=stack.scrollTop;
     stack.replaceChildren();
     const attachments=item.attachments||[];
     appendMessage(stack,'player',item.message,item.createdAt,attachments.filter(a=>a.replyId==null));
     for(const msg of item.messages||[])appendMessage(stack,msg.author,msg.body,msg.created_at||msg.createdAt,
       attachments.filter(a=>a.replyId===msg.id));
-    body.scrollTop=nearEnd?body.scrollHeight:oldPosition;
+    stack.scrollTop=nearEnd?stack.scrollHeight:oldPosition;
   }
   function threadVersion(item){
     return JSON.stringify([item.id,item.status,item.updatedAt,item.message,
@@ -401,7 +403,7 @@
       const data=await core.lookup(receipt);
       if(activeReceipt!==receipt || !threadIsVisible())return;
       updateThread(data.feedback);
-      syncNotice('上次更新：'+new Intl.DateTimeFormat('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date()));
+      syncNotice('更新時間：'+formatMessageTime(new Date()));
     }catch(err){
       if(activeReceipt!==receipt)return;
       const message=err?.message||'更新失敗';
