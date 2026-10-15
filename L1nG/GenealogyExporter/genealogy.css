@@ -14,6 +14,15 @@ body[data-theme="ling"] {
     /* 互動強調色 */ --action-primary: #55acee;
     /* 懸停強調色 */ --action-primary-hover: #3e95d3;
     /* 深色主色 */ --action-primary-strong: #315f83;
+    /* 危險操作色彩 */ --danger-text: #B33432;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #B33432;
+    /* 危險操作色彩 */ --danger-solid-hover: #942725;
+    /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
+    /* 警告色彩 */ --warning-text: #895717;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #3f4852;
     /* 頂欄次要文字 */ --navigation-text-muted: #7d8790;
     /* 頂欄欄位背景 */ --navigation-control-surface: #ffffff;
@@ -88,6 +97,15 @@ body[data-theme="sage"] {
     /* 互動強調色 */ --action-primary: #5f806c;
     /* 懸停強調色 */ --action-primary-hover: #4c6b59;
     /* 深色主色 */ --action-primary-strong: #3f5849;
+    /* 危險操作色彩 */ --danger-text: #B23B39;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #B23B39;
+    /* 危險操作色彩 */ --danger-solid-hover: #912C2A;
+    /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
+    /* 警告色彩 */ --warning-text: #825B15;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #2f3a32;
     /* 頂欄次要文字 */ --navigation-text-muted: #68756b;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.72);
@@ -162,6 +180,15 @@ body[data-theme="rose"] {
     /* 互動強調色 */ --action-primary: #a55270;
     /* 懸停強調色 */ --action-primary-hover: #8c425e;
     /* 深色主色 */ --action-primary-strong: #703447;
+    /* 危險操作色彩 */ --danger-text: #C13C2B;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #C13C2B;
+    /* 危險操作色彩 */ --danger-solid-hover: #9B3022;
+    /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
+    /* 警告色彩 */ --warning-text: #8C5815;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #4a2d37;
     /* 頂欄次要文字 */ --navigation-text-muted: #7d606a;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.70);
@@ -236,6 +263,15 @@ body[data-theme="amber"] {
     /* 互動強調色 */ --action-primary: #a66b2f;
     /* 懸停強調色 */ --action-primary-hover: #8d5825;
     /* 深色主色 */ --action-primary-strong: #6d441f;
+    /* 危險操作色彩 */ --danger-text: #B63C3C;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #B63C3C;
+    /* 危險操作色彩 */ --danger-solid-hover: #942E2E;
+    /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
+    /* 警告色彩 */ --warning-text: #815314;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #493824;
     /* 頂欄次要文字 */ --navigation-text-muted: #796b58;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.68);
@@ -334,6 +370,15 @@ body[data-theme="ink"] {
     --action-primary: #b79acb;
     --action-primary-hover: #c9add9;
     --action-primary-strong: #9274a7;
+    /* 危險操作色彩 */ --danger-text: #FF8880;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #FF8880;
+    /* 危險操作色彩 */ --danger-solid-hover: #FFAAA1;
+    /* 危險操作色彩 */ --danger-on-solid: #21181C;
+    /* 警告色彩 */ --warning-text: #F4CD77;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     --navigation-text: #f4f0f5;
     --navigation-text-muted: #c0b8c3;
     --navigation-control-text: #f4f0f5;
@@ -408,6 +453,15 @@ body[data-theme="berrynight"] {
     --action-primary: #d28aa6;
     --action-primary-hover: #e1a2b9;
     --action-primary-strong: #aa6881;
+    /* 危險操作色彩 */ --danger-text: #FF9A78;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #FF9A78;
+    /* 危險操作色彩 */ --danger-solid-hover: #FFB297;
+    /* 危險操作色彩 */ --danger-on-solid: #29191B;
+    /* 警告色彩 */ --warning-text: #FFD085;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     --navigation-text: #f7f1f4;
     --navigation-text-muted: #c7b7bf;
     --navigation-control-text: #f7f1f4;
@@ -482,6 +536,15 @@ body[data-theme="graphite"] {
     --action-primary: #87a7c4;
     --action-primary-hover: #a3bdd3;
     --action-primary-strong: #6689a8;
+    /* 危險操作色彩 */ --danger-text: #FF8388;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #FF8388;
+    /* 危險操作色彩 */ --danger-solid-hover: #FFA3A6;
+    /* 危險操作色彩 */ --danger-on-solid: #24191C;
+    /* 警告色彩 */ --warning-text: #F5C97D;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     --navigation-text: #f3f5f7;
     --navigation-text-muted: #b9c0c7;
     --navigation-control-text: #f3f5f7;
@@ -532,6 +595,15 @@ body[data-theme="custom"] {
     /* 互動強調色 */ --action-primary: #8a5cb0;
     /* 懸停強調色 */ --action-primary-hover: #724a98;
     /* 深色主色 */ --action-primary-strong: #6a4688;
+    /* 危險操作色彩 */ --danger-text: #B33432;
+    /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
+    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-solid: #B33432;
+    /* 危險操作色彩 */ --danger-solid-hover: #942725;
+    /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
+    /* 警告色彩 */ --warning-text: #895717;
+    /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
+    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #2f2f35;
     /* 頂欄次要文字 */ --navigation-text-muted: #707078;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.70);
@@ -1989,7 +2061,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 移除按鈕不使用外框 */ border: 0;
     /* 圓角只用於懸停背景 */ border-radius: 999px;
     /* 平常保持透明 */ background: transparent;
-    /* 危險操作顏色 */ color: #b03a2e;
+    /* 危險操作顏色 */ color: var(--danger-text);
     /* 滑鼠指標 */ cursor: pointer;
     /* 不額外撐高人物列 */ align-self: center;
 }
@@ -2001,8 +2073,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 
 .family-rel-remove:hover,
 .family-rel-remove:focus-visible {
-    /* 懸停只顯示淡紅底，不增加外框 */ background: color-mix(in srgb,#b03a2e 9%,transparent);
-    /* 聚焦外框交由瀏覽器 */ color: #a32f24;
+    /* 懸停只顯示淡紅底，不增加外框 */ background: var(--danger-surface);
+    /* 聚焦外框交由瀏覽器 */ color: var(--danger-text);
 }
 
 .family-rel-kind-select {
@@ -3126,12 +3198,12 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .ui-dialog-actions button.danger {
-    /* 文字顏色 */ color: #b03a2e;
-    /* 邊框顏色 */ border-color: #e6c9c4;
+    /* 文字顏色 */ color: var(--danger-text);
+    /* 邊框顏色 */ border-color: var(--danger-border);
 }
 
 .ui-dialog-actions button.danger:hover {
-    /* 背景設定 */ background: rgba(200,60,40,.06);
+    /* 背景設定 */ background: var(--danger-surface);
 }
 
 .info {
@@ -3493,8 +3565,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 #appearanceBackgroundClearBtn{
-    color:#b03a2e;
-    border-color:rgba(176,58,46,.25);
+    color:var(--danger-text);
+    border-color:var(--danger-border);
 }
 
 .appearance-background-controls{
@@ -3590,9 +3662,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel .genealogy-feedback-reply-form[hidden],
 .genealogy-feedback-panel .genealogy-feedback-section-heading[hidden]{display:none}
 /* 族譜回饋：沿用既有主題色，附件及訊息不增加多餘外框。 */
-.genealogy-feedback-panel .genealogy-feedback-field-error{color:#b6515a;font-size:11px;line-height:1.6;margin:7px 0 0}
+.genealogy-feedback-panel .genealogy-feedback-field-error{color:var(--danger-text);font-size:11px;line-height:1.6;margin:7px 0 0}
 .genealogy-feedback-panel .genealogy-feedback-field-error[hidden]{display:none}
-.genealogy-feedback-panel .genealogy-feedback-field.genealogy-feedback-invalid{border-color:#b6515a;background:var(--surface-input)}
+.genealogy-feedback-panel .genealogy-feedback-field.genealogy-feedback-invalid{border-color:var(--danger-text);background:var(--surface-input)}
 .genealogy-feedback-panel .genealogy-feedback-files li .genealogy-feedback-file-text{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .genealogy-feedback-panel .genealogy-feedback-files li small{color:var(--gf-muted);white-space:nowrap;font-size:10px}
 .genealogy-feedback-panel .genealogy-feedback-paperclip,.genealogy-feedback-panel .genealogy-feedback-attach-action svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--gf-muted)}
@@ -3994,7 +4066,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 
 .genealogy-feedback-required {
     margin-left:4px;
-    color:#b6515a;
+    color:var(--danger-text);
     font-size:12px;
 }
 
@@ -4217,17 +4289,17 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     flex:0 0 auto;
     min-height:26px;
     padding:3px 7px;
-    border:1px solid var(--red,#b6515a);
+    border:1px solid var(--danger-text);
     border-radius:6px;
     background:transparent;
-    color:var(--red,#b6515a);
+    color:var(--danger-text);
     font-family:inherit;
     font-size:11px;
     font-weight:650;
     cursor:pointer;
 }
 .genealogy-feedback-panel .genealogy-feedback-files button:hover {
-    background:color-mix(in srgb,var(--red,#b6515a) 9%,transparent);
+    background:var(--danger-surface);
 }
 
 .genealogy-feedback-reply-options {
@@ -4503,9 +4575,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel .genealogy-feedback-history-status {
     margin:0 0 15px;
     padding:12px;
-    border:1px solid color-mix(in srgb,#b6515a 30%,var(--gf-stroke));
+    border:1px solid var(--danger-border);
     border-radius:10px;
-    background:color-mix(in srgb,#b6515a 7%,var(--gf-surface));
+    background:color-mix(in srgb,var(--danger-text) 7%,var(--gf-surface));
     color:var(--gf-text);
     font-size:12px;
     line-height:1.6;
@@ -4526,8 +4598,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     width:21px;
     height:21px;
     border-radius:50%;
-    background:#b6515a;
-    color:#fff;
+    background:var(--danger-solid);
+    color:var(--danger-on-solid);
     font-size:13px;
     font-weight:800;
 }
@@ -4988,14 +5060,14 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     background:var(--surface-item-hover);
 }
 .pet-item-actions button.danger {
-    /* 文字顏色 */ color: #b03a2e;
-    /* 邊框顏色 */ border-color: #e6c9c4;
+    /* 文字顏色 */ color: var(--danger-text);
+    /* 邊框顏色 */ border-color: var(--danger-border);
 }
 .pet-item-actions button.danger:hover,
 .pet-item-actions button.danger:focus-visible {
-    border-color:#b03a2e;
-    color:#b03a2e;
-    background:color-mix(in srgb,#b03a2e 7%,var(--surface-input));
+    border-color:var(--danger-text);
+    color:var(--danger-text);
+    background:color-mix(in srgb,var(--danger-text) 7%,var(--surface-input));
 }
 
 .pet-add-btn {
@@ -5097,7 +5169,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .life-photo-action.danger:hover {
-    /* 背景設定 */ background: #c94a3a;
+    /* 背景設定 */ background: var(--danger-solid);
+    color:var(--danger-on-solid);
 }
 
 .life-photo-title {
@@ -5238,7 +5311,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .photo-size-tip.warn {
-    /* 文字顏色 */ color: #c94a3a;
+    /* 文字顏色 */ color: var(--warning-text);
     /* 字體粗細 */ font-weight: 600;
 }
 
@@ -5570,7 +5643,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 .person-library-batch-toolbar[hidden],.person-library-batch-count[hidden] { display:none; }
 .person-library-batch-toolbar button { min-height:34px; padding:6px 11px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-card); color:var(--text-primary); font:inherit; font-size:11.5px; cursor:pointer; }
-.person-library-batch-toolbar button.danger { color:#b03a2e; border-color:rgba(176,58,46,.35); }
+.person-library-batch-toolbar button.danger { color:var(--danger-text); border-color:var(--danger-border); }
 .person-library-batch-toolbar button:disabled { opacity:.4; cursor:default; }
 @media (max-width:720px) {
     #personLibraryDialog { padding:10px; }
@@ -5726,8 +5799,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .family-member-picker-item.remove-selected {
-    /* 邊框顏色 */ border-color: #c94a3a;
-    /* 背景設定 */ background: rgba(200,60,40,.08);
+    /* 邊框顏色 */ border-color: var(--danger-solid);
+    /* 背景設定 */ background: var(--danger-surface);
 }
 
 .family-member-picker-checkbox {
@@ -5753,9 +5826,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .family-member-picker-item.remove-selected .family-member-picker-checkbox {
-    /* 背景設定 */ background: #c94a3a;
-    /* 文字顏色 */ color: #fff;
-    /* 邊框顏色 */ border-color: #c94a3a;
+    /* 背景設定 */ background: var(--danger-solid);
+    /* 文字顏色 */ color: var(--danger-on-solid);
+    /* 邊框顏色 */ border-color: var(--danger-solid);
 }
 
 .family-member-picker-item .family-member-picker-text {
@@ -5777,7 +5850,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .family-member-picker-count.remove-count b {
-    /* 文字顏色 */ color: #c94a3a;
+    /* 文字顏色 */ color: var(--danger-solid);
 }
 
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
@@ -6916,13 +6989,15 @@ html[lang="en"] body {
 
 
 .ui-dialog[data-kind="danger"] .ui-dialog-actions button.primary {
-    /* 背景設定 */ background: #b44848;
-    /* 邊框顏色 */ border-color: #b44848;
+    /* 背景設定 */ background: var(--danger-solid);
+    /* 邊框顏色 */ border-color: var(--danger-solid);
+    color:var(--danger-on-solid);
 }
 
 .ui-dialog[data-kind="danger"] .ui-dialog-actions button.primary:hover {
-    /* 背景設定 */ background: #963838;
-    /* 邊框顏色 */ border-color: #963838;
+    /* 背景設定 */ background: var(--danger-solid-hover);
+    /* 邊框顏色 */ border-color: var(--danger-solid-hover);
+    color:var(--danger-on-solid);
 }
 
 /* ========【共用確認彈窗】 alert / confirm / choice / prompt 操作按鈕統一置中 ======== */
@@ -7804,7 +7879,7 @@ button.is-loading .button-loading-label {
 .member-add-popover { top:calc(100% + 5px); right:0; }
 .ui-menu-item { width:100%; display:flex; align-items:center; gap:8px; min-height:34px; padding:6px 9px; border:0; border-radius:4px; background:transparent; color:inherit; font:inherit; font-size:12px; text-align:left; white-space:nowrap; cursor:pointer; text-decoration:none; }
 .ui-menu-item:hover { background:var(--nav-dropdown-hover-bg); color:var(--nav-dropdown-hover-text); }
-.ui-menu-item.danger { color:#b8483c; }
+.ui-menu-item.danger { color:var(--danger-text); }
 .ui-menu-divider { height:1px; margin:4px 3px; background:var(--nav-dropdown-divider); }
 .ui-menu-language-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 7px; }
 .ui-menu-language-label { display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--text-secondary); }
@@ -8166,7 +8241,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 .family-section-batch-remove:hover,
 .family-section-batch-remove:focus-visible {
     background:var(--surface-item-hover);
-    color:#b03a2e;
+    color:var(--danger-text);
 }
 .family-section-batch-remove .l1ng-icon {
     width:13px;
@@ -8207,12 +8282,12 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     color:var(--text-primary);
 }
 .family-member-remove-confirm {
-    background:#b03a2e;
-    color:#fff;
+    background:var(--danger-solid);
+    color:var(--danger-on-solid);
 }
 .family-member-remove-confirm:hover:not(:disabled),
 .family-member-remove-confirm:focus-visible:not(:disabled) {
-    background:#953126;
+    background:var(--danger-text);
 }
 .family-member-remove-confirm:disabled {
     opacity:.38;
@@ -8246,7 +8321,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 }
 .family-member-row.remove-selected,
 .family-member-row.remove-selected:hover {
-    background:rgba(176,58,46,.16);
+    background:color-mix(in srgb,var(--danger-text) 16%,transparent);
 }
 
 .family-member-avatar-wrap {
@@ -8284,8 +8359,8 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     padding:0;
     border:0;
     border-radius:50%;
-    background:rgba(176,58,46,.42);
-    color:rgba(255,255,255,.92);
+    background:color-mix(in srgb,var(--danger-solid) 42%,transparent);
+    color:var(--danger-on-solid);
     opacity:0;
     transform:scale(.97);
     pointer-events:none;
@@ -8301,8 +8376,8 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 .family-member-remove-select.selected {
     opacity:.52;
     transform:scale(1);
-    background:rgba(176,58,46,.52);
-    color:#fff;
+    background:color-mix(in srgb,var(--danger-solid) 52%,transparent);
+    color:var(--danger-on-solid);
     animation:none;
 }
 .family-member-remove-select .l1ng-icon {
@@ -8642,7 +8717,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .person-card-menu-action { width:100%; min-height:31px; display:flex; align-items:center; gap:8px; padding:6px 9px; border:0; border-radius:5px; background:transparent; color:var(--text-primary); font:inherit; text-align:left; }
 .person-card-menu-action:hover:not(:disabled) { background:var(--surface-item-hover); }
 .person-card-menu-action:disabled { opacity:.4; cursor:default; }
-.person-card-menu-action.danger { color:#b03a2e; }
+.person-card-menu-action.danger { color:var(--danger-text); }
 .person-card-menu-divider { height:1px; margin:5px 3px; background:var(--border-default); }
 .person-card-menu-section-title { padding:5px 9px 4px; color:var(--text-secondary); font-size:10.5px; font-weight:700; letter-spacing:.35px; }
 .person-card-menu-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 3px; }
@@ -9429,17 +9504,17 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 /* ========【危險操作】 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */
 /* 有既有外框的按鈕會連同外框變紅；border:0 的導覽 / 工具按鈕不會因此新增外框。 */
 button.danger-action {
-    color:#b03a2e;
-    border-color:rgba(176,58,46,.34);
+    color:var(--danger-text);
+    border-color:var(--danger-border);
 }
 button.danger-action .l1ng-icon {
     color:currentColor;
 }
 button.danger-action:hover,
 button.danger-action:focus-visible {
-    color:#953126;
-    border-color:rgba(176,58,46,.55);
-    background:rgba(176,58,46,.07);
+    color:var(--danger-text);
+    border-color:var(--danger-border);
+    background:var(--danger-surface);
     outline:none;
 }
 
