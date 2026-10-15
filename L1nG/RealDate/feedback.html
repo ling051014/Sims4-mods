@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-unified-r4"/>
         <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"/>
         <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
-        <link rel="stylesheet" href="../feedback/feedback.css?v=20261016-reply-compose-r2"/>
+        <link rel="stylesheet" href="../feedback/feedback.css?v=20261016-thread-layout-r3"/>
         <link rel="stylesheet" href="../feedback/feedback-loading.css"/>
         <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
@@ -433,7 +433,7 @@
 
                                     </div>
                                     <div class="hide" id="thread-chat">
-                                        <div class="thread-summary">
+                                        <div class="thread-chat-header"><div class="thread-summary">
                                             <div>
                                                 <strong id="thread-ref"></strong><span id="thread-meta"></span>
                                             </div>
@@ -443,23 +443,21 @@
                                             <span id="thread-refresh-status" role="status" aria-live="polite">開啟對話後會自動檢查新回覆。</span>
                                             <button class="secondary" id="thread-refresh" type="button">立即更新</button>
                                         </div>
-                                        <div class="conversation-stack" id="visitor-messages" aria-live="polite"></div>
+                                        </div><div class="conversation-stack" id="visitor-messages" aria-live="polite"></div>
                                         <form id="visitor-reply-form" class="thread-compose">
 <textarea id="visitor-reply" class="field" aria-label="輸入匿名對話回覆" rows="3" maxlength="2000" placeholder="在這裡補充問題、回覆或說明結果⋯⋯"></textarea>
-                                            <div class="realdate-reply-attachments">
-                                                <label class="attach-action" for="visitor-reply-files"><svg class="i sm"><use href="#ico-paperclip"></use></svg>選擇附件<input id="visitor-reply-files" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log" multiple hidden></label>
-                                                <span id="visitor-reply-file-info" class="hint">最多 3 個檔案・合計 20 MB</span>
+                                            <div class="realdate-reply-attachments feedback-reply-drop-target">
+                                                <div class="realdate-reply-attachment-choice"><label class="attach-action" for="visitor-reply-files"><svg class="i sm"><use href="#ico-paperclip"></use></svg>選擇附件<input id="visitor-reply-files" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log" multiple hidden></label><span class="hint">或拖曳檔案至此</span><span id="visitor-reply-file-info" class="hint">最多 3 個檔案・合計 20 MB</span></div>
+                                                <div id="visitor-reply-selected" class="feedback-attachment-list" aria-live="polite"></div>
                                             </div>
-                                            <div id="visitor-reply-selected" class="feedback-attachment-list" aria-live="polite"></div>
                                             <div class="realdate-reply-verification">
-                                                <span class="field-label">安全驗證</span>
+                                                <span class="field-label">安全驗證 <span class="required" aria-hidden="true">*</span></span>
                                                 <div id="realdate-reply-turnstile"></div>
                                             </div>
                                             <p id="visitor-reply-error" class="restore-error" role="alert" hidden></p>
-                                            <div class="thread-compose-actions"><button class="primary" type="submit">送出回覆 <svg class="i sm"><use href="#ico-send"></use></svg></button></div>
+                                            <div class="thread-compose-actions"><button class="text-action thread-switch-back" id="thread-back-list" type="button">← 返回我的回饋</button><button class="primary" type="submit">送出回覆 <svg class="i sm"><use href="#ico-send"></use></svg></button></div>
                                         </form>
-                                        <button class="text-action thread-switch-back" id="thread-back-list" type="button">← 返回我的回饋</button>
-                                    </div>
+                                     </div>
                                 </div>
                             </div>
                         </div>

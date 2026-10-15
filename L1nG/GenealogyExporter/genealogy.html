@@ -219,24 +219,23 @@
                                     <div class="genealogy-feedback-conversation" id="genealogyFeedbackMessages" aria-live="polite"></div>
                                     <form id="genealogyFeedbackReplyForm" class="genealogy-feedback-reply-form" novalidate>
                                         <textarea class="genealogy-feedback-field" id="genealogyFeedbackReply" aria-label="輸入匿名對話回覆" maxlength="2000" rows="3" placeholder="補充問題、回覆或說明結果⋯⋯"></textarea>
-                                        <div class="genealogy-feedback-reply-attachments">
-                                            <label class="genealogy-feedback-attach-action" for="genealogyFeedbackReplyFiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5 0 0 1-8-7.5L13 3"/></svg>選擇附件</label>
+                                        <div class="genealogy-feedback-reply-attachments feedback-reply-drop-target">
+                                            <div class="genealogy-feedback-attachment-choice"><label class="genealogy-feedback-attach-action" for="genealogyFeedbackReplyFiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5 0 0 1-8-7.5L13 3"/></svg>選擇附件</label><span class="genealogy-feedback-drag-hint">或拖曳檔案至此</span><small>最多 3 個檔案・合計 20 MB</small></div>
                                             <input id="genealogyFeedbackReplyFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log" multiple hidden>
                                             <ul id="genealogyFeedbackReplyFileList" class="genealogy-feedback-files"></ul>
                                         </div>
                                         <div class="genealogy-feedback-reply-verification">
-                                            <span class="genealogy-feedback-field-label">安全驗證</span>
+                                            <span class="genealogy-feedback-field-label">安全驗證 <span class="genealogy-feedback-required" aria-hidden="true">*</span></span>
                                             <div id="genealogyFeedbackReplyVerify"></div>
                                         </div>
                                         <p class="genealogy-feedback-field-error" id="genealogyFeedbackReplyError" role="alert" hidden></p>
                                         <div class="genealogy-feedback-reply-actions">
+                                            <button class="genealogy-feedback-back-link" id="genealogyFeedbackWriteTab" type="button"><span class="l1ng-icon icon-chevron-down genealogy-feedback-back-icon" aria-hidden="true"></span>返回填寫回饋</button>
                                             <button class="genealogy-feedback-submit" id="genealogyFeedbackReplySubmit" type="submit">送出回覆</button>
                                         </div>
                                     </form>
                                 </div>
-                        <div class="genealogy-feedback-history-footer">
-                            <button class="genealogy-feedback-back-link" id="genealogyFeedbackWriteTab" type="button"><span class="l1ng-icon icon-chevron-down genealogy-feedback-back-icon" aria-hidden="true"></span>返回填寫回饋</button>
-                        </div>
+ 
                     </section>
                 </div>
             </div>
