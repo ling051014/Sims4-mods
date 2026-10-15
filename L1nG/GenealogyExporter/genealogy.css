@@ -933,7 +933,7 @@ body.sidebar-resizing {
 }
 
 body.sidebar-resizing * {
-    cursor: col-resize !important;
+    cursor: col-resize;
 }
 
 .main-area {
@@ -1372,7 +1372,6 @@ body.sidebar-resizing * {
 .person-card-residence,
 .person-card-aspiration {
     /* 字體大小 */ font-size: 10px;
-    /* 文字顏色 */ color: var(--text-secondary);
     /* 換行方式 */ white-space: nowrap;
     /* 溢出處理 */ overflow: hidden;
     /* 文字溢出 */ text-overflow: ellipsis;
@@ -1381,6 +1380,7 @@ body.sidebar-resizing * {
     /* 垂直對齊 */ align-items: center;
     /* 項目間距 */ gap: 3px;
 }
+.person-card-residence { color: var(--text-secondary); }
 
 /* ========【介面圖示】 設定 - 共用 SVG Icon 顯示規則 ======== */
 
@@ -1793,7 +1793,7 @@ button.avatar-editor-action { cursor:pointer; }
 .profile-age-field .age-input-wrap,
 .profile-residence-field > input { align-self:start; min-height:32px; }
 .profile-birthday-field .birthday-inputs { grid-template-columns:1.3fr .85fr .85fr; gap:5px; }
-.profile-age-field .age-input-wrap { min-height:32px; border-radius:6px; }
+.profile-age-field .age-input-wrap { border-radius:6px; }
 .profile-age-field .age-input-wrap input { min-height:30px; border:0; border-radius:0; box-shadow:none; background:transparent; padding-right:2px; }
 .sim-editor-tabs { flex:0 0 auto; display:flex; gap:0; overflow-x:auto; scrollbar-width:none; margin:0; padding:0 18px; border-bottom:1px solid var(--border-default); background:var(--surface-card); position:relative; z-index:5; }
 .sim-editor-tabs::-webkit-scrollbar { display:none; }
@@ -3380,14 +3380,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .custom-color-input{
-    width:44px;
-    height:32px;
     flex:0 0 44px;
-    padding:2px;
-    border:1px solid var(--border-default);
-    border-radius:6px;
-    background:var(--surface-input);
-    cursor:pointer;
 }
 
 .appearance-custom-theme-preview{
@@ -3653,8 +3646,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel .genealogy-feedback-copy-credential:focus-visible{outline:2px solid var(--gf-primary);outline-offset:2px}
 .genealogy-feedback-panel .genealogy-feedback-copy-credential code{font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;min-width:0;flex:1;user-select:all}
 .genealogy-feedback-panel .l1ng-copy-glyph{width:20px;height:20px;flex:0 0 20px;fill:none;overflow:visible}
-.genealogy-feedback-panel .l1ng-copy-stroke,.genealogy-feedback-panel .l1ng-check-stroke{fill:none;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
-.genealogy-feedback-panel .l1ng-copy-stroke{stroke:currentColor;stroke-dashoffset:0}
+.genealogy-feedback-panel .l1ng-copy-stroke,.genealogy-feedback-panel .l1ng-check-stroke{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.genealogy-feedback-panel .l1ng-copy-stroke{stroke:currentColor;stroke-width:1.85;stroke-dashoffset:0}
 .genealogy-feedback-panel .l1ng-check-stroke{stroke:#5d9876;stroke-width:2.2;stroke-dashoffset:var(--stroke-hide)}
 .genealogy-feedback-panel .l1ng-copy-running .l1ng-copy-stroke{animation:genealogyFeedbackCopyTrace 3.8s linear both}
 .genealogy-feedback-panel .l1ng-copy-running .l1ng-check-stroke{animation:genealogyFeedbackCheckTrace 3.8s linear both}
@@ -3681,7 +3674,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel .genealogy-feedback-reply-verification iframe{max-width:100%}
 .genealogy-feedback-panel .genealogy-feedback-reply-attachments{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-files{align-self:stretch;width:100%}
-.genealogy-feedback-panel .genealogy-feedback-reply-actions{justify-content:flex-end}
+
 .genealogy-feedback-panel .genealogy-feedback-reply-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .genealogy-feedback-panel .genealogy-feedback-attach-action{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--gf-primary);cursor:pointer}
 @media(max-width:720px){.genealogy-feedback-panel .genealogy-feedback-success-actions>*{flex:1}}
@@ -4535,7 +4528,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 
 .genealogy-feedback-panel .genealogy-feedback-error,
 .genealogy-feedback-panel .genealogy-feedback-history-status {
-    display:block;
     margin:0 0 15px;
     padding:12px;
     border:1px solid color-mix(in srgb,#b6515a 30%,var(--gf-stroke));
@@ -4545,6 +4537,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     font-size:12px;
     line-height:1.6;
 }
+.genealogy-feedback-panel .genealogy-feedback-history-status { display:block; }
 
 /* 回饋錯誤提示與 RealDate 同一資訊層級：提示符號、標題、詳情。 */
 .genealogy-feedback-panel .genealogy-feedback-error {
@@ -4594,12 +4587,12 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     border:1px solid var(--gf-stroke);
     border-radius:9px;
     background:var(--gf-surface);
-    color:var(--gf-text);
     font-family:inherit;
     font-size:12.5px;
     font-weight:650;
     cursor:pointer;
 }
+.genealogy-feedback-panel .genealogy-feedback-secondary { color:var(--gf-text); }
 .genealogy-feedback-panel .genealogy-feedback-secondary:hover,
 .genealogy-feedback-panel .genealogy-feedback-back-link:hover {
     background:var(--gf-subtle);
@@ -6296,24 +6289,16 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 @media (max-width:900px) {
-    .topbar-brand {
-        /* 元素寬度 */ width: var(--sidebar-width);
-        /* 字體大小 */ font-size: 14px;
-        /* 內縮空間 */ padding: 0 12px;
-    }
+    
     .brand-input {
         /* 元素寬度 */ width: 120px;
         /* 字體大小 */ font-size: 14px;
     }
-    .family-select {
-        /* 最大寬度 */ max-width: 140px;
-    }
+    
 }
 
 @media (max-width:720px) {
-    .topbar-brand {
-        /* 顯示方式 */ display: none;
-    }
+    
     .menu-toggle {
         /* 顯示方式 */ display: inline-flex;
     }
@@ -6321,10 +6306,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
         /* 元素寬度 */ width: 100px;
         /* 字體大小 */ font-size: 14px;
     }
-    .topbar-main {
-        /* 內縮空間 */ padding: 0 8px;
-        /* 項目間距 */ gap: 6px;
-    }
+    
     .family-select {
         /* 顯示方式 */ display: none;
     }
@@ -6343,16 +6325,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     .sidebar.open {
         /* 元素變形 */ transform: translateX(0);
     }
-    .sidebar-backdrop {
-        /* 顯示方式 */ display: none;
-        /* 定位方式 */ position: fixed;
-        /* 定位範圍 */ inset: 0;
-        /* 背景設定 */ background: rgba(0,0,0,.45);
-        /* 顯示層級 */ z-index: 299;
-    }
-    .sidebar-backdrop.show {
-        /* 顯示方式 */ display: block;
-    }
+    
+    
     body .grid label,
     body .grid .form-field {
         /* 網格欄位範圍 */ grid-column: 1/-1;
@@ -6446,14 +6420,12 @@ body[data-theme="ling"] #genealogyCanvasViewport {
         /* 字距設定 */ letter-spacing: 1.15px;
     }
     .language-select {
-        /* 最小寬度 */ min-width: 58px;
         /* 左側內縮 */ padding-left: 6px;
         /* 右側內縮 */ padding-right: 6px;
     }
 }
 
 /* ========【L1nG 專區】 設定 - 開發者工具 Icon 排列規範 ======== */
-.filebtn,
 .pet-add-btn,
 .life-photo-add-btn {
     /* 垂直對齊 */ align-items: center;
@@ -7815,7 +7787,8 @@ button.is-loading .button-loading-label {
 
 
 .topbar-primary-actions { display:flex; align-items:center; gap:2px; flex-shrink:0; }
-.topbar-text-btn,.topbar-icon-only { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:0 9px; border:0; border-radius:5px; background:transparent; color:var(--navigation-text); font:inherit; font-size:12.5px; }
+.topbar-text-btn,.topbar-icon-only { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; border:0; border-radius:5px; background:transparent; color:var(--navigation-text); font:inherit; font-size:12.5px; }
+.topbar-text-btn { padding:0 9px; }
 .topbar-icon-only { width:32px; padding:0; }
 .topbar-text-btn:hover,.topbar-icon-only:hover { background:var(--nav-button-hover-bg); }
 .topbar-export-btn { color:var(--action-primary); font-weight:600; }
@@ -8264,7 +8237,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 .family-member-empty { padding:18px 8px; color:var(--text-secondary); text-align:center; font-size:11.5px; line-height:1.5; }
 .family-member-row {
     display:grid;
-    grid-template-columns:36px minmax(0,1fr) 26px;
+    grid-template-columns:36px minmax(0,1fr) 28px;
     align-items:center;
     gap:8px;
     min-height:48px;
@@ -8621,7 +8594,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 /* ========【家族成員快捷選單】 設定 - 每位成員使用單一更多入口，避免重複常駐按鈕 ======== */
-.family-member-row { grid-template-columns:36px minmax(0,1fr) 28px; }
+
 .family-member-menu { justify-self:end; position:relative; }
 .family-member-more { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--text-secondary); opacity:.55; }
 .family-member-row:hover .family-member-more,.family-member-more:focus-visible,.family-member-menu.open .family-member-more { opacity:1; background:var(--surface-item-hover); color:var(--text-primary); }
@@ -8943,7 +8916,6 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 }
 .skeleton-block,
 .skeleton-person {
-    display:block;
     background:
       linear-gradient(
         90deg,
@@ -8954,6 +8926,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     background-size:220% 100%;
     animation:genealogy-skeleton-shimmer 1.25s linear infinite;
 }
+.skeleton-block { display:block; }
 .skeleton-brand { width:126px; height:14px; border-radius:4px; }
 .skeleton-help,
 .skeleton-more,
