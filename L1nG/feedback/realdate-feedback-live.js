@@ -32,7 +32,17 @@
       path.setAttribute('d','m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3');svg.append(path);
       const label=document.createElement('span');label.textContent=file.name;
       const size=document.createElement('small');size.textContent=Math.max(1,Math.round(file.size/1024))+' KB';
-      span.append(svg,label,size);
+      if(node.id==='visitor-reply-selected'&&file.type.startsWith('image/')){
+        const image=document.createElement('img');image.className='feedback-reply-thumb';image.alt='附件縮圖';
+        const url=URL.createObjectURL(file);image.src=url;
+        image.addEventListener('load',()=>URL.revokeObjectURL(url),{once:true});
+        image.addEventListener('error',()=>URL.revokeObjectURL(url),{once:true});
+        span.append(image);
+      }else if(node.id==='visitor-reply-selected'){
+        const doc=document.createElementNS('http://www.w3.org/2000/svg','svg');doc.setAttribute('viewBox','0 0 24 24');doc.classList.add('feedback-paperclip');
+        const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d','M7 3h7l5 5v13H7z M14 3v6h5 M9 13h8 M9 17h8');doc.append(p);span.append(doc);
+      }else span.append(svg);
+      span.append(label,size);
       const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='移除';
       button.addEventListener('click',()=>{list.splice(i,1);displayFiles(list,node);});
       row.append(span,button);node.append(row);
@@ -421,7 +431,7 @@
       startThreadRefresh();
       if(!['done','spam'].includes(current.status) && !replyVerifier && core.isLive()){
         const container=$('realdate-reply-turnstile');
-        core.createVerification(container).then(v=>{replyVerifier=v;}).catch(err=>{
+        core.createVerification(container,{size:'flexible'}).then(v=>{replyVerifier=v;}).catch(err=>{
           $('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;
         });
       }
@@ -458,6 +468,19 @@
     $('visitor-reply-file-info').textContent='最多 3 個檔案・合計 20 MB';
     displayFiles(replyFiles,$('visitor-reply-selected'));
   });
+  const replyDrop=$('visitor-reply-files')?.closest('.feedback-reply-drop-target');
+  if(replyDrop){
+    const clear=()=>replyDrop.classList.remove('is-drag-over');
+    replyDrop.addEventListener('dragover',e=>{if(!e.dataTransfer?.types.includes('Files'))return;e.preventDefault();replyDrop.classList.add('is-drag-over');});
+    replyDrop.addEventListener('dragleave',e=>{if(!replyDrop.contains(e.relatedTarget))clear();});
+    replyDrop.addEventListener('drop',e=>{
+      if(!e.dataTransfer?.files.length)return;e.preventDefault();clear();
+      const checked=core.checkFiles(replyFiles,e.dataTransfer.files);
+      replyFiles.splice(0,replyFiles.length,...checked.files);displayFiles(replyFiles,$('visitor-reply-selected'));
+      const error=$('visitor-reply-error');error.hidden=!checked.errors.length;
+      if(checked.errors.length)error.textContent=checked.errors.join('；');
+    });
+  }
   $('visitor-reply-form')?.addEventListener('submit',async e=>{
     e.preventDefault();
     const message=$('visitor-reply').value.trim();
