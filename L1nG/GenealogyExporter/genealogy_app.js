@@ -15186,6 +15186,48 @@ const petEditorController = {
       : null;
   },
 
+  // 偏好沿用人物編輯器的資料與顯示規則；寵物新增時不顯示唯讀分頁。
+  switchPreferenceTab(tabName='basic') {
+    const tabs=[...petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]')]
+      .filter(tab=>!tab.hidden);
+    if(!tabs.some(tab=>tab.dataset.petEditorTab===tabName))tabName='basic';
+
+    tabs.forEach(tab=>{
+      const active=tab.dataset.petEditorTab===tabName;
+      tab.classList.toggle('active',active);
+      tab.setAttribute('aria-selected',active?'true':'false');
+      tab.tabIndex=active?0:-1;
+    });
+
+    petEditorDialog.querySelectorAll('.pet-editor-panel[data-pet-editor-panel]')
+      .forEach(panel=>{
+        const active=panel.dataset.petEditorPanel===tabName;
+        panel.classList.toggle('active',active);
+        panel.hidden=!active;
+      });
+
+    if(tabName!=='basic'){
+      const isAttraction=tabName==='attraction';
+      personEditor.renderPreferenceList(
+        this.currentPet(),
+        tabName,
+        isAttraction?'petAttractionPreferenceList':'petGamePreferenceList',
+        isAttraction?'petAttractionPreferenceEmpty':'petGamePreferenceEmpty'
+      );
+    }
+  },
+
+  syncPreferenceTabs(pet) {
+    const exists=!!this.currentPet();
+    const data=personEditor.preferenceData(pet);
+    petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]')
+      .forEach(tab=>{
+        if(tab.dataset.petEditorTab==='preferences')tab.hidden=!exists;
+        if(tab.dataset.petEditorTab==='attraction')tab.hidden=!exists||!data.attraction.length;
+      });
+    this.switchPreferenceTab('basic');
+  },
+
   createBlankPet() {
     return {
       id:uid('pet'),
@@ -15231,6 +15273,7 @@ const petEditorController = {
     $('petModalTitle').textContent = uiText('編輯寵物');
     $('pDelete').style.display = '';
     this.populateForm(entry.pet);
+    this.syncPreferenceTabs(entry.pet);
     this.renderOwnerChoices(entry.pet);
     petEditorDialog.classList.add('show');
     requestAnimationFrame(() =>
@@ -15498,6 +15541,7 @@ const petEditorController = {
       validIndex ? '' : 'none';
 
     this.populateForm(pet);
+    this.syncPreferenceTabs(pet);
     this.renderOwnerChoices(pet);
     petEditorDialog.classList.add('show');
 
@@ -15951,6 +15995,27 @@ $('pName').addEventListener('input', () => {
 $('pSpecies').addEventListener('change', () => {
   petEditorController.syncGenderVisibility();
   petEditorController.refreshAvatarPreview();
+});
+
+petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    petEditorController.switchPreferenceTab(tab.dataset.petEditorTab);
+  });
+  tab.addEventListener('keydown',event=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    const tabs=[...petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]')]
+      .filter(item=>!item.hidden);
+    const index=tabs.indexOf(tab);
+    if(index<0)return;
+    event.preventDefault();
+    let nextIndex=index;
+    if(event.key==='ArrowLeft')nextIndex=(index-1+tabs.length)%tabs.length;
+    if(event.key==='ArrowRight')nextIndex=(index+1)%tabs.length;
+    if(event.key==='Home')nextIndex=0;
+    if(event.key==='End')nextIndex=tabs.length-1;
+    petEditorController.switchPreferenceTab(tabs[nextIndex].dataset.petEditorTab);
+    tabs[nextIndex].focus();
+  });
 });
 
 $('petOwnerSearch')?.addEventListener('input',event => {
