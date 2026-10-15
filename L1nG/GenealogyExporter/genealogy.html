@@ -6,9 +6,9 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261016-feedback-success-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261016-feedback-fixed-thread-r1">
         <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
-        <script src="genealogy-feedback.js?v=20261016-feedback-success-replies-r1" defer></script>
+        <script src="genealogy-feedback.js?v=20261016-feedback-fixed-thread-r1" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
         <script src="../site-info-modal.js?v=20261015-cookie-preferences-r4" defer></script>
     </head>
@@ -163,7 +163,6 @@
                     </section>
                     <section class="genealogy-feedback-view" id="genealogyFeedbackHistoryPanel" aria-labelledby="genealogyFeedbackTitle" hidden>
                         <div class="genealogy-feedback-scroll">
-                            <button class="genealogy-feedback-back-link" id="genealogyFeedbackWriteTab" type="button"><span class="l1ng-icon icon-chevron-down genealogy-feedback-back-icon" aria-hidden="true"></span>返回填寫回饋</button>
                             <section class="genealogy-feedback-section">
                                 <div class="genealogy-feedback-section-heading">
                                     <h3 class="genealogy-feedback-field-label">我的回饋</h3>
@@ -203,8 +202,13 @@
                                         <button class="genealogy-feedback-submit" id="genealogyFeedbackSuccessOpen" type="button" hidden>查看匿名對話 <svg class="genealogy-feedback-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
                                     </div>
                                 </div>
+
+                            </section>
+                        </div>
                                 <div class="genealogy-feedback-thread" id="genealogyFeedbackThread" hidden>
-                                    <div class="genealogy-feedback-thread-summary">
+                                    <div class="genealogy-feedback-thread-top">
+                                        <h3 class="genealogy-feedback-thread-heading">我的回饋</h3>
+                                        <div class="genealogy-feedback-thread-summary">
                                         <div><strong id="genealogyFeedbackThreadId"></strong><small id="genealogyFeedbackThreadTime"></small></div>
                                         <span id="genealogyFeedbackThreadState"></span>
                                     </div>
@@ -212,21 +216,28 @@
                                         <span id="genealogyFeedbackThreadRefreshInfo"></span>
                                         <button class="genealogy-feedback-secondary" id="genealogyFeedbackThreadRefresh" type="button">立即更新</button>
                                     </div>
+                                    </div>
                                     <div class="genealogy-feedback-conversation" id="genealogyFeedbackMessages" aria-live="polite"></div>
                                     <form id="genealogyFeedbackReplyForm" class="genealogy-feedback-reply-form" novalidate>
                                         <label class="genealogy-feedback-field-label" for="genealogyFeedbackReply">補充資訊或回覆管理員</label>
                                         <textarea class="genealogy-feedback-field" id="genealogyFeedbackReply" maxlength="2000" rows="3" placeholder="補充問題、回覆或說明結果⋯⋯"></textarea>
-                                        <div class="genealogy-feedback-reply-actions">
-                                            <label class="genealogy-feedback-attach-action" for="genealogyFeedbackReplyFiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3"/></svg>選擇附件</label>
+                                        <div class="genealogy-feedback-reply-attachments">
+                                            <label class="genealogy-feedback-attach-action" for="genealogyFeedbackReplyFiles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5 0 0 1-8-7.5L13 3"/></svg>選擇附件</label>
                                             <input id="genealogyFeedbackReplyFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log" multiple hidden>
+                                            <ul id="genealogyFeedbackReplyFileList" class="genealogy-feedback-files"></ul>
+                                        </div>
+                                        <div class="genealogy-feedback-reply-verification">
+                                            <span class="genealogy-feedback-field-label">安全驗證</span>
+                                            <div id="genealogyFeedbackReplyVerify"></div>
+                                        </div>
+                                        <p class="genealogy-feedback-field-error" id="genealogyFeedbackReplyError" role="alert" hidden></p>
+                                        <div class="genealogy-feedback-reply-actions">
                                             <button class="genealogy-feedback-submit" id="genealogyFeedbackReplySubmit" type="submit">送出回覆</button>
                                         </div>
-                                        <ul id="genealogyFeedbackReplyFileList" class="genealogy-feedback-files"></ul>
-                                        <p class="genealogy-feedback-field-error" id="genealogyFeedbackReplyError" role="alert" hidden></p>
-                                        <div id="genealogyFeedbackReplyVerify"></div>
                                     </form>
                                 </div>
-                            </section>
+                        <div class="genealogy-feedback-history-footer">
+                            <button class="genealogy-feedback-back-link" id="genealogyFeedbackWriteTab" type="button"><span class="l1ng-icon icon-chevron-down genealogy-feedback-back-icon" aria-hidden="true"></span>返回填寫回饋</button>
                         </div>
                     </section>
                 </div>
