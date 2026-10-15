@@ -9441,25 +9441,22 @@ function petLineageHTML(pet, { profileRows = false } = {}) {
   const lineage =
     getPetLineageInfo(pet);
 
-  if (!lineage.hasData) return '';
-
   if (profileRows) {
-    const rows = [];
-    if (lineage.parentNames.length) {
-      rows.push(renderPersonProfileRow('父母', lineage.parentNames.map(esc).join(' / ')));
-    }
-    if (lineage.childNames.length) {
-      rows.push(renderPersonProfileRow('子女', lineage.childNames.map(esc).join(' / ')));
-    }
-    if (!rows.length) {
-      rows.push(renderPersonProfileRow(
-        '資料',
-        esc(uiText('血統資料已保留，但目前沒有可顯示的姓名')),
-        { muted:true }
-      ));
-    }
-    return '<div class="person-profile-list">' + rows.join('') + '</div>';
+    // 血統與模擬市民的家庭關係一樣常駐；缺少任一方時只顯示「—」。
+    return '<div class="person-profile-list">' +
+      renderPersonProfileRow(
+        '父母',
+        lineage.parentNames.length ? lineage.parentNames.map(esc).join(' / ') : '—'
+      ) +
+      renderPersonProfileRow(
+        '子女',
+        lineage.childNames.length ? lineage.childNames.map(esc).join(' / ') : '—'
+      ) +
+    '</div>';
   }
+
+  // 市民編輯器內的寵物摘要仍維持原本的精簡呈現，不額外加上空資料。
+  if (!lineage.hasData) return '';
 
   const parts = [];
 
@@ -15258,6 +15255,7 @@ const petEditorController = {
       ageStage:'成年',
       status:'在世',
       traits:[],
+      notes:'',
       avatar:null,
       avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
       gameAvatar:null, gameAvatarFrame:null,
@@ -15489,6 +15487,11 @@ const petEditorController = {
     $('pStatus').value =
       pet.status || '在世';
 
+    $('pNotes').value =
+      owner
+        ? displayDataText(pet.notes || '', owner)
+        : (typeof pet.notes === 'string' ? pet.notes : '');
+
     petEditorState.traits =
       Array.isArray(pet.traits)
         ? pet.traits
@@ -15625,6 +15628,12 @@ const petEditorController = {
     const inputBreed =
       $('pBreed').value.trim();
 
+    const shownNotes =
+      previous && owner
+        ? displayDataText(previous.notes || '', owner)
+        : '';
+    const inputNotes = $('pNotes').value.trim();
+
     const name =
       previous &&
       isBuiltinSampleSim(owner) &&
@@ -15638,6 +15647,13 @@ const petEditorController = {
       inputBreed === shownBreed
         ? previous.breed
         : inputBreed;
+
+    const notes =
+      previous &&
+      isBuiltinSampleSim(owner) &&
+      inputNotes === shownNotes
+        ? (previous.notes || '')
+        : inputNotes;
 
     const species =
       $('pSpecies').value;
@@ -15668,6 +15684,7 @@ const petEditorController = {
       traits:[
         ...petEditorState.traits
       ],
+      notes,
       avatar:petEditorState.avatar || null,
       avatarFrame:normalizeAvatarFrame(petEditorState.avatarFrame),
       gameAvatar:petEditorState.gameAvatar || null,
@@ -18926,6 +18943,7 @@ function openPetProfileFromCanvas(entry) {
   const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('') +
     renderPersonProfileRow(uiText('特徵'),'<div class="person-profile-traits">' + (traitMarkup || '—') + '</div>');
   const lineageMarkup = petLineageHTML(pet, { profileRows:true });
+  const notes = displayDataText(pet.notes || '',owner).trim();
   $('personProfileContent').innerHTML = `
     <div class="person-profile-header">
       <div class="person-profile-avatar person-profile-pet-main-avatar">${avatar}</div>
@@ -18939,10 +18957,14 @@ function openPetProfileFromCanvas(entry) {
         <h3 class="person-profile-section-title">${esc(uiText('基本資料'))}</h3>
         <div class="person-profile-list">${factsMarkup || '—'}</div>
       </section>
-      ${lineageMarkup ? `<section class="person-profile-section">
+      <section class="person-profile-section">
         <h3 class="person-profile-section-title">${esc(uiText('血統'))}</h3>
         ${lineageMarkup}
-      </section>` : ''}
+      </section>
+      <section class="person-profile-section">
+        <h3 class="person-profile-section-title">${esc(uiText('備註'))}</h3>
+        <div class="person-profile-notes">${notes ? esc(notes) : '—'}</div>
+      </section>
     </div>`;
   personProfilePersonId = null;
   personProfilePetTarget = entry;
