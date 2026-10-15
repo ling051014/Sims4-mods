@@ -252,6 +252,7 @@
       if ($('overview-recent')) {
         $('overview-recent').textContent = entries.length
           ? '最新回饋：' + entries[0].title : '目前沒有回饋紀錄。';
+        $('overview-recent').removeAttribute('aria-busy');
       }
     } catch (error) {
       $('feedback-sync-status').textContent='更新失敗，請稍後重試。';
@@ -305,7 +306,7 @@
       + '/attachments/' + encodeURIComponent(file.id);
     const entry = el('div','detail-file');
     const thumb = el('div','thumb');
-    thumb.appendChild(icon(/^text\//.test(file.type||'')?'file-text':'paperclip'));
+    thumb.appendChild(icon('file'));
     const info = el('div','detail-file-info');
     info.append(el('strong','',file.name),el('small','',sizeText(file.size)));
     const link = el('a','', '下載');
@@ -360,8 +361,10 @@
     updateDetailTags(item);
 
     const threadHeading = el('h3','detail-thread-title');
-    threadHeading.append(document.createTextNode(item.followUp === 'conversation' ? '匿名對話 ' : '單次回饋 '));
-    threadHeading.append(el('span','reply-indicator',replyLabel(item)));
+    const typeName = item.followUp === 'conversation' ? '匿名對話' : '單次回饋';
+    const stateName = replyLabel(item);
+    threadHeading.append(document.createTextNode(typeName));
+    if(stateName !== typeName) threadHeading.append(el('span','reply-indicator',stateName));
     body.append(threadHeading);
     const stack = el('div','conversation-stack');
     const files = item.attachments || [];
@@ -524,6 +527,12 @@
   showPage(['overview','analytics','feedback','settings'].includes(initialView.page)
     ? initialView.page : 'overview');
   showListSkeleton();
+  const recent=$('overview-recent');
+  if(recent){
+    recent.replaceChildren();
+    for(let i=0;i<2;i++){const skeleton=el('div','feedback-overview-skeleton');skeleton.setAttribute('aria-hidden','true');recent.append(skeleton);}
+    recent.setAttribute('aria-busy','true');
+  }
   refresh({quiet:true}).then(()=>{
     if (initialView.detailId && page === 'feedback') openDetail(initialView.detailId);
   });

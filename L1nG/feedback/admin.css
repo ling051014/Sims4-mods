@@ -91,10 +91,29 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 .admin-only .detail-body .conversation-message .detail-file .thumb{flex:0 0 44px;width:44px;height:44px}
 .admin-only .feedback-skeleton-row{display:flex;align-items:center;gap:15px;padding:22px 18px;border-bottom:1px solid var(--stroke)}
 .admin-only .feedback-skeleton-main,.admin-only .feedback-skeleton-short,.admin-only .feedback-detail-skeleton{display:block;background:var(--subtle);border-radius:8px;animation:l1ng-dashboard-pulse 1.3s ease-in-out infinite alternate}
+.admin-only .feedback-overview-skeleton{height:44px;margin:10px 0;border-radius:9px;background:var(--subtle);animation:l1ng-dashboard-pulse 1.3s ease-in-out infinite alternate}
+.admin-only .ga4-first-loading .stat-card .num{color:transparent;background:var(--subtle);border-radius:7px;width:60%;max-width:140px;min-height:26px;animation:l1ng-dashboard-pulse 1.3s ease-in-out infinite alternate}
+.admin-only .ga4-first-loading #overview-chart,.admin-only .ga4-first-loading #ga-trend-chart{min-height:170px;border-radius:10px;background:var(--subtle);animation:l1ng-dashboard-pulse 1.3s ease-in-out infinite alternate}
+.admin-only .ga4-first-loading .rank-list,.admin-only .ga4-first-loading #ga-device{color:transparent;min-height:78px;border-radius:9px;background:var(--subtle);animation:l1ng-dashboard-pulse 1.3s ease-in-out infinite alternate}
+.admin-only .ga4-first-loading .rank-list>*{visibility:hidden}
 .admin-only .feedback-skeleton-main{height:13px;width:62%}.admin-only .feedback-skeleton-short{height:13px;width:18%}
 .admin-only .feedback-detail-skeleton{height:55px;margin-bottom:15px}
 .admin-only .feedback-detail-skeleton:nth-child(2){width:78%}
 .admin-only .is-loading{cursor:progress;opacity:.7}
 @keyframes l1ng-dashboard-pulse{to{opacity:.35}}
-@media(prefers-reduced-motion:reduce){.admin-only .feedback-skeleton-main,.admin-only .feedback-skeleton-short,.admin-only .feedback-detail-skeleton{animation:none}}
+@media(prefers-reduced-motion:reduce){.admin-only .feedback-skeleton-main,.admin-only .feedback-skeleton-short,.admin-only .feedback-detail-skeleton,.admin-only .feedback-overview-skeleton,.admin-only .ga4-first-loading .stat-card .num,.admin-only .ga4-first-loading #overview-chart,.admin-only .ga4-first-loading #ga-trend-chart,.admin-only .ga4-first-loading .rank-list,.admin-only .ga4-first-loading #ga-device{animation:none}}
+@media(max-width:980px){
+ .admin-only .admin-app{width:100%;max-width:100%;grid-template-columns:minmax(0,1fr)}
+ .admin-only .admin-main{width:100%;max-width:100%;min-width:0;overflow-x:clip}
+ .admin-only .admin-main>.panel-view,.admin-only .stat-grid,.admin-only .dash-overview-bottom,.admin-only .analytics-lower,.admin-only .analytics-filters,.admin-only .section-toolbar,.admin-only .feedback-filter-grid{min-width:0;max-width:100%}
+ .admin-only .stat-card,.admin-only .dash-card,.admin-only .feedback-table{min-width:0;max-width:100%}
+ .admin-only .detail-panel{width:min(510px,100%);max-width:100%;overflow:hidden}
+ .admin-only .detail-body{min-width:0;overflow-x:clip}
+ .admin-only .detail-head,.admin-only .detail-foot,.admin-only .admin-reply-compose{min-width:0;width:100%}
+ .admin-only .detail-file{box-sizing:border-box;min-width:0;max-width:100%;width:100%}
+ .admin-only .detail-file-info{min-width:0;overflow-wrap:anywhere}
+ .admin-only .admin-reply-actions{min-width:0}
+ .admin-only .admin-reply-actions .hint{min-width:0;flex:1 1 auto;overflow-wrap:anywhere}
+ .admin-only #admin-send{flex:0 0 auto;white-space:nowrap}
+}
 @media(max-width:600px){.admin-only .feedback-filter-grid{gap:6px}.admin-only .detail-foot{padding:10px 12px}.admin-only .detail-status-actions .l1ng-select{flex-basis:120px;min-width:80px}.admin-only .detail-head{padding:17px}.admin-only .feedback-refresh-button{font-size:11px}}
