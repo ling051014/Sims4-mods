@@ -48,7 +48,7 @@
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
       avatarHTML, renderTraitTagSummary, genderClass, statusClass,
-      showPetCards, petCardAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
+      showPetCards, petCardAvatarHTML, petOwnerAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
       syncPetSelectionClasses
     } = helpers;
     // Scene owns canvas-only presentation and relationship-label SVG markup.
@@ -6379,7 +6379,7 @@ function paintPetLayer() {
       const ownerPortraits=owners.map(sim=>{
         const label=displayDataText(sim.name,sim)||uiText('（未命名）');
         // 直接共用「編輯寵物 > 飼主」的肖像來源、裁切方式及姓名首字兜底。
-        const image=framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((label||'?').charAt(0));
+        const image=petOwnerAvatarHTML(sim);
         return '<span class="genealogy-pet-owner-avatar" title="'+esc(label)+'" aria-label="'+esc(uiText('飼主')+'：'+label)+'">'+image+'</span>';
       }).join('');
       const portraits='<span class="genealogy-pet-card-portraits">'+

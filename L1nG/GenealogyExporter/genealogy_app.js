@@ -9019,6 +9019,10 @@ genealogyScene =
       avatarHTML, renderTraitTagSummary, genderClass, statusClass,
       showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
       petCardAvatarHTML:pet => petAvatarWithFallbackHTML(pet),
+      petOwnerAvatarHTML:sim => {
+        const name=displayDataText(sim.name,sim)||uiText('（未命名）');
+        return framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((name||'?').charAt(0));
+      },
       petCardSpeciesLabel:formatPetSpecies,
       petCardGenderLabel:petGenderLabel,
       getPetCardSettings,
