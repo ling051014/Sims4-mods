@@ -242,6 +242,14 @@
     }
     root.append(ring,legend);
   }
+  let overviewReady=false,analyticsReady=false;
+  function reportLoading(section,loading){
+    const panel=$(section);
+    if(!panel)return;
+    panel.classList.toggle('ga4-first-loading',loading);
+    if(loading)panel.setAttribute('aria-busy','true');
+    else panel.removeAttribute('aria-busy');
+  }
   function renderAnalytics(data) {
     const s=data.summary||{};
     for(const [id,n] of Object.entries({'ga-users':s.activeUsers,'ga-views':s.views,'ga-downloads':s.downloads,'ga-new':s.newUsers}))
@@ -282,6 +290,7 @@
     }
     const id=++requestId,range=dateRange(),site=$('analytics-site')?.value||'all';
     setText('ga-load-status','正在讀取 GA4 真實數據…');
+    if(!analyticsReady)reportLoading('panel-analytics',true);
     resetDetails('正在載入…');
     try{
       const data=await fetchReport(site,range);
@@ -292,6 +301,8 @@
       if(requestId!==id)return;
       resetDetails('目前無法顯示資料，請查看上方提示。');
       setText('ga-load-status',e.message);
+    }finally{
+      if(requestId===id){analyticsReady=true;reportLoading('panel-analytics',false);}
     }
   }
   async function refreshOverview() {
@@ -301,11 +312,12 @@
       return;
     }
     const end=today();
+    if(!overviewReady)reportLoading('panel-overview',true);
     try{renderOverview(await fetchReport('all',{start:daysBefore(end,29),end}));}
     catch(e){
       for(const id of ['ov-users','ov-views','ov-downloads'])setText(id,'—');
       empty('overview-chart',e.message);
-    }
+    }finally{overviewReady=true;reportLoading('panel-overview',false);}
   }
   function initialize() {
     const end=today();
