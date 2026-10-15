@@ -1894,6 +1894,9 @@ function relationshipPairRenderGeometry(a,b,setting,routeContext=null) {
     const join=pairJoinPoint(a,b);
     return {d:createPartnerConnectionPath(a,b),labelX:join.x,labelY:join.y};
   }
+  if(relationshipIsNearVertical(a,b)){
+    return relationshipVerticalCurveGeometry(a,b,routeContext);
+  }
   const start={x:aX,y:aY},end={x:bX,y:bY};
   return relationshipSmartUpperCurveGeometry(start,end,relationshipRouteRects(routeContext,start,end,true));
 }
@@ -1909,7 +1912,10 @@ function relationshipRouteRects(context,start,end,forCurve=false) {
     if(!position||excluded.has(String(id)))return;
     const rect=context.geometry?.rects?.get(String(id))||cardOuterRect(position);
     // 曲線必須納入所有世代，不能按固定的垂直距離忽略祖先卡片。
-    if(forCurve){
+    if(forCurve==='vertical'){
+      // 側向外擴可超出兩端 X 範圍，不能忽略左右兩側的其他世代卡片。
+      if(rect.bottom<minY-12||rect.top>maxY+12)return;
+    }else if(forCurve){
       if(rect.right<minX-12||rect.left>maxX+12)return;
     }else if(rect.right<minX-230||rect.left>maxX+230||
       rect.bottom<minY-260||rect.top>maxY+260)return;
@@ -2021,10 +2027,17 @@ function relationshipCubicClear(segments,rects) {
     const {from,c1,c2,to}=segment;
     const length=Math.hypot(c1.x-from.x,c1.y-from.y)+
       Math.hypot(c2.x-c1.x,c2.y-c1.y)+Math.hypot(to.x-c2.x,to.y-c2.y);
+    // 先依整段控制點包圍盒篩選，再檢查實際曲線，避免多人物族譜卡頓。
+    const left=Math.min(from.x,c1.x,c2.x,to.x)-9;
+    const right=Math.max(from.x,c1.x,c2.x,to.x)+9;
+    const top=Math.min(from.y,c1.y,c2.y,to.y)-9;
+    const bottom=Math.max(from.y,c1.y,c2.y,to.y)+9;
+    const nearby=rects.filter(r=>r.right>=left&&r.left<=right&&r.bottom>=top&&r.top<=bottom);
+    if(!nearby.length)return true;
     const steps=Math.max(48,Math.min(480,Math.ceil(length/2)));
     for(let i=1;i<steps;i++){
       const p=relationshipCubicAt(segment,i/steps);
-      if(rects.some(r=>p.x>=r.left-9&&p.x<=r.right+9&&
+      if(nearby.some(r=>p.x>=r.left-9&&p.x<=r.right+9&&
         p.y>=r.top-9&&p.y<=r.bottom+9))return false;
     }
     return true;
@@ -2081,10 +2094,81 @@ function relationshipArcCandidate(start,end,amplitude,sign) {
 }
 
 // ========【智慧曲線】 所有線各自避障，只有單一、向上凸的 Bézier 弧線 ========
-function relationshipCurveSideAnchor(card,targetCard) {
+function relationshipCurveSideAnchor(card,targetCard,preferredSide=null) {
   const source=cardOuterRect(card),target=cardOuterRect(targetCard);
   const side=cardHorizontalConnectionRect(card),avatar=cardAvatarRect(card);
-  return {x:target.centerX>=source.centerX?side.right:side.left,y:avatar.centerY};
+  const useRight=preferredSide==='right'||
+    (preferredSide!=='left'&&target.centerX>=source.centerX);
+  return {x:useRight?side.right:side.left,y:avatar.centerY};
+}
+
+// ========【跨世代智慧曲線】 垂直對齊時使用單側外擴的單段 Bézier ========
+function relationshipIsNearVertical(a,b) {
+  const from=cardOuterRect(a),to=cardOuterRect(b);
+  const dx=Math.abs(to.centerX-from.centerX);
+  const dy=Math.abs(to.centerY-from.centerY);
+  return dy>=72 && dx<Math.max(48,dy*0.58);
+}
+
+function relationshipVerticalArcSegment(start,end,bow,side) {
+  const dx=end.x-start.x,dy=end.y-start.y;
+  const sideways=side*(4*bow/3);
+  // Y 座標保持單調，僅側向形成一個平滑弧度；不允許 S 形或下凹。
+  const rise=Math.min(Math.abs(dy)*0.17,Math.max(8,bow*0.08));
+  const lift=4*rise/3;
+  return {
+    from:start,
+    c1:{x:start.x+dx/3+sideways,y:start.y+dy/3-lift},
+    c2:{x:start.x+dx*2/3+sideways,y:start.y+dy*2/3-lift},
+    to:end
+  };
+}
+
+function relationshipVerticalCurveGeometry(a,b,context=null) {
+  const candidates=[1,-1].map(side=>{
+    const port=side>0?'right':'left';
+    const start=relationshipCurveSideAnchor(a,b,port);
+    const end=relationshipCurveSideAnchor(b,a,port);
+    const rects=relationshipRouteRects(context,start,end,'vertical');
+    const dx=Math.abs(end.x-start.x),dy=Math.abs(end.y-start.y);
+    const minBow=Math.max(40,dx*0.28+12,Math.min(130,dy*0.22));
+    // 垂直極端情況的探索範圍由障礙物外緣與跨世代距離共同決定。
+    const edge=side>0
+      ? Math.max(start.x,end.x,...rects.map(r=>r.right))
+      : Math.min(start.x,end.x,...rects.map(r=>r.left));
+    const reach=side>0
+      ? Math.max(0,edge-Math.min(start.x,end.x))
+      : Math.max(0,Math.max(start.x,end.x)-edge);
+    const maxBow=Math.min(1800,Math.max(minBow+120,dy*0.9,reach*1.5+110));
+    return {side,start,end,rects,minBow,maxBow};
+  });
+  const first=Math.min(...candidates.map(c=>c.minBow));
+  const limit=Math.max(...candidates.map(c=>c.maxBow));
+  let winner=null;
+  for(let bow=first;bow<=limit+12;bow+=12){
+    for(const candidate of candidates){
+      if(bow<candidate.minBow||bow>candidate.maxBow)continue;
+      const segment=relationshipVerticalArcSegment(candidate.start,candidate.end,bow,candidate.side);
+      if(relationshipCubicClear([segment],candidate.rects)){
+        winner={...candidate,bow,segment};
+        break;
+      }
+    }
+    if(winner)break;
+  }
+  if(winner){
+    for(let bow=Math.max(winner.minBow,winner.bow-12);bow<winner.bow;bow+=2){
+      const segment=relationshipVerticalArcSegment(winner.start,winner.end,bow,winner.side);
+      if(relationshipCubicClear([segment],winner.rects)){
+        winner.segment=segment;
+        break;
+      }
+    }
+    return relationshipCubicGeometry([winner.segment]);
+  }
+  // 真正沒有單一安全弧度時不偷換直線、折線或穿卡片曲線。
+  const {start,end}=candidates[0];
+  return {d:'',labelX:(start.x+end.x)/2,labelY:(start.y+end.y)/2,segments:[],blocked:true};
 }
 
 function relationshipUpperArcSegment(start,end,rise) {
@@ -2123,6 +2207,9 @@ function relationshipSmartUpperCurveGeometry(start,end,rects) {
 }
 
 function relationshipOtherRenderGeometry(a,b,setting,context=null) {
+  if(setting.curved&&relationshipIsNearVertical(a,b)){
+    return relationshipVerticalCurveGeometry(a,b,context);
+  }
   const from=setting.curved?relationshipCurveSideAnchor(a,b):avatarBoundaryAnchor(a,b);
   const to=setting.curved?relationshipCurveSideAnchor(b,a):avatarBoundaryAnchor(b,a);
   const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
@@ -6707,8 +6794,10 @@ function genealogyCoParentRelationshipJunction(group,pos,byId,link) {
   const positions=group.children.map(id=>pos.get(id)).filter(Boolean);
   if(!positions.length)return null;
   const childAnchors=positions.map(card=>cardVerticalAnchor(card,'top'));
-  const start=setting.curved?relationshipCurveSideAnchor(a,b):avatarBoundaryAnchor(a,b);
-  const end=setting.curved?relationshipCurveSideAnchor(b,a):avatarBoundaryAnchor(b,a);
+  const start=geometry.segments?.[0]?.from||
+    (setting.curved?relationshipCurveSideAnchor(a,b):avatarBoundaryAnchor(a,b));
+  const end=geometry.segments?.[geometry.segments.length-1]?.to||
+    (setting.curved?relationshipCurveSideAnchor(b,a):avatarBoundaryAnchor(b,a));
   const centerX=(start.x+end.x)/2;
   const childCenter=(Math.min(...childAnchors.map(p=>p.x))+
     Math.max(...childAnchors.map(p=>p.x)))/2;
