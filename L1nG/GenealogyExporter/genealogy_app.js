@@ -16428,12 +16428,21 @@ function findPetFamilyLocation(entry) {
   const modeOrder=[...new Set([familyTreeViewMode,'household','ea','extended'])];
   const matches=[];
   modeOrder.forEach((mode,modeIndex)=>{
-    const active=getActiveFamilySelectorEntry(mode);
+    // 只讀取當前模式的作用中項目；查找其他模式不可修改其選擇狀態。
+    const active=mode===familyTreeViewMode ? getActiveFamilySelectorEntry(mode) : null;
     getFamilySelectorEntries(mode).forEach((candidate,index)=>{
+      const memberIds=(candidate.memberIds || []).map(String);
+      const relationSources=mode!=='extended' && (candidate.primaryMemberIds || []).length
+        ? candidate.primaryMemberIds : null;
+      // 與 Scene 相同：家族成員、主要成員、可見關聯人物都可能攜帶寵物。
+      const visible=genealogyStore.getVisibleFamilyIds(
+        {memberIds},{relationshipSourceIds:relationSources}
+      );
       const sourceIds=new Set([
-        ...(candidate.memberIds || []),
-        ...(candidate.primaryMemberIds || [])
-      ].map(String));
+        ...memberIds,
+        ...(candidate.primaryMemberIds || []).map(String),
+        ...visible
+      ]);
       const ownerId=[...ownerIds].find(id=>sourceIds.has(id));
       const family=db.families.find(item=>String(item.id)===String(candidate.familyId));
       const familyHousehold=family?.gameData?.householdId;
@@ -16570,7 +16579,7 @@ function renderPetLibrary() {
           iconSvg('three-dots') + '</button>' +
         '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
           '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view">' +
-            iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span></button>' +
+            iconSvg('person-vcard') + '<span>' + esc(uiText('查看寵物資料')) + '</span></button>' +
           '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit">' +
             iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' +
           '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="locate">' +
