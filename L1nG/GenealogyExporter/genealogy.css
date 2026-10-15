@@ -16,7 +16,7 @@ body[data-theme="ling"] {
     /* 深色主色 */ --action-primary-strong: #315f83;
     /* 危險操作色彩 */ --danger-text: #B33432;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #B33432;
     /* 危險操作色彩 */ --danger-solid-hover: #942725;
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
@@ -99,7 +99,7 @@ body[data-theme="sage"] {
     /* 深色主色 */ --action-primary-strong: #3f5849;
     /* 危險操作色彩 */ --danger-text: #B23B39;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #B23B39;
     /* 危險操作色彩 */ --danger-solid-hover: #912C2A;
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
@@ -182,7 +182,7 @@ body[data-theme="rose"] {
     /* 深色主色 */ --action-primary-strong: #703447;
     /* 危險操作色彩 */ --danger-text: #C13C2B;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #C13C2B;
     /* 危險操作色彩 */ --danger-solid-hover: #9B3022;
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
@@ -265,7 +265,7 @@ body[data-theme="amber"] {
     /* 深色主色 */ --action-primary-strong: #6d441f;
     /* 危險操作色彩 */ --danger-text: #B63C3C;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #B63C3C;
     /* 危險操作色彩 */ --danger-solid-hover: #942E2E;
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
@@ -372,7 +372,7 @@ body[data-theme="ink"] {
     --action-primary-strong: #9274a7;
     /* 危險操作色彩 */ --danger-text: #FF8880;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #FF8880;
     /* 危險操作色彩 */ --danger-solid-hover: #FFAAA1;
     /* 危險操作色彩 */ --danger-on-solid: #21181C;
@@ -455,7 +455,7 @@ body[data-theme="berrynight"] {
     --action-primary-strong: #aa6881;
     /* 危險操作色彩 */ --danger-text: #FF9A78;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #FF9A78;
     /* 危險操作色彩 */ --danger-solid-hover: #FFB297;
     /* 危險操作色彩 */ --danger-on-solid: #29191B;
@@ -538,7 +538,7 @@ body[data-theme="graphite"] {
     --action-primary-strong: #6689a8;
     /* 危險操作色彩 */ --danger-text: #FF8388;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #FF8388;
     /* 危險操作色彩 */ --danger-solid-hover: #FFA3A6;
     /* 危險操作色彩 */ --danger-on-solid: #24191C;
@@ -597,7 +597,7 @@ body[data-theme="custom"] {
     /* 深色主色 */ --action-primary-strong: #6a4688;
     /* 危險操作色彩 */ --danger-text: #B33432;
     /* 危險操作色彩 */ --danger-border: color-mix(in srgb,var(--danger-text) 42%,var(--border-default));
-    /* 危險操作色彩 */ --danger-surface: var(--danger-surface);
+    /* 危險操作色彩 */ --danger-surface: color-mix(in srgb,var(--danger-text) 9%,transparent);
     /* 危險操作色彩 */ --danger-solid: #B33432;
     /* 危險操作色彩 */ --danger-solid-hover: #942725;
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
