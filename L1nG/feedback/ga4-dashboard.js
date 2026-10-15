@@ -197,7 +197,6 @@
     trend('ga-trend-chart',data.trend);
     list('ga-pages',data.pages,x=>labelSite(x.host)+' · '+(x.path||'/'));
     list('ga-countries',data.countries,x=>labelCountry(x.name));
-    list('ga-files',data.downloads,x=>labelSite(x.host));
     list('ga-feedback-events',data.feedbackEvents,x=>labelSite(x.host)+' · '+(feedbackNames[x.event]||'未知互動'));
     setText('ga-feedback-totals','開啟 '+number(s.feedbackOpened)+' · 成功提交 '+number(s.feedbackSubmitted));
     list('ga-download-items',data.downloadItems,x=>labelSite(x.host)+' · '+(downloadNames[x.id]||'其他下載'));
@@ -213,7 +212,7 @@
   }
   function resetDetails(message) {
     for(const id of ['ga-users','ga-views','ga-downloads','ga-new'])setText(id,'—');
-    for(const id of ['ga-trend-chart','ga-pages','ga-countries','ga-files','ga-referrals','ga-device','ga-feedback-events','ga-download-items'])empty(id,message);
+    for(const id of ['ga-trend-chart','ga-pages','ga-countries','ga-referrals','ga-device','ga-feedback-events','ga-download-items'])empty(id,message);
     setText('ga-feedback-totals','開啟 — · 成功提交 —');
   }
   function dateRange() {
