@@ -804,7 +804,7 @@ function refreshResolvedAssetDom(
         if (element.classList.contains('person-library-deferred-image')) return;
         if (element.src !== url) {
           if (element.classList.contains('pet-avatar-image')) {
-            element.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+            element.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar, .person-card-mini-pet-avatar, .family-cover-collage-pet')
               ?.classList.remove('has-image');
           }
           element.src = url;
@@ -8903,6 +8903,16 @@ function preloadCurrentViewAssets() {
 
   addPriority(family?.coverImage);
 
+  // 自動拼貼的寵物圖片即使畫布篩選隱藏寵物也需要載入。
+  (family?.memberIds||[]).forEach(id=>{
+    (currentGenealogyData().sims[id]?.pets||[]).forEach(pet=>addPriority(pet.avatar));
+  });
+  if(family?.gameData?.householdId!=null) {
+    (currentGenealogyData()?.meta?.unassignedPets||[]).forEach(pet=>{
+      if(String(pet?.gameData?.householdId??'')===String(family.gameData.householdId))addPriority(pet.avatar);
+    });
+  }
+
   const visibleIds =
     getVisibleIds(
       currentGenealogyData().currentFamilyId
@@ -9332,14 +9342,14 @@ function markPetAvatarLoaded(event) {
   const image = event.target;
   if (!(image instanceof HTMLImageElement) || !image.classList.contains('pet-avatar-image')) return;
   // 等圖片解碼成功才隱藏 SVG，避免透明的遊戲頭像露出預設物種圖示。
-  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar, .person-card-mini-pet-avatar, .family-cover-collage-pet')
     ?.classList.toggle('has-image', image.naturalWidth > 0);
 }
 
 function markPetAvatarError(event) {
   const image = event.target;
   if (!(image instanceof HTMLImageElement) || !image.classList.contains('pet-avatar-image')) return;
-  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar, .person-card-mini-pet-avatar, .family-cover-collage-pet')
     ?.classList.remove('has-image');
 }
 
@@ -13707,13 +13717,31 @@ function renderFamilyCover(fam) {
     img.src = coverUrl; img.hidden = false; collage.innerHTML=''; empty.style.display='none'; return;
   }
   img.hidden = true; img.removeAttribute('src');
-  const members = (fam.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean).slice(0,4);
-  const withContent = members.filter(Boolean);
-  collage.innerHTML = withContent.map(sim => {
-    const avatar = framedAvatarImageHTML(sim.avatar, sim.avatarFrame);
-    return `<div class="family-cover-collage-item">${avatar || esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>`;
-  }).join('');
-  empty.style.display = withContent.length ? 'none' : '';
+  // 手動上傳的封面優先；自動四格拼貼加入有關聯的寵物。
+  const data=currentGenealogyData();
+  const members=[...new Set((fam.memberIds||[]).map(String))].map(id=>data.sims[id]).filter(Boolean);
+  const householdId=fam.gameData?.householdId==null?'':String(fam.gameData.householdId);
+  const pets=new Map();
+  const addPet=(pet,ownerId,index)=>{
+    if(!pet||typeof pet!=='object')return;
+    const id=String(pet.gameData?.simId||pet.id||ownerId+':'+index);
+    if(!pets.has(id)||(!pets.get(id).avatar&&pet.avatar))pets.set(id,pet);
+  };
+  members.forEach(sim=>(sim.pets||[]).forEach((pet,i)=>addPet(pet,String(sim.id),i)));
+  if(householdId)(data.meta?.unassignedPets||[]).forEach((pet,i)=>{
+    if(String(pet?.gameData?.householdId??'')===householdId)addPet(pet,'unassigned',i);
+  });
+  const availablePets=[...pets.values()].sort((a,b)=>Number(!!b.avatar)-Number(!!a.avatar));
+  const petSlots=availablePets.length?Math.min(availablePets.length,Math.max(1,4-members.length)):0;
+  const collageMembers=members.slice(0,4-petSlots);
+  const collagePets=availablePets.slice(0,4-collageMembers.length);
+  collage.innerHTML=collageMembers.map(sim=>{
+    const avatar=framedAvatarImageHTML(sim.avatar,sim.avatarFrame);
+    return '<div class="family-cover-collage-item">'+(avatar||esc((displayDataText(sim.name,sim)||'?').charAt(0)))+'</div>';
+  }).join('')+collagePets.map(pet=>
+    '<div class="family-cover-collage-item family-cover-collage-pet" title="'+esc(displayDataText(pet.name)||uiText('寵物'))+'">'+petAvatarWithFallbackHTML(pet)+'</div>'
+  ).join('');
+  empty.style.display=(collageMembers.length||collagePets.length)?'none':'';
 }
 
 
@@ -19079,6 +19107,10 @@ let activePetTouchDragPointerId = null;
 let lastPetTouchPressAt = -Infinity;
 petCardsLayer?.addEventListener('load',markPetAvatarLoaded,true);
 petCardsLayer?.addEventListener('error',markPetAvatarError,true);
+nodes?.addEventListener('load',markPetAvatarLoaded,true);
+nodes?.addEventListener('error',markPetAvatarError,true);
+$('familyCoverCollage')?.addEventListener('load',markPetAvatarLoaded,true);
+$('familyCoverCollage')?.addEventListener('error',markPetAvatarError,true);
 personProfileDialog?.addEventListener('load',markPetAvatarLoaded,true);
 personProfileDialog?.addEventListener('error',markPetAvatarError,true);
 petCardsLayer?.addEventListener('contextmenu',event => {
