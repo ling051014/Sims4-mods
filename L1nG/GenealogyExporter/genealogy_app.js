@@ -16260,7 +16260,7 @@ const personLibraryController = {
       button.tabIndex = active ? 0 : -1;
     }
     if (personLibrarySearch) {
-      personLibrarySearch.placeholder = uiText(petTab ? '搜尋寵物……' : '搜尋人物……');
+      personLibrarySearch.placeholder = uiText(petTab ? '搜尋寵物……' : '搜尋市民……');
     }
   },
   setCategory(category) {
