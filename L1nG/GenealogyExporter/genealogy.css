@@ -3593,12 +3593,11 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel .genealogy-feedback-files li .genealogy-feedback-file-text{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .genealogy-feedback-panel .genealogy-feedback-files li small{color:var(--gf-muted);white-space:nowrap;font-size:10px}
 .genealogy-feedback-panel .genealogy-feedback-paperclip,.genealogy-feedback-panel .genealogy-feedback-attach-action svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--gf-muted)}
-.genealogy-feedback-panel .genealogy-feedback-files button{margin-left:auto}
 .genealogy-feedback-panel .genealogy-feedback-success[hidden],.genealogy-feedback-panel .genealogy-feedback-thread[hidden],.genealogy-feedback-panel .genealogy-feedback-credential[hidden],.genealogy-feedback-panel .genealogy-feedback-success-actions [hidden]{display:none}
 .genealogy-feedback-panel .genealogy-feedback-thread{display:flex;flex:1 1 auto;flex-direction:column;gap:0;min-width:0;min-height:0;overflow:hidden}
 .genealogy-feedback-panel .genealogy-feedback-thread-top{display:flex;flex:0 0 auto;flex-direction:column;gap:13px;padding:16px 20px 12px;border-bottom:1px solid var(--gf-stroke)}
 .genealogy-feedback-panel .genealogy-feedback-thread-heading{margin:0;font-size:13px;font-weight:700;color:var(--gf-text)}
-.genealogy-feedback-panel .genealogy-feedback-history-footer{display:flex;flex:0 0 auto;justify-content:flex-end;align-items:center;padding:10px 20px;border-top:1px solid var(--gf-stroke);background:var(--gf-surface)}
+.genealogy-feedback-panel .genealogy-feedback-history-footer{display:none;flex:0 0 auto;justify-content:flex-end;align-items:center;padding:10px 20px;border-top:1px solid var(--gf-stroke);background:var(--gf-surface)}
 .genealogy-feedback-panel .genealogy-feedback-history-footer .genealogy-feedback-back-link{margin:0}
 .genealogy-feedback-panel #genealogyFeedbackHistoryPanel.is-success>.genealogy-feedback-history-footer{display:none}
 .genealogy-feedback-panel #genealogyFeedbackHistoryPanel.is-thread>.genealogy-feedback-scroll{display:none}
@@ -3642,13 +3641,13 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel .genealogy-feedback-message-attachment{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gf-muted);overflow-wrap:anywhere}
 .genealogy-feedback-panel .genealogy-feedback-message-attachment small{font-size:10px;white-space:nowrap}
 .genealogy-feedback-panel .genealogy-feedback-reply-form{display:flex;flex:0 0 auto;flex-direction:column;gap:9px;min-width:0;min-height:0;padding:12px 20px 14px}
-.genealogy-feedback-panel .genealogy-feedback-reply-verification{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.genealogy-feedback-panel .genealogy-feedback-reply-verification{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%}
 .genealogy-feedback-panel .genealogy-feedback-reply-verification iframe{max-width:100%}
 .genealogy-feedback-panel .genealogy-feedback-reply-attachments{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:8px}
 .genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-files{display:contents}
 
 .genealogy-feedback-panel .genealogy-feedback-reply-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.genealogy-feedback-panel .genealogy-feedback-attach-action{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--gf-primary);cursor:pointer}
+.genealogy-feedback-panel .genealogy-feedback-attach-action{display:inline-flex;align-items:center;gap:7px;font-size:13px;padding:6px 0;color:var(--gf-primary);cursor:pointer}
 @media(max-width:720px){.genealogy-feedback-panel .genealogy-feedback-success-actions>*{flex:1}}
 @media(prefers-reduced-motion:reduce){.genealogy-feedback-panel .l1ng-copy-running .l1ng-copy-stroke{animation:none;stroke-dashoffset:var(--stroke-hide)}.genealogy-feedback-panel .l1ng-copy-running .l1ng-check-stroke{animation:none;stroke-dashoffset:0}}
 
@@ -4211,6 +4210,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .genealogy-feedback-panel .genealogy-feedback-files button {
+    margin-left:auto;
     flex:0 0 auto;
     min-height:26px;
     padding:3px 7px;
@@ -4772,6 +4772,25 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
         transition:none;
     }
 }
+
+/* 回覆編輯區共用單一操作頁尾，僅對話紀錄捲動，輸入與操作控制固定。 */
+.genealogy-feedback-panel #genealogyFeedbackReply{width:100%;resize:vertical;min-height:72px;max-height:150px}
+.genealogy-feedback-panel .genealogy-feedback-reply-attachments:has(.genealogy-feedback-files li:nth-child(2):last-child) .genealogy-feedback-attachment-choice{grid-column:1/-1}
+.genealogy-feedback-panel .genealogy-feedback-attachment-choice{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;position:relative}
+.genealogy-feedback-panel .genealogy-feedback-attachment-top{display:flex;align-items:center;gap:6px;width:100%;min-width:0}
+.genealogy-feedback-panel .genealogy-feedback-attachment-top .genealogy-feedback-attach-action{flex:0 0 auto;white-space:nowrap}
+.genealogy-feedback-panel .genealogy-feedback-attachment-top .genealogy-feedback-drag-hint{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.genealogy-feedback-panel .genealogy-feedback-attachment-choice small,.genealogy-feedback-panel .genealogy-feedback-drag-hint{color:var(--gf-muted);font-size:10px}
+.genealogy-feedback-panel .genealogy-feedback-attachment-choice .genealogy-feedback-drag-hint{display:inline}
+.genealogy-feedback-panel .genealogy-feedback-reply-attachments.is-drag-over{background:var(--gf-primary-pale);border-radius:9px}
+.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-files li{min-width:0;padding:5px;border:1px solid var(--gf-stroke);border-radius:9px;gap:5px}
+.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text{min-width:0;gap:5px}
+.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text .feedback-reply-thumb{width:34px;height:34px;object-fit:cover;border-radius:5px;flex:0 0 34px}
+.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text svg{width:26px;height:26px;flex:0 0 26px}
+.genealogy-feedback-panel #genealogyFeedbackReplyVerify{width:100%;min-width:0}
+.genealogy-feedback-panel #genealogyFeedbackReplyVerify iframe{max-width:100%}
+.genealogy-feedback-panel .genealogy-feedback-reply-actions .genealogy-feedback-back-link{margin:0}
 
 /* ========【關係編輯】 設定 - 關係清單、自訂標註與操作 ======== */
 
@@ -9775,26 +9794,3 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 @media (pointer:coarse){.l1ng-color-picker-tools button{min-height:40px}.l1ng-color-picker-inputs input{font-size:16px;height:32px;min-height:32px}}
 
 @media (prefers-reduced-motion:reduce){.l1ng-color-picker-hue-rest,.l1ng-color-picker-hue-lens{transition:none}}
-
-/* Reply composer uses one footer: only history scrolls, controls stay stationary. */
-.genealogy-feedback-panel #genealogyFeedbackReply{width:100%;resize:vertical;min-height:72px;max-height:150px}
-.genealogy-feedback-panel .genealogy-feedback-reply-attachments:has(.genealogy-feedback-files li:nth-child(2):last-child) .genealogy-feedback-attachment-choice{grid-column:1/-1}
-.genealogy-feedback-panel .genealogy-feedback-attachment-choice{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
-.genealogy-feedback-panel .genealogy-feedback-attachment-top{display:flex;align-items:center;gap:6px;width:100%;min-width:0}
-.genealogy-feedback-panel .genealogy-feedback-attachment-top .genealogy-feedback-attach-action{flex:0 0 auto;white-space:nowrap}
-.genealogy-feedback-panel .genealogy-feedback-attachment-top .genealogy-feedback-drag-hint{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.genealogy-feedback-panel .genealogy-feedback-attachment-choice small,.genealogy-feedback-panel .genealogy-feedback-drag-hint{color:var(--gf-muted);font-size:10px}
-.genealogy-feedback-panel .genealogy-feedback-attach-action{font-size:13px;padding:6px 0}
-.genealogy-feedback-panel .genealogy-feedback-attachment-choice .genealogy-feedback-drag-hint{display:inline}
-.genealogy-feedback-panel .genealogy-feedback-attachment-choice{position:relative}
-.genealogy-feedback-panel .genealogy-feedback-reply-attachments.is-drag-over{background:var(--gf-primary-pale);border-radius:9px}
-.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-files li{min-width:0;padding:5px;border:1px solid var(--gf-stroke);border-radius:9px;gap:5px}
-.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text{min-width:0;gap:5px}
-.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text .feedback-reply-thumb{width:34px;height:34px;object-fit:cover;border-radius:5px;flex:0 0 34px}
-.genealogy-feedback-panel .genealogy-feedback-reply-attachments .genealogy-feedback-file-text svg{width:26px;height:26px;flex:0 0 26px}
-.genealogy-feedback-panel .genealogy-feedback-reply-verification{width:100%}
-.genealogy-feedback-panel #genealogyFeedbackReplyVerify{width:100%;min-width:0}
-.genealogy-feedback-panel #genealogyFeedbackReplyVerify iframe{max-width:100%}
-.genealogy-feedback-panel .genealogy-feedback-reply-actions .genealogy-feedback-back-link{margin:0}
-.genealogy-feedback-panel .genealogy-feedback-history-footer{display:none}
