@@ -15233,6 +15233,8 @@ const petEditorController = {
         isAttraction?'petAttractionPreferenceEmpty':'petGamePreferenceEmpty'
       );
     }
+    const content=petEditorDialog.querySelector('.pet-editor-content');
+    if(content)content.scrollTop=0;
   },
 
   syncPreferenceTabs(pet) {
