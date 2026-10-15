@@ -1457,30 +1457,8 @@ body.sidebar-resizing * {
     /* 透明度 */ opacity: .9;
 }
 
-.person-card-pet-chip {
-    /* 顯示方式 */ display: inline-flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 2px;
-    /* 內縮空間 */ padding: 1px 5px;
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 背景設定 */ background: var(--surface-item);
-    /* 字體大小 */ font-size: 9.5px;
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 最大寬度 */ max-width: 88px;
-    /* 換行方式 */ white-space: nowrap;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-}
 
-.person-card.dead .person-card-pet-chip {
-    /* 背景設定 */ background: var(--person-deceased-tag-surface);
-    /* 文字顏色 */ color: var(--person-deceased-tag-text);
-}
 
-.person-card.ghost .person-card-pet-chip {
-    /* 背景設定 */ background: var(--person-ghost-tag-surface);
-    /* 文字顏色 */ color: var(--person-ghost-tag-text);
-}
 
 .person-card-life-photo-badge {
     /* 顯示方式 */ display: inline-flex;

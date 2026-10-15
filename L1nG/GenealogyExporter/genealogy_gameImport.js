@@ -47,14 +47,6 @@
     return JSON.parse(JSON.stringify(value));
   }
 
-  function sameData(left, right) {
-    if (left === right) return true;
-    try {
-      return JSON.stringify(left) === JSON.stringify(right);
-    } catch (_) {
-      return false;
-    }
-  }
 
   function uniqueStrings(values) {
     return [...new Set(

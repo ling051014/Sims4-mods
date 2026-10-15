@@ -980,13 +980,6 @@ function clampAvatarValue(value,min,max,fallback){
     const f=normalizeAvatarFrame(frame);
     return [`--avatar-x:${(f.x*100).toFixed(2)}%`,`--avatar-y:${(f.y*100).toFixed(2)}%`,`--avatar-zoom:${f.zoom.toFixed(3)}`].join(';');
   }
-  function applyAvatarFrameToElement(element,frame){
-    if(!element)return;
-    const f=normalizeAvatarFrame(frame);
-    element.style.setProperty('--avatar-x',`${(f.x*100).toFixed(2)}%`);
-    element.style.setProperty('--avatar-y',`${(f.y*100).toFixed(2)}%`);
-    element.style.setProperty('--avatar-zoom',f.zoom.toFixed(3));
-  }
   function framedAvatarImageHTML(ref,frame,extraClass='',deferSrc=false){
     if(!isAssetId(ref))return'';
 
@@ -4525,20 +4518,6 @@ function inferredSiblingIdsForParents(
     );
 }
 
-function inferredSiblingIds(simId) {
-  const id =
-    String(simId || '');
-
-  const sim =
-    currentGenealogyData()?.sims?.[id];
-
-  if (!sim) return [];
-
-  return inferredSiblingIdsForParents(
-    id,
-    genealogyParentIds(sim)
-  );
-}
 
 function resolveSiblingRelationships(
   simId,
@@ -7211,22 +7190,8 @@ function saveRelationshipLineSettings() {
   }
 }
 
-function relationshipStyleOptionsHTML() {
-  return [
-    ['solid','實線'],['short-dash','短虛線'],['long-dash','長虛線'],['dot','點線']
-  ].map(([value,label]) =>
-    '<option value="' + value + '">' + esc(uiText(label)) + '</option>'
-  ).join('');
-}
 
-function otherRelationshipDomKey(type) {
-  return encodeURIComponent(String(type));
-}
 
-function otherRelationshipTypeFromDomKey(key) {
-  try { return decodeURIComponent(String(key || '')); }
-  catch (_) { return String(key || ''); }
-}
 
 const RELATIONSHIP_EDITOR_LABELS = Object.freeze({
   parent:'父母 / 子女',spouse:'配偶',exspouse:'前任',adopt:'領養',other:'其他關係'
@@ -9051,7 +9016,7 @@ genealogyScene =
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
+      avatarHTML, renderTraitTagSummary, genderClass, statusClass,
       showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
       petCardAvatarHTML:pet => petAvatarWithFallbackHTML(pet),
       petCardSpeciesLabel:formatPetSpecies,
@@ -9501,122 +9466,8 @@ function petLineageHTML(pet) {
   return `<div class="pet-lineage">${parts.join('')}</div>`;
 }
 
-function renderPetLifeStatusIcon(pet) {
-  const status =
-    String(pet?.status || '');
 
-  if (status === '幽靈') {
-    return iconSvg('ghost-symbol');
-  }
 
-  if (status === '已故') {
-    return iconSvg('tombstone');
-  }
-
-  return '';
-}
-
-function petChipPresentation(
-  pet,
-  owner
-) {
-  const name =
-    personDisplayText(
-      pet?.name,
-      owner
-    );
-
-  const breed =
-    personDisplayText(
-      pet?.breed,
-      owner
-    );
-
-  return {
-    name,
-    breed,
-    species:
-      formatPetSpecies(
-        pet
-      ),
-    icon:
-      petIconFor(
-        pet
-      ),
-    statusIcon:
-      renderPetLifeStatusIcon(
-        pet
-      )
-  };
-}
-
-function renderPetChipSummary(
-  pets,
-  owner = null
-) {
-  const source =
-    Array.isArray(pets)
-      ? pets
-      : [];
-
-  if (!source.length) {
-    return '';
-  }
-
-  const parts = [];
-  const visiblePets =
-    source.slice(0, 3);
-
-  for (const pet of visiblePets) {
-    const item =
-      petChipPresentation(
-        pet,
-        owner
-      );
-
-    const title =
-      item.name +
-      ' · ' +
-      item.species +
-      (
-        item.breed
-          ? ' · ' + item.breed
-          : ''
-      );
-
-    parts.push(
-      '<span class="person-card-pet-chip" title="' +
-      esc(title) +
-      '">' +
-        '<span class="pet-icon">' +
-          item.icon +
-        '</span>' +
-        (item.statusIcon || '') +
-        esc(item.name) +
-      '</span>'
-    );
-  }
-
-  const remaining =
-    source.length -
-    visiblePets.length;
-
-  if (remaining > 0) {
-    parts.push(
-      '<span class="person-card-pet-chip" title="' +
-      esc(
-        uiText(
-          `${source.length} 只寵物`
-        )
-      ) +
-      '">+' +
-      remaining +
-      '</span>'
-    );
-  }
-
-  return parts.join('');
-}
 
 function genderClass(sim) {
   const gender =
@@ -9645,17 +9496,6 @@ function statusClass(sim) {
 }
 
 // ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
-
-// ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
-function profileDirectFamilyIds(simId) {
-  return resolveDirectFamilyRelationships(
-    simId
-  )
-    .all
-    .map(relation =>
-      relation.targetId
-    );
-}
 
 function profileFamilyRelationshipRows(
   simId

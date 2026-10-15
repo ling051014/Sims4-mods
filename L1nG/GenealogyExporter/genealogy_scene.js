@@ -47,7 +47,7 @@
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
+      avatarHTML, renderTraitTagSummary, genderClass, statusClass,
       showPetCards, petCardAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
       syncPetSelectionClasses
     } = helpers;
@@ -9570,7 +9570,6 @@ function paintPersonLayer() {
     const dCareer = displayDataText(c.career, c);
     const dResidence = displayDataText(c.residence, c);
     const dAspiration = displayDataText(c.aspiration, c);
-    const dCause = displayDataText(c.causeOfDeath, c);
     const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
     const cls = derivePersonCardClassName(c, {viewMode:isView});
     const dStage = uiText(c.lifeStage);
