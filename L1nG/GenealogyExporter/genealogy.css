@@ -4865,7 +4865,12 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 文字顏色 */ color: var(--text-secondary);
 }
 
-/* ========【寵物資料】 設定 - 寵物清單、頭像與編輯操作 ======== */
+/* ========【寵物資料】 設定 - 寵物與相簿上下排列，寵物資訊以兩欄呈現 ======== */
+#petList { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px; }
+#petList > .relationship-empty { grid-column:1/-1; }
+@media (max-width:560px) {
+  #petList { grid-template-columns:minmax(0,1fr); }
+}
 
 .pet-item {
     /* 顯示方式 */ display: flex;
@@ -4874,7 +4879,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 內縮空間 */ padding: 6px 8px;
     /* 背景設定 */ background: var(--surface-item);
     /* 圓角弧度 */ border-radius: 6px;
-    /* 下方外距 */ margin-bottom: 5px;
+    /* 保持雙欄卡片可縮小 */ min-width:0;
+    /* 讓操作按鈕在窄欄位自然換行 */ flex-wrap:wrap;
 }
 
 .pet-item-avatar {
@@ -4903,13 +4909,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 最小寬度 */ min-width: 0;
 }
 
-.pet-item-name {
-    /* 字體大小 */ font-size: 13px;
-    /* 字體粗細 */ font-weight: 600;
-    /* 換行方式 */ white-space: nowrap;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-}
+.pet-item-heading { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px; min-width:0; }
+.pet-item-name { font-size:12px; font-weight:650; min-width:0; overflow-wrap:anywhere; }
+.pet-item-identity { color:var(--text-secondary); font-size:10px; white-space:nowrap; }
 
 .pet-item-meta {
     /* 字體大小 */ font-size: 11px;
@@ -5949,16 +5951,20 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .person-profile-row .person-profile-traits { margin-top:0; }
 .person-profile-traits .tag { font-size:10.5px; padding:3px 7px; max-width:none; }
 .person-profile-notes { font-size:12.5px; line-height:1.55; color:var(--text-primary); word-break:break-word; white-space:pre-wrap; }
-.person-profile-media { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:16px; }
+.person-profile-media { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; }
+.person-profile-media-column + .person-profile-media-column { border-top:1px solid var(--border-default); padding-top:12px; }
 .person-profile-media-column { min-width:0; }
 .person-profile-media-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:7px; color:var(--text-primary); font-size:12px; font-weight:700; }
 .person-profile-media-count { color:var(--text-secondary); font-size:10.5px; font-weight:500; }
-.person-profile-pets { display:flex; flex-direction:column; gap:5px; }
+.person-profile-pets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 9px; }
+@media (max-width:400px) { .person-profile-pets { grid-template-columns:minmax(0,1fr); } }
 .person-profile-pet { display:flex; align-items:center; gap:7px; padding:4px 6px; background:var(--surface-item); border-radius:6px; }
 .person-profile-pet-avatar { width:30px; height:30px; border-radius:7px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); display:flex; align-items:center; justify-content:center; font-size:14px; border:1px solid var(--border-default); }
 .person-profile-pet-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
 .person-profile-pet-text { flex:1; min-width:0; }
-.person-profile-pet-name { font-size:11.5px; font-weight:600; }
+.person-profile-pet-heading { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px; }
+.person-profile-pet-name { font-size:11.5px; font-weight:600; overflow-wrap:anywhere; }
+.person-profile-pet-identity { color:var(--text-secondary); font-size:10px; white-space:nowrap; }
 .person-profile-pet-meta {
     color:var(--text-secondary);
     font-size:10.5px;
@@ -8550,11 +8556,12 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 
 
 /* ========【人物媒體分頁】 設定 - 寵物與相簿並列，減少縱向留白 ======== */
-.sim-editor-panel[data-editor-panel="media"].active { display:grid; grid-template-columns:minmax(230px,.82fr) minmax(0,1.35fr); gap:16px; align-items:start; }
+.sim-editor-panel[data-editor-panel="media"].active { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
 .sim-editor-panel[data-editor-panel="media"] .relationship-section { margin:0; padding:0; border-top:0; }
+.sim-editor-panel[data-editor-panel="media"] #lifePhotoSection { padding-top:14px; border-top:1px solid var(--border-default); }
 .sim-editor-panel[data-editor-panel="media"] .relationship-section-title { margin-bottom:7px; }
 @media (max-width:680px) {
-  .sim-editor-panel[data-editor-panel="media"].active { grid-template-columns:1fr; gap:14px; }
+  #petList { grid-template-columns:minmax(0,1fr); }
 }
 
 
