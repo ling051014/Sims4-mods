@@ -28,10 +28,12 @@ function enhance(select){
  wrapper.appendChild(button);select.insertAdjacentElement('afterend',wrapper);document.body.appendChild(panel);
  select.classList.add('l1ng-select-native');
  const entry={select,button,panel};registry.set(select,entry);
+ window.L1nGRefreshSelect=window.L1nGRefreshSelect||((node)=>{const e=registry.get(node);if(e)refresh(e);});
  button.addEventListener('click',()=>{if(opened===entry){close();return;}close();refresh(entry);panel.hidden=false;opened=entry;button.setAttribute('aria-expanded','true');position(entry)});
  button.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){if(!opened){e.preventDefault();button.click();}else if(e.key==='ArrowDown'){e.preventDefault();panel.querySelector('button')?.focus()}}});
  panel.addEventListener('keydown',e=>{const choices=Array.from(panel.querySelectorAll('button'));const idx=choices.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();close();button.focus()}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();choices[Math.max(0,Math.min(choices.length-1,idx+(e.key==='ArrowDown'?1:-1)))]?.focus()}});
  select.addEventListener('change',()=>refresh(entry));
+ select.addEventListener('input',()=>refresh(entry));
  new MutationObserver(()=>refresh(entry)).observe(select,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled','selected','hidden']});
  refresh(entry);
 }
