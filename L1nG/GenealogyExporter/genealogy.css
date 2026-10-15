@@ -4909,17 +4909,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 最小寬度 */ min-width: 0;
 }
 
-.pet-item-heading { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px; min-width:0; }
-.pet-item-name { font-size:12px; font-weight:650; min-width:0; overflow-wrap:anywhere; }
+.pet-item-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:6px; min-width:0; }
+.pet-item-name { font-size:12px; font-weight:650; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pet-item-identity { color:var(--text-secondary); font-size:10px; white-space:nowrap; }
-
-.pet-item-meta {
-    /* 字體大小 */ font-size: 11px;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 換行方式 */ white-space: nowrap;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-}
 
 .pet-trait-summary {
     /* 寵物清單直接顯示已記錄特徵 */ display:flex;
@@ -5962,17 +5954,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .person-profile-pet-avatar { width:30px; height:30px; border-radius:7px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); display:flex; align-items:center; justify-content:center; font-size:14px; border:1px solid var(--border-default); }
 .person-profile-pet-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
 .person-profile-pet-text { flex:1; min-width:0; }
-.person-profile-pet-heading { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px; }
-.person-profile-pet-name { font-size:11.5px; font-weight:600; overflow-wrap:anywhere; }
+.person-profile-pet-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:6px; min-width:0; }
+.person-profile-pet-name { font-size:11.5px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .person-profile-pet-identity { color:var(--text-secondary); font-size:10px; white-space:nowrap; }
-.person-profile-pet-meta {
-    color:var(--text-secondary);
-    font-size:10.5px;
-    line-height:1.35;
-    white-space:normal;
-    overflow-wrap:anywhere;
-    word-break:break-word;
-}
 
 .person-profile-pet-traits {
     /* 人物檔案中的寵物特徵採與人物特徵一致的標籤語言 */ display:flex;
