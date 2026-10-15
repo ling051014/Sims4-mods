@@ -101,6 +101,7 @@
   }
   const label = status => statuses[status] || status || '未知';
   const categoryLabel = category => categories[category] || category || '未分類';
+  const categoryBadgeClass = category => ['bug','feature','other'].includes(category) ? category : 'uncategorized';
   const dateText = value => {
     if (!value) return '未知';
     const timestamp = new Date(value);
@@ -215,7 +216,7 @@
       row.append(primary);
       row.append(el('span','row-text row-source',item.site));
       const type = el('span','row-type');
-      type.append(el('span','type-badge',categoryLabel(item.category)));
+      type.append(el('span','type-badge '+categoryBadgeClass(item.category),categoryLabel(item.category)));
       row.append(type);
       const status = el('span','row-status');
       status.append(el('span','status-badge ' + item.status,label(item.status)));
@@ -343,7 +344,7 @@
   }
   function updateDetailTags(item){
     const tags=$('detail-head-tags');if(!tags)return;tags.replaceChildren();
-    tags.append(el('span','status-badge '+item.status,label(item.status)),el('span','type-badge',categoryLabel(item.category)),el('span','contact-tag '+(item.contact?'has-contact':'anonymous'),item.contact?'已留聯絡方式':'未留聯絡方式'));
+    tags.append(el('span','status-badge '+item.status,label(item.status)),el('span','type-badge '+categoryBadgeClass(item.category),categoryLabel(item.category)),el('span','contact-tag '+(item.contact?'has-contact':'anonymous'),item.contact?'已留聯絡方式':'未留聯絡方式'));
   }
   function populateDetail(item,requestId) {
     current = item;
