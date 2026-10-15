@@ -300,10 +300,11 @@
       loadThumbnail(image,url,requestId);
     }
   }
-  function renderMessage(root, author, body, date) {
+  function renderMessage(root, author, body, date, files=[], requestId=0) {
     const message = el('div','conversation-message ' + (author === 'admin' ? 'by-admin' : 'by-player'));
     message.append(el('span','conversation-label',author === 'admin' ? 'L1nG · 管理員' : '匿名玩家'));
     message.append(el('div','conversation-bubble',body));
+    for (const file of files) renderFile(message,file,requestId);
     message.append(el('span','conversation-time',dateText(date)));
     root.appendChild(message);
   }
@@ -333,9 +334,12 @@
     threadHeading.append(el('span','reply-indicator',replyLabel(item)));
     body.append(threadHeading);
     const stack = el('div','conversation-stack');
-    renderMessage(stack,'player',item.message,item.createdAt);
+    const files = item.attachments || [];
+    renderMessage(stack,'player',item.message,item.createdAt,
+      files.filter(file=>file.replyId==null),requestId);
     for (const msg of item.messages || []) {
-      renderMessage(stack,msg.author,msg.body,msg.created_at || msg.createdAt);
+      renderMessage(stack,msg.author,msg.body,msg.created_at || msg.createdAt,
+        files.filter(file=>file.replyId===msg.id),requestId);
     }
     body.append(stack);
 
@@ -353,14 +357,6 @@
       : '未留聯絡方式');
     body.append(details);
 
-    const fileGroup = el('div','detail-field');
-    const files = item.attachments || [];
-    const fileTitle = el('h3','', '附加檔案 ');
-    fileTitle.append(el('span','optional','(' + files.length + ')'));
-    fileGroup.append(fileTitle);
-    if (!files.length) fileGroup.append(el('p','','這則回饋沒有附加檔案。'));
-    else for (const file of files) renderFile(fileGroup,file,requestId);
-    body.append(fileGroup);
     const compose = document.querySelector('.admin-reply-compose');
     const canReply = item.followUp === 'conversation' && !['done','spam'].includes(item.status);
     if (compose) compose.hidden = !canReply;
