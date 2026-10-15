@@ -5,6 +5,7 @@ on:
       - genealogy-structural-optimization-20260926
     paths:
       - 'L1nG/**'
+      - 'tests/**'
       - '.github/workflows/l1ng-pages-build-check.yml'
   workflow_dispatch:
 jobs:
