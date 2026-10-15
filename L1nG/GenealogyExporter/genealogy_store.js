@@ -521,6 +521,29 @@
       return settings;
     }
 
+    // 沿用舊預設的存檔自動啟用「寵物」；玩家自訂的欄位設定不覆蓋。
+    // 記錄升級版本，避免玩家之後取消勾選又被自動開啟。
+    function migrateDefaultPersonPetFields(meta) {
+      if (meta.personCardPetDefaultsVersion === 1) return;
+      const oldView = {
+        name:true,gender:true,lifeStage:false,age:false,birthday:false,
+        status:true,race:false,career:false,residence:false,aspiration:false,
+        traits:false,gallery:false
+      };
+      const oldEdit = {
+        name:true,gender:true,lifeStage:true,age:true,birthday:true,
+        status:false,race:false,career:false,residence:true,aspiration:false,
+        traits:true,gallery:false
+      };
+      const matchesOldDefault = (settings,expected,mode) =>
+        settings?.pets === false &&
+        Object.entries(expected).every(([key,value])=>settings[key]===value) &&
+        (mode !== 'view' || settings.appearance === 'minimal');
+      if(matchesOldDefault(meta.cardView,oldView,'view'))meta.cardView.pets=true;
+      if(matchesOldDefault(meta.cardEdit,oldEdit,'edit'))meta.cardEdit.pets=true;
+      meta.personCardPetDefaultsVersion=1;
+    }
+
     function ensureCardSettings(current) {
       if (
         !current.meta ||
@@ -541,6 +564,8 @@
           'edit',
           current.meta.cardEdit
         );
+
+      migrateDefaultPersonPetFields(current.meta);
 
       current.meta.petCardView = normalizePetCardSettings('view',current.meta.petCardView);
       current.meta.petCardEdit = normalizePetCardSettings('edit',current.meta.petCardEdit);

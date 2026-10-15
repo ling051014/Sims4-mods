@@ -88,7 +88,7 @@ const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
   residence: false,
   aspiration: false,
   traits: false,
-  pets: false,
+  pets: true,
   gallery: false,
   appearance: 'minimal'
 });
@@ -106,7 +106,7 @@ const DEFAULT_CARD_EDIT_SETTINGS = Object.freeze({
   residence: true,
   aspiration: false,
   traits: true,
-  pets: false,
+  pets: true,
   gallery: false
 });
 
