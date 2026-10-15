@@ -48,7 +48,7 @@
   }
 
   function downloadDetails(anchor) {
-    if (site !== 'realdate' && site !== 'translations') return null;
+    if (!['realdate','translations','extractor'].includes(site)) return null;
     let url;
     try { url = new URL(anchor.href, document.baseURI); } catch (_) { return null; }
     const localFile = url.origin === global.location.origin

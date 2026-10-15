@@ -45,10 +45,11 @@ for (const icon of ['ui-search.svg', 'ui-clear.svg', 'afdian.svg',
 file('analytics.js');
 file('cookie-consent.js');
 file('cookie-consent.css');
-// Scope the only Pages Function to its one analytics-region endpoint;
-// all regular web pages and assets remain purely static.
+// Only regional consent and the protected home GA4 reports use Pages Functions.
+const functionRoutes=['/l1ng-analytics-region'];
+if (mode==='home') functionRoutes.push('/feedback/ga4-api');
 fs.writeFileSync(path.join(out,'_routes.json'),
-  JSON.stringify({version:1,include:['/l1ng-analytics-region'],exclude:[]}));
+  JSON.stringify({version:1,include:functionRoutes,exclude:[]}));
 const publicFeedback = [
   'feedback-core.js','feedback-i18n.js','feedback-loading.css',
   'feedback.css','realdate-feedback-live.js','select-ui.js'
@@ -59,7 +60,7 @@ if (mode === 'home') {
     'changelog.css','changelog.js','changelog.html'
   ]) file(name);
   // The dashboard belongs on the home domain only. Its API is NOT a static file.
-  for (const name of ['admin.html','admin.css','admin.js','feedback.css','select-ui.js']) {
+  for (const name of ['admin.html','admin.css','admin.js','ga4-dashboard.js','feedback.css','select-ui.js']) {
     file(path.join('feedback',name),path.join('feedback',name));
   }
   put(site('home.html'),path.join(out,'index.html'));
@@ -172,7 +173,7 @@ for (const p of htmls) {
   }
 }
 if (mode==='home') {
-  for(const name of ['feedback/admin.html','feedback/admin.js','feedback/admin.css'])
+  for(const name of ['feedback/admin.html','feedback/admin.js','feedback/ga4-dashboard.js','feedback/admin.css'])
     if(!fs.existsSync(path.join(out,name)))missing.push('Missing dashboard '+name);
 }
 if (mode==='realdate' && !fs.existsSync(path.join(out,'feedback.html'))) missing.push('Missing RealDate feedback page');

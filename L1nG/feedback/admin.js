@@ -417,15 +417,7 @@
   for (const id of ['search-input','site-filter','contact-filter','reply-filter']) {
     $(id)?.addEventListener('input',render);
   }
-  document.querySelectorAll('[data-range]').forEach(button =>
-    button.addEventListener('click',() => {
-      document.querySelectorAll('[data-range]').forEach(other => other.classList.toggle('active',other === button));
-      if ($('custom-date-row')) $('custom-date-row').hidden = button.dataset.range !== 'custom';
-    }));
-  $('apply-date')?.addEventListener('click',() => {
-    const from = $('date-from')?.value, to = $('date-to')?.value, error = $('date-error');
-    if (error) error.textContent = !from || !to || from > to ? '請選擇正確的日期範圍。' : '';
-  });
+  // GA4 date filters are managed by the dedicated, live report module.
   $('settings-theme')?.addEventListener('click',activateTheme);
   $('detail-close')?.addEventListener('click',closeDetail);
   $('admin-preview-close')?.addEventListener('click',()=>closeFullPreview());
@@ -485,13 +477,7 @@
       notify('已刪除回饋。');
     } catch (error) { notify(error.message); }
   });
-  for (const id of ['ga-users','ga-views','ga-downloads','ga-new','ov-users','ov-views','ov-downloads']) {
-    if ($(id)) $(id).textContent = '—';
-  }
-  if ($('overview-chart')) $('overview-chart').textContent = '尚未連接網站分析資料。';
-  for (const id of ['ga-countries','ga-pages','ga-devices','ga-referrals','ga-trend-chart','analytics-traffic-chart']) {
-    if ($(id)) $(id).textContent = '尚未連接資料來源。';
-  }
+  // GA4 statistics, charts and loading/error states are rendered by ga4-dashboard.js.
   document.addEventListener('keydown',event => {
     if (event.key !== 'Escape') return;
     if ($('confirm-layer')?.classList.contains('open')) $('cancel-delete')?.click();
