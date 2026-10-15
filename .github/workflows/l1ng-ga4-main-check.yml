@@ -1,0 +1,39 @@
+name: GA4 dashboard checks (main)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'functions/feedback/ga4-api.js'
+      - 'L1nG/feedback/admin.js'
+      - 'L1nG/feedback/admin.html'
+      - 'L1nG/build-pages.mjs'
+      - 'L1nG/analytics.js'
+      - 'tests/ga4_api.test.mjs'
+      - '.github/workflows/l1ng-ga4-main-check.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate GA4 JS and Pages Function syntax
+        run: |
+          node --check functions/feedback/ga4-api.js
+          node --check L1nG/feedback/admin.js
+          node --check L1nG/analytics.js
+          node --check L1nG/build-pages.mjs
+      - name: Run GA4 authentication and Data API regression tests
+        run: node --test tests/ga4_api.test.mjs
+      - name: Build home Pages bundle and inspect Function routes
+        run: |
+          node L1nG/build-pages.mjs home
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync('dist/_routes.json','utf8'));
+            if(!r.include.includes('/feedback/ga4-api'))process.exit(1);
+            if(fs.existsSync('dist/feedback/ga4-api.js'))process.exit(1);
+          "
