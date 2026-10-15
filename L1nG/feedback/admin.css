@@ -1,7 +1,8 @@
 /* 管理中心獨立頁：訪客回饋元素不會載入 */
-body.admin-only{min-height:100dvh}
+body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
+@media(min-width:981px){body.admin-only{height:100dvh;overflow:hidden}}
 .admin-only .admin-app{min-height:100dvh;height:100dvh}
-.admin-only .admin-main{min-height:0}
+.admin-only .admin-main{min-width:0;min-height:0;max-width:100%;overflow-x:clip}
 .admin-only .sidebar{height:100dvh}
 .admin-only .sidebar-note{display:none}
 .admin-only .admin-notice{display:none}
@@ -14,7 +15,11 @@ body.admin-only{min-height:100dvh}
 .admin-only .stat-card[data-jump],.admin-only .stat-card[data-status]{cursor:pointer}
 .admin-only select,.admin-only input[type="date"]{-webkit-appearance:none;appearance:none}
 .admin-only select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='%238f8f99' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:38px}
-@media(max-width:980px){.admin-only .admin-app,.admin-only .admin-main{height:auto;min-height:100dvh}.admin-only .sidebar{display:none}}
+@media(max-width:980px){
+ .admin-only .admin-app{grid-template-columns:minmax(0,1fr);height:auto;min-height:100dvh;overflow:visible}
+ .admin-only .admin-main{width:100%;height:auto;min-height:0;overflow:visible}
+ .admin-only .sidebar{display:none}
+}
 @media(max-width:600px){.admin-only .analytics-download-details{margin-top:12px}}
 
 /* 正式 Dashboard 沒有原型的 66px 頂欄，側邊詳情與確認視窗應完整覆蓋畫面。 */
