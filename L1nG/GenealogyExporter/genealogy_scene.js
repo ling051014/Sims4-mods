@@ -6137,12 +6137,12 @@ function solveAutomaticGenealogyPositions(visibleIds) {
 }
 
 // 一個寵物可能由多位模擬市民共同飼養，使用穩定 ID 查找實際飼主。
-function petOwnerDisplayNames(pet) {
+function petCardOwners(pet) {
   const id=String(pet?.gameData?.simId || pet?.id || '');
-  if (!id) return [];
-  return Object.values(genealogyData?.sims || {}).filter(sim =>
-    (sim.pets || []).some(item => String(item?.gameData?.simId || item?.id || '') === id)
-  ).map(sim => displayDataText(sim.name,sim)).filter(Boolean);
+  if(!id)return [];
+  return Object.values(genealogyData?.sims || {}).filter(sim=>
+    (sim.pets || []).some(item=>String(item?.gameData?.simId || item?.id || '')===id)
+  );
 }
 
 // ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
@@ -6159,37 +6159,42 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
   if (species || breed) rows.push({key:'speciesBreed',text:[species,breed].filter(Boolean).join(' · ')});
   if (stage || status) rows.push({key:'stageStatus',text:[stage,status].filter(Boolean).join(' · ')});
   if (traits.length) rows.push({key:'traits',text:traits.join(' / '),traits});
-  const owners=petOwnerDisplayNames(pet);
-  if (owners.length) rows.push({key:'owners',text:uiText('飼主')+'：'+owners.join('、')});
   return rows;
 }
 
 function petCardDimensions(pet,owner) {
-  const settings = getPetCardSettings();
-  const rows = petCardFieldRows(pet,owner,settings);
-  const edit = viewMode === 'edit';
-  const W = edit ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
-  const textWidth = edit ? W - 82 : W - 18;
-  const lines = (value,fontSize = 10) => {
-    const charWidth = /[^\x00-\x7f]/.test(String(value || '')) ? fontSize : fontSize * 0.58;
-    return Math.max(1,Math.ceil([...String(value || '')].length * charWidth / textWidth));
+  const settings=getPetCardSettings();
+  const rows=petCardFieldRows(pet,owner,settings);
+  const edit=viewMode==='edit';
+  const ownerCount=settings.owners ? petCardOwners(pet).length : 0;
+  const avatarSize=edit ? 51 : 61;
+  const columns=Math.min(2,ownerCount);
+  const ownerRows=Math.ceil(ownerCount/2);
+  const portraitWidth=avatarSize+(columns ? 5+columns*avatarSize+(columns-1)*4 : 0);
+  const portraitHeight=Math.max(avatarSize,ownerRows*avatarSize+Math.max(0,ownerRows-1)*4);
+  const W=Math.max(edit?PET_EDIT_DIMS.W:PET_VIEW_DIMS.W,portraitWidth+(edit?124:14));
+  const textWidth=edit?Math.max(94,W-portraitWidth-40):W-18;
+  const lines=(value,fontSize=10)=>{
+    const charWidth=/[^\x00-\x7f]/.test(String(value||'')) ? fontSize : fontSize*.58;
+    return Math.max(1,Math.ceil([...String(value||'')].length*charWidth/textWidth));
   };
-  const name = settings.name ? displayDataText(pet.name,owner) : '';
-  const nameHeight = name ? lines(name,edit?12:11)*17 : 0;
-  const rowHeight = rows.reduce((sum,row) => {
-    if (edit && row.key === 'traits') {
-      let used = 0, count = 1;
-      for (const trait of row.traits) {
-        const width = Math.min(textWidth,[...trait].length*9+12);
-        if (used && used+width+3>textWidth) {count++;used=0;}
-        used += width+3;
+  const name=settings.name?displayDataText(pet.name,owner):'';
+  const nameHeight=name?lines(name,edit?12:11)*17:0;
+  const rowHeight=rows.reduce((sum,row)=>{
+    if(edit && row.key==='traits'){
+      let used=0,count=1;
+      for(const trait of row.traits){
+        const width=Math.min(textWidth,[...trait].length*9+12);
+        if(used && used+width+3>textWidth){count++;used=0;}
+        used+=width+3;
       }
       return sum+count*19;
     }
     return sum+lines(row.text)*14+3;
   },0);
-  if (edit) return {W,H:Math.max(84,20+Math.max(51,nameHeight+rowHeight+4))};
-  return {W,H:Math.max(90,12+61+(nameHeight?nameHeight+5:0)+rowHeight+10)};
+  const H=edit?Math.max(84,20+Math.max(portraitHeight,nameHeight+rowHeight+4))
+    :Math.max(90,12+portraitHeight+(nameHeight?nameHeight+5:0)+rowHeight+10);
+  return {W,H};
 }
 
 function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
@@ -6286,14 +6291,19 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     const itemDims = group.entries.map(entry =>
       petCardDimensions(entry.pet,genealogyData?.sims?.[entry.ownerId] || null)
     );
-    const W = viewMode === 'edit' ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
-    const rowHeights = Array.from({length:rows},(_,i) =>
-      Math.max(...itemDims.slice(i*3,i*3+3).map(dim => dim.H))
+    const colWidths=Array.from({length:cols},(_,col)=>
+      Math.max(...itemDims.filter((_,i)=>i%3===col).map(dim=>dim.W))
     );
-    const rowTops = rowHeights.map((_,i) =>
-      rowHeights.slice(0,i).reduce((sum,height)=>sum+height+PET_ROW_GAP,0)
+    const colLefts=colWidths.map((_,col)=>
+      colWidths.slice(0,col).reduce((sum,w)=>sum+w+PET_CARD_GAP,0)
     );
-    const groupW = cols*W+Math.max(0,cols-1)*PET_CARD_GAP;
+    const rowHeights=Array.from({length:rows},(_,i)=>
+      Math.max(...itemDims.slice(i*3,i*3+3).map(dim=>dim.H))
+    );
+    const rowTops=rowHeights.map((_,i)=>
+      rowHeights.slice(0,i).reduce((sum,h)=>sum+h+PET_ROW_GAP,0)
+    );
+    const groupW=colWidths.reduce((sum,w)=>sum+w,0)+Math.max(0,cols-1)*PET_CARD_GAP;
     const groupH = rowHeights.reduce((sum,height)=>sum+height,0)+
       Math.max(0,rows-1)*PET_ROW_GAP;
     const y = Math.max(0,group.anchorY);
@@ -6313,7 +6323,7 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     group.y = y;
     occupied.push({left:x,top:y,right:x+groupW,bottom:y+groupH});
     group.entries.forEach((entry,index) => {
-      const cardX = x+(index%3)*(W+PET_CARD_GAP);
+      const cardX=x+colLefts[index%3];
       const cardY = y+rowTops[Math.floor(index/3)];
       // 寵物使用與人物相同的每家庭、每模式手動位置快照。
       const manual = family?.freeLayout?.[viewMode]
@@ -6349,6 +6359,7 @@ function paintPetLayer() {
       const state = pet.status === '幽靈' ? 'ghost' : pet.status === '已故' ? 'dead' : '';
       const settings = getPetCardSettings();
       const fields = petCardFieldRows(pet,owner,settings);
+      const owners=settings.owners ? petCardOwners(pet) : [];
       const edit = viewMode === 'edit';
       const gender = settings.gender ? String(pet.gender || '').toLowerCase() : '';
       const male = ['男','公','male'].includes(gender);
@@ -6368,12 +6379,20 @@ function paintPetLayer() {
         }
         return `<span class="genealogy-pet-card-field${edit ? ' person-card-edit-meta' : ' person-card-view-meta'}" title="${esc(row.text)}">${esc(row.text)}</span>`;
       }).join('');
+      const ownerPortraits=owners.map(sim=>{
+        const label=displayDataText(sim.name,sim)||uiText('（未命名）');
+        return '<span class="genealogy-pet-owner-avatar" title="'+esc(label)+'" aria-label="'+esc(uiText('飼主')+'：'+label)+'">'+avatarHTML(sim)+'</span>';
+      }).join('');
+      const portraits='<span class="genealogy-pet-card-portraits">'+
+        '<span class="genealogy-pet-card-avatar">'+petCardAvatarHTML(pet)+'</span>'+
+        (ownerPortraits?'<span class="genealogy-pet-card-owners">'+ownerPortraits+'</span>':'')+
+      '</span>';
       const cardMode = edit ? 'mode-edit' : 'mode-view';
       const appearanceClass = edit ? '' : ' card-appearance-' + (settings.appearance || 'minimal');
       const hasContent = settings.name || fields.length;
       return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}${appearanceClass}${hasContent ? '' : ' pet-avatar-only'}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
         style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${card.width}px;height:${card.height}px">
-        <span class="genealogy-pet-card-avatar">${petCardAvatarHTML(pet)}</span>
+        ${portraits}
         ${hasContent ? `<span class="genealogy-pet-card-info">
           ${settings.name ? `<span class="genealogy-pet-card-name">${esc(name)}${genderIcon}</span>` : ''}
           ${fieldHTML}
