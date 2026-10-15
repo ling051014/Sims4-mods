@@ -16413,6 +16413,112 @@ function petLibraryDisplayInfo(entry) {
   return {name,breed,traits,ownerLabel,owner,species:formatPetSpecies(pet)};
 }
 
+
+function findPetFamilyLocation(entry) {
+  const db=currentGenealogyData();
+  const pet=entry?.pet;
+  if(!pet)return null;
+  const petId=String(pet.gameData?.simId || pet.id || '');
+  const ownerIds=new Set([...(entry.ownerIds || [])].map(String));
+  Object.values(db?.sims || {}).forEach(sim=>{
+    if((sim.pets || []).some(item=>String(item?.gameData?.simId || item?.id || '')===petId))
+      ownerIds.add(String(sim.id));
+  });
+  const householdId=pet.gameData?.householdId == null ? '' : String(pet.gameData.householdId);
+  const modeOrder=[...new Set([familyTreeViewMode,'household','ea','extended'])];
+  const matches=[];
+  modeOrder.forEach((mode,modeIndex)=>{
+    const active=getActiveFamilySelectorEntry(mode);
+    getFamilySelectorEntries(mode).forEach((candidate,index)=>{
+      const sourceIds=new Set([
+        ...(candidate.memberIds || []),
+        ...(candidate.primaryMemberIds || [])
+      ].map(String));
+      const ownerId=[...ownerIds].find(id=>sourceIds.has(id));
+      const family=db.families.find(item=>String(item.id)===String(candidate.familyId));
+      const familyHousehold=family?.gameData?.householdId;
+      const byHousehold=!!householdId && (
+        (familyHousehold != null && String(familyHousehold)===householdId) ||
+        [...sourceIds].some(id=>String(db.sims[id]?.gameData?.householdId ?? '')===householdId)
+      );
+      if(!ownerId && !byHousehold)return;
+      matches.push({mode,entry:candidate,ownerId,byHousehold,
+        score:(ownerId?0:1)*100 + (candidate===active?0:1)*10 + modeIndex,
+        index});
+    });
+  });
+  matches.sort((a,b)=>a.score-b.score || a.index-b.index);
+  return matches[0] || null;
+}
+
+function locatePetFromLibrary(entry) {
+  const petId=String(entry?.pet?.gameData?.simId || entry?.pet?.id || '');
+  if(!petId)return false;
+  const selected=findPetFamilyLocation(entry);
+  if(!selected){
+    uiAlert(uiText('找不到包含這隻寵物的族譜，請先指派飼主或所屬家庭。'),{
+      title:uiText('在族譜中定位')
+    });
+    return false;
+  }
+  const {mode,entry:familyEntry,ownerId}=selected;
+  const changedFamily=familyTreeViewMode!==mode ||
+    String(currentFamily()?.id || '')!==String(familyEntry.familyId || '') ||
+    getFamilyTreeSelectionValue(mode)!==familyEntry.value;
+  const changedFilters=petVisibilityFilter && !petVisibilityFilter.checked;
+  if(changedFilters){
+    petVisibilityFilter.checked=true;
+    updateTopbarFilterUI();
+  }
+  const revealedOwner=ownerId ? revealPersonInTopbarFilters(currentGenealogyData().sims[ownerId]) : false;
+  if(changedFamily){
+    familyTreeViewMode=mode;
+    try{localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY,mode);}catch(_){}
+    setFamilyTreeSelectionValue(mode,familyEntry.value);
+    genealogyStore.setCurrentFamilyId(familyEntry.familyId);
+    familyTreeLastSourceFamilyId=familyEntry.familyId;
+    dragHistory.clear();
+    clearNodeSelection();
+    resetFamilyMemberOperations();
+  }
+  personLibraryController.close();
+  if(changedFamily){
+    save();
+    refreshFamilyUI();
+  }else if(changedFilters || revealedOwner){
+    refreshFamilyProfilePanel();
+  }
+  if(changedFamily || changedFilters || revealedOwner)render();
+  requestAnimationFrame(()=>{
+    if(!findCanvasPetEntry(petId))render();
+    requestAnimationFrame(()=>{
+      const card=findCanvasPetEntry(petId);
+      if(card)focusPetOnCanvas(card);
+      else uiAlert(uiText('這隻寵物目前沒有可顯示的族譜卡片。'),{
+        title:uiText('在族譜中定位')
+      });
+    });
+  });
+  return true;
+}
+
+async function deletePetFromLibrary(entry) {
+  const petId=String(entry?.pet?.gameData?.simId || entry?.pet?.id || '');
+  if(!petId)return;
+  const info=petLibraryDisplayInfo(entry);
+  const confirmed=await uiConfirm(
+    uiText('確定永久刪除寵物')+'「'+info.name+'」？\n'+
+    uiText('這會從所有飼主與未指派寵物清單中移除，無法復原。'),
+    {title:uiText('永久刪除寵物'),kind:'danger',confirmText:uiText('永久刪除')}
+  );
+  if(!confirmed)return;
+  const mutation=genealogyStore.deletePet(petId);
+  if(!mutation.dataChanged)return;
+  selectedPetIds.delete(petId);
+  applyGenealogyMutation(mutation);
+  if(personLibraryDialog.classList.contains('show'))renderPersonLibrary();
+}
+
 function renderPetLibrary() {
   const list = $('personLibraryList');
   const all = collectPetLibraryEntries();
@@ -16439,7 +16545,6 @@ function renderPetLibrary() {
       [uiText('物種'),info.species],
       [uiText('品種'),info.breed],
       [uiText('性別'),petGenderLabel(pet)],
-      [uiText('人生階段'),uiText(pet.ageStage || '')],
       [uiText('狀態'),uiText(pet.status || '')],
       [uiText('所屬家庭'),info.ownerLabel]
     ].filter(([,value]) => !!value);
@@ -16466,8 +16571,13 @@ function renderPetLibrary() {
         '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
           '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view">' +
             iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span></button>' +
-          (entry.ownerId ? '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit">' +
-            iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' : '') +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit">' +
+            iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="locate">' +
+            iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span></button>' +
+          '<div class="ui-menu-divider"></div>' +
+          '<button class="ui-menu-item danger" type="button" role="menuitem" data-pet-library-action="delete">' +
+            iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span></button>' +
         '</div>' +
       '</div></div>';
   }).join('');
@@ -16483,7 +16593,10 @@ function renderPetLibrary() {
     row.querySelectorAll('[data-pet-library-action]').forEach(button => {
       button.addEventListener('click', event => {
         event.stopPropagation();
-        if (button.dataset.petLibraryAction === 'edit') openPetEditorFromCanvas(entry);
+        const action=button.dataset.petLibraryAction;
+        if (action === 'edit') openPetEditorFromCanvas(entry);
+        else if (action === 'locate') locatePetFromLibrary(entry);
+        else if (action === 'delete') void deletePetFromLibrary(entry);
         else openPetProfileFromCanvas(entry);
       });
     });
@@ -16584,7 +16697,6 @@ function renderPersonLibrary() {
         '</div>' +
         '<div class="person-library-text">' +
           '<div class="person-library-name">' +
-            raceIconHTML(s) + statusIconHTML(s) +
             '<span class="person-library-name-label">' + esc(displayDataText(s.name, s)) + '</span>' +
             '<span class="person-library-life">' + esc(displayDataText(s.lifeStage, s)) + '</span>' +
           '</div>' +
