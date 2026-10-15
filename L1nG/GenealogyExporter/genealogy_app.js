@@ -18986,8 +18986,6 @@ function connectAssetStoreInBackground() {
 // 內建範例的圖片在檔案中提供，首次載入與恢復預設時匯入既有 Blob 資產庫。
 async function ensureSamplePortraitAssets(database) {
   if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 11) return false;
-  const images = window.L1nGGenealogySamplePortraits;
-  if (!images) throw new Error('預設族譜 PNG 索引尚未載入。');
 
   // 只處理內建 82 位人物與 6 隻寵物，不覆蓋玩家後來自行新增的角色。
   const baseline = buildSample();
@@ -19021,14 +19019,9 @@ async function ensureSamplePortraitAssets(database) {
     let promise = importPromises.get(path);
     if (promise) return promise;
     promise = (async () => {
-      let bytes;
-      if (typeof images[path] === 'string') {
-        bytes = Uint8Array.from(atob(images[path]), char => char.charCodeAt(0));
-      } else {
-        const response = await fetch(path, { cache:'no-store' });
-        if (!response.ok) throw new Error(path + '：HTTP ' + response.status);
-        bytes = new Uint8Array(await response.arrayBuffer());
-      }
+      const response = await fetch(path, { cache:'no-store' });
+      if (!response.ok) throw new Error(path + '：HTTP ' + response.status);
+      const bytes = new Uint8Array(await response.arrayBuffer());
       const signature = [137,80,78,71,13,10,26,10];
       if (bytes.length < 33 || !signature.every((value,index) => bytes[index] === value)) {
         throw new Error('預設肖像不是有效 PNG：' + path);
