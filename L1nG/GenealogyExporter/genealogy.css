@@ -2905,6 +2905,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
   flex:1 1 auto; min-height:0; overflow-y:auto;
   overscroll-behavior:contain; padding:20px 24px 16px;
 }
+.pet-editor-tabs { margin:12px -24px 14px; padding:0 24px; }
+.pet-editor-tabs .pet-editor-tab { flex:1 1 0; }
+.pet-editor-panel[hidden] { display:none; }
 .pet-editor-modal > .ui-dialog-actions.sim-editor-actions {
   position:relative; z-index:1;
 }
@@ -8495,6 +8498,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .profile-residence-field { grid-column:2; }
   .pet-editor-layout { grid-template-columns:1fr; }
   .pet-editor-content { padding:14px 14px 16px; }
+  .pet-editor-tabs { margin:12px -14px 14px; padding:0 14px; }
   .pet-avatar-editor-block { width:100%; }
   .pet-editor-fields { grid-template-columns:1fr; }
   .pet-field-full { grid-column:auto; }
