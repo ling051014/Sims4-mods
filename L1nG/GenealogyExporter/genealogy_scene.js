@@ -6166,9 +6166,10 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
 // 飼主按每排最多三人平均分配：4=2+2、5=3+2、7=3+2+2。
 function petOwnerRowSizes(count) {
   const rows=Math.ceil(count/3);
-  return Array.from({length:rows},(_,index)=>
-    Math.ceil((count-index*Math.ceil(count/rows))/(rows-index))
-  );
+  if(!rows)return [];
+  const base=Math.floor(count/rows);
+  const remainder=count%rows;
+  return Array.from({length:rows},(_,index)=>base+(index<remainder?1:0));
 }
 
 function petOwnerTopSpace(count) {
