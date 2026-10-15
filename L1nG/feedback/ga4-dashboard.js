@@ -14,6 +14,55 @@
     'translations.by-l1ng.com':'漢化專區'
   };
   const labelSite = name => siteLabels[name] || name || '未知網站';
+
+  // Use the visible Traditional Chinese navigation/page titles, not GA4 URL slugs.
+  // Paths are host-scoped: /download can mean different things on different sites.
+  const pageTitles = Object.freeze({
+    'home.by-l1ng.com': Object.freeze({
+      '/': 'L1nG · 首頁',
+      '/home': 'L1nG · 首頁',
+      '/home-en': 'L1nG · 首頁（英文）',
+      '/site-info': 'L1nG · 使用、隱私與 Cookie 說明',
+      '/changelog': 'RealDate · 更新日誌'
+    }),
+    'realdate.by-l1ng.com': Object.freeze({
+      '/': 'RealDate',
+      '/gameplay': 'RealDate · 完整玩法',
+      '/download': 'RealDate · 下載與安裝',
+      '/compatibility': 'RealDate · 相容性',
+      '/changelog': 'RealDate · 更新日誌',
+      '/roadmap': 'RealDate · 開發方向',
+      '/faq': 'RealDate · 常見問題',
+      '/feedback': 'RealDate · 問題反饋',
+      '/installation': 'RealDate · 安裝說明已合併'
+    }),
+    'genealogy-tool.by-l1ng.com': Object.freeze({
+      '/': '族譜工具',
+      '/genealogy': '族譜工具'
+    }),
+    'genealogy-exporter.by-l1ng.com': Object.freeze({
+      '/': '族譜提取器',
+      '/genealogy-exporter': '族譜提取器'
+    }),
+    'translations.by-l1ng.com': Object.freeze({
+      '/': '漢化專區'
+    })
+  });
+  function labelPage(item) {
+    const host = String(item?.host || '');
+    let path = String(item?.path || '/').trim().split(/[?#]/, 1)[0] || '/';
+    try { path = decodeURI(path); } catch (_) { /* Keep the original pathname. */ }
+    if (!path.startsWith('/')) path = '/' + path;
+    path = path.replace(/\/{2,}/g, '/')
+      .replace(/\/index(?:\.html?)?$/i, '/')
+      .replace(/\.html?$/i, '');
+    if (path.length > 1) path = path.replace(/\/+$/, '');
+    path = path.toLowerCase();
+    const label = pageTitles[host]?.[path];
+    if (label) return label;
+    // Future pages with no mapped title must not expose raw URL filenames as titles.
+    return labelSite(host) + ' · 其他頁面';
+  }
   const downloadNames=Object.freeze({
     "r_v05_homehero":"RealDate v0.5 Beta · 首頁上方下載",
     "r_v05_homecard":"RealDate v0.5 Beta · 首頁版本卡下載",
@@ -199,7 +248,7 @@
       setText(id,number(n));
     setText('chart-description',data.range.startDate+' 至 '+data.range.endDate+' · 活躍使用者');
     trend('ga-trend-chart',data.trend);
-    list('ga-pages',data.pages,x=>labelSite(x.host)+' · '+(x.path||'/'));
+    list('ga-pages',data.pages,x=>labelPage(x));
     list('ga-countries',data.countries,x=>labelCountry(x.name));
     list('ga-feedback-events',data.feedbackEvents,x=>labelSite(x.host)+' · '+(feedbackNames[x.event]||'未知互動'));
     setText('ga-feedback-totals','開啟 '+number(s.feedbackOpened)+' · 成功提交 '+number(s.feedbackSubmitted));
