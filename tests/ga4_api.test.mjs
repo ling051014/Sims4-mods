@@ -64,7 +64,7 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
     seen.push(new URL(url).hostname);
     if(url.endsWith('/cdn-cgi/access/certs'))return Response.json({keys:[jwk]});
     if(url==='https://oauth2.googleapis.com/token'){
-      assert.match(String(options.body),'grant_type=');
+      assert.match(String(options.body),/grant_type=/);
       return Response.json({access_token:'fake-google-access-token',expires_in:3599});
     }
     if(url.includes('analyticsdata.googleapis.com/v1beta/properties/558394569:runReport')){
