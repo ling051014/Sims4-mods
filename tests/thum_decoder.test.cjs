@@ -43,14 +43,21 @@ test('普通 PNG 保留原 bytes',async()=>{
   const asset=await window.L1nGGameImport.prepareGameAvatarAsset({bytes,mimeType:'image/png'});
   assert.equal(asset.converted,false);assert.deepEqual(new Uint8Array(await asset.blob.arrayBuffer()),bytes);
 });
-test('遊戲 ZIP pet 不進人物 THUM codec',async()=>{
-  const asset=await window.L1nGGameImport.prepareGameAvatarAsset({bytes:raw,mimeType:'image/jpeg'},'pet');
-  assert.equal(asset.converted,false);assert.deepEqual(new Uint8Array(await asset.blob.arrayBuffer()),raw);
+test('遊戲 ZIP 寵物及人物共享 THUM codec，普通 JPEG 原始 bytes 保持不變',async()=>{
+  const meta=codec.inspect(raw);
+  const jpeg=new Uint8Array([...raw.subarray(0,20),...raw.subarray(meta.alphaEnd)]);
+  for (const kind of ['sim','pet']) {
+    const asset=await window.L1nGGameImport.prepareGameAvatarAsset({bytes:jpeg,mimeType:'image/jpeg'},kind);
+    assert.equal(asset.converted,false);
+    assert.deepEqual(new Uint8Array(await asset.blob.arrayBuffer()),jpeg);
+  }
+  const importSource=fs.readFileSync(path.join(root,'genealogy_gameImport.js'),'utf8');
+  assert.match(importSource,/\['sim', 'pet'\]\.includes\(kind\)/);
 });
 test('EA codec 只接 canonical 遊戲 avatar import，不接 generic asset store 或 manual pipeline',()=>{
   const app=fs.readFileSync(path.join(root,'genealogy_app.js'),'utf8');
   assert.equal((app.match(/prepareGameAvatarAsset\(/g)||[]).length,1);
-  assert.ok(app.includes('saveImageAsset(prepared.blob, prepared.metadata)'));
+  assert.match(app,/saveImageAsset\s*\(\s*prepared\.blob,\s*prepared\.metadata\s*\)/);
   assert.ok(!fs.readFileSync(path.join(root,'genealogy_assets.js'),'utf8').includes('L1nGThumDecoder'));
   assert.ok(!fs.readFileSync(path.join(root,'genealogy_image_worker.js'),'utf8').includes('L1nGThumDecoder'));
 });
