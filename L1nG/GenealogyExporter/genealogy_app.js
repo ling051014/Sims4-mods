@@ -9759,7 +9759,6 @@ function renderPersonProfileSection(
 function renderPersonProfilePet(pet,model) {
   const avatar=petAvatarWithFallbackHTML(pet);
   const name=personDisplayText(pet.name,model.person,model.draft)||uiText('（未命名）');
-  const breed=pet.breed ? personDisplayText(pet.breed,model.person,model.draft) : '';
   const traits=(pet.traits || []).map(value=>
     personDisplayText(value,model.person,model.draft)
   ).filter(Boolean);
@@ -9772,7 +9771,6 @@ function renderPersonProfilePet(pet,model) {
           <span class="person-profile-pet-name">${esc(name)}</span>
           <span class="person-profile-pet-identity">${esc(labels.join(' · '))}</span>
         </div>
-        ${breed ? '<div class="person-profile-pet-meta">'+esc(breed)+'</div>' : ''}
         ${traits.length ? '<div class="person-profile-pet-traits">'+
           traits.map(value=>'<span class="tag">'+esc(value)+'</span>').join('')+'</div>' : ''}
       </div>
@@ -15898,12 +15896,7 @@ function renderPetDraftList() {
         ) ||
         petIconFor(pet);
 
-      const breed=pet.breed
-        ? owner ? displayDataText(pet.breed,owner) : pet.breed
-        : '';
       const identity=[formatPetSpecies(pet),petGenderLabel(pet)].filter(Boolean);
-      const secondary=[breed,pet.ageStage ? uiText(pet.ageStage) : '',
-        pet.status && pet.status!=='在世' ? uiText(pet.status) : ''].filter(Boolean);
 
       const displayName =
         owner
@@ -15918,7 +15911,6 @@ function renderPetDraftList() {
           <div class="pet-item-avatar">${avatar}</div>
           <div class="pet-item-info">
             <div class="pet-item-heading"><span class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</span><span class="pet-item-identity">${esc(identity.join(' · '))}</span></div>
-            ${secondary.length ? '<div class="pet-item-meta">'+esc(secondary.join(' · '))+'</div>' : ''}
             ${(pet.traits || []).length
               ? '<div class="pet-trait-summary">' +
                 (pet.traits || [])
