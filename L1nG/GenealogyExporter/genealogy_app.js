@@ -369,14 +369,12 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     width:2.0,
     color:null,
     curved:false,
-    curveAmount:50
   }),
   spouse: Object.freeze({
     style:'solid',
     width:2.4,
     color:null,
     curved:false,
-    curveAmount:50,
     routing:'auto'
   }),
   exspouse: Object.freeze({
@@ -390,14 +388,12 @@ const RELATIONSHIP_LINE_DEFAULTS = Object.freeze({
     width:1.7,
     color:null,
     curved:false,
-    curveAmount:50
   }),
   other: Object.freeze({
     style:'dot',
     width:1.5,
     color:null,
     curved:false,
-    curveAmount:50,
     routing:'auto',
     showArrow:false
   }),
@@ -463,27 +459,16 @@ function normalizeRelationshipLineSetting(
             : 'manual'
         );
 
-  normalized.curveAmount =
-    Math.max(
-      10,
-      Math.min(
-        100,
-        Number(normalized.curveAmount) ||
-        fallback.curveAmount ||
-        50
-      )
-    );
+  // 舊版手動弧度欄位不再回寫。
+  delete normalized.curveAmount;
+  delete normalized.curveAmountManual;
 
   if (key === 'exspouse') {
     normalized.routing = 'auto';
     delete normalized.curved;
-    delete normalized.curveAmount;
   }
 
   if (key === 'other') {
-    normalized.curveAmountManual = saved?.curveAmountManual === true ||
-      (saved?.curveAmountManual == null && saved?.curveAmount != null &&
-       Number(saved.curveAmount) !== Number(fallback.curveAmount ?? 50));
     normalized.showArrow =
       saved.showArrow === undefined
         ? !!fallback.showArrow
@@ -6803,28 +6788,6 @@ const REL_STROKE_STYLES =
     'dot'
   ]);
 
-function clampRelationshipCurveAmount(value) {
-  const number =
-    Number(value);
-
-  if (!Number.isFinite(number)) {
-    return 50;
-  }
-
-  return Math.max(
-    10,
-    Math.min(100, number)
-  );
-}
-
-
-
-
-
-
-
-
-
 function normalizeColorForInput(
   value,
   fallback='#8896a4'
@@ -6918,7 +6881,6 @@ function relationshipOtherDefaultSetting(
     ...RELATIONSHIP_LINE_DEFAULTS.other,
     curved:normalizedType === '情人' || isRoommate,
     showArrow:isRoommate ? true : RELATIONSHIP_LINE_DEFAULTS.other.showArrow,
-    curveAmountManual:false,
     style:
       definition?.lineStyle ||
       RELATIONSHIP_LINE_DEFAULTS.other.style
@@ -6933,19 +6895,11 @@ function getOtherRelationshipLineSetting(
       type
     );
 
-  const normalized =
-    normalizeRelationshipLineSetting(
-      'other',
-      relationshipLineSettings
-        .otherTypes?.[type],
-      fallback
-    );
-
-  if (!normalized.curveAmountManual) {
-    const computed=genealogyScene?.recommendedOtherCurveAmount?.(type);
-    if (Number.isFinite(computed)) normalized.curveAmount=computed;
-  }
-  return normalized;
+  return normalizeRelationshipLineSetting(
+    'other',
+    relationshipLineSettings.otherTypes?.[type],
+    fallback
+  );
 }
 
 function ensureOtherRelationshipLineSetting(
@@ -7024,23 +6978,8 @@ function relationshipInlineSvgStyle(
   );
 }
 
-function relationshipCurvePreviewPath(
-  curveAmount
-) {
-  const amount =
-    clampRelationshipCurveAmount(
-      curveAmount
-    );
-
-  const amplitude =
-    2 +
-    (amount / 100) * 12;
-
-  return (
-    'M4 18 ' +
-    'Q60 ' + (18 - amplitude) +
-    ' 116 18'
-  );
+function relationshipCurvePreviewPath() {
+  return 'M4 18 C41 3 79 3 116 18';
 }
 
 function updateRelationshipLinePreview(
@@ -7084,9 +7023,7 @@ function updateRelationshipLinePreview(
       '<svg class="relationship-curve-mini-preview" ' +
       'viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true">' +
       '<path d="' +
-      relationshipCurvePreviewPath(
-        setting.curveAmount
-      ) +
+      relationshipCurvePreviewPath() +
       '" style="stroke:' +
       color +
       ';stroke-width:' +
@@ -7286,14 +7223,7 @@ function relationshipFullPreviewPath(
     key === 'other' &&
     setting.curved
   ) {
-    const amount =
-      clampRelationshipCurveAmount(
-        setting.curveAmount
-      );
-
-    const amplitude =
-      8 +
-      (amount / 100) * 34;
+    const amplitude=Math.max(12,Math.min(32,Math.abs(bX-aX)*0.16));
 
     const midX =
       (aX + bX) / 2;
@@ -7429,16 +7359,12 @@ function relationshipPreviewLineGeometry(setting, preview) {
   const {aX,aY,bX,bY}=relationshipHorizontalPreviewAnchors(preview);
   let controlX1=null,controlY1=null,controlX2=null,controlY2=null;
   if(setting.curved){
-    const dx=bX-aX,dy=bY-aY,span=Math.max(1,Math.hypot(dx,dy));
-    const max=Math.max(90,Math.min(230,span*0.65));
-    const amount=clampRelationshipCurveAmount(setting.curveAmount);
-    const amplitude=8+(max-8)*(amount-10)/90;
-    const sign=dx>=0?-1:1;
-    const nx=-dy/span,ny=dx/span;
-    controlX1=aX+dx*0.28+nx*amplitude*sign;
-    controlY1=aY+dy*0.28+ny*amplitude*sign;
-    controlX2=bX-dx*0.28+nx*amplitude*sign;
-    controlY2=bY-dy*0.28+ny*amplitude*sign;
+    const dx=bX-aX,dy=bY-aY;
+    const rise=Math.max(10,Math.min(30,Math.abs(dx)*0.14));
+    controlX1=aX+dx/3;
+    controlY1=aY+dy/3-4*rise/3;
+    controlX2=aX+dx*2/3;
+    controlY2=aY+dy*2/3-4*rise/3;
   }
   return {startX:aX,startY:aY,endX:bX,endY:bY,
     controlX1,controlY1,controlX2,controlY2};
@@ -7655,25 +7581,6 @@ function syncRelationshipLineControls() {
   setRelationshipSwitchState($('relationshipEditorCurveToggle'),curveSupported && !!setting.curved);
   setRelationshipSwitchState($('relationshipEditorArrowToggle'),arrowSupported && !!setting.showArrow);
 
-  const curveRow = $('relationshipEditorCurveAmountRow');
-  const curveInput = $('relationshipEditorCurveAmount');
-  const curveValue = $('relationshipEditorCurveAmountValue');
-
-  if (curveRow) {
-    curveRow.hidden = !curveSupported;
-    curveRow.classList.toggle('is-disabled',!setting.curved);
-    curveRow.setAttribute('aria-disabled',setting.curved ? 'false' : 'true');
-  }
-  const shownCurveAmount=other && !setting.curveAmountManual
-    ? (genealogyScene?.recommendedOtherCurveAmount?.(activeOtherRelationshipType) ?? setting.curveAmount)
-    : setting.curveAmount;
-  if (curveInput) {
-    curveInput.value = String(shownCurveAmount);
-    curveInput.disabled = !setting.curved;
-    syncGenealogyRangeFill(curveInput);
-  }
-  if (curveValue) curveValue.textContent = Math.round(shownCurveAmount) + '%';
-
   syncRelationshipNavPreviews();
   updateRelationshipFullPreview();
 }
@@ -7741,13 +7648,6 @@ $('relationshipEditorArrowToggle')?.addEventListener('click',() => {
   if (activeRelationshipStyleKey !== 'other') return;
   const setting = relationshipEditorSetting();
   setting.showArrow = !setting.showArrow;
-  saveRelationshipLineSettings();
-});
-
-$('relationshipEditorCurveAmount')?.addEventListener('input',event => {
-  const setting = relationshipEditorSetting();
-  setting.curveAmount = clampRelationshipCurveAmount(event.currentTarget.value);
-  setting.curveAmountManual = true;
   saveRelationshipLineSettings();
 });
 
@@ -8980,7 +8880,7 @@ genealogyScene =
       buildPersonPresentation,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
-      clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
+      relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
