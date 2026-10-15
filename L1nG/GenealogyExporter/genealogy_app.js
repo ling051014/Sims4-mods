@@ -66,7 +66,7 @@ const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','s
 const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
 const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits','owners'];
 const DEFAULT_PET_CARD_VIEW_SETTINGS = Object.freeze({
-  avatar:true, name:true, species:true, breed:true,
+  avatar:true, name:true, species:true, breed:false,
   gender:true, ageStage:false, status:false, traits:false, owners:true,
   appearance:'minimal'
 });

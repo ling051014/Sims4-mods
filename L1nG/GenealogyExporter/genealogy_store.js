@@ -500,6 +500,16 @@
       const settings =
         current && typeof current === 'object' && !Array.isArray(current)
           ? current : {};
+      // 僅將與上一版預設完全相同的舊設定遷移到新的檢視預設；
+      // 玩家手動勾選過的欄位仍沿用保存值。
+      if (mode === 'view' &&
+          ['name','species','breed','gender','ageStage','status','traits','owners']
+            .every(field => settings[field] === ({
+              name:true,species:true,breed:true,gender:true,
+              ageStage:false,status:false,traits:false,owners:true
+            })[field])) {
+        settings.breed = !!defaults.breed;
+      }
       settings.avatar = true;
       petCardFields.forEach(field => {
         if (typeof settings[field] !== 'boolean') settings[field] = !!defaults[field];

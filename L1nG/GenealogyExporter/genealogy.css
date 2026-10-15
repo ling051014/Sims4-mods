@@ -1913,6 +1913,17 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 避免長單字溢出 */ overflow-wrap: anywhere;
 }
 
+/* 語意差異由目前主題的強調色、標籤色及次要文字色混合產生，避免固定配色。 */
+.game-preference-row.is-like .game-preference-chip {
+    background: color-mix(in srgb, var(--action-primary) 18%, var(--tag-surface));
+    color: var(--tag-text);
+}
+.game-preference-row.is-dislike .game-preference-chip {
+    background: color-mix(in srgb, var(--text-secondary) 17%, var(--surface-card));
+    color: var(--text-secondary);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-secondary) 22%, transparent);
+}
+
 .game-preference-footnote {
     /* 唯讀來源提示不搶主內容視覺 */ margin: 8px 0 0;
     /* 使用次要文字色 */ color: var(--text-secondary);
@@ -9471,16 +9482,17 @@ button.danger-action:focus-visible {
 /* 與人物卡一致：檢視直向、編輯橫向，寵物資訊各自適配。 */
 .genealogy-pet-card-info { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; min-width:0; width:100%; text-align:center; }
 .genealogy-pet-card.mode-view .genealogy-pet-card-avatar { width:61px; height:61px; align-self:center; }
-.genealogy-pet-card-portraits { display:flex; align-items:center; justify-content:center; gap:5px; flex:0 0 auto; max-width:100%; }
-.genealogy-pet-card-owners { display:grid; grid-template-columns:repeat(2,auto); justify-content:start; align-content:center; gap:4px; }
+.genealogy-pet-card-portraits { position:relative; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; overflow:visible; }
+.genealogy-pet-card-owners { position:absolute; right:-7px; bottom:-7px; display:flex; align-items:center; flex-direction:row; pointer-events:none; }
 .genealogy-pet-owner-avatar {
-  display:flex; align-items:center; justify-content:center; width:61px; height:61px; flex:0 0 61px;
-  border:1px solid var(--border-default); border-radius:9px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  width:24px; height:24px; flex:0 0 24px;
+  border:2px solid var(--surface-card); border-radius:999px; overflow:hidden;
   background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
-  color:var(--avatar-text); box-sizing:border-box;
+  color:var(--avatar-text); font-size:10px; font-weight:700; box-sizing:border-box;
 }
+.genealogy-pet-owner-avatar + .genealogy-pet-owner-avatar { margin-left:-8px; }
 .genealogy-pet-owner-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
-.genealogy-pet-card.mode-edit .genealogy-pet-owner-avatar { width:51px; height:51px; flex-basis:51px; }
 .genealogy-pet-card.mode-view .genealogy-pet-card-portraits { align-self:center; }
 .genealogy-pet-card.mode-view .genealogy-pet-card-info { align-items:center; text-align:center; }
 .genealogy-pet-card.mode-edit { flex-direction:row; align-items:center; justify-content:flex-start; gap:10px; padding:10px; }

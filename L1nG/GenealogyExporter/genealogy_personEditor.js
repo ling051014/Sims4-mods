@@ -439,10 +439,10 @@ function groupPersonEditorPreferences(items, sim=currentSimEditorPerson()){
   return [...groups.values()];
 }
 
-function personEditorPreferenceRowMarkup(label,items){
+function personEditorPreferenceRowMarkup(label,items,kind){
   if(!items.length)return '';
 
-  return '<div class="game-preference-row">'+
+  return '<div class="game-preference-row is-'+(kind === 'dislike' ? 'dislike' : 'like')+'">'+
     '<span class="game-preference-row-label">'+
       esc(label)+
     '</span>'+
@@ -473,8 +473,8 @@ function renderEditorPreferenceList(sim, tabName, listId, emptyId){
     const dislikeLabel=isAttraction ? '反感' : '討厭';
     return '<section class="game-preference-category">'+
       '<div class="game-preference-category-title">'+esc(group.label)+'</div>'+
-      personEditorPreferenceRowMarkup(likeLabel, group.likes)+
-      personEditorPreferenceRowMarkup(dislikeLabel, group.dislikes)+
+      personEditorPreferenceRowMarkup(likeLabel, group.likes, 'like')+
+      personEditorPreferenceRowMarkup(dislikeLabel, group.dislikes, 'dislike')+
     '</section>';
   }).join('');
   empty.hidden=groups.length > 0;

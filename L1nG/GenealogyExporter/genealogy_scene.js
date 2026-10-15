@@ -6156,8 +6156,9 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
     ? (pet.traits || []).map(trait => displayDataText(trait,owner)).filter(Boolean)
     : [];
   const rows = [];
-  if (species || breed) rows.push({key:'speciesBreed',text:[species,breed].filter(Boolean).join(' · ')});
-  if (stage || status) rows.push({key:'stageStatus',text:[stage,status].filter(Boolean).join(' · ')});
+  // 物種、人生階段及狀態依現有顯示開關組成同一行，不再各佔一列。
+  if (species || stage || status) rows.push({key:'identity',text:[species,stage,status].filter(Boolean).join(' · ')});
+  if (breed) rows.push({key:'breed',text:breed});
   if (traits.length) rows.push({key:'traits',text:traits.join(' / '),traits});
   return rows;
 }
@@ -6166,14 +6167,10 @@ function petCardDimensions(pet,owner) {
   const settings=getPetCardSettings();
   const rows=petCardFieldRows(pet,owner,settings);
   const edit=viewMode==='edit';
-  const ownerCount=settings.owners ? petCardOwners(pet).length : 0;
+  // 飼主的 24px 圓形肖像只疊在寵物肖像角落，不改變卡片的幾何尺寸。
   const avatarSize=edit ? 51 : 61;
-  const columns=Math.min(2,ownerCount);
-  const ownerRows=Math.ceil(ownerCount/2);
-  const portraitWidth=avatarSize+(columns ? 5+columns*avatarSize+(columns-1)*4 : 0);
-  const portraitHeight=Math.max(avatarSize,ownerRows*avatarSize+Math.max(0,ownerRows-1)*4);
-  const W=Math.max(edit?PET_EDIT_DIMS.W:PET_VIEW_DIMS.W,portraitWidth+(edit?124:14));
-  const textWidth=edit?Math.max(94,W-portraitWidth-40):W-18;
+  const W=edit?PET_EDIT_DIMS.W:PET_VIEW_DIMS.W;
+  const textWidth=edit?Math.max(94,W-avatarSize-40):W-18;
   const lines=(value,fontSize=10)=>{
     const charWidth=/[^\x00-\x7f]/.test(String(value||'')) ? fontSize : fontSize*.58;
     return Math.max(1,Math.ceil([...String(value||'')].length*charWidth/textWidth));
@@ -6192,8 +6189,8 @@ function petCardDimensions(pet,owner) {
     }
     return sum+lines(row.text)*14+3;
   },0);
-  const H=edit?Math.max(84,20+Math.max(portraitHeight,nameHeight+rowHeight+4))
-    :Math.max(90,12+portraitHeight+(nameHeight?nameHeight+5:0)+rowHeight+10);
+  const H=edit?Math.max(PET_EDIT_DIMS.H,20+Math.max(avatarSize,nameHeight+rowHeight+4))
+    :Math.max(90,12+avatarSize+(nameHeight?nameHeight+5:0)+rowHeight+10);
   return {W,H};
 }
 
@@ -6381,11 +6378,13 @@ function paintPetLayer() {
       }).join('');
       const ownerPortraits=owners.map(sim=>{
         const label=displayDataText(sim.name,sim)||uiText('（未命名）');
-        return '<span class="genealogy-pet-owner-avatar" title="'+esc(label)+'" aria-label="'+esc(uiText('飼主')+'：'+label)+'">'+avatarHTML(sim)+'</span>';
+        // 直接共用「編輯寵物 > 飼主」的肖像來源、裁切方式及姓名首字兜底。
+        const image=framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((label||'?').charAt(0));
+        return '<span class="genealogy-pet-owner-avatar" title="'+esc(label)+'" aria-label="'+esc(uiText('飼主')+'：'+label)+'">'+image+'</span>';
       }).join('');
       const portraits='<span class="genealogy-pet-card-portraits">'+
         '<span class="genealogy-pet-card-avatar">'+petCardAvatarHTML(pet)+'</span>'+
-        (ownerPortraits?'<span class="genealogy-pet-card-owners">'+ownerPortraits+'</span>':'')+
+        (ownerPortraits?'<span class="genealogy-pet-card-owners" aria-label="'+esc(uiText('飼主'))+'">'+ownerPortraits+'</span>':'')+
       '</span>';
       const cardMode = edit ? 'mode-edit' : 'mode-view';
       const appearanceClass = edit ? '' : ' card-appearance-' + (settings.appearance || 'minimal');
