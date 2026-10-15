@@ -1089,6 +1089,8 @@
         ).trim();
 
       const placeholderSource = wrap.dataset.placeholder || '點選選擇……';
+      const matchWidth = wrap.dataset.uiSelectMatchWidth === 'true';
+      if (wrap.dataset.uiSelectColumns === '2') dropdown.dataset.uiSelectColumns = '2';
       const home = { parent:dropdown.parentNode, next:dropdown.nextSibling };
 
       function nativeOptionModel(option) {
@@ -1266,9 +1268,10 @@
         }
 
         dropdown.classList.add('ui-select-dropdown-portal');
+        const width = input.getBoundingClientRect().width;
         positionPortal(input, dropdown, {
-          minWidth:280,
-          maxWidth:520,
+          minWidth:matchWidth ? Math.min(width, Math.max(1,global.innerWidth - 20)) : 280,
+          maxWidth:matchWidth ? Math.max(1,width) : 520,
           maxHeight:360
         });
       }
