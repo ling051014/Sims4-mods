@@ -10027,13 +10027,6 @@ function renderPersonProfileContent(
     );
   }
 
-  sections.push(
-    renderPersonProfileSection(
-      '備註',
-      `<div class="person-profile-notes">${person.notes ? esc(presentation.notes) : '—'}</div>`
-    )
-  );
-
   const petItems =
     (person.pets || [])
       .map(pet =>
@@ -10078,6 +10071,13 @@ function renderPersonProfileContent(
         </div>
       </section>
     `
+  );
+
+  sections.push(
+    renderPersonProfileSection(
+      '備註',
+      `<div class="person-profile-notes">${person.notes ? esc(presentation.notes) : '—'}</div>`
+    )
   );
 
   container.innerHTML = `
@@ -15264,24 +15264,98 @@ const petEditorController = {
     };
   },
 
-  // 只有由寵物資料卡開啟的獨立編輯才直接更動飼主；人物編輯器的寵物草稿維持原流程。
+  ownerEditOpen:false,
+  outsideOwnerIds:new Set(),
+
+  eligibleOwnerSims(pet) {
+    const db=currentGenealogyData();
+    const sims=Object.values(db?.sims || {}).filter(sim=>sim?.id);
+    const linkedOwner=db?.sims?.[this.directEntry?.ownerId];
+    const householdId=pet?.gameData?.householdId ?? linkedOwner?.gameData?.householdId;
+    if(householdId!=null && String(householdId)!=='') {
+      return sims.filter(sim=>sim.gameData?.householdId!=null &&
+        String(sim.gameData.householdId)===String(householdId));
+    }
+    const petId=String(pet?.gameData?.simId || pet?.id || '');
+    const owners=new Set(sims.filter(sim=>(sim.pets || []).some(item=>
+      String(item?.gameData?.simId || item?.id || '')===petId
+    )).map(sim=>String(sim.id)));
+    const families=db?.families || [];
+    const current=currentFamily();
+    const family=current && (current.memberIds || []).some(id=>owners.has(String(id)))
+      ? current
+      : families.find(f=>(f.memberIds || []).some(id=>owners.has(String(id))));
+    if(!family)return [];
+    const ids=new Set((family.memberIds || []).map(String));
+    return sims.filter(sim=>ids.has(String(sim.id)));
+  },
+
+  renderOwnerPreview() {
+    const preview=$('petOwnerPreview'),select=$('petOwnerIds');
+    if(!preview || !select)return;
+    const ids=new Set([...select.selectedOptions].map(option=>String(option.value)));
+    this.outsideOwnerIds.forEach(id=>ids.add(id));
+    const sims=currentGenealogyData()?.sims || {};
+    preview.classList.toggle('family-rel-preview-editable',this.ownerEditOpen);
+    preview.innerHTML=[...ids].map(id=>{
+      const sim=sims[id];
+      if(!sim)return '';
+      const name=displayDataText(sim.name,sim)||uiText('（未命名）');
+      const avatar=framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((name||'?').charAt(0));
+      return '<div class="family-rel-preview-row'+(this.ownerEditOpen?' is-editing':'')+'">'+
+        (this.ownerEditOpen?'<button class="family-rel-remove" type="button" data-pet-owner-remove="'+esc(id)+'" aria-label="'+esc(uiText('移除'))+'">'+iconSvg('x-lg')+'</button>':'')+
+        '<span class="family-rel-person"><span class="family-rel-person-avatar">'+avatar+'</span>'+
+        '<span class="family-rel-person-copy"><span class="family-rel-person-name">'+esc(name)+'</span></span></span></div>';
+    }).join('')||'<span class="family-rel-empty">—</span>';
+    preview.querySelectorAll('[data-pet-owner-remove]').forEach(button=>button.onclick=()=>{
+      const id=button.dataset.petOwnerRemove;
+      const option=[...select.options].find(item=>String(item.value)===id);
+      if(option)option.selected=false;
+      this.outsideOwnerIds.delete(id);
+      genealogyUI.refreshSelect('petOwnerIds');
+      this.renderOwnerPreview();
+    });
+  },
+
+  toggleOwnerEditing(force) {
+    if($('petOwnerField').hidden)return;
+    this.ownerEditOpen=typeof force==='boolean'?force:!this.ownerEditOpen;
+    $('petOwnerEditPanel').hidden=!this.ownerEditOpen;
+    const toggle=$('petOwnerEditToggle');
+    toggle.textContent=uiText(this.ownerEditOpen?'完成':'編輯');
+    toggle.setAttribute('aria-expanded',String(this.ownerEditOpen));
+    this.renderOwnerPreview();
+    if(this.ownerEditOpen)$('petOwnerEditPanel').querySelector('.ui-select-input')?.focus({preventScroll:true});
+  },
+
   renderOwnerChoices(pet) {
-    const row = $('petOwnerField');
-    if (!row) return;
-    row.hidden = !this.directEntry;
-    if (!this.directEntry) return;
-    const sims = Object.values(currentGenealogyData()?.sims || {}).filter(sim => sim?.id);
-    const id = String(pet?.gameData?.simId || pet?.id || '');
-    const selected = new Set(sims.filter(sim => (sim.pets || []).some(item =>
-      String(item?.gameData?.simId || item?.id || '') === id
-    )).map(sim => String(sim.id)));
-    $('petOwnerChoices').innerHTML = sims.map(sim =>
-      '<label class="pet-owner-choice"><input type="checkbox" value="' + esc(sim.id) + '"' +
-      (selected.has(String(sim.id)) ? ' checked' : '') + '><span>' +
-      esc(displayDataText(sim.name,sim) || uiText('（未命名）')) +
-      '</span></label>'
-    ).join('');
-    $('petOwnerSearch').value = '';
+    const row=$('petOwnerField');
+    row.hidden=!this.directEntry;
+    this.ownerEditOpen=false;
+    this.outsideOwnerIds=new Set();
+    $('petOwnerEditPanel').hidden=true;
+    $('petOwnerEditToggle').textContent=uiText('編輯');
+    $('petOwnerEditToggle').setAttribute('aria-expanded','false');
+    const select=$('petOwnerIds');
+    select.replaceChildren();
+    if(!this.directEntry)return;
+    const petId=String(pet?.gameData?.simId || pet?.id || '');
+    const sims=Object.values(currentGenealogyData()?.sims || {});
+    const owners=new Set(sims.filter(sim=>(sim.pets || []).some(item=>
+      String(item?.gameData?.simId || item?.id || '')===petId
+    )).map(sim=>String(sim.id)));
+    const eligible=this.eligibleOwnerSims(pet);
+    const allowed=new Set(eligible.map(sim=>String(sim.id)));
+    this.outsideOwnerIds=new Set([...owners].filter(id=>!allowed.has(id)));
+    eligible.forEach(sim=>{
+      const option=document.createElement('option');
+      option.value=String(sim.id);
+      option.textContent=displayDataText(sim.name,sim)||uiText('（未命名）');
+      option.selected=owners.has(String(sim.id));
+      select.appendChild(option);
+    });
+    genealogyUI.refreshSelect('petOwnerIds');
+    this.renderOwnerPreview();
   },
 
   openDirect(entry) {
@@ -15580,6 +15654,8 @@ const petEditorController = {
   close() {
     petEditorDialog.classList.remove('show');
     this.directEntry = null;
+    this.ownerEditOpen=false;
+    this.outsideOwnerIds.clear();
 
     if (avatarCropTarget === 'pet') {
       closeAvatarCropEditor();
@@ -15757,7 +15833,7 @@ const petEditorController = {
     if (!pet) return;
 
     if (this.directEntry) {
-      const owners = [...$('petOwnerChoices').querySelectorAll('input:checked')].map(input => input.value);
+      const owners = [...$('petOwnerIds').selectedOptions].map(option=>String(option.value)).concat([...this.outsideOwnerIds]);
       const mutation = genealogyStore.savePetWithOwners(pet,owners);
       applyGenealogyMutation(mutation);
       this.close();
@@ -16055,12 +16131,8 @@ petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]').forEach
   });
 });
 
-$('petOwnerSearch')?.addEventListener('input',event => {
-  const query = event.target.value.trim().toLocaleLowerCase();
-  $('petOwnerChoices')?.querySelectorAll('.pet-owner-choice').forEach(row => {
-    row.hidden = !!query && !row.textContent.toLocaleLowerCase().includes(query);
-  });
-});
+$('petOwnerEditToggle')?.addEventListener('click',()=>petEditorController.toggleOwnerEditing());
+$('petOwnerIds')?.addEventListener('change',()=>petEditorController.renderOwnerPreview());
 
 $('petTraitAddBtn')?.addEventListener(
   'click',
