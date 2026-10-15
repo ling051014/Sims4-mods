@@ -359,6 +359,7 @@
             : '',
         ageStage:pet.ageStage || '成年',
         status:pet.status || '在世',
+        notes:typeof pet.notes === 'string' ? pet.notes : '',
         traits:
           Array.isArray(pet.traits)
             ? pet.traits
