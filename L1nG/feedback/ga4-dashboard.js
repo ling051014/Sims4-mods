@@ -11,6 +11,33 @@
     'translations.by-l1ng.com':'漢化專區'
   };
   const labelSite = name => siteLabels[name] || name || '未知網站';
+  // Keep GA4's canonical dimension values untouched; translate only visible labels.
+  const deviceNames = Object.freeze({
+    desktop:'電腦', mobile:'手機', tablet:'平板',
+    'smart tv':'智慧電視', '(not set)':'未設定'
+  });
+  const labelDevice = name => deviceNames[String(name || '').toLowerCase()] || name || '其他';
+  const countryNames = Object.freeze({
+    Taiwan:'臺灣', Japan:'日本', 'United States':'美國',
+    'United Kingdom':'英國', 'Hong Kong':'香港', China:'中國',
+    Singapore:'新加坡', 'South Korea':'南韓', Australia:'澳洲',
+    'New Zealand':'紐西蘭', Canada:'加拿大', Germany:'德國',
+    France:'法國', Italy:'義大利', Spain:'西班牙',
+    Netherlands:'荷蘭', Switzerland:'瑞士', India:'印度',
+    Malaysia:'馬來西亞', Philippines:'菲律賓', Thailand:'泰國',
+    Indonesia:'印尼', Vietnam:'越南', Brazil:'巴西',
+    '(not set)':'未設定'
+  });
+  const labelCountry = name => countryNames[name] || name || '未知';
+  const labelReferral = value => {
+    const raw = String(value || '').trim();
+    if (!raw || raw === '(not set)') return '未設定';
+    if (raw === '(direct) / (none)') return '直接造訪';
+    const match = /^(.+) \/ (referral|organic|cpc|paid|email|social|none)$/i.exec(raw);
+    if (!match) return raw;
+    const categories = {referral:'推薦連結',organic:'自然搜尋',cpc:'付費點擊',paid:'付費流量',email:'電子郵件',social:'社群',none:'無'};
+    return match[1] + '／' + categories[match[2].toLowerCase()];
+  };
   const node = (tag,cls,text) => {
     const item=document.createElement(tag);
     if(cls)item.className=cls;
@@ -118,11 +145,11 @@
     const ring=node('div','donut'),legend=node('div','device-legend');
     ring.style.background='conic-gradient('+stops.join(',')+')';
     ring.setAttribute('role','img');
-    ring.setAttribute('aria-label',rows.map(x=>x.name+' '+number(x.value)).join('、'));
+    ring.setAttribute('aria-label',rows.map(x=>labelDevice(x.name)+' '+number(x.value)).join('、'));
     for(const [i,item] of rows.entries()){
       const itemRow=node('div','legend-item'),left=node('span');
       const dot=node('span','dot');dot.style.background=colors[i%colors.length];
-      left.append(dot,document.createTextNode(item.name||'其他'));
+      left.append(dot,document.createTextNode(labelDevice(item.name)));
       itemRow.append(left,node('b','',Math.round(100*Number(item.value)/sum)+'%'));legend.append(itemRow);
     }
     root.append(ring,legend);
@@ -134,9 +161,9 @@
     setText('chart-description',data.range.startDate+' 至 '+data.range.endDate+' · 活躍使用者');
     trend('ga-trend-chart',data.trend);
     list('ga-pages',data.pages,x=>labelSite(x.host)+' · '+(x.path||'/'));
-    list('ga-countries',data.countries,x=>x.name||'未知');
+    list('ga-countries',data.countries,x=>labelCountry(x.name));
     list('ga-files',data.downloads,x=>labelSite(x.host));
-    list('ga-referrals',data.referrals,x=>x.name||'(direct) / (none)');
+    list('ga-referrals',data.referrals,x=>labelReferral(x.name));
     devices(data.devices);
   }
   function renderOverview(data) {
