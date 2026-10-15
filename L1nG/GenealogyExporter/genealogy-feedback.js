@@ -548,6 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
       $('genealogyFeedbackHistoryIntro').hidden=true;
       $('genealogyFeedbackThread').hidden=true;
       historyForm.hidden=true;
+      $('genealogyFeedbackHistoryPanel').classList.add('is-success');
+      $('genealogyFeedbackHistoryPanel').classList.remove('is-thread');
       lastReceipt=result.receipt||'';
       if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
@@ -599,15 +601,15 @@ document.addEventListener('DOMContentLoaded', () => {
     $('genealogyFeedbackThreadId').textContent=item.id;
     $('genealogyFeedbackThreadTime').textContent=dateText(item.createdAt);
     const list=$('genealogyFeedbackMessages');list.replaceChildren();
-    const messages=[{author:'player',body:item.message,created_at:item.createdAt},...(item.messages||[])];
+    const messages=[{id:null,author:'player',body:item.message,created_at:item.createdAt},...(item.messages||[])];
     messages.forEach((msg,index)=>{
       const row=document.createElement('div'),player=msg.author!=='admin';
       row.className='genealogy-feedback-conversation-message'+(player?' is-player':'');
-      const by=document.createElement('span');by.textContent=player?'你':'管理員';
+      const by=document.createElement('span');by.textContent=player?'你':'L1nG';
       const bubble=document.createElement('div');bubble.className='genealogy-feedback-conversation-bubble';bubble.textContent=msg.body||'';
       const stamp=document.createElement('span');stamp.textContent=dateText(msg.created_at||msg.createdAt);
       row.append(by,bubble,stamp);
-      if(index===0)renderAttachments(row,item.attachments||[]);
+      renderAttachments(row,(item.attachments||[]).filter(file=>(file.replyId??null)===(msg.id??null)));
       list.append(row);
     });
     const last=(item.messages||[]).at(-1);
@@ -626,6 +628,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try{
       const response=await core.lookup(receipt);
       activeReceipt=receipt;rememberReceipt(receipt);receiptInput.value=receipt;
+      $('genealogyFeedbackHistoryPanel').classList.remove('is-success');
+      $('genealogyFeedbackHistoryPanel').classList.add('is-thread');
       $('genealogyFeedbackSuccess').hidden=true;historyForm.hidden=true;
       $('genealogyFeedbackHistoryIntro').hidden=true;
       $('genealogyFeedbackThread').hidden=false;
@@ -652,6 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function showHistory(){
     stopPolling();activeReceipt='';
+    $('genealogyFeedbackHistoryPanel').classList.remove('is-success','is-thread');
     $('genealogyFeedbackSuccess').hidden=true;$('genealogyFeedbackThread').hidden=true;
     $('genealogyFeedbackHistoryIntro').hidden=false;
     historyForm.hidden=false;
@@ -695,9 +700,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('genealogyFeedbackReplyForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const content=$('genealogyFeedbackReply').value.trim(),err=$('genealogyFeedbackReplyError');
-    if(!content||!activeReceipt){err.textContent='請輸入回覆內容。';err.hidden=false;return;}
+    if(!content||!activeReceipt){err.textContent='請輸入回覆內容。';err.hidden=false;err.scrollIntoView({block:'nearest'});return;}
     const token=replyVerification?.getToken();
-    if(!token){err.textContent='請先完成安全驗證。';err.hidden=false;return;}
+    if(!token){err.textContent='請先完成安全驗證，再送出回覆。';err.hidden=false;err.scrollIntoView({block:'nearest'});return;}
     const button=$('genealogyFeedbackReplySubmit');button.disabled=true;
     try{
       await core.reply(activeReceipt,content,replyFiles,token);
@@ -707,7 +712,9 @@ document.addEventListener('DOMContentLoaded', () => {
     finally{button.disabled=false;}
   });
   $('genealogyFeedbackReply').addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();$('genealogyFeedbackReplyForm').requestSubmit();}
+    if(e.key!=='Enter'||e.shiftKey||e.ctrlKey||e.altKey||e.metaKey||e.repeat||e.isComposing||e.keyCode===229)return;
+    e.preventDefault();
+    if(!$('genealogyFeedbackReplySubmit').disabled)$('genealogyFeedbackReplyForm').requestSubmit();
   });
   document.addEventListener('visibilitychange',()=>{if(threadVisible()&&Date.now()-lastCheck>15000)updateThread();});
   window.addEventListener('focus',()=>{if(threadVisible()&&Date.now()-lastCheck>15000)updateThread();});
