@@ -6,7 +6,7 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261015-pet-preferences-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261015-pet-profile-editor-alignment-r1">
         <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
         <script src="genealogy-feedback.js?v=20261013-exporter-version-select-r2" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
@@ -412,7 +412,7 @@
                                 </div>
                                 <div class="topbar-filter-column">
                                     <fieldset class="topbar-filter-group">
-                                        <legend>人生階段</legend>
+                                        <legend>年齡階段</legend>
                                         <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="新生兒" checked><span>新生兒</span></label>
                                         <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="嬰兒" checked><span>嬰兒</span></label>
                                         <label class="topbar-filter-option"><input type="checkbox" name="lifeStageFilter" value="幼兒" checked><span>幼兒</span></label>
@@ -659,7 +659,7 @@
                         <div class="sim-profile-edit-fields">
                             <div class="profile-name-field form-field"><span class="form-field-title" id="fNameLabel">姓名</span><input id="fName" maxlength="30" placeholder="如：莫蒂默·高斯" aria-labelledby="fNameLabel"></div>
                             <div class="profile-identity-row">
-                                <div class="form-field"><span class="form-field-title" id="fStageLabel">人生階段</span><select id="fStage" aria-labelledby="fStageLabel">
+                                <div class="form-field"><span class="form-field-title" id="fStageLabel">年齡階段</span><select id="fStage" aria-labelledby="fStageLabel">
                                     <option value="嬰兒">嬰兒</option><option value="幼兒">幼兒</option><option value="兒童">兒童</option><option value="青少年">青少年</option><option value="青年">青年</option><option value="成年">成年</option><option value="老年">老年</option>
                                 </select></div>
                                 <div class="form-field"><span class="form-field-title" id="fGenderLabel">性別</span><select id="fGender" aria-labelledby="fGenderLabel"><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></div>
@@ -833,17 +833,11 @@
             </div>
         </div>
 
-        <!-- ========【寵物編輯】 設定 - 與模擬市民共用頭像編輯器、EA 寵物性別與資料欄位 ======== -->
+        <!-- ========【寵物編輯】 設定 - 固定個人資料、分頁與捲動內容，與市民編輯器共用頁面層級 ======== -->
         <div class="ui-dialog-backdrop nested" id="petEditorDialog">
             <div class="ui-dialog-panel pet-editor-modal" tabindex="-1">
-                <div class="pet-editor-content">
+                <div class="pet-editor-top">
                     <h2 id="petModalTitle">新增寵物</h2>
-                    <div class="sim-editor-tabs pet-editor-tabs" role="tablist" aria-label="寵物編輯分類">
-                        <button class="sim-editor-tab pet-editor-tab active" type="button" role="tab" aria-selected="true" data-pet-editor-tab="basic">基本資料</button>
-                        <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="preferences" hidden>喜好與厭惡</button>
-                        <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="attraction" hidden>吸引力偏好</button>
-                    </div>
-                    <section class="pet-editor-panel active" data-pet-editor-panel="basic" role="tabpanel">
                     <div class="pet-editor-layout">
                     <div class="avatar-editor-block pet-avatar-editor-block">
                         <div class="avatar-preview pet-avatar-editor-preview avatar-editor-preview" id="petAvatarPreview">?</div>
@@ -865,6 +859,16 @@
                             <label>狀態<select id="pStatus"><option value="在世">在世</option><option value="幽靈">幽靈</option><option value="已故">已故</option></select></label>
                         </div>
                     </div>
+                    </div>
+                </div>
+                    <div class="sim-editor-tabs pet-editor-tabs" role="tablist" aria-label="寵物編輯分類">
+                        <button class="sim-editor-tab pet-editor-tab active" type="button" role="tab" aria-selected="true" data-pet-editor-tab="basic">基本資料</button>
+                        <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="preferences" hidden>喜好與厭惡</button>
+                        <button class="sim-editor-tab pet-editor-tab" type="button" role="tab" aria-selected="false" data-pet-editor-tab="attraction" hidden>吸引力偏好</button>
+                    </div>
+                <div class="pet-editor-content">
+                    <section class="pet-editor-panel active" data-pet-editor-panel="basic" role="tabpanel">
+                        <div class="pet-editor-layout pet-editor-detail-layout">
                         <div class="pet-field-full pet-trait-field form-field trait-field">
                             <span class="field-label-row form-field-title" id="petTraitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span>
                             <div class="trait-editor">
@@ -880,7 +884,7 @@
                             <input type="search" id="petOwnerSearch" placeholder="搜尋模擬市民" aria-label="搜尋飼主">
                             <div class="pet-owner-choices" id="petOwnerChoices" role="group" aria-label="飼主（可多選）"></div>
                         </div>
-                    </div>
+                        </div>
                     </section>
                     <section class="pet-editor-panel" data-pet-editor-panel="preferences" role="tabpanel" hidden>
                         <div class="game-preference-list" id="petGamePreferenceList"></div>
@@ -891,8 +895,7 @@
                         <div class="game-preference-list" id="petAttractionPreferenceList"></div>
                         <div class="editor-empty-note" id="petAttractionPreferenceEmpty" hidden>這隻寵物尚未設定吸引力偏好。</div>
                         <p class="game-preference-footnote">偏好資料由遊戲匯入，目前僅供檢視。</p>
-                    </section>
-                </div>
+                    </section>                </div>
                 <div class="ui-dialog-actions sim-editor-actions">
                     <button class="danger" id="pDelete" type="button" style="display:none">刪除寵物</button>
                     <span class="spacer"></span>
@@ -1503,7 +1506,7 @@
         <script src="genealogy_sample_preset.js?v=20261010-png-complete-r3"></script>
         <script src="genealogy_sample_portraits.js?v=20261011-portrait-files-r1"></script>
 
-        <script src="genealogy_app.js?v=20261015-library-pets-actions-r1"></script>
+        <script src="genealogy_app.js?v=20261015-pet-profile-editor-alignment-r1"></script>
         <script src="genealogy_colorPicker.js?v=20261012-liquid-hue-r3"></script>
     </body>
 </html>
