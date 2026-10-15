@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
         <link rel="stylesheet" href="genealogy.css?v=20261015-main-life-photo-hidden-r1">
         <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
-        <script src="genealogy-feedback.js?v=20261013-exporter-version-select-r2" defer></script>
+        <script src="genealogy-feedback.js?v=20261015-turnstile-required-label-r1" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
         <script src="../site-info-modal.js?v=20261015-cookie-preferences-r4" defer></script>
     </head>
@@ -139,14 +139,13 @@
                                 </section>
                                 <section class="genealogy-feedback-section">
                                     <div class="genealogy-feedback-section-heading">
-                                        <span class="genealogy-feedback-field-label">安全驗證</span>
-                                        <span class="genealogy-feedback-optional">Cloudflare Turnstile</span>
+                                        <span class="genealogy-feedback-field-label" id="genealogyFeedbackVerifyLabel">安全驗證 <span class="genealogy-feedback-required" aria-hidden="true">*</span></span>
                                     </div>
-                                    <div class="genealogy-feedback-verify-card">
+                                    <div class="genealogy-feedback-verify-card" role="group" aria-labelledby="genealogyFeedbackVerifyLabel">
                                         <div class="genealogy-feedback-turnstile" id="genealogy-feedback-turnstile"></div>
                                         <button class="genealogy-feedback-retry" id="genealogyFeedbackVerifyRetry" type="button" hidden>重新載入驗證</button>
                                     </div>
-                                    <p class="genealogy-feedback-help" id="genealogyFeedbackVerifyHelp" role="status" aria-live="polite">開啟視窗後將載入安全驗證。</p>
+                                    <p class="genealogy-feedback-help" id="genealogyFeedbackVerifyHelp" role="status" aria-live="polite" hidden></p>
                                 </section>
                             </div>
                             <div class="genealogy-feedback-actions">

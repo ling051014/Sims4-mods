@@ -41,7 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const verificationVisible = () => backdrop.classList.contains('show') && !tabs[0].panel.hidden;
   const setVerificationState = (state, message) => {
     verificationState = state;
-    if (verificationHelp) verificationHelp.textContent = message;
+    // Cloudflare 顯示自己的正常驗證狀態；僅在異常或預覽限制時顯示網站提示。
+    const showHelp = state === 'error' || state === 'expired' || state === 'preview';
+    if (verificationHelp) {
+      verificationHelp.hidden = !showHelp;
+      verificationHelp.textContent = showHelp ? message : '';
+    }
     if (verificationRetry) verificationRetry.hidden = state !== 'error';
   };
   async function ensureVerification() {
@@ -53,13 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 等視窗顯示、尺寸確定後才建立 Cloudflare iframe。
     if (!verificationVisible()) return;
     verificationLoading = true;
-    setVerificationState('loading', '正在載入 Cloudflare 安全驗證…');
+    setVerificationState('loading', '');
     try {
       const widget = await core.createVerification(verificationHost, {
         size: verificationHost.clientWidth < 300 ? 'compact' : 'flexible',
         shouldRender: verificationVisible,
         onStatus: state => {
-          if (state === 'success') setVerificationState('success', '安全驗證已完成。');
+          if (state === 'success') setVerificationState('success', '');
           else if (state === 'expired') setVerificationState('expired', '驗證已過期，請重新完成驗證。');
           else if (state === 'error' || state === 'timeout') {
             setVerificationState('error', '安全驗證發生問題，請重新載入驗證。');
@@ -68,13 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       verification = widget;
       if (verificationState === 'loading') {
-        setVerificationState(widget.getToken() ? 'success' : 'ready',
-          widget.getToken() ? '安全驗證已完成。' : '請完成上方的安全驗證。');
+        setVerificationState(widget.getToken() ? 'success' : 'ready', '');
       }
     } catch (error) {
       verificationHost.replaceChildren();
       if (!verificationVisible()) {
-        setVerificationState('idle', '開啟回饋視窗後將載入安全驗證。');
+        setVerificationState('idle', '');
       } else {
         setVerificationState('error', error?.message || '安全驗證載入失敗，請重新載入。');
       }
@@ -548,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
       verification?.reset();
-      if (verification) setVerificationState('ready', '請完成上方的安全驗證。');
+      if (verification) setVerificationState('ready', '');
       form.reset();
       attached.splice(0, attached.length);
       updateFileList();
