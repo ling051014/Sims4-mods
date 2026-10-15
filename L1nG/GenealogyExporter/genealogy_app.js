@@ -17008,6 +17008,33 @@ $('familyMemberRemoveConfirmBtn').onclick = event => {
   familyMemberController.confirmRemoveSelected(event);
 };
 
+// 匯出檔名使用本次遊戲匯入的目前存檔來源；不將歷史 knownSaves 誤當成多存檔。
+function exportSaveSlotPrefix(database) {
+  const source = database?.meta?.gameImportSource;
+  if (source?.saveSlotConsistency === 'conflict') return '';
+
+  const save = source?.currentSave;
+  if (!save || typeof save !== 'object' || Array.isArray(save)) return '';
+
+  const slotFile = String(save.slotFile || '').trim();
+  const matched = /^Slot_([0-9A-F]{8})$/i.exec(slotFile);
+  if (matched) return 'Slot_' + matched[1].toUpperCase();
+
+  if (save.slotId == null || save.slotId === '') return '';
+  const slotId = Number(save.slotId);
+  if (!Number.isSafeInteger(slotId) || slotId < 0 || slotId > 0xFFFFFFFF) return '';
+  return 'Slot_' + slotId.toString(16).toUpperCase().padStart(8, '0');
+}
+
+function withExportSlotPrefix(filename, database) {
+  const slot = exportSaveSlotPrefix(database);
+  return slot ? slot + '_' + filename : filename;
+}
+
+function localizedExportFilenamePart(label) {
+  return sanitizeDownloadName(uiText(label)).replace(/\s+/g, '_');
+}
+
 async function exportJSON() {
   try {
     const exportDb = genealogyStore.snapshotDatabase();
@@ -17027,7 +17054,7 @@ async function exportJSON() {
     const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = '模擬市民4_族譜備份.json';
+    a.download = withExportSlotPrefix(localizedExportFilenamePart('族譜備份') + '.json', exportDb);
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   } catch (error) {
@@ -17606,9 +17633,11 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
 
     const family = currentFamily();
     const familyName = displayDataText((family && family.name) || uiText('家族'), family || null);
-    const fileBase = sanitizeDownloadName(`${familyName}_族譜`);
-    const sizeLabel = sizeKey === 'uhd' ? '超高畫質' : sizeKey === 'hd' ? '高畫質' : '標準';
-    downloadBlob(blob, `${fileBase}_${sizeLabel}.png`);
+    const familySuffix = (window.LING_I18N?.language === 'en' ? ' ' : '') + uiText('族譜');
+    const fileBase = sanitizeDownloadName(familyName + familySuffix);
+    const sizeLabel = sizeKey === 'uhd' ? '超高畫質' : sizeKey === 'hd' ? '高畫質（2×）' : '標準';
+    const filename = `${fileBase}_${localizedExportFilenamePart(sizeLabel)}.png`;
+    downloadBlob(blob, withExportSlotPrefix(filename, currentGenealogyData()));
   } finally {
     captureViewport.remove();
   }
