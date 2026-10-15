@@ -1,9 +1,7 @@
 /*
- * L1nG Genealogy Game Bundle Importer v0.3
- * 對應 L1nG Genealogy Exporter schemaVersion 1。
- *
- * 第一版 exporter 使用 ZIP_STORED，因此這裡不需要第三方 ZIP 函式庫。
- * 未來若改用 DEFLATE，請升級 parser，不要靜默接受未知壓縮方式。
+ * L1nG Genealogy Game Bundle Importer
+ * 解析族譜提取器的遊戲資料 ZIP（format: l1ng-genealogy，schemaVersion: 1）。
+ * 目前僅支援 ZIP_STORED（壓縮方式 0）；其他壓縮方式須先實作驗證，不能直接接受。
  */
 (function (global) {
   'use strict';

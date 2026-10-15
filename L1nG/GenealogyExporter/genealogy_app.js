@@ -1575,8 +1575,6 @@ function buildSample() {
       sample:true,
       sampleLanguage:'zh-Hant',
       sampleVersion:11,
-      sampleSource:'Slot_00001128_20261010',
-      samplePreferenceDemo:true,
       unassignedPets:(samplePack?.unassignedPets || []).map(pet => {
         const value = JSON.parse(JSON.stringify(pet));
         return value;
@@ -1585,7 +1583,6 @@ function buildSample() {
       sourceFormat:'l1ng-genealogy',
       sourceSchemaVersion:1,
       exporterVersion:'v0.1 Beta',
-      targetGameVersion:'1.128',
       gameLocale:'zh-tw',
       exportedAt:'2026-09-27T05:26:55.970318+08:00',
       realDateCurrentDate:{ year:2026, month:10, day:5 },
