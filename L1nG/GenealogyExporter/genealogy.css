@@ -2964,6 +2964,22 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 .pet-owner-field { display:grid; gap:6px; min-width:0; }
 .pet-owner-field[hidden] { display:none; }
+/* 寵物備註沿用模擬市民基本資料的字級、表單邊框與內容捲動區。 */
+.pet-notes-field { display:grid; gap:4px; min-width:0; }
+.pet-notes-field .form-field-title {
+  color:var(--text-secondary); font-size:11.5px; font-weight:600;
+}
+.pet-notes-field textarea {
+  width:100%; min-width:0; min-height:76px; padding:8px 9px;
+  border:1px solid var(--border-default); border-radius:7px;
+  background:var(--surface-input); color:var(--text-primary);
+  font:inherit; font-size:13px; line-height:1.45;
+  resize:vertical; outline:none;
+}
+.pet-notes-field textarea:focus { border-color:var(--action-primary); }
+@media (max-width:520px) {
+  .pet-notes-field textarea { font-size:16px; }
+}
 /* genealogy_ui.js 將 type=search 包在 .l1ng-search-control 內；
    樣式必須指向實際產生的 DOM，而非原本不存在的直接子元素。 */
 .pet-editor-layout .pet-owner-field > .l1ng-search-control {
