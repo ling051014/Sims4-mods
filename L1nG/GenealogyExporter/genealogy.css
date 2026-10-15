@@ -2898,20 +2898,28 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 
 /* ========【共用頭像編輯器】 設定 - 模擬市民與寵物共用上傳、取景與移除操作 ======== */
 .pet-editor-modal {
-  width:min(620px,100%); max-height:min(720px,calc(100dvh - 24px));
+  width:min(620px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none;
   padding:0; overflow:hidden; display:flex; flex-direction:column;
 }
+.pet-editor-top {
+  flex:0 0 auto; padding:13px 24px 0;
+  background:var(--surface-card);
+}
+#petModalTitle { margin-bottom:8px; }
+.pet-editor-top > .pet-editor-layout { padding-bottom:11px; }
 .pet-editor-content {
   flex:1 1 auto; min-height:0; overflow-y:auto;
-  overscroll-behavior:contain; padding:20px 24px 16px;
+  overscroll-behavior:contain; padding:12px 24px 14px;
+  background:var(--surface-card);
 }
-.pet-editor-tabs { margin:12px -24px 14px; padding:0 24px; }
+.pet-editor-tabs { padding:0 24px; }
 .pet-editor-tabs .pet-editor-tab { flex:1 1 0; }
 .pet-editor-panel[hidden] { display:none; }
 .pet-editor-modal > .ui-dialog-actions.sim-editor-actions {
   position:relative; z-index:1;
 }
 .pet-editor-layout { display:grid; grid-template-columns:170px minmax(0,1fr); align-items:start; gap:18px; }
+.pet-editor-layout.pet-editor-detail-layout { grid-template-columns:minmax(0,1fr); gap:14px; }
 .pet-avatar-editor-block { display:grid; align-content:start; gap:7px; min-width:0; }
 .pet-avatar-editor-preview { width:112px; height:112px; margin:0 auto; border-radius:11px; font-size:36px; }
 .pet-avatar-editor-block .avatar-tip { text-align:center; margin:0; font-size:10.5px; line-height:1.35; }
@@ -8476,6 +8484,21 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .family-rel-editor { grid-template-columns:1fr; }
   .sim-editor-panel .family-rel-block { border-bottom:1px solid var(--border-default); }
   .sim-editor-panel .family-rel-block:last-child { border-bottom:0; }
+  .pet-editor-modal {
+    width:100%; height:calc(100dvh - 16px); max-height:none;
+    display:block; overflow-y:auto; overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .pet-editor-top { padding:12px 14px 0; }
+  .pet-editor-tabs {
+    position:sticky; top:0; z-index:8; padding:0 14px;
+    background:color-mix(in srgb,var(--surface-card) 96%,transparent);
+    backdrop-filter:blur(8px);
+  }
+  .pet-editor-content { min-height:auto; overflow:visible; padding:11px 14px 18px; }
+  .pet-editor-modal > .ui-dialog-actions.sim-editor-actions {
+    position:sticky; bottom:0; z-index:9;
+  }
   .pet-editor-layout { grid-template-columns:150px minmax(0,1fr); gap:14px; }
   .person-profile-panel { width:min(540px,100%); }
 }
@@ -8497,8 +8520,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .profile-age-field { grid-column:1; }
   .profile-residence-field { grid-column:2; }
   .pet-editor-layout { grid-template-columns:1fr; }
-  .pet-editor-content { padding:14px 14px 16px; }
-  .pet-editor-tabs { margin:12px -14px 14px; padding:0 14px; }
+  .pet-editor-top { padding:10px 14px 0; }
+  .pet-editor-tabs { padding:0 8px; }
+  .pet-editor-content { padding:11px 14px 18px; }
   .pet-avatar-editor-block { width:100%; }
   .pet-editor-fields { grid-template-columns:1fr; }
   .pet-field-full { grid-column:auto; }
@@ -9510,7 +9534,6 @@ button.danger-action:focus-visible {
 .person-profile-pet-main-avatar { position:relative; }
 .person-profile-pet-main-avatar .pet-avatar-species-fallback .l1ng-icon { width:48px; height:48px; }
 .genealogy-pet-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
-.person-profile-pet-lineage { display:flex; flex-direction:column; gap:6px; font-size:12px; line-height:1.5; color:var(--text-secondary); }
 
 
 /* ========【統一表單】 設定 - A 款勾選與單選，保留原生語意與鍵盤操作 ======== */
