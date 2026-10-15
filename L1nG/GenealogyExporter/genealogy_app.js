@@ -1,4 +1,4 @@
-/* ========【L1nG Genealogy App】 設定 - 族譜工具主程式與 UI 協調 ======== */
+/* ========【L1nG Genealogy App】 族譜工具主程式與 UI 協調 ======== */
 /*
  * 主要來源語言：繁體中文（zh-Hant）
  * 支援語言：繁體中文 / 簡體中文 / English
@@ -6,7 +6,7 @@
  */
 
 
-// ========【滑桿填色】 設定 - 將目前數值映射至自訂細軌道，不依賴瀏覽器原生進度 ========
+// ========【滑桿填色】 將目前數值映射至自訂細軌道，不依賴瀏覽器原生進度 ========
 function syncGenealogyRangeFill(input) {
   if (!input || input.type !== 'range') return;
   const min = Number(input.min);
@@ -48,7 +48,7 @@ const RELATIONSHIP_VERTICAL_SNAP_PX = 10;
 const SIBLING_RELATION_TYPE = 'sibling';
 const SIBLING_RELATION_LABEL = '兄弟姊妹';
 
-// ========【族譜 Runtime】 設定 - Cache / DOM / Save 由獨立執行層負責 ========
+// ========【族譜 Runtime】 Cache / DOM / Save 由獨立執行層負責 ========
 const genealogyRuntime =
   window.L1nGGenealogyRuntime?.create?.() ||
   null;
@@ -60,7 +60,7 @@ const genealogyInteraction =
 let genealogyStore = null;
 let genealogyScene = null;
 
-// ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
+// ========【族譜卡片顯示】 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
 const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
 const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits','owners'];
@@ -264,7 +264,7 @@ const RACE_PRESETS = {
 };
 
 const PET_SPECIES = Object.freeze({
-  // ========【寵物種類】 設定 - 顯示文字、canonical value 與專用 SVG 圖示統一 ========
+  // ========【寵物種類】 顯示文字、canonical value 與專用 SVG 圖示統一 ========
   dog:     Object.freeze({ icon:'dog', label:'狗' }),
   fox:     Object.freeze({ icon:'wolf-head', label:'狐狸' }),
   cat:     Object.freeze({ icon:'cat', label:'貓' }),
@@ -530,7 +530,7 @@ try {
   }
 } catch (_) {}
 
-// ========【拖曳歷史】 設定 - 卡片與關係標籤共用 Ctrl+Z / Ctrl+Y ========
+// ========【拖曳歷史】 卡片與關係標籤共用 Ctrl+Z / Ctrl+Y ========
 const DRAG_HISTORY_LIMIT = 60;
 
 function sameLayoutHistoryState(left, right) {
@@ -719,7 +719,7 @@ let avatarCropPointer = null;
 let avatarCropNaturalSize = { width:0, height:0 };
 let avatarCropRenderMetrics = null;
 
-// ========【圖片資產權威層】 設定 - genealogy.js 只保存 assetId；Blob / SHA-256 / Lazy URL 由獨立模組管理 ========
+// ========【圖片資產權威層】 genealogy.js 只保存 assetId；Blob / SHA-256 / Lazy URL 由獨立模組管理 ========
 const assetStore = window.L1nGGenealogyAssets;
 if (!assetStore) {
   throw new Error('找不到 L1nG 圖片資產模組。');
@@ -785,7 +785,7 @@ function refreshResolvedAssetDom(
     });
 }
 
-// ========【資產局部刷新】 設定 - 圖片 ready 不再重算族譜 Layout ========
+// ========【資產局部刷新】 圖片 ready 不再重算族譜 Layout ========
 function scheduleResolvedAssetRefresh(
   assetId,
   url
@@ -984,7 +984,7 @@ function cardSettingsHasBody(settings) {
   );
 }
 
-// ========【人物呈現模型】 設定 - 畫布卡片、個人檔案與人物清單共用同一份顯示資料 ========
+// ========【人物呈現模型】 畫布卡片、個人檔案與人物清單共用同一份顯示資料 ========
 function personDisplayText(value, owner, draft = false) {
   if (value == null) return '';
   return draft
@@ -1156,7 +1156,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
 function buildSample() {
   const sims = {};
 
-  // ========【預設 EA NPC 範例】 設定 - 取自 2026-09-27 遊戲匯出；家庭只保留指定 EA Household ========
+  // ========【預設 EA NPC 範例】 取自 2026-09-27 遊戲匯出；家庭只保留指定 EA Household ========
   // Household 選單固定為：
   // 史賓瑟．金．路易斯 / 朗德古拉伯 / 高斯 / 伊藤 / 維托 / 達榮
   // sims 額外保留這 22 位 Household 成員實際 genealogy 連得到的 family-tree-only 節點，
@@ -1187,7 +1187,7 @@ function buildSample() {
     "944092612642774246":{"source":"RealDate","runtimeActive":true,"birthday":{"year":2017,"month":7,"day":14},"currentDate":{"year":2026,"month":10,"day":5},"age":{"years":9,"months":2,"days":21,"displayValue":9,"displayUnit":"years"}}
   };
 
-  // ========【預設偏好示範】 設定 - 不改預設家庭，只讓初次使用者能先看到偏好分頁 ========
+  // ========【預設偏好示範】 不改預設家庭，只讓初次使用者能先看到偏好分頁 ========
   // 這些值是依 2026-10-02 實機匯出確認過的 EA preference schema / tuning metadata 建立的 UI 範例，
   // 不宣稱是史賓瑟．金．路易斯家庭目前存檔中的實際偏好；真正匯入遊戲 ZIP 時會由匯入資料取代。
   const samplePreferenceCategories = Object.freeze({
@@ -1655,7 +1655,7 @@ const appearanceCustomThemeEditor = $('appearanceCustomThemeEditor');
 const appearanceCustomThemePreview = $('appearanceCustomThemePreview');
 const lifePhotoGrid = $('lifePhotoGrid');
 
-// ========【家族名稱輸入】 設定 - 固定導覽欄位、虛線只跟著文字寬度 ========
+// ========【家族名稱輸入】 固定導覽欄位、虛線只跟著文字寬度 ========
 const _familyNameMeasureCanvas = document.createElement('canvas');
 const _familyNameMeasureContext = _familyNameMeasureCanvas.getContext('2d');
 
@@ -1757,7 +1757,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g,
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const pairKey = (a,b) => [a,b].sort().join('::');
 
-// ========【UI 圖示】 設定 - 圖示遮罩由 genealogy_icon_masks.css 內嵌提供，不再逐顆請求 SVG ========
+// ========【UI 圖示】 圖示遮罩由 genealogy_icon_masks.css 內嵌提供，不再逐顆請求 SVG ========
 const iconSvg = (name, extra = '') => {
   const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
   if (!safe) return '';
@@ -1775,7 +1775,7 @@ function setIconText(el, iconName, text) {
   el.innerHTML = `${iconSvg(iconName)}<span>${esc(text)}</span>`;
 }
 
-// ========【頂部自訂下拉選單】 設定 - 取代瀏覽器原生 select 展開介面 ========
+// ========【頂部自訂下拉選單】 取代瀏覽器原生 select 展開介面 ========
 const navSelectControls = new Map();
 
 function familyNavLanguage() {
@@ -1841,7 +1841,7 @@ function familyNavTabMarkup(mode) {
     '</span>';
 }
 
-// ========【家族選擇器分流】 設定 - EA 家庭 / EA 原生族譜範圍 / 完整大家族分開 ========
+// ========【家族選擇器分流】 EA 家庭 / EA 原生族譜範圍 / 完整大家族分開 ========
 function familyGenealogyNeighborIds(sim) {
   if (!sim) return [];
 
@@ -1913,7 +1913,7 @@ function familySourceSeedIds(fam) {
     .filter(id => currentGenealogyData().sims[id]);
 }
 
-// ========【Family Selector Cache】 設定 - 家族範圍只在 genealogy 結構改變時重建 ========
+// ========【Family Selector Cache】 家族範圍只在 genealogy 結構改變時重建 ========
 const familySelectorCache = {
   entriesByMode:new Map(),
   activeByMode:new Map()
@@ -3035,7 +3035,7 @@ function setupTopbarNavSelects() {
 }
 
 
-// ========【共用 HTML 彈窗】 設定 - UI Controller 是唯一彈窗與按鈕 Loading Authority ========
+// ========【共用 HTML 彈窗】 UI Controller 是唯一彈窗與按鈕 Loading Authority ========
 const genealogyDialogs =
   window.L1nGGenealogyUI?.createDialogController?.({
     uiText,
@@ -3097,7 +3097,7 @@ function currentFamily() {
   return genealogyStore.getCurrentFamily();
 }
 
-// ========【頂部人物篩選】 設定 - 同類多選 OR、跨類別 AND ========
+// ========【頂部人物篩選】 同類多選 OR、跨類別 AND ========
 function checkedTopbarFilterValues(inputs) {
   return new Set(
     inputs
@@ -3161,8 +3161,7 @@ function updateTopbarFilterUI() {
   }
 }
 
-// ========【預設資料翻譯】 設定 - 繁中為唯一基準；只翻譯內建範例既有值 ========
-// ========【預設資料翻譯】 設定 - 繁中為唯一基準；只翻譯內建範例既有值 ========
+// ========【預設資料翻譯】 繁中為唯一基準；只翻譯內建範例既有值 ========
 const BUILTIN_SAMPLE_REFERENCE = buildSample();
 const BUILTIN_SAMPLE_SIM_IDS = new Set(
   Object.keys(BUILTIN_SAMPLE_REFERENCE.sims)
@@ -3196,7 +3195,7 @@ function uiText(value) {
   return text;
 }
 
-// ========【日期顯示格式】 設定 - 生日與遊戲日期屬於 App 呈現層，不由人物編輯器持有 ========
+// ========【日期顯示格式】 生日與遊戲日期屬於 App 呈現層，不由人物編輯器持有 ========
 function formatBirthdaySummary(monthValue, dayValue, yearValue = null) {
   const month = Number(monthValue) || 0;
   const day = Number(dayValue) || 0;
@@ -3303,7 +3302,7 @@ function displayRelationshipText(value) {
 }
 
 
-// ========【其他關係詞庫】 設定 - 內建詞彙與玩家自訂詞彙分離；自訂詞彙跟著族譜資料保存 ========
+// ========【其他關係詞庫】 內建詞彙與玩家自訂詞彙分離；自訂詞彙跟著族譜資料保存 ========
 function builtInSocialRelationshipTypes() {
   return Object.keys(
     SOCIAL_RELATIONSHIP_DEFINITIONS
@@ -3479,7 +3478,7 @@ function syncRelationshipTypePickerSeam(){
   const active=index?.querySelector('.relationship-type-index-tab.active');
   if(!popover||popover.hidden||!active)return;
 
-  // Measure the tab and menu after layout: all six tabs share the same positioning logic.
+  // 依排版後的頁籤與選單座標計算接縫，分類頁籤共用定位方式。
   const menuRect=popover.getBoundingClientRect();
   const tabRect=active.getBoundingClientRect();
   const start=Math.max(0,Math.min(menuRect.height,tabRect.top-menuRect.top));
@@ -3566,7 +3565,7 @@ function relationshipTypePickerFilteredOptions(){
       .trim()
       .toLocaleLowerCase();
 
-  // Visual settings reuse the picker but list only existing relationship types.
+  // 視覺設定共用關係種類選單，但僅列出目前存在的關係類型。
   const options=relationshipTypePickerOnSelect
     ? getOtherRelationshipTypes().map(entry=>({
         value:entry.type,
@@ -4382,7 +4381,7 @@ function relationshipCreateOptionText(value) {
   return '新增「' + text + '」';
 }
 
-// ========【關係語意】 設定 - 客觀關係、社會關係與顯示覆寫分離 ========
+// ========【關係語意】 客觀關係、社會關係與顯示覆寫分離 ========
 function isSiblingLink(link) {
   if (!link) return false;
 
@@ -4826,7 +4825,7 @@ function directFamilyKinshipLabel(
   return '';
 }
 
-// ========【家庭關係 Authority】 設定 - 所有 UI 共用同一份直接家庭關係模型 ========
+// ========【家庭關係 Authority】 所有 UI 共用同一份直接家庭關係模型 ========
 function resolveDirectFamilyRelationships(
   simId
 ) {
@@ -5805,7 +5804,7 @@ function setRelationshipPerspective(
 
 
 
-// ========【頂欄與側邊欄】 設定 - UI 模組唯一持有選單、Tooltip、Resize 事件 ========
+// ========【頂欄與側邊欄】 UI 模組唯一持有選單、Tooltip、Resize 事件 ========
 const genealogyChrome =
   window.L1nGGenealogyUI?.createChromeController?.({
     dom:{
@@ -5856,7 +5855,7 @@ function applySidebarWidth(value, options) {
 // 初始寬度仍在原本階段恢復；不依賴後續 bootstrap。
 genealogyChrome.restoreSidebarWidth();
 
-// ========【資料儲存佇列】 設定 - Runtime Save Coordinator 為唯一儲存 Authority ========
+// ========【資料儲存佇列】 Runtime Save Coordinator 為唯一儲存 Authority ========
 let workspaceWriteSequence = 0;
 let workspaceWritePending = Promise.resolve();
 const genealogySaveCoordinator =
@@ -6353,7 +6352,7 @@ $('applyCustomBtn').onclick = () => {
   chooseCustomTheme(customColor1.value,customColor2.value,customColor3.value);
 };
 
-// ========【自由排列跨模式映射】 設定 - 檢視 / 編輯共用同一份視覺構圖 ========
+// ========【自由排列跨模式映射】 檢視 / 編輯共用同一份視覺構圖 ========
 function medianNumber(values) {
   const list =
     (values || [])
@@ -6760,7 +6759,7 @@ const sourceMode =
 }
 modeToggle.onclick = toggleViewMode;
 
-// ========【關係線外觀】 設定 - 沿用現有外觀 UI，只有其他關係提供曲線與個別類型設定 ========
+// ========【關係線外觀】 沿用現有外觀 UI，只有其他關係提供曲線與個別類型設定 ========
 const REL_LINE_KEYS =
   ['parent','spouse','exspouse','adopt','other'];
 
@@ -7604,7 +7603,7 @@ $('relationshipOtherTypeTrigger')?.addEventListener('click',event=>{
     trigger,
     value:activeOtherRelationshipType,
     onSelect:value=>{
-      // The visual settings edit existing line types; never create relationships here.
+      // 視覺設定只調整既有關係線類型，不在此新增人物關係。
       if (!getOtherRelationshipTypes().some(entry=>entry.type===value)) return;
       const select=$('relationshipOtherTypeSelect');
       if (!select) return;
@@ -8052,7 +8051,7 @@ storageDialog.onclick = event => {
   }
 };
 
-// ========【恢復預設】 設定 - 介面設定與範例資料分開處理 ========
+// ========【恢復預設】 介面設定與範例資料分開處理 ========
 const resetUiSettingsBtn = $('resetUiSettingsBtn');
 if (resetUiSettingsBtn) {
   resetUiSettingsBtn.onclick = async () => {
@@ -8370,7 +8369,7 @@ $('cleanupBtn').onclick = async () => {
   );
 };
 
-// ========【使用說明輸入方式】 設定 - 依實際操作切換電腦／觸控說明，不綁定裝置類型 ========
+// ========【使用說明輸入方式】 依實際操作切換電腦／觸控說明，不綁定裝置類型 ========
 let helpInputMode =
   window.matchMedia?.(
     '(hover: none) and (pointer: coarse)'
@@ -8440,7 +8439,7 @@ helpDialog.onclick = event => {
   }
 };
 
-// ========【彈窗 Lifecycle】 設定 - Esc 只找最上層彈窗；各 subsystem 自己清理狀態 ========
+// ========【彈窗 Lifecycle】 Esc 只找最上層彈窗；各 subsystem 自己清理狀態 ========
 const MODAL_LIFECYCLE_STACK = [
   { dialog:avatarCropDialog, close:() => closeAvatarCropEditor() },
   { dialog:lifePhotoEditorDialog, close:() => lifePhotoWorkspace.closeEditor() },
@@ -8518,7 +8517,7 @@ if (!genealogyStore) {
 
 personEditor.bindStore(genealogyStore);
 
-// ========【Canonical Database Replace】 設定 - 整庫替換後統一失效所有結構快取 ========
+// ========【Canonical Database Replace】 整庫替換後統一失效所有結構快取 ========
 function replaceCanonicalGenealogyDatabase(
   nextData
 ) {
@@ -8599,7 +8598,7 @@ function applyGenealogyMutation(
 }
 
 
-// ========【Trait 顯示文字】 設定 - 人物與寵物共用舊資料富文字清理 ========
+// ========【特質顯示文字】 人物與寵物共用特質內容的富文字標籤清理 ========
 function cleanTraitDisplayText(value) {
   const source =
     String(value ?? '');
@@ -8643,7 +8642,7 @@ function cleanTraitDisplayText(value) {
     .trim();
 }
 
-// ========【L1nG v1 資料載入整理】 設定 - canonical shape 由 Genealogy Store 唯一負責 ========
+// ========【Schema v1 資料載入】 資料正規化由 Genealogy Store 統一負責 ========
 // 圖片清理排程交由 Assets；每次真正執行時讀取最新資料。
 function scheduleGC() {
   assetStore.scheduleGarbageCollect(() => ({
@@ -8726,7 +8725,7 @@ function currentDisplayedFamily() {
   };
 }
 
-// ========【圖片預熱】 設定 - 只預先載入目前畫面會立即看到的圖片，避免 F5 後頭像逐張跳出 ========
+// ========【圖片預熱】 優先載入當前可見圖片，降低畫面中的頭像載入跳動 ========
 function preloadCurrentViewAssets() {
   if (!assetStoreReady || !currentGenealogyData()) {
     return Promise.resolve({
@@ -8840,7 +8839,7 @@ function preloadCurrentViewAssets() {
   return primary;
 }
 
-// ========【族譜 Viewport】 設定 - 視角狀態與座標換算由獨立模組唯一管理 ========
+// ========【族譜 Viewport】 視角狀態與座標換算由獨立模組唯一管理 ========
 genealogyViewport =
   window.L1nGGenealogyViewport?.create?.({
     dom:{
@@ -8861,7 +8860,7 @@ if (!genealogyViewport) {
   );
 }
 
-// ========【族譜 Scene】 設定 - Layout / Relationship Geometry / Renderer 唯一 Canvas Authority ========
+// ========【族譜 Scene】 Layout / Relationship Geometry / Renderer 唯一 Canvas Authority ========
 genealogyScene =
   window.L1nGGenealogyScene?.create?.({
     runtime:genealogyRuntime,
@@ -9056,7 +9055,7 @@ function focusSimOnCanvas(simId) {
   }
 }
 
-// ========【App Render Orchestration】 設定 - Runtime 唯一管理 Scene / Chrome / Lists dirty 排程 ========
+// ========【App Render Orchestration】 Runtime 唯一管理 Scene / Chrome / Lists dirty 排程 ========
 const genealogyRenderCoordinator =
   genealogyRuntime?.createRenderCoordinator?.({
     requestSceneUpdate:(layers,options) => genealogyScene?.requestUpdate?.(layers,options),
@@ -9189,7 +9188,7 @@ function petIconFor(pet) {
   );
 }
 
-// ========【寵物頭像】 設定 - 物種 SVG 在圖片完成載入前保持可見 ========
+// ========【寵物頭像】 物種 SVG 在圖片完成載入前保持可見 ========
 function petAvatarWithFallbackHTML(pet) {
   const icon = petIconFor(pet);
   const image = framedAvatarImageHTML(pet?.avatar,pet?.avatarFrame,'pet-avatar-image');
@@ -9273,7 +9272,7 @@ function petGenderLabel(pet) {
   return '';
 }
 
-// ========【寵物血統】 設定 - 遊戲匯入血統只讀顯示，不改變既有手動寵物編輯流程 ========
+// ========【寵物血統】 遊戲匯入血統只讀顯示，不改變既有手動寵物編輯流程 ========
 function getPetLineageInfo(pet) {
   const lineage =
     pet &&
@@ -9382,7 +9381,7 @@ function statusClass(sim) {
       : '';
 }
 
-// ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
+// ========【個人資料關係】 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
 
 function profileFamilyRelationshipRows(
   simId
@@ -12261,7 +12260,7 @@ labelsSvg.addEventListener('pointerup', finishLabelDrag);
 labelsSvg.addEventListener('pointercancel', finishLabelDrag);
 labelsSvg.addEventListener('lostpointercapture', finishLabelDrag);
 
-// ========【智慧對齊與等距吸附】// ========【智慧對齊與等距吸附】 設定 - 對齊邊緣 / 中心，同時支援水平與垂直等距 ========
+// ========【智慧對齊與等距吸附】 邊緣、中心及水平／垂直等距吸附 ========
 function hideSmartGuides() {
   if (smartGuideVertical) smartGuideVertical.classList.remove('show');
   if (smartGuideHorizontal) smartGuideHorizontal.classList.remove('show');
@@ -12327,7 +12326,7 @@ function showEqualSpacingGuide(guideData) {
   target.classList.add('show');
 }
 
-// ========【Interaction Snap Orchestration】 設定 - Scene 提供 geometry，Interaction 執行對齊 / 等距 / 關係吸附 ========
+// ========【Interaction Snap Orchestration】 Scene 提供 geometry，Interaction 執行對齊 / 等距 / 關係吸附 ========
 function getSmartSnap(id, rawX, rawY, performanceSession = null) {
   const session =
     performanceSession ||
@@ -12417,7 +12416,7 @@ function getDragSelectionSmartSnap(
     spacingY:null
   };
 }
-// ========【拖曳 Geometry Snapshot】 設定 - PointerMove 不再重建整張族譜幾何 ========
+// ========【拖曳 Geometry Snapshot】 PointerMove 不再重建整張族譜幾何 ========
 function createSingleDragPerformanceSession(
   id
 ) {
@@ -13603,7 +13602,7 @@ function renderFamilyCover(fam) {
 }
 
 
-// ========【家族成員世代排序】 設定 - 只改側邊欄顯示順序，不改寫家族成員資料 ========
+// ========【家族成員世代排序】 只改側邊欄顯示順序，不改寫家族成員資料 ========
 function familyGenerationSortText(order) {
   const lang = familyNavLanguage();
 
@@ -14145,7 +14144,7 @@ $('delFamilyBtn').onclick = async () => {
   requestAnimationFrame(() => genealogyViewport.fit());
 };
 
-// ========【共用 UI Controller】 設定 - 單選 / 搜尋 / 多選 / 可輸入建議由獨立 UI 模組負責 ========
+// ========【共用 UI Controller】 單選 / 搜尋 / 多選 / 可輸入建議由獨立 UI 模組負責 ========
 const genealogyUI =
   window.L1nGGenealogyUI?.create?.({
     helpers:{
@@ -16001,7 +16000,7 @@ $('petSectionEditToggle')?.addEventListener('click',()=>{
   renderPetDraftList();
 });
 
-// ========【人物編輯器 Authority】 設定 - Draft / lifecycle / 關係編輯由獨立模組負責 ========
+// ========【人物編輯器 Authority】 Draft / lifecycle / 關係編輯由獨立模組負責 ========
 personEditor.mount({
   openAvatarCropEditor,
   compressImage,
@@ -16051,7 +16050,7 @@ async function deleteChar(id) {
   }
 }
 
-// ========【人物庫】 設定 - 精簡 / 詳細檢視、單人選單與批量管理 ========
+// ========【人物庫】 精簡 / 詳細檢視、單人選單與批量管理 ========
 const personLibraryController = {
   syncViewControls() {
     const compact = $('personLibraryCompactBtn');
@@ -16226,7 +16225,7 @@ function personLibraryCompactMeta(sim) {
 }
 
 
-/* ========【人物與寵物總覽】設定 - 清單只載入可見頭像，避免 256 個暫存網址被大量清單耗盡 ======== */
+/* ========【人物與寵物總覽】 清單只載入可見頭像，避免 256 個暫存網址被大量清單耗盡 ======== */
 function personLibraryAvatarHTML(sim) {
   const name = displayDataText(sim?.name, sim) || '?';
   const initial = esc(name.trim().charAt(0) || '?');
@@ -16896,7 +16895,7 @@ $('familyMemberPickerConfirmBtn').onclick = () => {
   addMemberController.commit();
 };
 
-// ========【家族成員批量移除】 設定 - 側邊欄原地選取，送出前必須二次確認 ========
+// ========【家族成員批量移除】 側邊欄原地選取，送出前必須二次確認 ========
 $('removeMemberBtn').onclick = () => {
   const family = currentFamily();
   if (!family.memberIds.length) return;
@@ -17240,7 +17239,7 @@ async function prepareCaptureIcons(captureRoot) {
 }
 
 
-/* ========【族譜 PNG 匯出】設定 - 只在匯出副本內嵌頭像與關係圖示，不改動原畫布 ======== */
+/* ========【族譜 PNG 匯出】 只在匯出副本內嵌頭像與關係圖示，不改動原畫布 ======== */
 async function prepareCaptureAssetImages(captureRoot, backgroundMode) {
   const images = [...captureRoot.querySelectorAll('img[data-asset-id]')];
   const ids = new Set(images.map(image => image.dataset.assetId).filter(isAssetId));
@@ -17322,7 +17321,7 @@ async function prepareCaptureRelationshipIcons(captureRoot) {
 
 const EXPORT_TREE_PADDING_PX = 40;
 
-// ========【族譜圖片主題背景】 設定 - 匯出時沿用目前主題的實際畫布底色與紋理 ========
+// ========【族譜圖片主題背景】 匯出時沿用目前主題的實際畫布底色與紋理 ========
 function isTransparentBackgroundColor(value) {
   const normalized = String(value || '').replace(/\s+/g, '').toLowerCase();
   if (!normalized || normalized === 'transparent') return true;
@@ -17547,7 +17546,7 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   }
 }
 
-// ========【L1nG v1 資料載入】 設定 - 只讀取目前 schema，不承接舊版網站資料 ========
+// ========【L1nG v1 資料載入】 只讀取目前 schema，不承接舊版網站資料 ========
 async function readStoredGenealogyData() {
   const currentRaw = localStorage.getItem(STORE_KEY);
   if (currentRaw === WORKSPACE_IDB_MARKER) {
@@ -17644,7 +17643,7 @@ async function importJSON(file) {
   }
 }
 
-// ========【遊戲族譜匯入狀態】 設定 - 顯示 ZIP 讀取與族譜建立進度 ========
+// ========【遊戲族譜匯入狀態】 顯示 ZIP 讀取與族譜建立進度 ========
 let gameImportStatusElement = null;
 
 function ensureGameImportStatus() {
@@ -17712,8 +17711,8 @@ function waitForImportPaint() {
   });
 }
 
-// ========【遊戲族譜匯入】 設定 - 讀取 L1nG Genealogy Exporter ZIP ========
-// ========【遊戲族譜頭像】 設定 - ZIP 圖片直接進 Blob Asset Store，再回填人物 / 寵物 assetId ========
+// ========【遊戲族譜匯入】 讀取 L1nG Genealogy Exporter ZIP ========
+// ========【遊戲族譜頭像】 ZIP 圖片直接進 Blob Asset Store，再回填人物 / 寵物 assetId ========
 async function persistGameImportAvatars(bundle, converted, importMode = 'replace') {
   if (!window.L1nGGameImport || !bundle || !converted) {
     return { saved:0, unsupported:0, missing:0 };
@@ -18423,7 +18422,7 @@ async function importGameGenealogy(file) {
 }
 
 
-// ========【畫布檔案拖曳匯入】 設定 - JSON 備份 / 遊戲族譜 ZIP 可直接拖到畫布讀取 ========
+// ========【畫布檔案拖曳匯入】 JSON 備份 / 遊戲族譜 ZIP 可直接拖到畫布讀取 ========
 let canvasImportDragDepth = 0;
 let canvasImportDropOverlay = null;
 
@@ -18795,7 +18794,7 @@ $('relationshipAddBtn').onclick = () => {
   applyGenealogyMutation(mutation);
 };
 
-// ========【寵物卡互動】 設定 - 檢視沿用人物個人資料視窗；編輯沿用既有寵物編輯器 ========
+// ========【寵物卡互動】 檢視沿用人物個人資料視窗；編輯沿用既有寵物編輯器 ========
 function petCanvasOwnerIndex(entry) {
   const owner = currentGenealogyData()?.sims?.[entry?.ownerId];
   if (!owner || !Array.isArray(owner.pets)) return -1;
@@ -18898,7 +18897,7 @@ function openPetProfileFromCanvas(entry) {
 }
 
 
-// ========【寵物右鍵選單】 設定 - 沿用人物選單外觀，操作僅指向寵物 ========
+// ========【寵物右鍵選單】 沿用人物選單外觀，操作僅指向寵物 ========
 function findCanvasPetEntry(key) {
   return getSceneLayout()?.petLayout?.cards?.find(entry => entry.key === String(key)) || null;
 }
@@ -18965,7 +18964,7 @@ function handlePetCardMenuAction(action,key) {
   if (action === 'locate') { focusPetOnCanvas(entry); return; }
 }
 
-// ========【寵物卡操作】 設定 - PointerUp 啟用觸控／滑鼠卡片；Click 保留鍵盤啟用 ========
+// ========【寵物卡操作】 PointerUp 啟用觸控／滑鼠卡片；Click 保留鍵盤啟用 ========
 function activatePetCanvasCard(id, additive = false) {
   const card = getSceneLayout()?.petLayout?.cards?.find(entry => entry.key === id);
   if (!card) return false;
@@ -19151,7 +19150,7 @@ petCardsLayer?.addEventListener('click', event => {
   activatePetCanvasCard(id,event.shiftKey);
 });
 
-// ========【頂部篩選】 設定 - 狀態、性別、種族與年齡階段篩選 ========
+// ========【頂部篩選】 狀態、性別、種族與年齡階段篩選 ========
 function applyTopbarFilters() {
   updateTopbarFilterUI();
   // 畫布與側欄都由 getVisibleIds() 決定顯示人物；篩選後一併刷新。
@@ -19257,7 +19256,7 @@ if (gameImportInput) {
   };
 }
 
-// ========【全站載入骨架】 設定 - 完成初始資料與圖片載入後一次移除 ========
+// ========【全站載入骨架】 完成初始資料與圖片載入後一次移除 ========
 function hideAppSkeleton() {
   const skeleton = $('appSkeleton');
   if (!skeleton || skeleton.classList.contains('is-hidden')) return;
@@ -19562,9 +19561,8 @@ async function initializeGenealogyWorkspace() {
 
   applyRelationshipLineSettings();
   restoreCanvasBackground();
-  // A failed IndexedDB Blob write must not block access to an otherwise valid
-  // saved family tree. Never clear picture references or rewrite the workspace
-  // while the browser's image storage is failing.
+  // IndexedDB 圖片 Blob 寫入失敗時，仍應允許讀取有效的族譜存檔。
+  // 儲存空間異常期間，不得清除圖片參照或覆寫目前工作區。
   let repairedSamplePortraits = false;
   let portraitStorageError = null;
   try {
@@ -19640,7 +19638,7 @@ async function initializeGenealogyWorkspace() {
 }
 
 
-/* ========【多語系介面回呼】 設定 - 語言切換後刷新 App 專屬畫面狀態 ======== */
+/* ========【多語系介面回呼】 語言切換後刷新 App 專屬畫面狀態 ======== */
 function handleGenealogyLanguageChanged() {
   // 關係標籤寬度與 selector 顯示文字都依目前語言重新計算。
   invalidateFamilySelectorCache();
