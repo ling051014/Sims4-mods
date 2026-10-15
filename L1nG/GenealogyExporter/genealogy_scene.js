@@ -43,7 +43,7 @@
       buildPersonPresentation,
       getActiveFamilySelectorEntry, currentTreeFamily, currentFamily, uiText, displayDataText,
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
-      clampRelationshipCurveAmount, relationshipLineSetting, relationshipOtherType,
+      relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
@@ -1746,19 +1746,6 @@
         viewMode
       ];
     }
-function relationshipCurveFactor(value) {
-  const percent =
-    clampRelationshipCurveAmount(
-      value
-    );
-
-  // 50% 對應舊版「其他關係」約 0.15 的固定曲率。
-  return (
-    0.03 +
-    (percent / 100) * 0.24
-  );
-}
-
 function relationshipSegmentIntersectsRect(
   x1,
   y1,
@@ -1900,160 +1887,32 @@ function relationshipBlockingCard(
   return null;
 }
 
-function relationshipCurveDirection(
-  blocker,
-  x1,
-  y1,
-  x2,
-  y2
-) {
-  if (!blocker?.rect) {
-    return 1;
+function relationshipPairRenderGeometry(a,b,setting,routeContext=null) {
+  const {aX,aY,bX,bY}=getPairConnectionGeometry(a,b);
+  // 伴侶關係維持既有正交路線，僅處理舊存檔明確指定的曲線。
+  if(setting.routing!=='manual'||!setting.curved){
+    const join=pairJoinPoint(a,b);
+    return {d:createPartnerConnectionPath(a,b),labelX:join.x,labelY:join.y};
   }
-
-  const cross =
-    (x2 - x1) *
-      (blocker.rect.centerY - y1) -
-    (y2 - y1) *
-      (blocker.rect.centerX - x1);
-
-  return cross >= 0
-    ? -1
-    : 1;
-}
-
-function relationshipQuadraticGeometry(
-  x1,
-  y1,
-  x2,
-  y2,
-  curveAmount,
-  direction = 1
-) {
-  const dx =
-    x2 - x1;
-
-  const dy =
-    y2 - y1;
-
-  const distance =
-    Math.max(
-      1,
-      Math.hypot(dx, dy)
-    );
-
-  const normalX =
-    -dy / distance;
-
-  const normalY =
-    dx / distance;
-
-  const bend = Math.min(36,distance * relationshipCurveFactor(curveAmount)) *
-    (direction < 0 ? -1 : 1);
-
-  const cx =
-    (x1 + x2) / 2 +
-    normalX * bend;
-
-  const cy =
-    (y1 + y2) / 2 +
-    normalY * bend;
-
-  return {
-    d:
-      'M' + x1 + ' ' + y1 +
-      ' Q' + cx + ' ' + cy +
-      ' ' + x2 + ' ' + y2,
-    cx,
-    cy,
-    labelX:
-      0.25 * x1 +
-      0.5 * cx +
-      0.25 * x2,
-    labelY:
-      0.25 * y1 +
-      0.5 * cy +
-      0.25 * y2
-  };
-}
-
-function relationshipPairRenderGeometry(
-  a,
-  b,
-  setting,
-  routeContext = null
-) {
-  const {
-    aX,
-    aY,
-    bX,
-    bY
-  } =
-    getPairConnectionGeometry(
-      a,
-      b
-    );
-
-  // 配偶 / 前任 / 已故配偶的預設幾何固定為正交線：
-  // 同高時 H；手動拖離同一列後 H-V-H。
-  // 只有玩家明確把該關係切成手動曲線時，才允許曲線。
-  const useCurve =
-    setting.routing === 'manual' &&
-    !!setting.curved;
-
-  if (!useCurve) {
-    const join =
-      pairJoinPoint(
-        a,
-        b
-      );
-
-    return {
-      d:
-        createPartnerConnectionPath(
-          a,
-          b
-        ),
-      labelX:join.x,
-      labelY:join.y
-    };
-  }
-
-  const blocker =
-    relationshipBlockingCard(
-      routeContext,
-      aX,
-      aY,
-      bX,
-      bY
-    );
-
-  return relationshipQuadraticGeometry(
-    aX,
-    aY,
-    bX,
-    bY,
-    setting.curveAmount,
-    relationshipCurveDirection(
-      blocker,
-      aX,
-      aY,
-      bX,
-      bY
-    )
-  );
+  const start={x:aX,y:aY},end={x:bX,y:bY};
+  return relationshipSmartUpperCurveGeometry(start,end,relationshipRouteRects(routeContext,start,end,true));
 }
 
 // ========【其他關係線避障】 設定 - 統一遵守視覺設定，尋找最短且不穿越卡片的路徑 ========
-function relationshipRouteRects(context,start,end) {
+function relationshipRouteRects(context,start,end,forCurve=false) {
   if(!context?.pos)return [];
   const excluded=new Set([String(context.fromId||''),String(context.toId||'')]);
   const result=[];
+  const minX=Math.min(start.x,end.x),maxX=Math.max(start.x,end.x);
+  const minY=Math.min(start.y,end.y),maxY=Math.max(start.y,end.y);
   context.pos.forEach((position,id)=>{
     if(!position||excluded.has(String(id)))return;
     const rect=context.geometry?.rects?.get(String(id))||cardOuterRect(position);
-    if(rect.right<Math.min(start.x,end.x)-230||rect.left>Math.max(start.x,end.x)+230||
-       rect.bottom<Math.min(start.y,end.y)-260||rect.top>Math.max(start.y,end.y)+260)return;
+    // 曲線必須納入所有世代，不能按固定的垂直距離忽略祖先卡片。
+    if(forCurve){
+      if(rect.right<minX-12||rect.left>maxX+12)return;
+    }else if(rect.right<minX-230||rect.left>maxX+230||
+      rect.bottom<minY-260||rect.top>maxY+260)return;
     result.push(rect);
   });
   return result;
@@ -2157,17 +2016,16 @@ function relationshipCubicAt(segment,t) {
 }
 
 function relationshipCubicClear(segments,rects) {
-  // 驗證實際曲線而不是只驗證控制點或折線。
-  // 小段曲線提高取樣密度，避免窄卡片被略過。
+  // 沿 SVG 實際軌跡取樣，含 9px 安全間距，避免僅檢查控制點而擦到卡片。
   return segments.every(segment=>{
-    const length=Math.hypot(segment.to.x-segment.from.x,segment.to.y-segment.from.y);
-    const steps=Math.max(32,Math.min(160,Math.ceil(length/3)));
-    for(let step=1;step<steps;step++){
-      const p=relationshipCubicAt(segment,step/steps);
-      if(rects.some(rect=>
-        p.x>=rect.left-9&&p.x<=rect.right+9&&
-        p.y>=rect.top-9&&p.y<=rect.bottom+9
-      ))return false;
+    const {from,c1,c2,to}=segment;
+    const length=Math.hypot(c1.x-from.x,c1.y-from.y)+
+      Math.hypot(c2.x-c1.x,c2.y-c1.y)+Math.hypot(to.x-c2.x,to.y-c2.y);
+    const steps=Math.max(48,Math.min(480,Math.ceil(length/2)));
+    for(let i=1;i<steps;i++){
+      const p=relationshipCubicAt(segment,i/steps);
+      if(rects.some(r=>p.x>=r.left-9&&p.x<=r.right+9&&
+        p.y>=r.top-9&&p.y<=r.bottom+9))return false;
     }
     return true;
   });
@@ -2222,132 +2080,56 @@ function relationshipArcCandidate(start,end,amplitude,sign) {
   }];
 }
 
-// ========【弧度滑桿與實際曲線】 設定 - 在安全避障空間內連續調整弧度 ========
-// ========【弧度優先權】 設定 - 預設找最小安全弧度，玩家手動值不再被避障演算法覆蓋 ========
-function relationshipCurveAmplitude(start,end,amount) {
-  const span=Math.hypot(end.x-start.x,end.y-start.y);
-  const max=Math.max(90,Math.min(230,span*0.65));
-  return 8+(max-8)*(clampRelationshipCurveAmount(amount)-10)/90;
+// ========【智慧曲線】 所有線各自避障，只有單一、向上凸的 Bézier 弧線 ========
+function relationshipCurveSideAnchor(card,targetCard) {
+  const source=cardOuterRect(card),target=cardOuterRect(targetCard);
+  const side=cardHorizontalConnectionRect(card),avatar=cardAvatarRect(card);
+  return {x:target.centerX>=source.centerX?side.right:side.left,y:avatar.centerY};
 }
 
-function relationshipUpperCurveSign(start,end) {
-  // SVG 的 Y 軸向下；無論人物排列左右如何，預設曲線只往上拱。
-  return end.x>=start.x ? -1 : 1;
+function relationshipUpperArcSegment(start,end,rise) {
+  const dx=end.x-start.x,dy=end.y-start.y,lift=4*rise/3;
+  // y(t) = start.y + t*dy - 4*rise*t*(1-t)：不可能形成 S 形或多弧頂。
+  return {
+    from:start,
+    c1:{x:start.x+dx/3,y:start.y+dy/3-lift},
+    c2:{x:start.x+dx*2/3,y:start.y+dy*2/3-lift},
+    to:end
+  };
 }
 
-function relationshipRecommendedCurveAmount(start,end,rects,minAmount=50) {
-  const sign=relationshipUpperCurveSign(start,end);
-  // 自動弧度不能從視覺上幾乎水平的 10% 起算。
-  for(let amount=clampRelationshipCurveAmount(minAmount);amount<=100;amount++){
-    const segments=relationshipArcCandidate(
-      start,end,relationshipCurveAmplitude(start,end,amount),sign
-    );
-    if(relationshipCubicClear(segments,rects))return amount;
-  }
-  return null;
-}
-
-const defaultOtherCurveCache=new Map();
-function recommendOtherRelationshipCurveAmount(type) {
-  if(defaultOtherCurveCache.has(type))return defaultOtherCurveCache.get(type);
-  if(!layoutCache?.pos||!layoutCache?.byId)return null;
-  const {pos,byId,visibleIds,geometry}=layoutCache;
-  const relations=[
-    ...(genealogyData.links||[]),
-    ...inferCoParentRelationshipLinks(
-      buildParentChildConnectorGroups(byId,visibleIds),byId
-    )
-  ];
-  let required=10,found=false;
-  relations.forEach(link=>{
-    if(relationshipOtherType(link)!==type)return;
-    const from=pos.get(String(link.from)),to=pos.get(String(link.to));
-    if(!from||!to)return;
-    found=true;
-    const start=avatarBoundaryAnchor(from,to);
-    const end=avatarBoundaryAnchor(to,from);
-    const rects=relationshipRouteRects({pos,byId,geometry,fromId:link.from,toId:link.to},start,end);
-    const value=relationshipRecommendedCurveAmount(start,end,rects);
-    // 少數家族沒有上方安全單弧通道，保留最大值給後續避障分支。
-    required=Math.max(required,value??100);
-  });
-  const result=found?required:null;
-  defaultOtherCurveCache.set(type,result);
-  return result;
-}
-
-// ========【自然曲線避障】 使用連續切線的兩段 Bézier 拱線，不再把直角折線磨圓 ========
-function relationshipNaturalArchSegments(start,end,rise,peakRatio=0.5) {
-  const dx=end.x-start.x;
-  const apex={x:start.x+dx*peakRatio,y:Math.min(start.y,end.y)-rise};
-  const shoulder=dx*0.16;
-  const lift=Math.max(20,rise*0.78);
-  return [
-    {
-      from:start,
-      c1:{x:start.x+dx*0.04,y:start.y-lift},
-      c2:{x:apex.x-shoulder,y:apex.y},
-      to:apex
-    },
-    {
-      from:apex,
-      c1:{x:apex.x+shoulder,y:apex.y},
-      c2:{x:end.x-dx*0.04,y:end.y-lift},
-      to:end
+function relationshipSmartUpperCurveGeometry(start,end,rects) {
+  const horizontalSpan=Math.abs(end.x-start.x);
+  const maxRise=Math.min(280,Math.max(96,horizontalSpan*0.52));
+  let safe=null,previous=0;
+  for(let rise=8;rise<=maxRise+8;rise+=8){
+    const next=Math.min(rise,maxRise);
+    if(relationshipCubicClear([relationshipUpperArcSegment(start,end,next)],rects)){
+      safe=next;break;
     }
-  ];
-}
-
-function relationshipUpperDetourGeometry(start,end,rects,amount=50) {
-  const dx=end.x-start.x,dy=end.y-start.y;
-  // 近乎垂直的關係交由原本的單弧處理，不建立不必要的側向回折。
-  if(Math.abs(dx)<Math.max(80,Math.abs(dy)*0.5))return null;
-  const initialRise=Math.max(52,relationshipCurveAmplitude(start,end,amount)*0.75);
-  // 先試較低的自然拱線；確定撞到其他人物卡片才逐步提高。
-  // 只測有限組弧度與頂點，避免大族譜反覆進行高成本避障搜尋。
-  const rises=[0,30,65,105,155,220,300,390,490];
-  for(const extra of rises){
-    const rise=initialRise+extra;
-    for(const ratio of [0.5,0.42,0.58]){
-      const segments=relationshipNaturalArchSegments(start,end,rise,ratio);
-      if(relationshipCubicClear(segments,rects))
-        return relationshipCubicGeometry(segments);
-    }
+    previous=next;
+    if(next===maxRise)break;
   }
-  return null;
+  if(safe!==null){
+    for(let rise=Math.max(8,previous+1);rise<safe;rise++){
+      if(relationshipCubicClear([relationshipUpperArcSegment(start,end,rise)],rects)){
+        safe=rise;break;
+      }
+    }
+    return relationshipCubicGeometry([relationshipUpperArcSegment(start,end,safe)]);
+  }
+  // 若向上單弧無安全路徑，絕不改為向下凹、波浪線或穿越卡片。
+  return {d:'',labelX:(start.x+end.x)/2,labelY:(start.y+end.y)/2,segments:[],blocked:true};
 }
 
 function relationshipOtherRenderGeometry(a,b,setting,context=null) {
-  const from=avatarBoundaryAnchor(a,b),to=avatarBoundaryAnchor(b,a);
+  const from=setting.curved?relationshipCurveSideAnchor(a,b):avatarBoundaryAnchor(a,b);
+  const to=setting.curved?relationshipCurveSideAnchor(b,a):avatarBoundaryAnchor(b,a);
   const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
-  const rects=relationshipRouteRects(context,start,end);
-
-  if(!setting.curved){
+  const rects=relationshipRouteRects(context,start,end,!!setting.curved);
+  if(!setting.curved)
     return relationshipStraightRoute(relationshipOrthogonalRoute(start,end,rects)||[start,end]);
-  }
-
-  const amount=clampRelationshipCurveAmount(setting.curveAmount);
-  const sign=relationshipUpperCurveSign(start,end);
-  const segments=relationshipArcCandidate(start,end,
-    relationshipCurveAmplitude(start,end,amount),sign
-  );
-
-  // 玩家指定弧度維持原樣，不強制替換其數值。
-  if(setting.curveAmountManual===true)return relationshipCubicGeometry(segments);
-
-  // 每一條曲線依目前的卡片重新驗證，不沿用同類型其他線的避障結果。
-  const safeAmount=relationshipRecommendedCurveAmount(start,end,rects,Math.max(50,amount));
-  if(safeAmount!==null){
-    return relationshipCubicGeometry(relationshipArcCandidate(start,end,
-      relationshipCurveAmplitude(start,end,safeAmount),sign));
-  }
-
-  // 單弧無法避開其他卡片時改用連續拱形曲線，不採用「水平折線加圓角」。
-  const detour=relationshipUpperDetourGeometry(start,end,rects,Math.max(50,amount));
-  if(detour)return detour;
-  // 極度擁擠且找不到安全上方通道時，仍保留真正的 Bézier 弧線，
-  // 不因避障失敗而退回水平直線。玩家手動指定弧度仍有最高優先權。
-  return relationshipCubicGeometry(segments);
+  return relationshipSmartUpperCurveGeometry(start,end,rects);
 }
 
 function drawPerspectiveKinshipLabels(
@@ -6921,10 +6703,12 @@ function genealogyCoParentRelationshipJunction(group,pos,byId,link) {
   const setting=getOtherRelationshipLineSetting(relationshipOtherType(link));
   const context={pos,byId,fromId:link.from,toId:link.to};
   const geometry=relationshipOtherRenderGeometry(a,b,setting,context);
+  if(geometry.blocked)return null;
   const positions=group.children.map(id=>pos.get(id)).filter(Boolean);
   if(!positions.length)return null;
   const childAnchors=positions.map(card=>cardVerticalAnchor(card,'top'));
-  const start=avatarBoundaryAnchor(a,b),end=avatarBoundaryAnchor(b,a);
+  const start=setting.curved?relationshipCurveSideAnchor(a,b):avatarBoundaryAnchor(a,b);
+  const end=setting.curved?relationshipCurveSideAnchor(b,a):avatarBoundaryAnchor(b,a);
   const centerX=(start.x+end.x)/2;
   const childCenter=(Math.min(...childAnchors.map(p=>p.x))+
     Math.max(...childAnchors.map(p=>p.x)))/2;
@@ -7353,7 +7137,6 @@ function paintRelationshipLayer({
   includeLabels = true
 } = {}) {
   if (!layoutCache) return;
-  defaultOtherCurveCache.clear();
 
   const {
     pos,
@@ -7951,7 +7734,7 @@ function paintRelationshipLayer({
           link,
           setting,
           obstacleSensitive:
-            setting.routing !== 'manual',
+            !!setting.curved || setting.routing !== 'manual',
           simIds:[
             String(link.from),
             String(link.to)
@@ -7968,6 +7751,8 @@ function paintRelationshipLayer({
         markerAttributes +
         '/>'
       );
+
+      if(geometryResult.blocked)return;
 
       if (
         !includeLabels ||
@@ -9326,7 +9111,6 @@ function resizeStageToContent() {
     function withState(fn) { return function () { syncState(); return fn.apply(null, arguments); }; }
     return Object.freeze({
       requestUpdate:requestSceneUpdate,
-      recommendedOtherCurveAmount:withState(recommendOtherRelationshipCurveAmount),
       renderImmediately:renderSceneImmediately,
       requestRelationshipUpdate:requestRelationshipLayerUpdate,
       requestRelationshipPreviewUpdate,
