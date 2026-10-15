@@ -1809,6 +1809,7 @@
         ageStage:mapLifeStage(pet.age),
         status:mapStatus(pet),
         traits,
+        notes:'',
         avatar:null,
         avatarFrame:null,
         gameAvatar:null,
