@@ -9789,7 +9789,7 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 .genealogy-feedback-panel .genealogy-feedback-attachment-choice{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
 .genealogy-feedback-panel .genealogy-feedback-attachment-top{display:flex;align-items:center;gap:6px;width:100%;min-width:0}
 .genealogy-feedback-panel .genealogy-feedback-attachment-top .genealogy-feedback-attach-action{flex:0 0 auto;white-space:nowrap}
-.genealogy-feedback-panel .genealogy-feedback-attachment-top .genealogy-feedback-drag-hint{min-width:0;white-space:nowrap}
+.genealogy-feedback-panel .genealogy-feedback-attachment-top .genealogy-feedback-drag-hint{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .genealogy-feedback-panel .genealogy-feedback-attachment-choice small,.genealogy-feedback-panel .genealogy-feedback-drag-hint{color:var(--gf-muted);font-size:10px}
 .genealogy-feedback-panel .genealogy-feedback-attach-action{font-size:13px;padding:6px 0}
 .genealogy-feedback-panel .genealogy-feedback-attachment-choice .genealogy-feedback-drag-hint{display:inline}

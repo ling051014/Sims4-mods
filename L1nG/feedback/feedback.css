@@ -394,7 +394,7 @@ body.realdate-only #visitor-reply{width:100%;min-height:72px;max-height:150px;re
 body.realdate-only .realdate-reply-attachment-choice{display:flex;align-items:flex-start;flex-direction:column;gap:2px;min-width:0}
 body.realdate-only .realdate-reply-attachment-top{display:flex;align-items:center;gap:6px;width:100%;min-width:0}
 body.realdate-only .realdate-reply-attachment-top .attach-action{flex:0 0 auto;white-space:nowrap}
-body.realdate-only .realdate-reply-attachment-top .hint{min-width:0;white-space:nowrap}
+body.realdate-only .realdate-reply-attachment-top .hint{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.realdate-only .realdate-reply-attachment-choice .attach-action{font-size:13px;padding:6px 0}
 body.realdate-only .realdate-reply-attachment-choice .hint{font-size:10px}
 body.realdate-only #visitor-reply-selected{display:contents}
