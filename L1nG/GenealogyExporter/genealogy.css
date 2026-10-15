@@ -4874,14 +4874,15 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .pet-item {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 10px;
-    /* 內縮空間 */ padding: 6px 8px;
-    /* 背景設定 */ background: var(--surface-item);
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 保持雙欄卡片可縮小 */ min-width:0;
-    /* 讓操作按鈕在窄欄位自然換行 */ flex-wrap:wrap;
+    /* 頭像、姓名與特徵、編輯操作維持同一橫排，不能把按鈕推到下一行。 */
+    display:grid;
+    grid-template-columns:36px minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    padding:6px 8px;
+    background:var(--surface-item);
+    border-radius:6px;
+    min-width:0;
 }
 
 .pet-item-avatar {
@@ -4910,9 +4911,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 最小寬度 */ min-width: 0;
 }
 
-.pet-item-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:6px; min-width:0; }
-.pet-item-name { font-size:12px; font-weight:650; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.pet-item-identity { color:var(--text-secondary); font-size:10px; white-space:nowrap; }
+.pet-item-heading { display:flex; flex-wrap:nowrap; align-items:baseline; gap:5px; min-width:0; }
+.pet-item-name { flex:0 1 auto; font-size:12px; font-weight:650; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pet-item-identity { flex:0 0 auto; color:var(--text-secondary); font-size:10px; white-space:nowrap; }
 
 .pet-trait-summary {
     /* 寵物清單直接顯示已記錄特徵 */ display:flex;
@@ -4925,9 +4926,12 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .pet-item-actions {
-    /* 顯示方式 */ display: flex;
-    /* 項目間距 */ gap: 4px;
-    /* 彈性收縮 */ flex-shrink: 0;
+    /* 編輯／刪除只在編輯狀態出現，兩顆按鈕始終同排。 */
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:4px;
+    white-space:nowrap;
 }
 
 .pet-item-actions button {
@@ -4938,6 +4942,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 圓角弧度 */ border-radius: 6px;
     /* 滑鼠指標 */ cursor: pointer;
     /* 文字顏色 */ color: var(--text-primary);
+    /* 長姓名時按鈕不能被壓縮或換行。 */
+    white-space:nowrap;
+    flex:0 0 auto;
     /* 與模擬市民頭像操作一致的懸停回饋 */ transition:border-color .15s ease,color .15s ease,background-color .15s ease;
 }
 .pet-item-actions button:hover,
@@ -5999,9 +6006,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .person-profile-pet-avatar { width:30px; height:30px; border-radius:7px; flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); display:flex; align-items:center; justify-content:center; font-size:14px; border:1px solid var(--border-default); }
 .person-profile-pet-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
 .person-profile-pet-text { flex:1; min-width:0; }
-.person-profile-pet-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:6px; min-width:0; }
-.person-profile-pet-name { font-size:11.5px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.person-profile-pet-identity { color:var(--text-secondary); font-size:10px; white-space:nowrap; }
+.person-profile-pet-heading { display:flex; flex-wrap:nowrap; align-items:baseline; gap:5px; min-width:0; }
+.person-profile-pet-name { flex:0 1 auto; font-size:11.5px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.person-profile-pet-identity { flex:0 0 auto; color:var(--text-secondary); font-size:10px; white-space:nowrap; }
 
 .person-profile-pet-traits {
     /* 人物檔案中的寵物特徵採與人物特徵一致的標籤語言 */ display:flex;
