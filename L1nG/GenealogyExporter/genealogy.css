@@ -785,11 +785,13 @@ input[type="range"]:disabled {
 }
 
 
-/* ========【側邊欄尺寸】 設定 - 左上品牌區與側邊欄共用同一寬度 ======== */
+/* ========【全域變數】 側邊欄尺寸與篩選勾選框預設圖示 ======== */
 
 :root {
     --sidebar-width: 300px;
     --sidebar-default-width: 300px;
+    /* 篩選勾號預設使用白色；深色主題及自訂主題另行指定。 */
+    --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .app {
@@ -1178,6 +1180,7 @@ body.sidebar-resizing * {
 
 .person-card {
     /* 定位方式 */ position: absolute;
+    /* 預設不強制建立合成層 */ will-change: auto;
     /* 背景設定 */ background: var(--surface-card);
     /* 邊框設定 */ border: 1.5px solid var(--border-default);
     /* 圓角弧度 */ border-radius: 10px;
@@ -6418,6 +6421,8 @@ body[data-theme="ling"] #genealogyCanvasViewport {
         /* 字距設定 */ letter-spacing: 1.15px;
     }
     .language-select {
+        /* 固定寬度 */ width: 80px;
+        /* 最小寬度 */ min-width: 80px;
         /* 左側內縮 */ padding-left: 6px;
         /* 右側內縮 */ padding-right: 6px;
     }
@@ -6732,10 +6737,6 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* 文字繪製方式 */ text-rendering: geometricPrecision;
 }
 
-.person-card {
-    /* 預先最佳化 */ will-change: auto;
-}
-
 .person-card-avatar img,
 .person-card-view-avatar img,
 .person-library-avatar img,
@@ -6773,10 +6774,6 @@ html[lang="en"] body {
         /* 固定寬度 */ width: 140px;
         /* 最大寬度 */ max-width: 140px;
         /* 最小寬度 */ min-width: 140px;
-    }
-    .language-select {
-        /* 固定寬度 */ width: 80px;
-        /* 最小寬度 */ min-width: 80px;
     }
 }
 
@@ -7830,7 +7827,6 @@ button.is-loading .button-loading-label {
 .topbar-filter-option { display:flex; align-items:center; gap:8px; min-height:29px; padding:3px 2px; color:var(--nav-dropdown-text); font-size:12px; cursor:pointer; }
 /* 篩選勾選框：背景沿用各主題強調色，勾號依顏色對比選深色或白色。 */
 /* 各主題沿用 --action-primary 作為勾選底色；勾號則依主題色亮度配對。 */
-:root { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"] { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23172636' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 /* 自訂主題勾號由 chooseCustomTheme() 按使用者選的強調色計算。 */
 .topbar-filter-option input[type="checkbox"],
