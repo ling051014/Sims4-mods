@@ -6,9 +6,9 @@
         <meta name="theme-color" content="#f7f7f5">
         <title>管理中心 · L1nG</title>
         <link rel="stylesheet" href="feedback.css">
-        <link rel="stylesheet" href="admin.css?v=20261016-main-feedback-sync-r1">
-        <script src="select-ui.js" defer></script>
-        <script src="admin.js?v=20261016-main-feedback-sync-r1" defer></script>
+        <link rel="stylesheet" href="admin.css?v=20261016-dashboard-refresh-r3">
+        <script src="select-ui.js?v=20261016-dashboard-r3" defer></script>
+        <script src="admin.js?v=20261016-dashboard-refresh-r3" defer></script>
         <script src="ga4-dashboard.js?v=20261016-download-details-only-r2" defer></script>
     </head>
     <body class="admin-only">
@@ -121,9 +121,7 @@
                         <div class="section-toolbar">
                             <h2>回饋列表 <span class="list-count" id="list-count">0 則</span></h2>
                             <div class="toolbar-tools">
-                                <label class="search-field"><svg class="i sm"><use href="#ico-search"></use></svg><input aria-label="搜尋回饋" id="search-input" placeholder="搜尋回饋內容…" type="search"/></label><select aria-label="來源網站" class="toolbar-select" id="site-filter"><option value="all">所有網站</option><option value="Genealogy">Genealogy</option><option value="RealDate">RealDate</option><option value="L1nG">L1nG</option></select><select aria-label="是否有聯絡方式" class="toolbar-select" id="contact-filter"><option value="all">所有聯絡狀態</option><option value="contact">已留聯絡方式</option><option value="anonymous">未留聯絡方式</option></select><select aria-label="對話回覆狀態" class="toolbar-select" id="reply-filter"><option value="all">全部對話狀態</option><option value="admin">等待我回覆</option><option value="player">等待玩家回覆</option><option value="no-reply">尚未有管理員回覆</option></select>
-                            </div>
-                        </div>
+                                <label class="search-field"><svg class="i sm"><use href="#ico-search"></use></svg><input aria-label="搜尋回饋" id="search-input" placeholder="搜尋回饋內容…" type="search"/></label><button class="secondary feedback-refresh-button" id="feedback-refresh" type="button"><svg class="i sm"><use href="#ico-refresh"></use></svg>立即更新</button></div></div><div class="feedback-filter-grid"><select aria-label="來源網站" class="toolbar-select" id="site-filter"><option value="all">所有網站</option><option value="Genealogy">Genealogy</option><option value="RealDate">RealDate</option></select><select aria-label="是否有聯絡方式" class="toolbar-select" id="contact-filter"><option value="all">所有聯絡狀態</option><option value="contact">已留聯絡方式</option><option value="anonymous">未留聯絡方式</option></select><select aria-label="對話回覆狀態" class="toolbar-select" id="reply-filter"><option value="all">全部對話狀態</option><option value="admin">等待我回覆</option><option value="player">等待玩家回覆</option><option value="no-reply">尚未有管理員回覆</option></select></div><p class="feedback-sync-status" id="feedback-sync-status" role="status" aria-live="polite"></p>
                         <div class="feedback-table">
                             <div class="table-header">
                                 <span>回饋內容</span><span>相關網站</span><span>回饋類型</span><span>處理狀態</span><span>提交日期</span>
@@ -352,7 +350,7 @@
             <aside aria-labelledby="detail-title" aria-modal="true" class="detail-panel" role="dialog">
                 <div class="detail-head">
                     <div>
-                        <span class="eyebrow">FEEDBACK DETAIL</span><h2 id="detail-title">回饋詳情</h2>
+                        <span class="eyebrow">FEEDBACK DETAIL</span><h2 id="detail-title">回饋詳情</h2><div class="detail-meta" id="detail-head-tags"></div>
                     </div>
                     <button aria-label="關閉詳情" class="icon-btn" id="detail-close" type="button">
                         <svg class="i"><use href="#ico-close"></use></svg>
@@ -370,8 +368,8 @@
                     <p class="restore-error" id="admin-reply-error" hidden>請先輸入回覆內容。</p>
                 </div>
                 <div class="detail-foot">
-                    <select aria-label="處理狀態" class="field" id="detail-status"><option value="pending">尚未處理</option><option value="progress">處理中</option><option value="done">已完成</option><option value="spam">垃圾訊息</option></select>
-                    <button class="secondary" id="detail-update" type="button">儲存狀態</button>
+                    <div class="detail-status-actions"><select aria-label="處理狀態" class="field" id="detail-status"><option value="pending">尚未處理</option><option value="progress">處理中</option><option value="done">已完成</option><option value="spam">垃圾訊息</option></select>
+                    <button class="secondary" id="detail-update" type="button">儲存狀態</button></div>
                     <button aria-label="刪除這則回饋" class="danger" id="detail-delete" title="刪除這則回饋" type="button">
                         <svg class="i sm"><use href="#ico-trash"></use></svg>
                     </button>
