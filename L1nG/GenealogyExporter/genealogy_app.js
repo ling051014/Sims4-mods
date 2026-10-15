@@ -1591,7 +1591,7 @@ function buildSample() {
       gameImport:true,
       sourceFormat:'l1ng-genealogy',
       sourceSchemaVersion:1,
-      exporterVersion:'0.4.3-runtime-test',
+      exporterVersion:'v0.1 Beta',
       targetGameVersion:'1.128',
       gameLocale:'zh-tw',
       exportedAt:'2026-09-27T05:26:55.970318+08:00',
