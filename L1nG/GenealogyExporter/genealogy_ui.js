@@ -7,7 +7,7 @@
     const { sidebar, sidebarBackdrop, menuToggle, sidebarResizer } = dom;
     const { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_DEFAULT_WIDTH,
       SIDEBAR_WIDTH_KEY, FAMILY_PANEL_COLLAPSED_KEY } = constants;
-    const { uiText, iconSvg, scheduleFamilyNameInputWidthSync,
+    const { scheduleFamilyNameInputWidthSync,
       createDebouncedCallback } = helpers;
     const $ = id => document.getElementById(id);
 
@@ -24,12 +24,6 @@
     function setFamilyPanelCollapsed(collapsed, { persist = true } = {}) {
       const next = !!collapsed;
       document.body.classList.toggle('family-panel-collapsed', next);
-      const btn = $('familyPanelCollapseBtn');
-      if (btn) {
-        btn.innerHTML = iconSvg(next ? 'chevron-right' : 'chevron-left');
-        btn.title = uiText(next ? '展開家族欄' : '收合家族欄');
-        btn.setAttribute('aria-label', btn.title);
-      }
       if (persist) { try { localStorage.setItem(FAMILY_PANEL_COLLAPSED_KEY, next ? '1' : '0'); } catch (_) {} }
     }
     function restoreFamilyPanelCollapsed() {
@@ -45,7 +39,6 @@
       }
     };
     sidebarBackdrop.onclick = closeSidebar;
-    $('familyPanelCollapseBtn')?.addEventListener('click', () => setFamilyPanelCollapsed(true));
 
     // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
     function restoreAppMenuPortal(menu) {
@@ -1096,6 +1089,8 @@
         ).trim();
 
       const placeholderSource = wrap.dataset.placeholder || '點選選擇……';
+      const matchWidth = wrap.dataset.uiSelectMatchWidth === 'true';
+      if (wrap.dataset.uiSelectColumns === '2') dropdown.dataset.uiSelectColumns = '2';
       const home = { parent:dropdown.parentNode, next:dropdown.nextSibling };
 
       function nativeOptionModel(option) {
@@ -1273,9 +1268,10 @@
         }
 
         dropdown.classList.add('ui-select-dropdown-portal');
+        const width = input.getBoundingClientRect().width;
         positionPortal(input, dropdown, {
-          minWidth:280,
-          maxWidth:520,
+          minWidth:matchWidth ? Math.min(width, Math.max(1,global.innerWidth - 20)) : 280,
+          maxWidth:matchWidth ? Math.max(1,width) : 520,
           maxHeight:360
         });
       }

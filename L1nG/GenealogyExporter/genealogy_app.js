@@ -62,17 +62,18 @@ let genealogyStore = null;
 let genealogyScene = null;
 
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
+const LIFE_PHOTOS_PUBLIC = document.body?.dataset.lifePhotos !== 'hidden';
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
 const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
-const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits'];
+const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits','owners'];
 const DEFAULT_PET_CARD_VIEW_SETTINGS = Object.freeze({
-  avatar:true, name:true, species:true, breed:true,
-  gender:true, ageStage:false, status:false, traits:false,
+  avatar:true, name:true, species:true, breed:false,
+  gender:true, ageStage:false, status:false, traits:false, owners:true,
   appearance:'minimal'
 });
 const DEFAULT_PET_CARD_EDIT_SETTINGS = Object.freeze({
   avatar:true, name:true, species:true, breed:true,
-  gender:true, ageStage:true, status:true, traits:true
+  gender:true, ageStage:true, status:true, traits:true, owners:true
 });
 
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
@@ -88,7 +89,7 @@ const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
   residence: false,
   aspiration: false,
   traits: false,
-  pets: false,
+  pets: true,
   gallery: false,
   appearance: 'minimal'
 });
@@ -106,7 +107,7 @@ const DEFAULT_CARD_EDIT_SETTINGS = Object.freeze({
   residence: true,
   aspiration: false,
   traits: true,
-  pets: false,
+  pets: true,
   gallery: false
 });
 
@@ -804,7 +805,7 @@ function refreshResolvedAssetDom(
         if (element.classList.contains('person-library-deferred-image')) return;
         if (element.src !== url) {
           if (element.classList.contains('pet-avatar-image')) {
-            element.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+            element.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar, .person-card-mini-pet-avatar, .family-cover-collage-pet')
               ?.classList.remove('has-image');
           }
           element.src = url;
@@ -980,13 +981,6 @@ function clampAvatarValue(value,min,max,fallback){
     const f=normalizeAvatarFrame(frame);
     return [`--avatar-x:${(f.x*100).toFixed(2)}%`,`--avatar-y:${(f.y*100).toFixed(2)}%`,`--avatar-zoom:${f.zoom.toFixed(3)}`].join(';');
   }
-  function applyAvatarFrameToElement(element,frame){
-    if(!element)return;
-    const f=normalizeAvatarFrame(frame);
-    element.style.setProperty('--avatar-x',`${(f.x*100).toFixed(2)}%`);
-    element.style.setProperty('--avatar-y',`${(f.y*100).toFixed(2)}%`);
-    element.style.setProperty('--avatar-zoom',f.zoom.toFixed(3));
-  }
   function framedAvatarImageHTML(ref,frame,extraClass='',deferSrc=false){
     if(!isAssetId(ref))return'';
 
@@ -1007,21 +1001,13 @@ let _dimsCache = { mode: null, dims: null };
 let _gapsCache = { mode: null, gaps: null };
 
 function getCardViewSettings() {
-  return (
-    genealogyStore?.getCardSettings?.(
-      'view'
-    ) ||
-    { ...DEFAULT_CARD_VIEW_SETTINGS }
-  );
+  const s=genealogyStore?.getCardSettings?.('view')||{...DEFAULT_CARD_VIEW_SETTINGS};
+  return LIFE_PHOTOS_PUBLIC?s:{...s,gallery:false};
 }
 
 function getCardEditSettings() {
-  return (
-    genealogyStore?.getCardSettings?.(
-      'edit'
-    ) ||
-    { ...DEFAULT_CARD_EDIT_SETTINGS }
-  );
+  const s=genealogyStore?.getCardSettings?.('edit')||{...DEFAULT_CARD_EDIT_SETTINGS};
+  return LIFE_PHOTOS_PUBLIC?s:{...s,gallery:false};
 }
 
 function getPetCardSettings(mode = viewMode) {
@@ -2804,7 +2790,15 @@ function positionFamilyNavTabsPortal(control) {
 
   portal.style.display = 'flex';
   portal.style.top = Math.round(menuRect.top) + 'px';
-  portal.style.left = Math.max(2, Math.round(menuRect.left - tabWidth + 1)) + 'px';
+  portal.style.left = Math.max(2, Math.round(menuRect.left - tabWidth)) + 'px';
+  const active = portal.querySelector('.family-nav-index-tab.active');
+  if (active) {
+    const rect = active.getBoundingClientRect();
+    const start = Math.max(0,Math.min(menuRect.height,rect.top-menuRect.top));
+    const end = Math.max(start,Math.min(menuRect.height,rect.bottom-menuRect.top));
+    control.menu.style.setProperty('--family-seam-start',start+'px');
+    control.menu.style.setProperty('--family-seam-end',end+'px');
+  }
 }
 
 
@@ -3529,6 +3523,21 @@ function relationshipTypePickerTabMarkup(category){
   '</span>';
 }
 
+function syncRelationshipTypePickerSeam(){
+  const popover=$('relationshipTypePopover');
+  const index=$('relationshipTypeIndex');
+  const active=index?.querySelector('.relationship-type-index-tab.active');
+  if(!popover||popover.hidden||!active)return;
+
+  // Measure the tab and menu after layout: all six tabs share the same positioning logic.
+  const menuRect=popover.getBoundingClientRect();
+  const tabRect=active.getBoundingClientRect();
+  const start=Math.max(0,Math.min(menuRect.height,tabRect.top-menuRect.top));
+  const end=Math.max(start,Math.min(menuRect.height,tabRect.bottom-menuRect.top));
+  popover.style.setProperty('--relationship-seam-start',start+'px');
+  popover.style.setProperty('--relationship-seam-end',end+'px');
+}
+
 function syncRelationshipTypePickerTabs(){
   document
     .querySelectorAll(
@@ -3571,6 +3580,7 @@ function syncRelationshipTypePickerTabs(){
           category
         );
     });
+  syncRelationshipTypePickerSeam();
 }
 
 function syncRelationshipTypePickerValue(){
@@ -3590,7 +3600,7 @@ function syncRelationshipTypePickerValue(){
   const text=
     selected&&selected.value
       ? selected.textContent
-      : uiText('選擇或輸入關係……');
+      : uiText('新增其他關係');
 
   value.textContent=text;
   value.title=text;
@@ -3606,8 +3616,14 @@ function relationshipTypePickerFilteredOptions(){
       .trim()
       .toLocaleLowerCase();
 
-  const options=
-    relationshipTypeOptions();
+  // Visual settings reuse the picker but list only existing relationship types.
+  const options=relationshipTypePickerOnSelect
+    ? getOtherRelationshipTypes().map(entry=>({
+        value:entry.type,
+        label:entry.label,
+        custom:!SOCIAL_RELATIONSHIP_DEFINITIONS[entry.type]
+      }))
+    : relationshipTypeOptions();
 
   if(query){
     return options.filter(option=>
@@ -3740,7 +3756,7 @@ function renderRelationshipTypePickerOptions(){
       );
 
   const createMarkup=
-    normalizedRaw&&!hasExact
+    !relationshipTypePickerOnSelect&&normalizedRaw&&!hasExact
       ? '<button class="relationship-type-option relationship-type-create" type="button" data-create-relationship-type="'+
         esc(normalizedRaw)+
         '">'+
@@ -3889,7 +3905,7 @@ function positionRelationshipTypePicker(){
   const margin=10;
   const gap=6;
   const tabWidth=52;
-  const tabOverlap=1;
+  const tabOverlap=0;
 
   const viewportWidth=
     Math.max(
@@ -4022,6 +4038,7 @@ function positionRelationshipTypePicker(){
     Math.round(menuWidth)+'px';
   popover.style.height='100%';
   popover.style.maxHeight='100%';
+  syncRelationshipTypePickerSeam();
 }
 
 function openRelationshipTypePicker({
@@ -4494,20 +4511,6 @@ function inferredSiblingIdsForParents(
     );
 }
 
-function inferredSiblingIds(simId) {
-  const id =
-    String(simId || '');
-
-  const sim =
-    currentGenealogyData()?.sims?.[id];
-
-  if (!sim) return [];
-
-  return inferredSiblingIdsForParents(
-    id,
-    genealogyParentIds(sim)
-  );
-}
 
 function resolveSiblingRelationships(
   simId,
@@ -7180,22 +7183,8 @@ function saveRelationshipLineSettings() {
   }
 }
 
-function relationshipStyleOptionsHTML() {
-  return [
-    ['solid','實線'],['short-dash','短虛線'],['long-dash','長虛線'],['dot','點線']
-  ].map(([value,label]) =>
-    '<option value="' + value + '">' + esc(uiText(label)) + '</option>'
-  ).join('');
-}
 
-function otherRelationshipDomKey(type) {
-  return encodeURIComponent(String(type));
-}
 
-function otherRelationshipTypeFromDomKey(key) {
-  try { return decodeURIComponent(String(key || '')); }
-  catch (_) { return String(key || ''); }
-}
 
 const RELATIONSHIP_EDITOR_LABELS = Object.freeze({
   parent:'父母 / 子女',spouse:'配偶',exspouse:'前任',adopt:'領養',other:'其他關係'
@@ -7236,6 +7225,8 @@ function syncOtherRelationshipTypeSelect() {
   }
 
   select.value = activeOtherRelationshipType;
+  const label=$('relationshipOtherTypeValue');
+  if (label) label.textContent=options.find(entry=>entry.type===activeOtherRelationshipType)?.label||uiText('關聯');
 }
 
 function setRelationshipSwitchState(button,enabled) {
@@ -7718,7 +7709,6 @@ function syncRelationshipLineControls() {
   }
   if (curveValue) curveValue.textContent = Math.round(shownCurveAmount) + '%';
 
-  if (other) window.L1nGGenealogyUIController?.refreshControl?.($('relationshipOtherTypeSelect'));
   syncRelationshipNavPreviews();
   updateRelationshipFullPreview();
 }
@@ -7727,6 +7717,28 @@ document.querySelectorAll('[data-rel-editor-key]').forEach(button => {
   button.addEventListener('click',() => {
     activeRelationshipStyleKey = button.dataset.relEditorKey || 'parent';
     syncRelationshipLineControls();
+  });
+});
+
+$('relationshipOtherTypeTrigger')?.addEventListener('click',event=>{
+  event.preventDefault();
+  event.stopPropagation();
+  const trigger=event.currentTarget;
+  if (!$('relationshipTypePopover')?.hidden && trigger.getAttribute('aria-expanded')==='true') {
+    closeRelationshipTypePicker();
+    return;
+  }
+  openRelationshipTypePicker({
+    trigger,
+    value:activeOtherRelationshipType,
+    onSelect:value=>{
+      // The visual settings edit existing line types; never create relationships here.
+      if (!getOtherRelationshipTypes().some(entry=>entry.type===value)) return;
+      const select=$('relationshipOtherTypeSelect');
+      if (!select) return;
+      select.value=value;
+      select.dispatchEvent(new Event('change',{bubbles:true}));
+    }
   });
 });
 
@@ -8884,6 +8896,16 @@ function preloadCurrentViewAssets() {
 
   addPriority(family?.coverImage);
 
+  // 自動拼貼的寵物圖片即使畫布篩選隱藏寵物也需要載入。
+  (family?.memberIds||[]).forEach(id=>{
+    (currentGenealogyData().sims[id]?.pets||[]).forEach(pet=>addPriority(pet.avatar));
+  });
+  if(family?.gameData?.householdId!=null) {
+    (currentGenealogyData()?.meta?.unassignedPets||[]).forEach(pet=>{
+      if(String(pet?.gameData?.householdId??'')===String(family.gameData.householdId))addPriority(pet.avatar);
+    });
+  }
+
   const visibleIds =
     getVisibleIds(
       currentGenealogyData().currentFamilyId
@@ -8997,9 +9019,13 @@ genealogyScene =
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
+      avatarHTML, renderTraitTagSummary, genderClass, statusClass,
       showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
       petCardAvatarHTML:pet => petAvatarWithFallbackHTML(pet),
+      petOwnerAvatarHTML:sim => {
+        const name=displayDataText(sim.name,sim)||uiText('（未命名）');
+        return framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((name||'?').charAt(0));
+      },
       petCardSpeciesLabel:formatPetSpecies,
       petCardGenderLabel:petGenderLabel,
       getPetCardSettings,
@@ -9202,16 +9228,6 @@ function avatarHTML(sim) {
   );
 }
 
-function statusBadgeHTML(sim) {
-  const status =
-    buildPersonPresentation(sim)
-      ?.status;
-
-  if (!status) return '';
-
-  return `<div class="person-card-status-badge ${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</div>`;
-}
-
 function statusIconHTML(sim) {
   const status =
     buildPersonPresentation(sim)
@@ -9220,16 +9236,6 @@ function statusIconHTML(sim) {
   if (!status) return '';
 
   return `<span class="person-meta-icon status-icon status-${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</span>`;
-}
-
-function raceBadgeHTML(sim) {
-  const race =
-    buildPersonPresentation(sim)
-      ?.race;
-
-  if (!race?.icon) return '';
-
-  return `<div class="person-card-race-badge race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</div>`;
 }
 
 function raceIconHTML(sim) {
@@ -9329,14 +9335,14 @@ function markPetAvatarLoaded(event) {
   const image = event.target;
   if (!(image instanceof HTMLImageElement) || !image.classList.contains('pet-avatar-image')) return;
   // 等圖片解碼成功才隱藏 SVG，避免透明的遊戲頭像露出預設物種圖示。
-  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar, .person-card-mini-pet-avatar, .family-cover-collage-pet')
     ?.classList.toggle('has-image', image.naturalWidth > 0);
 }
 
 function markPetAvatarError(event) {
   const image = event.target;
   if (!(image instanceof HTMLImageElement) || !image.classList.contains('pet-avatar-image')) return;
-  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar')
+  image.closest('.genealogy-pet-card-avatar, .person-profile-pet-main-avatar, .person-profile-pet-avatar, .person-card-mini-pet-avatar, .family-cover-collage-pet')
     ?.classList.remove('has-image');
 }
 
@@ -9438,10 +9444,25 @@ function getPetLineageInfo(pet) {
   };
 }
 
-function petLineageHTML(pet) {
+function petLineageHTML(pet, { profileRows = false } = {}) {
   const lineage =
     getPetLineageInfo(pet);
 
+  if (profileRows) {
+    // 血統與模擬市民的家庭關係一樣常駐；缺少任一方時只顯示「—」。
+    return '<div class="person-profile-list">' +
+      renderPersonProfileRow(
+        '父母',
+        lineage.parentNames.length ? lineage.parentNames.map(esc).join(' / ') : '—'
+      ) +
+      renderPersonProfileRow(
+        '子女',
+        lineage.childNames.length ? lineage.childNames.map(esc).join(' / ') : '—'
+      ) +
+    '</div>';
+  }
+
+  // 市民編輯器內的寵物摘要仍維持原本的精簡呈現，不額外加上空資料。
   if (!lineage.hasData) return '';
 
   const parts = [];
@@ -9467,122 +9488,8 @@ function petLineageHTML(pet) {
   return `<div class="pet-lineage">${parts.join('')}</div>`;
 }
 
-function renderPetLifeStatusIcon(pet) {
-  const status =
-    String(pet?.status || '');
 
-  if (status === '幽靈') {
-    return iconSvg('ghost-symbol');
-  }
 
-  if (status === '已故') {
-    return iconSvg('tombstone');
-  }
-
-  return '';
-}
-
-function petChipPresentation(
-  pet,
-  owner
-) {
-  const name =
-    personDisplayText(
-      pet?.name,
-      owner
-    );
-
-  const breed =
-    personDisplayText(
-      pet?.breed,
-      owner
-    );
-
-  return {
-    name,
-    breed,
-    species:
-      formatPetSpecies(
-        pet
-      ),
-    icon:
-      petIconFor(
-        pet
-      ),
-    statusIcon:
-      renderPetLifeStatusIcon(
-        pet
-      )
-  };
-}
-
-function renderPetChipSummary(
-  pets,
-  owner = null
-) {
-  const source =
-    Array.isArray(pets)
-      ? pets
-      : [];
-
-  if (!source.length) {
-    return '';
-  }
-
-  const parts = [];
-  const visiblePets =
-    source.slice(0, 3);
-
-  for (const pet of visiblePets) {
-    const item =
-      petChipPresentation(
-        pet,
-        owner
-      );
-
-    const title =
-      item.name +
-      ' · ' +
-      item.species +
-      (
-        item.breed
-          ? ' · ' + item.breed
-          : ''
-      );
-
-    parts.push(
-      '<span class="person-card-pet-chip" title="' +
-      esc(title) +
-      '">' +
-        '<span class="pet-icon">' +
-          item.icon +
-        '</span>' +
-        (item.statusIcon || '') +
-        esc(item.name) +
-      '</span>'
-    );
-  }
-
-  const remaining =
-    source.length -
-    visiblePets.length;
-
-  if (remaining > 0) {
-    parts.push(
-      '<span class="person-card-pet-chip" title="' +
-      esc(
-        uiText(
-          `${source.length} 只寵物`
-        )
-      ) +
-      '">+' +
-      remaining +
-      '</span>'
-    );
-  }
-
-  return parts.join('');
-}
 
 function genderClass(sim) {
   const gender =
@@ -9611,17 +9518,6 @@ function statusClass(sim) {
 }
 
 // ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
-
-// ========【個人資料關係】 設定 - 個人檔案與族譜視角共用同一套親屬稱謂解析器 ========
-function profileDirectFamilyIds(simId) {
-  return resolveDirectFamilyRelationships(
-    simId
-  )
-    .all
-    .map(relation =>
-      relation.targetId
-    );
-}
 
 function profileFamilyRelationshipRows(
   simId
@@ -9867,61 +9763,23 @@ function renderPersonProfileSection(
   `;
 }
 
-function renderPersonProfilePet(
-  pet,
-  model
-) {
-  const avatar =
-    petAvatarWithFallbackHTML(pet);
-
-  const meta = [
-    formatPetSpecies(pet),
-    pet.breed
-      ? personDisplayText(
-          pet.breed,
-          model.person,
-          model.draft
-        )
-      : '',
-    petGenderLabel(pet)
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  const name =
-    personDisplayText(
-      pet.name,
-      model.person,
-      model.draft
-    ) ||
-    uiText('（未命名）');
-
+function renderPersonProfilePet(pet,model) {
+  const avatar=petAvatarWithFallbackHTML(pet);
+  const name=personDisplayText(pet.name,model.person,model.draft)||uiText('（未命名）');
+  const traits=(pet.traits || []).map(value=>
+    personDisplayText(value,model.person,model.draft)
+  ).filter(Boolean);
+  const labels=[formatPetSpecies(pet),petGenderLabel(pet)].filter(Boolean);
   return `
     <div class="person-profile-pet">
       <div class="person-profile-pet-avatar">${avatar}</div>
       <div class="person-profile-pet-text">
-        <div class="person-profile-pet-name">${esc(name)}</div>
-        <div class="person-profile-pet-meta">${esc(meta)}</div>
-        ${(pet.traits || []).length
-          ? '<div class="person-profile-pet-traits">' +
-            (pet.traits || [])
-              .map(value =>
-                personDisplayText(
-                  value,
-                  model.person,
-                  model.draft
-                )
-              )
-              .filter(Boolean)
-              .map(value =>
-                '<span class="tag">' +
-                  esc(value) +
-                '</span>'
-              )
-              .join('') +
-            '</div>'
-          : ''}
-        ${petLineageHTML(pet)}
+        <div class="person-profile-pet-heading">
+          <span class="person-profile-pet-name">${esc(name)}</span>
+          <span class="person-profile-pet-identity">${esc(labels.join(' · '))}</span>
+        </div>
+        ${traits.length ? '<div class="person-profile-pet-traits">'+
+          traits.map(value=>'<span class="tag">'+esc(value)+'</span>').join('')+'</div>' : ''}
       </div>
     </div>
   `;
@@ -10138,13 +9996,6 @@ function renderPersonProfileContent(
     );
   }
 
-  sections.push(
-    renderPersonProfileSection(
-      '備註',
-      `<div class="person-profile-notes">${person.notes ? esc(presentation.notes) : '—'}</div>`
-    )
-  );
-
   const petItems =
     (person.pets || [])
       .map(pet =>
@@ -10179,16 +10030,23 @@ function renderPersonProfileContent(
             </div>
             <div class="person-profile-pets">${petItems}</div>
           </div>
-          <div class="person-profile-media-column">
+          ${LIFE_PHOTOS_PUBLIC ? `<div class="person-profile-media-column">
             <div class="person-profile-media-head">
               <span>${esc(uiText('人生照片'))}</span>
               <span class="person-profile-media-count">${(person.gallery || []).length}</span>
             </div>
             <div class="person-profile-gallery">${galleryItems}</div>
-          </div>
+          </div>` : ''}
         </div>
       </section>
     `
+  );
+
+  sections.push(
+    renderPersonProfileSection(
+      '備註',
+      `<div class="person-profile-notes">${person.notes ? esc(presentation.notes) : '—'}</div>`
+    )
   );
 
   container.innerHTML = `
@@ -10914,6 +10772,25 @@ function getLayoutNodeBox(id, position = null) {
   };
 }
 
+function getUnpositionedPetPositions(fam, mode) {
+  const saved = fam?.manualPositions?.[mode] || {};
+  const positions = {};
+  (getSceneLayout()?.petLayout?.cards || []).forEach(card => {
+    const key = 'pet:' + card.key;
+    if (Object.prototype.hasOwnProperty.call(saved,key)) return;
+    positions[key] = {x:card.x,y:card.y};
+  });
+  return positions;
+}
+
+// 保留目前寵物的獨立位置，不讓移動人物時因家庭錨點重新計算而連帶移動。
+function freezeUnpositionedPetCards(fam, mode) {
+  const positions = getUnpositionedPetPositions(fam,mode);
+  return Object.keys(positions).length
+    ? genealogyStore.setNodePositions(fam.id,mode,positions)
+    : null;
+}
+
 function seedVisibleScenePositionsForFreeLayout(
   fam,
   mode
@@ -10941,6 +10818,8 @@ function seedVisibleScenePositionsForFreeLayout(
       y:position.y
     };
   });
+
+  Object.assign(seeded,getUnpositionedPetPositions(fam,mode));
 
   return genealogyStore.setFamilyLayoutState(
     fam.id,
@@ -11206,10 +11085,10 @@ function renderPersonCardMenu(simId, clientX, clientY) {
   }
 
   const fieldRows = [
-    ['name','姓名'], ['gender','性別'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
+    ['name','姓名'], ['gender','性別'], ['lifeStage','年齡階段'], ['age','年齡'], ['birthday','生日'],
     ['status','狀態'], ['race','種族'], ['career','職業'], ['residence','居住地'], ['aspiration','人生抱負'],
     ['traits','特徵'], ['pets','寵物'], ['gallery','人生照片']
-  ].map(([key,label]) => `<label class="person-card-menu-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
+  ].filter(([key])=>LIFE_PHOTOS_PUBLIC||key!=='gallery').map(([key,label]) => `<label class="person-card-menu-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
 
   const appearanceSection = isEditCard ? '' : `
     <div class="person-card-menu-divider"></div>
@@ -11232,8 +11111,10 @@ function renderPersonCardMenu(simId, clientX, clientY) {
     ` : ''}
     <div class="person-card-menu-divider"></div>
     <div class="person-card-menu-section-title">${esc(uiText(isEditCard ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
-    <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
-    <div class="person-card-menu-grid">${fieldRows}</div>
+    <div class="person-card-menu-grid">
+      <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
+      ${fieldRows}
+    </div>
     ${appearanceSection}
     <div class="person-card-menu-note">${esc(uiText(isEditCard ? '只套用於編輯模式人物卡' : '只套用於檢視模式人物卡'))}</div>`;
 
@@ -11746,6 +11627,12 @@ function getTouchPointerKind(
     };
   }
 
+  // 寵物卡是 button，但仍屬畫布卡片；與人物共用觸控長按選單。
+  const petCard = target?.closest?.('.genealogy-pet-card[data-pet-id]');
+  if (petCard) {
+    return {kind:'pet-card',simId:null,petId:petCard.dataset.petId};
+  }
+
   if (
     target?.closest?.(
       '.edge-label'
@@ -11834,7 +11721,7 @@ function suppressActiveTouchCardActivation() {
       point.blocked = true;
 
       if (
-        point.kind === 'card'
+        point.kind === 'card' || point.kind === 'pet-card'
       ) {
         touchCardActivationSuppressed.add(
           point.pointerId
@@ -11868,7 +11755,7 @@ function scheduleTouchCardLongPress(
           current.moved ||
           current.blocked ||
           activeTouchPointers.size !== 1 ||
-          !current.simId
+          !(current.simId || current.petId)
         ) {
           return;
         }
@@ -11883,6 +11770,21 @@ function scheduleTouchCardLongPress(
           currentGenealogyData()
             ? currentFamily()
             : null;
+
+        if (current.kind === 'pet-card') {
+          const entry = findCanvasPetEntry(current.petId);
+          if (!entry) return;
+          if (
+            fam && genealogyScene.isFreeLayoutActive(fam) &&
+            arrangeTool === 'select' && !selectedPetIds.has(current.petId)
+          ) {
+            selectedPetIds.clear();
+            selectedPetIds.add(current.petId);
+            syncNodeSelectionClasses();
+          }
+          renderPetCardMenu(entry,current.clientX,current.clientY);
+          return;
+        }
 
         if (
           fam &&
@@ -11934,7 +11836,8 @@ function handleTouchPointerDown(
     moved:false,
     blocked:false,
     kind:descriptor.kind,
-    simId:descriptor.simId
+    simId:descriptor.simId,
+    petId:descriptor.petId || null
   };
 
   if (
@@ -11963,7 +11866,7 @@ function handleTouchPointerDown(
     }
 
     if (
-      point.kind === 'card'
+      (point.kind === 'card' || point.kind === 'pet-card')
     ) {
       scheduleTouchCardLongPress(
         point
@@ -12160,7 +12063,7 @@ function finishTouchPointer(
 
   if (
     event.type === 'pointercancel' &&
-    point.kind === 'card'
+    (point.kind === 'card' || point.kind === 'pet-card')
   ) {
     touchCardActivationSuppressed.add(
       point.pointerId
@@ -12830,6 +12733,9 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
       hideSmartGuides();
 
       if (moved && previewPosition) {
+        dragMutation = genealogyStore.mergeResults(
+          dragMutation, freezeUnpositionedPetCards(fam,dragMode)
+        );
         dragMutation =
           genealogyStore.mergeResults(
             dragMutation,
@@ -13105,6 +13011,9 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
       hideSmartGuides();
 
       if (moved && previewPositions) {
+        dragMutation = genealogyStore.mergeResults(
+          dragMutation, freezeUnpositionedPetCards(fam,viewMode)
+        );
         dragMutation =
           genealogyStore.mergeResults(
             dragMutation,
@@ -13273,6 +13182,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
             };
           }
         );
+        Object.assign(seededPositions,getUnpositionedPetPositions(fam,dragMode));
 
         dragMutation =
           genealogyStore.mergeResults(
@@ -13287,7 +13197,8 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
             )
           );
 
-        arrangeTool = 'select';
+        // 單一卡片拖曳只啟用自由排列，不應強制切換成選取工具。
+        setArrangeTool('pan');
         syncLayoutModeControls();
       }
 
@@ -13411,6 +13322,9 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
     hideSmartGuides();
 
     if (moved && previewPosition) {
+      dragMutation = genealogyStore.mergeResults(
+        dragMutation, freezeUnpositionedPetCards(fam,dragMode)
+      );
       dragMutation =
         genealogyStore.mergeResults(
           dragMutation,
@@ -13436,9 +13350,8 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
         after:afterLayoutState
       });
 
-      selectedNodeIds.clear();
-      selectedNodeIds.add(id);
-      syncNodeSelectionClasses();
+      // 放開即結束單一卡片操作，不把該人物留在選取狀態。
+      clearNodeSelection();
 
       applyGenealogyMutation(
         dragMutation,
@@ -13797,13 +13710,31 @@ function renderFamilyCover(fam) {
     img.src = coverUrl; img.hidden = false; collage.innerHTML=''; empty.style.display='none'; return;
   }
   img.hidden = true; img.removeAttribute('src');
-  const members = (fam.memberIds || []).map(id => currentGenealogyData().sims[id]).filter(Boolean).slice(0,4);
-  const withContent = members.filter(Boolean);
-  collage.innerHTML = withContent.map(sim => {
-    const avatar = framedAvatarImageHTML(sim.avatar, sim.avatarFrame);
-    return `<div class="family-cover-collage-item">${avatar || esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>`;
-  }).join('');
-  empty.style.display = withContent.length ? 'none' : '';
+  // 手動上傳的封面優先；自動四格拼貼加入有關聯的寵物。
+  const data=currentGenealogyData();
+  const members=[...new Set((fam.memberIds||[]).map(String))].map(id=>data.sims[id]).filter(Boolean);
+  const householdId=fam.gameData?.householdId==null?'':String(fam.gameData.householdId);
+  const pets=new Map();
+  const addPet=(pet,ownerId,index)=>{
+    if(!pet||typeof pet!=='object')return;
+    const id=String(pet.gameData?.simId||pet.id||ownerId+':'+index);
+    if(!pets.has(id)||(!pets.get(id).avatar&&pet.avatar))pets.set(id,pet);
+  };
+  members.forEach(sim=>(sim.pets||[]).forEach((pet,i)=>addPet(pet,String(sim.id),i)));
+  if(householdId)(data.meta?.unassignedPets||[]).forEach((pet,i)=>{
+    if(String(pet?.gameData?.householdId??'')===householdId)addPet(pet,'unassigned',i);
+  });
+  const availablePets=[...pets.values()].sort((a,b)=>Number(!!b.avatar)-Number(!!a.avatar));
+  const petSlots=availablePets.length?Math.min(availablePets.length,Math.max(1,4-members.length)):0;
+  const collageMembers=members.slice(0,4-petSlots);
+  const collagePets=availablePets.slice(0,4-collageMembers.length);
+  collage.innerHTML=collageMembers.map(sim=>{
+    const avatar=framedAvatarImageHTML(sim.avatar,sim.avatarFrame);
+    return '<div class="family-cover-collage-item">'+(avatar||esc((displayDataText(sim.name,sim)||'?').charAt(0)))+'</div>';
+  }).join('')+collagePets.map(pet=>
+    '<div class="family-cover-collage-item family-cover-collage-pet" title="'+esc(displayDataText(pet.name)||uiText('寵物'))+'">'+petAvatarWithFallbackHTML(pet)+'</div>'
+  ).join('');
+  empty.style.display=(collageMembers.length||collagePets.length)?'none':'';
 }
 
 
@@ -14379,6 +14310,8 @@ function setEditingAvatarCropFrame(target,frame){
   const normalized=normalizeAvatarFrame(frame);
 
   if(target==='pet'){
+    if (petEditorState.avatarSource === 'game') petEditorState.gameAvatarFrame = normalized;
+    else petEditorState.customAvatarFrame = normalized;
     petEditorState.avatarFrame=normalized;
     petEditorController.refreshAvatarPreview();
   }else{
@@ -15225,20 +15158,80 @@ function renderRelAnno(simId) {
   );
 }
 
+function syncPetEditorActiveAvatar() {
+  let source = petEditorState.avatarSource === 'game' ? 'game' : 'custom';
+  if (source === 'game' && !petEditorState.gameAvatar && petEditorState.customAvatar) source = 'custom';
+  else if (source === 'custom' && !petEditorState.customAvatar && petEditorState.gameAvatar) source = 'game';
+  petEditorState.avatarSource = source;
+  petEditorState.avatar = source === 'game' ? petEditorState.gameAvatar : petEditorState.customAvatar;
+  petEditorState.avatarFrame = normalizeAvatarFrame(
+    source === 'game' ? petEditorState.gameAvatarFrame : petEditorState.customAvatarFrame
+  );
+  return source;
+}
+
 const petEditorController = {
+  directEntry:null,
+
   owner() {
+    if (this.directEntry) return currentGenealogyData()?.sims?.[this.directEntry.ownerId] || null;
     return simEditorState.simId
       ? currentGenealogyData().sims[simEditorState.simId]
       : null;
   },
 
   currentPet() {
+    if (this.directEntry) return this.directEntry.pet;
     return (
       petEditorState.index >= 0 &&
       editingPets[petEditorState.index]
     )
       ? editingPets[petEditorState.index]
       : null;
+  },
+
+  // 偏好沿用人物編輯器的資料與顯示規則；寵物新增時不顯示唯讀分頁。
+  switchPreferenceTab(tabName='basic') {
+    const tabs=[...petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]')]
+      .filter(tab=>!tab.hidden);
+    if(!tabs.some(tab=>tab.dataset.petEditorTab===tabName))tabName='basic';
+
+    tabs.forEach(tab=>{
+      const active=tab.dataset.petEditorTab===tabName;
+      tab.classList.toggle('active',active);
+      tab.setAttribute('aria-selected',active?'true':'false');
+      tab.tabIndex=active?0:-1;
+    });
+
+    petEditorDialog.querySelectorAll('.pet-editor-panel[data-pet-editor-panel]')
+      .forEach(panel=>{
+        const active=panel.dataset.petEditorPanel===tabName;
+        panel.classList.toggle('active',active);
+        panel.hidden=!active;
+      });
+
+    if(tabName!=='basic'){
+      const isAttraction=tabName==='attraction';
+      personEditor.renderPreferenceList(
+        this.currentPet(),
+        tabName,
+        isAttraction?'petAttractionPreferenceList':'petGamePreferenceList',
+        isAttraction?'petAttractionPreferenceEmpty':'petGamePreferenceEmpty'
+      );
+    }
+    const content=petEditorDialog.querySelector('.pet-editor-content');
+    if(content)content.scrollTop=0;
+  },
+
+  syncPreferenceTabs(pet) {
+    const exists=!!this.currentPet();
+    const data=personEditor.preferenceData(pet);
+    petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]')
+      .forEach(tab=>{
+        if(tab.dataset.petEditorTab==='preferences')tab.hidden=!exists;
+        if(tab.dataset.petEditorTab==='attraction')tab.hidden=!exists||!data.attraction.length;
+      });
+    this.switchPreferenceTab('basic');
   },
 
   createBlankPet() {
@@ -15251,9 +15244,123 @@ const petEditorController = {
       ageStage:'成年',
       status:'在世',
       traits:[],
+      notes:'',
       avatar:null,
-      avatarFrame:{ ...DEFAULT_AVATAR_FRAME }
+      avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+      gameAvatar:null, gameAvatarFrame:null,
+      customAvatar:null, customAvatarFrame:null,
+      avatarSource:'custom'
     };
+  },
+
+  ownerEditOpen:false,
+  outsideOwnerIds:new Set(),
+
+  eligibleOwnerSims(pet) {
+    const db=currentGenealogyData();
+    const sims=Object.values(db?.sims || {}).filter(sim=>sim?.id);
+    const linkedOwner=db?.sims?.[this.directEntry?.ownerId];
+    const householdId=pet?.gameData?.householdId ?? linkedOwner?.gameData?.householdId;
+    if(householdId!=null && String(householdId)!=='') {
+      return sims.filter(sim=>sim.gameData?.householdId!=null &&
+        String(sim.gameData.householdId)===String(householdId));
+    }
+    const petId=String(pet?.gameData?.simId || pet?.id || '');
+    const owners=new Set(sims.filter(sim=>(sim.pets || []).some(item=>
+      String(item?.gameData?.simId || item?.id || '')===petId
+    )).map(sim=>String(sim.id)));
+    const families=db?.families || [];
+    const current=currentFamily();
+    const family=current && (current.memberIds || []).some(id=>owners.has(String(id)))
+      ? current
+      : families.find(f=>(f.memberIds || []).some(id=>owners.has(String(id))));
+    if(!family)return [];
+    const ids=new Set((family.memberIds || []).map(String));
+    return sims.filter(sim=>ids.has(String(sim.id)));
+  },
+
+  renderOwnerPreview() {
+    const preview=$('petOwnerPreview'),select=$('petOwnerIds');
+    if(!preview || !select)return;
+    const ids=new Set([...select.selectedOptions].map(option=>String(option.value)));
+    this.outsideOwnerIds.forEach(id=>ids.add(id));
+    const sims=currentGenealogyData()?.sims || {};
+    preview.classList.toggle('family-rel-preview-editable',this.ownerEditOpen);
+    preview.innerHTML=[...ids].map(id=>{
+      const sim=sims[id];
+      if(!sim)return '';
+      const name=displayDataText(sim.name,sim)||uiText('（未命名）');
+      const avatar=framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((name||'?').charAt(0));
+      return '<div class="family-rel-preview-row'+(this.ownerEditOpen?' is-editing':'')+'">'+
+        (this.ownerEditOpen?'<button class="family-rel-remove" type="button" data-pet-owner-remove="'+esc(id)+'" aria-label="'+esc(uiText('移除'))+'">'+iconSvg('x-lg')+'</button>':'')+
+        '<span class="family-rel-person"><span class="family-rel-person-avatar">'+avatar+'</span>'+
+        '<span class="family-rel-person-copy"><span class="family-rel-person-name">'+esc(name)+'</span></span></span></div>';
+    }).join('')||'<span class="family-rel-empty">—</span>';
+    preview.querySelectorAll('[data-pet-owner-remove]').forEach(button=>button.onclick=()=>{
+      const id=button.dataset.petOwnerRemove;
+      const option=[...select.options].find(item=>String(item.value)===id);
+      if(option)option.selected=false;
+      this.outsideOwnerIds.delete(id);
+      genealogyUI.refreshSelect('petOwnerIds');
+      this.renderOwnerPreview();
+    });
+  },
+
+  toggleOwnerEditing(force) {
+    if($('petOwnerField').hidden)return;
+    this.ownerEditOpen=typeof force==='boolean'?force:!this.ownerEditOpen;
+    $('petOwnerEditPanel').hidden=!this.ownerEditOpen;
+    const toggle=$('petOwnerEditToggle');
+    toggle.textContent=uiText(this.ownerEditOpen?'完成':'編輯');
+    toggle.setAttribute('aria-expanded',String(this.ownerEditOpen));
+    this.renderOwnerPreview();
+    if(this.ownerEditOpen)$('petOwnerEditPanel').querySelector('.ui-select-input')?.focus({preventScroll:true});
+  },
+
+  renderOwnerChoices(pet) {
+    const row=$('petOwnerField');
+    row.hidden=!this.directEntry;
+    this.ownerEditOpen=false;
+    this.outsideOwnerIds=new Set();
+    $('petOwnerEditPanel').hidden=true;
+    $('petOwnerEditToggle').textContent=uiText('編輯');
+    $('petOwnerEditToggle').setAttribute('aria-expanded','false');
+    const select=$('petOwnerIds');
+    select.replaceChildren();
+    if(!this.directEntry)return;
+    const petId=String(pet?.gameData?.simId || pet?.id || '');
+    const sims=Object.values(currentGenealogyData()?.sims || {});
+    const owners=new Set(sims.filter(sim=>(sim.pets || []).some(item=>
+      String(item?.gameData?.simId || item?.id || '')===petId
+    )).map(sim=>String(sim.id)));
+    const eligible=this.eligibleOwnerSims(pet);
+    const allowed=new Set(eligible.map(sim=>String(sim.id)));
+    this.outsideOwnerIds=new Set([...owners].filter(id=>!allowed.has(id)));
+    eligible.forEach(sim=>{
+      const option=document.createElement('option');
+      option.value=String(sim.id);
+      option.textContent=displayDataText(sim.name,sim)||uiText('（未命名）');
+      option.selected=owners.has(String(sim.id));
+      select.appendChild(option);
+    });
+    genealogyUI.refreshSelect('petOwnerIds');
+    this.renderOwnerPreview();
+  },
+
+  openDirect(entry) {
+    if (!entry?.pet) return false;
+    this.directEntry = entry;
+    petEditorState.index = -1;
+    $('petModalTitle').textContent = uiText('編輯寵物');
+    $('pDelete').style.display = '';
+    this.populateForm(entry.pet);
+    this.syncPreferenceTabs(entry.pet);
+    this.renderOwnerChoices(entry.pet);
+    petEditorDialog.classList.add('show');
+    requestAnimationFrame(() =>
+      petEditorDialog.querySelector('.pet-editor-modal')?.focus({preventScroll:true})
+    );
+    return true;
   },
 
   renderTraits() {
@@ -15360,6 +15467,16 @@ const petEditorController = {
   },
 
   refreshAvatarPreview() {
+    const source = syncPetEditorActiveAvatar();
+    const toggle = $('petAvatarSourceToggleBtn');
+    if (toggle) {
+      const target = source === 'game' ? 'custom' : 'game';
+      toggle.textContent = uiText(target === 'game' ? '使用遊戲頭像' : '使用自訂頭像');
+      toggle.disabled = !(target === 'game' ? petEditorState.gameAvatar : petEditorState.customAvatar);
+      toggle.dataset.avatarTarget = target;
+    }
+    const clear = $('petAvatarClearBtn');
+    if (clear) clear.disabled = source !== 'custom' || !petEditorState.customAvatar;
     const preview = $('petAvatarPreview');
     const avatar =
       framedAvatarImageHTML(
@@ -15433,6 +15550,11 @@ const petEditorController = {
     $('pStatus').value =
       pet.status || '在世';
 
+    $('pNotes').value =
+      owner
+        ? displayDataText(pet.notes || '', owner)
+        : (typeof pet.notes === 'string' ? pet.notes : '');
+
     petEditorState.traits =
       Array.isArray(pet.traits)
         ? pet.traits
@@ -15459,13 +15581,12 @@ const petEditorController = {
       traitInput.value = '';
     }
 
-    petEditorState.avatar =
-      pet.avatar || null;
-
-    petEditorState.avatarFrame =
-      normalizeAvatarFrame(
-        pet.avatarFrame
-      );
+    petEditorState.gameAvatar = pet.gameAvatar || null;
+    petEditorState.gameAvatarFrame = normalizeAvatarFrame(pet.gameAvatarFrame);
+    petEditorState.customAvatar = pet.customAvatar || null;
+    petEditorState.customAvatarFrame = normalizeAvatarFrame(pet.customAvatarFrame);
+    petEditorState.avatarSource = pet.avatarSource === 'game' ? 'game' : 'custom';
+    syncPetEditorActiveAvatar();
 
     this.syncGenderVisibility();
     this.refreshAvatarPreview();
@@ -15481,6 +15602,7 @@ const petEditorController = {
   },
 
   open(index = -1) {
+    this.directEntry = null;
     const validIndex =
       Number.isInteger(index) &&
       index >= 0 &&
@@ -15505,6 +15627,8 @@ const petEditorController = {
       validIndex ? '' : 'none';
 
     this.populateForm(pet);
+    this.syncPreferenceTabs(pet);
+    this.renderOwnerChoices(pet);
     petEditorDialog.classList.add('show');
 
     requestAnimationFrame(() => {
@@ -15518,6 +15642,9 @@ const petEditorController = {
 
   close() {
     petEditorDialog.classList.remove('show');
+    this.directEntry = null;
+    this.ownerEditOpen=false;
+    this.outsideOwnerIds.clear();
 
     if (avatarCropTarget === 'pet') {
       closeAvatarCropEditor();
@@ -15525,9 +15652,12 @@ const petEditorController = {
 
     petEditorState.index = -1;
     petEditorState.avatar = null;
-    petEditorState.avatarFrame = {
-      ...DEFAULT_AVATAR_FRAME
-    };
+    petEditorState.avatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.gameAvatar = null;
+    petEditorState.gameAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.customAvatar = null;
+    petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.avatarSource = 'custom';
     petEditorState.traits = [];
   },
 
@@ -15563,6 +15693,12 @@ const petEditorController = {
     const inputBreed =
       $('pBreed').value.trim();
 
+    const shownNotes =
+      previous && owner
+        ? displayDataText(previous.notes || '', owner)
+        : '';
+    const inputNotes = $('pNotes').value.trim();
+
     const name =
       previous &&
       isBuiltinSampleSim(owner) &&
@@ -15576,6 +15712,13 @@ const petEditorController = {
       inputBreed === shownBreed
         ? previous.breed
         : inputBreed;
+
+    const notes =
+      previous &&
+      isBuiltinSampleSim(owner) &&
+      inputNotes === shownNotes
+        ? (previous.notes || '')
+        : inputNotes;
 
     const species =
       $('pSpecies').value;
@@ -15606,13 +15749,14 @@ const petEditorController = {
       traits:[
         ...petEditorState.traits
       ],
-      avatar:
-        petEditorState.avatar ||
-        null,
-      avatarFrame:
-        normalizeAvatarFrame(
-          petEditorState.avatarFrame
-        )
+      notes,
+      avatar:petEditorState.avatar || null,
+      avatarFrame:normalizeAvatarFrame(petEditorState.avatarFrame),
+      gameAvatar:petEditorState.gameAvatar || null,
+      gameAvatarFrame:petEditorState.gameAvatar ? normalizeAvatarFrame(petEditorState.gameAvatarFrame) : null,
+      customAvatar:petEditorState.customAvatar || null,
+      customAvatarFrame:petEditorState.customAvatar ? normalizeAvatarFrame(petEditorState.customAvatarFrame) : null,
+      avatarSource:petEditorState.avatarSource
     };
 
     if (
@@ -15677,6 +15821,15 @@ const petEditorController = {
     const pet = this.collectForm();
     if (!pet) return;
 
+    if (this.directEntry) {
+      const owners = [...$('petOwnerIds').selectedOptions].map(option=>String(option.value)).concat([...this.outsideOwnerIds]);
+      const mutation = genealogyStore.savePetWithOwners(pet,owners);
+      applyGenealogyMutation(mutation);
+      this.close();
+      uiToast(uiText('已儲存寵物資料'));
+      return;
+    }
+
     if (petEditorState.index >= 0) {
       editingPets[
         petEditorState.index
@@ -15705,11 +15858,20 @@ const petEditorController = {
 
     if (!confirmed) return;
 
-    editingPets.splice(
-      petEditorState.index,
-      1
-    );
+    if (this.directEntry) {
+      // 寵物資料卡的刪除是完整刪除，而非解除飼主；所有飼主引用一併移除。
+      const petId = String(pet.gameData?.simId || pet.id || '');
+      const mutation = genealogyStore.deletePet(petId);
+      if (!mutation.dataChanged) return;
+      selectedPetIds.delete(petId);
+      this.close();
+      applyGenealogyMutation(mutation);
+      return;
+    }
 
+    // 人物編輯器使用草稿，僅對目前尚未儲存的寵物清單進行刪除。
+    if (petEditorState.index < 0 || petEditorState.index >= editingPets.length) return;
+    editingPets.splice(petEditorState.index,1);
     renderPetDraftList();
     personEditor.renderInfoPreviewIfActive();
     this.close();
@@ -15722,27 +15884,19 @@ const petEditorController = {
         'pet'
       );
 
-    petEditorState.avatar =
-      await saveImageAsset(
-        result.blob,
-        {
-          width:result.width,
-          height:result.height
-        }
-      );
-
-    petEditorState.avatarFrame = {
-      ...DEFAULT_AVATAR_FRAME
-    };
-
+    petEditorState.customAvatar = await saveImageAsset(
+      result.blob,{width:result.width,height:result.height}
+    );
+    petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    petEditorState.avatarSource = 'custom';
     this.refreshAvatarPreview();
   },
 
   clearAvatar() {
-    petEditorState.avatar = null;
-    petEditorState.avatarFrame = {
-      ...DEFAULT_AVATAR_FRAME
-    };
+    if (petEditorState.avatarSource !== 'custom' || !petEditorState.customAvatar) return;
+    petEditorState.customAvatar = null;
+    petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+    if (petEditorState.gameAvatar) petEditorState.avatarSource = 'game';
     this.refreshAvatarPreview();
   }
 };
@@ -15750,12 +15904,11 @@ const petEditorController = {
 function renderPetDraftList() {
   const list = $('petList');
   if (!list) return;
-
-  if (!editingPets.length) {
-    list.innerHTML =
-      `<div class="relationship-empty">${esc(uiText('尚未新增寵物'))}</div>`;
-    personEditor.renderInfoPreviewIfActive();
-    return;
+  const editing = $('petSection').classList.contains('is-editing');
+  const toggle = $('petSectionEditToggle');
+  if (toggle) {
+    toggle.textContent = uiText(editing ? '完成' : '編輯');
+    toggle.setAttribute('aria-expanded', String(editing));
   }
 
   const owner = petEditorController.owner();
@@ -15769,39 +15922,7 @@ function renderPetDraftList() {
         ) ||
         petIconFor(pet);
 
-      const meta = [
-        formatPetSpecies(pet)
-      ];
-
-      if (pet.breed) {
-        meta.push(
-          owner
-            ? displayDataText(
-                pet.breed,
-                owner
-              )
-            : pet.breed
-        );
-      }
-
-      const gender =
-        petGenderLabel(pet);
-
-      if (gender) meta.push(gender);
-      if (pet.ageStage) {
-        meta.push(
-          uiText(pet.ageStage)
-        );
-      }
-
-      if (
-        pet.status &&
-        pet.status !== '在世'
-      ) {
-        meta.push(
-          uiText(pet.status)
-        );
-      }
+      const identity=[formatPetSpecies(pet),petGenderLabel(pet)].filter(Boolean);
 
       const displayName =
         owner
@@ -15815,8 +15936,7 @@ function renderPetDraftList() {
         <div class="pet-item" data-pet-draft-index="${index}">
           <div class="pet-item-avatar">${avatar}</div>
           <div class="pet-item-info">
-            <div class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</div>
-            <div class="pet-item-meta">${esc(meta.join(' · '))}</div>
+            <div class="pet-item-heading"><span class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</span><span class="pet-item-identity">${esc(identity.join(' · '))}</span></div>
             ${(pet.traits || []).length
               ? '<div class="pet-trait-summary">' +
                 (pet.traits || [])
@@ -15837,24 +15957,25 @@ function renderPetDraftList() {
                   .join('') +
                 '</div>'
               : ''}
-            ${petLineageHTML(pet)}
           </div>
-          <div class="pet-item-actions">
-            <button
-              type="button"
-              data-pet-action="edit"
-              data-pet-index="${index}"
-            >編輯</button>
-            <button
-              type="button"
-              class="danger"
-              data-pet-action="delete"
-              data-pet-index="${index}"
-            >刪除</button>
-          </div>
+          ${editing ? `<div class="pet-item-actions">
+            <button type="button" data-pet-action="edit" data-pet-index="${index}">${esc(uiText('編輯'))}</button>
+            <button type="button" class="danger" data-pet-action="delete" data-pet-index="${index}">${esc(uiText('刪除'))}</button>
+          </div>` : ''}
         </div>
       `;
-    }).join('');
+    }).join('') +
+    (!editingPets.length && !editing
+      ? '<div class="relationship-empty">'+esc(uiText('尚未新增寵物'))+'</div>'
+      : '') +
+    (editing
+      ? '<button class="pet-add-btn" id="btnAddPet" type="button">'+
+          iconSvg('plus-lg')+'<span>'+esc(uiText('新增寵物'))+'</span></button>'
+      : '');
+
+  list.querySelector('#btnAddPet')?.addEventListener('click', () => {
+    petEditorController.open();
+  });
 
   list
     .querySelectorAll('[data-pet-action="edit"]')
@@ -15924,6 +16045,14 @@ $('petAvatarAdjustBtn').onclick = () => {
   openAvatarCropEditor('pet');
 };
 
+$('petAvatarSourceToggleBtn').onclick = () => {
+  const target = petEditorState.avatarSource === 'game' ? 'custom' : 'game';
+  const available = target === 'game' ? petEditorState.gameAvatar : petEditorState.customAvatar;
+  if (!available) return;
+  petEditorState.avatarSource = target;
+  petEditorController.refreshAvatarPreview();
+};
+
 $('petAvatarClearBtn').onclick = () => {
   petEditorController.clearAvatar();
 };
@@ -15936,6 +16065,30 @@ $('pSpecies').addEventListener('change', () => {
   petEditorController.syncGenderVisibility();
   petEditorController.refreshAvatarPreview();
 });
+
+petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    petEditorController.switchPreferenceTab(tab.dataset.petEditorTab);
+  });
+  tab.addEventListener('keydown',event=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    const tabs=[...petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]')]
+      .filter(item=>!item.hidden);
+    const index=tabs.indexOf(tab);
+    if(index<0)return;
+    event.preventDefault();
+    let nextIndex=index;
+    if(event.key==='ArrowLeft')nextIndex=(index-1+tabs.length)%tabs.length;
+    if(event.key==='ArrowRight')nextIndex=(index+1)%tabs.length;
+    if(event.key==='Home')nextIndex=0;
+    if(event.key==='End')nextIndex=tabs.length-1;
+    petEditorController.switchPreferenceTab(tabs[nextIndex].dataset.petEditorTab);
+    tabs[nextIndex].focus();
+  });
+});
+
+$('petOwnerEditToggle')?.addEventListener('click',()=>petEditorController.toggleOwnerEditing());
+$('petOwnerIds')?.addEventListener('change',()=>petEditorController.renderOwnerPreview());
 
 $('petTraitAddBtn')?.addEventListener(
   'click',
@@ -15977,9 +16130,11 @@ petEditorDialog.onclick = event => {
   }
 };
 
-$('btnAddPet').onclick = () => {
-  petEditorController.open();
-};
+$('petSectionEditToggle')?.addEventListener('click',()=>{
+  const section=$('petSection');
+  section.classList.toggle('is-editing');
+  renderPetDraftList();
+});
 
 // ========【人物編輯器 Authority】 設定 - Draft / lifecycle / 關係編輯由獨立模組負責 ========
 personEditor.mount({
@@ -16325,6 +16480,121 @@ function petLibraryDisplayInfo(entry) {
   return {name,breed,traits,ownerLabel,owner,species:formatPetSpecies(pet)};
 }
 
+
+function findPetFamilyLocation(entry) {
+  const db=currentGenealogyData();
+  const pet=entry?.pet;
+  if(!pet)return null;
+  const petId=String(pet.gameData?.simId || pet.id || '');
+  const ownerIds=new Set([...(entry.ownerIds || [])].map(String));
+  Object.values(db?.sims || {}).forEach(sim=>{
+    if((sim.pets || []).some(item=>String(item?.gameData?.simId || item?.id || '')===petId))
+      ownerIds.add(String(sim.id));
+  });
+  const householdId=pet.gameData?.householdId == null ? '' : String(pet.gameData.householdId);
+  const modeOrder=[...new Set([familyTreeViewMode,'household','ea','extended'])];
+  const matches=[];
+  modeOrder.forEach((mode,modeIndex)=>{
+    // 只讀取當前模式的作用中項目；查找其他模式不可修改其選擇狀態。
+    const active=mode===familyTreeViewMode ? getActiveFamilySelectorEntry(mode) : null;
+    getFamilySelectorEntries(mode).forEach((candidate,index)=>{
+      const memberIds=(candidate.memberIds || []).map(String);
+      const relationSources=mode!=='extended' && (candidate.primaryMemberIds || []).length
+        ? candidate.primaryMemberIds : null;
+      // 與 Scene 相同：家族成員、主要成員、可見關聯人物都可能攜帶寵物。
+      const visible=genealogyStore.getVisibleFamilyIds(
+        {memberIds},{relationshipSourceIds:relationSources}
+      );
+      const sourceIds=new Set([
+        ...memberIds,
+        ...(candidate.primaryMemberIds || []).map(String),
+        ...visible
+      ]);
+      const ownerId=[...ownerIds].find(id=>sourceIds.has(id));
+      const family=db.families.find(item=>String(item.id)===String(candidate.familyId));
+      const familyHousehold=family?.gameData?.householdId;
+      const byHousehold=!!householdId && (
+        (familyHousehold != null && String(familyHousehold)===householdId) ||
+        [...sourceIds].some(id=>String(db.sims[id]?.gameData?.householdId ?? '')===householdId)
+      );
+      if(!ownerId && !byHousehold)return;
+      matches.push({mode,entry:candidate,ownerId,byHousehold,
+        score:(ownerId?0:1)*100 + (candidate===active?0:1)*10 + modeIndex,
+        index});
+    });
+  });
+  matches.sort((a,b)=>a.score-b.score || a.index-b.index);
+  return matches[0] || null;
+}
+
+function locatePetFromLibrary(entry) {
+  const petId=String(entry?.pet?.gameData?.simId || entry?.pet?.id || '');
+  if(!petId)return false;
+  const selected=findPetFamilyLocation(entry);
+  if(!selected){
+    uiAlert(uiText('找不到包含這隻寵物的族譜，請先指派飼主或所屬家庭。'),{
+      title:uiText('在族譜中定位')
+    });
+    return false;
+  }
+  const {mode,entry:familyEntry,ownerId}=selected;
+  const changedFamily=familyTreeViewMode!==mode ||
+    String(currentFamily()?.id || '')!==String(familyEntry.familyId || '') ||
+    getFamilyTreeSelectionValue(mode)!==familyEntry.value;
+  const changedFilters=petVisibilityFilter && !petVisibilityFilter.checked;
+  if(changedFilters){
+    petVisibilityFilter.checked=true;
+    updateTopbarFilterUI();
+  }
+  const revealedOwner=ownerId ? revealPersonInTopbarFilters(currentGenealogyData().sims[ownerId]) : false;
+  if(changedFamily){
+    familyTreeViewMode=mode;
+    try{localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY,mode);}catch(_){}
+    setFamilyTreeSelectionValue(mode,familyEntry.value);
+    genealogyStore.setCurrentFamilyId(familyEntry.familyId);
+    familyTreeLastSourceFamilyId=familyEntry.familyId;
+    dragHistory.clear();
+    clearNodeSelection();
+    resetFamilyMemberOperations();
+  }
+  personLibraryController.close();
+  if(changedFamily){
+    save();
+    refreshFamilyUI();
+  }else if(changedFilters || revealedOwner){
+    refreshFamilyProfilePanel();
+  }
+  if(changedFamily || changedFilters || revealedOwner)render();
+  requestAnimationFrame(()=>{
+    if(!findCanvasPetEntry(petId))render();
+    requestAnimationFrame(()=>{
+      const card=findCanvasPetEntry(petId);
+      if(card)focusPetOnCanvas(card);
+      else uiAlert(uiText('這隻寵物目前沒有可顯示的族譜卡片。'),{
+        title:uiText('在族譜中定位')
+      });
+    });
+  });
+  return true;
+}
+
+async function deletePetFromLibrary(entry) {
+  const petId=String(entry?.pet?.gameData?.simId || entry?.pet?.id || '');
+  if(!petId)return;
+  const info=petLibraryDisplayInfo(entry);
+  const confirmed=await uiConfirm(
+    uiText('確定永久刪除寵物')+'「'+info.name+'」？\n'+
+    uiText('這會從所有飼主與未指派寵物清單中移除，無法復原。'),
+    {title:uiText('永久刪除寵物'),kind:'danger',confirmText:uiText('永久刪除')}
+  );
+  if(!confirmed)return;
+  const mutation=genealogyStore.deletePet(petId);
+  if(!mutation.dataChanged)return;
+  selectedPetIds.delete(petId);
+  applyGenealogyMutation(mutation);
+  if(personLibraryDialog.classList.contains('show'))renderPersonLibrary();
+}
+
 function renderPetLibrary() {
   const list = $('personLibraryList');
   const all = collectPetLibraryEntries();
@@ -16351,7 +16621,6 @@ function renderPetLibrary() {
       [uiText('物種'),info.species],
       [uiText('品種'),info.breed],
       [uiText('性別'),petGenderLabel(pet)],
-      [uiText('人生階段'),uiText(pet.ageStage || '')],
       [uiText('狀態'),uiText(pet.status || '')],
       [uiText('所屬家庭'),info.ownerLabel]
     ].filter(([,value]) => !!value);
@@ -16377,9 +16646,14 @@ function renderPetLibrary() {
           iconSvg('three-dots') + '</button>' +
         '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
           '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view">' +
-            iconSvg('person-vcard') + '<span>' + esc(uiText('查看個人檔案')) + '</span></button>' +
-          (entry.ownerId ? '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit">' +
-            iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' : '') +
+            iconSvg('person-vcard') + '<span>' + esc(uiText('查看寵物資料')) + '</span></button>' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit">' +
+            iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="locate">' +
+            iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span></button>' +
+          '<div class="ui-menu-divider"></div>' +
+          '<button class="ui-menu-item danger" type="button" role="menuitem" data-pet-library-action="delete">' +
+            iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span></button>' +
         '</div>' +
       '</div></div>';
   }).join('');
@@ -16395,7 +16669,10 @@ function renderPetLibrary() {
     row.querySelectorAll('[data-pet-library-action]').forEach(button => {
       button.addEventListener('click', event => {
         event.stopPropagation();
-        if (button.dataset.petLibraryAction === 'edit') openPetEditorFromCanvas(entry);
+        const action=button.dataset.petLibraryAction;
+        if (action === 'edit') openPetEditorFromCanvas(entry);
+        else if (action === 'locate') locatePetFromLibrary(entry);
+        else if (action === 'delete') void deletePetFromLibrary(entry);
         else openPetProfileFromCanvas(entry);
       });
     });
@@ -16431,7 +16708,7 @@ function renderPersonLibrary() {
       (p.name || '').toLowerCase().includes(q)
       || (p.breed || '').toLowerCase().includes(q)
     )
-    || (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q))
+    || (LIFE_PHOTOS_PUBLIC && (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q)))
   ) : all;
 
   personLibraryController.syncCategoryCounts();
@@ -16468,7 +16745,7 @@ function renderPersonLibrary() {
 
     const selected = personLibraryState.selection.has(s.id);
     const compactMeta = personLibraryCompactMeta(s);
-    const photoCount = (s.gallery || []).length;
+    const photoCount = LIFE_PHOTOS_PUBLIC ? (s.gallery || []).length : 0;
     const familyLabel = familyNames.join(' · ') || uiText('（未歸屬）');
     const familyDetails = familyLabel + (photoCount ? ' · ' + photoCount + ' ' + uiText('張人生照片') : '');
     const detail = [
@@ -16496,7 +16773,6 @@ function renderPersonLibrary() {
         '</div>' +
         '<div class="person-library-text">' +
           '<div class="person-library-name">' +
-            raceIconHTML(s) + statusIconHTML(s) +
             '<span class="person-library-name-label">' + esc(displayDataText(s.name, s)) + '</span>' +
             '<span class="person-library-life">' + esc(displayDataText(s.lifeStage, s)) + '</span>' +
           '</div>' +
@@ -17612,8 +17888,13 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
           'game';
       }
     } else {
-      target.avatar =
-        savedAvatar;
+      target.gameAvatar = savedAvatar;
+      if (!target.gameAvatarFrame) target.gameAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+      if (!target.customAvatar) target.avatarSource = 'game';
+      if (target.avatarSource === 'game') {
+        target.avatar = savedAvatar;
+        target.avatarFrame = normalizeAvatarFrame(target.gameAvatarFrame);
+      }
     }
 
     if (prepared.converted) thumDecoded++;
@@ -17631,14 +17912,14 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
   for (const [, sim] of personEntries) {
     for (const pet of sim.pets || []) {
       const petId = pet?.gameData?.simId;
-      if (petId && !pet.avatar) petEntries.push([pet, petId]);
+      if (petId && !pet.gameAvatar) petEntries.push([pet, petId]);
     }
   }
   const unassignedPets = Array.isArray(converted.meta?.unassignedPets)
     ? converted.meta.unassignedPets : [];
   for (const pet of unassignedPets) {
     const petId = pet?.gameData?.simId;
-    if (petId && !pet.avatar) petEntries.push([pet, petId]);
+    if (petId && !pet.gameAvatar) petEntries.push([pet, petId]);
   }
 
   // 頭像總數只計算 ZIP 中實際存在、且格式可處理的圖片；
@@ -18631,19 +18912,7 @@ function petCanvasOwnerIndex(entry) {
 }
 
 function openPetEditorFromCanvas(entry) {
-  const index = petCanvasOwnerIndex(entry);
-  if (index < 0) return false;
-
-  personEditor.open(entry.ownerId);
-  const mediaTab = document.querySelector('.sim-editor-tab[data-editor-tab="media"]');
-  mediaTab?.click();
-  const draftIndex = editingPets.findIndex(pet =>
-    String(pet.gameData?.simId || pet.id || '') ===
-      String(entry.pet?.gameData?.simId || entry.pet?.id || '')
-  );
-  if (draftIndex < 0) return false;
-  petEditorController.open(draftIndex);
-  return true;
+  return petEditorController.openDirect(entry);
 }
 
 function resolvePetHouseholdName(entry) {
@@ -18674,23 +18943,43 @@ function openPetProfileFromCanvas(entry) {
   const owner = currentGenealogyData()?.sims?.[entry.ownerId] || null;
   const name = displayDataText(pet.name,owner) || uiText('（未命名）');
   const avatar = petAvatarWithFallbackHTML(pet);
+  const petId = String(pet.gameData?.simId || pet.id || '');
+  const ownerNames = Object.values(currentGenealogyData()?.sims || {}).filter(sim =>
+    (sim.pets || []).some(item => String(item?.gameData?.simId || item?.id || '') === petId)
+  ).map(sim => displayDataText(sim.name,sim)).filter(Boolean);
+  const petGender = normalizePetGender(pet.gender);
+  const petStatus = pet.status || '在世';
+  const petStatusIcon = petStatus === '幽靈' ? 'ghost-symbol'
+    : petStatus === '已故' ? 'tombstone' : 'heart';
+  const petSpecies = PET_SPECIES[pet.species] || PET_SPECIES.other;
+  const metaItems = [
+    pet.ageStage ? '<span class="stage-tag stage-' + esc(pet.ageStage) + '">' +
+      esc(uiText(pet.ageStage)) + '</span>' : '',
+    petGender ? '<span class="meta-pill">' +
+      iconSvg(petGender === 'male' ? 'gender-male' : 'gender-female') +
+      '<span>' + esc(petGenderLabel(pet)) + '</span></span>' : '',
+    '<span class="meta-pill">' + iconSvg(petStatusIcon) +
+      '<span>' + esc(uiText(petStatus)) + '</span></span>',
+    '<span class="meta-pill">' + iconSvg(petSpecies.icon) +
+      '<span>' + esc(formatPetSpecies(pet)) + '</span></span>'
+  ].filter(Boolean);
   const facts = [
     [uiText('品種'),displayDataText(pet.breed,owner)],
-    [uiText('性別'),petGenderLabel(pet)],
-    [uiText('人生階段'),uiText(pet.ageStage || '')],
-    [uiText('狀態'),uiText(pet.status || '')],
-    [uiText('所屬家庭'),resolvePetHouseholdName(entry)]
+    [uiText('所屬家庭'),resolvePetHouseholdName(entry)],
+    [uiText('飼主'),ownerNames.join('、') || '—']
   ].filter(([,value]) => !!value);
-  const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('');
   const traitMarkup = (pet.traits || []).map(trait => displayDataText(trait,owner))
     .filter(Boolean).map(trait => `<span class="tag">${esc(trait)}</span>`).join('');
-  const lineageMarkup = petLineageHTML(pet);
+  const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('') +
+    renderPersonProfileRow(uiText('特徵'),'<div class="person-profile-traits">' + (traitMarkup || '—') + '</div>');
+  const lineageMarkup = petLineageHTML(pet, { profileRows:true });
+  const notes = displayDataText(pet.notes || '',owner).trim();
   $('personProfileContent').innerHTML = `
     <div class="person-profile-header">
       <div class="person-profile-avatar person-profile-pet-main-avatar">${avatar}</div>
       <div class="person-profile-header-text">
         <div class="person-profile-name-row"><span class="person-profile-name">${esc(name)}</span></div>
-        <div class="person-profile-meta"><span class="meta-pill">${esc(formatPetSpecies(pet))}</span></div>
+        <div class="person-profile-meta">${metaItems.join('')}</div>
       </div>
     </div>
     <div class="person-profile-body">
@@ -18699,17 +18988,17 @@ function openPetProfileFromCanvas(entry) {
         <div class="person-profile-list">${factsMarkup || '—'}</div>
       </section>
       <section class="person-profile-section">
-        <h3 class="person-profile-section-title">${esc(uiText('特徵'))}</h3>
-        <div class="person-profile-traits">${traitMarkup || '—'}</div>
-      </section>
-      ${lineageMarkup ? `<section class="person-profile-section">
         <h3 class="person-profile-section-title">${esc(uiText('血統'))}</h3>
-        <div class="person-profile-pet-lineage">${lineageMarkup}</div>
-      </section>` : ''}
+        ${lineageMarkup}
+      </section>
+      <section class="person-profile-section">
+        <h3 class="person-profile-section-title">${esc(uiText('備註'))}</h3>
+        <div class="person-profile-notes">${notes ? esc(notes) : '—'}</div>
+      </section>
     </div>`;
   personProfilePersonId = null;
-  personProfilePetTarget = petCanvasOwnerIndex(entry) >= 0 ? entry : null;
-  $('personProfileEditBtn').style.display = personProfilePetTarget ? '' : 'none';
+  personProfilePetTarget = entry;
+  $('personProfileEditBtn').style.display = '';
   personProfileDialog.classList.add('pet-profile-open');
   personProfileDialog.classList.add('show');
 }
@@ -18741,7 +19030,7 @@ function renderPetCardMenu(entry,clientX,clientY) {
   const settings = getPetCardSettings();
   const fieldRows = [
     ['name','姓名'],['species','物種'],['breed','品種'],['gender','性別'],
-    ['ageStage','人生階段'],['status','狀態'],['traits','特徵']
+    ['ageStage','年齡階段'],['status','狀態'],['traits','特徵'],['owners','飼主']
   ].map(([key,label]) =>
     `<label class="person-card-menu-check"><input type="checkbox" data-pet-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`
   ).join('');
@@ -18754,15 +19043,16 @@ function renderPetCardMenu(entry,clientX,clientY) {
   personCardMenu.innerHTML = `
     <div class="person-card-menu-title">${esc(title)}</div>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看寵物資料'))}</span></button>
-    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="edit" ${editable ? '' : 'disabled'}>${iconSvg('pencil-square')}<span>${esc(uiText('編輯寵物'))}</span></button>
+    <button class="person-card-menu-action" type="button" data-pet-card-menu-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯寵物'))}</span></button>
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
     <div class="person-card-menu-divider"></div>
     <div class="person-card-menu-section-title">${esc(uiText(viewMode === 'edit' ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
-    <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
-    <div class="person-card-menu-grid">${fieldRows}</div>
+    <div class="person-card-menu-grid">
+      <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
+      ${fieldRows}
+    </div>
     ${appearanceSection}
     <div class="person-card-menu-note">${esc(uiText(viewMode === 'edit' ? '只套用於編輯模式寵物卡' : '只套用於檢視模式寵物卡'))}</div>
-    ${editable ? '' : `<div class="person-card-menu-note">${esc(uiText('此寵物沒有可編輯的所屬人物，目前僅能檢視。'))}</div>`}
   `;
   delete personCardMenu.dataset.simId;
   personCardMenu.dataset.petId = entry.key;
@@ -18777,7 +19067,7 @@ function handlePetCardMenuAction(action,key) {
   if (!entry) {closePersonCardMenu();return;}
   closePersonCardMenu();
   if (action === 'view') { openPetProfileFromCanvas(entry); return; }
-  if (action === 'edit') { if (petCanvasOwnerIndex(entry) >= 0) openPetEditorFromCanvas(entry); return; }
+  if (action === 'edit') { openPetEditorFromCanvas(entry); return; }
   if (action === 'locate') { focusPetOnCanvas(entry); return; }
 }
 
@@ -18805,10 +19095,15 @@ function activatePetCanvasCard(id, additive = false) {
   return true;
 }
 
-let petPointerStart = null;
 let lastPetPointerActivation = null;
+let activePetTouchDragPointerId = null;
+let lastPetTouchPressAt = -Infinity;
 petCardsLayer?.addEventListener('load',markPetAvatarLoaded,true);
 petCardsLayer?.addEventListener('error',markPetAvatarError,true);
+nodes?.addEventListener('load',markPetAvatarLoaded,true);
+nodes?.addEventListener('error',markPetAvatarError,true);
+$('familyCoverCollage')?.addEventListener('load',markPetAvatarLoaded,true);
+$('familyCoverCollage')?.addEventListener('error',markPetAvatarError,true);
 personProfileDialog?.addEventListener('load',markPetAvatarLoaded,true);
 personProfileDialog?.addEventListener('error',markPetAvatarError,true);
 petCardsLayer?.addEventListener('contextmenu',event => {
@@ -18816,6 +19111,9 @@ petCardsLayer?.addEventListener('contextmenu',event => {
   if (!cardElement) return;
   event.preventDefault();
   event.stopPropagation();
+  // 觸控長按由共用 520ms 選單處理，略過 Safari 額外合成的 contextmenu。
+  if (event.pointerType === 'touch' || activePetTouchDragPointerId !== null ||
+      performance.now() - lastPetTouchPressAt < 1100) return;
   const entry = findCanvasPetEntry(cardElement.dataset.petId);
   if (entry) renderPetCardMenu(entry,event.clientX,event.clientY);
 });
@@ -18828,29 +19126,122 @@ petCardsLayer?.addEventListener('keydown',event => {
   const box = cardElement.getBoundingClientRect();
   if (entry) renderPetCardMenu(entry,box.left+Math.min(box.width,40),box.top+Math.min(box.height,40));
 });
+
+// 與人物卡一致：點擊開資料，移動超過 3px（觸控 8px）直接啟動拖曳；不等待長按。
+// 手勢只由同一組 PointerDown/Move/Up 收尾，避免 pointerup/click 重複執行。
 petCardsLayer?.addEventListener('pointerdown', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
   if (!element || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
-  petPointerStart = {
-    id:element.dataset.petId,
-    pointerId:event.pointerId,
-    x:event.clientX,
-    y:event.clientY
+  const entry = findCanvasPetEntry(element.dataset.petId);
+  if (!entry) return;
+  const fam = currentFamily();
+  // 與人物一致：已解鎖時，自動/自由排列都可開始手動拖曳。
+  const canDrag = !!(fam && !fam.locked && !spacePanHeld);
+  const mode = viewMode;
+  const origin = {x:entry.x,y:entry.y};
+  const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
+  const isTouch = event.pointerType === 'touch';
+  if (isTouch) {
+    activePetTouchDragPointerId = event.pointerId;
+    lastPetTouchPressAt = performance.now();
+  }
+  const dragThreshold = isTouch ? TOUCH_DRAG_THRESHOLD_PX : 3;
+  const tapAllowance = isTouch ? TOUCH_DRAG_THRESHOLD_PX : 5;
+  // 在手勢開始時固定人物對齊目標；移動過程不再反覆取 Scene/遍歷 Map。
+  const personSnapTargets = [...(getSceneLayout()?.pos?.values() || [])];
+  let moved = false, gestureBlocked = false;
+  let previewPosition = null;
+  // 防止瀏覽器原生圖像拖曳；游標離開卡片仍維持追蹤。
+  event.preventDefault();
+  event.stopPropagation();
+  try { element.setPointerCapture?.(event.pointerId); } catch (_) {}
+  const movement = ev => Math.hypot(ev.clientX-event.clientX,ev.clientY-event.clientY);
+  const clear = () => {
+    moveFrame?.cancel?.();
+    document.removeEventListener('pointermove',onMove);
+    document.removeEventListener('pointerup',onFinish);
+    document.removeEventListener('pointercancel',onFinish);
+    element.classList.remove('dragging');
+    hideSmartGuides();
   };
-  event.stopPropagation();
-});
-petCardsLayer?.addEventListener('pointercancel', () => { petPointerStart = null; });
-petCardsLayer?.addEventListener('pointerup', event => {
-  const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
-  const start = petPointerStart;
-  petPointerStart = null;
-  if (!start || !element || event.pointerId !== start.pointerId ||
-      element.dataset.petId !== start.id ||
-      Math.hypot(event.clientX - start.x,event.clientY - start.y) > 8) return;
-  event.stopPropagation();
-  // 原生 Click 在 PointerUp 後仍可能觸發，記錄 ID 防止重複開啟視窗。
-  lastPetPointerActivation = {id:start.id,time:performance.now()};
-  activatePetCanvasCard(start.id,event.shiftKey);
+  // 與人物卡一致，將多次 PointerMove 合併到同一個動畫幀。
+  const applyMove = point => {
+    const worldDelta = genealogyViewport.screenDeltaToWorld(
+      point.clientX-event.clientX,
+      point.clientY-event.clientY
+    );
+    const rawX = Math.max(0,origin.x+worldDelta.x);
+    const rawY = Math.max(0,origin.y+worldDelta.y);
+    const threshold = genealogyViewport.screenPixelsToWorld(8);
+    let guideX = null, guideY = null;
+    let nearestX = threshold, nearestY = threshold;
+    for (const target of personSnapTargets) {
+      const diffX = Math.abs(target.x-rawX);
+      const diffY = Math.abs(target.y-rawY);
+      if (diffX < nearestX) {nearestX=diffX;guideX=target.x;}
+      if (diffY < nearestY) {nearestY=diffY;guideY=target.y;}
+    }
+    previewPosition = {x:Math.max(0,guideX ?? rawX),y:Math.max(0,guideY ?? rawY)};
+    element.style.left = (previewPosition.x+PAD)+'px';
+    element.style.top = (previewPosition.y+PAD)+'px';
+    hideSmartGuides();
+    if (guideX !== null) showSmartGuide('x',guideX);
+    if (guideY !== null) showSmartGuide('y',guideY);
+  };
+  const moveFrame = genealogyInteraction?.createFrameScheduler?.(applyMove) || null;
+  const onMove = ev => {
+    if (ev.pointerId !== event.pointerId) return;
+    // 雙指手勢只縮放畫布，絕不觸發寵物拖曳。
+    if (isTouch && (activeTouchPointers.size !== 1 ||
+      activeTouchPointers.get(event.pointerId)?.blocked ||
+      touchCardActivationSuppressed.has(event.pointerId))) {
+      gestureBlocked = true;
+      moveFrame?.cancel?.();
+      return;
+    }
+    if (!canDrag || gestureBlocked) return;
+    if (!moved && movement(ev) <= dragThreshold) return;
+    moved = true;
+    element.classList.add('dragging');
+    const point = {clientX:ev.clientX,clientY:ev.clientY};
+    if (moveFrame) moveFrame.push(point);
+    else applyMove(point);
+    ev.preventDefault?.();
+  };
+  const onFinish = ev => {
+    if (ev.pointerId !== event.pointerId) return;
+    const cancelled = gestureBlocked || ev.type === 'pointercancel' ||
+      (isTouch && touchCardActivationSuppressed.has(event.pointerId));
+    // 寫入前補齊最後一幀，避免放開時位置落後指標；取消時丟棄預覽。
+    if (!cancelled) moveFrame?.flush?.();
+    const tap = !cancelled && !moved && movement(ev) <= tapAllowance;
+    clear();
+    if (isTouch && activePetTouchDragPointerId === ev.pointerId)
+      activePetTouchDragPointerId = null;
+    // 阻止 pointerup 之後瀏覽器合成的 click 重新開啟視窗。
+    lastPetPointerActivation = {id:entry.key,time:performance.now()};
+    if (moved && previewPosition && !cancelled) {
+      const seed = fam.freeLayout[mode] ? null : seedVisibleScenePositionsForFreeLayout(fam,mode);
+      const change = genealogyStore.setNodePosition(fam.id,mode,'pet:'+entry.key,previewPosition);
+      // 讓排版重算排到下一幀，避免 pointerup 同步重建整張族譜。
+      applyGenealogyMutation(genealogyStore.mergeResults(seed,change),{immediateRender:false});
+      syncLayoutModeControls();
+      dragHistory.push({type:'card-layout',familyId:fam.id,mode,
+        before,after:captureLayoutHistoryState(fam,mode)});
+    } else {
+      if (moved) {
+        element.style.left = (origin.x+PAD)+'px';
+        element.style.top = (origin.y+PAD)+'px';
+      }
+      if (tap) activatePetCanvasCard(entry.key,ev.shiftKey);
+    }
+    try {
+      if (element.hasPointerCapture?.(ev.pointerId)) element.releasePointerCapture(ev.pointerId);
+    } catch (_) {}
+  };
+  document.addEventListener('pointermove',onMove);
+  document.addEventListener('pointerup',onFinish);
+  document.addEventListener('pointercancel',onFinish);
 });
 petCardsLayer?.addEventListener('click', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
@@ -18858,14 +19249,15 @@ petCardsLayer?.addEventListener('click', event => {
   event.stopPropagation();
   const id = element.dataset.petId;
   if (lastPetPointerActivation?.id === id &&
-      performance.now() - lastPetPointerActivation.time < 900) {
+      performance.now()-lastPetPointerActivation.time < 900) {
     lastPetPointerActivation = null;
     return;
   }
+  // 鍵盤啟用或無 Pointer Events 的瀏覽器保留 Click。
   activatePetCanvasCard(id,event.shiftKey);
 });
 
-// ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
+// ========【頂部篩選】 設定 - 狀態、性別、種族與年齡階段篩選 ========
 function applyTopbarFilters() {
   updateTopbarFilterUI();
   // 畫布與側欄都由 getVisibleIds() 決定顯示人物；篩選後一併刷新。
@@ -19204,12 +19596,21 @@ async function ensureSamplePortraitAssets(database) {
           assetStore.isAssetId(item.person.avatar) &&
           await assetStore.hasAsset(item.person.avatar)) return;
       const id = await importOriginalPng(item.path);
-      if (item.person.avatar !== id) changed = true;
-      item.person.avatar = id;
       if (item.isSim) {
+        if (item.person.avatar !== id) changed = true;
+        item.person.avatar = id;
         item.person.gameAvatar = id;
         item.person.gameData = item.person.gameData || {};
         item.person.gameData.avatarSource = 'game';
+      } else {
+        if (item.person.gameAvatar !== id) changed = true;
+        item.person.gameAvatar = id;
+        item.person.gameAvatarFrame ||= { ...DEFAULT_AVATAR_FRAME };
+        if (!item.person.customAvatar) item.person.avatarSource = 'game';
+        if (item.person.avatarSource === 'game') {
+          item.person.avatar = id;
+          item.person.avatarFrame = normalizeAvatarFrame(item.person.gameAvatarFrame);
+        }
       }
     }));
   }
@@ -19304,9 +19705,24 @@ async function initializeGenealogyWorkspace() {
 
   applyRelationshipLineSettings();
   restoreCanvasBackground();
-  const repairedSamplePortraits = await ensureSamplePortraitAssets(initialDatabase);
+  // A failed IndexedDB Blob write must not block access to an otherwise valid
+  // saved family tree. Never clear picture references or rewrite the workspace
+  // while the browser's image storage is failing.
+  let repairedSamplePortraits = false;
+  let portraitStorageError = null;
+  try {
+    repairedSamplePortraits = await ensureSamplePortraitAssets(initialDatabase);
+  } catch (error) {
+    const storageFailure = /Failed to write blobs|IOError|QuotaExceededError|quota/i.test(
+      String(error?.name || '') + ' ' + String(error?.message || '')
+    );
+    if (!storageFailure) throw error;
+    portraitStorageError = error;
+    console.error('[圖片資產儲存失敗] 保留既有資料並繼續載入族譜。', error);
+  }
 
   const clearedImageRefs =
+    portraitStorageError ? 0 :
     assetStore.clearUnsupportedImageRefs(
       initialDatabase,
       bgSettings
@@ -19327,9 +19743,11 @@ async function initializeGenealogyWorkspace() {
 
     persistCanvasBackground();
   } else if (
-    preparedResult.changed ||
-    upgradedSample ||
-    repairedSamplePortraits
+    !portraitStorageError && (
+      preparedResult.changed ||
+      upgradedSample ||
+      repairedSamplePortraits
+    )
   ) {
     save({ immediate:true });
   }
@@ -19351,6 +19769,17 @@ async function initializeGenealogyWorkspace() {
     requestAnimationFrame(
       hideAppSkeleton
     );
+    if (portraitStorageError) {
+      window.setTimeout(() => {
+        void uiAlert(
+          '瀏覽器暫時無法儲存部分肖像圖片（IndexedDB Blob 寫入失敗）。' +
+          '\n\n族譜已繼續載入，原有的族譜資料及圖片引用不會因此清除。' +
+          '\n請先確認是否能匯出 JSON 備份，再檢查裝置可用儲存空間。' +
+          '\n在備份前請勿清除網站資料或重設瀏覽器儲存空間。',
+          { title:'圖片儲存異常', kind:'danger' }
+        );
+      }, 220);
+    }
   });
 }
 

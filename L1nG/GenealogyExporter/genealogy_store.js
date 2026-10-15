@@ -359,6 +359,7 @@
             : '',
         ageStage:pet.ageStage || '成年',
         status:pet.status || '在世',
+        notes:typeof pet.notes === 'string' ? pet.notes : '',
         traits:
           Array.isArray(pet.traits)
             ? pet.traits
@@ -366,11 +367,36 @@
                 .filter(Boolean)
             : [],
         avatar:pet.avatar || null,
-        avatarFrame:
-          normalizeAvatarFrame(
-            pet.avatarFrame
-          )
+        avatarFrame:normalizeAvatarFrame(pet.avatarFrame)
       };
+
+      // 將舊版單一頭像保留在正確來源；舊版手動覆寫不能被當作遊戲頭像。
+      const original = pet.avatar || null;
+      const manual = manualOverrideValues(pet).includes('avatar');
+      const imported = isGameImportedRecord(pet);
+      normalized.gameAvatar = pet.gameAvatar ||
+        (original && imported && !manual && !pet.customAvatar ? original : null);
+      normalized.customAvatar = pet.customAvatar ||
+        (original && (!imported || manual) && !pet.gameAvatar ? original : null);
+      normalized.gameAvatarFrame = normalized.gameAvatar
+        ? normalizeAvatarFrame(pet.gameAvatarFrame ||
+            (original === normalized.gameAvatar ? pet.avatarFrame : null)) : null;
+      normalized.customAvatarFrame = normalized.customAvatar
+        ? normalizeAvatarFrame(pet.customAvatarFrame ||
+            (original === normalized.customAvatar ? pet.avatarFrame : null)) : null;
+      let chosen = pet.avatarSource === 'game' ? 'game'
+        : pet.avatarSource === 'custom' ? 'custom'
+        : normalized.customAvatar ? 'custom'
+        : normalized.gameAvatar ? 'game' : 'custom';
+      if (chosen === 'game' && !normalized.gameAvatar && normalized.customAvatar)
+        chosen = 'custom';
+      else if (chosen === 'custom' && !normalized.customAvatar && normalized.gameAvatar)
+        chosen = 'game';
+      normalized.avatarSource = chosen;
+      normalized.avatar = chosen === 'game'
+        ? normalized.gameAvatar : normalized.customAvatar;
+      normalized.avatarFrame = normalizeAvatarFrame(chosen === 'game'
+        ? normalized.gameAvatarFrame : normalized.customAvatarFrame);
 
       if (
         normalized.gameData &&
@@ -474,6 +500,16 @@
       const settings =
         current && typeof current === 'object' && !Array.isArray(current)
           ? current : {};
+      // 僅將與上一版預設完全相同的舊設定遷移到新的檢視預設；
+      // 玩家手動勾選過的欄位仍沿用保存值。
+      if (mode === 'view' &&
+          ['name','species','breed','gender','ageStage','status','traits','owners']
+            .every(field => settings[field] === ({
+              name:true,species:true,breed:true,gender:true,
+              ageStage:false,status:false,traits:false,owners:true
+            })[field])) {
+        settings.breed = !!defaults.breed;
+      }
       settings.avatar = true;
       petCardFields.forEach(field => {
         if (typeof settings[field] !== 'boolean') settings[field] = !!defaults[field];
@@ -483,6 +519,29 @@
           ? String(defaults.appearance) : 'minimal';
       }
       return settings;
+    }
+
+    // 沿用舊預設的存檔自動啟用「寵物」；玩家自訂的欄位設定不覆蓋。
+    // 記錄升級版本，避免玩家之後取消勾選又被自動開啟。
+    function migrateDefaultPersonPetFields(meta) {
+      if (meta.personCardPetDefaultsVersion === 1) return;
+      const oldView = {
+        name:true,gender:true,lifeStage:false,age:false,birthday:false,
+        status:true,race:false,career:false,residence:false,aspiration:false,
+        traits:false,gallery:false
+      };
+      const oldEdit = {
+        name:true,gender:true,lifeStage:true,age:true,birthday:true,
+        status:false,race:false,career:false,residence:true,aspiration:false,
+        traits:true,gallery:false
+      };
+      const matchesOldDefault = (settings,expected,mode) =>
+        settings?.pets === false &&
+        Object.entries(expected).every(([key,value])=>settings[key]===value) &&
+        (mode !== 'view' || settings.appearance === 'minimal');
+      if(matchesOldDefault(meta.cardView,oldView,'view'))meta.cardView.pets=true;
+      if(matchesOldDefault(meta.cardEdit,oldEdit,'edit'))meta.cardEdit.pets=true;
+      meta.personCardPetDefaultsVersion=1;
     }
 
     function ensureCardSettings(current) {
@@ -505,6 +564,8 @@
           'edit',
           current.meta.cardEdit
         );
+
+      migrateDefaultPersonPetFields(current.meta);
 
       current.meta.petCardView = normalizePetCardSettings('view',current.meta.petCardView);
       current.meta.petCardEdit = normalizePetCardSettings('edit',current.meta.petCardEdit);
@@ -1436,6 +1497,98 @@
       });
     }
 
+
+    // 寵物可由多位模擬市民共同飼養，唯一身分以遊戲 simId 或自訂 id 判斷。
+    // 統一經 Store 修改所有飼主與未指派寵物，避免多份寵物資料不一致。
+    function savePetWithOwners(pet, ownerIds) {
+      const db = data();
+      const result = rawResult();
+      const normalized = normalizePetRecord(cloneValue(pet));
+      const petId = String(normalized?.gameData?.simId || normalized?.id || '');
+      if (!petId) return finalized(result);
+      const samePet = item =>
+        String(item?.gameData?.simId || item?.id || '') === petId;
+      const requested = new Set((ownerIds || []).map(String).filter(id => !!db.sims[id]));
+      const updatedOwners = [];
+
+      Object.entries(db.sims || {}).forEach(([id, sim]) => {
+        const previous = Array.isArray(sim.pets) ? sim.pets : [];
+        const index = previous.findIndex(samePet);
+        const selected = requested.has(id);
+        if (!selected && index < 0) return;
+        const next = previous.filter(item => !samePet(item));
+        if (selected) next.splice(index < 0 ? next.length : Math.min(index, next.length), 0, cloneValue(normalized));
+        if (sameValue(previous, next)) return;
+        sim.pets = next;
+        updatedOwners.push(id);
+      });
+
+      db.meta = db.meta && typeof db.meta === 'object' ? db.meta : {};
+      const previousUnassigned = Array.isArray(db.meta.unassignedPets) ? db.meta.unassignedPets : [];
+      const nextUnassigned = previousUnassigned.filter(item => !samePet(item));
+      if (!requested.size) nextUnassigned.push(cloneValue(normalized));
+      const unassignedChanged = !sameValue(previousUnassigned, nextUnassigned);
+      if (unassignedChanged) db.meta.unassignedPets = nextUnassigned;
+      if (!updatedOwners.length && !unassignedChanged) return finalized(result);
+
+      mark(result, {
+        dataChanged:true, layoutChanged:true, nodesChanged:true,
+        listsChanged:true, familyUiChanged:true, saveDirty:true,
+        assetsChanged:true
+      });
+      addAffected(result, 'sim', updatedOwners);
+      return finalized(result);
+    }
+
+    // 刪除全部飼主與未指派清單中的同一隻寵物；並清理兩種排列模式的卡片位置。
+    function deletePet(petId) {
+      const db = data();
+      const result = rawResult();
+      const key = String(petId || '');
+      if (!key) return finalized(result);
+      const isTarget = pet =>
+        String(pet?.gameData?.simId || pet?.id || '') === key;
+      let removed = false;
+
+      Object.entries(db.sims || {}).forEach(([simId, sim]) => {
+        const original = Array.isArray(sim?.pets) ? sim.pets : [];
+        const next = original.filter(pet => !isTarget(pet));
+        if (next.length === original.length) return;
+        sim.pets = next;
+        addAffected(result, 'sim', [simId]);
+        removed = true;
+      });
+
+      if (Array.isArray(db.meta?.unassignedPets)) {
+        const original = db.meta.unassignedPets;
+        const next = original.filter(pet => !isTarget(pet));
+        if (next.length !== original.length) {
+          db.meta.unassignedPets = next;
+          removed = true;
+        }
+      }
+      if (!removed) return finalized(result);
+
+      (db.families || []).forEach(family => {
+        if (!family) return;
+        ensureFamilyLayout(family);
+        let changed = false;
+        for (const mode of ['view','edit']) {
+          const positions = family.manualPositions[mode];
+          const positionKey = 'pet:' + key;
+          if (!Object.prototype.hasOwnProperty.call(positions,positionKey)) continue;
+          delete positions[positionKey];
+          changed = true;
+        }
+        if (changed) addAffected(result,'family',[family.id]);
+      });
+      mark(result, {
+        dataChanged:true,layoutChanged:true,nodesChanged:true,
+        listsChanged:true,familyUiChanged:true,assetsChanged:true,saveDirty:true
+      });
+      return finalized(result);
+    }
+
     function setPetCardField(mode, field, enabled) {
       const db = data();
       const result = rawResult();
@@ -1466,6 +1619,8 @@
       db.meta.petCardView.appearance = next;
       mark(result, {
         dataChanged:true,
+        // 寵物畫面由 Layout 擁有：單純 nodesChanged 會被寵物版面快取略過。
+        layoutChanged:true,
         nodesChanged:true,
         saveDirty:true
       });
@@ -3071,6 +3226,8 @@
       getCardSettings,
       setCardField,
       getPetCardSettings,
+      savePetWithOwners,
+      deletePet,
       setPetCardField,
       setPetCardAppearance,
       setCardAppearance,

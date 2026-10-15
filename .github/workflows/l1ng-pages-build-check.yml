@@ -5,6 +5,7 @@ on:
       - genealogy-structural-optimization-20260926
     paths:
       - 'L1nG/**'
+      - 'tests/**'
       - '.github/workflows/l1ng-pages-build-check.yml'
   workflow_dispatch:
 jobs:
@@ -21,3 +22,22 @@ jobs:
           node-version: '22'
       - name: Build ${{ matrix.site }} Pages site
         run: node L1nG/build-pages.mjs ${{ matrix.site }}
+
+  regression:
+    name: Genealogy, THUM and feedback regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          for file in L1nG/GenealogyExporter/genealogy_*.js L1nG/home.js L1nG/RealDate/realdate.js L1nG/build-pages.mjs; do
+            node --check "$file"
+          done
+      - name: Run genealogy unit and layout regression tests
+        run: node --test tests/*.test.cjs
+      - name: Run feedback API offline tests
+        run: node --test L1nG/feedback/api/worker.test.mjs

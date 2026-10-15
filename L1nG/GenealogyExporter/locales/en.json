@@ -1147,6 +1147,20 @@
     "單一附件不可超過 10 MB": "Each attachment must be 10 MB or less",
     "附件總大小不可超過 20 MB": "Total attachments must be 20 MB or less",
     "網站端": "Website",
-    "遊戲端": "In-game"
+    "遊戲端": "In-game",
+    "問題反饋": "Feedback",
+    "關於族譜工具": "About Genealogy Tool",
+    "新增其他關係": "Add Other Relationship",
+    "選擇目標市民（可多選）": "Select Target Sims (multiple allowed)",
+    "這隻寵物尚未設定喜好與厭惡。": "This pet has no likes or dislikes set.",
+    "這隻寵物尚未設定吸引力偏好。": "This pet has no attraction preferences set.",
+    "寵物編輯分類": "Pet editor categories",
+    "找不到包含這隻寵物的族譜，請先指派飼主或所屬家庭。": "No family tree contains this pet. Assign an owner or household first.",
+    "這隻寵物目前沒有可顯示的族譜卡片。": "This pet does not currently have a visible family-tree card.",
+    "確定永久刪除寵物": "Permanently delete pet",
+    "這會從所有飼主與未指派寵物清單中移除，無法復原。": "This removes the pet from every owner's list and the unassigned list. This cannot be undone.",
+    "永久刪除寵物": "Permanently Delete Pet",
+    "查看寵物資料": "View Pet Details",
+    "新增飼主（可多選）": "Add Owners (multiple selection)"
   }
 }

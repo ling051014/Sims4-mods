@@ -36,11 +36,19 @@ for (const name of [
   'site-footer.css','site-info-modal.css','site-info-modal.js',
   'site-info.css','site-info.js','site-info.html'
 ]) file(name);
-folder('icons');
-for (const icon of ['ui-search.svg', 'ui-clear.svg']) {
+// Repository SVG sources are stored exclusively in html icons/.
+for (const icon of ['ui-search.svg', 'ui-clear.svg', 'afdian.svg',
+                    'genealogy-extractor.svg', 'genealogy-people.svg',
+                    'genealogy-zip-folder.svg', 'patreon.svg']) {
   put(path.join(base,'html icons',icon),path.join(out,'html icons',icon));
 }
 file('analytics.js');
+file('cookie-consent.js');
+file('cookie-consent.css');
+// Scope the only Pages Function to its one analytics-region endpoint;
+// all regular web pages and assets remain purely static.
+fs.writeFileSync(path.join(out,'_routes.json'),
+  JSON.stringify({version:1,include:['/l1ng-analytics-region'],exclude:[]}));
 const publicFeedback = [
   'feedback-core.js','feedback-i18n.js','feedback-loading.css',
   'feedback.css','realdate-feedback-live.js','select-ui.js'
@@ -67,6 +75,8 @@ if (mode === 'home') {
   for (const name of ['genealogy-exporter.html','genealogy-exporter.css','genealogy-exporter.js']) {
     file(path.join('GenealogyExporter',name),name);
   }
+  // Keep the install ZIP alongside the deployed page at /downloads/.
+  folder('GenealogyExporter/downloads','downloads');
   put(site('GenealogyExporter','genealogy-exporter.html'),path.join(out,'index.html'));
 } else if (mode === 'translations') {
   contents('Translations');
@@ -76,6 +86,11 @@ if (mode === 'home') {
 // live two levels below html icons. Rewrite only deployed copies.
 if (mode === 'genealogy' || mode === 'translations') {
   const cssFile = path.join(out,mode === 'genealogy' ? 'genealogy.css' : 'translations.css');
+  const css = fs.readFileSync(cssFile,'utf8');
+  fs.writeFileSync(cssFile,css.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
+}
+if (mode === 'extractor') {
+  const cssFile = path.join(out,'genealogy-exporter.css');
   const css = fs.readFileSync(cssFile,'utf8');
   fs.writeFileSync(cssFile,css.replaceAll('../../html%20icons/','html%20icons/'),'utf8');
 }
@@ -126,9 +141,12 @@ for(const p of htmls) {
   // Never count private administrator activity as public traffic.
   if (relative !== 'feedback/admin.html') {
     if (!/<\/head\s*>/i.test(modified)) throw new Error('Missing HTML head: '+relative);
-    const trackingSrc='../'.repeat(relative.split('/').length-1)+'analytics.js?v=20261014-ga4-r1';
-    modified=modified.replace(/<\/head\s*>/i,
-      '    <script src="'+trackingSrc+'" defer></script>\n</head>');
+    const assetPrefix='../'.repeat(relative.split('/').length-1);
+    if (!/src=["'][^"']*cookie-consent\.js(?:[?"'])/.test(modified)) {
+      modified=modified.replace(/<\/head\s*>/i,
+        '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261015-cookie-preferences-skeleton-r4">\n' +
+        '    <script src="'+assetPrefix+'cookie-consent.js?v=20261015-cookie-preferences-skeleton-r4" defer></script>\n</head>');
+    }
     analyticsPages++;
   }
   if (modified!==html) fs.writeFileSync(p,modified,'utf8');

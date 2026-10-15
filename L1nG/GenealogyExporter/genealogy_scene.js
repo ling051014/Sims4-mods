@@ -47,8 +47,8 @@
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
       relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, renderPetChipSummary, genderClass, statusClass,
-      showPetCards, petCardAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
+      avatarHTML, renderTraitTagSummary, genderClass, statusClass,
+      showPetCards, petCardAvatarHTML, petOwnerAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
       syncPetSelectionClasses
     } = helpers;
     // Scene owns canvas-only presentation and relationship-label SVG markup.
@@ -180,15 +180,6 @@
         settings.gallery
       ) {
         const mediaBits = [];
-
-        if (
-          settings.pets &&
-          (sim.pets || []).length
-        ) {
-          mediaBits.push(
-            `${uiText('寵物')} ${(sim.pets || []).length}`
-          );
-        }
 
         if (
           settings.gallery &&
@@ -1485,7 +1476,8 @@
           settings
         );
 
-      if (!model.hasText) return 100;
+      const petSpace=settings.pets ? stackedPortraitTopSpace((sim.pets||[]).length,4) : 0;
+      if (!model.hasText) return 100+petSpace;
 
       const innerWidth =
         VIEW_CARD_LAYOUT.width -
@@ -1494,7 +1486,8 @@
       let height =
         VIEW_CARD_LAYOUT.topPadding +
         VIEW_CARD_LAYOUT.avatarSize +
-        VIEW_CARD_LAYOUT.gap;
+        VIEW_CARD_LAYOUT.gap +
+        petSpace;
 
       if (model.name) {
         height +=
@@ -1688,6 +1681,12 @@
               )
             }
           : resolveDefaultCardDimensions();
+
+      if(viewMode==='edit' && sim) {
+        const settings=getCardEditSettings();
+        const extra=settings.pets ? stackedPortraitTopSpace((sim.pets||[]).length,4) : 0;
+        if(extra)dimensions.H+=extra;
+      }
 
       if (cacheKey) {
         nodeDimensionCache.set(
@@ -5047,63 +5046,9 @@ function setGenerationVerticalPositions(layers) {
   });
 }
 
-function packGenealogyLayer(layer, desiredLefts, gap) {
-  if (!layer || !layer.length) return;
 
-  const targets = layer.map(unit => {
-    const target = desiredLefts.get(unit.id);
-    return Number.isFinite(target) ? target : unit.x;
-  });
 
-  const packed = [...targets];
 
-  // ========【同世代防重疊】 設定 - 只處理卡片碰撞，不重新定義族譜中心 ========
-  // 先由左至右消除碰撞，再由右至左回收不必要的位移。
-  // 這裡只負責「卡片不能重疊」，父母 / 子女的真正中心由 pedigree anchor solver 決定。
-  for (let index = 1; index < layer.length; index += 1) {
-    const minimum =
-      packed[index - 1] +
-      layer[index - 1].width +
-      gap;
-
-    if (packed[index] < minimum) {
-      packed[index] = minimum;
-    }
-  }
-
-  for (let index = layer.length - 2; index >= 0; index -= 1) {
-    const maximum =
-      packed[index + 1] -
-      layer[index].width -
-      gap;
-
-    if (
-      packed[index] > maximum &&
-      targets[index] <= maximum
-    ) {
-      packed[index] = maximum;
-    }
-  }
-
-  layer.forEach((unit, index) => {
-    unit.x = packed[index];
-  });
-}
-
-function assignInitialGenealogyHorizontalPositions(layers) {
-  const {
-    SIBLING:SIBLING_GAP
-  } = resolveLayoutGaps();
-
-  layers.forEach(layer => {
-    let cursorX = 0;
-
-    layer.forEach(unit => {
-      unit.x = cursorX;
-      cursorX += unit.width + SIBLING_GAP;
-    });
-  });
-}
 
 function genealogyUnitMemberLocalGeometry(unit, simId) {
   if (!unit) return null;
@@ -5290,875 +5235,36 @@ function genealogyChildAnchorX(childId, model) {
   );
 }
 
-function pedigreeChildEntries(group, model, generation, layerIndex) {
-  const entries =
-    group.children
-      .map(childId => {
-        const unit =
-          model.unitBySim.get(childId);
 
-        if (
-          !unit ||
-          unit.generation !== generation
-        ) {
-          return null;
-        }
 
-        const geometry =
-          genealogyUnitMemberRelationshipGeometry(
-            unit,
-            childId
-          );
 
-        if (!geometry) return null;
 
-        return {
-          childId,
-          unit,
-          geometry,
-          order:
-            layerIndex.get(unit.id) ??
-            Number.MAX_SAFE_INTEGER
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) =>
-        a.order - b.order ||
-        a.geometry.anchorLocalX -
-          b.geometry.anchorLocalX
-      );
 
-  // 同一 family unit 只佔一個自動排列位置；
-  // 真正 SVG 仍可保留每一位子女自己的 relationship anchor。
-  const unique = [];
-  const seen = new Set();
 
-  entries.forEach(entry => {
-    if (seen.has(entry.unit.id)) {
-      return;
-    }
 
-    seen.add(entry.unit.id);
-    unique.push(entry);
-  });
 
-  return unique;
-}
 
-function buildPedigreeChildTargets(
-  group,
-  model,
-  generation,
-  layerIndex,
-  gap
-) {
-  const sourceX =
-    genealogyGroupSourceX(
-      group,
-      model
-    );
 
-  if (!Number.isFinite(sourceX)) {
-    return [];
-  }
 
-  const entries =
-    pedigreeChildEntries(
-      group,
-      model,
-      generation,
-      layerIndex
-    );
 
-  if (!entries.length) {
-    return [];
-  }
 
-  if (entries.length === 1) {
-    const entry =
-      entries[0];
 
-    return [{
-      unit:entry.unit,
-      left:
-        sourceX -
-        entry.geometry.anchorLocalX
-    }];
-  }
 
-  // ========【多子女 Relationship Bus】 設定 - 以真正 child relationship anchor 排 sibling ========
-  // 水平 sibling bus 是必要結構，但最後落到每名子女的 branch 必須是純垂直；
-  // 因此所有間距與置中都以實際 relationship anchor 為基準，不再使用卡片中心。
-  const anchorXs = [0];
 
-  for (
-    let index = 1;
-    index < entries.length;
-    index += 1
-  ) {
-    const previous =
-      entries[index - 1];
 
-    const current =
-      entries[index];
 
-    anchorXs[index] =
-      anchorXs[index - 1] +
-      previous.geometry.rightExtent +
-      gap +
-      current.geometry.leftExtent;
-  }
 
-  const busCenter =
-    (
-      anchorXs[0] +
-      anchorXs[
-        anchorXs.length - 1
-      ]
-    ) / 2;
 
-  const shift =
-    sourceX -
-    busCenter;
 
-  return entries.map(
-    (entry, index) => {
-      const branchX =
-        anchorXs[index] +
-        shift;
 
-      return {
-        unit:entry.unit,
-        left:
-          branchX -
-          entry.geometry.anchorLocalX
-      };
-    }
-  );
-}
 
-function mergePedigreeLeftTarget(targets, unitId, left) {
-  if (!Number.isFinite(left)) return;
 
-  if (!targets.has(unitId)) {
-    targets.set(unitId, []);
-  }
 
-  targets.get(unitId).push(left);
-}
 
-function averagePedigreeLeftTargets(targets) {
-  const averaged = new Map();
 
-  targets.forEach((values, unitId) => {
-    if (!values.length) return;
 
-    averaged.set(
-      unitId,
-      values.reduce((sum, value) => sum + value, 0) /
-        values.length
-    );
-  });
 
-  return averaged;
-}
 
-function alignPedigreeChildrenToParents(layers, model, connectorGroups) {
-  const {
-    SIBLING:SIBLING_GAP
-  } = resolveLayoutGaps();
-
-  const generations =
-    [...layers.keys()].sort((a, b) => a - b);
-
-  generations.slice(1).forEach(generation => {
-    const layer = layers.get(generation);
-    const layerIndex =
-      new Map(
-        layer.map((unit, index) => [unit.id, index])
-      );
-
-    const requestedLefts = new Map();
-
-    connectorGroups.forEach(group => {
-      buildPedigreeChildTargets(
-        group,
-        model,
-        generation,
-        layerIndex,
-        SIBLING_GAP
-      ).forEach(target => {
-        mergePedigreeLeftTarget(
-          requestedLefts,
-          target.unit.id,
-          target.left
-        );
-      });
-    });
-
-    packGenealogyLayer(
-      layer,
-      averagePedigreeLeftTargets(requestedLefts),
-      SIBLING_GAP
-    );
-  });
-}
-
-function alignPedigreeParentsToChildren(layers, model, connectorGroups) {
-  const {
-    SIBLING:SIBLING_GAP
-  } = resolveLayoutGaps();
-
-  const generations =
-    [...layers.keys()].sort((a, b) => a - b);
-
-  generations
-    .slice(0, -1)
-    .reverse()
-    .forEach(generation => {
-      const requestedLefts = new Map();
-
-      connectorGroups.forEach(group => {
-        const parents =
-          genealogyGroupParentEntries(group, model)
-            .filter(entry =>
-              entry.unit.generation === generation
-            );
-
-        if (!parents.length) return;
-
-        const childXs =
-          group.children
-            .map(childId =>
-              genealogyChildAnchorX(
-                childId,
-                model
-              )
-            )
-            .filter(Number.isFinite);
-
-        if (!childXs.length) return;
-
-        const targetX =
-          childXs.length === 1
-            ? childXs[0]
-            : (
-                Math.min(...childXs) +
-                Math.max(...childXs)
-              ) / 2;
-
-        const sourceX =
-          genealogyGroupSourceX(group, model);
-
-        if (!Number.isFinite(sourceX)) return;
-
-        const delta =
-          targetX - sourceX;
-
-        const parentUnits =
-          new Map();
-
-        parents.forEach(parent => {
-          parentUnits.set(
-            parent.unit.id,
-            parent.unit
-          );
-        });
-
-        parentUnits.forEach(unit => {
-          if (!requestedLefts.has(unit.id)) {
-            requestedLefts.set(unit.id, []);
-          }
-
-          requestedLefts.get(unit.id)
-            .push(unit.x + delta);
-        });
-      });
-
-      const layer =
-        layers.get(generation);
-
-      const desiredLefts =
-        new Map();
-
-      layer.forEach(unit => {
-        const requests =
-          requestedLefts.get(unit.id);
-
-        if (!requests || !requests.length) {
-          desiredLefts.set(
-            unit.id,
-            unit.x
-          );
-          return;
-        }
-
-        desiredLefts.set(
-          unit.id,
-          requests.reduce(
-            (sum, value) => sum + value,
-            0
-          ) / requests.length
-        );
-      });
-
-      // 對齊父母時同時做 collision packing。
-      // 「不重疊」是硬約束；無法完全置中時交給正交關係線處理，
-      // 不再為了追求垂直主幹把另一個家系壓進來。
-      packGenealogyLayer(
-        layer,
-        desiredLefts,
-        SIBLING_GAP
-      );
-    });
-}
-
-function resolvePedigreeLayerCollisions(layers) {
-  const {
-    SIBLING:SIBLING_GAP
-  } = resolveLayoutGaps();
-
-  layers.forEach(layer => {
-    if (!layer.length) return;
-
-    // ========【同世代防重疊】 設定 - 保留家系語意順序 ========
-    // layer 的順序與初始空間已由 Family Branch Block Layout 決定。
-    // collision pass 只能推開距離，不能再依目前 x 重新排序，
-    // 否則同父母子女會再次被其他家系插入。
-    const targets =
-      new Map(
-        layer.map(unit => [
-          unit.id,
-          unit.x
-        ])
-      );
-
-    packGenealogyLayer(
-      layer,
-      targets,
-      SIBLING_GAP
-    );
-  });
-}
-
-
-
-
-// ========【親子垂直關係線】 設定 - 自動排列以單一子女直線為硬約束，不借用卡片智慧吸附 ========
-
-// ========【自動排列關係幾何】 設定 - 單一子女親子線預設必須為垂直，不以 V-H-V 解決碰撞 ========
-function buildAutoVerticalRelationshipConstraints(
-  model,
-  connectorGroups
-) {
-  const constraints = [];
-
-  connectorGroups.forEach(group => {
-    const parentEntries =
-      genealogyGroupParentEntries(
-        group,
-        model
-      );
-
-    if (!parentEntries.length) {
-      return;
-    }
-
-    const sourceX =
-      genealogyGroupSourceX(
-        group,
-        model
-      );
-
-    if (!Number.isFinite(sourceX)) {
-      return;
-    }
-
-    const parentUnitIds =
-      [...new Set(
-        parentEntries.map(
-          entry => entry.unit.id
-        )
-      )];
-
-    const parentCoefficients =
-      new Map();
-
-    if (parentUnitIds.length === 1) {
-      parentCoefficients.set(
-        parentUnitIds[0],
-        1
-      );
-    } else {
-      const weight =
-        1 /
-        parentUnitIds.length;
-
-      parentUnitIds.forEach(unitId => {
-        parentCoefficients.set(
-          unitId,
-          weight
-        );
-      });
-    }
-
-    const sourceConstant =
-      sourceX -
-      [...parentCoefficients.entries()]
-        .reduce(
-          (
-            sum,
-            [unitId, coefficient]
-          ) =>
-            sum +
-            coefficient *
-            (
-              model.unitById
-                .get(unitId)?.x ||
-              0
-            ),
-          0
-        );
-
-    const children =
-      group.children
-        .map(childId => {
-          const unit =
-            model.unitBySim.get(
-              childId
-            );
-
-          const geometry =
-            genealogyUnitMemberRelationshipGeometry(
-              unit,
-              childId
-            );
-
-          if (!unit || !geometry) {
-            return null;
-          }
-
-          return {
-            childId,
-            unit,
-            geometry,
-            anchorX:
-              unit.x +
-              geometry.anchorLocalX
-          };
-        })
-        .filter(Boolean)
-        .sort((left, right) =>
-          left.anchorX -
-            right.anchorX ||
-          String(left.childId)
-            .localeCompare(
-              String(right.childId)
-            )
-        );
-
-    if (!children.length) {
-      return;
-    }
-
-    const coefficients =
-      new Map();
-
-    const addCoefficient =
-      (unitId, value) => {
-        coefficients.set(
-          unitId,
-          (
-            coefficients.get(unitId) ||
-            0
-          ) +
-          value
-        );
-      };
-
-    parentCoefficients.forEach(
-      (coefficient, unitId) => {
-        addCoefficient(
-          unitId,
-          -coefficient
-        );
-      }
-    );
-
-    let childConstant = 0;
-    let type = 'single-child-axis';
-
-    if (children.length === 1) {
-      const child =
-        children[0];
-
-      addCoefficient(
-        child.unit.id,
-        1
-      );
-
-      childConstant =
-        child.geometry.anchorLocalX;
-    } else {
-      // 多子女的 canonical 幾何：
-      // parent trunk 對準 sibling bus 的外側 child branches 中點。
-      // 中間子女可依實際 layout unit 寬度自然展開，不被固定死。
-      const leftChild =
-        children[0];
-
-      const rightChild =
-        children[
-          children.length - 1
-        ];
-
-      addCoefficient(
-        leftChild.unit.id,
-        0.5
-      );
-
-      addCoefficient(
-        rightChild.unit.id,
-        0.5
-      );
-
-      childConstant =
-        (
-          leftChild.geometry.anchorLocalX +
-          rightChild.geometry.anchorLocalX
-        ) / 2;
-
-      type =
-        'multi-child-bus-center';
-    }
-
-    constraints.push({
-      type,
-      groupKey:group.key,
-      childIds:
-        children.map(
-          child => child.childId
-        ),
-      coefficients,
-
-      // child expression = parent source
-      // Σ(child coefficients * unit.x) + childConstant
-      // =
-      // Σ(parent coefficients * unit.x) + sourceConstant
-      b:
-        sourceConstant -
-        childConstant
-    });
-  });
-
-  return constraints;
-}
-
-function projectAutoVerticalRelationshipConstraints(
-  model,
-  constraints
-) {
-  let maxError = 0;
-
-  constraints.forEach(constraint => {
-    let current = 0;
-    let denominator = 0;
-
-    constraint.coefficients.forEach(
-      (coefficient, unitId) => {
-        const unit =
-          model.unitById.get(unitId);
-
-        if (!unit) return;
-
-        current +=
-          coefficient *
-          unit.x;
-
-        denominator +=
-          coefficient *
-          coefficient;
-      }
-    );
-
-    if (denominator <= 0) {
-      return;
-    }
-
-    const error =
-      constraint.b -
-      current;
-
-    maxError =
-      Math.max(
-        maxError,
-        Math.abs(error)
-      );
-
-    if (Math.abs(error) <= 0.0001) {
-      return;
-    }
-
-    const correction =
-      error /
-      denominator;
-
-    constraint.coefficients.forEach(
-      (coefficient, unitId) => {
-        const unit =
-          model.unitById.get(unitId);
-
-        if (!unit) return;
-
-        unit.x +=
-          coefficient *
-          correction;
-      }
-    );
-  });
-
-  return maxError;
-}
-
-
-function projectAutoRelationshipLayerCollisions(
-  layers
-) {
-  const {
-    SIBLING:SIBLING_GAP
-  } = resolveLayoutGaps();
-
-  let maxOverlap = 0;
-
-  layers.forEach(layer => {
-    if (!layer || layer.length < 2) {
-      return;
-    }
-
-    for (
-      let index = 1;
-      index < layer.length;
-      index += 1
-    ) {
-      const left =
-        layer[index - 1];
-
-      const right =
-        layer[index];
-
-      const required =
-        left.x +
-        left.width +
-        SIBLING_GAP;
-
-      const overlap =
-        required -
-        right.x;
-
-      if (overlap <= 0.0001) {
-        continue;
-      }
-
-      maxOverlap =
-        Math.max(
-          maxOverlap,
-          overlap
-        );
-
-      // 同代 collision 也是正式幾何約束。
-      // 左右各退一半，下一個 relationship projection 再把關係軸精準拉回。
-      const half =
-        overlap / 2;
-
-      left.x -= half;
-      right.x += half;
-    }
-  });
-
-  return maxOverlap;
-}
-
-function measureAutoRelationshipConstraintError(
-  model,
-  constraints
-) {
-  let maxError = 0;
-
-  constraints.forEach(constraint => {
-    let current = 0;
-
-    constraint.coefficients.forEach(
-      (coefficient, unitId) => {
-        const unit =
-          model.unitById.get(unitId);
-
-        if (!unit) return;
-
-        current +=
-          coefficient *
-          unit.x;
-      }
-    );
-
-    maxError =
-      Math.max(
-        maxError,
-        Math.abs(
-          constraint.b -
-          current
-        )
-      );
-  });
-
-  return maxError;
-}
-
-function solveAutoRelationshipGeometry(
-  layers,
-  model,
-  connectorGroups
-) {
-  const constraints =
-    buildAutoVerticalRelationshipConstraints(
-      model,
-      connectorGroups
-    );
-
-  if (!constraints.length) {
-    return;
-  }
-
-  // ========【Auto Relationship Geometry Solver】 設定 - 問題規模線性上限 + 停滯偵測 ========
-  // 每一輪都會完整投影 relationship equality 與同代 collision。
-  // 上限改為接近「一輪覆蓋所有 active unit / constraint」的線性規模，
-  // 並設硬上限，避免大型族譜因難收斂而在主執行緒跑數千輪。
-  const problemSize =
-    model.units.length +
-    constraints.length;
-
-  const maxPasses =
-    Math.min(
-      192,
-      Math.max(
-        32,
-        problemSize + 8
-      )
-    );
-
-  let previousError =
-    Number.POSITIVE_INFINITY;
-
-  let stagnantPasses = 0;
-
-  for (
-    let pass = 0;
-    pass < maxPasses;
-    pass += 1
-  ) {
-    projectAutoVerticalRelationshipConstraints(
-      model,
-      constraints
-    );
-
-    const maxOverlap =
-      projectAutoRelationshipLayerCollisions(
-        layers
-      );
-
-    const maxRelationshipError =
-      measureAutoRelationshipConstraintError(
-        model,
-        constraints
-      );
-
-    const currentError =
-      Math.max(
-        maxOverlap,
-        maxRelationshipError
-      );
-
-    if (currentError <= 0.01) {
-      break;
-    }
-
-    const improvement =
-      previousError -
-      currentError;
-
-    const minimumUsefulImprovement =
-      Math.max(
-        0.001,
-        Number.isFinite(
-          previousError
-        )
-          ? previousError * 0.0001
-          : 0.001
-      );
-
-    if (
-      improvement <=
-      minimumUsefulImprovement
-    ) {
-      stagnantPasses += 1;
-    } else {
-      stagnantPasses = 0;
-    }
-
-    previousError =
-      currentError;
-
-    if (stagnantPasses >= 12) {
-      break;
-    }
-  }
-
-  for (
-    let settle = 0;
-    settle < 4;
-    settle += 1
-  ) {
-    const error =
-      projectAutoVerticalRelationshipConstraints(
-        model,
-        constraints
-      );
-
-    if (error <= 0.0001) {
-      break;
-    }
-  }
-}
-
-function solvePedigreeHorizontalLayout(layers, model, connectorGroups) {
-  // ========【族譜幾何核心】 設定 - 在 Family Branch Ordering 內求解座標 ========
-  // 硬約束：
-  // 1. 同世代 family unit 不重疊。
-  // 2. 配偶維持同一世代。
-  //
-  // 軟約束：
-  // 3. 父母 union 儘量對準子女群中心。
-  // 4. 子女群儘量以父母 union 為中心。
-  //
-  // 這一階段只調整既定 branch order 下的座標，不得重新排序 unit。
-  // 單／多子女的 canonical relationship geometry
-  // 仍由 solveAutoRelationshipGeometry() 作為最終 hard constraint。
-  for (let iteration = 0; iteration < 10; iteration += 1) {
-    alignPedigreeChildrenToParents(
-      layers,
-      model,
-      connectorGroups
-    );
-
-    alignPedigreeParentsToChildren(
-      layers,
-      model,
-      connectorGroups
-    );
-  }
-
-  // 最後一次硬性 collision pass。
-  // 後面不再執行任何會把 family unit 拉回去的步驟。
-  resolvePedigreeLayerCollisions(layers);
-}
 
 function placeGenealogyUnitMembers(units) {
   const pos = new Map();
@@ -7029,6 +6135,15 @@ function solveAutomaticGenealogyPositions(visibleIds) {
   );
 }
 
+// 一個寵物可能由多位模擬市民共同飼養，使用穩定 ID 查找實際飼主。
+function petCardOwners(pet) {
+  const id=String(pet?.gameData?.simId || pet?.id || '');
+  if(!id)return [];
+  return Object.values(genealogyData?.sims || {}).filter(sim=>
+    (sim.pets || []).some(item=>String(item?.gameData?.simId || item?.id || '')===id)
+  );
+}
+
 // ========【家庭寵物排列】 設定 - 人物族譜先排好，寵物卡只占用畫布外側空間 ========
 // ========【寵物卡顯示資訊】 設定 - 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
 function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
@@ -7040,38 +6155,79 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
     ? (pet.traits || []).map(trait => displayDataText(trait,owner)).filter(Boolean)
     : [];
   const rows = [];
-  if (species || breed) rows.push({key:'speciesBreed',text:[species,breed].filter(Boolean).join(' · ')});
-  if (stage || status) rows.push({key:'stageStatus',text:[stage,status].filter(Boolean).join(' · ')});
+  // 物種、人生階段及狀態依現有顯示開關組成同一行，不再各佔一列。
+  if (species || stage || status) rows.push({key:'identity',text:[species,stage,status].filter(Boolean).join(' · ')});
+  if (breed) rows.push({key:'breed',text:breed});
   if (traits.length) rows.push({key:'traits',text:traits.join(' / '),traits});
   return rows;
 }
 
+// 從底排往上填滿：飼主每排最多 3 位，人物卡上的寵物每排最多 4 隻。
+function stackedPortraitRowSizes(count,maxPerRow) {
+  const total=Math.max(0,Math.floor(Number(count)||0));
+  const rows=Math.ceil(total/maxPerRow);
+  return Array.from({length:rows},(_,i)=>i===0 ? total-(rows-1)*maxPerRow : maxPerRow);
+}
+function stackedPortraitTopSpace(count,maxPerRow) {
+  const rows=stackedPortraitRowSizes(count,maxPerRow).length;
+  return rows ? 18+(rows-1)*19 : 0;
+}
+function petOwnerRowSizes(count) {
+  return stackedPortraitRowSizes(count,3);
+}
+function petOwnerTopSpace(count) {
+  return stackedPortraitTopSpace(count,3);
+}
+function personPetPortraits(sim,settings) {
+  if(!settings.pets || !Array.isArray(sim?.pets) || !sim.pets.length)return '';
+  const rows=stackedPortraitRowSizes(sim.pets.length,4);
+  let offset=0;
+  return '<span class="person-card-mini-pets" aria-label="'+esc(uiText('寵物'))+'">'+rows.map(size=>{
+    const avatars=sim.pets.slice(offset,offset+size).map(pet=>{
+      const label=displayDataText(pet.name,sim)||uiText('（未命名）');
+      return '<span class="person-card-mini-pet-avatar" role="img" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+petCardAvatarHTML(pet)+'</span>';
+    }).join('');
+    offset+=size;
+    return '<span class="genealogy-pet-owner-row">'+avatars+'</span>';
+  }).join('')+'</span>';
+}
+function personCardPortraitHTML(sim,settings,isView) {
+  const avatar='<div class="'+(isView?'person-card-view-avatar':'person-card-avatar')+'" data-line-anchor="avatar">'+avatarHTML(sim)+'</div>';
+  const pets=personPetPortraits(sim,settings);
+  if(!pets)return avatar;
+  return '<span class="person-card-portraits" style="--person-pet-space:'+stackedPortraitTopSpace(sim.pets.length,4)+'px">'+avatar+pets+'</span>';
+}
+
 function petCardDimensions(pet,owner) {
-  const settings = getPetCardSettings();
-  const rows = petCardFieldRows(pet,owner,settings);
-  const edit = viewMode === 'edit';
-  const W = edit ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
-  const textWidth = edit ? W - 82 : W - 18;
-  const lines = (value,fontSize = 10) => {
-    const charWidth = /[^\x00-\x7f]/.test(String(value || '')) ? fontSize : fontSize * 0.58;
-    return Math.max(1,Math.ceil([...String(value || '')].length * charWidth / textWidth));
+  const settings=getPetCardSettings();
+  const rows=petCardFieldRows(pet,owner,settings);
+  const edit=viewMode==='edit';
+  // 飼主在寵物頭像頂端置中，僅增加必要的垂直高度，不增加卡片寬度。
+  const ownerSpace=settings.owners ? petOwnerTopSpace(petCardOwners(pet).length) : 0;
+  const avatarSize=edit ? 51 : 61;
+  const W=edit?PET_EDIT_DIMS.W:PET_VIEW_DIMS.W;
+  const textWidth=edit?Math.max(94,W-avatarSize-40):W-18;
+  const lines=(value,fontSize=10)=>{
+    const charWidth=/[^\x00-\x7f]/.test(String(value||'')) ? fontSize : fontSize*.58;
+    return Math.max(1,Math.ceil([...String(value||'')].length*charWidth/textWidth));
   };
-  const name = settings.name ? displayDataText(pet.name,owner) : '';
-  const nameHeight = name ? lines(name,edit?12:11)*17 : 0;
-  const rowHeight = rows.reduce((sum,row) => {
-    if (edit && row.key === 'traits') {
-      let used = 0, count = 1;
-      for (const trait of row.traits) {
-        const width = Math.min(textWidth,[...trait].length*9+12);
-        if (used && used+width+3>textWidth) {count++;used=0;}
-        used += width+3;
+  const name=settings.name?displayDataText(pet.name,owner):'';
+  const nameHeight=name?lines(name,edit?12:11)*17:0;
+  const rowHeight=rows.reduce((sum,row)=>{
+    if(edit && row.key==='traits'){
+      let used=0,count=1;
+      for(const trait of row.traits){
+        const width=Math.min(textWidth,[...trait].length*9+12);
+        if(used && used+width+3>textWidth){count++;used=0;}
+        used+=width+3;
       }
       return sum+count*19;
     }
     return sum+lines(row.text)*14+3;
   },0);
-  if (edit) return {W,H:Math.max(84,20+Math.max(51,nameHeight+rowHeight+4))};
-  return {W,H:Math.max(90,12+61+(nameHeight?nameHeight+5:0)+rowHeight+10)};
+  const H=edit?Math.max(PET_EDIT_DIMS.H,20+Math.max(avatarSize+ownerSpace,nameHeight+rowHeight+4))
+    :Math.max(90,12+avatarSize+ownerSpace+(nameHeight?nameHeight+5:0)+rowHeight+10);
+  return {W,H};
 }
 
 function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
@@ -7168,14 +6324,19 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     const itemDims = group.entries.map(entry =>
       petCardDimensions(entry.pet,genealogyData?.sims?.[entry.ownerId] || null)
     );
-    const W = viewMode === 'edit' ? PET_EDIT_DIMS.W : PET_VIEW_DIMS.W;
-    const rowHeights = Array.from({length:rows},(_,i) =>
-      Math.max(...itemDims.slice(i*3,i*3+3).map(dim => dim.H))
+    const colWidths=Array.from({length:cols},(_,col)=>
+      Math.max(...itemDims.filter((_,i)=>i%3===col).map(dim=>dim.W))
     );
-    const rowTops = rowHeights.map((_,i) =>
-      rowHeights.slice(0,i).reduce((sum,height)=>sum+height+PET_ROW_GAP,0)
+    const colLefts=colWidths.map((_,col)=>
+      colWidths.slice(0,col).reduce((sum,w)=>sum+w+PET_CARD_GAP,0)
     );
-    const groupW = cols*W+Math.max(0,cols-1)*PET_CARD_GAP;
+    const rowHeights=Array.from({length:rows},(_,i)=>
+      Math.max(...itemDims.slice(i*3,i*3+3).map(dim=>dim.H))
+    );
+    const rowTops=rowHeights.map((_,i)=>
+      rowHeights.slice(0,i).reduce((sum,h)=>sum+h+PET_ROW_GAP,0)
+    );
+    const groupW=colWidths.reduce((sum,w)=>sum+w,0)+Math.max(0,cols-1)*PET_CARD_GAP;
     const groupH = rowHeights.reduce((sum,height)=>sum+height,0)+
       Math.max(0,rows-1)*PET_ROW_GAP;
     const y = Math.max(0,group.anchorY);
@@ -7195,9 +6356,16 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     group.y = y;
     occupied.push({left:x,top:y,right:x+groupW,bottom:y+groupH});
     group.entries.forEach((entry,index) => {
-      const cardX = x+(index%3)*(W+PET_CARD_GAP);
+      const cardX=x+colLefts[index%3];
       const cardY = y+rowTops[Math.floor(index/3)];
-      cards.push({...entry,x:cardX,y:cardY,width:itemDims[index].W,height:itemDims[index].H});
+      // 寵物使用與人物相同的每家庭、每模式手動位置快照。
+      const manual = family?.freeLayout?.[viewMode]
+        ? family?.manualPositions?.[viewMode]?.['pet:' + entry.key] : null;
+      const finalX = manual && Number.isFinite(Number(manual.x)) ? Math.max(0,Number(manual.x)) : cardX;
+      const finalY = manual && Number.isFinite(Number(manual.y)) ? Math.max(0,Number(manual.y)) : cardY;
+      cards.push({...entry,x:finalX,y:finalY,width:itemDims[index].W,height:itemDims[index].H});
+      maxRight = Math.max(maxRight,finalX+itemDims[index].W);
+      maxBottom = Math.max(maxBottom,finalY+itemDims[index].H);
     });
     maxRight = Math.max(maxRight,x+groupW);
     maxBottom = Math.max(maxBottom,y+groupH);
@@ -7224,6 +6392,7 @@ function paintPetLayer() {
       const state = pet.status === '幽靈' ? 'ghost' : pet.status === '已故' ? 'dead' : '';
       const settings = getPetCardSettings();
       const fields = petCardFieldRows(pet,owner,settings);
+      const owners=settings.owners ? petCardOwners(pet) : [];
       const edit = viewMode === 'edit';
       const gender = settings.gender ? String(pet.gender || '').toLowerCase() : '';
       const male = ['男','公','male'].includes(gender);
@@ -7243,12 +6412,29 @@ function paintPetLayer() {
         }
         return `<span class="genealogy-pet-card-field${edit ? ' person-card-edit-meta' : ' person-card-view-meta'}" title="${esc(row.text)}">${esc(row.text)}</span>`;
       }).join('');
+      const ownerPortraits=owners.map(sim=>{
+        const label=displayDataText(sim.name,sim)||uiText('（未命名）');
+        // 沿用編輯寵物視窗的飼主圖片裁切及姓名兜底。
+        const image=petOwnerAvatarHTML(sim);
+        return '<span class="genealogy-pet-owner-avatar" title="'+esc(label)+'" aria-label="'+esc(uiText('飼主')+'：'+label)+'">'+image+'</span>';
+      });
+      const ownerRowSizes=petOwnerRowSizes(ownerPortraits.length);
+      let ownerIndex=0;
+      const ownerRows=ownerRowSizes.map(count=>{
+        const row='<span class="genealogy-pet-owner-row">'+ownerPortraits.slice(ownerIndex,ownerIndex+count).join('')+'</span>';
+        ownerIndex+=count;
+        return row;
+      }).join('');
+      const portraits='<span class="genealogy-pet-card-portraits" style="--pet-owner-space:'+petOwnerTopSpace(owners.length)+'px">'+
+        '<span class="genealogy-pet-card-avatar">'+petCardAvatarHTML(pet)+'</span>'+
+        (ownerRows?'<span class="genealogy-pet-card-owners" aria-label="'+esc(uiText('飼主'))+'">'+ownerRows+'</span>':'')+
+      '</span>';
       const cardMode = edit ? 'mode-edit' : 'mode-view';
       const appearanceClass = edit ? '' : ' card-appearance-' + (settings.appearance || 'minimal');
       const hasContent = settings.name || fields.length;
       return `<button type="button" class="genealogy-pet-card ${cardMode} ${state}${appearanceClass}${hasContent ? '' : ' pet-avatar-only'}" data-pet-id="${esc(card.key)}" title="${esc(name)}"
         style="left:${card.x+PAD}px;top:${card.y+PAD}px;width:${card.width}px;height:${card.height}px">
-        <span class="genealogy-pet-card-avatar">${petCardAvatarHTML(pet)}</span>
+        ${portraits}
         ${hasContent ? `<span class="genealogy-pet-card-info">
           ${settings.name ? `<span class="genealogy-pet-card-name">${esc(name)}${genderIcon}</span>` : ''}
           ${fieldHTML}
@@ -9437,8 +8623,7 @@ function createPartnerConnectionPath(a, b) {
 function derivePersonCardClassName(
   person,
   {
-    viewMode:isViewMode = false,
-    isInlaw = false
+    viewMode:isViewMode = false
   } = {}
 ) {
   const classes =
@@ -9474,12 +8659,6 @@ function derivePersonCardClassName(
     );
   }
 
-  if (isInlaw) {
-    classes.add(
-      'inlaw'
-    );
-  }
-
   return [
     ...classes
   ].join(' ');
@@ -9489,7 +8668,6 @@ function nodeRenderSignature(
   sim,
   {
     isView,
-    isInlaw,
     cardSettings,
     appearanceClass
   }
@@ -9509,9 +8687,6 @@ function nodeRenderSignature(
       isView
         ? 'view'
         : 'edit',
-
-    isInlaw:
-      !!isInlaw,
 
     appearanceClass:
       appearanceClass || '',
@@ -9544,8 +8719,6 @@ function nodeRenderSignature(
 }
 
 function paintPersonLayer() {
-  const fam = currentTreeFamily();
-  const memberSet = new Set(fam.memberIds);
   const {pos, byId, visibleIds} = layoutCache;
   const isView = viewMode === 'view';
   const cardSettings = isView ? getCardViewSettings() : getCardEditSettings();
@@ -9561,15 +8734,12 @@ function paintPersonLayer() {
       H:NODE_H
     } = getNodeDimensions(c);
 
-    const isInlaw = !memberSet.has(id);
-
     const dName = displayDataText(c.name, c);
     const dCareer = displayDataText(c.career, c);
     const dResidence = displayDataText(c.residence, c);
     const dAspiration = displayDataText(c.aspiration, c);
-    const dCause = displayDataText(c.causeOfDeath, c);
     const dTraits = (c.traits||[]).map(value => displayDataText(value, c));
-    const cls = derivePersonCardClassName(c, {viewMode:isView, isInlaw});
+    const cls = derivePersonCardClassName(c, {viewMode:isView});
     const dStage = uiText(c.lifeStage);
     const displayName =
       cardSettings.name
@@ -9588,7 +8758,6 @@ function paintPersonLayer() {
         c,
         {
           isView,
-          isInlaw,
           cardSettings,
           appearanceClass
         }
@@ -9608,7 +8777,7 @@ function paintPersonLayer() {
 
       return `<div class="${cls} mode-view ${appearanceClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-        <div class="person-card-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
+        ${personCardPortraitHTML(c,cardSettings,true)}
         ${model.name ? `<div class="person-card-view-name" title="${esc(model.name)}">${esc(model.name)}${genderIcon}</div>` : ''}
         ${model.primary.map(renderViewCardLine).join('')}
         ${model.details.map(renderViewCardLine).join('')}
@@ -9641,13 +8810,13 @@ function paintPersonLayer() {
     const configuredEditBody = cardSettingsHasBody(cardSettings);
     const editBody = configuredEditBody ? `<div class="person-card-body">
       ${cardSettings.name ? `<div class="person-card-name" title="${esc(displayName)}">${esc(displayName)}${genderIcon}</div>` : ''}
-      ${editRows.join('') || (cardSettings.name ? '' : `<div class="person-card-edit-meta">—</div>`)}
+      ${editRows.join('') || (cardSettings.name || (cardSettings.pets && (c.pets||[]).length) ? '' : `<div class="person-card-edit-meta">—</div>`)}
     </div>` : '';
     const avatarOnlyClass = configuredEditBody ? '' : ' card-avatar-only';
 
     return `<div class="${cls} mode-edit${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
       style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-      <div class="person-card-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
+      ${personCardPortraitHTML(c,cardSettings,false)}
       ${editBody}
     </div>`;
   }).join('');

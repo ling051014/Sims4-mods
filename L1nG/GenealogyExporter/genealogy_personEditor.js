@@ -61,6 +61,11 @@
     index:-1,
     avatar:null,
     avatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    gameAvatar:null,
+    gameAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    customAvatar:null,
+    customAvatarFrame:{ ...DEFAULT_AVATAR_FRAME },
+    avatarSource:'custom',
     traits:[]
   };
 
@@ -199,6 +204,8 @@
   }
 
   function resetPersonEditorDraftState() {
+    // 媒體分頁的寵物操作與家庭關係一致，每次重開人物編輯器均回到檢視模式。
+    $('petSection')?.classList.remove('is-editing');
     simEditorState.simId = null;
     simEditorState.avatar = null;
     simEditorState.avatarFrame = {
@@ -352,7 +359,7 @@ function personEditorPreferenceData(sim=currentSimEditorPerson()){
   };
 }
 
-function personEditorPreferenceCategory(item){
+function personEditorPreferenceCategory(item, sim=currentSimEditorPerson()){
   const category=item && item.category;
   if(!category || typeof category !== 'object'){
     return {
@@ -374,12 +381,12 @@ function personEditorPreferenceCategory(item){
         category.internalName ||
         '其他'
       ).trim() || '其他',
-      currentSimEditorPerson()
+      sim
     )
   };
 }
 
-function personEditorPreferenceName(item){
+function personEditorPreferenceName(item, sim=currentSimEditorPerson()){
   if(!item || typeof item !== 'object')return '';
 
   return displayDataText(
@@ -390,18 +397,18 @@ function personEditorPreferenceName(item){
       item.tuningId ||
       ''
     ).trim(),
-    currentSimEditorPerson()
+    sim
   );
 }
 
-function groupPersonEditorPreferences(items){
+function groupPersonEditorPreferences(items, sim=currentSimEditorPerson()){
   const groups=new Map();
 
   (items || []).forEach(item=>{
     if(!item || typeof item !== 'object')return;
 
     const category=
-      personEditorPreferenceCategory(item);
+      personEditorPreferenceCategory(item, sim);
 
     if(!groups.has(category.key)){
       groups.set(category.key,{
@@ -412,7 +419,7 @@ function groupPersonEditorPreferences(items){
     }
 
     const name=
-      personEditorPreferenceName(item);
+      personEditorPreferenceName(item, sim);
 
     if(!name)return;
 
@@ -432,10 +439,10 @@ function groupPersonEditorPreferences(items){
   return [...groups.values()];
 }
 
-function personEditorPreferenceRowMarkup(label,items){
+function personEditorPreferenceRowMarkup(label,items,kind){
   if(!items.length)return '';
 
-  return '<div class="game-preference-row">'+
+  return '<div class="game-preference-row is-'+(kind === 'dislike' ? 'dislike' : 'like')+'">'+
     '<span class="game-preference-row-label">'+
       esc(label)+
     '</span>'+
@@ -451,66 +458,36 @@ function personEditorPreferenceRowMarkup(label,items){
   '</div>';
 }
 
-function renderPersonEditorPreferences(tabName){
-  const isAttraction=
-    tabName === 'attraction';
-
-  const data=
-    personEditorPreferenceData();
-
-  const items=
-    isAttraction
-      ? data.attraction
-      : data.likesDislikes;
-
-  const list=$(
-    isAttraction
-      ? 'attractionPreferenceList'
-      : 'gamePreferenceList'
-  );
-
-  const empty=$(
-    isAttraction
-      ? 'attractionPreferenceEmpty'
-      : 'gamePreferenceEmpty'
-  );
-
+// 市民及寵物共用同一套唯讀偏好分組、標籤與空狀態規則。
+function renderEditorPreferenceList(sim, tabName, listId, emptyId){
+  const isAttraction=tabName === 'attraction';
+  const data=personEditorPreferenceData(sim);
+  const items=isAttraction ? data.attraction : data.likesDislikes;
+  const list=$(listId);
+  const empty=$(emptyId);
   if(!list || !empty)return;
 
-  const groups=
-    groupPersonEditorPreferences(items);
+  const groups=groupPersonEditorPreferences(items, sim);
+  list.innerHTML=groups.map(group=>{
+    const likeLabel=isAttraction ? '心動' : '喜歡';
+    const dislikeLabel=isAttraction ? '反感' : '討厭';
+    return '<section class="game-preference-category">'+
+      '<div class="game-preference-category-title">'+esc(group.label)+'</div>'+
+      personEditorPreferenceRowMarkup(likeLabel, group.likes, 'like')+
+      personEditorPreferenceRowMarkup(dislikeLabel, group.dislikes, 'dislike')+
+    '</section>';
+  }).join('');
+  empty.hidden=groups.length > 0;
+}
 
-  list.innerHTML=
-    groups
-      .map(group=>{
-        const likeLabel=
-          isAttraction
-            ? '心動'
-            : '喜歡';
-
-        const dislikeLabel=
-          isAttraction
-            ? '反感'
-            : '討厭';
-
-        return '<section class="game-preference-category">'+
-          '<div class="game-preference-category-title">'+
-            esc(group.label)+
-          '</div>'+
-          personEditorPreferenceRowMarkup(
-            likeLabel,
-            group.likes
-          )+
-          personEditorPreferenceRowMarkup(
-            dislikeLabel,
-            group.dislikes
-          )+
-        '</section>';
-      })
-      .join('');
-
-  empty.hidden=
-    groups.length > 0;
+function renderPersonEditorPreferences(tabName){
+  const isAttraction=tabName === 'attraction';
+  renderEditorPreferenceList(
+    currentSimEditorPerson(),
+    tabName,
+    isAttraction ? 'attractionPreferenceList' : 'gamePreferenceList',
+    isAttraction ? 'attractionPreferenceEmpty' : 'gamePreferenceEmpty'
+  );
 }
 
 function syncPersonEditorPreferenceTabs(sim){
@@ -2501,9 +2478,12 @@ function buildPersonEditorDraft({
 
   petEditorState.index = -1;
   petEditorState.avatar = null;
-  petEditorState.avatarFrame = {
-    ...DEFAULT_AVATAR_FRAME
-  };
+  petEditorState.avatarFrame = { ...DEFAULT_AVATAR_FRAME };
+  petEditorState.gameAvatar = null;
+  petEditorState.gameAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+  petEditorState.customAvatar = null;
+  petEditorState.customAvatarFrame = { ...DEFAULT_AVATAR_FRAME };
+  petEditorState.avatarSource = 'custom';
   petEditorState.traits = [];
 
   lifePhotoEditorDialog.classList.remove(
@@ -3958,6 +3938,8 @@ function commitPersonEditorDraft() {
       populateBirthdayDays:populatePersonEditorBirthdayDays,
       renderFamilyPreviews:renderPersonEditorFamilyPreviews,
       renderInfoPreviewIfActive:renderPersonEditorInfoPreviewIfActive,
+      preferenceData:personEditorPreferenceData,
+      renderPreferenceList:renderEditorPreferenceList,
       renderRelationshipList:renderPersonEditorRelationshipList,
       syncCauseOfDeathVisibility:syncPersonEditorCauseOfDeathVisibility
     });
