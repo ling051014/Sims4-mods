@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('genealogyFeedbackThreadState').textContent=item.status==='done'?'已完成':item.status==='spam'?'已結案':last?.author==='admin'?'管理員已回覆':last?.author==='player'?'等待管理員回覆':item.status==='progress'?'處理中':'尚未處理';
     $('genealogyFeedbackReplyForm').hidden=['done','spam'].includes(item.status);
     if(!$('genealogyFeedbackReplyForm').hidden&&!replyVerification&&core.isLive()){
-      core.createVerification($('genealogyFeedbackReplyVerify')).then(v=>{replyVerification=v;}).catch(e=>{
+      core.createVerification($('genealogyFeedbackReplyVerify'),{size:'flexible'}).then(v=>{replyVerification=v;}).catch(e=>{
         $('genealogyFeedbackReplyError').textContent=e.message;$('genealogyFeedbackReplyError').hidden=false;
       });
     }
@@ -682,7 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const row=document.createElement('li'),text=document.createElement('span');text.className='genealogy-feedback-file-text';
       const name=document.createElement('span');name.textContent=file.name;
       const size=document.createElement('small');size.textContent=Math.max(1,Math.round(file.size/1024))+' KB';
-      text.append(pin(),name,size);
+      if(file.type.startsWith('image/')){const img=document.createElement('img');img.className='feedback-reply-thumb';img.alt='附件縮圖';const url=URL.createObjectURL(file);img.src=url;img.addEventListener('load',()=>URL.revokeObjectURL(url),{once:true});img.addEventListener('error',()=>URL.revokeObjectURL(url),{once:true});text.append(img);}else text.append(pin());
+      text.append(name,size);
       const remove=document.createElement('button');remove.type='button';remove.textContent='移除';
       remove.onclick=()=>{replyFiles.splice(index,1);showReplyFiles();};
       row.append(text,remove);root.append(row);
@@ -693,6 +694,19 @@ document.addEventListener('DOMContentLoaded', () => {
     replyFiles.splice(0,replyFiles.length,...checked.files);showReplyFiles();e.target.value='';
     if(checked.errors.length){$('genealogyFeedbackReplyError').textContent=checked.errors.join('；');$('genealogyFeedbackReplyError').hidden=false;}
   });
+  const genealogyDrop=$('genealogyFeedbackReplyFiles').closest('.feedback-reply-drop-target');
+  if(genealogyDrop){
+    const clearDrag=()=>genealogyDrop.classList.remove('is-drag-over');
+    genealogyDrop.addEventListener('dragover',e=>{if(!e.dataTransfer?.types.includes('Files'))return;e.preventDefault();genealogyDrop.classList.add('is-drag-over');});
+    genealogyDrop.addEventListener('dragleave',e=>{if(!genealogyDrop.contains(e.relatedTarget))clearDrag();});
+    genealogyDrop.addEventListener('drop',e=>{
+      if(!e.dataTransfer?.files.length)return;e.preventDefault();clearDrag();
+      const checked=core.checkFiles(replyFiles,e.dataTransfer.files);
+      replyFiles.splice(0,replyFiles.length,...checked.files);showReplyFiles();
+      const err=$('genealogyFeedbackReplyError');err.hidden=!checked.errors.length;
+      if(checked.errors.length)err.textContent=checked.errors.join('；');
+    });
+  }
   $('genealogyFeedbackReplyForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const content=$('genealogyFeedbackReply').value.trim(),err=$('genealogyFeedbackReplyError');
