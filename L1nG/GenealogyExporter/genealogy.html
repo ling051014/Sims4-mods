@@ -869,6 +869,13 @@
                 <div class="pet-editor-content">
                     <section class="pet-editor-panel active" data-pet-editor-panel="basic" role="tabpanel">
                         <div class="pet-editor-layout pet-editor-detail-layout">
+                            <section class="pet-field-full family-rel-block" id="petOwnerField" hidden>
+                                <div class="family-rel-block-head"><span>飼主</span><button class="family-rel-manage" id="petOwnerEditToggle" type="button" aria-expanded="false">編輯</button></div>
+                                <div class="family-rel-preview" id="petOwnerPreview"><span class="family-rel-empty">—</span></div>
+                                <div class="family-rel-edit" id="petOwnerEditPanel" hidden>
+                                    <div class="ui-select-wrap" data-placeholder="新增飼主（可多選）" data-ui-select-for="petOwnerIds" data-ui-select-portal="true" data-ui-select-mode="add-only" data-ui-select-match-width="true" data-ui-select-columns="2"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="petOwnerIds" multiple></select>
+                                </div>
+                            </section>
                             <div class="pet-field-full pet-trait-field form-field trait-field">
                                 <span class="field-label-row form-field-title" id="petTraitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span>
                                 <div class="trait-editor">
@@ -879,13 +886,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <section class="pet-field-full family-rel-block" id="petOwnerField" hidden>
-                                <div class="family-rel-block-head"><span>飼主</span><button class="family-rel-manage" id="petOwnerEditToggle" type="button" aria-expanded="false">編輯</button></div>
-                                <div class="family-rel-preview" id="petOwnerPreview"><span class="family-rel-empty">—</span></div>
-                                <div class="family-rel-edit" id="petOwnerEditPanel" hidden>
-                                    <div class="ui-select-wrap" data-placeholder="新增飼主（可多選）" data-ui-select-for="petOwnerIds" data-ui-select-portal="true" data-ui-select-mode="add-only" data-ui-select-match-width="true" data-ui-select-columns="2"><div class="ui-select-input" tabindex="0"></div><div class="ui-select-dropdown" style="display:none"><input class="ui-select-search" placeholder="搜尋姓名……" type="text"><div class="ui-select-options"></div></div></div><select hidden id="petOwnerIds" multiple></select>
-                                </div>
-                            </section>
                             <div class="pet-field-full form-field pet-notes-field">
                                 <span class="form-field-title" id="pNotesLabel">備註</span>
                                 <textarea id="pNotes" rows="3" placeholder="補充想記錄的資訊或故事……" aria-labelledby="pNotesLabel"></textarea>
