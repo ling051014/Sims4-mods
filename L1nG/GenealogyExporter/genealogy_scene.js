@@ -182,15 +182,6 @@
         const mediaBits = [];
 
         if (
-          settings.pets &&
-          (sim.pets || []).length
-        ) {
-          mediaBits.push(
-            `${uiText('寵物')} ${(sim.pets || []).length}`
-          );
-        }
-
-        if (
           settings.gallery &&
           (sim.gallery || []).length
         ) {
@@ -1485,7 +1476,8 @@
           settings
         );
 
-      if (!model.hasText) return 100;
+      const petSpace=settings.pets ? stackedPortraitTopSpace((sim.pets||[]).length,4) : 0;
+      if (!model.hasText) return 100+petSpace;
 
       const innerWidth =
         VIEW_CARD_LAYOUT.width -
@@ -1494,7 +1486,8 @@
       let height =
         VIEW_CARD_LAYOUT.topPadding +
         VIEW_CARD_LAYOUT.avatarSize +
-        VIEW_CARD_LAYOUT.gap;
+        VIEW_CARD_LAYOUT.gap +
+        petSpace;
 
       if (model.name) {
         height +=
@@ -1688,6 +1681,12 @@
               )
             }
           : resolveDefaultCardDimensions();
+
+      if(viewMode==='edit' && sim) {
+        const settings=getCardEditSettings();
+        const extra=settings.pets ? stackedPortraitTopSpace((sim.pets||[]).length,4) : 0;
+        if(extra)dimensions.H+=extra;
+      }
 
       if (cacheKey) {
         nodeDimensionCache.set(
@@ -6163,18 +6162,40 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
   return rows;
 }
 
-// 飼主按每排最多三人平均分配：4=2+2、5=3+2、7=3+2+2。
-function petOwnerRowSizes(count) {
-  const rows=Math.ceil(count/3);
-  if(!rows)return [];
-  const base=Math.floor(count/rows);
-  const remainder=count%rows;
-  return Array.from({length:rows},(_,index)=>base+(index<remainder?1:0));
+// 從底排往上填滿：飼主每排最多 3 位，人物卡上的寵物每排最多 4 隻。
+function stackedPortraitRowSizes(count,maxPerRow) {
+  const total=Math.max(0,Math.floor(Number(count)||0));
+  const rows=Math.ceil(total/maxPerRow);
+  return Array.from({length:rows},(_,i)=>i===0 ? total-(rows-1)*maxPerRow : maxPerRow);
 }
-
-function petOwnerTopSpace(count) {
-  const rows=petOwnerRowSizes(count).length;
+function stackedPortraitTopSpace(count,maxPerRow) {
+  const rows=stackedPortraitRowSizes(count,maxPerRow).length;
   return rows ? 18+(rows-1)*19 : 0;
+}
+function petOwnerRowSizes(count) {
+  return stackedPortraitRowSizes(count,3);
+}
+function petOwnerTopSpace(count) {
+  return stackedPortraitTopSpace(count,3);
+}
+function personPetPortraits(sim,settings) {
+  if(!settings.pets || !Array.isArray(sim?.pets) || !sim.pets.length)return '';
+  const rows=stackedPortraitRowSizes(sim.pets.length,4);
+  let offset=0;
+  return '<span class="person-card-mini-pets" aria-label="'+esc(uiText('寵物'))+'">'+rows.map(size=>{
+    const avatars=sim.pets.slice(offset,offset+size).map(pet=>{
+      const label=displayDataText(pet.name,sim)||uiText('（未命名）');
+      return '<span class="person-card-mini-pet-avatar" role="img" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+petCardAvatarHTML(pet)+'</span>';
+    }).join('');
+    offset+=size;
+    return '<span class="genealogy-pet-owner-row">'+avatars+'</span>';
+  }).join('')+'</span>';
+}
+function personCardPortraitHTML(sim,settings,isView) {
+  const avatar='<div class="'+(isView?'person-card-view-avatar':'person-card-avatar')+'" data-line-anchor="avatar">'+avatarHTML(sim)+'</div>';
+  const pets=personPetPortraits(sim,settings);
+  if(!pets)return avatar;
+  return '<span class="person-card-portraits" style="--person-pet-space:'+stackedPortraitTopSpace(sim.pets.length,4)+'px">'+avatar+pets+'</span>';
 }
 
 function petCardDimensions(pet,owner) {
@@ -8756,7 +8777,7 @@ function paintPersonLayer() {
 
       return `<div class="${cls} mode-view ${appearanceClass}${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
         style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-        <div class="person-card-view-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
+        ${personCardPortraitHTML(c,cardSettings,true)}
         ${model.name ? `<div class="person-card-view-name" title="${esc(model.name)}">${esc(model.name)}${genderIcon}</div>` : ''}
         ${model.primary.map(renderViewCardLine).join('')}
         ${model.details.map(renderViewCardLine).join('')}
@@ -8789,13 +8810,13 @@ function paintPersonLayer() {
     const configuredEditBody = cardSettingsHasBody(cardSettings);
     const editBody = configuredEditBody ? `<div class="person-card-body">
       ${cardSettings.name ? `<div class="person-card-name" title="${esc(displayName)}">${esc(displayName)}${genderIcon}</div>` : ''}
-      ${editRows.join('') || (cardSettings.name ? '' : `<div class="person-card-edit-meta">—</div>`)}
+      ${editRows.join('') || (cardSettings.name || (cardSettings.pets && (c.pets||[]).length) ? '' : `<div class="person-card-edit-meta">—</div>`)}
     </div>` : '';
     const avatarOnlyClass = configuredEditBody ? '' : ' card-avatar-only';
 
     return `<div class="${cls} mode-edit${avatarOnlyClass}" data-id="${c.id}" data-render-key="${esc(renderKey)}" data-stage="${c.lifeStage}"
       style="left:${p.x+PAD}px;top:${p.y+PAD}px;width:${NODE_W}px;height:${NODE_H}px">
-      <div class="person-card-avatar" data-line-anchor="avatar">${avatarHTML(c)}</div>
+      ${personCardPortraitHTML(c,cardSettings,false)}
       ${editBody}
     </div>`;
   }).join('');
