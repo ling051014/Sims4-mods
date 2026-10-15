@@ -19,7 +19,17 @@
     const input={version: $('manual-version-wrap')?.hidden?$('module-version'):$('manual-version'),gameVersion:$('game-version'),contact:$('contact-value'),message:$('message-field')}[target];
     input?.classList.add('feedback-invalid');
   };
-  const show=(id)=>{for(const name of ['form-main','success-pane','thread-pane']){const el=$(name);el.classList.toggle('hide',id!==name);if(name==='form-main')el.style.display=id===name?'flex':'none';}};
+  const show=(id)=>{
+    const form=$('form-main');
+    if(form&&getComputedStyle(form).display!=='none'){
+      const height=Math.ceil(form.getBoundingClientRect().height);
+      if(height>0)$('thread-pane')?.style.setProperty('--realdate-form-height',Math.min(height,window.innerHeight-45)+'px');
+    }
+    for(const name of ['form-main','success-pane','thread-pane']){
+      const el=$(name);el.classList.toggle('hide',id!==name);
+      if(name==='form-main')el.style.display=id===name?'flex':'none';
+    }
+  };
   const describeFile=f=>f.name+' · '+Math.max(1,Math.round(f.size/1024))+' KB';
   const displayFiles=(list,node)=>{
     node.replaceChildren();
