@@ -298,7 +298,7 @@
     wrapper.className='conversation-message '+(player?'by-player':'by-admin');
     const label=document.createElement('span');
     label.className='conversation-label';
-    label.textContent=player?'你':'管理員';
+    label.textContent=player?'你':'L1nG';
     const bubble=document.createElement('div');
     bubble.className='conversation-bubble';
     bubble.textContent=body||'';
@@ -420,10 +420,7 @@
       syncNotice('每 60 秒自動更新，切回頁面會立即檢查。');
       startThreadRefresh();
       if(!['done','spam'].includes(current.status) && !replyVerifier && core.isLive()){
-        const container=document.createElement('div');
-        container.id='realdate-reply-turnstile';
-        const actions=$('visitor-reply-form')?.querySelector('.thread-compose-actions');
-        if(actions)actions.before(container);
+        const container=$('realdate-reply-turnstile');
         core.createVerification(container).then(v=>{replyVerifier=v;}).catch(err=>{
           $('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;
         });
@@ -464,11 +461,22 @@
   $('visitor-reply-form')?.addEventListener('submit',async e=>{
     e.preventDefault();
     const message=$('visitor-reply').value.trim();
-    if(!message||!activeReceipt){$('visitor-reply-error').textContent='請先輸入回覆內容。';$('visitor-reply-error').hidden=false;return;}
+    const error=$('visitor-reply-error');
+    if(!message||!activeReceipt){error.textContent='請先輸入回覆內容。';error.hidden=false;error.scrollIntoView({block:'nearest'});return;}
     const token=replyVerifier?.getToken();
-    if(!token){$('visitor-reply-error').textContent='請先完成下方的人機驗證。';$('visitor-reply-error').hidden=false;return;}
+    if(!token){error.textContent='請先完成安全驗證，再送出回覆。';error.hidden=false;error.scrollIntoView({block:'nearest'});return;}
+    const submit=$('visitor-reply-form').querySelector('button[type="submit"]');
+    if(submit.disabled)return;
+    submit.disabled=true;submit.classList.add('is-loading');error.hidden=true;
     try{await core.reply(activeReceipt,message,replyFiles,token);replyFiles=[];displayFiles(replyFiles,$('visitor-reply-selected'));$('visitor-reply').value='';replyVerifier?.reset();await openThread(activeReceipt);}
-    catch(err){$('visitor-reply-error').textContent=err.message;$('visitor-reply-error').hidden=false;replyVerifier?.reset();}
+    catch(err){error.textContent=err.message;error.hidden=false;error.scrollIntoView({block:'nearest'});replyVerifier?.reset();}
+    finally{submit.disabled=false;submit.classList.remove('is-loading');}
+  });
+  $('visitor-reply')?.addEventListener('keydown',event=>{
+    if(event.key!=='Enter'||event.shiftKey||event.ctrlKey||event.altKey||event.metaKey||event.repeat||event.isComposing||event.keyCode===229)return;
+    event.preventDefault();
+    const form=$('visitor-reply-form'),submit=form?.querySelector('button[type="submit"]');
+    if(form&&!submit?.disabled)form.requestSubmit();
   });
   // 示範管理入口與假資料不得在正式網站對外開啟。
   $('admin-screen')?.remove();
