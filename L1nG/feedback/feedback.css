@@ -106,9 +106,6 @@
 .thread-refresh-tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:11px;margin:5px 0 12px}
 .thread-refresh-tools .secondary{min-height:32px;padding:5px 11px;border-radius:8px;font-size:11px}
 .thread-refresh-tools .secondary:disabled{opacity:.55;cursor:wait}
-.thread-attachment-list{display:flex;flex-direction:column;gap:7px;margin:-3px 0 15px}
-.thread-attachment-list[hidden]{display:none}
-.thread-attachment-list .conversation-attachment{margin-top:0}
 /* RealDate 回饋：桌面把回覆說明放在標題旁，手機仍顯示「由你決定」和原下方提示。 */
 .reply-preference .reply-mobile-note{display:none}
 @media(max-width:720px){
@@ -349,7 +346,7 @@ body.realdate-only .upload-zone.appearance-background-upload small {
 
 /* RealDate：附件選取與匿名對話共用不帶外框的迴紋針列表；維持原站配色。 */
 .realdate-only .feedback-attachment-list,.realdate-only .file-list{display:flex;flex-direction:column;gap:7px}
-.realdate-only .feedback-attachment-row,.realdate-only .file-list .file-entry,.realdate-only .thread-attachment-list .conversation-attachment{
+.realdate-only .feedback-attachment-row,.realdate-only .file-list .file-entry,.realdate-only .conversation-message .conversation-attachment{
  display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;margin:0;padding:3px 0;border:0;border-radius:0;background:transparent;box-shadow:none;font-size:11px
 }
 .realdate-only .feedback-attachment-name{display:flex;align-items:center;gap:8px;min-width:0;flex:1}

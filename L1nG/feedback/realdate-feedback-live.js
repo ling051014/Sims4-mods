@@ -292,7 +292,7 @@
       year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false
     }).format(parsed)+'（'+offset+'）';
   }
-  function appendMessage(stack,author,body,time){
+  function appendMessage(stack,author,body,time,attachments=[]){
     const player=author!=='admin';
     const wrapper=document.createElement('div');
     wrapper.className='conversation-message '+(player?'by-player':'by-admin');
@@ -303,6 +303,21 @@
     bubble.className='conversation-bubble';
     bubble.textContent=body||'';
     wrapper.append(label,bubble);
+    for(const a of attachments){
+      const row=document.createElement('div');
+      row.className='conversation-attachment feedback-attachment-row';
+      const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      icon.setAttribute('viewBox','0 0 24 24');
+      icon.setAttribute('aria-hidden','true');
+      icon.classList.add('feedback-paperclip');
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5 5 0 0 1-8-7.5L13 3');
+      icon.append(path);
+      const name=document.createElement('span');name.textContent=a.name||'附件';
+      const size=document.createElement('small');size.textContent=Math.max(1,Math.round((a.size||0)/1024))+' KB';
+      row.append(icon,name,size);
+      wrapper.append(row);
+    }
     const formatted=formatMessageTime(time);
     if(formatted){
       const stamp=document.createElement('time');
@@ -319,32 +334,16 @@
     const nearEnd=body.scrollHeight-body.scrollTop-body.clientHeight<90;
     const oldPosition=body.scrollTop;
     stack.replaceChildren();
-    appendMessage(stack,'player',item.message,item.createdAt);
-    for(const msg of item.messages||[])appendMessage(stack,msg.author,msg.body,msg.created_at||msg.createdAt);
-    // API 目前回傳附件清單，但沒有將附件 ID 配對到每則回覆；因此單獨列示，不虛構歸屬。
-    const files=$('thread-attachment-list');
-    if(files){
-      files.replaceChildren();
-      const attachments=item.attachments||[];
-      files.hidden=!attachments.length;
-      for(const a of attachments){
-        const row=document.createElement('div');
-        row.className='conversation-attachment feedback-attachment-row';
-        const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');
-        icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');icon.classList.add('feedback-paperclip');
-        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-        path.setAttribute('d','m8.5 12.5 6.5-6.5a3.5 3.5 0 0 1 5 5l-9.5 9.5a5.5 5.5 0 0 1-8-7.5L13 3');icon.append(path);
-        const name=document.createElement('span');name.textContent=a.name||'附件';
-        const size=document.createElement('small');size.textContent=Math.max(1,Math.round((a.size||0)/1024))+' KB';
-        row.append(icon,name,size);files.append(row);
-      }
-    }
+    const attachments=item.attachments||[];
+    appendMessage(stack,'player',item.message,item.createdAt,attachments.filter(a=>a.replyId==null));
+    for(const msg of item.messages||[])appendMessage(stack,msg.author,msg.body,msg.created_at||msg.createdAt,
+      attachments.filter(a=>a.replyId===msg.id));
     body.scrollTop=nearEnd?body.scrollHeight:oldPosition;
   }
   function threadVersion(item){
     return JSON.stringify([item.id,item.status,item.updatedAt,item.message,
       (item.messages||[]).map(x=>[x.id,x.author,x.body,x.created_at]),
-      (item.attachments||[]).map(x=>[x.id,x.name])]);
+      (item.attachments||[]).map(x=>[x.id,x.name,x.replyId])]);
   }
   function updateThread(item){
     const fingerprint=threadVersion(item);

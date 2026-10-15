@@ -6,9 +6,9 @@
         <title>L1nG 模擬市民族譜工具</title>
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261012-extractor-inline-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261015-stacked-pets-cover-r1">
+        <link rel="stylesheet" href="genealogy.css?v=20261016-feedback-success-r1">
         <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
-        <script src="genealogy-feedback.js?v=20261013-exporter-version-select-r2" defer></script>
+        <script src="genealogy-feedback.js?v=20261016-feedback-success-replies-r1" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261014-title-info-r2">
         <script src="../site-info-modal.js?v=20261015-cookie-preferences-r4" defer></script>
     </head>
@@ -176,11 +176,18 @@
                                 </form>
                                 <p class="genealogy-feedback-history-status" id="genealogyFeedbackHistoryStatus" role="status" hidden></p>
                                 <div class="genealogy-feedback-success" id="genealogyFeedbackSuccess" hidden>
+                                    <div class="genealogy-feedback-success-bubble" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg>
+                                    </div>
+                                    <span class="genealogy-feedback-success-pill">回饋已建立</span>
                                     <h3>已收到你的回饋！</h3>
                                     <p id="genealogyFeedbackSuccessCode"></p>
                                     <p id="genealogyFeedbackSuccessDescription"></p>
                                     <div class="genealogy-feedback-credential" id="genealogyFeedbackCredential" hidden>
-                                        <strong>你的私人回饋憑證</strong>
+                                        <div class="genealogy-feedback-credential-heading">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                                            <strong>你的私人回饋憑證</strong>
+                                        </div>
                                         <button class="genealogy-feedback-copy-credential" id="genealogyFeedbackCopyCredential" type="button" aria-label="複製回饋憑證">
                                             <code id="genealogyFeedbackSuccessToken"></code>
                                             <svg class="l1ng-copy-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -189,11 +196,11 @@
                                                 <path class="l1ng-check-stroke" d="M5 12.5l4.2 4.2L19 7" stroke-dasharray="19.728 70" style="--stroke-hide:21.728"></path>
                                             </svg>
                                         </button>
-                                        <small>請妥善保存。私人憑證相當於密碼，請勿公開。</small>
+                                        <small>請妥善保存。回饋編號本身無法開啟對話；私人憑證則相當於密碼，請勿公開。</small>
                                     </div>
                                     <div class="genealogy-feedback-success-actions">
                                         <button class="genealogy-feedback-secondary" id="genealogyFeedbackSuccessNew" type="button">再寫一則</button>
-                                        <button class="genealogy-feedback-submit" id="genealogyFeedbackSuccessOpen" type="button" hidden>查看匿名對話</button>
+                                        <button class="genealogy-feedback-submit" id="genealogyFeedbackSuccessOpen" type="button" hidden>查看匿名對話 <svg class="genealogy-feedback-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
                                     </div>
                                 </div>
                                 <div class="genealogy-feedback-thread" id="genealogyFeedbackThread" hidden>

@@ -116,13 +116,13 @@ const formatFeedback = (row,messages=[],attachments=[],admin=false) => ({
   status:row.status,createdAt:row.created_at,updatedAt:row.updated_at,
   version:row.version,gameVersion:row.game_version,
   ...(admin?{contact:row.contact_value?{method:row.contact_method,value:row.contact_value}:null}:{}),
-  messages,attachments:attachments.map(a=>({id:a.id,name:a.name,type:a.content_type,size:a.size}))
+  messages,attachments:attachments.map(a=>({id:a.id,replyId:a.reply_id??null,name:a.name,type:a.content_type,size:a.size}))
 });
 async function readRecord(env,id){
   const row=await env.DB.prepare("SELECT * FROM feedback WHERE id=?").bind(id).first();
   if(!row) return null;
   const messages=(await env.DB.prepare("SELECT id,author,body,created_at FROM replies WHERE feedback_id=? ORDER BY created_at ASC,id ASC").bind(id).all()).results;
-  const attachments=(await env.DB.prepare("SELECT id,name,content_type,size FROM attachments WHERE feedback_id=? ORDER BY created_at ASC").bind(id).all()).results;
+  const attachments=(await env.DB.prepare("SELECT id,reply_id,name,content_type,size FROM attachments WHERE feedback_id=? ORDER BY created_at ASC,id ASC").bind(id).all()).results;
   return {row,messages,attachments};
 }
 async function verifiedReceipt(env,value){

@@ -544,6 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $('genealogyFeedbackHistoryIntro').hidden=true;
       $('genealogyFeedbackThread').hidden=true;
       historyForm.hidden=true;
+      $('genealogyFeedbackHistoryPanel').classList.add('is-success');
       lastReceipt=result.receipt||'';
       if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
@@ -595,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('genealogyFeedbackThreadId').textContent=item.id;
     $('genealogyFeedbackThreadTime').textContent=dateText(item.createdAt);
     const list=$('genealogyFeedbackMessages');list.replaceChildren();
-    const messages=[{author:'player',body:item.message,created_at:item.createdAt},...(item.messages||[])];
+    const messages=[{id:null,author:'player',body:item.message,created_at:item.createdAt},...(item.messages||[])];
     messages.forEach((msg,index)=>{
       const row=document.createElement('div'),player=msg.author!=='admin';
       row.className='genealogy-feedback-conversation-message'+(player?' is-player':'');
@@ -603,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const bubble=document.createElement('div');bubble.className='genealogy-feedback-conversation-bubble';bubble.textContent=msg.body||'';
       const stamp=document.createElement('span');stamp.textContent=dateText(msg.created_at||msg.createdAt);
       row.append(by,bubble,stamp);
-      if(index===0)renderAttachments(row,item.attachments||[]);
+      renderAttachments(row,(item.attachments||[]).filter(file=>(file.replyId??null)===(msg.id??null)));
       list.append(row);
     });
     const last=(item.messages||[]).at(-1);
@@ -622,6 +623,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try{
       const response=await core.lookup(receipt);
       activeReceipt=receipt;rememberReceipt(receipt);receiptInput.value=receipt;
+      $('genealogyFeedbackHistoryPanel').classList.remove('is-success');
       $('genealogyFeedbackSuccess').hidden=true;historyForm.hidden=true;
       $('genealogyFeedbackHistoryIntro').hidden=true;
       $('genealogyFeedbackThread').hidden=false;
@@ -648,6 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function showHistory(){
     stopPolling();activeReceipt='';
+    $('genealogyFeedbackHistoryPanel').classList.remove('is-success');
     $('genealogyFeedbackSuccess').hidden=true;$('genealogyFeedbackThread').hidden=true;
     $('genealogyFeedbackHistoryIntro').hidden=false;
     historyForm.hidden=false;

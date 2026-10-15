@@ -61,3 +61,7 @@ body.admin-only{min-height:100dvh}
  .admin-only .admin-preview-actions .secondary,.admin-only .admin-preview-download{padding:5px 7px;font-size:11px;min-width:30px}
  .admin-only .admin-preview-content{padding:10px}
 }
+
+/* 附件與所屬訊息一起排列；維持原有預覽、縮圖及下載行為。 */
+.admin-only .detail-body .conversation-message .detail-file{width:100%;max-width:100%;min-width:0;margin-top:3px}
+.admin-only .detail-body .conversation-message .detail-file-info{min-width:0}
