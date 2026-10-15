@@ -6163,11 +6163,25 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
   return rows;
 }
 
+// 飼主按每排最多三人平均分配：4=2+2、5=3+2、7=3+2+2。
+function petOwnerRowSizes(count) {
+  const rows=Math.ceil(count/3);
+  return Array.from({length:rows},(_,index)=>
+    Math.ceil((count-index*Math.ceil(count/rows))/(rows-index))
+  );
+}
+
+function petOwnerTopSpace(count) {
+  const rows=petOwnerRowSizes(count).length;
+  return rows ? 18+(rows-1)*19 : 0;
+}
+
 function petCardDimensions(pet,owner) {
   const settings=getPetCardSettings();
   const rows=petCardFieldRows(pet,owner,settings);
   const edit=viewMode==='edit';
-  // 飼主的 24px 圓形肖像只疊在寵物肖像角落，不改變卡片的幾何尺寸。
+  // 飼主在寵物頭像頂端置中，僅增加必要的垂直高度，不增加卡片寬度。
+  const ownerSpace=settings.owners ? petOwnerTopSpace(petCardOwners(pet).length) : 0;
   const avatarSize=edit ? 51 : 61;
   const W=edit?PET_EDIT_DIMS.W:PET_VIEW_DIMS.W;
   const textWidth=edit?Math.max(94,W-avatarSize-40):W-18;
@@ -6189,8 +6203,8 @@ function petCardDimensions(pet,owner) {
     }
     return sum+lines(row.text)*14+3;
   },0);
-  const H=edit?Math.max(PET_EDIT_DIMS.H,20+Math.max(avatarSize,nameHeight+rowHeight+4))
-    :Math.max(90,12+avatarSize+(nameHeight?nameHeight+5:0)+rowHeight+10);
+  const H=edit?Math.max(PET_EDIT_DIMS.H,20+Math.max(avatarSize+ownerSpace,nameHeight+rowHeight+4))
+    :Math.max(90,12+avatarSize+ownerSpace+(nameHeight?nameHeight+5:0)+rowHeight+10);
   return {W,H};
 }
 
@@ -6378,13 +6392,20 @@ function paintPetLayer() {
       }).join('');
       const ownerPortraits=owners.map(sim=>{
         const label=displayDataText(sim.name,sim)||uiText('（未命名）');
-        // 直接共用「編輯寵物 > 飼主」的肖像來源、裁切方式及姓名首字兜底。
+        // 沿用編輯寵物視窗的飼主圖片裁切及姓名兜底。
         const image=petOwnerAvatarHTML(sim);
         return '<span class="genealogy-pet-owner-avatar" title="'+esc(label)+'" aria-label="'+esc(uiText('飼主')+'：'+label)+'">'+image+'</span>';
+      });
+      const ownerRowSizes=petOwnerRowSizes(ownerPortraits.length);
+      let ownerIndex=0;
+      const ownerRows=ownerRowSizes.map(count=>{
+        const row='<span class="genealogy-pet-owner-row">'+ownerPortraits.slice(ownerIndex,ownerIndex+count).join('')+'</span>';
+        ownerIndex+=count;
+        return row;
       }).join('');
-      const portraits='<span class="genealogy-pet-card-portraits">'+
+      const portraits='<span class="genealogy-pet-card-portraits" style="--pet-owner-space:'+petOwnerTopSpace(owners.length)+'px">'+
         '<span class="genealogy-pet-card-avatar">'+petCardAvatarHTML(pet)+'</span>'+
-        (ownerPortraits?'<span class="genealogy-pet-card-owners" aria-label="'+esc(uiText('飼主'))+'">'+ownerPortraits+'</span>':'')+
+        (ownerRows?'<span class="genealogy-pet-card-owners" aria-label="'+esc(uiText('飼主'))+'">'+ownerRows+'</span>':'')+
       '</span>';
       const cardMode = edit ? 'mode-edit' : 'mode-view';
       const appearanceClass = edit ? '' : ' card-appearance-' + (settings.appearance || 'minimal');
