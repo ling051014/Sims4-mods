@@ -370,20 +370,13 @@
         avatarFrame:normalizeAvatarFrame(pet.avatarFrame)
       };
 
-      // 將舊版單一頭像保留在正確來源；舊版手動覆寫不能被當作遊戲頭像。
-      const original = pet.avatar || null;
-      const manual = manualOverrideValues(pet).includes('avatar');
-      const imported = isGameImportedRecord(pet);
-      normalized.gameAvatar = pet.gameAvatar ||
-        (original && imported && !manual && !pet.customAvatar ? original : null);
-      normalized.customAvatar = pet.customAvatar ||
-        (original && (!imported || manual) && !pet.gameAvatar ? original : null);
+      // 遊戲與自訂頭像以現行雙來源欄位為準，顯示頭像由 avatarSource 衍生。
+      normalized.gameAvatar = pet.gameAvatar || null;
+      normalized.customAvatar = pet.customAvatar || null;
       normalized.gameAvatarFrame = normalized.gameAvatar
-        ? normalizeAvatarFrame(pet.gameAvatarFrame ||
-            (original === normalized.gameAvatar ? pet.avatarFrame : null)) : null;
+        ? normalizeAvatarFrame(pet.gameAvatarFrame) : null;
       normalized.customAvatarFrame = normalized.customAvatar
-        ? normalizeAvatarFrame(pet.customAvatarFrame ||
-            (original === normalized.customAvatar ? pet.avatarFrame : null)) : null;
+        ? normalizeAvatarFrame(pet.customAvatarFrame) : null;
       let chosen = pet.avatarSource === 'game' ? 'game'
         : pet.avatarSource === 'custom' ? 'custom'
         : normalized.customAvatar ? 'custom'
@@ -455,17 +448,6 @@
 
       settings.avatar = true;
 
-      if (
-        typeof settings.genderBar ===
-        'boolean'
-      ) {
-        settings.gender =
-          !!settings.gender ||
-          settings.genderBar;
-
-        delete settings.genderBar;
-      }
-
       cardSettingFields.forEach(field => {
         if (typeof settings[field] !== 'boolean') {
           settings[field] = !!defaults[field];
@@ -500,16 +482,6 @@
       const settings =
         current && typeof current === 'object' && !Array.isArray(current)
           ? current : {};
-      // 僅將與上一版預設完全相同的舊設定遷移到新的檢視預設；
-      // 玩家手動勾選過的欄位仍沿用保存值。
-      if (mode === 'view' &&
-          ['name','species','breed','gender','ageStage','status','traits','owners']
-            .every(field => settings[field] === ({
-              name:true,species:true,breed:true,gender:true,
-              ageStage:false,status:false,traits:false,owners:true
-            })[field])) {
-        settings.breed = !!defaults.breed;
-      }
       settings.avatar = true;
       petCardFields.forEach(field => {
         if (typeof settings[field] !== 'boolean') settings[field] = !!defaults[field];
@@ -519,29 +491,6 @@
           ? String(defaults.appearance) : 'minimal';
       }
       return settings;
-    }
-
-    // 沿用舊預設的存檔自動啟用「寵物」；玩家自訂的欄位設定不覆蓋。
-    // 記錄升級版本，避免玩家之後取消勾選又被自動開啟。
-    function migrateDefaultPersonPetFields(meta) {
-      if (meta.personCardPetDefaultsVersion === 1) return;
-      const oldView = {
-        name:true,gender:true,lifeStage:false,age:false,birthday:false,
-        status:true,race:false,career:false,residence:false,aspiration:false,
-        traits:false,gallery:false
-      };
-      const oldEdit = {
-        name:true,gender:true,lifeStage:true,age:true,birthday:true,
-        status:false,race:false,career:false,residence:true,aspiration:false,
-        traits:true,gallery:false
-      };
-      const matchesOldDefault = (settings,expected,mode) =>
-        settings?.pets === false &&
-        Object.entries(expected).every(([key,value])=>settings[key]===value) &&
-        (mode !== 'view' || settings.appearance === 'minimal');
-      if(matchesOldDefault(meta.cardView,oldView,'view'))meta.cardView.pets=true;
-      if(matchesOldDefault(meta.cardEdit,oldEdit,'edit'))meta.cardEdit.pets=true;
-      meta.personCardPetDefaultsVersion=1;
     }
 
     function ensureCardSettings(current) {
@@ -564,8 +513,6 @@
           'edit',
           current.meta.cardEdit
         );
-
-      migrateDefaultPersonPetFields(current.meta);
 
       current.meta.petCardView = normalizePetCardSettings('view',current.meta.petCardView);
       current.meta.petCardEdit = normalizePetCardSettings('edit',current.meta.petCardEdit);
