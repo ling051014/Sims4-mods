@@ -9471,10 +9471,22 @@ button.danger-action:focus-visible {
 /* 與人物卡一致：檢視直向、編輯橫向，寵物資訊各自適配。 */
 .genealogy-pet-card-info { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; min-width:0; width:100%; text-align:center; }
 .genealogy-pet-card.mode-view .genealogy-pet-card-avatar { width:61px; height:61px; align-self:center; }
+.genealogy-pet-card-portraits { display:flex; align-items:center; justify-content:center; gap:5px; flex:0 0 auto; max-width:100%; }
+.genealogy-pet-card-owners { display:grid; grid-template-columns:repeat(2,auto); justify-content:start; align-content:center; gap:4px; }
+.genealogy-pet-owner-avatar {
+  display:flex; align-items:center; justify-content:center; width:61px; height:61px; flex:0 0 61px;
+  border:1px solid var(--border-default); border-radius:9px; overflow:hidden;
+  background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
+  color:var(--avatar-text); box-sizing:border-box;
+}
+.genealogy-pet-owner-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.genealogy-pet-card.mode-edit .genealogy-pet-owner-avatar { width:51px; height:51px; flex-basis:51px; }
+.genealogy-pet-card.mode-view .genealogy-pet-card-portraits { align-self:center; }
 .genealogy-pet-card.mode-view .genealogy-pet-card-info { align-items:center; text-align:center; }
 .genealogy-pet-card.mode-edit { flex-direction:row; align-items:center; justify-content:flex-start; gap:10px; padding:10px; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-info { align-items:flex-start; text-align:left; gap:3px; flex:1; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-avatar { width:51px; height:51px; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-portraits { align-self:center; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name,
 .genealogy-pet-card.mode-edit .genealogy-pet-card-field { text-align:left; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name { font-size:12px; }
