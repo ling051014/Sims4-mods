@@ -1151,6 +1151,9 @@
     "問題反饋": "Feedback",
     "關於族譜工具": "About Genealogy Tool",
     "新增其他關係": "Add Other Relationship",
-    "選擇目標市民（可多選）": "Select Target Sims (multiple allowed)"
+    "選擇目標市民（可多選）": "Select Target Sims (multiple allowed)",
+    "這隻寵物尚未設定喜好與厭惡。": "This pet has no likes or dislikes set.",
+    "這隻寵物尚未設定吸引力偏好。": "This pet has no attraction preferences set.",
+    "寵物編輯分類": "Pet editor categories"
   }
 }
