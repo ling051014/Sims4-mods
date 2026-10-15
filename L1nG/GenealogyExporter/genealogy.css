@@ -899,12 +899,7 @@ input[type="range"]:disabled {
     /* 最小寬度 */ min-width: 8px;
 }
 
-.topbar-right {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 6px;
-    /* 彈性收縮 */ flex-shrink: 0;
-}
+
 
 /* ========【主版面】 設定 - 側邊欄與族譜工作區 ======== */
 
@@ -2177,7 +2172,16 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 不超出可用空間 */ min-width: 0;
 }
 
+
+
 .other-rel-type-trigger {
+    /* 關係類型欄位保持足夠可讀寬度 */ min-width: 92px;
+    /* 內容與箭頭並排 */ display: inline-flex;
+    /* 垂直置中 */ align-items: center;
+    /* 內縮 */ padding: 2px 6px 2px 8px;
+    /* 項目間距 */ gap: 6px;
+    /* 文字靠左 */ text-align: left;
+
     /* 既有關係編輯控制維持列內小型尺寸 */ min-height: 24px;
     /* 固定列內高度 */ height: 24px;
     /* 邊框 */ border: 1px solid var(--border-default);
@@ -2187,15 +2191,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 字體 */ font: inherit;
     /* 字級 */ font-size: 10.5px;
     /* 滑鼠指標 */ cursor: pointer;
-}
-
-.other-rel-type-trigger {
-    /* 關係類型欄位保持足夠可讀寬度 */ min-width: 92px;
-    /* 內容與箭頭並排 */ display: inline-flex;
-    /* 垂直置中 */ align-items: center;
-    /* 內縮 */ padding: 2px 6px 2px 8px;
-    /* 項目間距 */ gap: 6px;
-    /* 文字靠左 */ text-align: left;
 }
 
 .other-rel-type-trigger:hover,
@@ -2589,25 +2584,13 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 網格欄位範圍 */ grid-column: 1/-1;
 }
 
-.grid label.span-3,
-.grid .form-field.span-3 {
-    /* 網格欄位範圍 */ grid-column: span 3;
-}
 
-.grid label.span-4,
-.grid .form-field.span-4 {
-    /* 網格欄位範圍 */ grid-column: span 4;
-}
 
-.grid label.span-6,
-.grid .form-field.span-6 {
-    /* 網格欄位範圍 */ grid-column: span 6;
-}
 
-.grid label.span-8,
-.grid .form-field.span-8 {
-    /* 網格欄位範圍 */ grid-column: span 8;
-}
+
+
+
+
 
 .grid input,
 .grid select,
@@ -2633,12 +2616,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 調整尺寸 */ resize: vertical;
 }
 
-.grid .hint-below {
-    /* 字體大小 */ font-size: 10.5px;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 透明度 */ opacity: .75;
-    /* 上方外距 */ margin-top: 1px;
-}
+
 
 .ui-select-wrap {
     /* 定位方式 */ position: relative;
@@ -2853,11 +2831,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 字體大小 */ font-size: 12px;
 }
 
-.avatar-row {
-    /* 顯示方式 */ display: flex;
-    /* 項目間距 */ gap: 12px;
-    /* 垂直對齊 */ align-items: flex-start;
-}
+
 
 .avatar-preview {
     /* 元素寬度 */ width: 80px;
@@ -3379,9 +3353,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     font-weight:600;
 }
 
-.custom-color-input{
-    flex:0 0 44px;
-}
+
 
 .appearance-custom-theme-preview{
     height:48px;
@@ -4129,9 +4101,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     opacity:1;
 }
 
-.genealogy-feedback-select-wrap {
-    position:relative;
-}
+
 
 /* 保留原生 select 作資料來源，但只顯示族譜已存在的自訂下拉；避免兩個欄位重疊。 */
 .genealogy-feedback-panel select.genealogy-feedback-field.ui-control-source {
@@ -5818,17 +5788,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 圓角弧度 */ border-radius: 10px;
 }
 
-.sim-editor-paper-back {
-    /* 背紙寬度直接跟隨實際編輯頁，不受 560px 預覽寬度影響 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
-    /* 背紙高度直接跟隨實際編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
-    /* 幾何尺寸由編輯頁量測值決定 */ max-height: none;
-}
 
-.sim-editor-preview-sheet {
-    /* 尚未翻頁時，這張紙也要與編輯頁完全同寬，才會形成真正的同尺寸紙張堆疊 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
-    /* 高度同樣跟隨編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
-    /* 尺寸由編輯頁量測值決定 */ max-height: none;
-}
+
+
 
 #simEditorDialog.sheet-ready .sim-editor-paper-back,
 #simEditorDialog.sheet-ready .sim-editor-preview-sheet {
@@ -5844,6 +5806,10 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 不接收操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 12px 30px rgba(31,35,40,.08);
     /* 動畫過渡；翻到預覽時寬度與前景一起收斂 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease;
+
+    /* 背紙寬度直接跟隨實際編輯頁，不受 560px 預覽寬度影響 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
+    /* 背紙高度直接跟隨實際編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
+    /* 幾何尺寸由編輯頁量測值決定 */ max-height: none;
 }
 
 .sim-editor-preview-sheet {
@@ -5859,6 +5825,10 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 預設不可操作 */ pointer-events: none;
     /* 陰影設定 */ box-shadow: 0 14px 36px rgba(31,35,40,.11);
     /* 寬度、位移與透明度同步收尾；層級只在翻頁結束時切換 */ transition: width .38s cubic-bezier(.2,.75,.25,1),transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease,z-index 0s linear var(--sim-editor-layer-delay);
+
+    /* 尚未翻頁時，這張紙也要與編輯頁完全同寬，才會形成真正的同尺寸紙張堆疊 */ width: var(--sim-editor-sheet-width,min(790px,calc(100vw - 40px)));
+    /* 高度同樣跟隨編輯頁 */ height: var(--sim-editor-sheet-height,min(680px,92vh));
+    /* 尺寸由編輯頁量測值決定 */ max-height: none;
 }
 
 /* 預覽內容也要跟著紙張過渡；返回編輯時不會在動畫未完成前突然消失。 */
@@ -9545,7 +9515,7 @@ button.danger-action:focus-visible {
 .genealogy-pet-card.mode-edit .genealogy-pet-card-portraits { align-self:center; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-name,
 .genealogy-pet-card.mode-edit .genealogy-pet-card-field { text-align:left; }
-.genealogy-pet-card.mode-edit .genealogy-pet-card-name { font-size:12px; }
+
 .genealogy-pet-card.mode-edit .genealogy-pet-card-traits.person-card-tags {
   width:100%; max-height:none; overflow:visible; margin-top:1px;
   display:flex; flex-wrap:wrap; gap:3px; align-items:flex-start;
@@ -9555,7 +9525,8 @@ button.danger-action:focus-visible {
   text-overflow:clip; min-height:16px;
 }
 .genealogy-pet-card .person-card-gender-icon { flex:0 0 auto; }
-.genealogy-pet-card.mode-edit .genealogy-pet-card-name { display:flex; align-items:center; gap:2px; }
+.genealogy-pet-card.mode-edit .genealogy-pet-card-name { display:flex; align-items:center; gap:2px; 
+ font-size:12px; }
 .genealogy-pet-card.mode-view .genealogy-pet-card-name { text-align:center; }
 .genealogy-pet-card.mode-view .genealogy-pet-card-field.person-card-view-meta { justify-content:center; text-align:center; }
 .genealogy-pet-card.mode-edit .genealogy-pet-card-field.person-card-edit-meta { justify-content:flex-start; text-align:left; min-height:0; }
@@ -9649,8 +9620,8 @@ button.danger-action:focus-visible {
 .l1ng-search-clear::before {content:"";display:block;width:13px;height:13px;background:currentColor;-webkit-mask:url("../../html%20icons/ui-clear.svg") center/contain no-repeat;mask:url("../../html%20icons/ui-clear.svg") center/contain no-repeat}
 .l1ng-search-clear:hover,.l1ng-search-clear:focus-visible {background:var(--surface-item-hover);color:var(--text-primary)}
 .l1ng-search-clear:focus-visible {outline:2px solid var(--action-primary);outline-offset:1px}
-.l1ng-search-control > .ui-select-search {margin-bottom:0}
-.ui-select-dropdown > .l1ng-search-control {display:block;width:100%;margin-bottom:4px}
+
+
 .relationship-type-search + .l1ng-search-clear {z-index:1}
 .l1ng-search-clear[hidden] {display:none}
 @media(pointer:coarse){.l1ng-search-clear{width:40px;height:40px;right:0}.l1ng-search-control > input{padding-right:43px}}
@@ -9702,12 +9673,14 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, body *::-webkit-sc
     flex: 0 0 auto;
     min-height: 0;
     color: var(--nav-dropdown-text);
-}
+
+display:block;width:100%;margin-bottom:4px}
 .l1ng-search-control > .ui-select-search {
     display: block;
     width: 100%;
     box-sizing: border-box;
-}
+
+margin-bottom:0}
 @media (pointer:coarse) {
     .relationship-type-menu > .l1ng-search-control > .relationship-type-search {
         padding-right: 45px;
@@ -9715,6 +9688,7 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, body *::-webkit-sc
 }
 
 /* ========【顏色選擇器色塊】 設定 - 僅統一色塊外觀，保留原生選色功能 ======== */
+.custom-color-input { flex:0 0 44px; }
 .custom-color-input,
 .relationship-editor-color input[type="color"] {
     -webkit-appearance: none;
