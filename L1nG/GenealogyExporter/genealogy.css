@@ -2,9 +2,9 @@
     /* 尺寸計算 */ box-sizing: border-box;
 }
 
-/* ========【主題系統】 設定 - 五套正式主題與自訂漸層共用完整 Token ======== */
+/* ========【主題系統】 五套正式主題與自訂漸層共用完整 Token ======== */
 
-/* ========【Genealogy Design Tokens】 設定 - 品牌 / 介面 / 人物狀態 / 關係線使用語意化 Token ======== */
+/* ========【Genealogy Design Tokens】 品牌 / 介面 / 人物狀態 / 關係線使用語意化 Token ======== */
 :root,
 body[data-theme="ling"] {
     /* 漸層起始色 */ --brand-gradient-start: #ffffff;
@@ -616,7 +616,7 @@ body[data-topbar-contrast="dark"] {
     /* 頂欄欄位懸停 */ --navigation-control-hover: rgba(255,255,255,.36);
 }
 
-/* ========【全站基礎】 設定 - 頁面尺寸、字型與通用元件 ======== */
+/* ========【全站基礎】 頁面尺寸、字型與通用元件 ======== */
 
 html,
 body {
@@ -673,7 +673,7 @@ input:disabled,
     /* 停用控制項使用禁止操作游標 */ cursor: not-allowed;
 }
 
-/* ========【滑桿】 設定 - 全部使用 A 款極簡細線，不依賴瀏覽器原生外觀 ======== */
+/* ========【滑桿】 共用自訂滑桿軌道與控制點外觀 ======== */
 input[type="range"] {
     --range-fill: 0%;
     --range-track-height: 4px;
@@ -801,7 +801,7 @@ input[type="range"]:disabled {
     /* 溢出處理 */ overflow: hidden;
 }
 
-/* ========【頂部導覽列】 設定 - 品牌、搜尋、語言與工具操作 ======== */
+/* ========【頂部導覽列】 品牌、搜尋、語言與工具操作 ======== */
 
 .topbar {
     display: flex;
@@ -903,7 +903,7 @@ input[type="range"]:disabled {
 
 
 
-/* ========【主版面】 設定 - 側邊欄與族譜工作區 ======== */
+/* ========【主版面】 側邊欄與族譜工作區 ======== */
 
 .app-body {
     flex: 1;
@@ -942,7 +942,7 @@ body.sidebar-resizing * {
     position: relative;
 }
 
-/* ========【族譜畫布】 設定 - 平移、縮放、關係線與標註 ======== */
+/* ========【族譜畫布】 平移、縮放、關係線與標註 ======== */
 
 #genealogyCanvasViewport {
     /* 彈性配比 */ flex: 1;
@@ -1030,7 +1030,7 @@ body.sidebar-resizing * {
     /* 滑鼠指標 */ cursor: grabbing;
 }
 
-/* ========【智慧對齊輔助線】 設定 - 卡片拖曳時提供邊緣與中心吸附提示 ======== */
+/* ========【智慧對齊輔助線】 卡片拖曳時提供邊緣與中心吸附提示 ======== */
 
 #smartGuides {
     /* 定位方式 */ position: absolute;
@@ -1064,7 +1064,7 @@ body.sidebar-resizing * {
     /* 元素高度 */ height: 1px;
 }
 
-/* ========【等距吸附提示】 設定 - 顯示兩段相等間距，不移動其他卡片 ======== */
+/* ========【等距吸附提示】 顯示兩段相等間距，不移動其他卡片 ======== */
 
 .smart-spacing {
     /* 定位方式 */ position: absolute;
@@ -1133,7 +1133,7 @@ body.sidebar-resizing * {
     /* 向量縮放行為 */ vector-effect: non-scaling-stroke;
 }
 
-/* ========【關係線】 設定 - 五種關係使用新的預設線型，並支援玩家自訂 ======== */
+/* ========【關係線】 各類關係使用對應線型並支援玩家自訂 ======== */
 .edge-parent {
     stroke: var(--rel-parent-color,var(--relationship-parent));
     stroke-width: var(--rel-parent-width,2);
@@ -1176,7 +1176,7 @@ body.sidebar-resizing * {
     /* 標籤拖曳事件交給外層群組 */ pointer-events: none;
 }
 
-/* ========【模擬市民卡片】 設定 - 卡片狀態、頭像與資料呈現 ======== */
+/* ========【模擬市民卡片】 卡片狀態、頭像與資料呈現 ======== */
 
 .person-card {
     /* 定位方式 */ position: absolute;
@@ -1380,7 +1380,7 @@ body.sidebar-resizing * {
 }
 .person-card-residence { color: var(--text-secondary); }
 
-/* ========【介面圖示】 設定 - 共用 SVG Icon 顯示規則 ======== */
+/* ========【介面圖示】 共用 SVG Icon 顯示規則 ======== */
 
 .l1ng-icon {
     /* 預設遮罩 */ --l1ng-icon: linear-gradient(transparent, transparent);
@@ -1532,7 +1532,7 @@ body.sidebar-resizing * {
     /* 內縮空間 */ padding: 1px 7px;
 }
 
-/* ========【年齡階段標籤】 設定 - 使用低彩度底色與左側色線，取代舊版實心彩色標籤 ======== */
+/* ========【年齡階段標籤】 使用低彩度底色與左側色線區分人生階段 ======== */
 .stage-tag,
 .life-photo-stage {
     --stage-accent:#8aa1b3;
@@ -1665,7 +1665,7 @@ body[data-theme="graphite"] .life-photo-stage {
     /* 內縮空間 */ padding: 20px;
 }
 
-/* ========【彈出視窗】 設定 - 遮罩、表單與共用 Modal 元件 ======== */
+/* ========【彈出視窗】 遮罩、表單與共用 Modal 元件 ======== */
 
 .ui-dialog-backdrop {
     /* 定位方式 */ position: fixed;
@@ -1696,7 +1696,7 @@ body[data-theme="graphite"] .life-photo-stage {
     /* 顯示層級 */ z-index: 210;
 }
 
-/* ========【共用彈出視窗】 設定 - 輕量外框、較小圓角與位移淡入 ======== */
+/* ========【共用彈出視窗】 輕量外框、較小圓角與位移淡入 ======== */
 .ui-dialog-panel {
     background:var(--surface-card);
     border:1px solid var(--border-default);
@@ -1740,7 +1740,7 @@ body[data-theme="graphite"] .life-photo-stage {
 }
 
 
-/* ========【共用提示 Tooltip】 設定 - 小 i 圖示放在標題／欄位名稱後方，懸停或鍵盤焦點顯示 ======== */
+/* ========【共用提示 Tooltip】 小 i 圖示放在標題／欄位名稱後方，懸停或鍵盤焦點顯示 ======== */
 .help-tooltip { position:relative; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; flex:0 0 22px; border-radius:999px; color:var(--action-primary); cursor:help; outline:none; vertical-align:middle; }
 .help-tooltip.compact { width:18px; height:18px; flex-basis:18px; font-size:11px; }
 .help-tooltip:hover,.help-tooltip:focus-visible { background:var(--brand-tint-start); color:var(--action-primary-hover); }
@@ -1761,7 +1761,7 @@ body[data-theme="graphite"] .life-photo-stage {
 .form-field { min-width:0; }
 .form-field-title { color:var(--text-secondary); font:inherit; font-weight:600; }
 
-/* ========【模擬市民個人檔案編輯器】 設定 - 緊湊人物檔案、分頁內容與固定操作列 ======== */
+/* ========【模擬市民個人檔案編輯器】 緊湊人物檔案、分頁內容與固定操作列 ======== */
 .sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; --sim-editor-placeholder-color:color-mix(in srgb,var(--text-secondary) 80%,transparent); transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease; }
 .sim-editor-top { flex:0 0 auto; padding:13px 18px 0; background:var(--surface-card); position:relative; z-index:5; }
 #simEditorDialog .sim-editor-title { margin-bottom:8px; padding-right:64px; }
@@ -1848,7 +1848,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .trait-add-row button { display:inline-flex; align-items:center; justify-content:center; gap:4px; min-width:70px; padding:5px 10px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-item); color:var(--text-primary); font-size:11.5px; }
 .trait-add-row button:hover { border-color:var(--action-primary); color:var(--action-primary); }
 
-/* ========【遊戲偏好唯讀顯示】 設定 - 簡約分類列，不使用表格框線 ======== */
+/* ========【遊戲偏好唯讀顯示】 簡約分類列，不使用表格框線 ======== */
 .game-preference-list {
     /* 每個 EA 分類依序排列 */ display: grid;
 }
@@ -1938,7 +1938,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .family-rel-manage:hover { color:var(--action-primary-hover); text-decoration:underline; }
 .family-rel-preview { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:4px 10px; min-height:29px; align-items:center; }
 
-/* ========【家庭關係編輯列】 設定 - 檢視 / 編輯共用同一人物列，避免重複三層 ======== */
+/* ========【家庭關係編輯列】 檢視 / 編輯共用同一人物列，避免重複三層 ======== */
 .family-rel-preview.family-rel-preview-editable {
     /* 編輯時每位人物獨立一列 */ grid-template-columns: 1fr;
     /* 列間距 */ gap: 5px;
@@ -2009,7 +2009,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 原生來源欄位只保留語意尺寸，視覺由 ui-single-select 接手 */ width: 78px;
 }
 
-/* ========【關係種類小型下拉】 設定 - 親生 / 收養維持列內尺寸，選單寬度與欄位一致 ======== */
+/* ========【關係種類小型下拉】 親生 / 收養維持列內尺寸，選單寬度與欄位一致 ======== */
 .ui-single-select-compact {
     /* 固定小型欄寬 */ width: 78px;
     /* 不被其他控制擠壓 */ flex: 0 0 78px;
@@ -2141,7 +2141,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .family-rel-person-kinship { color:var(--text-secondary); font-size:10px; line-height:1.25; }
 .family-rel-person-custom { color:var(--action-primary); font-size:10.5px; line-height:1.3; overflow-wrap:anywhere; }
 
-/* ========【其他關係編輯列】 設定 - 沿用家庭關係的人物列結構，標籤控制直接整合於同一筆關係 ======== */
+/* ========【其他關係編輯列】 沿用家庭關係的人物列結構，標籤控制直接整合於同一筆關係 ======== */
 .other-rel-block {
     /* 其他關係分頁只有單一主區塊 */ padding-top: 0;
     /* 不需要區塊底線 */ border-bottom: 0;
@@ -2336,7 +2336,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     border-color: var(--action-primary);
 }
 
-/* ========【其他關係分類選擇器】 設定 - 直接沿用家族選擇器的紙張、便利貼與清單語言 ======== */
+/* ========【其他關係分類選擇器】 直接沿用家族選擇器的紙張、便利貼與清單語言 ======== */
 .relationship-type-picker {
     /* 觸發欄位容器 */ position: relative;
     /* 允許 Flex 正確縮小 */ min-width: 0;
@@ -2563,7 +2563,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .sim-editor-panel .relationship-section.first { margin-top:0; padding-top:0; border-top:0; }
-/* 編輯器操作列原本被後方的共用規則補回 18px 上方外距，使用複合選擇器保留原設計。 */
+/* 編輯器操作列維持零上方外距，避免共用對話框規則改變底部操作區高度。 */
 .ui-dialog-actions.sim-editor-actions { flex:0 0 auto; margin-top:0; padding:9px 18px 10px; border-top:1px solid var(--border-default); background:var(--surface-card); box-shadow:none; position:relative; z-index:6; }
 
 .grid {
@@ -2897,7 +2897,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 
-/* ========【共用頭像編輯器】 設定 - 模擬市民與寵物共用上傳、取景與移除操作 ======== */
+/* ========【共用頭像編輯器】 模擬市民與寵物共用上傳、取景與移除操作 ======== */
 .pet-editor-modal {
   width:min(620px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none;
   padding:0; overflow:hidden; display:flex; flex-direction:column;
@@ -3228,7 +3228,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     letter-spacing:.35px;
 }
 
-/* 主題卡：沿用視覺設定 prototype。 */
+/* 主題選擇卡共用視覺設定的排版與間距。 */
 .appearance-theme-grid{
     display:flex;
     flex-wrap:wrap;
@@ -4795,7 +4795,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel #genealogyFeedbackReplyVerify iframe{max-width:100%}
 .genealogy-feedback-panel .genealogy-feedback-reply-actions .genealogy-feedback-back-link{margin:0}
 
-/* ========【關係編輯】 設定 - 關係清單、自訂標註與操作 ======== */
+/* ========【關係編輯】 關係清單、自訂標註與操作 ======== */
 
 .relationship-section {
     /* 上方外距 */ margin-top: 14px;
@@ -4899,7 +4899,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 文字顏色 */ color: var(--text-secondary);
 }
 
-/* ========【寵物資料】 設定 - 檢視／編輯分層與兩欄寵物資訊 ======== */
+/* ========【寵物資料】 檢視／編輯分層與兩欄寵物資訊 ======== */
 #petList { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px; }
 #petList .pet-add-btn { min-width:0; width:100%; min-height:64px; display:flex; align-items:center; justify-content:center; gap:7px; }
 #petList > .relationship-empty { grid-column:1/-1; }
@@ -5018,7 +5018,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     background:var(--surface-item-hover);
 }
 
-/* ========【模擬市民相簿】 設定 - 圖片網格、拖放與圖片操作 ======== */
+/* ========【模擬市民相簿】 圖片網格、拖放與圖片操作 ======== */
 
 .life-photo-grid {
     /* 顯示方式 */ display: grid;
@@ -5176,7 +5176,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 背景設定 */ background: var(--surface-panel);
 }
 
-/* ========【人生照片】 設定 - 人物檔案內的照片編輯 ======== */
+/* ========【人生照片】 人物檔案內的照片編輯 ======== */
 
 .photo-modal {
     /* 元素寬度 */ width: min(560px,100%);
@@ -5242,7 +5242,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 字體粗細 */ font-weight: 600;
 }
 
-/* ========【人生照片檢視】 設定 - 人物專屬照片視窗，不再使用全螢幕浮動按鈕 ======== */
+/* ========【人生照片檢視】 人物專屬照片視窗，不再使用全螢幕浮動按鈕 ======== */
 .photo-viewer-panel {
     width:min(980px,calc(100vw - 32px));
     height:min(760px,calc(100vh - 32px));
@@ -5397,7 +5397,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     font-variant-numeric:tabular-nums;
 }
 
-/* ========【市民與寵物總覽】 設定 - v7 固定視窗、分類與管理共用結構 ======== */
+/* ========【市民與寵物總覽】 固定視窗、分類與管理共用結構 ======== */
 .person-library-panel {
     width:min(870px,100%);
     height:min(650px,calc(100dvh - 40px));
@@ -5608,7 +5608,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     .person-library-header-actions button { font-size:10px; padding:5px 4px; gap:3px; }
     .person-library-header-actions button .l1ng-icon { width:11px; height:11px; flex-basis:11px; }
 }
-/* ========【加入家族人物列】 設定 - 維持原有尺寸，不受人物庫檢視模式影響 ======== */
+/* ========【加入家族人物列】 維持原有尺寸，不受人物庫檢視模式影響 ======== */
 .family-member-picker-avatar {
     /* 頭像寬度 */ width: 42px;
     /* 頭像高度 */ height: 42px;
@@ -5782,7 +5782,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
-/* ========【模擬市民獨立預覽頁】 設定 - 編輯頁背紙維持同尺寸，預覽頁與預覽背紙共用同一尺寸 authority ======== */
+/* ========【模擬市民獨立預覽頁】 編輯頁背紙維持同尺寸，預覽頁與預覽背紙共用同一尺寸 authority ======== */
 #simEditorDialog {
     /* 桌面正式人物預覽寬度；預覽前景與預覽背紙必須共用這一個值 */ --sim-editor-preview-width: min(560px,calc(100vw - 40px));
 }
@@ -5920,7 +5920,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 與正式人物檢視內容寬度一致 */ padding: 0 18px 18px;
 }
 
-/* ========【模擬市民預覽翻頁】 設定 - 只翻編輯頁與獨立預覽頁，不改四個編輯分類 ======== */
+/* ========【模擬市民預覽翻頁】 只翻編輯頁與獨立預覽頁，不改四個編輯分類 ======== */
 #simEditorDialog.preview-open .sim-editor-modal {
     /* 主編輯頁翻離前景 */ transform: translateX(-54px) translateY(4px) rotate(-1.5deg) scale(.99);
     /* 主編輯頁淡出 */ opacity: 0;
@@ -6055,7 +6055,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 提升檔案檢視可讀性 */ font-size:10px;
 }
 
-/* ========【寵物血統】 設定 - 匯入的父母／子女資料以次要資訊顯示 ======== */
+/* ========【寵物血統】 匯入的父母／子女資料以次要資訊顯示 ======== */
 .pet-lineage {
     /* 版面配置 */ display: grid;
     /* 行距 */ gap: 2px;
@@ -6084,7 +6084,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .person-profile-gallery .life-photo-title { display:none; }
 .person-profile-panel > .ui-dialog-actions { margin:0; padding:10px 18px 12px; border-top:1px solid var(--border-default); }
 
-/* ========【使用說明】 設定 - 簡約雙欄閱讀版型 ======== */
+/* ========【使用說明】 簡約雙欄閱讀版型 ======== */
 .help-panel {
     /* 視窗寬度 */ width:min(820px,100%);
     /* 清除共用面板內距，改由標題列與內容各自控制 */ padding:0;
@@ -6351,15 +6351,15 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     }
 }
 
-/* ========【L1nG 視覺系統】 設定 - 延續 Sims4-mods 的開發者專區風格 ======== */
+/* ========【L1nG 視覺系統】 延續 Sims4-mods 的開發者專區風格 ======== */
 
 /* 白 / 淺灰底、細線、低飽和文字、寬字距，並以藍色作為互動提示。 */
 
-/* ========【全站字體】 設定 - 與主專案使用習慣一致 ======== */
+/* ========【全站字體】 與主專案使用習慣一致 ======== */
 
-/* ========【左上品牌】 設定 - 與側邊欄共用寬度並保持水平置中 ======== */
+/* ========【左上品牌】 與側邊欄共用寬度並保持水平置中 ======== */
 
-/* ========【L1nG 晴空導覽】 設定 - 僅此主題套用 L1nG 白灰藍視覺 ======== */
+/* ========【L1nG 晴空導覽】 僅此主題套用 L1nG 白灰藍視覺 ======== */
 
 body[data-theme="ling"] .topbar {
     height: 52px;
@@ -6391,7 +6391,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* 背景尺寸 */ background-size: 24px 24px;
 }
 
-/* ========【語言切換】 設定 - 共用於所有主題 ======== */
+/* ========【語言切換】 共用於所有主題 ======== */
 
 .language-switch {
     /* 相對定位 */ position: relative;
@@ -6409,7 +6409,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* 動畫過渡 */ transition: .15s;
 }
 
-/* ========【響應式設定】 設定 - 窄螢幕側邊欄與品牌寬度最佳化 ======== */
+/* ========【響應式設定】 窄螢幕側邊欄與品牌寬度最佳化 ======== */
 
 @media (max-width:900px) {
     .topbar-brand {
@@ -6428,7 +6428,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     }
 }
 
-/* ========【L1nG 專區】 設定 - 開發者工具 Icon 排列規範 ======== */
+/* ========【L1nG 專區】 開發者工具 Icon 排列規範 ======== */
 .pet-add-btn,
 .life-photo-add-btn {
     /* 垂直對齊 */ align-items: center;
@@ -6439,7 +6439,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* 最小寬度 */ min-width: 0;
 }
 
-/* ========【SVG 圖示資源】 設定 - 對應獨立 Bootstrap Icons SVG 檔案 ======== */
+/* ========【SVG 圖示資源】 對應獨立 Bootstrap Icons SVG 檔案 ======== */
 
 .icon-activity {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-activity);
@@ -6725,7 +6725,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-x-lg);
 }
 
-/* ========【族譜縮放】 設定 - 提升文字、線條與圖片清晰度 ======== */
+/* ========【族譜縮放】 提升文字、線條與圖片清晰度 ======== */
 
 #genealogyCanvasStage.is-transforming {
     /* 預先最佳化 */ will-change: transform;
@@ -6745,9 +6745,9 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* 圖片繪製方式 */ image-rendering: auto;
 }
 
-/* ========【導覽精修】 設定 - 僅調整頂部導覽，不影響族譜編輯表單 ======== */
+/* ========【導覽精修】 僅調整頂部導覽，不影響族譜編輯表單 ======== */
 
-/* ========【語系字型】 設定 - 繁中、簡中與英文各自使用合適字型 ======== */
+/* ========【語系字型】 繁中、簡中與英文各自使用合適字型 ======== */
 
 html[lang="zh-Hant"] body {
     /* 繁中字型 */ font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
@@ -6761,13 +6761,13 @@ html[lang="en"] body {
     /* 英文字型 */ font-family: "Segoe UI", Arial, system-ui, sans-serif;
 }
 
-/* ========【SVG 圖示資源】 設定 - 語言切換地球圖示 ======== */
+/* ========【SVG 圖示資源】 語言切換地球圖示 ======== */
 
 .icon-globe2 {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-globe2);
 }
 
-/* ========【響應式設定】 設定 - 小螢幕維持固定欄位邏輯 ======== */
+/* ========【響應式設定】 小螢幕維持固定欄位邏輯 ======== */
 
 @media (max-width:900px) {
     .family-select {
@@ -6783,17 +6783,17 @@ html[lang="en"] body {
 }
 
 
-/* ========【語言切換】 設定 - 與相鄰工具按鈕一致置中 ======== */
+/* ========【語言切換】 與相鄰工具按鈕一致置中 ======== */
 
 .language-switch:hover,
 .language-switch:focus-within {
     /* 背景顏色 */ background-color: var(--navigation-control-hover);
 }
 
-/* ========【關係名稱】 設定 - 英文與長文字依內容自適應 ======== */
+/* ========【關係名稱】 英文與長文字依內容自適應 ======== */
 
 
-/* ========【共用 HTML 彈窗】 設定 - 取代瀏覽器原生彈窗 ======== */
+/* ========【共用 HTML 彈窗】 取代瀏覽器原生彈窗 ======== */
 
 .ui-dialog-mask {
     /* 固定定位 */ position: fixed;
@@ -6925,7 +6925,7 @@ html[lang="en"] body {
     /* 邊框顏色 */ border-color: #963838;
 }
 
-/* ========【共用確認彈窗】 設定 - alert / confirm / choice / prompt 操作按鈕統一置中 ======== */
+/* ========【共用確認彈窗】 alert / confirm / choice / prompt 操作按鈕統一置中 ======== */
 
 #uiDialog .ui-dialog-actions {
     /* 共用確認彈窗不依賴按鈕數量判斷位置，避免新增第三操作後又回到靠右 */ justify-content: center;
@@ -6963,7 +6963,7 @@ html[lang="en"] body {
     /* 字體大小 */ font-size: 12.5px;
 }
 
-/* ========【遊戲族譜匯入狀態】 設定 - ZIP 讀取與資料轉換進度 ======== */
+/* ========【遊戲族譜匯入狀態】 ZIP 讀取與資料轉換進度 ======== */
 .game-import-status-mask {
     /* 定位方式 */ position: fixed;
     /* 定位範圍 */ inset: 0;
@@ -7053,7 +7053,7 @@ html[lang="en"] body {
     }
 }
 
-/* ========【關係編輯】 設定 - 長英文名稱與多語系內容自適應 ======== */
+/* ========【關係編輯】 長英文名稱與多語系內容自適應 ======== */
 @media (max-width: 760px) {
     .relationship-annotation-item {
         /* 小螢幕改為較彈性的雙欄，避免英文欄位被壓縮 */ grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
@@ -7063,9 +7063,9 @@ html[lang="en"] body {
     }
 }
 
-/* ========【導覽配色 Token】 設定 - 下拉選單與導覽互動獨立於主題強調色 ======== */
+/* ========【導覽配色 Token】 下拉選單與導覽互動獨立於主題強調色 ======== */
 
-/* ========【家族名稱編輯】 設定 - 名稱底線自適應、鉛筆與文字同一水平線 ======== */
+/* ========【家族名稱編輯】 名稱底線自適應、鉛筆與文字同一水平線 ======== */
 .family-identity { position:relative; display:inline-flex; align-items:center; min-width:0; max-width:100%; gap:4px; }
 .family-name-editor { display:inline-flex; align-items:center; min-width:0; max-width:100%; flex:0 1 auto; gap:4px; overflow:visible; }
 .family-name-editor .brand-input { flex:0 1 auto; min-width:68px; max-width:100%; width:88px; box-sizing:border-box; padding:2px 1px 3px; border:0; border-bottom:1px dashed color-mix(in srgb,var(--text-primary) 45%,transparent); border-radius:0; background:transparent; color:var(--text-primary); font-size:18px; font-weight:700; line-height:1.25; letter-spacing:.1px; outline:none; text-shadow:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -7074,7 +7074,7 @@ html[lang="en"] body {
 .family-name-edit-btn { width:22px; height:26px; flex:0 0 22px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--text-secondary); display:inline-flex; align-items:center; justify-content:center; }
 .family-name-edit-btn:hover,.family-name-edit-btn:focus-visible { background:var(--surface-item-hover); color:var(--action-primary); outline:none; }
 .family-name-icon { width:14px; height:14px; color:currentColor; opacity:.86; transform:scaleX(1); transform-origin:center; }
-/* ========【頂部自訂下拉選單】 設定 - 參考專案搜尋結果樣式 ======== */
+/* ========【頂部自訂下拉選單】 參考專案搜尋結果樣式 ======== */
 
 .nav-select {
     /* 相對定位 */ position: relative;
@@ -7234,12 +7234,12 @@ select.nav-native-select {
 
 .nav-select-language .nav-select-menu { left:auto; right:0; transform:none; width:max-content; min-width:100%; max-width:180px; }
 
-/* ========【頂部搜尋結果】 設定 - Hover 與選取維持中性灰階 ======== */
+/* ========【頂部搜尋結果】 Hover 與選取維持中性灰階 ======== */
 
-/* ========【搜尋型下拉選單】 設定 - 所有主題維持可讀對比 ======== */
+/* ========【搜尋型下拉選單】 所有主題維持可讀對比 ======== */
 
 
-/* ========【新增 SVG 圖示】 設定 - 下拉箭頭與家族名稱編輯筆 ======== */
+/* ========【新增 SVG 圖示】 下拉箭頭與家族名稱編輯筆 ======== */
 
 .icon-chevron-down {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-chevron-down);
@@ -7253,10 +7253,10 @@ select.nav-native-select {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-funnel);
 }
 
-/* ========【響應式導覽】 設定 - 小螢幕維持固定欄位但避免擠壓 ======== */
+/* ========【響應式導覽】 小螢幕維持固定欄位但避免擠壓 ======== */
 
 
-/* ========【語言按鈕容器】 設定 - 避免舊版 language-switch hover 產生第二層背景 ======== */
+/* ========【語言按鈕容器】 保持容器透明，避免重複顯示懸停背景 ======== */
 
 .nav-select-language:hover,
 .nav-select-language:focus-within {
@@ -7264,20 +7264,20 @@ select.nav-native-select {
     /* 容器邊框透明 */ border-color: transparent;
 }
 
-/* ========【頂部下拉尺寸】 設定 - 欄位與結果面板維持固定寬度 ======== */
+/* ========【頂部下拉尺寸】 欄位與結果面板維持固定寬度 ======== */
 
 .nav-select-family .nav-select-menu { left:0; right:auto; width:max-content; min-width:100%; max-width:min(280px,calc(100vw - 24px)); }
 
 
-/* ========【家族名稱輸入】 設定 - 固定導覽槽位、虛線依文字寬度自適應 ======== */
+/* ========【家族名稱輸入】 固定導覽槽位、虛線依文字寬度自適應 ======== */
 
-/* ========【語言切換】 設定 - 點擊範圍、尺寸與相鄰工具按鈕完全一致 ======== */
+/* ========【語言切換】 點擊範圍、尺寸與相鄰工具按鈕完全一致 ======== */
 
-/* ========【頂部下拉結果】 設定 - 對齊既有專案搜尋結果的白底、細框、圓角與分隔線邏輯 ======== */
+/* ========【頂部下拉結果】 對齊既有專案搜尋結果的白底、細框、圓角與分隔線邏輯 ======== */
 
-/* ========【共用下拉箭頭】 設定 - 編輯頁與導覽共用同一顆 chevron-down.svg ======== */
+/* ========【共用下拉箭頭】 編輯頁與導覽共用同一顆 chevron-down.svg ======== */
 
-/* ========【網站表單選擇器】 設定 - 單選 / 可輸入建議 / 搜尋多選共用同一套 UI ======== */
+/* ========【網站表單選擇器】 單選 / 可輸入建議 / 搜尋多選共用同一套 UI ======== */
 
 .ui-control-source {
     /* 原生 select 只保留資料與既有程式 API，不再直接顯示作業系統選單 */ display: none;
@@ -7400,9 +7400,9 @@ select.nav-native-select {
 
 /* 原生 select 已不再負責視覺，因此不需要 color-scheme / appearance 過渡層。 */
 
-/* ========【搜尋型下拉結果】 設定 - 主題安全色與中性 Hover / Selected ======== */
+/* ========【搜尋型下拉結果】 主題安全色與中性 Hover / Selected ======== */
 
-/* ========【人物資訊語意圖示】 設定 - 種族、存歿、寵物使用可直接辨識的 SVG ======== */
+/* ========【人物資訊語意圖示】 種族、存歿、寵物使用可直接辨識的 SVG ======== */
 
 .icon-paw {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-paw);
@@ -7441,7 +7441,7 @@ select.nav-native-select {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-fairy-wings);
 }
 
-/* ========【人物狀態圖示】 設定 - 在世、已故、幽靈使用不同語意色 ======== */
+/* ========【人物狀態圖示】 在世、已故、幽靈使用不同語意色 ======== */
 
 .person-meta-icon.status-alive {
     /* 在世圖示使用柔和綠色 */ color: #5f8a69;
@@ -7465,7 +7465,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     /* 深色主題提高在世圖示亮度 */ color: #8fc59b;
 }
 
-/* ========【匯出面板】 設定 - 沿用視覺設定視窗外殼，保留圖片與 JSON 匯出功能 ======== */
+/* ========【匯出面板】 沿用視覺設定視窗外殼，保留圖片與 JSON 匯出功能 ======== */
 .export-mask {
     position:fixed;
     inset:0;
@@ -7665,7 +7665,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
     cursor:wait;
 }
 
-/* ========【共用按鈕處理狀態】 設定 - 儲存、匯出、清理等等待操作統一使用跳動圓點 ======== */
+/* ========【共用按鈕處理狀態】 儲存、匯出、清理等等待操作統一使用跳動圓點 ======== */
 button.is-loading {
     display:inline-flex;
     align-items:center;
@@ -7763,7 +7763,7 @@ button.is-loading .button-loading-label {
 }
 
 
-/* ========【正式新版外殼】 家族檔案欄、精簡頂欄、畫布情境工具 ======== */
+/* ========【網站外殼】 家族檔案欄、精簡頂欄與畫布情境工具 ======== */
 
 .icon-three-dots { --l1ng-icon:var(--l1ng-icon-three-dots); }
 .icon-dash-lg { --l1ng-icon:var(--l1ng-icon-dash-lg); }
@@ -7809,7 +7809,7 @@ button.is-loading .button-loading-label {
 .ui-menu-language-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 7px; }
 .ui-menu-language-label { display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--text-secondary); }
 
-/* ========【頂部人物篩選】 設定 - 狀態與性別交叉篩選 ======== */
+/* ========【頂部人物篩選】 狀態與性別交叉篩選 ======== */
 .topbar-filter-menu { position:absolute; left:50%; top:50%; z-index:40; flex:0 0 auto; transform:translate(-50%,-50%); }
 .topbar-filter-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:0 9px; border:0; border-radius:5px; background:transparent; color:var(--navigation-text); font:inherit; font-size:12.5px; white-space:nowrap; }
 .topbar-filter-btn:hover { background:var(--nav-button-hover-bg); }
@@ -7903,7 +7903,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 .family-switch-btn .nav-select-value { display:none; }
 .family-title-row .nav-select-family .nav-select-menu { left:0; right:auto; width:max-content; min-width:100%; max-width:min(280px,calc(100vw - 24px)); }
 
-/* ========【家族下拉選單】 設定 - 脫離側欄裁切，先向下排列，超量才向右增加欄位 ======== */
+/* ========【家族下拉選單】 脫離側欄裁切，先向下排列，超量才向右增加欄位 ======== */
 .nav-select-menu.family-nav-portal {
     position:fixed;
     z-index:1400;
@@ -7940,7 +7940,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     min-width:168px;
     white-space:nowrap;
 }
-/* ========【家族選擇器索引】 設定 - 左側網頁分頁式 EA 族譜 / 大家族索引，不改動原多欄下拉 ======== */
+/* ========【家族選擇器索引】 左側網頁分頁式 EA 族譜 / 大家族索引，不改動原多欄下拉 ======== */
 .family-nav-tabs-portal {
     position:fixed;
     z-index:1401;
@@ -8173,7 +8173,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     height:13px;
 }
 
-/* ========【家族成員批量移除】 設定 - 頭像疊加半透明選取提示，不改動原成員資訊 ======== */
+/* ========【家族成員批量移除】 頭像疊加半透明選取提示，不改動原成員資訊 ======== */
 .family-member-remove-toolbar {
     display:flex;
     align-items:center;
@@ -8340,7 +8340,7 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
 .canvas-tool-divider { width:1px; height:18px; margin:0 3px; background:var(--border-default); }
 .arrange-tool { min-width:54px; }
 
-/* ========【自由排列工具】 設定 - 選取框、多選與畫布拖曳模式 ======== */
+/* ========【自由排列工具】 選取框、多選與畫布拖曳模式 ======== */
 #selectionMarquee {
     position:absolute;
     display:none;
@@ -8429,7 +8429,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .canvas-toolbar { max-width:calc(100% - 16px); overflow-x:auto; }
 }
 
-/* ========【手機視窗捲動】 設定 - 匯出固定標題；視覺設定沿用全尺寸固定標題結構 ======== */
+/* ========【手機視窗捲動】 匯出固定標題；視覺設定沿用全尺寸固定標題結構 ======== */
 @media (max-width:720px) {
   #appearanceDialog {
     padding:14px;
@@ -8456,7 +8456,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 
-/* ========【人物檔案響應式】 設定 - 小螢幕維持緊湊但不擠壓頭像 ======== */
+/* ========【人物檔案響應式】 小螢幕維持緊湊但不擠壓頭像 ======== */
 @media (max-width:760px) {
   #simEditorDialog, #petEditorDialog { padding:8px; }
   .sim-editor-modal {
@@ -8588,7 +8588,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .export-background-options { grid-template-columns:1fr; }
 }
 
-/* ========【家族成員快捷選單】 設定 - 每位成員使用單一更多入口，避免重複常駐按鈕 ======== */
+/* ========【家族成員快捷選單】 每位成員使用單一更多入口，避免重複常駐按鈕 ======== */
 
 .family-member-menu { justify-self:end; position:relative; }
 .family-member-more { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--text-secondary); opacity:.55; }
@@ -8596,7 +8596,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .family-member-popover { top:calc(100% + 4px); right:0; left:auto; min-width:176px; }
 .family-member-popover .ui-menu-item { white-space:nowrap; }
 
-/* ========【族譜定位提示】 設定 - 從家族成員選單定位時短暫標示人物 ======== */
+/* ========【族譜定位提示】 從家族成員選單定位時短暫標示人物 ======== */
 @keyframes genealogy-focus-pulse {
   0%,100% { box-shadow:0 0 0 0 transparent; }
   28% { box-shadow:0 0 0 4px color-mix(in srgb,var(--action-primary) 38%,transparent),0 5px 18px rgba(0,0,0,.12); }
@@ -8604,7 +8604,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .person-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
 
 
-/* ========【人物媒體分頁】 設定 - 寵物與相簿上下分區，與基本資料標題同層級 ======== */
+/* ========【人物媒體分頁】 寵物與相簿上下分區，與基本資料標題同層級 ======== */
 .sim-editor-panel[data-editor-panel="media"].active { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
 .sim-editor-panel[data-editor-panel="media"] .relationship-section { margin:0; padding:0; border-top:0; }
 .sim-editor-panel[data-editor-panel="media"] #lifePhotoSection { padding-top:14px; border-top:1px solid var(--border-default); }
@@ -8622,7 +8622,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 }
 
 
-/* ========【人物卡右鍵選單】 設定 - 人物操作、卡片內容與外觀 ======== */
+/* ========【人物卡右鍵選單】 人物操作、卡片內容與外觀 ======== */
 .person-card-menu {
     position:fixed;
     z-index:5000;
@@ -8655,7 +8655,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 .person-card-menu-check.fixed input[type="checkbox"]:disabled { opacity:.65; }
 .person-card-menu-note { padding:5px 9px 7px; color:var(--text-secondary); font-size:10px; line-height:1.4; }
 
-/* ========【人物卡片外觀】 設定 - 檢視模式外觀；檢視 / 編輯顯示內容各自獨立 ======== */
+/* ========【人物卡片外觀】 檢視模式外觀；檢視 / 編輯顯示內容各自獨立 ======== */
 .person-card.view.card-appearance-minimal {
     background:transparent;
     border-color:transparent;
@@ -8704,7 +8704,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 .person-card-view-text { overflow:visible; text-overflow:clip; white-space:normal; }
 
 
-/* ========【編輯模式人物卡】 設定 - 與檢視卡分離的橫向管理版型 ======== */
+/* ========【編輯模式人物卡】 與檢視卡分離的橫向管理版型 ======== */
 .person-card.mode-edit {
     /* 編輯卡維持較大的橫向管理版型；右鍵只共用「顯示哪些資料」，不共用檢視卡外觀。 */
     padding:12px 14px 12px 12px;
@@ -8754,7 +8754,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     margin-top:1px;
 }
 
-/* ========【使用提示】 設定 - 鍵盤 keycap 與滑鼠左右鍵 / 滾輪視覺語言 ======== */
+/* ========【使用提示】 鍵盤 keycap 與滑鼠左右鍵 / 滾輪視覺語言 ======== */
 .help-section .mouse-hint {
     position:relative;
     display:inline-block;
@@ -8795,7 +8795,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 .help-section .mouse-hint.mouse-wheel::before,
 .help-section .mouse-hint.mouse-wheel::after { background:transparent; }
 
-/* ========【檢視卡片版型】 設定 - 檢視模式固定直向，appearance 只控制視覺效果 ======== */
+/* ========【檢視卡片版型】 檢視模式固定直向，appearance 只控制視覺效果 ======== */
 .person-card.view.card-appearance-translucent,
 .person-card.view.card-appearance-full {
     flex-direction:column;
@@ -8844,7 +8844,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     margin: 0;
 }
 
-/* ========【全站載入骨架】 設定 - 初始化期間對齊目前正式介面分佈 ======== */
+/* ========【全站載入骨架】 初始化期間對齊目前正式介面分佈 ======== */
 .app-skeleton {
     position:fixed;
     inset:0;
@@ -9155,7 +9155,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 }
 
 
-/* ========【圖片與儲存】 設定 - 共用固定標題、關閉按鈕與獨立捲動內容 ======== */
+/* ========【圖片與儲存】 共用固定標題、關閉按鈕與獨立捲動內容 ======== */
 .storage-modal {
     width:min(680px,100%);
     max-height:min(680px,calc(100dvh - 40px));
@@ -9330,11 +9330,11 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 }
 
 
-/* ========【家族切換選單】 設定 - Portal 只在家族切換器展開時顯示 ======== */
+/* ========【家族切換選單】 Portal 只在家族切換器展開時顯示 ======== */
 
 
 
-/* ========【搜尋型下拉視窗】 設定 - 由 data-ui-select-portal 控制是否脫離編輯視窗裁切 ======== */
+/* ========【搜尋型下拉視窗】 由 data-ui-select-portal 控制是否脫離編輯視窗裁切 ======== */
 .ui-select-dropdown.ui-select-dropdown-portal {
     position:fixed;
     z-index:5200;
@@ -9348,7 +9348,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     max-height:min(300px,calc(100vh - 150px));
 }
 
-/* ========【關係線設定】 設定 - 左側類型清單與右側共用編輯器 ======== */
+/* ========【關係線設定】 左側類型清單與右側共用編輯器 ======== */
 .relationship-style-workspace{display:grid;grid-template-columns:168px minmax(0,1fr);gap:12px;align-items:start}
 .relationship-style-nav{min-width:0;display:grid;gap:5px}
 .relationship-style-choice{min-width:0;min-height:42px;padding:7px 9px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-card);color:var(--text-primary);display:grid;grid-template-columns:74px minmax(0,1fr);align-items:center;gap:8px;text-align:left;font:inherit;font-size:10.5px;font-weight:600;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,color .15s ease}
@@ -9427,7 +9427,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 @media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:minmax(82px,.9fr) minmax(0,1.45fr) 44px;gap:8px}.relationship-editor-range{grid-template-columns:minmax(0,1fr) max-content;gap:4px}.relationship-editor-range output{min-width:28px;font-size:10px}.relationship-curve-slider{gap:4px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 
-/* ========【危險操作】 設定 - 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */
+/* ========【危險操作】 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */
 /* 有既有外框的按鈕會連同外框變紅；border:0 的導覽 / 工具按鈕不會因此新增外框。 */
 button.danger-action {
     color:#b03a2e;
@@ -9447,7 +9447,7 @@ button.danger-action:focus-visible {
 
 
 
-/* ========【畫布寵物卡】 設定 - 沿用人物卡片配色，家庭旁獨立顯示，不覆蓋血緣線 ======== */
+/* ========【畫布寵物卡】 沿用人物卡片配色，家庭旁獨立顯示，不覆蓋血緣線 ======== */
 /* 寵物卡置於畫布標籤上方；容器不擋人物卡，只有卡片接收點擊。 */
 #genealogyPetLayer { position:absolute; inset:0; z-index:4; pointer-events:none; overflow:visible; }
 #genealogyPetLayer .genealogy-pet-card { pointer-events:auto; touch-action:none; }
@@ -9590,7 +9590,7 @@ button.danger-action:focus-visible {
 .genealogy-pet-card.mode-view.card-appearance-minimal.dead { background:transparent; border-color:transparent; border-style:solid; }
 .genealogy-pet-card.dead { background:var(--person-deceased-surface); border-color:var(--person-deceased-border); border-style:dashed; }
 
-/* ========【寵物資料視窗】 設定 - 延續人物樣式，減少寵物資料的空白 ======== */
+/* ========【寵物資料視窗】 延續人物樣式，減少寵物資料的空白 ======== */
 #personProfileDialog.pet-profile-open .person-profile-panel { width:min(430px,100%); }
 #personProfileDialog.pet-profile-open .person-profile-header { padding:14px 16px 12px; gap:12px; }
 #personProfileDialog.pet-profile-open .person-profile-avatar { width:80px; height:80px; font-size:26px; }
@@ -9604,7 +9604,7 @@ button.danger-action:focus-visible {
 .genealogy-pet-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
 
 
-/* ========【統一表單】 設定 - A 款勾選與單選，保留原生語意與鍵盤操作 ======== */
+/* ========【統一表單】 A 款勾選與單選，保留原生語意與鍵盤操作 ======== */
 .export-background-option input[type="radio"],
 .person-card-menu-radio input[type="radio"] {
     appearance:none;
@@ -9629,7 +9629,7 @@ button.danger-action:focus-visible {
     outline-offset:2px;
 }
 
-/* ========【搜尋欄】 設定 - 共用搜尋 SVG 與清除鈕，不更動下拉選單邏輯 ======== */
+/* ========【搜尋欄】 共用搜尋 SVG 與清除鈕，不更動下拉選單邏輯 ======== */
 .l1ng-search-control {position:relative;min-width:0;flex:1 1 auto}
 .l1ng-search-control > input {width:100%;padding-left:33px;padding-right:34px;box-sizing:border-box}
 .l1ng-search-control::before {content:"";position:absolute;left:11px;top:50%;width:15px;height:15px;transform:translateY(-50%);background:currentColor;opacity:.58;pointer-events:none;-webkit-mask:url("../../html%20icons/ui-search.svg") center/contain no-repeat;mask:url("../../html%20icons/ui-search.svg") center/contain no-repeat}
@@ -9644,8 +9644,8 @@ button.danger-action:focus-visible {
 .l1ng-search-clear[hidden] {display:none}
 @media(pointer:coarse){.l1ng-search-clear{width:40px;height:40px;right:0}.l1ng-search-control > input{padding-right:43px}}
 
-/* ========【捲軸】 設定 - A 款細線，涵蓋畫布側欄與所有彈窗捲動區 ======== */
-/* 直接指定全體捲動容器，避免先前僅限 .app／滑鼠裝置而漏掉手機與浮動面板。 */
+/* ========【捲軸】 A 款細線，涵蓋畫布側欄與所有彈窗捲動區 ======== */
+/* 捲軸樣式涵蓋一般頁面、手機與浮動面板的捲動容器。 */
 html, body, body * {
     scrollbar-width: thin;
     scrollbar-color: var(--border-default) transparent;
@@ -9665,7 +9665,7 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, body *::-webkit-sc
 
 
 
-/* ========【其他關係搜尋】 設定 - 修正插入搜尋 SVG 後搜尋列被 flex 撐高的問題 ======== */
+/* ========【其他關係搜尋】 搜尋列尺寸與搜尋圖示對齊 ======== */
 .relationship-type-menu > .l1ng-search-control {
     flex: 0 0 auto;
     display: block;
@@ -9705,7 +9705,7 @@ margin-bottom:0}
     }
 }
 
-/* ========【顏色選擇器色塊】 設定 - 僅統一色塊外觀，保留原生選色功能 ======== */
+/* ========【顏色選擇器色塊】 僅統一色塊外觀，保留原生選色功能 ======== */
 .custom-color-input { flex:0 0 44px; }
 .custom-color-input,
 .relationship-editor-color input[type="color"] {
@@ -9741,7 +9741,7 @@ margin-bottom:0}
 }
 
 
-/* ========【浮動調色板】 設定 - 緊湊色碼欄位與手機觸控 ======== */
+/* ========【浮動調色板】 緊湊色碼欄位與手機觸控 ======== */
 .l1ng-color-picker-trigger{position:relative;display:inline-flex;vertical-align:middle;width:44px;height:32px;flex:0 0 44px}
 .l1ng-color-picker-trigger>input[type="color"]{position:absolute;inset:0;opacity:0;pointer-events:none;width:100%;height:100%;padding:0}
 .l1ng-color-swatch-button{display:block;width:44px;height:32px;padding:3px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-input);cursor:pointer}
@@ -9755,7 +9755,7 @@ margin-bottom:0}
 .l1ng-color-picker-close{cursor:pointer}
 .l1ng-color-picker-sv{position:relative;height:124px;border-radius:6px;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,transparent),var(--picker-hue,#55acee);touch-action:none;cursor:crosshair}
 .l1ng-color-picker-dot{position:absolute;width:14px;height:14px;border:2px solid white;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #404953;pointer-events:none}
-/* ========【色相玻璃】 B 款材質配 A 款 29px 尺寸，彩虹軌道保留 ======== */
+/* ========【色相玻璃】 29px 玻璃控制點、彩虹軌道與觸控狀態 ======== */
 .l1ng-color-picker-hue-wrap{position:relative;width:100%;height:52px;margin:4px 0 2px;isolation:isolate}
 .l1ng-color-picker-hue-track{position:absolute;left:14.5px;right:14.5px;top:50%;height:10px;transform:translateY(-50%);border-radius:99px;pointer-events:none;background:linear-gradient(90deg,#f00 0%,#ff0 16.67%,#0f0 33.33%,#0ff 50%,#00f 66.67%,#f0f 83.33%,#f00 100%)}
 .l1ng-color-picker-hue-rest{position:absolute;top:50%;left:50%;width:17px;height:17px;border:2px solid #fff;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #8293a0,0 1px 3px rgba(18,44,70,.14);transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:none;transition:opacity .31s ease,transform .36s cubic-bezier(.22,1.15,.36,1)}
