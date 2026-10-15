@@ -380,8 +380,9 @@ body.realdate-only .upload-zone.appearance-background-upload small {
 .realdate-only #submit-inline-error.visible{display:block;max-width:100%;margin:0 auto 0 0;line-height:1.6}
 
 /* RealDate thread: fixed height, fixed summary + composer, conversation-only scroll. */
-body.realdate-only #thread-pane{height:min(820px,calc(100dvh - 120px));max-height:min(820px,calc(100dvh - 120px));min-height:0}
+body.realdate-only #thread-pane{height:var(--realdate-form-height,min(820px,calc(100dvh - 120px)));max-height:calc(100dvh - 45px);min-height:0}
 body.realdate-only #thread-pane .thread-body{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;padding:0}
+body.realdate-only #thread-home{flex:1;min-height:0;overflow-y:auto;padding:15px 24px}
 body.realdate-only #thread-chat:not(.hide){display:flex;flex:1;min-height:0;flex-direction:column}
 body.realdate-only #thread-chat .thread-chat-header{flex-shrink:0;padding:15px 24px 9px}
 body.realdate-only #visitor-messages{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 24px;margin:0}
