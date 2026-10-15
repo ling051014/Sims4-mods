@@ -4865,8 +4865,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 文字顏色 */ color: var(--text-secondary);
 }
 
-/* ========【寵物資料】 設定 - 寵物與相簿上下排列，寵物資訊以兩欄呈現 ======== */
+/* ========【寵物資料】 設定 - 檢視／編輯分層與兩欄寵物資訊 ======== */
 #petList { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px; }
+#petList .pet-add-btn { min-width:0; width:100%; min-height:64px; display:flex; align-items:center; justify-content:center; gap:7px; }
 #petList > .relationship-empty { grid-column:1/-1; }
 @media (max-width:560px) {
   #petList { grid-template-columns:minmax(0,1fr); }
@@ -4937,22 +4938,43 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 圓角弧度 */ border-radius: 6px;
     /* 滑鼠指標 */ cursor: pointer;
     /* 文字顏色 */ color: var(--text-primary);
+    /* 與模擬市民頭像操作一致的懸停回饋 */ transition:border-color .15s ease,color .15s ease,background-color .15s ease;
 }
-
+.pet-item-actions button:hover,
+.pet-item-actions button:focus-visible {
+    border-color:var(--action-primary);
+    color:var(--action-primary);
+    background:var(--surface-item-hover);
+}
 .pet-item-actions button.danger {
     /* 文字顏色 */ color: #b03a2e;
     /* 邊框顏色 */ border-color: #e6c9c4;
 }
+.pet-item-actions button.danger:hover,
+.pet-item-actions button.danger:focus-visible {
+    border-color:#b03a2e;
+    color:#b03a2e;
+    background:color-mix(in srgb,#b03a2e 7%,var(--surface-input));
+}
 
 .pet-add-btn {
-    /* 上方外距 */ margin-top: 8px;
-    /* 內縮空間 */ padding: 6px 12px;
-    /* 字體大小 */ font-size: 12px;
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 滑鼠指標 */ cursor: pointer;
+    /* 操作模式才建立的半寬新增卡片，沿用相簿的虛線入口 */
+    margin:0;
+    padding:10px 12px;
+    font-size:12px;
+    border:1px dashed var(--border-default);
+    border-radius:8px;
+    background:var(--surface-panel);
+    color:var(--text-secondary);
+    font:inherit;
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease,background-color .15s ease;
+}
+.pet-add-btn:hover,
+.pet-add-btn:focus-visible {
+    border-color:var(--action-primary);
+    color:var(--action-primary);
+    background:var(--surface-item-hover);
 }
 
 /* ========【模擬市民相簿】 設定 - 圖片網格、拖放與圖片操作 ======== */
@@ -5081,6 +5103,29 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 邊框顏色 */ border-color: var(--action-primary);
     /* 文字顏色 */ color: var(--action-primary);
     /* 背景設定 */ background: var(--surface-item-hover);
+}
+/* 相簿為空時，提示與新增入口各佔半行；已有照片仍使用原本圖片網格。 */
+.life-photo-layout:has(.life-photo-empty) {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:stretch;
+    gap:10px;
+}
+.life-photo-layout:has(.life-photo-empty) .life-photo-grid {
+    display:block;
+    min-height:0;
+    margin:0;
+}
+.life-photo-layout:has(.life-photo-empty) .life-photo-empty,
+.life-photo-layout:has(.life-photo-empty) .life-photo-add-btn {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+    height:100%;
+    min-height:58px;
+    margin:0;
+    padding:10px;
 }
 
 .life-photo-grid.dragover {
@@ -8539,13 +8584,20 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 .person-card.focus-pulse { animation:genealogy-focus-pulse 1.05s ease; }
 
 
-/* ========【人物媒體分頁】 設定 - 寵物與相簿並列，減少縱向留白 ======== */
+/* ========【人物媒體分頁】 設定 - 寵物與相簿上下分區，與基本資料標題同層級 ======== */
 .sim-editor-panel[data-editor-panel="media"].active { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
 .sim-editor-panel[data-editor-panel="media"] .relationship-section { margin:0; padding:0; border-top:0; }
 .sim-editor-panel[data-editor-panel="media"] #lifePhotoSection { padding-top:14px; border-top:1px solid var(--border-default); }
-.sim-editor-panel[data-editor-panel="media"] .relationship-section-title { margin-bottom:7px; }
+.sim-editor-panel[data-editor-panel="media"] .media-section-heading {
+  color:var(--text-primary);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+.sim-editor-panel[data-editor-panel="media"] .media-section-heading .family-rel-manage { margin-left:auto; }
 @media (max-width:680px) {
   #petList { grid-template-columns:minmax(0,1fr); }
+  #petList .pet-add-btn { width:50%; }
 }
 
 
