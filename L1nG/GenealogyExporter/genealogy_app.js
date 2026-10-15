@@ -34,7 +34,6 @@ const BG_KEY = 'l1ng_genealogy_background_v1';
 const MODE_KEY = 'l1ng_genealogy_view_mode_v1';
 const LABELS_KEY = 'l1ng_genealogy_relationship_labels_v1';
 const LABEL_LOCK_KEY = 'l1ng_genealogy_relationship_label_lock_v1';
-const LABEL_LOCK_DEFAULT_APPLIED_KEY = 'l1ng_genealogy_relationship_label_lock_default_applied';
 const SIDEBAR_WIDTH_KEY = 'l1ng_genealogy_sidebar_width_v1';
 const FAMILY_PANEL_COLLAPSED_KEY = 'l1ng_genealogy_family_panel_collapsed_v1';
 const PERSON_LIBRARY_VIEW_KEY = 'l1ng_genealogy_person_library_view_v1';
@@ -486,44 +485,13 @@ function normalizeRelationshipLineSetting(
     normalized.curveAmountManual = saved?.curveAmountManual === true ||
       (saved?.curveAmountManual == null && saved?.curveAmount != null &&
        Number(saved.curveAmount) !== Number(fallback.curveAmount ?? 50));
-    const storedShowArrow =
-      saved &&
-      Object.prototype.hasOwnProperty.call(
-        saved,
-        'showArrow'
-      )
-        ? saved.showArrow
-        : saved?.bidirectional;
-
     normalized.showArrow =
-      storedShowArrow === undefined
+      saved.showArrow === undefined
         ? !!fallback.showArrow
-        : !!storedShowArrow;
-
-    delete normalized.bidirectional;
+        : !!saved.showArrow;
   }
 
   return normalized;
-}
-
-// 舊版「室友」類型曾沿用其他關係的關閉預設，某些瀏覽器已將它存入 localStorage。
-// 沒有任何線型、粗細、顏色、弧度等自訂變更時，才採用新版的室友預設。
-function isUnmodifiedLegacyRoommateLineSetting(saved) {
-  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return false;
-  const defaults = RELATIONSHIP_LINE_DEFAULTS.other;
-  const expectedKeys = new Set([
-    'style','width','color','curved','curveAmount','curveAmountManual',
-    'routing','showArrow'
-  ]);
-  return Object.keys(saved).every(key => expectedKeys.has(key)) &&
-    saved.style === defaults.style &&
-    Number(saved.width) === defaults.width &&
-    saved.color == null &&
-    saved.curved === false &&
-    (saved.curveAmount == null || Number(saved.curveAmount) === defaults.curveAmount) &&
-    (saved.curveAmountManual == null || saved.curveAmountManual === false) &&
-    (saved.routing == null || saved.routing === defaults.routing) &&
-    (saved.showArrow == null || saved.showArrow === false);
 }
 
 let relationshipLineSettings =
@@ -567,17 +535,10 @@ try {
             return;
           }
 
-          // 舊版進入視覺設定時可能自動儲存「室友」的全關閉預設；
-          // 只更新完全未修改的舊預設，避免覆寫玩家調整過的樣式。
-          const storedSetting =
-            type === '室友' && isUnmodifiedLegacyRoommateLineSetting(setting)
-              ? relationshipOtherDefaultSetting(type)
-              : setting;
-
           relationshipLineSettings.otherTypes[type] =
             normalizeRelationshipLineSetting(
               'other',
-              storedSetting,
+              setting,
               type === '室友' ? relationshipOtherDefaultSetting(type) : null
             );
         });
@@ -19458,15 +19419,9 @@ function restoreWorkspacePreferences() {
 
   setGenealogyViewMode(savedMode);
 
-  // 首次套用新版「預設鎖定關係」時，修正舊版留存的解鎖狀態；
-  // 後續仍保留玩家透過「解鎖關係」手動切換的選擇。
   let savedLabelLock = true;
   try {
-    if (localStorage.getItem(LABEL_LOCK_DEFAULT_APPLIED_KEY) === '1') {
-      savedLabelLock = localStorage.getItem(LABEL_LOCK_KEY) !== '0';
-    } else {
-      localStorage.setItem(LABEL_LOCK_DEFAULT_APPLIED_KEY, '1');
-    }
+    savedLabelLock = localStorage.getItem(LABEL_LOCK_KEY) !== '0';
   } catch (_) {}
   setRelationshipLabelLock(savedLabelLock);
 
@@ -19623,38 +19578,9 @@ async function ensureSamplePortraitAssets(database) {
 
 async function prepareInitialWorkspaceDatabase() {
   let preparedResult;
-  let upgradedSample = false;
 
   try {
-    let saved = await readStoredGenealogyData();
-    // 只升級網站內建範例。保留玩家已經修改的人物內容與排版位置，
-    // 不會動到玩家從遊戲 ZIP 匯入的族譜。
-    if (saved?.meta?.sample && Number(saved.meta.sampleVersion || 0) < 11) {
-      const latest = buildSample();
-      saved.sims = saved.sims || {};
-      for (const [id,sim] of Object.entries(latest.sims)) {
-        if (!saved.sims[id]) saved.sims[id] = sim;
-      }
-      saved.families = saved.families || [];
-      const knownFamilies = new Set(saved.families.map(family => String(family.id)));
-      for (const family of latest.families) {
-        if (!knownFamilies.has(String(family.id))) saved.families.push(family);
-      }
-      saved.links = saved.links || [];
-      const knownLinks = new Set(saved.links.map(link => String(link.id)));
-      for (const link of latest.links || []) {
-        if (!knownLinks.has(String(link.id))) saved.links.push(link);
-      }
-      saved.meta.unassignedPets = saved.meta.unassignedPets || [];
-      const knownPets = new Set(saved.meta.unassignedPets.map(pet => String(pet.gameData?.simId || pet.id)));
-      for (const pet of latest.meta.unassignedPets || []) {
-        if (!knownPets.has(String(pet.gameData?.simId || pet.id))) saved.meta.unassignedPets.push(pet);
-      }
-      saved.meta.sampleVersion = 11;
-      saved.meta.sampleSource = latest.meta.sampleSource;
-      delete saved.meta.samplePortraitVersion;
-      upgradedSample = true;
-    }
+    const saved = await readStoredGenealogyData();
     preparedResult = prepareDatabase(saved || buildSample());
   } catch (error) {
     if (localStorage.getItem(STORE_KEY) === WORKSPACE_IDB_MARKER) throw error;
@@ -19687,8 +19613,7 @@ async function prepareInitialWorkspaceDatabase() {
 
   return {
     preparedResult,
-    initialDatabase,
-    upgradedSample
+    initialDatabase
   };
 }
 
@@ -19698,8 +19623,7 @@ async function initializeGenealogyWorkspace() {
 
   const {
     preparedResult,
-    initialDatabase,
-    upgradedSample
+    initialDatabase
   } =
     await prepareInitialWorkspaceDatabase();
 
@@ -19745,7 +19669,6 @@ async function initializeGenealogyWorkspace() {
   } else if (
     !portraitStorageError && (
       preparedResult.changed ||
-      upgradedSample ||
       repairedSamplePortraits
     )
   ) {
