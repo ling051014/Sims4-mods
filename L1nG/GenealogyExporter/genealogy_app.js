@@ -9437,11 +9437,29 @@ function getPetLineageInfo(pet) {
   };
 }
 
-function petLineageHTML(pet) {
+function petLineageHTML(pet, { profileRows = false } = {}) {
   const lineage =
     getPetLineageInfo(pet);
 
   if (!lineage.hasData) return '';
+
+  if (profileRows) {
+    const rows = [];
+    if (lineage.parentNames.length) {
+      rows.push(renderPersonProfileRow('父母', lineage.parentNames.map(esc).join(' / ')));
+    }
+    if (lineage.childNames.length) {
+      rows.push(renderPersonProfileRow('子女', lineage.childNames.map(esc).join(' / ')));
+    }
+    if (!rows.length) {
+      rows.push(renderPersonProfileRow(
+        '資料',
+        esc(uiText('血統資料已保留，但目前沒有可顯示的姓名')),
+        { muted:true }
+      ));
+    }
+    return '<div class="person-profile-list">' + rows.join('') + '</div>';
+  }
 
   const parts = [];
 
@@ -11101,7 +11119,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
   }
 
   const fieldRows = [
-    ['name','姓名'], ['gender','性別'], ['lifeStage','人生階段'], ['age','年齡'], ['birthday','生日'],
+    ['name','姓名'], ['gender','性別'], ['lifeStage','年齡階段'], ['age','年齡'], ['birthday','生日'],
     ['status','狀態'], ['race','種族'], ['career','職業'], ['residence','居住地'], ['aspiration','人生抱負'],
     ['traits','特徵'], ['pets','寵物'], ['gallery','人生照片']
   ].map(([key,label]) => `<label class="person-card-menu-check"><input type="checkbox" data-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`).join('');
@@ -18880,11 +18898,24 @@ function openPetProfileFromCanvas(entry) {
   const ownerNames = Object.values(currentGenealogyData()?.sims || {}).filter(sim =>
     (sim.pets || []).some(item => String(item?.gameData?.simId || item?.id || '') === petId)
   ).map(sim => displayDataText(sim.name,sim)).filter(Boolean);
+  const petGender = normalizePetGender(pet.gender);
+  const petStatus = pet.status || '在世';
+  const petStatusIcon = petStatus === '幽靈' ? 'ghost-symbol'
+    : petStatus === '已故' ? 'tombstone' : 'heart';
+  const petSpecies = PET_SPECIES[pet.species] || PET_SPECIES.other;
+  const metaItems = [
+    pet.ageStage ? '<span class="stage-tag stage-' + esc(pet.ageStage) + '">' +
+      esc(uiText(pet.ageStage)) + '</span>' : '',
+    petGender ? '<span class="meta-pill">' +
+      iconSvg(petGender === 'male' ? 'gender-male' : 'gender-female') +
+      '<span>' + esc(petGenderLabel(pet)) + '</span></span>' : '',
+    '<span class="meta-pill">' + iconSvg(petStatusIcon) +
+      '<span>' + esc(uiText(petStatus)) + '</span></span>',
+    '<span class="meta-pill">' + iconSvg(petSpecies.icon) +
+      '<span>' + esc(formatPetSpecies(pet)) + '</span></span>'
+  ].filter(Boolean);
   const facts = [
     [uiText('品種'),displayDataText(pet.breed,owner)],
-    [uiText('性別'),petGenderLabel(pet)],
-    [uiText('人生階段'),uiText(pet.ageStage || '')],
-    [uiText('狀態'),uiText(pet.status || '')],
     [uiText('所屬家庭'),resolvePetHouseholdName(entry)],
     [uiText('飼主'),ownerNames.join('、') || '—']
   ].filter(([,value]) => !!value);
@@ -18892,13 +18923,13 @@ function openPetProfileFromCanvas(entry) {
     .filter(Boolean).map(trait => `<span class="tag">${esc(trait)}</span>`).join('');
   const factsMarkup = facts.map(([label,value]) => renderPersonProfileRow(label,esc(value))).join('') +
     renderPersonProfileRow(uiText('特徵'),'<div class="person-profile-traits">' + (traitMarkup || '—') + '</div>');
-  const lineageMarkup = petLineageHTML(pet);
+  const lineageMarkup = petLineageHTML(pet, { profileRows:true });
   $('personProfileContent').innerHTML = `
     <div class="person-profile-header">
       <div class="person-profile-avatar person-profile-pet-main-avatar">${avatar}</div>
       <div class="person-profile-header-text">
         <div class="person-profile-name-row"><span class="person-profile-name">${esc(name)}</span></div>
-        <div class="person-profile-meta"><span class="meta-pill">${esc(formatPetSpecies(pet))}</span></div>
+        <div class="person-profile-meta">${metaItems.join('')}</div>
       </div>
     </div>
     <div class="person-profile-body">
@@ -18908,7 +18939,7 @@ function openPetProfileFromCanvas(entry) {
       </section>
       ${lineageMarkup ? `<section class="person-profile-section">
         <h3 class="person-profile-section-title">${esc(uiText('血統'))}</h3>
-        <div class="person-profile-pet-lineage">${lineageMarkup}</div>
+        ${lineageMarkup}
       </section>` : ''}
     </div>`;
   personProfilePersonId = null;
@@ -18945,7 +18976,7 @@ function renderPetCardMenu(entry,clientX,clientY) {
   const settings = getPetCardSettings();
   const fieldRows = [
     ['name','姓名'],['species','物種'],['breed','品種'],['gender','性別'],
-    ['ageStage','人生階段'],['status','狀態'],['traits','特徵']
+    ['ageStage','年齡階段'],['status','狀態'],['traits','特徵']
   ].map(([key,label]) =>
     `<label class="person-card-menu-check"><input type="checkbox" data-pet-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`
   ).join('');
@@ -19166,7 +19197,7 @@ petCardsLayer?.addEventListener('click', event => {
   activatePetCanvasCard(id,event.shiftKey);
 });
 
-// ========【頂部篩選】 設定 - 狀態、性別、種族與人生階段篩選 ========
+// ========【頂部篩選】 設定 - 狀態、性別、種族與年齡階段篩選 ========
 function applyTopbarFilters() {
   updateTopbarFilterUI();
   // 畫布與側欄都由 getVisibleIds() 決定顯示人物；篩選後一併刷新。
