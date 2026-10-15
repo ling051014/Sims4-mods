@@ -64,15 +64,15 @@ let genealogyScene = null;
 // ========【族譜卡片顯示】 設定 - 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
 const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
-const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits'];
+const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits','owners'];
 const DEFAULT_PET_CARD_VIEW_SETTINGS = Object.freeze({
   avatar:true, name:true, species:true, breed:true,
-  gender:true, ageStage:false, status:false, traits:false,
+  gender:true, ageStage:false, status:false, traits:false, owners:true,
   appearance:'minimal'
 });
 const DEFAULT_PET_CARD_EDIT_SETTINGS = Object.freeze({
   avatar:true, name:true, species:true, breed:true,
-  gender:true, ageStage:true, status:true, traits:true
+  gender:true, ageStage:true, status:true, traits:true, owners:true
 });
 
 const DEFAULT_CARD_VIEW_SETTINGS = Object.freeze({
@@ -11104,8 +11104,10 @@ function renderPersonCardMenu(simId, clientX, clientY) {
     ` : ''}
     <div class="person-card-menu-divider"></div>
     <div class="person-card-menu-section-title">${esc(uiText(isEditCard ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
-    <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
-    <div class="person-card-menu-grid">${fieldRows}</div>
+    <div class="person-card-menu-grid">
+      <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
+      ${fieldRows}
+    </div>
     ${appearanceSection}
     <div class="person-card-menu-note">${esc(uiText(isEditCard ? '只套用於編輯模式人物卡' : '只套用於檢視模式人物卡'))}</div>`;
 
@@ -19003,7 +19005,7 @@ function renderPetCardMenu(entry,clientX,clientY) {
   const settings = getPetCardSettings();
   const fieldRows = [
     ['name','姓名'],['species','物種'],['breed','品種'],['gender','性別'],
-    ['ageStage','年齡階段'],['status','狀態'],['traits','特徵']
+    ['ageStage','年齡階段'],['status','狀態'],['traits','特徵'],['owners','飼主']
   ].map(([key,label]) =>
     `<label class="person-card-menu-check"><input type="checkbox" data-pet-card-field="${key}" ${settings[key] ? 'checked' : ''}><span>${esc(uiText(label))}</span></label>`
   ).join('');
@@ -19020,8 +19022,10 @@ function renderPetCardMenu(entry,clientX,clientY) {
     <button class="person-card-menu-action" type="button" data-pet-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
     <div class="person-card-menu-divider"></div>
     <div class="person-card-menu-section-title">${esc(uiText(viewMode === 'edit' ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
-    <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
-    <div class="person-card-menu-grid">${fieldRows}</div>
+    <div class="person-card-menu-grid">
+      <label class="person-card-menu-check fixed"><input type="checkbox" checked disabled><span>${esc(uiText('頭像'))}</span></label>
+      ${fieldRows}
+    </div>
     ${appearanceSection}
     <div class="person-card-menu-note">${esc(uiText(viewMode === 'edit' ? '只套用於編輯模式寵物卡' : '只套用於檢視模式寵物卡'))}</div>
   `;
