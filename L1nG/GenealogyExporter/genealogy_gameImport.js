@@ -1827,6 +1827,8 @@
           householdName:optionalDisplayValue(household?.name) || '',
           ownerIds,
           recordState:pet.recordState || 'full',
+          dataAvailability:pet.dataAvailability || null,
+          preferences:normalizeImportedPreferences(pet),
           portrait:pet.portrait || null,
           lineage:{
             parentIds:petRelations.parentIds,
