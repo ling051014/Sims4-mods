@@ -703,7 +703,7 @@
 
         guideX:
           relationSnapX
-            ? relationSnapX.guide
+            ? null
             : (
                 bestX &&
                 bestX.guide !==
@@ -714,7 +714,7 @@
 
         guideY:
           relationSnapY
-            ? relationSnapY.guide
+            ? null
             : (
                 bestY &&
                 bestY.guide !==
