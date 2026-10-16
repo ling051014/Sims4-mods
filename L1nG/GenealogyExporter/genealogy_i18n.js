@@ -5,9 +5,9 @@
   const LANG_KEY = 'ling_genealogy_language_v1';
   const SUPPORTED_LANGUAGES = Object.freeze(['zh-Hant', 'zh-Hans', 'en']);
   const LOCALE_FILES = Object.freeze({
-    'zh-Hant': 'locales/zh-TW.json?v=20261016-slot-export-i18n-r1',
-    'zh-Hans': 'locales/zh-CN.json?v=20261016-slot-export-i18n-r1',
-    'en': 'locales/en.json?v=20261016-slot-export-i18n-r1'
+    'zh-Hant': 'locales/zh-TW.json?v=20261017-i18n-text-preservation-r1',
+    'zh-Hans': 'locales/zh-CN.json?v=20261017-i18n-text-preservation-r1',
+    'en': 'locales/en.json?v=20261017-i18n-text-preservation-r1'
   });
 
   const catalogs = new Map();
@@ -20,17 +20,6 @@
   let applying = false;
   let observer = null;
   let loadPromise = null;
-
-  function stripLegacyEmoji(text) {
-    return String(text ?? '')
-      .replace(/\p{Extended_Pictographic}|\p{Emoji_Presentation}|[\uFE0F\u200D]/gu, '')
-      .replace(/ {2,}/g, ' ')
-      .trim();
-  }
-
-  function canonicalTraditional(source) {
-    return stripLegacyEmoji(source);
-  }
 
   function normalizedCatalog(data = {}) {
     const messages =
@@ -110,12 +99,12 @@
   }
 
   function toSimplifiedUI(value) {
-    const canonical = canonicalTraditional(value);
+    const canonical = String(value ?? '');
     const catalog = catalogs.get('zh-Hans');
     const messages = catalog?.messages || {};
 
     if (messages[canonical] != null) {
-      return stripLegacyEmoji(messages[canonical]);
+      return String(messages[canonical]);
     }
 
     let output = canonical;
@@ -130,16 +119,14 @@
       .map(character => characters[character] || character)
       .join('');
 
-    return stripLegacyEmoji(output);
+    return output;
   }
 
   function translateFor(lang, source) {
-    const canonical = canonicalTraditional(source);
+    const canonical = String(source ?? '');
 
     if (lang === 'zh-Hant') {
-      return stripLegacyEmoji(
-        messagesFor('zh-Hant')[canonical] ?? canonical
-      );
+      return String(messagesFor('zh-Hant')[canonical] ?? canonical);
     }
 
     if (lang === 'zh-Hans') {
@@ -147,9 +134,7 @@
     }
 
     if (lang === 'en') {
-      return stripLegacyEmoji(
-        messagesFor('en')[canonical] ?? canonical
-      );
+      return String(messagesFor('en')[canonical] ?? canonical);
     }
 
     return canonical;
@@ -161,7 +146,7 @@
   }
 
   function translatePatterns(source) {
-    const canonical = canonicalTraditional(source);
+    const canonical = String(source ?? '');
 
     if (language !== 'en') {
       return translateExact(canonical);
@@ -170,7 +155,7 @@
     const english = messagesFor('en');
 
     if (english[canonical] != null) {
-      return stripLegacyEmoji(english[canonical]);
+      return String(english[canonical]);
     }
 
     let match;
@@ -259,7 +244,7 @@ They will remain in the global Sim pool.`;
         .split(' · ')
         .map(part =>
           english[part] != null
-            ? stripLegacyEmoji(english[part])
+            ? String(english[part])
             : part
         )
         .join(' · ');
