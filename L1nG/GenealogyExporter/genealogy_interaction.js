@@ -711,7 +711,7 @@
 
         guideY:
           relationSnapY
-            ? relationSnapY.value
+            ? null
             : (
                 bestY &&
                 bestY.guide !==
