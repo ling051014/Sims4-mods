@@ -5,9 +5,9 @@
   const LANG_KEY = 'ling_genealogy_language_v1';
   const SUPPORTED_LANGUAGES = Object.freeze(['zh-Hant', 'zh-Hans', 'en']);
   const LOCALE_FILES = Object.freeze({
-    'zh-Hant': 'locales/zh-TW.json?v=20261017-i18n-text-preservation-r1',
-    'zh-Hans': 'locales/zh-CN.json?v=20261017-i18n-text-preservation-r1',
-    'en': 'locales/en.json?v=20261017-i18n-text-preservation-r1'
+    'zh-Hant': 'locales/zh-TW.json?v=20261017-copy-localization-round2',
+    'zh-Hans': 'locales/zh-CN.json?v=20261017-copy-localization-round2',
+    'en': 'locales/en.json?v=20261017-copy-localization-round2'
   });
 
   const catalogs = new Map();
@@ -177,7 +177,7 @@
 
 ${match[3]}
 
-They will remain in the global Sim pool.`;
+They can still be added to other families.`;
     }
     if ((match = canonical.match(/^清理完成：刪除了 (\d+) 張未使用圖片。$/))) {
       return `Cleanup complete: deleted ${match[1]} unused image(s).`;
@@ -188,20 +188,20 @@ They will remain in the global Sim pool.`;
     if ((match = canonical.match(/^匯入失敗：(.+)$/))) {
       return `Import failed: ${match[1]}`;
     }
-    if ((match = canonical.match(/^確定刪除家族「(.+)」嗎？$/))) {
+    if ((match = canonical.match(/^要刪除「(.+)」家族嗎？$/))) {
       return `Delete family “${match[1]}”?`;
     }
     if (canonical === '家族中的模擬市民不會被刪除，之後仍可加入其他家族。') {
-      return '(All Sims in this family will remain in the global Sim pool.)';
+      return 'The Sims in this family will not be deleted and can be added to other families later.';
     }
-    if ((match = canonical.match(/^確定徹底刪除「(.+)」嗎？$/))) {
+    if ((match = canonical.match(/^要永久刪除「(.+)」嗎？$/))) {
       return `Permanently delete “${match[1]}”?`;
     }
-    if (canonical === '該操作會從所有家族中移除，並從模擬市民池永久刪除。') {
-      return 'This removes the Sim from every family and permanently deletes it from the global Sim pool.';
+    if (canonical === '這位模擬市民將從所有家族移除，人物資料與相關關係也會一併刪除。') {
+      return 'This Sim will be removed from every family, and the Sim data and related relationships will also be deleted.';
     }
-    if (canonical === '（若只想從目前家族移除，請使用「移出家族」）') {
-      return '(To remove the Sim only from this family, use “Remove from Family”.)';
+    if (canonical === '如果只想移出目前家族，請使用「移出家族」。') {
+      return 'To remove the Sim only from this family, use “Remove from Family”.';
     }
     if (canonical === '請為新家族取個名稱。') {
       return 'Enter a name for the new family.';
@@ -215,10 +215,10 @@ They will remain in the global Sim pool.`;
     if ((match = canonical.match(/^原始圖片大小約 ([\d.]+) MB。$/))) {
       return `Original image size: about ${match[1]} MB.`;
     }
-    if ((match = canonical.match(/^確定刪除圖片「(.+)」嗎？$/))) {
+    if ((match = canonical.match(/^要刪除「(.+)」這張圖片嗎？$/))) {
       return `Delete image “${match[1]}”?`;
     }
-    if ((match = canonical.match(/^確定刪除寵物「(.+)」嗎？$/))) {
+    if ((match = canonical.match(/^要刪除寵物「(.+)」嗎？$/))) {
       return `Delete pet “${match[1]}”?`;
     }
     if ((match = canonical.match(/^圖片處理失敗：(.+)$/))) {
@@ -227,15 +227,32 @@ They will remain in the global Sim pool.`;
     if ((match = canonical.match(/^背景處理失敗：(.+)$/))) {
       return `Background processing failed: ${translatePatterns(match[1])}`;
     }
-    if ((match = canonical.match(/^清除「(.+)模式」下本家族的所有手動位置，恢復自動樹狀。確定嗎？$/))) {
-      return `Clear all manual positions for this family in ${translatePatterns(match[1])} mode and restore automatic tree layout?`;
+    if ((match = canonical.match(/^要重設這個家族在「(.+)模式」中的卡片位置嗎？手動調整的位置將被清除，卡片會重新自動排列。$/))) {
+      return `Reset this family's card positions in ${translatePatterns(match[1])} mode? Manually adjusted positions will be cleared and the cards automatically rearranged.`;
     }
     if ((match = canonical.match(/^確定將以下 (\d+) 位從「(.+)」移除嗎？$/))) {
       return `Remove the following ${match[1]} Sim(s) from “${match[2]}”?`;
     }
     if (canonical === '他們仍保留在模擬市民池中。') {
-      return 'They will remain in the global Sim pool.';
+      return 'They can still be added to other families.';
     }
+
+    if ((match = canonical.match(/^要永久刪除選取的 (\d+) 位模擬市民嗎？$/))) {
+      return `Permanently delete the ${match[1]} selected Sim(s)?`;
+    }
+    if ((match = canonical.match(/^有 (\d+) 張遊戲頭像無法解析，已略過。詳細資訊請查看瀏覽器主控台。$/))) {
+      return `${match[1]} game portrait(s) could not be decoded and were skipped. Check the browser console for details.`;
+    }
+    if ((match = canonical.match(/^遊戲族譜匯入失敗：(.+)$/))) {
+      return `Game genealogy import failed: ${translatePatterns(match[1])}`;
+    }
+    if ((match = canonical.match(/^模擬市民資料儲存失敗：(.+)$/))) {
+      return `Could not save Sim data: ${translatePatterns(match[1])}`;
+    }
+    if ((match = canonical.match(/^族譜圖片匯出失敗：(.+)$/))) {
+      return `Family tree image export failed: ${translatePatterns(match[1])}`;
+    }
+
     if (canonical === '查看') return 'View';
     if (canonical === '編輯') return 'Edit';
 

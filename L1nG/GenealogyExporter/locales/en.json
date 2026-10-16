@@ -1011,7 +1011,7 @@
     "目前尚未加入存檔編號識別；請自行確認這份 ZIP 是要延續目前族譜的遊戲資料。": "Save identification is not available yet. Please confirm that this ZIP should continue the current genealogy.",
     "目前族譜已有遊戲資料，但這份 ZIP 沒有找到相同的遊戲人物。": "The current genealogy already contains game data, but this ZIP has no matching game Sims.",
     "在尚未加入存檔編號識別前，網站不會把它自動視為同一份族譜的更新。": "Until save identification is added, the site will not automatically treat this ZIP as an update to the same genealogy.",
-    "已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。": "Preserved: manual layout, life photos, custom relationships, custom labels, family covers, and website-only data.",
+    "已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。": "Preserved: manual positions, life photos, custom relationships, custom labels, family covers, and manually added website data.",
     "覆蓋現有族譜": "Replace Existing Genealogy",
     "匯入遊戲族譜": "Import Game Genealogy",
     "是否仍要使用這份 ZIP 覆蓋現有族譜？": "Use this ZIP to replace the existing genealogy anyway?",
@@ -1029,7 +1029,7 @@
     "這次匯出": "This export",
     "如果這是「另存新檔」後繼續遊玩的存檔，可以將它視為同一族譜並繼續更新。": "If this is a Save As copy that continues the same playthrough, you can treat it as the same genealogy and keep updating it.",
     "這是同一族譜，繼續更新": "Same Genealogy, Continue Updating",
-    "同步最新遊戲資料，保留手動排列、人生照片、自訂關係、家庭封面與你在網站上的修改。": "Sync the latest game data while keeping manual layout, life photos, custom relationships, family covers, and your website edits.",
+    "同步最新遊戲資料，保留手動排列、人生照片、自訂關係、家庭封面與你在網站上的修改。": "Sync the latest game data while keeping manual positions, life photos, custom relationships, family covers, and website edits.",
     "使用這份 ZIP 重新建立遊戲族譜；目前族譜內容會被取代。": "Rebuild the game genealogy from this ZIP; the current genealogy content will be replaced.",
     "將這個不同存檔記錄為目前族譜的延續來源，並同步最新遊戲資料。": "Record this different save as a continuation source for the current genealogy and sync its latest game data.",
     "目前族譜已有遊戲資料，但這份 ZIP 沒有找到可安全更新的相同來源。": "The current genealogy already contains game data, but this ZIP has no source that can be safely matched for an update.",
@@ -1173,6 +1173,18 @@
     "要清理未使用的圖片嗎？系統會移除目前沒有被族譜引用的圖片，仍在使用的圖片會保留。": "Clear unused images? Images no longer used by the family tree will be removed; images still in use will be kept.",
     "需要保留至少一個家族，才能繼續使用族譜畫布。": "At least one family is needed to use the family-tree canvas.",
     "請為新家族取個名稱。": "Enter a name for the new family.",
-    "家族中的模擬市民不會被刪除，之後仍可加入其他家族。": "The Sims in this family will not be deleted and can be added to another family later."
+    "家族中的模擬市民不會被刪除，之後仍可加入其他家族。": "The Sims in this family will not be deleted and can be added to another family later.",
+    "這位模擬市民將從所有家族移除，人物資料與相關關係也會一併刪除。": "This Sim will be removed from every family, and the Sim data and related relationships will also be deleted.",
+    "如果只想移出目前家族，請使用「移出家族」。": "To remove the Sim only from this family, use “Remove from Family”.",
+    "要將選取的模擬市民移出目前家族嗎？": "Remove the selected Sims from the current family?",
+    "模擬市民資料會保留，之後仍可重新加入家族。": "The Sim data will be kept, and the Sims can be added to families again.",
+    "這份資料來自先前匯入過的遊戲存檔。": "This data comes from a game save imported previously.",
+    "人物資料與相關關係都會一併刪除。": "Sim data and related relationships will also be deleted.",
+    "人物資料、關係與人生照片都會一併刪除。": "Sim data, relationships, and life photos will all be deleted.",
+    "未知錯誤": "Unknown error",
+    "這個家族還沒有模擬市民。點選「成員 ＋」，即可新增或加入已建立的模擬市民。": "This family has no Sims yet. Select “Members +” to create a Sim or add one you already have.",
+    "點選選擇檔案，也可以拖曳檔案到這裡": "Choose a file, or drag and drop it here",
+    "已保留：手動排列、自訂關係、自訂標籤、家庭封面與網站手動資料。": "Preserved: manual positions, custom relationships, custom labels, family covers, and manually added website data.",
+    "同步最新遊戲資料，保留手動排列、自訂關係、家庭封面與你在網站上的修改。": "Sync the latest game data while keeping manual positions, custom relationships, family covers, and website edits."
   }
 }

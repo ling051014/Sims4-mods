@@ -7464,7 +7464,7 @@ function paintCanvasBackgroundPreview() {
     'aria-label',
     url
       ? uiText('更換背景圖片')
-      : uiText('拖曳圖片到這裡，或點擊此區域選擇檔案')
+      : uiText('將圖片拖曳到這裡，或點選此處選擇檔案')
   );
 }
 
@@ -9723,7 +9723,7 @@ const lifePhotoWorkspace = {
     if (!entry) return;
 
     const confirmed = await uiConfirm(
-      `確定刪除圖片「${entry.title || '未命名'}」嗎？`,
+      `要刪除「${entry.title || '未命名'}」這張圖片嗎？`,
       {
         title:'刪除圖片',
         kind:'danger',
@@ -9856,7 +9856,7 @@ const lifePhotoWorkspace = {
           if (!entry) return;
 
           const confirmed = await uiConfirm(
-            `確定刪除圖片「${entry.title || '未命名'}」嗎？`,
+            `要刪除「${entry.title || '未命名'}」這張圖片嗎？`,
             {
               title:'刪除圖片',
               kind:'danger',
@@ -10648,7 +10648,7 @@ const ids =
     const fam = currentFamily();
     const ids = [...selectedNodeIds].filter(id => fam.memberIds.includes(id));
     if (!ids.length) { closePersonCardMenu(); return; }
-    const ok = await uiConfirm(`${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`, {
+    const ok = await uiConfirm(`${uiText('要將選取的模擬市民移出目前家族嗎？')}\n${uiText('模擬市民資料會保留，之後仍可重新加入家族。')}`, {
       title: uiText('移出所選人物'), kind: 'danger', confirmText: uiText('移出家族')
     });
     if (!ok) return;
@@ -13026,7 +13026,7 @@ $('resetLayoutBtn').onclick = async () => {
       : '編輯';
 
   if (!await uiConfirm(
-    `清除「${modeName}模式」下本家族的所有手動位置，恢復自動樹狀。確定嗎？`,
+    `要重設這個家族在「${modeName}模式」中的卡片位置嗎？手動調整的位置將被清除，卡片會重新自動排列。`,
     {
       title:'重設卡片位置',
       kind:'danger',
@@ -13303,7 +13303,7 @@ const familyMemberController = {
     if (!ids.length) return;
 
     const confirmed = await uiConfirm(
-      `${uiText('確定要將所選人物移出目前家族嗎？')}\n${uiText('人物本身仍會保留在人物資料中。')}`,
+      `${uiText('要將選取的模擬市民移出目前家族嗎？')}\n${uiText('模擬市民資料會保留，之後仍可重新加入家族。')}`,
       {
         title:uiText('移出所選人物'),
         kind:'danger',
@@ -13689,7 +13689,7 @@ $('newFamilyBtn').onclick = async () => {
 $('delFamilyBtn').onclick = async () => {
   if (currentGenealogyData().families.length <= 1) { uiAlert('需要保留至少一個家族，才能繼續使用族譜畫布。', { title: '無法刪除家族' }); return; }
   const fam = currentFamily();
-  if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n家族中的模擬市民不會被刪除，之後仍可加入其他家族。`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
+  if (!await uiConfirm(`要刪除「${displayDataText(fam.name, fam)}」家族嗎？\n家族中的模擬市民不會被刪除，之後仍可加入其他家族。`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
   const fallbackFamilyId =
     currentGenealogyData().families
       .find(f => f.id !== fam.id)
@@ -15279,7 +15279,7 @@ const petEditorController = {
     if (!pet) return;
 
     const confirmed = await uiConfirm(
-      `確定刪除寵物「${pet.name}」嗎？`,
+      `要刪除寵物「${pet.name}」嗎？`,
       {
         title:'刪除寵物',
         kind:'danger',
@@ -15432,7 +15432,7 @@ function renderPetDraftList() {
 
           const confirmed =
             await uiConfirm(
-              `確定刪除寵物「${pet.name}」嗎？`,
+              `要刪除寵物「${pet.name}」嗎？`,
               {
                 title:'刪除寵物',
                 kind:'danger',
@@ -15599,9 +15599,9 @@ async function deleteChar(id) {
   if (!c) return;
 
   const message =
-    '確定徹底刪除「' + displayDataText(c.name, c) + '」嗎？\n' +
-    '該操作會從所有家族中移除，並從人物庫永久刪除。\n\n' +
-    '（若只想從目前家族移除，請使用「移出家族」）';
+    '要永久刪除「' + displayDataText(c.name, c) + '」嗎？\n' +
+    '這位模擬市民將從所有家族移除，人物資料與相關關係也會一併刪除。\n\n' +
+    '如果只想移出目前家族，請使用「移出家族」。';
 
   if (!await uiConfirm(message, {
     title: '永久刪除人物',
@@ -15762,8 +15762,8 @@ const personLibraryController = {
     if (!ids.length) return;
 
     const confirmed = await uiConfirm(
-      '確定永久刪除這 ' + ids.length + ' 位人物嗎？\n' +
-      '人物資料、關係與人生照片都會一併移除。\n\n' +
+      '要永久刪除選取的 ' + ids.length + ' 位模擬市民嗎？\n' +
+      (LIFE_PHOTOS_PUBLIC ? '人物資料、關係與人生照片都會一併刪除。\n\n' : '人物資料與相關關係都會一併刪除。\n\n') +
       '此操作無法復原。',
       {
         title:'批量刪除人物',
@@ -17543,7 +17543,7 @@ function gameImportSourceMessageLines(
     'known_save'
   ) {
     lines.push(
-      uiText('已確認為目前族譜曾接受的存檔來源。'),
+      uiText('這份資料來自先前匯入過的遊戲存檔。'),
       gameSaveSlotLabel(
         source.incomingSave
       )
@@ -17629,7 +17629,9 @@ async function chooseGameImportMode(
   ];
 
   const updateHint =
-    '同步最新遊戲資料，保留手動排列、人生照片、自訂關係、家庭封面與你在網站上的修改。';
+    LIFE_PHOTOS_PUBLIC
+      ? '同步最新遊戲資料，保留手動排列、人生照片、自訂關係、家庭封面與你在網站上的修改。'
+      : '同步最新遊戲資料，保留手動排列、自訂關係、家庭封面與你在網站上的修改。';
 
   const replaceHint =
     '使用這份 ZIP 重新建立遊戲族譜；目前族譜內容會被取代。';
@@ -17743,9 +17745,11 @@ function gameImportUpdateSummary(
     `${uiText('新增遊戲關係')}：${stats.relationships?.added || 0}`,
     `${uiText('移除已不存在的遊戲關係')}：${stats.relationships?.removed || 0}`,
     `${uiText('新匯入頭像')}：${avatarStats?.saved || 0}`,
-    avatarStats?.decodeFailed ? `EA THUM decode failed / skipped: ${avatarStats.decodeFailed} (console: Sim / path / stage)` : null,
+    avatarStats?.decodeFailed ? `有 ${avatarStats.decodeFailed} 張遊戲頭像無法解析，已略過。詳細資訊請查看瀏覽器主控台。` : null,
     '',
-    uiText('已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。')
+    uiText(LIFE_PHOTOS_PUBLIC
+      ? '已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。'
+      : '已保留：手動排列、自訂關係、自訂標籤、家庭封面與網站手動資料。')
   ].filter(line => line !== null).join('\n');
 }
 
@@ -17953,7 +17957,7 @@ async function importGameGenealogy(file) {
           `寵物：${petCount}`,
           `家族：${familyCount}`,
           `頭像：${avatarStats.saved}`,
-          avatarStats.decodeFailed ? `EA THUM decode failed / skipped: ${avatarStats.decodeFailed} (console: Sim / path / stage)` : null,
+          avatarStats.decodeFailed ? `有 ${avatarStats.decodeFailed} 張遊戲頭像無法解析，已略過。詳細資訊請查看瀏覽器主控台。` : null,
           importedGameDate
             ? `${uiText('遊戲日期')}：${importedGameDate}`
             : null,
@@ -17979,7 +17983,7 @@ async function importGameGenealogy(file) {
     console.error('[遊戲族譜匯入]', err);
 
     await uiAlert(
-      `遊戲族譜匯入失敗：${err && err.message ? err.message : 'Unknown error'}`,
+      `遊戲族譜匯入失敗：${err && err.message ? err.message : '未知錯誤'}`,
       {
         title: '遊戲族譜匯入失敗',
         kind: 'danger'
@@ -18175,7 +18179,7 @@ async function savePersonEditorFromUi() {
       '模擬市民資料儲存失敗：' +
         (
           error?.message ||
-          'Unknown error'
+          '未知錯誤'
         ),
       {
         title:'儲存失敗',
@@ -18807,7 +18811,7 @@ if (exportImageBtn) exportImageBtn.onclick = async () => {
     );
   } catch (err) {
     console.error(err);
-    await uiAlert(`族譜圖片匯出失敗：${err && err.message ? err.message : 'Unknown error'}`, { title: '族譜圖片匯出失敗', kind: 'danger' });
+    await uiAlert(`族譜圖片匯出失敗：${err && err.message ? err.message : '未知錯誤'}`, { title: '族譜圖片匯出失敗', kind: 'danger' });
   } finally {
     exportJsonBtn && (exportJsonBtn.disabled = false);
   }
