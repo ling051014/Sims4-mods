@@ -2345,6 +2345,8 @@ function buildGenealogyLayoutModel(visibleIds) {
     pairCandidates
   );
 
+  alignRootCoParentLayoutGenerations(byId,parentGroups,layoutGenerationBySim);
+
   const pairSelection =
     selectPrimaryHorizontalPairs(
       pairCandidates,
@@ -3283,6 +3285,32 @@ function alignIndependentLineageGenerations(
       );
     });
   }
+}
+
+function alignRootCoParentLayoutGenerations(byId,parentGroups,layoutGenerationBySim) {
+  // canonical generation 為資料權威；這裡只調整畫布上的顯示世代。
+  const groupsByChild=new Set();
+  const groupsByParent=new Map();
+  parentGroups.forEach(group=>{
+    group.children.forEach(id=>groupsByChild.add(id));
+    group.parentIds.forEach(id=>{
+      if(!groupsByParent.has(id))groupsByParent.set(id,[]);
+      groupsByParent.get(id).push(group);
+    });
+  });
+  parentGroups.forEach(group=>{
+    const parents=group.parentIds.filter(id=>byId.has(id));
+    if(parents.length!==2||!group.children.length)return;
+    const target=Math.max(...parents.map(id=>layoutGenerationBySim.get(id)||0));
+    if(!group.children.every(id=>(layoutGenerationBySim.get(id)??-1)>target))return;
+    parents.forEach(id=>{
+      if(groupsByChild.has(id)||(layoutGenerationBySim.get(id)||0)>=target)return;
+      // 若父母自身有祖先，或其他子女會被提升為同一世代，就不改動。
+      if((groupsByParent.get(id)||[]).some(g=>g.children.some(childId=>
+        (layoutGenerationBySim.get(childId)??-1)<=target)))return;
+      layoutGenerationBySim.set(id,target);
+    });
+  });
 }
 
 function selectPrimaryHorizontalPairs(
@@ -5226,6 +5254,7 @@ function canPlaceGenealogyUnitAtX(
   });
 }
 
+// ========【姻親家系接合】以完整根區塊靠接未成對的共同父母，不拆分血緣分支 ========
 function alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups) {
   const rootOf=unit=>unit?(ownership.rootByUnit.get(unit.id)||unit.id):null;
   const rootUnits=new Map();
@@ -5718,6 +5747,49 @@ function alignFamilyBranchParentAxes(layers, model, connectorGroups, ownership =
 
 // ========【情人共同子女自動排列】 在真正的關係線連接點下放置完整後代區塊 ========
 // ========【家系分支安全位移】 空間不足時移到可行極限，不是整組原地不動 ========
+function settleFamilyBranchParentAxes(layers,model,connectorGroups,ownership) {
+  const axisErrors=()=>connectorGroups.map(group=>{
+    const source=genealogyGroupSourceX(group,model);
+    const childXs=group.children.map(id=>genealogyChildAnchorX(id,model))
+      .filter(Number.isFinite);
+    return Number.isFinite(source)&&childXs.length
+      ?source-(Math.min(...childXs)+Math.max(...childXs))/2
+      :null;
+  });
+  const before=axisErrors();
+  if(!before.some(error=>Number.isFinite(error)&&Math.abs(error)>0.75))return 0;
+  const original=new Map(model.units.map(unit=>[unit.id,unit.x]));
+  const gap=resolveLayoutGaps().SIBLING;
+  const collisions=()=>{
+    let count=0;
+    layers.forEach(layer=>{
+      const row=[...layer].sort((a,b)=>a.x-b.x);
+      for(let i=1;i<row.length;i++){
+        if(row[i].x<row[i-1].x+row[i-1].width+gap-0.01)count++;
+      }
+    });
+    return count;
+  };
+  const startCollisions=collisions();
+  // 跨世代分支須逐層傳遞最終錨點；以兩輪為上限避免反覆震盪。
+  for(let pass=0;pass<2;pass++){
+    alignFamilyBranchParentAxes(layers,model,connectorGroups,ownership);
+    if(!axisErrors().some(error=>Number.isFinite(error)&&Math.abs(error)>0.75))break;
+  }
+  const after=axisErrors();
+  const cost=errors=>errors.reduce((sum,error)=>
+    sum+(Number.isFinite(error)?error*error:0),0);
+  const losesStraightLine=before.some((error,index)=>
+    Number.isFinite(error)&&Math.abs(error)<=0.75&&
+    (!Number.isFinite(after[index])||Math.abs(after[index])>0.75));
+  // 既有直線被破壞、增加碰撞、或總偏差未改善時，一次還原整輪。
+  if(losesStraightLine||collisions()>startCollisions||cost(after)>=cost(before)-0.01){
+    model.units.forEach(unit=>{unit.x=original.get(unit.id);});
+    return 0;
+  }
+  return 1;
+}
+
 function genealogySafeDescendantShift(layers,model,ownership,group,delta,parentGeneration,gap) {
   if(!Number.isFinite(delta)||Math.abs(delta)<0.75)return 0;
   const descendants=new Set();
@@ -6006,6 +6078,7 @@ function compactCrossRootSiblingGroups(layers,model,ownership) {
   return corrected;
 }
 
+// ========【完整家系獨立排列】先辨識人物與水平配偶單位的血緣連通群 ========
 function genealogyConnectedLayoutFamilyComponents(model,visibleIds) {
   const parent=new Map([...visibleIds].map(id=>[String(id),String(id)]));
   const find=id=>{
@@ -6181,6 +6254,7 @@ function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,compon
 
   // 最後確認同父母的跨家系兄弟姊妹連續，不能讓另一個家族插在中間。
   compactCrossRootSiblingGroups(layers,model,ownership);
+  settleFamilyBranchParentAxes(layers,model,connectorGroups,ownership);
 
   // Family Branch Block 本身就是最終水平幾何權威。
   // 不再執行 generation-global packing，避免把已保留的 Parent Group block 再推壞。
@@ -8962,6 +9036,7 @@ function getVisibleTreeContentBounds() {
   };
 }
 
+// ========【配偶水平吸附】 與畫線共用頭像中心，雙向辨識現任／前任／已故配偶 ========
 function genealogySpouseSnapCandidates(id) {
   const person=layoutCache?.byId?.get(id);
   if(!person||!layoutCache?.pos||!layoutCache?.visibleIds)return [];
@@ -9125,6 +9200,7 @@ function buildDragPerformanceGeometry() {
   return geometry;
 }
 
+// 已快取的關係軸直接交給 Interaction 執行智慧吸附，不再維護第二套座標算法。
 function buildSingleDragRelationshipTargets(id) {
   if(!layoutCache?.byId||!layoutCache?.visibleIds||!layoutCache?.pos)
     return {x:[],y:[]};
