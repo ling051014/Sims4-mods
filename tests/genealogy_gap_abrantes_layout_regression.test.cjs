@@ -150,18 +150,37 @@ test('阿布蘭特斯修正只位移實際擋路的蓋普／蒙提分支，不�
     )+'\nsolveAutomaticGenealogyPositions;',ctx
   );
   const before=oldSolver(ids);
-  const moved=sims.filter(sim=>{
-    const old=before.get(sim.id),now=positions.get(sim.id);
-    return old.x!==now.x||old.y!==now.y;
-  }).map(sim=>sim.name);
-  const allowed=new Set([
-    '阿布蘭特斯艾梅琳達','阿布蘭特斯蘇菲亞',
-    '蓋普提伯特','蓋普碧翠絲','蓋普瑟勒絲特','蓋普維吉里歐',
-    '蒙提茱麗葉','蒙提但丁'
-  ]);
-  assert.ok(moved.length>0,'測試應確實觸發排列校正');
-  assert.ok(moved.every(name=>allowed.has(name)),
-    '修阿布蘭特斯不得動到無關的家族：'+moved.join('、'));
+  // 獨立家系排列後，上一家系寬度變動會讓其他家系整組平移。
+  // 僅主家系的跨家系兄弟與其祖先可以做局部修正；無關家系不得變形。
+  const geometry=vm.runInNewContext(
+    implementations+'\n({buildGenealogyLayoutModel,genealogyConnectedLayoutFamilyComponents});',
+    ctx
+  );
+  const roots=geometry.genealogyConnectedLayoutFamilyComponents(
+    geometry.buildGenealogyLayoutModel(ids),ids
+  );
+  const selected=new Set(family.memberIds);
+  let externalChecked=0;
+  roots.filter(root=>!root.some(id=>selected.has(id))).forEach(root=>{
+    const anchor=root[0];
+    const delta=positions.get(anchor).x-before.get(anchor).x;
+    root.forEach(id=>{
+      const name=byId.get(id)?.name;
+      assert.ok(Math.abs((positions.get(id).x-before.get(id).x)-delta)<0.001,
+        '無關完整家系內部的相對位置不可變更：'+name);
+      assert.equal(positions.get(id).y,before.get(id).y,
+        '無關完整家系的顯示世代不可變更：'+name);
+      externalChecked++;
+    });
+  });
+  assert.ok(externalChecked>=35,'須確實檢查大量未選取的其他家庭');
+  const affected=['阿布蘭特斯蘇菲亞','蒙提茱麗葉','柯德莉亞．蓋普']
+    .filter(name=>{
+      const id=sims.find(sim=>sim.name===name)?.id;
+      return id&&(positions.get(id).x!==before.get(id).x||
+        positions.get(id).y!==before.get(id).y);
+    });
+  assert.ok(affected.length>0,'測試應確實觸發主要家系校正');
 });
 test('完成排列後同世代所有人物卡不得碰撞',()=>{
   const rows=new Map();
@@ -304,4 +323,51 @@ test('各完整血緣家系先獨立排列，避免跨家族親子線被拉成�
     '血緣家系應該完整接合，不得再出現數千像素長的親子線');
   assert.ok(implementations.includes('function genealogyConnectedLayoutFamilyComponents('));
   assert.ok(implementations.includes('function arrangeIndependentGenealogyFamilyComponents('));
+});
+
+test('82 位預設模擬市民的全部 31 組親子中軸都真正置中',()=>{
+  const center=xs=>(Math.min(...xs)+Math.max(...xs))/2;
+  assert.equal(parentGroupMap.size,31);
+  parentGroupMap.forEach(group=>{
+    const parents=group.parentIds.map(id=>positions.get(id).x+47.5);
+    const children=group.children.map(id=>positions.get(id).x+47.5);
+    const offset=Math.abs(center(parents)-center(children));
+    assert.ok(offset<=0.75,
+      '親子中軸偏差：'+group.parentIds.map(id=>byId.get(id)?.name).join('、')+' = '+offset);
+  });
+});
+test('跨代共同父母在畫布同列，但 canonical generation 不變',()=>{
+  const names=['高斯貝拉','高斯摩提梅爾','莉娜．達榮','賽夫．達榮',
+    '阿德．達榮','艾尼歐拉．達榮','達麗拉．德里莫','戴維斯．德里莫',
+    '達榮阿德科亞','伊曼尼．達榮'];
+  for(let i=0;i<names.length;i+=2){
+    assert.equal(person(names[i]).y,person(names[i+1]).y,
+      '配偶不同世代：'+names[i]);
+  }
+  const model=vm.runInNewContext(implementations+'\nbuildGenealogyLayoutModel;',ctx)(ids);
+  sims.forEach(sim=>assert.equal(model.canonicalGenerationBySim.get(sim.id),canonical.get(sim.id),
+    '畫布世代不可覆寫資料：'+sim.name));
+});
+test('上游祖先與較早出生子女限制可阻止不安全的世代提升',()=>{
+  const start=scene.indexOf('function alignRootCoParentLayoutGenerations(');
+  const end=scene.indexOf('function selectPrimaryHorizontalPairs(',start);
+  assert.ok(start>=0&&end>start);
+  const normalize=vm.runInNewContext(
+    scene.slice(start,end)+'\nalignRootCoParentLayoutGenerations;'
+  );
+  const ids=['ancestor','mother','father','child','olderChild'];
+  const byId=new Map(ids.map(id=>[id,{id}]));
+  const groups=[
+    {parentIds:['ancestor'],children:['mother']},
+    {parentIds:['mother','father'],children:['child']},
+    {parentIds:['father'],children:['olderChild']}
+  ];
+  const generation=new Map([['ancestor',0],['mother',2],['father',0],
+    ['child',3],['olderChild',1]]);
+  normalize(byId,groups,generation);
+  assert.equal(generation.get('mother'),2);
+  assert.equal(generation.get('father'),0);
+  generation.delete('olderChild');
+  normalize(byId,groups.slice(0,2),generation);
+  assert.equal(generation.get('father'),2);
 });
