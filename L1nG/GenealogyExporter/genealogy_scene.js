@@ -6007,11 +6007,89 @@ function compactCrossRootSiblingGroups(layers,model,ownership) {
   return corrected;
 }
 
-function solveAutomaticGenealogyPositions(visibleIds) {
+// ========【完整家系獨立排列】先辨識人物與水平配偶單位的血緣連通群 ========
+function genealogyConnectedLayoutFamilyComponents(model,visibleIds) {
+  const parent=new Map([...visibleIds].map(id=>[String(id),String(id)]));
+  const find=id=>{
+    const current=parent.get(id);
+    if(!current)return null;
+    if(current===id)return current;
+    const root=find(current);
+    parent.set(id,root);
+    return root;
+  };
+  const union=(a,b)=>{
+    const first=find(a),second=find(b);
+    if(first&&second&&first!==second)parent.set(second,first);
+  };
+  // 同一水平配對永遠屬於同一個排列區塊，不會在分家時把配偶拆開。
+  model.units.forEach(unit=>{
+    const ids=unit.members.map(sim=>String(sim.id));
+    for(let i=1;i<ids.length;i++)union(ids[0],ids[i]);
+  });
+  model.parentGroups.forEach(group=>{
+    const ids=[...group.parentIds,...group.children]
+      .map(String).filter(id=>parent.has(id));
+    for(let i=1;i<ids.length;i++)union(ids[0],ids[i]);
+  });
+  const components=new Map();
+  parent.forEach((_,id)=>{
+    const root=find(id);
+    if(!components.has(root))components.set(root,[]);
+    components.get(root).push(id);
+  });
+  return [...components.values()];
+}
+
+// 每個家系先沿用原本 Parent Group / Branch Block 演算法完整排列；
+// 最後只平移整個家系區塊，不再讓無關家庭插進祖先與子女之間。
+function arrangeIndependentGenealogyFamilyComponents(visibleIds) {
+  const overall=buildGenealogyLayoutModel(visibleIds);
+  const components=genealogyConnectedLayoutFamilyComponents(overall,visibleIds);
+  if(components.length<=1)return null;
+
+  const primary=getActiveLayoutPrimaryIds(visibleIds);
+  const blocks=components.map(ids=>{
+    const units=[...new Set(ids.map(id=>overall.unitBySim.get(id)).filter(Boolean))];
+    const earliest=Math.min(...units.map(unit=>unit.generation));
+    const seeds=new Set(ids.filter(id=>primary.has(id)));
+    // 非選中家系以自己的最早祖先為骨架，不能借主家族的 seed 來排。
+    if(!seeds.size)units.filter(unit=>unit.generation===earliest)
+      .forEach(unit=>unit.members.forEach(sim=>seeds.add(sim.id)));
+
+    const positions=solveAutomaticGenealogyPositions(new Set(ids),seeds,true);
+    const values=[...positions.values()];
+    const left=Math.min(...values.map(pos=>pos.x));
+    const right=Math.max(...values.map(pos=>pos.x+getNodeDimensionsById(pos.id).W));
+    return {
+      ids,positions,left,right,
+      primary:ids.some(id=>primary.has(id)),
+      order:ids[0]
+    };
+  });
+
+  blocks.sort((a,b)=>
+    Number(b.primary)-Number(a.primary)||
+    a.order.localeCompare(b.order)
+  );
+  const positions=new Map();
+  const gap=Math.max(64,resolveLayoutGaps().SIBLING*2);
+  let cursor=0;
+  blocks.forEach(block=>{
+    const shift=cursor-block.left;
+    block.positions.forEach((pos,id)=>positions.set(id,{...pos,x:pos.x+shift}));
+    cursor+=block.right-block.left+gap;
+  });
+  return positions;
+}
+
+function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,componentOnly=false) {
+  if(!componentOnly){
+    const arranged=arrangeIndependentGenealogyFamilyComponents(visibleIds);
+    if(arranged)return arranged;
+  }
   const primarySimIds =
-    getActiveLayoutPrimaryIds(
-      visibleIds
-    );
+    primaryOverride || getActiveLayoutPrimaryIds(visibleIds);
 
   const model =
     buildGenealogyLayoutModel(
