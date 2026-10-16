@@ -159,10 +159,7 @@
         best = {
           value,
           distance,
-          priority,
-          guide:typeof target === 'number'
-            ? null
-            : target?.guide ?? null
+          priority
         };
       }
     }
