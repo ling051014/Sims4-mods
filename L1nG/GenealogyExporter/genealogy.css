@@ -6327,19 +6327,28 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .help-section kbd {
-    /* Keycap 置中 */ display:inline-flex;
-    /* 垂直置中 */ align-items:center;
-    /* 水平置中 */ justify-content:center;
-    /* 最小高度 */ min-height:20px;
-    /* 內縮空間 */ padding:1px 5px;
-    /* 邊框 */ border:1px solid var(--border-default);
-    /* 圓角 */ border-radius:4px;
-    /* 背景 */ background:var(--surface-input);
-    /* 不使用額外陰影 */ box-shadow:none;
-    /* 主要文字色 */ color:var(--text-primary);
-    /* 沿用網站字體 */ font-family:inherit;
-    /* 字體大小 */ font-size:10.5px;
-    /* 行距 */ line-height:1;
+    /* 實體鍵帽：鍵面置中並保留文字的自然寬度 */ display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    /* 功能鍵隨文字加寬，鍵帽稍微加厚 */ min-height:23px;
+    padding:2px 7px 3px;
+    /* 相鄰按鍵留出縫隙，底座不擠壓說明文字 */ margin:0 2px 2px;
+    vertical-align:middle;
+    /* 鍵面上緣較亮、下緣略暗，全部沿用主題色票 */ border:1px solid color-mix(in srgb,var(--border-default) 82%,var(--text-secondary));
+    border-radius:5px;
+    background:linear-gradient(180deg,
+        color-mix(in srgb,var(--surface-input) 84%,var(--surface-card)),
+        color-mix(in srgb,var(--surface-input) 68%,var(--border-default)));
+    /* 內側高光、底部厚度與柔和投影構成鍵帽，不使用覆寫層 */ box-shadow:
+        inset 0 1px 0 color-mix(in srgb,var(--surface-card) 84%,transparent),
+        inset 0 -1px 0 color-mix(in srgb,var(--border-default) 40%,transparent),
+        0 2px 0 color-mix(in srgb,var(--border-default) 74%,var(--text-secondary)),
+        0 3px 5px color-mix(in srgb,var(--text-primary) 11%,transparent);
+    color:var(--text-primary);
+    font-family:inherit;
+    font-size:10.5px;
+    font-weight:600;
+    line-height:1;
 }
 
 @media (max-width:720px) {
