@@ -259,7 +259,6 @@
     "沒有符合的圖片": "No matching images",
     "新家族": "New Family",
     "家族名稱：": "Family name:",
-    "至少需要保留一個家族。": "At least one family must remain.",
     "確定刪除目前家族嗎？\n人物本身不會被刪除。": "Delete the current family?\nThe Sims themselves will not be deleted.",
     "請輸入家族名稱。": "Please enter a family name.",
     "確定刪除這個模擬市民嗎？此操作會同時清除相關關係。": "Delete this Sim? Related relationships will also be removed.",
@@ -397,7 +396,6 @@
     "移除背景圖片": "Remove Background Image",
     "確定清除目前背景圖片嗎？": "Remove the current background image?",
     "清理未使用圖片": "Clean Up Unused Images",
-    "將掃描所有未被引用的圖片並刪除。確定繼續嗎？": "Scan for all unreferenced images and delete them?",
     "開始清理": "Start Cleanup",
     "尚未選擇圖片": "No Image Selected",
     "請先選擇一張圖片": "Choose an image first.",
@@ -1171,6 +1169,10 @@
     "以 2× 解析度輸出，適合分享與保存": "Export at 2× resolution for sharing and saving",
     "以 3× 解析度輸出，適合高解析度保存": "Export at 3× resolution for high-resolution copies",
     "JSON 備份包含目前的族譜資料與圖片，日後匯入後仍可繼續編輯。": "A JSON backup includes your current family tree data and images so you can import it and continue editing later.",
-    "保存完整族譜資料與圖片，之後匯入備份即可接續編輯。": "Keep a full backup of your family tree and images to import and edit again later."
+    "保存完整族譜資料與圖片，之後匯入備份即可接續編輯。": "Keep a full backup of your family tree and images to import and edit again later.",
+    "要清理未使用的圖片嗎？系統會移除目前沒有被族譜引用的圖片，仍在使用的圖片會保留。": "Clear unused images? Images no longer used by the family tree will be removed; images still in use will be kept.",
+    "需要保留至少一個家族，才能繼續使用族譜畫布。": "At least one family is needed to use the family-tree canvas.",
+    "請為新家族取個名稱。": "Enter a name for the new family.",
+    "家族中的模擬市民不會被刪除，之後仍可加入其他家族。": "The Sims in this family will not be deleted and can be added to another family later."
   }
 }
