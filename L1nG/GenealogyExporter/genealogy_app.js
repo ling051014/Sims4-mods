@@ -129,9 +129,9 @@ const THEME_PRESETS = [
   { id:'sage',       name:'森霧鼠尾草', grad:'linear-gradient(120deg, #dfe9e0 0%, #eef3ea 100%)' },
   { id:'rose',       name:'莓果薄暮',   grad:'linear-gradient(120deg, #e8c4d0 0%, #f4dfe6 100%)' },
   { id:'amber',      name:'琥珀紙頁',   grad:'linear-gradient(120deg, #e5c896 0%, #f2dfb9 100%)' },
-  { id:'ink',        name:'墨曜紫灰',   grad:'linear-gradient(120deg, #111014 0%, #211e24 100%)' },
-  { id:'berrynight', name:'夜莓酒紅',   grad:'linear-gradient(120deg, #151013 0%, #281d22 100%)' },
-  { id:'graphite',   name:'中性石墨',   grad:'linear-gradient(120deg, #111315 0%, #202428 100%)' }
+  { id:'ink',        name:'墨曜紫灰',   grad:'linear-gradient(120deg, #141317 0%, #262229 100%)' },
+  { id:'berrynight', name:'夜莓酒紅',   grad:'linear-gradient(120deg, #181417 0%, #2c2328 100%)' },
+  { id:'graphite',   name:'中性石墨',   grad:'linear-gradient(120deg, #151719 0%, #272b2e 100%)' }
 ];
 
 const MAX_TAGS = 5;
