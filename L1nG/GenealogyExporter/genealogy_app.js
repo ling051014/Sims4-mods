@@ -18253,10 +18253,19 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') { e.preventDefault(); lifePhotoWorkspace.moveViewer(-1); return; }
     if (e.key === 'ArrowRight') { e.preventDefault(); lifePhotoWorkspace.moveViewer(1); return; }
   }
-  if (e.key === 'Enter' && e.ctrlKey) {
-    if (lifePhotoEditorDialog.classList.contains('show')) lifePhotoWorkspace.commitEditor();
-    else if (petEditorDialog.classList.contains('show')) petEditorController.commit();
-    else if (mask.classList.contains('show')) void savePersonEditorFromUi();
+  // 編輯視窗內使用 Ctrl/Cmd + S 快速儲存；一般頁面不攔截瀏覽器快捷鍵。
+  if (modifier && key === 's' && !e.altKey) {
+    const lifePhotoOpen = lifePhotoEditorDialog.classList.contains('show');
+    const petEditorOpen = petEditorDialog.classList.contains('show');
+    const personEditorOpen = mask.classList.contains('show');
+    if (lifePhotoOpen || petEditorOpen || personEditorOpen) {
+      e.preventDefault();
+      if (e.repeat) return;
+      if (lifePhotoOpen) lifePhotoWorkspace.commitEditor();
+      else if (petEditorOpen) petEditorController.commit();
+      else void savePersonEditorFromUi();
+      return;
+    }
   }
 });
 
