@@ -9339,7 +9339,7 @@ function paintPersonLayer() {
 
   const nodeHtml =
     html ||
-    `<div class="empty">${esc(uiText('目前家族還沒有成員，使用「成員 ＋」新增或加入人物'))}</div>`;
+    `<div class="empty">${esc(uiText('這個家族還沒有模擬市民。點選「成員 ＋」，即可新增或加入已建立的模擬市民。'))}</div>`;
 
   if (
     html &&
