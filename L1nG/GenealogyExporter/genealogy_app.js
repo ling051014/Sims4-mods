@@ -17301,6 +17301,7 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
   let missing = 0;
   let thumDecoded = 0;
   let decodeFailed = 0;
+  const decodeFailures = [];
 
   const persistAsset = async (target, simId, kind = 'sim') => {
     const sourceSim = sourceSims[String(simId)];
@@ -17329,6 +17330,7 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
       if (error?.code !== 'EA_THUM_DECODE_FAILED') throw error;
       // 已知 THUM conversion failure 只略過這張頭像，不能中止或損失整份族譜。
       decodeFailed++;
+      decodeFailures.push({simId:String(simId),path:String(asset.path || ''),stage:String(error.stage || ''),reason:String(error.message || error.code || '')});
       console.warn('[遊戲 ZIP 頭像] EA THUM fail closed：', { simId:String(simId), path:asset.path, stage:error.stage, reason:error.message }, error);
       return;
     }
@@ -17454,7 +17456,8 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
     unsupported,
     missing,
     thumDecoded,
-    decodeFailed
+    decodeFailed,
+    decodeFailures
   };
 }
 
@@ -17752,7 +17755,7 @@ function gameImportUpdateSummary(
     `${uiText('新增遊戲關係')}：${stats.relationships?.added || 0}`,
     `${uiText('移除已不存在的遊戲關係')}：${stats.relationships?.removed || 0}`,
     `${uiText('新匯入頭像')}：${avatarStats?.saved || 0}`,
-    avatarStats?.decodeFailed ? `有 ${avatarStats.decodeFailed} 張遊戲頭像無法解析，已略過。詳細資訊請查看瀏覽器主控台。` : null,
+    avatarStats?.decodeFailed ? `有 ${avatarStats.decodeFailed} 張遊戲頭像無法解析，已略過。` : null,
     '',
     uiText(LIFE_PHOTOS_PUBLIC
       ? '已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。'
@@ -17945,36 +17948,48 @@ async function importGameGenealogy(file) {
     hideFileOperationStatus();
 
     if (isUpdate) {
-      await uiAlert(
-        gameImportUpdateSummary(
-          updateResult,
-          avatarStats
-        ),
-        {
-          title:'遊戲族譜更新完成',
-          confirmText:'查看族譜'
-        }
+      const summaryLines = gameImportUpdateSummary(updateResult, avatarStats)
+        .split('\n').filter(Boolean);
+      const diagnosticLines = (avatarStats.decodeFailures || []).map(item =>
+        `ID: ${item.simId} | ${item.stage || item.path || 'EA THUM'} | ${item.reason || 'EA_THUM_DECODE_FAILED'}`
       );
+      await uiAlert(summaryLines.slice(0, 4).join('\n'), {
+        title:'遊戲族譜更新完成',
+        kind:'success',
+        confirmText:'查看族譜',
+        details:{
+          label:'查看完整更新明細',
+          text:[
+            ...summaryLines.slice(4),
+            ...(diagnosticLines.length
+              ? [uiText('無法解析的頭像'), ...diagnosticLines] : [])
+          ].join('\n')
+        }
+      });
     } else {
-      await uiAlert(
-        [
-          '遊戲族譜已成功匯入。',
-          '',
-          `人物：${simCount}`,
-          `寵物：${petCount}`,
-          `家族：${familyCount}`,
-          `頭像：${avatarStats.saved}`,
-          avatarStats.decodeFailed ? `有 ${avatarStats.decodeFailed} 張遊戲頭像無法解析，已略過。詳細資訊請查看瀏覽器主控台。` : null,
-          importedGameDate
-            ? `${uiText('遊戲日期')}：${importedGameDate}`
-            : null,
-          `目前顯示：${activeFamilyName}`
-        ].filter(Boolean).join('\n'),
-        {
-          title:'遊戲族譜匯入完成',
-          confirmText:'查看族譜'
-        }
+      const diagnosticLines = (avatarStats.decodeFailures || []).map(item =>
+        `ID: ${item.simId} | ${item.stage || item.path || 'EA THUM'} | ${item.reason || 'EA_THUM_DECODE_FAILED'}`
       );
+      await uiAlert([
+        '遊戲族譜已成功匯入。',
+        `${uiText('人物')}：${simCount}`,
+        `${uiText('寵物')}：${petCount}`,
+        `${uiText('家族')}：${familyCount}`,
+        `${uiText('頭像')}：${avatarStats.saved}`,
+        avatarStats.decodeFailed
+          ? `${avatarStats.decodeFailed} ${uiText('張頭像無法解析，已略過；其他資料已成功匯入。')}`
+          : null,
+        importedGameDate ? `${uiText('遊戲日期')}：${importedGameDate}` : null,
+        `${uiText('目前顯示')}：${activeFamilyName}`
+      ].filter(Boolean).join('\n'), {
+        title:'遊戲族譜匯入完成',
+        kind:'success',
+        confirmText:'查看族譜',
+        details:diagnosticLines.length ? {
+          label:'查看失敗頭像明細',
+          text:diagnosticLines.join('\n')
+        } : null
+      });
     }
 
     // 完成後主動讓玩家看見家族清單。
