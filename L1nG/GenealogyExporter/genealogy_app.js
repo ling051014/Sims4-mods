@@ -17766,19 +17766,19 @@ async function importGameGenealogy(file) {
       throw new Error('找不到遊戲族譜匯入模組。');
     }
 
-    showFileOperationStatus('讀取並檢查 ZIP 檔案……', 0);
+    showFileOperationStatus('讀取並檢查 ZIP 檔案……', 0, '匯入遊戲族譜');
     await waitForFileOperationPaint();
 
     const bundle = await window.L1nGGameImport.parseFile(file);
 
-    showFileOperationStatus('整理模擬市民、寵物、家族與人物關係……', 12);
+    showFileOperationStatus('整理模擬市民、寵物、家族與人物關係……', 12, '匯入遊戲族譜');
     await waitForFileOperationPaint();
 
     const converted =
       window.L1nGGameImport
         .convertBundle(bundle);
 
-    showFileOperationStatus('比對遊戲存檔與現有族譜資料……', 22);
+    showFileOperationStatus('比對遊戲存檔與現有族譜資料……', 22, '匯入遊戲族譜');
     await waitForFileOperationPaint();
 
     const analysis =
