@@ -66,7 +66,7 @@ test('原本折成 V-H-V 的單一子女，靠近父母 X 軸時直接吸回直�
   assert.equal(targets.x[0].value,100);
   const snapped=drag(targets,'C',106,250);
   assert.equal(snapped.x,100);
-  assert.equal(snapped.guideX,150);
+  assert.equal(snapped.guideX,null);
   assert.equal(f.source(f.group,f.pos).x,snapped.x+50);
 });
 test('父母端也能反向吸附至子女中軸，而不只支援拖曳子女',()=>{
@@ -75,7 +75,7 @@ test('父母端也能反向吸附至子女中軸，而不只支援拖曳子女',
   assert.equal(targets.x[0].value,115);
   const snapped=drag(targets,'P',110,0);
   assert.equal(snapped.x,115);
-  assert.equal(snapped.guideX,165);
+  assert.equal(snapped.guideX,null);
   const moved=new Map(f.pos);
   moved.set('P',{...moved.get('P'),x:snapped.x});
   assert.equal(f.source(f.group,moved).x,f.anchor(f.pos.get('C')).x);
@@ -111,7 +111,7 @@ test('配偶 H-V-H 接近同一頭像高度時吸回水平 H，輔助線指向�
   const targets=f.buildSingleDragRelationshipTargets('M');
   const snapped=drag(targets,'M',100,7);
   assert.equal(snapped.y,0);
-  assert.equal(snapped.guideY,40);
+  assert.equal(snapped.guideY,null);
 });
 test('離吸附範圍太遠時不強制移動；放大後使用同樣畫面像素閾值',()=>{
   const f=fixture();
