@@ -1203,6 +1203,15 @@
     "準備族譜畫布……": "Preparing genealogy canvas…",
     "載入頭像與關係圖示……": "Loading portraits and relationship icons…",
     "正在繪製族譜圖片……": "Rendering genealogy image…",
-    "正在產生 PNG 檔案……": "Generating PNG file…"
+    "正在產生 PNG 檔案……": "Generating PNG file…",
+    "查看詳細資訊": "View details",
+    "收合詳細資訊": "Hide details",
+    "複製診斷資訊": "Copy diagnostics",
+    "已複製": "Copied",
+    "查看完整更新明細": "View full update details",
+    "查看失敗頭像明細": "View failed portrait details",
+    "無法解析的頭像": "Portraits that could not be decoded",
+    "張頭像無法解析，已略過；其他資料已成功匯入。": "portrait(s) could not be decoded and were skipped; other data imported successfully.",
+    "目前顯示": "Now showing"
   }
 }

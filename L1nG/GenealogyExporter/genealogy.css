@@ -6878,144 +6878,187 @@ html[lang="en"] body {
 /* ========【關係名稱】 英文與長文字依內容自適應 ======== */
 
 
-/* ========【共用 HTML 彈窗】 取代瀏覽器原生彈窗 ======== */
-
+/* ========【訊息／決策共用視窗】 六種語意共用置中框架，不影響編輯視窗 ======== */
 .ui-dialog-mask {
-    /* 固定定位 */ position: fixed;
-    /* 四邊貼齊 */ inset: 0;
-    /* 預設隱藏 */ display: none;
-    /* 水平對齊 */ align-items: center;
-    /* 垂直對齊 */ justify-content: center;
-    /* 內縮空間 */ padding: 20px;
-    /* 遮罩背景 */ background: rgba(0,0,0,.10);
-    /* 毛玻璃 */ backdrop-filter: blur(5px);
-    /* 顯示層級 */ z-index: 20000;
-}
-
-.ui-dialog-mask.show {
-    /* 顯示方式 */ display: flex;
-}
-
-.ui-dialog:focus,
-.ui-dialog-panel:focus,
-.ui-dialog-backdrop:focus {
-    outline: none;
-}
-
-.ui-dialog {
-    /* 相對定位 */ position: relative;
-    /* 元素寬度 */ width: min(420px, 92vw);
-    /* 背景設定 */ background: var(--surface-card);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 12px;
-    /* 元素陰影 */ box-shadow: 0 10px 40px rgba(0,0,0,.22);
-    /* 溢出處理 */ overflow: hidden;
-}
-
-.ui-dialog-header {
-    /* 相對定位 */ position: relative;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 內縮空間 */ padding: 15px 52px;
-    /* 背景設定 */ background: var(--surface-panel);
-    /* 下方邊框 */ border-bottom: 1px solid var(--border-default);
-    /* 字體大小 */ font-size: 16px;
-    /* 字體粗細 */ font-weight: 600;
-    /* 文字置中 */ text-align: center;
-}
-
-.ui-dialog-title-row {
-    display:inline-flex;
+    position:fixed;
+    inset:0;
+    display:none;
     align-items:center;
     justify-content:center;
-    gap:4px;
-    min-width:0;
+    padding:16px;
+    background:var(--overlay-backdrop);
+    backdrop-filter:blur(5px);
+    z-index:20000;
 }
+.ui-dialog-mask.show { display:flex; }
+.ui-dialog:focus,
+.ui-dialog-panel:focus,
+.ui-dialog-backdrop:focus { outline:none; }
 
-
-.ui-dialog-close {
-    /* 絕對定位 */ position: absolute;
-    /* 右側位置 */ right: 16px;
-    /* 頂部位置 */ top: 50%;
-    /* 垂直置中 */ transform: translateY(-50%);
-    /* 元素寬度 */ width: 32px;
-    /* 元素高度 */ height: 32px;
-    /* 移除邊框 */ border: none;
-    /* 背景透明 */ background: transparent;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 字體大小 */ font-size: 22px;
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 滑鼠指標 */ cursor: pointer;
+.ui-dialog {
+    width:min(460px,100%);
+    max-height:calc(100dvh - 32px);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:var(--surface-card);
+    color:var(--text-primary);
+    border:1px solid var(--border-default);
+    border-radius:12px;
+    box-shadow:0 16px 42px rgba(31,35,40,.18);
+    animation:l1ng-dialog-in .16s ease-out;
+    text-align:center;
 }
-
-.ui-dialog-close:hover {
-    /* 背景設定 */ background: var(--surface-item-hover);
-    /* 文字顏色 */ color: var(--text-primary);
+.ui-dialog-header {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:25px 23px 0;
+    text-align:center;
 }
-
+.ui-dialog-status-icon {
+    width:25px;
+    height:25px;
+    color:var(--action-primary);
+}
+.ui-dialog[data-presentation="result"] .ui-dialog-status-icon {
+    color:var(--action-primary);
+}
+.ui-dialog[data-presentation="error"] .ui-dialog-status-icon,
+.ui-dialog[data-mode="confirm"][data-kind="danger"] .ui-dialog-status-icon {
+    color:var(--danger-text);
+}
+.ui-dialog-header h2 {
+    margin:0;
+    font-size:16px;
+    font-weight:700;
+    line-height:1.4;
+    color:var(--text-primary);
+    overflow-wrap:anywhere;
+}
 .ui-dialog-body {
-    /* 內縮空間 */ padding: 22px 24px;
+    padding:13px 24px 0;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    text-align:center;
 }
-
 .ui-dialog-message {
-    /* 文字置中 */ text-align: center;
-    /* 行距設定 */ line-height: 1.75;
-    /* 保留換行 */ white-space: pre-wrap;
-    /* 字體大小 */ font-size: 13px;
+    font-size:13px;
+    line-height:1.75;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    text-align:center;
 }
-
 .ui-dialog-input {
-    /* 元素寬度 */ width: 100%;
-    /* 上方間距 */ margin-top: 16px;
-    /* 內縮空間 */ padding: 10px 14px;
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 字體設定 */ font-family: inherit;
-    /* 字體大小 */ font-size: 13px;
-    /* 文字置中 */ text-align: center;
-    /* 移除外框 */ outline: none;
-    /* 預設隱藏 */ display: none;
+    display:none;
+    width:100%;
+    max-width:300px;
+    margin:16px auto 0;
+    padding:9px 12px;
+    border:1px solid var(--border-default);
+    border-radius:7px;
+    background:var(--surface-input);
+    color:var(--text-primary);
+    font:inherit;
+    font-size:13px;
+    text-align:center;
+    outline:none;
 }
-
-.ui-dialog-input.show {
-    /* 顯示方式 */ display: block;
+.ui-dialog-input.show { display:block; }
+.ui-dialog-input:focus-visible {
+    border-color:var(--action-primary);
+    box-shadow:0 0 0 2px var(--brand-tint-start);
 }
-
-.ui-dialog-input:focus {
-    /* 邊框顏色 */ border-color: var(--action-primary);
-    /* 元素陰影 */ box-shadow: 0 0 0 3px var(--brand-tint-start);
+.ui-dialog-details {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:9px;
+    margin-top:12px;
 }
-
-
-
-
-
-
-
-
-
-
-
-.ui-dialog[data-kind="danger"] .ui-dialog-actions button.primary {
-    /* 背景設定 */ background: var(--danger-solid);
-    /* 邊框顏色 */ border-color: var(--danger-solid);
-    color:var(--danger-on-solid);
+.ui-dialog-details[hidden],
+.ui-dialog-details-content[hidden],
+.ui-dialog-details-copy[hidden] { display:none; }
+.ui-dialog-details-toggle,
+.ui-dialog-details-copy {
+    border:0;
+    border-radius:5px;
+    padding:6px 9px;
+    background:transparent;
+    color:var(--action-primary);
+    font:inherit;
+    font-size:12px;
+    cursor:pointer;
 }
-
-.ui-dialog[data-kind="danger"] .ui-dialog-actions button.primary:hover {
-    /* 背景設定 */ background: var(--danger-solid-hover);
-    /* 邊框顏色 */ border-color: var(--danger-solid-hover);
-    color:var(--danger-on-solid);
+.ui-dialog-details-toggle:hover,
+.ui-dialog-details-copy:hover { background:var(--brand-tint-start); }
+.ui-dialog-details-content {
+    width:100%;
+    padding:12px;
+    border-radius:7px;
+    background:var(--surface-panel);
+    font-size:12px;
+    line-height:1.7;
+    color:var(--text-secondary);
+    text-align:center;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    user-select:text;
 }
-
-/* ========【共用確認彈窗】 alert / confirm / choice / prompt 操作按鈕統一置中 ======== */
-
 #uiDialog .ui-dialog-actions {
-    /* 共用確認彈窗不依賴按鈕數量判斷位置，避免新增第三操作後又回到靠右 */ justify-content: center;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin:0;
+    padding:20px 20px 22px;
+}
+#uiDialog .ui-dialog-actions button {
+    flex:0 1 auto;
+    min-width:88px;
+    max-width:100%;
+    padding:9px 15px;
+    overflow-wrap:anywhere;
+    text-align:center;
+}
+#uiDialog .ui-dialog-actions button[hidden] { display:none; }
+#uiDialog .ui-dialog-actions button.primary.destructive {
+    background:var(--danger-solid);
+    border-color:var(--danger-solid);
+    color:var(--danger-on-solid);
+}
+#uiDialog .ui-dialog-actions button.primary.destructive:hover {
+    background:var(--danger-solid-hover);
+    border-color:var(--danger-solid-hover);
+    color:var(--danger-on-solid);
+}
+#uiDialog .ui-dialog-actions button.danger {
+    border-color:var(--danger-border);
+    color:var(--danger-text);
+    background:var(--surface-card);
+}
+#uiDialog .ui-dialog-actions button.danger:hover {
+    background:var(--danger-surface);
+}
+#uiDialog[data-mode="choice"] #uiDialogCancel {
+    order:3;
+}
+@media (max-width:440px) {
+    .ui-dialog-mask { padding:12px; }
+    .ui-dialog { max-height:calc(100dvh - 24px); }
+    .ui-dialog-header { padding:22px 16px 0; }
+    .ui-dialog-body { padding:12px 16px 0; }
+    #uiDialog .ui-dialog-actions { padding:16px 12px 19px; }
+    #uiDialog[data-mode="choice"] #uiDialogCancel {
+        flex-basis:100%;
+        margin-inline:auto;
+    }
+}
+@media (prefers-reduced-motion:reduce) {
+    .ui-dialog { animation:none; }
 }
 
 /* 一般功能彈窗若操作列只有兩顆按鈕與 spacer，也一起置中；有計數器等其他資訊者維持原排版。 */

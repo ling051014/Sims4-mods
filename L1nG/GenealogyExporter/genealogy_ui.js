@@ -416,6 +416,8 @@
     const $ = id => document.getElementById(id);
     let _uiDialogResolve = null;
     let _uiDialogMode = 'alert';
+    let _uiDialogCancelValue = null;
+    let _uiDialogPreviousFocus = null;
 
     function closeUiDialog(result = null) {
       const overlay = $('confirmationDialog');
@@ -425,8 +427,14 @@
       const resolve = _uiDialogResolve;
       _uiDialogResolve = null;
       if (resolve) resolve(result);
+      if (_uiDialogPreviousFocus?.isConnected) {
+        _uiDialogPreviousFocus.focus({preventScroll:true});
+      }
+      _uiDialogPreviousFocus = null;
     }
 
+
+    // 六種訊息／決策型視窗共用同一個 DOM，狀態色不等於操作危險程度。
     function openUiDialog({
       title = '提示',
       message = '',
@@ -441,197 +449,184 @@
       secondaryHint = '',
       confirmHint = '',
       confirmValue = true,
-      cancelValue = mode === 'confirm' ? false : null
+      cancelValue = mode === 'confirm' ? false : null,
+      details = null
     } = {}) {
       const overlay = $('confirmationDialog');
       const dialog = $('uiDialog');
       const titleEl = $('uiDialogTitle');
+      const iconEl = $('uiDialogIcon');
       const messageEl = $('uiDialogMessage');
+      const detailsEl = $('uiDialogDetails');
+      const detailsToggle = $('uiDialogDetailsToggle');
+      const detailsContent = $('uiDialogDetailsContent');
+      const detailsCopy = $('uiDialogDetailsCopy');
       const inputEl = $('uiDialogInput');
       const cancelBtn = $('uiDialogCancel');
       const secondaryBtn = $('uiDialogSecondary');
       const confirmBtn = $('uiDialogConfirm');
-      const titleHint = $('uiDialogTitleHint');
-      const closeBtn = $('uiDialogClose');
 
-      if (!overlay || !dialog || !titleEl || !messageEl || !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn || !titleHint || !closeBtn) {
-        return Promise.resolve(
-          mode === 'confirm'
-            ? false
-            : mode === 'choice'
-              ? null
-              : mode === 'prompt'
-                ? null
-                : true
-        );
+      if (!overlay || !dialog || !titleEl || !iconEl || !messageEl ||
+          !detailsEl || !detailsToggle || !detailsContent || !detailsCopy ||
+          !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn) {
+        return Promise.resolve(cancelValue);
       }
 
       if (_uiDialogResolve) closeUiDialog(null);
       _uiDialogMode = mode;
-      titleEl.textContent = uiText(title);
-      // 先嘗試翻譯完整訊息，讓跨行確認文案與動態樣式能一次正確處理；
-      // 若沒有完整對應，再逐行翻譯，避免英文介面殘留繁中文字。
-      const rawMessage = String(message ?? '');
-      const wholeMessage = uiText(rawMessage);
-      messageEl.textContent = wholeMessage !== rawMessage
-        ? wholeMessage
-        : rawMessage.split('\n').map(line => uiText(line)).join('\n');
+      _uiDialogCancelValue = cancelValue;
+      _uiDialogPreviousFocus = document.activeElement;
+
+      const presentation = mode === 'result' || kind === 'success'
+        ? 'result'
+        : mode === 'error' || (mode === 'alert' && kind === 'danger')
+          ? 'error'
+          : mode === 'choice' ? 'choice'
+          : mode === 'prompt' ? 'prompt'
+          : mode === 'confirm' ? 'confirm' : 'notice';
+      const iconClasses = {
+        notice:'icon-info-circle',
+        confirm:kind === 'danger' ? 'icon-exclamation-triangle' : 'icon-info-circle',
+        choice:'icon-info-circle',
+        result:'icon-check-circle',
+        error:'icon-exclamation-triangle',
+        prompt:'icon-pencil-square'
+      };
+
+      dialog.dataset.presentation = presentation;
       dialog.dataset.kind = kind;
-      const hasSecondaryAction =
-        !!String(secondaryText || '').trim();
+      dialog.dataset.mode = mode;
+      titleEl.textContent = uiText(title);
+      iconEl.className = 'l1ng-icon ui-dialog-status-icon ' + iconClasses[presentation];
 
-      dialog.dataset.actionCount =
-        mode === 'alert'
-          ? '1'
-          : hasSecondaryAction
-            ? '3'
-            : '2';
+      // 保持純文字渲染；不讓 ZIP 中的名字或錯誤訊息被當成 HTML 執行。
+      const localizeLines = value => {
+        const raw = String(value ?? '');
+        const whole = uiText(raw);
+        return whole !== raw
+          ? whole
+          : raw.split('\n').map(line => uiText(line)).join('\n');
+      };
+      messageEl.textContent = localizeLines(message);
 
+      const hasSecondary = !!String(secondaryText || '').trim();
+      dialog.dataset.actionCount = mode === 'alert' || mode === 'result' ||
+        mode === 'error' ? '1' : hasSecondary ? '3' : '2';
       confirmBtn.textContent = uiText(confirmText);
-      cancelBtn.textContent = uiText(cancelText);
-      cancelBtn.style.display = mode === 'alert' ? 'none' : '';
-
-      secondaryBtn.textContent =
-        hasSecondaryAction
-          ? uiText(secondaryText)
-          : '';
-
-      secondaryBtn.hidden =
-        !hasSecondaryAction;
-
-      secondaryBtn.classList.toggle(
-        'danger',
-        hasSecondaryAction &&
-        secondaryKind === 'danger'
+      confirmBtn.classList.toggle(
+        'destructive',
+        mode === 'confirm' && kind === 'danger'
       );
+      confirmBtn.title = confirmHint ? uiText(confirmHint) : '';
+      if (confirmHint) confirmBtn.setAttribute('aria-description', uiText(confirmHint));
+      else confirmBtn.removeAttribute('aria-description');
 
-      const confirmHintText =
-        String(confirmHint || '').trim();
+      cancelBtn.textContent = uiText(cancelText);
+      cancelBtn.hidden = mode === 'alert' || mode === 'result' || mode === 'error';
+      secondaryBtn.textContent = hasSecondary ? uiText(secondaryText) : '';
+      secondaryBtn.hidden = !hasSecondary || mode !== 'choice';
+      secondaryBtn.classList.toggle('danger', secondaryKind === 'danger');
+      secondaryBtn.title = secondaryHint ? uiText(secondaryHint) : '';
+      if (secondaryHint) secondaryBtn.setAttribute('aria-description', uiText(secondaryHint));
+      else secondaryBtn.removeAttribute('aria-description');
 
-      const secondaryHintText =
-        String(secondaryHint || '').trim();
-
-      const titleHintSections = [];
-
-      if (confirmHintText) {
-        titleHintSections.push(
-          `${uiText(confirmText)}：${uiText(confirmHintText)}`
+      const detailText = typeof details === 'string' ? details : details?.text;
+      const hasDetails = !!String(detailText ?? '').trim();
+      detailsEl.hidden = !hasDetails;
+      detailsContent.hidden = true;
+      detailsToggle.setAttribute('aria-expanded', 'false');
+      detailsToggle.textContent = uiText(details?.label || '查看詳細資訊');
+      detailsContent.textContent = hasDetails ? localizeLines(detailText) : '';
+      const copyText = typeof details === 'object' && details?.copyText
+        ? String(details.copyText) : String(detailText ?? '');
+      detailsCopy.hidden = !hasDetails;
+      detailsCopy.textContent = uiText('複製診斷資訊');
+      detailsToggle.onclick = () => {
+        const expanded = detailsToggle.getAttribute('aria-expanded') === 'true';
+        detailsContent.hidden = expanded;
+        detailsToggle.setAttribute('aria-expanded', String(!expanded));
+        detailsToggle.textContent = uiText(
+          expanded ? (details?.label || '查看詳細資訊') : '收合詳細資訊'
         );
-      }
-
-      if (
-        hasSecondaryAction &&
-        secondaryHintText
-      ) {
-        titleHintSections.push(
-          `${uiText(secondaryText)}：${uiText(secondaryHintText)}`
-        );
-      }
-
-      const titleHintText =
-        titleHintSections.join('\n\n');
-
-      titleHint.hidden =
-        !titleHintText;
-
-      if (titleHintText) {
-        titleHint.dataset.tooltip =
-          titleHintText;
-
-        titleHint.setAttribute(
-          'aria-label',
-          uiText('匯入方式說明')
-        );
-      } else {
-        delete titleHint.dataset.tooltip;
-      }
+      };
+      detailsCopy.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(copyText);
+          detailsCopy.textContent = uiText('已複製');
+        } catch (error) {
+          console.warn('[共用視窗] 複製明細失敗：', error);
+        }
+      };
 
       inputEl.classList.toggle('show', mode === 'prompt');
       inputEl.value = mode === 'prompt' ? uiText(defaultValue) : '';
+      inputEl.setAttribute('aria-label', uiText(title));
 
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden', 'false');
 
       return new Promise(resolve => {
         _uiDialogResolve = resolve;
-
-        const finishConfirm = () => {
-          if (mode === 'prompt') {
-            closeUiDialog(inputEl.value);
-            return;
-          }
-
-          closeUiDialog(confirmValue);
-        };
-
-        const finishSecondary = () =>
-          closeUiDialog(secondaryValue);
-
-        const finishCancel = () =>
-          closeUiDialog(cancelValue);
-
+        const finishConfirm = () => closeUiDialog(
+          mode === 'prompt' ? inputEl.value : confirmValue
+        );
+        const finishCancel = () => closeUiDialog(cancelValue);
         confirmBtn.onclick = finishConfirm;
-        secondaryBtn.onclick =
-          hasSecondaryAction
-            ? finishSecondary
-            : null;
         cancelBtn.onclick = finishCancel;
-        closeBtn.onclick = finishCancel;
+        secondaryBtn.onclick = hasSecondary ? () => closeUiDialog(secondaryValue) : null;
         overlay.onclick = event => {
           if (event.target === overlay) finishCancel();
         };
-
         inputEl.onkeydown = event => {
-          if (event.key === 'Enter') {
+          if (event.key === 'Enter' && mode === 'prompt') {
             event.preventDefault();
             finishConfirm();
           }
         };
-
         requestAnimationFrame(() => {
           if (mode === 'prompt') {
             inputEl.focus();
             inputEl.select();
-            return;
+          } else {
+            confirmBtn.focus({ preventScroll:true });
           }
-
-          dialog.focus({
-            preventScroll:true
-          });
         });
       });
     }
 
     function uiAlert(message, options = {}) {
       return openUiDialog({
-        title: options.title || '提示',
+        title:options.title || '提示',
         message,
-        mode: 'alert',
-        kind: options.kind || 'default',
-        confirmText: options.confirmText || '確定'
+        mode:options.mode || (options.kind === 'danger' ? 'error' :
+          options.kind === 'success' ? 'result' : 'alert'),
+        kind:options.kind || 'default',
+        confirmText:options.confirmText || '確定',
+        details:options.details || null
       });
     }
 
     function uiConfirm(message, options = {}) {
       return openUiDialog({
-        title: options.title || '請確認',
+        title:options.title || '請確認',
         message,
-        mode: 'confirm',
-        kind: options.kind || 'default',
-        confirmText: options.confirmText || '確定',
-        cancelText: options.cancelText || '取消'
+        mode:'confirm',
+        kind:options.kind || 'default',
+        confirmText:options.confirmText || '確定',
+        cancelText:options.cancelText || '取消',
+        details:options.details || null
       });
     }
 
     function uiPrompt(message, defaultValue = '', options = {}) {
       return openUiDialog({
-        title: options.title || '輸入資料',
+        title:options.title || '輸入資料',
         message,
-        mode: 'prompt',
-        kind: options.kind || 'default',
+        mode:'prompt',
+        kind:options.kind || 'default',
         defaultValue,
-        confirmText: options.confirmText || '確定',
-        cancelText: options.cancelText || '取消'
+        confirmText:options.confirmText || '確定',
+        cancelText:options.cancelText || '取消'
       });
     }
 
@@ -782,7 +777,7 @@
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopImmediatePropagation();
-        closeUiDialog(_uiDialogMode === 'confirm' ? false : null);
+        closeUiDialog(_uiDialogCancelValue);
       }
     });
 
