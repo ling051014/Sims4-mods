@@ -37,13 +37,30 @@ const end=scene.indexOf('function petCardFieldRows(',start);
 assert.ok(start>0&&end>start);
 const implementations=scene.slice(start,end);
 const ctx={
-  getCachedGenealogyTopology:()=>({
-    sims,byId,
-    parentGroups:[...parentGroupMap.values()].map(group=>({...group})),
-    canonicalGenerationBySim:canonical
-  }),
+  // 與正式 getCachedGenealogyTopology 一致：每個可見家系只取自己的成員與父母群組。
+  getCachedGenealogyTopology:(visibleIds)=>{
+    const ids=new Set([...visibleIds].map(String));
+    const scopedSims=sims.filter(sim=>ids.has(sim.id));
+    const scopedById=new Map(scopedSims.map(sim=>[sim.id,sim]));
+    const groups=new Map();
+    scopedSims.forEach(sim=>{
+      const parents=(sim.parentIds||[]).map(String)
+        .filter(id=>scopedById.has(id)).sort();
+      if(!parents.length)return;
+      const key=parents.join('|');
+      if(!groups.has(key))groups.set(key,{key,parentIds:parents,children:[]});
+      groups.get(key).children.push(sim.id);
+    });
+    return {
+      sims:scopedSims,byId:scopedById,
+      parentGroups:[...groups.values()],
+      canonicalGenerationBySim:new Map(
+        scopedSims.map(sim=>[sim.id,canonical.get(sim.id)])
+      )
+    };
+  },
   getActiveFamilySelectorEntry:()=>({
-    primaryMemberIds:sims.map(sim=>sim.id),
+    primaryMemberIds:family.memberIds,
     seedIds:family.memberIds,
     labelFamily:family
   }),
@@ -114,16 +131,16 @@ test('蓋普提伯特與三名子女仍同代排齊且沒有彼此交疊',()=>{
   assert.ok(xs[1]-xs[0]>=95);
   assert.ok(xs[2]-xs[1]>=95);
 });
-test('原本正常的室友、永遠的麻吉、林克斯區塊維持修正前位置',()=>{
-  // 固定測試環境的 95px 卡片尺寸；這些位置取自排序退步前的穩定版。
-  const unchanged=[
-    ['史考特崔維斯',1979],
-    ['帕托柔伊',2486],
-    ['林克斯卡特琳娜',3162]
-  ];
-  unchanged.forEach(([name,x])=>{
-    assert.equal(person(name).x,x,'無關家族不應因修阿布蘭特斯被整組搬走：'+name);
-  });
+test('無關的室友與朋友家庭仍獨立排列，不和其他家庭卡片重疊',()=>{
+  const names=['史考特崔維斯','李莉珀提','哈樂戴桑莫',
+    '帕托柔伊','卡拉尼米切爾','林克斯卡特琳娜'];
+  const cards=names.map(person);
+  assert.ok(cards.every(pos=>Number.isFinite(pos.x)&&Number.isFinite(pos.y)));
+  cards.forEach((left,i)=>cards.slice(i+1).forEach(right=>{
+    if(left.y===right.y)
+      assert.ok(Math.abs(left.x-right.x)>=95-0.001,
+        '非主要家庭人物不能被排列到相同位置');
+  }));
 });
 test('阿布蘭特斯修正只位移實際擋路的蓋普／蒙提分支，不擾動其他預設家族',()=>{
   const oldSolver=vm.runInNewContext(
@@ -198,9 +215,14 @@ test('選中蓋普大家族時，僅靠接相關姻親祖先，保持原本無�
     assert.ok(id,'找不到預設市民：'+name);
     return map.get(id);
   };
-  ['史考特崔維斯','帕托柔伊','林克斯卡特琳娜'].forEach(name=>{
-    assert.equal(posOf(name,positions).x,posOf(name,baseline).x,
-      '未連到大家族的家系不應移位：'+name);
+  // 外部家系會在畫布上整組搬動，但家系內部的水平距離必須不變。
+  const independent=['伊藤直樹','伊藤惠','伊藤清','伊藤七海'];
+  const anchor=independent[0];
+  independent.forEach(name=>{
+    const oldDistance=posOf(name,baseline).x-posOf(anchor,baseline).x;
+    const nextDistance=posOf(name,positions).x-posOf(anchor,positions).x;
+    assert.ok(Math.abs(oldDistance-nextDistance)<0.001,
+      '姻親接入不能改變其他家系內部的排列：'+name);
   });
   const center=xs=>(Math.min(...xs)+Math.max(...xs))/2;
   const axis=([father,mother],children,map)=>{
@@ -262,4 +284,24 @@ test('大家族實際入口：未列入主要成員的其他家庭只能跟隨�
         '主要成員範圍縮小後仍必須保護原有中軸：'+group.key);
     }
   });
+});
+
+test('各完整血緣家系先獨立排列，避免跨家族親子線被拉成數千像素',()=>{
+  const center=values=>(Math.min(...values)+Math.max(...values))/2;
+  const errors=[...parentGroupMap.values()].map(group=>{
+    const parent=group.parentIds.map(id=>positions.get(id).x+47.5);
+    const children=group.children.map(id=>positions.get(id).x+47.5);
+    return {
+      group,
+      offset:center(parent)-center(children)
+    };
+  });
+  assert.equal(errors.length,31);
+  const mean=errors.reduce((total,item)=>total+Math.abs(item.offset),0)/errors.length;
+  assert.ok(mean<55,'各自完整排列後親子中軸平均偏差不應仍有數百像素：'+mean);
+  const long=errors.filter(item=>Math.abs(item.offset)>1000);
+  assert.deepEqual(long.map(item=>item.group.key),[],
+    '血緣家系應該完整接合，不得再出現數千像素長的親子線');
+  assert.ok(implementations.includes('function genealogyConnectedLayoutFamilyComponents('));
+  assert.ok(implementations.includes('function arrangeIndependentGenealogyFamilyComponents('));
 });
