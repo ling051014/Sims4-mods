@@ -160,3 +160,66 @@ test('完成排列後同世代所有人物卡不得碰撞',()=>{
     }
   });
 });
+
+test('姻親完整家系靠接後：已正確的親子中軸不可因接入而偏離',()=>{
+  const marker='  alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups);';
+  assert.ok(implementations.includes(marker),'正式自動排列必須實際呼叫姻親完整區塊接合');
+  const baseline=vm.runInNewContext(
+    implementations.replace(marker,'  // 測試比較：停用姻親家系接合')+
+    '\nsolveAutomaticGenealogyPositions;',ctx
+  )(ids);
+  const anchorX=(id,map)=>map.get(id)?.x+47.5;
+  const center=values=>(Math.min(...values)+Math.max(...values))/2;
+  const axis=(group,map)=>center(group.parentIds.map(id=>anchorX(id,map)))-
+    center(group.children.map(id=>anchorX(id,map)));
+  const groups=[...parentGroupMap.values()];
+  let protectedAxes=0;
+  groups.forEach(group=>{
+    const old=axis(group,baseline);
+    const current=axis(group,positions);
+    if(Math.abs(old)<=1){
+      protectedAxes++;
+      assert.ok(Math.abs(current)<=1,
+        '原本正確的親子中軸不能因姻親接入被改壞：'+
+        group.parentIds.map(id=>byId.get(id)?.name).join('、'));
+    }
+  });
+  assert.ok(protectedAxes>=15,'應有足夠已經正確的父母群組作為回歸保護');
+});
+
+test('選中蓋普大家族時，僅靠接相關姻親祖先，保持原本無關家系座標',()=>{
+  const marker='  alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups);';
+  const baseline=vm.runInNewContext(
+    implementations.replace(marker,'  // 測試比較：停用姻親家系接合')+
+    '\nsolveAutomaticGenealogyPositions;',ctx
+  )(ids);
+  const posOf=(name,map)=>{
+    const id=sims.find(sim=>sim.name===name)?.id;
+    assert.ok(id,'找不到預設市民：'+name);
+    return map.get(id);
+  };
+  ['史考特崔維斯','帕托柔伊','林克斯卡特琳娜'].forEach(name=>{
+    assert.equal(posOf(name,positions).x,posOf(name,baseline).x,
+      '未連到大家族的家系不應移位：'+name);
+  });
+  const center=xs=>(Math.min(...xs)+Math.max(...xs))/2;
+  const axis=([father,mother],children,map)=>{
+    const parentXs=[father,mother].map(name=>posOf(name,map).x+47.5);
+    const childXs=children.map(name=>posOf(name,map).x+47.5);
+    return center(parentXs)-center(childXs);
+  };
+  const examples=[
+    [['底比女王','約翰．威爾森．鬍鬍'],['柯德莉亞．底比二世']],
+    [['安德洛瑪刻．底比','海克特．底比'],['蓋普康索特']],
+    [['蓋普康索特','康特莎．蓋普'],['柯德莉亞．蓋普']],
+    [['蒙提茱麗葉','蒙提羅密歐'],['蒙提但丁']]
+  ];
+  examples.forEach(([parents,children])=>{
+    const old=Math.abs(axis(parents,children,baseline));
+    const updated=Math.abs(axis(parents,children,positions));
+    assert.ok(old>1000,'測試案例應確實重現跨家系嚴重偏移');
+    assert.ok(updated<40,
+      '配偶另一側的完整家系應靠接到子女群組，不可繼續遠離：'+
+      parents.join('、')+'；偏移 '+updated);
+  });
+});
