@@ -223,3 +223,43 @@ test('選中蓋普大家族時，僅靠接相關姻親祖先，保持原本無�
       parents.join('、')+'；偏移 '+updated);
   });
 });
+
+test('大家族實際入口：未列入主要成員的其他家庭只能跟隨整張畫布平移',()=>{
+  const scope={...ctx,getActiveFamilySelectorEntry:()=>({
+    primaryMemberIds:[...family.memberIds],
+    labelFamily:family
+  })};
+  const marker='  alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups);';
+  const solver=vm.runInNewContext(
+    implementations+'\nsolveAutomaticGenealogyPositions;',scope
+  );
+  const baselineSolver=vm.runInNewContext(
+    implementations.replace(marker,'  // 測試比較：未接入姻親')+
+    '\nsolveAutomaticGenealogyPositions;',scope
+  );
+  const next=solver(ids),before=baselineSolver(ids);
+  const simId=name=>sims.find(sim=>sim.name===name)?.id;
+  const originId=simId('史考特崔維斯');
+  assert.ok(originId,'測試缺少室友家庭人物');
+  const canvasShift=next.get(originId).x-before.get(originId).x;
+  ['史考特崔維斯','李莉珀提','帕托柔伊','林克斯卡特琳娜',
+   '伊藤直樹','戴爾加托塞普莉亞'].forEach(name=>{
+    const id=simId(name);
+    assert.ok(id,'測試缺少無關家庭成員：'+name);
+    assert.ok(Math.abs(next.get(id).x-before.get(id).x-canvasShift)<0.001,
+      '外部姻親接合不可改動無關家系內部距離：'+name);
+    assert.equal(next.get(id).y,before.get(id).y);
+  });
+  const center=xs=>(Math.min(...xs)+Math.max(...xs))/2;
+  [...parentGroupMap.values()].forEach(group=>{
+    const axis=positions=>{
+      const parents=group.parentIds.map(id=>positions.get(id).x+47.5);
+      const children=group.children.map(id=>positions.get(id).x+47.5);
+      return center(parents)-center(children);
+    };
+    if(Math.abs(axis(before))<=1){
+      assert.ok(Math.abs(axis(next))<=1,
+        '主要成員範圍縮小後仍必須保護原有中軸：'+group.key);
+    }
+  });
+});
