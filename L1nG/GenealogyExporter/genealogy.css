@@ -1268,7 +1268,9 @@ body.sidebar-resizing * {
     /* 觸控行為 */ touch-action: none;
 }
 
-.person-card:hover {
+.person-card:hover,
+.person-card.ghost:hover,
+.person-card.dead:hover {
     /* 邊框顏色 */ border-color: var(--action-primary);
     /* 元素陰影 */ box-shadow: 0 8px 20px rgba(0,0,0,.12);
     /* 顯示層級 */ z-index: 9;
