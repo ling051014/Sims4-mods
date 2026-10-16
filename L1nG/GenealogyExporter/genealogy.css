@@ -6257,7 +6257,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .help-section-shortcuts {
-    /* 快捷鍵橫跨雙欄 */ grid-column:1 / -1;
+    /* main 的人生照片暫不公開；快捷鍵與圖片儲存並排 */ grid-column:auto;
 }
 
 .help-section h3 {
@@ -6293,9 +6293,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .help-section-shortcuts ul {
-    /* 快捷鍵使用雙欄列表 */ display:grid;
-    /* 兩欄等寬 */ grid-template-columns:repeat(2,minmax(0,1fr));
-    /* 欄間距 */ column-gap:30px;
+    /* 與圖片儲存各佔一欄；快捷鍵自身維持單欄清單 */ display:grid;
+    grid-template-columns:minmax(0,1fr);
 }
 
 .help-section li {
