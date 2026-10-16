@@ -8951,7 +8951,7 @@ function genealogyParentAxisSnapTargets(id) {
   const current=pos.get(key),offset=relationshipVerticalAnchorOffsetX(key);
   const targets=[];
   // 使用正式 parent topology；拖曳期間僅建立一次，避免 PointerMove 重算整棵族譜。
-  getCachedGenealogyTopology(layoutCache.visibleIds).parentGroups.forEach(group=>{
+  buildParentChildConnectorGroups(byId,layoutCache.visibleIds).forEach(group=>{
     const childIds=group.children.map(String).filter(childId=>pos.has(childId));
     if(!childIds.length)return;
     const isParent=group.parentIds.map(String).includes(key);
