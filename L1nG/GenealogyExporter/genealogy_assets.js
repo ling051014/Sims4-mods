@@ -852,9 +852,10 @@
     return new Blob([bytes], { type:mime || 'application/octet-stream' });
   }
 
-  async function serializeAssets(ids) {
+  async function serializeAssets(ids, onProgress = null) {
     const uniqueIds = [...new Set(ids || [])].filter(isAssetId);
     const assets = {};
+    let processed = 0;
 
     for (const id of uniqueIds) {
       const record = await getRecord(id);
@@ -869,17 +870,20 @@
         byteSize:Number(record.byteSize) || record.blob.size,
         data:await blobToBase64(record.blob)
       };
+      if (typeof onProgress === 'function') onProgress(++processed, uniqueIds.length);
     }
 
     return assets;
   }
 
-  async function importSerializedAssets(serializedAssets) {
+  async function importSerializedAssets(serializedAssets, onProgress = null) {
     if (!serializedAssets || typeof serializedAssets !== 'object' || Array.isArray(serializedAssets)) {
       throw new Error('備份中的圖片資產表格式不正確。');
     }
 
     const addedIds = [];
+    const total = Object.keys(serializedAssets).length;
+    let processed = 0;
 
     try {
       for (const [id, item] of Object.entries(serializedAssets)) {
@@ -896,7 +900,10 @@
           throw new Error(`圖片資產校驗失敗：${id}`);
         }
 
-        if (await hasAsset(id)) continue;
+        if (await hasAsset(id)) {
+          if (typeof onProgress === 'function') onProgress(++processed, total);
+          continue;
+        }
 
         await putRecord({
           id,
@@ -910,6 +917,7 @@
         });
 
         addedIds.push(id);
+        if (typeof onProgress === 'function') onProgress(++processed, total);
       }
     } catch (error) {
       for (const id of addedIds) {
