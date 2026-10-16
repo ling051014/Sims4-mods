@@ -5226,6 +5226,111 @@ function canPlaceGenealogyUnitAtX(
   });
 }
 
+function alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups) {
+  const rootOf=unit=>unit?(ownership.rootByUnit.get(unit.id)||unit.id):null;
+  const rootUnits=new Map();
+  model.units.forEach(unit=>{
+    const root=rootOf(unit);
+    if(!rootUnits.has(root))rootUnits.set(root,[]);
+    rootUnits.get(root).push(unit);
+  });
+  const anchorRoots=new Set(
+    [...(ownership.anchorSimIds||[])]
+      .map(id=>rootOf(model.unitBySim.get(id)))
+      .filter(Boolean)
+  );
+  const gap=resolveLayoutGaps().SIBLING;
+  const childrenCenter=group=>{
+    const anchors=group.children
+      .map(id=>genealogyChildAnchorX(id,model))
+      .filter(Number.isFinite);
+    return anchors.length?(Math.min(...anchors)+Math.max(...anchors))/2:null;
+  };
+  const parentAxisError=group=>{
+    const source=genealogyGroupSourceX(group,model);
+    const center=childrenCenter(group);
+    return Number.isFinite(source)&&Number.isFinite(center)?source-center:null;
+  };
+
+  // 主家族先完成 Parent Group 排列；只有配偶雙方分屬不同根時，
+  // 才允許另一側完整祖先分支靠接，不能把無關家族拖入本次重排。
+  const candidates=connectorGroups.map(group=>{
+    if(group.parentIds.length!==2||!group.children.length)return null;
+    const parents=genealogyGroupParentEntries(group,model);
+    if(parents.length!==2||parents[0].unit.id===parents[1].unit.id)return null;
+    const childRoots=new Set(group.children.map(id=>rootOf(model.unitBySim.get(id))));
+    if(childRoots.size!==1)return null;
+    const childRoot=[...childRoots][0];
+    if(!anchorRoots.has(childRoot))return null;
+    const outside=parents.filter(parent=>rootOf(parent.unit)!==childRoot);
+    if(outside.length!==1)return null;
+    const root=rootOf(outside[0].unit);
+    if(anchorRoots.has(root))return null;
+    return {group,root,childRoot};
+  }).filter(Boolean).sort((a,b)=>
+    Math.abs(parentAxisError(b.group)||0)-Math.abs(parentAxisError(a.group)||0)||
+    (rootUnits.get(a.root)?.length||0)-(rootUnits.get(b.root)?.length||0)
+  );
+
+  const movedRoots=new Set();
+  let adjusted=0;
+  candidates.forEach(({group,root,childRoot})=>{
+    if(movedRoots.has(root))return;
+    const parents=genealogyGroupParentEntries(group,model);
+    const attachedParent=parents.find(parent=>rootOf(parent.unit)===root);
+    const primaryParent=parents.find(parent=>rootOf(parent.unit)===childRoot);
+    const center=childrenCenter(group);
+    const units=rootUnits.get(root)||[];
+    if(!attachedParent||!primaryParent||!Number.isFinite(center)||!units.length)return;
+
+    // 兩個父母的真實血緣錨點平均值須對準子女群組中軸。
+    const desiredShift=2*center-primaryParent.anchorX-attachedParent.anchorX;
+    if(!Number.isFinite(desiredShift)||Math.abs(desiredShift)<1)return;
+    const movingIds=new Set(units.map(unit=>unit.id));
+    const before=connectorGroups.map(parentAxisError);
+    const originals=units.map(unit=>[unit,unit.x]);
+    let accepted=false;
+
+    // 區塊碰撞或既有直線受損時撤銷整組移動，尋找最近的安全掛接位置。
+    for(let step=0;step<=36&&!accepted;step++){
+      const offsets=step===0?[0]:[-step*24,step*24];
+      for(const offset of offsets){
+        const shift=desiredShift+offset;
+        if(Math.abs(shift)<1)continue;
+        const overlaps=units.some(unit=>(layers.get(unit.generation)||[]).some(other=>
+          !movingIds.has(other.id)&&
+          unit.x+shift<other.x+other.width+gap-0.01&&
+          unit.x+unit.width+shift>other.x-gap+0.01
+        ));
+        if(overlaps)continue;
+        units.forEach(unit=>{unit.x+=shift;});
+        const after=connectorGroups.map(parentAxisError);
+        const preservesAligned=before.every((error,index)=>
+          !Number.isFinite(error)||Math.abs(error)>1||
+          (Number.isFinite(after[index])&&Math.abs(after[index])<=1)
+        );
+        const gain=before.reduce((sum,error,index)=>
+          sum+(!Number.isFinite(error)||!Number.isFinite(after[index])?0:
+            Math.min(1e7,error*error)-Math.min(1e7,after[index]*after[index])),0
+        );
+        if(preservesAligned&&gain>1){
+          accepted=true;
+          movedRoots.add(root);
+          adjusted++;
+          break;
+        }
+        originals.forEach(([unit,x])=>{unit.x=x;});
+      }
+    }
+  });
+
+  // 後續碰撞檢查使用最新 X 排序，不再沿用接合前的同代順序。
+  if(adjusted)layers.forEach(layer=>
+    layer.sort((a,b)=>a.x-b.x||stableGenealogyUnitCompare(a,b))
+  );
+  return adjusted;
+}
+
 function alignDirectParentChildGroups(
   layers,
   model,
@@ -5901,11 +6006,88 @@ function compactCrossRootSiblingGroups(layers,model,ownership) {
   return corrected;
 }
 
-function solveAutomaticGenealogyPositions(visibleIds) {
+function genealogyConnectedLayoutFamilyComponents(model,visibleIds) {
+  const parent=new Map([...visibleIds].map(id=>[String(id),String(id)]));
+  const find=id=>{
+    const current=parent.get(id);
+    if(!current)return null;
+    if(current===id)return current;
+    const root=find(current);
+    parent.set(id,root);
+    return root;
+  };
+  const union=(a,b)=>{
+    const first=find(a),second=find(b);
+    if(first&&second&&first!==second)parent.set(second,first);
+  };
+  // 同一水平配對永遠屬於同一個排列區塊，不會在分家時把配偶拆開。
+  model.units.forEach(unit=>{
+    const ids=unit.members.map(sim=>String(sim.id));
+    for(let i=1;i<ids.length;i++)union(ids[0],ids[i]);
+  });
+  model.parentGroups.forEach(group=>{
+    const ids=[...group.parentIds,...group.children]
+      .map(String).filter(id=>parent.has(id));
+    for(let i=1;i<ids.length;i++)union(ids[0],ids[i]);
+  });
+  const components=new Map();
+  parent.forEach((_,id)=>{
+    const root=find(id);
+    if(!components.has(root))components.set(root,[]);
+    components.get(root).push(id);
+  });
+  return [...components.values()];
+}
+
+// 每個家系先沿用原本 Parent Group / Branch Block 演算法完整排列；
+// 最後只平移整個家系區塊，不再讓無關家庭插進祖先與子女之間。
+function arrangeIndependentGenealogyFamilyComponents(visibleIds) {
+  const overall=buildGenealogyLayoutModel(visibleIds);
+  const components=genealogyConnectedLayoutFamilyComponents(overall,visibleIds);
+  if(components.length<=1)return null;
+
+  const primary=getActiveLayoutPrimaryIds(visibleIds);
+  const blocks=components.map(ids=>{
+    const units=[...new Set(ids.map(id=>overall.unitBySim.get(id)).filter(Boolean))];
+    const earliest=Math.min(...units.map(unit=>unit.generation));
+    const seeds=new Set(ids.filter(id=>primary.has(id)));
+    // 非選中家系以自己的最早祖先為骨架，不能借主家族的 seed 來排。
+    if(!seeds.size)units.filter(unit=>unit.generation===earliest)
+      .forEach(unit=>unit.members.forEach(sim=>seeds.add(sim.id)));
+
+    const positions=solveAutomaticGenealogyPositions(new Set(ids),seeds,true);
+    const values=[...positions.values()];
+    const left=Math.min(...values.map(pos=>pos.x));
+    const right=Math.max(...values.map(pos=>pos.x+getNodeDimensionsById(pos.id).W));
+    return {
+      ids,positions,left,right,
+      primary:ids.some(id=>primary.has(id)),
+      order:ids[0]
+    };
+  });
+
+  blocks.sort((a,b)=>
+    Number(b.primary)-Number(a.primary)||
+    a.order.localeCompare(b.order)
+  );
+  const positions=new Map();
+  const gap=Math.max(64,resolveLayoutGaps().SIBLING*2);
+  let cursor=0;
+  blocks.forEach(block=>{
+    const shift=cursor-block.left;
+    block.positions.forEach((pos,id)=>positions.set(id,{...pos,x:pos.x+shift}));
+    cursor+=block.right-block.left+gap;
+  });
+  return positions;
+}
+
+function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,componentOnly=false) {
+  if(!componentOnly){
+    const arranged=arrangeIndependentGenealogyFamilyComponents(visibleIds);
+    if(arranged)return arranged;
+  }
   const primarySimIds =
-    getActiveLayoutPrimaryIds(
-      visibleIds
-    );
+    primaryOverride || getActiveLayoutPrimaryIds(visibleIds);
 
   const model =
     buildGenealogyLayoutModel(
@@ -5964,6 +6146,9 @@ function solveAutomaticGenealogyPositions(visibleIds) {
       ownership
     );
   }
+
+  // 完整姻親家系靠接以 Root Block 為單位，原大家族的親子排列不受牽動。
+  alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups);
 
   // 先滿足最簡單、最可讀的親子直線；只有碰撞時才交給 renderer 畫折線。
   alignDirectParentChildGroups(
@@ -8777,167 +8962,113 @@ function getVisibleTreeContentBounds() {
   };
 }
 
-function getSpouseRowSnap(id, rawY) {
-  if (
-    !layoutCache ||
-    !layoutCache.byId ||
-    !layoutCache.visibleIds ||
-    !layoutCache.pos
-  ) {
-    return null;
-  }
-
-  const sim =
-    layoutCache.byId.get(id);
-
-  if (!sim) return null;
-
-  const avatarGeometry =
-    getCardAvatarGeometry();
-
-  const draggedAvatarOffset =
-    avatarGeometry.top +
-    avatarGeometry.size / 2;
-
-  const threshold =
-    (GUIDE_SNAP_PX * 1.5) /
-    Math.max(scale, 0.001);
-
-  const candidates = [];
-  const seen = new Set();
-
-  (sim.spouseIds || []).forEach(partnerId => {
-    if (seen.has(partnerId)) return;
-    seen.add(partnerId);
-    candidates.push({
-      id:partnerId,
-      priority:0
-    });
+function genealogySpouseSnapCandidates(id) {
+  const person=layoutCache?.byId?.get(id);
+  if(!person||!layoutCache?.pos||!layoutCache?.visibleIds)return [];
+  const candidates=new Map();
+  const add=(partnerId,priority)=>{
+    const key=String(partnerId||'');
+    if(!key||key===id||!layoutCache.visibleIds.has(key)||!layoutCache.pos.has(key))return;
+    if(!candidates.has(key)||priority<candidates.get(key))candidates.set(key,priority);
+  };
+  const collect=(sim,partnerId,sourceId)=>{
+    const includes=(list)=>(list||[]).map(String).includes(partnerId);
+    if(includes(sim?.spouseIds))add(sourceId,0);
+    if(includes(sim?.exSpouseIds))add(sourceId,1);
+    if(includes(sim?.gameData?.deceasedSpouseIds))add(sourceId,2);
+  };
+  [
+    ...(person.spouseIds||[]),
+    ...(person.exSpouseIds||[]),
+    ...(person.gameData?.deceasedSpouseIds||[])
+  ].map(String).forEach(partnerId=>collect(person,partnerId,partnerId));
+  // EA 可能只記錄另一方，原本的單向查找會讓配偶吸附完全失效。
+  layoutCache.visibleIds.forEach(otherId=>{
+    const key=String(otherId);
+    if(key!==id)collect(layoutCache.byId.get(key),id,key);
   });
+  return [...candidates].map(([partnerId,priority])=>({id:partnerId,priority}));
+}
 
-  (sim.exSpouseIds || []).forEach(partnerId => {
-    if (seen.has(partnerId)) return;
-    seen.add(partnerId);
-    candidates.push({
-      id:partnerId,
-      priority:1
-    });
+function genealogySpouseRowSnapTargets(id) {
+  const avatar=getCardAvatarGeometry();
+  const draggedOffset=avatar.top+avatar.size/2;
+  return genealogySpouseSnapCandidates(id).map(candidate=>{
+    const guide=cardAvatarRect(layoutCache.pos.get(candidate.id)).centerY;
+    return {
+      value:guide-PAD-draggedOffset,
+      guide,
+      priority:candidate.priority,
+      relation:'spouse-row'
+    };
   });
+}
 
-  let best = null;
-
-  candidates.forEach(candidate => {
-    if (
-      !layoutCache.visibleIds.has(candidate.id)
-    ) {
-      return;
-    }
-
-    const partnerPosition =
-      layoutCache.pos.get(candidate.id);
-
-    if (!partnerPosition) return;
-
-    const partnerAvatarCenter =
-      cardAvatarRect(partnerPosition).centerY;
-
-    const targetY =
-      partnerAvatarCenter -
-      PAD -
-      draggedAvatarOffset;
-
-    const distance =
-      Math.abs(targetY - rawY);
-
-    if (distance > threshold) return;
-
-    if (
-      !best ||
-      distance < best.distance - 0.001 ||
-      (
-        Math.abs(distance - best.distance) <= 0.001 &&
-        candidate.priority < best.priority
-      )
-    ) {
-      best = {
-        value:targetY,
-        distance,
-        priority:candidate.priority,
-        relation:'spouse-row'
-      };
-    }
+function getSpouseRowSnap(id,rawY) {
+  if(!layoutCache?.pos)return null;
+  const threshold=GUIDE_SNAP_PX*1.5/Math.max(scale,0.001);
+  let best=null;
+  genealogySpouseRowSnapTargets(String(id)).forEach(target=>{
+    const distance=Math.abs(target.value-rawY);
+    if(distance<=threshold&&(!best||distance<best.distance-0.001||
+       (Math.abs(distance-best.distance)<=0.001&&target.priority<best.priority)))
+      best={...target,distance};
   });
-
   return best;
 }
 
-function getParentConnectorStraightSnap(id, rawX) {
-  if (
-    !layoutCache ||
-    !layoutCache.byId ||
-    !layoutCache.visibleIds ||
-    !layoutCache.pos ||
-    !layoutCache.byId.has(id)
-  ) {
-    return null;
-  }
-
-  const threshold =
-    RELATIONSHIP_VERTICAL_SNAP_PX /
-    Math.max(scale, 0.001);
-
-  let best = null;
-
-  buildParentChildConnectorGroups(
-    layoutCache.byId,
-    layoutCache.visibleIds
-  ).forEach(group => {
-    // 多子女本來就各自擁有垂直 child branch；
-    // 只有單一子女才存在「V-H-V 是否收斂成 V」這個關係軸問題。
-    if (
-      group.children.length !== 1 ||
-      group.children[0] !== id
-    ) {
-      return;
+// ========【親子垂直吸附】 拖曳子女或父母都以實際 SVG 接點為對齊權威 ========
+function genealogyParentAxisSnapTargets(id) {
+  const key=String(id);
+  if(!layoutCache?.byId?.has(key)||!layoutCache?.visibleIds?.has(key)||
+     !layoutCache?.pos?.has(key))return [];
+  const pos=layoutCache.pos,byId=layoutCache.byId;
+  const current=pos.get(key),offset=relationshipVerticalAnchorOffsetX(key);
+  const targets=[];
+  // 使用正式 parent topology；拖曳期間僅建立一次，避免 PointerMove 重算整棵族譜。
+  buildParentChildConnectorGroups(byId,layoutCache.visibleIds).forEach(group=>{
+    const childIds=group.children.map(String).filter(childId=>pos.has(childId));
+    if(!childIds.length)return;
+    const isParent=group.parentIds.map(String).includes(key);
+    if(childIds.includes(key)&&childIds.length===1){
+      const source=parentConnectorSource(group,pos,byId,[]);
+      if(Number.isFinite(source?.x))targets.push({
+        value:source.x-offset,guide:source.x,priority:0,relation:'parent-vertical-axis'
+      });
     }
-
-    const source =
-      parentConnectorSource(
-        group,
-        layoutCache.pos,
-        layoutCache.byId,
-        []
-      );
-
-    if (!source) return;
-
-    // source.x 與 relationshipVerticalAnchorOffsetX()
-    // 都使用 renderer 的實際座標系，因此吸附後頭像／卡片中心必定落在線上。
-    const targetX =
-      source.x -
-      relationshipVerticalAnchorOffsetX(id);
-
-    const distance =
-      Math.abs(
-        targetX -
-        rawX
-      );
-
-    if (
-      distance <= threshold &&
-      (
-        !best ||
-        distance < best.distance
-      )
-    ) {
-      best = {
-        value:targetX,
-        distance,
-        relation:'parent-vertical-axis'
-      };
-    }
+    if(!isParent)return;
+    const anchors=childIds.map(childId=>cardVerticalAnchor(pos.get(childId),'top').x)
+      .filter(Number.isFinite);
+    if(!anchors.length)return;
+    const center=(Math.min(...anchors)+Math.max(...anchors))/2;
+    const source=parentConnectorSource(group,pos,byId,[]);
+    if(!Number.isFinite(source?.x))return;
+    const sourceAt=x=>{
+      const sample=new Map(pos);
+      sample.set(key,{...current,x});
+      return parentConnectorSource(group,sample,byId,[])?.x;
+    };
+    // 單親接點隨人物位移 1:1；雙親中點通常是 1:2。
+    // 由相同 renderer 函式取樣並再次驗證，不硬寫卡片外框中心。
+    const next=sourceAt(current.x+4),slope=(next-source.x)/4;
+    if(!Number.isFinite(slope)||Math.abs(slope)<0.001)return;
+    const value=current.x+(center-source.x)/slope;
+    if(!Number.isFinite(value)||Math.abs(value-current.x)>10000)return;
+    const check=sourceAt(value);
+    if(!Number.isFinite(check)||Math.abs(check-center)>0.75)return;
+    targets.push({value,guide:center,priority:0,relation:'parent-vertical-axis'});
   });
+  return targets;
+}
 
+function getParentConnectorStraightSnap(id,rawX) {
+  const threshold=RELATIONSHIP_VERTICAL_SNAP_PX/Math.max(scale,0.001);
+  let best=null;
+  genealogyParentAxisSnapTargets(String(id)).forEach(target=>{
+    const distance=Math.abs(target.value-rawX);
+    if(distance<=threshold&&(!best||distance<best.distance))
+      best={...target,distance};
+  });
   return best;
 }
 
@@ -8994,118 +9125,14 @@ function buildDragPerformanceGeometry() {
   return geometry;
 }
 
-function buildSingleDragRelationshipTargets(
-  id
-) {
-  const targets = {
-    x:[],
-    y:[]
+function buildSingleDragRelationshipTargets(id) {
+  if(!layoutCache?.byId||!layoutCache?.visibleIds||!layoutCache?.pos)
+    return {x:[],y:[]};
+  const key=String(id);
+  return {
+    x:genealogyParentAxisSnapTargets(key),
+    y:genealogySpouseRowSnapTargets(key)
   };
-
-  if (
-    !layoutCache?.byId ||
-    !layoutCache?.visibleIds ||
-    !layoutCache?.pos
-  ) {
-    return targets;
-  }
-
-  getCachedGenealogyTopology(
-    layoutCache.visibleIds
-  ).parentGroups.forEach(group => {
-    if (
-      group.children.length !== 1 ||
-      group.children[0] !== id
-    ) {
-      return;
-    }
-
-    const source =
-      parentConnectorSource(
-        group,
-        layoutCache.pos,
-        layoutCache.byId,
-        []
-      );
-
-    if (!source) return;
-
-    targets.x.push({
-      value:
-        source.x -
-        relationshipVerticalAnchorOffsetX(
-          id
-        ),
-      priority:0
-    });
-  });
-
-  const sim =
-    layoutCache.byId.get(id);
-
-  if (!sim) {
-    return targets;
-  }
-
-  const avatarGeometry =
-    getCardAvatarGeometry();
-
-  const draggedAvatarOffset =
-    avatarGeometry.top +
-    avatarGeometry.size / 2;
-
-  const seen =
-    new Set();
-
-  [
-    ...(sim.spouseIds || [])
-      .map(partnerId => ({
-        id:partnerId,
-        priority:0
-      })),
-
-    ...(sim.exSpouseIds || [])
-      .map(partnerId => ({
-        id:partnerId,
-        priority:1
-      }))
-  ].forEach(candidate => {
-    const partnerId =
-      String(candidate.id || '');
-
-    if (
-      !partnerId ||
-      seen.has(partnerId) ||
-      !layoutCache.visibleIds.has(
-        partnerId
-      )
-    ) {
-      return;
-    }
-
-    seen.add(partnerId);
-
-    const partnerPosition =
-      layoutCache.pos.get(
-        partnerId
-      );
-
-    if (!partnerPosition) return;
-
-    targets.y.push({
-      value:
-        cardAvatarRect(
-          partnerPosition
-        ).centerY -
-        PAD -
-        draggedAvatarOffset,
-
-      priority:
-        candidate.priority
-    });
-  });
-
-  return targets;
 }
 
 function resizeStageToContent() {
