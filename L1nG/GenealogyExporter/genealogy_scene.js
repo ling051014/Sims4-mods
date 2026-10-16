@@ -6243,6 +6243,139 @@ function compactDetachedCoParentRoots(layers,model,ownership,groups) {
 
 // 同父母兩名子女以真正錨點對稱展開；配偶寬度不能取代親子間距。
 // 同時保留下一代的完整分支安全距離。
+
+// 遠距共同父母改以完整家系的線性約束求解，不針對人物姓名移動卡片。
+function optimizeDistantCoParentFamilyBlocks(layers,model,ownership,groups) {
+  const gap=resolveLayoutGaps().SIBLING;
+  const rootOf=unit=>unit?(ownership.rootByUnit?.get(unit.id)||unit.id):null;
+  const candidates=groups.map(group=>{
+    if(group.parentIds.length!==2||group.children.length!==1)return null;
+    const parents=genealogyGroupParentEntries(group,model);
+    if(parents.length!==2||parents[0].unit.id===parents[1].unit.id)return null;
+    const child=model.unitBySim.get(group.children[0]);
+    if(!child)return null;
+    const root=rootOf(child);
+    const outside=parents.filter(p=>rootOf(p.unit)!==root&&p.unit.members.length===1);
+    const inside=parents.filter(p=>rootOf(p.unit)===root);
+    if(outside.length!==1||inside.length!==1)return null;
+    const distance=Math.abs(outside[0].anchorX-inside[0].anchorX);
+    return distance>550?{group,outside:outside[0],inside:inside[0],distance}:null;
+  }).filter(Boolean).sort((a,b)=>b.distance-a.distance);
+  let improved=0;
+  for(const candidate of candidates.slice(0,3)){
+    const {group,outside,inside}=candidate;
+    const units=model.units,index=new Map(units.map((unit,i)=>[unit.id,i]));
+    const outsideIndex=index.get(outside.unit.id);
+    const insideIndex=index.get(inside.unit.id);
+    if(outsideIndex==null||insideIndex==null)continue;
+    const previous=new Float64Array(units.map(unit=>unit.x));
+    const axis=group=>{
+      const parentX=genealogyGroupSourceX(group,model);
+      const children=group.children.map(id=>genealogyChildAnchorX(id,model)).filter(Number.isFinite);
+      return Number.isFinite(parentX)&&children.length
+        ?parentX-(Math.min(...children)+Math.max(...children))/2:null;
+    };
+    const before=groups.map(axis);
+    const get=id=>{
+      const unit=model.unitBySim.get(id);
+      return unit?{index:index.get(unit.id),x:genealogyChildAnchorX(id,model),unit}:null;
+    };
+    const constraints=[];
+    groups.forEach(parentGroup=>{
+      const parents=parentGroup.parentIds.map(get).filter(Boolean);
+      const children=parentGroup.children.map(get).filter(Boolean).sort((a,b)=>a.x-b.x);
+      if(!parents.length||!children.length)return;
+      const coefficients=new Map();
+      parents.forEach(parent=>coefficients.set(parent.index,
+        (coefficients.get(parent.index)||0)+1/parents.length));
+      [children[0],children[children.length-1]].forEach(child=>
+        coefficients.set(child.index,(coefficients.get(child.index)||0)-0.5));
+      const terms=[...coefficients].filter(([,factor])=>Math.abs(factor)>1e-10);
+      if(terms.length){
+        const center=items=>(Math.min(...items.map(item=>item.x))+
+          Math.max(...items.map(item=>item.x)))/2;
+        constraints.push({terms,error:center(parents)-center(children),
+          norm:terms.reduce((sum,[,value])=>sum+value*value,0)});
+      }
+      // 原本緊密的兄弟姊妹視為一個區塊，避免親子軸對齊卻把家族撐開。
+      for(let i=1;i<children.length;i++){
+        const first=children[i-1],second=children[i];
+        if(first.unit.id===second.unit.id||first.unit.generation!==second.unit.generation||
+          second.x-first.x>260)continue;
+        constraints.push({terms:[[first.index,1],[second.index,-1]],error:0,norm:2});
+      }
+    });
+    const childBranches=genealogyOwnedBranchUnits(model,ownership,
+      group.children.map(id=>model.unitBySim.get(id)?.id).filter(Boolean),false);
+    const side=outside.anchorX<inside.anchorX?1:-1;
+    let accepted=false;
+    for(let desired=520;desired<=760&&!accepted;desired+=40){
+      if(desired>=candidate.distance-120)break;
+      const target=side*(candidate.distance-desired);
+      const seed=new Float64Array(units.length);
+      seed[outsideIndex]=target;
+      childBranches.forEach(unitId=>{
+        const idx=index.get(unitId);
+        if(idx!=null&&idx!==outsideIndex&&idx!==insideIndex)seed[idx]=target/2;
+      });
+      // 按新的預期位置重新分配每個世代的左右順序，不沿用已經失效的舊排列。
+      const gaps=[];
+      layers.forEach(layer=>{
+        const row=[...layer].sort((a,b)=>
+          a.x+seed[index.get(a.id)]-b.x-seed[index.get(b.id)]);
+        for(let i=1;i<row.length;i++){
+          const a=row[i-1],b=row[i];
+          gaps.push({left:index.get(a.id),right:index.get(b.id),
+            slack:b.x-a.x-a.width-gap});
+        }
+      });
+      const shift=new Float64Array(seed);
+      const passes=units.length>100?4000:8000;
+      for(let round=0;round<passes;round++){
+        constraints.forEach(eq=>{
+          let error=eq.error;
+          eq.terms.forEach(([i,w])=>{error+=w*shift[i];});
+          if(Math.abs(error)<1e-9)return;
+          const amount=error/eq.norm;
+          eq.terms.forEach(([i,w])=>{shift[i]-=w*amount;});
+        });
+        gaps.forEach(edge=>{
+          const overlap=shift[edge.left]-shift[edge.right]-edge.slack;
+          if(overlap<=0)return;
+          shift[edge.left]-=overlap/2;
+          shift[edge.right]+=overlap/2;
+        });
+        const goal=shift[outsideIndex]-shift[insideIndex]-target;
+        shift[outsideIndex]-=goal/2;
+        shift[insideIndex]+=goal/2;
+        if(round%100!==99)continue;
+        const residual=Math.max(0,...constraints.map(eq=>
+          Math.abs(eq.terms.reduce((sum,[i,w])=>sum+w*shift[i],eq.error))));
+        if(residual<0.01&&Math.abs(goal)<0.01&&gaps.every(edge=>
+          shift[edge.left]-shift[edge.right]<=edge.slack+0.01))break;
+      }
+      const residual=Math.max(0,...constraints.map(eq=>
+        Math.abs(eq.terms.reduce((sum,[i,w])=>sum+w*shift[i],eq.error))));
+      if(residual>0.75||gaps.some(edge=>
+        shift[edge.left]-shift[edge.right]>edge.slack+0.01))continue;
+      units.forEach((unit,i)=>{unit.x=previous[i]+shift[i];});
+      const after=groups.map(axis);
+      const damaged=before.some((error,i)=>
+        Number.isFinite(error)&&Math.abs(error)<=0.75&&
+        (!Number.isFinite(after[i])||Math.abs(after[i])>0.75));
+      const distance=Math.abs(genealogyChildAnchorX(outside.id,model)-
+        genealogyChildAnchorX(inside.id,model));
+      if(!damaged&&distance<candidate.distance-120){
+        layers.forEach(row=>row.sort((a,b)=>a.x-b.x));
+        accepted=true;
+        improved++;
+      }else units.forEach((unit,i)=>{unit.x=previous[i];});
+    }
+    if(!accepted)units.forEach((unit,i)=>{unit.x=previous[i];});
+  }
+  return improved;
+}
+
 function compactSiblingBranchAnchors(layers,model,ownership,groups) {
   const gap=resolveLayoutGaps().SIBLING;
   const collisionCount=()=>{
@@ -6487,6 +6620,7 @@ function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,compon
   enforceOutwardAffinalFamilyGroups(layers,model,ownership,connectorGroups);
   compactDetachedCoParentRoots(layers,model,ownership,connectorGroups);
   compactSiblingBranchAnchors(layers,model,ownership,connectorGroups);
+  optimizeDistantCoParentFamilyBlocks(layers,model,ownership,connectorGroups);
 
   // Family Branch Block 本身就是最終水平幾何權威。
   // 不再執行 generation-global packing，避免把已保留的 Parent Group block 再推壞。

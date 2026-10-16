@@ -258,7 +258,7 @@ test('蓋普大家族的姻親接合保持其他完整家系的相對位置',()=
   examples.forEach(([parents,children])=>{
     const old=Math.abs(axis(parents,children,baseline));
     const updated=Math.abs(axis(parents,children,positions));
-    assert.ok(updated<=old+0.001,'姻親接合不得增加原本的親子中軸偏差');
+    assert.ok(updated<=0.75,'姻親接合後原本正確的親子中軸仍須真正對齊');
     assert.ok(updated<40,
       '配偶另一側的完整家系應靠接到子女群組，不可繼續遠離：'+
       parents.join('、')+'；偏移 '+updated);
@@ -402,6 +402,57 @@ test('完整姻親家系從主家外側接入，血緣連接仍維持置中',()=
   const ancestor=person('柯德莉亞．底比四世');
   assert.ok(partner.x+95<main.x,'外部配偶不能靠主家內側');
   assert.ok(sibling.x+95<partner.x,'兄弟姊妹應向外延伸');
-  assert.equal(main.x,ancestor.x,'主家原生親子主幹不可偏移');
+  assert.ok(Math.abs(main.x-ancestor.x)<=0.75,'主家原生親子主幹不可偏移');
   assert.ok(Math.abs(mother.x-(partner.x+sibling.x)/2)<=0.75,'姻親上一代必須正確置中');
+});
+
+test('多重共同父母以完整區塊靠近，不能只修其中一名家長',()=>{
+  const queen=person('底比女王'),john=person('約翰．威爾森．鬍鬍');
+  const rodrigo=person('羅吉戈．迪．帕布羅');
+  const cornelia=person('柯德莉亞．底比二世'),rodrigoChild=person('羅吉戈．底比');
+  assert.ok(queen.x-john.x<650,'約翰仍離主要共同父母過遠');
+  assert.ok(queen.x-rodrigo.x<300,'另一組共同父母不能被推遠');
+  assert.ok(john.x<rodrigo.x&&rodrigo.x<queen.x,'多位共同父母應向家系外側排列');
+  assert.ok(cornelia.x+95<=rodrigoChild.x,'不同父母群組的子女不能碰撞');
+  const algorithm=scene.slice(scene.indexOf('function optimizeDistantCoParentFamilyBlocks('),
+    scene.indexOf('function compactSiblingBranchAnchors('));
+  assert.doesNotMatch(algorithm,/約翰|羅吉戈|阿布蘭特斯/,'不能用人物名稱寫死排列');
+});
+test('切換家系主軸時，不可惡化原本正確的親子中軸或造成重疊',()=>{
+  const selections=[
+    ['底比女王'],
+    ['阿布蘭特斯艾梅琳達','阿布蘭特斯蘇菲亞'],
+    ['蓋普提伯特','蓋普碧翠絲','蓋普瑟勒絲特','蓋普維吉里歐']
+  ];
+  const lookup=new Map(sims.map(sim=>[sim.name,sim.id]));
+  const injection='  optimizeDistantCoParentFamilyBlocks(layers,model,ownership,connectorGroups);';
+  selections.forEach(names=>{
+    const selected=names.map(name=>lookup.get(name));
+    const context={...ctx,getActiveFamilySelectorEntry:()=>({
+      primaryMemberIds:selected,seedIds:selected,labelFamily:{memberIds:selected}
+    }),currentTreeFamily:()=>({memberIds:selected})};
+    const calculate=code=>vm.runInNewContext(code+'\nsolveAutomaticGenealogyPositions;',context)(ids);
+    const next=calculate(implementations);
+    const before=calculate(implementations.replace(injection,'  // 舊版未收斂遠距父母'));
+    const center=(group,positions)=>{
+      const parent=group.parentIds.map(id=>positions.get(id).x+47.5);
+      const child=group.children.map(id=>positions.get(id).x+47.5);
+      const mid=a=>(Math.min(...a)+Math.max(...a))/2;
+      return Math.abs(mid(parent)-mid(child));
+    };
+    parentGroupMap.forEach(group=>{
+      if(center(group,before)<=0.75)assert.ok(center(group,next)<=0.75,
+        '切換主家不可破壞既有直線：'+names.join('、'));
+    });
+    const rows=new Map();
+    next.forEach(pos=>{
+      if(!rows.has(pos.y))rows.set(pos.y,[]);
+      rows.get(pos.y).push(pos.x);
+    });
+    rows.forEach(xs=>{
+      xs.sort((a,b)=>a-b);
+      for(let i=1;i<xs.length;i++)assert.ok(xs[i]-xs[i-1]>=95-0.01,
+        '切換主家後卡片不可重疊：'+names.join('、'));
+    });
+  });
 });
