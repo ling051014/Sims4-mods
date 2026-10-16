@@ -2207,11 +2207,15 @@ function relationshipSmartUpperCurveGeometry(start,end,rects) {
 }
 
 function relationshipOtherRenderGeometry(a,b,setting,context=null) {
-  if(setting.curved&&relationshipIsNearVertical(a,b)){
+  const sameGeneration=!!context?.sameGeneration;
+  // 同代一律從兩張頭像的側邊中線出入，即使拖曳後高度不同。
+  if(setting.curved&&!sameGeneration&&relationshipIsNearVertical(a,b)){
     return relationshipVerticalCurveGeometry(a,b,context);
   }
-  const from=setting.curved?relationshipCurveSideAnchor(a,b):avatarBoundaryAnchor(a,b);
-  const to=setting.curved?relationshipCurveSideAnchor(b,a):avatarBoundaryAnchor(b,a);
+  const from=(sameGeneration||setting.curved)
+    ?relationshipCurveSideAnchor(a,b):avatarBoundaryAnchor(a,b);
+  const to=(sameGeneration||setting.curved)
+    ?relationshipCurveSideAnchor(b,a):avatarBoundaryAnchor(b,a);
   const start={x:from.x,y:from.y},end={x:to.x,y:to.y};
   const rects=relationshipRouteRects(context,start,end,!!setting.curved);
   if(!setting.curved)
@@ -6079,6 +6083,140 @@ function compactCrossRootSiblingGroups(layers,model,ownership) {
 }
 
 // ========【完整家系獨立排列】先辨識人物與水平配偶單位的血緣連通群 ========
+
+function compactDetachedCoParentRoots(layers,model,ownership,groups) {
+  const {SIBLING:siblingGap,SPOUSE:spouseGap}=resolveLayoutGaps();
+  const gap=Math.max(siblingGap,spouseGap||0);
+  const rootOf=unit=>unit?(ownership.rootByUnit.get(unit.id)||unit.id):null;
+  const collisionCount=()=>{
+    let count=0;
+    layers.forEach(layer=>{
+      const row=[...layer].sort((a,b)=>a.x-b.x);
+      for(let i=1;i<row.length;i++)if(row[i].x<row[i-1].x+row[i-1].width+siblingGap-0.01)count++;
+    });
+    return count;
+  };
+  const originalCollisions=collisionCount();
+  const errors=()=>groups.map(group=>{
+    const source=genealogyGroupSourceX(group,model);
+    const xs=group.children.map(id=>genealogyChildAnchorX(id,model)).filter(Number.isFinite);
+    return Number.isFinite(source)&&xs.length
+      ?source-(Math.min(...xs)+Math.max(...xs))/2:null;
+  });
+  const visited=new Set();
+  let adjusted=0;
+  groups.forEach((group,index)=>{
+    if(group.parentIds.length!==2||group.children.length!==1)return;
+    const parents=genealogyGroupParentEntries(group,model);
+    if(parents.length!==2||parents[0].unit.id===parents[1].unit.id)return;
+    const childUnit=model.unitBySim.get(group.children[0]);
+    if(!childUnit)return;
+    const childRoot=rootOf(childUnit);
+    const outside=parents.filter(p=>rootOf(p.unit)!==childRoot&&p.unit.members.length===1);
+    const inside=parents.filter(p=>rootOf(p.unit)===childRoot);
+    if(outside.length!==1||inside.length!==1)return;
+    const outsider=outside[0].unit,home=inside[0].unit;
+    if(visited.has(outsider.id))return;
+    visited.add(outsider.id);
+    const oldDistance=Math.abs(outside[0].anchorX-inside[0].anchorX);
+    if(oldDistance<600)return;
+    const outerBranch=model.units.filter(unit=>rootOf(unit)===rootOf(outsider));
+    const childBranch=genealogyOwnedBranchUnits(model,ownership,[childUnit.id],false);
+    if(childBranch.has(home.id)||outerBranch.some(unit=>childBranch.has(unit.id)))return;
+    const before=new Map(model.units.map(unit=>[unit.id,unit.x]));
+    const previous=errors();
+    for(const target of [home.x-gap-outsider.width,home.x+home.width+gap]){
+      const shift=target-outsider.x;
+      outerBranch.forEach(unit=>{unit.x=before.get(unit.id)+shift;});
+      const source=genealogyGroupSourceX(group,model);
+      const anchor=genealogyChildAnchorX(group.children[0],model);
+      if(Number.isFinite(source)&&Number.isFinite(anchor)){
+        const childShift=source-anchor;
+        childBranch.forEach(id=>{model.unitById.get(id).x=before.get(id)+childShift;});
+        const next=errors();
+        const lostStraight=previous.some((error,i)=>
+          Number.isFinite(error)&&Math.abs(error)<=0.75&&
+          (!Number.isFinite(next[i])||Math.abs(next[i])>0.75));
+        const newer=genealogyGroupParentEntries(group,model);
+        const distance=Math.abs(newer[0].anchorX-newer[1].anchorX);
+        if(!lostStraight&&collisionCount()<=originalCollisions&&
+          Math.abs(next[index]||0)<=0.75&&distance<oldDistance-1){
+          adjusted++;break;
+        }
+      }
+      model.units.forEach(unit=>{unit.x=before.get(unit.id);});
+    }
+  });
+  return adjusted;
+}
+
+// 同父母兩名子女以真正錨點對稱展開；配偶寬度不能取代親子間距。
+// 同時保留下一代的完整分支安全距離。
+function compactSiblingBranchAnchors(layers,model,ownership,groups) {
+  const gap=resolveLayoutGaps().SIBLING;
+  const collisionCount=()=>{
+    let count=0;
+    layers.forEach(layer=>{
+      const row=[...layer].sort((a,b)=>a.x-b.x);
+      for(let i=1;i<row.length;i++)if(row[i].x<row[i-1].x+row[i-1].width+gap-0.01)count++;
+    });
+    return count;
+  };
+  const baselineCollisions=collisionCount();
+  const errors=()=>groups.map(group=>{
+    const source=genealogyGroupSourceX(group,model);
+    const xs=group.children.map(id=>genealogyChildAnchorX(id,model)).filter(Number.isFinite);
+    return Number.isFinite(source)&&xs.length
+      ?source-(Math.min(...xs)+Math.max(...xs))/2:null;
+  });
+  let count=0;
+  groups.forEach(group=>{
+    const ids=[...new Set(group.childUnitIds||[])];
+    if(ids.length!==2)return;
+    const siblings=ids.map(id=>{
+      const unit=model.unitById.get(id);
+      const child=group.children.find(simId=>model.unitBySim.get(simId)?.id===id);
+      return unit&&child?{unit,anchor:genealogyChildAnchorX(child,model)}:null;
+    }).filter(Boolean).sort((a,b)=>a.anchor-b.anchor);
+    if(siblings.length!==2||siblings[0].unit.generation!==siblings[1].unit.generation)return;
+    const [left,right]=siblings;
+    const source=genealogyGroupSourceX(group,model);
+    if(![source,left.anchor,right.anchor].every(Number.isFinite)||
+      Math.abs((left.anchor+right.anchor)/2-source)>0.75)return;
+    const leftBranch=genealogyOwnedBranchUnits(model,ownership,[left.unit.id],false);
+    const rightBranch=genealogyOwnedBranchUnits(model,ownership,[right.unit.id],false);
+    if([...leftBranch].some(id=>rightBranch.has(id))||
+      (group.parentUnitIds||[]).some(id=>leftBranch.has(id)||rightBranch.has(id)))return;
+    let required=gap;
+    const generations=new Set([...leftBranch,...rightBranch].map(id=>model.unitById.get(id)?.generation));
+    generations.forEach(generation=>{
+      const l=[...leftBranch].map(id=>model.unitById.get(id)).filter(u=>u.generation===generation);
+      const r=[...rightBranch].map(id=>model.unitById.get(id)).filter(u=>u.generation===generation);
+      if(!l.length||!r.length)return;
+      required=Math.max(required,
+        Math.max(...l.map(u=>u.x+u.width-left.anchor))-
+        Math.min(...r.map(u=>u.x-right.anchor))+gap);
+    });
+    const distance=right.anchor-left.anchor;
+    if(distance<=required+0.75)return;
+    const original=new Map(model.units.map(unit=>[unit.id,unit.x]));
+    const oldErrors=errors();
+    const offset=(distance-required)/2;
+    leftBranch.forEach(id=>{model.unitById.get(id).x=original.get(id)+offset;});
+    rightBranch.forEach(id=>{model.unitById.get(id).x=original.get(id)-offset;});
+    const newer=errors();
+    const breakAxis=oldErrors.some((error,i)=>
+      Number.isFinite(error)&&Math.abs(error)<=0.75&&
+      (!Number.isFinite(newer[i])||Math.abs(newer[i])>0.75));
+    if(breakAxis||collisionCount()>baselineCollisions){
+      model.units.forEach(unit=>{unit.x=original.get(unit.id);});
+      return;
+    }
+    count++;
+  });
+  return count;
+}
+
 function genealogyConnectedLayoutFamilyComponents(model,visibleIds) {
   const parent=new Map([...visibleIds].map(id=>[String(id),String(id)]));
   const find=id=>{
@@ -6255,6 +6393,8 @@ function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,compon
   // 最後確認同父母的跨家系兄弟姊妹連續，不能讓另一個家族插在中間。
   compactCrossRootSiblingGroups(layers,model,ownership);
   settleFamilyBranchParentAxes(layers,model,connectorGroups,ownership);
+  compactDetachedCoParentRoots(layers,model,ownership,connectorGroups);
+  compactSiblingBranchAnchors(layers,model,ownership,connectorGroups);
 
   // Family Branch Block 本身就是最終水平幾何權威。
   // 不再執行 generation-global packing，避免把已保留的 Parent Group block 再推壞。
@@ -7047,7 +7187,7 @@ function genealogyCoParentRelationshipJunction(group,pos,byId,link) {
   const a=pos.get(String(link.from)),b=pos.get(String(link.to));
   if(!a||!b)return null;
   const setting=getOtherRelationshipLineSetting(relationshipOtherType(link));
-  const context={pos,byId,fromId:link.from,toId:link.to};
+  const context={pos,byId,fromId:link.from,toId:link.to,sameGeneration:true};
   const geometry=relationshipOtherRenderGeometry(a,b,setting,context);
   if(geometry.blocked)return null;
   const positions=group.children.map(id=>pos.get(id)).filter(Boolean);
@@ -8053,6 +8193,13 @@ function paintRelationshipLayer({
           type
         );
 
+      const sameGeneration=!!link.inferred ||
+        Math.abs(a.y-b.y)<=0.75 ||
+        (topology.canonicalGenerationBySim.has(String(link.from)) &&
+          topology.canonicalGenerationBySim.has(String(link.to)) &&
+          topology.canonicalGenerationBySim.get(String(link.from))===
+          topology.canonicalGenerationBySim.get(String(link.to)));
+
       const geometryResult =
         relationshipOtherRenderGeometry(
           a,
@@ -8063,7 +8210,8 @@ function paintRelationshipLayer({
             toId:link.to,
             pos,
             byId,
-            geometry
+            geometry,
+            sameGeneration
           }
         );
 
@@ -8081,6 +8229,7 @@ function paintRelationshipLayer({
           kind:'other',
           link,
           setting,
+          sameGeneration,
           obstacleSensitive:
             !!setting.curved || setting.routing !== 'manual',
           simIds:[
@@ -8431,7 +8580,8 @@ function paintRelationshipPreview(
             toId,
             pos,
             byId,
-            geometry:layoutCache.geometry
+            geometry:layoutCache.geometry,
+            sameGeneration:record.sameGeneration
           }
         );
 
@@ -8652,7 +8802,7 @@ function avatarBoundaryAnchor(card, targetCard) {
 
     return {
       x:dx >= 0 ? rect.right : rect.left,
-      y:rect.centerY
+      y:cardAvatarRect(card).centerY
     };
   }
 

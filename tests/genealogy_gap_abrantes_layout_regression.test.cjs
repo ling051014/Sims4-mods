@@ -371,3 +371,25 @@ test('上游祖先與較早出生子女限制可阻止不安全的世代提升',
   normalize(byId,groups.slice(0,2),generation);
   assert.equal(generation.get('father'),2);
 });
+
+test('羅吉戈與底比女王貼近橫向連接，子女仍在下一代',()=>{
+  const queen=person('底比女王'),rodrigo=person('羅吉戈．迪．帕布羅');
+  const child=person('羅吉戈．底比');
+  assert.equal(rodrigo.y,queen.y);
+  assert.ok(Math.abs(rodrigo.x-queen.x)<200,
+    '共同父母相隔過遠：'+Math.abs(rodrigo.x-queen.x));
+  assert.ok(child.x>rodrigo.x&&child.x<queen.x+95&&child.y>queen.y);
+});
+test('蒙提茱麗葉與蓋普提伯特以親子錨點對稱，保留下游家系安全空間',()=>{
+  const juliet=person('蒙提茱麗葉'),tibert=person('蓋普提伯特');
+  const parents=[person('卡利班．蓋普'),person('柯德莉亞．蓋普')];
+  const source=(parents[0].x+47.5+parents[1].x+47.5)/2;
+  const children=(juliet.x+47.5+tibert.x+47.5)/2;
+  assert.ok(Math.abs(source-children)<=0.75);
+  assert.ok(tibert.x-juliet.x<200,
+    '配偶不能把兄妹卡片撐開超出必要空間');
+  const dante=person('蒙提但丁'),beatrice=person('蓋普碧翠絲');
+  assert.ok(dante.x+95+34<=beatrice.x+0.001,
+    '子孫不能為了置中而互相重疊');
+  assert.equal(juliet.y,tibert.y);
+});
