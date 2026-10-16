@@ -7922,7 +7922,7 @@ $('appearanceBackgroundFit').onchange = event => {
 $('appearanceBackgroundClearBtn').onclick = removeCanvasBackground;
 
 $('cleanupBtn').onclick = async () => {
-  if (!await uiConfirm('將掃描所有未被引用的圖片並刪除。確定繼續嗎？', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
+  if (!await uiConfirm('要清理未使用的圖片嗎？系統會移除目前沒有被族譜引用的圖片，仍在使用的圖片會保留。', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
   const button = $('cleanupBtn');
 
   await withActionButtonLoading(
@@ -13673,7 +13673,7 @@ $('familyCoverClearBtn')?.addEventListener('click', async () => {
 });
 
 $('newFamilyBtn').onclick = async () => {
-  const name = await uiPrompt('請輸入新家族名稱。', '新家族', { title: '新增家族', confirmText: '新增' });
+  const name = await uiPrompt('請為新家族取個名稱。', '新家族', { title: '新增家族', confirmText: '新增' });
   if (name === null) return;
   const fam = {
     id:uid('fam'), name:name.trim()||'新家族',
@@ -13694,9 +13694,9 @@ $('newFamilyBtn').onclick = async () => {
   requestAnimationFrame(() => genealogyViewport.fit());
 };
 $('delFamilyBtn').onclick = async () => {
-  if (currentGenealogyData().families.length <= 1) { uiAlert('至少需要保留一個家族。', { title: '無法刪除家族' }); return; }
+  if (currentGenealogyData().families.length <= 1) { uiAlert('需要保留至少一個家族，才能繼續使用族譜畫布。', { title: '無法刪除家族' }); return; }
   const fam = currentFamily();
-  if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n（家族內所有模擬市民仍保留在模擬市民池中）`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
+  if (!await uiConfirm(`確定刪除家族「${displayDataText(fam.name, fam)}」嗎？\n家族中的模擬市民不會被刪除，之後仍可加入其他家族。`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
   const fallbackFamilyId =
     currentGenealogyData().families
       .find(f => f.id !== fam.id)

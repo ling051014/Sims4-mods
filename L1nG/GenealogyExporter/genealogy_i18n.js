@@ -191,7 +191,7 @@ They will remain in the global Sim pool.`;
     if ((match = canonical.match(/^確定刪除家族「(.+)」嗎？$/))) {
       return `Delete family “${match[1]}”?`;
     }
-    if (canonical === '（家族內所有模擬市民仍保留在模擬市民池中）') {
+    if (canonical === '家族中的模擬市民不會被刪除，之後仍可加入其他家族。') {
       return '(All Sims in this family will remain in the global Sim pool.)';
     }
     if ((match = canonical.match(/^確定徹底刪除「(.+)」嗎？$/))) {
@@ -203,7 +203,7 @@ They will remain in the global Sim pool.`;
     if (canonical === '（若只想從目前家族移除，請使用「移出家族」）') {
       return '(To remove the Sim only from this family, use “Remove from Family”.)';
     }
-    if (canonical === '請輸入新家族名稱。') {
+    if (canonical === '請為新家族取個名稱。') {
       return 'Enter a name for the new family.';
     }
     if ((match = canonical.match(/^（(\d+) \/ (\d+) 張）$/))) {
