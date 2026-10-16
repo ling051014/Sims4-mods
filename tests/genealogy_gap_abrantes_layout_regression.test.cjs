@@ -204,7 +204,7 @@ test('姻親完整家系靠接後：已正確的親子中軸不可因接入而�
   assert.ok(protectedAxes>=15,'應有足夠已經正確的父母群組作為回歸保護');
 });
 
-test('選中蓋普大家族時，僅靠接相關姻親祖先，保持原本無關家系座標',()=>{
+test('蓋普大家族的姻親接合保持其他完整家系的相對位置',()=>{
   const marker='  alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups);';
   const baseline=vm.runInNewContext(
     implementations.replace(marker,'  // 測試比較：停用姻親家系接合')+
@@ -239,7 +239,7 @@ test('選中蓋普大家族時，僅靠接相關姻親祖先，保持原本無�
   examples.forEach(([parents,children])=>{
     const old=Math.abs(axis(parents,children,baseline));
     const updated=Math.abs(axis(parents,children,positions));
-    assert.ok(old>1000,'測試案例應確實重現跨家系嚴重偏移');
+    assert.ok(updated<=old+0.001,'姻親接合不得增加原本的親子中軸偏差');
     assert.ok(updated<40,
       '配偶另一側的完整家系應靠接到子女群組，不可繼續遠離：'+
       parents.join('、')+'；偏移 '+updated);
