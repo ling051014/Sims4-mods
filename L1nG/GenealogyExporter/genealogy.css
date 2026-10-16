@@ -7050,8 +7050,8 @@ html[lang="en"] body {
     /* 字體大小 */ font-size: 12.5px;
 }
 
-/* ========【遊戲族譜匯入狀態】 ZIP 讀取與資料轉換進度 ======== */
-.game-import-status-mask {
+/* ========【檔案處理進度】 ZIP、JSON 與 PNG 共用進度視窗 ======== */
+.file-operation-status-mask {
     /* 定位方式 */ position: fixed;
     /* 定位範圍 */ inset: 0;
     /* 顯示層級 */ z-index: 22000;
@@ -7063,11 +7063,11 @@ html[lang="en"] body {
     /* 背景濾鏡 */ backdrop-filter: blur(3px);
 }
 
-.game-import-status-mask.show {
+.file-operation-status-mask.show {
     /* 顯示方式 */ display: flex;
 }
 
-.game-import-status-card {
+.file-operation-status-card {
     /* 原有卡片加上第二列進度條 */ display: grid;
     grid-template-columns: 22px minmax(0,1fr) auto;
     align-items: center;
@@ -7083,40 +7083,40 @@ html[lang="en"] body {
     /* 元素陰影 */ box-shadow: 0 18px 48px rgba(0,0,0,.22);
 }
 
-.game-import-status-content {
+.file-operation-status-content {
     min-width: 0;
     /* 顯示方式 */ display: flex;
     /* 排列方向 */ flex-direction: column;
     /* 項目間距 */ gap: 4px;
 }
 
-.game-import-status-title {
+.file-operation-status-title {
     /* 字體大小 */ font-size: 14px;
     /* 行距設定 */ line-height: 1.4;
     /* 文字顏色 */ color: var(--text-primary);
 }
 
-.game-import-status-text {
+.file-operation-status-text {
     /* 字體大小 */ font-size: 12.5px;
     /* 行距設定 */ line-height: 1.45;
     /* 文字顏色 */ color: var(--text-secondary);
 }
 
-.game-import-status-percent {
+.file-operation-status-percent {
     font-size: 16px;
     font-weight: 650;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
-.game-import-status-track {
+.file-operation-status-track {
     grid-column: 1 / -1;
     height: 6px;
     border-radius: 999px;
     overflow: hidden;
     background: var(--border-default);
 }
-.game-import-status-fill {
+.file-operation-status-fill {
     display: block;
     height: 100%;
     width: 0;
@@ -7124,20 +7124,42 @@ html[lang="en"] body {
     background: var(--action-primary);
     transition: width .12s ease;
 }
-.game-import-spinner {
+.file-operation-spinner {
     /* 元素寬度 */ width: 22px;
     /* 元素高度 */ height: 22px;
     /* 彈性尺寸 */ flex: 0 0 22px;
     /* 邊框設定 */ border: 2px solid var(--border-default);
     /* 上方邊框 */ border-top-color: var(--action-primary);
     /* 圓角弧度 */ border-radius: 50%;
-    /* 動畫設定 */ animation: game-import-spin .7s linear infinite;
+    /* 動畫設定 */ animation: file-operation-spin .7s linear infinite;
 }
 
-@keyframes game-import-spin {
+@keyframes file-operation-spin {
     to {
         /* 元素變形 */ transform: rotate(360deg);
     }
+}
+.file-operation-status-mask.is-indeterminate .file-operation-status-percent {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.file-operation-status-mask.is-indeterminate .file-operation-status-fill {
+    width: 32%;
+    transition: none;
+    animation: file-operation-indeterminate 1.5s ease-in-out infinite;
+}
+@keyframes file-operation-indeterminate {
+    from { transform: translateX(-110%); }
+    to { transform: translateX(315%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .file-operation-status-mask.is-indeterminate .file-operation-status-fill {
+        animation: none;
+        width: 100%;
+        opacity: .6;
+    }
+    .file-operation-spinner { animation: none; }
 }
 
 /* ========【關係編輯】 長英文名稱與多語系內容自適應 ======== */

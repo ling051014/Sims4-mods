@@ -1185,6 +1185,24 @@
     "這個家族還沒有模擬市民。點選「成員 ＋」，即可新增或加入已建立的模擬市民。": "This family has no Sims yet. Select “Members +” to create a Sim or add one you already have.",
     "點選選擇檔案，也可以拖曳檔案到這裡": "Choose a file, or drag and drop it here",
     "已保留：手動排列、自訂關係、自訂標籤、家庭封面與網站手動資料。": "Preserved: manual positions, custom relationships, custom labels, family covers, and manually added website data.",
-    "同步最新遊戲資料，保留手動排列、自訂關係、家庭封面與你在網站上的修改。": "Sync the latest game data while keeping manual positions, custom relationships, family covers, and website edits."
+    "同步最新遊戲資料，保留手動排列、自訂關係、家庭封面與你在網站上的修改。": "Sync the latest game data while keeping manual positions, custom relationships, family covers, and website edits.",
+    "檔案處理中": "Processing File",
+    "處理中": "Processing",
+    "進度": "Progress",
+    "讀取 JSON 備份檔案……": "Reading JSON backup file…",
+    "檢查備份格式與版本……": "Checking backup format and version…",
+    "整理模擬市民、寵物與家庭關係……": "Organizing Sims, pets, and family relationships…",
+    "檢查族譜引用的圖片資產……": "Checking referenced image assets…",
+    "還原圖片資產": "Restoring image assets",
+    "更新族譜與背景設定……": "Updating genealogy and background settings…",
+    "儲存族譜與圖片資料……": "Saving genealogy and image data…",
+    "整理族譜與背景設定……": "Preparing genealogy and background settings…",
+    "整理圖片資產": "Preparing image assets",
+    "建立 JSON 備份檔案……": "Creating JSON backup file…",
+    "準備下載……": "Preparing download…",
+    "準備族譜畫布……": "Preparing genealogy canvas…",
+    "載入頭像與關係圖示……": "Loading portraits and relationship icons…",
+    "正在繪製族譜圖片……": "Rendering genealogy image…",
+    "正在產生 PNG 檔案……": "Generating PNG file…"
   }
 }

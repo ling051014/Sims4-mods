@@ -16506,30 +16506,26 @@ function localizedExportFilenamePart(label) {
 }
 
 async function exportJSON() {
-  try {
-    const exportDb = genealogyStore.snapshotDatabase();
-    const exportBg = { ...bgSettings };
-    const assetIds = assetStore.collectReferencedAssetIds(exportDb, exportBg, { strict:true });
-    const assets = await assetStore.serializeAssets(assetIds);
-
-    const payload = {
-      ...exportDb,
-      bgSettings:exportBg,
-      backupFormat:'l1ng-genealogy-backup',
-      backupVersion:1,
-      assets
-    };
-
-    // 備份以 compact JSON 輸出；Base64 只存在 portable backup，不回寫 runtime。
-    const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = withExportSlotPrefix(localizedExportFilenamePart('族譜備份') + '.json', exportDb);
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  } catch (error) {
-    uiAlert('匯出失敗：' + error.message, { title:'匯出失敗', kind:'danger' });
-  }
+  const title = '匯出 JSON 備份';
+  showFileOperationStatus('整理族譜與背景設定……', null, title);
+  const exportDb = genealogyStore.snapshotDatabase();
+  const exportBg = { ...bgSettings };
+  const assetIds = assetStore.collectReferencedAssetIds(exportDb, exportBg, { strict:true });
+  if (assetIds.size) showFileAssetProgress('整理圖片資產', 0, assetIds.size, title);
+  const assets = await assetStore.serializeAssets(assetIds, (done, total) => {
+    showFileAssetProgress('整理圖片資產', done, total, title);
+  });
+  showFileOperationStatus('建立 JSON 備份檔案……', null, title);
+  const payload = { ...exportDb, bgSettings:exportBg,
+    backupFormat:'l1ng-genealogy-backup', backupVersion:1, assets };
+  // Base64 只寫入攜帶式備份，不變更原本儲存格式。
+  const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+  showFileOperationStatus('準備下載……', null, title);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = withExportSlotPrefix(localizedExportFilenamePart('族譜備份') + '.json', exportDb);
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 function openExportPanel() {
@@ -17050,6 +17046,7 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
     try { await document.fonts.ready; } catch (_) {}
   }
   render();
+  showFileOperationStatus('準備族譜畫布……', null, '匯出族譜圖片');
 
   const factorMap = { standard: 1, hd: 2, uhd: 3 };
   const factor = factorMap[sizeKey] || 1;
@@ -17065,6 +17062,7 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   try {
     // 先讓 clone 套用完整 CSS，再把 mask icon 換成 html2canvas 能正確輸出的 SVG。
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    showFileOperationStatus('載入頭像與關係圖示……', null, '匯出族譜圖片');
     await Promise.all([
       prepareCaptureIcons(captureViewport),
       prepareCaptureRelationshipIcons(captureViewport),
@@ -17078,6 +17076,7 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
       throw new Error('圖片尺寸超過瀏覽器可安全輸出的範圍，請改用較小的匯出尺寸。');
     }
 
+    showFileOperationStatus('正在繪製族譜圖片……', null, '匯出族譜圖片');
     const canvas = await html2canvas(captureViewport, {
       backgroundColor: backgroundMode === 'transparent' ? null : undefined,
       scale: factor,
@@ -17097,6 +17096,7 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
       removeContainer: true
     });
 
+    showFileOperationStatus('正在產生 PNG 檔案……', null, '匯出族譜圖片');
     const blob = await new Promise((resolve, reject) => {
       canvas.toBlob(result => result ? resolve(result) : reject(new Error('PNG encoding failed')), 'image/png');
     });
@@ -17107,6 +17107,7 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
     const fileBase = sanitizeDownloadName(familyName + familySuffix);
     const sizeLabel = sizeKey === 'uhd' ? '超高畫質' : sizeKey === 'hd' ? '高畫質（2×）' : '標準';
     const filename = `${fileBase}_${localizedExportFilenamePart(sizeLabel)}.png`;
+    showFileOperationStatus('準備下載……', null, '匯出族譜圖片');
     downloadBlob(blob, withExportSlotPrefix(filename, currentGenealogyData()));
   } finally {
     captureViewport.remove();
@@ -17159,45 +17160,43 @@ function prepareDatabase(raw) {
 }
 
 async function importJSON(file) {
+  const title = '匯入 JSON 備份';
   try {
+    showFileOperationStatus('讀取 JSON 備份檔案……', null, title);
+    await waitForFileOperationPaint();
     const raw = JSON.parse(await file.text());
-
-    if (
-      raw?.backupFormat !== 'l1ng-genealogy-backup' ||
-      Number(raw?.backupVersion) !== 1
-    ) {
+    showFileOperationStatus('檢查備份格式與版本……', null, title);
+    if (raw?.backupFormat !== 'l1ng-genealogy-backup' || Number(raw?.backupVersion) !== 1) {
       throw new Error('這不是目前 L1nG 圖片資產架構的完整 JSON 備份。');
     }
-
     const incomingBg = raw.bgSettings && typeof raw.bgSettings === 'object'
-      ? { ...raw.bgSettings }
-      : { image:null, opacity:0.5, fit:'cover' };
-
+      ? { ...raw.bgSettings } : { image:null, opacity:0.5, fit:'cover' };
     const rawDb = { ...raw };
     delete rawDb.backupFormat;
     delete rawDb.backupVersion;
     delete rawDb.bgSettings;
     delete rawDb.assets;
-
+    showFileOperationStatus('整理模擬市民、寵物與家庭關係……', null, title);
     const preparedResult = prepareDatabase(rawDb);
     const nextDb = preparedResult.prepared;
+    showFileOperationStatus('檢查族譜引用的圖片資產……', null, title);
     const requiredAssets = assetStore.collectReferencedAssetIds(nextDb, incomingBg, { strict:true });
     const serializedAssets = raw.assets || {};
-
     for (const id of requiredAssets) {
       if (!Object.prototype.hasOwnProperty.call(serializedAssets, id)) {
         throw new Error(`備份缺少被族譜引用的圖片資產：${id}`);
       }
     }
-
-    await assetStore.importSerializedAssets(serializedAssets);
-
-    replaceCanonicalGenealogyDatabase(
-      nextDb
-    );
+    const totalAssets = Object.keys(serializedAssets).length;
+    if (totalAssets) showFileAssetProgress('還原圖片資產', 0, totalAssets, title);
+    await assetStore.importSerializedAssets(serializedAssets, (done, total) => {
+      showFileAssetProgress('還原圖片資產', done, total, title);
+    });
+    showFileOperationStatus('更新族譜與背景設定……', null, title);
+    replaceCanonicalGenealogyDatabase(nextDb);
     dragHistory.clear();
     bgSettings = { ...bgSettings, ...incomingBg };
-
+    showFileOperationStatus('儲存族譜與圖片資料……', null, title);
     save({ immediate:true });
     persistCanvasBackground();
     refreshFamilyUI();
@@ -17205,77 +17204,78 @@ async function importJSON(file) {
     render();
     scheduleGC();
     requestAnimationFrame(() => genealogyViewport.fit());
+    showFileOperationStatus('所有資料已處理完成！', 100, title);
+    await waitForFileOperationPaint();
   } catch(err) {
-    uiAlert('匯入失敗：' + err.message, { title:'匯入失敗', kind:'danger' });
+    hideFileOperationStatus();
+    await uiAlert('匯入失敗：' + err.message, { title:'匯入失敗', kind:'danger' });
+  } finally {
+    hideFileOperationStatus();
   }
 }
 
-// ========【遊戲族譜匯入狀態】 顯示 ZIP 讀取與族譜建立進度 ========
-let gameImportStatusElement = null;
-
-function ensureGameImportStatus() {
-  if (gameImportStatusElement) return gameImportStatusElement;
-
+// ========【檔案處理進度】匯入與匯出共用 UI ========
+let fileOperationStatusElement = null;
+function ensureFileOperationStatus() {
+  if (fileOperationStatusElement) return fileOperationStatusElement;
   const overlay = document.createElement('div');
-  overlay.id = 'gameImportStatus';
-  overlay.className = 'game-import-status-mask';
+  overlay.id = 'fileOperationStatus';
+  overlay.className = 'file-operation-status-mask';
   overlay.setAttribute('aria-hidden', 'true');
-
   overlay.innerHTML = `
-    <div class="game-import-status-card" role="status" aria-live="polite" aria-atomic="true">
-      <span class="game-import-spinner" aria-hidden="true"></span>
-
-      <div class="game-import-status-content">
-        <strong class="game-import-status-title">匯入遊戲族譜</strong>
-        <span class="game-import-status-text">準備中……</span>
+    <div class="file-operation-status-card" role="status" aria-live="polite" aria-atomic="true">
+      <span class="file-operation-spinner" aria-hidden="true"></span>
+      <div class="file-operation-status-content">
+        <strong class="file-operation-status-title">檔案處理中</strong>
+        <span class="file-operation-status-text">準備中……</span>
       </div>
-      <span class="game-import-status-percent" aria-hidden="true">0%</span>
-      <div class="game-import-status-track" role="progressbar" aria-label="遊戲族譜匯入進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-        <span class="game-import-status-fill"></span>
+      <span class="file-operation-status-percent" aria-hidden="true">處理中</span>
+      <div class="file-operation-status-track" role="progressbar" aria-label="檔案處理進度" aria-valuemin="0" aria-valuemax="100">
+        <span class="file-operation-status-fill"></span>
       </div>
-    </div>
-  `;
-
+    </div>`;
   document.body.appendChild(overlay);
-  gameImportStatusElement = overlay;
-
+  fileOperationStatusElement = overlay;
   return overlay;
 }
-
-function showGameImportStatus(message, percent = null, title = '匯入遊戲族譜') {
-  const overlay = ensureGameImportStatus();
-  const text = overlay.querySelector('.game-import-status-text');
-  const titleElement = overlay.querySelector('.game-import-status-title');
-  const percentageElement = overlay.querySelector('.game-import-status-percent');
-  const progressBar = overlay.querySelector('.game-import-status-track');
-  const fill = overlay.querySelector('.game-import-status-fill');
-
-  if (text) text.textContent = uiText(message);
-  if (titleElement) titleElement.textContent = uiText(title);
-  if (Number.isFinite(percent)) {
+function showFileOperationStatus(message, percent = null, title = '檔案處理中') {
+  const overlay = ensureFileOperationStatus();
+  const text = overlay.querySelector('.file-operation-status-text');
+  const heading = overlay.querySelector('.file-operation-status-title');
+  const number = overlay.querySelector('.file-operation-status-percent');
+  const track = overlay.querySelector('.file-operation-status-track');
+  const fill = overlay.querySelector('.file-operation-status-fill');
+  const determinate = Number.isFinite(percent);
+  text.textContent = uiText(message);
+  heading.textContent = uiText(title);
+  track.setAttribute('aria-label', uiText(title) + ' ' + uiText('進度'));
+  track.setAttribute('aria-valuetext', uiText(message));
+  overlay.classList.toggle('is-indeterminate', !determinate);
+  if (determinate) {
     const value = Math.min(100, Math.max(0, Math.floor(percent)));
-    if (percentageElement) percentageElement.textContent = value + '%';
-    if (progressBar) progressBar.setAttribute('aria-valuenow', String(value));
-    if (fill) fill.style.width = value + '%';
+    number.textContent = value + '%';
+    track.setAttribute('aria-valuenow', String(value));
+    fill.style.width = value + '%';
+  } else {
+    number.textContent = uiText('處理中');
+    track.removeAttribute('aria-valuenow');
+    fill.style.width = '';
   }
-
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
 }
-
-function hideGameImportStatus() {
-  if (!gameImportStatusElement) return;
-
-  gameImportStatusElement.classList.remove('show');
-  gameImportStatusElement.setAttribute('aria-hidden', 'true');
+function hideFileOperationStatus() {
+  if (!fileOperationStatusElement) return;
+  fileOperationStatusElement.classList.remove('show', 'is-indeterminate');
+  fileOperationStatusElement.setAttribute('aria-hidden', 'true');
 }
-
-function waitForImportPaint() {
-  return new Promise(resolve => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(resolve);
-    });
-  });
+function showFileAssetProgress(label, done, total, title) {
+  const en = window.LING_I18N?.language === 'en';
+  const count = en ? ` (${done} / ${total})` : `（${done} / ${total}）`;
+  showFileOperationStatus(uiText(label) + count + '……', total ? done / total * 100 : null, title);
+}
+function waitForFileOperationPaint() {
+  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
 // ========【遊戲族譜匯入】 讀取 L1nG Genealogy Exporter ZIP ========
@@ -17398,7 +17398,7 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
     return !!(asset?.supported && asset.bytes);
   });
   const totalPets = petHasPortrait.filter(Boolean).length;
-  showGameImportStatus(
+  showFileOperationStatus(
     uiText('處理模擬市民頭像') + (english ? ' (' : '（') +
       '0 / ' + totalPeople + (english ? ')' : '）'),
     25, progressTitle
@@ -17411,7 +17411,7 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
     if (!personHasPortrait[index]) continue;
     const done = ++personDone;
     if (done % personStep === 0 || done === totalPeople) {
-      showGameImportStatus(
+      showFileOperationStatus(
         uiText('處理模擬市民頭像') + (english ? ' (' : '（') +
           done + ' / ' + totalPeople + (english ? ')' : '）'),
         25 + Math.floor(50 * done / totalPeople), progressTitle
@@ -17420,7 +17420,7 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
   }
 
   if (totalPets) {
-    showGameImportStatus(
+    showFileOperationStatus(
       uiText('處理寵物頭像') + (english ? ' (' : '（') +
         '0 / ' + totalPets + (english ? ')' : '）'),
       75, progressTitle
@@ -17433,7 +17433,7 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
       if (!petHasPortrait[index]) continue;
       const done = ++petDone;
       if (done % petStep === 0 || done === totalPets) {
-        showGameImportStatus(
+        showFileOperationStatus(
           uiText('處理寵物頭像') + (english ? ' (' : '（') +
             done + ' / ' + totalPets + (english ? ')' : '）'),
           75 + Math.floor(13 * done / totalPets), progressTitle
@@ -17612,7 +17612,7 @@ async function chooseGameImportMode(
     return 'replace';
   }
 
-  hideGameImportStatus();
+  hideFileOperationStatus();
 
   const source =
     analysis.source || {};
@@ -17759,20 +17759,20 @@ async function importGameGenealogy(file) {
       throw new Error('找不到遊戲族譜匯入模組。');
     }
 
-    showGameImportStatus('讀取並檢查 ZIP 檔案……', 0);
-    await waitForImportPaint();
+    showFileOperationStatus('讀取並檢查 ZIP 檔案……', 0);
+    await waitForFileOperationPaint();
 
     const bundle = await window.L1nGGameImport.parseFile(file);
 
-    showGameImportStatus('整理模擬市民、寵物、家族與人物關係……', 12);
-    await waitForImportPaint();
+    showFileOperationStatus('整理模擬市民、寵物、家族與人物關係……', 12);
+    await waitForFileOperationPaint();
 
     const converted =
       window.L1nGGameImport
         .convertBundle(bundle);
 
-    showGameImportStatus('比對遊戲存檔與現有族譜資料……', 22);
-    await waitForImportPaint();
+    showFileOperationStatus('比對遊戲存檔與現有族譜資料……', 22);
+    await waitForFileOperationPaint();
 
     const analysis =
       currentGameImportUpdateAnalysis(
@@ -17785,14 +17785,14 @@ async function importGameGenealogy(file) {
       );
 
     if (importMode === 'cancel') {
-      hideGameImportStatus();
+      hideFileOperationStatus();
       return;
     }
 
     const isUpdate = importMode === 'update' || importMode === 'continue_update';
     const progressTitle = isUpdate ? '更新遊戲族譜' : '匯入遊戲族譜';
-    showGameImportStatus('準備處理匯入頭像……', 24, progressTitle);
-    await waitForImportPaint();
+    showFileOperationStatus('準備處理匯入頭像……', 24, progressTitle);
+    await waitForFileOperationPaint();
 
     const avatarStats =
       await persistGameImportAvatars(
@@ -17803,8 +17803,8 @@ async function importGameGenealogy(file) {
 
     console.info('[遊戲 ZIP 頭像] 匯入摘要：', avatarStats);
 
-    showGameImportStatus('整理匯入資料並準備儲存……', 88, progressTitle);
-    await waitForImportPaint();
+    showFileOperationStatus('整理匯入資料並準備儲存……', 88, progressTitle);
+    await waitForFileOperationPaint();
 
     const incomingPrepared =
       prepareDatabase(
@@ -17816,11 +17816,11 @@ async function importGameGenealogy(file) {
       incomingPrepared;
 
     if (isUpdate) {
-      showGameImportStatus(
+      showFileOperationStatus(
         '合併最新遊戲資料，保留網站上的手動修改……',
         91, progressTitle
       );
-      await waitForImportPaint();
+      await waitForFileOperationPaint();
 
       updateResult =
         window.L1nGGameImport
@@ -17842,11 +17842,11 @@ async function importGameGenealogy(file) {
         ).prepared;
     }
 
-    showGameImportStatus(
+    showFileOperationStatus(
       '儲存資料並更新家族清單與族譜畫布……',
       95, progressTitle
     );
-    await waitForImportPaint();
+    await waitForFileOperationPaint();
 
     replaceCanonicalGenealogyDatabase(
       nextDatabase
@@ -17929,13 +17929,13 @@ async function importGameGenealogy(file) {
           ?.realDateCurrentDate
       );
 
-    showGameImportStatus(
+    showFileOperationStatus(
       '所有資料已處理完成！',
       100,
       isUpdate ? '遊戲族譜更新完成' : '遊戲族譜匯入完成'
     );
-    await waitForImportPaint();
-    hideGameImportStatus();
+    await waitForFileOperationPaint();
+    hideFileOperationStatus();
 
     if (isUpdate) {
       await uiAlert(
@@ -17978,7 +17978,7 @@ async function importGameGenealogy(file) {
     }
 
   } catch (err) {
-    hideGameImportStatus();
+    hideFileOperationStatus();
 
     console.error('[遊戲族譜匯入]', err);
 
@@ -18097,7 +18097,6 @@ async function importCanvasDroppedFile(file) {
   }
 
   if (kind === 'json-backup') {
-    uiToast('正在匯入 JSON 備份……');
     await importJSON(file);
     return;
   }
@@ -18775,50 +18774,52 @@ $('exportBtn').onclick = openExportPanel;
 if (exportCloseBtn) exportCloseBtn.onclick = closeExportPanel;
 if (exportDialog) exportDialog.onclick = e => { if (e.target === exportDialog) closeExportPanel(); };
 if (exportJsonBtn) exportJsonBtn.onclick = async () => {
-  exportImageBtn && (exportImageBtn.disabled = true);
-
+  exportJsonBtn.disabled = true;
+  if (exportImageBtn) exportImageBtn.disabled = true;
   try {
-    await withActionButtonLoading(
-      exportJsonBtn,
-      '正在匯出 JSON 備份',
-      async () => {
-        await exportJSON();
-        closeExportPanel();
-        uiToast('JSON 備份匯出完成');
-      }
-    );
-  } finally {
-    exportImageBtn && (exportImageBtn.disabled = false);
-  }
-};
-
-if (exportImageBtn) exportImageBtn.onclick = async () => {
-  exportJsonBtn && (exportJsonBtn.disabled = true);
-
-  try {
-    await withActionButtonLoading(
-      exportImageBtn,
-      '正在匯出族譜圖片',
-      async () => {
-        await exportGenealogyImage(
-          getSelectedExportImageSize(),
-          getSelectedExportBackgroundMode()
-        );
-
-        closeExportPanel();
-        uiToast('族譜圖片匯出完成');
-      }
-    );
+    showFileOperationStatus('整理族譜與背景設定……', null, '匯出 JSON 備份');
+    await waitForFileOperationPaint();
+    await exportJSON();
+    showFileOperationStatus('所有資料已處理完成！', 100, '匯出 JSON 備份');
+    await waitForFileOperationPaint();
+    hideFileOperationStatus();
+    closeExportPanel();
+    uiToast('JSON 備份匯出完成');
   } catch (err) {
-    console.error(err);
-    await uiAlert(`族譜圖片匯出失敗：${err && err.message ? err.message : '未知錯誤'}`, { title: '族譜圖片匯出失敗', kind: 'danger' });
+    hideFileOperationStatus();
+    console.error('[JSON 備份匯出]', err);
+    await uiAlert('匯出失敗：' + (err?.message || '未知錯誤'), { title:'匯出失敗', kind:'danger' });
   } finally {
-    exportJsonBtn && (exportJsonBtn.disabled = false);
+    hideFileOperationStatus();
+    exportJsonBtn.disabled = false;
+    if (exportImageBtn) exportImageBtn.disabled = false;
   }
 };
-$('importInput').onchange = e => {
+if (exportImageBtn) exportImageBtn.onclick = async () => {
+  exportImageBtn.disabled = true;
+  if (exportJsonBtn) exportJsonBtn.disabled = true;
+  try {
+    showFileOperationStatus('準備族譜畫布……', null, '匯出族譜圖片');
+    await waitForFileOperationPaint();
+    await exportGenealogyImage(getSelectedExportImageSize(), getSelectedExportBackgroundMode());
+    showFileOperationStatus('所有資料已處理完成！', 100, '匯出族譜圖片');
+    await waitForFileOperationPaint();
+    hideFileOperationStatus();
+    closeExportPanel();
+    uiToast('族譜圖片匯出完成');
+  } catch (err) {
+    hideFileOperationStatus();
+    console.error('[族譜圖片匯出]', err);
+    await uiAlert(`族譜圖片匯出失敗：${err?.message || '未知錯誤'}`, { title:'族譜圖片匯出失敗', kind:'danger' });
+  } finally {
+    hideFileOperationStatus();
+    exportImageBtn.disabled = false;
+    if (exportJsonBtn) exportJsonBtn.disabled = false;
+  }
+};
+$('importInput').onchange = async e => {
   const f = e.target.files[0];
-  if (f) importJSON(f);
+  if (f) await importJSON(f);
   e.target.value = '';
 };
 
