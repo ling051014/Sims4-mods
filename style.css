@@ -581,78 +581,90 @@ body.mod-list-page {
 /* 強制隱藏 */
 .hide-item { display: none !important; }
 
-/* ========【快捷鍵提示】 設定 - 鍵盤按鍵 ======== */
-.shortcut-key {
-    /* 繼承網站字體 */ font-family: inherit;
-    /* 字體大小 */ font-size: 11px;
-    /* 背景顏色 */ background: #ffffff;
-    /* 邊框設定 */ border: 1px solid #dddddd;
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 內縮空間 */ padding: 1px 5px;
-    /* 按鍵立體感 */ box-shadow: 0 1px 0 #dddddd;
-    /* 文字顏色 */ color: #666666;
-    /* 禁止按鍵文字換行 */ white-space: nowrap;
-}
-
-/* ========【快捷鍵提示】 設定 - 滑鼠外型 ======== */
+/* ========【快捷鍵提示】 K2 B 柔和版鍵帽 × M2 陶瓷柔光滑鼠 ======== */
+/* 模組整理使用獨立配色，僅在鍵帽與滑鼠提示內映射語意色票。 */
+.shortcut-key,
 .mouse-hint {
-    /* 相對定位 */ position: relative;
-    /* 行內區塊 */ display: inline-block;
-    /* 滑鼠寬度 */ width: 19px;
-    /* 滑鼠高度 */ height: 24px;
-    /* 左右間距 */ margin: 0 4px 0 2px;
-    /* 與文字垂直對齊 */ vertical-align: -7px;
-    /* 外框線條 */ border: 1.35px solid currentColor;
-    /* 滑鼠圓角 */ border-radius: 8px 8px 9px 9px;
-    /* 外框顏色 */ color: #888888;
-    /* 背景顏色 */ background: #ffffff;
-    /* 隱藏超出內容 */ overflow: hidden;
+  --text-primary:#666666;
+  --text-secondary:#888888;
+  --border-default:#dddddd;
+  --surface-input:#ffffff;
+  --surface-card:#ffffff;
+  --action-primary:#55acee;
 }
 
-/* ========【快捷鍵提示】 設定 - 滑鼠左右鍵區域 ======== */
+.shortcut-key {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text-primary);
+  font-family:inherit;
+  font-size:10.5px;
+  line-height:1;
+  vertical-align:middle;
+
+  min-height:26px;
+  padding:4px 9px;
+  margin:0 3px 4px;
+  border:1px solid color-mix(in srgb,var(--border-default) 66%,var(--text-secondary));
+  border-radius:7px;
+  background:linear-gradient(180deg,var(--surface-card),color-mix(in srgb,var(--surface-input) 75%,var(--border-default)));
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb,var(--surface-card) 66%,var(--border-default)),
+    inset 0 2px 0 color-mix(in srgb,var(--surface-card) 88%,white),
+    0 2px 0 color-mix(in srgb,var(--text-secondary) 58%,var(--border-default)),
+    0 4px 5px color-mix(in srgb,var(--text-primary) 15%,transparent);
+  font-weight:650;
+  white-space:nowrap;
+}
+
+.mouse-hint {
+  position:relative;
+  display:inline-block;
+  width:19px;
+  height:24px;
+  margin:0 4px 0 2px;
+  vertical-align:-7px;
+  color:var(--text-secondary);
+  overflow:hidden;
+
+  border:1.2px solid color-mix(in srgb,var(--border-default) 54%,var(--text-secondary));
+  border-radius:9px 9px 11px 11px;
+  background:linear-gradient(130deg,color-mix(in srgb,var(--surface-card) 88%,white) 3%,color-mix(in srgb,var(--surface-input) 66%,var(--border-default)) 100%);
+  box-shadow:
+    inset 2px 1px 1px color-mix(in srgb,var(--surface-card) 88%,transparent),
+    inset -2px -2px 1px color-mix(in srgb,var(--border-default) 43%,transparent),
+    0 2px 0 color-mix(in srgb,var(--border-default) 55%,var(--text-secondary)),
+    0 4px 7px color-mix(in srgb,var(--text-primary) 16%,transparent);
+}
 .mouse-hint::before,
 .mouse-hint::after {
-    /* 建立按鍵區域 */ content: "";
-    /* 絕對定位 */ position: absolute;
-    /* 頂部位置 */ top: 1px;
-    /* 按鍵寬度 */ width: 7px;
-    /* 按鍵高度 */ height: 8px;
-    /* 按鍵圓角 */ border-radius: 5px 3px 2px 2px;
-}
-.mouse-hint::before {
-    /* 左鍵位置 */ left: 1px;
-}
-.mouse-hint::after {
-    /* 右鍵位置 */ right: 1px;
-}
+  content:"";
+  position:absolute;
+  top:1px;
+  width:7px;
+  height:8px;
+  border-radius:5px 3px 2px 2px;
 
-/* ========【快捷鍵提示】 設定 - 左鍵與右鍵高亮 ======== */
+}
+.mouse-hint::before {left:1px;}
+.mouse-hint::after {right:1px;}
 .mouse-hint.mouse-left::before,
-.mouse-hint.mouse-right::after {
-    /* 使用網站品牌藍 */ background: #55acee;
-}
+.mouse-hint.mouse-right::after {background:var(--action-primary);}
+.mouse-hint .mouse-hint-wheel {
+  position:absolute;
+  left:50%;
+  top:3px;
+  width:3px;
+  height:6px;
+  border-radius:3px;
+  background:color-mix(in srgb,var(--text-secondary) 55%,transparent);
+  transform:translateX(-50%);
 
-/* ========【快捷鍵提示】 設定 - 滑鼠滾輪 ======== */
-.mouse-hint-wheel {
-    /* 絕對定位 */ position: absolute;
-    /* 水平置中 */ left: 50%;
-    /* 頂部位置 */ top: 3px;
-    /* 滾輪寬度 */ width: 3px;
-    /* 滾輪高度 */ height: 6px;
-    /* 滾輪圓角 */ border-radius: 3px;
-    /* 預設滾輪顏色 */ background: #aaaaaa;
-    /* 水平置中修正 */ transform: translateX(-50%);
 }
-
-/* ========【快捷鍵提示】 設定 - 滾輪操作高亮 ======== */
-.mouse-hint.mouse-wheel .mouse-hint-wheel {
-    /* 使用網站品牌藍 */ background: #55acee;
-}
-
+.mouse-hint.mouse-wheel .mouse-hint-wheel {background:var(--action-primary);}
 .mouse-hint.mouse-wheel::before,
-.mouse-hint.mouse-wheel::after {
-    /* 滾輪模式不高亮左右鍵 */ background: transparent;
-}
+.mouse-hint.mouse-wheel::after {background:transparent;}
 
 /* ========【技能懸浮提示】 設定 - 觸發文字 ======== */
 .skill-tooltip-trigger {
