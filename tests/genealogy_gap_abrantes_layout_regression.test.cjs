@@ -106,9 +106,9 @@ test('阿布蘭特斯兩名子女維持同代並緊靠排列，不被蓋普提�
   const sofia=person('阿布蘭特斯蘇菲亞');
   const tibert=person('蓋普提伯特');
   assert.equal(tiago.y,sofia.y);
-  assert.ok(sofia.x>tiago.x,'蘇菲亞應緊鄰蒂亞戈的配偶卡片右側');
-  assert.ok(sofia.x-tiago.x<300,'同父母子女不可橫跨其他家族');
-  assert.ok(tibert.x>sofia.x,'蓋普不能插在阿布蘭特斯兄弟姊妹中間');
+  assert.ok(sofia.x<tiago.x,'姻親兄弟姊妹應在主家外側');
+  assert.ok(tiago.x-sofia.x<300,'同父母子女不可橫跨其他家族');
+  assert.ok(tibert.x>tiago.x,'蓋普不能插在阿布蘭特斯兄弟姊妹中間');
 });
 test('阿布蘭特斯母親位於兩名子女連接中軸上方',()=>{
   const parent=person('阿布蘭特斯艾梅琳達');
@@ -392,4 +392,16 @@ test('蒙提茱麗葉與蓋普提伯特以親子錨點對稱，保留下游家�
   assert.ok(dante.x+95+34<=beatrice.x+0.001,
     '子孫不能為了置中而互相重疊');
   assert.equal(juliet.y,tibert.y);
+});
+
+test('完整姻親家系從主家外側接入，血緣連接仍維持置中',()=>{
+  const main=person('底比五世柯德莉亞');
+  const partner=person('阿布蘭特斯蒂亞戈');
+  const sibling=person('阿布蘭特斯蘇菲亞');
+  const mother=person('阿布蘭特斯艾梅琳達');
+  const ancestor=person('柯德莉亞．底比四世');
+  assert.ok(partner.x+95<main.x,'外部配偶不能靠主家內側');
+  assert.ok(sibling.x+95<partner.x,'兄弟姊妹應向外延伸');
+  assert.equal(main.x,ancestor.x,'主家原生親子主幹不可偏移');
+  assert.ok(Math.abs(mother.x-(partner.x+sibling.x)/2)<=0.75,'姻親上一代必須正確置中');
 });

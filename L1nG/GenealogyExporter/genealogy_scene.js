@@ -2220,7 +2220,12 @@ function relationshipOtherRenderGeometry(a,b,setting,context=null) {
   const rects=relationshipRouteRects(context,start,end,!!setting.curved);
   if(!setting.curved)
     return relationshipStraightRoute(relationshipOrthogonalRoute(start,end,rects)||[start,end]);
-  return relationshipSmartUpperCurveGeometry(start,end,rects);
+  const geometry=relationshipSmartUpperCurveGeometry(start,end,rects);
+  if(geometry.blocked&&sameGeneration){
+    const route=relationshipOrthogonalRoute(start,end,rects);
+    if(route)return relationshipStraightRoute(route);
+  }
+  return geometry;
 }
 
 function drawPerspectiveKinshipLabels(
@@ -6084,6 +6089,92 @@ function compactCrossRootSiblingGroups(layers,model,ownership) {
 
 // ========【完整家系獨立排列】先辨識人物與水平配偶單位的血緣連通群 ========
 
+
+function enforceOutwardAffinalFamilyGroups(layers,model,ownership,groups) {
+  // 主家血緣沿目前選中的人物向上尋找祖先，再向下找同血脈子孫。
+  // 共同子女不能把另一位父母的原生家族誤升格成主家。
+  const blood=new Set([...(ownership.anchorSimIds||[])].map(String).filter(id=>model.byId.has(id)));
+  const parentsByChild=new Map(),childrenByParent=new Map();
+  groups.forEach(group=>group.children.forEach(child=>{
+    if(!parentsByChild.has(child))parentsByChild.set(child,new Set());
+    group.parentIds.forEach(parent=>{
+      parentsByChild.get(child).add(parent);
+      if(!childrenByParent.has(parent))childrenByParent.set(parent,new Set());
+      childrenByParent.get(parent).add(child);
+    });
+  }));
+  const ancestors=[...blood];
+  for(let i=0;i<ancestors.length;i++)for(const id of parentsByChild.get(ancestors[i])||[]){
+    if(!blood.has(id)){blood.add(id);ancestors.push(id);}
+  }
+  const descendants=[...blood];
+  for(let i=0;i<descendants.length;i++)for(const id of childrenByParent.get(descendants[i])||[]){
+    if(!blood.has(id)){blood.add(id);descendants.push(id);}
+  }
+  const {SIBLING:gap}=resolveLayoutGaps();
+  const anchor=id=>genealogyChildAnchorX(id,model);
+  const errors=()=>groups.map(group=>{
+    const source=genealogyGroupSourceX(group,model);
+    const children=group.children.map(anchor).filter(Number.isFinite);
+    return Number.isFinite(source)&&children.length
+      ?source-(Math.min(...children)+Math.max(...children))/2:0;
+  });
+  const collisions=()=>{
+    let count=0;
+    layers.forEach(row=>{
+      const items=[...row].sort((a,b)=>a.x-b.x);
+      for(let i=1;i<items.length;i++)if(items[i].x<items[i-1].x+items[i-1].width+gap-0.01)count++;
+    });
+    return count;
+  };
+  let moved=0;
+  model.units.forEach(unit=>{
+    if(unit.members.length!==2)return;
+    const main=unit.members.filter(sim=>blood.has(sim.id));
+    if(main.length!==1)return;
+    const outsider=unit.members.find(sim=>sim.id!==main[0].id);
+    const side=ownership.primarySideByUnit.get(unit.id)||1;
+    if((unit.members[0].id===main[0].id)===(side>=0))return;
+    // 須能連同姻親的兄弟姊妹與上一代一起向外安置。
+    const familyGroups=groups.filter(group=>group.parentIds.length===1&&
+      group.children.includes(outsider.id)&&
+      group.children.some(id=>id!==outsider.id&&!blood.has(id)));
+    if(familyGroups.length!==1)return;
+    const family=familyGroups[0];
+    const siblings=[...new Set(family.children.filter(id=>id!==outsider.id&&!blood.has(id))
+      .map(id=>model.unitBySim.get(id)))].filter(Boolean);
+    if(siblings.some(item=>item.id===unit.id))return;
+    const parents=[...new Set(family.parentIds.map(id=>model.unitBySim.get(id)))].filter(Boolean);
+    if(parents.length!==1||parents[0].parentUnitIds?.size)return;
+    const saved=new Map(model.units.map(other=>[other.id,other.x]));
+    const members=[...unit.members],previousMainAnchor=anchor(main[0].id);
+    const oldErrors=errors(),oldCollisions=collisions();
+    unit.members.reverse();
+    unit.x+=previousMainAnchor-anchor(main[0].id);
+    let cursor=side<0?unit.x-gap:unit.x+unit.width+gap;
+    siblings.sort((a,b)=>a.x-b.x).forEach(sibling=>{
+      const x=side<0?cursor-sibling.width:cursor,delta=x-sibling.x;
+      genealogyOwnedBranchUnits(model,ownership,[sibling.id],false).forEach(id=>{
+        model.unitById.get(id).x=saved.get(id)+delta;
+      });
+      cursor=side<0?x-gap:x+sibling.width+gap;
+    });
+    const childXs=family.children.map(anchor).filter(Number.isFinite);
+    parents[0].x+=(Math.min(...childXs)+Math.max(...childXs))/2-
+      genealogyGroupSourceX(family,model);
+    const nextErrors=errors();
+    const broken=oldErrors.some((error,index)=>
+      Math.abs(error)<=0.75&&Math.abs(nextErrors[index])>0.75);
+    if(broken||collisions()>oldCollisions){
+      unit.members=members;
+      model.units.forEach(other=>{other.x=saved.get(other.id);});
+      return;
+    }
+    moved++;
+  });
+  return moved;
+}
+
 function compactDetachedCoParentRoots(layers,model,ownership,groups) {
   const {SIBLING:siblingGap,SPOUSE:spouseGap}=resolveLayoutGaps();
   const gap=Math.max(siblingGap,spouseGap||0);
@@ -6393,6 +6484,7 @@ function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,compon
   // 最後確認同父母的跨家系兄弟姊妹連續，不能讓另一個家族插在中間。
   compactCrossRootSiblingGroups(layers,model,ownership);
   settleFamilyBranchParentAxes(layers,model,connectorGroups,ownership);
+  enforceOutwardAffinalFamilyGroups(layers,model,ownership,connectorGroups);
   compactDetachedCoParentRoots(layers,model,ownership,connectorGroups);
   compactSiblingBranchAnchors(layers,model,ownership,connectorGroups);
 
@@ -7291,9 +7383,16 @@ function parentConnectorSource(
       group,pos,byId,relation
     );
     if(junction)return junction;
+    // 已有共同父母關係線時，一律以左右頭像的側邊中心為接點。
+    const a=pos.get(String(relation.from)),b=pos.get(String(relation.to));
+    if(a&&b){
+      const first=relationshipCurveSideAnchor(a,b);
+      const second=relationshipCurveSideAnchor(b,a);
+      return {x:(first.x+second.x)/2,y:(first.y+second.y)/2};
+    }
   }
 
-  // 兩位共同父母不是配偶 / 前任時，不使用懸空的「假配偶中點」。
+  // 沒有共同父母關係線才建立額外的血緣匯流。
   // 直接從兩張父母卡片向下匯流，再由匯流點接往子女。
   const firstAnchor =
     cardVerticalAnchor(first.pos, 'bottom');
