@@ -159,7 +159,10 @@
         best = {
           value,
           distance,
-          priority
+          priority,
+          guide:typeof target === 'number'
+            ? null
+            : target?.guide ?? null
         };
       }
     }
@@ -700,7 +703,7 @@
 
         guideX:
           relationSnapX
-            ? null
+            ? relationSnapX.guide
             : (
                 bestX &&
                 bestX.guide !==
@@ -711,7 +714,7 @@
 
         guideY:
           relationSnapY
-            ? relationSnapY.value
+            ? relationSnapY.guide
             : (
                 bestY &&
                 bestY.guide !==
