@@ -1272,6 +1272,8 @@ body.sidebar-resizing * {
 .person-card.ghost:hover,
 .person-card.dead:hover {
     /* 邊框顏色 */ border-color: var(--action-primary);
+    /* 懸停時統一為清楚的實線外框，離開後恢復幽靈／已故的狀態線型。 */
+    border-style: solid;
     /* 元素陰影 */ box-shadow: 0 8px 20px rgba(0,0,0,.12);
     /* 顯示層級 */ z-index: 9;
 }
@@ -8737,6 +8739,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     background:transparent;
     border-color:transparent;
     border-left-color:transparent;
+    border-style:solid;
     box-shadow:none;
 }
 .person-card.view.card-appearance-minimal:hover {
@@ -8744,18 +8747,13 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     border-color:color-mix(in srgb,var(--action-primary) 58%,transparent);
     box-shadow:none;
 }
-.person-card.view.card-appearance-minimal.ghost,
-.person-card.view.card-appearance-minimal.dead {
-    background:transparent;
-    border-color:transparent;
-    border-left-color:transparent;
-    border-style:solid;
-}
 .person-card.view.card-appearance-translucent {
     background:color-mix(in srgb,var(--surface-card) 76%,transparent);
-    border-color:color-mix(in srgb,var(--border-default) 74%,transparent);
     box-shadow:0 2px 10px rgba(0,0,0,.05);
     backdrop-filter:blur(5px);
+}
+.person-card.view.card-appearance-translucent:not(:hover) {
+    border-color:color-mix(in srgb,var(--border-default) 74%,transparent);
 }
 .person-card.view.card-appearance-full {
     background:var(--surface-card);
