@@ -8423,7 +8423,7 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
 .canvas-toolbar { position:absolute; top:12px; right:12px; z-index:24; display:flex; align-items:center; gap:1px; padding:4px; border:1px solid var(--border-default); border-radius:6px; background:color-mix(in srgb,var(--surface-card) 94%,transparent); box-shadow:0 4px 15px rgba(0,0,0,.07); backdrop-filter:blur(8px); }
 .canvas-tool { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:30px; padding:5px 8px; border:0; border-radius:4px; background:transparent; color:var(--text-secondary); font:inherit; font-size:11px; white-space:nowrap; }
 .canvas-tool:hover { background:var(--surface-item-hover); color:var(--text-primary); }
-.canvas-tool.active,.canvas-tool.lock-active { color:var(--action-primary); background:var(--brand-tint-start); }
+.canvas-tool.active { color:var(--action-primary); background:var(--brand-tint-start); }
 .canvas-tool-divider { width:1px; height:18px; margin:0 3px; background:var(--border-default); }
 .arrange-tool { min-width:54px; }
 
@@ -9516,7 +9516,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 .appearance-modal .ui-single-select-trigger:focus-visible{border-color:var(--action-primary);box-shadow:0 0 0 2px var(--brand-tint-start)}
 .appearance-modal .ui-select-chevron-icon{color:var(--text-secondary)}
 .appearance-modal .ui-single-select:focus-within .ui-select-chevron-icon{color:var(--action-primary)}
-@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:minmax(82px,.9fr) minmax(0,1.45fr) 44px;gap:8px}.relationship-editor-range{grid-template-columns:minmax(0,1fr) max-content;gap:4px}.relationship-editor-range output{min-width:28px;font-size:10px}.relationship-curve-slider{gap:4px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:minmax(82px,.9fr) minmax(0,1.45fr) 44px;gap:8px}.relationship-editor-range{grid-template-columns:minmax(0,1fr) max-content;gap:4px}.relationship-editor-range output{min-width:28px;font-size:10px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 
 /* ========【危險操作】 刪除、移除、清理與覆蓋資料統一使用紅色語意 ======== */
