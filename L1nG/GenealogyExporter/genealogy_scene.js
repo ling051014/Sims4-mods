@@ -5226,6 +5226,112 @@ function canPlaceGenealogyUnitAtX(
   });
 }
 
+// ========【姻親家系接合】以完整根區塊靠接未成對的共同父母，不拆分血緣分支 ========
+function alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups) {
+  const rootOf=unit=>unit?(ownership.rootByUnit.get(unit.id)||unit.id):null;
+  const rootUnits=new Map();
+  model.units.forEach(unit=>{
+    const root=rootOf(unit);
+    if(!rootUnits.has(root))rootUnits.set(root,[]);
+    rootUnits.get(root).push(unit);
+  });
+  const anchorRoots=new Set(
+    [...(ownership.anchorSimIds||[])]
+      .map(id=>rootOf(model.unitBySim.get(id)))
+      .filter(Boolean)
+  );
+  const gap=resolveLayoutGaps().SIBLING;
+  const childrenCenter=group=>{
+    const anchors=group.children
+      .map(id=>genealogyChildAnchorX(id,model))
+      .filter(Number.isFinite);
+    return anchors.length?(Math.min(...anchors)+Math.max(...anchors))/2:null;
+  };
+  const parentAxisError=group=>{
+    const source=genealogyGroupSourceX(group,model);
+    const center=childrenCenter(group);
+    return Number.isFinite(source)&&Number.isFinite(center)?source-center:null;
+  };
+
+  // 主家族先完成 Parent Group 排列；只有配偶雙方分屬不同根時，
+  // 才允許另一側完整祖先分支靠接，不能把無關家族拖入本次重排。
+  const candidates=connectorGroups.map(group=>{
+    if(group.parentIds.length!==2||!group.children.length)return null;
+    const parents=genealogyGroupParentEntries(group,model);
+    if(parents.length!==2||parents[0].unit.id===parents[1].unit.id)return null;
+    const childRoots=new Set(group.children.map(id=>rootOf(model.unitBySim.get(id))));
+    if(childRoots.size!==1)return null;
+    const childRoot=[...childRoots][0];
+    if(!anchorRoots.has(childRoot))return null;
+    const outside=parents.filter(parent=>rootOf(parent.unit)!==childRoot);
+    if(outside.length!==1)return null;
+    const root=rootOf(outside[0].unit);
+    if(anchorRoots.has(root))return null;
+    return {group,root,childRoot};
+  }).filter(Boolean).sort((a,b)=>
+    Math.abs(parentAxisError(b.group)||0)-Math.abs(parentAxisError(a.group)||0)||
+    (rootUnits.get(a.root)?.length||0)-(rootUnits.get(b.root)?.length||0)
+  );
+
+  const movedRoots=new Set();
+  let adjusted=0;
+  candidates.forEach(({group,root,childRoot})=>{
+    if(movedRoots.has(root))return;
+    const parents=genealogyGroupParentEntries(group,model);
+    const attachedParent=parents.find(parent=>rootOf(parent.unit)===root);
+    const primaryParent=parents.find(parent=>rootOf(parent.unit)===childRoot);
+    const center=childrenCenter(group);
+    const units=rootUnits.get(root)||[];
+    if(!attachedParent||!primaryParent||!Number.isFinite(center)||!units.length)return;
+
+    // 兩個父母的真實血緣錨點平均值須對準子女群組中軸。
+    const desiredShift=2*center-primaryParent.anchorX-attachedParent.anchorX;
+    if(!Number.isFinite(desiredShift)||Math.abs(desiredShift)<1)return;
+    const movingIds=new Set(units.map(unit=>unit.id));
+    const before=connectorGroups.map(parentAxisError);
+    const originals=units.map(unit=>[unit,unit.x]);
+    let accepted=false;
+
+    // 區塊碰撞或既有直線受損時撤銷整組移動，尋找最近的安全掛接位置。
+    for(let step=0;step<=36&&!accepted;step++){
+      const offsets=step===0?[0]:[-step*24,step*24];
+      for(const offset of offsets){
+        const shift=desiredShift+offset;
+        if(Math.abs(shift)<1)continue;
+        const overlaps=units.some(unit=>(layers.get(unit.generation)||[]).some(other=>
+          !movingIds.has(other.id)&&
+          unit.x+shift<other.x+other.width+gap-0.01&&
+          unit.x+unit.width+shift>other.x-gap+0.01
+        ));
+        if(overlaps)continue;
+        units.forEach(unit=>{unit.x+=shift;});
+        const after=connectorGroups.map(parentAxisError);
+        const preservesAligned=before.every((error,index)=>
+          !Number.isFinite(error)||Math.abs(error)>1||
+          (Number.isFinite(after[index])&&Math.abs(after[index])<=1)
+        );
+        const gain=before.reduce((sum,error,index)=>
+          sum+(!Number.isFinite(error)||!Number.isFinite(after[index])?0:
+            Math.min(1e7,error*error)-Math.min(1e7,after[index]*after[index])),0
+        );
+        if(preservesAligned&&gain>1){
+          accepted=true;
+          movedRoots.add(root);
+          adjusted++;
+          break;
+        }
+        originals.forEach(([unit,x])=>{unit.x=x;});
+      }
+    }
+  });
+
+  // 後續碰撞檢查使用最新 X 排序，不再沿用接合前的同代順序。
+  if(adjusted)layers.forEach(layer=>
+    layer.sort((a,b)=>a.x-b.x||stableGenealogyUnitCompare(a,b))
+  );
+  return adjusted;
+}
+
 function alignDirectParentChildGroups(
   layers,
   model,
@@ -5964,6 +6070,9 @@ function solveAutomaticGenealogyPositions(visibleIds) {
       ownership
     );
   }
+
+  // 完整姻親家系靠接以 Root Block 為單位，原大家族的親子排列不受牽動。
+  alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups);
 
   // 先滿足最簡單、最可讀的親子直線；只有碰撞時才交給 renderer 畫折線。
   alignDirectParentChildGroups(
