@@ -160,6 +160,12 @@
 
     let match;
 
+    if ((match = canonical.match(/^移出 (\\d+) 位$/))) {
+      return `Remove ${match[1]} Sim(s) from family`;
+    }
+    if ((match = canonical.match(/^已清理 (\\d+) 張未使用的圖片。$/))) {
+      return `Cleaned up ${match[1]} unused image(s).`;
+    }
     if ((match = canonical.match(/^已選\s*(\d+)\s*人$/))) {
       return `Selected ${match[1]} Sim(s)`;
     }
