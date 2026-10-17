@@ -6,11 +6,14 @@ on:
       - 'functions/feedback/ga4-api.js'
       - 'functions/feedback/admin.html.js'
       - 'L1nG/feedback/ga4-dashboard.js'
+      - 'L1nG/feedback/ga4-country-labels.js'
+      - 'L1nG/feedback/admin-network.js'
       - 'L1nG/feedback/admin.js'
       - 'L1nG/feedback/admin.html'
       - 'L1nG/build-pages.mjs'
       - 'L1nG/analytics.js'
       - 'tests/ga4_api.test.mjs'
+      - 'tests/dashboard_locale_network.test.mjs'
       - '.github/workflows/l1ng-ga4-main-check.yml'
   workflow_dispatch:
 jobs:
@@ -27,11 +30,13 @@ jobs:
           node --check functions/feedback/ga4-api.js
           node --check functions/feedback/admin.html.js
           node --check L1nG/feedback/ga4-dashboard.js
+          node --check L1nG/feedback/ga4-country-labels.js
+          node --check L1nG/feedback/admin-network.js
           node --check L1nG/feedback/admin.js
           node --check L1nG/analytics.js
           node --check L1nG/build-pages.mjs
       - name: Run GA4 authentication and Data API regression tests
-        run: node --test tests/ga4_api.test.mjs
+        run: node --test tests/ga4_api.test.mjs tests/dashboard_locale_network.test.mjs
       - name: Build home Pages bundle and inspect Function routes
         run: |
           node L1nG/build-pages.mjs home
