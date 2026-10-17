@@ -3055,6 +3055,12 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
   .pet-notes-field textarea { font-size:16px; }
 }
 .avatar-crop-modal { width:min(560px,100%); }
+.avatar-crop-modal > h2 .l1ng-icon { width:18px; height:18px; flex:0 0 18px; }
+.avatar-crop-modal > .ui-dialog-actions {
+    margin:18px -24px -20px;
+    padding:12px 24px 16px;
+    border-top:1px solid var(--border-default);
+}
 .avatar-crop-workspace {
     position:relative;
     width:min(500px,82vw);
@@ -3083,7 +3089,10 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     max-height:none;
     pointer-events:none;
     user-select:none;
-    will-change:left,top,width,height;
+    left:0;
+    top:0;
+    transform-origin:top left;
+    will-change:transform;
 }
 .avatar-crop-window {
     position:absolute;

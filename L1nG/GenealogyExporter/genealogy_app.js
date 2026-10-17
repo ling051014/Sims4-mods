@@ -719,6 +719,8 @@ let avatarCropUrl = '';
 let avatarCropPointer = null;
 let avatarCropNaturalSize = { width:0, height:0 };
 let avatarCropRenderMetrics = null;
+let avatarCropGeometry = null;
+let avatarCropRenderFrame = 0;
 
 // ========【圖片資產權威層】 genealogy.js 只保存 assetId；Blob / SHA-256 / Lazy URL 由獨立模組管理 ========
 const assetStore = window.L1nGGenealogyAssets;
@@ -13827,130 +13829,102 @@ function setEditingAvatarCropFrame(target,frame){
   }
 }
 
-function avatarCropBounds(){
+// 工作區及裁切框尺寸在開啟時快取；縮放只重新計算數值，不重讀 DOM。
+function measureAvatarCropGeometry(){
+  if(avatarCropGeometry)return avatarCropGeometry;
   const workspace=$('avatarCropWorkspace');
   const windowEl=$('avatarCropWindow');
-
-  if(
-    !workspace||
-    !windowEl||
-    !avatarCropNaturalSize.width||
-    !avatarCropNaturalSize.height
-  ){
-    return null;
-  }
-
+  if(!workspace||!windowEl||
+    !avatarCropNaturalSize.width||!avatarCropNaturalSize.height)return null;
   const workspaceRect=workspace.getBoundingClientRect();
   const cropRect=windowEl.getBoundingClientRect();
-
-  if(
-    !workspaceRect.width||
-    !workspaceRect.height||
-    !cropRect.width||
-    !cropRect.height
-  ){
-    return null;
-  }
-
-  const cropWidth=cropRect.width;
-  const cropHeight=cropRect.height;
-  const baseScale=Math.max(
-    cropWidth/avatarCropNaturalSize.width,
-    cropHeight/avatarCropNaturalSize.height
+  if(!workspaceRect.width||!workspaceRect.height||
+    !cropRect.width||!cropRect.height)return null;
+  const scale=Math.max(
+    cropRect.width/avatarCropNaturalSize.width,
+    cropRect.height/avatarCropNaturalSize.height
   );
+  avatarCropGeometry={
+    cropWidth:cropRect.width,
+    cropHeight:cropRect.height,
+    cropCenterX:cropRect.left-workspaceRect.left+cropRect.width/2,
+    cropCenterY:cropRect.top-workspaceRect.top+cropRect.height/2,
+    baseImageWidth:avatarCropNaturalSize.width*scale,
+    baseImageHeight:avatarCropNaturalSize.height*scale
+  };
+  return avatarCropGeometry;
+}
+
+function avatarCropBounds(){
+  const geometry=measureAvatarCropGeometry();
+  if(!geometry)return null;
   const zoom=Math.max(1,Number(avatarCropDraft.zoom)||1);
-  const scale=baseScale*zoom;
-  const imageWidth=avatarCropNaturalSize.width*scale;
-  const imageHeight=avatarCropNaturalSize.height*scale;
-
-  const minX=Math.min(.5,cropWidth/(2*imageWidth));
-  const maxX=Math.max(.5,1-minX);
-  const minY=Math.min(.5,cropHeight/(2*imageHeight));
-  const maxY=Math.max(.5,1-minY);
-
-  const cropCenterX=
-    cropRect.left-workspaceRect.left+
-    cropRect.width/2;
-  const cropCenterY=
-    cropRect.top-workspaceRect.top+
-    cropRect.height/2;
-
+  const imageWidth=geometry.baseImageWidth*zoom;
+  const imageHeight=geometry.baseImageHeight*zoom;
+  const minX=Math.min(.5,geometry.cropWidth/(2*imageWidth));
+  const minY=Math.min(.5,geometry.cropHeight/(2*imageHeight));
   return{
-    workspaceRect,
-    cropRect,
-    cropCenterX,
-    cropCenterY,
+    ...geometry,
     imageWidth,
     imageHeight,
     minX,
-    maxX,
+    maxX:Math.max(.5,1-minX),
     minY,
-    maxY
+    maxY:Math.max(.5,1-minY)
   };
 }
 
-function clampAvatarCropDraft(){
-  const bounds=avatarCropBounds();
+function clampAvatarCropDraft(bounds=avatarCropBounds()){
   if(!bounds)return avatarCropDraft;
-
   avatarCropDraft=normalizeAvatarFrame({
     ...avatarCropDraft,
-    x:Math.min(
-      bounds.maxX,
-      Math.max(bounds.minX,avatarCropDraft.x)
-    ),
-    y:Math.min(
-      bounds.maxY,
-      Math.max(bounds.minY,avatarCropDraft.y)
-    )
+    x:Math.min(bounds.maxX,Math.max(bounds.minX,avatarCropDraft.x)),
+    y:Math.min(bounds.maxY,Math.max(bounds.minY,avatarCropDraft.y))
   });
-
   return avatarCropDraft;
 }
 
 function renderAvatarCropPreview(){
   const image=$('avatarCropImage');
-  const zoom=$('avatarCropZoom');
-  const output=$('avatarCropZoomValue');
-
   if(!image)return;
+  if(avatarCropUrl&&image.src!==avatarCropUrl)image.src=avatarCropUrl;
 
-  if(avatarCropUrl&&image.src!==avatarCropUrl){
-    image.src=avatarCropUrl;
-  }
-
-  if(
-    !avatarCropNaturalSize.width||
-    !avatarCropNaturalSize.height
-  ){
-    return;
-  }
-
-  clampAvatarCropDraft();
   const bounds=avatarCropBounds();
   if(!bounds)return;
-
+  clampAvatarCropDraft(bounds);
   avatarCropRenderMetrics=bounds;
 
-  image.style.width=`${bounds.imageWidth}px`;
-  image.style.height=`${bounds.imageHeight}px`;
-  image.style.left=`${
-    bounds.cropCenterX-
-    avatarCropDraft.x*bounds.imageWidth
-  }px`;
-  image.style.top=`${
-    bounds.cropCenterY-
-    avatarCropDraft.y*bounds.imageHeight
-  }px`;
+  // 保留原本相同的取景幾何，使用 GPU 合成層 transform 取代 left/top/width/height 更新。
+  image.style.width=bounds.baseImageWidth+'px';
+  image.style.height=bounds.baseImageHeight+'px';
+  const left=bounds.cropCenterX-avatarCropDraft.x*bounds.imageWidth;
+  const top=bounds.cropCenterY-avatarCropDraft.y*bounds.imageHeight;
+  image.style.transform='translate3d('+left+'px,'+top+'px,0) scale('+avatarCropDraft.zoom+')';
 
+  const zoom=$('avatarCropZoom');
+  const output=$('avatarCropZoomValue');
   if(zoom){
     zoom.value=String(avatarCropDraft.zoom);
     syncGenealogyRangeFill(zoom);
   }
-  if(output){
-    output.textContent=
-      `${Math.round(avatarCropDraft.zoom*100)}%`;
+  if(output)output.textContent=Math.round(avatarCropDraft.zoom*100)+'%';
+}
+
+// 高頻拖曳／滾輪只繪製每個影格最後的狀態；放開按鈕即時套用最後位置。
+function scheduleAvatarCropRender(){
+  if(avatarCropRenderFrame||!avatarCropTarget)return;
+  avatarCropRenderFrame=requestAnimationFrame(()=>{
+    avatarCropRenderFrame=0;
+    if(avatarCropTarget)renderAvatarCropPreview();
+  });
+}
+
+function flushAvatarCropRender(){
+  if(avatarCropRenderFrame){
+    cancelAnimationFrame(avatarCropRenderFrame);
+    avatarCropRenderFrame=0;
   }
+  renderAvatarCropPreview();
 }
 
 async function loadAvatarCropImage(url){
@@ -14026,6 +14000,7 @@ async function openAvatarCropEditor(target){
   avatarCropUrl=url;
   avatarCropPointer=null;
   avatarCropRenderMetrics=null;
+  avatarCropGeometry=null;
   avatarCropNaturalSize={width:0,height:0};
 
   avatarCropDialog.classList.add('show');
@@ -14053,12 +14028,17 @@ function closeAvatarCropEditor(){
   avatarCropPointer=null;
   avatarCropNaturalSize={width:0,height:0};
   avatarCropRenderMetrics=null;
+  avatarCropGeometry=null;
+  if(avatarCropRenderFrame){
+    cancelAnimationFrame(avatarCropRenderFrame);
+    avatarCropRenderFrame=0;
+  }
   $('avatarCropWorkspace')?.classList.remove('dragging');
 }
 
 function resetAvatarCropEditor(){
   avatarCropDraft={...DEFAULT_AVATAR_FRAME};
-  renderAvatarCropPreview();
+  flushAvatarCropRender();
 }
 
 function commitAvatarCropEditor(){
@@ -14075,6 +14055,20 @@ function commitAvatarCropEditor(){
 
 const avatarCropWorkspace=$('avatarCropWorkspace');
 
+function updateAvatarCropPointer(event){
+  const pointer=avatarCropPointer;
+  if(!pointer||pointer.pointerId!==event.pointerId)return;
+  const dx=event.clientX-pointer.startX;
+  const dy=event.clientY-pointer.startY;
+  avatarCropDraft=normalizeAvatarFrame({
+    ...avatarCropDraft,
+    x:pointer.frame.x-dx/pointer.imageWidth,
+    y:pointer.frame.y-dy/pointer.imageHeight
+  });
+  scheduleAvatarCropRender();
+}
+
+
 avatarCropWorkspace?.addEventListener(
   'pointerdown',
   event=>{
@@ -14085,7 +14079,7 @@ avatarCropWorkspace?.addEventListener(
       event.pointerId
     );
 
-    renderAvatarCropPreview();
+    flushAvatarCropRender();
 
     avatarCropWorkspace.classList.add('dragging');
 
@@ -14104,31 +14098,7 @@ avatarCropWorkspace?.addEventListener(
 
 avatarCropWorkspace?.addEventListener(
   'pointermove',
-  event=>{
-    if(
-      !avatarCropPointer||
-      avatarCropPointer.pointerId!==event.pointerId
-    ){
-      return;
-    }
-
-    const dx=
-      event.clientX-avatarCropPointer.startX;
-    const dy=
-      event.clientY-avatarCropPointer.startY;
-
-    avatarCropDraft=normalizeAvatarFrame({
-      ...avatarCropDraft,
-      x:
-        avatarCropPointer.frame.x-
-        dx/avatarCropPointer.imageWidth,
-      y:
-        avatarCropPointer.frame.y-
-        dy/avatarCropPointer.imageHeight
-    });
-
-    renderAvatarCropPreview();
-  }
+  updateAvatarCropPointer
 );
 
 const finishAvatarCropPointer=event=>{
@@ -14139,8 +14109,10 @@ const finishAvatarCropPointer=event=>{
     return;
   }
 
+  if(event.type==='pointerup')updateAvatarCropPointer(event);
   avatarCropPointer=null;
   avatarCropWorkspace?.classList.remove('dragging');
+  flushAvatarCropRender();
 };
 
 avatarCropWorkspace?.addEventListener(
@@ -14176,7 +14148,7 @@ avatarCropWorkspace?.addEventListener(
         direction*step
     });
 
-    renderAvatarCropPreview();
+    scheduleAvatarCropRender();
   },
   {passive:false}
 );
@@ -14189,7 +14161,7 @@ $('avatarCropZoom')?.addEventListener(
       zoom:Number(event.target.value)
     });
 
-    renderAvatarCropPreview();
+    scheduleAvatarCropRender();
   }
 );
 
@@ -14221,7 +14193,8 @@ window.addEventListener(
     if(
       avatarCropDialog?.classList.contains('show')
     ){
-      renderAvatarCropPreview();
+      avatarCropGeometry=null;
+      scheduleAvatarCropRender();
     }
   },80)
 );
