@@ -5326,7 +5326,7 @@ function syncRelationshipPerspectiveUI() {
 
   setIconText(
     relationshipPerspectiveBtn,
-    'person-vcard',
+    'scan-eye',
     relationshipPerspectiveActionText(
       sim,
       true
@@ -10624,7 +10624,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
     <button class="person-card-menu-action" type="button" data-person-card-menu-action="view">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
     <button class="person-card-menu-action" type="button" data-person-card-menu-action="edit">${iconSvg('pencil-square')}<span>${esc(uiText('編輯模擬市民'))}</span></button>
     <button class="person-card-menu-action" type="button" data-person-card-menu-action="locate">${iconSvg('crosshair')}<span>${esc(uiText('在族譜中定位'))}</span></button>
-    <button class="person-card-menu-action" type="button" data-person-card-menu-action="perspective">${iconSvg('person-vcard')}<span>${esc(relationshipPerspectiveActionText(sim, relationshipPerspectiveSimId === String(sim.id)))}</span></button>
+    <button class="person-card-menu-action" type="button" data-person-card-menu-action="perspective">${iconSvg('scan-eye')}<span>${esc(relationshipPerspectiveActionText(sim, relationshipPerspectiveSimId === String(sim.id)))}</span></button>
     ${isMulti ? `
       <div class="person-card-menu-divider"></div>
       <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
