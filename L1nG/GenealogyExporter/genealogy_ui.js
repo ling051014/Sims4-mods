@@ -435,6 +435,61 @@
     }
 
 
+
+    // 六種共用對話框共用結構化資訊容器；外部匯入值永遠以純文字插入。
+    function renderDialogRichContent(host, rich, translate) {
+      host.replaceChildren();
+      if (!rich || typeof rich !== 'object') return;
+      const make = (tag, cls, value) => {
+        const node = document.createElement(tag);
+        node.className = cls;
+        if (value !== undefined && value !== null) node.textContent = translate(value);
+        return node;
+      };
+      if (rich.lead) host.appendChild(make('p', 'ui-dialog-rich-lead', rich.lead));
+      if (rich.meta?.length) {
+        const block = make('div', 'ui-dialog-rich-meta');
+        rich.meta.forEach(([label, value]) => {
+          const item = make('div', 'ui-dialog-rich-meta-item');
+          item.appendChild(make('span', 'ui-dialog-rich-meta-label', label));
+          item.appendChild(make('strong', 'ui-dialog-rich-meta-value', value));
+          block.appendChild(item);
+        });
+        host.appendChild(block);
+      }
+      if (rich.stats?.length) {
+        const block = make('div', 'ui-dialog-rich-counters');
+        rich.stats.forEach(([label, value]) => {
+          const item = make('div', 'ui-dialog-rich-counter');
+          item.appendChild(make('strong', 'ui-dialog-rich-counter-value', value));
+          item.appendChild(make('span', 'ui-dialog-rich-counter-label', label));
+          block.appendChild(item);
+        });
+        host.appendChild(block);
+      }
+      (rich.sections || []).forEach(section => {
+        if (!section?.items?.length) return;
+        const block = make('section', 'ui-dialog-rich-section');
+        block.appendChild(make('h3', 'ui-dialog-rich-section-title', section.title));
+        const grid = make('div', 'ui-dialog-rich-grid');
+        section.items.forEach(([label, value]) => {
+          const item = make('div', 'ui-dialog-rich-stat');
+          item.appendChild(make('span', 'ui-dialog-rich-stat-label', label));
+          item.appendChild(make('strong', 'ui-dialog-rich-stat-value', value));
+          grid.appendChild(item);
+        });
+        block.appendChild(grid);
+        host.appendChild(block);
+      });
+      (rich.paragraphs || []).forEach(line =>
+        host.appendChild(make('p', 'ui-dialog-rich-paragraph', line))
+      );
+      (rich.warnings || []).forEach(line =>
+        host.appendChild(make('p', 'ui-dialog-rich-warning', line))
+      );
+      if (rich.footer) host.appendChild(make('p', 'ui-dialog-rich-footer', rich.footer));
+    }
+
     // 六種訊息／決策型視窗共用同一個 DOM，狀態色不等於操作危險程度。
     function openUiDialog({
       title = '提示',
@@ -452,13 +507,15 @@
       confirmValue = true,
       cancelValue = mode === 'confirm' ? false : null,
       details = null,
-      backupAction = null
+      backupAction = null,
+      richContent = null
     } = {}) {
       const overlay = $('confirmationDialog');
       const dialog = $('uiDialog');
       const titleEl = $('uiDialogTitle');
       const iconEl = $('uiDialogIcon');
       const messageEl = $('uiDialogMessage');
+      const richEl = $('uiDialogRich');
       const detailsEl = $('uiDialogDetails');
       const detailsToggle = $('uiDialogDetailsToggle');
       const detailsContent = $('uiDialogDetailsContent');
@@ -472,7 +529,7 @@
       const secondaryBtn = $('uiDialogSecondary');
       const confirmBtn = $('uiDialogConfirm');
 
-      if (!overlay || !dialog || !titleEl || !iconEl || !messageEl ||
+      if (!overlay || !dialog || !titleEl || !iconEl || !messageEl || !richEl ||
           !detailsEl || !detailsToggle || !detailsContent || !detailsCopy ||
           !backupGroup || !backupButton || !backupLabel || !backupStatus ||
           !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn) {
@@ -517,6 +574,12 @@
           : raw.split('\n').map(line => uiText(line)).join('\n');
       };
       messageEl.textContent = localizeLines(message);
+      const hasRich = !!richContent;
+      dialog.dataset.rich = hasRich ? 'true' : 'false';
+      messageEl.hidden = hasRich;
+      richEl.hidden = !hasRich;
+      dialog.setAttribute('aria-describedby', hasRich ? 'uiDialogRich' : 'uiDialogMessage');
+      renderDialogRichContent(richEl, richContent, localizeLines);
 
       const hasSecondary = !!String(secondaryText || '').trim();
       dialog.dataset.actionCount = mode === 'alert' || mode === 'result' ||
@@ -654,7 +717,8 @@
           options.kind === 'success' ? 'result' : 'alert'),
         kind:options.kind || 'default',
         confirmText:options.confirmText || '確定',
-        details:options.details || null
+        details:options.details || null,
+        richContent:options.richContent || null
       });
     }
 
@@ -667,7 +731,8 @@
         confirmText:options.confirmText || '確定',
         cancelText:options.cancelText || '取消',
         details:options.details || null,
-        backupAction:options.backupAction || null
+        backupAction:options.backupAction || null,
+        richContent:options.richContent || null
       });
     }
 
