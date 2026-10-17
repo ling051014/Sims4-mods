@@ -2298,7 +2298,7 @@
         const clear = document.createElement('button');
         clear.type = 'button';
         clear.className = 'l1ng-search-clear';
-        clear.setAttribute('aria-label','清除搜尋');
+        clear.setAttribute('aria-label', uiText('清除搜尋'));
         clear.title = '清除搜尋';
         const sync = () => { clear.hidden = !input.value; };
         clear.addEventListener('click',() => {
