@@ -2228,10 +2228,23 @@ function relationshipOtherRenderGeometry(a,b,setting,context=null) {
   return geometry;
 }
 
+// 視角模式只繪出與選定市民直接相連的「其他關係」；不改動 links 的原始方向。
+function perspectiveOtherLinkEndpoints(link, rootId) {
+  const firstId = String(link?.from ?? '');
+  const secondId = String(link?.to ?? '');
+  if (!firstId || !secondId) return null;
+  if (!rootId) return {fromId:firstId, toId:secondId, reversed:false};
+  const root = String(rootId);
+  if (firstId === root) return {fromId:root, toId:secondId, reversed:false};
+  if (secondId === root) return {fromId:root, toId:firstId, reversed:true};
+  return null;
+}
+
 function drawPerspectiveKinshipLabels(
   labels,
   pos,
-  visibleIds
+  visibleIds,
+  otherLinkTypesByTarget = null
 ) {
   const root =
     relationshipPerspectiveSim();
@@ -2275,6 +2288,10 @@ function drawPerspectiveKinshipLabels(
           );
 
     if (!label) return;
+
+    // 只有由「其他關係」推導的視角稱謂改在線上顯示；
+    // 血緣、配偶等正常家族稱謂仍維持卡片上方。
+    if (otherLinkTypesByTarget?.get(String(targetId))?.has(label)) return;
 
     const rect =
       cardOuterRect(card);
@@ -8390,30 +8407,18 @@ function paintRelationshipLayer({
     ...(genealogyData.links || []),
     ...inferCoParentRelationshipLinks(topology.parentGroups, byId)
   ];
+  const perspectiveOtherLinkTypes = new Map();
 
   drawnOtherLinks
     .forEach(link => {
-      if (
-        !visibleIds.has(
-          link.from
-        ) ||
-        !visibleIds.has(
-          link.to
-        )
-      ) {
-        return;
-      }
+      const oriented = perspectiveOtherLinkEndpoints(link, relationshipPerspectiveSimId);
+      if (!oriented ||
+          !visibleIds.has(oriented.fromId) ||
+          !visibleIds.has(oriented.toId)) return;
 
-      const a =
-        pos.get(
-          link.from
-        );
-
-      const b =
-        pos.get(
-          link.to
-        );
-
+      // 視角模式以選定市民為線段起點，資料仍保留原先 from / to 定義。
+      const a = pos.get(oriented.fromId);
+      const b = pos.get(oriented.toId);
       if (!a || !b) return;
 
       const type =
@@ -8425,6 +8430,13 @@ function paintRelationshipLayer({
         getOtherRelationshipLineSetting(
           type
         );
+
+      if (relationshipPerspectiveSimId) {
+        if (!perspectiveOtherLinkTypes.has(oriented.toId)) {
+          perspectiveOtherLinkTypes.set(oriented.toId, new Set());
+        }
+        perspectiveOtherLinkTypes.get(oriented.toId).add(type);
+      }
 
       const sameGeneration=!!link.inferred ||
         Math.abs(a.y-b.y)<=0.75 ||
@@ -8439,8 +8451,8 @@ function paintRelationshipLayer({
           b,
           setting,
           {
-            fromId:link.from,
-            toId:link.to,
+            fromId:oriented.fromId,
+            toId:oriented.toId,
             pos,
             byId,
             geometry,
@@ -8448,11 +8460,15 @@ function paintRelationshipLayer({
           }
         );
 
-      const markerAttributes =
+      let markerAttributes =
         relationshipArrowMarkerAttributes(
           setting,
           type
         );
+      // 單向關係若原始方向指向視角市民，箭頭仍須保留原本語意。
+      if (oriented.reversed && !isSymmetricSocialRelationshipType(type)) {
+        markerAttributes = markerAttributes.replace(' marker-end=', ' marker-start=');
+      }
 
       registerEdge(
         {
@@ -8466,8 +8482,8 @@ function paintRelationshipLayer({
           obstacleSensitive:
             !!setting.curved || setting.routing !== 'manual',
           simIds:[
-            String(link.from),
-            String(link.to)
+            oriented.fromId,
+            oriented.toId
           ]
         },
         '<path class="edge edge-other" d="' +
@@ -8486,8 +8502,7 @@ function paintRelationshipLayer({
 
       if (
         !includeLabels ||
-        !showRelLabels ||
-        relationshipPerspectiveSimId
+        !showRelLabels
       ) {
         return;
       }
@@ -8515,7 +8530,8 @@ function paintRelationshipLayer({
           geometryResult.labelY,
           info.icon,
           info.text,
-          key
+          // 視角標籤固定在線上；不讀取一般視圖的手動偏移，也不提供拖曳。
+          relationshipPerspectiveSimId ? null : key
         )
       );
     });
@@ -8559,7 +8575,8 @@ function paintRelationshipLayer({
       drawPerspectiveKinshipLabels(
         labels,
         pos,
-        visibleIds
+        visibleIds,
+        perspectiveOtherLinkTypes
       );
     }
 

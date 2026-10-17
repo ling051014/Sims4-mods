@@ -6451,6 +6451,8 @@ body[data-theme="ling"] #genealogyCanvasViewport {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-eye);
 }
 
+.icon-scan-eye { --l1ng-icon: var(--l1ng-icon-scan-eye); }
+
 .icon-feather {
     /* SVG 圖示路徑 */ --l1ng-icon: var(--l1ng-icon-feather);
 }
