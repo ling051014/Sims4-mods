@@ -6919,38 +6919,187 @@ html[lang="en"] body {
 }
 
 
-/* ========【共用對話視窗】來源、摘要與結果使用同一結構化資訊元件 ======== */
+
+/* ========【共用視窗內容】恢復已確認的完整資訊置中版型；不額外建立資訊卡片 ======== */
 #uiDialog[data-rich="true"] { width:min(510px,100%); }
-#uiDialog .ui-dialog-message[hidden], #uiDialog .ui-dialog-rich[hidden] { display:none; }
-#uiDialog .ui-dialog-rich { display:flex; flex-direction:column; align-items:stretch; gap:11px; width:100%; text-align:center; }
-#uiDialog .ui-dialog-rich-lead { margin:0; color:var(--text-primary); font-size:13px; font-weight:600; line-height:1.65; }
-#uiDialog .ui-dialog-rich-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-#uiDialog .ui-dialog-rich-meta:has(> :only-child) { grid-template-columns:minmax(0,1fr); }
-#uiDialog .ui-dialog-rich-meta-item {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  min-width:0; gap:2px; padding:9px 7px;
-  border:1px solid var(--border-default); border-radius:7px; background:var(--surface-panel);
+#uiDialog .ui-dialog-message[hidden],
+#uiDialog .ui-dialog-rich[hidden] { display:none; }
+#uiDialog .ui-dialog-rich {
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:0;
+    text-align:center;
 }
-#uiDialog .ui-dialog-rich-meta-label { font-size:11px; color:var(--text-secondary); }
-#uiDialog .ui-dialog-rich-meta-value { font-size:12px; font-weight:650; width:100%; overflow-wrap:anywhere; }
-#uiDialog .ui-dialog-rich-counters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
-#uiDialog .ui-dialog-rich-counter { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; gap:3px; padding:9px 4px; border-radius:7px; background:var(--surface-panel); }
-#uiDialog .ui-dialog-rich-counter-value { font-size:18px; font-weight:700; line-height:1.35; font-variant-numeric:tabular-nums; }
-#uiDialog .ui-dialog-rich-counter-label { font-size:11px; line-height:1.5; color:var(--text-secondary); overflow-wrap:anywhere; }
-#uiDialog .ui-dialog-rich-section { display:flex; flex-direction:column; align-items:stretch; gap:6px; min-width:0; }
-#uiDialog .ui-dialog-rich-section-title { margin:3px 0 0; font-size:11.5px; font-weight:700; color:var(--text-secondary); text-align:center; }
-#uiDialog .ui-dialog-rich-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
-#uiDialog .ui-dialog-rich-stat { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; gap:2px; padding:8px 5px; border:1px solid var(--border-default); border-radius:7px; }
-#uiDialog .ui-dialog-rich-stat-label { font-size:11px; line-height:1.5; color:var(--text-secondary); overflow-wrap:anywhere; }
-#uiDialog .ui-dialog-rich-stat-value { font-size:15px; font-weight:700; line-height:1.4; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-#uiDialog .ui-dialog-rich-paragraph { margin:0; color:var(--text-secondary); font-size:12px; line-height:1.75; overflow-wrap:anywhere; }
-#uiDialog .ui-dialog-rich-warning { margin:0; padding:9px 11px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-panel); color:var(--text-primary); font-size:12px; line-height:1.65; overflow-wrap:anywhere; }
-#uiDialog .ui-dialog-rich-footer { margin:0; font-size:12px; line-height:1.6; color:var(--text-secondary); overflow-wrap:anywhere; }
-@media(max-width:440px) {
-  #uiDialog .ui-dialog-rich { gap:10px; }
-  #uiDialog .ui-dialog-rich-meta-item { padding:8px 5px; }
-  #uiDialog .ui-dialog-rich-meta-value { font-size:11.5px; }
-  #uiDialog .ui-dialog-rich-counter-value { font-size:17px; }
+#uiDialog .ui-dialog-rich-lead {
+    margin:0 0 10px;
+    color:var(--text-primary);
+    font-size:13px;
+    font-weight:550;
+    line-height:1.8;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-meta {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    width:100%;
+    margin:13px auto 0;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-meta-item {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    min-width:0;
+    width:100%;
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-meta-label {
+    color:var(--text-secondary);
+    font-size:12px;
+    line-height:1.7;
+}
+#uiDialog .ui-dialog-rich-meta-value {
+    max-width:100%;
+    color:var(--text-primary);
+    font-size:12px;
+    line-height:1.65;
+    font-weight:700;
+    overflow-wrap:anywhere;
+}
+#uiDialog .ui-dialog-rich-counters,
+#uiDialog .ui-dialog-rich-grid {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    column-gap:18px;
+    row-gap:6px;
+    width:100%;
+    margin:5px auto 0;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-counters { margin-top:13px; }
+#uiDialog .ui-dialog-rich-counter-title {
+    flex:0 0 100%;
+    color:var(--text-secondary);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-counter,
+#uiDialog .ui-dialog-rich-stat {
+    display:inline-flex;
+    flex-direction:row-reverse;
+    flex-wrap:wrap;
+    align-items:baseline;
+    justify-content:center;
+    gap:5px;
+    flex:0 1 auto;
+    min-width:0;
+    max-width:100%;
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-counter-label,
+#uiDialog .ui-dialog-rich-stat-label {
+    color:var(--text-secondary);
+    font-size:12px;
+    line-height:1.8;
+    overflow-wrap:anywhere;
+}
+#uiDialog .ui-dialog-rich-counter-value,
+#uiDialog .ui-dialog-rich-stat-value {
+    color:var(--text-primary);
+    font-size:13px;
+    line-height:1.55;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    overflow-wrap:anywhere;
+}
+#uiDialog .ui-dialog-rich-section {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-width:0;
+    gap:5px;
+    margin:12px auto 0;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-section-title {
+    margin:0;
+    color:var(--text-secondary);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-align:center;
+}
+#uiDialog .ui-dialog-rich-paragraph,
+#uiDialog .ui-dialog-rich-footer {
+    max-width:410px;
+    margin:12px auto 0;
+    color:var(--text-secondary);
+    font-size:12px;
+    line-height:1.8;
+    text-align:center;
+    overflow-wrap:anywhere;
+}
+#uiDialog .ui-dialog-rich-warning {
+    max-width:410px;
+    margin:12px auto 0;
+    padding:0;
+    color:var(--text-secondary);
+    background:transparent;
+    border:0;
+    border-radius:0;
+    font-size:12px;
+    line-height:1.8;
+    text-align:center;
+    overflow-wrap:anywhere;
+}
+#uiDialog[data-mode="choice"] .ui-dialog-rich-warning:last-of-type,
+#uiDialog[data-mode="confirm"][data-kind="danger"] .ui-dialog-rich-warning:last-of-type {
+    color:var(--danger-text);
+}
+#uiDialog[data-mode="choice"] .ui-dialog-actions {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:stretch;
+    gap:8px;
+    width:min(100%,420px);
+    margin:0 auto;
+}
+#uiDialog[data-mode="choice"] #uiDialogConfirm { order:1; }
+#uiDialog[data-mode="choice"] #uiDialogSecondary { order:2; }
+#uiDialog[data-mode="choice"] #uiDialogCancel {
+    order:3;
+    grid-column:1/-1;
+    min-width:95px;
+    max-width:150px;
+    justify-self:center;
+}
+@media (max-width:440px) {
+    #uiDialog .ui-dialog-rich-counters,
+    #uiDialog .ui-dialog-rich-grid { column-gap:12px; row-gap:5px; }
+    #uiDialog .ui-dialog-rich-counter-label,
+    #uiDialog .ui-dialog-rich-stat-label { font-size:11.5px; }
 }
 
 /* ========【確認視窗內備份】沿用全站 SVG mask 與檔案 Loading ======== */

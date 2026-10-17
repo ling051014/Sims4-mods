@@ -459,6 +459,7 @@
       }
       if (rich.stats?.length) {
         const block = make('div', 'ui-dialog-rich-counters');
+        if (rich.statsTitle) block.appendChild(make('span', 'ui-dialog-rich-counter-title', rich.statsTitle));
         rich.stats.forEach(([label, value]) => {
           const item = make('div', 'ui-dialog-rich-counter');
           item.appendChild(make('strong', 'ui-dialog-rich-counter-value', value));
