@@ -8275,7 +8275,7 @@ async function compressImage(file, kind = 'sim') {
   return assetStore.optimizeForUsage(file, kind === 'pet' ? 'petAvatar' : 'avatar');
 }
 
-function getVisibleIds(familyId) {
+function familyVisibleIds(familyId, { applyTopbarFilters = true } = {}) {
   const db = currentGenealogyData();
   const isCurrent = familyId === db.currentFamilyId;
   const family = isCurrent ? currentTreeFamily() : genealogyStore.getFamily(familyId);
@@ -8284,11 +8284,15 @@ function getVisibleIds(familyId) {
       ? family.primaryMemberIds : null;
   return genealogyStore.getVisibleFamilyIds(family, {
     relationshipSourceIds:attachmentSources,
-    matchesSim:simMatchesTopbarFilters
+    matchesSim:applyTopbarFilters ? simMatchesTopbarFilters : null
   });
 }
 
-// 側邊欄與畫布共同使用同一份可見範圍；不修改真正的家庭成員清單。
+function getVisibleIds(familyId) {
+  return familyVisibleIds(familyId);
+}
+
+// 側邊欄使用族譜完整成員範圍；頂部篩選只影響畫布。
 // 配偶／前任屬於可顯示的關聯人物，不代表已加入原始 Household。
 function currentDisplayedFamily() {
   const family = currentFamily();
@@ -8296,7 +8300,7 @@ function currentDisplayedFamily() {
   const treeFamily = currentTreeFamily() || family;
   return {
     ...treeFamily,
-    memberIds:[...getVisibleIds(family.id)]
+    memberIds:[...familyVisibleIds(family.id, { applyTopbarFilters:false })]
   };
 }
 
@@ -13252,7 +13256,10 @@ const familyMemberController = {
     const confirmBtn = $('familyMemberRemoveConfirmBtn');
     const count = familyMemberOperationState.selection.size;
 
-    if (startBtn) startBtn.hidden = familyMemberOperationState.removeMode;
+    if (startBtn) {
+      startBtn.hidden = familyMemberOperationState.removeMode;
+      startBtn.disabled = !(currentFamily()?.memberIds || []).length;
+    }
     if (addMenu) addMenu.hidden = familyMemberOperationState.removeMode;
     if (toolbar) toolbar.hidden = !familyMemberOperationState.removeMode;
     if (countEl) countEl.textContent = `已選 ${count} 位`;
@@ -13337,12 +13344,9 @@ function renderFamilyMemberList(fam) {
   if (!list) return;
 
   // 延伸族譜可顯示姻親等關聯人物，但「移出目前家族」只能修改真正的成員。
-  // 批量模式使用可實際移除的名單，讓每一列都有原本的紅色選取與閃爍垃圾桶。
-  const listedFamily = familyMemberOperationState.removeMode
-    ? currentFamily()
-    : fam;
+  // 批量模式保留完整族譜清單，僅讓真正屬於目前家族的市民勾選移出。
   let members =
-    (listedFamily?.memberIds || [])
+    (fam?.memberIds || [])
       .map(id => currentGenealogyData().sims[id])
       .filter(Boolean);
 
@@ -13354,6 +13358,8 @@ function renderFamilyMemberList(fam) {
     list.innerHTML = `<div class="family-member-empty">${esc(uiText('目前家族還沒有成員'))}</div>`;
     return;
   }
+
+  list.classList.toggle('is-remove-mode', familyMemberOperationState.removeMode);
 
   const currentIds =
     new Set(members.map(sim => sim.id));
@@ -13429,13 +13435,15 @@ function renderFamilyMemberList(fam) {
 
     const selected = familyMemberOperationState.selection.has(sim.id);
     const editable = editableIds.has(String(sim.id));
+    const unavailable = familyMemberOperationState.removeMode && !editable;
+    const unavailableHint = uiText('此模擬市民不屬於目前家族，無法移出');
 
-    return `<div class="family-member-row${familyMemberOperationState.removeMode && editable ? ' remove-mode' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" tabindex="0">
+    return `<div class="family-member-row${familyMemberOperationState.removeMode && editable ? ' remove-mode' : ''}${unavailable ? ' remove-unavailable' : ''}${selected ? ' remove-selected' : ''}" data-family-sim-id="${esc(sim.id)}" ${unavailable ? `title="${esc(unavailableHint)}"` : ''} tabindex="0">
       <div class="family-member-avatar-wrap">
         <div class="family-member-avatar">${framedAvatarImageHTML(sim.avatar, sim.avatarFrame) || esc((displayDataText(sim.name,sim)||'?').charAt(0))}</div>
         ${editable ? `<button class="family-member-remove-select${selected ? ' selected' : ''}" type="button" data-family-member-remove-select="${esc(sim.id)}" aria-pressed="${selected ? 'true' : 'false'}" title="${esc(uiText(selected ? '取消選取' : '批量移除'))}">
           ${iconSvg(selected ? 'check-lg' : 'trash3')}
-        </button>` : ''}
+        </button>` : unavailable ? `<span class="family-member-remove-unavailable" title="${esc(unavailableHint)}" aria-label="${esc(unavailableHint)}">${iconSvg('lock')}</span>` : ''}
       </div>
       <div class="family-member-copy"><div class="family-member-name">${esc(displayDataText(sim.name,sim))}</div><div class="family-member-meta">${esc(meta)}</div></div>
       <div class="ui-menu family-member-menu">
