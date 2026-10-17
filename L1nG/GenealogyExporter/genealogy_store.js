@@ -230,7 +230,7 @@
       return true;
     }
 
-    // ========【人物頭像雙來源】 設定 - 只接受目前 schema；avatar / avatarFrame 僅作目前顯示衍生值 ========
+    // ========【模擬市民頭像雙來源】 設定 - 只接受目前 schema；avatar / avatarFrame 僅作目前顯示衍生值 ========
     function syncSimAvatarSources(record) {
       if (
         !record ||
@@ -577,8 +577,8 @@
       if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
       if (typeof sim.notes !== 'string') sim.notes = '';
 
-      // 人物簡介已由 notes 取代；原版世家欄位也不屬於現行 schema。
-      // 只清人物記錄，不影響家庭 family.bio。
+      // 模擬市民簡介已由 notes 取代；原版世家欄位也不屬於現行 schema。
+      // 只清模擬市民記錄，不影響家庭 family.bio。
       delete sim.bio;
       delete sim.dynasties;
       delete sim.dynastyRole;
@@ -1183,7 +1183,7 @@
     }
 
 
-    // ========【子女索引】Store 維持單一快取，避免重複遍歷所有人物 ========
+    // ========【子女索引】Store 維持單一快取，避免重複遍歷所有模擬市民 ========
     let childrenIndex = null;
 
     function getChildrenOf(id) {
