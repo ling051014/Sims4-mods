@@ -53,6 +53,10 @@
       );
     }
 
+    function smoothScale(value) {
+      return Math.min(Math.max(Number(value) || 1, minScale), maxScale);
+    }
+
     function snapScale(value) {
       const bounded =
         Math.min(
@@ -290,7 +294,7 @@
         previousScale;
 
       const nextScale =
-        snapScale(
+        smoothScale(
           scale *
           (Number(factor) || 1)
         );
