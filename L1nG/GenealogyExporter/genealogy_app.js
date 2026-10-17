@@ -13328,8 +13328,13 @@ function renderFamilyMemberList(fam) {
   const list = $('familyMemberList');
   if (!list) return;
 
+  // 延伸族譜可顯示姻親等關聯人物，但「移出目前家族」只能修改真正的成員。
+  // 批量模式使用可實際移除的名單，讓每一列都有原本的紅色選取與閃爍垃圾桶。
+  const listedFamily = familyMemberOperationState.removeMode
+    ? currentFamily()
+    : fam;
   let members =
-    (fam.memberIds || [])
+    (listedFamily?.memberIds || [])
       .map(id => currentGenealogyData().sims[id])
       .filter(Boolean);
 
