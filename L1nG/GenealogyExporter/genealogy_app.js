@@ -240,7 +240,11 @@ const KINSHIP_SYSTEM_LABELS = Object.freeze([
   '孫子','孫女','外孫','外孫女','孫輩',
   '曾祖父','曾祖母','曾祖父母',
   '高祖父','高祖母','高祖父母',
-  '曾孫','曾孫女','曾孫輩',
+  '曾孫','曾孫女','曾孫輩','玄孫','玄孫女','玄孫輩',
+  '兒媳','女婿','孫媳','孫女婿','外孫媳','外孫女婿',
+  '曾孫媳','曾孫女婿','玄孫媳','玄孫女婿',
+  '嫂嫂','弟媳','姐夫','妹夫','伯母','嬸嬸','姑丈','舅媽','姨丈',
+  '姪媳','姪女婿','外甥媳','外甥女婿',
   '伯父','叔叔','叔伯','姑姑','舅舅','阿姨','父母的兄弟姊妹',
   '姪子','姪女','外甥','外甥女','兄弟姊妹的子女',
   '堂哥','堂姐','堂弟','堂妹','堂兄弟姊妹',
@@ -4572,10 +4576,10 @@ function resolveDirectFamilyRelationships(
 }
 
 // 親屬稱謂保留在 App，僅將祖先／後代路徑交給 Store。
-function findAncestorPath(sourceId, targetId, maxDepth = 8) {
+function findAncestorPath(sourceId, targetId, maxDepth = 10) {
   return genealogyStore.findAncestorPath(sourceId, targetId, maxDepth);
 }
-function findDescendantPath(sourceId, targetId, maxDepth = 8) {
+function findDescendantPath(sourceId, targetId, maxDepth = 10) {
   return genealogyStore.findDescendantPath(sourceId, targetId, maxDepth);
 }
 
@@ -4748,6 +4752,9 @@ function descendantKinshipLabel(
       '曾孫女',
       '曾孫輩'
     );
+  }
+  if (depth === 4) {
+    return genderedKinship(targetSim, '玄孫', '玄孫女', '玄孫輩');
   }
 
   return (
@@ -5141,6 +5148,39 @@ function directSocialPerspectiveLabel(
   ).trim() || '關聯';
 }
 
+// 視角姻親只沿「血親 / 旁系 + 一條現任婚姻」推導，不將姻親寫回族譜資料。
+function perspectiveBloodRelationDescriptor(perspectiveId, relativeId) {
+  const db = currentGenealogyData();
+  const source = db?.sims?.[String(perspectiveId)];
+  const target = db?.sims?.[String(relativeId)];
+  if (!source || !target || String(source.id) === String(target.id)) return null;
+  const descendants = findDescendantPath(source.id, target.id, 10);
+  if (descendants) return {kind:'descendant', depth:descendants.length,
+    label:descendantKinshipLabel(source,target,descendants)};
+  const ancestors = findAncestorPath(source.id, target.id, 10);
+  if (ancestors) return {kind:'ancestor', depth:ancestors.length,
+    label:ancestorKinshipLabel(source,target,ancestors)};
+  if (genealogySiblingIds(source.id).includes(String(target.id)))
+    return {kind:'sibling',label:siblingKinshipLabel(source,target)};
+  const parentSibling = parentSiblingKinship(source.id,target.id);
+  if (parentSibling) return {kind:'parent-sibling',label:parentSibling};
+  const siblingChild = siblingChildKinship(source.id,target.id);
+  if (siblingChild) return {kind:'sibling-child',label:siblingChild};
+  const cousin = cousinKinship(source.id,target.id);
+  if (cousin) return {kind:'cousin',label:cousin};
+  return null;
+}
+
+function perspectiveAffinalLabel(perspectiveId,targetId) {
+  return window.L1nGGenealogyKinship?.perspectiveAffinalKinship?.({
+    perspectiveId,targetId,
+    sims:currentGenealogyData()?.sims,
+    describeBlood:relativeId=>perspectiveBloodRelationDescriptor(perspectiveId,relativeId),
+    siblingIds:simId=>genealogySiblingIds(simId),
+    siblingLabel:(spouse,target)=>siblingKinshipLabel(spouse,target)
+  }) || null;
+}
+
 function resolveKinshipLabel(
   perspectiveId,
   targetId
@@ -5248,10 +5288,7 @@ function resolveKinshipLabel(
     return spouseParent;
   }
 
-  return directSocialPerspectiveLabel(
-    root.id,
-    target.id
-  );
+  return perspectiveAffinalLabel(root.id,target.id) || directSocialPerspectiveLabel(root.id,target.id);
 }
 
 function relationshipPerspectiveSim() {
