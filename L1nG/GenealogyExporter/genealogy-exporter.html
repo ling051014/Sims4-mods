@@ -5,7 +5,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>族譜提取器 · L1nG</title>
-    <meta content="使用 L1nG 族譜提取器，將《模擬市民 4》存檔中的人物、家庭、族譜關係、寵物與可取得的頭像整理成 ZIP，匯入網頁端族譜工具。" name="description"/>
+    <meta content="使用 L1nG 族譜提取器，將《模擬市民 4》存檔中的模擬市民、家庭、族譜關係、寵物與可取得的頭像整理成 ZIP，匯入網頁端族譜工具。" name="description"/>
     <meta content="#f6f8fb" name="theme-color"/>
     <link rel="stylesheet" href="genealogy-exporter.css?v=20261015-download-hover-r1"/>
     <script src="genealogy-exporter.js?v=20261013-mobile-nav-unified-r2" defer></script>
@@ -96,7 +96,7 @@
                     <div class="bridge-card bridge-module">
                         <span class="bridge-kicker">02</span>
                         <strong><span data-lang="zh-Hant">族譜提取器</span><span data-lang="en">EXPORTER</span></strong>
-                        <small data-lang="zh-Hant">人物、關係與頭像</small>
+                        <small data-lang="zh-Hant">模擬市民、關係與頭像</small>
                         <small data-lang="en">Family Data &amp; Portraits</small>
                     </div>
                     <span aria-hidden="true" class="bridge-line"></span>
@@ -122,7 +122,7 @@
                     <div>
                         <strong data-lang="zh-Hant">不修改存檔</strong>
                         <strong data-lang="en">Does not modify saves</strong>
-                        <p data-lang="zh-Hant">讀取需要的人物與家庭資料，不更改存檔中的人物或親子關係</p>
+                        <p data-lang="zh-Hant">讀取需要的模擬市民與家庭資料，不更改存檔中的模擬市民或親子關係</p>
                         <p data-lang="en">Reads the required Sim and household data without editing the save or its family relationships</p>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
         <section class="section" id="features">
             <div class="section-heading reveal">
                 <span class="section-kicker"><span data-lang="zh-Hant">提取內容</span><span data-lang="en">WHAT YOU CAN EXPORT</span></span>
-                <h2 data-lang="zh-Hant">從人物資料到家族關係，一次整理</h2>
+                <h2 data-lang="zh-Hant">從模擬市民資料到家族關係，一次整理</h2>
                 <h2 data-lang="en">From Sims and households to family relationships</h2>
                 <p data-lang="zh-Hant">提取器會整理存檔中可取得的資料，實際內容依模擬市民、存檔及已安裝模組而有所不同</p>
                 <p data-lang="en">The exporter gathers available information from your save. Results may vary by Sim, save, and installed mods</p>
@@ -186,7 +186,7 @@
                 </article>
                 <article class="feature-card reveal">
                     <span class="feature-number">03</span>
-                    <h3 data-lang="zh-Hant">人物詳細資料</h3>
+                    <h3 data-lang="zh-Hant">模擬市民詳細資料</h3>
                     <h3 data-lang="en">Sim Details</h3>
                     <p data-lang="zh-Hant">整理可取得的特徵、職業與職級、抱負、特殊種族及死亡相關資訊</p>
                     <p data-lang="en">Includes available traits, career levels, aspirations, occult types, and death-related information</p>
@@ -242,7 +242,7 @@
                     <span class="feature-number">07</span>
                     <div class="feature-state" data-lang="zh-Hant">尚在研究</div>
                     <div class="feature-state" data-lang="en">In Research</div>
-                    <h3 data-lang="zh-Hant">人物 CAS 服裝照片</h3>
+                    <h3 data-lang="zh-Hant">模擬市民 CAS 服裝照片</h3>
                     <h3 data-lang="en">CAS Outfit Photos</h3>
                     <p data-lang="zh-Hant">正在研究提取模擬市民在 CAS 中的服裝造型照片，目前尚未提供匯出</p>
                     <p data-lang="en">Research into exporting Sims' CAS outfit photos is ongoing; this feature is not yet available</p>
@@ -362,13 +362,13 @@
                     <span class="section-kicker"><span data-lang="zh-Hant">匯出檔案</span><span data-lang="en">YOUR EXPORT FILE</span></span>
                     <h2 data-lang="zh-Hant">將族譜資料整理成 ZIP</h2>
                     <h2 data-lang="en">Your genealogy data in one ZIP</h2>
-                    <p data-lang="zh-Hant">這份 ZIP 包含提取的人物、家庭、族譜資料與頭像，檔案會留在你的電腦中，直到你自行選取匯入；<strong>它不是遊戲存檔備份</strong></p>
+                    <p data-lang="zh-Hant">這份 ZIP 包含提取的模擬市民、家庭、族譜資料與頭像，檔案會留在你的電腦中，直到你自行選取匯入；<strong>它不是遊戲存檔備份</strong></p>
                     <p data-lang="en">The ZIP contains exported Sims, households, family relationships, and available portraits. It stays on your computer until you choose to import it; <strong>it is not a backup of your game save</strong></p>
                 </div>
                 <div aria-label="Export ZIP structure" class="file-tree">
                     <div class="file-tree-root">L1nG_Genealogy_*.zip</div>
                     <div class="file-tree-item"><span></span><strong>manifest.json</strong><small data-lang="zh-Hant">檔案版本與匯出資訊</small><small data-lang="en">Export file details</small></div>
-                    <div class="file-tree-item"><span></span><strong>genealogy.json</strong><small data-lang="zh-Hant">人物、寵物、家庭與族譜資料</small><small data-lang="en">Sims, pets, households, relationships</small></div>
+                    <div class="file-tree-item"><span></span><strong>genealogy.json</strong><small data-lang="zh-Hant">模擬市民、寵物、家庭與族譜資料</small><small data-lang="en">Sims, pets, households, relationships</small></div>
                     <div class="file-tree-item"><span></span><strong>avatars/</strong><small data-lang="zh-Hant">可取得的頭像圖片</small><small data-lang="en">Available portrait images</small></div>
                 </div>
             </div>
@@ -416,7 +416,7 @@
                         <strong data-lang="en">In Development &amp; Testing</strong>
                     </div>
                     <ul>
-                        <li data-lang="zh-Hant">人物 CAS 服裝照片提取</li>
+                        <li data-lang="zh-Hant">模擬市民 CAS 服裝照片提取</li>
                         <li data-lang="en">CAS outfit photo extraction</li>
                         <li data-lang="zh-Hant">家庭合照提取</li>
                         <li data-lang="en">Household group photo extraction</li>
