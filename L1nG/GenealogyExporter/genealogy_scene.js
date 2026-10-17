@@ -2027,7 +2027,7 @@ function relationshipCubicClear(segments,rects) {
     const {from,c1,c2,to}=segment;
     const length=Math.hypot(c1.x-from.x,c1.y-from.y)+
       Math.hypot(c2.x-c1.x,c2.y-c1.y)+Math.hypot(to.x-c2.x,to.y-c2.y);
-    // 先依整段控制點包圍盒篩選，再檢查實際曲線，避免多人物族譜卡頓。
+    // 先依整段控制點包圍盒篩選，再檢查實際曲線，避免多模擬市民族譜卡頓。
     const left=Math.min(from.x,c1.x,c2.x,to.x)-9;
     const right=Math.max(from.x,c1.x,c2.x,to.x)+9;
     const top=Math.min(from.y,c1.y,c2.y,to.y)-9;
@@ -2505,7 +2505,7 @@ function buildGenealogyLayoutModel(visibleIds) {
     );
 
   // Parent Group 是族譜真正的骨架。同一個人可以同時參與多個 Parent Group，
-  // 但人物卡只存在一次，不再因多配偶 / 多共同生育對象被 union 成三人以上 layout unit。
+  // 但市民卡片只存在一次，不再因多配偶 / 多共同生育對象被 union 成三人以上 layout unit。
   parentGroups.forEach(group => {
     group.parentUnitIds =
       [...new Set(
@@ -3379,7 +3379,7 @@ function stableGenealogyUnitCompare(a, b) {
 }
 
 
-// ========【族譜排列身分】 主家族與外部關係人物分離 ========
+// ========【族譜排列身分】 主家族與外部關係模擬市民分離 ========
 // 選中的實際家庭是排列中心；EA 族譜擴張出的雙方祖先則只是血緣主幹，不能全部變中心。
 function getActiveLayoutAnchorIds(visibleIds) {
   const visible=visibleIds instanceof Set?visibleIds:new Set(visibleIds||[]);
@@ -4011,7 +4011,7 @@ function buildFamilyBranchOwnership(
   };
 }
 
-// ========【Family Branch Block Layout】 先保留整個子孫分支，再放人物 ========
+// ========【Family Branch Block Layout】 先保留整個子孫分支，再放模擬市民 ========
 function buildFamilyBranchBlockMetrics(
   model,
   ownership
@@ -4465,7 +4465,7 @@ function assignFamilyBranchBlockPositions(
   };
 
   // 恢復原有的子孫分支定位：不可將配偶放在整棵祖先樹的最外邊，
-  // 更不可替全族譜每一代的外部人物都額外疊加根區塊留白。
+  // 更不可替全族譜每一代的外部模擬市民都額外疊加根區塊留白。
   let cursorX=0;
   const placeRoot=rootId=>{
     const unit=model.unitById.get(rootId);
@@ -4484,7 +4484,7 @@ function assignFamilyBranchBlockPositions(
       stableGenealogyUnitCompare(model.unitById.get(a),model.unitById.get(b)))
     .forEach(placeRoot);
 
-  // 配偶與前任必須圍繞其真正關聯人物的分支，而不是整個 root 的極端邊界。
+  // 配偶與前任必須圍繞其真正關聯模擬市民的分支，而不是整個 root 的極端邊界。
   const placedAttachments=new Set();
   layers.forEach(layer=>{
     const occupied=layer.filter(unit=>ownership.primaryUnitIds.has(unit.id));
@@ -4536,7 +4536,7 @@ function genealogyAttachmentPriority(unit,ownerId,model) {
 }
 
 // 主家系根區塊排序：保持原血緣先後，只把同一實際家庭的獨立根分支合攏。
-// 家系根區塊同時受血緣、共同父母與社交優先級約束；同一人物仍只有一個 unit。
+// 家系根區塊同時受血緣、共同父母與社交優先級約束；同一模擬市民仍只有一個 unit。
 // 血緣根排序只處理實際跨根的親子與同家庭連接；
 // 不以情人／一般社交關係強制重排整張原本正常的族譜。
 // 血緣與家庭群組不拆分；配偶、前任及情人只能在完整根區塊外側排序。
@@ -4610,7 +4610,7 @@ function genealogyOrderRootFamilyBlocks(ids,model,ownership) {
       (index.get(components.get(a.a)?.roots[0])??0)-
       (index.get(components.get(b.a)?.roots[0])??0));
 
-  // 已佔據的現任配偶方向先計入；前任貼近人物，其餘關係往外排。
+  // 已佔據的現任配偶方向先計入；前任貼近模擬市民，其餘關係往外排。
   components.forEach(component=>{
     const pair=model.units.find(unit=>unit.members?.length===2 &&
       unit.members.some(member=>anchors.has(member.id)) &&
@@ -4699,8 +4699,8 @@ function applyFamilyBranchOrdering(layers,model,ownership) {
       root.right.sort((a,b)=>compareAttachment(a,b,1));
       result.push(...root.left,...root.primary,...root.right);
     });
-    // 在每個完整原生家系的外側加入配偶／前任／社交人物，
-    // 而不是把某一家系的人物塞到另一個家系的親子中間。
+    // 在每個完整原生家系的外側加入配偶／前任／社交模擬市民，
+    // 而不是把某一家系的模擬市民塞到另一個家系的親子中間。
     layer.splice(0,layer.length,...result);
   });
 }
@@ -6087,11 +6087,11 @@ function compactCrossRootSiblingGroups(layers,model,ownership) {
   return corrected;
 }
 
-// ========【完整家系獨立排列】先辨識人物與水平配偶單位的血緣連通群 ========
+// ========【完整家系獨立排列】先辨識模擬市民與水平配偶單位的血緣連通群 ========
 
 
 function enforceOutwardAffinalFamilyGroups(layers,model,ownership,groups) {
-  // 主家血緣沿目前選中的人物向上尋找祖先，再向下找同血脈子孫。
+  // 主家血緣沿目前選中的模擬市民向上尋找祖先，再向下找同血脈子孫。
   // 共同子女不能把另一位父母的原生家族誤升格成主家。
   const blood=new Set([...(ownership.anchorSimIds||[])].map(String).filter(id=>model.byId.has(id)));
   const parentsByChild=new Map(),childrenByParent=new Map();
@@ -6244,7 +6244,7 @@ function compactDetachedCoParentRoots(layers,model,ownership,groups) {
 // 同父母兩名子女以真正錨點對稱展開；配偶寬度不能取代親子間距。
 // 同時保留下一代的完整分支安全距離。
 
-// 遠距共同父母改以完整家系的線性約束求解，不針對人物姓名移動卡片。
+// 遠距共同父母改以完整家系的線性約束求解，不針對模擬市民姓名移動卡片。
 function optimizeDistantCoParentFamilyBlocks(layers,model,ownership,groups) {
   const gap=resolveLayoutGaps().SIBLING;
   const rootOf=unit=>unit?(ownership.rootByUnit?.get(unit.id)||unit.id):null;
@@ -6600,7 +6600,7 @@ function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,compon
     ownership
   );
 
-  // 真正改動人物位置：以情人關係線的接點為基準，整組平移私生子女與其後代。
+  // 真正改動模擬市民位置：以情人關係線的接點為基準，整組平移私生子女與其後代。
   alignNonSpousalCoParentBranches(
     layers,
     model,
@@ -6638,8 +6638,8 @@ function petCardOwners(pet) {
   );
 }
 
-// ========【家庭寵物排列】 人物族譜先排好，寵物卡只占用畫布外側空間 ========
-// ========【寵物卡顯示資訊】 與人物卡分開保存，欄位開關決定實際內容和卡片高度 ========
+// ========【家庭寵物排列】 模擬市民族譜先排好，寵物卡只占用畫布外側空間 ========
+// ========【寵物卡顯示資訊】 與市民卡片分開保存，欄位開關決定實際內容和卡片高度 ========
 function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
   const species = settings.species ? petCardSpeciesLabel(pet) : '';
   const breed = settings.breed ? displayDataText(pet.breed,owner) : '';
@@ -6656,7 +6656,7 @@ function petCardFieldRows(pet,owner,settings = getPetCardSettings()) {
   return rows;
 }
 
-// 從底排往上填滿：飼主每排最多 3 位，人物卡上的寵物每排最多 4 隻。
+// 從底排往上填滿：飼主每排最多 3 位，市民卡片上的寵物每排最多 4 隻。
 function stackedPortraitRowSizes(count,maxPerRow) {
   const total=Math.max(0,Math.floor(Number(count)||0));
   const rows=Math.ceil(total/maxPerRow);
@@ -6836,7 +6836,7 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     const y = Math.max(0,group.anchorY);
     let x = Math.max(0,group.anchorX+PET_SIDE_GAP);
 
-    // 僅移動寵物群組避開人物卡；不同高度的寵物卡以同列最高卡為間距基準。
+    // 僅移動寵物群組避開市民卡片；不同高度的寵物卡以同列最高卡為間距基準。
     for (let attempt=0; attempt<occupied.length+1; attempt++) {
       const blocking = occupied.find(rect =>
         x < rect.right+clearance && x+groupW+clearance > rect.left &&
@@ -6852,7 +6852,7 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     group.entries.forEach((entry,index) => {
       const cardX=x+colLefts[index%3];
       const cardY = y+rowTops[Math.floor(index/3)];
-      // 寵物使用與人物相同的每家庭、每模式手動位置快照。
+      // 寵物使用與模擬市民相同的每家庭、每模式手動位置快照。
       const manual = family?.freeLayout?.[viewMode]
         ? family?.manualPositions?.[viewMode]?.['pet:' + entry.key] : null;
       const finalX = manual && Number.isFinite(Number(manual.x)) ? Math.max(0,Number(manual.x)) : cardX;
@@ -6867,9 +6867,9 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
   return {cards,groups,width:maxRight,height:maxBottom};
 }
 
-// ========【寵物畫布圖層】 不混入人物節點、選取及關係線路由 ========
+// ========【寵物畫布圖層】 不混入模擬市民節點、選取及關係線路由 ========
 function paintPetLayer() {
-  // 只有 Layout 更新才重建寵物 DOM；拖曳人物卡的每一幀不重建寵物頭像。
+  // 只有 Layout 更新才重建寵物 DOM；拖曳市民卡片的每一幀不重建寵物頭像。
   if (lastPaintedPetLayout === layoutCache?.petLayout) return;
   lastPaintedPetLayout = layoutCache?.petLayout;
   if (!layoutCache?.petLayout?.cards?.length) {
@@ -9506,7 +9506,7 @@ function genealogyParentAxisSnapTargets(id) {
       sample.set(key,{...current,x});
       return parentConnectorSource(group,sample,byId,[])?.x;
     };
-    // 單親接點隨人物位移 1:1；雙親中點通常是 1:2。
+    // 單親接點隨模擬市民位移 1:1；雙親中點通常是 1:2。
     // 由相同 renderer 函式取樣並再次驗證，不硬寫卡片外框中心。
     const next=sourceAt(current.x+4),slope=(next-source.x)/4;
     if(!Number.isFinite(slope)||Math.abs(slope)<0.001)return;
