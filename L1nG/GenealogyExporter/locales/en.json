@@ -1231,6 +1231,17 @@
     "可加入的模擬市民": "Available Sims",
     "搜尋姓名、職涯、特質或居住地……": "Search name, career, traits or residence…",
     "此模擬市民不屬於目前家族，無法移出": "This Sim is not a member of the current family",
-    "關閉加入模擬市民視窗": "Close Add Sims dialog"
+    "關閉加入模擬市民視窗": "Close Add Sims dialog",
+    "遊戲存檔": "Game save",
+    "本次匯入摘要": "Import summary",
+    "張遊戲頭像無法解析，已略過。": "game portraits could not be decoded and were skipped.",
+    "已完成遊戲資料同步，網站上的自訂內容已保留。": "Game data has been updated and custom website content was preserved.",
+    "這次匯入的族譜資料已完成儲存。": "The imported family tree has been saved.",
+    "請確認是否要取代目前族譜。": "Confirm whether to replace the current family tree.",
+    "這會刪除目前族譜資料。此操作無法復原，建議先匯出 JSON 備份。": "This deletes your current family tree and cannot be undone. Consider exporting a JSON backup first.",
+    "恢復繁體中文的預設族譜。": "Restore the default family tree in Traditional Chinese.",
+    "模擬市民資料、關係與人生照片都會一併刪除。此操作無法復原。": "Sim data, relationships, and life photos will be deleted. This cannot be undone.",
+    "模擬市民資料與相關關係都會一併刪除。此操作無法復原。": "Sim data and related relationships will be deleted. This cannot be undone.",
+    "遊戲關係": "Game relationships"
   }
 }
