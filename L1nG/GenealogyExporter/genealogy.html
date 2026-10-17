@@ -591,14 +591,14 @@
                                             <button class="ui-menu-item" id="addMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入既有模擬市民</span></button>
                                         </div>
                                     </div>
-                                    <button class="family-section-batch-remove danger-action" id="removeMemberBtn" type="button" title="批量移除" aria-label="批量移除">
+                                    <button class="family-section-batch-remove danger-action" id="removeMemberBtn" type="button" title="批量移出家族" aria-label="批量移出家族">
                                         <span class="l1ng-icon icon-person-dash" aria-hidden="true"></span>
-                                        <span>批量移除</span>
+                                        <span>批量移出家族</span>
                                     </button>
                                     <div class="family-member-remove-toolbar" id="familyMemberRemoveToolbar" hidden>
                                         <span class="family-member-remove-count" id="familyMemberRemoveCount">已選 0 位</span>
                                         <button class="family-member-remove-cancel" id="familyMemberRemoveCancelBtn" type="button">取消</button>
-                                        <button class="family-member-remove-confirm" id="familyMemberRemoveConfirmBtn" type="button" disabled>移除 0 位</button>
+                                        <button class="family-member-remove-confirm" id="familyMemberRemoveConfirmBtn" type="button" disabled>移出 0 位</button>
                                     </div>
                                 </div>
                             </div>
@@ -837,7 +837,7 @@
                 </div>
 
                 <div class="ui-dialog-actions sim-editor-actions">
-                    <button class="danger" id="btnDelete" style="display:none">刪除模擬市民</button>
+                    <button class="danger" id="btnDelete" style="display:none">永久刪除模擬市民</button>
                     <span class="spacer"></span>
                     <button id="btnCancel">取消</button>
                     <button class="primary" id="btnSave">儲存</button>
@@ -974,7 +974,7 @@
                         </div>
                         <div class="photo-actions-row">
                             <label class="photo-action-button filebtn" for="photoInput"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span></label>
-                            <button class="photo-action-button danger-action" id="photoClearBtn" type="button" disabled><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清除圖片</span></button>
+                            <button class="photo-action-button danger-action" id="photoClearBtn" type="button" disabled><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>移除圖片</span></button>
                             <span class="photo-size-tip" id="photoSizeTip">尚未選擇圖片</span>
                         </div>
                         <input accept="image/jpeg,image/png,image/webp" hidden id="photoInput" type="file">
@@ -1266,7 +1266,7 @@
                 </section>
 
                 <section class="appearance-section">
-                    <div class="setting-group-title">重設視覺設定</div>
+                    <div class="setting-group-title">恢復預設</div>
                     <button id="resetUiSettingsBtn" type="button">恢復介面預設</button>
                 </section>
 
@@ -1329,7 +1329,7 @@
                     <div class="storage-maintenance-card">
                         <div>
                             <strong>清理未使用的圖片</strong>
-                            <p>只會清除沒有被模擬市民、寵物、人生照片、家庭合照或背景引用的圖片，不影響仍在使用的圖片。</p>
+                            <p>只會清理未被模擬市民、寵物、人生照片、家庭合照或背景引用的圖片，不影響仍在使用的圖片。</p>
                         </div>
                         <button class="danger-action" id="cleanupBtn" type="button"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清理未使用的圖片</span></button>
                     </div>
