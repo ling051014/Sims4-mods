@@ -2864,12 +2864,40 @@ const BUILTIN_RELATION_LABELS =
 
 function displayRelationshipText(value) {
   const text = String(value ?? '');
+  const lang = document.documentElement.lang || 'zh-Hant';
 
-  // 系統語意與親屬稱謂會跟著介面語言切換；
-  // 玩家自己輸入的其他關係名稱維持原文。
-  return BUILTIN_RELATION_LABELS.has(text)
-    ? uiText(text)
-    : text;
+  // 世代序號與組合式姻親標籤採動態翻譯，不列舉所有可能代數。
+  const depthMatch = text.match(/^第 (\d+) 代(祖先|後代)$/);
+  if (depthMatch) {
+    const depth = Number(depthMatch[1]);
+    const ancestor = depthMatch[2] === '祖先';
+    if (lang === 'en') return ancestor
+      ? 'Ancestor (' + depth + ' generations above)'
+      : 'Descendant (' + depth + ' generations below)';
+    if (lang === 'zh-Hans') return '第 ' + depth + ' 代' + (ancestor ? '祖先' : '后代');
+    return text;
+  }
+
+  const affinalMatch = text.match(/^(.+)的配偶$/);
+  if (affinalMatch && (BUILTIN_RELATION_LABELS.has(affinalMatch[1]) ||
+      /^第 \d+ 代(?:祖先|後代)$/.test(affinalMatch[1]))) {
+    return lang === 'en'
+      ? 'Spouse of ' + displayRelationshipText(affinalMatch[1])
+      : lang === 'zh-Hans'
+        ? displayRelationshipText(affinalMatch[1]) + '的配偶'
+        : text;
+  }
+  const spouseRelativeMatch = text.match(/^配偶的(.+)$/);
+  if (spouseRelativeMatch && BUILTIN_RELATION_LABELS.has(spouseRelativeMatch[1])) {
+    return lang === 'en'
+      ? "Spouse's " + displayRelationshipText(spouseRelativeMatch[1])
+      : lang === 'zh-Hans'
+        ? '配偶的' + displayRelationshipText(spouseRelativeMatch[1])
+        : text;
+  }
+
+  // 系統語意與親屬稱謂會跟著介面語言切換；自訂詞彙保持原文。
+  return BUILTIN_RELATION_LABELS.has(text) ? uiText(text) : text;
 }
 
 
