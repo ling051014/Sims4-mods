@@ -17730,7 +17730,7 @@ function gameImportChoiceRichContent(analysis, {canUpdate = true, continuation =
   }
   if (!canUpdate) warnings.push('目前族譜已有遊戲資料，但這份 ZIP 沒有找到可安全更新的相同來源。');
   warnings.push('若以這份 ZIP 重新建立族譜，現有內容將被取代。建議先匯出 JSON 備份。');
-  return {lead:leads[state] || leads.unverified, meta, stats, paragraphs, warnings};
+  return {lead:leads[state] || leads.unverified, meta, stats, statsTitle:'模擬市民比對', paragraphs, warnings};
 }
 
 function gameImportUpdateRichContent(result, avatarStats) {
