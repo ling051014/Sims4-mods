@@ -17652,7 +17652,31 @@ async function chooseGameImportMode(
     !analysis ||
     analysis.currentGameSimCount <= 0
   ) {
-    return 'replace';
+    // 沒有既有遊戲來源不代表網站沒有玩家自行建立的資料。
+    // 只有真的有內容時才確認，空白族譜與內建範例仍直接匯入。
+    const pets = currentDatabase?.pets;
+    const hasExistingContent =
+      Object.keys(currentDatabase?.sims || {}).length > 0 ||
+      (Array.isArray(pets) ? pets.length > 0 : Object.keys(pets || {}).length > 0) ||
+      (currentDatabase?.families || []).some(family =>
+        family?.memberIds?.length > 0 ||
+        !!family?.coverImage ||
+        !!String(family?.bio || '').trim()
+      ) ||
+      !!bgSettings?.image;
+    if (!hasExistingContent) return 'replace';
+
+    hideFileOperationStatus();
+    const replace = await uiConfirm(
+      uiText('目前族譜含有網站自行建立的資料，匯入這份 ZIP 將取代現有內容。建議先匯出 JSON 備份。'),
+      {
+        title:'匯入遊戲族譜',
+        kind:'danger',
+        confirmText:'覆蓋現有族譜',
+        backupAction:exportCurrentGenealogyBackup
+      }
+    );
+    return replace ? 'replace' : 'cancel';
   }
 
   hideFileOperationStatus();
