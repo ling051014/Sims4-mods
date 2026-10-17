@@ -2982,7 +2982,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
   flex:0 0 auto; padding:13px 24px 0;
   background:var(--surface-card);
 }
-#petModalTitle { margin-bottom:8px; }
+.pet-editor-top > .pet-editor-title { margin-bottom:8px; }
 .pet-editor-top > .pet-editor-layout { padding-bottom:11px; }
 .pet-editor-content {
   flex:1 1 auto; min-height:0; overflow-y:auto;
