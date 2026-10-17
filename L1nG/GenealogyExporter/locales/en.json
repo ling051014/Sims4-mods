@@ -1223,6 +1223,7 @@
     "若以這份 ZIP 重新建立族譜，現有內容將被取代。建議先匯出 JSON 備份。": "Rebuilding the family tree from this ZIP replaces existing content. Consider exporting a JSON backup first.",
     "這份 JSON 備份將取代目前族譜資料與背景設定。此操作無法復原，建議先匯出目前族譜的 JSON 備份。": "This JSON backup will replace the current family tree and background settings. This cannot be undone. Consider exporting a backup of your current tree first.",
     "還原這份備份": "Restore this backup",
-    "查看頭像解析失敗明細": "View portrait decoding errors"
+    "查看頭像解析失敗明細": "View portrait decoding errors",
+    "目前族譜含有網站自行建立的資料，匯入這份 ZIP 將取代現有內容。建議先匯出 JSON 備份。": "This tree contains content created on the website. Importing this ZIP will replace it. Consider exporting a JSON backup first."
   }
 }
