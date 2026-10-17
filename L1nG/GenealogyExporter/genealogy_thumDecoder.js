@@ -1,7 +1,7 @@
 (function (global) {
   'use strict';
 
-  // ========【EA 人物縮圖格式】 設定 - 只供遊戲 ZIP importer 使用，不參與一般圖片上傳 ========
+  // ========【EA 模擬市民縮圖格式】 設定 - 只供遊戲 ZIP importer 使用，不參與一般圖片上傳 ========
   const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
   const MAX_PIXELS = 16 * 1024 * 1024;
   const crcTable = new Uint32Array(256);
