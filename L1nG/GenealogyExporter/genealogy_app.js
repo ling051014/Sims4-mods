@@ -17262,12 +17262,124 @@ function prepareDatabase(raw) {
   };
 }
 
+// ========【族譜匯入診斷】在例外發生時保存原始資訊；不以 UI 摘要取代堆疊 ========
+function captureGenealogyImportError(error, depth = 0) {
+  if (error == null) return null;
+  if (depth > 3) return { truncated:true };
+  if (typeof error !== 'object') return { message:String(error) };
+  const result = {
+    name:String(error.name || 'Error'),
+    message:String(error.message || error.code || '未知錯誤')
+  };
+  for (const key of ['code','stage','path']) {
+    if (error[key] != null) result[key] = String(error[key]);
+  }
+  if (typeof error.stack === 'string') result.stack = error.stack;
+  if (error.cause != null && error.cause !== error) {
+    result.cause = captureGenealogyImportError(error.cause, depth + 1);
+  }
+  return result;
+}
+
+function makeGenealogyImportDiagnostic({source,stage,file,error,failures=[],counts=null}) {
+  return {
+    format:'l1ng-genealogy-import-diagnostic',
+    version:1,
+    capturedAt:new Date().toISOString(),
+    source,
+    stage:stage || 'unknown',
+    file:file ? {
+      name:String(file.name || ''),
+      size:Number(file.size) || 0,
+      type:String(file.type || ''),
+      lastModified:Number(file.lastModified) || null
+    } : null,
+    browser:{
+      userAgent:navigator.userAgent,
+      language:document.documentElement.lang || navigator.language || ''
+    },
+    error:captureGenealogyImportError(error),
+    counts,
+    failures:failures.map(item => ({
+      simId:item.simId || null,
+      kind:item.kind || null,
+      path:item.path || null,
+      stage:item.stage || null,
+      reason:item.reason || null,
+      error:item.error || null
+    }))
+  };
+}
+
+function genealogyImportDetailOptions(report, failures=[]) {
+  const entries=failures.length
+    ? failures.map((item,index) => ({
+        title:'失敗頭像 ' + (index + 1),
+        caption:item.kind === 'pet' ? '寵物' : '模擬市民',
+        fields:[
+          ['Sim ID',item.simId || '未擷取'],
+          ['失敗階段',item.stage || '未擷取'],
+          ['錯誤原因',item.reason || '未擷取'],
+          ['ZIP 路徑',item.path || '未擷取'],
+          ['原始堆疊',item.error?.stack || '未擷取']
+        ]
+      }))
+    : [{
+        title:'原始錯誤紀錄',
+        fields:[
+          ['錯誤類型',report.error?.name || '未擷取'],
+          ['錯誤訊息',report.error?.message || '未擷取'],
+          ['錯誤代碼',report.error?.code || '未擷取'],
+          ['發生階段',report.stage || '未擷取'],
+          ['原始堆疊',report.error?.stack || '未擷取'],
+          ...(report.error?.cause ? [['底層原因',JSON.stringify(report.error.cause,null,2)]] : [])
+        ]
+      }];
+  return {
+    label:'查看詳細資訊',
+    items:entries,
+    text:report.error?.message || (failures.length ? failures.length + ' 張頭像未能解析' : ''),
+    copyText:JSON.stringify(report,null,2)
+  };
+}
+
+async function showGenealogyImportError(error, {source,stage,file}) {
+  const report=makeGenealogyImportDiagnostic({source,stage,file,error});
+  const raw=report.error?.message || '未知錯誤';
+  const isZip=source === 'game-zip';
+  const title=isZip ? '遊戲族譜匯入失敗' : 'JSON 備份還原失敗';
+  const isUnsaved=/尚未成功保存|尚未確認|儲存失敗|寫入失敗/.test(raw);
+  await uiAlert(raw,{
+    title,
+    kind:'danger',
+    richContent:{
+      lead:raw,
+      ...(isUnsaved ? {paragraphs:['資料尚未確認成功儲存，請先匯出 JSON 備份，不要重新整理網頁。']} : {})
+    },
+    details:genealogyImportDetailOptions(report)
+  });
+}
+
+function reconcileImportedFamilyView() {
+  const family=currentFamily();
+  for (const mode of ['household','ea','extended']) {
+    const entries=getFamilySelectorEntries(mode);
+    const selected=findBestFamilySelectorEntry(family,entries);
+    setFamilyTreeSelectionValue(mode,selected?.value || null);
+  }
+  const active=getActiveFamilySelectorEntry(familyTreeViewMode);
+  if (active?.familyId) genealogyStore.setCurrentFamilyId(active.familyId);
+  familyTreeLastSourceFamilyId=currentFamily()?.id || null;
+}
+
 async function importJSON(file) {
   const title = '匯入 JSON 備份';
+  let diagnosticStage = 'read-json';
   try {
     showFileOperationStatus('讀取 JSON 備份檔案……', null, title);
     await waitForFileOperationPaint();
     const raw = JSON.parse(await file.text());
+    diagnosticStage = 'verify-format';
     showFileOperationStatus('檢查備份格式與版本……', null, title);
     if (raw?.backupFormat !== 'l1ng-genealogy-backup' || Number(raw?.backupVersion) !== 1) {
       throw new Error('這不是目前 L1nG 圖片資產架構的完整 JSON 備份。');
@@ -17280,9 +17392,11 @@ async function importJSON(file) {
     delete rawDb.bgSettings;
     delete rawDb.assets;
     showFileOperationStatus('整理模擬市民、寵物與家庭關係……', null, title);
+    diagnosticStage = 'prepare-database';
     const preparedResult = prepareDatabase(rawDb);
     const nextDb = preparedResult.prepared;
     showFileOperationStatus('檢查族譜引用的圖片資產……', null, title);
+    diagnosticStage = 'validate-asset-references';
     const requiredAssets = assetStore.collectReferencedAssetIds(nextDb, incomingBg, { strict:true });
     const serializedAssets = raw.assets || {};
     for (const id of requiredAssets) {
@@ -17312,14 +17426,17 @@ async function importJSON(file) {
     }
     const totalAssets = Object.keys(serializedAssets).length;
     if (totalAssets) showFileAssetProgress('還原圖片資產', 0, totalAssets, title);
+    diagnosticStage = 'restore-assets';
     await assetStore.importSerializedAssets(serializedAssets, (done, total) => {
       showFileAssetProgress('還原圖片資產', done, total, title);
     });
     showFileOperationStatus('更新族譜與背景設定……', null, title);
+    diagnosticStage = 'apply-database';
     replaceCanonicalGenealogyDatabase(nextDb);
     dragHistory.clear();
     bgSettings = { ...bgSettings, ...incomingBg };
     showFileOperationStatus('儲存族譜與圖片資料……', null, title);
+    diagnosticStage = 'persist-database';
     save({ immediate:true });
     persistCanvasBackground();
     refreshFamilyUI();
@@ -17331,7 +17448,8 @@ async function importJSON(file) {
     await waitForFileOperationPaint();
   } catch(err) {
     hideFileOperationStatus();
-    await uiAlert('匯入失敗：' + err.message, { title:'匯入失敗', kind:'danger' });
+    console.error('[JSON 備份還原]', err);
+    await showGenealogyImportError(err,{source:'json-backup',stage:diagnosticStage,file});
   } finally {
     hideFileOperationStatus();
   }
@@ -17446,7 +17564,7 @@ async function persistGameImportAvatars(bundle, converted, importMode = 'replace
       if (error?.code !== 'EA_THUM_DECODE_FAILED') throw error;
       // 已知 THUM conversion failure 只略過這張頭像，不能中止或損失整份族譜。
       decodeFailed++;
-      decodeFailures.push({simId:String(simId),path:String(asset.path || ''),stage:String(error.stage || ''),reason:String(error.message || error.code || '')});
+      decodeFailures.push({simId:String(simId),kind,path:String(asset.path || ''),stage:String(error.stage || ''),reason:String(error.message || error.code || ''),error:captureGenealogyImportError(error)});
       console.warn('[遊戲 ZIP 頭像] EA THUM fail closed：', { simId:String(simId), path:asset.path, stage:error.stage, reason:error.message }, error);
       return;
     }
@@ -17780,7 +17898,7 @@ function gameImportUpdateRichContent(result, avatarStats) {
     paragraphs:[LIFE_PHOTOS_PUBLIC
       ? '已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。'
       : '已保留：手動排列、自訂關係、自訂標籤、家庭封面與網站手動資料。'],
-    warnings:failed ? [failed + ' ' + uiText('張遊戲頭像無法解析，已略過。')] : []
+    importWarning:failed ? {title:failed + ' 張遊戲頭像無法解析',description:'已略過失敗的頭像；其他族譜資料仍已完成匯入。'} : null
   };
 }
 
@@ -17791,7 +17909,7 @@ function gameImportNewRichContent(sims, pets, families, portraits, gameDate, cur
       ['模擬市民',sims],['寵物',pets],['家族',families],['頭像',portraits]
     ]}],
     meta:[...(gameDate ? [['遊戲日期',gameDate]] : []),['目前顯示',currentFamilyName]],
-    warnings:failedCount ? [failedCount + ' ' + uiText('張遊戲頭像無法解析，已略過。')] : []
+    importWarning:failedCount ? {title:failedCount + ' 張遊戲頭像無法解析',description:'已略過失敗的頭像；其他族譜資料仍已完成匯入。'} : null
   };
 }
 
@@ -17994,6 +18112,7 @@ function gameImportUpdateSummary(
 }
 
 async function importGameGenealogy(file) {
+  let diagnosticStage='read-zip';
   try {
     if (!window.L1nGGameImport) {
       throw new Error('找不到遊戲族譜匯入模組。');
@@ -18007,6 +18126,7 @@ async function importGameGenealogy(file) {
     showFileOperationStatus('整理模擬市民、寵物、家族與家庭關係……', 12, '匯入遊戲族譜');
     await waitForFileOperationPaint();
 
+    diagnosticStage='convert-bundle';
     const converted =
       window.L1nGGameImport
         .convertBundle(bundle);
@@ -18014,6 +18134,7 @@ async function importGameGenealogy(file) {
     showFileOperationStatus('比對遊戲存檔與現有族譜資料……', 22, '匯入遊戲族譜');
     await waitForFileOperationPaint();
 
+    diagnosticStage='compare-save-source';
     const analysis =
       currentGameImportUpdateAnalysis(
         converted
@@ -18034,6 +18155,7 @@ async function importGameGenealogy(file) {
     showFileOperationStatus('準備處理匯入頭像……', 24, progressTitle);
     await waitForFileOperationPaint();
 
+    diagnosticStage='persist-avatars';
     const avatarStats =
       await persistGameImportAvatars(
         bundle,
@@ -18046,6 +18168,7 @@ async function importGameGenealogy(file) {
     showFileOperationStatus('整理匯入資料並準備儲存……', 88, progressTitle);
     await waitForFileOperationPaint();
 
+    diagnosticStage='prepare-database';
     const incomingPrepared =
       prepareDatabase(
         converted
@@ -18062,6 +18185,7 @@ async function importGameGenealogy(file) {
       );
       await waitForFileOperationPaint();
 
+      diagnosticStage='merge-database';
       updateResult =
         window.L1nGGameImport
           .mergeConvertedDatabase(
@@ -18088,9 +18212,11 @@ async function importGameGenealogy(file) {
     );
     await waitForFileOperationPaint();
 
+    diagnosticStage='apply-database';
     replaceCanonicalGenealogyDatabase(
       nextDatabase
     );
+    reconcileImportedFamilyView();
 
     // 整庫替換後清掉舊操作中的暫態狀態，但「更新」本身已保留資料庫內的手動排列。
     dragHistory.clear();
@@ -18102,6 +18228,7 @@ async function importGameGenealogy(file) {
 
     arrangeTool = 'pan';
 
+    diagnosticStage='persist-workspace';
     save({ immediate:true });
     // 原本的成功提示只代表內存已更新；必須確認重新整理時能讀回完整資料。
     await workspaceWritePending;
@@ -18155,13 +18282,9 @@ async function importGameGenealogy(file) {
     const activeFamily =
       currentFamily();
 
-    const activeFamilyName =
-      activeFamily
-        ? displayDataText(
-            activeFamily.name,
-            activeFamily
-          )
-        : '—';
+    const activeEntry=getActiveFamilySelectorEntry(familyTreeViewMode);
+    const activeFamilyName=activeEntry?.label ||
+      (activeFamily ? displayDataText(activeFamily.name,activeFamily) : '—');
 
     const importedGameDate =
       formatGameDate(
@@ -18180,23 +18303,32 @@ async function importGameGenealogy(file) {
     if (isUpdate) {
       const summaryLines = gameImportUpdateSummary(updateResult, avatarStats)
         .split('\n').filter(Boolean);
-      const diagnosticLines = (avatarStats.decodeFailures || []).map(item =>
-        `ID: ${item.simId} | ${item.stage || item.path || 'EA THUM'} | ${item.reason || 'EA_THUM_DECODE_FAILED'}`
-      );
+      const diagnosticReport=makeGenealogyImportDiagnostic({
+        source:'game-zip',stage:'avatar-conversion',file,
+        failures:avatarStats.decodeFailures || [],
+        counts:{saved:avatarStats.saved,decodeFailed:avatarStats.decodeFailed,
+          unsupported:avatarStats.unsupported,missing:avatarStats.missing}
+      });
+      const detailOptions=(avatarStats.decodeFailures || []).length
+        ? genealogyImportDetailOptions(diagnosticReport,avatarStats.decodeFailures)
+        : null;
       await uiAlert(summaryLines.join('\n'), {
         title:'遊戲族譜更新完成',
         kind:'success',
         richContent:gameImportUpdateRichContent(updateResult, avatarStats),
         confirmText:'查看族譜',
-        details:diagnosticLines.length ? {
-          label:'查看頭像解析失敗明細',
-          text:diagnosticLines.join('\n')
-        } : null
+        details:detailOptions
       });
     } else {
-      const diagnosticLines = (avatarStats.decodeFailures || []).map(item =>
-        `ID: ${item.simId} | ${item.stage || item.path || 'EA THUM'} | ${item.reason || 'EA_THUM_DECODE_FAILED'}`
-      );
+      const diagnosticReport=makeGenealogyImportDiagnostic({
+        source:'game-zip',stage:'avatar-conversion',file,
+        failures:avatarStats.decodeFailures || [],
+        counts:{saved:avatarStats.saved,decodeFailed:avatarStats.decodeFailed,
+          unsupported:avatarStats.unsupported,missing:avatarStats.missing}
+      });
+      const detailOptions=(avatarStats.decodeFailures || []).length
+        ? genealogyImportDetailOptions(diagnosticReport,avatarStats.decodeFailures)
+        : null;
       await uiAlert([
         '遊戲族譜已成功匯入。',
         `${uiText('模擬市民')}：${simCount}`,
@@ -18214,10 +18346,7 @@ async function importGameGenealogy(file) {
         richContent:gameImportNewRichContent(simCount, petCount, familyCount,
           avatarStats.saved, importedGameDate, activeFamilyName, avatarStats.decodeFailed),
         confirmText:'查看族譜',
-        details:diagnosticLines.length ? {
-          label:'查看失敗頭像明細',
-          text:diagnosticLines.join('\n')
-        } : null
+        details:detailOptions
       });
     }
 
@@ -18233,13 +18362,7 @@ async function importGameGenealogy(file) {
 
     console.error('[遊戲族譜匯入]', err);
 
-    await uiAlert(
-      `遊戲族譜匯入失敗：${err && err.message ? err.message : '未知錯誤'}`,
-      {
-        title: '遊戲族譜匯入失敗',
-        kind: 'danger'
-      }
-    );
+    await showGenealogyImportError(err,{source:'game-zip',stage:diagnosticStage,file});
   }
 }
 
@@ -18354,7 +18477,7 @@ async function importCanvasDroppedFile(file) {
 
   await uiAlert(
     '不支援這個檔案。請使用遊戲族譜 ZIP 或 JSON 備份。',
-    { title: '匯入失敗', kind: 'danger' }
+    { title: '不支援的檔案', kind: 'default' }
   );
 }
 
@@ -18398,7 +18521,7 @@ viewport.addEventListener('drop', async event => {
   if (files.length !== 1) {
     await uiAlert(
       '請一次只拖曳一個族譜檔案。',
-      { title: '匯入失敗', kind: 'danger' }
+      { title: '請一次選擇一個檔案', kind: 'default' }
     );
     return;
   }
