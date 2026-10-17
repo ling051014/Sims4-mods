@@ -326,7 +326,7 @@
     const url = URL.createObjectURL(blob);
     objectUrlCache.set(id, url);
 
-    // 批次收斂快取；不能回收目前仍由人物卡、寵物卡、相簿或背景使用的網址。
+    // 批次收斂快取；不能回收目前仍由市民卡片、寵物卡、相簿或背景使用的網址。
     if (objectUrlCache.size > URL_CACHE_LIMIT && !urlCachePruneQueued) {
       urlCachePruneQueued = true;
       requestAnimationFrame(() => {
@@ -722,9 +722,9 @@
     };
 
     Object.values(targetDb?.sims || {}).forEach(sim => {
-      add(sim.avatar, '人物目前頭像');
-      add(sim.gameAvatar, '人物遊戲頭像');
-      add(sim.customAvatar, '人物自訂頭像');
+      add(sim.avatar, '模擬市民目前頭像');
+      add(sim.gameAvatar, '模擬市民遊戲頭像');
+      add(sim.customAvatar, '模擬市民自訂頭像');
       (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
       (sim.pets || []).forEach(pet => {
         add(pet.avatar, '寵物目前頭像');
