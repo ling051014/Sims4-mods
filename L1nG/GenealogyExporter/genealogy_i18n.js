@@ -5,9 +5,9 @@
   const LANG_KEY = 'ling_genealogy_language_v1';
   const SUPPORTED_LANGUAGES = Object.freeze(['zh-Hant', 'zh-Hans', 'en']);
   const LOCALE_FILES = Object.freeze({
-    'zh-Hant': 'locales/zh-TW.json?v=20261018-kinship-r1',
-    'zh-Hans': 'locales/zh-CN.json?v=20261018-kinship-r1',
-    'en': 'locales/en.json?v=20261018-kinship-r1'
+    'zh-Hant': 'locales/zh-TW.json?v=20261018-locale-audit-r2',
+    'zh-Hans': 'locales/zh-CN.json?v=20261018-locale-audit-r2',
+    'en': 'locales/en.json?v=20261018-locale-audit-r2'
   });
 
   const catalogs = new Map();
@@ -165,6 +165,24 @@
     }
     if ((match = canonical.match(/^已清理 (\d+) 張未使用的圖片。$/))) {
       return `Cleaned up ${match[1]} unused image(s).`;
+    }
+    if ((match = canonical.match(/^已選\s*(\d+)\s*位$/))) {
+      return `Selected ${match[1]} Sim(s)`;
+    }
+    if ((match = canonical.match(/^可加入\s*(\d+)\s*位$/))) {
+      return `${match[1]} Sim(s) available`;
+    }
+    if ((match = canonical.match(/^加入\s*(\d+)\s*位$/))) {
+      return `Add ${match[1]} Sim(s)`;
+    }
+    if ((match = canonical.match(/^回饋編號\s*(\d+)$/))) {
+      return `Feedback #${match[1]}`;
+    }
+    if ((match = canonical.match(/^(\d+) 張人生照片$/))) {
+      return `${match[1]} life photo(s)`;
+    }
+    if ((match = canonical.match(/^更新時間：(.+)$/))) {
+      return `Updated: ${match[1]}`;
     }
     if ((match = canonical.match(/^已選\s*(\d+)\s*人$/))) {
       return `Selected ${match[1]} Sim(s)`;
