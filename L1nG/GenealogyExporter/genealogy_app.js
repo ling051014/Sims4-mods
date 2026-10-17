@@ -10272,6 +10272,35 @@ function getLayoutNodeBox(id, position = null) {
   };
 }
 
+// 混合多選共用相同的寵物位置鍵值，與市民拖曳使用同一筆歷史記錄。
+function getSelectedPetDragPositions(fam, mode) {
+  const saved = fam?.manualPositions?.[mode] || {};
+  const starts = new Map();
+  (getSceneLayout()?.petLayout?.cards || []).forEach(card => {
+    if (!selectedPetIds.has(card.key)) return;
+    const pos = saved['pet:' + card.key] || card;
+    starts.set(card.key, {x:pos.x, y:pos.y});
+  });
+  return starts;
+}
+function previewSelectedPetDrag(starts, dx, dy, positions) {
+  starts.forEach((start, id) => {
+    const next = {x:Math.max(0,start.x + dx), y:Math.max(0,start.y + dy)};
+    positions['pet:' + id] = next;
+    const element = petCardsLayer?.querySelector('.genealogy-pet-card[data-pet-id="' + CSS.escape(id) + '"]');
+    if (element) {
+      element.style.left = (next.x + PAD) + 'px';
+      element.style.top = (next.y + PAD) + 'px';
+    }
+  });
+}
+function markSelectedPetDragging(starts, active) {
+  starts.forEach((_,id) =>
+    petCardsLayer?.querySelector('.genealogy-pet-card[data-pet-id="' + CSS.escape(id) + '"]')
+      ?.classList.toggle('dragging', active)
+  );
+}
+
 function getUnpositionedPetPositions(fam, mode) {
   const saved = fam?.manualPositions?.[mode] || {};
   const positions = {};
@@ -12288,6 +12317,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
     const wasSelected = selectedNodeIds.has(id);
 
     if (!shift && !wasSelected) {
+      selectedPetIds.clear();
       selectedNodeIds.clear();
       selectedNodeIds.add(id);
       syncNodeSelectionClasses();
@@ -12321,6 +12351,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
       }
     });
 
+    const startPetPositions = getSelectedPetDragPositions(fam, viewMode);
     const primaryStart =
       startPositions.get(id);
 
@@ -12361,6 +12392,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
       ) {
         moved = true;
 
+        markSelectedPetDragging(startPetPositions, true);
         dragIds.forEach(sid =>
           nodes
             .querySelector(
@@ -12425,6 +12457,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
         }
       });
 
+      previewSelectedPetDrag(startPetPositions, deltaX, deltaY, nextPositions);
       previewPositions =
         nextPositions;
 
@@ -12509,8 +12542,9 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
       );
 
       hideSmartGuides();
+      markSelectedPetDragging(startPetPositions, false);
 
-      if (moved && previewPositions) {
+      if (moved && previewPositions && ev.type !== 'pointercancel' && !isTouchCardActivationSuppressed(ev)) {
         dragMutation = genealogyStore.mergeResults(
           dragMutation, freezeUnpositionedPetCards(fam,viewMode)
         );
@@ -18985,6 +19019,15 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const canDrag = !!(fam && !fam.locked && !spacePanHeld);
   const mode = viewMode;
   const origin = {x:entry.x,y:entry.y};
+  const groupDrag = !!(canDrag && genealogyScene.isFreeLayoutActive(fam) &&
+    arrangeTool === 'select' && selectedPetIds.has(entry.key) &&
+    selectedPetIds.size + selectedNodeIds.size > 1);
+  const groupPets = groupDrag ? getSelectedPetDragPositions(fam,mode) : new Map();
+  const groupSims = new Map();
+  if (groupDrag) selectedNodeIds.forEach(id => {
+    const pos = fam.manualPositions[mode]?.[id] || getSceneLayout()?.pos?.get(id);
+    if (pos) groupSims.set(id,{x:pos.x,y:pos.y});
+  });
   const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
   const isTouch = event.pointerType === 'touch';
   if (isTouch) {
@@ -18997,6 +19040,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const personSnapTargets = [...(getSceneLayout()?.pos?.values() || [])];
   let moved = false, gestureBlocked = false;
   let previewPosition = null;
+  let previewGroupPositions = null;
   // 防止瀏覽器原生圖像拖曳；游標離開卡片仍維持追蹤。
   event.preventDefault();
   event.stopPropagation();
@@ -19008,6 +19052,12 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     document.removeEventListener('pointerup',onFinish);
     document.removeEventListener('pointercancel',onFinish);
     element.classList.remove('dragging');
+    if (groupDrag) {
+      markSelectedPetDragging(groupPets,false);
+      groupSims.forEach((_,id) =>
+        nodes.querySelector('.person-card[data-id="' + CSS.escape(id) + '"]')
+          ?.classList.remove('dragging'));
+    }
     hideSmartGuides();
   };
   // 與市民卡片一致，將多次 PointerMove 合併到同一個動畫幀。
@@ -19016,6 +19066,24 @@ petCardsLayer?.addEventListener('pointerdown', event => {
       point.clientX-event.clientX,
       point.clientY-event.clientY
     );
+    if (groupDrag) {
+      const positions = {};
+      groupSims.forEach((start,id) => {
+        const next = {x:Math.max(0,start.x+worldDelta.x),y:Math.max(0,start.y+worldDelta.y)};
+        positions[id] = next;
+        genealogyScene.updateTransientPersonPosition(id,next);
+        const el = nodes.querySelector('.person-card[data-id="' + CSS.escape(id) + '"]');
+        if (el) {
+          el.style.left = (next.x+PAD)+'px';
+          el.style.top = (next.y+PAD)+'px';
+        }
+      });
+      previewSelectedPetDrag(groupPets,worldDelta.x,worldDelta.y,positions);
+      previewGroupPositions = positions;
+      genealogyScene?.updateRelationshipPreviewImmediately?.([...groupSims.keys()]);
+      hideSmartGuides();
+      return;
+    }
     const rawX = Math.max(0,origin.x+worldDelta.x);
     const rawY = Math.max(0,origin.y+worldDelta.y);
     const threshold = genealogyViewport.screenPixelsToWorld(8);
@@ -19049,6 +19117,17 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     if (!moved && movement(ev) <= dragThreshold) return;
     moved = true;
     element.classList.add('dragging');
+    if (groupDrag) {
+      markSelectedPetDragging(groupPets,true);
+      groupSims.forEach((_,id) =>
+        nodes.querySelector('.person-card[data-id="' + CSS.escape(id) + '"]')
+          ?.classList.add('dragging'));
+    } else if (genealogyScene.isFreeLayoutActive(fam) && arrangeTool === 'select' &&
+      !selectedPetIds.has(entry.key)) {
+      clearNodeSelection();
+      selectedPetIds.add(entry.key);
+      syncNodeSelectionClasses();
+    }
     const point = {clientX:ev.clientX,clientY:ev.clientY};
     if (moveFrame) moveFrame.push(point);
     else applyMove(point);
@@ -19066,15 +19145,26 @@ petCardsLayer?.addEventListener('pointerdown', event => {
       activePetTouchDragPointerId = null;
     // 阻止 pointerup 之後瀏覽器合成的 click 重新開啟視窗。
     lastPetPointerActivation = {id:entry.key,time:performance.now()};
-    if (moved && previewPosition && !cancelled) {
+    if (moved && (groupDrag ? previewGroupPositions : previewPosition) && !cancelled) {
       const seed = fam.freeLayout[mode] ? null : seedVisibleScenePositionsForFreeLayout(fam,mode);
-      const change = genealogyStore.setNodePosition(fam.id,mode,'pet:'+entry.key,previewPosition);
+      const change = groupDrag
+        ? genealogyStore.setNodePositions(fam.id,mode,previewGroupPositions)
+        : genealogyStore.setNodePosition(fam.id,mode,'pet:'+entry.key,previewPosition);
       // 讓排版重算排到下一幀，避免 pointerup 同步重建整張族譜。
       applyGenealogyMutation(genealogyStore.mergeResults(seed,change),{immediateRender:false});
       syncLayoutModeControls();
       dragHistory.push({type:'card-layout',familyId:fam.id,mode,
         before,after:captureLayoutHistoryState(fam,mode)});
     } else {
+      if (moved && groupDrag) {
+        groupSims.forEach((start,id) => {
+          genealogyScene.updateTransientPersonPosition(id,start);
+          const el = nodes.querySelector('.person-card[data-id="' + CSS.escape(id) + '"]');
+          if (el) { el.style.left = (start.x+PAD)+'px'; el.style.top = (start.y+PAD)+'px'; }
+        });
+        previewSelectedPetDrag(groupPets,0,0,{});
+        genealogyScene?.updateRelationshipPreviewImmediately?.([...groupSims.keys()]);
+      }
       if (moved) {
         element.style.left = (origin.x+PAD)+'px';
         element.style.top = (origin.y+PAD)+'px';
