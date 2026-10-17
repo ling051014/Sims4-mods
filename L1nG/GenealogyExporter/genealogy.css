@@ -5699,23 +5699,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .family-member-picker-bulk button { padding:4px 5px; border:0; border-radius:5px; background:transparent; color:var(--action-primary-strong); font:inherit; font-size:11px; cursor:pointer; }
 .family-member-picker-bulk button:hover,.family-member-picker-bulk button:focus-visible { background:var(--brand-tint-start); }
 .family-member-picker-bulk button:disabled { opacity:.4; cursor:default; }
-.family-member-picker-list { display:flex; flex:1 1 auto; flex-direction:column; gap:0; min-height:0; padding:0 18px 8px; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
-.family-member-picker-item { display:flex; flex:0 0 auto; width:100%; min-width:0; align-items:center; gap:11px; min-height:67px; padding:11px 4px; border:0; border-bottom:1px solid var(--border-default); border-radius:0; background:transparent; color:var(--text-primary); text-align:left; cursor:pointer; font:inherit; transition:background-color .14s ease; }
-.family-member-picker-item:hover,.family-member-picker-item:focus-visible { background:var(--surface-item-hover); outline:none; }
-.family-member-picker-item.selected { background:var(--brand-tint-start); }
-.family-member-picker-checkbox { display:flex; flex:0 0 19px; width:19px; height:19px; align-items:center; justify-content:center; border:1.5px solid var(--border-default); border-radius:50%; background:var(--surface-input); color:transparent; }
-.family-member-picker-item.selected .family-member-picker-checkbox { color:#fff; background:var(--action-primary); border-color:var(--action-primary); }
-.family-member-picker-checkbox .l1ng-icon { width:12px; height:12px; }
-.family-member-picker-avatar { display:flex; flex:0 0 42px; width:42px; height:42px; align-items:center; justify-content:center; overflow:hidden; border:1px solid var(--border-default); border-radius:50%; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); color:var(--avatar-text); font-size:15px; font-weight:700; }
-.family-member-picker-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
-.family-member-picker-text { display:flex; flex:1 1 auto; flex-direction:column; gap:4px; min-width:0; }
-.family-member-picker-name { display:flex; align-items:center; gap:5px; min-width:0; color:var(--text-primary); font-size:12.5px; font-weight:650; }
-.family-member-picker-name-label { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.family-member-picker-name > .stage-tag { margin-left:auto; flex:0 0 auto; }
-.family-member-picker-meta { display:flex; align-items:center; gap:5px; min-width:0; color:var(--text-secondary); font-size:10.5px; }
-.family-member-picker-meta > span:last-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.family-member-picker-meta .l1ng-icon { width:13px; height:13px; flex:0 0 13px; }
-.family-member-picker-empty { padding:46px 16px; color:var(--text-secondary); font-size:12px; text-align:center; }
+.family-member-picker-item { cursor:pointer; }
+.family-member-picker-item:focus-visible { outline:2px solid var(--action-primary); outline-offset:-2px; }
+.family-member-picker-item .person-library-batch-select { pointer-events:none; }
 .family-member-picker-footer { flex:0 0 auto; margin:0; padding:12px 18px max(12px,env(safe-area-inset-bottom)); border-top:1px solid var(--border-default); background:var(--surface-card); }
 .family-member-picker-count { color:var(--text-secondary); font-size:12px; font-variant-numeric:tabular-nums; }
 .family-member-picker-count b { color:var(--action-primary); font-weight:700; }
@@ -5725,10 +5711,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
   .family-member-picker-header { padding:13px 14px; }
   .family-member-picker-heading h2 { font-size:13.5px; }
   .family-member-picker-toolbar { padding:11px 13px; }
-  .family-member-picker-list { padding:0 12px 5px; }
-  .family-member-picker-item { gap:8px; padding:10px 2px; }
-  .family-member-picker-avatar { width:38px; height:38px; flex-basis:38px; }
-  .family-member-picker-name { font-size:11.5px; }
   .family-member-picker-footer { padding:10px 13px max(10px,env(safe-area-inset-bottom)); gap:7px; }
 }
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
