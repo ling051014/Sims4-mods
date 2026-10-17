@@ -15816,6 +15816,22 @@ function personLibraryAvatarHTML(sim) {
   return image || initial;
 }
 
+// 總覽與加入家族共用市民精簡列內容。
+function personLibrarySimMainHTML(sim, detailHtml = '') {
+  return '<div class="person-library-main">' +
+    '<div class="person-library-avatar-wrap"><div class="person-library-avatar">' +
+      personLibraryAvatarHTML(sim) + '</div></div>' +
+    '<div class="person-library-text">' +
+      '<div class="person-library-name">' +
+        '<span class="person-library-name-label">' + esc(displayDataText(sim.name, sim)) + '</span>' +
+        '<span class="person-library-life">' + esc(displayDataText(sim.lifeStage, sim)) + '</span>' +
+      '</div>' +
+      '<div class="person-library-compact-meta">' + esc(personLibraryCompactMeta(sim)) + '</div>' +
+      '<div class="person-library-detailed-meta">' + detailHtml + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
 function petLibraryAvatarHTML(pet) {
   return '<span class="pet-avatar-species-fallback" aria-hidden="true">' +
     petIconFor(pet) + '</span>' +
@@ -16190,7 +16206,6 @@ function renderPersonLibrary() {
       .map(f => displayDataText(f.name, f));
 
     const selected = personLibraryState.selection.has(s.id);
-    const compactMeta = personLibraryCompactMeta(s);
     const photoCount = LIFE_PHOTOS_PUBLIC ? (s.gallery || []).length : 0;
     const familyLabel = familyNames.join(' · ') || uiText('（未歸屬）');
     const familyDetails = familyLabel + (photoCount ? ' · ' + photoCount + ' ' + uiText('張人生照片') : '');
@@ -16213,19 +16228,7 @@ function renderPersonLibrary() {
         (personLibraryState.batchMode ? ' batch-mode' : '') +
         (selected ? ' batch-selected' : '') +
         '" data-person-library-id="' + esc(s.id) + '">' +
-      '<div class="person-library-main">' +
-        '<div class="person-library-avatar-wrap">' +
-          '<div class="person-library-avatar">' + personLibraryAvatarHTML(s) + '</div>' +
-        '</div>' +
-        '<div class="person-library-text">' +
-          '<div class="person-library-name">' +
-            '<span class="person-library-name-label">' + esc(displayDataText(s.name, s)) + '</span>' +
-            '<span class="person-library-life">' + esc(displayDataText(s.lifeStage, s)) + '</span>' +
-          '</div>' +
-          '<div class="person-library-compact-meta">' + esc(compactMeta) + '</div>' +
-          '<div class="person-library-detailed-meta">' + detailHtml + '</div>' +
-        '</div>' +
-      '</div>' +
+      personLibrarySimMainHTML(s, detailHtml) +
       '<button class="person-library-batch-select' + (selected ? ' selected' : '') +
         '" type="button" data-person-library-select="' + esc(s.id) +
         '" aria-pressed="' + (selected ? 'true' : 'false') + '" aria-label="' +
@@ -16349,13 +16352,15 @@ const addMemberController = {
   open() {
     personLibraryState.addSelection.clear();
     $('familyMemberPickerSearch').value = '';
-    renderFamilyMemberPickerList();
     familyMemberPickerDialog.classList.add('show');
+    renderFamilyMemberPickerList();
     if (window.matchMedia('(min-width:721px)').matches) requestAnimationFrame(() => $('familyMemberPickerSearch').focus());
   },
 
   close() {
     familyMemberPickerDialog.classList.remove('show');
+    personLibraryAvatarObserver?.disconnect();
+    personLibraryAvatarObserver = null;
     personLibraryState.addSelection.clear();
   },
 
@@ -16415,11 +16420,13 @@ function syncFamilyMemberPickerSelection() {
   const list = $('familyMemberPickerList');
   list.querySelectorAll('[data-family-member-picker-id]').forEach(row => {
     const selected = selectedIds.has(row.dataset.familyMemberPickerId);
-    if (row.classList.contains('selected') === selected) return;
-    row.classList.toggle('selected', selected);
+    row.classList.toggle('batch-selected', selected);
     row.setAttribute('aria-pressed', String(selected));
-    const check = row.querySelector('.family-member-picker-checkbox');
-    if (check) check.innerHTML = selected ? iconSvg('check-lg') : '';
+    const check = row.querySelector('.person-library-batch-select');
+    if (check) {
+      check.classList.toggle('selected', selected);
+      check.innerHTML = selected ? iconSvg('check-lg') : '';
+    }
   });
   const count = selectedIds.size;
   $('familyMemberPickerCount').innerHTML = uiText('已選') + ' <b>' + count + '</b> ' + uiText('位');
@@ -16440,27 +16447,31 @@ function renderFamilyMemberPickerList() {
   const list = $('familyMemberPickerList');
   list.innerHTML = candidates.length ? candidates.map(sim => {
     const id = String(sim.id);
-    const fams = currentGenealogyData().families
-      .filter(f => (f.memberIds || []).map(String).includes(id))
-      .map(f => displayDataText(f.name,f)).join(' · ') || uiText('（未歸屬）');
-    const genderIcon = sim.gender === '男' ? iconSvg('gender-male') : sim.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
     const selected = personLibraryState.addSelection.has(id);
-    return '<button class="family-member-picker-item' + (selected ? ' selected' : '') +
-      '" type="button" data-family-member-picker-id="' + esc(id) + '" aria-pressed="' + selected + '">' +
-      '<span class="family-member-picker-checkbox">' + (selected ? iconSvg('check-lg') : '') + '</span>' +
-      '<span class="family-member-picker-avatar">' + avatarHTML(sim) + '</span>' +
-      '<span class="family-member-picker-text"><span class="family-member-picker-name">' +
-      raceIconHTML(sim) + statusIconHTML(sim) +
-      '<span class="family-member-picker-name-label">' + esc(displayDataText(sim.name,sim)) + '</span>' +
-      '<span class="stage-tag stage-' + esc(sim.lifeStage) + '">' + esc(uiText(sim.lifeStage)) + '</span></span>' +
-      '<span class="family-member-picker-meta">' + genderIcon + '<span>' + esc(fams) + '</span></span></span></button>';
-  }).join('') : '<div class="family-member-picker-empty">' +
+    return '<div class="person-library-item family-member-picker-item batch-mode' +
+      (selected ? ' batch-selected' : '') +
+      '" role="button" tabindex="0" data-family-member-picker-id="' + esc(id) +
+      '" aria-pressed="' + String(selected) + '" aria-label="' +
+      esc(uiText('選取') + ' ' + displayDataText(sim.name, sim)) + '">' +
+      personLibrarySimMainHTML(sim) +
+      '<span class="person-library-batch-select' + (selected ? ' selected' : '') +
+      '" aria-hidden="true">' + (selected ? iconSvg('check-lg') : '') + '</span>' +
+      '</div>';
+  }).join('') : '<div class="person-library-empty">' +
     esc(uiText(total === 0 ? '所有模擬市民都已在目前家族中' : '沒有符合的項目')) + '</div>';
+  observePersonLibraryAvatars(list);
   syncFamilyMemberPickerSelection();
 }
 $('familyMemberPickerList').addEventListener('click', event => {
   const row = event.target.closest('[data-family-member-picker-id]');
   if (row) addMemberController.toggle(row.dataset.familyMemberPickerId);
+});
+$('familyMemberPickerList').addEventListener('keydown', event => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const row = event.target.closest('[data-family-member-picker-id]');
+  if (!row) return;
+  event.preventDefault();
+  addMemberController.toggle(row.dataset.familyMemberPickerId);
 });
 
 $('addMemberBtn').onclick = () => {
