@@ -7714,7 +7714,7 @@ if (restoreSampleBtn) {
         dragHistory.clear();
 
         showFileOperationStatus('儲存族譜與圖片資料……', 95, progressTitle);
-        save({ immediate:true });
+        await save({ immediate:true });
         refreshFamilyUI();
         render();
         appearanceDialog.classList.remove('show');
