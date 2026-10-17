@@ -5,9 +5,9 @@
   const LANG_KEY = 'ling_genealogy_language_v1';
   const SUPPORTED_LANGUAGES = Object.freeze(['zh-Hant', 'zh-Hans', 'en']);
   const LOCALE_FILES = Object.freeze({
-    'zh-Hant': 'locales/zh-TW.json?v=20261017-backup-in-dialog-r1',
-    'zh-Hans': 'locales/zh-CN.json?v=20261017-backup-in-dialog-r1',
-    'en': 'locales/en.json?v=20261017-backup-in-dialog-r1'
+    'zh-Hant': 'locales/zh-TW.json?v=20261017-sim-roster-picker-terms-r1',
+    'zh-Hans': 'locales/zh-CN.json?v=20261017-sim-roster-picker-terms-r1',
+    'en': 'locales/en.json?v=20261017-sim-roster-picker-terms-r1'
   });
 
   const catalogs = new Map();
@@ -197,7 +197,7 @@ They can still be added to other families.`;
     if ((match = canonical.match(/^要永久刪除「(.+)」嗎？$/))) {
       return `Permanently delete “${match[1]}”?`;
     }
-    if (canonical === '這位模擬市民將從所有家族移除，人物資料與相關關係也會一併刪除。') {
+    if (canonical === '這位模擬市民將從所有家族移除，模擬市民資料與相關關係也會一併刪除。') {
       return 'This Sim will be removed from every family, and the Sim data and related relationships will also be deleted.';
     }
     if (canonical === '如果只想移出目前家族，請使用「移出家族」。') {
