@@ -642,7 +642,7 @@
     return { manifest, genealogy, files };
   }
 
-  // ========【遊戲頭像讀取】 設定 - 從遊戲匯出 ZIP 依 Sim ID 配對人物圖片 ========
+  // ========【遊戲頭像讀取】 設定 - 從遊戲匯出 ZIP 依 Sim ID 配對模擬市民圖片 ========
   function imageMimeType(path, bytes) {
     const lower = String(path || '').toLowerCase();
 
@@ -714,7 +714,7 @@
     const bytes = bundle.files.get(path);
     const mimeType = imageMimeType(path, bytes);
 
-    // DDS / 未知格式保留在 ZIP，但瀏覽器不直接當作人物頭像載入。
+    // DDS / 未知格式保留在 ZIP，但瀏覽器不直接當作模擬市民頭像載入。
     if (!mimeType) {
       return {
         path,
@@ -736,7 +736,7 @@
 
   async function prepareGameAvatarAsset(asset, kind = 'sim') {
     const original = new Blob([asset.bytes], { type:asset.mimeType });
-    // EA codec 用於遊戲 ZIP 人物及寵物頭像；普通 JPEG／PNG 與其他圖片保持原流程。
+    // EA codec 用於遊戲 ZIP 模擬市民及寵物頭像；普通 JPEG／PNG 與其他圖片保持原流程。
     if (!['sim', 'pet'].includes(kind) || asset.mimeType !== 'image/jpeg') return { blob:original, converted:false, metadata:{} };
     const result = await global.L1nGThumDecoder.decode(asset.bytes);
     return result
@@ -768,7 +768,7 @@
     return key || '';
   }
 
-  // ========【遊戲資料正規化】 設定 - species 負責人物 / 寵物分類；occult 才是人物種族 ========
+  // ========【遊戲資料正規化】 設定 - species 負責模擬市民 / 寵物分類；occult 才是模擬市民種族 ========
   function speciesKey(value) {
     return enumKey(value).toLowerCase();
   }
@@ -864,7 +864,7 @@
     return item.localizedName || item.displayName || item.internalName || item.tuningId || '';
   }
 
-  // ========【Trait 顯示文字】 設定 - 人物與寵物共用 EA / 第三方模組富文字清理 ========
+  // ========【Trait 顯示文字】 設定 - 模擬市民與寵物共用 EA / 第三方模組富文字清理 ========
   // 僅處理 traits；職業、抱負、品種與其他遊戲文字仍維持各自原有流程。
   function decodeImportedTextEntities(value) {
     const source =
@@ -1478,7 +1478,7 @@
         secondId
       ]) => {
         // 室友是 Household 推導關係，優先級最低；
-        // 若同一人物組已有訂婚／伴侶等明確遊戲關係，會保留明確關係。
+        // 若同一模擬市民組已有訂婚／伴侶等明確遊戲關係，會保留明確關係。
         add(
           firstId,
           secondId,
@@ -1494,7 +1494,7 @@
       }) => link);
   }
 
-  // ========【遊戲人物分類】 設定 - 分類只影響 UI 歸屬，不刪除任何匯入人物 ========
+  // ========【遊戲模擬市民分類】 設定 - 分類只影響 UI 歸屬，不刪除任何匯入模擬市民 ========
   function classifyGamePerson(sim, household) {
     const recordState = String((sim && sim.recordState) || '').toLowerCase();
 
@@ -1870,10 +1870,10 @@
           const memberIds = stringIds(household.memberIds)
             .filter(id => humanIds.has(id));
 
-          // family.memberIds 只保存 EA Household 的真正人物成員。
+          // family.memberIds 只保存 EA Household 的真正模擬市民成員。
           // genealogy 顯示範圍由網站的 EA 族譜 / 大家族模式另外計算，
           // 不再把遞迴展開的親族網污染成 Household 成員。
-          // 純寵物 Household 不建立空白人物家族。
+          // 純寵物 Household 不建立空白模擬市民家族。
           if (!memberIds.length) return null;
 
           return {
@@ -2693,7 +2693,7 @@
           return;
         }
 
-        // 本次已被分配給人物，不再保留在「未分配寵物」。
+        // 本次已被分配給模擬市民，不再保留在「未分配寵物」。
         if (
           context.incomingAssignedPetIds.has(id)
         ) {
@@ -3101,7 +3101,7 @@
           mergedSims[incomingKey]
         ) {
           throw new Error(
-            '遊戲人物 ID 與網站手動人物發生衝突：' +
+            '遊戲模擬市民 ID 與網站手動模擬市民發生衝突：' +
             incomingKey
           );
         }
