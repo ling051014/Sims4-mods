@@ -418,6 +418,7 @@
     let _uiDialogMode = 'alert';
     let _uiDialogCancelValue = null;
     let _uiDialogPreviousFocus = null;
+    let _uiDialogBackupBusy = false;
 
     function closeUiDialog(result = null) {
       const overlay = $('confirmationDialog');
@@ -450,7 +451,8 @@
       confirmHint = '',
       confirmValue = true,
       cancelValue = mode === 'confirm' ? false : null,
-      details = null
+      details = null,
+      backupAction = null
     } = {}) {
       const overlay = $('confirmationDialog');
       const dialog = $('uiDialog');
@@ -461,6 +463,10 @@
       const detailsToggle = $('uiDialogDetailsToggle');
       const detailsContent = $('uiDialogDetailsContent');
       const detailsCopy = $('uiDialogDetailsCopy');
+      const backupGroup = $('uiDialogBackup');
+      const backupButton = $('uiDialogBackupAction');
+      const backupLabel = $('uiDialogBackupLabel');
+      const backupStatus = $('uiDialogBackupStatus');
       const inputEl = $('uiDialogInput');
       const cancelBtn = $('uiDialogCancel');
       const secondaryBtn = $('uiDialogSecondary');
@@ -468,6 +474,7 @@
 
       if (!overlay || !dialog || !titleEl || !iconEl || !messageEl ||
           !detailsEl || !detailsToggle || !detailsContent || !detailsCopy ||
+          !backupGroup || !backupButton || !backupLabel || !backupStatus ||
           !inputEl || !cancelBtn || !secondaryBtn || !confirmBtn) {
         return Promise.resolve(cancelValue);
       }
@@ -476,6 +483,8 @@
       _uiDialogMode = mode;
       _uiDialogCancelValue = cancelValue;
       _uiDialogPreviousFocus = document.activeElement;
+      _uiDialogBackupBusy = false;
+      dialog.removeAttribute('aria-busy');
 
       const presentation = mode === 'result' || kind === 'success'
         ? 'result'
@@ -559,6 +568,46 @@
         }
       };
 
+      // 備份只是附屬操作；不結束選擇或確認 Promise。
+      const canBackup = typeof backupAction === 'function' &&
+        (mode === 'choice' || mode === 'confirm');
+      backupGroup.hidden = !canBackup;
+      backupButton.disabled = !canBackup;
+      backupLabel.textContent = uiText('匯出 JSON 備份');
+      backupStatus.hidden = true;
+      backupStatus.dataset.state = '';
+      backupStatus.textContent = '';
+      backupButton.onclick = canBackup ? async () => {
+        if (_uiDialogBackupBusy) return;
+        _uiDialogBackupBusy = true;
+        dialog.setAttribute('aria-busy', 'true');
+        const originalDisabled = [confirmBtn, cancelBtn, secondaryBtn]
+          .map(button => button.disabled);
+        [confirmBtn, cancelBtn, secondaryBtn, backupButton]
+          .forEach(button => { button.disabled = true; });
+        backupStatus.hidden = false;
+        backupStatus.dataset.state = 'progress';
+        backupStatus.textContent = uiText('正在產生備份……');
+        try {
+          await backupAction();
+          backupLabel.textContent = uiText('再次匯出 JSON 備份');
+          backupStatus.dataset.state = 'success';
+          backupStatus.textContent = uiText('已產生備份，請確認下載。');
+        } catch (error) {
+          backupStatus.dataset.state = 'error';
+          backupStatus.textContent = uiText('匯出失敗：') +
+            (error?.message || uiText('未知錯誤'));
+          console.error('[族譜確認視窗備份]', error);
+        } finally {
+          _uiDialogBackupBusy = false;
+          dialog.removeAttribute('aria-busy');
+          [confirmBtn, cancelBtn, secondaryBtn]
+            .forEach((button, index) => { button.disabled = originalDisabled[index]; });
+          backupButton.disabled = false;
+          if (overlay.classList.contains('show')) backupButton.focus({preventScroll:true});
+        }
+      } : null;
+
       inputEl.classList.toggle('show', mode === 'prompt');
       inputEl.value = mode === 'prompt' ? uiText(defaultValue) : '';
       inputEl.setAttribute('aria-label', uiText(title));
@@ -568,13 +617,15 @@
 
       return new Promise(resolve => {
         _uiDialogResolve = resolve;
-        const finishConfirm = () => closeUiDialog(
+        const finishConfirm = () => { if (_uiDialogBackupBusy) return; closeUiDialog(
           mode === 'prompt' ? inputEl.value : confirmValue
-        );
-        const finishCancel = () => closeUiDialog(cancelValue);
+        ); };
+        const finishCancel = () => { if (!_uiDialogBackupBusy) closeUiDialog(cancelValue); };
         confirmBtn.onclick = finishConfirm;
         cancelBtn.onclick = finishCancel;
-        secondaryBtn.onclick = hasSecondary ? () => closeUiDialog(secondaryValue) : null;
+        secondaryBtn.onclick = hasSecondary ? () => {
+          if (!_uiDialogBackupBusy) closeUiDialog(secondaryValue);
+        } : null;
         overlay.onclick = event => {
           if (event.target === overlay) finishCancel();
         };
@@ -615,7 +666,8 @@
         kind:options.kind || 'default',
         confirmText:options.confirmText || '確定',
         cancelText:options.cancelText || '取消',
-        details:options.details || null
+        details:options.details || null,
+        backupAction:options.backupAction || null
       });
     }
 
@@ -778,7 +830,7 @@
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopImmediatePropagation();
-        closeUiDialog(_uiDialogCancelValue);
+        if (!_uiDialogBackupBusy) closeUiDialog(_uiDialogCancelValue);
       }
     });
 

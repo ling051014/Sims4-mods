@@ -7061,6 +7061,24 @@ html[lang="en"] body {
     .ui-dialog { animation:none; }
 }
 
+/* ========【確認視窗內備份】沿用全站 SVG mask 與檔案 Loading ======== */
+#uiDialog .ui-dialog-backup { display:flex; flex-direction:column; align-items:center; gap:7px; margin-top:14px; }
+#uiDialog .ui-dialog-backup[hidden],#uiDialog .ui-dialog-backup-status[hidden] { display:none; }
+#uiDialog .ui-dialog-backup-action {
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:7px 11px; max-width:100%; border:0; border-radius:6px;
+    color:var(--action-primary); background:transparent; font:inherit;
+    font-size:12px; font-weight:650; cursor:pointer;
+}
+#uiDialog .ui-dialog-backup-action .l1ng-icon { width:15px; height:15px; flex:0 0 15px; }
+#uiDialog .ui-dialog-backup-action:hover { background:var(--brand-tint-start); }
+#uiDialog .ui-dialog-backup-action:focus-visible { outline:2px solid var(--action-primary); outline-offset:2px; }
+#uiDialog .ui-dialog-backup-action:disabled { opacity:.6; cursor:default; }
+#uiDialog .ui-dialog-backup-status { color:var(--text-secondary); font-size:11.5px; line-height:1.6; text-align:center; overflow-wrap:anywhere; }
+#uiDialog .ui-dialog-backup-status[data-state="error"] { color:var(--danger-text); }
+#uiDialog .ui-dialog-backup-status[data-state="success"] { color:var(--success-text); }
+#uiDialog[aria-busy="true"] .ui-dialog-actions button:disabled { opacity:.65; cursor:default; }
+
 /* 一般功能彈窗若操作列只有兩顆按鈕與 spacer，也一起置中；有計數器等其他資訊者維持原排版。 */
 
 .ui-dialog-actions:has(> button:nth-of-type(2)):not(:has(> button:nth-of-type(3))):not(:has(> :not(button):not(.spacer))) {
