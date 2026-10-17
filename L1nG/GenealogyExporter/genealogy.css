@@ -8491,6 +8491,11 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     }
 }
 
+.family-member-list.is-remove-mode .family-member-row.remove-unavailable { opacity:.58; cursor:not-allowed; }
+.family-member-list.is-remove-mode .family-member-menu { visibility:hidden; pointer-events:none; }
+.family-member-remove-unavailable { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); pointer-events:none; }
+.family-member-remove-unavailable .l1ng-icon { width:14px; height:14px; }
+.family-section-batch-remove:disabled { opacity:.4; cursor:default; }
 .family-member-copy { min-width:0; }
 .family-member-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-primary); font-size:12px; font-weight:600; line-height:1.25; }
 .family-member-meta { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px; color:var(--text-secondary); font-size:10px; line-height:1.25; }
