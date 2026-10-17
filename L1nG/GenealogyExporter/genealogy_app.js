@@ -16350,12 +16350,15 @@ $('personLibraryBatchDeleteBtn').onclick = () => {
   personLibraryController.deleteSelection();
 };
 
+const familyMemberPickerVisibleIds = new Set();
+
 const addMemberController = {
   open() {
     personLibraryState.addSelection.clear();
     $('familyMemberPickerSearch').value = '';
     renderFamilyMemberPickerList();
     familyMemberPickerDialog.classList.add('show');
+    if (window.matchMedia('(min-width:721px)').matches) requestAnimationFrame(() => $('familyMemberPickerSearch').focus());
   },
 
   close() {
@@ -16372,25 +16375,17 @@ const addMemberController = {
       personLibraryState.addSelection.add(id);
     }
 
-    renderFamilyMemberPickerList();
+    syncFamilyMemberPickerSelection();
   },
 
   selectAllCandidates() {
-    const family = currentFamily();
-    const memberSet = new Set(family.memberIds);
-
-    Object.values(currentGenealogyData().sims).forEach(sim => {
-      if (!memberSet.has(sim.id)) {
-        personLibraryState.addSelection.add(sim.id);
-      }
-    });
-
-    renderFamilyMemberPickerList();
+    familyMemberPickerVisibleIds.forEach(id => personLibraryState.addSelection.add(id));
+    syncFamilyMemberPickerSelection();
   },
 
   clearSelection() {
     personLibraryState.addSelection.clear();
-    renderFamilyMemberPickerList();
+    syncFamilyMemberPickerSelection();
   },
 
   commit() {
@@ -16409,58 +16404,78 @@ const addMemberController = {
   }
 };
 
+function familyMemberPickerCandidates() {
+  const fam = currentFamily();
+  if (!fam) return { candidates:[], total:0, query:'' };
+  const memberSet = new Set((fam.memberIds || []).map(String));
+  const query = $('familyMemberPickerSearch').value.trim().toLocaleLowerCase();
+  const all = Object.values(currentGenealogyData().sims).sort((a,b) => displayDataText(a.name,a).localeCompare(displayDataText(b.name,b),'zh'));
+  const eligible = all.filter(sim => !memberSet.has(String(sim.id)));
+  const candidates = !query ? eligible : eligible.filter(sim =>
+    [displayDataText(sim.name,sim),displayDataText(sim.career,sim),displayDataText(sim.residence,sim),...(sim.traits || [])]
+      .some(value => String(value || '').toLocaleLowerCase().includes(query)));
+  return { candidates, total:eligible.length, query };
+}
+
+function syncFamilyMemberPickerSelection() {
+  const selectedIds = personLibraryState.addSelection;
+  const list = $('familyMemberPickerList');
+  list.querySelectorAll('[data-family-member-picker-id]').forEach(row => {
+    const selected = selectedIds.has(row.dataset.familyMemberPickerId);
+    if (row.classList.contains('selected') === selected) return;
+    row.classList.toggle('selected', selected);
+    row.setAttribute('aria-pressed', String(selected));
+    const check = row.querySelector('.family-member-picker-checkbox');
+    if (check) check.innerHTML = selected ? iconSvg('check-lg') : '';
+  });
+  const count = selectedIds.size;
+  $('familyMemberPickerCount').innerHTML = uiText('已選') + ' <b>' + count + '</b> ' + uiText('位');
+  const confirm = $('familyMemberPickerConfirmBtn');
+  confirm.disabled = count === 0;
+  confirm.textContent = uiText('加入') + ' ' + count + ' ' + uiText('位');
+}
+
 function renderFamilyMemberPickerList() {
   const fam = currentFamily();
-  const memberSet = new Set(fam.memberIds);
-  const q = $('familyMemberPickerSearch').value.trim().toLowerCase();
-  const all = Object.values(currentGenealogyData().sims);
-  all.sort((a,b) => String(a.name).localeCompare(String(b.name),'zh'));
-  let candidates = all.filter(s => !memberSet.has(s.id));
-  if (q) {
-    candidates = candidates.filter(s =>
-      (s.name||'').toLowerCase().includes(q)
-      || (s.career||'').toLowerCase().includes(q)
-      || (s.residence||'').toLowerCase().includes(q)
-      || (s.traits||[]).some(t => (t||'').toLowerCase().includes(q)));
-  }
+  if (!fam) return;
+  const { candidates, total, query } = familyMemberPickerCandidates();
+  familyMemberPickerVisibleIds.clear();
+  candidates.forEach(sim => familyMemberPickerVisibleIds.add(String(sim.id)));
   $('familyMemberPickerFamilyName').textContent = displayDataText(fam.name, fam);
+  $('familyMemberPickerAvailable').textContent = uiText(query ? '搜尋結果' : '可加入') + ' ' + candidates.length + ' ' + uiText('位');
+  $('familyMemberPickerAllBtn').disabled = candidates.length === 0;
   const list = $('familyMemberPickerList');
-  if (!candidates.length) {
-    list.innerHTML = all.length === memberSet.size
-      ? '<div class="family-member-picker-empty">所有模擬市民都已在目前家族中</div>'
-      : '<div class="family-member-picker-empty">沒有符合的項目</div>';
-  } else {
-    list.innerHTML = candidates.map(s => {
-      const fams = currentGenealogyData().families.filter(f => f.memberIds.includes(s.id)).map(f => displayDataText(f.name, f)).join(' · ') || uiText('（未歸屬）');
-      const genderIcon = s.gender === '男' ? iconSvg('gender-male') : s.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
-      const isSel = personLibraryState.addSelection.has(s.id);
-      return `<div class="family-member-picker-item${isSel ? ' selected' : ''}" data-family-member-picker-id="${s.id}">
-        <div class="family-member-picker-checkbox">${isSel ? iconSvg('check-lg') : ''}</div>
-        <div class="family-member-picker-avatar">${avatarHTML(s)}</div>
-        <div class="family-member-picker-text">
-          <div class="family-member-picker-name">${raceIconHTML(s)}${statusIconHTML(s)}${esc(displayDataText(s.name, s))}
-            <span class="stage-tag stage-${s.lifeStage}">${esc(uiText(s.lifeStage))}</span>
-          </div>
-          <div class="family-member-picker-meta">${genderIcon} ${esc(fams)}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  const count = personLibraryState.addSelection.size;
-  $('familyMemberPickerCount').innerHTML = `已選 <b>${count}</b> 人`;
-  $('familyMemberPickerConfirmBtn').disabled = count === 0;
-  list.querySelectorAll('.family-member-picker-item').forEach(el => {
-    el.onclick = () => {
-      const id = el.dataset.familyMemberPickerId;
-      addMemberController.toggle(id);
-    };
-  });
+  list.innerHTML = candidates.length ? candidates.map(sim => {
+    const id = String(sim.id);
+    const fams = currentGenealogyData().families
+      .filter(f => (f.memberIds || []).map(String).includes(id))
+      .map(f => displayDataText(f.name,f)).join(' · ') || uiText('（未歸屬）');
+    const genderIcon = sim.gender === '男' ? iconSvg('gender-male') : sim.gender === '女' ? iconSvg('gender-female') : iconSvg('gender-ambiguous');
+    const selected = personLibraryState.addSelection.has(id);
+    return '<button class="family-member-picker-item' + (selected ? ' selected' : '') +
+      '" type="button" data-family-member-picker-id="' + esc(id) + '" aria-pressed="' + selected + '">' +
+      '<span class="family-member-picker-checkbox">' + (selected ? iconSvg('check-lg') : '') + '</span>' +
+      '<span class="family-member-picker-avatar">' + avatarHTML(sim) + '</span>' +
+      '<span class="family-member-picker-text"><span class="family-member-picker-name">' +
+      raceIconHTML(sim) + statusIconHTML(sim) +
+      '<span class="family-member-picker-name-label">' + esc(displayDataText(sim.name,sim)) + '</span>' +
+      '<span class="stage-tag stage-' + esc(sim.lifeStage) + '">' + esc(uiText(sim.lifeStage)) + '</span></span>' +
+      '<span class="family-member-picker-meta">' + genderIcon + '<span>' + esc(fams) + '</span></span></span></button>';
+  }).join('') : '<div class="family-member-picker-empty">' +
+    esc(uiText(total === 0 ? '所有模擬市民都已在目前家族中' : '沒有符合的項目')) + '</div>';
+  syncFamilyMemberPickerSelection();
 }
+$('familyMemberPickerList').addEventListener('click', event => {
+  const row = event.target.closest('[data-family-member-picker-id]');
+  if (row) addMemberController.toggle(row.dataset.familyMemberPickerId);
+});
+
 $('addMemberBtn').onclick = () => {
   addMemberController.open();
 };
 
 $('familyMemberPickerSearch').oninput = createDebouncedCallback(renderFamilyMemberPickerList, 150);
+$('familyMemberPickerCloseBtn').onclick = () => addMemberController.close();
 
 $('familyMemberPickerCancelBtn').onclick = () => {
   addMemberController.close();
