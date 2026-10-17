@@ -539,11 +539,12 @@
       detailsContent.textContent = hasDetails ? localizeLines(detailText) : '';
       const copyText = typeof details === 'object' && details?.copyText
         ? String(details.copyText) : String(detailText ?? '');
-      detailsCopy.hidden = !hasDetails;
+      detailsCopy.hidden = true;
       detailsCopy.textContent = uiText('複製診斷資訊');
       detailsToggle.onclick = () => {
         const expanded = detailsToggle.getAttribute('aria-expanded') === 'true';
         detailsContent.hidden = expanded;
+        detailsCopy.hidden = expanded;
         detailsToggle.setAttribute('aria-expanded', String(!expanded));
         detailsToggle.textContent = uiText(
           expanded ? (details?.label || '查看詳細資訊') : '收合詳細資訊'
