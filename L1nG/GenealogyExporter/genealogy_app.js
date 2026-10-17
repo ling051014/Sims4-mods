@@ -16496,7 +16496,6 @@ $('addMemberBtn').onclick = () => {
 };
 
 $('familyMemberPickerSearch').oninput = createDebouncedCallback(renderFamilyMemberPickerList, 150);
-$('familyMemberPickerCloseBtn').onclick = () => addMemberController.close();
 
 $('familyMemberPickerCancelBtn').onclick = () => {
   addMemberController.close();
