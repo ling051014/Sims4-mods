@@ -1363,7 +1363,7 @@
                             <li><span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>雙擊空白處</b>自動置中並適應畫面</li>
                             <li><span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>拖曳卡片</b>超過判定距離後切換為「自由排列」，並儲存新位置</li>
                             <li>自由排列提供<b>選取</b>與<b>拖曳</b>工具：選取工具可框選市民與寵物；拖曳工具可平移畫布</li>
-                            <li>選取工具支援 <kbd>Shift</kbd> + <span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>左鍵</b>增減多選、<kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>A</kbd>全選目前可見的市民與寵物；拖曳已選市民可整組移動</li>
+                            <li>選取工具支援 <kbd>Shift</kbd> + <span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>左鍵</b>增減多選、<kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>A</kbd>全選目前可見的市民與寵物；拖曳任一已選卡片可整組移動</li>
                             <li>使用選取工具時可按住 <kbd>Space</kbd> + <span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>左鍵</b>暫時平移畫布，放開後回到選取工具</li>
                             <li>市民卡片使用 <span class="mouse-hint mouse-left" role="img" aria-label="左鍵"><span class="mouse-hint-wheel"></span></span><b>左鍵</b>在檢視模式查看資料，或在編輯模式編輯市民；<span class="mouse-hint mouse-right" role="img" aria-label="右鍵"><span class="mouse-hint-wheel"></span></span><b>右鍵</b>開啟卡片操作選單</li>
                             <li><b>智慧對齊輔助線</b>在卡片接近其他卡片的邊緣或中心時顯示，並自動吸附對齊</li>
@@ -1380,9 +1380,9 @@
                             <li><b>快速點兩下空白畫布</b>可置中並適應畫面。</li>
                             <li><b>雙指捏合</b>可縮放畫布；<b>雙指一起移動</b>可平移視角。</li>
                             <li><b>輕點市民卡片</b>可查看或編輯資料；<b>長按市民卡片</b>可開啟卡片操作選單。</li>
-                            <li><b>拖曳市民卡片</b>可移動模擬市民；在自動排列下拖曳超過判定距離後，會切換為自由排列並保留新位置。</li>
+                            <li><b>拖曳市民卡片</b>可調整位置；自動排列下，超過判定距離後切換為自由排列並儲存新位置。</li>
                             <li>選取工具下，<b>點選市民</b>可進行多選；<b>拖曳已選市民</b>可整組移動。</li>
-                            <li>選取工具下，<b>拖曳空白處</b>可框選市民與寵物；<b>點一下空白處</b>可取消目前選取。</li>
+                            <li>選取工具下，<b>拖曳空白處</b>可框選市民與寵物；<b>輕點空白處</b>可取消選取。</li>
                             <li>拖曳市民卡片接近其他卡片時，同樣支援<b>智慧對齊</b>與<b>等距吸附</b>。</li>
                             <li>自由排列下可使用<b>鎖定排列</b>避免誤拖；<b>重設位置</b>會清除目前模式的手動位置，並恢復自動排列。</li>
                         </ul>
@@ -1404,7 +1404,7 @@
                             <li>點選頂端「<b>匯出</b>」，可選擇<b>族譜圖片</b>或<b>JSON 備份</b></li>
                             <li><b>族譜圖片</b>會匯出完整族譜，不受目前畫布的縮放與平移影響</li>
                             <li>圖片會保留<b>卡片位置、關係名稱位置及主題</b>；背景可選目前背景圖片、主題背景顏色或透明背景，不包含網站操作介面</li>
-                            <li>族譜圖片」，可選擇<b>標準（1×） / 高畫質（2×） / 超高畫質（3×）</b></li>
+                            <li>族譜圖片提供<b>標準（1×） / 高畫質（2×） / 超高畫質（3×）</b></li>
                             <li><b>JSON 備份</b>會保存族譜資料及引用的圖片，可用於日後還原與繼續編輯</li>
                         </ul>
                     </section>
@@ -1564,15 +1564,15 @@
         <script src="genealogy_runtime.js?v=20261008-round4-render-controller-r1"></script>
         <script src="genealogy_store.js?v=20261017-sim-terminology-r1"></script>
         <script src="genealogy_interaction.js?v=20261016-connected-family-layout-r2"></script>
-        <script src="genealogy_viewport.js?v=20261018-touch-precision-r1"></script>
+        <script src="genealogy_viewport.js?v=20261018-touch-precision-r2"></script>
         <script src="genealogy_ui.js?v=20261018-import-diagnostics-r1"></script>
         <script src="genealogy_scene.js?v=20261017-sim-terminology-r1"></script>
         <script src="genealogy_kinship.js?v=20261011-family-kinship-r1"></script>
         <script src="genealogy_personEditor.js?v=20261017-sim-terminology-r1"></script>
-        <script src="genealogy_i18n.js?v=20261018-help-touch-r1"></script>
+        <script src="genealogy_i18n.js?v=20261018-help-locales-r2"></script>
         <script src="genealogy_sample_preset.js?v=20261017-sim-terminology-r1"></script>
 
-        <script src="genealogy_app.js?v=20261018-help-touch-r1"></script>
+        <script src="genealogy_app.js?v=20261018-mixed-drag-r2"></script>
         <script src="genealogy_colorPicker.js?v=20261012-liquid-hue-r3"></script>
     </body>
 </html>
