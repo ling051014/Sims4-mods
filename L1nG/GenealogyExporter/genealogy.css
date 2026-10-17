@@ -6917,6 +6917,41 @@ html[lang="en"] body {
     .ui-dialog { animation:none; }
 }
 
+
+/* ========【共用對話視窗】來源、摘要與結果使用同一結構化資訊元件 ======== */
+#uiDialog[data-rich="true"] { width:min(510px,100%); }
+#uiDialog .ui-dialog-message[hidden], #uiDialog .ui-dialog-rich[hidden] { display:none; }
+#uiDialog .ui-dialog-rich { display:flex; flex-direction:column; align-items:stretch; gap:11px; width:100%; text-align:center; }
+#uiDialog .ui-dialog-rich-lead { margin:0; color:var(--text-primary); font-size:13px; font-weight:600; line-height:1.65; }
+#uiDialog .ui-dialog-rich-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+#uiDialog .ui-dialog-rich-meta:has(> :only-child) { grid-template-columns:minmax(0,1fr); }
+#uiDialog .ui-dialog-rich-meta-item {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-width:0; gap:2px; padding:9px 7px;
+  border:1px solid var(--border-default); border-radius:7px; background:var(--surface-panel);
+}
+#uiDialog .ui-dialog-rich-meta-label { font-size:11px; color:var(--text-secondary); }
+#uiDialog .ui-dialog-rich-meta-value { font-size:12px; font-weight:650; width:100%; overflow-wrap:anywhere; }
+#uiDialog .ui-dialog-rich-counters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+#uiDialog .ui-dialog-rich-counter { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; gap:3px; padding:9px 4px; border-radius:7px; background:var(--surface-panel); }
+#uiDialog .ui-dialog-rich-counter-value { font-size:18px; font-weight:700; line-height:1.35; font-variant-numeric:tabular-nums; }
+#uiDialog .ui-dialog-rich-counter-label { font-size:11px; line-height:1.5; color:var(--text-secondary); overflow-wrap:anywhere; }
+#uiDialog .ui-dialog-rich-section { display:flex; flex-direction:column; align-items:stretch; gap:6px; min-width:0; }
+#uiDialog .ui-dialog-rich-section-title { margin:3px 0 0; font-size:11.5px; font-weight:700; color:var(--text-secondary); text-align:center; }
+#uiDialog .ui-dialog-rich-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+#uiDialog .ui-dialog-rich-stat { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; gap:2px; padding:8px 5px; border:1px solid var(--border-default); border-radius:7px; }
+#uiDialog .ui-dialog-rich-stat-label { font-size:11px; line-height:1.5; color:var(--text-secondary); overflow-wrap:anywhere; }
+#uiDialog .ui-dialog-rich-stat-value { font-size:15px; font-weight:700; line-height:1.4; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+#uiDialog .ui-dialog-rich-paragraph { margin:0; color:var(--text-secondary); font-size:12px; line-height:1.75; overflow-wrap:anywhere; }
+#uiDialog .ui-dialog-rich-warning { margin:0; padding:9px 11px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-panel); color:var(--text-primary); font-size:12px; line-height:1.65; overflow-wrap:anywhere; }
+#uiDialog .ui-dialog-rich-footer { margin:0; font-size:12px; line-height:1.6; color:var(--text-secondary); overflow-wrap:anywhere; }
+@media(max-width:440px) {
+  #uiDialog .ui-dialog-rich { gap:10px; }
+  #uiDialog .ui-dialog-rich-meta-item { padding:8px 5px; }
+  #uiDialog .ui-dialog-rich-meta-value { font-size:11.5px; }
+  #uiDialog .ui-dialog-rich-counter-value { font-size:17px; }
+}
+
 /* ========【確認視窗內備份】沿用全站 SVG mask 與檔案 Loading ======== */
 #uiDialog .ui-dialog-backup { display:flex; flex-direction:column; align-items:center; gap:7px; margin-top:14px; }
 #uiDialog .ui-dialog-backup[hidden],#uiDialog .ui-dialog-backup-status[hidden] { display:none; }
