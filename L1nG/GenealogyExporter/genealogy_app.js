@@ -7554,11 +7554,11 @@ async function removeCanvasBackground() {
   if (!bgSettings.image) return;
 
   const confirmed = await uiConfirm(
-    '確定清除目前背景圖片嗎？',
+    '確定移除目前背景圖片嗎？',
     {
       title:'移除背景圖片',
       kind:'danger',
-      confirmText:'移除背景'
+      confirmText:'移除背景圖片'
     }
   );
 
@@ -7629,7 +7629,7 @@ if (resetUiSettingsBtn) {
   resetUiSettingsBtn.onclick = async () => {
     const ok = await uiConfirm(
       '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？\n族譜模擬市民、關係與卡片位置不會被刪除。',
-      { title:'重設介面設定', confirmText:'重設', kind:'default' }
+      { title:'恢復介面預設', confirmText:'恢復預設', kind:'default' }
     );
     if (!ok) return;
 
@@ -7949,7 +7949,7 @@ $('appearanceBackgroundFit').onchange = event => {
 $('appearanceBackgroundClearBtn').onclick = removeCanvasBackground;
 
 $('cleanupBtn').onclick = async () => {
-  if (!await uiConfirm('要清理未使用的圖片嗎？系統會移除目前沒有被族譜引用的圖片，仍在使用的圖片會保留。', { title: '清理未使用圖片', kind: 'danger', confirmText: '開始清理' })) return;
+  if (!await uiConfirm('要清理未使用的圖片嗎？系統會移除目前沒有被族譜引用的圖片，仍在使用的圖片會保留。', { title: '清理未使用的圖片', kind: 'danger', confirmText: '開始清理' })) return;
   const button = $('cleanupBtn');
 
   await withActionButtonLoading(
@@ -7961,7 +7961,7 @@ $('cleanupBtn').onclick = async () => {
 
       uiToast(
         n > 0
-          ? `清理完成：刪除了 ${n} 張未使用圖片。`
+          ? `已清理 ${n} 張未使用的圖片。`
           : '目前沒有可清理的圖片。'
       );
 
@@ -10571,7 +10571,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
       <div class="person-card-menu-divider"></div>
       <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
       <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選模擬市民'))}</span></button>
-      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('清除選取'))}</span></button>
     `;
 
     personCardMenu.dataset.simId = simId;
@@ -10605,7 +10605,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
       <div class="person-card-menu-divider"></div>
       <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
       <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選模擬市民'))}</span></button>
-      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
+      <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('清除選取'))}</span></button>
     ` : ''}
     <div class="person-card-menu-divider"></div>
     <div class="person-card-menu-section-title">${esc(uiText(isEditCard ? '編輯模式顯示內容' : '檢視模式顯示內容'))}</div>
@@ -13321,7 +13321,7 @@ const familyMemberController = {
 
     if (confirmBtn) {
       confirmBtn.disabled = count === 0;
-      confirmBtn.textContent = `移除 ${count} 位`;
+      confirmBtn.textContent = uiText(`移出 ${count} 位`);
     }
   },
 
@@ -14799,7 +14799,7 @@ const petEditorController = {
       const name=displayDataText(sim.name,sim)||uiText('（未命名）');
       const avatar=framedAvatarImageHTML(sim.avatar,sim.avatarFrame)||esc((name||'?').charAt(0));
       return '<div class="family-rel-preview-row'+(this.ownerEditOpen?' is-editing':'')+'">'+
-        (this.ownerEditOpen?'<button class="family-rel-remove" type="button" data-pet-owner-remove="'+esc(id)+'" aria-label="'+esc(uiText('移除'))+'">'+iconSvg('x-lg')+'</button>':'')+
+        (this.ownerEditOpen?'<button class="family-rel-remove" type="button" data-pet-owner-remove="'+esc(id)+'" aria-label="'+esc(uiText('移除飼主'))+'">'+iconSvg('x-lg')+'</button>':'')+
         '<span class="family-rel-person"><span class="family-rel-person-avatar">'+avatar+'</span>'+
         '<span class="family-rel-person-copy"><span class="family-rel-person-name">'+esc(name)+'</span></span></span></div>';
     }).join('')||'<span class="family-rel-empty">—</span>';
@@ -14860,6 +14860,7 @@ const petEditorController = {
     petEditorState.index = -1;
     $('petModalTitle').textContent = uiText('編輯寵物');
     $('pDelete').style.display = '';
+    $('pDelete').textContent = uiText('永久刪除寵物');
     this.populateForm(entry.pet);
     this.syncPreferenceTabs(entry.pet);
     this.renderOwnerChoices(entry.pet);
@@ -14887,9 +14888,9 @@ const petEditorController = {
               '<button type="button" class="trait-chip-remove" data-pet-trait-index="' +
                 index +
                 '" aria-label="' +
-                esc(uiText('移除')) +
+                esc(uiText('移除特徵')) +
                 '" title="' +
-                esc(uiText('移除')) +
+                esc(uiText('移除特徵')) +
               '">×</button>' +
             '</span>'
         )
@@ -15132,6 +15133,7 @@ const petEditorController = {
 
     $('pDelete').style.display =
       validIndex ? '' : 'none';
+    $('pDelete').textContent = uiText('刪除寵物');
 
     this.populateForm(pet);
     this.syncPreferenceTabs(pet);
@@ -15354,12 +15356,15 @@ const petEditorController = {
     const pet = this.currentPet();
     if (!pet) return;
 
+    const permanent = !!this.directEntry;
     const confirmed = await uiConfirm(
-      `要刪除寵物「${pet.name}」嗎？`,
+      permanent
+        ? uiText('確定永久刪除寵物') + '「' + displayDataText(pet.name, pet) + '」？\n' + uiText('此操作無法復原。')
+        : `要刪除寵物「${pet.name}」嗎？`,
       {
-        title:'刪除寵物',
+        title:permanent ? uiText('永久刪除寵物') : uiText('刪除寵物'),
         kind:'danger',
-        confirmText:'刪除'
+        confirmText:permanent ? uiText('永久刪除') : uiText('刪除')
       }
     );
 
@@ -16570,7 +16575,7 @@ $('familyMemberPickerConfirmBtn').onclick = () => {
   addMemberController.commit();
 };
 
-// ========【家族成員批量移除】 側邊欄原地選取，送出前必須二次確認 ========
+// ========【家族成員批量移出家族】 側邊欄原地選取，送出前必須二次確認 ========
 $('removeMemberBtn').onclick = () => {
   const family = currentFamily();
   if (!family.memberIds.length) return;
