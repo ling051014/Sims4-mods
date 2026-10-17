@@ -7077,7 +7077,7 @@ html[lang="en"] body {
 #uiDialog .ui-dialog-backup-action:disabled { opacity:.6; cursor:default; }
 #uiDialog .ui-dialog-backup-status { color:var(--text-secondary); font-size:11.5px; line-height:1.6; text-align:center; overflow-wrap:anywhere; }
 #uiDialog .ui-dialog-backup-status[data-state="error"] { color:var(--danger-text); }
-#uiDialog .ui-dialog-backup-status[data-state="success"] { color:var(--success-text); }
+#uiDialog .ui-dialog-backup-status[data-state="success"] { color:var(--action-primary); }
 #uiDialog[aria-busy="true"] .ui-dialog-actions button:disabled { opacity:.65; cursor:default; }
 
 /* 一般功能彈窗若操作列只有兩顆按鈕與 spacer，也一起置中；有計數器等其他資訊者維持原排版。 */
