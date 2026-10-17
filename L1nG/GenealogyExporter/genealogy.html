@@ -659,6 +659,7 @@
             <div class="ui-dialog-panel sim-editor-modal" tabindex="-1">
                 <div class="sim-editor-top">
                     <h2 class="sim-editor-title">
+                        <span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span>
                         <span id="modalTitle">新增模擬市民</span>
                     </h2>
                     <button class="sim-editor-preview-open" id="simEditorPreviewBtn" type="button">預覽</button>
@@ -857,7 +858,7 @@
         <div class="ui-dialog-backdrop nested" id="petEditorDialog">
             <div class="ui-dialog-panel pet-editor-modal" tabindex="-1">
                 <div class="pet-editor-top">
-                    <h2 id="petModalTitle">新增寵物</h2>
+                    <h2 class="pet-editor-title"><span class="l1ng-icon icon-paw" aria-hidden="true"></span><span id="petModalTitle">新增寵物</span></h2>
                     <div class="pet-editor-layout">
                         <div class="avatar-editor-block pet-avatar-editor-block">
                             <div class="avatar-preview pet-avatar-editor-preview avatar-editor-preview" id="petAvatarPreview">?</div>
@@ -956,57 +957,72 @@
         <!-- ========【人生照片編輯】 設定 - 圖片、標題、人生階段與備註 ======== -->
         <div class="ui-dialog-backdrop nested" id="lifePhotoEditorDialog">
             <div class="ui-dialog-panel photo-modal" tabindex="-1">
-                <h2 id="photoModalTitle">新增圖片</h2>
-                <div class="grid">
-                    <label class="full">
-                        圖片
-                        <div class="photo-preview-wrap">
-                            <div class="photo-preview" id="photoPreview" tabindex="0">點選選擇 · 或拖曳 · 或 Ctrl+V 貼上</div>
-                            <div class="photo-actions-row">
-                                <label class="filebtn"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span><input accept="image/jpeg,image/png,image/webp" hidden id="photoInput" type="file"></label>
-                                <button class="danger-action" id="photoClearBtn" type="button">清除圖片</button>
-                                <span class="photo-size-tip" id="photoSizeTip"></span>
+                <header class="photo-modal-header">
+                    <span class="l1ng-icon icon-images photo-modal-heading-icon" aria-hidden="true"></span>
+                    <h2 id="photoModalTitle">新增圖片</h2>
+                </header>
+                <div class="photo-modal-body">
+                    <div class="photo-form-field">
+                        <span class="photo-field-label">圖片</span>
+                        <div class="photo-preview" id="photoPreview" role="button" tabindex="0" aria-label="選擇圖片或拖曳圖片至此">
+                            <div class="photo-preview-empty">
+                                <span class="photo-preview-empty-icon"><span class="l1ng-icon icon-image" aria-hidden="true"></span></span>
+                                <strong>點擊選擇或拖曳圖片</strong>
+                                <small>也可以按 Ctrl + V 貼上圖片</small>
                             </div>
+                            <span class="photo-preview-hover" aria-hidden="true">點擊更換圖片</span>
                         </div>
-                    </label>
-                    <label class="full">
-                        標題
-                        <input id="phTitle" data-ui-suggestion-list="photoTitlePresets" maxlength="40" placeholder="如：幼兒期 / 婚禮合影 / 全家福">
-                        <datalist id="photoTitlePresets">
-                            <option value="嬰兒期"></option>
-                            <option value="幼兒期"></option>
-                            <option value="兒童期"></option>
-                            <option value="青少年"></option>
-                            <option value="青年期"></option>
-                            <option value="成年期"></option>
-                            <option value="老年期"></option>
-                            <option value="婚禮合影"></option>
-                            <option value="全家福"></option>
-                            <option value="畢業照"></option>
-                            <option value="度假照"></option>
-                            <option value="生日派對"></option>
-                        </datalist>
-                    </label>
-                    <label class="span-6">
-                        關聯階段（可選）
-                        <select id="phStage">
-                            <option value="">（不指定）</option>
-                            <option value="嬰兒">嬰兒</option>
-                            <option value="幼兒">幼兒</option>
-                            <option value="兒童">兒童</option>
-                            <option value="青少年">青少年</option>
-                            <option value="青年">青年</option>
-                            <option value="成年">成年</option>
-                            <option value="老年">老年</option>
-                        </select>
-                    </label>
-                    <label class="full">備註<textarea id="phNote" placeholder="可選：拍攝場景、備註、想記錄的故事……" rows="2"></textarea></label>
+                        <div class="photo-actions-row">
+                            <label class="photo-action-button filebtn" for="photoInput"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span></label>
+                            <button class="photo-action-button danger-action" id="photoClearBtn" type="button" disabled><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清除圖片</span></button>
+                            <span class="photo-size-tip" id="photoSizeTip">尚未選擇圖片</span>
+                        </div>
+                        <input accept="image/jpeg,image/png,image/webp" hidden id="photoInput" type="file">
+                        <p class="photo-format-note">支援 JPG、PNG、WebP</p>
+                    </div>
+                    <div class="photo-form-fields">
+                        <div class="photo-form-field">
+                            <label for="phTitle">標題</label>
+                            <input id="phTitle" data-ui-suggestion-list="photoTitlePresets" maxlength="40" placeholder="例如：婚禮合影、全家福">
+                            <datalist id="photoTitlePresets">
+                                <option value="嬰兒期"></option>
+                                <option value="幼兒期"></option>
+                                <option value="兒童期"></option>
+                                <option value="青少年"></option>
+                                <option value="青年期"></option>
+                                <option value="成年期"></option>
+                                <option value="老年期"></option>
+                                <option value="婚禮合影"></option>
+                                <option value="全家福"></option>
+                                <option value="畢業照"></option>
+                                <option value="度假照"></option>
+                                <option value="生日派對"></option>
+                            </datalist>
+                        </div>
+                        <div class="photo-form-field">
+                            <label for="phStage">關聯階段 <span class="photo-optional">（選填）</span></label>
+                            <select id="phStage">
+                                <option value="">（不指定）</option>
+                                <option value="嬰兒">嬰兒</option>
+                                <option value="幼兒">幼兒</option>
+                                <option value="兒童">兒童</option>
+                                <option value="青少年">青少年</option>
+                                <option value="青年">青年</option>
+                                <option value="成年">成年</option>
+                                <option value="老年">老年</option>
+                            </select>
+                        </div>
+                        <div class="photo-form-field">
+                            <label for="phNote">備註 <span class="photo-optional">（選填）</span></label>
+                            <textarea id="phNote" placeholder="記下這張照片的故事……" rows="2"></textarea>
+                        </div>
+                    </div>
                 </div>
-                <div class="ui-dialog-actions">
-                    <button class="danger" id="phDelete" style="display:none">刪除圖片</button>
+                <div class="ui-dialog-actions photo-modal-footer">
+                    <button class="danger" id="phDelete" style="display:none" type="button">刪除圖片</button>
                     <span class="spacer"></span>
-                    <button id="phCancel">取消</button>
-                    <button class="primary" id="phSave">儲存</button>
+                    <button id="phCancel" type="button">取消</button>
+                    <button class="primary" id="phSave" type="button" disabled>儲存</button>
                 </div>
             </div>
         </div>
