@@ -142,16 +142,12 @@
     toast.classList.add('show');
   }
   async function api(path, method = 'GET', payload) {
-    const response = await fetch(API + path, {
-      method, cache:'no-store', credentials:'include',
+    return window.L1nGAdminNetwork.requestJSON(API + path, {
+      method,
       headers:payload ? {'content-type':'application/json'} : undefined,
-      body:payload ? JSON.stringify(payload) : undefined
+      body:payload ? JSON.stringify(payload) : undefined,
+      timeoutMs:18000
     });
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || '無法讀取管理資料，請確認 Cloudflare Access 登入狀態。');
-    }
-    return data;
   }
   function showPage(next) {
     if (!['overview','analytics','feedback','settings'].includes(next)) return;
@@ -255,7 +251,7 @@
         $('overview-recent').removeAttribute('aria-busy');
       }
     } catch (error) {
-      $('feedback-sync-status').textContent='更新失敗，請稍後重試。';
+      $('feedback-sync-status').textContent='更新失敗：'+error.message;
       if(manual||!listLoaded)notify(error.message);
       if(!listLoaded){
         const root=$('feedback-rows');root.replaceChildren(el('p','empty-list','回饋載入失敗，請按「立即更新」重試。'));

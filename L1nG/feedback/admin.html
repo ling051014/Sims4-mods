@@ -8,8 +8,10 @@
         <link rel="stylesheet" href="feedback.css?v=20261016-feedback-layout-r5">
         <link rel="stylesheet" href="admin.css?v=20261016-dashboard-mobile-r6">
         <script src="select-ui.js?v=20261016-dashboard-r3" defer></script>
-        <script src="admin.js?v=20261016-dashboard-mobile-r6" defer></script>
-        <script src="ga4-dashboard.js?v=20261016-dashboard-loading-r6" defer></script>
+        <script src="admin-network.js?v=20261018-dashboard-network-r1" defer></script>
+        <script src="ga4-country-labels.js?v=20261018-dashboard-regions-r1" defer></script>
+        <script src="admin.js?v=20261018-dashboard-network-r1" defer></script>
+        <script src="ga4-dashboard.js?v=20261018-dashboard-regions-network-r1" defer></script>
     </head>
     <body class="admin-only">
         <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
@@ -170,7 +172,7 @@
                             </div>
                             <div class="overview-chart" id="overview-chart">
                             </div>
-                            <p class="hint"></p>
+                            <p class="hint" id="overview-ga4-status" role="status" aria-live="polite"></p>
                         </section>
                         <section class="dash-card">
                             <div class="dash-card-header">

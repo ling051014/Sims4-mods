@@ -2,8 +2,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  // Branch previews (RawGitHack / pages.dev) never contact the production GA4 API.
-  // This branch contains presentation code only; authentication and GA4 API remain on main.
+  // 分支預覽只展示介面，不會讀取正式管理資料或 GA4。
   const previewOnly = window.location.hostname !== 'home.by-l1ng.com';
   const number = n => new Intl.NumberFormat('zh-TW').format(Number(n) || 0);
   const siteLabels = {
@@ -104,18 +103,7 @@
     'smart tv':'智慧電視', '(not set)':'未設定'
   });
   const labelDevice = name => deviceNames[String(name || '').toLowerCase()] || name || '其他';
-  const countryNames = Object.freeze({
-    Taiwan:'臺灣', Japan:'日本', 'United States':'美國',
-    'United Kingdom':'英國', 'Hong Kong':'香港', China:'中國',
-    Singapore:'新加坡', 'South Korea':'南韓', Australia:'澳洲',
-    'New Zealand':'紐西蘭', Canada:'加拿大', Germany:'德國',
-    France:'法國', Italy:'義大利', Spain:'西班牙',
-    Netherlands:'荷蘭', Switzerland:'瑞士', India:'印度',
-    Malaysia:'馬來西亞', Philippines:'菲律賓', Thailand:'泰國',
-    Indonesia:'印尼', Vietnam:'越南', Brazil:'巴西',
-    '(not set)':'未設定'
-  });
-  const labelCountry = name => countryNames[name] || name || '未知';
+  const labelCountry = name => window.L1nGGa4Countries.label(name);
   const labelReferral = value => {
     const raw = String(value || '').trim();
     if (!raw || raw === '(not set)') return '未設定';
@@ -149,15 +137,16 @@
     INVALID_DATE_RANGE:'日期範圍不正確。',
     INVALID_FILTER:'網站篩選條件不正確。'
   };
+  const pendingReports=new Map();
   async function fetchReport(site,range) {
-    if(previewOnly)throw Error('預覽模式不允許查詢正式 GA4');
+    const key=site+'|'+range.start+'|'+range.end;
+    if(pendingReports.has(key))return pendingReports.get(key);
     const params=new URLSearchParams({site,startDate:range.start,endDate:range.end});
-    const response=await fetch('/feedback/ga4-api?'+params,{
-      credentials:'include',cache:'no-store'
-    });
-    const data=await response.json().catch(()=>null);
-    if(response.ok && data?.ok)return data;
-    throw Error(errors[data?.error] || '無法讀取 GA4 報表（HTTP '+response.status+'）。');
+    const promise=window.L1nGAdminNetwork.requestJSON('/feedback/ga4-api?'+params,{
+      timeoutMs:32000,errorMessages:errors
+    }).finally(()=>pendingReports.delete(key));
+    pendingReports.set(key,promise);
+    return promise;
   }
   const setText=(id,value)=>{if($(id))$(id).textContent=value;};
   function empty(id,message) {
@@ -242,7 +231,7 @@
     }
     root.append(ring,legend);
   }
-  let overviewReady=false,analyticsReady=false;
+  let overviewReady=false,analyticsReady=false,hasAnalyticsData=false,hasOverviewData=false;
   function reportLoading(section,loading){
     const panel=$(section);
     if(!panel)return;
@@ -291,15 +280,16 @@
     const id=++requestId,range=dateRange(),site=$('analytics-site')?.value||'all';
     setText('ga-load-status','正在讀取 GA4 真實數據…');
     if(!analyticsReady)reportLoading('panel-analytics',true);
-    resetDetails('正在載入…');
+    if(!hasAnalyticsData)resetDetails('正在載入…');
     try{
       const data=await fetchReport(site,range);
       if(requestId!==id)return;
       renderAnalytics(data);
+      hasAnalyticsData=true;
       setText('ga-load-status','已更新 · '+new Date().toLocaleString('zh-TW'));
     }catch(e){
       if(requestId!==id)return;
-      resetDetails('目前無法顯示資料，請查看上方提示。');
+      if(!hasAnalyticsData)resetDetails('目前無法顯示資料，請查看上方提示。');
       setText('ga-load-status',e.message);
     }finally{
       if(requestId===id){analyticsReady=true;reportLoading('panel-analytics',false);}
@@ -309,14 +299,21 @@
     if(previewOnly) {
       for(const id of ['ov-users','ov-views','ov-downloads'])setText(id,'—');
       empty('overview-chart','預覽模式不提供正式統計資料。');
+      setText('overview-ga4-status','分支預覽：不連接正式 GA4。');
       return;
     }
     const end=today();
     if(!overviewReady)reportLoading('panel-overview',true);
-    try{renderOverview(await fetchReport('all',{start:daysBefore(end,29),end}));}
-    catch(e){
-      for(const id of ['ov-users','ov-views','ov-downloads'])setText(id,'—');
-      empty('overview-chart',e.message);
+    try{
+      renderOverview(await fetchReport('all',{start:daysBefore(end,29),end}));
+      hasOverviewData=true;
+      setText('overview-ga4-status','');
+    }catch(e){
+      setText('overview-ga4-status',e.message+(hasOverviewData?'（目前保留上次資料）':''));
+      if(!hasOverviewData){
+        for(const id of ['ov-users','ov-views','ov-downloads'])setText(id,'—');
+        empty('overview-chart',e.message);
+      }
     }finally{overviewReady=true;reportLoading('panel-overview',false);}
   }
   function initialize() {
