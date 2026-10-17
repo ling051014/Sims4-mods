@@ -115,7 +115,7 @@ const SUPPORTED_IMAGE_MIME_TYPES = Object.freeze(['image/jpeg','image/png','imag
 const SUPPORTED_IMAGE_EXTENSIONS = Object.freeze(['jpg','jpeg','png','webp']);
 const personEditor = window.L1nGGenealogyPersonEditor;
 if (!personEditor) {
-  throw new Error('找不到 L1nG 人物編輯器模組。');
+  throw new Error('找不到 L1nG 模擬市民編輯器模組。');
 }
 const DEFAULT_AVATAR_FRAME = personEditor.DEFAULT_AVATAR_FRAME;
 const simEditorState = personEditor.state.sim;
@@ -746,7 +746,7 @@ function refreshResolvedAssetDom(
         element instanceof
         HTMLImageElement
       ) {
-        // 人物／寵物總覽的頭像由可見範圍觀察器管理，避免一次載入數百張導致暫存網址遭回收。
+        // 模擬市民／寵物總覽的頭像由可見範圍觀察器管理，避免一次載入數百張導致暫存網址遭回收。
         if (element.classList.contains('person-library-deferred-image')) return;
         if (element.src !== url) {
           if (element.classList.contains('pet-avatar-image')) {
@@ -984,7 +984,7 @@ function cardSettingsHasBody(settings) {
   );
 }
 
-// ========【人物呈現模型】 畫布卡片、個人檔案與人物清單共用同一份顯示資料 ========
+// ========【模擬市民呈現模型】 畫布卡片、個人檔案與模擬市民清單共用同一份顯示資料 ========
 function personDisplayText(value, owner, draft = false) {
   if (value == null) return '';
   return draft
@@ -1149,7 +1149,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
   };
 }
 
-// 畫布專屬的人物卡內容及欄位排版，統一由 genealogy_scene.js 負責。
+// 畫布專屬的市民卡片內容及欄位排版，統一由 genealogy_scene.js 負責。
 
 // ========【預設資料】 基準語言：繁體中文（zh-Hant） ========
 // 簡體中文與英文僅作顯示翻譯；預設資料的 canonical source 永遠保留繁體中文。
@@ -2671,7 +2671,7 @@ function currentFamily() {
   return genealogyStore.getCurrentFamily();
 }
 
-// ========【頂部人物篩選】 同類多選 OR、跨類別 AND ========
+// ========【頂部模擬市民篩選】 同類多選 OR、跨類別 AND ========
 function checkedTopbarFilterValues(inputs) {
   return new Set(
     inputs
@@ -2769,7 +2769,7 @@ function uiText(value) {
   return text;
 }
 
-// ========【日期顯示格式】 生日與遊戲日期屬於 App 呈現層，不由人物編輯器持有 ========
+// ========【日期顯示格式】 生日與遊戲日期屬於 App 呈現層，不由模擬市民編輯器持有 ========
 function formatBirthdaySummary(monthValue, dayValue, yearValue = null) {
   const month = Number(monthValue) || 0;
   const day = Number(dayValue) || 0;
@@ -6102,7 +6102,7 @@ function mapFreeLayoutSnapshotToMode(
   }
 
   // 檢視卡是直向、編輯卡是橫向；
-  // 用兩種卡片尺寸的中位比例縮放人物中心間距，
+  // 用兩種卡片尺寸的中位比例縮放模擬市民中心間距，
   // 不直接複製 top / left，避免模式切換後整張圖擠在一起。
   const scaleX =
     medianNumber(
@@ -7177,7 +7177,7 @@ $('relationshipOtherTypeTrigger')?.addEventListener('click',event=>{
     trigger,
     value:activeOtherRelationshipType,
     onSelect:value=>{
-      // 視覺設定只調整既有關係線類型，不在此新增人物關係。
+      // 視覺設定只調整既有關係線類型，不在此新增家庭關係。
       if (!getOtherRelationshipTypes().some(entry=>entry.type===value)) return;
       const select=$('relationshipOtherTypeSelect');
       if (!select) return;
@@ -7630,7 +7630,7 @@ const resetUiSettingsBtn = $('resetUiSettingsBtn');
 if (resetUiSettingsBtn) {
   resetUiSettingsBtn.onclick = async () => {
     const ok = await uiConfirm(
-      '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？\n族譜人物、關係與卡片位置不會被刪除。',
+      '恢復主題、背景、側邊欄寬度、檢視模式與關係線等介面設定？\n族譜模擬市民、關係與卡片位置不會被刪除。',
       { title:'重設介面設定', confirmText:'重設', kind:'default' }
     );
     if (!ok) return;
@@ -8173,7 +8173,7 @@ function applyGenealogyMutation(
 }
 
 
-// ========【特質顯示文字】 人物與寵物共用特質內容的富文字標籤清理 ========
+// ========【特質顯示文字】 模擬市民與寵物共用特質內容的富文字標籤清理 ========
 function cleanTraitDisplayText(value) {
   const source =
     String(value ?? '');
@@ -8269,7 +8269,7 @@ function getRelInfoByKey(
 
 // 畫布關係標籤的量測與 SVG 排版，改由 genealogy_scene.js 負責。
 
-// 人物編輯器保留目前的回呼介面，但壓縮政策與執行由 Assets 負責。
+// 模擬市民編輯器保留目前的回呼介面，但壓縮政策與執行由 Assets 負責。
 async function compressImage(file, kind = 'sim') {
   validateSupportedImageFile(file);
   return assetStore.optimizeForUsage(file, kind === 'pet' ? 'petAvatar' : 'avatar');
@@ -8293,7 +8293,7 @@ function getVisibleIds(familyId) {
 }
 
 // 側邊欄使用族譜完整成員範圍；頂部篩選只影響畫布。
-// 配偶／前任屬於可顯示的關聯人物，不代表已加入原始 Household。
+// 配偶／前任屬於可顯示的關聯模擬市民，不代表已加入原始 Household。
 function currentDisplayedFamily() {
   const family = currentFamily();
   if (!family) return null;
@@ -8478,7 +8478,7 @@ genealogyScene =
 if (!genealogyScene) throw new Error('Genealogy Scene failed to initialize.');
 function getSceneLayout() { return genealogyScene?.readScenePlan?.() || null; }
 // Viewport transform / zoom / fit / resize lifecycle 已移至 genealogy_viewport.js。
-// ========【人物庫定位】 依實際族譜範圍找家庭，而不是只在當前畫布搜尋卡片 ========
+// ========【模擬市民庫定位】 依實際族譜範圍找家庭，而不是只在當前畫布搜尋卡片 ========
 function findPersonFamilyLocation(simId) {
   const db = currentGenealogyData();
   const id = String(simId || '');
@@ -8534,7 +8534,7 @@ function findPersonFamilyLocation(simId) {
   return selected ? { mode:selected.mode, entry:selected.entry } : null;
 }
 
-// 定位是玩家明確要求顯示人物；若被篩選隱藏，只補勾必要的分類選項。
+// 定位是玩家明確要求顯示模擬市民；若被篩選隱藏，只補勾必要的分類選項。
 function revealPersonInTopbarFilters(sim) {
   let changed = false;
   [
@@ -8553,7 +8553,7 @@ function revealPersonInTopbarFilters(sim) {
   return changed;
 }
 
-// 先確立家庭與分頁，再更新畫布，最後依新座標將人物置中。
+// 先確立家庭與分頁，再更新畫布，最後依新座標將模擬市民置中。
 function locatePersonFromLibrary(simId) {
   const id = String(simId || '');
   const sim = currentGenealogyData()?.sims?.[id];
@@ -9906,7 +9906,7 @@ const lifePhotoWorkspace = {
 
     $('photoViewerPersonName').textContent =
       $('fName')?.value?.trim() ||
-      uiText('人物');
+      uiText('模擬市民');
 
     this.refreshViewer();
     lifePhotoViewerDialog.classList.add('show');
@@ -9922,7 +9922,7 @@ const lifePhotoWorkspace = {
 
     $('photoViewerPersonName').textContent =
       displayDataText(sim.name, sim) ||
-      uiText('人物');
+      uiText('模擬市民');
 
     this.refreshViewer();
     lifePhotoViewerDialog.classList.add('show');
@@ -10226,7 +10226,7 @@ function getUnpositionedPetPositions(fam, mode) {
   return positions;
 }
 
-// 保留目前寵物的獨立位置，不讓移動人物時因家庭錨點重新計算而連帶移動。
+// 保留目前寵物的獨立位置，不讓移動模擬市民時因家庭錨點重新計算而連帶移動。
 function freezeUnpositionedPetCards(fam, mode) {
   const positions = getUnpositionedPetPositions(fam,mode);
   return Object.keys(positions).length
@@ -10515,7 +10515,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
 
       <div class="person-card-menu-divider"></div>
       <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
-      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
+      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選模擬市民'))}</span></button>
       <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
     `;
 
@@ -10549,7 +10549,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
     ${isMulti ? `
       <div class="person-card-menu-divider"></div>
       <button class="person-card-menu-action" type="button" data-person-card-menu-action="reset-selected">${iconSvg('arrow-counterclockwise')}<span>${esc(uiText('重設所選位置'))}</span></button>
-      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選人物'))}</span></button>
+      <button class="person-card-menu-action danger" type="button" data-person-card-menu-action="remove-selected">${iconSvg('person-dash')}<span>${esc(uiText('移出所選模擬市民'))}</span></button>
       <button class="person-card-menu-action" type="button" data-person-card-menu-action="clear-selection">${iconSvg('x-lg')}<span>${esc(uiText('取消選取'))}</span></button>
     ` : ''}
     <div class="person-card-menu-divider"></div>
@@ -10559,7 +10559,7 @@ function renderPersonCardMenu(simId, clientX, clientY) {
       ${fieldRows}
     </div>
     ${appearanceSection}
-    <div class="person-card-menu-note">${esc(uiText(isEditCard ? '只套用於編輯模式人物卡' : '只套用於檢視模式人物卡'))}</div>`;
+    <div class="person-card-menu-note">${esc(uiText(isEditCard ? '只套用於編輯模式市民卡片' : '只套用於檢視模式市民卡片'))}</div>`;
 
   personCardMenu.dataset.simId = simId;
   personCardMenu.dataset.cardMode = viewMode;
@@ -10661,7 +10661,7 @@ const ids =
     const ids = [...selectedNodeIds].filter(id => fam.memberIds.includes(id));
     if (!ids.length) { closePersonCardMenu(); return; }
     const ok = await uiConfirm(`${uiText('要將選取的模擬市民移出目前家族嗎？')}\n${uiText('模擬市民資料會保留，之後仍可重新加入家族。')}`, {
-      title: uiText('移出所選人物'), kind: 'danger', confirmText: uiText('移出家族')
+      title: uiText('移出所選模擬市民'), kind: 'danger', confirmText: uiText('移出家族')
     });
     if (!ok) return;
     const mutation =
@@ -11070,7 +11070,7 @@ function getTouchPointerKind(
     };
   }
 
-  // 寵物卡是 button，但仍屬畫布卡片；與人物共用觸控長按選單。
+  // 寵物卡是 button，但仍屬畫布卡片；與模擬市民共用觸控長按選單。
   const petCard = target?.closest?.('.genealogy-pet-card[data-pet-id]');
   if (petCard) {
     return {kind:'pet-card',simId:null,petId:petCard.dataset.petId};
@@ -12045,7 +12045,7 @@ function createGroupDragPerformanceSession(
 }
 
 nodes.addEventListener('pointerdown', e => {
-  // 只讓主滑鼠鍵進入人物卡的點擊／拖曳流程。
+  // 只讓主滑鼠鍵進入市民卡片的點擊／拖曳流程。
   // 右鍵必須完整保留給 contextmenu，避免自由排列模式的 preventDefault() 吃掉右鍵選單。
   if (e.button !== 0) return;
   const el = e.target.closest('.person-card');
@@ -12065,7 +12065,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
   // Space 是選取工具中的暫時平移：不攔截，交給 viewport 的平移手勢。
   if (isFree && spacePanHeld) return;
 
-  // 拖曳工具：按住空白處平移畫布；按住人物卡片則直接移動該卡片。
+  // 拖曳工具：按住空白處平移畫布；按住市民卡片則直接移動該卡片。
   // 選取工具才負責多選 / 框選 / 整組拖曳，單張卡片移動不需要先進入選取狀態。
   if (isFree && arrangeTool === 'pan') {
     e.preventDefault();
@@ -12219,7 +12219,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
     return;
   }
 
-  // 自由排列 + 選取工具：左鍵負責單選 / Shift 多選 / 拖曳已選人物。
+  // 自由排列 + 選取工具：左鍵負責單選 / Shift 多選 / 拖曳已選模擬市民。
   if (arrangeTool === 'select') {
     e.preventDefault();
     e.stopPropagation();
@@ -12512,7 +12512,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
     return;
   }
 
-  // 自動排列沿用既有邏輯：拖動人物超過門檻後切換到自由排列。
+  // 自動排列沿用既有邏輯：拖動模擬市民超過門檻後切換到自由排列。
   e.preventDefault();
   e.stopPropagation();
 
@@ -12793,7 +12793,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
         after:afterLayoutState
       });
 
-      // 放開即結束單一卡片操作，不把該人物留在選取狀態。
+      // 放開即結束單一卡片操作，不把該模擬市民留在選取狀態。
       clearNodeSelection();
 
       applyGenealogyMutation(
@@ -13320,7 +13320,7 @@ const familyMemberController = {
     const confirmed = await uiConfirm(
       `${uiText('要將選取的模擬市民移出目前家族嗎？')}\n${uiText('模擬市民資料會保留，之後仍可重新加入家族。')}`,
       {
-        title:uiText('移出所選人物'),
+        title:uiText('移出所選模擬市民'),
         kind:'danger',
         confirmText:uiText('移出家族')
       }
@@ -13343,7 +13343,7 @@ function renderFamilyMemberList(fam) {
   const list = $('familyMemberList');
   if (!list) return;
 
-  // 延伸族譜可顯示姻親等關聯人物，但「移出目前家族」只能修改真正的成員。
+  // 延伸族譜可顯示姻親等關聯模擬市民，但「移出目前家族」只能修改真正的成員。
   // 批量模式保留完整族譜清單，僅讓真正屬於目前家族的市民勾選移出。
   let members =
     (fam?.memberIds || [])
@@ -13398,8 +13398,8 @@ function renderFamilyMemberList(fam) {
     const bKnown =
       Number.isFinite(bGeneration);
 
-    // 無法判定世代的人物固定放在清單最後，
-    // 升序 / 降序都不會把未連入族譜的人物推到最前面。
+    // 無法判定世代的模擬市民固定放在清單最後，
+    // 升序 / 降序都不會把未連入族譜的模擬市民推到最前面。
     if (aKnown !== bKnown) {
       return aKnown ? -1 : 1;
     }
@@ -14642,7 +14642,7 @@ const petEditorController = {
       : null;
   },
 
-  // 偏好沿用人物編輯器的資料與顯示規則；寵物新增時不顯示唯讀分頁。
+  // 偏好沿用模擬市民編輯器的資料與顯示規則；寵物新增時不顯示唯讀分頁。
   switchPreferenceTab(tabName='basic') {
     const tabs=[...petEditorDialog.querySelectorAll('.pet-editor-tab[data-pet-editor-tab]')]
       .filter(tab=>!tab.hidden);
@@ -15321,7 +15321,7 @@ const petEditorController = {
       return;
     }
 
-    // 人物編輯器使用草稿，僅對目前尚未儲存的寵物清單進行刪除。
+    // 模擬市民編輯器使用草稿，僅對目前尚未儲存的寵物清單進行刪除。
     if (petEditorState.index < 0 || petEditorState.index >= editingPets.length) return;
     editingPets.splice(petEditorState.index,1);
     renderPetDraftList();
@@ -15588,7 +15588,7 @@ $('petSectionEditToggle')?.addEventListener('click',()=>{
   renderPetDraftList();
 });
 
-// ========【人物編輯器 Authority】 Draft / lifecycle / 關係編輯由獨立模組負責 ========
+// ========【模擬市民編輯器 Authority】 Draft / lifecycle / 關係編輯由獨立模組負責 ========
 personEditor.mount({
   openAvatarCropEditor,
   compressImage,
@@ -15621,11 +15621,11 @@ async function deleteChar(id) {
 
   const message =
     '要永久刪除「' + displayDataText(c.name, c) + '」嗎？\n' +
-    '這位模擬市民將從所有家族移除，人物資料與相關關係也會一併刪除。\n\n' +
+    '這位模擬市民將從所有家族移除，模擬市民資料與相關關係也會一併刪除。\n\n' +
     '如果只想移出目前家族，請使用「移出家族」。';
 
   if (!await uiConfirm(message, {
-    title: '永久刪除人物',
+    title: '永久刪除模擬市民',
     kind: 'danger',
     confirmText: '永久刪除'
   })) return;
@@ -15638,7 +15638,7 @@ async function deleteChar(id) {
   }
 }
 
-// ========【人物庫】 精簡 / 詳細檢視、單人選單與批量管理 ========
+// ========【模擬市民庫】 精簡 / 詳細檢視、單人選單與批量管理 ========
 const personLibraryController = {
   syncViewControls() {
     const compact = $('personLibraryCompactBtn');
@@ -15784,10 +15784,10 @@ const personLibraryController = {
 
     const confirmed = await uiConfirm(
       '要永久刪除選取的 ' + ids.length + ' 位模擬市民嗎？\n' +
-      (LIFE_PHOTOS_PUBLIC ? '人物資料、關係與人生照片都會一併刪除。\n\n' : '人物資料與相關關係都會一併刪除。\n\n') +
+      (LIFE_PHOTOS_PUBLIC ? '模擬市民資料、關係與人生照片都會一併刪除。\n\n' : '模擬市民資料與相關關係都會一併刪除。\n\n') +
       '此操作無法復原。',
       {
-        title:'批量刪除人物',
+        title:'批量刪除模擬市民',
         kind:'danger',
         confirmText:'永久刪除',
         backupAction:exportCurrentGenealogyBackup
@@ -15814,7 +15814,7 @@ function personLibraryCompactMeta(sim) {
 }
 
 
-/* ========【人物與寵物總覽】 清單只載入可見頭像，避免 256 個暫存網址被大量清單耗盡 ======== */
+/* ========【模擬市民與寵物總覽】 清單只載入可見頭像，避免 256 個暫存網址被大量清單耗盡 ======== */
 function personLibraryAvatarHTML(sim) {
   const name = displayDataText(sim?.name, sim) || '?';
   const initial = esc(name.trim().charAt(0) || '?');
@@ -15852,7 +15852,7 @@ function observePersonLibraryAvatars(list) {
       image.src = url;
       if (image.complete) setReady(image.naturalWidth > 0);
     } catch (error) {
-      console.warn('人物庫頭像載入失敗：', id, error);
+      console.warn('模擬市民庫頭像載入失敗：', id, error);
     }
   }
 
@@ -15954,7 +15954,7 @@ function findPetFamilyLocation(entry) {
       const memberIds=(candidate.memberIds || []).map(String);
       const relationSources=mode!=='extended' && (candidate.primaryMemberIds || []).length
         ? candidate.primaryMemberIds : null;
-      // 與 Scene 相同：家族成員、主要成員、可見關聯人物都可能攜帶寵物。
+      // 與 Scene 相同：家族成員、主要成員、可見關聯模擬市民都可能攜帶寵物。
       const visible=genealogyStore.getVisibleFamilyIds(
         {memberIds},{relationshipSourceIds:relationSources}
       );
@@ -16186,8 +16186,8 @@ function renderPersonLibrary() {
 
   if (!filtered.length) {
     list.innerHTML = all.length
-      ? '<div class="person-library-empty">沒有符合的人物</div>'
-      : '<div class="person-library-empty">還沒有任何人物</div>';
+      ? '<div class="person-library-empty">沒有符合的模擬市民</div>'
+      : '<div class="person-library-empty">還沒有任何模擬市民</div>';
     return;
   }
 
@@ -17349,7 +17349,7 @@ function waitForFileOperationPaint() {
 }
 
 // ========【遊戲族譜匯入】 讀取 L1nG Genealogy Exporter ZIP ========
-// ========【遊戲族譜頭像】 ZIP 圖片直接進 Blob Asset Store，再回填人物 / 寵物 assetId ========
+// ========【遊戲族譜頭像】 ZIP 圖片直接進 Blob Asset Store，再回填模擬市民 / 寵物 assetId ========
 async function persistGameImportAvatars(bundle, converted, importMode = 'replace') {
   if (!window.L1nGGameImport || !bundle || !converted) {
     return { saved:0, unsupported:0, missing:0 };
@@ -17639,7 +17639,7 @@ function gameImportSourceMessageLines(
     );
   } else {
     lines.push(
-      uiText('目前無法確認存檔來源，將以相同遊戲人物作為更新參考。')
+      uiText('目前無法確認存檔來源，將以相同遊戲模擬市民作為更新參考。')
     );
   }
 
@@ -17720,9 +17720,9 @@ async function chooseGameImportMode(
     );
 
   const statsLines = [
-    `${uiText('找到相同遊戲人物')}：${analysis.matchedSimCount}`,
-    `${uiText('這次新增人物')}：${analysis.newSimCount}`,
-    `${uiText('這次未出現人物')}：${analysis.missingSimCount}`
+    `${uiText('找到相同遊戲模擬市民')}：${analysis.matchedSimCount}`,
+    `${uiText('這次新增模擬市民')}：${analysis.newSimCount}`,
+    `${uiText('這次未出現模擬市民')}：${analysis.missingSimCount}`
   ];
 
   const updateExplanation = uiText(LIFE_PHOTOS_PUBLIC
@@ -17837,9 +17837,9 @@ function gameImportUpdateSummary(
   return [
     uiText('遊戲族譜已更新。'),
     '',
-    `${uiText('相同人物')}：${stats.people?.matched || 0}`,
-    `${uiText('新增人物')}：${stats.people?.added || 0}`,
-    `${uiText('本次未出現人物')}：${stats.people?.notSeen || 0}`,
+    `${uiText('相同模擬市民')}：${stats.people?.matched || 0}`,
+    `${uiText('新增模擬市民')}：${stats.people?.added || 0}`,
+    `${uiText('本次未出現模擬市民')}：${stats.people?.notSeen || 0}`,
     `${uiText('同步寵物')}：${stats.pets?.matched || 0}`,
     `${uiText('新增寵物')}：${stats.pets?.added || 0}`,
     `${uiText('更新家庭')}：${stats.families?.matched || 0}`,
@@ -17867,7 +17867,7 @@ async function importGameGenealogy(file) {
 
     const bundle = await window.L1nGGameImport.parseFile(file);
 
-    showFileOperationStatus('整理模擬市民、寵物、家族與人物關係……', 12, '匯入遊戲族譜');
+    showFileOperationStatus('整理模擬市民、寵物、家族與家庭關係……', 12, '匯入遊戲族譜');
     await waitForFileOperationPaint();
 
     const converted =
@@ -18061,7 +18061,7 @@ async function importGameGenealogy(file) {
       );
       await uiAlert([
         '遊戲族譜已成功匯入。',
-        `${uiText('人物')}：${simCount}`,
+        `${uiText('模擬市民')}：${simCount}`,
         `${uiText('寵物')}：${petCount}`,
         `${uiText('家族')}：${familyCount}`,
         `${uiText('頭像')}：${avatarStats.saved}`,
@@ -18484,7 +18484,7 @@ $('relationshipAddBtn').onclick = () => {
   applyGenealogyMutation(mutation);
 };
 
-// ========【寵物卡互動】 檢視沿用人物個人資料視窗；編輯沿用既有寵物編輯器 ========
+// ========【寵物卡互動】 檢視沿用模擬市民個人資料視窗；編輯沿用既有寵物編輯器 ========
 function petCanvasOwnerIndex(entry) {
   const owner = currentGenealogyData()?.sims?.[entry?.ownerId];
   if (!owner || !Array.isArray(owner.pets)) return -1;
@@ -18587,7 +18587,7 @@ function openPetProfileFromCanvas(entry) {
 }
 
 
-// ========【寵物右鍵選單】 沿用人物選單外觀，操作僅指向寵物 ========
+// ========【寵物右鍵選單】 沿用模擬市民選單外觀，操作僅指向寵物 ========
 function findCanvasPetEntry(key) {
   return getSceneLayout()?.petLayout?.cards?.find(entry => entry.key === String(key)) || null;
 }
@@ -18710,7 +18710,7 @@ petCardsLayer?.addEventListener('keydown',event => {
   if (entry) renderPetCardMenu(entry,box.left+Math.min(box.width,40),box.top+Math.min(box.height,40));
 });
 
-// 與人物卡一致：點擊開資料，移動超過 3px（觸控 8px）直接啟動拖曳；不等待長按。
+// 與市民卡片一致：點擊開資料，移動超過 3px（觸控 8px）直接啟動拖曳；不等待長按。
 // 手勢只由同一組 PointerDown/Move/Up 收尾，避免 pointerup/click 重複執行。
 petCardsLayer?.addEventListener('pointerdown', event => {
   const element = event.target.closest('.genealogy-pet-card[data-pet-id]');
@@ -18718,7 +18718,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const entry = findCanvasPetEntry(element.dataset.petId);
   if (!entry) return;
   const fam = currentFamily();
-  // 與人物一致：已解鎖時，自動/自由排列都可開始手動拖曳。
+  // 與模擬市民一致：已解鎖時，自動/自由排列都可開始手動拖曳。
   const canDrag = !!(fam && !fam.locked && !spacePanHeld);
   const mode = viewMode;
   const origin = {x:entry.x,y:entry.y};
@@ -18730,7 +18730,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   }
   const dragThreshold = isTouch ? TOUCH_DRAG_THRESHOLD_PX : 3;
   const tapAllowance = isTouch ? TOUCH_DRAG_THRESHOLD_PX : 5;
-  // 在手勢開始時固定人物對齊目標；移動過程不再反覆取 Scene/遍歷 Map。
+  // 在手勢開始時固定模擬市民對齊目標；移動過程不再反覆取 Scene/遍歷 Map。
   const personSnapTargets = [...(getSceneLayout()?.pos?.values() || [])];
   let moved = false, gestureBlocked = false;
   let previewPosition = null;
@@ -18747,7 +18747,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     element.classList.remove('dragging');
     hideSmartGuides();
   };
-  // 與人物卡一致，將多次 PointerMove 合併到同一個動畫幀。
+  // 與市民卡片一致，將多次 PointerMove 合併到同一個動畫幀。
   const applyMove = point => {
     const worldDelta = genealogyViewport.screenDeltaToWorld(
       point.clientX-event.clientX,
@@ -18843,7 +18843,7 @@ petCardsLayer?.addEventListener('click', event => {
 // ========【頂部篩選】 狀態、性別、種族與年齡階段篩選 ========
 function applyTopbarFilters() {
   updateTopbarFilterUI();
-  // 畫布與側欄都由 getVisibleIds() 決定顯示人物；篩選後一併刷新。
+  // 畫布與側欄都由 getVisibleIds() 決定顯示模擬市民；篩選後一併刷新。
   refreshFamilyProfilePanel();
   render();
 }
@@ -19100,7 +19100,7 @@ function connectAssetStoreInBackground() {
 async function ensureSamplePortraitAssets(database) {
   if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 11) return false;
 
-  // 只處理內建 82 位人物與 6 隻寵物，不覆蓋玩家後來自行新增的角色。
+  // 只處理內建 82 位模擬市民與 6 隻寵物，不覆蓋玩家後來自行新增的角色。
   const baseline = buildSample();
   const prefix = 'assets/sample-portraits/';
   const sharedPath = prefix + 'shared_unknown.png';
