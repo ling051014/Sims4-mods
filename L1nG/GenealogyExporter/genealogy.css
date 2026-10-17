@@ -5685,178 +5685,53 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     .person-library-header-actions button { font-size:10px; padding:5px 4px; gap:3px; }
     .person-library-header-actions button .l1ng-icon { width:11px; height:11px; flex-basis:11px; }
 }
-/* ========【加入家族人物列】 維持原有尺寸，不受人物庫檢視模式影響 ======== */
-.family-member-picker-avatar {
-    /* 頭像寬度 */ width: 42px;
-    /* 頭像高度 */ height: 42px;
-    /* 圓形頭像 */ border-radius: 50%;
-    /* 裁切內容 */ overflow: hidden;
-    /* 置中內容 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 水平置中 */ justify-content: center;
-    /* 頭像背景 */ background: linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end));
-    /* 頭像文字 */ color: var(--avatar-text);
-    /* 字體大小 */ font-size: 15px;
-    /* 字體粗細 */ font-weight: 700;
-    /* 頭像邊框 */ border: 1px solid var(--border-default);
-    /* 固定尺寸 */ flex: 0 0 42px;
+/* ========【加入既有模擬市民】 沿用市民總覽標頭，只有清單捲動 ======== */
+.family-member-picker-panel { display:flex; flex-direction:column; width:min(680px,100%); height:min(650px,calc(100dvh - 40px)); max-height:calc(100dvh - 40px); min-height:0; padding:0; overflow:hidden; }
+.family-member-picker-header { flex:0 0 auto; align-items:center; }
+.family-member-picker-heading h2 { display:block; margin:0; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:0; }
+.family-member-picker-family-name { margin-inline-start:.25em; font-weight:700; color:var(--text-primary); }
+.family-member-picker-toolbar { display:flex; flex:0 0 auto; flex-direction:column; gap:10px; padding:13px 18px; border-bottom:1px solid var(--border-default); }
+.family-member-picker-search-wrap { position:relative; display:flex; align-items:center; min-width:0; }
+.family-member-picker-search-wrap > .l1ng-icon { position:absolute; left:11px; width:15px; height:15px; color:var(--text-secondary); pointer-events:none; }
+.family-member-picker-search-wrap input { width:100%; min-width:0; min-height:36px; padding:7px 12px 7px 35px; border:1px solid var(--border-default); border-radius:7px; outline:none; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12.5px; }
+.family-member-picker-search-wrap input:focus { border-color:var(--action-primary); box-shadow:0 0 0 2px var(--brand-tint-start); }
+.family-member-picker-bulk { display:flex; align-items:center; gap:9px; min-width:0; }
+.family-member-picker-available { margin-right:auto; color:var(--text-secondary); font-size:11px; }
+.family-member-picker-bulk button { padding:4px 5px; border:0; border-radius:5px; background:transparent; color:var(--action-primary-strong); font:inherit; font-size:11px; cursor:pointer; }
+.family-member-picker-bulk button:hover,.family-member-picker-bulk button:focus-visible { background:var(--brand-tint-start); }
+.family-member-picker-bulk button:disabled { opacity:.4; cursor:default; }
+.family-member-picker-list { display:flex; flex:1 1 auto; flex-direction:column; gap:0; min-height:0; padding:0 18px 8px; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+.family-member-picker-item { display:flex; flex:0 0 auto; width:100%; min-width:0; align-items:center; gap:11px; min-height:67px; padding:11px 4px; border:0; border-bottom:1px solid var(--border-default); border-radius:0; background:transparent; color:var(--text-primary); text-align:left; cursor:pointer; font:inherit; transition:background-color .14s ease; }
+.family-member-picker-item:hover,.family-member-picker-item:focus-visible { background:var(--surface-item-hover); outline:none; }
+.family-member-picker-item.selected { background:var(--brand-tint-start); }
+.family-member-picker-checkbox { display:flex; flex:0 0 19px; width:19px; height:19px; align-items:center; justify-content:center; border:1.5px solid var(--border-default); border-radius:50%; background:var(--surface-input); color:transparent; }
+.family-member-picker-item.selected .family-member-picker-checkbox { color:#fff; background:var(--action-primary); border-color:var(--action-primary); }
+.family-member-picker-checkbox .l1ng-icon { width:12px; height:12px; }
+.family-member-picker-avatar { display:flex; flex:0 0 42px; width:42px; height:42px; align-items:center; justify-content:center; overflow:hidden; border:1px solid var(--border-default); border-radius:50%; background:linear-gradient(135deg,var(--avatar-surface-start),var(--avatar-surface-end)); color:var(--avatar-text); font-size:15px; font-weight:700; }
+.family-member-picker-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.family-member-picker-text { display:flex; flex:1 1 auto; flex-direction:column; gap:4px; min-width:0; }
+.family-member-picker-name { display:flex; align-items:center; gap:5px; min-width:0; color:var(--text-primary); font-size:12.5px; font-weight:650; }
+.family-member-picker-name-label { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.family-member-picker-name > .stage-tag { margin-left:auto; flex:0 0 auto; }
+.family-member-picker-meta { display:flex; align-items:center; gap:5px; min-width:0; color:var(--text-secondary); font-size:10.5px; }
+.family-member-picker-meta > span:last-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.family-member-picker-meta .l1ng-icon { width:13px; height:13px; flex:0 0 13px; }
+.family-member-picker-empty { padding:46px 16px; color:var(--text-secondary); font-size:12px; text-align:center; }
+.family-member-picker-footer { flex:0 0 auto; margin:0; padding:12px 18px max(12px,env(safe-area-inset-bottom)); border-top:1px solid var(--border-default); background:var(--surface-card); }
+.family-member-picker-count { color:var(--text-secondary); font-size:12px; font-variant-numeric:tabular-nums; }
+.family-member-picker-count b { color:var(--action-primary); font-weight:700; }
+@media(max-width:720px) {
+  #familyMemberPickerDialog { padding:10px; }
+  .family-member-picker-panel { width:100%; height:calc(100dvh - 20px); max-height:calc(100dvh - 20px); }
+  .family-member-picker-header { padding:13px 14px; }
+  .family-member-picker-heading h2 { font-size:13.5px; }
+  .family-member-picker-toolbar { padding:11px 13px; }
+  .family-member-picker-list { padding:0 12px 5px; }
+  .family-member-picker-item { gap:8px; padding:10px 2px; }
+  .family-member-picker-avatar { width:38px; height:38px; flex-basis:38px; }
+  .family-member-picker-name { font-size:11.5px; }
+  .family-member-picker-footer { padding:10px 13px max(10px,env(safe-area-inset-bottom)); gap:7px; }
 }
-
-.family-member-picker-avatar img {
-    /* 圖片寬度 */ width: 100%;
-    /* 圖片高度 */ height: 100%;
-    /* 圖片裁切 */ object-fit: cover;
-    /* 清除行內空隙 */ display: block;
-}
-
-.family-member-picker-text {
-    /* 避免文字撐破容器 */ min-width: 0;
-    /* 垂直排列 */ display: flex;
-    /* 排列方向 */ flex-direction: column;
-    /* 行間距 */ gap: 3px;
-}
-
-.family-member-picker-name {
-    /* 避免長名稱撐破 */ min-width: 0;
-    /* 名稱列 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 圖示間距 */ gap: 5px;
-    /* 主文字 */ color: var(--text-primary);
-    /* 字體大小 */ font-size: 12.5px;
-    /* 字體粗細 */ font-weight: 650;
-}
-
-.family-member-picker-name > span:last-child {
-    /* 過長名稱隱藏 */ overflow: hidden;
-    /* 省略號 */ text-overflow: ellipsis;
-    /* 單行顯示 */ white-space: nowrap;
-}
-
-.family-member-picker-panel {
-    /* 元素寬度 */ width: min(680px,100%);
-}
-
-.family-member-picker-toolbar {
-    /* 顯示方式 */ display: flex;
-    /* 項目間距 */ gap: 8px;
-    /* 下方外距 */ margin-bottom: 10px;
-    /* 垂直對齊 */ align-items: center;
-    /* 自動換行 */ flex-wrap: wrap;
-}
-
-.family-member-picker-toolbar input {
-    /* 彈性配比 */ flex: 1;
-    /* 最小寬度 */ min-width: 120px;
-    /* 內縮空間 */ padding: 8px 11px;
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 字體設定 */ font-family: inherit;
-    /* 字體大小 */ font-size: 13px;
-    /* 外框設定 */ outline: none;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-}
-
-.family-member-picker-toolbar input:focus {
-    /* 邊框顏色 */ border-color: var(--action-primary);
-}
-
-.family-member-picker-toolbar button {
-    /* 內縮空間 */ padding: 6px 10px;
-    /* 字體大小 */ font-size: 12px;
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 文字顏色 */ color: var(--text-primary);
-    /* 滑鼠指標 */ cursor: pointer;
-}
-
-.family-member-picker-list {
-    /* 最大高度 */ max-height: 52vh;
-    /* 溢出處理 */ overflow: auto;
-    /* 邊框設定 */ border: 1px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 8px;
-    /* 內縮空間 */ padding: 6px;
-    /* 背景設定 */ background: var(--surface-panel);
-}
-
-.family-member-picker-item {
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 項目間距 */ gap: 10px;
-    /* 內縮空間 */ padding: 6px 10px;
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 下方外距 */ margin-bottom: 4px;
-    /* 滑鼠指標 */ cursor: pointer;
-    /* 動畫過渡 */ transition: .15s;
-    /* 背景設定 */ background: var(--surface-input);
-    /* 邊框設定 */ border: 1.5px solid transparent;
-}
-
-.family-member-picker-item:hover {
-    /* 背景設定 */ background: var(--surface-item-hover);
-}
-
-.family-member-picker-item.selected {
-    /* 邊框顏色 */ border-color: var(--action-primary);
-    /* 背景設定 */ background: var(--surface-item-hover);
-}
-
-.family-member-picker-item.remove-selected {
-    /* 邊框顏色 */ border-color: var(--danger-solid);
-    /* 背景設定 */ background: var(--danger-surface);
-}
-
-.family-member-picker-checkbox {
-    /* 元素寬度 */ width: 18px;
-    /* 元素高度 */ height: 18px;
-    /* 邊框設定 */ border: 1.5px solid var(--border-default);
-    /* 圓角弧度 */ border-radius: 4px;
-    /* 彈性收縮 */ flex-shrink: 0;
-    /* 顯示方式 */ display: flex;
-    /* 垂直對齊 */ align-items: center;
-    /* 水平對齊 */ justify-content: center;
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: transparent;
-    /* 字體粗細 */ font-weight: 700;
-    /* 動畫過渡 */ transition: .15s;
-    /* 背景設定 */ background: var(--surface-input);
-}
-
-.family-member-picker-item.selected .family-member-picker-checkbox {
-    /* 背景設定 */ background: var(--action-primary);
-    /* 文字顏色 */ color: #fff;
-    /* 邊框顏色 */ border-color: var(--action-primary);
-}
-
-.family-member-picker-item.remove-selected .family-member-picker-checkbox {
-    /* 背景設定 */ background: var(--danger-solid);
-    /* 文字顏色 */ color: var(--danger-on-solid);
-    /* 邊框顏色 */ border-color: var(--danger-solid);
-}
-
-.family-member-picker-item .family-member-picker-text {
-    /* 彈性配比 */ flex: 1;
-    /* 最小寬度 */ min-width: 0;
-}
-
-.family-member-picker-count {
-    /* 字體大小 */ font-size: 12px;
-    /* 文字顏色 */ color: var(--text-secondary);
-    /* 內縮空間 */ padding: 4px 10px;
-    /* 背景設定 */ background: var(--surface-item);
-    /* 圓角弧度 */ border-radius: 6px;
-}
-
-.family-member-picker-count b {
-    /* 文字顏色 */ color: var(--action-primary);
-    /* 字體粗細 */ font-weight: 700;
-}
-
-.family-member-picker-count.remove-count b {
-    /* 文字顏色 */ color: var(--danger-solid);
-}
-
 .person-profile-panel { width:min(560px,100%); padding:0; overflow:hidden; }
 .person-profile-content { min-width:0; }
 /* ========【模擬市民獨立預覽頁】 編輯頁背紙維持同尺寸，預覽頁與預覽背紙共用同一尺寸 authority ======== */
