@@ -1099,21 +1099,33 @@
             </div>
         </div>
 
-        <!-- ========【加入家族】 設定 - 將既有模擬市民加入目前家族 ======== -->
+        <!-- ========【加入家族】 搜尋既有模擬市民並加入目前家族 ======== -->
         <div class="ui-dialog-backdrop person-library-backdrop" id="familyMemberPickerDialog">
-            <div class="ui-dialog-panel family-member-picker-panel">
-                <h2>新增模擬市民到<span class="family-name-chip" id="familyMemberPickerFamilyName">—</span><span class="help-tooltip" tabindex="0" role="button" aria-label="加入家族說明" data-tooltip="選取要加入的模擬市民，再點選「加入家族」。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></h2>
-                <div class="family-member-picker-toolbar">
-                    <input id="familyMemberPickerSearch" placeholder="搜尋……" type="search">
-                    <button id="familyMemberPickerAllBtn" type="button">全選</button>
-                    <button id="familyMemberPickerNoneBtn" type="button">清空</button>
+            <div class="ui-dialog-panel family-member-picker-panel" role="dialog" aria-modal="true" aria-labelledby="familyMemberPickerTitle" tabindex="-1">
+                <div class="person-library-header family-member-picker-header">
+                    <span class="l1ng-icon icon-person-add person-library-heading-icon" aria-hidden="true"></span>
+                    <div class="person-library-heading family-member-picker-heading">
+                        <h2 id="familyMemberPickerTitle">加入既有模擬市民至：<strong id="familyMemberPickerFamilyName" class="family-member-picker-family-name">—</strong></h2>
+                    </div>
+                    <button class="help-close-btn" id="familyMemberPickerCloseBtn" type="button" title="關閉" aria-label="關閉加入模擬市民視窗"><span class="l1ng-icon icon-x-lg" aria-hidden="true"></span></button>
                 </div>
-                <div class="family-member-picker-list" id="familyMemberPickerList"></div>
-                <div class="ui-dialog-actions">
-                    <span class="family-member-picker-count" id="familyMemberPickerCount">已選<b>0</b>人</span>
+                <div class="family-member-picker-toolbar">
+                    <label class="family-member-picker-search-wrap">
+                        <span class="l1ng-icon icon-search" aria-hidden="true"></span>
+                        <input id="familyMemberPickerSearch" placeholder="搜尋姓名、職涯、特質或居住地……" type="search" autocomplete="off" aria-label="搜尋模擬市民">
+                    </label>
+                    <div class="family-member-picker-bulk">
+                        <span class="family-member-picker-available" id="familyMemberPickerAvailable">可加入 0 位</span>
+                        <button id="familyMemberPickerAllBtn" type="button">全選結果</button>
+                        <button id="familyMemberPickerNoneBtn" type="button">清除選取</button>
+                    </div>
+                </div>
+                <div class="family-member-picker-list" id="familyMemberPickerList" role="group" aria-label="可加入的模擬市民"></div>
+                <div class="ui-dialog-actions family-member-picker-footer">
+                    <span class="family-member-picker-count" id="familyMemberPickerCount">已選 <b>0</b> 位</span>
                     <span class="spacer"></span>
-                    <button id="familyMemberPickerCancelBtn">取消</button>
-                    <button class="primary" disabled id="familyMemberPickerConfirmBtn">加入家族</button>
+                    <button id="familyMemberPickerCancelBtn" type="button">取消</button>
+                    <button class="primary" disabled id="familyMemberPickerConfirmBtn" type="button">加入 0 位</button>
                 </div>
             </div>
         </div>
