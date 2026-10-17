@@ -6826,6 +6826,57 @@ html[lang="en"] body {
 .ui-dialog-details[hidden],
 .ui-dialog-details-content[hidden],
 .ui-dialog-details-copy[hidden] { display:none; }
+/* 共用匯入診斷：外框不變；長明細僅在自身捲動，複製動作不跟著捲動。 */
+#uiDialog .ui-dialog-details { width:100%; }
+#uiDialog .ui-dialog-details-content {
+    max-height:min(260px,32dvh);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+    text-align:left;
+    white-space:normal;
+}
+#uiDialog .ui-dialog-diagnostic-item {
+    padding:11px;
+    border:1px solid var(--border-default);
+    border-radius:7px;
+    background:var(--surface-card);
+    text-align:left;
+}
+#uiDialog .ui-dialog-diagnostic-item + .ui-dialog-diagnostic-item { margin-top:9px; }
+#uiDialog .ui-dialog-diagnostic-item-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-primary); }
+#uiDialog .ui-dialog-diagnostic-item-heading small { font-size:11px; color:var(--text-secondary); }
+#uiDialog .ui-dialog-diagnostic-fields { display:grid; grid-template-columns:74px minmax(0,1fr); column-gap:9px; row-gap:6px; margin:9px 0 0; font-size:11px; line-height:1.65; }
+#uiDialog .ui-dialog-diagnostic-fields dt { color:var(--text-secondary); }
+#uiDialog .ui-dialog-diagnostic-fields dd { margin:0; min-width:0; overflow-wrap:anywhere; white-space:pre-wrap; user-select:text; color:var(--text-primary); }
+#uiDialog .ui-dialog-import-warning {
+    width:100%;
+    margin:14px auto 0;
+    padding:13px;
+    border:1px solid var(--warning-border, var(--border-default));
+    border-radius:8px;
+    background:var(--warning-bg, var(--surface-panel));
+    text-align:left;
+}
+#uiDialog .ui-dialog-import-warning-title { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); }
+#uiDialog .ui-dialog-import-warning-title .l1ng-icon { width:17px; height:17px; color:var(--warning-text, var(--text-secondary)); }
+#uiDialog .ui-dialog-import-warning-description { margin:6px 0 0 25px; color:var(--text-secondary); font-size:12px; line-height:1.7; }
+#uiDialog .ui-dialog-import-warning .ui-dialog-details { margin-top:8px; gap:8px; align-items:stretch; }
+#uiDialog .ui-dialog-import-warning .ui-dialog-details-toggle { width:100%; text-align:left; padding:8px 0 0; border-top:1px solid var(--border-default); border-radius:0; background:none; }
+#uiDialog .ui-dialog-details-copy { display:inline-flex; align-items:center; justify-content:center; gap:7px; background:transparent; }
+#uiDialog .ui-dialog-details-copy[hidden] { display:none; }
+#uiDialog .ui-dialog-details-copy .l1ng-copy-glyph { display:block; width:19px; height:19px; flex:0 0 19px; overflow:visible; fill:none; }
+#uiDialog .ui-dialog-details-copy .l1ng-copy-stroke,
+#uiDialog .ui-dialog-details-copy .l1ng-check-stroke { fill:none; stroke-linecap:round; stroke-linejoin:round; }
+#uiDialog .ui-dialog-details-copy .l1ng-copy-stroke { stroke:currentColor; stroke-width:1.85; stroke-dashoffset:0; }
+#uiDialog .ui-dialog-details-copy .l1ng-check-stroke { stroke:#5d9876; stroke-width:2.2; stroke-dashoffset:var(--stroke-hide); }
+#uiDialog .ui-dialog-details-copy .l1ng-copy-running .l1ng-copy-stroke { animation:genealogyFeedbackCopyTrace 3.8s linear both; }
+#uiDialog .ui-dialog-details-copy .l1ng-copy-running .l1ng-check-stroke { animation:genealogyFeedbackCheckTrace 3.8s linear both; }
+@media(prefers-reduced-motion:reduce) {
+  #uiDialog .ui-dialog-details-copy .l1ng-copy-running .l1ng-copy-stroke { animation:none; stroke-dashoffset:var(--stroke-hide); }
+  #uiDialog .ui-dialog-details-copy .l1ng-copy-running .l1ng-check-stroke { animation:none; stroke-dashoffset:0; }
+}
+
 .ui-dialog-details-toggle,
 .ui-dialog-details-copy {
     border:0;

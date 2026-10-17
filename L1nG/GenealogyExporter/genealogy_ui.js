@@ -489,6 +489,17 @@
         host.appendChild(make('p', 'ui-dialog-rich-warning', line))
       );
       if (rich.footer) host.appendChild(make('p', 'ui-dialog-rich-footer', rich.footer));
+      if (rich.importWarning?.title) {
+        const group=make('section','ui-dialog-import-warning');
+        const heading=make('div','ui-dialog-import-warning-title');
+        heading.appendChild(make('span','l1ng-icon icon-exclamation-triangle'));
+        heading.appendChild(make('strong','ui-dialog-import-warning-heading',rich.importWarning.title));
+        group.appendChild(heading);
+        if (rich.importWarning.description) {
+          group.appendChild(make('p','ui-dialog-import-warning-description',rich.importWarning.description));
+        }
+        host.appendChild(group);
+      }
     }
 
     // 六種訊息／決策型視窗共用同一個 DOM，狀態色不等於操作危險程度。
@@ -580,6 +591,8 @@
       messageEl.hidden = hasRich;
       richEl.hidden = !hasRich;
       dialog.setAttribute('aria-describedby', hasRich ? 'uiDialogRich' : 'uiDialogMessage');
+      // 重新開啟視窗前先把診斷容器移回原位置，避免上一個警告區被清空時銷毀。
+      richEl.after(detailsEl);
       renderDialogRichContent(richEl, richContent, localizeLines);
 
       const hasSecondary = !!String(secondaryText || '').trim();
@@ -604,31 +617,95 @@
       else secondaryBtn.removeAttribute('aria-description');
 
       const detailText = typeof details === 'string' ? details : details?.text;
-      const hasDetails = !!String(detailText ?? '').trim();
+      const detailItems = Array.isArray(details?.items) ? details.items : [];
+      const hasDetails = !!String(detailText ?? '').trim() || detailItems.length > 0;
       detailsEl.hidden = !hasDetails;
       detailsContent.hidden = true;
-      detailsToggle.setAttribute('aria-expanded', 'false');
+      detailsToggle.setAttribute('aria-expanded','false');
       detailsToggle.textContent = uiText(details?.label || '查看詳細資訊');
-      detailsContent.textContent = hasDetails ? localizeLines(detailText) : '';
+      detailsContent.replaceChildren();
+      if (detailItems.length) {
+        detailItems.forEach(item => {
+          const card=document.createElement('section');
+          card.className='ui-dialog-diagnostic-item';
+          const heading=document.createElement('div');
+          heading.className='ui-dialog-diagnostic-item-heading';
+          const strong=document.createElement('strong');
+          strong.textContent=localizeLines(item.title || '錯誤紀錄');
+          heading.appendChild(strong);
+          if (item.caption) {
+            const caption=document.createElement('small');
+            caption.textContent=localizeLines(item.caption);
+            heading.appendChild(caption);
+          }
+          card.appendChild(heading);
+          const fields=document.createElement('dl');
+          fields.className='ui-dialog-diagnostic-fields';
+          (item.fields || []).forEach(([label,value]) => {
+            const dt=document.createElement('dt');
+            dt.textContent=localizeLines(label);
+            const dd=document.createElement('dd');
+            dd.textContent=String(value ?? '未擷取');
+            fields.append(dt,dd);
+          });
+          card.appendChild(fields);
+          detailsContent.appendChild(card);
+        });
+      } else {
+        detailsContent.textContent=hasDetails ? localizeLines(detailText) : '';
+      }
+      if (richContent?.importWarning?.title) {
+        const warning=richEl.querySelector('.ui-dialog-import-warning');
+        if (warning) warning.appendChild(detailsEl);
+      }
       const copyText = typeof details === 'object' && details?.copyText
         ? String(details.copyText) : String(detailText ?? '');
-      detailsCopy.hidden = true;
-      detailsCopy.textContent = uiText('複製診斷資訊');
-      detailsToggle.onclick = () => {
-        const expanded = detailsToggle.getAttribute('aria-expanded') === 'true';
-        detailsContent.hidden = expanded;
-        detailsCopy.hidden = expanded;
-        detailsToggle.setAttribute('aria-expanded', String(!expanded));
-        detailsToggle.textContent = uiText(
-          expanded ? (details?.label || '查看詳細資訊') : '收合詳細資訊'
-        );
+      detailsCopy.hidden=true;
+      detailsCopy.setAttribute('aria-label',uiText('複製完整診斷報告'));
+      const copyLabel=detailsCopy.querySelector('.ui-dialog-details-copy-label');
+      const copyGlyph=detailsCopy.querySelector('.l1ng-copy-glyph');
+      if (detailsCopy._resetTimer) {
+        clearTimeout(detailsCopy._resetTimer);
+        detailsCopy._resetTimer=null;
+      }
+      copyGlyph?.classList.remove('l1ng-copy-running');
+      if (copyLabel) copyLabel.textContent=uiText('複製完整診斷報告');
+      detailsToggle.onclick=()=>{
+        const expanded=detailsToggle.getAttribute('aria-expanded')==='true';
+        detailsContent.hidden=expanded;
+        detailsCopy.hidden=expanded;
+        detailsToggle.setAttribute('aria-expanded',String(!expanded));
+        detailsToggle.textContent=uiText(expanded ? (details?.label || '查看詳細資訊') : '收合詳細資訊');
       };
-      detailsCopy.onclick = async () => {
+      detailsCopy.onclick=async()=>{
         try {
-          await navigator.clipboard.writeText(copyText);
-          detailsCopy.textContent = uiText('已複製');
-        } catch (error) {
-          console.warn('[共用視窗] 複製明細失敗：', error);
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(copyText);
+          } else {
+            const textarea=document.createElement('textarea');
+            textarea.value=copyText;
+            textarea.style.position='fixed';
+            textarea.style.opacity='0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            const copied=document.execCommand('copy');
+            textarea.remove();
+            if (!copied) throw new Error('Clipboard copy failed');
+          }
+          if (copyLabel) copyLabel.textContent=uiText('已複製');
+          if (copyGlyph) {
+            copyGlyph.classList.remove('l1ng-copy-running');
+            void copyGlyph.getBoundingClientRect();
+            copyGlyph.classList.add('l1ng-copy-running');
+          }
+          if (detailsCopy._resetTimer) clearTimeout(detailsCopy._resetTimer);
+          detailsCopy._resetTimer=setTimeout(()=>{
+            copyGlyph?.classList.remove('l1ng-copy-running');
+            if (copyLabel) copyLabel.textContent=uiText('複製完整診斷報告');
+          },3900);
+        } catch(error) {
+          console.warn('[共用視窗] 複製明細失敗：',error);
+          if (copyLabel) copyLabel.textContent=uiText('複製失敗');
         }
       };
 
