@@ -321,7 +321,7 @@ function renderTraitEditor() {
   if (!list) return;
   syncTraitHiddenInput();
   list.innerHTML = simEditorState.traits.map((trait, index) =>
-    `<span class="trait-chip"><span>${esc(trait)}</span><button type="button" class="trait-chip-remove" data-trait-index="${index}" aria-label="${esc(uiText('移除'))}" title="${esc(uiText('移除'))}">×</button></span>`
+    `<span class="trait-chip"><span>${esc(trait)}</span><button type="button" class="trait-chip-remove" data-trait-index="${index}" aria-label="${esc(uiText('移除特徵'))}" title="${esc(uiText('移除特徵'))}">×</button></span>`
   ).join('');
   list.querySelectorAll('.trait-chip-remove').forEach(button => {
     button.addEventListener('click', () => {
@@ -1204,7 +1204,7 @@ function buildPersonEditorDraft({
 
     if(!familyRelationCanRemove(role,target))return'<span class="family-rel-remove-spacer" aria-hidden="true"></span>';
 
-    return '<button class="family-rel-remove" type="button" data-family-rel-remove-role="'+esc(role)+'" data-family-rel-remove-id="'+esc(target)+'" aria-label="'+esc(uiText('移除'))+'" title="'+esc(uiText('移除'))+'">'+
+    return '<button class="family-rel-remove" type="button" data-family-rel-remove-role="'+esc(role)+'" data-family-rel-remove-id="'+esc(target)+'" aria-label="'+esc(uiText('移除關係'))+'" title="'+esc(uiText('移除關係'))+'">'+
       iconSvg('x-lg')+
     '</button>';
   }
@@ -3114,9 +3114,9 @@ function renderPersonEditorRelationshipList(c) {
                 ? '<button class="family-rel-remove" type="button" data-other-rel-delete="'+
                   esc(String(link.id||''))+
                   '" aria-label="'+
-                  esc(uiText('移除'))+
+                  esc(uiText('移除關係'))+
                   '" title="'+
-                  esc(uiText('移除'))+
+                  esc(uiText('移除關係'))+
                   '">'+
                     iconSvg('x-lg')+
                   '</button>'
