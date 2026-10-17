@@ -1,7 +1,7 @@
 /* ========【網站預設族譜】 82 位模擬市民、13 個家庭及寵物與關係資料 ======== */
 (function (global) {
   'use strict';
-  // 唯一的預設資料來源：包含人物、生日、RealDate、偏好、寵物與親屬關係。
+  // 唯一的預設資料來源：包含模擬市民、生日、RealDate、偏好、寵物與親屬關係。
   // 卡片欄位的預設顯示設定由主程式建立資料庫時提供，不在此重複定義。
   global.L1nGGenealogySamplePack = Object.freeze({
   "version": 1,
