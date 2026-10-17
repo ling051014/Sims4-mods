@@ -7088,14 +7088,14 @@ html[lang="en"] body {
 #uiDialog .ui-dialog-backup-action {
     display:inline-flex; align-items:center; justify-content:center; gap:8px;
     padding:4px 0; max-width:100%; border:0; border-radius:0;
-    color:var(--text-primary); background:transparent; box-shadow:none;
+    color:var(--action-primary); background:transparent; box-shadow:none;
     font:inherit; font-size:13px; font-weight:600; cursor:pointer;
 }
 #uiDialog .ui-dialog-backup-action:is(:hover,:focus-visible,:active) {
     background:transparent; box-shadow:none;
 }
 #uiDialog .ui-dialog-backup-action .l1ng-icon {
-    width:17px; height:17px; flex:0 0 17px; color:var(--text-secondary);
+    width:17px; height:17px; flex:0 0 17px; color:inherit;
 }
 #uiDialog .ui-dialog-backup-action:is(:hover:not(:disabled),:focus-visible) #uiDialogBackupLabel {
     text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px;
