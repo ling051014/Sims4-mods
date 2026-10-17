@@ -7685,7 +7685,8 @@ if (restoreSampleBtn) {
 
       const ok = await uiConfirm(
         '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。\n此操作無法復原，建議先匯出 JSON 備份。',
-        { title:'恢復預設族譜', confirmText:'恢復預設族譜', kind:'danger' }
+        { title:'恢復預設族譜', confirmText:'恢復預設族譜', kind:'danger',
+          backupAction:exportCurrentGenealogyBackup }
       );
 
       if (!ok) return;
@@ -15780,7 +15781,8 @@ const personLibraryController = {
       {
         title:'批量刪除人物',
         kind:'danger',
-        confirmText:'永久刪除'
+        confirmText:'永久刪除',
+        backupAction:exportCurrentGenealogyBackup
       }
     );
 
@@ -16540,6 +16542,23 @@ async function exportJSON() {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+/* ========【確認視窗內備份】共用現有 JSON 匯出與 Loading ======== */
+let jsonBackupInProgress = false;
+async function exportCurrentGenealogyBackup() {
+  if (jsonBackupInProgress) throw new Error(uiText('匯出尚未完成，請稍後再試。'));
+  jsonBackupInProgress = true;
+  try {
+    showFileOperationStatus('整理族譜與背景設定……', null, '匯出 JSON 備份');
+    await waitForFileOperationPaint();
+    await exportJSON();
+    showFileOperationStatus('所有資料已處理完成！', 100, '匯出 JSON 備份');
+    await waitForFileOperationPaint();
+  } finally {
+    hideFileOperationStatus();
+    jsonBackupInProgress = false;
+  }
+}
+
 function openExportPanel() {
   if (!exportDialog) return;
   exportDialog.classList.add('show');
@@ -17199,6 +17218,22 @@ async function importJSON(file) {
         throw new Error(`備份缺少被族譜引用的圖片資產：${id}`);
       }
     }
+    // 格式與引用驗證通過，寫入資料前提供備份及覆蓋確認。
+    if (currentGenealogyData()?.meta?.sample !== true) {
+      hideFileOperationStatus();
+      const confirmed = await uiConfirm(
+        uiText('這份 JSON 備份將取代目前族譜資料與背景設定。此操作無法復原，建議先匯出目前族譜的 JSON 備份。'),
+        {
+          title:'還原 JSON 備份',
+          kind:'danger',
+          confirmText:'還原這份備份',
+          backupAction:exportCurrentGenealogyBackup
+        }
+      );
+      if (!confirmed) return;
+      showFileOperationStatus('檢查族譜引用的圖片資產……', null, title);
+      await waitForFileOperationPaint();
+    }
     const totalAssets = Object.keys(serializedAssets).length;
     if (totalAssets) showFileAssetProgress('還原圖片資產', 0, totalAssets, title);
     await assetStore.importSerializedAssets(serializedAssets, (done, total) => {
@@ -17643,13 +17678,12 @@ async function chooseGameImportMode(
     `${uiText('這次未出現人物')}：${analysis.missingSimCount}`
   ];
 
-  const updateHint =
-    LIFE_PHOTOS_PUBLIC
-      ? '同步最新遊戲資料，保留手動排列、人生照片、自訂關係、家庭封面與你在網站上的修改。'
-      : '同步最新遊戲資料，保留手動排列、自訂關係、家庭封面與你在網站上的修改。';
-
-  const replaceHint =
-    '使用這份 ZIP 重新建立遊戲族譜；目前族譜內容會被取代。';
+  const updateExplanation = uiText(LIFE_PHOTOS_PUBLIC
+    ? '同步遊戲資料時，會保留手動排列、人生照片、自訂關係、自訂標籤、家庭封面及網站上的其他調整。'
+    : '同步遊戲資料時，會保留手動排列、自訂關係、自訂標籤、家庭封面及網站上的其他調整。');
+  const replaceExplanation =
+    uiText('若以這份 ZIP 重新建立族譜，現有內容將被取代。建議先匯出 JSON 備份。');
+  const choiceExplanation = [updateExplanation, replaceExplanation];
 
   if (
     source.verification ===
@@ -17663,7 +17697,9 @@ async function chooseGameImportMode(
         '',
         ...statsLines,
         '',
-        uiText('如果這是「另存新檔」後繼續遊玩的存檔，可以將它視為同一族譜並繼續更新。')
+        uiText('如果這是「另存新檔」後繼續遊玩的存檔，可以將它視為同一族譜並繼續更新。'),
+        '',
+        ...choiceExplanation
       ].join('\n'),
       mode:'choice',
       confirmText:'這是同一族譜，繼續更新',
@@ -17672,7 +17708,8 @@ async function chooseGameImportMode(
       secondaryText:'覆蓋現有族譜',
       secondaryValue:'replace',
       secondaryKind:'danger',
-      secondaryHint:replaceHint,
+      secondaryHint:replaceExplanation,
+      backupAction:exportCurrentGenealogyBackup,
       cancelText:'取消',
       cancelValue:'cancel'
     });
@@ -17700,20 +17737,21 @@ async function chooseGameImportMode(
     return await openUiDialog({
       title:'匯入遊戲族譜',
       message:[
-        uiText('網站目前已經有遊戲族譜。'),
-        '',
         ...sourceLines,
         '',
-        ...statsLines
+        ...statsLines,
+        '',
+        ...choiceExplanation
       ].join('\n'),
       mode:'choice',
       confirmText:'更新目前族譜',
       confirmValue:'update',
-      confirmHint:updateHint,
+      confirmHint:updateExplanation,
       secondaryText:'覆蓋現有族譜',
       secondaryValue:'replace',
       secondaryKind:'danger',
-      secondaryHint:replaceHint,
+      secondaryHint:replaceExplanation,
+      backupAction:exportCurrentGenealogyBackup,
       cancelText:'取消',
       cancelValue:'cancel'
     });
@@ -17724,13 +17762,16 @@ async function chooseGameImportMode(
       ...sourceLines,
       '',
       uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到可安全更新的相同來源。'),
-      uiText('是否仍要使用這份 ZIP 覆蓋現有族譜？')
+      uiText('是否仍要使用這份 ZIP 覆蓋現有族譜？'),
+      '',
+      replaceExplanation
     ].join('\n'),
     {
       title:'匯入遊戲族譜',
       kind:'danger',
       confirmText:'覆蓋現有族譜',
-      cancelText:'取消'
+      cancelText:'取消',
+      backupAction:exportCurrentGenealogyBackup
     }
   );
 
@@ -17958,18 +17999,14 @@ async function importGameGenealogy(file) {
       const diagnosticLines = (avatarStats.decodeFailures || []).map(item =>
         `ID: ${item.simId} | ${item.stage || item.path || 'EA THUM'} | ${item.reason || 'EA_THUM_DECODE_FAILED'}`
       );
-      await uiAlert(summaryLines.slice(0, 4).join('\n'), {
+      await uiAlert(summaryLines.join('\n'), {
         title:'遊戲族譜更新完成',
         kind:'success',
         confirmText:'查看族譜',
-        details:{
-          label:'查看完整更新明細',
-          text:[
-            ...summaryLines.slice(4),
-            ...(diagnosticLines.length
-              ? [uiText('無法解析的頭像'), ...diagnosticLines] : [])
-          ].join('\n')
-        }
+        details:diagnosticLines.length ? {
+          label:'查看頭像解析失敗明細',
+          text:diagnosticLines.join('\n')
+        } : null
       });
     } else {
       const diagnosticLines = (avatarStats.decodeFailures || []).map(item =>
@@ -18804,12 +18841,7 @@ if (exportJsonBtn) exportJsonBtn.onclick = async () => {
   exportJsonBtn.disabled = true;
   if (exportImageBtn) exportImageBtn.disabled = true;
   try {
-    showFileOperationStatus('整理族譜與背景設定……', null, '匯出 JSON 備份');
-    await waitForFileOperationPaint();
-    await exportJSON();
-    showFileOperationStatus('所有資料已處理完成！', 100, '匯出 JSON 備份');
-    await waitForFileOperationPaint();
-    hideFileOperationStatus();
+    await exportCurrentGenealogyBackup();
     closeExportPanel();
     uiToast('JSON 備份匯出完成');
   } catch (err) {

@@ -219,7 +219,7 @@
     "家族名稱": "Family Name",
     "搜尋姓名 / 職業 / 居住地……": "Search name / career / residence…",
     "匯入 JSON 備份": "Import JSON Backup",
-    "匯出 JSON 備份": "Export JSON Backup",
+    "匯出 JSON 備份": "Export JSON backup",
     "如：莫蒂默·高斯": "e.g. Mortimer Goth",
     "如：衰老 / 溺水 / 火災……": "e.g. old age / drowning / fire…",
     "作家 / 學生 / 無": "Writer / Student / None",
@@ -1212,6 +1212,17 @@
     "查看失敗頭像明細": "View failed portrait details",
     "無法解析的頭像": "Portraits that could not be decoded",
     "張頭像無法解析，已略過；其他資料已成功匯入。": "portrait(s) could not be decoded and were skipped; other data imported successfully.",
-    "目前顯示": "Now showing"
+    "目前顯示": "Now showing",
+    "再次匯出 JSON 備份": "Export JSON backup again",
+    "正在產生備份……": "Creating backup…",
+    "已產生備份，請確認下載。": "Backup created. Check your downloads.",
+    "匯出失敗：": "Export failed: ",
+    "匯出尚未完成，請稍後再試。": "Backup export is already in progress. Please try again.",
+    "同步遊戲資料時，會保留手動排列、人生照片、自訂關係、自訂標籤、家庭封面及網站上的其他調整。": "Updating game data preserves manual layouts, life photos, custom relationships, custom labels, family covers, and other website changes.",
+    "同步遊戲資料時，會保留手動排列、自訂關係、自訂標籤、家庭封面及網站上的其他調整。": "Updating game data preserves manual layouts, custom relationships, custom labels, family covers, and other website changes.",
+    "若以這份 ZIP 重新建立族譜，現有內容將被取代。建議先匯出 JSON 備份。": "Rebuilding the family tree from this ZIP replaces existing content. Consider exporting a JSON backup first.",
+    "這份 JSON 備份將取代目前族譜資料與背景設定。此操作無法復原，建議先匯出目前族譜的 JSON 備份。": "This JSON backup will replace the current family tree and background settings. This cannot be undone. Consider exporting a backup of your current tree first.",
+    "還原這份備份": "Restore this backup",
+    "查看頭像解析失敗明細": "View portrait decoding errors"
   }
 }
