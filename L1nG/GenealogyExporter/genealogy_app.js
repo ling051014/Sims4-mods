@@ -776,11 +776,9 @@ function refreshResolvedAssetDom(
         'has-image'
       );
 
-      if (
-        element.id ===
-        'photoPreview'
-      ) {
-        element.textContent = '';
+      if (element.id === 'photoPreview') {
+        $('photoClearBtn').disabled = false;
+        $('phSave').disabled = false;
       }
     });
 }
@@ -7695,27 +7693,51 @@ if (restoreSampleBtn) {
 
       if (!ok) return;
 
-      personEditor.close();
+      const progressTitle = '恢復預設族譜';
+      showFileOperationStatus('準備預設族譜資料……', 10, progressTitle);
+      await waitForFileOperationPaint();
+      try {
+        // 所有預設肖像必須先驗證完成，才允許取代玩家目前的族譜。
+        const sampleDb = prepareDatabase(buildSample()).prepared;
+        showFileOperationStatus('整理模擬市民、寵物與家庭關係……', 20, progressTitle);
+        await waitForFileOperationPaint();
+        await ensureSamplePortraitAssets(sampleDb, {
+          onProgress(done, total) {
+            const en = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+            const count = en ? ` (${done} / ${total})` : `（${done} / ${total}）`;
+            showFileOperationStatus(
+              '還原預設頭像' + count + '……',
+              total ? 20 + Math.floor(65 * done / total) : 85,
+              progressTitle
+            );
+          }
+        });
+        showFileOperationStatus('更新目前族譜……', 90, progressTitle);
+        await waitForFileOperationPaint();
+        personEditor.close();
+        replaceCanonicalGenealogyDatabase(sampleDb);
+        // 恢復預設族譜時，關係標籤鎖定與拖曳歷史一併還原。
+        setRelationshipLabelLock(true);
+        dragHistory.clear();
 
-      const sampleDb =
-        prepareDatabase(
-          buildSample()
-        ).prepared;
-      await ensureSamplePortraitAssets(sampleDb);
-
-      replaceCanonicalGenealogyDatabase(
-        sampleDb
-      );
-      // 「恢復預設族譜」也恢復預設的關係標籤鎖定狀態。
-      setRelationshipLabelLock(true);
-      dragHistory.clear();
-      save({ immediate:true });
-      refreshFamilyUI();
-      render();
-      appearanceDialog.classList.remove('show');
-      storageDialog.classList.remove('show');
-      requestAnimationFrame(() => genealogyViewport.fit());
-      uiToast('已恢復預設族譜。');
+        showFileOperationStatus('儲存族譜與圖片資料……', 95, progressTitle);
+        save({ immediate:true });
+        refreshFamilyUI();
+        render();
+        appearanceDialog.classList.remove('show');
+        storageDialog.classList.remove('show');
+        requestAnimationFrame(() => genealogyViewport.fit());
+        showFileOperationStatus('所有資料已處理完成！', 100, progressTitle);
+        await waitForFileOperationPaint();
+        uiToast('已恢復預設族譜。');
+      } catch (error) {
+        hideFileOperationStatus();
+        await uiAlert('恢復預設族譜失敗：' + (error?.message || String(error)), {
+          title:'恢復預設族譜失敗', kind:'danger'
+        });
+      } finally {
+        hideFileOperationStatus();
+      }
     } finally {
       delete restoreSampleBtn.dataset.confirmPending;
     }
@@ -9628,12 +9650,12 @@ const lifePhotoWorkspace = {
     preview.classList.toggle('has-image', !!url);
     preview.style.backgroundImage =
       url ? `url("${url}")` : '';
-    preview.textContent =
-      url ? '' : '點選選擇 · 或拖曳 · 或 Ctrl+V 貼上';
+    $('photoClearBtn').disabled = !imageRef;
+    $('phSave').disabled = !imageRef;
 
     const tip = $('photoSizeTip');
     if (!url) {
-      tip.textContent = '';
+      tip.textContent = imageRef ? '圖片載入中……' : '尚未選擇圖片';
       tip.classList.remove('warn');
       return;
     }
@@ -10054,6 +10076,35 @@ lifePhotoEditorDialog.onclick = event => {
 $('photoPreview').onclick = () => {
   $('photoInput').click();
 };
+$('photoPreview').addEventListener('keydown', event => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  $('photoInput').click();
+});
+for (const type of ['dragenter', 'dragover']) {
+  $('photoPreview').addEventListener(type, event => {
+    if (!Array.from(event.dataTransfer?.types || []).includes('Files')) return;
+    event.preventDefault();
+    $('photoPreview').classList.add('dragover');
+  });
+}
+for (const type of ['dragleave', 'drop']) {
+  $('photoPreview').addEventListener(type, () => {
+    $('photoPreview').classList.remove('dragover');
+  });
+}
+$('photoPreview').addEventListener('drop', async event => {
+  const file = Array.from(event.dataTransfer?.files || [])[0];
+  if (!file) return;
+  event.preventDefault();
+  event.stopPropagation();
+  try {
+    await lifePhotoWorkspace.prepareFile(file);
+  } catch (error) {
+    await uiAlert('圖片處理失敗：' + error.message,
+      { title:'圖片處理失敗', kind:'danger' });
+  }
+});
 $('photoInput').onchange = async event => {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -19208,7 +19259,7 @@ function connectAssetStoreInBackground() {
 }
 
 // 內建範例的圖片在檔案中提供，首次載入與恢復預設時匯入既有 Blob 資產庫。
-async function ensureSamplePortraitAssets(database) {
+async function ensureSamplePortraitAssets(database, { onProgress = null } = {}) {
   if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 11) return false;
 
   // 只處理內建 82 位模擬市民與 6 隻寵物，不覆蓋玩家後來自行新增的角色。
@@ -19267,6 +19318,7 @@ async function ensureSamplePortraitAssets(database) {
 
   const entries = [...items.values()];
   let changed = false;
+  if (typeof onProgress === 'function') onProgress(0, entries.length);
   for (let start = 0; start < entries.length; start += 4) {
     await Promise.all(entries.slice(start, start+4).map(async item => {
       // 重新整理已完成的預設肖像不重新下載；但若 IndexedDB 已遺失圖片，會自動補回。
@@ -19291,6 +19343,9 @@ async function ensureSamplePortraitAssets(database) {
         }
       }
     }));
+    if (typeof onProgress === 'function') {
+      onProgress(Math.min(start + 4, entries.length), entries.length);
+    }
   }
   if (Number(database.meta.samplePortraitVersion) !== 11) {
     database.meta.samplePortraitVersion = 11;
