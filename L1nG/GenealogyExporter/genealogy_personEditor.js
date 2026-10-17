@@ -1,4 +1,4 @@
-/* ========【L1nG Genealogy Person Editor】 設定 - 人物編輯工作區 / Draft State / Editor Lifecycle Authority ======== */
+/* ========【L1nG Genealogy Person Editor】 設定 - 模擬市民編輯工作區 / Draft State / Editor Lifecycle Authority ======== */
 (function (global) {
   'use strict';
 
@@ -71,7 +71,7 @@
 
   const editingGallery = [];
 
-  // ========【人物編輯器延遲建立】 設定 - 基本資料先顯示，隱藏分頁真正需要時再建立 ========
+  // ========【模擬市民編輯器延遲建立】 設定 - 基本資料先顯示，隱藏分頁真正需要時再建立 ========
   let personEditorRelationshipDataReady=false;
   let personEditorRelationshipUiReady=false;
   let personEditorRelationshipAuthority=null;
@@ -204,7 +204,7 @@
   }
 
   function resetPersonEditorDraftState() {
-    // 媒體分頁的寵物操作與家庭關係一致，每次重開人物編輯器均回到檢視模式。
+    // 媒體分頁的寵物操作與家庭關係一致，每次重開模擬市民編輯器均回到檢視模式。
     $('petSection')?.classList.remove('is-editing');
     simEditorState.simId = null;
     simEditorState.avatar = null;
@@ -861,7 +861,7 @@ function buildPersonEditorDraft({
     });
   }
 
-  // ========【家庭關係自訂標籤文字】 設定 - 直接整合於父母 / 配偶 / 子女等人物列 ========
+  // ========【家庭關係自訂標籤文字】 設定 - 直接整合於父母 / 配偶 / 子女等模擬市民列 ========
   function editorFamilyLabelIdentity(role,targetId){
     if(role==='parent')return'parent-group';
     return String(role||'')+':'+String(targetId||'');
@@ -2148,7 +2148,7 @@ function buildPersonEditorDraft({
 
     applyEditorSiblingStateToSelect();
 
-    // 其他關係目標不需要預先建立整份人物 option。
+    // 其他關係目標不需要預先建立整份模擬市民 option。
     $('relationshipTarget').replaceChildren();
 
     resetOtherRelationshipEditor();
@@ -2496,7 +2496,7 @@ function buildPersonEditorDraft({
   lifePhotoState.editor.isOriginal = false;
 }
 
-// ========【其他關係編輯列】 設定 - 與家庭關係共用單層人物列，不再拆成獨立標籤區 ========
+// ========【其他關係編輯列】 設定 - 與家庭關係共用單層模擬市民列，不再拆成獨立標籤區 ========
 function personEditorOtherRelationships(simId){
   const id=String(simId||'');
   if(!id)return[];
@@ -3643,7 +3643,7 @@ function commitPersonEditorDraft() {
 
   if (!sim) {
     uiAlert(
-      '人物資料儲存失敗。',
+      '模擬市民資料儲存失敗。',
       {
         title:'儲存失敗',
         kind:'danger'
