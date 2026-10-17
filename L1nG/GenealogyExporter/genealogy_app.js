@@ -7677,11 +7677,11 @@ if (restoreSampleBtn) {
       await new Promise(resolve => requestAnimationFrame(resolve));
 
       const ok = await uiConfirm(
-        '這會刪除目前族譜資料，並恢復繁體中文的預設族譜。\n此操作無法復原，建議先匯出 JSON 備份。',
+        '恢復後，目前的族譜資料將被取代且無法復原。建議先匯出 JSON 備份。',
         { title:'恢復預設族譜', confirmText:'恢復預設族譜', kind:'danger',
           richContent:{
-            lead:'恢復繁體中文的預設族譜。',
-            warnings:['這會刪除目前族譜資料。此操作無法復原，建議先匯出 JSON 備份。']
+            lead:'',
+            warnings:['恢復後，目前的族譜資料將被取代且無法復原。建議先匯出 JSON 備份。']
           },
           backupAction:exportCurrentGenealogyBackup }
       );
@@ -11030,6 +11030,33 @@ const activeTouchPointers = new Map();
 const touchCardActivationSuppressed = new Set();
 
 let touchPinchGeometry = null;
+let touchGestureFrame = 0;
+let pendingTouchGesture = null;
+
+// 每個影格套用最後一筆雙指位置，保留真實倍率與雙指中心的平移。
+function applyPendingTouchGesture() {
+  touchGestureFrame = 0;
+  const nextGeometry = pendingTouchGesture;
+  pendingTouchGesture = null;
+  if (!nextGeometry || !touchPinchGeometry || activeTouchPointers.size < 2) return;
+  genealogyViewport.transformGesture?.(
+    touchPinchGeometry.centerX,
+    touchPinchGeometry.centerY,
+    nextGeometry.centerX,
+    nextGeometry.centerY,
+    nextGeometry.distance / touchPinchGeometry.distance
+  );
+  touchPinchGeometry = nextGeometry;
+}
+
+function flushTouchGesture() {
+  if (touchGestureFrame) {
+    cancelAnimationFrame(touchGestureFrame);
+    touchGestureFrame = 0;
+  }
+  applyPendingTouchGesture();
+}
+
 let touchLongPressTimer = 0;
 let touchLongPressPointerId = null;
 let lastTouchCanvasTap = null;
@@ -11399,6 +11426,7 @@ function handleTouchPointerDown(
   genealogyViewport.cancelPan();
   hideSmartGuides();
 
+  flushTouchGesture();
   touchPinchGeometry =
     readTouchPairGeometry();
 
@@ -11461,21 +11489,10 @@ function handleTouchPointerMove(
       readTouchPairGeometry();
 
     if (nextGeometry) {
-      const factor =
-        nextGeometry.distance /
-        touchPinchGeometry.distance;
-
-      genealogyViewport
-        .transformGesture?.(
-          touchPinchGeometry.centerX,
-          touchPinchGeometry.centerY,
-          nextGeometry.centerX,
-          nextGeometry.centerY,
-          factor
-        );
-
-      touchPinchGeometry =
-        nextGeometry;
+      pendingTouchGesture = nextGeometry;
+      if (!touchGestureFrame) {
+        touchGestureFrame = requestAnimationFrame(applyPendingTouchGesture);
+      }
     }
 
     event.preventDefault();
@@ -11553,6 +11570,7 @@ function finishTouchPointer(
   const wasPinching =
     !!touchPinchGeometry &&
     activeTouchPointers.size >= 2;
+  if (wasPinching) flushTouchGesture();
 
   if (
     event.type === 'pointercancel' &&

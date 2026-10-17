@@ -1251,6 +1251,27 @@
     "已清理": "Cleaned",
     "移除特徵": "Remove Trait",
     "移除關係": "Remove Relationship",
-    "移除飼主": "Remove Owner"
+    "移除飼主": "Remove Owner",
+    "恢復後，目前的族譜資料將被取代且無法復原。建議先匯出 JSON 備份。": "Restoring the default family tree will replace your current data and cannot be undone. Export a JSON backup first.",
+    "新增或編輯市民、寵物時儲存": "Save while adding or editing Sims and pets",
+    "新增或編輯市民、寵物時儲存；也可儲存人生照片的編輯內容": "Save while adding or editing Sims, pets, or life photos",
+    "全選目前可見的市民與寵物；拖曳已選市民可整組移動": "select all visible Sims and pets; drag selected Sims to move them together",
+    "關係名稱與位置": "Relationship Labels & Positions",
+    "雙指捏合": "Pinch with two fingers",
+    "自動排列下，": "In Auto Layout, ",
+    "平移畫布；": " to pan the canvas; ",
+    "以游標位置為中心縮放": " to zoom around the pointer",
+    "自動置中並適應畫面": "to center and fit the family tree",
+    "超過判定距離後切換為「自由排列」，並儲存新位置": "past the drag threshold to switch to Free Layout and save the new position",
+    "自由排列提供": "Free Layout offers ",
+    "選取工具可框選市民與寵物；拖曳工具可平移畫布": "Select lets you marquee-select Sims and pets; Pan lets you move the canvas",
+    "在檢視模式查看資料，或在編輯模式編輯市民；": "to view details in View mode or edit a Sim in Edit mode; ",
+    "開啟卡片操作選單": "to open card actions",
+    "關閉目前最上層的視窗": "close the topmost dialog",
+    "重做上一步拖曳": "redo the last drag",
+    "顯示關係 / 隱藏關係": "Show Relationships / Hide Relationships",
+    "可切換畫布上的關係名稱，不影響關係線": "toggles relationship labels without hiding the relationship lines",
+    "只會移除族譜中未被引用的圖片，正在使用的圖片不受影響": "removes only images no longer referenced in the family tree",
+    "市民與寵物頭像、家族封面及背景圖片會保存在目前的瀏覽器中，不會自動上傳至伺服器": "Sim and pet portraits, family covers, and backgrounds are stored in this browser and are not automatically uploaded."
   }
 }
