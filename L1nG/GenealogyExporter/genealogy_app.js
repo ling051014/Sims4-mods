@@ -5356,9 +5356,9 @@ function relationshipPerspectiveActionText(
   if (lang === 'en') {
     return ending
       ? 'End ' + name + ' perspective'
-      : 'View genealogy from ' +
+      : 'View family tree from ' +
         name +
-        ' perspective';
+        "'s perspective";
   }
 
   if (lang === 'zh-Hans') {

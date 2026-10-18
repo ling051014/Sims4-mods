@@ -7,7 +7,7 @@
   const LOCALE_FILES = Object.freeze({
     'zh-Hant': 'locales/zh-TW.json?v=20261018-kinship-r1',
     'zh-Hans': 'locales/zh-CN.json?v=20261018-kinship-r1',
-    'en': 'locales/en.json?v=20261018-kinship-r1'
+    'en': 'locales/en.json?v=20261018-family-tree-en-r1'
   });
 
   const catalogs = new Map();
@@ -250,7 +250,7 @@ They can still be added to other families.`;
       return `${match[1]} game portrait(s) could not be decoded and were skipped. Check the browser console for details.`;
     }
     if ((match = canonical.match(/^遊戲族譜匯入失敗：(.+)$/))) {
-      return `Game genealogy import failed: ${translatePatterns(match[1])}`;
+      return `Game family tree import failed: ${translatePatterns(match[1])}`;
     }
     if ((match = canonical.match(/^模擬市民資料儲存失敗：(.+)$/))) {
       return `Could not save Sim data: ${translatePatterns(match[1])}`;
@@ -355,10 +355,18 @@ They can still be added to other families.`;
         }
       }
 
+      const description = document.querySelector('meta[name="description"]');
+      if (description) {
+        description.setAttribute('content', language === 'en'
+          ? "Create, edit, and explore The Sims 4 family trees with L1nG Genealogy. Import game data and manage generations, relationships, and pets."
+          : language === 'zh-Hans'
+            ? "使用 L1nG 模拟市民族谱工具创建、编辑和整理《模拟市民 4》的家族关系、世代与宠物，并支持导入游戏存档数据。"
+            : "使用 L1nG 模擬市民族譜工具建立、編輯和整理《模擬市民 4》的家族關係、世代與寵物，並支援匯入遊戲存檔資料。");
+      }
       document.documentElement.lang = language;
       document.title =
         language === 'en'
-          ? 'L1nG The Sims 4 Genealogy Tool'
+          ? 'L1nG Genealogy – The Sims 4 Family Tree Tool'
           : language === 'zh-Hans'
             ? 'L1nG 模拟市民族谱工具'
             : 'L1nG 模擬市民族譜工具';
