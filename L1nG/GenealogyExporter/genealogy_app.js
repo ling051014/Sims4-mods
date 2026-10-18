@@ -584,6 +584,8 @@ function sameLabelHistoryState(left, right) {
 function dragHistoryEntryHasChange(entry) {
   if (!entry) return false;
 
+  if (entry.type === 'database') return JSON.stringify(entry.before) !== JSON.stringify(entry.after);
+
   if (entry.type === 'card-layout') {
     return !sameLayoutHistoryState(entry.before, entry.after);
   }
@@ -602,8 +604,25 @@ const dragHistory = {
   push(entry) {
     if (!dragHistoryEntryHasChange(entry)) return false;
 
+    const previous = this.undoStack[this.undoStack.length - 1];
+    const now = Date.now();
+    if (entry.keyboardKey && previous?.keyboardKey === entry.keyboardKey &&
+        previous.familyId === entry.familyId && previous.mode === entry.mode &&
+        now - previous.recordedAt < 380 &&
+        sameLayoutHistoryState(previous.after, entry.before)) {
+      previous.after = entry.after;
+      previous.recordedAt = now;
+      this.redoStack.length = 0;
+      return true;
+    }
+    entry.recordedAt = now;
     this.undoStack.push(entry);
     if (this.undoStack.length > DRAG_HISTORY_LIMIT) this.undoStack.shift();
+    let dataEntries = 0;
+    for (let index = this.undoStack.length - 1; index >= 0; index--) {
+      if (this.undoStack[index].type !== 'database') continue;
+      if (++dataEntries > 8) this.undoStack.splice(index, 1);
+    }
     this.redoStack.length = 0;
     return true;
   },
@@ -667,6 +686,17 @@ function applyDragHistoryEntry(entry, stateKey) {
   const state = entry[stateKey];
   if (!state || !currentGenealogyData() || !genealogyStore) return;
 
+  if (entry.type === 'database') {
+    replaceCanonicalGenealogyDatabase(state);
+    clearNodeSelection();
+    closePersonCardMenu();
+    save({ immediate:true });
+    refreshFamilyUI();
+    render();
+    if (personLibraryDialog?.classList.contains('show')) renderPersonLibrary();
+    return;
+  }
+
   if (entry.type === 'card-layout') {
     const fam = currentGenealogyData().families.find(item => item.id === entry.familyId);
     if (!fam) return;
@@ -709,6 +739,30 @@ function applyDragHistoryEntry(entry, stateKey) {
       immediateSave:true
     });
   }
+}
+
+// 復原所需圖片以 Blob 保留，不會因資料暫時不再引用就被自動清理。
+function retainedHistoryAssetIds() {
+  const ids = new Set();
+  const collect = snapshot => {
+    if (!snapshot) return;
+    assetStore.collectReferencedAssetIds(snapshot,null).forEach(id => ids.add(id));
+  };
+  [...dragHistory.undoStack,...dragHistory.redoStack].forEach(entry => {
+    if (entry.type !== 'database') return;
+    collect(entry.before);
+    collect(entry.after);
+  });
+  return ids;
+}
+function captureCanonicalHistory() {
+  const serialized = genealogyStore?.serializeDatabase?.();
+  if (!serialized || serialized.length > 4000000) return null;
+  return JSON.parse(serialized);
+}
+function recordCanonicalHistory(before) {
+  if (!before) return false;
+  return dragHistory.push({type:'database',before,after:genealogyStore.snapshotDatabase()});
 }
 
 function isNativeTextUndoTarget(target) {
@@ -8308,7 +8362,8 @@ function cleanTraitDisplayText(value) {
 function scheduleGC() {
   assetStore.scheduleGarbageCollect(() => ({
     database:currentGenealogyData(),
-    background:bgSettings
+    background:bgSettings,
+    retainAssetIds:retainedHistoryAssetIds()
   }));
 }
 
@@ -10614,6 +10669,66 @@ const ids = getSelectedLayoutNodeIds();
   return true;
 }
 
+// 精細移動沿用既有自由排列、選取及位置保存；鍵盤長按合併歷史。
+function nudgeSelectedCanvasCards(event) {
+  const directions = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+  const direction = directions[event.key], fam = currentFamily(), layout = getSceneLayout();
+  if (!direction || !fam || !layout || !genealogyScene.isFreeLayoutActive(fam) || arrangeTool !== 'select') return false;
+  const mode = viewMode, saved = fam.manualPositions?.[mode] || {}, positions = {};
+  const step = event.shiftKey ? 10 : 1, dx = direction[0]*step, dy = direction[1]*step;
+  [...selectedNodeIds].forEach(id => {
+    const from = saved[id] || layout.pos?.get(id);
+    if (from) positions[id] = {x:Math.max(0,from.x+dx),y:Math.max(0,from.y+dy)};
+  });
+  (layout.petLayout?.cards || []).forEach(card => {
+    if (!selectedPetIds.has(card.key)) return;
+    const key='pet:'+card.key, from=saved[key] || card;
+    positions[key]={x:Math.max(0,from.x+dx),y:Math.max(0,from.y+dy)};
+  });
+  if (!Object.keys(positions).length) return false;
+  const changed = Object.entries(positions).some(([id,pos]) => {
+    const from=saved[id] || (id.startsWith('pet:')
+      ? layout.petLayout?.cards?.find(card => 'pet:'+card.key === id) : layout.pos?.get(id));
+    return from && (from.x !== pos.x || from.y !== pos.y);
+  });
+  if (!changed) return false;
+  const before=captureLayoutHistoryState(fam,mode);
+  const mutation=genealogyStore.mergeResults(freezeUnpositionedPetCards(fam,mode),genealogyStore.setNodePositions(fam.id,mode,positions));
+  applyGenealogyMutation(mutation);
+  dragHistory.push({type:'card-layout',keyboardKey:event.key,familyId:fam.id,mode,before,after:captureLayoutHistoryState(fam,mode)});
+  syncNodeSelectionClasses();
+  genealogyScene?.resizeStageToContent?.();
+  return true;
+}
+
+async function deleteSelectedCanvasCards() {
+  const fam=currentFamily();
+  if (!fam || !genealogyScene.isFreeLayoutActive(fam) || arrangeTool !== 'select') return false;
+  const simIds=[...selectedNodeIds].filter(id=>!!currentGenealogyData()?.sims?.[id]);
+  const petIds=[...selectedPetIds].map(id=>{
+    const card=getSceneLayout()?.petLayout?.cards?.find(item=>item.key===id);
+    return String(card?.pet?.gameData?.simId || card?.pet?.id || '');
+  }).filter(Boolean);
+  if (!simIds.length && !petIds.length) return false;
+  const confirmed=await uiConfirm(
+    '確定永久刪除選取的 '+(simIds.length+petIds.length)+' 張卡片嗎？\n'+
+    '包含 '+simIds.length+' 位模擬市民、'+petIds.length+' 隻寵物。\n'+
+    '資料將從所有家族及相關關係中移除。可在切換家族或匯入資料前使用 Ctrl + Z 復原。',
+    {title:'刪除選取的卡片',kind:'danger',confirmText:'永久刪除'}
+  );
+  if (!confirmed) return false;
+  const before=captureCanonicalHistory();
+  let mutation=null;
+  simIds.forEach(id=>{mutation=genealogyStore.mergeResults(mutation,purgeSimData(id));});
+  petIds.forEach(id=>{mutation=genealogyStore.mergeResults(mutation,genealogyStore.deletePet(id));});
+  if (!mutation?.dataChanged) return false;
+  clearNodeSelection();
+  applyGenealogyMutation(mutation);
+  recordCanonicalHistory(before);
+  scheduleGC();
+  return true;
+}
+
 function renderPersonCardMenu(simId, clientX, clientY) {
   if (!personCardMenu || !currentGenealogyData()?.sims?.[simId]) return;
   const sim = currentGenealogyData().sims[simId];
@@ -10798,6 +10913,7 @@ const ids =
       title: uiText('移出所選模擬市民'), kind: 'danger', confirmText: uiText('移出家族')
     });
     if (!ok) return;
+    const before=captureCanonicalHistory();
     const mutation =
       genealogyStore.removeFamilyMembers(
         fam.id,
@@ -10806,6 +10922,7 @@ const ids =
 
     clearNodeSelection();
     applyGenealogyMutation(mutation);
+    recordCanonicalHistory(before);
     closePersonCardMenu();
   }
 }
@@ -11055,6 +11172,10 @@ panToolBtn?.addEventListener('click', () => setArrangeTool('pan'));
 
 function isTextInteractionTarget(target) {
   return !!target?.closest?.('input, textarea, select, [contenteditable="true"]');
+}
+function hasBlockingGenealogyDialog() {
+  return MODAL_LIFECYCLE_STACK.some(entry=>entry.dialog?.classList.contains('show')) ||
+    !!document.querySelector('[id$="Dialog"].show, .ui-dialog-mask.show, #fileOperationStatus.show');
 }
 
 function isPanGestureActive() {
@@ -15405,8 +15526,10 @@ const petEditorController = {
 
     if (this.directEntry) {
       const owners = [...$('petOwnerIds').selectedOptions].map(option=>String(option.value)).concat([...this.outsideOwnerIds]);
+      const before=captureCanonicalHistory();
       const mutation = genealogyStore.savePetWithOwners(pet,owners);
       applyGenealogyMutation(mutation);
+      recordCanonicalHistory(before);
       this.close();
       uiToast(uiText('已儲存寵物資料'));
       return;
@@ -15446,11 +15569,13 @@ const petEditorController = {
     if (this.directEntry) {
       // 寵物資料卡的刪除是完整刪除，而非解除飼主；所有飼主引用一併移除。
       const petId = String(pet.gameData?.simId || pet.id || '');
+      const before=captureCanonicalHistory();
       const mutation = genealogyStore.deletePet(petId);
       if (!mutation.dataChanged) return;
       selectedPetIds.delete(petId);
       this.close();
       applyGenealogyMutation(mutation);
+      recordCanonicalHistory(before);
       return;
     }
 
@@ -15763,8 +15888,10 @@ async function deleteChar(id) {
     confirmText: '永久刪除'
   })) return;
 
+  const before=captureCanonicalHistory();
   const mutation = purgeSimData(id);
   finalizeSimDataChange(mutation);
+  recordCanonicalHistory(before);
 
   if (personLibraryDialog.classList.contains('show')) {
     renderPersonLibrary();
@@ -16196,10 +16323,12 @@ async function deletePetFromLibrary(entry) {
     {title:uiText('永久刪除寵物'),kind:'danger',confirmText:uiText('永久刪除')}
   );
   if(!confirmed)return;
+  const before=captureCanonicalHistory();
   const mutation=genealogyStore.deletePet(petId);
   if(!mutation.dataChanged)return;
   selectedPetIds.delete(petId);
   applyGenealogyMutation(mutation);
+  recordCanonicalHistory(before);
   if(personLibraryDialog.classList.contains('show'))renderPersonLibrary();
 }
 
@@ -16536,12 +16665,14 @@ const addMemberController = {
     if (!personLibraryState.addSelection.size) return;
 
     const family = currentFamily();
+    const before=captureCanonicalHistory();
     const mutation = genealogyStore.addFamilyMembers(
       family.id,
       [...personLibraryState.addSelection]
     );
 
     applyGenealogyMutation(mutation);
+    recordCanonicalHistory(before);
     this.close();
     refreshFamilyProfilePanel();
     requestAnimationFrame(() => genealogyViewport.fit());
@@ -18496,11 +18627,14 @@ window.addEventListener('resize', () => {
 
 async function savePersonEditorFromUi() {
   try {
-    return await withActionButtonLoading(
+    const before=captureCanonicalHistory();
+    const result=await withActionButtonLoading(
       $('btnSave'),
       '儲存中',
       () => personEditor.commit()
     );
+    recordCanonicalHistory(before);
+    return result;
   } catch (error) {
     console.error(
       '[Genealogy] Person editor save failed.',
@@ -18535,20 +18669,20 @@ document.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   const modifier = e.ctrlKey || e.metaKey;
 
-  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
+  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && !hasBlockingGenealogyDialog() && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
     spacePanHeld = true;
     updateArrangeToolUI();
     e.preventDefault();
   }
 
-  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
+  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && !hasBlockingGenealogyDialog() && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
     selectVisibleNodes();
     e.preventDefault();
     return;
   }
 
-  // 拖曳復原只在非文字編輯欄位攔截，輸入框仍保留瀏覽器原生 Ctrl+Z。
-  if (modifier && !isNativeTextUndoTarget(e.target)) {
+  // 畫布歷史不干擾輸入框及其他視窗自己的 Ctrl / Cmd + Z。
+  if (modifier && !isNativeTextUndoTarget(e.target) && !hasBlockingGenealogyDialog()) {
     const isUndoShortcut =
       key === 'z' &&
       !e.shiftKey;
@@ -18574,8 +18708,34 @@ document.addEventListener('keydown', e => {
     }
   }
 
+  if (!modifier && !e.altKey && !e.isComposing && !isTextInteractionTarget(e.target) && !hasBlockingGenealogyDialog()) {
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key) && nudgeSelectedCanvasCards(e)) {
+      e.preventDefault();
+      return;
+    }
+    if ((e.key === 'Delete' || e.key === 'Backspace') &&
+        (selectedNodeIds.size || selectedPetIds.size) &&
+        genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
+      e.preventDefault();
+      if (!e.repeat) void deleteSelectedCanvasCards();
+      return;
+    }
+    if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd') {
+      e.preventDefault();
+      const p=zoomCenter();
+      genealogyViewport.zoomAt(p.x,p.y,1.16);
+      return;
+    }
+    if (e.key === '-' || e.code === 'NumpadSubtract') {
+      e.preventDefault();
+      const p=zoomCenter();
+      genealogyViewport.zoomAt(p.x,p.y,1/1.16);
+      return;
+    }
+  }
+
   if (e.key === 'Escape') {
-    if (!closeTopModal() && selectedNodeIds.size) clearNodeSelection();
+    if (!closeTopModal() && (selectedNodeIds.size || selectedPetIds.size)) clearNodeSelection();
     return;
   }
   if (lifePhotoViewerDialog.classList.contains('show')) {
@@ -18587,13 +18747,25 @@ document.addEventListener('keydown', e => {
     const lifePhotoOpen = lifePhotoEditorDialog.classList.contains('show');
     const petEditorOpen = petEditorDialog.classList.contains('show');
     const personEditorOpen = mask.classList.contains('show');
-    if (lifePhotoOpen || petEditorOpen || personEditorOpen) {
+    const nestedDialogOpen=avatarCropDialog.classList.contains('show') ||
+      !!document.querySelector('.ui-dialog-mask.show');
+    if (!nestedDialogOpen && (lifePhotoOpen || petEditorOpen || personEditorOpen)) {
       e.preventDefault();
       if (e.repeat) return;
       if (lifePhotoOpen) lifePhotoWorkspace.commitEditor();
       else if (petEditorOpen) petEditorController.commit();
       else void savePersonEditorFromUi();
       return;
+    }
+    if (!hasBlockingGenealogyDialog() && !isTextInteractionTarget(e.target)) {
+      e.preventDefault();
+      if (e.repeat) return;
+      Promise.resolve(_flushSave())
+        .then(()=>uiToast(uiText('族譜已儲存在此瀏覽器')))
+        .catch(error=>{
+          console.error('[Genealogy] Ctrl + S save failed.',error);
+          void uiAlert(uiText('族譜儲存失敗'),{title:uiText('儲存失敗'),kind:'danger'});
+        });
     }
   }
 });
@@ -18666,6 +18838,7 @@ $('relationshipAddBtn').onclick = () => {
     return;
   }
 
+  const before=captureCanonicalHistory();
   let mutation=null;
 
   targetIds.forEach(targetId=>{
@@ -18704,6 +18877,7 @@ $('relationshipAddBtn').onclick = () => {
   renderRelAnno(c.id);
 
   applyGenealogyMutation(mutation);
+  recordCanonicalHistory(before);
 };
 
 // ========【寵物卡互動】 檢視沿用模擬市民個人資料視窗；編輯沿用既有寵物編輯器 ========
