@@ -18713,14 +18713,14 @@ document.addEventListener('keydown', e => {
       e.preventDefault();
       return;
     }
-    if ((e.key === 'Delete' || e.key === 'Backspace') &&
+    if (e.key === 'Delete' &&
         (selectedNodeIds.size || selectedPetIds.size) &&
         genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
       e.preventDefault();
       if (!e.repeat) void deleteSelectedCanvasCards();
       return;
     }
-    if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd') {
+    if (e.key === '+' || e.code === 'NumpadAdd') {
       e.preventDefault();
       const p=zoomCenter();
       genealogyViewport.zoomAt(p.x,p.y,1.16);
