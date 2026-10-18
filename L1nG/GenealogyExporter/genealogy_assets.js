@@ -821,7 +821,11 @@
       gcTimer = null;
       try {
         const refs = typeof getCurrentReferences === 'function' ? getCurrentReferences() : null;
-        if (refs?.database) await cleanupUnusedAssets(refs.database, refs.background);
+        if (refs?.database) {
+          const used=collectReferencedAssetIds(refs.database,refs.background);
+          for (const id of refs.retainAssetIds || []) used.add(id);
+          await garbageCollect(used);
+        }
       } catch (error) {
         console.warn('[GC] 清理未使用圖片失敗：', error);
       }
