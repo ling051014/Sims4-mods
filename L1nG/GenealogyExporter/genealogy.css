@@ -6883,9 +6883,6 @@ html[lang="en"] body {
 #uiDialog .ui-dialog-actions button.danger:hover {
     background:var(--danger-surface);
 }
-#uiDialog[data-mode="choice"] #uiDialogCancel {
-    order:3;
-}
 @media (max-width:440px) {
     .ui-dialog-mask { padding:12px; }
     .ui-dialog { max-height:calc(100dvh - 24px); }
