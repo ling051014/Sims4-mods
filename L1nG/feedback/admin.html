@@ -6,7 +6,7 @@
         <meta name="theme-color" content="#f7f7f5">
         <title>管理中心 · L1nG</title>
         <link rel="stylesheet" href="feedback.css?v=20261016-feedback-layout-r5">
-        <link rel="stylesheet" href="admin.css?v=20261016-dashboard-mobile-r6">
+        <link rel="stylesheet" href="admin.css?v=20261018-admin-handbook-r1">
         <script src="select-ui.js?v=20261016-dashboard-r3" defer></script>
         <script src="admin-network.js?v=20261018-dashboard-network-r1" defer></script>
         <script src="ga4-country-labels.js?v=20261018-dashboard-regions-r1" defer></script>
@@ -345,6 +345,154 @@
                             </div>
                         </section>
                     </div>
+
+                    <section class="dash-card ops-guide" aria-labelledby="ops-guide-title">
+                        <header class="ops-guide-head">
+                            <span class="eyebrow">WEBSITE OPERATIONS / HANDBOOK</span>
+                            <h3 id="ops-guide-title">網站管理與維運手冊</h3>
+                            <p>不知道設定要去哪裡改時，先在這裡找。依目前 L1nG 的網站架構整理：每個項目都有操作位置、步驟和可直接開啟的官方入口。</p>
+                            <p class="ops-guide-muted">本頁是操作說明，不會讀取或改動 Cloudflare、Google 帳號設定；顯示的是程式配置，不代表線上環境的即時狀態。控制台選單名稱可能隨官方介面更新。</p>
+                        </header>
+                        <div class="ops-guide-entry">
+                            <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare 控制台 <span aria-hidden="true">↗</span></a>
+                            <a href="https://one.dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Zero Trust <span aria-hidden="true">↗</span></a>
+                            <a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer">Google Analytics <span aria-hidden="true">↗</span></a>
+                            <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud <span aria-hidden="true">↗</span></a>
+                            <a href="https://github.com/ling051014/Sims4-mods" target="_blank" rel="noopener noreferrer">GitHub 專案 <span aria-hidden="true">↗</span></a>
+                        </div>
+                        <div class="ops-guide-map">
+                            <h4>目前網站與負責服務</h4>
+                            <p>五個子網域共用 <code>by-l1ng.com</code>，網頁部署由各自的 Cloudflare Pages 專案承接；主網域不等於首頁。</p>
+                            <div class="ops-guide-table-wrap">
+                                <table class="ops-guide-table">
+                                    <thead><tr><th scope="col">網站</th><th scope="col">正式網址</th><th scope="col">主要用途</th></tr></thead>
+                                    <tbody>
+                                        <tr><th scope="row">L1nG 首頁</th><td><a href="https://home.by-l1ng.com/" target="_blank" rel="noopener noreferrer">home.by-l1ng.com ↗</a></td><td>首頁、管理中心、GA4 報表入口</td></tr>
+                                        <tr><th scope="row">RealDate</th><td><a href="https://realdate.by-l1ng.com/" target="_blank" rel="noopener noreferrer">realdate.by-l1ng.com ↗</a></td><td>模組介紹與玩家回饋</td></tr>
+                                        <tr><th scope="row">族譜工具</th><td><a href="https://genealogy-tool.by-l1ng.com/" target="_blank" rel="noopener noreferrer">genealogy-tool.by-l1ng.com ↗</a></td><td>Family Tree 網頁工具</td></tr>
+                                        <tr><th scope="row">族譜提取器</th><td><a href="https://genealogy-exporter.by-l1ng.com/" target="_blank" rel="noopener noreferrer">genealogy-exporter.by-l1ng.com ↗</a></td><td>遊戲端提取器介紹與下載</td></tr>
+                                        <tr><th scope="row">漢化專區</th><td><a href="https://translations.by-l1ng.com/" target="_blank" rel="noopener noreferrer">translations.by-l1ng.com ↗</a></td><td>繁體中文漢化作品</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="ops-guide-muted">例如 <code>family-tree.by-l1ng.com</code> 目前只是討論中的候選網址，不能把它當成已啟用的正式網站。</p>
+                        </div>
+                        <h4 class="ops-guide-group-title">按要做的事情查找</h4>
+                        <div class="ops-guide-topics">
+                            <details class="ops-guide-topic">
+                                <summary><span class="ops-guide-summary"><strong>01　新增或更換子網域</strong><small>Pages 自訂網域、DNS、舊網址 301 轉址，以及程式設定</small></span></summary>
+                                <div class="ops-guide-content">
+                                    <p><strong>什麼時候看這裡？</strong>例如決定將 <code>genealogy-tool.by-l1ng.com</code> 改為 <code>family-tree.by-l1ng.com</code>，或為新作品開設另一個子網域。</p>
+                                    <ol>
+                                        <li><strong>先新增新網址，不要先刪舊網址。</strong>至 <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare</a> → Workers &amp; Pages → 找到對應網站的 Pages 專案 → Custom domains → Set up a domain，新增新子網域。族譜網頁請找現有的族譜工具 Pages 專案，不是 <code>l1ng-home</code>。</li>
+                                        <li><strong>檢查 DNS。</strong>到 Cloudflare → <code>by-l1ng.com</code> → DNS → Records，確認新子網域已正確連到 Pages 且憑證生效。新增 Pages 網域應從 Pages 的 Custom domains 流程開始，不能只手動建立 CNAME 就當成完成。</li>
+                                        <li><strong>同步網站原始碼。</strong>檢查首頁與導覽連結，並更新 <a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/analytics.js" target="_blank" rel="noopener noreferrer"><code>L1nG/analytics.js</code></a> 的站點對照、<a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/cookie-consent.js" target="_blank" rel="noopener noreferrer"><code>cookie-consent.js</code></a> 的允許站點，以及 <a href="https://github.com/ling051014/Sims4-mods/blob/main/functions/feedback/ga4-api.js" target="_blank" rel="noopener noreferrer"><code>ga4-api.js</code></a> 的 GA4 網域篩選。站點間的連結也要一起檢查。</li>
+                                        <li><strong>如果新網址會使用問題回饋，還要同步 Worker。</strong>確認 <a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/feedback/api/wrangler.jsonc" target="_blank" rel="noopener noreferrer"><code>ALLOWED_ORIGINS</code>、<code>TURNSTILE_HOSTNAMES</code></a>、Worker 來源檢查、Turnstile Widget 的 Hostname Management，以及需要時的 GA4 資料串流設定。修改 GitHub 不代表 Worker 已自動部署。</li>
+                                        <li><strong>正式站與 API 驗收完成後才開 301 轉址。</strong>到 Cloudflare → <code>by-l1ng.com</code> → Rules → Redirect Rules，建立只針對舊子網域的永久轉址，保留原路徑及查詢參數。不要設定整個 <code>*.by-l1ng.com</code>，否則會連其他站都轉走。</li>
+                                        <li><strong>最後測試。</strong>以一般與無痕瀏覽器分別檢查新舊網址、首頁導覽、Cookie、GA4、問題回饋、手機版、下載功能；確認正常後再考慮清理過期的設定。</li>
+                                    </ol>
+                                    <p class="ops-guide-warning"><strong>提醒：</strong>子網域改名涉及多個系統，這個頁面只是教學，不會自動替你做設定變更。301 轉址必須由 Cloudflare 實際建立並驗證。</p>
+                                    <div class="ops-guide-links"><a href="https://developers.cloudflare.com/pages/configuration/custom-domains/" target="_blank" rel="noopener noreferrer">Pages 自訂網域官方教學 ↗</a><a href="https://developers.cloudflare.com/rules/url-forwarding/single-redirects/create-dashboard/" target="_blank" rel="noopener noreferrer">Cloudflare 301 轉址教學 ↗</a></div>
+                                </div>
+                            </details>
+                            <details class="ops-guide-topic">
+                                <summary><span class="ops-guide-summary"><strong>02　網站沒有更新或部署失敗</strong><small>GitHub 分支、Cloudflare Pages Deployments、正式站與預覽站</small></span></summary>
+                                <div class="ops-guide-content">
+                                    <ol>
+                                        <li>到 <a href="https://github.com/ling051014/Sims4-mods/branches" target="_blank" rel="noopener noreferrer">GitHub 分支</a>確認修改究竟在 <code>main</code> 還是 <code>genealogy-structural-optimization-20260926</code>；分支預覽不代表正式站已更新。</li>
+                                        <li>到 Cloudflare → Workers &amp; Pages → 對應 Pages 專案 → Deployments，確認 Production 是否使用預期分支、最新部署是否成功及部署時間。<code>l1ng-home</code> 是首頁 Pages 專案。</li>
+                                        <li>部署失敗就開啟該次 Build logs，檢查 Build command、輸出目錄、檔案遺漏、Functions 錯誤；不要只反覆刷新瀏覽器。</li>
+                                        <li>部署成功但內容仍舊時，確認目前開的是正式網域還是 GitHack／pages.dev 預覽，必要時再強制重新整理；沒有部署成功時，清快取通常無法解決。</li>
+                                        <li>留意 <code>l1ng-feedback-api</code> 是獨立 Worker；只更新 Pages 不代表這個 Worker 也更新。</li>
+                                    </ol>
+                                    <div class="ops-guide-links"><a href="https://github.com/ling051014/Sims4-mods/actions" target="_blank" rel="noopener noreferrer">查看 GitHub Actions ↗</a><a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">開啟 Workers &amp; Pages ↗</a></div>
+                                </div>
+                            </details>
+                            <details class="ops-guide-topic">
+                                <summary><span class="ops-guide-summary"><strong>03　管理中心登入、403 或 Failed to fetch</strong><small>Cloudflare Zero Trust、Access 政策、Pages Function 與 Worker Route</small></span></summary>
+                                <div class="ops-guide-content">
+                                    <p>到 <a href="https://one.dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Zero Trust</a> → Access controls → Applications → <code>L1nG Dashboard</code>。確認只有授權管理員可以通過 Allow 政策，且下列路徑均受保護：</p>
+                                    <ul>
+                                        <li><code>home.by-l1ng.com/feedback/admin.html</code>：管理中心頁面，由 Pages Function 驗證。</li>
+                                        <li><code>home.by-l1ng.com/feedback/ga4-api</code>：GA4 報表 API，由 Pages Function 驗證。</li>
+                                        <li><code>home.by-l1ng.com/feedback/admin-api/*</code>：回饋管理 API，經 Cloudflare Worker Route 交給 <code>l1ng-feedback-api</code> 驗證。</li>
+                                    </ul>
+                                    <ol>
+                                        <li><strong>跳出登入頁／403：</strong>先確認 Access 工作階段與 Allow 規則，再核對設定中的 <code>ACCESS_TEAM_DOMAIN</code>、<code>ACCESS_AUD</code>、<code>ADMIN_EMAIL</code> 是否與實際 Access 應用程式一致。</li>
+                                        <li><strong>Failed to fetch：</strong>先區分是回饋 API 還是 GA4 API；再到瀏覽器開發者工具 → Network 看請求網址、HTTP 狀態與重新導向。網路中斷、Access 驗證與 Worker 路由問題要分開查，不能只憑錯誤文字判定。</li>
+                                        <li><strong>匿名安全驗收：</strong>全新無痕視窗請求 <code>/feedback/admin-api/feedback</code> 應被要求登入或拒絕；絕不能直接看到包含玩家資料的 JSON。</li>
+                                    </ol>
+                                    <p class="ops-guide-warning">不要將整個 <code>/feedback/*</code> 設為管理員專用，否則可能阻擋玩家的公開回饋 API。不要為了排除錯誤而停用 JWT 驗證。</p>
+                                    <div class="ops-guide-links"><a href="https://one.dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">開啟 Zero Trust ↗</a><a href="https://developers.cloudflare.com/cloudflare-one/access-controls/policies/app-paths/" target="_blank" rel="noopener noreferrer">Access 網址路徑官方說明 ↗</a></div>
+                                </div>
+                            </details>
+                            <details class="ops-guide-topic">
+                                <summary><span class="ops-guide-summary"><strong>04　GA4 沒資料、流量異常或 API 失敗</strong><small>Google Analytics、Google Cloud 與 Pages 環境變數</small></span></summary>
+                                <div class="ops-guide-content">
+                                    <ol>
+                                        <li>到 <a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer">Google Analytics</a>，選取 L1nG 的 GA4 資源；在 Admin 中核對 Property details、Data streams、Property access management，確認網站使用的衡量 ID 與服務帳戶讀取權限。</li>
+                                        <li>到 <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud</a>，選取 <code>l1ng-ga4-dashboard</code> 專案，確認 APIs &amp; Services 中 Google Analytics Data API 已啟用，並檢查 IAM &amp; Admin → Service Accounts 的對應帳戶。</li>
+                                        <li>到 Cloudflare → Workers &amp; Pages → <code>l1ng-home</code> → Settings → Variables and Secrets（Production），檢查 <code>GA4_PROPERTY_ID</code>、<code>GA4_SERVICE_ACCOUNT_JSON</code>、<code>ACCESS_TEAM_DOMAIN</code>、<code>ACCESS_AUD</code> 的名稱與環境。私鑰必須是 Secret。</li>
+                                        <li>若更換子網域，請同步核對網站的 GA4 追蹤載入、GA4 資料串流網站網址，以及管理 API 中用於篩選站點的 hostname 對照；否則數據可能存在 GA4，卻沒有出現在管理中心。</li>
+                                        <li>先比較 GA4 官方報表與管理中心的同一日期範圍。Cookie 拒絕統計、事件尚未觸發、GA4 處理延遲都可能使數字不同；歷史未追蹤的點擊無法事後補回。</li>
+                                    </ol>
+                                    <p class="ops-guide-muted">資料流向：網站追蹤 → GA4；管理中心 → <code>/feedback/ga4-api</code> → Google Analytics Data API。Google 服務帳戶私鑰不會放在前端。</p>
+                                    <div class="ops-guide-links"><a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer">開啟 GA4 ↗</a><a href="https://console.cloud.google.com/apis/library/analyticsdata.googleapis.com" target="_blank" rel="noopener noreferrer">Analytics Data API ↗</a><a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank" rel="noopener noreferrer">Google Cloud 服務帳戶 ↗</a></div>
+                                </div>
+                            </details>
+                            <details class="ops-guide-topic">
+                                <summary><span class="ops-guide-summary"><strong>05　玩家回饋、附件或安全驗證異常</strong><small>Cloudflare Worker、D1、R2、Turnstile 與網域允許清單</small></span></summary>
+                                <div class="ops-guide-content">
+                                    <p>這套回饋系統與首頁 Pages 的 GA4 Function 是不同服務：<code>l1ng-feedback-api</code> 處理玩家回饋與管理操作；<code>l1ng-feedback-db</code>（D1）保存紀錄；<code>l1ng-feedback-attachments</code>（R2）存放私人附件。</p>
+                                    <ol>
+                                        <li>到 Cloudflare → Workers &amp; Pages → <code>l1ng-feedback-api</code>，查看 Deployments／Logs、Settings → Variables and Secrets，確認 <code>TURNSTILE_SECRET_KEY</code>、<code>ACCESS_TEAM_DOMAIN</code>、<code>ACCESS_AUD</code>、<code>ADMIN_EMAIL</code> 等設定存在且環境正確。</li>
+                                        <li>到 Worker → Settings → Domains &amp; Routes，核對管理 API Route 是否匹配 <code>home.by-l1ng.com/feedback/admin-api/*</code>；不要把整個首頁路由交給回饋 Worker。</li>
+                                        <li>到 Cloudflare → D1 → <code>l1ng-feedback-db</code> 查看資料庫狀況；R2 → <code>l1ng-feedback-attachments</code> 確認附件儲存空間與 Worker 綁定。R2 必須保持私有，不要開 Public Access。</li>
+                                        <li>到 Cloudflare → Turnstile → 現有 Widget → Settings → Hostname Management，檢查 RealDate 與族譜工具使用的主機名稱；新增或改名網址時，同時核對 Worker 的 <code>ALLOWED_ORIGINS</code>、<code>TURNSTILE_HOSTNAMES</code>。</li>
+                                        <li>以不含私人資料的測試回饋確認提交、憑證查詢、管理員讀取、附件上傳及回覆。遇到失敗，應查看 Worker Logs 與回應狀態，勿直接清空 D1 或 R2。</li>
+                                    </ol>
+                                    <p class="ops-guide-warning">D1 / R2 不是可以重建就自動恢復玩家資料的快取。操作刪除、重建資料表或更換 Bucket 前，應先有安全備份及回復方案。</p>
+                                    <div class="ops-guide-links"><a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare Worker / D1 / R2 ↗</a><a href="https://developers.cloudflare.com/turnstile/get-started/widget-management/dashboard/" target="_blank" rel="noopener noreferrer">Turnstile 管理教學 ↗</a><a href="https://developers.cloudflare.com/workers/configuration/routing/routes/" target="_blank" rel="noopener noreferrer">Worker Route 官方教學 ↗</a></div>
+                                </div>
+                            </details>
+                            <details class="ops-guide-topic">
+                                <summary><span class="ops-guide-summary"><strong>06　Cookie、隱私與跨站統計</strong><small>五個子網域共用 Cookie，訪客的統計同意與拒絕</small></span></summary>
+                                <div class="ops-guide-content">
+                                    <ol>
+                                        <li>共用 Cookie 的 Domain 是 <code>.by-l1ng.com</code>；不要因為只改一個子網域，就把共用 Cookie Domain 改成單一網站。</li>
+                                        <li>可在 <a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/cookie-consent.js" target="_blank" rel="noopener noreferrer"><code>L1nG/cookie-consent.js</code></a> 檢查已允許的網站名稱及統計載入政策；更換網域時同步新增或移除已授權的主機名稱。</li>
+                                        <li>在無痕視窗重新檢查接受統計、拒絕統計、開啟偏好設定三種操作，以及子網域間選擇是否一致。不得為了讓 GA4 數字增加而繞過訪客的同意設定。</li>
+                                    </ol>
+                                    <div class="ops-guide-links"><a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/cookie-consent.js" target="_blank" rel="noopener noreferrer">查看 Cookie 程式 ↗</a><a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer">比對 GA4 報表 ↗</a></div>
+                                </div>
+                            </details>
+                            <details class="ops-guide-topic">
+                                <summary><span class="ops-guide-summary"><strong>07　故障速查與修改前後驗收</strong><small>不知道從哪裡查起時，先依症狀定位</small></span></summary>
+                                <div class="ops-guide-content">
+                                    <div class="ops-guide-table-wrap">
+                                        <table class="ops-guide-table">
+                                            <thead><tr><th scope="col">症狀</th><th scope="col">先檢查哪裡</th></tr></thead>
+                                            <tbody>
+                                                <tr><th scope="row">改好 GitHub，網站仍是舊畫面</th><td>GitHub 分支 → Pages Deployments → Production 建置結果 → 瀏覽器快取</td></tr>
+                                                <tr><th scope="row">新網域打不開、404 / 522</th><td>Pages Custom domains → DNS Records → 網域憑證與 Redirect Rules</td></tr>
+                                                <tr><th scope="row">管理中心登入不成功 / 403</th><td>Zero Trust → L1nG Dashboard → Access 網址路徑、Allow 政策與 JWT 設定</td></tr>
+                                                <tr><th scope="row">Failed to fetch</th><td>瀏覽器 Network 區分 <code>admin-api</code> 或 <code>ga4-api</code> → Access → Worker / Pages Logs</td></tr>
+                                                <tr><th scope="row">GA4 沒有訪客或下載數據</th><td>GA4 官方報表 → Cookie 同意 → Data streams → Pages 的 GA4 API 設定</td></tr>
+                                                <tr><th scope="row">玩家送出回饋失敗</th><td>Turnstile Hostnames → Worker Logs → Origins → D1 寫入限制</td></tr>
+                                                <tr><th scope="row">回饋附件無法上傳或下載</th><td>Worker Logs → R2 Bucket / Binding → 附件大小與存取權限</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <h5>每次修改前</h5>
+                                    <p>確認正在編輯正確的分支與專案、記錄原設定、確認備份是否存在、核對變更範圍；修改身分驗證、DNS、Worker Route 或資料庫時，先規劃回復方法。</p>
+                                    <h5>每次修改後</h5>
+                                    <p>查看部署是否成功，使用電腦與手機、登入與無痕視窗測試；至少驗證站內連結、Cookie、GA4、管理 API、安全登入及問題回饋，再宣布正式完成。</p>
+                                    <p class="ops-guide-muted">安全原則：<code>GA4_SERVICE_ACCOUNT_JSON</code>、<code>TURNSTILE_SECRET_KEY</code>、Access JWT 與私人憑證都不能貼在 GitHub、聊天室、公開 HTML 或玩家回饋裡。這份手冊只列變數名稱，不儲存任何密鑰。</p>
+                                </div>
+                            </details>
+                        </div>
+                        <p class="ops-guide-footnote">手冊內容以 2026/10/18 的專案程式架構為基礎；新增站點、調整部署或改動安全配置後，也應同步更新此頁，避免教學過期。</p>
+                    </section>
                 </section>
             </div>
         </div>
