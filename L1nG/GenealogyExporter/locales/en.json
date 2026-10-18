@@ -6,6 +6,17 @@
     "canonical": false
   },
   "messages": {
+    "族譜已儲存在此瀏覽器": "Family tree saved in this browser.",
+    "族譜儲存失敗": "Failed to save the family tree.",
+    "刪除選取的卡片": "Delete selected cards",
+    "復原上一步卡片位置、關係名稱或資料修改；文字輸入仍使用瀏覽器原生復原": "Undo the last card position, relationship label, or data change; text inputs keep their native undo.",
+    "重做上一步操作": "Redo the last action",
+    "微調選取的市民 / 寵物卡片位置；按住 ": "Nudge selected Sim / pet cards; hold ",
+    " 每次移動 10 單位": " to move 10 units at a time",
+    "刪除選取的卡片，操作前會要求確認": "Delete selected cards with confirmation",
+    "放大 / 縮小族譜畫布（不影響瀏覽器縮放）": "Zoom the family tree canvas (without changing browser zoom)",
+    "新增或編輯市民、寵物時儲存；在畫布上則將目前族譜儲存於瀏覽器": "Save when editing Sims or pets; on the canvas, save the family tree in this browser.",
+    "新增或編輯市民、寵物及人生照片時儲存；在畫布上則將目前族譜儲存於瀏覽器": "Save when editing Sims, pets, or life photos; on the canvas, save the family tree in this browser.",
     "找不到包含這位模擬市民的族譜，請先將其加入家族。": "No family tree contains this Sim. Add them to a family first.",
     "這位模擬市民目前沒有可顯示的族譜卡片。": "This Sim has no visible card in the family tree.",
     "目前使用量": "Current Usage",
