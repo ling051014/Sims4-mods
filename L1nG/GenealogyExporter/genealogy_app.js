@@ -8774,16 +8774,6 @@ function statusIconHTML(sim) {
   return `<span class="person-meta-icon status-icon status-${esc(status.className)}" title="${esc(status.text)}">${iconSvg(status.icon)}</span>`;
 }
 
-function raceIconHTML(sim) {
-  const race =
-    buildPersonPresentation(sim)
-      ?.race;
-
-  if (!race?.icon) return '';
-
-  return `<span class="person-meta-icon race-icon" title="${esc(race.text)}">${iconSvg(race.icon)}</span>`;
-}
-
 function personTraitDisplayLabels(
   traits,
   owner = null
