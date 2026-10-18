@@ -1796,97 +1796,6 @@ function relationshipSegmentIntersectsRect(
   );
 }
 
-function relationshipBlockingCard(
-  routeContext,
-  x1,
-  y1,
-  x2,
-  y2
-) {
-  if (
-    !routeContext?.pos ||
-    !routeContext?.byId
-  ) {
-    return null;
-  }
-
-  const ignored =
-    new Set([
-      String(
-        routeContext.fromId || ''
-      ),
-      String(
-        routeContext.toId || ''
-      )
-    ]);
-
-  const geometry =
-    routeContext.geometry ||
-    (
-      routeContext.pos ===
-        layoutCache?.pos
-        ? layoutCache.geometry
-        : null
-    );
-
-  const candidates =
-    queryGeometryCandidatesForSegment(
-      geometry,
-      x1,
-      y1,
-      x2,
-      y2
-    );
-
-  const candidateIds =
-    candidates ||
-    new Set(
-      [...routeContext.pos.keys()]
-        .map(String)
-    );
-
-  for (
-    const id
-    of candidateIds
-  ) {
-    if (ignored.has(String(id))) {
-      continue;
-    }
-
-    const position =
-      routeContext.pos.get(id);
-
-    if (!position) {
-      continue;
-    }
-
-    const rect =
-      geometry?.rects?.get(
-        String(id)
-      ) ||
-      cardOuterRect(
-        position
-      );
-
-    if (
-      relationshipSegmentIntersectsRect(
-        x1,
-        y1,
-        x2,
-        y2,
-        rect
-      )
-    ) {
-      return {
-        id:String(id),
-        rect
-      };
-    }
-  }
-
-  return null;
-}
-
 function relationshipPairRenderGeometry(a,b,setting,routeContext=null) {
   const {aX,aY,bX,bY}=getPairConnectionGeometry(a,b);
   // 伴侶關係維持既有正交路線，僅處理舊存檔明確指定的曲線。
@@ -2078,19 +1987,6 @@ function relationshipCubicGeometry(segments) {
     walked+=lengths[i];
   }
   return {d:d.join(' '),labelX:label.x,labelY:label.y,segments};
-}
-
-function relationshipArcCandidate(start,end,amplitude,sign) {
-  const dx=end.x-start.x,dy=end.y-start.y;
-  const length=Math.max(1,Math.hypot(dx,dy));
-  const nx=-dy/length,ny=dx/length;
-  const normal=amplitude*sign;
-  return [{
-    from:start,
-    c1:{x:start.x+dx*0.28+nx*normal,y:start.y+dy*0.28+ny*normal},
-    c2:{x:end.x-dx*0.28+nx*normal,y:end.y-dy*0.28+ny*normal},
-    to:end
-  }];
 }
 
 // ========【智慧曲線】 所有線各自避障，只有單一、向上凸的 Bézier 弧線 ========

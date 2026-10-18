@@ -1800,20 +1800,6 @@ body[data-theme="graphite"] .life-photo-stage {
     /* 自動換行 */ flex-wrap: wrap;
 }
 
-.ui-dialog-panel h2 .family-name-chip {
-    /* 顯示方式 */ display: inline-block;
-    /* 內縮空間 */ padding: 1px 8px;
-    /* 圓角弧度 */ border-radius: 6px;
-    /* 背景設定 */ background: var(--surface-item);
-    /* 文字顏色 */ color: var(--action-primary);
-    /* 字體大小 */ font-size: 14px;
-    /* 字體粗細 */ font-weight: 700;
-    /* 最大寬度 */ max-width: 280px;
-    /* 溢出處理 */ overflow: hidden;
-    /* 文字溢出 */ text-overflow: ellipsis;
-    /* 換行方式 */ white-space: nowrap;
-    /* 垂直對齊 */ vertical-align: middle;
-}
 
 
 /* ========【共用提示 Tooltip】 小 i 圖示放在標題／欄位名稱後方，懸停或鍵盤焦點顯示 ======== */
@@ -3685,9 +3671,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .genealogy-feedback-panel .genealogy-feedback-thread{display:flex;flex:1 1 auto;flex-direction:column;gap:0;min-width:0;min-height:0;overflow:hidden}
 .genealogy-feedback-panel .genealogy-feedback-thread-top{display:flex;flex:0 0 auto;flex-direction:column;gap:13px;padding:16px 20px 12px;border-bottom:1px solid var(--gf-stroke)}
 .genealogy-feedback-panel .genealogy-feedback-thread-heading{margin:0;font-size:13px;font-weight:700;color:var(--gf-text)}
-.genealogy-feedback-panel .genealogy-feedback-history-footer{display:none;flex:0 0 auto;justify-content:flex-end;align-items:center;padding:10px 20px;border-top:1px solid var(--gf-stroke);background:var(--gf-surface)}
-.genealogy-feedback-panel .genealogy-feedback-history-footer .genealogy-feedback-back-link{margin:0}
-.genealogy-feedback-panel #genealogyFeedbackHistoryPanel.is-success>.genealogy-feedback-history-footer{display:none}
 .genealogy-feedback-panel #genealogyFeedbackHistoryPanel.is-thread>.genealogy-feedback-scroll{display:none}
 .genealogy-feedback-panel .genealogy-feedback-success{display:flex;flex-direction:column;align-items:center;gap:13px;padding:0 0 8px;min-width:0;text-align:center}
 .genealogy-feedback-panel .genealogy-feedback-success-bubble{width:65px;height:65px;display:grid;place-items:center;border-radius:19px;background:#eaf5ef;color:#307c59}
@@ -3788,41 +3771,9 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     font-size:11.5px;
 }
 
-.genealogy-feedback-nav {
-    display:flex;
-    flex:0 0 auto;
-    align-items:center;
-    justify-content:flex-end;
-    min-height:48px;
-    padding:0 20px;
-    background:var(--gf-surface);
-}
 
-.genealogy-feedback-panel .genealogy-feedback-nav-link {
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:5px;
-    min-height:36px;
-    padding:7px 5px;
-    border:0;
-    border-radius:7px;
-    background:transparent;
-    color:var(--gf-primary);
-    font-family:inherit;
-    font-size:12px;
-    font-weight:600;
-    line-height:1.4;
-    cursor:pointer;
-}
 
-.genealogy-feedback-nav-link:hover {
-    background:var(--gf-primary-pale);
-}
 
-.genealogy-feedback-panel .genealogy-feedback-nav-link[hidden] {
-    display:none;
-}
 
 .genealogy-feedback-back-icon {
     transform:rotate(90deg);
@@ -3836,7 +3787,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     transition:transform .16s ease;
 }
 
-.genealogy-feedback-nav-link:hover .genealogy-feedback-arrow,
 .genealogy-feedback-submit:hover .genealogy-feedback-arrow {
     transform:translateX(3px);
 }
@@ -4727,10 +4677,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
         padding:15px 16px 12px;
     }
 
-    .genealogy-feedback-nav {
-        padding:0 16px;
-        min-height:48px;
-    }
 
     .genealogy-feedback-panel .genealogy-feedback-scroll {
         padding:0 16px 20px;
@@ -4738,7 +4684,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     .genealogy-feedback-panel .genealogy-feedback-thread-top{padding:13px 16px 10px}
     .genealogy-feedback-panel .genealogy-feedback-conversation{padding:14px 16px}
     .genealogy-feedback-panel .genealogy-feedback-reply-form{padding:12px 16px}
-    .genealogy-feedback-panel .genealogy-feedback-history-footer{padding:10px 16px}
 
     .genealogy-feedback-section {
         padding:17px 0;
@@ -4773,7 +4718,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     .genealogy-feedback-panel .genealogy-feedback-type-choice > strong,
     .genealogy-feedback-panel .genealogy-feedback-reply-text strong,
     .genealogy-feedback-panel .genealogy-feedback-contact-copy strong,
-    .genealogy-feedback-panel .genealogy-feedback-verify-text strong,
     .genealogy-feedback-panel .genealogy-feedback-error-copy strong {
         font-size:13px;
         line-height:1.45;
@@ -4784,7 +4728,6 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     .genealogy-feedback-panel .genealogy-feedback-field-note,
     .genealogy-feedback-panel .genealogy-feedback-reply-text small,
     .genealogy-feedback-panel .genealogy-feedback-contact-copy small,
-    .genealogy-feedback-panel .genealogy-feedback-verify-text small,
     .genealogy-feedback-panel .genealogy-feedback-error-copy p,
     .genealogy-feedback-panel .genealogy-feedback-policy,
     .genealogy-feedback-panel .genealogy-feedback-files li,
@@ -5614,7 +5557,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .person-library-item.batch-mode .person-library-batch-select.selected { border-color:var(--action-primary); background:var(--action-primary); color:#fff; }
 .person-library-batch-select .l1ng-icon { width:12px; height:12px; }
 .person-library-item.batch-mode .person-library-item-menu { display:none; }
-.person-library-empty,.family-member-picker-empty { padding:40px 20px; color:var(--text-secondary); font-size:12.5px; text-align:center; }
+.person-library-empty { padding:40px 20px; color:var(--text-secondary); font-size:12.5px; text-align:center; }
 .person-library-batch-toolbar {
     flex:0 0 auto;
     display:flex;
@@ -6672,7 +6615,6 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 .person-card-avatar img,
 .person-card-view-avatar img,
 .person-library-avatar img,
-.family-member-picker-avatar img,
 .pet-item-avatar img {
     /* 圖片繪製方式 */ image-rendering: auto;
 }
