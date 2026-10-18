@@ -17870,68 +17870,6 @@ function gameSaveSlotLabel(
   );
 }
 
-function gameImportSourceMessageLines(
-  analysis
-) {
-  const source =
-    analysis?.source || {};
-
-  const lines = [];
-
-  if (
-    source.verification ===
-    'same_slot'
-  ) {
-    lines.push(
-      uiText('已確認來自相同遊戲存檔。'),
-      gameSaveSlotLabel(
-        source.incomingSave
-      )
-    );
-  } else if (
-    source.verification ===
-    'known_save'
-  ) {
-    lines.push(
-      uiText('這份資料來自先前匯入過的遊戲存檔。'),
-      gameSaveSlotLabel(
-        source.incomingSave
-      )
-    );
-  } else if (
-    source.verification ===
-    'different_slot'
-  ) {
-    lines.push(
-      uiText('偵測到不同的遊戲存檔。'),
-      `${uiText('目前族譜')}：${gameSaveSlotLabel(source.currentSave)}`,
-      `${uiText('這次匯入')}：${gameSaveSlotLabel(source.incomingSave)}`
-    );
-  } else if (
-    source.verification ===
-    'conflict'
-  ) {
-    lines.push(
-      uiText('ZIP 內的存檔識別資料不一致，網站無法自動確認來源。')
-    );
-  } else {
-    lines.push(
-      uiText('目前無法確認存檔來源，將以相同遊戲模擬市民作為更新參考。')
-    );
-  }
-
-  if (source.olderImport) {
-    lines.push(
-      '',
-      uiText('這份遊戲資料早於目前族譜最後一次匯入，更新可能會同步回較早的遊戲狀態。'),
-      `${uiText('目前最後匯入')}：${formatGameImportTime(source.currentLastImportedAt)}`,
-      `${uiText('這次匯出')}：${formatGameImportTime(source.incomingImportedAt)}`
-    );
-  }
-
-  return lines;
-}
-
 function currentGameImportUpdateAnalysis(
   incomingDatabase
 ) {
@@ -18019,25 +17957,43 @@ function gameImportNewRichContent(sims, pets, families, portraits, gameDate, cur
   };
 }
 
-async function chooseGameImportMode(
-  analysis
-) {
-  const currentDatabase =
-    currentGenealogyData();
+/* ========【匯入視窗】結構化內容為單一來源，純文字備援由同份資料產生 ======== */
+function gameImportDialogText(content) {
+  if (!content) return '';
+  const blocks = [];
+  const append = lines => {
+    const visible = (lines || []).filter(value =>
+      value !== null && value !== undefined && String(value).trim()
+    );
+    if (visible.length) blocks.push(visible.map(String).join('\n'));
+  };
+  const details = entries => (entries || []).map(([label, value]) =>
+    String(label) + '：' + String(value ?? '')
+  );
+  append([content.lead]);
+  append(details(content.meta));
+  append([...(content.statsTitle && content.stats?.length ? [content.statsTitle] : []),
+    ...details(content.stats)]);
+  (content.sections || []).forEach(section => {
+    if (section?.items?.length) append([section.title, ...details(section.items)]);
+  });
+  append(content.paragraphs);
+  append(content.warnings);
+  append([content.footer]);
+  if (content.importWarning?.title) {
+    append([content.importWarning.title, content.importWarning.description]);
+  }
+  return blocks.join('\n\n');
+}
+
+async function chooseGameImportMode(analysis) {
+  const currentDatabase = currentGenealogyData();
 
   // 內建預設族譜只是示範資料，第一次匯入真正遊戲 ZIP 時直接建立新族譜。
-  if (
-    currentDatabase?.meta?.sample === true
-  ) {
-    return 'replace';
-  }
+  if (currentDatabase?.meta?.sample === true) return 'replace';
 
-  if (
-    !analysis ||
-    analysis.currentGameSimCount <= 0
-  ) {
+  if (!analysis || analysis.currentGameSimCount <= 0) {
     // 沒有既有遊戲來源不代表網站沒有玩家自行建立的資料。
-    // 只有真的有內容時才確認，空白族譜與內建範例仍直接匯入。
     const pets = currentDatabase?.pets;
     const hasExistingContent =
       Object.keys(currentDatabase?.sims || {}).length > 0 ||
@@ -18051,65 +18007,43 @@ async function chooseGameImportMode(
     if (!hasExistingContent) return 'replace';
 
     hideFileOperationStatus();
-    const replace = await uiConfirm(
-      uiText('目前族譜含有網站自行建立的資料，匯入這份 ZIP 將取代現有內容。建議先匯出 JSON 備份。'),
-      {
-        title:'匯入遊戲族譜',
-        kind:'danger',
-        confirmText:'覆蓋現有族譜',
-        backupAction:exportCurrentGenealogyBackup,
-        richContent:{
-          lead:'請確認是否要取代目前族譜。',
-          warnings:['目前族譜含有網站自行建立的資料，匯入這份 ZIP 將取代現有內容。建議先匯出 JSON 備份。']
-        }
-      }
-    );
+    const richContent = {
+      lead:'請確認是否要取代目前族譜。',
+      warnings:['目前族譜含有網站自行建立的資料，匯入這份 ZIP 將取代現有內容。建議先匯出 JSON 備份。']
+    };
+    const replace = await uiConfirm(gameImportDialogText(richContent), {
+      title:'匯入遊戲族譜',
+      kind:'danger',
+      confirmText:'覆蓋現有族譜',
+      backupAction:exportCurrentGenealogyBackup,
+      richContent
+    });
     return replace ? 'replace' : 'cancel';
   }
 
   hideFileOperationStatus();
+  const source = analysis.source || {};
+  const continuation =
+    source.verification === 'different_slot' && analysis.matchedSimCount > 0;
+  const sourceAllowsUpdate =
+    source.verification === 'same_slot' || source.verification === 'known_save';
+  const fallbackAllowsUpdate =
+    (source.verification === 'unverified' || source.verification === 'conflict') &&
+    analysis.matchedSimCount > 0;
+  const canUpdate = continuation || sourceAllowsUpdate || fallbackAllowsUpdate;
+  const richContent = gameImportChoiceRichContent(analysis, {canUpdate, continuation});
+  // 操作提示也取自視窗內容，避免獨立維護第二份文字。
+  const updateExplanation = richContent.paragraphs?.[0] || '';
+  const replaceExplanation = richContent.warnings?.at(-1) || '';
 
-  const source =
-    analysis.source || {};
-
-  const sourceLines =
-    gameImportSourceMessageLines(
-      analysis
-    );
-
-  const statsLines = [
-    `${uiText('找到相同遊戲模擬市民')}：${analysis.matchedSimCount}`,
-    `${uiText('這次新增模擬市民')}：${analysis.newSimCount}`,
-    `${uiText('這次未出現模擬市民')}：${analysis.missingSimCount}`
-  ];
-
-  const updateExplanation = uiText(LIFE_PHOTOS_PUBLIC
-    ? '同步遊戲資料時，會保留手動排列、人生照片、自訂關係、自訂標籤、家庭封面及網站上的其他調整。'
-    : '同步遊戲資料時，會保留手動排列、自訂關係、自訂標籤、家庭封面及網站上的其他調整。');
-  const replaceExplanation =
-    uiText('若以這份 ZIP 重新建立族譜，現有內容將被取代。建議先匯出 JSON 備份。');
-  const choiceExplanation = [updateExplanation, replaceExplanation];
-
-  if (
-    source.verification ===
-      'different_slot' &&
-    analysis.matchedSimCount > 0
-  ) {
+  if (continuation) {
     return await openUiDialog({
       title:'匯入遊戲族譜',
-      message:[
-        ...sourceLines,
-        '',
-        ...statsLines,
-        '',
-        uiText('如果這是「另存新檔」後繼續遊玩的存檔，可以將它視為同一族譜並繼續更新。'),
-        '',
-        ...choiceExplanation
-      ].join('\n'),
+      message:gameImportDialogText(richContent),
       mode:'choice',
       confirmText:'這是同一族譜，繼續更新',
       confirmValue:'continue_update',
-      richContent:gameImportChoiceRichContent(analysis, {canUpdate:true, continuation:true}),
+      richContent,
       confirmHint:'將這個不同存檔記錄為目前族譜的延續來源，並同步最新遊戲資料。',
       secondaryText:'覆蓋現有族譜',
       secondaryValue:'replace',
@@ -18121,38 +18055,14 @@ async function chooseGameImportMode(
     });
   }
 
-  const sourceAllowsUpdate =
-    source.verification ===
-      'same_slot' ||
-    source.verification ===
-      'known_save';
-
-  const fallbackAllowsUpdate =
-    (
-      source.verification ===
-        'unverified' ||
-      source.verification ===
-        'conflict'
-    ) &&
-    analysis.matchedSimCount > 0;
-
-  if (
-    sourceAllowsUpdate ||
-    fallbackAllowsUpdate
-  ) {
+  if (canUpdate) {
     return await openUiDialog({
       title:'匯入遊戲族譜',
-      message:[
-        ...sourceLines,
-        '',
-        ...statsLines,
-        '',
-        ...choiceExplanation
-      ].join('\n'),
+      message:gameImportDialogText(richContent),
       mode:'choice',
       confirmText:'更新目前族譜',
       confirmValue:'update',
-      richContent:gameImportChoiceRichContent(analysis, {canUpdate:true}),
+      richContent,
       confirmHint:updateExplanation,
       secondaryText:'覆蓋現有族譜',
       secondaryValue:'replace',
@@ -18164,57 +18074,15 @@ async function chooseGameImportMode(
     });
   }
 
-  const replace = await uiConfirm(
-    [
-      ...sourceLines,
-      '',
-      uiText('目前族譜已有遊戲資料，但這份 ZIP 沒有找到可安全更新的相同來源。'),
-      uiText('是否仍要使用這份 ZIP 覆蓋現有族譜？'),
-      '',
-      replaceExplanation
-    ].join('\n'),
-    {
-      title:'匯入遊戲族譜',
-      kind:'danger',
-      confirmText:'覆蓋現有族譜',
-      cancelText:'取消',
-      richContent:gameImportChoiceRichContent(analysis, {canUpdate:false}),
-      backupAction:exportCurrentGenealogyBackup
-    }
-  );
-
-  return replace
-    ? 'replace'
-    : 'cancel';
-}
-
-function gameImportUpdateSummary(
-  result,
-  avatarStats
-) {
-  const stats =
-    result?.stats || {};
-
-  return [
-    uiText('遊戲族譜已更新。'),
-    '',
-    `${uiText('相同模擬市民')}：${stats.people?.matched || 0}`,
-    `${uiText('新增模擬市民')}：${stats.people?.added || 0}`,
-    `${uiText('本次未出現模擬市民')}：${stats.people?.notSeen || 0}`,
-    `${uiText('同步寵物')}：${stats.pets?.matched || 0}`,
-    `${uiText('新增寵物')}：${stats.pets?.added || 0}`,
-    `${uiText('更新家庭')}：${stats.families?.matched || 0}`,
-    `${uiText('新增家庭')}：${stats.families?.added || 0}`,
-    `${uiText('同步遊戲關係')}：${stats.relationships?.matched || 0}`,
-    `${uiText('新增遊戲關係')}：${stats.relationships?.added || 0}`,
-    `${uiText('移除已不存在的遊戲關係')}：${stats.relationships?.removed || 0}`,
-    `${uiText('新匯入頭像')}：${avatarStats?.saved || 0}`,
-    avatarStats?.decodeFailed ? `有 ${avatarStats.decodeFailed} 張遊戲頭像無法解析，已略過。` : null,
-    '',
-    uiText(LIFE_PHOTOS_PUBLIC
-      ? '已保留：手動排列、人生照片、自訂關係、自訂標籤、家庭封面與網站手動資料。'
-      : '已保留：手動排列、自訂關係、自訂標籤、家庭封面與網站手動資料。')
-  ].filter(line => line !== null).join('\n');
+  const replace = await uiConfirm(gameImportDialogText(richContent), {
+    title:'匯入遊戲族譜',
+    kind:'danger',
+    confirmText:'覆蓋現有族譜',
+    cancelText:'取消',
+    richContent,
+    backupAction:exportCurrentGenealogyBackup
+  });
+  return replace ? 'replace' : 'cancel';
 }
 
 async function importGameGenealogy(file) {
@@ -18407,8 +18275,7 @@ async function importGameGenealogy(file) {
     hideFileOperationStatus();
 
     if (isUpdate) {
-      const summaryLines = gameImportUpdateSummary(updateResult, avatarStats)
-        .split('\n').filter(Boolean);
+      const richContent = gameImportUpdateRichContent(updateResult, avatarStats);
       const diagnosticReport=makeGenealogyImportDiagnostic({
         source:'game-zip',stage:'avatar-conversion',file,
         failures:avatarStats.decodeFailures || [],
@@ -18418,10 +18285,10 @@ async function importGameGenealogy(file) {
       const detailOptions=(avatarStats.decodeFailures || []).length
         ? genealogyImportDetailOptions(diagnosticReport,avatarStats.decodeFailures)
         : null;
-      await uiAlert(summaryLines.join('\n'), {
+      await uiAlert(gameImportDialogText(richContent), {
         title:'遊戲族譜更新完成',
         kind:'success',
-        richContent:gameImportUpdateRichContent(updateResult, avatarStats),
+        richContent,
         confirmText:'查看族譜',
         details:detailOptions
       });
@@ -18435,22 +18302,14 @@ async function importGameGenealogy(file) {
       const detailOptions=(avatarStats.decodeFailures || []).length
         ? genealogyImportDetailOptions(diagnosticReport,avatarStats.decodeFailures)
         : null;
-      await uiAlert([
-        '遊戲族譜已成功匯入。',
-        `${uiText('模擬市民')}：${simCount}`,
-        `${uiText('寵物')}：${petCount}`,
-        `${uiText('家族')}：${familyCount}`,
-        `${uiText('頭像')}：${avatarStats.saved}`,
-        avatarStats.decodeFailed
-          ? `${avatarStats.decodeFailed} ${uiText('張頭像無法解析，已略過；其他資料已成功匯入。')}`
-          : null,
-        importedGameDate ? `${uiText('遊戲日期')}：${importedGameDate}` : null,
-        `${uiText('目前顯示')}：${activeFamilyName}`
-      ].filter(Boolean).join('\n'), {
+      const richContent = gameImportNewRichContent(
+        simCount, petCount, familyCount, avatarStats.saved,
+        importedGameDate, activeFamilyName, avatarStats.decodeFailed
+      );
+      await uiAlert(gameImportDialogText(richContent), {
         title:'遊戲族譜匯入完成',
         kind:'success',
-        richContent:gameImportNewRichContent(simCount, petCount, familyCount,
-          avatarStats.saved, importedGameDate, activeFamilyName, avatarStats.decodeFailed),
+        richContent,
         confirmText:'查看族譜',
         details:detailOptions
       });
