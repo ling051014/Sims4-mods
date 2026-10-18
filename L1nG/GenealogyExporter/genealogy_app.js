@@ -754,14 +754,36 @@ function retainedHistoryAssetIds() {
   });
   return ids;
 }
+// 資料操作必須先取得可還原快照；大型族譜不得因大小門檻靜默跳過復原。
 function captureCanonicalHistory() {
-  const serialized = genealogyStore?.serializeDatabase?.();
-  if (!serialized || serialized.length > 4000000) return null;
-  return JSON.parse(serialized);
+  try {
+    return genealogyStore.snapshotDatabase();
+  } catch (error) {
+    console.error('[Genealogy] 無法建立操作歷史，已取消資料變更。',error);
+    void uiAlert(uiText('無法建立復原記錄，操作已取消。'),{
+      title:uiText('操作未執行'),kind:'danger'
+    });
+    return null;
+  }
 }
 function recordCanonicalHistory(before) {
   if (!before) return false;
-  return dragHistory.push({type:'database',before,after:genealogyStore.snapshotDatabase()});
+  try {
+    return dragHistory.push({
+      type:'database',before,after:genealogyStore.snapshotDatabase()
+    });
+  } catch (error) {
+    // 不允許資料已刪除卻沒有可用的操作歷史。
+    console.error('[Genealogy] 無法完成復原記錄，回復操作前資料。',error);
+    replaceCanonicalGenealogyDatabase(before);
+    save({immediate:true});
+    refreshFamilyUI();
+    render();
+    void uiAlert(uiText('無法保存復原記錄，已還原本次變更。'),{
+      title:uiText('操作已取消'),kind:'danger'
+    });
+    return false;
+  }
 }
 
 function isNativeTextUndoTarget(target) {
@@ -10720,11 +10742,12 @@ async function deleteSelectedCanvasCards() {
   const confirmed=await uiConfirm(
     '確定永久刪除選取的 '+(simIds.length+petIds.length)+' 張卡片嗎？\n'+
     '包含 '+simIds.length+' 位模擬市民、'+petIds.length+' 隻寵物。\n'+
-    '資料將從所有家族及相關關係中移除。可在切換家族或匯入資料前使用 Ctrl + Z 復原。',
+    uiText('資料將從所有家族及相關關係中移除。') + '\n' + uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。'),
     {title:'刪除選取的卡片',kind:'danger',confirmText:'永久刪除'}
   );
   if (!confirmed) return false;
   const before=captureCanonicalHistory();
+  if (!before) return;
   let mutation=null;
   simIds.forEach(id=>{mutation=genealogyStore.mergeResults(mutation,purgeSimData(id));});
   petIds.forEach(id=>{mutation=genealogyStore.mergeResults(mutation,genealogyStore.deletePet(id));});
@@ -10921,6 +10944,7 @@ const ids =
     });
     if (!ok) return;
     const before=captureCanonicalHistory();
+  if (!before) return;
     const mutation =
       genealogyStore.removeFamilyMembers(
         fam.id,
@@ -13612,6 +13636,8 @@ const familyMemberController = {
 
     if (!confirmed) return;
 
+    const before = captureCanonicalHistory();
+    if (!before) return;
     const mutation = genealogyStore.removeFamilyMembers(
       family.id,
       ids
@@ -13619,6 +13645,7 @@ const familyMemberController = {
 
     resetFamilyMemberOperations();
     applyGenealogyMutation(mutation);
+    recordCanonicalHistory(before);
     requestAnimationFrame(() => genealogyViewport.fit());
   }
 };
@@ -15533,6 +15560,7 @@ const petEditorController = {
     if (this.directEntry) {
       const owners = [...$('petOwnerIds').selectedOptions].map(option=>String(option.value)).concat([...this.outsideOwnerIds]);
       const before=captureCanonicalHistory();
+  if (!before) return;
       const mutation = genealogyStore.savePetWithOwners(pet,owners);
       applyGenealogyMutation(mutation);
       recordCanonicalHistory(before);
@@ -15561,7 +15589,7 @@ const petEditorController = {
     const permanent = !!this.directEntry;
     const confirmed = await uiConfirm(
       permanent
-        ? uiText('確定永久刪除寵物') + '「' + displayDataText(pet.name, pet) + '」？\n' + uiText('此操作無法復原。')
+        ? uiText('確定永久刪除寵物') + '「' + displayDataText(pet.name, pet) + '」？\n' + uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。')
         : `要刪除寵物「${pet.name}」嗎？`,
       {
         title:permanent ? uiText('永久刪除寵物') : uiText('刪除寵物'),
@@ -15576,6 +15604,7 @@ const petEditorController = {
       // 寵物資料卡的刪除是完整刪除，而非解除飼主；所有飼主引用一併移除。
       const petId = String(pet.gameData?.simId || pet.id || '');
       const before=captureCanonicalHistory();
+  if (!before) return;
       const mutation = genealogyStore.deletePet(petId);
       if (!mutation.dataChanged) return;
       selectedPetIds.delete(petId);
@@ -15886,7 +15915,8 @@ async function deleteChar(id) {
   const message =
     '要永久刪除「' + displayDataText(c.name, c) + '」嗎？\n' +
     '這位模擬市民將從所有家族移除，模擬市民資料與相關關係也會一併刪除。\n\n' +
-    '如果只想移出目前家族，請使用「移出家族」。';
+    '如果只想移出目前家族，請使用「移出家族」。\n' +
+    uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。');
 
   if (!await uiConfirm(message, {
     title: '永久刪除模擬市民',
@@ -15895,6 +15925,7 @@ async function deleteChar(id) {
   })) return;
 
   const before=captureCanonicalHistory();
+  if (!before) return;
   const mutation = purgeSimData(id);
   finalizeSimDataChange(mutation);
   recordCanonicalHistory(before);
@@ -16024,21 +16055,27 @@ const personLibraryController = {
 
   addSelectionToCurrentFamily() {
     const family = currentFamily();
+    const before = captureCanonicalHistory();
+    if (!before) return;
     const mutation = genealogyStore.addFamilyMembers(
       family.id,
       [...personLibraryState.selection].filter(id => currentGenealogyData().sims[id])
     );
     applyGenealogyMutation(mutation);
+    recordCanonicalHistory(before);
     this.setBatchMode(false);
   },
 
   removeSelectionFromCurrentFamily() {
     const family = currentFamily();
+    const before = captureCanonicalHistory();
+    if (!before) return;
     const mutation = genealogyStore.removeFamilyMembers(
       family.id,
       [...personLibraryState.selection]
     );
     applyGenealogyMutation(mutation);
+    recordCanonicalHistory(before);
     this.setBatchMode(false);
   },
 
@@ -16051,7 +16088,7 @@ const personLibraryController = {
     const confirmed = await uiConfirm(
       '要永久刪除選取的 ' + ids.length + ' 位模擬市民嗎？\n' +
       (LIFE_PHOTOS_PUBLIC ? '模擬市民資料、關係與人生照片都會一併刪除。\n\n' : '模擬市民資料與相關關係都會一併刪除。\n\n') +
-      '此操作無法復原。',
+      uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。'),
       {
         title:'批量刪除模擬市民',
         kind:'danger',
@@ -16059,8 +16096,8 @@ const personLibraryController = {
         richContent:{
           lead:'要永久刪除選取的 ' + ids.length + ' 位模擬市民嗎？',
           warnings:[LIFE_PHOTOS_PUBLIC
-            ? '模擬市民資料、關係與人生照片都會一併刪除。此操作無法復原。'
-            : '模擬市民資料與相關關係都會一併刪除。此操作無法復原。']
+            ? uiText('模擬市民資料、關係與人生照片都會一併刪除。') + ' ' + uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。')
+            : uiText('模擬市民資料與相關關係都會一併刪除。') + ' ' + uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。')]
         },
         backupAction:exportCurrentGenealogyBackup
       }
@@ -16068,11 +16105,14 @@ const personLibraryController = {
 
     if (!confirmed) return;
 
+    const before = captureCanonicalHistory();
+    if (!before) return;
     const mutation = genealogyStore.mergeResults(
       ...ids.map(purgeSimData)
     );
 
     finalizeSimDataChange(mutation);
+    recordCanonicalHistory(before);
     this.setBatchMode(false);
   }
 };
@@ -16325,11 +16365,12 @@ async function deletePetFromLibrary(entry) {
   const info=petLibraryDisplayInfo(entry);
   const confirmed=await uiConfirm(
     uiText('確定永久刪除寵物')+'「'+info.name+'」？\n'+
-    uiText('這會從所有飼主與未指派寵物清單中移除，無法復原。'),
+    uiText('這會從所有飼主與未指派寵物清單中移除。') + '\n' + uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。'),
     {title:uiText('永久刪除寵物'),kind:'danger',confirmText:uiText('永久刪除')}
   );
   if(!confirmed)return;
   const before=captureCanonicalHistory();
+  if (!before) return;
   const mutation=genealogyStore.deletePet(petId);
   if(!mutation.dataChanged)return;
   selectedPetIds.delete(petId);
@@ -16672,6 +16713,7 @@ const addMemberController = {
 
     const family = currentFamily();
     const before=captureCanonicalHistory();
+  if (!before) return;
     const mutation = genealogyStore.addFamilyMembers(
       family.id,
       [...personLibraryState.addSelection]
@@ -18634,6 +18676,7 @@ window.addEventListener('resize', () => {
 async function savePersonEditorFromUi() {
   try {
     const before=captureCanonicalHistory();
+  if (!before) return;
     const result=await withActionButtonLoading(
       $('btnSave'),
       '儲存中',
@@ -18763,16 +18806,6 @@ document.addEventListener('keydown', e => {
       else void savePersonEditorFromUi();
       return;
     }
-    if (!hasBlockingGenealogyDialog() && !isTextInteractionTarget(e.target)) {
-      e.preventDefault();
-      if (e.repeat) return;
-      Promise.resolve(_flushSave())
-        .then(()=>uiToast(uiText('族譜已儲存在此瀏覽器')))
-        .catch(error=>{
-          console.error('[Genealogy] Ctrl + S save failed.',error);
-          void uiAlert(uiText('族譜儲存失敗'),{title:uiText('儲存失敗'),kind:'danger'});
-        });
-    }
   }
 });
 
@@ -18845,6 +18878,7 @@ $('relationshipAddBtn').onclick = () => {
   }
 
   const before=captureCanonicalHistory();
+  if (!before) return;
   let mutation=null;
 
   targetIds.forEach(targetId=>{
