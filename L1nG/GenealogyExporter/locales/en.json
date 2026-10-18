@@ -1452,7 +1452,8 @@
     "這會從所有飼主與未指派寵物清單中移除。": "This removes the pet from every owner and the unassigned pet list.",
     "資料將從所有家族及相關關係中移除。": "The records will be removed from every family and related relationship.",
     "復原上一步卡片位置、關係名稱、新增、編輯或刪除；文字輸入仍使用瀏覽器原生復原": "Undo card moves, relationship labels, additions, edits, or deletions; text fields keep native undo.",
-    "刪除選取的市民 / 寵物卡片，會先確認，刪除後可使用 Ctrl + Z 復原": "Delete selected Sim / pet cards after confirmation; use Ctrl + Z to undo.",
-    "重做上一步可復原的操作": "Redo the previous undoable action"
+    "重做上一步可復原的操作": "Redo the previous undoable action",
+    "刪除選取的市民 / 寵物卡片，會先確認，刪除後可使用": "Delete selected Sim / pet cards after confirmation; use",
+    "復原": "to undo"
   }
 }
