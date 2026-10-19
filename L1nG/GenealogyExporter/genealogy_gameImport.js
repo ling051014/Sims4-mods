@@ -1663,6 +1663,17 @@
     const source = bundle.genealogy || {};
     const sourceSims = source.sims || {};
     const households = source.households || {};
+    // 有些提取檔使用根層 Household ID，而不是逐一標記家庭。
+    // 有明確 isActiveHousehold 旗標時，以家庭自己的旗標優先。
+    const hasHouseholdActiveFlag = Object.values(households).some(
+      household => household?.isActiveHousehold === true
+    );
+    const explicitActiveHouseholdId = [
+      source.activeHouseholdId,
+      bundle.manifest?.activeHouseholdId,
+      source.currentHouseholdId,
+      bundle.manifest?.currentHouseholdId
+    ].find(value => value !== null && value !== undefined && String(value) !== '');
     const importedAt =
       bundle.manifest?.exportedAt ||
       null;
@@ -1908,7 +1919,10 @@
               worldName:optionalDisplayValue(household.worldName),
               neighborhoodName:optionalDisplayValue(household.neighborhoodName),
               hidden:!!household.hidden,
-              isActiveHousehold:!!household.isActiveHousehold,
+              isActiveHousehold:!!household.isActiveHousehold ||
+                (!hasHouseholdActiveFlag &&
+                  explicitActiveHouseholdId != null &&
+                  householdId === String(explicitActiveHouseholdId)),
               isPlayedHousehold:!!household.isPlayedHousehold,
               isPlayerHousehold:!!household.isPlayerHousehold,
               householdMemberIds:stringIds(household.memberIds),
