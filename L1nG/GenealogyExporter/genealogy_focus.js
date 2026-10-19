@@ -11,6 +11,7 @@
     '[tabindex]:not([tabindex="-1"])'
   ].join(',');
   let lastInteraction = null;
+  let interactionMode = 'pointer';
   let redirecting = false;
 
   function visible(element) {
@@ -30,13 +31,6 @@
     return document.getElementById('genealogyCanvasViewport');
   }
 
-  function focusCanvas() {
-    const viewport = canvas();
-    if (!viewport?.isConnected) return false;
-    viewport.focus({ preventScroll:true });
-    return document.activeElement === viewport;
-  }
-
   function focusedWithin(owner, target = document.activeElement) {
     return !!(owner && target && owner.contains(target));
   }
@@ -47,20 +41,22 @@
   }
 
   function restore(entry) {
+    // 滑鼠完成操作後不再把焦點送回工具按鈕，更不聚焦整個畫布。
+    // 鍵盤操作仍恢復至有效的觸發元素或上一層視窗。
+    if (interactionMode !== 'keyboard' && !entry.keyboardOrigin) return;
     const parent = stack[stack.length - 1];
     const origin = entry.origin;
     const fallback = parent?.element.querySelector('[role="dialog"], [tabindex="-1"]') || parent?.element;
     const target = canReturn(origin) && (!parent || parent.element.contains(origin))
       ? origin
-      : parent && visible(fallback) ? fallback : canvas();
+      : parent && visible(fallback) ? fallback : null;
     if (!target || !visible(target)) return;
     global.requestAnimationFrame(() => {
-      const current = top();
-      if (current && current !== parent) return;
+      if (top() !== parent || !visible(target)) return;
       if (document.activeElement && document.activeElement !== document.body &&
-          !entry.element.contains(document.activeElement) && (parent ? parent.element.contains(document.activeElement) : document.activeElement !== document.documentElement)) return;
-      if (target === canvas()) focusCanvas();
-      else target.focus({ preventScroll:true });
+          !entry.element.contains(document.activeElement) &&
+          (parent ? parent.element.contains(document.activeElement) : true)) return;
+      target.focus({ preventScroll:true });
     });
   }
 
@@ -69,7 +65,7 @@
     if (stack.some(entry => entry.element === element)) return;
     const active = document.activeElement;
     const candidate = origin || (active && !element.contains(active) ? active : lastInteraction);
-    stack.push({ element, origin:canReturn(candidate) ? candidate : null });
+    stack.push({ element, origin:canReturn(candidate) ? candidate : null, keyboardOrigin:interactionMode === 'keyboard' });
     if (initial) focusLater(initial, element, 0);
   }
 
@@ -136,13 +132,33 @@
     return [...owner.querySelectorAll(focusableSelector)].filter(visible);
   }
 
+  // 工具按鈕可以用滑鼠直接操作，但不需因此獲得鍵盤焦點。
+  // 只攔截滑鼠的預設聚焦行為，不阻止 click / Tab 鍵盤操作。
+  document.addEventListener('mousedown', event => {
+    if (event.button === 0 && event.target?.closest?.('#canvasToolbar button.canvas-tool')) {
+      event.preventDefault();
+    }
+  }, true);
+
   document.addEventListener('pointerdown', event => {
+    interactionMode = 'pointer';
+    const viewport = canvas();
+    // 玩家改用指標操作畫布時，解除先前留在工具列或輸入框的焦點；
+    // 不把焦點轉交給畫布，因此不會出現整張畫布的預設黑色外框。
+    if (!top() && viewport?.contains(event.target) &&
+        !event.target?.closest?.('input, textarea, select, button, a[href], [contenteditable], [role="textbox"], [role="button"]')) {
+      const active = document.activeElement;
+      if (active && active !== document.body && !viewport.contains(active)) active.blur?.();
+    }
     const target = event.target?.closest?.('button, a[href], input, select, textarea, [tabindex]');
-    lastInteraction = canReturn(target) ? target : (canReturn(document.activeElement) ? document.activeElement : canvas());
+    lastInteraction = canReturn(target) ? target : null;
   }, true);
   document.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      if (canReturn(document.activeElement)) lastInteraction = document.activeElement;
+    if (!event.isComposing && ['Tab','Escape','Enter',' ','Backspace','Delete','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) {
+      interactionMode = 'keyboard';
+    }
+    if ((event.key === 'Enter' || event.key === ' ') && canReturn(document.activeElement)) {
+      lastInteraction = document.activeElement;
     }
   }, true);
 
@@ -206,7 +222,8 @@
   else global.setTimeout(() => document.addEventListener('keydown', handleModalKeyboard), 0);
 
   global.L1nGGenealogyFocus = Object.freeze({
-    register, enter, leave, top, sync, focusCanvas, focusLater,
+    register, enter, leave, top, sync, focusLater,
+    isKeyboardInteraction:() => interactionMode === 'keyboard',
     ownsKeyboard, isCanvasShortcutTarget
   });
 })(window);
