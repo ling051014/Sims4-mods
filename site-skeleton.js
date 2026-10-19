@@ -161,9 +161,6 @@
                     rowLines() + twoButtons() + '</div><div class="sk-download-files">' + rowLines() + '</div></div>' +
                 title() + '<div class="sk-step-grid">' + repeat(3, feature) + '</div></div>',
 
-        "realdate-installation": () =>
-            rd('<div class="sk-button-row">' + block("sk-button") + '</div>'),
-
         "realdate-faq": () =>
             rd("", true) + '<div class="sk-realdate-body sk-faq-list">' +
                 repeat(9, () => '<div class="sk-faq-row">' + block("sk-faq-line") +
