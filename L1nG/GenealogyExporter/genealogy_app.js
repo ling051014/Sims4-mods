@@ -256,7 +256,7 @@ const KINSHIP_SYSTEM_LABELS = Object.freeze([
 const RACE_PRESETS = {
   '':           { icon:'', label:'（不顯示）' },
   human:        { icon:'person', label:'人類' },
-  // 種族圖示改用「看到圖形就能聯想到內容」的語意圖，不再拿抽象導覽圖示代用。
+  // 種族使用對應物種特徵的語意圖示，方便辨識。
   vampire:      { icon:'vampire-fangs', label:'吸血鬼' },
   alien:        { icon:'alien-head', label:'外星人' },
   werewolf:     { icon:'wolf-head', label:'狼人' },
@@ -464,7 +464,7 @@ function normalizeRelationshipLineSetting(
             : 'manual'
         );
 
-  // 舊版手動弧度欄位不再回寫。
+  // 正規化時排除未納入現行關係線設定的手動弧度屬性。
   delete normalized.curveAmount;
   delete normalized.curveAmountManual;
 
@@ -866,7 +866,7 @@ function refreshResolvedAssetDom(
     });
 }
 
-// ========【資產局部刷新】 圖片 ready 不再重算族譜 Layout ========
+// ========【資產局部刷新】 圖片載入完成後只刷新受影響的顯示內容 ========
 function scheduleResolvedAssetRefresh(
   assetId,
   url
@@ -1368,7 +1368,7 @@ function syncFamilyNameInputWidth() {
 
   // family-identity 本身已經由 Flex 自動扣除右側家族管理按鈕，
   // 這裡只扣 identity 內部的鉛筆、家族切換箭頭與兩層 gap。
-  // 因此長名稱可以使用真正剩餘的最大寬度，不再被手機版重複預留空間。
+  // 長名稱以扣除操作圖示與間距後的實際可用寬度計算。
   const availableWidth =
     identityWidth > 0
       ? Math.max(
@@ -1404,7 +1404,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g,
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const pairKey = (a,b) => [a,b].sort().join('::');
 
-// ========【UI 圖示】 圖示遮罩由 genealogy_icon_masks.css 內嵌提供，不再逐顆請求 SVG ========
+// ========【UI 圖示】 透過 genealogy_icon_masks.css 提供的內嵌遮罩呈現圖示 ========
 const iconSvg = (name, extra = '') => {
   const safe = String(name || '').replace(/[^a-z0-9-]/gi, '');
   if (!safe) return '';
@@ -2491,7 +2491,7 @@ function positionFamilyNavSelectMenu(control) {
   const rect = trigger.getBoundingClientRect();
   const margin = 10;
   const gap = 6;
-  // 選項上下內距已超過舊版假設的 32px；使用實際列高，避免最後幾列被裁切。
+  // 依選項實際列高與上下內距計算清單高度，避免底部選項遭裁切。
   const menuStyle = getComputedStyle(menu);
   const verticalInset = [
     menuStyle.paddingTop,
@@ -5574,7 +5574,7 @@ function applySidebarWidth(value, options) {
   return genealogyChrome.applySidebarWidth(value, options);
 }
 
-// 初始寬度仍在原本階段恢復；不依賴後續 bootstrap。
+// 在 UI Controller 建立後立即恢復側邊欄寬度。
 genealogyChrome.restoreSidebarWidth();
 
 // ========【資料儲存佇列】 Runtime Save Coordinator 為唯一儲存 Authority ========
@@ -6922,7 +6922,7 @@ function relationshipFullPreviewPath(
   setting,
   preview
 ) {
-  // 父母 / 子女與領養沿用原本已確認的固定垂直置中預覽。
+  // 父母 / 子女與領養使用固定垂直置中的關係預覽。
   if (
     key === 'parent' ||
     key === 'adopt'
@@ -11172,7 +11172,7 @@ function updateArrangeToolUI() {
   }
 
   // selection 是互動狀態，不屬於 free-layout 資料。
-  // 切換自動 / 自由排列不再清掉目前多選。
+  // 切換排列模式時保留目前的多選狀態。
   if (!hasFamily) {
     clearNodeSelection();
     marqueeState = null;
@@ -12306,7 +12306,7 @@ function getDragSelectionSmartSnap(
     spacingY:null
   };
 }
-// ========【拖曳 Geometry Snapshot】 PointerMove 不再重建整張族譜幾何 ========
+// ========【拖曳 Geometry Snapshot】 PointerMove 沿用手勢起始時的幾何快照 ========
 function createSingleDragPerformanceSession(
   id
 ) {
@@ -14164,7 +14164,7 @@ function renderAvatarCropPreview(){
   clampAvatarCropDraft(bounds);
   avatarCropRenderMetrics=bounds;
 
-  // 保留原本相同的取景幾何，使用 GPU 合成層 transform 取代 left/top/width/height 更新。
+  // 維持取景幾何，透過 GPU 合成層 transform 更新圖片位置。
   image.style.width=bounds.baseImageWidth+'px';
   image.style.height=bounds.baseImageHeight+'px';
   const left=bounds.cropCenterX-avatarCropDraft.x*bounds.imageWidth;
@@ -16996,8 +16996,8 @@ async function ensureHtml2Canvas() {
   }
 }
 
-// iOS Safari 可能把主題顏色計算成 color(display-p3 ...)；舊版 html2canvas 不支援這種格式。
-// 只替 iOS PNG 匯出載入支援 CSS Color 4 的相容版本，不更換電腦版的既有繪製流程。
+// iOS Safari 可能輸出 color(display-p3 ...)；標準 html2canvas 無法解析此色彩格式。
+// iOS PNG 匯出另載入支援 CSS Color 4 的版本，桌面版維持標準繪製流程。
 let _iosHtml2CanvasPromise = null;
 
 async function ensureIosHtml2Canvas() {
@@ -17015,7 +17015,7 @@ async function ensureIosHtml2Canvas() {
       const previousRenderer = window.html2canvas;
       try {
         await loadScriptOnce(src);
-        // 即使頁面先前曾載入舊版，仍須確認相容版已真正取代它。
+        // 確認相容版已替換目前的 html2canvas 實例，避免沿用不支援色彩格式的實作。
         if (typeof window.html2canvas === 'function' &&
             window.html2canvas !== previousRenderer) {
           return window.html2canvas;
@@ -17505,7 +17505,7 @@ async function exportGenealogyImage(sizeKey = 'standard', backgroundMode = 'curr
   }
 }
 
-// ========【L1nG v1 資料載入】 只讀取目前 schema，不承接舊版網站資料 ========
+// ========【L1nG v1 資料載入】 讀取現行工作區儲存格式 ========
 async function readStoredGenealogyData() {
   const currentRaw = localStorage.getItem(STORE_KEY);
   if (currentRaw === WORKSPACE_IDB_MARKER) {

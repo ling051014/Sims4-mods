@@ -2496,7 +2496,7 @@ function buildPersonEditorDraft({
   lifePhotoState.editor.isOriginal = false;
 }
 
-// ========【其他關係編輯列】 設定 - 與家庭關係共用單層模擬市民列，不再拆成獨立標籤區 ========
+// ========【其他關係編輯列】 與家庭關係共用單層模擬市民列表 ========
 function personEditorOtherRelationships(simId){
   const id=String(simId||'');
   if(!id)return[];

@@ -1892,7 +1892,7 @@
 
           // family.memberIds 只保存 EA Household 的真正模擬市民成員。
           // genealogy 顯示範圍由網站的 EA 族譜 / 大家族模式另外計算，
-          // 不再把遞迴展開的親族網污染成 Household 成員。
+          // Household 成員只包含該家庭的實際成員；親族展開由族譜顯示模式獨立計算。
           // 純寵物 Household 不建立空白模擬市民家族。
           if (!memberIds.length) return null;
 

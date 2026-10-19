@@ -135,7 +135,7 @@
     overflow: hidden;
     background: var(--surface-card);
 }
-/* 僅「關於族譜工具」採固定外框；展開條款時不再重新計算視窗高度。 */
+/* 「關於族譜工具」採固定高度外框，展開條款時保持視窗尺寸。 */
 .l1ng-site-info-native[data-site-info-section="genealogy"] .l1ng-site-info-native-panel {
     height: min(680px, calc(100dvh - 28px));
     max-height: min(680px, calc(100dvh - 28px));
