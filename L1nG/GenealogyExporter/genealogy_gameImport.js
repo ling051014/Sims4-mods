@@ -1901,8 +1901,8 @@
             memberIds,
             bio:optionalDisplayValue(household.bio) || optionalDisplayValue(household.description) || '',
             coverImage:null,
-            freeLayout:{ view:false, edit:false },
-            manualPositions:{ view:{}, edit:{} },
+            freeLayout:false,
+            manualPositions:{},
             locked:false,
             gameImport:true,
             gameData:{
@@ -1938,8 +1938,8 @@
         memberIds,
         bio:'',
         coverImage:null,
-        freeLayout:{ view:false, edit:false },
-        manualPositions:{ view:{}, edit:{} },
+        freeLayout:false,
+        manualPositions:{},
         locked:false,
         gameImport:true,
         gameData:{
