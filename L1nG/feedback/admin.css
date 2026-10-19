@@ -296,7 +296,7 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 .admin-only .ga-chart-tooltip[hidden]{display:none}
 .admin-only .ga-chart-tooltip-date{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
 .admin-only .ga-chart-tooltip-value{font-size:11px;font-weight:740;font-variant-numeric:tabular-nums}
-.admin-only .ga-chart-scroll svg:focus-visible{outline:2px solid var(--primary);outline-offset:-2px;border-radius:8px}
+.admin-only .ga-chart-scroll svg:focus-visible{outline:none}
 @media(max-width:700px){
   .admin-only .ga-chart-scroll svg,.admin-only .overview-chart .ga-chart-scroll svg{
     width:560px;min-width:560px;max-width:none;max-height:none
@@ -371,4 +371,66 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
  .admin-only .admin-reply-actions{display:flex;flex-wrap:wrap;min-width:0}
  .admin-only .admin-reply-actions .hint{flex:1 1 160px;min-width:0}
  .admin-only .detail-body .conversation-stack,.admin-only .detail-body .conversation-message{min-width:0;max-width:100%}
+}
+
+/* 管理中心日期範圍：單一入口、雙月區間高亮，手機單月。 */
+.admin-only #panel-analytics .custom-date-row{flex:0 1 auto;display:flex;align-items:center;margin:0;min-width:0}
+.admin-only #panel-analytics .custom-date-row[hidden]{display:none}
+.admin-only .admin-date-range-trigger{min-height:38px;display:flex;align-items:center;gap:9px;padding:7px 11px;border:1px solid var(--stroke);border-radius:9px;background:var(--surface);color:var(--ink);font-size:12px;white-space:nowrap}
+.admin-only .admin-date-range-trigger .admin-date-value{font-variant-numeric:tabular-nums}
+.admin-only .admin-date-range-trigger:hover,.admin-only .admin-date-range-trigger[aria-expanded="true"]{border-color:var(--primary-line);background:var(--subtle)}
+.admin-only .admin-date-popover{width:min(580px,calc(100vw - 16px));overflow-y:auto;overflow-x:hidden;max-height:calc(100dvh - 16px)}
+.admin-only .admin-date-months{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.admin-only .admin-calendar-month{min-width:0}
+.admin-only .admin-calendar-month h3{text-align:center;font-size:12px;font-weight:700;margin:0 0 10px}
+.admin-only .admin-date-hint{font-size:11px;color:var(--muted);min-height:18px;margin:0 0 12px;overflow-wrap:anywhere}
+.admin-only .admin-date-day{position:relative;z-index:0;isolation:isolate;border-radius:7px}
+.admin-only .admin-date-day.range-middle,.admin-only .admin-date-day.range-preview,.admin-only .admin-date-day.range-selected{background:var(--primary-pale);color:var(--primary);border-radius:0}
+.admin-only .admin-date-day.range-start,.admin-only .admin-date-day.range-end{background:var(--primary);color:var(--surface);border-radius:8px;font-weight:760}
+.admin-only .admin-date-day.range-preview:not(.range-start):not(.range-end){background:var(--primary-pale)}
+.admin-only .admin-date-day.range-start:hover,.admin-only .admin-date-day.range-end:hover{background:var(--primary-hover);color:var(--surface)}
+.admin-only .admin-date-actions{justify-content:flex-end;flex-wrap:wrap}
+.admin-only .admin-date-summary{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);margin-right:auto}
+.admin-only .admin-date-actions .primary{font-size:11px;min-height:34px;padding:7px 12px}
+.admin-only .admin-date-close{color:var(--muted)}
+@media(max-width:700px){
+ .admin-only .admin-date-popover{width:min(320px,calc(100vw - 16px));padding:12px}
+ .admin-only .admin-date-months{grid-template-columns:minmax(0,1fr)}
+ .admin-only .admin-date-day{min-height:37px;aspect-ratio:auto}
+ .admin-only #panel-analytics .custom-date-row{width:100%}
+ .admin-only #panel-analytics .admin-date-range-trigger{width:100%;min-width:0;justify-content:space-between}
+}
+
+/* 修正回饋分頁：在手機模式移除桌面 Grid 最小內容寬度的擴張來源。 */
+@media(max-width:800px){
+ body.admin-only .admin-app{grid-template-columns:minmax(0,1fr);width:100%;min-width:0}
+ body.admin-only .admin-main{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
+ body.admin-only .admin-main>.panel-view{width:100%;min-width:0}
+ body.admin-only #panel-feedback{display:block}
+ body.admin-only #panel-feedback[hidden]{display:none}
+ body.admin-only #panel-feedback>.admin-head,
+ body.admin-only #panel-feedback>section,
+ body.admin-only #panel-feedback .feedback-table,
+ body.admin-only #panel-feedback .feedback-filter-grid,
+ body.admin-only #panel-feedback .feedback-filters{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
+ body.admin-only #panel-feedback .feedback-row{grid-template-columns:minmax(0,1fr) minmax(0,max-content)}
+ body.admin-only #panel-feedback .feedback-row .row-primary,
+ body.admin-only #panel-feedback .feedback-row .row-primary strong,
+ body.admin-only #panel-feedback .feedback-row .row-primary .excerpt{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+ body.admin-only #panel-feedback .feedback-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ body.admin-only #panel-feedback .feedback-filters button{width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere}
+ body.admin-only #panel-feedback .feedback-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ body.admin-only #panel-feedback .feedback-filter-grid>.l1ng-select{width:100%;min-width:0;max-width:100%;flex:none;margin:0}
+ body.admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{width:100%;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+ body.admin-only #panel-feedback .toolbar-tools{grid-template-columns:minmax(0,1fr) auto;min-width:0}
+ body.admin-only #panel-feedback .toolbar-tools .search-field{width:100%;min-width:0}
+ body.admin-only #panel-feedback .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.admin-only #panel-feedback .stat-card{min-width:0}
+ body.admin-only #panel-feedback .stat-card .topline{min-width:0}
+ body.admin-only .admin-mobile-nav{width:100%;min-width:0}
+ body.admin-only .admin-mobile-nav button{min-width:0}
+}
+@media(max-width:360px){
+ body.admin-only #panel-feedback .feedback-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.admin-only #panel-feedback .feedback-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
