@@ -119,15 +119,7 @@
     if(text!==undefined)item.textContent=String(text);
     return item;
   };
-  const today = () => {
-    const d=new Date();
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  };
-  function daysBefore(date,offset) {
-    const d=new Date(date+'T12:00:00');
-    d.setDate(d.getDate()-offset);
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  }
+  const {today,daysBefore}=window.L1nGAdminTime;
   let chosenRange='30',requestId=0;
   const errors={
     FORBIDDEN:'未通過 Cloudflare Access 管理員驗證。請確認登入狀態與管理 API 存取權。',
@@ -267,6 +259,7 @@
   }
   function dateRange() {
     const end=today();
+    for(const id of ['date-from','date-to'])if($(id))$(id).max=end;
     return chosenRange==='custom'
       ? {start:$('date-from')?.value||'',end:$('date-to')?.value||''}
       : {start:daysBefore(end,Number(chosenRange)-1),end};
@@ -286,7 +279,7 @@
       if(requestId!==id)return;
       renderAnalytics(data);
       hasAnalyticsData=true;
-      setText('ga-load-status','已更新 · '+new Date().toLocaleString('zh-TW'));
+      setText('ga-load-status','已更新 · '+window.L1nGAdminTime.timestamp(new Date()));
     }catch(e){
       if(requestId!==id)return;
       if(!hasAnalyticsData)resetDetails('目前無法顯示資料，請查看上方提示。');
