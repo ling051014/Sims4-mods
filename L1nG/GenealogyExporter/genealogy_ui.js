@@ -428,9 +428,7 @@
       const resolve = _uiDialogResolve;
       _uiDialogResolve = null;
       if (resolve) resolve(result);
-      if (_uiDialogPreviousFocus?.isConnected) {
-        _uiDialogPreviousFocus.focus({preventScroll:true});
-      }
+      window.L1nGGenealogyFocus?.leave(overlay);
       _uiDialogPreviousFocus = null;
     }
 
@@ -755,6 +753,7 @@
 
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden', 'false');
+      window.L1nGGenealogyFocus?.enter(overlay, null, _uiDialogPreviousFocus);
 
       return new Promise(resolve => {
         _uiDialogResolve = resolve;
@@ -777,6 +776,7 @@
           }
         };
         requestAnimationFrame(() => {
+          if (!overlay.classList.contains('show')) return;
           if (mode === 'prompt') {
             inputEl.focus();
             inputEl.select();
@@ -992,6 +992,11 @@
 
   // 各視窗自行關閉，UI 只選擇當前最上層可見的視窗。
   function closeTopmostDialog(lifecycles) {
+    const active = window.L1nGGenealogyFocus?.top();
+    if (active) {
+      const match = (lifecycles || []).find(lifecycle => lifecycle.dialog === active.element);
+      if (match) { match.close(); return true; }
+    }
     for (const lifecycle of lifecycles || []) {
       if (!lifecycle.dialog || !lifecycle.dialog.classList.contains('show')) continue;
       lifecycle.close();
@@ -1791,7 +1796,7 @@
           });
         }
 
-        global.setTimeout(() => search.focus(), 30);
+        window.L1nGGenealogyFocus?.focusLater(search, wrap, 30);
       }
 
       function refresh() {
@@ -1824,6 +1829,7 @@
       search.onkeydown = event => {
         if (event.key === 'Escape') {
           event.preventDefault();
+          event.stopPropagation();
           close();
           input.focus();
           return;
@@ -2095,11 +2101,11 @@
         if (event.key === 'Escape') {
           if (host.classList.contains('ui-select-open')) {
             event.preventDefault();
+            event.stopPropagation();
             close();
           }
           return;
         }
-
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
           event.preventDefault();
 
@@ -2281,11 +2287,11 @@
         if (event.key === 'Escape') {
           if (host.classList.contains('ui-select-open')) {
             event.preventDefault();
+            event.stopPropagation();
             close();
           }
           return;
         }
-
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
           event.preventDefault();
           if (!host.classList.contains('ui-select-open')) open();
