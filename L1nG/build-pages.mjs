@@ -60,7 +60,7 @@ if (mode === 'home') {
     'changelog.css','changelog.js','changelog.html'
   ]) file(name);
   // The dashboard belongs on the home domain only. Its API is NOT a static file.
-  for (const name of ['admin.html','admin.css','admin-network.js','ga4-country-labels.js','admin.js','ga4-dashboard.js','feedback.css','select-ui.js']) {
+  for (const name of ['admin.html','admin.css','admin-network.js','admin-time.js','ga4-country-labels.js','admin.js','ga4-dashboard.js','feedback.css','select-ui.js']) {
     file(path.join('feedback',name),path.join('feedback',name));
   }
   put(site('home.html'),path.join(out,'index.html'));
@@ -173,7 +173,7 @@ for (const p of htmls) {
   }
 }
 if (mode==='home') {
-  for(const name of ['feedback/admin.html','feedback/admin-network.js','feedback/ga4-country-labels.js','feedback/admin.js','feedback/ga4-dashboard.js','feedback/admin.css'])
+  for(const name of ['feedback/admin.html','feedback/admin-network.js','feedback/admin-time.js','feedback/ga4-country-labels.js','feedback/admin.js','feedback/ga4-dashboard.js','feedback/admin.css'])
     if(!fs.existsSync(path.join(out,name)))missing.push('Missing dashboard '+name);
 }
 if (mode==='realdate' && !fs.existsSync(path.join(out,'feedback.html'))) missing.push('Missing RealDate feedback page');
