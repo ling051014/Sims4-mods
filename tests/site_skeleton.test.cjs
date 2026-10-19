@@ -15,7 +15,7 @@ const layouts = new Map([
   ["L1nG/Translations/index.html","translations"],
   ["L1nG/GenealogyExporter/genealogy-exporter.html","genealogy-exporter"],
   ["L1nG/RealDate/index.html","realdate-home"],
-  ...["download","installation","faq","roadmap","gameplay","compatibility","changelog"].map(k=>["L1nG/RealDate/"+k+".html","realdate-"+k])
+  ...["download","faq","roadmap","gameplay","compatibility","changelog"].map(k=>["L1nG/RealDate/"+k+".html","realdate-"+k])
 ]);
 test("正式頁面皆使用對應骨架及最新版資源",()=>{
   for (const [path,layout] of layouts) {
@@ -48,12 +48,12 @@ test("骨架退出由單一公開 ready 接口控制",()=>{
   assert.match(script,/transitionend/);
 });
 
-test("18 種骨架皆可建立畫面並確實退出",()=>{
+test("17 種骨架皆可建立畫面並確實退出",()=>{
   const vm=require("node:vm");
   const all=[
     "mods-home","mods-list","mods-table","l1ng-home","l1ng-changelog",
     "genealogy-exporter","translations","realdate-home","realdate-download",
-    "realdate-installation","realdate-faq","realdate-roadmap","realdate-gameplay",
+    "realdate-faq","realdate-roadmap","realdate-gameplay",
     "realdate-compatibility","realdate-changelog","realdate-content",
     "l1ng-content","product"
   ];
