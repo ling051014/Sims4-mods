@@ -167,3 +167,11 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
  .admin-only .ops-guide-table{min-width:440px}
 }
 @media(prefers-reduced-motion:reduce){.admin-only .ops-guide-topic summary::after{transition:none}}
+
+/* Access 逾期時提供明確的重新驗證入口；既有 toast 仍使用站點主題。 */
+.admin-only .toast .dashboard-auth-link{display:inline-flex;align-items:center;
+  padding:6px 9px;margin-inline-start:7px;border:1px solid currentColor;
+  border-radius:7px;color:inherit;font-size:12px;font-weight:750;
+  text-underline-offset:3px;white-space:nowrap}
+.admin-only .toast .dashboard-auth-link:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(max-width:600px){.admin-only .toast .dashboard-auth-link{margin:7px 0 0;width:max-content}}

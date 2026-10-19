@@ -33,10 +33,15 @@
       const timeout=setTimeout(()=>controller.abort(),timeoutMs);
       try {
         const response=await fetch(url.href,{
-          method,credentials:'include',cache:'no-store',redirect:'follow',
-          headers,body,signal:controller.signal
+          method,credentials:'same-origin',cache:'no-store',redirect:'manual',
+          headers:{...headers,'X-Requested-With':'XMLHttpRequest'},
+          body,signal:controller.signal
         });
-        if(loginRedirect(response.url) || response.redirected && new URL(response.url).origin!==url.origin)
+        // Access 會以 401 告知帶有 X-Requested-With 的請求需要重新驗證；
+        // 部分設定仍會回 302。手動處理轉址，避免 fetch 跟往跨網域登入頁產生 CORS 錯誤。
+        if(response.type==='opaqueredirect' ||
+            response.status>=300 && response.status<400 ||
+            loginRedirect(response.url))
           throw new RequestError(accessMessage,'auth');
         const contentType=(response.headers?.get('content-type')||'').toLowerCase();
         if(!contentType.includes('json')) {
@@ -70,7 +75,16 @@
             '管理 API 連線未完成。可能是網路中斷或 Cloudflare Access 重新驗證，請確認登入後重試。',
             timedOut?'timeout':'network',!offline);
         }
-        if(!problem.retryable || attempt===attempts-1)throw problem;
+        if(!problem.retryable || attempt===attempts-1){
+          // 僅記錄端點路徑與錯誤類型，不輸出 Token、回饋內容或查詢字串。
+          console.warn('[管理中心] API 請求失敗', {
+            endpoint:url.pathname,method:method.toUpperCase(),kind:problem.kind
+          });
+          if(problem.kind==='auth' && typeof window.dispatchEvent==='function' &&
+              typeof CustomEvent==='function')
+            window.dispatchEvent(new CustomEvent('l1ng-admin-auth-required'));
+          throw problem;
+        }
       } finally { clearTimeout(timeout); }
       await wait(650);
     }

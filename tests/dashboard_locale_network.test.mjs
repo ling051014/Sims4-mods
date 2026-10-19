@@ -54,3 +54,35 @@ test('preview environment does not contact private production APIs',async()=>{
   await assert.rejects(window.L1nGAdminNetwork.requestJSON('/feedback/admin-api/feedback'),/預覽模式/);
   assert.equal(calls,0);
 });
+
+test('Access AJAX request uses same-origin cookies and XMLHttpRequest header',async()=>{
+  let options;
+  const window=load('admin-network.js','home.by-l1ng.com',async(_url,init)=>{
+    options=init;
+    return response({ok:true,items:[]});
+  });
+  await window.L1nGAdminNetwork.requestJSON('/feedback/admin-api/feedback');
+  assert.equal(options.credentials,'same-origin');
+  assert.equal(options.redirect,'manual');
+  assert.equal(options.headers['X-Requested-With'],'XMLHttpRequest');
+});
+test('Access login redirect is treated as authentication, not as failed network',async()=>{
+  let calls=0;
+  const window=load('admin-network.js','home.by-l1ng.com',async()=>{
+    calls++;
+    return {type:'opaqueredirect',status:0,url:'',headers:{get:()=>null}};
+  });
+  await assert.rejects(window.L1nGAdminNetwork.requestJSON('/feedback/admin-api/feedback'),
+    error=>error.kind==='auth');
+  assert.equal(calls,1);
+});
+test('unauthorized Access response does not retry',async()=>{
+  let calls=0;
+  const window=load('admin-network.js','home.by-l1ng.com',async()=>{
+    calls++;
+    return response({ok:false,error:'UNAUTHORIZED'},401);
+  });
+  await assert.rejects(window.L1nGAdminNetwork.requestJSON('/feedback/admin-api/feedback'),
+    error=>error.kind==='auth');
+  assert.equal(calls,1);
+});
