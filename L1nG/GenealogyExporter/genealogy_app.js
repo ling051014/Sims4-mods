@@ -13854,7 +13854,8 @@ const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value
     }
   }
 
-  renderFamilyCover(viewFamily); renderFamilyMemberList(viewFamily);
+  // 合照使用真正的 Household 成員；成員清單仍與目前族譜畫布範圍一致。
+  renderFamilyCover(fam); renderFamilyMemberList(viewFamily);
 }
 
 function refreshFamilyUI() {
@@ -17654,10 +17655,19 @@ async function showGenealogyImportError(error, {source,stage,file}) {
   });
 }
 
-function reconcileImportedFamilyView() {
-  // 保留匯入來源的 Household 錨點；大家族的代表家庭不應覆寫它。
+function reconcileImportedFamilyView({ defaultToHousehold = false } = {}) {
+  // 新匯入／覆蓋時，先顯示 ZIP 選中的實際 Household；
+  // 更新現有族譜則保留玩家的視角和目前選擇。
   const family=currentFamily();
   const sourceFamilyId=family?.id || null;
+  if (defaultToHousehold && family) {
+    familyTreeViewMode='household';
+    try {
+      localStorage.setItem(FAMILY_TREE_VIEW_MODE_KEY, familyTreeViewMode);
+    } catch (_) {}
+  }
+  // 其他兩種族譜視角也以同一 Household 為來源對應，
+  // 切換 EA 族譜／大家族時才展開相關市民。
   for (const mode of ['household','ea','extended']) {
     const entries=getFamilySelectorEntries(mode);
     const selected=findBestFamilySelectorEntry(family,entries);
@@ -18378,7 +18388,7 @@ async function importGameGenealogy(file) {
     replaceCanonicalGenealogyDatabase(
       nextDatabase
     );
-    reconcileImportedFamilyView();
+    reconcileImportedFamilyView({ defaultToHousehold:!isUpdate });
 
     // 整庫替換後清掉舊操作中的暫態狀態，但「更新」本身已保留資料庫內的手動排列。
     dragHistory.clear();
