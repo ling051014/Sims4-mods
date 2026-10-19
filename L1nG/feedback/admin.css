@@ -179,3 +179,24 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 /* Toast 原本 pointer-events:none；僅含 Access 操作的通知可接收點擊。 */
 .admin-only .toast.show[data-kind="auth"]{pointer-events:auto}
 .admin-only .toast.show[data-kind="auth"] .dashboard-auth-link{pointer-events:auto;cursor:pointer}
+/* GA4 範圍與網站篩選：固定日期按鈕為水平行，網站選單不再撐滿欄位。 */
+.admin-only #panel-analytics .analytics-filters{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:12px}
+.admin-only #panel-analytics .analytics-range{display:flex;flex:0 0 auto;width:max-content;min-width:0;align-items:center;flex-wrap:nowrap;white-space:nowrap}
+.admin-only #panel-analytics .analytics-range .range-btn{flex:0 0 auto;white-space:nowrap;min-width:56px}
+.admin-only #panel-analytics .analytics-filters>.l1ng-select{flex:0 0 220px;width:220px;min-width:0;max-width:220px}
+.admin-only #panel-analytics .analytics-filters>.l1ng-select .l1ng-select-trigger{width:100%;min-width:0}
+.admin-only #panel-analytics .analytics-filters>#analytics-site{flex:0 0 220px;width:220px;max-width:220px}
+@media(max-width:600px){
+  .admin-only #panel-analytics .analytics-range{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}
+  .admin-only #panel-analytics .analytics-range .range-btn{min-width:0;padding:9px 4px}
+  .admin-only #panel-analytics .analytics-filters>.l1ng-select{flex:0 1 220px;width:min(220px,100%);max-width:100%}
+  .admin-only #panel-analytics .analytics-filters>#analytics-site{flex:0 1 220px;width:min(220px,100%);max-width:100%}
+}
+/* 折線圖精確節點數據；在兩張共用 GA4 圖表上顯示日期與活躍使用者。 */
+.admin-only .chart-area,.admin-only .overview-chart{position:relative}
+.admin-only .overview-chart svg{min-width:0;flex:1 1 auto}
+.admin-only .ga-chart-tooltip{position:absolute;z-index:3;pointer-events:none;min-width:130px;padding:9px 12px;border:1px solid var(--primary-line);border-radius:10px;background:var(--surface);color:var(--ink);box-shadow:var(--small-shadow);font-size:12px;line-height:1.6;white-space:nowrap}
+.admin-only .ga-chart-tooltip[hidden]{display:none}
+.admin-only .ga-chart-tooltip-date{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.admin-only .ga-chart-tooltip-value{font-size:12px;font-weight:740;font-variant-numeric:tabular-nums}
+.admin-only .chart-area svg:focus-visible,.admin-only .overview-chart svg:focus-visible{outline:2px solid var(--primary);outline-offset:-2px;border-radius:8px}
