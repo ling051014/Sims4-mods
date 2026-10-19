@@ -12028,7 +12028,7 @@ nodes.addEventListener('pointerdown', e => {
   if (e.shiftKey && arrangeTool !== 'select') {
     e.preventDefault();
     e.stopPropagation();
-    genealogyFocus.focusCanvas();
+    // 指標選取只更新選取狀態，不主動移動鍵盤焦點。
     if (selectedNodeIds.has(id)) selectedNodeIds.delete(id);
     else selectedNodeIds.add(id);
     syncNodeSelectionClasses();
@@ -12200,7 +12200,7 @@ nodes.addEventListener('pointerdown', e => {
   if (arrangeTool === 'select') {
     e.preventDefault();
     e.stopPropagation();
-    genealogyFocus.focusCanvas();
+    // 指標選取只更新選取狀態，不主動移動鍵盤焦點。
 
     const shift =
       e.pointerType === 'touch'
@@ -18792,7 +18792,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   if (event.shiftKey && arrangeTool !== 'select') {
     event.preventDefault();
     event.stopPropagation();
-    genealogyFocus.focusCanvas();
+    // 指標選取只更新選取狀態，不主動移動鍵盤焦點。
     if (selectedPetIds.has(entry.key)) selectedPetIds.delete(entry.key);
     else selectedPetIds.add(entry.key);
     syncNodeSelectionClasses();
