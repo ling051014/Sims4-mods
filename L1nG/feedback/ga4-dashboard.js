@@ -246,9 +246,9 @@
       const point=coords[index],record=points[index],date=formatDate(record.date),value=number(record.value);
       guide.setAttribute('x1',point.x);guide.setAttribute('x2',point.x);
       marker.setAttribute('cx',point.x);marker.setAttribute('cy',point.y===null?bottom:point.y);
+      const missing=record.value===null;
       guide.style.display='';marker.style.display=missing?'none':'';
       detailDate.textContent=date;
-      const missing=record.value===null;
       detailValue.textContent=missing?'未取得資料':'活躍使用者 '+value;
       tooltipDate.textContent=date;
       tooltipValue.textContent=missing?'未取得資料':'活躍使用者 · '+value;
