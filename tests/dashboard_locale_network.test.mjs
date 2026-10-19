@@ -121,3 +121,30 @@ test('admin and GA4 views use shared Taipei time service',()=>{
   assert.ok(html.indexOf('admin-time.js?')<html.indexOf('admin.js?'));
   assert.ok(html.indexOf('admin-time.js?')<html.indexOf('ga4-dashboard.js?'));
 });
+
+
+test('GA4 daily trend retains gaps and distinguishes a reported zero from an absent day',()=>{
+  const service=load('admin-time.js').L1nGAdminTime;
+  const timeline=service.normalizeDailyTrend(
+    {startDate:'2026-10-18',endDate:'2026-10-20'},
+    [{date:'20261018',value:5},{date:'20261019',value:0}]
+  );
+  assert.deepEqual(Array.from(timeline,item=>[item.date,item.value,item.reported]),[
+    ['20261018',5,true],['20261019',0,true],['20261020',null,false]
+  ]);
+  const leap=service.normalizeDailyTrend(
+    {startDate:'2024-02-28',endDate:'2024-03-01'},
+    [{date:'20240229',value:3}]
+  );
+  assert.deepEqual(Array.from(leap,item=>item.date),['20240228','20240229','20240301']);
+  assert.equal(leap[0].value,null);
+  assert.equal(leap[1].value,3);
+  assert.throws(()=>service.normalizeDailyTrend({startDate:'2026-11-02',endDate:'2026-11-01'},[]));
+});
+test('GA4 chart distinguishes missing days and separates line segments',()=>{
+  const ga4=fs.readFileSync(new URL('ga4-dashboard.js',folder),'utf8');
+  assert.match(ga4,/normalizeDailyTrend\(data\.range,data\.trend\)/);
+  assert.match(ga4,/const segments=\[\]/);
+  assert.match(ga4,/detailValue\.textContent=missing\?'未取得資料'/);
+  assert.doesNotMatch(ga4,/data\.trend\s*\.map\([^)]*\|\|0/);
+});
