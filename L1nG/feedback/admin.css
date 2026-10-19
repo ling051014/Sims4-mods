@@ -1,8 +1,8 @@
 /* 管理中心獨立頁：訪客回饋元素不會載入 */
-body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
+body.admin-only{width:100%;min-height:100dvh}
 @media(min-width:981px){body.admin-only{height:100dvh;overflow:hidden}}
 .admin-only .admin-app{min-height:100dvh;height:100dvh}
-.admin-only .admin-main{min-width:0;min-height:0;max-width:100%;overflow-x:clip}
+.admin-only .admin-main{min-width:0;min-height:0;max-width:100%}
 .admin-only .sidebar{height:100dvh}
 .admin-only .sidebar-note{display:none}
 .admin-only .admin-notice{display:none}
@@ -13,13 +13,8 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 .admin-only .overview-chart .empty-data{color:var(--muted);font-size:13px}
 .admin-only .stat-card{cursor:default}
 .admin-only .stat-card[data-jump],.admin-only .stat-card[data-status]{cursor:pointer}
-.admin-only select,.admin-only input[type="date"]{-webkit-appearance:none;appearance:none}
+.admin-only select{-webkit-appearance:none;appearance:none}
 .admin-only select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='%238f8f99' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:38px}
-@media(max-width:980px){
- .admin-only .admin-app{grid-template-columns:minmax(0,1fr);height:auto;min-height:100dvh;overflow:visible}
- .admin-only .admin-main{width:100%;height:auto;min-height:0;overflow:visible}
- .admin-only .sidebar{display:none}
-}
 @media(max-width:600px){.admin-only .analytics-download-details{margin-top:12px}}
 
 /* 正式 Dashboard 沒有原型的 66px 頂欄，側邊詳情與確認視窗應完整覆蓋畫面。 */
@@ -31,7 +26,6 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 .admin-only .detail-body .conversation-stack{margin:20px 0 25px}
 .admin-only .admin-reply-compose[hidden]{display:none}
 .admin-only .detail-panel{min-height:0}
-@media(max-width:600px){.admin-only .detail-layer,.admin-only .confirm-layer{top:0;inset-block-start:0}}
 
 
 /* 中央附件預覽：只在手動點選時出現；右側詳情維持原位。 */
@@ -103,8 +97,9 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 @keyframes l1ng-dashboard-pulse{to{opacity:.35}}
 @media(prefers-reduced-motion:reduce){.admin-only .feedback-skeleton-main,.admin-only .feedback-skeleton-short,.admin-only .feedback-detail-skeleton,.admin-only .feedback-overview-skeleton,.admin-only .ga4-first-loading .stat-card .num,.admin-only .ga4-first-loading #overview-chart,.admin-only .ga4-first-loading #ga-trend-chart,.admin-only .ga4-first-loading .rank-list,.admin-only .ga4-first-loading #ga-device{animation:none}}
 @media(max-width:980px){
- .admin-only .admin-app{width:100%;max-width:100%;grid-template-columns:minmax(0,1fr)}
- .admin-only .admin-main{width:100%;max-width:100%;min-width:0;overflow-x:clip}
+ .admin-only .admin-app{width:100%;max-width:100%;grid-template-columns:minmax(0,1fr);height:auto;min-height:100dvh;overflow:visible}
+ .admin-only .admin-main{width:100%;max-width:100%;min-width:0;height:auto;overflow:visible}
+ .admin-only .sidebar{display:none}
  .admin-only .admin-main>.panel-view,.admin-only .stat-grid,.admin-only .dash-overview-bottom,.admin-only .analytics-lower,.admin-only .analytics-filters,.admin-only .section-toolbar,.admin-only .feedback-filter-grid{min-width:0;max-width:100%}
  .admin-only .stat-card,.admin-only .dash-card,.admin-only .feedback-table{min-width:0;max-width:100%}
  .admin-only .detail-panel{width:min(510px,100%);max-width:100%;overflow:hidden}
@@ -116,8 +111,298 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
  .admin-only .admin-reply-actions .hint{min-width:0;flex:1 1 auto;overflow-wrap:anywhere}
  .admin-only #admin-send{flex:0 0 auto;white-space:nowrap}
 }
-@media(max-width:600px){.admin-only .feedback-filter-grid{gap:6px}.admin-only .detail-foot{padding:10px 12px}.admin-only .detail-status-actions .l1ng-select{flex-basis:120px;min-width:80px}.admin-only .detail-head{padding:17px}.admin-only .feedback-refresh-button{font-size:11px}}
+@media(max-width:600px){.admin-only .detail-foot{padding:10px 12px}.admin-only .detail-head{padding:17px}.admin-only .feedback-refresh-button{font-size:11px}}
 
+
+
+/* ===== 管理中心 / 問題反饋元件 ===== */
+.admin-only #panel-feedback,
+.admin-only #panel-feedback > section,
+.admin-only #panel-feedback .section-toolbar,
+.admin-only #panel-feedback .toolbar-tools,
+.admin-only #panel-feedback .feedback-table,
+.admin-only #panel-feedback #feedback-rows,
+.admin-only #panel-feedback .feedback-row,
+.admin-only #panel-feedback .feedback-filters{
+  box-sizing:border-box;min-width:0;max-width:100%
+}
+.admin-only #panel-feedback .feedback-row{width:100%}
+.admin-only #panel-feedback .feedback-row > *,
+.admin-only #panel-feedback .row-primary{min-width:0;max-width:100%}
+.admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{
+  min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.admin-only .detail-body .conversation-message,
+.admin-only .detail-body .conversation-bubble{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.admin-only .detail-head > div:first-child,
+.admin-only .detail-head h2{min-width:0;overflow-wrap:anywhere}
+.admin-only .admin-reply-compose,
+.admin-only .admin-reply-compose textarea{min-width:0;max-width:100%;width:100%}
+.admin-only .admin-reply-actions{display:flex;flex-wrap:wrap;min-width:0}
+.admin-only .admin-reply-actions .hint{flex:1 1 160px;min-width:0}
+
+/* ===== 管理中心 / GA4 範圍與網站篩選 ===== */
+.admin-only #panel-analytics .analytics-filters{
+  display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;
+  gap:9px;margin-top:24px;min-width:0
+}
+.admin-only #panel-analytics .analytics-range{
+  display:flex;flex:0 0 auto;align-items:center;flex-wrap:nowrap;
+  width:max-content;min-width:0;white-space:nowrap
+}
+.admin-only #panel-analytics .analytics-range .range-btn{
+  flex:0 0 auto;min-width:52px;white-space:nowrap;padding:9px 11px
+}
+.admin-only #panel-analytics .custom-date-row{
+  flex:0 1 auto;display:flex;align-items:center;min-width:0;gap:8px;margin:0
+}
+.admin-only #panel-analytics .custom-date-row[hidden]{display:none}
+.admin-only #panel-analytics .custom-date-row .date-error{
+  flex-basis:100%;font-size:11px;overflow-wrap:anywhere
+}
+.admin-only #panel-analytics .custom-date-row .date-error:empty{display:none}
+.admin-only #panel-analytics .analytics-filters > .l1ng-select,
+.admin-only #panel-analytics .analytics-filters > #analytics-site{
+  flex:0 0 158px;width:158px;min-width:0;max-width:158px;margin-left:auto
+}
+.admin-only #panel-analytics .analytics-filters > .l1ng-select .l1ng-select-trigger{
+  width:100%;min-width:0;min-height:38px;padding:8px 30px 8px 11px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px
+}
+
+/* ===== 管理中心 / GA4 折線圖 ===== */
+.admin-only .chart-area,
+.admin-only .overview-chart{position:relative;min-width:0}
+.admin-only .overview-chart{flex-direction:column;align-items:stretch;justify-content:center}
+.admin-only .ga-chart-scroll{
+  width:100%;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:thin;scrollbar-color:var(--primary-line) transparent;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain
+}
+.admin-only .ga-chart-scroll svg{
+  display:block;width:100%;min-width:0;max-height:320px;height:auto;touch-action:pan-x pan-y
+}
+.admin-only .overview-chart .ga-chart-scroll svg{max-height:210px;flex:none}
+.admin-only .ga-chart-readout{
+  display:flex;align-items:center;justify-content:space-between;gap:8px 14px;
+  flex-wrap:wrap;width:100%;min-width:0;padding-bottom:7px;color:var(--ink)
+}
+.admin-only .ga-chart-readout-detail{
+  display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;min-width:0
+}
+.admin-only .ga-chart-readout-date{
+  font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums
+}
+.admin-only .ga-chart-readout-value{
+  font-size:12px;font-weight:750;font-variant-numeric:tabular-nums
+}
+.admin-only .ga-chart-readout-hint{font-size:10px;color:var(--faint)}
+.admin-only .ga-chart-tooltip{
+  position:absolute;z-index:3;pointer-events:none;
+  max-width:min(200px,calc(100% - 12px));padding:6px 9px;
+  border:1px solid var(--primary-line);border-radius:9px;
+  background:var(--surface);color:var(--ink);box-shadow:var(--small-shadow);
+  font-size:11px;line-height:1.5;white-space:nowrap
+}
+.admin-only .ga-chart-tooltip[hidden]{display:none}
+.admin-only .ga-chart-tooltip-date{
+  font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums
+}
+.admin-only .ga-chart-tooltip-value{
+  font-size:11px;font-weight:740;font-variant-numeric:tabular-nums
+}
+/* 鍵盤操作使用圖表內節點標記；不顯示整張 SVG 的焦點框。 */
+.admin-only .ga-chart-scroll svg:focus-visible{outline:none}
+
+/* ===== 管理中心 / 單一日期範圍月曆 ===== */
+.admin-only .admin-date-range-trigger{
+  display:flex;align-items:center;gap:9px;min-height:38px;
+  padding:7px 11px;border:1px solid var(--stroke);border-radius:9px;
+  background:var(--surface);color:var(--ink);font-size:12px;white-space:nowrap
+}
+.admin-only .admin-date-range-trigger .admin-date-value{font-variant-numeric:tabular-nums}
+.admin-only .admin-date-range-trigger:hover,
+.admin-only .admin-date-range-trigger[aria-expanded="true"]{
+  border-color:var(--primary-line);background:var(--subtle)
+}
+.admin-only .admin-date-popover{
+  position:fixed;z-index:160;width:min(580px,calc(100vw - 16px));
+  max-height:calc(100dvh - 16px);overflow-y:auto;overflow-x:hidden;
+  padding:13px;border:1px solid var(--stroke);border-radius:13px;
+  background:var(--surface);box-shadow:var(--shadow);color:var(--ink)
+}
+.admin-only .admin-date-popover[hidden]{display:none}
+.admin-only .admin-date-header{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px
+}
+.admin-only .admin-date-month{font-size:13px;letter-spacing:.02em}
+.admin-only .admin-date-nav{
+  width:32px;height:32px;border:1px solid var(--stroke);border-radius:8px;
+  background:var(--surface);font-size:23px;line-height:1
+}
+.admin-only .admin-date-nav:hover:not(:disabled){
+  background:var(--subtle);border-color:var(--primary-line)
+}
+.admin-only .admin-date-hint{
+  min-height:18px;margin:0 0 12px;font-size:11px;color:var(--muted);overflow-wrap:anywhere
+}
+.admin-only .admin-date-months{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px
+}
+.admin-only .admin-calendar-month{min-width:0}
+.admin-only .admin-calendar-month h3{
+  margin:0 0 10px;text-align:center;font-size:12px;font-weight:700
+}
+.admin-only .admin-date-weekdays,
+.admin-only .admin-date-days{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px
+}
+.admin-only .admin-date-weekdays{margin-bottom:4px}
+.admin-only .admin-date-weekdays span{
+  font-size:11px;color:var(--muted);text-align:center
+}
+.admin-only .admin-date-day{
+  position:relative;aspect-ratio:1;border:1px solid transparent;
+  border-radius:7px;background:transparent;font-size:12px;font-variant-numeric:tabular-nums
+}
+.admin-only .admin-date-day:hover:not(:disabled){background:var(--primary-pale);color:var(--primary)}
+.admin-only .admin-date-day.range-middle,
+.admin-only .admin-date-day.range-preview,
+.admin-only .admin-date-day.range-selected{
+  background:var(--primary-pale);color:var(--primary);border-radius:0
+}
+.admin-only .admin-date-day.range-start,
+.admin-only .admin-date-day.range-end{
+  background:var(--primary);color:var(--surface);border-radius:8px;font-weight:760
+}
+.admin-only .admin-date-day.range-start:hover,
+.admin-only .admin-date-day.range-end:hover{
+  background:var(--primary-hover);color:var(--surface)
+}
+.admin-only .admin-date-day.is-today:not(.range-start):not(.range-end){
+  border-color:var(--primary-line);color:var(--primary);font-weight:740
+}
+.admin-only .admin-date-day:disabled{opacity:.3;cursor:not-allowed}
+.admin-only .admin-date-actions{
+  display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+  gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)
+}
+.admin-only .admin-date-summary{
+  margin-right:auto;font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted)
+}
+.admin-only .admin-date-actions .primary{min-height:34px;padding:7px 12px;font-size:11px}
+.admin-only .admin-date-close{
+  padding:6px 8px;border:0;border-radius:7px;
+  background:transparent;color:var(--muted);font-size:12px;font-weight:680
+}
+.admin-only .admin-date-close:hover{background:var(--subtle)}
+
+/* ===== 管理中心 / 唯一響應式入口 ===== */
+@media(max-width:800px){
+  .admin-only .admin-app{grid-template-columns:minmax(0,1fr);min-width:0}
+  .admin-only .admin-main,.admin-only .admin-main > .panel-view{width:100%;min-width:0}
+  .admin-only #panel-feedback[hidden]{display:none}
+  .admin-only #panel-feedback .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-only #panel-feedback .stat-card,
+  .admin-only #panel-feedback .stat-card .topline{min-width:0}
+  .admin-only #panel-feedback .feedback-filters{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;width:100%
+  }
+  .admin-only #panel-feedback .feedback-filters .mobile-filter{
+    width:100%;min-width:0;padding:9px 4px;white-space:normal;
+    line-height:1.4;overflow-wrap:anywhere
+  }
+  .admin-only #panel-feedback .feedback-filter-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));width:100%;min-width:0
+  }
+  .admin-only #panel-feedback .feedback-filter-grid > .l1ng-select{
+    flex:none;margin:0;width:100%;min-width:0;max-width:100%
+  }
+  .admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{
+    width:100%;padding-inline:8px 23px;font-size:11px
+  }
+  .admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger::after{right:10px}
+  .admin-only #panel-feedback .section-toolbar{
+    display:flex;flex-direction:column;align-items:stretch
+  }
+  .admin-only #panel-feedback .toolbar-tools{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;width:100%;min-width:0
+  }
+  .admin-only #panel-feedback .toolbar-tools .search-field{width:100%;min-width:0}
+  .admin-only #panel-feedback .feedback-row{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;width:100%;min-width:0
+  }
+  .admin-only #panel-feedback .feedback-row .row-primary{
+    grid-column:1/-1;grid-row:1;min-width:0;max-width:100%
+  }
+  .admin-only #panel-feedback .feedback-row .row-primary strong,
+  .admin-only #panel-feedback .feedback-row .row-primary .excerpt{
+    display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis
+  }
+  .admin-only #panel-feedback .feedback-row .row-source{
+    grid-column:1;grid-row:2;min-width:0;overflow-wrap:anywhere;white-space:normal
+  }
+  .admin-only #panel-feedback .feedback-row .row-status{
+    grid-column:2;grid-row:2;min-width:0
+  }
+  .admin-only #panel-feedback .feedback-row .row-type,
+  .admin-only #panel-feedback .feedback-row .row-date{display:none}
+  .admin-only .detail-status-actions{flex:1 1 auto;min-width:0}
+  .admin-only .detail-status-actions .l1ng-select{flex:1 1 110px;min-width:0}
+  .admin-only .detail-status-actions .l1ng-select-trigger{
+    min-width:0;overflow:hidden;text-overflow:ellipsis
+  }
+  .admin-only .admin-mobile-nav,.admin-only .admin-mobile-nav button{min-width:0}
+}
+@media(max-width:700px){
+  .admin-only #panel-analytics .analytics-filters{gap:9px 7px}
+  .admin-only #panel-analytics .analytics-range .range-btn{
+    min-width:44px;padding:9px 8px
+  }
+  .admin-only #panel-analytics .analytics-filters > .l1ng-select,
+  .admin-only #panel-analytics .analytics-filters > #analytics-site{
+    flex-basis:142px;width:142px;max-width:142px
+  }
+  .admin-only .ga-chart-scroll svg,
+  .admin-only .overview-chart .ga-chart-scroll svg{
+    width:560px;min-width:560px;max-width:none;max-height:none
+  }
+  .admin-only .ga-chart-tooltip{display:none}
+  .admin-only .ga-chart-readout{padding-bottom:9px}
+  .admin-only .admin-date-popover{width:min(320px,calc(100vw - 16px));padding:12px}
+  .admin-only .admin-date-months{grid-template-columns:minmax(0,1fr)}
+  .admin-only .admin-date-day{min-height:37px;aspect-ratio:auto}
+  .admin-only #panel-analytics .custom-date-row{flex:1 1 100%;width:100%}
+  .admin-only #panel-analytics .admin-date-range-trigger{
+    width:100%;min-width:0;justify-content:space-between
+  }
+}
+@media(max-width:600px){
+  .admin-only #panel-feedback .feedback-filter-grid{gap:6px}
+  .admin-only #panel-feedback .feedback-refresh-button{
+    min-width:0;padding-inline:10px
+  }
+  .admin-only .detail-panel{width:100%;max-width:100vw}
+  .admin-only .detail-head,
+  .admin-only .detail-body,
+  .admin-only .detail-foot{min-width:0}
+  .admin-only .detail-foot .detail-status-actions{min-width:0;flex:1 1 auto}
+  .admin-only .detail-status-actions .l1ng-select{flex-basis:120px}
+  .admin-only #panel-analytics .analytics-range{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    flex:0 0 100%;width:100%
+  }
+  .admin-only #panel-analytics .analytics-range .range-btn{
+    min-width:0;padding:9px 4px
+  }
+}
+@media(max-width:360px){
+  .admin-only #panel-feedback .feedback-filter-grid,
+  .admin-only #panel-feedback .feedback-filters{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+}
 
 /* 管理中心設定內的唯讀維運手冊；使用原站主題色，不引入外部元件。 */
 .admin-only .ops-guide{grid-column:1/-1;width:100%;min-width:0;align-items:stretch;gap:16px}
@@ -179,258 +464,3 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 /* Toast 原本 pointer-events:none；僅含 Access 操作的通知可接收點擊。 */
 .admin-only .toast.show[data-kind="auth"]{pointer-events:auto}
 .admin-only .toast.show[data-kind="auth"] .dashboard-auth-link{pointer-events:auto;cursor:pointer}
-/* 管理中心的回饋列表及詳情：窄螢幕只允許元件內縮，不產生整頁橫向捲動。 */
-.admin-only #panel-feedback,.admin-only #panel-feedback>section,
-.admin-only #panel-feedback .section-toolbar,.admin-only #panel-feedback .toolbar-tools,
-.admin-only #panel-feedback .feedback-table,.admin-only #panel-feedback #feedback-rows,
-.admin-only #panel-feedback .feedback-row{min-width:0;max-width:100%}
-.admin-only #panel-feedback .feedback-row{width:100%}
-.admin-only #panel-feedback .feedback-row>*,
-.admin-only #panel-feedback .row-primary,
-.admin-only #panel-feedback .row-text{min-width:0;max-width:100%}
-.admin-only #panel-feedback .feedback-filters{max-width:100%;min-width:0;flex-wrap:wrap}
-.admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.admin-only .detail-body .conversation-message,
-.admin-only .detail-body .conversation-bubble{min-width:0;max-width:100%;overflow-wrap:anywhere}
-@media(max-width:600px){
-  .admin-only #panel-feedback .feedback-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .admin-only #panel-feedback .toolbar-tools{grid-template-columns:minmax(0,1fr) auto}
-  .admin-only #panel-feedback .feedback-refresh-button{min-width:0;padding-inline:10px}
-  .admin-only #panel-feedback .feedback-table{width:100%;overflow:hidden}
-  .admin-only .detail-panel{width:100%;max-width:100vw}
-  .admin-only .detail-head,.admin-only .detail-body,.admin-only .detail-foot{min-width:0}
-  .admin-only .detail-foot .detail-status-actions{min-width:0;flex:1 1 auto}
-}
-
-/* GA4 日期工具列：自訂日期緊接範圍按鈕，網站篩選靠最右側。 */
-.admin-only #panel-analytics .analytics-filters{
-  display:flex;align-items:flex-end;justify-content:flex-start;flex-wrap:wrap;gap:9px;margin-top:24px
-}
-.admin-only #panel-analytics .analytics-range{
-  display:flex;flex:0 0 auto;align-items:center;flex-wrap:nowrap;
-  width:max-content;min-width:0;white-space:nowrap
-}
-.admin-only #panel-analytics .analytics-range .range-btn{flex:0 0 auto;min-width:52px;white-space:nowrap;padding:9px 11px}
-.admin-only #panel-analytics .custom-date-row{
-  display:flex;align-items:flex-end;flex:0 1 auto;min-width:0;
-  flex-wrap:wrap;gap:8px;margin:0
-}
-.admin-only #panel-analytics .custom-date-row[hidden]{display:none}
-.admin-only #panel-analytics .custom-date-row label{
-  display:flex;flex-direction:column;gap:4px;min-width:0;color:var(--muted);
-  font-size:11px;font-weight:620
-}
-.admin-only #panel-analytics .custom-date-row input[type="date"]{
-  display:block;box-sizing:border-box;width:143px;min-width:0;max-width:100%;
-  min-height:38px;height:38px;padding:7px 9px;
-  border:1px solid var(--stroke);border-radius:9px;
-  background:var(--surface);color:var(--ink);font:inherit;
-  font-size:12px;font-variant-numeric:tabular-nums;color-scheme:inherit
-}
-.admin-only #panel-analytics .custom-date-row input[type="date"]:hover{border-color:var(--primary-line)}
-.admin-only #panel-analytics .custom-date-row input[type="date"]:focus-visible{
-  outline:2px solid var(--primary);outline-offset:2px;border-color:var(--primary)
-}
-.admin-only #panel-analytics .custom-date-row input[type="date"]::-webkit-calendar-picker-indicator{
-  cursor:pointer;opacity:.75;margin-inline-start:3px
-}
-.admin-only #panel-analytics .custom-date-row #apply-date{
-  height:38px;min-height:38px;white-space:nowrap;padding:7px 11px;font-size:12px
-}
-.admin-only #panel-analytics .custom-date-row .date-error{flex-basis:100%;overflow-wrap:anywhere}
-.admin-only #panel-analytics .custom-date-row .date-error:empty{display:none}
-.admin-only #panel-analytics .analytics-filters>.l1ng-select{
-  flex:0 0 158px;width:158px;min-width:0;max-width:158px;margin-left:auto
-}
-.admin-only #panel-analytics .analytics-filters>.l1ng-select .l1ng-select-trigger{
-  width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  min-height:38px;padding:8px 30px 8px 11px;font-size:12px
-}
-.admin-only #panel-analytics .analytics-filters>#analytics-site{
-  flex:0 0 158px;width:158px;min-width:0;max-width:158px;margin-left:auto
-}
-@media(max-width:700px){
-  .admin-only #panel-analytics .analytics-filters{gap:9px 7px}
-  .admin-only #panel-analytics .analytics-range{flex:0 0 auto;width:max-content;max-width:100%}
-  .admin-only #panel-analytics .analytics-range .range-btn{min-width:44px;padding:9px 8px}
-  .admin-only #panel-analytics .custom-date-row{flex:1 1 auto;max-width:100%}
-  .admin-only #panel-analytics .custom-date-row input[type="date"]{width:134px}
-  .admin-only #panel-analytics .analytics-filters>.l1ng-select,
-  .admin-only #panel-analytics .analytics-filters>#analytics-site{
-    flex:0 0 142px;width:142px;max-width:142px;margin-left:auto
-  }
-}
-@media(max-width:600px){
-  .admin-only #panel-analytics .analytics-range{flex:0 0 100%;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-  .admin-only #panel-analytics .analytics-range .range-btn{min-width:0;padding:9px 4px}
-  .admin-only #panel-analytics .custom-date-row{flex:1 1 100%;width:100%;gap:8px}
-  .admin-only #panel-analytics .custom-date-row label{flex:1 1 130px}
-  .admin-only #panel-analytics .custom-date-row input[type="date"]{width:100%;max-width:none}
-  .admin-only #panel-analytics .custom-date-row #apply-date{margin-left:auto}
-}
-
-/* 桌面浮窗保持精簡；手機改為固定數據列、圖表區域自行水平捲動。 */
-.admin-only .chart-area,.admin-only .overview-chart{position:relative;min-width:0}
-.admin-only .overview-chart{flex-direction:column;align-items:stretch;justify-content:center}
-.admin-only .ga-chart-scroll{
-  display:block;width:100%;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;
-  scrollbar-width:thin;scrollbar-color:var(--primary-line) transparent;
-  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain
-}
-.admin-only .ga-chart-scroll svg{display:block;width:100%;height:auto;max-height:320px;min-width:0;touch-action:pan-x pan-y}
-.admin-only .overview-chart .ga-chart-scroll svg{max-height:210px;flex:none}
-.admin-only .ga-chart-readout{
-  display:flex;align-items:center;justify-content:space-between;gap:8px 14px;
-  flex-wrap:wrap;width:100%;min-width:0;padding:0 0 7px;color:var(--ink)
-}
-.admin-only .ga-chart-readout-detail{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;min-width:0}
-.admin-only .ga-chart-readout-date{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.admin-only .ga-chart-readout-value{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums}
-.admin-only .ga-chart-readout-hint{font-size:10px;color:var(--faint)}
-.admin-only .ga-chart-tooltip{
-  position:absolute;z-index:3;pointer-events:none;min-width:0;max-width:min(200px,calc(100% - 12px));
-  padding:6px 9px;border:1px solid var(--primary-line);border-radius:9px;
-  background:var(--surface);color:var(--ink);box-shadow:var(--small-shadow);
-  font-size:11px;line-height:1.5;white-space:nowrap
-}
-.admin-only .ga-chart-tooltip[hidden]{display:none}
-.admin-only .ga-chart-tooltip-date{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
-.admin-only .ga-chart-tooltip-value{font-size:11px;font-weight:740;font-variant-numeric:tabular-nums}
-.admin-only .ga-chart-scroll svg:focus-visible{outline:none}
-@media(max-width:700px){
-  .admin-only .ga-chart-scroll svg,.admin-only .overview-chart .ga-chart-scroll svg{
-    width:560px;min-width:560px;max-width:none;max-height:none
-  }
-  .admin-only .ga-chart-tooltip{display:none}
-  .admin-only .ga-chart-readout{padding-bottom:9px}
-  .admin-only .ga-chart-readout-hint{font-size:10px}
-}
-
-/* 自訂月曆：統一主題、手機觸控及桌面游標狀態。 */
-.admin-only #panel-analytics .admin-date-field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.admin-only #panel-analytics .admin-date-label{color:var(--muted);font-size:11px;font-weight:620}
-.admin-only #panel-analytics .custom-date-row .admin-date-trigger{
- display:flex;align-items:center;justify-content:space-between;gap:10px;width:145px;min-height:38px;
- padding:7px 10px;border:1px solid var(--stroke);border-radius:9px;
- background:var(--surface);color:var(--ink);font-size:12px;font-variant-numeric:tabular-nums;text-align:left
-}
-.admin-only #panel-analytics .admin-date-trigger:hover{border-color:var(--primary-line);background:var(--subtle)}
-.admin-only #panel-analytics .admin-date-trigger[aria-expanded="true"]{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-pale)}
-.admin-only .admin-date-popover{
- position:fixed;z-index:160;width:min(304px,calc(100vw - 16px));padding:13px;background:var(--surface);
- border:1px solid var(--stroke);border-radius:13px;box-shadow:var(--shadow);color:var(--ink)
-}
-.admin-only .admin-date-popover[hidden]{display:none}
-.admin-only .admin-date-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.admin-only .admin-date-month{font-size:13px;letter-spacing:.02em}
-.admin-only .admin-date-nav{width:32px;height:32px;border:1px solid var(--stroke);border-radius:8px;background:var(--surface);font-size:23px;line-height:1}
-.admin-only .admin-date-nav:hover:not(:disabled){background:var(--subtle);border-color:var(--primary-line)}
-.admin-only .admin-date-weekdays,.admin-only .admin-date-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
-.admin-only .admin-date-weekdays{margin-bottom:4px}
-.admin-only .admin-date-weekdays span{font-size:11px;color:var(--muted);text-align:center}
-.admin-only .admin-date-day{aspect-ratio:1;border:1px solid transparent;border-radius:8px;background:transparent;font-size:12px;font-variant-numeric:tabular-nums}
-.admin-only .admin-date-day:hover:not(:disabled){background:var(--primary-pale);color:var(--primary)}
-.admin-only .admin-date-day.selected{background:var(--primary);color:var(--surface);font-weight:750}
-.admin-only .admin-date-day.is-today:not(.selected){border-color:var(--primary-line);color:var(--primary);font-weight:740}
-.admin-only .admin-date-day:disabled{opacity:.3;cursor:not-allowed}
-.admin-only .admin-date-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
-.admin-only .admin-date-today,.admin-only .admin-date-close{border:0;background:transparent;color:var(--primary);font-size:12px;font-weight:680;padding:6px 8px;border-radius:7px}
-.admin-only .admin-date-today:hover,.admin-only .admin-date-close:hover{background:var(--subtle)}
-@media(max-width:600px){
- .admin-only #panel-analytics .custom-date-row .admin-date-field{flex:1 1 128px}
- .admin-only #panel-analytics .custom-date-row .admin-date-trigger{width:100%;min-width:0}
-}
-
-/* 意見回饋手機版的內容寬度，由可收縮的 grid/flex 欄位決定。 */
-@media(max-width:800px){
- .admin-only #panel-feedback{width:100%;min-width:0}
- .admin-only #panel-feedback>section{width:100%;min-width:0}
- .admin-only #panel-feedback .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
- .admin-only #panel-feedback .stat-card{min-width:0;width:100%}
- .admin-only #panel-feedback .stat-card .topline{min-width:0;gap:4px}
- .admin-only #panel-feedback .feedback-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:7px}
- .admin-only #panel-feedback .feedback-filters .mobile-filter{min-width:0;width:100%;white-space:normal;line-height:1.4;padding:9px 4px;overflow-wrap:anywhere}
- .admin-only #panel-feedback .feedback-filter-grid{width:100%;grid-template-columns:repeat(3,minmax(0,1fr))}
- .admin-only #panel-feedback .feedback-filter-grid>.l1ng-select{min-width:0;width:100%;max-width:100%}
- .admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{width:100%;min-width:0;padding-inline:8px 23px;font-size:11px}
- .admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger::after{right:10px}
- .admin-only #panel-feedback .feedback-table,.admin-only #panel-feedback #feedback-rows{width:100%;min-width:0}
- .admin-only #panel-feedback .feedback-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;width:100%;min-width:0}
- .admin-only #panel-feedback .feedback-row .row-primary{grid-column:1/-1;grid-row:1;min-width:0}
- .admin-only #panel-feedback .feedback-row .row-source{grid-column:1;grid-row:2;min-width:0;overflow-wrap:anywhere;white-space:normal}
- .admin-only #panel-feedback .feedback-row .row-status{grid-column:2;grid-row:2;min-width:0}
- .admin-only #panel-feedback .feedback-row .row-type,.admin-only #panel-feedback .feedback-row .row-date{display:none}
- .admin-only #panel-feedback .section-toolbar{display:flex;flex-direction:column;align-items:stretch}
- .admin-only #panel-feedback .toolbar-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;width:100%;min-width:0}
- .admin-only #panel-feedback .toolbar-tools .search-field{width:100%;min-width:0}
- .admin-only .detail-head>div:first-child,.admin-only .detail-head h2{min-width:0;overflow-wrap:anywhere}
- .admin-only .detail-status-actions{flex:1 1 auto;min-width:0}
- .admin-only .detail-status-actions .l1ng-select{flex:1 1 110px;min-width:0}
- .admin-only .detail-status-actions .l1ng-select-trigger{min-width:0;overflow:hidden;text-overflow:ellipsis}
- .admin-only .admin-reply-compose,.admin-only .admin-reply-compose textarea{min-width:0;max-width:100%;width:100%}
- .admin-only .admin-reply-actions{display:flex;flex-wrap:wrap;min-width:0}
- .admin-only .admin-reply-actions .hint{flex:1 1 160px;min-width:0}
- .admin-only .detail-body .conversation-stack,.admin-only .detail-body .conversation-message{min-width:0;max-width:100%}
-}
-
-/* 管理中心日期範圍：單一入口、雙月區間高亮，手機單月。 */
-.admin-only #panel-analytics .custom-date-row{flex:0 1 auto;display:flex;align-items:center;margin:0;min-width:0}
-.admin-only #panel-analytics .custom-date-row[hidden]{display:none}
-.admin-only .admin-date-range-trigger{min-height:38px;display:flex;align-items:center;gap:9px;padding:7px 11px;border:1px solid var(--stroke);border-radius:9px;background:var(--surface);color:var(--ink);font-size:12px;white-space:nowrap}
-.admin-only .admin-date-range-trigger .admin-date-value{font-variant-numeric:tabular-nums}
-.admin-only .admin-date-range-trigger:hover,.admin-only .admin-date-range-trigger[aria-expanded="true"]{border-color:var(--primary-line);background:var(--subtle)}
-.admin-only .admin-date-popover{width:min(580px,calc(100vw - 16px));overflow-y:auto;overflow-x:hidden;max-height:calc(100dvh - 16px)}
-.admin-only .admin-date-months{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
-.admin-only .admin-calendar-month{min-width:0}
-.admin-only .admin-calendar-month h3{text-align:center;font-size:12px;font-weight:700;margin:0 0 10px}
-.admin-only .admin-date-hint{font-size:11px;color:var(--muted);min-height:18px;margin:0 0 12px;overflow-wrap:anywhere}
-.admin-only .admin-date-day{position:relative;z-index:0;isolation:isolate;border-radius:7px}
-.admin-only .admin-date-day.range-middle,.admin-only .admin-date-day.range-preview,.admin-only .admin-date-day.range-selected{background:var(--primary-pale);color:var(--primary);border-radius:0}
-.admin-only .admin-date-day.range-start,.admin-only .admin-date-day.range-end{background:var(--primary);color:var(--surface);border-radius:8px;font-weight:760}
-.admin-only .admin-date-day.range-preview:not(.range-start):not(.range-end){background:var(--primary-pale)}
-.admin-only .admin-date-day.range-start:hover,.admin-only .admin-date-day.range-end:hover{background:var(--primary-hover);color:var(--surface)}
-.admin-only .admin-date-actions{justify-content:flex-end;flex-wrap:wrap}
-.admin-only .admin-date-summary{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);margin-right:auto}
-.admin-only .admin-date-actions .primary{font-size:11px;min-height:34px;padding:7px 12px}
-.admin-only .admin-date-close{color:var(--muted)}
-@media(max-width:700px){
- .admin-only .admin-date-popover{width:min(320px,calc(100vw - 16px));padding:12px}
- .admin-only .admin-date-months{grid-template-columns:minmax(0,1fr)}
- .admin-only .admin-date-day{min-height:37px;aspect-ratio:auto}
- .admin-only #panel-analytics .custom-date-row{width:100%}
- .admin-only #panel-analytics .admin-date-range-trigger{width:100%;min-width:0;justify-content:space-between}
-}
-
-/* 修正回饋分頁：在手機模式移除桌面 Grid 最小內容寬度的擴張來源。 */
-@media(max-width:800px){
- body.admin-only .admin-app{grid-template-columns:minmax(0,1fr);width:100%;min-width:0}
- body.admin-only .admin-main{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
- body.admin-only .admin-main>.panel-view{width:100%;min-width:0}
- body.admin-only #panel-feedback{display:block}
- body.admin-only #panel-feedback[hidden]{display:none}
- body.admin-only #panel-feedback>.admin-head,
- body.admin-only #panel-feedback>section,
- body.admin-only #panel-feedback .feedback-table,
- body.admin-only #panel-feedback .feedback-filter-grid,
- body.admin-only #panel-feedback .feedback-filters{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
- body.admin-only #panel-feedback .feedback-row{grid-template-columns:minmax(0,1fr) minmax(0,max-content)}
- body.admin-only #panel-feedback .feedback-row .row-primary,
- body.admin-only #panel-feedback .feedback-row .row-primary strong,
- body.admin-only #panel-feedback .feedback-row .row-primary .excerpt{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
- body.admin-only #panel-feedback .feedback-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
- body.admin-only #panel-feedback .feedback-filters button{width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere}
- body.admin-only #panel-feedback .feedback-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
- body.admin-only #panel-feedback .feedback-filter-grid>.l1ng-select{width:100%;min-width:0;max-width:100%;flex:none;margin:0}
- body.admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{width:100%;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
- body.admin-only #panel-feedback .toolbar-tools{grid-template-columns:minmax(0,1fr) auto;min-width:0}
- body.admin-only #panel-feedback .toolbar-tools .search-field{width:100%;min-width:0}
- body.admin-only #panel-feedback .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
- body.admin-only #panel-feedback .stat-card{min-width:0}
- body.admin-only #panel-feedback .stat-card .topline{min-width:0}
- body.admin-only .admin-mobile-nav{width:100%;min-width:0}
- body.admin-only .admin-mobile-nav button{min-width:0}
-}
-@media(max-width:360px){
- body.admin-only #panel-feedback .feedback-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
- body.admin-only #panel-feedback .feedback-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
