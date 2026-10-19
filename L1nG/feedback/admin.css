@@ -179,24 +179,129 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
 /* Toast 原本 pointer-events:none；僅含 Access 操作的通知可接收點擊。 */
 .admin-only .toast.show[data-kind="auth"]{pointer-events:auto}
 .admin-only .toast.show[data-kind="auth"] .dashboard-auth-link{pointer-events:auto;cursor:pointer}
-/* GA4 範圍與網站篩選：固定日期按鈕為水平行，網站選單不再撐滿欄位。 */
-.admin-only #panel-analytics .analytics-filters{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:12px}
-.admin-only #panel-analytics .analytics-range{display:flex;flex:0 0 auto;width:max-content;min-width:0;align-items:center;flex-wrap:nowrap;white-space:nowrap}
-.admin-only #panel-analytics .analytics-range .range-btn{flex:0 0 auto;white-space:nowrap;min-width:56px}
-.admin-only #panel-analytics .analytics-filters>.l1ng-select{flex:0 0 220px;width:220px;min-width:0;max-width:220px}
-.admin-only #panel-analytics .analytics-filters>.l1ng-select .l1ng-select-trigger{width:100%;min-width:0}
-.admin-only #panel-analytics .analytics-filters>#analytics-site{flex:0 0 220px;width:220px;max-width:220px}
+/* 管理中心的回饋列表及詳情：窄螢幕只允許元件內縮，不產生整頁橫向捲動。 */
+.admin-only #panel-feedback,.admin-only #panel-feedback>section,
+.admin-only #panel-feedback .section-toolbar,.admin-only #panel-feedback .toolbar-tools,
+.admin-only #panel-feedback .feedback-table,.admin-only #panel-feedback #feedback-rows,
+.admin-only #panel-feedback .feedback-row{min-width:0;max-width:100%}
+.admin-only #panel-feedback .feedback-row{width:100%}
+.admin-only #panel-feedback .feedback-row>*,
+.admin-only #panel-feedback .row-primary,
+.admin-only #panel-feedback .row-text{min-width:0;max-width:100%}
+.admin-only #panel-feedback .feedback-filters{max-width:100%;min-width:0;flex-wrap:wrap}
+.admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-only .detail-body .conversation-message,
+.admin-only .detail-body .conversation-bubble{min-width:0;max-width:100%;overflow-wrap:anywhere}
 @media(max-width:600px){
-  .admin-only #panel-analytics .analytics-range{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}
-  .admin-only #panel-analytics .analytics-range .range-btn{min-width:0;padding:9px 4px}
-  .admin-only #panel-analytics .analytics-filters>.l1ng-select{flex:0 1 220px;width:min(220px,100%);max-width:100%}
-  .admin-only #panel-analytics .analytics-filters>#analytics-site{flex:0 1 220px;width:min(220px,100%);max-width:100%}
+  .admin-only #panel-feedback .feedback-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .admin-only #panel-feedback .toolbar-tools{grid-template-columns:minmax(0,1fr) auto}
+  .admin-only #panel-feedback .feedback-refresh-button{min-width:0;padding-inline:10px}
+  .admin-only #panel-feedback .feedback-table{width:100%;overflow:hidden}
+  .admin-only .detail-panel{width:100%;max-width:100vw}
+  .admin-only .detail-head,.admin-only .detail-body,.admin-only .detail-foot{min-width:0}
+  .admin-only .detail-foot .detail-status-actions{min-width:0;flex:1 1 auto}
 }
-/* 折線圖精確節點數據；在兩張共用 GA4 圖表上顯示日期與活躍使用者。 */
-.admin-only .chart-area,.admin-only .overview-chart{position:relative}
-.admin-only .overview-chart svg{min-width:0;flex:1 1 auto}
-.admin-only .ga-chart-tooltip{position:absolute;z-index:3;pointer-events:none;min-width:130px;padding:9px 12px;border:1px solid var(--primary-line);border-radius:10px;background:var(--surface);color:var(--ink);box-shadow:var(--small-shadow);font-size:12px;line-height:1.6;white-space:nowrap}
+
+/* GA4 日期工具列：自訂日期緊接範圍按鈕，網站篩選靠最右側。 */
+.admin-only #panel-analytics .analytics-filters{
+  display:flex;align-items:flex-end;justify-content:flex-start;flex-wrap:wrap;gap:9px;margin-top:24px
+}
+.admin-only #panel-analytics .analytics-range{
+  display:flex;flex:0 0 auto;align-items:center;flex-wrap:nowrap;
+  width:max-content;min-width:0;white-space:nowrap
+}
+.admin-only #panel-analytics .analytics-range .range-btn{flex:0 0 auto;min-width:52px;white-space:nowrap;padding:9px 11px}
+.admin-only #panel-analytics .custom-date-row{
+  display:flex;align-items:flex-end;flex:0 1 auto;min-width:0;
+  flex-wrap:wrap;gap:8px;margin:0
+}
+.admin-only #panel-analytics .custom-date-row[hidden]{display:none}
+.admin-only #panel-analytics .custom-date-row label{
+  display:flex;flex-direction:column;gap:4px;min-width:0;color:var(--muted);
+  font-size:11px;font-weight:620
+}
+.admin-only #panel-analytics .custom-date-row input[type="date"]{
+  display:block;box-sizing:border-box;width:143px;min-width:0;max-width:100%;
+  min-height:38px;height:38px;padding:7px 9px;
+  border:1px solid var(--stroke);border-radius:9px;
+  background:var(--surface);color:var(--ink);font:inherit;
+  font-size:12px;font-variant-numeric:tabular-nums;color-scheme:inherit
+}
+.admin-only #panel-analytics .custom-date-row input[type="date"]:hover{border-color:var(--primary-line)}
+.admin-only #panel-analytics .custom-date-row input[type="date"]:focus-visible{
+  outline:2px solid var(--primary);outline-offset:2px;border-color:var(--primary)
+}
+.admin-only #panel-analytics .custom-date-row input[type="date"]::-webkit-calendar-picker-indicator{
+  cursor:pointer;opacity:.75;margin-inline-start:3px
+}
+.admin-only #panel-analytics .custom-date-row #apply-date{
+  height:38px;min-height:38px;white-space:nowrap;padding:7px 11px;font-size:12px
+}
+.admin-only #panel-analytics .custom-date-row .date-error{flex-basis:100%;overflow-wrap:anywhere}
+.admin-only #panel-analytics .custom-date-row .date-error:empty{display:none}
+.admin-only #panel-analytics .analytics-filters>.l1ng-select{
+  flex:0 0 158px;width:158px;min-width:0;max-width:158px;margin-left:auto
+}
+.admin-only #panel-analytics .analytics-filters>.l1ng-select .l1ng-select-trigger{
+  width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  min-height:38px;padding:8px 30px 8px 11px;font-size:12px
+}
+.admin-only #panel-analytics .analytics-filters>#analytics-site{
+  flex:0 0 158px;width:158px;min-width:0;max-width:158px;margin-left:auto
+}
+@media(max-width:700px){
+  .admin-only #panel-analytics .analytics-filters{gap:9px 7px}
+  .admin-only #panel-analytics .analytics-range{flex:0 0 auto;width:max-content;max-width:100%}
+  .admin-only #panel-analytics .analytics-range .range-btn{min-width:44px;padding:9px 8px}
+  .admin-only #panel-analytics .custom-date-row{flex:1 1 auto;max-width:100%}
+  .admin-only #panel-analytics .custom-date-row input[type="date"]{width:134px}
+  .admin-only #panel-analytics .analytics-filters>.l1ng-select,
+  .admin-only #panel-analytics .analytics-filters>#analytics-site{
+    flex:0 0 142px;width:142px;max-width:142px;margin-left:auto
+  }
+}
+@media(max-width:600px){
+  .admin-only #panel-analytics .analytics-range{flex:0 0 100%;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .admin-only #panel-analytics .analytics-range .range-btn{min-width:0;padding:9px 4px}
+  .admin-only #panel-analytics .custom-date-row{flex:1 1 100%;width:100%;gap:8px}
+  .admin-only #panel-analytics .custom-date-row label{flex:1 1 130px}
+  .admin-only #panel-analytics .custom-date-row input[type="date"]{width:100%;max-width:none}
+  .admin-only #panel-analytics .custom-date-row #apply-date{margin-left:auto}
+}
+
+/* 桌面浮窗保持精簡；手機改為固定數據列、圖表區域自行水平捲動。 */
+.admin-only .chart-area,.admin-only .overview-chart{position:relative;min-width:0}
+.admin-only .overview-chart{flex-direction:column;align-items:stretch;justify-content:center}
+.admin-only .ga-chart-scroll{
+  display:block;width:100%;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:thin;scrollbar-color:var(--primary-line) transparent;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain
+}
+.admin-only .ga-chart-scroll svg{display:block;width:100%;height:auto;max-height:320px;min-width:0;touch-action:pan-x pan-y}
+.admin-only .overview-chart .ga-chart-scroll svg{max-height:210px;flex:none}
+.admin-only .ga-chart-readout{
+  display:flex;align-items:center;justify-content:space-between;gap:8px 14px;
+  flex-wrap:wrap;width:100%;min-width:0;padding:0 0 7px;color:var(--ink)
+}
+.admin-only .ga-chart-readout-detail{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;min-width:0}
+.admin-only .ga-chart-readout-date{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.admin-only .ga-chart-readout-value{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums}
+.admin-only .ga-chart-readout-hint{font-size:10px;color:var(--faint)}
+.admin-only .ga-chart-tooltip{
+  position:absolute;z-index:3;pointer-events:none;min-width:0;max-width:min(200px,calc(100% - 12px));
+  padding:6px 9px;border:1px solid var(--primary-line);border-radius:9px;
+  background:var(--surface);color:var(--ink);box-shadow:var(--small-shadow);
+  font-size:11px;line-height:1.5;white-space:nowrap
+}
 .admin-only .ga-chart-tooltip[hidden]{display:none}
-.admin-only .ga-chart-tooltip-date{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.admin-only .ga-chart-tooltip-value{font-size:12px;font-weight:740;font-variant-numeric:tabular-nums}
-.admin-only .chart-area svg:focus-visible,.admin-only .overview-chart svg:focus-visible{outline:2px solid var(--primary);outline-offset:-2px;border-radius:8px}
+.admin-only .ga-chart-tooltip-date{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.admin-only .ga-chart-tooltip-value{font-size:11px;font-weight:740;font-variant-numeric:tabular-nums}
+.admin-only .ga-chart-scroll svg:focus-visible{outline:2px solid var(--primary);outline-offset:-2px;border-radius:8px}
+@media(max-width:700px){
+  .admin-only .ga-chart-scroll svg,.admin-only .overview-chart .ga-chart-scroll svg{
+    width:560px;min-width:560px;max-width:none;max-height:none
+  }
+  .admin-only .ga-chart-tooltip{display:none}
+  .admin-only .ga-chart-readout{padding-bottom:9px}
+  .admin-only .ga-chart-readout-hint{font-size:10px}
+}
