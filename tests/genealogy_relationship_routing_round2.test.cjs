@@ -1,112 +1,85 @@
+'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const fs=require('node:fs');
 const vm=require('node:vm');
-const path=require('node:path');
-const source=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy_scene.js'),'utf8');
-const start=source.indexOf('function relationshipRouteRects(');
-const end=source.indexOf('function drawPerspectiveKinshipLabels(',start);
-assert.ok(start>=0&&end>start);
-const scoped=source.slice(start,end);
-const context={
- clampRelationshipCurveAmount:n=>Math.max(10,Math.min(100,Number(n)||50)),
- cardOuterRect:p=>p.rect,
- avatarBoundaryAnchor:(from,to)=>from.anchor,
- relationshipQuadraticGeometry:(x1,y1,x2,y2,v)=>{
-   const distance=Math.hypot(x2-x1,y2-y1),amp=Math.min(36,distance*(0.03+v/100*0.24));
-   return {d:'M'+x1+' '+y1+' Q'+((x1+x2)/2)+' '+((y1+y2)/2+amp)+' '+x2+' '+y2,
-     cx:(x1+x2)/2,cy:(y1+y2)/2+amp,labelX:(x1+x2)/2,labelY:(y1+y2)/2+amp/2};
- },
- relationshipSegmentIntersectsRect:(x1,y1,x2,y2,r,padding=6)=>{
-   const rect={left:r.left-padding,right:r.right+padding,top:r.top-padding,bottom:r.bottom+padding};
-   const length=70;
-   for(let i=0;i<=length;i++){
-     const t=i/length,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t;
-     if(x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom)return true;
-   }
-   return false;
- }
-};
-const render=vm.runInNewContext(scoped+'\nrelationshipOtherRenderGeometry;',context);
-const A={anchor:{x:0,y:0}},B={anchor:{x:400,y:0}};
-const obstacle=rect=>({pos:new Map([['parent',{rect}]]),fromId:'A',toId:'B'});
-test('沒有障礙且沒有勾曲線時維持直線',()=>{
- const result=render(A,B,{curved:false,curveAmount:100},obstacle({left:500,right:550,top:-20,bottom:20}));
- assert.doesNotMatch(result.d,/[QC]/);
+const {scene,extract,api,rect,card,routeContext,curve,clearResult}=require('./genealogy_smart_curve_fixture.cjs');
+const A=card(0,0),B=card(440,0);
+test('曲線關閉：無障礙時是直線，沒有 Bézier 指令',()=>{
+  const result=api.relationshipOtherRenderGeometry(A,B,{curved:false},routeContext([],{sameGeneration:true}));
+  assert.doesNotMatch(result.d,/\bC/);
+  assert.ok(result.d.startsWith('M'));
 });
-test('有原配阻擋、曲線關閉時一定沒有曲線命令',()=>{
- const result=render(A,B,{curved:false,curveAmount:90},obstacle({left:150,right:240,top:-40,bottom:40}));
- assert.doesNotMatch(result.d,/[QC]/);
- assert.ok((result.d.match(/L/g)||[]).length>=2,'關閉曲線應為多段折線避開卡片');
+test('曲線關閉：卡片阻擋時以直角折線避障，不畫曲線',()=>{
+  const obstacle=rect(180,0,300,90);
+  const result=api.relationshipOtherRenderGeometry(A,B,{curved:false},routeContext([obstacle],{sameGeneration:true}));
+  assert.doesNotMatch(result.d,/\bC/);
+  assert.ok((result.points||[]).length>=3,'需要繞過阻擋卡片');
+  for(let i=1;i<result.points.length;i++){
+    const a=result.points[i-1],b=result.points[i];
+    assert.ok(a.x===b.x||a.y===b.y,'所有折線路徑必須水平或垂直');
+  }
 });
-test('有原配阻擋、曲線開啟時使用有限弧度圓角，不是巨大拱橋',()=>{
- const rect={left:150,right:240,top:-40,bottom:40};
- const result=render(A,B,{curved:true,curveAmount:100},obstacle(rect));
- assert.match(result.d,/C/);
- const nums=[...result.d.matchAll(/[-+]?(?:\d+\.?\d*|\.\d+)/g)].map(x=>Number(x[0]));
- assert.ok(nums.every(Number.isFinite));
- assert.ok(Math.max(...nums.map(Math.abs))<600,'控制點不得無限制遠離人物');
+test('同代曲線從雙方頭像中線連接，向上拱且保持單段',()=>{
+  const result=curve(A,B,[],{sameGeneration:true});
+  assert.equal(result.segments?.length,1);
+  const seg=result.segments[0];
+  assert.equal(seg.from.y,A.avatarY);
+  assert.equal(seg.to.y,B.avatarY);
+  assert.equal(seg.from.x,A.rect.right);
+  assert.equal(seg.to.x,B.rect.left);
+  assert.ok(api.relationshipCubicAt(seg,0.5).y<Math.min(seg.from.y,seg.to.y));
 });
-test('上下兩側都有其他人物卡片時尋找避障路徑',()=>{
- const pos=new Map([
-   ['parent',{rect:{left:150,right:240,top:-40,bottom:40}}],
-   ['ancestor',{rect:{left:155,right:245,top:-140,bottom:-60}}]
- ]);
- const result=render(A,B,{curved:false,curveAmount:50},{pos,fromId:'A',toId:'B'});
- assert.doesNotMatch(result.d,/[QC]/);
- assert.ok(result.d.length>15,'應繞開上一代，不應只有直線');
+test('同代曲線遇一般障礙物，若輸出 Bézier 則整段實際路徑必須避開',()=>{
+  const obstacles=[rect(160,-25,290,82)];
+  const result=curve(A,B,obstacles,{sameGeneration:true});
+  assert.ok(result.d.length>0);
+  if(result.segments?.length){
+    assert.equal(result.segments.length,1,'只能使用單一弧度');
+    assert.ok(clearResult(result,obstacles),'取樣的曲線不能穿過卡片');
+  }else{
+    assert.ok(result.points?.length>=2,'無安全上拱時須使用直角避障');
+  }
 });
-test('推定情人直接沿用關係曲線作為共同子女來源，不產生第二條伴侶線',()=>{
- const line=source.slice(source.indexOf('function parentConnectorSource('),source.indexOf('function parentConnectorChildAnchor('));
- assert.match(line,/genealogyNonSpousalCoParentLink\(group,byId\)/);
- assert.match(line,/genealogyCoParentRelationshipJunction\(/);
- assert.match(line,/if\(junction\)return junction/);
- const branch=line.slice(line.indexOf('if(relation){'),line.indexOf('// 兩位共同父母不是配偶'));
- assert.doesNotMatch(branch,/paths\.push\(/);
+test('跨世代避障無解時要回報 blocked，不能偷畫穿卡片線段',()=>{
+  const upper=card(0,0),lower=card(0,350);
+  const obstacles=[rect(-2000,90,2000,330)];
+  const result=curve(upper,lower,obstacles);
+  assert.ok(result.blocked||clearResult(result,obstacles));
 });
-test('視覺設定曲線與弧度是同一組 setting 來源',()=>{
- assert.match(scoped,/if\(!setting\.curved\)/);
- assert.match(scoped,/setting\.curveAmount/);
- assert.doesNotMatch(scoped,/setting\.routing\s*===\s*'manual'/);
- const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
- assert.match(html,/genealogy_scene\.js\?v=[\w-]+/);
+test('關係端點順序顛倒時曲線仍向上，且不產生下凹或 S 形',()=>{
+  const forward=curve(A,B,[],{sameGeneration:true});
+  const backward=curve(B,A,[],{sameGeneration:true});
+  for(const result of [forward,backward]){
+    assert.equal(result.segments?.length,1);
+    const seg=result.segments[0];
+    let minY=Infinity;
+    for(let i=0;i<=50;i++)minY=Math.min(minY,api.relationshipCubicAt(seg,i/50).y);
+    assert.ok(minY<seg.from.y);
+    assert.equal(seg.c1.y,seg.c2.y,'等高端點的 Bézier 應只有一個上拱');
+  }
 });
-
-test('曲線弧度 10% 與 100% 無障礙時有不同的真正曲線',()=>{
- const low=render(A,B,{curved:true,curveAmount:10},obstacle({left:500,right:550,top:-20,bottom:20}));
- const high=render(A,B,{curved:true,curveAmount:100},obstacle({left:500,right:550,top:-20,bottom:20}));
- assert.match(low.d,/C/);assert.match(high.d,/C/);
- assert.notEqual(low.d,high.d,'滑桿必須實際改變曲線幾何');
-});
-test('有原配阻擋時，滑桿弧度不能全部被固定避障值覆蓋',()=>{
- const context=obstacle({left:150,right:240,top:-40,bottom:40});
- const low=render(A,B,{curved:true,curveAmount:10},context);
- const high=render(A,B,{curved:true,curveAmount:100},context);
- assert.match(low.d,/C/);assert.match(high.d,/C/);
- assert.notEqual(low.d,high.d,'原配阻擋時仍須保有弧度調整空間');
-});
-
-test('長距離情人曲線避開其他人物時維持連續拱線，不再有水平折線與圓角',()=>{
- const a={anchor:{x:0,y:0}},b={anchor:{x:400,y:0}};
- const rect={left:130,right:270,top:-190,bottom:35};
- const pos=new Map([['blocking-sim',{rect}]]);
- const result=render(a,b,{curved:true,curveAmount:65},{pos,fromId:'A',toId:'B'});
- assert.equal(result.segments.length,2,'高障礙應改用自然拱線，而不是折線轉角');
- assert.doesNotMatch(result.d,/\\sL/,'曲線模式不得退回水平折線');
- const [first,second]=result.segments;
- assert.equal(first.to.x,second.from.x);
- assert.equal(first.to.y,second.from.y);
- assert.equal(first.c2.y,first.to.y,'拱頂不能保留折線的轉角');
- assert.equal(second.c1.y,second.from.y,'拱頂前後應保持連續水平切線');
- assert.ok(first.to.y<rect.top-9,'曲線必須確實避開卡片');
- assert.ok(first.c1.y>first.to.y,'曲線上升過程不能是長條水平線');
-});
-test('手動曲線弧度優先與關閉曲線時的直角避障不受自然拱線修正影響',()=>{
- const a={anchor:{x:0,y:0}},b={anchor:{x:400,y:0}};
- const obstacle={pos:new Map([['block',{rect:{left:130,right:270,top:-190,bottom:35}}]]),fromId:'A',toId:'B'};
- const manual=render(a,b,{curved:true,curveAmount:80,curveAmountManual:true},obstacle);
- const orthogonal=render(a,b,{curved:false,curveAmount:80},obstacle);
- assert.equal(manual.segments.length,1);
- assert.match(manual.d,/C/);
- assert.doesNotMatch(orthogonal.d,/C/);
+test('已存在的共同父母關係與配偶關係只共用連接點，不重複建立父母橋',()=>{
+  const source=extract('function parentConnectorSource(','function parentConnectorChildAnchor(');
+  const context={
+    genealogyNonSpousalCoParentLink:()=>({from:'A',to:'B',type:'情人'}),
+    genealogyCoParentRelationshipJunction:()=>({x:210,y:55}),
+    pairJoinPoint:()=>({x:205,y:42}),
+    cardVerticalAnchor:(position,side)=>({x:position.x+10,y:position.y+(side==='bottom'?30:0)})
+  };
+  const parentSource=vm.runInNewContext(source+'\nparentConnectorSource;',context);
+  const positions=new Map([['A',{x:0,y:0}],['B',{x:400,y:0}]]);
+  const common=(A,B)=>({parentIds:['A','B'],children:['child']});
+  const lovers=new Map([
+    ['A',{id:'A',spouseIds:[],exSpouseIds:[],gameData:{}}],
+    ['B',{id:'B',spouseIds:[],exSpouseIds:[],gameData:{}}]
+  ]);
+  const paths=[];
+  const junction=parentSource(common(),positions,lovers,paths);
+  assert.equal(junction.x,210);
+  assert.equal(junction.y,55);
+  assert.equal(paths.length,0,'情人共同子女不得產生第二組父母橋');
+  lovers.get('A').spouseIds=['B'];
+  const married=parentSource(common(),positions,lovers,paths);
+  assert.equal(married.x,205);
+  assert.equal(paths.length,0,'配偶共同子女不得產生第二組父母橋');
 });
