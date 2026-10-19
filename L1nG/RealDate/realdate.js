@@ -9,7 +9,7 @@ document.documentElement.classList.add("js");
     const DEFAULT_LANGUAGE = "zh-Hant";
     const SUPPORTED_LANGUAGES = new Set(["zh-Hant", "en"]);
 
-    const PAGE_TITLES = {"index.html":["RealDate · L1nG","RealDate · L1nG"],"gameplay.html":["完整玩法 · RealDate · L1nG","Gameplay · RealDate · L1nG"],"download.html":["下載與安裝 · RealDate · L1nG","Download & Install · RealDate · L1nG"],"compatibility.html":["相容性 · RealDate · L1nG","Compatibility · RealDate · L1nG"],"changelog.html":["更新日誌 · RealDate · L1nG","Changelog · RealDate · L1nG"],"roadmap.html":["開發方向 · RealDate · L1nG","Roadmap · RealDate · L1nG"],"faq.html":["常見問題 · RealDate · L1nG","FAQ · RealDate · L1nG"],"feedback.html":["問題反饋 · RealDate · L1nG","Feedback · RealDate · L1nG"],"installation.html":["安裝說明 · RealDate · L1nG","Installation Guide · RealDate · L1nG"]};
+    const PAGE_TITLES = {"index.html":["RealDate · L1nG","RealDate · L1nG"],"gameplay.html":["完整玩法 · RealDate · L1nG","Gameplay · RealDate · L1nG"],"download.html":["下載與安裝 · RealDate · L1nG","Download & Install · RealDate · L1nG"],"compatibility.html":["相容性 · RealDate · L1nG","Compatibility · RealDate · L1nG"],"changelog.html":["更新日誌 · RealDate · L1nG","Changelog · RealDate · L1nG"],"roadmap.html":["開發方向 · RealDate · L1nG","Roadmap · RealDate · L1nG"],"faq.html":["常見問題 · RealDate · L1nG","FAQ · RealDate · L1nG"],"feedback.html":["問題反饋 · RealDate · L1nG","Feedback · RealDate · L1nG"]};
     const root = document.documentElement;
     const buttons = Array.from(document.querySelectorAll("[data-language-button]"));
 
