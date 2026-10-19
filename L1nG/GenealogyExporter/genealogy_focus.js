@@ -109,9 +109,11 @@
     if (!target || !owner) return;
     const generation = generations.get(owner) || 0;
     const apply = () => {
-      if ((generations.get(owner) || 0) !== generation ||
-          !owner.isConnected || !owner.classList.contains('show') ||
-          !target.isConnected || !visible(target) || top()?.element !== owner) return;
+      if ((generations.get(owner) || 0) !== generation || !owner.isConnected ||
+          !target.isConnected || !visible(target)) return;
+      const modal = registry.has(owner);
+      if (modal && (!owner.classList.contains('show') || top()?.element !== owner)) return;
+      if (!modal && !owner.classList.contains('ui-select-open')) return;
       target.focus({ preventScroll:true });
     };
     if (delay > 0) global.setTimeout(apply, delay);
@@ -166,7 +168,7 @@
     }
   });
 
-  document.addEventListener('keydown', event => {
+  const handleModalKeyboard = event => {
     if (event.key !== 'Tab' && event.key !== 'Escape') return;
     const current = top();
     if (!current) return;
@@ -198,7 +200,10 @@
       event.preventDefault();
       all[0].focus({ preventScroll:true });
     }
-  });
+  };
+  // 放在原有元件的 keydown 處理器後面，讓下拉選單先消費 Esc。
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => document.addEventListener('keydown', handleModalKeyboard), {once:true});
+  else global.setTimeout(() => document.addEventListener('keydown', handleModalKeyboard), 0);
 
   global.L1nGGenealogyFocus = Object.freeze({
     register, enter, leave, top, sync, focusCanvas, focusLater,
