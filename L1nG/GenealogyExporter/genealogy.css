@@ -1483,7 +1483,7 @@ body.sidebar-resizing * {
 }
 .filebtn .l1ng-icon,
 .ui-dialog-actions .l1ng-icon,
-.pet-add-btn .l1ng-icon,
+.pet-list-add-button .l1ng-icon,
 .life-photo-add-btn .l1ng-icon {
     /* 字體大小 */ font-size: 1.02em;
 }
@@ -4927,14 +4927,14 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 /* ========【寵物資料】 檢視／編輯分層與兩欄寵物資訊 ======== */
-#petList { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px; }
-#petList .pet-add-btn { min-width:0; width:100%; min-height:64px; display:flex; align-items:center; justify-content:center; gap:7px; }
-#petList > .relationship-empty { grid-column:1/-1; }
+#simEditorPetList { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 10px; }
+#simEditorPetList .pet-list-add-button { min-width:0; width:100%; min-height:64px; display:flex; align-items:center; justify-content:center; gap:7px; }
+#simEditorPetList > .relationship-empty { grid-column:1/-1; }
 @media (max-width:560px) {
-  #petList { grid-template-columns:minmax(0,1fr); }
+  #simEditorPetList { grid-template-columns:minmax(0,1fr); }
 }
 
-.pet-item {
+.pet-list-item {
     /* 頭像、姓名與特徵、編輯操作維持同一橫排，不能把按鈕推到下一行。 */
     display:grid;
     grid-template-columns:36px minmax(0,1fr) auto;
@@ -4946,7 +4946,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     min-width:0;
 }
 
-.pet-item-avatar {
+.pet-list-item-avatar {
     /* 元素寬度 */ width: 36px;
     /* 元素高度 */ height: 36px;
     /* 圓角弧度 */ border-radius: 8px;
@@ -4960,20 +4960,20 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 邊框設定 */ border: 1px solid var(--border-default);
 }
 
-.pet-item-avatar img {
+.pet-list-item-avatar img {
     /* 元素寬度 */ width: 100%;
     /* 元素高度 */ height: 100%;
     /* 圖片填滿方式 */ object-fit: cover;
     /* 顯示方式 */ display: block;
 }
 
-.pet-item-info {
+.pet-list-item-details {
     /* 彈性配比 */ flex: 1;
     /* 最小寬度 */ min-width: 0;
 }
 
 .pet-item-heading { display:flex; flex-wrap:nowrap; align-items:baseline; gap:5px; min-width:0; }
-.pet-item-name { flex:0 1 auto; font-size:12px; font-weight:650; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pet-list-item-name { flex:0 1 auto; font-size:12px; font-weight:650; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pet-item-identity { flex:0 0 auto; color:var(--text-secondary); font-size:10px; white-space:nowrap; }
 
 .pet-trait-summary {
@@ -4986,7 +4986,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 清單中的寵物特徵稍微放寬，避免文字過早省略 */ max-width:120px;
 }
 
-.pet-item-actions {
+.pet-list-item-actions {
     /* 編輯／刪除只在編輯狀態出現，兩顆按鈕始終同排。 */
     display:flex;
     flex-wrap:nowrap;
@@ -4995,7 +4995,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     white-space:nowrap;
 }
 
-.pet-item-actions button {
+.pet-list-item-actions button {
     /* 內縮空間 */ padding: 3px 9px;
     /* 字體大小 */ font-size: 12px;
     /* 邊框設定 */ border: 1px solid var(--border-default);
@@ -5008,24 +5008,24 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     flex:0 0 auto;
     /* 與模擬市民頭像操作一致的懸停回饋 */ transition:border-color .15s ease,color .15s ease,background-color .15s ease;
 }
-.pet-item-actions button:hover,
-.pet-item-actions button:focus-visible {
+.pet-list-item-actions button:hover,
+.pet-list-item-actions button:focus-visible {
     border-color:var(--action-primary);
     color:var(--action-primary);
     background:var(--surface-item-hover);
 }
-.pet-item-actions button.danger {
+.pet-list-item-actions button.danger {
     /* 文字顏色 */ color: var(--danger-text);
     /* 邊框顏色 */ border-color: var(--danger-border);
 }
-.pet-item-actions button.danger:hover,
-.pet-item-actions button.danger:focus-visible {
+.pet-list-item-actions button.danger:hover,
+.pet-list-item-actions button.danger:focus-visible {
     border-color:var(--danger-text);
     color:var(--danger-text);
     background:color-mix(in srgb,var(--danger-text) 7%,var(--surface-input));
 }
 
-.pet-add-btn {
+.pet-list-add-button {
     /* 操作模式才建立的半寬新增卡片，沿用相簿的虛線入口 */
     margin:0;
     padding:10px 12px;
@@ -5038,8 +5038,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     cursor:pointer;
     transition:border-color .15s ease,color .15s ease,background-color .15s ease;
 }
-.pet-add-btn:hover,
-.pet-add-btn:focus-visible {
+.pet-list-add-button:hover,
+.pet-list-add-button:focus-visible {
     border-color:var(--action-primary);
     color:var(--action-primary);
     background:var(--surface-item-hover);
@@ -5347,13 +5347,13 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     backdrop-filter:none;
 }
 
-.photo-viewer-info .gv-title {
+.photo-viewer-info .photo-viewer-title {
     margin:0 0 3px;
     font-size:13px;
     font-weight:700;
 }
 
-.photo-viewer-info .gv-note {
+.photo-viewer-info .photo-viewer-note {
     max-width:620px;
     margin:0;
     color:var(--text-secondary);
@@ -5393,7 +5393,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     cursor:default;
 }
 
-.gv-counter {
+.photo-viewer-counter {
     min-width:52px;
     text-align:center;
     color:var(--text-secondary);
@@ -6298,12 +6298,12 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 }
 
 /* ========【L1nG 專區】 開發者工具 Icon 排列規範 ======== */
-.pet-add-btn,
+.pet-list-add-button,
 .life-photo-add-btn {
     /* 垂直對齊 */ align-items: center;
 }
 .filebtn>span,
-.pet-add-btn>span,
+.pet-list-add-button>span,
 .life-photo-add-btn>span {
     /* 最小寬度 */ min-width: 0;
 }
@@ -6615,7 +6615,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 .person-card-avatar img,
 .person-card-view-avatar img,
 .person-library-avatar img,
-.pet-item-avatar img {
+.pet-list-item-avatar img {
     /* 圖片繪製方式 */ image-rendering: auto;
 }
 
@@ -8815,8 +8815,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 .sim-editor-panel[data-editor-panel="media"] .media-section-heading .family-rel-manage { margin-left:auto; }
 @media (max-width:680px) {
-  #petList { grid-template-columns:minmax(0,1fr); }
-  #petList .pet-add-btn { width:50%; }
+  #simEditorPetList { grid-template-columns:minmax(0,1fr); }
+  #simEditorPetList .pet-list-add-button { width:50%; }
 }
 
 

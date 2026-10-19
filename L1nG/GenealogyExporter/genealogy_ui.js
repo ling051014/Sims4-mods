@@ -4,7 +4,7 @@
 
   // ========【頂欄／側欄介面】UI 模組管理側欄寬度、選單與提示浮層 ========
   function createChromeController({ dom = {}, constants = {}, helpers = {} } = {}) {
-    const { sidebar, sidebarBackdrop, menuToggle, sidebarResizer } = dom;
+    const { familySidebar, familySidebarBackdrop, familySidebarToggleButton, sidebarResizer } = dom;
     const { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_DEFAULT_WIDTH,
       SIDEBAR_WIDTH_KEY, FAMILY_PANEL_COLLAPSED_KEY } = constants;
     const { scheduleFamilyNameInputWidthSync,
@@ -12,14 +12,14 @@
     const $ = id => document.getElementById(id);
 
     function openSidebar() {
-      if (!sidebar) return;
-      sidebar.classList.add('open');
-      sidebarBackdrop?.classList.add('show');
+      if (!familySidebar) return;
+      familySidebar.classList.add('open');
+      familySidebarBackdrop?.classList.add('show');
     }
     function closeSidebar() {
-      if (!sidebar) return;
-      sidebar.classList.remove('open');
-      sidebarBackdrop?.classList.remove('show');
+      if (!familySidebar) return;
+      familySidebar.classList.remove('open');
+      familySidebarBackdrop?.classList.remove('show');
     }
     function setFamilyPanelCollapsed(collapsed, { persist = true } = {}) {
       const next = !!collapsed;
@@ -31,14 +31,14 @@
       try { collapsed = localStorage.getItem(FAMILY_PANEL_COLLAPSED_KEY) === '1'; } catch (_) {}
       setFamilyPanelCollapsed(collapsed, { persist:false });
     }
-    menuToggle.onclick = () => {
+    familySidebarToggleButton.onclick = () => {
       if (window.innerWidth <= 720) {
-        if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+        if (familySidebar.classList.contains('open')) closeSidebar(); else openSidebar();
       } else {
         setFamilyPanelCollapsed(!document.body.classList.contains('family-panel-collapsed'));
       }
     };
-    sidebarBackdrop.onclick = closeSidebar;
+    familySidebarBackdrop.onclick = closeSidebar;
 
     // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
     function restoreAppMenuPortal(menu) {
@@ -317,7 +317,7 @@
 
     function applySidebarWidth(value, { persist = true } = {}) {
       const width = clampSidebarWidth(value);
-      document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+      document.documentElement.style.setProperty('--familySidebar-width', `${width}px`);
       scheduleFamilyNameInputWidthSync();
       if (sidebarResizer) sidebarResizer.setAttribute('aria-valuenow', String(width));
       if (persist) {
@@ -342,8 +342,8 @@
         if (window.innerWidth <= 720 || document.body.classList.contains('family-panel-collapsed')) return;
         e.preventDefault();
         const startX = e.clientX;
-        const startWidth = sidebar.getBoundingClientRect().width;
-        document.body.classList.add('sidebar-resizing');
+        const startWidth = familySidebar.getBoundingClientRect().width;
+        document.body.classList.add('familySidebar-resizing');
         try { sidebarResizer.setPointerCapture(e.pointerId); } catch (_) {}
 
         const onMove = ev => {
@@ -354,7 +354,7 @@
           sidebarResizer.removeEventListener('pointermove', onMove);
           sidebarResizer.removeEventListener('pointerup', onUp);
           sidebarResizer.removeEventListener('pointercancel', onUp);
-          document.body.classList.remove('sidebar-resizing');
+          document.body.classList.remove('familySidebar-resizing');
         };
 
         sidebarResizer.addEventListener('pointermove', onMove);
@@ -368,7 +368,7 @@
 
       sidebarResizer.addEventListener('keydown', e => {
         if (window.innerWidth <= 720) return;
-        const current = sidebar.getBoundingClientRect().width;
+        const current = familySidebar.getBoundingClientRect().width;
         const step = e.shiftKey ? 20 : 8;
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
@@ -388,7 +388,7 @@
 
     window.addEventListener('resize', createDebouncedCallback(() => {
       if (window.innerWidth > 720) {
-        const current = sidebar.getBoundingClientRect().width;
+        const current = familySidebar.getBoundingClientRect().width;
         const clamped = clampSidebarWidth(current);
         if (Math.abs(clamped - current) > 0.5) applySidebarWidth(clamped);
       }

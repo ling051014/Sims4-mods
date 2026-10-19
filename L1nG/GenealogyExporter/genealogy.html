@@ -378,7 +378,7 @@
             <!-- ========【頂部導覽列】 設定 - L1nG 品牌導覽、篩選、模擬市民與低頻工具 ======== -->
             <header class="topbar">
                 <div class="topbar-brand">
-                    <button class="menu-toggle" id="menuToggle" type="button" title="顯示 / 隱藏家族欄" aria-label="顯示 / 隱藏家族欄"><span class="l1ng-icon icon-list" aria-hidden="true"></span></button>
+                    <button class="menu-toggle" id="familySidebarToggleButton" type="button" title="顯示 / 隱藏家族欄" aria-label="顯示 / 隱藏家族欄"><span class="l1ng-icon icon-list" aria-hidden="true"></span></button>
                     <div class="topbar-brand-group" aria-label="網站導覽">
                         <a class="topbar-creator-link" href="../home.html">L1nG</a>
                         <span class="topbar-brand-divider" aria-hidden="true">/</span>
@@ -459,7 +459,7 @@
                                 <label class="ui-menu-item" role="menuitem" tabindex="0">
                                     <span class="l1ng-icon icon-box-arrow-in-down" aria-hidden="true"></span>
                                     <span>匯入 JSON 備份</span>
-                                    <input accept=".json" hidden id="importInput" type="file">
+                                    <input accept=".json" hidden id="jsonBackupFileInput" type="file">
                                 </label>
                                 
                                 <label class="ui-menu-item" role="menuitem" tabindex="0">
@@ -500,7 +500,7 @@
 
             <!-- ========【主版面】 設定 - 家族檔案欄與族譜工作區 ======== -->
             <div class="app-body">
-                <aside class="family-panel" id="sidebar" aria-label="家族檔案">
+                <aside class="family-panel" id="familySidebar" aria-label="家族檔案">
                     <div class="family-panel-scroll">
                         <section class="family-cover-section" aria-label="家庭合照">
                             <div class="family-cover" id="familyCover">
@@ -518,7 +518,7 @@
                             <div class="family-title-row">
                                 <div class="family-identity" id="familyIdentity">
                                     <div class="family-name-editor" title="家族名稱">
-                                        <input class="brand-input" id="familyName" placeholder="家族名稱" autocomplete="off">
+                                        <input class="brand-input" id="familyNameInput" placeholder="家族名稱" autocomplete="off">
                                         <button class="family-name-edit-btn" id="familyNameEditBtn" type="button" title="編輯家族名稱" aria-label="編輯家族名稱"><span class="l1ng-icon icon-pencil family-name-icon" aria-hidden="true"></span></button>
                                     </div>
                                     <div class="nav-select nav-select-family" data-nav-select-for="familySelect">
@@ -557,8 +557,8 @@
                                 <div class="ui-menu family-actions-menu">
                                     <button class="family-title-menu-btn ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="家族管理"><span class="l1ng-icon icon-three-dots" aria-hidden="true"></span></button>
                                     <div class="ui-menu-popover family-actions-popover" role="menu">
-                                        <button class="ui-menu-item" id="newFamilyBtn" type="button" role="menuitem"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增家族</span></button>
-                                        <button class="ui-menu-item danger" id="delFamilyBtn" type="button" role="menuitem"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>刪除家族</span></button>
+                                        <button class="ui-menu-item" id="createFamilyButton" type="button" role="menuitem"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增家族</span></button>
+                                        <button class="ui-menu-item danger" id="deleteFamilyButton" type="button" role="menuitem"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>刪除家族</span></button>
                                     </div>
                                 </div>
                             </div>
@@ -588,11 +588,11 @@
                                     <div class="ui-menu" id="familyMemberAddMenu">
                                         <button class="family-section-icon ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="新增成員"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span></button>
                                         <div class="ui-menu-popover member-add-popover" role="menu">
-                                            <button class="ui-menu-item" id="addBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增模擬市民</span></button>
-                                            <button class="ui-menu-item" id="addMemberBtn" type="button" role="menuitem"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入既有模擬市民</span></button>
+                                            <button class="ui-menu-item" id="addNewSimButton" type="button" role="menuitem"><span class="l1ng-icon icon-person-plus" aria-hidden="true"></span><span>新增模擬市民</span></button>
+                                            <button class="ui-menu-item" id="addExistingSimToFamilyButton" type="button" role="menuitem"><span class="l1ng-icon icon-person-add" aria-hidden="true"></span><span>加入既有模擬市民</span></button>
                                         </div>
                                     </div>
-                                    <button class="family-section-batch-remove danger-action" id="removeMemberBtn" type="button" title="批量移出家族" aria-label="批量移出家族">
+                                    <button class="family-section-batch-remove danger-action" id="removeFamilyMembersButton" type="button" title="批量移出家族" aria-label="批量移出家族">
                                         <span class="l1ng-icon icon-person-dash" aria-hidden="true"></span>
                                         <span>批量移出家族</span>
                                     </button>
@@ -609,21 +609,21 @@
                 </aside>
 
                 <div class="family-panel-resizer" id="sidebarResizer" role="separator" aria-label="調整家族欄寬度" aria-orientation="vertical" tabindex="0" title="拖曳調整家族欄寬度；雙擊恢復預設寬度"></div>
-                <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+                <div class="sidebar-backdrop" id="familySidebarBackdrop"></div>
 
                 <div class="main-area">
                     <div class="canvas-toolbar" id="canvasToolbar" aria-label="畫布工具">
                         <button class="canvas-tool" id="modeToggle" type="button"><span class="l1ng-icon icon-eye" aria-hidden="true"></span><span>檢視模式</span></button>
-                        <button class="canvas-tool" id="layoutToggle" type="button"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動排列</span></button>
+                        <button class="canvas-tool" id="autoLayoutToggleButton" type="button"><span class="l1ng-icon icon-diagram-3" aria-hidden="true"></span><span>自動排列</span></button>
                         <span class="canvas-tool-divider arrange-tool-divider" id="arrangeToolDivider" style="display:none"></span>
                         <button class="canvas-tool arrange-tool active" id="selectToolBtn" type="button" style="display:none" aria-pressed="true" title="選取工具：拖曳空白處框選模擬市民"><span class="l1ng-icon icon-mouse" aria-hidden="true"></span><span>選取</span></button>
                         <button class="canvas-tool arrange-tool" id="panToolBtn" type="button" style="display:none" aria-pressed="false" title="拖曳工具：拖曳畫布進行平移"><span class="l1ng-icon icon-arrows-move" aria-hidden="true"></span><span>拖曳</span></button>
                         <span class="canvas-tool-divider arrange-tool-divider" id="arrangeToolDividerEnd" style="display:none"></span>
-                        <button class="canvas-tool" id="lockToggle" type="button" style="display:none"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>未鎖定</span></button>
-                        <button class="canvas-tool" id="resetLayoutBtn" type="button" style="display:none"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>重設位置</span></button>
+                        <button class="canvas-tool" id="canvasLockToggleButton" type="button" style="display:none"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>未鎖定</span></button>
+                        <button class="canvas-tool" id="resetCanvasLayoutButton" type="button" style="display:none"><span class="l1ng-icon icon-arrow-counterclockwise" aria-hidden="true"></span><span>重設位置</span></button>
                         <span class="canvas-tool-divider"></span>
-                        <button class="canvas-tool active" id="labelToggle" type="button"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>隱藏關係</span></button>
-                        <button class="canvas-tool" id="labelLockToggle" type="button"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>鎖定關係</span></button>
+                        <button class="canvas-tool active" id="relationshipLabelsVisibilityToggle" type="button"><span class="l1ng-icon icon-tags" aria-hidden="true"></span><span>隱藏關係</span></button>
+                        <button class="canvas-tool" id="relationshipLabelsLockToggle" type="button"><span class="l1ng-icon icon-lock" aria-hidden="true"></span><span>鎖定關係</span></button>
                         <button class="canvas-tool" id="relationshipPerspectiveBtn" type="button" style="display:none" hidden><span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span><span>結束模擬市民視角</span></button>
                     </div>
 
@@ -661,20 +661,20 @@
                 <div class="sim-editor-top">
                     <h2 class="sim-editor-title">
                         <span class="l1ng-icon icon-person-vcard" aria-hidden="true"></span>
-                        <span id="modalTitle">新增模擬市民</span>
+                        <span id="simEditorTitle">新增模擬市民</span>
                     </h2>
                     <button class="sim-editor-preview-open" id="simEditorPreviewBtn" type="button">預覽</button>
 
                     <div class="sim-profile-header">
                         <div class="sim-profile-avatar-block avatar-editor-block">
-                            <div class="avatar-preview sim-profile-avatar avatar-editor-preview" id="avatarPreview">?</div>
+                            <div class="avatar-preview sim-profile-avatar avatar-editor-preview" id="simAvatarPreview">?</div>
                             <div class="sim-profile-avatar-actions avatar-editor-actions">
-                                <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="avatarInput" type="file"></label>
+                                <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="simAvatarFileInput" type="file"></label>
                                 <button class="avatar-editor-action" id="avatarAdjustBtn" type="button">調整範圍</button>
                                 <button class="avatar-editor-action" id="avatarSourceToggleBtn" type="button" disabled>使用遊戲頭像</button>
-                                <button class="avatar-clear-compact avatar-editor-action danger-action" id="avatarClearBtn" type="button">移除頭像</button>
+                                <button class="avatar-clear-compact avatar-editor-action danger-action" id="simAvatarRemoveButton" type="button">移除頭像</button>
                             </div>
-                            <div class="avatar-tip" id="avatarQualityHint">支援 JPG / PNG / WEBP</div>
+                            <div class="avatar-tip" id="simAvatarFormatHint">支援 JPG / PNG / WEBP</div>
                         </div>
 
                         <div class="sim-profile-edit-fields">
@@ -711,7 +711,7 @@
                     <section class="sim-editor-panel active" data-editor-panel="basic" role="tabpanel">
                         <div class="grid profile-grid profile-basic-grid">
                             <div class="form-field full"><span class="form-field-title" id="simCareerLabel">職業</span><input id="simCareerInput" placeholder="醫生 / 小學生 / 無……" aria-labelledby="simCareerLabel"></div>
-                            <div class="form-field full" id="causeOfDeathLabel" style="display:none"><span class="form-field-title" id="simCauseOfDeathLabelText">死因</span><input id="simCauseOfDeathInput" data-ui-suggestion-list="causeOfDeathPresets" maxlength="40" placeholder="衰老 / 溺水 / 火災……" aria-labelledby="simCauseOfDeathLabelText"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></div>
+                            <div class="form-field full" id="simCauseOfDeathField" style="display:none"><span class="form-field-title" id="simCauseOfDeathLabelText">死因</span><input id="simCauseOfDeathInput" data-ui-suggestion-list="causeOfDeathPresets" maxlength="40" placeholder="衰老 / 溺水 / 火災……" aria-labelledby="simCauseOfDeathLabelText"><datalist id="causeOfDeathPresets"><option value="衰老"></option><option value="飢餓"></option><option value="溺水"></option><option value="火災"></option><option value="電擊"></option><option value="笑死"></option><option value="尷尬死"></option><option value="暴曬"></option><option value="凍死"></option><option value="牛頭人花"></option><option value="河豚"></option><option value="流星"></option><option value="心臟病"></option><option value="憤怒死"></option><option value="羞憤死"></option><option value="蒸汽浴"></option><option value="神秘死"></option><option value="吸血鬼灼燒"></option><option value="其他"></option></datalist></div>
                             <div class="form-field full"><span class="form-field-title" id="simAspirationLabel">抱負</span><input id="simAspirationInput" data-ui-suggestion-list="aspirationPresets" maxlength="40" placeholder="暢銷作家 / 靈魂伴侶……" aria-labelledby="simAspirationLabel"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></div>
                             <div class="form-field full trait-field"><span class="field-label-row form-field-title" id="traitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="simTraitsHiddenInput" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="traitFieldLabel"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></div>
                             <div class="form-field full"><span class="form-field-title" id="simNotesLabel">備註</span><textarea id="simNotesTextarea" placeholder="補充想記錄的資訊或故事……" rows="3" aria-labelledby="simNotesLabel"></textarea></div>
@@ -823,9 +823,9 @@
                     </section>
 
                     <section class="sim-editor-panel" data-editor-panel="media" role="tabpanel" hidden>
-                        <div class="relationship-section first" id="petSection">
-                            <div class="relationship-section-title media-section-heading"><span>寵物</span><button class="family-rel-manage" id="petSectionEditToggle" type="button" aria-expanded="false" aria-controls="petList">編輯</button></div>
-                            <div id="petList"></div>
+                        <div class="relationship-section first" id="simEditorPetsSection">
+                            <div class="relationship-section-title media-section-heading"><span>寵物</span><button class="family-rel-manage" id="petSectionEditToggle" type="button" aria-expanded="false" aria-controls="simEditorPetList">編輯</button></div>
+                            <div id="simEditorPetList"></div>
                         </div>
                         <div class="relationship-section" id="lifePhotoSection">
                             <div class="relationship-section-title media-section-heading"><span>人生照片</span><span class="help-tooltip compact" tabindex="0" role="button" aria-label="人生照片說明" data-tooltip="記錄這位模擬市民值得保存的人生照片；可標記人生階段、標題與備註。"><span class="l1ng-icon icon-info-circle" aria-hidden="true"></span></span></div>
@@ -859,17 +859,17 @@
         <div class="ui-dialog-backdrop nested" id="petEditorDialog">
             <div class="ui-dialog-panel pet-editor-modal" tabindex="-1">
                 <div class="pet-editor-top">
-                    <h2 class="pet-editor-title"><span class="l1ng-icon icon-paw" aria-hidden="true"></span><span id="petModalTitle">新增寵物</span></h2>
+                    <h2 class="pet-editor-title"><span class="l1ng-icon icon-paw" aria-hidden="true"></span><span id="petEditorTitle">新增寵物</span></h2>
                     <div class="pet-editor-layout">
                         <div class="avatar-editor-block pet-avatar-editor-block">
                             <div class="avatar-preview pet-avatar-editor-preview avatar-editor-preview" id="petAvatarPreview">?</div>
                             <div class="avatar-editor-actions">
-                                <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="petAvatarInput" type="file"></label>
+                                <label class="filebtn compact avatar-editor-action"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>更換頭像</span><input accept="image/jpeg,image/png,image/webp" hidden id="petAvatarFileInput" type="file"></label>
                                 <button class="avatar-editor-action" id="petAvatarAdjustBtn" type="button">調整範圍</button>
                                 <button class="avatar-editor-action" id="petAvatarSourceToggleBtn" type="button" disabled>使用遊戲頭像</button>
-                                <button class="avatar-clear-compact avatar-editor-action danger-action" id="petAvatarClearBtn" type="button">移除頭像</button>
+                                <button class="avatar-clear-compact avatar-editor-action danger-action" id="petAvatarRemoveButton" type="button">移除頭像</button>
                             </div>
-                            <div class="avatar-tip" id="petAvatarQualityHint">支援 JPG / PNG / WEBP</div>
+                            <div class="avatar-tip" id="petAvatarFormatHint">支援 JPG / PNG / WEBP</div>
                         </div>
                         <div class="pet-editor-fields">
                             <label class="pet-field-full">名字<input id="petNameInput" maxlength="30" placeholder="多多 / 小黑……"></label>
@@ -960,12 +960,12 @@
             <div class="ui-dialog-panel photo-modal" tabindex="-1">
                 <header class="photo-modal-header">
                     <span class="l1ng-icon icon-images photo-modal-heading-icon" aria-hidden="true"></span>
-                    <h2 id="photoModalTitle">新增圖片</h2>
+                    <h2 id="simPhotoEditorTitle">新增圖片</h2>
                 </header>
                 <div class="photo-modal-body">
                     <div class="photo-form-field">
                         <span class="photo-field-label">圖片</span>
-                        <div class="photo-preview" id="photoPreview" role="button" tabindex="0" aria-label="選擇圖片或拖曳圖片至此">
+                        <div class="photo-preview" id="simPhotoEditorPreview" role="button" tabindex="0" aria-label="選擇圖片或拖曳圖片至此">
                             <div class="photo-preview-empty">
                                 <span class="photo-preview-empty-icon"><span class="l1ng-icon icon-image" aria-hidden="true"></span></span>
                                 <strong>點擊選擇或拖曳圖片</strong>
@@ -974,18 +974,18 @@
                             <span class="photo-preview-hover" aria-hidden="true">點擊更換圖片</span>
                         </div>
                         <div class="photo-actions-row">
-                            <label class="photo-action-button filebtn" for="photoInput"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span></label>
-                            <button class="photo-action-button danger-action" id="photoClearBtn" type="button" disabled><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>移除圖片</span></button>
-                            <span class="photo-size-tip" id="photoSizeTip">尚未選擇圖片</span>
+                            <label class="photo-action-button filebtn" for="simPhotoFileInput"><span class="l1ng-icon icon-image" aria-hidden="true"></span><span>選擇圖片</span></label>
+                            <button class="photo-action-button danger-action" id="simPhotoRemoveImageButton" type="button" disabled><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>移除圖片</span></button>
+                            <span class="photo-size-tip" id="simPhotoFileInfo">尚未選擇圖片</span>
                         </div>
-                        <input accept="image/jpeg,image/png,image/webp" hidden id="photoInput" type="file">
+                        <input accept="image/jpeg,image/png,image/webp" hidden id="simPhotoFileInput" type="file">
                         <p class="photo-format-note">支援 JPG、PNG、WebP</p>
                     </div>
                     <div class="photo-form-fields">
                         <div class="photo-form-field">
-                            <label for="lifePhotoTitleInput">標題</label>
-                            <input id="lifePhotoTitleInput" data-ui-suggestion-list="photoTitlePresets" maxlength="40" placeholder="例如：婚禮合影、全家福">
-                            <datalist id="photoTitlePresets">
+                            <label for="simPhotoTitleInput">標題</label>
+                            <input id="simPhotoTitleInput" data-ui-suggestion-list="simPhotoTitleSuggestions" maxlength="40" placeholder="例如：婚禮合影、全家福">
+                            <datalist id="simPhotoTitleSuggestions">
                                 <option value="嬰兒期"></option>
                                 <option value="幼兒期"></option>
                                 <option value="兒童期"></option>
@@ -1001,8 +1001,8 @@
                             </datalist>
                         </div>
                         <div class="photo-form-field">
-                            <label for="lifePhotoLifeStageSelect">關聯階段 <span class="photo-optional">（選填）</span></label>
-                            <select id="lifePhotoLifeStageSelect">
+                            <label for="simPhotoLifeStageSelect">關聯階段 <span class="photo-optional">（選填）</span></label>
+                            <select id="simPhotoLifeStageSelect">
                                 <option value="">（不指定）</option>
                                 <option value="嬰兒">嬰兒</option>
                                 <option value="幼兒">幼兒</option>
@@ -1014,16 +1014,16 @@
                             </select>
                         </div>
                         <div class="photo-form-field">
-                            <label for="lifePhotoNoteTextarea">備註 <span class="photo-optional">（選填）</span></label>
-                            <textarea id="lifePhotoNoteTextarea" placeholder="記下這張照片的故事……" rows="2"></textarea>
+                            <label for="simPhotoNoteTextarea">備註 <span class="photo-optional">（選填）</span></label>
+                            <textarea id="simPhotoNoteTextarea" placeholder="記下這張照片的故事……" rows="2"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="ui-dialog-actions photo-modal-footer">
-                    <button class="danger" id="lifePhotoEditorDeleteButton" style="display:none" type="button">刪除圖片</button>
+                    <button class="danger" id="simPhotoEditorDeleteButton" style="display:none" type="button">刪除圖片</button>
                     <span class="spacer"></span>
-                    <button id="lifePhotoEditorCancelButton" type="button">取消</button>
-                    <button class="primary" id="lifePhotoEditorSaveButton" type="button" disabled>儲存</button>
+                    <button id="simPhotoEditorCancelButton" type="button">取消</button>
+                    <button class="primary" id="simPhotoEditorSaveButton" type="button" disabled>儲存</button>
                 </div>
             </div>
         </div>
@@ -1042,12 +1042,12 @@
                 <div class="photo-viewer-image-wrap"><img alt="" id="photoViewerImage" src=""></div>
                 <div class="photo-viewer-footer">
                     <div class="photo-viewer-info">
-                        <div class="gv-title" id="photoViewerTitle"></div>
-                        <div class="gv-note" id="photoViewerNote"></div>
+                        <div class="photo-viewer-title" id="photoViewerTitle"></div>
+                        <div class="photo-viewer-note" id="photoViewerNote"></div>
                     </div>
                     <div class="photo-viewer-controls">
                         <button class="photo-viewer-nav prev" id="photoViewerPrevBtn" type="button" title="上一張 (←)">‹</button>
-                        <div class="gv-counter" id="photoViewerCounter"></div>
+                        <div class="photo-viewer-counter" id="photoViewerCounter"></div>
                         <button class="photo-viewer-nav next" id="photoViewerNextBtn" type="button" title="下一張 (→)">›</button>
                     </div>
                 </div>
@@ -1171,12 +1171,12 @@
                     <div class="appearance-custom-theme" id="appearanceCustomThemeEditor" hidden>
                         <div class="appearance-custom-theme-title">自訂配色</div>
                         <div class="appearance-custom-theme-row">
-                            <label><span>主色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customColor1" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customColor1" aria-label="主色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
-                            <label><span>輔色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customColor2" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customColor2" aria-label="輔色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
+                            <label><span>主色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customThemePrimaryColorInput" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customThemePrimaryColorInput" aria-label="主色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
+                            <label><span>輔色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customThemeSecondaryColorInput" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customThemeSecondaryColorInput" aria-label="輔色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
                             <label><span>強調色</span><span class="l1ng-color-picker-trigger"><input class="custom-color-input" id="customColor3" type="color" tabindex="-1" aria-hidden="true"><button type="button" class="l1ng-color-swatch-button" data-color-for="customColor3" aria-label="強調色" aria-haspopup="dialog" aria-expanded="false"></button></span></label>
                         </div>
                         <div class="appearance-custom-theme-preview" id="appearanceCustomThemePreview"></div>
-                        <div class="appearance-custom-theme-actions"><button class="apply-btn" id="applyCustomBtn" type="button">套用自訂配色</button></div>
+                        <div class="appearance-custom-theme-actions"><button class="apply-btn" id="applyCustomThemeColorsButton" type="button">套用自訂配色</button></div>
                     </div>
                 </section>
 
@@ -1332,7 +1332,7 @@
                             <strong>清理未使用的圖片</strong>
                             <p>只會清理未被模擬市民、寵物、人生照片、家庭合照或背景引用的圖片，不影響仍在使用的圖片。</p>
                         </div>
-                        <button class="danger-action" id="cleanupBtn" type="button"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清理未使用的圖片</span></button>
+                        <button class="danger-action" id="cleanupUnusedImagesButton" type="button"><span class="l1ng-icon icon-trash3" aria-hidden="true"></span><span>清理未使用的圖片</span></button>
                     </div>
                 </section>
 

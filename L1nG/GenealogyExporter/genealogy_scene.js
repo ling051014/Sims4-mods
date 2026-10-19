@@ -45,9 +45,9 @@
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
-      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
+      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelationshipInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, genderClass, statusClass,
+      avatarHTML, renderTraitTagSummary, getSimGenderClass, getSimStatusClass,
       showPetCards, petCardAvatarHTML, petOwnerAvatarHTML, petCardSpeciesLabel, petCardGenderLabel, getPetCardSettings,
       syncPetSelectionClasses
     } = helpers;
@@ -346,7 +346,7 @@
     const RELATIONSHIP_LABEL_ICON_SPRITE =
       '../../html%20icons/relationship-label-icons.svg?v=20260930-relationship-catalog';
 
-    function makeLabelSVG(x, y, iconName, text, key) {
+    function buildRelationshipLabelSvgMarkup(x, y, iconName, text, key) {
       const fs = 12;
       const displayText =
         displayRelationshipText(text);
@@ -2162,7 +2162,7 @@ function drawPerspectiveKinshipLabels(
       targetId;
 
     labels.push(
-      makeLabelSVG(
+      buildRelationshipLabelSvgMarkup(
         rect.centerX,
         Math.max(
           12,
@@ -2491,7 +2491,7 @@ function pairRelationshipInfo(
       .map(String)
       .includes(secondId)
   ) {
-    return getRelInfoByKey(
+    return getRelationshipInfoByKey(
       'spouse:' + pairK,
       'spouse'
     );
@@ -2503,7 +2503,7 @@ function pairRelationshipInfo(
       .map(String)
       .includes(secondId)
   ) {
-    return getRelInfoByKey(
+    return getRelationshipInfoByKey(
       'deceased-spouse:' +
         pairK,
       'deceased-spouse'
@@ -2515,7 +2515,7 @@ function pairRelationshipInfo(
       .map(String)
       .includes(secondId)
   ) {
-    return getRelInfoByKey(
+    return getRelationshipInfoByKey(
       'exspouse:' + pairK,
       'exspouse'
     );
@@ -2543,7 +2543,7 @@ function pairRelationshipInfo(
       );
 
   if (link) {
-    return getRelInfoByKey(
+    return getRelationshipInfoByKey(
       'link:' + link.id,
       'social',
       relationshipOtherType(
@@ -7565,14 +7565,14 @@ function drawParentConnectorGroup(
         'parent:' + child.id;
 
       const info =
-        getRelInfoByKey(
+        getRelationshipInfoByKey(
           key,
           child.kind
         );
 
       if (info) {
         labels.push(
-          makeLabelSVG(
+          buildRelationshipLabelSvgMarkup(
             labelX,
             labelY,
             info.icon,
@@ -7706,7 +7706,7 @@ function drawParentConnectorGroup(
         'parent:' + child.id;
 
       const info =
-        getRelInfoByKey(
+        getRelationshipInfoByKey(
           key,
           child.kind
         );
@@ -7714,7 +7714,7 @@ function drawParentConnectorGroup(
       if (!info) return;
 
       labels.push(
-        makeLabelSVG(
+        buildRelationshipLabelSvgMarkup(
           child.anchor.x,
           branchY +
             (
@@ -8001,7 +8001,7 @@ function paintRelationshipLayer({
           pairK;
 
         const info =
-          getRelInfoByKey(
+          getRelationshipInfoByKey(
             key,
             'spouse'
           );
@@ -8009,7 +8009,7 @@ function paintRelationshipLayer({
         if (!info) return;
 
         labels.push(
-          makeLabelSVG(
+          buildRelationshipLabelSvgMarkup(
             geometryResult.labelX,
             geometryResult.labelY,
             info.icon,
@@ -8124,7 +8124,7 @@ function paintRelationshipLayer({
         pairK;
 
       const info =
-        getRelInfoByKey(
+        getRelationshipInfoByKey(
           key,
           'deceased-spouse'
         );
@@ -8132,7 +8132,7 @@ function paintRelationshipLayer({
       if (!info) return;
 
       labels.push(
-        makeLabelSVG(
+        buildRelationshipLabelSvgMarkup(
           geometryResult.labelX,
           geometryResult.labelY,
           info.icon,
@@ -8242,7 +8242,7 @@ function paintRelationshipLayer({
           pairK;
 
         const info =
-          getRelInfoByKey(
+          getRelationshipInfoByKey(
             key,
             'exspouse'
           );
@@ -8250,7 +8250,7 @@ function paintRelationshipLayer({
         if (!info) return;
 
         labels.push(
-          makeLabelSVG(
+          buildRelationshipLabelSvgMarkup(
             geometryResult.labelX,
             geometryResult.labelY,
             info.icon,
@@ -8371,7 +8371,7 @@ function paintRelationshipLayer({
         link.id;
 
       const info =
-        getRelInfoByKey(
+        getRelationshipInfoByKey(
           key,
           isSiblingLink(link)
             ? 'sibling'
@@ -8384,7 +8384,7 @@ function paintRelationshipLayer({
       if (!info) return;
 
       labels.push(
-        makeLabelSVG(
+        buildRelationshipLabelSvgMarkup(
           geometryResult.labelX,
           geometryResult.labelY,
           info.icon,
@@ -8520,7 +8520,7 @@ function updateRelationshipPreviewLabel(
 
   if (record.kind === 'pair') {
     info =
-      getRelInfoByKey(
+      getRelationshipInfoByKey(
         record.key,
         record.labelKind
       );
@@ -8533,7 +8533,7 @@ function updateRelationshipPreviewLabel(
       );
 
     info =
-      getRelInfoByKey(
+      getRelationshipInfoByKey(
         record.key,
         isSiblingLink(record.link)
           ? 'sibling'
@@ -8547,7 +8547,7 @@ function updateRelationshipPreviewLabel(
   if (!info) return;
 
   replaceRelationshipPreviewLabelMarkup(
-    makeLabelSVG(
+    buildRelationshipLabelSvgMarkup(
       x,
       y,
       info.icon,
@@ -9030,7 +9030,7 @@ function derivePersonCardClassName(
   }
 
   const gender =
-    genderClass(
+    getSimGenderClass(
       person
     );
 
@@ -9041,7 +9041,7 @@ function derivePersonCardClassName(
   }
 
   const status =
-    statusClass(
+    getSimStatusClass(
       person
     );
 
