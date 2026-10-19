@@ -10745,32 +10745,45 @@ function nudgeSelectedCanvasCards(event) {
   return true;
 }
 
-async function deleteSelectedCanvasCards() {
-  const fam=currentFamily();
-  if (!fam || !genealogyScene.isFreeLayoutActive(fam) || arrangeTool !== 'select') return false;
-  const simIds=[...selectedNodeIds].filter(id=>!!currentGenealogyData()?.sims?.[id]);
-  const petIds=[...selectedPetIds].map(id=>{
-    const card=getSceneLayout()?.petLayout?.cards?.find(item=>item.key===id);
-    return String(card?.pet?.gameData?.simId || card?.pet?.id || '');
-  }).filter(Boolean);
-  if (!simIds.length && !petIds.length) return false;
-  const confirmed=await uiConfirm(
-    '確定永久刪除選取的 '+(simIds.length+petIds.length)+' 張卡片嗎？\n'+
-    '包含 '+simIds.length+' 位模擬市民、'+petIds.length+' 隻寵物。\n'+
-    uiText('資料將從所有家族及相關關係中移除。') + '\n' + uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。'),
-    {title:'刪除選取的卡片',kind:'danger',confirmText:'永久刪除'}
+function deleteSelectedCanvasCards() {
+  const fam = currentFamily();
+  const data = currentGenealogyData();
+  const layout = getSceneLayout();
+  if (!fam || !data || !layout) return false;
+
+  // 只刪除畫布實際選取且目前可見的卡片，與排列模式 / 工具無關。
+  const visibleSimIds = new Set(layout.visibleIds || []);
+  const simIds = [...selectedNodeIds].filter(id =>
+    visibleSimIds.has(id) && !!data.sims?.[id]
   );
-  if (!confirmed) return false;
-  const before=captureCanonicalHistory();
-  if (!before) return;
-  let mutation=null;
-  simIds.forEach(id=>{mutation=genealogyStore.mergeResults(mutation,purgeSimData(id));});
-  petIds.forEach(id=>{mutation=genealogyStore.mergeResults(mutation,genealogyStore.deletePet(id));});
+  const petCards = new Map(
+    (layout.petLayout?.cards || []).map(card => [card.key, card])
+  );
+  const petIds = [...new Set([...selectedPetIds].map(id => {
+    const pet = petCards.get(id)?.pet;
+    return String(pet?.gameData?.simId || pet?.id || '');
+  }).filter(Boolean))];
+  if (!simIds.length && !petIds.length) {
+    syncNodeSelectionClasses();
+    return false;
+  }
+
+  // 無法建立快照時直接取消；刪除後若歷史記錄失敗，會恢復快照。
+  const before = captureCanonicalHistory();
+  if (!before) return false;
+  let mutation = null;
+  simIds.forEach(id => {
+    mutation = genealogyStore.mergeResults(mutation, purgeSimData(id));
+  });
+  petIds.forEach(id => {
+    mutation = genealogyStore.mergeResults(mutation, genealogyStore.deletePet(id));
+  });
   if (!mutation?.dataChanged) return false;
   clearNodeSelection();
   applyGenealogyMutation(mutation);
-  recordCanonicalHistory(before);
+  if (!recordCanonicalHistory(before)) return false;
   scheduleGC();
+  uiToast(uiText('已刪除選取的市民 / 寵物，可使用 Ctrl + Z 復原。'));
   return true;
 }
 
@@ -12370,7 +12383,18 @@ nodes.addEventListener('pointerdown', e => {
   if (!el) return;
   const id = el.dataset.id;
   const fam = currentFamily();
-const isFree = genealogyScene.isFreeLayoutActive(fam);
+  const isFree = genealogyScene.isFreeLayoutActive(fam);
+
+  // 預設拖曳工具也可 Shift + 點擊選取卡片，不影響一般點擊開啟資料。
+  if (e.shiftKey && arrangeTool !== 'select') {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isTextInteractionTarget(document.activeElement)) document.activeElement.blur();
+    if (selectedNodeIds.has(id)) selectedNodeIds.delete(id);
+    else selectedNodeIds.add(id);
+    syncNodeSelectionClasses();
+    return;
+  }
   const cardDragThreshold =
     e.pointerType === 'touch'
       ? TOUCH_DRAG_THRESHOLD_PX
@@ -12541,6 +12565,7 @@ const isFree = genealogyScene.isFreeLayoutActive(fam);
   if (arrangeTool === 'select') {
     e.preventDefault();
     e.stopPropagation();
+    if (isTextInteractionTarget(document.activeElement)) document.activeElement.blur();
 
     const shift =
       e.pointerType === 'touch'
@@ -18792,11 +18817,9 @@ document.addEventListener('keydown', e => {
       e.preventDefault();
       return;
     }
-    if (e.key === 'Delete' &&
-        (selectedNodeIds.size || selectedPetIds.size) &&
-        genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
+    if (e.key === 'Delete' && (selectedNodeIds.size || selectedPetIds.size)) {
       e.preventDefault();
-      if (!e.repeat) void deleteSelectedCanvasCards();
+      if (!e.repeat) deleteSelectedCanvasCards();
       return;
     }
     if (e.key === '+' || e.code === 'NumpadAdd') {
@@ -19183,6 +19206,17 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   if (!element || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
   const entry = findCanvasPetEntry(element.dataset.petId);
   if (!entry) return;
+  // 拖曳工具下 Shift + 點擊只切換選取，不開啟寵物視窗。
+  if (event.shiftKey && arrangeTool !== 'select') {
+    event.preventDefault();
+    event.stopPropagation();
+    if (isTextInteractionTarget(document.activeElement)) document.activeElement.blur();
+    if (selectedPetIds.has(entry.key)) selectedPetIds.delete(entry.key);
+    else selectedPetIds.add(entry.key);
+    syncNodeSelectionClasses();
+    lastPetPointerActivation = {id:entry.key,time:performance.now()};
+    return;
+  }
   const fam = currentFamily();
   // 與模擬市民一致：已解鎖時，自動/自由排列都可開始手動拖曳。
   const canDrag = !!(fam && !fam.locked && !spacePanHeld);
