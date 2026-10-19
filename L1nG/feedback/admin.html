@@ -60,7 +60,7 @@
                         <svg class="i"><use href="#ico-chart"></use></svg>網站分析 <span class="count">GA4</span>
                     </button>
                     <button class="side-item dash-side" data-adminpage="feedback" type="button">
-                        <svg class="i"><use href="#ico-inbox"></use></svg>意見回饋 <span class="count" id="nav-count-all">0</span>
+                        <svg class="i"><use href="#ico-inbox"></use></svg>問題反饋 <span class="count" id="nav-count-all">0</span>
                     </button>
                     <button class="side-item dash-side" data-adminpage="settings" type="button">
                         <svg class="i"><use href="#ico-shield"></use></svg>設定</button>
@@ -78,13 +78,13 @@
                 <nav aria-label="管理功能切換" class="admin-mobile-nav">
                     <button class="active" data-adminpage="overview" type="button">總覽</button>
                     <button data-adminpage="analytics" type="button">網站分析</button>
-                    <button data-adminpage="feedback" type="button">意見回饋</button>
+                    <button data-adminpage="feedback" type="button">問題反饋</button>
                     <button data-adminpage="settings" type="button">設定</button>
                 </nav>
                 <div class="panel-view" hidden="" id="panel-feedback">
                     <div class="admin-head">
                         <div>
-                            <span class="eyebrow">FEEDBACK / INBOX</span><h1>意見回饋</h1><p>查看問題、追蹤匿名對話，直接在此回覆玩家。</p>
+                            <span class="eyebrow">FEEDBACK / INBOX</span><h1>問題反饋</h1><p>查看問題、追蹤匿名對話，直接在此回覆玩家。</p>
                         </div>
                         <div class="admin-head-actions">
                         </div>
@@ -159,7 +159,7 @@
                             <span class="topline">頁面瀏覽量 <svg class="i sm"><use href="#ico-grid"></use></svg></span><strong class="num" id="ov-views">—</strong><span class="stat-footer">GA4 · 近 30 天</span>
                         </button>
                         <button class="stat-card" data-jump="feedback" type="button">
-                            <span class="topline">尚未處理 <svg class="i sm"><use href="#ico-clock"></use></svg></span><strong class="num" id="ov-pending">—</strong><span class="stat-footer">問題回饋 · 全部網站</span>
+                            <span class="topline">尚未處理 <svg class="i sm"><use href="#ico-clock"></use></svg></span><strong class="num" id="ov-pending">—</strong><span class="stat-footer">問題反饋 · 全部網站</span>
                         </button>
                         <button class="stat-card" data-jump="analytics" type="button">
                             <span class="topline">下載點擊 <svg class="i sm"><use href="#ico-arrow"></use></svg></span><strong class="num" id="ov-downloads">—</strong><span class="stat-footer">GA4 事件 · 近 30 天</span>
@@ -286,7 +286,7 @@
                         <section class="dash-card">
                             <div class="dash-card-header">
                                 <div>
-                                    <span class="eyebrow">FEEDBACK INTERACTIONS</span><h3>問題回饋互動</h3>
+                                    <span class="eyebrow">FEEDBACK INTERACTIONS</span><h3>問題反饋互動</h3>
                                 </div>
                                 <span class="hint" id="ga-feedback-totals">開啟 — · 成功提交 —</span>
                             </div>
@@ -403,9 +403,9 @@
                                         <li><strong>先新增新網址，不要先刪舊網址。</strong>至 <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare</a> → Workers &amp; Pages → 找到對應網站的 Pages 專案 → Custom domains → Set up a domain，新增新子網域。族譜網頁請找現有的族譜工具 Pages 專案，不是 <code>l1ng-home</code>。</li>
                                         <li><strong>檢查 DNS。</strong>到 Cloudflare → <code>by-l1ng.com</code> → DNS → Records，確認新子網域已正確連到 Pages 且憑證生效。新增 Pages 網域應從 Pages 的 Custom domains 流程開始，不能只手動建立 CNAME 就當成完成。</li>
                                         <li><strong>同步網站原始碼。</strong>檢查首頁與導覽連結，並更新 <a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/analytics.js" target="_blank" rel="noopener noreferrer"><code>L1nG/analytics.js</code></a> 的站點對照、<a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/cookie-consent.js" target="_blank" rel="noopener noreferrer"><code>cookie-consent.js</code></a> 的允許站點，以及 <a href="https://github.com/ling051014/Sims4-mods/blob/main/functions/feedback/ga4-api.js" target="_blank" rel="noopener noreferrer"><code>ga4-api.js</code></a> 的 GA4 網域篩選。站點間的連結也要一起檢查。</li>
-                                        <li><strong>如果新網址會使用問題回饋，還要同步 Worker。</strong>確認 <a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/feedback/api/wrangler.jsonc" target="_blank" rel="noopener noreferrer"><code>ALLOWED_ORIGINS</code>、<code>TURNSTILE_HOSTNAMES</code></a>、Worker 來源檢查、Turnstile Widget 的 Hostname Management，以及需要時的 GA4 資料串流設定。修改 GitHub 不代表 Worker 已自動部署。</li>
+                                        <li><strong>如果新網址會使用問題反饋，還要同步 Worker。</strong>確認 <a href="https://github.com/ling051014/Sims4-mods/blob/main/L1nG/feedback/api/wrangler.jsonc" target="_blank" rel="noopener noreferrer"><code>ALLOWED_ORIGINS</code>、<code>TURNSTILE_HOSTNAMES</code></a>、Worker 來源檢查、Turnstile Widget 的 Hostname Management，以及需要時的 GA4 資料串流設定。修改 GitHub 不代表 Worker 已自動部署。</li>
                                         <li><strong>正式站與 API 驗收完成後才開 301 轉址。</strong>到 Cloudflare → <code>by-l1ng.com</code> → Rules → Redirect Rules，建立只針對舊子網域的永久轉址，保留原路徑及查詢參數。不要設定整個 <code>*.by-l1ng.com</code>，否則會連其他站都轉走。</li>
-                                        <li><strong>最後測試。</strong>以一般與無痕瀏覽器分別檢查新舊網址、首頁導覽、Cookie、GA4、問題回饋、手機版、下載功能；確認正常後再考慮清理過期的設定。</li>
+                                        <li><strong>最後測試。</strong>以一般與無痕瀏覽器分別檢查新舊網址、首頁導覽、Cookie、GA4、問題反饋、手機版、下載功能；確認正常後再考慮清理過期的設定。</li>
                                     </ol>
                                     <p class="ops-guide-warning"><strong>提醒：</strong>子網域改名涉及多個系統，這個頁面只是教學，不會自動替你做設定變更。301 轉址必須由 Cloudflare 實際建立並驗證。</p>
                                     <div class="ops-guide-links"><a href="https://developers.cloudflare.com/pages/configuration/custom-domains/" target="_blank" rel="noopener noreferrer">Pages 自訂網域官方教學 ↗</a><a href="https://developers.cloudflare.com/rules/url-forwarding/single-redirects/create-dashboard/" target="_blank" rel="noopener noreferrer">Cloudflare 301 轉址教學 ↗</a></div>
@@ -502,7 +502,7 @@
                                     <h5>每次修改前</h5>
                                     <p>確認正在編輯正確的分支與專案、記錄原設定、確認備份是否存在、核對變更範圍；修改身分驗證、DNS、Worker Route 或資料庫時，先規劃回復方法。</p>
                                     <h5>每次修改後</h5>
-                                    <p>查看部署是否成功，使用電腦與手機、登入與無痕視窗測試；至少驗證站內連結、Cookie、GA4、管理 API、安全登入及問題回饋，再宣布正式完成。</p>
+                                    <p>查看部署是否成功，使用電腦與手機、登入與無痕視窗測試；至少驗證站內連結、Cookie、GA4、管理 API、安全登入及問題反饋，再宣布正式完成。</p>
                                     <p class="ops-guide-muted">安全原則：<code>GA4_SERVICE_ACCOUNT_JSON</code>、<code>TURNSTILE_SECRET_KEY</code>、Access JWT 與私人憑證都不能貼在 GitHub、聊天室、公開 HTML 或玩家回饋裡。這份手冊只列變數名稱，不儲存任何密鑰。</p>
                                 </div>
                             </details>
