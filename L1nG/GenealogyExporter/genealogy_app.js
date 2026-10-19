@@ -7853,7 +7853,18 @@ const MODAL_LIFECYCLE_STACK = [
   { dialog:appearanceDialog, close:() => closeAppearancePanel() }
 ];
 
+const genealogyFocus = window.L1nGGenealogyFocus;
+MODAL_LIFECYCLE_STACK.forEach(entry => genealogyFocus?.register(entry.dialog, entry.close));
+genealogyFocus?.register(exportDialog, () => closeExportPanel());
 function closeTopModal() {
+  if (genealogyFocus) {
+    const current = genealogyFocus.top();
+    if (!current) return false;
+    const lifecycle = MODAL_LIFECYCLE_STACK.find(item => item.dialog === current.element);
+    if (lifecycle) { lifecycle.close(); return true; }
+    if (current.element === exportDialog) { closeExportPanel(); return true; }
+    return false;
+  }
   return window.L1nGGenealogyUI.closeTopmostDialog(MODAL_LIFECYCLE_STACK);
 }
 
@@ -12010,7 +12021,7 @@ nodes.addEventListener('pointerdown', e => {
   if (e.shiftKey && arrangeTool !== 'select') {
     e.preventDefault();
     e.stopPropagation();
-    if (isTextInteractionTarget(document.activeElement)) document.activeElement.blur();
+    genealogyFocus.focusCanvas();
     if (selectedNodeIds.has(id)) selectedNodeIds.delete(id);
     else selectedNodeIds.add(id);
     syncNodeSelectionClasses();
@@ -12182,7 +12193,7 @@ nodes.addEventListener('pointerdown', e => {
   if (arrangeTool === 'select') {
     e.preventDefault();
     e.stopPropagation();
-    if (isTextInteractionTarget(document.activeElement)) document.activeElement.blur();
+    genealogyFocus.focusCanvas();
 
     const shift =
       e.pointerType === 'touch'
@@ -18336,20 +18347,20 @@ document.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   const modifier = e.ctrlKey || e.metaKey;
 
-  if (e.code === 'Space' && !isTextInteractionTarget(e.target) && !hasBlockingGenealogyDialog() && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
+  if (e.code === 'Space' && genealogyFocus.isCanvasShortcutTarget(e.target) && !hasBlockingGenealogyDialog() && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
     spacePanHeld = true;
     updateArrangeToolUI();
     e.preventDefault();
   }
 
-  if (modifier && key === 'a' && !isTextInteractionTarget(e.target) && !hasBlockingGenealogyDialog() && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
+  if (modifier && key === 'a' && genealogyFocus.isCanvasShortcutTarget(e.target) && !hasBlockingGenealogyDialog() && genealogyScene.isFreeLayoutActive(currentFamily()) && arrangeTool === 'select') {
     selectVisibleNodes();
     e.preventDefault();
     return;
   }
 
   // 畫布歷史不干擾輸入框及其他視窗自己的 Ctrl / Cmd + Z。
-  if (modifier && !isNativeTextUndoTarget(e.target) && !hasBlockingGenealogyDialog()) {
+  if (modifier && !isNativeTextUndoTarget(e.target) && !hasBlockingGenealogyDialog() && genealogyFocus.isCanvasShortcutTarget(e.target)) {
     const isUndoShortcut =
       key === 'z' &&
       !e.shiftKey;
@@ -18375,7 +18386,7 @@ document.addEventListener('keydown', e => {
     }
   }
 
-  if (!modifier && !e.altKey && !e.isComposing && !isTextInteractionTarget(e.target) && !hasBlockingGenealogyDialog()) {
+  if (!modifier && !e.altKey && !e.isComposing && genealogyFocus.isCanvasShortcutTarget(e.target) && !hasBlockingGenealogyDialog()) {
     if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key) && nudgeSelectedCanvasCards(e)) {
       e.preventDefault();
       return;
@@ -18400,6 +18411,7 @@ document.addEventListener('keydown', e => {
   }
 
   if (e.key === 'Escape') {
+    if (e.defaultPrevented) return;
     if (!closeTopModal() && (selectedNodeIds.size || selectedPetIds.size)) clearNodeSelection();
     return;
   }
@@ -18773,7 +18785,7 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   if (event.shiftKey && arrangeTool !== 'select') {
     event.preventDefault();
     event.stopPropagation();
-    if (isTextInteractionTarget(document.activeElement)) document.activeElement.blur();
+    genealogyFocus.focusCanvas();
     if (selectedPetIds.has(entry.key)) selectedPetIds.delete(entry.key);
     else selectedPetIds.add(entry.key);
     syncNodeSelectionClasses();
@@ -19472,7 +19484,7 @@ function handleGenealogyLanguageChanged() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && exportDialog && exportDialog.classList.contains('show')) closeExportPanel();
+  // Export dialog Escape is handled by the shared focus manager.
 });
 
 async function bootstrapGenealogyApp() {
