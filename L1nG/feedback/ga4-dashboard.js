@@ -170,33 +170,106 @@
   function trend(id,series) {
     const root=$(id);if(!root)return;
     root.replaceChildren();
-    const points=(series||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+    const points=(series||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     if(!points.length){empty(id,'目前沒有每日訪客資料。');return;}
-    const max=Math.max(1,...points.map(x=>Number(x.value)||0));
-    const svg=svgElement('svg',{viewBox:'0 0 760 224',role:'img','aria-label':'GA4 每日活躍使用者趨勢'});
-    const left=35,right=741,top=16,bottom=184;
+    const max=Math.max(1,...points.map(item=>Number(item.value)||0));
+    const width=760,height=224,left=35,right=741,top=16,bottom=184;
+    const svg=svgElement('svg',{
+      viewBox:'0 0 '+width+' '+height,role:'group',tabindex:0,
+      'aria-label':'每日活躍使用者趨勢；使用左右方向鍵查看每日數值'
+    });
+    root.setAttribute('role','group');
     for(let n=0;n<=4;n++){
       const y=bottom-n*(bottom-top)/4;
       svg.append(svgElement('line',{x1:left,x2:right,y1:y,y2:y,stroke:'currentColor','stroke-opacity':'.13'}));
-      const t=svgElement('text',{x:left-7,y:y+4,'text-anchor':'end','font-size':10,fill:'currentColor',opacity:'.65'});
-      t.textContent=number(Math.round(max*n/4));svg.append(t);
+      const label=svgElement('text',{x:left-7,y:y+4,'text-anchor':'end','font-size':10,fill:'currentColor',opacity:'.65'});
+      label.textContent=number(Math.round(max*n/4));svg.append(label);
     }
     const coords=points.map((p,i)=>({
-      x:points.length===1?left+(right-left)/2:left+(right-left)*i/(points.length-1),
+      x:points.length===1?(left+right)/2:left+(right-left)*i/(points.length-1),
       y:bottom-(bottom-top)*(Number(p.value)||0)/max
     }));
     const path=coords.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');
-    const area=path+' L'+coords[coords.length-1].x+' '+bottom+' L'+coords[0].x+' '+bottom+' Z';
-    svg.append(svgElement('path',{d:area,fill:'var(--primary)','fill-opacity':'.10'}));
+    svg.append(svgElement('path',{d:path+' L'+coords[coords.length-1].x+' '+bottom+' L'+coords[0].x+' '+bottom+' Z',fill:'var(--primary)','fill-opacity':'.10'}));
     svg.append(svgElement('path',{d:path,fill:'none',stroke:'var(--primary)','stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
-    const indices=[...new Set([0,Math.floor((points.length-1)/2),points.length-1])];
-    for(const idx of indices){
-      const p=coords[idx],raw=points[idx].date;
-      const t=svgElement('text',{x:p.x,y:210,'text-anchor':idx===0?'start':idx===points.length-1?'end':'middle','font-size':11,fill:'currentColor',opacity:'.6'});
-      t.textContent=/^\d{8}$/.test(raw)?raw.slice(4,6)+'/'+raw.slice(6,8):raw;
-      svg.append(t);
+    // 短期間呈現全部資料點；長期間以互動時的節點標示為主。
+    if(points.length<=31)coords.forEach(p=>svg.append(svgElement('circle',{
+      cx:p.x,cy:p.y,r:2.5,fill:'var(--primary)','fill-opacity':'.7','pointer-events':'none'
+    })));
+    const guide=svgElement('line',{x1:0,x2:0,y1:top,y2:bottom,stroke:'var(--primary)',
+      'stroke-width':1,'stroke-dasharray':'4 4','stroke-opacity':'.5','pointer-events':'none'});
+    const marker=svgElement('circle',{cx:0,cy:0,r:5,fill:'var(--primary)',
+      stroke:'var(--surface)','stroke-width':2.5,'pointer-events':'none'});
+    guide.style.display='none';marker.style.display='none';
+    svg.append(guide,marker);
+    for(const idx of new Set([0,Math.floor((points.length-1)/2),points.length-1])){
+      const p=coords[idx],raw=String(points[idx].date);
+      const label=svgElement('text',{x:p.x,y:210,
+        'text-anchor':idx===0?'start':idx===points.length-1?'end':'middle',
+        'font-size':11,fill:'currentColor',opacity:'.6'});
+      label.textContent=/^\d{8}$/.test(raw)?raw.slice(4,6)+'/'+raw.slice(6,8):raw;
+      svg.append(label);
     }
-    root.append(svg);
+    const tooltip=node('div','ga-chart-tooltip');
+    tooltip.hidden=true;tooltip.setAttribute('role','tooltip');
+    const tooltipDate=node('div','ga-chart-tooltip-date');
+    const tooltipValue=node('div','ga-chart-tooltip-value');
+    tooltip.append(tooltipDate,tooltipValue);root.append(svg,tooltip);
+    let selectedIndex=-1;
+    const formatDate=raw=>{
+      const date=String(raw||'');
+      if(/^\d{8}$/.test(date))return date.slice(0,4)+'/'+date.slice(4,6)+'/'+date.slice(6,8);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(date))return date.replace(/-/g,'/');
+      return date;
+    };
+    function show(index){
+      if(index<0||index>=points.length)return;
+      selectedIndex=index;
+      const point=coords[index],record=points[index],date=formatDate(record.date),value=number(record.value);
+      guide.setAttribute('x1',point.x);guide.setAttribute('x2',point.x);
+      marker.setAttribute('cx',point.x);marker.setAttribute('cy',point.y);
+      guide.style.display='';marker.style.display='';tooltip.hidden=false;
+      tooltipDate.textContent=date;tooltipValue.textContent='活躍使用者 · '+value;
+      svg.setAttribute('aria-label',date+'，活躍使用者 '+value+'。使用左右方向鍵切換日期');
+      const svgRect=svg.getBoundingClientRect(),rootRect=root.getBoundingClientRect();
+      const px=svgRect.left-rootRect.left+point.x/width*svgRect.width;
+      const py=svgRect.top-rootRect.top+point.y/height*svgRect.height;
+      const tw=tooltip.offsetWidth,th=tooltip.offsetHeight;
+      tooltip.style.left=Math.max(6,Math.min(px-tw/2,rootRect.width-tw-6))+'px';
+      tooltip.style.top=(py-th-10>=0?py-th-10:py+11)+'px';
+    }
+    function hide(){
+      selectedIndex=-1;guide.style.display='none';marker.style.display='none';tooltip.hidden=true;
+      svg.setAttribute('aria-label','每日活躍使用者趨勢；使用左右方向鍵查看每日數值');
+    }
+    function nearest(clientX){
+      const rect=svg.getBoundingClientRect();
+      if(!rect.width)return -1;
+      const x=(clientX-rect.left)/rect.width*width;
+      const idx=points.length===1?0:Math.round((x-left)/(right-left)*(points.length-1));
+      return Math.max(0,Math.min(points.length-1,idx));
+    }
+    svg.addEventListener('pointermove',event=>{
+      if(event.pointerType!=='touch')show(nearest(event.clientX));
+    });
+    svg.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='touch')show(nearest(event.clientX));
+    });
+    svg.addEventListener('pointerleave',event=>{
+      if(event.pointerType!=='touch'&&document.activeElement!==svg)hide();
+    });
+    svg.addEventListener('focus',()=>show(selectedIndex<0?points.length-1:selectedIndex));
+    svg.addEventListener('blur',hide);
+    svg.addEventListener('keydown',event=>{
+      let next=selectedIndex<0?points.length-1:selectedIndex;
+      if(event.key==='ArrowLeft')next=Math.max(0,next-1);
+      else if(event.key==='ArrowRight')next=Math.min(points.length-1,next+1);
+      else if(event.key==='Home')next=0;
+      else if(event.key==='End')next=points.length-1;
+      else if(event.key==='Escape'){event.preventDefault();hide();return;}
+      else return;
+      event.preventDefault();show(next);
+    });
   }
   function devices(items) {
     const root=$('ga-device');if(!root)return;
