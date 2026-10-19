@@ -175,3 +175,7 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
   text-underline-offset:3px;white-space:nowrap}
 .admin-only .toast .dashboard-auth-link:focus-visible{outline:2px solid currentColor;outline-offset:3px}
 @media(max-width:600px){.admin-only .toast .dashboard-auth-link{margin:7px 0 0;width:max-content}}
+
+/* Toast 原本 pointer-events:none；僅含 Access 操作的通知可接收點擊。 */
+.admin-only .toast.show[data-kind="auth"]{pointer-events:auto}
+.admin-only .toast.show[data-kind="auth"] .dashboard-auth-link{pointer-events:auto;cursor:pointer}

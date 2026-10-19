@@ -86,3 +86,12 @@ test('unauthorized Access response does not retry',async()=>{
     error=>error.kind==='auth');
   assert.equal(calls,1);
 });
+
+test('Access toast links remain clickable without enabling clicks on ordinary toasts',()=>{
+  const css=fs.readFileSync(new URL('admin.css',folder),'utf8');
+  const js=fs.readFileSync(new URL('admin.js',folder),'utf8');
+  assert.match(css,/\.admin-only \.toast\.show\[data-kind="auth"\]\s*\{pointer-events:auto\}/);
+  assert.match(js,/retry\.href='\/feedback\/admin\.html'/);
+  assert.match(js,/logout\.href='\/cdn-cgi\/access\/logout'/);
+  assert.doesNotMatch(css,/\.admin-only \.toast\.show\s*\{pointer-events:auto\}/);
+});

@@ -151,9 +151,12 @@
     toast.textContent=message;
     toast.dataset.kind=kind;
     if(kind==='auth'){
-      const link=el('a','dashboard-auth-link','重新驗證登入');
-      link.href='/feedback/admin.html';
-      toast.append(' ',link);
+      const retry=el('a','dashboard-auth-link','重新開啟管理中心');
+      retry.href='/feedback/admin.html';
+      const logout=el('a','dashboard-auth-link','登出 Access');
+      logout.href='/cdn-cgi/access/logout';
+      logout.title='結束 Cloudflare Access 工作階段；之後重新開啟管理中心即可再次登入';
+      toast.append(' ',retry,' ',logout);
     }
     toast.classList.add('show');
     // 避免一次失敗後通知永久停在畫面；登入提醒可持續顯示至使用者處理。
