@@ -414,6 +414,7 @@
     for(const id of ['date-from','date-to'])if($(id))$(id).max=end;
     if($('date-from'))$('date-from').value=daysBefore(end,29);
     if($('date-to'))$('date-to').value=end;
+    window.L1nGAdminDatePicker?.refresh();
     document.querySelectorAll('[data-range]').forEach(button=>button.addEventListener('click',()=>{
       chosenRange=button.dataset.range;
       document.querySelectorAll('[data-range]').forEach(el=>el.classList.toggle('active',el===button));
