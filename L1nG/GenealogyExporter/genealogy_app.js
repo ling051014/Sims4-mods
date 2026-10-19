@@ -860,7 +860,7 @@ function refreshResolvedAssetDom(
 
       if (element.id === 'photoPreview') {
         $('photoClearBtn').disabled = false;
-        $('phSave').disabled = false;
+        $('lifePhotoEditorSaveButton').disabled = false;
       }
     });
 }
@@ -9762,12 +9762,12 @@ const lifePhotoWorkspace = {
   },
 
   fillEditorFields(entry = null) {
-    $('phTitle').value = entry?.title || '';
-    $('phNote').value = entry?.note || '';
-    $('phStage').value = entry?.lifeStage || '';
+    $('lifePhotoTitleInput').value = entry?.title || '';
+    $('lifePhotoNoteTextarea').value = entry?.note || '';
+    $('lifePhotoLifeStageSelect').value = entry?.lifeStage || '';
 
-    genealogyUI.refreshSelect('phTitle');
-    genealogyUI.refreshSelect('phStage');
+    genealogyUI.refreshSelect('lifePhotoTitleInput');
+    genealogyUI.refreshSelect('lifePhotoLifeStageSelect');
   },
 
   refreshPreview() {
@@ -9785,7 +9785,7 @@ const lifePhotoWorkspace = {
     preview.style.backgroundImage =
       url ? `url("${url}")` : '';
     $('photoClearBtn').disabled = !imageRef;
-    $('phSave').disabled = !imageRef;
+    $('lifePhotoEditorSaveButton').disabled = !imageRef;
 
     const tip = $('photoSizeTip');
     if (!url) {
@@ -9841,7 +9841,7 @@ const lifePhotoWorkspace = {
     this.fillEditorFields(entry);
     $('photoModalTitle').textContent =
       entry ? '編輯圖片' : '新增圖片';
-    $('phDelete').style.display =
+    $('lifePhotoEditorDeleteButton').style.display =
       entry ? '' : 'none';
 
     this.refreshPreview();
@@ -9873,9 +9873,9 @@ const lifePhotoWorkspace = {
     const previous = this.currentEditorEntry();
     const entry = {
       id:previous?.id || uid('photo'),
-      title:$('phTitle').value.trim(),
-      note:$('phNote').value.trim(),
-      lifeStage:$('phStage').value,
+      title:$('lifePhotoTitleInput').value.trim(),
+      note:$('lifePhotoNoteTextarea').value.trim(),
+      lifeStage:$('lifePhotoLifeStageSelect').value,
       image:lifePhotoState.editor.imageRef,
       addedAt:previous?.addedAt || Date.now()
     };
@@ -10065,7 +10065,7 @@ const lifePhotoWorkspace = {
     lifePhotoState.viewer.index = index;
 
     $('photoViewerPersonName').textContent =
-      $('fName')?.value?.trim() ||
+      $('simNameInput')?.value?.trim() ||
       uiText('模擬市民');
 
     this.refreshViewer();
@@ -10155,7 +10155,7 @@ const lifePhotoWorkspace = {
   }
 };
 
-$('btnAddPhoto').onclick = () => {
+$('simAddLifePhotoButton').onclick = () => {
   lifePhotoWorkspace.openEditor();
 };
 
@@ -10192,13 +10192,13 @@ lifePhotoGrid.addEventListener('drop', async event => {
   }
 });
 
-$('phSave').onclick = () => {
+$('lifePhotoEditorSaveButton').onclick = () => {
   lifePhotoWorkspace.commitEditor();
 };
-$('phCancel').onclick = () => {
+$('lifePhotoEditorCancelButton').onclick = () => {
   lifePhotoWorkspace.closeEditor();
 };
-$('phDelete').onclick = () => {
+$('lifePhotoEditorDeleteButton').onclick = () => {
   lifePhotoWorkspace.deleteEditorEntry();
 };
 lifePhotoEditorDialog.onclick = event => {
@@ -15086,8 +15086,8 @@ const petEditorController = {
     this.directEntry = entry;
     petEditorState.index = -1;
     $('petModalTitle').textContent = uiText('編輯寵物');
-    $('pDelete').style.display = '';
-    $('pDelete').textContent = uiText('永久刪除寵物');
+    $('petEditorDeleteButton').style.display = '';
+    $('petEditorDeleteButton').textContent = uiText('永久刪除寵物');
     this.populateForm(entry.pet);
     this.syncPreferenceTabs(entry.pet);
     this.renderOwnerChoices(entry.pet);
@@ -15222,9 +15222,9 @@ const petEditorController = {
     if (avatar) {
       preview.innerHTML = avatar;
     } else {
-      const name = $('pName').value.trim();
+      const name = $('petNameInput').value.trim();
       const species =
-        PET_SPECIES[$('pSpecies').value] ||
+        PET_SPECIES[$('petSpeciesSelect').value] ||
         PET_SPECIES.other;
 
       preview.innerHTML =
@@ -15240,9 +15240,9 @@ const petEditorController = {
   },
 
   syncGenderVisibility() {
-    const field = $('pGenderField');
-    const select = $('pGender');
-    const species = $('pSpecies').value;
+    const field = $('petGenderField');
+    const select = $('petGenderSelect');
+    const species = $('petSpeciesSelect').value;
     const visible = isEaCasPetSpecies(species);
 
     if (field) {
@@ -15256,36 +15256,36 @@ const petEditorController = {
         ? (normalizePetGender(select.value) || 'male')
         : '';
 
-    genealogyUI.refreshSelect('pGender');
+    genealogyUI.refreshSelect('petGenderSelect');
   },
 
   populateForm(pet) {
     const owner = this.owner();
 
-    $('pName').value =
+    $('petNameInput').value =
       owner
         ? displayDataText(pet.name, owner)
         : (pet.name || '');
 
-    $('pSpecies').value =
+    $('petSpeciesSelect').value =
       pet.species || 'dog';
 
-    $('pBreed').value =
+    $('petBreedInput').value =
       owner
         ? displayDataText(pet.breed, owner)
         : (pet.breed || '');
 
-    $('pGender').value =
+    $('petGenderSelect').value =
       normalizePetGender(pet.gender) ||
       'male';
 
-    $('pAgeStage').value =
+    $('petLifeStageSelect').value =
       pet.ageStage || '成年';
 
-    $('pStatus').value =
+    $('petStatusSelect').value =
       pet.status || '在世';
 
-    $('pNotes').value =
+    $('petNotesTextarea').value =
       owner
         ? displayDataText(pet.notes || '', owner)
         : (typeof pet.notes === 'string' ? pet.notes : '');
@@ -15327,10 +15327,10 @@ const petEditorController = {
     this.refreshAvatarPreview();
 
     [
-      'pSpecies',
-      'pGender',
-      'pAgeStage',
-      'pStatus'
+      'petSpeciesSelect',
+      'petGenderSelect',
+      'petLifeStageSelect',
+      'petStatusSelect'
     ].forEach(id =>
       genealogyUI.refreshSelect(id)
     );
@@ -15358,9 +15358,9 @@ const petEditorController = {
           : '新增寵物'
       );
 
-    $('pDelete').style.display =
+    $('petEditorDeleteButton').style.display =
       validIndex ? '' : 'none';
-    $('pDelete').textContent = uiText('刪除寵物');
+    $('petEditorDeleteButton').textContent = uiText('刪除寵物');
 
     this.populateForm(pet);
     this.syncPreferenceTabs(pet);
@@ -15400,7 +15400,7 @@ const petEditorController = {
   collectForm() {
     const owner = this.owner();
     const previous = this.currentPet();
-    const inputName = $('pName').value.trim();
+    const inputName = $('petNameInput').value.trim();
 
     if (!inputName) {
       uiAlert(
@@ -15427,13 +15427,13 @@ const petEditorController = {
         : '';
 
     const inputBreed =
-      $('pBreed').value.trim();
+      $('petBreedInput').value.trim();
 
     const shownNotes =
       previous && owner
         ? displayDataText(previous.notes || '', owner)
         : '';
-    const inputNotes = $('pNotes').value.trim();
+    const inputNotes = $('petNotesTextarea').value.trim();
 
     const name =
       previous &&
@@ -15457,7 +15457,7 @@ const petEditorController = {
         : inputNotes;
 
     const species =
-      $('pSpecies').value;
+      $('petSpeciesSelect').value;
 
     const nextPet = {
       ...(previous
@@ -15473,15 +15473,15 @@ const petEditorController = {
         isEaCasPetSpecies(species)
           ? (
               normalizePetGender(
-                $('pGender').value
+                $('petGenderSelect').value
               ) ||
               'male'
             )
           : '',
       ageStage:
-        $('pAgeStage').value,
+        $('petLifeStageSelect').value,
       status:
-        $('pStatus').value,
+        $('petStatusSelect').value,
       traits:[
         ...petEditorState.traits
       ],
@@ -15802,11 +15802,11 @@ $('petAvatarClearBtn').onclick = () => {
   petEditorController.clearAvatar();
 };
 
-$('pName').addEventListener('input', () => {
+$('petNameInput').addEventListener('input', () => {
   petEditorController.refreshAvatarPreview();
 });
 
-$('pSpecies').addEventListener('change', () => {
+$('petSpeciesSelect').addEventListener('change', () => {
   petEditorController.syncGenderVisibility();
   petEditorController.refreshAvatarPreview();
 });
@@ -15857,15 +15857,15 @@ $('petTraitInput')?.addEventListener(
   }
 );
 
-$('pSave').onclick = () => {
+$('petEditorSaveButton').onclick = () => {
   petEditorController.commit();
 };
 
-$('pCancel').onclick = () => {
+$('petEditorCancelButton').onclick = () => {
   petEditorController.close();
 };
 
-$('pDelete').onclick = () => {
+$('petEditorDeleteButton').onclick = () => {
   petEditorController.removeCurrent();
 };
 
@@ -18678,7 +18678,7 @@ async function savePersonEditorFromUi() {
     const before=captureCanonicalHistory();
   if (!before) return;
     const result=await withActionButtonLoading(
-      $('btnSave'),
+      $('simEditorSaveButton'),
       '儲存中',
       () => personEditor.commit()
     );
@@ -18707,11 +18707,11 @@ async function savePersonEditorFromUi() {
 }
 
 $('addBtn').onclick = () => personEditor.open(null);
-$('btnCancel').onclick = personEditor.close;
-$('btnSave').onclick = () => {
+$('simEditorCancelButton').onclick = personEditor.close;
+$('simEditorSaveButton').onclick = () => {
   void savePersonEditorFromUi();
 };
-$('btnDelete').onclick = () => simEditorState.simId && deleteChar(simEditorState.simId);
+$('simEditorDeleteButton').onclick = () => simEditorState.simId && deleteChar(simEditorState.simId);
 mask.onclick = e => { if (e.target === mask) personEditor.close(); };
 
 document.addEventListener('keydown', e => {
@@ -19830,8 +19830,8 @@ function handleGenealogyLanguageChanged() {
 
   if (mask && mask.classList.contains('show')) {
     const birthdayDay =
-      $('fBirthdayDay')
-        ? $('fBirthdayDay').value
+      $('simBirthdayDaySelect')
+        ? $('simBirthdayDaySelect').value
         : '';
 
     personEditor.populateBirthdayDays(birthdayDay);
