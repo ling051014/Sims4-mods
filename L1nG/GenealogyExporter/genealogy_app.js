@@ -355,7 +355,7 @@ try {
   }
 } catch (_) {}
 
-let familyTreeViewMode = 'extended';
+let familyTreeViewMode = 'household';
 try {
   const savedFamilyTreeViewMode = localStorage.getItem(FAMILY_TREE_VIEW_MODE_KEY);
   if (savedFamilyTreeViewMode === 'household' || savedFamilyTreeViewMode === 'ea' || savedFamilyTreeViewMode === 'extended') {
@@ -18448,6 +18448,7 @@ async function importGameGenealogy(file) {
       currentFamily();
 
     const activeEntry=getActiveFamilySelectorEntry(familyTreeViewMode);
+    // 摘要須反映實際畫面，不能把缺少主控標記的第一筆家族誤稱為主控。
     const activeFamilyName=activeEntry?.label ||
       (activeFamily ? displayDataText(activeFamily.name,activeFamily) : '—');
 
