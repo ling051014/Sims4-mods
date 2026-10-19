@@ -437,7 +437,7 @@
       if(chosenRange!=='custom')void refreshAnalytics();
     }));
     $('analytics-site')?.addEventListener('change',()=>void refreshAnalytics());
-    $('apply-date')?.addEventListener('click',()=>{
+    document.addEventListener('l1ng:analytics-date-applied',()=>{
       const range=dateRange();
       const n=(Date.parse(range.end)-Date.parse(range.start))/86400000;
       if(!range.start || !range.end || !Number.isFinite(n) || n<0 || n>365 || range.end>today()){
