@@ -13495,7 +13495,7 @@ function refreshFamilyUI() {
     familySelect.value = selected.value;
   }
 
-  document.title = familyName + ' · ' + uiText('模擬市民族譜工具');
+  // 瀏覽器標題由多語系模組管理，不隨家族切換變更。
   syncLayoutModeControls();
   syncNavSelectControl('familySelect');
   refreshFamilyProfilePanel();

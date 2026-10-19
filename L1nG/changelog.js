@@ -68,6 +68,7 @@
 
         root.dataset.language = nextLanguage;
         root.lang = nextLanguage;
+        document.title = nextLanguage === 'en' ? 'Changelog · RealDate · L1nG' : '更新日誌 · RealDate · L1nG';
 
         languageButtons.forEach((button) => {
             const isActive =

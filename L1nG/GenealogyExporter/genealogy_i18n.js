@@ -366,10 +366,10 @@ They can still be added to other families.`;
       document.documentElement.lang = language;
       document.title =
         language === 'en'
-          ? 'L1nG Genealogy – The Sims 4 Family Tree Tool'
+          ? 'Genealogy Tool · L1nG'
           : language === 'zh-Hans'
-            ? 'L1nG 模拟市民族谱工具'
-            : 'L1nG 模擬市民族譜工具';
+            ? '模拟市民族谱工具 · L1nG'
+            : '模擬市民族譜工具 · L1nG';
     } finally {
       applying = false;
     }
