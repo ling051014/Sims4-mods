@@ -607,8 +607,7 @@ const dragHistory = {
     const previous = this.undoStack[this.undoStack.length - 1];
     const now = Date.now();
     if (entry.keyboardKey && previous?.keyboardKey === entry.keyboardKey &&
-        previous.familyId === entry.familyId && previous.mode === entry.mode &&
-        now - previous.recordedAt < 380 &&
+        previous.familyId === entry.familyId && now - previous.recordedAt < 380 &&
         sameLayoutHistoryState(previous.after, entry.before)) {
       previous.after = entry.after;
       previous.recordedAt = now;
@@ -670,10 +669,10 @@ function cloneManualPositionMap(source) {
   return copy;
 }
 
-function captureLayoutHistoryState(fam, mode) {
+function captureLayoutHistoryState(fam) {
 return {
-    freeLayout: !!fam.freeLayout[mode],
-    manualPositions: cloneManualPositionMap(fam.manualPositions[mode])
+    freeLayout: !!fam.freeLayout,
+    manualPositions: cloneManualPositionMap(fam.manualPositions)
   };
 }
 
@@ -704,7 +703,7 @@ function applyDragHistoryEntry(entry, stateKey) {
     const mutation =
       genealogyStore.setFamilyLayoutState(
         entry.familyId,
-        entry.mode,
+        
         {
           freeLayout:!!state.freeLayout,
           manualPositions:cloneManualPositionMap(state.manualPositions)
@@ -714,13 +713,11 @@ function applyDragHistoryEntry(entry, stateKey) {
     applyGenealogyMutation(mutation, {
       immediateSave:true,
       render:
-        currentGenealogyData().currentFamilyId === entry.familyId &&
-        viewMode === entry.mode
+        currentGenealogyData().currentFamilyId === entry.familyId
     });
 
     if (
-      currentGenealogyData().currentFamilyId === entry.familyId &&
-      viewMode === entry.mode
+      currentGenealogyData().currentFamilyId === entry.familyId
     ) {
       syncLayoutModeControls();
     }
@@ -6074,290 +6071,7 @@ $('applyCustomThemeColorsButton').onclick = () => {
   chooseCustomTheme(customThemePrimaryColorInput.value,customThemeSecondaryColorInput.value,customColor3.value);
 };
 
-// ========【自由排列跨模式映射】 檢視 / 編輯共用同一份視覺構圖 ========
-function medianNumber(values) {
-  const list =
-    (values || [])
-      .map(Number)
-      .filter(Number.isFinite)
-      .sort((a, b) => a - b);
-
-  if (!list.length) {
-    return 1;
-  }
-
-  const middle =
-    Math.floor(
-      list.length / 2
-    );
-
-  return list.length % 2
-    ? list[middle]
-    : (
-        list[middle - 1] +
-        list[middle]
-      ) / 2;
-}
-
-function captureFreeLayoutModeSnapshot(
-  fam,
-  mode
-) {
-  if (
-    !fam ||
-    !fam.freeLayout?.[mode] ||
-    !getSceneLayout()?.pos
-  ) {
-    return null;
-  }
-
-  const entries = [];
-
-  getSceneLayout()
-    .visibleIds
-    .forEach(id => {
-      const position =
-        getSceneLayout().pos.get(id);
-
-      if (!position) {
-        return;
-      }
-
-      const dimensions =
-        genealogyScene
-          .measurePersonCardById(
-            id
-          );
-
-      if (
-        !dimensions ||
-        !Number.isFinite(
-          dimensions.W
-        ) ||
-        !Number.isFinite(
-          dimensions.H
-        )
-      ) {
-        return;
-      }
-
-      entries.push({
-        id:String(id),
-        x:Number(position.x) || 0,
-        y:Number(position.y) || 0,
-        width:dimensions.W,
-        height:dimensions.H,
-        centerX:
-          (Number(position.x) || 0) +
-          dimensions.W / 2,
-        centerY:
-          (Number(position.y) || 0) +
-          dimensions.H / 2
-      });
-    });
-
-  if (!entries.length) {
-    return null;
-  }
-
-  const minX =
-    Math.min(
-      ...entries.map(entry =>
-        entry.x
-      )
-    );
-
-  const minY =
-    Math.min(
-      ...entries.map(entry =>
-        entry.y
-      )
-    );
-
-  const maxX =
-    Math.max(
-      ...entries.map(entry =>
-        entry.x +
-        entry.width
-      )
-    );
-
-  const maxY =
-    Math.max(
-      ...entries.map(entry =>
-        entry.y +
-        entry.height
-      )
-    );
-
-  return {
-    sourceMode:mode,
-    entries,
-    minX,
-    minY,
-    centerX:
-      (minX + maxX) / 2,
-    centerY:
-      (minY + maxY) / 2
-  };
-}
-
-function mapFreeLayoutSnapshotToMode(
-  fam,
-  targetMode,
-  snapshot
-) {
-  if (
-    !fam ||
-    !snapshot?.entries?.length
-  ) {
-    return null;
-  }
-
-  const mappedEntries =
-    snapshot.entries
-      .map(entry => {
-        const dimensions =
-          genealogyScene
-            .measurePersonCardById(
-              entry.id
-            );
-
-        if (
-          !dimensions ||
-          !Number.isFinite(
-            dimensions.W
-          ) ||
-          !Number.isFinite(
-            dimensions.H
-          )
-        ) {
-          return null;
-        }
-
-        return {
-          ...entry,
-          targetWidth:
-            dimensions.W,
-          targetHeight:
-            dimensions.H
-        };
-      })
-      .filter(Boolean);
-
-  if (!mappedEntries.length) {
-    return null;
-  }
-
-  // 檢視卡是直向、編輯卡是橫向；
-  // 用兩種卡片尺寸的中位比例縮放模擬市民中心間距，
-  // 不直接複製 top / left，避免模式切換後整張圖擠在一起。
-  const scaleX =
-    medianNumber(
-      mappedEntries.map(entry =>
-        entry.targetWidth /
-        Math.max(
-          1,
-          entry.width
-        )
-      )
-    );
-
-  const scaleY =
-    medianNumber(
-      mappedEntries.map(entry =>
-        entry.targetHeight /
-        Math.max(
-          1,
-          entry.height
-        )
-      )
-    );
-
-  const next = {};
-
-  const provisional =
-    mappedEntries.map(entry => {
-      const centerX =
-        snapshot.centerX +
-        (
-          entry.centerX -
-          snapshot.centerX
-        ) *
-        scaleX;
-
-      const centerY =
-        snapshot.centerY +
-        (
-          entry.centerY -
-          snapshot.centerY
-        ) *
-        scaleY;
-
-      return {
-        id:entry.id,
-        x:
-          centerX -
-          entry.targetWidth / 2,
-        y:
-          centerY -
-          entry.targetHeight / 2,
-        width:
-          entry.targetWidth,
-        height:
-          entry.targetHeight
-      };
-    });
-
-  const nextMinX =
-    Math.min(
-      ...provisional.map(entry =>
-        entry.x
-      )
-    );
-
-  const nextMinY =
-    Math.min(
-      ...provisional.map(entry =>
-        entry.y
-      )
-    );
-
-  const translateX =
-    snapshot.minX -
-    nextMinX;
-
-  const translateY =
-    snapshot.minY -
-    nextMinY;
-
-  provisional.forEach(entry => {
-    next[entry.id] = {
-      x:
-        entry.x +
-        translateX,
-      y:
-        entry.y +
-        translateY
-    };
-  });
-
-  // 保留目前 selector 範圍以外、但玩家先前在目標模式排過的位置。
-  const merged =
-    cloneManualPositionMap(
-      fam.manualPositions?.[
-        targetMode
-      ]
-    );
-
-  Object.assign(
-    merged,
-    next
-  );
-
-  return merged;
-}
-
+// ========【共用排列狀態】切換檢視 / 編輯模式不再複製位置 ========
 function normalizeGenealogyViewMode(mode) {
   return VALID_MODES.includes(mode)
     ? mode
@@ -6405,79 +6119,13 @@ function setGenealogyViewMode(mode) {
   } catch (_) {}
 }
 function toggleViewMode() {
-  const fam =
-    currentFamily();
-const sourceMode =
-    viewMode;
-
-  const targetMode =
-    sourceMode === 'view'
-      ? 'edit'
-      : 'view';
-
-  const sourceWasFree =
-    !!fam.freeLayout[
-      sourceMode
-    ];
-
-  const transferSnapshot =
-    sourceWasFree
-      ? captureFreeLayoutModeSnapshot(
-          fam,
-          sourceMode
-        )
-      : null;
-
-  dragHistory.clear();
   clearNodeSelection();
   arrangeTool = 'pan';
-
-  setGenealogyViewMode(
-    targetMode
-  );
-
-  let mutation = null;
-
-  if (
-    sourceWasFree &&
-    transferSnapshot
-  ) {
-    const mappedPositions =
-      mapFreeLayoutSnapshotToMode(
-        fam,
-        targetMode,
-        transferSnapshot
-      );
-
-    if (mappedPositions) {
-      mutation =
-        genealogyStore
-          .setFamilyLayoutState(
-            fam.id,
-            targetMode,
-            {
-              freeLayout:true,
-              manualPositions:
-                mappedPositions
-            }
-          );
-    }
-  }
-
-  if (mutation) {
-    applyGenealogyMutation(
-      mutation,
-      {
-        render:false
-      }
-    );
-  }
-
+  setGenealogyViewMode(viewMode === 'view' ? 'edit' : 'view');
+  // 只改卡片外觀，不改手動位置、排列狀態或 Ctrl + Z 歷史。
   render();
-
-  requestAnimationFrame(() =>
-    genealogyViewport.fit()
-  );
+  syncLayoutModeControls();
+  requestAnimationFrame(() => genealogyViewport.fit());
 }
 modeToggle.onclick = toggleViewMode;
 
@@ -10412,8 +10060,8 @@ function getLayoutNodeBox(id, position = null) {
 }
 
 // 混合多選共用相同的寵物位置鍵值，與市民拖曳使用同一筆歷史記錄。
-function getSelectedPetDragPositions(fam, mode) {
-  const saved = fam?.manualPositions?.[mode] || {};
+function getSelectedPetDragPositions(fam) {
+  const saved = fam?.manualPositions || {};
   const starts = new Map();
   (getSceneLayout()?.petLayout?.cards || []).forEach(card => {
     if (!selectedPetIds.has(card.key)) return;
@@ -10440,8 +10088,8 @@ function markSelectedPetDragging(starts, active) {
   );
 }
 
-function getUnpositionedPetPositions(fam, mode) {
-  const saved = fam?.manualPositions?.[mode] || {};
+function getUnpositionedPetPositions(fam) {
+  const saved = fam?.manualPositions || {};
   const positions = {};
   (getSceneLayout()?.petLayout?.cards || []).forEach(card => {
     const key = 'pet:' + card.key;
@@ -10452,17 +10100,14 @@ function getUnpositionedPetPositions(fam, mode) {
 }
 
 // 保留目前寵物的獨立位置，不讓移動模擬市民時因家庭錨點重新計算而連帶移動。
-function freezeUnpositionedPetCards(fam, mode) {
-  const positions = getUnpositionedPetPositions(fam,mode);
+function freezeUnpositionedPetCards(fam) {
+  const positions = getUnpositionedPetPositions(fam);
   return Object.keys(positions).length
-    ? genealogyStore.setNodePositions(fam.id,mode,positions)
+    ? genealogyStore.setNodePositions(fam.id,positions)
     : null;
 }
 
-function seedVisibleScenePositionsForFreeLayout(
-  fam,
-  mode
-) {
+function seedVisibleScenePositionsForFreeLayout(fam) {
   const scene =
     getSceneLayout();
 
@@ -10472,7 +10117,7 @@ function seedVisibleScenePositionsForFreeLayout(
 
   const seeded =
     cloneManualPositionMap(
-      fam.manualPositions?.[mode]
+      fam.manualPositions
     );
 
   scene.visibleIds.forEach(id => {
@@ -10487,11 +10132,11 @@ function seedVisibleScenePositionsForFreeLayout(
     };
   });
 
-  Object.assign(seeded,getUnpositionedPetPositions(fam,mode));
+  Object.assign(seeded,getUnpositionedPetPositions(fam));
 
   return genealogyStore.setFamilyLayoutState(
     fam.id,
-    mode,
+    
     {
       freeLayout:true,
       manualPositions:seeded
@@ -10521,13 +10166,10 @@ const ids = getSelectedLayoutNodeIds();
   }
 
   const before =
-    captureLayoutHistoryState(
-      fam,
-      viewMode
-    );
+    captureLayoutHistoryState(fam);
 
   const activateFreeLayout =
-    !fam.freeLayout[viewMode];
+    !fam.freeLayout;
 
   const minLeft =
     Math.min(...boxes.map(box => box.x));
@@ -10667,16 +10309,13 @@ const ids = getSelectedLayoutNodeIds();
 
   const freeLayoutMutation =
     activateFreeLayout
-      ? seedVisibleScenePositionsForFreeLayout(
-          fam,
-          viewMode
-        )
+      ? seedVisibleScenePositionsForFreeLayout(fam)
       : null;
 
   const positionMutation =
     genealogyStore.setNodePositions(
       fam.id,
-      viewMode,
+      
       nextPositions
     );
 
@@ -10694,12 +10333,8 @@ const ids = getSelectedLayoutNodeIds();
   dragHistory.push({
     type:'card-layout',
     familyId:fam.id,
-    mode:viewMode,
     before,
-    after:captureLayoutHistoryState(
-      fam,
-      viewMode
-    )
+    after:captureLayoutHistoryState(fam)
   });
 
   return true;
@@ -10710,7 +10345,7 @@ function nudgeSelectedCanvasCards(event) {
   const directions = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
   const direction = directions[event.key], fam = currentFamily(), layout = getSceneLayout();
   if (!direction || !fam || !layout || !genealogyScene.isFreeLayoutActive(fam) || arrangeTool !== 'select') return false;
-  const mode = viewMode, saved = fam.manualPositions?.[mode] || {}, positions = {};
+  const mode = viewMode, saved = fam.manualPositions || {}, positions = {};
   const step = event.shiftKey ? 10 : 1, dx = direction[0]*step, dy = direction[1]*step;
   [...selectedNodeIds].forEach(id => {
     const from = saved[id] || layout.pos?.get(id);
@@ -10728,10 +10363,10 @@ function nudgeSelectedCanvasCards(event) {
     return from && (from.x !== pos.x || from.y !== pos.y);
   });
   if (!changed) return false;
-  const before=captureLayoutHistoryState(fam,mode);
-  const mutation=genealogyStore.mergeResults(freezeUnpositionedPetCards(fam,mode),genealogyStore.setNodePositions(fam.id,mode,positions));
+  const before=captureLayoutHistoryState(fam);
+  const mutation=genealogyStore.mergeResults(freezeUnpositionedPetCards(fam),genealogyStore.setNodePositions(fam.id,positions));
   applyGenealogyMutation(mutation);
-  dragHistory.push({type:'card-layout',keyboardKey:event.key,familyId:fam.id,mode,before,after:captureLayoutHistoryState(fam,mode)});
+  dragHistory.push({type:'card-layout',keyboardKey:event.key,familyId:fam.id,before,after:captureLayoutHistoryState(fam)});
   syncNodeSelectionClasses();
   genealogyScene?.resizeStageToContent?.();
   return true;
@@ -10914,7 +10549,7 @@ const ids =
       [...selectedNodeIds]
         .filter(id =>
           Object.prototype.hasOwnProperty.call(
-            fam.manualPositions[viewMode],
+            fam.manualPositions,
             id
           )
         );
@@ -10925,15 +10560,12 @@ const ids =
     }
 
     const before =
-      captureLayoutHistoryState(
-        fam,
-        viewMode
-      );
+      captureLayoutHistoryState(fam);
 
     const mutation =
       genealogyStore.removeNodePositions(
         fam.id,
-        viewMode,
+        
         ids
       );
 
@@ -10944,12 +10576,8 @@ const ids =
     dragHistory.push({
       type:'card-layout',
       familyId:fam.id,
-      mode:viewMode,
       before,
-      after:captureLayoutHistoryState(
-        fam,
-        viewMode
-      )
+      after:captureLayoutHistoryState(fam)
     });
 
     closePersonCardMenu();
@@ -12407,11 +12035,11 @@ nodes.addEventListener('pointerdown', e => {
     e.stopPropagation();
 
     const dragMode = viewMode;
-    const manualPositions = fam.manualPositions[dragMode];
+    const manualPositions = fam.manualPositions;
     const initialPos = manualPositions[id] || getSceneLayout()?.pos?.get(id) || null;
     const startPos = initialPos ? { x:initialPos.x, y:initialPos.y } : null;
     const sx = e.clientX, sy = e.clientY;
-    const beforeLayoutState = captureLayoutHistoryState(fam, dragMode);
+    const beforeLayoutState = captureLayoutHistoryState(fam);
     let moved = false;
     let dragMutation = null;
     let previewPosition = null;
@@ -12512,14 +12140,14 @@ nodes.addEventListener('pointerdown', e => {
 
       if (moved && previewPosition) {
         dragMutation = genealogyStore.mergeResults(
-          dragMutation, freezeUnpositionedPetCards(fam,dragMode)
+          dragMutation, freezeUnpositionedPetCards(fam)
         );
         dragMutation =
           genealogyStore.mergeResults(
             dragMutation,
             genealogyStore.setNodePosition(
               fam.id,
-              dragMode,
+              
               id,
               previewPosition
             )
@@ -12528,12 +12156,8 @@ nodes.addEventListener('pointerdown', e => {
         dragHistory.push({
           type:'card-layout',
           familyId:fam.id,
-          mode:dragMode,
           before:beforeLayoutState,
-          after:captureLayoutHistoryState(
-            fam,
-            dragMode
-          )
+          after:captureLayoutHistoryState(fam)
         });
 
         applyGenealogyMutation(
@@ -12588,7 +12212,7 @@ nodes.addEventListener('pointerdown', e => {
       const p =
         isFree
           ? (
-              fam.manualPositions[viewMode][sid] ||
+              fam.manualPositions[sid] ||
               getSceneLayout().pos.get(sid)
             )
           : getSceneLayout().pos.get(sid);
@@ -12601,7 +12225,7 @@ nodes.addEventListener('pointerdown', e => {
       }
     });
 
-    const startPetPositions = getSelectedPetDragPositions(fam, viewMode);
+    const startPetPositions = getSelectedPetDragPositions(fam);
     const primaryStart =
       startPositions.get(id);
 
@@ -12609,10 +12233,7 @@ nodes.addEventListener('pointerdown', e => {
     const sy = e.clientY;
 
     const beforeLayoutState =
-      captureLayoutHistoryState(
-        fam,
-        viewMode
-      );
+      captureLayoutHistoryState(fam);
 
     let moved = false;
     let dragMutation = null;
@@ -12796,14 +12417,14 @@ nodes.addEventListener('pointerdown', e => {
 
       if (moved && previewPositions && ev.type !== 'pointercancel' && !isTouchCardActivationSuppressed(ev)) {
         dragMutation = genealogyStore.mergeResults(
-          dragMutation, freezeUnpositionedPetCards(fam,viewMode)
+          dragMutation, freezeUnpositionedPetCards(fam)
         );
         dragMutation =
           genealogyStore.mergeResults(
             dragMutation,
             genealogyStore.setNodePositions(
               fam.id,
-              viewMode,
+              
               previewPositions
             )
           );
@@ -12811,12 +12432,8 @@ nodes.addEventListener('pointerdown', e => {
         dragHistory.push({
           type:'card-layout',
           familyId:fam.id,
-          mode:viewMode,
           before:beforeLayoutState,
-          after:captureLayoutHistoryState(
-            fam,
-            viewMode
-          )
+          after:captureLayoutHistoryState(fam)
         });
 
         applyGenealogyMutation(
@@ -12903,13 +12520,10 @@ nodes.addEventListener('pointerdown', e => {
   const dragMode = viewMode;
 
   const beforeLayoutState =
-    captureLayoutHistoryState(
-      fam,
-      dragMode
-    );
+    captureLayoutHistoryState(fam);
 
   const manualPositions =
-    fam.manualPositions[dragMode];
+    fam.manualPositions;
 
   const sim =
     currentGenealogyData().sims[id];
@@ -12955,7 +12569,7 @@ nodes.addEventListener('pointerdown', e => {
     if (!moved) return;
 
     if (!dragInitialized) {
-      if (!fam.freeLayout[dragMode]) {
+      if (!fam.freeLayout) {
         const seededPositions = {};
 
         getSceneLayout().pos.forEach(
@@ -12966,14 +12580,14 @@ nodes.addEventListener('pointerdown', e => {
             };
           }
         );
-        Object.assign(seededPositions,getUnpositionedPetPositions(fam,dragMode));
+        Object.assign(seededPositions,getUnpositionedPetPositions(fam));
 
         dragMutation =
           genealogyStore.mergeResults(
             dragMutation,
             genealogyStore.setFamilyLayoutState(
               fam.id,
-              dragMode,
+              
               {
                 freeLayout:true,
                 manualPositions:seededPositions
@@ -13107,29 +12721,25 @@ nodes.addEventListener('pointerdown', e => {
 
     if (moved && previewPosition) {
       dragMutation = genealogyStore.mergeResults(
-        dragMutation, freezeUnpositionedPetCards(fam,dragMode)
+        dragMutation, freezeUnpositionedPetCards(fam)
       );
       dragMutation =
         genealogyStore.mergeResults(
           dragMutation,
           genealogyStore.setNodePosition(
             fam.id,
-            dragMode,
+            
             id,
             previewPosition
           )
         );
 
       const afterLayoutState =
-        captureLayoutHistoryState(
-          fam,
-          dragMode
-        );
+        captureLayoutHistoryState(fam);
 
       dragHistory.push({
         type:'card-layout',
         familyId:fam.id,
-        mode:dragMode,
         before:beforeLayoutState,
         after:afterLayoutState
       });
@@ -13267,18 +12877,13 @@ $('autoLayoutToggleButton').onclick = () => {
   const fam =
     currentFamily();
 const before =
-    captureLayoutHistoryState(
-      fam,
-      viewMode
-    );
+    captureLayoutHistoryState(fam);
 
   let mutation;
 
-  if (!fam.freeLayout[viewMode]) {
+  if (!fam.freeLayout) {
     const savedManual =
-      fam.manualPositions[
-        viewMode
-      ] || {};
+      fam.manualPositions || {};
 
     const visibleIds =
       getSceneLayout()
@@ -13307,7 +12912,7 @@ const before =
       mutation =
         genealogyStore.setFamilyLayoutState(
           fam.id,
-          viewMode,
+          
           {
             freeLayout:true
           }
@@ -13315,10 +12920,7 @@ const before =
     } else {
       // 第一次進入自由排列：以目前畫面位置建立 snapshot。
       mutation =
-        seedVisibleScenePositionsForFreeLayout(
-          fam,
-          viewMode
-        );
+        seedVisibleScenePositionsForFreeLayout(fam);
     }
 
     arrangeTool =
@@ -13329,7 +12931,7 @@ const before =
     mutation =
       genealogyStore.setFamilyLayoutState(
         fam.id,
-        viewMode,
+        
         {
           freeLayout:false
         }
@@ -13345,12 +12947,8 @@ const before =
   dragHistory.push({
     type:'card-layout',
     familyId:fam.id,
-    mode:viewMode,
     before,
-    after:captureLayoutHistoryState(
-      fam,
-      viewMode
-    )
+    after:captureLayoutHistoryState(fam)
   });
 };
 
@@ -13373,51 +12971,23 @@ $('canvasLockToggleButton').onclick = () => {
 
 $('resetCanvasLayoutButton').onclick = async () => {
   const fam = currentFamily();
-  const modeName =
-    viewMode === 'view'
-      ? '檢視'
-      : '編輯';
-
+  if (!fam) return;
   if (!await uiConfirm(
-    `要重設這個家族在「${modeName}模式」中的卡片位置嗎？手動調整的位置將被清除，卡片會重新自動排列。`,
-    {
-      title:'重設卡片位置',
-      kind:'danger',
-      confirmText:'重設位置'
-    }
+    uiText('要重設這個家族的卡片位置嗎？所有手動調整的位置將被清除，卡片會重新自動排列。'),
+    { title:'重設卡片位置', kind:'danger', confirmText:'重設位置' }
   )) return;
-
-  const before =
-    captureLayoutHistoryState(
-      fam,
-      viewMode
-    );
-
-  const mutation =
-    genealogyStore.setFamilyLayoutState(
-      fam.id,
-      viewMode,
-      {
-        freeLayout:false,
-        manualPositions:{}
-      }
-    );
-
+  const before = captureLayoutHistoryState(fam);
+  const mutation = genealogyStore.setFamilyLayoutState(fam.id, {
+    freeLayout:false,
+    manualPositions:{}
+  });
   clearNodeSelection();
   applyGenealogyMutation(mutation);
   syncLayoutModeControls();
-
   dragHistory.push({
-    type:'card-layout',
-    familyId:fam.id,
-    mode:viewMode,
-    before,
-    after:captureLayoutHistoryState(
-      fam,
-      viewMode
-    )
+    type:'card-layout', familyId:fam.id,
+    before, after:captureLayoutHistoryState(fam)
   });
-
   requestAnimationFrame(() => genealogyViewport.fit());
 };
 
@@ -14037,8 +13607,8 @@ $('createFamilyButton').onclick = async () => {
   const fam = {
     id:uid('fam'), name:name.trim()||'新家族',
     memberIds:[], bio:'', coverImage:null,
-    freeLayout: { view: false, edit: false },
-    manualPositions: { view: {}, edit: {} }, locked: false
+    freeLayout:false,
+    manualPositions:{}, locked: false
   };
   const mutation =
     genealogyStore.createFamily(
@@ -19218,13 +18788,13 @@ petCardsLayer?.addEventListener('pointerdown', event => {
   const groupDrag = !!(canDrag && genealogyScene.isFreeLayoutActive(fam) &&
     arrangeTool === 'select' && selectedPetIds.has(entry.key) &&
     selectedPetIds.size + selectedNodeIds.size > 1);
-  const groupPets = groupDrag ? getSelectedPetDragPositions(fam,mode) : new Map();
+  const groupPets = groupDrag ? getSelectedPetDragPositions(fam) : new Map();
   const groupSims = new Map();
   if (groupDrag) selectedNodeIds.forEach(id => {
-    const pos = fam.manualPositions[mode]?.[id] || getSceneLayout()?.pos?.get(id);
+    const pos = fam.manualPositions?.[id] || getSceneLayout()?.pos?.get(id);
     if (pos) groupSims.set(id,{x:pos.x,y:pos.y});
   });
-  const before = canDrag ? captureLayoutHistoryState(fam,mode) : null;
+  const before = canDrag ? captureLayoutHistoryState(fam) : null;
   const isTouch = event.pointerType === 'touch';
   if (isTouch) {
     activePetTouchDragPointerId = event.pointerId;
@@ -19342,15 +18912,15 @@ petCardsLayer?.addEventListener('pointerdown', event => {
     // 阻止 pointerup 之後瀏覽器合成的 click 重新開啟視窗。
     lastPetPointerActivation = {id:entry.key,time:performance.now()};
     if (moved && (groupDrag ? previewGroupPositions : previewPosition) && !cancelled) {
-      const seed = fam.freeLayout[mode] ? null : seedVisibleScenePositionsForFreeLayout(fam,mode);
+      const seed = fam.freeLayout ? null : seedVisibleScenePositionsForFreeLayout(fam);
       const change = groupDrag
-        ? genealogyStore.setNodePositions(fam.id,mode,previewGroupPositions)
-        : genealogyStore.setNodePosition(fam.id,mode,'pet:'+entry.key,previewPosition);
+        ? genealogyStore.setNodePositions(fam.id,previewGroupPositions)
+        : genealogyStore.setNodePosition(fam.id,'pet:'+entry.key,previewPosition);
       // 讓排版重算排到下一幀，避免 pointerup 同步重建整張族譜。
       applyGenealogyMutation(genealogyStore.mergeResults(seed,change),{immediateRender:false});
       syncLayoutModeControls();
-      dragHistory.push({type:'card-layout',familyId:fam.id,mode,
-        before,after:captureLayoutHistoryState(fam,mode)});
+      dragHistory.push({type:'card-layout',familyId:fam.id,
+        before,after:captureLayoutHistoryState(fam)});
     } else {
       if (moved && groupDrag) {
         groupSims.forEach((start,id) => {
