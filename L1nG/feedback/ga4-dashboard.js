@@ -172,7 +172,7 @@
     root.replaceChildren();
     const points=(series||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     if(!points.length){empty(id,'目前沒有每日訪客資料。');return;}
-    const max=Math.max(1,...points.map(item=>Number(item.value)||0));
+    const max=Math.max(1,...points.filter(item=>item.value!==null).map(item=>Number(item.value)||0));
     const width=760,height=224,left=35,right=741,top=16,bottom=184;
     const svg=svgElement('svg',{
       viewBox:'0 0 '+width+' '+height,role:'group',tabindex:0,
@@ -190,12 +190,21 @@
     }
     const coords=points.map((p,i)=>({
       x:points.length===1?(left+right)/2:left+(right-left)*i/(points.length-1),
-      y:bottom-(bottom-top)*(Number(p.value)||0)/max
+      y:p.value===null?null:bottom-(bottom-top)*(Number(p.value)||0)/max
     }));
-    const path=coords.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');
-    svg.append(svgElement('path',{d:path+' L'+coords[coords.length-1].x+' '+bottom+' L'+coords[0].x+' '+bottom+' Z',fill:'var(--primary)','fill-opacity':'.10'}));
-    svg.append(svgElement('path',{d:path,fill:'none',stroke:'var(--primary)','stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
-    if(points.length<=31)coords.forEach(p=>svg.append(svgElement('circle',{
+    // 未回傳日期不補零，並讓線段在缺漏處中斷，避免誤導為流量下跌。
+    const segments=[];let segment=[];
+    for(const point of coords){
+      if(point.y===null){if(segment.length)segments.push(segment);segment=[];}
+      else segment.push(point);
+    }
+    if(segment.length)segments.push(segment);
+    for(const run of segments){
+      const path=run.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');
+      if(run.length>1)svg.append(svgElement('path',{d:path+' L'+run[run.length-1].x+' '+bottom+' L'+run[0].x+' '+bottom+' Z',fill:'var(--primary)','fill-opacity':'.10'}));
+      svg.append(svgElement('path',{d:path,fill:'none',stroke:'var(--primary)','stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    }
+    if(points.length<=31)coords.filter(p=>p.y!==null).forEach(p=>svg.append(svgElement('circle',{
       cx:p.x,cy:p.y,r:2.5,fill:'var(--primary)','fill-opacity':'.7','pointer-events':'none'
     })));
     const guide=svgElement('line',{x1:0,x2:0,y1:top,y2:bottom,stroke:'var(--primary)',
@@ -238,18 +247,19 @@
       selectedIndex=index;
       const point=coords[index],record=points[index],date=formatDate(record.date),value=number(record.value);
       guide.setAttribute('x1',point.x);guide.setAttribute('x2',point.x);
-      marker.setAttribute('cx',point.x);marker.setAttribute('cy',point.y);
-      guide.style.display='';marker.style.display='';
+      marker.setAttribute('cx',point.x);marker.setAttribute('cy',point.y===null?bottom:point.y);
+      guide.style.display='';marker.style.display=missing?'none':'';
       detailDate.textContent=date;
-      detailValue.textContent='活躍使用者 '+value;
+      const missing=record.value===null;
+      detailValue.textContent=missing?'未取得資料':'活躍使用者 '+value;
       tooltipDate.textContent=date;
-      tooltipValue.textContent='活躍使用者 · '+value;
-      svg.setAttribute('aria-label',date+'，活躍使用者 '+value+'。使用左右方向鍵切換日期');
+      tooltipValue.textContent=missing?'未取得資料':'活躍使用者 · '+value;
+      svg.setAttribute('aria-label',date+'，'+(missing?'尚未取得 GA4 資料':'活躍使用者 '+value)+'。使用左右方向鍵切換日期');
       tooltip.hidden=mobile.matches||!withTooltip;
       if(!tooltip.hidden){
         const svgRect=svg.getBoundingClientRect(),rootRect=root.getBoundingClientRect();
         const px=svgRect.left-rootRect.left+point.x/width*svgRect.width;
-        const py=svgRect.top-rootRect.top+point.y/height*svgRect.height;
+        const py=svgRect.top-rootRect.top+(point.y===null?bottom:point.y)/height*svgRect.height;
         const tw=tooltip.offsetWidth,th=tooltip.offsetHeight;
         tooltip.style.left=Math.max(6,Math.min(px-tw/2,rootRect.width-tw-6))+'px';
         tooltip.style.top=(py-th-10>=0?py-th-10:py+11)+'px';
@@ -349,7 +359,7 @@
     for(const [id,n] of Object.entries({'ga-users':s.activeUsers,'ga-views':s.views,'ga-downloads':s.downloads,'ga-new':s.newUsers}))
       setText(id,number(n));
     setText('chart-description',data.range.startDate+' 至 '+data.range.endDate+' · 活躍使用者');
-    trend('ga-trend-chart',data.trend);
+    trend('ga-trend-chart',window.L1nGAdminTime.normalizeDailyTrend(data.range,data.trend));
     list('ga-pages',data.pages,x=>labelPage(x));
     list('ga-countries',data.countries,x=>labelCountry(x.name));
     list('ga-feedback-events',data.feedbackEvents,x=>labelSite(x.host)+' · '+(feedbackNames[x.event]||'未知互動'));
@@ -363,7 +373,7 @@
     setText('ov-users',number(s.activeUsers));
     setText('ov-views',number(s.views));
     setText('ov-downloads',number(s.downloads));
-    trend('overview-chart',data.trend);
+    trend('overview-chart',window.L1nGAdminTime.normalizeDailyTrend(data.range,data.trend));
   }
   function resetDetails(message) {
     for(const id of ['ga-users','ga-views','ga-downloads','ga-new'])setText(id,'—');
