@@ -148,3 +148,12 @@ test('GA4 chart distinguishes missing days and separates line segments',()=>{
   assert.match(ga4,/detailValue\.textContent=missing\?'未取得資料'/);
   assert.doesNotMatch(ga4,/data\.trend\s*\.map\([^)]*\|\|0/);
 });
+
+test('GA4 chart selection does not reference missing before initialization',()=>{
+  const code=fs.readFileSync(new URL('ga4-dashboard.js',folder),'utf8');
+  const show=code.match(/function show\(index,withTooltip=false\) \{([\s\S]*?)\n    \}\n    function hideFloating/);
+  assert.ok(show,'Chart selection handler exists');
+  const body=show[1];
+  assert.ok(body.indexOf('const missing=record.value===null;')>=0);
+  assert.ok(body.indexOf('const missing=record.value===null;')<body.indexOf("marker.style.display=missing"));
+});
