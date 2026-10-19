@@ -7,7 +7,7 @@
         <title>問題反饋 · RealDate · L1nG</title>
         <link rel="stylesheet" href="realdate.css?v=20261013-mobile-nav-unified-r4"/>
         <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"/>
-        <script src="realdate.js?v=20261012-nav-center-floating-r1" defer></script>
+        <script src="realdate.js?v=20261020-unified-titles-r1" defer></script>
         <link rel="stylesheet" href="../feedback/feedback.css?v=20261016-feedback-layout-r4"/>
         <link rel="stylesheet" href="../feedback/feedback-loading.css"/>
         <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
@@ -117,7 +117,7 @@
                             <div class="mock-more-menu hide" id="mock-more-menu" role="menu">
                                 <span class="more-head">更多功能</span>
                                 <button data-open-form="" role="menuitem" type="button">
-                                    <svg class="i sm"><use href="#ico-msg"></use></svg>意見回饋 <svg class="i sm more-arrow"><use href="#ico-arrow"></use></svg>
+                                    <svg class="i sm"><use href="#ico-msg"></use></svg>問題反饋 <svg class="i sm more-arrow"><use href="#ico-arrow"></use></svg>
                                 </button>
                                 <button data-open-thread="" role="menuitem" type="button">
                                     <svg class="i sm"><use href="#ico-lock"></use></svg>查看我的回饋 <svg class="i sm more-arrow"><use href="#ico-arrow"></use></svg>
@@ -131,10 +131,10 @@
                 </div>
                 <section class="hero">
                     <div class="hero-copy">
-                        <span class="eyebrow">L1nG / GENEALOGY</span><h1>你的族譜，<br/><span class="light">你的故事。</span></h1><p>建立模擬市民的家族連結，保留每段關係與回憶。這是族譜工具的頁面。意見回饋會放在頂條「更多」選單中，不會新增干擾畫布的浮動按鈕。</p>
+                        <span class="eyebrow">L1nG / GENEALOGY</span><h1>你的族譜，<br/><span class="light">你的故事。</span></h1><p>建立模擬市民的家族連結，保留每段關係與回憶。這是族譜工具的頁面。問題反饋會放在頂條「更多」選單中，不會新增干擾畫布的浮動按鈕。</p>
                         <div class="hero-actions">
                             <button class="primary" data-open-form="" type="button">
-                                <svg class="i sm"><use href="#ico-msg"></use></svg>查看意見回饋視窗 <svg class="i sm"><use href="#ico-arrow"></use></svg>
+                                <svg class="i sm"><use href="#ico-msg"></use></svg>查看問題反饋視窗 <svg class="i sm"><use href="#ico-arrow"></use></svg>
                             </button>
                             <button class="secondary" id="visitor-go-admin" type="button">查看管理中心</button>
                         </div>
@@ -196,7 +196,7 @@
                 </div>
             </div>
         </main>
-        <section aria-label="RealDate 意見回饋獨立頁面" class="realdate-preview" id="realdate-preview">
+        <section aria-label="RealDate 問題反饋獨立頁面" class="realdate-preview" id="realdate-preview">
             <div class="rd-v1-hero">
                 <div class="rd-v1-hero-copy reveal">
                     <span class="eyebrow">FEEDBACK</span><h1>問題反饋</h1><p>你的想法，讓RealDate變得更好。</p>
@@ -227,7 +227,7 @@
                             <div id="form-main" style="display:flex;flex-direction:column;min-height:0;overflow:hidden">
                                 <div class="modal-top">
                                     <div>
-                                        <span class="eyebrow">FEEDBACK</span><h2 id="form-title">意見回饋</h2><p id="form-subtitle">匿名提交，不需要登入。</p>
+                                        <span class="eyebrow">FEEDBACK</span><h2 id="form-title">問題反饋</h2><p id="form-subtitle">匿名提交，不需要登入。</p>
                                     </div>
                                     <div class="modal-head-actions">
                                         <button class="text-action" id="form-open-thread" type="button">我的回饋</button>
@@ -511,7 +511,7 @@
                         <svg class="i"><use href="#ico-chart"></use></svg>網站分析 <span class="count">GA4</span>
                     </button>
                     <button class="side-item dash-side" data-adminpage="feedback" type="button">
-                        <svg class="i"><use href="#ico-inbox"></use></svg>意見回饋 <span class="count" id="nav-count-all">9</span>
+                        <svg class="i"><use href="#ico-inbox"></use></svg>問題反饋 <span class="count" id="nav-count-all">9</span>
                     </button>
                     <button class="side-item dash-side" data-adminpage="settings" type="button">
                         <svg class="i"><use href="#ico-shield"></use></svg>設定</button>
@@ -532,13 +532,13 @@
                 <nav aria-label="管理功能切換" class="admin-mobile-nav">
                     <button class="active" data-adminpage="overview" type="button">總覽</button>
                     <button data-adminpage="analytics" type="button">網站分析</button>
-                    <button data-adminpage="feedback" type="button">意見回饋</button>
+                    <button data-adminpage="feedback" type="button">問題反饋</button>
                     <button data-adminpage="settings" type="button">設定</button>
                 </nav>
                 <div class="panel-view" hidden="" id="panel-feedback">
                     <div class="admin-head">
                         <div>
-                            <span class="eyebrow">FEEDBACK / INBOX</span><h1>意見回饋</h1><p>查看問題、追蹤匿名對話，直接在此回覆玩家。</p>
+                            <span class="eyebrow">FEEDBACK / INBOX</span><h1>問題反饋</h1><p>查看問題、追蹤匿名對話，直接在此回覆玩家。</p>
                         </div>
                         <div class="admin-head-actions">
                             <button class="secondary" id="reset-demo" type="button">
@@ -625,7 +625,7 @@
                             <span class="topline">頁面瀏覽量 <svg class="i sm"><use href="#ico-grid"></use></svg></span><strong class="num" id="ov-views">—</strong><span class="stat-footer">GA4 · 近 30 天</span>
                         </button>
                         <button class="stat-card" data-jump="feedback" type="button">
-                            <span class="topline">尚未處理 <svg class="i sm"><use href="#ico-clock"></use></svg></span><strong class="num" id="ov-pending">—</strong><span class="stat-footer">問題回饋 · 全部網站</span>
+                            <span class="topline">尚未處理 <svg class="i sm"><use href="#ico-clock"></use></svg></span><strong class="num" id="ov-pending">—</strong><span class="stat-footer">問題反饋 · 全部網站</span>
                         </button>
                         <button class="stat-card" data-jump="analytics" type="button">
                             <span class="topline">下載點擊 <svg class="i sm"><use href="#ico-arrow"></use></svg></span><strong class="num" id="ov-downloads">—</strong><span class="stat-footer">GA4 事件 · 近 30 天</span>
