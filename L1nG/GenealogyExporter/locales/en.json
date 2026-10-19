@@ -1450,9 +1450,9 @@
     "資料將從所有家族及相關關係中移除。": "The records will be removed from every family and related relationship.",
     "重做上一步可復原的操作": "Redo the previous undoable action",
     "復原": "to undo",
-    "復原上一筆操作，包括移動卡片、修改關係名稱，以及新增、編輯或刪除市民 / 寵物。": "Undo the previous action, including moving cards, editing relationship labels, and adding, editing, or deleting Sims / pets.",
     "刪除畫布上選取的市民 / 寵物": "Delete selected Sims / pets on the canvas",
     "已刪除選取的市民 / 寵物，可使用 Ctrl + Z 復原。": "Selected Sims / pets deleted. Press Ctrl + Z to undo.",
-    "要重設這個家族的卡片位置嗎？所有手動調整的位置將被清除，卡片會重新自動排列。": "Reset this family's card positions? All manually adjusted positions will be cleared, and the cards will be arranged automatically again."
+    "要重設這個家族的卡片位置嗎？所有手動調整的位置將被清除，卡片會重新自動排列。": "Reset this family's card positions? All manually adjusted positions will be cleared, and the cards will be arranged automatically again.",
+    "復原上一筆操作，包括移動卡片、修改關係名稱，以及新增、編輯或刪除市民 / 寵物": "Undo the previous action, including moving cards, editing relationship labels, and adding, editing, or deleting Sims / pets"
   }
 }
