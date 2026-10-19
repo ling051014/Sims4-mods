@@ -380,6 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (more?.getAttribute('aria-expanded') === 'true') more.click();
     backdrop.classList.add('show');
     backdrop.setAttribute('aria-hidden', 'false');
+    window.L1nGGenealogyFocus?.enter(backdrop, null, lastFocus);
     setTab(0);
     panel.focus({ preventScroll: true });
     requestAnimationFrame(() => { if (backdrop.classList.contains('show')) ensureVerification(); });
@@ -392,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backdrop.setAttribute('aria-hidden', 'true');
     setTab(0);
     error.hidden = true;
-    if (lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
+    window.L1nGGenealogyFocus?.leave(backdrop);
     lastFocus = null;
   }
 
@@ -760,9 +761,11 @@ document.addEventListener('DOMContentLoaded', () => {
   backdrop.addEventListener('pointerdown', event => {
     if (event.target === backdrop) closeFeedback();
   });
+  window.L1nGGenealogyFocus?.register(backdrop, closeFeedback);
   backdrop.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
       event.preventDefault();
+      event.stopPropagation();
       closeFeedback();
       return;
     }
