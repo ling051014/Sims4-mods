@@ -61,6 +61,7 @@ let genealogyStore = null;
 let genealogyScene = null;
 
 // ========【族譜卡片顯示】 檢視 / 編輯模式各自保存顯示內容；檢視卡另有外觀設定 ========
+const LIFE_PHOTOS_PUBLIC = document.body?.dataset.lifePhotos !== 'hidden';
 const CARD_CONTENT_FIELD_KEYS = ['name','gender','lifeStage','age','birthday','status','race','career','residence','aspiration','traits','pets','gallery'];
 const CARD_SETTING_FIELD_KEYS = [...CARD_CONTENT_FIELD_KEYS];
 const PET_CARD_FIELD_KEYS = ['name','species','breed','gender','ageStage','status','traits','owners'];
