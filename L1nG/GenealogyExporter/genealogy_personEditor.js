@@ -1017,6 +1017,8 @@ function buildPersonEditorDraft({
 
       input.addEventListener('keydown',event=>{
         if(event.key!=='Escape')return;
+        event.preventDefault();
+        event.stopPropagation();
 
         const control=input.closest('[data-family-label-identity]');
         const editor=control?.querySelector('.family-rel-label-inline-editor');
