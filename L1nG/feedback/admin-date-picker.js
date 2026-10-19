@@ -1,85 +1,148 @@
-/* 管理中心專用日期選擇器：使用站內樣式，取代不可客製的原生月曆。 */
+/* 管理中心日期範圍：雙月桌面、單月手機；點選起點後懸停預覽，完成後才提交。 */
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
-const pop=$('admin-date-popover');if(!pop)return;
-const controls=[...document.querySelectorAll('[data-date-target]')];
+const pop=$('admin-date-popover'), trigger=$('admin-date-range-trigger');
+const custom=document.querySelector('[data-range="custom"]');
+const from=$('date-from'),to=$('date-to'),apply=$('apply-date');
+if(!pop||!trigger||!from||!to||!apply)return;
+const today=()=>window.L1nGAdminTime?.today?.()||new Date().toLocaleDateString('en-CA');
 const iso=(y,m,d)=>[y,String(m+1).padStart(2,'0'),String(d).padStart(2,'0')].join('-');
-const parse=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'')?new Date(Number(s.slice(0,4)),Number(s.slice(5,7))-1,Number(s.slice(8,10))):null;
-let active=null,year=0,month=0;
-function display(input){
- const button=controls.find(x=>x.dataset.dateTarget===input.id);
- if(!button)return;
- const value=input.value;
- button.querySelector('.admin-date-value').textContent=value?value.replace(/-/g,' / '):'選擇日期';
- button.setAttribute('aria-label',(input.id==='date-from'?'開始日期':'結束日期')+'：'+(value||'尚未選擇'));
+const parse=value=>/^\d{4}-\d{2}-\d{2}$/.test(value||'')?new Date(Number(value.slice(0,4)),Number(value.slice(5,7))-1,Number(value.slice(8,10))):null;
+const monthAt=(y,m)=>new Date(y,m,1);
+const format=value=>value?value.replace(/-/g,'/'): '—';
+const spanDays=(a,b)=>Math.round(Math.abs(Date.parse(b+'T00:00:00Z')-Date.parse(a+'T00:00:00Z'))/86400000);
+const mobile=()=>matchMedia('(max-width:700px)').matches;
+let anchor=monthAt(new Date().getFullYear(),new Date().getMonth()),open=false,source=null;
+let start='',end='',hover='',selectingEnd=false;
+function summary(){
+ const text=from.value&&to.value?format(from.value)+' – '+format(to.value):'選擇日期範圍';
+ trigger.querySelector('.admin-date-value').textContent=text;
+ trigger.setAttribute('aria-label','日期範圍：'+text);
 }
-function close(restore=false){
- if(pop.hidden)return;
- pop.hidden=true;
- controls.forEach(x=>x.setAttribute('aria-expanded','false'));
- if(restore)active?.focus({preventScroll:true});
- active=null;
+function status(text){
+ $('admin-date-hint').textContent=text;
+ $('admin-date-summary').textContent=start?(format(start)+(end?' – '+format(end):hover?' – '+format(hover):' – …')):'尚未選擇';
+ apply.disabled=!(start&&end&&!selectingEnd);
+}
+function styleDays(){
+ const preview=selectingEnd&&hover?hover:end;
+ const lower=start&&preview?(start<preview?start:preview):start;
+ const upper=start&&preview?(start>preview?start:preview):start;
+ for(const day of pop.querySelectorAll('.admin-date-day')){
+  const value=day.dataset.date;
+  day.classList.toggle('range-middle',Boolean(lower&&upper&&value>lower&&value<upper));
+  day.classList.toggle('range-start',Boolean(start&&value===start));
+  day.classList.toggle('range-end',Boolean(preview&&value===preview));
+  day.classList.toggle('range-preview',Boolean(selectingEnd&&hover&&value>=lower&&value<=upper));
+  day.classList.toggle('range-selected',Boolean(!selectingEnd&&start&&end&&value>=lower&&value<=upper));
+  day.setAttribute('aria-pressed',String(Boolean(value===start||(!selectingEnd&&value===end))));
+ }
+ $('admin-date-summary').textContent=start?(format(start)+(end?' – '+format(end):hover?' – '+format(hover):' – …')):'尚未選擇';
 }
 function pick(value){
- const input=$(active.dataset.dateTarget);
- input.value=value;
- input.dispatchEvent(new Event('input',{bubbles:true}));
- input.dispatchEvent(new Event('change',{bubbles:true}));
- display(input);
- close(true);
+ if(!selectingEnd||!start){
+  start=value;end='';hover='';selectingEnd=true;
+  status('已選擇開始日期，請選擇結束日期（最多 366 天）');
+ }else{
+  if(spanDays(start,value)>365){
+   status('日期區間最多 366 天，請選擇更近的日期');return;
+  }
+  const first=start<value?start:value,last=start<value?value:start;
+  start=first;end=last;hover='';selectingEnd=false;
+  status('已選擇完整區間，按「套用日期」開始查詢');
+ }
+ styleDays();
 }
 function render(){
- const input=$(active.dataset.dateTarget);
- const selected=input.value;
- const max=input.max||'9999-12-31';
- $('admin-date-month').textContent=year+' 年 '+(month+1)+' 月';
- const grid=$('admin-date-days');grid.replaceChildren();
- const first=new Date(year,month,1).getDay();
- const count=new Date(year,month+1,0).getDate();
- for(let n=0;n<first;n++){const gap=document.createElement('span');gap.className='admin-date-blank';grid.append(gap);}
- const today=window.L1nGAdminTime?.today?.()||'';
- for(let day=1;day<=count;day++){
-  const value=iso(year,month,day),button=document.createElement('button');
-  button.type='button';button.className='admin-date-day';button.textContent=String(day);
-  button.setAttribute('aria-label',value);
-  button.disabled=value>max||(input.min&&value<input.min);
-  if(value===selected){button.classList.add('selected');button.setAttribute('aria-selected','true');}
-  if(value===today)button.classList.add('is-today');
-  button.addEventListener('click',()=>pick(value));
-  grid.append(button);
+ const cols=mobile()?1:2,limit=today();
+ const months=$('admin-date-months');months.replaceChildren();
+ for(let i=0;i<cols;i++){
+  const m=monthAt(anchor.getFullYear(),anchor.getMonth()+i);
+  const y=m.getFullYear(),mo=m.getMonth();
+  const month=document.createElement('section');
+  month.className='admin-calendar-month';
+  const label=document.createElement('h3');label.textContent=y+' 年 '+(mo+1)+' 月';
+  month.append(label);
+  const weekdays=document.createElement('div');weekdays.className='admin-date-weekdays';
+  for(const wd of ['日','一','二','三','四','五','六']){
+   const el=document.createElement('span');el.textContent=wd;weekdays.append(el);
+  }
+  month.append(weekdays);
+  const days=document.createElement('div');days.className='admin-date-days';
+  days.setAttribute('role','group');days.setAttribute('aria-label',label.textContent);
+  const shift=new Date(y,mo,1).getDay(),last=new Date(y,mo+1,0).getDate();
+  for(let d=0;d<shift;d++){const el=document.createElement('span');el.className='admin-date-blank';days.append(el);}
+  for(let d=1;d<=last;d++){
+   const value=iso(y,mo,d),button=document.createElement('button');
+   button.type='button';button.className='admin-date-day';button.dataset.date=value;
+   button.textContent=d;button.setAttribute('aria-label',value);
+   button.disabled=value>limit;
+   if(value===limit)button.classList.add('is-today');
+   button.addEventListener('click',()=>pick(value));
+   button.addEventListener('pointerenter',event=>{
+    if(event.pointerType!=='touch'&&selectingEnd&&value<=limit){hover=value;styleDays();}
+   });
+   button.addEventListener('focus',()=>{if(selectingEnd){hover=value;styleDays();}});
+   days.append(button);
+  }
+  days.addEventListener('pointerleave',event=>{
+   if(event.pointerType!=='touch'&&selectingEnd){hover='';styleDays();}
+  });
+  month.append(days);months.append(month);
  }
- const next=pop.querySelector('[data-calendar-step="1"]');
- next.disabled=iso(year,month,1)>max.slice(0,7)+'-01'||(year>=Number(max.slice(0,4))&&month>=Number(max.slice(5,7))-1);
- $('admin-date-today').disabled=today>max;
+ const first=anchor, last=monthAt(anchor.getFullYear(),anchor.getMonth()+cols-1);
+ $('admin-date-month').textContent=first.getFullYear()+' 年 '+(first.getMonth()+1)+' 月'+
+  (cols===2?' – '+last.getFullYear()+' 年 '+(last.getMonth()+1)+' 月':'');
+ pop.querySelector('[data-calendar-step="1"]').disabled=last>=monthAt(Number(limit.slice(0,4)),Number(limit.slice(5,7))-1);
+ styleDays();
 }
 function place(){
- if(!active||pop.hidden)return;
- const r=active.getBoundingClientRect(),w=pop.offsetWidth;
- const roomBelow=innerHeight-r.bottom,above=innerHeight-roomBelow-r.height;
- pop.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+'px';
- pop.style.top=roomBelow>=pop.offsetHeight+8||roomBelow>=above?r.bottom+6+'px':Math.max(8,r.top-pop.offsetHeight-6)+'px';
+ if(!open||pop.hidden||!source)return;
+ const r=source.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
+ const left=Math.max(8,Math.min(r.left,innerWidth-w-8));
+ const below=innerHeight-r.bottom,above=r.top;
+ pop.style.left=left+'px';
+ pop.style.top=(below>=h+8||below>=above?r.bottom+7:Math.max(8,r.top-h-7))+'px';
+ pop.style.maxHeight='calc(100dvh - 16px)';
 }
-controls.forEach(button=>button.addEventListener('click',()=>{
- if(active===button&&!pop.hidden){close(true);return;}
- active=button;
- const date=parse($(button.dataset.dateTarget).value)||parse(window.L1nGAdminTime?.today?.())||new Date();
- year=date.getFullYear();month=date.getMonth();
- pop.hidden=false;controls.forEach(x=>x.setAttribute('aria-expanded',String(x===button)));
+function close(restore=false){
+ if(!open)return;
+ open=false;pop.hidden=true;trigger.setAttribute('aria-expanded','false');
+ if(restore)source?.focus({preventScroll:true});
+ source=null;
+}
+function show(sourceButton=trigger){
+ if(open){close();return;}
+ source=sourceButton;open=true;start=from.value||'';end=to.value||'';
+ hover='';selectingEnd=false;
+ const date=parse(end||today())||new Date();
+ anchor=monthAt(date.getFullYear(),date.getMonth()-(mobile()?0:1));
+ pop.hidden=false;trigger.setAttribute('aria-expanded','true');
+ status('先點選開始日期，再點選結束日期；滑鼠移動可預覽區間');
+ render();place();
+}
+trigger.addEventListener('click',()=>show(trigger));
+custom?.addEventListener('click',()=>queueMicrotask(()=>{
+ if(!$('custom-date-row').hidden&&!open)show(trigger);
+}));
+pop.querySelectorAll('[data-calendar-step]').forEach(btn=>btn.addEventListener('click',()=>{
+ anchor=monthAt(anchor.getFullYear(),anchor.getMonth()+Number(btn.dataset.calendarStep));
  render();place();
 }));
-pop.querySelectorAll('[data-calendar-step]').forEach(button=>button.addEventListener('click',()=>{
- const target=new Date(year,month+Number(button.dataset.calendarStep),1);
- year=target.getFullYear();month=target.getMonth();render();place();
-}));
-$('admin-date-today').addEventListener('click',()=>{if(active)pick(window.L1nGAdminTime.today());});
-$('admin-date-close').addEventListener('click',()=>close(true));
-document.addEventListener('pointerdown',event=>{if(active&&!pop.contains(event.target)&&!controls.includes(event.target)&&!controls.some(x=>x.contains(event.target)))close();});
-document.addEventListener('keydown',event=>{
- if(!active||pop.hidden)return;
- if(event.key==='Escape'){event.preventDefault();close(true);}
+apply.addEventListener('click',()=>{
+ if(!open||!start||!end||selectingEnd)return;
+ from.value=start;to.value=end;
+ for(const input of [from,to])input.dispatchEvent(new Event('change',{bubbles:true}));
+ summary();close(false);
 });
-window.addEventListener('resize',place);
+$('admin-date-close').addEventListener('click',()=>close(true));
+document.addEventListener('pointerdown',event=>{
+ if(open&&!pop.contains(event.target)&&!trigger.contains(event.target)&&!custom?.contains(event.target))close();
+});
+document.addEventListener('keydown',event=>{if(open&&event.key==='Escape'){event.preventDefault();close(true);}});
+window.addEventListener('resize',()=>{if(open){render();place();}});
 document.addEventListener('scroll',place,{capture:true,passive:true});
-for(const id of ['date-from','date-to']){const input=$(id);if(input){input.addEventListener('change',()=>display(input));display(input);}}
-window.L1nGAdminDatePicker={refresh:()=>{for(const id of ['date-from','date-to']){const input=$(id);if(input)display(input);}}};
+for(const input of [from,to])input.addEventListener('change',summary);
+window.L1nGAdminDatePicker={refresh:summary,close:()=>close(false)};
+summary();
 })();
