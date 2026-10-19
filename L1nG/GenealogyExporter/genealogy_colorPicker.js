@@ -1,7 +1,7 @@
 /* ========【浮動調色板】 設定 - HEX／RGB／HSL 同步與圖片吸色 ======== */
 (() => {
   'use strict';
-  const ids = ['customColor1','customColor2','customColor3','relationshipEditorColor'];
+  const ids = ['customThemePrimaryColorInput','customThemeSecondaryColorInput','customColor3','relationshipEditorColor'];
   const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
   const validHex = value => /^#[\da-f]{6}$/i.test(String(value));
   const rgbFromHex = hex => [1,3,5].map(i => parseInt(hex.slice(i,i+2),16));

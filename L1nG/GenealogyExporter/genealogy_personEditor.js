@@ -194,7 +194,7 @@
     }
 
     const clear =
-      $('avatarClearBtn');
+      $('simAvatarRemoveButton');
 
     if (clear) {
       clear.disabled =
@@ -205,7 +205,7 @@
 
   function resetPersonEditorDraftState() {
     // 媒體分頁的寵物操作與家庭關係一致，每次重開模擬市民編輯器均回到檢視模式。
-    $('petSection')?.classList.remove('is-editing');
+    $('simEditorPetsSection')?.classList.remove('is-editing');
     simEditorState.simId = null;
     simEditorState.avatar = null;
     simEditorState.avatarFrame = {
@@ -270,7 +270,7 @@
 function renderPersonEditorAvatarPreview(){
     syncPersonEditorAvatarControls();
 
-    const element=$('avatarPreview');
+    const element=$('simAvatarPreview');
     const avatar=framedAvatarImageHTML(simEditorState.avatar,simEditorState.avatarFrame);
 
     if(avatar){
@@ -283,7 +283,7 @@ function renderPersonEditorAvatarPreview(){
 
   function syncPersonEditorCauseOfDeathVisibility() {
   const st = $('simStatusSelect').value;
-  const label = $('causeOfDeathLabel');
+  const label = $('simCauseOfDeathField');
   if (st === '已故' || st === '幽靈') label.style.display = '';
   else label.style.display = 'none';
 }
@@ -2252,7 +2252,7 @@ function buildPersonEditorDraft({
         ? currentGenealogyData().sims[id]
         : null;
 
-    $('modalTitle').textContent=
+    $('simEditorTitle').textContent=
       sim
         ? uiText('編輯模擬市民')
         : uiText('新增模擬市民');
@@ -3796,7 +3796,7 @@ function commitPersonEditorDraft() {
         personEditorRelationshipOptionProvider
       );
 
-    $('avatarInput').onchange=async event=>{
+    $('simAvatarFileInput').onchange=async event=>{
       const file=event.target.files[0];
       if(!file)return;
 
@@ -3863,7 +3863,7 @@ function commitPersonEditorDraft() {
       renderPersonEditorInfoPreviewIfActive();
     };
 
-    $('avatarClearBtn').onclick=()=>{
+    $('simAvatarRemoveButton').onclick=()=>{
       if(
         simEditorState.avatarSource!=='custom' ||
         !simEditorState.customAvatar

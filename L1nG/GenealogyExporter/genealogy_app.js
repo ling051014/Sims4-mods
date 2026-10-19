@@ -859,9 +859,9 @@ function refreshResolvedAssetDom(
         'has-image'
       );
 
-      if (element.id === 'photoPreview') {
-        $('photoClearBtn').disabled = false;
-        $('lifePhotoEditorSaveButton').disabled = false;
+      if (element.id === 'simPhotoEditorPreview') {
+        $('simPhotoRemoveImageButton').disabled = false;
+        $('simPhotoEditorSaveButton').disabled = false;
       }
     });
 }
@@ -1141,7 +1141,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
         ? 'tombstone'
         : 'heart';
 
-  const statusClass =
+  const simStatusPresentationClass =
     statusValue === '幽靈'
       ? 'ghost'
       : statusValue === '已故'
@@ -1197,7 +1197,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
       value:statusValue,
       text:uiText(statusValue),
       icon:statusIcon,
-      className:statusClass
+      className:simStatusPresentationClass
     },
     race:racePreset
       ? {
@@ -1227,7 +1227,7 @@ function buildPersonPresentation(sim, { draft = false } = {}) {
 // ========【預設資料】 基準語言：繁體中文（zh-Hant） ========
 // 簡體中文與英文僅作顯示翻譯；預設資料的 canonical source 永遠保留繁體中文。
 // ========【預設族譜載入】 載入單一資料包並套用現行卡片顯示預設設定 ========
-function buildSample() {
+function buildDefaultGenealogyData() {
   const source = window.L1nGGenealogySamplePack;
   if (!source || source.version !== 1 || !source.meta || !source.sims || !Array.isArray(source.families)) {
     throw new Error('預設族譜資料尚未載入。');
@@ -1269,7 +1269,7 @@ const exportDialog = $('exportDialog');
 const exportCloseBtn = $('exportCloseBtn');
 const exportImageBtn = $('exportImageBtn');
 const exportJsonBtn = $('exportJsonBtn');
-const familyNameInput = $('familyName'), familySelect = $('familySelect');
+const familyNameInput = $('familyNameInput'), familySelect = $('familySelect');
 const statusFilterInputs = [...document.querySelectorAll('input[name="statusFilter"]')];
 const genderFilterInputs = [...document.querySelectorAll('input[name="genderFilter"]')];
 const raceFilterInputs = [...document.querySelectorAll('input[name="raceFilter"]')];
@@ -1284,19 +1284,19 @@ const arrangeToolDivider = $('arrangeToolDivider');
 const arrangeToolDividerEnd = $('arrangeToolDividerEnd');
 const selectionMarquee = $('selectionMarquee');
 const personCardMenu = $('personCardContextMenu');
-const labelLockToggle = $('labelLockToggle');
+const relationshipLabelsLockToggle = $('relationshipLabelsLockToggle');
 const relationshipPerspectiveBtn = $('relationshipPerspectiveBtn');
-const sidebar = $('sidebar');
+const familySidebar = $('familySidebar');
 const sidebarResizer = $('sidebarResizer');
-const sidebarBackdrop = $('sidebarBackdrop');
-const menuToggle = $('menuToggle');
+const familySidebarBackdrop = $('familySidebarBackdrop');
+const familySidebarToggleButton = $('familySidebarToggleButton');
 const smartGuideVertical = $('smartGuideVertical');
 const smartGuideHorizontal = $('smartGuideHorizontal');
 const smartSpacingHorizontal = $('smartSpacingHorizontal');
 const smartSpacingVertical = $('smartSpacingVertical');
 const appearanceThemeGrid = $('appearanceThemeGrid');
-const customColor1 = $('customColor1');
-const customColor2 = $('customColor2');
+const customThemePrimaryColorInput = $('customThemePrimaryColorInput');
+const customThemeSecondaryColorInput = $('customThemeSecondaryColorInput');
 const customColor3 = $('customColor3');
 const appearanceCustomThemeEditor = $('appearanceCustomThemeEditor');
 const appearanceCustomThemePreview = $('appearanceCustomThemePreview');
@@ -2823,7 +2823,7 @@ function updateTopbarFilterUI() {
 }
 
 // ========【預設資料翻譯】 繁中為唯一基準；只翻譯內建範例既有值 ========
-const BUILTIN_SAMPLE_REFERENCE = buildSample();
+const BUILTIN_SAMPLE_REFERENCE = buildDefaultGenealogyData();
 const BUILTIN_SAMPLE_SIM_IDS = new Set(
   Object.keys(BUILTIN_SAMPLE_REFERENCE.sims)
 );
@@ -5530,9 +5530,9 @@ function setRelationshipPerspective(
 const genealogyChrome =
   window.L1nGGenealogyUI?.createChromeController?.({
     dom:{
-      sidebar,
-      sidebarBackdrop,
-      menuToggle,
+      familySidebar,
+      familySidebarBackdrop,
+      familySidebarToggleButton,
       sidebarResizer
     },
     constants:{
@@ -5662,14 +5662,14 @@ function save({
     });
 }
 
-function _flushSave() {
+function flushPendingGenealogySave() {
   return genealogySaveCoordinator
     .flush();
 }
 
 window.addEventListener(
   'beforeunload',
-  () => _flushSave()
+  () => flushPendingGenealogySave()
 );
 
 document.addEventListener(
@@ -5679,7 +5679,7 @@ document.addEventListener(
       document.visibilityState ===
       'hidden'
     ) {
-      _flushSave();
+      flushPendingGenealogySave();
     }
   }
 );
@@ -5923,8 +5923,8 @@ function paintThemeChoices() {
           customColors = currentThemeSeedColors();
         }
 
-        customColor1.value = customColors.c1;
-        customColor2.value = customColors.c2;
+        customThemePrimaryColorInput.value = customColors.c1;
+        customThemeSecondaryColorInput.value = customColors.c2;
         customColor3.value = customColors.c3;
         window.L1nGColorPicker?.sync?.();
         appearanceCustomThemeEditor.hidden = !appearanceCustomThemeEditor.hidden;
@@ -6061,17 +6061,17 @@ function paintCustomThemePreview() {
   if (!appearanceCustomThemePreview) return;
 
   appearanceCustomThemePreview.style.background =
-    'linear-gradient(120deg, ' + customColor1.value + ' 0%, ' + customColor2.value + ' 100%)';
+    'linear-gradient(120deg, ' + customThemePrimaryColorInput.value + ' 0%, ' + customThemeSecondaryColorInput.value + ' 100%)';
   appearanceCustomThemePreview.style.boxShadow =
     'inset 0 0 0 2px ' + formatHexRgba(customColor3.value,0.58);
 }
 
-[customColor1,customColor2,customColor3].forEach(input => {
+[customThemePrimaryColorInput,customThemeSecondaryColorInput,customColor3].forEach(input => {
   input?.addEventListener('input',paintCustomThemePreview);
 });
 
-$('applyCustomBtn').onclick = () => {
-  chooseCustomTheme(customColor1.value,customColor2.value,customColor3.value);
+$('applyCustomThemeColorsButton').onclick = () => {
+  chooseCustomTheme(customThemePrimaryColorInput.value,customThemeSecondaryColorInput.value,customColor3.value);
 };
 
 // ========【自由排列跨模式映射】 檢視 / 編輯共用同一份視覺構圖 ========
@@ -7380,10 +7380,10 @@ $('resetRelationshipStyleBtn')?.addEventListener('click',() => {
 });
 
 function syncRelationshipLabelLockControl() {
-  if (!labelLockToggle) return;
+  if (!relationshipLabelsLockToggle) return;
 
   setIconText(
-    labelLockToggle,
+    relationshipLabelsLockToggle,
     labelLocked
       ? 'unlock'
       : 'lock',
@@ -7392,7 +7392,7 @@ function syncRelationshipLabelLockControl() {
       : '鎖定關係'
   );
 
-  labelLockToggle.classList.toggle(
+  relationshipLabelsLockToggle.classList.toggle(
     'active',
     labelLocked
   );
@@ -7433,11 +7433,11 @@ function setRelationshipLabelLock(locked) {
   } catch (_) {}
 }
 function syncRelationshipToolbarVisibility() {
-  if (!labelLockToggle) return;
-  labelLockToggle.hidden = !showRelLabels;
-  labelLockToggle.style.display = showRelLabels ? '' : 'none';
+  if (!relationshipLabelsLockToggle) return;
+  relationshipLabelsLockToggle.hidden = !showRelLabels;
+  relationshipLabelsLockToggle.style.display = showRelLabels ? '' : 'none';
 }
-labelLockToggle.onclick = () => setRelationshipLabelLock(!labelLocked);
+relationshipLabelsLockToggle.onclick = () => setRelationshipLabelLock(!labelLocked);
 
 function restoreCanvasBackground() {
   let restored = null;
@@ -7631,8 +7631,8 @@ function openAppearancePanel() {
     Math.round(bgSettings.opacity * 100) + '%';
   $('appearanceBackgroundFit').value = bgSettings.fit;
 
-  customColor1.value = customColors.c1;
-  customColor2.value = customColors.c2;
+  customThemePrimaryColorInput.value = customColors.c1;
+  customThemeSecondaryColorInput.value = customColors.c2;
   customColor3.value = customColors.c3;
   window.L1nGColorPicker?.sync?.();
 
@@ -7804,7 +7804,7 @@ if (resetUiSettingsBtn) {
     syncCanvasBackgroundSurface();
     paintCanvasBackgroundPreview();
     syncLayoutModeControls();
-    const labelBtn = $('labelToggle');
+    const labelBtn = $('relationshipLabelsVisibilityToggle');
     if (labelBtn) {
       labelBtn.classList.add('active');
       setIconText(labelBtn, 'tags', '隱藏關係');
@@ -7848,7 +7848,7 @@ if (restoreSampleBtn) {
       await waitForFileOperationPaint();
       try {
         // 所有預設肖像必須先驗證完成，才允許取代玩家目前的族譜。
-        const sampleDb = prepareDatabase(buildSample()).prepared;
+        const sampleDb = prepareDatabase(buildDefaultGenealogyData()).prepared;
         showFileOperationStatus('整理模擬市民、寵物與家庭關係……', 20, progressTitle);
         await waitForFileOperationPaint();
         await ensureSamplePortraitAssets(sampleDb, {
@@ -8098,9 +8098,9 @@ $('appearanceBackgroundFit').onchange = event => {
 
 $('appearanceBackgroundClearBtn').onclick = removeCanvasBackground;
 
-$('cleanupBtn').onclick = async () => {
+$('cleanupUnusedImagesButton').onclick = async () => {
   if (!await uiConfirm('要清理未使用的圖片嗎？系統會移除目前沒有被族譜引用的圖片，仍在使用的圖片會保留。', { title: '清理未使用的圖片', kind: 'danger', confirmText: '開始清理' })) return;
-  const button = $('cleanupBtn');
+  const button = $('cleanupUnusedImagesButton');
 
   await withActionButtonLoading(
     button,
@@ -8403,7 +8403,7 @@ function scheduleGC() {
   }));
 }
 
-function getRelInfoByKey(
+function getRelationshipInfoByKey(
   key,
   semanticType,
   defaultText = null
@@ -8637,9 +8637,9 @@ genealogyScene =
       displayRelationshipText, isSiblingLink, resolveKinshipLabel, relationshipPerspectiveSim,
       relationshipLineSetting, relationshipOtherType,
       getOtherRelationshipLineSetting, isSymmetricSocialRelationshipType, relationshipResolvedColor, relationshipInlineSvgStyle,
-      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelInfoByKey,
+      relationshipLayoutPriority, genealogyParentIds, genealogyParentRelationGroups, getChildrenOf, getRelationshipInfoByKey,
       getVisibleIds, syncNodeSelectionClasses, formatBirthdaySummary, esc, iconSvg, pairKey,
-      avatarHTML, renderTraitTagSummary, genderClass, statusClass,
+      avatarHTML, renderTraitTagSummary, getSimGenderClass, getSimStatusClass,
       showPetCards:() => !petVisibilityFilter || petVisibilityFilter.checked,
       petCardAvatarHTML:pet => petAvatarWithFallbackHTML(pet),
       petOwnerAvatarHTML:sim => {
@@ -9101,7 +9101,7 @@ function petLineageHTML(pet, { profileRows = false } = {}) {
 
 
 
-function genderClass(sim) {
+function getSimGenderClass(sim) {
   const gender =
     buildPersonPresentation(sim)
       ?.gender
@@ -9114,7 +9114,7 @@ function genderClass(sim) {
       : 'other';
 }
 
-function statusClass(sim) {
+function getSimStatusClass(sim) {
   const status =
     buildPersonPresentation(sim)
       ?.status
@@ -9769,16 +9769,16 @@ const lifePhotoWorkspace = {
   },
 
   fillEditorFields(entry = null) {
-    $('lifePhotoTitleInput').value = entry?.title || '';
-    $('lifePhotoNoteTextarea').value = entry?.note || '';
-    $('lifePhotoLifeStageSelect').value = entry?.lifeStage || '';
+    $('simPhotoTitleInput').value = entry?.title || '';
+    $('simPhotoNoteTextarea').value = entry?.note || '';
+    $('simPhotoLifeStageSelect').value = entry?.lifeStage || '';
 
-    genealogyUI.refreshSelect('lifePhotoTitleInput');
-    genealogyUI.refreshSelect('lifePhotoLifeStageSelect');
+    genealogyUI.refreshSelect('simPhotoTitleInput');
+    genealogyUI.refreshSelect('simPhotoLifeStageSelect');
   },
 
   refreshPreview() {
-    const preview = $('photoPreview');
+    const preview = $('simPhotoEditorPreview');
     const imageRef = lifePhotoState.editor.imageRef;
     const assetId = isAssetId(imageRef)
       ? String(imageRef)
@@ -9791,10 +9791,10 @@ const lifePhotoWorkspace = {
     preview.classList.toggle('has-image', !!url);
     preview.style.backgroundImage =
       url ? `url("${url}")` : '';
-    $('photoClearBtn').disabled = !imageRef;
-    $('lifePhotoEditorSaveButton').disabled = !imageRef;
+    $('simPhotoRemoveImageButton').disabled = !imageRef;
+    $('simPhotoEditorSaveButton').disabled = !imageRef;
 
-    const tip = $('photoSizeTip');
+    const tip = $('simPhotoFileInfo');
     if (!url) {
       tip.textContent = imageRef ? '圖片載入中……' : '尚未選擇圖片';
       tip.classList.remove('warn');
@@ -9846,9 +9846,9 @@ const lifePhotoWorkspace = {
     }
 
     this.fillEditorFields(entry);
-    $('photoModalTitle').textContent =
+    $('simPhotoEditorTitle').textContent =
       entry ? '編輯圖片' : '新增圖片';
-    $('lifePhotoEditorDeleteButton').style.display =
+    $('simPhotoEditorDeleteButton').style.display =
       entry ? '' : 'none';
 
     this.refreshPreview();
@@ -9880,9 +9880,9 @@ const lifePhotoWorkspace = {
     const previous = this.currentEditorEntry();
     const entry = {
       id:previous?.id || uid('photo'),
-      title:$('lifePhotoTitleInput').value.trim(),
-      note:$('lifePhotoNoteTextarea').value.trim(),
-      lifeStage:$('lifePhotoLifeStageSelect').value,
+      title:$('simPhotoTitleInput').value.trim(),
+      note:$('simPhotoNoteTextarea').value.trim(),
+      lifeStage:$('simPhotoLifeStageSelect').value,
       image:lifePhotoState.editor.imageRef,
       addedAt:previous?.addedAt || Date.now()
     };
@@ -10199,13 +10199,13 @@ lifePhotoGrid.addEventListener('drop', async event => {
   }
 });
 
-$('lifePhotoEditorSaveButton').onclick = () => {
+$('simPhotoEditorSaveButton').onclick = () => {
   lifePhotoWorkspace.commitEditor();
 };
-$('lifePhotoEditorCancelButton').onclick = () => {
+$('simPhotoEditorCancelButton').onclick = () => {
   lifePhotoWorkspace.closeEditor();
 };
-$('lifePhotoEditorDeleteButton').onclick = () => {
+$('simPhotoEditorDeleteButton').onclick = () => {
   lifePhotoWorkspace.deleteEditorEntry();
 };
 lifePhotoEditorDialog.onclick = event => {
@@ -10214,27 +10214,27 @@ lifePhotoEditorDialog.onclick = event => {
   }
 };
 
-$('photoPreview').onclick = () => {
-  $('photoInput').click();
+$('simPhotoEditorPreview').onclick = () => {
+  $('simPhotoFileInput').click();
 };
-$('photoPreview').addEventListener('keydown', event => {
+$('simPhotoEditorPreview').addEventListener('keydown', event => {
   if (event.key !== 'Enter' && event.key !== ' ') return;
   event.preventDefault();
-  $('photoInput').click();
+  $('simPhotoFileInput').click();
 });
 for (const type of ['dragenter', 'dragover']) {
-  $('photoPreview').addEventListener(type, event => {
+  $('simPhotoEditorPreview').addEventListener(type, event => {
     if (!Array.from(event.dataTransfer?.types || []).includes('Files')) return;
     event.preventDefault();
-    $('photoPreview').classList.add('dragover');
+    $('simPhotoEditorPreview').classList.add('dragover');
   });
 }
 for (const type of ['dragleave', 'drop']) {
-  $('photoPreview').addEventListener(type, () => {
-    $('photoPreview').classList.remove('dragover');
+  $('simPhotoEditorPreview').addEventListener(type, () => {
+    $('simPhotoEditorPreview').classList.remove('dragover');
   });
 }
-$('photoPreview').addEventListener('drop', async event => {
+$('simPhotoEditorPreview').addEventListener('drop', async event => {
   const file = Array.from(event.dataTransfer?.files || [])[0];
   if (!file) return;
   event.preventDefault();
@@ -10246,7 +10246,7 @@ $('photoPreview').addEventListener('drop', async event => {
       { title:'圖片處理失敗', kind:'danger' });
   }
 });
-$('photoInput').onchange = async event => {
+$('simPhotoFileInput').onchange = async event => {
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -10261,7 +10261,7 @@ $('photoInput').onchange = async event => {
     event.target.value = '';
   }
 };
-$('photoClearBtn').onclick = () => {
+$('simPhotoRemoveImageButton').onclick = () => {
   lifePhotoWorkspace.clearPreparedImage();
 };
 
@@ -13192,13 +13192,13 @@ function syncLayoutModeControls() {
     );
 
   const layoutButton =
-    $('layoutToggle');
+    $('autoLayoutToggleButton');
 
   const lockButton =
-    $('lockToggle');
+    $('canvasLockToggleButton');
 
   const resetButton =
-    $('resetLayoutBtn');
+    $('resetCanvasLayoutButton');
 
   setIconText(
     layoutButton,
@@ -13238,7 +13238,7 @@ function syncLayoutModeControls() {
 
   updateArrangeToolUI();
 }
-$('layoutToggle').onclick = () => {
+$('autoLayoutToggleButton').onclick = () => {
   const fam =
     currentFamily();
 const before =
@@ -13329,7 +13329,7 @@ const before =
   });
 };
 
-$('lockToggle').onclick = () => {
+$('canvasLockToggleButton').onclick = () => {
   const fam = currentFamily();
   if (!genealogyScene.isFreeLayoutActive(fam)) return;
 
@@ -13346,7 +13346,7 @@ $('lockToggle').onclick = () => {
   syncLayoutModeControls();
 };
 
-$('resetLayoutBtn').onclick = async () => {
+$('resetCanvasLayoutButton').onclick = async () => {
   const fam = currentFamily();
   const modeName =
     viewMode === 'view'
@@ -13403,9 +13403,9 @@ relationshipPerspectiveBtn?.addEventListener(
   }
 );
 
-$('labelToggle').onclick = () => {
+$('relationshipLabelsVisibilityToggle').onclick = () => {
   showRelLabels = !showRelLabels;
-  const btn = $('labelToggle');
+  const btn = $('relationshipLabelsVisibilityToggle');
   if (showRelLabels) { btn.classList.add('active'); setIconText(btn, 'tags', '隱藏關係'); }
   else { btn.classList.remove('active'); setIconText(btn, 'tags', '顯示關係'); }
   syncRelationshipToolbarVisibility();
@@ -13565,7 +13565,7 @@ $('familyGenerationSortBtn')?.addEventListener(
 
 const familyMemberController = {
   syncRemoveToolbar() {
-    const startBtn = $('removeMemberBtn');
+    const startBtn = $('removeFamilyMembersButton');
     const addMenu = $('familyMemberAddMenu');
     const toolbar = $('familyMemberRemoveToolbar');
     const countEl = $('familyMemberRemoveCount');
@@ -14006,7 +14006,7 @@ $('familyCoverClearBtn')?.addEventListener('click', async () => {
   scheduleGC();
 });
 
-$('newFamilyBtn').onclick = async () => {
+$('createFamilyButton').onclick = async () => {
   const name = await uiPrompt('請為新家族取個名稱。', '新家族', { title: '新增家族', confirmText: '新增' });
   if (name === null) return;
   const fam = {
@@ -14027,7 +14027,7 @@ $('newFamilyBtn').onclick = async () => {
   applyGenealogyMutation(mutation);
   requestAnimationFrame(() => genealogyViewport.fit());
 };
-$('delFamilyBtn').onclick = async () => {
+$('deleteFamilyButton').onclick = async () => {
   if (currentGenealogyData().families.length <= 1) { uiAlert('需要保留至少一個家族，才能繼續使用族譜畫布。', { title: '無法刪除家族' }); return; }
   const fam = currentFamily();
   if (!await uiConfirm(`要刪除「${displayDataText(fam.name, fam)}」家族嗎？\n家族中的模擬市民不會被刪除，之後仍可加入其他家族。`, { title: '刪除家族', kind: 'danger', confirmText: '刪除家族' })) return;
@@ -14469,7 +14469,7 @@ window.addEventListener(
   },80)
 );
 
-function buildRelationEntries(simId) {
+function buildRelationshipListEntries(simId) {
   const entries = [];
   const seen = new Set();
   const c = currentGenealogyData().sims[simId];
@@ -14872,11 +14872,11 @@ function renderRelAnnoList(
       if (!mutation.dataChanged) return;
 
       applyGenealogyMutation(mutation);
-      renderRelAnno(simId);
+      renderRelationshipAnnotations(simId);
     };
   });
 }
-function renderRelAnno(simId) {
+function renderRelationshipAnnotations(simId) {
   if(!simId){
     renderRelAnnoList(
       null,
@@ -14888,7 +14888,7 @@ function renderRelAnno(simId) {
   }
 
   const entries=
-    buildRelationEntries(simId)
+    buildRelationshipListEntries(simId)
       .filter(entry=>
         entry.group==='other'
       );
@@ -15094,7 +15094,7 @@ const petEditorController = {
     if (!entry?.pet) return false;
     this.directEntry = entry;
     petEditorState.index = -1;
-    $('petModalTitle').textContent = uiText('編輯寵物');
+    $('petEditorTitle').textContent = uiText('編輯寵物');
     $('petEditorDeleteButton').style.display = '';
     $('petEditorDeleteButton').textContent = uiText('永久刪除寵物');
     this.populateForm(entry.pet);
@@ -15219,7 +15219,7 @@ const petEditorController = {
       toggle.disabled = !(target === 'game' ? petEditorState.gameAvatar : petEditorState.customAvatar);
       toggle.dataset.avatarTarget = target;
     }
-    const clear = $('petAvatarClearBtn');
+    const clear = $('petAvatarRemoveButton');
     if (clear) clear.disabled = source !== 'custom' || !petEditorState.customAvatar;
     const preview = $('petAvatarPreview');
     const avatar =
@@ -15360,7 +15360,7 @@ const petEditorController = {
         ? editingPets[index]
         : this.createBlankPet();
 
-    $('petModalTitle').textContent =
+    $('petEditorTitle').textContent =
       uiText(
         validIndex
           ? '編輯寵物'
@@ -15656,9 +15656,9 @@ const petEditorController = {
 };
 
 function renderPetDraftList() {
-  const list = $('petList');
+  const list = $('simEditorPetList');
   if (!list) return;
-  const editing = $('petSection').classList.contains('is-editing');
+  const editing = $('simEditorPetsSection').classList.contains('is-editing');
   const toggle = $('petSectionEditToggle');
   if (toggle) {
     toggle.textContent = uiText(editing ? '完成' : '編輯');
@@ -15687,10 +15687,10 @@ function renderPetDraftList() {
           : pet.name;
 
       return `
-        <div class="pet-item" data-pet-draft-index="${index}">
-          <div class="pet-item-avatar">${avatar}</div>
-          <div class="pet-item-info">
-            <div class="pet-item-heading"><span class="pet-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</span><span class="pet-item-identity">${esc(identity.join(' · '))}</span></div>
+        <div class="pet-list-item" data-pet-draft-index="${index}">
+          <div class="pet-list-item-avatar">${avatar}</div>
+          <div class="pet-list-item-details">
+            <div class="pet-item-heading"><span class="pet-list-item-name">${esc(displayName) || esc(uiText('（未命名）'))}</span><span class="pet-item-identity">${esc(identity.join(' · '))}</span></div>
             ${(pet.traits || []).length
               ? '<div class="pet-trait-summary">' +
                 (pet.traits || [])
@@ -15712,7 +15712,7 @@ function renderPetDraftList() {
                 '</div>'
               : ''}
           </div>
-          ${editing ? `<div class="pet-item-actions">
+          ${editing ? `<div class="pet-list-item-actions">
             <button type="button" data-pet-action="edit" data-pet-index="${index}">${esc(uiText('編輯'))}</button>
             <button type="button" class="danger" data-pet-action="delete" data-pet-index="${index}">${esc(uiText('刪除'))}</button>
           </div>` : ''}
@@ -15723,7 +15723,7 @@ function renderPetDraftList() {
       ? '<div class="relationship-empty">'+esc(uiText('尚未新增寵物'))+'</div>'
       : '') +
     (editing
-      ? '<button class="pet-add-btn" id="btnAddPet" type="button">'+
+      ? '<button class="pet-list-add-button" id="btnAddPet" type="button">'+
           iconSvg('plus-lg')+'<span>'+esc(uiText('新增寵物'))+'</span></button>'
       : '');
 
@@ -15775,7 +15775,7 @@ function renderPetDraftList() {
   personEditor.renderInfoPreviewIfActive();
 }
 
-$('petAvatarInput').onchange = async event => {
+$('petAvatarFileInput').onchange = async event => {
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -15807,7 +15807,7 @@ $('petAvatarSourceToggleBtn').onclick = () => {
   petEditorController.refreshAvatarPreview();
 };
 
-$('petAvatarClearBtn').onclick = () => {
+$('petAvatarRemoveButton').onclick = () => {
   petEditorController.clearAvatar();
 };
 
@@ -15885,7 +15885,7 @@ petEditorDialog.onclick = event => {
 };
 
 $('petSectionEditToggle')?.addEventListener('click',()=>{
-  const section=$('petSection');
+  const section=$('simEditorPetsSection');
   section.classList.toggle('is-editing');
   renderPetDraftList();
 });
@@ -15983,12 +15983,12 @@ const personLibraryController = {
     const count = personLibraryState.selection.size;
     const toolbar = $('personLibraryBatchToolbar');
     const batchBtn = $('personLibraryBatchBtn');
-    const addBtn = $('personLibraryAddBtn');
+    const addNewSimButton = $('personLibraryAddBtn');
     const countEl = $('personLibraryBatchCount');
 
     if (toolbar) toolbar.hidden = !personLibraryState.batchMode || personLibraryCategory === 'pets';
     if (batchBtn) batchBtn.hidden = personLibraryState.batchMode || personLibraryCategory === 'pets';
-    if (addBtn) addBtn.hidden = personLibraryState.batchMode || personLibraryCategory === 'pets';
+    if (addNewSimButton) addNewSimButton.hidden = personLibraryState.batchMode || personLibraryCategory === 'pets';
     if (countEl) countEl.textContent = '已選 ' + count + ' 位';
 
     ['personLibraryBatchAddFamilyBtn','personLibraryBatchRemoveFamilyBtn','personLibraryBatchDeleteBtn']
@@ -16808,7 +16808,7 @@ $('familyMemberPickerList').addEventListener('keydown', event => {
   addMemberController.toggle(row.dataset.familyMemberPickerId);
 });
 
-$('addMemberBtn').onclick = () => {
+$('addExistingSimToFamilyButton').onclick = () => {
   addMemberController.open();
 };
 
@@ -16837,7 +16837,7 @@ $('familyMemberPickerConfirmBtn').onclick = () => {
 };
 
 // ========【家族成員批量移出家族】 側邊欄原地選取，送出前必須二次確認 ========
-$('removeMemberBtn').onclick = () => {
+$('removeFamilyMembersButton').onclick = () => {
   const family = currentFamily();
   if (!family.memberIds.length) return;
 
@@ -18729,7 +18729,7 @@ async function savePersonEditorFromUi() {
   }
 }
 
-$('addBtn').onclick = () => personEditor.open(null);
+$('addNewSimButton').onclick = () => personEditor.open(null);
 $('simEditorCancelButton').onclick = personEditor.close;
 $('simEditorSaveButton').onclick = () => {
   void savePersonEditorFromUi();
@@ -18937,7 +18937,7 @@ $('relationshipAddBtn').onclick = () => {
   );
 
   personEditor.renderRelationshipList(c);
-  renderRelAnno(c.id);
+  renderRelationshipAnnotations(c.id);
 
   applyGenealogyMutation(mutation);
   recordCanonicalHistory(before);
@@ -19438,7 +19438,7 @@ if (exportImageBtn) exportImageBtn.onclick = async () => {
     if (exportJsonBtn) exportJsonBtn.disabled = false;
   }
 };
-$('importInput').onchange = async e => {
+$('jsonBackupFileInput').onchange = async e => {
   const f = e.target.files[0];
   if (f) await importJSON(f);
   e.target.value = '';
@@ -19569,7 +19569,7 @@ function restoreWorkspacePreferences() {
   }
 
   const labelButton =
-    $('labelToggle');
+    $('relationshipLabelsVisibilityToggle');
 
   if (showRelLabels) {
     labelButton.classList.add(
@@ -19616,7 +19616,7 @@ async function ensureSamplePortraitAssets(database, { onProgress = null } = {}) 
   if (!database?.meta?.sample || Number(database.meta.sampleVersion) !== 11) return false;
 
   // 只處理內建 82 位模擬市民與 6 隻寵物，不覆蓋玩家後來自行新增的角色。
-  const baseline = buildSample();
+  const baseline = buildDefaultGenealogyData();
   const prefix = 'assets/sample-portraits/';
   const sharedPath = prefix + 'shared_unknown.png';
   const items = new Map();
@@ -19712,7 +19712,7 @@ async function prepareInitialWorkspaceDatabase() {
 
   try {
     const saved = await readStoredGenealogyData();
-    preparedResult = prepareDatabase(saved || buildSample());
+    preparedResult = prepareDatabase(saved || buildDefaultGenealogyData());
   } catch (error) {
     if (localStorage.getItem(STORE_KEY) === WORKSPACE_IDB_MARKER) throw error;
     console.warn(
@@ -19722,7 +19722,7 @@ async function prepareInitialWorkspaceDatabase() {
 
     preparedResult =
       prepareDatabase(
-        buildSample()
+        buildDefaultGenealogyData()
       );
   }
 
@@ -19735,7 +19735,7 @@ async function prepareInitialWorkspaceDatabase() {
   ) {
     preparedResult =
       prepareDatabase(
-        buildSample()
+        buildDefaultGenealogyData()
       );
 
     initialDatabase =
