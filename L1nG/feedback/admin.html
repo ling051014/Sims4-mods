@@ -6,13 +6,14 @@
         <meta name="theme-color" content="#f7f7f5">
         <title>管理中心 · L1nG</title>
         <link rel="stylesheet" href="feedback.css?v=20261016-feedback-layout-r5">
-        <link rel="stylesheet" href="admin.css?v=20261020-chart-mobile-r2">
+        <link rel="stylesheet" href="admin.css?v=20261020-custom-calendar-r3">
         <script src="select-ui.js?v=20261016-dashboard-r3" defer></script>
         <script src="admin-network.js?v=20261020-access-recovery-r1" defer></script>
         <script src="ga4-country-labels.js?v=20261018-dashboard-regions-r1" defer></script>
         <script src="admin-time.js?v=20261020-taipei-r1" defer></script>
         <script src="admin.js?v=20261020-taipei-r1" defer></script>
-        <script src="ga4-dashboard.js?v=20261020-chart-mobile-r2" defer></script>
+        <script src="ga4-dashboard.js?v=20261020-daterange-r3" defer></script>
+        <script src="admin-date-picker.js?v=20261020-custom-calendar-r1" defer></script>
     </head>
     <body class="admin-only">
         <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
@@ -28,6 +29,7 @@
             <symbol id="ico-lock" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="11"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></symbol>
             <symbol id="ico-check" viewbox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"></path></symbol>
             <symbol id="ico-search" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16.5 16.5 4 4"></path></symbol>
+            <symbol id="ico-calendar" viewbox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M7 3v4m10-4v4M3 10h18"></path></symbol>
             <symbol id="ico-clock" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></symbol>
             <symbol id="ico-inbox" viewbox="0 0 24 24"><path d="M4 4h16l2 10v6H2v-6L4 4Z"></path><path d="M2 14h6l2 3h4l2-3h6"></path></symbol>
             <symbol id="ico-chart" viewbox="0 0 24 24"><path d="M4 20V11m6 9V4m6 16v-7m5 7H2"></path></symbol>
@@ -201,8 +203,20 @@
                             <button aria-controls="custom-date-row" aria-expanded="false" class="range-btn" data-range="custom">自訂</button>
                         </div>
                         <div class="custom-date-row" hidden id="custom-date-row">
-                            <label>開始日期 <input aria-label="開始日期" id="date-from" type="date"/></label>
-                            <label>結束日期 <input aria-label="結束日期" id="date-to" type="date"/></label>
+                            <div class="admin-date-field">
+                                <span class="admin-date-label">開始日期</span>
+                                <input type="hidden" id="date-from"/>
+                                <button class="admin-date-trigger" type="button" data-date-target="date-from" aria-haspopup="dialog" aria-controls="admin-date-popover" aria-expanded="false" aria-label="選擇開始日期">
+                                    <span class="admin-date-value">選擇日期</span><svg class="i sm" aria-hidden="true"><use href="#ico-calendar"></use></svg>
+                                </button>
+                            </div>
+                            <div class="admin-date-field">
+                                <span class="admin-date-label">結束日期</span>
+                                <input type="hidden" id="date-to"/>
+                                <button class="admin-date-trigger" type="button" data-date-target="date-to" aria-haspopup="dialog" aria-controls="admin-date-popover" aria-expanded="false" aria-label="選擇結束日期">
+                                    <span class="admin-date-value">選擇日期</span><svg class="i sm" aria-hidden="true"><use href="#ico-calendar"></use></svg>
+                                </button>
+                            </div>
                             <button class="secondary" id="apply-date" type="button">套用日期</button>
                             <span class="date-error" id="date-error" role="status"></span>
                         </div>
@@ -496,6 +510,19 @@
                         <p class="ops-guide-footnote">手冊內容以 2026/10/18 的專案程式架構為基礎；新增站點、調整部署或改動安全配置後，也應同步更新此頁，避免教學過期。</p>
                     </section>
                 </section>
+            </div>
+        </div>
+        <div id="admin-date-popover" class="admin-date-popover" role="dialog" aria-label="選擇統計日期" hidden>
+            <div class="admin-date-header">
+                <button type="button" class="admin-date-nav" data-calendar-step="-1" aria-label="上一個月">‹</button>
+                <strong class="admin-date-month" id="admin-date-month"></strong>
+                <button type="button" class="admin-date-nav" data-calendar-step="1" aria-label="下一個月">›</button>
+            </div>
+            <div class="admin-date-weekdays" aria-hidden="true"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+            <div id="admin-date-days" class="admin-date-days" role="grid" aria-label="選擇日期"></div>
+            <div class="admin-date-actions">
+                <button type="button" class="admin-date-today" id="admin-date-today">今天</button>
+                <button type="button" class="admin-date-close" id="admin-date-close">關閉</button>
             </div>
         </div>
         <div aria-hidden="true" class="detail-layer" id="detail-layer">
