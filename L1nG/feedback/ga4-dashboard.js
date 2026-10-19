@@ -178,6 +178,9 @@
       viewBox:'0 0 '+width+' '+height,role:'group',tabindex:0,
       'aria-label':'每日活躍使用者趨勢；使用左右方向鍵查看每日數值'
     });
+    const scroll=node('div','ga-chart-scroll');
+    scroll.setAttribute('aria-label','可水平捲動的每日活躍使用者折線圖');
+    scroll.append(svg);
     root.setAttribute('role','group');
     for(let n=0;n<=4;n++){
       const y=bottom-n*(bottom-top)/4;
@@ -192,7 +195,6 @@
     const path=coords.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');
     svg.append(svgElement('path',{d:path+' L'+coords[coords.length-1].x+' '+bottom+' L'+coords[0].x+' '+bottom+' Z',fill:'var(--primary)','fill-opacity':'.10'}));
     svg.append(svgElement('path',{d:path,fill:'none',stroke:'var(--primary)','stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
-    // 短期間呈現全部資料點；長期間以互動時的節點標示為主。
     if(points.length<=31)coords.forEach(p=>svg.append(svgElement('circle',{
       cx:p.x,cy:p.y,r:2.5,fill:'var(--primary)','fill-opacity':'.7','pointer-events':'none'
     })));
@@ -210,37 +212,51 @@
       label.textContent=/^\d{8}$/.test(raw)?raw.slice(4,6)+'/'+raw.slice(6,8):raw;
       svg.append(label);
     }
+    const readout=node('div','ga-chart-readout');
+    const detail=node('div','ga-chart-readout-detail');
+    const detailDate=node('span','ga-chart-readout-date');
+    const detailValue=node('strong','ga-chart-readout-value');
+    detail.append(detailDate,detailValue);
+    const hint=node('span','ga-chart-readout-hint','點選節點或使用方向鍵查看');
+    readout.append(detail,hint);
     const tooltip=node('div','ga-chart-tooltip');
     tooltip.hidden=true;tooltip.setAttribute('role','tooltip');
     const tooltipDate=node('div','ga-chart-tooltip-date');
     const tooltipValue=node('div','ga-chart-tooltip-value');
-    tooltip.append(tooltipDate,tooltipValue);root.append(svg,tooltip);
-    let selectedIndex=-1;
+    tooltip.append(tooltipDate,tooltipValue);
+    root.append(readout,scroll,tooltip);
     const formatDate=raw=>{
       const date=String(raw||'');
       if(/^\d{8}$/.test(date))return date.slice(0,4)+'/'+date.slice(4,6)+'/'+date.slice(6,8);
       if(/^\d{4}-\d{2}-\d{2}$/.test(date))return date.replace(/-/g,'/');
       return date;
     };
-    function show(index){
+    const mobile=window.matchMedia('(max-width: 700px)');
+    let selectedIndex=-1;
+    function show(index,withTooltip=false) {
       if(index<0||index>=points.length)return;
       selectedIndex=index;
       const point=coords[index],record=points[index],date=formatDate(record.date),value=number(record.value);
       guide.setAttribute('x1',point.x);guide.setAttribute('x2',point.x);
       marker.setAttribute('cx',point.x);marker.setAttribute('cy',point.y);
-      guide.style.display='';marker.style.display='';tooltip.hidden=false;
-      tooltipDate.textContent=date;tooltipValue.textContent='活躍使用者 · '+value;
+      guide.style.display='';marker.style.display='';
+      detailDate.textContent=date;
+      detailValue.textContent='活躍使用者 '+value;
+      tooltipDate.textContent=date;
+      tooltipValue.textContent='活躍使用者 · '+value;
       svg.setAttribute('aria-label',date+'，活躍使用者 '+value+'。使用左右方向鍵切換日期');
-      const svgRect=svg.getBoundingClientRect(),rootRect=root.getBoundingClientRect();
-      const px=svgRect.left-rootRect.left+point.x/width*svgRect.width;
-      const py=svgRect.top-rootRect.top+point.y/height*svgRect.height;
-      const tw=tooltip.offsetWidth,th=tooltip.offsetHeight;
-      tooltip.style.left=Math.max(6,Math.min(px-tw/2,rootRect.width-tw-6))+'px';
-      tooltip.style.top=(py-th-10>=0?py-th-10:py+11)+'px';
+      tooltip.hidden=mobile.matches||!withTooltip;
+      if(!tooltip.hidden){
+        const svgRect=svg.getBoundingClientRect(),rootRect=root.getBoundingClientRect();
+        const px=svgRect.left-rootRect.left+point.x/width*svgRect.width;
+        const py=svgRect.top-rootRect.top+point.y/height*svgRect.height;
+        const tw=tooltip.offsetWidth,th=tooltip.offsetHeight;
+        tooltip.style.left=Math.max(6,Math.min(px-tw/2,rootRect.width-tw-6))+'px';
+        tooltip.style.top=(py-th-10>=0?py-th-10:py+11)+'px';
+      }
     }
-    function hide(){
-      selectedIndex=-1;guide.style.display='none';marker.style.display='none';tooltip.hidden=true;
-      svg.setAttribute('aria-label','每日活躍使用者趨勢；使用左右方向鍵查看每日數值');
+    function hideFloating(){
+      tooltip.hidden=true;guide.style.display='none';marker.style.display='none';
     }
     function nearest(clientX){
       const rect=svg.getBoundingClientRect();
@@ -250,26 +266,39 @@
       return Math.max(0,Math.min(points.length-1,idx));
     }
     svg.addEventListener('pointermove',event=>{
-      if(event.pointerType!=='touch')show(nearest(event.clientX));
+      if(event.pointerType!=='touch')show(nearest(event.clientX),true);
     });
     svg.addEventListener('pointerdown',event=>{
       if(event.pointerType==='touch')show(nearest(event.clientX));
     });
+    svg.addEventListener('click',event=>show(nearest(event.clientX),event.detail!==0));
     svg.addEventListener('pointerleave',event=>{
-      if(event.pointerType!=='touch'&&document.activeElement!==svg)hide();
+      if(event.pointerType!=='touch'&&document.activeElement!==svg)hideFloating();
     });
     svg.addEventListener('focus',()=>show(selectedIndex<0?points.length-1:selectedIndex));
-    svg.addEventListener('blur',hide);
+    svg.addEventListener('blur',hideFloating);
     svg.addEventListener('keydown',event=>{
       let next=selectedIndex<0?points.length-1:selectedIndex;
       if(event.key==='ArrowLeft')next=Math.max(0,next-1);
       else if(event.key==='ArrowRight')next=Math.min(points.length-1,next+1);
       else if(event.key==='Home')next=0;
       else if(event.key==='End')next=points.length-1;
-      else if(event.key==='Escape'){event.preventDefault();hide();return;}
+      else if(event.key==='Escape'){event.preventDefault();hideFloating();return;}
       else return;
       event.preventDefault();show(next);
+      if(mobile.matches){
+        const point=coords[next],scaledWidth=svg.getBoundingClientRect().width;
+        const target=point.x/width*scaledWidth;
+        if(target<scroll.scrollLeft+28||target>scroll.scrollLeft+scroll.clientWidth-28){
+          scroll.scrollLeft=Math.max(0,target-scroll.clientWidth/2);
+        }
+      }
     });
+    show(points.length-1);
+    hideFloating();
+    if(mobile.matches && scroll.scrollWidth>scroll.clientWidth){
+      scroll.scrollLeft=scroll.scrollWidth-scroll.clientWidth;
+    }
   }
   function devices(items) {
     const root=$('ga-device');if(!root)return;
@@ -391,6 +420,7 @@
       chosenRange=button.dataset.range;
       document.querySelectorAll('[data-range]').forEach(el=>el.classList.toggle('active',el===button));
       if($('custom-date-row'))$('custom-date-row').hidden=chosenRange!=='custom';
+      document.querySelector('[data-range="custom"]')?.setAttribute('aria-expanded',String(chosenRange==='custom'));
       setText('date-error','');
       if(chosenRange!=='custom')void refreshAnalytics();
     }));
