@@ -660,6 +660,11 @@ section[id] {
     gap:8px;
 }
 
+/* 沒有獨立備用檔時只顯示下載漢化與原模組，按鈕等寬。 */
+.card-actions.two-actions {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
 .card-action {
     min-height:38px;
     padding:0 11px;
