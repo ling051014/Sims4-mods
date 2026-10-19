@@ -1216,43 +1216,6 @@
       return geometry;
     }
 
-    function queryGeometryCandidatesForSegment(
-      geometry,
-      x1,
-      y1,
-      x2,
-      y2
-    ) {
-      if (!geometry) {
-        return null;
-      }
-
-      const bounds = {
-        left:Math.min(x1, x2),
-        right:Math.max(x1, x2),
-        top:Math.min(y1, y2),
-        bottom:Math.max(y1, y2)
-      };
-
-      const candidates =
-        new Set();
-
-      geometryBucketKeysForRect(
-        bounds
-      ).forEach(bucketKey => {
-        (
-          geometry.spatialBuckets.get(
-            bucketKey
-          ) ||
-          []
-        ).forEach(id => {
-          candidates.add(id);
-        });
-      });
-
-      return candidates;
-    }
-
     function validManualPosition(
       position
     ) {
