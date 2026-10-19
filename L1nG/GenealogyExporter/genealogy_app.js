@@ -18137,13 +18137,14 @@ function gameImportUpdateRichContent(result, avatarStats) {
   };
 }
 
-function gameImportNewRichContent(sims, pets, families, portraits, gameDate, currentFamilyName, failedCount) {
+function gameImportNewRichContent(sims, pets, families, portraits, gameDate, currentFamilyName, failedCount, hasActiveHousehold) {
   return {
     lead:'這次匯入的族譜資料已完成儲存。',
     sections:[{title:'本次匯入摘要',items:[
       ['模擬市民',sims],['寵物',pets],['家族',families],['頭像',portraits]
     ]}],
     meta:[...(gameDate ? [['遊戲日期',gameDate]] : []),['目前顯示',currentFamilyName]],
+    paragraphs:hasActiveHousehold ? [] : ['這份 ZIP 未提供可識別的主控家庭，因此暫時顯示第一個有效 EA 家庭。此名稱不代表匯出時正在操作的家庭。'],
     importWarning:failedCount ? {title:failedCount + ' 張遊戲頭像無法解析',description:'已略過失敗的頭像；其他族譜資料仍已完成匯入。'} : null
   };
 }
@@ -18496,7 +18497,10 @@ async function importGameGenealogy(file) {
         : null;
       const richContent = gameImportNewRichContent(
         simCount, petCount, familyCount, avatarStats.saved,
-        importedGameDate, activeFamilyName, avatarStats.decodeFailed
+        importedGameDate, activeFamilyName, avatarStats.decodeFailed,
+        (converted.families || []).some(family =>
+          family?.gameData?.isActiveHousehold === true
+        )
       );
       await uiAlert(gameImportDialogText(richContent), {
         title:'遊戲族譜匯入完成',
