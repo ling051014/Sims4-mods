@@ -1514,10 +1514,9 @@
         if (!family) return;
         ensureFamilyLayout(family);
         let changed = false;
-        for (const mode of ['view','edit']) {
-          const positions = family.manualPositions[mode];
-          const positionKey = 'pet:' + key;
-          if (!Object.prototype.hasOwnProperty.call(positions,positionKey)) continue;
+        const positions = family.manualPositions;
+        const positionKey = 'pet:' + key;
+        if (Object.prototype.hasOwnProperty.call(positions, positionKey)) {
           delete positions[positionKey];
           changed = true;
         }
@@ -1610,18 +1609,11 @@
       return sim.gameData;
     }
 
+    // 每家族共用一份手動位置與排列模式。
     function ensureFamilyLayout(family) {
       if (!family) return;
-      if (!family.manualPositions || typeof family.manualPositions !== 'object') {
-        family.manualPositions = { view:{}, edit:{} };
-      }
-      if (!family.manualPositions.view || typeof family.manualPositions.view !== 'object') family.manualPositions.view = {};
-      if (!family.manualPositions.edit || typeof family.manualPositions.edit !== 'object') family.manualPositions.edit = {};
-      if (!family.freeLayout || typeof family.freeLayout !== 'object') {
-        family.freeLayout = { view:false, edit:false };
-      }
-      if (typeof family.freeLayout.view !== 'boolean') family.freeLayout.view = false;
-      if (typeof family.freeLayout.edit !== 'boolean') family.freeLayout.edit = false;
+      if (!family.manualPositions || typeof family.manualPositions !== 'object' || Array.isArray(family.manualPositions)) family.manualPositions = {};
+      if (typeof family.freeLayout !== 'boolean') family.freeLayout = false;
       if (typeof family.locked !== 'boolean') family.locked = false;
     }
 
@@ -2065,8 +2057,7 @@
           family.memberIds = [...members, key];
         } else {
           family.memberIds = members.filter(id => id !== key);
-          delete family.manualPositions.view[key];
-          delete family.manualPositions.edit[key];
+          delete family.manualPositions[key];
         }
 
         changed = true;
@@ -2132,8 +2123,7 @@
       if (!members.includes(key)) return finalized(result);
 
       family.memberIds = members.filter(id => id !== key);
-      delete family.manualPositions.view[key];
-      delete family.manualPositions.edit[key];
+      delete family.manualPositions[key];
 
       mark(result, {
         dataChanged:true,
@@ -2291,10 +2281,9 @@
       return finalized(result);
     }
 
-    function setFamilyLayoutState(familyId, mode, state) {
+    function setFamilyLayoutState(familyId, state) {
       const family = familyById(familyId);
       const result = rawResult();
-      const layoutMode = mode === 'edit' ? 'edit' : 'view';
 
       if (!family) return finalized(result);
 
@@ -2303,8 +2292,8 @@
 
       if (Object.prototype.hasOwnProperty.call(state || {}, 'freeLayout')) {
         const value = !!state.freeLayout;
-        if (family.freeLayout[layoutMode] !== value) {
-          family.freeLayout[layoutMode] = value;
+        if (family.freeLayout !== value) {
+          family.freeLayout = value;
           changed = true;
         }
       }
@@ -2319,8 +2308,8 @@
           };
         });
 
-        if (!sameValue(family.manualPositions[layoutMode], normalized)) {
-          family.manualPositions[layoutMode] = normalized;
+        if (!sameValue(family.manualPositions, normalized)) {
+          family.manualPositions = normalized;
           changed = true;
         }
       }
@@ -2359,15 +2348,14 @@
       return finalized(result);
     }
 
-    function setNodePositions(familyId, mode, positionMap, { replace = false } = {}) {
+    function setNodePositions(familyId, positionMap, { replace = false } = {}) {
       const family = familyById(familyId);
       const result = rawResult();
-      const layoutMode = mode === 'edit' ? 'edit' : 'view';
 
       if (!family) return finalized(result);
 
       ensureFamilyLayout(family);
-      const next = replace ? {} : { ...family.manualPositions[layoutMode] };
+      const next = replace ? {} : { ...family.manualPositions };
       let touched = false;
 
       Object.entries(positionMap || {}).forEach(([simId, position]) => {
@@ -2384,10 +2372,10 @@
         addAffected(result, 'sim', [key]);
       });
 
-      if (replace && !sameValue(family.manualPositions[layoutMode], next)) touched = true;
+      if (replace && !sameValue(family.manualPositions, next)) touched = true;
       if (!touched) return finalized(result);
 
-      family.manualPositions[layoutMode] = next;
+      family.manualPositions = next;
       mark(result, {
         dataChanged:true,
         layoutChanged:true,
@@ -2399,21 +2387,20 @@
       return finalized(result);
     }
 
-    function setNodePosition(familyId, mode, simId, position) {
+    function setNodePosition(familyId, simId, position) {
       const map = {};
       map[String(simId)] = position;
-      return setNodePositions(familyId, mode, map);
+      return setNodePositions(familyId, map);
     }
 
-    function removeNodePositions(familyId, mode, simIds) {
+    function removeNodePositions(familyId, simIds) {
       const family = familyById(familyId);
       const result = rawResult();
-      const layoutMode = mode === 'edit' ? 'edit' : 'view';
 
       if (!family) return finalized(result);
 
       ensureFamilyLayout(family);
-      const next = { ...family.manualPositions[layoutMode] };
+      const next = { ...family.manualPositions };
       let changed = false;
 
       (simIds || []).forEach(simId => {
@@ -2426,7 +2413,7 @@
 
       if (!changed) return finalized(result);
 
-      family.manualPositions[layoutMode] = next;
+      family.manualPositions = next;
       mark(result, {
         dataChanged:true,
         layoutChanged:true,
@@ -2807,8 +2794,7 @@
           mark(result, { familyMembershipChanged:true });
         }
 
-        delete family.manualPositions.view[key];
-        delete family.manualPositions.edit[key];
+        delete family.manualPositions[key];
       });
 
       delete db.sims[key];
