@@ -2121,11 +2121,25 @@ function findBestFamilySelectorEntry(fam, entries) {
   if (!entries.length) return null;
   if (!fam) return entries[0];
 
-  const directSource = entries.find(entry =>
+  // EA 族譜可能將同一 Household 拆成多個分支，優先選到包含
+  // 來源家庭成員的分支，而不是只按清單中的第一個來源家族命中。
+  const sources = entries.filter(entry =>
     (entry.sourceFamilyIds || []).includes(fam.id)
   );
-
-  if (directSource) return directSource;
+  if (sources.length) {
+    const seedSet = new Set(familySourceSeedIds(fam));
+    return sources
+      .map(entry => ({
+        entry,
+        score:(entry.memberIds || []).reduce(
+          (total, id) => total + (seedSet.has(id) ? 1 : 0), 0
+        )
+      }))
+      .sort((left, right) =>
+        right.score - left.score ||
+        left.entry.sortIndex - right.entry.sortIndex
+      )[0].entry;
+  }
 
   const seedSet = new Set(familySourceSeedIds(fam));
 
@@ -17634,15 +17648,15 @@ async function showGenealogyImportError(error, {source,stage,file}) {
 }
 
 function reconcileImportedFamilyView() {
+  // 保留匯入來源的 Household 錨點；大家族的代表家庭不應覆寫它。
   const family=currentFamily();
+  const sourceFamilyId=family?.id || null;
   for (const mode of ['household','ea','extended']) {
     const entries=getFamilySelectorEntries(mode);
     const selected=findBestFamilySelectorEntry(family,entries);
     setFamilyTreeSelectionValue(mode,selected?.value || null);
   }
-  const active=getActiveFamilySelectorEntry(familyTreeViewMode);
-  if (active?.familyId) genealogyStore.setCurrentFamilyId(active.familyId);
-  familyTreeLastSourceFamilyId=currentFamily()?.id || null;
+  familyTreeLastSourceFamilyId=sourceFamilyId;
 }
 
 async function importJSON(file) {
