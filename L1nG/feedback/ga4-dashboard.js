@@ -294,8 +294,19 @@
     });
     show(points.length-1);
     hideFloating();
-    if(mobile.matches && scroll.scrollWidth>scroll.clientWidth){
-      scroll.scrollLeft=scroll.scrollWidth-scroll.clientWidth;
+    if(mobile.matches){
+      const showLatest=()=>{
+        if(!scroll.clientWidth)return false;
+        if(scroll.scrollWidth>scroll.clientWidth){
+          scroll.scrollLeft=scroll.scrollWidth-scroll.clientWidth;
+        }
+        return true;
+      };
+      // 網站分析分頁初始隱藏；等容器實際顯示後再定位最新日期。
+      if(!showLatest()&&typeof ResizeObserver==='function'){
+        const observer=new ResizeObserver(()=>{if(showLatest())observer.disconnect();});
+        observer.observe(scroll);
+      }
     }
   }
   function devices(items) {
