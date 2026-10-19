@@ -134,6 +134,7 @@ apply.addEventListener('click',()=>{
  from.value=start;to.value=end;
  for(const input of [from,to])input.dispatchEvent(new Event('change',{bubbles:true}));
  summary();close(false);
+ document.dispatchEvent(new Event('l1ng:analytics-date-applied'));
 });
 $('admin-date-close').addEventListener('click',()=>close(true));
 document.addEventListener('pointerdown',event=>{
