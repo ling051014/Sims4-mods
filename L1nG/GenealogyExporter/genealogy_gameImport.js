@@ -1598,6 +1598,14 @@
     return sorted.length ? `${sorted[0][0]}家族` : `遊戲家族 ${index + 1}`;
   }
 
+  // 主控家庭只以 EA 當下旗標判定；曾遊玩 / 玩家家庭不等於主控。
+  function initialGameFamilyId(families) {
+    const activeFamily = (families || []).find(family =>
+      family?.gameData?.isActiveHousehold === true
+    );
+    return activeFamily?.id || families?.[0]?.id || null;
+  }
+
   function stableHouseholdFamilyId(householdId, memberIds) {
     const source =
       householdId != null && householdId !== ''
@@ -1996,7 +2004,7 @@
         ),
       relationshipMap:{},
       labelPositions:{},
-      currentFamilyId:families.length ? families[0].id : null
+      currentFamilyId:initialGameFamilyId(families)
     };
   }
 
