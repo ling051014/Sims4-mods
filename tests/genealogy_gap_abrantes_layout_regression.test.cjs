@@ -73,7 +73,7 @@ const ctx={
   resolveLayoutGaps:()=>({SIBLING:34,SPOUSE:65,LEVEL:90}),
   relationshipBubbleWidth:()=>48,
   viewMode:'view',
-  getRelInfoByKey:(key,type)=>({key,type,label:type}),
+  getRelationshipInfoByKey:(key,type)=>({key,type,label:type}),
   pairKey:(a,b)=>[a,b].sort().join('|'),
   getChildrenOf:id=>sims.filter(sim=>(sim.parentIds||[]).includes(id)),
   isSiblingLink:()=>false,

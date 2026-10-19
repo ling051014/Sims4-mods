@@ -126,7 +126,7 @@ test('SVG 單一子女及配偶路徑，靠接錨點後真的收斂為純 V／�
     parentConnectorSource:(group,pos)=>({x:pos.get('P').x+50,y:100}),
     parentConnectorChildAnchor:p=>({x:p.x+50,y:250}),
     showRelLabels:false,relationshipPerspectiveSimId:null,
-    getRelInfoByKey:()=>null
+    getRelationshipInfoByKey:()=>null
   };
   const draw=vm.runInNewContext(parentCode+'\ndrawParentConnectorGroup;',env);
   const people=new Map([['P',{id:'P'}],['C',{id:'C'}]]);

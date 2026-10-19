@@ -48,7 +48,7 @@ test('三語系均有新稱謂，且不存在後爸／後媽',()=>{
    assert.equal(j.messages['後媽'],undefined);
  }
 });
-test('畫布由 getRelInfoByKey 共用推定標籤且保留自訂覆寫',()=>{
+test('畫布由 getRelationshipInfoByKey 共用推定標籤且保留自訂覆寫',()=>{
  const app=fs.readFileSync(path.join(root,'genealogy_app.js'),'utf8');
  assert.match(app,/function familyDerivedChildTitle\(/);
  assert.match(app,/String\(key\)\.startsWith\('parent:'\)/);
