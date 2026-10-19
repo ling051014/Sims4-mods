@@ -6,14 +6,14 @@
         <meta name="theme-color" content="#f7f7f5">
         <title>管理中心 · L1nG</title>
         <link rel="stylesheet" href="feedback.css?v=20261016-feedback-layout-r5">
-        <link rel="stylesheet" href="admin.css?v=20261020-custom-calendar-r3">
+        <link rel="stylesheet" href="admin.css?v=20261020-range-calendar-r4">
         <script src="select-ui.js?v=20261016-dashboard-r3" defer></script>
         <script src="admin-network.js?v=20261020-access-recovery-r1" defer></script>
         <script src="ga4-country-labels.js?v=20261018-dashboard-regions-r1" defer></script>
         <script src="admin-time.js?v=20261020-taipei-r1" defer></script>
         <script src="admin.js?v=20261020-taipei-r1" defer></script>
         <script src="ga4-dashboard.js?v=20261020-daterange-r3" defer></script>
-        <script src="admin-date-picker.js?v=20261020-custom-calendar-r1" defer></script>
+        <script src="admin-date-picker.js?v=20261020-range-calendar-r4" defer></script>
     </head>
     <body class="admin-only">
         <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
@@ -203,21 +203,13 @@
                             <button aria-controls="custom-date-row" aria-expanded="false" class="range-btn" data-range="custom">自訂</button>
                         </div>
                         <div class="custom-date-row" hidden id="custom-date-row">
-                            <div class="admin-date-field">
-                                <span class="admin-date-label">開始日期</span>
-                                <input type="hidden" id="date-from"/>
-                                <button class="admin-date-trigger" type="button" data-date-target="date-from" aria-haspopup="dialog" aria-controls="admin-date-popover" aria-expanded="false" aria-label="選擇開始日期">
-                                    <span class="admin-date-value">選擇日期</span><svg class="i sm" aria-hidden="true"><use href="#ico-calendar"></use></svg>
-                                </button>
-                            </div>
-                            <div class="admin-date-field">
-                                <span class="admin-date-label">結束日期</span>
-                                <input type="hidden" id="date-to"/>
-                                <button class="admin-date-trigger" type="button" data-date-target="date-to" aria-haspopup="dialog" aria-controls="admin-date-popover" aria-expanded="false" aria-label="選擇結束日期">
-                                    <span class="admin-date-value">選擇日期</span><svg class="i sm" aria-hidden="true"><use href="#ico-calendar"></use></svg>
-                                </button>
-                            </div>
-                            <button class="secondary" id="apply-date" type="button">套用日期</button>
+                            <input type="hidden" id="date-from"/>
+                            <input type="hidden" id="date-to"/>
+                            <button class="admin-date-range-trigger" id="admin-date-range-trigger" type="button" aria-haspopup="dialog" aria-controls="admin-date-popover" aria-expanded="false">
+                                <svg class="i sm" aria-hidden="true"><use href="#ico-calendar"></use></svg>
+                                <span class="admin-date-value">選擇日期範圍</span>
+                                <svg class="i sm" aria-hidden="true"><use href="#ico-chevron-down"></use></svg>
+                            </button>
                             <span class="date-error" id="date-error" role="status"></span>
                         </div>
                         <select aria-label="選擇分析網站" class="toolbar-select" id="analytics-site"><option value="all">全部網站</option><option value="home">L1nG 首頁</option><option value="realdate">RealDate</option><option value="genealogy">族譜工具</option><option value="extractor">族譜提取器</option><option value="translations">漢化專區</option></select>
@@ -512,17 +504,18 @@
                 </section>
             </div>
         </div>
-        <div id="admin-date-popover" class="admin-date-popover" role="dialog" aria-label="選擇統計日期" hidden>
+        <div id="admin-date-popover" class="admin-date-popover" role="dialog" aria-label="選擇統計日期範圍" hidden>
             <div class="admin-date-header">
                 <button type="button" class="admin-date-nav" data-calendar-step="-1" aria-label="上一個月">‹</button>
-                <strong class="admin-date-month" id="admin-date-month"></strong>
+                <strong id="admin-date-month" class="admin-date-month"></strong>
                 <button type="button" class="admin-date-nav" data-calendar-step="1" aria-label="下一個月">›</button>
             </div>
-            <div class="admin-date-weekdays" aria-hidden="true"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
-            <div id="admin-date-days" class="admin-date-days" role="grid" aria-label="選擇日期"></div>
+            <p id="admin-date-hint" class="admin-date-hint" aria-live="polite">先選擇開始日期，再選擇結束日期。</p>
+            <div id="admin-date-months" class="admin-date-months"></div>
             <div class="admin-date-actions">
-                <button type="button" class="admin-date-today" id="admin-date-today">今天</button>
-                <button type="button" class="admin-date-close" id="admin-date-close">關閉</button>
+                <span id="admin-date-summary" class="admin-date-summary">尚未選擇</span>
+                <button type="button" class="admin-date-close" id="admin-date-close">取消</button>
+                <button type="button" class="primary" id="apply-date" disabled>套用日期</button>
             </div>
         </div>
         <div aria-hidden="true" class="detail-layer" id="detail-layer">
