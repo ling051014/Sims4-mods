@@ -135,12 +135,32 @@
     svg.appendChild(use);
     return svg;
   };
-  function notify(message) {
-    const toast = $('toast');
-    if (!toast) return;
-    toast.textContent = message;
-    toast.classList.add('show');
+  let toastTimer=null,feedbackReadFailed=false;
+  function dismissToast(kind) {
+    const toast=$('toast');
+    if(!toast || kind && toast.dataset.kind!==kind)return;
+    if(toastTimer){clearTimeout(toastTimer);toastTimer=null;}
+    toast.classList.remove('show');
+    toast.textContent='';
+    delete toast.dataset.kind;
   }
+  function notify(message,{kind='notice'}={}) {
+    const toast=$('toast');
+    if(!toast)return;
+    dismissToast();
+    toast.textContent=message;
+    toast.dataset.kind=kind;
+    if(kind==='auth'){
+      const link=el('a','dashboard-auth-link','重新驗證登入');
+      link.href='/feedback/admin.html';
+      toast.append(' ',link);
+    }
+    toast.classList.add('show');
+    // 避免一次失敗後通知永久停在畫面；登入提醒可持續顯示至使用者處理。
+    if(kind!=='auth')toastTimer=setTimeout(()=>dismissToast(kind),7000);
+  }
+  window.addEventListener('l1ng-admin-auth-required',()=>
+    notify('Cloudflare Access 驗證需要更新。',{kind:'auth'}));
   async function api(path, method = 'GET', payload) {
     return window.L1nGAdminNetwork.requestJSON(API + path, {
       method,
@@ -240,19 +260,28 @@
       const additions=next.filter(item=>!knownRevisions.has(item.id)||(knownRevisions.get(item.id)!==revisionOf(item)&&item.lastReplyAuthor==='player'));
       const needsDetail=current&&next.some(item=>item.id===current.id&&knownRevisions.get(item.id)!==revisionOf(item));
       const shouldNotify=listLoaded&&additions.length&&!quiet;
+      const wasDisconnected=feedbackReadFailed;
+      feedbackReadFailed=false;
+      dismissToast('feedback-read');
       entries=next;knownRevisions=new Map(next.map(item=>[item.id,revisionOf(item)]));listLoaded=true;lastListCheck=Date.now();
       const area=document.querySelector('.admin-main'),scroll=area?.scrollTop||0;render();if(area)area.scrollTop=scroll;
       if(needsDetail)void refreshVisibleDetail();
       if(shouldNotify)$('feedback-sync-status').textContent='收到 '+additions.length+' 則新回饋或更新';
       else if(manual)$('feedback-sync-status').textContent='已更新 · '+new Date().toLocaleTimeString('zh-TW');
+      else if(wasDisconnected)$('feedback-sync-status').textContent='已恢復連線 · '+new Date().toLocaleTimeString('zh-TW');
       if ($('overview-recent')) {
         $('overview-recent').textContent = entries.length
           ? '最新回饋：' + entries[0].title : '目前沒有回饋紀錄。';
         $('overview-recent').removeAttribute('aria-busy');
       }
     } catch (error) {
-      $('feedback-sync-status').textContent='更新失敗：'+error.message;
-      if(manual||!listLoaded)notify(error.message);
+      feedbackReadFailed=true;
+      $('feedback-sync-status').textContent=
+        (listLoaded?'暫時無法檢查新回饋，已保留目前資料。':'回饋載入失敗。')+
+        ' '+error.message;
+      if((manual||!listLoaded) && error.kind!=='auth')
+        notify(error.message,{kind:'feedback-read'});
+      // 背景輪詢失敗不彈出全域警告；已載入的列表與對話維持原狀。
       if(!listLoaded){
         const root=$('feedback-rows');root.replaceChildren(el('p','empty-list','回饋載入失敗，請按「立即更新」重試。'));
         const recent=$('overview-recent');
