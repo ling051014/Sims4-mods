@@ -1514,7 +1514,6 @@ body.sidebar-resizing * {
 }
 
 .status-icon,
-.race-icon,
 .pet-icon {
     /* 顯示方式 */ display: inline-flex;
     /* 垂直對齊 */ align-items: center;
@@ -7652,10 +7651,6 @@ select.nav-native-select {
 
 .person-meta-icon.status-ghost {
     /* 幽靈圖示沿用幽靈文字色 */ color: var(--person-ghost-text);
-}
-
-.person-meta-icon.race-icon {
-    /* 種族圖示使用主題強調色提高辨識度 */ color: var(--action-primary);
 }
 
 body[data-theme="ink"] .person-meta-icon.status-alive,
