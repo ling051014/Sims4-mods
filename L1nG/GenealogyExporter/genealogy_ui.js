@@ -780,8 +780,11 @@
           if (mode === 'prompt') {
             inputEl.focus();
             inputEl.select();
-          } else {
+          } else if (window.L1nGGenealogyFocus?.isKeyboardInteraction()) {
             confirmBtn.focus({ preventScroll:true });
+          } else {
+            // 滑鼠開啟時只聚焦無外框的對話視窗本身，避免按鈕顯示焦點框。
+            dialog.focus({ preventScroll:true });
           }
         });
       });
