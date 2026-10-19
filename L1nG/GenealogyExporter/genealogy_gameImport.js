@@ -1598,6 +1598,15 @@
     return sorted.length ? `${sorted[0][0]}家族` : `遊戲家族 ${index + 1}`;
   }
 
+  // 首次匯入時以遊戲當時主控家庭為預設；不改動 EA Household 原本的排序。
+  // 缺少標記或主控家庭沒有可顯示的模擬市民時，才退回第一個有效家庭。
+  function initialGameFamilyId(families) {
+    const activeFamily = (families || []).find(family =>
+      family?.gameData?.isActiveHousehold === true
+    );
+    return activeFamily?.id || families?.[0]?.id || null;
+  }
+
   function stableHouseholdFamilyId(householdId, memberIds) {
     const source =
       householdId != null && householdId !== ''
@@ -1996,7 +2005,7 @@
         ),
       relationshipMap:{},
       labelPositions:{},
-      currentFamilyId:families.length ? families[0].id : null
+      currentFamilyId:initialGameFamilyId(families)
     };
   }
 
