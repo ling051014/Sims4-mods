@@ -1679,36 +1679,14 @@
       );
     }
 
-    function getCurrentManualPositions(
-      fam
-    ) {
-      if (!fam?.manualPositions) {
-        return {};
-      }
-
-      return (
-        fam.manualPositions[
-          viewMode
-        ] ||
-        {}
-      );
+    function getCurrentManualPositions(fam) {
+      return fam?.manualPositions || {};
     }
 
-    function isFreeLayoutActive(
-      fam
-    ) {
-      if (
-        !fam?.freeLayout ||
-        typeof fam.freeLayout !==
-          'object'
-      ) {
-        return false;
-      }
-
-      return !!fam.freeLayout[
-        viewMode
-      ];
+    function isFreeLayoutActive(fam) {
+      return !!fam?.freeLayout;
     }
+
 function relationshipSegmentIntersectsRect(
   x1,
   y1,
@@ -6728,9 +6706,9 @@ function buildPetCardLayout(family, visibleIds, positions, humanGeometry) {
     group.entries.forEach((entry,index) => {
       const cardX=x+colLefts[index%3];
       const cardY = y+rowTops[Math.floor(index/3)];
-      // 寵物使用與模擬市民相同的每家庭、每模式手動位置快照。
-      const manual = family?.freeLayout?.[viewMode]
-        ? family?.manualPositions?.[viewMode]?.['pet:' + entry.key] : null;
+      // 寵物使用與模擬市民相同的每家庭共用的手動位置。
+      const manual = family?.freeLayout
+        ? family?.manualPositions?.['pet:' + entry.key] : null;
       const finalX = manual && Number.isFinite(Number(manual.x)) ? Math.max(0,Number(manual.x)) : cardX;
       const finalY = manual && Number.isFinite(Number(manual.y)) ? Math.max(0,Number(manual.y)) : cardY;
       cards.push({...entry,x:finalX,y:finalY,width:itemDims[index].W,height:itemDims[index].H});
