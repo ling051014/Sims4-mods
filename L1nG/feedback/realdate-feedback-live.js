@@ -94,7 +94,7 @@
       if($('game-version-error'))$('game-version-error').classList.remove('visible');
     }
   }
-  // 沿用原預覽的公開版本選單，不再讓 RealDate 顯示族譜提取器的選項。
+  // RealDate 使用自己的公開版本選單選項。
   const version=$('module-version');
   if(version){
     version.replaceChildren();

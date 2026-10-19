@@ -509,7 +509,7 @@
 
     // ========【Canonical Generation】 世代只由親子 / 領養關係決定 ========
     // 使用帶位移的 Union-Find 解 parent -> child = +1 的有限等式系統。
-    // 共同父母會自然得到相同世代，不再靠「父母抬高 → 子女抬高」反覆迭代。
+    // 共同父母依 parent -> child 約束取得相同世代層級。
     // 若來源資料真的形成祖先循環，只忽略造成矛盾的那一條約束，
     // 不允許世代數在 render 中持續膨脹。
     function solveCanonicalGenerationLevels(
@@ -2381,7 +2381,7 @@ function buildGenealogyLayoutModel(visibleIds) {
     );
 
   // Parent Group 是族譜真正的骨架。同一個人可以同時參與多個 Parent Group，
-  // 但市民卡片只存在一次，不再因多配偶 / 多共同生育對象被 union 成三人以上 layout unit。
+  // 每位市民卡片只建立一次；多配偶及多組共同父母關係可共享卡片。
   parentGroups.forEach(group => {
     group.parentUnitIds =
       [...new Set(
@@ -3525,7 +3525,7 @@ function buildFamilyBranchOwnership(
                 rightId
             ) || '';
 
-          // 同一個實際家庭的同代成員應連續，不再被其他家庭群組穿插。
+          // 同一實際家庭的同代成員維持連續排列。
           const leftHousehold=[...genealogyUnitHouseholds(model.unitById.get(leftId))].sort()[0]||'~';
           const rightHousehold=[...genealogyUnitHouseholds(model.unitById.get(rightId))].sort()[0]||'~';
           return (
@@ -5238,7 +5238,7 @@ function alignAffinalAncestryBlocks(layers,model,ownership,connectorGroups) {
     }
   });
 
-  // 後續碰撞檢查使用最新 X 排序，不再沿用接合前的同代順序。
+  // 碰撞檢查使用接合完成後重新排序的 X 座標。
   if(adjusted)layers.forEach(layer=>
     layer.sort((a,b)=>a.x-b.x||stableGenealogyUnitCompare(a,b))
   );
@@ -5609,7 +5609,7 @@ function alignFamilyBranchParentAxes(layers, model, connectorGroups, ownership =
         .sort((a, b) => a.unit.x - b.unit.x)
         .forEach(moveWithinLayer);
 
-      // 不再因為父母旁邊有其他卡片就放棄置中：
+      // 優先維持父母連接點與子女家系的水平置中：
       // 安全條件允許時，將這組子女及其整個後代平移到父母連接點下方。
       connectorGroups.forEach(group => {
         const parents = genealogyGroupParentEntries(group, model);
@@ -6350,8 +6350,8 @@ function genealogyConnectedLayoutFamilyComponents(model,visibleIds) {
   return [...components.values()];
 }
 
-// 每個家系先沿用原本 Parent Group / Branch Block 演算法完整排列；
-// 最後只平移整個家系區塊，不再讓無關家庭插進祖先與子女之間。
+// 每個家系先依 Parent Group / Branch Block 演算法完成內部排列；
+// 最後以完整家系區塊平移，保護祖先與子女之間的連續性。
 function arrangeIndependentGenealogyFamilyComponents(visibleIds) {
   const overall=buildGenealogyLayoutModel(visibleIds);
   const components=genealogyConnectedLayoutFamilyComponents(overall,visibleIds);
@@ -6499,7 +6499,7 @@ function solveAutomaticGenealogyPositions(visibleIds,primaryOverride=null,compon
   optimizeDistantCoParentFamilyBlocks(layers,model,ownership,connectorGroups);
 
   // Family Branch Block 本身就是最終水平幾何權威。
-  // 不再執行 generation-global packing，避免把已保留的 Parent Group block 再推壞。
+  // 以 Family Branch Block 作為最終水平幾何來源，避免額外的跨世代全域重排。
   return placeGenealogyUnitMembers(
     model.units
   );
@@ -8938,7 +8938,7 @@ function getPairConnectionGeometry(a, b) {
     aOuter.centerX;
 
   // 配偶 / 前任配偶在族譜語意上永遠屬於同一世代的橫向關係。
-  // 不再用兩張卡片 centerY 的差距判斷方向，避免檢視卡內容高度不同時被誤判成直向關係。
+  // 同代關係方向依語意判定，不以不同卡片高度造成的 centerY 差值判定。
   const aX =
     dx >= 0
       ? aHorizontalRect.right
@@ -9176,7 +9176,7 @@ function paintPersonLayer() {
       </div>`;
     }
 
-    // 編輯模式有自己的顯示內容設定，不再跟檢視模式同步。
+    // 編輯模式與檢視模式分別使用各自的卡片內容設定。
     const editRows = [];
 
     const stageAge = [];
@@ -9459,7 +9459,7 @@ function buildDragPerformanceGeometry() {
   return geometry;
 }
 
-// 已快取的關係軸直接交給 Interaction 執行智慧吸附，不再維護第二套座標算法。
+// Interaction 直接使用 Scene 快取的關係軸進行智慧吸附。
 function buildSingleDragRelationshipTargets(id) {
   if(!layoutCache?.byId||!layoutCache?.visibleIds||!layoutCache?.pos)
     return {x:[],y:[]};

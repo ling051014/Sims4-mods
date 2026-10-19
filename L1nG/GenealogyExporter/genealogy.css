@@ -2024,7 +2024,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .family-rel-preview-row > .family-rel-person {
-    /* 模擬市民摘要本身不再額外包第二層卡片 */ padding: 0;
+    /* 模擬市民摘要與外層列表共用間距 */ padding: 0;
 }
 
 .family-rel-row-actions {
@@ -2077,7 +2077,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .ui-single-select-compact .ui-single-select-trigger {
-    /* 真正列內高度，不再接近整張模擬市民列 */ min-height: 24px;
+    /* 精簡選取欄位高度 */ min-height: 24px;
     /* 固定高度 */ height: 24px;
     /* 左右內距 */ padding: 2px 23px 2px 7px;
     /* 圓角 */ border-radius: 5px;
@@ -2165,7 +2165,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .ui-select-wrap[data-ui-select-mode="add-only"] .ui-select-input {
-    /* 新增關係入口改成輕量按鈕感，不再顯示已選模擬市民標籤 */ min-height: 31px;
+    /* 新增關係入口使用輕量按鈕外觀 */ min-height: 31px;
     /* 邊框樣式 */ border-style: dashed;
     /* 文字顏色 */ color: var(--action-primary);
     /* 背景 */ background: transparent;
@@ -2333,7 +2333,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .other-rel-edit .relationship-add-row {
-    /* 編輯狀態下新增入口不再額外拉開大段距離 */ margin-top: 0;
+    /* 新增關係入口緊貼所屬編輯區塊 */ margin-top: 0;
 }
 
 /* 其他關係觸發器需與欄位平齊，不受「新增」按鈕的通用樣式覆蓋。 */
@@ -2467,7 +2467,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 左側邊線由選單本身依選取標籤的實際高度繪製，其餘三邊維持既有邊框 */ border: 1px solid var(--nav-dropdown-border);
     border-left: 0;
     /* 左側上下角維持直角，只有選單右側保留圓角 */ border-radius: 0 6px 6px 0;
-    /* 陰影由共同 portal 統一提供，選單本體不再向便利貼投影 */ box-shadow: none;
+    /* 選單陰影由共用 portal 容器提供 */ box-shadow: none;
     /* 不讓右側內容破出圓角 */ overflow: hidden;
 }
 
@@ -2510,7 +2510,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 .relationship-type-index-tab {
-    /* 不再使用固定高度，直接平均分配右側選單高度 */ flex: 1 1 0;
+    /* 右側分類選單平均分配可用高度 */ flex: 1 1 0;
     /* 高度交由父層等分 */ height: auto;
     /* 允許在較矮視窗內縮小，不再超出選單 */ min-height: 0;
 }
@@ -5246,7 +5246,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 @media(max-width:650px) { .photo-modal { max-height:calc(100dvh - 20px); } .photo-modal-header { min-height:52px; padding:13px 15px; } .photo-modal-body { padding:14px 15px 17px; } .photo-preview { height:175px; } .photo-modal > .photo-modal-footer { padding:10px 14px max(10px,env(safe-area-inset-bottom)); } }
 @media(max-width:400px) { .photo-actions-row { gap:7px; } .photo-actions-row .photo-action-button { padding:7px 9px; } .photo-size-tip { flex-basis:100%; margin-left:0; } .photo-preview { height:156px; } }
 
-/* ========【人生照片檢視】 模擬市民專屬照片視窗，不再使用全螢幕浮動按鈕 ======== */
+/* ========【人生照片檢視】 模擬市民照片檢視視窗 ======== */
 .photo-viewer-panel {
     width:min(980px,calc(100vw - 32px));
     height:min(760px,calc(100vh - 32px));
@@ -5766,7 +5766,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .editor-info-preview {
     /* 預覽內容直接使用整張紙 */ width: 100%;
     /* 水平置中 */ margin: 0;
-    /* 不再額外包卡片 */ overflow: visible;
+    /* 使用外層容器版面 */ overflow: visible;
     /* 背景設定 */ background: var(--surface-card);
 }
 
@@ -7478,7 +7478,7 @@ select.nav-native-select {
 /* ========【網站表單選擇器】 單選 / 可輸入建議 / 搜尋多選共用同一套 UI ======== */
 
 .ui-control-source {
-    /* 原生 select 只保留資料與既有程式 API，不再直接顯示作業系統選單 */ display: none;
+    /* 原生 select 保留表單值與程式介面，視覺由自訂選單負責 */ display: none;
 }
 
 .ui-single-select,
@@ -7596,7 +7596,7 @@ select.nav-native-select {
     /* 展開時提高對比 */ color: var(--text-primary);
 }
 
-/* 原生 select 已不再負責視覺，因此不需要 color-scheme / appearance 過渡層。 */
+/* 自訂選單負責色彩與外觀，原生 select 不參與視覺呈現。 */
 
 /* ========【搜尋型下拉結果】 主題安全色與中性 Hover / Selected ======== */
 

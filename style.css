@@ -823,8 +823,8 @@ body.mod-list-page {
 
 /* ========【常用網站】 設定 - 區塊 ======== */
 .footer-links-section {
-    /* 移除舊版區塊底線 */ border-bottom: none;
-    /* 移除舊版下方內距 */ padding-bottom: 0;
+    /* 區塊不顯示底線 */ border-bottom: none;
+    /* 區塊不額外增加下方內距 */ padding-bottom: 0;
 }
 
 
@@ -873,14 +873,14 @@ body.mod-list-page {
 
 /* ========【本站資訊】 設定 - 內容區 ======== */
 .footer-site-info {
-    /* 移除舊版上下內距 */ padding: 0;
+    /* 內容區不額外增加上下內距 */ padding: 0;
     /* 改為左對齊 */ text-align: left;
 }
 
 
 /* ========【本站資訊】 設定 - 版權與非官方聲明 ======== */
 .footer-disclaimer {
-    /* 移除舊版置中外距 */ margin: 0;
+    /* 聲明區塊不額外設定外距 */ margin: 0;
     /* 最大文字寬度 */ max-width: 420px;
     /* 文字顏色 */ color: #aaaaaa;
     /* 字體大小 */ font-size: 12px;

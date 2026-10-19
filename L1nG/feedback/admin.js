@@ -1,4 +1,4 @@
-/* L1nG Dashboard：正式回饋列表與對話沿用 feedback.css 的原版型。
+/* L1nG Dashboard：回饋列表與對話共用 feedback.css 的現行版面。
  * 僅呈現 Worker/D1 實際回傳的資料，不載入示範回饋。
  */
 (() => {
@@ -117,7 +117,7 @@
     if (item.followUp !== 'conversation') return 'no-reply';
     if (item.lastReplyAuthor === 'admin') return 'player';
     if (item.lastReplyAuthor === 'player' || item.lastReplyAuthor === null) return 'admin';
-    // 舊版 Worker 未提供最後一則訊息作者時，不虛構對話的等待對象。
+    // 若回傳資料缺少最後一則訊息作者，顯示未知狀態以避免誤判等待對象。
     return 'unknown';
   };
   const replyLabel = item => {
