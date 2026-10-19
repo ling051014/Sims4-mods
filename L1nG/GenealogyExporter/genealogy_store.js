@@ -577,12 +577,6 @@
       if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
       if (typeof sim.notes !== 'string') sim.notes = '';
 
-      // 模擬市民簡介已由 notes 取代；原版世家欄位也不屬於現行 schema。
-      // 只清模擬市民記錄，不影響家庭 family.bio。
-      delete sim.bio;
-      delete sim.dynasties;
-      delete sim.dynastyRole;
-
       const gameData =
         ensureAdoptionMetadata(
           sim
