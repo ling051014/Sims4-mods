@@ -8535,6 +8535,9 @@ body.family-panel-collapsed .topbar-brand { min-width:210px; }
 .canvas-tool { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:30px; padding:5px 8px; border:0; border-radius:4px; background:transparent; color:var(--text-secondary); font:inherit; font-size:11px; white-space:nowrap; }
 .canvas-tool:hover { background:var(--surface-item-hover); color:var(--text-primary); }
 .canvas-tool.active { color:var(--action-primary); background:var(--brand-tint-start); }
+/* 滑鼠焦點不顯示瀏覽器預設黑框；鍵盤 Tab 仍保留主題色焦點提示。 */
+.canvas-tool:focus:not(:focus-visible) { outline:none; box-shadow:none; }
+.canvas-tool:focus-visible { outline:2px solid var(--action-primary); outline-offset:2px; }
 .canvas-tool-divider { width:1px; height:18px; margin:0 3px; background:var(--border-default); }
 .arrange-tool { min-width:54px; }
 
