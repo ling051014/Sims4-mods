@@ -305,3 +305,70 @@ body.admin-only{width:100%;min-height:100dvh;overflow-x:clip}
   .admin-only .ga-chart-readout{padding-bottom:9px}
   .admin-only .ga-chart-readout-hint{font-size:10px}
 }
+
+/* 自訂月曆：統一主題、手機觸控及桌面游標狀態。 */
+.admin-only #panel-analytics .admin-date-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.admin-only #panel-analytics .admin-date-label{color:var(--muted);font-size:11px;font-weight:620}
+.admin-only #panel-analytics .custom-date-row .admin-date-trigger{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;width:145px;min-height:38px;
+ padding:7px 10px;border:1px solid var(--stroke);border-radius:9px;
+ background:var(--surface);color:var(--ink);font-size:12px;font-variant-numeric:tabular-nums;text-align:left
+}
+.admin-only #panel-analytics .admin-date-trigger:hover{border-color:var(--primary-line);background:var(--subtle)}
+.admin-only #panel-analytics .admin-date-trigger[aria-expanded="true"]{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-pale)}
+.admin-only .admin-date-popover{
+ position:fixed;z-index:160;width:min(304px,calc(100vw - 16px));padding:13px;background:var(--surface);
+ border:1px solid var(--stroke);border-radius:13px;box-shadow:var(--shadow);color:var(--ink)
+}
+.admin-only .admin-date-popover[hidden]{display:none}
+.admin-only .admin-date-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.admin-only .admin-date-month{font-size:13px;letter-spacing:.02em}
+.admin-only .admin-date-nav{width:32px;height:32px;border:1px solid var(--stroke);border-radius:8px;background:var(--surface);font-size:23px;line-height:1}
+.admin-only .admin-date-nav:hover:not(:disabled){background:var(--subtle);border-color:var(--primary-line)}
+.admin-only .admin-date-weekdays,.admin-only .admin-date-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.admin-only .admin-date-weekdays{margin-bottom:4px}
+.admin-only .admin-date-weekdays span{font-size:11px;color:var(--muted);text-align:center}
+.admin-only .admin-date-day{aspect-ratio:1;border:1px solid transparent;border-radius:8px;background:transparent;font-size:12px;font-variant-numeric:tabular-nums}
+.admin-only .admin-date-day:hover:not(:disabled){background:var(--primary-pale);color:var(--primary)}
+.admin-only .admin-date-day.selected{background:var(--primary);color:var(--surface);font-weight:750}
+.admin-only .admin-date-day.is-today:not(.selected){border-color:var(--primary-line);color:var(--primary);font-weight:740}
+.admin-only .admin-date-day:disabled{opacity:.3;cursor:not-allowed}
+.admin-only .admin-date-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.admin-only .admin-date-today,.admin-only .admin-date-close{border:0;background:transparent;color:var(--primary);font-size:12px;font-weight:680;padding:6px 8px;border-radius:7px}
+.admin-only .admin-date-today:hover,.admin-only .admin-date-close:hover{background:var(--subtle)}
+@media(max-width:600px){
+ .admin-only #panel-analytics .custom-date-row .admin-date-field{flex:1 1 128px}
+ .admin-only #panel-analytics .custom-date-row .admin-date-trigger{width:100%;min-width:0}
+}
+
+/* 意見回饋手機版的內容寬度，由可收縮的 grid/flex 欄位決定。 */
+@media(max-width:800px){
+ .admin-only #panel-feedback{width:100%;min-width:0}
+ .admin-only #panel-feedback>section{width:100%;min-width:0}
+ .admin-only #panel-feedback .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+ .admin-only #panel-feedback .stat-card{min-width:0;width:100%}
+ .admin-only #panel-feedback .stat-card .topline{min-width:0;gap:4px}
+ .admin-only #panel-feedback .feedback-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:7px}
+ .admin-only #panel-feedback .feedback-filters .mobile-filter{min-width:0;width:100%;white-space:normal;line-height:1.4;padding:9px 4px;overflow-wrap:anywhere}
+ .admin-only #panel-feedback .feedback-filter-grid{width:100%;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .admin-only #panel-feedback .feedback-filter-grid>.l1ng-select{min-width:0;width:100%;max-width:100%}
+ .admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{width:100%;min-width:0;padding-inline:8px 23px;font-size:11px}
+ .admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger::after{right:10px}
+ .admin-only #panel-feedback .feedback-table,.admin-only #panel-feedback #feedback-rows{width:100%;min-width:0}
+ .admin-only #panel-feedback .feedback-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;width:100%;min-width:0}
+ .admin-only #panel-feedback .feedback-row .row-primary{grid-column:1/-1;grid-row:1;min-width:0}
+ .admin-only #panel-feedback .feedback-row .row-source{grid-column:1;grid-row:2;min-width:0;overflow-wrap:anywhere;white-space:normal}
+ .admin-only #panel-feedback .feedback-row .row-status{grid-column:2;grid-row:2;min-width:0}
+ .admin-only #panel-feedback .feedback-row .row-type,.admin-only #panel-feedback .feedback-row .row-date{display:none}
+ .admin-only #panel-feedback .section-toolbar{display:flex;flex-direction:column;align-items:stretch}
+ .admin-only #panel-feedback .toolbar-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;width:100%;min-width:0}
+ .admin-only #panel-feedback .toolbar-tools .search-field{width:100%;min-width:0}
+ .admin-only .detail-head>div:first-child,.admin-only .detail-head h2{min-width:0;overflow-wrap:anywhere}
+ .admin-only .detail-status-actions{flex:1 1 auto;min-width:0}
+ .admin-only .detail-status-actions .l1ng-select{flex:1 1 110px;min-width:0}
+ .admin-only .detail-status-actions .l1ng-select-trigger{min-width:0;overflow:hidden;text-overflow:ellipsis}
+ .admin-only .admin-reply-compose,.admin-only .admin-reply-compose textarea{min-width:0;max-width:100%;width:100%}
+ .admin-only .admin-reply-actions{display:flex;flex-wrap:wrap;min-width:0}
+ .admin-only .admin-reply-actions .hint{flex:1 1 160px;min-width:0}
+ .admin-only .detail-body .conversation-stack,.admin-only .detail-body .conversation-message{min-width:0;max-width:100%}
+}
