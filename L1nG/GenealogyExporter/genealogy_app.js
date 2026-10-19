@@ -18411,7 +18411,7 @@ document.addEventListener('keydown', e => {
   }
 
   if (e.key === 'Escape') {
-    if (e.defaultPrevented) return;
+    if (e.defaultPrevented || genealogyFocus.top()) return;
     if (!closeTopModal() && (selectedNodeIds.size || selectedPetIds.size)) clearNodeSelection();
     return;
   }
