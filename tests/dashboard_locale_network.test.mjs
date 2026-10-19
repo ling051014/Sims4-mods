@@ -95,3 +95,29 @@ test('Access toast links remain clickable without enabling clicks on ordinary to
   assert.match(js,/logout\.href='\/cdn-cgi\/access\/logout'/);
   assert.doesNotMatch(css,/\.admin-only \.toast\.show\s*\{pointer-events:auto\}/);
 });
+
+test('dashboard time service handles Taipei midnight and calendar boundaries',()=>{
+  const time=load('admin-time.js').L1nGAdminTime;
+  assert.equal(time.timeZone,'Asia/Taipei');
+  assert.equal(time.today(new Date('2026-10-19T15:59:59Z')),'2026-10-19');
+  assert.equal(time.today(new Date('2026-10-19T16:00:00Z')),'2026-10-20');
+  assert.equal(time.today(new Date('2025-12-31T16:00:00Z')),'2026-01-01');
+  assert.equal(time.daysBefore('2026-03-01',1),'2026-02-28');
+  assert.equal(time.daysBefore('2024-03-01',1),'2024-02-29');
+  assert.equal(time.daysBefore('2026-01-01',29),'2025-12-03');
+  assert.throws(()=>time.daysBefore('2026-02-30',1),/無效的日期/);
+  assert.match(time.timestamp('2026-10-19T16:00:00.000Z'),/UTC\+8/);
+  assert.match(time.clock(new Date('2026-10-19T16:00:00Z')),/UTC\+8/);
+});
+test('admin and GA4 views use shared Taipei time service',()=>{
+  const admin=fs.readFileSync(new URL('admin.js',folder),'utf8');
+  const ga4=fs.readFileSync(new URL('ga4-dashboard.js',folder),'utf8');
+  const html=fs.readFileSync(new URL('admin.html',folder),'utf8');
+  assert.match(admin,/const dateText = window\.L1nGAdminTime\.timestamp/);
+  assert.match(admin,/window\.L1nGAdminTime\.clock\(\)/);
+  assert.match(ga4,/const \{today,daysBefore\}=window\.L1nGAdminTime/);
+  assert.match(ga4,/window\.L1nGAdminTime\.timestamp\(new Date\(\)\)/);
+  assert.doesNotMatch(ga4,/getFullYear\(\)|getMonth\(\)|getDate\(\)/);
+  assert.ok(html.indexOf('admin-time.js?')<html.indexOf('admin.js?'));
+  assert.ok(html.indexOf('admin-time.js?')<html.indexOf('ga4-dashboard.js?'));
+});

@@ -102,12 +102,7 @@
   const label = status => statuses[status] || status || '未知';
   const categoryLabel = category => categories[category] || category || '未分類';
   const categoryBadgeClass = category => ['bug','feature','other'].includes(category) ? category : 'uncategorized';
-  const dateText = value => {
-    if (!value) return '未知';
-    const timestamp = new Date(value);
-    return Number.isNaN(timestamp.getTime()) ? '未知'
-      : new Intl.DateTimeFormat('zh-TW', {dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Taipei'}).format(timestamp) + '（UTC+8）';
-  };
+  const dateText = window.L1nGAdminTime.timestamp;
   const sizeText = n => {
     const size = Number(n) || 0;
     return size < 1024 ? size + ' B' : size < 1048576 ? (size / 1024).toFixed(1) + ' KB'
@@ -270,8 +265,8 @@
       const area=document.querySelector('.admin-main'),scroll=area?.scrollTop||0;render();if(area)area.scrollTop=scroll;
       if(needsDetail)void refreshVisibleDetail();
       if(shouldNotify)$('feedback-sync-status').textContent='收到 '+additions.length+' 則新回饋或更新';
-      else if(manual)$('feedback-sync-status').textContent='已更新 · '+new Date().toLocaleTimeString('zh-TW');
-      else if(wasDisconnected)$('feedback-sync-status').textContent='已恢復連線 · '+new Date().toLocaleTimeString('zh-TW');
+      else if(manual)$('feedback-sync-status').textContent='已更新 · '+window.L1nGAdminTime.clock();
+      else if(wasDisconnected)$('feedback-sync-status').textContent='已恢復連線 · '+window.L1nGAdminTime.clock();
       if ($('overview-recent')) {
         $('overview-recent').textContent = entries.length
           ? '最新回饋：' + entries[0].title : '目前沒有回饋紀錄。';
