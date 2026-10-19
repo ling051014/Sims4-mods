@@ -18810,7 +18810,7 @@ document.addEventListener('keydown', e => {
       e.preventDefault();
       return;
     }
-    if (e.key === 'Delete' && (selectedNodeIds.size || selectedPetIds.size)) {
+    if ((e.key === 'Delete' || e.key === 'Backspace') && (selectedNodeIds.size || selectedPetIds.size)) {
       e.preventDefault();
       if (!e.repeat) deleteSelectedCanvasCards();
       return;
