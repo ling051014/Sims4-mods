@@ -157,3 +157,10 @@ test('GA4 chart selection does not reference missing before initialization',()=>
   assert.ok(body.indexOf('const missing=record.value===null;')>=0);
   assert.ok(body.indexOf('const missing=record.value===null;')<body.indexOf("marker.style.display=missing"));
 });
+
+test('download item labels cover changelog and latest translation',()=>{
+  const js=fs.readFileSync(new URL('ga4-dashboard.js',folder),'utf8');
+  assert.match(js,/r_v05_changelog/);
+  assert.match(js,/t_nc4t_lifetime_cht/);
+  assert.match(js,/x\.unclassified\?'未分類下載/);
+});
