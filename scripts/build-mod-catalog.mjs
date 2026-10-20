@@ -9,7 +9,7 @@ const text=s=>String(s).replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&n
 const name=s=>text(s.replace(/<br\s*\/?>/gi," / "));
 const author=s=>text(s.match(/<a\b[^>]*>([\s\S]*?)<\/a>/i)?.[1]||s.match(/<a\b[^>]*>([^<\n\r]+)/i)?.[1]||s).replace(/^by\s+/i,"")||"作者未標示";
 const image=s=>{const u=s.match(/<img[^>]*\bsrc=["']([^"']+)["']/i)?.[1];return u&&!/\/\.(jpg|png|webp|gif)/i.test(u)?u:""};
-const outputs=new Map(),all=[];
+const outputs=new Map();
 for(const path of pages){
  const tag=path.replace(/\.html$/,"").replace(/[^a-z0-9]+/g,"-");
  const json=JSON.parse(await readFile(resolve(root,"data/mods",tag+".json"),"utf8"));
@@ -19,43 +19,19 @@ for(const path of pages){
  let n=0;
  let built=tpl.replace(/<!-- MOD_CARD:([a-z0-9-]+) -->/g,(_,id)=>{
   const c=map.get(id);if(!c)throw Error("missing "+id);n++;
-  all.push({id,path,title:name(c.slots.titleHtml),author:author(c.slots.authorHtml),image:image(c.slots.previewHtml)});
   return c.template.replace(/\{\{(\w+)\}\}/g,(_whole,key)=>{
    if(!Object.hasOwn(c.slots,key))throw Error("missing slot "+id+" "+key);
    return c.slots[key];
   }).replace('<div class="mod-card">','<div class="mod-card" id="mod-'+id+'">');
  });
  if(n!==json.cards.length)throw Error("card mismatch "+path);
- built=built.replace(/(<div class="nav-links">[\s\S]*?)(\s*<\/div>)/,(_,a,b)=>a+' <span style="color: #eee;">/</span> <a href="authors.html">作者</a>'+b);
+ built=built.replace(/(\n[ \t]*)(<div class="mod-container">)/,(_,space,tag)=>space+"<div class=\"mod-sort-bar\">\n  <label for=\"mod-sort\">排序</label>\n  <select id=\"mod-sort\" aria-label=\"模組排序\">\n    <option value=\"original\">原本順序</option>\n    <option value=\"author-asc\">作者 A–Z</option>\n    <option value=\"author-desc\">作者 Z–A</option>\n  </select>\n</div>"+space+tag);
+ built=built.replace('</body>', '    <script src="mod-sort.js?v=20261020-author-sort"></script>\n</body>');
  outputs.set(path,built);
 }
-const groups=new Map();
-for(const c of all){if(!groups.has(c.author))groups.set(c.author,[]);groups.get(c.author).push(c)}
-const cards=[...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0],"zh-Hant")).map(([label,mods])=>{
- const cover=mods.find(m=>m.image)?.image;
- const pic=cover?'<div class="preview-img"><img src="'+esc(cover)+'" alt=""></div>':"";
- const links=mods.map(m=>'<a href="'+esc(m.path)+'#mod-'+m.id+'">'+esc(m.title)+'</a>').join("<br>\n");
- return '<div class="mod-card">'+pic+'<div class="content"><h2 class="mod-header">'+esc(label)+'</h2><div class="author">收藏作者 / '+mods.length+' 款模組</div><div class="details"><div class="info-row">'+links+'</div></div></div></div>';
-}).join("\n");
-const authors=`<!DOCTYPE html>
-<html lang="zh-Hant">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LING'S SIMS 4 MODS - 作者索引</title>
-<link rel="stylesheet" href="style.css?v=20261011-unified-controls-r1">
-<link rel="stylesheet" href="site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"></head>
-<body class="mod-list-page">
-<script src="site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3" data-skeleton-layout="mods-list"></script>
-<nav class="nav-menu"><div class="nav-links"><a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#">依作者查看</a></div><div class="search-box"><input type="text" id="mod-search" placeholder="搜尋作者或模組..." onkeyup="searchMods()"><div id="search-results" class="search-dropdown"></div></div></nav>
-<main class="page-scroll"><div class="mod-container">
-${cards}
-</div></main>
-<script src="script.js?v=20261011-unified-controls-r1"></script>
-</body></html>
-`;
-outputs.set("authors.html",authors);
 const check=process.argv.includes("--check");
 for(const [path,html] of outputs){
  if(check){if(await readFile(resolve(root,path),"utf8")!==html)throw Error("stale "+path)}
  else await writeFile(resolve(root,path),html,"utf8");
 }
-console.log((check?"Verified ":"Generated ")+all.length+" mods, "+groups.size+" authors, "+outputs.size+" pages");
+console.log((check?"Verified ":"Generated ")+outputs.size+" categorized pages");
