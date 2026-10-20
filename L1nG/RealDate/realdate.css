@@ -194,6 +194,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 .main-nav {
+    position:relative;
     /* 顯示方式 */ display: flex;
     /* 水平排列 */ justify-content: center;
     /* 垂直對齊 */ align-items: center;
@@ -224,7 +225,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 文字顏色 */ color: var(--accent);
 }
 
-.main-nav > a.active::after,
+.main-nav:not(.l1ng-nav-indicator-ready) > a.active::after,
 .nav-more.active > summary::after {
     /* 建立內容 */ content: "";
     /* 定位方式 */ position: absolute;
@@ -1581,6 +1582,27 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     .nav-more.active > summary::after {
         /* 顯示方式 */ display: none;
     }
+/* 單一移動底線：與原本 active 底線同色、同厚度。 */
+.main-nav > .l1ng-nav-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: var(--l1ng-nav-width, 0px);
+    height: 1px;
+    background: var(--accent);
+    transform: translate3d(var(--l1ng-nav-x, 0px), var(--l1ng-nav-y, 0px), 0);
+    pointer-events: none;
+}
+.main-nav > .l1ng-nav-indicator.is-animated {
+    transition: transform 280ms ease-out, width 280ms ease-out;
+}
+.main-nav.open > .l1ng-nav-indicator { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    .main-nav > .l1ng-nav-indicator.is-animated { transition: none; }
+}
+
+
 
     .nav-more-menu {
         /* 定位方式 */ position: static;
