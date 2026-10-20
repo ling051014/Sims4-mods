@@ -77,6 +77,7 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
         '':['12','31','5'],
         date:['12'],
         'hostName,pagePath':['31'],
+        'hostName,eventName':['2'],
         country:['8'],
         deviceCategory:['7'],
         sessionSourceMedium:['10'],
@@ -87,7 +88,7 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
       const dims={
         '':[],date:['20261003'],'hostName,pagePath':['home.by-l1ng.com','/'],
         country:['Taiwan'],deviceCategory:['mobile'],sessionSourceMedium:['(direct) / (none)'],
-        hostName:['realdate.by-l1ng.com']
+        hostName:['realdate.by-l1ng.com'],'hostName,eventName':['realdate.by-l1ng.com','l1ng_dl_r_v050_main']
       };
       return Response.json({rows:[{
         dimensionValues:dims[dimensions.join(',')].map(value=>({value})),
@@ -106,9 +107,12 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
     assert.equal(result.body.pages[0].host,'home.by-l1ng.com');
     assert.equal(result.body.countries[0].name,'Taiwan');
     assert.equal(result.body.trend[0].date,'20261003');
-    assert.equal(result.body.downloads[0].value,3);
-    assert.equal(reportCalls,7);
-    assert.ok(calls>=9);
+    assert.equal(result.body.downloadItems[0].id,'r_v050_main');
+    assert.equal(result.body.downloadItems[0].value,2);
+    assert.equal(result.body.downloadItems[1].unclassified,true);
+    assert.equal(result.body.downloadItems[1].value,1);
+    assert.equal(reportCalls,8);
+    assert.ok(calls>=10);
     assert.equal(JSON.stringify(result.body).includes('PRIVATE KEY'),false);
   } finally {globalThis.fetch=original;}
 });
