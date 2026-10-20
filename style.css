@@ -1437,10 +1437,10 @@ th.desc .sort-arrows::after {
 .filter-group input[type="checkbox"]:focus-visible {outline:2px solid #55acee;outline-offset:2px;}
 @media(hover:hover) and (pointer:fine){.page-scroll,.search-dropdown,.table-container {scrollbar-width:thin;scrollbar-color:#cad7e2 transparent}.page-scroll::-webkit-scrollbar,.search-dropdown::-webkit-scrollbar,.table-container::-webkit-scrollbar {width:6px;height:6px}.page-scroll::-webkit-scrollbar-thumb,.search-dropdown::-webkit-scrollbar-thumb,.table-container::-webkit-scrollbar-thumb {background:#cad7e2;border-radius:999px}}
 .search-box {color:#6b7986}
-.search-box:before {content:"";position:absolute;left:13px;top:50%;transform:translateY(-50%);height:15px;width:15px;background:currentColor;opacity:.7;pointer-events:none;-webkit-mask:url("L1nG/icons/ui-search.svg") center/contain no-repeat;mask:url("L1nG/icons/ui-search.svg") center/contain no-repeat}
+.search-box:before {content:"";position:absolute;left:13px;top:50%;transform:translateY(-50%);height:15px;width:15px;background:currentColor;opacity:.7;pointer-events:none;-webkit-mask:url("html%20icons/ui-search.svg") center/contain no-repeat;mask:url("html%20icons/ui-search.svg") center/contain no-repeat}
 .search-box #mod-search {padding-left:35px;padding-right:37px}
 .search-box .l1ng-search-clear{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border:0;border-radius:50%;background:transparent;color:#768491;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.search-box .l1ng-search-clear:before {content:"";width:13px;height:13px;background:currentColor;-webkit-mask:url("L1nG/icons/ui-clear.svg") center/contain no-repeat;mask:url("L1nG/icons/ui-clear.svg") center/contain no-repeat}
+.search-box .l1ng-search-clear:before {content:"";width:13px;height:13px;background:currentColor;-webkit-mask:url("html%20icons/ui-clear.svg") center/contain no-repeat;mask:url("html%20icons/ui-clear.svg") center/contain no-repeat}
 .search-box .l1ng-search-clear[hidden]{display:none}
 .search-box .l1ng-search-clear:hover,.search-box .l1ng-search-clear:focus-visible{background:#edf4fa;color:#315f83}
 @media(pointer:coarse){.search-box .l1ng-search-clear{height:40px;width:40px;right:0}}
