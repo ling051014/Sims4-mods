@@ -2153,7 +2153,7 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-editor-tab { position:relative; flex:1 1 0; min-width:max-content; min-height:34px; padding:7px 11px 8px; border:0; border-radius:0; background:transparent; color:var(--text-secondary); font-size:12.5px; font-weight:600; line-height:1.2; transition:color .15s ease,background .15s ease; }
 .sim-editor-tab:hover { background:var(--surface-item-hover); color:var(--text-primary); }
 .sim-editor-tab.active { color:var(--action-primary); background:transparent; }
-.sim-editor-tab.active::after { content:""; position:absolute; left:14px; right:14px; bottom:0; height:2px; border-radius:999px; background:var(--action-primary); }
+.sim-editor-tabs:not(.l1ng-indicator-ready) .sim-editor-tab.active::after { content:""; position:absolute; left:14px; right:14px; bottom:0; height:2px; border-radius:999px; background:var(--action-primary); }
 .sim-editor-content { flex:1 1 auto; min-height:0; overflow-y:auto; padding:12px 18px 14px; background:var(--surface-card); }
 .sim-editor-panel { display:none; }
 .sim-editor-panel.active { display:block; }
@@ -4469,6 +4469,7 @@ button.avatar-editor-action { cursor:pointer; }
 .person-library-category-tabs button .l1ng-icon { width:16px; height:16px; flex:0 0 16px; }
 .person-library-category-tabs button:hover { background:var(--surface-item-hover); color:var(--text-primary); }
 .person-library-category-tabs button.active { color:var(--action-primary); background:var(--brand-tint-start); font-weight:700; }
+.person-library-category-tabs.l1ng-indicator-ready button.active { background:transparent; }
 .person-library-category-total { margin-left:auto; color:var(--text-secondary); font-size:10.5px; font-weight:500; font-variant-numeric:tabular-nums; line-height:1.2; }
 .person-library-category-tabs button.active .person-library-category-total { color:var(--action-primary); opacity:.76; }
 .person-library-header-actions { display:flex; flex-direction:column; align-items:stretch; gap:7px; margin-top:auto; padding-top:18px; }
@@ -4598,7 +4599,7 @@ button.avatar-editor-action { cursor:pointer; }
     .person-library-category-tabs { flex:1 1 auto; min-width:0; flex-direction:row; align-items:center; gap:2px; }
     .person-library-category-tabs button { position:relative; flex:0 0 auto; width:auto; min-height:40px; padding:6px 3px 8px; gap:5px; border:0; border-radius:0; background:transparent; font-size:11px; }
     .person-library-category-tabs button.active { background:transparent; color:var(--action-primary); }
-    .person-library-category-tabs button.active::after { content:""; position:absolute; left:1px; right:1px; bottom:-5px; height:2px; border-radius:2px; background:var(--action-primary); }
+    .person-library-category-tabs:not(.l1ng-indicator-ready) button.active::after { content:""; position:absolute; left:1px; right:1px; bottom:-5px; height:2px; border-radius:2px; background:var(--action-primary); }
     .person-library-category-tabs button .l1ng-icon { width:13px; height:13px; flex-basis:13px; }
     .person-library-category-total { font-size:9.5px; margin-left:0; }
     .person-library-header-actions { flex:0 0 auto; margin:0 0 0 auto; padding:0; align-items:center; flex-direction:row; justify-content:flex-end; gap:4px; }
@@ -8897,3 +8898,34 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 @media (pointer:coarse){.l1ng-color-picker-tools button{min-height:40px}.l1ng-color-picker-inputs input{font-size:16px;height:32px;min-height:32px}}
 
 @media (prefers-reduced-motion:reduce){.l1ng-color-picker-hue-rest,.l1ng-color-picker-hue-lens{transition:none}}
+
+/* ========【共用選取指示器】 同一條底線與垂直背景沿座標平滑移動 ======== */
+.sim-editor-tabs > .l1ng-selection-indicator,
+.person-library-category-tabs > .l1ng-selection-indicator {
+    position:absolute; pointer-events:none; z-index:0;
+    left:0; top:0; width:var(--l1ng-indicator-width,0px);
+    transform:translate3d(var(--l1ng-indicator-x,0px),var(--l1ng-indicator-y,0px),0);
+    transition:transform 260ms ease-out,width 260ms ease-out,height 260ms ease-out;
+}
+.sim-editor-tabs > .l1ng-selection-indicator {
+    height:2px; top:auto; bottom:0; background:var(--action-primary); border-radius:999px;
+    transform:translateX(var(--l1ng-indicator-x,0px));
+}
+.sim-editor-tabs > .sim-editor-tab { z-index:1; }
+.person-library-category-tabs { position:relative; }
+.person-library-category-tabs > .l1ng-selection-indicator {
+    height:var(--l1ng-indicator-height,0px);
+    background:var(--brand-tint-start); border-radius:7px;
+}
+.person-library-category-tabs > button { position:relative; z-index:1; }
+@media (max-width:720px) {
+    .person-library-category-tabs > .l1ng-selection-indicator {
+        height:2px; top:auto; bottom:-5px; border-radius:2px;
+        background:var(--action-primary);
+        transform:translateX(var(--l1ng-indicator-x,0px));
+    }
+}
+@media (prefers-reduced-motion:reduce) {
+    .sim-editor-tabs > .l1ng-selection-indicator,
+    .person-library-category-tabs > .l1ng-selection-indicator { transition:none; }
+}
