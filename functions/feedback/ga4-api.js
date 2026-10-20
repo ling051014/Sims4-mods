@@ -167,7 +167,11 @@ async function report(env,site,range) {
   if(!/^\d{6,15}$/.test(env.GA4_PROPERTY_ID||''))throw Error('Invalid property');
   const property=env.GA4_PROPERTY_ID;
   const token=await googleAccessToken(env);
+  // Aggregate downloads and per-button clicks are separate GA4 events. Query both;
+  // never substitute an event parameter that requires an unregistered custom dimension.
+  const downloadItemPrefix='l1ng_dl_';
   const eventFilter={filter:{fieldName:'eventName',stringFilter:{matchType:'EXACT',value:'l1ng_download_click'}}};
+  const itemFilter={filter:{fieldName:'eventName',stringFilter:{matchType:'BEGINS_WITH',value:downloadItemPrefix}}};
   const jobs=[
     query(range,site,[],['activeUsers','screenPageViews','newUsers']),
     query(range,site,['date'],['activeUsers'],370),
@@ -175,10 +179,29 @@ async function report(env,site,range) {
     query(range,site,['country'],['activeUsers'],12),
     query(range,site,['deviceCategory'],['activeUsers'],5),
     query(range,site,['sessionSourceMedium'],['sessions'],10),
-    query(range,site,['hostName'],['eventCount'],10,eventFilter)
+    query(range,site,['hostName'],['eventCount'],10,eventFilter),
+    query(range,site,['hostName','eventName'],['eventCount'],200,itemFilter)
   ];
   const results=await Promise.all(jobs.map(job=>runReport(property,token,job)));
   const downloads=parseRows(results[6]);
+  const itemRows=parseRows(results[7]);
+  const downloadItems=itemRows.filter(row=>
+    typeof row.dims[0]==='string'
+    && /^l1ng_dl_[a-z0-9_]{4,30}$/.test(row.dims[1]||'')
+    && row.values[0]>0
+  ).map(row=>({
+    host:row.dims[0],id:row.dims[1].slice(downloadItemPrefix.length),value:row.values[0]
+  }));
+  // Older or untagged clicks still count in the total, but must not be attributed
+  // to a specific button. Include them explicitly rather than showing an empty list.
+  const countsByHost=new Map();
+  for(const item of downloadItems)
+    countsByHost.set(item.host,(countsByHost.get(item.host)||0)+item.value);
+  for(const row of downloads){
+    const host=row.dims[0],unclassified=row.values[0]-(countsByHost.get(host)||0);
+    if(unclassified>0)downloadItems.push({host,id:null,value:unclassified,unclassified:true});
+  }
+  downloadItems.sort((a,b)=>b.value-a.value);
   const payload={
     ok:true,range,site,generatedAt:new Date().toISOString(),
     summary:{
@@ -192,7 +215,7 @@ async function report(env,site,range) {
     countries:parseRows(results[3]).map(row=>({name:row.dims[0],value:row.values[0]})),
     devices:parseRows(results[4]).map(row=>({name:row.dims[0],value:row.values[0]})),
     referrals:parseRows(results[5]).map(row=>({name:row.dims[0],value:row.values[0]})),
-    downloads:downloads.map(row=>({host:row.dims[0],value:row.values[0]}))
+    downloadItems
   };
   // Prevent unbounded isolate cache growth; authentication is checked before any cache read.
   if(reportCache.size>=24)reportCache.clear();
