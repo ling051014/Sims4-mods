@@ -164,3 +164,24 @@ test('download item labels cover changelog and latest translation',()=>{
   assert.match(js,/t_nc4t_lifetime_cht/);
   assert.match(js,/x\.unclassified\?'未分類下載/);
 });
+
+test('analytics dashboard layout and card links follow the report hierarchy',()=>{
+  const html=fs.readFileSync(new URL('admin.html',folder),'utf8');
+  const css=fs.readFileSync(new URL('admin.css',folder),'utf8');
+  const script=fs.readFileSync(new URL('ga4-dashboard.js',folder),'utf8');
+  const order=['analytics-traffic','analytics-devices','analytics-countries','analytics-pages','analytics-downloads'];
+  let previous=-1;
+  for(const id of order){
+    const position=html.indexOf('id="'+id+'"');
+    assert.ok(position>previous,'Report section order: '+id);
+    previous=position;
+  }
+  for(const id of ['analytics-traffic','analytics-pages','analytics-downloads','analytics-countries']){
+    assert.ok(html.includes('data-analytics-target="'+id+'"'),id+' has a summary-card link');
+  }
+  assert.match(html,/class="range-btn active" data-range="7"/);
+  assert.doesNotMatch(html,/class="range-btn active" data-range="30"/);
+  assert.match(script,/let chosenRange='7',requestId=0/);
+  assert.match(script,/querySelectorAll\('\[data-analytics-target\]'\)/);
+  assert.match(css,/@media\(max-width:700px\)\{\s*\.admin-only #panel-analytics \.ga-chart-readout\{display:flex\}/);
+});
