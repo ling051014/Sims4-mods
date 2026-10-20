@@ -16,6 +16,7 @@
 
     let loaded = false;
     let loading = null;
+    let contentLoading = null;
     let cards = [];
     let activeCategory = '';
     let ageState = 'undecided';
@@ -63,6 +64,7 @@
         if (loaded) return;
         if (loading) return loading;
         status.textContent = '載入全部模組中…';
+        contentLoading = window.L1nGSkeleton.start(container, 'cards', 6);
         loading = (async () => {
             const response = await fetch('all-mods.fragment.html');
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -72,14 +74,15 @@
             if (found.length !== 194) throw new Error('模組資料不完整（' + found.length + ' / 194）');
             for (const img of template.content.querySelectorAll('img')) img.loading = 'lazy';
             for (const video of template.content.querySelectorAll('video')) video.preload = 'none';
-            container.appendChild(template.content);
+            contentLoading.ready(template.content);
             bindCards();
         })();
         try { await loading; }
         catch (error) {
-            status.textContent = '目前無法載入全部模組，請再切換一次重試。';
+            contentLoading.fail('目前無法載入全部模組，請切回分類模式後重試。');
+            status.textContent = '全部模組載入失敗';
             console.error('模組收藏載入失敗', error);
-        } finally { loading = null; }
+        } finally { loading = null; contentLoading = null; }
     }
     function setView(mode) {
         const all = mode === 'all';
@@ -87,6 +90,7 @@
         allSection.hidden = !all;
         for (const button of switcher.querySelectorAll('[data-view]'))
             button.setAttribute('aria-pressed', String(button.dataset.view === mode));
+        positionSlider();
         if (all) {
             if (ageState === 'undecided') {
                 status.textContent = '請確認年齡後顯示全部模組';
@@ -107,6 +111,18 @@
     ageDialog.addEventListener('close', () => {
         if (ageState === 'undecided') setView('category');
     });
+    function positionSlider() {
+        const active = switcher.querySelector('.home-mod-view-button[aria-pressed="true"]');
+        if (!active) return;
+        switcher.style.setProperty('--view-slider-width', active.offsetWidth + 'px');
+        switcher.style.setProperty('--view-slider-x', active.offsetLeft + 'px');
+    }
+    if ('ResizeObserver' in window) {
+        const observer = new ResizeObserver(positionSlider);
+        observer.observe(switcher);
+        for (const button of switcher.querySelectorAll('.home-mod-view-button')) observer.observe(button);
+    } else window.addEventListener('resize', positionSlider);
+    positionSlider();
     switcher.addEventListener('click', event => {
         const button = event.target.closest('button[data-view]');
         if (!button) return;
