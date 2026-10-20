@@ -259,35 +259,11 @@ function sortTable(colIndex) {
     }
     
     // ===================================================
-    // ========【重新渲染排序後內容】（鎖定高度防擠壓版） ========
+    // ========【套用排序結果】 不鎖定表格高度，避免重複排序時擠壓版面 ========
     // ===================================================
-
-    // 1. 取得 table 並鎖定物理空間，防止搬移時高度塌陷
-    const targetTable = tbody.closest('table');
-    if (targetTable) {
-        const currentTableHeight = targetTable.offsetHeight;
-        targetTable.style.height = currentTableHeight + 'px';
-        targetTable.style.minHeight = currentTableHeight + 'px';
-        targetTable.style.overflow = 'hidden'; // 強制鎖死內容，防止瞬間抖動
-    }
-
-    // 2. 建立虛擬容器搬移行（注意：此處 rows 為你排序後的結果陣列）
-    const fragment = document.createDocumentFragment();
-    rows.forEach(row => fragment.appendChild(row));
-
-    // 3. 清空並一次性塞入新內容
-    tbody.replaceChildren(fragment);
-
-    // 4. 釋放高度鎖定（使用 setTimeout 確保渲染完全完成，避免面板卡載入）
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            if (targetTable) {
-                targetTable.style.removeProperty('height');
-                targetTable.style.removeProperty('min-height');
-                targetTable.style.removeProperty('overflow');
-            }
-        }, 10); 
-    });
+    // 一次性重排既有 DOM 列，保留篩選、選取及原始順序索引。
+    // DOM 更新在同一個 JavaScript 執行週期完成，無需固定高度或延遲解鎖。
+    tbody.replaceChildren(...rows);
 
     // ===================================================
     // ========【更新排序箭頭樣式】 ========
