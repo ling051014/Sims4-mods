@@ -101,7 +101,7 @@ function loadDLCTable(containerId) {
     if (!container) return;
 
     // 抓取外部的 dlc-table.html
-    fetch('dlc-table.html')
+    fetch('dlc-table.html?v=20261021-icons117-r1', { cache: 'no-cache' })
         .then(res => res.text()) // 轉為文字格式
         .then(html => {
             // 寫入 HTML
