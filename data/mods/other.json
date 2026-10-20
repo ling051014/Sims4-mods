@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "category": "other",
+  "categoryLabel": "其他延伸",
+  "sourceFile": "other.html",
+  "cards": [
+    {
+      "id": "other-001",
+      "order": 1,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/moonglow.jpg\">",
+        "titleHtml": "世界照明",
+        "authorHtml": "by <a href=\"https://softerhaze.tumblr.com/tagged/z\" target=\"_blank\">softerhaze.itch",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>模組主體 ｜</strong><a href=\"https://softerhaze.itch.io/sunblind\" target=\"_blank\">softerhaze - sunblind - royalty and legacy.zip</a></div>\n                        <div class=\"info-row\"><strong>備用載點 ｜</strong>無</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>Feb 13, 2026</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2026.07.05</div>\n                    ",
+        "tipsHtml": "\n                        <span class=\"text-green\">目前使用的是Sunblind，但部分環境太暗看不清楚</span></br>\n                        ( <a href=\"https://www.tumblr.com/softerhaze/628014593783087104/added-moonglow-lighting-mod-files-for-every\" target=\"_blank\">Moonglow</a>為備選方案 )</br>\n                        </br>\n                        <span class=\"text-orange\">每次遊戲更新或修復後需重新安裝</span></br>\n                        </br>\n                        請將Data、Delta資料夾「複製」、「貼上」至以下路徑</br>\n                        並選擇「取代」，<span class=\"text-red\">請勿刪除後再貼上</span></br>\n                        ➤ <strong>Origin</strong></br>\n                        C:\\Program Files (x86)\\Origin Games\\The Sims 4</br>\n                        ➤ <strong>Steam</strong></br>\n                        C:\\Program Files (x86)\\Steam\\steamapps\\common\\The Sims 4</br>\n                        ➤ <strong>EA</strong></br>\n                        C:\\Program Files\\EA Games\\The Sims 4</br>\n                        </br>\n                        ➤ <strong>Mac</strong></br>\n                        The Sims 4.app > Contents > res</br>\n                        Mac用戶需參考作者的下載指南</br>\n                    "
+      }
+    },
+    {
+      "id": "other-002",
+      "order": 2,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/Better_Graphics.jpg\">",
+        "titleHtml": "高清模組",
+        "authorHtml": "by <a href=\"https://www.patreon.com/cw/SulSulDUCK\" target=\"_blank\">鴨呀 (SulSulDUCK)</a>",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>檔案名稱 ｜</strong><a href=\"https://www.patreon.com/posts/better-graphics-113529819\" target=\"_blank\">Better Graphics Solution.zip</a></div>\n                        <div class=\"info-row\"><strong>備用載點 ｜</strong>無</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>May 31, 2025</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2026.07.05</div>\n                    ",
+        "tipsHtml": "\n                        <span class=\"text-green\">支援 DX9 與 DX11</span></br>\n                    \n                        請勿將此檔案放入「ConfigOverride」資料夾</br>\n                        否則遊戲無法啟動 (與 <a href=\"https://www.patreon.com/posts/55891224\" target=\"_blank\">Simp4Sims</a> 的版本不同)</br>\n                        必須「取代」Bin 資料夾內的檔案</br>\n                        </br>\n                        需確保 ConfigOverride 資料夾為空</br>\n                        ⤷ 舊文件可能會覆蓋目前文件並導致衝突</br>\n                        </br>\n                        ReShade / GShade 使用者</br>\n                        需要在「…」>「遊戲選項」>「畫面」>關閉「邊緣平滑」</br>\n                        改用 FXAA 或 SMAA</br>\n                        ⤷ 確保 MXAO、DOF、AdaptiveFog 和 DepthHaze 等著色器正常運作</br>\n                        </br>\n                        <span class=\"text-orange\">每次遊戲更新或修復後需重新安裝</span></br>\n                        ⤷ 每次遊戲更新或修復後，GraphicsRules.sgr 檔案都會重置</br>\n                    "
+      }
+    },
+    {
+      "id": "other-003",
+      "order": 3,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/reshade.jpg\">",
+        "titleHtml": "ReShade",
+        "authorHtml": "by RESHADE TEAM",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>檔案主體 ｜</strong><a href=\"https://reshade.me/\" target=\"_blank\">ReShade with full add-on support</a></div>\n                        <div class=\"info-row\"><strong>漢化版本 ｜</strong>內建繁中</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>6.7.3</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2026.05.18</div>\n                    ",
+        "tipsHtml": "\n                        <span class=\"text-red\">支援插件需安裝「Full add-on support」版本</span></br>\n                        濾鏡開關快捷鍵「數字 . 」</br>\n                        濾鏡選單HOME鍵「數字 7 」</br>\n                        </br>\n                        濾鏡資料夾路徑</br>\n                        ∞ <strong>Steam</strong> : 遊戲Sims ⇨ 右鍵內容 ⇨ 已安裝檔案 ⇨ 瀏覽 ⇨ Game ⇨ Bin</br>\n                        ∞ <strong>EA</strong> : 模擬市民4 ⇨ 點右上「…」⇨ 查看屬性 ⇨ 開啟資料夾 ⇨ Game ⇨ Bin</br>\n                        </br>\n                        <span class=\"text-green\">濾鏡核心檔案</span></br>\n                        d3d9.dll（DX9 使用者）</br>\n                        dxgi.dll（X11 使用者）\n                    "
+      }
+    },
+    {
+      "id": "other-004",
+      "order": 4,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/hide_ui.webp\">",
+        "titleHtml": "隱藏UI介面",
+        "authorHtml": "by <a href=\"https://www.patreon.com/vyxated\" target=\"_blank\">VYXATED</a>",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>插件主體 ｜</strong><a href=\"https://github.com/FransBouma/ShaderToggler/releases\" target=\"_blank\">ShaderToggler_v121.zip</a> (64位元)</div>\n                        <div class=\"info-row\"><strong>其他檔案 ｜</strong><a href=\"https://www.patreon.com/posts/reshade-hide-ui-93652879\" target=\"_blank\">ShaderToggler_DX11.ini</a> (DX11)</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>v121</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2026.05.18</div>\n                    ",
+        "tipsHtml": "\n                        <span class=\"text-green\">支援 ReShade 與 GShade</span></br>\n                        <span class=\"text-red\">ReShade with full add-on support 需 5.1以上版本</span></br>\n                        </br>\n                        32位元下載 ⇨ ShaderToggler_x86_101.zip</br>\n                        DX9下載 ⇨ ShaderToggler.ini</br>\n                        </br>\n                        <span class=\"text-red\">ini 檔案應該命名為 ShaderToggler.ini</span></br>\n                        <span class=\"text-red\">下載 DX11 版本需刪除「_DX11」後綴</span></br>\n                        </br>\n                        請「剪下」、「貼上」至資料夾路徑</br>\n                        ∞ <strong>Steam</strong> : 遊戲Sims ⇨ 右鍵內容 ⇨ 已安裝檔案 ⇨ 瀏覽 ⇨ Game ⇨ Bin</br>\n                        ∞ <strong>EA</strong> : 模擬市民4 ⇨ 點右上「…」⇨ 查看屬性 ⇨ 開啟資料夾 ⇨ Game ⇨ Bin</br>\n                    "
+      }
+    },
+    {
+      "id": "other-005",
+      "order": 5,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/.jpg\">",
+        "titleHtml": "SRWE 高清截圖",
+        "authorHtml": "by <a href=\"https://github.com/dtgDTGdtg\" target=\"_blank\">dtgDTGdtg</a>",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>模組主體 ｜</strong><a href=\"https://github.com/dtgDTGdtg/SRWE/releases\" target=\"_blank\">SRWE v2.3.6</a></div>\n                        <div class=\"info-row\"><strong>漢化版本 ｜</strong>無吳</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>v2.3.6</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2026.05.10</div>\n                    ",
+        "tipsHtml": "\n                        需要在「…」>「遊戲選項」>「畫面」中</br>\n                        將顯示模式切換為「視窗模式」</br>\n                        </br>\n                        打開 SRWE 點擊左上角選擇「 TS4_x64.exe」</br>\n                        輸入寬度高度參數，數值越大越高清也越佔空間</br>\n                        </br>\n                        若有安裝濾鏡 ( ReShade / GShade ) 使用一樣的截圖快捷鍵</br>\n                        沒有按裝濾鏡則使用遊戲內建快捷鍵「 C 」</br>\n                        </br>\n                        截圖後回到 SRWE 點擊「 Taskbar mode 」恢復遊戲大小</br>\n                    "
+      }
+    },
+    {
+      "id": "other-006",
+      "order": 6,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/mod_manager.png\">",
+        "titleHtml": "Sims 4 Mod Manager</br>模組可視化",
+        "authorHtml": "by GAMETIME DEV",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>官方網站 ｜</strong><a href=\"https://gametimedev.de/S4MM/\" target=\"_blank\">Gametimedev</a></div>\n                        <div class=\"info-row\"><strong>漢化版本 ｜</strong>內建繁中</div>\n                        <div class=\"info-row\"><strong>備用載點 ｜</strong>無</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>[B]2.1.9)</div>\n                    ",
+        "tipsHtml": "最強大的模組管理工具，支援圖片預覽，可快速抓出重複或損壞的檔案。"
+      }
+    },
+    {
+      "id": "other-007",
+      "order": 7,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/S4S.jpg\">",
+        "titleHtml": "Sims 4 Studio",
+        "authorHtml": "by <a href=\"https://sims4studio.com/\" target=\"_blank\">Sims 4 Studio</a>",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>程式主體 ｜</strong><a href=\"https://sims4studio.com/thread/29786/sims-studio-windows-star-open\" target=\"_blank\">InstallSims4Studio_v3.2.6.3 (Star).exe</a></div>\n                        <div class=\"info-row\"><strong>漢化版本 ｜</strong>內建繁中</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>v3.2.6.3</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2026.06.03</div>\n                    ",
+        "tipsHtml": "用於修復舊模組、批量更新 CC 以及開發自製物品的核心工具。"
+      }
+    },
+    {
+      "id": "other-008",
+      "order": 8,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/S4TI.jpg\">",
+        "titleHtml": "S4TI Tray導入器",
+        "authorHtml": "by <a href=\"https://luniversims.fr/profile/18-deevo/\" target=\"_blank\">Par deevo</a>",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>程式主體 ｜</strong><a href=\"https://luniversims.fr/files/file/73-sims-4-tray-importer/\" target=\"_blank\">S4TI_setup_250831.zip</a></div>\n                        <div class=\"info-row\"><strong>漢化版本 ｜</strong>內建繁中</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>v1.25.8.1</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2025.11.09</div>\n                    ",
+        "tipsHtml": "\n                        點選橘色的「Télécharger ce fichier」進行下載</br>\n                        </br>\n                        取消「自動檢測」，自行選擇模擬市民4的「安裝位置」；</br>\n                        「路徑檔案」選擇我的文件(My Documents)</br>\n                    "
+      }
+    },
+    {
+      "id": "other-009",
+      "order": 9,
+      "template": "<div class=\"mod-card\">\n                <div class=\"preview-img\">{{previewHtml}}</div>\n                <div class=\"content\">\n                    <h2 class=\"mod-header\">{{titleHtml}}</h2>\n                    <div class=\"author\">{{authorHtml}}</div>\n                    <div class=\"details\">{{detailsHtml}}</div>\n                    <div class=\"tips\">{{tipsHtml}}</div>\n                </div>\n            </div>",
+      "slots": {
+        "previewHtml": "<img src=\"preview/other/.jpg\">",
+        "titleHtml": "The Sims 4 Translator</br>翻譯程式工具",
+        "authorHtml": "by <a href=\"https://github.com/voky1\" target=\"_blank\">voky</a>",
+        "detailsHtml": "\n                        <div class=\"info-row\"><strong>程式主體 ｜</strong><a href=\"https://github.com/voky1/sims4-translator/releases\" target=\"_blank\">translator_1_4_x64.7z</a></div>\n                        <div class=\"info-row\"><strong>漢化版本 ｜</strong>內建繁中</div>\n                        <div class=\"info-row\"><strong>下載版本 ｜</strong>v1.4</div>\n                        <div class=\"info-row\"><strong>下載日期 ｜</strong>2026.06.07</div>\n                    ",
+        "tipsHtml": "\n                        Windows7 用戶下載 ⇨ translator_1_4_win7_x64.7z版本</br>\n                        </br>\n                        創建一個自訂資料夾，將壓縮檔丟到資料夾裡解壓縮(解完壓縮之後的壓縮檔就可以刪除了)，找到他的應用程式打開即可使用。</br>\n                        </br>\n                        第一次打開翻譯程式需先設置使用語言，在左上找到「Options」點開後選擇第一個選項。</br>\n                        如圖示將介面語言改為中文，目標語言改為CHT_CN。設定好後請關閉再重新開啟，設定才會生效。</br>\n                        (CHT_CN是繁體中文、CHS_CN是簡體中文；看你想翻譯的目標語言是哪一種)</br>\n                        </br>\n                        下載一個你想要進行漢化的模組。接著打開翻譯程式，點選左上「文件」>「載入文件」，選擇你剛剛下載的模組，載入程式後即可看到所有須漢化的英文詞條。\n                        選擇要翻譯的詞條按「Enter」或滑鼠點擊2下即可打開詞條進行翻譯。</br>\n                        (翻譯程式讀取的檔案為package)</br>\n                        </br>\n                        完成所有詞條翻譯後，如果你希望保存只有翻譯內容的檔案，請選擇「保存為...」；如果你希望漢化包含到主體模組裡，就選擇「確認保存package」。</br>\n                        ⚠️注意!! 如果你的漢化是要自用的，可以選擇「確認保存package」或「確認保存package至...」的選項(這個辦法是將原作者的模組本體+你自己的漢化包在一同一個檔案裡...等於搬運了原作者的本體在自己的網站給別人下載)；但如果你是想分享的，只要是非自用，請選擇「保存為...」。</br>\n                        ⚠️絕對不要分享包含了原模組主體的漢化，這個行為如同將別人的心血據為己有的盜用。經發現有此情況，將直接加入黑名單，並發布公告以提醒所有人。</br>\n                        </br>\n                        漢化檔案名稱的設置，建議盡量與原模組同名。並在前墜加上『!』，可以讓漢化檔案更容易被讀取到。(通常是Windows系統用「!」，Mac系統用「1」)</br>\n                        </br>\n                        如遇原模組更新，一樣使用翻譯程式打開模組檔案，選擇『導入翻譯』，選擇你之前翻譯此模組的漢化檔案導入。紅色顯示的部分就是新增的內容。</br>\n                    "
+      }
+    }
+  ]
+}
