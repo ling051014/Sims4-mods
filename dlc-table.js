@@ -98,7 +98,7 @@ function parseDLC(text) {
 async function loadDLCTable(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return false;
-    const loaded = await window.L1nGSkeleton.loadHtml(container, 'dlc-table.html', {
+    const loaded = await window.L1nGSkeleton.loadHtml(container, 'dlc-table.html?v=20261021-icons117-r1', {
         variant: 'dlc-table', count: 6, errorMessage: 'DLC 對照表載入失敗，請稍後重新整理。',
         onReady: () => requestAnimationFrame(initTable)
     });
