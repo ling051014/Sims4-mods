@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  const chartMediaCleanups=new WeakMap();
   // 分支預覽只展示介面，不會讀取正式管理資料或 GA4。
   const previewOnly = window.location.hostname !== 'home.by-l1ng.com';
   const number = n => new Intl.NumberFormat('zh-TW').format(Number(n) || 0);
@@ -171,7 +172,9 @@
   }
   function trend(id,series) {
     const root=$(id);if(!root)return;
+    chartMediaCleanups.get(root)?.();
     root.replaceChildren();
+    const mobile=window.matchMedia('(max-width: 700px)');
     const points=(series||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     if(!points.length){empty(id,'目前沒有每日訪客資料。');return;}
     const max=Math.max(1,...points.filter(item=>item.value!==null).map(item=>Number(item.value)||0));
@@ -235,14 +238,23 @@
     const tooltipDate=node('div','ga-chart-tooltip-date');
     const tooltipValue=node('div','ga-chart-tooltip-value');
     tooltip.append(tooltipDate,tooltipValue);
-    root.append(readout,scroll,tooltip);
+    root.append(scroll,tooltip);
+    // 桌面不建立讀數列；在窄螢幕才插入，避免重複桌面 Tooltip。
+    const syncReadout=()=>{
+      if(mobile.matches)root.insertBefore(readout,scroll);
+      else readout.remove();
+    };
+    syncReadout();
+    if(typeof mobile.addEventListener==='function'){
+      mobile.addEventListener('change',syncReadout);
+      chartMediaCleanups.set(root,()=>mobile.removeEventListener('change',syncReadout));
+    }
     const formatDate=raw=>{
       const date=String(raw||'');
       if(/^\d{8}$/.test(date))return date.slice(0,4)+'/'+date.slice(4,6)+'/'+date.slice(6,8);
       if(/^\d{4}-\d{2}-\d{2}$/.test(date))return date.replace(/-/g,'/');
       return date;
     };
-    const mobile=window.matchMedia('(max-width: 700px)');
     let selectedIndex=-1;
     function show(index,withTooltip=false) {
       if(index<0||index>=points.length)return;
