@@ -61,6 +61,7 @@
     return labelSite(host) + ' · 其他頁面';
   }
   const downloadNames=Object.freeze({
+    "r_v05_changelog":"RealDate v0.5 Beta · 更新日誌下載",
     "r_v05_homehero":"RealDate v0.5 Beta · 首頁上方下載",
     "r_v05_homecard":"RealDate v0.5 Beta · 首頁版本卡下載",
     "r_v050_main":"RealDate v0.5 Beta · 主要下載",
@@ -92,6 +93,7 @@
     "t_zodiac_cht":"十二星座 · 繁體中文下載",
     "t_zodiac_chs":"十二星座 · 簡體中文下載",
     "t_zodiac_backup":"十二星座 · 備用下載",
+    "t_nc4t_lifetime_cht":"Lifetime Aspirations Reworked · 繁體中文下載",
     "e_v01_main":"族譜提取器 v0.1 Beta · 主要下載"
   });
   const feedbackNames={l1ng_feedback_open:'開啟回饋',l1ng_feedback_submitted:'成功提交'};
@@ -362,7 +364,7 @@
     list('ga-countries',data.countries,x=>labelCountry(x.name));
     list('ga-feedback-events',data.feedbackEvents,x=>labelSite(x.host)+' · '+(feedbackNames[x.event]||'未知互動'));
     setText('ga-feedback-totals','開啟 '+number(s.feedbackOpened)+' · 成功提交 '+number(s.feedbackSubmitted));
-    list('ga-download-items',data.downloadItems,x=>labelSite(x.host)+' · '+(downloadNames[x.id]||'其他下載'));
+    list('ga-download-items',data.downloadItems,x=>labelSite(x.host)+' · '+(x.unclassified?'未分類下載（舊紀錄 / 未標記按鈕）':downloadNames[x.id]||'其他下載'));
     list('ga-referrals',data.referrals,x=>labelReferral(x.name));
     devices(data.devices);
   }
