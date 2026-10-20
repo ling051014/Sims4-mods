@@ -12,7 +12,7 @@
 
     <nav class="nav-menu">
         <div class="nav-links">
-            <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">默認替換</a> <span style="color: #eee;">/</span> <a href="authors.html">作者</a>
+            <a href="index.html">首頁</a> <span style="color: #eee;">/</span> <a href="#" style="color: #000;">默認替換</a>
         </div>
 
         <div class="search-box">
@@ -23,6 +23,14 @@
 
     <main class="page-scroll">
     
+        <div class="mod-sort-bar">
+  <label for="mod-sort">排序</label>
+  <select id="mod-sort" aria-label="模組排序">
+    <option value="original">原本順序</option>
+    <option value="author-asc">作者 A–Z</option>
+    <option value="author-desc">作者 Z–A</option>
+  </select>
+</div>
         <div class="mod-container">
     
             <div class="mod-card" id="mod-default-mods-001">
@@ -628,5 +636,6 @@
 
     <script src="script.js?v=20261011-unified-controls-r1"></script>
     
+    <script src="mod-sort.js?v=20261020-author-sort"></script>
 </body>
 </html>
