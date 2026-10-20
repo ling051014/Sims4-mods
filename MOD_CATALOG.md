@@ -31,3 +31,12 @@ node --test tests/mod_catalog.test.mjs
 ## 遷移原則
 
 此輪重構已逐筆比對原分類頁的 194 張卡片：文字、連結與圖片來源無差異，且保留 CAS 中的 NC4T「抱負大修」。舊的 `data/mods/`、`templates/mod-pages/` 及 `scripts/build-mod-catalog.mjs` 是先前遷移過程的重複資料，現在已改由根目錄 JSON + 根目錄產生器取代。
+
+## 首頁雙模式 / 分類彩色標籤
+
+- `index.html` 保留原有 12 個分類入口、快捷鍵、密技、DLC 對照、頁腳，新增「依分類瀏覽 / 全部模組」切換。
+- `all-mods.fragment.html` 是由同一個 `build-mod-catalog.mjs` 從 12 份 JSON 自動生成的卡片片段，**不是另一個網頁**，不手動編輯。
+- `home-mod-catalog.js` 只在切換到全部模組時載入片段，支援全文搜尋、作者排序、點選彩色分類標籤篩選 / 再次點選取消。
+- 分類標籤左上角（與編號同尺寸）、編號右上角；12 類固定低飽和顏色，只在首頁全部模組模式顯示。
+- `mod-sort.js` 共用排序邏輯，分類頁既有的排序行為不變。
+- 修改 JSON 後請執行 `node build-mod-catalog.mjs`，並以 `node build-mod-catalog.mjs --check` 驗證所有分類 HTML 及全模組片段與 JSON 一致。

@@ -32,7 +32,22 @@ for (const page of pages) {
 }
 assert.equal(total, 194);
 assert.equal(fields, 844);
+const home = await readFile(resolve(root, 'index.html'), 'utf8');
+const fragment = await readFile(resolve(root, 'all-mods.fragment.html'), 'utf8');
+const catalogJs = await readFile(resolve(root, 'home-mod-catalog.js'), 'utf8');
+const css = await readFile(resolve(root, 'style.css'), 'utf8');
+assert(home.includes('id="home-category-grid"') && home.includes('id="home-mod-catalog"'));
+assert(home.includes('data-view="category"') && home.includes('data-view="all"'));
+assert(home.includes('home-mod-catalog.js') && home.includes('mod-sort.js'));
+assert.equal((fragment.match(/class="mod-card"/g) || []).length, 194);
+assert.equal((fragment.match(/class="mod-category-label"/g) || []).length, 194);
+assert.equal((fragment.match(/data-category="/g) || []).length, 194);
+for (const category of ['PREP','CHEAT','UI','WORLD','DEFAULT','NSFW','SOCIAL','BUILDBUY','CAS','SLIDER','POSE','OTHER']) {
+    assert(fragment.includes('data-category="' + category + '"'), category);
+    assert(css.includes('data-category="' + category + '"'), 'Missing color ' + category);
+}
+assert(catalogJs.includes('all-mods.fragment.html'));
 const sortJs = await readFile(resolve(root, 'mod-sort.js'), 'utf8');
-assert(sortJs.includes('card.dataset.sortAuthor'));
+assert(sortJs.includes('card.dataset.sortAuthor') && sortJs.includes('L1nGModSort'));
 execFileSync(process.execPath, ['build-mod-catalog.mjs', '--check'], { cwd: root, stdio: 'pipe' });
 console.log('PASS: ' + total + ' structured mods / ' + fields + ' fields / 12 static category pages');

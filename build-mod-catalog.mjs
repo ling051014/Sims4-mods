@@ -24,7 +24,7 @@ function rich(nodes) {
             (node.children ? rich(node.children) + (node.unclosed ? '' : '</' + node.tag + '>') : '');
     }).join('');
 }
-function renderCard(mod) {
+function renderCard(mod, category = '') {
     const layout = mod.layout || {};
     const noteTag = layout.notesTag || 'div';
     if (!['p','div'].includes(noteTag)) throw new Error('Invalid notes layout');
@@ -33,7 +33,9 @@ function renderCard(mod) {
         : '';
     const previewStyle = layout.previewStyle ? ' style="' + attr(layout.previewStyle) + '"' : '';
     const author = attr(mod.authors?.[0]?.name || '');
-    let html = '<div class="mod-card" id="mod-' + mod.id + '" data-sort-author="' + author + '">' +
+    let html = '<div class="mod-card" id="mod-' + mod.id + '" data-sort-author="' + author + '"' +
+        (category ? ' data-category="' + category + '"' : '') + '>' +
+        (category ? '<button type="button" class="mod-category-label" aria-pressed="false" aria-label="篩選 ' + category + ' 分類">' + category + '</button>' : '') +
         '<div class="preview-img"' + previewStyle + '>' + rich(mod.preview) + '</div>' +
         '<div class="content">' +
         '<h2 class="mod-header">' + rich(mod.title) + '</h2>' +
@@ -63,6 +65,7 @@ export function generateCategory(source, data) {
 }
 
 let count = 0;
+const allMods = [];
 for (const page of pages) {
     const filename = page.replace(/\.html$/, '.json');
     const data = JSON.parse(await readFile(resolve(root, filename), 'utf8'));
@@ -75,7 +78,18 @@ for (const page of pages) {
     } else if (before !== after) {
         await writeFile(path, after, 'utf8');
     }
+    const category = page.replace(/\.html$/, '').replace(/-mods$/, '').replace(/-/g, '').toUpperCase();
+    for (const mod of [...data.mods].sort((a, b) => a.order - b.order)) allMods.push(renderCard(mod, category));
     count += data.mods.length;
+}
+// 全模組為生成的 HTML 片段（不是第二個頁面，也不維護第二份資料）。
+const fragmentPath = resolve(root, 'all-mods.fragment.html');
+const fullFragment = '<!-- 由 build-mod-catalog.mjs 從 12 個 JSON 產生，不要直接修改 -->\n' +
+    allMods.join('\n') + '\n';
+if (process.argv.includes('--check')) {
+    if (await readFile(fragmentPath, 'utf8') !== fullFragment) throw new Error('Outdated all-mods.fragment.html');
+} else {
+    await writeFile(fragmentPath, fullFragment, 'utf8');
 }
 console.log((process.argv.includes('--check') ? 'Verified ' : 'Generated ') +
     count + ' mods / ' + pages.length + ' categories');
