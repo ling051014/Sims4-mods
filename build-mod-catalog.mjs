@@ -10,7 +10,7 @@ const START = '<!-- L1NG_MODS_START -->';
 const END = '<!-- L1NG_MODS_END -->';
 
 const attr = value => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-const tags = new Set(['a','b','br','button','details','div','em','i','img','input','label','p','small','span','strong','summary','svg','path','video','source','wbr','hr','code','ul','li','ol']);
+const tags = new Set(['a','b','br','button','details','div','em','i','del','img','input','label','p','small','span','strong','summary','svg','path','video','source','wbr','hr','code','kbd','ul','li','ol']);
 function rich(nodes) {
     if (!Array.isArray(nodes)) throw new Error('Rich text must be an array');
     return nodes.map(node => {
