@@ -99,7 +99,7 @@ async function loadDLCTable(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return false;
     const loaded = await window.L1nGSkeleton.loadHtml(container, 'dlc-table.html', {
-        variant: 'table', count: 6, errorMessage: 'DLC 對照表載入失敗，請稍後重新整理。',
+        variant: 'dlc-table', count: 6, errorMessage: 'DLC 對照表載入失敗，請稍後重新整理。',
         onReady: () => requestAnimationFrame(initTable)
     });
     return loaded;
@@ -307,6 +307,19 @@ document.addEventListener('click', function (e) {
 // ========【頁面啟動】 ========
 // ===================================================
 window.addEventListener('DOMContentLoaded', () => {
-    // 呼叫載入 DLC 表格函式
-    loadDLCTable('home-table-placeholder');
+    // 首次展開才顯示與真實表格相符的骨架並載入資料；再次展開沿用內容。
+    const container = document.getElementById('home-table-placeholder');
+    const details = container?.closest('details');
+    if (!details) {
+        loadDLCTable('home-table-placeholder');
+        return;
+    }
+    let started = false;
+    const begin = () => {
+        if (!details.open || started) return;
+        started = true;
+        loadDLCTable('home-table-placeholder');
+    };
+    details.addEventListener('toggle', begin);
+    begin();
 });

@@ -215,6 +215,23 @@
     }
 
 
+    // DLC 專用內容骨架：兩列篩選控制、八欄表頭與可見資料列。
+    function dlcTableSkeleton(count) {
+        const option = () => '<span class="l1ng-dlc-sk-option"><span class="l1ng-dlc-sk-check"></span>' +
+            '<span class="l1ng-sk-block l1ng-dlc-sk-option-label"></span></span>';
+        const filter = length => '<div class="l1ng-dlc-sk-filter">' +
+            '<span class="l1ng-sk-block l1ng-dlc-sk-filter-name"></span>' +
+            repeat(length, option) + '</div>';
+        const row = header => '<div class="l1ng-dlc-sk-row' + (header ? ' is-header' : '') + '">' +
+            repeat(8, column => '<span class="l1ng-dlc-sk-cell"><span class="l1ng-sk-block ' +
+                (column === 2 ? 'l1ng-dlc-sk-icon' : 'l1ng-dlc-sk-cell-line') + '"></span></span>') +
+            '</div>';
+        return '<div class="l1ng-dlc-sk-filters">' + filter(5) + filter(8) + '</div>' +
+            '<div class="l1ng-dlc-sk-viewport"><div class="l1ng-dlc-sk-table">' +
+            row(true) + repeat(Math.min(8, Math.max(4, count)), () => row(false)) +
+            '</div></div>';
+    }
+
     // 全站內容區的共用載入狀態，延用頁面骨架動畫。
     function startLoading(target, variant = "table", count = 4) {
         if (!target) return null;
@@ -223,7 +240,7 @@
         loading.setAttribute("role", "status");
         loading.setAttribute("aria-label", "內容載入中");
         const block = (type = "line") => '<span class="l1ng-sk-block l1ng-content-' + type + '"></span>';
-        loading.innerHTML = Array.from({ length: Math.min(8, Math.max(1, count)) }, () =>
+        loading.innerHTML = variant === "dlc-table" ? dlcTableSkeleton(count) : Array.from({ length: Math.min(8, Math.max(1, count)) }, () =>
             variant === "cards"
                 ? '<div class="l1ng-content-card">' + block("media") +
                     '<div class="l1ng-content-card-body">' + block() + block("line short") + block() + '</div></div>'
