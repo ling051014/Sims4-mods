@@ -6,13 +6,13 @@
         <meta name="theme-color" content="#f7f7f5">
         <title>管理中心 · L1nG</title>
         <link rel="stylesheet" href="feedback.css?v=20261016-feedback-layout-r5">
-        <link rel="stylesheet" href="admin.css?v=20261020-admin-architecture-r5">
+        <link rel="stylesheet" href="admin.css?v=20261020-analytics-layout-r2">
         <script src="select-ui.js?v=20261016-dashboard-r3" defer></script>
         <script src="admin-network.js?v=20261020-access-recovery-r1" defer></script>
         <script src="ga4-country-labels.js?v=20261018-dashboard-regions-r1" defer></script>
         <script src="admin-time.js?v=20261020-ga4-daily-complete-r1" defer></script>
         <script src="admin.js?v=20261020-taipei-r1" defer></script>
-        <script src="ga4-dashboard.js?v=20261020-download-items-r1" defer></script>
+        <script src="ga4-dashboard.js?v=20261020-analytics-layout-r2" defer></script>
         <script src="admin-date-picker.js?v=20261020-admin-architecture-r5" defer></script>
     </head>
     <body class="admin-only">
@@ -197,8 +197,8 @@
                     </div>
                     <div class="analytics-filters">
                         <div aria-label="統計日期範圍" class="analytics-range" role="group">
-                            <button class="range-btn" data-range="7">7 天</button>
-                            <button class="range-btn active" data-range="30">30 天</button>
+                            <button class="range-btn active" data-range="7">7 天</button>
+                            <button class="range-btn" data-range="30">30 天</button>
                             <button class="range-btn" data-range="90">90 天</button>
                             <button aria-controls="custom-date-row" aria-expanded="false" class="range-btn" data-range="custom">自訂</button>
                         </div>
@@ -216,35 +216,35 @@
                     </div>
                     <p class="hint" id="ga-load-status" role="status" aria-live="polite">正在連接 GA4…</p>
                     <div class="stat-grid analytics-stat-grid">
-                        <div class="stat-card">
+                        <button class="stat-card" type="button" data-analytics-target="analytics-traffic" aria-controls="analytics-traffic" aria-label="活躍使用者，查看網站流量趨勢" title="查看網站流量趨勢">
                             <div class="topline">活躍使用者 <svg class="i sm"><use href="#ico-chart"></use></svg>
                             </div>
                             <div class="num" id="ga-users">—</div>
                             <div class="stat-footer">去重後的活躍使用者</div>
-                        </div>
-                        <div class="stat-card">
+                        </button>
+                        <button class="stat-card" type="button" data-analytics-target="analytics-pages" aria-controls="analytics-pages" aria-label="頁面瀏覽量，查看熱門頁面" title="查看熱門頁面">
                             <div class="topline">頁面瀏覽量 <svg class="i sm"><use href="#ico-grid"></use></svg>
                             </div>
                             <div class="num" id="ga-views">—</div>
                             <div class="stat-footer">統計期間的網頁瀏覽次數</div>
-                        </div>
-                        <div class="stat-card">
+                        </button>
+                        <button class="stat-card" type="button" data-analytics-target="analytics-downloads" aria-controls="analytics-downloads" aria-label="下載點擊，查看各下載按鈕點擊明細" title="查看各下載按鈕點擊明細">
                             <div class="topline">下載點擊 <svg class="i sm"><use href="#ico-arrow"></use></svg>
                             </div>
                             <div class="num" id="ga-downloads">—</div>
                             <div class="stat-footer">下載事件資料</div>
-                        </div>
-                        <div class="stat-card">
+                        </button>
+                        <button class="stat-card" type="button" data-analytics-target="analytics-countries" aria-controls="analytics-countries" aria-label="新訪客，查看訪客所在國家" title="查看訪客所在國家">
                             <div class="topline">新訪客 <svg class="i sm"><use href="#ico-spark"></use></svg>
                             </div>
                             <div class="num" id="ga-new">—</div>
                             <div class="stat-footer">統計期間首次造訪的使用者</div>
-                        </div>
+                        </button>
                     </div>
-                    <section class="dash-card analytics-traffic">
+                    <section class="dash-card analytics-traffic" id="analytics-traffic">
                         <div class="dash-card-header">
                             <div>
-                                <span class="eyebrow">TRAFFIC TREND</span><h3>網站流量趨勢</h3><p class="hint" id="chart-description">最近 30 天 · 活躍使用者</p>
+                                <span class="eyebrow">TRAFFIC TREND</span><h3>網站流量趨勢</h3><p class="hint" id="chart-description">最近 7 天 · 活躍使用者</p>
                             </div>
                             <div class="chart-key">
                                 <span class="chart-dot"></span>活躍使用者</div>
@@ -253,38 +253,7 @@
                         </div>
                     </section>
                     <div class="analytics-lower">
-                        <section class="dash-card">
-                            <div class="dash-card-header">
-                                <div>
-                                    <span class="eyebrow">TOP PAGES</span><h3>熱門頁面</h3>
-                                </div>
-                                <span class="hint">瀏覽量</span>
-                            </div>
-                            <div class="rank-list" id="ga-pages">
-                            </div>
-                        </section>
-                        <section class="dash-card">
-                            <div class="dash-card-header">
-                                <div>
-                                    <span class="eyebrow">AUDIENCE</span><h3>訪客所在國家</h3>
-                                </div>
-                                <span class="hint">分布</span>
-                            </div>
-                            <div class="rank-list" id="ga-countries">
-                            </div>
-                        </section>
-                    </div>
-                    <div class="analytics-lower">
-                        <section class="dash-card">
-                            <div class="dash-card-header">
-                                <div>
-                                    <span class="eyebrow">FEEDBACK INTERACTIONS</span><h3>問題反饋互動</h3>
-                                </div>
-                                <span class="hint" id="ga-feedback-totals">開啟 — · 成功提交 —</span>
-                            </div>
-                            <div class="rank-list" id="ga-feedback-events"></div>
-                        </section>
-                        <section class="dash-card">
+                        <section class="dash-card" id="analytics-devices">
                             <div class="dash-card-header">
                                 <div>
                                     <span class="eyebrow">DEVICES</span><h3>裝置分布</h3>
@@ -301,15 +270,46 @@
                                 </div>
                             </div>
                         </section>
+                        <section class="dash-card" id="analytics-countries">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">AUDIENCE</span><h3>訪客所在國家</h3>
+                                </div>
+                                <span class="hint">分布</span>
+                            </div>
+                            <div class="rank-list" id="ga-countries">
+                            </div>
+                        </section>
                     </div>
-                    <section class="dash-card analytics-download-details">
+                    <div class="analytics-lower">
+                        <section class="dash-card" id="analytics-pages">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">TOP PAGES</span><h3>熱門頁面</h3>
+                                </div>
+                                <span class="hint">瀏覽量</span>
+                            </div>
+                            <div class="rank-list" id="ga-pages">
+                            </div>
+                        </section>
+                        <section class="dash-card analytics-download-details" id="analytics-downloads">
+                            <div class="dash-card-header">
+                                <div>
+                                    <span class="eyebrow">DOWNLOAD DETAILS</span><h3>各下載按鈕點擊明細</h3>
+                                </div>
+                                <span class="hint">按模組、版本與下載入口</span>
+                            </div>
+                            <div class="rank-list" id="ga-download-items"></div>
+                        </section>
+                    </div>
+                    <section class="dash-card analytics-feedback">
                         <div class="dash-card-header">
                             <div>
-                                <span class="eyebrow">DOWNLOAD DETAILS</span><h3>各下載按鈕點擊明細</h3>
+                                <span class="eyebrow">FEEDBACK INTERACTIONS</span><h3>問題反饋互動</h3>
                             </div>
-                            <span class="hint">按模組、版本與下載入口</span>
+                            <span class="hint" id="ga-feedback-totals">開啟 — · 成功提交 —</span>
                         </div>
-                        <div class="rank-list" id="ga-download-items"></div>
+                        <div class="rank-list" id="ga-feedback-events"></div>
                     </section>
                     <p class="hint" style="margin-top:22px">數據來自 Google Analytics 4，僅涵蓋符合 Cookie 偏好設定的追蹤資料；下載及回饋互動事件從啟用後累積，不會回補先前紀錄。</p>
                 </section>
