@@ -40,3 +40,7 @@ node --test tests/mod_catalog.test.mjs
 - 分類標籤左上角（與編號同尺寸）、編號右上角；12 類固定低飽和顏色，只在首頁全部模組模式顯示。
 - `mod-sort.js` 共用排序邏輯，分類頁既有的排序行為不變。
 - 修改 JSON 後請執行 `node build-mod-catalog.mjs`，並以 `node build-mod-catalog.mjs --check` 驗證所有分類 HTML 及全模組片段與 JSON 一致。
+
+### 18+ 模組原有年齡驗證
+
+首頁「全部模組」保留現有 NSFW 分類的年齡提示：確認已滿 18 歲後顯示全部 194 張；未滿 18 歲則只顯示其餘 188 張，顯示提示。取消年齡提示會返回原本的分類入口，不直接呈現成人卡片。

@@ -1605,6 +1605,21 @@ html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scro
 .home-mod-catalog .mod-card[data-category="SLIDER"] { --mod-category-color: #4d8178; }
 .home-mod-catalog .mod-card[data-category="POSE"] { --mod-category-color: #8a665b; }
 .home-mod-catalog .mod-card[data-category="OTHER"] { --mod-category-color: #647077; }
+.home-mod-age-dialog {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: calc(100vw - 32px);
+}
+.home-mod-age-dialog::backdrop {
+    background: rgba(0, 0, 0, .25);
+    backdrop-filter: blur(4px);
+}
+.home-mod-age-dialog .age-modal {
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 32px));
+    padding: 30px;
+}
 @media (max-width: 600px) {
     .home-mod-view-switch { margin-top: 16px; }
     .home-mod-view-button { padding: 9px 15px; letter-spacing: .5px; }

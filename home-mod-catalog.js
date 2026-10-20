@@ -9,13 +9,16 @@
     const sort = document.getElementById('home-mod-sort');
     const reset = document.getElementById('home-category-reset');
     const status = document.getElementById('home-mod-status');
+    const ageDialog = document.getElementById('home-mod-age-dialog');
+    const adultButton = document.getElementById('home-mod-adult');
+    const underageButton = document.getElementById('home-mod-underage');
     if (!switcher || !categoryGrid || !allSection || !container) return;
 
     let loaded = false;
     let loading = null;
     let cards = [];
     let activeCategory = '';
-    let activeView = 'category';
+    let ageState = 'undecided';
     const lazyObserver = 'IntersectionObserver' in window
         ? new IntersectionObserver(entries => {
             for (const entry of entries) if (entry.isIntersecting) {
@@ -30,7 +33,8 @@
         const query = search.value.trim().toLocaleLowerCase();
         let visible = 0;
         for (const card of cards) {
-            const matches = (!activeCategory || card.dataset.category === activeCategory)
+            const allowed = ageState === 'adult' || card.dataset.category !== 'NSFW';
+            const matches = allowed && (!activeCategory || card.dataset.category === activeCategory)
                 && (!query || card.dataset.searchText.includes(query));
             card.hidden = !matches;
             if (matches) visible++;
@@ -40,15 +44,14 @@
         clear.hidden = !search.value;
         reset.hidden = !activeCategory;
         status.textContent = '顯示 ' + visible + ' / ' + cards.length + ' 款模組' +
-            (activeCategory ? ' · ' + activeCategory : '');
+            (activeCategory ? ' · ' + activeCategory : '') +
+            (ageState === 'minor' ? ' · 已隱藏 18+ 模組' : '');
     }
     function bindCards() {
         cards = [...container.querySelectorAll(':scope > .mod-card')];
         if (!cards.length) throw new Error('缺少模組卡片');
         for (const card of cards) {
             card.dataset.searchText = card.textContent.toLocaleLowerCase();
-            for (const img of card.querySelectorAll('img')) img.loading = 'lazy';
-            for (const video of card.querySelectorAll('video')) video.preload = 'none';
             if (lazyObserver) lazyObserver.observe(card);
             else card.classList.add('is-visible');
         }
@@ -67,6 +70,8 @@
             template.innerHTML = await response.text();
             const found = template.content.querySelectorAll('.mod-card');
             if (found.length !== 194) throw new Error('模組資料不完整（' + found.length + ' / 194）');
+            for (const img of template.content.querySelectorAll('img')) img.loading = 'lazy';
+            for (const video of template.content.querySelectorAll('video')) video.preload = 'none';
             container.appendChild(template.content);
             bindCards();
         })();
@@ -77,14 +82,31 @@
         } finally { loading = null; }
     }
     function setView(mode) {
-        activeView = mode;
         const all = mode === 'all';
         categoryGrid.hidden = all;
         allSection.hidden = !all;
         for (const button of switcher.querySelectorAll('[data-view]'))
             button.setAttribute('aria-pressed', String(button.dataset.view === mode));
-        if (all) void loadAll();
+        if (all) {
+            if (ageState === 'undecided') {
+                status.textContent = '請確認年齡後顯示全部模組';
+                ageDialog.showModal();
+            } else void loadAll();
+        }
     }
+    adultButton.addEventListener('click', () => {
+        ageState = 'adult';
+        ageDialog.close();
+        void loadAll();
+    });
+    underageButton.addEventListener('click', () => {
+        ageState = 'minor';
+        ageDialog.close();
+        void loadAll();
+    });
+    ageDialog.addEventListener('close', () => {
+        if (ageState === 'undecided') setView('category');
+    });
     switcher.addEventListener('click', event => {
         const button = event.target.closest('button[data-view]');
         if (!button) return;

@@ -39,6 +39,7 @@ const css = await readFile(resolve(root, 'style.css'), 'utf8');
 assert(home.includes('id="home-category-grid"') && home.includes('id="home-mod-catalog"'));
 assert(home.includes('data-view="category"') && home.includes('data-view="all"'));
 assert(home.includes('home-mod-catalog.js') && home.includes('mod-sort.js'));
+assert(home.includes('id="home-mod-age-dialog"') && home.includes('id="home-mod-adult"'));
 assert.equal((fragment.match(/class="mod-card"/g) || []).length, 194);
 assert.equal((fragment.match(/class="mod-category-label"/g) || []).length, 194);
 assert.equal((fragment.match(/data-category="/g) || []).length, 194);
@@ -47,6 +48,8 @@ for (const category of ['PREP','CHEAT','UI','WORLD','DEFAULT','NSFW','SOCIAL','B
     assert(css.includes('data-category="' + category + '"'), 'Missing color ' + category);
 }
 assert(catalogJs.includes('all-mods.fragment.html'));
+assert(catalogJs.includes("card.dataset.category !== 'NSFW'"));
+assert(catalogJs.includes("template.content.querySelectorAll('img')"));
 const sortJs = await readFile(resolve(root, 'mod-sort.js'), 'utf8');
 assert(sortJs.includes('card.dataset.sortAuthor') && sortJs.includes('L1nGModSort'));
 execFileSync(process.execPath, ['build-mod-catalog.mjs', '--check'], { cwd: root, stdio: 'pipe' });
