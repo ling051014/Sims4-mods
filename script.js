@@ -444,3 +444,25 @@ document.querySelectorAll('.mod-card')
 // ========【初始化】 設定 - 頁面載入後執行 ========
 // 更新模組數量
 updateModCount();
+
+/* ========【模組搜尋】 SVG 清除按鈕與搜尋框同步 ======== */
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('mod-search');
+    const host = input?.closest('.search-box');
+    if (!host || host.querySelector('.l1ng-search-clear')) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'l1ng-search-clear';
+    button.setAttribute('aria-label', '清除搜尋');
+    button.title = '清除搜尋';
+    const sync = () => { button.hidden = !input.value; };
+    button.addEventListener('click', () => {
+        input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        searchMods();
+        input.focus({ preventScroll: true });
+    });
+    input.addEventListener('input', sync);
+    host.appendChild(button);
+    sync();
+});
