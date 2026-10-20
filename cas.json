@@ -1,0 +1,4077 @@
+{
+  "schemaVersion": 2,
+  "category": "cas",
+  "categoryLabel": "創建模擬市民",
+  "sourceFile": "cas.html",
+  "mods": [
+    {
+      "id": "cas-001",
+      "order": 1,
+      "title": [
+        "去EA睫毛"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/Ir_7770",
+            "target": "_blank"
+          },
+          "children": [
+            "ir7770"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "ir7770",
+          "url": "https://www.patreon.com/Ir_7770"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/RemoveEALashes.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/ir7770-100371200",
+                "target": "_blank"
+              },
+              "children": [
+                "ir7770_RemoveEALashesForAll_1.115.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.19"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-002",
+      "order": 2,
+      "title": [
+        "CAS背景"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            "vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/download/3955041/",
+                "target": "_blank"
+              },
+              "children": [
+                "Vyxated Reflection Recolors (p00dle).zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2024.09.29"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-003",
+      "order": 3,
+      "title": [
+        "CAS人物不動 (自然)"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/8201558",
+            "target": "_blank"
+          },
+          "children": [
+            "MizoreYukii"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "MizoreYukii",
+          "url": "https://modthesims.info/m/8201558"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/Stand Still in CAS.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/630172/stand-still-in-cas-shimrod101-amp-shooksims.html",
+                "target": "_blank"
+              },
+              "children": [
+                "MizoreYukii_StandStillInCAS_OccultsOnly_NoMirroring.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.06"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-004",
+      "order": 4,
+      "title": [
+        "CAS手部特寫"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/northernsiberiawinds",
+            "target": "_blank"
+          },
+          "children": [
+            "northern siberia winds"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "northern siberia winds",
+          "url": "https://www.patreon.com/cw/northernsiberiawinds"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/HANDS CLOSE UP POSITIONS.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/103628223?collection=28863",
+                "target": "_blank"
+              },
+              "children": [
+                "!!![NORTHERN SIBERIA WINDS][CAS TUNING ADD-ON] HANDS CLOSE UP POSITIONS.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        會根據小人身高調整CAS鏡頭",
+        {
+          "tag": "br"
+        },
+        "\n                        (含禁用NPC隨機配戴飾品、化妝品 )",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        !!!!![NORTHERN SIBERIA WINDS][CAS TUNING BASE] CONTROLLED POSITION MOD V2.3.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 人物不會跟隨添加CC而轉動",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-005",
+      "order": 5,
+      "title": [
+        "More Columns in CAS",
+        {
+          "tag": "br"
+        },
+        "CAS更多欄位"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/weerbesu",
+            "target": "_blank"
+          },
+          "children": [
+            "weerbesu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "weerbesu",
+          "url": "https://www.patreon.com/weerbesu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/More Columns in CAS.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/more-columns-in-27751117",
+                "target": "_blank"
+              },
+              "children": [
+                "More_CAS_Columns_(5_Columns).package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.38"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.24"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        若欄位溢出 / 被UI擋住，可以在",
+        {
+          "tag": "br"
+        },
+        "\n                        「…」>「遊戲選項」>「可用性」中",
+        {
+          "tag": "br"
+        },
+        "\n                        調整「使用者介面比例」",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-006",
+      "order": 6,
+      "title": [
+        "Ultimate CAS items Unlocker",
+        {
+          "tag": "br"
+        },
+        "CAS解鎖器"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/loulicorn/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "Loulicorn"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Loulicorn",
+          "url": "https://www.curseforge.com/members/loulicorn/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/Loulicorn_Unlock_CAS.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/ultimate-cas-items-unlocker",
+                "target": "_blank"
+              },
+              "children": [
+                "Loulicorn_Unlock_CAS.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Apr 17, 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.14"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-007",
+      "order": 7,
+      "title": [
+        "CAS標籤"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SulSulDUCK",
+            "target": "_blank"
+          },
+          "children": [
+            "鴨呀 (SulSulDUCK)"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "鴨呀 (SulSulDUCK)",
+          "url": "https://www.patreon.com/cw/SulSulDUCK"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/ClassicTidyCAS.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/105011291?collection=566169",
+                "target": "_blank"
+              },
+              "children": [
+                "SulSulDUCK_TidyCAS_Classic Cream_CHT.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/download/4676535/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "先挑款式，再挑語言。只能擇一下載。"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-008",
+      "order": 8,
+      "title": [
+        "More Traits in CAS",
+        {
+          "tag": "br"
+        },
+        "更多特徵欄位"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/pancakemizore",
+            "target": "_blank"
+          },
+          "children": [
+            "thepancake1 and MizoreYukii"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "thepancake1 and MizoreYukii",
+          "url": "https://www.patreon.com/pancakemizore"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/MoreTraitsInCAS.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/more-traits-in-62838078",
+                "target": "_blank"
+              },
+              "children": [
+                "thepancake1-MoreTraitsInCAS-v2d-1.121.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.06"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-009",
+      "order": 9,
+      "title": [
+        "Lifetime Aspirations Reworked",
+        {
+          "tag": "br"
+        },
+        "抱負大修"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/NeedCoffee4That",
+            "target": "_blank"
+          },
+          "children": [
+            "NeedCoffee4That"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/ling051014",
+            "target": "_blank"
+          },
+          "children": [
+            "L1nG"
+          ]
+        },
+        " (我)\n                    "
+      ],
+      "authors": [
+        {
+          "name": "NeedCoffee4That",
+          "url": "https://www.patreon.com/cw/NeedCoffee4That"
+        },
+        {
+          "name": "L1nG",
+          "url": "https://www.patreon.com/cw/ling051014"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/LifetimeAspirationsReworked.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/NeedCoffee4That/posts/lifetime-89276756",
+                "target": "_blank"
+              },
+              "children": [
+                "NC4T_LifetimeAspirationsReworked.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://translations.by-l1ng.com/#translation-lifetime-aspirations",
+                "target": "_blank"
+              },
+              "children": [
+                "!_L1nG_NC4T_LifetimeAspirationsReworked_CHT_BY_L1nG.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "May 1, 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.10.19"
+          ]
+        }
+      ],
+      "notes": [
+        "\n            重製原版抱負為單一長期目標，並新增兒童、老年及幽靈等專屬抱負。",
+        {
+          "tag": "br"
+        },
+        "\n            ",
+        {
+          "tag": "br"
+        },
+        "\n            ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "請依照已購買的 DLC 選擇檔案，未擁有的資料片對應檔案不可安裝。"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n            ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "與舊版 ky-e v0.5 不可混用；更換前先備份存檔及抱負進度。"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n            ",
+        {
+          "tag": "br"
+        },
+        "\n            ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "目前依 DLC 建議保留 33 個檔案，另外 1 個腳本可選用。"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n            ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "目前 DLC 可安裝的檔案 (33 個)"
+                  ]
+                }
+              ]
+            },
+            "\n                ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                    ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "01 Lifetime Aspirations / 原版終生抱負重製"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "!Lifetime Aspirations KIDS"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "BG_",
+                {
+                  "tag": "wbr"
+                },
+                "BaseGame.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 遊戲本體即可使用",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "!Lifetime Aspirations TEENS"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "TEENS_",
+                {
+                  "tag": "wbr"
+                },
+                "EP12_",
+                {
+                  "tag": "wbr"
+                },
+                "HighSchoolYears.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP12《高中歲月》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "BG.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 遊戲本體即可使用",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP03_",
+                {
+                  "tag": "wbr"
+                },
+                "CityLiving.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP03《都會生活》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP04_",
+                {
+                  "tag": "wbr"
+                },
+                "Cats&amp;Dogs.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP04《貓狗總動員》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP07_",
+                {
+                  "tag": "wbr"
+                },
+                "IslandLiving.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP07《島嶼生活》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP10_",
+                {
+                  "tag": "wbr"
+                },
+                "SnowyEscape.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP10《雪國勝地》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP15_",
+                {
+                  "tag": "wbr"
+                },
+                "ForRent.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP15《出租住宅》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP18_",
+                {
+                  "tag": "wbr"
+                },
+                "B&amp;H.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP18《事業與嗜好》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP21_",
+                {
+                  "tag": "wbr"
+                },
+                "RoyaltyLegacy.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP21《王室與傳承》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP02_",
+                {
+                  "tag": "wbr"
+                },
+                "SpaDay.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 GP02《一日水療》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP04_",
+                {
+                  "tag": "wbr"
+                },
+                "Vampires.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 GP04《吸血鬼》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "SP46_",
+                {
+                  "tag": "wbr"
+                },
+                "HomeChefHustle.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 SP46《居家主廚》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "SP49_",
+                {
+                  "tag": "wbr"
+                },
+                "CrystalCreations.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 SP49《水晶創意》",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "02 New Aspirations / 新增終生抱負"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "!New Aspirations KIDS"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "BG_",
+                {
+                  "tag": "wbr"
+                },
+                "BaseGame.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 遊戲本體即可使用",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "EP05_",
+                {
+                  "tag": "wbr"
+                },
+                "Seasons.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP05《春夏秋冬》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "BG_",
+                {
+                  "tag": "wbr"
+                },
+                "BaseGame.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 遊戲本體即可使用",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP01_",
+                {
+                  "tag": "wbr"
+                },
+                "GetToWork.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP01《來去上班》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP03_",
+                {
+                  "tag": "wbr"
+                },
+                "CityLiving.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP03《都會生活》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP04_",
+                {
+                  "tag": "wbr"
+                },
+                "CatsAndDogs.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP04《貓狗總動員》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP05_",
+                {
+                  "tag": "wbr"
+                },
+                "Seasons.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP05《春夏秋冬》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP07_",
+                {
+                  "tag": "wbr"
+                },
+                "IslandLiving.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP07《島嶼生活》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP10_",
+                {
+                  "tag": "wbr"
+                },
+                "SnowyEscape.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP10《雪國勝地》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP15_",
+                {
+                  "tag": "wbr"
+                },
+                "ForRent.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP15《出租住宅》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP18_",
+                {
+                  "tag": "wbr"
+                },
+                "Businesses&amp;Hobbies.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP18《事業與嗜好》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP21_",
+                {
+                  "tag": "wbr"
+                },
+                "RoyaltyLegacy.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP21《王室與傳承》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "GP03_",
+                {
+                  "tag": "wbr"
+                },
+                "DineOut.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 GP03《外出用餐》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "GP04_",
+                {
+                  "tag": "wbr"
+                },
+                "Vampires.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 GP04《吸血鬼》",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "SP46_",
+                {
+                  "tag": "wbr"
+                },
+                "HomeChefHustle.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 SP46《居家主廚》",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "03 Elder Aspirations / 老年專屬抱負"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "ElderAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "BG_",
+                {
+                  "tag": "wbr"
+                },
+                "BaseGame.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 遊戲本體即可使用",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "ElderAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP05_",
+                {
+                  "tag": "wbr"
+                },
+                "Seasons.package",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 需要 EP05《春夏秋冬》",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "Scripts / 腳本"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirations.ts4script",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 主要腳本 (必要)",
+                {
+                  "tag": "br"
+                },
+                "\n                    NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "Elder.ts4script",
+                {
+                  "tag": "br"
+                },
+                "\n                    ⤷ 老年抱負分類腳本 (安裝老年抱負時必要)",
+                {
+                  "tag": "br"
+                },
+                "\n                    ",
+                {
+                  "tag": "br"
+                },
+                "\n                "
+              ]
+            },
+            "\n            "
+          ]
+        },
+        "\n            ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "其他附加檔案 (1 個選用)"
+                  ]
+                }
+              ]
+            },
+            "\n                ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "Scripts / 腳本"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "RewardStoreChanges.ts4script",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 獎勵商店調整腳本 (選用，不需要可不安裝)",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                "
+              ]
+            },
+            "\n            "
+          ]
+        },
+        "\n            ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 DLC，需移除的檔案 (42 個)"
+                  ]
+                }
+              ]
+            },
+            "\n                ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "01 Lifetime Aspirations / 原版終生抱負重製"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "!Lifetime Aspirations KIDS"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "EP13_",
+                {
+                  "tag": "wbr"
+                },
+                "GrowingTogether.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP13《成長路上》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "EP20_",
+                {
+                  "tag": "wbr"
+                },
+                "AdventureAwaits.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP20《冒險啟程》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP02_",
+                {
+                  "tag": "wbr"
+                },
+                "GetTogether.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP02《同歡共樂》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP06_",
+                {
+                  "tag": "wbr"
+                },
+                "GetFamous.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP06《星夢起飛》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP08_",
+                {
+                  "tag": "wbr"
+                },
+                "DiscoverUniversity.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP08《玩轉大學》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP09_",
+                {
+                  "tag": "wbr"
+                },
+                "EcoLifestyle.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP09《綠色生活》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP11_",
+                {
+                  "tag": "wbr"
+                },
+                "CottageLiving.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP11《鄉間生活》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP14_",
+                {
+                  "tag": "wbr"
+                },
+                "HorseRanch.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP14《駿馬牧場》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP16_",
+                {
+                  "tag": "wbr"
+                },
+                "Lovestruck.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP16《怦然心動》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP17_",
+                {
+                  "tag": "wbr"
+                },
+                "Life&amp;Death.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP17《生與死》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP19_",
+                {
+                  "tag": "wbr"
+                },
+                "EnchantedByNature.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP19《自然奇境》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "EP20_",
+                {
+                  "tag": "wbr"
+                },
+                "AdventureAwaits.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP20《冒險啟程》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP01_",
+                {
+                  "tag": "wbr"
+                },
+                "OutdoorRetreat.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP01《露天度假》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP05_",
+                {
+                  "tag": "wbr"
+                },
+                "Parenthood.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP05《生兒育女》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP06_",
+                {
+                  "tag": "wbr"
+                },
+                "JungleAdventure.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP06《叢林探險》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP07_",
+                {
+                  "tag": "wbr"
+                },
+                "StrangerVille.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP07《詭奇小鎮》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP08_",
+                {
+                  "tag": "wbr"
+                },
+                "RealmofMagic.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP08《魔法世界》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP09_",
+                {
+                  "tag": "wbr"
+                },
+                "JourneytoBatuu.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP09《星際大戰：巴圖星之旅》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "GP12_",
+                {
+                  "tag": "wbr"
+                },
+                "Werewolves.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP12《狼人》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "SP17_",
+                {
+                  "tag": "wbr"
+                },
+                "NiftyKnitting.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 SP17《巧手針織》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirationsReworked_",
+                {
+                  "tag": "wbr"
+                },
+                "SP22_",
+                {
+                  "tag": "wbr"
+                },
+                "BusttheDust.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 SP22《灰塵大作戰》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "02 New Aspirations / 新增終生抱負"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "!New Aspirations KIDS"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "EP06_",
+                {
+                  "tag": "wbr"
+                },
+                "GetFamous.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP06《星夢起飛》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "EP20_",
+                {
+                  "tag": "wbr"
+                },
+                "AdventureAwaits.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP20《冒險啟程》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "KIDS_",
+                {
+                  "tag": "wbr"
+                },
+                "SP07_",
+                {
+                  "tag": "wbr"
+                },
+                "KidsRoomStuff.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 SP07《童樂房間組合》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP02_",
+                {
+                  "tag": "wbr"
+                },
+                "GetTogether.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP02《同歡共樂》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP08_",
+                {
+                  "tag": "wbr"
+                },
+                "DiscoverUniversity.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP08《玩轉大學》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP09_",
+                {
+                  "tag": "wbr"
+                },
+                "EcoLifestyle.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP09《綠色生活》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP11_",
+                {
+                  "tag": "wbr"
+                },
+                "CottageLiving.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP11《鄉間生活》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP16_",
+                {
+                  "tag": "wbr"
+                },
+                "Lovestruck.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP16《怦然心動》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP17_",
+                {
+                  "tag": "wbr"
+                },
+                "Life&amp;Death.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP17《生與死》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP19_",
+                {
+                  "tag": "wbr"
+                },
+                "EnchantedByNature.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP19《自然奇境》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP20_",
+                {
+                  "tag": "wbr"
+                },
+                "AdventureAwaits.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP20《冒險啟程》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "GP01_",
+                {
+                  "tag": "wbr"
+                },
+                "OutdoorRetreat.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP01《露天度假》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "GP07_",
+                {
+                  "tag": "wbr"
+                },
+                "Strangerville.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP07《詭奇小鎮》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "GP10_",
+                {
+                  "tag": "wbr"
+                },
+                "DreamHomeDecorator.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP10《夢幻居家改造》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "SP18_",
+                {
+                  "tag": "wbr"
+                },
+                "Paranormal.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 SP18《靈異大追擊》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "NewAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "x_",
+                {
+                  "tag": "wbr"
+                },
+                "MULTI-",
+                {
+                  "tag": "wbr"
+                },
+                "PACK_",
+                {
+                  "tag": "wbr"
+                },
+                "Life&amp;Death-",
+                {
+                  "tag": "wbr"
+                },
+                "Vampires-",
+                {
+                  "tag": "wbr"
+                },
+                "Paranormal.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP17《生與死》、SP18《靈異大追擊》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "03 Elder Aspirations / 老年專屬抱負"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "ElderAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "EP11_",
+                {
+                  "tag": "wbr"
+                },
+                "CountryLiving.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP11《鄉間生活》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "ElderAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "GP06_",
+                {
+                  "tag": "wbr"
+                },
+                "JungleAdventure.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 GP06《叢林探險》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "ElderAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "SP17_",
+                {
+                  "tag": "wbr"
+                },
+                "NiftyKnitting.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 SP17《巧手針織》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "04 Ghost Aspirations / 幽靈專屬抱負"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "GhostAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "Ep17_",
+                {
+                  "tag": "wbr"
+                },
+                "Life&amp;Death.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP17《生與死》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    "Scripts / 腳本"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                NC4T_",
+                {
+                  "tag": "wbr"
+                },
+                "LifetimeAspirations_",
+                {
+                  "tag": "wbr"
+                },
+                "Ghosts.ts4script",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "缺少 EP17《生與死》，請移除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                            "
+              ]
+            },
+            "\n                    "
+          ]
+        },
+        "\n                    ",
+        {
+          "tag": "br"
+        },
+        "\n                    ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "你沒有 EP17《生與死》，因此幽靈專屬抱負及幽靈腳本都要移除。"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    漢化為獨立純文字 PACKAGE，與原作者模組共同安裝，不會取代玩法檔案。",
+        {
+          "tag": "br"
+        },
+        "\n                "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-010",
+      "order": 10,
+      "title": [
+        "100 Base Game Traits",
+        {
+          "tag": "br"
+        },
+        "100個主程式特徵包"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/chingyu1023",
+            "target": "_blank"
+          },
+          "children": [
+            "Vicky Sims (chingyu1023)"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Vicky Sims (chingyu1023)",
+          "url": "https://www.patreon.com/chingyu1023"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/100TRAITSPACK.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/chingyu1023/posts/100-base-game-v1-41969378",
+                "target": "_blank"
+              },
+              "children": [
+                "chingyu_100TRAITSPACK_V1.7.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/meowcats/posts/100-base-game-v1-107668872",
+                "target": "_blank"
+              },
+              "children": [
+                "!_chingyu_100TraitsV1_DefaultStrings_DO_NOT_REMOVE_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "V1.7"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.13"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2種版本請擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "100TRAITSPACK_V1.7",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ CAS模式的特徵版本",
+        {
+          "tag": "br"
+        },
+        "\n                        100TRAITSPACK_V1.7_RewardVersion",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 可以以額外的方式添加特徵，",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需搭配「",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://sites.google.com/view/vickysims/mod-info/sorted-traits-picker",
+                "target": "_blank"
+              },
+              "children": [
+                "特徵選擇器"
+              ]
+            },
+            "」模組"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-011",
+      "order": 11,
+      "title": [
+        "TODDLER Traits Pack",
+        {
+          "tag": "br"
+        },
+        "幼兒特徵包"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/chingyu1023",
+            "target": "_blank"
+          },
+          "children": [
+            "Vicky Sims (chingyu1023)"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Vicky Sims (chingyu1023)",
+          "url": "https://www.patreon.com/chingyu1023"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/chingyu1023/posts/toddler-traits-5-52561968?collection=838125",
+                "target": "_blank"
+              },
+              "children": [
+                "chingyu_CatAndDogTraits.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://",
+                "target": "_blank"
+              },
+              "children": [
+                ".package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "V2.5"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.23"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2種版本可同時下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "casVer_ToddlerTraits_V2.5",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ CAS模式的特徵版本",
+        {
+          "tag": "br"
+        },
+        "\n                        RewardVer_ToddlerTraits_V2.5",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 可以以額外的方式添加特徵，",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需搭配「",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://sites.google.com/view/vickysims/mod-info/sorted-traits-picker",
+                "target": "_blank"
+              },
+              "children": [
+                "特徵選擇器"
+              ]
+            },
+            "」模組"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-012",
+      "order": 12,
+      "title": [
+        "Cat And Dog Custom Traits Pack",
+        {
+          "tag": "br"
+        },
+        "貓狗特徵包"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/chingyu1023",
+            "target": "_blank"
+          },
+          "children": [
+            "Vicky Sims (chingyu1023)"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/ling051014",
+            "target": "_blank"
+          },
+          "children": [
+            "L1nG"
+          ]
+        },
+        " (我)\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Vicky Sims (chingyu1023)",
+          "url": "https://www.patreon.com/chingyu1023"
+        },
+        {
+          "name": "L1nG",
+          "url": "https://www.patreon.com/cw/ling051014"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/CatAndDogTraits.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/chingyu1023/posts/cat-and-dog-pack-120892985?collection=838462",
+                "target": "_blank"
+              },
+              "children": [
+                "chingyu_CatAndDogTraits.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.dropbox.com/scl/fi/7jrxenrsr3tx86u30s0fv/_chingyu_CatAndDogTraits_CHT_BY_L1nG.package?rlkey=04170f5z2kstv6owkpe7xrjf3&amp;st=73q9l82d&amp;dl=0"
+              },
+              "children": [
+                "!_chingyu_CatAndDogTraits_CHT_BY_L1nG.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "貓狗總動員"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.23"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-013",
+      "order": 13,
+      "title": [
+        "Zodiac Signs Mod",
+        {
+          "tag": "br"
+        },
+        "十二星座"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/chingyu1023",
+            "target": "_blank"
+          },
+          "children": [
+            "Vicky Sims (chingyu1023)"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/ling051014",
+            "target": "_blank"
+          },
+          "children": [
+            "L1nG"
+          ]
+        },
+        " (我)\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Vicky Sims (chingyu1023)",
+          "url": "https://www.patreon.com/chingyu1023"
+        },
+        {
+          "name": "L1nG",
+          "url": "https://www.patreon.com/cw/ling051014"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946?collection=838125",
+                "target": "_blank"
+              },
+              "children": [
+                "chingyu_ZodiacSigns_V3.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://translations.by-l1ng.com/#translation-zodiac-signs"
+              },
+              "children": [
+                "!_chingyu_ZodiacSigns_CHT_BY_L1nG.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "V3"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.22"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2個必裝核心檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "chingyu_ZodiacSigns.ts4script",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "chingyu_ZodiacSigns.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "附加檔案 (可根據自己的需求下載 )"
+                  ]
+                }
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "2種星座社交強度請擇一下載"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                !chingyu_addon_ZodiacStrongerCompatibility.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 較強的星座相容性效果",
+                {
+                  "tag": "br"
+                },
+                "\n                                !chingyu_addon_ZodiacSubtleCompatibility.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 較輕微的星座相容性效果",
+                {
+                  "tag": "br"
+                },
+                "\n                                Merged-Toddlers.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "其他"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                chingyu_addon_GrowUpAddSignsBySeasons_EP05.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 根據 EA 季節分配星座",
+                {
+                  "tag": "br"
+                },
+                "\n                                chingyu_addon_GrowUpAddSignsRandomly.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 增齡時隨機加入星座",
+                {
+                  "tag": "br"
+                },
+                "\n                                chingyu_addon_ZodiacSignAutoSwitchVersion.package",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 在市民長大後切換幼年 / 正式星座",
+                {
+                  "tag": "br"
+                },
+                "\n                                !chingyu_addon_ZodiacAvailableInCAS",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 可以在 CAS 選擇的人格特徵",
+                {
+                  "tag": "br"
+                },
+                "\n                            "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "為目前已下載檔案\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-014",
+      "order": 14,
+      "title": [
+        "The Attachment Style Story Pack",
+        {
+          "tag": "br"
+        },
+        "依戀風格故事包"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/JayESims",
+            "target": "_blank"
+          },
+          "children": [
+            "JayESims"
+          ]
+        },
+        " × JAYE HINSON\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "JayESims",
+          "url": "https://www.patreon.com/cw/JayESims"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/attachment_style.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/jayesims-x-jaye-135744796",
+                "target": "_blank"
+              },
+              "children": [
+                "JayESims_HealedorHurtingTheAttachmentStyleStoryPack_Autonomous_ALLINONE.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/141718053?collection=160712",
+                "target": "_blank"
+              },
+              "children": [
+                "!_JayESims_HealedorHurtingTheAttachmentStyleStoryPack_Autonomous_ALLINONE_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.09"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2種版本請擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "Autonomous_ALLINONE",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 小人自主行動版本",
+        {
+          "tag": "br"
+        },
+        "\n                        User Directed_ALLINONE",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 玩家控制版本",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "cas-015",
+      "order": 15,
+      "title": [
+        "New Emotional Traits",
+        {
+          "tag": "br"
+        },
+        "新情緒特徵"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/kuttoe/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "kuttoe"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "kuttoe",
+          "url": "https://www.curseforge.com/members/kuttoe/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cas/NewEmotionalTraits.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/new-emotional-traits",
+                "target": "_blank"
+              },
+              "children": [
+                "[Kuttoe] NewEmotionalTraits.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "自帶漢化"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Sep 21, 2025"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.23"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

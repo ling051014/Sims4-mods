@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 2,
+  "category": "slider",
+  "categoryLabel": "拉桿",
+  "sourceFile": "slider.html",
+  "mods": [
+    {
+      "id": "slider-001",
+      "order": 1,
+      "title": [
+        "Functional garage doors",
+        {
+          "tag": "br"
+        },
+        "【功能性】車庫門"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/NecrodogMTSandS4S",
+            "target": "_blank"
+          },
+          "children": [
+            "NecrodogMTSandS4S"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "NecrodogMTSandS4S",
+          "url": "https://www.patreon.com/NecrodogMTSandS4S"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/functional-doors-52688841",
+                "target": "_blank"
+              },
+              "children": [
+                "necrodog-garages-doors.7z"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "門"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.23"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        進出門會開啟 (有動畫）\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "slider-002",
+      "order": 2,
+      "title": [
+        "【功能性】各種交通工具"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/NecrodogMTSandS4S",
+            "target": "_blank"
+          },
+          "children": [
+            "NecrodogMTSandS4S"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "NecrodogMTSandS4S",
+          "url": "https://www.patreon.com/NecrodogMTSandS4S"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/atv-scooter-segway-wheel-chair-prox-x-hover.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/atv-scooter-prof-88728509",
+                "target": "_blank"
+              },
+              "children": [
+                "necrodog-BG-animated-atv-scooter-segway-wheel-chair-prox-x-hover.7z"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "室外"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.23"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        壓縮檔中包含摩托車、輪椅、平衡車、越野車\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "slider-003",
+      "order": 3,
+      "title": [
+        "【功能性】男性立式馬桶"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/c/menaceman44/home",
+            "target": "_blank"
+          },
+          "children": [
+            "Menaceman44"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Menaceman44",
+          "url": "https://www.patreon.com/c/menaceman44/home"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/MMmaleUrinal.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/581702/male-urinal.html",
+                "target": "_blank"
+              },
+              "children": [
+                "MMmaleUrinal.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "馬桶"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.13"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

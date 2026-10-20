@@ -1,0 +1,1739 @@
+{
+  "schemaVersion": 2,
+  "category": "build-buy",
+  "categoryLabel": "建造模式",
+  "sourceFile": "build-buy.html",
+  "mods": [
+    {
+      "id": "build-buy-001",
+      "order": 1,
+      "title": [
+        "Better BuildBuy (B.B.B.)",
+        {
+          "tag": "br"
+        },
+        "更好的建造購買"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/TwistedMexi",
+            "target": "_blank"
+          },
+          "children": [
+            "TwistedMexi"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "TwistedMexi",
+          "url": "https://www.patreon.com/TwistedMexi"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/B.B.B..jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/better-buildbuy-135871452",
+                "target": "_blank"
+              },
+              "children": [
+                "TwistedMexi's Better BuildBuy v4.5 Official.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/better-buildbuy",
+                "target": "_blank"
+              },
+              "children": [
+                "!tmex-BetterBuildBuy_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/better-buildbuy-organized-debug",
+                "target": "_blank"
+              },
+              "children": [
+                "curseforge"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v4.5"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.19"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        解壓縮後將「Tmex-BetterBuildBuy」資料夾放進Mods即可",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "不要"
+          ]
+        },
+        "放「TwistedMexi’s Better BuildBuy vX.X.X Official」",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "只需在安裝時輸入解鎖密技，安裝後無需多次輸入。"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        testingcheats true 開啟大密技",
+        {
+          "tag": "br"
+        },
+        "\n                        bb.showhiddenobjects 解鎖隱藏物品",
+        {
+          "tag": "br"
+        },
+        "\n                        bb.showliveeditobjects 解鎖環境物品 (debug)",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "B.B.B.包含以下模組功能，請務必刪除"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        「BuildMode FreeCam」",
+        {
+          "tag": "br"
+        },
+        "\n                        「Expandable BuildBuy Catalog」",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        🔰 進入建造模式，點擊篩選並勾選",
+        {
+          "tag": "br"
+        },
+        "\n                        「有組織的調試 / Debug物品分類功能」",
+        {
+          "tag": "br"
+        },
+        "\n                        勾選後會彈出提示視窗，重啟遊戲即可生效",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⚠️ 上傳NOCC房屋到工坊前需先取消勾選",
+        {
+          "tag": "br"
+        },
+        "\n                        「有組織的調試 / Debug物品分類功能」",
+        {
+          "tag": "br"
+        },
+        "\n                        重啟遊戲後再上傳",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        B.B.B.默認隱藏CC家具，需要手動開啟「自訂內容」",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⌨️ ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-purple"
+          },
+          "children": [
+            {
+              "tag": "strong",
+              "children": [
+                "相關快捷鍵"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        擴展CC家具欄位 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "1"
+          ]
+        },
+        " / ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "~"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        自由視角 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Tab"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        自由調整燈光顏色 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Shift"
+          ]
+        },
+        " + ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "mouse-hint mouse-left",
+            "role": "img",
+            "aria-label": "左鍵"
+          },
+          "children": [
+            {
+              "tag": "span",
+              "attrs": {
+                "class": "mouse-hint-wheel"
+              },
+              "children": []
+            }
+          ]
+        },
+        " 點擊燈具",
+        {
+          "tag": "br"
+        },
+        "\n                        將家具加入最愛 ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "mouse-hint mouse-wheel",
+            "role": "img",
+            "aria-label": "滑鼠滾輪"
+          },
+          "children": [
+            {
+              "tag": "span",
+              "attrs": {
+                "class": "mouse-hint-wheel"
+              },
+              "children": []
+            }
+          ]
+        },
+        " 按下滾輪",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-002",
+      "order": 2,
+      "title": [
+        "T.O.O.L.",
+        {
+          "tag": "br"
+        },
+        "自由建造工具"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/TwistedMexi",
+            "target": "_blank"
+          },
+          "children": [
+            "TwistedMexi"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "TwistedMexi",
+          "url": "https://www.patreon.com/TwistedMexi"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/T.O.O.L..png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/144306626",
+                "target": "_blank"
+              },
+              "children": [
+                "TwistedMexi's TOOL v3.2 Official.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/tool",
+                "target": "_blank"
+              },
+              "children": [
+                "!Tmex-TOOL_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/t-o-o-l",
+                "target": "_blank"
+              },
+              "children": [
+                "curseforge"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v3.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.19"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "無法單獨使用，需同時安裝B.B.B."
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        解壓縮後將「Tmex-TOOL」資料夾放進Mods即可",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "不要"
+          ]
+        },
+        "放「TwistedMexi’s TOOL vX.X Official」",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⚙️ ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-bluegray"
+          },
+          "children": [
+            {
+              "tag": "strong",
+              "children": [
+                "關閉捕捉地形"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        「選項」>「更改所選設置」>「捕捉地形」",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "否則移動物品時，物品會莫名的消失 / 下降"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⌨️ ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-purple"
+          },
+          "children": [
+            {
+              "tag": "strong",
+              "children": [
+                "開啟T.O.O.L.選單快捷鍵"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        生活模式 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Shift"
+          ]
+        },
+        " + ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "mouse-hint mouse-left",
+            "role": "img",
+            "aria-label": "左鍵"
+          },
+          "children": [
+            {
+              "tag": "span",
+              "attrs": {
+                "class": "mouse-hint-wheel"
+              },
+              "children": []
+            }
+          ]
+        },
+        " 點擊指定物品",
+        {
+          "tag": "br"
+        },
+        "\n                        建造模式 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Shift"
+          ]
+        },
+        " + ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "T"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⌨️ ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-purple"
+          },
+          "children": [
+            {
+              "tag": "strong",
+              "children": [
+                "物品多選快捷鍵"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        1. 長按 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Alt"
+          ]
+        },
+        " + ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "mouse-hint mouse-left",
+            "role": "img",
+            "aria-label": "左鍵"
+          },
+          "children": [
+            {
+              "tag": "span",
+              "attrs": {
+                "class": "mouse-hint-wheel"
+              },
+              "children": []
+            }
+          ]
+        },
+        " 點擊指定物品",
+        {
+          "tag": "br"
+        },
+        "\n                        2. 長按 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Shift"
+          ]
+        },
+        " + ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "mouse-hint mouse-left",
+            "role": "img",
+            "aria-label": "左鍵"
+          },
+          "children": [
+            {
+              "tag": "span",
+              "attrs": {
+                "class": "mouse-hint-wheel"
+              },
+              "children": []
+            }
+          ]
+        },
+        " 點擊選取範圍 (收尾需點擊第一個圖示下方)",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⌨️ ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-purple"
+          },
+          "children": [
+            {
+              "tag": "strong",
+              "children": [
+                "其他常用快捷鍵"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        縮小物品 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "["
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        放大物品 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "]"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        復原 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Ctrl"
+          ]
+        },
+        " + ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Z"
+          ]
+        },
+        " (上一步）",
+        {
+          "tag": "br"
+        },
+        "\n                        重做 ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Ctrl"
+          ]
+        },
+        " + ",
+        {
+          "tag": "kbd",
+          "attrs": {
+            "class": "shortcut-key"
+          },
+          "children": [
+            "Y"
+          ]
+        },
+        " (下一步）",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-003",
+      "order": 3,
+      "title": [
+        "wall tool mesh override",
+        {
+          "tag": "br"
+        },
+        "牆壁建造工具替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/WallTool.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vyxated/posts/wall-tool-mesh-109012338",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated-overrides-BB-0_WallTool_GraphitePencil.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/224846/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.16"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "擇一樣式下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-004",
+      "order": 4,
+      "title": [
+        "grid - recolors",
+        {
+          "tag": "br"
+        },
+        "網格線替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/GridRecolors.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vyxated/posts/build-buy-gizmo-99984985",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated-overrides-BB-GridRecolors.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/212423/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.16"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "解壓縮後僅擇一顏色保留"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-005",
+      "order": 5,
+      "title": [
+        "terrain & pond brush override",
+        {
+          "tag": "br"
+        },
+        "地形繪製工具替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/TerrainPondBrushes.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vyxated/posts/terrain-pond-133074182",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated-overrides-BB-TerrainPondBrushes.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/250697/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.16"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "三種顏色擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-006",
+      "order": 6,
+      "title": [
+        "active obj retexture",
+        {
+          "tag": "br"
+        },
+        "放置物品箭頭替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/ActiveObject.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vyxated/posts/active-obj-110818388",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated-overrides-BB-ActiveObject_Sketchy.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/227262/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.16"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "僅擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-007",
+      "order": 7,
+      "title": [
+        "Billiard",
+        {
+          "tag": "br"
+        },
+        "【功能性】撞球模組"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/UTOPYA_cc",
+            "target": "_blank"
+          },
+          "children": [
+            "UTOPIA_cc"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "UTOPIA_cc",
+          "url": "https://www.patreon.com/UTOPYA_cc"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/115297926",
+                "target": "_blank"
+              },
+              "children": [
+                "[UTOPYA] Pool Table Mod a0.3.9.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/11-5geng-xin-qiu-96463054",
+                "target": "_blank"
+              },
+              "children": [
+                "UTOPYA_撞球模組_a0.3.9(CHT).rar"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "活動和技能 > 娛樂"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "a0.3.9"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.22"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        可選擇1位主控模擬市民一起遊玩",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        [UTOPYA] Pool Table a0.3.4.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 撞球桌",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-008",
+      "order": 8,
+      "title": [
+        "Lumen Squeezy Hidden Lights",
+        {
+          "tag": "br"
+        },
+        "【功能性】流明開關隱藏燈"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/c/ravasheen/home",
+            "target": "_blank"
+          },
+          "children": [
+            "RAVASHEEN"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "RAVASHEEN",
+          "url": "https://www.patreon.com/c/ravasheen/home"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://ravasheen.com/download/easy-peasy-lumen-squeezy-hidden-lights/",
+                "target": "_blank"
+              },
+              "children": [
+                "RVSN_EasyPeasyLumenSqueezy_LightSystem_1_0_5.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/meowcats/posts/3-3zhu-ti-geng-76030051",
+                "target": "_blank"
+              },
+              "children": [
+                "!_RVSN_EasyPeasyLumenSqueezy_LightSystem_1_0_2_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "？ > ？"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1_0_5"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.21"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-009",
+      "order": 9,
+      "title": [
+        "Uplifting Elevator Portals",
+        {
+          "tag": "br"
+        },
+        "【功能性】電梯"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/ravasheen/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "ravasheen"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "ravasheen",
+          "url": "https://www.curseforge.com/members/ravasheen/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/build-buy/uplifting-elevators",
+                "target": "_blank"
+              },
+              "children": [
+                "RVSN_UpliftingElevatorPortals_1_0_1.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "家電 > 綜合"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.24"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        可進出、裝修內部\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-010",
+      "order": 10,
+      "title": [
+        "Functional garage doors",
+        {
+          "tag": "br"
+        },
+        "【功能性】車庫門"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/NecrodogMTSandS4S",
+            "target": "_blank"
+          },
+          "children": [
+            "NecrodogMTSandS4S"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "NecrodogMTSandS4S",
+          "url": "https://www.patreon.com/NecrodogMTSandS4S"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/functional-doors-52688841",
+                "target": "_blank"
+              },
+              "children": [
+                "necrodog-garages-doors.7z"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "門"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.23"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        進出門會開啟 (有動畫）\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-011",
+      "order": 11,
+      "title": [
+        "【功能性】各種交通工具"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/NecrodogMTSandS4S",
+            "target": "_blank"
+          },
+          "children": [
+            "NecrodogMTSandS4S"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "NecrodogMTSandS4S",
+          "url": "https://www.patreon.com/NecrodogMTSandS4S"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/atv-scooter-segway-wheel-chair-prox-x-hover.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/atv-scooter-prof-88728509",
+                "target": "_blank"
+              },
+              "children": [
+                "necrodog-BG-animated-atv-scooter-segway-wheel-chair-prox-x-hover.7z"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "室外"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.23"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        壓縮檔中包含摩托車、輪椅、平衡車、越野車\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "build-buy-012",
+      "order": 12,
+      "title": [
+        "【功能性】男性立式馬桶"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/c/menaceman44/home",
+            "target": "_blank"
+          },
+          "children": [
+            "Menaceman44"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Menaceman44",
+          "url": "https://www.patreon.com/c/menaceman44/home"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/build/MMmaleUrinal.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/581702/male-urinal.html",
+                "target": "_blank"
+              },
+              "children": [
+                "MMmaleUrinal.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "馬桶"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.13"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

@@ -1,0 +1,2465 @@
+{
+  "schemaVersion": 2,
+  "category": "ui-mods",
+  "categoryLabel": "介面美化",
+  "sourceFile": "ui-mods.html",
+  "mods": [
+    {
+      "id": "ui-mods-001",
+      "order": 1,
+      "title": [
+        "字體 - 馬路圓口體"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SulSulDUCK",
+            "target": "_blank"
+          },
+          "children": [
+            "鴨呀 (SulSulDUCK)"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "鴨呀 (SulSulDUCK)",
+          "url": "https://www.patreon.com/cw/SulSulDUCK"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/fonts.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/zi-ti-ti-huan-ya-119018297",
+                "target": "_blank"
+              },
+              "children": [
+                "SulSulDUCK_馬路口-Maruko1.0_Font_Replacement.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "http://www.simfileshare.net/download/5217037/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "請務必刪除緩存"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        「avatarcache.package」",
+        {
+          "tag": "br"
+        },
+        "\n                        ＆",
+        {
+          "tag": "br"
+        },
+        "\n                        「localthumbcache.package」\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-002",
+      "order": 2,
+      "title": [
+        "開機動畫"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SimMattically",
+            "target": "_blank"
+          },
+          "children": [
+            "SimMattically"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "SimMattically",
+          "url": "https://www.patreon.com/cw/SimMattically"
+        }
+      ],
+      "preview": [
+        "\n                    ",
+        {
+          "tag": "video",
+          "attrs": {
+            "autoplay": null,
+            "muted": null,
+            "loop": null,
+            "playsinline": null,
+            "width": "100%",
+            "height": "100%",
+            "style": "object-fit: cover;"
+          },
+          "children": [
+            "\n                        ",
+            {
+              "tag": "source",
+              "attrs": {
+                "src": "preview/ui/opening.mp4",
+                "type": "video/mp4"
+              }
+            },
+            "\n                    "
+          ]
+        },
+        "\n                    ",
+        {
+          "tag": "div",
+          "attrs": {
+            "class": "volume-btn",
+            "onclick": "toggleMute(this)"
+          },
+          "children": [
+            "🔇"
+          ]
+        },
+        "\n                "
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/refreshed-intro-120407155",
+                "target": "_blank"
+              },
+              "children": [
+                "SimMattically_RefreshedOpening.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "2025.01.24"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {
+        "previewStyle": "position: relative;"
+      }
+    },
+    {
+      "id": "ui-mods-003",
+      "order": 3,
+      "title": [
+        "鼠標"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/cursor.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/sims-4-cursor-136401170",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated-overrides-Cursor-Sketchy_White_v1.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-004",
+      "order": 4,
+      "title": [
+        "主選單"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SimMattically",
+            "target": "_blank"
+          },
+          "children": [
+            "SimMattically"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "SimMattically",
+          "url": "https://www.patreon.com/cw/SimMattically"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/RefreshedMainMenu3.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/refreshed-main-3-133777443",
+                "target": "_blank"
+              },
+              "children": [
+                "SimMattically_RefreshedMainMenu3_BASE.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "version 3.1.1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "\n                            SimMattically_RefreshedMainMenu3_BASE.package",
+            {
+              "tag": "br"
+            },
+            "\n                            ⤷ 必裝核心檔案 (含隱藏廣告彈窗 )\n                        "
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        \n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "其他附加檔案 (可根據自己的需求下載 )"
+                  ]
+                }
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "children": [
+                    "\n                                SimMattically_RefreshedMainMenu3_DefaultBackground_#E7F1BFE1A7B056C9.package",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                ⤷ 一張預設背景圖 (無替換 )",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                "
+                  ]
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "tooltip-trigger",
+                    "data-tooltip-id": "note-legacy"
+                  },
+                  "children": [
+                    "\n                                    ",
+                    {
+                      "tag": "span",
+                      "attrs": {
+                        "class": "text-yellow"
+                      },
+                      "children": [
+                        "★ "
+                      ]
+                    },
+                    "SimMattically_LegacyBackgroundsPack.zip",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                "
+                  ]
+                },
+                "\n                                \n                                ",
+                {
+                  "tag": "div",
+                  "attrs": {
+                    "id": "note-legacy",
+                    "class": "hidden-note"
+                  },
+                  "children": [
+                    "\n                                    ",
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": "note-title"
+                      },
+                      "children": [
+                        "已下載："
+                      ]
+                    },
+                    "\n                                    ",
+                    {
+                      "tag": "div",
+                      "attrs": {
+                        "class": "note-body"
+                      },
+                      "children": [
+                        "\n                                        CopperdaleShack_#C42FCEB070C239A7.package",
+                        {
+                          "tag": "br"
+                        },
+                        "\n                                        Night_#92F021FF46AC24F4.package",
+                        {
+                          "tag": "br"
+                        },
+                        "\n                                        RavenwoodWell_#3198D50FC98280CB.package",
+                        {
+                          "tag": "br"
+                        },
+                        "\n                                        TomarangBeach_#0FFC97DF4CAA0026.package\n                                    "
+                      ]
+                    },
+                    "\n                                "
+                  ]
+                },
+                "\n                                \n                                ",
+                {
+                  "tag": "span",
+                  "children": [
+                    "\n                                ⤷ 舊版背景包 (可自行挑選喜歡的 )",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                SimMattically_OriginalGameBackgroundsPack.zip",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                ⤷ EA 預設背景 (高畫質修復版本 )",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                SimMattically_RefreshedMainMenu3_Optional_AlternativeLogo.package",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                ⤷ 主選單 logo 替換",
+                    {
+                      "tag": "br"
+                    },
+                    "\n                                "
+                  ]
+                },
+                "\n                            "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⌨️ ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-purple"
+          },
+          "children": [
+            {
+              "tag": "strong",
+              "children": [
+                "相關快捷鍵"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        「 R 鍵 」隨機切換背景",
+        {
+          "tag": "br"
+        },
+        "\n                        「 F 鍵 」顯示 / 隱藏家庭肖像",
+        {
+          "tag": "br"
+        },
+        "\n                        「 S 鍵 」顯示 / 隱藏新聞視窗",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ⚠️請注意！",
+        {
+          "tag": "br"
+        },
+        "\n                        修改檔名請勿刪除 #代碼，否則會讀取不到圖\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-005",
+      "order": 5,
+      "title": [
+        "主選單logo"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/Main Menu Logos.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/120743746",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated - Main Menu Logos.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "May 4, 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.08"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "解壓縮後擇一使用"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        必須跟 SimMattically 的",
+        {
+          "tag": "br"
+        },
+        "\n                        SimMattically_RefreshedMainMenu3_BASE.package",
+        {
+          "tag": "br"
+        },
+        "\n                        放在同一個資料夾中 (如果有的話 )\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-006",
+      "order": 6,
+      "title": [
+        "整體黑色UI介面"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/Chalk'd UI.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/chalkd-ui-sims-4-94573845",
+                "target": "_blank"
+              },
+              "children": [
+                "- [vyxated] Chalk'd UI - July 25 2026.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/206245/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "July 25 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.30"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載最新版本的UI Cheats"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        [Chalk UI] Loading screens.zip",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 加載畫面替換 (1-V1)",
+        {
+          "tag": "br"
+        },
+        "\n                        00_Base UI 1 - Main - EA Notif.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 不覆蓋EA通知欄",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        需點進每個__開頭的資料夾確認",
+        {
+          "tag": "br"
+        },
+        "\n                        有衝突模組只需保留「 Compatible 」",
+        {
+          "tag": "br"
+        },
+        "\n                        沒有衝突模組則只需保留「 Standalone 」",
+        {
+          "tag": "br"
+        },
+        "\n                        確認每個資料夾只保留一個檔案",
+        {
+          "tag": "br"
+        },
+        "\n    \n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                "點擊查看更多相容性檔案"
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "若要使用其他作者手機介面則刪除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「_CONFIG」>",
+                {
+                  "tag": "br"
+                },
+                "\n                                「vyxated-Chalk'd-PhoneIcons_EA.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "模擬工坊想保持原樣則刪除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「_CONFIG」>「TMEX - More Rentals」>",
+                {
+                  "tag": "br"
+                },
+                "\n                                「2_Gallery - Text - Standalone.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「GFX-Text files」>「2_Gallery - Text.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「Texture Files」>「2_Gallery - Texture.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "若要替換其他作者世界背景則刪除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「GFX-Text files」>「3_World select - Text.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「Texture Files」>「3_World select - Texture.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "若要替換其他作者對話框則刪除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「_CONFIG」>「__TMEX - Smarter Pie Menu」",
+                {
+                  "tag": "br"
+                },
+                "\n                                整個資料夾才可和相容",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "若要替換其他作者CC板手則刪除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「_CONFIG」>「__EDITABLE - Wrench Icons」",
+                {
+                  "tag": "br"
+                },
+                "\n                                整個資料夾才可和相容",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "若要替換其他通知牆顏色則刪除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「GFX-Text files」>「0_Base UI 1 - Main - Text.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「Texture Files」>「0_Base UI 1 - Main - Custom Notif.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "不想覆蓋筆記本則刪除"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「GFX-Text files」>「Live_2 - Notebook - Text.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「Texture Files」>「Live_2 - Notebook - Texture.package」",
+                {
+                  "tag": "br"
+                },
+                "\n                            "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-007",
+      "order": 7,
+      "title": [
+        "淺藍色UI背景"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/Pastel Blue UI.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/pastel-blue-ui-4-116665531",
+                "target": "_blank"
+              },
+              "children": [
+                "- [vyxated] Pastel Blue UI - May 15 2026.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/254194/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "May 15 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.19"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        解壓縮後只留下",
+        {
+          "tag": "br"
+        },
+        "\n                        「2_Gallery - Texture.package」工坊背景",
+        {
+          "tag": "br"
+        },
+        "\n                        &",
+        {
+          "tag": "br"
+        },
+        "\n                        「3_World select - Texture.package」世界背景\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-008",
+      "order": 8,
+      "title": [
+        "粉色UI背景"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/Pastel Pink UI.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/114167964?collection=2044080",
+                "target": "_blank"
+              },
+              "children": [
+                "- [vyxated] Pastel Pink UI - May 15 2026.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/254193/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "May 15 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.08"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        解壓縮後只留下",
+        {
+          "tag": "br"
+        },
+        "\n                        「0_Base UI 1 - Main - Custom Notif.package」",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 通知牆、選單背景",
+        {
+          "tag": "br"
+        },
+        "\n                        &",
+        {
+          "tag": "br"
+        },
+        "\n                        「Live_3 - Pickers - Change Outfit - Texture.package」",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 市民服裝選擇器背景顏色\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-009",
+      "order": 9,
+      "title": [
+        "米色筆記本背景"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/Beige UI.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/116664129?collection=2044080",
+                "target": "_blank"
+              },
+              "children": [
+                "- [vyxated] Beige UI - May 15 2026.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/254196/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "May 15 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.08"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        解壓縮後只留下",
+        {
+          "tag": "br"
+        },
+        "\n                        「Live_2 - Notebook - Texture.package」\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-010",
+      "order": 10,
+      "title": [
+        "顯示世界地圖名稱"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SimMattically",
+            "target": "_blank"
+          },
+          "children": [
+            "SimMattically"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "SimMattically",
+          "url": "https://www.patreon.com/cw/SimMattically"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/better-world-137634160",
+                "target": "_blank"
+              },
+              "children": [
+                "SimMattically_BetterWorldSelect_v2.1.1.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v2.1.1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需刪除黑色UI介面的"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        「_CONFIG」>「__SimMattically - Better World Select」",
+        {
+          "tag": "br"
+        },
+        "\n                        整個資料夾才可和相容\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-011",
+      "order": 11,
+      "title": [
+        "世界地圖ICON"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/mama_llama",
+            "target": "_blank"
+          },
+          "children": [
+            "Mama-Llama"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Mama-Llama",
+          "url": "https://www.patreon.com/cw/mama_llama"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/collection/594545?view=expanded",
+                "target": "_blank"
+              },
+              "children": [
+                "Icons | Collection from Mama-Llama"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Nov. 23, 2025, 7:16 p.m."
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.13"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        根據自己有的地圖來下載",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "lookup-link",
+            "onclick": "openDLCDialog()"
+          },
+          "children": [
+            "🔍查看地圖中英文對照"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-012",
+      "order": 12,
+      "title": [
+        "真實風世界地圖美化"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/mama_llama",
+            "target": "_blank"
+          },
+          "children": [
+            "Mama-Llama"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Mama-Llama",
+          "url": "https://www.patreon.com/cw/mama_llama"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/collection/502911?view=expanded",
+                "target": "_blank"
+              },
+              "children": [
+                "[Mama-Llama]- San Myshuno - Luxury - Realistic map replacement - 1.121.342.1030.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.121.342.1030"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        根據自己有的地圖來下載",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "lookup-link",
+            "onclick": "openDLCDialog()"
+          },
+          "children": [
+            "🔍查看地圖中英文對照"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-013",
+      "order": 13,
+      "title": [
+        "世界地圖美化"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/c/20thCPlumbob/home",
+            "target": "_blank"
+          },
+          "children": [
+            "20th Century Plumbob"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "20th Century Plumbob",
+          "url": "https://www.patreon.com/c/20thCPlumbob/home"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/collection/82142?view=expanded",
+                "target": "_blank"
+              },
+              "children": [
+                "Map Replacement | Collection from 20th Century Plumb"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.120.117.1030"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        根據自己有的地圖來下載",
+        {
+          "tag": "br"
+        },
+        "\n                        目前套用柳溪 & 托馬朗 & 考柏戴爾",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "lookup-link",
+            "onclick": "openDLCDialog()"
+          },
+          "children": [
+            "🔍查看地圖中英文對照"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-014",
+      "order": 14,
+      "title": [
+        "Sparkle CC Wrench",
+        {
+          "tag": "br"
+        },
+        "自訂CC板手圖標"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/tiasha/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "tiasha"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "tiasha",
+          "url": "https://www.curseforge.com/members/tiasha/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/wrench.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/cc-wrench-override/files/all?page=1&pageSize=20&showAlphaFiles=hide",
+                "target": "_blank"
+              },
+              "children": [
+                "Tiasha - Sparkle CC Wrench.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.123"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "僅擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-015",
+      "order": 15,
+      "title": [
+        "晶錐替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/plumbob.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/2d-plumbob-ish-133589508",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated-overrides-2D Plumbob_Clubs_MERGED.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/251182/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.123"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        可自訂顏色\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-016",
+      "order": 16,
+      "title": [
+        "人物縮略圖"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://simplyanjuta.tumblr.com/search/ANGLED",
+            "target": "_blank"
+          },
+          "children": [
+            "SimplyAnjuta"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "SimplyAnjuta",
+          "url": "https://simplyanjuta.tumblr.com/search/ANGLED"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/UI Pose.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simplyanjuta.tumblr.com/post/727261103465349120/adjusted-camera-settings-for-household-panel",
+                "target": "_blank"
+              },
+              "children": [
+                "SimplyAnjuta_AngledPose_HouseholdPanel.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.mediafire.com/file/gjq2ukkzenrw55y/SimplyAnjuta_AngledPose_HouseholdPanel.package/file",
+                "target": "_blank"
+              },
+              "children": [
+                "mediafire"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Jan. 18, 2025, 7:04 p.m."
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        1A：針對兒童和寵物調整了相機設定",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "1B：針對身材較矮的青少年調整相機設定",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "最多只能擇一搭配使用"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-017",
+      "order": 17,
+      "title": [
+        "UI表情替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/nv_games",
+            "target": "_blank"
+          },
+          "children": [
+            "NV. Games"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "NV. Games",
+          "url": "https://www.patreon.com/nv_games"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/UI Mood 01.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/small-mods-69121597",
+                "target": "_blank"
+              },
+              "children": [
+                "NV. SM UI Mood 01.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        只需要保留成人及兒童的 All.package 即可",
+        {
+          "tag": "br"
+        },
+        "\n                        或是可自行選擇想要替換的表情",
+        {
+          "tag": "br"
+        },
+        "\n                        (此版本保留了EA風格)",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-018",
+      "order": 18,
+      "title": [
+        "優化手機分類"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/xosdr/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "xosdr"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SulSulDUCK",
+            "target": "_blank"
+          },
+          "children": [
+            "xosdr鴨呀 (SulSulDUCK)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "xosdr",
+          "url": "https://www.curseforge.com/members/xosdr/projects"
+        },
+        {
+          "name": "xosdr鴨呀 (SulSulDUCK)",
+          "url": "https://www.patreon.com/cw/SulSulDUCK"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/PhoneUI.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/phone-ui",
+                "target": "_blank"
+              },
+              "children": [
+                "xosdr_PhoneUI_Optional.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/SulSulDUCK/posts/geng-hao-de-shou-95907900",
+                "target": "_blank"
+              },
+              "children": [
+                "!_xosdr_PhoneUI_Optional_CH_SulSulDUCK.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Nov 7, 2024"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        主體解壓縮後只留下",
+        {
+          "tag": "br"
+        },
+        "\n                        「xosdr_PhoneUI_Optional.package 」",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ✦ 前往生活方式輔導：從「自宅」改為「前往 / 旅行」",
+        {
+          "tag": "br"
+        },
+        "\n                        ✦ 訂購外送：從「自宅」改為「購物」",
+        {
+          "tag": "br"
+        },
+        "\n                        ✦ 新增查看社群動態：從「社交」改為「社交兔兔」",
+        {
+          "tag": "br"
+        },
+        "\n                        ✦ 新增模擬相片社群動態：從「社交」改為「社交兔兔」",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        SulSulDUCK_xosdr_PhoneUI_Icons&Text_VerC",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 更好的手機UI (擇一版本下載，C、D 兩款不含手機桌布 )",
+        {
+          "tag": "br"
+        },
+        "\n                        SulSulDUCK_PhoneWallPaper_Morandi Color.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 莫蘭迪多色桌布 (可搭配 C、D 兩款UI )\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-019",
+      "order": 19,
+      "title": [
+        "Pie Menu"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/drearyfawn",
+            "target": "_blank"
+          },
+          "children": [
+            "drearyfawn"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "drearyfawn",
+          "url": "https://www.patreon.com/drearyfawn"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/123274408",
+                "target": "_blank"
+              },
+              "children": [
+                "drearyfawn - lace pie menu.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-020",
+      "order": 20,
+      "title": [
+        "繁中遊戲文本小修"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/StringsFix.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/strings-fix",
+                "target": "_blank"
+              },
+              "children": [
+                "ABonnie_StringsFix.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.simfileshare.net/download/4592828/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "2025/10/06"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.05"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需放置「",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/mo-ni-shi-min-4-95583774",
+                "target": "_blank"
+              },
+              "children": [
+                "優先級資料夾"
+              ]
+            },
+            "」中"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "ui-mods-021",
+      "order": 21,
+      "title": [
+        "特效"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            " vyxated"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vyxated",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/ui/overrides-VFX.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/headline-visual-133075040",
+                "target": "_blank"
+              },
+              "children": [
+                "vyxated-overrides-VFX.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

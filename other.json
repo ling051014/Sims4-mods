@@ -1,0 +1,1182 @@
+{
+  "schemaVersion": 2,
+  "category": "other",
+  "categoryLabel": "其他延伸",
+  "sourceFile": "other.html",
+  "mods": [
+    {
+      "id": "other-001",
+      "order": 1,
+      "title": [
+        "世界照明"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://softerhaze.tumblr.com/tagged/z",
+            "target": "_blank"
+          },
+          "children": [
+            "softerhaze.itch"
+          ],
+          "unclosed": true
+        }
+      ],
+      "authors": [
+        {
+          "name": "softerhaze.itch",
+          "url": "https://softerhaze.tumblr.com/tagged/z"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/moonglow.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://softerhaze.itch.io/sunblind",
+                "target": "_blank"
+              },
+              "children": [
+                "softerhaze - sunblind - royalty and legacy.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Feb 13, 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.05"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "目前使用的是Sunblind，但部分環境太暗看不清楚"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ( ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.tumblr.com/softerhaze/628014593783087104/added-moonglow-lighting-mod-files-for-every",
+            "target": "_blank"
+          },
+          "children": [
+            "Moonglow"
+          ]
+        },
+        "為備選方案 )",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "每次遊戲更新或修復後需重新安裝"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        請將Data、Delta資料夾「複製」、「貼上」至以下路徑",
+        {
+          "close": "br"
+        },
+        "\n                        並選擇「取代」，",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "請勿刪除後再貼上"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ➤ ",
+        {
+          "tag": "strong",
+          "children": [
+            "Origin"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        C:\\Program Files (x86)\\Origin Games\\The Sims 4",
+        {
+          "close": "br"
+        },
+        "\n                        ➤ ",
+        {
+          "tag": "strong",
+          "children": [
+            "Steam"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        C:\\Program Files (x86)\\Steam\\steamapps\\common\\The Sims 4",
+        {
+          "close": "br"
+        },
+        "\n                        ➤ ",
+        {
+          "tag": "strong",
+          "children": [
+            "EA"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        C:\\Program Files\\EA Games\\The Sims 4",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        ➤ ",
+        {
+          "tag": "strong",
+          "children": [
+            "Mac"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        The Sims 4.app > Contents > res",
+        {
+          "close": "br"
+        },
+        "\n                        Mac用戶需參考作者的下載指南",
+        {
+          "close": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-002",
+      "order": 2,
+      "title": [
+        "高清模組"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SulSulDUCK",
+            "target": "_blank"
+          },
+          "children": [
+            "鴨呀 (SulSulDUCK)"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "鴨呀 (SulSulDUCK)",
+          "url": "https://www.patreon.com/cw/SulSulDUCK"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/Better_Graphics.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "檔案名稱 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/better-graphics-113529819",
+                "target": "_blank"
+              },
+              "children": [
+                "Better Graphics Solution.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "May 31, 2025"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.05"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "支援 DX9 與 DX11"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                    \n                        請勿將此檔案放入「ConfigOverride」資料夾",
+        {
+          "close": "br"
+        },
+        "\n                        否則遊戲無法啟動 (與 ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/posts/55891224",
+            "target": "_blank"
+          },
+          "children": [
+            "Simp4Sims"
+          ]
+        },
+        " 的版本不同)",
+        {
+          "close": "br"
+        },
+        "\n                        必須「取代」Bin 資料夾內的檔案",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        需確保 ConfigOverride 資料夾為空",
+        {
+          "close": "br"
+        },
+        "\n                        ⤷ 舊文件可能會覆蓋目前文件並導致衝突",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        ReShade / GShade 使用者",
+        {
+          "close": "br"
+        },
+        "\n                        需要在「…」>「遊戲選項」>「畫面」>關閉「邊緣平滑」",
+        {
+          "close": "br"
+        },
+        "\n                        改用 FXAA 或 SMAA",
+        {
+          "close": "br"
+        },
+        "\n                        ⤷ 確保 MXAO、DOF、AdaptiveFog 和 DepthHaze 等著色器正常運作",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "每次遊戲更新或修復後需重新安裝"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ⤷ 每次遊戲更新或修復後，GraphicsRules.sgr 檔案都會重置",
+        {
+          "close": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-003",
+      "order": 3,
+      "title": [
+        "ReShade"
+      ],
+      "byline": [
+        "by RESHADE TEAM"
+      ],
+      "authors": [
+        {
+          "name": "RESHADE TEAM",
+          "url": null
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/reshade.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "檔案主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://reshade.me/",
+                "target": "_blank"
+              },
+              "children": [
+                "ReShade with full add-on support"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "內建繁中"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "6.7.3"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.18"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "支援插件需安裝「Full add-on support」版本"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        濾鏡開關快捷鍵「數字 . 」",
+        {
+          "close": "br"
+        },
+        "\n                        濾鏡選單HOME鍵「數字 7 」",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        濾鏡資料夾路徑",
+        {
+          "close": "br"
+        },
+        "\n                        ∞ ",
+        {
+          "tag": "strong",
+          "children": [
+            "Steam"
+          ]
+        },
+        " : 遊戲Sims ⇨ 右鍵內容 ⇨ 已安裝檔案 ⇨ 瀏覽 ⇨ Game ⇨ Bin",
+        {
+          "close": "br"
+        },
+        "\n                        ∞ ",
+        {
+          "tag": "strong",
+          "children": [
+            "EA"
+          ]
+        },
+        " : 模擬市民4 ⇨ 點右上「…」⇨ 查看屬性 ⇨ 開啟資料夾 ⇨ Game ⇨ Bin",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "濾鏡核心檔案"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        d3d9.dll（DX9 使用者）",
+        {
+          "close": "br"
+        },
+        "\n                        dxgi.dll（X11 使用者）\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-004",
+      "order": 4,
+      "title": [
+        "隱藏UI介面"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vyxated",
+            "target": "_blank"
+          },
+          "children": [
+            "VYXATED"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "VYXATED",
+          "url": "https://www.patreon.com/vyxated"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/hide_ui.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "插件主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://github.com/FransBouma/ShaderToggler/releases",
+                "target": "_blank"
+              },
+              "children": [
+                "ShaderToggler_v121.zip"
+              ]
+            },
+            " (64位元)"
+          ]
+        },
+        {
+          "label": "其他檔案 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/reshade-hide-ui-93652879",
+                "target": "_blank"
+              },
+              "children": [
+                "ShaderToggler_DX11.ini"
+              ]
+            },
+            " (DX11)"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v121"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.18"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "支援 ReShade 與 GShade"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "ReShade with full add-on support 需 5.1以上版本"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        32位元下載 ⇨ ShaderToggler_x86_101.zip",
+        {
+          "close": "br"
+        },
+        "\n                        DX9下載 ⇨ ShaderToggler.ini",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "ini 檔案應該命名為 ShaderToggler.ini"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "下載 DX11 版本需刪除「_DX11」後綴"
+          ]
+        },
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        請「剪下」、「貼上」至資料夾路徑",
+        {
+          "close": "br"
+        },
+        "\n                        ∞ ",
+        {
+          "tag": "strong",
+          "children": [
+            "Steam"
+          ]
+        },
+        " : 遊戲Sims ⇨ 右鍵內容 ⇨ 已安裝檔案 ⇨ 瀏覽 ⇨ Game ⇨ Bin",
+        {
+          "close": "br"
+        },
+        "\n                        ∞ ",
+        {
+          "tag": "strong",
+          "children": [
+            "EA"
+          ]
+        },
+        " : 模擬市民4 ⇨ 點右上「…」⇨ 查看屬性 ⇨ 開啟資料夾 ⇨ Game ⇨ Bin",
+        {
+          "close": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-005",
+      "order": 5,
+      "title": [
+        "SRWE 高清截圖"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://github.com/dtgDTGdtg",
+            "target": "_blank"
+          },
+          "children": [
+            "dtgDTGdtg"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "dtgDTGdtg",
+          "url": "https://github.com/dtgDTGdtg"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://github.com/dtgDTGdtg/SRWE/releases",
+                "target": "_blank"
+              },
+              "children": [
+                "SRWE v2.3.6"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "無吳"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v2.3.6"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        需要在「…」>「遊戲選項」>「畫面」中",
+        {
+          "close": "br"
+        },
+        "\n                        將顯示模式切換為「視窗模式」",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        打開 SRWE 點擊左上角選擇「 TS4_x64.exe」",
+        {
+          "close": "br"
+        },
+        "\n                        輸入寬度高度參數，數值越大越高清也越佔空間",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        若有安裝濾鏡 ( ReShade / GShade ) 使用一樣的截圖快捷鍵",
+        {
+          "close": "br"
+        },
+        "\n                        沒有按裝濾鏡則使用遊戲內建快捷鍵「 C 」",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        截圖後回到 SRWE 點擊「 Taskbar mode 」恢復遊戲大小",
+        {
+          "close": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-006",
+      "order": 6,
+      "title": [
+        "Sims 4 Mod Manager",
+        {
+          "close": "br"
+        },
+        "模組可視化"
+      ],
+      "byline": [
+        "by GAMETIME DEV"
+      ],
+      "authors": [
+        {
+          "name": "GAMETIME DEV",
+          "url": null
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/mod_manager.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "官方網站 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://gametimedev.de/S4MM/",
+                "target": "_blank"
+              },
+              "children": [
+                "Gametimedev"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "內建繁中"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "[B]2.1.9)"
+          ]
+        }
+      ],
+      "notes": [
+        "最強大的模組管理工具，支援圖片預覽，可快速抓出重複或損壞的檔案。"
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-007",
+      "order": 7,
+      "title": [
+        "Sims 4 Studio"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://sims4studio.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "Sims 4 Studio"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Sims 4 Studio",
+          "url": "https://sims4studio.com/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/S4S.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "程式主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://sims4studio.com/thread/29786/sims-studio-windows-star-open",
+                "target": "_blank"
+              },
+              "children": [
+                "InstallSims4Studio_v3.2.6.3 (Star).exe"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "內建繁中"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v3.2.6.3"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.03"
+          ]
+        }
+      ],
+      "notes": [
+        "用於修復舊模組、批量更新 CC 以及開發自製物品的核心工具。"
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-008",
+      "order": 8,
+      "title": [
+        "S4TI Tray導入器"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://luniversims.fr/profile/18-deevo/",
+            "target": "_blank"
+          },
+          "children": [
+            "Par deevo"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Par deevo",
+          "url": "https://luniversims.fr/profile/18-deevo/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/S4TI.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "程式主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://luniversims.fr/files/file/73-sims-4-tray-importer/",
+                "target": "_blank"
+              },
+              "children": [
+                "S4TI_setup_250831.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "內建繁中"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.25.8.1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.09"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        點選橘色的「Télécharger ce fichier」進行下載",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        取消「自動檢測」，自行選擇模擬市民4的「安裝位置」；",
+        {
+          "close": "br"
+        },
+        "\n                        「路徑檔案」選擇我的文件(My Documents)",
+        {
+          "close": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "other-009",
+      "order": 9,
+      "title": [
+        "The Sims 4 Translator",
+        {
+          "close": "br"
+        },
+        "翻譯程式工具"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://github.com/voky1",
+            "target": "_blank"
+          },
+          "children": [
+            "voky"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "voky",
+          "url": "https://github.com/voky1"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/other/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "程式主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://github.com/voky1/sims4-translator/releases",
+                "target": "_blank"
+              },
+              "children": [
+                "translator_1_4_x64.7z"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "內建繁中"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.4"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.07"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        Windows7 用戶下載 ⇨ translator_1_4_win7_x64.7z版本",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        創建一個自訂資料夾，將壓縮檔丟到資料夾裡解壓縮(解完壓縮之後的壓縮檔就可以刪除了)，找到他的應用程式打開即可使用。",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        第一次打開翻譯程式需先設置使用語言，在左上找到「Options」點開後選擇第一個選項。",
+        {
+          "close": "br"
+        },
+        "\n                        如圖示將介面語言改為中文，目標語言改為CHT_CN。設定好後請關閉再重新開啟，設定才會生效。",
+        {
+          "close": "br"
+        },
+        "\n                        (CHT_CN是繁體中文、CHS_CN是簡體中文；看你想翻譯的目標語言是哪一種)",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        下載一個你想要進行漢化的模組。接著打開翻譯程式，點選左上「文件」>「載入文件」，選擇你剛剛下載的模組，載入程式後即可看到所有須漢化的英文詞條。\n                        選擇要翻譯的詞條按「Enter」或滑鼠點擊2下即可打開詞條進行翻譯。",
+        {
+          "close": "br"
+        },
+        "\n                        (翻譯程式讀取的檔案為package)",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        完成所有詞條翻譯後，如果你希望保存只有翻譯內容的檔案，請選擇「保存為...」；如果你希望漢化包含到主體模組裡，就選擇「確認保存package」。",
+        {
+          "close": "br"
+        },
+        "\n                        ⚠️注意!! 如果你的漢化是要自用的，可以選擇「確認保存package」或「確認保存package至...」的選項(這個辦法是將原作者的模組本體+你自己的漢化包在一同一個檔案裡...等於搬運了原作者的本體在自己的網站給別人下載)；但如果你是想分享的，只要是非自用，請選擇「保存為...」。",
+        {
+          "close": "br"
+        },
+        "\n                        ⚠️絕對不要分享包含了原模組主體的漢化，這個行為如同將別人的心血據為己有的盜用。經發現有此情況，將直接加入黑名單，並發布公告以提醒所有人。",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        漢化檔案名稱的設置，建議盡量與原模組同名。並在前墜加上『!』，可以讓漢化檔案更容易被讀取到。(通常是Windows系統用「!」，Mac系統用「1」)",
+        {
+          "close": "br"
+        },
+        "\n                        ",
+        {
+          "close": "br"
+        },
+        "\n                        如遇原模組更新，一樣使用翻譯程式打開模組檔案，選擇『導入翻譯』，選擇你之前翻譯此模組的漢化檔案導入。紅色顯示的部分就是新增的內容。",
+        {
+          "close": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    }
+  ]
+}

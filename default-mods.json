@@ -1,0 +1,3220 @@
+{
+  "schemaVersion": 2,
+  "category": "default-mods",
+  "categoryLabel": "默認替換",
+  "sourceFile": "default-mods.html",
+  "mods": [
+    {
+      "id": "default-mods-001",
+      "order": 1,
+      "title": [
+        "iPhone 17 pro Max Override",
+        {
+          "tag": "br"
+        },
+        "手機替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/princessbarxbie",
+            "target": "_blank"
+          },
+          "children": [
+            "Princess Barxbie"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Princess Barxbie",
+          "url": "https://www.patreon.com/princessbarxbie"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/iPhone 17 pro Max.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/iphone-17-pro-150853342",
+                "target": "_blank"
+              },
+              "children": [
+                "[kia_dabarbie]SilverIPhone17promaxDefault ReplacementPhone.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.25"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "只能下載一種顏色"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-002",
+      "order": 2,
+      "title": [
+        "Better Babies Vol.2",
+        {
+          "tag": "br"
+        },
+        "嬰兒皮膚替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/c/sims3melancholic/posts",
+            "target": "_blank"
+          },
+          "children": [
+            "sims3melancholic"
+          ]
+        },
+        " × \n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.tumblr.com/plumberrycc",
+            "target": "_blank"
+          },
+          "children": [
+            "plumberrycc"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "sims3melancholic",
+          "url": "https://www.patreon.com/c/sims3melancholic/posts"
+        },
+        {
+          "name": "plumberrycc",
+          "url": "https://www.tumblr.com/plumberrycc"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Better Babies V2.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/better-babies-2-144721181",
+                "target": "_blank"
+              },
+              "children": [
+                "!sims3melancholic x plumberrycc_BETTER BABIES V2 OVERLAY.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.28"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        S3M x PBCC_ANIMATIONS.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 新動畫 (必須下載)",
+        {
+          "tag": "br"
+        },
+        "\n                        S3M x PBCC_BG_invisible_crib.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 隱形嬰兒床 (必須下載)",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.tumblr.com/plumberrycc/",
+            "target": "_blank"
+          },
+          "children": [
+            "S3M x PBCC_BG(2)_crib.package"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 嬰兒床替換 (必須根據DLC下載)",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.tumblr.com/plumberrycc/",
+            "target": "_blank"
+          },
+          "children": [
+            "S3M x PBCC_BABY_BOTTLE.package"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 預設奶瓶替換",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-003",
+      "order": 3,
+      "title": [
+        "painting animation override",
+        {
+          "tag": "br"
+        },
+        "畫畫動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        "\n                    ",
+        {
+          "tag": "video",
+          "attrs": {
+            "autoplay": null,
+            "muted": null,
+            "loop": null,
+            "playsinline": null,
+            "width": "100%",
+            "height": "100%",
+            "style": "object-fit: cover;"
+          },
+          "children": [
+            "\n                        ",
+            {
+              "tag": "source",
+              "attrs": {
+                "src": "preview/default/painting_animation.mp4",
+                "type": "video/mp4"
+              }
+            },
+            "\n                    "
+          ]
+        },
+        "\n                "
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/painting-mini-130600688",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_painting_animation_override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/painting-mini-fu-138726767",
+                "target": "_blank"
+              },
+              "children": [
+                "!_simkatu_painting animation override_CHT(merge)_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_functional_mini_easels.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 功能性迷你畫架 (使用前請輸入 bb.moveobjects )",
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_canvas_frame_override_v1.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 畫布厚度與畫框樣式 (擇一下載)",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {
+        "previewStyle": "position: relative;"
+      }
+    },
+    {
+      "id": "default-mods-004",
+      "order": 4,
+      "title": [
+        "eating at the table animation override",
+        {
+          "tag": "br"
+        },
+        "吃飯動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/eating_at_table_animation.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/134998014",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_eating_at_table_animation_override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-005",
+      "order": 5,
+      "title": [
+        "phone call animations override",
+        {
+          "tag": "br"
+        },
+        "手機通話動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/phone_calls_animations.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/phone-call-118902550",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_phone_calls_animations_override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-006",
+      "order": 6,
+      "title": [
+        "relaxed tv watching animations override",
+        {
+          "tag": "br"
+        },
+        "輕鬆看電視動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/relaxed_tv_watching.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/relaxed-tv-113487807",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_relaxed_tv_watching_override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/relaxed-tv-qing-115668811",
+                "target": "_blank"
+              },
+              "children": [
+                "!_simkatu_relaxed_tv_watching_override_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.01"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-007",
+      "order": 7,
+      "title": [
+        "computer animation override",
+        {
+          "tag": "br"
+        },
+        "玩電腦動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/compute_animation.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/computer-126595678",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_compute_animation_override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.06"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-008",
+      "order": 8,
+      "title": [
+        "computer desktop override",
+        {
+          "tag": "br"
+        },
+        "電腦畫面替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/computer desktop.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/simkatu/posts/computer-desktop-105628293",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu computer desktop override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-009",
+      "order": 9,
+      "title": [
+        "PC Games Override",
+        {
+          "tag": "br"
+        },
+        "電腦遊戲替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://imgloomie.tumblr.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "gloomiee"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "gloomiee",
+          "url": "https://imgloomie.tumblr.com/"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/PCVideoGamesOverride.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://imgloomie.tumblr.com/post/786856583383613440",
+                "target": "_blank"
+              },
+              "children": [
+                "[gloomiee]PCVideoGamesOverride.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/meowcats/posts/7-6geng-xin-pc-117500714",
+                "target": "_blank"
+              },
+              "children": [
+                "!_[gloomiee]PCVideoGamesOverride_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-010",
+      "order": 10,
+      "title": [
+        "reading animation override 2.0",
+        {
+          "tag": "br"
+        },
+        "看書動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/reading_override_2.0.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/reading-override-110145559",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_reading_override_2.0_standart_version.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        擁有生與死DLC還需另外下載",
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_reading_addon_fix_lifedeath.package",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-011",
+      "order": 11,
+      "title": [
+        "override of the singing animation with microphone",
+        {
+          "tag": "br"
+        },
+        "麥克風唱歌動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/singing_animation_with_microphone.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/override-of-with-107265096",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_override_of_the_singing_animation_with_microphone.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.02"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-012",
+      "order": 12,
+      "title": [
+        "Override Stereo Dances + 35 dances",
+        {
+          "tag": "br"
+        },
+        "跳舞動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/stevenstudios",
+            "target": "_blank"
+          },
+          "children": [
+            "Steven Studios"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Steven Studios",
+          "url": "https://www.patreon.com/cw/stevenstudios"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Dance Override.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/sims-4-mod-35-62083474",
+                "target": "_blank"
+              },
+              "children": [
+                "(Steven Studios) Dance Override MOD.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/download/4093205/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-013",
+      "order": 13,
+      "title": [
+        "Take off Shoes with animation",
+        {
+          "tag": "br"
+        },
+        "室內脫鞋動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cepzid",
+            "target": "_blank"
+          },
+          "children": [
+            "Cepzid Ferdiana Creation"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Cepzid Ferdiana Creation",
+          "url": "https://www.patreon.com/cepzid"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/ShoesTakeOffAnimation.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/take-off-shoes-43911459",
+                "target": "_blank"
+              },
+              "children": [
+                "Zulf_ShoesTakeOffAnimation.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.01"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-014",
+      "order": 14,
+      "title": [
+        "freshen Up mirror override",
+        {
+          "tag": "br"
+        },
+        "照鏡子動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.tumblr.com/tinycoffeecups-sims",
+            "target": "_blank"
+          },
+          "children": [
+            "tinycoffeecups-sims"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "tinycoffeecups-sims",
+          "url": "https://www.tumblr.com/tinycoffeecups-sims"
+        }
+      ],
+      "preview": [
+        "\n                    ",
+        {
+          "tag": "video",
+          "attrs": {
+            "autoplay": null,
+            "muted": null,
+            "loop": null,
+            "playsinline": null,
+            "width": "100%",
+            "height": "100%",
+            "style": "object-fit: cover;"
+          },
+          "children": [
+            "\n                        ",
+            {
+              "tag": "source",
+              "attrs": {
+                "src": "preview/default/freshen Up mirror.mp4",
+                "type": "video/mp4"
+              }
+            },
+            "\n                    "
+          ]
+        },
+        "\n                "
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.tumblr.com/tinycoffeecups-sims/790827534799568896/freshen-up-override",
+                "target": "_blank"
+              },
+              "children": [
+                "Female-FreshenUpOverride.package"
+              ]
+            },
+            " (女性)"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.02"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        可同時下載 Male-FreshenUp.package (男性版本)",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {
+        "previewStyle": "position: relative;"
+      }
+    },
+    {
+      "id": "default-mods-015",
+      "order": 15,
+      "title": [
+        "No Route Fail Animation",
+        {
+          "tag": "br"
+        },
+        "無路可走動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/lazarusinashes",
+            "target": "_blank"
+          },
+          "children": [
+            "lazarusinashes"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "lazarusinashes",
+          "url": "https://www.patreon.com/lazarusinashes"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/NoRouteFailAnimation.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/no-route-fail-52881585",
+                "target": "_blank"
+              },
+              "children": [
+                "lazarusinashes_MizoreYukii_NoRouteFailAnimation.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2種版本請擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        NoRouteFailAnimation.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 動作替換",
+        {
+          "tag": "br"
+        },
+        "\n                        lazarusinashes_NoRouteFailAnimation.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 無動作",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-016",
+      "order": 16,
+      "title": [
+        "Nap？",
+        {
+          "tag": "br"
+        },
+        "打瞌睡動畫替換 - 床"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.tumblr.com/tinycoffeecups-sims",
+            "target": "_blank"
+          },
+          "children": [
+            "tinycoffeecups-sims"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "tinycoffeecups-sims",
+          "url": "https://www.tumblr.com/tinycoffeecups-sims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.simfileshare.net/download/5621926/",
+                "target": "_blank"
+              },
+              "children": [
+                "Tiny_CoffeeBedOverride-1.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.02"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-017",
+      "order": 17,
+      "title": [
+        "Seated Nap Mod Override",
+        {
+          "tag": "br"
+        },
+        "打瞌睡動畫替換 - 沙發"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/Merakiscc",
+            "target": "_blank"
+          },
+          "children": [
+            "Meraki"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Meraki",
+          "url": "https://www.patreon.com/cw/Merakiscc"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/SeatedNap.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/seated-nap-mod-150943692",
+                "target": "_blank"
+              },
+              "children": [
+                "Meraki_SeatedNap Override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.02"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        共3種動畫隨機播放 (含孕婦版本)",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-018",
+      "order": 18,
+      "title": [
+        "Seated Nap Mod Override",
+        {
+          "tag": "br"
+        },
+        "男性小便動畫替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/khlas",
+            "target": "_blank"
+          },
+          "children": [
+            "Khlas"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Khlas",
+          "url": "https://www.patreon.com/cw/khlas"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.loverslab.com/files/file/17249-khlas-sex-animations-and-custom-contents-for-the-sims-4/",
+                "target": "_blank"
+              },
+              "children": [
+                "!khlas_male_pee_animations_replacer_merged.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2024.11.20"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-019",
+      "order": 19,
+      "title": [
+        "book cover default replacements",
+        {
+          "tag": "br"
+        },
+        "書籍封面替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/book cover.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/simkatu/posts/book-cover-100457724",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu book cover default replacements.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-020",
+      "order": 20,
+      "title": [
+        "Default Paintings Replaced",
+        {
+          "tag": "br"
+        },
+        "畫作替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/vellesa",
+            "target": "_blank"
+          },
+          "children": [
+            "vellesa"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vellesa",
+          "url": "https://www.patreon.com/cw/vellesa"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Paintings.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vellesa/posts/default-replaced-124378340",
+                "target": "_blank"
+              },
+              "children": [
+                "[vellesa] Default Paintings Replaced — Easel+Tablet.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.simfileshare.net/download/5349021/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-021",
+      "order": 21,
+      "title": [
+        "Replacing game texture accounts",
+        {
+          "tag": "br"
+        },
+        "帳單信件替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/Ser_Kisyan",
+            "target": "_blank"
+          },
+          "children": [
+            "Ser_Kisyan"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Ser_Kisyan",
+          "url": "https://www.patreon.com/cw/Ser_Kisyan"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Override__accounts.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/Ser_Kisyan/posts/replacing-game-62906719?collection=99608",
+                "target": "_blank"
+              },
+              "children": [
+                "!SER_KISYAN_Override__accounts_v11.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "僅擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-022",
+      "order": 22,
+      "title": [
+        "Mop replacement",
+        {
+          "tag": "br"
+        },
+        "拖把替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/Ser_Kisyan",
+            "target": "_blank"
+          },
+          "children": [
+            "Ser_Kisyan"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Ser_Kisyan",
+          "url": "https://www.patreon.com/cw/Ser_Kisyan"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/mop_replacement.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/Ser_Kisyan/posts/mop-replacement-100872735",
+                "target": "_blank"
+              },
+              "children": [
+                "SER_KISYAN_mop_replacement_Gray.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "3種顏色擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-023",
+      "order": 23,
+      "title": [
+        "FUNCTIONAL SPRAY FOR CLEANING",
+        {
+          "tag": "br"
+        },
+        "清潔噴霧替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/Ser_Kisyan",
+            "target": "_blank"
+          },
+          "children": [
+            "Ser_Kisyan"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Ser_Kisyan",
+          "url": "https://www.patreon.com/cw/Ser_Kisyan"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Cleaning_spray.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/Ser_Kisyan/posts/functional-spray-91698876",
+                "target": "_blank"
+              },
+              "children": [
+                "!(SER_KISYAN)_Cleaning_spray_blue.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.21"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "6種顏色擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-024",
+      "order": 24,
+      "title": [
+        "Mixing Bowl",
+        {
+          "tag": "br"
+        },
+        "料理碗替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/Ser_Kisyan",
+            "target": "_blank"
+          },
+          "children": [
+            "Ser_Kisyan"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Ser_Kisyan",
+          "url": "https://www.patreon.com/cw/Ser_Kisyan"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/MixingBowl.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/Ser_Kisyan/posts/mixing-bowl-for-129802415?collection=99608",
+                "target": "_blank"
+              },
+              "children": [
+                "!SER_KISYAN_MixingBowl_(gloss).package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2種版本擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-025",
+      "order": 25,
+      "title": [
+        "Override for the bar",
+        {
+          "tag": "br"
+        },
+        "調酒物品替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/Ser_Kisyan",
+            "target": "_blank"
+          },
+          "children": [
+            "Ser_Kisyan"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Ser_Kisyan",
+          "url": "https://www.patreon.com/cw/Ser_Kisyan"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Overrides_Bar.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/Ser_Kisyan/posts/override-for-bar-140275862?collection=99608",
+                "target": "_blank"
+              },
+              "children": [
+                "SER_KISYAN_Overrides_Bar.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/override-for-the-bar/files/all?page=1&pageSize=20&showAlphaFiles=hide",
+                "target": "_blank"
+              },
+              "children": [
+                "Curseforge"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-026",
+      "order": 26,
+      "title": [
+        "餐盤替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/LIJOUE",
+            "target": "_blank"
+          },
+          "children": [
+            "LIJOUE"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "LIJOUE",
+          "url": "https://www.patreon.com/LIJOUE"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Table Overrides Silver.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/LIJOUE/posts/merry-collection-118334978",
+                "target": "_blank"
+              },
+              "children": [
+                "Table Overrides Silver UNMERGED.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需刪除「__MACOSX資料夾」&「.DS_Store」",
+            {
+              "tag": "br"
+            },
+            "\n                            否則無法開啟遊戲"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-027",
+      "order": 27,
+      "title": [
+        "Cookware Override",
+        {
+          "tag": "br"
+        },
+        "平底鍋替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/southernsimmer/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "SouthernSimmer"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "SouthernSimmer",
+          "url": "https://www.curseforge.com/members/southernsimmer/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Cookware.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/cookware-override",
+                "target": "_blank"
+              },
+              "children": [
+                "TSS_Cookware_White"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Jul 16, 2025"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "解壓縮後只保留一種顏色"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-028",
+      "order": 28,
+      "title": [
+        "TV Remote Override",
+        {
+          "tag": "br"
+        },
+        "電視遙控器替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/southernsimmer/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "SouthernSimmer"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "SouthernSimmer",
+          "url": "https://www.curseforge.com/members/southernsimmer/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/TVRemote.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/tv-remote-override",
+                "target": "_blank"
+              },
+              "children": [
+                "TSS_Override_TVRemote.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Jun 4, 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.21"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-029",
+      "order": 29,
+      "title": [
+        "Cutting Board Override",
+        {
+          "tag": "br"
+        },
+        "沾板替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/channel4sims",
+            "target": "_blank"
+          },
+          "children": [
+            "channel4sims"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "channel4sims",
+          "url": "https://www.patreon.com/channel4sims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Cutting Board.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/channel4sims/posts/ts4-cutting-91658238",
+                "target": "_blank"
+              },
+              "children": [
+                "channel4sims - food replacements - cutting board ver 3.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://drive.google.com/drive/folders/1T8wWMhCg-6MJKDvuGGCjuQg5I5BIMm7c",
+                "target": "_blank"
+              },
+              "children": [
+                "雲端硬碟"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "FEBRUARY 21st, 2025."
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "擇一款式下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        channel4sims - food replacements - cutting board chef station.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 餐廳用沾板 (以上擇一後可同時下載)\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-030",
+      "order": 30,
+      "title": [
+        "Kitchen Sponge Override",
+        {
+          "tag": "br"
+        },
+        "洗碗海綿替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/channel4sims",
+            "target": "_blank"
+          },
+          "children": [
+            "channel4sims"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "channel4sims",
+          "url": "https://www.patreon.com/channel4sims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/kitchen sponge.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/channel4sims/posts/ts4-kitchen-78685263",
+                "target": "_blank"
+              },
+              "children": [
+                "channel4sims - kitchen sponge override - yellow and green.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://channel4sims-cc.tumblr.com/post/709251692181454848/ts4-kitchen-sponge-override-sul-sul-since-im",
+                "target": "_blank"
+              },
+              "children": [
+                "Tumblr"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "April 24, 2025."
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.21"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "擇一顏色下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-031",
+      "order": 31,
+      "title": [
+        "Wrench Override",
+        {
+          "tag": "br"
+        },
+        "板手替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/siimplyjessica",
+            "target": "_blank"
+          },
+          "children": [
+            "SiimplyJessica"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "SiimplyJessica",
+          "url": "https://www.patreon.com/cw/siimplyjessica"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/Wrench.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/siimplyjessica/posts/wrench-override-124078721",
+                "target": "_blank"
+              },
+              "children": [
+                "[SJ] Wrench Override_Cream.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "3種顏色擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-032",
+      "order": 32,
+      "title": [
+        "Default pencil override",
+        {
+          "tag": "br"
+        },
+        "鉛筆替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vixonspixels",
+            "target": "_blank"
+          },
+          "children": [
+            "vixonspixels"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vixonspixels",
+          "url": "https://www.patreon.com/vixonspixels"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/penciloverride.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vixonspixels/posts/default-pencil-91071159",
+                "target": "_blank"
+              },
+              "children": [
+                "Vp_yellowpenciloverride.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.11"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "5種顏色擇一下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-033",
+      "order": 33,
+      "title": [
+        "Default Spa Day Career Outift",
+        {
+          "tag": "br"
+        },
+        "Spa Day員工服裝替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vixonspixels",
+            "target": "_blank"
+          },
+          "children": [
+            "vixonspixels"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vixonspixels",
+          "url": "https://www.patreon.com/vixonspixels"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/spadaycareeroutfit.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vixonspixels/posts/spa-day-refresh-121924638",
+                "target": "_blank"
+              },
+              "children": [
+                "Vp_default-spadaycareeroutfit-fembottom.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "Spa Day"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.20"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "4個檔案都需要下載"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-034",
+      "order": 34,
+      "title": [
+        "Default school bus override",
+        {
+          "tag": "br"
+        },
+        "高中校車替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/vixonspixels",
+            "target": "_blank"
+          },
+          "children": [
+            "vixonspixels"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "vixonspixels",
+          "url": "https://www.patreon.com/vixonspixels"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/schoolbusoverride.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/vixonspixels/posts/default-school-92273295",
+                "target": "_blank"
+              },
+              "children": [
+                "Vp-schoolbusoverride.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "高中歲月"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.11"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "default-mods-035",
+      "order": 35,
+      "title": [
+        "High School Cafeteria Override",
+        {
+          "tag": "br"
+        },
+        "高中食堂午餐替換"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/littlbowbub",
+            "target": "_blank"
+          },
+          "children": [
+            "Littlbowbub"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SulSulDUCK",
+            "target": "_blank"
+          },
+          "children": [
+            "鴨呀 (SulSulDUCK)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Littlbowbub",
+          "url": "https://www.patreon.com/cw/littlbowbub"
+        },
+        {
+          "name": "鴨呀 (SulSulDUCK)",
+          "url": "https://www.patreon.com/cw/SulSulDUCK"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/default/HighSchoolCafeteria.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/littlbowbub/posts/high-school-86943951?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "Littlbowbub_HighSchoolCafeteria_Override.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.simfileshare.net/download/5661153/",
+                "target": "_blank"
+              },
+              "children": [
+                "!Littlbowbub_HighSchoolCafeteria_Override_CH_SulSulDUCK.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "高中歲月"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.11"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

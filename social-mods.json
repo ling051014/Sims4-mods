@@ -1,0 +1,7740 @@
+{
+  "schemaVersion": 2,
+  "category": "social-mods",
+  "categoryLabel": "功能性模組",
+  "sourceFile": "social-mods.html",
+  "mods": [
+    {
+      "id": "social-mods-001",
+      "order": 1,
+      "title": [
+        "Quicker Sim Autonomy & Simulation Lag Improvements",
+        {
+          "tag": "br"
+        },
+        "更快的市民自主性和模擬延遲優化"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://simsasylum.com/tfm/index.php?/profile/467-coolspear/",
+            "target": "_blank"
+          },
+          "children": [
+            "coolspear"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "coolspear",
+          "url": "https://simsasylum.com/tfm/index.php?/profile/467-coolspear/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simsasylum.com/tfm/index.php?/topic/14126-quicker-sim-autonomy-simulation-lag-improvements-checked-for-patch-1121-royals-legacy/",
+                "target": "_blank"
+              },
+              "children": [
+                "Quicker Sim Autonomy All Versions 1.105.rar"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "March 2024 1.105"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.16"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需放置「",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/mo-ni-shi-min-4-95583774",
+                "target": "_blank"
+              },
+              "children": [
+                "優先級資料夾"
+              ]
+            },
+            "」中"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        優化人物自主性推進與模擬延遲，改善市民發呆、指令反應慢，以及吃飯、喝水、下棋、洗碗等多階段互動卡頓問題。",
+        {
+          "tag": "br"
+        },
+        "\n                        \n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "模組版本建議 (擇一)"
+                  ]
+                }
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "🚀 極高速｜TS4・TS8"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "strong",
+                  "children": [
+                    "適合高階電腦、大家庭、繁忙地段，或使用 MCCC 大幅放慢世界時間的玩家"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "TS4"
+                      ]
+                    }
+                  ]
+                },
+                "：最快版本。作者本人使用的版本，適合希望自主性反應極快的玩家。(使用正常遊戲時間時可能會過度快速 )",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "TS8"
+                      ]
+                    }
+                  ]
+                },
+                "：作者非常喜歡的版本，速度很快，但比 TS4 稍微保守。適合想大幅減少發呆與自主反應延遲的玩家。",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "⚖️ 平衡型｜TS16・TS24"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "strong",
+                  "children": [
+                    "適合一般遊玩、中階電腦、中型家庭"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "TS16"
+                      ]
+                    }
+                  ]
+                },
+                "：中間值，適合作為大多數玩家的起始測試版本。速度與穩定性較為平衡。",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "TS24"
+                      ]
+                    }
+                  ]
+                },
+                "：比 TS16 更保守。如果覺得 TS16 太快，可以改用這個版本。",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "🐢 較慢｜TS33・TS64"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "strong",
+                  "children": [
+                    "適合低階電腦、小家庭，或不希望市民行動過快的玩家"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "TS33 (Default)"
+                      ]
+                    }
+                  ]
+                },
+                "：維持遊戲原本的自主性推進速度，適合不想改變原版遊戲節奏的玩家。",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-purple"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "TS64"
+                      ]
+                    }
+                  ]
+                },
+                "：比原版更慢。適合低階電腦、小家庭、小房子，或覺得市民太快重複執行相同事情的玩家。",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                        \n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "💡 怎麼選？"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "strong",
+                  "children": [
+                    "不知道從哪個開始？"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                建議先從 ",
+                {
+                  "tag": "strong",
+                  "children": [
+                    "TS16"
+                  ]
+                },
+                " 開始。",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                如果覺得自主反應還是太慢：",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "strong",
+                  "children": [
+                    "TS16 → TS8 → TS4"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                如果覺得市民動作太快、開始頻繁重複行為：",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "strong",
+                  "children": [
+                    "TS16 → TS24 → TS33 → TS64"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                        \n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "🎯\n                                    不要只看電腦規格選版本，應綜合考量電腦效能、家庭規模、地段複雜度、遊玩方式及 MCCC 世界時間設定。\n                                    沒有絕對最佳版本，重點是找到最適合自己的 Goldilocks Version (剛剛好的版本 )。\n                                "
+                  ]
+                },
+                "\n                            "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-002",
+      "order": 2,
+      "title": [
+        "Simulation Unclogger",
+        {
+          "tag": "br"
+        },
+        "時間軸疏通器"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/9833124",
+            "target": "_blank"
+          },
+          "children": [
+            "TURBODRIVER"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "TURBODRIVER",
+          "url": "https://modthesims.info/m/9833124"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/SimulationTimelineUnclogger.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/627246/simulation-unclogger.html",
+                "target": "_blank"
+              },
+              "children": [
+                "SimulationTimelineUnclogger.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/simulation-unclogger",
+                "target": "_blank"
+              },
+              "children": [
+                "curseforge"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "2nd Nov 2020"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.19"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        偵測模擬市民何時導致模擬卡住，使遊戲無法進行，並嘗試修復它。\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-003",
+      "order": 3,
+      "title": [
+        "Auto Pause On Pie Menu",
+        {
+          "tag": "br"
+        },
+        "打開選單自動暫停遊戲"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/pancakemizore",
+            "target": "_blank"
+          },
+          "children": [
+            "thepancake1 and MizoreYukii"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "thepancake1 and MizoreYukii",
+          "url": "https://www.patreon.com/pancakemizore"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/auto-pause-on-123423629",
+                "target": "_blank"
+              },
+              "children": [
+                "thepancake1_AutoPauseOnPieMenu_v1a_1.113.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1a_1.113"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.06"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-004",
+      "order": 4,
+      "title": [
+        "Smarter Self-Care",
+        {
+          "tag": "br"
+        },
+        "更好的自我照顧"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/chingyu1023",
+            "target": "_blank"
+          },
+          "children": [
+            "Vicky Sims (chingyu1023)"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Vicky Sims (chingyu1023)",
+          "url": "https://www.patreon.com/chingyu1023"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/SmarterSelfCare.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/smarter-self-v18-42041384",
+                "target": "_blank"
+              },
+              "children": [
+                "chingyu_SmarterSelfCare_V22.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "V22"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.13"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-005",
+      "order": 5,
+      "title": [
+        "Better Reactions",
+        {
+          "tag": "br"
+        },
+        "更好的反應"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/lotharihoe/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "lotharihoe"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "lotharihoe",
+          "url": "https://www.curseforge.com/members/lotharihoe/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/betterreactions.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/better-reactions",
+                "target": "_blank"
+              },
+              "children": [
+                "lotharihoe_betterreactions.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.0.7"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.05"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        小人不再是單調的行走，會邊行走邊做出動作反應",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-006",
+      "order": 6,
+      "title": [
+        "Run, Don't Jog!",
+        {
+          "tag": "br"
+        },
+        "距離遙遠就跑起來！"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/lotharihoe/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "lotharihoe"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "lotharihoe",
+          "url": "https://www.curseforge.com/members/lotharihoe/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/rundontjog.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/run-dont-jog",
+                "target": "_blank"
+              },
+              "children": [
+                "lotharihoe_rundontjog.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.0.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-007",
+      "order": 7,
+      "title": [
+        "Run when busting to pee!",
+        {
+          "tag": "br"
+        },
+        "快尿出來用跑的"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/10046604",
+            "target": "_blank"
+          },
+          "children": [
+            "moddymel"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "moddymel",
+          "url": "https://modthesims.info/m/10046604"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/RunWhenBusting.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/676206/run-when-busting-to-pee.html",
+                "target": "_blank"
+              },
+              "children": [
+                "RunWhenBusting.rar"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "29th Apr 2023"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2024.07.25"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-008",
+      "order": 8,
+      "title": [
+        "Stackable Go Here Interaction",
+        {
+          "tag": "br"
+        },
+        "可堆疊的「前往此處」"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/8465743",
+            "target": "_blank"
+          },
+          "children": [
+            "abidoang"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "abidoang",
+          "url": "https://modthesims.info/m/8465743"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/StackableGoHere.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/645747/stackable-go-here-interaction.html",
+                "target": "_blank"
+              },
+              "children": [
+                "onlyabidoang_StackableGoHere.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "23rd Oct 2024"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.15"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-009",
+      "order": 9,
+      "title": [
+        "Interactions Queue Extender",
+        {
+          "tag": "br"
+        },
+        "互動佇列擴充"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/9833124",
+            "target": "_blank"
+          },
+          "children": [
+            "TURBODRIVER"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "TURBODRIVER",
+          "url": "https://modthesims.info/m/9833124"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/InteractionsQueueExtender.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/645747/stackable-go-here-interaction.html",
+                "target": "_blank"
+              },
+              "children": [
+                "InteractionsQueueExtender_v2.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/interactions-queue-extender",
+                "target": "_blank"
+              },
+              "children": [
+                "curseforge"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "27th Dec 2025"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.16"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        EA預設上限6個提高至16個\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-010",
+      "order": 10,
+      "title": [
+        "Take It Off: No Shoes! No Accessories!",
+        {
+          "tag": "br"
+        },
+        "脫掉鞋襪和配件再睡覺打瞌睡"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/andirz",
+            "target": "_blank"
+          },
+          "children": [
+            "Andirz"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Andirz",
+          "url": "https://www.patreon.com/cw/andirz"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/TakeItOff.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/no-shoes-no-accessories",
+                "target": "_blank"
+              },
+              "children": [
+                "TakeItOff v. 4.2.3"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/take-it-off-no-shoes-no-accessories",
+                "target": "_blank"
+              },
+              "children": [
+                "!Andirz_TakeItOff_CORE_v.4.0.1_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v. 4.2.3"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.20"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載LOT51核心庫"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-011",
+      "order": 11,
+      "title": [
+        "Better Sleep Autonomy",
+        {
+          "tag": "br"
+        },
+        "更好的自主睡眠"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/10287475",
+            "target": "_blank"
+          },
+          "children": [
+            "Mokunoid"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Mokunoid",
+          "url": "https://modthesims.info/m/10287475"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/BetterSleepAutonomy.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/663675/better-sleep-autonomy.html",
+                "target": "_blank"
+              },
+              "children": [
+                "Mokunoid_BetterSleepAutonomy_MainV2.zip"
+              ]
+            },
+            " (核心)"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "21st Mar 2024"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "其他附加檔案 (可根據自己的需求下載 )"
+                  ]
+                }
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "2種核心檔案請擇一下載"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                Main.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 只能在活躍家庭的住宅睡覺 (舊版)",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "MainV2.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 任何有床的地方都可以睡覺 (新版)",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "3種整合版本請擇一下載"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                Merged-All.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 完整功能 (不需要再下載核心及其他檔案)",
+                {
+                  "tag": "br"
+                },
+                "\n                                Merged-All-NoVampires.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 完整功能，不含吸血鬼 (不需要再下載核心及其他檔案)",
+                {
+                  "tag": "br"
+                },
+                "\n                                Merged-Toddlers.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 僅整合幼兒功能",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "喚醒機制請擇一下載"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "WakeUp (Vampire Support).zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 改善模擬市民的自主起床時間判定",
+                {
+                  "tag": "br"
+                },
+                "\n                                WakeUp (No Vampire Support).zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 改善模擬市民的自主起床時間判定，不含吸血鬼",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "幼兒起床機制請擇一下載"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "Toddlers.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                +",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "ToddlersWakeUp.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 幼兒會依照睡眠需求自主起床與就寢",
+                {
+                  "tag": "br"
+                },
+                "\n                                Toddlers_DefaultWakeUp.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 保留EA邏輯，僅修改幼兒睡眠判定，不改變起床方式",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-orange"
+                  },
+                  "children": [
+                    "其他可自由選擇搭配下載"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "ToddlersExtras.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 額外優化幼兒自主作息與睡眠行為",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "Morning&Night.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 增加「白天活動、夜晚休息」規則，提升作息規律性",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "Moods.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 小人的情緒狀態與睡眠掛鉤，模擬真實睡眠品質",
+                {
+                  "tag": "br"
+                },
+                "\n                                LifeSkills.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 責任感等人格特質影響睡眠 (需要生兒育女DLC)",
+                {
+                  "tag": "br"
+                },
+                "\n                                Vampires.zip",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 調整吸血鬼專屬睡眠需求與自主行為 (需要吸血鬼DLC)",
+                {
+                  "tag": "br"
+                },
+                "\n                            "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "為目前已下載檔案\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-012",
+      "order": 12,
+      "title": [
+        "A Morning Routine Mod",
+        {
+          "tag": "br"
+        },
+        "起床例事"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/triplissims",
+            "target": "_blank"
+          },
+          "children": [
+            "TriplisSims"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/ling051014",
+            "target": "_blank"
+          },
+          "children": [
+            "L1nG"
+          ]
+        },
+        " (我)\n                    "
+      ],
+      "authors": [
+        {
+          "name": "TriplisSims",
+          "url": "https://www.patreon.com/triplissims"
+        },
+        {
+          "name": "L1nG",
+          "url": "https://www.patreon.com/cw/ling051014"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Triplis-HABIT.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/introducing-mod-25436971",
+                "target": "_blank"
+              },
+              "children": [
+                "Triplis-HABIT-V1-1.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.dropbox.com/scl/fi/pb9rbmrz4tuft9nj8i4ld/_Triplis-HABIT_CHT_BY_L1nG.package?rlkey=d8zcmm365y605c6swbx3yhja3&amp;st=8aje0mgu&amp;dl=0"
+              },
+              "children": [
+                "!_Triplis-HABIT_CHT_BY_L1nG"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.simfileshare.net/download/1825901/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "V1-1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        可自訂模擬市民起床後的固定流程",
+        {
+          "tag": "br"
+        },
+        "\n                        若中途與其他市民交流會被打斷",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-013",
+      "order": 13,
+      "title": [
+        "Slice of Life Mod",
+        {
+          "tag": "br"
+        },
+        "真實生活片段"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/KawaiiStacie",
+            "target": "_blank"
+          },
+          "children": [
+            "KawaiiStacie"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "KawaiiStacie",
+          "url": "https://www.patreon.com/cw/KawaiiStacie"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Slice Of Life.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/133610029",
+                "target": "_blank"
+              },
+              "children": [
+                "KawaiiStacie ♡ Slice Of Life 1.2.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/11-9geng-xin-of-87585627",
+                "target": "_blank"
+              },
+              "children": [
+                "KawaiiStacie_SOL 生活片段_1.0(CHT).zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "化妝效果需要「復古經典」(非必要)"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.19"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "其他附加檔案 (可根據自己的需求刪減 )"
+                  ]
+                }
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "美容功能"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「Slice of Life ♡ Beauty Features」資料夾",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「[KawaiiStacie] Beauty & Fashion Features.ts4script」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "酒精功能"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「Slice of Life ♡ Fun Juice Features」資料夾",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「[KawaiiStacie] Fun Juice Features.ts4script」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "健康功能"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「Slice of Life ♡ Health Features」資料夾",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「[KawaiiStacie] Health Features.ts4script」",
+                {
+                  "close": "span"
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "回憶功能"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「Slice of Life ♡ Memories」資料夾",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「KawaiiStacie ♡ My Memories.ts4script」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "經期功能"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「Slice of Life ♡ Menstrual Cycle」資料夾",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「[KawaiiStacie] Menstrual Cycle.ts4script」",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "自我嘿咻功能"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「Slice of Life ♡ Alcohol Features」資料夾",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-red"
+                  },
+                  "children": [
+                    "性格功能"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                「Slice of Life ♡ Personality」資料夾",
+                {
+                  "tag": "br"
+                },
+                "\n                                &",
+                {
+                  "tag": "br"
+                },
+                "\n                                「KawaiiStacie ♡ My Personality.ts4script」",
+                {
+                  "tag": "br"
+                },
+                "\n                                "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-014",
+      "order": 14,
+      "title": [
+        "RPO關係與懷孕大修"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/lumpinou",
+            "target": "_blank"
+          },
+          "children": [
+            "Lumpinou"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Lumpinou",
+          "url": "https://www.patreon.com/lumpinou"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/75983577",
+                "target": "_blank"
+              },
+              "children": [
+                "Lumpinou_RPO_Collection_AllFilesInOneArchive.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/11-8geng-xin-rpo-54016150",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Lumpinou_RPO_Collection_M00_CoreLibrary_REQUIRED_v2.986_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v2.986"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.09.07"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "M19 需下載Zerbu的自訂偏好"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "M0_CoreLibrary ➜ 必裝核心檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "其他附加檔案 (可根據自己的需求下載 )"
+                  ]
+                }
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                M1_PregnancyPreferences&Impact ➜ 家庭偏好和懷孕反應",
+                {
+                  "tag": "br"
+                },
+                "\n                                M2_Fertility&Protection ➜ 生育與保護",
+                {
+                  "tag": "br"
+                },
+                "\n                                M3_WooHooTransmittedDiseases ➜ 嘿咻傳染病",
+                {
+                  "tag": "br"
+                },
+                "\n                                M4_PaternityTesting ➜ 親子鑑定和事件",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "M5_TeenPregnancy ➜ 青少年懷孕和反應",
+                {
+                  "tag": "br"
+                },
+                "\n                                M6_TemporarySeparations ➜ 臨時分居 / 關係破裂",
+                {
+                  "tag": "br"
+                },
+                "\n                                M7_Cheating (Infidelity) Expansion & Overhaul ➜ 欺騙 (不忠 ) 擴展與大修",
+                {
+                  "tag": "br"
+                },
+                "\n                                M8_Insemination&Surrogacy ➜ 授精與代孕",
+                {
+                  "tag": "br"
+                },
+                "\n                                M9_AdoptionOverhaul ➜ 領養擴展和大修",
+                {
+                  "tag": "br"
+                },
+                "\n                                M10_Custody&PermanentSeparations ➜ 監護和永久分離",
+                {
+                  "tag": "br"
+                },
+                "\n                                M11_PregnancyTermination ➜ 終止妊娠",
+                {
+                  "tag": "br"
+                },
+                "\n                                M12_PregnancySideEffects ➜ 懷孕副作用",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "M13_Miscarriage&PregnancyLoss ➜ 流產和流產併發症",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "M14_Pregnancy&FamilyTweaks ➜ 懷孕調整",
+                {
+                  "tag": "br"
+                },
+                "\n                                M15_DatingLife&RomanceTweaks ➜ 約會生活與浪漫調整",
+                {
+                  "tag": "br"
+                },
+                "\n                                M16_Meet&Mingle_DatingApp ➜ 遇見&交往約App",
+                {
+                  "tag": "br"
+                },
+                "\n                                M17_Charm&Chemistry_Attraction ➜ 魅力與化學：吸引力系統",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-yellow"
+                  },
+                  "children": [
+                    "★ "
+                  ]
+                },
+                "M18_ExpandedWooHoo ➜ 嘿咻擴展",
+                {
+                  "tag": "br"
+                },
+                "\n                                M19_AdultLife ➜ 成人生活",
+                {
+                  "tag": "br"
+                },
+                "\n                            "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-yellow"
+          },
+          "children": [
+            "★ "
+          ]
+        },
+        "為目前已下載檔案\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-015",
+      "order": 15,
+      "title": [
+        "Responsible Pregnancy",
+        {
+          "tag": "br"
+        },
+        "負責任的孕期"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/Kemzima",
+            "target": "_blank"
+          },
+          "children": [
+            "Kemzima"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Kemzima",
+          "url": "https://www.patreon.com/cw/Kemzima"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/responsible-pregnancy.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://kemzimamods.com/responsible-pregnancy-mod/",
+                "target": "_blank"
+              },
+              "children": [
+                "Kemzima_ResponsiblePregnancy_v6.1.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/meowcats/posts/9-4zhu-ti-geng-152456857",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Kemzima_ResponsiblePregnancy_CoreSTRINGS_REQUIRED_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v6.1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.09.07"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載LOT51核心庫"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "Kemzima_ResponsiblePregnancy_CoreModule_REQUIRED",
+            {
+              "tag": "br"
+            },
+            "\n                            ⤷ 必裝核心檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-016",
+      "order": 16,
+      "title": [
+        "Gradual Pregnancy Bump Changes",
+        {
+          "tag": "br"
+        },
+        "更多階段的孕肚"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/medio/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "medio"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "medio",
+          "url": "https://www.curseforge.com/members/medio/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Gradual Pregnancy Bump Changes.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/gradual-pregnancy-bump-changes",
+                "target": "_blank"
+              },
+              "children": [
+                "[medio] - Gradual Pregnancy Bump Changes 1.0.2.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.0.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.09.07"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        將 EA 原本較突兀的三階段孕肚變化細分為九個階段",
+        {
+          "tag": "br"
+        },
+        "\n                        與 LittleMsSam 的 pregnancy-related mods相容\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-017",
+      "order": 17,
+      "title": [
+        "Pregnancy Belly Size Part",
+        {
+          "tag": "br"
+        },
+        "調整孕肚比例"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://littlemssam.my.curseforge.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "LittleMsSam"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "LittleMsSam",
+          "url": "https://littlemssam.my.curseforge.com/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Small_SlightlyBiggerBelly.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/pregnancy-overhaul",
+                "target": "_blank"
+              },
+              "children": [
+                "LittleMsSam_PregnancyOverhaul_NoHugeBelly_Small_SlightlyBiggerBelly_CF.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Sep 1, 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.09.07"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "4種比例擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        與 medio 的 Gradual Pregnant Belly Changes mod 相容\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-018",
+      "order": 18,
+      "title": [
+        "Make Friends Smart Interaction",
+        {
+          "tag": "br"
+        },
+        "自主交友 / 智能互動"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/carlssims4guide",
+            "target": "_blank"
+          },
+          "children": [
+            "Carl's Guides"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SulSulDUCK",
+            "target": "_blank"
+          },
+          "children": [
+            "鴨呀 (SulSulDUCK)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Carl's Guides",
+          "url": "https://www.patreon.com/carlssims4guide"
+        },
+        {
+          "name": "鴨呀 (SulSulDUCK)",
+          "url": "https://www.patreon.com/cw/SulSulDUCK"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/66817317",
+                "target": "_blank"
+              },
+              "children": [
+                "Carl_TrytoMakeFriends_v1.03.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/122059439",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Carl_TrytoMakeFriends_CH_SulSulDUCK.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.03"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.04"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-019",
+      "order": 19,
+      "title": [
+        "Cuddle And Bath Together",
+        {
+          "tag": "br"
+        },
+        "相擁沐浴"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/khlas",
+            "target": "_blank"
+          },
+          "children": [
+            "Khlas"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Khlas",
+          "url": "https://www.patreon.com/cw/khlas"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/cuddle-and-bath-98234300",
+                "target": "_blank"
+              },
+              "children": [
+                "Khlas_Cuddle_Bath_Together_1_0.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/cuddle-and-bath-100973180",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Khlas_Cuddle_Bath_Together_1_0_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.0"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-020",
+      "order": 20,
+      "title": [
+        "Carry and Kiss",
+        {
+          "tag": "br"
+        },
+        "扛起親吻"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/khlas",
+            "target": "_blank"
+          },
+          "children": [
+            "Khlas"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Khlas",
+          "url": "https://www.patreon.com/cw/khlas"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/66864823",
+                "target": "_blank"
+              },
+              "children": [
+                "khlas_carryup_animation_interaction_wip_v1.1.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/carry-and-kiss-78674229",
+                "target": "_blank"
+              },
+              "children": [
+                "!_khlas_carryup_animation_interaction_wip_v1.0_notongue_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.09"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        漢化版本v1.0 ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "兼容"
+          ]
+        },
+        " v1.1版本",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-021",
+      "order": 21,
+      "title": [
+        "More Kisses",
+        {
+          "tag": "br"
+        },
+        "更多親吻"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/maplebell",
+            "target": "_blank"
+          },
+          "children": [
+            "maplebell"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "maplebell",
+          "url": "https://www.patreon.com/maplebell"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/kiss.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/more-kisses-154144471?utm_campaign=patron_engagement&utm_source=post_link&post_id=154144471&utm_id=6d2c353a-bfda-42aa-94f1-92185c1ca25c&utm_medium=email",
+                "target": "_blank"
+              },
+              "children": [
+                "maplebell_morekisses (All-in-One) - v3.1.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/more-kisses-geng-100964567",
+                "target": "_blank"
+              },
+              "children": [
+                "!_maplebell_morekisses (All-in-One) - v3.1_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "有「成長路上」可解鎖與關係位相關的里程碑 (非必要)"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v3.1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.21"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載Lumpinou心情模組、XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-022",
+      "order": 22,
+      "title": [
+        "Kiss-n-Grind",
+        {
+          "tag": "br"
+        },
+        "親吻與磨舞"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/UTOPYA_cc",
+            "target": "_blank"
+          },
+          "children": [
+            "UTOPIA_cc"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "UTOPIA_cc",
+          "url": "https://www.patreon.com/UTOPYA_cc"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Kiss-n-Grind.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/kiss-n-grind-1-9-131081267?utm_campaign=patron_engagement&utm_source=post_link&post_id=131081267&utm_id=7379ed4a-11db-4637-a916-5e540c225303&utm_medium=email",
+                "target": "_blank"
+              },
+              "children": [
+                "[UTOPYA] Kiss-n-Grind Mod v1.9.9.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/9-21geng-xin-n-88314354",
+                "target": "_blank"
+              },
+              "children": [
+                "!_[UTOPYA] Kiss-n-Grind Mod v1.9.8_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.9.9"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.18"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載LOT51核心庫"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        漢化版本v1.9.8 ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "兼容"
+          ]
+        },
+        " v1.9.9版本",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-023",
+      "order": 23,
+      "title": [
+        "Wave-n-Grind",
+        {
+          "tag": "br"
+        },
+        "擺動與貼舞"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/UTOPYA_cc",
+            "target": "_blank"
+          },
+          "children": [
+            "UTOPIA_cc"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "UTOPIA_cc",
+          "url": "https://www.patreon.com/UTOPYA_cc"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/kiss-and-grind-115299392?utm_campaign=patron_engagement&utm_source=post_link&post_id=115299392&utm_id=ad534e74-0cc9-4050-91cf-7363c4a40cc6&utm_medium=email",
+                "target": "_blank"
+              },
+              "children": [
+                "[UTOPYA] Wave-n-Grind Mod a0.5.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/9-21geng-xin-n-88314354",
+                "target": "_blank"
+              },
+              "children": [
+                "!_[UTOPYA] Wave-n-Grind Mod a0.5_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "a0.5"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.18"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-024",
+      "order": 24,
+      "title": [
+        "Display of Affection",
+        {
+          "tag": "br"
+        },
+        "表達愛意"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/blaccdot/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "BlaccDot"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "BlaccDot",
+          "url": "https://www.curseforge.com/members/blaccdot/projects"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Display of Affection.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/display-of-affection-mod/files/all?page=1&pageSize=20&showAlphaFiles=hide",
+                "target": "_blank"
+              },
+              "children": [
+                "Display of Affection Mod V2"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/display-of-biao-105915064",
+                "target": "_blank"
+              },
+              "children": [
+                "!_#BlaccDot_Display Of Affection_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.12"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        新增了5種CAS特徵，可以在「浪漫」類別下找到它",
+        {
+          "tag": "br"
+        },
+        "\n                        必須已經完成了初吻才會在「浪漫」類別顯示此新選單",
+        {
+          "tag": "br"
+        },
+        "\n                        每個互動都附帶人物身高差",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-025",
+      "order": 25,
+      "title": [
+        "Romantic Interaction Addition",
+        {
+          "tag": "br"
+        },
+        "浪漫互動附加內容"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cepzid",
+            "target": "_blank"
+          },
+          "children": [
+            "Cepzid Ferdiana Creation"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Cepzid Ferdiana Creation",
+          "url": "https://www.patreon.com/cepzid"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/RomanticInteractionAddition.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/62995066",
+                "target": "_blank"
+              },
+              "children": [
+                "Zulf_RomanticInteractionAddition.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/101870392?collection=160712",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Zulf_RomanticInteractionAddition_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v3"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.09"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2種版本請擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        RomanticInteractionAddition",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 小人自主行動版本",
+        {
+          "tag": "br"
+        },
+        "\n                        RomanticInteractionAddition _NoAutonomous",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 玩家控制版本",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-026",
+      "order": 26,
+      "title": [
+        "Lie On Lap Interaction",
+        {
+          "tag": "br"
+        },
+        "躺在膝上互動"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/mercuryfoam",
+            "target": "_blank"
+          },
+          "children": [
+            "Mercuryfoam"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Mercuryfoam",
+          "url": "https://www.patreon.com/mercuryfoam"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/LieOnLap.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/lie-on-lap-57253438",
+                "target": "_blank"
+              },
+              "children": [
+                "Mercuryfoam_LieOnLap_v2.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/71295920?collection=160712",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Mercuryfoam_LieOnLap_Interaction_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.09"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        漢化版本 ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "兼容"
+          ]
+        },
+        " v2版本",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-027",
+      "order": 27,
+      "title": [
+        "extended phone calls",
+        {
+          "tag": "br"
+        },
+        "長時間通話"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/extended-phone-117285790",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_extended_phone_calls.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/5-15ben-ti-geng-156151855",
+                "target": "_blank"
+              },
+              "children": [
+                "!_simkatu_extended_phone_calls_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "怦然心動 (非必要)"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.02"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-028",
+      "order": 28,
+      "title": [
+        "mirror selfie",
+        {
+          "tag": "br"
+        },
+        "對鏡自拍"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/simkatu",
+            "target": "_blank"
+          },
+          "children": [
+            "simkatu"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "simkatu",
+          "url": "https://www.patreon.com/cw/simkatu"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/mirror_selfie.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/146833653?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "simkatu_mirror_photo.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/mirror-selfie-zi-156154937",
+                "target": "_blank"
+              },
+              "children": [
+                "!_simkatu_mirror selfie_CHT(merged)_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.25"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        包含女性化與男性化各 25 種自拍姿勢 (共 50 種)",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_mirrorphoto_posepack_male.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 男性化 25 種自拍姿勢",
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_mirrorphoto_posepack_female.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 女性化 25 種自拍姿勢",
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_mirrorphoto_phone.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ CAS中人物手機配件 (可用其他作者手機代替)",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "以下檔案擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_mirrorphoto_v2_genderneutral.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 中性化，自拍姿勢不限性別混用",
+        {
+          "tag": "br"
+        },
+        "\n                        simkatu_mirrorphoto.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 男性與女性自拍姿勢分開",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-029",
+      "order": 29,
+      "title": [
+        "Motorbikes with refillable gas tank!",
+        {
+          "tag": "br"
+        },
+        "可加注汽油的摩托車"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/c/Hiole/home?vanity=Hiole",
+            "target": "_blank"
+          },
+          "children": [
+            "Hiole's Corner"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Hiole's Corner",
+          "url": "https://www.patreon.com/c/Hiole/home?vanity=Hiole"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/motorbikes-with-148763663",
+                "target": "_blank"
+              },
+              "children": [
+                "[Hiole] Motorbikes_RefillableGasTank.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/motorbikes-with-160110124",
+                "target": "_blank"
+              },
+              "children": [
+                "!_[Hiole] Motorbikes_RefillableGasTank_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.24"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-030",
+      "order": 30,
+      "title": [
+        "Travel To Venue",
+        {
+          "tag": "br"
+        },
+        "前往特殊和隱藏地段"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/10034341",
+            "target": "_blank"
+          },
+          "children": [
+            "twelfthdoceor1"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "twelfthdoceor1",
+          "url": "https://modthesims.info/m/10034341"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/661147/travel-to-venue-hidden-and-vacation-destinations.html",
+                "target": "_blank"
+              },
+              "children": [
+                "[LP_TD1] Travel To Venue [Version 1.7].zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/travel-to-venue",
+                "target": "_blank"
+              },
+              "children": [
+                "![TwelfthDoctor1] Travel To Venue_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "需要有對應地段的DLC"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "[Version 1.7]"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.01"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        在手機上的新功能",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-031",
+      "order": 31,
+      "title": [
+        "Recipe Notebook",
+        {
+          "tag": "br"
+        },
+        "筆記本食譜"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.curseforge.com/members/alasenkidu/projects",
+            "target": "_blank"
+          },
+          "children": [
+            "alasEnkidu"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "alasEnkidu",
+          "url": "https://www.curseforge.com/members/alasenkidu/projects"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/enkidu_recipenotebook_v0-2.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/recipe-notebook",
+                "target": "_blank"
+              },
+              "children": [
+                "Recipe Notebook version 0.2"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "version 0.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.08"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-032",
+      "order": 32,
+      "title": [
+        "Turbo Careers Mod",
+        {
+          "tag": "br"
+        },
+        "開放式職業模組包"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://zerbu.tumblr.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "Zerbu"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Zerbu",
+          "url": "https://zerbu.tumblr.com/"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://zerbu.tumblr.com/post/160454960980/the-sims-4-turbo-careers-mod-pack",
+                "target": "_blank"
+              },
+              "children": [
+                "Turbo Careers.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/2-27zhu-ti-geng-59574518",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Zerbu - Turbo Careers Mod Pack_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://drive.google.com/file/d/10ADCGVTA4VG_NvgBk4IZ0xuLMY6b6YkE/view",
+                "target": "_blank"
+              },
+              "children": [
+                "drive"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "27th February 2025"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.25"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載自定義場地"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        將所有早期兔子洞的成人職業",
+        {
+          "tag": "br"
+        },
+        "\n                        (特務、宇航員、運動員、商業、作家、科技達人、演藝人員、畫家 )",
+        {
+          "tag": "br"
+        },
+        "\n                        以及兩個青少年職業 (快餐和咖啡師 )",
+        {
+          "tag": "br"
+        },
+        "\n                        轉變為開放 (可跟隨 )職業\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-033",
+      "order": 33,
+      "title": [
+        "Connected Sims",
+        {
+          "tag": "br"
+        },
+        "保持連絡的模擬市民"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/adeepindigo",
+            "target": "_blank"
+          },
+          "children": [
+            "a.deep.indigo"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "a.deep.indigo",
+          "url": "https://www.patreon.com/adeepindigo"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Connected Sims.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://adeepindigomods.itch.io/connected-sims",
+                "target": "_blank"
+              },
+              "children": [
+                "adeepindigo_smallmods_ConnectedSims_v2.2.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/7-11zhu-ti-geng-100090985",
+                "target": "_blank"
+              },
+              "children": [
+                "!_adeepindigo_smallmods_ConnectedSims_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/84768710",
+                "target": "_blank"
+              },
+              "children": [
+                "Patreon"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v2.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.02"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        模擬市民邀約會指定時間，而不是馬上出發\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-034",
+      "order": 34,
+      "title": [
+        "Dental Care",
+        {
+          "tag": "br"
+        },
+        "牙科護理"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/adeepindigo",
+            "target": "_blank"
+          },
+          "children": [
+            "a.deep.indigo"
+          ]
+        },
+        " × \n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/aroundthesims",
+            "target": "_blank"
+          },
+          "children": [
+            "Around the Sims"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "a.deep.indigo",
+          "url": "https://www.patreon.com/adeepindigo"
+        },
+        {
+          "name": "Around the Sims",
+          "url": "https://www.patreon.com/aroundthesims"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Dental Care.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://adeepindigomods.itch.io/dental-care",
+                "target": "_blank"
+              },
+              "children": [
+                "adeepindigo_gameplaymods_DentalCare_v7.7.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/5-31zhu-ti-geng-109895225",
+                "target": "_blank"
+              },
+              "children": [
+                "adeepindigo_牙科護理_v7.2(CHT).rar"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/84768710",
+                "target": "_blank"
+              },
+              "children": [
+                "Patreon"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v7.7"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.05"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載Lumpinou心情模組、通用選單"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        漢化版本v7.2 ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "兼容"
+          ]
+        },
+        " v7.7版本",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-bluegray"
+          },
+          "children": [
+            "非必要DLC"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        來去上班、毛骨悚然 ➜ 藥物動畫",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-035",
+      "order": 35,
+      "title": [
+        "Get to Work Health Overhaul",
+        {
+          "tag": "br"
+        },
+        "健康大修"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/adeepindigo",
+            "target": "_blank"
+          },
+          "children": [
+            "a.deep.indigo"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "a.deep.indigo",
+          "url": "https://www.patreon.com/adeepindigo"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Get to Work Health Overhaul.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://adeepindigomods.itch.io/gtw-health-overhaul",
+                "target": "_blank"
+              },
+              "children": [
+                "adeepindigo_gameplaymods_GTWHealthOverhaul_v4.9.5.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/4-30ben-ti-geng-64887771",
+                "target": "_blank"
+              },
+              "children": [
+                "!adeepindigo_gameplaymods_GTWHealthOverhaul_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/84780509",
+                "target": "_blank"
+              },
+              "children": [
+                "Patreon"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "來去上班"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v4.9.5"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.02"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "若同時下載醫療保健模組則刪除"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        (後綴 ) MODULE_Allergies.package",
+        {
+          "tag": "br"
+        },
+        "\n                        &",
+        {
+          "tag": "br"
+        },
+        "\n                        (後綴 ) Injury.package",
+        {
+          "tag": "br"
+        },
+        "\n                        &",
+        {
+          "tag": "br"
+        },
+        "\n                        (後綴 ) Pregnancy.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-bluegray"
+          },
+          "children": [
+            "其他非必要DLC"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        春夏秋冬、綠色生活、灰塵大戰 ➜ 過敏功能",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-036",
+      "order": 36,
+      "title": [
+        "Healthcare Redux",
+        {
+          "tag": "br"
+        },
+        "醫療保健"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/adeepindigo",
+            "target": "_blank"
+          },
+          "children": [
+            "a.deep.indigo"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "a.deep.indigo",
+          "url": "https://www.patreon.com/adeepindigo"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Healthcare Redux.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://adeepindigomods.itch.io/healthcare-redux",
+                "target": "_blank"
+              },
+              "children": [
+                "adeepindigo_gameplaymods_HealthcareRedux_v9.9.8.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/4-30ben-ti-geng-64887771",
+                "target": "_blank"
+              },
+              "children": [
+                "adeepindigo_醫療保健_v9.9.4(CHT).zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/84780509",
+                "target": "_blank"
+              },
+              "children": [
+                "Patreon"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "來去上班"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v9.9.8"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.01"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載Lumpinou心情模組、通用選單"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        模組主體壓縮檔已包含通用選單在內",
+        {
+          "tag": "br"
+        },
+        "\n                        ( adeepindigo_base_generalpiemenus_v3.package )",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "CORE.package 和 .ts4script ➜ 必裝核心檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        Mesh_Required檔案必須安裝",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "details",
+          "attrs": {
+            "class": "warning-accordion"
+          },
+          "children": [
+            "\n                            ",
+            {
+              "tag": "summary",
+              "attrs": {
+                "class": "warning-toggle-btn"
+              },
+              "children": [
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    "其他附加檔案 (可根據自己的需求刪減 )"
+                  ]
+                }
+              ]
+            },
+            "\n                            ",
+            {
+              "tag": "div",
+              "attrs": {
+                "class": "warning-content"
+              },
+              "children": [
+                "\n                                Allergies (過敏 )",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 模擬市民會產生過敏",
+                {
+                  "tag": "br"
+                },
+                "\n                                Conditions (環境 )",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 模擬市民會患上慢性病",
+                {
+                  "tag": "br"
+                },
+                "\n                                Emergencies (醫療緊急情況 )",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 闌尾炎、動脈瘤和心臟病現在都包含在醫療緊急情況下",
+                {
+                  "tag": "br"
+                },
+                "\n                                Injuries (受傷 )",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 模擬市民會受到輕微和嚴重的傷害",
+                {
+                  "tag": "br"
+                },
+                "\n                                Gynecology (婦科 )",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 模擬市民會有婦科檢查和婦科問題",
+                {
+                  "tag": "br"
+                },
+                "\n                                Pregnancy (懷孕 )",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 模擬市民能夠參加產前和產後護理，可能發生妊娠併發症，並有產後憂鬱",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "Medications資料夾"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 不可刪除，藥品檔案。包含 Sandy/ATS 的",
+                {
+                  "tag": "a",
+                  "attrs": {
+                    "href": "https://aroundthesims4.com/objects/decorative_clutter_35.shtml#functional&gsc.tab=0",
+                    "target": "_blank"
+                  },
+                  "children": [
+                    "功能性藥物"
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "br"
+                },
+                "\n                                ",
+                {
+                  "tag": "span",
+                  "attrs": {
+                    "class": "text-green"
+                  },
+                  "children": [
+                    {
+                      "tag": "strong",
+                      "children": [
+                        "Optional Addons資料夾"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "br"
+                },
+                "\n                                AJNebula_CochlearImplant_Meshes",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 可穿戴的人工耳蝸；現已作為可穿戴的醫療設備供應",
+                {
+                  "tag": "br"
+                },
+                "\n                                CochlerImplants_Auto",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 自動添加中性顏色的人工耳蝸；模擬市民獲得人工耳蝸時自動添加中性顏色。否則，將根據需要添加任何在CAS中的樣式。",
+                {
+                  "tag": "br"
+                },
+                "\n                                DiabetesGlucoseMonitor",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 糖尿病血糖儀；所有得到糖尿病的病患將會自動獲得血糖儀",
+                {
+                  "tag": "br"
+                },
+                "\n                                DiseaseImmunityChance",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 疾病免疫；模擬市民有機會會獲得疾病免疫的特徵，有此特徵的人物將不會獲得疾病。",
+                {
+                  "tag": "br"
+                },
+                "\n                                OPTIONAL_MedicationReminder",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 藥物提醒功能",
+                {
+                  "tag": "br"
+                },
+                "\n                                ModDeath _GlobalDisabler",
+                {
+                  "tag": "br"
+                },
+                "\n                                ⤷ 死亡全局禁用功能；所有的模擬市民不會因為此模組的疾病而死亡",
+                {
+                  "tag": "br"
+                },
+                "\n                            "
+              ]
+            },
+            "\n                        "
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-bluegray"
+          },
+          "children": [
+            "其他非必要DLC"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        貓狗總動員 ➜ 動物皮屑過敏",
+        {
+          "tag": "br"
+        },
+        "\n                        春夏秋冬 ➜ 季節性過敏、季節性情感障礙",
+        {
+          "tag": "br"
+        },
+        "\n                        綠色生活、灰塵大作戰 ➜ 季節性 / 一般過敏和氣喘",
+        {
+          "tag": "br"
+        },
+        "\n                        雪國勝地 ➜ 受傷、圖標、增益和藥物",
+        {
+          "tag": "br"
+        },
+        "\n                        毛骨悚然 ➜ 藥物動畫",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-037",
+      "order": 37,
+      "title": [
+        "Child Birth",
+        {
+          "tag": "br"
+        },
+        "現實分娩"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/PandasamaSims4",
+            "target": "_blank"
+          },
+          "children": [
+            "PandaSama"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "PandaSama",
+          "url": "https://www.patreon.com/cw/PandasamaSims4"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/ChildBirth_mod.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.pandasama.com/child-birth-mod/#downloads",
+                "target": "_blank"
+              },
+              "children": [
+                "Pandasama_ChildBirth_mod_v1.972.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/child-birth-mod-65116225",
+                "target": "_blank"
+              },
+              "children": [
+                "!_Pandasama_ChildBirth_mod_v1.971_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "來去上班"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.972"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.09.23"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-038",
+      "order": 38,
+      "title": [
+        "Sim Control Hub",
+        {
+          "tag": "br"
+        },
+        "模擬市民控制中心"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/DQuiet",
+            "target": "_blank"
+          },
+          "children": [
+            "DQuiet"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "DQuiet",
+          "url": "https://www.patreon.com/cw/DQuiet"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/sim_control_hub.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://dquiet-lab.github.io/sim-control-page/",
+                "target": "_blank"
+              },
+              "children": [
+                "Sim Control Hub v1.5.2"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/sim-control-hub-114797184",
+                "target": "_blank"
+              },
+              "children": [
+                "!_DQuiet_SimControlHub_v1.5.2_CHT(merge)_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.5.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.01"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        可將其他家庭的小人加入控制，一次控制多位小人，亦可控制寵物",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-039",
+      "order": 39,
+      "title": [
+        "Front Desk Staff Mod",
+        {
+          "tag": "br"
+        },
+        "前台工作人員模式"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/10233085",
+            "target": "_blank"
+          },
+          "children": [
+            "SHUSHU"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.dropbox.com/scl/fi/xr3pqlzz4412r9bpn5hfr/_SHUSHU__FrontDeskStaff_CHT_BY_L1nG.package?rlkey=uqmlj1gza7hks943i41k4znnu&amp;st=ebi9us9j&amp;dl=0"
+          },
+          "children": [
+            "自己漢化"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "SHUSHU",
+          "url": "https://modthesims.info/m/10233085"
+        },
+        {
+          "name": "自己漢化",
+          "url": "https://www.dropbox.com/scl/fi/xr3pqlzz4412r9bpn5hfr/_SHUSHU__FrontDeskStaff_CHT_BY_L1nG.package?rlkey=uqmlj1gza7hks943i41k4znnu&amp;st=ebi9us9j&amp;dl=0"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/FrontDeskStaff.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/648433/front-desk-staff-mod.html",
+                "target": "_blank"
+              },
+              "children": [
+                "SHUSHU__FrontDeskStaff__Oct262020.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.dropbox.com/scl/fi/xr3pqlzz4412r9bpn5hfr/_SHUSHU__FrontDeskStaff_CHT_BY_L1nG.package?rlkey=uqmlj1gza7hks943i41k4znnu&amp;st=ebi9us9j&amp;dl=0"
+              },
+              "children": [
+                "!_SHUSHU__FrontDeskStaff_CHT_BY_L1nG.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "來去上班"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "29th Oct 2020"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.21"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        在地段上放置一個工作前台，",
+        {
+          "tag": "br"
+        },
+        "\n                        系統將會自動生成一個前台接待。",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-040",
+      "order": 40,
+      "title": [
+        "patientssit",
+        {
+          "tag": "br"
+        },
+        "病人坐下"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.seebee.de/sims4me/index.php?list=0",
+            "target": "_blank"
+          },
+          "children": [
+            "sims4me"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "sims4me",
+          "url": "https://www.seebee.de/sims4me/index.php?list=0"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/patientssit.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.seebee.de/sims4me/index.php?list=9",
+                "target": "_blank"
+              },
+              "children": [
+                "sims4me_patientssit.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "來去上班"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "2020-12-26"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.21"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        讓病人在等待登記時會坐下來等待",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-041",
+      "order": 41,
+      "title": [
+        "Sit For Performances",
+        {
+          "tag": "br"
+        },
+        "坐著看表演"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/waffle_mix_ins",
+            "target": "_blank"
+          },
+          "children": [
+            "Waffle's Mix-Ins"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Waffle's Mix-Ins",
+          "url": "https://www.patreon.com/waffle_mix_ins"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Sit_For_Performances.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/waffle_mix_ins/posts/sit-for-120831030",
+                "target": "_blank"
+              },
+              "children": [
+                "Waffle_Sit_For_Performances.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載LOT51核心庫"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-042",
+      "order": 42,
+      "title": [
+        "Remove Sims From Conversations",
+        {
+          "tag": "br"
+        },
+        "剔除不想要聊天對象"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/pancakemizore",
+            "target": "_blank"
+          },
+          "children": [
+            "thepancake1 and MizoreYukii"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "thepancake1 and MizoreYukii",
+          "url": "https://www.patreon.com/pancakemizore"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/remove_sims.gif"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/remove-sims-from-62823426?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "thepancake1-RemoveSimsFromConversations-v1c-1.108.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.108"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.13"
+          ]
+        }
+      ],
+      "notes": [
+        "滑鼠右鍵即可移除"
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-043",
+      "order": 43,
+      "title": [
+        "Improved Visitor Notifications",
+        {
+          "tag": "br"
+        },
+        "訪客敲門通知"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://simularity.cc/",
+            "target": "_blank"
+          },
+          "children": [
+            "Simularity"
+          ],
+          "unclosed": true
+        }
+      ],
+      "authors": [
+        {
+          "name": "Simularity",
+          "url": "https://simularity.cc/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/visitor-notifications.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simularity.cc/mods/tuning/improved-visitor-notifications/",
+                "target": "_blank"
+              },
+              "children": [
+                "BosseladyTralfaz_ComeIn_StickAround_9.24.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            "自帶漢化"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://drive.google.com/file/d/1VsrupHf_WJjEUctAYdlqMapZc58P8fRp/view",
+                "target": "_blank"
+              },
+              "children": [
+                "google雲端硬碟"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "August 25, 2024"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.15"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        此版本會顯示訪客頭像 + 名字",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-044",
+      "order": 44,
+      "title": [
+        "Come In & Stick Around",
+        {
+          "tag": "br"
+        },
+        "請進！請留步"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://bosseladytv.my.curseforge.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "BosseladyTV"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SulSulDUCK",
+            "target": "_blank"
+          },
+          "children": [
+            "鴨呀 (SulSulDUCK)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "BosseladyTV",
+          "url": "https://bosseladytv.my.curseforge.com/"
+        },
+        {
+          "name": "鴨呀 (SulSulDUCK)",
+          "url": "https://www.patreon.com/cw/SulSulDUCK"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/ComeIn_StickAround.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/come-in-stick-around",
+                "target": "_blank"
+              },
+              "children": [
+                "BosseladyTralfaz_ComeIn_StickAround_9.24.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/122058656",
+                "target": "_blank"
+              },
+              "children": [
+                "!_BosseladyTralfaz_ComeIn_StickAround_9.24_CH_SulSulDUCK.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.108.349"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載LOT51核心庫"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-045",
+      "order": 45,
+      "title": [
+        "Stay Asleep from Cuddle",
+        {
+          "tag": "br"
+        },
+        "擁抱入睡"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://bosseladytv.my.curseforge.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "BosseladyTV"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "BosseladyTV",
+          "url": "https://bosseladytv.my.curseforge.com/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Stay_Asleep.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/stay-asleep-from-cuddle",
+                "target": "_blank"
+              },
+              "children": [
+                "BosseladyTralfaz_Stay_Asleep_from_Cuddle.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Dec 8, 2024"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-046",
+      "order": 46,
+      "title": [
+        "Weather Realism Overhaul",
+        {
+          "tag": "br"
+        },
+        "真實天氣"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/10097585",
+            "target": "_blank"
+          },
+          "children": [
+            "no12"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "no12",
+          "url": "https://modthesims.info/m/10097585"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/Celsius.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/620559/weather-realism-overhaul-2-0-9.html#google_vignette",
+                "target": "_blank"
+              },
+              "children": [
+                "WRO 2.1.6 [Celsius].zip"
+              ]
+            },
+            " (攝氏)"
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/weather-realism-overhaul",
+                "target": "_blank"
+              },
+              "children": [
+                "!WRO_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "春夏秋冬"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "2.1.6"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.21"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "Fahrenheit為華氏，請依個人習慣擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-047",
+      "order": 47,
+      "title": [
+        "simschangeoutfitwhenhotorcold",
+        {
+          "tag": "br"
+        },
+        "自主看天氣換衣服"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.seebee.de/sims4me/index.php",
+            "target": "_blank"
+          },
+          "children": [
+            "Sims4Me"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Sims4Me",
+          "url": "https://www.seebee.de/sims4me/index.php"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.seebee.de/sims4me/index.php?list=7",
+                "target": "_blank"
+              },
+              "children": [
+                "sims4me_simschangeoutfitwhenhotorcold.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "所需DLC ｜",
+          "value": [
+            "春夏秋冬"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "2022-04-24"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.16"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-048",
+      "order": 48,
+      "title": [
+        "No More Gender Neutral Relationships",
+        {
+          "tag": "br"
+        },
+        "不再有中性的關係稱呼"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/nerdydoll",
+            "target": "_blank"
+          },
+          "children": [
+            "NerdyDoll"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "NerdyDoll",
+          "url": "https://www.patreon.com/cw/nerdydoll"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/ask-to-be-boy-girlfriend/files/all?page=1&pageSize=20&showAlphaFiles=hide",
+                "target": "_blank"
+              },
+              "children": [
+                "NerdyDoll_NoMoreNeutralRelationshipNames.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/8-27geng-xin-no-109236419",
+                "target": "_blank"
+              },
+              "children": [
+                "!_NerdyDoll_NoMoreNeutralRelationshipNames_CHT_BY MeowCats.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.117.227"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.13"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-049",
+      "order": 49,
+      "title": [
+        "Auto Grab Drink when Eating",
+        {
+          "tag": "br"
+        },
+        "用餐時喝飲料"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://littlemssam.my.curseforge.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "LittleMsSam"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "LittleMsSam",
+          "url": "https://littlemssam.my.curseforge.com/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/rsm-auto-grab-drink-when-eating",
+                "target": "_blank"
+              },
+              "children": [
+                "LittleMsSam_RSM_BG_AutoDrinkWhenEating.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Oct 23, 2024"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2025.11.10"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        如果餐桌上有飲料會自動拿取",
+        {
+          "tag": "br"
+        },
+        "\n                        （飲料必須在用餐前放在餐桌上）",
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-050",
+      "order": 50,
+      "title": [
+        "Better Autonomous Homework",
+        {
+          "tag": "br"
+        },
+        "更好的自主寫作業"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://littlemssam.my.curseforge.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "LittleMsSam"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "LittleMsSam",
+          "url": "https://littlemssam.my.curseforge.com/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/better-autonomous-homework/files/all?page=1&pageSize=20&showAlphaFiles=hide",
+                "target": "_blank"
+              },
+              "children": [
+                "LittleMsSam_BetterAutonomousHomework.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.105.345"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.12"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-051",
+      "order": 51,
+      "title": [
+        "Ring Up Customers at Register",
+        {
+          "tag": "br"
+        },
+        "自動排隊結帳"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://littlemssam.my.curseforge.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "LittleMsSam"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "LittleMsSam",
+          "url": "https://littlemssam.my.curseforge.com/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/RingUpAtRegister.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/other-mods-ring-up-customers-at-register",
+                "target": "_blank"
+              },
+              "children": [
+                "LittleMsSam_cLineLy_RingUpAtRegister.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "May 8, 2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.12"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載XML注入器"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-052",
+      "order": 52,
+      "title": [
+        "Higher Distance for Sim Call Over",
+        {
+          "tag": "br"
+        },
+        "呼叫距離更遠"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://littlemssam.my.curseforge.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "LittleMsSam"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "LittleMsSam",
+          "url": "https://littlemssam.my.curseforge.com/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.curseforge.com/sims4/mods/rsm-higher-distance-for-sim-call-over/files/all?page=1&pageSize=20&showAlphaFiles=hide",
+                "target": "_blank"
+              },
+              "children": [
+                "LittleMsSam_RSM_BG_SimCallOverHigherDistance.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.113.277"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.16"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-053",
+      "order": 53,
+      "title": [
+        "Turn On TV",
+        {
+          "tag": "br"
+        },
+        "持續打開電視"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/pancakemizore",
+            "target": "_blank"
+          },
+          "children": [
+            "MizoreYukii"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "MizoreYukii",
+          "url": "https://www.patreon.com/pancakemizore"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/TurnOnTV.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/mod-turn-on-tv-70261108",
+                "target": "_blank"
+              },
+              "children": [
+                "MizoreYukii_SHEnanigans_TurnOnTV.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.26"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        市民離開後電視會繼續播放，不會自動關閉 (只能手動關閉)\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-054",
+      "order": 54,
+      "title": [
+        "No Fade On Everything",
+        {
+          "tag": "br"
+        },
+        "近物景色不要消失"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/MizoreYukii",
+            "target": "_blank"
+          },
+          "children": [
+            "MizoreYukii"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "MizoreYukii",
+          "url": "https://www.patreon.com/MizoreYukii"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/NoFadeEverything_SeparatePacks.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/mod-no-fade-on-9-30416620",
+                "target": "_blank"
+              },
+              "children": [
+                "MizoreYukii_NoFadeEverything_AllPacksCombined_Part1_BG & FP.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simfileshare.net/folder/80413/",
+                "target": "_blank"
+              },
+              "children": [
+                "SFS"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.95"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.18"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需放置「",
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/mo-ni-shi-min-4-95583774",
+                "target": "_blank"
+              },
+              "children": [
+                "優先級資料夾"
+              ]
+            },
+            "」中"
+          ]
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-055",
+      "order": 55,
+      "title": [
+        "(No) Bicycle Helmet",
+        {
+          "tag": "br"
+        },
+        "騎腳踏車不戴安全帽"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://modthesims.info/m/9452926",
+            "target": "_blank"
+          },
+          "children": [
+            "endermbind"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "endermbind",
+          "url": "https://modthesims.info/m/9452926"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/(No)bicycle_helmet.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://modthesims.info/d/651133/no-bicycle-helmet.html",
+                "target": "_blank"
+              },
+              "children": [
+                "MindB_ender_NoBikeHelmet.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.23"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-056",
+      "order": 56,
+      "title": [
+        "No Censor Blur Mosaic",
+        {
+          "tag": "br"
+        },
+        "去除所有馬賽克"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://simsasylum.com/tfm/index.php?/profile/467-coolspear/",
+            "target": "_blank"
+          },
+          "children": [
+            "coolspear"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "coolspear",
+          "url": "https://simsasylum.com/tfm/index.php?/profile/467-coolspear/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://simsasylum.com/tfm/index.php?/topic/16451-no-censor-blur-mosaic-all-sims-compatible-with-ww-new-december-2022/",
+                "target": "_blank"
+              },
+              "children": [
+                "cool1_NoCensorMosaic_OverridesFolder.rar"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.06"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        僅去除馬賽克，不是裸體!!!",
+        {
+          "tag": "br"
+        },
+        "\n                        與邪惡紳士相容\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "social-mods-057",
+      "order": 57,
+      "title": [
+        "AIRLINE EMPLOYEE CAREER",
+        {
+          "tag": "br"
+        },
+        "航空公司員工"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/simmillercc",
+            "target": "_blank"
+          },
+          "children": [
+            "SimmillerCC"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/ling051014",
+            "target": "_blank"
+          },
+          "children": [
+            "L1nG"
+          ]
+        },
+        " (我)\n                    "
+      ],
+      "authors": [
+        {
+          "name": "SimmillerCC",
+          "url": "https://www.patreon.com/simmillercc"
+        },
+        {
+          "name": "L1nG",
+          "url": "https://www.patreon.com/cw/ling051014"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/social/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/simmillercc/posts/sims-4-airline-67080319?l=pl-PL",
+                "target": "_blank"
+              },
+              "children": [
+                "SimmillerCC_Careers_AirlineEmployee_ECFGP_30DEC25.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://translations.by-l1ng.com/#translation-airline-employee"
+              },
+              "children": [
+                "!_SimmillerCC_Careers_AirlineEmployee_ECFGP_30DEC25_CHT_BY_L1nG.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "15MAY2026"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.10"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

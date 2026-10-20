@@ -1,0 +1,1339 @@
+{
+  "schemaVersion": 2,
+  "category": "pose-mods",
+  "categoryLabel": "動作",
+  "sourceFile": "pose-mods.html",
+  "mods": [
+    {
+      "id": "pose-mods-001",
+      "order": 1,
+      "title": [
+        "Teleport Any Sim",
+        {
+          "tag": "br"
+        },
+        "市民傳送器"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://scumbumbomods.com/",
+            "target": "_blank"
+          },
+          "children": [
+            "SCUMBUMBO"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "SCUMBUMBO",
+          "url": "https://scumbumbomods.com/"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/TeleportAnySim.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://sims4studio.com/post/72734",
+                "target": "_blank"
+              },
+              "children": [
+                "MTS_Scumbumbo_TeleportAnySim.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/teleport-any-sim",
+                "target": "_blank"
+              },
+              "children": [
+                "!MTS_Scumbumbo_TeleportAnySim_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "廚房 > 綜合"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "March 1 2024"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-002",
+      "order": 2,
+      "title": [
+        "Pose Player",
+        {
+          "tag": "br"
+        },
+        "動作播放器"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://sims4studio.com/thread/2617/andrews-studio",
+            "target": "_blank"
+          },
+          "children": [
+            "Andrew"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Andrew",
+          "url": "https://sims4studio.com/thread/2617/andrews-studio"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/poseplayer.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://sims4studio.com/thread/2617/andrews-studio",
+                "target": "_blank"
+              },
+              "children": [
+                "andrew_poseplayer_V10.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/pose-player",
+                "target": "_blank"
+              },
+              "children": [
+                "!andrew_poseplayer_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://.nz/file/ZFsxUSAJ#U5ZnCN801T3trYsYp_3UX5Mrg5iE88veGnxq912AZZQ",
+                "target": "_blank"
+              },
+              "children": [
+                "mega"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "V10"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-003",
+      "order": 3,
+      "title": [
+        "Backdrop",
+        {
+          "tag": "br"
+        },
+        "攝影棚"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "http://sims3s.ru/index.php",
+            "target": "_blank"
+          },
+          "children": [
+            "Severinka"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "Severinka",
+          "url": "http://sims3s.ru/index.php"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/Backdrop.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "http://sims3s.ru/objects4-backdrop.php",
+                "target": "_blank"
+              },
+              "children": [
+                "SV Backdrop.rar"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "家具分類 ｜",
+          "value": [
+            "地毯"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2024.10.31"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-004",
+      "order": 4,
+      "title": [
+        "單人自拍動作替換 - ？"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/BonitaSims",
+            "target": "_blank"
+          },
+          "children": [
+            "BonitaSims"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "BonitaSims",
+          "url": "https://www.patreon.com/cw/BonitaSims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/selfie_cool.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/BonitaSims/posts/bnts-look-at-me-136099579?collection=1998935",
+                "target": "_blank"
+              },
+              "children": [
+                "[BNTS] Look at me #1 (Override selfie_cool_).package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-005",
+      "order": 5,
+      "title": [
+        "單人自拍動作替換 - 悲傷"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/BonitaSims",
+            "target": "_blank"
+          },
+          "children": [
+            "BonitaSims"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "BonitaSims",
+          "url": "https://www.patreon.com/cw/BonitaSims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/selfie_sad.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/BonitaSims/posts/bnts-look-at-me-135773565?collection=1998935",
+                "target": "_blank"
+              },
+              "children": [
+                "[BNTS] Look at me #1 (Override selfie_sad_).package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-006",
+      "order": 6,
+      "title": [
+        "單人自拍動作替換 - 生氣"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/BonitaSims",
+            "target": "_blank"
+          },
+          "children": [
+            "BonitaSims"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "BonitaSims",
+          "url": "https://www.patreon.com/cw/BonitaSims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/selfie_Angry.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/BonitaSims/posts/bnts-look-at-me-136326086?collection=1998935",
+                "target": "_blank"
+              },
+              "children": [
+                "[BNTS] Look at me #1 (Override selfie_Angry_).package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-007",
+      "order": 7,
+      "title": [
+        "單人自拍動作替換 - 放鬆"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/Celebrity_%2315.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/singleselfie-15-103473771?collection=418926",
+                "target": "_blank"
+              },
+              "children": [
+                "[SingleSeflie_relaxed] DearKim_Celebrity_#15.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.11"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-008",
+      "order": 8,
+      "title": [
+        "單人自拍動作替換 - 興奮"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/Celebrity_%2318.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/singleselfie-18-109642407?collection=418926",
+                "target": "_blank"
+              },
+              "children": [
+                "[SingleSeflie_happy] DearKim_Celebrity_#18.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.11"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-009",
+      "order": 9,
+      "title": [
+        "單人自拍動作替換 - 搞怪"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/Celebrity_%2319.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/singleselfie-19-111475268?collection=418926",
+                "target": "_blank"
+              },
+              "children": [
+                "[SingleSeflie_silly] DearKim_Celebrity_#19.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.11"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-010",
+      "order": 10,
+      "title": [
+        "單人自拍動作替換 - 沉思"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/Celebrity_%2330.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/singleselfie-30-135790177?collection=418926",
+                "target": "_blank"
+              },
+              "children": [
+                "[SingleSeflie_thoughtful] DearKim_Celebrity_#30.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.11"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-011",
+      "order": 11,
+      "title": [
+        "單人自拍動作替換 - 挑逗"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/Celebrity_%2332.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/singleselfie-32-140564886?collection=418926",
+                "target": "_blank"
+              },
+              "children": [
+                "[SingleSeflie_romantic] DearKim_Celebrity_#32.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.11"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-012",
+      "order": 12,
+      "title": [
+        "雙人自拍動作替換 - 生氣"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2306.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-100903193?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_angry] DearKim_XOXO_#06.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-013",
+      "order": 13,
+      "title": [
+        "雙人自拍動作替換 - ？"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2309.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-102575458?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_cool] DearKim_XOXO_#09.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-014",
+      "order": 14,
+      "title": [
+        "雙人自拍動作替換 - 興奮"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2311.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-106419523?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_happy] DearKim_XOXO_#11.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-015",
+      "order": 15,
+      "title": [
+        "雙人自拍動作替換 - 放鬆"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2313.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-110578264?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_relaxed] DearKim_XOXO_#13.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-016",
+      "order": 16,
+      "title": [
+        "雙人自拍動作替換 - 挑逗"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2317.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-117766817?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_romantic] DearKim_XOXO_#17.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-017",
+      "order": 17,
+      "title": [
+        "雙人自拍動作替換 - 悲傷"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2321.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-124713901?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_sad] DearKim_XOXO_#21.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-018",
+      "order": 18,
+      "title": [
+        "雙人自拍動作替換 - 愚蠢"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2323.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-129440843?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_silly] DearKim_XOXO_#23.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "pose-mods-019",
+      "order": 19,
+      "title": [
+        "雙人自拍動作替換 - 沉思"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/dearkims",
+            "target": "_blank"
+          },
+          "children": [
+            "DearKim"
+          ]
+        }
+      ],
+      "authors": [
+        {
+          "name": "DearKim",
+          "url": "https://www.patreon.com/cw/dearkims"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/pose/XOXO_%2330.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/dearkims/posts/pairedselfie-xx-148593593?utm_campaign=postshare_fan",
+                "target": "_blank"
+              },
+              "children": [
+                "[PairedSelfie_thoughtful] DearKim_XOXO_#30.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.18"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

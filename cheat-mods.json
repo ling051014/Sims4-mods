@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 2,
+  "category": "cheat-mods",
+  "categoryLabel": "作弊模組",
+  "sourceFile": "cheat-mods.html",
+  "mods": [
+    {
+      "id": "cheat-mods-001",
+      "order": 1,
+      "title": [
+        "MC Command Center (MCCC)"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/c/mccc_deaderpool/posts?utm_source=campaign-search-results",
+            "target": "_blank"
+          },
+          "children": [
+            "Deaderpool"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.uk/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮个站"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Deaderpool",
+          "url": "https://www.patreon.com/c/mccc_deaderpool/posts?utm_source=campaign-search-results"
+        },
+        {
+          "name": "邦妮个站",
+          "url": "https://www.abonnie.uk/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cheat/mccc.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://deaderpool-mccc.com/downloads.html",
+                "target": "_blank"
+              },
+              "children": [
+                "McCmdCenter_AllModules_2026_5_0.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.uk/mc",
+                "target": "_blank"
+              },
+              "children": [
+                "!mc_cmd_center_CHT_CHS_ABonnie.package"
+              ]
+            },
+            " (作者已採用該漢化並添加在主體中，可不用另外下載)"
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "2026_5_0"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.31"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "請勿刪除「cfg 」檔案"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        否則須重新設定\n                    "
+      ],
+      "layout": {
+        "notesTag": "p"
+      }
+    },
+    {
+      "id": "cheat-mods-002",
+      "order": 2,
+      "title": [
+        "UI Cheats Extension"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/weerbesu",
+            "target": "_blank"
+          },
+          "children": [
+            "weerbesu"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/ling051014",
+            "target": "_blank"
+          },
+          "children": [
+            "L1nG"
+          ]
+        },
+        " (我)\n                    "
+      ],
+      "authors": [
+        {
+          "name": "weerbesu",
+          "url": "https://www.patreon.com/weerbesu"
+        },
+        {
+          "name": "L1nG",
+          "url": "https://www.patreon.com/cw/ling051014"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/cheat/UI_Cheats.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/ui-cheats-v1-16-26240068",
+                "target": "_blank"
+              },
+              "children": [
+                "UI_Cheats_Extension_v1.59.1.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://translations.by-l1ng.com/#translation-ui-cheats"
+              },
+              "children": [
+                "!_UI_Cheats_Extension_CHT_BY_L1nG.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v1.59.1"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.08.28"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}

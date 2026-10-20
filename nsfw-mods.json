@@ -1,0 +1,745 @@
+{
+  "schemaVersion": 2,
+  "category": "nsfw-mods",
+  "categoryLabel": "18+ 模組",
+  "sourceFile": "nsfw-mods.html",
+  "mods": [
+    {
+      "id": "nsfw-mods-001",
+      "order": 1,
+      "title": [
+        "WickedWhims",
+        {
+          "tag": "br"
+        },
+        "邪惡紳士"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://turbodriver.io/",
+            "target": "_blank"
+          },
+          "children": [
+            "TURBODRIVER"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://home.gamer.com.tw/profile/index_creation.php?owner=nannan0127",
+            "target": "_blank"
+          },
+          "children": [
+            "南子"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "TURBODRIVER",
+          "url": "https://turbodriver.io/"
+        },
+        {
+          "name": "南子",
+          "url": "https://home.gamer.com.tw/profile/index_creation.php?owner=nannan0127"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/nsfw/WW.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://wickedwhimsmod.com/download",
+                "target": "_blank"
+              },
+              "children": [
+                "WickedWhims v185k"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.youtube.com/watch?v=fBehn6WHtoQ&t=1s",
+                "target": "_blank"
+              },
+              "children": [
+                "邪惡紳士 (By Secret)"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://turbodriver.itch.io/wickedwhims",
+                "target": "_blank"
+              },
+              "children": [
+                "ITCH.IO"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v185k"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.09.11"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        包含完整性愛系統、避孕與週期設定。安裝後請務必確認動畫檔案路徑正確。\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "nsfw-mods-002",
+      "order": 2,
+      "title": [
+        "Wicked Memories Enhanced",
+        {
+          "tag": "br"
+        },
+        "嘿嘿記憶增強版"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/xtremsyn",
+            "target": "_blank"
+          },
+          "children": [
+            "XtremSyn"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/ling051014",
+            "target": "_blank"
+          },
+          "children": [
+            "L1nG"
+          ]
+        },
+        " (我)\n                    "
+      ],
+      "authors": [
+        {
+          "name": "XtremSyn",
+          "url": "https://www.patreon.com/cw/xtremsyn"
+        },
+        {
+          "name": "L1nG",
+          "url": "https://www.patreon.com/cw/ling051014"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/nsfw/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/xtremsyn/posts/wicked-memories-165936707?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link",
+                "target": "_blank"
+              },
+              "children": [
+                "XtremSyn_WME_1.0.2_Lite.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.dropbox.com/scl/fi/4jdif9ydavudq9l1jfe49/_XtremSyn_WickedMemoriesEnhanced_CHT_BY_L1nG.package?rlkey=3wdhtn5tjb2wsiad62g1k52m5&amp;st=6jm2ikya&amp;dl=0"
+              },
+              "children": [
+                "!_XtremSyn_WickedMemoriesEnhanced_CHT_BY_L1nG.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.loverslab.com/files/file/50280-wicked-memories-enhanced/",
+                "target": "_blank"
+              },
+              "children": [
+                "LoversLab"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "1.0.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.09.10"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "nsfw-mods-003",
+      "order": 3,
+      "title": [
+        "BDSM 物品合集"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/KrNC",
+            "target": "_blank"
+          },
+          "children": [
+            "Kritical"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/meowcats",
+            "target": "_blank"
+          },
+          "children": [
+            "喵嗚 (MeowCats)"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Kritical",
+          "url": "https://www.patreon.com/KrNC"
+        },
+        {
+          "name": "喵嗚 (MeowCats)",
+          "url": "https://www.patreon.com/cw/meowcats"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/nsfw/.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://wicked.cc/mods/kritical/dreams-of-surrender-1-08/",
+                "target": "_blank"
+              },
+              "children": [
+                "[Kritical]DreamsOfSurrender_1_34pb.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/meowcats/posts/kritical-bdsmwu-101016293?collection=456905",
+                "target": "_blank"
+              },
+              "children": [
+                "Kritical_屈服的想望_1.23(CHT).zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            "無"
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "0"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "0"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        提供多種地牢風格的裝飾雜物，需搭配漢化包使用以獲得最佳體驗。\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "nsfw-mods-004",
+      "order": 4,
+      "title": [
+        "Extreme Violence",
+        {
+          "tag": "br"
+        },
+        "極端暴力"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/cw/SACRIFICIAL",
+            "target": "_blank"
+          },
+          "children": [
+            "SACRIFICIAL"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.cc/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮分站 - 花花宇宙"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "SACRIFICIAL",
+          "url": "https://www.patreon.com/cw/SACRIFICIAL"
+        },
+        {
+          "name": "邦妮分站 - 花花宇宙",
+          "url": "https://www.abonnie.cc/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/nsfw/Extreme Violence.webp"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.patreon.com/posts/sacrificial-mods-35725766",
+                "target": "_blank"
+              },
+              "children": [
+                "SAC_ExtremeViolence -MOD- V2.6.3.2.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.cc/zh/extreme-violence",
+                "target": "_blank"
+              },
+              "children": [
+                "!SAC_ExtremeViolence_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://sacrificialmods.com/downloads.html#extreme-violence-download",
+                "target": "_blank"
+              },
+              "children": [
+                "s4s"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "V2.6.3.2"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.05.21"
+          ]
+        }
+      ],
+      "layout": {}
+    },
+    {
+      "id": "nsfw-mods-005",
+      "order": 5,
+      "title": [
+        "Basemental Drugs",
+        {
+          "tag": "br"
+        },
+        "絕命毒師"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/basemental",
+            "target": "_blank"
+          },
+          "children": [
+            "Basemental"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.cc/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮分站 - 花花宇宙"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "Basemental",
+          "url": "https://www.patreon.com/basemental"
+        },
+        {
+          "name": "邦妮分站 - 花花宇宙",
+          "url": "https://www.abonnie.cc/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/nsfw/BMD-Cover-2.png"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://basementalcc.com/adult_mods/basemental-drugs/",
+                "target": "_blank"
+              },
+              "children": [
+                "Basemental-Drugs-8.18.182-PUBLIC.zip"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.cc/zh/basemental-drugs",
+                "target": "_blank"
+              },
+              "children": [
+                "!Basemental Drugs_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://wicked.cc/mods/basemental/basemental-drugs/",
+                "target": "_blank"
+              },
+              "children": [
+                "WW"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "Version:8.18.182 (PUBLIC)"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.07.23"
+          ]
+        }
+      ],
+      "notes": [
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-red"
+          },
+          "children": [
+            "需下載通用場地清單"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        這是一個複雜且廣泛的模組，圍繞著毒品、毒品消費、毒品交易和毒品文化展開",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-green"
+          },
+          "children": [
+            "其他附加檔案 (可根據自己的需求下載 )"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                    "
+      ],
+      "layout": {}
+    },
+    {
+      "id": "nsfw-mods-006",
+      "order": 6,
+      "title": [
+        "Smoking MOD",
+        {
+          "tag": "br"
+        },
+        "抽菸模組"
+      ],
+      "byline": [
+        "by ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.patreon.com/NecrodogMTSandS4S",
+            "target": "_blank"
+          },
+          "children": [
+            "NecrodogMTSandS4S"
+          ]
+        },
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "a",
+          "attrs": {
+            "href": "https://www.abonnie.cc/",
+            "target": "_blank"
+          },
+          "children": [
+            "邦妮分站 - 花花宇宙"
+          ]
+        },
+        "\n                    "
+      ],
+      "authors": [
+        {
+          "name": "NecrodogMTSandS4S",
+          "url": "https://www.patreon.com/NecrodogMTSandS4S"
+        },
+        {
+          "name": "邦妮分站 - 花花宇宙",
+          "url": "https://www.abonnie.cc/"
+        }
+      ],
+      "preview": [
+        {
+          "tag": "img",
+          "attrs": {
+            "src": "preview/nsfw/SmokingMod.jpg"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "label": "模組主體 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://necrodogmtsands4s.tumblr.com/post/169939984705/smoking-mod-v4-addiction-system-by-basemental",
+                "target": "_blank"
+              },
+              "children": [
+                "necrodog - SmokingMod v4 (Addiction System by Basemental)-new-anims.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "漢化版本 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.abonnie.cc/zh/smoking-mod-v4",
+                "target": "_blank"
+              },
+              "children": [
+                "!necrodog - SmokingMod v4_CHT_CHS_ABonnie.package"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "備用載點 ｜",
+          "value": [
+            {
+              "tag": "a",
+              "attrs": {
+                "href": "https://www.mediafire.com/file/7uy6jb83b8z1w1h/",
+                "target": "_blank"
+              },
+              "children": [
+                "MediaFire"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "下載版本 ｜",
+          "value": [
+            "v4"
+          ]
+        },
+        {
+          "label": "下載日期 ｜",
+          "value": [
+            "2026.06.11"
+          ]
+        }
+      ],
+      "layout": {}
+    }
+  ]
+}
