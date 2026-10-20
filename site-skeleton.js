@@ -214,7 +214,69 @@
         }
     }
 
-    window.L1nGSkeleton = Object.assign(window.L1nGSkeleton || {}, { ready });
+
+    // 全站內容區的共用載入狀態，延用頁面骨架動畫。
+    function startLoading(target, variant = "table", count = 4) {
+        if (!target) return null;
+        const loading = document.createElement("div");
+        loading.className = "l1ng-content-skeleton l1ng-content-skeleton-" + variant;
+        loading.setAttribute("role", "status");
+        loading.setAttribute("aria-label", "內容載入中");
+        const block = (type = "line") => '<span class="l1ng-sk-block l1ng-content-' + type + '"></span>';
+        loading.innerHTML = Array.from({ length: Math.min(8, Math.max(1, count)) }, () =>
+            variant === "cards"
+                ? '<div class="l1ng-content-card">' + block("media") +
+                    '<div class="l1ng-content-card-body">' + block() + block("line short") + block() + '</div></div>'
+                : variant === "keywords"
+                    ? '<div class="l1ng-content-keyword">' + block("pill") + block() + block() + '</div>'
+                    : '<div class="l1ng-content-row">' + block("line short") + block() + block() + '</div>'
+        ).join("");
+        target.replaceChildren(loading);
+        target.setAttribute("aria-busy", "true");
+        target.dataset.loadState = "loading";
+        const finish = (state, content) => {
+            if (target.firstChild !== loading) return;
+            target.removeAttribute("aria-busy");
+            target.dataset.loadState = state;
+            if (state === "ready") {
+                if (typeof content === "string") target.innerHTML = content;
+                else if (content instanceof Node) target.replaceChildren(content);
+                else target.replaceChildren();
+            } else {
+                const p = document.createElement("p");
+                p.className = "l1ng-content-state-message";
+                p.setAttribute("role", state === "error" ? "alert" : "status");
+                p.textContent = content;
+                target.replaceChildren(p);
+            }
+        };
+        return {
+            ready: content => finish("ready", content),
+            empty: text => finish("empty", text || "目前沒有資料"),
+            fail: text => finish("error", text || "目前無法載入資料，請稍後再試")
+        };
+    }
+    async function loadHtml(target, url, options = {}) {
+        const state = startLoading(target, options.variant || "table", options.count || 4);
+        if (!state) return false;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const html = await response.text();
+            if (!html.trim()) { state.empty(options.emptyMessage); return false; }
+            state.ready(html);
+            if (options.onReady) options.onReady(target);
+            return true;
+        } catch (error) {
+            console.error("內容載入失敗", url, error);
+            state.fail(options.errorMessage);
+            return false;
+        }
+    }
+    window.L1nGSkeleton = Object.assign(window.L1nGSkeleton || {}, {
+        ready, start: startLoading, loadHtml
+    });
+
 
     if (autoReady) {
         const scheduleReady = () =>
