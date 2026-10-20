@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">RealDate 日曆圖示</title>
+  <desc id="desc">保留原版外型和配色的 RealDate 日曆向量復刻圖示</desc>
+  <defs>
+    <clipPath id="calendar-inner">
+      <rect x="19" y="24" width="89" height="86" rx="13" />
+    </clipPath>
+  </defs>
+
+  <!-- 陰影、深青色邊框、淺色日曆本體 -->
+  <rect x="17.5" y="24" width="99" height="96" rx="18" fill="#000000" opacity="0.29"/>
+  <rect x="14" y="19" width="99" height="96" rx="18" fill="#275A69"/>
+  <rect x="19" y="24" width="89" height="86" rx="13" fill="#F6F9FA"/>
+
+  <!-- 日曆上方純湖水綠色標頭與深青色分隔線 -->
+  <g clip-path="url(#calendar-inner)">
+    <path d="M19 33 H108 V56 H19 Z" fill="#3EC1B2"/>
+    <path d="M19 56 H108 V61 H19 Z" fill="#275A69"/>
+  </g>
+
+  <!-- 日曆條目：保留原始兩排三欄的圓角短線 -->
+  <g fill="#4D7B89">
+    <rect x="33" y="71.5" width="23" height="6" rx="3"/>
+    <rect x="61" y="71.5" width="23" height="6" rx="3"/>
+    <rect x="89" y="71.5" width="11" height="6" rx="3"/>
+    <rect x="33" y="88.5" width="23" height="6" rx="3"/>
+    <rect x="61" y="88.5" width="23" height="6" rx="3"/>
+    <rect x="89" y="88.5" width="11" height="6" rx="3"/>
+  </g>
+
+  <!-- 兩個暖黃色裝訂環，置於外框和標頭上方 -->
+  <rect x="38.5" y="11" width="8.5" height="29" rx="4.25" fill="#F4B042"/>
+  <rect x="80.5" y="11" width="8.5" height="29" rx="4.25" fill="#F4B042"/>
+</svg>
