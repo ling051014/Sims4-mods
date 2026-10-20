@@ -194,6 +194,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 .main-nav {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -226,7 +227,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     color: var(--accent);
 }
 
-.main-nav > a.active::after {
+.main-nav:not(.l1ng-nav-indicator-ready) > a.active::after {
     content: "";
     position: absolute;
     left: 0;
@@ -234,6 +235,26 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     bottom: -9px;
     height: 1px;
     background: var(--accent);
+}
+
+/* 單一移動底線：與原本 active 底線同色、同厚度。 */
+.main-nav > .l1ng-nav-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: var(--l1ng-nav-width, 0px);
+    height: 1px;
+    background: var(--accent);
+    transform: translate3d(var(--l1ng-nav-x, 0px), var(--l1ng-nav-y, 0px), 0);
+    pointer-events: none;
+}
+.main-nav > .l1ng-nav-indicator.is-animated {
+    transition: transform 280ms ease-out, width 280ms ease-out;
+}
+.main-nav.open > .l1ng-nav-indicator { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    .main-nav > .l1ng-nav-indicator.is-animated { transition: none; }
 }
 
 /* ========【RealDate 頂部導覽】 設定 - 語言與手機選單固定控制區 ======== */
