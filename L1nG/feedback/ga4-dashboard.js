@@ -120,7 +120,7 @@
     return item;
   };
   const {today,daysBefore}=window.L1nGAdminTime;
-  let chosenRange='30',requestId=0;
+  let chosenRange='7',requestId=0;
   const errors={
     FORBIDDEN:'未通過 Cloudflare Access 管理員驗證。請確認登入狀態與管理 API 存取權。',
     AUTH_NOT_CONFIGURED:'尚未設定 Cloudflare Access 管理員驗證變數。',
@@ -434,6 +434,14 @@
       document.querySelector('[data-range="custom"]')?.setAttribute('aria-expanded',String(chosenRange==='custom'));
       setText('date-error','');
       if(chosenRange!=='custom')void refreshAnalytics();
+    }));
+    // 卡片只導覽既有報表區塊，不重新查詢資料或修改統計。
+    document.querySelectorAll('[data-analytics-target]').forEach(button=>button.addEventListener('click',()=>{
+      const target=document.getElementById(button.dataset.analyticsTarget);
+      if(!target)return;
+      const scrollHost=target.closest('.admin-main');
+      const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      target.scrollIntoView({behavior:reduceMotion?'instant':'smooth',block:'start'});
     }));
     $('analytics-site')?.addEventListener('change',()=>void refreshAnalytics());
     document.addEventListener('l1ng:analytics-date-applied',()=>{
