@@ -185,3 +185,12 @@ test('analytics dashboard layout and card links follow the report hierarchy',()=
   assert.match(script,/querySelectorAll\('\[data-analytics-target\]'\)/);
   assert.match(css,/@media\(max-width:700px\)\{\s*\.admin-only #panel-analytics \.ga-chart-readout\{display:flex\}/);
 });
+
+test('GA4 SVG focus has no border and chart readout mounts only on mobile',()=>{
+  const css=fs.readFileSync(new URL('admin.css',folder),'utf8');
+  const js=fs.readFileSync(new URL('ga4-dashboard.js',folder),'utf8');
+  assert.match(css,/\.ga-chart-scroll svg:focus,\.admin-only \.ga-chart-scroll svg:focus-visible\{outline:none\}/);
+  assert.match(js,/if\(mobile\.matches\)root\.insertBefore\(readout,scroll\)/);
+  assert.match(js,/else readout\.remove\(\)/);
+  assert.match(js,/chartMediaCleanups\.get\(root\)\?\.\(\)/);
+});
