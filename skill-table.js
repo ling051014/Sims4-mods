@@ -85,33 +85,13 @@ function recalculateColumnWidths() {
 // ========【技能對照表】 載入外部 HTML 檔案 ========
 // ===================================================
 // 開始異步抓取外部的技能表格 HTML 檔案
-fetch('skill-table.html')
-    
-    // 階段一：接收回應，印出 HTTP 狀態碼以便開發除錯
-    .then(res => {
-        // 於主控台印出狀態碼 (例如：200 成功、404 找不到)
-        console.log('HTTP 狀態碼:', res.status);
-        // 將回應轉換為純文字 HTML 格式
-        return res.text();
-    })
-
-    // 階段二：成功抓取檔案後，將 HTML 內容插入網頁，並呼叫鎖定欄寬函式
-    .then(html => {
-        // 於主控台顯示成功訊息
-        console.log('✔ 技能表格初始化完成');
-        // 將外部 HTML 表格正式塞入網頁容器中
-        placeholder.innerHTML = html;
-        // 呼叫封裝好的欄寬計算函式，進行初次同步對齊
-        recalculateColumnWidths();
-    })
-    
-    // 階段三：發生非預期錯誤時 (例如檔案路徑打錯)，進行安全防禦回退
-    .catch(error => {
-        // 於主控台回報精準的錯誤原因
-        console.error('技能表格載入失敗:', error);
-        // 於畫面上回饋紅字提示給使用者
-        placeholder.innerHTML = '<span style="color:red;">技能表格載入失敗，請稍後再試。' + error.message + '</span>';
+if (placeholder) {
+    window.L1nGSkeleton.loadHtml(placeholder, 'skill-table.html', {
+        variant: 'table', count: 6,
+        errorMessage: '技能對照表載入失敗，請稍後重新整理。',
+        onReady: recalculateColumnWidths
     });
+}
 
 // ===================================================
 // ========【輔助函數】 唯一合一的顯示與定位功能 ========

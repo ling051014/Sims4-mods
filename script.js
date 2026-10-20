@@ -290,42 +290,14 @@ document.addEventListener('click', async (event) => {
 });
 
 // ========【DLC對照表】 設定 - 載入外部 HTML ========
-function loadDLCTable(containerId, callback) {
-    // 取得目標容器
-    const container = document.getElementById(containerId);
-    // 若容器不存在則停止
-    if (!container) return;
-    // 載入外部 HTML 檔案
-    fetch('dlc-table.html')
-        // 轉為文字格式
-        .then(response => response.text())
-        // 將內容插入容器
-        .then(data => {
-            // 插入 HTML
-            container.innerHTML = data;
-            // 若有回呼函式則執行
-            if (callback) callback();
-        })
-
-        // 錯誤訊息
-        .catch(err => {
-            console.error('無法載入對照表:', err);
-        });
-}
-
 // ========【DLC對照表】 設定 - 開啟 Dialog ========
-function openDLCDialog() {
+async function openDLCDialog() {
     const container = document.getElementById('modal-content-placeholder');
     const dialog = document.getElementById('dlc-dialog');
-    // 使用 trim() 確保準確判斷容器是否為空
-    if (container.innerHTML.trim() === "") {
-        loadDLCTable('modal-content-placeholder', () => {
-            dialog.showModal();
-            // 載入後重新綁定一次點擊事件（選擇性，若使用全域監聽則免）
-        });
-    } else {
-        dialog.showModal();
-    }
+    if (!container || !dialog) return;
+    dialog.showModal();
+    if (!container.dataset.loadState || container.dataset.loadState === 'error')
+        await window.L1nGSkeleton.loadHtml(container, 'dlc-table.html', { variant: 'table', count: 6 });
 }
 
 // 確保全域點擊表格行會變色（支援首頁與彈窗）

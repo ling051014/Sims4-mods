@@ -16,7 +16,9 @@ async function loadKeywords(placeholderId, categoryList) {
     const placeholder = document.getElementById(placeholderId);
     if (!placeholder) return;
 
+    const loadState = window.L1nGSkeleton.start(placeholder, 'keywords', 5);
     // 【遠端讀取】開始異步抓取資料
+
     fetch(`keywords.json?t=${new Date().getTime()}`)
         // 【狀態檢查】檢查回應是否成功
         .then(res => {
@@ -59,7 +61,8 @@ async function loadKeywords(placeholderId, categoryList) {
 
             // 【封裝結尾】完成所有節點生成
             html += `</div></div>`;
-            placeholder.innerHTML = html;
+            if (html.includes('keyword-cat')) loadState.ready(html);
+            else loadState.empty('目前沒有關鍵字資料');
 
             // 【獲取物件】抓取側邊列與膠囊
             const wrapper = placeholder.querySelector('.keyword-side-wrapper');
@@ -89,7 +92,7 @@ async function loadKeywords(placeholderId, categoryList) {
         // 【異常捕獲】處理錯誤提示顯示
         .catch(error => {
             console.error('關鍵字對照表載入失敗:', error);
-            placeholder.innerHTML = '<span style="color:red;">關鍵字對照表載入失敗，請稍後再試。' + error.message + '</span>';
+            loadState.fail('關鍵字對照表載入失敗，請稍後再試。');
         });
 }
 

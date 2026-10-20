@@ -95,30 +95,14 @@ function parseDLC(text) {
 // ===================================================
 // ========【1. 載入 DLC 表格】 ========
 // ===================================================
-function loadDLCTable(containerId) {
-    // 取得外部 HTML 要插入的容器
+async function loadDLCTable(containerId) {
     const container = document.getElementById(containerId);
-    if (!container) return;
-
-    // 抓取外部的 dlc-table.html
-    fetch('dlc-table.html')
-        .then(res => res.text()) // 轉為文字格式
-        .then(html => {
-            // 寫入 HTML
-            container.innerHTML = html;
-
-            // 等待瀏覽器完成 DOM 渲染
-            requestAnimationFrame(() => {
-                const table = document.getElementById('map-master-table');
-                if (!table) return;
-                // 表格確定存在後執行初始化
-                initTable();
-            });
-        })
-        .catch(error => {
-            console.error('DLC對照表載入失敗:', error);
-            skillPlaceholder.innerHTML = '<span style="color:red;">表格載入失敗，請稍後再試。' + error.message + '</span>';
-        });
+    if (!container) return false;
+    const loaded = await window.L1nGSkeleton.loadHtml(container, 'dlc-table.html', {
+        variant: 'table', count: 6, errorMessage: 'DLC 對照表載入失敗，請稍後重新整理。',
+        onReady: () => requestAnimationFrame(initTable)
+    });
+    return loaded;
 }
 
 // ===================================================
