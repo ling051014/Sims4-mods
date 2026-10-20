@@ -8,7 +8,8 @@
     const collator = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
     const records = cards.map((card, index) => ({
         card, index,
-        author: (card.querySelector('.author a')?.textContent
+        author: (card.dataset.sortAuthor
+            || card.querySelector('.author a')?.textContent
             || card.querySelector('.author')?.textContent.replace(/^\s*by\s*/i, '')
             || '').trim()
     }));
