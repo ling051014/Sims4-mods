@@ -239,7 +239,7 @@
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
         url.searchParams.set("parent", location.origin);
-        url.searchParams.set("v", "20261021-tou-branch-r1");
+        url.searchParams.set("v", "20261021-tou-preserve-r2");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         activeUrl = url;
         // 族譜「關於」的外框尺寸固定；只有其他政策視窗維持依內容調整高度。
