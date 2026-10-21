@@ -79,6 +79,9 @@
   ]);
   let ootdCategoryPosition=0;
   let ootdUploadTarget=null;
+  let ootdHoldState=null;
+  let ootdDragState=null;
+  let ootdSuppressClickUntil=0;
 
   // ========【模擬市民編輯器延遲建立】 設定 - 基本資料先顯示，隱藏分頁真正需要時再建立 ========
   let personEditorRelationshipDataReady=false;
@@ -250,6 +253,7 @@
       editingOutfits,
       []
     );
+    cancelOotdSorting();
     ootdCategoryPosition=0;
     ootdUploadTarget=null;
     closeOotdCategoryPopover();
@@ -1575,7 +1579,10 @@ function buildPersonEditorDraft({
   }
 
   function switchEditorTab(tabName='basic'){
-    if(tabName!=='ootd')closeOotdCategoryPopover();
+    if(tabName!=='ootd'){
+      cancelOotdSorting();
+      closeOotdCategoryPopover();
+    }
     closeOotdLightbox();
     ensurePersonEditorTabUi(
       tabName
@@ -2265,19 +2272,213 @@ function buildPersonEditorDraft({
     }
   }
 
+
+  // ========【穿搭排序】 原始 Outfit Index 與使用者顯示位置獨立保存 ========
+  function getOotdSlots(categoryId){
+    const slots=Array(5).fill(null);
+    const entries=editingOutfits.filter(item=>
+      Number(item.category)===categoryId &&
+      Number.isInteger(Number(item.index)) &&
+      Number(item.index)>=0 && Number(item.index)<5 && !!item.image
+    );
+    const pending=[];
+    for(const item of entries){
+      const position=Number(item.displayOrder);
+      if(item.displayOrder!=null && item.displayOrder!=='' &&
+        Number.isInteger(position) && position>=0 && position<5 && !slots[position]){
+        slots[position]=item;
+      }else{
+        pending.push(item);
+      }
+    }
+    for(const item of pending){
+      const originalIndex=Number(item.index);
+      const position=!slots[originalIndex]?originalIndex:slots.findIndex(entry=>!entry);
+      if(position>=0)slots[position]=item;
+    }
+    return slots;
+  }
+
+  function saveOotdDisplayOrder(slots){
+    slots.forEach((item,position)=>{
+      if(item)item.displayOrder=position;
+    });
+  }
+
+  function cancelOotdSorting(){
+    if(ootdHoldState){
+      global.clearTimeout(ootdHoldState.timer);
+      ootdHoldState=null;
+    }
+    if(!ootdDragState)return;
+    ootdDragState.ghost?.remove();
+    $('simOotdSlotGrid')?.querySelectorAll('.ootd-drag-source').forEach(item=>
+      item.classList.remove('ootd-drag-source')
+    );
+    ootdDragState=null;
+    document.body.classList.remove('ootd-sorting');
+    renderOotdWorkspace();
+  }
+
+  function finishOotdSorting(event,cancelled=false){
+    if(!ootdDragState){
+      if(ootdHoldState && event.pointerId===ootdHoldState.pointerId){
+        global.clearTimeout(ootdHoldState.timer);
+        ootdHoldState=null;
+      }
+      return;
+    }
+    const drag=ootdDragState;
+    if(event.pointerId!==drag.pointerId)return;
+    const grid=$('simOotdSlotGrid');
+    const bounds=grid?.getBoundingClientRect();
+    const inBounds=!cancelled && bounds && event.clientX>=bounds.left &&
+      event.clientX<=bounds.right && event.clientY>=bounds.top && event.clientY<=bounds.bottom &&
+      personEditorSessionVersion===drag.session &&
+      ootdCategoryPosition===drag.categoryPosition;
+    if(inBounds && drag.slots.some((item,index)=>item!==drag.original[index])){
+      saveOotdDisplayOrder(drag.slots);
+    }
+    ootdSuppressClickUntil=Date.now()+450;
+    drag.ghost?.remove();
+    ootdDragState=null;
+    document.body.classList.remove('ootd-sorting');
+    renderOotdWorkspace();
+  }
+
+  function updateOotdDragPreview(position){
+    const drag=ootdDragState;
+    const grid=$('simOotdSlotGrid');
+    if(!drag||!grid||position<0||position>4)return;
+    const current=drag.slots.indexOf(drag.item);
+    if(current===position||current<0)return;
+    const nodes=Array.from(grid.children);
+    if(nodes.length!==5)return;
+    const oldRects=new Map(nodes.map(node=>[node,node.getBoundingClientRect()]));
+    const [moving]=nodes.splice(current,1);
+    nodes.splice(position,0,moving);
+    const [entry]=drag.slots.splice(current,1);
+    drag.slots.splice(position,0,entry);
+    grid.append(...nodes);
+    nodes.forEach((node,index)=>{
+      node.dataset.ootdPosition=String(index);
+      node.querySelectorAll('[data-ootd-index]').forEach(control=>control.dataset.ootdIndex=String(index));
+      const name=node.querySelector('.ootd-slot-name');
+      if(name)name.textContent=uiText('第 {n} 套').replace('{n}',String(index+1));
+      const button=node.querySelector('.ootd-image-button');
+      if(button)button.setAttribute('aria-label',node.querySelector('.ootd-slot-name')?.textContent||'');
+    });
+    if(global.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+    nodes.forEach(node=>{
+      const from=oldRects.get(node);
+      const to=node.getBoundingClientRect();
+      if(!from||!node.animate)return;
+      const dx=from.left-to.left,dy=from.top-to.top;
+      if(Math.abs(dx)+Math.abs(dy)<1)return;
+      node.getAnimations?.().forEach(animation=>animation.cancel());
+      node.animate([
+        {transform:'translate('+dx+'px,'+dy+'px)'},
+        {transform:'translate(0px,0px)'}
+      ],{duration:170,easing:'cubic-bezier(.2,.8,.2,1)'});
+    });
+  }
+
+  function beginOotdSorting(hold){
+    if(ootdHoldState!==hold || !mask.classList.contains('show') ||
+       !document.querySelector('[data-editor-panel="ootd"]:not([hidden])'))return;
+    ootdHoldState=null;
+    const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
+    const slots=getOotdSlots(category);
+    const item=slots[hold.position];
+    if(!item)return;
+    const grid=$('simOotdSlotGrid');
+    const source=Array.from(grid.children)[hold.position];
+    const button=source?.querySelector('.ootd-image-button');
+    if(!button)return;
+    const bounds=button.getBoundingClientRect();
+    const ghost=button.cloneNode(true);
+    ghost.removeAttribute('data-ootd-action');
+    ghost.classList.add('ootd-drag-ghost');
+    ghost.style.width=bounds.width+'px';
+    ghost.style.height=bounds.height+'px';
+    ghost.style.left=bounds.left+'px';
+    ghost.style.top=bounds.top+'px';
+    document.body.append(ghost);
+    source.classList.add('ootd-drag-source');
+    document.body.classList.add('ootd-sorting');
+    ootdDragState={
+      pointerId:hold.pointerId,
+      item, slots, original:slots.slice(),
+      categoryPosition:ootdCategoryPosition,
+      session:personEditorSessionVersion,
+      ghost, offsetX:hold.x-bounds.left,offsetY:hold.y-bounds.top
+    };
+    ootdSuppressClickUntil=Date.now()+500;
+  }
+
+  function setupOotdSorting(){
+    const grid=$('simOotdSlotGrid');
+    if(!grid)return;
+    grid.addEventListener('pointerdown',event=>{
+      if(event.button!==0 || ootdHoldState || ootdDragState)return;
+      const button=event.target.closest('.ootd-image-button.has-image');
+      if(!button||!grid.contains(button))return;
+      const position=Number(button.dataset.ootdIndex);
+      if(!Number.isInteger(position)||position<0||position>4)return;
+      const hold={
+        pointerId:event.pointerId,x:event.clientX,y:event.clientY,position,
+        timer:null
+      };
+      hold.timer=global.setTimeout(()=>beginOotdSorting(hold),280);
+      ootdHoldState=hold;
+    });
+    global.addEventListener('pointermove',event=>{
+      if(ootdHoldState && ootdHoldState.pointerId===event.pointerId){
+        const distance=Math.hypot(event.clientX-ootdHoldState.x,event.clientY-ootdHoldState.y);
+        if(distance>9){
+          global.clearTimeout(ootdHoldState.timer);
+          ootdHoldState=null;
+        }
+      }
+      const drag=ootdDragState;
+      if(!drag || drag.pointerId!==event.pointerId)return;
+      event.preventDefault();
+      drag.ghost.style.left=(event.clientX-drag.offsetX)+'px';
+      drag.ghost.style.top=(event.clientY-drag.offsetY)+'px';
+      const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.ootd-slot');
+      if(target?.parentElement===grid){
+        const position=Number(target.dataset.ootdPosition);
+        if(Number.isInteger(position))updateOotdDragPreview(position);
+      }
+    },{passive:false});
+    global.addEventListener('pointerup',event=>finishOotdSorting(event));
+    global.addEventListener('pointercancel',event=>finishOotdSorting(event,true));
+    global.addEventListener('blur',()=>cancelOotdSorting());
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden)cancelOotdSorting();
+    });
+    // 拖曳後的 click 不應開啟圖片檢視器或上傳選單。
+    grid.addEventListener('click',event=>{
+      if(Date.now()>=ootdSuppressClickUntil)return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },true);
+  }
+
   function renderOotdWorkspace(){
     const grid=$('simOotdSlotGrid');
     if(!grid)return;
     const category=OOTD_CATEGORIES[ootdCategoryPosition];
+    const slots=getOotdSlots(category.id);
     const title=uiText(category.label);
     $('simOotdCategoryName').textContent=title;
     $('simOotdCategoryPosition').textContent=(ootdCategoryPosition+1)+' / '+OOTD_CATEGORIES.length;
     grid.innerHTML=Array.from({length:5},(_,index)=>{
-      const entry=editingOutfits.find(item=>Number(item.category)===category.id && Number(item.index)===index && item.image);
+      const entry=slots[index];
       const ref=entry?.image||'';
       const url=ref?resolveImageUrl(ref):'';
       const label=uiText('第 {n} 套').replace('{n}',String(index+1));
-      return '<article class="ootd-slot">'+
+      return '<article class="ootd-slot" data-ootd-position="'+index+'">'+
         '<button class="ootd-image-button'+(ref?' has-image':' life-photo-add-btn')+'" type="button" data-ootd-action="'+(ref?'preview':'upload')+'" data-ootd-index="'+index+'" aria-label="'+esc(ref?label:label+' '+uiText('新增穿搭'))+'">'+
         (ref?'<img data-asset-id="'+esc(String(ref))+'" src="'+esc(url)+'" alt="'+esc(label)+'">':'<span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>'+esc(uiText('新增穿搭'))+'</span>')+
         '</button>'+
@@ -2290,6 +2491,7 @@ function buildPersonEditorDraft({
   }
 
   function selectOotdCategory(position){
+    cancelOotdSorting();
     ootdCategoryPosition=(position+OOTD_CATEGORIES.length)%OOTD_CATEGORIES.length;
     closeOotdCategoryPopover();
     renderOotdWorkspace();
@@ -2319,10 +2521,7 @@ function buildPersonEditorDraft({
 
   function openOotdLightbox(index){
     const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
-    const item=editingOutfits.find(item=>
-      Number(item.category)===category &&
-      Number(item.index)===index && item.image
-    );
+    const item=getOotdSlots(category)[index];
     if(!item)return;
     const img=$('simOotdLightboxImage');
     const viewer=$('simOotdLightbox');
@@ -2333,6 +2532,7 @@ function buildPersonEditorDraft({
   }
 
   function setupOotdInteractions(){
+    setupOotdSorting();
     $('simOotdPrevCategory')?.addEventListener('click',()=>selectOotdCategory(ootdCategoryPosition-1));
     $('simOotdNextCategory')?.addEventListener('click',()=>selectOotdCategory(ootdCategoryPosition+1));
     $('simOotdCategoryToggle')?.addEventListener('click',toggleOotdCategoryPopover);
@@ -2348,7 +2548,11 @@ function buildPersonEditorDraft({
     });
     document.addEventListener('keydown',event=>{
       if(event.key!=='Escape')return;
-      if(!$('simOotdLightbox')?.hidden){
+      if(ootdDragState || ootdHoldState){
+        cancelOotdSorting();
+        event.preventDefault();
+        event.stopPropagation();
+      }else if(!$('simOotdLightbox')?.hidden){
         closeOotdLightbox();event.preventDefault();event.stopPropagation();
       }else if(!$('simOotdCategoryPopover')?.hidden){
         closeOotdCategoryPopover();event.preventDefault();event.stopPropagation();
@@ -2367,13 +2571,21 @@ function buildPersonEditorDraft({
       const action=button.dataset.ootdAction;
       if(action==='preview'){openOotdLightbox(index);return;}
       if(action==='remove'){
-        const pos=editingOutfits.findIndex(item=>Number(item.category)===category && Number(item.index)===index);
+        const selected=getOotdSlots(category)[index];
+        const pos=editingOutfits.indexOf(selected);
         if(pos>=0)editingOutfits.splice(pos,1);
         renderOotdWorkspace();
         return;
       }
       if(action==='upload'){
-        ootdUploadTarget={category,index,session:personEditorSessionVersion};
+        const selected=getOotdSlots(category)[index];
+        const occupiedIndices=new Set(editingOutfits.filter(item=>
+          Number(item.category)===category
+        ).map(item=>Number(item.index)));
+        const originalIndex=selected?Number(selected.index):
+          (!occupiedIndices.has(index)?index:Array.from({length:5},(_,i)=>i).find(i=>!occupiedIndices.has(i)));
+        if(!Number.isInteger(originalIndex))return;
+        ootdUploadTarget={category,index:originalIndex,displayOrder:index,session:personEditorSessionVersion};
         $('simOotdImageInput')?.click();
       }
     });
@@ -2392,7 +2604,7 @@ function buildPersonEditorDraft({
         const image=await avatarImageAssetSaver(file,{kind:'ootd'});
         if(target.session!==personEditorSessionVersion || !mask.classList.contains('show'))return;
         const prev=editingOutfits.findIndex(item=>Number(item.category)===target.category && Number(item.index)===target.index);
-        const item={...(prev>=0?editingOutfits[prev]:{}),category:target.category,index:target.index,image,source:'custom'};
+        const item={...(prev>=0?editingOutfits[prev]:{}),category:target.category,index:target.index,displayOrder:target.displayOrder,image,source:'custom'};
         if(prev>=0)editingOutfits.splice(prev,1,item);
         else editingOutfits.push(item);
         renderOotdWorkspace();
