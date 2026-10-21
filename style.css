@@ -889,6 +889,20 @@ body.mod-list-page {
 }
 
 
+/* ========【本站資訊】 共用隱私與使用條款入口 ======== */
+.footer-terms-note {
+    margin:10px 0 0;
+    color:#999999;
+    font-size:12px;
+    line-height:1.7;
+}
+.footer-terms-note a {
+    color:inherit;
+    text-decoration:underline;
+    text-underline-offset:3px;
+}
+.footer-terms-note a:hover { color:#55acee; }
+
 /* ========【網站頁腳】 設定 - 最底部資訊列 ======== */
 .footer-bottom {
     /* 上方分隔線 */ border-top: 1px solid #eeeeee;
