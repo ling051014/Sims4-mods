@@ -58,7 +58,7 @@
             document.addEventListener("DOMContentLoaded", remapAll, {once:true});
         } else remapAll();
     }
-    const sections = new Set(["privacy", "disclaimer", "terms", "genealogy"]);
+    const sections = new Set(["privacy", "terms", "genealogy"]);
     const baseUrl = new URL("site-info.html", script.src);
     // 公開的獨立子網域一律引用首頁域名；分支預覽與本地路徑則沿用相對路徑。
     if (location.hostname.endsWith(".by-l1ng.com") && location.hostname !== "home.by-l1ng.com") {
@@ -70,15 +70,10 @@
             "zh-Hans": ["隐私权与 Cookie", "了解本站如何使用分析工具及处理数据。"],
             en: ["Privacy & Cookies", "How this site uses analytics and handles data."]
         },
-        disclaimer: {
-            "zh-Hant": ["使用與免責聲明", "閱讀非官方聲明、模組相容性及第三方服務說明。"],
-            "zh-Hans": ["使用与免责声明", "阅读非官方声明、模组兼容性及第三方服务说明。"],
-            en: ["Terms & Disclaimer", "Compatibility, third-party services, and independent fan project notices."]
-        },
         terms: {
-            "zh-Hant": ["使用條款", "了解作品使用、分享、轉載及第三方授權規範。"],
-            "zh-Hans": ["使用条款", "了解作品使用、分享、转载及第三方授权规定。"],
-            en: ["T.O.U.", "Terms of Use for L1nG projects, sharing, and redistribution."]
+            "zh-Hant": ["使用條款與免責聲明", "作品使用、分享、轉載與相關免責說明。"],
+            "zh-Hans": ["使用条款与免责声明", "作品使用、分享、转载及相关免责声明。"],
+            en: ["T.O.U.", "Terms of Use & Disclaimer."]
         },
         genealogy: {
             "zh-Hant": ["關於族譜工具", "查看族譜資料、備份與使用注意事項。"],
@@ -209,7 +204,7 @@
         const skeleton = modal.querySelector(".l1ng-site-info-skeleton");
         if (skeleton && skeleton.dataset.section !== section) {
             skeleton.dataset.section = section;
-            // 族譜「關於」是簡介、版權 / 聲明、兩項可展開條款；骨架順序與正文一致。
+            // 族譜「關於」是簡介、版權、兩項可展開政策及 Cookie 設定；骨架對應正文。
             const rows = section === "genealogy"
                 ? ["skeleton-text", "skeleton-text-medium", "skeleton-text-short",
                     "skeleton-heading", "skeleton-text", "skeleton-text-medium",
@@ -239,7 +234,7 @@
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
         url.searchParams.set("parent", location.origin);
-        url.searchParams.set("v", "20261021-tou-preserve-r2");
+        url.searchParams.set("v", "20261021-tou-merged-scroll-r3");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         activeUrl = url;
         // 族譜「關於」的外框尺寸固定；只有其他政策視窗維持依內容調整高度。
@@ -273,7 +268,7 @@
     document.addEventListener("click", event => {
         const target = event.target.closest && event.target.closest("a[data-site-info-section]");
         if (!target || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-        const section = target.dataset.siteInfoSection;
+        const section = target.dataset.siteInfoSection === "disclaimer" ? "terms" : target.dataset.siteInfoSection;
         if (!sections.has(section)) return;
         event.preventDefault();
         open(section, target);
