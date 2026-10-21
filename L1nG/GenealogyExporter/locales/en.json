@@ -6,6 +6,7 @@
     "canonical": false
   },
   "messages": {
+    "使用條款": "T.O.U.",
     "找不到包含這位模擬市民的族譜，請先將其加入家族。": "No family tree contains this Sim. Add them to a family first.",
     "這位模擬市民目前沒有可顯示的族譜卡片。": "This Sim has no visible card in the family tree.",
     "目前使用量": "Current Usage",
