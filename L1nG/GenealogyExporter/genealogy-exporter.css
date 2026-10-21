@@ -1199,13 +1199,18 @@ html[data-language="en"] [data-lang="en"] { display:revert !important; }
 }
 /* ========【族譜提取器】 下載卡片使用條款提醒 ======== */
 .workflow-tou-note {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
     margin:0;
     color:var(--sub);
     font-size:11px;
     line-height:1.65;
+    text-align:center;
 }
 .workflow-tou-note a {
-    display:inline-block;
+    display:block;
     color:var(--accent-dark);
     text-decoration:underline;
     text-underline-offset:2px;
