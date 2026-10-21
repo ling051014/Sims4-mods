@@ -9833,36 +9833,31 @@ $('simAddLifePhotoButton').onclick = () => {
   lifePhotoWorkspace.openEditor();
 };
 
-lifePhotoGrid.addEventListener('dragover', event => {
+const lifePhotoDropZone=lifePhotoGrid.closest('.life-photo-layout');
+for(const type of ['dragenter','dragover'])lifePhotoDropZone.addEventListener(type,event=>{
+  if(!isFileDrag(event))return;
   event.preventDefault();
   event.stopPropagation();
-  lifePhotoGrid.classList.add('dragover');
+  if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
+  lifePhotoDropZone.classList.add('dragover');
 });
-lifePhotoGrid.addEventListener('dragleave', event => {
-  event.preventDefault();
-  lifePhotoGrid.classList.remove('dragover');
+lifePhotoDropZone.addEventListener('dragleave',event=>{
+  if(!lifePhotoDropZone.contains(event.relatedTarget))lifePhotoDropZone.classList.remove('dragover');
 });
-lifePhotoGrid.addEventListener('drop', async event => {
+lifePhotoDropZone.addEventListener('drop',async event=>{
+  if(!isFileDrag(event))return;
   event.preventDefault();
   event.stopPropagation();
-  lifePhotoGrid.classList.remove('dragover');
-
-  const files =
-    Array.from(event.dataTransfer?.files || [])
-      .filter(file => file.type.startsWith('image/'));
-
-  for (const file of files) {
-    try {
-      await lifePhotoWorkspace.prepareFile(
-        file,
-        { openEditor:true }
-      );
-    } catch (error) {
-      uiAlert(
-        '圖片處理失敗：' + error.message,
-        { title:'圖片處理失敗', kind:'danger' }
-      );
-    }
+  lifePhotoDropZone.classList.remove('dragover');
+  const files=Array.from(event.dataTransfer?.files||[]);
+  if(files.length!==1){
+    uiAlert(uiText('請一次只拖曳一張圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
+    return;
+  }
+  try{
+    await lifePhotoWorkspace.prepareFile(files[0],{openEditor:true});
+  }catch(error){
+    uiAlert('圖片處理失敗：'+error.message,{title:'圖片處理失敗',kind:'danger'});
   }
 });
 
@@ -15388,25 +15383,43 @@ function renderPetDraftList() {
   personEditor.renderInfoPreviewIfActive();
 }
 
-$('petAvatarFileInput').onchange = async event => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  try {
+async function importPetAvatarFile(file){
+  if(!file)return;
+  try{
     await petEditorController.setAvatarFile(file);
-    await openAvatarCropEditor('pet');
-  } catch (error) {
-    uiAlert(
-      '圖片處理失敗：' + error.message,
-      {
-        title:'圖片處理失敗',
-        kind:'danger'
-      }
-    );
-  } finally {
-    event.target.value = '';
+    if(petEditorDialog.classList.contains('show'))await openAvatarCropEditor('pet');
+  }catch(error){
+    uiAlert('圖片處理失敗：'+error.message,{title:'圖片處理失敗',kind:'danger'});
   }
+}
+$('petAvatarFileInput').onchange=event=>{
+  const file=event.target.files?.[0];
+  event.target.value='';
+  void importPetAvatarFile(file);
 };
+const petAvatarDropZone=$('petAvatarPreview');
+for(const type of ['dragenter','dragover'])petAvatarDropZone.addEventListener(type,event=>{
+  if(!isFileDrag(event))return;
+  event.preventDefault();
+  event.stopPropagation();
+  if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
+  petAvatarDropZone.classList.add('dragover');
+});
+petAvatarDropZone.addEventListener('dragleave',event=>{
+  if(!petAvatarDropZone.contains(event.relatedTarget))petAvatarDropZone.classList.remove('dragover');
+});
+petAvatarDropZone.addEventListener('drop',event=>{
+  if(!isFileDrag(event))return;
+  event.preventDefault();
+  event.stopPropagation();
+  petAvatarDropZone.classList.remove('dragover');
+  const files=Array.from(event.dataTransfer?.files||[]);
+  if(files.length!==1){
+    uiAlert(uiText('請一次只拖曳一張圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
+    return;
+  }
+  void importPetAvatarFile(files[0]);
+});
 
 $('petAvatarAdjustBtn').onclick = () => {
   openAvatarCropEditor('pet');

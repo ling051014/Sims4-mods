@@ -2634,7 +2634,72 @@ function buildPersonEditorDraft({
     viewer.hidden=false;
   }
 
+
+  function resolveOotdUploadTarget(position){
+    const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
+    const selected=getOotdSlots(category)[position];
+    const occupied=new Set(editingOutfits.filter(item=>Number(item.category)===category).map(item=>Number(item.index)));
+    const original=selected?Number(selected.index):(!occupied.has(position)?position:Array.from({length:5},(_,i)=>i).find(i=>!occupied.has(i)));
+    if(!Number.isInteger(original))return null;
+    return {category,index:original,displayOrder:position,session:personEditorSessionVersion};
+  }
+  async function importOotdImageFile(file,target){
+    if(!file||!target)return;
+    const mime=String(file.type||'').trim().toLowerCase();
+    const ext=String(file.name||'').split('.').pop().toLowerCase();
+    if(!(['image/jpeg','image/png','image/webp'].includes(mime)||(!mime&&['jpg','jpeg','png','webp'].includes(ext)))||file.size>20*1024*1024){
+      uiAlert(uiText('請選擇 20 MB 以下的 JPG / PNG / WEBP 圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
+      return;
+    }
+    try{
+      // 選擇檔案與拖放共用原始穿搭圖片的 SHA-256 Blob 儲存流程。
+      const image=await avatarImageAssetSaver(file,{kind:'ootd'});
+      if(target.session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
+      const previous=editingOutfits.findIndex(item=>Number(item.category)===target.category&&Number(item.index)===target.index);
+      const item={...(previous>=0?editingOutfits[previous]:{}),category:target.category,index:target.index,displayOrder:target.displayOrder,image,source:'custom'};
+      if(previous>=0)editingOutfits.splice(previous,1,item);
+      else editingOutfits.push(item);
+      renderOotdWorkspace();
+    }catch(error){
+      uiAlert(uiText('圖片處理失敗')+'：'+error.message,{title:uiText('圖片處理失敗'),kind:'danger'});
+    }
+  }
+  function setupOotdImageDrop(){
+    const grid=$('simOotdSlotGrid');
+    if(!grid)return;
+    const isFile=event=>Array.from(event.dataTransfer?.types||[]).includes('Files');
+    const clear=()=>grid.querySelectorAll('.ootd-image-button.dragover').forEach(button=>button.classList.remove('dragover'));
+    for(const type of ['dragenter','dragover'])grid.addEventListener(type,event=>{
+      if(!isFile(event))return;
+      const button=event.target.closest('.ootd-image-button');
+      if(!button||!grid.contains(button))return;
+      event.preventDefault();
+      event.stopPropagation();
+      if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
+      clear();
+      button.classList.add('dragover');
+    });
+    grid.addEventListener('dragleave',event=>{
+      if(!grid.contains(event.relatedTarget))clear();
+    });
+    grid.addEventListener('drop',event=>{
+      if(!isFile(event))return;
+      event.preventDefault();
+      event.stopPropagation();
+      const button=event.target.closest('.ootd-image-button');
+      const position=Number(button?.dataset.ootdIndex);
+      const files=Array.from(event.dataTransfer?.files||[]);
+      clear();
+      if(!button||!grid.contains(button)||!Number.isInteger(position)||position<0||position>=5)return;
+      if(files.length!==1){
+        uiAlert(uiText('請一次只拖曳一張圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
+        return;
+      }
+      void importOotdImageFile(files[0],resolveOotdUploadTarget(position));
+    });
+  }
   function setupOotdInteractions(){
+    setupOotdImageDrop();
     setupOotdSorting();
     $('simOotdPrevCategory')?.addEventListener('click',()=>selectOotdCategory(ootdCategoryPosition-1));
     $('simOotdNextCategory')?.addEventListener('click',()=>selectOotdCategory(ootdCategoryPosition+1));
@@ -2681,39 +2746,16 @@ function buildPersonEditorDraft({
         return;
       }
       if(action==='upload'){
-        const selected=getOotdSlots(category)[index];
-        const occupiedIndices=new Set(editingOutfits.filter(item=>
-          Number(item.category)===category
-        ).map(item=>Number(item.index)));
-        const originalIndex=selected?Number(selected.index):
-          (!occupiedIndices.has(index)?index:Array.from({length:5},(_,i)=>i).find(i=>!occupiedIndices.has(i)));
-        if(!Number.isInteger(originalIndex))return;
-        ootdUploadTarget={category,index:originalIndex,displayOrder:index,session:personEditorSessionVersion};
-        $('simOotdImageInput')?.click();
+        ootdUploadTarget=resolveOotdUploadTarget(index);
+        if(ootdUploadTarget)$('simOotdImageInput')?.click();
       }
     });
-    $('simOotdImageInput')?.addEventListener('change',async event=>{
+    $('simOotdImageInput')?.addEventListener('change',event=>{
       const file=event.target.files?.[0];
       const target=ootdUploadTarget;
       event.target.value='';
       ootdUploadTarget=null;
-      if(!file||!target)return;
-      if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>20*1024*1024){
-        uiAlert(uiText('請選擇 20 MB 以下的 JPG / PNG / WEBP 圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
-        return;
-      }
-      try{
-        // 原生 WHOLEBODY 圖片不在這裡壓縮或重採樣；沿用 SHA-256 Blob 資產層。
-        const image=await avatarImageAssetSaver(file,{kind:'ootd'});
-        if(target.session!==personEditorSessionVersion || !mask.classList.contains('show'))return;
-        const prev=editingOutfits.findIndex(item=>Number(item.category)===target.category && Number(item.index)===target.index);
-        const item={...(prev>=0?editingOutfits[prev]:{}),category:target.category,index:target.index,displayOrder:target.displayOrder,image,source:'custom'};
-        if(prev>=0)editingOutfits.splice(prev,1,item);
-        else editingOutfits.push(item);
-        renderOotdWorkspace();
-      }catch(error){
-        uiAlert(uiText('圖片處理失敗')+'：'+error.message,{title:uiText('圖片處理失敗'),kind:'danger'});
-      }
+      void importOotdImageFile(file,target);
     });
   }
 
@@ -4306,47 +4348,53 @@ function commitPersonEditorDraft() {
         personEditorRelationshipOptionProvider
       );
 
-    $('simAvatarFileInput').onchange=async event=>{
-      const file=event.target.files[0];
+    async function importSimAvatarFile(file){
       if(!file)return;
-
       try{
-        const result=
-          await avatarImageCompressor(
-            file,
-            'sim'
-          );
-
-        simEditorState.customAvatar=
-          await avatarImageAssetSaver(
-            result.blob,
-            {
-              width:result.width,
-              height:result.height
-            }
-          );
-
-        simEditorState.customAvatarFrame={
-          ...DEFAULT_AVATAR_FRAME
-        };
-
-        simEditorState.avatarSource=
-          'custom';
-
+        const session=personEditorSessionVersion;
+        const result=await avatarImageCompressor(file,'sim');
+        if(session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
+        simEditorState.customAvatar=await avatarImageAssetSaver(result.blob,{width:result.width,height:result.height});
+        if(session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
+        simEditorState.customAvatarFrame={...DEFAULT_AVATAR_FRAME};
+        simEditorState.avatarSource='custom';
         syncPersonEditorActiveAvatar();
         renderPersonEditorAvatarPreview();
         renderPersonEditorInfoPreviewIfActive();
-
         await avatarCropOpener('sim');
       }catch(error){
-        uiAlert('圖片處理失敗：'+error.message,{
-          title:'圖片處理失敗',
-          kind:'danger'
-        });
+        uiAlert('圖片處理失敗：'+error.message,{title:'圖片處理失敗',kind:'danger'});
       }
-
+    }
+    $('simAvatarFileInput').onchange=event=>{
+      const file=event.target.files?.[0];
       event.target.value='';
+      void importSimAvatarFile(file);
     };
+    const simAvatarDropZone=$('simAvatarPreview');
+    const isSimAvatarFile=event=>Array.from(event.dataTransfer?.types||[]).includes('Files');
+    for(const type of ['dragenter','dragover'])simAvatarDropZone.addEventListener(type,event=>{
+      if(!isSimAvatarFile(event))return;
+      event.preventDefault();
+      event.stopPropagation();
+      if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
+      simAvatarDropZone.classList.add('dragover');
+    });
+    simAvatarDropZone.addEventListener('dragleave',event=>{
+      if(!simAvatarDropZone.contains(event.relatedTarget))simAvatarDropZone.classList.remove('dragover');
+    });
+    simAvatarDropZone.addEventListener('drop',event=>{
+      if(!isSimAvatarFile(event))return;
+      event.preventDefault();
+      event.stopPropagation();
+      simAvatarDropZone.classList.remove('dragover');
+      const files=Array.from(event.dataTransfer?.files||[]);
+      if(files.length!==1){
+        uiAlert(uiText('請一次只拖曳一張圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
+        return;
+      }
+      void importSimAvatarFile(files[0]);
+    });
 
     $('avatarAdjustBtn').onclick=()=>{
       void avatarCropOpener('sim');
