@@ -100,7 +100,7 @@
             '<div class="l1ng-home-hero"><div class="l1ng-home-hero-inner">' +
                 block("l1ng-sk-line hero-kicker") + block("hero-title") +
                 block("l1ng-sk-line hero-subtitle") + block("l1ng-sk-line hero-description") +
-                '<div class="sk-home-creator-links">' + repeat(2, () =>
+                '<div class="sk-home-creator-links">' + repeat(3, () =>
                     '<div class="sk-home-creator-link">' + block("sk-home-creator-icon") +
                     block("sk-home-creator-label") + '</div>') + '</div>' +
             '</div>' + block("sk-scroll-hint") + '</div>',
