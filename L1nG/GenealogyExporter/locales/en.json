@@ -8,7 +8,7 @@
   "messages": {
     "會保存族譜資料、服裝穿搭及引用的圖片，可用於日後還原與繼續編輯": " includes family tree data, outfits, and referenced images, so you can restore and continue editing later",
     "可將遊戲族譜 ZIP 或 JSON 備份直接拖曳至族譜畫布匯入": "Drag a game family tree ZIP or JSON backup onto the family tree canvas to import it",
-    "可將圖片拖曳至人生照片區域，或在照片編輯視窗按": "Drag an image into Life Photos, or press",
+    "可將圖片拖曳至人生照片區域，或在照片編輯視窗按": "Drag an image into Life Photos, or press ",
     "貼上圖片": " to paste an image in the photo editor",
     "可點選「新增圖片」及「選擇圖片」，從裝置匯入照片": "Choose “Add Image” or “Choose Image” to import a photo from your device",
     "每個服裝分類最多": "Each outfit category holds up to",
