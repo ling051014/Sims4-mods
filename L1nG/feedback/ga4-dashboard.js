@@ -107,7 +107,7 @@
   const labelCountry = name => window.L1nGGa4Countries.label(name);
   const labelReferral = value => {
     const raw = String(value || '').trim();
-    if (!raw || raw === '(not set)') return '未設定';
+    if (!raw || raw === '(not set)') return '無法辨識來源';
     if (raw === '(direct) / (none)') return '直接造訪';
     const match = /^(.+) \/ (referral|organic|cpc|paid|email|social|none)$/i.exec(raw);
     if (!match) return raw;
