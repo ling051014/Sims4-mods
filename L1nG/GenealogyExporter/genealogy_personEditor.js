@@ -2238,6 +2238,7 @@ function buildPersonEditorDraft({
         ? JSON.parse(JSON.stringify(sim.outfits))
         : []
     );
+    OOTD_CATEGORIES.forEach(item=>saveOotdDisplayOrder(getOotdSlots(item.id)));
 
     personEditorMediaDraftReady=true;
   }
@@ -2274,35 +2275,26 @@ function buildPersonEditorDraft({
 
 
   // ========【穿搭排序】 原始 Outfit Index 與使用者顯示位置獨立保存 ========
+
   function getOotdSlots(categoryId){
-    const slots=Array(5).fill(null);
     const entries=editingOutfits.filter(item=>
       Number(item.category)===categoryId &&
       Number.isInteger(Number(item.index)) &&
       Number(item.index)>=0 && Number(item.index)<5 && !!item.image
     );
-    const pending=[];
-    for(const item of entries){
-      const position=Number(item.displayOrder);
-      if(item.displayOrder!=null && item.displayOrder!=='' &&
-        Number.isInteger(position) && position>=0 && position<5 && !slots[position]){
-        slots[position]=item;
-      }else{
-        pending.push(item);
-      }
-    }
-    for(const item of pending){
-      const originalIndex=Number(item.index);
-      const position=!slots[originalIndex]?originalIndex:slots.findIndex(entry=>!entry);
-      if(position>=0)slots[position]=item;
-    }
-    return slots;
+    const positionOf=item=>{
+      const order=Number(item.displayOrder);
+      return item.displayOrder!=null && item.displayOrder!=='' &&
+        Number.isInteger(order) && order>=0 && order<5
+        ? order : Number(item.index);
+    };
+    entries.sort((a,b)=>positionOf(a)-positionOf(b)||Number(a.index)-Number(b.index));
+    // Always render outfits contiguously; the original Outfit Index is retained.
+    return entries.slice(0,5).concat(Array(Math.max(0,5-entries.length)).fill(null));
   }
 
   function saveOotdDisplayOrder(slots){
-    slots.forEach((item,position)=>{
-      if(item)item.displayOrder=position;
-    });
+    slots.filter(Boolean).forEach((item,position)=>{item.displayOrder=position;});
   }
 
   function cancelOotdSorting(){
@@ -2351,6 +2343,7 @@ function buildPersonEditorDraft({
     const drag=ootdDragState;
     const grid=$('simOotdSlotGrid');
     if(!drag||!grid||position<0||position>4)return;
+    position=Math.min(position,drag.slots.filter(Boolean).length-1);
     const current=drag.slots.indexOf(drag.item);
     if(current===position||current<0)return;
     // Never detach or reinsert the touched DOM node: Safari cancels the gesture.
@@ -2635,35 +2628,76 @@ function buildPersonEditorDraft({
   }
 
 
+
   function resolveOotdUploadTarget(position){
     const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
-    const selected=getOotdSlots(category)[position];
-    const occupied=new Set(editingOutfits.filter(item=>Number(item.category)===category).map(item=>Number(item.index)));
-    const original=selected?Number(selected.index):(!occupied.has(position)?position:Array.from({length:5},(_,i)=>i).find(i=>!occupied.has(i)));
-    if(!Number.isInteger(original))return null;
-    return {category,index:original,displayOrder:position,session:personEditorSessionVersion};
+    const selected=getOotdSlots(category)[position]||null;
+    return {category,index:selected?Number(selected.index):null,session:personEditorSessionVersion};
   }
-  async function importOotdImageFile(file,target){
-    if(!file||!target)return;
-    const mime=String(file.type||'').trim().toLowerCase();
-    const ext=String(file.name||'').split('.').pop().toLowerCase();
-    if(!(['image/jpeg','image/png','image/webp'].includes(mime)||(!mime&&['jpg','jpeg','png','webp'].includes(ext)))||file.size>20*1024*1024){
-      uiAlert(uiText('請選擇 20 MB 以下的 JPG / PNG / WEBP 圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
+
+  let ootdUploadBusy=false;
+  async function importOotdImageFiles(files,target){
+    const incoming=Array.from(files||[]);
+    if(!incoming.length||!target)return;
+    if(ootdUploadBusy){
+      uiAlert(uiText('圖片正在處理中，請稍後再上傳。'),{title:uiText('圖片處理失敗')});
       return;
     }
+    const category=target.category;
+    const session=target.session;
+    const replacing=incoming.length===1&&Number.isInteger(target.index);
+    const available=5-getOotdSlots(category).filter(Boolean).length;
+    if(!replacing&&available===0){
+      uiAlert(uiText('這個分類最多只能儲存 5 套穿搭。'),{title:uiText('服裝穿搭')});
+      return;
+    }
+    const selected=incoming.slice(0,replacing?1:available);
+    const overflow=incoming.length-selected.length;
+    const valid=selected.every(file=>{
+      const mime=String(file.type||'').trim().toLowerCase();
+      const ext=String(file.name||'').split('.').pop().toLowerCase();
+      return (['image/jpeg','image/png','image/webp'].includes(mime)||
+        (!mime&&['jpg','jpeg','png','webp'].includes(ext)))&&file.size<=20*1024*1024;
+    });
+    if(!valid){
+      uiAlert(uiText('請選擇 20 MB 以下的 JPG / PNG / WEBP 圖片。'),
+        {title:uiText('圖片處理失敗'),kind:'danger'});
+      return;
+    }
+    ootdUploadBusy=true;
     try{
-      // 選擇檔案與拖放共用原始穿搭圖片的 SHA-256 Blob 儲存流程。
-      const image=await avatarImageAssetSaver(file,{kind:'ootd'});
-      if(target.session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
-      const previous=editingOutfits.findIndex(item=>Number(item.category)===target.category&&Number(item.index)===target.index);
-      const item={...(previous>=0?editingOutfits[previous]:{}),category:target.category,index:target.index,displayOrder:target.displayOrder,image,source:'custom'};
-      if(previous>=0)editingOutfits.splice(previous,1,item);
-      else editingOutfits.push(item);
-      renderOotdWorkspace();
+      for(const file of selected){
+        if(session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
+        const image=await avatarImageAssetSaver(file,{kind:'ootd'});
+        if(session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
+        if(replacing){
+          const at=editingOutfits.findIndex(item=>
+            Number(item.category)===category&&Number(item.index)===target.index);
+          if(at<0)return;
+          editingOutfits[at]={...editingOutfits[at],image,source:'custom'};
+        }else{
+          const used=new Set(editingOutfits.filter(item=>
+            Number(item.category)===category).map(item=>Number(item.index)));
+          const original=Array.from({length:5},(_,index)=>index).find(index=>!used.has(index));
+          if(original===undefined)break;
+          editingOutfits.push({category,index:original,image,source:'custom',
+            displayOrder:getOotdSlots(category).filter(Boolean).length});
+        }
+        saveOotdDisplayOrder(getOotdSlots(category));
+        renderOotdWorkspace();
+      }
+      if(overflow>0)uiAlert(
+        uiText('已略過 {n} 張圖片，每個分類最多 5 套。').replace('{n}',String(overflow)),
+        {title:uiText('服裝穿搭')}
+      );
     }catch(error){
-      uiAlert(uiText('圖片處理失敗')+'：'+error.message,{title:uiText('圖片處理失敗'),kind:'danger'});
+      uiAlert(uiText('圖片處理失敗')+'：'+error.message,
+        {title:uiText('圖片處理失敗'),kind:'danger'});
+    }finally{
+      ootdUploadBusy=false;
     }
   }
+
   function setupOotdImageDrop(){
     const grid=$('simOotdSlotGrid');
     if(!grid)return;
@@ -2671,13 +2705,12 @@ function buildPersonEditorDraft({
     const clear=()=>grid.querySelectorAll('.ootd-image-button.dragover').forEach(button=>button.classList.remove('dragover'));
     for(const type of ['dragenter','dragover'])grid.addEventListener(type,event=>{
       if(!isFile(event))return;
-      const button=event.target.closest('.ootd-image-button');
-      if(!button||!grid.contains(button))return;
       event.preventDefault();
       event.stopPropagation();
       if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
       clear();
-      button.classList.add('dragover');
+      const button=event.target.closest('.ootd-image-button');
+      if(button&&grid.contains(button))button.classList.add('dragover');
     });
     grid.addEventListener('dragleave',event=>{
       if(!grid.contains(event.relatedTarget))clear();
@@ -2687,15 +2720,10 @@ function buildPersonEditorDraft({
       event.preventDefault();
       event.stopPropagation();
       const button=event.target.closest('.ootd-image-button');
-      const position=Number(button?.dataset.ootdIndex);
+      const position=button&&grid.contains(button)?Number(button.dataset.ootdIndex):5;
       const files=Array.from(event.dataTransfer?.files||[]);
       clear();
-      if(!button||!grid.contains(button)||!Number.isInteger(position)||position<0||position>=5)return;
-      if(files.length!==1){
-        uiAlert(uiText('請一次只拖曳一張圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
-        return;
-      }
-      void importOotdImageFile(files[0],resolveOotdUploadTarget(position));
+      void importOotdImageFiles(files,resolveOotdUploadTarget(position));
     });
   }
   function setupOotdInteractions(){
@@ -2742,20 +2770,25 @@ function buildPersonEditorDraft({
         const selected=getOotdSlots(category)[index];
         const pos=editingOutfits.indexOf(selected);
         if(pos>=0)editingOutfits.splice(pos,1);
+        saveOotdDisplayOrder(getOotdSlots(category));
         renderOotdWorkspace();
         return;
       }
       if(action==='upload'){
         ootdUploadTarget=resolveOotdUploadTarget(index);
-        if(ootdUploadTarget)$('simOotdImageInput')?.click();
+        const input=$('simOotdImageInput');
+        if(input&&ootdUploadTarget){
+          input.multiple=ootdUploadTarget.index===null;
+          input.click();
+        }
       }
     });
     $('simOotdImageInput')?.addEventListener('change',event=>{
-      const file=event.target.files?.[0];
+      const files=Array.from(event.target.files||[]);
       const target=ootdUploadTarget;
       event.target.value='';
       ootdUploadTarget=null;
-      void importOotdImageFile(file,target);
+      void importOotdImageFiles(files,target);
     });
   }
 
