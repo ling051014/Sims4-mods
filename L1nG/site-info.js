@@ -12,7 +12,7 @@
     if (script && isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
         const cookieStyle = document.createElement("link");
         cookieStyle.rel = "stylesheet";
-        cookieStyle.href = new URL("cookie-consent.css?v=20261015-branch-preview-r1", script.src).href;
+        cookieStyle.href = new URL("cookie-consent.css?v=20261021-policy-scroll-r1", script.src).href;
         document.head.appendChild(cookieStyle);
         const cookieScript = document.createElement("script");
         cookieScript.src = new URL("cookie-consent.js?v=20261015-branch-preview-r1", script.src).href;
@@ -21,7 +21,8 @@
     }
     const allowed = new Set(["zh-Hant", "zh-Hans", "en"]);
     const params = new URLSearchParams(location.search);
-    const isEmbedded = params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(params.get("section"));
+    const selectedSection = params.get("section") === "disclaimer" ? "terms" : params.get("section");
+    const isEmbedded = params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(selectedSection);
     const normalize = value => allowed.has(value) ? value : "zh-Hant";
     const saved = () => {
         try { return localStorage.getItem("l1ng-site-info-language"); }
@@ -56,7 +57,7 @@
     applyLanguage(initial);
     if (isEmbedded) {
         // 嵌入視窗只呈現指定條款，避免樣式表未載入時顯示整份政策。
-        const chosen = params.get("section");
+        const chosen = selectedSection;
         for (const section of document.querySelectorAll(".policy-section")) {
             const selected = section.id === chosen;
             section.hidden = !selected;
