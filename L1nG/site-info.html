@@ -10,10 +10,12 @@
         // ========【嵌入初始狀態】在載入樣式前決定內容與語言 ========
         (() => {
             const params = new URLSearchParams(location.search);
-            const section = params.get("section");
+            const section = params.get("section") === "disclaimer" ? "terms" : params.get("section");
             if (params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(section)) {
                 document.documentElement.dataset.siteInfoSection = section;
             }
+            // 舊版 #disclaimer 連結導向同一段合併政策，避免歷史分享失效。
+            if (location.hash === "#disclaimer") history.replaceState(null, "", location.pathname + location.search + "#terms");
             const lang = params.get("lang");
             if (["zh-Hant", "zh-Hans", "en"].includes(lang)) {
                 document.documentElement.dataset.language = lang;
