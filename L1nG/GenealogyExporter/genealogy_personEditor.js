@@ -2356,6 +2356,7 @@ function buildPersonEditorDraft({
     // Never detach or reinsert the touched DOM node: Safari cancels the gesture.
     const nodes=drag.nodes;
     if(nodes.length!==5)return;
+    // Fixed geometry controls the hit zone; the animation never participates in hit-testing.
     const oldRects=new Map(nodes.map(node=>[node,node.getBoundingClientRect()]));
     const [moving]=nodes.splice(current,1);
     nodes.splice(position,0,moving);
@@ -2372,16 +2373,17 @@ function buildPersonEditorDraft({
     });
     if(global.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
     nodes.forEach(node=>{
+      if(node===drag.source || !node.animate)return;
       const from=oldRects.get(node);
       const to=node.getBoundingClientRect();
-      if(!from||!node.animate)return;
+      if(!from)return;
       const dx=from.left-to.left,dy=from.top-to.top;
-      if(Math.abs(dx)+Math.abs(dy)<1)return;
       node.getAnimations?.().forEach(animation=>animation.cancel());
+      if(Math.abs(dx)+Math.abs(dy)<1)return;
       node.animate([
         {transform:'translate('+dx+'px,'+dy+'px)'},
-        {transform:'translate(0px,0px)'}
-      ],{duration:170,easing:'cubic-bezier(.2,.8,.2,1)'});
+        {transform:'translate3d(0px,0px,0px)'}
+      ],{duration:180,easing:'cubic-bezier(.2,.8,.2,1)'});
     });
   }
 
@@ -2398,22 +2400,35 @@ function buildPersonEditorDraft({
     const button=source?.querySelector('.ootd-image-button');
     if(!button)return;
     const bounds=button.getBoundingClientRect();
-    const ghost=button.cloneNode(true);
-    ghost.removeAttribute('data-ootd-action');
-    ghost.classList.add('ootd-drag-ghost');
+    const image=button.querySelector('img');
+    if(!image)return;
+    // Render the raised card in its own layer, not as a cloned editor button.
+    // The previous clone retained .ootd-image-button {position:relative}, hiding the lift.
+    const ghost=document.createElement('div');
+    ghost.className='ootd-drag-ghost';
+    ghost.setAttribute('aria-hidden','true');
+    ghost.append(image.cloneNode(true));
     ghost.style.width=bounds.width+'px';
     ghost.style.height=bounds.height+'px';
     ghost.style.left=bounds.left+'px';
     ghost.style.top=bounds.top+'px';
+    ghost.style.transform='translate3d(0px,0px,0px) scale(1.08)';
     document.body.append(ghost);
+    const nodes=Array.from(grid.children);
+    const zones=nodes.map(node=>{
+      const rect=node.querySelector('.ootd-image-button').getBoundingClientRect();
+      return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+    });
     source.classList.add('ootd-drag-source');
     document.body.classList.add('ootd-sorting');
     ootdDragState={
       pointerId:hold.pointerId,mode:hold.mode,
-      item, slots, original:slots.slice(),nodes:Array.from(grid.children),
+      item, slots, original:slots.slice(),nodes,source,zones,
       categoryPosition:ootdCategoryPosition,
       session:personEditorSessionVersion,
-      ghost, offsetX:hold.x-bounds.left,offsetY:hold.y-bounds.top
+      ghost, originX:hold.x,originY:hold.y,
+      offsetX:hold.x-bounds.left,offsetY:hold.y-bounds.top,
+      width:bounds.width,height:bounds.height
     };
     ootdSuppressClickUntil=Date.now()+500;
   }
@@ -2445,13 +2460,26 @@ function buildPersonEditorDraft({
       }
       const drag=ootdDragState;
       if(!drag||drag.mode!==mode||drag.pointerId!==id)return false;
-      drag.ghost.style.left=(x-drag.offsetX)+'px';
-      drag.ghost.style.top=(y-drag.offsetY)+'px';
-      const target=document.elementFromPoint(x,y)?.closest('.ootd-slot');
-      if(target?.parentElement===grid){
-        const position=Number(target.dataset.ootdPosition);
-        if(Number.isInteger(position))updateOotdDragPreview(position);
-      }
+      drag.ghost.style.transform=
+        'translate3d('+(x-drag.originX)+'px,'+(y-drag.originY)+'px,0px) scale(1.08)';
+      // Compare against original cell centers, not animated card DOM under the finger.
+      // Hysteresis prevents repeated forward/backward swaps at a cell boundary.
+      const cx=x-drag.offsetX+drag.width/2;
+      const cy=y-drag.offsetY+drag.height/2;
+      const current=drag.slots.indexOf(drag.item);
+      if(current<0)return true;
+      const currentCenter=drag.zones[current];
+      const currentDistance=Math.hypot(cx-currentCenter.x,cy-currentCenter.y);
+      let target=current;
+      let minDistance=currentDistance;
+      drag.zones.forEach((zone,index)=>{
+        const distance=Math.hypot(cx-zone.x,cy-zone.y);
+        if(distance+15<minDistance){
+          target=index;
+          minDistance=distance;
+        }
+      });
+      if(target!==current)updateOotdDragPreview(target);
       return true;
     }
 
