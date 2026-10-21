@@ -38,8 +38,8 @@
             element.style.display = selected ? (element.tagName === "DIV" ? "block" : "inline") : "none";
         }
         document.title = {
-            "zh-Hant": "使用條款、隱私與 Cookie 說明 · L1nG",
-            "zh-Hans": "使用条款、隐私与 Cookie 说明 · L1nG",
+            "zh-Hant": "使用、隱私與 Cookie 說明 · L1nG",
+            "zh-Hans": "使用、隐私与 Cookie 说明 · L1nG",
             "en": "Site Policies & Information · L1nG"
         }[current];
         for (const button of document.querySelectorAll("[data-site-language-button]")) {
