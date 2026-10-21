@@ -95,7 +95,9 @@
             '<div class="l1ng-home-hero"><div class="l1ng-home-hero-inner">' +
                 block("l1ng-sk-line hero-kicker") + block("hero-title") +
                 block("l1ng-sk-line hero-sub") + block("l1ng-sk-line hero-sub") +
-                block("l1ng-sk-pill hero-cta") +
+                '<div class="sk-home-creator-links">' + repeat(2, () =>
+                    '<div class="sk-home-creator-link">' + block("sk-home-creator-icon") +
+                    block("sk-home-creator-label") + '</div>') + '</div>' +
             '</div>' + block("sk-scroll-hint") + '</div>',
 
         "l1ng-changelog": () =>
