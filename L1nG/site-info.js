@@ -21,7 +21,7 @@
     }
     const allowed = new Set(["zh-Hant", "zh-Hans", "en"]);
     const params = new URLSearchParams(location.search);
-    const isEmbedded = params.get("embed") === "1" && ["privacy", "disclaimer", "terms", "genealogy"].includes(params.get("section"));
+    const isEmbedded = params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(params.get("section"));
     const normalize = value => allowed.has(value) ? value : "zh-Hant";
     const saved = () => {
         try { return localStorage.getItem("l1ng-site-info-language"); }
@@ -69,8 +69,7 @@
             element.style.display = "none";
         }
         if (chosen === "genealogy") {
-            // 族譜工具沒有網站頁腳：把同一份版權聲明及完整政策搬進「關於」視窗。
-            // 不複製免責內容，修改共用說明頁即可同步更新。
+            // 族譜工具沿用共用政策：一個「使用條款與免責聲明」折疊區塊與隱私權說明。
             const genealogy = document.getElementById("genealogy");
             const legal = document.querySelector(".l1ng-footer-legal");
             if (genealogy && legal) {
@@ -89,7 +88,7 @@
                     en: "Cookie settings"
                 }[initial];
                 legal.appendChild(cookieButton);
-                for (const id of ["disclaimer", "terms", "privacy"]) {
+                for (const id of ["terms", "privacy"]) {
                     const section = document.getElementById(id);
                     const heading = section?.querySelector("h2");
                     if (!section || !heading) continue;
