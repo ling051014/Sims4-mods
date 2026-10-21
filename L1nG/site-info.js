@@ -6,9 +6,10 @@
     // Cookie CSS/JS injection. Load the same shared assets for branch review.
     // Cookie consent itself blocks analytics and persistence on preview hosts.
     const script = document.currentScript;
-    const previewPath = "/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/";
-    const isBranchPreview = location.hostname === "raw.githack.com"
-        && location.pathname.startsWith(previewPath);
+    // 預覽支援分支網址與固定 Commit CDN 網址；只用於預覽，不開啟正式統計。
+    const previewPath = /^\/ling051014\/Sims4-mods\/(?:genealogy-structural-optimization-20260926|[0-9a-f]{40})\//i;
+    const isBranchPreview = ["raw.githack.com", "rawcdn.githack.com"].includes(location.hostname)
+        && previewPath.test(location.pathname);
     if (script && isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
         const cookieStyle = document.createElement("link");
         cookieStyle.rel = "stylesheet";
