@@ -1,3 +1,4 @@
+@import url("site-scrollbar.css?v=20261021-policy-scroll-r1");
 /* ========【站點說明頁】與全站頁腳使用同一套簡潔文字系統 ======== */
 :root { color-scheme: light; }
 * { box-sizing: border-box; }
@@ -157,19 +158,6 @@ html[data-site-info-section="genealogy"] body {
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--site-info-border, #e3e8ed) transparent;
-}
-html[data-site-info-section="genealogy"] body::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-html[data-site-info-section="genealogy"] body::-webkit-scrollbar-track {
-    background: transparent;
-}
-html[data-site-info-section="genealogy"] body::-webkit-scrollbar-thumb {
-    background: var(--site-info-border, #e3e8ed);
-    border-radius: 999px;
 }
 
 /* ========【族譜工具主題】沿用目前族譜主題，而非固定白底說明視窗 ======== */

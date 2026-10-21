@@ -34,7 +34,7 @@ fs.mkdirSync(out,{recursive:true});
 for (const name of ['site-skeleton.css','site-skeleton.js']) put(path.join(base,name),path.join(out,name));
 for (const name of [
   'site-footer.css','site-info-modal.css','site-info-modal.js',
-  'site-info.css','site-info.js','site-info.html'
+  'site-info.css','site-info.js','site-info.html','site-scrollbar.css'
 ]) file(name);
 // Repository SVG sources are stored exclusively in html icons/.
 for (const icon of ['ui-search.svg', 'ui-clear.svg', 'afdian.svg',
@@ -145,7 +145,7 @@ for(const p of htmls) {
     const assetPrefix='../'.repeat(relative.split('/').length-1);
     if (!/src=["'][^"']*cookie-consent\.js(?:[?"'])/.test(modified)) {
       modified=modified.replace(/<\/head\s*>/i,
-        '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261015-cookie-preferences-skeleton-r4">\n' +
+        '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261021-policy-scroll-r1">\n' +
         '    <script src="'+assetPrefix+'cookie-consent.js?v=20261015-cookie-preferences-skeleton-r4" defer></script>\n</head>');
     }
     analyticsPages++;

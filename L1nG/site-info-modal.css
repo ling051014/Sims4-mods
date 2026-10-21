@@ -1,3 +1,4 @@
+@import url("site-scrollbar.css?v=20261021-policy-scroll-r1");
 /* ========【公開網站共用說明視窗】只作用於此視窗，不覆寫站點原樣式 ======== */
 .l1ng-site-info-backdrop {
     position: fixed;
