@@ -2322,14 +2322,15 @@ function buildPersonEditorDraft({
 
   function finishOotdSorting(event,cancelled=false){
     if(!ootdDragState){
-      if(ootdHoldState && event.pointerId===ootdHoldState.pointerId){
+      if(ootdHoldState && event.pointerId===ootdHoldState.pointerId &&
+         (event.mode||'pointer')===ootdHoldState.mode){
         global.clearTimeout(ootdHoldState.timer);
         ootdHoldState=null;
       }
       return;
     }
     const drag=ootdDragState;
-    if(event.pointerId!==drag.pointerId)return;
+    if(event.pointerId!==drag.pointerId || (event.mode||'pointer')!==drag.mode)return;
     const grid=$('simOotdSlotGrid');
     const bounds=grid?.getBoundingClientRect();
     const inBounds=!cancelled && bounds && event.clientX>=bounds.left &&
@@ -2352,15 +2353,16 @@ function buildPersonEditorDraft({
     if(!drag||!grid||position<0||position>4)return;
     const current=drag.slots.indexOf(drag.item);
     if(current===position||current<0)return;
-    const nodes=Array.from(grid.children);
+    // Never detach or reinsert the touched DOM node: Safari cancels the gesture.
+    const nodes=drag.nodes;
     if(nodes.length!==5)return;
     const oldRects=new Map(nodes.map(node=>[node,node.getBoundingClientRect()]));
     const [moving]=nodes.splice(current,1);
     nodes.splice(position,0,moving);
     const [entry]=drag.slots.splice(current,1);
     drag.slots.splice(position,0,entry);
-    grid.append(...nodes);
     nodes.forEach((node,index)=>{
+      node.style.order=String(index);
       node.dataset.ootdPosition=String(index);
       node.querySelectorAll('[data-ootd-index]').forEach(control=>control.dataset.ootdIndex=String(index));
       const name=node.querySelector('.ootd-slot-name');
@@ -2407,8 +2409,8 @@ function buildPersonEditorDraft({
     source.classList.add('ootd-drag-source');
     document.body.classList.add('ootd-sorting');
     ootdDragState={
-      pointerId:hold.pointerId,
-      item, slots, original:slots.slice(),
+      pointerId:hold.pointerId,mode:hold.mode,
+      item, slots, original:slots.slice(),nodes:Array.from(grid.children),
       categoryPosition:ootdCategoryPosition,
       session:personEditorSessionVersion,
       ghost, offsetX:hold.x-bounds.left,offsetY:hold.y-bounds.top
@@ -2419,45 +2421,115 @@ function buildPersonEditorDraft({
   function setupOotdSorting(){
     const grid=$('simOotdSlotGrid');
     if(!grid)return;
-    grid.addEventListener('pointerdown',event=>{
-      if(event.button!==0 || ootdHoldState || ootdDragState)return;
-      const button=event.target.closest('.ootd-image-button.has-image');
+
+    function startHold(target,mode,id,x,y){
+      if(ootdHoldState||ootdDragState)return;
+      const button=target?.closest?.('.ootd-image-button.has-image');
       if(!button||!grid.contains(button))return;
       const position=Number(button.dataset.ootdIndex);
       if(!Number.isInteger(position)||position<0||position>4)return;
       const hold={
-        pointerId:event.pointerId,x:event.clientX,y:event.clientY,position,
-        timer:null
+        mode,pointerId:id,x,y,position,timer:null
       };
       hold.timer=global.setTimeout(()=>beginOotdSorting(hold),280);
       ootdHoldState=hold;
-    });
-    global.addEventListener('pointermove',event=>{
-      if(ootdHoldState && ootdHoldState.pointerId===event.pointerId){
-        const distance=Math.hypot(event.clientX-ootdHoldState.x,event.clientY-ootdHoldState.y);
-        if(distance>9){
-          global.clearTimeout(ootdHoldState.timer);
+    }
+
+    function moveHoldOrDrag(mode,id,x,y){
+      const hold=ootdHoldState;
+      if(hold && hold.mode===mode && hold.pointerId===id){
+        if(Math.hypot(x-hold.x,y-hold.y)>9){
+          global.clearTimeout(hold.timer);
           ootdHoldState=null;
         }
       }
       const drag=ootdDragState;
-      if(!drag || drag.pointerId!==event.pointerId)return;
-      event.preventDefault();
-      drag.ghost.style.left=(event.clientX-drag.offsetX)+'px';
-      drag.ghost.style.top=(event.clientY-drag.offsetY)+'px';
-      const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('.ootd-slot');
+      if(!drag||drag.mode!==mode||drag.pointerId!==id)return false;
+      drag.ghost.style.left=(x-drag.offsetX)+'px';
+      drag.ghost.style.top=(y-drag.offsetY)+'px';
+      const target=document.elementFromPoint(x,y)?.closest('.ootd-slot');
       if(target?.parentElement===grid){
         const position=Number(target.dataset.ootdPosition);
         if(Number.isInteger(position))updateOotdDragPreview(position);
       }
+      return true;
+    }
+
+    // Mouse and pen: capture on the stable grid, not the card being repositioned.
+    grid.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='touch'||event.button!==0)return;
+      startHold(event.target,'pointer',event.pointerId,event.clientX,event.clientY);
+      if(ootdHoldState?.pointerId===event.pointerId){
+        try{grid.setPointerCapture(event.pointerId);}catch(_error){}
+      }
+    });
+    global.addEventListener('pointermove',event=>{
+      if(event.pointerType==='touch')return;
+      if(moveHoldOrDrag('pointer',event.pointerId,event.clientX,event.clientY)){
+        event.preventDefault();
+      }
     },{passive:false});
-    global.addEventListener('pointerup',event=>finishOotdSorting(event));
-    global.addEventListener('pointercancel',event=>finishOotdSorting(event,true));
+    global.addEventListener('pointerup',event=>{
+      if(event.pointerType!=='touch')finishOotdSorting(event);
+    });
+    global.addEventListener('pointercancel',event=>{
+      if(event.pointerType!=='touch')finishOotdSorting(event,true);
+    });
+
+    // iOS Safari: follow the same finger via Touch Events, even if Pointer Events
+    // are cancelled by Safari's native scrolling/long-press gesture system.
+    function changedFinger(event,id){
+      for(const touch of event.changedTouches){
+        if(touch.identifier===id)return touch;
+      }
+      return null;
+    }
+    grid.addEventListener('touchstart',event=>{
+      if(event.touches.length!==1){
+        cancelOotdSorting();
+        return;
+      }
+      const touch=event.changedTouches[0];
+      if(touch)startHold(event.target,'touch',touch.identifier,touch.clientX,touch.clientY);
+    },{passive:true});
+    global.addEventListener('touchmove',event=>{
+      if(event.touches.length!==1){
+        if(ootdDragState?.mode==='touch')cancelOotdSorting();
+        return;
+      }
+      const active=ootdDragState?.mode==='touch'?ootdDragState:ootdHoldState?.mode==='touch'?ootdHoldState:null;
+      if(!active)return;
+      const touch=changedFinger(event,active.pointerId);
+      if(!touch)return;
+      if(moveHoldOrDrag('touch',touch.identifier,touch.clientX,touch.clientY)){
+        event.preventDefault();
+      }
+    },{passive:false,capture:true});
+    global.addEventListener('touchend',event=>{
+      const active=ootdDragState?.mode==='touch'?ootdDragState:ootdHoldState?.mode==='touch'?ootdHoldState:null;
+      if(!active)return;
+      const touch=changedFinger(event,active.pointerId);
+      if(touch)finishOotdSorting({mode:'touch',pointerId:touch.identifier,clientX:touch.clientX,clientY:touch.clientY});
+    },{passive:true,capture:true});
+    global.addEventListener('touchcancel',event=>{
+      const active=ootdDragState?.mode==='touch'?ootdDragState:ootdHoldState?.mode==='touch'?ootdHoldState:null;
+      if(!active)return;
+      const touch=changedFinger(event,active.pointerId);
+      if(touch)finishOotdSorting({mode:'touch',pointerId:touch.identifier,clientX:touch.clientX,clientY:touch.clientY},true);
+    },{passive:true,capture:true});
+
+    // An image's native drag or callout steals the gesture on Safari.
+    grid.addEventListener('dragstart',event=>{
+      if(event.target.closest('.ootd-image-button.has-image'))event.preventDefault();
+    });
+    grid.addEventListener('contextmenu',event=>{
+      if(event.target.closest('.ootd-image-button.has-image'))event.preventDefault();
+    });
     global.addEventListener('blur',()=>cancelOotdSorting());
     document.addEventListener('visibilitychange',()=>{
       if(document.hidden)cancelOotdSorting();
     });
-    // 拖曳後的 click 不應開啟圖片檢視器或上傳選單。
+    // Drag release must not reopen the preview or upload dialog.
     grid.addEventListener('click',event=>{
       if(Date.now()>=ootdSuppressClickUntil)return;
       event.preventDefault();
@@ -2480,7 +2552,7 @@ function buildPersonEditorDraft({
       const label=uiText('第 {n} 套').replace('{n}',String(index+1));
       return '<article class="ootd-slot" data-ootd-position="'+index+'">'+
         '<button class="ootd-image-button life-photo-add-btn'+(ref?' has-image':'')+'" type="button" data-ootd-action="'+(ref?'preview':'upload')+'" data-ootd-index="'+index+'" aria-label="'+esc(ref?label:label+' '+uiText('新增穿搭'))+'">'+
-        (ref?'<img data-asset-id="'+esc(String(ref))+'" src="'+esc(url)+'" alt="'+esc(label)+'">':'<span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>'+esc(uiText('新增穿搭'))+'</span>')+
+        (ref?'<img data-asset-id="'+esc(String(ref))+'" src="'+esc(url)+'" alt="'+esc(label)+'" draggable="false">':'<span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>'+esc(uiText('新增穿搭'))+'</span>')+
         '</button>'+
         '<div class="ootd-slot-name">'+esc(label)+'</div>'+
         '<div class="ootd-slot-actions">'+
