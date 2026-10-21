@@ -438,6 +438,22 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 項目間距 */ gap: 11px;
 }
 
+/* ========【RealDate 下載】 最新版本授權提醒 ======== */
+.download-tou-note {
+    margin:14px 0 0;
+    color:var(--text-soft);
+    font-size:12px;
+    line-height:1.75;
+}
+.download-tou-note a {
+    display:inline;
+    margin-left:6px;
+    color:var(--accent);
+    text-decoration:underline;
+    text-underline-offset:3px;
+}
+.download-tou-note a:hover { color:var(--text-strong); }
+
 /* ========【RealDate 下載】 更新日誌靠左，下載按鈕群組靠右 ======== */
 .download-buttons > .download-file-actions,
 .history-actions > .download-file-actions {
