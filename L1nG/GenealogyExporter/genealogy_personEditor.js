@@ -2358,6 +2358,10 @@ function buildPersonEditorDraft({
     if(nodes.length!==5)return;
     // Fixed geometry controls the hit zone; the animation never participates in hit-testing.
     const oldRects=new Map(nodes.map(node=>[node,node.getBoundingClientRect()]));
+    // Preserve the current on-screen positions, then measure the new unanimated layout.
+    nodes.forEach(node=>{
+      if(node!==drag.source)node.getAnimations?.().forEach(animation=>animation.cancel());
+    });
     const [moving]=nodes.splice(current,1);
     nodes.splice(position,0,moving);
     const [entry]=drag.slots.splice(current,1);
@@ -2378,7 +2382,6 @@ function buildPersonEditorDraft({
       const to=node.getBoundingClientRect();
       if(!from)return;
       const dx=from.left-to.left,dy=from.top-to.top;
-      node.getAnimations?.().forEach(animation=>animation.cancel());
       if(Math.abs(dx)+Math.abs(dy)<1)return;
       node.animate([
         {transform:'translate('+dx+'px,'+dy+'px)'},
