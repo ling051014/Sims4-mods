@@ -1,0 +1,34 @@
+/* ========【共用捲軸】A 款細線 - 政策頁、政策彈窗及 Cookie 偏好設定 ======== */
+/* 由 site-info.css、site-info-modal.css 與 cookie-consent.css 引用同一份規則。 */
+/* 各站既有的邊框色及族譜主題色照常生效，不改變捲動容器或滾動邏輯。 */
+html.l1ng-policy-document,
+html.l1ng-policy-document body,
+html.l1ng-policy-document body *,
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop),
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop) * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--site-info-border, var(--border-default, var(--line, #d7dfe8))) transparent;
+}
+html.l1ng-policy-document::-webkit-scrollbar,
+html.l1ng-policy-document body::-webkit-scrollbar,
+html.l1ng-policy-document body *::-webkit-scrollbar,
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop)::-webkit-scrollbar,
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop) *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+html.l1ng-policy-document::-webkit-scrollbar-track,
+html.l1ng-policy-document body::-webkit-scrollbar-track,
+html.l1ng-policy-document body *::-webkit-scrollbar-track,
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop)::-webkit-scrollbar-track,
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop) *::-webkit-scrollbar-track {
+    background: transparent;
+}
+html.l1ng-policy-document::-webkit-scrollbar-thumb,
+html.l1ng-policy-document body::-webkit-scrollbar-thumb,
+html.l1ng-policy-document body *::-webkit-scrollbar-thumb,
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop)::-webkit-scrollbar-thumb,
+:is(.l1ng-site-info-backdrop, .l1ng-site-info-native, .l1ng-cookie-backdrop) *::-webkit-scrollbar-thumb {
+    background: var(--site-info-border, var(--border-default, var(--line, #d7dfe8)));
+    border-radius: 999px;
+}

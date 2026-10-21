@@ -6,13 +6,14 @@
     // RawGitHack serves source HTML directly, bypassing the Pages build-time
     // Cookie CSS/JS injection. Load the same shared assets for branch review.
     // Cookie consent itself blocks analytics and persistence on preview hosts.
-    const previewPath = "/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/";
-    const isBranchPreview = location.hostname === "raw.githack.com"
-        && location.pathname.startsWith(previewPath);
+    // 預覽支援分支網址與固定 Commit CDN 網址；只用於預覽，不開啟正式統計。
+    const previewPath = /^\/ling051014\/Sims4-mods\/(?:mods-catalog-json-refactor-20261020|[0-9a-f]{40})\//i;
+    const isBranchPreview = ["raw.githack.com", "rawcdn.githack.com"].includes(location.hostname)
+        && previewPath.test(location.pathname);
     if (isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
         const cookieStyle = document.createElement("link");
         cookieStyle.rel = "stylesheet";
-        cookieStyle.href = new URL("cookie-consent.css?v=20261015-cookie-preferences-skeleton-r4", script.src).href;
+        cookieStyle.href = new URL("cookie-consent.css?v=20261021-policy-scroll-r1", script.src).href;
         document.head.appendChild(cookieStyle);
         const cookieScript = document.createElement("script");
         cookieScript.src = new URL("cookie-consent.js?v=20261015-cookie-preferences-skeleton-r4", script.src).href;
@@ -34,7 +35,7 @@
             let requested;
             try { requested = new URL(anchor.href); } catch (_) { return; }
             // Keep already-rewritten preview URLs unchanged.
-            if (requested.hostname === location.hostname && requested.pathname.startsWith(previewPath)) return;
+            if (requested.hostname === location.hostname && previewPath.test(requested.pathname)) return;
             const local = hosts[requested.hostname];
             if (!local) return;
             let relative = local;
@@ -71,9 +72,9 @@
             en: ["Privacy & Cookies", "How this site uses analytics and handles data."]
         },
         terms: {
-            "zh-Hant": ["使用與免責聲明", "閱讀模組、漢化與第三方服務的使用說明。"],
-            "zh-Hans": ["使用与免责声明", "阅读模组、翻译与第三方服务的使用说明。"],
-            en: ["Terms & Disclaimer", "Usage notes for mods, translations and third-party services."]
+            "zh-Hant": ["使用條款與免責聲明", "作品使用、分享、轉載與相關免責說明。"],
+            "zh-Hans": ["使用条款与免责声明", "作品使用、分享、转载及相关免责声明。"],
+            en: ["T.O.U.", "Terms of Use & Disclaimer."]
         },
         genealogy: {
             "zh-Hant": ["關於族譜工具", "查看族譜資料、備份與使用注意事項。"],
@@ -204,7 +205,7 @@
         const skeleton = modal.querySelector(".l1ng-site-info-skeleton");
         if (skeleton && skeleton.dataset.section !== section) {
             skeleton.dataset.section = section;
-            // 族譜「關於」是簡介、版權 / 聲明、兩項可展開條款；骨架順序與正文一致。
+            // 族譜「關於」是簡介、版權、兩項可展開政策及 Cookie 設定；骨架對應正文。
             const rows = section === "genealogy"
                 ? ["skeleton-text", "skeleton-text-medium", "skeleton-text-short",
                     "skeleton-heading", "skeleton-text", "skeleton-text-medium",
@@ -234,7 +235,7 @@
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
         url.searchParams.set("parent", location.origin);
-        url.searchParams.set("v", "20261013-genealogy-about-theme-r3");
+        url.searchParams.set("v", "20261021-cookie-button-clean-r4");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         activeUrl = url;
         // 族譜「關於」的外框尺寸固定；只有其他政策視窗維持依內容調整高度。
@@ -268,7 +269,7 @@
     document.addEventListener("click", event => {
         const target = event.target.closest && event.target.closest("a[data-site-info-section]");
         if (!target || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-        const section = target.dataset.siteInfoSection;
+        const section = target.dataset.siteInfoSection === "disclaimer" ? "terms" : target.dataset.siteInfoSection;
         if (!sections.has(section)) return;
         event.preventDefault();
         open(section, target);
@@ -291,6 +292,12 @@
     window.addEventListener("message", event => {
         if (!dialog || !dialog.isConnected || event.source !== dialog.querySelector("iframe").contentWindow) return;
         if (!activeUrl || event.origin !== activeUrl.origin) return;
+        if (event.data?.type === "l1ng-site-info-cookie-preferences") {
+            // 先關閉「關於族譜工具」，再使用原有 Cookie 偏好視窗。
+            close();
+            window.L1nGCookiePreferences?.open();
+            return;
+        }
         if (event.data && event.data.type === "l1ng-site-info-close") close();
         if (event.data && event.data.type === "l1ng-site-info-size"
             && !(nativeGenealogy && dialog.dataset.siteInfoSection === "genealogy")) {

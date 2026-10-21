@@ -6,13 +6,14 @@
     // Cookie CSS/JS injection. Load the same shared assets for branch review.
     // Cookie consent itself blocks analytics and persistence on preview hosts.
     const script = document.currentScript;
-    const previewPath = "/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/";
-    const isBranchPreview = location.hostname === "raw.githack.com"
-        && location.pathname.startsWith(previewPath);
+    // 預覽支援分支網址與固定 Commit CDN 網址；只用於預覽，不開啟正式統計。
+    const previewPath = /^\/ling051014\/Sims4-mods\/(?:mods-catalog-json-refactor-20261020|[0-9a-f]{40})\//i;
+    const isBranchPreview = ["raw.githack.com", "rawcdn.githack.com"].includes(location.hostname)
+        && previewPath.test(location.pathname);
     if (script && isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
         const cookieStyle = document.createElement("link");
         cookieStyle.rel = "stylesheet";
-        cookieStyle.href = new URL("cookie-consent.css?v=20261015-branch-preview-r1", script.src).href;
+        cookieStyle.href = new URL("cookie-consent.css?v=20261021-policy-scroll-r1", script.src).href;
         document.head.appendChild(cookieStyle);
         const cookieScript = document.createElement("script");
         cookieScript.src = new URL("cookie-consent.js?v=20261015-branch-preview-r1", script.src).href;
@@ -21,7 +22,8 @@
     }
     const allowed = new Set(["zh-Hant", "zh-Hans", "en"]);
     const params = new URLSearchParams(location.search);
-    const isEmbedded = params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(params.get("section"));
+    const selectedSection = params.get("section") === "disclaimer" ? "terms" : params.get("section");
+    const isEmbedded = params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(selectedSection);
     const normalize = value => allowed.has(value) ? value : "zh-Hant";
     const saved = () => {
         try { return localStorage.getItem("l1ng-site-info-language"); }
@@ -56,7 +58,7 @@
     applyLanguage(initial);
     if (isEmbedded) {
         // 嵌入視窗只呈現指定條款，避免樣式表未載入時顯示整份政策。
-        const chosen = params.get("section");
+        const chosen = selectedSection;
         for (const section of document.querySelectorAll(".policy-section")) {
             const selected = section.id === chosen;
             section.hidden = !selected;
@@ -69,8 +71,7 @@
             element.style.display = "none";
         }
         if (chosen === "genealogy") {
-            // 族譜工具沒有網站頁腳：把同一份版權聲明及完整政策搬進「關於」視窗。
-            // 不複製免責內容，修改共用說明頁即可同步更新。
+            // 族譜工具沿用共用政策：一個「使用條款與免責聲明」折疊區塊與隱私權說明。
             const genealogy = document.getElementById("genealogy");
             const legal = document.querySelector(".l1ng-footer-legal");
             if (genealogy && legal) {
@@ -132,6 +133,13 @@
             }
         });
     }
+    // 嵌入視窗內的 Cookie 入口先通知外層關閉說明視窗，再開啟原本的 Cookie 偏好設定。
+    document.addEventListener("click", event => {
+        if (!isEmbedded || !event.target.closest?.("[data-l1ng-cookie-settings]")) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        window.parent.postMessage({type:"l1ng-site-info-cookie-preferences"}, params.get("parent") || "*");
+    }, true);
     document.addEventListener("click", event => {
         const button = event.target.closest?.("[data-site-language-button]");
         if (button) applyLanguage(button.dataset.siteLanguageButton, true);
