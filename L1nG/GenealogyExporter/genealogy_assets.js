@@ -726,6 +726,7 @@
       add(sim.gameAvatar, '模擬市民遊戲頭像');
       add(sim.customAvatar, '模擬市民自訂頭像');
       (sim.gallery || []).forEach(item => add(item.image, '人生照片'));
+      (sim.outfits || []).forEach(item => add(item.image, '服裝穿搭'));
       (sim.pets || []).forEach(pet => {
         add(pet.avatar, '寵物目前頭像');
         add(pet.gameAvatar, '寵物遊戲頭像');
@@ -758,6 +759,7 @@
       clean(sim, 'gameAvatar', null);
       clean(sim, 'customAvatar', null);
       (sim.gallery || []).forEach(item => clean(item, 'image', ''));
+      (sim.outfits || []).forEach(item => clean(item, 'image', ''));
       (sim.pets || []).forEach(pet => {
         clean(pet, 'avatar', null);
         clean(pet, 'gameAvatar', null);
