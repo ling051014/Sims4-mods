@@ -773,6 +773,21 @@ section[id] {
 }
 
 
+/* ========【注意事項】 作品轉載規範簡短提醒 ======== */
+.translations-tou-note {
+    margin:20px 0 0;
+    color:var(--sub);
+    font-size:12px;
+    line-height:1.8;
+}
+.translations-tou-note a {
+    color:var(--translation-dark);
+    text-decoration:underline;
+    text-underline-offset:3px;
+    white-space:nowrap;
+}
+.translations-tou-note a:hover { color:var(--translation); }
+
 /* ========【頁腳】 設定 - 專區入口 ======== */
 .site-footer {
     border-top:1px solid var(--line);
