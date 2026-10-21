@@ -2392,6 +2392,8 @@ function buildPersonEditorDraft({
     const item=slots[hold.position];
     if(!item)return;
     const grid=$('simOotdSlotGrid');
+    const occupiedCount=slots.filter(Boolean).length;
+    if(occupiedCount<2)return;
     const source=Array.from(grid.children)[hold.position];
     const button=source?.querySelector('.ootd-image-button');
     if(!button)return;
@@ -2411,18 +2413,24 @@ function buildPersonEditorDraft({
     ghost.style.transform='translate3d(0px,0px,0px) scale(1.08)';
     document.body.append(ghost);
     const nodes=Array.from(grid.children);
-    const zones=nodes.map(node=>{
-      const rect=node.querySelector('.ootd-image-button').getBoundingClientRect();
-      return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
-    });
+    const cellRects=nodes.map(node=>node.querySelector('.ootd-image-button').getBoundingClientRect());
+    const zones=cellRects.map(rect=>({x:rect.left+rect.width/2,y:rect.top+rect.height/2}));
+    const filledRects=cellRects.slice(0,occupiedCount);
+    const region={
+      left:Math.min(...filledRects.map(rect=>rect.left)),
+      top:Math.min(...filledRects.map(rect=>rect.top)),
+      right:Math.max(...filledRects.map(rect=>rect.right)),
+      bottom:Math.max(...filledRects.map(rect=>rect.bottom))
+    };
     source.classList.add('ootd-drag-source');
     document.body.classList.add('ootd-sorting');
     ootdDragState={
       pointerId:hold.pointerId,mode:hold.mode,
-      item, slots, original:slots.slice(),nodes,source,zones,
+      item, slots, original:slots.slice(),nodes,source,zones,region,
       categoryPosition:ootdCategoryPosition,
       session:personEditorSessionVersion,
       ghost, originX:hold.x,originY:hold.y,
+      ghostStartLeft:bounds.left,ghostStartTop:bounds.top,
       offsetX:hold.x-bounds.left,offsetY:hold.y-bounds.top,
       width:bounds.width,height:bounds.height
     };
@@ -2456,19 +2464,23 @@ function buildPersonEditorDraft({
       }
       const drag=ootdDragState;
       if(!drag||drag.mode!==mode||drag.pointerId!==id)return false;
+      // Desktop, mobile rows and iOS touch follow the same occupied-region boundary.
+      const left=Math.max(drag.region.left,
+        Math.min(x-drag.offsetX,drag.region.right-drag.width));
+      const top=Math.max(drag.region.top,
+        Math.min(y-drag.offsetY,drag.region.bottom-drag.height));
       drag.ghost.style.transform=
-        'translate3d('+(x-drag.originX)+'px,'+(y-drag.originY)+'px,0px) scale(1.08)';
-      // Compare against original cell centers, not animated card DOM under the finger.
-      // Hysteresis prevents repeated forward/backward swaps at a cell boundary.
-      const cx=x-drag.offsetX+drag.width/2;
-      const cy=y-drag.offsetY+drag.height/2;
+        'translate3d('+(left-drag.ghostStartLeft)+'px,'+(top-drag.ghostStartTop)+'px,0px) scale(1.08)';
+      // Use clamped card centre for hit zones; preserve hysteresis/animation.
+      const cx=left+drag.width/2;
+      const cy=top+drag.height/2;
       const current=drag.slots.indexOf(drag.item);
       if(current<0)return true;
       const currentCenter=drag.zones[current];
       const currentDistance=Math.hypot(cx-currentCenter.x,cy-currentCenter.y);
       let target=current;
       let minDistance=currentDistance;
-      drag.zones.forEach((zone,index)=>{
+      drag.zones.slice(0,drag.slots.filter(Boolean).length).forEach((zone,index)=>{
         const distance=Math.hypot(cx-zone.x,cy-zone.y);
         if(distance+15<minDistance){
           target=index;

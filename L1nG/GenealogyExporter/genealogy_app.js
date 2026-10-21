@@ -18186,8 +18186,8 @@ function ensureCanvasImportDropOverlay() {
     gap: '8px',
     boxSizing: 'border-box',
     padding: '24px',
-    border: '2px dashed var(--action-primary, #5a7fa3)',
-    borderRadius: '18px',
+    border: 'none',
+    borderRadius: '0',
     background: 'rgba(255,255,255,.92)',
     boxShadow: '0 18px 50px rgba(35,48,61,.18)',
     backdropFilter: 'blur(8px)',
@@ -18220,7 +18220,7 @@ function positionCanvasImportDropOverlay() {
   if (!canvasImportDropOverlay || !viewport) return;
 
   const rect = viewport.getBoundingClientRect();
-  const inset = 14;
+  const inset = 0;
 
   canvasImportDropOverlay.style.left = `${Math.round(rect.left + inset)}px`;
   canvasImportDropOverlay.style.top = `${Math.round(rect.top + inset)}px`;
