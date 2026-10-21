@@ -145,6 +145,10 @@
 .layout-l1ng-home .hero-title { width:min(560px,78vw); height:134px; border-radius:10px; }
 .layout-l1ng-home .hero-sub { width:min(420px,65vw); }
 .layout-l1ng-home .hero-cta { width:132px; height:36px; margin-top:8px; border-radius:999px; }
+.layout-l1ng-home .sk-home-creator-links { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:22px; margin-top:12px; }
+.layout-l1ng-home .sk-home-creator-link { display:flex; align-items:center; gap:8px; min-height:24px; }
+.layout-l1ng-home .sk-home-creator-icon { width:19px; height:19px; border-radius:5px; }
+.layout-l1ng-home .sk-home-creator-label { width:74px; height:12px; }
 
 
 /* ========【全站專頁骨架】 真實頁面形狀，不以通用四宮格代替 ======== */
