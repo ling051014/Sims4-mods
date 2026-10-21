@@ -11,7 +11,7 @@
         (() => {
             const params = new URLSearchParams(location.search);
             const section = params.get("section");
-            if (params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(section)) {
+            if (params.get("embed") === "1" && ["privacy", "terms", "disclaimer", "genealogy"].includes(section)) {
                 document.documentElement.dataset.siteInfoSection = section;
             }
             const lang = params.get("lang");
@@ -141,6 +141,39 @@
             <p>External links may lead to original creators, community platforms, or backup downloads such as Dropbox. Those services manage their own content and privacy practices. A download-link click does not guarantee a completed download.</p>
         </div>
     </section>
+    <section class="policy-section" id="disclaimer" aria-labelledby="disclaimer-title">
+        <h2 id="disclaimer-title"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="zh-Hans" hidden>使用与免责声明</span><span data-lang="en" hidden>Terms & Disclaimer</span></h2>
+        <div class="policy-language-content" data-site-language="zh-Hant">
+            <h3>非官方專案</h3>
+            <p>《The Sims 4》及相關商標屬各自權利人所有。L1nG 是獨立玩家創作網站，與 Electronic Arts（EA）、Maxis 或相關權利人沒有官方隸屬或背書關係。</p>
+            <h3>模組與工具的相容性</h3>
+            <p>模組及相關工具可能受遊戲更新、不同安裝環境或其他模組影響。使用前請確認支援版本並自行備份重要遊戲存檔；本站不保證所有功能在任何環境下均可持續相容。</p>
+            <h3>第三方模組與漢化</h3>
+            <p>第三方模組、素材及相關權利歸各原作者所有。漢化專區提供的是 L1nG 製作或維護的翻譯內容；原模組請依原作者的方式與授權取得。</p>
+            <h3>外部連結</h3>
+            <p>本站提供第三方連結方便查閱原作者說明與下載來源（包含 Dropbox 備用下載）；外部網站的內容、下載服務及隱私措施由各網站自行管理。下載點擊統計只代表連結被點擊，不保證下載完成。</p>
+        </div>
+        <div class="policy-language-content" data-site-language="zh-Hans" hidden>
+            <h3>非官方项目</h3>
+            <p>《The Sims 4》及相关商标归各自权利人所有。L1nG 是独立玩家创作网站，与 Electronic Arts（EA）、Maxis 或相关权利人没有官方隶属或背书关系。</p>
+            <h3>模组与工具的兼容性</h3>
+            <p>模组及相关工具可能受到游戏更新、不同安装环境或其他模组的影响。使用前请确认支持的版本，并自行备份重要的游戏存档；本站不保证所有功能在任何环境下都能持续兼容。</p>
+            <h3>第三方模组与汉化</h3>
+            <p>第三方模组、素材及相关权利归各原作者所有。汉化专区提供的是 L1nG 制作或维护的翻译内容；原模组请按照原作者的方式及授权获取。</p>
+            <h3>外部链接</h3>
+            <p>本站提供第三方链接，方便查看原作者说明与下载来源（包括 Dropbox 备用下载）；外部网站的内容、下载服务及隐私措施由相应网站自行管理。下载点击统计只表示链接被点击，不保证下载完成。</p>
+        </div>
+        <div class="policy-language-content" data-site-language="en" hidden>
+            <h3>Independent fan project</h3>
+            <p>The Sims 4 and related trademarks belong to their respective rights holders. L1nG is an independent fan-made site and is not affiliated with, sponsored by or endorsed by Electronic Arts (EA), Maxis or their rights holders.</p>
+            <h3>Mod and tool compatibility</h3>
+            <p>Mods and related tools may be affected by game updates, installation environments or conflicts with other mods. Check the supported versions and back up important game saves before use. Continued compatibility in every environment is not guaranteed.</p>
+            <h3>Third-party mods and translations</h3>
+            <p>Rights to third-party mods and assets remain with their respective creators. The translations section provides translations made or maintained by L1nG. Obtain the original mods through their creators under their applicable terms.</p>
+            <h3>External links</h3>
+            <p>Links to other sites, including Dropbox backup downloads, provide access to original creators' documentation and downloads. Each third-party site is responsible for its own content and privacy practices. Download-click counts do not guarantee successful downloads.</p>
+        </div>
+    </section>
     <section class="policy-section" id="genealogy" aria-labelledby="genealogy-title">
         <h2 id="genealogy-title"><span data-lang="zh-Hant">關於族譜工具</span><span data-lang="zh-Hans" hidden>关于族谱工具</span><span data-lang="en" hidden>About L1nG Genealogy</span></h2>
         <div class="policy-language-content" data-site-language="zh-Hant">
@@ -173,6 +206,7 @@
             <p class="l1ng-footer-copyright">© 2026 L1nG.</p>
             <nav class="l1ng-footer-policy-links" aria-label="Policies">
                 <a href="#privacy"><span data-lang="zh-Hant">隱私權與 Cookie</span><span data-lang="zh-Hans" hidden>隐私权与 Cookie</span><span data-lang="en" hidden>Privacy & Cookies</span></a>
+                <a href="#disclaimer"><span data-lang="zh-Hant">使用與免責聲明</span><span data-lang="zh-Hans" hidden>使用与免责声明</span><span data-lang="en" hidden>Terms &amp; Disclaimer</span></a>
                 <a href="#terms"><span data-lang="zh-Hant">使用條款</span><span data-lang="zh-Hans" hidden>使用条款</span><span data-lang="en" hidden>T.O.U.</span></a>
             </nav>
             <p class="l1ng-footer-disclaimer"><span data-lang="zh-Hant">《The Sims 4》及相關商標屬各自權利人所有。本站為獨立玩家創作網站，非 EA / Maxis 官方網站。</span><span data-lang="zh-Hans" hidden>《The Sims 4》及相关商标归各自权利人所有。本站为独立玩家创作网站，并非 EA / Maxis 官方网站。</span><span data-lang="en" hidden>The Sims 4 and related trademarks belong to their respective rights holders. L1nG is an independent fan site, not affiliated with EA or Maxis.</span></p>
