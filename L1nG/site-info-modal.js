@@ -71,9 +71,9 @@
             en: ["Privacy & Cookies", "How this site uses analytics and handles data."]
         },
         terms: {
-            "zh-Hant": ["使用與免責聲明", "閱讀模組、漢化與第三方服務的使用說明。"],
-            "zh-Hans": ["使用与免责声明", "阅读模组、翻译与第三方服务的使用说明。"],
-            en: ["Terms & Disclaimer", "Usage notes for mods, translations and third-party services."]
+            "zh-Hant": ["使用條款", "了解作品使用、分享、轉載及第三方授權規範。"],
+            "zh-Hans": ["使用条款", "了解作品使用、分享、转载及第三方授权规定。"],
+            en: ["T.O.U.", "Terms of Use for L1nG projects, sharing, and redistribution."]
         },
         genealogy: {
             "zh-Hant": ["關於族譜工具", "查看族譜資料、備份與使用注意事項。"],
@@ -234,7 +234,7 @@
         url.searchParams.set("section", section);
         url.searchParams.set("lang", language());
         url.searchParams.set("parent", location.origin);
-        url.searchParams.set("v", "20261013-genealogy-about-theme-r3");
+        url.searchParams.set("v", "20261021-tou-branch-r1");
         const frame = modal.querySelector(".l1ng-site-info-frame");
         activeUrl = url;
         // 族譜「關於」的外框尺寸固定；只有其他政策視窗維持依內容調整高度。
