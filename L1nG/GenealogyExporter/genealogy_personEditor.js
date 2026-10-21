@@ -2400,7 +2400,7 @@ function buildPersonEditorDraft({
         const image=await avatarImageAssetSaver(file,{kind:'ootd'});
         if(target.session!==personEditorSessionVersion || !mask.classList.contains('show'))return;
         const prev=editingOutfits.findIndex(item=>Number(item.category)===target.category && Number(item.index)===target.index);
-        const item={category:target.category,index:target.index,image,source:'custom'};
+        const item={...(prev>=0?editingOutfits[prev]:{}),category:target.category,index:target.index,image,source:'custom'};
         if(prev>=0)editingOutfits.splice(prev,1,item);
         else editingOutfits.push(item);
         renderOotdWorkspace();
