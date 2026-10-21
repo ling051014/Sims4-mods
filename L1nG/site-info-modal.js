@@ -58,7 +58,7 @@
             document.addEventListener("DOMContentLoaded", remapAll, {once:true});
         } else remapAll();
     }
-    const sections = new Set(["privacy", "terms", "genealogy"]);
+    const sections = new Set(["privacy", "disclaimer", "terms", "genealogy"]);
     const baseUrl = new URL("site-info.html", script.src);
     // 公開的獨立子網域一律引用首頁域名；分支預覽與本地路徑則沿用相對路徑。
     if (location.hostname.endsWith(".by-l1ng.com") && location.hostname !== "home.by-l1ng.com") {
@@ -69,6 +69,11 @@
             "zh-Hant": ["隱私權與 Cookie", "了解本站如何使用分析工具及處理資料。"],
             "zh-Hans": ["隐私权与 Cookie", "了解本站如何使用分析工具及处理数据。"],
             en: ["Privacy & Cookies", "How this site uses analytics and handles data."]
+        },
+        disclaimer: {
+            "zh-Hant": ["使用與免責聲明", "閱讀非官方聲明、模組相容性及第三方服務說明。"],
+            "zh-Hans": ["使用与免责声明", "阅读非官方声明、模组兼容性及第三方服务说明。"],
+            en: ["Terms & Disclaimer", "Compatibility, third-party services, and independent fan project notices."]
         },
         terms: {
             "zh-Hant": ["使用條款", "了解作品使用、分享、轉載及第三方授權規範。"],
@@ -291,6 +296,12 @@
     window.addEventListener("message", event => {
         if (!dialog || !dialog.isConnected || event.source !== dialog.querySelector("iframe").contentWindow) return;
         if (!activeUrl || event.origin !== activeUrl.origin) return;
+        if (event.data?.type === "l1ng-site-info-cookie-preferences") {
+            // 先關閉「關於族譜工具」，再使用原有 Cookie 偏好視窗。
+            close();
+            window.L1nGCookiePreferences?.open();
+            return;
+        }
         if (event.data && event.data.type === "l1ng-site-info-close") close();
         if (event.data && event.data.type === "l1ng-site-info-size"
             && !(nativeGenealogy && dialog.dataset.siteInfoSection === "genealogy")) {
