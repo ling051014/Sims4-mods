@@ -722,7 +722,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 /* ========【章節快速導覽】 浮動面板不佔用頁面與主頂條 ======== */
 .doc-quick-nav {
     position: fixed;
-    right: calc(20px + env(safe-area-inset-right, 0px));
+    left: calc(20px + env(safe-area-inset-left, 0px));
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     z-index: 90;
 }
@@ -783,7 +783,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 .doc-quick-panel {
     position: absolute;
-    right: 0;
+    left: 0;
     bottom: calc(100% + 12px);
     width: min(350px, calc(100vw - 32px));
     max-height: min(66vh, 540px);
@@ -877,7 +877,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 @media (max-width: 650px) {
     .doc-quick-nav {
-        right: calc(14px + env(safe-area-inset-right, 0px));
+        left: calc(14px + env(safe-area-inset-left, 0px));
         bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     }
 
