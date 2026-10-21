@@ -2269,19 +2269,11 @@ function buildPersonEditorDraft({
     const grid=$('simOotdSlotGrid');
     if(!grid)return;
     const category=OOTD_CATEGORIES[ootdCategoryPosition];
-    const entries=editingOutfits.filter(item=>
-      Number(item.category)===category.id &&
-      Number.isInteger(Number(item.index)) &&
-      Number(item.index)>=0 && Number(item.index)<5 &&
-      !!item.image
-    );
     const title=uiText(category.label);
     $('simOotdCategoryName').textContent=title;
-    $('simOotdCategoryHeading').textContent=title;
     $('simOotdCategoryPosition').textContent=(ootdCategoryPosition+1)+' / '+OOTD_CATEGORIES.length;
-    $('simOotdSlotCounter').textContent=entries.length+' / 5 '+uiText('套');
     grid.innerHTML=Array.from({length:5},(_,index)=>{
-      const entry=entries.find(item=>Number(item.index)===index);
+      const entry=editingOutfits.find(item=>Number(item.category)===category.id && Number(item.index)===index && item.image);
       const ref=entry?.image||'';
       const url=ref?resolveImageUrl(ref):'';
       const label=uiText('第 {n} 套').replace('{n}',String(index+1));
@@ -2290,10 +2282,10 @@ function buildPersonEditorDraft({
         (ref?'<img data-asset-id="'+esc(String(ref))+'" src="'+esc(url)+'" alt="'+esc(label)+'">':'<span class="ootd-empty-mark" aria-hidden="true">+</span>')+
         '</button>'+
         '<div class="ootd-slot-name">'+esc(label)+'</div>'+
-        '<div class="ootd-slot-actions">'+
-        '<button type="button" data-ootd-action="upload" data-ootd-index="'+index+'">'+uiText(ref?'更換圖片':'新增圖片')+'</button>'+
-        (ref?'<button type="button" data-ootd-action="remove" data-ootd-index="'+index+'">'+uiText('移除')+'</button>':'')+
-        '</div></article>';
+        (ref?'<div class="ootd-slot-actions">'+
+          '<button type="button" data-ootd-action="upload" data-ootd-index="'+index+'">'+uiText('更換圖片')+'</button>'+
+          '<button type="button" data-ootd-action="remove" data-ootd-index="'+index+'">'+uiText('移除')+'</button>'+
+        '</div>':'')+'</article>';
     }).join('');
   }
 
