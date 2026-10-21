@@ -62,6 +62,7 @@ html[data-site-info-section] .policy-language-content > :first-child { margin-to
 html[data-site-info-section] .policy-section h2 { display: none; }
 html[data-site-info-section="privacy"] #privacy,
 html[data-site-info-section="terms"] #terms,
+html[data-site-info-section="disclaimer"] #disclaimer,
 html[data-site-info-section="genealogy"] #genealogy { display: block; }
 html[data-site-info-section] #genealogy > p:last-child { display: none; }
 @media (max-width: 640px) { html[data-site-info-section] .policy-content { padding: 14px 16px 16px; } }
@@ -99,6 +100,26 @@ html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-dis
     font-size: 12px;
     line-height: 1.8;
 }
+/* 「關於族譜工具」中的 Cookie 設定一律可直接操作，不必展開隱私權內容。 */
+html[data-site-info-section="genealogy"] .policy-embedded-cookie-settings {
+    align-self:flex-start;
+    margin-top:4px;
+    padding:7px 12px;
+    border:1px solid var(--site-info-border,#cddde7);
+    border-radius:7px;
+    background:var(--site-info-input,#f0f5f8);
+    color:var(--site-info-text,#344455);
+    font:inherit;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+}
+html[data-site-info-section="genealogy"] .policy-embedded-cookie-settings:hover,
+html[data-site-info-section="genealogy"] .policy-embedded-cookie-settings:focus-visible {
+    border-color:var(--site-info-accent,#438cbe);
+    color:var(--site-info-accent,#438cbe);
+}
+
 html[data-site-info-section="genealogy"] .policy-embedded-details {
     border-top: 1px solid #e3e8ed;
 }
