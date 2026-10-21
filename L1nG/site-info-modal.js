@@ -6,9 +6,10 @@
     // RawGitHack serves source HTML directly, bypassing the Pages build-time
     // Cookie CSS/JS injection. Load the same shared assets for branch review.
     // Cookie consent itself blocks analytics and persistence on preview hosts.
-    const previewPath = "/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/";
-    const isBranchPreview = location.hostname === "raw.githack.com"
-        && location.pathname.startsWith(previewPath);
+    // 預覽支援分支網址與固定 Commit CDN 網址；只用於預覽，不開啟正式統計。
+    const previewPath = /^\/ling051014\/Sims4-mods\/(?:genealogy-structural-optimization-20260926|[0-9a-f]{40})\//i;
+    const isBranchPreview = ["raw.githack.com", "rawcdn.githack.com"].includes(location.hostname)
+        && previewPath.test(location.pathname);
     if (isBranchPreview && !document.querySelector('script[src*="/cookie-consent.js"]')) {
         const cookieStyle = document.createElement("link");
         cookieStyle.rel = "stylesheet";
@@ -34,7 +35,7 @@
             let requested;
             try { requested = new URL(anchor.href); } catch (_) { return; }
             // Keep already-rewritten preview URLs unchanged.
-            if (requested.hostname === location.hostname && requested.pathname.startsWith(previewPath)) return;
+            if (requested.hostname === location.hostname && previewPath.test(requested.pathname)) return;
             const local = hosts[requested.hostname];
             if (!local) return;
             let relative = local;
