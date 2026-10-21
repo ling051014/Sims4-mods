@@ -39,7 +39,8 @@ for (const name of [
 // Repository SVG sources are stored exclusively in html icons/.
 for (const icon of ['ui-search.svg', 'ui-clear.svg', 'afdian.svg',
                     'genealogy-extractor.svg', 'genealogy-people.svg',
-                    'genealogy-zip-folder.svg', 'patreon.svg']) {
+                    'genealogy-zip-folder.svg', 'patreon.svg',
+                    'tumblr.svg', 'curseforge.svg']) {
   put(path.join(base,'html icons',icon),path.join(out,'html icons',icon));
 }
 file('analytics.js');
@@ -76,6 +77,9 @@ if (mode === 'home') {
   for (const name of ['genealogy-exporter.html','genealogy-exporter.css','genealogy-exporter.js']) {
     file(path.join('GenealogyExporter',name),name);
   }
+  // The exporter uses local favicon paths; include the two source assets.
+  file('GenealogyExporter/favicon.svg','favicon.svg');
+  file('GenealogyExporter/favicon-32.png','favicon-32.png');
   // Keep the install ZIP alongside the deployed page at /downloads/.
   folder('GenealogyExporter/downloads','downloads');
   put(site('GenealogyExporter','genealogy-exporter.html'),path.join(out,'index.html'));
