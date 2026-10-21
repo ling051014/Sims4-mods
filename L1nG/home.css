@@ -310,6 +310,10 @@ section[id] {
 }
 
 
+/* ========【首頁主視覺】 設定 - Tumblr 外部連結圖示 ======== */
+.hero-tumblr-link { gap:8px; }
+.hero-tumblr-link img { width:18px; height:18px; flex:0 0 auto; opacity:.8; }
+
 /* ========【首頁主視覺】 設定 - 背景裝飾光暈 ======== */
 .hero-decoration {
     /* 絕對定位 */ position: absolute;
