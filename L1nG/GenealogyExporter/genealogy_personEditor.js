@@ -2479,14 +2479,14 @@ function buildPersonEditorDraft({
       const url=ref?resolveImageUrl(ref):'';
       const label=uiText('第 {n} 套').replace('{n}',String(index+1));
       return '<article class="ootd-slot" data-ootd-position="'+index+'">'+
-        '<button class="ootd-image-button'+(ref?' has-image':' life-photo-add-btn')+'" type="button" data-ootd-action="'+(ref?'preview':'upload')+'" data-ootd-index="'+index+'" aria-label="'+esc(ref?label:label+' '+uiText('新增穿搭'))+'">'+
+        '<button class="ootd-image-button life-photo-add-btn'+(ref?' has-image':'')+'" type="button" data-ootd-action="'+(ref?'preview':'upload')+'" data-ootd-index="'+index+'" aria-label="'+esc(ref?label:label+' '+uiText('新增穿搭'))+'">'+
         (ref?'<img data-asset-id="'+esc(String(ref))+'" src="'+esc(url)+'" alt="'+esc(label)+'">':'<span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>'+esc(uiText('新增穿搭'))+'</span>')+
         '</button>'+
         '<div class="ootd-slot-name">'+esc(label)+'</div>'+
-        (ref?'<div class="ootd-slot-actions">'+
-          '<button type="button" data-ootd-action="upload" data-ootd-index="'+index+'">'+uiText('更換圖片')+'</button>'+
-          '<button type="button" data-ootd-action="remove" data-ootd-index="'+index+'">'+uiText('移除')+'</button>'+
-        '</div>':'')+'</article>';
+        '<div class="ootd-slot-actions">'+
+          (ref?'<button type="button" data-ootd-action="upload" data-ootd-index="'+index+'">'+uiText('更換圖片')+'</button>'+
+          '<button type="button" data-ootd-action="remove" data-ootd-index="'+index+'">'+uiText('移除')+'</button>':'')+
+        '</div></article>';
     }).join('');
   }
 
