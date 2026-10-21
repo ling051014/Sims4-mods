@@ -21,7 +21,7 @@
     }
     const allowed = new Set(["zh-Hant", "zh-Hans", "en"]);
     const params = new URLSearchParams(location.search);
-    const isEmbedded = params.get("embed") === "1" && ["privacy", "terms", "genealogy"].includes(params.get("section"));
+    const isEmbedded = params.get("embed") === "1" && ["privacy", "disclaimer", "terms", "genealogy"].includes(params.get("section"));
     const normalize = value => allowed.has(value) ? value : "zh-Hant";
     const saved = () => {
         try { return localStorage.getItem("l1ng-site-info-language"); }
@@ -77,7 +77,19 @@
                 legal.classList.add("policy-embedded-legal");
                 legal.querySelector(".l1ng-footer-policy-links")?.remove();
                 genealogy.appendChild(legal);
-                for (const id of ["terms", "privacy"]) {
+                // 在「關於族譜工具」內保留可直接操作的 Cookie 設定，
+                // 不依賴被隱藏的網站頁腳或折疊中的隱私權內容。
+                const cookieButton = document.createElement("button");
+                cookieButton.type = "button";
+                cookieButton.className = "policy-embedded-cookie-settings";
+                cookieButton.dataset.siteInfoCookieSettings = "";
+                cookieButton.textContent = {
+                    "zh-Hant": "Cookie 設定",
+                    "zh-Hans": "Cookie 设置",
+                    en: "Cookie settings"
+                }[initial];
+                legal.appendChild(cookieButton);
+                for (const id of ["disclaimer", "terms", "privacy"]) {
                     const section = document.getElementById(id);
                     const heading = section?.querySelector("h2");
                     if (!section || !heading) continue;
@@ -132,6 +144,13 @@
             }
         });
     }
+    // 嵌入視窗內的 Cookie 入口先通知外層關閉說明視窗，再開啟原本的 Cookie 偏好設定。
+    document.addEventListener("click", event => {
+        if (!isEmbedded || !event.target.closest?.("[data-site-info-cookie-settings], [data-l1ng-cookie-settings]")) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        window.parent.postMessage({type:"l1ng-site-info-cookie-preferences"}, params.get("parent") || "*");
+    }, true);
     document.addEventListener("click", event => {
         const button = event.target.closest?.("[data-site-language-button]");
         if (button) applyLanguage(button.dataset.siteLanguageButton, true);
