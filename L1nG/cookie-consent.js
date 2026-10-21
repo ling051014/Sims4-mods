@@ -9,8 +9,8 @@
   const production = hosts.has(location.hostname);
   // Make the interface testable on branch previews without enabling GA4 or production cookies.
   const preview = !production && (
-    location.hostname === 'raw.githack.com' &&
-      location.pathname.startsWith('/ling051014/Sims4-mods/genealogy-structural-optimization-20260926/') ||
+    ['raw.githack.com', 'rawcdn.githack.com'].includes(location.hostname) &&
+      /^\/ling051014\/Sims4-mods\/(?:genealogy-structural-optimization-20260926|[0-9a-f]{40})\//i.test(location.pathname) ||
     /^(?:[a-z0-9-]+\.)?l1ng-(?:home|realdate|genealogy-tool|genealogy-exporter|translations)\.pages\.dev$/.test(location.hostname)
   );
   if (!production && !preview) return;
