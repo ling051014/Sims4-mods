@@ -15,4 +15,7 @@ function leavePage() {
 function enterPage() {
     document.getElementById("age-verify-overlay").style.display = "none";
     document.body.style.overflow = "auto";
+    // 驗證成年後才開始讀取限制級分類 JSON 與建立模組卡片。
+    const container = document.querySelector('.mod-card-region[data-catalog-category="nsfw-mods"]');
+    if (container) void window.L1nGModCatalog?.mountCategory(container, 'nsfw-mods');
 }
