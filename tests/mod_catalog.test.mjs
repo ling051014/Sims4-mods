@@ -54,7 +54,7 @@ test('home, categories and 18+ confirmation use the same browser-side renderer',
     assert(client.includes('catalog.loadMany(selected') && client.includes('catalog.renderCategory(category, slug, true)'));
     assert(client.includes("slug !== 'nsfw-mods'") && client.includes("ageState === 'adult'"));
     assert(client.includes('L1nGSkeleton.start') && client.includes('positionSlider()'));
-    assert(renderer.includes('fetch(slug + \\'.json\\')') || renderer.includes("fetch(slug + '.json')"));
+    assert(renderer.includes("fetch(slug + '.json')"));
     assert(renderer.includes('L1nGModSort?.bind'));
     assert(renderer.includes('L1nGModCardUI?.initialize'));
     assert(renderer.includes("container.dataset.catalogCategory !== 'nsfw-mods'"));
