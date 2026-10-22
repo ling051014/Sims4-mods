@@ -44,3 +44,9 @@ node --test tests/mod_catalog.test.mjs
 ### 18+ 模組原有年齡驗證
 
 首頁「全部模組」保留現有 NSFW 分類的年齡提示：確認已滿 18 歲後顯示全部 194 張；未滿 18 歲則只顯示其餘 188 張，顯示提示。取消年齡提示會返回原本的分類入口，不直接呈現成人卡片。
+
+## 產生的 HTML 排版
+
+分類 HTML 與 `all-mods.fragment.html` 都是由根目錄 JSON 自動產生。產生器會把每張 `.mod-card` 的圖片、標題、作者、詳細資料列與備註輸出成有縮排和換行的原始碼，方便在 GitHub 檢查與比較。這些換行是原始碼排版，卡片樣式仍由既有 CSS 負責。
+
+修改模組資訊只需更新對應 JSON，再執行 `node build-mod-catalog.mjs` 同步產生 12 個分類頁及首頁模組片段；以 `node --test tests/mod_catalog.test.mjs` 檢查產生結果及縮排。請勿將 `cas.html` 等頁面中的產生區改回手寫資料。
