@@ -6,6 +6,9 @@
     "canonical": false
   },
   "messages": {
+    "請一次只拖曳一張圖片。": "Drop one image at a time.",
+    "可將遊戲族譜 ZIP 或 JSON 備份直接拖曳至族譜畫布匯入": "Drag a game family tree ZIP or JSON backup onto the family tree canvas to import it",
+    "可將圖片直接拖曳至市民或寵物頭像框，上傳後仍可調整頭像範圍": "Drag an image onto a Sim or pet portrait to upload it, then adjust the portrait crop",
     "刪除選取的卡片": "Delete selected cards",
     "微調選取的市民 / 寵物卡片位置；按住 ": "Nudge selected Sim / pet cards; hold ",
     " 每次移動 10 單位": " to move 10 units at a time",
