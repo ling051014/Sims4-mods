@@ -80,7 +80,9 @@
     const templates = {
         "mods-home": () =>
             '<div class="mods-home-head">' + block("title") + block("l1ng-sk-line meta") + '</div>' +
-            '<div class="mods-home-switch">' + block("mods-home-switch-half") + block("mods-home-switch-half") + '</div>' +
+            '<div class="mods-home-switch"><div class="mods-home-switch-track">' +
+                block("mods-home-switch-selection") + block("mods-home-switch-label") +
+                block("mods-home-switch-label") + '</div></div>' +
             '<div class="mods-category-grid">' + repeat(12, () =>
                 '<div class="mods-category-tile">' + block("l1ng-sk-line") + block("l1ng-sk-line sm") + '</div>'
             ) + '</div><div class="mods-home-panels">' +

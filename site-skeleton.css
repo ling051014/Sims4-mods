@@ -72,20 +72,21 @@
 .layout-mods-home .mods-home-head .title { width:min(360px,66vw); height:26px; border-radius:6px; }
 .layout-mods-home .mods-home-head .meta { width:210px; }
 .layout-mods-home .mods-home-switch {
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:4px;
-    width:228px;
-    height:42px;
+    display:flex; justify-content:center; align-items:center; width:100%;
     margin:20px auto 2px;
-    padding:4px;
-    box-sizing:border-box;
-    border:1px solid var(--sk-line);
-    border-radius:24px;
-    background:var(--sk-surface);
 }
-.layout-mods-home .mods-home-switch-half { flex:1; height:30px; min-width:0; border-radius:20px; }
+.layout-mods-home .mods-home-switch-track {
+    width:228px; height:42px; padding:4px; box-sizing:border-box; border:1px solid var(--sk-line);
+    border-radius:24px; background:var(--sk-surface); display:grid; grid-template-columns:1fr 1fr;
+    align-items:center; gap:4px; position:relative;
+}
+.layout-mods-home .mods-home-switch-selection {
+    position:absolute; top:4px; bottom:4px; left:4px; width:calc((100% - 12px) / 2);
+    border-radius:20px; border:1px solid var(--sk-line); background:var(--sk-bg);
+}
+.layout-mods-home .mods-home-switch-label {
+    position:relative; z-index:1; height:11px; width:64px; margin:auto; border-radius:4px;
+}
 .layout-mods-home .mods-category-grid {
     width:min(1400px,calc(100% - 40px));
     margin:0 auto;

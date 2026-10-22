@@ -19,10 +19,12 @@ test('12 category HTML pages contain only the frame and dynamic JSON mount', asy
         assert.equal(json.schemaVersion, 2);
         assert.equal(json.category, slug);
         assert.equal(json.sourceFile, slug + '.html');
-        assert(html.includes('data-catalog-category="' + slug + '"'), slug);
+        assert(html.includes('class="mod-container" data-catalog-category="' + slug + '"'), slug);
+        assert(!html.includes('mod-card-region'), slug);
         assert(html.includes('mod-catalog.js?v=20261022-json-runtime-r1'), slug);
         assert(html.includes('id="mod-sort"') && html.includes('mod-sort.js'), slug);
         assert(html.includes('site-skeleton.js'), slug);
+        if (slug !== 'nsfw-mods') assert(html.includes('data-skeleton-auto="manual"'), slug);
         assert(!html.includes('class="mod-card"'), slug + ' must not duplicate JSON cards');
         assert(!html.includes('L1NG_MODS_START') && !html.includes('L1NG_MODS_END'));
         for (const mod of json.mods) {
