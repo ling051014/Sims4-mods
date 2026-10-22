@@ -365,3 +365,48 @@ test('離線回覆附件依每則 replyId 配對，原始附件保留 null',asyn
     assert.notEqual(item.messages[0].id,item.messages[1].id);
   }finally{globalThis.fetch=original;}
 });
+
+
+test('新回饋及玩家後續留言通知兩個信箱，寄信失敗不影響資料儲存',async()=>{
+  const harness=offlineFeedbackHarness();
+  const delivered=[];
+  const env={...harness.env,
+    ADMIN_EMAIL:'first@example.com,second@example.com',
+    FEEDBACK_EMAIL:{async send(message){delivered.push(message);if(message.to==='second@example.com')throw Object.assign(new Error('mock email failure'),{code:'MOCK_FAILED'});}}
+  };
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'realdate.by-l1ng.com'});
+  const jobs=[];
+  const ctx={waitUntil(promise){jobs.push(promise);}};
+  try{
+    const created=await worker.fetch(new Request(workerUrl+'/v1/feedback',{method:'POST',headers:offlineHeaders,body:offlineFeedbackForm()}),env,ctx);
+    assert.equal(created.status,201);
+    const data=await created.json();
+    assert.equal(harness.feedback.size,1);
+    await Promise.all(jobs.splice(0));
+    assert.equal(delivered.length,2);
+    assert.deepEqual(delivered.map(x=>x.to),['first@example.com','second@example.com']);
+    assert.ok(delivered.every(x=>x.subject.includes('新玩家回饋')));
+    assert.ok(delivered.every(x=>!x.text.includes(data.receipt)));
+    const form=new FormData();
+    form.set('receipt',data.receipt);form.set('message','後續補充測試');
+    form.set('turnstileToken','offline-token');
+    const reply=await worker.fetch(new Request(workerUrl+'/v1/feedback/reply',{method:'POST',headers:offlineHeaders,body:form}),env,ctx);
+    assert.equal(reply.status,200);
+    assert.equal(harness.replies.length,1);
+    await Promise.all(jobs.splice(0));
+    assert.equal(delivered.length,4);
+    assert.ok(delivered.slice(2).every(x=>x.subject.includes('玩家後續留言')));
+  }finally{globalThis.fetch=original;}
+});
+
+test('未配置寄信 Binding 仍可提交回饋',async()=>{
+  const harness=offlineFeedbackHarness();
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'realdate.by-l1ng.com'});
+  try{
+    const res=await call('/v1/feedback',{method:'POST',headers:offlineHeaders,body:offlineFeedbackForm(),env:harness.env});
+    assert.equal(res.status,201);
+    assert.equal(harness.feedback.size,1);
+  }finally{globalThis.fetch=original;}
+});
