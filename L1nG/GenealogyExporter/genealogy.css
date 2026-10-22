@@ -8093,7 +8093,6 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 
 .sidebar-backdrop { display:none; }
 .family-panel { position:relative; width:var(--familySidebar-width); flex:0 0 var(--familySidebar-width); min-width:0; display:flex; flex-direction:column; background:var(--surface-card); border-right:1px solid var(--border-default); z-index:35; transition:width .22s ease,flex-basis .22s ease,transform .22s ease; overflow:hidden; }
-body.familySidebar-resizing .family-panel { transition:none; }
 .family-panel-scroll {
     flex:1 1 auto;
     min-height:0;
