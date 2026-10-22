@@ -157,11 +157,13 @@
                     window.searchMods();
             }
             container.dataset.catalogStatus = 'ready';
+            window.L1nGSkeleton?.ready();
         } catch (error) {
             console.error('分類模組載入失敗', slug, error);
             if (loading) loading.fail('目前無法載入模組，請重新整理後再試。');
             else container.textContent = '目前無法載入模組，請重新整理後再試。';
             container.dataset.catalogStatus = 'error';
+            window.L1nGSkeleton?.ready();
         }
     }
 
@@ -199,7 +201,7 @@
         slugs, keyOf, loadCategory, loadMany, createCard, renderCategory, mountCategory
     });
     function initializePage() {
-        const container = document.querySelector('.mod-list-page .mod-card-region[data-catalog-category]');
+        const container = document.querySelector('.mod-list-page .mod-container[data-catalog-category]');
         if (!container) return;
         // 成人分類須先經原本的 enterPage() 驗證，不可提早取得 JSON。
         if (container.dataset.catalogCategory !== 'nsfw-mods')

@@ -183,11 +183,6 @@ body.mod-list-page {
 }
 
 /* ========【模組卡片】 設定 - 網格排列區 ======== */
-.mod-card-region {
-    /* 資料容器不影響既有 flex 卡片排列與自動編號 */
-    display: contents;
-}
-
 .mod-container {
     /* 網格系統 */ display: flex;
     /* 自動換行 */flex-wrap: wrap;
