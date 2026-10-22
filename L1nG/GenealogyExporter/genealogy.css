@@ -860,8 +860,8 @@ input[type="range"]:disabled {
 /* ========【全域變數】 側邊欄尺寸與篩選勾選框預設圖示 ======== */
 
 :root {
-    --sidebar-width: 300px;
-    --sidebar-default-width: 300px;
+    --familySidebar-width: 300px;
+    --familySidebar-default-width: 300px;
     /* 篩選勾號預設使用白色；深色主題及自訂主題另行指定。 */
     --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
@@ -985,7 +985,7 @@ input[type="range"]:disabled {
 }
 
 .sidebar {
-    /* 元素寬度 */ width: var(--sidebar-width);
+    /* 元素寬度 */ width: var(--familySidebar-width);
     /* 彈性收縮 */ flex-shrink: 0;
     /* 背景設定 */ background: var(--surface-canvas);
     /* 右側邊框 */ border-right: 1px solid var(--border-default);
@@ -996,12 +996,12 @@ input[type="range"]:disabled {
 }
 
 
-body.sidebar-resizing {
+body.familySidebar-resizing {
     cursor: col-resize;
     user-select: none;
 }
 
-body.sidebar-resizing * {
+body.familySidebar-resizing * {
     cursor: col-resize;
 }
 
@@ -6316,7 +6316,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 
 @media (max-width:900px) {
     .topbar-brand {
-        /* 元素寬度 */ width: var(--sidebar-width);
+        /* 元素寬度 */ width: var(--familySidebar-width);
         /* 最大寬度 */ max-width: none;
         /* 左右內縮 */ padding-left: 8px;
         /* 左右內縮 */ padding-right: 8px;
@@ -8093,7 +8093,8 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 
 
 .sidebar-backdrop { display:none; }
-.family-panel { position:relative; width:var(--sidebar-width); flex:0 0 var(--sidebar-width); min-width:0; display:flex; flex-direction:column; background:var(--surface-card); border-right:1px solid var(--border-default); z-index:35; transition:width .22s ease,flex-basis .22s ease,transform .22s ease; overflow:hidden; }
+.family-panel { position:relative; width:var(--familySidebar-width); flex:0 0 var(--familySidebar-width); min-width:0; display:flex; flex-direction:column; background:var(--surface-card); border-right:1px solid var(--border-default); z-index:35; transition:width .22s ease,flex-basis .22s ease,transform .22s ease; overflow:hidden; }
+body.familySidebar-resizing .family-panel { transition:none; }
 .family-panel-scroll {
     flex:1 1 auto;
     min-height:0;
@@ -8558,7 +8559,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 .family-member-meta { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px; color:var(--text-secondary); font-size:10px; line-height:1.25; }
 .family-panel-resizer { width:7px; margin-left:-4px; margin-right:-3px; position:relative; flex:0 0 7px; z-index:45; cursor:col-resize; touch-action:none; background:transparent; outline:none; }
 .family-panel-resizer::before { content:""; position:absolute; top:0; bottom:0; left:3px; width:1px; background:transparent; transition:background-color .15s; }
-.family-panel-resizer:hover::before,.family-panel-resizer:focus-visible::before,body.sidebar-resizing .family-panel-resizer::before { background:var(--action-primary); }
+.family-panel-resizer:hover::before,.family-panel-resizer:focus-visible::before,body.familySidebar-resizing .family-panel-resizer::before { background:var(--action-primary); }
 
 
 body.family-panel-collapsed .family-panel { width:0; flex-basis:0; border-right:0; }
@@ -9109,8 +9110,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:var(--surface-card);
 }
 .app-skeleton-brand-area {
-    width:var(--sidebar-width);
-    flex:0 0 var(--sidebar-width);
+    width:var(--familySidebar-width);
+    flex:0 0 var(--familySidebar-width);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -9132,8 +9133,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     display:flex;
 }
 .app-skeleton-sidebar {
-    width:var(--sidebar-width);
-    flex:0 0 var(--sidebar-width);
+    width:var(--familySidebar-width);
+    flex:0 0 var(--familySidebar-width);
     min-width:0;
     padding:12px 8px 16px;
     overflow:hidden;
