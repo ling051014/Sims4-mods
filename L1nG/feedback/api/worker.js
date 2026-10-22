@@ -115,7 +115,7 @@ async function saveFiles(files,id,env){
 const feedbackNotificationRecipients = env => [...new Set(
   text(env.FEEDBACK_NOTIFY_EMAILS || env.ADMIN_EMAIL)
     .split(",").map(email=>email.trim().toLowerCase())
-    .filter(email=>/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))
+    .filter(email=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
 )];
 function notifyFeedback(env,ctx,{type,id,source,category,version,gameVersion,createdAt,message}){
   if(!env.FEEDBACK_EMAIL || typeof env.FEEDBACK_EMAIL.send!=="function")return;
@@ -136,7 +136,7 @@ function notifyFeedback(env,ctx,{type,id,source,category,version,gameVersion,cre
     clean(message,220),
     "",
     "管理中心：https://home.by-l1ng.com/feedback/admin.html"
-  ].join("\\n");
+  ].join("\n");
   const from=text(env.FEEDBACK_NOTIFY_SENDER)||"notify@by-l1ng.com";
   const task=Promise.all(recipients.map(async to=>{
     try{await env.FEEDBACK_EMAIL.send({from,to,subject,text:body});}
