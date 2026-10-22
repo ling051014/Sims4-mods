@@ -1,3 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M8.6 13.5V5.1a2.6 2.6 0 0 0-5.2 0v8.4a4.4 4.4 0 1 0 5.2 0Z"/><path d="M6 12v4.2"/><circle cx="6" cy="17.2" r="2.1" fill="#000" stroke="none"/><path d="M17 4.5v15m-6-11.8 12 8.6m-12 0 12-8.6M14.8 6.5 17 8.7l2.2-2.2m-4.4 11 2.2-2.2 2.2 2.2m-6.3-7.7 2.8-.35-.65-2.7m6.1 7.85-2.8.35.65 2.7m.15-10.55-.65 2.7 2.8.35m-9.3 5.25 2.8-.35-.65 2.7" stroke-width="1.55"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+  <path fill="#000" fill-rule="evenodd" d="M5.9 1.5A3.55 3.55 0 0 0 2.35 5v8.4a5.2 5.2 0 1 0 7.1 0V5A3.55 3.55 0 0 0 5.9 1.5ZM5.9 3.9c.6 0 1.1.5 1.1 1.1v9.9l.9.7a2.8 2.8 0 1 1-4 0l.9-.7V5c0-.6.5-1.1 1.1-1.1Z"/>
+  <path fill="#000" d="M5.9 13.8a1.15 1.15 0 0 1 1.15 1.15v.6a2.45 2.45 0 1 1-2.3 0v-.6a1.15 1.15 0 0 1 1.15-1.15Z"/>
+  <path stroke="#000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 3v18M10.8 6.5l12.4 11M10.8 17.5l12.4-11M14.9 5.1 17 7.3l2.1-2.2m-4.2 13.8 2.1-2.2 2.1 2.2M11.1 9.4l3 .2-.4-3m6.6 10.1-.4-3 3-.2M11.1 14.6l3-.2-.4 3m6.6-10.1-.4 3 3 .2"/>
 </svg>
