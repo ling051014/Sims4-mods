@@ -297,7 +297,7 @@ async function openDLCDialog() {
     if (!container || !dialog) return;
     dialog.showModal();
     if (!container.dataset.loadState || container.dataset.loadState === 'error')
-        await window.L1nGSkeleton.loadHtml(container, 'dlc-table.html', { variant: 'table', count: 6 });
+        await window.L1nGSkeleton.loadHtml(container, 'dlc-table.html', { variant: 'dlc-table', count: 6 });
 }
 
 // 確保全域點擊表格行會變色（支援首頁與彈窗）
