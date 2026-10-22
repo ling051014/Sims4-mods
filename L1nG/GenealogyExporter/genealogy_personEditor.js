@@ -72,10 +72,10 @@
   const editingGallery = [];
   const editingOutfits = [];
   const OOTD_CATEGORIES=Object.freeze([
-    {id:0,label:'日常'}, {id:1,label:'正式'},
-    {id:2,label:'運動'}, {id:3,label:'睡衣'},
-    {id:4,label:'派對'}, {id:9,label:'游泳'},
-    {id:10,label:'炎熱天氣'}, {id:11,label:'寒冷天氣'}
+    {id:0,label:'日常',icon:'shirt'}, {id:1,label:'正式',icon:'outfit-formal'},
+    {id:2,label:'運動',icon:'outfit-athletic'}, {id:3,label:'睡衣',icon:'outfit-sleepwear'},
+    {id:4,label:'派對',icon:'outfit-party'}, {id:9,label:'游泳',icon:'outfit-swimwear'},
+    {id:10,label:'炎熱天氣',icon:'outfit-hot-weather'}, {id:11,label:'寒冷天氣',icon:'outfit-cold-weather'}
   ]);
   let ootdCategoryPosition=0;
   let ootdUploadTarget=null;
@@ -2580,6 +2580,7 @@ function buildPersonEditorDraft({
     const slots=getOotdSlots(category.id);
     const title=uiText(category.label);
     $('simOotdCategoryName').textContent=title;
+    $('simOotdCategoryIcon').className='l1ng-icon icon-'+category.icon+' ootd-category-icon';
     $('simOotdCategoryPosition').textContent=(ootdCategoryPosition+1)+' / '+OOTD_CATEGORIES.length;
     grid.innerHTML=Array.from({length:5},(_,index)=>{
       const entry=slots[index];
@@ -2612,7 +2613,9 @@ function buildPersonEditorDraft({
     if(!menu||!toggle||!modal)return;
     if(!menu.hidden){closeOotdCategoryPopover();return;}
     menu.innerHTML=OOTD_CATEGORIES.map((item,index)=>
-      '<button type="button" class="ootd-category-option'+(index===ootdCategoryPosition?' active':'')+'" data-ootd-category="'+index+'" aria-pressed="'+(index===ootdCategoryPosition)+'">'+esc(uiText(item.label))+'</button>'
+      '<button type="button" class="ootd-category-option'+(index===ootdCategoryPosition?' active':'')+'" data-ootd-category="'+index+'" aria-pressed="'+(index===ootdCategoryPosition)+'">'+
+        '<span class="l1ng-icon icon-'+item.icon+'" aria-hidden="true"></span>'+ 
+        '<span class="ootd-category-option-label">'+esc(uiText(item.label))+'</span></button>'
     ).join('');
     menu.hidden=false;
     toggle.setAttribute('aria-expanded','true');
