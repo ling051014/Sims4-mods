@@ -1292,7 +1292,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 字體大小 */ font-size: 10px;
 }
 
-/* ========【RealDate 社群翻譯】 設定 - 精簡卡片及響應式排列 ======== */
+/* ========【RealDate 社群翻譯】 設定 - 國旗、譯者與貼文獨立顯示 ======== */
 .community-translation-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1301,9 +1301,10 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 .community-translation-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 13px;
+    display: grid;
+    grid-template-columns: 81px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px 14px;
     min-width: 0;
     padding: 17px 18px;
     background: var(--surface);
@@ -1313,9 +1314,8 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 .community-translation-flag {
     display: block;
-    flex: 0 0 45px;
-    width: 45px;
-    height: 30px;
+    width: 81px;
+    height: 54px;
     border: 1px solid var(--line);
     border-radius: 4px;
     object-fit: cover;
@@ -1323,7 +1323,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
 .community-translation-info {
     min-width: 0;
-    flex: 1;
 }
 
 .community-translation-info h3 {
@@ -1335,28 +1334,42 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 .community-translation-info p {
-    margin: 1px 0 9px;
+    margin: 1px 0 8px;
     color: var(--text-muted);
     font-size: 12px;
     line-height: 1.5;
 }
 
-.community-translation-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 12px;
+.community-translation-credit {
+    color: var(--text-muted);
+    font-size: 12px;
     line-height: 1.5;
 }
 
-.community-translation-meta a {
+.community-translation-credit a {
     color: var(--accent);
-    font-size: 12px;
 }
 
-.community-translation-meta small {
+.community-translation-footer {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.community-translation-footer small {
     color: var(--text-soft);
     font-size: 11px;
+    line-height: 1.5;
+}
+
+.community-translation-footer a {
+    font-size: 12px;
+    white-space: nowrap;
 }
 
 @media (max-width: 980px) {
