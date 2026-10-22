@@ -33,7 +33,7 @@
                 if (!allowedAttrs.has(name)) throw new Error('未支援的模組屬性：' + name);
                 if (name === 'onclick' && !allowedHandlers.has(value))
                     throw new Error('未支援的模組操作');
-                return value === null ? ' ' + name : ' ' + name + '="' + escapeAttr(value) + '"';
+                return value === null ? ' ' + name : ' ' + name + '="' + escapeAttr(String(value).replace(/&amp;/g, '&')) + '"';
             }).join('');
             return '<' + node.tag + attrs + '>' +
                 (node.children ? rich(node.children) + (node.unclosed ? '' : '</' + node.tag + '>') : '');
@@ -166,7 +166,7 @@
         slugs, keyOf, loadCategory, loadMany, createCard, renderCategory, mountCategory
     });
     function initializePage() {
-        const container = document.querySelector('.mod-list-page .mod-container[data-catalog-category]');
+        const container = document.querySelector('.mod-list-page .mod-card-region[data-catalog-category]');
         if (!container) return;
         // 成人分類須先經原本的 enterPage() 驗證，不可提早取得 JSON。
         if (container.dataset.catalogCategory !== 'nsfw-mods')
