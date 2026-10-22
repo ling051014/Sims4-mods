@@ -6,6 +6,13 @@
     "canonical": false
   },
   "messages": {
+    "可平移畫布": " to pan the canvas",
+    "可置中並適應畫面": " to center and fit the tree",
+    "可平移視角": " to pan",
+    "可開啟卡片操作選單": " to open card actions",
+    "可調整位置；自動排列下，超過判定距離後切換為自由排列並儲存新位置": " to reposition it; in Auto Layout, dragging beyond the threshold switches to Free Layout and saves the new position",
+    "可整組移動": " to move the whole group",
+    "可取消選取": " to clear the selection",
     "請一次只拖曳一張圖片。": "Drop one image at a time.",
     "可將遊戲族譜 ZIP 或 JSON 備份直接拖曳至族譜畫布匯入": "Drag a game family tree ZIP or JSON backup onto the family tree canvas to import it",
     "可將圖片直接拖曳至市民或寵物頭像框，上傳後仍可調整頭像範圍": "Drag an image onto a Sim or pet portrait to upload it, then adjust the portrait crop",
