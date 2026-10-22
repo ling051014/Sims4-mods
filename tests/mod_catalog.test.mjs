@@ -1,58 +1,65 @@
-// 驗證根目錄 JSON 是唯一的模組來源，生成卡片不遺失或重複。
+// 模組收藏庫：12 份 JSON 是唯一卡片資料來源；網頁僅保存頁面框架。
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
+import { readFile, access } from 'node:fs/promises';
+import { test } from 'node:test';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const pages = ["prep-mods.html","cheat-mods.html","ui-mods.html","world-mods.html","default-mods.html","nsfw-mods.html","social-mods.html","build-buy.html","cas.html","slider.html","pose-mods.html","other.html"];
-const ids = new Set();
-let total = 0, fields = 0;
-for (const page of pages) {
-    const json = JSON.parse(await readFile(resolve(root, page.replace(/\.html$/, '.json')), 'utf8'));
-    const html = await readFile(resolve(root, page), 'utf8');
-    assert.equal(json.schemaVersion, 2, page);
-    assert.equal(json.sourceFile, page);
-    assert.equal((html.match(/class="mod-card"/g) || []).length, json.mods.length, page);
-    assert.equal((html.match(/data-sort-author="/g) || []).length, json.mods.length, page);
-    assert(html.includes('<!-- L1NG_MODS_START -->') && html.includes('<!-- L1NG_MODS_END -->'), page);
-    assert.match(html, /\n {4}<div class="preview-img"/, page + ': generated cards need readable indentation');
-    assert(html.includes('id="mod-sort"') && html.includes('mod-sort.js'), page);
-    assert(!html.includes('href="authors.html"'), page);
-    for (const mod of json.mods) {
-        assert(!ids.has(mod.id), 'Duplicate id: ' + mod.id);
-        ids.add(mod.id);
-        assert(html.includes('id="mod-' + mod.id + '"'));
-        assert(mod.title?.length && mod.byline?.length && mod.preview?.length);
-        assert(Array.isArray(mod.authors) && mod.authors.length > 0);
-        assert(Array.isArray(mod.fields) && mod.fields.length > 0);
-        assert(!Object.hasOwn(mod, 'template') && !Object.hasOwn(mod, 'slots'));
-        total++; fields += mod.fields.length;
+const slugs = ['prep-mods','cheat-mods','ui-mods','world-mods','default-mods',
+    'nsfw-mods','social-mods','build-buy','cas','slider','pose-mods','other'];
+
+test('12 category HTML pages contain only the frame and dynamic JSON mount', async () => {
+    let total = 0;
+    let fields = 0;
+    const ids = new Set();
+    for (const slug of slugs) {
+        const html = await readFile(resolve(root, slug + '.html'), 'utf8');
+        const json = JSON.parse(await readFile(resolve(root, slug + '.json'), 'utf8'));
+        assert.equal(json.schemaVersion, 2);
+        assert.equal(json.category, slug);
+        assert.equal(json.sourceFile, slug + '.html');
+        assert(html.includes('data-catalog-category="' + slug + '"'), slug);
+        assert(html.includes('mod-catalog.js?v=20261022-json-runtime-r1'), slug);
+        assert(html.includes('id="mod-sort"') && html.includes('mod-sort.js'), slug);
+        assert(html.includes('site-skeleton.js'), slug);
+        assert(!html.includes('class="mod-card"'), slug + ' must not duplicate JSON cards');
+        assert(!html.includes('L1NG_MODS_START') && !html.includes('L1NG_MODS_END'));
+        for (const mod of json.mods) {
+            assert(!ids.has(mod.id), 'Duplicate mod id ' + mod.id);
+            ids.add(mod.id);
+            assert(Number.isInteger(mod.order) && mod.order > 0);
+            assert(mod.title?.length && mod.preview?.length && mod.byline?.length);
+            assert(Array.isArray(mod.authors) && mod.authors.length);
+            assert(Array.isArray(mod.fields) && mod.fields.length);
+            assert(!Object.hasOwn(mod, 'template') && !Object.hasOwn(mod, 'slots'));
+            total++;
+            fields += mod.fields.length;
+        }
     }
-}
-assert.equal(total, 194);
-assert.equal(fields, 844);
-const home = await readFile(resolve(root, 'index.html'), 'utf8');
-const fragment = await readFile(resolve(root, 'all-mods.fragment.html'), 'utf8');
-const catalogJs = await readFile(resolve(root, 'home-mod-catalog.js'), 'utf8');
-const css = await readFile(resolve(root, 'style.css'), 'utf8');
-assert(home.includes('id="home-category-grid"') && home.includes('id="home-mod-catalog"'));
-assert(home.includes('data-view="category"') && home.includes('data-view="all"'));
-assert(home.includes('home-mod-catalog.js') && home.includes('mod-sort.js'));
-assert(home.includes('id="home-mod-age-dialog"') && home.includes('id="home-mod-adult"'));
-assert.equal((fragment.match(/class="mod-card"/g) || []).length, 194);
-assert.equal((fragment.match(/class="mod-category-label"/g) || []).length, 194);
-assert.match(fragment, /\n {4}<div class="preview-img"/, 'all-mods fragment must be readable');
-assert.equal((fragment.match(/data-category="/g) || []).length, 194);
-for (const category of ['PREP','CHEAT','UI','WORLD','DEFAULT','NSFW','SOCIAL','BUILDBUY','CAS','SLIDER','POSE','OTHER']) {
-    assert(fragment.includes('data-category="' + category + '"'), category);
-    assert(css.includes('data-category="' + category + '"'), 'Missing color ' + category);
-}
-assert(catalogJs.includes('all-mods.fragment.html'));
-assert(catalogJs.includes("card.dataset.category !== 'NSFW'"));
-assert(catalogJs.includes("template.content.querySelectorAll('img')"));
-const sortJs = await readFile(resolve(root, 'mod-sort.js'), 'utf8');
-assert(sortJs.includes('card.dataset.sortAuthor') && sortJs.includes('L1nGModSort'));
-execFileSync(process.execPath, ['build-mod-catalog.mjs', '--check'], { cwd: root, stdio: 'pipe' });
-console.log('PASS: ' + total + ' structured mods / ' + fields + ' fields / 12 static category pages');
+    assert.equal(total, 194);
+    assert.equal(fields, 844);
+});
+
+test('home, categories and 18+ confirmation use the same browser-side renderer', async () => {
+    const home = await readFile(resolve(root, 'index.html'), 'utf8');
+    const client = await readFile(resolve(root, 'home-mod-catalog.js'), 'utf8');
+    const renderer = await readFile(resolve(root, 'mod-catalog.js'), 'utf8');
+    const sort = await readFile(resolve(root, 'mod-sort.js'), 'utf8');
+    const nsfw = await readFile(resolve(root, 'nsfw.js'), 'utf8');
+    assert(home.includes('id="home-category-grid"') && home.includes('id="home-mod-catalog"'));
+    assert(home.includes('data-view="category"') && home.includes('data-view="all"'));
+    assert(home.includes('mod-catalog.js?v=20261022-json-runtime-r1'));
+    assert(home.includes('home-mod-catalog.js?v=20261022-json-runtime-r1'));
+    assert(client.includes('catalog.loadMany(selected') && client.includes('catalog.renderCategory(category, slug, true)'));
+    assert(client.includes("slug !== 'nsfw-mods'") && client.includes("ageState === 'adult'"));
+    assert(client.includes('L1nGSkeleton.start') && client.includes('positionSlider()'));
+    assert(renderer.includes('fetch(slug + \\'.json\\')') || renderer.includes("fetch(slug + '.json')"));
+    assert(renderer.includes('L1nGModSort?.bind'));
+    assert(renderer.includes('L1nGModCardUI?.initialize'));
+    assert(renderer.includes("container.dataset.catalogCategory !== 'nsfw-mods'"));
+    assert(nsfw.includes("mountCategory(container, 'nsfw-mods')"));
+    assert(sort.includes('card.dataset.sortAuthor'));
+    await assert.rejects(access(resolve(root, 'build-mod-catalog.mjs')));
+    await assert.rejects(access(resolve(root, 'all-mods.fragment.html')));
+});

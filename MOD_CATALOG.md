@@ -1,52 +1,33 @@
-# 模組收藏庫 / JSON 結構
+# 模組整理 / JSON 動態載入架構
 
-僅在 `mods-catalog-json-refactor-20261020` 分支修改。分類頁 `cas.html`、`social-mods.html` 等仍保留原網址、CSS、搜尋與卡片樣式。
+此方案**僅在 `mods-catalog-json-refactor-20261020` 分支使用**。模組資料集中於專案根目錄 12 份 JSON，分類 HTML 保留現有導航、搜尋、排序及其他頁面元件，但不再包含任何預先生成的 `.mod-card`。
 
-## 根目錄 JSON
+## 檔案職責
 
-12 份資料依原分類命名：`cas.json`、`social-mods.json` 等。共 194 筆收藏、844 個下載與版本等詳細欄位。每筆有：
+- `cas.json`、`social-mods.json` 等 12 份 JSON：194 張卡片及 844 個詳細資訊欄位的**唯一資料來源**
+- `mod-catalog.js`：瀏覽器 fetch JSON，驗證分類、建立完整卡片、保留現有富文字和連結，統一渲染及快取
+- `cas.html` 等 12 個分類頁：`<div class="mod-card-region" data-catalog-category="cas"></div>` 作為卡片載入位置，不手寫模組卡片
+- `home-mod-catalog.js`：首頁首次切換到全部模組時載入 12 份 JSON，含年齡確認、搜尋、分類標籤及排序
+- `mod-sort.js`：資料載入完成後初始化作者排序
+- `script.js`：卡片載入完成後初始化入場動畫、文字斷行、原有搜尋功能
+- `site-skeleton.js` / `.css`：載入中、成功、空資料及錯誤狀態的共用骨架屏
 
-- `id`、`order`：固定識別碼、原本的卡片排序
-- `title`：中英模組名稱（保留原本標題格式）
-- `authors`：可供排序的作者名稱與來源連結。第一位為排序依據；`byline` 保存作者與漢化者等顯示內容
-- `preview`：預覽圖片及既有互動標記
-- `fields`：結構化的 `label` / `value` 列表（下載、漢化、DLC、版本、日期等，順序不變）
-- `notes`：保留色彩、連結、換行、展開區域的富文字節點陣列，不是整段 HTML 字串
-- `layout`：極少數特殊卡片的備註位置或預覽樣式
+已移除 `build-mod-catalog.mjs`、`all-mods.fragment.html`。新版本**不需執行生成指令**。修改 JSON 後，重新整理頁面即可載入最新資料（視瀏覽器快取而定）。
 
-特殊備註仍有富文字標籤結構，並未硬猜缺少的安裝狀態、DLC 編號或漢化作者角色；不要將 `notes` 重新合併成 HTML 字串。
+## 保留的功能
 
-## 產生與驗收
+首頁依分類 / 全部模組雙模式、卡片右上編號與首頁左側彩色分類標籤、搜尋下拉選單、作者排序、圖片和影片預覽、NC4T 抱負大修資料、DLC 查詢、CAS / Build Buy 關鍵字表與共用骨架屏均延續既有規則。頁面上不需額外建立另一份卡片資料。
 
-直接在專案根目錄執行：
+**年齡限制：** 獨立 NSFW 分類頁在使用者確認成年後才取得 `nsfw-mods.json`；首頁首次切換到全部模組會要求年齡確認，成年載入全部 194 張，未成年僅請求其餘 11 類共 188 張，取消返回分類模式。
+
+## 驗收
 
 ```sh
-node build-mod-catalog.mjs
-node build-mod-catalog.mjs --check
 node --test tests/mod_catalog.test.mjs
 ```
 
-產生器只更新分類 HTML 中 `<!-- L1NG_MODS_START -->` 至 `<!-- L1NG_MODS_END -->` 的卡片區，其他頁面、搜尋框、排序選單、CSS 與 JS 保留。不要直接手動編輯這段產生後的 HTML，請先更新對應的 JSON。
+測試檢查 12 分類對應、194 筆 ID 唯一、844 個欄位、分類 HTML 未殘留完整卡片、首頁共用渲染器，以及 NSFW 載入限制。仍須實際操作桌面和手機瀏覽器，包含搜尋、排序、影片及 DLC 提示彈窗。
 
-## 遷移原則
+## 備註
 
-此輪重構已逐筆比對原分類頁的 194 張卡片：文字、連結與圖片來源無差異，且保留 CAS 中的 NC4T「抱負大修」。舊的 `data/mods/`、`templates/mod-pages/` 及 `scripts/build-mod-catalog.mjs` 是先前遷移過程的重複資料，現在已改由根目錄 JSON + 根目錄產生器取代。
-
-## 首頁雙模式 / 分類彩色標籤
-
-- `index.html` 保留原有 12 個分類入口、快捷鍵、密技、DLC 對照、頁腳，新增「依分類瀏覽 / 全部模組」切換。
-- `all-mods.fragment.html` 是由同一個 `build-mod-catalog.mjs` 從 12 份 JSON 自動生成的卡片片段，**不是另一個網頁**，不手動編輯。
-- `home-mod-catalog.js` 只在切換到全部模組時載入片段，支援全文搜尋、作者排序、點選彩色分類標籤篩選 / 再次點選取消。
-- 分類標籤左上角（與編號同尺寸）、編號右上角；12 類固定低飽和顏色，只在首頁全部模組模式顯示。
-- `mod-sort.js` 共用排序邏輯，分類頁既有的排序行為不變。
-- 修改 JSON 後請執行 `node build-mod-catalog.mjs`，並以 `node build-mod-catalog.mjs --check` 驗證所有分類 HTML 及全模組片段與 JSON 一致。
-
-### 18+ 模組原有年齡驗證
-
-首頁「全部模組」保留現有 NSFW 分類的年齡提示：確認已滿 18 歲後顯示全部 194 張；未滿 18 歲則只顯示其餘 188 張，顯示提示。取消年齡提示會返回原本的分類入口，不直接呈現成人卡片。
-
-## 產生的 HTML 排版
-
-分類 HTML 與 `all-mods.fragment.html` 都是由根目錄 JSON 自動產生。產生器會把每張 `.mod-card` 的圖片、標題、作者、詳細資料列與備註輸出成有縮排和換行的原始碼，方便在 GitHub 檢查與比較。這些換行是原始碼排版，卡片樣式仍由既有 CSS 負責。
-
-修改模組資訊只需更新對應 JSON，再執行 `node build-mod-catalog.mjs` 同步產生 12 個分類頁及首頁模組片段；以 `node --test tests/mod_catalog.test.mjs` 檢查產生結果及縮排。請勿將 `cas.html` 等頁面中的產生區改回手寫資料。
+JSON 的 `title` / `byline` / `preview` / `fields` / `notes` 仍包含富文字節點，主要為了完整保留原本格式；目前並未將每個版本與 DLC 資料全部拆成更精細的欄位，未經確認不可任意推測安裝狀態。
