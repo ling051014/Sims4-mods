@@ -1,4 +1,4 @@
-// 首頁雙檢視：分類入口保持原樣，全模組首次展開才載入 JSON 產生的卡片片段。
+// 首頁雙檢視：分類入口保持原樣，全模組首次展開才讀取 12 個分類 JSON。
 (() => {
     const switcher = document.querySelector('.home-mod-view-switch');
     const categoryGrid = document.getElementById('home-category-grid');
@@ -66,15 +66,24 @@
         status.textContent = '載入全部模組中…';
         contentLoading = window.L1nGSkeleton.start(container, 'cards', 6);
         loading = (async () => {
-            const response = await fetch('all-mods.fragment.html');
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const template = document.createElement('template');
-            template.innerHTML = await response.text();
-            const found = template.content.querySelectorAll('.mod-card');
-            if (found.length !== 194) throw new Error('模組資料不完整（' + found.length + ' / 194）');
-            for (const img of template.content.querySelectorAll('img')) img.loading = 'lazy';
-            for (const video of template.content.querySelectorAll('video')) video.preload = 'none';
-            contentLoading.ready(template.content);
+            const catalog = window.L1nGModCatalog;
+            if (!catalog) throw new Error('共用模組資料載入器不存在');
+            const selected = ageState === 'adult'
+                ? [...catalog.slugs]
+                : catalog.slugs.filter(slug => slug !== 'nsfw-mods');
+            const data = await catalog.loadMany(selected, (done, total) => {
+                status.textContent = '正在讀取模組分類 ' + done + ' / ' + total;
+            });
+            const fragment = document.createDocumentFragment();
+            let count = 0;
+            for (const { slug, data: category } of data) {
+                count += category.mods.length;
+                fragment.appendChild(catalog.renderCategory(category, slug, true));
+            }
+            const expected = ageState === 'adult' ? 194 : 188;
+            if (count !== expected)
+                throw new Error('模組資料不完整（' + count + ' / ' + expected + '）');
+            contentLoading.ready(fragment);
             bindCards();
         })();
         try { await loading; }
