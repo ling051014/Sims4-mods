@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="12" cy="12" r="9.35" fill="none" stroke="#000" stroke-width="1.65"/>
-<path fill="#000" d="M12 7.7 16 10.6 14.5 15.3h-5L8 10.6 12 7.7Z"/>
-<path d="M12 7.7 11.95 3.0M16 10.6l4.55-1.55M14.5 15.3l2.55 4.05M9.5 15.3l-2.55 4.05M8 10.6 3.45 9.05" fill="none" stroke="#000" stroke-width="1.55" stroke-linecap="round"/>
-<path d="M9.2 3.25 8.4 5.65l-2.55 1.15M14.8 3.25l.8 2.4 2.55 1.15M4.6 15.2l2.4.5m12.4-.5-2.4.5M10.25 21.1l1.75-1.4 1.75 1.4" fill="none" stroke="#000" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="12" cy="12" r="9.3" fill="none" stroke="#000" stroke-width="1.45"/>
+  <g fill="#000">
+    <path d="M12 7.8 15.9 10.6l-1.5 4.6H9.6l-1.5-4.6L12 7.8Z"/>
+    <path d="M9.1 3.1a9.3 9.3 0 0 1 5.8 0l-.9 2.4h-4l-.9-2.4Z"/>
+    <path d="M3.6 7.7a9.2 9.2 0 0 0-.7 4.9l2.8-.2 1.5-3-1.5-2.3-2.1.6Z"/>
+    <path d="M20.4 7.7a9.2 9.2 0 0 1 .7 4.9l-2.8-.2-1.5-3 1.5-2.3 2.1.6Z"/>
+    <path d="M5.8 17.5a9.2 9.2 0 0 0 4.7 3.6l.7-2.6-2.6-2.2-2.8.2v1Z"/>
+    <path d="M18.2 17.5a9.2 9.2 0 0 1-4.7 3.6l-.7-2.6 2.6-2.2 2.8.2v1Z"/>
+  </g>
+  <path d="m12 7.8-.1-2.2m-3.8 5-1-1.3m8.8 1.3 1-1.3m-7.3 5.9-1 1.1m5.8-1.1 1 1.1" fill="none" stroke="#000" stroke-width="1.08" stroke-linecap="round"/>
 </svg>
