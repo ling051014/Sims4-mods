@@ -162,6 +162,36 @@
         }
     }
 
+    // 首頁不載入分類頁的 script.js，這兩項卡片操作仍須可用。
+    if (typeof window.toggleMute !== 'function') {
+        window.toggleMute = function (button) {
+            const video = button?.closest('.preview-img')?.querySelector('video');
+            if (!video) return;
+            video.muted = !video.muted;
+            button.textContent = video.muted ? '🔇' : '🔊';
+        };
+    }
+    if (typeof window.openDLCDialog !== 'function') {
+        window.openDLCDialog = function () {
+            let dialog = document.getElementById('dlc-dialog');
+            if (!dialog) {
+                dialog = document.createElement('dialog');
+                dialog.id = 'dlc-dialog';
+                dialog.className = 'dlc-modal';
+                dialog.innerHTML = '<div class="modal-header">' +
+                    '<span>🔍 地圖中英文對照查詢</span>' +
+                    '<button class="close-btn" type="button" aria-label="關閉">×</button>' +
+                    '</div><div class="modal-body" id="modal-content-placeholder"></div>';
+                dialog.querySelector('.close-btn').addEventListener('click', () => dialog.close());
+                document.body.appendChild(dialog);
+            }
+            if (!dialog.open) dialog.showModal();
+            const content = dialog.querySelector('#modal-content-placeholder');
+            if (content && !['ready', 'loading'].includes(content.dataset.loadState))
+                void window.loadDLCTable?.('modal-content-placeholder');
+        };
+    }
+
     window.L1nGModCatalog = Object.freeze({
         slugs, keyOf, loadCategory, loadMany, createCard, renderCategory, mountCategory
     });
