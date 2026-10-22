@@ -82,6 +82,7 @@
   let ootdHoldState=null;
   let ootdDragState=null;
   let ootdSuppressClickUntil=0;
+  let ootdCategoryIconMotion=null;
 
   // ========【模擬市民編輯器延遲建立】 設定 - 基本資料先顯示，隱藏分頁真正需要時再建立 ========
   let personEditorRelationshipDataReady=false;
@@ -254,6 +255,7 @@
       []
     );
     cancelOotdSorting();
+    cancelOotdCategoryIconMotion();
     ootdCategoryPosition=0;
     ootdUploadTarget=null;
     closeOotdCategoryPopover();
@@ -2573,14 +2575,74 @@ function buildPersonEditorDraft({
     },true);
   }
 
-  function renderOotdWorkspace(){
+  // 只過渡中央分類圖示；既有 SVG 遮罩及浮窗圖示保持不變。
+  function cancelOotdCategoryIconMotion(){
+    const motion=ootdCategoryIconMotion;
+    if(!motion)return;
+    ootdCategoryIconMotion=null;
+    motion.animations.forEach(animation=>animation.cancel());
+    motion.outgoing.remove();
+    motion.stage.classList.remove('is-morphing');
+  }
+
+  function updateOotdCategoryIcon(category,animate=false){
+    const icon=$('simOotdCategoryIcon');
+    const stage=icon?.parentElement;
+    if(!icon||!stage)return;
+    const previous=icon.dataset.ootdIcon;
+    if(previous===category.icon)return;
+    const allowMotion=animate && previous &&
+      mask.classList.contains('show') && icon.getClientRects().length &&
+      typeof icon.animate==='function' &&
+      !global.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if(!allowMotion){
+      cancelOotdCategoryIconMotion();
+      icon.className='l1ng-icon icon-'+category.icon+' ootd-category-icon';
+      icon.dataset.ootdIcon=category.icon;
+      return;
+    }
+    // 連續切換時以畫面上正在顯示的圖示姿態作為下一段過渡起點。
+    const computed=global.getComputedStyle(icon);
+    const priorTransform=computed.transform==='none'?'scale(1)':computed.transform;
+    const priorOpacity=Math.max(.3,Math.min(1,Number(computed.opacity)||0));
+    cancelOotdCategoryIconMotion();
+    const outgoing=icon.cloneNode(false);
+    outgoing.removeAttribute('id');
+    outgoing.removeAttribute('data-ootd-icon');
+    outgoing.classList.add('ootd-category-icon-outgoing');
+    stage.insertBefore(outgoing,icon);
+    icon.className='l1ng-icon icon-'+category.icon+' ootd-category-icon';
+    icon.dataset.ootdIcon=category.icon;
+    stage.classList.add('is-morphing');
+    const timing={duration:270,easing:'cubic-bezier(.22,.72,.28,1)',fill:'both'};
+    const animations=[
+      outgoing.animate([
+        {offset:0,transform:priorTransform,opacity:priorOpacity,filter:'blur(0px)'},
+        {offset:.48,transform:'scale(.76,1.06) skewX(-5deg)',opacity:.68,filter:'blur(.45px)'},
+        {offset:1,transform:'scale(.42,.72) skewX(3deg)',opacity:0,filter:'blur(1.2px)'}
+      ],timing),
+      icon.animate([
+        {offset:0,transform:'scale(.4,.72) skewX(6deg)',opacity:0,filter:'blur(1.2px)'},
+        {offset:.45,transform:'scale(.79,1.06) skewX(-4deg)',opacity:.53,filter:'blur(.45px)'},
+        {offset:.77,transform:'scale(1.07,.96)',opacity:1,filter:'blur(0px)'},
+        {offset:1,transform:'scale(1)',opacity:1,filter:'blur(0px)'}
+      ],timing)
+    ];
+    const motion={animations,outgoing,stage};
+    ootdCategoryIconMotion=motion;
+    Promise.all(animations.map(animation=>animation.finished)).then(()=>{
+      if(ootdCategoryIconMotion===motion)cancelOotdCategoryIconMotion();
+    }).catch(()=>{ /* 後續切換取消前段動畫是正常情況 */ });
+  }
+
+  function renderOotdWorkspace(animateCategoryIcon=false){
     const grid=$('simOotdSlotGrid');
     if(!grid)return;
     const category=OOTD_CATEGORIES[ootdCategoryPosition];
     const slots=getOotdSlots(category.id);
     const title=uiText(category.label);
     $('simOotdCategoryName').textContent=title;
-    $('simOotdCategoryIcon').className='l1ng-icon icon-'+category.icon+' ootd-category-icon';
+    updateOotdCategoryIcon(category,animateCategoryIcon);
     $('simOotdCategoryPosition').textContent=(ootdCategoryPosition+1)+' / '+OOTD_CATEGORIES.length;
     grid.innerHTML=Array.from({length:5},(_,index)=>{
       const entry=slots[index];
@@ -2603,7 +2665,7 @@ function buildPersonEditorDraft({
     cancelOotdSorting();
     ootdCategoryPosition=(position+OOTD_CATEGORIES.length)%OOTD_CATEGORIES.length;
     closeOotdCategoryPopover();
-    renderOotdWorkspace();
+    renderOotdWorkspace(true);
   }
 
   function positionOotdCategoryIndicator(button){
