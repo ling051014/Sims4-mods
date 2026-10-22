@@ -17,6 +17,7 @@ for (const page of pages) {
     assert.equal((html.match(/class="mod-card"/g) || []).length, json.mods.length, page);
     assert.equal((html.match(/data-sort-author="/g) || []).length, json.mods.length, page);
     assert(html.includes('<!-- L1NG_MODS_START -->') && html.includes('<!-- L1NG_MODS_END -->'), page);
+    assert.match(html, /\n {4}<div class="preview-img"/, page + ': generated cards need readable indentation');
     assert(html.includes('id="mod-sort"') && html.includes('mod-sort.js'), page);
     assert(!html.includes('href="authors.html"'), page);
     for (const mod of json.mods) {
@@ -42,6 +43,7 @@ assert(home.includes('home-mod-catalog.js') && home.includes('mod-sort.js'));
 assert(home.includes('id="home-mod-age-dialog"') && home.includes('id="home-mod-adult"'));
 assert.equal((fragment.match(/class="mod-card"/g) || []).length, 194);
 assert.equal((fragment.match(/class="mod-category-label"/g) || []).length, 194);
+assert.match(fragment, /\n {4}<div class="preview-img"/, 'all-mods fragment must be readable');
 assert.equal((fragment.match(/data-category="/g) || []).length, 194);
 for (const category of ['PREP','CHEAT','UI','WORLD','DEFAULT','NSFW','SOCIAL','BUILDBUY','CAS','SLIDER','POSE','OTHER']) {
     assert(fragment.includes('data-category="' + category + '"'), category);
