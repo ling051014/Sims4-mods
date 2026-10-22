@@ -338,71 +338,40 @@ function updateModCount() {
     }
 }
 
-// ======== 【隱形換行斷點】自動在模組檔名的底線（_）與點（.）後方加入 ========
-document.addEventListener("DOMContentLoaded", () => {
-    // 抓取所有詳細資訊欄位裡的超連結與純文字
-    const infoLinks = document.querySelectorAll('.info-row a, .info-row span, .warning-content span');
-    
-    infoLinks.forEach(link => {
-        let text = link.innerHTML;
-        
-        // 1. 如果有底線，在底線 "_" 後面加斷點
-        if (text.includes('_')) {
-            text = text.replace(/_/g, '_<wbr>');
+// ========【動態模組卡片】載入完成後套用舊版檔名換行與入場動畫 ========
+const modCardObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver(entries => {
+        for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('is-visible');
+            modCardObserver.unobserve(entry.target);
         }
-        
-        // 2. 聰明處理點 "." 的斷點
-        if (text.includes('.')) {
-            // 規則 A：如果點的後面是副檔名（例如 .package, .zip 等英數字直到結尾）
-            // ➡️ 💡 密技：把斷點 <wbr> 加在點的「前面」，讓點帶著副檔名一起換行！
-            text = text.replace(/\.(?=[a-z0-9]+$)/gi, '<wbr>.');
-            
-            // 規則 B：處理其他一般的點（像是網址中間的點），但排除掉「版本號」（點的前後都是數字）
-            // ➡️ 在點的「後面」加斷點
-            text = text.replace(/\.(?!\d)(?![a-z0-9]+$)/gi, '.<wbr>');
-        }
-        
-        // 寫回原本的標籤裡
-        link.innerHTML = text;
-    });
-});
-
-// ========【滾動動畫】 設定 - 進入畫面時顯示 ========
-
-// IntersectionObserver 觸發條件
-const observerOptions = {
-    // 元素出現 10% 即觸發
-    threshold: 0.1
-};
-
-// 建立觀察器
-const observer = new IntersectionObserver(
-    // 偵測進入畫面的元素
-    (entries) => {
-        entries.forEach(entry => {
-            // 若元素進入畫面
-            if (entry.isIntersecting) {
-                // 加上顯示 class
-                entry.target.classList.add('is-visible');
+    }, { threshold: 0.1, rootMargin: '100px 0px' })
+    : null;
+function initializeModCardUI(container) {
+    if (!container) return;
+    for (const link of container.querySelectorAll('.info-row a, .info-row span, .warning-content span')) {
+        // 只處理純文字節點，避免改寫原本的巢狀標籤與連結。
+        const textNodes = [...link.childNodes].filter(node => node.nodeType === Node.TEXT_NODE);
+        for (const node of textNodes) {
+            const original = node.nodeValue;
+            if (!original || !/[_\.]/.test(original)) continue;
+            const fragment = document.createDocumentFragment();
+            const parts = original.split(/(?<=_)|(?<=\.)(?!\d)|(?=\.[a-z0-9]+$)/gi);
+            for (let i = 0; i < parts.length; i++) {
+                fragment.appendChild(document.createTextNode(parts[i]));
+                if (i < parts.length - 1 && parts[i]) fragment.appendChild(document.createElement('wbr'));
             }
-        });
-    },
-
-    // 套用設定
-    observerOptions
-);
-
-// 監聽所有模組卡片
-document.querySelectorAll('.mod-card')
-    .forEach(card => {
-        // 開始觀察
-        observer.observe(card);
-    });
-
-// ========【初始化】 設定 - 頁面載入後執行 ========
-// 更新模組數量
-updateModCount();
-
+            node.replaceWith(fragment);
+        }
+    }
+    for (const card of container.querySelectorAll('.mod-card')) {
+        if (modCardObserver) modCardObserver.observe(card);
+        else card.classList.add('is-visible');
+    }
+    updateModCount();
+}
+window.L1nGModCardUI = { initialize: initializeModCardUI };
 
 // ========【搜尋欄】 設定 - 沿用既有搜尋結果，不更動搜尋演算法 ========
 document.addEventListener('DOMContentLoaded', () => {
