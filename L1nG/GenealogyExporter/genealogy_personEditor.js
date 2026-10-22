@@ -72,7 +72,7 @@
   const editingGallery = [];
   const editingOutfits = [];
   const OOTD_CATEGORIES=Object.freeze([
-    {id:0,label:'日常',icon:'shirt'}, {id:1,label:'正式',icon:'outfit-formal'},
+    {id:0,label:'日常',icon:'outfit-everyday'}, {id:1,label:'正式',icon:'outfit-formal'},
     {id:2,label:'運動',icon:'outfit-athletic'}, {id:3,label:'睡衣',icon:'outfit-sleepwear'},
     {id:4,label:'派對',icon:'outfit-party'}, {id:9,label:'游泳',icon:'outfit-swimwear'},
     {id:10,label:'炎熱天氣',icon:'outfit-hot-weather'}, {id:11,label:'寒冷天氣',icon:'outfit-cold-weather'}
