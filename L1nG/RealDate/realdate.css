@@ -1355,16 +1355,10 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 6px 10px;
     padding-top: 10px;
     border-top: 1px solid var(--line-soft);
-}
-
-.community-translation-footer small {
-    color: var(--text-soft);
-    font-size: 11px;
-    line-height: 1.5;
 }
 
 .community-translation-footer a {
