@@ -2606,17 +2606,32 @@ function buildPersonEditorDraft({
     renderOotdWorkspace();
   }
 
+  function positionOotdCategoryIndicator(button){
+    const menu=$('simOotdCategoryPopover');
+    const indicator=menu?.querySelector('.ootd-category-indicator');
+    const label=button?.querySelector('.ootd-category-option-label');
+    if(!indicator||!label||menu.hidden)return;
+    const menuBounds=menu.getBoundingClientRect();
+    const labelBounds=label.getBoundingClientRect();
+    const width=Math.max(22,Math.min(56,labelBounds.width));
+    const x=labelBounds.left-menuBounds.left+(labelBounds.width-width)/2;
+    const y=labelBounds.bottom-menuBounds.top+3;
+    indicator.style.width=Math.round(width)+'px';
+    indicator.style.transform='translate3d('+Math.round(x)+'px,'+Math.round(y)+'px,0)';
+  }
+
   function toggleOotdCategoryPopover(){
     const menu=$('simOotdCategoryPopover');
     const toggle=$('simOotdCategoryToggle');
     const modal=document.querySelector('.sim-editor-modal');
     if(!menu||!toggle||!modal)return;
     if(!menu.hidden){closeOotdCategoryPopover();return;}
+    menu.classList.remove('ootd-indicator-animated');
     menu.innerHTML=OOTD_CATEGORIES.map((item,index)=>
       '<button type="button" class="ootd-category-option'+(index===ootdCategoryPosition?' active':'')+'" data-ootd-category="'+index+'" aria-pressed="'+(index===ootdCategoryPosition)+'">'+
         '<span class="l1ng-icon icon-'+item.icon+'" aria-hidden="true"></span>'+ 
         '<span class="ootd-category-option-label">'+esc(uiText(item.label))+'</span></button>'
-    ).join('');
+    ).join('')+'<span class="ootd-category-indicator" aria-hidden="true"></span>';
     menu.hidden=false;
     toggle.setAttribute('aria-expanded','true');
     const container=modal.getBoundingClientRect();
@@ -2624,10 +2639,14 @@ function buildPersonEditorDraft({
     const width=menu.offsetWidth;
     const maxLeft=Math.max(10,container.width-width-10);
     const left=Math.max(10,Math.min(maxLeft,trigger.left-container.left+(trigger.width-width)/2));
-    const desiredTop=trigger.bottom-container.top+7;
+    const desiredTop=trigger.bottom-container.top+12;
     const top=Math.min(desiredTop,Math.max(10,container.height-menu.offsetHeight-12));
     menu.style.left=Math.round(left)+'px';
     menu.style.top=Math.round(top)+'px';
+    positionOotdCategoryIndicator(menu.querySelector('.ootd-category-option.active'));
+    requestAnimationFrame(()=>{
+      if(!menu.hidden)menu.classList.add('ootd-indicator-animated');
+    });
   }
 
   function openOotdLightbox(index){
@@ -2747,10 +2766,27 @@ function buildPersonEditorDraft({
     $('simOotdPrevCategory')?.addEventListener('click',()=>selectOotdCategory(ootdCategoryPosition-1));
     $('simOotdNextCategory')?.addEventListener('click',()=>selectOotdCategory(ootdCategoryPosition+1));
     $('simOotdCategoryToggle')?.addEventListener('click',toggleOotdCategoryPopover);
-    $('simOotdCategoryPopover')?.addEventListener('click',event=>{
+    const ootdMenu=$('simOotdCategoryPopover');
+    ootdMenu?.addEventListener('click',event=>{
       const button=event.target.closest('button[data-ootd-category]');
       if(!button)return;
       selectOotdCategory(Number(button.dataset.ootdCategory));
+    });
+    ootdMenu?.addEventListener('pointerover',event=>{
+      const button=event.target.closest('button[data-ootd-category]');
+      if(button)positionOotdCategoryIndicator(button);
+    });
+    ootdMenu?.addEventListener('pointerleave',()=>{
+      positionOotdCategoryIndicator(ootdMenu.querySelector('.ootd-category-option.active'));
+    });
+    ootdMenu?.addEventListener('focusin',event=>{
+      const button=event.target.closest('button[data-ootd-category]');
+      if(button)positionOotdCategoryIndicator(button);
+    });
+    ootdMenu?.addEventListener('focusout',event=>{
+      if(!ootdMenu.contains(event.relatedTarget)){
+        positionOotdCategoryIndicator(ootdMenu.querySelector('.ootd-category-option.active'));
+      }
     });
     document.addEventListener('pointerdown',event=>{
       if($('simOotdCategoryPopover')?.hidden)return;
