@@ -110,6 +110,43 @@ async function saveFiles(files,id,env){
     throw e;
   }
 }
+// 回饋通知僅在 D1 已成功儲存後觸發；內容不含匿名憑證、聯絡方式與附件。
+// 管理員登入白名單可作為初始收件者；日後可用 FEEDBACK_NOTIFY_EMAILS 獨立指定。
+const feedbackNotificationRecipients = env => [...new Set(
+  text(env.FEEDBACK_NOTIFY_EMAILS || env.ADMIN_EMAIL)
+    .split(",").map(email=>email.trim().toLowerCase())
+    .filter(email=>/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))
+)];
+function notifyFeedback(env,ctx,{type,id,source,category,version,gameVersion,createdAt,message}){
+  if(!env.FEEDBACK_EMAIL || typeof env.FEEDBACK_EMAIL.send!=="function")return;
+  const recipients=feedbackNotificationRecipients(env);
+  if(!recipients.length)return;
+  const subject="[L1nG] "+source+" · "+(type==="created"?"新玩家回饋":"玩家後續留言");
+  const timestamp=new Date(createdAt).toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false});
+  const body=[
+    type==="created"?"收到新的玩家問題回饋。":"玩家在既有回饋中新增留言。",
+    "作品："+source,
+    "回饋編號："+id,
+    "類型："+category,
+    ...(version?["模組版本："+version]:[]),
+    ...(gameVersion?["遊戲版本："+gameVersion]:[]),
+    "時間（台灣）："+timestamp,
+    "",
+    "內容預覽：",
+    clean(message,220),
+    "",
+    "管理中心：https://home.by-l1ng.com/feedback/admin.html"
+  ].join("\\n");
+  const from=text(env.FEEDBACK_NOTIFY_SENDER)||"notify@by-l1ng.com";
+  const task=Promise.all(recipients.map(async to=>{
+    try{await env.FEEDBACK_EMAIL.send({from,to,subject,text:body});}
+    catch(error){console.error("Feedback email notification failed:",error?.code||"SEND_FAILED");}
+  }));
+  // waitUntil 確保回應後仍能完成寄信；寄信失敗不可影響玩家已完成的提交。
+  if(ctx && typeof ctx.waitUntil==="function")ctx.waitUntil(task);
+  else void task;
+}
+
 const formatFeedback = (row,messages=[],attachments=[],admin=false) => ({
   id:row.id,source:row.source,site:row.source,category:row.category,target:row.target,
   title:row.message.slice(0,32),message:row.message,followUp:row.follow_up,
@@ -131,7 +168,7 @@ async function verifiedReceipt(env,value){
   if(!row || !row.receipt_hash || row.receipt_hash!==await sha256(pair.secret)) return null;
   return row;
 }
-async function createFeedback(req,env,origin){
+async function createFeedback(req,env,origin,ctx){
   const len=Number(req.headers.get("content-length")||0);
   if(len>23*1048576) return fail("回饋資料超過允許大小。",413);
   let form;
@@ -161,6 +198,7 @@ async function createFeedback(req,env,origin){
     if(env.ATTACHMENTS)await Promise.allSettled(saved.map(a=>env.ATTACHMENTS.delete(a.key)));
     return fail("儲存回饋失敗，請稍後再試。",503);
   }
+  notifyFeedback(env,ctx,{type:"created",id,source:data.source,category:data.category,version:data.version,gameVersion:data.gameVersion,createdAt:created,message:data.message});
   return json({ok:true,id,receipt:secret?id+":"+secret:null,status:"pending"},201);
 }
 async function lookup(req,env){
@@ -171,7 +209,7 @@ async function lookup(req,env){
   const record=await readRecord(env,row.id);
   return json({ok:true,feedback:formatFeedback(record.row,record.messages,record.attachments)});
 }
-async function reply(req,env,origin){
+async function reply(req,env,origin,ctx){
   let form;try{form=await req.formData();}catch(_){return fail("回覆格式不正確。");}
   const row=await verifiedReceipt(env,f(form,"receipt"));
   if(!row)return fail("私人憑證無效或查無資料。",404);
@@ -200,6 +238,7 @@ async function reply(req,env,origin){
     if(env.ATTACHMENTS)await Promise.allSettled(saved.map(a=>env.ATTACHMENTS.delete(a.key)));
     return fail("儲存回覆失敗，請稍後再試。",503);
   }
+  notifyFeedback(env,ctx,{type:"reply",id:row.id,source:row.source,category:row.category,version:row.version,gameVersion:row.game_version,createdAt:created,message:body});
   return json({ok:true});
 }
 async function checkAdmin(request,env){
@@ -270,7 +309,7 @@ async function admin(req,env,path){
   return fail("找不到端點。",404);
 }
 export default {
-  async fetch(request,env){
+  async fetch(request,env,ctx){
     const url=new URL(request.url),path=url.pathname.replace(/\/+$/,"")||"/";
     if(path==="/health"&&request.method==="GET")return json({ok:true,service:"l1ng-feedback-api"});
     if(!env.DB)return fail("回饋資料庫尚未連接。",503);
@@ -289,9 +328,9 @@ export default {
     if(request.method==="OPTIONS")return new Response(null,{status:204,headers:cors(origin)});
     let result;
     try{
-      if(path==="/v1/feedback"&&request.method==="POST")result=await createFeedback(request,env,origin);
+      if(path==="/v1/feedback"&&request.method==="POST")result=await createFeedback(request,env,origin,ctx);
       else if(path==="/v1/feedback/lookup"&&request.method==="POST")result=await lookup(request,env);
-      else if(path==="/v1/feedback/reply"&&request.method==="POST")result=await reply(request,env,origin);
+      else if(path==="/v1/feedback/reply"&&request.method==="POST")result=await reply(request,env,origin,ctx);
       else result=fail("找不到端點。",404);
     }catch(_){result=fail("服務暫時無法處理請求。",503);}
     const headers=new Headers(result.headers);
