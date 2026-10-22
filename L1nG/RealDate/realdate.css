@@ -1292,6 +1292,84 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 字體大小 */ font-size: 10px;
 }
 
+/* ========【RealDate 社群翻譯】 設定 - 精簡卡片及響應式排列 ======== */
+.community-translation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 960px;
+}
+
+.community-translation-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    min-width: 0;
+    padding: 17px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.community-translation-flag {
+    flex: none;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+    font-size: 30px;
+    line-height: 1.3;
+}
+
+.community-translation-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.community-translation-info h3 {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.5;
+}
+
+.community-translation-info p {
+    margin: 1px 0 9px;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.community-translation-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    line-height: 1.5;
+}
+
+.community-translation-meta a {
+    color: var(--accent);
+    font-size: 12px;
+}
+
+.community-translation-meta small {
+    color: var(--text-soft);
+    font-size: 11px;
+}
+
+@media (max-width: 980px) {
+    .community-translation-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 660px;
+    }
+}
+
+@media (max-width: 600px) {
+    .community-translation-grid {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 100%;
+    }
+}
+
 /* ========【下載內容】 設定 - 顯示實際發布 ZIP 內含檔案 ======== */
 .package-contents {
     /* 上方外距 */ margin-top: 28px;
