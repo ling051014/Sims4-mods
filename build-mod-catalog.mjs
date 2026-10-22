@@ -27,24 +27,41 @@ function rich(nodes) {
 function renderCard(mod, category = '') {
     const layout = mod.layout || {};
     const noteTag = layout.notesTag || 'div';
-    if (!['p','div'].includes(noteTag)) throw new Error('Invalid notes layout');
+    if (!['p', 'div'].includes(noteTag)) throw new Error('Invalid notes layout');
     const notes = mod.notes
         ? '<' + noteTag + ' class="tips">' + rich(mod.notes) + '</' + noteTag + '>'
         : '';
     const previewStyle = layout.previewStyle ? ' style="' + attr(layout.previewStyle) + '"' : '';
     const author = attr(mod.authors?.[0]?.name || '');
-    let html = '<div class="mod-card" id="mod-' + mod.id + '" data-sort-author="' + author + '"' +
-        (category ? ' data-category="' + category + '"' : '') + '>' +
-        (category ? '<button type="button" class="mod-category-label" aria-pressed="false" aria-label="篩選 ' + category + ' 分類">' + category + '</button>' : '') +
-        '<div class="preview-img"' + previewStyle + '>' + rich(mod.preview) + '</div>' +
-        '<div class="content">' +
-        '<h2 class="mod-header">' + rich(mod.title) + '</h2>' +
-        '<div class="author">' + rich(mod.byline) + '</div>' +
-        '<div class="details">' + mod.fields.map(field =>
-            '<div class="info-row"><strong>' + field.label + '</strong>' + rich(field.value) + '</div>'
-        ).join('') + '</div>';
-    if (!layout.notesOutside) html += notes;
-    return html + '</div>' + (layout.notesOutside ? notes : '') + '</div>';
+
+    // 每張卡片輸出可閱讀的縮排、換行；原富文字內容保持不變。
+    const rows = [
+        '<div class="mod-card" id="mod-' + mod.id + '" data-sort-author="' + author + '"' +
+            (category ? ' data-category="' + category + '"' : '') + '>'
+    ];
+    if (category) {
+        rows.push('    <button type="button" class="mod-category-label" aria-pressed="false" aria-label="篩選 ' +
+            category + ' 分類">' + category + '</button>');
+    }
+    rows.push(
+        '    <div class="preview-img"' + previewStyle + '>',
+        '        ' + rich(mod.preview),
+        '    </div>',
+        '    <div class="content">',
+        '        <h2 class="mod-header">' + rich(mod.title) + '</h2>',
+        '        <div class="author">' + rich(mod.byline) + '</div>',
+        '        <div class="details">'
+    );
+    for (const field of mod.fields) {
+        rows.push('            <div class="info-row"><strong>' +
+            field.label + '</strong>' + rich(field.value) + '</div>');
+    }
+    rows.push('        </div>');
+    if (!layout.notesOutside && notes) rows.push('        ' + notes);
+    rows.push('    </div>');
+    if (layout.notesOutside && notes) rows.push('    ' + notes);
+    rows.push('</div>');
+    return rows.join('\n');
 }
 export function generateCategory(source, data) {
     if (data.schemaVersion !== 2 || !Array.isArray(data.mods)) throw new Error('Unsupported JSON schema');
