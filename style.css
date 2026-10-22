@@ -1497,20 +1497,102 @@ html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,body *::-webkit-scro
     color: #888;
     box-sizing: border-box;
 }
-.mod-sort-bar select {
-    font: inherit;
-    color: #555;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    padding: 7px 10px;
-    max-width: 100%;
-    cursor: pointer;
+/* 模組排序共用既有 select-ui 下拉互動，沿用本站顏色和尺寸 */
+.mod-sort-bar select:not(.l1ng-select-native) {
+    font:inherit;
+    color:#555;
+    background:#fff;
+    border:1px solid #e8e8e8;
+    border-radius:8px;
+    padding:8px 28px 8px 12px;
+    max-width:100%;
+    cursor:pointer;
 }
 .mod-sort-bar select:focus-visible {
-    outline: 2px solid #55acee;
-    outline-offset: 2px;
+    outline:2px solid #55acee;
+    outline-offset:2px;
 }
+.l1ng-select-native {
+    position:absolute;
+    width:1px;
+    height:1px;
+    opacity:0;
+    overflow:hidden;
+    padding:0;
+    clip-path:inset(50%);
+    pointer-events:none;
+}
+.mod-sort-bar .l1ng-select { display:inline-block; position:relative; min-width:126px; width:auto; }
+.mod-sort-bar .l1ng-select-trigger {
+    appearance:none;
+    -webkit-appearance:none;
+    box-sizing:border-box;
+    width:100%;
+    min-height:34px;
+    position:relative;
+    padding:8px 31px 8px 12px;
+    border:1px solid #e8e8e8;
+    border-radius:8px;
+    background:#fff;
+    color:#555;
+    font:inherit;
+    font-size:12px;
+    text-align:left;
+    white-space:nowrap;
+    cursor:pointer;
+}
+.mod-sort-bar .l1ng-select-trigger::after {
+    content:"";
+    position:absolute;
+    right:13px;
+    top:calc(50% - 5px);
+    width:7px;
+    height:7px;
+    border-right:1.7px solid #888;
+    border-bottom:1.7px solid #888;
+    transform:rotate(45deg);
+}
+.mod-sort-bar .l1ng-select-trigger:hover { border-color:#b9d8ec; }
+.mod-sort-bar .l1ng-select-trigger:focus-visible,
+.mod-sort-bar .l1ng-select-trigger[aria-expanded="true"] {
+    outline:2px solid #d8ebf8;
+    outline-offset:1px;
+    border-color:#55acee;
+}
+.l1ng-select-panel {
+    position:fixed;
+    z-index:20000;
+    box-sizing:border-box;
+    padding:5px;
+    border:1px solid #e8e8e8;
+    border-radius:10px;
+    background:#fff;
+    box-shadow:0 12px 32px rgba(0,0,0,.1);
+    overflow:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+}
+.l1ng-select-panel[hidden] { display:none; }
+.l1ng-select-item {
+    appearance:none;
+    -webkit-appearance:none;
+    display:block;
+    box-sizing:border-box;
+    width:100%;
+    min-height:36px;
+    padding:8px 10px;
+    border:0;
+    border-radius:6px;
+    background:transparent;
+    color:#555;
+    font:inherit;
+    font-size:12px;
+    text-align:left;
+    cursor:pointer;
+}
+.l1ng-select-item:hover,
+.l1ng-select-item:focus-visible { background:#f3f8fc; outline:none; }
+.l1ng-select-item.selected { color:#328cc4; background:#eaf5fc; font-weight:650; }
 @media (max-width: 600px) {
     .mod-sort-bar { margin: 10px auto -22px; padding: 0 12px; }
 }
