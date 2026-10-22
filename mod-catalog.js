@@ -151,7 +151,10 @@
                 if (loading) loading.ready(cards);
                 else container.replaceChildren(cards);
                 window.L1nGModCardUI?.initialize(container);
-                window.L1nGModSort?.bind(document.getElementById('mod-sort'), container);
+                const sorting = window.L1nGModSort?.bind(document.getElementById('mod-sort'), container);
+                sorting?.sort();
+                if (document.getElementById('mod-search')?.value && typeof window.searchMods === 'function')
+                    window.searchMods();
             }
             container.dataset.catalogStatus = 'ready';
         } catch (error) {

@@ -56,7 +56,8 @@
             if (lazyObserver) lazyObserver.observe(card);
             else card.classList.add('is-visible');
         }
-        window.L1nGModSort?.bind(sort, container);
+        const sorting = window.L1nGModSort?.bind(sort, container);
+        sorting?.sort();
         loaded = true;
         applyFilters();
     }
