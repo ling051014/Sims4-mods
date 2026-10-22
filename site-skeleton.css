@@ -55,7 +55,7 @@
     border-radius:12px;
     background:var(--sk-surface);
 }
-.l1ng-sk-card-media { height:190px; }
+.l1ng-sk-card-media { height:210px; }
 .l1ng-sk-card-body { padding:16px; display:grid; gap:11px; }
 .l1ng-sk-card-body .l1ng-sk-line:nth-child(1) { width:72%; }
 .l1ng-sk-card-body .l1ng-sk-line:nth-child(2) { width:42%; }
@@ -71,6 +71,21 @@
 }
 .layout-mods-home .mods-home-head .title { width:min(360px,66vw); height:26px; border-radius:6px; }
 .layout-mods-home .mods-home-head .meta { width:210px; }
+.layout-mods-home .mods-home-switch {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:4px;
+    width:228px;
+    height:42px;
+    margin:20px auto 2px;
+    padding:4px;
+    box-sizing:border-box;
+    border:1px solid var(--sk-line);
+    border-radius:24px;
+    background:var(--sk-surface);
+}
+.layout-mods-home .mods-home-switch-half { flex:1; height:30px; min-width:0; border-radius:20px; }
 .layout-mods-home .mods-category-grid {
     width:min(1400px,calc(100% - 40px));
     margin:0 auto;
@@ -113,11 +128,24 @@
 .layout-mods-table .mods-list-toolbar .crumb { width:190px; }
 .layout-mods-list .mods-list-toolbar .search,
 .layout-mods-table .mods-list-toolbar .search { width:280px; margin-left:auto; }
+.layout-mods-list .mods-sort-placeholder {
+    width:min(1200px,100%);
+    height:34px;
+    margin:18px auto -30px;
+    padding:0 20px;
+    box-sizing:border-box;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:10px;
+}
+.layout-mods-list .mods-sort-label { width:27px; height:11px; border-radius:3px; }
+.layout-mods-list .mods-sort-select { width:125px; height:33px; border-radius:7px; }
 .layout-mods-list .mods-card-grid {
     width:min(1200px,calc(100% - 40px));
     margin:50px auto;
     display:grid;
-    grid-template-columns:repeat(3,360px);
+    grid-template-columns:repeat(3,minmax(0,360px));
     justify-content:center;
     gap:30px;
 }
@@ -298,6 +326,8 @@
     .layout-mods-home .mods-category-tile { min-height:92px; padding:30px 12px; }
     .layout-mods-home .mods-home-panels { grid-template-columns:1fr; }
     .layout-mods-list .mods-list-toolbar, .layout-mods-table .mods-list-toolbar { padding:0 12px; }
+    .layout-mods-list .mods-sort-placeholder { margin:10px auto -22px; padding:0 12px; }
+    .layout-mods-list .mods-card-grid .l1ng-sk-card-media { height:140px; }
     .layout-mods-list .mods-list-toolbar .crumb, .layout-mods-table .mods-list-toolbar .crumb { width:120px; }
     .layout-mods-list .mods-list-toolbar .search, .layout-mods-table .mods-list-toolbar .search { width:42%; }
     .layout-mods-list .mods-card-grid { grid-template-columns:minmax(0,1fr); width:min(360px,calc(100% - 28px)); margin-top:28px; gap:18px; }
@@ -368,16 +398,19 @@
 .l1ng-content-row { display:grid; grid-template-columns:22% 1fr 1fr; gap:10px; min-height:35px; align-items:center; }
 .l1ng-content-line { height:13px; }
 .l1ng-content-line.short { width:72%; }
-.l1ng-content-skeleton-cards { max-width:1200px; margin:0 auto; grid-template-columns:repeat(3,minmax(0,1fr)); gap:30px; }
+.l1ng-content-skeleton-cards { max-width:1200px; margin:0 auto; grid-template-columns:repeat(3,minmax(0,360px)); justify-content:center; gap:30px; }
 .l1ng-content-card { min-width:0; overflow:hidden; background:#fff; border:1px solid #f0f0f0; border-radius:12px; }
 .l1ng-content-media { display:block; height:210px; border-radius:0; }
-.l1ng-content-card-body { display:grid; gap:12px; padding:20px; }
+.l1ng-content-card-body { display:grid; gap:12px; padding:20px; align-content:start; }
+.l1ng-content-badge { height:14px; width:32%; border-radius:10px; }
+.l1ng-content-action { height:32px; width:40%; border-radius:7px; }
 .l1ng-content-keyword { display:grid; grid-template-columns:100px 1fr 1fr; gap:15px; padding:10px; min-height:36px; align-items:center; }
 .l1ng-content-pill { height:28px; border-radius:18px; }
 .l1ng-content-state-message { padding:12px 20px; margin:16px auto; text-align:center; color:#777; font-size:13px; }
 @media (max-width:960px) { .l1ng-content-skeleton-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:630px) {
   .l1ng-content-skeleton-cards { grid-template-columns:minmax(0,360px); justify-content:center; gap:20px; }
+  .l1ng-content-skeleton-cards .l1ng-content-media { height:140px; }
   .l1ng-content-row { gap:6px; }
   .l1ng-content-keyword { grid-template-columns:70px 1fr; }
 }
