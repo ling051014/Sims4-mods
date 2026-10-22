@@ -80,6 +80,7 @@
     const templates = {
         "mods-home": () =>
             '<div class="mods-home-head">' + block("title") + block("l1ng-sk-line meta") + '</div>' +
+            '<div class="mods-home-switch">' + block("mods-home-switch-half") + block("mods-home-switch-half") + '</div>' +
             '<div class="mods-category-grid">' + repeat(12, () =>
                 '<div class="mods-category-tile">' + block("l1ng-sk-line") + block("l1ng-sk-line sm") + '</div>'
             ) + '</div><div class="mods-home-panels">' +
@@ -87,6 +88,7 @@
 
         "mods-list": () =>
             '<div class="mods-list-toolbar">' + block("l1ng-sk-line crumb") + block("l1ng-sk-pill search") + '</div>' +
+            '<div class="mods-sort-placeholder">' + block("mods-sort-label") + block("mods-sort-select") + '</div>' +
             '<div class="mods-card-grid">' + repeat(6, card) + '</div>',
 
         "mods-table": () =>
@@ -243,7 +245,9 @@
         loading.innerHTML = variant === "dlc-table" ? dlcTableSkeleton(count) : Array.from({ length: Math.min(8, Math.max(1, count)) }, () =>
             variant === "cards"
                 ? '<div class="l1ng-content-card">' + block("media") +
-                    '<div class="l1ng-content-card-body">' + block() + block("line short") + block() + '</div></div>'
+                    '<div class="l1ng-content-card-body">' +
+                    block("badge") + block() + block("line short") + block() +
+                    block("line short") + block("action") + '</div></div>'
                 : variant === "keywords"
                     ? '<div class="l1ng-content-keyword">' + block("pill") + block() + block() + '</div>'
                     : '<div class="l1ng-content-row">' + block("line short") + block() + block() + '</div>'
