@@ -836,8 +836,8 @@ input[type="range"]:disabled {
 /* ========【側邊欄尺寸】 設定 - 左上品牌區與側邊欄共用同一寬度 ======== */
 
 :root {
-    /* 側邊欄目前寬度 */ --sidebar-width: 220px;
-    /* 側邊欄預設寬度 */ --sidebar-default-width: 220px;
+    /* 側邊欄目前寬度 */ --familySidebar-width: 220px;
+    /* 側邊欄預設寬度 */ --familySidebar-default-width: 220px;
 }
 
 .app {
@@ -869,7 +869,7 @@ input[type="range"]:disabled {
     /* 換行方式 */ white-space: nowrap;
     /* 溢出處理 */ overflow: hidden;
     /* 文字溢出 */ text-overflow: ellipsis;
-    /* 元素寬度 */ width: var(--sidebar-width);
+    /* 元素寬度 */ width: var(--familySidebar-width);
     /* 水平對齊 */ justify-content: center;
     /* 文字對齊 */ text-align: center;
     /* 左右內縮 */ padding-left: 10px;
@@ -1002,7 +1002,7 @@ input[type="range"]:disabled {
 }
 
 .sidebar {
-    /* 元素寬度 */ width: var(--sidebar-width);
+    /* 元素寬度 */ width: var(--familySidebar-width);
     /* 彈性收縮 */ flex-shrink: 0;
     /* 背景設定 */ background: var(--surface-canvas);
     /* 右側邊框 */ border-right: 1px solid var(--border-default);
@@ -1040,17 +1040,17 @@ input[type="range"]:disabled {
 
 .sidebar-resizer:hover::before,
 .sidebar-resizer:focus-visible::before,
-body.sidebar-resizing .sidebar-resizer::before {
+body.familySidebar-resizing .sidebar-resizer::before {
     /* 背景設定 */ background: var(--action-primary);
     /* 元素陰影 */ box-shadow: 0 0 0 1px rgba(255,255,255,.65);
 }
 
-body.sidebar-resizing {
+body.familySidebar-resizing {
     /* 滑鼠指標 */ cursor: col-resize;
     /* 文字選取 */ user-select: none;
 }
 
-body.sidebar-resizing * {
+body.familySidebar-resizing * {
     /* 滑鼠指標 */ cursor: col-resize !important;
 }
 
@@ -5333,7 +5333,7 @@ button.avatar-editor-action { cursor:pointer; }
 
 @media (max-width:900px) {
     .topbar-brand {
-        /* 元素寬度 */ width: var(--sidebar-width);
+        /* 元素寬度 */ width: var(--familySidebar-width);
         /* 字體大小 */ font-size: 14px;
         /* 內縮空間 */ padding: 0 12px;
     }
@@ -5500,7 +5500,7 @@ body[data-theme="ling"] #genealogyCanvasViewport {
 
 @media (max-width:900px) {
     .topbar-brand {
-        /* 元素寬度 */ width: var(--sidebar-width);
+        /* 元素寬度 */ width: var(--familySidebar-width);
         /* 最大寬度 */ max-width: none;
         /* 左右內縮 */ padding-left: 8px;
         /* 左右內縮 */ padding-right: 8px;
@@ -6967,7 +6967,7 @@ button.is-loading .button-loading-label {
 
 
 /* ========【正式新版外殼】 家族檔案欄、精簡頂欄、畫布情境工具 ======== */
-:root { --sidebar-width:300px; --sidebar-default-width:300px; }
+:root { --familySidebar-width:300px; --familySidebar-default-width:300px; }
 .icon-three-dots { --l1ng-icon:var(--l1ng-icon-three-dots); }
 .icon-dash-lg { --l1ng-icon:var(--l1ng-icon-dash-lg); }
 .icon-arrows-fullscreen { --l1ng-icon:var(--l1ng-icon-arrows-fullscreen); }
@@ -7067,7 +7067,8 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 
 .app-body { flex:1; display:flex; min-height:0; overflow:hidden; }
 .sidebar-backdrop { display:none; }
-.family-panel { position:relative; width:var(--sidebar-width); flex:0 0 var(--sidebar-width); min-width:0; display:flex; flex-direction:column; background:var(--surface-card); border-right:1px solid var(--border-default); z-index:35; transition:width .22s ease,flex-basis .22s ease,transform .22s ease; overflow:hidden; }
+.family-panel { position:relative; width:var(--familySidebar-width); flex:0 0 var(--familySidebar-width); min-width:0; display:flex; flex-direction:column; background:var(--surface-card); border-right:1px solid var(--border-default); z-index:35; transition:width .22s ease,flex-basis .22s ease,transform .22s ease; overflow:hidden; }
+body.familySidebar-resizing .family-panel { transition:none; }
 .family-panel-scroll {
     flex:1 1 auto;
     min-height:0;
@@ -7511,9 +7512,9 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 
 .family-panel-resizer { width:7px; margin-left:-4px; margin-right:-3px; position:relative; flex:0 0 7px; z-index:45; cursor:col-resize; touch-action:none; background:transparent; outline:none; }
 .family-panel-resizer::before { content:""; position:absolute; top:0; bottom:0; left:3px; width:1px; background:transparent; transition:background-color .15s; }
-.family-panel-resizer:hover::before,.family-panel-resizer:focus-visible::before,body.sidebar-resizing .family-panel-resizer::before { background:var(--action-primary); }
-body.sidebar-resizing { cursor:col-resize; user-select:none; }
-body.sidebar-resizing * { cursor:col-resize !important; }
+.family-panel-resizer:hover::before,.family-panel-resizer:focus-visible::before,body.familySidebar-resizing .family-panel-resizer::before { background:var(--action-primary); }
+body.familySidebar-resizing { cursor:col-resize; user-select:none; }
+body.familySidebar-resizing * { cursor:col-resize !important; }
 body.family-panel-collapsed .family-panel { width:0; flex-basis:0; border-right:0; }
 body.family-panel-collapsed .family-panel-resizer { display:none; }
 body.family-panel-collapsed .topbar-brand { min-width:210px; }
@@ -8050,8 +8051,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:var(--surface-card);
 }
 .app-skeleton-brand-area {
-    width:var(--sidebar-width);
-    flex:0 0 var(--sidebar-width);
+    width:var(--familySidebar-width);
+    flex:0 0 var(--familySidebar-width);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -8073,8 +8074,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     display:flex;
 }
 .app-skeleton-sidebar {
-    width:var(--sidebar-width);
-    flex:0 0 var(--sidebar-width);
+    width:var(--familySidebar-width);
+    flex:0 0 var(--familySidebar-width);
     min-width:0;
     padding:12px 8px 16px;
     overflow:hidden;

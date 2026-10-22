@@ -324,7 +324,7 @@
 
     function applySidebarWidth(value, { persist = true } = {}) {
       const width = clampSidebarWidth(value);
-      document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+      document.documentElement.style.setProperty('--familySidebar-width', `${width}px`);
       scheduleFamilyNameInputWidthSync();
       if (sidebarResizer) sidebarResizer.setAttribute('aria-valuenow', String(width));
       if (persist) {
@@ -350,7 +350,7 @@
         e.preventDefault();
         const startX = e.clientX;
         const startWidth = sidebar.getBoundingClientRect().width;
-        document.body.classList.add('sidebar-resizing');
+        document.body.classList.add('familySidebar-resizing');
         try { sidebarResizer.setPointerCapture(e.pointerId); } catch (_) {}
 
         const onMove = ev => {
@@ -361,7 +361,7 @@
           sidebarResizer.removeEventListener('pointermove', onMove);
           sidebarResizer.removeEventListener('pointerup', onUp);
           sidebarResizer.removeEventListener('pointercancel', onUp);
-          document.body.classList.remove('sidebar-resizing');
+          document.body.classList.remove('familySidebar-resizing');
         };
 
         sidebarResizer.addEventListener('pointermove', onMove);
