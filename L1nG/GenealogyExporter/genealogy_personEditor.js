@@ -3798,47 +3798,53 @@ function commitPersonEditorDraft() {
         personEditorRelationshipOptionProvider
       );
 
-    $('simAvatarFileInput').onchange=async event=>{
-      const file=event.target.files[0];
+    async function importSimAvatarFile(file){
       if(!file)return;
-
       try{
-        const result=
-          await avatarImageCompressor(
-            file,
-            'sim'
-          );
-
-        simEditorState.customAvatar=
-          await avatarImageAssetSaver(
-            result.blob,
-            {
-              width:result.width,
-              height:result.height
-            }
-          );
-
-        simEditorState.customAvatarFrame={
-          ...DEFAULT_AVATAR_FRAME
-        };
-
-        simEditorState.avatarSource=
-          'custom';
-
+        const session=personEditorSessionVersion;
+        const result=await avatarImageCompressor(file,'sim');
+        if(session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
+        simEditorState.customAvatar=await avatarImageAssetSaver(result.blob,{width:result.width,height:result.height});
+        if(session!==personEditorSessionVersion||!mask.classList.contains('show'))return;
+        simEditorState.customAvatarFrame={...DEFAULT_AVATAR_FRAME};
+        simEditorState.avatarSource='custom';
         syncPersonEditorActiveAvatar();
         renderPersonEditorAvatarPreview();
         renderPersonEditorInfoPreviewIfActive();
-
         await avatarCropOpener('sim');
       }catch(error){
-        uiAlert('圖片處理失敗：'+error.message,{
-          title:'圖片處理失敗',
-          kind:'danger'
-        });
+        uiAlert('圖片處理失敗：'+error.message,{title:'圖片處理失敗',kind:'danger'});
       }
-
+    }
+    $('simAvatarFileInput').onchange=event=>{
+      const file=event.target.files?.[0];
       event.target.value='';
+      void importSimAvatarFile(file);
     };
+    const simAvatarDropZone=$('simAvatarPreview');
+    const isSimAvatarFile=event=>Array.from(event.dataTransfer?.types||[]).includes('Files');
+    for(const type of ['dragenter','dragover'])simAvatarDropZone.addEventListener(type,event=>{
+      if(!isSimAvatarFile(event))return;
+      event.preventDefault();
+      event.stopPropagation();
+      if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
+      simAvatarDropZone.classList.add('dragover');
+    });
+    simAvatarDropZone.addEventListener('dragleave',event=>{
+      if(!simAvatarDropZone.contains(event.relatedTarget))simAvatarDropZone.classList.remove('dragover');
+    });
+    simAvatarDropZone.addEventListener('drop',event=>{
+      if(!isSimAvatarFile(event))return;
+      event.preventDefault();
+      event.stopPropagation();
+      simAvatarDropZone.classList.remove('dragover');
+      const files=Array.from(event.dataTransfer?.files||[]);
+      if(files.length!==1){
+        uiAlert(uiText('請一次只拖曳一張圖片。'),{title:uiText('圖片處理失敗'),kind:'danger'});
+        return;
+      }
+      void importSimAvatarFile(files[0]);
+    });
 
     $('avatarAdjustBtn').onclick=()=>{
       void avatarCropOpener('sim');
