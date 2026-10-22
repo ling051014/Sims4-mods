@@ -15,6 +15,7 @@
       "database_id": "41982056-0458-490b-b9a7-a09f929960e3"
     }
   ],
+  "send_email": [{ "name": "FEEDBACK_EMAIL" }],
   "r2_buckets": [
     {
       "binding": "ATTACHMENTS",
