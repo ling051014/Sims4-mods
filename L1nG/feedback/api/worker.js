@@ -103,8 +103,9 @@ async function notifyAdminReply(env,feedback,replyId){
  if(!claim)return;
  // 同一筆回饋的取消通知連結保持穩定；否則收到下一封通知後，舊信連結會失效。
  // 使用伺服器端祕密簽發不可猜測的 URL token，D1 僅保存其雜湊，不附加私人憑證。
- if(!env.RESEND_API_KEY)return;
- const key=await crypto.subtle.importKey("raw",enc.encode(env.RESEND_API_KEY),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+ if(!feedback.receipt_hash)return;
+ // 以每筆對話獨立的隨機憑證雜湊衍生 token，避免輪替 Resend API Key 導致舊郵件失效。
+ const key=await crypto.subtle.importKey("raw",enc.encode(feedback.receipt_hash),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
  const token=b64(await crypto.subtle.sign("HMAC",key,enc.encode("feedback-email-unsubscribe:v1:"+feedback.id)));
  const copy=emailCopy[emailLang(item.language)],hash=await sha256(token);
  await env.DB.prepare("UPDATE email_notifications SET unsubscribe_hash=? WHERE feedback_id=?").bind(hash,feedback.id).run();
