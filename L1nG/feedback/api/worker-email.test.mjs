@@ -238,3 +238,40 @@ test('錯誤私人憑證、未授權管理員不能操作通知',async()=>{
    assert.equal(h.replies.length,0);
  });
 });
+
+test('重寄驗證信：未滿冷卻時間拒絕、逾期後換新 token、舊連結作廢',async()=>{
+ const h=harness();
+ await withMock(h,async()=>{
+   const item=await submit(h);
+   const previous=verificationUrl(h.sent[0]);
+   const tooSoon=await post('/v1/feedback/email/resend',{receipt:item.receipt},h.env);
+   assert.equal(tooSoon.status,429);
+   h.notifications.get(item.id).last_verification_sent_at='2000-01-01T00:00:00.000Z';
+   const ok=await post('/v1/feedback/email/resend',{receipt:item.receipt},h.env);
+   assert.equal(ok.status,200);
+   assert.equal(h.sent.length,2);
+   assert.notEqual(verificationUrl(h.sent[1]),previous);
+   const stale=await followLink(previous,h.env);
+   assert.match(await stale.text(),/已過期/);
+   const latest=await followLink(verificationUrl(h.sent[1]),h.env);
+   assert.match(await latest.text(),/電子郵件已驗證/);
+   const repeated=await post('/v1/feedback/email/resend',{receipt:item.receipt},h.env);
+   assert.equal(repeated.status,409);
+ });
+});
+test('通知信寄送故障不得撤銷已保存的管理員回覆；記錄寄送失敗',async()=>{
+ const h=harness({failSend:true});
+ await withMock(h,async()=>{
+   const jwt=await adminAuth(h),item=await submit(h);
+   const row=h.notifications.get(item.id);
+   // 模擬先前已完成的驗證，避免測試用假寄送失敗誤當成啟用。
+   row.state='verified';row.verify_hash=null;
+   const res=await adminReply(h,item.id,jwt);
+   assert.equal(res.status,200);
+   await h.flush();
+   assert.equal(h.replies.length,1);
+   assert.equal(h.sent.length,2);
+   assert.equal([...h.delivery.values()][0].status,'failed');
+   assert.equal(row.state,'verified');
+ });
+});
