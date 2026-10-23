@@ -9,9 +9,9 @@ const enc = new TextEncoder();
 const EMAIL_LANGS = new Set(["zh-Hant","zh-Hans","en"]);
 const emailLang = value => EMAIL_LANGS.has(value)?value:"zh-Hant";
 const emailCopy = {
- "zh-Hant":{verifySubject:"L1nG · 請驗證電子郵件",verifyTitle:"確認電子郵件",verifyBody:"請點擊以下連結，啟用問題回饋的 Email 回覆通知。",verifyAction:"驗證電子郵件",replySubject:"L1nG · 你的問題回饋有新回覆",replyTitle:"管理員已回覆你的問題",replyBody:"請回到官網，使用原本保存的私人憑證查看匿名對話。",unsubscribe:"關閉 Email 回覆通知",verified:"電子郵件已驗證",disabled:"Email 回覆通知已關閉",expired:"驗證連結無效或已過期",brand:"問題回饋"},
- "zh-Hans":{verifySubject:"L1nG · 请验证电子邮箱",verifyTitle:"确认电子邮箱",verifyBody:"请点击以下链接，启用问题反馈的 Email 回复通知。",verifyAction:"验证电子邮箱",replySubject:"L1nG · 你的问题反馈有新回复",replyTitle:"管理员已回复你的问题",replyBody:"请返回官网，使用之前保存的私人凭证查看匿名对话。",unsubscribe:"关闭 Email 回复通知",verified:"电子邮箱已验证",disabled:"Email 回复通知已关闭",expired:"验证链接无效或已过期",brand:"问题反馈"},
- "en":{verifySubject:"L1nG · Verify your email",verifyTitle:"Confirm your email address",verifyBody:"Please confirm your email to receive notifications when we reply to your feedback.",verifyAction:"Verify email",replySubject:"L1nG · New reply to your feedback",replyTitle:"Your feedback has a new reply",replyBody:"Visit the website and use your saved private receipt to view the conversation.",unsubscribe:"Turn off email notifications",verified:"Email verified",disabled:"Email notifications disabled",expired:"Verification link is invalid or has expired",brand:"Feedback"}
+ "zh-Hant":{verifySubject:"L1nG · 請驗證電子郵件",verifyTitle:"確認電子郵件",verifyBody:"請點擊以下連結，啟用問題回饋的 Email 回覆通知。",verifyAction:"驗證電子郵件",replySubject:"L1nG · 你的問題回饋有新回覆",replyTitle:"管理員已回覆你的問題",replyBody:"請點擊下方按鈕，使用原本保存的私人憑證查看匿名對話。",replyAction:"前往問題反饋",unsubscribe:"關閉 Email 回覆通知",verified:"電子郵件已驗證",disabled:"Email 回覆通知已關閉",expired:"驗證連結無效或已過期",brand:"問題回饋"},
+ "zh-Hans":{verifySubject:"L1nG · 请验证电子邮箱",verifyTitle:"确认电子邮箱",verifyBody:"请点击以下链接，启用问题反馈的 Email 回复通知。",verifyAction:"验证电子邮箱",replySubject:"L1nG · 你的问题反馈有新回复",replyTitle:"管理员已回复你的问题",replyBody:"请点击下方按钮，使用之前保存的私人凭证查看匿名对话。",replyAction:"前往问题反馈",unsubscribe:"关闭 Email 回复通知",verified:"电子邮箱已验证",disabled:"Email 回复通知已关闭",expired:"验证链接无效或已过期",brand:"问题反馈"},
+ "en":{verifySubject:"L1nG · Verify your email",verifyTitle:"Confirm your email address",verifyBody:"Please confirm your email to receive notifications when we reply to your feedback.",verifyAction:"Verify email",replySubject:"L1nG · New reply to your feedback",replyTitle:"Your feedback has a new reply",replyBody:"Use the button below and your saved private receipt to view the conversation.",replyAction:"View my feedback",unsubscribe:"Turn off email notifications",verified:"Email verified",disabled:"Email notifications disabled",expired:"Verification link is invalid or has expired",brand:"Feedback"}
 };
 const escapeHTML = v => String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const mailPage = (title,body)=>new Response('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L1nG</title><style>body{margin:0;background:#f7f7f5;color:#26262d;font:15px system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}.card{background:white;max-width:420px;width:calc(100% - 60px);padding:36px;border:1px solid #e8e8e8;border-radius:18px;text-align:center}h1{font-size:24px}p{color:#777883}</style><main class="card"><h1>'+escapeHTML(title)+'</h1><p>'+escapeHTML(body)+'</p></main></html>',{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","referrer-policy":"no-referrer","x-content-type-options":"nosniff"}});
@@ -87,7 +87,11 @@ async function notifyAdminReply(env,feedback,replyId){
  // 取消通知用一次性祕密，儲存雜湊而非明碼。
  await env.DB.prepare("UPDATE email_notifications SET unsubscribe_hash=? WHERE feedback_id=?").bind(hash,feedback.id).run();
  const url="https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback/email/unsubscribe?id="+encodeURIComponent(feedback.id)+"&token="+encodeURIComponent(token);
- const sent=await sendEmail(env,item.email,copy.replySubject,emailHtml(copy,copy.replyTitle,copy.replyBody,"","",url));
+ // The email link opens the site's existing private-feedback interface, never carries a receipt.
+ const feedbackUrl=feedback.source==="Genealogy"
+   ?"https://genealogy-tool.by-l1ng.com/#my-feedback"
+   :"https://realdate.by-l1ng.com/feedback.html#my-feedback";
+ const sent=await sendEmail(env,item.email,copy.replySubject,emailHtml(copy,copy.replyTitle,copy.replyBody,copy.replyAction,feedbackUrl,url));
  await env.DB.prepare("UPDATE email_delivery SET status=?,updated_at=? WHERE reply_id=?").bind(sent?"sent":"failed",now(),replyId).run();
 }
 
