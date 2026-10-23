@@ -39,3 +39,24 @@
 - `L1nG/build-pages.mjs` 刻意不把 `feedback/api` 放進公開靜態網站。
 - 本次設定已將經過核對的 D1 ID、R2 綁定寫入 `wrangler.jsonc`；Cloudflare 帳號 ID、Turnstile Secret、Access AUD、管理員 Email 不硬寫在 GitHub。
 - GA4 網站分析不屬於此輪回饋後端，仍未接通 Dashboard。
+
+## 2026-10-24 · Email 回覆通知（僅族譜重構分支，尚未部署）
+
+本次新增 RealDate（繁中 / EN）與族譜工具（繁中 / 簡中 / EN）的選用 Email 回覆通知。Email 內容會在玩家提交時保存語言偏好；不跟隨管理員後台語言。只有選擇「建立匿名對話」、填寫 Email 並明確勾選通知，才會建立待驗證紀錄。
+
+流程：
+1. 原有 Cloudflare Turnstile 通過後，回饋與私人憑證照常建立，後端自動嘗試寄驗證信。寄送失敗仍可用私人憑證查看對話，不得顯示「已寄送」。
+2. 驗證連結有 24 小時有效期，只保存 SHA-256 token 雜湊，不含私人對話憑證；從 Email 開的新頁面只顯示驗證結果。
+3. 原成功頁用私有憑證向 API 查詢狀態，返回頁面時立即查詢，等待中每 12 秒查詢，成功或停用後停止。
+4. 管理員已儲存的回覆觸發一次寄信嘗試，郵件不包含私有憑證與對話全文。以 reply_id 去重，錯誤以 email_delivery.failed 紀錄，不讓寄信故障回滾已保存的站內回覆。
+5. 玩家可在通知郵件中開啟關閉通知頁；必須再按一次確認才會停用，避免郵件掃描器自動請求 GET 就取消通知。
+
+### 部署前置條件（不得直接公開啟用）
+
+1. **先備份 D1**。正式庫原本已有資料，請在核對資料庫與環境後執行一次 `migrations/20261024_email_notifications.sql`（增量遷移）。`schema.sql` 僅用於空資料庫初始化，不是正式庫遷移腳本。
+2. 本分支採 **Resend API** 作為可設定的發信介面；並不代表現有 `notify@by-l1ng.com` 收件通知服務自動具有寄信權限。需先在發信商驗證 `by-l1ng.com` 或適用的寄件網域，並確認可以向玩家的任意收件信箱寄信。
+3. 在 Worker Secret 設定 `RESEND_API_KEY`；在 Worker 環境設定 `FEEDBACK_MAIL_FROM`（例如驗證後可使用的 `L1nG Notifications <notify@by-l1ng.com>`，實際值須與寄信商允許的地址一致）。不可把 API Key 加入 GitHub。
+4. 保持正式 `ALLOWED_ORIGINS` 與 Turnstile 配置；部署新 Worker、啟用 D1 遷移，才能端到端驗證。單純推送 GitHub 分支不會變更 Cloudflare Worker / D1。
+5. 測試繁中、簡中、英文寄信、錯誤地址、未勾選、一次性回饋、過期 / 重送、同一回覆去重、管理員通知、取消通知及跨分頁同步。避免向真實玩家信箱發測試信。
+
+**提醒：** 分支預覽目前為靜態預覽網域，不在正式 `isLive()` 白名單；只能檢查前端樣式，不會直接送出正式回饋或郵件。這是刻意的安全限制。
