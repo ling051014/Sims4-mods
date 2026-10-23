@@ -142,6 +142,62 @@
     $('game-version-error')?.classList.remove('visible');
   });
   $('contact-method')?.addEventListener('change',()=>{$('contact-value').type=$('contact-method').value==='email'?'email':'text';});
+  const emailOption=$('rd-email-option'),emailCheckbox=$('rd-email-notify'),emailHint=$('rd-email-hint');
+  function updateEmailOption(){
+    const allowed=$('reply-thread')?.checked && $('contact-option')?.open && $('contact-method')?.value==='email';
+    emailOption.hidden=!allowed;emailHint.hidden=!allowed;
+    if(!allowed)emailCheckbox.checked=false;
+  }
+  $('contact-method')?.addEventListener('change',updateEmailOption);
+  $('contact-option')?.addEventListener('toggle',updateEmailOption);
+  for(const radio of document.querySelectorAll('input[name="reply-mode"]'))radio.addEventListener('change',updateEmailOption);
+  updateEmailOption();
+  let emailStatusTimer=null,emailReceipt='',emailState='';
+  const emailText=()=>{
+    const en=document.documentElement.dataset.language==='en';
+    return en?{
+      pending:'Waiting for email verification',verified:'Email verified',disabled:'Email notifications turned off',unavailable:'Verification email could not be delivered',
+      instruction:'Check your inbox and follow the confirmation link to receive notifications when we reply.',
+      active:'Email reply notifications are enabled.',
+      error:'Email delivery is currently unavailable. You can still use your private receipt to view replies.',
+      resend:'Resend verification email'
+    }:{
+      pending:'等待電子郵件驗證',verified:'電子郵件已驗證',disabled:'Email 回覆通知已關閉',unavailable:'驗證信未能寄送',
+      instruction:'請前往信箱點擊驗證連結，完成後即可接收管理員回覆通知。',
+      active:'管理員回覆時，將透過 Email 通知你。',
+      error:'目前無法寄送驗證信，但仍可使用私人憑證查看回覆。',
+      resend:'重新寄送驗證信'
+    };
+  };
+  function renderEmailStatus(state){
+    emailState=state||'';
+    const box=$('rd-email-status'),copy=emailText();
+    box.hidden=!state;if(!state)return;
+    $('rd-email-title').textContent=state==='verified'?copy.verified:state==='disabled'?copy.disabled:state==='delivery_unavailable'?copy.unavailable:copy.pending;
+    $('rd-email-description').textContent=state==='verified'?copy.active:state==='delivery_unavailable'?copy.error:state==='pending'?copy.instruction:'';
+    $('rd-email-resend').hidden=state!=='pending'&&state!=='delivery_unavailable';
+    $('rd-email-resend').textContent=copy.resend;
+  }
+  async function checkEmailStatus(){
+    if(!emailReceipt||$('success-pane')?.classList.contains('hide')||document.visibilityState!=='visible')return;
+    try{
+      const result=await core.emailStatus(emailReceipt);
+      const state=result.email?.state||'';
+      renderEmailStatus(state);
+      if(state==='verified'||state==='disabled'){clearInterval(emailStatusTimer);emailStatusTimer=null;}
+    }catch(_){}
+  }
+  function stopEmailStatus(){if(emailStatusTimer!==null)clearInterval(emailStatusTimer);emailStatusTimer=null;emailReceipt='';}
+  $('rd-email-resend')?.addEventListener('click',async()=>{
+    const button=$('rd-email-resend');if(!emailReceipt)return;
+    button.disabled=true;
+    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');}
+    catch(err){$('rd-email-description').textContent=err.message||emailText().error;}
+    finally{button.disabled=false;}
+  });
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();});
+  document.querySelectorAll('[data-language-button]').forEach(button=>button.addEventListener('click',()=>queueMicrotask(()=>renderEmailStatus(emailState))));
+
   // RealDate 直接顯示 Cloudflare 原生元件，避免舊卡片與驗證框在手機上互相擠壓。
   const verificationStatus=$('realdate-turnstile-status');
   const verificationRetry=$('realdate-turnstile-retry');
@@ -219,7 +275,9 @@
     try{
       const result=await core.submit(core.normalizeFeedback({
         source:'RealDate',category,target:targetSelect?.value||'mod',message,files,followUp:chosen,
-        contactMethod:method,contactValue:contact,version:selected,gameVersion
+        contactMethod:method,contactValue:contact,version:selected,gameVersion,
+        emailNotify:chosen==='conversation' && method==='email' && !!contact && !!emailCheckbox.checked,
+        language:document.documentElement.dataset.language==='en'?'en':'zh-Hant'
       }),token);
       resetReceiptCopyState();
       lastReceipt=result.receipt||'';
@@ -228,6 +286,10 @@
       $('success-credential').hidden=!lastReceipt;
       $('success-open-thread').hidden=!lastReceipt;
       $('success-description').textContent=lastReceipt?'已建立匿名對話，請保存私人憑證。':'已收到單次回饋，不會建立匿名對話。';
+      stopEmailStatus();
+      emailReceipt=result.emailState&&lastReceipt?lastReceipt:'';
+      renderEmailStatus(result.emailState||'');
+      if(emailReceipt && result.emailState==='pending')emailStatusTimer=setInterval(checkEmailStatus,12000);
       show('success-pane');verifier?.reset();
       if(lastReceipt)activeReceipt=lastReceipt;
     }catch(err){setError(err.message||'送出失敗。');verifier?.reset();}
@@ -419,6 +481,7 @@
     refreshTimer=window.setInterval(()=>{if(threadIsVisible())refreshThread();},refreshInterval);
   }
   function newFeedback(){
+    stopEmailStatus();renderEmailStatus("");
     stopThreadRefresh();clearRememberedThread();activeReceipt='';current=null;threadFingerprint='';
     resetReceiptCopyState();form.reset();files=[];displayFiles(files,$('file-list'));
     category='bug';updateVersion();$('char-count').textContent='0 / 2000';
