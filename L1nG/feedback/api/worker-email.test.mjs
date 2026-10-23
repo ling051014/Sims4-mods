@@ -210,6 +210,11 @@ test('管理員回覆：只有已驗證的回饋寄通知，使用正確站點�
    assert.match(notice.data.html,/genealogy-tool\.by-l1ng\.com\/#my-feedback/);
    assert.equal(notice.data.html.includes(verified.receipt),false);
    const cancel=unsubscribeUrl(notice);assert.ok(cancel);
+   // 下一則管理員回覆不得讓舊信件的取消通知連結失效。
+   res=await adminReply(h,verified.id,idToken);
+   assert.equal(res.status,200);await h.flush();
+   assert.equal(h.sent.length,4);
+   assert.equal(unsubscribeUrl(h.sent[3]),cancel);
    const confirm=await followLink(cancel,h.env);
    assert.equal(confirm.status,200);
    assert.equal(h.notifications.get(verified.id).state,'verified','GET 不應停用');
@@ -219,7 +224,7 @@ test('管理員回覆：只有已驗證的回饋寄通知，使用正確站點�
    assert.equal(h.notifications.get(verified.id).state,'disabled');
    res=await adminReply(h,verified.id,idToken);
    assert.equal(res.status,200);await h.flush();
-   assert.equal(h.sent.length,3,'disabled 不能再寄通知');
+   assert.equal(h.sent.length,4,'disabled 不能再寄通知');
  });
 });
 test('錯誤私人憑證、未授權管理員不能操作通知',async()=>{
