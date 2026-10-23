@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const read=p=>readFileSync(new URL('../../../'+p,import.meta.url),'utf8');
+const read=p=>readFileSync(new URL('../../'+p,import.meta.url),'utf8');
 const bilingual=[
   'RealDate/index.html','RealDate/gameplay.html','RealDate/download.html',
   'RealDate/compatibility.html','RealDate/changelog.html','RealDate/roadmap.html',
