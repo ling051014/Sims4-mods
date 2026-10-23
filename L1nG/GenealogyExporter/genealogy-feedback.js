@@ -539,7 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('genealogyFeedbackEmailResend')?.addEventListener('click',async()=>{
     if(!emailReceipt)return;
     const button=$('genealogyFeedbackEmailResend');button.disabled=true;
-    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');}
+    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');
+      if(emailTimer===null)emailTimer=setInterval(checkEmailStatus,12000);
+      void checkEmailStatus();}
     catch(err){$('genealogyFeedbackEmailDescription').textContent=err.message||emailWords().error;}
     finally{button.disabled=false;}
   });
