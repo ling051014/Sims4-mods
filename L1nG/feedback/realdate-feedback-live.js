@@ -489,8 +489,9 @@
     }catch(err){
       if(activeReceipt!==receipt)return;
       const message=err?.message||'更新失敗';
-      syncNotice(message.includes('過於頻繁')?'查詢已達限制，請稍後再試。':'暫時無法更新，稍後會自動重試。');
-      if(message.includes('過於頻繁'))stopThreadRefresh();
+      const rateLimited=/過於頻繁|達限制|Too many requests|Too many replies/i.test(message);
+      syncNotice(rateLimited?'查詢已達限制，請稍後再試。':'暫時無法更新，稍後會自動重試。');
+      if(rateLimited)stopThreadRefresh();
     }finally{
       refreshBusy=false;
       if(button)button.disabled=false;
