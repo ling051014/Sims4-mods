@@ -19,13 +19,30 @@ function emailHtml(copy,title,body,button,url,footerUrl){
  const a=button?'<p style="margin:30px 0"><a href="'+escapeHTML(url)+'" style="background:#6554ae;color:#fff;padding:13px 22px;border-radius:9px;text-decoration:none">'+escapeHTML(button)+'</a></p>':'';
  return '<div style="background:#f7f7f5;padding:32px 14px;font-family:Arial,sans-serif;color:#26262d"><main style="max-width:510px;margin:auto;background:#fff;border:1px solid #e8e8e8;border-radius:16px;overflow:hidden"><header style="background:#6554ae;color:white;padding:24px 30px"><strong style="font-size:25px">L1nG</strong><p style="font-size:11px;letter-spacing:1px">'+escapeHTML(copy.brand)+'</p></header><section style="padding:30px"><h2>'+escapeHTML(title)+'</h2><p>'+escapeHTML(body)+'</p>'+a+(footerUrl?'<p style="margin-top:30px;font-size:11px"><a href="'+escapeHTML(footerUrl)+'">'+escapeHTML(copy.unsubscribe)+'</a></p>':'')+'</section></main></div>';
 }
-async function sendEmail(env,to,subject,html){
-  if(!env.FEEDBACK_EMAIL || typeof env.FEEDBACK_EMAIL.send!=="function")return false;
-  const from=text(env.FEEDBACK_NOTIFY_SENDER)||"notify@by-l1ng.com";
+// 玩家郵件獨立使用 Resend；管理員既有 Cloudflare FEEDBACK_EMAIL 通知不更動。
+async function sendPlayerEmail(env,to,subject,html,plain,idempotencyKey){
+  if(!env.RESEND_API_KEY)return false;
+  const from=text(env.RESEND_FROM_EMAIL)||"L1nG Notifications <notify@by-l1ng.com>";
   try{
-    await env.FEEDBACK_EMAIL.send({from:{email:from,name:"L1nG Notifications"},to,subject,html,text:subject});
+    const response=await fetch("https://api.resend.com/emails",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+env.RESEND_API_KEY,
+        "Content-Type":"application/json",
+        "Idempotency-Key":idempotencyKey
+      },
+      body:JSON.stringify({from,to:[to],subject,html,text:plain})
+    });
+    if(!response.ok){
+      // 不紀錄收件地址、密鑰、驗證連結或郵件內容。
+      console.error("Resend player email failed with HTTP status:",response.status);
+      return false;
+    }
     return true;
-  }catch(_){return false;}
+  }catch(_){
+    console.error("Resend player email request failed");
+    return false;
+  }
 }
 async function createVerificationEmail(env,id,email,language,force=false){
  const row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(id).first();
@@ -35,7 +52,8 @@ async function createVerificationEmail(env,id,email,language,force=false){
  await env.DB.prepare("UPDATE email_notifications SET state='pending',verify_hash=?,verify_expires_at=?,last_verification_sent_at=? WHERE feedback_id=? AND state IN ('pending','delivery_unavailable')").bind(hash,expires,at,id).run();
  const url="https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback/email/verify?token="+encodeURIComponent(token)+"&id="+encodeURIComponent(id);
  const copy=emailCopy[emailLang(language)];
- const sent=await sendEmail(env,email,copy.verifySubject,emailHtml(copy,copy.verifyTitle,copy.verifyBody,copy.verifyAction,url));
+ const plain=copy.verifyTitle+"\n\n"+copy.verifyBody+"\n\n"+copy.verifyAction+": "+url;
+ const sent=await sendPlayerEmail(env,email,copy.verifySubject,emailHtml(copy,copy.verifyTitle,copy.verifyBody,copy.verifyAction,url),plain,"verify/"+id+"/"+hash.slice(0,24));
  if(!sent)await env.DB.prepare("UPDATE email_notifications SET state='delivery_unavailable',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND verify_hash=? AND state='pending'").bind(id,hash).run();
  return sent;
 }
@@ -91,7 +109,8 @@ async function notifyAdminReply(env,feedback,replyId){
  const feedbackUrl=feedback.source==="Genealogy"
    ?"https://genealogy-tool.by-l1ng.com/#my-feedback"
    :"https://realdate.by-l1ng.com/feedback.html#my-feedback";
- const sent=await sendEmail(env,item.email,copy.replySubject,emailHtml(copy,copy.replyTitle,copy.replyBody,copy.replyAction,feedbackUrl,url));
+ const plain=copy.replyTitle+"\n\n"+copy.replyBody+"\n\n"+copy.replyAction+": "+feedbackUrl+"\n\n"+copy.unsubscribe+": "+url;
+ const sent=await sendPlayerEmail(env,item.email,copy.replySubject,emailHtml(copy,copy.replyTitle,copy.replyBody,copy.replyAction,feedbackUrl,url),plain,"reply/"+replyId);
  await env.DB.prepare("UPDATE email_delivery SET status=?,updated_at=? WHERE reply_id=?").bind(sent?"sent":"failed",now(),replyId).run();
 }
 
