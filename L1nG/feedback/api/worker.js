@@ -6,6 +6,92 @@ const MAX_FILES = 3, FILE_BYTES = 10 * 1048576, TOTAL_BYTES = 20 * 1048576;
 const TYPES = {png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",txt:"text/plain",log:"text/plain"};
 const PUBLIC_ORIGINS = ["https://realdate.by-l1ng.com","https://genealogy-tool.by-l1ng.com"];
 const enc = new TextEncoder();
+const EMAIL_LANGS = new Set(["zh-Hant","zh-Hans","en"]);
+const emailLang = value => EMAIL_LANGS.has(value)?value:"zh-Hant";
+const emailCopy = {
+ "zh-Hant":{verifySubject:"L1nG · 請驗證電子郵件",verifyTitle:"確認電子郵件",verifyBody:"請點擊以下連結，啟用問題回饋的 Email 回覆通知。",verifyAction:"驗證電子郵件",replySubject:"L1nG · 你的問題回饋有新回覆",replyTitle:"管理員已回覆你的問題",replyBody:"請回到官網，使用原本保存的私人憑證查看匿名對話。",unsubscribe:"關閉 Email 回覆通知",verified:"電子郵件已驗證",disabled:"Email 回覆通知已關閉",expired:"驗證連結無效或已過期",brand:"問題回饋"},
+ "zh-Hans":{verifySubject:"L1nG · 请验证电子邮箱",verifyTitle:"确认电子邮箱",verifyBody:"请点击以下链接，启用问题反馈的 Email 回复通知。",verifyAction:"验证电子邮箱",replySubject:"L1nG · 你的问题反馈有新回复",replyTitle:"管理员已回复你的问题",replyBody:"请返回官网，使用之前保存的私人凭证查看匿名对话。",unsubscribe:"关闭 Email 回复通知",verified:"电子邮箱已验证",disabled:"Email 回复通知已关闭",expired:"验证链接无效或已过期",brand:"问题反馈"},
+ "en":{verifySubject:"L1nG · Verify your email",verifyTitle:"Confirm your email address",verifyBody:"Please confirm your email to receive notifications when we reply to your feedback.",verifyAction:"Verify email",replySubject:"L1nG · New reply to your feedback",replyTitle:"Your feedback has a new reply",replyBody:"Visit the website and use your saved private receipt to view the conversation.",unsubscribe:"Turn off email notifications",verified:"Email verified",disabled:"Email notifications disabled",expired:"Verification link is invalid or has expired",brand:"Feedback"}
+};
+const escapeHTML = v => String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const mailPage = (title,body)=>new Response('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L1nG</title><style>body{margin:0;background:#f7f7f5;color:#26262d;font:15px system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}.card{background:white;max-width:420px;width:calc(100% - 60px);padding:36px;border:1px solid #e8e8e8;border-radius:18px;text-align:center}h1{font-size:24px}p{color:#777883}</style><main class="card"><h1>'+escapeHTML(title)+'</h1><p>'+escapeHTML(body)+'</p></main></html>',{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","referrer-policy":"no-referrer","x-content-type-options":"nosniff"}});
+function emailHtml(copy,title,body,button,url,footerUrl){
+ const a=button?'<p style="margin:30px 0"><a href="'+escapeHTML(url)+'" style="background:#6554ae;color:#fff;padding:13px 22px;border-radius:9px;text-decoration:none">'+escapeHTML(button)+'</a></p>':'';
+ return '<div style="background:#f7f7f5;padding:32px 14px;font-family:Arial,sans-serif;color:#26262d"><main style="max-width:510px;margin:auto;background:#fff;border:1px solid #e8e8e8;border-radius:16px;overflow:hidden"><header style="background:#6554ae;color:white;padding:24px 30px"><strong style="font-size:25px">L1nG</strong><p style="font-size:11px;letter-spacing:1px">'+escapeHTML(copy.brand)+'</p></header><section style="padding:30px"><h2>'+escapeHTML(title)+'</h2><p>'+escapeHTML(body)+'</p>'+a+(footerUrl?'<p style="margin-top:30px;font-size:11px"><a href="'+escapeHTML(footerUrl)+'">'+escapeHTML(copy.unsubscribe)+'</a></p>':'')+'</section></main></div>';
+}
+async function sendEmail(env,to,subject,html){
+  if(!env.FEEDBACK_EMAIL || typeof env.FEEDBACK_EMAIL.send!=="function")return false;
+  const from=text(env.FEEDBACK_NOTIFY_SENDER)||"notify@by-l1ng.com";
+  try{
+    await env.FEEDBACK_EMAIL.send({from:{email:from,name:"L1nG Notifications"},to,subject,html,text:subject});
+    return true;
+  }catch(_){return false;}
+}
+async function createVerificationEmail(env,id,email,language,force=false){
+ const row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(id).first();
+ if(!row || !["pending","delivery_unavailable"].includes(row.state))return false;
+ if(!force && row.last_verification_sent_at && Date.now()-Date.parse(row.last_verification_sent_at)<300000)return false;
+ const token=randomToken(),hash=await sha256(token),at=now(),expires=new Date(Date.now()+24*3600000).toISOString();
+ await env.DB.prepare("UPDATE email_notifications SET state='pending',verify_hash=?,verify_expires_at=?,last_verification_sent_at=? WHERE feedback_id=? AND state IN ('pending','delivery_unavailable')").bind(hash,expires,at,id).run();
+ const url="https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback/email/verify?token="+encodeURIComponent(token)+"&id="+encodeURIComponent(id);
+ const copy=emailCopy[emailLang(language)];
+ const sent=await sendEmail(env,email,copy.verifySubject,emailHtml(copy,copy.verifyTitle,copy.verifyBody,copy.verifyAction,url));
+ if(!sent)await env.DB.prepare("UPDATE email_notifications SET state='delivery_unavailable',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND verify_hash=? AND state='pending'").bind(id,hash).run();
+ return sent;
+}
+async function verifyEmailLink(req,env){
+ const url=new URL(req.url),id=url.searchParams.get("id")||"",token=url.searchParams.get("token")||"";
+ if(!/^LNG-[A-Z0-9]{12}$/.test(id)||!/^[A-Za-z0-9_-]{40,60}$/.test(token))return mailPage("L1nG","Invalid verification link");
+ const hash=await sha256(token),row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(id).first();
+ const copy=emailCopy[emailLang(row?.language)];
+ if(!row || row.state!=="pending" || row.verify_hash!==hash || !row.verify_expires_at || Date.parse(row.verify_expires_at)<Date.now())return mailPage(copy.expired,"");
+ await env.DB.prepare("UPDATE email_notifications SET state='verified',verified_at=?,verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND state='pending' AND verify_hash=?").bind(now(),id,hash).run();
+ return mailPage(copy.verified,copy.replyBody);
+}
+async function unsubscribeEmailLink(req,env){
+ const url=new URL(req.url),form=req.method==="POST"?await req.formData():null;
+ const id=(form?String(form.get("id")||""):url.searchParams.get("id"))||"";
+ const token=(form?String(form.get("token")||""):url.searchParams.get("token"))||"";
+ if(!/^LNG-[A-Z0-9]{12}$/.test(id)||!/^[A-Za-z0-9_-]{40,60}$/.test(token))return mailPage("L1nG","Invalid link");
+ const hash=await sha256(token),row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=? AND unsubscribe_hash=?").bind(id,hash).first();
+ if(!row)return mailPage("L1nG","Invalid link");
+ const copy=emailCopy[emailLang(row.language)];
+ if(req.method==="GET"){
+   const body='<form action="/v1/feedback/email/unsubscribe" method="post"><input type="hidden" name="id" value="'+escapeHTML(id)+'"><input type="hidden" name="token" value="'+escapeHTML(token)+'"><button type="submit" style="background:#6554ae;color:white;padding:12px 18px;border:0;border-radius:9px;cursor:pointer">'+escapeHTML(copy.unsubscribe)+'</button></form>';
+   return new Response('<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>L1nG</title><body style="margin:0;background:#f7f7f5;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif"><main style="background:white;padding:36px;border:1px solid #ddd;border-radius:16px"><h1>L1nG</h1>'+body+'</main></body></html>',{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","referrer-policy":"no-referrer"}});
+ }
+ await env.DB.prepare("UPDATE email_notifications SET state='disabled',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND unsubscribe_hash=?").bind(id,hash).run();
+ return mailPage(copy.disabled,"");
+}
+async function emailStatus(req,env){
+ let body;try{body=await req.json()}catch(_){return fail("查詢格式不正確。")}
+ const row=await verifiedReceipt(env,body.receipt);if(!row)return fail("私人憑證無效或查無資料。",404);
+ const item=await env.DB.prepare("SELECT state,last_verification_sent_at,language FROM email_notifications WHERE feedback_id=?").bind(row.id).first();
+ return json({ok:true,email: item?{state:item.state,language:item.language}:null});
+}
+async function resendEmail(req,env){
+ let body;try{body=await req.json()}catch(_){return fail("查詢格式不正確。")}
+ const row=await verifiedReceipt(env,body.receipt);if(!row)return fail("私人憑證無效或查無資料。",404);
+ const item=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(row.id).first();
+ if(!item || !["pending","delivery_unavailable"].includes(item.state))return fail("此回饋不需要重新驗證。",409);
+ if(item.last_verification_sent_at && Date.now()-Date.parse(item.last_verification_sent_at)<300000)return fail("請稍後再重新寄送。",429);
+ const sent=await createVerificationEmail(env,row.id,item.email,item.language,true);
+ return sent?json({ok:true}):fail("寄送服務暫時不可使用。",503);
+}
+async function notifyAdminReply(env,feedback,replyId){
+ const item=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=? AND state='verified'").bind(feedback.id).first();
+ if(!item)return;
+ const claim=await env.DB.prepare("INSERT OR IGNORE INTO email_delivery (reply_id,feedback_id,status,updated_at) VALUES (?,?,?,?) RETURNING reply_id").bind(replyId,feedback.id,"failed",now()).first();
+ if(!claim)return;
+ const copy=emailCopy[emailLang(item.language)],token=randomToken(),hash=await sha256(token);
+ // 取消通知用一次性祕密，儲存雜湊而非明碼。
+ await env.DB.prepare("UPDATE email_notifications SET unsubscribe_hash=? WHERE feedback_id=?").bind(hash,feedback.id).run();
+ const url="https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback/email/unsubscribe?id="+encodeURIComponent(feedback.id)+"&token="+encodeURIComponent(token);
+ const sent=await sendEmail(env,item.email,copy.replySubject,emailHtml(copy,copy.replyTitle,copy.replyBody,"","",url));
+ await env.DB.prepare("UPDATE email_delivery SET status=?,updated_at=? WHERE reply_id=?").bind(sent?"sent":"failed",now(),replyId).run();
+}
+
+
 const now = () => new Date().toISOString();
 const json = (data,status=200,headers={}) => new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff",...headers}});
 const fail = (message,status=400) => json({ok:false,error:message},status);
@@ -61,17 +147,18 @@ async function enforceRateLimit(request,env,kind,max){
 function validatePayload(form){
   const source=f(form,"source"), category=f(form,"category"),target=f(form,"target");
   const message=f(form,"message"), followUp=f(form,"followUp"),version=f(form,"version"),gameVersion=f(form,"gameVersion");
-  const method=f(form,"contactMethod"),contact=f(form,"contactValue");
+  const method=f(form,"contactMethod"),contact=f(form,"contactValue"),emailNotify=f(form,"emailNotify")==="true",language=emailLang(f(form,"language"));
   if(!["RealDate","Genealogy"].includes(source)) return {error:"來源網站不正確。"};
   if(!["bug","feature","other"].includes(category)) return {error:"回饋類型不正確。"};
   if(message.length<10||message.length>2000) return {error:"回饋內容需為 10 至 2000 字。"};
   if(!["once","conversation"].includes(followUp)) return {error:"回饋方式不正確。"};
   if(contact.length>120 || (contact && !(method==="email"?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact):method==="discord" && contact.length>=2)))
     return {error:"聯絡方式格式不正確。"};
+  if(emailNotify && (followUp!=="conversation" || method!=="email" || !contact))return {error:"Email 通知需要匿名對話及有效電子郵件。"};
   if(version.length>60||gameVersion.length>70||target.length>80) return {error:"版本或問題分類超過長度限制。"};
   if(source==="RealDate"&&category==="bug"&&target==="mod"&&!gameVersion.trim())
     return {error:"請填寫遊戲版本，可查看 RealDate 日誌確認。"};
-  return {data:{source,category,target,message,followUp,version,gameVersion,contactMethod:contact?method:null,contactValue:contact||null}};
+  return {data:{source,category,target,message,followUp,version,gameVersion,contactMethod:contact?method:null,contactValue:contact||null,emailNotify,language}};
 }
 async function validatedFiles(form,env){
   const rawFiles=form.getAll("files");
@@ -236,13 +323,19 @@ async function createFeedback(req,env,origin,ctx){
       .bind(id,data.source,data.category,data.target,data.message,data.followUp,hash,data.contactMethod,data.contactValue,data.version,data.gameVersion,"pending",created,created)
     ];
     for(const a of saved)statements.push(env.DB.prepare("INSERT INTO attachments (id,feedback_id,reply_id,r2_key,name,content_type,size,created_at) VALUES (?,?,?,?,?,?,?,?)").bind(a.id,id,null,a.key,a.name,a.type,a.size,created));
+    if(data.emailNotify)statements.push(env.DB.prepare("INSERT INTO email_notifications (feedback_id,email,language,state) VALUES (?,?,?, 'pending')").bind(id,data.contactValue,data.language));
     await env.DB.batch(statements);
   }catch(_){
     if(env.ATTACHMENTS)await Promise.allSettled(saved.map(a=>env.ATTACHMENTS.delete(a.key)));
     return fail("儲存回饋失敗，請稍後再試。",503);
   }
   notifyFeedback(env,ctx,{type:"created",id,source:data.source,category:data.category,version:data.version,gameVersion:data.gameVersion,createdAt:created,message:data.message});
-  return json({ok:true,id,receipt:secret?id+":"+secret:null,status:"pending"},201);
+  let emailState=null;
+  if(data.emailNotify){
+    try{emailState=await createVerificationEmail(env,id,data.contactValue,data.language)?"pending":"delivery_unavailable";}
+    catch(_){emailState="delivery_unavailable";}
+  }
+  return json({ok:true,id,receipt:secret?id+":"+secret:null,status:"pending",emailState},201);
 }
 async function lookup(req,env){
   let body;try{body=await req.json();}catch(_){return fail("查詢格式不正確。");}
@@ -308,7 +401,7 @@ async function checkAdmin(request,env){
     return await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,signature,enc.encode(pieces[0]+"."+pieces[1]));
   }catch(_){return false;}
 }
-async function admin(req,env,path){
+async function admin(req,env,path,ctx){
   if(!await checkAdmin(req,env))return fail("未授權的管理操作。",403);
   const bits=path.split("/").filter(Boolean),id=bits[3];
   if(req.method==="GET" && bits.length===3){
@@ -329,11 +422,14 @@ async function admin(req,env,path){
     const msg=text(body.message);
     if(record.row.follow_up!=="conversation")return fail("此回饋沒有啟用匿名對話。",409);
     if(msg.length<1||msg.length>2000)return fail("回覆內容需為 1 至 2000 字。");
-    const created=now();
+    const created=now(),replyId=crypto.randomUUID();
     await env.DB.batch([
-      env.DB.prepare("INSERT INTO replies (id,feedback_id,author,body,created_at) VALUES (?,?,?,?,?)").bind(crypto.randomUUID(),id,"admin",msg,created),
+      env.DB.prepare("INSERT INTO replies (id,feedback_id,author,body,created_at) VALUES (?,?,?,?,?)").bind(replyId,id,"admin",msg,created),
       env.DB.prepare("UPDATE feedback SET status='progress',updated_at=? WHERE id=?").bind(created,id)
     ]);
+    const notifyTask=notifyAdminReply(env,record.row,replyId).catch(()=>{});
+    if(ctx && typeof ctx.waitUntil==="function")ctx.waitUntil(notifyTask);
+    else await notifyTask;
     return json({ok:true});
   }
   if(req.method==="DELETE"&&bits.length===4){
@@ -356,12 +452,14 @@ export default {
     const url=new URL(request.url),path=url.pathname.replace(/\/+$/,"")||"/";
     if(path==="/health"&&request.method==="GET")return json({ok:true,service:"l1ng-feedback-api"});
     if(!env.DB)return fail("回饋資料庫尚未連接。",503);
+    if(path==="/v1/feedback/email/verify"&&request.method==="GET")return verifyEmailLink(request,env);
+    if(path==="/v1/feedback/email/unsubscribe"&&["GET","POST"].includes(request.method))return unsubscribeEmailLink(request,env);
     const adminPrefix="/feedback/admin-api";
     // 管理請求僅從首頁同網域的專用 Worker Route 進入，不接受 workers.dev 直連。
     // Cloudflare Access 必須保護 home.by-l1ng.com/feedback/admin-api/*。
     if(url.hostname==="home.by-l1ng.com" && path.startsWith(adminPrefix+"/")){
       const adminPath="/v1/admin"+path.slice(adminPrefix.length);
-      return admin(request,env,adminPath);
+      return admin(request,env,adminPath,ctx);
     }
     if(path.startsWith("/v1/admin/")){
       return fail("管理端點只能透過受保護的網站路徑存取。",403);
@@ -374,6 +472,8 @@ export default {
       if(path==="/v1/feedback"&&request.method==="POST")result=await createFeedback(request,env,origin,ctx);
       else if(path==="/v1/feedback/lookup"&&request.method==="POST")result=await lookup(request,env);
       else if(path==="/v1/feedback/reply"&&request.method==="POST")result=await reply(request,env,origin,ctx);
+      else if(path==="/v1/feedback/email/status"&&request.method==="POST")result=await emailStatus(request,env);
+      else if(path==="/v1/feedback/email/resend"&&request.method==="POST")result=await resendEmail(request,env);
       else result=fail("找不到端點。",404);
     }catch(_){result=fail("服務暫時無法處理請求。",503);}
     const headers=new Headers(result.headers);
