@@ -152,50 +152,66 @@
   $('contact-option')?.addEventListener('toggle',updateEmailOption);
   for(const radio of document.querySelectorAll('input[name="reply-mode"]'))radio.addEventListener('change',updateEmailOption);
   updateEmailOption();
-  let emailStatusTimer=null,emailReceipt='',emailState='';
+  let emailStatusTimer=null,emailReceipt='',emailState='',emailDeadline=0,emailResendAt=0,emailClockOffset=0;
   const emailText=()=>{
     const en=document.documentElement.dataset.language==='en';
     return en?{
       pending:'Waiting for email verification',verified:'Email verified',disabled:'Email notifications turned off',unavailable:'Verification email could not be delivered',
       instruction:'Check your inbox and follow the confirmation link to receive notifications when we reply.',
-      active:'Email reply notifications are enabled.',
-      error:'Email delivery is currently unavailable. You can still use your private receipt to view replies.',
-      resend:'Resend verification email'
+      active:'Email reply notifications are enabled.',error:'Email delivery is currently unavailable. You can still use your private receipt to view replies.',
+      resend:'Resend verification email',remaining:'Verification link expires in',expired:'Verification link expired. Request a new email.',wait:'Resend available in'
     }:{
       pending:'等待電子郵件驗證',verified:'電子郵件已驗證',disabled:'Email 回覆通知已關閉',unavailable:'驗證信未能寄送',
       instruction:'請前往信箱點擊驗證連結，完成後即可接收管理員回覆通知。',
-      active:'管理員回覆時，將透過 Email 通知你。',
-      error:'目前無法寄送驗證信，但仍可使用私人憑證查看回覆。',
-      resend:'重新寄送驗證信'
+      active:'管理員回覆時，將透過 Email 通知你。',error:'目前無法寄送驗證信，但仍可使用私人憑證查看回覆。',
+      resend:'重新寄送驗證信',remaining:'驗證連結剩餘',expired:'驗證連結已過期，請重新寄送驗證信。',wait:'可於以下時間後重新寄送'
     };
   };
+  function setEmailTiming(item,serverNow){
+    if(serverNow && Number.isFinite(Date.parse(serverNow)))emailClockOffset=Date.parse(serverNow)-Date.now();
+    emailDeadline=item?.expiresAt?Date.parse(item.expiresAt)||0:0;
+    emailResendAt=item?.resendAt?Date.parse(item.resendAt)||0:0;
+  }
+  const timeLeft=end=>Math.max(0,Math.ceil((end-Date.now()-emailClockOffset)/1000));
+  const readableTime=seconds=>String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   function renderEmailStatus(state){
     emailState=state||'';
     const box=$('rd-email-status'),copy=emailText();
     box.hidden=!state;if(!state)return;
+    const left=timeLeft(emailDeadline),cool=timeLeft(emailResendAt);
     $('rd-email-title').textContent=state==='verified'?copy.verified:state==='disabled'?copy.disabled:state==='delivery_unavailable'?copy.unavailable:copy.pending;
-    $('rd-email-description').textContent=state==='verified'?copy.active:state==='delivery_unavailable'?copy.error:state==='pending'?copy.instruction:'';
-    $('rd-email-resend').hidden=state!=='pending'&&state!=='delivery_unavailable';
-    $('rd-email-resend').textContent=copy.resend;
+    let description=state==='verified'?copy.active:state==='delivery_unavailable'?copy.error:state==='pending'?copy.instruction:'';
+    if(state==='pending'&&emailDeadline)description+=' '+(left>0?copy.remaining+' '+readableTime(left):copy.expired);
+    $('rd-email-description').textContent=description;
+    const resend=$('rd-email-resend');
+    resend.hidden=state!=='pending'&&state!=='delivery_unavailable';
+    resend.disabled=!resend.hidden&&cool>0;
+    resend.textContent=copy.resend+(!resend.hidden&&cool>0?' · '+readableTime(cool):'');
+  }
+  function startEmailStatus(){
+    if(emailStatusTimer!==null)clearInterval(emailStatusTimer);
+    emailStatusTimer=setInterval(()=>{renderEmailStatus(emailState);if(timeLeft(emailResendAt)===0&&emailState==='pending'&&emailDeadline&&timeLeft(emailDeadline)===0)void checkEmailStatus();},1000);
   }
   async function checkEmailStatus(){
     if(!emailReceipt||$('success-pane')?.classList.contains('hide')||document.visibilityState!=='visible')return;
     try{
       const result=await core.emailStatus(emailReceipt);
+      setEmailTiming(result.email,result.serverNow);
       const state=result.email?.state||'';
       renderEmailStatus(state);
-      if(state==='verified'||state==='disabled'){clearInterval(emailStatusTimer);emailStatusTimer=null;}
+      if(state==='verified'||state==='disabled')stopEmailClock();
     }catch(_){}
   }
-  function stopEmailStatus(){if(emailStatusTimer!==null)clearInterval(emailStatusTimer);emailStatusTimer=null;emailReceipt='';}
+  function stopEmailClock(){if(emailStatusTimer!==null)clearInterval(emailStatusTimer);emailStatusTimer=null;}
+  function stopEmailStatus(){stopEmailClock();emailReceipt='';emailDeadline=0;emailResendAt=0;emailClockOffset=0;}
   $('rd-email-resend')?.addEventListener('click',async()=>{
-    const button=$('rd-email-resend');if(!emailReceipt)return;
+    const button=$('rd-email-resend');if(!emailReceipt||button.disabled)return;
     button.disabled=true;
-    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');
-      if(emailStatusTimer===null)emailStatusTimer=setInterval(checkEmailStatus,12000);
-      void checkEmailStatus();}
-    catch(err){$('rd-email-description').textContent=err.message||emailText().error;}
-    finally{button.disabled=false;}
+    try{
+      const data=await core.resendVerification(emailReceipt);
+      setEmailTiming(data.email,data.serverNow);renderEmailStatus('pending');startEmailStatus();
+    }catch(err){$('rd-email-description').textContent=err.message||emailText().error;}
+    finally{renderEmailStatus(emailState);}
   });
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();});
   document.querySelectorAll('[data-language-button]').forEach(button=>button.addEventListener('click',()=>queueMicrotask(()=>renderEmailStatus(emailState))));
@@ -291,8 +307,8 @@
       $('success-description').textContent=lastReceipt?'已建立匿名對話，請保存私人憑證。':'已收到單次回饋，不會建立匿名對話。';
       stopEmailStatus();
       emailReceipt=result.emailState&&lastReceipt?lastReceipt:'';
-      renderEmailStatus(result.emailState||'');
-      if(emailReceipt && result.emailState==='pending')emailStatusTimer=setInterval(checkEmailStatus,12000);
+      setEmailTiming(result.email,result.serverNow);renderEmailStatus(result.emailState||'');
+      if(emailReceipt && (result.emailState==='pending'||result.emailState==='delivery_unavailable'))startEmailStatus();
       show('success-pane');verifier?.reset();
       if(lastReceipt)activeReceipt=lastReceipt;
     }catch(err){setError(err.message||'送出失敗。');verifier?.reset();}
