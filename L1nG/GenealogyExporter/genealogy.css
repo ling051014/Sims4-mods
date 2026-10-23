@@ -8056,7 +8056,8 @@ button.is-loading .button-loading-label {
 body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"] { --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23172636' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 /* 自訂主題勾號由 chooseCustomTheme() 按使用者選的強調色計算。 */
 .topbar-filter-option input[type="checkbox"],
-.person-card-menu-check input[type="checkbox"] {
+.person-card-menu-check input[type="checkbox"],
+.genealogy-feedback-email-option input[type="checkbox"] {
   -webkit-appearance:none;
   appearance:none;
   width:14px;
@@ -8071,13 +8072,15 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
   background-size:11px 11px;
 }
 .topbar-filter-option input[type="checkbox"]:checked,
-.person-card-menu-check input[type="checkbox"]:checked:checked {
+.person-card-menu-check input[type="checkbox"]:checked:checked,
+.genealogy-feedback-email-option input[type="checkbox"]:checked {
   border-color:var(--action-primary);
   background-color:var(--action-primary);
   background-image:var(--filter-checkmark-image);
 }
 .topbar-filter-option input[type="checkbox"]:focus-visible,
-.person-card-menu-check input[type="checkbox"]:focus-visible:focus-visible {
+.person-card-menu-check input[type="checkbox"]:focus-visible:focus-visible,
+.genealogy-feedback-email-option input[type="checkbox"]:focus-visible {
   outline:2px solid var(--action-primary);
   outline-offset:2px;
 }
@@ -10031,4 +10034,4 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 @media (prefers-reduced-motion:reduce){.l1ng-color-picker-hue-rest,.l1ng-color-picker-hue-lens{transition:none}}
 
 /* 回饋信箱通知延伸原有欄位與成功卡片，不新增另一套視窗。 */
-.genealogy-feedback-email-option{display:flex;gap:9px;align-items:center;margin-top:12px;cursor:pointer;font-size:12px}.genealogy-feedback-email-option[hidden],.genealogy-feedback-email-status[hidden]{display:none}.genealogy-feedback-email-option input{width:16px;height:16px;accent-color:var(--primary)}.genealogy-feedback-email-status{border:1px solid var(--stroke);border-radius:12px;padding:13px;margin:13px 0;text-align:left;width:100%;font-size:12px}.genealogy-feedback-email-status p{margin:5px 0}.genealogy-feedback-email-status button{border:0;background:transparent;padding:5px 0;color:inherit;text-decoration:underline;cursor:pointer}
+.genealogy-feedback-email-option{display:flex;gap:5px;align-items:center;margin-top:12px;cursor:pointer;font-size:12px}.genealogy-feedback-email-option[hidden],.genealogy-feedback-email-status[hidden]{display:none}.genealogy-feedback-email-option .genealogy-feedback-optional{margin-inline-start:.5em}.genealogy-feedback-email-status{border:1px solid var(--stroke);border-radius:12px;padding:13px;margin:13px 0;text-align:left;width:100%;font-size:12px}.genealogy-feedback-email-status p{margin:5px 0}.genealogy-feedback-email-status button{border:0;background:transparent;padding:5px 0;color:inherit;text-decoration:underline;cursor:pointer}
