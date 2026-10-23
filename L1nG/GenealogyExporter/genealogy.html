@@ -9,9 +9,9 @@
         <meta name="description" content="使用 L1nG 模擬市民族譜工具建立、編輯和整理《模擬市民 4》的家族關係、世代與寵物，並支援匯入遊戲存檔資料。">
         <meta name="theme-color" content="#ffffff">
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261018-perspective-scan-eye-r1">
-        <link rel="stylesheet" href="genealogy.css?v=20261022-main-avatar-drop-help-r1">
-        <script src="../feedback/feedback-core.js?v=20261013-turnstile-status-r1" defer></script>
-        <script src="genealogy-feedback.js?v=20261020-focus-r1" defer></script>
+        <link rel="stylesheet" href="genealogy.css?v=20261024-email-notifications-r2">
+        <script src="../feedback/feedback-core.js?v=20261024-email-notifications-r2" defer></script>
+        <script src="genealogy-feedback.js?v=20261024-email-notifications-r2" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261021-policy-scroll-r1">
         <script src="../site-info-modal.js?v=20261021-cookie-button-clean-r4" defer></script>
     </head>
@@ -136,7 +136,7 @@
                                             <label class="genealogy-feedback-field-label" for="genealogyFeedbackContact">聯絡資料</label>
                                             <input class="genealogy-feedback-field" id="genealogyFeedbackContact" type="text" maxlength="120" placeholder="example@email.com" autocomplete="off">
                                             <p class="genealogy-feedback-help">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</p>
-                                            <p class="genealogy-feedback-field-error" id="genealogyFeedbackContactError" hidden>請確認聯絡方式格式。</p>
+                                            <label class="genealogy-feedback-email-option" id="genealogyFeedbackEmailOption" hidden><input type="checkbox" id="genealogyFeedbackEmailNotify"><span>管理員回覆時，透過 Email 通知我</span></label><p class="genealogy-feedback-help" id="genealogyFeedbackEmailHint" hidden>提交後會寄送驗證信，完成驗證才會啟用回覆通知。</p><p class="genealogy-feedback-field-error" id="genealogyFeedbackContactError" hidden>請確認聯絡方式格式。</p>
                                         </div>
                                     </details>
                                 </section>
@@ -202,7 +202,7 @@
                                         </button>
                                         <small>請妥善保存。回饋編號本身無法開啟對話；私人憑證則相當於密碼，請勿公開。</small>
                                     </div>
-                                    <div class="genealogy-feedback-success-actions">
+                                    <div class="genealogy-feedback-email-status" id="genealogyFeedbackEmailStatus" hidden><strong id="genealogyFeedbackEmailTitle"></strong><p id="genealogyFeedbackEmailDescription"></p><button type="button" id="genealogyFeedbackEmailResend" hidden>重新寄送驗證信</button></div><div class="genealogy-feedback-success-actions">
                                         <button class="genealogy-feedback-secondary" id="genealogyFeedbackSuccessNew" type="button">再寫一則</button>
                                         <button class="genealogy-feedback-submit" id="genealogyFeedbackSuccessOpen" type="button" hidden>查看匿名對話 <svg class="genealogy-feedback-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
                                     </div>
