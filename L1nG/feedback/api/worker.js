@@ -32,7 +32,6 @@ async function createVerificationEmail(env,id,email,language,force=false){
  if(!force && row.last_verification_sent_at && Date.now()-Date.parse(row.last_verification_sent_at)<300000)return false;
  const token=randomToken(),hash=await sha256(token),at=now(),expires=new Date(Date.now()+24*3600000).toISOString();
  await env.DB.prepare("UPDATE email_notifications SET verify_hash=?,verify_expires_at=?,last_verification_sent_at=? WHERE feedback_id=? AND state='pending'").bind(hash,expires,at,id).run();
- const origin="https://"+(row.source==="Genealogy"?"genealogy-tool":"realdate")+".by-l1ng.com";
  const url="https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback/email/verify?token="+encodeURIComponent(token)+"&id="+encodeURIComponent(id);
  const copy=emailCopy[emailLang(language)];
  return sendEmail(env,email,copy.verifySubject,emailHtml(copy,copy.verifyTitle,copy.verifyBody,copy.verifyAction,url));
