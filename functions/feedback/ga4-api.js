@@ -172,6 +172,8 @@ async function report(env,site,range) {
   const downloadItemPrefix='l1ng_dl_';
   const eventFilter={filter:{fieldName:'eventName',stringFilter:{matchType:'EXACT',value:'l1ng_download_click'}}};
   const itemFilter={filter:{fieldName:'eventName',stringFilter:{matchType:'BEGINS_WITH',value:downloadItemPrefix}}};
+  const feedbackEventNames=['l1ng_feedback_open','l1ng_feedback_submitted'];
+  const feedbackFilter={filter:{fieldName:'eventName',inListFilter:{values:feedbackEventNames}}};
   const jobs=[
     query(range,site,[],['activeUsers','screenPageViews','newUsers']),
     query(range,site,['date'],['activeUsers'],370),
@@ -180,7 +182,8 @@ async function report(env,site,range) {
     query(range,site,['deviceCategory'],['activeUsers'],5),
     query(range,site,['sessionSourceMedium'],['sessions'],10),
     query(range,site,['hostName'],['eventCount'],10,eventFilter),
-    query(range,site,['hostName','eventName'],['eventCount'],200,itemFilter)
+    query(range,site,['hostName','eventName'],['eventCount'],200,itemFilter),
+    query(range,site,['hostName','eventName'],['eventCount'],100,feedbackFilter)
   ];
   const results=await Promise.all(jobs.map(job=>runReport(property,token,job)));
   const downloads=parseRows(results[6]);
@@ -202,19 +205,33 @@ async function report(env,site,range) {
     if(unclassified>0)downloadItems.push({host,id:null,value:unclassified,unclassified:true});
   }
   downloadItems.sort((a,b)=>b.value-a.value);
+  // These are GA4 consented interaction events, not D1 feedback records.
+  const feedbackEvents=parseRows(results[8]).filter(row=>
+    Object.values(SITE_HOSTS).includes(row.dims[0])
+    && feedbackEventNames.includes(row.dims[1])
+    && row.values[0]>0
+  ).map(row=>({host:row.dims[0],event:row.dims[1],value:row.values[0]}))
+   .sort((a,b)=>b.value-a.value);
+  const feedbackOpened=feedbackEvents.reduce((sum,row)=>
+    sum+(row.event==='l1ng_feedback_open'?row.value:0),0);
+  const feedbackSubmitted=feedbackEvents.reduce((sum,row)=>
+    sum+(row.event==='l1ng_feedback_submitted'?row.value:0),0);
   const payload={
     ok:true,range,site,generatedAt:new Date().toISOString(),
     summary:{
       activeUsers:metric(results[0],0),
       views:metric(results[0],1),
       newUsers:metric(results[0],2),
-      downloads:downloads.reduce((n,row)=>n+(row.values[0]||0),0)
+      downloads:downloads.reduce((n,row)=>n+(row.values[0]||0),0),
+      feedbackOpened,
+      feedbackSubmitted
     },
     trend:parseRows(results[1]).map(row=>({date:row.dims[0],value:row.values[0]})),
     pages:parseRows(results[2]).map(row=>({host:row.dims[0],path:row.dims[1],value:row.values[0]})),
     countries:parseRows(results[3]).map(row=>({name:row.dims[0],value:row.values[0]})),
     devices:parseRows(results[4]).map(row=>({name:row.dims[0],value:row.values[0]})),
     referrals:parseRows(results[5]).map(row=>({name:row.dims[0],value:row.values[0]})),
+    feedbackEvents,
     downloadItems
   };
   // Prevent unbounded isolate cache growth; authentication is checked before any cache read.
