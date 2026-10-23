@@ -516,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
   contactValue.closest('details')?.addEventListener('toggle',updateEmailOption);
   form.querySelectorAll('input[name="genealogyFeedbackFollowUp"]').forEach(radio=>radio.addEventListener('change',updateEmailOption));
   updateEmailOption();
-  let emailReceipt='',emailState='',emailTimer=null,emailDeadline=0,emailResendAt=0,emailClockOffset=0;
+  let emailReceipt='',emailState='',emailTimer=null,emailDeadline=0,emailResendAt=0,emailClockOffset=0,emailPolledAt=0;
   function setEmailTiming(item,serverNow){
     if(serverNow&&Number.isFinite(Date.parse(serverNow)))emailClockOffset=Date.parse(serverNow)-Date.now();
     emailDeadline=item?.expiresAt?Date.parse(item.expiresAt)||0:0;
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function startEmailTimer(){
     stopEmailTimer();
-    emailTimer=setInterval(()=>renderEmailStatus(emailState),1000);
+    emailTimer=setInterval(()=>{renderEmailStatus(emailState);if(emailReceipt&&document.visibilityState==='visible'&&backdrop.classList.contains('show')&&Date.now()-emailPolledAt>12000){emailPolledAt=Date.now();void checkEmailStatus();}},1000);
   }
   function stopEmailTimer(){if(emailTimer!==null)clearInterval(emailTimer);emailTimer=null;}
   $('genealogyFeedbackEmailResend')?.addEventListener('click',async()=>{
@@ -563,6 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   window.LING_I18N?.onLanguageChanged(()=>renderEmailStatus(emailState));
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();});
+  window.addEventListener('focus',()=>{if(emailReceipt)void checkEmailStatus();});
 
 
 
