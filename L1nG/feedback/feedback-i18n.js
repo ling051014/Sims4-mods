@@ -13,6 +13,17 @@ const dictionary=new Map(Object.entries({
 '（選填）':'(Optional)','至少 10 字':'At least 10 characters','最多 3 個檔案・合計 20 MB':'Up to 3 files · 20 MB total','回饋編號':'Feedback #','請選擇版本':'Select a version',
 '已收到你的回饋！':'Your feedback has been received!','回饋已建立':'Feedback created','未連接網路資料庫。':'Database connection unavailable.'
 }));
+// RealDate 正式動態狀態、API 錯誤與英文模式補充對照（原文為繁體中文）。
+for(const [zh,en] of Object.entries({"你":"You","附件":"Attachment","移除":"Remove","複製失敗，請長按憑證手動複製":"Copy failed. Press and hold the receipt to copy it manually.","回饋內容至少 10 字，最多 2000 字。":"Feedback must be between 10 and 2,000 characters.","請確認聯絡方式格式。":"Check the contact details format.","請先完成 Cloudflare 人機驗證。":"Complete the Cloudflare security check.","請選擇模組版本，或選擇「不確定」。":"Choose a mod version or select Not sure.","已建立匿名對話，請保存私人憑證。":"An anonymous conversation was created. Save your private receipt.","已收到單次回饋，不會建立匿名對話。":"Your one-time feedback has been received. No conversation was created.","送出失敗。":"Could not submit your feedback.","已完成":"Completed","已結案":"Closed","管理員已回覆":"Administrator replied","等待管理員回覆":"Waiting for administrator","處理中":"In progress","尚未處理":"Not yet reviewed","剛剛已更新，請稍後再試。":"Just updated. Try again shortly.","正在檢查新回覆…":"Checking for new replies…","更新失敗":"Update failed","查詢已達限制，請稍後再試。":"Too many requests. Try again later.","暫時無法更新，稍後會自動重試。":"Unable to refresh right now. Retrying automatically.","正在載入對話…":"Loading conversation…","每 60 秒自動更新，切回頁面會立即檢查。":"Updates automatically every 60 seconds and checks when you return to this page.","憑證查詢失敗。":"Could not look up your receipt.","請先輸入回覆內容。":"Enter a reply first.","請先完成安全驗證，再送出回覆。":"Complete the security check before sending your reply.","已複製！":"Copied!","不允許的網站來源。":"This website is not allowed to access feedback.","查詢格式不正確。":"Invalid lookup format.","私人憑證無效或查無資料。":"Invalid private receipt or feedback not found.","此回饋不需要重新驗證。":"This feedback does not require email verification.","請稍後再重新寄送。":"Please wait before resending the verification email.","寄送服務暫時不可使用。":"Email delivery is temporarily unavailable.","回饋資料超過允許大小。":"Feedback exceeds the size limit.","回饋格式不正確。":"Invalid feedback format.","附件合計不得超過 20 MB。":"Attachments must not exceed 20 MB in total.","回饋來源與提交網站不一致。":"Feedback source does not match the submitting website.","儲存回饋失敗，請稍後再試。":"Could not save feedback. Please try again later.","回覆格式不正確。":"Invalid reply format.","此對話已結束，暫時無法新增回覆。":"This conversation is closed and cannot accept new replies.","回覆內容需為 1 至 2000 字。":"Replies must contain 1 to 2,000 characters.","一小時內回覆過於頻繁，請稍後再試。":"Too many replies this hour. Please try again later.","儲存回覆失敗，請稍後再試。":"Could not save your reply. Try again later.","回饋資料庫尚未連接。":"The feedback database is unavailable.","服務暫時無法處理請求。":"The service cannot process your request right now.","回饋服務暫時無法使用，請稍後再試。":"Feedback is temporarily unavailable. Please try again later.","驗證服務尚未設定完成。":"Verification is not configured yet.","驗證服務暫時無法連線，請稍後重試。":"Verification is temporarily unreachable. Try again later.","人機驗證未通過或已過期，請重新驗證。":"Security verification failed or expired. Please retry.","無法確認提交來源，請稍後再試。":"Unable to verify request origin. Please try again later.","操作過於頻繁，請稍後再試。":"Too many requests. Please try again later.","回饋內容需為 10 至 2000 字。":"Feedback must contain 10 to 2,000 characters.","回饋方式不正確。":"Invalid feedback mode.","回饋類型不正確。":"Invalid feedback category.","來源網站不正確。":"Invalid source website.","聯絡方式格式不正確。":"Invalid contact format.","Email 通知需要匿名對話及有效電子郵件。":"Email notifications require an anonymous conversation and a valid email address.","版本或問題分類超過長度限制。":"Version or category exceeds the character limit.","請填寫遊戲版本，可查看 RealDate 日誌確認。":"Enter your game version. Check the RealDate log if needed.","回饋編號不正確。":"Invalid feedback ID.","找不到回饋。":"Feedback not found.","找不到端點。":"Endpoint not found."}))dictionary.set(zh,en);
+function translateValue(zh){
+ const exact=dictionary.get(zh);if(exact)return exact;
+ let match=zh.match(/^(回饋編號)\s+(LNG-[A-Z0-9]{12})$/);
+ if(match)return 'Feedback # '+match[2];
+ match=zh.match(/^更新時間：(.+)$/);
+ if(match)return 'Last updated: '+match[1];
+ return null;
+}
+window.L1nGFeedbackI18n=Object.freeze({translateFor:(value,language)=>language==='en'?(translateValue(String(value))||String(value)):String(value)});
 const roots=[document.getElementById('realdate-preview'),document.getElementById('form-layer')].filter(Boolean);
 const original=new WeakMap();const attributes=new WeakMap();let translating=false;
 function update(){
@@ -28,7 +39,7 @@ while(node=walker.nextNode()){
  if(!trim)continue;
  if(!original.has(node))original.set(node,trim);
  const zh=original.get(node);
- const eng=dictionary.get(zh);
+ const eng=translateValue(zh);
  if(!eng)continue;
  const candidate=raw.replace(trim,en?eng:zh);
  if(node.nodeValue!==candidate)node.nodeValue=candidate;
