@@ -1496,6 +1496,8 @@
     "套": "outfits",
     "服裝圖片預覽": "Outfit preview",
     "每個分類最多 5 套，圖片會保存在這台裝置的瀏覽器中。": "Up to 5 outfits per category. Images are saved in this browser.",
-    "請選擇 20 MB 以下的 JPG / PNG / WEBP 圖片。": "Choose a JPG, PNG, or WEBP image under 20 MB."
+    "請選擇 20 MB 以下的 JPG / PNG / WEBP 圖片。": "Choose a JPG, PNG, or WEBP image under 20 MB.",
+    "管理員回覆時，透過 Email 通知我": "Notify me by email when the administrator replies",
+    "提交後會寄送驗證信，完成驗證才會啟用回覆通知。": "A verification email will be sent after submission. Notifications will be enabled once verified."
   }
 }
