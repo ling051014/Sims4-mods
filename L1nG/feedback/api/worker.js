@@ -7,17 +7,28 @@ const TYPES = {png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/we
 const PUBLIC_ORIGINS = ["https://realdate.by-l1ng.com","https://genealogy-tool.by-l1ng.com"];
 const enc = new TextEncoder();
 const EMAIL_LANGS = new Set(["zh-Hant","zh-Hans","en"]);
+const EMAIL_VERIFY_MS = 15 * 60 * 1000, EMAIL_RESEND_MS = 60 * 1000;
 const emailLang = value => EMAIL_LANGS.has(value)?value:"zh-Hant";
 const emailCopy = {
- "zh-Hant":{verifySubject:"L1nG · 請驗證電子郵件",verifyTitle:"確認電子郵件",verifyBody:"請點擊以下連結，啟用問題回饋的 Email 回覆通知。",verifyAction:"驗證電子郵件",verifySuccessBody:"Email 回覆通知已啟用。管理員回覆時，我們會寄送電子郵件提醒。",replySubject:"L1nG · 你的問題回饋有新回覆",replyTitle:"管理員已回覆你的問題",replyBody:"請點擊下方按鈕，使用原本保存的私人憑證查看匿名對話。",replyAction:"前往問題反饋",unsubscribe:"關閉 Email 回覆通知",verified:"電子郵件已驗證",disabled:"Email 回覆通知已關閉",expired:"驗證連結無效或已過期",brand:"問題回饋"},
- "zh-Hans":{verifySubject:"L1nG · 请验证电子邮箱",verifyTitle:"确认电子邮箱",verifyBody:"请点击以下链接，启用问题反馈的 Email 回复通知。",verifyAction:"验证电子邮箱",verifySuccessBody:"Email 回复通知已启用。管理员回复时，我们会发送电子邮件提醒。",replySubject:"L1nG · 你的问题反馈有新回复",replyTitle:"管理员已回复你的问题",replyBody:"请点击下方按钮，使用之前保存的私人凭证查看匿名对话。",replyAction:"前往问题反馈",unsubscribe:"关闭 Email 回复通知",verified:"电子邮箱已验证",disabled:"Email 回复通知已关闭",expired:"验证链接无效或已过期",brand:"问题反馈"},
- "en":{verifySubject:"L1nG · Verify your email",verifyTitle:"Confirm your email address",verifyBody:"Please confirm your email to receive notifications when we reply to your feedback.",verifyAction:"Verify email",verifySuccessBody:"Email reply notifications are enabled. We will email you when the administrator replies.",replySubject:"L1nG · New reply to your feedback",replyTitle:"Your feedback has a new reply",replyBody:"Use the button below and your saved private receipt to view the conversation.",replyAction:"View my feedback",unsubscribe:"Turn off email notifications",verified:"Email verified",disabled:"Email notifications disabled",expired:"Verification link is invalid or has expired",brand:"Feedback"}
+ "zh-Hant":{verifySubject:"L1nG · 請驗證電子郵件",verifyTitle:"確認電子郵件",verifyBody:"請點擊以下連結，啟用問題回饋的 Email 回覆通知。",verifyValidity:"此驗證連結將於寄送後 15 分鐘失效。",expiredHelp:"請返回原本的回饋頁面，重新寄送驗證信。",autoCloseText:"{seconds} 秒後嘗試關閉此分頁；若瀏覽器阻擋，請手動關閉。",blockedText:"瀏覽器不允許自動關閉此分頁，請手動關閉，或返回問題回饋。",returnLabel:"返回問題回饋",closeLabel:"關閉分頁",verifyAction:"驗證電子郵件",verifySuccessBody:"Email 回覆通知已啟用。管理員回覆時，我們會寄送電子郵件提醒。",replySubject:"L1nG · 你的問題回饋有新回覆",replyTitle:"管理員已回覆你的問題",replyBody:"請點擊下方按鈕，使用原本保存的私人憑證查看匿名對話。",replyAction:"前往問題反饋",unsubscribe:"關閉 Email 回覆通知",verified:"電子郵件已驗證",disabled:"Email 回覆通知已關閉",expired:"驗證連結無效或已過期",brand:"問題回饋"},
+ "zh-Hans":{verifySubject:"L1nG · 请验证电子邮箱",verifyTitle:"确认电子邮箱",verifyBody:"请点击以下链接，启用问题反馈的 Email 回复通知。",verifyValidity:"此验证链接将在发送后 15 分钟失效。",expiredHelp:"请返回原来的反馈页面，重新发送验证邮件。",autoCloseText:"将在 {seconds} 秒后尝试关闭此标签页；如果浏览器阻止，请手动关闭。",blockedText:"浏览器不允许自动关闭此标签页，请手动关闭，或返回问题反馈。",returnLabel:"返回问题反馈",closeLabel:"关闭标签页",verifyAction:"验证电子邮箱",verifySuccessBody:"Email 回复通知已启用。管理员回复时，我们会发送电子邮件提醒。",replySubject:"L1nG · 你的问题反馈有新回复",replyTitle:"管理员已回复你的问题",replyBody:"请点击下方按钮，使用之前保存的私人凭证查看匿名对话。",replyAction:"前往问题反馈",unsubscribe:"关闭 Email 回复通知",verified:"电子邮箱已验证",disabled:"Email 回复通知已关闭",expired:"验证链接无效或已过期",brand:"问题反馈"},
+ "en":{verifySubject:"L1nG · Verify your email",verifyTitle:"Confirm your email address",verifyBody:"Please confirm your email to receive notifications when we reply to your feedback.",verifyValidity:"This verification link expires 15 minutes after it is sent.",expiredHelp:"Return to the original feedback page to resend your verification email.",autoCloseText:"Attempting to close this tab in {seconds} seconds. If your browser blocks it, close the tab manually.",blockedText:"Your browser prevented this tab from closing automatically. You can close it manually or return to feedback.",returnLabel:"Back to feedback",closeLabel:"Close tab",verifyAction:"Verify email",verifySuccessBody:"Email reply notifications are enabled. We will email you when the administrator replies.",replySubject:"L1nG · New reply to your feedback",replyTitle:"Your feedback has a new reply",replyBody:"Use the button below and your saved private receipt to view the conversation.",replyAction:"View my feedback",unsubscribe:"Turn off email notifications",verified:"Email verified",disabled:"Email notifications disabled",expired:"Verification link is invalid or has expired",brand:"Feedback"}
 };
 const escapeHTML = v => String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const mailPage = (title,body)=>new Response('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L1nG</title><style>body{margin:0;background:#f7f7f5;color:#26262d;font:15px system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}.card{background:white;max-width:420px;width:calc(100% - 60px);padding:36px;border:1px solid #e8e8e8;border-radius:18px;text-align:center}h1{font-size:24px}p{color:#777883}</style><main class="card"><h1>'+escapeHTML(title)+'</h1><p>'+escapeHTML(body)+'</p></main></html>',{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","referrer-policy":"no-referrer","x-content-type-options":"nosniff"}});
+// 驗證結果頁為獨立輕量 HTML，不依賴網站 JS/CSS；Email 開啟的分頁可能無法透過 window.close() 關閉。
+function mailPage(title,body,{kind="info",copy=emailCopy.en,autoClose=false,returnUrl=""}={}){
+ const success=kind==="success",icon=success?'<path d="m5 12 4.5 4.5L19 7"/>':kind==="error"?'<path d="M12 7v6m0 4h.01M12 2 2 21h20L12 2Z"/>':'<path d="M12 3v18m-9-9h18"/>';
+ const iconMarkup='<span class="symbol '+(success?'positive':kind==="error"?'negative':'')+'" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg></span>';
+ const a=returnUrl?'<a class="primary" href="'+escapeHTML(returnUrl)+'">'+escapeHTML(copy.returnLabel)+'</a>':'';
+ const close=autoClose?'<button class="secondary" id="close-tab" type="button">'+escapeHTML(copy.closeLabel)+'</button>':'';
+ const countdown=autoClose?'<p class="countdown" id="close-countdown" role="status">'+escapeHTML(copy.autoCloseText.replace("{seconds}","15"))+'</p>':'';
+ const script=autoClose?'<script>(function(){const c=document.getElementById("close-countdown"),b=document.getElementById("close-tab");let remaining=15;const attempt=()=>{window.close();setTimeout(()=>{c.textContent='+JSON.stringify(copy.blockedText)+';c.classList.add("blocked")},400)};b.addEventListener("click",attempt);const interval=setInterval(()=>{remaining--;if(remaining<=0){clearInterval(interval);attempt()}else c.textContent='+JSON.stringify(copy.autoCloseText)+'.replace("{seconds}",remaining)},1000);try{history.replaceState(null,"",location.pathname)}catch(_){}})();<\/script>':'';
+ const html='<!doctype html><html lang="'+escapeHTML(emailLang(Object.keys(emailCopy).find(k=>emailCopy[k]===copy)))+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>'+escapeHTML(title)+' · L1nG</title><style>*{box-sizing:border-box}body{min-height:100vh;margin:0;padding:24px;background:radial-gradient(circle at 50% 10%,#f0ecfb 0%,#f7f7f9 47%,#f4f4f7 100%);color:#2a2933;font:15px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center}.card{width:min(100%,480px);background:white;border:1px solid #eae8f1;box-shadow:0 22px 60px #42326411;border-radius:22px;text-align:center;overflow:hidden}.brand{background:#6350ab;color:white;text-align:left;padding:20px 28px;font-weight:800;letter-spacing:.03em;font-size:22px}.content{padding:38px 32px 34px}.symbol{display:inline-grid;place-items:center;border-radius:50%;background:#ede9f8;color:#6350ab;width:74px;height:74px;margin-bottom:14px}.symbol.positive{background:#e5f6ed;color:#23835a}.symbol.negative{background:#fff0ee;color:#ba6351}.symbol svg{width:38px;height:38px}h1{font-size:23px;line-height:1.3;margin:4px 0 12px}p{margin:0 auto;max-width:370px;color:#6b6977;overflow-wrap:anywhere}.actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:24px}.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 17px;border-radius:9px;font:inherit;font-weight:600;text-decoration:none;cursor:pointer}.primary{background:#6350ab;color:white;border:1px solid #6350ab}.secondary{background:white;color:#6350ab;border:1px solid #cfc8e9}.countdown{font-size:13px;margin-top:22px;color:#898397}.countdown.blocked{color:#7a718b}@media(max-width:450px){.brand{padding:17px 22px}.content{padding:32px 22px}h1{font-size:21px}}</style></head><body><main class="card"><div class="brand">L1nG</div><div class="content">'+iconMarkup+'<h1>'+escapeHTML(title)+'</h1><p>'+escapeHTML(body)+'</p><div class="actions">'+a+close+'</div>'+countdown+'</div></main>'+script+'</body></html>';
+ return new Response(html,{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","referrer-policy":"no-referrer","x-content-type-options":"nosniff","content-security-policy":"default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'self'"}});
+}
 function emailHtml(copy,title,body,button,url,footerUrl){
  const a=button?'<p style="margin:30px 0"><a href="'+escapeHTML(url)+'" style="background:#6554ae;color:#fff;padding:13px 22px;border-radius:9px;text-decoration:none">'+escapeHTML(button)+'</a></p>':'';
- return '<div style="background:#f7f7f5;padding:32px 14px;font-family:Arial,sans-serif;color:#26262d"><main style="max-width:510px;margin:auto;background:#fff;border:1px solid #e8e8e8;border-radius:16px;overflow:hidden"><header style="background:#6554ae;color:white;padding:24px 30px"><strong style="font-size:25px">L1nG</strong><p style="font-size:11px;letter-spacing:1px">'+escapeHTML(copy.brand)+'</p></header><section style="padding:30px"><h2>'+escapeHTML(title)+'</h2><p>'+escapeHTML(body)+'</p>'+a+(footerUrl?'<p style="margin-top:30px;font-size:11px"><a href="'+escapeHTML(footerUrl)+'">'+escapeHTML(copy.unsubscribe)+'</a></p>':'')+'</section></main></div>';
+ return '<div style="background:#f7f7f5;padding:32px 14px;font-family:Arial,sans-serif;color:#26262d"><main style="max-width:510px;margin:auto;background:#fff;border:1px solid #e8e8e8;border-radius:16px;overflow:hidden"><header style="background:#6554ae;color:white;padding:24px 30px"><strong style="font-size:25px">L1nG</strong><p style="font-size:11px;letter-spacing:1px">'+escapeHTML(copy.brand)+'</p></header><section style="padding:30px"><h2>'+escapeHTML(title)+'</h2><p>'+escapeHTML(body)+'</p>'+a+(!footerUrl&&button&&copy.verifyValidity?'<p style="font-size:12px;color:#777883;margin:22px 0 0">'+escapeHTML(copy.verifyValidity)+'</p>':'')+(footerUrl?'<p style="margin-top:30px;font-size:11px"><a href="'+escapeHTML(footerUrl)+'">'+escapeHTML(copy.unsubscribe)+'</a></p>':'')+'</section></main></div>';
 }
 // 玩家郵件獨立使用 Resend；管理員既有 Cloudflare FEEDBACK_EMAIL 通知不更動。
 async function sendPlayerEmail(env,to,subject,html,plain,idempotencyKey){
@@ -47,12 +58,12 @@ async function sendPlayerEmail(env,to,subject,html,plain,idempotencyKey){
 async function createVerificationEmail(env,id,email,language,force=false){
  const row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(id).first();
  if(!row || !["pending","delivery_unavailable"].includes(row.state))return false;
- if(!force && row.last_verification_sent_at && Date.now()-Date.parse(row.last_verification_sent_at)<300000)return false;
- const token=randomToken(),hash=await sha256(token),at=now(),expires=new Date(Date.now()+24*3600000).toISOString();
+ if(!force && row.last_verification_sent_at && Date.now()-Date.parse(row.last_verification_sent_at)<EMAIL_RESEND_MS)return false;
+ const token=randomToken(),hash=await sha256(token),at=now(),expires=new Date(Date.now()+EMAIL_VERIFY_MS).toISOString();
  await env.DB.prepare("UPDATE email_notifications SET state='pending',verify_hash=?,verify_expires_at=?,last_verification_sent_at=? WHERE feedback_id=? AND state IN ('pending','delivery_unavailable')").bind(hash,expires,at,id).run();
  const url="https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback/email/verify?token="+encodeURIComponent(token)+"&id="+encodeURIComponent(id);
  const copy=emailCopy[emailLang(language)];
- const plain=copy.verifyTitle+"\n\n"+copy.verifyBody+"\n\n"+copy.verifyAction+": "+url;
+ const plain=copy.verifyTitle+"\n\n"+copy.verifyBody+"\n\n"+copy.verifyAction+": "+url+"\n\n"+copy.verifyValidity;
  const sent=await sendPlayerEmail(env,email,copy.verifySubject,emailHtml(copy,copy.verifyTitle,copy.verifyBody,copy.verifyAction,url),plain,"verify/"+id+"/"+hash.slice(0,24));
  if(!sent)await env.DB.prepare("UPDATE email_notifications SET state='delivery_unavailable',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND verify_hash=? AND state='pending'").bind(id,hash).run();
  return sent;
@@ -62,9 +73,10 @@ async function verifyEmailLink(req,env){
  if(!/^LNG-[A-Z0-9]{12}$/.test(id)||!/^[A-Za-z0-9_-]{40,60}$/.test(token))return mailPage("L1nG","Invalid verification link");
  const hash=await sha256(token),row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(id).first();
  const copy=emailCopy[emailLang(row?.language)];
- if(!row || row.state!=="pending" || row.verify_hash!==hash || !row.verify_expires_at || Date.parse(row.verify_expires_at)<Date.now())return mailPage(copy.expired,"");
+ if(!row || row.state!=="pending" || row.verify_hash!==hash || !row.verify_expires_at || Date.parse(row.verify_expires_at)<Date.now())return mailPage(copy.expired,copy.expiredHelp,{kind:"error",copy});
+ const feedback=await env.DB.prepare("SELECT source FROM feedback WHERE id=?").bind(id).first();
  await env.DB.prepare("UPDATE email_notifications SET state='verified',verified_at=?,verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND state='pending' AND verify_hash=?").bind(now(),id,hash).run();
- return mailPage(copy.verified,copy.verifySuccessBody);
+ return mailPage(copy.verified,copy.verifySuccessBody,{kind:"success",copy,autoClose:true,returnUrl:feedback?.source==="Genealogy"?"https://genealogy-tool.by-l1ng.com/#my-feedback":"https://realdate.by-l1ng.com/feedback.html#my-feedback"});
 }
 async function unsubscribeEmailLink(req,env){
  const url=new URL(req.url),form=req.method==="POST"?await req.formData():null;
@@ -81,20 +93,27 @@ async function unsubscribeEmailLink(req,env){
  await env.DB.prepare("UPDATE email_notifications SET state='disabled',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND unsubscribe_hash=?").bind(id,hash).run();
  return mailPage(copy.disabled,"");
 }
+function emailStatusData(item){
+ if(!item)return null;
+ const sent=Date.parse(item.last_verification_sent_at||"");
+ return {state:item.state,language:item.language,expiresAt:item.state==="pending"?item.verify_expires_at:null,resendAt:Number.isFinite(sent)?new Date(sent+EMAIL_RESEND_MS).toISOString():null};
+}
 async function emailStatus(req,env){
  let body;try{body=await req.json()}catch(_){return fail("查詢格式不正確。")}
  const row=await verifiedReceipt(env,body.receipt);if(!row)return fail("私人憑證無效或查無資料。",404);
- const item=await env.DB.prepare("SELECT state,last_verification_sent_at,language FROM email_notifications WHERE feedback_id=?").bind(row.id).first();
- return json({ok:true,email: item?{state:item.state,language:item.language}:null});
+ const item=await env.DB.prepare("SELECT state,verify_expires_at,last_verification_sent_at,language FROM email_notifications WHERE feedback_id=?").bind(row.id).first();
+ return json({ok:true,email:emailStatusData(item),serverNow:now()});
 }
 async function resendEmail(req,env){
  let body;try{body=await req.json()}catch(_){return fail("查詢格式不正確。")}
  const row=await verifiedReceipt(env,body.receipt);if(!row)return fail("私人憑證無效或查無資料。",404);
  const item=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(row.id).first();
  if(!item || !["pending","delivery_unavailable"].includes(item.state))return fail("此回饋不需要重新驗證。",409);
- if(item.last_verification_sent_at && Date.now()-Date.parse(item.last_verification_sent_at)<300000)return fail("請稍後再重新寄送。",429);
+ if(item.last_verification_sent_at && Date.now()-Date.parse(item.last_verification_sent_at)<EMAIL_RESEND_MS)return fail("請稍後再重新寄送。",429);
  const sent=await createVerificationEmail(env,row.id,item.email,item.language,true);
- return sent?json({ok:true}):fail("寄送服務暫時不可使用。",503);
+ if(!sent)return fail("寄送服務暫時不可使用。",503);
+ const updated=await env.DB.prepare("SELECT state,verify_expires_at,last_verification_sent_at,language FROM email_notifications WHERE feedback_id=?").bind(row.id).first();
+ return json({ok:true,email:emailStatusData(updated),serverNow:now()});
 }
 async function notifyAdminReply(env,feedback,replyId){
  const item=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=? AND state='verified'").bind(feedback.id).first();
@@ -363,7 +382,8 @@ async function createFeedback(req,env,origin,ctx){
     try{emailState=await createVerificationEmail(env,id,data.contactValue,data.language)?"pending":"delivery_unavailable";}
     catch(_){emailState="delivery_unavailable";}
   }
-  return json({ok:true,id,receipt:secret?id+":"+secret:null,status:"pending",emailState},201);
+  const notification=data.emailNotify?await env.DB.prepare("SELECT state,verify_expires_at,last_verification_sent_at,language FROM email_notifications WHERE feedback_id=?").bind(id).first():null;
+  return json({ok:true,id,receipt:secret?id+":"+secret:null,status:"pending",emailState,email:emailStatusData(notification),serverNow:now()},201);
 }
 async function lookup(req,env){
   let body;try{body=await req.json();}catch(_){return fail("查詢格式不正確。");}
