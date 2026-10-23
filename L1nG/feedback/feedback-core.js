@@ -50,7 +50,7 @@
       : method === 'discord' && text.length >= 2;
   }
 
-  function normalizeFeedback({ source, category, target, message, files, followUp, contactMethod, contactValue, version, gameVersion }) {
+  function normalizeFeedback({ source, category, target, message, files, followUp, contactMethod, contactValue, version, gameVersion, emailNotify=false, language="zh-Hant" }) {
     return {
       source: source === 'RealDate' ? 'RealDate' : 'Genealogy',
       category: ['bug', 'feature', 'other'].includes(category) ? category : 'other',
@@ -58,6 +58,7 @@
       message: checkMessage(message).text,
       files: Array.from(files || []),
       followUp: followUp === 'conversation' ? 'conversation' : 'once',
+      emailNotify: !!emailNotify, language,
       contact: String(contactValue || '').trim()
         ? { method: contactMethod, value: String(contactValue).trim() }
         : null,
@@ -147,6 +148,8 @@
     }
     form.append('contactMethod', payload.contact?.method || '');
     form.append('contactValue', payload.contact?.value || '');
+    form.append('emailNotify', payload.emailNotify ? 'true' : 'false');
+    form.append('language', payload.language || 'zh-Hant');
     form.append('turnstileToken', token);
     for (const file of payload.files || []) form.append('files', file, file.name);
     const result = await request('/v1/feedback', form);
@@ -154,6 +157,8 @@
     global.L1nGAnalytics?.feedbackSubmitted?.();
     return result;
   }
+  async function emailStatus(receipt) { return request('/v1/feedback/email/status', {receipt}); }
+  async function resendVerification(receipt) { return request('/v1/feedback/email/resend', {receipt}); }
   async function lookup(receipt) { return request('/v1/feedback/lookup', {receipt}); }
   async function reply(receipt, message, files, token) {
     if (!token) throw new Error('請先完成人機驗證。');
@@ -167,6 +172,6 @@
   global.L1nGFeedbackCore = Object.freeze({
     MAX_FILES, MAX_FILE_BYTES, MAX_TOTAL_BYTES, MAX_MESSAGE_LENGTH,
     MIN_MESSAGE_LENGTH, isAllowedFile, checkFiles, checkMessage,
-    checkContact, normalizeFeedback, isLive, createVerification, submit, lookup, reply
+    checkContact, normalizeFeedback, isLive, createVerification, submit, lookup, reply, emailStatus, resendVerification
   });
 })(window);
