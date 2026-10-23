@@ -136,7 +136,7 @@
       cache: 'no-store'
     });
     const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || '服務暫時無法使用，請稍後再試。');
+    if (!response.ok || !data?.ok) { const source=data?.error || '服務暫時無法使用，請稍後再試。'; const lang=document.documentElement.dataset.language==='en'?'en':(global.LING_I18N?.language||'zh-Hant'); const message=global.L1nGFeedbackI18n?.translateFor?.(source,lang) || global.LING_I18N?.translateFor?.(lang,source) || source; throw new Error(message); }
     return data;
   }
   async function submit(payload, token) {
