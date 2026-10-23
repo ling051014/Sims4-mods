@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeFeedback() {
     if (!backdrop.classList.contains('show')) return;
-    stopPolling();
+    stopPolling();stopEmailTimer();
     backdrop.classList.remove('show');
     backdrop.setAttribute('aria-hidden', 'true');
     setTab(0);
@@ -492,6 +492,56 @@ document.addEventListener('DOMContentLoaded', () => {
   contactMethod.addEventListener('change', () => {
     contactValue.placeholder = contactMethod.value === 'email' ? 'example@email.com' : 'Discord 使用者名稱';
   });
+  const emailOption=$('genealogyFeedbackEmailOption'),emailCheckbox=$('genealogyFeedbackEmailNotify'),emailHint=$('genealogyFeedbackEmailHint');
+  function emailLanguage(){
+    const language=window.LING_I18N?.language;
+    return language==='en'?'en':language==='zh-Hans'?'zh-Hans':'zh-Hant';
+  }
+  function emailWords(){
+    const lang=emailLanguage();
+    return lang==='en'?{pending:'Waiting for email verification',verified:'Email verified',disabled:'Email notifications turned off',unavailable:'Verification email could not be delivered',instruction:'Check your inbox and follow the confirmation link to enable reply notifications.',active:'You will receive an email when the administrator replies.',error:'Email is currently unavailable. Your private receipt still works.',resend:'Resend verification email'}:
+      lang==='zh-Hans'?{pending:'等待电子邮箱验证',verified:'电子邮箱已验证',disabled:'Email 回复通知已关闭',unavailable:'验证邮件未能发送',instruction:'请前往邮箱点击验证链接，完成后即可接收管理员回复通知。',active:'管理员回复时，将通过 Email 通知你。',error:'暂时无法发送验证邮件，仍可使用私人凭证查看回复。',resend:'重新发送验证邮件'}:
+      {pending:'等待電子郵件驗證',verified:'電子郵件已驗證',disabled:'Email 回覆通知已關閉',unavailable:'驗證信未能寄送',instruction:'請前往信箱點擊驗證連結，完成後即可接收管理員回覆通知。',active:'管理員回覆時，將透過 Email 通知你。',error:'目前無法寄送驗證信，但仍可使用私人憑證查看回覆。',resend:'重新寄送驗證信'};
+  }
+  function updateEmailOption(){
+    const allowed=form.elements.genealogyFeedbackFollowUp.value==='conversation' && contactMethod.value==='email' && !!contactValue.closest('details')?.open;
+    emailOption.hidden=!allowed;emailHint.hidden=!allowed;
+    if(!allowed)emailCheckbox.checked=false;
+  }
+  contactMethod.addEventListener('change',updateEmailOption);
+  contactValue.closest('details')?.addEventListener('toggle',updateEmailOption);
+  form.querySelectorAll('input[name="genealogyFeedbackFollowUp"]').forEach(radio=>radio.addEventListener('change',updateEmailOption));
+  updateEmailOption();
+  let emailReceipt='',emailState='',emailTimer=null;
+  function renderEmailStatus(state){
+    emailState=state||'';
+    const box=$('genealogyFeedbackEmailStatus'),words=emailWords();
+    box.hidden=!state;
+    if(!state)return;
+    $('genealogyFeedbackEmailTitle').textContent=state==='verified'?words.verified:state==='disabled'?words.disabled:state==='delivery_unavailable'?words.unavailable:words.pending;
+    $('genealogyFeedbackEmailDescription').textContent=state==='verified'?words.active:state==='pending'?words.instruction:state==='delivery_unavailable'?words.error:'';
+    $('genealogyFeedbackEmailResend').hidden=state!=='pending'&&state!=='delivery_unavailable';
+    $('genealogyFeedbackEmailResend').textContent=words.resend;
+  }
+  async function checkEmailStatus(){
+    if(!emailReceipt||document.visibilityState!=='visible'||!backdrop.classList.contains('show'))return;
+    try{
+      const data=await core.emailStatus(emailReceipt),state=data.email?.state;
+      renderEmailStatus(state||'');
+      if(state==='verified'||state==='disabled')stopEmailTimer();
+    }catch(_){}
+  }
+  function stopEmailTimer(){if(emailTimer!==null)clearInterval(emailTimer);emailTimer=null;}
+  $('genealogyFeedbackEmailResend')?.addEventListener('click',async()=>{
+    if(!emailReceipt)return;
+    const button=$('genealogyFeedbackEmailResend');button.disabled=true;
+    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');}
+    catch(err){$('genealogyFeedbackEmailDescription').textContent=err.message||emailWords().error;}
+    finally{button.disabled=false;}
+  });
+  window.LING_I18N?.onLanguageChanged(()=>renderEmailStatus(emailState));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();});
+
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -526,6 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
       followUp: form.elements.genealogyFeedbackFollowUp.value,
       contactMethod: contactMethod.value,
       contactValue: contact,
+      emailNotify: form.elements.genealogyFeedbackFollowUp.value==='conversation' && contactMethod.value==='email' && !!contact && !!emailCheckbox.checked,
+      language: emailLanguage(),
       version: versionRow.hidden ? '' : versionField.value
     });
     submitButton.disabled = true;
@@ -547,7 +599,11 @@ document.addEventListener('DOMContentLoaded', () => {
       historyForm.hidden=true;
       $('genealogyFeedbackHistoryPanel').classList.add('is-success');
       $('genealogyFeedbackHistoryPanel').classList.remove('is-thread');
+      stopEmailTimer();
       lastReceipt=result.receipt||'';
+      emailReceipt=result.emailState&&lastReceipt?lastReceipt:'';
+      renderEmailStatus(result.emailState||'');
+      if(emailReceipt && result.emailState==='pending')emailTimer=setInterval(checkEmailStatus,12000);
       if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
       verification?.reset();
