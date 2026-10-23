@@ -191,7 +191,9 @@
   $('rd-email-resend')?.addEventListener('click',async()=>{
     const button=$('rd-email-resend');if(!emailReceipt)return;
     button.disabled=true;
-    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');}
+    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');
+      if(emailStatusTimer===null)emailStatusTimer=setInterval(checkEmailStatus,12000);
+      void checkEmailStatus();}
     catch(err){$('rd-email-description').textContent=err.message||emailText().error;}
     finally{button.disabled=false;}
   });
