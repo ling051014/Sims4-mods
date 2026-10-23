@@ -147,6 +147,8 @@
 
   function translatePatterns(source) {
     const canonical = String(source ?? '');
+    const feedbackCode = canonical.match(/^回饋編號\s+(LNG-[A-Z0-9]{12})$/);
+    if (feedbackCode) return language === 'en' ? 'Feedback # '+feedbackCode[1] : language === 'zh-Hans' ? '反馈编号 '+feedbackCode[1] : canonical;
 
     if (language !== 'en') {
       return translateExact(canonical);
