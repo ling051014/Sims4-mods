@@ -365,7 +365,7 @@
                                                 </summary>
                                                 <div class="contact-fields">
                                                     <label class="field-label" for="contact-method">聯絡方式</label><select class="field" id="contact-method"><option value="email">電子郵件</option><option value="discord">Discord</option></select><label class="field-label" for="contact-value" style="margin-top:10px;display:block">聯絡資料</label><input autocomplete="email" class="field" id="contact-value" maxlength="120" placeholder="example@email.com" type="email"/><p class="hint">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</p>
-                                                    <div class="field-error" id="contact-error">請確認聯絡方式格式，或收合此區塊保持匿名。</div>
+                                                    <label class="feedback-email-option" id="rd-email-option" hidden><input type="checkbox" id="rd-email-notify"><span>管理員回覆時，透過 Email 通知我</span></label><p class="hint" id="rd-email-hint" hidden>提交後會寄送驗證信，完成驗證才會啟用回覆通知。</p><div class="field-error" id="contact-error">請確認聯絡方式格式，或收合此區塊保持匿名。</div>
                                                 </div>
                                             </details>
                                         </section>
@@ -409,7 +409,7 @@
                                     </button>
                                     <small>請妥善保存。回饋編號本身無法開啟對話；私人憑證則相當於密碼，請勿公開。</small>
                                 </div>
-                                <div class="success-actions">
+                                <div class="feedback-email-status" id="rd-email-status" hidden><strong id="rd-email-title"></strong><p id="rd-email-description"></p><button type="button" class="link" id="rd-email-resend" hidden>重新寄送驗證信</button></div><div class="success-actions">
                                     <button class="secondary" id="success-new" type="button">再寫一則</button>
                                     <button class="primary" id="success-open-thread" type="button">查看匿名對話 <svg class="i sm"><use href="#ico-arrow"></use></svg>
                                     </button>
