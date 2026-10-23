@@ -23,6 +23,7 @@ function harness({key=true,failSend=false}={}){
              const r=feedback.get(a[0]);return r?.follow_up==='conversation'?r:null;
            }
            if(sql.startsWith('SELECT * FROM feedback WHERE id=?'))return feedback.get(a[0])||null;
+           if(sql.startsWith('SELECT source FROM feedback WHERE id=?')){const r=feedback.get(a[0]);return r?{source:r.source}:null;}
            if(sql.startsWith('SELECT * FROM email_notifications WHERE feedback_id=? AND unsubscribe_hash=?')){
              const r=notifications.get(a[0]);return r?.unsubscribe_hash===a[1]?r:null;
            }
@@ -334,5 +335,41 @@ test('Resend 寄件格式：同一封包含 HTML、純文字、正確寄件者�
    assert.ok(reply.headers['Idempotency-Key'].startsWith('reply/'));
    assert.equal(reply.data.html.includes(item.receipt),false);
    assert.equal(reply.data.text.includes(item.receipt),false);
+ });
+});
+
+test('驗證有效期 15 分鐘、重寄冷卻 1 分鐘，API 提供伺服器時間供網站倒數',async()=>{
+ const h=harness();
+ await withMock(h,async()=>{
+   const item=await submit(h);
+   assert.equal(item.emailState,'pending');
+   assert.ok(item.email.expiresAt&&item.email.resendAt&&item.serverNow);
+   assert.ok(Math.abs(Date.parse(item.email.expiresAt)-Date.parse(item.serverNow)-900000)<2500);
+   assert.ok(Math.abs(Date.parse(item.email.resendAt)-Date.parse(item.serverNow)-60000)<2500);
+   const status=await check(await post('/v1/feedback/email/status',{receipt:item.receipt},h.env),200);
+   assert.equal(status.email.expiresAt,item.email.expiresAt);
+   const soon=await post('/v1/feedback/email/resend',{receipt:item.receipt},h.env);
+   assert.equal(soon.status,429);
+   h.notifications.get(item.id).last_verification_sent_at=new Date(Date.now()-61000).toISOString();
+   const again=await check(await post('/v1/feedback/email/resend',{receipt:item.receipt},h.env),200);
+   assert.ok(again.email.expiresAt&&again.email.resendAt&&again.serverNow);
+   assert.equal(h.sent.length,2);
+   assert.match(h.sent[1].data.text,/15 分鐘/);
+ });
+});
+test('成功頁具有 15 秒倒數、手動關閉與返回網站入口；過期頁引導重新寄送',async()=>{
+ const h=harness();
+ await withMock(h,async()=>{
+   const item=await submit(h,'Genealogy','zh-Hant');
+   const success=await followLink(verificationUrl(h.sent[0]),h.env);
+   const html=await success.text();
+   assert.match(html,/close-countdown/);
+   assert.match(html,/remaining=15/);
+   assert.match(html,/window\.close\(\)/);
+   assert.match(html,/genealogy-tool\.by-l1ng\.com/);
+   assert.match(html,/關閉分頁/);
+   assert.equal(html.includes(item.receipt),false);
+   const expired=await followLink(verificationUrl(h.sent[0]),h.env);
+   assert.match(await expired.text(),/重新寄送驗證信/);
  });
 });
