@@ -10029,3 +10029,6 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 @media (pointer:coarse){.l1ng-color-picker-tools button{min-height:40px}.l1ng-color-picker-inputs input{font-size:16px;height:32px;min-height:32px}}
 
 @media (prefers-reduced-motion:reduce){.l1ng-color-picker-hue-rest,.l1ng-color-picker-hue-lens{transition:none}}
+
+/* 回饋信箱通知延伸原有欄位與成功卡片，不新增另一套視窗。 */
+.genealogy-feedback-email-option{display:flex;gap:9px;align-items:center;margin-top:12px;cursor:pointer;font-size:12px}.genealogy-feedback-email-option[hidden],.genealogy-feedback-email-status[hidden]{display:none}.genealogy-feedback-email-option input{width:16px;height:16px;accent-color:var(--primary)}.genealogy-feedback-email-status{border:1px solid var(--stroke);border-radius:12px;padding:13px;margin:13px 0;text-align:left;width:100%;font-size:12px}.genealogy-feedback-email-status p{margin:5px 0}.genealogy-feedback-email-status button{border:0;background:transparent;padding:5px 0;color:inherit;text-decoration:underline;cursor:pointer}
