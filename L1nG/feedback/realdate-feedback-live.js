@@ -524,8 +524,19 @@
   document.querySelectorAll('[data-open-form]').forEach(button=>button.addEventListener('click',()=>{$('form-layer').classList.remove('closed');newFeedback();}));
   $('thread-back-form')?.addEventListener('click',()=>{$('form-layer').classList.remove('closed');});
   updateVersion();show('form-main');
-  // F5 保留本分頁的私人對話，不要求再次貼上憑證。
-  if(core.isLive()){
+  // 信件僅攜帶固定頁面錨點，不攜帶私人憑證；直接開啟現有「我的回饋」。
+  const fromEmail=window.location.hash==='#my-feedback';
+  if(fromEmail){
+    window.history.replaceState(null,'',window.location.pathname+window.location.search);
+    const saved=rememberedThread();
+    if(saved && core.isLive())openThread(saved,{recover:true});
+    else {
+      $('thread-home').classList.remove('hide');
+      $('thread-chat').classList.add('hide');
+      show('thread-pane');
+    }
+  }else if(core.isLive()){
+    // F5 保留本分頁的私人對話，不要求再次貼上憑證。
     const previous=rememberedThread();
     if(previous)openThread(previous,{recover:true});
   }
