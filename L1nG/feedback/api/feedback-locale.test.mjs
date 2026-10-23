@@ -40,8 +40,9 @@ test('Genealogy locale catalogs translate email prompts and API failure states',
 });
 test('Worker verification and notification emails have three localized copies',()=>{
  const worker=read('feedback/api/worker.js');
- for(const language of ['"zh-Hant":','"zh-Hans":','"en":'])assert.ok(worker.includes(language));
- for(const label of ['verifyValidity:','verifySubject:','replySubject:','expiredHelp:','unsubscribe:'])assert.equal((worker.match(new RegExp(label,'g'))||[]).length,3);
+ const mailCopies=worker.slice(worker.indexOf('const emailCopy = {'),worker.indexOf('};',worker.indexOf('const emailCopy = {')));
+ for(const language of ['"zh-Hant":','"zh-Hans":','"en":'])assert.ok(mailCopies.includes(language));
+ for(const label of ['verifyValidity:','verifySubject:','replySubject:','expiredHelp:','unsubscribe:'])assert.equal((mailCopies.match(new RegExp(label,'g'))||[]).length,3);
 });
 test('Both opt-ins space their text; only Family Tree uses the existing themed checkbox',()=>{
  const rd=read('feedback/feedback.css'),gen=read('GenealogyExporter/genealogy.css');
