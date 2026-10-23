@@ -533,7 +533,7 @@
       }
     }catch(err){
       // 失效的憑證不再自動恢復；網路暫時失敗則保留分頁憑證供使用者重試。
-      if(recover && /無效|查無資料/.test(err?.message||''))clearRememberedThread();
+      if(recover && /無效|查無資料|Invalid private receipt|feedback not found/i.test(err?.message||''))clearRememberedThread();
       $('thread-home').classList.remove('hide');
       $('thread-chat').classList.add('hide');
       $('restore-token').value=value;
