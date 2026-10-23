@@ -790,4 +790,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateFields();
   setTab(0);
+  // Email 通知連結僅指定開啟「我的回饋」，不傳遞或曝光私人憑證。
+  if(window.location.hash==='#my-feedback'){
+    window.history.replaceState(null,'',window.location.pathname+window.location.search);
+    openFeedback();
+    showHistory();
+    setTab(1);
+    const saved=storedReceipt();
+    if(saved)void openThread(saved);
+  }
 });
