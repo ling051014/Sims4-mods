@@ -90,6 +90,19 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
         country:['Taiwan'],deviceCategory:['mobile'],sessionSourceMedium:['(direct) / (none)'],
         hostName:['realdate.by-l1ng.com'],'hostName,eventName':['realdate.by-l1ng.com','l1ng_dl_r_v050_main']
       };
+      if(dimensions.join(',')==='hostName,eventName'){
+        const filters=q.dimensionFilter.andGroup?.expressions||[];
+        const filter=filters.find(x=>x.filter?.fieldName==='eventName')?.filter;
+        if(filter?.inListFilter){
+          assert.deepEqual(filter.inListFilter.values,['l1ng_feedback_open','l1ng_feedback_submitted']);
+          return Response.json({rows:[
+            {dimensionValues:[{value:'realdate.by-l1ng.com'},{value:'l1ng_feedback_open'}],metricValues:[{value:'4'}]},
+            {dimensionValues:[{value:'realdate.by-l1ng.com'},{value:'l1ng_feedback_submitted'}],metricValues:[{value:'2'}]},
+            {dimensionValues:[{value:'genealogy-tool.by-l1ng.com'},{value:'l1ng_feedback_open'}],metricValues:[{value:'3'}]}
+          ]});
+        }
+        assert.equal(filter?.stringFilter?.matchType,'BEGINS_WITH');
+      }
       return Response.json({rows:[{
         dimensionValues:dims[dimensions.join(',')].map(value=>({value})),
         metricValues:names.map(value=>({value}))
@@ -104,6 +117,13 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
     assert.equal(result.body.summary.activeUsers,12);
     assert.equal(result.body.summary.views,31);
     assert.equal(result.body.summary.downloads,3);
+    assert.equal(result.body.summary.feedbackOpened,7);
+    assert.equal(result.body.summary.feedbackSubmitted,2);
+    assert.deepEqual(result.body.feedbackEvents.map(x=>({host:x.host,event:x.event,value:x.value})),[
+      {host:'realdate.by-l1ng.com',event:'l1ng_feedback_open',value:4},
+      {host:'genealogy-tool.by-l1ng.com',event:'l1ng_feedback_open',value:3},
+      {host:'realdate.by-l1ng.com',event:'l1ng_feedback_submitted',value:2}
+    ]);
     assert.equal(result.body.pages[0].host,'home.by-l1ng.com');
     assert.equal(result.body.countries[0].name,'Taiwan');
     assert.equal(result.body.trend[0].date,'20261003');
@@ -111,8 +131,8 @@ test('serves only real GA4-shaped reports to a cryptographically verified admin'
     assert.equal(result.body.downloadItems[0].value,2);
     assert.equal(result.body.downloadItems[1].unclassified,true);
     assert.equal(result.body.downloadItems[1].value,1);
-    assert.equal(reportCalls,8);
-    assert.ok(calls>=10);
+    assert.equal(reportCalls,9);
+    assert.ok(calls>=11);
     assert.equal(JSON.stringify(result.body).includes('PRIVATE KEY'),false);
   } finally {globalThis.fetch=original;}
 });
