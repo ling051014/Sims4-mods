@@ -80,7 +80,7 @@ function harness({key=true,failSend=false}={}){
      return Response.json({success:true,hostname:mock.origin||'realdate.by-l1ng.com'});
    }
    if(u==='https://api.resend.com/emails'){
-     assert.equal(options.headers.Authorization,'Bearer offline-resend-secret');
+     assert.equal(options.headers.Authorization,'Bearer '+env.RESEND_API_KEY);
      const data=JSON.parse(options.body);
      sent.push({data,headers:options.headers});
      return failSend?Response.json({error:'simulated'},{status:422}):Response.json({id:'offline-message-id'});
@@ -273,5 +273,66 @@ test('通知信寄送故障不得撤銷已保存的管理員回覆；記錄寄�
    assert.equal(h.sent.length,2);
    assert.equal([...h.delivery.values()][0].status,'failed');
    assert.equal(row.state,'verified');
+ });
+});
+
+test('驗證連結：過期與變造都不應啟用通知，失敗頁不洩露私人憑證',async()=>{
+ const h=harness();
+ await withMock(h,async()=>{
+   const item=await submit(h);
+   const url=verificationUrl(h.sent[0]),row=h.notifications.get(item.id);
+   const forged=new URL(url);
+   forged.searchParams.set('token','A'.repeat(43));
+   const wrong=await followLink(forged.href,h.env);
+   assert.match(await wrong.text(),/驗證連結無效或已過期/);
+   assert.equal(row.state,'pending');
+   row.verify_expires_at='2000-01-01T00:00:00.000Z';
+   const expired=await followLink(url,h.env);
+   const text=await expired.text();
+   assert.match(text,/驗證連結無效或已過期/);
+   assert.ok(!text.includes(item.receipt));
+   assert.equal(row.state,'pending','到期連結不得改為已驗證');
+ });
+});
+test('回覆通知：更換 Resend API Key 後舊取消通知連結仍有效',async()=>{
+ const h=harness();
+ await withMock(h,async()=>{
+   const jwt=await adminAuth(h),item=await submit(h);
+   await followLink(verificationUrl(h.sent[0]),h.env);
+   let result=await adminReply(h,item.id,jwt);
+   assert.equal(result.status,200);await h.flush();
+   const oldUrl=unsubscribeUrl(h.sent[1]);
+   assert.ok(oldUrl);
+   h.env.RESEND_API_KEY='rotated-offline-key';
+   result=await adminReply(h,item.id,jwt);
+   assert.equal(result.status,200);await h.flush();
+   assert.equal(unsubscribeUrl(h.sent[2]),oldUrl);
+   const q=new URL(oldUrl);
+   const cancelled=await followLink(oldUrl,h.env,'POST',new URLSearchParams({id:q.searchParams.get('id'),token:q.searchParams.get('token')}));
+   assert.equal(cancelled.status,200);
+   assert.equal(h.notifications.get(item.id).state,'disabled');
+ });
+});
+test('Resend 寄件格式：同一封包含 HTML、純文字、正確寄件者與固定網站網址，不含私人憑證',async()=>{
+ const h=harness();
+ await withMock(h,async()=>{
+   const item=await submit(h,'RealDate','en');
+   assert.equal(h.sent.length,1);
+   const verification=h.sent[0];
+   assert.equal(verification.data.from,'L1nG Notifications <notify@by-l1ng.com>');
+   assert.deepEqual(verification.data.to,['player@example.com']);
+   assert.match(verification.data.html,/Verify email/);
+   assert.match(verification.data.text,/Verify email/);
+   assert.equal(verification.data.html.includes(item.receipt),false);
+   await followLink(verificationUrl(verification),h.env);
+   const jwt=await adminAuth(h);
+   const response=await adminReply(h,item.id,jwt);
+   assert.equal(response.status,200);await h.flush();
+   const reply=h.sent[1];
+   assert.match(reply.data.html,/https:\/\/realdate\.by-l1ng\.com\/feedback\.html#my-feedback/);
+   assert.match(reply.data.text,/https:\/\/realdate\.by-l1ng\.com\/feedback\.html#my-feedback/);
+   assert.ok(reply.headers['Idempotency-Key'].startsWith('reply/'));
+   assert.equal(reply.data.html.includes(item.receipt),false);
+   assert.equal(reply.data.text.includes(item.receipt),false);
  });
 });
