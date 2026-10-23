@@ -400,6 +400,38 @@ test('新回饋及玩家後續留言通知兩個信箱，寄信失敗不影響�
   }finally{globalThis.fetch=original;}
 });
 
+test('HTML 通知保持雙收件者、保留純文字且跳脫玩家內容',async()=>{
+  const harness=offlineFeedbackHarness();
+  const delivered=[],jobs=[];
+  const env={...harness.env,ADMIN_EMAIL:'first@example.com,second@example.com',
+    FEEDBACK_EMAIL:{async send(message){delivered.push(message);}}
+  };
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>Response.json({success:true,hostname:'realdate.by-l1ng.com'});
+  try{
+    const form=offlineFeedbackForm();
+    form.set('message','Player reported <script>alert("x")</script> & changes in the calendar');
+    const response=await worker.fetch(new Request(workerUrl+'/v1/feedback',{
+      method:'POST',headers:offlineHeaders,body:form
+    }),env,{waitUntil(p){jobs.push(p);}});
+    assert.equal(response.status,201);
+    await Promise.all(jobs);
+    assert.equal(delivered.length,2);
+    for(const mail of delivered){
+      assert.equal(mail.from.email,'notify@by-l1ng.com');
+      assert.equal(mail.from.name,'L1nG Notifications');
+      assert.match(mail.html,/FEEDBACK NOTIFICATION/);
+      assert.match(mail.html,/前往管理中心/);
+      assert.match(mail.html,/&lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt; &amp;/);
+      assert.ok(!mail.html.includes('<script>alert'));
+      assert.match(mail.text,/Player reported/);
+      assert.match(mail.subject,/RealDate/);
+    }
+    assert.deepEqual(delivered.map(x=>x.to),['first@example.com','second@example.com']);
+    assert.equal(harness.feedback.size,1);
+  }finally{globalThis.fetch=original;}
+});
+
 test('未配置寄信 Binding 仍可提交回饋',async()=>{
   const harness=offlineFeedbackHarness();
   const original=globalThis.fetch;
