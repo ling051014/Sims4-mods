@@ -10120,3 +10120,6 @@ body.ootd-sorting,body.ootd-sorting * { cursor:grabbing; }
 .ootd-lightbox-close { position:absolute; top:12px; right:16px; border:1px solid var(--border-default); border-radius:7px; padding:5px 14px; background:var(--surface-card); color:var(--text-primary); font:inherit; font-size:12px; cursor:pointer; }
 @media(max-width:650px) { .ootd-slot-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; } }
 @media(max-width:390px) { .ootd-slot-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+/* 回饋信箱通知延伸原有欄位與成功卡片，不新增另一套視窗。 */
+.genealogy-feedback-email-option{display:flex;gap:9px;align-items:center;margin-top:12px;cursor:pointer;font-size:12px}.genealogy-feedback-email-option[hidden],.genealogy-feedback-email-status[hidden]{display:none}.genealogy-feedback-email-option input{width:16px;height:16px;accent-color:var(--primary)}.genealogy-feedback-email-status{border:1px solid var(--stroke);border-radius:12px;padding:13px;margin:13px 0;text-align:left;width:100%;font-size:12px}.genealogy-feedback-email-status p{margin:5px 0}.genealogy-feedback-email-status button{border:0;background:transparent;padding:5px 0;color:inherit;text-decoration:underline;cursor:pointer}
