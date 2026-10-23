@@ -117,11 +117,54 @@ const feedbackNotificationRecipients = env => [...new Set(
     .split(",").map(email=>email.trim().toLowerCase())
     .filter(email=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
 )];
+// HTML 郵件只使用內嵌樣式；玩家輸入插入 HTML 前必須跳脫。
+const escapeFeedbackHtml = value => String(value ?? "").replace(/[&<>"']/g,char=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+})[char]);
+const feedbackAdminUrl = "https://home.by-l1ng.com/feedback/admin.html";
+const feedbackCategoryName = category => ({bug:"問題回報",feature:"功能建議",other:"其他回饋"})[category] || "玩家回饋";
+function renderFeedbackEmail({type,source,category,version,gameVersion,id,timestamp,preview}){
+  const title=type==="created"?"收到新的玩家回饋":"玩家新增後續留言";
+  const description=type==="created"?"一位玩家提交了新的回饋。":"一位玩家補充了既有回饋的內容。";
+  const rows=[
+    ["作品",source],["回饋類型",feedbackCategoryName(category)],
+    ...(version?[["模組版本",version]]:[]),
+    ...(gameVersion?[["遊戲版本",gameVersion]]:[]),
+    ["提交時間",timestamp],["回饋編號",id]
+  ].map(([label,value])=>'<tr><td style="padding:9px 14px 9px 0;color:#817b91;font-size:12px;vertical-align:top;white-space:nowrap;">'+escapeFeedbackHtml(label)+'</td><td style="padding:9px 0;color:#2d2838;font-size:13px;font-weight:600;line-height:1.5;overflow-wrap:anywhere;">'+escapeFeedbackHtml(value)+'</td></tr>').join("");
+  const previewHtml=escapeFeedbackHtml(preview).replace(/\r\n|\r|\n/g,"<br>");
+  return [
+    '<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>',
+    '<body style="margin:0;padding:0;background:#f5f3f8;color:#302b3a;font-family:Arial,sans-serif;">',
+    '<div style="display:none;max-height:0;overflow:hidden;opacity:0;">'+escapeFeedbackHtml(description)+' '+escapeFeedbackHtml(source)+'</div>',
+    '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f5f3f8;"><tr><td align="center" style="padding:32px 14px;">',
+    '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;background:#ffffff;border:1px solid #e7e2ee;border-radius:16px;overflow:hidden;">',
+    '<tr><td style="padding:26px 30px;background:#6657aa;color:#ffffff;">',
+    '<div style="font-size:24px;font-weight:800;letter-spacing:0.4px;line-height:1.2;">L1nG</div>',
+    '<div style="margin-top:7px;color:#eeeafa;font-size:11px;letter-spacing:2px;font-weight:700;">FEEDBACK NOTIFICATION</div></td></tr>',
+    '<tr><td style="padding:29px 30px 14px;">',
+    '<div style="color:#282332;font-size:21px;font-weight:700;line-height:1.45;">'+escapeFeedbackHtml(title)+'</div>',
+    '<p style="font-size:14px;color:#706a7d;line-height:1.8;margin:9px 0 18px;">'+escapeFeedbackHtml(description)+'</p>',
+    '<div style="border-top:1px solid #ece8f0;padding-top:12px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">'+rows+'</table></div>',
+    '<div style="margin-top:22px;padding:16px 17px;border-radius:10px;background:#f5f3f8;">',
+    '<div style="margin-bottom:8px;color:#736a8d;font-size:11px;letter-spacing:1px;font-weight:700;">'+(type==="created"?"回饋內容":"新增留言")+'</div>',
+    '<div style="font-size:14px;line-height:1.85;color:#34303d;overflow-wrap:anywhere;">'+previewHtml+'</div></div>',
+    '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td bgcolor="#6657aa" style="border-radius:8px;">',
+    '<a href="'+feedbackAdminUrl+'" style="display:inline-block;padding:13px 23px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">前往管理中心 →</a>',
+    '</td></tr></table></td></tr>',
+    '<tr><td style="padding:18px 30px 24px;color:#87808f;font-size:12px;line-height:1.7;">',
+    '此信件由 L1nG 回饋系統自動發送，請至管理中心查看完整內容與附件。',
+    '</td></tr></table></td></tr></table></body></html>'
+  ].join("");
+}
+
 function notifyFeedback(env,ctx,{type,id,source,category,version,gameVersion,createdAt,message}){
   if(!env.FEEDBACK_EMAIL || typeof env.FEEDBACK_EMAIL.send!=="function")return;
   const recipients=feedbackNotificationRecipients(env);
   if(!recipients.length)return;
   const subject="[L1nG] "+source+" · "+(type==="created"?"新玩家回饋":"玩家後續留言");
+  const preview=clean(message,220);
+  const html=renderFeedbackEmail({type,source,category,version,gameVersion,id,timestamp:new Date(createdAt).toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false}),preview});
   const timestamp=new Date(createdAt).toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false});
   const body=[
     type==="created"?"收到新的玩家問題回饋。":"玩家在既有回饋中新增留言。",
@@ -133,13 +176,13 @@ function notifyFeedback(env,ctx,{type,id,source,category,version,gameVersion,cre
     "時間（台灣）："+timestamp,
     "",
     "內容預覽：",
-    clean(message,220),
+    preview,
     "",
-    "管理中心：https://home.by-l1ng.com/feedback/admin.html"
+    "管理中心："+feedbackAdminUrl
   ].join("\n");
   const from=text(env.FEEDBACK_NOTIFY_SENDER)||"notify@by-l1ng.com";
   const task=Promise.all(recipients.map(async to=>{
-    try{await env.FEEDBACK_EMAIL.send({from,to,subject,text:body});}
+    try{await env.FEEDBACK_EMAIL.send({from:{email:from,name:"L1nG Notifications"},to,subject,html,text:body});}
     catch(error){console.error("Feedback email notification failed:",error?.code||"SEND_FAILED");}
   }));
   // waitUntil 確保回應後仍能完成寄信；寄信失敗不可影響玩家已完成的提交。
