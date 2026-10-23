@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS email_notifications (
   feedback_id TEXT PRIMARY KEY REFERENCES feedback(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   language TEXT NOT NULL CHECK(language IN ('zh-Hant','zh-Hans','en')),
-  state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','verified','disabled')),
+  state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','verified','disabled','delivery_unavailable')),
   verify_hash TEXT UNIQUE,
   verify_expires_at TEXT,
   verified_at TEXT,
