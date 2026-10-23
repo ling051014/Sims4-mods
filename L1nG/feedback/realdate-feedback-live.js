@@ -152,7 +152,7 @@
   $('contact-option')?.addEventListener('toggle',updateEmailOption);
   for(const radio of document.querySelectorAll('input[name="reply-mode"]'))radio.addEventListener('change',updateEmailOption);
   updateEmailOption();
-  let emailStatusTimer=null,emailReceipt='',emailState='',emailDeadline=0,emailResendAt=0,emailClockOffset=0;
+  let emailStatusTimer=null,emailReceipt='',emailState='',emailDeadline=0,emailResendAt=0,emailClockOffset=0,emailPolledAt=0;
   const emailText=()=>{
     const en=document.documentElement.dataset.language==='en';
     return en?{
@@ -190,7 +190,7 @@
   }
   function startEmailStatus(){
     if(emailStatusTimer!==null)clearInterval(emailStatusTimer);
-    emailStatusTimer=setInterval(()=>{renderEmailStatus(emailState);if(timeLeft(emailResendAt)===0&&emailState==='pending'&&emailDeadline&&timeLeft(emailDeadline)===0)void checkEmailStatus();},1000);
+    emailStatusTimer=setInterval(()=>{renderEmailStatus(emailState);if(emailReceipt&&document.visibilityState==='visible'&&Date.now()-emailPolledAt>12000){emailPolledAt=Date.now();void checkEmailStatus();}},1000);
   }
   async function checkEmailStatus(){
     if(!emailReceipt||$('success-pane')?.classList.contains('hide')||document.visibilityState!=='visible')return;
@@ -214,6 +214,7 @@
     finally{renderEmailStatus(emailState);}
   });
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();});
+  window.addEventListener('focus',()=>{if(emailReceipt)void checkEmailStatus();});
   document.querySelectorAll('[data-language-button]').forEach(button=>button.addEventListener('click',()=>queueMicrotask(()=>renderEmailStatus(emailState))));
 
 
