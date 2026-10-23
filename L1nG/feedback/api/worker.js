@@ -28,13 +28,15 @@ async function sendEmail(env,to,subject,html){
 }
 async function createVerificationEmail(env,id,email,language,force=false){
  const row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(id).first();
- if(!row || row.state==="disabled")return false;
+ if(!row || !["pending","delivery_unavailable"].includes(row.state))return false;
  if(!force && row.last_verification_sent_at && Date.now()-Date.parse(row.last_verification_sent_at)<300000)return false;
  const token=randomToken(),hash=await sha256(token),at=now(),expires=new Date(Date.now()+24*3600000).toISOString();
- await env.DB.prepare("UPDATE email_notifications SET verify_hash=?,verify_expires_at=?,last_verification_sent_at=? WHERE feedback_id=? AND state='pending'").bind(hash,expires,at,id).run();
+ await env.DB.prepare("UPDATE email_notifications SET state='pending',verify_hash=?,verify_expires_at=?,last_verification_sent_at=? WHERE feedback_id=? AND state IN ('pending','delivery_unavailable')").bind(hash,expires,at,id).run();
  const url="https://l1ng-feedback-api.zpl74520.workers.dev/v1/feedback/email/verify?token="+encodeURIComponent(token)+"&id="+encodeURIComponent(id);
  const copy=emailCopy[emailLang(language)];
- return sendEmail(env,email,copy.verifySubject,emailHtml(copy,copy.verifyTitle,copy.verifyBody,copy.verifyAction,url));
+ const sent=await sendEmail(env,email,copy.verifySubject,emailHtml(copy,copy.verifyTitle,copy.verifyBody,copy.verifyAction,url));
+ if(!sent)await env.DB.prepare("UPDATE email_notifications SET state='delivery_unavailable',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND verify_hash=? AND state='pending'").bind(id,hash).run();
+ return sent;
 }
 async function verifyEmailLink(req,env){
  const url=new URL(req.url),id=url.searchParams.get("id")||"",token=url.searchParams.get("token")||"";
@@ -46,12 +48,19 @@ async function verifyEmailLink(req,env){
  return mailPage(copy.verified,copy.replyBody);
 }
 async function unsubscribeEmailLink(req,env){
- const url=new URL(req.url),id=url.searchParams.get("id")||"",token=url.searchParams.get("token")||"";
+ const url=new URL(req.url),form=req.method==="POST"?await req.formData():null;
+ const id=(form?String(form.get("id")||""):url.searchParams.get("id"))||"";
+ const token=(form?String(form.get("token")||""):url.searchParams.get("token"))||"";
  if(!/^LNG-[A-Z0-9]{12}$/.test(id)||!/^[A-Za-z0-9_-]{40,60}$/.test(token))return mailPage("L1nG","Invalid link");
  const hash=await sha256(token),row=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=? AND unsubscribe_hash=?").bind(id,hash).first();
  if(!row)return mailPage("L1nG","Invalid link");
- await env.DB.prepare("UPDATE email_notifications SET state='disabled',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=?").bind(id).run();
- return mailPage(emailCopy[emailLang(row.language)].disabled,"");
+ const copy=emailCopy[emailLang(row.language)];
+ if(req.method==="GET"){
+   const body='<form action="/v1/feedback/email/unsubscribe" method="post"><input type="hidden" name="id" value="'+escapeHTML(id)+'"><input type="hidden" name="token" value="'+escapeHTML(token)+'"><button type="submit" style="background:#6554ae;color:white;padding:12px 18px;border:0;border-radius:9px;cursor:pointer">'+escapeHTML(copy.unsubscribe)+'</button></form>';
+   return new Response('<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>L1nG</title><body style="margin:0;background:#f7f7f5;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif"><main style="background:white;padding:36px;border:1px solid #ddd;border-radius:16px"><h1>L1nG</h1>'+body+'</main></body></html>',{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","referrer-policy":"no-referrer"}});
+ }
+ await env.DB.prepare("UPDATE email_notifications SET state='disabled',verify_hash=NULL,verify_expires_at=NULL WHERE feedback_id=? AND unsubscribe_hash=?").bind(id,hash).run();
+ return mailPage(copy.disabled,"");
 }
 async function emailStatus(req,env){
  let body;try{body=await req.json()}catch(_){return fail("查詢格式不正確。")}
@@ -63,7 +72,7 @@ async function resendEmail(req,env){
  let body;try{body=await req.json()}catch(_){return fail("查詢格式不正確。")}
  const row=await verifiedReceipt(env,body.receipt);if(!row)return fail("私人憑證無效或查無資料。",404);
  const item=await env.DB.prepare("SELECT * FROM email_notifications WHERE feedback_id=?").bind(row.id).first();
- if(!item || item.state!=="pending")return fail("此回饋不需要重新驗證。",409);
+ if(!item || !["pending","delivery_unavailable"].includes(item.state))return fail("此回饋不需要重新驗證。",409);
  if(item.last_verification_sent_at && Date.now()-Date.parse(item.last_verification_sent_at)<300000)return fail("請稍後再重新寄送。",429);
  const sent=await createVerificationEmail(env,row.id,item.email,item.language,true);
  return sent?json({ok:true}):fail("寄送服務暫時不可使用。",503);
@@ -361,7 +370,7 @@ export default {
     if(path==="/health"&&request.method==="GET")return json({ok:true,service:"l1ng-feedback-api"});
     if(!env.DB)return fail("回饋資料庫尚未連接。",503);
     if(path==="/v1/feedback/email/verify"&&request.method==="GET")return verifyEmailLink(request,env);
-    if(path==="/v1/feedback/email/unsubscribe"&&request.method==="GET")return unsubscribeEmailLink(request,env);
+    if(path==="/v1/feedback/email/unsubscribe"&&["GET","POST"].includes(request.method))return unsubscribeEmailLink(request,env);
     const adminPrefix="/feedback/admin-api";
     // 管理請求僅從首頁同網域的專用 Worker Route 進入，不接受 workers.dev 直連。
     // Cloudflare Access 必須保護 home.by-l1ng.com/feedback/admin-api/*。
