@@ -516,34 +516,50 @@ document.addEventListener('DOMContentLoaded', () => {
   contactValue.closest('details')?.addEventListener('toggle',updateEmailOption);
   form.querySelectorAll('input[name="genealogyFeedbackFollowUp"]').forEach(radio=>radio.addEventListener('change',updateEmailOption));
   updateEmailOption();
-  let emailReceipt='',emailState='',emailTimer=null;
+  let emailReceipt='',emailState='',emailTimer=null,emailDeadline=0,emailResendAt=0,emailClockOffset=0;
+  function setEmailTiming(item,serverNow){
+    if(serverNow&&Number.isFinite(Date.parse(serverNow)))emailClockOffset=Date.parse(serverNow)-Date.now();
+    emailDeadline=item?.expiresAt?Date.parse(item.expiresAt)||0:0;
+    emailResendAt=item?.resendAt?Date.parse(item.resendAt)||0:0;
+  }
+  const emailSeconds=end=>Math.max(0,Math.ceil((end-Date.now()-emailClockOffset)/1000));
+  const emailClock=seconds=>String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   function renderEmailStatus(state){
     emailState=state||'';
     const box=$('genealogyFeedbackEmailStatus'),words=emailWords();
-    box.hidden=!state;
-    if(!state)return;
+    box.hidden=!state;if(!state)return;
+    const left=emailSeconds(emailDeadline),cool=emailSeconds(emailResendAt);
     $('genealogyFeedbackEmailTitle').textContent=state==='verified'?words.verified:state==='disabled'?words.disabled:state==='delivery_unavailable'?words.unavailable:words.pending;
-    $('genealogyFeedbackEmailDescription').textContent=state==='verified'?words.active:state==='pending'?words.instruction:state==='delivery_unavailable'?words.error:'';
-    $('genealogyFeedbackEmailResend').hidden=state!=='pending'&&state!=='delivery_unavailable';
-    $('genealogyFeedbackEmailResend').textContent=words.resend;
+    let description=state==='verified'?words.active:state==='pending'?words.instruction:state==='delivery_unavailable'?words.error:'';
+    if(state==='pending'&&emailDeadline)description+=' '+(left>0?(emailLanguage()==='en'?'Verification link expires in ':emailLanguage()==='zh-Hans'?'验证链接剩余 ':'驗證連結剩餘 ')+emailClock(left):(emailLanguage()==='en'?'Verification link expired. Request a new email.':emailLanguage()==='zh-Hans'?'验证链接已过期，请重新发送验证邮件。':'驗證連結已過期，請重新寄送驗證信。'));
+    $('genealogyFeedbackEmailDescription').textContent=description;
+    const button=$('genealogyFeedbackEmailResend');
+    button.hidden=state!=='pending'&&state!=='delivery_unavailable';
+    button.disabled=!button.hidden&&cool>0;
+    button.textContent=words.resend+(!button.hidden&&cool>0?' · '+emailClock(cool):'');
   }
   async function checkEmailStatus(){
     if(!emailReceipt||document.visibilityState!=='visible'||!backdrop.classList.contains('show'))return;
     try{
-      const data=await core.emailStatus(emailReceipt),state=data.email?.state;
-      renderEmailStatus(state||'');
+      const data=await core.emailStatus(emailReceipt);
+      setEmailTiming(data.email,data.serverNow);const state=data.email?.state||'';
+      renderEmailStatus(state);
       if(state==='verified'||state==='disabled')stopEmailTimer();
     }catch(_){}
+  }
+  function startEmailTimer(){
+    stopEmailTimer();
+    emailTimer=setInterval(()=>renderEmailStatus(emailState),1000);
   }
   function stopEmailTimer(){if(emailTimer!==null)clearInterval(emailTimer);emailTimer=null;}
   $('genealogyFeedbackEmailResend')?.addEventListener('click',async()=>{
     if(!emailReceipt)return;
-    const button=$('genealogyFeedbackEmailResend');button.disabled=true;
-    try{await core.resendVerification(emailReceipt);renderEmailStatus('pending');
-      if(emailTimer===null)emailTimer=setInterval(checkEmailStatus,12000);
-      void checkEmailStatus();}
-    catch(err){$('genealogyFeedbackEmailDescription').textContent=err.message||emailWords().error;}
-    finally{button.disabled=false;}
+    const button=$('genealogyFeedbackEmailResend');if(button.disabled)return;button.disabled=true;
+    try{
+      const data=await core.resendVerification(emailReceipt);
+      setEmailTiming(data.email,data.serverNow);renderEmailStatus('pending');startEmailTimer();
+    }catch(err){$('genealogyFeedbackEmailDescription').textContent=err.message||emailWords().error;}
+    finally{renderEmailStatus(emailState);}
   });
   window.LING_I18N?.onLanguageChanged(()=>renderEmailStatus(emailState));
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();});
@@ -610,8 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
       stopEmailTimer();
       lastReceipt=result.receipt||'';
       emailReceipt=result.emailState&&lastReceipt?lastReceipt:'';
-      renderEmailStatus(result.emailState||'');
-      if(emailReceipt && result.emailState==='pending')emailTimer=setInterval(checkEmailStatus,12000);
+      setEmailTiming(result.email,result.serverNow);renderEmailStatus(result.emailState||'');
+      if(emailReceipt && (result.emailState==='pending'||result.emailState==='delivery_unavailable'))startEmailTimer();
       if(lastReceipt)rememberReceipt(lastReceipt);else clearReceipt();
       setTab(1);
       verification?.reset();
