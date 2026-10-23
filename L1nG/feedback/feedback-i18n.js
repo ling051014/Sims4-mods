@@ -25,7 +25,7 @@ function translateValue(zh){
 }
 window.L1nGFeedbackI18n=Object.freeze({translateFor:(value,language)=>language==='en'?(translateValue(String(value))||String(value)):String(value)});
 const roots=[document.getElementById('realdate-preview'),document.getElementById('form-layer')].filter(Boolean);
-const original=new WeakMap();const attributes=new WeakMap();let translating=false;
+const original=new WeakMap();const rendered=new WeakMap();const attributes=new WeakMap();let translating=false;
 function update(){
 if(translating)return;translating=true;
 try{
@@ -37,11 +37,12 @@ while(node=walker.nextNode()){
  const parent=node.parentElement;if(!parent||parent.closest('script,style,code,svg'))continue;
  const raw=node.nodeValue,trim=raw.trim();
  if(!trim)continue;
- if(!original.has(node))original.set(node,trim);
- const zh=original.get(node);
- const eng=translateValue(zh);
- if(!eng)continue;
+ // 外部腳本更新節點時重新記錄繁中原文；語言切換造成的更新不應覆蓋原文。
+ if(!original.has(node)||!rendered.has(node)||raw!==rendered.get(node))original.set(node,trim);
+ const zh=original.get(node),eng=translateValue(zh);
+ if(!eng){rendered.set(node,raw);continue;}
  const candidate=raw.replace(trim,en?eng:zh);
+ rendered.set(node,candidate);
  if(node.nodeValue!==candidate)node.nodeValue=candidate;
 }
 for(const el of root.querySelectorAll('[placeholder],[aria-label],[title]')){
