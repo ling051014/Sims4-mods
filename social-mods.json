@@ -2625,7 +2625,7 @@
                 "target": "_blank"
               },
               "children": [
-                "[medio] - Gradual Pregnancy Bump Changes 1.0.2.zip"
+                "[medio] - Gradual Pregnancy Bump Changes 1.0.3.zip"
               ]
             }
           ]
@@ -2639,13 +2639,13 @@
         {
           "label": "下載版本 ｜",
           "value": [
-            "1.0.2"
+            "1.0.3"
           ]
         },
         {
           "label": "下載日期 ｜",
           "value": [
-            "2026.09.07"
+            "2026.10.26"
           ]
         }
       ],
@@ -2654,7 +2654,40 @@
         {
           "tag": "br"
         },
-        "\n                        與 LittleMsSam 的 pregnancy-related mods相容\n                    "
+        "\n                        ",
+        {
+          "tag": "br"
+        },
+        "\n                        ",
+        {
+          "tag": "span",
+          "attrs": {
+            "class": "text-orange"
+          },
+          "children": [
+            "2種版本擇一下載"
+          ]
+        },
+        {
+          "tag": "br"
+        },
+        "\n                        [medio] - Gradual Pregnancy Bump Changes 1.0.3A.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 常規版本",
+        {
+          "tag": "br"
+        },
+        "\n                        [medio] - Gradual Pregnancy Bump Changes 1.0.3B.package",
+        {
+          "tag": "br"
+        },
+        "\n                        ⤷ 與 LittleMsSam 的 pregnancy-related mods相容",
+        {
+          "tag": "br"
+        },
+        "\n                    "
       ],
       "layout": {}
     },
@@ -3815,7 +3848,7 @@
             "class": "text-orange"
           },
           "children": [
-            "2種版本請擇一下載"
+            "2種版本擇一下載"
           ]
         },
         {
