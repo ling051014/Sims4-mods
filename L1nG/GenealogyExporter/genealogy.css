@@ -10092,11 +10092,7 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 .ootd-category-toggle .nav-select-chevron { margin:0; }
 .ootd-category-toggle[aria-expanded="true"] .nav-select-chevron { transform:rotate(180deg); }
 .ootd-slot-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); align-items:start; gap:10px; }
-.ootd-slot-grid.ootd-all-overview { display:flex; flex-direction:column; gap:18px; }
-.ootd-all-section { width:100%; min-width:0; }
-.ootd-all-section h4 { display:flex; align-items:center; gap:7px; margin:0 0 9px; color:var(--text-primary); font-size:12px; font-weight:700; }
-.ootd-all-section h4 .l1ng-icon { width:17px; height:17px; flex:0 0 17px; }
-.ootd-all-empty { width:100%; margin:12px 0; color:var(--text-secondary); font-size:12px; text-align:center; }
+.ootd-all-empty { grid-column:1 / -1; width:100%; margin:12px 0; color:var(--text-secondary); font-size:12px; text-align:center; }
 .ootd-slot { display:flex; flex-direction:column; min-width:0; }
 .ootd-slot.ootd-drag-source .ootd-image-button { opacity:.16; }
 .ootd-drag-ghost { position:fixed; z-index:10020; box-sizing:border-box; margin:0; padding:0; pointer-events:none; border:2px solid var(--action-primary); border-radius:9px; background:var(--surface-panel); box-shadow:0 22px 48px rgba(0,0,0,.36),0 5px 15px rgba(0,0,0,.18); transform-origin:center center; will-change:transform; overflow:hidden; opacity:1; }
@@ -10131,8 +10127,8 @@ body.ootd-sorting,body.ootd-sorting * { cursor:grabbing; }
 #simEditorDialog .ootd-photo-lightbox { position:absolute; z-index:16; inset:0; display:flex; align-items:center; justify-content:center; padding:45px 20px 20px; background:var(--mask-bg,rgba(15,20,30,.88)); backdrop-filter:blur(4px); }
 .ootd-photo-lightbox img { width:auto; max-width:100%; max-height:100%; object-fit:contain; }
 .ootd-lightbox-close { position:absolute; top:12px; right:16px; border:1px solid var(--border-default); border-radius:7px; padding:5px 14px; background:var(--surface-card); color:var(--text-primary); font:inherit; font-size:12px; cursor:pointer; }
-@media(max-width:650px) { .ootd-slot-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; } }
-@media(max-width:390px) { .ootd-slot-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .ootd-slot-grid:not(.ootd-all-overview) { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; } }
+@media(max-width:390px) { .ootd-slot-grid:not(.ootd-all-overview) { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 
 /* 回饋信箱通知延伸原有欄位與成功卡片，不新增另一套視窗。 */
 .genealogy-feedback-email-option{display:flex;gap:9px;align-items:center;margin-top:12px;cursor:pointer;font-size:12px}.genealogy-feedback-email-option[hidden],.genealogy-feedback-email-status[hidden]{display:none}.genealogy-feedback-email-option input{width:16px;height:16px;accent-color:var(--primary)}.genealogy-feedback-email-status{border:1px solid var(--stroke);border-radius:12px;padding:13px;margin:13px 0;text-align:left;width:100%;font-size:12px}.genealogy-feedback-email-status p{margin:5px 0}.genealogy-feedback-email-status button{border:0;background:transparent;padding:5px 0;color:inherit;text-decoration:underline;cursor:pointer}
