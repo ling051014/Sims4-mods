@@ -1498,6 +1498,15 @@
     "每個分類最多 5 套，圖片會保存在這台裝置的瀏覽器中。": "Up to 5 outfits per category. Images are saved in this browser.",
     "請選擇 20 MB 以下的 JPG / PNG / WEBP 圖片。": "Choose a JPG, PNG, or WEBP image under 20 MB.",
     "管理員回覆時，透過 Email 通知我": "Notify me by email when the administrator replies",
-    "提交後會寄送驗證信，完成驗證才會啟用回覆通知。": "A verification email will be sent after submission. Notifications will be enabled once verified."
+    "提交後會寄送驗證信，完成驗證才會啟用回覆通知。": "A verification email will be sent after submission. Notifications will be enabled once verified.",
+    "全部": "All",
+    "特殊服裝": "Special Outfits",
+    "沐浴": "Bathing",
+    "職涯": "Career",
+    "情境": "Situation",
+    "預設": "Default",
+    "浴巾": "Towel",
+    "目前沒有服裝圖片": "No outfit images yet",
+    "「全部」顯示所有已加入的服裝圖片；「特殊服裝」固定為沐浴、職涯、情境、預設、浴巾，不支援調整順序": "“All” shows your uploaded outfit images; “Special Outfits” has fixed Bathing, Career, Situation, Default, and Towel slots that cannot be reordered"
   }
 }
