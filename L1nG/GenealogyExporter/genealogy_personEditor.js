@@ -72,11 +72,25 @@
   const editingGallery = [];
   const editingOutfits = [];
   const OOTD_CATEGORIES=Object.freeze([
+    {id:'all',label:'全部',icon:'outfit-all'},
     {id:0,label:'日常',icon:'outfit-everyday'}, {id:1,label:'正式',icon:'outfit-formal'},
     {id:2,label:'運動',icon:'outfit-athletic'}, {id:3,label:'睡衣',icon:'outfit-sleepwear'},
     {id:4,label:'派對',icon:'outfit-party'}, {id:9,label:'游泳',icon:'outfit-swimwear'},
-    {id:10,label:'炎熱天氣',icon:'outfit-hot-weather'}, {id:11,label:'寒冷天氣',icon:'outfit-cold-weather'}
+    {id:10,label:'炎熱天氣',icon:'outfit-hot-weather'}, {id:11,label:'寒冷天氣',icon:'outfit-cold-weather'},
+    {id:'special',label:'特殊服裝',icon:'outfit-special'}
   ]);
+  const OOTD_STANDARD_CATEGORIES=Object.freeze(OOTD_CATEGORIES.filter(item=>typeof item.id==='number'));
+  // Native (category, index) keys are immutable; their labels are not displayOrder.
+  const OOTD_SPECIAL_SLOTS=Object.freeze([
+    {category:5,index:0,label:'沐浴'},
+    {category:6,index:0,label:'職涯'},
+    {category:7,index:0,label:'情境'},
+    {category:8,index:0,label:'預設'},
+    {category:8,index:1,label:'浴巾'}
+  ]);
+  const isOotdSpecialKey=(category,index)=>OOTD_SPECIAL_SLOTS.some(
+    slot=>slot.category===Number(category)&&slot.index===Number(index)
+  );
   let ootdCategoryPosition=0;
   let ootdUploadTarget=null;
   let ootdHoldState=null;
@@ -2240,7 +2254,7 @@ function buildPersonEditorDraft({
         ? JSON.parse(JSON.stringify(sim.outfits))
         : []
     );
-    OOTD_CATEGORIES.forEach(item=>saveOotdDisplayOrder(getOotdSlots(item.id)));
+    OOTD_STANDARD_CATEGORIES.forEach(item=>saveOotdDisplayOrder(getOotdSlots(item.id)));
 
     personEditorMediaDraftReady=true;
   }
@@ -2279,6 +2293,11 @@ function buildPersonEditorDraft({
   // ========【穿搭排序】 原始 Outfit Index 與使用者顯示位置獨立保存 ========
 
   function getOotdSlots(categoryId){
+    if(categoryId==='special'){
+      return OOTD_SPECIAL_SLOTS.map(slot=>editingOutfits.find(item=>
+        Number(item.category)===slot.category&&Number(item.index)===slot.index&&!!item.image
+      )||null);
+    }
     const entries=editingOutfits.filter(item=>
       Number(item.category)===categoryId &&
       Number.isInteger(Number(item.index)) &&
@@ -2390,6 +2409,7 @@ function buildPersonEditorDraft({
        !document.querySelector('[data-editor-panel="ootd"]:not([hidden])'))return;
     ootdHoldState=null;
     const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
+    if(typeof category!=='number')return;
     const slots=getOotdSlots(category);
     const item=slots[hold.position];
     if(!item)return;
@@ -2444,7 +2464,8 @@ function buildPersonEditorDraft({
     if(!grid)return;
 
     function startHold(target,mode,id,x,y){
-      if(ootdHoldState||ootdDragState)return;
+      if(ootdHoldState||ootdDragState||
+         typeof OOTD_CATEGORIES[ootdCategoryPosition].id!=='number')return;
       const button=target?.closest?.('.ootd-image-button.has-image');
       if(!button||!grid.contains(button))return;
       const position=Number(button.dataset.ootdIndex);
@@ -2635,30 +2656,58 @@ function buildPersonEditorDraft({
     }).catch(()=>{ /* 後續切換取消前段動畫是正常情況 */ });
   }
 
+  function renderOotdCard(entry,position,label,allView=false){
+    const ref=entry?.image||'';
+    const url=ref?resolveImageUrl(ref):'';
+    // The overview edits the original entry; it never creates another outfit.
+    const identity=allView&&entry
+      ? ' data-ootd-category="'+Number(entry.category)+'" data-ootd-original-index="'+Number(entry.index)+'"'
+      : '';
+    const control=action=>' data-ootd-action="'+action+'" data-ootd-index="'+position+'"'+identity;
+    return '<article class="ootd-slot" data-ootd-position="'+position+'">'+
+      '<button class="ootd-image-button life-photo-add-btn'+(ref?' has-image':'')+'" type="button"'+
+        control(ref?'preview':'upload')+' aria-label="'+esc(ref?label:label+' '+uiText('新增穿搭'))+'">'+
+        (ref?'<img data-asset-id="'+esc(String(ref))+'" src="'+esc(url)+'" alt="'+esc(label)+'" draggable="false">':
+          '<span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>'+esc(uiText('新增穿搭'))+'</span>')+
+      '</button><div class="ootd-slot-name">'+esc(label)+'</div>'+
+      '<div class="ootd-slot-actions">'+
+        (ref?'<button type="button"'+control('upload')+'>'+esc(uiText('更換圖片'))+'</button>'+
+          '<button type="button"'+control('remove')+'>'+esc(uiText('移除'))+'</button>':'')+
+      '</div></article>';
+  }
+
   function renderOotdWorkspace(animateCategoryIcon=false){
     const grid=$('simOotdSlotGrid');
     if(!grid)return;
     const category=OOTD_CATEGORIES[ootdCategoryPosition];
-    const slots=getOotdSlots(category.id);
-    const title=uiText(category.label);
-    $('simOotdCategoryName').textContent=title;
+    $('simOotdCategoryName').textContent=uiText(category.label);
     updateOotdCategoryIcon(category,animateCategoryIcon);
     $('simOotdCategoryPosition').textContent=(ootdCategoryPosition+1)+' / '+OOTD_CATEGORIES.length;
-    grid.innerHTML=Array.from({length:5},(_,index)=>{
-      const entry=slots[index];
-      const ref=entry?.image||'';
-      const url=ref?resolveImageUrl(ref):'';
-      const label=uiText('第 {n} 套').replace('{n}',String(index+1));
-      return '<article class="ootd-slot" data-ootd-position="'+index+'">'+
-        '<button class="ootd-image-button life-photo-add-btn'+(ref?' has-image':'')+'" type="button" data-ootd-action="'+(ref?'preview':'upload')+'" data-ootd-index="'+index+'" aria-label="'+esc(ref?label:label+' '+uiText('新增穿搭'))+'">'+
-        (ref?'<img data-asset-id="'+esc(String(ref))+'" src="'+esc(url)+'" alt="'+esc(label)+'" draggable="false">':'<span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>'+esc(uiText('新增穿搭'))+'</span>')+
-        '</button>'+
-        '<div class="ootd-slot-name">'+esc(label)+'</div>'+
-        '<div class="ootd-slot-actions">'+
-          (ref?'<button type="button" data-ootd-action="upload" data-ootd-index="'+index+'">'+uiText('更換圖片')+'</button>'+
-          '<button type="button" data-ootd-action="remove" data-ootd-index="'+index+'">'+uiText('移除')+'</button>':'')+
-        '</div></article>';
-    }).join('');
+    grid.classList.toggle('ootd-all-overview',category.id==='all');
+    if(category.id==='all'){
+      const groups=[...OOTD_STANDARD_CATEGORIES,{id:'special',label:'特殊服裝',icon:'outfit-special'}];
+      const sections=groups.map(group=>{
+        const slots=getOotdSlots(group.id);
+        const cards=slots.map((entry,index)=>entry
+          ? renderOotdCard(entry,index,group.id==='special'
+            ? uiText(OOTD_SPECIAL_SLOTS[index].label)
+            : uiText('第 {n} 套').replace('{n}',String(index+1)),true)
+          : '').join('');
+        return cards
+          ? '<section class="ootd-all-section"><h4><span class="l1ng-icon icon-'+group.icon+
+            '" aria-hidden="true"></span>'+esc(uiText(group.label))+'</h4>'+
+            '<div class="ootd-slot-grid">'+cards+'</div></section>'
+          : '';
+      }).filter(Boolean);
+      grid.innerHTML=sections.length?sections.join(''):
+        '<p class="ootd-all-empty">'+esc(uiText('目前沒有服裝圖片'))+'</p>';
+      return;
+    }
+    const slots=getOotdSlots(category.id);
+    grid.innerHTML=slots.map((entry,index)=>renderOotdCard(entry,index,
+      category.id==='special' ? uiText(OOTD_SPECIAL_SLOTS[index].label)
+        : uiText('第 {n} 套').replace('{n}',String(index+1))
+    )).join('');
   }
 
   function selectOotdCategory(position){
@@ -2711,9 +2760,7 @@ function buildPersonEditorDraft({
     });
   }
 
-  function openOotdLightbox(index){
-    const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
-    const item=getOotdSlots(category)[index];
+  function openOotdLightbox(item){
     if(!item)return;
     const img=$('simOotdLightboxImage');
     const viewer=$('simOotdLightbox');
@@ -2725,10 +2772,40 @@ function buildPersonEditorDraft({
 
 
 
-  function resolveOotdUploadTarget(position){
+  function getOotdControlEntry(control){
     const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
-    const selected=getOotdSlots(category)[position]||null;
-    return {category,index:selected?Number(selected.index):null,session:personEditorSessionVersion};
+    const position=Number(control?.dataset.ootdIndex);
+    if(category==='all'){
+      const entryCategory=Number(control?.dataset.ootdCategory);
+      const entryIndex=Number(control?.dataset.ootdOriginalIndex);
+      return editingOutfits.find(item=>Number(item.category)===entryCategory&&
+        Number(item.index)===entryIndex&&!!item.image)||null;
+    }
+    return getOotdSlots(category)[position]||null;
+  }
+
+  function resolveOotdUploadTarget(position,control){
+    const current=OOTD_CATEGORIES[ootdCategoryPosition].id;
+    if(current==='all'){
+      const item=getOotdControlEntry(control);
+      if(!item)return null;
+      const category=Number(item.category),index=Number(item.index);
+      const special=isOotdSpecialKey(category,index);
+      const slotPosition=special?OOTD_SPECIAL_SLOTS.findIndex(slot=>
+        slot.category===category&&slot.index===index):position;
+      return {category,index,replace:true,special,slotPosition,session:personEditorSessionVersion};
+    }
+    if(current==='special'){
+      const identity=OOTD_SPECIAL_SLOTS[position];
+      if(!identity)return null;
+      const selected=getOotdSlots('special')[position];
+      return {category:identity.category,index:identity.index,replace:!!selected,
+        special:true,slotPosition:position,session:personEditorSessionVersion};
+    }
+    if(!Number.isInteger(position)||position<0||position>=5)return null;
+    const selected=getOotdSlots(current)[position]||null;
+    return {category:current,index:selected?Number(selected.index):null,replace:!!selected,
+      special:false,slotPosition:position,session:personEditorSessionVersion};
   }
 
   let ootdUploadBusy=false;
@@ -2741,8 +2818,14 @@ function buildPersonEditorDraft({
     }
     const category=target.category;
     const session=target.session;
-    const replacing=incoming.length===1&&Number.isInteger(target.index);
-    const available=5-getOotdSlots(category).filter(Boolean).length;
+    const replacing=!!target.replace;
+    const openSpecialSlots=target.special
+      ? OOTD_SPECIAL_SLOTS.slice(target.slotPosition).filter(slot=>!editingOutfits.some(item=>
+          Number(item.category)===slot.category&&Number(item.index)===slot.index&&!!item.image
+        ))
+      : [];
+    const available=target.special ? openSpecialSlots.length
+      : 5-getOotdSlots(category).filter(Boolean).length;
     if(!replacing&&available===0){
       uiAlert(uiText('這個分類最多只能儲存 5 套穿搭。'),{title:uiText('服裝穿搭')});
       return;
@@ -2771,6 +2854,13 @@ function buildPersonEditorDraft({
             Number(item.category)===category&&Number(item.index)===target.index);
           if(at<0)return;
           editingOutfits[at]={...editingOutfits[at],image,source:'custom'};
+        }else if(target.special){
+          const slot=openSpecialSlots.shift();
+          if(!slot)break;
+          const at=editingOutfits.findIndex(item=>
+            Number(item.category)===slot.category&&Number(item.index)===slot.index);
+          if(at>=0)editingOutfits[at]={...editingOutfits[at],image,source:'custom'};
+          else editingOutfits.push({category:slot.category,index:slot.index,image,source:'custom'});
         }else{
           const used=new Set(editingOutfits.filter(item=>
             Number(item.category)===category).map(item=>Number(item.index)));
@@ -2779,7 +2869,7 @@ function buildPersonEditorDraft({
           editingOutfits.push({category,index:original,image,source:'custom',
             displayOrder:getOotdSlots(category).filter(Boolean).length});
         }
-        saveOotdDisplayOrder(getOotdSlots(category));
+        if(!target.special)saveOotdDisplayOrder(getOotdSlots(category));
         renderOotdWorkspace();
       }
       if(overflow>0)uiAlert(
@@ -2819,7 +2909,7 @@ function buildPersonEditorDraft({
       const position=button&&grid.contains(button)?Number(button.dataset.ootdIndex):5;
       const files=Array.from(event.dataTransfer?.files||[]);
       clear();
-      void importOotdImageFiles(files,resolveOotdUploadTarget(position));
+      void importOotdImageFiles(files,resolveOotdUploadTarget(position,button));
     });
   }
   function setupOotdInteractions(){
@@ -2878,20 +2968,23 @@ function buildPersonEditorDraft({
       if(!Number.isInteger(index)||index<0||index>=5)return;
       const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
       const action=button.dataset.ootdAction;
-      if(action==='preview'){openOotdLightbox(index);return;}
+      if(action==='preview'){openOotdLightbox(getOotdControlEntry(button));return;}
       if(action==='remove'){
-        const selected=getOotdSlots(category)[index];
+        const selected=getOotdControlEntry(button);
         const pos=editingOutfits.indexOf(selected);
         if(pos>=0)editingOutfits.splice(pos,1);
-        saveOotdDisplayOrder(getOotdSlots(category));
+        if(typeof category==='number')saveOotdDisplayOrder(getOotdSlots(category));
+        if(category==='all'&&selected&&!isOotdSpecialKey(selected.category,selected.index)){
+          saveOotdDisplayOrder(getOotdSlots(Number(selected.category)));
+        }
         renderOotdWorkspace();
         return;
       }
       if(action==='upload'){
-        ootdUploadTarget=resolveOotdUploadTarget(index);
+        ootdUploadTarget=resolveOotdUploadTarget(index,button);
         const input=$('simOotdImageInput');
         if(input&&ootdUploadTarget){
-          input.multiple=ootdUploadTarget.index===null;
+          input.multiple=!ootdUploadTarget.replace;
           input.click();
         }
       }
