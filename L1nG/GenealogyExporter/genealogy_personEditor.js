@@ -2685,22 +2685,19 @@ function buildPersonEditorDraft({
     $('simOotdCategoryPosition').textContent=(ootdCategoryPosition+1)+' / '+OOTD_CATEGORIES.length;
     grid.classList.toggle('ootd-all-overview',category.id==='all');
     if(category.id==='all'){
-      const groups=[...OOTD_STANDARD_CATEGORIES,{id:'special',label:'特殊服裝',icon:'outfit-special'}];
-      const sections=groups.map(group=>{
-        const slots=getOotdSlots(group.id);
-        const cards=slots.map((entry,index)=>entry
-          ? renderOotdCard(entry,index,group.id==='special'
+      // Keep one uninterrupted five-column grid; no headers or artificial gaps.
+      // All cards reference the same records as their original categories.
+      const groups=[...OOTD_STANDARD_CATEGORIES,{id:'special',label:'特殊服裝'}];
+      const cards=groups.flatMap(group=>getOotdSlots(group.id)
+        .map((entry,index)=>entry?{
+          entry,
+          label:group.id==='special'
             ? uiText(OOTD_SPECIAL_SLOTS[index].label)
-            : uiText('第 {n} 套').replace('{n}',String(index+1)),true)
-          : '').join('');
-        return cards
-          ? '<section class="ootd-all-section"><h4><span class="l1ng-icon icon-'+group.icon+
-            '" aria-hidden="true"></span>'+esc(uiText(group.label))+'</h4>'+
-            '<div class="ootd-slot-grid">'+cards+'</div></section>'
-          : '';
-      }).filter(Boolean);
-      grid.innerHTML=sections.length?sections.join(''):
-        '<p class="ootd-all-empty">'+esc(uiText('目前沒有服裝圖片'))+'</p>';
+            : uiText(group.label)+' · '+uiText('第 {n} 套').replace('{n}',String(index+1))
+        }:null).filter(Boolean));
+      grid.innerHTML=cards.length
+        ? cards.map(({entry,label},index)=>renderOotdCard(entry,index,label,true)).join('')
+        : '<p class="ootd-all-empty">'+esc(uiText('目前沒有服裝圖片'))+'</p>';
       return;
     }
     const slots=getOotdSlots(category.id);
@@ -2965,8 +2962,8 @@ function buildPersonEditorDraft({
       const button=event.target.closest('button[data-ootd-action]');
       if(!button)return;
       const index=Number(button.dataset.ootdIndex);
-      if(!Number.isInteger(index)||index<0||index>=5)return;
       const category=OOTD_CATEGORIES[ootdCategoryPosition].id;
+      if(!Number.isInteger(index)||index<0||(category!=='all'&&index>=5))return;
       const action=button.dataset.ootdAction;
       if(action==='preview'){openOotdLightbox(getOotdControlEntry(button));return;}
       if(action==='remove'){
