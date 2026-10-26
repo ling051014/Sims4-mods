@@ -164,6 +164,7 @@ if ("IntersectionObserver" in window) {
                     running = null;
                     details.style.overflow = originalOverflow;
                 }
+                details.classList.remove("is-closing");
                 return;
             }
 
@@ -182,6 +183,8 @@ if ("IntersectionObserver" in window) {
             }
 
             desiredOpen = !desiredOpen;
+            // 箭頭立即更新方向，不必等待收合動畫結束。
+            details.classList.toggle("is-closing", !desiredOpen);
             // 收合期間保持 open，內容才不會在動畫完成前消失。
             details.open = true;
             const expandedHeight = details.getBoundingClientRect().height;
@@ -193,6 +196,7 @@ if ("IntersectionObserver" in window) {
 
             if (Math.abs(targetHeight - startHeight) < 1) {
                 details.open = desiredOpen;
+                details.classList.remove("is-closing");
                 details.style.overflow = originalOverflow;
                 return;
             }
@@ -219,6 +223,7 @@ if ("IntersectionObserver" in window) {
                 height.cancel();
                 fades.forEach((fade) => fade.cancel());
                 details.open = desiredOpen;
+                details.classList.remove("is-closing");
                 details.style.overflow = originalOverflow;
                 running = null;
             };
