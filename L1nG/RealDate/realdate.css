@@ -1804,6 +1804,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 .faq-item > summary::-webkit-details-marker {display:none}
 .faq-item > summary::after {content:"";width:8px;height:8px;flex:0 0 auto;border-right:1.5px solid var(--text-muted);border-bottom:1.5px solid var(--text-muted);transform:rotate(45deg);transition:transform .2s ease}
 .faq-item[open] > summary::after {transform:rotate(225deg)}
+.faq-item[open].is-closing > summary::after {transform:rotate(45deg)}
 .faq-item > p {margin:0 22px 22px;padding:16px 0 0;border-top:1px solid var(--line-soft);color:var(--text-muted);font-size:13px;line-height:1.9}
 .faq-item > p a {color:var(--accent);text-underline-offset:3px}
 @media(max-width:640px){.faq-item > summary{padding:17px;font-size:13px}.faq-item > p{margin:0 17px 17px}}
