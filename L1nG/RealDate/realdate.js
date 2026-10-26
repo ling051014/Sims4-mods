@@ -136,3 +136,97 @@ if ("IntersectionObserver" in window) {
 } else {
     revealItems.forEach((item) => item.classList.add("visible"));
 }
+
+// ========【RealDate 常見問題】 展開 / 收合高度與內容淡入淡出動畫 ========
+(() => {
+    "use strict";
+
+    const questions = document.querySelectorAll(".faq-list > details.faq-item");
+    if (!questions.length) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const duration = 260;
+
+    questions.forEach((details) => {
+        const summary = details.querySelector(":scope > summary");
+        if (!summary) return;
+
+        const originalOverflow = details.style.overflow;
+        let desiredOpen = details.open;
+        let running = null;
+
+        summary.addEventListener("click", (event) => {
+            // 保留原生 details 的鍵盤操作、無動畫環境與減少動態效果。
+            if (reducedMotion.matches || typeof details.animate !== "function") {
+                if (running) {
+                    running.height.cancel();
+                    running.fades.forEach((fade) => fade.cancel());
+                    running = null;
+                    details.style.overflow = originalOverflow;
+                }
+                return;
+            }
+
+            event.preventDefault();
+            const startHeight = details.getBoundingClientRect().height;
+            const reversing = !!running;
+            const priorOpacity = new Map();
+            if (running) {
+                Array.from(details.children).forEach((child) => {
+                    if (child !== summary) priorOpacity.set(child, parseFloat(getComputedStyle(child).opacity));
+                });
+                running.height.onfinish = null;
+                running.height.cancel();
+                running.fades.forEach((fade) => fade.cancel());
+                running = null;
+            }
+
+            desiredOpen = !desiredOpen;
+            // 收合期間保持 open，內容才不會在動畫完成前消失。
+            details.open = true;
+            const expandedHeight = details.getBoundingClientRect().height;
+            const computed = getComputedStyle(details);
+            const collapsedHeight = summary.getBoundingClientRect().height
+                + parseFloat(computed.borderTopWidth) + parseFloat(computed.borderBottomWidth)
+                + parseFloat(computed.paddingTop) + parseFloat(computed.paddingBottom);
+            const targetHeight = desiredOpen ? expandedHeight : collapsedHeight;
+
+            if (Math.abs(targetHeight - startHeight) < 1) {
+                details.open = desiredOpen;
+                details.style.overflow = originalOverflow;
+                return;
+            }
+
+            details.style.overflow = "hidden";
+            const height = details.animate(
+                [{ height: startHeight + "px" }, { height: targetHeight + "px" }],
+                { duration, easing: "ease-in-out" }
+            );
+            const fades = Array.from(details.children)
+                .filter((child) => child !== summary && getComputedStyle(child).display !== "none")
+                .map((child) => child.animate(
+                    [
+                        { opacity: reversing ? (priorOpacity.get(child) ?? 1) : (desiredOpen ? 0 : 1) },
+                        { opacity: desiredOpen ? 1 : 0 }
+                    ],
+                    { duration: 210, delay: desiredOpen ? 20 : 0, easing: "ease-out", fill: "both" }
+                ));
+
+            running = { height, fades };
+            height.onfinish = () => {
+                if (!running || running.height !== height) return;
+                height.onfinish = null;
+                height.cancel();
+                fades.forEach((fade) => fade.cancel());
+                details.open = desiredOpen;
+                details.style.overflow = originalOverflow;
+                running = null;
+            };
+        });
+
+        // 其他程式或瀏覽器原生切換仍以 details.open 為準。
+        details.addEventListener("toggle", () => {
+            if (!running) desiredOpen = details.open;
+        });
+    });
+})();
