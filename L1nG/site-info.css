@@ -166,6 +166,7 @@ html[data-site-info-section="genealogy"] body {
     color:var(--site-info-text,#344455);
 }
 html[data-site-info-section="genealogy"] .policy-section p,
+html[data-site-info-section="genealogy"] .policy-section li,
 html[data-site-info-section="genealogy"] .policy-embedded-legal .l1ng-footer-disclaimer {
     color:var(--site-info-secondary,#617487);
 }
