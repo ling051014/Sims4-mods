@@ -188,6 +188,11 @@ html[data-site-info-section="genealogy"] .policy-info {
     border: 1px solid var(--site-info-border,#e3e8ed);
     color: var(--site-info-secondary,#617487);
 }
+/* 深色主題：提高 Cookie 說明框與視窗、按鈕的層次；淺色主題維持原樣。 */
+html[data-site-info-section="genealogy"][data-site-info-theme="dark"] .policy-info {
+    background: color-mix(in srgb, var(--site-info-bg,#262229) 88%, #fff 12%);
+    border-color: color-mix(in srgb, var(--site-info-border,#514b55) 85%, #fff 15%);
+}
 /* 僅已展開的條款標題使用目前主題強調色；沿用原始分隔線，不額外套外框或底色。 */
 html[data-site-info-section="genealogy"] .policy-embedded-details[open] > summary {
     color: var(--site-info-accent, #438cbe);
