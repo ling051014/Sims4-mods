@@ -13965,6 +13965,13 @@ const familyMemberController = {
 function renderFamilyMemberList(fam) {
   const list = $('familyMemberList');
   if (!list) return;
+  // 成員選單在 body 浮層顯示，不參與清單的 scrollHeight。
+  // 捲動或重繪前先關閉，避免選單滯留在原本的畫面座標。
+  if (list.querySelector('.family-member-menu.open')) closeAppMenus();
+  if (!list.dataset.memberMenuScrollBound) {
+    list.dataset.memberMenuScrollBound = '1';
+    list.addEventListener('scroll', () => closeAppMenus(), { passive:true });
+  }
 
   let members =
     (fam.memberIds || [])
@@ -14063,7 +14070,7 @@ function renderFamilyMemberList(fam) {
         </button>` : ''}
       </div>
       <div class="family-member-copy"><div class="family-member-name">${esc(displayDataText(sim.name,sim))}</div><div class="family-member-meta">${esc(meta)}</div></div>
-      <div class="ui-menu family-member-menu">
+      <div class="ui-menu family-member-menu" data-menu-portal="body">
         <button class="family-member-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="${esc(uiText('更多'))}">${iconSvg('three-dots')}</button>
         <div class="ui-menu-popover family-member-popover" role="menu">
           <button class="ui-menu-item" type="button" role="menuitem" data-family-member-action="view" data-family-member-id="${esc(sim.id)}">${iconSvg('person-vcard')}<span>${esc(uiText('查看個人檔案'))}</span></button>
