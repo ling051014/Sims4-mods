@@ -1157,6 +1157,16 @@ function closeAppMenus(except = null) {
     if (menu === except) return;
     menu.classList.remove('open');
     menu.querySelector('.app-menu-trigger')?.setAttribute('aria-expanded','false');
+    const popover = menu._memberMenuPortal;
+    if (popover) {
+      popover.classList.remove('member-menu-body-portal');
+      popover.style.removeProperty('left');
+      popover.style.removeProperty('top');
+      popover.style.removeProperty('right');
+      popover.style.removeProperty('bottom');
+      menu.appendChild(popover);
+      menu._memberMenuPortal = null;
+    }
   });
 }
 let _appMenuGlobalBound = false;
@@ -1171,6 +1181,24 @@ function setupAppMenus() {
       closeAppMenus(menu);
       menu.classList.toggle('open', willOpen);
       trigger.setAttribute('aria-expanded', willOpen ? 'true':'false');
+      if (willOpen && menu.classList.contains('family-member-menu')) {
+        const popover = menu.querySelector(':scope > .app-menu-popover');
+        if (popover) {
+          const rect = trigger.getBoundingClientRect();
+          document.body.appendChild(popover);
+          popover.classList.add('member-menu-body-portal');
+          const size = popover.getBoundingClientRect();
+          const margin = 8, gap = 4;
+          const left = Math.max(margin, Math.min(rect.right - size.width, window.innerWidth - size.width - margin));
+          const top = rect.bottom + size.height + gap <= window.innerHeight - margin
+            ? rect.bottom + gap : Math.max(margin, rect.top - size.height - gap);
+          popover.style.left = Math.round(left) + 'px';
+          popover.style.top = Math.round(top) + 'px';
+          popover.style.right = 'auto';
+          popover.style.bottom = 'auto';
+          menu._memberMenuPortal = popover;
+        }
+      }
     });
     menu.querySelectorAll('.app-menu-item').forEach(item => item.addEventListener('click', () => {
       setTimeout(() => closeAppMenus(), 0);
@@ -4739,6 +4767,11 @@ function renderFamilyCover(fam) {
 
 function renderFamilyMemberList(fam) {
   const list = $('familyMemberList'); if (!list) return;
+  closeAppMenus();
+  if (!list.dataset.memberMenuScrollBound) {
+    list.dataset.memberMenuScrollBound = '1';
+    list.addEventListener('scroll', () => closeAppMenus(), { passive:true });
+  }
   const members = (fam.memberIds || []).map(id => db.sims[id]).filter(Boolean);
   if (!members.length) { list.innerHTML = `<div class="family-member-empty">${esc(uiText('目前家族還沒有成員'))}</div>`; return; }
   list.innerHTML = members.map(sim => {
