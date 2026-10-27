@@ -118,7 +118,8 @@
                 secondary: token("--text-secondary") || css.color,
                 border: token("--border-default") || "#e3e8ed",
                 accent: token("--action-primary") || "#438cbe",
-                input: token("--surface-panel") || token("--surface-input") || css.backgroundColor
+                input: token("--surface-panel") || token("--surface-input") || css.backgroundColor,
+                theme: document.body.dataset.theme || ""
             }
         }, activeUrl.origin);
     }
