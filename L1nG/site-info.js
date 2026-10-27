@@ -117,6 +117,8 @@
                 || event.source !== window.parent || event.origin !== parentOrigin
                 || event.data?.type !== "l1ng-site-info-theme") return;
             const colors = event.data.colors || {};
+            const darkThemes = ["ink", "berrynight", "graphite"];
+            root.dataset.siteInfoTheme = darkThemes.includes(colors.theme) ? "dark" : "light";
             const vars = {
                 background: "--site-info-bg",
                 text: "--site-info-text",
