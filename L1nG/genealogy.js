@@ -1178,8 +1178,12 @@ function setupAppMenus() {
     trigger.addEventListener('click', e => {
       e.preventDefault(); e.stopPropagation();
       const willOpen = !menu.classList.contains('open');
+      if (!willOpen) {
+        closeAppMenus();
+        return;
+      }
       closeAppMenus(menu);
-      menu.classList.toggle('open', willOpen);
+      menu.classList.add('open');
       trigger.setAttribute('aria-expanded', willOpen ? 'true':'false');
       if (willOpen && menu.classList.contains('family-member-menu')) {
         const popover = menu.querySelector(':scope > .app-menu-popover');
@@ -4770,7 +4774,7 @@ function renderFamilyMemberList(fam) {
   closeAppMenus();
   if (!list.dataset.memberMenuScrollBound) {
     list.dataset.memberMenuScrollBound = '1';
-    list.addEventListener('scroll', () => closeAppMenus(), { passive:true });
+    (list.closest('.family-panel-scroll') || list).addEventListener('scroll', () => closeAppMenus(), { passive:true });
   }
   const members = (fam.memberIds || []).map(id => db.sims[id]).filter(Boolean);
   if (!members.length) { list.innerHTML = `<div class="family-member-empty">${esc(uiText('目前家族還沒有成員'))}</div>`; return; }
