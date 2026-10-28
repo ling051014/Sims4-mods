@@ -6779,6 +6779,18 @@ html[lang="en"] body {
     animation:l1ng-dialog-in .16s ease-out;
     text-align:center;
 }
+/* 匯入後情境決策：遮罩點擊只提示，不隱含取消操作。 */
+.ui-dialog.ui-dialog-nudge {
+    animation:l1ng-dialog-nudge .24s ease-out;
+}
+@keyframes l1ng-dialog-nudge {
+    0%,100% { transform:translateX(0); }
+    20%,60% { transform:translateX(-5px); }
+    40%,80% { transform:translateX(5px); }
+}
+@media(prefers-reduced-motion:reduce) {
+    .ui-dialog.ui-dialog-nudge { animation:none; outline:2px solid var(--action-primary); outline-offset:2px; }
+}
 .ui-dialog-header {
     display:flex;
     flex-direction:column;
