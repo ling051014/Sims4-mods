@@ -9178,7 +9178,6 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 /* 左上三條線圖示的骨架，與正式選單按鈕對齊。 */
 .skeleton-menu-toggle { width:30px; height:30px; flex:0 0 30px; display:block; border-radius:7px; }
 .skeleton-brand { width:126px; height:14px; border-radius:4px; }
-.skeleton-help,
 .skeleton-more,
 .skeleton-mobile-menu {
     width:30px;
@@ -9186,8 +9185,15 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     flex:0 0 30px;
     border-radius:7px;
 }
-.skeleton-mobile-menu { display:none; }
-.skeleton-mobile-help { display:none; width:28px; height:28px; flex:0 0 28px; border-radius:50%; }
+.skeleton-help,
+.skeleton-mobile-help {
+    width:28px;
+    height:28px;
+    flex:0 0 28px;
+    border-radius:50%;
+}
+.skeleton-mobile-menu,
+.skeleton-mobile-help { display:none; }
 /* 與正式 .topbar-filter-menu 相同，以整條頂欄而非按鈕列為置中基準。 */
 .skeleton-filter {
     position:absolute;
