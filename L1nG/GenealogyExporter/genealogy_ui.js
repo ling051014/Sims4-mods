@@ -434,12 +434,15 @@
     let _uiDialogCancelValue = null;
     let _uiDialogPreviousFocus = null;
     let _uiDialogBackupBusy = false;
+    let _uiDialogDismissPolicy = 'default';
 
     function closeUiDialog(result = null) {
       const overlay = $('confirmationDialog');
       if (!overlay || !overlay.classList.contains('show')) return;
       overlay.classList.remove('show');
       overlay.setAttribute('aria-hidden', 'true');
+      $('uiDialog')?.classList.remove('ui-dialog-nudge');
+      _uiDialogDismissPolicy = 'default';
       const resolve = _uiDialogResolve;
       _uiDialogResolve = null;
       if (resolve) resolve(result);
@@ -533,7 +536,8 @@
       cancelValue = mode === 'confirm' ? false : null,
       details = null,
       backupAction = null,
-      richContent = null
+      richContent = null,
+      dismissPolicy = 'default'
     } = {}) {
       const overlay = $('confirmationDialog');
       const dialog = $('uiDialog');
@@ -563,6 +567,7 @@
 
       if (_uiDialogResolve) closeUiDialog(null);
       _uiDialogMode = mode;
+      _uiDialogDismissPolicy = dismissPolicy === 'explicit' ? 'explicit' : 'default';
       _uiDialogCancelValue = cancelValue;
       _uiDialogPreviousFocus = document.activeElement;
       _uiDialogBackupBusy = false;
@@ -782,7 +787,16 @@
           if (!_uiDialogBackupBusy) closeUiDialog(secondaryValue);
         } : null;
         overlay.onclick = event => {
-          if (event.target === overlay) finishCancel();
+          if (event.target !== overlay) return;
+          if (_uiDialogDismissPolicy === 'explicit') {
+            if (!_uiDialogBackupBusy) {
+              dialog.classList.remove('ui-dialog-nudge');
+              void dialog.offsetWidth;
+              dialog.classList.add('ui-dialog-nudge');
+            }
+            return;
+          }
+          finishCancel();
         };
         inputEl.onkeydown = event => {
           if (event.key === 'Enter' && mode === 'prompt') {
@@ -814,7 +828,8 @@
         kind:options.kind || 'default',
         confirmText:options.confirmText || '確定',
         details:options.details || null,
-        richContent:options.richContent || null
+        richContent:options.richContent || null,
+        dismissPolicy:options.dismissPolicy || 'default'
       });
     }
 
@@ -828,7 +843,8 @@
         cancelText:options.cancelText || '取消',
         details:options.details || null,
         backupAction:options.backupAction || null,
-        richContent:options.richContent || null
+        richContent:options.richContent || null,
+        dismissPolicy:options.dismissPolicy || 'default'
       });
     }
 
@@ -991,7 +1007,7 @@
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (!_uiDialogBackupBusy) closeUiDialog(_uiDialogCancelValue);
+        if (_uiDialogDismissPolicy !== 'explicit' && !_uiDialogBackupBusy) closeUiDialog(_uiDialogCancelValue);
       }
     });
 
