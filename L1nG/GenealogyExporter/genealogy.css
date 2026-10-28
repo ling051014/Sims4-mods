@@ -8647,6 +8647,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
   .topbar-text-btn { width:32px; padding:0; }
   .canvas-tool span:last-child { display:none; }
   .canvas-tool { width:30px; padding:5px; }
+  /* Mobile selection and pan controls align with icon-only tools. */
+  .canvas-tool.arrange-tool { width:30px; min-width:30px; max-width:30px; flex:0 0 30px; }
 }
 @media (max-width:720px) {
   /* 手機層級：完整視窗高於頂部工具列；工具列與其選單只需高於常駐家庭資訊。 */
@@ -9185,6 +9187,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     border-radius:7px;
 }
 .skeleton-mobile-menu { display:none; }
+.skeleton-mobile-help { display:none; width:28px; height:28px; flex:0 0 28px; border-radius:50%; }
 /* 與正式 .topbar-filter-menu 相同，以整條頂欄而非按鈕列為置中基準。 */
 .skeleton-filter {
     position:absolute;
@@ -9351,6 +9354,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         gap:6px;
     }
     .skeleton-mobile-menu { display:block; }
+    .skeleton-mobile-help { display:block; }
     .skeleton-filter { width:32px; }
     .skeleton-action { width:34px; }
     .skeleton-action-wide { display:none; }
