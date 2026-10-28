@@ -2685,5 +2685,138 @@
   }
 
   global.L1nGGenealogyUI = Object.freeze({ create, createChromeController, createDialogController, closeTopmostDialog });
+
+  // ========【首次操作導覽】沿用現有入口，僅說明不修改族譜資料 ========
+  function initializeGuidedTour() {
+    const key = 'l1ng_genealogy_tour_v1';
+    const steps = [
+      {target:'#familySidebarToggleButton', title:'家族與側邊欄', description:'從這裡查看家族資料、切換或管理成員。'},
+      {target:'#canvasToolbar', title:'畫布工具', description:'在這裡切換檢視與編輯、排列族譜，並搭配拖曳與縮放操作。'},
+      {target:'#modeToggle', title:'查看與編輯市民', description:'切換模式後，點擊市民或寵物卡片即可查看資料或進入編輯。'},
+      {target:'#topbarMoreBtn', title:'建立與匯入族譜', description:'可以手動建立，也可以由選單匯入遊戲族譜 ZIP 或 JSON 備份。'}
+    ];
+    let index = 0;
+    let active = false;
+    const overlay = document.createElement('div');
+    overlay.className = 'l1ng-tour-overlay';
+    overlay.setAttribute('aria-hidden','true');
+    const spotlight = document.createElement('div');
+    spotlight.className = 'l1ng-tour-spotlight';
+    const panel = document.createElement('section');
+    panel.className = 'l1ng-tour-panel';
+    panel.setAttribute('role','dialog');
+    panel.setAttribute('aria-modal','true');
+    panel.setAttribute('aria-label','族譜操作導覽');
+    const progress = document.createElement('small');
+    progress.className = 'l1ng-tour-progress';
+    const title = document.createElement('h3');
+    const description = document.createElement('p');
+    const actions = document.createElement('div');
+    actions.className = 'l1ng-tour-actions';
+    const skip = document.createElement('button');
+    skip.type = 'button';
+    skip.textContent = '跳過';
+    const previous = document.createElement('button');
+    previous.type = 'button';
+    previous.textContent = '上一步';
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.textContent = '下一步';
+    next.className = 'primary';
+    actions.append(skip,previous,next);
+    panel.append(progress,title,description,actions);
+    overlay.append(spotlight,panel);
+    document.body.append(overlay);
+    function layout() {
+      if (!active) return;
+      const target = document.querySelector(steps[index].target);
+      if (!target || !target.getClientRects().length) return;
+      const rect = target.getBoundingClientRect();
+      const pad = 5;
+      const x = Math.max(4,rect.left-pad);
+      const y = Math.max(4,rect.top-pad);
+      const w = Math.max(30,Math.min(window.innerWidth-x-4,rect.width+pad*2));
+      const h = Math.max(30,Math.min(window.innerHeight-y-4,rect.height+pad*2));
+      spotlight.style.left = x+'px';
+      spotlight.style.top = y+'px';
+      spotlight.style.width = w+'px';
+      spotlight.style.height = h+'px';
+      const panelWidth = Math.min(340,window.innerWidth-24);
+      const panelTop = y+h+18+180 < window.innerHeight
+        ? y+h+14 : Math.max(12,y-210);
+      panel.style.left = Math.round(Math.max(12,Math.min(window.innerWidth-panelWidth-12,x+w/2-panelWidth/2)))+'px';
+      panel.style.top = Math.round(Math.min(window.innerHeight-220,Math.max(12,panelTop)))+'px';
+      panel.style.width = panelWidth+'px';
+    }
+    function render() {
+      progress.textContent = (index+1)+' / '+steps.length;
+      title.textContent = steps[index].title;
+      description.textContent = steps[index].description;
+      previous.disabled = index===0;
+      next.textContent = index===steps.length-1 ? '完成' : '下一步';
+      requestAnimationFrame(layout);
+    }
+    function close() {
+      active = false;
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+      try { localStorage.setItem(key,'1'); } catch (_) {}
+    }
+    function open() {
+      if (active) return;
+      if (document.querySelector('.ui-dialog-backdrop.show, .ui-dialog-mask.show, .file-operation-status-mask.show')) return;
+      active = true;
+      index = 0;
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden','false');
+      render();
+    }
+    skip.addEventListener('click',close);
+    previous.addEventListener('click',()=>{ index=Math.max(0,index-1);render(); });
+    next.addEventListener('click',()=>{ if(index===steps.length-1) close(); else {index++;render();} });
+    window.addEventListener('resize',layout,{passive:true});
+    window.addEventListener('scroll',layout,true);
+    document.addEventListener('keydown',event=>{
+      if (!active || event.key!=='Escape') return;
+      event.preventDefault();event.stopImmediatePropagation();close();
+    },true);
+    function attach() {
+      const help = document.querySelector('#helpDialog .help-heading');
+      if (help && !document.getElementById('genealogyTourReplay')) {
+        const replay = document.createElement('button');
+        replay.id = 'genealogyTourReplay';
+        replay.type = 'button';
+        replay.className = 'l1ng-tour-replay';
+        replay.textContent = '操作導覽';
+        replay.addEventListener('click',()=>{
+          document.getElementById('helpCloseBtn')?.click();
+          requestAnimationFrame(()=>requestAnimationFrame(open));
+        });
+        help.append(replay);
+      }
+      let seen = false;
+      try { seen = localStorage.getItem(key)==='1'; } catch (_) {}
+      if (!seen) {
+        const welcome = document.createElement('div');
+        welcome.className = 'l1ng-tour-welcome';
+        const label = document.createElement('span');
+        label.textContent = '第一次使用族譜工具嗎？';
+        const start = document.createElement('button');
+        start.type='button';
+        start.textContent='開始導覽';
+        const dismiss = document.createElement('button');
+        dismiss.type='button';
+        dismiss.textContent='略過';
+        start.addEventListener('click',()=>{welcome.remove();open();});
+        dismiss.addEventListener('click',()=>{welcome.remove();try{localStorage.setItem(key,'1');}catch(_){}});
+        welcome.append(label,start,dismiss);
+        document.body.append(welcome);
+      }
+    }
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});
+    else attach();
+  }
+
+  initializeGuidedTour();
   initializeSelectionIndicators();
 })(window);
