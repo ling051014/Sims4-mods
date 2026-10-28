@@ -17865,6 +17865,7 @@ async function chooseGameImportMode(
   ) {
     return await openUiDialog({
       title:'匯入遊戲族譜',
+      dismissPolicy:'explicit',
       message:[
         ...sourceLines,
         '',
@@ -17906,6 +17907,7 @@ async function chooseGameImportMode(
   ) {
     return await openUiDialog({
       title:'匯入遊戲族譜',
+      dismissPolicy:'explicit',
       message:[
         uiText('網站目前已經有遊戲族譜。'),
         '',
@@ -17935,6 +17937,7 @@ async function chooseGameImportMode(
     ].join('\n'),
     {
       title:'匯入遊戲族譜',
+      dismissPolicy:'explicit',
       kind:'danger',
       confirmText:'覆蓋現有族譜',
       cancelText:'取消'
@@ -18165,6 +18168,7 @@ async function importGameGenealogy(file) {
         ),
         {
           title:'遊戲族譜更新完成',
+          dismissPolicy:'explicit',
           confirmText:'查看族譜'
         }
       );
@@ -18185,6 +18189,7 @@ async function importGameGenealogy(file) {
         ].filter(Boolean).join('\n'),
         {
           title:'遊戲族譜匯入完成',
+          dismissPolicy:'explicit',
           confirmText:'查看族譜'
         }
       );
