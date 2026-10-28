@@ -10189,3 +10189,39 @@ body.ootd-sorting,body.ootd-sorting * { cursor:grabbing; }
 }
 @keyframes l1ng-sheet-in { from{transform:translateY(20px);opacity:.65} to{transform:translateY(0);opacity:1} }
 @media(prefers-reduced-motion:reduce){.ui-menu-popover.l1ng-mobile-sheet{animation:none}}
+
+/* ========【族譜聚光導覽】只指出既有元件，不接管資料編輯流程 ======== */
+.l1ng-tour-overlay {display:none;position:fixed;inset:0;z-index:1500;pointer-events:auto;}
+.l1ng-tour-overlay.show {display:block;}
+.l1ng-tour-spotlight {
+  position:fixed;pointer-events:none;border:2px solid var(--action-primary);
+  border-radius:10px;box-shadow:0 0 0 200vmax rgba(12,19,27,.64);
+}
+.l1ng-tour-panel {
+  position:fixed;box-sizing:border-box;background:var(--surface-card);color:var(--text-primary);
+  border:1px solid var(--border-default);border-radius:12px;padding:17px;
+  box-shadow:0 12px 42px rgba(0,0,0,.22);
+}
+.l1ng-tour-panel h3 {margin:7px 0;font-size:16px;}
+.l1ng-tour-panel p {font-size:13px;line-height:1.65;margin:0 0 16px;color:var(--text-secondary);}
+.l1ng-tour-progress {font-size:11px;color:var(--text-secondary);}
+.l1ng-tour-actions {display:flex;gap:7px;justify-content:flex-end;align-items:center;}
+.l1ng-tour-actions button,.l1ng-tour-replay,.l1ng-tour-welcome button {
+  cursor:pointer;border:1px solid var(--border-default);border-radius:7px;padding:8px 11px;
+  background:var(--surface-card);color:var(--text-primary);font:inherit;font-size:12px;
+}
+.l1ng-tour-actions button.primary,.l1ng-tour-welcome button:first-of-type {
+  background:var(--action-primary);color:var(--navigation-text,#fff);border-color:var(--action-primary);
+}
+.l1ng-tour-actions button:disabled {opacity:.35;cursor:default;}
+.l1ng-tour-replay {margin-left:auto;white-space:nowrap;}
+.l1ng-tour-welcome {
+  position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));
+  transform:translateX(-50%);z-index:390;max-width:calc(100vw - 20px);width:max-content;
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;
+  padding:10px 12px;border-radius:10px;border:1px solid var(--border-default);
+  box-shadow:0 5px 20px rgba(0,0,0,.12);background:var(--surface-card);color:var(--text-primary);
+  font-size:12px;
+}
+@media(max-width:720px) {.l1ng-tour-panel{padding:14px}.l1ng-tour-welcome{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.l1ng-tour-overlay *{animation:none!important;transition:none!important}}
