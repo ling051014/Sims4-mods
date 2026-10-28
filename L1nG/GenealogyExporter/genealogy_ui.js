@@ -2656,11 +2656,11 @@
         {id:'workspace',name:'族譜操作',en:'Working with trees',sidebar:true,steps:[
           step('#familySelectTrigger','切換家族與視角','從家族欄切換家庭、EA 族譜或大家族視角。','Family selection','Switch between households, EA genealogy and extended-family views.'),
           step('#genealogyCanvasViewport','畫布操作','拖曳空白處平移畫布，使用滑鼠滾輪縮放；也能使用右下角的縮放與適應畫面工具。','Canvas navigation','Drag empty space to pan and use the mouse wheel to zoom; zoom and fit controls are also available.'),
-          step('#canvasToolbar','排列與模式','從畫布工具列切換檢視／編輯、自動／自由排列，以及關係標籤等功能。','Modes and layout','Switch view/edit modes, automatic/free layout and relationship labels from the canvas toolbar.'),
+          step('#canvasToolbar','排列與模式','從畫布工具列切換檢視 / 編輯、自動 / 自由排列，以及關係標籤等功能。','Modes and layout','Switch view/edit modes, automatic/free layout and relationship labels from the canvas toolbar.'),
           step('#genealogyPersonLayer','市民與寵物操作','點擊卡片查看或編輯，右鍵開啟更多操作；Ctrl / Cmd + Z 可復原，支援的編輯視窗可用 Ctrl + S 儲存。','Cards and shortcuts','Click or right-click cards for actions. Use Ctrl / Cmd + Z to undo and Ctrl + S to save in supported editors.',{fallback:'#genealogyCanvasViewport'})
         ]},
         {id:'data',name:'匯入與備份',en:'Import and backups',steps:[
-          step('#topbarMoreBtn','匯入與設定','在「更多」選單匯入遊戲 ZIP／JSON，或前往族譜提取器及視覺設定；導覽不會執行匯入。','Import and settings','Use More for ZIP/JSON imports, the Exporter and appearance settings. The tour does not import data.'),
+          step('#topbarMoreBtn','匯入與設定','在「更多」選單匯入遊戲 ZIP / JSON，或前往族譜提取器及視覺設定；導覽不會執行匯入。','Import and settings','Use More for ZIP/JSON imports, the Exporter and appearance settings. The tour does not import data.'),
           step('#exportBtn','匯出備份','大量編輯或匯入其他存檔前，建議先匯出 JSON 備份。','Save a backup','Export a JSON backup before major changes or importing another save.')
         ]}
       ];
@@ -2687,15 +2687,15 @@
         step('#zoomInBtn','放大畫布','這個加號可以放大畫布。可以試著點一下，也可以直接略過。','Zoom in','Press plus to zoom in. You may try it or skip.',{practice:true}),
         step('#zoomOutBtn','縮小畫布','這個減號可以縮小畫布。可以試著點一下，也可以直接略過。','Zoom out','Press minus to zoom out. You may try it or skip.',{practice:true}),
         step('#fitScreenBtn','適應畫面','自動調整縮放與位置，將目前族譜放進可見畫面。','Fit to screen','Fit the current tree within the viewport.',{practice:true}),
-        step('#modeToggle','檢視／編輯模式','切換卡片的查看與編輯方式；操作導覽不會替你切換模式。','View / edit mode','Switch how cards open for viewing or editing. The tour will not toggle this.'),
-        step('#autoLayoutToggleButton','自動／自由排列','自動排列依家系安排位置；自由排列可自行調整卡片，並出現更多排列工具。','Automatic / free layout','Auto-layout arranges families; free layout offers more manual tools.'),
+        step('#modeToggle','檢視 / 編輯模式','切換卡片的查看與編輯方式；操作導覽不會替你切換模式。','View / edit mode','Switch how cards open for viewing or editing. The tour will not toggle this.'),
+        step('#autoLayoutToggleButton','自動 / 自由排列','自動排列依家系安排位置；自由排列可自行調整卡片，並出現更多排列工具。','Automatic / free layout','Auto-layout arranges families; free layout offers more manual tools.'),
         step('#selectToolBtn','選取工具','在自由排列狀態可以框選或多選市民與寵物。','Selection tool','Select one or more cards in free layout.',{optional:true}),
         step('#panToolBtn','拖曳工具','自由排列時可切換為拖曳工具，平移畫布而非框選。','Pan tool','Pan the canvas instead of selecting cards.',{optional:true}),
         step('#canvasLockToggleButton','畫布鎖定','此功能只在對應模式顯示，用來限制部分畫布操作。','Canvas lock','Restricts canvas interactions in supported modes.',{optional:true}),
         step('#resetCanvasLayoutButton','重設卡片位置','會清除手動調整的位置；導覽只介紹，不會執行重設。','Reset positions','Clears custom card positions. The tour will not trigger it.',{optional:true})
       ]},
       {id:'relations',name:'關係與卡片',en:'Relationships and cards',steps:[
-        step('#relationshipLabelsVisibilityToggle','顯示／隱藏關係','控制關係標籤的顯示，不會刪除實際關係。','Relationship labels','Show or hide relationship labels without deleting connections.'),
+        step('#relationshipLabelsVisibilityToggle','顯示 / 隱藏關係','控制關係標籤的顯示，不會刪除實際關係。','Relationship labels','Show or hide relationship labels without deleting connections.'),
         step('#relationshipLabelsLockToggle','鎖定關係','鎖定或解鎖關係線相關操作，避免誤調。','Lock relationships','Lock relationship line interactions to avoid accidental changes.'),
         step('#genealogyPersonLayer',mobile?'點擊市民卡片':'滑鼠操作市民卡片',mobile?'點擊市民卡片查看資訊；編輯模式下可以修改資料。':'在檢視模式點擊查看資料，切換到編輯模式則可修改市民。','Sim cards',mobile?'Tap a card to inspect it, or edit in edit mode.':'Click a card to inspect it; use edit mode to change details.',{fallback:'#genealogyCanvasViewport'}),
         step('#genealogyCanvasViewport',mobile?'長按卡片':'右鍵卡片',mobile?'長按卡片可開啟適用的操作選單；長按也可能用於特定拖曳操作。':'在卡片上按滑鼠右鍵，可以開啟額外的卡片操作選單。','Card actions',mobile?'Long-press a card to open contextual actions, depending on the active tool.':'Right-click a card to open its context menu.'),
@@ -2712,7 +2712,7 @@
         step('#fitScreenBtn','畫布重新置中','如果在大型族譜中迷失位置，可點擊適應畫面快速返回。','Recenter your tree','Use Fit to screen to find your tree again.')
       ]:[
         step('#genealogyCanvasViewport','Shift 與多選','在支援的選取模式中，使用 Shift 與滑鼠選取多個卡片。','Shift and multiselect','Use Shift with the mouse to select multiple cards in selection mode.'),
-        step('#genealogyCanvasViewport','復原／重做','使用 Ctrl / Cmd + Z 復原；需要時使用 Ctrl + Y 重做。','Undo / redo','Use Ctrl / Cmd + Z to undo and Ctrl + Y to redo.'),
+        step('#genealogyCanvasViewport','復原 / 重做','使用 Ctrl / Cmd + Z 復原；需要時使用 Ctrl + Y 重做。','Undo / redo','Use Ctrl / Cmd + Z to undo and Ctrl + Y to redo.'),
         step('#genealogyCanvasViewport','儲存編輯視窗','在支援的編輯視窗中，使用 Ctrl + S 儲存變更。','Save editor','Use Ctrl + S to save in supported editing dialogs.')
       ]}
     ];
@@ -2850,12 +2850,42 @@
       panel.style.left = Math.round(Math.max(12,Math.min(viewportWidth-panelWidth-12,x+width/2-panelWidth/2)))+'px';
       panel.style.top = Math.round(Math.max(12,top))+'px';
     }
+    const normalizeTourSlashes = value => String(value).replace(/\s*[／\/]\s*/g, ' / ');
+    function renderTourDescription(value) {
+      const content = normalizeTourSlashes(value);
+      const tokenPattern = /滑鼠滾輪|滑鼠右鍵|滑鼠左鍵|滾輪|右鍵|左鍵|滑鼠|mouse wheel|right-click|left-click|mouse|\b(?:Ctrl|Cmd|Shift|Alt|Esc|Delete|Backspace|Space)\b|(?<=\+\s)[A-Z0-9]\b/g;
+      description.replaceChildren();
+      let last = 0;
+      for (const match of content.matchAll(tokenPattern)) {
+        description.append(document.createTextNode(content.slice(last, match.index)));
+        const token = match[0];
+        const mouseToken = /^(?:滑鼠|滾輪|右鍵|左鍵|mouse|right-click|left-click)/.test(token);
+        if (mouseToken && !isMobileView()) {
+          const type = /滾輪|mouse wheel/.test(token) ? 'wheel' :
+            /右鍵|right-click/.test(token) ? 'right' : 'left';
+          const icon = document.createElement('span');
+          icon.className = 'mouse-hint mouse-' + type;
+          icon.setAttribute('role', 'img');
+          icon.setAttribute('aria-label', type === 'wheel' ? '滾輪' : type === 'right' ? '右鍵' : '左鍵');
+          const wheel = document.createElement('span');
+          wheel.className = 'mouse-hint-wheel';
+          icon.append(wheel);
+          description.append(icon, document.createTextNode(token));
+        } else if (!mouseToken) {
+          const key = document.createElement('kbd');
+          key.textContent = token;
+          description.append(key);
+        } else description.append(document.createTextNode(token));
+        last = match.index + token.length;
+      }
+      description.append(document.createTextNode(content.slice(last)));
+    }
     function renderChapters() {
       chapterSelect.replaceChildren();
       currentChapters.forEach((chapter,i)=>{
         const option=document.createElement('option');
         option.value=String(i);
-        option.textContent=tr(chapter.name,chapter.en);
+        option.textContent=normalizeTourSlashes(tr(chapter.name,chapter.en));
         chapterSelect.append(option);
       });
       chapterSelect.value=String(chapterIndex);
@@ -2867,8 +2897,8 @@
       if (!item) { close(true); return; }
       renderChapters();
       progress.textContent=(stepIndex+1)+' / '+chapter.visibleSteps.length;
-      title.textContent=tr(item.title,item.enTitle);
-      description.textContent=tr(item.body,item.enBody);
+      title.textContent=normalizeTourSlashes(tr(item.title,item.enTitle));
+      renderTourDescription(tr(item.body,item.enBody));
       hint.hidden=!item.practice;
       hint.textContent=item.practice ? tr('可以點擊聚光目標試試，或直接按「下一步」','Tap the highlighted control to try, or choose Next to skip.') : '';
       skip.textContent=tr('結束導覽','End tour');
