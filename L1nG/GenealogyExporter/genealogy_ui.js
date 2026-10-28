@@ -438,12 +438,15 @@
     const $ = id => document.getElementById(id);
     let _uiDialogResolve = null;
     let _uiDialogMode = 'alert';
+    let _uiDialogDismissPolicy = 'default';
 
     function closeUiDialog(result = null) {
       const overlay = $('confirmationDialog');
       if (!overlay || !overlay.classList.contains('show')) return;
       overlay.classList.remove('show');
       overlay.setAttribute('aria-hidden', 'true');
+      $('uiDialog')?.classList.remove('ui-dialog-nudge');
+      _uiDialogDismissPolicy = 'default';
       const resolve = _uiDialogResolve;
       _uiDialogResolve = null;
       if (resolve) resolve(result);
@@ -463,7 +466,8 @@
       secondaryHint = '',
       confirmHint = '',
       confirmValue = true,
-      cancelValue = mode === 'confirm' ? false : null
+      cancelValue = mode === 'confirm' ? false : null,
+      dismissPolicy = 'default'
     } = {}) {
       const overlay = $('confirmationDialog');
       const dialog = $('uiDialog');
@@ -490,6 +494,7 @@
 
       if (_uiDialogResolve) closeUiDialog(null);
       _uiDialogMode = mode;
+      _uiDialogDismissPolicy = dismissPolicy === 'explicit' ? 'explicit' : 'default';
       titleEl.textContent = uiText(title);
       // 先嘗試翻譯完整訊息，讓跨行確認文案與動態樣式能一次正確處理；
       // 若沒有完整對應，再逐行翻譯，避免英文介面殘留繁中文字。
@@ -600,7 +605,14 @@
         cancelBtn.onclick = finishCancel;
         closeBtn.onclick = finishCancel;
         overlay.onclick = event => {
-          if (event.target === overlay) finishCancel();
+          if (event.target !== overlay) return;
+          if (_uiDialogDismissPolicy === 'explicit') {
+            dialog.classList.remove('ui-dialog-nudge');
+            void dialog.offsetWidth;
+            dialog.classList.add('ui-dialog-nudge');
+            return;
+          }
+          finishCancel();
         };
 
         inputEl.onkeydown = event => {
@@ -630,7 +642,8 @@
         message,
         mode: 'alert',
         kind: options.kind || 'default',
-        confirmText: options.confirmText || '確定'
+        confirmText: options.confirmText || '確定',
+        dismissPolicy:options.dismissPolicy || 'default'
       });
     }
 
@@ -641,7 +654,8 @@
         mode: 'confirm',
         kind: options.kind || 'default',
         confirmText: options.confirmText || '確定',
-        cancelText: options.cancelText || '取消'
+        cancelText: options.cancelText || '取消',
+        dismissPolicy:options.dismissPolicy || 'default'
       });
     }
 
@@ -804,7 +818,7 @@
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopImmediatePropagation();
-        closeUiDialog(_uiDialogMode === 'confirm' ? false : null);
+        if (_uiDialogDismissPolicy !== 'explicit') closeUiDialog(_uiDialogMode === 'confirm' ? false : null);
       }
     });
 
