@@ -50,33 +50,12 @@
 
     familySidebar?.addEventListener('scroll', closeSidebarActionMenus, true);
 
-    let activeMobileSheet = null;
-    const mobileSheetBackdrop = document.createElement('div');
-    mobileSheetBackdrop.className = 'l1ng-mobile-sheet-backdrop';
-    mobileSheetBackdrop.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(mobileSheetBackdrop);
-    mobileSheetBackdrop.addEventListener('click', () => {
-      if (activeMobileSheet) closeAppMenu(activeMobileSheet);
-    });
-
-    function useMobileSheet(menu) {
-      return window.matchMedia('(max-width:720px)').matches &&
-        (menu.matches('#topbarFilterMenu, #topbarMoreMenu, #familyMemberAddMenu, .family-actions-menu, .member-manage-menu'));
-    }
-
     function restoreAppMenuPortal(menu) {
       const popover =
         menu?._bodyPortalPopover;
 
       if (!popover) return;
 
-      if (activeMobileSheet === menu) {
-        activeMobileSheet = null;
-        mobileSheetBackdrop.classList.remove('show');
-        mobileSheetBackdrop.setAttribute('aria-hidden','true');
-      }
-      popover.querySelector(':scope > .l1ng-mobile-sheet-header')?.remove();
-      popover.classList.remove('l1ng-mobile-sheet');
       popover.classList.remove(
         'ui-menu-body-portal'
       );
@@ -97,31 +76,6 @@
       trigger,
       popover
     ) {
-      if (useMobileSheet(menu)) {
-        document.body.appendChild(popover);
-        popover.classList.add('ui-menu-body-portal', 'l1ng-mobile-sheet');
-        popover.removeAttribute('style');
-        const title = menu.matches('#topbarFilterMenu') ? '篩選' :
-          menu.matches('#topbarMoreMenu') ? '更多功能' :
-          menu.matches('#familyMemberAddMenu') ? '新增成員' :
-          menu.matches('.family-actions-menu') ? '家族管理' : '成員操作';
-        const heading = document.createElement('div');
-        heading.className = 'l1ng-mobile-sheet-header';
-        const text = document.createElement('strong');
-        text.textContent = title;
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'l1ng-mobile-sheet-close';
-        close.textContent = '完成';
-        close.addEventListener('click', () => closeAppMenu(menu));
-        heading.append(text,close);
-        popover.prepend(heading);
-        menu._bodyPortalPopover = popover;
-        activeMobileSheet = menu;
-        mobileSheetBackdrop.classList.add('show');
-        mobileSheetBackdrop.setAttribute('aria-hidden','false');
-        return;
-      }
       const margin = 8;
       const gap = 4;
       const triggerRect =
@@ -259,7 +213,7 @@
 
               if (
                 menu.dataset.menuPortal ===
-                'body' || useMobileSheet(menu)
+                'body'
               ) {
                 const popover =
                   menu.querySelector(
