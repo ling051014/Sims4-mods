@@ -149,7 +149,7 @@ for(const p of htmls) {
     const assetPrefix='../'.repeat(relative.split('/').length-1);
     if (!/src=["'][^"']*cookie-consent\.js(?:[?"'])/.test(modified)) {
       modified=modified.replace(/<\/head\s*>/i,
-        '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261021-policy-scroll-r1">\n' +
+        '    <link rel="stylesheet" href="'+assetPrefix+'cookie-consent.css?v=20261029-cookie-states-r1">\n' +
         '    <script src="'+assetPrefix+'cookie-consent.js?v=20261015-cookie-preferences-skeleton-r4" defer></script>\n</head>');
     }
     analyticsPages++;
