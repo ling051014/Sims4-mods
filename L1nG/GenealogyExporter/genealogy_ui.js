@@ -3063,13 +3063,15 @@
         event.preventDefault();event.stopImmediatePropagation();close(true,true);return;
       }
       if (event.key==='Tab') {
-        const items=[chapterSelect,skip,previous,next].filter(el=>!el.disabled);
+        const items=[chapterSelect,skip,previous,next,
+          ...(!practiceHitArea.hidden ? [practiceHitArea] : [])].filter(el=>!el.disabled);
         const positionInItems=items.indexOf(document.activeElement);
         if(positionInItems>=0) {
           const nextIndex=(positionInItems+(event.shiftKey?-1:1)+items.length)%items.length;
           event.preventDefault();items[nextIndex].focus();
-        } else if(!panel.contains(document.activeElement)) {
-          event.preventDefault();chapterSelect.focus();
+        } else if(document.activeElement===panel || !panel.contains(document.activeElement)) {
+          event.preventDefault();
+          (event.shiftKey ? items[items.length-1] : chapterSelect).focus();
         }
       }
     },true);
