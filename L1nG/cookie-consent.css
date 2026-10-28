@@ -50,26 +50,34 @@
   font: inherit;
   font-weight: 550;
   cursor: pointer;
-  transition: background-color .16s, border-color .16s;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, filter .12s ease;
 }
-.l1ng-cookie-actions button:hover {
+.l1ng-cookie-actions button:hover:not(:disabled) {
   background: var(--cookie-hover);
   border-color: var(--cookie-accent);
+  color: var(--cookie-accent);
 }
 .l1ng-cookie-actions .l1ng-cookie-accept {
   background: var(--cookie-accent);
   border-color: var(--cookie-accent);
   color: #fff;
 }
-.l1ng-cookie-actions .l1ng-cookie-accept:hover {
+.l1ng-cookie-actions .l1ng-cookie-accept:hover:not(:disabled) {
   background: var(--cookie-accent-hover);
   border-color: var(--cookie-accent-hover);
+  color: #fff;
 }
 .l1ng-cookie-banner button:focus-visible,
 .l1ng-cookie-dialog button:focus-visible {
   outline: 2px solid var(--cookie-accent);
   outline-offset: 2px;
 }
+.l1ng-cookie-actions button:active:not(:disabled),
+.l1ng-cookie-close:active:not(:disabled),
+button.l1ng-cookie-switch:active:not(:disabled) { filter: brightness(.94); }
+.l1ng-cookie-actions button:disabled,
+.l1ng-cookie-close:disabled,
+button.l1ng-cookie-switch:disabled { cursor:not-allowed; opacity:.55; filter:none; }
 .l1ng-cookie-backdrop {
   position: fixed;
   z-index: 61000;
@@ -117,6 +125,12 @@
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, filter .12s ease;
+}
+.l1ng-cookie-close:hover:not(:disabled) {
+  background: var(--cookie-hover);
+  color: var(--cookie-text);
+  border-color: var(--cookie-border);
 }
 .l1ng-cookie-setting {
   display: flex;
@@ -146,7 +160,10 @@
   border-radius: 999px;
   background: var(--cookie-border);
   cursor: pointer;
-  transition: background-color .16s;
+  transition: background-color .16s ease, box-shadow .16s ease, filter .12s ease;
+}
+button.l1ng-cookie-switch:hover:not(:disabled) {
+  box-shadow: 0 0 0 2px color-mix(in srgb,var(--cookie-accent) 28%,transparent);
 }
 .l1ng-cookie-switch::after {
   content: "";
@@ -262,10 +279,6 @@
   align-items: center;
   justify-content: center;
 }
-.l1ng-cookie-genealogy .l1ng-cookie-dialog .help-close-btn.l1ng-cookie-close:hover {
-  background: var(--surface-item-hover);
-  color: var(--text-primary);
-}
 .l1ng-cookie-genealogy .l1ng-cookie-close .l1ng-icon { width: 14px; height: 14px; }
 .l1ng-cookie-genealogy .l1ng-cookie-body {
   flex: 1 1 auto;
@@ -285,6 +298,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .l1ng-cookie-actions button,
+  .l1ng-cookie-close,
   .l1ng-cookie-switch,
   .l1ng-cookie-switch::after { transition: none; }
 }
