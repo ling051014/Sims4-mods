@@ -3183,6 +3183,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 
 /* 共用按鈕基礎：延續早期 ui-dialog-actions，其他控制項只保留尺寸及特殊語意。 */
+/* 早期共用按鈕：一般狀態沿用原本編輯視窗的主題色與邊框。 */
 .ui-dialog-actions button,
 .l1ng-tour-actions button,
 .l1ng-tour-replay,
@@ -3194,7 +3195,13 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .filebtn.compact,
 .sim-editor-preview-sheet-toolbar button,
 .storage-maintenance-card button {
-  }
+    border: 1px solid var(--border-default);
+    background: var(--surface-input);
+    color: var(--text-primary);
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease, filter .11s ease;
+}
 .l1ng-tour-chapter-option,
 .person-library-view-toggle button,
 .person-library-category-tabs button,
@@ -3228,22 +3235,29 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .ui-dialog-actions button.primary,
 .l1ng-tour-actions button.primary,
 .l1ng-tour-welcome button:first-of-type,
-
+.person-library-header-actions button.primary {
+    background: var(--action-primary);
+    border-color: var(--action-primary);
+    color: #fff;
+}
 .ui-dialog-actions button.primary:hover:not(:disabled),
 .l1ng-tour-actions button.primary:hover:not(:disabled),
 .l1ng-tour-welcome button:first-of-type:hover:not(:disabled),
 .person-library-header-actions button.primary:hover:not(:disabled) {
-  background: var(--action-primary-hover);
-  border-color: var(--action-primary-hover);
-  color: #fff;
+    background: var(--action-primary-hover);
+    border-color: var(--action-primary-hover);
+    color: #fff;
 }
 .ui-dialog-actions button.danger,
-
+.person-library-batch-toolbar button.danger {
+    color: var(--danger-text);
+    border-color: var(--danger-border);
+}
 .ui-dialog-actions button.danger:hover:not(:disabled),
 .person-library-batch-toolbar button.danger:hover:not(:disabled) {
-  color: var(--danger-text);
-  border-color: var(--danger-text);
-  background: var(--danger-surface);
+    color: var(--danger-text);
+    border-color: var(--danger-text);
+    background: var(--danger-surface);
 }
 .ui-dialog-actions button:active:not(:disabled),
 .l1ng-tour-actions button:active:not(:disabled),
@@ -3323,22 +3337,15 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
   .l1ng-tour-welcome button:first-of-type { transition: none; }
 }
 
-.ui-dialog-actions button {
+.ui-dialog-actions button,
+.l1ng-tour-actions button,
+.l1ng-tour-replay,
+.l1ng-tour-welcome button {
     padding: 9px 16px;
     border-radius: 8px;
     font-size: 13px;
     min-width: 86px;
-    }
-
-
-
-
-
-
-
-
-
-
+}
 
 .info {
     /* 字體大小 */ font-size: 12px;
@@ -10297,8 +10304,8 @@ body.ootd-sorting,body.ootd-sorting * { cursor:grabbing; }
 .l1ng-tour-panel p {font-size:13px;line-height:1.65;margin:0 0 14px;color:var(--text-secondary);}
 .l1ng-tour-panel .l1ng-tour-hint {margin-top:-5px;font-size:11px;}
 .l1ng-tour-progress {font-size:11px;color:var(--text-secondary);white-space:nowrap;}
-.l1ng-tour-actions {display:flex;gap:7px;justify-content:flex-end;align-items:center;}
-.l1ng-tour-actions button,.l1ng-tour-replay,.l1ng-tour-welcome button {border-radius:7px;padding:8px 11px;font-size:12px;}
+.l1ng-tour-actions {display:flex;gap:7px;justify-content:flex-end;align-items:center;flex-wrap:wrap;}
+
 
 .l1ng-tour-actions button:disabled{opacity:.35;cursor:default;}
 .l1ng-tour-replay{margin-left:auto;white-space:nowrap;}
