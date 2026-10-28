@@ -6732,6 +6732,18 @@ html[lang="en"] body {
     animation:l1ng-dialog-in .16s ease-out;
     text-align:center;
 }
+/* 匯入後情境決策：遮罩點擊只提示，不隱含取消操作。 */
+.ui-dialog.ui-dialog-nudge {
+    animation:l1ng-dialog-nudge .24s ease-out;
+}
+@keyframes l1ng-dialog-nudge {
+    0%,100% { transform:translateX(0); }
+    20%,60% { transform:translateX(-5px); }
+    40%,80% { transform:translateX(5px); }
+}
+@media(prefers-reduced-motion:reduce) {
+    .ui-dialog.ui-dialog-nudge { animation:none; outline:2px solid var(--action-primary); outline-offset:2px; }
+}
 .ui-dialog-header {
     display:flex;
     flex-direction:column;
@@ -10030,3 +10042,74 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 @media (pointer:coarse){.l1ng-color-picker-tools button{min-height:40px}.l1ng-color-picker-inputs input{font-size:16px;height:32px;min-height:32px}}
 
 @media (prefers-reduced-motion:reduce){.l1ng-color-picker-hue-rest,.l1ng-color-picker-hue-lens{transition:none}}
+
+/* ========【分裝置章節式操作導覽】 ======== */
+.l1ng-tour-overlay {display:none;position:fixed;inset:0;z-index:1500;pointer-events:auto;}
+.l1ng-tour-overlay.show {display:block;}
+.l1ng-tour-spotlight {position:fixed;pointer-events:none;border:2px solid var(--action-primary);border-radius:9px;box-shadow:0 0 0 200vmax rgba(12,19,27,.64);}
+.l1ng-tour-spotlight[hidden],.l1ng-tour-practice-target[hidden]{display:none!important}
+.l1ng-tour-practice-target {position:fixed;z-index:1;border:2px solid var(--action-primary);border-radius:9px;cursor:pointer;background:transparent;color:transparent;}
+.l1ng-tour-panel {position:fixed;z-index:2;box-sizing:border-box;background:var(--surface-card);color:var(--text-primary);border:1px solid var(--border-default);border-radius:12px;padding:17px;box-shadow:0 12px 42px rgba(0,0,0,.22);max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;}
+.l1ng-tour-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.l1ng-tour-chapter-select {max-width:70%;min-width:0;border:1px solid var(--border-default);border-radius:7px;padding:7px 10px;background:var(--surface-card);color:var(--text-primary);font:inherit;font-size:12px;}
+.l1ng-tour-panel h3 {margin:12px 0 7px;font-size:16px;}
+.l1ng-tour-panel p {font-size:13px;line-height:1.65;margin:0 0 14px;color:var(--text-secondary);}
+.l1ng-tour-panel .l1ng-tour-hint {margin-top:-5px;font-size:11px;}
+.l1ng-tour-progress {font-size:11px;color:var(--text-secondary);white-space:nowrap;}
+.l1ng-tour-actions {display:flex;gap:7px;justify-content:flex-end;align-items:center;}
+.l1ng-tour-actions button,.l1ng-tour-replay,.l1ng-tour-welcome button {cursor:pointer;border:1px solid var(--border-default);border-radius:7px;padding:8px 11px;background:var(--surface-card);color:var(--text-primary);font:inherit;font-size:12px;}
+.l1ng-tour-actions button.primary,.l1ng-tour-welcome button:first-of-type {background:var(--action-primary);color:var(--navigation-text,#fff);border-color:var(--action-primary);}
+.l1ng-tour-actions button:disabled{opacity:.35;cursor:default;}
+.l1ng-tour-replay{margin-left:auto;white-space:nowrap;}
+.l1ng-tour-welcome {position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:390;max-width:calc(100vw - 20px);width:max-content;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-default);box-shadow:0 5px 20px rgba(0,0,0,.12);background:var(--surface-card);color:var(--text-primary);font-size:12px;}
+@media(max-width:720px){.l1ng-tour-panel{padding:14px}.l1ng-tour-welcome{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.l1ng-tour-overlay *{animation:none!important;transition:none!important}}
+
+/* 提早結束導覽：卡片縮回說明圖示，並給予一次性的重新查看提示。 */
+.l1ng-tour-return-ghost {
+  z-index:1601;
+  position:fixed;
+  pointer-events:none;
+  overflow:hidden;
+  transform-origin:center center;
+  will-change:transform,opacity;
+}
+.l1ng-tour-replay-hint {
+  position:fixed;
+  z-index:1602;
+  box-sizing:border-box;
+  padding:11px 13px;
+  border:1px solid var(--border-default);
+  border-radius:9px;
+  background:var(--surface-card);
+  color:var(--text-primary);
+  box-shadow:0 7px 26px rgba(0,0,0,.16);
+  font-size:12px;
+  line-height:1.55;
+  pointer-events:none;
+  animation:l1ng-tour-hint-enter .2s ease-out both;
+}
+.l1ng-tour-replay-hint::before {
+  content:"";
+  position:absolute;
+  top:-6px;
+  left:var(--l1ng-tour-arrow-x,20px);
+  width:10px;
+  height:10px;
+  transform:translateX(-50%) rotate(45deg);
+  background:var(--surface-card);
+  border-left:1px solid var(--border-default);
+  border-top:1px solid var(--border-default);
+}
+.topbar-help-btn.l1ng-tour-help-highlight {
+  position:relative;
+  z-index:1603;
+  box-shadow:0 0 0 4px var(--brand-tint-start);
+}
+@keyframes l1ng-tour-hint-enter {
+  from {opacity:0;transform:translateY(-5px)}
+  to {opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .l1ng-tour-replay-hint{animation:none}
+}
