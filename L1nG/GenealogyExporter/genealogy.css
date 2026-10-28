@@ -5291,7 +5291,7 @@ button.avatar-editor-action { cursor:pointer; }
     /* 字體粗細 */ font-weight:650;
 }
 
-.help-section kbd {
+:is(.help-section, .l1ng-tour-panel) kbd {
     /* Keycap 置中 */ display:inline-flex;
     /* 垂直置中 */ align-items:center;
     /* 水平置中 */ justify-content:center;
@@ -7948,7 +7948,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
 }
 
 /* ========【使用提示】 設定 - 鍵盤 keycap 與滑鼠左右鍵 / 滾輪視覺語言 ======== */
-.help-section .mouse-hint {
+:is(.help-section, .l1ng-tour-panel) .mouse-hint {
     position:relative;
     display:inline-block;
     width:19px;
@@ -7961,8 +7961,8 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:var(--surface-input);
     overflow:hidden;
 }
-.help-section .mouse-hint::before,
-.help-section .mouse-hint::after {
+:is(.help-section, .l1ng-tour-panel) .mouse-hint::before,
+:is(.help-section, .l1ng-tour-panel) .mouse-hint::after {
     content:"";
     position:absolute;
     top:1px;
@@ -7970,11 +7970,11 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     height:8px;
     border-radius:5px 3px 2px 2px;
 }
-.help-section .mouse-hint::before { left:1px; }
-.help-section .mouse-hint::after { right:1px; }
-.help-section .mouse-hint.mouse-left::before,
-.help-section .mouse-hint.mouse-right::after { background:var(--action-primary); }
-.help-section .mouse-hint-wheel {
+:is(.help-section, .l1ng-tour-panel) .mouse-hint::before { left:1px; }
+:is(.help-section, .l1ng-tour-panel) .mouse-hint::after { right:1px; }
+:is(.help-section, .l1ng-tour-panel) .mouse-hint.mouse-left::before,
+:is(.help-section, .l1ng-tour-panel) .mouse-hint.mouse-right::after { background:var(--action-primary); }
+:is(.help-section, .l1ng-tour-panel) .mouse-hint-wheel {
     position:absolute;
     left:50%;
     top:3px;
@@ -7984,9 +7984,9 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background:color-mix(in srgb,var(--text-secondary) 55%,transparent);
     transform:translateX(-50%);
 }
-.help-section .mouse-hint.mouse-wheel .mouse-hint-wheel { background:var(--action-primary); }
-.help-section .mouse-hint.mouse-wheel::before,
-.help-section .mouse-hint.mouse-wheel::after { background:transparent; }
+:is(.help-section, .l1ng-tour-panel) .mouse-hint.mouse-wheel .mouse-hint-wheel { background:var(--action-primary); }
+:is(.help-section, .l1ng-tour-panel) .mouse-hint.mouse-wheel::before,
+:is(.help-section, .l1ng-tour-panel) .mouse-hint.mouse-wheel::after { background:transparent; }
 
 /* ========【檢視卡片版型】 設定 - 檢視模式固定直向，appearance 只控制視覺效果 ======== */
 .person-card.view.card-appearance-translucent,
