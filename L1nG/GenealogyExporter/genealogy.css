@@ -8927,6 +8927,198 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 
 @media (prefers-reduced-motion:reduce){.l1ng-color-picker-hue-rest,.l1ng-color-picker-hue-lens{transition:none}}
 
+/* ========【共用按鈕互動】 使用原有主題 Token；不變更尺寸、SVG 或選取動畫 ======== */
+/* 統一過渡屬性，不覆蓋已有的特殊動畫（如分頁滑動、頭像與拖曳）。 */
+:where(
+  .ui-dialog-actions button,
+  .l1ng-tour-actions button, .l1ng-tour-replay, .l1ng-tour-welcome button,
+  .l1ng-tour-chapter-option,
+  .person-library-header-actions button, .person-library-batch-toolbar button,
+  .person-library-view-toggle button, .person-library-category-tabs button,
+  .avatar-editor-action, .avatar-clear-compact, .filebtn.compact,
+  .sim-editor-preview-sheet-toolbar button, .storage-maintenance-card button,
+  .topbar-help-btn, .topbar-text-btn, .topbar-icon-only, .topbar-filter-btn,
+  .ui-menu-item, .canvas-tool, .canvas-zoom button, .help-close-btn,
+  .family-member-remove-cancel, .family-member-remove-confirm,
+  .genealogy-feedback-secondary, .genealogy-feedback-back-link,
+  .genealogy-feedback-submit, .apply-btn, .export-actions button
+) {
+  transition: background-color 160ms ease, border-color 160ms ease,
+    color 160ms ease, box-shadow 160ms ease, filter 110ms ease;
+}
+
+/* 次要／外框按鈕：懸停時完整改變背景、邊框與文字色。 */
+.l1ng-tour-actions button:not(.primary):hover:not(:disabled),
+.l1ng-tour-welcome button:not(:first-of-type):hover:not(:disabled),
+.l1ng-tour-replay:hover:not(:disabled),
+.person-library-header-actions button:not(.primary):hover:not(:disabled),
+.person-library-batch-toolbar button:not(.danger):hover:not(:disabled),
+.sim-editor-preview-sheet-toolbar button:hover:not(:disabled),
+.storage-maintenance-card button:hover:not(:disabled),
+.avatar-editor-action:hover:not(:disabled),
+.avatar-clear-compact:hover:not(:disabled),
+.filebtn.compact:hover,
+.ui-dialog-actions button:not(.primary):not(.danger):not(.danger-action):hover:not(:disabled) {
+  background: var(--surface-item-hover);
+  border-color: var(--action-primary);
+  color: var(--action-primary);
+}
+
+/* 主要操作保留實心主題背景，不套用次要按鈕的淡色懸停。 */
+.l1ng-tour-actions button.primary:hover:not(:disabled),
+.l1ng-tour-welcome button:first-of-type:hover:not(:disabled),
+.person-library-header-actions button.primary:hover:not(:disabled),
+.apply-btn:hover:not(:disabled) {
+  background: var(--action-primary-hover);
+  border-color: var(--action-primary-hover);
+  color: var(--navigation-text, #fff);
+}
+
+/* 危險操作維持危險色語意，不因共用規則變成藍色。 */
+.person-library-batch-toolbar button.danger:hover:not(:disabled),
+.ui-dialog-actions button.danger:not(.primary):hover:not(:disabled),
+.ui-dialog-actions button.danger-action:not(.primary):hover:not(:disabled) {
+  background: var(--danger-surface);
+  border-color: var(--danger-text);
+  color: var(--danger-text);
+}
+
+/* 原本無外框的圖示／導覽控制，只補淡色懸停，不新增邊框。 */
+.person-library-view-toggle button:hover:not(:disabled),
+.canvas-zoom button:hover:not(:disabled),
+.canvas-tool:hover:not(:disabled),
+.help-close-btn:hover:not(:disabled) {
+  background: var(--surface-item-hover);
+  color: var(--text-primary);
+}
+.topbar-help-btn:hover:not(:disabled),
+.topbar-text-btn:hover:not(:disabled),
+.topbar-icon-only:hover:not(:disabled),
+.topbar-filter-btn:hover:not(:disabled) {
+  background: var(--nav-button-hover-bg);
+}
+.ui-menu-item:hover:not(:disabled) {
+  background: var(--nav-dropdown-hover-bg);
+  color: var(--nav-dropdown-hover-text);
+}
+.l1ng-tour-chapter-option:hover:not(.active):not(:disabled) {
+  background: color-mix(in srgb, var(--surface-item-hover) 68%, transparent);
+}
+.genealogy-feedback-panel .genealogy-feedback-secondary:hover:not(:disabled),
+.genealogy-feedback-panel .genealogy-feedback-back-link:hover:not(:disabled) {
+  border-color: var(--gf-primary, var(--action-primary));
+}
+
+/* 按下提供短暫亮度回饋，不移動控制項／影響現有 transform。 */
+:is(
+  .ui-dialog-actions button, .l1ng-tour-actions button, .l1ng-tour-replay,
+  .l1ng-tour-welcome button, .l1ng-tour-chapter-option,
+  .person-library-header-actions button, .person-library-batch-toolbar button,
+  .person-library-view-toggle button, .person-library-category-tabs button,
+  .topbar-help-btn, .topbar-text-btn, .topbar-icon-only, .topbar-filter-btn,
+  .ui-menu-item, .canvas-tool, .canvas-zoom button, .help-close-btn,
+  .family-member-remove-cancel, .family-member-remove-confirm,
+  .sim-editor-preview-sheet-toolbar button, .storage-maintenance-card button,
+  .avatar-editor-action, .avatar-clear-compact, .filebtn.compact,
+  .genealogy-feedback-secondary, .genealogy-feedback-back-link,
+  .genealogy-feedback-submit, .apply-btn, .export-actions button
+):active:not(:disabled) {
+  filter: brightness(.94);
+}
+
+/* 僅真正的鍵盤焦點顯示主題色外框，避免滑鼠點擊殘留黑框。 */
+:is(
+  .ui-dialog-actions button, .l1ng-tour-actions button, .l1ng-tour-replay,
+  .l1ng-tour-welcome button, .l1ng-tour-chapter-option,
+  .person-library-header-actions button, .person-library-batch-toolbar button,
+  .person-library-view-toggle button, .person-library-category-tabs button,
+  .topbar-help-btn, .topbar-text-btn, .topbar-icon-only, .topbar-filter-btn,
+  .ui-menu-item, .canvas-tool, .canvas-zoom button, .help-close-btn,
+  .family-member-remove-cancel, .family-member-remove-confirm,
+  .sim-editor-preview-sheet-toolbar button, .storage-maintenance-card button,
+  .avatar-editor-action, .avatar-clear-compact, .filebtn.compact,
+  .genealogy-feedback-secondary, .genealogy-feedback-back-link,
+  .genealogy-feedback-submit, .apply-btn, .export-actions button
+):focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+:is(
+  .ui-dialog-actions button, .l1ng-tour-actions button, .l1ng-tour-replay,
+  .l1ng-tour-welcome button, .l1ng-tour-chapter-option,
+  .person-library-header-actions button, .person-library-batch-toolbar button,
+  .person-library-view-toggle button, .person-library-category-tabs button,
+  .topbar-help-btn, .topbar-text-btn, .topbar-icon-only, .topbar-filter-btn,
+  .ui-menu-item, .canvas-tool, .canvas-zoom button, .help-close-btn
+):focus:not(:focus-visible) {
+  outline: none;
+}
+:where(
+  .l1ng-tour-actions button, .l1ng-tour-welcome button,
+  .person-library-header-actions button, .person-library-batch-toolbar button,
+  .ui-dialog-actions button
+):disabled {
+  pointer-events: none;
+  filter: none;
+}
+
+/* Cookie 是跨站元件：只對包含族譜頂部工具的頁面統一按鈕效果。 */
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-actions button,
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-close,
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-switch {
+  transition: background-color 160ms ease, border-color 160ms ease,
+    color 160ms ease, box-shadow 160ms ease, filter 110ms ease;
+}
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-actions button:not(.l1ng-cookie-accept):hover:not(:disabled) {
+  background: var(--cookie-hover, var(--surface-item-hover));
+  border-color: var(--cookie-accent, var(--action-primary));
+  color: var(--cookie-accent, var(--action-primary));
+}
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-actions .l1ng-cookie-accept:hover:not(:disabled) {
+  background: var(--cookie-accent-hover, var(--action-primary-hover));
+  border-color: var(--cookie-accent-hover, var(--action-primary-hover));
+  color: #fff;
+}
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-close:hover:not(:disabled) {
+  background: var(--surface-item-hover);
+  color: var(--text-primary);
+}
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-switch:hover:not(.is-on) {
+  box-shadow: 0 0 0 2px var(--brand-tint-start);
+}
+body[data-theme]:has(#topbarMoreMenu) :is(.l1ng-cookie-actions button, .l1ng-cookie-close, .l1ng-cookie-switch):active:not(:disabled) {
+  filter: brightness(.94);
+}
+body[data-theme]:has(#topbarMoreMenu) :is(.l1ng-cookie-actions button, .l1ng-cookie-close, .l1ng-cookie-switch):focus-visible {
+  outline: 2px solid var(--cookie-accent, var(--action-primary));
+  outline-offset: 2px;
+}
+body[data-theme]:has(#topbarMoreMenu) :is(.l1ng-cookie-actions button, .l1ng-cookie-close, .l1ng-cookie-switch):focus:not(:focus-visible) {
+  outline: none;
+}
+body[data-theme]:has(#topbarMoreMenu) .l1ng-cookie-actions button:disabled {
+  pointer-events: none;
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    .ui-dialog-actions button, .l1ng-tour-actions button, .l1ng-tour-replay,
+    .l1ng-tour-welcome button, .l1ng-tour-chapter-option,
+    .person-library-header-actions button, .person-library-batch-toolbar button,
+    .person-library-view-toggle button, .person-library-category-tabs button,
+    .topbar-help-btn, .topbar-text-btn, .topbar-icon-only, .topbar-filter-btn,
+    .ui-menu-item, .canvas-tool, .canvas-zoom button, .help-close-btn,
+    .family-member-remove-cancel, .family-member-remove-confirm,
+    .sim-editor-preview-sheet-toolbar button, .storage-maintenance-card button,
+    .avatar-editor-action, .avatar-clear-compact, .filebtn.compact,
+    .genealogy-feedback-secondary, .genealogy-feedback-back-link,
+    .genealogy-feedback-submit, .apply-btn, .export-actions button
+  ),
+  body[data-theme]:has(#topbarMoreMenu) :is(.l1ng-cookie-actions button, .l1ng-cookie-close, .l1ng-cookie-switch) {
+    transition: none !important;
+  }
+}
+
 /* ========【分裝置章節式操作導覽】 ======== */
 .l1ng-tour-overlay {display:none;position:fixed;inset:0;z-index:1500;pointer-events:auto;}
 .l1ng-tour-overlay.show {display:block;}
