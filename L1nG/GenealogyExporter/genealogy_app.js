@@ -17273,6 +17273,7 @@ async function showGenealogyImportError(error, {source,stage,file}) {
   await uiAlert(raw,{
     title,
     kind:'danger',
+    dismissPolicy:'explicit',
     richContent:{
       lead:raw,
       ...(isUnsaved ? {paragraphs:['資料尚未確認成功儲存，請先匯出 JSON 備份，不要重新整理網頁。']} : {})
@@ -17341,6 +17342,7 @@ async function importJSON(file) {
         uiText('這份 JSON 備份將取代目前族譜資料與背景設定。此操作無法復原，建議先匯出目前族譜的 JSON 備份。'),
         {
           title:'還原 JSON 備份',
+          dismissPolicy:'explicit',
           kind:'danger',
           richContent:{
             lead:'請確認是否要取代目前族譜。',
@@ -17838,6 +17840,7 @@ async function chooseGameImportMode(analysis) {
     };
     const replace = await uiConfirm(gameImportDialogText(richContent), {
       title:'匯入遊戲族譜',
+      dismissPolicy:'explicit',
       kind:'danger',
       confirmText:'覆蓋現有族譜',
       backupAction:exportCurrentGenealogyBackup,
@@ -17864,6 +17867,7 @@ async function chooseGameImportMode(analysis) {
   if (continuation) {
     return await openUiDialog({
       title:'匯入遊戲族譜',
+      dismissPolicy:'explicit',
       message:gameImportDialogText(richContent),
       mode:'choice',
       confirmText:'這是同一族譜，繼續更新',
@@ -17883,6 +17887,7 @@ async function chooseGameImportMode(analysis) {
   if (canUpdate) {
     return await openUiDialog({
       title:'匯入遊戲族譜',
+      dismissPolicy:'explicit',
       message:gameImportDialogText(richContent),
       mode:'choice',
       confirmText:'更新目前族譜',
@@ -17901,6 +17906,7 @@ async function chooseGameImportMode(analysis) {
 
   const replace = await uiConfirm(gameImportDialogText(richContent), {
     title:'匯入遊戲族譜',
+    dismissPolicy:'explicit',
     kind:'danger',
     confirmText:'覆蓋現有族譜',
     cancelText:'取消',
@@ -18113,6 +18119,7 @@ async function importGameGenealogy(file) {
         : null;
       await uiAlert(gameImportDialogText(richContent), {
         title:'遊戲族譜更新完成',
+        dismissPolicy:'explicit',
         kind:'success',
         richContent,
         confirmText:'查看族譜',
@@ -18137,6 +18144,7 @@ async function importGameGenealogy(file) {
       );
       await uiAlert(gameImportDialogText(richContent), {
         title:'遊戲族譜匯入完成',
+        dismissPolicy:'explicit',
         kind:'success',
         richContent,
         confirmText:'查看族譜',
