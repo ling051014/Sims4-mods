@@ -2851,66 +2851,6 @@
       panel.style.left = Math.round(Math.max(12,Math.min(viewportWidth-panelWidth-12,x+width/2-panelWidth/2)))+'px';
       panel.style.top = Math.round(Math.max(12,top))+'px';
     }
-    const normalizeTourSlashes = value => String(value).replace(/\s*[ / \/]\s*/g, ' / ');
-    function renderTourDescription(value) {
-      const content = normalizeTourSlashes(value);
-      const tokenPattern = /滑鼠滾輪|滑鼠右鍵|滑鼠左鍵|滾輪|右鍵|左鍵|滑鼠|mouse wheel|right-click|left-click|mouse|\b(?:Ctrl|Cmd|Shift|Alt|Esc|Delete|Backspace|Space)\b|(?<=\+\s)[A-Z0-9]\b/g;
-      description.replaceChildren();
-      let last = 0;
-      for (const match of content.matchAll(tokenPattern)) {
-        description.append(document.createTextNode(content.slice(last, match.index)));
-        const token = match[0];
-        const mouseToken = /^(?:滑鼠|滾輪|右鍵|左鍵|mouse|right-click|left-click)/.test(token);
-        if (mouseToken && !isMobileView()) {
-          const type = /滾輪|mouse wheel/.test(token) ? 'wheel' :
-            /右鍵|right-click/.test(token) ? 'right' : 'left';
-          const icon = document.createElement('span');
-          icon.className = 'mouse-hint mouse-' + type;
-          icon.setAttribute('role', 'img');
-          icon.setAttribute('aria-label', type === 'wheel' ? '滾輪' : type === 'right' ? '右鍵' : '左鍵');
-          const wheel = document.createElement('span');
-          wheel.className = 'mouse-hint-wheel';
-          icon.append(wheel);
-          description.append(icon, document.createTextNode(token));
-        } else if (!mouseToken) {
-          const key = document.createElement('kbd');
-          key.textContent = token;
-          description.append(key);
-        } else description.append(document.createTextNode(token));
-        last = match.index + token.length;
-      }
-      description.append(document.createTextNode(content.slice(last)));
-    }
-    const normalizeTourSlashes = value => String(value).replace(/\s*[ / \/]\s*/g, ' / ');
-    function renderTourDescription(value) {
-      const content = normalizeTourSlashes(value);
-      const tokenPattern = /滑鼠滾輪|滑鼠右鍵|滑鼠左鍵|滾輪|右鍵|左鍵|滑鼠|mouse wheel|right-click|left-click|mouse|\b(?:Ctrl|Cmd|Shift|Alt|Esc|Delete|Backspace|Space)\b|(?<=\+\s)[A-Z0-9]\b/g;
-      description.replaceChildren();
-      let last = 0;
-      for (const match of content.matchAll(tokenPattern)) {
-        description.append(document.createTextNode(content.slice(last, match.index)));
-        const token = match[0];
-        const mouseToken = /^(?:滑鼠|滾輪|右鍵|左鍵|mouse|right-click|left-click)/.test(token);
-        if (mouseToken && !isMobileView()) {
-          const type = /滾輪|mouse wheel/.test(token) ? 'wheel' :
-            /右鍵|right-click/.test(token) ? 'right' : 'left';
-          const icon = document.createElement('span');
-          icon.className = 'mouse-hint mouse-' + type;
-          icon.setAttribute('role', 'img');
-          icon.setAttribute('aria-label', type === 'wheel' ? '滾輪' : type === 'right' ? '右鍵' : '左鍵');
-          const wheel = document.createElement('span');
-          wheel.className = 'mouse-hint-wheel';
-          icon.append(wheel);
-          description.append(icon, document.createTextNode(token));
-        } else if (!mouseToken) {
-          const key = document.createElement('kbd');
-          key.textContent = token;
-          description.append(key);
-        } else description.append(document.createTextNode(token));
-        last = match.index + token.length;
-      }
-      description.append(document.createTextNode(content.slice(last)));
-    }
     const normalizeTourSlashes = value => String(value).replace(/\s*[／\/]\s*/g, ' / ');
     function renderTourDescription(value) {
       const content = normalizeTourSlashes(value);
