@@ -10176,3 +10176,52 @@ body.ootd-sorting,body.ootd-sorting * { cursor:grabbing; }
 .l1ng-tour-welcome {position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:390;max-width:calc(100vw - 20px);width:max-content;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-default);box-shadow:0 5px 20px rgba(0,0,0,.12);background:var(--surface-card);color:var(--text-primary);font-size:12px;}
 @media(max-width:720px){.l1ng-tour-panel{padding:14px}.l1ng-tour-welcome{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.l1ng-tour-overlay *{animation:none!important;transition:none!important}}
+
+/* 提早結束導覽：卡片縮回說明圖示，並給予一次性的重新查看提示。 */
+.l1ng-tour-return-ghost {
+  z-index:1601;
+  position:fixed;
+  pointer-events:none;
+  overflow:hidden;
+  transform-origin:center center;
+  will-change:transform,opacity;
+}
+.l1ng-tour-replay-hint {
+  position:fixed;
+  z-index:1602;
+  box-sizing:border-box;
+  padding:11px 13px;
+  border:1px solid var(--border-default);
+  border-radius:9px;
+  background:var(--surface-card);
+  color:var(--text-primary);
+  box-shadow:0 7px 26px rgba(0,0,0,.16);
+  font-size:12px;
+  line-height:1.55;
+  pointer-events:none;
+  animation:l1ng-tour-hint-enter .2s ease-out both;
+}
+.l1ng-tour-replay-hint::before {
+  content:"";
+  position:absolute;
+  top:-6px;
+  left:var(--l1ng-tour-arrow-x,20px);
+  width:10px;
+  height:10px;
+  transform:translateX(-50%) rotate(45deg);
+  background:var(--surface-card);
+  border-left:1px solid var(--border-default);
+  border-top:1px solid var(--border-default);
+}
+.topbar-help-btn.l1ng-tour-help-highlight {
+  position:relative;
+  z-index:1603;
+  box-shadow:0 0 0 4px var(--brand-tint-start);
+}
+@keyframes l1ng-tour-hint-enter {
+  from {opacity:0;transform:translateY(-5px)}
+  to {opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .l1ng-tour-replay-hint{animation:none}
+}
