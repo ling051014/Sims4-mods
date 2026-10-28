@@ -2647,7 +2647,25 @@
     const tr = (zh,en) => locale()==='en' ? en : (window.LING_I18N?.translateFor?.(locale(),zh) || zh);
     const step = (target,title,body,enTitle,enBody,options={}) =>
       ({target,title,body,enTitle,enBody,...options});
-    const chapters = mobile => [
+    const chapters = mobile => {
+      if (!mobile) return [
+        {id:'top',name:'基本介面',en:'Main interface',steps:[
+          step('#familySidebarToggleButton','家族側邊欄','展開或收合家族資訊，並調整畫布可用空間。','Family sidebar','Toggle family information to make room for the tree.'),
+          step('.topbar-primary-actions','頂部主要功能','「總覽」管理市民與寵物；「匯出」保存族譜；「恢復預設」會取代現有資料；「更多」收納其他設定。','Main toolbar','Overview manages Sims and pets; Export saves data; Restore replaces your data; More opens additional settings.'),
+          step('#topbarFilterBtn','顯示篩選','按條件篩選畫布上的市民與寵物，不會刪除資料。','Display filters','Filter visible Sims and pets without deleting them.')
+        ]},
+        {id:'workspace',name:'族譜操作',en:'Working with trees',sidebar:true,steps:[
+          step('#familySelectTrigger','選擇家族','從側邊欄切換家庭、EA 族譜或大家族檢視。','Choose a family','Switch among households, EA genealogy and extended family views.'),
+          step('#genealogyCanvasViewport','畫布操作','拖曳空白處平移、使用滑鼠滾輪縮放；需要時可使用右下角的適應畫面按鈕。','Canvas controls','Drag empty space to pan and use the mouse wheel to zoom. Fit to screen is in the corner.'),
+          step('#modeToggle','檢視與編輯','在檢視模式查看卡片，切換到編輯模式修改資料；需要時可使用自動排列。','View and edit','Inspect cards in view mode or switch to edit mode to make changes. Auto-layout is available.'),
+          step('#genealogyPersonLayer','卡片操作與快捷鍵','點擊卡片查看或編輯；右鍵開啟更多操作。Ctrl / Cmd + Z 復原，支援的編輯視窗可用 Ctrl + S 儲存。','Cards and shortcuts','Click or right-click a card for actions. Ctrl / Cmd + Z undoes; Ctrl + S saves in supported editors.',{fallback:'#genealogyCanvasViewport'})
+        ]},
+        {id:'data',name:'資料管理',en:'Data and backups',steps:[
+          step('#topbarMoreBtn','匯入與設定','從「更多」匯入遊戲 ZIP 或 JSON 備份，也能找到族譜提取器、視覺設定與圖片儲存。導覽不會執行匯入。','Import and settings','More contains ZIP / JSON import, the Exporter, appearance and image storage. The tour will not import anything.'),
+          step('#exportBtn','匯出與備份','修改大型家族或匯入其他存檔之前，建議先匯出 JSON 備份。','Export and backups','Export a JSON backup before major edits or imports.')
+        ]}
+      ];
+      return [
       {id:'top',name:'頂部導覽',en:'Top navigation',steps:[
         step('#familySidebarToggleButton','家族側邊欄',mobile?'點擊這個選單圖示，展開或收合家族側邊欄。':'開啟或收合家族側邊欄，讓畫布獲得更多空間。','Family sidebar',mobile?'Open or close the family sidebar.':'Toggle the family sidebar to make more room for the tree.'),
         step('#helpBtn','使用說明','從這裡閱讀完整使用說明，或重新啟動操作導覽。','Help','Read detailed help or replay this tour.'),
@@ -2699,6 +2717,7 @@
         step('#genealogyCanvasViewport','儲存編輯視窗','在支援的編輯視窗中，使用 Ctrl + S 儲存變更。','Save editor','Use Ctrl + S to save in supported editing dialogs.')
       ]}
     ];
+    };
     let currentChapters = [];
     let chapterIndex = 0;
     let stepIndex = 0;
@@ -2749,6 +2768,9 @@
     overlay.append(spotlight,practiceHitArea,panel);
     document.body.append(overlay);
     let welcome = null;
+    let replayReminder = null;
+    let reminderTimeout = null;
+    let returnGhost = null;
     const currentChapter = () => currentChapters[chapterIndex];
     const currentStep = () => currentChapter()?.visibleSteps[stepIndex];
     const validTarget = selector => {
@@ -2882,24 +2904,100 @@
       stepIndex=delta>0?0:Math.max(0,currentChapter().visibleSteps.length-1);
       render();
     }
-    function close(remember=true) {
+    function clearReplayReminder() {
+      if (reminderTimeout !== null) {
+        clearTimeout(reminderTimeout);
+        reminderTimeout = null;
+      }
+      replayReminder?.remove();
+      replayReminder = null;
+      document.getElementById('helpBtn')?.classList.remove('l1ng-tour-help-highlight');
+    }
+    function showReplayReminder() {
+      if (active) return;
+      clearReplayReminder();
+      const help = document.getElementById('helpBtn');
+      if (!help?.getClientRects().length) return;
+      const bubble = document.createElement('div');
+      bubble.className = 'l1ng-tour-replay-hint';
+      bubble.setAttribute('role','status');
+      bubble.textContent = tr('之後可從這裡開啟「使用說明」，再選「操作導覽」重新查看。',
+        'You can replay the tour here: Help → Guided tour.');
+      document.body.append(bubble);
+      const helpRect = help.getBoundingClientRect();
+      const width = Math.min(290,window.innerWidth-24);
+      const left = Math.max(12,Math.min(window.innerWidth-width-12,helpRect.left+helpRect.width/2-35));
+      bubble.style.width = width+'px';
+      bubble.style.left = Math.round(left)+'px';
+      bubble.style.top = Math.round(Math.min(window.innerHeight-76,helpRect.bottom+12))+'px';
+      bubble.style.setProperty('--l1ng-tour-arrow-x',
+        Math.round(Math.max(15,Math.min(width-15,helpRect.left+helpRect.width/2-left)))+'px');
+      help.classList.add('l1ng-tour-help-highlight');
+      replayReminder = bubble;
+      reminderTimeout = setTimeout(clearReplayReminder,4700);
+    }
+    function animateReturnToHelp() {
+      const target = document.getElementById('helpBtn');
+      if (!target || !panel.getClientRects().length) {
+        showReplayReminder();
+        return;
+      }
+      const from = panel.getBoundingClientRect();
+      const to = target.getBoundingClientRect();
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      returnGhost?.remove();
+      returnGhost = null;
+      if (reduced || !Element.prototype.animate) {
+        requestAnimationFrame(showReplayReminder);
+        return;
+      }
+      const ghost = panel.cloneNode(true);
+      ghost.setAttribute('aria-hidden','true');
+      ghost.className = 'l1ng-tour-panel l1ng-tour-return-ghost';
+      ghost.style.left = from.left+'px';
+      ghost.style.top = from.top+'px';
+      ghost.style.width = from.width+'px';
+      ghost.style.height = from.height+'px';
+      ghost.style.maxHeight = from.height+'px';
+      document.body.append(ghost);
+      returnGhost = ghost;
+      const dx = to.left+to.width/2 - (from.left+from.width/2);
+      const dy = to.top+to.height/2 - (from.top+from.height/2);
+      const scale = Math.max(.06,Math.min(.16,to.width/from.width));
+      const animation = ghost.animate([
+        {transform:'translate(0,0) scale(1)',opacity:1,offset:0},
+        {transform:'translate('+(dx*.70)+'px,'+(dy*.70)+'px) scale(.38)',opacity:.8,offset:.72},
+        {transform:'translate('+dx+'px,'+dy+'px) scale('+scale+')',opacity:0,offset:1}
+      ],{duration:430,easing:'cubic-bezier(.22,1,.36,1)',fill:'forwards'});
+      animation.finished.then(()=>{
+        if (returnGhost !== ghost) return;
+        ghost.remove();
+        returnGhost = null;
+        showReplayReminder();
+      }).catch(()=>{ghost.remove();if(returnGhost===ghost)returnGhost=null;});
+    }
+    function close(remember=true, guideToHelp=false) {
       if (!active) return;
       active=false;
       overlay.classList.remove('show');
       overlay.setAttribute('aria-hidden','true');
       practiceHitArea.hidden=true;
       closeAutoSidebar();
+      if (guideToHelp) animateReturnToHelp();
       if (remember) {
         try {localStorage.setItem('l1ng_genealogy_tour_v2_'+deviceAtStart,'1');}catch(_){}
       }
       if (initialFocus?.isConnected) {
-        try { initialFocus.focus({preventScroll:true}); } catch (_) {}
+        try {initialFocus.focus({preventScroll:true});} catch (_) {}
       }
       initialFocus=null;
     }
     function open(chapterId='top') {
       if (active) return;
       if (document.querySelector('.ui-dialog-backdrop.show, .ui-dialog-mask.show, .file-operation-status-mask.show')) return;
+      clearReplayReminder();
+      returnGhost?.remove();
+      returnGhost = null;
       deviceAtStart=isMobileView()?'mobile':'desktop';
       currentChapters=chapters(deviceAtStart==='mobile');
       chapterIndex=Math.max(0,currentChapters.findIndex(ch=>ch.id===chapterId));
@@ -2921,7 +3019,7 @@
       requestAnimationFrame(()=>{if(active) move(1);});
     });
     chapterSelect.addEventListener('change',()=>goToChapter(Number(chapterSelect.value)));
-    skip.addEventListener('click',()=>close(true));
+    skip.addEventListener('click',()=>close(true,true));
     previous.addEventListener('click',()=>move(-1));
     next.addEventListener('click',()=>move(1));
     window.addEventListener('resize',position,{passive:true});
@@ -2929,7 +3027,7 @@
     document.addEventListener('keydown',event=>{
       if (!active) return;
       if (event.key==='Escape') {
-        event.preventDefault();event.stopImmediatePropagation();close(true);return;
+        event.preventDefault();event.stopImmediatePropagation();close(true,true);return;
       }
       if (event.key==='Tab') {
         const items=[chapterSelect,skip,previous,next].filter(el=>!el.disabled);
