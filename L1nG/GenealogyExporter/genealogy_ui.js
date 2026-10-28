@@ -2584,7 +2584,8 @@
   const configs = [
     {selector:'.sim-editor-tabs:not(.pet-editor-tabs)', item:'.sim-editor-tab', kind:'line'},
     {selector:'.pet-editor-tabs', item:'.pet-editor-tab', kind:'line'},
-    {selector:'.person-library-category-tabs', item:'button[role="tab"]', kind:'adaptive'}
+    {selector:'.person-library-category-tabs', item:'button[role="tab"]', kind:'adaptive'},
+    {selector:'.l1ng-tour-chapter-tabs', item:'.l1ng-tour-chapter-option', kind:'pill'}
   ];
   function mount(config) {
     const root = document.querySelector(config.selector);
@@ -2658,7 +2659,7 @@
           step('#familySelectTrigger','切換家族與視角','從家族欄切換家庭、EA 族譜或大家族視角。','Family selection','Switch between households, EA genealogy and extended-family views.'),
           step('#genealogyCanvasViewport','畫布操作','拖曳空白處平移畫布，使用滑鼠滾輪縮放；也能使用右下角的縮放與適應畫面工具。','Canvas navigation','Drag empty space to pan and use the mouse wheel to zoom; zoom and fit controls are also available.'),
           step('#canvasToolbar','排列與模式','從畫布工具列切換檢視 / 編輯、自動 / 自由排列，以及關係標籤等功能。','Modes and layout','Switch view/edit modes, automatic/free layout and relationship labels from the canvas toolbar.'),
-          step('#genealogyPersonLayer','市民與寵物操作','點擊卡片查看或編輯，右鍵開啟更多操作；Ctrl / Cmd + Z 可復原，支援的編輯視窗可用 Ctrl + S 儲存。','Cards and shortcuts','Click or right-click cards for actions. Use Ctrl / Cmd + Z to undo and Ctrl + S to save in supported editors.',{fallback:'#genealogyCanvasViewport'})
+          step('#genealogyCanvasViewport','市民與寵物操作','點擊卡片查看或編輯，右鍵開啟更多操作；Ctrl / Cmd + Z 可復原，支援的編輯視窗可用 Ctrl + S 儲存。','Cards and shortcuts','Click or right-click cards for actions. Use Ctrl / Cmd + Z to undo and Ctrl + S to save in supported editors.')
         ]},
         {id:'data',name:'匯入與備份',en:'Import and backups',steps:[
           step('#topbarMoreBtn','匯入與設定','在「更多」選單匯入遊戲 ZIP / JSON，或前往族譜提取器及視覺設定；導覽不會執行匯入。','Import and settings','Use More for ZIP/JSON imports, the Exporter and appearance settings. The tour does not import data.'),
@@ -2742,14 +2743,16 @@
     panel.setAttribute('aria-modal','true');
     panel.setAttribute('aria-label','族譜操作導覽');
     panel.tabIndex = -1;
-    const chapterSelect = document.createElement('select');
-    chapterSelect.className = 'l1ng-tour-chapter-select';
-    chapterSelect.setAttribute('aria-label','導覽章節');
+    const chapterTabs = document.createElement('div');
+    chapterTabs.className = 'l1ng-tour-chapter-tabs';
+    chapterTabs.setAttribute('role','group');
+    chapterTabs.setAttribute('aria-label','導覽章節');
+    let chapterOptions = [];
     const progress = document.createElement('span');
     progress.className = 'l1ng-tour-progress';
     const heading = document.createElement('div');
     heading.className = 'l1ng-tour-heading';
-    heading.append(chapterSelect,progress);
+    heading.append(chapterTabs,progress);
     const title = document.createElement('h3');
     const description = document.createElement('p');
     const hint = document.createElement('p');
@@ -2882,14 +2885,45 @@
       description.append(document.createTextNode(content.slice(last)));
     }
     function renderChapters() {
-      chapterSelect.replaceChildren();
-      currentChapters.forEach((chapter,i)=>{
-        const option=document.createElement('option');
-        option.value=String(i);
-        option.textContent=normalizeTourSlashes(tr(chapter.name,chapter.en));
-        chapterSelect.append(option);
+      chapterTabs.setAttribute('aria-label',tr('導覽章節','Tour chapters'));
+      if (chapterOptions.length!==currentChapters.length) {
+        chapterOptions.forEach(option=>option.remove());
+        chapterOptions=currentChapters.map((chapter,index)=>{
+          const option=document.createElement('button');
+          option.type='button';
+          option.className='l1ng-tour-chapter-option';
+          option.addEventListener('click',()=>goToChapter(index));
+          option.addEventListener('keydown',event=>{
+            if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+            event.preventDefault();
+            const destination=event.key==='Home'?0:event.key==='End'?currentChapters.length-1:
+              (index+(event.key==='ArrowRight'?1:-1)+currentChapters.length)%currentChapters.length;
+            goToChapter(destination);
+            chapterOptions[destination]?.focus();
+          });
+          chapterTabs.append(option);
+          return option;
+        });
+      }
+      chapterOptions.forEach((option,i)=>{
+        const selected=i===chapterIndex;
+        option.textContent=normalizeTourSlashes(tr(currentChapters[i].name,currentChapters[i].en));
+        option.classList.toggle('active',selected);
+        option.setAttribute('aria-pressed',String(selected));
       });
-      chapterSelect.value=String(chapterIndex);
+      requestAnimationFrame(()=>{
+        if(!active)return;
+        const selected=chapterOptions[chapterIndex];
+        if(!selected)return;
+        const left=selected.offsetLeft, right=left+selected.offsetWidth;
+        if(left<chapterTabs.scrollLeft || right>chapterTabs.scrollLeft+chapterTabs.clientWidth) {
+          const reduced=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+          chapterTabs.scrollTo({
+            left:Math.max(0,left-(chapterTabs.clientWidth-selected.offsetWidth)/2),
+            behavior:reduced?'auto':'smooth'
+          });
+        }
+      });
     }
     function render() {
       if (!active) return;
@@ -3048,7 +3082,6 @@
       target.click();
       requestAnimationFrame(()=>{if(active) move(1);});
     });
-    chapterSelect.addEventListener('change',()=>goToChapter(Number(chapterSelect.value)));
     skip.addEventListener('click',()=>close(true,true));
     previous.addEventListener('click',()=>move(-1));
     next.addEventListener('click',()=>move(1));
@@ -3061,7 +3094,7 @@
         event.preventDefault();event.stopImmediatePropagation();close(true,true);return;
       }
       if (event.key==='Tab') {
-        const items=[chapterSelect,skip,previous,next,
+        const items=[...chapterOptions,skip,previous,next,
           ...(!practiceHitArea.hidden ? [practiceHitArea] : [])].filter(el=>!el.disabled);
         const positionInItems=items.indexOf(document.activeElement);
         if(positionInItems>=0) {
@@ -3069,7 +3102,7 @@
           event.preventDefault();items[nextIndex].focus();
         } else if(document.activeElement===panel || !panel.contains(document.activeElement)) {
           event.preventDefault();
-          (event.shiftKey ? items[items.length-1] : chapterSelect).focus();
+          (event.shiftKey ? items[items.length-1] : chapterOptions[chapterIndex]).focus();
         }
       }
     },true);
