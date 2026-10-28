@@ -8103,8 +8103,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     background-size:24px 24px;
 }
 /* selection */
-.skeleton-menu-toggle { width:30px; height:30px; flex:0 0 30px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
-.skeleton-menu-line { width:17px; height:2px; border-radius:2px; }
+.skeleton-menu-toggle { width:30px; height:30px; flex:0 0 30px; display:block; border-radius:7px; }
 .skeleton-block {
     display:block;
     background:
@@ -8251,34 +8250,13 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
     gap:26px;
 }
 .skeleton-node {
-    flex:0 1 152px;
-    min-width:0;
-    height:138px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    padding:14px 10px;
-    border:1px solid var(--border-default);
-    border-radius:10px;
-    background:var(--surface-card);
+    flex:0 0 84px; width:84px; min-width:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:8px; padding:0;
+    border:0; background:transparent;
 }
-.skeleton-node-avatar {
-    width:48px;
-    height:48px;
-    flex:0 0 48px;
-    border-radius:50%;
-}
-.skeleton-node-line {
-    width:72%;
-    height:10px;
-    border-radius:4px;
-}
-.skeleton-node-line.short {
-    width:46%;
-    height:8px;
-}
+.skeleton-node-avatar { width:64px; height:64px; flex:0 0 64px; border-radius:8px; }
+.skeleton-node-line { width:56px; max-width:100%; height:9px; border-radius:4px; }
+.skeleton-node:nth-child(even) .skeleton-node-line { width:46px; }
 /* 正式 .canvas-zoom 位於畫布底部中央，骨架亦採用同一定位。 */
 .skeleton-zoom {
     position:absolute;
@@ -8313,7 +8291,7 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         padding:0 8px;
         gap:6px;
     }
-    .skeleton-mobile-menu { display:flex; }
+    .skeleton-mobile-menu { display:block; }
     .skeleton-filter { width:32px; }
     .skeleton-action { width:34px; }
     .skeleton-action-wide { display:none; }
@@ -8328,16 +8306,10 @@ body[data-theme="ling"] .family-name-editor .brand-input { color:#444; }
         gap:38px;
     }
     .skeleton-tree-row { gap:12px; }
-    .skeleton-node {
-        height:112px;
-        padding:10px 5px;
-        gap:8px;
-    }
-    .skeleton-node-avatar {
-        width:36px;
-        height:36px;
-        flex-basis:36px;
-    }
+    .skeleton-node { width:68px; flex-basis:68px; gap:7px; }
+    .skeleton-node-avatar { width:46px; height:46px; flex-basis:46px; }
+    .skeleton-node-line { width:48px; height:8px; }
+    .skeleton-node:nth-child(even) .skeleton-node-line { width:42px; }
     .skeleton-zoom { bottom:8px; }
 }
 @media (prefers-reduced-motion:reduce) {
