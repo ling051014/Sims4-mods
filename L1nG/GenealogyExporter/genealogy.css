@@ -10155,41 +10155,6 @@ body.ootd-sorting,body.ootd-sorting * { cursor:grabbing; }
 /* 回饋信箱通知延伸原有欄位與成功卡片，不新增另一套視窗。 */
 .genealogy-feedback-email-option{display:flex;gap:9px;align-items:center;margin-top:12px;cursor:pointer;font-size:12px}.genealogy-feedback-email-option[hidden],.genealogy-feedback-email-status[hidden]{display:none}.genealogy-feedback-email-option input{width:16px;height:16px;accent-color:var(--primary)}.genealogy-feedback-email-status{border:1px solid var(--stroke);border-radius:12px;padding:13px;margin:13px 0;text-align:left;width:100%;font-size:12px}.genealogy-feedback-email-status p{margin:5px 0}.genealogy-feedback-email-status button{border:0;background:transparent;padding:5px 0;color:inherit;text-decoration:underline;cursor:pointer}
 
-/* ========【手機共用選單底部面板】沿用既有 ui-menu 內容與事件，不複製選項 ======== */
-.l1ng-mobile-sheet-backdrop { display:none; }
-@media(max-width:720px) {
-  .l1ng-mobile-sheet-backdrop.show {
-    position:fixed; inset:0; display:block; background:rgba(15,20,30,.36);
-    z-index:780; backdrop-filter:blur(2px);
-  }
-  .ui-menu-popover.l1ng-mobile-sheet {
-    position:fixed!important; top:auto!important; left:0!important;
-    right:0!important; bottom:0!important; width:100%!important;
-    max-width:100%!important; max-height:min(85dvh,720px)!important;
-    margin:0!important; padding:0 14px max(14px,env(safe-area-inset-bottom))!important;
-    overflow-y:auto!important; overscroll-behavior:contain;
-    border-radius:16px 16px 0 0!important;
-    z-index:781!important; display:block!important;
-    background:var(--surface-card); color:var(--text-primary);
-    box-shadow:0 -10px 36px rgba(15,20,30,.18);
-    animation:l1ng-sheet-in .2s cubic-bezier(.22,1,.36,1);
-    -webkit-overflow-scrolling:touch;
-  }
-  .l1ng-mobile-sheet-header {
-    position:sticky;top:0;z-index:2;display:flex;align-items:center;
-    justify-content:space-between;min-height:52px;
-    background:var(--surface-card);border-bottom:1px solid var(--border-default);
-    margin:0 -14px 12px;padding:0 16px;font-size:14px;
-  }
-  .l1ng-mobile-sheet-close {
-    border:0;background:transparent;color:var(--action-primary);
-    padding:10px;font:inherit;font-size:13px;cursor:pointer;
-  }
-  .l1ng-mobile-sheet .ui-menu-item { min-height:44px; }
-}
-@keyframes l1ng-sheet-in { from{transform:translateY(20px);opacity:.65} to{transform:translateY(0);opacity:1} }
-@media(prefers-reduced-motion:reduce){.ui-menu-popover.l1ng-mobile-sheet{animation:none}}
-
 /* ========【族譜聚光導覽】只指出既有元件，不接管資料編輯流程 ======== */
 .l1ng-tour-overlay {display:none;position:fixed;inset:0;z-index:1500;pointer-events:auto;}
 .l1ng-tour-overlay.show {display:block;}
