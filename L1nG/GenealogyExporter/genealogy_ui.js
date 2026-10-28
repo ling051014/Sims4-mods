@@ -2640,137 +2640,350 @@
 
   global.L1nGGenealogyUI = Object.freeze({ create, createChromeController, createDialogController, closeTopmostDialog });
 
-  // ========【首次操作導覽】沿用現有入口，僅說明不修改族譜資料 ========
+  // ========【分裝置操作導覽】章節與步驟共用引擎；不更動實際族譜資料 ========
   function initializeGuidedTour() {
-    const key = 'l1ng_genealogy_tour_v1';
-    const steps = [
-      {target:'#familySidebarToggleButton', title:'家族與側邊欄', description:'從這裡查看家族資料、切換或管理成員。'},
-      {target:'#canvasToolbar', title:'畫布工具', description:'在這裡切換檢視與編輯、排列族譜，並搭配拖曳與縮放操作。'},
-      {target:'#modeToggle', title:'查看與編輯市民', description:'切換模式後，點擊市民或寵物卡片即可查看資料或進入編輯。'},
-      {target:'#topbarMoreBtn', title:'建立與匯入族譜', description:'可以手動建立，也可以由選單匯入遊戲族譜 ZIP 或 JSON 備份。'}
+    const isMobileView = () => window.matchMedia('(max-width:720px)').matches;
+    const locale = () => window.LING_I18N?.language || 'zh-Hant';
+    const tr = (zh,en) => locale()==='en' ? en : (window.LING_I18N?.translateFor?.(locale(),zh) || zh);
+    const step = (target,title,body,enTitle,enBody,options={}) =>
+      ({target,title,body,enTitle,enBody,...options});
+    const chapters = mobile => [
+      {id:'top',name:'頂部導覽',en:'Top navigation',steps:[
+        step('#familySidebarToggleButton','家族側邊欄',mobile?'點擊這個選單圖示，展開或收合家族側邊欄。':'開啟或收合家族側邊欄，讓畫布獲得更多空間。','Family sidebar',mobile?'Open or close the family sidebar.':'Toggle the family sidebar to make more room for the tree.'),
+        step('#helpBtn','使用說明','從這裡閱讀完整使用說明，或重新啟動操作導覽。','Help','Read detailed help or replay this tour.'),
+        step('#topbarFilterBtn','篩選市民','篩選年齡階段、性別、狀態、種族與寵物；只影響畫布顯示，不會刪除資料。','Filter Sims','Filter age, gender, status, occult types and pets without deleting data.'),
+        step('#personLibraryBtn','市民與寵物總覽',mobile?'這個 SVG 按鈕是「總覽」，可以搜尋與管理全部市民和寵物。':'在總覽中搜尋、檢視及批次管理市民與寵物。','Sims and pets overview','Search and manage Sims and pets in the overview.'),
+        step('#exportBtn','匯出資料','從這裡匯出族譜圖片或 JSON 備份，方便保存和還原。','Export','Export a tree image or JSON backup for safekeeping.'),
+        step('#restoreSampleBtn','恢復預設族譜','這是恢復示範族譜的操作，可能取代現有資料；導覽不會真的觸發。','Restore sample tree','Restores sample data and may replace your data. The tour will not activate it.'),
+        step('#topbarMoreBtn','更多功能','這裡包含 ZIP / JSON 匯入、族譜提取器、視覺設定、圖片與儲存及語言切換。','More options','Find ZIP / JSON import, Exporter, appearance, storage and language settings.')
+      ]},
+      {id:'families',name:'家族與成員',en:'Families and members',sidebar:true,steps:[
+        step('#familySelectTrigger','切換家族','選擇要查看的家族；這裡還有 EA 家庭、EA 族譜與大家族視角。','Switch families','Choose a family or switch among Household, EA genealogy and extended views.'),
+        step('.family-actions-menu > .ui-menu-trigger','家族管理','這裡可以新增家族或刪除家族。導覽只會介紹，不會執行刪除。','Family management','Create or delete a family. No deletion is performed during the tour.'),
+        step('#familyMemberAddMenu > .ui-menu-trigger','新增成員','可以新增模擬市民，或把既有模擬市民加入目前家族。','Add members','Create a Sim or add an existing Sim to the current family.'),
+        step('#removeFamilyMembersButton','批次移出家族','先選取要移出的成員，再進行批次操作；不等於永久刪除市民。','Remove members in bulk','Remove selected members from this family without permanently deleting Sims.'),
+        step('#familySidebar','家庭成員清單','側邊欄顯示目前家族資料與成員，方便切換和尋找。','Family member list','Use the sidebar to browse the current family and its members.')
+      ]},
+      {id:'canvas',name:'族譜畫布',en:'Tree canvas',steps:[
+        step('#genealogyCanvasViewport',mobile?'單指移動畫布':'拖曳畫布',mobile?'在畫布空白處用一根手指拖曳，可以平移族譜。':'在自動排列時拖曳畫布空白處，可以平移族譜。','Pan the canvas',mobile?'Drag an empty part of the canvas with one finger.':'Drag the empty canvas area to pan the family tree.'),
+        step('#genealogyCanvasViewport',mobile?'雙指縮放':'滑鼠滾輪縮放',mobile?'用兩根手指張開或收攏來縮放族譜；也能使用畫面上的縮放按鈕。':'使用滑鼠滾輪，以游標所在位置為中心放大或縮小族譜。','Zoom gestures',mobile?'Pinch with two fingers, or use the zoom controls.':'Use your mouse wheel to zoom around the pointer.'),
+        step('#zoomInBtn','放大畫布','這個加號可以放大畫布。可以試著點一下，也可以直接略過。','Zoom in','Press plus to zoom in. You may try it or skip.',{practice:true}),
+        step('#zoomOutBtn','縮小畫布','這個減號可以縮小畫布。可以試著點一下，也可以直接略過。','Zoom out','Press minus to zoom out. You may try it or skip.',{practice:true}),
+        step('#fitScreenBtn','適應畫面','自動調整縮放與位置，將目前族譜放進可見畫面。','Fit to screen','Fit the current tree within the viewport.',{practice:true}),
+        step('#modeToggle','檢視／編輯模式','切換卡片的查看與編輯方式；操作導覽不會替你切換模式。','View / edit mode','Switch how cards open for viewing or editing. The tour will not toggle this.'),
+        step('#autoLayoutToggleButton','自動／自由排列','自動排列依家系安排位置；自由排列可自行調整卡片，並出現更多排列工具。','Automatic / free layout','Auto-layout arranges families; free layout offers more manual tools.'),
+        step('#selectToolBtn','選取工具','在自由排列狀態可以框選或多選市民與寵物。','Selection tool','Select one or more cards in free layout.',{optional:true}),
+        step('#panToolBtn','拖曳工具','自由排列時可切換為拖曳工具，平移畫布而非框選。','Pan tool','Pan the canvas instead of selecting cards.',{optional:true}),
+        step('#canvasLockToggleButton','畫布鎖定','此功能只在對應模式顯示，用來限制部分畫布操作。','Canvas lock','Restricts canvas interactions in supported modes.',{optional:true}),
+        step('#resetCanvasLayoutButton','重設卡片位置','會清除手動調整的位置；導覽只介紹，不會執行重設。','Reset positions','Clears custom card positions. The tour will not trigger it.',{optional:true})
+      ]},
+      {id:'relations',name:'關係與卡片',en:'Relationships and cards',steps:[
+        step('#relationshipLabelsVisibilityToggle','顯示／隱藏關係','控制關係標籤的顯示，不會刪除實際關係。','Relationship labels','Show or hide relationship labels without deleting connections.'),
+        step('#relationshipLabelsLockToggle','鎖定關係','鎖定或解鎖關係線相關操作，避免誤調。','Lock relationships','Lock relationship line interactions to avoid accidental changes.'),
+        step('#genealogyPersonLayer',mobile?'點擊市民卡片':'滑鼠操作市民卡片',mobile?'點擊市民卡片查看資訊；編輯模式下可以修改資料。':'在檢視模式點擊查看資料，切換到編輯模式則可修改市民。','Sim cards',mobile?'Tap a card to inspect it, or edit in edit mode.':'Click a card to inspect it; use edit mode to change details.',{fallback:'#genealogyCanvasViewport'}),
+        step('#genealogyCanvasViewport',mobile?'長按卡片':'右鍵卡片',mobile?'長按卡片可開啟適用的操作選單；長按也可能用於特定拖曳操作。':'在卡片上按滑鼠右鍵，可以開啟額外的卡片操作選單。','Card actions',mobile?'Long-press a card to open contextual actions, depending on the active tool.':'Right-click a card to open its context menu.'),
+        step('#genealogyPetLayer','寵物卡片','寵物也有獨立資料和關係，可以查看與編輯。','Pet cards','Pets have their own profiles and relationships.',{fallback:'#genealogyCanvasViewport'})
+      ]},
+      {id:'data',name:'資料與備份',en:'Data and backups',steps:[
+        step('#topbarMoreBtn','匯入遊戲族譜 ZIP','在「更多」選單匯入提取器產生的 ZIP，網站會辨識現有族譜與存檔來源。導覽不會執行匯入。','Import game ZIP','Import a ZIP from the Exporter via More. The tour will not start an import.'),
+        step('#topbarMoreBtn','還原 JSON 備份','從「更多」選單選取 JSON 備份；若會覆蓋現有資料，網站會要求確認。','Restore JSON backup','Restore a JSON backup from More; replacing data requires confirmation.'),
+        step('#topbarMoreBtn','族譜提取器與設定','「更多」還包含提取器下載頁、視覺設定、圖片與儲存及語言切換。','Exporter and settings','More also contains the Exporter page, appearance, image storage and language options.'),
+        step('#exportBtn','定期備份','建議在大幅修改家族或匯入其他存檔前，先匯出 JSON 備份。','Keep backups','Export a JSON backup before major edits or imports.')
+      ]},
+      {id:'shortcuts',name:mobile?'觸控補充':'滑鼠與快捷鍵',en:mobile?'Touch tips':'Mouse and shortcuts',steps:mobile?[
+        step('#genealogyCanvasViewport','長按與拖曳','長按卡片可能啟動選取、排列或其他操作，實際行為以目前模式為準。','Long press and drag','Long pressing a card may select, reorder or open context actions depending on mode.'),
+        step('#fitScreenBtn','畫布重新置中','如果在大型族譜中迷失位置，可點擊適應畫面快速返回。','Recenter your tree','Use Fit to screen to find your tree again.')
+      ]:[
+        step('#genealogyCanvasViewport','Shift 與多選','在支援的選取模式中，使用 Shift 與滑鼠選取多個卡片。','Shift and multiselect','Use Shift with the mouse to select multiple cards in selection mode.'),
+        step('#genealogyCanvasViewport','復原／重做','使用 Ctrl / Cmd + Z 復原；需要時使用 Ctrl + Y 重做。','Undo / redo','Use Ctrl / Cmd + Z to undo and Ctrl + Y to redo.'),
+        step('#genealogyCanvasViewport','儲存編輯視窗','在支援的編輯視窗中，使用 Ctrl + S 儲存變更。','Save editor','Use Ctrl + S to save in supported editing dialogs.')
+      ]}
     ];
-    let index = 0;
+    let currentChapters = [];
+    let chapterIndex = 0;
+    let stepIndex = 0;
     let active = false;
+    let deviceAtStart = '';
+    let initialFocus = null;
+    let tourOpenedSidebar = false;
+    let activeTarget = null;
     const overlay = document.createElement('div');
     overlay.className = 'l1ng-tour-overlay';
     overlay.setAttribute('aria-hidden','true');
     const spotlight = document.createElement('div');
     spotlight.className = 'l1ng-tour-spotlight';
+    const practiceHitArea = document.createElement('button');
+    practiceHitArea.type = 'button';
+    practiceHitArea.className = 'l1ng-tour-practice-target';
+    practiceHitArea.setAttribute('aria-label','');
+    practiceHitArea.hidden = true;
     const panel = document.createElement('section');
     panel.className = 'l1ng-tour-panel';
     panel.setAttribute('role','dialog');
     panel.setAttribute('aria-modal','true');
     panel.setAttribute('aria-label','族譜操作導覽');
-    const progress = document.createElement('small');
+    panel.tabIndex = -1;
+    const chapterSelect = document.createElement('select');
+    chapterSelect.className = 'l1ng-tour-chapter-select';
+    chapterSelect.setAttribute('aria-label','導覽章節');
+    const progress = document.createElement('span');
     progress.className = 'l1ng-tour-progress';
+    const heading = document.createElement('div');
+    heading.className = 'l1ng-tour-heading';
+    heading.append(chapterSelect,progress);
     const title = document.createElement('h3');
     const description = document.createElement('p');
+    const hint = document.createElement('p');
+    hint.className = 'l1ng-tour-hint';
     const actions = document.createElement('div');
     actions.className = 'l1ng-tour-actions';
     const skip = document.createElement('button');
     skip.type = 'button';
-    skip.textContent = '跳過';
     const previous = document.createElement('button');
     previous.type = 'button';
-    previous.textContent = '上一步';
     const next = document.createElement('button');
     next.type = 'button';
-    next.textContent = '下一步';
     next.className = 'primary';
     actions.append(skip,previous,next);
-    panel.append(progress,title,description,actions);
-    overlay.append(spotlight,panel);
+    panel.append(heading,title,description,hint,actions);
+    overlay.append(spotlight,practiceHitArea,panel);
     document.body.append(overlay);
-    function layout() {
+    let welcome = null;
+    const currentChapter = () => currentChapters[chapterIndex];
+    const currentStep = () => currentChapter()?.visibleSteps[stepIndex];
+    const validTarget = selector => {
+      if (!selector) return null;
+      const el = document.querySelector(selector);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      return rect.width>0 && rect.height>0 && style.display!=='none' && style.visibility!=='hidden' ? el : null;
+    };
+    function closeAutoSidebar() {
+      if (!tourOpenedSidebar) return;
+      const sidebar = document.getElementById('familySidebar');
+      const mobile = isMobileView();
+      const opened = mobile ? sidebar?.classList.contains('open') :
+        !document.body.classList.contains('family-panel-collapsed');
+      if (opened) document.getElementById('familySidebarToggleButton')?.click();
+      tourOpenedSidebar = false;
+    }
+    function ensureChapterReady(chapter) {
+      if (chapter?.sidebar) {
+        const sidebar = document.getElementById('familySidebar');
+        const closed = isMobileView() ? !sidebar?.classList.contains('open') :
+          document.body.classList.contains('family-panel-collapsed');
+        if (closed) {
+          document.getElementById('familySidebarToggleButton')?.click();
+          tourOpenedSidebar = true;
+        }
+      } else closeAutoSidebar();
+    }
+    function availableSteps(chapter) {
+      return chapter.steps.filter(item => !item.optional || validTarget(item.target));
+    }
+    function position() {
       if (!active) return;
-      const target = document.querySelector(steps[index].target);
-      if (!target || !target.getClientRects().length) return;
+      if ((isMobileView()?'mobile':'desktop')!==deviceAtStart) { close(false); return; }
+      const stepNow = currentStep();
+      if (!stepNow) return;
+      const target = validTarget(stepNow.target) || validTarget(stepNow.fallback);
+      activeTarget = target;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      if (!target) {
+        spotlight.hidden = true;
+        practiceHitArea.hidden = true;
+        panel.style.left = '12px';
+        panel.style.top = '72px';
+        panel.style.width = Math.max(260,viewportWidth-24)+'px';
+        return;
+      }
+      spotlight.hidden = false;
       const rect = target.getBoundingClientRect();
       const pad = 5;
-      const x = Math.max(4,rect.left-pad);
-      const y = Math.max(4,rect.top-pad);
-      const w = Math.max(30,Math.min(window.innerWidth-x-4,rect.width+pad*2));
-      const h = Math.max(30,Math.min(window.innerHeight-y-4,rect.height+pad*2));
+      const x = Math.max(4,Math.min(viewportWidth-30,rect.left-pad));
+      const y = Math.max(4,Math.min(viewportHeight-30,rect.top-pad));
+      const width = Math.max(30,Math.min(viewportWidth-x-4,rect.width+pad*2));
+      const height = Math.max(30,Math.min(viewportHeight-y-4,rect.height+pad*2));
       spotlight.style.left = x+'px';
       spotlight.style.top = y+'px';
-      spotlight.style.width = w+'px';
-      spotlight.style.height = h+'px';
-      const panelWidth = Math.min(340,window.innerWidth-24);
-      const panelTop = y+h+18+180 < window.innerHeight
-        ? y+h+14 : Math.max(12,y-210);
-      panel.style.left = Math.round(Math.max(12,Math.min(window.innerWidth-panelWidth-12,x+w/2-panelWidth/2)))+'px';
-      panel.style.top = Math.round(Math.min(window.innerHeight-220,Math.max(12,panelTop)))+'px';
+      spotlight.style.width = width+'px';
+      spotlight.style.height = height+'px';
+      practiceHitArea.hidden = !stepNow.practice || target!==document.querySelector(stepNow.target);
+      if (!practiceHitArea.hidden) {
+        practiceHitArea.style.left = x+'px';
+        practiceHitArea.style.top = y+'px';
+        practiceHitArea.style.width = width+'px';
+        practiceHitArea.style.height = height+'px';
+        practiceHitArea.setAttribute('aria-label',tr(stepNow.title,stepNow.enTitle));
+      }
+      const panelWidth = Math.min(365,viewportWidth-24);
       panel.style.width = panelWidth+'px';
+      const panelHeight = Math.max(165,panel.getBoundingClientRect().height);
+      const aboveSpace = y-12;
+      const belowSpace = viewportHeight-(y+height)-12;
+      const top = belowSpace>=panelHeight+14 ? y+height+12 :
+        aboveSpace>=panelHeight+14 ? y-panelHeight-12 :
+        Math.max(12,Math.min(viewportHeight-panelHeight-12,(viewportHeight-panelHeight)/2));
+      panel.style.left = Math.round(Math.max(12,Math.min(viewportWidth-panelWidth-12,x+width/2-panelWidth/2)))+'px';
+      panel.style.top = Math.round(Math.max(12,top))+'px';
+    }
+    function renderChapters() {
+      chapterSelect.replaceChildren();
+      currentChapters.forEach((chapter,i)=>{
+        const option=document.createElement('option');
+        option.value=String(i);
+        option.textContent=tr(chapter.name,chapter.en);
+        chapterSelect.append(option);
+      });
+      chapterSelect.value=String(chapterIndex);
     }
     function render() {
-      progress.textContent = (index+1)+' / '+steps.length;
-      title.textContent = steps[index].title;
-      description.textContent = steps[index].description;
-      previous.disabled = index===0;
-      next.textContent = index===steps.length-1 ? '完成' : '下一步';
-      requestAnimationFrame(layout);
+      if (!active) return;
+      const chapter=currentChapter();
+      const item=currentStep();
+      if (!item) { close(true); return; }
+      renderChapters();
+      progress.textContent=(stepIndex+1)+' / '+chapter.visibleSteps.length;
+      title.textContent=tr(item.title,item.enTitle);
+      description.textContent=tr(item.body,item.enBody);
+      hint.hidden=!item.practice;
+      hint.textContent=item.practice ? tr('可以點擊聚光目標試試，或直接按「下一步」','Tap the highlighted control to try, or choose Next to skip.') : '';
+      skip.textContent=tr('結束導覽','End tour');
+      previous.textContent=tr('上一步','Previous');
+      next.textContent=chapterIndex===currentChapters.length-1 && stepIndex===chapter.visibleSteps.length-1 ?
+        tr('完成導覽','Finish') : stepIndex===chapter.visibleSteps.length-1 ?
+        tr('下一章','Next chapter') : tr('下一步','Next');
+      previous.disabled=chapterIndex===0 && stepIndex===0;
+      requestAnimationFrame(()=>requestAnimationFrame(position));
     }
-    function close() {
-      active = false;
-      overlay.classList.remove('show');
-      overlay.setAttribute('aria-hidden','true');
-      try { localStorage.setItem(key,'1'); } catch (_) {}
-    }
-    function open() {
-      if (active) return;
-      if (document.querySelector('.ui-dialog-backdrop.show, .ui-dialog-mask.show, .file-operation-status-mask.show')) return;
-      active = true;
-      index = 0;
-      overlay.classList.add('show');
-      overlay.setAttribute('aria-hidden','false');
+    function goToChapter(index) {
+      if (!active || !currentChapters[index]) return;
+      chapterIndex=index;
+      ensureChapterReady(currentChapter());
+      currentChapter().visibleSteps=availableSteps(currentChapter());
+      stepIndex=0;
       render();
     }
-    skip.addEventListener('click',close);
-    previous.addEventListener('click',()=>{ index=Math.max(0,index-1);render(); });
-    next.addEventListener('click',()=>{ if(index===steps.length-1) close(); else {index++;render();} });
-    window.addEventListener('resize',layout,{passive:true});
-    window.addEventListener('scroll',layout,true);
+    function move(delta) {
+      if (!active) return;
+      const steps=currentChapter().visibleSteps;
+      const n=stepIndex+delta;
+      if(n>=0 && n<steps.length){stepIndex=n;render();return;}
+      const newChapter=chapterIndex+(delta>0?1:-1);
+      if (!currentChapters[newChapter]) {
+        if(delta>0) close(true);
+        return;
+      }
+      chapterIndex=newChapter;
+      ensureChapterReady(currentChapter());
+      currentChapter().visibleSteps=availableSteps(currentChapter());
+      stepIndex=delta>0?0:Math.max(0,currentChapter().visibleSteps.length-1);
+      render();
+    }
+    function close(remember=true) {
+      if (!active) return;
+      active=false;
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+      practiceHitArea.hidden=true;
+      closeAutoSidebar();
+      if (remember) {
+        try {localStorage.setItem('l1ng_genealogy_tour_v2_'+deviceAtStart,'1');}catch(_){}
+      }
+      if (initialFocus?.isConnected) {
+        try { initialFocus.focus({preventScroll:true}); } catch (_) {}
+      }
+      initialFocus=null;
+    }
+    function open(chapterId='top') {
+      if (active) return;
+      if (document.querySelector('.ui-dialog-backdrop.show, .ui-dialog-mask.show, .file-operation-status-mask.show')) return;
+      deviceAtStart=isMobileView()?'mobile':'desktop';
+      currentChapters=chapters(deviceAtStart==='mobile');
+      chapterIndex=Math.max(0,currentChapters.findIndex(ch=>ch.id===chapterId));
+      initialFocus=document.activeElement;
+      active=true;
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden','false');
+      ensureChapterReady(currentChapter());
+      currentChapter().visibleSteps=availableSteps(currentChapter());
+      stepIndex=0;
+      render();
+      requestAnimationFrame(()=>panel.focus({preventScroll:true}));
+    }
+    practiceHitArea.addEventListener('click',()=>{
+      const item=currentStep();
+      const target=activeTarget;
+      if (!active || !item?.practice || !target || target!==document.querySelector(item.target)) return;
+      target.click();
+      requestAnimationFrame(()=>{if(active) move(1);});
+    });
+    chapterSelect.addEventListener('change',()=>goToChapter(Number(chapterSelect.value)));
+    skip.addEventListener('click',()=>close(true));
+    previous.addEventListener('click',()=>move(-1));
+    next.addEventListener('click',()=>move(1));
+    window.addEventListener('resize',position,{passive:true});
+    window.addEventListener('scroll',position,true);
     document.addEventListener('keydown',event=>{
-      if (!active || event.key!=='Escape') return;
-      event.preventDefault();event.stopImmediatePropagation();close();
+      if (!active) return;
+      if (event.key==='Escape') {
+        event.preventDefault();event.stopImmediatePropagation();close(true);return;
+      }
+      if (event.key==='Tab') {
+        const items=[chapterSelect,skip,previous,next].filter(el=>!el.disabled);
+        const positionInItems=items.indexOf(document.activeElement);
+        if(positionInItems>=0) {
+          const nextIndex=(positionInItems+(event.shiftKey?-1:1)+items.length)%items.length;
+          event.preventDefault();items[nextIndex].focus();
+        } else if(!panel.contains(document.activeElement)) {
+          event.preventDefault();chapterSelect.focus();
+        }
+      }
     },true);
     function attach() {
-      const help = document.querySelector('#helpDialog .help-heading');
-      if (help && !document.getElementById('genealogyTourReplay')) {
-        const replay = document.createElement('button');
-        replay.id = 'genealogyTourReplay';
-        replay.type = 'button';
-        replay.className = 'l1ng-tour-replay';
-        replay.textContent = '操作導覽';
+      const help=document.querySelector('#helpDialog .help-heading');
+      if(help && !document.getElementById('genealogyTourReplay')) {
+        const replay=document.createElement('button');
+        replay.id='genealogyTourReplay';
+        replay.type='button';
+        replay.className='l1ng-tour-replay';
+        replay.textContent=tr('操作導覽','Guided tour');
         replay.addEventListener('click',()=>{
           document.getElementById('helpCloseBtn')?.click();
-          requestAnimationFrame(()=>requestAnimationFrame(open));
+          requestAnimationFrame(()=>requestAnimationFrame(()=>open('top')));
         });
         help.append(replay);
+        window.LING_I18N?.onLanguageChanged?.(()=>{replay.textContent=tr('操作導覽','Guided tour');if(active)render();});
       }
-      let seen = false;
-      try { seen = localStorage.getItem(key)==='1'; } catch (_) {}
-      if (!seen) {
-        const welcome = document.createElement('div');
-        welcome.className = 'l1ng-tour-welcome';
-        const label = document.createElement('span');
-        label.textContent = '第一次使用族譜工具嗎？';
-        const start = document.createElement('button');
-        start.type='button';
-        start.textContent='開始導覽';
-        const dismiss = document.createElement('button');
-        dismiss.type='button';
-        dismiss.textContent='略過';
-        start.addEventListener('click',()=>{welcome.remove();open();});
-        dismiss.addEventListener('click',()=>{welcome.remove();try{localStorage.setItem(key,'1');}catch(_){}});
-        welcome.append(label,start,dismiss);
-        document.body.append(welcome);
-      }
+      const key='l1ng_genealogy_tour_v2_'+(isMobileView()?'mobile':'desktop');
+      let seen=false;
+      try{seen=localStorage.getItem(key)==='1';}catch(_){}
+      if(seen)return;
+      welcome=document.createElement('div');
+      welcome.className='l1ng-tour-welcome';
+      const text=document.createElement('span');
+      text.textContent=tr('想認識族譜工具的操作嗎？','Would you like a guided tour?');
+      const start=document.createElement('button');
+      start.type='button';
+      start.textContent=tr('開始導覽','Start tour');
+      const dismiss=document.createElement('button');
+      dismiss.type='button';
+      dismiss.textContent=tr('略過','Skip');
+      start.addEventListener('click',()=>{welcome.remove();welcome=null;open('top');});
+      dismiss.addEventListener('click',()=>{
+        welcome.remove();welcome=null;
+        try{localStorage.setItem(key,'1');}catch(_){}
+      });
+      welcome.append(text,start,dismiss);
+      document.body.append(welcome);
     }
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});
     else attach();
   }
 
   initializeGuidedTour();
+
   initializeSelectionIndicators();
 })(window);
