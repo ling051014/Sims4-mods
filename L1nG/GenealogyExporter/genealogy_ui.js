@@ -2649,52 +2649,20 @@
       ({target,title,body,enTitle,enBody,...options});
     const chapters = mobile => {
       if (!mobile) return [
-        {id:'top',name:'頂部導覽',en:'Top navigation',steps:[
-          step('#familySidebarToggleButton','家族側邊欄','展開或收合家族資訊，讓畫布獲得更多操作空間。','Family sidebar','Toggle the family sidebar to make room for your tree.'),
-          step('#helpBtn','使用說明','閱讀完整操作說明，也可以從這裡重新開啟導覽。','Help','Read the full help guide or replay this tour.'),
-          step('#topbarFilterBtn','篩選市民','依狀態、性別、年齡階段與種族篩選畫布內容；不會刪除任何資料。','Filter Sims','Filter by status, gender, age and occult type without deleting data.'),
-          step('#personLibraryBtn','市民與寵物總覽','集中搜尋、查看及管理所有市民和寵物。','Sims and pets overview','Search, review and manage Sims and pets.'),
-          step('#exportBtn','匯出族譜','可以儲存族譜圖片，也能匯出 JSON 備份。','Export genealogy','Save a tree image or export a JSON backup.'),
-          step('#restoreSampleBtn','恢復預設族譜','會取代目前族譜資料，導覽只介紹此按鈕，不會執行恢復。','Restore sample tree','Replaces current data. The tour never starts this operation.'),
-          step('#topbarMoreBtn','更多功能','可找到 ZIP / JSON 匯入、族譜提取器、視覺設定、圖片與儲存、語言切換。','More options','Find ZIP / JSON import, Exporter, appearance, storage and language options.')
+        {id:'top',name:'基本介面',en:'Main interface',steps:[
+          step('#familySidebarToggleButton','家族側邊欄','展開或收合家族資訊，讓畫布擁有更多可用空間。','Family sidebar','Show or hide the family sidebar to free up canvas space.'),
+          step('.topbar-primary-actions','頂部主要功能','總覽可管理市民與寵物；匯出可保存圖片或備份；恢復預設會取代資料；更多提供匯入及其他設定。','Main tools','Overview manages Sims and pets. Export saves images or backups. Restore replaces data; More contains imports and settings.'),
+          step('#topbarFilterBtn','篩選市民','依年齡、狀態、性別和種族篩選顯示內容，不會刪除資料。','Filter Sims','Filter visible Sims by age, status, gender or type without deleting data.')
         ]},
-        {id:'families',name:'家族與成員',en:'Families and members',sidebar:true,steps:[
-          step('#familySelectTrigger','切換家族與視角','從側邊欄切換家庭、EA 族譜及大家族的檢視範圍。','Families and views','Switch between household, EA family tree and extended views.'),
-          step('.family-actions-menu > .ui-menu-trigger','家族管理','這裡可以建立家族或刪除家族；導覽不會觸發任何刪除。','Manage families','Create or remove families. The tour does not delete anything.'),
-          step('#familyMemberAddMenu > .ui-menu-trigger','新增家庭成員','新增模擬市民，或將既有市民加入家族。','Add family members','Create a Sim or add an existing Sim to a family.'),
-          step('#removeFamilyMembersButton','批次移出家族','選取後可將多位成員移出目前家族，不等於永久刪除市民。','Remove family members','Remove selected members from this family without deleting the Sims.'),
-          step('#familySidebar','家族與成員資料','左側整理家庭、關係與成員資訊，便於在大族譜中瀏覽。','Family details','Find family, relationship and member information in the sidebar.')
-        ]},
-        {id:'canvas',name:'畫布與排列',en:'Canvas and layout',steps:[
-          step('#genealogyCanvasViewport','滑鼠拖曳平移','在自動排列狀態下拖曳空白處，平移族譜畫布。','Drag to pan','Drag empty canvas space to pan in automatic layout.'),
-          step('#genealogyCanvasViewport','滾輪縮放','使用滑鼠滾輪，以游標位置為中心縮放畫布。','Mouse-wheel zoom','Zoom around the pointer using your mouse wheel.'),
-          step('#zoomInBtn','放大','點擊加號放大畫布。此項可實際操作，也可略過。','Zoom in','Click plus to zoom in. You can try it or skip.',{practice:true}),
-          step('#zoomOutBtn','縮小','點擊減號縮小畫布。此項可實際操作，也可略過。','Zoom out','Click minus to zoom out. You can try it or skip.',{practice:true}),
-          step('#fitScreenBtn','適應畫面','讓族譜重新置中並適應目前畫面範圍。','Fit to screen','Center and fit the tree in the viewport.',{practice:true}),
-          step('#modeToggle','檢視與編輯模式','切換卡片查看與編輯方式；導覽不會擅自切換模式。','View and edit modes','Switch how cards are opened; the tour does not change modes.'),
-          step('#autoLayoutToggleButton','自動與自由排列','自動排列會依家系配置卡片；自由排列允許手動調整。','Automatic and free layout','Arrange family cards automatically or position them manually.'),
-          step('#selectToolBtn','選取工具','自由排列時可框選卡片，也能搭配 Shift 多選。','Selection tool','Marquee-select cards and use Shift for multiple selections.',{optional:true}),
-          step('#panToolBtn','拖曳工具','自由排列模式可將滑鼠拖曳改成平移畫布。','Pan tool','Switch to panning rather than selecting in free layout.',{optional:true}),
-          step('#canvasLockToggleButton','畫布鎖定','依目前排列狀態限制畫布操作，避免不必要的調整。','Canvas lock','Restrict canvas interactions in supported modes.',{optional:true}),
-          step('#resetCanvasLayoutButton','重設位置','會清除自行調整的卡片位置；導覽不執行重設。','Reset positions','Resets manual card positions; the tour never activates it.',{optional:true})
-        ]},
-        {id:'relations',name:'卡片與關係',en:'Cards and relationships',steps:[
-          step('#relationshipLabelsVisibilityToggle','關係標籤顯示','切換畫布上的關係標籤，不會更動實際關係。','Relationship labels','Show or hide relationship labels without changing relationships.'),
-          step('#relationshipLabelsLockToggle','關係線鎖定','防止誤調整關係線相關操作。','Lock relationship lines','Prevent accidental relationship-line changes.'),
-          step('#genealogyPersonLayer','市民卡片','左鍵查看市民資訊或進入編輯，依目前模式而定。','Sim cards','Left-click a card to view or edit, depending on the mode.',{fallback:'#genealogyCanvasViewport'}),
-          step('#genealogyCanvasViewport','右鍵操作','對市民或寵物卡片按右鍵，可以開啟相應的操作選單。','Right-click actions','Right-click a Sim or pet card to open contextual actions.'),
-          step('#genealogyPetLayer','寵物卡片','寵物也有獨立的個人資訊與相關關係。','Pet cards','Pets have their own profiles and relationships.',{fallback:'#genealogyCanvasViewport'})
+        {id:'workspace',name:'族譜操作',en:'Working with trees',sidebar:true,steps:[
+          step('#familySelectTrigger','切換家族與視角','從家族欄切換家庭、EA 族譜或大家族視角。','Family selection','Switch between households, EA genealogy and extended-family views.'),
+          step('#genealogyCanvasViewport','畫布操作','拖曳空白處平移畫布，使用滑鼠滾輪縮放；也能使用右下角的縮放與適應畫面工具。','Canvas navigation','Drag empty space to pan and use the mouse wheel to zoom; zoom and fit controls are also available.'),
+          step('#canvasToolbar','排列與模式','從畫布工具列切換檢視／編輯、自動／自由排列，以及關係標籤等功能。','Modes and layout','Switch view/edit modes, automatic/free layout and relationship labels from the canvas toolbar.'),
+          step('#genealogyPersonLayer','市民與寵物操作','點擊卡片查看或編輯，右鍵開啟更多操作；Ctrl / Cmd + Z 可復原，支援的編輯視窗可用 Ctrl + S 儲存。','Cards and shortcuts','Click or right-click cards for actions. Use Ctrl / Cmd + Z to undo and Ctrl + S to save in supported editors.',{fallback:'#genealogyCanvasViewport'})
         ]},
         {id:'data',name:'匯入與備份',en:'Import and backups',steps:[
-          step('#topbarMoreBtn','匯入遊戲族譜 ZIP','在「更多」中選取遊戲提取器 ZIP；遇到更新或覆蓋時會有確認。','Import game ZIP','Choose an Exporter ZIP from More. Updates and overwrites require a decision.'),
-          step('#topbarMoreBtn','還原 JSON 備份','從「更多」還原 JSON 備份；本導覽不會執行資料匯入。','Restore JSON backup','Restore a JSON backup from More. The tour never performs an import.'),
-          step('#topbarMoreBtn','提取器、外觀與儲存','「更多」亦提供提取器、視覺設定、圖片與儲存等功能。','Exporter and settings','More also provides Exporter, appearance and image storage.'),
-          step('#exportBtn','先備份再編輯','對家族進行大幅修改前，建議先匯出 JSON 備份。','Back up before editing','Export a JSON backup before major changes.')
-        ]},
-        {id:'shortcuts',name:'鍵盤與快捷鍵',en:'Keyboard shortcuts',steps:[
-          step('#genealogyCanvasViewport','多選與框選','選取工具可用 Shift 多選；Ctrl / Cmd + A 可全選可見的市民與寵物。','Multi-select','Use Shift to multi-select and Ctrl / Cmd + A to select visible Sims and pets.'),
-          step('#genealogyCanvasViewport','復原與重做','Ctrl / Cmd + Z 復原，Ctrl + Y 重做；方向鍵可在支援模式中微調卡片位置。','Undo and redo','Use Ctrl / Cmd + Z to undo, Ctrl + Y to redo and arrow keys to adjust positions.'),
-          step('#genealogyCanvasViewport','快速儲存','編輯市民、寵物或圖片等支援的視窗，可用 Ctrl + S 快速儲存。','Quick save','Press Ctrl + S to save in supported Sim, pet and image editing dialogs.')
+          step('#topbarMoreBtn','匯入與設定','在「更多」選單匯入遊戲 ZIP／JSON，或前往族譜提取器及視覺設定；導覽不會執行匯入。','Import and settings','Use More for ZIP/JSON imports, the Exporter and appearance settings. The tour does not import data.'),
+          step('#exportBtn','匯出備份','大量編輯或匯入其他存檔前，建議先匯出 JSON 備份。','Save a backup','Export a JSON backup before major changes or importing another save.')
         ]}
       ];
       return [
