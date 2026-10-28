@@ -1120,11 +1120,13 @@ function openSidebar() {
   sidebarBackdrop?.classList.add('show');
 }
 function closeSidebar() {
+  closeSidebarActionMenus();
   if (!sidebar) return;
   sidebar.classList.remove('open');
   sidebarBackdrop?.classList.remove('show');
 }
 function setFamilyPanelCollapsed(collapsed, { persist = true } = {}) {
+  if (collapsed) closeSidebarActionMenus();
   const next = !!collapsed;
   document.body.classList.toggle('family-panel-collapsed', next);
   const btn = $('familyPanelCollapseBtn');
@@ -1152,6 +1154,21 @@ sidebarBackdrop.onclick = closeSidebar;
 $('familyPanelCollapseBtn')?.addEventListener('click', () => setFamilyPanelCollapsed(true));
 
 // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
+function closeSidebarActionMenus() {
+  document.querySelectorAll('.family-panel .app-menu.open').forEach(menu => {
+    menu.classList.remove('open');
+    menu.querySelector(':scope > .app-menu-trigger')?.setAttribute('aria-expanded','false');
+    if (menu._memberMenuPortal) {
+      const popover = menu._memberMenuPortal;
+      popover.classList.remove('member-menu-body-portal');
+      ['left','top','right','bottom','max-height','overflow-y'].forEach(prop => popover.style.removeProperty(prop));
+      menu.appendChild(popover);
+      menu._memberMenuPortal = null;
+    }
+  });
+}
+document.querySelector('.family-panel-scroll')?.addEventListener('scroll', closeSidebarActionMenus, {passive:true});
+
 function closeAppMenus(except = null) {
   document.querySelectorAll('.app-menu.open').forEach(menu => {
     if (menu === except) return;
@@ -1164,6 +1181,8 @@ function closeAppMenus(except = null) {
       popover.style.removeProperty('top');
       popover.style.removeProperty('right');
       popover.style.removeProperty('bottom');
+      popover.style.removeProperty('max-height');
+      popover.style.removeProperty('overflow-y');
       menu.appendChild(popover);
       menu._memberMenuPortal = null;
     }
@@ -1185,12 +1204,14 @@ function setupAppMenus() {
       closeAppMenus(menu);
       menu.classList.add('open');
       trigger.setAttribute('aria-expanded', willOpen ? 'true':'false');
-      if (willOpen && menu.classList.contains('family-member-menu')) {
+      if (willOpen && (menu.classList.contains('family-member-menu') || menu.classList.contains('family-actions-menu') || menu.closest('.family-member-actions'))) {
         const popover = menu.querySelector(':scope > .app-menu-popover');
         if (popover) {
           const rect = trigger.getBoundingClientRect();
           document.body.appendChild(popover);
           popover.classList.add('member-menu-body-portal');
+          popover.style.maxHeight = Math.max(80, window.innerHeight - 16) + 'px';
+          popover.style.overflowY = 'auto';
           const size = popover.getBoundingClientRect();
           const margin = 8, gap = 4;
           const left = Math.max(margin, Math.min(rect.right - size.width, window.innerWidth - size.width - margin));
@@ -1210,7 +1231,7 @@ function setupAppMenus() {
   });
   if (!_appMenuGlobalBound) {
     _appMenuGlobalBound = true;
-    document.addEventListener('click', e => { if (!e.target.closest?.('.app-menu')) closeAppMenus(); });
+    document.addEventListener('click', e => { if (!e.target.closest?.('.app-menu, .member-menu-body-portal')) closeAppMenus(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAppMenus(); });
   }
 }
