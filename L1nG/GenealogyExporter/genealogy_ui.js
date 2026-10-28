@@ -17,11 +17,13 @@
       familySidebarBackdrop?.classList.add('show');
     }
     function closeSidebar() {
+      closeSidebarActionMenus();
       if (!familySidebar) return;
       familySidebar.classList.remove('open');
       familySidebarBackdrop?.classList.remove('show');
     }
     function setFamilyPanelCollapsed(collapsed, { persist = true } = {}) {
+      if (collapsed) closeSidebarActionMenus();
       const next = !!collapsed;
       document.body.classList.toggle('family-panel-collapsed', next);
       if (persist) { try { localStorage.setItem(FAMILY_PANEL_COLLAPSED_KEY, next ? '1' : '0'); } catch (_) {} }
@@ -41,6 +43,13 @@
     familySidebarBackdrop.onclick = closeSidebar;
 
     // ========【共用彈出選單】 設定 - 頂欄、家族與成員操作 ========
+    function closeSidebarActionMenus() {
+      document.querySelectorAll('.family-actions-menu.open, #familyMemberAddMenu.open, .member-manage-menu.open')
+        .forEach(menu => closeAppMenu(menu));
+    }
+
+    familySidebar?.addEventListener('scroll', closeSidebarActionMenus, true);
+
     function restoreAppMenuPortal(menu) {
       const popover =
         menu?._bodyPortalPopover;
@@ -55,6 +64,8 @@
       popover.style.removeProperty('left');
       popover.style.removeProperty('right');
       popover.style.removeProperty('bottom');
+      popover.style.removeProperty('max-height');
+      popover.style.removeProperty('overflow-y');
 
       menu.appendChild(popover);
       menu._bodyPortalPopover = null;
@@ -75,6 +86,10 @@
       popover.classList.add(
         'ui-menu-body-portal'
       );
+
+      const availableHeight = Math.max(80, window.innerHeight - margin * 2);
+      popover.style.maxHeight = availableHeight + 'px';
+      popover.style.overflowY = 'auto';
 
       const popoverRect =
         popover.getBoundingClientRect();
