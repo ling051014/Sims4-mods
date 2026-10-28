@@ -9127,9 +9127,9 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     flex:0 0 var(--familySidebar-width);
     display:flex;
     align-items:center;
-    justify-content:center;
+    justify-content:flex-start;
     gap:12px;
-    padding:0 10px;
+    padding:0 14px;
 }
 .app-skeleton-main-actions {
     flex:1;
@@ -9163,8 +9163,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     background-image:radial-gradient(circle,rgba(0,0,0,.055) 1px,transparent 1px);
     background-size:24px 24px;
 }
-.skeleton-block,
-.skeleton-person {
+.skeleton-block {
     background:
       linear-gradient(
         90deg,
@@ -9176,6 +9175,22 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     animation:genealogy-skeleton-shimmer 1.25s linear infinite;
 }
 .skeleton-block { display:block; }
+/* 模擬左上原有的三條線圖示，不放置整塊按鈕背景。 */
+.skeleton-menu-toggle {
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+}
+.skeleton-menu-line {
+    width:17px;
+    height:2px;
+    border-radius:2px;
+}
 .skeleton-brand { width:126px; height:14px; border-radius:4px; }
 .skeleton-help,
 .skeleton-more,
@@ -9237,6 +9252,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
     flex-direction:column;
     gap:7px;
 }
+/* 成員列只保留頭像和兩行文字的骨架，不讓整列閃爍。 */
 .skeleton-person {
     height:48px;
     padding:6px 8px;
@@ -9372,7 +9388,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
         padding:0 8px;
         gap:6px;
     }
-    .skeleton-mobile-menu { display:block; }
+    .skeleton-mobile-menu { display:flex; }
     .skeleton-filter { width:32px; }
     .skeleton-action { width:34px; }
     .skeleton-action-wide { display:none; }
@@ -9401,8 +9417,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 }
 @media (prefers-reduced-motion:reduce) {
     .app-skeleton { transition:none; }
-    .skeleton-block,
-    .skeleton-person {
+    .skeleton-block {
         animation:none;
         background:color-mix(in srgb,var(--border-default) 68%,transparent);
     }
