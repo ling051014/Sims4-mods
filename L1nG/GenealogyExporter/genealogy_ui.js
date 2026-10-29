@@ -2195,9 +2195,12 @@
 
       if (!(list instanceof global.HTMLDataListElement)) return [];
 
-      const language = global.LING_I18N?.language || 'zh-Hant';
+      const catalogKey = list.dataset.suggestionCatalog;
+      if (catalogKey) {
+        return global.LING_I18N?.getSuggestionList?.(catalogKey) || [];
+      }
+
       return [...list.options]
-        .filter(option => !option.dataset.suggestionLang || option.dataset.suggestionLang === language)
         .map(option => String(option.value || option.textContent || '').trim())
         .filter(Boolean);
     }
