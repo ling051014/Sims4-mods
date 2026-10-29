@@ -710,47 +710,7 @@
                     <section class="sim-editor-panel active" data-editor-panel="basic" role="tabpanel">
                         <div class="grid profile-grid profile-basic-grid">
                             <div class="form-field full"><span class="form-field-title" id="simCareerLabel">職業</span><input id="simCareerInput" placeholder="醫生 / 小學生 / 無……" aria-labelledby="simCareerLabel"></div>
-                            <div class="form-field full" id="simCauseOfDeathField" style="display:none"><span class="form-field-title" id="simCauseOfDeathLabelText">死因</span><input id="simCauseOfDeathInput" data-ui-suggestion-list="causeOfDeathPresets" maxlength="40" placeholder="火災而亡 / 溺斃……" aria-labelledby="simCauseOfDeathLabelText"><datalist id="causeOfDeathPresets">
-                                    <option data-suggestion-lang="zh-Hant" value="因牛頭搖搖樹而亡"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="因發霉而死"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="因陽光而死"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="從高處墜落而死"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="死於布穀鳥鐘故障"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="溺斃"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="火災而亡"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="被販賣機弄死"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="謀殺致死"></option>
-                                    <option data-suggestion-lang="zh-Hant" value="電擊致死"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="衰老"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="饥饿"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="溺水"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="火灾"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="电击"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="笑死"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="尴尬死"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="暴晒"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="冻死"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="牛头人花"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="河豚"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="流星"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="心脏病"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="愤怒死"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="羞愤死"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="蒸汽浴"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="神秘死"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="吸血鬼灼烧"></option>
-                                    <option data-suggestion-lang="zh-Hans" value="其他"></option>
-                                    <option data-suggestion-lang="en" value="Death by Cowplant"></option>
-                                    <option data-suggestion-lang="en" value="Death by Mold"></option>
-                                    <option data-suggestion-lang="en" value="Death by Sunlight"></option>
-                                    <option data-suggestion-lang="en" value="Death by Falling from Heights"></option>
-                                    <option data-suggestion-lang="en" value="Death by Cuckoo Clock Malfunction"></option>
-                                    <option data-suggestion-lang="en" value="Drowning"></option>
-                                    <option data-suggestion-lang="en" value="Death by Fire"></option>
-                                    <option data-suggestion-lang="en" value="Death by Vending Machine"></option>
-                                    <option data-suggestion-lang="en" value="Murder"></option>
-                                    <option data-suggestion-lang="en" value="Electrocution"></option>
-                                </datalist></div>
+                            <div class="form-field full" id="simCauseOfDeathField" style="display:none"><span class="form-field-title" id="simCauseOfDeathLabelText">死因</span><input id="simCauseOfDeathInput" data-ui-suggestion-list="causeOfDeathPresets" maxlength="40" placeholder="火災而亡 / 溺斃……" aria-labelledby="simCauseOfDeathLabelText"><datalist id="causeOfDeathPresets" data-suggestion-catalog="causeOfDeath"></datalist></div>
                             <div class="form-field full"><span class="form-field-title" id="simAspirationLabel">抱負</span><input id="simAspirationInput" data-ui-suggestion-list="aspirationPresets" maxlength="40" placeholder="暢銷作家 / 靈魂伴侶……" aria-labelledby="simAspirationLabel"><datalist id="aspirationPresets"><option value="靈魂伴侶"></option><option value="大家庭"></option><option value="超級父母"></option><option value="美食大師"></option><option value="調酒大師"></option><option value="財富創造者"></option><option value="豪宅大亨"></option><option value="電腦奇才"></option><option value="卓越畫家"></option><option value="暢銷作家"></option><option value="音樂天才"></option><option value="生物博士"></option><option value="考古學家"></option><option value="靈魂探索者"></option><option value="連環浪漫"></option><option value="情場達人"></option><option value="自然主義者"></option><option value="園藝大師"></option><option value="釣魚大師"></option><option value="派對王"></option><option value="摯友"></option><option value="名人"></option><option value="世界之友"></option><option value="健美運動員"></option><option value="首席運動員"></option><option value="極限運動員"></option><option value="公敵"></option><option value="都市傳說"></option><option value="首領"></option><option value="無所事事"></option></datalist></div>
                             <div class="form-field full trait-field"><span class="field-label-row form-field-title" id="traitFieldLabel"><span>特徵</span><span class="field-label-note">可逐一新增或移除</span></span><input id="simTraitsHiddenInput" type="hidden"><div class="trait-editor" id="traitEditor"><div class="trait-chip-list" id="traitChipList"></div><div class="trait-add-row"><input id="traitInput" maxlength="30" placeholder="輸入特徵後按 Enter" aria-labelledby="traitFieldLabel"><button id="traitAddBtn" type="button"><span class="l1ng-icon icon-plus-lg" aria-hidden="true"></span><span>新增</span></button></div></div></div>
                             <div class="form-field full"><span class="form-field-title" id="simNotesLabel">備註</span><textarea id="simNotesTextarea" placeholder="補充想記錄的資訊或故事……" rows="3" aria-labelledby="simNotesLabel"></textarea></div>
@@ -1611,11 +1571,11 @@
         <script src="genealogy_interaction.js?v=20261016-connected-family-layout-r2"></script>
         <script src="genealogy_viewport.js?v=20261018-touch-precision-r2"></script>
         <script src="genealogy_focus.js?v=20261020-pointer-focus-r2"></script>
-        <script src="genealogy_ui.js?v=20261030-death-locales-r1"></script>
+        <script src="genealogy_ui.js?v=20261030-death-json-r2"></script>
         <script src="genealogy_scene.js?v=20261029-overview-pets-r1"></script>
         <script src="genealogy_kinship.js?v=20261018-kinship-r1"></script>
         <script src="genealogy_personEditor.js?v=20261020-focus-r1"></script>
-        <script src="genealogy_i18n.js?v=20261030-death-locales-r1"></script>
+        <script src="genealogy_i18n.js?v=20261030-death-json-r2"></script>
         <script src="genealogy_sample_preset.js?v=20261020-shared-layout-r1"></script>
 
         <script src="genealogy_app.js?v=20261029-overview-pets-r1"></script>
