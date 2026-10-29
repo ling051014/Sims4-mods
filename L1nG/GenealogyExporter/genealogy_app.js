@@ -7079,13 +7079,7 @@ function syncRelationshipLabelLockControl() {
 }
 
 function cancelRelationshipLabelDrag() {
-  if (!labelDrag) return;
-
-  labelDrag.el?.classList.remove(
-    'dragging'
-  );
-
-  labelDrag = null;
+  finishRelationshipLabelDrag(null, false);
 }
 
 function setRelationshipLabelLock(locked) {
@@ -11727,30 +11721,32 @@ viewport.addEventListener('dblclick', e => {
   genealogyViewport.cancelPan();
   genealogyViewport.fit();
 });
+// Wheel input is normalized by Viewport; App only forwards the input event.
 viewport.addEventListener('wheel', e => {
   e.preventDefault();
-  const d = e.deltaY;
-  if (d === 0) return;
-  const step = Math.min(Math.abs(d)/100, 2);
-  const factor = d < 0 ? Math.pow(1.12, step) : Math.pow(1/1.12, step);
-  genealogyViewport.zoomAt(
+  genealogyViewport.zoomFromWheel(
     e.clientX,
     e.clientY,
-    factor
+    e.deltaY,
+    e.deltaMode
   );
-}, { passive: false });
+}, { passive:false });
 
 labelsSvg.addEventListener('pointerdown', e => {
-  if (labelLocked) return;
+  if (labelLocked || labelDrag) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+
   const g = e.target.closest('.edge-label');
   if (!g) return;
   const key = g.dataset.key;
   if (!key) return;
-  e.preventDefault(); e.stopPropagation();
+
+  e.preventDefault();
+  e.stopPropagation();
 
   const baseX = parseFloat(g.dataset.x) || 0;
   const baseY = parseFloat(g.dataset.y) || 0;
-  const cur = (currentGenealogyData().labelPositions || {})[key] || { dx:0, dy:0 };
+  const beforeOffset = captureLabelHistoryState(key);
 
   labelDrag = {
     key,
@@ -11759,43 +11755,28 @@ labelsSvg.addEventListener('pointerdown', e => {
     baseY,
     startX:e.clientX,
     startY:e.clientY,
-    startDx:cur.dx || 0,
-    startDy:cur.dy || 0,
-    beforeOffset:captureLabelHistoryState(key),
-    mutation:null,
+    startDx:beforeOffset?.dx || 0,
+    startDy:beforeOffset?.dy || 0,
+    currentDx:beforeOffset?.dx || 0,
+    currentDy:beforeOffset?.dy || 0,
+    beforeOffset,
     moved:false,
-    pointerId:e.pointerId
+    pointerId:e.pointerId,
+    dragThresholdPx:e.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD_PX : 3
   };
 
-  try { g.setPointerCapture(e.pointerId); } catch(_){}
+  try { g.setPointerCapture(e.pointerId); } catch (_) {}
 });
 
 labelsSvg.addEventListener('pointermove', e => {
   if (!labelDrag || labelDrag.pointerId !== e.pointerId) return;
 
-  const screenDx =
-    e.clientX -
-    labelDrag.startX;
-
-  const screenDy =
-    e.clientY -
-    labelDrag.startY;
-
-  const worldDelta =
-    genealogyViewport.screenDeltaToWorld(
-      screenDx,
-      screenDy
-    );
-
-  const rawDx = worldDelta.x;
-  const rawDy = worldDelta.y;
+  const screenDx = e.clientX - labelDrag.startX;
+  const screenDy = e.clientY - labelDrag.startY;
 
   if (
     !labelDrag.moved &&
-    Math.hypot(
-      screenDx,
-      screenDy
-    ) > 3
+    Math.hypot(screenDx, screenDy) > labelDrag.dragThresholdPx
   ) {
     labelDrag.moved = true;
     labelDrag.el.classList.add('dragging');
@@ -11803,92 +11784,68 @@ labelsSvg.addEventListener('pointermove', e => {
 
   if (!labelDrag.moved) return;
 
-  const snapDistance =
-    genealogyViewport
-      .screenPixelsToWorld(
-        GUIDE_SNAP_PX
-      );
+  const worldDelta = genealogyViewport.screenDeltaToWorld(screenDx, screenDy);
+  const snapDistance = genealogyViewport.screenPixelsToWorld(GUIDE_SNAP_PX);
 
-  let dx = labelDrag.startDx + rawDx;
-  let dy = labelDrag.startDy + rawDy;
-
+  let dx = labelDrag.startDx + worldDelta.x;
+  let dy = labelDrag.startDy + worldDelta.y;
   if (Math.abs(dx) <= snapDistance) dx = 0;
   if (Math.abs(dy) <= snapDistance) dy = 0;
 
-  labelDrag.mutation =
-    genealogyStore.mergeResults(
-      labelDrag.mutation,
-      genealogyStore.setRelationshipLabelPosition(
-        labelDrag.key,
-        dx === 0 && dy === 0
-          ? null
-          : { dx, dy }
-      )
-    );
-
+  // Live preview only: Store, history, and persistence change on pointerup.
   labelDrag.currentDx = dx;
   labelDrag.currentDy = dy;
-
-  const tx = labelDrag.baseX + dx;
-  const ty = labelDrag.baseY + dy;
-
   labelDrag.el.setAttribute(
     'transform',
-    `translate(${tx.toFixed(1)},${ty.toFixed(1)})`
+    `translate(${(labelDrag.baseX + dx).toFixed(1)},${(labelDrag.baseY + dy).toFixed(1)})`
   );
 });
 
-const finishLabelDrag = e => {
+function finishRelationshipLabelDrag(event, commit) {
   if (!labelDrag) return;
   if (
-    e &&
-    e.pointerId !== undefined &&
-    labelDrag.pointerId !== e.pointerId
-  ) {
-    return;
-  }
+    event?.pointerId !== undefined &&
+    labelDrag.pointerId !== event.pointerId
+  ) return;
 
-  const activeDrag = labelDrag;
-  activeDrag.el.classList.remove('dragging');
+  const drag = labelDrag;
+  labelDrag = null; // Clear before releasing capture (which can emit lostpointercapture).
+  drag.el.classList.remove('dragging');
 
   try {
-    if (
-      activeDrag.el.hasPointerCapture &&
-      activeDrag.el.hasPointerCapture(activeDrag.pointerId)
-    ) {
-      activeDrag.el.releasePointerCapture(activeDrag.pointerId);
+    if (drag.el.hasPointerCapture?.(drag.pointerId)) {
+      drag.el.releasePointerCapture(drag.pointerId);
     }
   } catch (_) {}
 
-  if (activeDrag.moved) {
-    const afterOffset =
-      captureLabelHistoryState(
-        activeDrag.key
-      );
+  if (commit && drag.moved) {
+    const afterOffset = drag.currentDx === 0 && drag.currentDy === 0
+      ? null
+      : { dx:drag.currentDx, dy:drag.currentDy };
+    const mutation = genealogyStore.setRelationshipLabelPosition(drag.key, afterOffset);
 
-    dragHistory.push({
-      type:'relationship-label',
-      key:activeDrag.key,
-      before:{
-        offset:activeDrag.beforeOffset
-      },
-      after:{
-        offset:afterOffset
-      }
-    });
-
-    applyGenealogyMutation(
-      activeDrag.mutation,
-      { render:false }
-    );
+    if (mutation.dataChanged) {
+      dragHistory.push({
+        type:'relationship-label',
+        key:drag.key,
+        before:{ offset:drag.beforeOffset },
+        after:{ offset:afterOffset }
+      });
+      applyGenealogyMutation(mutation, { render:false });
+      return;
+    }
   }
 
-  labelDrag = null;
-};
+  // Cancel, lost capture, or unchanged position: restore the persisted visual.
+  drag.el.setAttribute(
+    'transform',
+    `translate(${(drag.baseX + drag.startDx).toFixed(1)},${(drag.baseY + drag.startDy).toFixed(1)})`
+  );
+}
 
-labelsSvg.addEventListener('pointerup', finishLabelDrag);
-labelsSvg.addEventListener('pointercancel', finishLabelDrag);
-labelsSvg.addEventListener('lostpointercapture', finishLabelDrag);
+labelsSvg.addEventListener('pointerup', e => finishRelationshipLabelDrag(e, true));
+labelsSvg.addEventListener('pointercancel', e => finishRelationshipLabelDrag(e, false));
+labelsSvg.addEventListener('lostpointercapture', e => finishRelationshipLabelDrag(e, false));
 
 // ========【智慧對齊與等距吸附】 邊緣、中心及水平／垂直等距吸附 ========
 function hideSmartGuides() {
@@ -18174,6 +18131,7 @@ async function importGameGenealogy(file) {
     await waitForFileOperationPaint();
 
     diagnosticStage='apply-database';
+    cancelRelationshipLabelDrag();
     replaceCanonicalGenealogyDatabase(
       nextDatabase
     );
@@ -18184,7 +18142,6 @@ async function importGameGenealogy(file) {
     clearNodeSelection();
     finishMarquee();
 
-    labelDrag = null;
     genealogyViewport.cancelPan();
 
     arrangeTool = 'pan';

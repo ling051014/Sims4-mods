@@ -45,6 +45,7 @@
     };
 
     let panSession = null;
+    let wheelAccumulatedScale = null;
 
     function safeScale() {
       return Math.max(
@@ -208,6 +209,7 @@
       clientY,
       factor
     ) {
+      wheelAccumulatedScale = null;
       const rect =
         viewport.getBoundingClientRect();
 
@@ -255,6 +257,37 @@
       return true;
     }
 
+    // Wheel unit conversion and sub-step accumulation are owned by Viewport.
+    // Accumulating only the fractional scale prevents trackpad input from
+    // disappearing under the existing 2.5% wheel-zoom quantization.
+    function zoomFromWheel(clientX, clientY, deltaY, deltaMode = 0) {
+      const delta = Number(deltaY);
+      if (!Number.isFinite(delta) || delta === 0) return false;
+
+      const pixelDelta = delta * (
+        deltaMode === 1 ? 16
+          : deltaMode === 2 ? Math.max(1, viewport.clientHeight)
+            : 1
+      );
+      const step = Math.min(Math.abs(pixelDelta) / 100, 2);
+      const factor = pixelDelta < 0
+        ? Math.pow(1.12, step)
+        : Math.pow(1 / 1.12, step);
+
+      const preciseScale = smoothScale(
+        (wheelAccumulatedScale ?? scale) * factor
+      );
+      const snapped = snapScale(preciseScale);
+      if (snapped === scale) {
+        wheelAccumulatedScale = preciseScale;
+        return false;
+      }
+
+      const changed = zoomAt(clientX, clientY, snapped / scale);
+      wheelAccumulatedScale = preciseScale;
+      return changed;
+    }
+
     // ========【觸控視角】 設定 - 雙指縮放同時保留兩指中心的平移 ========
     function transformGesture(
       previousClientX,
@@ -263,6 +296,7 @@
       currentClientY,
       factor = 1
     ) {
+      wheelAccumulatedScale = null;
       const rect =
         viewport.getBoundingClientRect();
 
@@ -329,6 +363,7 @@
     function fit({
       rememberState = true
     } = {}) {
+      wheelAccumulatedScale = null;
       const viewportWidth =
         viewport.clientWidth;
 
@@ -589,6 +624,7 @@
         minFocusScale = 0.72
       } = {}
     ) {
+      wheelAccumulatedScale = null;
       viewState = 'manual';
 
       if (
@@ -622,6 +658,7 @@
       clientX,
       clientY
     ) {
+      wheelAccumulatedScale = null;
       panSession = {
         startX:
           Number(clientX || 0),
@@ -715,6 +752,7 @@
       screenDeltaToWorld,
       screenPointToWorld,
       zoomAt,
+      zoomFromWheel,
       transformGesture,
       fit,
       observeResize,
