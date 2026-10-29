@@ -15619,16 +15619,29 @@ const personLibraryController = {
     const addNewSimButton = $('personLibraryAddBtn');
     const countEl = $('personLibraryBatchCount');
 
-    if (toolbar) toolbar.hidden = !personLibraryState.batchMode || personLibraryCategory === 'pets';
-    if (batchBtn) batchBtn.hidden = personLibraryState.batchMode || personLibraryCategory === 'pets';
-    if (addNewSimButton) addNewSimButton.hidden = personLibraryState.batchMode || personLibraryCategory === 'pets';
-    if (countEl) countEl.textContent = '已選 ' + count + ' 位';
-
-    ['personLibraryBatchAddFamilyBtn','personLibraryBatchRemoveFamilyBtn','personLibraryBatchDeleteBtn']
-      .forEach(id => {
-        const button = $(id);
-        if (button) button.disabled = count === 0;
-      });
+    const petTab = personLibraryCategory === 'pets';
+    if (toolbar) toolbar.hidden = !personLibraryState.batchMode;
+    if (batchBtn) {
+      batchBtn.hidden = personLibraryState.batchMode;
+      const icon = batchBtn.querySelector('.l1ng-icon');
+      icon?.classList.toggle('icon-paw',petTab);
+      icon?.classList.toggle('icon-person-check',!petTab);
+    }
+    if (addNewSimButton) addNewSimButton.hidden = personLibraryState.batchMode || petTab;
+    if (countEl) countEl.textContent = petTab
+      ? uiText('已選 {n} 隻寵物').replace('{n}',String(count))
+      : '已選 ' + count + ' 位';
+    for (const id of ['personLibraryBatchAddFamilyBtn','personLibraryBatchRemoveFamilyBtn','personLibraryBatchDeleteBtn']) {
+      const button = $(id);
+      if (!button) continue;
+      button.hidden = petTab;
+      button.disabled = count === 0;
+    }
+    const petDelete = $('personLibraryBatchDeletePetBtn');
+    if (petDelete) {
+      petDelete.hidden = !petTab;
+      petDelete.disabled = count === 0;
+    }
   },
 
   setBatchMode(enabled) {
@@ -15640,7 +15653,12 @@ const personLibraryController = {
   },
 
   toggleSelection(id) {
-    if (!personLibraryState.batchMode || !currentGenealogyData().sims[id]) return;
+    if (!personLibraryState.batchMode) return;
+    const selectable = personLibraryCategory === 'pets'
+      ? collectPetLibraryEntries().some(entry => entry.key === id &&
+          String(entry.pet?.gameData?.simId || entry.pet?.id || '') === id)
+      : !!currentGenealogyData().sims[id];
+    if (!selectable) return;
 
     if (personLibraryState.selection.has(id)) {
       personLibraryState.selection.delete(id);
@@ -15683,7 +15701,7 @@ const personLibraryController = {
       button.tabIndex = active ? 0 : -1;
     }
     if (personLibrarySearch) {
-      personLibrarySearch.placeholder = uiText(petTab ? '搜尋寵物……' : '搜尋市民……');
+      personLibrarySearch.placeholder = uiText('搜尋姓名……');
     }
   },
   setCategory(category) {
@@ -15718,6 +15736,31 @@ const personLibraryController = {
     );
     applyGenealogyMutation(mutation);
     recordCanonicalHistory(before);
+    this.setBatchMode(false);
+  },
+
+  async deletePetsSelection() {
+    const available = new Set(collectPetLibraryEntries()
+      .filter(entry => String(entry.pet?.gameData?.simId || entry.pet?.id || '') === entry.key)
+      .map(entry => entry.key));
+    const ids = [...personLibraryState.selection].filter(id => available.has(id));
+    if (!ids.length) return;
+    const confirmed = await uiConfirm(
+      uiText('確定永久刪除選取的 {n} 隻寵物嗎？').replace('{n}',String(ids.length)) + '\n' +
+      uiText('這會從所有飼主與未指派寵物清單中移除。') + '\n' +
+      uiText('刪除後可使用 Ctrl + Z 復原，操作歷史不會跨重新整理或切換家族保留。'),
+      { title:uiText('批量刪除寵物'), kind:'danger',
+        confirmText:uiText('永久刪除'), backupAction:exportCurrentGenealogyBackup }
+    );
+    if (!confirmed) return;
+    const before = captureCanonicalHistory();
+    if (!before) return;
+    const mutation = genealogyStore.mergeResults(...ids.map(id => genealogyStore.deletePet(id)));
+    if (!mutation.dataChanged) return;
+    ids.forEach(id => selectedPetIds.delete(id));
+    applyGenealogyMutation(mutation);
+    recordCanonicalHistory(before);
+    scheduleGC();
     this.setBatchMode(false);
   },
 
@@ -16025,12 +16068,9 @@ function renderPetLibrary() {
   const list = $('personLibraryList');
   const all = collectPetLibraryEntries();
   const query = personLibrarySearch.value.trim().toLowerCase();
-  const filtered = all.filter(entry => {
-    if (!query) return true;
-    const info = petLibraryDisplayInfo(entry);
-    return [info.name,info.breed,info.species,info.ownerLabel,...info.traits]
-      .some(value => String(value || '').toLowerCase().includes(query));
-  });
+  const filtered = all.filter(entry =>
+    !query || petLibraryDisplayInfo(entry).name.toLowerCase().includes(query)
+  );
   personLibraryController.syncCategoryCounts();
   personLibraryController.syncViewControls();
   personLibraryController.syncBatchToolbar();
@@ -16051,12 +16091,18 @@ function renderPetLibrary() {
       [uiText('所屬家庭'),info.ownerLabel]
     ].filter(([,value]) => !!value);
     const short = [info.species,info.breed].filter(Boolean).join(' · ');
+    const petId = String(pet.gameData?.simId || pet.id || '');
+    const selectable = !!petId && petId === entry.key;
+    const selected = selectable && personLibraryState.selection.has(entry.key);
     const detailHtml = details.map(([label,value]) =>
       '<div class="person-library-detail-field"><span class="person-library-detail-label">' +
       esc(label) + '</span><span class="person-library-detail-value">' +
       esc(value) + '</span></div>'
     ).join('');
-    return '<div class="person-library-item person-library-pet-item" data-pet-library-key="' + esc(entry.key) + '">' +
+    return '<div class="person-library-item person-library-pet-item' +
+      (personLibraryState.batchMode ? ' batch-mode' : '') +
+      (selected ? ' batch-selected' : '') +
+      '" data-pet-library-key="' + esc(entry.key) + '">' +
       '<div class="person-library-main">' +
         '<div class="person-library-avatar-wrap"><div class="person-library-avatar">' +
           petLibraryAvatarHTML(pet) + '</div></div>' +
@@ -16067,6 +16113,12 @@ function renderPetLibrary() {
           '<div class="person-library-detailed-meta">' + detailHtml + '</div>' +
         '</div>' +
       '</div>' +
+      '<button class="person-library-batch-select' + (selected ? ' selected' : '') +
+        '" type="button" data-pet-library-select="' + esc(entry.key) +
+        '" aria-pressed="' + String(selected) + '" aria-label="' +
+        esc(uiText('選取') + ' ' + info.name) + '"' +
+        (selectable ? '' : ' disabled') + '>' +
+        (selected ? iconSvg('check-lg') : '') + '</button>' +
       '<div class="ui-menu person-library-item-menu" data-menu-portal="body">' +
         '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') + '</button>' +
@@ -16089,8 +16141,13 @@ function renderPetLibrary() {
     const entry = indexed.get(row.dataset.petLibraryKey);
     if (!entry) return;
     row.addEventListener('click', event => {
-      if (event.target.closest('.person-library-item-menu')) return;
-      openPetProfileFromCanvas(entry);
+      if (event.target.closest('.person-library-item-menu,.person-library-batch-select')) return;
+      if (personLibraryState.batchMode) personLibraryController.toggleSelection(entry.key);
+      else openPetProfileFromCanvas(entry);
+    });
+    row.querySelector('[data-pet-library-select]')?.addEventListener('click', event => {
+      event.stopPropagation();
+      personLibraryController.toggleSelection(entry.key);
     });
     row.querySelectorAll('[data-pet-library-action]').forEach(button => {
       button.addEventListener('click', event => {
@@ -16104,7 +16161,7 @@ function renderPetLibrary() {
     });
   });
   observePersonLibraryAvatars(list);
-  setupAppMenus();
+  if (!personLibraryState.batchMode) setupAppMenus();
 }
 
 function renderPersonLibrary() {
@@ -16124,17 +16181,7 @@ function renderPersonLibrary() {
   all.sort((x, y) => String(x.name).localeCompare(String(y.name), 'zh'));
 
   const filtered = q ? all.filter(s =>
-    (s.name || '').toLowerCase().includes(q)
-    || (s.career || '').toLowerCase().includes(q)
-    || (s.residence || '').toLowerCase().includes(q)
-    || (s.aspiration || '').toLowerCase().includes(q)
-    || (s.causeOfDeath || '').toLowerCase().includes(q)
-    || (s.traits || []).some(t => (t || '').toLowerCase().includes(q))
-    || (s.pets || []).some(p =>
-      (p.name || '').toLowerCase().includes(q)
-      || (p.breed || '').toLowerCase().includes(q)
-    )
-    || (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q))
+    displayDataText(s.name,s).toLowerCase().includes(q)
   ) : all;
 
   personLibraryController.syncCategoryCounts();
@@ -16307,7 +16354,10 @@ $('personLibraryBatchRemoveFamilyBtn').onclick = () => {
 };
 
 $('personLibraryBatchDeleteBtn').onclick = () => {
-  personLibraryController.deleteSelection();
+  void personLibraryController.deleteSelection();
+};
+$('personLibraryBatchDeletePetBtn').onclick = () => {
+  void personLibraryController.deletePetsSelection();
 };
 
 const familyMemberPickerVisibleIds = new Set();
