@@ -7,7 +7,7 @@
   const LOCALE_FILES = Object.freeze({
     'zh-Hant': 'locales/zh-TW.json?v=20261026-outfit-categories-r1',
     'zh-Hans': 'locales/zh-CN.json?v=20261026-outfit-categories-r1',
-    'en': 'locales/en.json?v=20261026-outfit-categories-r1'
+    'en': 'locales/en.json?v=20261029-en-layout-r1'
   });
 
   const catalogs = new Map();
