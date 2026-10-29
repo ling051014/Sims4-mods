@@ -301,7 +301,7 @@ function populatePersonEditorBirthdayDays(preferredValue = null) {
 
   const current = preferredValue !== null ? String(preferredValue || '') : String(daySelect.value || '');
   const limit = monthSelect.value ? getBirthdayDayLimit(monthSelect.value) : 31;
-  daySelect.innerHTML = `<option value="">${esc(uiText('日'))}</option>` +
+  daySelect.innerHTML = `<option value="">${esc(uiText('生日日期提示'))}</option>` +
     Array.from({ length: limit }, (_, index) => {
       const day = String(index + 1);
       return `<option value="${day}">${day}</option>`;
