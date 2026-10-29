@@ -1509,16 +1509,26 @@
   },
   "suggestions": {
     "causeOfDeath": [
+      "Death by Freezing",
+      "Death by Stink Capsule",
+      "Death by Pufferfish",
       "Death by Cowplant",
       "Death by Mold",
-      "Death by Sunlight",
+      "Death by Urban Myth",
       "Death by Falling from Heights",
       "Death by Cuckoo Clock Malfunction",
+      "Death by Anger",
+      "Death by Laughter",
       "Drowning",
       "Death by Fire",
+      "Death by Embarrassment",
+      "Death by Steam",
       "Death by Vending Machine",
-      "Murder",
-      "Electrocution"
+      "Death by Overexertion",
+      "Death by Overheating",
+      "Death by Lightning",
+      "Electrocution",
+      "Death by Starvation"
     ]
   }
 }
