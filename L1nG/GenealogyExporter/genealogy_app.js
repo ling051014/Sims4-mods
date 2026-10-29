@@ -7487,17 +7487,79 @@ if (restoreSampleBtn) {
       // 避免同一個輸入事件落到確認按鈕。
       await new Promise(resolve => requestAnimationFrame(resolve));
 
-      const ok = await uiConfirm(
-        '恢復後，目前的族譜資料將被取代且無法復原。建議先匯出 JSON 備份。',
-        { title:'恢復預設族譜', confirmText:'恢復預設族譜', kind:'danger',
-          richContent:{
-            lead:'',
-            warnings:['恢復後，目前的族譜資料將被取代且無法復原。建議先匯出 JSON 備份。']
-          },
-          backupAction:exportCurrentGenealogyBackup }
-      );
+      const action = await openUiDialog({
+        title:'恢復 / 清空族譜',
+        message:'恢復預設族譜或清空族譜，都會取代目前的族譜資料且無法復原。建議先匯出 JSON 備份。',
+        mode:'choice',
+        kind:'danger',
+        dismissPolicy:'explicit',
+        actionLayout:'inline',
+        confirmText:'清空族譜',
+        confirmKind:'danger',
+        confirmValue:'clear',
+        secondaryText:'恢復預設族譜',
+        secondaryKind:'danger',
+        secondaryValue:'restore',
+        cancelText:'取消',
+        cancelValue:'cancel',
+        richContent:{
+          warnings:['恢復預設族譜或清空族譜，都會取代目前的族譜資料且無法復原。建議先匯出 JSON 備份。']
+        },
+        backupAction:exportCurrentGenealogyBackup
+      });
 
-      if (!ok) return;
+      if (action === 'cancel' || action == null) return;
+
+      if (action === 'clear') {
+        const progressTitle = '清空族譜';
+        try {
+          showFileOperationStatus('清空目前族譜資料……', 20, progressTitle);
+          await waitForFileOperationPaint();
+          const familyId = uid('fam');
+          const emptyDb = prepareDatabase({
+            version:1,
+            meta:{ sample:false, unassignedPets:[] },
+            sims:{},
+            families:[{
+              id:familyId, name:'新家族', memberIds:[],
+              bio:'', coverImage:null, freeLayout:false,
+              manualPositions:{}, locked:false
+            }],
+            currentFamilyId:familyId
+          }).prepared;
+          personEditor.close();
+          replaceCanonicalGenealogyDatabase(emptyDb);
+          relationshipPerspectiveSimId = null;
+          syncRelationshipPerspectiveUI();
+          familyTreeLastSourceFamilyId = null;
+          for (const mode of ['household','ea','extended']) {
+            setFamilyTreeSelectionValue(mode, null);
+          }
+          clearNodeSelection();
+          resetPersonLibraryOperations();
+          resetFamilyMemberOperations();
+          dragHistory.clear();
+          showFileOperationStatus('儲存空白族譜……', 80, progressTitle);
+          await save({ immediate:true });
+          refreshFamilyUI();
+          render();
+          requestAnimationFrame(() => genealogyViewport.fit());
+          showFileOperationStatus('所有資料已處理完成！', 100, progressTitle);
+          await waitForFileOperationPaint();
+          uiToast('已清空族譜。');
+          scheduleGC();
+        } catch (error) {
+          hideFileOperationStatus();
+          await uiAlert('清空族譜失敗：' + (error?.message || String(error)), {
+            title:'清空族譜失敗', kind:'danger'
+          });
+        } finally {
+          hideFileOperationStatus();
+        }
+        return;
+      }
+
+      if (action !== 'restore') return;
 
       const progressTitle = '恢復預設族譜';
       showFileOperationStatus('準備預設族譜資料……', 10, progressTitle);
