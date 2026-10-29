@@ -2309,7 +2309,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 小型箭頭 */ width: 10px;
     /* 小型箭頭 */ height: 10px;
     /* 不被壓縮 */ flex: 0 0 10px;
-    /* 轉場 */ transition: transform .15s ease;
+    /* 轉場 */ transition: transform var(--genealogy-chevron-duration) ease;
 }
 
 .other-rel-type-trigger.open .other-rel-type-chevron {
@@ -2472,7 +2472,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 圖示尺寸 */ width: 12px;
     /* 圖示高度 */ height: 12px;
     /* 顏色 */ color: var(--text-secondary);
-    /* 轉場 */ transition: transform .15s ease;
+    /* 轉場 */ transition: transform var(--genealogy-chevron-duration) ease;
 }
 
 .relationship-type-picker.open .relationship-type-chevron {
@@ -7574,7 +7574,7 @@ select.nav-native-select {
     /* 左側自動推移 */ margin-left: auto;
     /* 右側內縮 */ margin-right: 5px;
     /* 彈性收縮 */ flex-shrink: 0;
-    /* 動畫過渡 */ transition: transform .18s ease;
+    /* 動畫過渡 */ transition: transform var(--genealogy-chevron-duration) ease;
     /* 透明度 */ opacity: .72;
 }
 
@@ -7713,6 +7713,10 @@ select.nav-native-select {
 /* ========【頂部下拉結果】 對齊既有專案搜尋結果的白底、細框、圓角與分隔線邏輯 ======== */
 
 /* ========【共用下拉箭頭】 編輯頁與導覽共用同一顆 chevron-down.svg ======== */
+:root { --genealogy-chevron-duration: .18s; }
+@media (prefers-reduced-motion: reduce) {
+    :root { --genealogy-chevron-duration: 0s; }
+}
 
 /* ========【網站表單選擇器】 單選 / 可輸入建議 / 搜尋多選共用同一套 UI ======== */
 
@@ -7829,7 +7833,7 @@ select.nav-native-select {
 .ui-suggestion-toggle .l1ng-icon {
     /* 固定圖示大小 */ width: 12px;
     /* 固定圖示大小 */ height: 12px;
-    /* 展開動畫 */ transition: transform .15s ease;
+    /* 展開動畫 */ transition: transform var(--genealogy-chevron-duration) ease;
 }
 
 .ui-suggestion-combobox.ui-select-open .ui-suggestion-toggle .l1ng-icon {
@@ -7847,7 +7851,7 @@ select.nav-native-select {
     /* 與導覽箭頭一致尺寸 */ height: 12px;
     /* 跟著目前主題變化 */ color: var(--text-secondary);
     /* 不攔截欄位點擊 */ pointer-events: none;
-    /* 動畫過渡 */ transition: transform .15s ease, color .15s ease;
+    /* 動畫過渡 */ transition: transform var(--genealogy-chevron-duration) ease, color .15s ease;
 }
 
 .ui-select-wrap.ui-select-open .ui-select-chevron-icon,
