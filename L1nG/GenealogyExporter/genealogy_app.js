@@ -19072,6 +19072,9 @@ function applyTopbarFilters() {
   // 畫布與側欄都由 getVisibleIds() 決定顯示模擬市民；篩選後一併刷新。
   refreshFamilyProfilePanel();
   render();
+  // 篩選改變可見內容後，直接以最新 Scene 範圍重新置中。
+  // render() 同步更新 layout，避免沿用空畫布前的平移／縮放座標。
+  genealogyViewport.fit();
 }
 
 [
