@@ -530,6 +530,8 @@
       secondaryText = '',
       secondaryValue = null,
       secondaryKind = 'default',
+      confirmKind = 'default',
+      actionLayout = 'default',
       secondaryHint = '',
       confirmHint = '',
       confirmValue = true,
@@ -583,7 +585,7 @@
       const iconClasses = {
         notice:'icon-info-circle',
         confirm:kind === 'danger' ? 'icon-exclamation-triangle' : 'icon-info-circle',
-        choice:'icon-info-circle',
+        choice:kind === 'danger' ? 'icon-exclamation-triangle' : 'icon-info-circle',
         result:'icon-check-circle',
         error:'icon-exclamation-triangle',
         prompt:'icon-pencil-square'
@@ -592,6 +594,7 @@
       dialog.dataset.presentation = presentation;
       dialog.dataset.kind = kind;
       dialog.dataset.mode = mode;
+      dialog.dataset.actionLayout = actionLayout === 'inline' ? 'inline' : 'default';
       titleEl.textContent = uiText(title);
       iconEl.className = 'l1ng-icon ui-dialog-status-icon ' + iconClasses[presentation];
 
@@ -619,7 +622,7 @@
       confirmBtn.textContent = uiText(confirmText);
       confirmBtn.classList.toggle(
         'destructive',
-        mode === 'confirm' && kind === 'danger'
+        (mode === 'confirm' && kind === 'danger') || confirmKind === 'danger'
       );
       confirmBtn.title = confirmHint ? uiText(confirmHint) : '';
       if (confirmHint) confirmBtn.setAttribute('aria-description', uiText(confirmHint));
