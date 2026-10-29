@@ -1859,7 +1859,7 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-profile-edit-fields label,.sim-profile-edit-fields .form-field { min-width:0; display:grid; gap:4px; color:var(--text-secondary); font-size:10.5px; font-weight:600; }
 .sim-profile-edit-fields input,.sim-profile-edit-fields select,.sim-profile-edit-fields .ui-single-select-trigger { width:100%; min-width:0; min-height:32px; padding:5px 8px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12px; outline:none; }
 .sim-profile-edit-fields input:focus,.sim-profile-edit-fields select:focus,.sim-profile-edit-fields .ui-single-select-trigger:focus-visible { border-color:var(--action-primary); }
-.profile-name-field input { box-sizing:border-box; height:36px; min-height:36px; line-height:24px; font-size:17px; font-weight:700; padding:5px 9px; }
+.profile-name-field input { box-sizing:border-box; height:36px; min-height:36px; line-height:normal; font-size:17px; font-weight:700; padding:0 9px; }
 .profile-identity-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
 .profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:start; }
 .profile-fact-edit-row > .form-field { grid-template-rows:auto 32px; align-items:start; }
@@ -7713,7 +7713,28 @@ select.nav-native-select {
 
 .ui-single-select-menu .ui-select-options,
 .ui-suggestion-menu .ui-select-options {
-    /* 依視窗高度限制清單 */ max-height: min(300px,calc(100vh - 120px));
+    /* 由定位程式依開啟方向與視窗剩餘高度決定實際可捲動範圍。 */
+    max-height: var(--ui-suggestion-available-height, min(300px,calc(100vh - 120px)));
+}
+
+/* 市民與寵物編輯器沿用同一套建議選單：桌機三欄，窄螢幕兩欄。 */
+.ui-suggestion-menu-editor .ui-select-options {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    align-content:start;
+    gap:2px 5px;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+}
+.ui-suggestion-menu-editor .ui-select-option {
+    min-width:0;
+    overflow-wrap:anywhere;
+}
+.ui-suggestion-menu-editor .ui-select-empty { grid-column:1/-1; }
+@media (max-width:600px) {
+    .ui-suggestion-menu-editor .ui-select-options {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
 }
 
 .ui-select-option.keyboard-active {
