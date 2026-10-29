@@ -150,8 +150,87 @@ test('iOS Safari 和 iPadOS 使用不漏畫頭像的匯出路徑，桌面保留�
   assert.match(app,/foreignObjectRendering:\s*!useSafeIosGenealogyCapture\(\)/);
   assert.match(app,/await\s+Promise\.all\(\[\s*prepareCaptureIcons\(captureViewport\),\s*prepareCaptureRelationshipIcons\(captureViewport\),\s*prepareCaptureAssetImages\(captureViewport, backgroundMode\)/);
 });
-test('人物庫更多操作確實呼叫跨家庭定位，而非只在當前畫布尋找',()=>{
-  const menu=between("list.querySelectorAll('[data-person-library-action]')","observePersonLibraryAvatars(list);");
-  assert.match(menu,/locatePersonFromLibrary\(id\)/);
-  assert.doesNotMatch(menu,/personLibraryDialog\.classList\.remove\('show'\);\s*focusSimOnCanvas\(id\)/);
+test('總覽改由容器事件委派後，更多操作仍確實呼叫跨家庭定位',async()=>{
+  const delegate=between('function bindPersonLibraryEvents() {','function renderPersonLibraryRows(');
+  const listeners=[];
+  const calls=[];
+  const row={dataset:{personLibraryId:'B'}};
+  const action={dataset:{personLibraryAction:'locate'}};
+  const list={
+    dataset:{},
+    addEventListener:(name,handler)=>{if(name==='click')listeners.push(handler);},
+    contains:element=>element===row
+  };
+  const target={
+    closest:selector=>{
+      if(selector==='[data-person-library-id]')return row;
+      if(selector==='[data-person-library-action]')return action;
+      return null;
+    }
+  };
+  vm.runInNewContext(delegate+'\nbindPersonLibraryEvents();bindPersonLibraryEvents();',{
+    $:id=>id==='personLibraryList'?list:null,
+    currentGenealogyData:()=>({sims:{B:{id:'B'}}}),
+    locatePersonFromLibrary:id=>calls.push(id)
+  });
+  assert.equal(listeners.length,1,'容器僅綁定一次 click 事件');
+  let stopped=0;
+  await listeners[0]({target,stopPropagation:()=>{stopped++;}});
+  assert.deepEqual(calls,['B']);
+  assert.equal(stopped,1);
+  assert.doesNotMatch(delegate,/focusSimOnCanvas\(simId\)/);
+});
+
+test('總覽大清單分批渲染，且切換分類後取消過期批次',()=>{
+  const source=between('function renderPersonLibraryRows(','function renderPetLibrary(');
+  const run=(total,cancel)=>{
+    const frames=[];
+    let observed=0;
+    const list={
+      isConnected:true,children:[],
+      insertAdjacentHTML:(position,html)=>{
+        for(const _ of html.matchAll(/<article>/g))list.children.push({querySelectorAll:()=>[]});
+      }
+    };
+    const context={
+      list,items:Array.from({length:total},(_,i)=>i),
+      personLibraryRenderToken:1,
+      personLibraryState:{batchMode:false},
+      requestAnimationFrame:fn=>frames.push(fn),
+      observePersonLibraryAvatars:(root,rows)=>{observed+=rows.length;},
+      setupAppMenus:()=>{}
+    };
+    vm.runInNewContext(source+'\nrenderPersonLibraryRows(list,items,()=>"<article></article>");',context);
+    const firstPaint=list.children.length;
+    if(cancel)context.personLibraryRenderToken++;
+    while(frames.length)frames.shift()();
+    return {firstPaint,count:list.children.length,observed};
+  };
+  assert.deepEqual(run(80,false),{firstPaint:80,count:80,observed:80});
+  assert.deepEqual(run(700,false),{firstPaint:48,count:700,observed:700});
+  assert.deepEqual(run(700,true),{firstPaint:48,count:48,observed:48});
+});
+
+test('總覽市民家族索引快取在資料變動時失效',()=>{
+  const source=between('let personLibraryIndexCache = null;','function resetPersonLibraryOperations(');
+  const db={
+    sims:{b:{id:'b',name:'Bob'},a:{id:'a',name:'Amy'}},
+    families:[{id:'one',memberIds:['a','b']},{id:'two',memberIds:['a']}]
+  };
+  let petCollections=0;
+  const context={
+    currentGenealogyData:()=>db,
+    collectPetLibraryEntries:()=>{petCollections++;return [{key:'pet',pet:{id:'pet'}}];}
+  };
+  const examine=vm.runInNewContext(source+'\n({getPersonLibraryIndex,invalidatePersonLibraryIndex})',context);
+  const first=examine.getPersonLibraryIndex();
+  assert.equal(examine.getPersonLibraryIndex(),first);
+  assert.equal(first.sims[0].id,'a');
+  assert.equal(first.familyNamesBySimId.get('a').length,2);
+  assert.equal(first.petsByKey.get('pet').key,'pet');
+  assert.equal(petCollections,1);
+  db.sims.z={id:'z',name:'Zed'};
+  examine.invalidatePersonLibraryIndex();
+  assert.equal(examine.getPersonLibraryIndex().sims.length,3);
+  assert.equal(petCollections,2);
 });
