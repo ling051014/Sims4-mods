@@ -7934,6 +7934,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 .export-background-option {
     display:inline-flex;
     align-items:center;
+    gap:12px;
     min-height:24px;
     padding:2px 0;
     color:var(--text-primary);
@@ -7943,7 +7944,6 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 }
 
 .export-background-option input {
-    margin:0 12px 0 0;
     accent-color:var(--action-primary);
 }
 
