@@ -16144,7 +16144,7 @@ const personLibraryController = {
       button.tabIndex = active ? 0 : -1;
     }
     if (personLibrarySearch) {
-      personLibrarySearch.placeholder = uiText(petTab ? '搜尋寵物……' : '搜尋人物……');
+      personLibrarySearch.placeholder = uiText('搜尋姓名……');
     }
   },
   setCategory(category) {
@@ -16336,12 +16336,7 @@ function renderPetLibrary() {
   const list = $('personLibraryList');
   const all = collectPetLibraryEntries();
   const query = personLibrarySearch.value.trim().toLowerCase();
-  const filtered = all.filter(entry => {
-    if (!query) return true;
-    const info = petLibraryDisplayInfo(entry);
-    return [info.name,info.breed,info.species,info.ownerLabel,...info.traits]
-      .some(value => String(value || '').toLowerCase().includes(query));
-  });
+  const filtered = all.filter(entry => !query || petLibraryDisplayInfo(entry).name.toLowerCase().includes(query));
   personLibraryController.syncCategoryCounts();
   personLibraryController.syncViewControls();
   personLibraryController.syncBatchToolbar();
@@ -16427,19 +16422,7 @@ function renderPersonLibrary() {
 
   all.sort((x, y) => String(x.name).localeCompare(String(y.name), 'zh'));
 
-  const filtered = q ? all.filter(s =>
-    (s.name || '').toLowerCase().includes(q)
-    || (s.career || '').toLowerCase().includes(q)
-    || (s.residence || '').toLowerCase().includes(q)
-    || (s.aspiration || '').toLowerCase().includes(q)
-    || (s.causeOfDeath || '').toLowerCase().includes(q)
-    || (s.traits || []).some(t => (t || '').toLowerCase().includes(q))
-    || (s.pets || []).some(p =>
-      (p.name || '').toLowerCase().includes(q)
-      || (p.breed || '').toLowerCase().includes(q)
-    )
-    || (s.gallery || []).some(g => (g.title || '').toLowerCase().includes(q))
-  ) : all;
+  const filtered = q ? all.filter(s => displayDataText(s.name,s).toLowerCase().includes(q)) : all;
 
   personLibraryController.syncCategoryCounts();
   personLibraryController.syncViewControls();
