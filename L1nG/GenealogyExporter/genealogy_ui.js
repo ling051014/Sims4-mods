@@ -2043,12 +2043,14 @@
       function paintTrigger() {
         const option = select.options[select.selectedIndex];
         triggerValue.textContent = optionLabel(option);
+        triggerValue.classList.toggle('ui-single-select-placeholder',
+          select.id === 'simRaceSelect' && option?.value === '');
         trigger.disabled = !!select.disabled;
       }
 
       function paintOptions() {
         optionsHost.innerHTML =
-          [...select.options].map(option => {
+          [...select.options].filter(option => !option.hidden).map(option => {
             const classes = [
               'ui-select-option',
               option.selected ? 'selected' : '',

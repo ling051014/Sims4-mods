@@ -3065,7 +3065,7 @@ function buildPersonEditorDraft({
     $('simRaceSelect').value=
       sim
         ? (sim.race||'')
-        : '';
+        : 'human';
 
     $('simBirthdayYearInput').value=
       sim&&sim.birthdayYear!=null
