@@ -307,6 +307,35 @@ let hasSavedCustomTheme = false;
 let personLibraryViewMode = 'detailed';
 let personLibraryCategory = 'sims';
 let personLibraryAvatarObserver = null;
+
+// Cache only normalized overview data; canonical data changes invalidate this snapshot.
+let personLibraryIndexCache = null;
+let personLibraryRenderToken = 0;
+
+function invalidatePersonLibraryIndex() {
+  personLibraryIndexCache = null;
+}
+
+function getPersonLibraryIndex() {
+  const db = currentGenealogyData();
+  if (personLibraryIndexCache?.database === db) return personLibraryIndexCache;
+  const sims = Object.values(db?.sims || {})
+    .sort((a,b) => String(a.name).localeCompare(String(b.name), 'zh'));
+  const familyNamesBySimId = new Map();
+  for (const family of db?.families || []) {
+    for (const id of family.memberIds || []) {
+      const key = String(id);
+      if (!familyNamesBySimId.has(key)) familyNamesBySimId.set(key, []);
+      familyNamesBySimId.get(key).push(family);
+    }
+  }
+  const pets = collectPetLibraryEntries();
+  personLibraryIndexCache = {
+    database:db, sims, pets, familyNamesBySimId,
+    petsByKey:new Map(pets.map(entry => [entry.key,entry]))
+  };
+  return personLibraryIndexCache;
+}
 try {
   const savedPersonLibraryView = localStorage.getItem(PERSON_LIBRARY_VIEW_KEY);
   if (savedPersonLibraryView === 'compact' || savedPersonLibraryView === 'detailed') personLibraryViewMode = savedPersonLibraryView;
@@ -8025,6 +8054,7 @@ function replaceCanonicalGenealogyDatabase(
     );
 
   invalidateFamilySelectorCache();
+  invalidatePersonLibraryIndex();
   genealogyScene?.invalidateTopologyCache?.();
   invalidateChildrenIndex();
   invalidateRelationshipGraph();
@@ -8042,6 +8072,7 @@ function applyGenealogyMutation(
   } = {}
 ) {
   if (!mutation?.dataChanged) return mutation;
+  invalidatePersonLibraryIndex();
 
   if (mutation.childrenIndexChanged) {
     invalidateChildrenIndex();
@@ -15666,7 +15697,9 @@ const personLibraryController = {
   },
 
   setViewMode(mode) {
-    personLibraryViewMode = mode === 'compact' ? 'compact' : 'detailed';
+    const next = mode === 'compact' ? 'compact' : 'detailed';
+    if (personLibraryViewMode === next) return;
+    personLibraryViewMode = next;
     try {
       localStorage.setItem(PERSON_LIBRARY_VIEW_KEY, personLibraryViewMode);
     } catch (_) {}
@@ -15712,14 +15745,26 @@ const personLibraryController = {
     personLibraryState.selection.clear();
     closeAppMenus();
     this.syncBatchToolbar();
-    renderPersonLibrary();
+    // Keep existing rows, menus and visible avatar URLs while toggling batch controls.
+    $('personLibraryList').querySelectorAll('.person-library-item').forEach(row => {
+      row.classList.toggle('batch-mode', personLibraryState.batchMode);
+      row.classList.remove('batch-selected');
+      const button = row.querySelector('.person-library-batch-select');
+      if (!button) return;
+      button.classList.remove('selected');
+      button.setAttribute('aria-pressed', 'false');
+      button.innerHTML = '';
+    });
+    if (!personLibraryState.batchMode) setupAppMenus();
   },
 
   toggleSelection(id) {
     if (!personLibraryState.batchMode) return;
     const selectable = personLibraryCategory === 'pets'
-      ? collectPetLibraryEntries().some(entry => entry.key === id &&
-          String(entry.pet?.gameData?.simId || entry.pet?.id || '') === id)
+      ? (() => {
+          const entry = getPersonLibraryIndex().petsByKey.get(id);
+          return !!entry && String(entry.pet?.gameData?.simId || entry.pet?.id || '') === id;
+        })()
       : !!currentGenealogyData().sims[id];
     if (!selectable) return;
 
@@ -15729,7 +15774,21 @@ const personLibraryController = {
       personLibraryState.selection.add(id);
     }
 
-    renderPersonLibrary();
+    const list = $('personLibraryList');
+    const row = [...list.children].find(item =>
+      personLibraryCategory === 'pets'
+        ? item.dataset.petLibraryKey === id
+        : item.dataset.personLibraryId === id
+    );
+    const selected = personLibraryState.selection.has(id);
+    row?.classList.toggle('batch-selected', selected);
+    const button = row?.querySelector('.person-library-batch-select');
+    if (button) {
+      button.classList.toggle('selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+      button.innerHTML = selected ? iconSvg('check-lg') : '';
+    }
+    this.syncBatchToolbar();
   },
 
   open() {
@@ -15743,13 +15802,15 @@ const personLibraryController = {
 
   close() {
     personLibraryDialog.classList.remove('show');
+    personLibraryRenderToken++;
     personLibraryAvatarObserver?.disconnect();
     personLibraryAvatarObserver = null;
     resetPersonLibraryOperations({ batch:true, add:false });
   },
   syncCategoryCounts() {
-    const sims = Object.keys(currentGenealogyData().sims || {}).length;
-    const pets = collectPetLibraryEntries().length;
+    const { sims:simsList, pets:petList } = getPersonLibraryIndex();
+    const sims = simsList.length;
+    const pets = petList.length;
     if ($('personLibrarySimsCount')) $('personLibrarySimsCount').textContent = String(sims);
     if ($('personLibraryPetsCount')) $('personLibraryPetsCount').textContent = String(pets);
   },
@@ -15905,10 +15966,14 @@ function petLibraryAvatarHTML(pet) {
     framedAvatarImageHTML(pet?.avatar, pet?.avatarFrame, 'person-library-deferred-image', true);
 }
 
-function observePersonLibraryAvatars(list) {
-  personLibraryAvatarObserver?.disconnect();
-  personLibraryAvatarObserver = null;
-  const images = [...list.querySelectorAll('img.person-library-deferred-image[data-asset-id]')];
+function observePersonLibraryAvatars(list, addedRows = null) {
+  if (!addedRows) {
+    personLibraryAvatarObserver?.disconnect();
+    personLibraryAvatarObserver = null;
+  }
+  const images = (addedRows || [list]).flatMap(row =>
+    [...row.querySelectorAll('img.person-library-deferred-image[data-asset-id]')]
+  );
   if (!images.length) return;
 
   async function loadVisibleAvatar(image) {
@@ -15941,7 +16006,7 @@ function observePersonLibraryAvatars(list) {
     return;
   }
 
-  personLibraryAvatarObserver = new IntersectionObserver(entries => {
+  if (!personLibraryAvatarObserver) personLibraryAvatarObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       const image = entry.target;
       if (entry.isIntersecting) {
@@ -16127,13 +16192,91 @@ async function deletePetFromLibrary(entry) {
   if(personLibraryDialog.classList.contains('show'))renderPersonLibrary();
 }
 
+// One container listener survives list replacement, view switches and batch mode.
+function bindPersonLibraryEvents() {
+  const list = $('personLibraryList');
+  if (list.dataset.libraryEventsBound === '1') return;
+  list.dataset.libraryEventsBound = '1';
+  list.addEventListener('click', async event => {
+    const target = event.target;
+    const petRow = target.closest('[data-pet-library-key]');
+    const simRow = target.closest('[data-person-library-id]');
+    const row = petRow || simRow;
+    if (!row || !list.contains(row)) return;
+    const petId = petRow?.dataset.petLibraryKey;
+    const simId = simRow?.dataset.personLibraryId;
+
+    if (target.closest('[data-pet-library-select], [data-person-library-select]')) {
+      event.stopPropagation();
+      personLibraryController.toggleSelection(petId || simId);
+      return;
+    }
+
+    const petAction = target.closest('[data-pet-library-action]');
+    if (petAction && petRow) {
+      event.stopPropagation();
+      const entry = getPersonLibraryIndex().petsByKey.get(petId);
+      if (!entry) return;
+      const action = petAction.dataset.petLibraryAction;
+      if (action === 'edit') openPetEditorFromCanvas(entry);
+      else if (action === 'locate') locatePetFromLibrary(entry);
+      else if (action === 'delete') void deletePetFromLibrary(entry);
+      else openPetProfileFromCanvas(entry);
+      return;
+    }
+
+    const simAction = target.closest('[data-person-library-action]');
+    if (simAction && simRow) {
+      event.stopPropagation();
+      if (!currentGenealogyData().sims[simId]) return;
+      const action = simAction.dataset.personLibraryAction;
+      if (action === 'view') openPersonProfile(simId);
+      else if (action === 'edit') personEditor.open(simId);
+      else if (action === 'locate') locatePersonFromLibrary(simId);
+      else if (action === 'toggle-family') {
+        const fam = currentFamily();
+        const mutation = fam.memberIds.includes(simId)
+          ? genealogyStore.removeFamilyMember(fam.id, simId)
+          : genealogyStore.addFamilyMember(fam.id, simId);
+        applyGenealogyMutation(mutation);
+        renderPersonLibrary();
+      } else if (action === 'delete') await deleteChar(simId);
+      return;
+    }
+    if (target.closest('.person-library-item-menu')) return;
+    if (personLibraryState.batchMode) personLibraryController.toggleSelection(petId || simId);
+    else if (petRow) {
+      const entry = getPersonLibraryIndex().petsByKey.get(petId);
+      if (entry) openPetProfileFromCanvas(entry);
+    } else openPersonProfile(simId);
+  });
+}
+
+// Keep the first tab-switch frame short for large imported saves.
+function renderPersonLibraryRows(list, items, renderRow) {
+  const token = personLibraryRenderToken;
+  const batchSize = items.length > 120 ? 48 : Math.max(items.length, 1);
+  let position = 0;
+  function appendBatch() {
+    if (token !== personLibraryRenderToken || !list.isConnected) return;
+    const end = Math.min(position + batchSize, items.length);
+    const previousCount = list.children.length;
+    list.insertAdjacentHTML('beforeend', items.slice(position, end).map(renderRow).join(''));
+    const addedRows = Array.from(list.children).slice(previousCount);
+    observePersonLibraryAvatars(list, addedRows);
+    if (!personLibraryState.batchMode && (position === 0 || end === items.length)) setupAppMenus();
+    position = end;
+    if (position < items.length) requestAnimationFrame(appendBatch);
+  }
+  appendBatch();
+}
+
 function renderPetLibrary() {
   const list = $('personLibraryList');
-  const all = collectPetLibraryEntries();
+  const all = getPersonLibraryIndex().pets;
   const query = personLibrarySearch.value.trim().toLowerCase();
-  const filtered = all.filter(entry =>
-    !query || petLibraryDisplayInfo(entry).name.toLowerCase().includes(query)
-  );
+  const filtered = all.map(entry => ({ entry, info:petLibraryDisplayInfo(entry) }))
+    .filter(({info}) => !query || info.name.toLowerCase().includes(query));
   personLibraryController.syncCategoryCounts();
   personLibraryController.syncViewControls();
   personLibraryController.syncBatchToolbar();
@@ -16143,8 +16286,8 @@ function renderPetLibrary() {
     return;
   }
 
-  list.innerHTML = filtered.map(entry => {
-    const info = petLibraryDisplayInfo(entry);
+  list.replaceChildren();
+  renderPersonLibraryRows(list, filtered, ({entry, info}) => {
     const pet = entry.pet;
     const details = [
       [uiText('物種'),info.species],
@@ -16157,11 +16300,13 @@ function renderPetLibrary() {
     const petId = String(pet.gameData?.simId || pet.id || '');
     const selectable = !!petId && petId === entry.key;
     const selected = selectable && personLibraryState.selection.has(entry.key);
-    const detailHtml = details.map(([label,value]) =>
-      '<div class="person-library-detail-field"><span class="person-library-detail-label">' +
-      esc(label) + '</span><span class="person-library-detail-value">' +
-      esc(value) + '</span></div>'
-    ).join('');
+    const detailHtml = personLibraryViewMode === 'detailed'
+      ? details.map(([label,value]) =>
+          '<div class="person-library-detail-field"><span class="person-library-detail-label">' +
+          esc(label) + '</span><span class="person-library-detail-value">' +
+          esc(value) + '</span></div>'
+        ).join('')
+      : '';
     return '<div class="person-library-item person-library-pet-item' +
       (personLibraryState.batchMode ? ' batch-mode' : '') +
       (selected ? ' batch-selected' : '') +
@@ -16197,38 +16342,13 @@ function renderPetLibrary() {
             iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span></button>' +
         '</div>' +
       '</div></div>';
-  }).join('');
-
-  const indexed = new Map(filtered.map(entry => [entry.key,entry]));
-  list.querySelectorAll('[data-pet-library-key]').forEach(row => {
-    const entry = indexed.get(row.dataset.petLibraryKey);
-    if (!entry) return;
-    row.addEventListener('click', event => {
-      if (event.target.closest('.person-library-item-menu,.person-library-batch-select')) return;
-      if (personLibraryState.batchMode) personLibraryController.toggleSelection(entry.key);
-      else openPetProfileFromCanvas(entry);
-    });
-    row.querySelector('[data-pet-library-select]')?.addEventListener('click', event => {
-      event.stopPropagation();
-      personLibraryController.toggleSelection(entry.key);
-    });
-    row.querySelectorAll('[data-pet-library-action]').forEach(button => {
-      button.addEventListener('click', event => {
-        event.stopPropagation();
-        const action=button.dataset.petLibraryAction;
-        if (action === 'edit') openPetEditorFromCanvas(entry);
-        else if (action === 'locate') locatePetFromLibrary(entry);
-        else if (action === 'delete') void deletePetFromLibrary(entry);
-        else openPetProfileFromCanvas(entry);
-      });
-    });
   });
-  observePersonLibraryAvatars(list);
-  if (!personLibraryState.batchMode) setupAppMenus();
 }
 
 function renderPersonLibrary() {
+  personLibraryRenderToken++;
   closeAppMenus();
+  bindPersonLibraryEvents();
   personLibraryAvatarObserver?.disconnect();
   personLibraryAvatarObserver = null;
   personLibraryController.syncCategoryControls();
@@ -16239,9 +16359,9 @@ function renderPersonLibrary() {
 
   const fam = currentFamily();
   const q = personLibrarySearch.value.trim().toLowerCase();
-  const all = Object.values(currentGenealogyData().sims);
-
-  all.sort((x, y) => String(x.name).localeCompare(String(y.name), 'zh'));
+  const index = getPersonLibraryIndex();
+  const all = index.sims;
+  const familyMembers = new Set((fam?.memberIds || []).map(String));
 
   const filtered = q ? all.filter(s =>
     displayDataText(s.name,s).toLowerCase().includes(q)
@@ -16274,10 +16394,11 @@ function renderPersonLibrary() {
     return;
   }
 
-  list.innerHTML = filtered.map(s => {
-    const familyNames = currentGenealogyData().families
-      .filter(f => f.memberIds.includes(s.id))
-      .map(f => displayDataText(f.name, f));
+  list.replaceChildren();
+  renderPersonLibraryRows(list, filtered, s => {
+    const familyNames = personLibraryViewMode === 'detailed'
+      ? (index.familyNamesBySimId.get(String(s.id)) || []).map(f => displayDataText(f.name, f))
+      : [];
 
     const selected = personLibraryState.selection.has(s.id);
     const photoCount = (s.gallery || []).length;
@@ -16289,14 +16410,17 @@ function renderPersonLibrary() {
       [uiText('居住地'), displayDataText(s.residence, s) || uiText('居住地未知')],
       [uiText('所屬家族'), familyDetails]
     ];
-    const detailHtml = detail.map(([label,value]) =>
-      '<div class="person-library-detail-field"><span class="person-library-detail-label">' +
-      esc(label) + '</span><span class="person-library-detail-value">' +
-      esc(value) + '</span></div>'
-    ).join('');
+    const detailHtml = personLibraryViewMode === 'detailed'
+      ? detail.map(([label,value]) =>
+          '<div class="person-library-detail-field"><span class="person-library-detail-label">' +
+          esc(label) + '</span><span class="person-library-detail-value">' +
+          esc(value) + '</span></div>'
+        ).join('')
+      : '';
 
-    const familyAction = fam.memberIds.includes(s.id) ? '移出目前家族' : '加入目前家族';
-    const familyIcon = fam.memberIds.includes(s.id) ? 'person-dash' : 'person-add';
+    const inCurrentFamily = familyMembers.has(String(s.id));
+    const familyAction = inCurrentFamily ? '移出目前家族' : '加入目前家族';
+    const familyIcon = inCurrentFamily ? 'person-dash' : 'person-add';
 
     return '<div class="person-library-item' +
         (personLibraryState.batchMode ? ' batch-mode' : '') +
@@ -16334,54 +16458,7 @@ function renderPersonLibrary() {
         '</div>' +
       '</div>' +
     '</div>';
-  }).join('');
-
-  list.querySelectorAll('[data-person-library-id]').forEach(row => {
-    row.addEventListener('click', e => {
-      if (e.target.closest('.person-library-item-menu, .person-library-batch-select')) return;
-      const id = row.dataset.personLibraryId;
-      if (personLibraryState.batchMode) personLibraryController.toggleSelection(id);
-      else openPersonProfile(id);
-    });
   });
-
-  list.querySelectorAll('[data-person-library-select]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      personLibraryController.toggleSelection(btn.dataset.personLibrarySelect);
-    });
-  });
-
-  list.querySelectorAll('[data-person-library-action]').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-
-      const id = btn.dataset.personLibraryActionId;
-      const action = btn.dataset.personLibraryAction;
-      if (!currentGenealogyData().sims[id]) return;
-
-      if (action === 'view') {
-        openPersonProfile(id);
-      } else if (action === 'edit') {
-        personEditor.open(id);
-      } else if (action === 'locate') {
-        locatePersonFromLibrary(id);
-      } else if (action === 'toggle-family') {
-        const mutation =
-          fam.memberIds.includes(id)
-            ? genealogyStore.removeFamilyMember(fam.id, id)
-            : genealogyStore.addFamilyMember(fam.id, id);
-
-        applyGenealogyMutation(mutation);
-        renderPersonLibrary();
-      } else if (action === 'delete') {
-        await deleteChar(id);
-      }
-    });
-  });
-
-  observePersonLibraryAvatars(list);
-  if (!personLibraryState.batchMode) setupAppMenus();
 }
 
 $('personLibraryBtn').onclick = () => {
