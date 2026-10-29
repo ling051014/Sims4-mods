@@ -5,9 +5,9 @@
   const LANG_KEY = 'ling_genealogy_language_v1';
   const SUPPORTED_LANGUAGES = Object.freeze(['zh-Hant', 'zh-Hans', 'en']);
   const LOCALE_FILES = Object.freeze({
-    'zh-Hant': 'locales/zh-TW.json?v=20261026-outfit-categories-r1',
-    'zh-Hans': 'locales/zh-CN.json?v=20261026-outfit-categories-r1',
-    'en': 'locales/en.json?v=20261029-en-layout-r1'
+    'zh-Hant': 'locales/zh-TW.json?v=20261029-overview-pets-r1',
+    'zh-Hans': 'locales/zh-CN.json?v=20261029-overview-pets-r1',
+    'en': 'locales/en.json?v=20261029-overview-pets-r1'
   });
 
   const catalogs = new Map();
