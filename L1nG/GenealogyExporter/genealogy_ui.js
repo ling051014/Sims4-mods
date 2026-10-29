@@ -1512,10 +1512,11 @@
 
       function paintSelection() {
         const placeholder = uiText(placeholderSource);
+        let markup;
 
         if (multiple) {
           if (addOnly) {
-            input.innerHTML =
+            markup =
               '<span class="ui-select-add-label">' +
                 iconSvg('plus-lg') +
                 '<span>' +
@@ -1525,7 +1526,7 @@
           } else {
             const selected = [...select.options].filter(option => option.selected);
 
-            input.innerHTML = selected.length
+            markup = selected.length
               ? selected.map(option => {
                   const locked = option.disabled;
                   const note = option.dataset.uiSelectNote || '';
@@ -1541,33 +1542,39 @@
                   );
                 }).join('')
               : '<span class="ui-select-placeholder">' + esc(placeholder) + '</span>';
-
-            input.querySelectorAll('.ui-select-tag-x').forEach(remove => {
-              remove.onclick = event => {
-                event.stopPropagation();
-
-                const option = [...select.options].find(item => item.value === remove.dataset.remove);
-                if (option) option.selected = false;
-
-                paintSelection();
-                paintOptions(search.value);
-                emitChange(select);
-              };
-            });
           }
         } else {
           const selected = select.options[select.selectedIndex];
 
-          input.innerHTML =
+          markup =
             !selected
               ? '<span class="ui-select-placeholder">' + esc(placeholder) + '</span>'
               : '<span class="ui-single-select-value">' + esc(selected.textContent) + '</span>';
         }
 
-        input.insertAdjacentHTML(
-          'beforeend',
-          iconSvg('chevron-down', 'ui-select-chevron-icon')
-        );
+        // 更新選取內容時保留同一個 SVG 節點，避免展開 / 收合動畫被重建中斷。
+        const chevron = input.querySelector(':scope > .ui-select-chevron-icon');
+        if (chevron) {
+          [...input.childNodes].forEach(node => {
+            if (node !== chevron) node.remove();
+          });
+          chevron.insertAdjacentHTML('beforebegin', markup);
+        } else {
+          input.innerHTML = markup + iconSvg('chevron-down', 'ui-select-chevron-icon');
+        }
+
+        input.querySelectorAll('.ui-select-tag-x').forEach(remove => {
+          remove.onclick = event => {
+            event.stopPropagation();
+
+            const option = [...select.options].find(item => item.value === remove.dataset.remove);
+            if (option) option.selected = false;
+
+            paintSelection();
+            paintOptions(search.value);
+            emitChange(select);
+          };
+        });
       }
 
       function close() {
@@ -2028,14 +2035,14 @@
         return option.textContent;
       }
 
+      const triggerValue = document.createElement('span');
+      triggerValue.className = 'ui-single-select-value';
+      trigger.appendChild(triggerValue);
+      trigger.insertAdjacentHTML('beforeend', iconSvg('chevron-down', 'ui-select-chevron-icon'));
+
       function paintTrigger() {
         const option = select.options[select.selectedIndex];
-        const text = optionLabel(option);
-
-        trigger.innerHTML =
-          '<span class="ui-single-select-value">' + esc(text) + '</span>' +
-          iconSvg('chevron-down', 'ui-select-chevron-icon');
-
+        triggerValue.textContent = optionLabel(option);
         trigger.disabled = !!select.disabled;
       }
 

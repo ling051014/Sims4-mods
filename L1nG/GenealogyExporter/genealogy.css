@@ -2294,7 +2294,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 小型箭頭 */ width: 10px;
     /* 小型箭頭 */ height: 10px;
     /* 不被壓縮 */ flex: 0 0 10px;
-    /* 轉場 */ transition: transform .15s ease;
+    /* 轉場 */ transition: transform var(--genealogy-chevron-duration) ease;
 }
 
 .other-rel-type-trigger.open .other-rel-type-chevron {
@@ -2457,7 +2457,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     /* 圖示尺寸 */ width: 12px;
     /* 圖示高度 */ height: 12px;
     /* 顏色 */ color: var(--text-secondary);
-    /* 轉場 */ transition: transform .15s ease;
+    /* 轉場 */ transition: transform var(--genealogy-chevron-duration) ease;
 }
 
 .relationship-type-picker.open .relationship-type-chevron {
@@ -7516,7 +7516,7 @@ select.nav-native-select {
     /* 左側自動推移 */ margin-left: auto;
     /* 右側內縮 */ margin-right: 5px;
     /* 彈性收縮 */ flex-shrink: 0;
-    /* 動畫過渡 */ transition: transform .18s ease;
+    /* 動畫過渡 */ transition: transform var(--genealogy-chevron-duration) ease;
     /* 透明度 */ opacity: .72;
 }
 
@@ -7655,6 +7655,10 @@ select.nav-native-select {
 /* ========【頂部下拉結果】 對齊既有專案搜尋結果的白底、細框、圓角與分隔線邏輯 ======== */
 
 /* ========【共用下拉箭頭】 編輯頁與導覽共用同一顆 chevron-down.svg ======== */
+:root { --genealogy-chevron-duration: .18s; }
+@media (prefers-reduced-motion: reduce) {
+    :root { --genealogy-chevron-duration: 0s; }
+}
 
 /* ========【網站表單選擇器】 單選 / 可輸入建議 / 搜尋多選共用同一套 UI ======== */
 
@@ -7771,7 +7775,7 @@ select.nav-native-select {
 .ui-suggestion-toggle .l1ng-icon {
     /* 固定圖示大小 */ width: 12px;
     /* 固定圖示大小 */ height: 12px;
-    /* 展開動畫 */ transition: transform .15s ease;
+    /* 展開動畫 */ transition: transform var(--genealogy-chevron-duration) ease;
 }
 
 .ui-suggestion-combobox.ui-select-open .ui-suggestion-toggle .l1ng-icon {
@@ -7789,7 +7793,7 @@ select.nav-native-select {
     /* 與導覽箭頭一致尺寸 */ height: 12px;
     /* 跟著目前主題變化 */ color: var(--text-secondary);
     /* 不攔截欄位點擊 */ pointer-events: none;
-    /* 動畫過渡 */ transition: transform .15s ease, color .15s ease;
+    /* 動畫過渡 */ transition: transform var(--genealogy-chevron-duration) ease, color .15s ease;
 }
 
 .ui-select-wrap.ui-select-open .ui-select-chevron-icon,
@@ -10229,14 +10233,15 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 .l1ng-tour-practice-target {position:fixed;z-index:1;border:2px solid var(--action-primary);border-radius:9px;cursor:pointer;background:transparent;color:transparent;}
 .l1ng-tour-panel {position:fixed;z-index:2;box-sizing:border-box;background:var(--surface-card);color:var(--text-primary);border:1px solid var(--border-default);border-radius:12px;padding:17px;box-shadow:0 12px 42px rgba(0,0,0,.22);max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;}
 .l1ng-tour-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.l1ng-tour-chapter-tabs {display:flex;position:relative;flex:1 1 0;min-width:0;min-height:36px;align-items:stretch;gap:3px;padding:3px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;border:1px solid var(--border-default);border-radius:999px;background:var(--surface-panel);}
+.l1ng-tour-chapter-tabs {display:flex;position:relative;flex:1 1 0;min-width:0;min-height:36px;align-items:stretch;gap:3px;padding:3px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;border:1px solid transparent;border-radius:999px;background:var(--surface-panel);}
 .l1ng-tour-chapter-tabs::-webkit-scrollbar {display:none;}
-.l1ng-tour-chapter-tabs > .l1ng-selection-indicator {position:absolute;z-index:0;top:0;left:0;pointer-events:none;width:var(--l1ng-indicator-width,0px);height:var(--l1ng-indicator-height,0px);border:1px solid var(--nav-active-border);border-radius:999px;background:var(--brand-tint-start);transform:translate3d(var(--l1ng-indicator-x,0px),var(--l1ng-indicator-y,0px),0);box-sizing:border-box;}
+.l1ng-tour-chapter-tabs > .l1ng-selection-indicator {position:absolute;z-index:0;top:0;left:0;pointer-events:none;width:var(--l1ng-indicator-width,0px);height:var(--l1ng-indicator-height,0px);border:1px solid transparent;border-radius:999px;background:var(--surface-card);transform:translate3d(var(--l1ng-indicator-x,0px),var(--l1ng-indicator-y,0px),0);box-sizing:border-box;}
 .l1ng-tour-chapter-tabs.l1ng-indicator-animated > .l1ng-selection-indicator {transition:transform 260ms ease-out,width 260ms ease-out,height 260ms ease-out;}
 .l1ng-tour-chapter-option {position:relative;z-index:1;flex:1 0 auto;min-height:28px;border:0;border-radius:999px;padding:6px 10px;background:transparent;color:var(--text-secondary);font:inherit;font-size:12px;line-height:1.3;white-space:nowrap;cursor:pointer;}
 .l1ng-tour-chapter-option:hover {color:var(--text-primary);}
+.l1ng-tour-chapter-option:not(.active):hover {background:color-mix(in srgb,var(--surface-card) 58%,transparent);}
 .l1ng-tour-chapter-option.active {color:var(--action-primary);font-weight:700;}
-.l1ng-tour-chapter-tabs:not(.l1ng-indicator-ready) .l1ng-tour-chapter-option.active {background:var(--brand-tint-start);}
+.l1ng-tour-chapter-tabs:not(.l1ng-indicator-ready) .l1ng-tour-chapter-option.active {background:var(--surface-card);}
 .l1ng-tour-chapter-option:focus:not(:focus-visible) {outline:none;}
 .l1ng-tour-chapter-option:focus-visible {outline:2px solid var(--action-primary);outline-offset:-2px;}
 @media(prefers-reduced-motion:reduce){.l1ng-tour-chapter-tabs > .l1ng-selection-indicator,.l1ng-tour-chapter-option {transition:none!important;}}
