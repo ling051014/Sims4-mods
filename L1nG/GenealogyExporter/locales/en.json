@@ -6,6 +6,9 @@
     "canonical": false
   },
   "messages": {
+    "批量刪除寵物": "Delete Multiple Pets",
+    "已選 {n} 隻寵物": "{n} pets selected",
+    "確定永久刪除選取的 {n} 隻寵物嗎？": "Permanently delete the {n} selected pets?",
     "會保存族譜資料、服裝穿搭及引用的圖片，可用於日後還原與繼續編輯": " includes family tree data, outfits, and referenced images, so you can restore and continue editing later",
     "可將遊戲族譜 ZIP 或 JSON 備份直接拖曳至族譜畫布匯入": "Drag a game family tree ZIP or JSON backup onto the family tree canvas to import it",
     "可將圖片拖曳至人生照片區域，或在照片編輯視窗按": "Drag an image into Life Photos, or press ",
