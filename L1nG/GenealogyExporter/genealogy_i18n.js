@@ -5,9 +5,9 @@
   const LANG_KEY = 'ling_genealogy_language_v1';
   const SUPPORTED_LANGUAGES = Object.freeze(['zh-Hant', 'zh-Hans', 'en']);
   const LOCALE_FILES = Object.freeze({
-    'zh-Hant': 'locales/zh-TW.json?v=20261030-death-locales-r1',
-    'zh-Hans': 'locales/zh-CN.json?v=20261030-death-locales-r1',
-    'en': 'locales/en.json?v=20261030-death-locales-r1'
+    'zh-Hant': 'locales/zh-TW.json?v=20261030-death-json-r2',
+    'zh-Hans': 'locales/zh-CN.json?v=20261030-death-json-r2',
+    'en': 'locales/en.json?v=20261030-death-json-r2'
   });
 
   const catalogs = new Map();
@@ -26,6 +26,10 @@
       data.messages && typeof data.messages === 'object'
         ? data.messages
         : {};
+    const suggestions =
+      data.suggestions && typeof data.suggestions === 'object' && !Array.isArray(data.suggestions)
+        ? data.suggestions
+        : {};
     const phrases =
       data.phrases && typeof data.phrases === 'object'
         ? data.phrases
@@ -41,6 +45,7 @@
           ? data._meta
           : {},
       messages,
+      suggestions,
       phrases,
       characters,
       phraseKeys:Object.keys(phrases).sort((a, b) => b.length - a.length)
@@ -493,6 +498,13 @@ They can still be added to other families.`;
     observe();
   }
 
+  function getSuggestionList(key) {
+    const values = catalogs.get(language)?.suggestions?.[String(key || '')];
+    return Array.isArray(values)
+      ? values.filter(value => typeof value === 'string' && value.trim()).map(value => value.trim())
+      : [];
+  }
+
   function onLanguageChanged(listener) {
     if (typeof listener !== 'function') return () => {};
 
@@ -508,6 +520,7 @@ They can still be added to other families.`;
     setLanguage,
     translate:translatePatterns,
     translateFor,
+    getSuggestionList,
     onLanguageChanged,
     get language() {
       return language;
