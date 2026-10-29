@@ -582,7 +582,7 @@ function buildPersonEditorDraft({
       lifeStage:$('simLifeStageSelect').value,
       gender:$('simGenderSelect').value,
       status,
-      race:$('simRaceSelect').value||'',
+      race:$('simRaceSelect').value||'human',
       birthdayYear:$('simBirthdayYearInput').value===''?null:Math.trunc(Number($('simBirthdayYearInput').value)),
       birthdayMonth:$('simBirthdayMonthSelect').value?Number($('simBirthdayMonthSelect').value):null,
       birthdayDay:$('simBirthdayDaySelect').value?Number($('simBirthdayDaySelect').value):null,
@@ -2283,9 +2283,7 @@ function buildPersonEditorDraft({
         : '在世';
 
     $('simRaceSelect').value=
-      sim
-        ? (sim.race||'')
-        : 'human';
+      sim?.race || 'human';
 
     $('simBirthdayYearInput').value=
       sim&&sim.birthdayYear!=null
@@ -3332,7 +3330,7 @@ function collectPersonEditorSaveRequest() {
       $('simGenderSelect').value,
     status,
     race:
-      $('simRaceSelect').value || '',
+      $('simRaceSelect').value || 'human',
     birthdayYear:
       $('simBirthdayYearInput').value === ''
         ? null
