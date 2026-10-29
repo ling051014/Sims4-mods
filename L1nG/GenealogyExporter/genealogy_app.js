@@ -2484,7 +2484,7 @@ function positionFamilyNavSelectMenu(control) {
   if (!control || control.select.id !== 'familySelect') return;
 
   const { trigger, menu } = control;
-  const items = [...menu.querySelectorAll('.nav-select-option')];
+  const items = [...menu.querySelectorAll('.nav-select-option:not(:disabled)')];
 
   if (menu.parentElement !== document.body) {
     document.body.appendChild(menu);
@@ -2571,8 +2571,9 @@ function syncNavSelectControl(selectId) {
 
   menu.innerHTML = options.map(option => {
     const selectedClass = option.value === select.value ? ' selected' : '';
+    const disabled = option.disabled;
     const label = getNavSelectDisplayText(select, option);
-    return `<button type="button" class="nav-select-option${selectedClass}" role="option" aria-selected="${option.value === select.value ? 'true' : 'false'}" data-nav-value="${esc(option.value)}" title="${esc(label)}">${esc(label)}</button>`;
+    return `<button type="button" class="nav-select-option${selectedClass}" role="option" aria-selected="${option.value === select.value ? 'true' : 'false'}"${disabled ? ' disabled aria-disabled="true"' : ''} data-nav-value="${esc(option.value)}" title="${esc(label)}">${esc(label)}</button>`;
   }).join('');
 
   if (selectId === 'familySelect') syncFamilyNavTabsPortal(control);
@@ -2630,8 +2631,8 @@ function setupTopbarNavSelects() {
         }
 
         const current =
-          menu.querySelector('.nav-select-option.selected') ||
-          menu.querySelector('.nav-select-option');
+          menu.querySelector('.nav-select-option.selected:not(:disabled)') ||
+          menu.querySelector('.nav-select-option:not(:disabled)');
 
         if (current) current.focus({ preventScroll:true });
       });
@@ -13543,7 +13544,13 @@ const bio = $('familyBio'); if (bio && document.activeElement !== bio) bio.value
 
 function refreshFamilyUI() {
   const fam = currentFamily();
-  if (!fam) return;
+  if (!fam) {
+    familyNameInput.value = '';
+    syncFamilyNameInputWidth();
+    familySelect.innerHTML = '<option value="" disabled>' + esc(uiText('目前尚未建立任何家族')) + '</option>';
+    syncNavSelectControl('familySelect');
+    return;
+  }
 
   const familyName = displayDataText(fam.name, fam);
   const selectorEntries = getFamilySelectorEntries();
@@ -13551,11 +13558,25 @@ function refreshFamilyUI() {
   familyNameInput.value = familyName;
   syncFamilyNameInputWidth();
 
-  familySelect.innerHTML = selectorEntries
-    .map(entry =>
-      `<option value="${esc(entry.value)}">${esc(entry.label || displayDataText(entry.labelFamily.name, entry.labelFamily) || uiText('家族名稱'))}</option>`
-    )
-    .join('');
+  const families = currentGenealogyData().families || [];
+  const emptyWorkspace = families.length === 0 ||
+    (families.length === 1 &&
+      !String(families[0]?.name || '').trim() &&
+      !familySourceSeedIds(families[0]).length &&
+      Object.keys(currentGenealogyData().sims || {}).length === 0);
+
+  // 家族名稱欄位的 placeholder 不可當成選單選項，也不能回寫至家族資料。
+  familySelect.innerHTML = selectorEntries.map(entry => {
+    const label = emptyWorkspace
+      ? uiText('目前尚未建立任何家族')
+      : entry.label || displayDataText(entry.labelFamily?.name, entry.labelFamily) || uiText('未命名家族');
+    return `<option value="${esc(entry.value)}"${emptyWorkspace ? ' disabled' : ''}>${esc(label)}</option>`;
+  }).join('') || `<option value="" disabled>${esc(uiText(emptyWorkspace ? '目前尚未建立任何家族' : '目前沒有其他家族可切換'))}</option>`;
+
+  if (!emptyWorkspace && families.length === 1 && selectorEntries.length === 1) {
+    familySelect.insertAdjacentHTML('beforeend',
+      `<option value="__family_status__" disabled>${esc(uiText('目前沒有其他家族可切換'))}</option>`);
+  }
 
   const selected =
     selectorEntries.find(entry =>

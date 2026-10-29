@@ -10243,3 +10243,10 @@ input[type="range"].l1ng-color-picker-hue::-moz-range-thumb{height:29px;width:29
 @media(prefers-reduced-motion:reduce){
   .l1ng-tour-replay-hint{animation:none}
 }
+
+/* 不可選的家族選單狀態文字。 */
+.nav-select-option:disabled, .nav-select-option:disabled:hover {
+    cursor: default;
+    background: var(--nav-dropdown-bg);
+    color: var(--text-secondary);
+}
