@@ -6,6 +6,9 @@
     "canonical": false
   },
   "messages": {
+    "生日年份提示": "YY",
+    "生日月份提示": "MM",
+    "生日日期提示": "DD",
     "伊藤惠": "Megumi Ito",
     "木漏隙光山 / 2-5-1 若葉森": "Mt. Komorebi / 2-5-1 Wakabamori",
     "火災而亡 / 溺斃……": "Death by Fire / Drowning…",
