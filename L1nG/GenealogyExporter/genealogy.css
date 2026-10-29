@@ -6878,7 +6878,8 @@ html[lang="en"] body {
     color:var(--action-primary);
 }
 .ui-dialog[data-presentation="error"] .ui-dialog-status-icon,
-.ui-dialog[data-mode="confirm"][data-kind="danger"] .ui-dialog-status-icon {
+.ui-dialog[data-mode="confirm"][data-kind="danger"] .ui-dialog-status-icon,
+.ui-dialog[data-mode="choice"][data-kind="danger"] .ui-dialog-status-icon {
     color:var(--danger-text);
 }
 .ui-dialog-header h2 {
