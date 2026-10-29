@@ -6,6 +6,9 @@
     "canonical": false
   },
   "messages": {
+    "伊藤惠": "Megumi Ito",
+    "木漏隙光山 / 2-5-1 若葉森": "Mt. Komorebi / 2-5-1 Wakabamori",
+    "火災而亡 / 溺斃……": "Death by Fire / Drowning…",
     "可平移畫布": " to pan the canvas",
     "可置中並適應畫面": " to center and fit the tree",
     "可平移視角": " to pan",
@@ -213,10 +216,7 @@
     "搜尋姓名 / 職業 / 居住地……": "Search name / career / residence…",
     "匯入 JSON 備份": "Import JSON Backup",
     "匯出 JSON 備份": "Export JSON backup",
-    "如：莫蒂默·高斯": "e.g. Mortimer Goth",
-    "如：衰老 / 溺水 / 火災……": "e.g. old age / drowning / fire…",
     "作家 / 學生 / 無": "Writer / Student / None",
-    "如：柳溪 - 花園社區": "e.g. Willow Creek - Garden District",
     "如：暢銷作家 / 靈魂伴侶……": "e.g. Bestselling Author / Soulmate…",
     "搜尋家族……": "Search families…",
     "搜尋姓名……": "Search names…",
@@ -810,7 +810,6 @@
     "輸入自訂顯示文字": "Enter custom display text",
     "恢復預設": "Restore Defaults",
     "醫生 / 小學生 / 無……": "Doctor / Elementary School Student / None…",
-    "衰老 / 溺水 / 火災……": "Old Age / Drowning / Fire…",
     "抱負": "Aspiration",
     "暢銷作家 / 靈魂伴侶……": "Bestselling Author / Soulmate…",
     "管理": "Manage",
