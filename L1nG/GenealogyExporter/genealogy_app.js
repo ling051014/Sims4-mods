@@ -2475,6 +2475,7 @@ function restoreFamilyNavSelectMenu(control) {
   menu.style.removeProperty('width');
   menu.style.removeProperty('max-width');
   menu.style.removeProperty('max-height');
+  menu.style.removeProperty('min-height');
   menu.style.removeProperty('overflow-y');
   menu.style.removeProperty('--family-menu-rows');
 
@@ -2506,8 +2507,6 @@ function positionFamilyNavSelectMenu(control) {
   const { trigger, menu } = control;
   const items = [...menu.querySelectorAll('.nav-select-option')];
 
-  if (!items.length) return;
-
   if (menu.parentElement !== document.body) {
     document.body.appendChild(menu);
   }
@@ -2538,14 +2537,23 @@ function positionFamilyNavSelectMenu(control) {
     Math.min(items.length, Math.floor((availableHeight - verticalInset) / itemHeight))
   );
   const contentHeight = rows * itemHeight + verticalInset;
+  // 下拉面板至少與左側三個分類索引等高，仍受可用視窗高度限制。
+  const portal = ensureFamilyNavTabsPortal(control);
+  const tabsHeight = [...(portal?.querySelectorAll('.family-nav-index-tab') || [])]
+    .reduce((total, tab) => {
+      const style = getComputedStyle(tab);
+      return total + (parseFloat(style.height) || 0) + (parseFloat(style.marginTop) || 0);
+    }, 0);
+  const menuHeight = Math.min(availableHeight, Math.max(contentHeight, tabsHeight + 2));
   const menuTop = openAbove
-    ? rect.top - gap - contentHeight
+    ? rect.top - gap - menuHeight
     : rect.bottom + gap;
 
   menu.style.setProperty('--family-menu-rows', String(rows));
   menu.style.top = `${Math.round(Math.max(margin, menuTop))}px`;
   menu.style.left = `${Math.max(margin, Math.round(rect.left))}px`;
   menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
+  menu.style.minHeight = `${Math.max(0, Math.floor(menuHeight))}px`;
   menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
   // 極矮視窗連一列都容不下時，仍保留捲動入口，不留下看不見的可點擊項目。
   menu.style.overflowY = availableHeight < itemHeight + verticalInset ? 'auto' : 'hidden';
@@ -7542,7 +7550,7 @@ if (restoreSampleBtn) {
             meta:{ sample:false, unassignedPets:[] },
             sims:{},
             families:[{
-              id:familyId, name:'新家族', memberIds:[],
+              id:familyId, name:'', memberIds:[],
               bio:'', coverImage:null, freeLayout:false,
               manualPositions:{}, locked:false
             }],
@@ -13561,7 +13569,7 @@ function refreshFamilyUI() {
 
   familySelect.innerHTML = selectorEntries
     .map(entry =>
-      `<option value="${esc(entry.value)}">${esc(entry.label || displayDataText(entry.labelFamily.name, entry.labelFamily))}</option>`
+      `<option value="${esc(entry.value)}">${esc(entry.label || displayDataText(entry.labelFamily.name, entry.labelFamily) || uiText('家族名稱'))}</option>`
     )
     .join('');
 
@@ -13626,7 +13634,7 @@ window.addEventListener('resize', createDebouncedCallback(syncFamilyNameInputWid
 familyNameInput.onchange = () => {
   const fam = currentFamily();
   const shownBefore = displayDataText(fam.name, fam);
-  const v = familyNameInput.value.trim() || uiText('家族');
+  const v = familyNameInput.value.trim();
   // 只是在其他語言下顯示內建範例名稱、沒有真的改字時，不回寫翻譯值。
   if (isBuiltinSampleFamily(fam) && v === shownBefore) {
     familyNameInput.value = shownBefore;
