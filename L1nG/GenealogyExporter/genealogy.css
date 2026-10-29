@@ -7922,7 +7922,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 .export-background-option {
     display:inline-flex;
     align-items:center;
-    gap:12px;
+    gap:8px;
     min-height:24px;
     padding:2px 0;
     color:var(--text-primary);
