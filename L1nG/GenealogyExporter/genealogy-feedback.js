@@ -102,10 +102,28 @@ document.addEventListener('DOMContentLoaded', () => {
   let floatingPaper = null;
   const peelDuration = 1080;
   const svgNS = 'http://www.w3.org/2000/svg';
-  const pageCorners = (width, height) => [
-    { x: 0, y: 0 }, { x: width, y: 0 },
-    { x: width, y: height }, { x: 0, y: height }
-  ];
+  // 紙張只沿用視窗底部兩角的圓角；頂部黏貼邊維持直角。
+  const pageCorners = (width, height, bottomLeft, bottomRight) => {
+    const left = Math.max(0, Math.min(bottomLeft, width / 2, height));
+    const right = Math.max(0, Math.min(bottomRight, width / 2, height));
+    const outline = [{ x: 0, y: 0 }, { x: width, y: 0 }];
+    const addArc = (cx, cy, radius, start, end) => {
+      if (!radius) {
+        outline.push({ x: cx, y: cy });
+        return;
+      }
+      for (let i = 0; i <= 8; i++) {
+        const angle = start + (end - start) * i / 8;
+        outline.push({
+          x: cx + radius * Math.cos(angle),
+          y: cy + radius * Math.sin(angle)
+        });
+      }
+    };
+    addArc(width - right, height - right, right, 0, Math.PI / 2);
+    addArc(left, height - left, left, Math.PI / 2, Math.PI);
+    return outline;
+  };
 
   function paperClip(points, threshold, keepTop) {
     const within = point => keepTop
@@ -129,14 +147,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const paperPoint = point => point.x.toFixed(2) + ',' + point.y.toFixed(2);
-  function foldEnds(threshold, width, height) {
-    const points = [
-      { x: threshold, y: 0 }, { x: 0, y: threshold },
-      { x: threshold - height, y: height }, { x: width, y: threshold - width }
-    ].filter(point =>
-      point.x >= -.01 && point.y >= -.01
-      && point.x <= width + .01 && point.y <= height + .01
-    );
+  function foldEnds(threshold, outline) {
+    const points = [];
+    for (let i = 0; i < outline.length; i++) {
+      const from = outline[i], to = outline[(i + 1) % outline.length];
+      const a = from.x + from.y - threshold;
+      const b = to.x + to.y - threshold;
+      if (Math.abs(a) < .01) points.push(from);
+      if (a * b < 0) {
+        const fraction = a / (a - b);
+        points.push({
+          x: from.x + (to.x - from.x) * fraction,
+          y: from.y + (to.y - from.y) * fraction
+        });
+      }
+    }
     return points.filter((point, index) => points.findIndex(other =>
       Math.abs(point.x - other.x) < .01 && Math.abs(point.y - other.y) < .01
     ) === index).slice(0, 2);
@@ -173,9 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return .935 + .065 * smoothstep((time - .91) / .09);
   }
 
-  function drawPeel(progress, outgoing, visual, width, height) {
+  function drawPeel(progress, outgoing, visual, width, height, corners) {
     const threshold = Math.max(0, (width + height) * (1 - peelAmount(progress)));
-    const corners = pageCorners(width, height);
     const near = paperClip(corners, threshold, true);
     const lifted = paperClip(corners, threshold, false);
     const flipped = lifted.map(point => ({
@@ -185,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     outgoing.style.clipPath = near.length >= 3
       ? 'polygon(' + near.map(point => point.x.toFixed(2) + 'px ' + point.y.toFixed(2) + 'px').join(',') + ')'
       : 'polygon(0 0,0 0,0 0)';
-    const ends = foldEnds(threshold, width, height);
+    const ends = foldEnds(threshold, corners);
     // 紙張折痕不是尺畫出的硬直線：摺背邊緣與陰影共用同一條微彎曲線。
     const bend = Math.min(15, Math.min(width, height) * .025)
       * Math.sin(Math.PI * Math.min(1, progress * 1.06));
@@ -345,6 +369,12 @@ document.addEventListener('DOMContentLoaded', () => {
       setTab(index, true);
       return;
     }
+    const panelStyle = getComputedStyle(panel);
+    const corners = pageCorners(
+      rect.width, rect.height,
+      parseFloat(panelStyle.borderBottomLeftRadius) || 0,
+      parseFloat(panelStyle.borderBottomRightRadius) || 0
+    );
     pendingPage = index;
     panel.focus({ preventScroll: true });
     incoming.hidden = false;
@@ -363,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (pendingPage !== index) return;
       if (start === null) start = timestamp;
       const progress = Math.min(1, (timestamp - start) / peelDuration);
-      drawPeel(progress, paper.sheet, paper.visual, rect.width, rect.height);
+      drawPeel(progress, paper.sheet, paper.visual, rect.width, rect.height, corners);
       if (progress >= 1) {
         setTab(index, true);
       } else {
