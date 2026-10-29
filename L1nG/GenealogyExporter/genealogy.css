@@ -1830,7 +1830,8 @@ body[data-theme="graphite"] .life-photo-stage {
 .form-field-title { color:var(--text-secondary); font:inherit; font-weight:600; }
 
 /* ========【模擬市民個人檔案編輯器】 緊湊模擬市民檔案、分頁內容與固定操作列 ======== */
-.sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; --sim-editor-placeholder-color:color-mix(in srgb,var(--text-secondary) 80%,transparent); transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease; }
+:is(.sim-editor-modal, .pet-editor-modal) { --sim-editor-placeholder-color:color-mix(in srgb,var(--text-secondary) 80%,transparent); }
+.sim-editor-modal { width:min(790px,calc(100vw - 40px)); height:min(680px,92vh); max-height:none; padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; z-index:3; transition:transform .38s cubic-bezier(.2,.75,.25,1),opacity .38s ease,box-shadow .38s ease; }
 .sim-editor-top { flex:0 0 auto; padding:13px 18px 0; background:var(--surface-card); position:relative; z-index:5; }
 #simEditorDialog .sim-editor-title { margin-bottom:8px; padding-right:64px; }
 .sim-profile-header { display:grid; grid-template-columns:156px minmax(0,1fr); align-items:start; gap:18px; padding:0 0 11px; }
@@ -1858,7 +1859,7 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-profile-edit-fields label,.sim-profile-edit-fields .form-field { min-width:0; display:grid; gap:4px; color:var(--text-secondary); font-size:10.5px; font-weight:600; }
 .sim-profile-edit-fields input,.sim-profile-edit-fields select,.sim-profile-edit-fields .ui-single-select-trigger { width:100%; min-width:0; min-height:32px; padding:5px 8px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12px; outline:none; }
 .sim-profile-edit-fields input:focus,.sim-profile-edit-fields select:focus,.sim-profile-edit-fields .ui-single-select-trigger:focus-visible { border-color:var(--action-primary); }
-.profile-name-field input { min-height:36px; font-size:17px; font-weight:700; padding:5px 9px; }
+.profile-name-field input { box-sizing:border-box; height:36px; min-height:36px; line-height:24px; font-size:17px; font-weight:700; padding:5px 9px; }
 .profile-identity-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
 .profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:start; }
 .profile-fact-edit-row > .form-field { grid-template-rows:auto 32px; align-items:start; }
@@ -1888,16 +1889,16 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-editor-tab.active { color:var(--action-primary); background:transparent; }
 .sim-editor-tabs:not(.l1ng-indicator-ready) .sim-editor-tab.active::after { content:""; position:absolute; left:14px; right:14px; bottom:0; height:2px; border-radius:999px; background:var(--action-primary); }
 .sim-editor-content { flex:1 1 auto; min-height:0; overflow-y:auto; padding:12px 18px 14px; background:var(--surface-card); }
-/* 編輯模擬市民的已撰寫提示內容：統一字型、13px 字級、粗細及各主題的次要文字色。 */
-.sim-editor-modal input::placeholder,
-.sim-editor-modal textarea::placeholder {
+/* 市民與寵物共用輸入提示，不另建寵物樣式。 */
+:is(.sim-editor-modal, .pet-editor-modal) input::placeholder,
+:is(.sim-editor-modal, .pet-editor-modal) textarea::placeholder {
     font-family:inherit;
     font-size:13px;
     font-weight:400;
     color:var(--sim-editor-placeholder-color);
     opacity:1;
 }
-.sim-editor-modal .ui-select-placeholder {
+:is(.sim-editor-modal, .pet-editor-modal) .ui-select-placeholder {
     font-family:inherit;
     font-size:13px;
     font-weight:400;
