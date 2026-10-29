@@ -1169,8 +1169,8 @@
       const viewportWidth = Math.max(1, global.innerWidth || document.documentElement.clientWidth || 1);
       const viewportHeight = Math.max(1, global.innerHeight || document.documentElement.clientHeight || 1);
       const width = Math.min(
-        Math.max(minWidth, rect.width),
-        Math.max(minWidth, Math.min(maxWidth, viewportWidth - margin * 2))
+        Math.max(1, viewportWidth - margin * 2),
+        Math.max(1, Math.min(maxWidth, Math.max(minWidth, rect.width)))
       );
       const left = Math.min(
         Math.max(margin, rect.left),
@@ -1178,8 +1178,9 @@
       );
       const below = viewportHeight - rect.bottom - gap - margin;
       const above = rect.top - gap - margin;
-      const openAbove = below < 190 && above > below;
-      const available = Math.max(140, openAbove ? above : below);
+      const desiredHeight = Math.min(maxHeight, popup.scrollHeight || maxHeight);
+      const openAbove = below < desiredHeight && above > below;
+      const available = Math.max(0, openAbove ? above : below);
       const height = Math.min(maxHeight, available);
 
       popup.style.position = 'fixed';
@@ -2016,9 +2017,20 @@
         trigger.setAttribute('aria-label', sourceLabel || inferLabelText(select));
       }
 
+      function optionLabel(option) {
+        if (!option) return '';
+        if (option.value === '' && select.id === 'simBirthdayMonthSelect') {
+          return uiText('生日月份提示');
+        }
+        if (option.value === '' && select.id === 'simBirthdayDaySelect') {
+          return uiText('生日日期提示');
+        }
+        return option.textContent;
+      }
+
       function paintTrigger() {
         const option = select.options[select.selectedIndex];
-        const text = option ? option.textContent : '';
+        const text = optionLabel(option);
 
         trigger.innerHTML =
           '<span class="ui-single-select-value">' + esc(text) + '</span>' +
@@ -2041,7 +2053,7 @@
               '<div class="' + classes + '" data-value="' + esc(option.value) + '"' +
               (option.disabled ? ' aria-disabled="true"' : '') +
               ' role="option" aria-selected="' + (option.selected ? 'true' : 'false') + '">' +
-              '<span>' + esc(option.textContent) + '</span>' +
+              '<span>' + esc(optionLabel(option)) + '</span>' +
               (option.selected
                 ? '<span class="ui-select-option-selected-icon">' + iconSvg('check-lg') + '</span>'
                 : '') +
@@ -2185,6 +2197,7 @@
       };
 
       registerController(api, select);
+      global.LING_I18N?.onLanguageChanged?.(refresh);
       paintTrigger();
       return api;
     }
@@ -2228,6 +2241,8 @@
 
       const menu = document.createElement('div');
       menu.className = 'ui-select-dropdown ui-select-dropdown-portal ui-suggestion-menu';
+      const editorMenu = !!input.closest('.sim-editor-modal, .pet-editor-modal');
+      if (editorMenu) menu.classList.add('ui-suggestion-menu-editor');
       menu.style.display = 'none';
 
       const optionsHost = document.createElement('div');
@@ -2242,6 +2257,8 @@
       host.appendChild(input);
       host.appendChild(toggle);
 
+      // 自訂建議選單已接管候選值，避免瀏覽器輸入紀錄另開第二個浮窗。
+      input.setAttribute('autocomplete', 'off');
       input.setAttribute('role', 'combobox');
       input.setAttribute('aria-autocomplete', 'list');
       input.setAttribute('aria-haspopup', 'listbox');
@@ -2280,11 +2297,11 @@
 
       function position() {
         if (!host.classList.contains('ui-select-open')) return;
-        positionPortal(input, menu, {
-          minWidth:Math.max(180, input.getBoundingClientRect().width),
-          maxWidth:520,
-          maxHeight:320
-        });
+        positionPortal(input, menu, editorMenu
+          ? { minWidth:240, maxWidth:430, maxHeight:260 }
+          : { minWidth:180, maxWidth:520, maxHeight:320 });
+        const viewportLimit = Math.max(0, parseFloat(menu.style.maxHeight) || 0);
+        menu.style.setProperty('--ui-suggestion-available-height', Math.max(0, viewportLimit - 8) + 'px');
       }
 
       function open() {
