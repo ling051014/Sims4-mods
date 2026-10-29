@@ -2675,7 +2675,7 @@
         step('#topbarFilterBtn','篩選市民','篩選年齡階段、性別、狀態、種族與寵物；只影響畫布顯示，不會刪除資料。','Filter Sims','Filter age, gender, status, occult types and pets without deleting data.'),
         step('#personLibraryBtn','市民與寵物總覽',mobile?'這個 SVG 按鈕是「總覽」，可以搜尋與管理全部市民和寵物。':'在總覽中搜尋、檢視及批次管理市民與寵物。','Sims and pets overview','Search and manage Sims and pets in the overview.'),
         step('#exportBtn','匯出資料','從這裡匯出族譜圖片或 JSON 備份，方便保存和還原。','Export','Export a tree image or JSON backup for safekeeping.'),
-        step('#restoreSampleBtn','恢復預設族譜','這是恢復示範族譜的操作，可能取代現有資料；導覽不會真的觸發。','Restore sample tree','Restores sample data and may replace your data. The tour will not activate it.'),
+        step('#restoreSampleBtn','恢復 / 清空族譜','可以恢復預設範例或清空整份族譜。建議先匯出 JSON 備份；導覽不會真的觸發。','Restore / clear tree','Restore the default example or clear the entire tree. Export a JSON backup first. The tour will not activate it.'),
         step('#topbarMoreBtn','更多功能','這裡包含 ZIP / JSON 匯入、族譜提取器、視覺設定、圖片與儲存及語言切換。','More options','Find ZIP / JSON import, Exporter, appearance, storage and language settings.')
       ]},
       {id:'families',name:'家族與成員',en:'Families and members',sidebar:true,steps:[
