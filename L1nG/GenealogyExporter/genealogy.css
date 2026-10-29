@@ -1733,12 +1733,18 @@ body[data-theme="graphite"] .life-photo-stage {
     /* 顯示方式 */ display: flex;
     /* 垂直對齊 */ align-items: center;
     /* 水平對齊 */ justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 2;
     /* 文字顏色 */ color: var(--text-secondary);
     /* 字體大小 */ font-size: 14px;
     /* 滑鼠事件 */ pointer-events: none;
     /* 文字對齊 */ text-align: center;
     /* 內縮空間 */ padding: 20px;
 }
+.empty[hidden] { display:none; }
+.empty > span { display:block; white-space:nowrap; }
+@media (max-width:720px) { .empty > span { white-space:normal; overflow-wrap:break-word; } }
 
 /* ========【彈出視窗】 遮罩、表單與共用 Modal 元件 ======== */
 
@@ -7916,6 +7922,7 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 .export-background-option {
     display:inline-flex;
     align-items:center;
+    gap:12px;
     min-height:24px;
     padding:2px 0;
     color:var(--text-primary);
@@ -7925,7 +7932,6 @@ body[data-theme="graphite"] .person-meta-icon.status-alive {
 }
 
 .export-background-option input {
-    margin:0 6px 0 0;
     accent-color:var(--action-primary);
 }
 
