@@ -1499,5 +1499,14 @@
     "版本或問題分類超過長度限制。": "Version or category exceeds the character limit.",
     "請填寫遊戲版本，可查看 RealDate 日誌確認。": "Enter your game version. Check the RealDate log if needed.",
     "正在檢查新回覆…": "Checking for new replies…"
-  }
+  },
+  "恢復 / 清空族譜": "Restore / Clear Family Tree",
+  "恢復預設族譜或清空族譜，都會取代目前的族譜資料且無法復原。建議先匯出 JSON 備份。": "Restoring the default family tree or clearing the tree will replace your current data and cannot be undone. Export a JSON backup first.",
+  "清空族譜": "Clear Family Tree",
+  "清空目前族譜資料……": "Clearing current family tree data…",
+  "儲存空白族譜……": "Saving blank family tree…",
+  "已清空族譜。": "Family tree cleared.",
+  "清空族譜失敗：": "Failed to clear family tree: ",
+  "清空族譜失敗": "Failed to Clear Family Tree",
+  "新家族": "New Family"
 }
