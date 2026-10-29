@@ -9191,9 +9191,18 @@ function paintPersonLayer() {
     </div>`;
   }).join('');
 
-  const nodeHtml =
-    html ||
-    `<div class="empty">${esc(uiText('這個家族還沒有模擬市民。點選「成員 ＋」，即可新增或加入已建立的模擬市民。'))}</div>`;
+  const notice = document.getElementById('genealogyCanvasEmpty');
+  if (notice) {
+    notice.hidden = !!html;
+    if (!html) {
+      const message = uiText('這個家族還沒有模擬市民。點選「成員 ＋」，即可新增或加入已建立的模擬市民。');
+      const breakIndex = message.indexOf('。');
+      const split = breakIndex < 0 ? message.search(/[.!?]/) : breakIndex;
+      notice.innerHTML = (split < 0 ? [message] : [message.slice(0, split + 1), message.slice(split + 1).trim()])
+        .filter(Boolean).map(line => '<span>' + esc(line) + '</span>').join('');
+    }
+  }
+  const nodeHtml = html || '';
 
   if (
     html &&
