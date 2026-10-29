@@ -10,7 +10,6 @@ body[data-theme="ling"] {
     /* 漸層起始色 */ --brand-gradient-start: #ffffff;
     /* 漸層結束色 */ --brand-gradient-end: #f3f8fc;
     /* 淡色漸層起始 */ --brand-tint-start: rgba(85,172,238,.10);
-    /* 淡色漸層結束 */ --brand-tint-end: rgba(85,172,238,.05);
     /* 互動強調色 */ --action-primary: #55acee;
     /* 懸停強調色 */ --action-primary-hover: #3e95d3;
     /* 深色主色 */ --action-primary-strong: #315f83;
@@ -22,7 +21,6 @@ body[data-theme="ling"] {
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
     /* 警告色彩 */ --warning-text: #895717;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #3f4852;
     /* 頂欄次要文字 */ --navigation-text-muted: #7d8790;
     /* 頂欄欄位背景 */ --navigation-control-surface: #ffffff;
@@ -82,10 +80,6 @@ body[data-theme="ling"] {
     /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #eceff2;
     /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #2f353b;
     /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f7f7f8;
-    /* 導覽選取背景 */ --nav-active-bg: #f2f3f4;
-    /* 導覽選取邊框 */ --nav-active-border: #d8dde2;
-    /* 導覽選取文字 */ --nav-active-text: #444b52;
-    /* L1nG 晴空模擬市民列背景 */ --genealogy-roster-item-bg: #f8fafc;
     /* L1nG 晴空模擬市民列懸停 */ --genealogy-roster-item-hover: #f1f5f9;
 }
 
@@ -93,7 +87,6 @@ body[data-theme="sage"] {
     /* 漸層起始色 */ --brand-gradient-start: #dfe9e0;
     /* 漸層結束色 */ --brand-gradient-end: #eef3ea;
     /* 淡色漸層起始 */ --brand-tint-start: rgba(95,128,108,.13);
-    /* 淡色漸層結束 */ --brand-tint-end: rgba(137,157,126,.10);
     /* 互動強調色 */ --action-primary: #5f806c;
     /* 懸停強調色 */ --action-primary-hover: #4c6b59;
     /* 深色主色 */ --action-primary-strong: #3f5849;
@@ -105,7 +98,6 @@ body[data-theme="sage"] {
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
     /* 警告色彩 */ --warning-text: #825B15;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #2f3a32;
     /* 頂欄次要文字 */ --navigation-text-muted: #68756b;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.72);
@@ -165,10 +157,6 @@ body[data-theme="sage"] {
     /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #e6ebe7;
     /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #2e3831;
     /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f2f4f2;
-    /* 導覽選取背景 */ --nav-active-bg: #e9ede9;
-    /* 導覽選取邊框 */ --nav-active-border: #d4dcd5;
-    /* 導覽選取文字 */ --nav-active-text: #3e4b41;
-    /* 森霧鼠尾草模擬市民列背景 */ --genealogy-roster-item-bg: #f4f8f3;
     /* 森霧鼠尾草模擬市民列懸停 */ --genealogy-roster-item-hover: #ebf2ea;
 }
 
@@ -176,7 +164,6 @@ body[data-theme="rose"] {
     /* 漸層起始色 */ --brand-gradient-start: #e8c4d0;
     /* 漸層結束色 */ --brand-gradient-end: #f4dfe6;
     /* 淡色漸層起始 */ --brand-tint-start: rgba(165,82,112,.12);
-    /* 淡色漸層結束 */ --brand-tint-end: rgba(190,117,142,.09);
     /* 互動強調色 */ --action-primary: #a55270;
     /* 懸停強調色 */ --action-primary-hover: #8c425e;
     /* 深色主色 */ --action-primary-strong: #703447;
@@ -188,7 +175,6 @@ body[data-theme="rose"] {
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
     /* 警告色彩 */ --warning-text: #8C5815;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #4a2d37;
     /* 頂欄次要文字 */ --navigation-text-muted: #7d606a;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.70);
@@ -248,10 +234,6 @@ body[data-theme="rose"] {
     /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #eee7ea;
     /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #413439;
     /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f7f3f5;
-    /* 導覽選取背景 */ --nav-active-bg: #f0eaec;
-    /* 導覽選取邊框 */ --nav-active-border: #ded5d9;
-    /* 導覽選取文字 */ --nav-active-text: #514147;
-    /* 莓果薄暮模擬市民列背景 */ --genealogy-roster-item-bg: #fff5f8;
     /* 莓果薄暮模擬市民列懸停 */ --genealogy-roster-item-hover: #f9eaf0;
 }
 
@@ -259,7 +241,6 @@ body[data-theme="amber"] {
     /* 漸層起始色 */ --brand-gradient-start: #e5c896;
     /* 漸層結束色 */ --brand-gradient-end: #f2dfb9;
     /* 淡色漸層起始 */ --brand-tint-start: rgba(166,107,47,.13);
-    /* 淡色漸層結束 */ --brand-tint-end: rgba(195,148,83,.10);
     /* 互動強調色 */ --action-primary: #a66b2f;
     /* 懸停強調色 */ --action-primary-hover: #8d5825;
     /* 深色主色 */ --action-primary-strong: #6d441f;
@@ -271,7 +252,6 @@ body[data-theme="amber"] {
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
     /* 警告色彩 */ --warning-text: #815314;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #493824;
     /* 頂欄次要文字 */ --navigation-text-muted: #796b58;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.68);
@@ -331,10 +311,6 @@ body[data-theme="amber"] {
     /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #ece6dc;
     /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #3e372f;
     /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f6f3ee;
-    /* 導覽選取背景 */ --nav-active-bg: #eee8df;
-    /* 導覽選取邊框 */ --nav-active-border: #ded6ca;
-    /* 導覽選取文字 */ --nav-active-text: #4e453a;
-    /* 琥珀紙頁模擬市民列背景 */ --genealogy-roster-item-bg: #fff9ef;
     /* 琥珀紙頁模擬市民列懸停 */ --genealogy-roster-item-hover: #f8eedc;
 }
 
@@ -366,7 +342,6 @@ body[data-theme="ink"] {
     --brand-gradient-start: #1b1920;
     --brand-gradient-end: #302a33;
     --brand-tint-start: rgba(163,145,173,.10);
-    --brand-tint-end: rgba(163,145,173,.06);
     --action-primary: #a391ad;
     --action-primary-hover: #b0a0ba;
     --action-primary-strong: #8f8099;
@@ -378,7 +353,6 @@ body[data-theme="ink"] {
     /* 危險操作色彩 */ --danger-on-solid: #21181C;
     /* 警告色彩 */ --warning-text: #F4CD77;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     --navigation-text: #ece8ed;
     --navigation-text-muted: #b9b1bc;
     --navigation-control-text: #ece8ed;
@@ -414,10 +388,6 @@ body[data-theme="ink"] {
     --nav-dropdown-hover-text: #ece8ed;
     --nav-dropdown-selected-bg: #3a333e;
     --nav-button-hover-bg: #302b34;
-    --nav-active-bg: #39323e;
-    --nav-active-border: #605866;
-    --nav-active-text: #ece8ed;
-    --genealogy-roster-item-bg: #262229;
     --genealogy-roster-item-hover: #302b34;
 }
 
@@ -449,7 +419,6 @@ body[data-theme="berrynight"] {
     --brand-gradient-start: #21191d;
     --brand-gradient-end: #382c32;
     --brand-tint-start: rgba(183,142,155,.10);
-    --brand-tint-end: rgba(183,142,155,.06);
     --action-primary: #b78e9b;
     --action-primary-hover: #c4a1aa;
     --action-primary-strong: #9f7685;
@@ -461,7 +430,6 @@ body[data-theme="berrynight"] {
     /* 危險操作色彩 */ --danger-on-solid: #29191B;
     /* 警告色彩 */ --warning-text: #FFD085;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     --navigation-text: #f0e9ec;
     --navigation-text-muted: #c1b1b9;
     --navigation-control-text: #f0e9ec;
@@ -497,10 +465,6 @@ body[data-theme="berrynight"] {
     --nav-dropdown-hover-text: #f0e9ec;
     --nav-dropdown-selected-bg: #43343c;
     --nav-button-hover-bg: #392d33;
-    --nav-active-bg: #402f37;
-    --nav-active-border: #68565f;
-    --nav-active-text: #f0e9ec;
-    --genealogy-roster-item-bg: #2c2328;
     --genealogy-roster-item-hover: #392d33;
 }
 
@@ -532,7 +496,6 @@ body[data-theme="graphite"] {
     --brand-gradient-start: #1b1f22;
     --brand-gradient-end: #30373b;
     --brand-tint-start: rgba(150,166,176,.09);
-    --brand-tint-end: rgba(150,166,176,.055);
     --action-primary: #96a6b0;
     --action-primary-hover: #acbac3;
     --action-primary-strong: #7b929f;
@@ -544,7 +507,6 @@ body[data-theme="graphite"] {
     /* 危險操作色彩 */ --danger-on-solid: #24191C;
     /* 警告色彩 */ --warning-text: #F5C97D;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     --navigation-text: #e9edef;
     --navigation-text-muted: #afb9bf;
     --navigation-control-text: #e9edef;
@@ -580,10 +542,6 @@ body[data-theme="graphite"] {
     --nav-dropdown-hover-text: #e9edef;
     --nav-dropdown-selected-bg: #384248;
     --nav-button-hover-bg: #31383c;
-    --nav-active-bg: #353e43;
-    --nav-active-border: #5d6870;
-    --nav-active-text: #e9edef;
-    --genealogy-roster-item-bg: #272b2e;
     --genealogy-roster-item-hover: #31383c;
 }
 
@@ -591,7 +549,6 @@ body[data-theme="custom"] {
     /* 漸層起始色 */ --brand-gradient-start: #f0c050;
     /* 漸層結束色 */ --brand-gradient-end: #a878c8;
     /* 淡色漸層起始 */ --brand-tint-start: rgba(240,192,80,.14);
-    /* 淡色漸層結束 */ --brand-tint-end: rgba(168,120,200,.12);
     /* 互動強調色 */ --action-primary: #8a5cb0;
     /* 懸停強調色 */ --action-primary-hover: #724a98;
     /* 深色主色 */ --action-primary-strong: #6a4688;
@@ -603,7 +560,6 @@ body[data-theme="custom"] {
     /* 危險操作色彩 */ --danger-on-solid: #FFFFFF;
     /* 警告色彩 */ --warning-text: #895717;
     /* 警告色彩 */ --warning-border: color-mix(in srgb,var(--warning-text) 42%,var(--border-default));
-    /* 警告色彩 */ --warning-surface: color-mix(in srgb,var(--warning-text) 9%,transparent);
     /* 頂欄文字顏色 */ --navigation-text: #2f2f35;
     /* 頂欄次要文字 */ --navigation-text-muted: #707078;
     /* 頂欄欄位背景 */ --navigation-control-surface: rgba(255,255,255,.70);
@@ -663,9 +619,6 @@ body[data-theme="custom"] {
     /* 下拉選單選取背景 */ --nav-dropdown-selected-bg: #ececf0;
     /* 下拉選單選取文字 */ --nav-dropdown-selected-text: #303036;
     /* 導覽按鈕懸停背景 */ --nav-button-hover-bg: #f6f6f7;
-    /* 導覽選取背景 */ --nav-active-bg: #eeeeF1;
-    /* 導覽選取邊框 */ --nav-active-border: #dcdce2;
-    /* 導覽選取文字 */ --nav-active-text: #44444b;
 }
 
 body[data-topbar-contrast="light"] {
@@ -861,7 +814,6 @@ input[type="range"]:disabled {
 
 :root {
     --familySidebar-width: 300px;
-    --familySidebar-default-width: 300px;
     /* 篩選勾號預設使用白色；深色主題及自訂主題另行指定。 */
     --filter-checkmark-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }

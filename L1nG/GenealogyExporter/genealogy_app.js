@@ -5860,7 +5860,7 @@ function shiftHexLightness(hex, amount) {
 function resetThemeSurface() {
   [
     '--brand-gradient-start','--brand-gradient-end',
-    '--brand-tint-start','--brand-tint-end',
+    '--brand-tint-start',
     '--action-primary','--action-primary-hover',
     '--action-primary-strong','--selection-highlight',
     '--navigation-text','--navigation-text-muted',
@@ -5879,8 +5879,7 @@ function resetThemeSurface() {
     '--nav-dropdown-divider','--nav-dropdown-hover-bg',
     '--nav-dropdown-hover-text','--nav-dropdown-selected-bg',
     '--nav-dropdown-selected-text','--nav-button-hover-bg',
-    '--nav-active-bg','--nav-active-border','--nav-active-text',
-    '--genealogy-roster-item-bg','--genealogy-roster-item-hover',
+    '--genealogy-roster-item-hover',
     '--filter-checkmark-image'
   ].forEach(property => document.body.style.removeProperty(property));
 
@@ -6033,7 +6032,6 @@ function chooseCustomTheme(primary, secondary, accentColor, { persist = true } =
   [
     ['--brand-gradient-start',c1],['--brand-gradient-end',c2],
     ['--brand-tint-start',formatHexRgba(c3,dark ? 0.16 : 0.13)],
-    ['--brand-tint-end',formatHexRgba(c3,dark ? 0.09 : 0.07)],
     ['--action-primary',c3],
     ['--filter-checkmark-image',relativeHexLuminance(c3) > 0.179
       ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8l3.2 3.2L13 4.7' stroke='%23172636' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`
@@ -6069,9 +6067,6 @@ function chooseCustomTheme(primary, secondary, accentColor, { persist = true } =
     ['--nav-dropdown-selected-bg',dark ? shiftHexLightness(surfaceCard,0.13) : shiftHexLightness(surfacePanel,-0.03)],
     ['--nav-dropdown-selected-text',textPrimary],
     ['--nav-button-hover-bg',dark ? shiftHexLightness(surfaceCard,0.07) : surfacePanel],
-    ['--nav-active-bg',dark ? shiftHexLightness(surfaceCard,0.11) : surfacePanel],
-    ['--nav-active-border',border],['--nav-active-text',textPrimary],
-    ['--genealogy-roster-item-bg',surfaceCard],
     ['--genealogy-roster-item-hover',dark ? shiftHexLightness(surfaceCard,0.08) : surfacePanel]
   ].forEach(([property,value]) => document.body.style.setProperty(property,value));
 
