@@ -6,6 +6,9 @@
     "canonical": false
   },
   "messages": {
+    "批量刪除寵物": "Delete Multiple Pets",
+    "已選 {n} 隻寵物": "{n} pets selected",
+    "確定永久刪除選取的 {n} 隻寵物嗎？": "Permanently delete the {n} selected pets?",
     "生日年份提示": "YY",
     "生日月份提示": "MM",
     "生日日期提示": "DD",
@@ -1155,8 +1158,8 @@
     "恢復繁體中文的預設族譜。": "Restore the default family tree in Traditional Chinese.",
     "遊戲關係": "Game relationships",
     "移除圖片": "Remove Image",
-    "批量移出家族": "Remove Multiple from Family",
-    "移出 0 位": "Remove 0 Sims from Family",
+    "批量移出家族": "Remove Members",
+    "移出 0 位": "Remove 0 Sims",
     "確定移除目前背景圖片嗎？": "Remove the current background image?",
     "恢復介面預設": "Restore Interface Defaults",
     "已清理": "Cleaned",
