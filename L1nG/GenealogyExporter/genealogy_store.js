@@ -571,7 +571,7 @@
               .filter(Boolean)
           : [];
 
-      if (sim.race === undefined) sim.race = '';
+      if (!sim.race) sim.race = 'human';
       if (sim.residence === undefined) sim.residence = '';
       if (sim.aspiration === undefined) sim.aspiration = '';
       if (sim.causeOfDeath === undefined) sim.causeOfDeath = '';
