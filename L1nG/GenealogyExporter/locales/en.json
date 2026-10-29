@@ -6,6 +6,9 @@
     "canonical": false
   },
   "messages": {
+    "目前尚未建立任何家族": "No families have been created yet",
+    "目前沒有其他家族可切換": "No other families to switch to",
+    "未命名家族": "Unnamed Family",
     "生日年份提示": "YY",
     "生日月份提示": "MM",
     "生日日期提示": "DD",

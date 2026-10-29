@@ -10397,3 +10397,10 @@ body.ootd-sorting,body.ootd-sorting * { cursor:grabbing; }
 @media(prefers-reduced-motion:reduce){
   .l1ng-tour-replay-hint{animation:none}
 }
+
+/* 家族下拉選單的不可選狀態文字，沿用主題色。 */
+.nav-select-option:disabled, .nav-select-option:disabled:hover {
+    cursor: default;
+    background: var(--nav-dropdown-bg);
+    color: var(--text-secondary);
+}
