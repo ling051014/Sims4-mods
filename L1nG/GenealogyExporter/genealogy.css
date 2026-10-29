@@ -10292,3 +10292,10 @@ html[lang="en"] .pet-avatar-editor-block > .avatar-editor-actions > :is(.avatar-
 /* English-only: retain the original single-row family member toolbar. */
 html[lang="en"] .family-section-heading { gap:4px; }
 html[lang="en"]
+
+/* 不可選的家族狀態訊息沿用原下拉選單主題色。 */
+.nav-select-option:disabled, .nav-select-option:disabled:hover {
+    cursor: default;
+    background: var(--nav-dropdown-bg);
+    color: var(--text-secondary);
+}
