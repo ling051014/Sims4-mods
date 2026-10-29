@@ -7689,6 +7689,8 @@ select.nav-native-select {
     /* 保持單行 */ white-space: nowrap;
 }
 
+.ui-single-select-value.ui-single-select-placeholder { color: var(--text-secondary); }
+
 .ui-single-select-trigger:disabled {
     /* 停用狀態 */ opacity: .55;
     /* 停用狀態 */ cursor: not-allowed;

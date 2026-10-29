@@ -254,7 +254,6 @@ const KINSHIP_SYSTEM_LABELS = Object.freeze([
 ]);
 
 const RACE_PRESETS = {
-  '':           { icon:'', label:'（不顯示）' },
   human:        { icon:'person', label:'人類' },
   // 種族使用對應物種特徵的語意圖示，方便辨識。
   vampire:      { icon:'vampire-fangs', label:'吸血鬼' },
