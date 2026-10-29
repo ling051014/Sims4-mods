@@ -2195,7 +2195,9 @@
 
       if (!(list instanceof global.HTMLDataListElement)) return [];
 
+      const language = global.LING_I18N?.language || 'zh-Hant';
       return [...list.options]
+        .filter(option => !option.dataset.suggestionLang || option.dataset.suggestionLang === language)
         .map(option => String(option.value || option.textContent || '').trim())
         .filter(Boolean);
     }
@@ -2371,6 +2373,7 @@
       };
 
       registerController(api, input);
+      global.LING_I18N?.onLanguageChanged?.(refresh);
       return api;
     }
 
