@@ -7,7 +7,7 @@
   const LOCALE_FILES = Object.freeze({
     'zh-Hant': 'locales/zh-TW.json?v=20261018-kinship-r1',
     'zh-Hans': 'locales/zh-CN.json?v=20261018-kinship-r1',
-    'en': 'locales/en.json?v=20261018-family-tree-en-r1'
+    'en': 'locales/en.json?v=20261029-en-layout-r1'
   });
 
   const catalogs = new Map();
