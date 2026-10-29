@@ -2089,6 +2089,27 @@ function getFamilySelectorEntries(mode = familyTreeViewMode) {
         ? buildEaTreeEntries()
         : buildExtendedFamilyComponents();
 
+  // 空白家族仍是有效的家族。三種視角都要能選到它，
+  // 但不能改動已經有成員的 EA / 大家族分組規則。
+  const representedFamilies = new Set(
+    entries.flatMap(entry => entry.sourceFamilyIds || [entry.familyId])
+  );
+  currentGenealogyData().families.forEach((fam, index) => {
+    if (!fam || representedFamilies.has(fam.id) || familySourceSeedIds(fam).length) return;
+    entries.push({
+      mode:normalizedMode,
+      value:`${normalizedMode}:empty:${fam.id}`,
+      familyId:fam.id,
+      labelFamily:fam,
+      label:displayDataText(fam.name, fam),
+      memberIds:[],
+      primaryMemberIds:[],
+      sourceFamilyIds:[fam.id],
+      sortIndex:index
+    });
+  });
+  entries.sort((a, b) => a.sortIndex - b.sortIndex);
+
   familySelectorCache.entriesByMode.set(
     normalizedMode,
     entries
