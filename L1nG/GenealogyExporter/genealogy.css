@@ -7229,6 +7229,22 @@ html[lang="en"] body {
     width:min(100%,420px);
     margin:0 auto;
 }
+#uiDialog[data-mode="choice"][data-action-layout="inline"] .ui-dialog-actions {
+    display:flex;
+    flex-wrap:wrap;
+    width:100%;
+    justify-content:center;
+}
+#uiDialog[data-mode="choice"][data-action-layout="inline"] #uiDialogCancel,
+#uiDialog[data-mode="choice"][data-action-layout="inline"] #uiDialogConfirm,
+#uiDialog[data-mode="choice"][data-action-layout="inline"] #uiDialogSecondary {
+    order:initial;
+    grid-column:auto;
+    flex:0 1 auto;
+    min-width:88px;
+    max-width:100%;
+    margin:0;
+}
 #uiDialog[data-mode="choice"] #uiDialogConfirm { order:1; }
 #uiDialog[data-mode="choice"] #uiDialogSecondary { order:2; }
 #uiDialog[data-mode="choice"] #uiDialogCancel {
