@@ -1506,5 +1506,19 @@
     "已清空族譜。": "Family tree cleared.",
     "清空族譜失敗：": "Failed to clear family tree: ",
     "清空族譜失敗": "Failed to Clear Family Tree"
+  },
+  "suggestions": {
+    "causeOfDeath": [
+      "Death by Cowplant",
+      "Death by Mold",
+      "Death by Sunlight",
+      "Death by Falling from Heights",
+      "Death by Cuckoo Clock Malfunction",
+      "Drowning",
+      "Death by Fire",
+      "Death by Vending Machine",
+      "Murder",
+      "Electrocution"
+    ]
   }
 }
