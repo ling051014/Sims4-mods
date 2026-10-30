@@ -2601,7 +2601,8 @@ function positionFamilyNavSearch(control) {
   const rect = control.menu.getBoundingClientRect();
   bar.style.left = Math.round(rect.left + 8) + 'px';
   bar.style.top = Math.round(rect.top + 7) + 'px';
-  bar.style.width = Math.max(1,Math.round(rect.width - 16)) + 'px';
+  // A 方案搜尋欄維持兩個家庭選項左右的精簡寬度，不隨橫向欄數撐滿面板。
+  bar.style.width = Math.max(1, Math.min(320, Math.round(rect.width - 16))) + 'px';
 }
 
 function restoreFamilyNavSelectMenu(control) {
