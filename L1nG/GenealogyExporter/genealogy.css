@@ -8354,6 +8354,54 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     min-width:168px;
     white-space:nowrap;
 }
+/* ========【家庭搜尋 A】 大量家庭時才在三個索引下方顯示搜尋入口 ======== */
+.family-nav-search-trigger {
+    display:flex; align-items:center; justify-content:center; align-self:center;
+    width:39px; height:39px; flex:0 0 39px; margin-top:12px; padding:0;
+    border:1px solid var(--nav-dropdown-border); border-radius:7px;
+    background:var(--nav-dropdown-bg); color:var(--text-secondary);
+    box-shadow:0 4px 12px rgba(0,0,0,.04); cursor:pointer;
+}
+.family-nav-search-trigger::before {
+    content:""; width:16px; height:16px; background:currentColor;
+    -webkit-mask:url("../../html%20icons/ui-search.svg") center/contain no-repeat;
+    mask:url("../../html%20icons/ui-search.svg") center/contain no-repeat;
+}
+.family-nav-search-trigger:hover,.family-nav-search-trigger.active {
+    color:var(--action-primary); background:var(--nav-dropdown-hover-bg);
+}
+.family-nav-search-trigger:focus-visible,.family-nav-search-dismiss:focus-visible {
+    outline:2px solid var(--action-primary); outline-offset:2px;
+}
+.family-nav-search-trigger[hidden],.family-nav-searchbar[hidden] { display:none; }
+.family-nav-searchbar {
+    position:fixed; z-index:1402; display:flex; align-items:center; gap:4px;
+    box-sizing:border-box; color:var(--nav-dropdown-text); background:var(--nav-dropdown-bg);
+}
+.family-nav-searchbar .family-nav-search-field { flex:1 1 auto; min-width:0; }
+.family-nav-searchbar .family-nav-search-field input {
+    display:block; width:100%; height:34px; min-height:34px; padding-top:0; padding-bottom:0;
+    border:1px solid var(--nav-dropdown-border); border-radius:6px;
+    background:var(--surface-input); color:var(--nav-dropdown-text);
+    font:inherit; font-size:12px; outline:none;
+}
+.family-nav-searchbar .family-nav-search-field input:focus {
+    border-color:var(--action-primary);
+}
+.family-nav-searchbar .family-nav-search-field input::placeholder {
+    color:var(--text-secondary); opacity:1;
+}
+.family-nav-searchbar .family-nav-search-dismiss {
+    position:static; transform:none; flex:0 0 28px; width:28px; height:28px; min-height:28px;
+}
+.nav-select-menu.family-nav-portal.family-nav-search-active {
+    min-width:290px; padding-top:46px;
+}
+.nav-select-menu.family-nav-portal .nav-select-option[hidden] { display:none; }
+.family-nav-search-empty {
+    grid-column:1; grid-row:1; min-width:168px; padding:12px 15px;
+    font-size:12px; color:var(--text-secondary); text-align:center;
+}
 /* ========【家族選擇器索引】 左側網頁分頁式 EA 族譜 / 大家族索引，不改動原多欄下拉 ======== */
 .family-nav-tabs-portal {
     position:fixed;
