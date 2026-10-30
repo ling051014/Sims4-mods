@@ -2483,10 +2483,137 @@ function getNavSelectControlByHost(host) {
   return null;
 }
 
+// 家庭索引下方的搜尋按鈕：只有目前分類至少 30 個家庭時才顯示。
+function setupFamilyNavSearch(control) {
+  if (!control || control.select.id !== 'familySelect' || control.familySearchInput) return;
+  const tabs = ensureFamilyNavTabsPortal(control);
+  const trigger = tabs?.querySelector('#familyNavSearchTrigger');
+  const bar = document.getElementById('familyNavSearchBar');
+  const input = document.getElementById('familyNavSearchInput');
+  const clear = document.getElementById('familyNavSearchClear');
+  const dismiss = document.getElementById('familyNavSearchDismiss');
+  if (!trigger || !bar || !input || !clear || !dismiss) return;
+
+  control.familySearchTrigger = trigger;
+  control.familySearchBar = bar;
+  control.familySearchInput = input;
+  control.familySearchClear = clear;
+  control.familySearchOpen = false;
+  control.familySearchQuery = '';
+
+  const hideSearch = () => {
+    control.familySearchOpen = false;
+    control.familySearchQuery = '';
+    input.value = '';
+    syncFamilyNavSearch(control);
+    if (control.host.classList.contains('open')) positionFamilyNavSelectMenu(control);
+  };
+  trigger.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (trigger.hidden || !control.host.classList.contains('open')) return;
+    if (control.familySearchOpen) {
+      hideSearch();
+      trigger.focus({ preventScroll:true });
+      return;
+    }
+    control.familySearchOpen = true;
+    control.familySearchQuery = '';
+    input.value = '';
+    syncFamilyNavSearch(control);
+    positionFamilyNavSelectMenu(control);
+    input.focus({ preventScroll:true });
+  });
+  bar.addEventListener('click', event => event.stopPropagation());
+  bar.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopPropagation();
+    hideSearch();
+    trigger.focus({ preventScroll:true });
+  });
+  input.addEventListener('input', () => {
+    control.familySearchQuery = input.value;
+    syncFamilyNavSearch(control);
+    control.menu.scrollLeft = 0;
+    positionFamilyNavSelectMenu(control);
+  });
+  clear.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    control.familySearchQuery = '';
+    input.value = '';
+    syncFamilyNavSearch(control);
+    positionFamilyNavSelectMenu(control);
+    input.focus({ preventScroll:true });
+  });
+  dismiss.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    hideSearch();
+    trigger.focus({ preventScroll:true });
+  });
+}
+
+function syncFamilyNavSearch(control) {
+  if (!control?.familySearchInput) return;
+  const { select, menu, familySearchTrigger:trigger, familySearchBar:bar } = control;
+  const enough = [...select.options].filter(option => !option.disabled).length >= 30;
+  if (!enough) {
+    control.familySearchOpen = false;
+    control.familySearchQuery = '';
+  }
+  const active = enough && control.familySearchOpen;
+  const query = active ? control.familySearchQuery.trim().toLocaleLowerCase() : '';
+  trigger.hidden = !enough;
+  trigger.classList.toggle('active',active);
+  trigger.setAttribute('aria-expanded',String(active));
+  bar.hidden = !active;
+  control.familySearchInput.value = active ? control.familySearchQuery : '';
+  control.familySearchClear.hidden = !query;
+  menu.classList.toggle('family-nav-search-active',active);
+
+  let matches = 0;
+  menu.querySelectorAll('.nav-select-option').forEach(option => {
+    const visible = !query || (!option.disabled && option.textContent.toLocaleLowerCase().includes(query));
+    option.hidden = !visible;
+    if (visible && !option.disabled) matches++;
+  });
+  menu.querySelector('.family-nav-search-empty')?.remove();
+  if (query && !matches) {
+    const empty = document.createElement('div');
+    empty.className = 'family-nav-search-empty';
+    empty.textContent = uiText('沒有符合的項目');
+    menu.appendChild(empty);
+  }
+}
+
+function positionFamilyNavSearch(control) {
+  if (!control?.familySearchBar || !control.familySearchOpen || !control.host.classList.contains('open')) return;
+  const bar = control.familySearchBar;
+  if (bar.parentElement !== document.body) document.body.appendChild(bar);
+  const rect = control.menu.getBoundingClientRect();
+  bar.style.left = Math.round(rect.left + 8) + 'px';
+  bar.style.top = Math.round(rect.top + 7) + 'px';
+  bar.style.width = Math.max(1,Math.round(rect.width - 16)) + 'px';
+}
+
 function restoreFamilyNavSelectMenu(control) {
   if (!control || control.select.id !== 'familySelect') return;
 
   const { host, menu } = control;
+  if (control.familySearchInput) {
+    control.familySearchOpen = false;
+    control.familySearchQuery = '';
+    control.familySearchInput.value = '';
+    control.familySearchBar.hidden = true;
+    control.familySearchTrigger.classList.remove('active');
+    control.familySearchTrigger.setAttribute('aria-expanded','false');
+    if (control.familySearchBar.parentElement !== host) host.appendChild(control.familySearchBar);
+    control.familySearchBar.style.removeProperty('left');
+    control.familySearchBar.style.removeProperty('top');
+    control.familySearchBar.style.removeProperty('width');
+  }
 
   if (menu.parentElement !== host) {
     host.appendChild(menu);
@@ -2497,7 +2624,7 @@ function restoreFamilyNavSelectMenu(control) {
     host.appendChild(portal);
   }
 
-  menu.classList.remove('family-nav-portal');
+  menu.classList.remove('family-nav-portal','family-nav-search-active');
   menu.style.removeProperty('left');
   menu.style.removeProperty('top');
   menu.style.removeProperty('width');
@@ -2516,7 +2643,7 @@ function scrollSelectedFamilyNavOption(control) {
   const menu = control.menu;
   if (!control.host.classList.contains('open') || menu.parentElement !== document.body) return;
 
-  const selected = menu.querySelector('.nav-select-option.selected');
+  const selected = menu.querySelector('.nav-select-option.selected:not([hidden])');
   const maxScroll = Math.max(0, menu.scrollWidth - menu.clientWidth);
   if (!selected || maxScroll <= 1) return;
 
@@ -2533,7 +2660,7 @@ function positionFamilyNavSelectMenu(control) {
   if (!control || control.select.id !== 'familySelect') return;
 
   const { trigger, menu } = control;
-  const items = [...menu.querySelectorAll('.nav-select-option:not(:disabled)')];
+  const items = [...menu.querySelectorAll('.nav-select-option:not(:disabled):not([hidden])')];
 
   if (menu.parentElement !== document.body) {
     document.body.appendChild(menu);
@@ -2562,7 +2689,7 @@ function positionFamilyNavSelectMenu(control) {
   const availableHeight = openAbove ? aboveHeight : belowHeight;
   const rows = Math.max(
     1,
-    Math.min(items.length, Math.floor((availableHeight - verticalInset) / itemHeight))
+    Math.min(Math.max(1,items.length), Math.floor((availableHeight - verticalInset) / itemHeight))
   );
   const contentHeight = rows * itemHeight + verticalInset;
   // 下拉面板至少與左側三個分類索引等高，仍受可用視窗高度限制。
@@ -2586,6 +2713,7 @@ function positionFamilyNavSelectMenu(control) {
   // 極矮視窗連一列都容不下時，仍保留捲動入口，不留下看不見的可點擊項目。
   menu.style.overflowY = availableHeight < itemHeight + verticalInset ? 'auto' : 'hidden';
   positionFamilyNavTabsPortal(control);
+  positionFamilyNavSearch(control);
   scrollSelectedFamilyNavOption(control);
 }
 
@@ -2625,7 +2753,10 @@ function syncNavSelectControl(selectId) {
     return `<button type="button" class="nav-select-option${selectedClass}" role="option" aria-selected="${option.value === select.value ? 'true' : 'false'}"${disabled ? ' disabled aria-disabled="true"' : ''} data-nav-value="${esc(option.value)}" title="${esc(label)}">${esc(label)}</button>`;
   }).join('');
 
-  if (selectId === 'familySelect') syncFamilyNavTabsPortal(control);
+  if (selectId === 'familySelect') {
+    syncFamilyNavTabsPortal(control);
+    syncFamilyNavSearch(control);
+  }
 
   menu.querySelectorAll('.nav-select-option').forEach(optionButton => {
     optionButton.addEventListener('click', event => {
@@ -2658,6 +2789,7 @@ function setupTopbarNavSelects() {
 
     const control = { select, host, trigger, valueEl, menu };
     navSelectControls.set(selectId, control);
+    if (selectId === 'familySelect') setupFamilyNavSearch(control);
 
     trigger.addEventListener('click', event => {
       event.preventDefault();
@@ -2747,6 +2879,9 @@ function setupTopbarNavSelects() {
 
   document.addEventListener('click', event => {
     const inside = event.target.closest && event.target.closest('.nav-select');
+    const familyPortal = event.target.closest &&
+      event.target.closest('.family-nav-portal, .family-nav-tabs-portal, .family-nav-searchbar');
+    if (familyPortal) return;
     closeAllNavSelects(inside || null);
   });
 
