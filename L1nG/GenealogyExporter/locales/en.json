@@ -6,6 +6,13 @@
     "canonical": false
   },
   "messages": {
+    "已選 {s} 位模擬市民 / {p} 隻寵物": "Selected: {s} Sims / {p} pets",
+    "只處理已選取的模擬市民": "Applies only to selected Sims",
+    "永久刪除已選取項目": "Delete Selected",
+    "沒有符合的模擬市民或寵物": "No matching Sims or pets",
+    "目前沒有模擬市民或寵物": "No Sims or pets yet",
+    "批量刪除市民與寵物": "Delete Sims & Pets",
+    "即將刪除 {s} 位模擬市民與 {p} 隻寵物。": "You are about to delete {s} Sims and {p} pets.",
     "目前尚未建立任何家族": "No families have been created yet",
     "目前沒有其他家族可切換": "No other families to switch to",
     "未命名家族": "Unnamed Family",
