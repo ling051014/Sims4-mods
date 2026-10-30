@@ -2305,9 +2305,13 @@
 
       function position() {
         if (!host.classList.contains('ui-select-open')) return;
-        positionPortal(input, menu, editorMenu
-          ? { minWidth:240, maxWidth:430, maxHeight:260 }
-          : { minWidth:180, maxWidth:520, maxHeight:320 });
+        const matchWidth = input.dataset.uiSuggestionMatchWidth === 'true';
+        const fieldWidth = input.getBoundingClientRect().width;
+        positionPortal(input, menu, matchWidth
+          ? { minWidth:fieldWidth, maxWidth:fieldWidth, maxHeight:editorMenu ? 260 : 320 }
+          : editorMenu
+            ? { minWidth:240, maxWidth:430, maxHeight:260 }
+            : { minWidth:180, maxWidth:520, maxHeight:320 });
         const viewportLimit = Math.max(0, parseFloat(menu.style.maxHeight) || 0);
         menu.style.setProperty('--ui-suggestion-available-height', Math.max(0, viewportLimit - 8) + 'px');
       }
