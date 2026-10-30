@@ -8395,7 +8395,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
     position:static; transform:none; flex:0 0 28px; width:28px; height:28px; min-height:28px;
 }
 .nav-select-menu.family-nav-portal.family-nav-search-active {
-    min-width:290px; padding-top:46px;
+    min-width:min(290px,var(--family-menu-available-width,290px)); padding-top:46px;
 }
 .nav-select-menu.family-nav-portal .nav-select-option[hidden] { display:none; }
 .family-nav-search-empty {
