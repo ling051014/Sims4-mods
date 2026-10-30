@@ -8370,7 +8370,7 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 .family-nav-search-trigger:hover,.family-nav-search-trigger.active {
     color:var(--action-primary); background:var(--nav-dropdown-hover-bg);
 }
-.family-nav-search-trigger:focus-visible,.family-nav-search-dismiss:focus-visible {
+.family-nav-search-trigger:focus-visible {
     outline:2px solid var(--action-primary); outline-offset:2px;
 }
 .family-nav-search-trigger[hidden],.family-nav-searchbar[hidden] { display:none; }
@@ -8395,9 +8395,6 @@ body[data-theme="ink"],body[data-theme="berrynight"],body[data-theme="graphite"]
 }
 .family-nav-searchbar .family-nav-search-field input::placeholder {
     color:var(--text-secondary); opacity:1;
-}
-.family-nav-searchbar .family-nav-search-dismiss {
-    position:static; transform:none; flex:0 0 28px; width:28px; height:28px; min-height:28px;
 }
 .nav-select-menu.family-nav-portal.family-nav-search-active {
     min-width:min(410px,var(--family-menu-available-width,410px)); padding-top:46px;
