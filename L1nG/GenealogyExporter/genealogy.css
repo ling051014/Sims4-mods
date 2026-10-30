@@ -1803,6 +1803,8 @@ button.avatar-editor-action { cursor:pointer; }
 .sim-profile-edit-fields input,.sim-profile-edit-fields select,.sim-profile-edit-fields .ui-single-select-trigger { width:100%; min-width:0; min-height:32px; padding:5px 8px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12px; outline:none; }
 .sim-profile-edit-fields input:focus,.sim-profile-edit-fields select:focus,.sim-profile-edit-fields .ui-single-select-trigger:focus-visible { border-color:var(--action-primary); }
 .profile-name-field input { box-sizing:border-box; height:36px; min-height:36px; line-height:normal; font-size:17px; font-weight:700; padding:0 9px; }
+/* 姓名輸入框的預設文字使用與其他欄位相同的字級與字重，避免繼承 17px 輸入基線而視覺下沉。 */
+.profile-name-field input:placeholder-shown { font-size:13px; font-weight:400; }
 .profile-identity-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
 .profile-fact-edit-row { display:grid; grid-template-columns:minmax(150px,.9fr) minmax(94px,.52fr) minmax(190px,1.45fr); gap:8px; align-items:start; }
 .profile-fact-edit-row > .form-field { grid-template-rows:auto 32px; align-items:start; }
