@@ -2496,13 +2496,15 @@ function setupFamilyNavSearch(control) {
   const bar = document.getElementById('familyNavSearchBar');
   const input = document.getElementById('familyNavSearchInput');
   const clear = document.getElementById('familyNavSearchClear');
+  const count = document.getElementById('familyNavSearchCount');
   const dismiss = document.getElementById('familyNavSearchDismiss');
-  if (!trigger || !bar || !input || !clear || !dismiss) return;
+  if (!trigger || !bar || !input || !clear || !count || !dismiss) return;
 
   control.familySearchTrigger = trigger;
   control.familySearchBar = bar;
   control.familySearchInput = input;
   control.familySearchClear = clear;
+  control.familySearchCount = count;
   control.familySearchOpen = false;
   control.familySearchQuery = '';
 
@@ -2563,7 +2565,8 @@ function setupFamilyNavSearch(control) {
 function syncFamilyNavSearch(control) {
   if (!control?.familySearchInput) return;
   const { select, menu, familySearchTrigger:trigger, familySearchBar:bar } = control;
-  const enough = [...select.options].filter(option => !option.disabled).length >= 30;
+  const total = [...select.options].filter(option => !option.disabled).length;
+  const enough = total >= 30;
   if (!enough) {
     control.familySearchOpen = false;
     control.familySearchQuery = '';
@@ -2585,6 +2588,13 @@ function syncFamilyNavSearch(control) {
     option.hidden = !visible;
     if (visible && !option.disabled) matches++;
   });
+  const count = control.familySearchCount;
+  if (count) {
+    count.hidden = !query;
+    count.textContent = query
+      ? `${matches} / ${total}${familyNavLanguage() === 'en' ? '' : familyNavLanguage() === 'zh-Hans' ? ' 个' : ' 個'}`
+      : '';
+  }
   menu.querySelector('.family-nav-search-empty')?.remove();
   if (query && !matches) {
     const empty = document.createElement('div');
@@ -2602,7 +2612,7 @@ function positionFamilyNavSearch(control) {
   bar.style.left = Math.round(rect.left + 8) + 'px';
   bar.style.top = Math.round(rect.top + 7) + 'px';
   // A 方案搜尋欄維持兩個家庭選項左右的精簡寬度，不隨橫向欄數撐滿面板。
-  bar.style.width = Math.max(1, Math.min(320, Math.round(rect.width - 16))) + 'px';
+  bar.style.width = Math.max(1, Math.min(410, Math.round(rect.width - 16))) + 'px';
 }
 
 function restoreFamilyNavSelectMenu(control) {
