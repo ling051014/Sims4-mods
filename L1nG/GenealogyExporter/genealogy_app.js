@@ -2497,8 +2497,7 @@ function setupFamilyNavSearch(control) {
   const input = document.getElementById('familyNavSearchInput');
   const clear = document.getElementById('familyNavSearchClear');
   const count = document.getElementById('familyNavSearchCount');
-  const dismiss = document.getElementById('familyNavSearchDismiss');
-  if (!trigger || !bar || !input || !clear || !count || !dismiss) return;
+  if (!trigger || !bar || !input || !clear || !count) return;
 
   control.familySearchTrigger = trigger;
   control.familySearchBar = bar;
@@ -2554,12 +2553,6 @@ function setupFamilyNavSearch(control) {
     positionFamilyNavSelectMenu(control);
     input.focus({ preventScroll:true });
   });
-  dismiss.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
-    hideSearch();
-    trigger.focus({ preventScroll:true });
-  });
 }
 
 function syncFamilyNavSearch(control) {
@@ -2612,7 +2605,7 @@ function positionFamilyNavSearch(control) {
   bar.style.left = Math.round(rect.left + 8) + 'px';
   bar.style.top = Math.round(rect.top + 7) + 'px';
   // A 方案搜尋欄維持兩個家庭選項左右的精簡寬度，不隨橫向欄數撐滿面板。
-  bar.style.width = Math.max(1, Math.min(410, Math.round(rect.width - 16))) + 'px';
+  bar.style.width = Math.max(1, Math.min(360, Math.round(rect.width - 16))) + 'px';
 }
 
 function restoreFamilyNavSelectMenu(control) {
