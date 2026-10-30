@@ -2338,6 +2338,11 @@ function setFamilyTreeViewMode(mode, control = null) {
     familyTreeLastSourceFamilyId = previousFamily.id;
   }
 
+  if (control?.familySearchInput) {
+    control.familySearchQuery = '';
+    control.familySearchInput.value = '';
+    syncFamilyNavSearch(control);
+  }
   familyTreeViewMode = nextMode;
 
   try {
@@ -2569,7 +2574,8 @@ function syncFamilyNavSearch(control) {
   trigger.classList.toggle('active',active);
   trigger.setAttribute('aria-expanded',String(active));
   bar.hidden = !active;
-  control.familySearchInput.value = active ? control.familySearchQuery : '';
+  const desiredValue = active ? control.familySearchQuery : '';
+  if (control.familySearchInput.value !== desiredValue) control.familySearchInput.value = desiredValue;
   control.familySearchClear.hidden = !query;
   menu.classList.toggle('family-nav-search-active',active);
 
@@ -2709,12 +2715,14 @@ function positionFamilyNavSelectMenu(control) {
   menu.style.left = `${Math.max(margin, Math.round(rect.left))}px`;
   menu.style.maxHeight = `${Math.floor(availableHeight)}px`;
   menu.style.minHeight = `${Math.max(0, Math.floor(menuHeight))}px`;
-  menu.style.maxWidth = `${Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin)}px`;
+  const menuAvailableWidth = Math.max(180, window.innerWidth - Math.max(margin, rect.left) - margin);
+  menu.style.maxWidth = `${menuAvailableWidth}px`;
+  menu.style.setProperty('--family-menu-available-width',`${menuAvailableWidth}px`);
   // 極矮視窗連一列都容不下時，仍保留捲動入口，不留下看不見的可點擊項目。
   menu.style.overflowY = availableHeight < itemHeight + verticalInset ? 'auto' : 'hidden';
   positionFamilyNavTabsPortal(control);
   positionFamilyNavSearch(control);
-  scrollSelectedFamilyNavOption(control);
+  if (!control.familySearchQuery?.trim()) scrollSelectedFamilyNavOption(control);
 }
 
 function closeNavSelect(host) {
