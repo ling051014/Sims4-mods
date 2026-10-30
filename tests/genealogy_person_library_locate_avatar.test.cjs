@@ -150,35 +150,100 @@ test('iOS Safari 和 iPadOS 使用不漏畫頭像的匯出路徑，桌面保留�
   assert.match(app,/foreignObjectRendering:\s*!useSafeIosGenealogyCapture\(\)/);
   assert.match(app,/await\s+Promise\.all\(\[\s*prepareCaptureIcons\(captureViewport\),\s*prepareCaptureRelationshipIcons\(captureViewport\),\s*prepareCaptureAssetImages\(captureViewport, backgroundMode\)/);
 });
-test('總覽改由容器事件委派後，更多操作仍確實呼叫跨家庭定位',async()=>{
-  const delegate=between('function bindPersonLibraryEvents() {','function renderPersonLibraryRows(');
-  const listeners=[];
-  const calls=[];
-  const row={dataset:{personLibraryId:'B'}};
-  const action={dataset:{personLibraryAction:'locate'}};
+test('市民與寵物選單在清單內及 body 浮層都使用相同操作處理器',async()=>{
+  const delegate=between('async function handlePersonLibraryMenuAction(','function renderPersonLibraryRows(');
+  const listListeners=[],documentListeners=[],calls=[];
   const list={
     dataset:{},
-    addEventListener:(name,handler)=>{if(name==='click')listeners.push(handler);},
-    contains:element=>element===row
+    addEventListener:(name,handler)=>{if(name==='click')listListeners.push(handler);},
+    contains:row=>!!row
   };
-  const target={
-    closest:selector=>{
-      if(selector==='[data-person-library-id]')return row;
-      if(selector==='[data-person-library-action]')return action;
+  const pet={key:'PET',pet:{id:'PET',name:'小黑'}};
+  const button=(kind,id,action)=>{
+    const sim=kind==='sim';
+    const target={
+      dataset:sim
+        ? {personLibraryAction:action,personLibraryActionId:id}
+        : {petLibraryAction:action,petLibraryActionId:id}
+    };
+    target.closest=selector=>{
+      if(selector==='[data-person-library-action]')return sim?target:null;
+      if(selector==='[data-pet-library-action]')return sim?null:target;
+      if(selector==='.ui-menu-body-portal')return {};
       return null;
-    }
+    };
+    return target;
   };
-  vm.runInNewContext(delegate+'\nbindPersonLibraryEvents();bindPersonLibraryEvents();',{
-    $:id=>id==='personLibraryList'?list:null,
-    currentGenealogyData:()=>({sims:{B:{id:'B'}}}),
-    locatePersonFromLibrary:id=>calls.push(id)
-  });
-  assert.equal(listeners.length,1,'容器僅綁定一次 click 事件');
+  const context={
+    $:name=>name==='personLibraryList'?list:null,
+    document:{addEventListener:(name,handler,capture)=>{
+      if(name==='click')documentListeners.push({handler,capture});
+    }},
+    personLibraryDialog:{classList:{contains:value=>value==='show'}},
+    currentGenealogyData:()=>({sims:{B:{id:'B',name:'Beth'}}}),
+    getPersonLibraryIndex:()=>({petsByKey:new Map([['PET',pet]])}),
+    locatePersonFromLibrary:id=>calls.push('sim:'+id),
+    locatePetFromLibrary:entry=>calls.push('pet:'+entry.key)
+  };
+  vm.runInNewContext(delegate+'\nbindPersonLibraryEvents();bindPersonLibraryEvents();',context);
+  assert.equal(listListeners.length,1,'清單只綁定一次');
+  assert.equal(documentListeners.length,1,'body 浮層只綁定一次');
+  assert.equal(documentListeners[0].capture,true,'在共用 UI 還原浮層前處理動作');
+
+  const simAction=button('sim','B','locate');
+  const simRow={dataset:{personLibraryId:'B'}};
   let stopped=0;
-  await listeners[0]({target,stopPropagation:()=>{stopped++;}});
-  assert.deepEqual(calls,['B']);
+  await listListeners[0]({
+    target:{closest:selector=>{
+      if(selector==='[data-person-library-id]')return simRow;
+      if(selector==='[data-person-library-action], [data-pet-library-action]')return simAction;
+      return null;
+    }},
+    stopPropagation:()=>stopped++
+  });
+  assert.deepEqual(calls,['sim:B']);
   assert.equal(stopped,1);
+
+  const portal=(action)=>({
+    closest:selector=>
+      selector==='[data-person-library-action], [data-pet-library-action]'?action:null
+  });
+  documentListeners[0].handler({target:portal(button('sim','B','locate'))});
+  documentListeners[0].handler({target:portal(button('pet','PET','locate'))});
+  assert.deepEqual(calls,['sim:B','sim:B','pet:PET']);
   assert.doesNotMatch(delegate,/focusSimOnCanvas\(simId\)/);
+
+  const petMarkup=between('function renderPetLibrary() {','function renderPersonLibrary() {');
+  assert.equal((petMarkup.match(/data-pet-library-action-id/g)||[]).length,4,
+    '寵物每個操作項目都附有可供 body 浮層查找的穩定 ID');
+});
+
+test('分批加入的清單使用局部選單初始化，不重掃全文件',()=>{
+  const source=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy_ui.js'),'utf8');
+  const begin=source.indexOf('function setupAppMenus(scope = document) {');
+  const end=source.indexOf('// ========【共用說明 Tooltip】',begin);
+  assert.ok(begin>=0&&end>begin,'找不到共用選單初始化');
+  const fn=source.slice(begin,end);
+  const bindings={menu:0,global:0};
+  const menu={
+    dataset:{},
+    querySelector:selector=>selector===':scope > .ui-menu-trigger'?trigger:null,
+    querySelectorAll:selector=>selector==='.ui-menu-item'?[item]:[]
+  };
+  const trigger={dataset:{},addEventListener:()=>bindings.menu++};
+  const item={addEventListener:()=>bindings.menu++};
+  const row={querySelectorAll:selector=>selector==='.ui-menu'?[menu]:[]};
+  vm.runInNewContext('let _appMenuGlobalBound=false;\n'+fn+
+    '\nsetupAppMenus([row]);setupAppMenus([row]);',{
+      row,
+      document:{
+        querySelectorAll:()=>{throw Error('不應掃描整個 document');},
+        addEventListener:()=>bindings.global++
+      },
+      window:{addEventListener:()=>bindings.global++}
+    });
+  assert.equal(bindings.menu,2,'同一選單按鈕與項目均只初始化一次');
+  assert.equal(bindings.global,3,'全域 click、keydown、resize 監聽只初始化一次');
 });
 
 test('總覽大清單分批渲染，且切換分類後取消過期批次',()=>{
@@ -186,6 +251,7 @@ test('總覽大清單分批渲染，且切換分類後取消過期批次',()=>{
   const run=(total,cancel)=>{
     const frames=[];
     let observed=0;
+    const menuScopes=[];
     const list={
       isConnected:true,children:[],
       insertAdjacentHTML:(position,html)=>{
@@ -198,17 +264,22 @@ test('總覽大清單分批渲染，且切換分類後取消過期批次',()=>{
       personLibraryState:{batchMode:false},
       requestAnimationFrame:fn=>frames.push(fn),
       observePersonLibraryAvatars:(root,rows)=>{observed+=rows.length;},
-      setupAppMenus:()=>{}
+      setupAppMenus:rows=>menuScopes.push(rows.length)
     };
     vm.runInNewContext(source+'\nrenderPersonLibraryRows(list,items,()=>"<article></article>");',context);
     const firstPaint=list.children.length;
     if(cancel)context.personLibraryRenderToken++;
     while(frames.length)frames.shift()();
-    return {firstPaint,count:list.children.length,observed};
+    return {firstPaint,count:list.children.length,observed,menuScopes};
   };
-  assert.deepEqual(run(80,false),{firstPaint:80,count:80,observed:80});
-  assert.deepEqual(run(700,false),{firstPaint:48,count:700,observed:700});
-  assert.deepEqual(run(700,true),{firstPaint:48,count:48,observed:48});
+  assert.deepEqual(run(80,false),{firstPaint:80,count:80,observed:80,menuScopes:[80]});
+  const many=run(700,false);
+  assert.equal(many.firstPaint,48);
+  assert.equal(many.count,700);
+  assert.equal(many.observed,700);
+  assert.equal(many.menuScopes.length,15);
+  assert.equal(many.menuScopes.reduce((a,b)=>a+b,0),700);
+  assert.deepEqual(run(700,true),{firstPaint:48,count:48,observed:48,menuScopes:[48]});
 });
 
 test('總覽市民家族索引快取在資料變動時失效',()=>{

@@ -168,10 +168,11 @@
 
     let _appMenuGlobalBound = false;
 
-    function setupAppMenus() {
-      document
-        .querySelectorAll('.ui-menu')
-        .forEach(menu => {
+    function setupAppMenus(scope = document) {
+      const menus = Array.isArray(scope)
+        ? scope.flatMap(row => [...row.querySelectorAll('.ui-menu')])
+        : [...scope.querySelectorAll('.ui-menu')];
+      menus.forEach(menu => {
           const trigger =
             menu.querySelector(
               ':scope > .ui-menu-trigger'

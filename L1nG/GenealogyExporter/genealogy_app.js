@@ -5626,7 +5626,7 @@ function setFamilyPanelCollapsed(collapsed, options) {
 function restoreFamilyPanelCollapsed() {
   return genealogyChrome.restoreFamilyPanelCollapsed();
 }
-function setupAppMenus() { return genealogyChrome.setupAppMenus(); }
+function setupAppMenus(scope) { return genealogyChrome.setupAppMenus(scope); }
 function closeAppMenus(except = null) {
   return genealogyChrome.closeAppMenus(except);
 }
@@ -16192,11 +16192,52 @@ async function deletePetFromLibrary(entry) {
   if(personLibraryDialog.classList.contains('show'))renderPersonLibrary();
 }
 
-// One container listener survives list replacement, view switches and batch mode.
+// Keep one action dispatcher even when the shared menu moves its popover to body.
+async function handlePersonLibraryMenuAction(button, key) {
+  const petAction = button.closest('[data-pet-library-action]');
+  if (petAction) {
+    const entry = getPersonLibraryIndex().petsByKey.get(String(key || ''));
+    if (!entry) return;
+    const action = petAction.dataset.petLibraryAction;
+    if (action === 'edit') openPetEditorFromCanvas(entry);
+    else if (action === 'locate') locatePetFromLibrary(entry);
+    else if (action === 'delete') await deletePetFromLibrary(entry);
+    else if (action === 'view') openPetProfileFromCanvas(entry);
+    return;
+  }
+  const simAction = button.closest('[data-person-library-action]');
+  if (!simAction) return;
+  const simId = String(key || '');
+  if (!currentGenealogyData().sims[simId]) return;
+  const action = simAction.dataset.personLibraryAction;
+  if (action === 'view') openPersonProfile(simId);
+  else if (action === 'edit') personEditor.open(simId);
+  else if (action === 'locate') locatePersonFromLibrary(simId);
+  else if (action === 'toggle-family') {
+    const fam = currentFamily();
+    const mutation = fam.memberIds.includes(simId)
+      ? genealogyStore.removeFamilyMember(fam.id, simId)
+      : genealogyStore.addFamilyMember(fam.id, simId);
+    applyGenealogyMutation(mutation);
+    renderPersonLibrary();
+  } else if (action === 'delete') await deleteChar(simId);
+}
+
+// Delegation on the list handles rows; capture on document handles popovers
+// moved out of the list by the shared Chrome controller.
 function bindPersonLibraryEvents() {
   const list = $('personLibraryList');
   if (list.dataset.libraryEventsBound === '1') return;
   list.dataset.libraryEventsBound = '1';
+
+  document.addEventListener('click', event => {
+    if (!personLibraryDialog.classList.contains('show')) return;
+    const button = event.target.closest?.('[data-person-library-action], [data-pet-library-action]');
+    if (!button || !button.closest('.ui-menu-body-portal')) return;
+    const key = button.dataset.petLibraryActionId || button.dataset.personLibraryActionId;
+    void handlePersonLibraryMenuAction(button, key);
+  }, true);
+
   list.addEventListener('click', async event => {
     const target = event.target;
     const petRow = target.closest('[data-pet-library-key]');
@@ -16211,36 +16252,10 @@ function bindPersonLibraryEvents() {
       personLibraryController.toggleSelection(petId || simId);
       return;
     }
-
-    const petAction = target.closest('[data-pet-library-action]');
-    if (petAction && petRow) {
+    const action = target.closest('[data-person-library-action], [data-pet-library-action]');
+    if (action) {
       event.stopPropagation();
-      const entry = getPersonLibraryIndex().petsByKey.get(petId);
-      if (!entry) return;
-      const action = petAction.dataset.petLibraryAction;
-      if (action === 'edit') openPetEditorFromCanvas(entry);
-      else if (action === 'locate') locatePetFromLibrary(entry);
-      else if (action === 'delete') void deletePetFromLibrary(entry);
-      else openPetProfileFromCanvas(entry);
-      return;
-    }
-
-    const simAction = target.closest('[data-person-library-action]');
-    if (simAction && simRow) {
-      event.stopPropagation();
-      if (!currentGenealogyData().sims[simId]) return;
-      const action = simAction.dataset.personLibraryAction;
-      if (action === 'view') openPersonProfile(simId);
-      else if (action === 'edit') personEditor.open(simId);
-      else if (action === 'locate') locatePersonFromLibrary(simId);
-      else if (action === 'toggle-family') {
-        const fam = currentFamily();
-        const mutation = fam.memberIds.includes(simId)
-          ? genealogyStore.removeFamilyMember(fam.id, simId)
-          : genealogyStore.addFamilyMember(fam.id, simId);
-        applyGenealogyMutation(mutation);
-        renderPersonLibrary();
-      } else if (action === 'delete') await deleteChar(simId);
+      await handlePersonLibraryMenuAction(action, petId || simId);
       return;
     }
     if (target.closest('.person-library-item-menu')) return;
@@ -16264,7 +16279,7 @@ function renderPersonLibraryRows(list, items, renderRow) {
     list.insertAdjacentHTML('beforeend', items.slice(position, end).map(renderRow).join(''));
     const addedRows = Array.from(list.children).slice(previousCount);
     observePersonLibraryAvatars(list, addedRows);
-    if (!personLibraryState.batchMode && (position === 0 || end === items.length)) setupAppMenus();
+    if (!personLibraryState.batchMode) setupAppMenus(addedRows);
     position = end;
     if (position < items.length) requestAnimationFrame(appendBatch);
   }
@@ -16331,14 +16346,14 @@ function renderPetLibrary() {
         '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') + '</button>' +
         '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
             iconSvg('person-vcard') + '<span>' + esc(uiText('查看寵物資料')) + '</span></button>' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
             iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="locate">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="locate" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
             iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span></button>' +
           '<div class="ui-menu-divider"></div>' +
-          '<button class="ui-menu-item danger" type="button" role="menuitem" data-pet-library-action="delete">' +
+          '<button class="ui-menu-item danger" type="button" role="menuitem" data-pet-library-action="delete" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
             iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span></button>' +
         '</div>' +
       '</div></div>';
