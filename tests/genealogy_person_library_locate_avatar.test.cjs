@@ -213,7 +213,7 @@ test('市民與寵物選單在清單內及 body 浮層都使用相同操作處�
   assert.deepEqual(calls,['sim:B','sim:B','pet:PET']);
   assert.doesNotMatch(delegate,/focusSimOnCanvas\(simId\)/);
 
-  const petMarkup=between('function renderPetLibrary() {','function renderPersonLibrary() {');
+  const petMarkup=between('function renderPetLibraryRow(','function renderPetLibrary() {');
   assert.equal((petMarkup.match(/data-pet-library-action-id/g)||[]).length,4,
     '寵物每個操作項目都附有可供 body 浮層查找的穩定 ID');
 });
@@ -307,7 +307,7 @@ test('總覽市民家族索引快取在資料變動時失效',()=>{
 });
 
 test('寵物總覽輸出的四項選單操作均攜帶真實寵物 ID',()=>{
-  const renderSource=between('function renderPetLibrary() {','function renderPersonLibrary() {');
+  const renderSource=between('function renderPetLibraryRow(','function renderSimLibraryRow(');
   const keys=['PET-001','PET-002'];
   const entries=keys.map(key=>({key,pet:{id:key,name:key}}));
   let html='';
@@ -326,6 +326,7 @@ test('寵物總覽輸出的四項選單操作均攜帶真實寵物 ID',()=>{
     personLibraryState:{batchMode:false,selection:new Set()},
     esc:value=>String(value),
     iconSvg:()=>'',petLibraryAvatarHTML:()=>'<span></span>',
+    personLibrarySelectionKey:(kind,id)=>kind+':'+id,
     renderPersonLibraryRows:(root,filtered,renderRow)=>{
       html=filtered.map(renderRow).join('');
     }
@@ -338,4 +339,79 @@ test('寵物總覽輸出的四項選單操作均攜帶真實寵物 ID',()=>{
       ['view','edit','locate','delete']);
   }
   assert.doesNotMatch(html,/data-pet-library-action-id="' \+ esc\(entry\.key\) \+ '"/);
+});
+
+test('全部分類共用現有 SVG，並按姓名合併市民與寵物',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../L1nG/GenealogyExporter/genealogy.html'),'utf8');
+  const tabs=['personLibraryAllTab','personLibrarySimsTab','personLibraryPetsTab'];
+  const indexes=tabs.map(id=>html.indexOf('id="'+id+'"'));
+  assert.ok(indexes.every(i=>i>=0));
+  assert.ok(indexes[0]<indexes[1]&&indexes[1]<indexes[2]);
+  assert.match(html,/id="personLibraryAllTab"[\s\S]{0,190}icon-outfit-all/);
+  const source=between('function renderAllPersonLibrary() {','function renderPersonLibrary() {');
+  const rows=[];
+  const index={sims:[{id:'same',name:'A'}],pets:[{key:'same',pet:{name:'B'}}]};
+  const list={replaceChildren(){},innerHTML:'',isConnected:true};
+  vm.runInNewContext(source+'\nrenderAllPersonLibrary();',{
+    getPersonLibraryIndex:()=>index,
+    currentFamily:()=>({memberIds:['same']}),
+    personLibrarySearch:{value:''},
+    displayDataText:(value)=>value,
+    petLibraryDisplayInfo:entry=>({name:entry.pet.name}),
+    personLibraryController:{syncCategoryCounts(){},syncViewControls(){},syncBatchToolbar(){}},
+    $:()=>list,uiText:value=>value,esc:value=>value,
+    renderPersonLibraryRows:(root,items,renderer)=>{
+      items.forEach(item=>rows.push({
+        kind:item.kind,id:item.id,name:item.name,markup:renderer(item)
+      }));
+    },
+    renderSimLibraryRow:sim=>'sim:'+sim.id,
+    renderPetLibraryRow:({entry})=>'pet:'+entry.key
+  });
+  assert.equal(rows.length,2);
+  assert.deepEqual(rows.map(x=>x.name),['A','B']);
+  assert.deepEqual(rows.map(x=>x.markup),['sim:same','pet:same']);
+});
+
+test('全部分類混合選取使用類型 ID 避免市民與寵物碰撞',()=>{
+  const source=between('function personLibrarySelectionKey(','// ========【模擬市民庫】');
+  const state={selection:new Set(['sim:123','pet:123','sim:456'])};
+  const f=vm.runInNewContext(source+
+    '\n({personLibrarySelectionKey,personLibrarySelectedIds})',{personLibraryState:state});
+  assert.notEqual(f.personLibrarySelectionKey('sim','123'),f.personLibrarySelectionKey('pet','123'));
+  assert.deepEqual([...f.personLibrarySelectedIds('sim')],['123','456']);
+  assert.deepEqual([...f.personLibrarySelectedIds('pet')],['123']);
+});
+
+test('混合批量刪除保留正確種類與單筆 Ctrl + Z 歷史',async()=>{
+  const source=between('  async deleteMixedSelection() {','  async deletePetsSelection() {');
+  const operations=[];
+  const data={sims:{shared:{id:'shared',name:'Sim'}}};
+  const ctx={
+    personLibrarySelectedIds:kind=>kind==='sim'?['shared']:['shared'],
+    currentGenealogyData:()=>data,
+    getPersonLibraryIndex:()=>({pets:[{key:'shared',pet:{id:'shared'}}]}),
+    uiText:value=>value,
+    uiConfirm:async()=>true,
+    exportCurrentGenealogyBackup:()=>{},
+    captureCanonicalHistory:()=>({snapshot:true}),
+    genealogyStore:{
+      deletePet:id=>{operations.push('pet:'+id);return {dataChanged:true};},
+      mergeResults:(...results)=>({dataChanged:results.some(x=>x.dataChanged)})
+    },
+    purgeSimData:id=>{operations.push('sim:'+id);return {dataChanged:true};},
+    selectedPetIds:new Set(['shared']),
+    finalizeSimDataChange:()=>operations.push('finalize'),
+    recordCanonicalHistory:()=>operations.push('undo'),
+    personLibraryDialog:{classList:{contains:()=>false}},
+    renderPersonLibrary:()=>{},
+    scheduleGC:()=>{},
+    applyGenealogyMutation:()=>{}
+  };
+  const object=vm.runInNewContext('({'+source+' setBatchMode(){operations.push("batchOff");}})',{
+    ...ctx,operations
+  });
+  await object.deleteMixedSelection();
+  assert.deepEqual(operations,['pet:shared','sim:shared','finalize','undo','batchOff']);
+  assert.equal(ctx.selectedPetIds.has('shared'),false);
 });

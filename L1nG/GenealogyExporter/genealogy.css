@@ -5692,6 +5692,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     border-radius:0;
     background:var(--surface-card);
 }
+.person-library-batch-count { color:var(--text-secondary); font-size:11px; font-weight:600; font-variant-numeric:tabular-nums; }
 .person-library-batch-toolbar[hidden],.person-library-batch-count[hidden] { display:none; }
 .person-library-batch-toolbar button { min-height:34px; padding:6px 11px; border-radius:7px; font-size:11.5px; }
 .person-library-batch-toolbar button.danger { color:var(--danger-text); border-color:var(--danger-border); }
@@ -5728,13 +5729,14 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
     .person-library-batch-toolbar { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:10px 13px max(10px,env(safe-area-inset-bottom)); gap:6px; }
     .person-library-batch-toolbar[hidden] { display:none; }
     .person-library-batch-toolbar button { min-width:0; font-size:10.5px; padding:6px 3px; }
+    .person-library-batch-toolbar .person-library-batch-count { grid-column:1 / -1; }
 }
 @media (max-width:360px) {
     .person-library-side { padding:5px 7px; gap:4px; }
-    .person-library-category-tabs button { font-size:10px; gap:3px; padding-left:1px; padding-right:1px; }
+    .person-library-category-tabs button { font-size:9.5px; gap:2px; padding-left:0; padding-right:0; }
     .person-library-category-tabs button .l1ng-icon { width:12px; height:12px; flex-basis:12px; }
     .person-library-header-actions { gap:3px; }
-    .person-library-header-actions button { font-size:10px; padding:5px 4px; gap:3px; }
+    .person-library-header-actions button { font-size:9.5px; padding:5px 3px; gap:2px; }
     .person-library-header-actions button .l1ng-icon { width:11px; height:11px; flex-basis:11px; }
 }
 /* ========【加入既有模擬市民】 沿用市民總覽標頭，只有清單捲動 ======== */
