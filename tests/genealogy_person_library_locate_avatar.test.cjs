@@ -305,3 +305,37 @@ test('總覽市民家族索引快取在資料變動時失效',()=>{
   assert.equal(examine.getPersonLibraryIndex().sims.length,3);
   assert.equal(petCollections,2);
 });
+
+test('寵物總覽輸出的四項選單操作均攜帶真實寵物 ID',()=>{
+  const renderSource=between('function renderPetLibrary() {','function renderPersonLibrary() {');
+  const keys=['PET-001','PET-002'];
+  const entries=keys.map(key=>({key,pet:{id:key,name:key}}));
+  let html='';
+  const list={replaceChildren(){}};
+  const controller={syncCategoryCounts(){},syncViewControls(){},syncBatchToolbar(){}};
+  vm.runInNewContext(renderSource+'\nrenderPetLibrary();',{
+    $:()=>list,
+    getPersonLibraryIndex:()=>({pets:entries}),
+    personLibrarySearch:{value:''},
+    personLibraryController:controller,
+    petLibraryDisplayInfo:entry=>({
+      name:entry.pet.name,species:'狗',breed:'',ownerLabel:'飼主'
+    }),
+    uiText:text=>text,
+    petGenderLabel:()=>'',personLibraryViewMode:'detailed',
+    personLibraryState:{batchMode:false,selection:new Set()},
+    esc:value=>String(value),
+    iconSvg:()=>'',petLibraryAvatarHTML:()=>'<span></span>',
+    renderPersonLibraryRows:(root,filtered,renderRow)=>{
+      html=filtered.map(renderRow).join('');
+    }
+  });
+  const actions=[...html.matchAll(/data-pet-library-action="(view|edit|locate|delete)" data-pet-library-action-id="([^"]*)"/g)]
+    .map(match=>({action:match[1],id:match[2]}));
+  assert.equal(actions.length,8);
+  for(const key of keys){
+    assert.deepEqual(actions.filter(item=>item.id===key).map(item=>item.action),
+      ['view','edit','locate','delete']);
+  }
+  assert.doesNotMatch(html,/data-pet-library-action-id="' \+ esc\(entry\.key\) \+ '"/);
+});

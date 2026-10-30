@@ -16347,14 +16347,14 @@ function renderPetLibrary() {
         '<button class="person-library-more ui-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" title="' + esc(uiText('更多')) + '">' +
           iconSvg('three-dots') + '</button>' +
         '<div class="ui-menu-popover person-library-item-popover" role="menu">' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="view" data-pet-library-action-id="' + esc(entry.key) + '">' +
             iconSvg('person-vcard') + '<span>' + esc(uiText('查看寵物資料')) + '</span></button>' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="edit" data-pet-library-action-id="' + esc(entry.key) + '">' +
             iconSvg('pencil-square') + '<span>' + esc(uiText('編輯寵物')) + '</span></button>' +
-          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="locate" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
+          '<button class="ui-menu-item" type="button" role="menuitem" data-pet-library-action="locate" data-pet-library-action-id="' + esc(entry.key) + '">' +
             iconSvg('crosshair') + '<span>' + esc(uiText('在族譜中定位')) + '</span></button>' +
           '<div class="ui-menu-divider"></div>' +
-          '<button class="ui-menu-item danger" type="button" role="menuitem" data-pet-library-action="delete" data-pet-library-action-id="\' + esc(entry.key) + \'">' +
+          '<button class="ui-menu-item danger" type="button" role="menuitem" data-pet-library-action="delete" data-pet-library-action-id="' + esc(entry.key) + '">' +
             iconSvg('trash3') + '<span>' + esc(uiText('永久刪除')) + '</span></button>' +
         '</div>' +
       '</div></div>';
