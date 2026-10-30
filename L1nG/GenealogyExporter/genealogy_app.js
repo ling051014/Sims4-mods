@@ -15755,7 +15755,7 @@ const personLibraryController = {
       button.setAttribute('aria-pressed', 'false');
       button.innerHTML = '';
     });
-    if (!personLibraryState.batchMode) setupAppMenus();
+    if (!personLibraryState.batchMode) setupAppMenus($('personLibraryList'));
   },
 
   toggleSelection(id) {
@@ -16277,7 +16277,8 @@ function renderPersonLibraryRows(list, items, renderRow) {
     const end = Math.min(position + batchSize, items.length);
     const previousCount = list.children.length;
     list.insertAdjacentHTML('beforeend', items.slice(position, end).map(renderRow).join(''));
-    const addedRows = Array.from(list.children).slice(previousCount);
+    const addedRows = [];
+    for (let i = previousCount; i < list.children.length; i++) addedRows.push(list.children[i]);
     observePersonLibraryAvatars(list, addedRows);
     if (!personLibraryState.batchMode) setupAppMenus(addedRows);
     position = end;

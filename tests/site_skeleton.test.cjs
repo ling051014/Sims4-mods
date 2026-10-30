@@ -21,7 +21,10 @@ test("正式頁面皆使用對應骨架及最新版資源",()=>{
   for (const [path,layout] of layouts) {
     const html=readFileSync(join(root,path),"utf8");
     assert.ok(html.includes('data-skeleton-layout="'+layout+'"'), path+" layout");
-    assert.ok(html.includes("site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3"),path+" JS cache");
+    const expectedJsVersion = /^L1nG\/home(?:-en)?\.html$/.test(path)
+      ? "20261021-home-curseforge-r1"
+      : "20261012-site-skeleton-hero-sync-r3";
+    assert.ok(html.includes("site-skeleton.js?v="+expectedJsVersion),path+" JS cache");
     assert.ok(html.includes("site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"),path+" CSS cache");
     assert.ok(script.includes('"'+layout+'": () =>'),layout+" template");
   }
@@ -120,7 +123,15 @@ test("頂欄品牌與導覽保持三區，漢化頁有專區名稱而不新增�
 });
 
 test("主視覺骨架保持與實際內容一致",()=>{
-  assert.match(script,/repeat\(2, \(\) =>\s*'<div class="sk-home-creator-link">/);
+  const home = readFileSync(join(root,"L1nG/home.html"),"utf8");
+  const homeEn = readFileSync(join(root,"L1nG/home-en.html"),"utf8");
+  const count = (home.match(/class="creator-link"/g)||[]).length;
+  assert.ok(count>0,"首頁應保留外部連結");
+  assert.equal((homeEn.match(/class="creator-link"/g)||[]).length,count,
+    "中英文首頁外部連結數量必須一致");
+  const skeletonLinks = script.match(/repeat\((\d+), \(\) =>\s*'<div class="sk-home-creator-link">/);
+  assert.ok(skeletonLinks,"首頁骨架需要包含外部連結佔位");
+  assert.equal(Number(skeletonLinks[1]),count,"首頁連結數量與骨架佔位數量必須相符");
   assert.match(script,/const links = type === "realdate" \? 7/);
   assert.match(script,/sk-translation-stat-wide/);
   assert.match(script,/sk-realdate-release-item/);
