@@ -115,44 +115,103 @@ if ("IntersectionObserver" in window) {
 }
 
 
-/* ========【首頁最新更新】 僅顯示正式公開發布；與完整更新日誌共用資料 ======== */
-(function renderPublicAnnouncements(){
+/* ========【首頁最新更新】 僅列已公開版本，直接前往既有專案頁面 ======== */
+(function renderHomeReleaseLinks() {
     const list = document.getElementById("homeUpdatesList");
     if (!list) return;
     const status = document.getElementById("homeUpdatesStatus");
     const language = document.documentElement.lang.toLowerCase().startsWith("en") ? "en" : "zh-Hant";
-    const releases = Array.isArray(window.L1NG_PUBLIC_UPDATES) ? window.L1NG_PUBLIC_UPDATES : [];
-    const recent = releases.filter(item => item && item.publishedAt && item.title && item.project && item.id)
-        .slice().sort((a,b) => b.publishedAt.localeCompare(a.publishedAt)).slice(0,5);
-    if (!recent.length) {
-        if (status) status.textContent = language === "en" ? "No published announcements are available." : "目前沒有可顯示的公開公告。";
-        return;
+    // 只在正式對外發布／公告時維護；不要從 GitHub 提交紀錄產生條目。
+    const announcements = [
+    {
+        "date": "2026-10-19",
+        "project": {
+            "zh-Hant": "族譜工具 / 族譜提取器",
+            "en": "Genealogy Tool / Exporter"
+        },
+        "title": {
+            "zh-Hant": "v0.1 Beta 首次公開測試",
+            "en": "v0.1 Beta public launch"
+        },
+        "href": "GenealogyExporter/genealogy.html"
+    },
+    {
+        "date": "2026-10-14",
+        "project": {
+            "zh-Hant": "RealDate",
+            "en": "RealDate"
+        },
+        "title": {
+            "zh-Hant": "v0.5 Beta：人生回憶錄與紀念日",
+            "en": "v0.5 Beta: Life Chronicle & Anniversaries"
+        },
+        "href": "RealDate/changelog.html#v050"
+    },
+    {
+        "date": "2026-09-22",
+        "project": {
+            "zh-Hant": "RealDate",
+            "en": "RealDate"
+        },
+        "title": {
+            "zh-Hant": "v0.4 Beta：生日社交與年號玩法",
+            "en": "v0.4 Beta: Birthday socials & Eras"
+        },
+        "href": "RealDate/changelog.html#v040"
+    },
+    {
+        "date": "2026-09-08",
+        "project": {
+            "zh-Hant": "RealDate",
+            "en": "RealDate"
+        },
+        "title": {
+            "zh-Hant": "v0.3 Beta：RealDate 月曆與生理時間軸",
+            "en": "v0.3 Beta: Calendar & reproductive timeline"
+        },
+        "href": "RealDate/changelog.html#v030"
+    },
+    {
+        "date": "2026-08-31",
+        "project": {
+            "zh-Hant": "RealDate",
+            "en": "RealDate"
+        },
+        "title": {
+            "zh-Hant": "v0.2.1 Beta：午夜換日與生日修正",
+            "en": "v0.2.1 Beta: Midnight rollover fixes"
+        },
+        "href": "RealDate/changelog.html#v021"
     }
+];
+    const latest = announcements.slice()
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 5);
     const fragment = document.createDocumentFragment();
-    for (const item of recent) {
+    for (const entry of latest) {
         const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.className = "home-update-link";
-        a.href = "changelog.html#" + encodeURIComponent(item.id);
-        const time = document.createElement("time");
-        time.className = "home-update-date";
-        time.dateTime = item.publishedAt;
-        time.textContent = item.publishedAt.replaceAll("-","/");
+        const link = document.createElement("a");
+        link.className = "home-update-link";
+        link.href = entry.href;
+        const date = document.createElement("time");
+        date.className = "home-update-date";
+        date.dateTime = entry.date;
+        date.textContent = entry.date.replaceAll("-", "/");
         const main = document.createElement("span");
         main.className = "home-update-main";
         const project = document.createElement("span");
         project.className = "home-update-project";
-        project.textContent = item.project[language] || item.project["zh-Hant"];
+        project.textContent = entry.project[language] || entry.project["zh-Hant"];
         const title = document.createElement("span");
         title.className = "home-update-title";
-        title.textContent = item.title[language] || item.title["zh-Hant"];
+        title.textContent = entry.title[language] || entry.title["zh-Hant"];
         const arrow = document.createElement("span");
         arrow.className = "home-update-arrow";
+        arrow.setAttribute("aria-hidden", "true");
         arrow.textContent = "→";
-        arrow.setAttribute("aria-hidden","true");
-        main.append(project,title);
-        a.append(time,main,arrow);
-        li.append(a);
+        main.append(project, title);
+        link.append(date, main, arrow);
+        li.append(link);
         fragment.append(li);
     }
     list.replaceChildren(fragment);
