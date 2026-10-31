@@ -115,50 +115,46 @@ if ("IntersectionObserver" in window) {
 }
 
 
-/* ========【首頁最新更新】 共用 JSON 按發布日期取最近五筆 ======== */
-(async function renderHomeUpdates(){
-    const list=document.getElementById("homeUpdatesList");
-    if(!list)return;
-    const status=document.getElementById("homeUpdatesStatus");
-    const language=document.documentElement.lang.toLowerCase().startsWith("en")?"en":"zh-Hant";
-    try{
-        const response=await fetch("home-updates.json",{cache:"no-cache"});
-        if(!response.ok)throw new Error("Update feed unavailable");
-        const feed=await response.json();
-        const updates=Array.isArray(feed.updates)?feed.updates:[];
-        const recent=updates.filter(x=>x&&typeof x.publishedAt==="string"&&x.title&&x.project&&typeof x.href==="string")
-          .sort((a,b)=>Date.parse(b.publishedAt)-Date.parse(a.publishedAt)).slice(0,5);
-        if(!recent.length)throw new Error("Update feed empty");
-        const fragment=document.createDocumentFragment();
-        for(const entry of recent){
-            const li=document.createElement("li");
-            const a=document.createElement("a");
-            a.className="home-update-link";
-            a.href=entry.href;
-            const time=document.createElement("time");
-            time.className="home-update-date";
-            time.dateTime=entry.publishedAt;
-            time.textContent=entry.publishedAt.slice(0,10).replaceAll("-","/");
-            const main=document.createElement("span");
-            main.className="home-update-main";
-            const project=document.createElement("span");
-            project.className="home-update-project";
-            project.textContent=entry.project[language]||entry.project["zh-Hant"]||"L1nG";
-            const title=document.createElement("span");
-            title.className="home-update-title";
-            title.textContent=entry.title[language]||entry.title["zh-Hant"]||"";
-            const arrow=document.createElement("span");
-            arrow.className="home-update-arrow";
-            arrow.setAttribute("aria-hidden","true");
-            arrow.textContent="→";
-            main.append(project,title);
-            a.append(time,main,arrow);
-            li.append(a);
-            fragment.append(li);
-        }
-        list.replaceChildren(fragment);
-        if(status)status.hidden=true;
-    }catch(error){
-        if(status)status.textContent=language==="en"?"Updates are temporarily unavailable.":"目前無法載入最新更新。";
+/* ========【首頁最新更新】 僅顯示正式公開發布；與完整更新日誌共用資料 ======== */
+(function renderPublicAnnouncements(){
+    const list = document.getElementById("homeUpdatesList");
+    if (!list) return;
+    const status = document.getElementById("homeUpdatesStatus");
+    const language = document.documentElement.lang.toLowerCase().startsWith("en") ? "en" : "zh-Hant";
+    const releases = Array.isArray(window.L1NG_PUBLIC_UPDATES) ? window.L1NG_PUBLIC_UPDATES : [];
+    const recent = releases.filter(item => item && item.publishedAt && item.title && item.project && item.id)
+        .slice().sort((a,b) => b.publishedAt.localeCompare(a.publishedAt)).slice(0,5);
+    if (!recent.length) {
+        if (status) status.textContent = language === "en" ? "No published announcements are available." : "目前沒有可顯示的公開公告。";
+        return;
     }
+    const fragment = document.createDocumentFragment();
+    for (const item of recent) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.className = "home-update-link";
+        a.href = "changelog.html#" + encodeURIComponent(item.id);
+        const time = document.createElement("time");
+        time.className = "home-update-date";
+        time.dateTime = item.publishedAt;
+        time.textContent = item.publishedAt.replaceAll("-","/");
+        const main = document.createElement("span");
+        main.className = "home-update-main";
+        const project = document.createElement("span");
+        project.className = "home-update-project";
+        project.textContent = item.project[language] || item.project["zh-Hant"];
+        const title = document.createElement("span");
+        title.className = "home-update-title";
+        title.textContent = item.title[language] || item.title["zh-Hant"];
+        const arrow = document.createElement("span");
+        arrow.className = "home-update-arrow";
+        arrow.textContent = "→";
+        arrow.setAttribute("aria-hidden","true");
+        main.append(project,title);
+        a.append(time,main,arrow);
+        li.append(a);
+        fragment.append(li);
+    }
+    list.replaceChildren(fragment);
+    if (status) status.hidden = true;
 })();
