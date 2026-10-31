@@ -14,8 +14,7 @@ window.L1NG_PUBLIC_UPDATES = Object.freeze([
     "summary": {
       "zh-Hant": "正式公開族譜工具與遊戲端族譜提取器，支援建立、整理族譜及匯入遊戲資料。",
       "en": "The Genealogy Tool and in-game Exporter enter public beta, supporting family-tree editing and game-data import."
-    },
-    "source": "https://www.patreon.com/ling051014/posts/genealogy-v0-1-172541487"
+    }
   },
   {
     "id": "v050",
@@ -31,8 +30,7 @@ window.L1NG_PUBLIC_UPDATES = Object.freeze([
     "summary": {
       "zh-Hant": "新增人生回憶錄、關係歷史、事件管理與紀念日社交活動，並擴展行事曆活動規劃。",
       "en": "Introduced Life Chronicle, relationship history, Event Management, anniversary events, and expanded Calendar planning."
-    },
-    "source": "https://www.patreon.com/ling051014/posts/realdate-v0-5-170351394"
+    }
   },
   {
     "id": "v040",
@@ -48,8 +46,7 @@ window.L1NG_PUBLIC_UPDATES = Object.freeze([
     "summary": {
       "zh-Hant": "新增生日記憶與社交、年號玩法、星期校正，強化生理時間軸及第三方模組相容。",
       "en": "Added birthday memories and socials, Era gameplay, weekday recalibration, and stronger timeline compatibility."
-    },
-    "source": "https://www.patreon.com/ling051014/posts/realdate-v0-4-168970984"
+    }
   },
   {
     "id": "v030",
@@ -65,8 +62,7 @@ window.L1NG_PUBLIC_UPDATES = Object.freeze([
     "summary": {
       "zh-Hant": "將 RealDate 日期整合進 EA 月曆，加入月齡、年齡階段及生理時間軸。",
       "en": "Integrated RealDate dates with EA's Calendar and added age-in-months, life stages, and reproductive timelines."
-    },
-    "source": "https://www.patreon.com/ling051014/posts/realdate-v0-3-168436378"
+    }
   },
   {
     "id": "v021",
@@ -82,8 +78,7 @@ window.L1NG_PUBLIC_UPDATES = Object.freeze([
     "summary": {
       "zh-Hant": "修正午夜換日延遲，以及生日當天日期可能停留在前一天的問題。",
       "en": "Fixed delayed midnight rollover and dates occasionally remaining on the previous day during birthdays."
-    },
-    "source": "https://www.patreon.com/ling051014/posts/realdate-v0-2-1-167674241"
+    }
   },
   {
     "id": "v020",
