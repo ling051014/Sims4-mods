@@ -3,10 +3,10 @@
     <head>
         <meta charset="utf-8"/>
         <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-        <title>更新日誌 · L1nG</title>
+        <title>更新日誌 · RealDate · L1nG</title>
         <meta content="#ffffff" name="theme-color"/>
-        <link href="changelog.css?v=20261101-public-announcements-r1" rel="stylesheet"/>
-        <script defer="" src="changelog.js?v=20261101-public-announcements-r1"></script>
+        <link href="changelog.css?v=20261011-scrollbar-r2" rel="stylesheet"/>
+        <script defer="" src="changelog.js?v=20261020-unified-titles-r1"></script>
         <link rel="stylesheet" href="../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
         <link rel="stylesheet" href="site-footer.css?v=20261012-footer-index-r1">
     <link rel="stylesheet" href="site-info-modal.css?v=20261021-policy-scroll-r1">
@@ -16,7 +16,7 @@
         <script src="../site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3" data-skeleton-layout="l1ng-changelog"></script>
         <!-- ========【頂部導覽列】 設定 - 返回開發者專區、頁面識別與語言切換 ======== -->
         <nav class="changelog-nav">
-            <div class="changelog-nav-left"><a class="changelog-back" href="home.html">L1nG</a><span class="changelog-divider">/</span><span class="changelog-current">CHANGELOG</span>
+            <div class="changelog-nav-left"><a class="changelog-back" href="index.html">L1nG</a><span class="changelog-divider">/</span><span class="changelog-current">CHANGELOG</span>
             </div>
             <div class="nav-version-center" data-nav-version-center="">
             </div>
@@ -30,22 +30,20 @@
             <section class="changelog-page changelog-intro">
                 <header class="project-header">
                     <div class="project-eyebrow">L1nG PROJECT</div>
-                    <h1>L1nG</h1>
-                    <p class="project-description" data-lang="zh-Hant">L1nG 各專案的公開更新紀錄，依正式發布日期排列；不收錄日常開發提交與尚未公告的功能。</p>
-                    <p class="project-description" data-lang="en">Public releases across L1nG projects, ordered by announcement date. Routine code commits and unannounced work are excluded.</p>
+                    <h1>REALDATE</h1>
+                    <p class="project-description" data-lang="zh-Hant">RealDate 的版本更新紀錄。此頁只保留版本差異、相容性與重要限制；發布貼文中的介紹、開場與重複說明已整理精簡。</p>
+                    <p class="project-description" data-lang="en">RealDate version history. This page focuses on release changes, compatibility, and important limitations; announcement-style introductions and repeated explanations have been condensed.</p>
                     <div class="project-meta">
-                        <span data-lang="zh-Hant">最新公告 · Genealogy v0.1 Beta</span>
-                        <span data-lang="en">Latest announcement · Genealogy v0.1 Beta</span>
-                        <span data-lang="zh-Hant">最後更新 · 2026.10.19 (UTC+8)</span>
-                        <span data-lang="en">Last Updated · 2026.10.19 (UTC+8)</span>
+                        <span data-lang="zh-Hant">最新版本 · v0.4 Beta</span>
+                        <span data-lang="en">Latest Version · v0.4 Beta</span>
+                        <span data-lang="zh-Hant">最後更新 · 2026.09.23 (UTC+8)</span>
+                        <span data-lang="en">Last Updated · 2026.09.23 (UTC+8)</span>
                     </div>
                 </header>
             </section>
             <div class="version-index-home" data-version-index-home="">
                 <nav aria-label="版本快速導覽" class="version-index"><span class="sr-only" data-lang="zh-Hant">快速跳至版本</span><span class="sr-only" data-lang="en">Jump to version</span>
-                    <a class="version-link active" data-version-target="genealogy-010" href="#genealogy-010">Genealogy v0.1</a>
-                    <a class="version-link" data-version-target="v050" href="#v050">RealDate v0.5</a>
-                    <a class="version-link" data-version-target="v040" href="#v040">v0.4</a>
+                    <a class="version-link active" data-version-target="v040" href="#v040">v0.4</a>
                     <a class="version-link" data-version-target="v030" href="#v030">v0.3</a>
                     <a class="version-link" data-version-target="v021" href="#v021">v0.2.1</a>
                     <a class="version-link" data-version-target="v020" href="#v020">v0.2</a>
@@ -55,40 +53,6 @@
             </div>
             <main class="changelog-page changelog-releases">
                 <div class="release-list">
-                    <article class="release" id="genealogy-010">
-                        <div aria-hidden="true" class="release-marker"></div>
-                        <div class="release-content">
-                            <header class="release-header">
-                                <div>
-                                    <div class="release-project">族譜工具 / 族譜提取器 <span aria-hidden="true">/</span> Genealogy Tool / Exporter</div>
-                                    <div class="release-version">v0.1 Beta</div>
-                                    <h2 data-lang="zh-Hant">v0.1 Beta 首次公開測試</h2>
-                                    <h2 data-lang="en">v0.1 Beta public launch</h2>
-                                </div>
-                                <time datetime="2026-10-19">2026.10.19 (UTC+8)</time>
-                            </header>
-                            <p class="release-summary" data-lang="zh-Hant">正式公開族譜工具與遊戲端族譜提取器，支援建立、整理族譜及匯入遊戲資料。</p>
-                            <p class="release-summary" data-lang="en">The Genealogy Tool and in-game Exporter enter public beta, supporting family-tree editing and game-data import.</p>
-                            <div class="change-grid"><section class="change-section"><h3 data-lang="zh-Hant">首次公開</h3><h3 data-lang="en">PUBLIC BETA</h3><ul><li data-lang="zh-Hant">族譜工具可建立與編輯家族、人物及關係，也能匯入族譜提取器產生的遊戲資料。</li><li data-lang="en">Create and edit families, Sims, and relationships in the web tool, or import game data from the Exporter.</li><li data-lang="zh-Hant">遊戲端提取內容可能因存檔與市民狀態而有所差異；CAS 服裝照片與家庭合照的自動提取仍在研究中。</li><li data-lang="en">Game exports depend on save and Sim data. Automatic CAS outfit photos and group portraits remain under research.</li></ul></section></div>
-                        </div>
-                    </article>
-                    <article class="release" id="v050">
-                        <div aria-hidden="true" class="release-marker"></div>
-                        <div class="release-content">
-                            <header class="release-header">
-                                <div>
-                                    <div class="release-project">RealDate <span aria-hidden="true">/</span> RealDate</div>
-                                    <div class="release-version">v0.5 Beta</div>
-                                    <h2 data-lang="zh-Hant">v0.5 Beta：人生回憶錄與紀念日</h2>
-                                    <h2 data-lang="en">v0.5 Beta: Life Chronicle &amp; Anniversaries</h2>
-                                </div>
-                                <time datetime="2026-10-14">2026.10.14 (UTC+8)</time>
-                            </header>
-                            <p class="release-summary" data-lang="zh-Hant">新增人生回憶錄、關係歷史、事件管理與紀念日社交活動，並擴展行事曆活動規劃。</p>
-                            <p class="release-summary" data-lang="en">Introduced Life Chronicle, relationship history, Event Management, anniversary events, and expanded Calendar planning.</p>
-                            <div class="change-grid"><section class="change-section"><h3 data-lang="zh-Hant">主要更新</h3><h3 data-lang="en">MAJOR UPDATES</h3><ul><li data-lang="zh-Hant">支援在 EA 原生記事本保存人生與關係歷史，並以事件管理補登或編輯過去事件。</li><li data-lang="en">Records life and relationship history in EA's Notebook, with Event Management for past entries.</li><li data-lang="zh-Hant">新增交往、訂婚、結婚紀念日社交活動，並擴展行事曆活動安排範圍。</li><li data-lang="en">Introduces dating, engagement, and wedding anniversary events, plus expanded Calendar planning.</li></ul></section></div>
-                        </div>
-                    </article>
                     <article class="release" id="v040">
                         <div aria-hidden="true" class="release-marker">
                         </div>
@@ -99,7 +63,7 @@
                                     <h2 data-lang="zh-Hant">架構重構、生活玩法與相容性擴充</h2>
                                     <h2 data-lang="en">Architecture, Life Gameplay &amp; Compatibility</h2>
                                 </div>
-                                <time datetime="2026-09-22">2026.09.22 (UTC+8)</time>
+                                <time datetime="2026-09-23">2026.09.23 (UTC+8)</time>
                             </header>
                             <p class="release-summary" data-lang="zh-Hant">目前規模最大的一次架構重構與系統整合更新。新增生日社交、年號、星期校正與每日換日通知，並進一步整合生理時間軸、MCCC、RPO 與 Child Birth Mod。</p>
                             <p class="release-summary" data-lang="en">The largest architectural and systems-integration update so far. Adds birthday social gameplay, Eras, weekday recalibration, daily date-change notifications, and deeper integration with reproductive timelines, MCCC, RPO, and Child Birth Mod.</p>
@@ -533,8 +497,8 @@
         <div class="l1ng-footer-inner">
             <div class="l1ng-footer-main">
                 <div class="l1ng-footer-identity">
-                    <strong>L1nG</strong>
-                    <p><span data-lang="zh-Hant">《模擬市民 4》模組、工具與漢化</span><span data-lang="en">The Sims 4 mods, tools &amp; translations</span></p>
+                    <strong>REALDATE</strong>
+                    <p><span data-lang="zh-Hant">《模擬市民 4》時間與人生系統模組</span><span data-lang="en">The Sims 4 Time &amp; Life System</span></p>
                 </div>
                 <nav class="l1ng-footer-nav" aria-label="網站導覽">
                     <a href="RealDate/index.html"><span data-lang="zh-Hant">RealDate</span><span data-lang="en">RealDate</span></a>
