@@ -11,12 +11,13 @@ function updateHeaderState() {
         return;
     }
 
-    // 桌機沿用原本過渡。手機／平板分成透明 → 純毛玻璃 → 白底。
-    // 毛玻璃階段的白色覆蓋為 0%；只有靠近專案區才提高背景不透明度。
+    // 桌機沿用既有過渡；手機／平板採較緩的透明 → 毛玻璃 → 白底轉場。
+    // 毛玻璃獨立繪製在導覽列背景層，不影響上方品牌、語言與選單文字。
     const compactNavigation = window.matchMedia("(max-width: 850px)").matches;
     const headerBottom = siteHeader.getBoundingClientRect().bottom;
     const heroBottom = homeHero.getBoundingClientRect().bottom;
     const clamp01 = value => Math.max(0, Math.min(1, value));
+    const smoothstep = value => value * value * (3 - 2 * value);
 
     let backgroundOpacity;
     let borderOpacity;
@@ -24,30 +25,33 @@ function updateHeaderState() {
     let blur;
 
     if (compactNavigation) {
-        // 0～100px：透明背景上的 backdrop-filter 逐步增至 20px。
-        const glassProgress = clamp01(window.scrollY / 100);
-        const glass = 1 - Math.pow(1 - glassProgress, 3);
+        // 約 240px 緩慢形成 12px 的毛玻璃，沒有白色覆蓋。
+        const glass = smoothstep(clamp01(window.scrollY / 240));
 
-        // 主視覺底緣接近導覽列時才開始最後 160px 的轉白過渡。
-        const whiteProgress = clamp01((headerBottom + 160 - heroBottom) / 160);
-        const white = whiteProgress * whiteProgress * (3 - 2 * whiteProgress);
+        // 接近主視覺底部約 300px 才緩慢轉成實色背景，同時降低模糊。
+        const white = smoothstep(clamp01((headerBottom + 300 - heroBottom) / 300));
 
         backgroundOpacity = white;
-        borderOpacity = 0.12 * glass * (1 - white) + 0.65 * white;
-        shadowOpacity = 0.015 * glass * (1 - white) + 0.055 * white;
-        blur = 20 * glass * (1 - white);
+        borderOpacity = 0.08 * glass * (1 - white) + 0.65 * white;
+        shadowOpacity = 0.008 * glass * (1 - white) + 0.055 * white;
+        blur = 12 * glass * (1 - white);
+
+        siteHeader.style.setProperty("--header-glass-blur", blur.toFixed(2) + "px");
+        siteHeader.style.setProperty("--header-blur", "0px");
     } else {
         const progress = clamp01((headerBottom - heroBottom) / 120);
         backgroundOpacity = 0.92 * progress;
         borderOpacity = 0.78 * progress;
         shadowOpacity = 0.06 * progress;
         blur = 18 * progress;
+
+        siteHeader.style.removeProperty("--header-glass-blur");
+        siteHeader.style.setProperty("--header-blur", blur.toFixed(2) + "px");
     }
 
     siteHeader.style.setProperty("--header-bg-opacity", backgroundOpacity.toFixed(3));
     siteHeader.style.setProperty("--header-border-opacity", borderOpacity.toFixed(3));
     siteHeader.style.setProperty("--header-shadow-opacity", shadowOpacity.toFixed(3));
-    siteHeader.style.setProperty("--header-blur", blur.toFixed(2) + "px");
 }
 
 window.addEventListener("scroll", updateHeaderState, { passive: true });
