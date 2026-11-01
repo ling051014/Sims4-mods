@@ -145,6 +145,10 @@
     background:transparent;
 }
 .layout-l1ng-home .l1ng-home-hero-inner { width:min(980px,calc(100% - 40px)); display:grid; justify-items:center; gap:18px; }
+@media (max-width:850px) {
+    /* 與首頁 hero 安全起點同步，避免骨架屏與真實內容垂直跳動。 */
+    .layout-l1ng-home .l1ng-home-hero { padding-top:calc(112px + env(safe-area-inset-top)); }
+}
 .layout-l1ng-home .hero-kicker { width:225px; }
 .layout-l1ng-home .hero-title { width:min(580px,78vw); height:136px; border-radius:10px; }
 .layout-l1ng-home .hero-description { width:min(490px,72vw); }
