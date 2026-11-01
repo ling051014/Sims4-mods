@@ -855,12 +855,13 @@ section[id] {
 /* ========【響應式設定】 設定 - 平板與小尺寸桌面 ======== */
 @media (max-width: 850px) {
 
-    /* ========【手機與平板導覽】 起始即使用輕度毛玻璃，避免文字從頂欄透出 ======== */
+    /* ========【手機與平板導覽】 霧面背景保底，不依賴 JavaScript 或模糊效果 ======== */
     .site-header {
-        --header-bg-opacity: 0.78;
+        /* 高不透明度優先保證底下文字不會穿過頂欄；JS 只增加捲動後的濃度 */
+        background-color: rgba(246, 248, 251, 0.965);
         --header-border-opacity: 0.14;
         --header-shadow-opacity: 0.015;
-        --header-blur: 12px;
+        --header-blur: 14px;
     }
 
     /* ========【頂部導覽列】 設定 - 平板導覽 ======== */
