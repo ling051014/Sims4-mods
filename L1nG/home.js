@@ -11,8 +11,8 @@ function updateHeaderState() {
         return;
     }
 
-    // 桌機沿用原本的透明至實色過渡。手機／平板明確分成三階段：
-    // ① 頂部透明 → ② 主視覺中持續毛玻璃 → ③ 接近專案區才漸變成白色。
+    // 桌機沿用原本過渡。手機／平板分成透明 → 純毛玻璃 → 白底。
+    // 毛玻璃階段的白色覆蓋為 0%；只有靠近專案區才提高背景不透明度。
     const compactNavigation = window.matchMedia("(max-width: 850px)").matches;
     const headerBottom = siteHeader.getBoundingClientRect().bottom;
     const heroBottom = homeHero.getBoundingClientRect().bottom;
@@ -24,19 +24,18 @@ function updateHeaderState() {
     let blur;
 
     if (compactNavigation) {
-        // 第一階段：前 100px 形成半透明毛玻璃，不直接跳到白底。
+        // 0～100px：透明背景上的 backdrop-filter 逐步增至 20px。
         const glassProgress = clamp01(window.scrollY / 100);
         const glass = 1 - Math.pow(1 - glassProgress, 3);
 
-        // 第二階段：在主視覺其餘區域保留毛玻璃。
-        // 第三階段：主視覺底緣靠近頂欄 160px 時，才淡出毛玻璃、轉為實色。
-        const white = clamp01((headerBottom + 160 - heroBottom) / 160);
-        const whiteEase = white * white * (3 - 2 * white);
+        // 主視覺底緣接近導覽列時才開始最後 160px 的轉白過渡。
+        const whiteProgress = clamp01((headerBottom + 160 - heroBottom) / 160);
+        const white = whiteProgress * whiteProgress * (3 - 2 * whiteProgress);
 
-        backgroundOpacity = 0.70 * glass + (1 - 0.70) * whiteEase;
-        borderOpacity = 0.12 * glass + (0.65 - 0.12) * whiteEase;
-        shadowOpacity = 0.015 * glass + (0.055 - 0.015) * whiteEase;
-        blur = 22 * glass * (1 - whiteEase);
+        backgroundOpacity = white;
+        borderOpacity = 0.12 * glass * (1 - white) + 0.65 * white;
+        shadowOpacity = 0.015 * glass * (1 - white) + 0.055 * white;
+        blur = 20 * glass * (1 - white);
     } else {
         const progress = clamp01((headerBottom - heroBottom) / 120);
         backgroundOpacity = 0.92 * progress;
