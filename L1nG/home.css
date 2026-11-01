@@ -98,37 +98,19 @@ section[id] {
 }
 
 
-/* ========【頂部導覽列】 設定 - 固定導覽背景與分隔線 ======== */
+/* ========【頂部導覽列】 設定 - 主視覺透明、離開後平滑浮現底色 ======== */
 .site-header {
-    /* 離開主視覺後固定於頂部 */ position: fixed;
-    /* 頂部座標 */ top: 0;
-    /* 左右貼齊視窗 */ left: 0;
+    /* 全程固定且可操作，主視覺期間與頁面共用同一背景 */ position: fixed;
+    top: 0;
+    left: 0;
     right: 0;
-    /* 顯示層級 */ z-index: 100;
+    z-index: 100;
     /* iPhone 安全區域 */ padding-top: env(safe-area-inset-top);
-    /* 底部分隔線 */ border-bottom: 1px solid rgba(216, 222, 228, 0.78);
-    /* 半透明背景 */ background: rgba(246, 248, 251, 0.88);
-    /* 背景模糊 */ backdrop-filter: blur(18px);
-    /* Safari 背景模糊 */ -webkit-backdrop-filter: blur(18px);
-    /* 主視覺期間完全隱藏；離開後由捲動進度連續控制 */
-    transform: translateY(var(--header-offset, -110%));
-    opacity: var(--header-opacity, 0);
-    pointer-events: none;
-    /* 背景與陰影仍保留輕微過渡 */ transition:
-        background 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-/* ========【頂部導覽列】 設定 - 淡入完成後才可操作 ======== */
-.site-header.interactive {
-    pointer-events: auto;
-}
-
-
-/* ========【頂部導覽列】 設定 - 滾動後增加層次 ======== */
-.site-header.scrolled {
-    /* 滾動後背景 */ background: rgba(255, 255, 255, 0.92);
-    /* 滾動後陰影 */ box-shadow: 0 8px 28px rgba(47, 68, 82, 0.06);
+    /* 不建立獨立背景層；捲動進度由 home.js 漸進設定 */ background: rgba(255, 255, 255, var(--header-bg-opacity, 0));
+    border-bottom: 1px solid rgba(216, 222, 228, var(--header-border-opacity, 0));
+    box-shadow: 0 8px 28px rgba(47, 68, 82, var(--header-shadow-opacity, 0));
+    backdrop-filter: blur(var(--header-blur, 0px));
+    -webkit-backdrop-filter: blur(var(--header-blur, 0px));
 }
 
 
