@@ -50,11 +50,13 @@
             button.setAttribute("aria-pressed", String(active));
         }
         if (remember && !isEmbedded) {
-            try { localStorage.setItem("l1ng-site-info-language", current); }
-            catch (_) { /* 不影響切換 */ }
+            try { localStorage.setItem("l1ng-site-info-language", current); } catch (_) {}
+            window.L1nGLanguage?.remember(current);
         }
     }
-    const initial = normalize(params.get("lang") || (!isEmbedded && saved()) || "zh-Hant");
+    const initial = normalize(params.get("lang") ||
+        (isEmbedded ? null : window.L1nGLanguage?.resolve(["zh-Hant", "zh-Hans", "en"], "l1ng-site-info-language")) ||
+        "zh-Hant");
     applyLanguage(initial);
     if (isEmbedded) {
         // 嵌入視窗只呈現指定條款，避免樣式表未載入時顯示整份政策。
