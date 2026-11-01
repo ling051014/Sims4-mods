@@ -29,8 +29,15 @@
 
             releases.sort((a, b) => b.dataset.releaseDate.localeCompare(a.dataset.releaseDate));
             list.replaceChildren(...releases.slice(0, 5));
+            for (const [index, item] of Array.from(list.children).entries()) {
+                item.style.setProperty("--release-index", index);
+            }
 
-            mount.replaceChildren(document.importNode(section, true));
+            const imported = document.importNode(section, true);
+            mount.replaceChildren(imported);
+            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                imported.classList.add("is-loaded");
+            }
         } catch (_) {
             const message = document.createElement("p");
             message.className = "home-changelog-loading";
