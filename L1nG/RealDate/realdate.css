@@ -1579,6 +1579,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     transition: transform .2s ease;
 }
 .compat-detail[open] > summary > .compat-chevron { transform: rotate(90deg); }
+.compat-detail[open].is-closing > summary > .compat-chevron { transform: rotate(0deg); }
 
 .compat-detail > summary::-webkit-details-marker {
     display: none;

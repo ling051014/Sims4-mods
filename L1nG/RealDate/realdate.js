@@ -435,17 +435,17 @@ if ("IntersectionObserver" in window) {
     });
 })();
 
-// ========【RealDate 常見問題】 展開 / 收合高度與內容淡入淡出動畫 ========
+// ========【RealDate 常見問題／完整相容說明】 共用展開、收合與內容淡入淡出動畫 ========
 (() => {
     "use strict";
 
-    const questions = document.querySelectorAll(".faq-list > details.faq-item");
-    if (!questions.length) return;
+    const panels = document.querySelectorAll(".faq-list > details.faq-item, .compat-details > details.compat-detail");
+    if (!panels.length) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const duration = 260;
 
-    questions.forEach((details) => {
+    panels.forEach((details) => {
         const summary = details.querySelector(":scope > summary");
         if (!summary) return;
 
@@ -454,7 +454,9 @@ if ("IntersectionObserver" in window) {
         let running = null;
 
         summary.addEventListener("click", (event) => {
-            // 保留原生 details 的鍵盤操作、無動畫環境與減少動態效果。
+            // 相容性標題內的外部連結保留原生導覽，不誤觸展開。
+            if (event.target.closest?.("a, button")) return;
+            // 保留原生 details 的鍵盤操作、無動畫環境與減少動態效果.
             if (reducedMotion.matches || typeof details.animate !== "function") {
                 if (running) {
                     running.height.cancel();
