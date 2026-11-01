@@ -2,7 +2,7 @@
 document.documentElement.classList.add("js");
 
 
-// ========【頂部導覽列】 起始透明、手機提前漸變，避免內容穿透固定頂欄 ========
+// ========【頂部導覽列】 手機透明 → 毛玻璃 → 實色，桌機維持既有過渡 ========
 const siteHeader = document.getElementById("siteHeader");
 const homeHero = document.querySelector(".hero");
 
@@ -11,24 +11,44 @@ function updateHeaderState() {
         return;
     }
 
-    // 桌機維持原本的主視覺透明轉場；手機則在第一行文字接近頂欄前建立霧面。
+    // 桌機沿用原本的透明至實色過渡。手機／平板明確分成三階段：
+    // ① 頂部透明 → ② 主視覺中持續毛玻璃 → ③ 接近專案區才漸變成白色。
     const compactNavigation = window.matchMedia("(max-width: 850px)").matches;
     const headerBottom = siteHeader.getBoundingClientRect().bottom;
     const heroBottom = homeHero.getBoundingClientRect().bottom;
-    const progress = compactNavigation
-        ? Math.min(1, Math.max(0, window.scrollY / 72))
-        : Math.min(1, Math.max(0, (headerBottom - heroBottom) / 120));
+    const clamp01 = value => Math.max(0, Math.min(1, value));
 
-    // 手機採 ease-out，開始捲動即逐漸形成背景，72px 內達到足夠遮蔽度。
-    const amount = compactNavigation ? 1 - Math.pow(1 - progress, 3) : progress;
-    const backgroundOpacity = (compactNavigation ? 0.97 : 0.92) * amount;
-    const borderOpacity = (compactNavigation ? 0.35 : 0.78) * amount;
-    const shadowOpacity = (compactNavigation ? 0.035 : 0.06) * amount;
+    let backgroundOpacity;
+    let borderOpacity;
+    let shadowOpacity;
+    let blur;
+
+    if (compactNavigation) {
+        // 第一階段：前 100px 形成半透明毛玻璃，不直接跳到白底。
+        const glassProgress = clamp01(window.scrollY / 100);
+        const glass = 1 - Math.pow(1 - glassProgress, 3);
+
+        // 第二階段：在主視覺其餘區域保留毛玻璃。
+        // 第三階段：主視覺底緣靠近頂欄 160px 時，才淡出毛玻璃、轉為實色。
+        const white = clamp01((headerBottom + 160 - heroBottom) / 160);
+        const whiteEase = white * white * (3 - 2 * white);
+
+        backgroundOpacity = 0.70 * glass + (0.985 - 0.70) * whiteEase;
+        borderOpacity = 0.12 * glass + (0.65 - 0.12) * whiteEase;
+        shadowOpacity = 0.015 * glass + (0.055 - 0.015) * whiteEase;
+        blur = 22 * glass * (1 - whiteEase);
+    } else {
+        const progress = clamp01((headerBottom - heroBottom) / 120);
+        backgroundOpacity = 0.92 * progress;
+        borderOpacity = 0.78 * progress;
+        shadowOpacity = 0.06 * progress;
+        blur = 18 * progress;
+    }
 
     siteHeader.style.setProperty("--header-bg-opacity", backgroundOpacity.toFixed(3));
     siteHeader.style.setProperty("--header-border-opacity", borderOpacity.toFixed(3));
     siteHeader.style.setProperty("--header-shadow-opacity", shadowOpacity.toFixed(3));
-    siteHeader.style.setProperty("--header-blur", (18 * amount).toFixed(2) + "px");
+    siteHeader.style.setProperty("--header-blur", blur.toFixed(2) + "px");
 }
 
 window.addEventListener("scroll", updateHeaderState, { passive: true });
