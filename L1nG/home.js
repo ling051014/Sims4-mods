@@ -2,7 +2,7 @@
 document.documentElement.classList.add("js");
 
 
-// ========【頂部導覽列】 桌機保留透明起始；手機起始毛玻璃隨捲動增強 ========
+// ========【頂部導覽列】 起始透明、手機提前漸變，避免內容穿透固定頂欄 ========
 const siteHeader = document.getElementById("siteHeader");
 const homeHero = document.querySelector(".hero");
 
@@ -11,33 +11,24 @@ function updateHeaderState() {
         return;
     }
 
-    // 桌機維持原本的透明封面：離開主視覺後才逐漸顯示底色。
-    // 手機／平板則先有輕毛玻璃，從開始捲動就逐漸加深，避免文字穿過固定頂欄。
+    // 桌機維持原本的主視覺透明轉場；手機則在第一行文字接近頂欄前建立霧面。
     const compactNavigation = window.matchMedia("(max-width: 850px)").matches;
     const headerBottom = siteHeader.getBoundingClientRect().bottom;
     const heroBottom = homeHero.getBoundingClientRect().bottom;
     const progress = compactNavigation
-        ? Math.min(1, Math.max(0, window.scrollY / 200))
+        ? Math.min(1, Math.max(0, window.scrollY / 72))
         : Math.min(1, Math.max(0, (headerBottom - heroBottom) / 120));
 
-    const from = compactNavigation
-        ? { border: 0.14, shadow: 0.015, blur: 14 }
-        : { border: 0, shadow: 0, blur: 0 };
+    // 手機採 ease-out，開始捲動即逐漸形成背景，72px 內達到足夠遮蔽度。
+    const amount = compactNavigation ? 1 - Math.pow(1 - progress, 3) : progress;
+    const backgroundOpacity = (compactNavigation ? 0.97 : 0.92) * amount;
+    const borderOpacity = (compactNavigation ? 0.35 : 0.78) * amount;
+    const shadowOpacity = (compactNavigation ? 0.035 : 0.06) * amount;
 
-    // 直接設定手機頂欄背景色，不把閱讀對比交給 CSS 變數或 backdrop-filter。
-    // CSS 已有 96.5% 不透明的保底背景；捲動後平滑提高至 98.5%。
-    if (compactNavigation) {
-        const opacity = 0.965 + 0.020 * progress;
-        siteHeader.style.backgroundColor = "rgba(246, 248, 251, " + opacity.toFixed(3) + ")";
-    } else {
-        // 從手機切回桌機時，恢復原本首頁透明轉實色的規則。
-        siteHeader.style.removeProperty("background-color");
-    }
-
-    siteHeader.style.setProperty("--header-bg-opacity", (0.92 * progress).toFixed(3));
-    siteHeader.style.setProperty("--header-border-opacity", (from.border + (0.78 - from.border) * progress).toFixed(3));
-    siteHeader.style.setProperty("--header-shadow-opacity", (from.shadow + (0.06 - from.shadow) * progress).toFixed(3));
-    siteHeader.style.setProperty("--header-blur", (from.blur + (18 - from.blur) * progress).toFixed(2) + "px");
+    siteHeader.style.setProperty("--header-bg-opacity", backgroundOpacity.toFixed(3));
+    siteHeader.style.setProperty("--header-border-opacity", borderOpacity.toFixed(3));
+    siteHeader.style.setProperty("--header-shadow-opacity", shadowOpacity.toFixed(3));
+    siteHeader.style.setProperty("--header-blur", (18 * amount).toFixed(2) + "px");
 }
 
 window.addEventListener("scroll", updateHeaderState, { passive: true });
