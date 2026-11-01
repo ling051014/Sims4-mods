@@ -21,10 +21,20 @@ function updateHeaderState() {
         : Math.min(1, Math.max(0, (headerBottom - heroBottom) / 120));
 
     const from = compactNavigation
-        ? { background: 0.78, border: 0.14, shadow: 0.015, blur: 12 }
-        : { background: 0, border: 0, shadow: 0, blur: 0 };
+        ? { border: 0.14, shadow: 0.015, blur: 14 }
+        : { border: 0, shadow: 0, blur: 0 };
 
-    siteHeader.style.setProperty("--header-bg-opacity", (from.background + (0.92 - from.background) * progress).toFixed(3));
+    // 直接設定手機頂欄背景色，不把閱讀對比交給 CSS 變數或 backdrop-filter。
+    // CSS 已有 96.5% 不透明的保底背景；捲動後平滑提高至 98.5%。
+    if (compactNavigation) {
+        const opacity = 0.965 + 0.020 * progress;
+        siteHeader.style.backgroundColor = "rgba(246, 248, 251, " + opacity.toFixed(3) + ")";
+    } else {
+        // 從手機切回桌機時，恢復原本首頁透明轉實色的規則。
+        siteHeader.style.removeProperty("background-color");
+    }
+
+    siteHeader.style.setProperty("--header-bg-opacity", (0.92 * progress).toFixed(3));
     siteHeader.style.setProperty("--header-border-opacity", (from.border + (0.78 - from.border) * progress).toFixed(3));
     siteHeader.style.setProperty("--header-shadow-opacity", (from.shadow + (0.06 - from.shadow) * progress).toFixed(3));
     siteHeader.style.setProperty("--header-blur", (from.blur + (18 - from.blur) * progress).toFixed(2) + "px");
