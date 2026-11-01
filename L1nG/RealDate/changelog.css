@@ -102,8 +102,21 @@
     box-shadow: 0 8px 34px rgba(25, 38, 48, .025);
 }
 
-.release:first-child .release-content {
-    border-color: var(--accent-border);
+/* ========【版本定位】 錨點跳轉後只短暫高亮，動畫結束即恢復一般邊框 ======== */
+.release:target .release-content {
+    animation: release-anchor-highlight 2.5s ease-out 1;
+}
+
+@keyframes release-anchor-highlight {
+    0%, 18% {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-border), 0 8px 34px rgba(25, 38, 48, .025);
+    }
+
+    100% {
+        border-color: var(--line);
+        box-shadow: 0 8px 34px rgba(25, 38, 48, .025);
+    }
 }
 
 .release:first-child .release-marker {
