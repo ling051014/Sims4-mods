@@ -33,7 +33,7 @@ function updateHeaderState() {
         const white = clamp01((headerBottom + 160 - heroBottom) / 160);
         const whiteEase = white * white * (3 - 2 * white);
 
-        backgroundOpacity = 0.70 * glass + (0.985 - 0.70) * whiteEase;
+        backgroundOpacity = 0.70 * glass + (1 - 0.70) * whiteEase;
         borderOpacity = 0.12 * glass + (0.65 - 0.12) * whiteEase;
         shadowOpacity = 0.015 * glass + (0.055 - 0.015) * whiteEase;
         blur = 22 * glass * (1 - whiteEase);
