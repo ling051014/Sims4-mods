@@ -151,7 +151,7 @@ section[id] {
 /* ========【頂部導覽列】 設定 - 導覽項目排列 ======== */
 .main-nav {
     /* 與 RealDate、族譜提取器一致置中 */ justify-self: center;
-    /* 橫向排列 */ display: flex;
+    /* 桌機首頁不顯示重複的專案與漢化入口；手機展開選單仍保留 */ display: none;
     /* 垂直置中 */ align-items: center;
     /* 項目間距 */ gap: 21px;
 }
