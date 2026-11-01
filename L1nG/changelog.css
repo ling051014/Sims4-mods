@@ -39,15 +39,6 @@
     letter-spacing: .045em;
 }
 
-.home-updates-count {
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1.6;
-    letter-spacing: .11em;
-    white-space: nowrap;
-}
-
 .home-updates-list {
     margin: 0;
     padding: 0;
@@ -69,8 +60,6 @@
     border-radius: 6px;
     color: var(--sub);
     text-decoration: none;
-    position: relative;
-    isolation: isolate;
     transition: background-color .24s ease, color .24s ease, transform .24s cubic-bezier(.2,.8,.2,1);
 }
 
