@@ -95,12 +95,7 @@
   }
 
   function getSavedLanguage() {
-    try {
-      const value = localStorage.getItem(LANG_KEY);
-      if (SUPPORTED_LANGUAGES.includes(value)) return value;
-    } catch (_) {}
-
-    return 'zh-Hant';
+    return global.L1nGLanguage?.resolve(SUPPORTED_LANGUAGES, LANG_KEY) || 'zh-Hant';
   }
 
   function toSimplifiedUI(value) {
@@ -410,7 +405,7 @@ They can still be added to other families.`;
     });
   }
 
-  async function setLanguage(lang) {
+  async function setLanguage(lang, remember = true) {
     if (!SUPPORTED_LANGUAGES.includes(lang)) {
       lang = 'zh-Hant';
     }
@@ -428,9 +423,10 @@ They can still be added to other families.`;
 
     language = lang;
 
-    try {
-      localStorage.setItem(LANG_KEY, lang);
-    } catch (_) {}
+    if (remember) {
+      try { localStorage.setItem(LANG_KEY, lang); } catch (_) {}
+      global.L1nGLanguage?.remember(lang);
+    }
 
     const select = document.getElementById('languageSelect');
     if (select) select.value = lang;

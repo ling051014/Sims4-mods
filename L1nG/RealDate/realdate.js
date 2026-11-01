@@ -18,14 +18,10 @@ document.documentElement.classList.add("js");
     }
 
     function getInitialLanguage() {
-        try {
-            return normalizeLanguage(localStorage.getItem(STORAGE_KEY));
-        } catch (_) {
-            return DEFAULT_LANGUAGE;
-        }
+        return window.L1nGLanguage?.resolve([...SUPPORTED_LANGUAGES], STORAGE_KEY) || DEFAULT_LANGUAGE;
     }
 
-    function applyLanguage(language) {
+    function applyLanguage(language, remember = false) {
         const nextLanguage = normalizeLanguage(language);
 
         root.dataset.language = nextLanguage;
@@ -39,16 +35,15 @@ document.documentElement.classList.add("js");
             button.setAttribute("aria-pressed", String(active));
         });
 
-        try {
-            localStorage.setItem(STORAGE_KEY, nextLanguage);
-        } catch (_) {
-            // 儲存不可用時，不影響目前頁面。
+        if (remember) {
+            try { localStorage.setItem(STORAGE_KEY, nextLanguage); } catch (_) {}
+            window.L1nGLanguage?.remember(nextLanguage);
         }
     }
 
     buttons.forEach((button) => {
         button.addEventListener("click", () => {
-            applyLanguage(button.dataset.languageButton);
+            applyLanguage(button.dataset.languageButton, true);
         });
     });
 

@@ -73,7 +73,7 @@
     });
 
 
-    function setLanguage(language) {
+    function setLanguage(language, remember = false) {
         const next = language === 'en' ? 'en' : 'zh-Hant';
         root.dataset.language = next;
         root.lang = next === 'en' ? 'en' : 'zh-Hant';
@@ -92,25 +92,18 @@
             setCommandFeedback(button);
         });
 
-        try {
-            localStorage.setItem(LANGUAGE_KEY, next);
-        } catch (error) {
-            // localStorage 不可用時仍可正常使用目前頁面。
+        if (remember) {
+            try { localStorage.setItem(LANGUAGE_KEY, next); } catch (_) {}
+            window.L1nGLanguage?.remember(next);
         }
     }
 
     function initialLanguage() {
-        try {
-            const saved = localStorage.getItem(LANGUAGE_KEY);
-            if (saved === 'en' || saved === 'zh-Hant') return saved;
-        } catch (error) {
-            // 忽略儲存空間錯誤。
-        }
-        return 'zh-Hant';
+        return window.L1nGLanguage?.resolve(['zh-Hant', 'en'], LANGUAGE_KEY) || 'zh-Hant';
     }
 
     languageButtons.forEach(button => {
-        button.addEventListener('click', () => setLanguage(button.dataset.languageButton));
+        button.addEventListener('click', () => setLanguage(button.dataset.languageButton, true));
     });
 
     if (navToggle && mainNav) {

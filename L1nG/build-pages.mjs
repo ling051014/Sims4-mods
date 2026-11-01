@@ -31,7 +31,7 @@ fs.rmSync(out,{force:true,recursive:true});
 fs.mkdirSync(out,{recursive:true});
 
 // Resources required by page-local links and the shared about/privacy modal.
-for (const name of ['site-skeleton.css','site-skeleton.js']) put(path.join(base,name),path.join(out,name));
+for (const name of ['site-skeleton.css','site-skeleton.js','site-language.js','site-user-select.css']) put(path.join(base,name),path.join(out,name));
 for (const name of [
   'site-footer.css','site-info-modal.css','site-info-modal.js',
   'site-info.css','site-info.js','site-info.html','site-scrollbar.css'
@@ -58,6 +58,7 @@ const publicFeedback = [
 if (mode === 'home') {
   for (const name of [
     'home.css','home.js','home.html','home-en.html',
+    'home-updates.css','home-updates.js','home-updates.html',
     'changelog.css','changelog.js','changelog.html'
   ]) file(name);
   // The dashboard belongs on the home domain only. Its API is NOT a static file.
