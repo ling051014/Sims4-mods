@@ -855,12 +855,46 @@ section[id] {
 /* ========【響應式設定】 設定 - 平板與小尺寸桌面 ======== */
 @media (max-width: 850px) {
 
-    /* ========【手機與平板導覽】 純毛玻璃期間不疊白底，靠近專案區才轉實色 ======== */
+    /* ========【手機與平板導覽】 獨立毛玻璃層，底緣以遮罩柔和淡出 ======== */
     .site-header {
-        /* backdrop-filter 可在背景 alpha 0 時運作；透明度與模糊各自過渡。 */
+        /* 純毛玻璃階段不添加白底；白色由 JS 在接近專案區時才逐步出現。 */
         background: rgba(255, 255, 255, var(--header-bg-opacity, 0));
-        -webkit-backdrop-filter: blur(var(--header-blur, 0px));
-        backdrop-filter: blur(var(--header-blur, 0px));
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        isolation: isolate;
+    }
+
+    .site-header::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 -24px;
+        z-index: 0;
+        pointer-events: none;
+        /* 極低 alpha 只用於穩定 Safari 合成層，肉眼仍是透明玻璃。 */
+        background: rgba(255, 255, 255, 0.001);
+        -webkit-backdrop-filter: blur(var(--header-glass-blur, 0px));
+        backdrop-filter: blur(var(--header-glass-blur, 0px));
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 52%,
+            rgba(0, 0, 0, 0.88) 68%,
+            rgba(0, 0, 0, 0.45) 84%,
+            transparent 100%
+        );
+        mask-image: linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 52%,
+            rgba(0, 0, 0, 0.88) 68%,
+            rgba(0, 0, 0, 0.45) 84%,
+            transparent 100%
+        );
+    }
+
+    .site-header-inner {
+        position: relative;
+        z-index: 1;
     }
 
     /* 內容超過螢幕高度時，不再從負位置置中，避免最上方文字被固定導覽遮住。 */
