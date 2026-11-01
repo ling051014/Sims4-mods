@@ -2,7 +2,7 @@
 document.documentElement.classList.add("js");
 
 
-// ========【頂部導覽列】 設定 - 始終顯示，離開主視覺時背景平滑過渡 ========
+// ========【頂部導覽列】 桌機保留透明起始；手機起始毛玻璃隨捲動增強 ========
 const siteHeader = document.getElementById("siteHeader");
 const homeHero = document.querySelector(".hero");
 
@@ -11,17 +11,23 @@ function updateHeaderState() {
         return;
     }
 
-    // 主視覺仍位於導覽列下方時完全透明，避免出現另一塊不同色的背景。
-    // 主視覺底緣滑過導覽列後，逐漸加入白底、模糊與輕微陰影。
+    // 桌機維持原本的透明封面：離開主視覺後才逐漸顯示底色。
+    // 手機／平板則先有輕毛玻璃，從開始捲動就逐漸加深，避免文字穿過固定頂欄。
+    const compactNavigation = window.matchMedia("(max-width: 850px)").matches;
     const headerBottom = siteHeader.getBoundingClientRect().bottom;
     const heroBottom = homeHero.getBoundingClientRect().bottom;
-    const transitionDistance = 120;
-    const progress = Math.min(1, Math.max(0, (headerBottom - heroBottom) / transitionDistance));
+    const progress = compactNavigation
+        ? Math.min(1, Math.max(0, window.scrollY / 200))
+        : Math.min(1, Math.max(0, (headerBottom - heroBottom) / 120));
 
-    siteHeader.style.setProperty("--header-bg-opacity", (0.92 * progress).toFixed(3));
-    siteHeader.style.setProperty("--header-border-opacity", (0.78 * progress).toFixed(3));
-    siteHeader.style.setProperty("--header-shadow-opacity", (0.06 * progress).toFixed(3));
-    siteHeader.style.setProperty("--header-blur", (18 * progress).toFixed(2) + "px");
+    const from = compactNavigation
+        ? { background: 0.78, border: 0.14, shadow: 0.015, blur: 12 }
+        : { background: 0, border: 0, shadow: 0, blur: 0 };
+
+    siteHeader.style.setProperty("--header-bg-opacity", (from.background + (0.92 - from.background) * progress).toFixed(3));
+    siteHeader.style.setProperty("--header-border-opacity", (from.border + (0.78 - from.border) * progress).toFixed(3));
+    siteHeader.style.setProperty("--header-shadow-opacity", (from.shadow + (0.06 - from.shadow) * progress).toFixed(3));
+    siteHeader.style.setProperty("--header-blur", (from.blur + (18 - from.blur) * progress).toFixed(2) + "px");
 }
 
 window.addEventListener("scroll", updateHeaderState, { passive: true });
