@@ -2,7 +2,7 @@
 document.documentElement.classList.add("js");
 
 
-// ========【頂部導覽列】 設定 - 主視覺完全離開後才顯示 ========
+// ========【頂部導覽列】 設定 - 始終顯示，離開主視覺時背景平滑過渡 ========
 const siteHeader = document.getElementById("siteHeader");
 const homeHero = document.querySelector(".hero");
 
@@ -11,20 +11,17 @@ function updateHeaderState() {
         return;
     }
 
+    // 主視覺仍位於導覽列下方時完全透明，避免出現另一塊不同色的背景。
+    // 主視覺底緣滑過導覽列後，逐漸加入白底、模糊與輕微陰影。
+    const headerBottom = siteHeader.getBoundingClientRect().bottom;
     const heroBottom = homeHero.getBoundingClientRect().bottom;
-    const fadeDistance = 88;
-    const distancePastHero = Math.max(0, -heroBottom);
-    const progress = Math.min(1, distancePastHero / fadeDistance);
-    const offset = -110 * (1 - progress);
+    const transitionDistance = 120;
+    const progress = Math.min(1, Math.max(0, (headerBottom - heroBottom) / transitionDistance));
 
-    siteHeader.style.setProperty("--header-opacity", progress.toFixed(3));
-    siteHeader.style.setProperty("--header-offset", offset.toFixed(2) + "%");
-    siteHeader.classList.toggle("interactive", progress >= 0.98);
-    siteHeader.classList.toggle("scrolled", progress > 0);
-
-    if (progress < 0.98) {
-        closeMobileNav();
-    }
+    siteHeader.style.setProperty("--header-bg-opacity", (0.92 * progress).toFixed(3));
+    siteHeader.style.setProperty("--header-border-opacity", (0.78 * progress).toFixed(3));
+    siteHeader.style.setProperty("--header-shadow-opacity", (0.06 * progress).toFixed(3));
+    siteHeader.style.setProperty("--header-blur", (18 * progress).toFixed(2) + "px");
 }
 
 window.addEventListener("scroll", updateHeaderState, { passive: true });
