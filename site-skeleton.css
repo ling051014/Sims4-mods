@@ -145,9 +145,12 @@
     background:transparent;
 }
 .layout-l1ng-home .l1ng-home-hero-inner { width:min(980px,calc(100% - 40px)); display:grid; justify-items:center; gap:18px; }
+@media (max-width:850px) {
+    /* 與首頁 hero 安全起點同步，避免骨架屏與真實內容垂直跳動。 */
+    .layout-l1ng-home .l1ng-home-hero { padding-top:calc(112px + env(safe-area-inset-top)); }
+}
 .layout-l1ng-home .hero-kicker { width:225px; }
 .layout-l1ng-home .hero-title { width:min(580px,78vw); height:136px; border-radius:10px; }
-.layout-l1ng-home .hero-subtitle { width:min(640px,78vw); height:28px; }
 .layout-l1ng-home .hero-description { width:min(490px,72vw); }
 .sk-home-creator-links { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:22px; margin-top:12px; }
 .sk-home-creator-link { display:flex; align-items:center; gap:8px; min-height:24px; }
@@ -305,7 +308,6 @@
     .layout-mods-table .mods-table-head, .layout-mods-table .mods-table-row { grid-template-columns:1.6fr 1fr; }
     .layout-mods-table .mods-table-head > :nth-child(n+3), .layout-mods-table .mods-table-row > :nth-child(n+3) { display:none; }
     .layout-l1ng-home .hero-title { width:min(360px,80vw); height:88px; }
-    .layout-l1ng-home .hero-subtitle { width:min(350px,80vw); height:40px; }
     .layout-l1ng-home .hero-description { width:min(300px,74vw); }
     .layout-l1ng-home .l1ng-home-hero-inner { gap:14px; }
 
