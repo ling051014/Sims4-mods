@@ -106,7 +106,7 @@ section[id] {
     right: 0;
     z-index: 100;
     /* iPhone 安全區域 */ padding-top: env(safe-area-inset-top);
-    /* 不建立獨立背景層；捲動進度由 home.js 漸進設定 */ background: rgba(255, 255, 255, var(--header-bg-opacity, 0));
+    /* 白底透明度由 home.js 控制，手機另透過獨立背景層繪製漸層毛玻璃 */ background: rgba(255, 255, 255, var(--header-bg-opacity, 0));
     border-bottom: 1px solid rgba(216, 222, 228, var(--header-border-opacity, 0));
     box-shadow: 0 8px 28px rgba(47, 68, 82, var(--header-shadow-opacity, 0));
     backdrop-filter: blur(var(--header-blur, 0px));
@@ -150,10 +150,7 @@ section[id] {
 
 /* ========【頂部導覽列】 設定 - 導覽項目排列 ======== */
 .main-nav {
-    /* 與 RealDate、族譜提取器一致置中 */ justify-self: center;
-    /* 橫向排列 */ display: flex;
-    /* 垂直置中 */ align-items: center;
-    /* 項目間距 */ gap: 21px;
+    /* 桌機隱藏重複入口；手機展開狀態另由媒體查詢控制 */ display: none;
 }
 
 
@@ -857,8 +854,7 @@ section[id] {
 
     /* ========【手機與平板導覽】 獨立毛玻璃層，底緣以遮罩柔和淡出 ======== */
     .site-header {
-        /* 純毛玻璃階段不添加白底；白色由 JS 在接近專案區時才逐步出現。 */
-        background: rgba(255, 255, 255, var(--header-bg-opacity, 0));
+        /* 獨立玻璃層負責背景模糊；本體維持 home.js 控制的底色。 */
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
         isolation: isolate;
@@ -892,11 +888,6 @@ section[id] {
         );
     }
 
-    .site-header-inner {
-        position: relative;
-        z-index: 1;
-    }
-
     /* 內容超過螢幕高度時，不再從負位置置中，避免最上方文字被固定導覽遮住。 */
     .hero {
         align-items: safe center;
@@ -909,7 +900,8 @@ section[id] {
 
     /* ========【頂部導覽列】 設定 - 平板導覽 ======== */
     .site-header-inner {
-        /* 相對定位 */ position: relative;
+        /* 保持導覽控制項位於毛玻璃背景層上方 */ position: relative;
+        z-index: 1;
         /* 手機導覽只保留品牌與右側控制 */ grid-template-columns: minmax(0, 1fr) auto;
         /* 縮小頂條間距 */ gap: 12px;
     }
@@ -937,7 +929,6 @@ section[id] {
         /* 垂直排列 */ flex-direction: column;
         /* 左側對齊 */ align-items: stretch;
         /* 項目間距 */ gap: 4px;
-        /* 預設隱藏 */ display: none;
     }
 
     .main-nav.open {
@@ -951,22 +942,6 @@ section[id] {
 
     .main-nav a:hover {
         /* 懸停淡藍背景 */ background: #f5faff;
-    }
-
-    .main-nav .nav-external {
-        /* 移除額外邊框 */ border: none;
-        /* 移除額外背景 */ background: transparent;
-    }
-
-    .language-switch a {
-        /* 語言切換維持緊湊 */ padding: 0;
-    }
-
-
-    /* ========【首頁主視覺】 設定 - 平板維持完整首屏 ======== */
-    .hero {
-        /* 舊瀏覽器 fallback */ min-height: 100vh;
-        /* 依目前實際可見視窗填滿整個首屏 */ min-height: 100dvh;
     }
 
 
@@ -1016,15 +991,9 @@ section[id] {
     }
 
 
-    /* ========【首頁主視覺】 設定 - 手機 V3 完整首屏 ======== */
-    .hero {
-        /* 舊瀏覽器 fallback */ min-height: 100vh;
-        /* iPhone Safari 依目前實際可見視窗填滿首屏 */ min-height: 100dvh;
-    }
-
+    /* ========【首頁主視覺】 設定 - 手機內距與安全區域 ======== */
     .hero-inner {
-        /* 手機縮窄文字區並保留上下安全空間 */ width: min(calc(100% - 30px), 680px);
-        padding:
+        /* 寬度沿用上方共用行動版規則，僅保留專屬上下內距 */ padding:
             calc(112px + env(safe-area-inset-top))
             0
             calc(84px + env(safe-area-inset-bottom));

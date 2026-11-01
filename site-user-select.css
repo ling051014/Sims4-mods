@@ -1,0 +1,19 @@
+/* ========【全站文字選取】 介面文字不允許反白；保留實際輸入與編輯功能 ======== */
+/* 這是全站共用規則；不攔截右鍵、複製按鈕或 Clipboard API。 */
+html,
+body,
+body *,
+body *::before,
+body *::after {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+
+/* 表單輸入和可編輯區域仍可正常選取、輸入與複製。 */
+input,
+textarea,
+[contenteditable]:not([contenteditable="false"]),
+[contenteditable]:not([contenteditable="false"]) * {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}

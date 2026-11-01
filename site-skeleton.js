@@ -77,6 +77,21 @@
                 '<div class="sk-release-section-items">' + repeat(3, () => block("sk-wide-copy")) +
             '</div></div>') + '</div></div></div>';
 
+    // 與首頁更新日誌共用的五筆佔位；網路請求尚未完成時持續顯示。
+    const homeUpdates = () =>
+        '<div class="sk-home-updates" aria-hidden="true">' +
+            '<div class="sk-home-updates-heading">' + block("sk-home-update-heading") + '</div>' +
+            '<div class="sk-home-updates-list">' + repeat(5, () =>
+                '<div class="sk-home-update-row">' +
+                    block("sk-home-update-date") +
+                    '<div class="sk-home-update-main">' +
+                        block("sk-home-update-project") + block("sk-home-update-title") +
+                    '</div>' +
+                    block("sk-home-update-arrow") +
+                '</div>') +
+            '</div>' +
+        '</div>';
+
     const templates = {
         "mods-home": () =>
             '<div class="mods-home-head">' + block("title") + block("l1ng-sk-line meta") + '</div>' +
@@ -103,6 +118,7 @@
                 '<div class="sk-home-creator-links">' + repeat(4, () =>
                     '<div class="sk-home-creator-link">' + block("sk-home-creator-icon") +
                     block("sk-home-creator-label") + '</div>') + '</div>' +
+                homeUpdates() +
             '</div>' + block("sk-scroll-hint") + '</div>',
 
         "l1ng-changelog": () =>
@@ -214,7 +230,7 @@
         }
     }
 
-    window.L1nGSkeleton = Object.assign(window.L1nGSkeleton || {}, { ready });
+    window.L1nGSkeleton = Object.assign(window.L1nGSkeleton || {}, { ready, homeUpdates });
 
     if (autoReady) {
         const scheduleReady = () =>
