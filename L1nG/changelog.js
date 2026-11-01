@@ -5,6 +5,10 @@
     const mount = document.getElementById("homeChangelogMount");
     if (!mount) return;
 
+    // 首屏骨架淡出後，沿用相同佔位直到 changelog.html 載入完畢。
+    const skeletonMarkup = window.L1nGSkeleton?.homeUpdates?.();
+    if (skeletonMarkup) mount.innerHTML = skeletonMarkup;
+
     const english = document.documentElement.lang.toLowerCase().startsWith("en");
     const errorMessage = english
         ? "Recent announcements are temporarily unavailable."
