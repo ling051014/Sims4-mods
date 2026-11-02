@@ -58,7 +58,6 @@ const publicFeedback = [
 if (mode === 'home') {
   for (const name of [
     'home.css','home.js','home.html','home-en.html',
-    'home-updates.css','home-updates.js','home-updates.html',
     'changelog.css','changelog.js','changelog.html'
   ]) file(name);
   // The dashboard belongs on the home domain only. Its API is NOT a static file.
