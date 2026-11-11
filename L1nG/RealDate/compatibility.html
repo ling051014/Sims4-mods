@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261021-occupancy">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>相容性 · RealDate · L1nG</title>
-    <meta name="description" content="RealDate v0.5 Beta 相容模組、測試版本、相容檔與安裝限制。">
+    <meta name="description" content="RealDate v0.5 Beta 相容性及 v0.6 Beta 教育、增齡與第三方模組相容性預覽。">
     <meta name="theme-color" content="#fafafa">
     <link rel="stylesheet" href="realdate.css?v=20261102-compat-accordion-r1">
     <script src="../../site-language.js?v=20261102-language-beta-r1"></script>
@@ -68,6 +68,58 @@
                     <strong>RealDate handles “when,” while the original mod handles “what happens.”</strong><br>
                     Tested versions, integration scope, compatibility packages, and responsibility boundaries are documented separately below.
                 </p>
+            </div>
+        </section>
+
+        <!-- ========【v0.6 相容性預覽】 不取代 v0.5 已發布測試表 ======== -->
+        <section class="section" id="v060-compatibility">
+            <div class="section-heading reveal">
+                <span class="eyebrow">v0.6 BETA · COMPATIBILITY PREVIEW</span>
+                <h2 data-lang="zh-Hant">v0.6 相容性預覽</h2>
+                <h2 data-lang="en">v0.6 Compatibility Preview</h2>
+                                <p data-lang="zh-Hant">以下是 v0.6 發布草稿列出的測試組合與預計整合範圍，尚未作為正式公開版相容性保證；v0.5 已發布的測試資訊保留在下方。</p>
+                <p data-lang="en">The following versions and integrations are listed in the v0.6 release draft, not as a compatibility guarantee for a published build. The verified v0.5 release environment remains below.</p>
+            </div>
+            <div class="environment-grid reveal">
+                <div><small>遊戲版本 / Game Version</small><strong>1.129.39.1030</strong></div>
+                <div><small>必要前置 / Required</small><strong>Lot51 Core Library v1.43.1</strong></div>
+                <div><small>UI Cheats</small><strong>v1.59.1</strong></div>
+                <div><small>MCCC</small><strong>2026.6.0</strong></div>
+                <div><small>WickedWhims</small><strong>v185k</strong></div>
+                <div><small>Slice of Life / Menstrual</small><strong>v1.2 / Strawberry 0.7</strong></div>
+                <div><small>RPO</small><strong>v2.986</strong></div>
+                <div><small>PandaSama Child Birth</small><strong>v1.972</strong></div>
+                <div><small>Mood Pack Mod</small><strong>v1.677</strong></div>
+                <div><small>Better Simology Panel</small><strong>v1.2.2 / UI Cheats v1.2.4</strong></div>
+            </div>
+            <div class="feature-list reveal">
+                <div>
+                    <strong data-lang="zh-Hant">Education Overhaul · 新增教育相容</strong><strong data-lang="en">Education Overhaul · New school integration</strong>
+                                        <p data-lang="zh-Hant">與 adeepindigo 的 Education Overhaul 協調小學、國中、高中階段、學年與學校職涯，避免重複分配或覆蓋學籍；原模組仍負責學校選擇、課外活動及校園玩法。</p>
+                    <p data-lang="en">Coordinates Elementary/Middle/High School stages, school years, and school careers with adeepindigo's Education Overhaul while retaining the original mod's school choices, extracurriculars, and gameplay.</p>
+                    <a class="external-name-link" href="https://adeepindigomods.itch.io/education-overhaul" target="_blank" rel="noopener noreferrer">Education Overhaul</a>
+                </div>
+                <div>
+                    <strong data-lang="zh-Hant">MCCC／UI Cheats 年齡操作</strong><strong data-lang="en">MCCC / UI Cheats aging controls</strong>
+                                        <p data-lang="zh-Hant">當 RealDate 管理市民年齡時，對已支援偵測的外部年齡修改顯示提示並阻止覆寫。</p>
+                    <p data-lang="en">Supported external age edits are blocked with a notification while RealDate manages Sim ages.</p>
+                </div>
+                <div>
+                    <strong data-lang="zh-Hant">懷孕與經期系統</strong><strong data-lang="en">Pregnancy &amp; menstrual integrations</strong>
+                                        <p data-lang="zh-Hant">改善 MCCC、WickedWhims、RPO、PandaSama Child Birth 的懷孕與預產期同步，並處理 WickedWhims／Slice of Life 讀檔後的經期系統啟用。原模組仍控制驗孕、孕肚變化與分娩。</p>
+                    <p data-lang="en">Improves pregnancy/due-date synchronization with MCCC, WickedWhims, RPO, and PandaSama Child Birth, plus menstrual-system activation after loading with WickedWhims/Slice of Life. Third-party mods retain their own testing, belly progression, and childbirth features.</p>
+                </div>
+                <div>
+                    <strong data-lang="zh-Hant">Better Simology Panel · 可選擇介面相容檔</strong><strong data-lang="en">Better Simology Panel · Optional UI packages</strong>
+                                        <p data-lang="zh-Hant">v0.6 草稿新增一般版與 UI Cheats 合併版的相容檔，依實際安裝組合擇一，不能同時使用。</p>
+                    <p data-lang="en">The v0.6 draft lists a standard compatibility package and a combined UI Cheats variant. Choose the one that matches your installed setup; do not install both.</p>
+                    <code>L1nG_RealDate_Compat_BetterSimology.package</code>
+                    <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code>
+                </div>
+            </div>
+            <div class="doc-note doc-note-warning reveal">
+                <span data-lang="zh-Hant">v0.6 相容檔尚未提供正式下載。安裝時只能從 UI Cheats、Quick Save、Quick Save + UI Cheats 三款中擇一；所有對應相容檔均應放入 Mods\Overrides。</span>
+                <span data-lang="en">v0.6 compatibility files are not yet publicly available. Choose only one UI Cheats, Quick Save, or combined UI Cheats + Quick Save package and place matching compatibility files in Mods\Overrides.</span>
             </div>
         </section>
 
