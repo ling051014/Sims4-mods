@@ -31,7 +31,7 @@ fs.rmSync(out,{force:true,recursive:true});
 fs.mkdirSync(out,{recursive:true});
 
 // Resources required by page-local links and the shared about/privacy modal.
-for (const name of ['site-skeleton.css','site-skeleton.js']) put(path.join(base,name),path.join(out,name));
+for (const name of ['site-skeleton.css','site-skeleton.js','site-language.js','site-user-select.css']) put(path.join(base,name),path.join(out,name));
 for (const name of [
   'site-footer.css','site-info-modal.css','site-info-modal.js',
   'site-info.css','site-info.js','site-info.html','site-scrollbar.css'
