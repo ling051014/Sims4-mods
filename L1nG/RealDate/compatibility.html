@@ -311,12 +311,12 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持自己的日期與時間一致性。
-                            RealDate 的 UI 相容檔則負責避免雙方修改同一介面資源時互相覆蓋。
+                            使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持日期與時間的一致性。當 RealDate 正在管理模擬市民年紀時，會阻止已支援偵測的 UI Cheats 年紀修改並顯示提示，避免進度被意外覆寫。
+                            對應的 UI 相容檔則用於避免雙方共用的介面資源互相覆蓋。
                         </p>
                         <p data-lang="en">
-                            RealDate keeps its date / time state consistent when UI Cheats is used on supported time-related UI.
-                            The compatibility package prevents both mods from overwriting the same UI resources.
+                            RealDate keeps its date and time consistent when UI Cheats is used on supported season / time interfaces. While RealDate manages a Sim's age, detected UI Cheats age edits are blocked with a notification to prevent accidental overrides.
+                            The matching UI compatibility package prevents both mods from overwriting shared interface resources.
                         </p>
                         <div class="compat-meta">
                             <div>
@@ -639,12 +639,10 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            自 v0.4 起已提供 Quick Save 專用相容檔，以及 Quick Save + UI Cheats 合併相容檔；v0.6 持續提供。
-                            這些相容檔用於避免共用的介面修改互相衝突。
+                            自 v0.4 起提供 Quick Save 專用相容檔，以及 Quick Save + UI Cheats 合併相容檔，用於避免共用介面資源互相衝突。
                         </p>
                         <p data-lang="en">
-                            Quick Save-specific and combined Quick Save + UI Cheats compatibility packages have been available since v0.4 and remain included in v0.6.
-                            They prevent overlapping UI changes from conflicting.
+                            Quick Save-specific and combined Quick Save + UI Cheats compatibility packages have been available since v0.4 to prevent conflicting changes to shared interface resources.
                         </p>
                         <div class="compat-meta">
                             <div>
@@ -668,7 +666,11 @@
                     <summary>
                         <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
                         <span>
-                            <strong><a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/better-simology-130566542" target="_blank" rel="noopener noreferrer">Better Simology Panel</a></strong>
+                            <strong>
+                                <a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/better-simology-130566542" target="_blank" rel="noopener noreferrer">
+                                    Better Simology Panel
+                                </a>
+                            </strong>
                             <small>v1.2.2 / UI Cheats v1.2.4</small>
                         </span>
                         <span class="compat-status" data-lang="zh-Hant">需要相容檔</span>
@@ -681,21 +683,15 @@
                             <div>
                                 <small data-lang="zh-Hant">v0.6 測試版本</small>
                                 <small data-lang="en">Tested with v0.6</small>
-                                <strong>Better Simology Panel v1.2.2</strong>
+                                <strong>Better Simology Panel v1.2.2 / UI Cheats v1.2.4</strong>
                             </div>
                             <div>
-                                <small data-lang="zh-Hant">搭配 UI Cheats 的版本</small>
-                                <small data-lang="en">With UI Cheats</small>
-                                <strong>Better Simology Panel v1.2.4</strong>
-                            </div>
-                            <div>
-                                <small data-lang="zh-Hant">一般相容檔</small>
-                                <small data-lang="en">Standard package</small>
+                                <small data-lang="zh-Hant">只有 Better Simology</small>
+                                <small data-lang="en">Better Simology only</small>
                                 <code>L1nG_RealDate_Compat_BetterSimology.package</code>
                             </div>
                             <div>
-                                <small data-lang="zh-Hant">搭配 UI Cheats 的相容檔</small>
-                                <small data-lang="en">With UI Cheats package</small>
+                                <small>Better Simology + UI Cheats</small>
                                 <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code>
                             </div>
                         </div>
