@@ -159,10 +159,10 @@
                 </p>
                 <div class="feature-list">
                     <div>
-                        <strong data-lang="zh-Hant">365 / 366 天公曆日期</strong>
-                        <strong data-lang="en">Gregorian common and leap years</strong>
-                        <p data-lang="zh-Hant">月曆依照公曆規則顯示 365 / 366 天，正確處理不同月份天數、跨月、跨年與閏年。2 月 29 日出生的模擬市民也能保留原始生日。</p>
-                        <p data-lang="en">The Calendar follows 365 / 366-day Gregorian years, accurate month lengths, month / year transitions and leap-day rules. Sims born on February 29 keep their original birth date.</p>
+                        <strong data-lang="zh-Hant">真正的月份與閏年</strong>
+                        <strong data-lang="en">Real Months &amp; Leap Years</strong>
+                        <p data-lang="zh-Hant">每個月都有和現實一樣的天數，平年有 365 天，閏年有 366 天。閏年的 2 月 29 日也會出現，這天出生的模擬市民可以保留原本的生日。</p>
+                        <p data-lang="en">Months have the same number of days as in real life, with 365 days in regular years and 366 in leap years. February 29 appears in leap years, and Sims born on that day keep their original birthday.</p>
                     </div>
                     <div>
                         <strong data-lang="zh-Hant">生日標記</strong>
@@ -211,15 +211,12 @@
                 <h2 data-lang="zh-Hant">年齡與生命階段</h2>
                 <h2 data-lang="en">Aging &amp; Life Stages</h2>
                 <p data-lang="zh-Hant">
-                    RealDate 依目前日期與出生日期計算實際年齡。
-                    市民每年仍會增加一歲，但只有真正跨越下一個 RealDate 階段門檻時，
-                    才會啟動 EA 原本的增齡流程。
+                    RealDate 會根據出生日期計算模擬市民幾歲。每年過生日都會長一歲，但只有到了下一個生命階段的年紀，才會真正從兒童長成青少年等，不會每次過生日就增齡。
                 </p>
                 <p data-lang="en">
-                    RealDate calculates real age from the current date and birth date.
-                    Sims still grow one year older each year, but EA's native age-up flow only runs when a RealDate life-stage threshold is crossed.
+                    RealDate calculates each Sim’s age from their birthday. Sims grow a year older on each birthday, but they only move to the next life stage when they reach the right age—not every time they celebrate.
                 </p>
-                <div class="doc-note"><span data-lang="zh-Hant">下表是 RealDate 預設的生命階段起始年紀，玩家可自行調整。</span><span data-lang="en">The table below shows RealDate's default life-stage age thresholds, which you can customize.</span></div>
+                <div class="doc-note"><span data-lang="zh-Hant">以下是 RealDate 原本設定好的增齡年紀，也可以依自己的玩法調整。</span><span data-lang="en">These are RealDate’s default ages for each life stage. You can change them to suit your game.</span></div>
                 <div class="life-stage-table">
                     <div>
                         <strong data-lang="zh-Hant">出生～未滿 1 個月</strong>
@@ -280,8 +277,8 @@
                     <div>
                         <strong data-lang="zh-Hant">RealDate 年齡進度</strong>
                         <strong data-lang="en">RealDate aging progress</strong>
-                        <p data-lang="zh-Hant">模擬市民學年齡進度依實際 RealDate 時間比例前進。</p>
-                        <p data-lang="en">Simology aging progress follows actual RealDate time.</p>
+                        <p data-lang="zh-Hant">模擬市民學的年齡進度條會隨著 RealDate 的日期慢慢增加。</p>
+                        <p data-lang="en">The age progress bar in Simology fills as time passes in RealDate.</p>
                     </div>
                     <div>
                         <strong data-lang="zh-Hant">增齡倒數</strong>
@@ -310,8 +307,8 @@
                     <div>
                         <strong data-lang="zh-Hant">自訂增齡年紀</strong>
                         <strong data-lang="en">Customizable Age-Up Ages</strong>
-                        <p data-lang="zh-Hant">一般市民、吸血鬼、人魚與外星人可分別設定增齡年紀，嬰幼兒支援月份並可恢復預設值。從 RealDate 主選單 → 進階設定 → 自訂增齡年紀調整；儲存遊戲並完整重新啟動後生效。</p>
-                        <p data-lang="en">Set age-up thresholds separately for regular Sims, Vampires, Mermaids and Aliens, with month-based early stages and reset options. Change them under RealDate Main Menu → Advanced Settings → Customizable Age-Up Ages, then save your game and fully restart.</p>
+                        <p data-lang="zh-Hant">一般市民、吸血鬼、人魚與外星人都能自行設定幾歲增齡，嬰幼兒還能用月份調整。從 RealDate 主選單 → 進階設定 → 自訂增齡年紀修改，也能恢復預設值。儲存遊戲並完整重新啟動後生效。</p>
+                        <p data-lang="en">Choose when regular Sims, Vampires, Mermaids, and Aliens age up, including ages in months for younger Sims. Go to RealDate Main Menu → Advanced Settings → Customizable Age-Up Ages. You can restore the defaults; save your game and fully restart to apply your changes.</p>
                     </div>
                 </div>
             </div>
@@ -381,24 +378,44 @@
             <div class="doc-content reveal">
                 <h2 data-lang="zh-Hant">學年與學校</h2>
                 <h2 data-lang="en">School &amp; Academic Progress</h2>
-                <p data-lang="zh-Hant">RealDate 依模擬市民的實際年紀與已完成的學業紀錄，安排小學、國中與高中的就讀階段。12 年教育制度分成六年小學、三年國中與三年高中；達到某個年紀，不代表先前的學業已經自動完成。</p>
-                <p data-lang="en">RealDate organizes a twelve-year education system around each Sim's actual age and confirmed academic progress: six years of Elementary School, three of Middle School and three of High School. Reaching a certain age does not automatically complete earlier schooling.</p>
+                <p data-lang="zh-Hant">RealDate 讓模擬市民可以從小學一路讀到高中，中間還加入了國中！小學六年、國中三年、高中三年，總共 12 年。升學除了看年紀，也會看前面的年級有沒有讀完，不會過一次生日就直接跳級。</p>
+                <p data-lang="en">RealDate lets Sims go from Elementary School all the way to High School, with Middle School in between! That's six years of Elementary, three of Middle, and three of High School. Moving up depends on age and the grades they've finished, so a birthday won't make them skip school years.</p>
                 <div class="feature-list">
-                    <div><strong data-lang="zh-Hant">小學（7～12 歲）</strong><strong data-lang="en">Elementary School (ages 7–12)</strong><p data-lang="zh-Hant">7～12 歲對應小學階段，共六年。學業進度會依實際完成的學年記錄，不會只靠年紀判斷。</p><p data-lang="en">Sims aged 7–12 attend the six-year Elementary School stage. Progress depends on completed school years rather than age alone.</p></div>
-                    <div><strong data-lang="zh-Hant">獨立國中（13～15 歲）</strong><strong data-lang="en">Dedicated Middle School (ages 13–15)</strong><p data-lang="zh-Hant">RealDate Middle School 使用與遊戲學校職涯整合的兔子洞上學方式，包含出勤、作業與學業進度，但不會新增可直接操控的國中校園。</p><p data-lang="en">RealDate Middle School uses rabbit-hole attendance integrated with school careers, including classes, homework and academic progress. It does not add an actively playable Middle School lot.</p></div>
-                    <div><strong data-lang="zh-Hant">高中（16～18 歲）</strong><strong data-lang="en">High School (ages 16–18)</strong><p data-lang="zh-Hant">16～18 歲對應高中階段，共三年。完成國中學業並符合升學條件後，才能繼續升入高中。</p><p data-lang="en">Sims aged 16–18 enter the three-year High School stage after completing the required Middle School studies and meeting advancement conditions.</p></div>
-                    <div><strong data-lang="zh-Hant">學籍保存與升學</strong><strong data-lang="en">Student Records &amp; Progression</strong><p data-lang="zh-Hant">目前就讀的學校階段、學年進度及已確認完成的學業會分開保存。重新讀檔或切換生命階段時，不會憑年紀補完學年，也不會為舊存檔編造不存在的學業紀錄。</p><p data-lang="en">Current school stage, academic progress and confirmed completed studies are tracked separately. Reloading a save or changing life stages does not invent completed years or missing school records.</p></div>
+                    <div>
+                        <strong data-lang="zh-Hant">小學（7～12 歲）</strong>
+                        <strong data-lang="en">Elementary School (ages 7–12)</strong>
+                        <p data-lang="zh-Hant">7～12 歲就讀小學，一共六年。讀完一個年級，才會接著進入下一個年級。</p>
+                        <p data-lang="en">Sims aged 7–12 attend Elementary School for six years, moving through the grades as they complete each one.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">獨立國中（13～15 歲）</strong>
+                        <strong data-lang="en">Dedicated Middle School (ages 13–15)</strong>
+                        <p data-lang="zh-Hant">13～15 歲可以上 RealDate Middle School。就像原版小學，市民會自己出門上課，也有作業和上學進度；玩家不用進入校園，因為沒有新增可操作的國中場地。</p>
+                        <p data-lang="en">Sims aged 13–15 can attend RealDate Middle School. Like regular Elementary School, they head off to class on their own and still have homework and school progress. There is no new playable Middle School lot.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">高中（16～18 歲）</strong>
+                        <strong data-lang="en">High School (ages 16–18)</strong>
+                        <p data-lang="zh-Hant">16～18 歲的模擬市民，在讀完國中並符合升學條件後，就能升上高中，繼續完成最後三年的學業。</p>
+                        <p data-lang="en">Sims aged 16–18 can move on to High School after finishing Middle School and meeting the requirements, then complete their final three school years.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">上學進度與升學</strong>
+                        <strong data-lang="en">School Progress &amp; Moving Up</strong>
+                        <p data-lang="zh-Hant">RealDate 會記住市民讀到哪個年級。重新讀檔或長大後，仍會接著原本的進度上學，不會把沒讀過的年級直接算成已完成。</p>
+                        <p data-lang="en">RealDate remembers how far each Sim has gotten in school. Reloading a save or growing older won't automatically mark school years they never attended as complete.</p>
+                    </div>
                     <div>
                         <strong data-lang="zh-Hant">學期與寒暑假</strong>
                         <strong data-lang="en">School Terms &amp; Holidays</strong>
-                        <p data-lang="zh-Hant">不同世界依日期安排學期、寒假與暑假。假期期間不用照常上學，結束後會依原本的學籍與學年進度恢復上課。</p>
-                        <p data-lang="en">Term dates and winter / summer holidays vary by world. Sims do not attend regular classes during school breaks and return to their existing enrollment and academic progress afterward.</p>
+                        <p data-lang="zh-Hant">不同世界的學期和放假時間可能不同。寒暑假期間不用上學，假期結束後就會回到原本的學校繼續上課。</p>
+                        <p data-lang="en">School terms and holiday dates can vary by world. Sims get time off during winter and summer breaks, then return to their usual school when the holidays end.</p>
                     </div>
                     <div>
-                        <strong data-lang="zh-Hant">Education Overhaul 教育系統相容</strong>
-                        <strong data-lang="en">Education Overhaul Integration</strong>
-                        <p data-lang="zh-Hant">同時使用 adeepindigo 的 Education Overhaul 時，RealDate 會依模擬市民的實際年紀、學籍與已完成學年判斷小學、國中及高中，並與 Education Overhaul 的學校職涯及升學流程協調，避免重複分配學校或覆蓋既有學籍。學校選擇、課外活動及其他校園玩法仍由 Education Overhaul 負責。</p>
-                        <p data-lang="en">When used with adeepindigo's Education Overhaul, RealDate determines Elementary, Middle and High School placement from each Sim's age, student records and completed school years. It coordinates school careers and progression to avoid duplicate assignments or overwriting existing enrollment. Education Overhaul continues to manage school choices, extracurricular activities and its other school gameplay.</p>
+                        <strong data-lang="zh-Hant">搭配 Education Overhaul</strong>
+                        <strong data-lang="en">Playing with Education Overhaul</strong>
+                        <p data-lang="zh-Hant">如果也安裝了 adeepindigo 的 Education Overhaul，原本的學校選擇、課外活動和其他校園玩法都可以繼續使用。RealDate 會按照市民的年紀和已讀完的年級安排小學、國中或高中，避免兩個模組重複安排學校，也不會隨意更改已經就讀的學校。</p>
+                        <p data-lang="en">If you also use adeepindigo's Education Overhaul, you can keep its school choices, extracurricular activities, and other school features. RealDate uses your Sim's age and completed grades to decide whether they belong in Elementary, Middle, or High School, without assigning the same Sim to school twice or unexpectedly changing their current school.</p>
                     </div>
                 </div>
             </div>
