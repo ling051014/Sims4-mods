@@ -151,10 +151,10 @@
                 </p>
                 <div class="feature-list">
                     <div>
-                        <strong data-lang="zh-Hant">365／366 天公曆日期</strong>
-                        <strong data-lang="en">Gregorian 365/366-day dates</strong>
-                        <p data-lang="zh-Hant">月曆依公曆平年與閏年顯示 365／366 天，正確處理各月天數、跨年及 2 月 29 日。</p>
-                        <p data-lang="en">The Calendar follows Gregorian common and leap years, accurate month lengths, transitions, and February 29.</p>
+                        <strong data-lang="zh-Hant">365 / 366 天公曆日期</strong>
+                        <strong data-lang="en">Gregorian common and leap years</strong>
+                        <p data-lang="zh-Hant">月曆依照公曆規則顯示 365 / 366 天，正確處理不同月份天數、跨月、跨年與閏年。2 月 29 日出生的模擬市民也能保留原始生日。</p>
+                        <p data-lang="en">The Calendar follows 365 / 366-day Gregorian years, accurate month lengths, month / year transitions and leap-day rules. Sims born on February 29 keep their original birth date.</p>
                     </div>
                     <div>
                         <strong data-lang="zh-Hant">生日標記</strong>
@@ -178,13 +178,19 @@
                         <strong data-lang="zh-Hant">存檔級啟用 / 停用</strong>
                         <strong data-lang="en">Per-save enable / disable</strong>
                         <p data-lang="zh-Hant">7 / 14 / 28 天季節會停用目前存檔的 RealDate；約 90 天重新啟用，停用期間不補算。</p>
-                        <p data-lang="en">7/14/28-day seasons disable RealDate for that save; About 90 Days re-enables it without retroactive catch-up.</p>
+                        <p data-lang="en">7 / 14 / 28-day seasons disable RealDate for that save; About 90 Days re-enables it without retroactive catch-up.</p>
                     </div>
                     <div>
                         <strong data-lang="zh-Hant">載入日期提示</strong>
                         <strong data-lang="en">Load-date notification</strong>
                         <p data-lang="zh-Hant">每次啟動遊戲後，各存檔第一次載入家庭時可顯示「今天是 {日期}」。</p>
                         <p data-lang="en">After each game launch, the first household load for a save can show “Today is {date}”.</p>
+                    </div>
+                    <div>
+                        <strong data-lang="zh-Hant">校曆、學期與寒暑假</strong>
+                        <strong data-lang="en">School calendar, terms and holidays</strong>
+                        <p data-lang="zh-Hant">以日期及不同世界的校曆安排學期、寒假與暑假。假期期間暫停一般上課，結束後依原有學籍與進度恢復上學。</p>
+                        <p data-lang="en">Academic terms and winter / summer breaks follow dates and the calendar for each world. Regular attendance pauses during holidays and resumes under existing enrollment afterward.</p>
                     </div>
                 </div>
                 <div class="doc-note">
@@ -211,7 +217,7 @@
                     RealDate calculates real age from the current date and birth date.
                     Sims still grow one year older each year, but EA's native age-up flow only runs when a RealDate life-stage threshold is crossed.
                 </p>
-                <div class="doc-note"><span data-lang="zh-Hant">自訂增齡年紀：可在 RealDate 主選單 → 進階設定 → 自訂增齡年紀，分別設定一般市民、吸血鬼、人魚與外星人的生命階段起始年齡，嬰幼兒支援月份並可按種族恢復預設值。儲存設定後，請先儲存遊戲並完整重新啟動遊戲才會生效。下表為 RealDate 預設年齡。</span><span data-lang="en">Customizable Age-Up Ages: Set thresholds separately for regular Sims, Vampires, Mermaids, and Aliens in RealDate Main Menu → Advanced Settings → Customizable Age-Up Ages. Early ages can be month-based and reset per type. Save the game and fully restart to apply settings. The table below shows RealDate defaults.</span></div>
+                <div class="doc-note"><span data-lang="zh-Hant">下表是 RealDate 預設的生命階段起始年紀，玩家可自行調整。</span><span data-lang="en">The table below shows RealDate's default life-stage age thresholds, which you can customize.</span></div>
                 <div class="life-stage-table">
                     <div>
                         <strong data-lang="zh-Hant">出生～未滿 1 個月</strong>
@@ -257,6 +263,12 @@
                     </div>
                 </div>
                 <div class="feature-list">
+                    <div>
+                        <strong data-lang="zh-Hant">自訂增齡年紀</strong>
+                        <strong data-lang="en">Customizable Age-Up Ages</strong>
+                        <p data-lang="zh-Hant">從 RealDate 主選單 → 進階設定 → 自訂增齡年紀，可為一般市民、吸血鬼、人魚與外星人分別調整生命階段的起始年紀。嬰幼兒支援以月份設定，各種族也能個別恢復 RealDate 預設值。確認設定後，請先儲存遊戲並完整重新啟動，新的年紀門檻才會生效。</p>
+                        <p data-lang="en">In RealDate Main Menu → Advanced Settings → Customizable Age-Up Ages, choose life-stage thresholds separately for regular Sims, Vampires, Mermaids and Aliens. Early life stages support month-based ages, and each type can restore its own defaults. Save the game and fully restart after changing these settings.</p>
+                    </div>
                     <div>
                         <strong data-lang="zh-Hant">0～11 個月月齡</strong>
                         <strong data-lang="en">0–11 months</strong>
@@ -362,9 +374,29 @@
             </div>
         </section>
 
+        <section class="doc-section" id="school">
+            <div class="doc-label"><span>05</span><strong>SCHOOL &amp; ACADEMIC PROGRESS</strong></div>
+            <div class="doc-content reveal">
+                <h2 data-lang="zh-Hant">學年與學校</h2>
+                <h2 data-lang="en">School &amp; Academic Progress</h2>
+                <p data-lang="zh-Hant">RealDate 依模擬市民的實際年紀與已完成的學業紀錄，安排小學、國中與高中的就讀階段。12 年教育制度分成六年小學、三年國中與三年高中；達到某個年紀，不代表先前的學業已經自動完成。</p>
+                <p data-lang="en">RealDate organizes a twelve-year education system around each Sim's actual age and confirmed academic progress: six years of Elementary School, three of Middle School and three of High School. Reaching a certain age does not automatically complete earlier schooling.</p>
+                <div class="feature-list">
+                    <div><strong data-lang="zh-Hant">小學（7～12 歲）</strong><strong data-lang="en">Elementary School (ages 7–12)</strong><p data-lang="zh-Hant">7～12 歲對應小學階段，共六年。學業進度會依實際完成的學年記錄，不會只靠年紀判斷。</p><p data-lang="en">Sims aged 7–12 attend the six-year Elementary School stage. Progress depends on completed school years rather than age alone.</p></div>
+                    <div><strong data-lang="zh-Hant">獨立國中（13～15 歲）</strong><strong data-lang="en">Dedicated Middle School (ages 13–15)</strong><p data-lang="zh-Hant">RealDate Middle School 使用與遊戲學校職涯整合的兔子洞上學方式，包含出勤、作業與學業進度，但不會新增可直接操控的國中校園。</p><p data-lang="en">RealDate Middle School uses rabbit-hole attendance integrated with school careers, including classes, homework and academic progress. It does not add an actively playable Middle School lot.</p></div>
+                    <div><strong data-lang="zh-Hant">高中（16～18 歲）</strong><strong data-lang="en">High School (ages 16–18)</strong><p data-lang="zh-Hant">16～18 歲對應高中階段，共三年。完成國中學業並符合升學條件後，才能繼續升入高中。</p><p data-lang="en">Sims aged 16–18 enter the three-year High School stage after completing the required Middle School studies and meeting advancement conditions.</p></div>
+                    <div><strong data-lang="zh-Hant">學籍保存與升學</strong><strong data-lang="en">Student Records &amp; Progression</strong><p data-lang="zh-Hant">目前就讀的學校階段、學年進度及已確認完成的學業會分開保存。重新讀檔或切換生命階段時，不會憑年紀補完學年，也不會為舊存檔編造不存在的學業紀錄。</p><p data-lang="en">Current school stage, academic progress and confirmed completed studies are tracked separately. Reloading a save or changing life stages does not invent completed years or missing school records.</p></div>
+                </div>
+                <div class="doc-note">
+                    <span data-lang="zh-Hant">學期與寒暑假的日期安排請參閱「<a href="#calendar">月曆與季節</a>」；Education Overhaul 的學校選擇及職涯相容說明請參閱「<a href="compatibility.html#education-overhaul">相容性</a>」。</span>
+                    <span data-lang="en">For academic calendars and breaks, see <a href="#calendar">Calendar &amp; Seasons</a>. For Education Overhaul school options and careers, see <a href="compatibility.html#education-overhaul">Compatibility</a>.</span>
+                </div>
+            </div>
+        </section>
+
         <section class="doc-section" id="reproductive">
             <div class="doc-label">
-                <span>05</span>
+                <span>06</span>
                 <strong>REPRODUCTIVE TIMELINE</strong>
             </div>
             <div class="doc-content reveal">
@@ -437,7 +469,7 @@
 
         <section class="doc-section" id="pregnancy">
             <div class="doc-label">
-                <span>06</span>
+                <span>07</span>
                 <strong>PREGNANCY &amp; POSTPARTUM</strong>
             </div>
             <div class="doc-content reveal">
@@ -482,7 +514,7 @@
 
         <section class="doc-section" id="eras">
             <div class="doc-label">
-                <span>07</span>
+                <span>08</span>
                 <strong>ERAS &amp; WEEKDAYS</strong>
             </div>
             <div class="doc-content reveal">
@@ -499,7 +531,7 @@
                         <strong data-lang="zh-Hant">元年紀年</strong>
                         <strong data-lang="en">Era-year reckoning</strong>
                         <p data-lang="zh-Hant">可選擇顯示年號紀年；開始使用的當年為元年，跨年後增加 1 年。</p>
-                        <p data-lang="en">Optionally display Era-year reckoning; the start year is Year 1 and increments on January 1.</p>
+                        <p data-lang="en">Optionally display Era-year reckoning; the first year of an Era and increases on January 1.</p>
                     </div>
                     <div>
                         <strong data-lang="zh-Hant">年號歷史</strong>
@@ -529,11 +561,11 @@
             </div>
         </section>
 
-        <section class="doc-section" id="life-chronicle"><div class="doc-label"><span>08</span><strong>LIFE CHRONICLE &amp; EVENT MANAGEMENT</strong></div><div class="doc-content reveal"><h2 data-lang="zh-Hant">人生回憶錄與事件管理</h2><h2 data-lang="en">Life Chronicle &amp; Event Management</h2><p data-lang="zh-Hant">現在 RealDate 可以記錄重要事件實際發生的日期，並將支援的關係歷史保存在 EA 原生記事本的「人生回憶錄」。</p><p data-lang="en">RealDate now preserves actual dates for supported events in the Life Chronicle, integrated into EA's native Notebook.</p><div class="feature-list"><div><strong data-lang="zh-Hant">人生與關係事件</strong><strong data-lang="en">Life and relationship events</strong><p data-lang="zh-Hant">包含交往、訂婚、結婚與喪偶等支援事件，分成「人生事件」與「關係事件」。</p><p data-lang="en">Supports dating, engagement, marriage, and widowhood, organized into Life Events and Relationship Events.</p></div><div><strong data-lang="zh-Hant">事件管理</strong><strong data-lang="en">Event Management</strong><p data-lang="zh-Hant">從 RealDate「進階設定」開啟，可替目前選擇的模擬市民補登過去未記錄的事件。</p><p data-lang="en">Open through Advanced Settings to manually record past events for the selected Sim.</p></div><div><strong data-lang="zh-Hant">編輯與刪除</strong><strong data-lang="en">Edit and delete</strong><p data-lang="zh-Hant">依支援內容修改相關模擬市民、事件類型或實際日期，也可刪除事件；修改會同步至記事本。</p><p data-lang="en">Edit related Sims, event types, or actual dates where supported, or delete events; changes are reflected in the Notebook.</p></div><div><strong data-lang="zh-Hant">歷史日期限制</strong><strong data-lang="en">Historical date limits</strong><p data-lang="zh-Hant">補登事件不可使用未來日期。</p><p data-lang="en">Past events cannot be entered with future dates.</p></div></div><div class="doc-note"><span data-lang="zh-Hant">舊存檔的歷史日期不會被自動推測；RealDate 也不會自行建立尚未支援的事件。</span><span data-lang="en">RealDate does not guess missing historical dates in older saves or create unsupported event records.</span></div></div></section>
-<section class="doc-section" id="anniversaries"><div class="doc-label"><span>09</span><strong>ANNIVERSARIES &amp; CALENDAR</strong></div><div class="doc-content reveal"><h2 data-lang="zh-Hant">紀念日社交活動與行事曆</h2><h2 data-lang="en">Anniversary Social Events &amp; Calendar</h2><p data-lang="zh-Hant">可從 EA「計劃一場活動」安排交往、訂婚或結婚紀念日，依據 RealDate 保存的關係事件日期。</p><p data-lang="en">Plan dating, engagement, and wedding anniversaries via EA's Plan a Social Event menu, using relationship dates saved by RealDate.</p><div class="feature-list"><div><strong data-lang="zh-Hant">三項紀念日互動</strong><strong data-lang="en">Three anniversary interactions</strong><p data-lang="zh-Hant">祝福、共同回憶與感謝陪伴；即使沒有舉辦活動，紀念日當天也可以使用。</p><p data-lang="en">Anniversary wishes, reminiscing, and expressing gratitude can be used on the anniversary even without an event.</p></div><div><strong data-lang="zh-Hant">活動目標與獎勵</strong><strong data-lang="en">Goals and rewards</strong><p data-lang="zh-Hant">完成浪漫互動等活動目標後可獲得不同情緒獎勵；符合條件的慶祝也會留下歷史紀錄。</p><p data-lang="en">Complete social goals for emotional rewards; qualifying celebrations can also be saved in relationship history.</p></div><div><strong data-lang="zh-Hant">擴展日期規劃</strong><strong data-lang="en">Extended scheduling</strong><p data-lang="zh-Hant">一般活動可安排在 RealDate 行事曆顯示的日期範圍內，不再受原本約 14 天限制；慶生派對也可依生日提前安排。</p><p data-lang="en">Regular events may be planned on dates shown in the RealDate Calendar beyond EA's usual ~14-day limit; Birthday Parties can be planned in advance.</p></div><div><strong data-lang="zh-Hant">生日與星期修復</strong><strong data-lang="en">Birthday and weekday fixes</strong><p data-lang="zh-Hant">慶祝生日與增齡分開判斷；固定星期活動、職涯 / 學校倒數與行事曆偶發無法選取日期的問題也獲得修正。</p><p data-lang="en">Birthday celebrations are separate from aging up; fixes improve weekday events, Career/School countdowns, and occasional unselectable Calendar dates.</p></div></div><div class="doc-note"><span data-lang="zh-Hant">每場紀念日活動限兩位紀念日主角參加；婚禮專用的延伸規劃不包含在本版。Mood Pack 相容檔可增加情緒反應，未安裝時使用 EA 原生情緒。</span><span data-lang="en">Anniversary events currently allow only the two Sims involved. Extended Wedding planning is not included. Mood Pack compatibility expands emotions; EA native moodlets work without it.</span></div></div></section>
+        <section class="doc-section" id="life-chronicle"><div class="doc-label"><span>09</span><strong>LIFE CHRONICLE &amp; EVENT MANAGEMENT</strong></div><div class="doc-content reveal"><h2 data-lang="zh-Hant">人生回憶錄與事件管理</h2><h2 data-lang="en">Life Chronicle &amp; Event Management</h2><p data-lang="zh-Hant">現在 RealDate 可以記錄重要事件實際發生的日期，並將支援的關係歷史保存在 EA 原生記事本的「人生回憶錄」。</p><p data-lang="en">RealDate now preserves actual dates for supported events in the Life Chronicle, integrated into EA's native Notebook.</p><div class="feature-list"><div><strong data-lang="zh-Hant">人生與關係事件</strong><strong data-lang="en">Life and relationship events</strong><p data-lang="zh-Hant">包含交往、訂婚、結婚與喪偶等支援事件，分成「人生事件」與「關係事件」。</p><p data-lang="en">Supports dating, engagement, marriage, and widowhood, organized into Life Events and Relationship Events.</p></div><div><strong data-lang="zh-Hant">事件管理</strong><strong data-lang="en">Event Management</strong><p data-lang="zh-Hant">從 RealDate「進階設定」開啟，可替目前選擇的模擬市民補登過去未記錄的事件。</p><p data-lang="en">Open through Advanced Settings to manually record past events for the selected Sim.</p></div><div><strong data-lang="zh-Hant">編輯與刪除</strong><strong data-lang="en">Edit and delete</strong><p data-lang="zh-Hant">依支援內容修改相關模擬市民、事件類型或實際日期，也可刪除事件；修改會同步至記事本。</p><p data-lang="en">Edit related Sims, event types, or actual dates where supported, or delete events; changes are reflected in the Notebook.</p></div><div><strong data-lang="zh-Hant">歷史日期限制</strong><strong data-lang="en">Historical date limits</strong><p data-lang="zh-Hant">補登事件不可使用未來日期。</p><p data-lang="en">Past events cannot be entered with future dates.</p></div></div><div class="doc-note"><span data-lang="zh-Hant">舊存檔的歷史日期不會被自動推測；RealDate 也不會自行建立尚未支援的事件。</span><span data-lang="en">RealDate does not guess missing historical dates in older saves or create unsupported event records.</span></div></div></section>
+<section class="doc-section" id="anniversaries"><div class="doc-label"><span>10</span><strong>ANNIVERSARIES &amp; CALENDAR</strong></div><div class="doc-content reveal"><h2 data-lang="zh-Hant">紀念日社交活動與行事曆</h2><h2 data-lang="en">Anniversary Social Events &amp; Calendar</h2><p data-lang="zh-Hant">可從 EA「計劃一場活動」安排交往、訂婚或結婚紀念日，依據 RealDate 保存的關係事件日期。</p><p data-lang="en">Plan dating, engagement, and wedding anniversaries via EA's Plan a Social Event menu, using relationship dates saved by RealDate.</p><div class="feature-list"><div><strong data-lang="zh-Hant">三項紀念日互動</strong><strong data-lang="en">Three anniversary interactions</strong><p data-lang="zh-Hant">祝福、共同回憶與感謝陪伴；即使沒有舉辦活動，紀念日當天也可以使用。</p><p data-lang="en">Anniversary wishes, reminiscing, and expressing gratitude can be used on the anniversary even without an event.</p></div><div><strong data-lang="zh-Hant">活動目標與獎勵</strong><strong data-lang="en">Goals and rewards</strong><p data-lang="zh-Hant">完成浪漫互動等活動目標後可獲得不同情緒獎勵；符合條件的慶祝也會留下歷史紀錄。</p><p data-lang="en">Complete social goals for emotional rewards; qualifying celebrations can also be saved in relationship history.</p></div><div><strong data-lang="zh-Hant">擴展日期規劃</strong><strong data-lang="en">Extended scheduling</strong><p data-lang="zh-Hant">一般活動可安排在 RealDate 行事曆顯示的日期範圍內，不再受原本約 14 天限制；慶生派對也可依生日提前安排。</p><p data-lang="en">Regular events may be planned on dates shown in the RealDate Calendar beyond EA's usual ~14-day limit; Birthday Parties can be planned in advance.</p></div><div><strong data-lang="zh-Hant">生日與星期修復</strong><strong data-lang="en">Birthday and weekday fixes</strong><p data-lang="zh-Hant">慶祝生日與增齡分開判斷；固定星期活動、職涯 / 學校倒數與行事曆偶發無法選取日期的問題也獲得修正。</p><p data-lang="en">Birthday celebrations are separate from aging up; fixes improve weekday events, Career/School countdowns, and occasional unselectable Calendar dates.</p></div></div><div class="doc-note"><span data-lang="zh-Hant">每場紀念日活動限兩位紀念日主角參加；婚禮專用的延伸規劃不包含在本版。Mood Pack 相容檔可增加情緒反應，未安裝時使用 EA 原生情緒。</span><span data-lang="en">Anniversary events currently allow only the two Sims involved. Extended Wedding planning is not included. Mood Pack compatibility expands emotions; EA native moodlets work without it.</span></div></div></section>
 <section class="doc-section" id="zodiac">
             <div class="doc-label">
-                <span>10</span>
+                <span>11</span>
                 <strong>ZODIAC INTEGRATION</strong>
             </div>
             <div class="doc-content reveal">
@@ -561,7 +593,7 @@
 
         <section class="doc-section" id="tools">
             <div class="doc-label">
-                <span>11</span>
+                <span>12</span>
                 <strong>UI, SETTINGS &amp; DIAGNOSTICS</strong>
             </div>
             <div class="doc-content reveal">
@@ -607,26 +639,7 @@
                 </div>
             </div>
         </section>
-        <!-- ========【教育制度】 12 年學制、國中、學籍與校曆 ======== -->
-        <section class="doc-section" id="school">
-            <div class="doc-label"><span>12</span><strong>SCHOOL YEARS &amp; EDUCATION</strong></div>
-            <div class="doc-content reveal">
-                <h2 data-lang="zh-Hant">學年與學校生活</h2>
-                <h2 data-lang="en">School Years &amp; Education</h2>
-                <p data-lang="zh-Hant">RealDate 採用 Year 1～12 的教育制度，依實際年齡及確認完成的學年，管理小學、國中、高中的入學與升學。年齡不等於已完成學籍。</p>
-                <p data-lang="en">RealDate uses Years 1–12, with enrollment and advancement based on actual ages and confirmed academic records. Age does not automatically mean earlier school years are complete.</p>
-                <div class="feature-list">
-                    <div><strong data-lang="zh-Hant">小學 · Year 1～6</strong><strong data-lang="en">Elementary · Years 1–6</strong><p data-lang="zh-Hant">7～12 歲就讀小學，六個學年。</p><p data-lang="en">Ages 7–12 attend six years of Elementary School.</p></div>
-                    <div><strong data-lang="zh-Hant">國中 · Year 7～9</strong><strong data-lang="en">Middle School · Years 7–9</strong><p data-lang="zh-Hant">13～15 歲進入獨立 RealDate Middle School，採兔子洞式上學、出勤、作業與學業進度；不是可操控校園。</p><p data-lang="en">Ages 13–15 attend the dedicated rabbit-hole RealDate Middle School with attendance, homework and progression, not an actively playable school lot.</p></div>
-                    <div><strong data-lang="zh-Hant">高中 · Year 10～12</strong><strong data-lang="en">High School · Years 10–12</strong><p data-lang="zh-Hant">16～18 歲對應高中，須符合學年完成與升學條件。</p><p data-lang="en">Ages 16–18 correspond to High School, subject to completed years and progression requirements.</p></div>
-                    <div><strong data-lang="zh-Hant">學生學籍紀錄</strong><strong data-lang="en">Student Records</strong><p data-lang="zh-Hant">分別記錄目前教育階段、學年與已完成學業；不因改變生命階段就補完學年，也不虛構舊存檔未曾記錄的學業歷史。</p><p data-lang="en">Current stage, school year and confirmed completions are stored separately. Life-stage changes do not complete years, and missing history in old saves is not fabricated.</p></div>
-                    <div><strong data-lang="zh-Hant">學期與寒暑假</strong><strong data-lang="en">Academic Terms &amp; Holidays</strong><p data-lang="zh-Hant">依不同世界的校曆安排學期、寒假與暑假，假期停止一般上課，結束後恢復既有學籍。</p><p data-lang="en">World-based academic calendars schedule terms, winter and summer breaks; regular attendance pauses during holidays and resumes afterward.</p></div>
-                    <div><strong data-lang="zh-Hant">Education Overhaul 相容</strong><strong data-lang="en">Education Overhaul Integration</strong><p data-lang="zh-Hant">RealDate 協調教育階段、學籍與學年日期；Education Overhaul 原本的學校選擇、課外活動與玩法仍由原模組負責。</p><p data-lang="en">RealDate coordinates stages, student records and school-year dates while Education Overhaul retains its school options, extracurricular activities and gameplay.</p></div>
-                </div>
-                <div class="doc-note"><span data-lang="zh-Hant">《玩轉大學》課表仍依 EA 原本的星期安排，使用星期作弊後可能與 RealDate 顯示不一致；目前尚無該 DLC 可自行測試。</span><span data-lang="en">Discover University schedules still follow EA's weekdays and may differ after using the RealDate Weekday Cheat; the DLC is not available for direct testing.</span></div>
-            </div>
-        </section>
-    </main>
+            </main>
 
     <!-- ========【章節快速導覽】 隨時可開啟，並標示目前章節 ======== -->
     <details class="doc-quick-nav" data-doc-quick-nav>
@@ -648,14 +661,14 @@
                 <a href="#calendar" data-index="02"><span data-lang="zh-Hant">月曆與季節</span><span data-lang="en">Calendar &amp; Seasons</span></a>
                 <a href="#aging" data-index="03"><span data-lang="zh-Hant">年齡與生命階段</span><span data-lang="en">Ages &amp; Life Stages</span></a>
                 <a href="#birthdays" data-index="04"><span data-lang="zh-Hant">生日與社交</span><span data-lang="en">Birthdays &amp; Socials</span></a>
-                <a href="#reproductive" data-index="05"><span data-lang="zh-Hant">生理時間軸</span><span data-lang="en">Reproductive Timeline</span></a>
-                <a href="#pregnancy" data-index="06"><span data-lang="zh-Hant">懷孕與產後</span><span data-lang="en">Pregnancy &amp; Postpartum</span></a>
-                <a href="#eras" data-index="07"><span data-lang="zh-Hant">年號與星期</span><span data-lang="en">Eras &amp; Weekdays</span></a>
-                <a href="#life-chronicle" data-index="08"><span data-lang="zh-Hant">人生回憶錄</span><span data-lang="en">Life Chronicle</span></a>
-                <a href="#anniversaries" data-index="09"><span data-lang="zh-Hant">紀念日活動</span><span data-lang="en">Anniversaries</span></a>
-                <a href="#zodiac" data-index="10"><span data-lang="zh-Hant">星座聯動</span><span data-lang="en">Zodiac Integration</span></a>
-                <a href="#tools" data-index="11"><span data-lang="zh-Hant">介面與診斷</span><span data-lang="en">Interface &amp; Diagnostics</span></a>
-                <a href="#school" data-index="12"><span data-lang="zh-Hant">學年與學校</span><span data-lang="en">School Years</span></a>
+                <a href="#school" data-index="05"><span data-lang="zh-Hant">學年與學校</span><span data-lang="en">Education</span></a>
+                <a href="#reproductive" data-index="06"><span data-lang="zh-Hant">生理時間軸</span><span data-lang="en">Reproductive Timeline</span></a>
+                <a href="#pregnancy" data-index="07"><span data-lang="zh-Hant">懷孕與產後</span><span data-lang="en">Pregnancy &amp; Postpartum</span></a>
+                <a href="#eras" data-index="08"><span data-lang="zh-Hant">年號與星期</span><span data-lang="en">Eras &amp; Weekdays</span></a>
+                <a href="#life-chronicle" data-index="09"><span data-lang="zh-Hant">人生回憶錄</span><span data-lang="en">Life Chronicle</span></a>
+                <a href="#anniversaries" data-index="10"><span data-lang="zh-Hant">紀念日活動</span><span data-lang="en">Anniversaries</span></a>
+                <a href="#zodiac" data-index="11"><span data-lang="zh-Hant">星座聯動</span><span data-lang="en">Zodiac Integration</span></a>
+                <a href="#tools" data-index="12"><span data-lang="zh-Hant">介面與診斷</span><span data-lang="en">Interface &amp; Diagnostics</span></a>
             </nav>
             <button class="doc-quick-top" type="button" data-doc-to-top>
                 <span data-lang="zh-Hant">↑　回到頁首</span>
