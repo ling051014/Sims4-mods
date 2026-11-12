@@ -58,8 +58,8 @@
                 <span class="eyebrow">GAMEPLAY GUIDE</span>
                 <h1 data-lang="zh-Hant">完整玩法</h1>
                 <h1 data-lang="en">Complete Gameplay</h1>
-                <p data-lang="zh-Hant">前十一章整理目前公開的 v0.5 Beta 累積玩法；頁末另列尚未發布的 v0.6 Beta 內容預覽，避免將新功能誤認為目前已可下載。</p>
-                <p data-lang="en">The first eleven sections cover the current v0.5 Beta release. The v0.6 Beta preview is separate at the end and is not yet available to download.</p>
+                <p data-lang="zh-Hant">這裡依系統整理 v0.6 Beta 的完整累積玩法，包含真正公曆、自訂增齡年紀、學籍與學校生活。</p>
+                <p data-lang="en">Explore v0.6 Beta gameplay by system, including the true Gregorian calendar, customizable age-up ages, and the education system.</p>
                 
             </div>
         </section>
@@ -151,10 +151,10 @@
                 </p>
                 <div class="feature-list">
                     <div>
-                        <strong data-lang="zh-Hant">365 天日期範圍</strong>
-                        <strong data-lang="en">365-day date range</strong>
-                        <p data-lang="zh-Hant">月曆提供 365 天 RealDate 日期、日號與完整日期提示。</p>
-                        <p data-lang="en">The Calendar provides 365 days of RealDate dates, day numbers, and full-date tooltips.</p>
+                        <strong data-lang="zh-Hant">365／366 天公曆日期</strong>
+                        <strong data-lang="en">Gregorian 365/366-day dates</strong>
+                        <p data-lang="zh-Hant">月曆依公曆平年與閏年顯示 365／366 天，正確處理各月天數、跨年及 2 月 29 日。</p>
+                        <p data-lang="en">The Calendar follows Gregorian common and leap years, accurate month lengths, transitions, and February 29.</p>
                     </div>
                     <div>
                         <strong data-lang="zh-Hant">生日標記</strong>
@@ -211,6 +211,7 @@
                     RealDate calculates real age from the current date and birth date.
                     Sims still grow one year older each year, but EA's native age-up flow only runs when a RealDate life-stage threshold is crossed.
                 </p>
+                <div class="doc-note"><span data-lang="zh-Hant">自訂增齡年紀：可在 RealDate 主選單 → 進階設定 → 自訂增齡年紀，分別設定一般市民、吸血鬼、人魚與外星人的生命階段起始年齡，嬰幼兒支援月份並可按種族恢復預設值。儲存設定後，請先儲存遊戲並完整重新啟動遊戲才會生效。下表為 RealDate 預設年齡。</span><span data-lang="en">Customizable Age-Up Ages: Set thresholds separately for regular Sims, Vampires, Mermaids, and Aliens in RealDate Main Menu → Advanced Settings → Customizable Age-Up Ages. Early ages can be month-based and reset per type. Save the game and fully restart to apply settings. The table below shows RealDate defaults.</span></div>
                 <div class="life-stage-table">
                     <div>
                         <strong data-lang="zh-Hant">出生～未滿 1 個月</strong>
@@ -606,37 +607,23 @@
                 </div>
             </div>
         </section>
-        <!-- ========【v0.6 玩法預覽】 尚未發布，不取代上述 v0.5 公開版玩法 ======== -->
-        <section class="doc-section" id="v060-preview">
-            <div class="doc-label"><span>12</span><strong>v0.6 BETA · IN PREPARATION</strong></div>
+        <!-- ========【教育制度】 12 年學制、國中、學籍與校曆 ======== -->
+        <section class="doc-section" id="school">
+            <div class="doc-label"><span>12</span><strong>SCHOOL YEARS &amp; EDUCATION</strong></div>
             <div class="doc-content reveal">
-                <h2 data-lang="zh-Hant">v0.6 公曆與教育制度預覽</h2>
-                <h2 data-lang="en">v0.6 Gregorian Calendar &amp; Schooling Preview</h2>
-                                <p data-lang="zh-Hant">以下依 v0.6 發布草稿整理，仍是開發預覽；目前公開下載仍為 v0.5 Beta。</p>
-                <p data-lang="en">The following describes the v0.6 release draft and remains a development preview. v0.5 Beta is still the latest public download.</p>
+                <h2 data-lang="zh-Hant">學年與學校生活</h2>
+                <h2 data-lang="en">School Years &amp; Education</h2>
+                <p data-lang="zh-Hant">RealDate 採用 Year 1～12 的教育制度，依實際年齡及確認完成的學年，管理小學、國中、高中的入學與升學。年齡不等於已完成學籍。</p>
+                <p data-lang="en">RealDate uses Years 1–12, with enrollment and advancement based on actual ages and confirmed academic records. Age does not automatically mean earlier school years are complete.</p>
                 <div class="feature-list">
-                    <div><strong data-lang="zh-Hant">真正公曆與閏日</strong><strong data-lang="en">True Gregorian calendar and leap days</strong>                        <p data-lang="zh-Hant">依公曆規則計算 365 / 366 天、每月天數、跨月與跨年；保留 2 月 29 日出生市民的原始生日，並區分實際日期與遊戲內部時間。</p>
-                        <p data-lang="en">Gregorian 365/366-day years, accurate month lengths, month/year transitions, preserved February 29 birth dates, and a separation of calendar dates from internal game time.</p></div>
-                    <div><strong data-lang="zh-Hant">自訂增齡年紀</strong><strong data-lang="en">Customizable age-up ages</strong>                        <p data-lang="zh-Hant">可於「RealDate 主選單 → 進階設定 → 自訂增齡年紀」為一般市民、吸血鬼、人魚與外星人分別設定生命階段起始年齡；嬰幼兒可用月份設定，各種族可個別恢復預設值。儲存設定後，先儲存遊戲並完整重新啟動才生效。</p>
-                        <p data-lang="en">Configure life-stage thresholds separately for regular Sims, Vampires, Mermaids, and Aliens via RealDate Main Menu → Advanced Settings → Customizable Age-Up Ages. Month-based early-stage ages and per-type resets are supported. Save the game and fully restart for changes to take effect.</p></div>
-                    <div><strong data-lang="zh-Hant">12 年教育制度</strong><strong data-lang="en">12-year education system</strong>                        <p data-lang="zh-Hant">7～12 歲就讀小學 Year 1～6；13～15 歲就讀國中 Year 7～9；16～18 歲就讀高中 Year 10～12。年齡與實際學年紀錄分開管理，升學需考慮已完成的學業進度。</p>
-                        <p data-lang="en">Elementary School covers ages 7–12 (Years 1–6), Middle School ages 13–15 (Years 7–9), and High School ages 16–18 (Years 10–12). Age and confirmed academic progression are tracked separately.</p></div>
-                    <div><strong data-lang="zh-Hant">獨立 RealDate Middle School</strong><strong data-lang="en">Dedicated RealDate Middle School</strong>                        <p data-lang="zh-Hant">新增兔子洞式國中，整合遊戲學校職涯、出勤、作業與學年進度；須完成國中學年並符合條件才能升入高中。不是新增可操控校園。</p>
-                        <p data-lang="en">A new rabbit-hole Middle School integrates with school careers, attendance, homework, and school progression; eligible Sims proceed to High School after required Middle School years. It is not an actively playable school lot.</p></div>
-                    <div><strong data-lang="zh-Hant">學生學籍與舊存檔</strong><strong data-lang="en">Student records and existing saves</strong>                        <p data-lang="zh-Hant">分別保存教育階段、目前學年與已確認完成的學業；切換生命階段不會憑空完成學年，舊存檔缺乏的學籍歷史也不會自行編造。</p>
-                        <p data-lang="en">School stages, current years, and confirmed completed years are distinct. Life-stage changes do not auto-complete school years, and missing records in old saves are not fabricated.</p></div>
-                    <div><strong data-lang="zh-Hant">學期、校曆與寒暑假</strong><strong data-lang="en">Academic terms, calendars &amp; holidays</strong>                        <p data-lang="zh-Hant">不同世界可依對應校曆安排學期、寒假與暑假；假期停止一般上課，結束後依原學籍與學年恢復。</p>
-                        <p data-lang="en">World-based calendars define academic terms and winter/summer breaks. Regular attendance is suspended during holidays and resumes under existing enrollment afterward.</p></div>
-                    <div><strong data-lang="zh-Hant">Education Overhaul 相容</strong><strong data-lang="en">Education Overhaul compatibility</strong>                        <p data-lang="zh-Hant">RealDate 協調教育階段、學年、日期與學校職涯，避免重複分配或覆寫既有學籍；Education Overhaul 仍負責學校選擇、課外活動與其他玩法。</p>
-                        <p data-lang="en">RealDate coordinates school stages, records, dates, and school careers without replacing Education Overhaul's school choices, extracurricular activities, or other gameplay.</p></div>
-                    <div><strong data-lang="zh-Hant">年齡、懷孕與遊戲恢復改善</strong><strong data-lang="en">Aging, pregnancy &amp; restoration improvements</strong>                        <p data-lang="zh-Hant">草稿涵蓋 MCCC／UI Cheats 年齡操作、懷孕與預產期同步、停用 RealDate 後 EA 系統恢復，以及月曆、讀檔增齡、經期啟用、睡眠增齡動畫與 CAS 年齡特徵問題。</p>
-                        <p data-lang="en">The draft covers MCCC/UI Cheats aging controls, pregnancy/due-date synchronization, native game restoration when disabled, and Calendar, reload aging, menstrual activation, sleep age-up animations, and CAS age-trait fixes.</p></div>
+                    <div><strong data-lang="zh-Hant">小學 · Year 1～6</strong><strong data-lang="en">Elementary · Years 1–6</strong><p data-lang="zh-Hant">7～12 歲就讀小學，六個學年。</p><p data-lang="en">Ages 7–12 attend six years of Elementary School.</p></div>
+                    <div><strong data-lang="zh-Hant">國中 · Year 7～9</strong><strong data-lang="en">Middle School · Years 7–9</strong><p data-lang="zh-Hant">13～15 歲進入獨立 RealDate Middle School，採兔子洞式上學、出勤、作業與學業進度；不是可操控校園。</p><p data-lang="en">Ages 13–15 attend the dedicated rabbit-hole RealDate Middle School with attendance, homework and progression, not an actively playable school lot.</p></div>
+                    <div><strong data-lang="zh-Hant">高中 · Year 10～12</strong><strong data-lang="en">High School · Years 10–12</strong><p data-lang="zh-Hant">16～18 歲對應高中，須符合學年完成與升學條件。</p><p data-lang="en">Ages 16–18 correspond to High School, subject to completed years and progression requirements.</p></div>
+                    <div><strong data-lang="zh-Hant">學生學籍紀錄</strong><strong data-lang="en">Student Records</strong><p data-lang="zh-Hant">分別記錄目前教育階段、學年與已完成學業；不因改變生命階段就補完學年，也不虛構舊存檔未曾記錄的學業歷史。</p><p data-lang="en">Current stage, school year and confirmed completions are stored separately. Life-stage changes do not complete years, and missing history in old saves is not fabricated.</p></div>
+                    <div><strong data-lang="zh-Hant">學期與寒暑假</strong><strong data-lang="en">Academic Terms &amp; Holidays</strong><p data-lang="zh-Hant">依不同世界的校曆安排學期、寒假與暑假，假期停止一般上課，結束後恢復既有學籍。</p><p data-lang="en">World-based academic calendars schedule terms, winter and summer breaks; regular attendance pauses during holidays and resumes afterward.</p></div>
+                    <div><strong data-lang="zh-Hant">Education Overhaul 相容</strong><strong data-lang="en">Education Overhaul Integration</strong><p data-lang="zh-Hant">RealDate 協調教育階段、學籍與學年日期；Education Overhaul 原本的學校選擇、課外活動與玩法仍由原模組負責。</p><p data-lang="en">RealDate coordinates stages, student records and school-year dates while Education Overhaul retains its school options, extracurricular activities and gameplay.</p></div>
                 </div>
-                <div class="doc-note">
-                    <span data-lang="zh-Hant">已知問題：《玩轉大學》課表仍按 EA 原本的星期安排，可能與 RealDate 星期作弊顯示不一致。此版本的文字、翻譯、圖示及 UI 也可能在發布前調整。</span>
-                    <span data-lang="en">Known issue: Discover University class schedules still follow EA's original weekdays and may differ from RealDate's Weekday Cheat display. Text, translations, icons, and UI may change before release.</span>
-                </div>
-                <a class="text-link text-link-strong arrow-link-motion" href="changelog.html#v060-preview"><span data-lang="zh-Hant">查看 v0.6 更新與測試重點</span><span data-lang="en">View v0.6 changes and testing focus</span><span aria-hidden="true">→</span></a>
+                <div class="doc-note"><span data-lang="zh-Hant">《玩轉大學》課表仍依 EA 原本的星期安排，使用星期作弊後可能與 RealDate 顯示不一致；目前尚無該 DLC 可自行測試。</span><span data-lang="en">Discover University schedules still follow EA's weekdays and may differ after using the RealDate Weekday Cheat; the DLC is not available for direct testing.</span></div>
             </div>
         </section>
     </main>
@@ -668,7 +655,7 @@
                 <a href="#anniversaries" data-index="09"><span data-lang="zh-Hant">紀念日活動</span><span data-lang="en">Anniversaries</span></a>
                 <a href="#zodiac" data-index="10"><span data-lang="zh-Hant">星座聯動</span><span data-lang="en">Zodiac Integration</span></a>
                 <a href="#tools" data-index="11"><span data-lang="zh-Hant">介面與診斷</span><span data-lang="en">Interface &amp; Diagnostics</span></a>
-                <a href="#v060-preview" data-index="12"><span data-lang="zh-Hant">v0.6 預覽</span><span data-lang="en">v0.6 Preview</span></a>
+                <a href="#school" data-index="12"><span data-lang="zh-Hant">學年與學校</span><span data-lang="en">School Years</span></a>
             </nav>
             <button class="doc-quick-top" type="button" data-doc-to-top>
                 <span data-lang="zh-Hant">↑　回到頁首</span>
