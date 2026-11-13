@@ -99,7 +99,7 @@
   if(version){
     version.replaceChildren();
     for(const [value,label] of [
-      ['','請選擇版本'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
+      ['','請選擇版本'],['v0.6 Beta','v0.6 Beta'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
       ['v0.2.1 Beta','v0.2.1 Beta'],['v0.2 Beta','v0.2 Beta'],
       ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta'],
       ['other','其他版本（手動填寫）'],['unknown','不確定']
