@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261021-occupancy">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>相容性 · RealDate · L1nG</title>
-    <meta name="description" content="RealDate v0.5 Beta 相容模組、測試版本、相容檔與安裝限制。">
+    <meta name="description" content="RealDate v0.6 Beta 教育整合、第三方模組、測試版本及相容檔安裝說明。">
     <meta name="theme-color" content="#fafafa">
     <link rel="stylesheet" href="realdate.css?v=20261102-compat-accordion-r1">
     <script src="../../site-language.js?v=20261102-language-beta-r1"></script>
@@ -71,28 +71,28 @@
             </div>
         </section>
 
-        <section class="section">
+                <section class="section">
             <div class="section-heading reveal">
-                <span class="eyebrow">TESTED ENVIRONMENT · v0.5</span>
-                <h2 data-lang="zh-Hant">v0.5 測試環境</h2>
-                <h2 data-lang="en">v0.5 Test Environment</h2>
-                <p data-lang="zh-Hant">這些是 v0.5 發布時實際使用 / 驗證的版本。較低或後續版本需自行測試，不一定相容。</p>
+                <span class="eyebrow">TESTED ENVIRONMENT · v0.6</span>
+                <h2 data-lang="zh-Hant">v0.6 測試環境</h2>
+                <h2 data-lang="en">v0.6 Test Environment</h2>
+                <p data-lang="zh-Hant">這些是 v0.6 發布時實際使用 / 驗證的版本。較低或後續版本需自行測試，不一定相容。</p>
                 <p data-lang="en">
-                    These are the versions used / verified for the v0.5 release. Older or newer versions should be tested independently and may not be compatible.
+                    These are the versions used / verified for the v0.6 release. Older or newer versions should be tested independently and may not be compatible.
                 </p>
             </div>
             <div class="environment-grid reveal">
                 <div>
                     <small data-lang="zh-Hant">遊戲版本</small>
                     <small data-lang="en">Game</small>
-                    <strong>1.128.90.1030</strong>
+                    <strong>1.129.39.1030</strong>
                 </div>
                 <div>
                     <small data-lang="zh-Hant">必要前置</small>
                     <small data-lang="en">Required</small>
                     <strong>
                         <a class="external-name-link" href="https://lot51.cc/mods/core-library" target="_blank" rel="noopener noreferrer">
-                            Lot51 Core Library v1.43
+                            Lot51 Core Library v1.43.1
                         </a>
                     </strong>
                 </div>
@@ -113,7 +113,7 @@
                     <small>MCCC</small>
                     <strong>
                         <a class="external-name-link" href="https://deaderpool-mccc.com/downloads" target="_blank" rel="noopener noreferrer">
-                            2026.5.0
+                            2026.6.0
                         </a>
                     </strong>
                 </div>
@@ -143,7 +143,7 @@
                     <small>Child Birth Mod</small>
                     <strong>
                         <a class="external-name-link" href="https://www.pandasama.com/child-birth-mod/" target="_blank" rel="noopener noreferrer">
-                            v1.965
+                            v1.972
                         </a>
                     </strong>
                 </div>
@@ -264,6 +264,14 @@
                     <span data-lang="en">Matching compatibility package required</span>
                 </div>
                 <div>
+                    <strong><a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/better-simology-130566542" target="_blank" rel="noopener noreferrer">Better Simology Panel</a></strong>
+                    <span data-lang="zh-Hant">需要對應介面相容檔</span><span data-lang="en">Matching UI package required</span>
+                </div>
+                <div>
+                    <strong><a class="external-name-link" href="https://adeepindigomods.itch.io/education-overhaul" target="_blank" rel="noopener noreferrer">Education Overhaul</a></strong>
+                    <span data-lang="zh-Hant">學校階段與學年整合</span><span data-lang="en">School stages &amp; academic progression</span>
+                </div>
+                <div>
                     <strong>
                         <a class="external-name-link" href="https://www.patreon.com/chingyu1023/posts/zodiac-signs-mod-87603946" target="_blank" rel="noopener noreferrer">
                             Zodiac Signs Mod V3
@@ -272,6 +280,8 @@
                     <span data-lang="zh-Hant">星座聯動 · 有額外安裝規則</span>
                     <span data-lang="en">Zodiac integration · special installation rules</span>
                 </div>
+
+
             </div>
         </section>
 
@@ -282,6 +292,9 @@
                 <h2 data-lang="en">Detailed Compatibility</h2>
             </div>
             <div class="compat-details">
+                
+                
+
                 <details class="compat-detail reveal" open>
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -298,17 +311,17 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持自己的日期與時間一致性。
-                            RealDate 的 UI 相容檔則負責避免雙方修改同一介面資源時互相覆蓋。
+                            使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持日期與時間的一致性。當 RealDate 正在管理模擬市民年紀時，會阻止已支援偵測的 UI Cheats 年紀修改並顯示提示，避免進度被意外覆寫。
+                            對應的 UI 相容檔則用於避免雙方共用的介面資源互相覆蓋。
                         </p>
                         <p data-lang="en">
-                            RealDate keeps its date/time state consistent when UI Cheats is used on supported time-related UI.
-                            The compatibility package prevents both mods from overwriting the same UI resources.
+                            RealDate keeps its date and time consistent when UI Cheats is used on supported season / time interfaces. While RealDate manages a Sim's age, detected UI Cheats age edits are blocked with a notification to prevent accidental overrides.
+                            The matching UI compatibility package prevents both mods from overwriting shared interface resources.
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
                                 <strong>UI Cheats v1.59.1</strong>
                             </div>
                             <div>
@@ -323,11 +336,12 @@
                             </div>
                         </div>
                         <div class="doc-note doc-note-warning">
-                            <span data-lang="zh-Hant">UI Cheats、Quick Save、Quick Save + UI Cheats 三個版本只能擇一安裝。</span>
-                            <span data-lang="en">Choose only one of UI Cheats, Quick Save, or Quick Save + UI Cheats compatibility packages.</span>
+                            <span data-lang="zh-Hant">UI Cheats、Quick Save、Quick Save + UI Cheats 三個相容檔只能擇一安裝。如果同時使用 Better Simology Panel，還需另外安裝 <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code>，不要再安裝 Better Simology 的一般相容檔。</span>
+                            <span data-lang="en">Choose only one of the UI Cheats, Quick Save, or combined UI Cheats + Quick Save compatibility packages. If you also use Better Simology Panel, install <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code> as well, instead of the standard Better Simology compatibility package.</span>
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -337,7 +351,7 @@
                                     MC Command Center (MCCC)
                                 </a>
                             </strong>
-                            <small>2026.5.0</small>
+                            <small>2026.6.0</small>
                         </span>
                         <span class="compat-status" data-lang="zh-Hant">已支援</span>
                         <span class="compat-status" data-lang="en">Supported</span>
@@ -383,13 +397,14 @@
                         </ul>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
-                                <strong>MCCC 2026.5.0</strong>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
+                                <strong>MCCC 2026.6.0</strong>
                             </div>
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -415,13 +430,14 @@
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
                                 <strong>WickedWhims v185k</strong>
                             </div>
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -442,13 +458,13 @@
                             額外相容檔只負責特徵卡說明顯示，不安裝也不影響核心週期同步。
                         </p>
                         <p data-lang="en">
-                            RealDate synchronizes SOL's native period/cycle states and resynchronizes cycle and menopause states after birthday or age changes.
+                            RealDate synchronizes SOL's native period / cycle states and resynchronizes cycle and menopause states after birthday or age changes.
                             The extra package only handles trait-card display and is not required for core timing synchronization.
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
                                 <strong>Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7</strong>
                             </div>
                             <div>
@@ -459,6 +475,7 @@
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -492,13 +509,14 @@
                         </div>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
                                 <strong>RPO v2.986</strong>
                             </div>
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -508,7 +526,7 @@
                                     PandaSama Child Birth Mod
                                 </a>
                             </strong>
-                            <small>v1.965</small>
+                            <small>v1.972</small>
                         </span>
                         <span class="compat-status" data-lang="zh-Hant">已支援</span>
                         <span class="compat-status" data-lang="en">Supported</span>
@@ -532,13 +550,14 @@
                         </div>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
-                                <strong>Child Birth Mod v1.965</strong>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
+                                <strong>Child Birth Mod v1.972</strong>
                             </div>
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -561,8 +580,8 @@
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
                                 <strong>Mood Pack Mod v1.677</strong>
                             </div>
                             <div>
@@ -573,6 +592,7 @@
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -598,8 +618,8 @@
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
                                 <strong>BetterBuildBuy v4.5</strong>
                             </div>
                             <div>
@@ -610,6 +630,7 @@
                         </div>
                     </div>
                 </details>
+                
                 <details class="compat-detail reveal">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -626,17 +647,16 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            自 v0.4 起已提供 Quick Save 專用相容檔，以及 Quick Save + UI Cheats 合併相容檔；v0.5 持續提供。
-                            這些相容檔用於避免共用的介面修改互相衝突。
+                            自 v0.4 起提供 Quick Save Button 專用相容檔，以及 Quick Save Button + UI Cheats 合併相容檔，用於避免共用介面資源互相衝突。依是否使用 UI Cheats 選擇對應相容檔，兩款不要同時安裝。
                         </p>
                         <p data-lang="en">
-                            Quick Save-specific and combined Quick Save + UI Cheats compatibility packages have been available since v0.4 and remain included in v0.5.
-                            They prevent overlapping UI changes from conflicting.
+                            Since v0.4, RealDate has provided a Quick Save Button compatibility package and a combined Quick Save Button + UI Cheats package to prevent conflicts in shared UI resources.
+                            Choose the version that matches your setup; do not install both.
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.5 測試版本</small>
-                                <small data-lang="en">Tested with v0.5</small>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
                                 <strong>Quick Save Button March 4th, 2026</strong>
                             </div>
                             <div>
@@ -651,6 +671,71 @@
                         </div>
                     </div>
                 </details>
+                
+                <details class="compat-detail reveal" id="better-simology">
+                    <summary>
+                        <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+                        <span>
+                            <strong>
+                                <a class="external-name-link" href="https://www.patreon.com/SimMattically/posts/better-simology-130566542" target="_blank" rel="noopener noreferrer">
+                                    Better Simology Panel
+                                </a>
+                            </strong>
+                            <small>v1.2.2 / UI Cheats v1.2.4</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">需要相容檔</span>
+                        <span class="compat-status" data-lang="en">Package required</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">
+                            自 v0.6 起提供 Better Simology Panel 專用相容檔，以及 Better Simology Panel + UI Cheats 合併相容檔，用於避免共用介面資源互相衝突。依是否使用 UI Cheats 選擇對應相容檔，兩款不要同時安裝。
+                        </p>
+                        <p data-lang="en">
+                            Since v0.6, RealDate has provided a Better Simology Panel compatibility package and a combined Better Simology Panel + UI Cheats package to prevent conflicts in shared UI resources.
+                            Choose the version that matches your setup; do not install both.
+                        </p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
+                                <strong>Better Simology Panel v1.2.2 / UI Cheats v1.2.4</strong>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">只有 Better Simology</small>
+                                <small data-lang="en">Better Simology only</small>
+                                <code>L1nG_RealDate_Compat_BetterSimology.package</code>
+                            </div>
+                            <div>
+                                <small>Better Simology + UI Cheats</small>
+                                <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                
+                <details class="compat-detail reveal" id="education-overhaul">
+                    <summary>
+                        <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+                        <span>
+                            <strong><a class="external-name-link" href="https://adeepindigomods.itch.io/education-overhaul" target="_blank" rel="noopener noreferrer">Education Overhaul</a></strong>
+                            <small>v6.6.2</small>
+                        </span>
+                        <span class="compat-status" data-lang="zh-Hant">已支援</span>
+                        <span class="compat-status" data-lang="en">Supported</span>
+                    </summary>
+                    <div class="compat-detail-body">
+                        <p data-lang="zh-Hant">RealDate 的 12 年教育制度可以和 Education Overhaul 一起使用！玩家仍能選擇學校、參加課外活動及使用其他原本的校園玩法，RealDate 則依市民年紀與讀完的年級安排小學、國中或高中。</p>
+                        <p data-lang="en">RealDate's twelve-year education system works alongside Education Overhaul! Sims can still choose schools, join extracurricular activities, and enjoy its other original school features, while RealDate places them in Elementary, Middle, or High School based on their age and completed grades.</p>
+                        <div class="compat-meta">
+                            <div>
+                                <small data-lang="zh-Hant">v0.6 測試版本</small>
+                                <small data-lang="en">Tested with v0.6</small>
+                                <strong>Education Overhaul v6.6.2</strong>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                
                 <details class="compat-detail reveal" id="zodiac-compatibility">
                     <summary>
                     <svg class="compat-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
@@ -668,7 +753,7 @@
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">RealDate 依市民實際出生月日判斷星座，並分配原作者的星座特徵；修改生日後也會重新判定。</p>
                         <p data-lang="en">
-                            RealDate assigns the original zodiac traits from the Sim's actual birth month/day
+                            RealDate assigns the original zodiac traits from the Sim's actual birth month / day
                             and recalculates the sign after birthday changes.
                         </p>
                         <h4 data-lang="zh-Hant">必須保留原模組主檔</h4>
@@ -693,6 +778,7 @@
                         </div>
                     </div>
                 </details>
+                
             </div>
         </section>
 
