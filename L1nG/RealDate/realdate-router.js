@@ -232,6 +232,7 @@
       window.L1nGRealDate?.initPage?.();
     }
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  // Wait for all initial deferred scripts (including the feedback form) before booting.
+  if (document.readyState !== 'complete') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 })();
