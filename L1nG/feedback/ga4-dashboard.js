@@ -62,6 +62,10 @@
     return labelSite(host) + ' · 其他頁面';
   }
   const downloadNames=Object.freeze({
+    "r_v06_changelog":"RealDate v0.6 Beta · 更新日誌下載",
+    "r_v06_homehero":"RealDate v0.6 Beta · 首頁上方下載",
+    "r_v060_main":"RealDate v0.6 Beta · 主要下載",
+    "r_v060_backup":"RealDate v0.6 Beta · 備用下載",
     "r_v05_changelog":"RealDate v0.5 Beta · 更新日誌下載",
     "r_v05_homehero":"RealDate v0.5 Beta · 首頁上方下載",
     "r_v05_homecard":"RealDate v0.5 Beta · 首頁版本卡下載",
@@ -376,7 +380,7 @@
     list('ga-countries',data.countries,x=>labelCountry(x.name));
     list('ga-feedback-events',data.feedbackEvents,x=>labelSite(x.host)+' · '+(feedbackNames[x.event]||'未知互動'));
     setText('ga-feedback-totals','開啟 '+number(s.feedbackOpened)+' · 成功提交 '+number(s.feedbackSubmitted));
-    list('ga-download-items',data.downloadItems,x=>labelSite(x.host)+' · '+(x.unclassified?'未分類下載（舊紀錄 / 未標記按鈕）':downloadNames[x.id]||'其他下載'));
+    list('ga-download-items',data.downloadItems,x=>labelSite(x.host)+' · '+(x.unclassified?'未分類下載（舊紀錄 / 未標記按鈕）':downloadNames[x.id]||('未識別下載（ID：'+(x.id||'未知')+'）')));
     list('ga-referrals',data.referrals,x=>labelReferral(x.name));
     devices(data.devices);
   }
