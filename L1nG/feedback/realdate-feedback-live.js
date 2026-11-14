@@ -1,9 +1,22 @@
-/* RealDate 正式回饋：沿用既有表單、成功頁與匿名對話外觀，不使用展示資料。 */
+/* RealDate 回饋：可在局部頁面切換後重新初始化，離開時清除監聽與計時器。 */
 (() => {
   'use strict';
-  const $=id=>document.getElementById(id);
-  const core=window.L1nGFeedbackCore;
-  if(!core || !$('feedback-form'))return;
+  let activeRoot = null, cleanup = null;
+  function dispose() {
+    if (cleanup) cleanup();
+    cleanup = null;
+    activeRoot = null;
+  }
+  function init() {
+    const root = document.getElementById('feedback-form');
+    if (!root || (root === activeRoot && cleanup)) return;
+    dispose();
+    const $ = id => document.getElementById(id);
+    const core = window.L1nGFeedbackCore;
+    if (!core) return;
+    const session = new AbortController();
+    const signal = session.signal;
+    activeRoot = root;
   let category='bug', files=[], replyFiles=[], verifier=null, replyVerifier=null, activeReceipt='', current=null, lastReceipt='';
   const verificationHost=$('realdate-turnstile');
   const setError=(msg,field)=>{
@@ -195,8 +208,8 @@
     catch(err){$('rd-email-description').textContent=err.message||emailText().error;}
     finally{button.disabled=false;}
   });
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();});
-  document.querySelectorAll('[data-language-button]').forEach(button=>button.addEventListener('click',()=>queueMicrotask(()=>renderEmailStatus(emailState))));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkEmailStatus();},{signal});
+  document.querySelectorAll('[data-language-button]').forEach(button=>button.addEventListener('click',()=>queueMicrotask(()=>renderEmailStatus(emailState)),{signal}));
 
   // RealDate 直接顯示 Cloudflare 原生元件，避免舊卡片與驗證框在手機上互相擠壓。
   const verificationStatus=$('realdate-turnstile-status');
@@ -534,9 +547,9 @@
   function checkVisibleThread(){
     if(threadIsVisible() && Date.now()-lastCheckAt>15000)refreshThread();
   }
-  document.addEventListener('visibilitychange',checkVisibleThread);
-  window.addEventListener('focus',checkVisibleThread);
-  window.addEventListener('online',checkVisibleThread);
+  document.addEventListener('visibilitychange',checkVisibleThread,{signal});
+  window.addEventListener('focus',checkVisibleThread,{signal});
+  window.addEventListener('online',checkVisibleThread,{signal});
   $('thread-back-form')?.addEventListener('click',newFeedback);
   $('visitor-reply-files')?.addEventListener('change',e=>{
     addFiles(replyFiles,e.target.files,null);e.target.value='';
@@ -592,4 +605,18 @@
     const previous=rememberedThread();
     if(previous)openThread(previous,{recover:true});
   }
+
+    cleanup = () => {
+      session.abort();
+      stopEmailStatus();
+      stopThreadRefresh();
+      if (receiptCopyResetTimer !== null) clearTimeout(receiptCopyResetTimer);
+      try { verifier?.remove?.(); } catch (_) {}
+      try { replyVerifier?.remove?.(); } catch (_) {}
+    };
+  }
+  window.L1nGFeedbackLive = Object.freeze({ init, dispose });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else init();
 })();

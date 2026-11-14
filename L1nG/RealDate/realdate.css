@@ -123,6 +123,12 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 字體粗細 */ font-weight: 650;
 }
 
+/* 子頁直接進入時，預留共用頂條高度，避免載入期間內容跳動。 */
+[data-realdate-header-slot] {
+    display: block;
+    min-height: var(--header-height);
+}
+
 /* ========【RealDate 頂部導覽】 設定 - 固定主導覽 ======== */
 .site-header {
     /* 定位方式 */ position: sticky;

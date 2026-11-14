@@ -13,41 +13,59 @@ const dictionary=new Map(Object.entries({
 '（選填）':'(Optional)','至少 10 字':'At least 10 characters','最多 3 個檔案・合計 20 MB':'Up to 3 files · 20 MB total','回饋編號':'Feedback #','請選擇版本':'Select a version',
 '已收到你的回饋！':'Your feedback has been received!','回饋已建立':'Feedback created','未連接網路資料庫。':'Database connection unavailable.'
 }));
-const roots=[document.getElementById('realdate-preview'),document.getElementById('form-layer')].filter(Boolean);
-const original=new WeakMap();const attributes=new WeakMap();let translating=false;
-function update(){
-if(translating)return;translating=true;
-try{
-const en=document.documentElement.dataset.language==='en';
-for(const root of roots){
-const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-let node;
-while(node=walker.nextNode()){
- const parent=node.parentElement;if(!parent||parent.closest('script,style,code,svg'))continue;
- const raw=node.nodeValue,trim=raw.trim();
- if(!trim)continue;
- if(!original.has(node))original.set(node,trim);
- const zh=original.get(node);
- const eng=dictionary.get(zh);
- if(!eng)continue;
- const candidate=raw.replace(trim,en?eng:zh);
- if(node.nodeValue!==candidate)node.nodeValue=candidate;
-}
-for(const el of root.querySelectorAll('[placeholder],[aria-label],[title]')){
- let m=attributes.get(el);if(!m){m={};attributes.set(el,m);}
- for(const k of ['placeholder','aria-label','title']){
-  if(!el.hasAttribute(k))continue;
-  if(!(k in m))m[k]=el.getAttribute(k);
-  const translated=dictionary.get(m[k]);if(translated)el.setAttribute(k,en?translated:m[k]);
+let cleanup=null;
+function dispose(){cleanup?.();cleanup=null;}
+function init(){
+ dispose();
+ const roots=[document.getElementById('realdate-preview'),document.getElementById('form-layer')].filter(Boolean);
+ if(!roots.length)return;
+ const original=new WeakMap(), attributes=new WeakMap();
+ let translating=false, scheduled=false, alive=true;
+ function update(){
+  if(!alive||translating)return;
+  translating=true;
+  try{
+   const en=document.documentElement.dataset.language==='en';
+   for(const root of roots){
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    let node;
+    while(node=walker.nextNode()){
+     const parent=node.parentElement;
+     if(!parent||parent.closest('script,style,code,svg'))continue;
+     const raw=node.nodeValue, trim=raw.trim();
+     if(!trim)continue;
+     if(!original.has(node))original.set(node,trim);
+     const zh=original.get(node), eng=dictionary.get(zh);
+     if(eng)node.nodeValue=raw.replace(trim,en?eng:zh);
+    }
+    for(const el of root.querySelectorAll('[placeholder],[aria-label],[title]')){
+     let m=attributes.get(el);
+     if(!m){m={};attributes.set(el,m);}
+     for(const k of ['placeholder','aria-label','title']){
+      if(!el.hasAttribute(k))continue;
+      if(!(k in m))m[k]=el.getAttribute(k);
+      const translated=dictionary.get(m[k]);
+      if(translated)el.setAttribute(k,en?translated:m[k]);
+     }
+    }
+   }
+  }finally{translating=false;}
  }
+ const schedule=()=>{if(!alive||scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update();});};
+ const observers=[];
+ const watch=(root,opts)=>{
+  const observer=new MutationObserver(schedule);observer.observe(root,opts);observers.push(observer);
+ };
+ watch(document.documentElement,{attributes:true,attributeFilter:['data-language']});
+ for(const root of roots)watch(root,{subtree:true,childList:true,characterData:true});
+ const signalController=new AbortController();
+ for(const button of document.querySelectorAll('[data-language-button]')){
+  button.addEventListener('click',schedule,{signal:signalController.signal});
+ }
+ cleanup=()=>{alive=false;signalController.abort();observers.forEach(o=>o.disconnect());};
+ schedule();
 }
-}
-}finally{translating=false}
-}
-let scheduled=false;
-const schedule=()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update()})};
-new MutationObserver(schedule).observe(document.documentElement,{attributes:true,attributeFilter:['data-language']});
-for(const root of roots)new MutationObserver(schedule).observe(root,{subtree:true,childList:true,characterData:true});
-document.querySelectorAll('[data-language-button]').forEach(b=>b.addEventListener('click',schedule));
-schedule();
+window.L1nGFeedbackI18n=Object.freeze({init,dispose});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+else init();
 })();

@@ -8,14 +8,15 @@
     <title>完整玩法 · RealDate · L1nG</title>
     <meta name="description" content="RealDate v0.6 Beta 的真正公曆、自訂增齡年紀、12 年教育制度與累積玩法。">
     <meta name="theme-color" content="#fafafa">
-    <link rel="stylesheet" href="realdate.css?v=20261022-doc-quick-left-r1">
+    <link rel="stylesheet" href="realdate.css?v=20261115-shell-r1">
     <script src="../../site-language.js?v=20261102-language-beta-r1"></script>
-    <script src="realdate.js?v=20261020-unified-titles-r1" defer></script>
+    <script src="realdate.js?v=20261115-shell-r1" defer></script>
     <link rel="stylesheet" href="../../site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3">
     <link rel="stylesheet" href="../site-footer.css?v=20261012-footer-index-r1">
     <link rel="stylesheet" href="../site-info-modal.css?v=20261021-policy-scroll-r1">
     <script src="../site-info-modal.js?v=20261021-tou-merged-scroll-r3" defer></script>
-    <script src="realdate-nav-indicator.js?v=20261020-underline-v1" defer></script>
+    <script src="realdate-nav-indicator.js?v=20261115-shell-r1" defer></script>
+    <script src="realdate-router.js?v=20261115-shell-r1" defer></script>
 <link rel="stylesheet" href="../../site-user-select.css?v=20261102-user-select-r1">
 </head>
 
@@ -23,36 +24,10 @@
     <script src="../../site-skeleton.js?v=20261012-site-skeleton-hero-sync-r3" data-skeleton-layout="realdate-gameplay"></script>
 
     <!-- ========【RealDate 頂部導覽】 設定 - 品牌、頁面導覽與語言切換 ======== -->
-        <header class="site-header" id="siteHeader">
-        <div class="site-header-inner">
-            <div class="site-brand-group">
-                <a class="creator-link" href="../home.html">L1nG</a>
-                <span class="brand-divider">/</span>
-                <a class="realdate-brand" href="index.html">RealDate</a>
-            </div>
-            <nav class="main-nav" id="mainNav" aria-label="RealDate">
-                <a class="active" href="gameplay.html"><span data-lang="zh-Hant">玩法</span><span data-lang="en">Gameplay</span></a>
-                <a href="download.html"><span data-lang="zh-Hant">下載與安裝</span><span data-lang="en">Download &amp; Install</span></a>
-                <a href="compatibility.html"><span data-lang="zh-Hant">相容性</span><span data-lang="en">Compatibility</span></a>
-                <a href="changelog.html"><span data-lang="zh-Hant">更新日誌</span><span data-lang="en">Changelog</span></a>
-                <!-- 全部導覽項目直接顯示，避免桌面版額外的「更多」選單 -->
-                <a href="roadmap.html"><span data-lang="zh-Hant">開發方向</span><span data-lang="en">Direction</span></a>
-                <a href="faq.html"><span data-lang="zh-Hant">常見問題</span><span data-lang="en">FAQ</span></a>
-                <a href="feedback.html"><span data-lang="zh-Hant">問題反饋</span><span data-lang="en">Feedback</span></a>
-            </nav>
-            <div class="header-controls">
-                <div class="language-switch" role="group" aria-label="Language">
-                    <button class="language-button active" type="button" data-language-button="zh-Hant" aria-pressed="true">中文</button>
-                    <span class="language-divider">/</span>
-                    <button class="language-button" type="button" data-language-button="en" aria-pressed="false">EN</button>
-                </div>
-                <button class="nav-toggle" id="navToggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="開啟導覽選單"><span></span><span></span></button>
-            </div>
+        <div data-realdate-header-slot aria-label="RealDate 導覽列"></div>
 
-        </div>
-    </header>
-
-    <main>
+    <div data-realdate-page>
+<main>
         <section class="page-hero">
             <div class="page-hero-inner reveal">
                 <span class="eyebrow">GAMEPLAY GUIDE</span>
@@ -697,6 +672,7 @@
     </details>
 
     <!-- ========【RealDate 網站底部】 設定 - 專案資訊與站內入口 ======== -->
+        </div>
         <footer class="l1ng-document-footer" data-footer-project="realdate">
         <div class="l1ng-footer-inner">
             <div class="l1ng-footer-main">
