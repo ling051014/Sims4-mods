@@ -23,43 +23,59 @@ function translateValue(zh){
  if(match)return 'Last updated: '+match[1];
  return null;
 }
-window.L1nGFeedbackI18n=Object.freeze({translateFor:(value,language)=>language==='en'?(translateValue(String(value))||String(value)):String(value)});
-const roots=[document.getElementById('realdate-preview'),document.getElementById('form-layer')].filter(Boolean);
-const original=new WeakMap();const rendered=new WeakMap();const attributes=new WeakMap();let translating=false;
-function update(){
-if(translating)return;translating=true;
-try{
-const en=document.documentElement.dataset.language==='en';
-for(const root of roots){
-const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-let node;
-while(node=walker.nextNode()){
- const parent=node.parentElement;if(!parent||parent.closest('script,style,code,svg'))continue;
- const raw=node.nodeValue,trim=raw.trim();
- if(!trim)continue;
- // 外部腳本更新節點時重新記錄繁中原文；語言切換造成的更新不應覆蓋原文。
- if(!original.has(node)||!rendered.has(node)||raw!==rendered.get(node))original.set(node,trim);
- const zh=original.get(node),eng=translateValue(zh);
- if(!eng){rendered.set(node,raw);continue;}
- const candidate=raw.replace(trim,en?eng:zh);
- rendered.set(node,candidate);
- if(node.nodeValue!==candidate)node.nodeValue=candidate;
-}
-for(const el of root.querySelectorAll('[placeholder],[aria-label],[title]')){
- let m=attributes.get(el);if(!m){m={};attributes.set(el,m);}
- for(const k of ['placeholder','aria-label','title']){
-  if(!el.hasAttribute(k))continue;
-  if(!(k in m))m[k]=el.getAttribute(k);
-  const translated=dictionary.get(m[k]);if(translated)el.setAttribute(k,en?translated:m[k]);
+let cleanup=null;
+function dispose() { cleanup?.(); cleanup=null; }
+function init() {
+ dispose();
+ const roots=[document.getElementById('realdate-preview'),document.getElementById('form-layer')].filter(Boolean);
+ if(!roots.length)return;
+ const original=new WeakMap(),rendered=new WeakMap(),attributes=new WeakMap();
+ let translating=false,scheduled=false,alive=true;
+ function update(){
+  if(!alive||translating)return;
+  translating=true;
+  try {
+   const en=document.documentElement.dataset.language==='en';
+   for(const root of roots) {
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    let node;
+    while(node=walker.nextNode()) {
+     const parent=node.parentElement;
+     if(!parent||parent.closest('script,style,code,svg'))continue;
+     const raw=node.nodeValue,trim=raw.trim();
+     if(!trim)continue;
+     // Persist source Traditional Chinese, but refresh if an external script updated a rendered node.
+     if(!original.has(node)||!rendered.has(node)||raw!==rendered.get(node))original.set(node,trim);
+     const zh=original.get(node),eng=translateValue(zh);
+     if(!eng){rendered.set(node,raw);continue;}
+     const candidate=raw.replace(trim,en?eng:zh);
+     rendered.set(node,candidate);
+     if(node.nodeValue!==candidate)node.nodeValue=candidate;
+    }
+    for(const el of root.querySelectorAll('[placeholder],[aria-label],[title]')) {
+     let values=attributes.get(el);
+     if(!values){values={};attributes.set(el,values);}
+     for(const key of ['placeholder','aria-label','title']) {
+      if(!el.hasAttribute(key))continue;
+      if(!(key in values))values[key]=el.getAttribute(key);
+      const text=translateValue(values[key]);
+      if(text)el.setAttribute(key,en?text:values[key]);
+     }
+    }
+   }
+  } finally { translating=false; }
  }
+ const schedule=()=>{if(!alive||scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update();});};
+ const observers=[];
+ const watch=(node,opts)=>{const observer=new MutationObserver(schedule);observer.observe(node,opts);observers.push(observer);};
+ watch(document.documentElement,{attributes:true,attributeFilter:['data-language']});
+ for(const root of roots)watch(root,{subtree:true,childList:true,characterData:true});
+ const signals=new AbortController();
+ for(const button of document.querySelectorAll('[data-language-button]')) button.addEventListener('click',schedule,{signal:signals.signal});
+ cleanup=()=>{alive=false;signals.abort();observers.forEach(o=>o.disconnect());};
+ schedule();
 }
-}
-}finally{translating=false}
-}
-let scheduled=false;
-const schedule=()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update()})};
-new MutationObserver(schedule).observe(document.documentElement,{attributes:true,attributeFilter:['data-language']});
-for(const root of roots)new MutationObserver(schedule).observe(root,{subtree:true,childList:true,characterData:true});
-document.querySelectorAll('[data-language-button]').forEach(b=>b.addEventListener('click',schedule));
-schedule();
+window.L1nGFeedbackI18n=Object.freeze({init,dispose,translateFor:(value,language)=>language==='en'?(translateValue(String(value))||String(value)):String(value)});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+else init();
 })();

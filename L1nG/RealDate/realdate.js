@@ -11,7 +11,7 @@ document.documentElement.classList.add("js");
 
     const PAGE_TITLES = {"index.html":["RealDate · L1nG","RealDate · L1nG"],"gameplay.html":["完整玩法 · RealDate · L1nG","Gameplay · RealDate · L1nG"],"download.html":["下載與安裝 · RealDate · L1nG","Download & Install · RealDate · L1nG"],"compatibility.html":["相容性 · RealDate · L1nG","Compatibility · RealDate · L1nG"],"changelog.html":["更新日誌 · RealDate · L1nG","Changelog · RealDate · L1nG"],"roadmap.html":["開發方向 · RealDate · L1nG","Roadmap · RealDate · L1nG"],"faq.html":["常見問題 · RealDate · L1nG","FAQ · RealDate · L1nG"],"feedback.html":["問題反饋 · RealDate · L1nG","Feedback · RealDate · L1nG"]};
     const root = document.documentElement;
-    const buttons = Array.from(document.querySelectorAll("[data-language-button]"));
+    const buttons = () => Array.from(document.querySelectorAll("[data-language-button]"));
 
     function normalizeLanguage(language) {
         return SUPPORTED_LANGUAGES.has(language) ? language : DEFAULT_LANGUAGE;
@@ -29,7 +29,7 @@ document.documentElement.classList.add("js");
         const page = location.pathname.split('/').pop() || 'index.html';
         document.title = (PAGE_TITLES[page] || PAGE_TITLES['index.html'])[nextLanguage === 'en' ? 1 : 0];
 
-        buttons.forEach((button) => {
+        buttons().forEach((button) => {
             const active = button.dataset.languageButton === nextLanguage;
             button.classList.toggle("active", active);
             button.setAttribute("aria-pressed", String(active));
@@ -41,67 +41,97 @@ document.documentElement.classList.add("js");
         }
     }
 
-    buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-            applyLanguage(button.dataset.languageButton, true);
+    function bindLanguageButtons() {
+        buttons().forEach((button) => {
+            if (button.dataset.realdateLanguageBound === "true") return;
+            button.dataset.realdateLanguageBound = "true";
+            button.addEventListener("click", () => {
+                applyLanguage(button.dataset.languageButton, true);
+            });
         });
-    });
+    }
 
+    bindLanguageButtons();
     applyLanguage(getInitialLanguage());
+    window.L1nGRealDateLanguage = Object.freeze({
+        refresh() {
+            bindLanguageButtons();
+            applyLanguage(root.dataset.language || getInitialLanguage());
+        }
+    });
 })();
 
-// ========【RealDate 頂部導覽】 設定 - 滾動後增加層次 ========
-const siteHeader = document.getElementById("siteHeader");
+// ========【RealDate 共用頂條】 由首頁提供內容，初始化只執行一次 ========
+let siteHeader = null;
+let navToggle = null;
+let mainNav = null;
 
 function updateHeaderState() {
-    if (!siteHeader) return;
-
-    siteHeader.classList.toggle("scrolled", window.scrollY > 8);
+    siteHeader?.classList.toggle("scrolled", window.scrollY > 8);
 }
-
-updateHeaderState();
-window.addEventListener("scroll", updateHeaderState, { passive: true });
-
-// ========【RealDate 手機導覽】 設定 - 展開與關閉 ========
-const navToggle = document.getElementById("navToggle");
-const mainNav = document.getElementById("mainNav");
 
 function closeMobileNav() {
     if (!navToggle || !mainNav) return;
-
     navToggle.classList.remove("active");
     mainNav.classList.remove("open");
     navToggle.setAttribute("aria-expanded", "false");
     navToggle.setAttribute("aria-label", "開啟導覽選單");
 }
 
-if (navToggle && mainNav) {
-    navToggle.addEventListener("click", () => {
-        const isOpen = mainNav.classList.toggle("open");
-
-        navToggle.classList.toggle("active", isOpen);
-        navToggle.setAttribute("aria-expanded", String(isOpen));
-        navToggle.setAttribute("aria-label", isOpen ? "關閉導覽選單" : "開啟導覽選單");
-    });
-
-    mainNav.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", closeMobileNav);
-    });
-
-    document.addEventListener("click", (event) => {
-        if (
-            mainNav.classList.contains("open") &&
-            !mainNav.contains(event.target) &&
-            !navToggle.contains(event.target)
-        ) {
-            closeMobileNav();
-        }
-    });
-
-    window.addEventListener("resize", () => {
-        if (window.innerWidth > 980) closeMobileNav();
-    });
+function initHeader() {
+    const node = document.getElementById("siteHeader");
+    if (!node) return;
+    siteHeader = node;
+    navToggle = document.getElementById("navToggle");
+    mainNav = document.getElementById("mainNav");
+    if (node.dataset.realdateBound === "true") {
+        window.L1nGRealDateLanguage?.refresh();
+        updateHeaderState();
+        return;
+    }
+    node.dataset.realdateBound = "true";
+    updateHeaderState();
+    window.addEventListener("scroll", updateHeaderState, { passive: true });
+    if (navToggle && mainNav) {
+        navToggle.addEventListener("click", () => {
+            const open = mainNav.classList.toggle("open");
+            navToggle.classList.toggle("active", open);
+            navToggle.setAttribute("aria-expanded", String(open));
+            navToggle.setAttribute("aria-label", open ? "關閉導覽選單" : "開啟導覽選單");
+        });
+        mainNav.addEventListener("click", event => {
+            if (event.target.closest("a[href]")) closeMobileNav();
+        });
+        document.addEventListener("click", event => {
+            if (mainNav.classList.contains("open") &&
+                !mainNav.contains(event.target) && !navToggle.contains(event.target))
+                closeMobileNav();
+        });
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 980) closeMobileNav();
+        });
+    }
+    window.L1nGRealDateLanguage?.refresh();
 }
+
+// ========【RealDate 內容頁生命週期】 局部載入後重新綁定、離開時清理 ========
+let pageCleanup = null;
+function destroyPage() {
+    if (!pageCleanup) return;
+    pageCleanup();
+    pageCleanup = null;
+}
+function initPage() {
+    destroyPage();
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const cleanupFns = [];
+    function onGlobal(target, type, callback, options) {
+        if (!target?.addEventListener) return;
+        const settings = typeof options === "object" && options ? { ...options, signal } :
+            { signal, capture: options === true };
+        target.addEventListener(type, callback, settings);
+    }
 
 // ========【RealDate 進場動畫】 設定 - 進入畫面後顯示 ========
 const revealItems = document.querySelectorAll(".reveal");
@@ -120,6 +150,7 @@ if ("IntersectionObserver" in window) {
     );
 
     revealItems.forEach((item) => observer.observe(item));
+    cleanupFns.push(() => observer.disconnect());
 } else {
     revealItems.forEach((item) => item.classList.add("visible"));
 }
@@ -135,8 +166,8 @@ if ("IntersectionObserver" in window) {
         window.requestAnimationFrame(() => zodiac.scrollIntoView({ block: "start" }));
     }
 
-    window.addEventListener("hashchange", revealZodiac);
-    window.addEventListener("load", revealZodiac, { once: true });
+    onGlobal(window, "hashchange", revealZodiac);
+    onGlobal(window, "load", revealZodiac, { once: true });
     revealZodiac();
 })();
 
@@ -198,19 +229,19 @@ if ("IntersectionObserver" in window) {
         });
     }
 
-    document.addEventListener("click", (event) => {
+    onGlobal(document, "click", (event) => {
         if (quickNav.open && !quickNav.contains(event.target)) quickNav.open = false;
     });
-    document.addEventListener("keydown", (event) => {
+    onGlobal(document, "keydown", (event) => {
         if (event.key === "Escape" && quickNav.open) {
             quickNav.open = false;
             summary.focus();
         }
     });
 
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate, { passive: true });
-    window.addEventListener("hashchange", scheduleUpdate);
+    onGlobal(window, "scroll", scheduleUpdate, { passive: true });
+    onGlobal(window, "resize", scheduleUpdate, { passive: true });
+    onGlobal(window, "hashchange", scheduleUpdate);
     updateCurrentSection();
 })();
 
@@ -304,10 +335,10 @@ if ("IntersectionObserver" in window) {
         if (frame) return;
         frame = window.requestAnimationFrame(update);
     }
-    window.addEventListener("scroll",schedule,{passive:true});
-    window.addEventListener("resize",schedule,{passive:true});
-    reduceMotion.addEventListener?.("change",schedule);
-    window.addEventListener("load",schedule,{once:true});
+    onGlobal(window, "scroll",schedule,{passive:true});
+    onGlobal(window, "resize",schedule,{passive:true});
+    onGlobal(reduceMotion, "change",schedule);
+    onGlobal(window, "load",schedule,{once:true});
     update();
 })();
 
@@ -340,7 +371,7 @@ if ("IntersectionObserver" in window) {
         target = Math.max(-3,Math.min(3,target + delta * .026));
         if (!frame) frame = requestAnimationFrame(step);
     }
-    window.addEventListener("scroll",() => {
+    onGlobal(window, "scroll",() => {
         const delta = window.scrollY - prevY; prevY = window.scrollY;
         const box = line.getBoundingClientRect();
         if (box.bottom < 0 || box.top > window.innerHeight) return;
@@ -352,7 +383,7 @@ if ("IntersectionObserver" in window) {
         const delta = line.scrollLeft - prevX; prevX = line.scrollLeft;
         nudge(delta);
     },{passive:true});
-    reduceMotion.addEventListener?.("change",() => {
+    onGlobal(reduceMotion, "change",() => {
         if (reduceMotion.matches) {
             target=0; swing=0;
             if (frame) cancelAnimationFrame(frame);
@@ -377,8 +408,8 @@ if ("IntersectionObserver" in window) {
             guide.scrollIntoView({ block: "start" });
         });
     }
-    window.addEventListener("hashchange", openGuideFromLink);
-    window.addEventListener("load", openGuideFromLink, { once:true });
+    onGlobal(window, "hashchange", openGuideFromLink);
+    onGlobal(window, "load", openGuideFromLink, { once:true });
     openGuideFromLink();
 
     const copyButton = guide.querySelector("[data-resource-copy]");
@@ -535,3 +566,18 @@ if ("IntersectionObserver" in window) {
         });
     });
 })();
+
+    pageCleanup = () => {
+        controller.abort();
+        cleanupFns.forEach(clean => clean());
+    };
+}
+window.L1nGRealDate = Object.freeze({
+    initHeader, closeMobileNav, initPage, destroyPage,
+    refreshTitle: () => window.L1nGRealDateLanguage?.refresh()
+});
+initHeader();
+// If the router script fails to load, retain basic page interactions.
+window.addEventListener("load", () => {
+    if (!window.L1nGRealDateRouterActive) initPage();
+}, { once: true });
