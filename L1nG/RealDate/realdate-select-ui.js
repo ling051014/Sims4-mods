@@ -100,7 +100,7 @@
   }
   function init() {
     if (!active) active = true;
-    document.querySelectorAll('main select:not([data-native-select])').forEach(enhance);
+    document.querySelectorAll('#feedback-form select:not([data-native-select])').forEach(enhance);
   }
   window.L1nGRefreshSelect = node => { const entry = registry.get(node); if (entry) refresh(entry); };
   window.L1nGSelectUI = Object.freeze({ init, dispose });

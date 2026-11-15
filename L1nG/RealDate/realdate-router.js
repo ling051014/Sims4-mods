@@ -55,7 +55,7 @@
     };
     if (window[globals[name]]) return Promise.resolve();
     const url = new URL(name === 'realdate-select-ui.js' ? name : '../feedback/' + name, base);
-    url.searchParams.set('v', '20261115-shell-r1');
+    url.searchParams.set('v', name === 'realdate-select-ui.js' ? '20261115-select-focus-r2' : '20261115-shell-r1');
     if (loadedScripts.has(name)) return loadedScripts.get(name);
     const promise = new Promise((resolve, reject) => {
       const node = document.createElement('script');
