@@ -2,6 +2,79 @@
 (function (global) {
   'use strict';
 
+  // ========【下拉浮層定位】所有 body Portal 共用原生錨定，舊瀏覽器走既有 JS 備援 ========
+  const nativePopupAnchors = !!global.CSS &&
+    global.CSS.supports('anchor-name: --l1ng-popup') &&
+    global.CSS.supports('position-anchor: --l1ng-popup') &&
+    global.CSS.supports('top: anchor(bottom)') &&
+    global.CSS.supports('position-try-fallbacks: flip-block');
+  const nativePopupVisibility = global.CSS?.supports('position-visibility: anchors-visible')
+    ? 'anchors-visible' : '';
+  let popupAnchorSequence = 0;
+
+  function releasePopupAnchor(popup) {
+    const binding = popup?._l1ngPopupAnchor;
+    if (!binding) return;
+    binding.anchor.style.removeProperty('anchor-name');
+    popup.style.removeProperty('position-anchor');
+    popup.style.removeProperty('position-try-fallbacks');
+    popup.style.removeProperty('position-visibility');
+    delete popup._l1ngPopupAnchor;
+  }
+
+  function anchorPopup(anchor, popup, {
+    minWidth = 120, maxWidth = 420, maxHeight = 320,
+    margin = 10, gap = 5, align = 'start'
+  } = {}) {
+    if (!nativePopupAnchors || !anchor || !popup) return false;
+    const rect = anchor.getBoundingClientRect();
+    const viewportWidth = Math.max(1, global.innerWidth || document.documentElement.clientWidth || 1);
+    const viewportHeight = Math.max(1, global.innerHeight || document.documentElement.clientHeight || 1);
+    const width = Math.min(Math.max(1, viewportWidth - margin * 2),
+      Math.max(1, Math.min(maxWidth, Math.max(minWidth, rect.width))));
+    const room = Math.max(rect.top, viewportHeight - rect.bottom) - gap - margin;
+    let binding = popup._l1ngPopupAnchor;
+    if (!binding || binding.anchor !== anchor) {
+      releasePopupAnchor(popup);
+      binding = { anchor, name: '--l1ng-popup-' + (++popupAnchorSequence) };
+      popup._l1ngPopupAnchor = binding;
+      anchor.style.setProperty('anchor-name', binding.name);
+    }
+    popup.style.position = 'fixed';
+    popup.style.positionAnchor = binding.name;
+    popup.style.positionTryFallbacks = 'flip-block';
+    if (nativePopupVisibility) popup.style.positionVisibility = nativePopupVisibility;
+    popup.style.width = Math.round(width) + 'px';
+    const offset = align === 'end'
+      ? 'calc(anchor(right) - ' + Math.round(width) + 'px)'
+      : 'anchor(left)';
+    popup.style.left = 'clamp(' + margin + 'px, ' + offset +
+      ', calc(100vw - ' + Math.round(width + margin) + 'px))';
+    popup.style.top = 'calc(anchor(bottom) + ' + gap + 'px)';
+    popup.style.right = 'auto';
+    popup.style.bottom = '';
+    popup.style.maxHeight = Math.round(Math.max(40, Math.min(maxHeight, room))) + 'px';
+    return true;
+  }
+
+  function popupAnchorVisible(anchor) {
+    if (!anchor?.isConnected) return false;
+    const rect = anchor.getBoundingClientRect();
+    const viewportWidth = global.innerWidth || document.documentElement.clientWidth;
+    const viewportHeight = global.innerHeight || document.documentElement.clientHeight;
+    if (!rect.width || !rect.height || rect.bottom <= 0 || rect.top >= viewportHeight ||
+        rect.right <= 0 || rect.left >= viewportWidth) return false;
+    // 包含編輯視窗、側欄及回饋內容的多層捲動裁切。
+    for (let el = anchor.parentElement; el && el !== document.documentElement; el = el.parentElement) {
+      const style = global.getComputedStyle(el);
+      if (!/(auto|scroll|hidden|clip)/.test(style.overflowX + ' ' + style.overflowY)) continue;
+      const clip = el.getBoundingClientRect();
+      if (rect.bottom <= clip.top || rect.top >= clip.bottom ||
+          rect.right <= clip.left || rect.left >= clip.right) return false;
+    }
+    return true;
+  }
+
   // ========【頂欄／側欄介面】UI 模組管理側欄寬度、選單與提示浮層 ========
   function createChromeController({ dom = {}, constants = {}, helpers = {} } = {}) {
     const { familySidebar, familySidebarBackdrop, familySidebarToggleButton, sidebarResizer } = dom;
@@ -48,13 +121,14 @@
         .forEach(menu => closeAppMenu(menu));
     }
 
-    familySidebar?.addEventListener('scroll', closeSidebarActionMenus, true);
-
     function restoreAppMenuPortal(menu) {
       const popover =
         menu?._bodyPortalPopover;
 
       if (!popover) return;
+      menu._popoverVisibilityObserver?.disconnect();
+      menu._popoverVisibilityObserver = null;
+      releasePopupAnchor(popover);
 
       popover.classList.remove(
         'ui-menu-body-portal'
@@ -66,6 +140,8 @@
       popover.style.removeProperty('bottom');
       popover.style.removeProperty('max-height');
       popover.style.removeProperty('overflow-y');
+      popover.style.removeProperty('width');
+      popover.style.removeProperty('position');
 
       menu.appendChild(popover);
       menu._bodyPortalPopover = null;
@@ -81,7 +157,7 @@
       const triggerRect =
         trigger.getBoundingClientRect();
 
-      document.body.appendChild(popover);
+      if (popover.parentNode !== document.body) document.body.appendChild(popover);
 
       popover.classList.add(
         'ui-menu-body-portal'
@@ -93,6 +169,15 @@
 
       const popoverRect =
         popover.getBoundingClientRect();
+
+      if (anchorPopup(trigger, popover, {
+        minWidth:popoverRect.width, maxWidth:popoverRect.width,
+        maxHeight:availableHeight, margin, gap, align:'end'
+      })) {
+        menu._bodyPortalPopover = popover;
+        observeAppMenuAnchor(menu, trigger);
+        return;
+      }
 
       const left =
         Math.max(
@@ -136,6 +221,17 @@
 
       menu._bodyPortalPopover =
         popover;
+      observeAppMenuAnchor(menu, trigger);
+    }
+
+    function observeAppMenuAnchor(menu, trigger) {
+      if (menu._popoverVisibilityObserver || !global.IntersectionObserver) return;
+      const observer = new global.IntersectionObserver(entries => {
+        if (entries.some(entry => entry.target === trigger && !entry.isIntersecting) &&
+            menu.classList.contains('open')) closeAppMenu(menu);
+      });
+      observer.observe(trigger);
+      menu._popoverVisibilityObserver = observer;
     }
 
     function closeAppMenu(menu) {
@@ -167,6 +263,26 @@
     }
 
     let _appMenuGlobalBound = false;
+    let appMenuScrollFrame = 0;
+
+    function syncAppMenuPortals() {
+      if (appMenuScrollFrame) return;
+      // 原生錨點直接跟著捲動；IntersectionObserver 負責關閉離開畫面的面板。
+      if (nativePopupAnchors && global.IntersectionObserver) return;
+      if (!document.querySelector('.ui-menu.open[data-menu-portal="body"]')) return;
+      appMenuScrollFrame = global.requestAnimationFrame(() => {
+        appMenuScrollFrame = 0;
+        document.querySelectorAll('.ui-menu.open[data-menu-portal="body"]').forEach(menu => {
+          const trigger = menu.querySelector(':scope > .ui-menu-trigger');
+          const popover = menu._bodyPortalPopover;
+          if (!trigger || !popover || !popupAnchorVisible(trigger)) {
+            closeAppMenu(menu);
+            return;
+          }
+          if (!nativePopupAnchors) positionAppMenuPortal(menu, trigger, popover);
+        });
+      });
+    }
 
     function setupAppMenus(scope = document) {
       const menus = Array.isArray(scope)
@@ -274,6 +390,7 @@
           }
         );
 
+        document.addEventListener('scroll', syncAppMenuPortals, { capture:true, passive:true });
         window.addEventListener(
           'resize',
           () => closeAppMenus()
@@ -1047,15 +1164,6 @@
     const uiText = typeof helpers.uiText === 'function' ? helpers.uiText : value => String(value ?? '');
     const esc = typeof helpers.esc === 'function' ? helpers.esc : value => String(value ?? '');
     const iconSvg = typeof helpers.iconSvg === 'function' ? helpers.iconSvg : () => '';
-    // 原生 CSS Anchor Positioning 能隨瀏覽器的捲動合成直接追蹤回饋欄位。
-    const supportsFeedbackAnchor = !!global.CSS &&
-      global.CSS.supports('position-anchor: --l1ng-feedback-anchor') &&
-      global.CSS.supports('top: anchor(bottom)') &&
-      global.CSS.supports('position-try-fallbacks: flip-block');
-    const feedbackAnchorVisibility = global.CSS?.supports('position-visibility: anchors-visible')
-      ? 'anchors-visible'
-      : global.CSS?.supports('position-visibility: anchor-visible') ? 'anchor-visible' : '';
-    const feedbackAnchorName = '--l1ng-genealogy-feedback-anchor';
     const normalizeCreatableValue =
       typeof helpers.normalizeCreatableValue === 'function'
         ? helpers.normalizeCreatableValue
@@ -1492,9 +1600,10 @@
       }
 
       function restoreHome() {
+        releasePopupAnchor(dropdown);
         if (!portal || dropdown.parentNode === home.parent) return;
         dropdown.classList.remove('ui-select-dropdown-portal');
-        ['left','top','width','max-height','position'].forEach(name => dropdown.style.removeProperty(name));
+        ['left','top','right','bottom','width','max-height','position'].forEach(name => dropdown.style.removeProperty(name));
 
         if (home.next && home.next.parentNode === home.parent) {
           home.parent.insertBefore(dropdown, home.next);
@@ -1512,11 +1621,12 @@
 
         dropdown.classList.add('ui-select-dropdown-portal');
         const width = input.getBoundingClientRect().width;
-        positionPortal(input, dropdown, {
+        const options = {
           minWidth:matchWidth ? Math.min(width, Math.max(1,global.innerWidth - 20)) : 280,
           maxWidth:matchWidth ? Math.max(1,width) : 520,
           maxHeight:360
-        });
+        };
+        if (!anchorPopup(input, dropdown, options)) positionPortal(input, dropdown, options);
       }
 
       function paintSelection() {
@@ -1844,7 +1954,8 @@
         paintOptions();
 
         if (portal) {
-          global.requestAnimationFrame(() => {
+          if (nativePopupAnchors) position();
+          else global.requestAnimationFrame(() => {
             position();
             global.requestAnimationFrame(position);
           });
@@ -1859,7 +1970,10 @@
         if (!wrap.classList.contains('ui-select-open')) return;
 
         paintOptions(search.value);
-        if (portal) global.requestAnimationFrame(position);
+        if (portal) {
+          if (nativePopupAnchors) position();
+          else global.requestAnimationFrame(position);
+        }
       }
 
       input.setAttribute('role', 'combobox');
@@ -1922,6 +2036,7 @@
         type:'searchable',
         source:select,
         anchor:input,
+        nativeAnchored:portal && nativePopupAnchors,
         refresh,
         open,
         close,
@@ -1993,8 +2108,7 @@
 
       const matchPopoverWidth =
         select.dataset.uiPopoverMatchWidth === 'true';
-      const nativeFeedbackAnchor =
-        supportsFeedbackAnchor && !!select.closest('.genealogy-feedback-scroll');
+      const nativeAnchor = nativePopupAnchors;
 
       if (compact) {
         host.classList.add('ui-single-select-compact');
@@ -2110,25 +2224,11 @@
             trigger.getBoundingClientRect().width
           );
 
-        if (nativeFeedbackAnchor) {
-          // 不在捲動影格中追座標：固定面板交由原生 anchor() 緊貼欄位。
-          const rect = trigger.getBoundingClientRect();
-          const viewportWidth = Math.max(1, global.innerWidth || document.documentElement.clientWidth);
-          const viewportHeight = Math.max(1, global.innerHeight || document.documentElement.clientHeight);
-          const width = Math.round(Math.min(Math.max(1, viewportWidth - 20), triggerWidth));
-          const room = Math.max(rect.top, viewportHeight - rect.bottom) - 14;
-          trigger.style.anchorName = feedbackAnchorName;
-          menu.style.position = 'fixed';
-          menu.style.positionAnchor = feedbackAnchorName;
-          menu.style.positionTryFallbacks = 'flip-block';
-          menu.style.positionVisibility = feedbackAnchorVisibility;
-          menu.style.width = width + 'px';
-          menu.style.left = 'clamp(10px, anchor(left), calc(100vw - ' + width + 'px - 10px))';
-          menu.style.top = 'calc(anchor(bottom) + 5px)';
-          menu.style.bottom = '';
-          menu.style.maxHeight = Math.max(40, Math.min(320, room)) + 'px';
-          return;
-        }
+        if (anchorPopup(trigger, menu, {
+          minWidth:matchPopoverWidth ? triggerWidth : Math.max(120, triggerWidth),
+          maxWidth:matchPopoverWidth ? triggerWidth : 420,
+          maxHeight:320
+        })) return;
 
         positionPortal(trigger, menu, {
           minWidth:
@@ -2159,9 +2259,9 @@
         trigger.setAttribute('aria-expanded', 'true');
 
         // 首次開啟就建立錨定，不等待第一個 rAF 才顯示正確位置。
-        if (nativeFeedbackAnchor) position();
+        if (nativeAnchor) position();
         global.requestAnimationFrame(() => {
-          if (!nativeFeedbackAnchor) position();
+          if (!nativeAnchor) position();
           const selected = optionsHost.querySelector('.ui-select-option.selected');
           selected?.scrollIntoView({ block:'nearest' });
         });
@@ -2171,12 +2271,7 @@
         menu.style.display = 'none';
         host.classList.remove('ui-select-open');
         trigger.setAttribute('aria-expanded', 'false');
-        if (nativeFeedbackAnchor) {
-          trigger.style.removeProperty('anchor-name');
-          menu.style.removeProperty('position-anchor');
-          menu.style.removeProperty('position-try-fallbacks');
-          menu.style.removeProperty('position-visibility');
-        }
+        releasePopupAnchor(menu);
         resetKeyboardIndex(optionsHost);
         clearActive(api);
       }
@@ -2237,7 +2332,7 @@
         type:'single',
         source:select,
         anchor:trigger,
-        nativeAnchored:nativeFeedbackAnchor,
+        nativeAnchored:nativeAnchor,
         host,
         refresh,
         open,
@@ -2350,11 +2445,12 @@
         if (!host.classList.contains('ui-select-open')) return;
         const matchWidth = input.dataset.uiSuggestionMatchWidth === 'true';
         const fieldWidth = input.getBoundingClientRect().width;
-        positionPortal(input, menu, matchWidth
+        const options = matchWidth
           ? { minWidth:fieldWidth, maxWidth:fieldWidth, maxHeight:editorMenu ? 260 : 320 }
           : editorMenu
             ? { minWidth:240, maxWidth:430, maxHeight:260 }
-            : { minWidth:180, maxWidth:520, maxHeight:320 });
+            : { minWidth:180, maxWidth:520, maxHeight:320 };
+        if (!anchorPopup(input, menu, options)) positionPortal(input, menu, options);
         const viewportLimit = Math.max(0, parseFloat(menu.style.maxHeight) || 0);
         menu.style.setProperty('--ui-suggestion-available-height', Math.max(0, viewportLimit - 8) + 'px');
       }
@@ -2370,13 +2466,15 @@
         menu.style.display = '';
         host.classList.add('ui-select-open');
         input.setAttribute('aria-expanded', 'true');
-        global.requestAnimationFrame(position);
+        if (nativePopupAnchors) position();
+        else global.requestAnimationFrame(position);
       }
 
       function close() {
         menu.style.display = 'none';
         host.classList.remove('ui-select-open');
         input.setAttribute('aria-expanded', 'false');
+        releasePopupAnchor(menu);
         resetKeyboardIndex(optionsHost);
         clearActive(api);
       }
@@ -2439,6 +2537,7 @@
         type:'suggestion',
         source:input,
         anchor:input,
+        nativeAnchored:nativePopupAnchors,
         host,
         refresh,
         open,
@@ -2620,25 +2719,9 @@
       }
     }, true);
 
-    // Body Portal 跟隨捲動；每個動畫影格只更新一次，避免 Debounce 造成延遲。
+    // 原生錨定隨畫面捲動；JS 備援只在每個動畫影格執行一次。
     let repositionFrame = 0;
     let nativeMetricsDirty = false;
-    function feedbackAnchorVisible(controller) {
-      const anchor = controller.anchor;
-      const scrollport = anchor?.closest('.genealogy-feedback-scroll');
-      if (!scrollport) return true;
-      const rect = anchor.getBoundingClientRect();
-      const clip = scrollport.getBoundingClientRect();
-      const viewportWidth = global.innerWidth || document.documentElement.clientWidth;
-      const viewportHeight = global.innerHeight || document.documentElement.clientHeight;
-      return anchor.isConnected && scrollport.isConnected &&
-        rect.width > 0 && rect.height > 0 &&
-        rect.bottom > Math.max(0, clip.top) &&
-        rect.top < Math.min(viewportHeight, clip.bottom) &&
-        rect.right > Math.max(0, clip.left) &&
-        rect.left < Math.min(viewportWidth, clip.right);
-    }
-
     function repositionActive(event) {
       if (event?.type === 'resize') nativeMetricsDirty = true;
       if (!activeController || repositionFrame) return;
@@ -2648,7 +2731,7 @@
         const refreshMetrics = nativeMetricsDirty;
         nativeMetricsDirty = false;
         if (!controller) return;
-        if (!feedbackAnchorVisible(controller)) {
+        if (!popupAnchorVisible(controller.anchor)) {
           controller.close();
           return;
         }
