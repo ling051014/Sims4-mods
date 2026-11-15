@@ -1047,7 +1047,6 @@
     const uiText = typeof helpers.uiText === 'function' ? helpers.uiText : value => String(value ?? '');
     const esc = typeof helpers.esc === 'function' ? helpers.esc : value => String(value ?? '');
     const iconSvg = typeof helpers.iconSvg === 'function' ? helpers.iconSvg : () => '';
-    const debounce = typeof helpers.debounce === 'function' ? helpers.debounce : fn => fn;
     const normalizeCreatableValue =
       typeof helpers.normalizeCreatableValue === 'function'
         ? helpers.normalizeCreatableValue
@@ -1913,6 +1912,7 @@
       const api = {
         type:'searchable',
         source:select,
+        anchor:input,
         refresh,
         open,
         close,
@@ -2197,6 +2197,7 @@
       const api = {
         type:'single',
         source:select,
+        anchor:trigger,
         host,
         refresh,
         open,
@@ -2397,6 +2398,7 @@
       const api = {
         type:'suggestion',
         source:input,
+        anchor:input,
         host,
         refresh,
         open,
@@ -2578,15 +2580,46 @@
       }
     }, true);
 
-    const repositionActive =
-      debounce(() => {
-        activeController?.position?.();
-      }, 40);
+    // Body Portal 跟隨捲動；每個動畫影格只更新一次，避免 Debounce 造成延遲。
+    let repositionFrame = 0;
+    function feedbackAnchorVisible(controller) {
+      const anchor = controller.anchor;
+      const scrollport = anchor?.closest('.genealogy-feedback-scroll');
+      if (!scrollport) return true;
+      const rect = anchor.getBoundingClientRect();
+      const clip = scrollport.getBoundingClientRect();
+      const viewportWidth = global.innerWidth || document.documentElement.clientWidth;
+      const viewportHeight = global.innerHeight || document.documentElement.clientHeight;
+      return anchor.isConnected && scrollport.isConnected &&
+        rect.width > 0 && rect.height > 0 &&
+        rect.bottom > Math.max(0, clip.top) &&
+        rect.top < Math.min(viewportHeight, clip.bottom) &&
+        rect.right > Math.max(0, clip.left) &&
+        rect.left < Math.min(viewportWidth, clip.right);
+    }
+
+    function repositionActive() {
+      if (!activeController || repositionFrame) return;
+      repositionFrame = global.requestAnimationFrame(() => {
+        repositionFrame = 0;
+        const controller = activeController;
+        if (!controller) return;
+        if (!feedbackAnchorVisible(controller)) {
+          controller.close();
+          return;
+        }
+        controller.position?.();
+      });
+    }
 
     global.addEventListener('resize', repositionActive);
-    document.addEventListener('scroll', repositionActive, true);
+    document.addEventListener('scroll', repositionActive, { capture:true, passive:true });
+    global.visualViewport?.addEventListener('resize', repositionActive, { passive:true });
+    global.visualViewport?.addEventListener('scroll', repositionActive, { passive:true });
 
     function dispose() {
+      if (repositionFrame) global.cancelAnimationFrame(repositionFrame);
+      repositionFrame = 0;
       activeController?.close?.();
 
       [...controllers]

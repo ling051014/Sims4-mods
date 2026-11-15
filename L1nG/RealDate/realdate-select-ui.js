@@ -4,14 +4,32 @@
   const registry = new Map();
   let opened = null;
   let active = false;
+  let repositionFrame = 0;
   function close() {
     if (!opened) return;
     opened.panel.hidden = true;
     opened.button.setAttribute('aria-expanded', 'false');
     opened = null;
   }
+  function anchorVisible(button) {
+    if (!button.isConnected) return false;
+    const rect = button.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0 ||
+        rect.bottom <= 0 || rect.top >= innerHeight ||
+        rect.right <= 0 || rect.left >= innerWidth) return false;
+    // 桌機表單另有捲動容器，欄位完全離開可視區時不保留 Portal。
+    const scrollport = button.closest('.modal-content');
+    if (!scrollport) return true;
+    const clip = scrollport.getBoundingClientRect();
+    return rect.bottom > clip.top && rect.top < clip.bottom &&
+      rect.right > clip.left && rect.left < clip.right;
+  }
   function position(entry) {
     if (!entry || entry.panel.hidden) return;
+    if (!anchorVisible(entry.button)) {
+      if (opened === entry) close();
+      return;
+    }
     const r = entry.button.getBoundingClientRect(), w = Math.max(180, r.width);
     const roomBelow = innerHeight - r.bottom, roomAbove = r.top;
     const below = roomBelow > 210 || roomBelow >= roomAbove;
@@ -92,6 +110,8 @@
     refresh(entry);
   }
   function dispose() {
+    if (repositionFrame) cancelAnimationFrame(repositionFrame);
+    repositionFrame = 0;
     close();
     for (const entry of registry.values()) {
       entry.observer.disconnect();
@@ -114,8 +134,18 @@
     if (opened && !opened.panel.contains(e.target) && !opened.button.contains(e.target)) close();
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-  document.addEventListener('scroll', () => { if (opened) position(opened); }, { capture: true, passive: true });
-  window.addEventListener('resize', () => { if (opened) position(opened); });
+  // 合併連續捲動事件，避免同步重算下拉定位阻塞捲動。
+  function repositionOpened() {
+    if (!opened || repositionFrame) return;
+    repositionFrame = requestAnimationFrame(() => {
+      repositionFrame = 0;
+      if (opened) position(opened);
+    });
+  }
+  document.addEventListener('scroll', repositionOpened, { capture: true, passive: true });
+  window.addEventListener('resize', repositionOpened, { passive: true });
+  window.visualViewport?.addEventListener('resize', repositionOpened, { passive: true });
+  window.visualViewport?.addEventListener('scroll', repositionOpened, { passive: true });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
 })();
