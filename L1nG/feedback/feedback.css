@@ -412,3 +412,21 @@ body.realdate-only .realdate-reply-attachments.is-drag-over{background:var(--pri
 
 /* 問題反饋 Email 回覆通知：使用原有字體、色彩與控制項比例。 */
 .feedback-email-option{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:12px;cursor:pointer}.feedback-email-option[hidden],.feedback-email-status[hidden]{display:none}.feedback-email-option input{accent-color:var(--primary);width:16px;height:16px}.feedback-email-status{width:100%;max-width:420px;border:1px solid var(--stroke);border-radius:12px;padding:14px;text-align:left;font-size:12px}.feedback-email-status p{font-size:11px;margin:5px 0;color:var(--muted)}.feedback-email-status .link{font-size:11px;margin-top:8px}
+
+/* RealDate 回饋：聚焦時只改變既有邊框，不疊加外框或發光。 */
+body.realdate-only #realdate-preview .field:focus,
+body.realdate-only #realdate-preview .field:focus-visible {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: none;
+}
+body.realdate-only #realdate-preview .field.feedback-invalid:focus,
+body.realdate-only #realdate-preview .field.feedback-invalid:focus-visible {
+    border-color: var(--red);
+}
+body.realdate-only #feedback-form .l1ng-select-trigger:focus-visible,
+body.realdate-only #feedback-form .l1ng-select-trigger[aria-expanded="true"] {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: none;
+}
