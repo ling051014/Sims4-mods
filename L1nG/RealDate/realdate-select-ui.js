@@ -26,7 +26,11 @@
     if (!entry.select.isConnected) return;
     const { select, button, panel } = entry;
     const selected = select.options[select.selectedIndex];
-    button.textContent = selected ? selected.textContent.trim() : '請選擇';
+    const placeholder = document.documentElement.dataset.language === 'en'
+      ? (select.dataset.placeholderEn || select.dataset.placeholder || 'Select a version')
+      : (select.dataset.placeholder || '請選擇');
+    button.textContent = selected ? selected.textContent.trim() : placeholder;
+    button.classList.toggle('is-placeholder', !selected && Boolean(select.dataset.placeholder));
     button.disabled = select.disabled;
     button.setAttribute('aria-label', (select.getAttribute('aria-label') || select.id || '選擇') + '：' + button.textContent);
     panel.replaceChildren();
@@ -104,6 +108,8 @@
   }
   window.L1nGRefreshSelect = node => { const entry = registry.get(node); if (entry) refresh(entry); };
   window.L1nGSelectUI = Object.freeze({ init, dispose });
+  new MutationObserver(() => { for (const entry of registry.values()) refresh(entry); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-language'] });
   document.addEventListener('pointerdown', e => {
     if (opened && !opened.panel.contains(e.target) && !opened.button.contains(e.target)) close();
   });
