@@ -22,14 +22,14 @@
   const setError=(msg,field)=>{
     const nodes=['message-error','version-error','game-version-error','contact-error','file-error','submit-inline-error'];
     for(const id of nodes){const node=$(id);if(node){node.classList.remove('visible');node.textContent='';}}
-    for(const id of ['message-field','module-version','manual-version','game-version','contact-value'])$(id)?.classList.remove('feedback-invalid');
+    for(const id of ['message-field','module-version','game-version','contact-value'])$(id)?.classList.remove('feedback-invalid');
     $('submit-error-summary').hidden=true;
     if(!msg)return;
     const target=field||(msg.includes('版本')?'version':msg.includes('聯絡')?'contact':msg.includes('附件')?'file':msg.includes('回饋內容')?'message':'submit');
     const lookup={version:'version-error',gameVersion:'game-version-error',contact:'contact-error',file:'file-error',message:'message-error',submit:'submit-inline-error'};
     const node=$(lookup[target]||'submit-inline-error');
     if(node){node.textContent=msg;node.classList.add('visible');}
-    const input={version: $('manual-version-wrap')?.hidden?$('module-version'):$('manual-version'),gameVersion:$('game-version'),contact:$('contact-value'),message:$('message-field')}[target];
+    const input={version: $('module-version'),gameVersion:$('game-version'),contact:$('contact-value'),message:$('message-field')}[target];
     input?.classList.add('feedback-invalid');
   };
   const captureFormHeight=()=>{
@@ -114,8 +114,7 @@
     for(const [value,label] of [
       ['v0.6 Beta','v0.6 Beta'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
       ['v0.2.1 Beta','v0.2.1 Beta'],['v0.2 Beta','v0.2 Beta'],
-      ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta'],
-      ['other','其他版本（手動填寫）'],['unknown','不確定']
+      ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta']
     ])version.add(new Option(label,value));
     // The placeholder is display text, not a selectable version.
     version.selectedIndex = -1;
@@ -149,7 +148,6 @@
       versionHelpOpener=null;
     });
   }
-  version?.addEventListener('change',()=>{$('manual-version-wrap').hidden=version.value!=='other';});
   targetSelect?.addEventListener('change',updateVersion);
   $('message-field')?.addEventListener('input',()=>{$('char-count').textContent=$('message-field').value.length+' / 2000';setError('');});
   $('game-version')?.addEventListener('input',()=>{
@@ -296,15 +294,15 @@
     const token=verifier?.getToken();
     if(!token){setError('請先完成 Cloudflare 人機驗證。');return;}
     const chosen=$('reply-thread').checked?'conversation':'once';
-    if(category==='bug'&&targetSelect?.value==='mod'&&(!version?.value||(version.value==='other'&&!$('manual-version').value.trim()))){
-      setError('請選擇模組版本，或選擇「不確定」。');return;
+    if(category==='bug'&&targetSelect?.value==='mod'&&!version?.value){
+      setError('請選擇模組版本。');return;
     }
     const gameVersion=category==='bug'&&targetSelect?.value==='mod'
       ? ($('game-version')?.value.trim()||'') : '';
     if(category==='bug'&&targetSelect?.value==='mod'&&!gameVersion){
       setError('請填寫遊戲版本，可查看 RealDate 日誌確認。','gameVersion');return;
     }
-    const selected=version?.value==='other'?$('manual-version').value:version?.value||'';
+    const selected=version?.value||'';
     const button=form.querySelector('button[type="submit"]');button.disabled=true;button.classList.add('is-loading');
     setError('');
     try{

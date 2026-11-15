@@ -11,7 +11,7 @@
         <link rel="stylesheet" href="genealogy_icon_masks.css?v=20261031-overview-all-main-r1">
         <link rel="stylesheet" href="genealogy.css?v=20261031-overview-all-main-r1">
         <script src="../feedback/feedback-core.js?v=20261024-feedback-i18n-audit-r1" defer></script>
-        <script src="genealogy-feedback.js?v=20261115-exporter-feedback-versions-r1" defer></script>
+        <script src="genealogy-feedback.js?v=20261115-feedback-versions-only-r1" defer></script>
         <link rel="stylesheet" href="../site-info-modal.css?v=20261021-policy-scroll-r1">
         <script src="../site-info-modal.js?v=20261028-genealogy-dark-cookie-r2" defer></script>
     <link rel="stylesheet" href="../../site-user-select.css?v=20261102-user-select-r1">
@@ -71,12 +71,7 @@
                                     <select class="genealogy-feedback-field" id="genealogyFeedbackTarget" data-ui-popover-match-width="true"><option value="web">族譜工具網站</option><option value="exporter">族譜提取器</option></select>
                                     <div class="genealogy-feedback-conditional" id="genealogyFeedbackVersionRow" hidden>
                                         <label class="genealogy-feedback-field-label" for="genealogyFeedbackVersion">族譜提取器版本 <span class="genealogy-feedback-required" aria-hidden="true">*</span></label>
-                                        <select class="genealogy-feedback-field" id="genealogyFeedbackVersion" data-ui-popover-match-width="true" data-ui-placeholder="請選擇版本" required><option value="v0.1.1 Beta">v0.1.1 Beta</option><option value="v0.1 Beta">v0.1 Beta</option><option value="other">其他版本（手動填寫）</option><option value="unknown">不確定</option></select>
-                                        <div class="genealogy-feedback-conditional" id="genealogyFeedbackManualVersionRow" hidden>
-                                            <label class="genealogy-feedback-field-label" for="genealogyFeedbackManualVersion">其他版本號</label>
-                                            <input class="genealogy-feedback-field" id="genealogyFeedbackManualVersion" type="text" maxlength="60" autocomplete="off" placeholder="輸入安裝的版本，例如 v0.1.1 Beta">
-                                            <p class="genealogy-feedback-field-error" id="genealogyFeedbackManualVersionError" hidden>請輸入族譜提取器版本。</p>
-                                        </div>
+                                        <select class="genealogy-feedback-field" id="genealogyFeedbackVersion" data-ui-popover-match-width="true" data-ui-placeholder="請選擇版本" required><option value="v0.1.1 Beta">v0.1.1 Beta</option><option value="v0.1 Beta">v0.1 Beta</option></select>
                                         <p class="genealogy-feedback-field-error" id="genealogyFeedbackVersionError" hidden>請選擇族譜提取器版本。</p>
                                     </div>
                                 </section>
