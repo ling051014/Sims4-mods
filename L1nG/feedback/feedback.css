@@ -430,3 +430,8 @@ body.realdate-only #feedback-form .l1ng-select-trigger[aria-expanded="true"] {
     outline: none;
     box-shadow: none;
 }
+
+/* RealDate 版本提示僅顯示於欄位內，不屬於選單選項。 */
+body.realdate-only #feedback-form .l1ng-select-trigger.is-placeholder {
+    color: var(--muted);
+}

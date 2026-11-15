@@ -112,11 +112,13 @@
   if(version){
     version.replaceChildren();
     for(const [value,label] of [
-      ['','請選擇版本'],['v0.6 Beta','v0.6 Beta'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
+      ['v0.6 Beta','v0.6 Beta'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
       ['v0.2.1 Beta','v0.2.1 Beta'],['v0.2 Beta','v0.2 Beta'],
       ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta'],
       ['other','其他版本（手動填寫）'],['unknown','不確定']
     ])version.add(new Option(label,value));
+    // The placeholder is display text, not a selectable version.
+    version.selectedIndex = -1;
   }
   $('form-title').textContent='問題反饋';
   $('form-subtitle').textContent='你的想法，讓 RealDate 變得更好。';
@@ -517,7 +519,7 @@
   function newFeedback(){
     stopEmailStatus();renderEmailStatus("");
     stopThreadRefresh();clearRememberedThread();activeReceipt='';current=null;threadFingerprint='';
-    resetReceiptCopyState();form.reset();files=[];displayFiles(files,$('file-list'));
+    resetReceiptCopyState();form.reset();if(version){version.selectedIndex=-1;window.L1nGRefreshSelect?.(version);}files=[];displayFiles(files,$('file-list'));
     category='bug';updateVersion();$('char-count').textContent='0 / 2000';
     verifier?.reset();show('form-main');setError('');
   }
