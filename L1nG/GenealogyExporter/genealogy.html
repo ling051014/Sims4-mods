@@ -68,10 +68,10 @@
                                     <div class="genealogy-feedback-section-heading">
                                         <label class="genealogy-feedback-field-label" for="genealogyFeedbackTarget">問題發生在哪裡？</label>
                                     </div>
-                                    <select class="genealogy-feedback-field" id="genealogyFeedbackTarget"><option value="web">族譜工具網站</option><option value="exporter">族譜提取器</option></select>
+                                    <select class="genealogy-feedback-field" id="genealogyFeedbackTarget" data-ui-popover-match-width="true"><option value="web">族譜工具網站</option><option value="exporter">族譜提取器</option></select>
                                     <div class="genealogy-feedback-conditional" id="genealogyFeedbackVersionRow" hidden>
                                         <label class="genealogy-feedback-field-label" for="genealogyFeedbackVersion">族譜提取器版本 <span class="genealogy-feedback-required" aria-hidden="true">*</span></label>
-                                        <select class="genealogy-feedback-field" id="genealogyFeedbackVersion" required><option value="v0.1 Beta" selected>v0.1 Beta</option></select>
+                                        <select class="genealogy-feedback-field" id="genealogyFeedbackVersion" data-ui-popover-match-width="true" required><option value="v0.1 Beta" selected>v0.1 Beta</option></select>
                                         <p class="genealogy-feedback-field-error" id="genealogyFeedbackVersionError" hidden>請選擇族譜提取器版本。</p>
                                     </div>
                                 </section>
@@ -133,7 +133,7 @@
                                         </summary>
                                         <div class="genealogy-feedback-contact-fields">
                                             <label class="genealogy-feedback-field-label" for="genealogyFeedbackContactMethod">聯絡方式</label>
-                                            <select class="genealogy-feedback-field" id="genealogyFeedbackContactMethod"><option value="email">電子郵件</option><option value="discord">Discord</option></select>
+                                            <select class="genealogy-feedback-field" id="genealogyFeedbackContactMethod" data-ui-popover-match-width="true"><option value="email">電子郵件</option><option value="discord">Discord</option></select>
                                             <label class="genealogy-feedback-field-label" for="genealogyFeedbackContact">聯絡資料 <span class="genealogy-feedback-optional">未填寫就維持匿名。此欄僅供本次問題回覆，不會用於網站分析。</span></label>
                                             <input class="genealogy-feedback-field" id="genealogyFeedbackContact" type="text" maxlength="120" placeholder="example@email.com" autocomplete="off">
                                             <label class="genealogy-feedback-email-option" id="genealogyFeedbackEmailOption" hidden><input type="checkbox" id="genealogyFeedbackEmailNotify"><span>管理員回覆時，透過 Email 通知我 <span class="genealogy-feedback-optional" id="genealogyFeedbackEmailHint" hidden>提交後會寄送驗證信，完成驗證才會啟用回覆通知。</span></span></label><p class="genealogy-feedback-field-error" id="genealogyFeedbackContactError" hidden>請確認聯絡方式格式。</p>
