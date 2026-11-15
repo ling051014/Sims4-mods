@@ -5,10 +5,25 @@
   let opened = null;
   let active = false;
   let repositionFrame = 0;
+  let nativeMetricsDirty = false;
+  const nativeAnchorName = '--l1ng-realdate-feedback-anchor';
+  const supportsNativeAnchor = typeof CSS !== 'undefined' &&
+    CSS.supports('position-anchor: --l1ng-feedback-anchor') &&
+    CSS.supports('top: anchor(bottom)') &&
+    CSS.supports('position-try-fallbacks: flip-block');
+  const nativeAnchorVisibility = typeof CSS !== 'undefined' &&
+    (CSS.supports('position-visibility: anchors-visible') ? 'anchors-visible'
+    : CSS.supports('position-visibility: anchor-visible') ? 'anchor-visible' : '');
   function close() {
     if (!opened) return;
     opened.panel.hidden = true;
     opened.button.setAttribute('aria-expanded', 'false');
+    if (supportsNativeAnchor) {
+      opened.button.style.removeProperty('anchor-name');
+      opened.panel.style.removeProperty('position-anchor');
+      opened.panel.style.removeProperty('position-try-fallbacks');
+      opened.panel.style.removeProperty('position-visibility');
+    }
     opened = null;
   }
   function anchorVisible(button) {
@@ -31,6 +46,20 @@
       return;
     }
     const r = entry.button.getBoundingClientRect(), w = Math.max(180, r.width);
+    if (supportsNativeAnchor) {
+      const width = Math.min(w, Math.max(1, innerWidth - 20));
+      const room = Math.max(r.top, innerHeight - r.bottom) - 14;
+      entry.button.style.anchorName = nativeAnchorName;
+      entry.panel.style.positionAnchor = nativeAnchorName;
+      entry.panel.style.positionTryFallbacks = 'flip-block';
+      entry.panel.style.positionVisibility = nativeAnchorVisibility;
+      entry.panel.style.width = width + 'px';
+      entry.panel.style.left = 'clamp(10px, anchor(left), calc(100vw - ' + width + 'px - 10px))';
+      entry.panel.style.top = 'calc(anchor(bottom) + 5px)';
+      entry.panel.style.bottom = '';
+      entry.panel.style.maxHeight = Math.max(40, Math.min(320, room)) + 'px';
+      return;
+    }
     const roomBelow = innerHeight - r.bottom, roomAbove = r.top;
     const below = roomBelow > 210 || roomBelow >= roomAbove;
     const max = Math.min(320, Math.max(110, (below ? roomBelow : roomAbove) - 14));
@@ -112,6 +141,7 @@
   function dispose() {
     if (repositionFrame) cancelAnimationFrame(repositionFrame);
     repositionFrame = 0;
+    nativeMetricsDirty = false;
     close();
     for (const entry of registry.values()) {
       entry.observer.disconnect();
@@ -135,11 +165,16 @@
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
   // 合併連續捲動事件，避免同步重算下拉定位阻塞捲動。
-  function repositionOpened() {
+  function repositionOpened(event) {
+    if (event?.type === 'resize') nativeMetricsDirty = true;
     if (!opened || repositionFrame) return;
     repositionFrame = requestAnimationFrame(() => {
       repositionFrame = 0;
-      if (opened) position(opened);
+      const refreshMetrics = nativeMetricsDirty;
+      nativeMetricsDirty = false;
+      if (!opened) return;
+      if (!anchorVisible(opened.button)) close();
+      else if (!supportsNativeAnchor || refreshMetrics) position(opened);
     });
   }
   document.addEventListener('scroll', repositionOpened, { capture: true, passive: true });

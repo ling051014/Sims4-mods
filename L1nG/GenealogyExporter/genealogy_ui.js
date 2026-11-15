@@ -1047,6 +1047,15 @@
     const uiText = typeof helpers.uiText === 'function' ? helpers.uiText : value => String(value ?? '');
     const esc = typeof helpers.esc === 'function' ? helpers.esc : value => String(value ?? '');
     const iconSvg = typeof helpers.iconSvg === 'function' ? helpers.iconSvg : () => '';
+    // 原生 CSS Anchor Positioning 能隨瀏覽器的捲動合成直接追蹤回饋欄位。
+    const supportsFeedbackAnchor = !!global.CSS &&
+      global.CSS.supports('position-anchor: --l1ng-feedback-anchor') &&
+      global.CSS.supports('top: anchor(bottom)') &&
+      global.CSS.supports('position-try-fallbacks: flip-block');
+    const feedbackAnchorVisibility = global.CSS?.supports('position-visibility: anchors-visible')
+      ? 'anchors-visible'
+      : global.CSS?.supports('position-visibility: anchor-visible') ? 'anchor-visible' : '';
+    const feedbackAnchorName = '--l1ng-genealogy-feedback-anchor';
     const normalizeCreatableValue =
       typeof helpers.normalizeCreatableValue === 'function'
         ? helpers.normalizeCreatableValue
@@ -1984,6 +1993,8 @@
 
       const matchPopoverWidth =
         select.dataset.uiPopoverMatchWidth === 'true';
+      const nativeFeedbackAnchor =
+        supportsFeedbackAnchor && !!select.closest('.genealogy-feedback-scroll');
 
       if (compact) {
         host.classList.add('ui-single-select-compact');
@@ -2099,6 +2110,26 @@
             trigger.getBoundingClientRect().width
           );
 
+        if (nativeFeedbackAnchor) {
+          // 不在捲動影格中追座標：固定面板交由原生 anchor() 緊貼欄位。
+          const rect = trigger.getBoundingClientRect();
+          const viewportWidth = Math.max(1, global.innerWidth || document.documentElement.clientWidth);
+          const viewportHeight = Math.max(1, global.innerHeight || document.documentElement.clientHeight);
+          const width = Math.round(Math.min(Math.max(1, viewportWidth - 20), triggerWidth));
+          const room = Math.max(rect.top, viewportHeight - rect.bottom) - 14;
+          trigger.style.anchorName = feedbackAnchorName;
+          menu.style.position = 'fixed';
+          menu.style.positionAnchor = feedbackAnchorName;
+          menu.style.positionTryFallbacks = 'flip-block';
+          menu.style.positionVisibility = feedbackAnchorVisibility;
+          menu.style.width = width + 'px';
+          menu.style.left = 'clamp(10px, anchor(left), calc(100vw - ' + width + 'px - 10px))';
+          menu.style.top = 'calc(anchor(bottom) + 5px)';
+          menu.style.bottom = '';
+          menu.style.maxHeight = Math.max(40, Math.min(320, room)) + 'px';
+          return;
+        }
+
         positionPortal(trigger, menu, {
           minWidth:
             matchPopoverWidth
@@ -2127,8 +2158,10 @@
         host.classList.add('ui-select-open');
         trigger.setAttribute('aria-expanded', 'true');
 
+        // 首次開啟就建立錨定，不等待第一個 rAF 才顯示正確位置。
+        if (nativeFeedbackAnchor) position();
         global.requestAnimationFrame(() => {
-          position();
+          if (!nativeFeedbackAnchor) position();
           const selected = optionsHost.querySelector('.ui-select-option.selected');
           selected?.scrollIntoView({ block:'nearest' });
         });
@@ -2138,6 +2171,12 @@
         menu.style.display = 'none';
         host.classList.remove('ui-select-open');
         trigger.setAttribute('aria-expanded', 'false');
+        if (nativeFeedbackAnchor) {
+          trigger.style.removeProperty('anchor-name');
+          menu.style.removeProperty('position-anchor');
+          menu.style.removeProperty('position-try-fallbacks');
+          menu.style.removeProperty('position-visibility');
+        }
         resetKeyboardIndex(optionsHost);
         clearActive(api);
       }
@@ -2198,6 +2237,7 @@
         type:'single',
         source:select,
         anchor:trigger,
+        nativeAnchored:nativeFeedbackAnchor,
         host,
         refresh,
         open,
@@ -2582,6 +2622,7 @@
 
     // Body Portal 跟隨捲動；每個動畫影格只更新一次，避免 Debounce 造成延遲。
     let repositionFrame = 0;
+    let nativeMetricsDirty = false;
     function feedbackAnchorVisible(controller) {
       const anchor = controller.anchor;
       const scrollport = anchor?.closest('.genealogy-feedback-scroll');
@@ -2598,17 +2639,21 @@
         rect.left < Math.min(viewportWidth, clip.right);
     }
 
-    function repositionActive() {
+    function repositionActive(event) {
+      if (event?.type === 'resize') nativeMetricsDirty = true;
       if (!activeController || repositionFrame) return;
       repositionFrame = global.requestAnimationFrame(() => {
         repositionFrame = 0;
         const controller = activeController;
+        const refreshMetrics = nativeMetricsDirty;
+        nativeMetricsDirty = false;
         if (!controller) return;
         if (!feedbackAnchorVisible(controller)) {
           controller.close();
           return;
         }
-        controller.position?.();
+        // 原生錨定無須每次捲動執行 getBoundingClientRect() + style 寫入。
+        if (!controller.nativeAnchored || refreshMetrics) controller.position?.();
       });
     }
 
@@ -2620,6 +2665,7 @@
     function dispose() {
       if (repositionFrame) global.cancelAnimationFrame(repositionFrame);
       repositionFrame = 0;
+      nativeMetricsDirty = false;
       activeController?.close?.();
 
       [...controllers]
