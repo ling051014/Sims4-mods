@@ -55,7 +55,7 @@
     };
     if (window[globals[name]]) return Promise.resolve();
     const url = new URL(name === 'realdate-select-ui.js' ? name : '../feedback/' + name, base);
-    url.searchParams.set('v', name === 'feedback-i18n.js' ? '20261115-feedback-placeholder-en-r5' : (name === 'realdate-select-ui.js' || name === 'realdate-feedback-live.js' ? '20261115-version-placeholder-r3' : '20261115-shell-r1'));
+    url.searchParams.set('v', (name === 'feedback-i18n.js' || name === 'realdate-feedback-live.js') ? '20261115-feedback-versions-only-r1' : (name === 'realdate-select-ui.js' ? '20261115-version-placeholder-r3' : '20261115-shell-r1'));
     if (loadedScripts.has(name)) return loadedScripts.get(name);
     const promise = new Promise((resolve, reject) => {
       const node = document.createElement('script');
