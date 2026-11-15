@@ -6,8 +6,8 @@
   const SUPPORTED_LANGUAGES = Object.freeze(['zh-Hant', 'zh-Hans', 'en']);
   const LOCALE_FILES = Object.freeze({
     'zh-Hant': 'locales/zh-TW.json?v=20261030-death-json-r2',
-    'zh-Hans': 'locales/zh-CN.json?v=20261115-genealogy-feedback-placeholders-r1',
-    'en': 'locales/en.json?v=20261115-genealogy-feedback-placeholders-r1'
+    'zh-Hans': 'locales/zh-CN.json?v=20261115-exporter-feedback-versions-r1',
+    'en': 'locales/en.json?v=20261115-exporter-feedback-versions-r1'
   });
 
   const catalogs = new Map();
