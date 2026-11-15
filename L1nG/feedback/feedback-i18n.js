@@ -13,6 +13,8 @@ const dictionary=new Map(Object.entries({
 '（選填）':'(Optional)','至少 10 字':'At least 10 characters','最多 3 個檔案・合計 20 MB':'Up to 3 files · 20 MB total','回饋編號':'Feedback #','請選擇版本':'Select a version',
 '已收到你的回饋！':'Your feedback has been received!','回饋已建立':'Feedback created','未連接網路資料庫。':'Database connection unavailable.'
 }));
+// Current on-page placeholders; keep the legacy strings for older dynamic text.
+dictionary.set('請描述遇到的情況、操作步驟，或想提出的建議⋯⋯', 'Describe what happened, the steps to reproduce it, or your idea…');
 let cleanup=null;
 function dispose(){cleanup?.();cleanup=null;}
 function init(){
