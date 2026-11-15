@@ -2043,7 +2043,9 @@
 
       function paintTrigger() {
         const option = select.options[select.selectedIndex];
-        triggerValue.textContent = optionLabel(option);
+        const showPlaceholder = !option && !!select.dataset.uiPlaceholder;
+        triggerValue.textContent = showPlaceholder ? uiText(select.dataset.uiPlaceholder) : optionLabel(option);
+        triggerValue.classList.toggle('ui-select-placeholder', showPlaceholder);
         trigger.disabled = !!select.disabled;
       }
 

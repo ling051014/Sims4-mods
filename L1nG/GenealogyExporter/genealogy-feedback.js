@@ -26,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const versionField = $('genealogyFeedbackVersion');
   const versionRow = $('genealogyFeedbackVersionRow');
   const versionError = $('genealogyFeedbackVersionError');
+  const manualVersionRow = $('genealogyFeedbackManualVersionRow');
+  const manualVersion = $('genealogyFeedbackManualVersion');
+  const manualVersionError = $('genealogyFeedbackManualVersionError');
+  versionField.selectedIndex = -1;
   const error = $('genealogyFeedbackError');
   const submitButton = $('genealogyFeedbackSubmit');
   const contactMethod = $('genealogyFeedbackContactMethod');
@@ -445,8 +449,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const versionVisible = category === 'bug' && target.value === 'exporter';
     versionRow.hidden = !versionVisible;
     versionField.required = versionVisible;
+    manualVersionRow.hidden = !versionVisible || versionField.value !== 'other';
     versionField.classList.remove('genealogy-feedback-invalid');
+    manualVersion.classList.remove('genealogy-feedback-invalid');
     versionError.hidden = true;
+    manualVersionError.hidden = true;
     showError('');
   }
 
@@ -515,6 +522,13 @@ document.addEventListener('DOMContentLoaded', () => {
   versionField.addEventListener('change', () => {
     versionField.classList.remove('genealogy-feedback-invalid');
     versionError.hidden = true;
+    manualVersionRow.hidden = versionField.value !== 'other' || versionRow.hidden;
+    manualVersion.classList.remove('genealogy-feedback-invalid');
+    manualVersionError.hidden = true;
+  });
+  manualVersion.addEventListener('input', () => {
+    manualVersion.classList.remove('genealogy-feedback-invalid');
+    manualVersionError.hidden = true;
   });
   message.addEventListener('input', () => {
     $('genealogyFeedbackCount').textContent = message.value.length + ' / 2000';
@@ -612,7 +626,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!versionRow.hidden && (!versionOption || !versionOption.value || versionOption.disabled)) {
       versionField.classList.add('genealogy-feedback-invalid');
       versionError.hidden = false;
-      versionField.focus({ preventScroll: true });
+      (versionField.closest('.ui-single-select')?.querySelector('.ui-single-select-trigger') || versionField).focus({ preventScroll: true });
+      return;
+    }
+    if (!versionRow.hidden && versionField.value === 'other' && !manualVersion.value.trim()) {
+      manualVersion.classList.add('genealogy-feedback-invalid');
+      manualVersionError.hidden = false;
+      manualVersion.focus({ preventScroll: true });
       return;
     }
     const contact = contactValue.value.trim();
@@ -633,7 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
       contactValue: contact,
       emailNotify: form.elements.genealogyFeedbackFollowUp.value==='conversation' && contactMethod.value==='email' && !!contact && !!emailCheckbox.checked,
       language: emailLanguage(),
-      version: versionRow.hidden ? '' : versionField.value
+      version: versionRow.hidden ? '' : (versionField.value === 'other' ? manualVersion.value.trim() : versionField.value)
     });
     submitButton.disabled = true;
     submitButton.classList.add('is-loading');
@@ -664,6 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
       verification?.reset();
       if (verification) setVerificationState('ready', '');
       form.reset();
+      versionField.selectedIndex = -1;
+      window.L1nGGenealogyUIController?.refreshControl?.(versionField);
       attached.splice(0, attached.length);
       updateFileList();
       updateFields();
