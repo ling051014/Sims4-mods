@@ -38,14 +38,19 @@
 
         <section class="section faq-list" aria-label="RealDate 常見問題">
             <details class="faq-item reveal" open>
+                <summary><span data-lang="zh-Hant">RealDate 目前還在 Beta 測試階段嗎？</span><span data-lang="en">Is RealDate still in beta?</span></summary>
+                <p data-lang="zh-Hant">是的。RealDate 目前仍處於 Beta 測試階段，尚未推出正式穩定版。遊玩時可能遇到尚未發現的錯誤或相容性問題；如果有任何問題或建議，歡迎透過<a href="feedback.html">問題反饋</a>告訴我。</p>
+                <p data-lang="en">Yes. RealDate is still in beta and has not reached a stable release yet. You may encounter undiscovered bugs or compatibility issues. If you run into problems or have suggestions, please let me know through <a href="feedback.html">Feedback</a>.</p>
+            </details>
+            <details class="faq-item reveal">
                 <summary><span data-lang="zh-Hant">是否必須安裝《春夏秋冬》？</span><span data-lang="en">Is Seasons required?</span></summary>
                 <p data-lang="zh-Hant">不需要。RealDate 的日期、出生年份、實際年齡和年齡特徵等核心功能不依賴《春夏秋冬》。與 EA 季節系統相關的功能則以<a href="gameplay.html">完整玩法</a>說明為準。</p>
                 <p data-lang="en">No. Core dates, birth years, ages and age traits do not require Seasons. See <a href="gameplay.html">Gameplay</a> for features involving EA's seasonal system.</p>
             </details>
             <details class="faq-item reveal">
                 <summary><span data-lang="zh-Hant">安裝 RealDate 需要哪些檔案？</span><span data-lang="en">Which files do I need to install?</span></summary>
-                <p data-lang="zh-Hant">請先安裝必要前置 <a href="https://lot51.cc/mods/core-library" target="_blank" rel="noopener noreferrer">Lot51 Core Library</a>；v0.6 Beta 的發布測試環境使用 v1.43.1。再安裝 RealDate 的 <code>.package</code> 與 <code>.ts4script</code> 主檔，並依自己的模組組合選用相容檔。完整步驟請參閱<a href="download.html#installation">下載與安裝</a>。</p>
-                <p data-lang="en">Install the required <a href="https://lot51.cc/mods/core-library" target="_blank" rel="noopener noreferrer">Lot51 Core Library</a> first (v1.43.1 in the v0.6 Beta tested environment), then both RealDate <code>.package</code> and <code>.ts4script</code> files. Add matching compatibility packages as needed. See <a href="download.html#installation">Installation</a>.</p>
+                <p data-lang="zh-Hant">請先安裝必要前置 <a href="https://lot51.cc/mods/core-library" target="_blank" rel="noopener noreferrer">Lot51 Core Library</a>，再安裝 RealDate 的 <code>.package</code> 與 <code>.ts4script</code> 主檔，並依自己的模組組合選用相容檔。完整步驟請參閱<a href="download.html#installation">下載與安裝</a>。</p>
+                <p data-lang="en">Install the required <a href="https://lot51.cc/mods/core-library" target="_blank" rel="noopener noreferrer">Lot51 Core Library</a> first, then both RealDate <code>.package</code> and <code>.ts4script</code> files. Add matching compatibility packages as needed. See <a href="download.html#installation">Installation</a>.</p>
             </details>
             <details class="faq-item reveal">
                 <summary><span data-lang="zh-Hant">目前支援哪些遊戲語言？</span><span data-lang="en">Which game languages are supported?</span></summary>
@@ -129,26 +134,6 @@ PackedFile Overrides\*.package</pre>
                         <p class="resource-hint" data-lang="en">UI Cheats is only an example. Do not install compatibility packages for third-party mods you don't use. Restart the game afterward.</p>
                     </section>
                 </div>
-            </details>
-            <details class="faq-item reveal">
-                <summary><span data-lang="zh-Hant">UI Cheats 與 Quick Save 的相容檔可以同時安裝嗎？</span><span data-lang="en">Can UI Cheats and Quick Save packages be installed together?</span></summary>
-                <p data-lang="zh-Hant">不能將三個互斥的版本一起安裝。請依安裝組合，從「只有 UI Cheats」、「只有 Quick Save」及「UI Cheats + Quick Save」三種相容檔中擇一；詳細檔名見<a href="download.html#compat-files">相容檔選擇</a>。</p>
-                <p data-lang="en">Do not install all three mutually exclusive variants. Choose exactly one: UI Cheats only, Quick Save only, or the combined UI Cheats + Quick Save package. See <a href="download.html#compat-files">Compatibility package selection</a>.</p>
-            </details>
-            <details class="faq-item reveal">
-                <summary><span data-lang="zh-Hant">RealDate 會在預產期強制生產嗎？</span><span data-lang="en">Does RealDate force childbirth on the due date?</span></summary>
-                <p data-lang="zh-Hant">不會。RealDate 記錄與同步懷孕相關日期，但真正的生產流程仍由 EA 原版遊戲或已安裝的其他模組控制；到達預產期不代表會立即強制生產。</p>
-                <p data-lang="en">No. RealDate tracks pregnancy dates, but childbirth remains controlled by EA or compatible third-party mods. Reaching the due date does not trigger forced delivery.</p>
-            </details>
-            <details class="faq-item reveal">
-                <summary><span data-lang="zh-Hant">新生兒滿月算是年度生日嗎？</span><span data-lang="en">Is a newborn's first month an annual birthday?</span></summary>
-                <p data-lang="zh-Hant">不是。新生兒滿月會沿用 EA 的增齡流程進入嬰兒階段，但不會因此觸發 RealDate 的年度生日通知。</p>
-                <p data-lang="en">No. A newborn reaching one month uses EA's age-up flow to become an Infant, but does not trigger RealDate's annual birthday notification.</p>
-            </details>
-            <details class="faq-item reveal">
-                <summary><span data-lang="zh-Hant">可以下載歷史版本嗎？</span><span data-lang="en">Are previous versions available?</span></summary>
-                <p data-lang="zh-Hant">可以。<a href="download.html#history">歷史版本</a>頁段提供已發布的版本檔案，主要供存檔環境維持、對照或測試使用。一般情況建議使用與目前遊戲版本相容的最新公開版。</p>
-                <p data-lang="en">Yes. The <a href="download.html#history">release archive</a> contains previous public versions for reference and testing. For regular use, choose the latest public version compatible with your game.</p>
             </details>
         </section>
     </main>
