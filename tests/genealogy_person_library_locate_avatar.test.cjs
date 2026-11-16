@@ -236,6 +236,8 @@ test('分批加入的清單使用局部選單初始化，不重掃全文件',()=
   vm.runInNewContext('let _appMenuGlobalBound=false;\n'+fn+
     '\nsetupAppMenus([row]);setupAppMenus([row]);',{
       row,
+      // 測試僅擷取 setupAppMenus；提供共用浮層捲動回呼。
+      syncAppMenuPortals:()=>{},
       document:{
         querySelectorAll:()=>{throw Error('不應掃描整個 document');},
         addEventListener:()=>bindings.global++
@@ -243,7 +245,7 @@ test('分批加入的清單使用局部選單初始化，不重掃全文件',()=
       window:{addEventListener:()=>bindings.global++}
     });
   assert.equal(bindings.menu,2,'同一選單按鈕與項目均只初始化一次');
-  assert.equal(bindings.global,3,'全域 click、keydown、resize 監聽只初始化一次');
+  assert.equal(bindings.global,4,'全域 click、keydown、scroll、resize 監聽只初始化一次');
 });
 
 test('總覽大清單分批渲染，且切換分類後取消過期批次',()=>{

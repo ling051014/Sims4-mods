@@ -11,7 +11,6 @@ const layouts = new Map([
   ...["build-buy","cas","cheat-mods","default-mods","nsfw-mods","other","pose-mods","prep-mods","slider","social-mods","ui-mods","world-mods"].map(k=>[k+".html","mods-list"]),
   ["L1nG/home.html","l1ng-home"],
   ["L1nG/home-en.html","l1ng-home"],
-  ["L1nG/changelog.html","l1ng-changelog"],
   ["L1nG/Translations/index.html","translations"],
   ["L1nG/GenealogyExporter/genealogy-exporter.html","genealogy-exporter"],
   ["L1nG/RealDate/index.html","realdate-home"],
