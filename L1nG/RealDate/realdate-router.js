@@ -8,7 +8,7 @@
     'index.html', 'gameplay.html', 'download.html', 'compatibility.html',
     'changelog.html', 'roadmap.html', 'faq.html', 'feedback.html'
   ]);
-  const routeStyles = /(?:^|\/)(?:changelog|feedback|feedback-loading)\.css$/;
+  const routeStyles = /(?:^|\/)(?:realdate|changelog|feedback|feedback-loading)\.css$/;
   let route = routeName(location.href);
   let sequence = 0;
   let pending = null;
