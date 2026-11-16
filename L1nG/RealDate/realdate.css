@@ -1054,43 +1054,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 字體大小 */ font-size: 11px;
 }
 
-/* 寒暑假沿用季節卡片外框，僅調整半球日期的內部資訊層級。 */
-.school-holiday-map > div {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 12px;
-}
-.school-holiday-map .school-holiday-row {
-    width: 100%;
-    padding: 12px;
-    background: var(--surface-soft);
-    border: 1px solid var(--line-soft);
-    border-radius: 4px;
-}
-.school-holiday-map .school-holiday-hemisphere {
-    display: block;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    color: var(--text-muted);
-    font-size: 11px;
-}
-.school-holiday-map .school-holiday-dates {
-    display: block;
-    margin-top: 5px;
-    color: var(--text-strong);
-    font-size: 14px;
-    font-weight: 550;
-    line-height: 1.5;
-    font-variant-numeric: tabular-nums;
-}
-.school-holiday-year-start {
-    margin-top: 16px;
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
 .life-stage-table {
     /* 上方外距 */ margin-top: 28px;
     /* 顯示方式 */ display: grid;
