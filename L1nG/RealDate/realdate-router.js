@@ -15,13 +15,23 @@
   let appReady = false;
   const loadedScripts = new Map();
 
+  // Cloudflare Pages serves /faq and /download as aliases of their HTML files.
+  // Keep .html names internally for existing script and page lifecycle contracts.
   function routeName(target) {
     let u;
     try { u = new URL(target, location.href); } catch (_) { return null; }
     if (u.origin !== location.origin || !u.pathname.startsWith(base.pathname)) return null;
     const rest = u.pathname.slice(base.pathname.length);
-    const name = rest || 'index.html';
+    const name = !rest || rest === 'index.html'
+      ? 'index.html' : (rest.endsWith('.html') ? rest : rest + '.html');
     return pages.has(name) ? name : null;
+  }
+  function cleanUrl(target) {
+    const url = new URL(target, location.href);
+    const name = routeName(url.href);
+    if (!name) return url;
+    url.pathname = base.pathname + (name === 'index.html' ? '' : name.slice(0, -5));
+    return url;
   }
   function isPlainClick(event, anchor) {
     return !event.defaultPrevented && event.button === 0 && !event.ctrlKey &&
@@ -157,7 +167,7 @@
       finishStyles();
       if (!pop) {
         rememberPosition();
-        history.pushState({ realdateRoute: true, scrollY: 0 }, '', url.href);
+        history.pushState({ realdateRoute: true, scrollY: 0 }, '', cleanUrl(url).href);
       }
       route = name;
       window.L1nGRealDate?.refreshTitle?.();
@@ -181,7 +191,7 @@
       if (controller.signal.aborted || id !== sequence) return;
       console.error('[RealDate navigation]', error);
       if (pop) location.reload();
-      else location.assign(url.href);
+      else location.assign(cleanUrl(url).href);
     } finally {
       if (id === sequence) {
         pending = null;
@@ -195,9 +205,10 @@
     const url = new URL(anchor.href, location.href);
     const name = routeName(url.href);
     if (!name || url.search) return;
-    if (name === route && url.pathname === location.pathname) return; // Native anchors.
+    if (name === route && cleanUrl(url).pathname === cleanUrl(location.href).pathname)
+      return; // Native same-page anchors and query navigation.
     event.preventDefault();
-    navigate(url);
+    navigate(cleanUrl(url));
   });
   window.addEventListener('popstate', event => {
     const name = routeName(location.href);
@@ -218,6 +229,10 @@
       if (route === 'feedback.html') await feedbackReady();
       if (location.hash) scrollToTarget(new URL(location.href), null);
       history.scrollRestoration = 'manual';
+      // Normalize legacy URLs without an extra navigation or reloading the page.
+      const canonical = cleanUrl(location.href);
+      if (canonical.href !== location.href)
+        history.replaceState(history.state, '', canonical.href);
     } catch (error) {
       console.error('[RealDate shared header]', error);
       appReady = false;

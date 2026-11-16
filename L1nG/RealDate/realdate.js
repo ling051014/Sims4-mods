@@ -26,7 +26,8 @@ document.documentElement.classList.add("js");
 
         root.dataset.language = nextLanguage;
         root.lang = nextLanguage;
-        const page = location.pathname.split('/').pop() || 'index.html';
+        const segment = location.pathname.split('/').filter(Boolean).pop() || 'index';
+        const page = segment.endsWith('.html') ? segment : segment + '.html';
         document.title = (PAGE_TITLES[page] || PAGE_TITLES['index.html'])[nextLanguage === 'en' ? 1 : 0];
 
         buttons().forEach((button) => {

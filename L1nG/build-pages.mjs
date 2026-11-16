@@ -113,19 +113,49 @@ const domains = {
   'GenealogyExporter/genealogy-exporter.html':'https://genealogy-exporter.by-l1ng.com/',
   'Translations/index.html':'https://translations.by-l1ng.com/'
 };
-const rewrite = (value,attribute) => {
-  if (attribute !== 'href') return value;
-  const main=value.split(/[?#]/,1)[0];
-  if (value.startsWith('../home.html') || value==='home.html' && mode!=='home')
-    return 'https://home.by-l1ng.com/' + value.slice(main.length);
-  if (domains[main]) return domains[main]+value.slice(main.length);
-  if (main.startsWith('RealDate/')) return 'https://realdate.by-l1ng.com/'+main.slice('RealDate/'.length)+value.slice(main.length);
-  if (main.startsWith('GenealogyExporter/')) return 'https://genealogy-tool.by-l1ng.com/'+main.slice('GenealogyExporter/'.length)+value.slice(main.length);
-  if (mode==='genealogy' && main==='genealogy-exporter.html')
-    return 'https://genealogy-exporter.by-l1ng.com/'+value.slice(main.length);
-  if (mode==='extractor' && main==='genealogy.html')
-    return 'https://genealogy-tool.by-l1ng.com/'+value.slice(main.length);
-  return value;
+// Rewrite only public HTML navigation in the deployed copies. Source files
+// retain their .html names. Never change assets or protected admin URLs.
+const origins={
+  home:'https://home.by-l1ng.com',
+  realdate:'https://realdate.by-l1ng.com',
+  genealogy:'https://genealogy-tool.by-l1ng.com',
+  extractor:'https://genealogy-exporter.by-l1ng.com',
+  translations:'https://translations.by-l1ng.com'
+};
+const aliases={
+  home:new Set(['/index.html','/home.html']),
+  realdate:new Set(['/index.html']),
+  genealogy:new Set(['/index.html','/genealogy.html']),
+  extractor:new Set(['/index.html','/genealogy-exporter.html']),
+  translations:new Set(['/index.html'])
+};
+const rewrite=(value,attribute,relative)=>{
+  if(attribute!=='href'||/^(#|mailto:|tel:|javascript:|data:|blob:)/i.test(value))return value;
+  const main=value.split(/[?#]/,1)[0],suffix=value.slice(main.length);
+  let link=value;
+  if(main==='../home.html'||main==='home.html'&&mode!=='home')
+    link=origins.home+'/'+suffix;
+  else if(main==='../home-en.html')link=origins.home+'/home-en.html'+suffix;
+  else if(domains[main])link=domains[main]+suffix;
+  else if(main.startsWith('RealDate/'))
+    link=origins.realdate+'/'+main.slice('RealDate/'.length)+suffix;
+  else if(main.startsWith('GenealogyExporter/'))
+    link=origins.genealogy+'/'+main.slice('GenealogyExporter/'.length)+suffix;
+  else if(mode==='genealogy'&&main==='genealogy-exporter.html')
+    link=origins.extractor+'/'+suffix;
+  else if(mode==='extractor'&&main==='genealogy.html')
+    link=origins.genealogy+'/'+suffix;
+  let url;
+  try{url=new URL(link,new URL(relative,origins[mode]+'/'));}catch{return link;}
+  const target=Object.keys(origins).find(k=>origins[k]===url.origin);
+  if(!target||!url.pathname.endsWith('.html'))return link;
+  // Protected dashboard keeps its exact access-controlled pathname.
+  if(target==='home'&&url.pathname==='/feedback/admin.html')return link;
+  const canonical=aliases[target].has(url.pathname)
+    ? '/' : url.pathname.slice(0,-5);
+  return target===mode
+    ? canonical+url.search+url.hash
+    : origins[target]+canonical+url.search+url.hash;
 };
 function htmlFiles(directory) {
   const all=[];
@@ -140,9 +170,9 @@ const htmls=htmlFiles(out);
 let analyticsPages=0;
 for(const p of htmls) {
   const html=fs.readFileSync(p,'utf8');
-  let modified=html.replace(/\b(href|src)=(["'])([^"']+)\2/g, (whole,key,quote,value)=>
-    key+'='+quote+rewrite(value,key)+quote);
   const relative=path.relative(out,p).split(path.sep).join('/');
+  let modified=html.replace(/\b(href|src)=(["'])([^"']+)\2/g, (whole,key,quote,value)=>
+    key+'='+quote+rewrite(value,key,relative)+quote);
   // Never count private administrator activity as public traffic.
   if (relative !== 'feedback/admin.html') {
     if (!/<\/head\s*>/i.test(modified)) throw new Error('Missing HTML head: '+relative);
@@ -171,9 +201,11 @@ for (const p of htmls) {
     try { target=new URL(value,pageUrl); } catch { missing.push(rel+': invalid URL '+value); continue; }
     if (target.origin!=='https://pages.example') continue;
     const resolved=path.join(out,decodeURIComponent(target.pathname).replace(/^\/+/,''));
-    if (!fs.existsSync(resolved) || fs.statSync(resolved).isDirectory() && !fs.existsSync(path.join(resolved,'index.html'))) {
-      missing.push(rel+': missing '+value);
-    }
+    const exists=fs.existsSync(resolved) &&
+      (!fs.statSync(resolved).isDirectory() || fs.existsSync(path.join(resolved,'index.html')));
+    const alias=target.pathname.endsWith('/')
+      ? path.join(resolved,'index.html') : resolved+'.html';
+    if (!exists && !fs.existsSync(alias)) missing.push(rel+': missing '+value);
   }
 }
 if (mode==='home') {

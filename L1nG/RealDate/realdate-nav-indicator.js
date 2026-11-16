@@ -17,7 +17,9 @@
   function recalculate() { if (active && indicator) write(coordinates(active)); }
   function activate(pathname, immediate = false) {
     if (!nav) return;
-    const next = links.find(link => new URL(link.href, location.href).pathname === pathname) || null;
+    // Both /faq and /faq.html identify the same navigation item.
+    const normalize = path => path.replace(/\/index\.html$/, '/').replace(/\.html$/, '').replace(/\/$/, '') || '/';
+    const next = links.find(link => normalize(new URL(link.href, location.href).pathname) === normalize(pathname)) || null;
     for (const link of links) {
       const selected = link === next;
       link.classList.toggle('active', selected);
