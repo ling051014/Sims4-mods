@@ -159,3 +159,67 @@ test("FAQ 骨架對應六題並保留展開答案，長頁面具有後續章節"
   assert.match(script,/sk-home-project-grid/);
   assert.match(script,/sk-feedback-layout/);
 });
+
+test("文件骨架依真實內容高度延伸且在退場時解除高度監聽",()=>{
+  const vm=require("node:vm");
+  let skeleton;
+  let disconnected=false;
+  let watched=null;
+  const body={
+    getBoundingClientRect:()=>({height:2600}),
+    offsetHeight:2450
+  };
+  const doc={
+    readyState:"complete",
+    body,
+    documentElement:{clientHeight:780},
+    currentScript:{
+      dataset:{skeletonLayout:"realdate-faq",skeletonAuto:"manual"},
+      insertAdjacentElement(_position,node){skeleton=node;}
+    },
+    createElement(){return {
+      style:{},innerHTML:"",setAttribute(){},remove(){},
+      classList:{add(){}},addEventListener(){}
+    };}
+  };
+  class Observer{
+    observe(node){watched=node;}
+    disconnect(){disconnected=true;}
+  }
+  const win={innerHeight:900,ResizeObserver:Observer,addEventListener(){},removeEventListener(){}};
+  vm.runInNewContext(script,{
+    document:doc,window:win,
+    requestAnimationFrame:()=>1,cancelAnimationFrame(){},
+    setTimeout(){},matchMedia:()=>({matches:true})
+  });
+  assert.equal(skeleton.style.height,"2600px");
+  assert.equal(watched,body);
+  win.L1nGSkeleton.ready();
+  assert.equal(disconnected,true);
+});
+test("內部捲動骨架退出時保留模組列表的捲動進度",()=>{
+  const vm=require("node:vm");
+  const scrollport={scrollTop:325};
+  const content={scrollTop:0};
+  let skeleton;
+  const doc={
+    currentScript:{
+      dataset:{skeletonLayout:"mods-list",skeletonAuto:"manual"},
+      insertAdjacentElement(_position,node){skeleton=node;}
+    },
+    querySelector:s=>s===".page-scroll"?content:null,
+    createElement(){return {
+      style:{},innerHTML:"",setAttribute(){},
+      classList:{add(){}},addEventListener(){},remove(){},
+      querySelector:s=>s===".sk-mods-scroll"?scrollport:null
+    };}
+  };
+  const win={};
+  vm.runInNewContext(script,{
+    document:doc,window:win,requestAnimationFrame:()=>1,
+    cancelAnimationFrame(){},matchMedia:()=>({matches:true})
+  });
+  assert.match(skeleton.className,/is-internal-scroll/);
+  win.L1nGSkeleton.ready();
+  assert.equal(content.scrollTop,325);
+});
