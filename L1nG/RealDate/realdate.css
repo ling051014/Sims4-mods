@@ -1063,6 +1063,11 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 溢出處理 */ overflow: hidden;
 }
 
+/* 學校門檻沿用生命階段表格視覺，只調整欄數。 */
+.life-stage-table.school-stage-table {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .life-stage-table > div {
     /* 內縮空間 */ padding: 15px;
     /* 背景 */ background: var(--surface);
@@ -1949,7 +1954,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 }
 
 
-/* ========【RealDate 首頁指定整合】 左側字級／大小寫、右側翻頁日曆 ======== */
+/* ========【RealDate 首頁指定整合】 左側字級 / 大小寫、右側翻頁日曆 ======== */
 /* 僅作用於首頁 rd-hero-track；保留其他頁面與共用頁腳原樣。 */
 .rd-hero-track .hero-copy h1 {
     font-family: "Helvetica Neue", "Segoe UI", "Lato", sans-serif;
@@ -2332,6 +2337,10 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 
     .life-stage-table {
         /* 網格欄位 */ grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .life-stage-table.school-stage-table {
+        grid-template-columns: 1fr;
     }
 
     /* 手機版將每一組模組與相容檔合併閱讀，不再拆成表格的兩列。 */
