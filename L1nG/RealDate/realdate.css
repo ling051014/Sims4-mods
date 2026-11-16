@@ -1054,6 +1054,44 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 字體大小 */ font-size: 11px;
 }
 
+/* 寒暑假沿用 .season-map 卡片，日期資訊只作區塊內的排版調整。 */
+.school-holiday-map .school-holiday-period {
+    width: 100%;
+    padding: 12px;
+    background: var(--surface-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+}
+.school-holiday-map p { margin: 0; }
+.school-holiday-map .school-holiday-kind {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+.school-holiday-map .school-holiday-dates {
+    margin-top: 5px;
+    color: var(--text-strong);
+    font-size: 16px;
+    font-weight: 550;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+}
+.school-holiday-map .school-holiday-start {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    width: 100%;
+    gap: 6px 12px;
+    margin-top: 9px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+.school-holiday-map .school-holiday-start b {
+    color: var(--text-strong);
+    font-size: 13px;
+    font-weight: 600;
+}
+
 .life-stage-table {
     /* 上方外距 */ margin-top: 28px;
     /* 顯示方式 */ display: grid;
