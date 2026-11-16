@@ -67,6 +67,13 @@
     const rd = (extra, small = false) => bar("realdate") + pageHero(extra || "", small);
     const title = () => '<div class="sk-section-heading">' + eyebrow() + block("sk-section-title") + '</div>';
     const docIndex = n => '<div class="sk-doc-index">' + repeat(n, () => block("sk-index-link")) + '</div>';
+    // 長頁骨架依主要章節延伸，避免捲動後只剩第一屏佔位。
+    const documentSection = (count = 3) =>
+        '<section class="sk-document-section">' + title() +
+        '<div class="sk-feature-grid">' + repeat(count, feature) + '</div></section>';
+    const documentRows = (count = 4) =>
+        '<div class="sk-document-rows">' + repeat(count, () =>
+            '<div class="sk-document-row">' + rowLines() + '</div>') + '</div>';
     const roadRow = () => '<div class="sk-timeline-row"><span class="sk-timeline-dot"></span><div class="sk-timeline-card">' +
         block("sk-status-pill") + rowLines() + '</div></div>';
     const releaseRow = () => '<div class="sk-release-row"><span class="sk-timeline-dot"></span><div class="sk-release-card">' +
@@ -102,14 +109,14 @@
 
         "mods-list": () =>
             '<div class="mods-list-toolbar">' + block("l1ng-sk-line crumb") + block("l1ng-sk-pill search") + '</div>' +
-            '<div class="mods-card-grid">' + repeat(6, card) + '</div>',
+            '<div class="sk-mods-scroll"><div class="mods-card-grid">' + repeat(12, card) + '</div></div>',
 
         "mods-table": () =>
             '<div class="mods-list-toolbar">' + block("l1ng-sk-line crumb") + block("l1ng-sk-pill search") + '</div>' +
-            '<div class="mods-table-shell"><div class="mods-table-head">' +
-            repeat(4, () => block("l1ng-sk-line")) + '</div>' + repeat(8, () =>
+            '<div class="sk-mods-scroll"><div class="mods-table-shell"><div class="mods-table-head">' +
+            repeat(4, () => block("l1ng-sk-line")) + '</div>' + repeat(18, () =>
                 '<div class="mods-table-row">' + repeat(4, () => block("l1ng-sk-line sm")) + '</div>'
-            ) + '</div>',
+            ) + '</div></div>',
 
         "l1ng-home": () =>
             '<div class="l1ng-home-hero"><div class="l1ng-home-hero-inner">' +
@@ -119,7 +126,9 @@
                     '<div class="sk-home-creator-link">' + block("sk-home-creator-icon") +
                     block("sk-home-creator-label") + '</div>') + '</div>' +
                 homeUpdates() +
-            '</div>' + block("sk-scroll-hint") + '</div>',
+            '</div>' + block("sk-scroll-hint") + '</div>' +
+            '<div class="sk-home-projects">' + title() + '<div class="sk-home-project-grid">' +
+            repeat(3, feature) + '</div></div>',
 
         "l1ng-changelog": () =>
             '<div class="sk-changelog-header">' + block("sk-changelog-brand") +
@@ -128,7 +137,7 @@
             '<div class="sk-changelog-body">' + eyebrow() + block("sk-changelog-title") +
                 block("sk-wide-copy") + block("sk-medium-copy") +
                 '<div class="sk-changelog-pills">' + repeat(6, () => block("sk-status-pill")) + '</div>' +
-                releaseRow() + releaseRow() + '</div>',
+                repeat(5, releaseRow) + '</div>',
 
         "genealogy-exporter": () =>
             bar("product") +
@@ -138,7 +147,9 @@
             '</div><div class="sk-exporter-visual"><div class="sk-exporter-visual-head"></div>' +
                 '<div class="sk-exporter-portrait-row">' + repeat(3, () => block("sk-exporter-portrait")) + '</div>' +
                 block("sk-medium-copy") + '</div></div>' +
-            '<div class="sk-exporter-features">' + repeat(3, feature) + '</div>',
+            '<div class="sk-exporter-features">' + repeat(7, feature) + '</div>' +
+            '<div class="sk-realdate-body">' + documentSection(4) +
+            documentSection(3) + documentRows(4) + '</div>',
 
         "translations": () =>
             bar("translations") +
@@ -153,9 +164,9 @@
             '<div class="sk-translations-body">' + title() +
                 '<div class="sk-translation-toolbar">' + block("sk-search") +
                     repeat(3, () => block("sk-filter")) + '</div>' +
-                '<div class="sk-translation-grid">' + repeat(4, () =>
+                '<div class="sk-translation-grid">' + repeat(8, () =>
                     '<div class="sk-translation-card">' + rowLines() + block("sk-button") + '</div>'
-                ) + '</div></div>',
+                ) + '</div>' + documentSection(3) + documentSection(3) + '</div>',
 
         "realdate-home": () =>
             bar("realdate") +
@@ -169,45 +180,60 @@
                 block("sk-medium-copy") + block("sk-section-title") +
                 '<div class="sk-calendar-days">' + repeat(28, () => block("sk-calendar-day")) + '</div>' +
             '</div><div class="sk-calendar-floating">' + rowLines() + '</div></div></div>' +
-            '<div class="sk-realdate-home-features">' + repeat(3, feature) + '</div>',
+            '<div class="sk-realdate-home-features">' + repeat(6, feature) + '</div>' +
+            '<div class="sk-realdate-body">' + title() + '<div class="sk-feature-grid">' +
+            repeat(2, feature) + '</div></div>',
 
         "realdate-download": () =>
             rd() + '<div class="sk-realdate-body">' + title() +
                 '<div class="sk-download-card"><div class="sk-download-copy">' +
                     rowLines() + twoButtons() + '</div><div class="sk-download-files">' + rowLines() + '</div></div>' +
-                title() + '<div class="sk-step-grid">' + repeat(3, feature) + '</div></div>',
+                title() + '<div class="sk-step-grid">' + repeat(3, feature) + '</div>' +
+            documentSection(3) + documentSection(2) + documentRows(7) + '</div>',
 
         "realdate-faq": () =>
             rd("", true) + '<div class="sk-realdate-body sk-faq-list">' +
-                repeat(9, () => '<div class="sk-faq-row">' + block("sk-faq-line") +
+                '<div class="sk-faq-row">' + block("sk-faq-line") + block("sk-faq-icon") + '</div>' +
+                '<div class="sk-faq-answer">' + block("sk-wide-copy") + block("sk-medium-copy") + '</div>' +
+                repeat(5, () => '<div class="sk-faq-row">' + block("sk-faq-line") +
                     block("sk-faq-icon") + '</div>') + '</div>',
 
         "realdate-roadmap": () =>
-            rd() + '<div class="sk-realdate-body sk-roadmap-list">' + repeat(3, roadRow) + '</div>',
+            rd() + '<div class="sk-realdate-body sk-roadmap-list">' + repeat(5, roadRow) + '</div>',
 
         "realdate-gameplay": () =>
             rd('<div class="sk-doc-note">' + block("sk-medium-copy") + '</div>') +
                 '<div class="sk-realdate-body">' + title() +
                     '<div class="sk-doc-copy">' + rowLines() +
-                        '<div class="sk-feature-grid">' + repeat(2, feature) + '</div></div></div>',
+                        '<div class="sk-feature-grid">' + repeat(2, feature) + '</div></div>' +
+                        repeat(7, () => documentSection(3)) + '</div>',
 
         "realdate-compatibility": () =>
             rd() + '<div class="sk-realdate-body">' + title() +
                 '<div class="sk-environment-grid">' + repeat(3, feature) + '</div>' +
-                title() + '<div class="sk-feature-grid">' + repeat(2, feature) + '</div></div>',
+                title() + '<div class="sk-feature-grid">' + repeat(2, feature) + '</div>' +
+                repeat(9, () => documentSection(2)) + '</div>',
 
         "realdate-changelog": () =>
             rd('<div class="sk-release-facts">' + block("sk-medium-copy") + block("sk-medium-copy") +
                 '</div>' + twoButtons()) +
-                '<div class="sk-realdate-body sk-changelog-list">' + releaseRow() + releaseRow() + '</div>',
+                '<div class="sk-realdate-body sk-changelog-list">' + repeat(8, releaseRow) + '</div>',
 
-        "realdate-content": () => rd() + '<div class="sk-realdate-body">' + title() + feature() + '</div>',
+        "realdate-content": () => rd() + '<div class="sk-realdate-body sk-feedback-layout">' +
+            '<aside class="sk-feedback-aside">' + title() + rowLines() + rowLines() + '</aside>' +
+            '<div class="sk-feedback-form">' + title() +
+            repeat(5, () => '<div class="sk-feedback-field">' + block("sk-medium-copy") +
+                block("sk-feedback-input") + '</div>') +
+            block("sk-button") + '</div></div>',
         "l1ng-content": () => bar("home") + '<div class="sk-realdate-body">' + title() + feature() + '</div>',
         "product": () => bar("product") + '<div class="sk-realdate-body">' + title() + feature() + '</div>'
     };
 
+    // 普通文件跟隨 document 捲動；模組索引本身使用獨立 .page-scroll。
+    const internalScroll = layout === "mods-list" || layout === "mods-table";
     const skeleton = document.createElement("div");
-    skeleton.className = "l1ng-site-skeleton layout-" + layout;
+    skeleton.className = "l1ng-site-skeleton layout-" + layout +
+        (internalScroll ? " is-internal-scroll" : " is-document-scroll");
     skeleton.setAttribute("aria-hidden", "true");
     skeleton.innerHTML =
         '<div class="l1ng-sk-shell">' +
@@ -217,17 +243,61 @@
     script.insertAdjacentElement("afterend", skeleton);
 
     let finished = false;
+    let layoutObserver = null;
+    let heightFrame = 0;
+
+    function sizeToDocument() {
+        heightFrame = 0;
+        if (finished || internalScroll || !document.body?.getBoundingClientRect || !skeleton.style) return;
+        // 使用實際頁面自然高度，不讓骨架自己撐大捲動範圍。
+        const height = Math.max(
+            document.body.getBoundingClientRect().height,
+            document.body.offsetHeight || 0,
+            document.documentElement?.clientHeight || 0,
+            window.innerHeight || 0
+        );
+        if (height > 0) skeleton.style.height = Math.ceil(height) + "px";
+    }
+    function scheduleDocumentHeight() {
+        if (!heightFrame && !finished) heightFrame = requestAnimationFrame(sizeToDocument);
+    }
+    function watchDocument() {
+        if (internalScroll || !document.body?.getBoundingClientRect) return;
+        sizeToDocument();
+        if (typeof window.ResizeObserver === "function") {
+            layoutObserver = new window.ResizeObserver(scheduleDocumentHeight);
+            layoutObserver.observe(document.body);
+        }
+        window.addEventListener?.("resize", scheduleDocumentHeight, { passive: true });
+    }
+    if (!internalScroll) {
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", watchDocument, { once: true });
+        } else watchDocument();
+    }
+
     function ready() {
         if (finished) return;
         finished = true;
-        skeleton.classList.add("is-hidden");
-
-        const remove = () => skeleton.remove();
-        skeleton.addEventListener("transitionend", remove, { once:true });
-
-        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            remove();
+        layoutObserver?.disconnect();
+        if (heightFrame) cancelAnimationFrame(heightFrame);
+        if (!internalScroll) window.removeEventListener?.("resize", scheduleDocumentHeight);
+        else {
+            // 固定工作區的模組索引：交還骨架捲動進度，避免退場後跳回頂端。
+            const placeholder = skeleton.querySelector?.(".sk-mods-scroll");
+            const content = document.querySelector?.(".page-scroll");
+            if (placeholder && content) content.scrollTop = placeholder.scrollTop;
         }
+        skeleton.classList.add("is-hidden");
+        let removed = false;
+        const remove = () => {
+            if (removed) return;
+            removed = true;
+            skeleton.remove();
+        };
+        skeleton.addEventListener("transitionend", remove, { once:true });
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) remove();
+        else setTimeout(remove, 260); // 被取消的轉場也必須完成退場
     }
 
     window.L1nGSkeleton = Object.assign(window.L1nGSkeleton || {}, { ready, homeUpdates });

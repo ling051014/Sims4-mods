@@ -21,11 +21,9 @@ test("正式頁面皆使用對應骨架及最新版資源",()=>{
   for (const [path,layout] of layouts) {
     const html=readFileSync(join(root,path),"utf8");
     assert.ok(html.includes('data-skeleton-layout="'+layout+'"'), path+" layout");
-    const expectedJsVersion = /^L1nG\/home(?:-en)?\.html$/.test(path)
-      ? "20261021-home-curseforge-r1"
-      : "20261012-site-skeleton-hero-sync-r3";
+    const expectedJsVersion = "20261116-full-page-skeleton-r1";
     assert.ok(html.includes("site-skeleton.js?v="+expectedJsVersion),path+" JS cache");
-    assert.ok(html.includes("site-skeleton.css?v=20261012-site-skeleton-hero-sync-r3"),path+" CSS cache");
+    assert.ok(html.includes("site-skeleton.css?v=20261116-full-page-skeleton-r1"),path+" CSS cache");
     assert.ok(script.includes('"'+layout+'": () =>'),layout+" template");
   }
 });
@@ -139,4 +137,26 @@ test("主視覺骨架保持與實際內容一致",()=>{
   assert.match(style,/\.sk-site-links\s*\{[^}]*justify-content:center;/);
   assert.match(style,/\.sk-release-sections\s*\{[^}]*display:grid;/);
   assert.match(style,/\.sk-translations-hero\s*\{[^}]*min-height:620px;/);
+});
+
+test("骨架支援整頁捲動並維持固定工作區模式",()=>{
+  assert.match(style,/\.l1ng-site-skeleton\s*\{[^}]*position:absolute;/);
+  assert.match(style,/\.l1ng-site-skeleton\.is-document-scroll \.sk-sitebar\s*\{[^}]*position:sticky;/);
+  assert.match(style,/\.l1ng-site-skeleton\.is-internal-scroll\s*\{[^}]*position:fixed;/);
+  assert.match(style,/\.l1ng-site-skeleton\.is-internal-scroll \.sk-mods-scroll\s*\{[^}]*overflow-y:auto;/);
+  assert.match(script,/function sizeToDocument\(\)/);
+  assert.match(script,/document\.body\.getBoundingClientRect\(\)\.height/);
+  assert.match(script,/layoutObserver\.observe\(document\.body\)/);
+  assert.match(script,/content\.scrollTop = placeholder\.scrollTop/);
+  assert.match(script,/setTimeout\(remove, 260\)/);
+});
+test("FAQ 骨架對應六題並保留展開答案，長頁面具有後續章節",()=>{
+  const faq=readFileSync(join(root,"L1nG/RealDate/faq.html"),"utf8");
+  assert.equal((faq.match(/<details class="faq-item reveal"/g)||[]).length,6);
+  assert.match(script,/repeat\(5, \(\) => '<div class="sk-faq-row">/);
+  assert.match(script,/class="sk-faq-answer"/);
+  assert.doesNotMatch(script,/repeat\(9, \(\) => '<div class="sk-faq-row">/);
+  assert.match(script,/repeat\(8, releaseRow\)/);
+  assert.match(script,/sk-home-project-grid/);
+  assert.match(script,/sk-feedback-layout/);
 });
