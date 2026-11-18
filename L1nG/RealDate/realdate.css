@@ -1508,7 +1508,7 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     /* 最小寬度 */ min-width: 180px;
 }
 
-/* ========【相容性】 設定 - 測試環境與快速總覽 ======== */
+/* ========【相容性】 設定 - 測試環境 ======== */
 .environment-grid {
     /* 顯示方式 */ display: grid;
     /* 網格欄位 */ grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1522,34 +1522,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
 .environment-grid > div {
     /* 內縮空間 */ padding: 15px;
     /* 背景 */ background: var(--surface);
-}
-
-.compat-overview {
-    /* 顯示方式 */ display: grid;
-    /* 網格欄位 */ grid-template-columns: repeat(2, minmax(0, 1fr));
-    /* 邊框 */ border: 1px solid var(--line);
-    /* 圓角弧度 */ border-radius: 7px;
-    /* 溢出處理 */ overflow: hidden;
-}
-
-.compat-overview > div {
-    /* 內縮空間 */ padding: 14px 16px;
-    /* 顯示方式 */ display: flex;
-    /* 水平排列 */ justify-content: space-between;
-    /* 項目間距 */ gap: 16px;
-    /* 背景 */ background: var(--surface);
-    /* 下方邊框 */ border-bottom: 1px solid var(--line-soft);
-}
-
-.compat-overview strong {
-    /* 文字顏色 */ color: var(--text-strong);
-    /* 字體大小 */ font-size: 12px;
-}
-
-.compat-overview span {
-    /* 文字顏色 */ color: var(--text-muted);
-    /* 字體大小 */ font-size: 11px;
-    /* 文字對齊 */ text-align: right;
 }
 
 /* ========【相容性】 設定 - 與常見問題共用的展開視覺 ======== */
@@ -2307,7 +2279,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
     .optional-package-grid,
     .release-section,
     .environment-grid,
-    .compat-overview,
     .responsibility-grid,
     .download-facts {
         /* 網格欄位 */ grid-template-columns: 1fr;
@@ -2392,15 +2363,6 @@ html[data-language="en"] [data-lang="zh-Hant"] {
         flex-shrink: 0;
         white-space: nowrap;
         text-align: right;
-    }
-
-    .compat-overview > div {
-        /* 排列方向 */ flex-direction: column;
-        /* 垂直對齊 */ align-items: flex-start;
-    }
-
-    .compat-overview span {
-        /* 文字對齊 */ text-align: left;
     }
 
 
