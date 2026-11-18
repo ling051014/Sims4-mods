@@ -211,7 +211,6 @@
         "realdate-compatibility": () =>
             rd() + '<div class="sk-realdate-body">' + title() +
                 '<div class="sk-environment-grid">' + repeat(3, feature) + '</div>' +
-                title() + '<div class="sk-feature-grid">' + repeat(2, feature) + '</div>' +
                 repeat(9, () => documentSection(2)) + '</div>',
 
         "realdate-changelog": () =>
