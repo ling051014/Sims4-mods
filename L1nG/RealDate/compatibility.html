@@ -286,12 +286,10 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持日期與時間的一致性。當 RealDate 正在管理模擬市民年紀時，會阻止已支援偵測的 UI Cheats 年紀修改並顯示提示，避免進度被意外覆寫。
-                            對應的 UI 相容檔則用於避免雙方共用的介面資源互相覆蓋。
+                            RealDate 會維持 UI Cheats 季節 / 時間操作的日期一致性，並攔截已支援偵測的年紀修改衝突；相容檔可避免共用介面資源互相覆蓋。
                         </p>
                         <p data-lang="en">
-                            RealDate keeps its date and time consistent when UI Cheats is used on supported season / time interfaces. While RealDate manages a Sim's age, detected UI Cheats age edits are blocked with a notification to prevent accidental overrides.
-                            The matching UI compatibility package prevents both mods from overwriting shared interface resources.
+                            RealDate keeps dates consistent with UI Cheats season / time controls and blocks detected conflicting age edits. Compatibility packages prevent shared UI resources from overwriting each other.
                         </p>
                         <div class="compat-meta">
                             <div>
@@ -309,10 +307,6 @@
                                 <small data-lang="en">UI Cheats + Quick Save</small>
                                 <code>L1nG_RealDate_Compat_QuickSave_UI_Cheats.package</code>
                             </div>
-                        </div>
-                        <div class="doc-note doc-note-warning">
-                            <span data-lang="zh-Hant">v0.6 的 UI Cheats 與 Quick Save Button 相容檔依模組組合擇一，搭配 Better Simology Panel 時另選其對應相容檔。v0.6.1 同時使用三個模組時，只安裝 <code>L1nG_RealDate_Compat_QuickSave_BetterSimology_UI_Cheats.package</code>，不要另外疊加其他對應介面相容檔。</span>
-                            <span data-lang="en">For v0.6, choose one UI Cheats / Quick Save Button compatibility package for your setup and the matching Better Simology Panel package if needed. When using all three mods with v0.6.1, install only <code>L1nG_RealDate_Compat_QuickSave_BetterSimology_UI_Cheats.package</code>, without stacking other matching UI packages.</span>
                         </div>
                     </div>
                 </details>
