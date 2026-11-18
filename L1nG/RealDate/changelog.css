@@ -153,8 +153,7 @@
     overflow-wrap: anywhere;
 }
 
-.release-header time,
-.release-header .release-date {
+.release-header time {
     flex: 0 0 auto;
     padding-top: 2px;
     color: var(--text-soft);
@@ -295,8 +294,7 @@
         gap: 6px;
     }
 
-    .release-header time,
-    .release-header .release-date {
+    .release-header time {
         padding: 0;
     }
 
