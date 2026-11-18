@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261021-occupancy">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>相容性 · RealDate · L1nG</title>
-    <meta name="description" content="RealDate v0.6 Beta 教育整合、第三方模組、測試版本及相容檔安裝說明。">
+    <meta name="description" content="RealDate v0.6.1 Beta 教育整合、第三方模組、測試版本及相容檔安裝說明。">
     <meta name="theme-color" content="#fafafa">
     <link rel="stylesheet" href="realdate.css?v=20261119-compat-cleanup-r1">
     <script src="../../site-language.js?v=20261102-language-beta-r1"></script>
@@ -48,12 +48,12 @@
 
                 <section class="section">
             <div class="section-heading reveal">
-                <span class="eyebrow">TESTED ENVIRONMENT · v0.6</span>
-                <h2 data-lang="zh-Hant">v0.6 測試環境</h2>
-                <h2 data-lang="en">v0.6 Test Environment</h2>
-                <p data-lang="zh-Hant">這些是 v0.6 發布時實際使用 / 驗證的版本。較低或後續版本需自行測試，不一定相容。</p>
+                <span class="eyebrow">TESTED ENVIRONMENT · v0.6.1</span>
+                <h2 data-lang="zh-Hant">v0.6.1 測試環境</h2>
+                <h2 data-lang="en">v0.6.1 Test Environment</h2>
+                <p data-lang="zh-Hant">這些是 v0.6.1 發布時實際使用 / 驗證的版本。較低或後續版本需自行測試，不一定相容。</p>
                 <p data-lang="en">
-                    These are the versions used / verified for the v0.6 release. Older or newer versions should be tested independently and may not be compatible.
+                    These are the versions used / verified for the v0.6.1 release. Older or newer versions should be tested independently and may not be compatible.
                 </p>
             </div>
             <div class="environment-grid reveal">
@@ -176,17 +176,15 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            使用 UI Cheats 操作季節 / 時間相關介面時，RealDate 會維持日期與時間的一致性。當 RealDate 正在管理模擬市民年紀時，會阻止已支援偵測的 UI Cheats 年紀修改並顯示提示，避免進度被意外覆寫。
-                            對應的 UI 相容檔則用於避免雙方共用的介面資源互相覆蓋。
+                            相容檔用於整合 RealDate 的日期與年齡資訊，避免與 UI Cheats 共用的介面資源互相覆蓋。依模組組合擇一安裝對應相容檔。
                         </p>
                         <p data-lang="en">
-                            RealDate keeps its date and time consistent when UI Cheats is used on supported season / time interfaces. While RealDate manages a Sim's age, detected UI Cheats age edits are blocked with a notification to prevent accidental overrides.
-                            The matching UI compatibility package prevents both mods from overwriting shared interface resources.
+                            The compatibility packages integrate RealDate's date and age information and prevent shared UI resources from overwriting those used by UI Cheats. Install only the matching compatibility package for your mod setup.
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>UI Cheats v1.59.1</strong>
                             </div>
                             <div>
@@ -199,10 +197,16 @@
                                 <small data-lang="en">UI Cheats + Quick Save</small>
                                 <code>L1nG_RealDate_Compat_QuickSave_UI_Cheats.package</code>
                             </div>
-                        </div>
-                        <div class="doc-note doc-note-warning">
-                            <span data-lang="zh-Hant">UI Cheats、Quick Save、Quick Save + UI Cheats 三個相容檔只能擇一安裝。如果同時使用 Better Simology Panel，還需另外安裝 <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code>，不要再安裝 Better Simology 的一般相容檔。</span>
-                            <span data-lang="en">Choose only one of the UI Cheats, Quick Save, or combined UI Cheats + Quick Save compatibility packages. If you also use Better Simology Panel, install <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code> as well, instead of the standard Better Simology compatibility package.</span>
+                            <div>
+                                <small data-lang="zh-Hant">UI Cheats + Better Simology Panel</small>
+                                <small data-lang="en">UI Cheats + Better Simology Panel</small>
+                                <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">UI Cheats + Quick Save + Better Simology Panel</small>
+                                <small data-lang="en">UI Cheats + Quick Save + Better Simology Panel</small>
+                                <code>L1nG_RealDate_Compat_QuickSave_BetterSimology_UI_Cheats.package</code>
+                            </div>
                         </div>
                     </div>
                 </details>
@@ -262,8 +266,8 @@
                         </ul>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>MCCC 2026.6.0</strong>
                             </div>
                         </div>
@@ -295,8 +299,8 @@
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>WickedWhims v185k</strong>
                             </div>
                         </div>
@@ -328,8 +332,8 @@
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>Slice of Life v1.2 / Menstrual Cycle Strawberry 0.7</strong>
                             </div>
                             <div>
@@ -374,8 +378,8 @@
                         </div>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>RPO v2.986</strong>
                             </div>
                         </div>
@@ -415,8 +419,8 @@
                         </div>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>Child Birth Mod v1.972</strong>
                             </div>
                         </div>
@@ -445,8 +449,8 @@
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>Mood Pack Mod v1.677</strong>
                             </div>
                             <div>
@@ -483,8 +487,8 @@
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>BetterBuildBuy v4.5</strong>
                             </div>
                             <div>
@@ -512,16 +516,15 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            自 v0.4 起提供 Quick Save Button 專用相容檔，以及 Quick Save Button + UI Cheats 合併相容檔，用於避免共用介面資源互相衝突。依是否使用 UI Cheats 選擇對應相容檔，兩款不要同時安裝。
+                            自 v0.4 起提供 Quick Save Button 專用相容檔及 UI Cheats 合併相容檔，v0.6.1 新增三模組整合相容檔。依模組組合擇一安裝對應相容檔，避免共用介面資源衝突。
                         </p>
                         <p data-lang="en">
-                            Since v0.4, RealDate has provided a Quick Save Button compatibility package and a combined Quick Save Button + UI Cheats package to prevent conflicts in shared UI resources.
-                            Choose the version that matches your setup; do not install both.
+                            Since v0.4, RealDate has provided a Quick Save Button compatibility package and a combined UI Cheats package. v0.6.1 adds a three-mod combined package. Install only the package that matches your setup to avoid shared UI resource conflicts.
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>Quick Save Button March 4th, 2026</strong>
                             </div>
                             <div>
@@ -532,6 +535,11 @@
                             <div>
                                 <small>Quick Save + UI Cheats</small>
                                 <code>L1nG_RealDate_Compat_QuickSave_UI_Cheats.package</code>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">UI Cheats + Quick Save + Better Simology Panel</small>
+                                <small data-lang="en">UI Cheats + Quick Save + Better Simology Panel</small>
+                                <code>L1nG_RealDate_Compat_QuickSave_BetterSimology_UI_Cheats.package</code>
                             </div>
                         </div>
                     </div>
@@ -553,16 +561,15 @@
                     </summary>
                     <div class="compat-detail-body">
                         <p data-lang="zh-Hant">
-                            自 v0.6 起提供 Better Simology Panel 專用相容檔，以及 Better Simology Panel + UI Cheats 合併相容檔，用於避免共用介面資源互相衝突。依是否使用 UI Cheats 選擇對應相容檔，兩款不要同時安裝。
+                            自 v0.6 起提供 Better Simology Panel 專用相容檔及 UI Cheats 合併相容檔，v0.6.1 新增三模組整合相容檔。依模組組合擇一安裝對應相容檔，避免共用介面資源衝突。
                         </p>
                         <p data-lang="en">
-                            Since v0.6, RealDate has provided a Better Simology Panel compatibility package and a combined Better Simology Panel + UI Cheats package to prevent conflicts in shared UI resources.
-                            Choose the version that matches your setup; do not install both.
+                            Since v0.6, RealDate has provided a Better Simology Panel compatibility package and a combined UI Cheats package. v0.6.1 adds a three-mod combined package. Install only the package that matches your setup to avoid shared UI resource conflicts.
                         </p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>Better Simology Panel v1.2.2 / UI Cheats v1.2.4</strong>
                             </div>
                             <div>
@@ -573,6 +580,11 @@
                             <div>
                                 <small>Better Simology + UI Cheats</small>
                                 <code>L1nG_RealDate_Compat_BetterSimology_UI_Cheats.package</code>
+                            </div>
+                            <div>
+                                <small data-lang="zh-Hant">UI Cheats + Quick Save + Better Simology Panel</small>
+                                <small data-lang="en">UI Cheats + Quick Save + Better Simology Panel</small>
+                                <code>L1nG_RealDate_Compat_QuickSave_BetterSimology_UI_Cheats.package</code>
                             </div>
                         </div>
                     </div>
@@ -593,8 +605,8 @@
                         <p data-lang="en">RealDate's twelve-year education system works alongside Education Overhaul! Sims can still choose schools, join extracurricular activities, and enjoy its other original school features, while RealDate places them in Elementary, Middle, or High School based on their age and completed grades.</p>
                         <div class="compat-meta">
                             <div>
-                                <small data-lang="zh-Hant">v0.6 測試版本</small>
-                                <small data-lang="en">Tested with v0.6</small>
+                                <small data-lang="zh-Hant">v0.6.1 測試版本</small>
+                                <small data-lang="en">Tested with v0.6.1</small>
                                 <strong>Education Overhaul v6.6.2</strong>
                             </div>
                         </div>
