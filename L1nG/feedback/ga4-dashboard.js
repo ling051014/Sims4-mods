@@ -66,7 +66,6 @@
   const downloadNames=Object.freeze({
     "r_v061_main":"RealDate v0.6.1 Beta · 主要下載",
     "r_v061_backup":"RealDate v0.6.1 Beta · 備用下載",
-    "r_v061_changelog":"RealDate v0.6.1 Beta · 更新日誌下載",
     "r_v06_changelog":"RealDate v0.6 Beta · 更新日誌下載",
     "r_v06_homehero":"RealDate v0.6 Beta · 首頁上方下載",
     "r_v060_main":"RealDate v0.6 Beta · 主要下載",
