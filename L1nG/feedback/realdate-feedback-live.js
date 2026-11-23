@@ -112,7 +112,7 @@
   if(version){
     version.replaceChildren();
     for(const [value,label] of [
-      ['v0.6 Beta','v0.6 Beta'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
+      ['v0.6.1 Beta','v0.6.1 Beta'],['v0.6 Beta','v0.6 Beta'],['v0.5 Beta','v0.5 Beta'],['v0.4 Beta','v0.4 Beta'],['v0.3 Beta','v0.3 Beta'],
       ['v0.2.1 Beta','v0.2.1 Beta'],['v0.2 Beta','v0.2 Beta'],
       ['v0.1.1 Beta','v0.1.1 Beta'],['v0.1 Beta','v0.1 Beta']
     ])version.add(new Option(label,value));
