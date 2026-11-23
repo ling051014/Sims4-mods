@@ -90,7 +90,7 @@ body.admin-only{width:100%;min-height:100dvh}
 /* 問題反饋的三欄篩選器以 Flex 等分，允許縮小但不擠出容器寬度。 */
 .admin-only #panel-feedback .feedback-filter-grid{display:flex;flex-wrap:nowrap;gap:9px;margin:0 0 14px;min-width:0;max-width:100%}
 .admin-only #panel-feedback .feedback-filter-grid>.l1ng-select{flex:1 1 0;min-width:0;width:auto}
-.admin-only .feedback-filter-grid .l1ng-select-trigger,.admin-only .feedback-filter-grid>.toolbar-select{width:100%;max-width:none;min-width:0;text-align:left}
+.admin-only .feedback-filter-grid .l1ng-select-trigger,.admin-only .feedback-filter-grid>.toolbar-select:not(.l1ng-select-native){width:100%;max-width:none;min-width:0;text-align:left}
 .admin-only .feedback-refresh-button{height:38px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .admin-only .feedback-sync-status{margin:0 0 9px;color:var(--muted);font-size:11px}
 .admin-only .feedback-sync-status:empty{display:none}
