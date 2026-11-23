@@ -16,6 +16,23 @@
   const idList = ['all','pending','progress','done','spam'];
   let page = 'overview', entries = [], current = null, filterStatus = 'all';
   let detailRequest = 0, previewUrls = [];
+  // 手機全螢幕回饋詳情必須獨立捲動，不允許底下頁面跟著滑動。
+  let detailBackgroundScrollY = null;
+  function lockDetailBackgroundScroll(){
+    if(detailBackgroundScrollY !== null || !window.matchMedia('(max-width:980px)').matches)return;
+    detailBackgroundScrollY = window.scrollY;
+    document.body.style.setProperty('--admin-detail-scroll-top', -detailBackgroundScrollY+'px');
+    document.body.classList.add('admin-detail-scroll-locked');
+  }
+  function unlockDetailBackgroundScroll(){
+    if(detailBackgroundScrollY === null)return;
+    const y = detailBackgroundScrollY;
+    detailBackgroundScrollY = null;
+    document.body.classList.remove('admin-detail-scroll-locked');
+    document.body.style.removeProperty('--admin-detail-scroll-top');
+    window.scrollTo(0,y);
+  }
+
   let listBusy=false,listLoaded=false,lastListCheck=0,refreshTimer=null,detailBusy=false,knownRevisions=new Map();
   const savedAdminViewKey = 'l1ng-admin-view-v1';
   function readSavedView() {
@@ -423,6 +440,7 @@
     if (compose) compose.hidden = !canReply;
     if ($('admin-reply')) $('admin-reply').value = '';
     if ($('admin-reply-error')) $('admin-reply-error').hidden = true;
+    lockDetailBackgroundScroll();
     $('detail-layer').classList.add('open');
     $('detail-layer').setAttribute('aria-hidden','false');
     $('detail-close')?.focus();
@@ -431,6 +449,7 @@
     const requestId = ++detailRequest;detailBusy=true;
     const root=$('detail-body');root.replaceChildren();for(let i=0;i<3;i++)root.append(el('div','feedback-detail-skeleton'));
     root.setAttribute('aria-busy','true');
+    lockDetailBackgroundScroll();
     $('detail-layer').classList.add('open');$('detail-layer').setAttribute('aria-hidden','false');
     try {
       const info = await api('/feedback/' + encodeURIComponent(id));
@@ -453,6 +472,7 @@
     saveView();
     $('detail-layer')?.classList.remove('open');
     $('detail-layer')?.setAttribute('aria-hidden','true');
+    unlockDetailBackgroundScroll();
     $('confirm-layer')?.classList.remove('open');
     $('confirm-layer')?.setAttribute('aria-hidden','true');
   }
