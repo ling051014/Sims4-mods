@@ -34,6 +34,19 @@ body.admin-only{width:100%;min-height:100dvh}
 .admin-only .detail-body .conversation-stack{margin:20px 0 25px}
 .admin-only .admin-reply-compose[hidden]{display:none}
 .admin-only .detail-panel{min-height:0}
+/* 手機單則回饋詳情：只鎖定背景捲動，不修改回饋列表的版型。 */
+@media(max-width:980px){
+  .admin-only .detail-body{overscroll-behavior:contain}
+  body.admin-only.admin-detail-scroll-locked{
+    position:fixed;
+    top:var(--admin-detail-scroll-top,0px);
+    left:0;
+    right:0;
+    width:100%;
+    height:100dvh;
+    overflow:hidden
+  }
+}
 
 
 /* 中央附件預覽：只在手動點選時出現；右側詳情維持原位。 */
