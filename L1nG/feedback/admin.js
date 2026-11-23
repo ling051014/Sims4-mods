@@ -28,9 +28,15 @@
     if(detailBackgroundScrollY === null)return;
     const y = detailBackgroundScrollY;
     detailBackgroundScrollY = null;
+    // feedback.css sets smooth scrolling on html; override it only while restoring
+    // the pre-dialog scroll position so the page never visibly scrolls from the top.
+    const root = document.documentElement;
+    const previousBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
     document.body.classList.remove('admin-detail-scroll-locked');
     document.body.style.removeProperty('--admin-detail-scroll-top');
-    window.scrollTo(0,y);
+    window.scrollTo({top:y,left:0,behavior:'instant'});
+    root.style.scrollBehavior = previousBehavior;
   }
   let listBusy=false,listLoaded=false,lastListCheck=0,refreshTimer=null,detailBusy=false,knownRevisions=new Map();
   const savedAdminViewKey = 'l1ng-admin-view-v1';
