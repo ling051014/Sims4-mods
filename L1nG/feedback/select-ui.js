@@ -2,7 +2,31 @@
 (()=>{'use strict';
 const registry=new Map();let opened=null;
 function close(){if(!opened)return;opened.panel.hidden=true;opened.button.setAttribute('aria-expanded','false');opened=null;}
-function position(entry){if(!entry||entry.panel.hidden)return;const r=entry.button.getBoundingClientRect();const w=Math.max(180,r.width);const roomBelow=innerHeight-r.bottom;const roomAbove=r.top;const below=roomBelow>210||roomBelow>=roomAbove;const max=Math.min(320,Math.max(110,(below?roomBelow:roomAbove)-14));entry.panel.style.width=Math.min(w,innerWidth-20)+'px';entry.panel.style.left=Math.max(10,Math.min(r.left,innerWidth-Math.min(w,innerWidth-20)-10))+'px';entry.panel.style.maxHeight=max+'px';entry.panel.style.top=below?(r.bottom+5)+'px':'';entry.panel.style.bottom=below?'':(innerHeight-r.top+5)+'px';}
+function position(entry){if(!entry||entry.panel.hidden)return;const r=entry.button.getBoundingClientRect();const w=entry.feedbackFilter?r.width:Math.max(180,r.width);const roomBelow=innerHeight-r.bottom;const roomAbove=r.top;const below=roomBelow>210||roomBelow>=roomAbove;const max=Math.min(320,Math.max(110,(below?roomBelow:roomAbove)-14));entry.panel.style.width=Math.min(w,innerWidth-20)+'px';entry.panel.style.left=Math.max(10,Math.min(r.left,innerWidth-Math.min(w,innerWidth-20)-10))+'px';entry.panel.style.maxHeight=max+'px';entry.panel.style.top=below?(r.bottom+5)+'px':'';entry.panel.style.bottom=below?'':(innerHeight-r.top+5)+'px';}
+// 管理中心問題反饋的三個篩選器：以最長選項計算穩定寬度。
+function sizeFeedbackFilter(entry){
+ if(!entry.feedbackFilter)return;
+ const {select,button,wrapper}=entry;
+ const style=getComputedStyle(button);
+ const ruler=document.createElement('span');
+ ruler.style.cssText='position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;white-space:nowrap';
+ ruler.style.fontFamily=style.fontFamily;
+ ruler.style.fontSize=style.fontSize;
+ ruler.style.fontWeight=style.fontWeight;
+ ruler.style.fontStyle=style.fontStyle;
+ ruler.style.letterSpacing=style.letterSpacing;
+ document.body.append(ruler);
+ let longest=0;
+ for(const option of select.options){
+  if(option.hidden)continue;
+  ruler.textContent=option.textContent.trim();
+  longest=Math.max(longest,ruler.getBoundingClientRect().width);
+ }
+ ruler.remove();
+ const px=value=>parseFloat(value)||0;
+ const space=px(style.paddingLeft)+px(style.paddingRight)+px(style.borderLeftWidth)+px(style.borderRightWidth);
+ wrapper.style.setProperty('--feedback-filter-option-width',Math.ceil(longest+space+6)+'px');
+}
 function refresh(entry){
  const {select,button,panel}=entry;
  const selected=select.options[select.selectedIndex];
@@ -18,6 +42,7 @@ function refresh(entry){
    select.value=option.value;select.dispatchEvent(new Event('input',{bubbles:true}));select.dispatchEvent(new Event('change',{bubbles:true}));refresh(entry);close();button.focus({preventScroll:true});
   });panel.appendChild(item);
  }
+ sizeFeedbackFilter(entry);
  position(entry);
 }
 function enhance(select){
@@ -27,7 +52,8 @@ function enhance(select){
  const panel=document.createElement('div');panel.className='l1ng-select-panel';panel.role='listbox';panel.hidden=true;
  wrapper.appendChild(button);select.insertAdjacentElement('afterend',wrapper);document.body.appendChild(panel);
  select.classList.add('l1ng-select-native');
- const entry={select,button,panel};registry.set(select,entry);
+ const feedbackFilter=!!select.closest('#panel-feedback .feedback-filter-grid');
+ const entry={select,button,panel,wrapper,feedbackFilter};registry.set(select,entry);
  window.L1nGRefreshSelect=window.L1nGRefreshSelect||((node)=>{const e=registry.get(node);if(e)refresh(e);});
  button.addEventListener('click',()=>{if(opened===entry){close();return;}close();refresh(entry);panel.hidden=false;opened=entry;button.setAttribute('aria-expanded','true');position(entry)});
  button.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='Enter'||e.key===' '){if(!opened){e.preventDefault();button.click();}else if(e.key==='ArrowDown'){e.preventDefault();panel.querySelector('button')?.focus()}}});
@@ -42,5 +68,5 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 document.addEventListener('pointerdown',e=>{if(opened&&!opened.panel.contains(e.target)&&!opened.button.contains(e.target))close()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 document.addEventListener('scroll',()=>{if(opened)position(opened)},{capture:true,passive:true});
-window.addEventListener('resize',()=>{if(opened)position(opened)});
+window.addEventListener('resize',()=>{for(const entry of registry.values())if(entry.feedbackFilter)sizeFeedbackFilter(entry);if(opened)position(opened)});
 })();
