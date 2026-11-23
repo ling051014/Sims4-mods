@@ -1868,7 +1868,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .profile-basic-grid textarea { min-height:76px; }
 .birthday-inputs { display:grid; grid-template-columns:1.3fr .85fr .85fr; gap:6px; }
 .age-input-wrap { display:flex; align-items:center; min-height:34px; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-input); overflow:hidden; transition:border-color .15s ease,box-shadow .15s ease; }
-.age-input-wrap:focus-within { border-color:var(--action-primary); box-shadow:0 0 0 2px var(--brand-tint-start); }
+.age-input-wrap:focus-within { border-color:var(--action-primary); box-shadow:none; }
 .profile-grid .age-input-wrap input { flex:1 1 auto; min-width:0; width:0; min-height:32px; border:0; border-radius:0; box-shadow:none; background:transparent; padding-right:3px; }
 .age-input-suffix { flex:0 0 auto; padding:0 9px 0 4px; color:var(--text-secondary); font-size:10.5px; font-weight:500; line-height:1; white-space:nowrap; }
 .trait-editor { border:1px solid var(--border-default); border-radius:7px; background:var(--surface-input); padding:7px; }
@@ -4226,7 +4226,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 
 .genealogy-feedback-panel .genealogy-feedback-field:focus {
     border-color:var(--gf-primary);
-    box-shadow:0 0 0 2px var(--gf-primary-pale);
+    box-shadow:none;
 }
 
 .genealogy-feedback-panel .genealogy-feedback-field::placeholder {
@@ -4252,8 +4252,8 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 }
 .genealogy-feedback-panel .genealogy-feedback-view .ui-single-select-trigger:focus-visible {
     border-color:var(--gf-primary);
-    box-shadow:0 0 0 2px var(--gf-primary-pale);
-}
+    box-shadow:none;
+outline:none;}
 .genealogy-feedback-panel .genealogy-feedback-message {
     min-height:126px;
     resize:vertical;
@@ -5312,7 +5312,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .photo-form-field input:not([hidden]),.photo-form-field select,.photo-form-field textarea { width:100%; min-width:0; min-height:38px; padding:9px 11px; border:1px solid var(--border-default); border-radius:7px; outline:none; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12.5px; line-height:1.45; }
 .photo-form-field select { cursor:pointer; }
 .photo-form-field textarea { min-height:74px; resize:vertical; }
-.photo-form-field input:focus,.photo-form-field select:focus,.photo-form-field textarea:focus { border-color:var(--action-primary); box-shadow:0 0 0 2px var(--brand-tint-start); }
+.photo-form-field input:focus,.photo-form-field select:focus,.photo-form-field textarea:focus { border-color:var(--action-primary); box-shadow:none; }
 .photo-optional { color:var(--text-secondary); font-size:11px; font-weight:400; }
 .photo-preview { position:relative; display:flex; justify-content:center; align-items:center; width:100%; height:205px; min-height:0; padding:0; border:1px dashed var(--border-default); border-radius:8px; overflow:hidden; color:var(--text-secondary); background-color:var(--surface-panel); background-size:contain; background-position:center; background-repeat:no-repeat; text-align:center; cursor:pointer; transition:border-color .16s ease,background-color .16s ease; }
 .photo-preview:hover,.photo-preview.dragover,.photo-preview:focus-visible { border-color:var(--action-primary); background-color:var(--surface-item-hover); outline:none; }
@@ -5593,7 +5593,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .person-library-main-pane { display:flex; flex:1 1 auto; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
 .person-library-toolbar { flex:0 0 auto; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; padding:14px 18px 12px; margin:0; }
 .person-library-toolbar input { width:100%; min-width:0; min-height:36px; padding:7px 11px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12.5px; outline:none; }
-.person-library-toolbar input:focus { border-color:var(--action-primary); box-shadow:0 0 0 2px var(--brand-tint-start); }
+.person-library-toolbar input:focus { border-color:var(--action-primary); box-shadow:none; }
 .person-library-view-toggle { display:inline-flex; flex:0 0 auto; align-items:center; gap:2px; padding:2px; border:1px solid var(--border-default); border-radius:7px; background:var(--surface-panel); }
 .person-library-view-toggle button { display:grid; place-items:center; width:35px; height:32px; padding:0; border:0; border-radius:5px; background:transparent; color:var(--text-secondary); cursor:pointer; }
 .person-library-view-toggle button svg { width:16px; height:16px; }
@@ -5736,7 +5736,7 @@ section.sim-editor-panel[data-editor-panel][hidden] { display:none; }
 .family-member-picker-toolbar { display:flex; flex:0 0 auto; flex-direction:column; gap:10px; padding:13px 18px; border-bottom:1px solid var(--border-default); }
 .family-member-picker-search-wrap { position:relative; display:flex; align-items:center; min-width:0; }
 .family-member-picker-search-wrap input { width:100%; min-width:0; min-height:36px; padding:7px 12px; border:1px solid var(--border-default); border-radius:7px; outline:none; background:var(--surface-input); color:var(--text-primary); font:inherit; font-size:12.5px; }
-.family-member-picker-search-wrap input:focus { border-color:var(--action-primary); box-shadow:0 0 0 2px var(--brand-tint-start); }
+.family-member-picker-search-wrap input:focus { border-color:var(--action-primary); box-shadow:none; }
 .family-member-picker-bulk { display:flex; align-items:center; gap:9px; min-width:0; }
 .family-member-picker-available { margin-right:auto; color:var(--text-secondary); font-size:11px; }
 .family-member-picker-bulk button { padding:4px 5px; border:0; border-radius:5px; background:transparent; color:var(--action-primary-strong); font:inherit; font-size:11px; cursor:pointer; }
@@ -6883,7 +6883,7 @@ html[lang="en"] body {
 .ui-dialog-input.show { display:block; }
 .ui-dialog-input:focus-visible {
     border-color:var(--action-primary);
-    box-shadow:0 0 0 2px var(--brand-tint-start);
+    box-shadow:none;
 }
 .ui-dialog-details {
     display:flex;
@@ -9861,7 +9861,7 @@ body[data-life-photos="hidden"] #lifePhotoSection,body[data-life-photos="hidden"
 .appearance-modal .ui-single-select{width:100%}
 .appearance-modal select,.appearance-modal .ui-single-select-trigger{width:100%;min-height:32px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-input);color:var(--text-primary);font:inherit;font-size:11px;outline:none;transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}
 .appearance-modal .ui-single-select-trigger:hover{border-color:color-mix(in srgb,var(--action-primary) 40%,var(--border-default))}
-.appearance-modal .ui-single-select-trigger:focus-visible{border-color:var(--action-primary);box-shadow:0 0 0 2px var(--brand-tint-start)}
+.appearance-modal .ui-single-select-trigger:focus-visible{border-color:var(--action-primary);box-shadow:none;outline:none;}
 .appearance-modal .ui-select-chevron-icon{color:var(--text-secondary)}
 .appearance-modal .ui-single-select:focus-within .ui-select-chevron-icon{color:var(--action-primary)}
 @media(max-width:680px){.relationship-style-workspace{grid-template-columns:1fr}.relationship-style-nav{grid-template-columns:repeat(5,minmax(108px,1fr));overflow-x:auto;padding-bottom:2px}.relationship-style-choice{grid-template-columns:1fr;gap:4px}.relationship-editor-fields{grid-template-columns:minmax(82px,.9fr) minmax(0,1.45fr) 44px;gap:8px}.relationship-editor-range{grid-template-columns:minmax(0,1fr) max-content;gap:4px}.relationship-editor-range output{min-width:28px;font-size:10px}.relationship-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
