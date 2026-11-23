@@ -17,3 +17,11 @@ textarea,
     -webkit-user-select: text !important;
     user-select: text !important;
 }
+
+/* 玩家回饋對話及管理中心：僅訊息氣泡內文開放選取複製。 */
+/* 標題、時間、標籤、附件及其他 UI 仍遵循全站禁止選取設定。 */
+.admin-only #detail-body .conversation-bubble,
+.realdate-only #visitor-messages .conversation-bubble {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}
