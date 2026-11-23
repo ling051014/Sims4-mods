@@ -87,11 +87,9 @@ body.admin-only{width:100%;min-height:100dvh}
 .admin-only .detail-body .conversation-message .detail-file-info{min-width:0}
 
 /* Admin dashboard scoped list controls, pinned metadata and loading states. */
-/* 問題反饋三個篩選器：按最長選項設定按鈕與浮窗寬度，空間不足時換行。 */
-.admin-only #panel-feedback .feedback-filter-grid{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:0 0 14px;min-width:0;max-width:100%}
-.admin-only #panel-feedback .feedback-filter-grid>.l1ng-select{flex:0 1 var(--feedback-filter-option-width,160px);width:var(--feedback-filter-option-width,160px);min-width:0;max-width:100%}
-.admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{width:100%;max-width:100%;min-width:0;text-align:left}
-.admin-only #panel-feedback .feedback-filter-grid>.toolbar-select:not(.l1ng-select-native){flex:0 1 auto;width:auto;min-width:0;max-width:100%}
+.admin-only .feedback-filter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 14px}
+.admin-only .feedback-filter-grid>.l1ng-select{min-width:0;width:100%}
+.admin-only .feedback-filter-grid .l1ng-select-trigger,.admin-only .feedback-filter-grid>.toolbar-select{width:100%;max-width:none;min-width:0;text-align:left}
 .admin-only .feedback-refresh-button{height:38px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .admin-only .feedback-sync-status{margin:0 0 9px;color:var(--muted);font-size:11px}
 .admin-only .feedback-sync-status:empty{display:none}
@@ -335,7 +333,12 @@ body.admin-only{width:100%;min-height:100dvh}
     width:100%;min-width:0;padding:9px 4px;white-space:normal;
     line-height:1.4;overflow-wrap:anywhere
   }
-  .admin-only #panel-feedback .feedback-filter-grid{width:100%;min-width:0}
+  .admin-only #panel-feedback .feedback-filter-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));width:100%;min-width:0
+  }
+  .admin-only #panel-feedback .feedback-filter-grid > .l1ng-select{
+    flex:none;margin:0;width:100%;min-width:0;max-width:100%
+  }
   .admin-only #panel-feedback .feedback-filter-grid .l1ng-select-trigger{
     width:100%;padding-inline:8px 23px;font-size:11px
   }
@@ -416,6 +419,7 @@ body.admin-only{width:100%;min-height:100dvh}
   }
 }
 @media(max-width:360px){
+  .admin-only #panel-feedback .feedback-filter-grid,
   .admin-only #panel-feedback .feedback-filters{
     grid-template-columns:repeat(2,minmax(0,1fr))
   }
