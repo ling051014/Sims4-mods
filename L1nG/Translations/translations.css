@@ -399,7 +399,7 @@ section[id] {
 
 .search-field input:focus {
     border-color:var(--translation-border);
-    box-shadow:0 0 0 3px rgba(127,115,180,.08);
+    box-shadow:none;
 }
 
 .filter-group {
